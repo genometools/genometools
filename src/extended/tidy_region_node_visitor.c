@@ -137,6 +137,17 @@ static int tidy_region_node_visitor_comment_node(GtNodeVisitor *nv,
   return 0;
 }
 
+static int tidy_region_node_visitor_meta_node(GtNodeVisitor *nv,
+                                              GtMetaNode *mn,
+                                              GT_UNUSED GtError *err)
+{
+  GtTidyRegionNodeVisitor *trnv;
+  gt_error_check(err);
+  trnv = tidy_region_node_visitor_cast(nv);
+  gt_queue_add(trnv->node_buffer, mn);
+  return 0;
+}
+
 static int tidy_region_node_visitor_eof_node(GtNodeVisitor *nv,
                                              GtEOFNode *en,
                                              GT_UNUSED GtError *err)
@@ -150,7 +161,7 @@ static int tidy_region_node_visitor_eof_node(GtNodeVisitor *nv,
 
 const GtNodeVisitorClass* gt_tidy_region_node_visitor_class()
 {
-  static const GtNodeVisitorClass *nvc = NULL;
+  static GtNodeVisitorClass *nvc = NULL;
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtTidyRegionNodeVisitor),
                                     tidy_region_node_visitor_free,
@@ -159,6 +170,8 @@ const GtNodeVisitorClass* gt_tidy_region_node_visitor_class()
                                     tidy_region_node_visitor_region_node,
                                     tidy_region_node_visitor_sequence_node,
                                     tidy_region_node_visitor_eof_node);
+    gt_node_visitor_class_set_meta_node_func(nvc,
+                                            tidy_region_node_visitor_meta_node);
   }
   return nvc;
 }

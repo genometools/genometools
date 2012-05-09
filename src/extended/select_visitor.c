@@ -91,6 +91,16 @@ static int select_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
   return 0;
 }
 
+static int select_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
+                                    GT_UNUSED GtError *err)
+{
+  GtSelectVisitor *select_visitor;
+  gt_error_check(err);
+  select_visitor = select_visitor_cast(nv);
+  gt_queue_add(select_visitor->node_buffer, mn);
+  return 0;
+}
+
 static bool filter_contain_range(GtFeatureNode *fn, GtRange contain_range)
 {
   GtRange range;
@@ -344,7 +354,7 @@ static int select_visitor_eof_node(GtNodeVisitor *nv, GtEOFNode *eofn,
 
 const GtNodeVisitorClass* gt_select_visitor_class()
 {
-  static const GtNodeVisitorClass *nvc = NULL;
+  static GtNodeVisitorClass *nvc = NULL;
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtSelectVisitor),
                                     select_visitor_free,
@@ -353,6 +363,7 @@ const GtNodeVisitorClass* gt_select_visitor_class()
                                     select_visitor_region_node,
                                     select_visitor_sequence_node,
                                     select_visitor_eof_node);
+    gt_node_visitor_class_set_meta_node_func(nvc, select_visitor_meta_node);
   }
   return nvc;
 }

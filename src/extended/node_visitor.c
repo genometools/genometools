@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -28,12 +28,13 @@ struct GtNodeVisitorClass {
   GtNodeVisitorFreeFunc free;
   GtNodeVisitorCommentNodeFunc comment_node;
   GtNodeVisitorFeatureNodeFunc feature_node;
+  GtNodeVisitorMetaNodeFunc meta_node;
   GtNodeVisitorRegionNodeFunc region_node;
   GtNodeVisitorSequenceNodeFunc sequence_node;
   GtNodeVisitorEOFNodeFunc eof_node;
 };
 
-const GtNodeVisitorClass*
+GtNodeVisitorClass*
 gt_node_visitor_class_new(size_t size,
                           GtNodeVisitorFreeFunc free,
                           GtNodeVisitorCommentNodeFunc comment_node,
@@ -53,6 +54,14 @@ gt_node_visitor_class_new(size_t size,
   c_class->sequence_node = sequence_node;
   c_class->eof_node = eof_node;
   return c_class;
+}
+
+void gt_node_visitor_class_set_meta_node_func(GtNodeVisitorClass *nvc,
+                                              GtNodeVisitorMetaNodeFunc
+                                              meta_node)
+{
+  gt_assert(nvc);
+  nvc->meta_node = meta_node;
 }
 
 GtNodeVisitor* gt_node_visitor_create(const GtNodeVisitorClass *nvc)
@@ -87,6 +96,16 @@ int gt_node_visitor_visit_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   gt_error_check(err);
   gt_assert(nv && fn && nv->c_class && nv->c_class->feature_node);
   return nv->c_class->feature_node(nv, fn, err);
+}
+
+int gt_node_visitor_visit_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
+                                    GtError *err)
+{
+  gt_error_check(err);
+  gt_assert(nv && mn && nv->c_class);
+  if (nv->c_class->meta_node)
+    return nv->c_class->meta_node(nv, mn, err);
+  return 0;
 }
 
 int gt_node_visitor_visit_region_node(GtNodeVisitor *nv, GtRegionNode *rn,

@@ -316,6 +316,20 @@ static int gff3_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   return had_err;
 }
 
+static int gff3_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
+                                  GT_UNUSED GtError *err)
+{
+  GtGFF3Visitor *gff3_visitor;
+  gt_error_check(err);
+  gff3_visitor = gff3_visitor_cast(nv);
+  gt_assert(nv && mn);
+  gff3_version_string(nv);
+  gt_file_xprintf(gff3_visitor->outfp, "##%s %s\n",
+                  gt_meta_node_get_directive(mn),
+                  gt_meta_node_get_data(mn));
+  return 0;
+}
+
 static int gff3_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
                                     GT_UNUSED GtError *err)
 {
@@ -362,7 +376,7 @@ static int gff3_visitor_eof_node(GtNodeVisitor *nv, GT_UNUSED GtEOFNode *en,
 
 const GtNodeVisitorClass* gt_gff3_visitor_class()
 {
-  static const GtNodeVisitorClass *nvc = NULL;
+  static GtNodeVisitorClass *nvc = NULL;
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtGFF3Visitor),
                                     gff3_visitor_free,
@@ -371,6 +385,7 @@ const GtNodeVisitorClass* gt_gff3_visitor_class()
                                     gff3_visitor_region_node,
                                     gff3_visitor_sequence_node,
                                     gff3_visitor_eof_node);
+    gt_node_visitor_class_set_meta_node_func(nvc, gff3_visitor_meta_node);
   }
   return nvc;
 }

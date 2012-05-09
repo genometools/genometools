@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -24,6 +24,7 @@ typedef struct GtNodeVisitor GtNodeVisitor;
 #include "extended/comment_node_api.h"
 #include "extended/eof_node_api.h"
 #include "extended/feature_node_api.h"
+#include "extended/meta_node_api.h"
 #include "extended/region_node_api.h"
 #include "extended/sequence_node_api.h"
 
@@ -35,6 +36,10 @@ int   gt_node_visitor_visit_comment_node(GtNodeVisitor *node_visitor,
 int   gt_node_visitor_visit_feature_node(GtNodeVisitor *node_visitor,
                                          GtFeatureNode *feature_node,
                                          GtError *err);
+/* Visit <meta_node> with <node_visitor>. */
+int   gt_node_visitor_visit_meta_node(GtNodeVisitor *node_visitor,
+                                      GtMetaNode *meta_node,
+                                      GtError *err);
 /* Visit <region_node> with <node_visitor>. */
 int   gt_node_visitor_visit_region_node(GtNodeVisitor *node_visitor,
                                         GtRegionNode *region_node,
@@ -51,6 +56,8 @@ typedef int  (*GtNodeVisitorCommentNodeFunc)(GtNodeVisitor*, GtCommentNode*,
                                              GtError*);
 typedef int  (*GtNodeVisitorFeatureNodeFunc)(GtNodeVisitor*, GtFeatureNode*,
                                              GtError*);
+typedef int  (*GtNodeVisitorMetaNodeFunc)(GtNodeVisitor*, GtMetaNode*,
+                                          GtError*);
 typedef int  (*GtNodeVisitorRegionNodeFunc)(GtNodeVisitor*, GtRegionNode*,
                                             GtError*);
 typedef int  (*GtNodeVisitorSequenceNodeFunc)(GtNodeVisitor*, GtSequenceNode*,
@@ -65,13 +72,15 @@ struct GtNodeVisitor {
   GtNodeVisitorMembers *members;
 };
 
-const GtNodeVisitorClass* gt_node_visitor_class_new(size_t size,
-                                                  GtNodeVisitorFreeFunc,
-                                                  GtNodeVisitorCommentNodeFunc,
-                                                  GtNodeVisitorFeatureNodeFunc,
-                                                  GtNodeVisitorRegionNodeFunc,
-                                                  GtNodeVisitorSequenceNodeFunc,
-                                                  GtNodeVisitorEOFNodeFunc);
+GtNodeVisitorClass* gt_node_visitor_class_new(size_t size,
+                                              GtNodeVisitorFreeFunc,
+                                              GtNodeVisitorCommentNodeFunc,
+                                              GtNodeVisitorFeatureNodeFunc,
+                                              GtNodeVisitorRegionNodeFunc,
+                                              GtNodeVisitorSequenceNodeFunc,
+                                              GtNodeVisitorEOFNodeFunc);
+void gt_node_visitor_class_set_meta_node_func(GtNodeVisitorClass*,
+                                              GtNodeVisitorMetaNodeFunc);
 GtNodeVisitor*      gt_node_visitor_create(const GtNodeVisitorClass*);
 void*               gt_node_visitor_cast(const GtNodeVisitorClass*,
                                          GtNodeVisitor*);

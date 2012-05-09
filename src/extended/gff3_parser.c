@@ -1731,6 +1731,7 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
     }
   }
   else {
+    char *data;
     if (strncmp(line, GT_GFF_SPECIES, strlen(GT_GFF_SPECIES))
           && strncmp(line, GT_GFF_FEATURE_ONTOLOGY,
                      strlen(GT_GFF_FEATURE_ONTOLOGY))
@@ -1743,10 +1744,22 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       gt_warning("unknown meta-directive encountered in line %u in file "
                  "\"%s\", keep as comment: %s", line_number, filename, line);
     }
-    /* storing comment */
-    gn = gt_comment_node_new(line+1);
-    gt_genome_node_set_origin(gn, filenamestr, line_number);
-    gt_queue_add(genome_nodes, gn);
+    data = strchr(line+2, ' ');
+    if (data) {
+      data[0] = '\0';
+      data++;
+    }
+    else {
+      gt_error_set(err, "meta-directive encountered in line %u in file "
+                 "\"%s\" does not have data: %s", line_number, filename, line);
+      had_err = -1;
+    }
+    if (!had_err) {
+      /* storing meta node */
+      gn = gt_meta_node_new(line+2, data);
+      gt_genome_node_set_origin(gn, filenamestr, line_number);
+      gt_queue_add(genome_nodes, gn);
+    }
   }
   gt_str_delete(changed_seqid);
   return had_err;
