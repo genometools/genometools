@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -84,6 +84,8 @@ static int i2m_change_target_seqids(GtFeatureNode *fn, const char *target,
       GtRange transformed_range;
       gt_str_set(md5str, GT_MD5_SEQID_PREFIX);
       gt_str_append_cstr(md5str, md5);
+      gt_str_append_char(md5str, GT_MD5_SEQID_SEPARATOR);
+      gt_str_append_str(md5str, seqid);
       gt_str_array_set(target_ids, i, md5str);
       gt_assert(offset);
       transformed_range = gt_range_offset(range, -(offset - 1));
@@ -145,6 +147,8 @@ static int seqid_to_md5(GtGenomeNode *gn, GtRegionMapping *region_mapping,
     if (!had_err) {
       GtStr *new_seqid = gt_str_new_cstr(GT_MD5_SEQID_PREFIX);
       gt_str_append_cstr(new_seqid, md5);
+      gt_str_append_char(new_seqid, GT_MD5_SEQID_SEPARATOR);
+      gt_str_append_str(new_seqid, seqid);
       if (gt_feature_node_try_cast(gn)) {
         I2MChangeSeqidInfo info;
         info.new_seqid = new_seqid;

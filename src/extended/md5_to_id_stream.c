@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,6 @@
 GtNodeStream* gt_md5_to_id_stream_new(GtNodeStream *in_stream,
                                       GtRegionMapping *rm)
 {
-  gt_assert(in_stream && rm);
+  gt_assert(in_stream);
   return gt_visitor_stream_new(in_stream, gt_md5_to_id_visitor_new(rm));
 }

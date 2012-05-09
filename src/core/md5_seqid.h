@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,10 @@
 
 #define GT_MD5_SEQID_PREFIX      "md5:"
 #define GT_MD5_SEQID_PREFIX_LEN  4
+#define GT_MD5_SEQID_HASH_LEN    32
+#define GT_MD5_SEQID_TOTAL_LEN   (GT_MD5_SEQID_PREFIX_LEN + \
+                                  GT_MD5_SEQID_HASH_LEN + 1)
+#define GT_MD5_SEQID_SEPARATOR   ':'
 
 /* Returns <true> if <seqid> has the prefix used to denote MD5 sequence IDs,
    <false> otherwise. */

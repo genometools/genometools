@@ -63,7 +63,7 @@ static GtOptionParser* gt_md5_to_id_option_parser_new(void *tool_arguments)
                             "given GFF3 files to ``regular'' ones.");
 
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
-  gt_seqid2file_register_options(op, arguments->s2fi);
+  gt_seqid2file_register_options_ext(op, arguments->s2fi, false, true);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -71,8 +71,6 @@ static GtOptionParser* gt_md5_to_id_option_parser_new(void *tool_arguments)
 
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
-
-  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
 
   return op;
 }
@@ -84,7 +82,7 @@ static int gt_md5_to_id_runner(GT_UNUSED int argc, const char **argv,
   GtNodeStream *gff3_in_stream, *md5_to_id_stream = NULL,
                *gff3_out_stream = NULL;
   MD5ToSeqidsArguments *arguments = tool_arguments;
-  GtRegionMapping *region_mapping;
+  GtRegionMapping *region_mapping = NULL;
   int had_err = 0;
 
   gt_error_check(err);
@@ -97,9 +95,11 @@ static int gt_md5_to_id_runner(GT_UNUSED int argc, const char **argv,
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
   /* create region mapping */
-  region_mapping = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
-  if (!region_mapping)
-    had_err = -1;
+  if (gt_seqid2file_option_used(arguments->s2fi)) {
+    region_mapping = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
+    if (!region_mapping)
+      had_err = -1;
+  }
 
   if (!had_err) {
     /* create seqid to md5 stream */

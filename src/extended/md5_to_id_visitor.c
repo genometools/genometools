@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -57,7 +57,7 @@ static int m2i_change_target_seqids(GtFeatureNode *fn, const char *target,
   unsigned long i;
   int had_err;
   gt_error_check(err);
-  gt_assert(fn && target && region_mapping);
+  gt_assert(fn && target);
   target_ids = gt_str_array_new();
   target_ranges = gt_array_new(sizeof (GtRange));
   target_strands = gt_array_new(sizeof (GtStrand));
@@ -73,10 +73,22 @@ static int m2i_change_target_seqids(GtFeatureNode *fn, const char *target,
     gt_str_reset(desc);
     gt_str_reset(new_seqid);
     seqid = gt_str_array_get_str(target_ids, i);
-    had_err = gt_region_mapping_get_description(region_mapping, desc, seqid,
-                                                err);
+    if (gt_str_length(seqid) > GT_MD5_SEQID_TOTAL_LEN)
+      gt_str_append_cstr(new_seqid, gt_str_get(seqid) + GT_MD5_SEQID_TOTAL_LEN);
+    else {
+      /* for backward compatibility */
+      if (!region_mapping) {
+        gt_error_set(err, "no region mapping defined");
+        had_err = -1;
+      }
+      if (!had_err) {
+        had_err = gt_region_mapping_get_description(region_mapping, desc, seqid,
+                                                    err);
+      }
+      if (!had_err)
+        gt_regular_seqid_save(new_seqid, desc);
+    }
     if (!had_err)
-      gt_regular_seqid_save(new_seqid, desc);
       gt_str_array_set(target_ids, i, new_seqid);
   }
   if (!had_err) {
@@ -112,16 +124,29 @@ static int md5_to_seqid(GtGenomeNode *gn, GtRegionMapping *region_mapping,
   GtStr *seqid;
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(gn && region_mapping);
+  gt_assert(gn);
   seqid = gt_genome_node_get_seqid(gn);
   if (gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
+    GtStr *new_seqid = gt_str_new();
     /* seqid is a MD5 seqid -> change id */
-    GtStr *desc = gt_str_new();
-    had_err = gt_region_mapping_get_description(region_mapping, desc, seqid,
-                                                err);
+    if (gt_str_length(seqid) > GT_MD5_SEQID_TOTAL_LEN)
+      gt_str_append_cstr(new_seqid, gt_str_get(seqid) + GT_MD5_SEQID_TOTAL_LEN);
+    else {
+      /* for backward compatibility */
+      GtStr *desc = gt_str_new();
+      if (!region_mapping) {
+        gt_error_set(err, "no region mapping defined");
+        had_err = -1;
+      }
+      if (!had_err) {
+        had_err = gt_region_mapping_get_description(region_mapping, desc, seqid,
+                                                    err);
+      }
+      if (!had_err)
+        gt_regular_seqid_save(new_seqid, desc);
+      gt_str_delete(desc);
+    }
     if (!had_err) {
-      GtStr *new_seqid = gt_str_new();
-      gt_regular_seqid_save(new_seqid, desc);
       if (gt_feature_node_try_cast(gn)) {
         M2IChangeSeqidInfo info;
         info.new_seqid = new_seqid;
@@ -132,9 +157,8 @@ static int md5_to_seqid(GtGenomeNode *gn, GtRegionMapping *region_mapping,
       }
       else
         gt_genome_node_change_seqid(gn, new_seqid);
-      gt_str_delete(new_seqid);
     }
-    gt_str_delete(desc);
+    gt_str_delete(new_seqid);
   }
   return had_err;
 }
