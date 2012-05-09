@@ -30,7 +30,7 @@
 typedef struct {
   bool verbose, quiet;
   bool singlestrand, encodeonly, cntlist, encseqall, encseq, sorted, seqnums,
-       fasta, twobit, seppos;
+       fasta, twobit, seppos, copynum;
   unsigned long width;
   GtStr *readset;
   GtStrArray *db;
@@ -66,8 +66,8 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
            *fasta_option, *sorted_option, *seqnums_option, *twobit_option,
            *seppos_option, *encseqall_option, *encseq_option, *readset_option,
            *v_option, *q_option, *db_option, *testrs_option,
-           *testrs_depth_option, *testrs_print_option,
-           *testrs_maxdepth_option;
+           *testrs_depth_option, *testrs_print_option, *testrs_maxdepth_option,
+           *copynum_option;
 
   gt_assert(arguments);
 
@@ -200,6 +200,14 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   gt_option_is_development_option(testrs_maxdepth_option);
   gt_option_parser_add_option(op, testrs_maxdepth_option);
 
+  /* -copynum */
+  copynum_option = gt_option_new_bool("copynum",
+      "[eqlen only] output reads copy number to <readset>"
+      GT_READJOINER_SUFFIX_READSCOPYNUM,
+      &arguments->copynum, false);
+  gt_option_is_development_option(copynum_option);
+  gt_option_parser_add_option(op, copynum_option);
+
   gt_option_parser_set_max_args(op, 0U);
   return op;
 }
@@ -233,6 +241,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
   int had_err = 0;
   bool varlen;
   GtStr *cntlistfilename = NULL;
+  GtStr *copynumfilename = NULL;
   GtStr *sepposfilename = NULL;
   unsigned long i;
   unsigned long input_nofreads, output_nofreads;
@@ -274,6 +283,11 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     sepposfilename = gt_str_new_cstr(gt_str_get(arguments->readset));
     gt_str_append_cstr(sepposfilename, GT_READJOINER_SUFFIX_SEPPOS);
   }
+  if (arguments->copynum)
+  {
+    copynumfilename = gt_str_new_cstr(gt_str_get(arguments->readset));
+    gt_str_append_cstr(copynumfilename, GT_READJOINER_SUFFIX_READSCOPYNUM);
+  }
 
   contfinder = gt_contfinder_new(arguments->db, arguments->readset,
       arguments->encseqall, err);
@@ -311,7 +325,8 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
           ? GT_CONTFINDER_SEQNUMS : (arguments->fasta ? GT_CONTFINDER_FASTA
             : GT_CONTFINDER_QUIET)), arguments->sorted, arguments->cntlist ?
         gt_str_get(cntlistfilename) : NULL, arguments->seppos ?
-        gt_str_get(sepposfilename) : NULL, arguments->encseq, err);
+        gt_str_get(sepposfilename) : NULL, arguments->copynum ?
+        gt_str_get(copynumfilename) : NULL, arguments->encseq, err);
     gt_logger_log(verbose_logger, "contained reads = %lu "
         "[%.2f %% of input]",
         gt_contfinder_nofcontained(contfinder),
@@ -338,6 +353,11 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
         gt_logger_log(verbose_logger, "contained reads list saved: %s",
                       gt_str_get(cntlistfilename));
       }
+      if (arguments->copynum)
+      {
+        gt_logger_log(verbose_logger, "reads copy number saved: %s",
+                      gt_str_get(copynumfilename));
+      }
       if (arguments->seppos)
       {
         gt_logger_log(verbose_logger, "separator positions saved: %s",
@@ -362,6 +382,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     }
   }
   gt_str_delete(cntlistfilename);
+  gt_str_delete(copynumfilename);
   gt_str_delete(sepposfilename);
   gt_logger_delete(verbose_logger);
   gt_logger_delete(default_logger);

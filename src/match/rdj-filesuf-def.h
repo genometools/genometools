@@ -32,6 +32,7 @@
 /* -- prefilter -- */
 
 #define GT_READJOINER_SUFFIX_PREFILTERED_FAS   ".prefiltered.fas"
+#define GT_READJOINER_SUFFIX_READSCOPYNUM      ".rcn"
 
 /* -- test / debug / development output -- */
 

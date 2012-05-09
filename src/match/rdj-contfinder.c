@@ -67,6 +67,24 @@ typedef uint32_t gt_contfinder_seqnum_t;
 typedef uint8_t gt_contfinder_kmercode_t;
 typedef uint8_t gt_contfinder_overflow_t;
 
+typedef uint8_t gt_contfinder_copynum_t;
+#define GT_CONTFINDER_COPYNUM_MAX UINT8_MAX
+#define GT_CONTFINDER_COPYNUM_INC(VALUE, INC) \
+  if ((VALUE) < GT_CONTFINDER_COPYNUM_MAX - INC + 1)\
+  {\
+    (VALUE) += INC;\
+  }\
+
+#define GT_CONTFINDER_CONTAINS(CONTFINDERPTR, CONTAINER, CONTAINED)\
+  gt_assert(!GT_ISIBITSET((CONTFINDERPTR)->contained, CONTAINER));\
+  GT_SETIBIT((CONTFINDERPTR)->contained, (CONTAINED));\
+  if ((CONTFINDERPTR)->copynum != NULL)\
+  {\
+    GT_CONTFINDER_COPYNUM_INC((CONTFINDERPTR)->copynum[(CONTAINER)],\
+        (CONTFINDERPTR)->copynum[(CONTAINED)]);\
+    (CONTFINDERPTR)->copynum[(CONTAINED)] = 0;\
+  }
+
 typedef struct {
   gt_contfinder_kmercode_t code;
   gt_contfinder_overflow_t overflow;
@@ -137,6 +155,8 @@ struct GtContfinder {
   unsigned long characterdistribution[GT_CONTFINDER_ALPHASIZE];
   size_t totallength;
   bool contained_deleted;
+  /* copynum buffer */
+  gt_contfinder_copynum_t *copynum;
 };
 
 static inline gt_contfinder_kmercode_t gt_contfinder_code_at_position(
@@ -255,7 +275,7 @@ static inline void gt_contfinder_insertion_sort(
     const GtContfinder contfinder, GtContfinderBucketInfo bucket)
 {
   size_t i, j;
-  gt_contfinder_seqnum_t u, v;
+  gt_contfinder_seqnum_t u, v, container;
   int uvcmp;
 
   gt_assert(bucket.nofseqs > (gt_contfinder_seqnum_t)1);
@@ -328,7 +348,9 @@ static inline void gt_contfinder_insertion_sort(
         }
       }
       if (uvcmp < 0)
+      {
         break;
+      }
       if (uvcmp == 0)
       {
         if (ucorrected > vcorrected)
@@ -343,6 +365,26 @@ static inline void gt_contfinder_insertion_sort(
     GT_READJOINER_CONTFINDER_SET_SEQNUM(bucket.seqnums,
         j + bucket.seqnums_offset, u);
   }
+  container = GT_READJOINER_CONTFINDER_GET_SEQNUM(bucket.seqnums,
+        bucket.seqnums_offset);
+  if (container >= contfinder.nofseqs)
+    container = (contfinder.nofseqs << 1) - 1 - container;
+  gt_assert(!GT_ISIBITSET(contfinder.contained, container));
+  for (i = (size_t)1; i < bucket.nofseqs; i++)
+  {
+    u = GT_READJOINER_CONTFINDER_GET_SEQNUM(bucket.seqnums,
+        i + bucket.seqnums_offset);
+    if (u >= contfinder.nofseqs)
+      u = (contfinder.nofseqs << 1) - 1 - u;
+    if (GT_ISIBITSET(contfinder.contained, u))
+    {
+      GT_CONTFINDER_CONTAINS(&contfinder, container, u);
+    }
+    else
+    {
+      container = u;
+    }
+  }
 }
 
 /* the following assumes the seqnums are sorted in the bucket */
@@ -351,6 +393,7 @@ static inline void gt_contfinder_mark_as_contained(
     bool except_lowest_seqnum)
 {
   size_t i, from = 0, to = bucket.nofseqs;
+  gt_contfinder_seqnum_t container = 0;
   gt_assert(bucket.nofseqs > 0);
   if (except_lowest_seqnum)
   {
@@ -368,9 +411,14 @@ static inline void gt_contfinder_mark_as_contained(
     {
       from--;
       to--;
+      container = last;
     }
-    else if (first == last) /* palindromic */
-      to--;
+    else
+    {
+      container = first;
+      if (first == last) /* palindromic */
+        to--;
+    }
   }
   for (i = from; i < to; i++)
   {
@@ -379,7 +427,7 @@ static inline void gt_contfinder_mark_as_contained(
           i + bucket.seqnums_offset);
     if (corrected >= contfinder.nofseqs)
       corrected = (contfinder.nofseqs << 1) - corrected - 1;
-    GT_SETIBIT(contfinder.contained, corrected);
+    GT_CONTFINDER_CONTAINS(&contfinder, container, corrected);
   }
 }
 
@@ -1099,7 +1147,8 @@ static int gt_contfinder_output_encseq(GtContfinder *contfinder, GtError *err)
 
 int gt_contfinder_run(GtContfinder *contfinder, bool rev, GtFile *outfp,
     GtContfinderOutputFormat format, bool sorted, const char *cntlistfilename,
-    const char *sepposfilename, bool output_encseq, GtError *err)
+    const char *sepposfilename, const char *copynumfilename,
+    bool output_encseq, GtError *err)
 {
   gt_contfinder_seqnum_t i;
   GtReadjoinerContfinderSeqnumsType *seqnums;
@@ -1118,6 +1167,19 @@ int gt_contfinder_run(GtContfinder *contfinder, bool rev, GtFile *outfp,
     contfinder->logicalnofseqs <<= 1;
 
   GT_READJOINER_CONTFINDER_ALLOC_SEQNUMS(seqnums, contfinder->logicalnofseqs);
+
+  if (copynumfilename != NULL)
+  {
+    gt_contfinder_seqnum_t idx;
+    /* the mark_as_contained function is currently not able to set
+     * correctly the copynum if sequences have variable length,
+     * thus: */
+    gt_assert(contfinder->len > 0);
+    contfinder->copynum = gt_malloc(sizeof (*contfinder->copynum) *
+        contfinder->nofseqs);
+    for (idx = 0; idx < contfinder->nofseqs; idx++)
+      contfinder->copynum[idx] = (gt_contfinder_seqnum_t)1;
+  }
 
   contfinder->contained = contained;
   all.nofseqs = contfinder->logicalnofseqs;
@@ -1260,6 +1322,43 @@ int gt_contfinder_run(GtContfinder *contfinder, bool rev, GtFile *outfp,
     had_err = gt_cntlist_show(contained, (unsigned long)(contfinder->nofseqs +
           contfinder->nofcontained), cntlistfilename, true, err);
   }
+  if (!had_err && copynumfilename != NULL)
+  {
+    FILE *file;
+    file = gt_fa_fopen(copynumfilename, "wb", err);
+    if (file == NULL)
+      had_err = -1;
+    else
+    {
+#ifndef NDEBUG
+      gt_contfinder_seqnum_t n_noncontained = 0;
+      unsigned long cnsum = 0;
+      bool had_overflow = false;
+#endif
+      gt_contfinder_copynum_t cn;
+      for (i = 0; i < contfinder->nofseqs + contfinder->nofcontained; i++)
+      {
+        cn = contfinder->copynum[i];
+        if (cn > 0)
+        {
+          gt_xfwrite(contfinder->copynum + i, sizeof (*contfinder->copynum),
+              (size_t)1, file);
+#ifndef NDEBUG
+          n_noncontained++;
+          if (cn == GT_CONTFINDER_COPYNUM_MAX)
+          {
+            had_overflow = true;
+          }
+          cnsum += cn;
+#endif
+        }
+      }
+      gt_assert(n_noncontained == contfinder->nofseqs);
+      gt_assert(had_overflow || (cnsum == (unsigned long)(contfinder->nofseqs +
+        contfinder->nofcontained)));
+      gt_fa_fclose(file);
+    }
+  }
   if (!had_err && sepposfilename != NULL && contfinder->seppos != NULL)
   {
     FILE *file;
@@ -1320,6 +1419,7 @@ void gt_contfinder_delete(GtContfinder *contfinder)
     gt_free(contfinder->seppos);
     gt_free(contfinder->filelengthtab);
     gt_free(contfinder->contained);
+    gt_free(contfinder->copynum);
     gt_free(contfinder);
   }
 }
@@ -1695,6 +1795,7 @@ GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
   contfinder->discardedlength = 0;
   contfinder->contained = NULL;
   contfinder->contained_deleted = false;
+  contfinder->copynum = NULL;
   had_err = gt_contfinder_encode_files(contfinder, err);
   if (!had_err && contfinder->len > 0 &&
       output_encseq && contfinder->nofseqs > 0)

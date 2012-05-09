@@ -51,7 +51,8 @@ typedef enum {
  */
 int gt_contfinder_run(GtContfinder *contfinder, bool rev, GtFile *outfp,
     GtContfinderOutputFormat format, bool sorted, const char *cntlistfilename,
-    const char *sepposfilename, bool output_encseq, GtError *err);
+    const char *sepposfilename, const char *copynumfilename,
+    bool output_encseq, GtError *err);
 
 void gt_contfinder_delete(GtContfinder *contfinder);
 
