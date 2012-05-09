@@ -24,6 +24,7 @@
 #include "core/cstr_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
+#include "core/md5_seqid.h"
 #include "core/parseutils.h"
 #include "core/queue.h"
 #include "core/splitter.h"
@@ -178,6 +179,40 @@ static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
   return had_err;
 }
 
+static int verify_seqid(const GtStr *seqid, const char *filename,
+                        unsigned int line_number, GtError *err)
+{
+  int had_err = 0;
+  gt_error_check(err);
+  gt_assert(seqid);
+  if (gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
+    if (gt_str_length(seqid) < GT_MD5_SEQID_PREFIX_LEN +
+                               GT_MD5_SEQID_HASH_LEN) {
+      gt_error_set(err, "MD5 sequence ID '%s' on line %u in file \"%s\" is too "
+                   "short", gt_str_get(seqid), line_number, filename);
+      had_err = -1;
+    }
+    if (!had_err && gt_str_length(seqid) >= GT_MD5_SEQID_TOTAL_LEN) {
+      const char *sid = gt_str_get(seqid);
+      if (sid[GT_MD5_SEQID_TOTAL_LEN-1] != GT_MD5_SEQID_SEPARATOR) {
+        gt_error_set(err, "MD5 sequence ID '%s' on line %u in file \"%s\" has "
+                     "wrong separator '%c' (must be '%c')",
+                     gt_str_get(seqid), line_number, filename,
+                     sid[GT_MD5_SEQID_TOTAL_LEN-1], GT_MD5_SEQID_SEPARATOR);
+        had_err = -1;
+      }
+    }
+    if (!had_err && gt_str_length(seqid) == GT_MD5_SEQID_TOTAL_LEN) {
+      gt_error_set(err, "MD5 sequence ID '%s' on line %u in file \"%s\" has "
+                   "missing sequence ID after separator '%c'",
+                   gt_str_get(seqid), line_number, filename,
+                   GT_MD5_SEQID_SEPARATOR);
+      had_err = -1;
+    }
+  }
+  return had_err;
+}
+
 static int parse_target_attribute(const char *value, bool tidy,
                                   GtStr *target_id, GtRange *target_range,
                                   GtStrand *target_strand,
@@ -213,6 +248,8 @@ static int parse_target_attribute(const char *value, bool tidy,
                                gt_splitter_get_token(splitter, 0),
                                strlen(gt_splitter_get_token(splitter, 0)), err);
   }
+  if (!had_err)
+    had_err = verify_seqid(unescaped_target, filename, line_number, err);
   if (!had_err && target_id)
     gt_str_append_str(target_id, unescaped_target);
   if (!had_err && target_ids)
@@ -1320,7 +1357,7 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
     attributes = tokens[8];
   }
 
-  if (parser->tidy && (start[0] == '.' || end[0] == '.')) {
+  if (!had_err && parser->tidy && (start[0] == '.' || end[0] == '.')) {
     gt_warning("feature \"%s\" on line %u in file \"%s\" has undefined "
                "range, discarding feature", type, line_number, filename);
     gt_splitter_delete(splitter);
@@ -1381,6 +1418,9 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
     had_err = get_seqid_str(&seqid_str, seqid, range, parser, filename,
                             line_number, err);
   }
+  /* verify seqid */
+  if (!had_err)
+    had_err = verify_seqid(seqid_str, filename, line_number, err);
 
   /* create the feature */
   if (!had_err) {
@@ -1652,6 +1692,8 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
                        ssr);
       }
     }
+    if (!had_err)
+      had_err = verify_seqid(ssr->seqid_str, filename, line_number, err);
     if (!had_err) {
       gt_assert(ssr);
       gn = gt_region_node_new(ssr->seqid_str, range.start, range.end);

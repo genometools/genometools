@@ -1227,6 +1227,30 @@ Test do
   run "diff #{last_stdout} #{$testdata}cds_with_multiple_parents_2_tidied.gff3"
 end
 
+Name "gt gff3 MD5 seqid (missing seqid)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}md5_seqid_missing_seqid.gff3",
+           :retval => 1
+  grep last_stderr, "has missing sequence ID after separator"
+end
+
+Name "gt gff3 MD5 seqid (too short)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}md5_seqid_too_short.gff3",
+           :retval => 1
+  grep last_stderr, "too short"
+end
+
+Name "gt gff3 MD5 seqid (wrong separator)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}md5_seqid_wrong_separator.gff3",
+           :retval => 1
+  grep last_stderr, "wrong separator"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"
