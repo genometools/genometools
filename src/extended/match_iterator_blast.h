@@ -22,13 +22,6 @@
 
 typedef struct GtMatchIteratorBlast GtMatchIteratorBlast;
 
-typedef struct {
-  char *seqid1, *seqid2;
-  long double e_value;
-  float bitscore;
-  unsigned long ali_length;
-} GtBlastMatchInfo;
-
 GtMatchIterator* gt_match_iterator_blast_file_new(const char *matchfile,
                                                   GtError *err);
 
