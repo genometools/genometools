@@ -84,7 +84,8 @@ typedef struct {
     : GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(BUCKETNUM))
 
 static inline gt_radixsort_str_kmercode_t gt_radixsort_str_code_at_position(
-    const GtTwobitencoding *twobitencoding, unsigned long pos)
+    const GtTwobitencoding *twobitencoding, unsigned long pos,
+    unsigned long totallength)
 {
   unsigned int unitoffset = (unsigned int) GT_MODBYUNITSIN2BITENC(pos);
   unsigned long unitindex = GT_DIVBYUNITSIN2BITENC(pos);
@@ -92,6 +93,7 @@ static inline gt_radixsort_str_kmercode_t gt_radixsort_str_code_at_position(
   if (unitoffset <=
       (unsigned int) (GT_UNITSIN2BITENC - GT_RADIXSORT_STR_KMERSIZE))
   {
+    gt_assert(unitindex < gt_unitsoftwobitencoding(totallength));
     return (gt_radixsort_str_kmercode_t)
       (twobitencoding[unitindex] >>
        GT_MULT2(GT_UNITSIN2BITENC - GT_RADIXSORT_STR_KMERSIZE - unitoffset))
@@ -101,6 +103,7 @@ static inline gt_radixsort_str_kmercode_t gt_radixsort_str_code_at_position(
     unsigned int shiftleft =
       GT_MULT2(unitoffset + (unsigned int) GT_RADIXSORT_STR_KMERSIZE -
                GT_UNITSIN2BITENC);
+    gt_assert(unitindex + 1 < gt_unitsoftwobitencoding(totallength));
     return (gt_radixsort_str_kmercode_t)
                   ((twobitencoding[unitindex] << shiftleft) |
                    (twobitencoding[unitindex + 1] >>
@@ -126,7 +129,7 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
     if (suffixnum <= totallength)
     {
       remaining = equallengthplus1 - 1 - pos % equallengthplus1;
-      code = gt_radixsort_str_code_at_position(twobitencoding, pos);
+      code = gt_radixsort_str_code_at_position(twobitencoding, pos,totallength);
       if (remaining < (unsigned long) GT_RADIXSORT_STR_KMERSIZE)
       {
         overflow = GT_RADIXSORT_STR_KMERSIZE - remaining;
@@ -139,8 +142,9 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
       pos -= (remaining > (unsigned long) GT_RADIXSORT_STR_KMERSIZE)
                ? (unsigned long) GT_RADIXSORT_STR_KMERSIZE
                : remaining;
+      gt_assert(pos < totallength);
       code = GT_RADIXSORT_STR_REVCOMPL(gt_radixsort_str_code_at_position(
-                                       twobitencoding, pos));
+                                       twobitencoding, pos, totallength));
       if (remaining < (unsigned long) GT_RADIXSORT_STR_KMERSIZE)
       {
         overflow = GT_RADIXSORT_STR_KMERSIZE - remaining;

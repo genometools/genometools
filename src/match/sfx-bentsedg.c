@@ -142,7 +142,8 @@ typedef struct
                  *esr2;
   GtReadmode readmode;
   bool fwd, complement;
-  unsigned long totallength;
+  unsigned long totallength,
+                realtotallength;
   GtArrayGtMKVstack mkvauxstack; /* XXX be careful with threads */
   GtLcpvalues *tableoflcpvalues;
   GtMedianinfo *medianinfospace;
@@ -873,7 +874,6 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
 #endif
     if (bsr->sfxstrategy->withradixsort &&
         gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
-        !gt_encseq_is_mirrored(bsr->encseq) &&
         bsr->readmode == GT_READMODE_FORWARD)
     {
       gt_sfx_radixsort(bsr->twobitencoding,
@@ -882,7 +882,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                        subbucketleft,
                        width,
                        bsr->equallengthplus1,
-                       bsr->totallength,
+                       bsr->realtotallength,
                        bsr->sssp,
                        bsr->tableoflcpvalues);
       bsr->countradixsort++;
@@ -1376,6 +1376,9 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
 
   bsr->readmode = readmode;
   bsr->totallength = gt_encseq_total_length(encseq);
+  bsr->realtotallength = gt_encseq_is_mirrored(encseq)
+                           ? GT_DIV2(bsr->totallength - 1)
+                           : bsr->totallength;
   bsr->sfxstrategy = sfxstrategy;
   bsr->sssp = suffixsortspace;
   gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
