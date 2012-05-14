@@ -1726,7 +1726,8 @@ void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
   {
     suffixes[i] = i;
   }
-  gt_radixsort_str_eqlen(contfinder->twobitencoding, suffixes, depth,
+  gt_radixsort_str_eqlen(contfinder->twobitencoding, suffixes,
+                         NULL, 0, depth,
                          maxdepth, width,
                          (unsigned long) contfinder->len, totallength);
   if (print)

@@ -662,12 +662,7 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
       laststart = idx;
     } else
     {
-      /*if (lcpvalue > maxdepth)
-      {
-        fprintf(stderr,"lcpvalue = %lu > %lu = maxdepth\n",lcpvalue,maxdepth);
-      }
       gt_assert(lcpvalue == maxdepth);
-      */
     }
   }
   if (laststart < width-1)

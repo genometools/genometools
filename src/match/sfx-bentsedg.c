@@ -874,8 +874,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
     if (bsr->sfxstrategy->withradixsort &&
         gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
         !gt_encseq_is_mirrored(bsr->encseq) &&
-        bsr->readmode == GT_READMODE_FORWARD &&
-        bsr->tableoflcpvalues == NULL)
+        bsr->readmode == GT_READMODE_FORWARD)
     {
       gt_sfx_radixsort(bsr->twobitencoding,
                        depth,
@@ -884,7 +883,8 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                        width,
                        bsr->equallengthplus1,
                        bsr->totallength,
-                       bsr->sssp);
+                       bsr->sssp,
+                       bsr->tableoflcpvalues);
       bsr->countradixsort++;
       return;
     }

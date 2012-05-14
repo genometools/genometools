@@ -375,7 +375,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   unsigned long idx, lcpvalue;
   Largelcpvalue *largelcpvalueptr;
 
-  gt_assert(lcpsubtab->lcp2file != NULL);
+  gt_assert(lcpsubtab != NULL && lcpsubtab->lcp2file != NULL);
   lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue = 0;
   if (lcpsubtab->tableoflcpvalues.numoflargelcpvalues > 0 &&
       lcpsubtab->tableoflcpvalues.numoflargelcpvalues >=

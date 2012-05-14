@@ -17,6 +17,8 @@
 
 #ifndef RADIXSORT_STR_H
 #define RADIXSORT_STR_H
+#include "core/intbits.h"
+#include "sfx-lcpvalues.h"
 
 /*
  * *suffixes + offset = position of first suffix to sort
@@ -30,8 +32,13 @@
  * */
 
 void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
-    unsigned long *suffixes, unsigned long depth,
-    unsigned long maxdepth, unsigned long width, unsigned long equallengthplus1,
-    unsigned long totallength);
+                            unsigned long *suffixes,
+                            GtLcpvalues *lcpvalues,
+                            unsigned long subbucketleft,
+                            unsigned long depth,
+                            unsigned long maxdepth,
+                            unsigned long width,
+                            unsigned long equallengthplus1,
+                            unsigned long totallength);
 
 #endif

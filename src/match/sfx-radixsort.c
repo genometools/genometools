@@ -20,6 +20,7 @@
 #include "sfx-suffixgetset.h"
 #include "radixsort_str.h"
 #include "sfx-radixsort.h"
+#include "sfx-lcpvalues.h"
 
 void gt_sfx_radixsort(const GtTwobitencoding *twobitencoding,
                       unsigned long depth,
@@ -28,7 +29,8 @@ void gt_sfx_radixsort(const GtTwobitencoding *twobitencoding,
                       unsigned long width,
                       unsigned long equallengthplus1,
                       unsigned long totallength,
-                      GtSuffixsortspace *sssp)
+                      GtSuffixsortspace *sssp,
+                      GtLcpvalues *lcpvalues)
 {
   unsigned long idx, *suffixes;
   GtSuffixsortspace_exportptr *exportptr
@@ -47,9 +49,14 @@ void gt_sfx_radixsort(const GtTwobitencoding *twobitencoding,
       suffixes[idx] = (unsigned long) exportptr->uinttabsectionptr[idx];
     }
   }
-  gt_radixsort_str_eqlen(twobitencoding,suffixes,depth,
+  gt_radixsort_str_eqlen(twobitencoding,
+                         suffixes,
+                         lcpvalues,
+                         subbucketleft,
+                         depth,
                          (unsigned long) sortmaxdepth,
-                         width, equallengthplus1,
+                         width,
+                         equallengthplus1,
                          totallength);
   if (allocated)
   {
