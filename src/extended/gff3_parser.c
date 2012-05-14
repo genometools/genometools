@@ -53,7 +53,8 @@ struct GtGFF3Parser {
        strict,
        tidy,
        fasta_parsing, /* parser is in FASTA parsing mode */
-       eof_emitted;
+       eof_emitted,
+       gvf_mode;
   long offset;
   GtMapping *offset_mapping;
   GtOrphanage *orphanage;
@@ -1056,6 +1057,43 @@ void gt_gff3_parser_build_target_str(GtStr *target, GtStrArray *target_ids,
   }
 }
 
+static bool invalid_uppercase_gff3_attribute(const char *attr_tag)
+{
+return (strcmp(attr_tag, GT_GFF_ID) &&
+        strcmp(attr_tag, GT_GFF_NAME) &&
+        strcmp(attr_tag, GT_GFF_ALIAS) &&
+        strcmp(attr_tag, GT_GFF_PARENT) &&
+        strcmp(attr_tag, GT_GFF_TARGET) &&
+        strcmp(attr_tag, GT_GFF_GAP) &&
+        strcmp(attr_tag, GT_GFF_DERIVES_FROM) &&
+        strcmp(attr_tag, GT_GFF_NOTE) &&
+        strcmp(attr_tag, GT_GFF_DBXREF) &&
+        strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM) &&
+        strcmp(attr_tag, GT_GFF_IS_CIRCULAR));
+}
+
+static bool invalid_uppercase_gvf_attribute(const char *attr_tag)
+{
+return (strcmp(attr_tag, GT_GVF_GENOTYPE) &&
+        strcmp(attr_tag, GT_GVF_REFERENCE_SEQ) &&
+        strcmp(attr_tag, GT_GVF_VARIANT_SEQ) &&
+        strcmp(attr_tag, GT_GVF_VARIANT_FREQ) &&
+        strcmp(attr_tag, GT_GVF_VARIANT_EFFECT) &&
+        strcmp(attr_tag, GT_GVF_VARIANT_READS) &&
+        strcmp(attr_tag, GT_GVF_TOTAL_READS) &&
+        strcmp(attr_tag, GT_GVF_PHASED) &&
+        strcmp(attr_tag, GT_GVF_START_RANGE) &&
+        strcmp(attr_tag, GT_GVF_END_RANGE) &&
+        strcmp(attr_tag, GT_GVF_INDIVIDUAL) &&
+        strcmp(attr_tag, GT_GVF_REFERENCE_CODON) &&
+        strcmp(attr_tag, GT_GVF_VARIANT_CODON) &&
+        strcmp(attr_tag, GT_GVF_REFERENCE_AA) &&
+        strcmp(attr_tag, GT_GVF_VARIANT_AA) &&
+        strcmp(attr_tag, GT_GVF_BREAKPOINT_DETAIL) &&
+        strcmp(attr_tag, GT_GVF_SEQUENCE_CONTEXT) &&
+        strcmp(attr_tag, GT_GVF_ZYGOSITY));
+}
+
 static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
                             bool *is_child, GtGFF3Parser *parser,
                             const char *seqid, GtQueue *genome_nodes,
@@ -1151,17 +1189,13 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
     }
     if (!had_err && attr_valid && isupper(attr_tag[0])) {
       /* check if uppercase attributes are the predefined ones */
-      if (strcmp(attr_tag, GT_GFF_ID) &&
-          strcmp(attr_tag, GT_GFF_NAME) &&
-          strcmp(attr_tag, GT_GFF_ALIAS) &&
-          strcmp(attr_tag, GT_GFF_PARENT) &&
-          strcmp(attr_tag, GT_GFF_TARGET) &&
-          strcmp(attr_tag, GT_GFF_GAP) &&
-          strcmp(attr_tag, GT_GFF_DERIVES_FROM) &&
-          strcmp(attr_tag, GT_GFF_NOTE) &&
-          strcmp(attr_tag, GT_GFF_DBXREF) &&
-          strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM) &&
-          strcmp(attr_tag, GT_GFF_IS_CIRCULAR)) {
+      bool invalid;
+      if (parser->gvf_mode)
+        invalid = invalid_uppercase_gff3_attribute(attr_tag)
+                    && invalid_uppercase_gvf_attribute(attr_tag);
+      else
+        invalid = invalid_uppercase_gff3_attribute(attr_tag);
+      if (invalid) {
         if (parser->tidy) {
           gt_warning("illegal uppercase attribute \"%s\" on line %u in file "
                      "\"%s\"; change to lowercase", attr_tag, line_number,
@@ -1462,26 +1496,35 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
 }
 
 static int parse_first_gff3_line(const char *line, const char *filename,
-                                 bool tidy, GtError *err)
+                                 bool *gvf_mode, bool tidy, GtError *err)
 {
   int version, had_err = 0;
   gt_error_check(err);
   gt_assert(line && filename);
   if (strncmp(line, GT_GFF_VERSION_PREFIX, strlen(GT_GFF_VERSION_PREFIX))) {
-    if (tidy) {
-      gt_warning("line 1 in file \"%s\" does not begin with \"%s\", create "
-                 "\"%s %d\" line automatically", filename,
-                 GT_GFF_VERSION_PREFIX, GT_GFF_VERSION_PREFIX, GT_GFF_VERSION);
-      return 0;
-    }
-    else {
-      gt_error_set(err, "line 1 in file \"%s\" does not begin with \"%s\"",
-                   filename, GT_GFF_VERSION_PREFIX);
-      had_err = -1;
+    if (strncmp(line, GT_GVF_VERSION_PREFIX, strlen(GT_GVF_VERSION_PREFIX))) {
+      if (tidy) {
+        gt_warning("line 1 in file \"%s\" does not begin with \"%s\" or "
+                   "\"%s\", create \"%s %d\" line automatically",
+                   filename,
+                   GT_GFF_VERSION_PREFIX, GT_GFF_VERSION_PREFIX,
+                   GT_GFF_VERSION_PREFIX, GT_GFF_VERSION);
+        return 0;
+      }
+      else {
+        gt_error_set(err, "line 1 in file \"%s\" does not begin with \"%s\" "
+                     "or \"%s\"",
+                     filename, GT_GFF_VERSION_PREFIX, GT_GFF_VERSION_PREFIX);
+        had_err = -1;
+      }
+    } else {
+      *gvf_mode = true;
     }
   }
   if (!had_err) {
-    line += strlen(GT_GFF_VERSION_PREFIX);
+    line += *gvf_mode
+              ? strlen(GT_GVF_VERSION_PREFIX)
+              : strlen(GT_GFF_VERSION_PREFIX);
     /* skip blanks */
     while (line[0] == ' ')
       line++;
@@ -1570,6 +1613,73 @@ static int process_orphans(GtOrphanage *orphanage, GtFeatureInfo *feature_info,
     gt_free(parent_attr_dup);
   }
   return had_err;
+}
+
+static bool invalid_gvf_pragma(const char *line)
+{
+  return (strncmp(line, GT_GVF_REFERENCE_FASTA, strlen(GT_GVF_REFERENCE_FASTA))
+            && strncmp(line, GT_GVF_FEATURE_GFF3, strlen(GT_GVF_FEATURE_GFF3))
+            && strncmp(line, GT_GVF_FILE_VERSION, strlen(GT_GVF_FILE_VERSION))
+            && strncmp(line, GT_GVF_FILE_DATE, strlen(GT_GVF_FILE_DATE))
+            && strncmp(line, GT_GVF_INDIVIDUAL_ID, strlen(GT_GVF_INDIVIDUAL_ID))
+            && strncmp(line, GT_GVF_POPULATION, strlen(GT_GVF_POPULATION))
+            && strncmp(line, GT_GVF_SEX, strlen(GT_GVF_SEX))
+            && strncmp(line, GT_GVF_TECHNOLOGY_PLATFORM,
+                       strlen(GT_GVF_TECHNOLOGY_PLATFORM))
+            && strncmp(line, GT_GVF_TECHNOLOGY_PLATFORM_CLASS,
+                       strlen(GT_GVF_TECHNOLOGY_PLATFORM_CLASS))
+            && strncmp(line, GT_GVF_TECHNOLOGY_PLATFORM_NAME,
+                       strlen(GT_GVF_TECHNOLOGY_PLATFORM_NAME))
+            && strncmp(line, GT_GVF_TECHNOLOGY_PLATFORM_VERSION,
+                       strlen(GT_GVF_TECHNOLOGY_PLATFORM_VERSION))
+            && strncmp(line, GT_GVF_TECHNOLOGY_PLATFORM_MACHINE_ID,
+                       strlen(GT_GVF_TECHNOLOGY_PLATFORM_MACHINE_ID))
+            && strncmp(line, GT_GVF_TECHNOLOGY_PLATFORM_READ_LENGTH,
+                       strlen(GT_GVF_TECHNOLOGY_PLATFORM_READ_LENGTH))
+            && strncmp(line, GT_GVF_TECHNOLOGY_PLATFORM_READ_TYPE,
+                       strlen(GT_GVF_TECHNOLOGY_PLATFORM_READ_TYPE))
+            && strncmp(line, GT_GVF_TECHNOLOGY_PLATFORM_READ_PAIR_SPAN,
+                       strlen(GT_GVF_TECHNOLOGY_PLATFORM_READ_PAIR_SPAN))
+            && strncmp(line, GT_GVF_TECHNOLOGY_PLATFORM_AVERAGE_COVERAGE,
+                       strlen(GT_GVF_TECHNOLOGY_PLATFORM_AVERAGE_COVERAGE))
+            && strncmp(line, GT_GVF_SEQUENCING_SCOPE,
+                       strlen(GT_GVF_SEQUENCING_SCOPE))
+            && strncmp(line, GT_GVF_CAPTURE_METHOD,
+                       strlen(GT_GVF_CAPTURE_METHOD))
+            && strncmp(line, GT_GVF_CAPTURE_REGIONS,
+                       strlen(GT_GVF_CAPTURE_REGIONS))
+            && strncmp(line, GT_GVF_SEQUENCE_ALIGNMENT,
+                       strlen(GT_GVF_SEQUENCE_ALIGNMENT))
+            && strncmp(line, GT_GVF_VARIANT_CALLING,
+                       strlen(GT_GVF_VARIANT_CALLING))
+            && strncmp(line, GT_GVF_SAMPLE_DESCRIPTION,
+                       strlen(GT_GVF_SAMPLE_DESCRIPTION))
+            && strncmp(line, GT_GVF_GENOMIC_SOURCE,
+                       strlen(GT_GVF_GENOMIC_SOURCE))
+            && strncmp(line, GT_GVF_MULTI_INDIVIDUAL,
+                       strlen(GT_GVF_MULTI_INDIVIDUAL))
+            && strncmp(line, GT_GVF_DATA_SOURCE, strlen(GT_GVF_DATA_SOURCE))
+            && strncmp(line, GT_GVF_SCORE_METHOD, strlen(GT_GVF_SCORE_METHOD))
+            && strncmp(line, GT_GVF_SOURCE_METHOD, strlen(GT_GVF_SOURCE_METHOD))
+            && strncmp(line, GT_GVF_ATTRIBUTE_METHOD,
+                       strlen(GT_GVF_ATTRIBUTE_METHOD))
+            && strncmp(line, GT_GVF_PHENOTYPE_DESCRIPTION,
+                       strlen(GT_GVF_PHENOTYPE_DESCRIPTION))
+            && strncmp(line, GT_GVF_PHASED_GENOTYPES,
+                       strlen(GT_GVF_PHASED_GENOTYPES)));
+}
+
+static bool invalid_gff3_pragma(const char *line)
+{
+  return (strncmp(line, GT_GFF_SPECIES, strlen(GT_GFF_SPECIES))
+            && strncmp(line, GT_GFF_FEATURE_ONTOLOGY,
+                       strlen(GT_GFF_FEATURE_ONTOLOGY))
+            && strncmp(line, GT_GFF_ATTRIBUTE_ONTOLOGY,
+                       strlen(GT_GFF_ATTRIBUTE_ONTOLOGY))
+            && strncmp(line, GT_GFF_SOURCE_ONTOLOGY,
+                       strlen(GT_GFF_SOURCE_ONTOLOGY))
+            && strncmp(line, GT_GFF_GENOME_BUILD,
+                       strlen(GT_GFF_GENOME_BUILD)));
 }
 
 static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
@@ -1730,17 +1840,27 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       had_err = -1;
     }
   }
+  else if (strncmp(line, GT_GVF_VERSION_PREFIX,
+                   strlen(GT_GVF_VERSION_PREFIX)) == 0) {
+    char *data;
+    data = strchr(line+2, ' ');
+    if (data) {
+      data[0] = '\0';
+      data++;
+    }
+    parser->gvf_mode = true;
+    gn = gt_meta_node_new(line+2, data);
+    gt_genome_node_set_origin(gn, filenamestr, line_number);
+    gt_queue_add(genome_nodes, gn);
+  }
   else {
     char *data;
-    if (strncmp(line, GT_GFF_SPECIES, strlen(GT_GFF_SPECIES))
-          && strncmp(line, GT_GFF_FEATURE_ONTOLOGY,
-                     strlen(GT_GFF_FEATURE_ONTOLOGY))
-          && strncmp(line, GT_GFF_ATTRIBUTE_ONTOLOGY,
-                     strlen(GT_GFF_ATTRIBUTE_ONTOLOGY))
-          && strncmp(line, GT_GFF_SOURCE_ONTOLOGY,
-                     strlen(GT_GFF_SOURCE_ONTOLOGY))
-          && strncmp(line, GT_GFF_GENOME_BUILD,
-                     strlen(GT_GFF_GENOME_BUILD))) {
+    bool invalid;
+    if (parser->gvf_mode)
+      invalid = invalid_gff3_pragma(line) && invalid_gvf_pragma(line);
+    else
+      invalid = invalid_gff3_pragma(line);
+    if (invalid) {
       gt_warning("unknown meta-directive encountered in line %u in file "
                  "\"%s\", keep as comment: %s", line_number, filename, line);
     }
@@ -1792,7 +1912,8 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
     (*line_number)++;
 
     if (*line_number == 1) {
-      had_err = parse_first_gff3_line(line, filename, parser->tidy, err);
+      had_err = parse_first_gff3_line(line, filename, &parser->gvf_mode,
+                                      parser->tidy, err);
       if (had_err == -1) /* error */
         break;
       if (had_err == 1) { /* line processed */
