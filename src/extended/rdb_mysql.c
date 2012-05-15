@@ -76,7 +76,6 @@ GtRDB* gt_rdb_mysql_new(const char *server,
     gt_error_set(err, "cannot connect to database: %s",
                  mysql_error(&rdbm->conn));
     mysql_close(&rdbm->conn);
-    mysql_library_end();
     gt_rdb_delete(rdb);
     return NULL;
   }
@@ -249,7 +248,6 @@ static void gt_rdb_mysql_delete(GtRDB *rdb)
   rdbm = gt_rdb_mysql_cast(rdb);
   mysql_close(&rdbm->conn);
   gt_str_delete(rdbm->database);
-  mysql_library_end();
 }
 
 static void gt_rdb_stmt_mysql_delete(GtRDBStmt *st)

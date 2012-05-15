@@ -18,6 +18,9 @@
 #ifndef WITHOUT_CAIRO
 #include <fontconfig.h>
 #endif
+#ifdef HAVE_MYSQL
+#include <mysql/mysql.h>
+#endif
 #include <string.h>
 #include "core/init_api.h"
 #include "core/class_alloc.h"
@@ -112,6 +115,9 @@ void gt_lib_init(void)
   gt_symbol_init();
   gt_class_prealloc_run();
   gt_ya_rand_init(0);
+#ifdef HAVE_MYSQL
+  mysql_library_init(0, NULL, NULL);
+#endif
 }
 
 static void gt_lib_atexit_func(void)
@@ -145,6 +151,9 @@ int gt_lib_clean(void)
   gt_ma_clean();
 #ifndef WITHOUT_CAIRO
   FcFini();
+#endif
+#ifdef HAVE_MYSQL
+  mysql_library_end();
 #endif
   return fa_fptr_rval || fa_mmap_rval || gt_rval;
 }
