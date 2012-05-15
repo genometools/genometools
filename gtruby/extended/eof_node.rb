@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,18 +15,23 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'extended/add_introns_stream'
-require 'extended/anno_db'
-require 'extended/comment_node'
-require 'extended/custom_stream'
-require 'extended/custom_visitor'
-require 'extended/eof_node'
-require 'extended/feature_node'
-require 'extended/gff3_in_stream'
-require 'extended/gff3_out_stream'
-require 'extended/gff3_visitor'
-require 'extended/meta_node'
-require 'extended/rdb'
-require 'extended/region_node'
-require 'extended/sequence_node'
-require 'extended/type_checker'
+require 'dl/import'
+require 'gthelper'
+require 'extended/genome_node'
+
+module GT
+  extend DL::Importable
+  gtdlload "libgenometools"
+  extern "GtGenomeNode* gt_eof_node_new()"
+
+  class EOFNode < GenomeNode
+    def self.create
+      newfn = GT.gt_eof_node_new()
+      return GT::EOFNode.new(newfn, true)
+    end
+
+    def initialize(gn, newref=false)
+      super(gn, newref)
+    end
+  end
+end

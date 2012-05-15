@@ -23,7 +23,6 @@ from gt.extended.node_visitor import NodeVisitor
 from gt.core.gtstr import Str
 from gt.props import cachedproperty
 
-
 class GenomeNode(object):
 
     def __init__(self):
@@ -84,12 +83,18 @@ class GenomeNode(object):
     seqid = cachedproperty(get_seqid)
 
     def get_start(self):
-        return gtlib.gt_genome_node_get_start(self.gn)
+        if not self.__class__.__name__ == "EOFNode":
+            return gtlib.gt_genome_node_get_start(self.gn)
+        else:
+            return None
 
     start = cachedproperty(get_start)
 
     def get_end(self):
-        return gtlib.gt_genome_node_get_end(self.gn)
+        if not self.__class__.__name__ == "EOFNode":
+            return gtlib.gt_genome_node_get_end(self.gn)
+        else:
+            return None
 
     end = cachedproperty(get_end)
 

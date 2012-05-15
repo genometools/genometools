@@ -122,7 +122,7 @@ if not $arguments["nocairo"] then
     run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
   end
 
-  Name "gtruby: {Comment,Sequence,Region}Node classes"
+  Name "gtruby: {Comment,Sequence,Region,Meta,EOF}Node classes"
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/node_types.rb"
@@ -133,6 +133,12 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby "#{$testdata}gtruby/custom_stuff.rb #{$testdata}eden.gff3"
     run "diff #{last_stdout} #{$testdata}custom_streams_ref.txt"
+  end
+
+  Name "gtruby: CustomStream/CustomVisitor all node types"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/custom_visitor.rb"
   end
 
   Name "gtruby: Range class"

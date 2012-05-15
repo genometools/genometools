@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2009-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2009-2012 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,9 @@
 require 'dl/import'
 require 'gthelper'
 require 'extended/comment_node'
+require 'extended/eof_node'
 require 'extended/feature_node'
+require 'extended/meta_node'
 require 'extended/sequence_node'
 require 'extended/region_node'
 
@@ -26,7 +28,8 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   extern "GtNodeVisitor* gt_script_wrapper_visitor_new(void*, void*, void*,
-                                                       void*, void*)"
+                                                       void*, void*, void*,
+                                                       void*)"
 
   class CustomVisitor
     def visitor_func_generic(node_class, node_ptr, err_ptr, method_name)
@@ -68,10 +71,18 @@ module GT
       @sequence_node_cb = DL.callback("IPP") do |sn_ptr, err_ptr|
         self.visitor_func_generic(GT::CommentNode, sn_ptr, err_ptr, "sequence")
       end
+      @meta_node_cb = DL.callback("IPP") do |mn_ptr, err_ptr|
+        self.visitor_func_generic(GT::MetaNode, mn_ptr, err_ptr, "meta")
+      end
+      @eof_node_cb = DL.callback("IPP") do |en_ptr, err_ptr|
+        self.visitor_func_generic(GT::EOFNode, en_ptr, err_ptr, "eof")
+      end
       @genome_visitor = GT.gt_script_wrapper_visitor_new(@comment_node_cb,
                                                          @feature_node_cb,
                                                          @region_node_cb,
                                                          @sequence_node_cb,
+                                                         @meta_node_cb,
+                                                         @eof_node_cb,
                                                          nil)
       @genome_visitor.free = GT::symbol("gt_node_visitor_delete", "0P")
     end

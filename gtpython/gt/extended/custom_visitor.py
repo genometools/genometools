@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2009-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2009-2012 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -24,12 +24,16 @@ from gt.extended.feature_node import FeatureNode
 from gt.extended.region_node import RegionNode
 from gt.extended.sequence_node import SequenceNode
 from gt.extended.comment_node import CommentNode
+from gt.extended.eof_node import EOFNode
+from gt.extended.meta_node import MetaNode
 from gt.core.error import Error, GTError
 
 CommentNodeFunc = CFUNCTYPE(c_int, c_void_p, c_void_p)
 FeatureNodeFunc = CFUNCTYPE(c_int, c_void_p, c_void_p)
 RegionNodeFunc = CFUNCTYPE(c_int, c_void_p, c_void_p)
 SequenceNodeFunc = CFUNCTYPE(c_int, c_void_p, c_void_p)
+MetaNodeFunc = CFUNCTYPE(c_int, c_void_p, c_void_p)
+EOFNodeFunc = CFUNCTYPE(c_int, c_void_p, c_void_p)
 FreeFunc = CFUNCTYPE(c_void_p, c_void_p)
 
 class CustomVisitor(NodeVisitor):
@@ -95,10 +99,42 @@ class CustomVisitor(NodeVisitor):
 
         self.comment_node_cb = CommentNodeFunc(comment_node_w)
 
+        def eof_node_w(en_p, err_p):
+            en = EOFNode.create_from_ptr(en_p)
+            err = Error(err_p)
+            try:
+                try:
+                    self.visit_eof_node(en)
+                except AttributeError:
+                    pass
+                return 0
+            except GTError, errmsg:
+                err.set(str(errmsg))
+                return -1
+
+        self.eof_node_cb = EOFNodeFunc(eof_node_w)
+
+        def meta_node_w(mn_p, err_p):
+            mn = EOFNode.create_from_ptr(mn_p)
+            err = Error(err_p)
+            try:
+                try:
+                    self.visit_meta_node(mn)
+                except AttributeError:
+                    pass
+                return 0
+            except GTError, errmsg:
+                err.set(str(errmsg))
+                return -1
+
+        self.meta_node_cb = MetaNodeFunc(meta_node_w)
+
         self.gv = gtlib.gt_script_wrapper_visitor_new(self.comment_node_cb, \
                                                       self.feature_node_cb, \
                                                       self.region_node_cb, \
                                                       self.sequence_node_cb, \
+                                                      self.meta_node_cb, \
+                                                      self.eof_node_cb, \
                                                       None)
         self._as_parameter_ = self.gv
 

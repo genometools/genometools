@@ -32,6 +32,10 @@ typedef int  (*GtScriptWrapperVisitorRegionNodeFunc)(GtRegionNode*,
                                                      GtError*);
 typedef int  (*GtScriptWrapperVisitorSequenceNodeFunc)(GtSequenceNode*,
                                                        GtError*);
+typedef int  (*GtScriptWrapperVisitorMetaNodeFunc)(GtMetaNode*,
+                                                   GtError*);
+typedef int  (*GtScriptWrapperVisitorEOFNodeFunc)(GtEOFNode*,
+                                                  GtError*);
 
 const GtNodeVisitorClass* gt_script_wrapper_visitor_class(void);
 GtNodeVisitor*            gt_script_wrapper_visitor_new(
@@ -39,6 +43,8 @@ GtNodeVisitor*            gt_script_wrapper_visitor_new(
                                         GtScriptWrapperVisitorFeatureNodeFunc,
                                         GtScriptWrapperVisitorRegionNodeFunc,
                                         GtScriptWrapperVisitorSequenceNodeFunc,
+                                        GtScriptWrapperVisitorMetaNodeFunc,
+                                        GtScriptWrapperVisitorEOFNodeFunc,
                                         GtScriptWrapperVisitorFreeFunc);
 
 #endif

@@ -64,3 +64,27 @@ else
   raise(TestFailedError, "no failure on start > stop")
 end
 # does not have any exposed methods yet (see _api.h)
+
+# test MetaNodes
+cn  = GT::MetaNode.create("directive", "data")
+cn2 = GT::MetaNode.create(333, 444)
+
+unless cn.get_directive == "directive"
+  raise(TestFailedError, "MetaNode.get_directive")
+end
+unless cn2.get_directive == "333"
+  raise(TestFailedError, "CommentNode.get_directive")
+end
+unless cn.get_data == "data"
+  raise(TestFailedError, "MetaNode.get_data")
+end
+unless cn2.get_data == "444"
+  raise(TestFailedError, "CommentNode.get_data")
+end
+
+# test EOFNodes
+rn = GT::EOFNode.create()
+if rn.nil? then
+  raise(TestFailedError, "EOFNode.create")
+end
+# does not have any exposed methods yet (see _api.h)

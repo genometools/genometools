@@ -3,7 +3,8 @@
 
 import unittest
 from gt import FeatureNode, CommentNode, SequenceNode, RegionNode, \
-               CustomVisitor, FeatureNodeIteratorDepthFirst, GTError
+               CustomVisitor, MetaNode, EOFNode,FeatureNodeIteratorDepthFirst, \
+               GTError
 
 class TestVisitor(CustomVisitor):
 
@@ -12,6 +13,8 @@ class TestVisitor(CustomVisitor):
         self.sn = None
         self.rn = None
         self.cn = None
+        self.en = None
+        self.mn = None
 
     def visit_feature_node(self, fn):
         new_child = FeatureNode.create_new(fn.get_seqid(), "bar", 100, 1000, "+")
@@ -25,6 +28,12 @@ class TestVisitor(CustomVisitor):
 
     def visit_sequence_node(self, sn):
         self.sn = sn
+
+    def visit_meta_node(self, mn):
+        self.mn = mn
+
+    def visit_eof_node(self, en):
+        self.en = en
 
 class ErrorTestVisitor(CustomVisitor):
 
@@ -41,6 +50,8 @@ class CustomVisitorTestCase(unittest.TestCase):
         self.cn = CommentNode.create_new("comment")
         self.rn = RegionNode.create_new("foo", 100, 2000)
         self.sn = SequenceNode.create_new("foo", "AGATATAGA")
+        self.en = EOFNode.create_new()
+        self.mn = MetaNode.create_new("foo", "bar")
         self.tv = TestVisitor()
         self.etv = ErrorTestVisitor()
 
@@ -73,6 +84,16 @@ class CustomVisitorTestCase(unittest.TestCase):
         self.assertNotEqual(self.tv.cn, self.cn)
         self.cn.accept(self.tv)
         self.assertEqual(self.tv.cn, self.cn)
+
+    def test_accept_eof_node(self):
+        self.assertNotEqual(self.tv.en, self.en)
+        self.en.accept(self.tv)
+        self.assertEqual(self.tv.en, self.en)
+
+    def test_accept_meta_node(self):
+        self.assertNotEqual(self.tv.mn, self.mn)
+        self.mn.accept(self.tv)
+        self.assertEqual(self.tv.mn, self.mn)
 
 if __name__ == "__main__":
     unittest.main()

@@ -25,6 +25,8 @@ struct GtScriptWrapperVisitor {
   GtScriptWrapperVisitorFeatureNodeFunc feature_node_func;
   GtScriptWrapperVisitorRegionNodeFunc region_node_func;
   GtScriptWrapperVisitorSequenceNodeFunc sequence_node_func;
+  GtScriptWrapperVisitorMetaNodeFunc meta_node_func;
+  GtScriptWrapperVisitorEOFNodeFunc eof_node_func;
   GtScriptWrapperVisitorFreeFunc free_func;
 };
 
@@ -92,9 +94,35 @@ static int script_wrapper_visitor_sequence_node(GtNodeVisitor *nv,
   return had_err;
 }
 
+static int script_wrapper_visitor_meta_node(GtNodeVisitor *nv,
+                                            GtMetaNode *rn,
+                                            GtError *err)
+{
+  GtScriptWrapperVisitor *swv;
+  int had_err = 0;
+  gt_error_check(err);
+  swv = gt_script_wrapper_visitor_cast(nv);
+  if (swv->meta_node_func)
+    had_err = swv->meta_node_func(rn, err);
+  return had_err;
+}
+
+static int script_wrapper_visitor_eof_node(GtNodeVisitor *nv,
+                                           GtEOFNode *rn,
+                                           GtError *err)
+{
+  GtScriptWrapperVisitor *swv;
+  int had_err = 0;
+  gt_error_check(err);
+  swv = gt_script_wrapper_visitor_cast(nv);
+  if (swv->eof_node_func)
+    had_err = swv->eof_node_func(rn, err);
+  return had_err;
+}
+
 const GtNodeVisitorClass* gt_script_wrapper_visitor_class()
 {
-  static const GtNodeVisitorClass *nvc = NULL;
+  static GtNodeVisitorClass *nvc = NULL;
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtScriptWrapperVisitor),
                                     script_wrapper_visitor_free,
@@ -102,7 +130,9 @@ const GtNodeVisitorClass* gt_script_wrapper_visitor_class()
                                     script_wrapper_visitor_feature_node,
                                     script_wrapper_visitor_region_node,
                                     script_wrapper_visitor_sequence_node,
-                                    NULL);
+                                    script_wrapper_visitor_eof_node);
+    gt_node_visitor_class_set_meta_node_func(nvc,
+                                             script_wrapper_visitor_meta_node);
   }
   return nvc;
 }
@@ -112,16 +142,21 @@ gt_script_wrapper_visitor_new(GtScriptWrapperVisitorCommentNodeFunc cn,
                               GtScriptWrapperVisitorFeatureNodeFunc fn,
                               GtScriptWrapperVisitorRegionNodeFunc rn,
                               GtScriptWrapperVisitorSequenceNodeFunc sn,
+                              GtScriptWrapperVisitorMetaNodeFunc mn,
+                              GtScriptWrapperVisitorEOFNodeFunc en,
                               GtScriptWrapperVisitorFreeFunc free_func)
 {
   GtNodeVisitor *nv;
   GtScriptWrapperVisitor *swv;
   nv = gt_node_visitor_create(gt_script_wrapper_visitor_class());
+
   swv = gt_script_wrapper_visitor_cast(nv);
   swv->comment_node_func = cn;
   swv->feature_node_func = fn;
   swv->region_node_func = rn;
   swv->sequence_node_func = sn;
+  swv->meta_node_func = mn;
+  swv->eof_node_func = en;
   swv->free_func = free_func;
   return nv;
 }
