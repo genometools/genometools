@@ -459,8 +459,13 @@ static int gt_rdb_stmt_mysql_get_string(GtRDBStmt *st, unsigned long field_no,
   stm = gt_rdb_stmt_mysql_cast(st);
   CHECK_INIT_STATEMENT
   if (!had_err
-      && stm->results[field_no].buffer_type != MYSQL_TYPE_STRING
-      && stm->results[field_no].buffer_type != MYSQL_TYPE_VAR_STRING)
+        && stm->results[field_no].buffer_type != MYSQL_TYPE_STRING
+        && stm->results[field_no].buffer_type != MYSQL_TYPE_VAR_STRING
+        && stm->results[field_no].buffer_type != MYSQL_TYPE_BLOB
+        && stm->results[field_no].buffer_type != MYSQL_TYPE_TINY_BLOB
+        && stm->results[field_no].buffer_type != MYSQL_TYPE_MEDIUM_BLOB
+        && stm->results[field_no].buffer_type != MYSQL_TYPE_LONG_BLOB
+        && stm->results[field_no].buffer_type != MYSQL_TYPE_BIT)
   {
     gt_error_set(err, "incompatible type!");
     had_err = -1;
@@ -567,6 +572,11 @@ static int gt_rdb_stmt_mysql_exec(GtRDBStmt *st, GtError *err)
               break;
             case MYSQL_TYPE_STRING:
             case MYSQL_TYPE_VAR_STRING:
+            case MYSQL_TYPE_BLOB:
+            case MYSQL_TYPE_TINY_BLOB:
+            case MYSQL_TYPE_MEDIUM_BLOB:
+            case MYSQL_TYPE_LONG_BLOB:
+            case MYSQL_TYPE_BIT:
               {char *str = gt_calloc(field->max_length+1, sizeof (char));
               gt_hashtable_add(stm->buffers, &str);
               unsigned long *length = gt_calloc(1, sizeof (unsigned long));
