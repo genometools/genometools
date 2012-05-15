@@ -43,6 +43,10 @@ module GT
       @genome_node.free = GT::symbol("gt_genome_node_delete", "0P")
     end
 
+    def ==(node)
+      (node.genome_node == @genome_node)
+    end
+
     def get_range
       (GT::gt_genome_node_get_start(@genome_node)..\
        GT::gt_genome_node_get_end(@genome_node))
