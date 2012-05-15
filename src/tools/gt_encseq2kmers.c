@@ -15,12 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/encseq_api.h"
+#include "core/log_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
+#include "core/showtime.h"
+#include "match/randomsamples.h"
 #include "tools/gt_encseq2kmers.h"
 
 typedef struct {
-  unsigned int kmersize;
+  unsigned int kmersize, samplingfactor;
   GtStr  *encseqinput;
   bool verbose;
 } GtEncseq2kmersArguments;
@@ -57,6 +61,12 @@ static GtOptionParser* gt_encseq2kmers_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
+  /* -sf */
+  option = gt_option_new_uint_min("sf", "specify the sampling factor",
+                                  &arguments->samplingfactor, 50U, 1U);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
   /* -ii */
   option = gt_option_new_string("ii", "specify the input sequence",
                                 arguments->encseqinput, NULL);
@@ -83,15 +93,49 @@ static int gt_encseq2kmers_arguments_check(GT_UNUSED int rest_argc,
 
 static int gt_encseq2kmers_runner(GT_UNUSED int argc,
     GT_UNUSED const char **argv, GT_UNUSED int parsed_args,
-    GT_UNUSED void *tool_arguments, GT_UNUSED GtError *err)
+    void *tool_arguments, GtError *err)
 {
   GtEncseq2kmersArguments *arguments = tool_arguments;
-  int had_err = 0;
+  GtEncseqLoader *el = NULL;
+  GtEncseq *encseq = NULL;
+  GtRandomSamples *codes;
+  GtTimer *timer = NULL;
+  bool haserr = false;
 
   gt_error_check(err);
   gt_assert(arguments);
+  gt_log_log("indexname = %s", gt_str_get(arguments->encseqinput));
+  gt_log_log("kmersize = %u", arguments->kmersize);
+  gt_log_log("samplingfactor = %u", arguments->samplingfactor);
+  el = gt_encseq_loader_new();
+  gt_encseq_loader_drop_description_support(el);
+  gt_encseq_loader_disable_autosupport(el);
+  encseq = gt_encseq_loader_load(el, gt_str_get(arguments->encseqinput), err);
+  if (encseq == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    if (gt_showtime_enabled())
+    {
+      timer = gt_timer_new_with_progress_description("for initialization");
+      gt_timer_show_cpu_time_by_progress(timer);
+      gt_timer_start(timer);
+    }
+    codes = gt_randomsamples_new(encseq, arguments->kmersize, timer);
+    gt_randomsamples_sample(codes, arguments->samplingfactor);
+    gt_randomsamples_delete(codes);
+  }
+  gt_encseq_delete(encseq);
+  gt_encseq_loader_delete(el);
+  if (timer != NULL)
+  {
+    gt_timer_show_progress_final(timer, stdout);
+    gt_timer_delete(timer);
+  }
 
-  return had_err;
+  return haserr ? -1 : 0;
 }
 
 GtTool* gt_encseq2kmers(void)
