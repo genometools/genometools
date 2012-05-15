@@ -30,7 +30,7 @@ module GT
       unless start <= stop
         raise(ArgumentError, "start (#{start}) > stop (#{stop})")
       else
-        newrn = GT.gt_region_node_new(Gt::Str.new(seqid.to_s), start, stop)
+        newrn = GT.gt_region_node_new(GT::Str.new(seqid.to_s), start, stop)
         return GT::RegionNode.new(newrn, true)
       end
     end
