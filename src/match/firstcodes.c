@@ -711,6 +711,7 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
   }
   bitsforrelpos = gt_determinebitspervalue(maxrelpos);
   fci->buf.snrp = gt_seqnumrelpos_new(bitsforrelpos,encseq);
+  fci->buf.accum_all = false;
   fci->buf.markprefix = NULL;
   fci->buf.marksuffix = NULL;
   fci->numofsequences = gt_encseq_num_of_sequences(encseq);

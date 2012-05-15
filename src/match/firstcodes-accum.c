@@ -27,9 +27,9 @@
 
 #define GT_FIRSTCODES_ACCUM(BUF,CODE,RELPOS)\
         {\
-          if (((RELPOS) > 0) &&\
+          if ((BUF)->accum_all || (((RELPOS) > 0) &&\
               GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
-              GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE))\
+              GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE)))\
           {\
             if ((BUF)->nextfree == (BUF)->allocated)\
             {\

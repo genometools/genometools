@@ -37,6 +37,7 @@ typedef struct
   GtUlong *spaceGtUlong;
   GtSeqnumrelpos *snrp;
   void *fciptr;
+  bool accum_all;
 } GtCodeposbuffer;
 
 #endif
