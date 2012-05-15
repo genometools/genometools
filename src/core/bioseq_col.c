@@ -146,7 +146,7 @@ int gt_bioseq_col_md5_to_seq(GtBioseqCol *bsc, const char **seq,
   unsigned long i, seqnum = GT_UNDEF_ULONG;
   char *seqid = NULL;
   int had_err = 0;
-  GtBioseq *bioseq;
+  GtBioseq *bioseq = NULL;
   gt_error_check(err);
   gt_assert(bsc && seq && length && md5_seqid && err);
   gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
