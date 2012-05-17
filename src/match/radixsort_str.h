@@ -33,6 +33,8 @@
 
 typedef struct GtRadixsortstringinfo GtRadixsortstringinfo;
 
+unsigned long gt_radixsort_str_minwidth(void);
+
 GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
                                              *twobitencoding,
                                             unsigned long totallength,

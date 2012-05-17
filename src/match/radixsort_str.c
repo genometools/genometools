@@ -38,8 +38,6 @@ typedef struct {
   unsigned long lcp;
 } GtRadixsortStrBucketInfo;
 
-#define GT_RADIXSORT_STR_INSERTION_SORT_MAX 31UL
-
 #define GT_RADIXSORT_STR_UINT8_REVCOMPL(CODE) \
   (GT_RADIXSORT_STR_KMERCODE_MAX ^ \
    (((((CODE) & (3 << 6)) >> 6) | (((CODE) & 3) << 6)) | \
@@ -193,6 +191,11 @@ static inline gt_radixsort_str_bucketnum_t
   }
 }
 
+unsigned long gt_radixsort_str_minwidth(void)
+{
+  return (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS;
+}
+
 static inline void gt_radixsort_str_insertionsort(
     const GtTwobitencoding *twobitencoding,
     unsigned long equallengthplus1,
@@ -296,7 +299,7 @@ GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
   rsi->totallength = totallength;
   rsi->maxwidth = maxwidth;
   rsi->bytesinsizesofbuckets = sizeof (*rsi->sizesofbuckets) *
-                              GT_RADIXSORT_STR_NOFBUCKETS;
+                               GT_RADIXSORT_STR_NOFBUCKETS;
   rsi->sizesofbuckets = gt_malloc(rsi->bytesinsizesofbuckets);
   rsi->sorted = gt_malloc(sizeof (*rsi->sorted) * maxwidth);
   rsi->oracle = gt_malloc(sizeof (*rsi->oracle) * maxwidth);
@@ -438,6 +441,7 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
           {
             if (subbucket.width > 1UL)
             {
+#define GT_RADIXSORT_STR_INSERTION_SORT_MAX 31UL
               if (subbucket.width <= GT_RADIXSORT_STR_INSERTION_SORT_MAX)
               {
                 gt_radixsort_str_insertionsort(rsi->twobitencoding,

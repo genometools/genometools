@@ -871,17 +871,15 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       return;
     }
 #endif
-    if (bsr->sfxstrategy->withradixsort &&
-        gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
-        bsr->readmode == GT_READMODE_FORWARD)
+    if (bsr->rsi != NULL && width >= gt_radixsort_str_minwidth())
     {
-      gt_sfx_radixsort(bsr->rsi,
-                       depth,
-                       bsr->sortmaxdepth,
-                       subbucketleft,
-                       width,
-                       bsr->sssp,
-                       bsr->tableoflcpvalues);
+      gt_sfx_radixsort_str(bsr->rsi,
+                           depth,
+                           bsr->sortmaxdepth,
+                           subbucketleft,
+                           width,
+                           bsr->sssp,
+                           bsr->tableoflcpvalues);
       bsr->countradixsort++;
       return;
     }

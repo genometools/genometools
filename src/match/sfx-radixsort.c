@@ -22,13 +22,13 @@
 #include "sfx-radixsort.h"
 #include "sfx-lcpvalues.h"
 
-void gt_sfx_radixsort(GtRadixsortstringinfo *rsi,
-                      unsigned long depth,
-                      unsigned int sortmaxdepth,
-                      unsigned long subbucketleft,
-                      unsigned long width,
-                      GtSuffixsortspace *sssp,
-                      GtLcpvalues *lcpvalues)
+void gt_sfx_radixsort_str(GtRadixsortstringinfo *rsi,
+                          unsigned long depth,
+                          unsigned int sortmaxdepth,
+                          unsigned long subbucketleft,
+                          unsigned long width,
+                          GtSuffixsortspace *sssp,
+                          GtLcpvalues *lcpvalues)
 {
   unsigned long idx, *suffixes;
   GtSuffixsortspace_exportptr *exportptr
