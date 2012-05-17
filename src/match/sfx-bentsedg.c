@@ -269,7 +269,7 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
                              unsigned long width,
                              unsigned long offset)
 {
-  unsigned long sval1, sval2, pm, pl, startpos1, startpos2, temp, lcplen = 0;
+  unsigned long sval1, sval2, pm, pl, startpos1, startpos2, lcplen = 0;
   int retval;
   GtCommonunits commonunits;
 
@@ -353,7 +353,8 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
       {
         break;
       }
-      BS_SWAPARRAY(temp,subbucketleft,pl,pl-1);
+      gt_suffixsortspace_set(bsr->sssp,subbucketleft,pl-1,sval2);
+      gt_suffixsortspace_set(bsr->sssp,subbucketleft,pl,sval1);
     }
   }
 }
@@ -364,7 +365,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
                                      unsigned long offset,
                                      unsigned long maxdepth)
 {
-  unsigned long sval1, sval2, pm, pl, startpos1, startpos2, temp,
+  unsigned long sval1, sval2, pm, pl, startpos1, startpos2,
                 lcplen = 0, idx = 0;
   int retval;
   bool tempb;
@@ -469,7 +470,8 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
         bsr->equalwithprevious[idx] = true;
         break;
       }
-      BS_SWAPARRAY(temp,subbucketleft,pl,pl-1);
+      gt_suffixsortspace_set(bsr->sssp,subbucketleft,pl-1,sval2);
+      gt_suffixsortspace_set(bsr->sssp,subbucketleft,pl,sval1);
       tempb = bsr->equalwithprevious[idx-1];
       bsr->equalwithprevious[idx-1] = bsr->equalwithprevious[idx];
       bsr->equalwithprevious[idx] = tempb;
@@ -526,7 +528,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
         bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
                                         bucketleftidx + subbucketleft + width
                                                       - 1 - equalsrangewidth,
-                                      equalsrangewidth + 1, maxdepth);
+                                        equalsrangewidth + 1, maxdepth);
       }
     }
   }
