@@ -26,7 +26,7 @@
  * depth = start sorting at given depth
  * maxdepth = stop sorting at given depth (0 means infinite)
  *
- * totallength = "real" length (not the mirror logical length)
+ * realtotallength = "real" length (not the mirror logical length)
  * equallengthplus1 = sequence length, including the separator
  *
  * */
@@ -37,7 +37,7 @@ unsigned long gt_radixsort_str_minwidth(void);
 
 GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
                                              *twobitencoding,
-                                            unsigned long totallength,
+                                            unsigned long realtotallength,
                                             unsigned long equallengthplus1,
                                             unsigned long maxwidth);
 
