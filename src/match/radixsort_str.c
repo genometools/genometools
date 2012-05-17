@@ -114,6 +114,17 @@ GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
   return rsi;
 }
 
+void gt_radixsort_str_delete(GtRadixsortstringinfo *rsi)
+{
+  if (rsi != NULL)
+  {
+    gt_free(rsi->sizesofbuckets);
+    gt_free(rsi->sorted);
+    gt_free(rsi->oracle);
+    gt_free(rsi);
+  }
+}
+
 static inline gt_radixsort_str_kmercode_t gt_radixsort_str_code_at_position(
     const GtTwobitencoding *twobitencoding, unsigned long pos)
 {
@@ -225,12 +236,12 @@ unsigned long gt_radixsort_str_minwidth(void)
   return (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS;
 }
 
-static void gt_radixsort_str_insertionsort(
-    GtRadixsortstringinfo *rsi,
-    unsigned long maxdepth,
-    const GtRadixsortStrBucketInfo *bucket,
-    GtLcpvalues *lcpvalues,
-    unsigned long subbucketleft)
+static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
+                                           unsigned long sortmaxdepth,
+                                           const GtRadixsortStrBucketInfo
+                                             *bucket,
+                                           GtLcpvalues *lcpvalues,
+                                           unsigned long subbucketleft)
 {
   unsigned long pm, pl, u, v, depth;
 
@@ -244,7 +255,7 @@ static void gt_radixsort_str_insertionsort(
       u = bucket->suffixes[pl-1];
       v = bucket->suffixes[pl];
       for (depth = bucket->depth;
-           (maxdepth == 0 || depth <= maxdepth) && uvcmp == 0;
+           (sortmaxdepth == 0 || depth <= sortmaxdepth) && uvcmp == 0;
            /* Nothing */)
       {
         unk = gt_radixsort_str_get_code(rsi->twobitencoding, u, depth,
@@ -310,35 +321,22 @@ static void gt_radixsort_str_insertionsort(
 
 GT_STACK_DECLARESTRUCT(GtRadixsortStrBucketInfo, 1024);
 
-void gt_radixsort_str_delete(GtRadixsortstringinfo *rsi)
-{
-  if (rsi != NULL)
-  {
-    gt_free(rsi->sizesofbuckets);
-    gt_free(rsi->sorted);
-    gt_free(rsi->oracle);
-    gt_free(rsi);
-  }
-}
-
 void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                             unsigned long *suffixes,
                             GtLcpvalues *lcpvalues,
                             unsigned long subbucketleft,
                             unsigned long depth,
-                            unsigned long maxdepth,
+                            unsigned long sortmaxdepth,
                             unsigned long width)
 {
-  unsigned long idx;
-  gt_radixsort_str_bucketnum_t i;
-  unsigned long *bucketindex; /* overlay with sizesofbuckets */
-  unsigned long previousbucketsize;
+  unsigned long idx, previousbucketsize, offset,
+                *bucketindex; /* overlay with sizesofbuckets */
   GtStackGtRadixsortStrBucketInfo stack;
   GtRadixsortStrBucketInfo bucket, subbucket;
 
   gt_assert(width <= rsi->maxwidth);
-  gt_assert(maxdepth == 0 ||
-            (depth <= maxdepth && maxdepth <= rsi->equallengthplus1));
+  gt_assert(sortmaxdepth == 0 ||
+            (depth <= sortmaxdepth && sortmaxdepth <= rsi->equallengthplus1));
 
   GT_STACK_INIT(&stack, 1024UL);
 
@@ -351,7 +349,8 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
   bucketindex = rsi->sizesofbuckets;
   while (!GT_STACK_ISEMPTY(&stack))
   {
-    gt_radixsort_str_bucketnum_t prev = GT_RADIXSORT_STR_SPECIAL_BUCKET;
+    gt_radixsort_str_bucketnum_t prevbucketnum
+      = GT_RADIXSORT_STR_SPECIAL_BUCKET;
                                    /* = undefined */
     bucket = GT_STACK_POP(&stack);
     memset(rsi->sizesofbuckets, 0, rsi->bytesinsizesofbuckets);
@@ -360,16 +359,15 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
     for (idx = 0; idx < bucket.width; idx++)
     {
       rsi->oracle[idx] = gt_radixsort_str_get_code(rsi->twobitencoding,
-                                              bucket.suffixes[idx],
-                                              bucket.depth,
-                                              rsi->equallengthplus1,
-                                              rsi->realtotallength);
+                                                   bucket.suffixes[idx],
+                                                   bucket.depth,
+                                                   rsi->equallengthplus1,
+                                                   rsi->realtotallength);
     }
     for (idx = 0; idx < bucket.width; idx++)
     {
       rsi->sizesofbuckets[rsi->oracle[idx]]++;
     }
-
     previousbucketsize = rsi->sizesofbuckets[0];
     bucketindex[0] = 0;
     for (idx = 1UL; idx < (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS; idx++)
@@ -403,57 +401,60 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
     subbucket.suffixes = bucket.suffixes;
     subbucket.depth = bucket.depth + GT_RADIXSORT_STR_KMERSIZE;
     if (bucket.depth < rsi->equallengthplus1 &&
-        (maxdepth == 0 || bucket.depth <= maxdepth))
+        (sortmaxdepth == 0 || bucket.depth <= sortmaxdepth))
     {
-      for (i = 0;
-           i < (gt_radixsort_str_bucketnum_t) GT_RADIXSORT_STR_NOFBUCKETS;
-           i++)
+      gt_radixsort_str_bucketnum_t bucketnum;
+
+      for (bucketnum = 0;
+           bucketnum < (gt_radixsort_str_bucketnum_t)
+                       GT_RADIXSORT_STR_NOFBUCKETS;
+           bucketnum++)
       {
-        subbucket.width = i > 0 ? (bucketindex[i] - bucketindex[i-1])
-                                : bucketindex[i];
+        subbucket.width
+          = bucketnum > 0 ? (bucketindex[bucketnum] - bucketindex[bucketnum-1])
+                          : bucketindex[bucketnum];
         if (subbucket.width > 0)
         {
-          if (prev == GT_RADIXSORT_STR_SPECIAL_BUCKET)
+          offset = (unsigned long) (subbucket.suffixes - suffixes);
+          if (prevbucketnum == GT_RADIXSORT_STR_SPECIAL_BUCKET)
           {
             subbucket.lcp = bucket.lcp;
           } else
           {
-            subbucket.lcp = bucket.depth + gt_radixsort_str_codeslcp(prev,i);
+            subbucket.lcp = bucket.depth +
+                            gt_radixsort_str_codeslcp(prevbucketnum,bucketnum);
           }
           if (lcpvalues != NULL)
           {
-            gt_lcptab_update(lcpvalues,subbucketleft,
-                             (unsigned long) (subbucket.suffixes - suffixes),
-                             subbucket.lcp);
+            gt_lcptab_update(lcpvalues,subbucketleft,offset,subbucket.lcp);
           }
-          if (GT_RADIXSORT_STR_HAS_OVERFLOW(i))
+          if (GT_RADIXSORT_STR_HAS_OVERFLOW(bucketnum))
           {
             if (lcpvalues != NULL)
             {
-              unsigned long j;
+              unsigned long j,
+                            lcpvalue = bucket.depth
+                                       + GT_RADIXSORT_STR_KMERSIZE
+                                       - GT_RADIXSORT_STR_OVERFLOW(bucketnum);
 
               for (j = 1UL; j < subbucket.width; j++)
               {
-                gt_lcptab_update(lcpvalues,subbucketleft,
-                                 j +
-                                 (unsigned long) (subbucket.suffixes-suffixes),
-                                 bucket.depth + GT_RADIXSORT_STR_KMERSIZE
-                                              - GT_RADIXSORT_STR_OVERFLOW(i));
+                gt_lcptab_update(lcpvalues,subbucketleft,offset+j,lcpvalue);
               }
             }
           } else
           {
             if (subbucket.width > 1UL)
             {
-#define GT_RADIXSORT_STR_INSERTION_SORT_MAX 31UL
-              if (subbucket.width <= GT_RADIXSORT_STR_INSERTION_SORT_MAX)
+              const unsigned long radixsort_str_insertion_sort_max = 31UL;
+
+              if (subbucket.width <= radixsort_str_insertion_sort_max)
               {
                 gt_radixsort_str_insertionsort(rsi,
-                                               maxdepth,
+                                               sortmaxdepth,
                                                &subbucket,
                                                lcpvalues,
-                                               subbucketleft + (unsigned long)
-                                               (subbucket.suffixes-suffixes));
+                                               subbucketleft + offset);
               } else
               {
                 GT_STACK_PUSH(&stack, subbucket);
@@ -462,10 +463,10 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
           }
           subbucket.suffixes += subbucket.width;
           gt_assert(subbucket.suffixes <= bucket.suffixes + bucket.width);
-          prev = i;
+          prevbucketnum = bucketnum;
         }
       }
-     gt_assert(bucket.suffixes + bucket.width == subbucket.suffixes);
+      gt_assert(bucket.suffixes + bucket.width == subbucket.suffixes);
     }
   }
   GT_STACK_DELETE(&stack);
