@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012 Stefan Kurtz <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -223,64 +224,28 @@ unsigned long gt_radixsort_str_minwidth(void)
   return (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS;
 }
 
-static inline void gt_radixsort_str_insertionsort(
+static void gt_radixsort_str_insertionsort(
     GtRadixsortstringinfo *rsi,
     unsigned long maxdepth,
     const GtRadixsortStrBucketInfo *bucket,
     GtLcpvalues *lcpvalues,
     unsigned long subbucketleft)
 {
-  unsigned long pm;
+  unsigned long pm, pl, u, v, depth;
 
   for (pm = 1UL; pm < bucket->width; pm++)
   {
-    unsigned long pl;
-    const unsigned long u = bucket->suffixes[pm];
-
     for (pl = pm; pl > 0; pl--)
     {
-      const unsigned long v = bucket->suffixes[pl - 1];
-      unsigned long depth;
+      gt_radixsort_str_bucketnum_t codeslcp, unk = 0, vnk = 0;
       int uvcmp = 0;
-      gt_radixsort_str_bucketnum_t unk = 0, vnk = 0;
 
+      u = bucket->suffixes[pl-1];
+      v = bucket->suffixes[pl];
       for (depth = bucket->depth;
-           (maxdepth == 0 || depth <= maxdepth)
-           && uvcmp == 0
-           && !GT_RADIXSORT_STR_HAS_OVERFLOW(unk)
-           && !GT_RADIXSORT_STR_HAS_OVERFLOW(vnk);
-           depth += GT_RADIXSORT_STR_KMERSIZE)
+           (maxdepth == 0 || depth <= maxdepth) && uvcmp == 0;
+           /* Nothing */)
       {
-        unk = gt_radixsort_str_get_code(rsi->twobitencoding, u, depth,
-                                        rsi->equallengthplus1,
-                                        rsi->realtotallength);
-        vnk = gt_radixsort_str_get_code(rsi->twobitencoding, v, depth,
-                                        rsi->equallengthplus1,
-                                        rsi->realtotallength);
-        uvcmp = (int) vnk - (int) unk;
-      }
-      if (uvcmp <= 0)
-      {
-        break;
-      }
-      bucket->suffixes[pl] = v;
-    }
-    bucket->suffixes[pl] = u;
-  }
-  if (lcpvalues != NULL)
-  {
-    unsigned long idx;
-
-    for (idx = 1UL; idx < bucket->width; idx++)
-    {
-      const unsigned long u = bucket->suffixes[idx];
-      const unsigned long v = bucket->suffixes[idx-1];
-      gt_radixsort_str_bucketnum_t codeslcp;
-      unsigned long depth = bucket->depth;
-
-      do
-      {
-        gt_radixsort_str_bucketnum_t unk, vnk;
         unk = gt_radixsort_str_get_code(rsi->twobitencoding, u, depth,
                                         rsi->equallengthplus1,
                                         rsi->realtotallength);
@@ -289,8 +254,55 @@ static inline void gt_radixsort_str_insertionsort(
                                         rsi->realtotallength);
         codeslcp = gt_radixsort_str_codeslcp(unk, vnk);
         depth += codeslcp;
-      } while (codeslcp == GT_RADIXSORT_STR_KMERSIZE);
-      gt_lcptab_update(lcpvalues,subbucketleft,idx,depth);
+        if (unk < vnk)
+        {
+          uvcmp = -1;
+        } else
+        {
+          if (unk > vnk)
+          {
+            uvcmp = 1;
+          } else
+          {
+            if (GT_RADIXSORT_STR_HAS_OVERFLOW(unk))
+            {
+              if (GT_RADIXSORT_STR_HAS_OVERFLOW(vnk))
+              {
+                uvcmp = -1;
+              } else
+              {
+                uvcmp = 1;
+              }
+            } else
+            {
+              if (GT_RADIXSORT_STR_HAS_OVERFLOW(vnk))
+              {
+                uvcmp = -1;
+              } else
+              {
+                uvcmp = 0;
+              }
+            }
+          }
+        }
+        gt_assert((uvcmp == 0 && codeslcp == GT_RADIXSORT_STR_KMERSIZE) ||
+                   (uvcmp != 0 && codeslcp < GT_RADIXSORT_STR_KMERSIZE));
+      }
+      if (lcpvalues != NULL)
+      {
+        if (pl < pm && uvcmp > 0)
+        {
+          gt_lcptab_update(lcpvalues,subbucketleft,pl+1,
+                           gt_lcptab_getvalue(lcpvalues,subbucketleft,pl));
+        }
+        gt_lcptab_update(lcpvalues,subbucketleft,pl,depth);
+      }
+      if (uvcmp < 0)
+      {
+        break;
+      }
+      bucket->suffixes[pl-1] = v;
+      bucket->suffixes[pl] = u;
     }
   }
 }
