@@ -230,16 +230,16 @@ static inline void gt_radixsort_str_insertionsort(
     GtLcpvalues *lcpvalues,
     unsigned long subbucketleft)
 {
-  unsigned long idx;
+  unsigned long pm;
 
-  for (idx = 1UL; idx < bucket->width; idx++)
+  for (pm = 1UL; pm < bucket->width; pm++)
   {
-    unsigned long j;
-    const unsigned long u = bucket->suffixes[idx];
+    unsigned long pl;
+    const unsigned long u = bucket->suffixes[pm];
 
-    for (j = idx; j > 0; j--)
+    for (pl = pm; pl > 0; pl--)
     {
-      const unsigned long v = bucket->suffixes[j - 1];
+      const unsigned long v = bucket->suffixes[pl - 1];
       unsigned long depth;
       int uvcmp = 0;
       gt_radixsort_str_bucketnum_t unk = 0, vnk = 0;
@@ -263,12 +263,14 @@ static inline void gt_radixsort_str_insertionsort(
       {
         break;
       }
-      bucket->suffixes[j] = v;
+      bucket->suffixes[pl] = v;
     }
-    bucket->suffixes[j] = u;
+    bucket->suffixes[pl] = u;
   }
   if (lcpvalues != NULL)
   {
+    unsigned long idx;
+
     for (idx = 1UL; idx < bucket->width; idx++)
     {
       const unsigned long u = bucket->suffixes[idx];
