@@ -145,7 +145,9 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
     unsigned long depth, unsigned long equallengthplus1,
     unsigned long realtotallength)
 {
-  if (suffixnum % equallengthplus1 + depth > equallengthplus1 - 2)
+  unsigned long relpos = suffixnum % equallengthplus1 + depth;
+
+  if (relpos >= equallengthplus1 - 1) /* suffix starts on separator position */
   {
     return GT_RADIXSORT_STR_SPECIAL_BUCKET;
   } else
@@ -154,9 +156,9 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
     gt_radixsort_str_kmercode_t code;
     unsigned long remaining, pos = suffixnum + depth;
 
+    remaining = equallengthplus1 - 1 - relpos;
     if (suffixnum <= realtotallength)
     {
-      remaining = equallengthplus1 - 1 - pos % equallengthplus1;
       code = gt_radixsort_str_code_at_position(twobitencoding, pos);
       if (remaining < (unsigned long) GT_RADIXSORT_STR_KMERSIZE)
       {
@@ -166,7 +168,6 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
     } else
     {
       pos = GT_MULT2(realtotallength + 1) - pos - 1;
-      remaining = pos % equallengthplus1;
       pos -= (remaining > (unsigned long) GT_RADIXSORT_STR_KMERSIZE)
                ? (unsigned long) GT_RADIXSORT_STR_KMERSIZE
                : remaining;
