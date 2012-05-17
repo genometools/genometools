@@ -31,14 +31,22 @@
  *
  * */
 
-void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
+typedef struct GtRadixsortstringinfo GtRadixsortstringinfo;
+
+GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
+                                             *twobitencoding,
+                                            unsigned long totallength,
+                                            unsigned long equallengthplus1,
+                                            unsigned long maxwidth);
+
+void gt_radixsort_str_delete(GtRadixsortstringinfo *rsi);
+
+void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                             unsigned long *suffixes,
                             GtLcpvalues *lcpvalues,
                             unsigned long subbucketleft,
                             unsigned long depth,
                             unsigned long maxdepth,
-                            unsigned long width,
-                            unsigned long equallengthplus1,
-                            unsigned long totallength);
+                            unsigned long width);
 
 #endif

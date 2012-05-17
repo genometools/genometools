@@ -19,16 +19,15 @@
 #define SFX_RADIXSORT_H
 
 #include "core/intbits.h"
+#include "radixsort_str.h"
 #include "sfx-lcpvalues.h"
 #include "sfx-suffixgetset.h"
 
-void gt_sfx_radixsort(const GtTwobitencoding *twobitencoding,
+void gt_sfx_radixsort(GtRadixsortstringinfo *rsi,
                       unsigned long depth,
                       unsigned int sortmaxdepth,
                       unsigned long subbucketleft,
                       unsigned long width,
-                      unsigned long equallengthplus1,
-                      unsigned long totallength,
                       GtSuffixsortspace *sssp,
                       GtLcpvalues *lcpvalues);
 

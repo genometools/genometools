@@ -185,6 +185,8 @@ size_t gt_bcktab_sizeforlcpvalues(const GtBcktab *bcktab);
 
 unsigned long gt_bcktab_maxbucketsize(const GtBcktab *bcktab);
 
+unsigned long gt_bcktab_nonspecialsmaxsize(const GtBcktab *bcktab);
+
 void gt_bcktab_leftborder_show(const GtBcktab *bcktab);
 
 GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,

@@ -1068,7 +1068,7 @@ void gt_bcktab_determinemaxsize(GtBcktab *bcktab,
   */
 }
 
-static unsigned long gt_bcktab_nonspecialsmaxsize(const GtBcktab *bcktab)
+unsigned long gt_bcktab_nonspecialsmaxsize(const GtBcktab *bcktab)
 {
   return bcktab->maxbucketinfo.nonspecialsmaxbucketsize;
 }

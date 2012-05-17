@@ -22,13 +22,11 @@
 #include "sfx-radixsort.h"
 #include "sfx-lcpvalues.h"
 
-void gt_sfx_radixsort(const GtTwobitencoding *twobitencoding,
+void gt_sfx_radixsort(GtRadixsortstringinfo *rsi,
                       unsigned long depth,
                       unsigned int sortmaxdepth,
                       unsigned long subbucketleft,
                       unsigned long width,
-                      unsigned long equallengthplus1,
-                      unsigned long totallength,
                       GtSuffixsortspace *sssp,
                       GtLcpvalues *lcpvalues)
 {
@@ -49,15 +47,13 @@ void gt_sfx_radixsort(const GtTwobitencoding *twobitencoding,
       suffixes[idx] = (unsigned long) exportptr->uinttabsectionptr[idx];
     }
   }
-  gt_radixsort_str_eqlen(twobitencoding,
+  gt_radixsort_str_eqlen(rsi,
                          suffixes,
                          lcpvalues,
                          subbucketleft,
                          depth,
                          (unsigned long) sortmaxdepth,
-                         width,
-                         equallengthplus1,
-                         totallength);
+                         width);
   if (allocated)
   {
     gt_assert(exportptr->uinttabsectionptr != NULL);

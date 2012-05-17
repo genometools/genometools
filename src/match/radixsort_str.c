@@ -271,30 +271,67 @@ static inline void gt_radixsort_str_insertionsort(
 
 GT_STACK_DECLARESTRUCT(GtRadixsortStrBucketInfo, 1024);
 
-void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
+struct GtRadixsortstringinfo
+{
+  const GtTwobitencoding *twobitencoding;
+  size_t bytesinsizesofbuckets;
+  unsigned long equallengthplus1,
+                totallength,
+                maxwidth,
+                *sizesofbuckets,
+                *sorted;
+  gt_radixsort_str_bucketnum_t *oracle;
+};
+
+GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
+                                             *twobitencoding,
+                                            unsigned long totallength,
+                                            unsigned long equallengthplus1,
+                                            unsigned long maxwidth)
+{
+  GtRadixsortstringinfo *rsi = gt_malloc(sizeof(*rsi));
+
+  rsi->twobitencoding = twobitencoding;
+  rsi->equallengthplus1 = equallengthplus1;
+  rsi->totallength = totallength;
+  rsi->maxwidth = maxwidth;
+  rsi->bytesinsizesofbuckets = sizeof (*rsi->sizesofbuckets) *
+                              GT_RADIXSORT_STR_NOFBUCKETS;
+  rsi->sizesofbuckets = gt_malloc(rsi->bytesinsizesofbuckets);
+  rsi->sorted = gt_malloc(sizeof (*rsi->sorted) * maxwidth);
+  rsi->oracle = gt_malloc(sizeof (*rsi->oracle) * maxwidth);
+  return rsi;
+}
+
+void gt_radixsort_str_delete(GtRadixsortstringinfo *rsi)
+{
+  if (rsi != NULL)
+  {
+    gt_free(rsi->sizesofbuckets);
+    gt_free(rsi->sorted);
+    gt_free(rsi->oracle);
+    gt_free(rsi);
+  }
+}
+
+void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                             unsigned long *suffixes,
                             GtLcpvalues *lcpvalues,
                             unsigned long subbucketleft,
                             unsigned long depth,
                             unsigned long maxdepth,
-                            unsigned long width,
-                            unsigned long equallengthplus1,
-                            unsigned long totallength)
+                            unsigned long width)
 {
   unsigned long idx;
   gt_radixsort_str_bucketnum_t i;
-  unsigned long bucketsize[GT_RADIXSORT_STR_NOFBUCKETS];
-  unsigned long *bucketindex; /* overlay with bucketsize */
-  unsigned long *sorted, previousbucketsize;
+  unsigned long *bucketindex; /* overlay with sizesofbuckets */
+  unsigned long previousbucketsize;
   GtStackGtRadixsortStrBucketInfo stack;
-  gt_radixsort_str_bucketnum_t *oracle;
   GtRadixsortStrBucketInfo bucket, subbucket;
 
+  gt_assert(width <= rsi->maxwidth);
   gt_assert(maxdepth == 0 ||
-            (depth <= maxdepth && maxdepth <= equallengthplus1));
-
-  oracle = gt_malloc(sizeof (*oracle) * width);
-  sorted = gt_malloc(sizeof (*sorted) * width);
+            (depth <= maxdepth && maxdepth <= rsi->equallengthplus1));
 
   GT_STACK_INIT(&stack, 1024UL);
 
@@ -304,35 +341,36 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
   bucket.lcp = depth;
   GT_STACK_PUSH(&stack, bucket);
 
-  bucketindex = bucketsize;
+  bucketindex = rsi->sizesofbuckets;
   while (!GT_STACK_ISEMPTY(&stack))
   {
     gt_radixsort_str_bucketnum_t prev = GT_RADIXSORT_STR_SPECIAL_BUCKET;
                                    /* = undefined */
     bucket = GT_STACK_POP(&stack);
-    memset(&bucketsize, 0, sizeof (bucketsize));
+    memset(rsi->sizesofbuckets, 0, rsi->bytesinsizesofbuckets);
 
     /* Loop A */
     for (idx = 0; idx < bucket.width; idx++)
     {
-      oracle[idx] = gt_radixsort_str_get_code(twobitencoding,
+      rsi->oracle[idx] = gt_radixsort_str_get_code(rsi->twobitencoding,
                                               bucket.suffixes[idx],
-                                              bucket.depth, equallengthplus1,
-                                              totallength);
+                                              bucket.depth,
+                                              rsi->equallengthplus1,
+                                              rsi->totallength);
     }
     for (idx = 0; idx < bucket.width; idx++)
     {
-      bucketsize[oracle[idx]]++;
+      rsi->sizesofbuckets[rsi->oracle[idx]]++;
     }
 
-    previousbucketsize = bucketsize[0];
+    previousbucketsize = rsi->sizesofbuckets[0];
     bucketindex[0] = 0;
     for (idx = 1UL; idx < (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS; idx++)
     {
       unsigned long tmp;
 
       tmp = bucketindex[idx-1] + previousbucketsize;
-      previousbucketsize = bucketsize[idx];
+      previousbucketsize = rsi->sizesofbuckets[idx];
       bucketindex[idx] = tmp;
     }
 
@@ -343,21 +381,21 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
       for (idx = bucket.width; idx > 0; /* Nothing */)
       {
         idx--;
-        sorted[bucketindex[oracle[idx]]++] = bucket.suffixes[idx];
+        rsi->sorted[bucketindex[rsi->oracle[idx]]++] = bucket.suffixes[idx];
       }
     } else
     {
       for (idx = 0; idx < bucket.width; idx++)
       {
-        sorted[bucketindex[oracle[idx]]++] = bucket.suffixes[idx];
+        rsi->sorted[bucketindex[rsi->oracle[idx]]++] = bucket.suffixes[idx];
       }
     }
 
-    memcpy(bucket.suffixes, sorted, sizeof (unsigned long) * bucket.width);
+    memcpy(bucket.suffixes, rsi->sorted, sizeof (*rsi->sorted) * bucket.width);
 
     subbucket.suffixes = bucket.suffixes;
     subbucket.depth = bucket.depth + GT_RADIXSORT_STR_KMERSIZE;
-    if (bucket.depth < equallengthplus1 &&
+    if (bucket.depth < rsi->equallengthplus1 &&
         (maxdepth == 0 || bucket.depth <= maxdepth))
     {
       for (i = 0;
@@ -402,8 +440,10 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
             {
               if (subbucket.width <= GT_RADIXSORT_STR_INSERTION_SORT_MAX)
               {
-                gt_radixsort_str_insertionsort(twobitencoding, equallengthplus1,
-                                               maxdepth, totallength,
+                gt_radixsort_str_insertionsort(rsi->twobitencoding,
+                                               rsi->equallengthplus1,
+                                               maxdepth,
+                                               rsi->totallength,
                                                &subbucket,
                                                lcpvalues,
                                                subbucketleft + (unsigned long)
@@ -423,6 +463,4 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     }
   }
   GT_STACK_DELETE(&stack);
-  gt_free(sorted);
-  gt_free(oracle);
 }

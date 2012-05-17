@@ -142,8 +142,7 @@ typedef struct
                  *esr2;
   GtReadmode readmode;
   bool fwd, complement;
-  unsigned long totallength,
-                realtotallength;
+  unsigned long totallength;
   GtArrayGtMKVstack mkvauxstack; /* XXX be careful with threads */
   GtLcpvalues *tableoflcpvalues;
   GtMedianinfo *medianinfospace;
@@ -168,7 +167,7 @@ typedef struct
                 srs_maxremain; /* only relevant for short read sort */
   GtShortreadsortworkinfo *srsw;
   const GtTwobitencoding *twobitencoding;
-  unsigned long equallengthplus1;
+  GtRadixsortstringinfo *rsi;
 } GtBentsedgresources;
 
 #ifdef WITHCHECKSTARTPOINTER
@@ -876,13 +875,11 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
         gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
         bsr->readmode == GT_READMODE_FORWARD)
     {
-      gt_sfx_radixsort(bsr->twobitencoding,
+      gt_sfx_radixsort(bsr->rsi,
                        depth,
                        bsr->sortmaxdepth,
                        subbucketleft,
                        width,
-                       bsr->equallengthplus1,
-                       bsr->realtotallength,
                        bsr->sssp,
                        bsr->tableoflcpvalues);
       bsr->countradixsort++;
@@ -1376,11 +1373,9 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
 
   bsr->readmode = readmode;
   bsr->totallength = gt_encseq_total_length(encseq);
-  bsr->realtotallength = gt_encseq_is_mirrored(encseq)
-                           ? GT_DIV2(bsr->totallength - 1)
-                           : bsr->totallength;
   bsr->sfxstrategy = sfxstrategy;
   bsr->sssp = suffixsortspace;
+  bsr->rsi = NULL;
   gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
   bsr->encseq = encseq;
   bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
@@ -1392,11 +1387,9 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   if (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH)
   {
     bsr->twobitencoding = gt_encseq_twobitencoding_export(bsr->encseq);
-    bsr->equallengthplus1 = 1 + gt_encseq_equallength(bsr->encseq);
   } else
   {
     bsr->twobitencoding = NULL;
-    bsr->equallengthplus1 = 0;
   }
   if (sortmaxdepth > 0)
   {
@@ -1502,6 +1495,7 @@ static void bentsedgresources_delete(GtBentsedgresources *bsr, GtLogger *logger)
   gt_encseq_reader_delete(bsr->esr2);
   gt_free(bsr->equalwithprevious);
   GT_FREEARRAY(&bsr->mkvauxstack,GtMKVstack);
+  gt_radixsort_str_delete(bsr->rsi);
   gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
   gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
   gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
@@ -1549,6 +1543,17 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                          sfxstrategy,
                          outlcpinfo != NULL ? true : false);
   gt_bcktab_determinemaxsize(bcktab, mincode, maxcode, numberofsuffixes);
+  if (bsr.sfxstrategy->withradixsort &&
+      gt_encseq_accesstype_get(bsr.encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
+      bsr.readmode == GT_READMODE_FORWARD)
+  {
+    bsr.rsi = gt_radixsort_str_new(bsr.twobitencoding,
+                                   gt_encseq_is_mirrored(encseq)
+                                     ? GT_DIV2(bsr.totallength - 1)
+                                     : bsr.totallength,
+                                   1 + gt_encseq_equallength(bsr.encseq),
+                                   gt_bcktab_nonspecialsmaxsize(bcktab));
+  }
   if (outlcpinfo != NULL)
   {
     bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,bcktab);

@@ -1719,17 +1719,20 @@ void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
     unsigned long maxdepth, bool print)
 {
   unsigned long *suffixes, totallength, width, i;
-  totallength = (unsigned long)contfinder->nofseqs * contfinder->len - 1;
-  width = (mirrored ? ((totallength + 1) << 1) : (totallength + 1));
+  GtRadixsortstringinfo *rsi;
+
+  totallength = (unsigned long) contfinder->nofseqs * contfinder->len - 1;
+  width = mirrored ? GT_MULT2(totallength + 1) : (totallength + 1);
+  rsi = gt_radixsort_str_new(contfinder->twobitencoding,
+                             totallength,
+                             (unsigned long) contfinder->len,
+                             width);
   suffixes = gt_malloc(sizeof (unsigned long) * width);
   for (i = 0; i < width; i++)
   {
     suffixes[i] = i;
   }
-  gt_radixsort_str_eqlen(contfinder->twobitencoding, suffixes,
-                         NULL, 0, depth,
-                         maxdepth, width,
-                         (unsigned long) contfinder->len, totallength);
+  gt_radixsort_str_eqlen(rsi, suffixes, NULL, 0, depth, maxdepth, width);
   if (print)
   {
     for (i = 0; i < width; i++)
@@ -1738,4 +1741,5 @@ void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
     }
   }
   gt_free(suffixes);
+  gt_radixsort_str_delete(rsi);
 }
