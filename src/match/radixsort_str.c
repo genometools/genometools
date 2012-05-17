@@ -278,18 +278,11 @@ static inline void gt_radixsort_str_insertionsort(
     for (i = 1UL; i < bucket->width; i++)
     {
       const unsigned long u = bucket->suffixes[i];
-      const unsigned long v = bucket->suffixes[i - 1];
-      unsigned long depth = bucket->depth - GT_RADIXSORT_STR_KMERSIZE,
-                    lcpafterdepth = 0;
-      gt_radixsort_str_bucketnum_t codeslcp = GT_RADIXSORT_STR_KMERSIZE;
+      const unsigned long v = bucket->suffixes[i-1];
+      gt_radixsort_str_bucketnum_t codeslcp;
+      unsigned long depth = bucket->depth - GT_RADIXSORT_STR_KMERSIZE;
 
-      gt_assert(gt_radixsort_str_get_code(rsi->twobitencoding, u, depth,
-                                          rsi->equallengthplus1,
-                                          rsi->realtotallength) ==
-                gt_radixsort_str_get_code(rsi->twobitencoding, u, depth,
-                                          rsi->equallengthplus1,
-                                          rsi->realtotallength));
-      while (codeslcp == GT_RADIXSORT_STR_KMERSIZE)
+      do
       {
         gt_radixsort_str_bucketnum_t unk, vnk;
         unk = gt_radixsort_str_get_code(rsi->twobitencoding, u, depth,
@@ -299,12 +292,9 @@ static inline void gt_radixsort_str_insertionsort(
                                         rsi->equallengthplus1,
                                         rsi->realtotallength);
         codeslcp = gt_radixsort_str_codeslcp(unk, vnk);
-        lcpafterdepth += codeslcp;
-        depth += GT_RADIXSORT_STR_KMERSIZE;
-      }
-      gt_lcptab_update(lcpvalues,subbucketleft,
-                       i,bucket->depth - GT_RADIXSORT_STR_KMERSIZE +
-                         lcpafterdepth);
+        depth += codeslcp;
+      } while (codeslcp == GT_RADIXSORT_STR_KMERSIZE);
+      gt_lcptab_update(lcpvalues,subbucketleft,i,depth);
     }
   }
 }
