@@ -233,7 +233,7 @@ static inline gt_radixsort_str_bucketnum_t
 
 unsigned long gt_radixsort_str_minwidth(void)
 {
-  return (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS;
+  return (unsigned long) GT_DIV64(GT_RADIXSORT_STR_NOFBUCKETS);
 }
 
 static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
@@ -307,7 +307,8 @@ static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
           gt_lcptab_update(lcpvalues,subbucketleft,pl+1,
                            gt_lcptab_getvalue(lcpvalues,subbucketleft,pl));
         }
-        gt_lcptab_update(lcpvalues,subbucketleft,pl,depth);
+        gt_lcptab_update(lcpvalues,subbucketleft,pl,
+                         sortmaxdepth == 0 ? depth : MIN(depth,sortmaxdepth));
       }
       if (uvcmp < 0)
       {
@@ -400,8 +401,7 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
 
     subbucket.suffixes = bucket.suffixes;
     subbucket.depth = bucket.depth + GT_RADIXSORT_STR_KMERSIZE;
-    if (bucket.depth < rsi->equallengthplus1 &&
-        (sortmaxdepth == 0 || bucket.depth <= sortmaxdepth))
+    if (bucket.depth < rsi->equallengthplus1)
     {
       gt_radixsort_str_bucketnum_t bucketnum;
 
@@ -426,7 +426,10 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
           }
           if (lcpvalues != NULL)
           {
-            gt_lcptab_update(lcpvalues,subbucketleft,offset,subbucket.lcp);
+            gt_lcptab_update(lcpvalues,subbucketleft,offset,
+                             sortmaxdepth == 0
+                               ? subbucket.lcp
+                               : MIN(subbucket.lcp,sortmaxdepth));
           }
           if (GT_RADIXSORT_STR_HAS_OVERFLOW(bucketnum))
           {
@@ -437,6 +440,10 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                                        + GT_RADIXSORT_STR_KMERSIZE
                                        - GT_RADIXSORT_STR_OVERFLOW(bucketnum);
 
+              if (sortmaxdepth > 0 && lcpvalue > sortmaxdepth)
+              {
+                lcpvalue = sortmaxdepth;
+              }
               for (j = 1UL; j < subbucket.width; j++)
               {
                 gt_lcptab_update(lcpvalues,subbucketleft,offset+j,lcpvalue);
@@ -446,18 +453,32 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
           {
             if (subbucket.width > 1UL)
             {
-              const unsigned long radixsort_str_insertion_sort_max = 31UL;
-
-              if (subbucket.width <= radixsort_str_insertion_sort_max)
+              if (sortmaxdepth == 0 || subbucket.depth <= sortmaxdepth)
               {
-                gt_radixsort_str_insertionsort(rsi,
-                                               sortmaxdepth,
-                                               &subbucket,
-                                               lcpvalues,
-                                               subbucketleft + offset);
+                const unsigned long radixsort_str_insertion_sort_max = 31UL;
+
+                if (subbucket.width <= radixsort_str_insertion_sort_max)
+                {
+                  gt_radixsort_str_insertionsort(rsi,
+                                                 sortmaxdepth,
+                                                 &subbucket,
+                                                 lcpvalues,
+                                                 subbucketleft + offset);
+                } else
+                {
+                  GT_STACK_PUSH(&stack, subbucket);
+                }
               } else
               {
-                GT_STACK_PUSH(&stack, subbucket);
+                if (lcpvalues != NULL)
+                {
+                  unsigned long j;
+                  for (j = 1UL; j < subbucket.width; j++)
+                  {
+                    gt_lcptab_update(lcpvalues,subbucketleft,offset+j,
+                                     sortmaxdepth);
+                  }
+                }
               }
             }
           }
