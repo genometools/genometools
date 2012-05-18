@@ -30,7 +30,6 @@
 #endif
 #include "tools/gt_seqcorrect.h"
 #include "match/randomcodes.h"
-#include "match/randomcodes-scan.h"
 #include "match/esa-spmsk.h"
 
 #include "match/randomsamples.h"
@@ -52,7 +51,6 @@ typedef struct
                minmatchlength,
                numofparts,
                radixparts,
-               singlescan,
                addbscache_depth,
                forcek;
   unsigned long maximumspace,
@@ -71,7 +69,6 @@ static void* gt_seqcorrect_arguments_new(void)
   arguments->outputspms = false;
   arguments->countspms = false;
   arguments->radixlarge = false;
-  arguments->singlescan = 0;
   arguments->numofparts = 0;
   arguments->radixparts = 1U;
   arguments->encseqinput = gt_str_new();
@@ -208,14 +205,6 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   option = gt_option_new_uint("radixparts", "specify the number of parts "
                               "for radixsort",
                               &arguments->radixparts, 1U);
-  gt_option_parser_add_option(op, option);
-  gt_option_is_development_option(option);
-
-  /* -singlescan */
-  option = gt_option_new_uint("singlescan", "run a single scan: 1=fast; "
-                              "2=fast with check; 3=fast with output; "
-                              "4=sfx-mapped4-version",
-                              &arguments->singlescan, 0);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
@@ -418,29 +407,7 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
   }
   else
   {
-    if (!haserr && arguments->singlescan > 0)
-    {
-      if (!haserr)
-      {
-        unsigned int kmersize = 0;
-        haserr = gt_seqcorrect_kmersize(arguments, &kmersize, err);
-        if (!haserr)
-        {
-          if (arguments->singlescan == 4U)
-          {
-            gt_rungetencseqkmers_rc(encseq,kmersize);
-          } else
-          {
-            if (arguments->singlescan > 0)
-            {
-              gt_randomcode_runkmerscan(encseq,arguments->singlescan - 1,
-                  kmersize, arguments->minmatchlength);
-            }
-          }
-        }
-      }
-    }
-    if (!haserr && arguments->singlescan == 0)
+    if (!haserr)
     {
       const GtReadmode readmode = GT_READMODE_FORWARD;
       GtBUstate_spmsk **spmsk_states = NULL;
