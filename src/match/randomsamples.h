@@ -21,10 +21,11 @@
 #include "core/encseq_api.h"
 
 typedef struct GtRandomSamples GtRandomSamples;
-GtRandomSamples* gt_randomsamples_new(GtEncseq *encseq, unsigned int kmersize,
-    GtTimer *timer);
-void gt_randomsamples_sample(GtRandomSamples *rs,
-    unsigned long sampling_factor);
+GtRandomSamples* gt_randomsamples_new(GtEncseq *encseq, GtTimer *timer,
+    unsigned int correction_kmersize, GtLogger *default_logger,
+    GtLogger *verbose_logger, GtError *err);
+int gt_randomsamples_run(GtRandomSamples *rs, unsigned long sampling_factor,
+    unsigned int numofparts, unsigned long maximumspace);
 void gt_randomsamples_delete(GtRandomSamples* rs);
 
 #endif

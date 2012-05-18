@@ -51,4 +51,9 @@ unsigned long gt_firstcodes_find_accu(
                                  const GtArrayGtIndexwithcode *binsearchcache,
                                  unsigned long code);
 
+unsigned long gt_randomsamples_find_accu(
+    unsigned long *foundcode, const unsigned long *codes,
+    unsigned long differentcodes, const GtArrayGtIndexwithcode *binsearchcache,
+    unsigned long code);
+
 #endif
