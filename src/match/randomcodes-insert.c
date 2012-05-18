@@ -26,8 +26,10 @@
 
 #define GT_RANDOMCODES_INSERTSUFFIXES(BUF,CODE,SEQNUM,RELPOS)\
         {\
-          if ((BUF)->currentmincode <= (CODE) &&\
-              (CODE) <= (BUF)->currentmaxcode)\
+          if (\
+              ((BUF)->currentmincode == 0 ||\
+               (BUF)->currentmincode < (CODE)) &&\
+               (CODE) <= (BUF)->currentmaxcode)\
           {\
             if ((BUF)->nextfree == (BUF)->allocated)\
             {\

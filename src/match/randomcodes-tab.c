@@ -23,7 +23,7 @@
 #include "core/divmodmul.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
-#ifdef SKDEBIG
+#ifdef SKDEBUG
 #include "core/disc_distri.h"
 #endif
 #include "core/log.h"
@@ -31,13 +31,13 @@
 #include "core/hashmap-generic.h"
 #include "core/arraydef.h"
 #include "randomcodes-tab.h"
-#include "randomcodes-psbuf.h"
+#include "firstcodes-psbuf.h"
 
-static void gt_randomcodes_countocc_new(GtFirstcodesspacelog *fcsl,
+void gt_randomcodes_countocc_new(GtFirstcodesspacelog *fcsl,
                                        GtRandomcodestab *rct,
                                        unsigned long numofsequences)
 {
-  rct->countocc_small = gt_malloc((size_t) (numofsequences+1) *
+  rct->countocc_small = gt_calloc((size_t) (numofsequences+1),
                                   sizeof (*rct->countocc_small));
   GT_FCI_ADDWORKSPACE(fcsl,"countocc_small",
                       sizeof (*rct->countocc_small) *
@@ -57,9 +57,10 @@ static void gt_randomcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   }
   GT_INITARRAY(&rct->bitchangepoints,GtUlong);
 #endif
+  rct->differentcodes = numofsequences;
 }
 
-static void gt_randomcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
+void gt_randomcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
                                           GtRandomcodestab *rct,
                                           unsigned long numofdifferentcodes)
 {
@@ -150,23 +151,17 @@ static void checkcodesorder(const unsigned long *tab,unsigned long len,
 #endif
 
 unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
-                                    GtFirstcodesspacelog *fcsl,
-                                    GtRandomcodestab *rct,
-                                    unsigned long numofsequences,
+                                    unsigned long numofcodes,
                                     GtLogger *logger)
 {
-  if (numofsequences == 0)
+  unsigned long numofdifferentcodes = 0;
+  if (numofcodes != 0)
   {
-    rct->differentcodes = 0;
-  } else
-  {
-    unsigned long numofdifferentcodes, *storeptr, *readptr;
+    unsigned long *storeptr, *readptr;
     bool firstincrement;
 
-    gt_randomcodes_countocc_new(fcsl,rct,numofsequences);
-    gt_randomcodes_countocc_increment(rct,0,true); /* first increment */
     for (storeptr = allrandomcodes, readptr = allrandomcodes+1;
-         readptr < allrandomcodes + numofsequences;
+         readptr < allrandomcodes + numofcodes;
          readptr++)
     {
       if (*storeptr != *readptr)
@@ -178,34 +173,27 @@ unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
       {
         firstincrement = false;
       }
-      gt_randomcodes_countocc_increment(rct,(unsigned long)
-                                       (storeptr - allrandomcodes),
-                                       firstincrement);
     }
     numofdifferentcodes = (unsigned long) (storeptr - allrandomcodes + 1);
-    if (numofdifferentcodes < numofsequences)
+    if (numofdifferentcodes < numofcodes)
     {
-      /* reduce the memory requirement, as the duplicated elements are not
-         needed */
-      gt_randomcodes_countocc_resize(fcsl,rct,numofdifferentcodes);
 #ifdef SKDEBUG
       checkcodesorder(allrandomcodes,numofdifferentcodes,false);
 #endif
     }
-    rct->differentcodes = numofdifferentcodes;
   }
-  gt_logger_log(logger,"number of different first codes=%lu (%.2f%%) "
-                       "in %lu sequences",
-                rct->differentcodes,
-                100.00 * (double) rct->differentcodes/numofsequences,
-                numofsequences);
-  return rct->differentcodes;
+  gt_logger_log(logger,"number of different bucket codes=%lu (%.2f%%) "
+                       "of %lu sampled codes",
+                numofdifferentcodes,
+                100.00 * (double) numofdifferentcodes/numofcodes,
+                numofcodes);
+  return numofdifferentcodes;
 }
 
 static uint32_t gt_randomcodes_countocc_get(const GtRandomcodestab *rct,
                                            unsigned long idx)
 {
-  if (rct->countocc_small[idx] > 0)
+  if (rct->countocc_small[idx] != GT_RANDOMCODES_COUNTOCC_OVERFLOW)
   {
     return (uint32_t) rct->countocc_small[idx];
   } else

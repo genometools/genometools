@@ -27,7 +27,8 @@
 #include "firstcodes-tab.h"
 #include "firstcodes-spacelog.h"
 
-#define GT_RANDOMCODES_MAXSMALL UINT8_MAX
+#define GT_RANDOMCODES_MAXSMALL (UINT8_MAX - 1)
+#define GT_RANDOMCODES_COUNTOCC_OVERFLOW UINT8_MAX
 
 typedef struct
 {
@@ -55,52 +56,45 @@ typedef struct
 
 GT_UNUSED
 static inline void gt_randomcodes_countocc_increment(GtRandomcodestab *rct,
-                                                    unsigned long idx,
-                                                    bool firstincrement)
+                                                    unsigned long idx)
 {
-  if (firstincrement)
+  rct->all_incrementcount++;
+  if (rct->countocc_small[idx] != GT_RANDOMCODES_COUNTOCC_OVERFLOW)
   {
-    rct->countocc_small[idx] = (uint8_t) 1;
-  } else
-  {
-    rct->all_incrementcount++;
-    if (rct->countocc_small[idx] > 0)
+    if (rct->countocc_small[idx] < GT_RANDOMCODES_MAXSMALL)
     {
-      if (rct->countocc_small[idx] < GT_RANDOMCODES_MAXSMALL)
-      {
-        rct->countocc_small[idx]++;
-      } else
-      {
-        gt_assert (rct->countocc_small[idx] == GT_RANDOMCODES_MAXSMALL);
-        rct->countocc_small[idx] = 0;
-        rct->lastincremented_valueptr
-          = ul_u32_gt_hashmap_add_and_return_storage(rct->countocc_exceptions,
-                                                     idx, (uint32_t) 1);
-        rct->lastincremented_idx = idx;
-        rct->hashmap_addcount++;
-      }
+      rct->countocc_small[idx]++;
     } else
     {
-      /* there is already an overflow for this index */
-      if (rct->lastincremented_valueptr != NULL &&
-          rct->lastincremented_idx == idx)
-      {
-        /* last index is identucal to current index. */
-        gt_assert(*rct->lastincremented_valueptr < UINT32_MAX);
-        (*rct->lastincremented_valueptr)++;
-      } else
-      {
-        uint32_t *valueptr
-          = ul_u32_gt_hashmap_get(rct->countocc_exceptions,idx);
-
-        rct->hashmap_getcount++;
-        gt_assert(valueptr != NULL && *valueptr < UINT32_MAX);
-        (*valueptr)++;
-        rct->lastincremented_idx = idx;
-        rct->lastincremented_valueptr = valueptr;
-      }
-      rct->hashmap_incrementcount++;
+      gt_assert (rct->countocc_small[idx] == GT_RANDOMCODES_MAXSMALL);
+      rct->countocc_small[idx] = GT_RANDOMCODES_COUNTOCC_OVERFLOW;
+      rct->lastincremented_valueptr
+        = ul_u32_gt_hashmap_add_and_return_storage(rct->countocc_exceptions,
+            idx, (uint32_t) 1);
+      rct->lastincremented_idx = idx;
+      rct->hashmap_addcount++;
     }
+  } else
+  {
+    /* there is already an overflow for this index */
+    if (rct->lastincremented_valueptr != NULL &&
+        rct->lastincremented_idx == idx)
+    {
+      /* last index is identical to current index. */
+      gt_assert(*rct->lastincremented_valueptr < UINT32_MAX);
+      (*rct->lastincremented_valueptr)++;
+    } else
+    {
+      uint32_t *valueptr
+        = ul_u32_gt_hashmap_get(rct->countocc_exceptions,idx);
+
+      rct->hashmap_getcount++;
+      gt_assert(valueptr != NULL && *valueptr < UINT32_MAX);
+      (*valueptr)++;
+      rct->lastincremented_idx = idx;
+      rct->lastincremented_valueptr = valueptr;
+    }
+    rct->hashmap_incrementcount++;
   }
 }
 
@@ -159,6 +153,14 @@ void gt_randomcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
 void gt_randomcodes_tab_delete(GtFirstcodesspacelog *fcsl,
                               GtRandomcodestab *rct);
 
+void gt_randomcodes_countocc_new(GtFirstcodesspacelog *fcsl,
+                                       GtRandomcodestab *rct,
+                                       unsigned long numofsequences);
+
+void gt_randomcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
+                                          GtRandomcodestab *rct,
+                                          unsigned long numofdifferentcodes);
+
 void gt_randomcodes_countocc_setnull(GtRandomcodestab *rct);
 
 uint32_t **gt_randomcodes_leftborder_address(GtRandomcodestab *rct);
@@ -178,8 +180,6 @@ unsigned long gt_randomcodes_get_sample(const GtRandomcodestab *rct,
                                        unsigned long idx);
 
 unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
-                                    GtFirstcodesspacelog *fcsl,
-                                    GtRandomcodestab *rct,
                                     unsigned long numofsequences,
                                     GtLogger *logger);
 
