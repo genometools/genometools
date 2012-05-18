@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
 #include "core/unused_api.h"
 #include "core/option_api.h"
 #include "core/encseq_api.h"
+#include "core/log_api.h"
 #include "core/logger.h"
 #include "core/intbits.h"
 #include "core/minmax.h"
@@ -32,17 +33,23 @@
 #include "match/randomcodes-scan.h"
 #include "match/esa-spmsk.h"
 
+#include "match/randomsamples.h"
+
 typedef struct
 {
   bool checksuftab,
        singlestrand,
        verbose,
+       quiet,
        outputspms,
        onlyaccum,
        onlyallrandomcodes,
        radixlarge,
-       countspms;
-  unsigned int minmatchlength,
+       countspms,
+       runrandomsamplescode;
+  unsigned int kmersize,
+               samplingfactor,
+               minmatchlength,
                numofparts,
                radixparts,
                singlescan,
@@ -56,11 +63,11 @@ typedef struct
         *phase2extraarg;
   GtOption *refoptionmemlimit,
            *refoptionphase2extra;
-} GtEncseq2spmArguments;
+} GtSeqcorrectArguments;
 
 static void* gt_seqcorrect_arguments_new(void)
 {
-  GtEncseq2spmArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
+  GtSeqcorrectArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->outputspms = false;
   arguments->countspms = false;
   arguments->radixlarge = false;
@@ -78,7 +85,7 @@ static void* gt_seqcorrect_arguments_new(void)
 
 static void gt_seqcorrect_arguments_delete(void *tool_arguments)
 {
-  GtEncseq2spmArguments *arguments = tool_arguments;
+  GtSeqcorrectArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->encseqinput);
   gt_str_delete(arguments->spmspec);
@@ -91,22 +98,38 @@ static void gt_seqcorrect_arguments_delete(void *tool_arguments)
 
 static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
 {
-  GtEncseq2spmArguments *arguments = tool_arguments;
+  GtSeqcorrectArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionparts, *optionmemlimit;
+  GtOption *option, *optionparts, *optionmemlimit, *q_option, *v_option;
 
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] [file]",
-                            "Compute suffix prefix matches "
-                            "from encoded sequence.");
+  op = gt_option_parser_new("-ii <indexname> -k <kmersize> [option ...]",
+                         "K-mer based sequence correction.");
+
+  /* -k */
+  option = gt_option_new_uint_min_max("k", "specify the kmer size",
+                                  &arguments->kmersize, 31U, 1U, 32U);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
+
+  /* -sf */
+  option = gt_option_new_uint_min("sf", "specify the sampling factor",
+                                  &arguments->samplingfactor, 50U, 1U);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
 
   /* -l */
   option = gt_option_new_uint_min("l", "specify the minimum length",
                                   &arguments->minmatchlength, 0, 1U);
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
+
+  /* -rs */
+  option = gt_option_new_bool("rs", "use randomsamples code",
+                              &arguments->runrandomsamplescode, false);
+  gt_option_parser_add_option(op, option);
 
   /* -parts */
   optionparts = gt_option_new_uint("parts", "specify the number of parts",
@@ -202,13 +225,23 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_verbose(&arguments->verbose);
-  gt_option_parser_add_option(op, option);
+  /* -v */
+  v_option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, v_option);
+
+  /* -q */
+  q_option = gt_option_new_bool("q",
+      "suppress standard output messages",
+      &arguments->quiet, false);
+  gt_option_exclude(q_option, v_option);
+  gt_option_parser_add_option(op, q_option);
+
+  gt_option_parser_set_max_args(op, 0);
 
   return op;
 }
 
-static bool gt_seqcorrect_kmersize(GtEncseq2spmArguments *arguments,
+static bool gt_seqcorrect_kmersize(GtSeqcorrectArguments *arguments,
     unsigned int *kmersize, GtError *err)
 {
   bool haserr = false;
@@ -244,7 +277,7 @@ static int gt_seqcorrect_arguments_check(int rest_argc,
                                          void *tool_arguments,
                                          GtError *err)
 {
-  GtEncseq2spmArguments *arguments = tool_arguments;
+  GtSeqcorrectArguments *arguments = tool_arguments;
   bool haserr = false;
 
   gt_error_check(err);
@@ -315,13 +348,28 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
                                 void *tool_arguments,
                                 GtError *err)
 {
-  GtEncseq2spmArguments *arguments = tool_arguments;
+  GtSeqcorrectArguments *arguments = tool_arguments;
   GtEncseqLoader *el = NULL;
   GtEncseq *encseq = NULL;
+  GtTimer *timer = NULL;
+  GtLogger *default_logger, *verbose_logger;
   bool haserr = false;
 
   gt_error_check(err);
   gt_assert(arguments);
+
+  if (gt_showtime_enabled())
+  {
+    timer = gt_timer_new_with_progress_description("for initialization");
+    gt_timer_show_cpu_time_by_progress(timer);
+    gt_timer_start(timer);
+  }
+  default_logger =
+    gt_logger_new(!arguments->quiet, GT_LOGGER_DEFLT_PREFIX, stdout);
+  gt_logger_log(default_logger, "gt seqcorrect");
+  verbose_logger =
+    gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
+
   el = gt_encseq_loader_new();
   gt_encseq_loader_drop_description_support(el);
   gt_encseq_loader_disable_autosupport(el);
@@ -346,143 +394,136 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
     }
   }
 
-  if (!haserr && arguments->singlescan > 0)
+  if (arguments->runrandomsamplescode)
   {
-    GtTimer *timer = NULL;
-
-    if (gt_showtime_enabled())
-    {
-      char *outmsg;
-
-      switch (arguments->singlescan)
-      {
-        case 1:
-          outmsg = "to run fast scanning";
-          break;
-        case 2:
-          outmsg = "to run fast scanning with check";
-          break;
-        case 3:
-          outmsg = "to run fast scanning with output";
-          break;
-        case 4:
-          outmsg = "to run old scanning code";
-          break;
-        default:
-          gt_error_set(err,"argument %u to option -singlescan not allowed",
-                       arguments->singlescan);
-          haserr = true;
-      }
-      if (!haserr)
-      {
-        timer = gt_timer_new_with_progress_description(outmsg);
-        gt_timer_start(timer);
-      }
-    }
     if (!haserr)
     {
-      unsigned int kmersize = 0;
-      haserr = gt_seqcorrect_kmersize(arguments, &kmersize, err);
+      GtRandomSamples *codes;
+      if ((codes = gt_randomsamples_new(encseq, timer, arguments->kmersize,
+              default_logger, verbose_logger, err))
+          == NULL)
+      {
+        haserr = true;
+      }
+      else
+      {
+        if (gt_randomsamples_run(codes, arguments->samplingfactor,
+              arguments->numofparts, arguments->maximumspace) != 0)
+        {
+          haserr = true;
+        }
+        gt_randomsamples_delete(codes);
+      }
+    }
+  }
+  else
+  {
+    if (!haserr && arguments->singlescan > 0)
+    {
       if (!haserr)
       {
-        if (arguments->singlescan == 4U)
+        unsigned int kmersize = 0;
+        haserr = gt_seqcorrect_kmersize(arguments, &kmersize, err);
+        if (!haserr)
         {
-          gt_rungetencseqkmers_rc(encseq,kmersize);
-        } else
-        {
-          if (arguments->singlescan > 0)
+          if (arguments->singlescan == 4U)
           {
-            gt_randomcode_runkmerscan(encseq,arguments->singlescan - 1,kmersize,
-                arguments->minmatchlength);
+            gt_rungetencseqkmers_rc(encseq,kmersize);
+          } else
+          {
+            if (arguments->singlescan > 0)
+            {
+              gt_randomcode_runkmerscan(encseq,arguments->singlescan - 1,
+                  kmersize, arguments->minmatchlength);
+            }
           }
         }
       }
     }
-    if (timer != NULL)
+    if (!haserr && arguments->singlescan == 0)
     {
-      gt_timer_show_progress_final(timer, stdout);
-      gt_timer_delete(timer);
-    }
-  }
-  if (!haserr && arguments->singlescan == 0)
-  {
-    GtLogger *logger;
-    const GtReadmode readmode = GT_READMODE_FORWARD;
-    GtBUstate_spmsk **spmsk_states = NULL;
-    unsigned int kmersize, threadcount;
+      const GtReadmode readmode = GT_READMODE_FORWARD;
+      GtBUstate_spmsk **spmsk_states = NULL;
+      unsigned int kmersize, threadcount;
 
 #ifdef GT_THREADS_ENABLED
-    const unsigned int threads = gt_jobs;
+      const unsigned int threads = gt_jobs;
 #else
-    const unsigned int threads = 1U;
+      const unsigned int threads = 1U;
 #endif
 
-    if (arguments->countspms || arguments->outputspms)
-    {
-      spmsk_states = gt_malloc(sizeof (*spmsk_states) * threads);
-      for (threadcount = 0; threadcount < threads; threadcount++)
+      if (arguments->countspms || arguments->outputspms)
       {
-        spmsk_states[threadcount]
-          = gt_spmsk_inl_new(encseq,
-                             readmode,
-                             (unsigned long) arguments->minmatchlength,
-                             arguments->countspms,
-                             arguments->outputspms,
-                             gt_str_get(arguments->encseqinput));
+        spmsk_states = gt_malloc(sizeof (*spmsk_states) * threads);
+        for (threadcount = 0; threadcount < threads; threadcount++)
+        {
+          spmsk_states[threadcount]
+            = gt_spmsk_inl_new(encseq,
+                readmode,
+                (unsigned long) arguments->minmatchlength,
+                arguments->countspms,
+                arguments->outputspms,
+                gt_str_get(arguments->encseqinput));
+        }
       }
-    }
-    logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
-    haserr = gt_seqcorrect_kmersize(arguments, &kmersize, err);
-    if (!haserr)
-    {
-      if (storerandomcodes_getencseqkmers_twobitencoding(encseq,
-                                                      kmersize,
-                                                      arguments->numofparts,
-                                                      arguments->maximumspace,
-                                                      arguments->minmatchlength,
-                                     /* use false */  arguments->checksuftab,
-                                     /* use false */  arguments->onlyaccum,
-                                     /* use false */  arguments->
-                                                            onlyallrandomcodes,
-                                     /* use 5U */     arguments->
-                                                            addbscache_depth,
-                                     /* specify the extra space needed for
-                                        the function processing the interval */
-                                                      arguments->phase2extra,
-                                     /* use true */   arguments->radixlarge ?
-                                                        false : true,
-                                     /* use 2 without threads and
-                                        use 1 with threads */
-                                                      arguments->radixparts,
-                                                      spmsk_states != NULL
-                                                        ? gt_spmsk_inl_process
-                                                        : NULL,
-                                                      gt_spmsk_inl_process_end,
-                                                      spmsk_states,
-                                                      logger,
-                                                      err) != 0)
+      haserr = gt_seqcorrect_kmersize(arguments, &kmersize, err);
+      if (!haserr)
       {
-        haserr = true;
+        if (storerandomcodes_getencseqkmers_twobitencoding(encseq,
+              kmersize,
+              arguments->numofparts,
+              arguments->maximumspace,
+              arguments->minmatchlength,
+              /* use false */  arguments->checksuftab,
+              /* use false */  arguments->onlyaccum,
+              /* use false */  arguments->
+              onlyallrandomcodes,
+              /* use 5U */     arguments->
+              addbscache_depth,
+              /* specify the extra space needed for
+                 the function processing the interval */
+              arguments->phase2extra,
+              /* use true */   arguments->radixlarge ?
+              false : true,
+              /* use 2 without threads and
+                 use 1 with threads */
+              arguments->radixparts,
+              spmsk_states != NULL
+              ? gt_spmsk_inl_process
+              : NULL,
+              gt_spmsk_inl_process_end,
+              spmsk_states,
+              verbose_logger,
+              err) != 0)
+              {
+                haserr = true;
+              }
       }
-    }
-    if (spmsk_states != NULL)
-    {
-      unsigned long countmatches = 0;
+      if (spmsk_states != NULL)
+      {
+        unsigned long countmatches = 0;
 
-      for (threadcount = 0; threadcount < threads; threadcount++)
-      {
-        countmatches += gt_spmsk_inl_delete(spmsk_states[threadcount]);
+        for (threadcount = 0; threadcount < threads; threadcount++)
+        {
+          countmatches += gt_spmsk_inl_delete(spmsk_states[threadcount]);
+        }
+        if (arguments->countspms)
+        {
+          printf("number of suffix-prefix matches=%lu\n",countmatches);
+        }
+        gt_free(spmsk_states);
       }
-      if (arguments->countspms)
-      {
-        printf("number of suffix-prefix matches=%lu\n",countmatches);
-      }
-      gt_free(spmsk_states);
     }
-    gt_logger_delete(logger);
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
+  if (timer != NULL)
+  {
+    gt_timer_show_progress_final(timer, stdout);
+    gt_timer_delete(timer);
+  }
+  gt_logger_delete(default_logger);
+  gt_logger_delete(verbose_logger);
   return haserr ? -1 : 0;
 }
 
