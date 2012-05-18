@@ -153,8 +153,6 @@ unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
                                     GtFirstcodesspacelog *fcsl,
                                     GtRandomcodestab *rct,
                                     unsigned long numofsequences,
-                                    Gtmarksubstring *markprefix,
-                                    Gtmarksubstring *marksuffix,
                                     GtLogger *logger)
 {
   if (numofsequences == 0)
@@ -167,8 +165,6 @@ unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
 
     gt_randomcodes_countocc_new(fcsl,rct,numofsequences);
     gt_randomcodes_countocc_increment(rct,0,true); /* first increment */
-    gt_marksubstring_mark(markprefix,allrandomcodes[0]);
-    gt_marksubstring_mark(marksuffix,allrandomcodes[0]);
     for (storeptr = allrandomcodes, readptr = allrandomcodes+1;
          readptr < allrandomcodes + numofsequences;
          readptr++)
@@ -185,8 +181,6 @@ unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
       gt_randomcodes_countocc_increment(rct,(unsigned long)
                                        (storeptr - allrandomcodes),
                                        firstincrement);
-      gt_marksubstring_mark(markprefix,*readptr);
-      gt_marksubstring_mark(marksuffix,*readptr);
     }
     numofdifferentcodes = (unsigned long) (storeptr - allrandomcodes + 1);
     if (numofdifferentcodes < numofsequences)

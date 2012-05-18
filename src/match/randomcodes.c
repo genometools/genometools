@@ -33,13 +33,12 @@
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
 #endif
-#include "randomcodes-buf.h"
+#include "firstcodes-buf.h"
 #include "firstcodes-spacelog.h"
 #include "randomcodes-tab.h"
-#include "randomcodes-accum.h"
+#include "firstcodes-accum.h"
 #include "randomcodes-insert.h"
 #include "randomcodes.h"
-#include "marksubstring.h"
 #include "seqnumrelpos.h"
 #include "randomcodes-sfx-partssuf.h"
 #include "sfx-shortreadsort.h"
@@ -72,16 +71,12 @@ typedef struct
                 widthofpart;
   GtArrayGtIndexwithcodeRC binsearchcache;
   unsigned int flushcount,
-               shiftright2index,
-               marksuffixunits,
-               markprefixunits,
                bitsforposref;
   GtRadixsortinfo *radixsort_code,
                   *radixsort_codepos;
   GtSpmsuftab *spmsuftab;
   GtSfxmappedrange *mappedleftborder,
-                   *mappedallrandomcodes,
-                   *mappedmarkprefix;
+                   *mappedallrandomcodes;
   unsigned long *allrandomcodes;
 #define RANDOMCODES_DIFFERENCES
 #ifdef RANDOMCODES_DIFFERENCES
@@ -95,23 +90,6 @@ typedef struct
 static double gt_randomcodes_round(double d)
 {
   return floor(d + 0.5);
-}
-
-static unsigned long gt_kmercode2prefix_index(unsigned long idx,
-                                              const void *data)
-{
-  const GtRandomcodesinfo *fci = (const GtRandomcodesinfo *) data;
-
-  gt_assert(fci != NULL && idx < fci->differentcodes);
-  return fci->allrandomcodes[idx] >> fci->shiftright2index;
-}
-
-static void gt_minmax_index_kmercode2prefix(unsigned long *minindex,
-                                            unsigned long *maxindex,
-                                            const void *data)
-{
-  *minindex = gt_kmercode2prefix_index(*minindex,data);
-  *maxindex = gt_kmercode2prefix_index(*maxindex,data);
 }
 
 static void gt_storerandomcodes(void *processinfo,
@@ -860,25 +838,6 @@ static void gt_firstcode_delete_before_end(GtRandomcodesinfo *fci)
     GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"radixsort_codepos");
     fci->radixsort_codepos = NULL;
   }
-  if (fci->mappedmarkprefix != NULL)
-  {
-    gt_Sfxmappedrange_delete(fci->mappedmarkprefix);
-    gt_marksubstring_delete(fci->buf.markprefix,true);
-  } else
-  {
-    gt_marksubstring_delete(fci->buf.markprefix,true);
-    if (fci->buf.markprefix != NULL)
-    {
-      GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"markprefix");
-    }
-  }
-  fci->buf.markprefix = NULL;
-  gt_marksubstring_delete(fci->buf.marksuffix,true);
-  if (fci->buf.marksuffix != NULL)
-  {
-    GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"marksuffix");
-  }
-  fci->buf.marksuffix = NULL;
   if (fci->mappedallrandomcodes == NULL && fci->allrandomcodes != NULL)
   {
     gt_free(fci->allrandomcodes);
@@ -945,7 +904,6 @@ static void run_allcodes_distribution(const unsigned long *allrandomcodes,
 
 static int gt_randomcodes_init(GtRandomcodesinfo *fci,
                               const GtEncseq *encseq,
-                              unsigned int kmersize,
                               bool withsuftabcheck,
                               unsigned int minmatchlength,
                               GtError *err)
@@ -958,33 +916,6 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
   totallength = gt_encseq_total_length(encseq);
   logtotallength
     = (unsigned int) gt_randomcodes_round(log((double) totallength));
-  if (logtotallength >= 8U)
-  {
-    fci->markprefixunits = MAX(8U,logtotallength - 8U);
-  } else
-  {
-    fci->markprefixunits = MIN(kmersize/2U,8U);
-  }
-  if (fci->markprefixunits >= 2U)
-  {
-    fci->marksuffixunits = fci->markprefixunits - 1;
-  } else
-  {
-    fci->marksuffixunits = fci->markprefixunits;
-  }
-  if (fci->marksuffixunits + fci->markprefixunits > kmersize)
-  {
-    if (fci->marksuffixunits % 2U == 0)
-    {
-      fci->marksuffixunits = fci->markprefixunits = kmersize/2U;
-    } else
-    {
-      fci->marksuffixunits = kmersize/2;
-      fci->markprefixunits = kmersize - fci->marksuffixunits;
-    }
-  }
-  gt_log_log("markprefixunits=%u,marksuffixunits=%u",fci->markprefixunits,
-                                                     fci->marksuffixunits);
   if (maxseqlength > (unsigned long) minmatchlength)
   {
     maxrelpos = maxseqlength - (unsigned long) minmatchlength;
@@ -996,6 +927,7 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
   fci->buf.snrp = gt_seqnumrelpos_new(bitsforrelpos,encseq);
   fci->buf.markprefix = NULL;
   fci->buf.marksuffix = NULL;
+  fci->buf.accum_all = false;
   fci->numofsequences = gt_encseq_num_of_sequences(encseq);
   gt_assert(fci->numofsequences > 0);
   bitsforseqnum = gt_determinebitspervalue(fci->numofsequences - 1);
@@ -1016,7 +948,6 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
   fci->buf.spaceGtUlongPair = NULL;
   fci->buf.spaceGtUlong = NULL;
   fci->mappedallrandomcodes = NULL;
-  fci->mappedmarkprefix = NULL;
   fci->mappedleftborder = NULL;
   GT_FCI_ADDWORKSPACE(fci->fcsl,"encseq",(size_t) gt_encseq_sizeofrep(encseq));
   if (withsuftabcheck)
@@ -1073,23 +1004,11 @@ static void gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
   gt_radixsort_inplace_ulong(fci->allrandomcodes,fci->numofsequences);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   gt_assert(numofchars == 4U);
-  fci->buf.markprefix = gt_marksubstring_new(numofchars,kmersize,false,
-                                            fci->markprefixunits);
-  fci->shiftright2index = gt_marksubstring_shiftright(fci->buf.markprefix)
-                          + GT_LOGWORDSIZE;
-  GT_FCI_ADDSPLITSPACE(fci->fcsl,"markprefix",
-                      (size_t) gt_marksubstring_size(fci->buf.markprefix));
-  fci->buf.marksuffix = gt_marksubstring_new(numofchars,kmersize,true,
-                                            fci->marksuffixunits);
-  GT_FCI_ADDWORKSPACE(fci->fcsl,"marksuffix",
-                      (size_t) gt_marksubstring_size(fci->buf.marksuffix));
   gt_assert(fci->allrandomcodes != NULL);
   fci->differentcodes = gt_randomcodes_remdups(fci->allrandomcodes,
                                              fci->fcsl,
                                              &fci->tab,
                                              fci->numofsequences,
-                                             fci->buf.markprefix,
-                                             fci->buf.marksuffix,
                                              logger);
   if (fci->differentcodes > 0 && fci->differentcodes < fci->numofsequences)
   {
@@ -1170,7 +1089,7 @@ static void gt_randomcodes_accumulatecounts_run(GtRandomcodesinfo *fci,
   fci->buf.flush_function = gt_randomcodes_accumulatecounts_flush;
   gt_logger_log(logger,"maximum space for accumulating counts %.2f MB",
                 GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)));
-  gt_randomcodes_accum_runkmerscan(encseq, kmersize, minmatchlength,&fci->buf);
+  gt_firstcodes_accum_runkmerscan(encseq, kmersize, minmatchlength,&fci->buf);
   gt_randomcodes_accumulatecounts_flush(fci);
   gt_logger_log(logger,"codebuffer_total=%lu (%.3f%% of all suffixes)",
                 fci->codebuffer_total,
@@ -1205,13 +1124,6 @@ static void gt_randomcodes_accumulatecounts_run(GtRandomcodesinfo *fci,
 static void gt_randomcodes_map_sections(GtRandomcodesinfo *fci,
                                        GtSfxmappedrangelist *sfxmrlist)
 {
-  fci->mappedmarkprefix
-    = gt_Sfxmappedrange_new("markprefix",
-                            gt_marksubstring_entries(fci->buf.markprefix),
-                            GtSfxGtBitsequence,
-                            gt_minmax_index_kmercode2prefix,
-                            fci);
-  gt_Sfxmappedrangelist_add(sfxmrlist,fci->mappedmarkprefix);
   if (fci->differentcodes > 0)
   {
     fci->mappedallrandomcodes = gt_Sfxmappedrange_new("allrandomcodes",
@@ -1309,20 +1221,10 @@ static void gt_randomcodes_handle_tmp(GtRandomcodesinfo *fci,
                                      false);
     GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"allrandomcodes");
     gt_assert(fci->allrandomcodes == NULL);
-    gt_marksubstring_bits_null(fci->buf.markprefix,false);
-    gt_assert(fci->mappedmarkprefix != NULL);
-    gt_Sfxmappedrange_storetmp_bitsequence(fci->mappedmarkprefix,
-                                           gt_marksubstring_bits_address(
-                                                fci->buf.markprefix),
-                                           false);
-    GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"markprefix");
-    gt_marksubstring_bits_null(fci->buf.markprefix,true);
   } else
   {
     gt_Sfxmappedrange_delete(fci->mappedallrandomcodes);
     fci->mappedallrandomcodes = NULL;
-    gt_Sfxmappedrange_delete(fci->mappedmarkprefix);
-    fci->mappedmarkprefix = NULL;
   }
 }
 
@@ -1418,19 +1320,6 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
                                                fci->mappedleftborder,
                                                fci->currentminindex,
                                                fci->currentmaxindex));
-  if (fci->mappedmarkprefix != NULL)
-  {
-    mapptr = gt_Sfxmappedrange_map(fci->mappedmarkprefix,
-                                   fci->currentminindex,
-                                   fci->currentmaxindex);
-
-    gt_marksubstring_bits_map(fci->buf.markprefix, (GtBitsequence *) mapptr);
-    GT_FCI_ADDSPLITSPACE(fci->fcsl,"markprefix",
-                         (size_t) gt_Sfxmappedrange_size_mapped(
-                                               fci->mappedmarkprefix,
-                                               fci->currentminindex,
-                                               fci->currentmaxindex));
-  }
   gt_logger_log(logger,"maximum space for part %u: %.2f MB",
                 part,GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)));
   fci->buf.currentmincode = gt_randomcodes_idx2code(fci,fci->currentminindex);
@@ -1442,11 +1331,6 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
                                    minmatchlength,
                                    &fci->buf);
   gt_randomcodes_insertsuffixes_flush(fci);
-  if (fci->mappedmarkprefix != NULL)
-  {
-    gt_Sfxmappedrange_unmap(fci->mappedmarkprefix);
-    GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"markprefix");
-  }
   if (fci->mappedallrandomcodes != NULL)
   {
     gt_Sfxmappedrange_unmap(fci->mappedallrandomcodes);
@@ -1579,7 +1463,6 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   if (gt_randomcodes_init(&fci,
                          encseq,
-                         kmersize,
                          withsuftabcheck,
                          minmatchlength,
                          err) != 0)
@@ -1607,8 +1490,6 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       run_allcodes_distribution(fci.allrandomcodes,fci.differentcodes);
       gt_free(fci.allrandomcodes);
       fci.allrandomcodes = NULL;
-      gt_marksubstring_delete(fci.buf.markprefix,true);
-      gt_marksubstring_delete(fci.buf.marksuffix,true);
       gt_randomcodes_countocc_delete(fci.fcsl,&fci.tab);
       gt_firstcodes_spacelog_delete(fci.fcsl);
       gt_seqnumrelpos_delete(fci.buf.snrp);

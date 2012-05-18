@@ -21,15 +21,13 @@
 #include "core/divmodmul.h"
 #include "core/encseq.h"
 #include "kmercodes.h"
-#include "randomcodes-buf.h"
+#include "firstcodes-buf.h"
 #include "randomcodes-insert.h"
 
 #define GT_RANDOMCODES_INSERTSUFFIXES(BUF,CODE,SEQNUM,RELPOS)\
         {\
           if ((BUF)->currentmincode <= (CODE) &&\
-              (CODE) <= (BUF)->currentmaxcode &&\
-              GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
-              GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE))\
+              (CODE) <= (BUF)->currentmaxcode)\
           {\
             if ((BUF)->nextfree == (BUF)->allocated)\
             {\
@@ -60,7 +58,7 @@ static void gt_randomcodes_insert_kmerscan_range(
   unsigned int shiftright;
   unsigned long unitindex, frelpos;
   GtTwobitencoding currentencoding;
-  GtCodetype cc, marksubstringtmpcode, fcode, rccode;
+  GtCodetype cc, fcode, rccode;
 
   gt_assert(kmersize <= (unsigned int) GT_UNITSIN2BITENC);
   fcode = gt_kmercode_at_position(twobitencoding, startpos, kmersize);

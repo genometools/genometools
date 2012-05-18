@@ -19,7 +19,7 @@
 #define RANDOMCODES_INSERT_H
 
 #include "core/encseq_api.h"
-#include "match/randomcodes-buf.h"
+#include "match/firstcodes-buf.h"
 
 void gt_randomcodes_insert_runkmerscan(const GtEncseq *encseq,
                                       unsigned int kmersize,

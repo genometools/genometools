@@ -24,7 +24,6 @@
 #include "core/hashmap-generic.h"
 #include "core/logger_api.h"
 #include "core/arraydef.h"
-#include "marksubstring.h"
 #include "firstcodes-tab.h"
 #include "firstcodes-spacelog.h"
 
@@ -182,8 +181,6 @@ unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
                                     GtFirstcodesspacelog *fcsl,
                                     GtRandomcodestab *rct,
                                     unsigned long numofsequences,
-                                    Gtmarksubstring *markprefix,
-                                    Gtmarksubstring *marksuffix,
                                     GtLogger *logger);
 
 #endif
