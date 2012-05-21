@@ -447,17 +447,78 @@ static void gt_randomcodes_checksuftab_bucket(const GtEncseq *encseq,
   }
 }
 
+static void gt_randomcodes_process_kmer_itv(
+    GT_UNUSED const unsigned long *suffixes,
+    GT_UNUSED unsigned long nofsuffixes,
+    GT_UNUSED void *data)
+{
+}
+
+static void gt_randomcodes_process_kmergroup_end(GT_UNUSED void *data)
+{
+}
+
+GT_UNUSED
+static int gt_randomcodes_process_bucket(
+    const unsigned long *bucketofsuffixes,
+    const uint16_t *lcptab_bucket,
+    unsigned long numberofsuffixes,
+    GT_UNUSED const GtSeqnumrelpos *snrp,
+    const unsigned long correction_kmersize,
+    GT_UNUSED GtError *err)
+{
+  unsigned long lcpvalue, idx, itvstart;
+  bool haserr = false, firstedgefromroot;
+
+  firstedgefromroot = true;
+  idx = 1UL;
+  itvstart = 0;
+  for (idx = 1UL; idx < numberofsuffixes; idx++)
+  {
+    lcpvalue = (unsigned long) lcptab_bucket[idx];
+    if (lcpvalue < correction_kmersize)
+    {
+      gt_randomcodes_process_kmer_itv(bucketofsuffixes + itvstart,
+          idx - itvstart, NULL);
+      itvstart = idx;
+      if (lcpvalue < correction_kmersize - 1)
+      {
+        gt_randomcodes_process_kmergroup_end(NULL);
+      }
+    }
+  }
+  gt_randomcodes_process_kmer_itv(bucketofsuffixes + itvstart,
+      numberofsuffixes - itvstart, NULL);
+  gt_randomcodes_process_kmergroup_end(NULL);
+  return haserr ? -1 : 0;
+}
+
+/* this can be maybe improved by using optimized code for
+ * determining the position of the most significant bit */
+static unsigned long gt_randomcodes_codelcp(unsigned long a, unsigned long b)
+{
+  unsigned long lcpvalue = 0;
+  unsigned long mask;
+  const unsigned long xorvalue = a ^ b;
+  for (mask = 3UL << GT_MULT2(GT_UNITSIN2BITENC - 1);
+      mask > 0; mask >>= 2, lcpvalue++)
+    if (xorvalue & mask)
+      return lcpvalue;
+  return lcpvalue;
+}
+
 static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        const GtEncseq *encseq,
                                        GtReadmode readmode,
                                        const GtSpmsuftab *spmsuftab,
                                        const GtSeqnumrelpos *snrp,
                                        const GtRandomcodestab *rct,
+                                       const unsigned long *allrandomcodes,
                                        unsigned long minindex,
                                        unsigned long maxindex,
                                        unsigned long sumofwidth,
                                        unsigned long spaceforbucketprocessing,
-                                       unsigned long depth,
+                                       GT_UNUSED unsigned long depth,
                                        GtRandomcodesintervalprocess itvprocess,
                                        GtRandomcodesintervalprocess_end
                                               itvprocess_end,
@@ -474,6 +535,7 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
   GtShortreadsortresult srsresult;
   bool previousdefined = false, haserr = false;
 
+  gt_assert(allrandomcodes != NULL);
   current = gt_randomcodes_get_leftborder(rct,minindex);
   for (idx = minindex; idx <= maxindex; idx++)
   {
@@ -491,6 +553,13 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
     gt_assert(sumwidth <= spmsuftab->numofentries);
     if (width >= 2UL)
     {
+      unsigned long lcpvalue = 0;
+      if (idx > minindex)
+      {
+        lcpvalue = gt_randomcodes_codelcp(allrandomcodes[idx - 1],
+            allrandomcodes[idx]);
+      }
+      gt_assert(lcpvalue < GT_UNITSIN2BITENC);
       gt_shortreadsort_firstcodes_sort(&srsresult,
                                        srsw,
                                        snrp,
@@ -498,7 +567,7 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        spmsuftab,
                                        current,
                                        width,
-                                       depth);
+                                       MIN(depth,lcpvalue));
       if (withsuftabcheck)
       {
         gt_randomcodes_checksuftab_bucket(encseq,
@@ -616,6 +685,7 @@ typedef struct
   const GtSpmsuftab *spmsuftab;
   const GtSeqnumrelpos *snrp;
   const GtRandomcodestab *rct;
+  const unsigned long *allrandomcodes;
   unsigned long depth,
                 minindex,
                 maxindex,
@@ -639,6 +709,7 @@ static void *gt_randomcodes_thread_caller_sortremaining(void *data)
                                   threadinfo->spmsuftab,
                                   threadinfo->snrp,
                                   threadinfo->rct,
+                                  threadinfo->allrandomcodes,
                                   threadinfo->minindex,
                                   threadinfo->maxindex,
                                   threadinfo->sumofwidth,
@@ -662,6 +733,7 @@ static int gt_randomcodes_thread_sortremaining(
                                        const GtSpmsuftab *spmsuftab,
                                        const GtSeqnumrelpos *snrp,
                                        const GtRandomcodestab *rct,
+                                       unsigned long *allrandomcodes,
                                        unsigned long partminindex,
                                        unsigned long partmaxindex,
                                        unsigned long widthofpart,
@@ -695,6 +767,7 @@ static int gt_randomcodes_thread_sortremaining(
     threadinfo[t].spmsuftab = spmsuftab;
     threadinfo[t].snrp = snrp;
     threadinfo[t].rct = rct;
+    threadinfo[t].allrandomcodes = allrandomcodes;
     threadinfo[t].minindex = t == 0 ? partminindex : endindexes[t-1] + 1,
     threadinfo[t].maxindex = endindexes[t];
     threadinfo[t].readmode = readmode;
@@ -763,12 +836,6 @@ static void gt_firstcode_delete_before_end(GtRandomcodesinfo *fci)
     gt_radixsort_delete(fci->radixsort_codepos);
     GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"radixsort_codepos");
     fci->radixsort_codepos = NULL;
-  }
-  if (fci->mappedallrandomcodes == NULL && fci->allrandomcodes != NULL)
-  {
-    gt_free(fci->allrandomcodes);
-    fci->allrandomcodes = NULL;
-    GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"allrandomcodes");
   }
 }
 
@@ -1135,32 +1202,6 @@ static int gt_randomcodes_auto_parts(GtRandomcodesinfo *fci,
   }
 }
 
-static void gt_randomcodes_handle_tmp(GtRandomcodesinfo *fci,
-                                     GtSuftabparts_rc *suftabparts_rc)
-{
-  gt_assert(fci->mappedleftborder != NULL);
-  gt_Sfxmappedrange_usetmp(fci->mappedleftborder,
-                           gt_randomcodes_outfilenameleftborder(&fci->tab),
-                           (void **)
-                             gt_randomcodes_leftborder_address(&fci->tab),
-                           gt_randomcodes_leftborder_entries(&fci->tab),
-                           true);
-  if (gt_suftabparts_rc_numofparts(suftabparts_rc) > 1U)
-  {
-    gt_assert(fci->allrandomcodes != NULL);
-    gt_assert(fci->mappedallrandomcodes != NULL);
-    gt_Sfxmappedrange_storetmp_ulong(fci->mappedallrandomcodes,
-                                     &fci->allrandomcodes,
-                                     false);
-    GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"allrandomcodes");
-    gt_assert(fci->allrandomcodes == NULL);
-  } else
-  {
-    gt_Sfxmappedrange_delete(fci->mappedallrandomcodes);
-    fci->mappedallrandomcodes = NULL;
-  }
-}
-
 static void gt_randomcodes_allocsize_for_insertion(GtRandomcodesinfo *fci,
                                                   unsigned long maximumspace,
                                                   const GtSuftabparts_rc
@@ -1243,6 +1284,7 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
                                         fci->currentminindex,
                                         fci->currentmaxindex));
   }
+  gt_assert(fci->allrandomcodes != NULL);
   gt_assert(fci->mappedleftborder != NULL);
   mapptr = gt_Sfxmappedrange_map(fci->mappedleftborder,
                                  fci->currentminindex,
@@ -1266,11 +1308,6 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
                                    minmatchlength,
                                    &fci->buf);
   gt_randomcodes_insertsuffixes_flush(fci);
-  if (fci->mappedallrandomcodes != NULL)
-  {
-    gt_Sfxmappedrange_unmap(fci->mappedallrandomcodes);
-    GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"allrandomcodes");
-  }
   if (part == gt_suftabparts_rc_numofparts(suftabparts_rc) - 1)
   {
     gt_firstcode_delete_before_end(fci);
@@ -1304,6 +1341,7 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
           fci->spmsuftab,
           fci->buf.snrp,
           &fci->tab,
+          fci->allrandomcodes,
           fci->currentminindex,
           fci->currentmaxindex,
           gt_suftabparts_rc_widthofpart(part,suftabparts_rc),
@@ -1329,6 +1367,7 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
           fci->spmsuftab,
           fci->buf.snrp,
           &fci->tab,
+          fci->allrandomcodes,
           fci->currentminindex,
           fci->currentmaxindex,
           gt_suftabparts_rc_sumofwidth(part,suftabparts_rc),
@@ -1344,6 +1383,11 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
     {
       haserr = true;
     }
+  }
+  if (fci->mappedallrandomcodes != NULL)
+  {
+    gt_Sfxmappedrange_unmap(fci->mappedallrandomcodes);
+    GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"allrandomcodes");
   }
   if (fci->mappedleftborder != NULL)
   {
@@ -1500,7 +1544,26 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     sfxmrlist = NULL;
     gt_randomcodes_samples_delete(fci.fcsl,&fci.tab);
     gt_assert(fci.buf.nextfree == 0);
-    gt_randomcodes_handle_tmp(&fci,suftabparts_rc);
+    gt_assert(fci.mappedleftborder != NULL);
+    gt_Sfxmappedrange_usetmp(fci.mappedleftborder,
+        gt_randomcodes_outfilenameleftborder(&fci.tab),
+        (void **)
+        gt_randomcodes_leftborder_address(&fci.tab),
+        gt_randomcodes_leftborder_entries(&fci.tab),
+        true);
+    if (gt_suftabparts_rc_numofparts(suftabparts_rc) > 1U)
+    {
+      gt_assert(fci.allrandomcodes != NULL);
+      gt_assert(fci.mappedallrandomcodes != NULL);
+      gt_Sfxmappedrange_storetmp_ulong(fci.mappedallrandomcodes,
+          &fci.allrandomcodes, false);
+      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allrandomcodes");
+      gt_assert(fci.allrandomcodes == NULL);
+    } else
+    {
+      gt_Sfxmappedrange_delete(fci.mappedallrandomcodes);
+      fci.mappedallrandomcodes = NULL;
+    }
     largest_width = gt_suftabparts_rc_largest_width(suftabparts_rc);
     fci.spmsuftab = gt_spmsuftab_new(largest_width,
                                      totallength,
@@ -1625,11 +1688,13 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"suftab");
     fci.spmsuftab = NULL;
   }
-  gt_Sfxmappedrange_delete(fci.mappedleftborder);
   if (fci.mappedallrandomcodes == NULL && fci.allrandomcodes != NULL)
   {
+    gt_free(fci.allrandomcodes);
+    fci.allrandomcodes = NULL;
     GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allrandomcodes");
   }
+  gt_Sfxmappedrange_delete(fci.mappedleftborder);
   gt_Sfxmappedrange_delete(fci.mappedallrandomcodes);
   gt_seqnumrelpos_delete(fci.buf.snrp);
   gt_firstcodes_spacelog_stop_diff(fci.fcsl);
