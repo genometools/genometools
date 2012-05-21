@@ -95,8 +95,7 @@ static int grep_desc(GtBioseqCol *bsc, unsigned long *filenum,
         /* cache results */
         seq_info.filenum = i;
         seq_info.seqnum = j;
-        gt_seq_info_cache_add(bsc->grep_cache, gt_cstr_dup(gt_str_get(seqid)),
-                              &seq_info);
+        gt_seq_info_cache_add(bsc->grep_cache, gt_str_get(seqid), &seq_info);
         break;
       }
     }
