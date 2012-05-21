@@ -30,25 +30,19 @@
 #endif
 #include "tools/gt_seqcorrect.h"
 #include "match/randomcodes.h"
-#include "match/esa-spmsk.h"
-
+#include "match/randomcodes-correct.h"
 #include "match/randomsamples.h"
 
 typedef struct
 {
   bool checksuftab,
-       singlestrand,
        verbose,
        quiet,
-       outputspms,
        onlyaccum,
        onlyallrandomcodes,
-       radixlarge,
-       countspms,
-       runrandomsamplescode;
-  unsigned int kmersize,
+       radixlarge;
+  unsigned int correction_kmersize,
                samplingfactor,
-               minmatchlength,
                numofparts,
                radixparts,
                addbscache_depth,
@@ -56,7 +50,6 @@ typedef struct
   unsigned long maximumspace,
                 phase2extra;
   GtStr *encseqinput,
-        *spmspec,
         *memlimitarg,
         *phase2extraarg;
   GtOption *refoptionmemlimit,
@@ -66,13 +59,10 @@ typedef struct
 static void* gt_seqcorrect_arguments_new(void)
 {
   GtSeqcorrectArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
-  arguments->outputspms = false;
-  arguments->countspms = false;
   arguments->radixlarge = false;
   arguments->numofparts = 0;
   arguments->radixparts = 1U;
   arguments->encseqinput = gt_str_new();
-  arguments->spmspec = gt_str_new();
   arguments->memlimitarg = gt_str_new();
   arguments->phase2extraarg = gt_str_new();
   arguments->phase2extra = 0UL; /* in bytes */
@@ -85,7 +75,6 @@ static void gt_seqcorrect_arguments_delete(void *tool_arguments)
   GtSeqcorrectArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->encseqinput);
-  gt_str_delete(arguments->spmspec);
   gt_option_delete(arguments->refoptionmemlimit);
   gt_option_delete(arguments->refoptionphase2extra);
   gt_str_delete(arguments->memlimitarg);
@@ -106,8 +95,8 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
                          "K-mer based sequence correction.");
 
   /* -k */
-  option = gt_option_new_uint_min_max("k", "specify the kmer size",
-                                  &arguments->kmersize, 31U, 1U, 32U);
+  option = gt_option_new_uint_min("k", "specify the kmer size for the "
+      "correction algorithm", &arguments->correction_kmersize, 31U, 2U);
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
@@ -116,17 +105,6 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
                                   &arguments->samplingfactor, 50U, 1U);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
-
-  /* -l */
-  option = gt_option_new_uint_min("l", "specify the minimum length",
-                                  &arguments->minmatchlength, 0, 1U);
-  gt_option_parser_add_option(op, option);
-  gt_option_is_mandatory(option);
-
-  /* -rs */
-  option = gt_option_new_bool("rs", "use randomsamples code",
-                              &arguments->runrandomsamplescode, false);
-  gt_option_parser_add_option(op, option);
 
   /* -parts */
   optionparts = gt_option_new_uint("parts", "specify the number of parts",
@@ -148,17 +126,6 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
                              &arguments->checksuftab, false);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
-
-  /* -singlestrand */
-  option = gt_option_new_bool("singlestrand", "use only the forward strand "
-                              "of the sequence",
-                              &arguments->singlestrand, false);
-  gt_option_parser_add_option(op, option);
-
-  /* -spm */
-  option = gt_option_new_string("spm", "specify output for spms",
-                                arguments->spmspec, NULL);
-  gt_option_parser_add_option(op, option);
 
   /* -ii */
   option = gt_option_new_string("ii", "specify the input sequence",
@@ -209,8 +176,8 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
 
   /* -forcek */
-  option = gt_option_new_uint("forcek", "specify the value of k",
-                              &arguments->forcek, 0);
+  option = gt_option_new_uint("forcek", "specify the kmersize for the bucket "
+      "keys", &arguments->forcek, 0);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -230,7 +197,7 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static bool gt_seqcorrect_kmersize(GtSeqcorrectArguments *arguments,
+static bool gt_seqcorrect_bucketkey_kmersize(GtSeqcorrectArguments *arguments,
     unsigned int *kmersize, GtError *err)
 {
   bool haserr = false;
@@ -238,10 +205,10 @@ static bool gt_seqcorrect_kmersize(GtSeqcorrectArguments *arguments,
   if (arguments->forcek > 0)
   {
     *kmersize = arguments->forcek;
-    if (*kmersize > arguments->minmatchlength)
+    if (*kmersize >= arguments->correction_kmersize)
     {
-      gt_error_set(err,"argument %u to option -forcek > l",
-          *kmersize);
+      gt_error_set(err,"argument %u to option -forcek must be < "
+          "correction kmersize (-k)", *kmersize);
       haserr = true;
     }
     else if (*kmersize > (unsigned int)GT_UNITSIN2BITENC)
@@ -254,15 +221,16 @@ static bool gt_seqcorrect_kmersize(GtSeqcorrectArguments *arguments,
   }
   else
   {
+    gt_assert(arguments->correction_kmersize > 1U);
     *kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,
-        arguments->minmatchlength);
+        arguments->correction_kmersize - 1);
   }
-  gt_log_log("kmersize=%u", *kmersize);
+  gt_log_log("bucketkey kmersize=%u", *kmersize);
   gt_assert(*kmersize > 0);
   return haserr;
 }
 
-static int gt_seqcorrect_arguments_check(int rest_argc,
+static int gt_seqcorrect_arguments_check(GT_UNUSED int rest_argc,
                                          void *tool_arguments,
                                          GtError *err)
 {
@@ -270,30 +238,6 @@ static int gt_seqcorrect_arguments_check(int rest_argc,
   bool haserr = false;
 
   gt_error_check(err);
-  if (rest_argc != 0)
-  {
-    gt_error_set(err,"unnecessary arguments");
-    haserr = true;
-  }
-  if (!haserr && gt_str_length(arguments->spmspec) > 0)
-  {
-    const char *spmspecstring = gt_str_get(arguments->spmspec);
-    if (strcmp(spmspecstring,"show") == 0)
-    {
-      arguments->outputspms = true;
-    } else
-    {
-      if (strcmp(spmspecstring,"count") == 0)
-      {
-        arguments->countspms = true;
-      } else
-      {
-        gt_error_set(err,"illegal argument \"%s\" to option -spm",
-                     spmspecstring);
-        haserr = true;
-      }
-    }
-  }
   if (!haserr && gt_option_is_set(arguments->refoptionmemlimit))
   {
     if (gt_option_parse_spacespec(&arguments->maximumspace,
@@ -363,124 +307,73 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
   gt_encseq_loader_drop_description_support(el);
   gt_encseq_loader_disable_autosupport(el);
   encseq = gt_encseq_loader_load(el, gt_str_get(arguments->encseqinput),
-                                 err);
+      err);
   if (encseq == NULL)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    if (arguments->singlestrand)
+    if (gt_encseq_mirror(encseq, err) != 0)
     {
-      gt_error_set(err,"option -singlestand is not implemented");
       haserr = true;
-    } else
-    {
-      if (gt_encseq_mirror(encseq, err) != 0)
-      {
-        haserr = true;
-      }
     }
   }
 
-  if (arguments->runrandomsamplescode)
+  if (!haserr)
   {
-    if (!haserr)
-    {
-      GtRandomSamples *codes;
-      if ((codes = gt_randomsamples_new(encseq, timer, arguments->kmersize,
-              default_logger, verbose_logger, err))
-          == NULL)
-      {
-        haserr = true;
-      }
-      else
-      {
-        if (gt_randomsamples_run(codes, arguments->samplingfactor,
-              arguments->numofparts, arguments->maximumspace) != 0)
-        {
-          haserr = true;
-        }
-        gt_randomsamples_delete(codes);
-      }
-    }
-  }
-  else
-  {
-    if (!haserr)
-    {
-      const GtReadmode readmode = GT_READMODE_FORWARD;
-      GtBUstate_spmsk **spmsk_states = NULL;
-      unsigned int kmersize, threadcount;
+    GtRandomcodesCorrectData **data_array = NULL;
+    unsigned int bucketkey_kmersize, threadcount;
 
 #ifdef GT_THREADS_ENABLED
-      const unsigned int threads = gt_jobs;
+    const unsigned int threads = gt_jobs;
 #else
-      const unsigned int threads = 1U;
+    const unsigned int threads = 1U;
 #endif
 
-      if (arguments->countspms || arguments->outputspms)
-      {
-        spmsk_states = gt_malloc(sizeof (*spmsk_states) * threads);
-        for (threadcount = 0; threadcount < threads; threadcount++)
-        {
-          spmsk_states[threadcount]
-            = gt_spmsk_inl_new(encseq,
-                readmode,
-                (unsigned long) arguments->minmatchlength,
-                arguments->countspms,
-                arguments->outputspms,
-                gt_str_get(arguments->encseqinput));
-        }
-      }
-      haserr = gt_seqcorrect_kmersize(arguments, &kmersize, err);
-      if (!haserr)
-      {
-        if (storerandomcodes_getencseqkmers_twobitencoding(encseq,
-              kmersize,
-              arguments->numofparts,
-              arguments->maximumspace,
-              arguments->minmatchlength,
-              /* use false */  arguments->checksuftab,
-              /* use false */  arguments->onlyaccum,
-              /* use false */  arguments->
-              onlyallrandomcodes,
-              /* use 5U */     arguments->
-              addbscache_depth,
-              /* specify the extra space needed for
-                 the function processing the interval */
-              arguments->phase2extra,
-              /* use true */   arguments->radixlarge ?
-              false : true,
-              /* use 2 without threads and
-                 use 1 with threads */
-              arguments->radixparts,
-              spmsk_states != NULL
-              ? gt_spmsk_inl_process
-              : NULL,
-              gt_spmsk_inl_process_end,
-              spmsk_states,
-              verbose_logger,
-              err) != 0)
-              {
-                haserr = true;
-              }
-      }
-      if (spmsk_states != NULL)
-      {
-        unsigned long countmatches = 0;
-
-        for (threadcount = 0; threadcount < threads; threadcount++)
-        {
-          countmatches += gt_spmsk_inl_delete(spmsk_states[threadcount]);
-        }
-        if (arguments->countspms)
-        {
-          printf("number of suffix-prefix matches=%lu\n",countmatches);
-        }
-        gt_free(spmsk_states);
-      }
+    data_array = gt_malloc(sizeof (*data_array) * threads);
+    for (threadcount = 0; threadcount < threads; threadcount++)
+    {
+      data_array[threadcount] = gt_randomcodes_correct_data_new();
     }
+    gt_log_log("correction kmersize=%u", arguments->correction_kmersize);
+    haserr = gt_seqcorrect_bucketkey_kmersize(arguments,
+        &bucketkey_kmersize, err);
+    if (!haserr)
+    {
+      if (storerandomcodes_getencseqkmers_twobitencoding(encseq,
+            bucketkey_kmersize,
+            arguments->numofparts,
+            arguments->maximumspace,
+            arguments->correction_kmersize,
+            /* use false */  arguments->checksuftab,
+            /* use false */  arguments->onlyaccum,
+            /* use false */  arguments->
+            onlyallrandomcodes,
+            /* use 5U */     arguments->
+            addbscache_depth,
+            /* specify the extra space needed for
+               the function processing the interval */
+            arguments->phase2extra,
+            /* use true */   arguments->radixlarge ?
+            false : true,
+            /* use 2 without threads and
+               use 1 with threads */
+            arguments->radixparts,
+            gt_randomcodes_correct_process_bucket,
+            NULL,
+            data_array,
+            verbose_logger,
+            err) != 0)
+            {
+              haserr = true;
+            }
+    }
+    for (threadcount = 0; threadcount < threads; threadcount++)
+    {
+      gt_randomcodes_correct_data_delete(data_array[threadcount]);
+    }
+    gt_free(data_array);
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);

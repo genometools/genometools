@@ -29,7 +29,7 @@ typedef int (*GtRandomcodesintervalprocess)(void *,
                                            const GtSeqnumrelpos *,
                                            const uint16_t *,
                                            unsigned long,
-                                           unsigned long,
+                                           unsigned int,
                                            GtError *);
 
 typedef void (*GtRandomcodesintervalprocess_end)(void *);
