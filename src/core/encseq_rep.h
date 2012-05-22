@@ -32,6 +32,7 @@
 #include "core/encseq_api.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
+#include "core/md5_tab.h"
 #include "core/types_api.h"
 #include "core/str_array_api.h"
 #include "core/defined-types.h"
@@ -213,6 +214,9 @@ struct GtEncseq
   /* reference counting */
   unsigned long reference_count;
   GtMutex *refcount_lock;
+
+  /* MD5 sums */
+  GtMD5Tab *md5_tab;
 
   bool hasmirror,
        accesstype_via_utables;

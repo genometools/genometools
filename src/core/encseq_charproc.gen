@@ -24,6 +24,17 @@
               lastwildcardrangelength = 0;
             }
             lastnonspecialrangelength++;
+            if (md5enc != NULL) {
+              if (md5_blockcount == 64UL) {
+                gt_md5_encoder_add_block(md5enc, md5_blockbuf, md5_blockcount);
+                md5_blockcount = 0UL;
+              }
+              if (outoistab)
+                md5_blockbuf[md5_blockcount++] = toupper(cc);
+              else
+                md5_blockbuf[md5_blockcount++] = toupper(gt_alphabet_decode(a,
+                                                                     charcode));
+            }
           } else
           {
             if (lastnonspecialrangelength > 0)
@@ -43,6 +54,18 @@
               }
               lastwildcardrangelength++;
               specialcharinfo->wildcards++;
+              if (md5enc != NULL) {
+                if (md5_blockcount == 64UL) {
+                  gt_md5_encoder_add_block(md5enc, md5_blockbuf,
+                                           md5_blockcount);
+                  md5_blockcount = 0UL;
+                }
+              if (outoistab)
+                md5_blockbuf[md5_blockcount++] = toupper(cc);
+              else
+                md5_blockbuf[md5_blockcount++] = toupper(gt_alphabet_decode(a,
+                                                                     charcode));
+              }
 #ifdef WITHEQUALLENGTH_DES_SSP
               lengthofcurrentsequence++;
 #endif
@@ -58,6 +81,15 @@
                 gt_disc_distri_add(distwildcardrangelength,
                                    lastwildcardrangelength);
                 lastwildcardrangelength = 0;
+              }
+              if (md5enc != NULL) {
+                gt_md5_encoder_add_block(md5enc, md5_blockbuf, md5_blockcount);
+                gt_md5_encoder_finish(md5enc, md5_output, md5_outbuf);
+#ifdef WITHMD5FP
+                gt_xfwrite(md5_outbuf, sizeof (char), (size_t) 33, md5fp);
+#endif
+                gt_md5_encoder_reset(md5enc);
+                md5_blockcount = 0;
               }
 #ifdef WITHEQUALLENGTH_DES_SSP
               if (equallength->defined)

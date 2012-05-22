@@ -43,6 +43,7 @@ struct GtEncseqOptions {
            *optionsds,
            *optionlossless,
            *optiontis,
+           *optionmd5,
            *optiondir,
            *optiondna,
            *optionplain,
@@ -56,6 +57,7 @@ struct GtEncseqOptions {
        lossless,
        dna,
        tis,
+       md5,
        protein,
        plain,
        mirrored,
@@ -74,6 +76,7 @@ static GtEncseqOptions* gt_encseq_options_new(void)
   oi->des = false;
   oi->ssp = false;
   oi->sds = false;
+  oi->md5 = false;
   oi->lossless = false;
   oi->dna = false;
   oi->protein = false;
@@ -87,6 +90,7 @@ static GtEncseqOptions* gt_encseq_options_new(void)
   oi->optionlossless = NULL;
   oi->optionsds = NULL;
   oi->optiontis = NULL;
+  oi->optionmd5 = NULL;
   oi->optiondna = NULL;
   oi->optionplain = NULL;
   oi->optionprotein = NULL;
@@ -201,6 +205,12 @@ gt_encseq_options_register_generic(GtOptionParser *op,
                                        true);
     gt_option_parser_add_option(op, oi->optionsds);
     gt_option_imply(oi->optionsds, oi->optiondes);
+
+    oi->optionmd5 = gt_option_new_bool("md5",
+                                       "output MD5 sums to file",
+                                       &oi->md5,
+                                       true);
+    gt_option_parser_add_option(op, oi->optionmd5);
 
     oi->optionsat = gt_option_new_string("sat",
                                          "specify kind of sequence "
@@ -334,6 +344,7 @@ GT_ENCSEQ_OPTS_GETTER_DEF(sds, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF(ssp, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF(des, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF(tis, bool);
+GT_ENCSEQ_OPTS_GETTER_DEF(md5, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF(lossless, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF(smap, GtStr*);
 GT_ENCSEQ_OPTS_GETTER_DEF(dna, bool);

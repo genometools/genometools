@@ -54,6 +54,7 @@
 #include "core/ma_api.h"
 #include "core/mapspec.h"
 #include "core/mathsupport.h"
+#include "core/md5_encoder.h"
 #include "core/minmax.h"
 #include "core/progressbar.h"
 #include "core/sequence_buffer_fasta.h"
@@ -2008,6 +2009,8 @@ void gt_encseq_delete(GtEncseq *encseq)
     gt_free(encseq->headerptr.filelengthtab);
   }
   encseq->headerptr.filelengthtab = NULL;
+  if (encseq->md5_tab != NULL)
+    gt_md5_tab_delete(encseq->md5_tab);
   gt_mutex_unlock(encseq->refcount_lock);
   gt_mutex_delete(encseq->refcount_lock);
   gt_free(encseq);
@@ -4290,6 +4293,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->hasallocatedsdstab = false;
   encseq->destablength = 0;
   encseq->fsptab = NULL;
+  encseq->md5_tab = NULL;
   encseq->hasallocatedssptab = false;
   if (equallength == NULL)
   {
@@ -4797,6 +4801,7 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
                                           bool withsdstab,
                                           bool withssptab,
                                           bool withoistab,
+                                          bool withmd5tab,
                                           GtLogger *logger,
                                           GtError *err)
 {
@@ -4933,6 +4938,23 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
     {
       haserr = true;
     }
+  }
+  if (!haserr && withmd5tab)
+  {
+    GtStr *md5fn;
+    gt_assert(encseq != NULL);
+
+    md5fn = gt_str_new_cstr(indexname);
+    gt_str_append_cstr(md5fn, GT_MD5TABFILESUFFIX);
+    encseq->md5_tab = gt_md5_tab_new_from_cache_file(gt_str_get(md5fn),
+                                                     encseq->numofdbsequences,
+                                                     true,
+                                                     err);
+    if (!encseq->md5_tab)
+    {
+      haserr = true;
+    }
+    gt_str_delete(md5fn);
   }
   if (!haserr)
   {
@@ -5566,6 +5588,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            bool plainformat,
                                            bool outdestab,
                                            bool outsdstab,
+                                           bool outmd5tab,
                                            unsigned long *characterdistribution,
                                            unsigned long *classstartpositions,
                                            char *maxchars,
@@ -5573,7 +5596,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            unsigned long *numofallchars,
                                            unsigned char *subsymbolmap,
                                            unsigned char *maxsubalphasize,
-                                           GT_UNUSED bool outoistab,
+                                           bool outoistab,
                                            unsigned long *numofseparators,
                                            unsigned long *minseqlen,
                                            unsigned long *maxseqlen,
@@ -5589,12 +5612,17 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                 lastnonspecialrangelength = 0,
                 lengthofcurrentsequence = 0,
                 lengthofalphadef,
-                *originaldistribution = NULL;
+                *originaldistribution = NULL,
+                md5_blockcount = 0;
   bool specialprefix = true, wildcardprefix = true, haserr = false;
   GtDiscDistri *distspecialrangelength = NULL, *distwildcardrangelength = NULL;
   GtDescBuffer *descqueue = NULL;
-  char *desc;
-  FILE *desfp = NULL, *sdsfp = NULL, *oisfp = NULL;
+  GtMD5Encoder *md5enc = NULL;
+  char *desc,
+       md5_blockbuf[64],
+       md5_outbuf[33];
+  unsigned char md5_output[16];
+  FILE *desfp = NULL, *sdsfp = NULL, *oisfp = NULL, *md5fp = NULL;
 
   gt_error_check(err);
   equallength->defined = true;
@@ -5635,9 +5663,18 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       haserr = true;
     }
   }
+  if (!haserr && outmd5tab)
+  {
+    md5fp = gt_fa_fopen_with_suffix(indexname,GT_MD5TABFILESUFFIX,"wb",err);
+    if (md5fp == NULL)
+    {
+      haserr = true;
+    }
+  }
   if (!haserr)
   {
     char cc;
+    const GtAlphabet *a = alpha;
     gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
     *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
                                sizeof (GtFilelengthvalues));
@@ -5651,6 +5688,8 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     distwildcardrangelength = gt_disc_distri_new();
     originaldistribution = gt_calloc((size_t) UCHAR_MAX,
                                      sizeof (unsigned long));
+    if (md5fp != NULL)
+      md5enc = gt_md5_encoder_new();
     for (currentpos = 0; /* Nothing */; currentpos++)
     {
 #ifndef _LP64
@@ -5670,6 +5709,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
 #define WITHOISTAB
 #define WITHCOUNTMINMAX
 #define WITHORIGDIST
+#define WITHMD5FP
 #include "encseq_charproc.gen"
       } else
       {
@@ -5702,6 +5742,11 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
             gt_disc_distri_add(distwildcardrangelength,
                                lastwildcardrangelength);
           }
+          if (md5enc != NULL) {
+            gt_md5_encoder_add_block(md5enc, md5_blockbuf, md5_blockcount);
+            gt_md5_encoder_finish(md5enc, md5_output, md5_outbuf);
+            gt_xfwrite(md5_outbuf, sizeof (char), (size_t) 33, md5fp);
+          }
         } else /* retval < 0 */
         {
           haserr = true;
@@ -5709,6 +5754,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
         break;
       }
     }
+    gt_md5_encoder_delete(md5enc);
   }
   if (!haserr) {
     alphabet_to_key_values(alpha, NULL, &lengthofalphadef, NULL);
@@ -5777,6 +5823,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   gt_disc_distri_delete(distspecialrangelength);
   gt_disc_distri_delete(distwildcardrangelength);
   gt_fa_xfclose(oisfp);
+  gt_fa_xfclose(md5fp);
   gt_sequence_buffer_delete(fb);
   gt_desc_buffer_delete(descqueue);
 #ifndef NDEBUG
@@ -5785,19 +5832,40 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   return haserr ? -1 : 0;
 }
 
+GtMD5Tab* gt_encseq_get_md5_tab(const GtEncseq *encseq,
+                                GT_UNUSED GtError *err)
+{
+  gt_assert(encseq);
+  gt_error_check(err);
+
+  return gt_md5_tab_ref(encseq->md5_tab);
+}
+
+bool gt_encseq_has_md5_support(const GtEncseq *encseq)
+{
+  gt_assert(encseq);
+  return (encseq->md5_tab != NULL);
+}
+
 static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
                                      const GtUchar *seq,
                                      const unsigned long len,
+                                     GtAlphabet *a,
                                      GtLogger *logger)
 {
   GtUchar charcode;
   unsigned long currentpos,
                 lastspecialrangelength = 0,
                 lastnonspecialrangelength = 0,
-                lastwildcardrangelength = 0;
+                lastwildcardrangelength = 0,
+                md5_blockcount = 0;
   bool specialprefix = true, wildcardprefix = true;
   GtDiscDistri *distspecialrangelength,
                *distwildcardrangelength;
+  GtMD5Encoder *md5enc = NULL;
+  char md5_blockbuf[64];
+  GT_UNUSED char md5_outbuf[33];
+  unsigned char md5_output[16];
 
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->wildcards = 0;
@@ -5805,13 +5873,18 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   specialcharinfo->lengthofwildcardprefix = 0;
   distspecialrangelength = gt_disc_distri_new();
   distwildcardrangelength = gt_disc_distri_new();
+
+  md5enc = gt_md5_encoder_new();
   for (currentpos = 0; currentpos < len; currentpos++)
   {
+    char cc = '\0';
+    bool outoistab = false;
     charcode = seq[currentpos];
 #undef WITHEQUALLENGTH_DES_SSP
 #undef WITHOISTAB
 #undef WITHORIGDIST
 #undef WITHCOUNTMINMAX
+#undef WITHMD5FP
 #include "encseq_charproc.gen"
   }
   if (lastspecialrangelength > 0)
@@ -5832,6 +5905,7 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   specialcharinfo->wildcardranges = specialcharinfo->realwildcardranges;
   gt_disc_distri_delete(distspecialrangelength);
   gt_disc_distri_delete(distwildcardrangelength);
+  gt_md5_encoder_delete(md5enc);
 }
 
 static unsigned long fwdgetnexttwobitencodingstopposViaequallength(
@@ -7767,6 +7841,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                           bool outsdstab,
                                           bool outssptab,
                                           bool outoistab,
+                                          bool outmd5tab,
                                           GtLogger *logger,
                                           GtError *err)
 {
@@ -7848,6 +7923,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                         isplain,
                                         outdestab,
                                         outsdstab,
+                                        outmd5tab,
                                         characterdistribution,
                                         classstartpositions,
                                         maxchars,
@@ -8402,6 +8478,7 @@ struct GtEncseqEncoder {
        ssptab,
        sdstab,
        oistab,
+       md5tab,
        isdna,
        isprotein,
        isplain;
@@ -8416,6 +8493,7 @@ GtEncseqEncoder* gt_encseq_encoder_new()
   GtEncseqEncoder *ee = gt_calloc((size_t) 1, sizeof (GtEncseqEncoder));
   gt_encseq_encoder_enable_multiseq_support(ee);
   gt_encseq_encoder_enable_description_support(ee);
+  gt_encseq_encoder_enable_md5_support(ee);
   gt_encseq_encoder_disable_lossless_support(ee);
   ee->isdna = ee->isprotein = ee->isplain = false;
   ee->sat = gt_str_new();
@@ -8434,6 +8512,7 @@ GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
   /* reset table requests */
   gt_encseq_encoder_disable_description_support(ee);
   gt_encseq_encoder_disable_multiseq_support(ee);
+  gt_encseq_encoder_disable_md5_support(ee);
   gt_encseq_encoder_disable_lossless_support(ee);
 
   /* set table requests according to options */
@@ -8451,6 +8530,8 @@ GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
     gt_encseq_encoder_set_input_preencoded(ee);
   if (gt_encseq_options_lossless_value(opts))
     gt_encseq_encoder_enable_lossless_support(ee);
+  if (gt_encseq_options_md5_value(opts))
+    gt_encseq_encoder_enable_md5_support(ee);
   if (gt_str_length(gt_encseq_options_smap_value(opts)) > 0)
     had_err = gt_encseq_encoder_use_symbolmap_file(ee,
                                  gt_str_get(gt_encseq_options_smap_value(opts)),
@@ -8554,6 +8635,24 @@ bool gt_encseq_encoder_sds_tab_requested(const GtEncseqEncoder *ee)
   return ee->sdstab;
 }
 
+void gt_encseq_encoder_create_md5_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->md5tab = true;
+}
+
+void gt_encseq_encoder_do_not_create_md5_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->md5tab = false;
+}
+
+bool gt_encseq_encoder_md5_tab_requested(const GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->md5tab;
+}
+
 void gt_encseq_encoder_enable_description_support(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
@@ -8578,6 +8677,18 @@ void gt_encseq_encoder_disable_multiseq_support(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
   gt_encseq_encoder_do_not_create_ssp_tab(ee);
+}
+
+void gt_encseq_encoder_enable_md5_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_create_md5_tab(ee);
+}
+
+void gt_encseq_encoder_disable_md5_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_do_not_create_md5_tab(ee);
 }
 
 void gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee)
@@ -8694,6 +8805,7 @@ int gt_encseq_encoder_encode(GtEncseqEncoder *ee, GtStrArray *seqfiles,
                                     ee->sdstab,
                                     ee->ssptab,
                                     ee->oistab,
+                                    ee->md5tab,
                                     ee->logger,
                                     err);
   if (!encseq)
@@ -8715,6 +8827,7 @@ struct GtEncseqLoader {
        ssptab,
        oistab,
        sdstab,
+       md5tab,
        mirrored,
        autodiscover;
   GtLogger *logger;
@@ -8725,6 +8838,7 @@ GtEncseqLoader* gt_encseq_loader_new()
   GtEncseqLoader *el = gt_calloc((size_t) 1, sizeof (GtEncseqLoader));
   gt_encseq_loader_drop_multiseq_support(el);
   gt_encseq_loader_drop_lossless_support(el);
+  gt_encseq_loader_drop_md5_support(el);
   gt_encseq_loader_drop_description_support(el);
   gt_encseq_loader_enable_autosupport(el);
   gt_encseq_loader_do_not_mirror(el);
@@ -8741,6 +8855,8 @@ GtEncseqLoader* gt_encseq_loader_new_from_options(GtEncseqOptions *opts,
   /* set options according to option object */
   if (gt_encseq_options_lossless_value(opts))
     gt_encseq_loader_require_lossless_support(el);
+  if (gt_encseq_options_md5_value(opts))
+    gt_encseq_loader_require_md5_support(el);
   if (gt_encseq_options_mirrored_value(opts))
     gt_encseq_loader_mirror(el);
   return el;
@@ -8840,6 +8956,24 @@ bool gt_encseq_loader_ois_tab_required(const GtEncseqLoader *el)
   return el->oistab;
 }
 
+void gt_encseq_loader_require_md5_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->md5tab = true;
+}
+
+void gt_encseq_loader_do_not_require_md5_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->md5tab = false;
+}
+
+bool gt_encseq_loader_md5_tab_required(const GtEncseqLoader *el)
+{
+  gt_assert(el);
+  return el->md5tab;
+}
+
 void gt_encseq_loader_require_description_support(GtEncseqLoader *el)
 {
   gt_encseq_loader_require_des_tab(el);
@@ -8870,6 +9004,16 @@ void gt_encseq_loader_require_lossless_support(GtEncseqLoader *el)
 void gt_encseq_loader_drop_lossless_support(GtEncseqLoader *el)
 {
   gt_encseq_loader_do_not_require_ois_tab(el);
+}
+
+void gt_encseq_loader_require_md5_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_require_md5_tab(el);
+}
+
+void gt_encseq_loader_drop_md5_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_do_not_require_md5_tab(el);
 }
 
 void gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l)
@@ -8910,17 +9054,21 @@ GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, const char *indexname,
     (void) snprintf(buf, BUFSIZ, "%s%s", indexname, GT_OISTABFILESUFFIX);
     if (gt_file_exists(buf))
       el->oistab = true;
+    (void) snprintf(buf, BUFSIZ, "%s%s", indexname, GT_MD5TABFILESUFFIX);
+    if (gt_file_exists(buf))
+      el->md5tab = true;
   }
   gt_log_log("loading encseq %s with des: %d, sds: %d, ssp: %d, ois: %d, "
-             "mirr: %d",
+             "md5: %d, mirr: %d",
              indexname, el->destab, el->sdstab, el->ssptab, el->oistab,
-             el->mirrored);
+             el->md5tab, el->mirrored);
 
   encseq = gt_encseq_new_from_index(indexname,
                                     el->destab,
                                     el->sdstab,
                                     el->ssptab,
                                     el->oistab,
+                                    el->md5tab,
                                     el->logger,
                                     err);
   if (encseq && el->mirrored) {
@@ -9237,7 +9385,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
 
   gt_assert(eb->plainseq);
   sequence2specialcharinfo(&samplespecialcharinfo,eb->plainseq,
-                           eb->seqlen,eb->logger);
+                           eb->seqlen, eb->alpha, eb->logger);
   encseq = determineencseqkeyvalues(sat,
                                     eb->seqlen,
                                     eb->nof_seqs,

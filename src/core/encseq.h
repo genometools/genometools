@@ -29,6 +29,7 @@
 #include "core/encseq_options.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
+#include "core/md5_tab.h"
 #include "core/range.h"
 #include "core/readmode.h"
 #include "core/str.h"
@@ -433,7 +434,6 @@ unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq);
 
 /* The following function returns the size of the GtEncseq-structure
    in bytes. */
-
 unsigned long gt_encseq_sizeofstructure(void);
 
 /* The following function delivers the accesstype of a given encoded
@@ -443,6 +443,10 @@ GtEncseqAccessType gt_encseq_accesstype_get(const GtEncseq *encseq);
 /* The following function delivers the encseq->equallength.valueunsignedlong
    if encseq->equallength.defined is true */
 unsigned long gt_encseq_equallength(const GtEncseq *encseq);
+
+/* Returns a new <GtMD5Tab> allowing to match MD5 sums to sequence numbers for a
+   given <encseq>. */
+GtMD5Tab*  gt_encseq_get_md5_tab(const GtEncseq *encseq, GtError *err);
 
 /* The following functions are for testing */
 

@@ -352,3 +352,24 @@ Test do
            :retval => 1
   grep last_stderr, /is format version 0/
 end
+
+["yes", "no"].each do |yn|
+  Name "gt encseq MD5 from file <-> from seq lossless #{yn}"
+  Keywords "gt_encseq encseq md5"
+  Test do
+    fastafiles.each do |fn|
+      run "#{$bin}gt encseq encode -lossless #{yn} -indexname idx #{$testdata}/#{fn}"
+      run_test "#{$bin}gt encseq md5 -force -o out1 idx"
+      run_test "#{$bin}gt encseq md5 -force -fromindex no -o out2 idx"
+      run "diff out1 out2"
+    end
+  end
+end
+
+Name "gt encseq MD5 index w/o MD5 support"
+Keywords "encseq gt_encseq md5"
+Test do
+  run "#{$bin}gt encseq encode -md5 no -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq md5 foo", :retval => 1
+  grep last_stderr, /does not have MD5 support/
+end

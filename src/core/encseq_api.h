@@ -74,6 +74,8 @@ typedef struct GtEncseqReader GtEncseqReader;
 #define GT_SDSTABFILESUFFIX ".sds"
 /* The file suffix used for original input sequence tables. */
 #define GT_OISTABFILESUFFIX ".ois"
+/* The file suffix used for MD5 fingerprints. */
+#define GT_MD5TABFILESUFFIX ".md5"
 
 /* Returns the total number of characters in all sequences of <encseq>,
    including separators and wildcards. */
@@ -132,6 +134,8 @@ unsigned long     gt_encseq_max_seq_length(const GtEncseq *encseq);
 bool              gt_encseq_has_multiseq_support(const GtEncseq *encseq);
 /* Returns <true> if <encseq> has description support. */
 bool              gt_encseq_has_description_support(const GtEncseq *encseq);
+/* Returns <true> if <encseq> has MD5 support. */
+bool              gt_encseq_has_md5_support(const GtEncseq *encseq);
 /* Returns the start position of the <seqnum>-th sequence in the <encseq>.
    Requires multiple sequence support enabled in <encseq>. */
 unsigned long     gt_encseq_seqstartpos(const GtEncseq *encseq,
@@ -264,6 +268,13 @@ void             gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee);
    enabled. */
 void             gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder
                                                                            *ee);
+/* Enables support for quick MD5 indexing of the sequences in <ee>. Activated by
+   default. */
+void             gt_encseq_encoder_enable_md5_support(GtEncseqEncoder *ee);
+/* Enables support for quick MD5 indexing of the sequences in <ee>. Encoded
+   sequences created without this support will not be able to be loaded via
+   a <GtEncseqLoader> with <gt_encseq_loader_require_md5_support()> enabled.*/
+void             gt_encseq_encoder_disable_md5_support(GtEncseqEncoder *ee);
 /* Enables creation of the .des table containing sequence descriptions.
    Enabled by default. */
 void             gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee);
@@ -288,6 +299,14 @@ void             gt_encseq_encoder_do_not_create_sds_tab(GtEncseqEncoder *ee);
 /* Returns <true> if the creation of the .sds table has been requested,
    <false> otherwise. */
 bool             gt_encseq_encoder_sds_tab_requested(const GtEncseqEncoder *ee);
+/* Enables creation of the .md5 table containing MD5 sums. Enabled by
+   default. */
+void             gt_encseq_encoder_create_md5_tab(GtEncseqEncoder *ee);
+/* Disables creation of the .md5 table. */
+void             gt_encseq_encoder_do_not_create_md5_tab(GtEncseqEncoder *ee);
+/* Returns <true> if the creation of the .md5 table has been requested,
+   <false> otherwise. */
+bool             gt_encseq_encoder_md5_tab_requested(const GtEncseqEncoder *ee);
 /* Sets the sequence input type for <ee> to DNA. */
 void             gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee);
 /* Returns <true> if the input sequence has been defined as being DNA. */
@@ -353,6 +372,16 @@ void             gt_encseq_loader_require_lossless_support(GtEncseqLoader *el);
    However, disabling this support may result in a reduced alphabet
    representation when accessing decoded characters. */
 void             gt_encseq_loader_drop_lossless_support(GtEncseqLoader *el);
+/* Enables support for quick retrieval of the MD5 sums for the sequences in the
+   encoded sequence to be loaded by <el>. That is, the .md5 table must be
+   present. For example, this table is created by having enabled the
+   <gt_encseq_encoder_enable_md5_support()> option when encoding.
+   Activated by default. */
+void             gt_encseq_loader_require_md5_support(GtEncseqLoader *el);
+/* Disables support for quick retrieval of the MD5 sums for the sequences in the
+   encoded sequence to be loaded by <el>. That is, the .md5 table needs not be
+   present. */
+void             gt_encseq_loader_drop_md5_support(GtEncseqLoader *el);
 /* Requires presence of the .des table containing sequence descriptions.
    Enabled by default. */
 void             gt_encseq_loader_require_des_tab(GtEncseqLoader *el);
