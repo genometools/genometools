@@ -43,6 +43,7 @@ typedef struct
        radixlarge;
   unsigned int correction_kmersize,
                samplingfactor,
+               trusted_count,
                numofparts,
                radixparts,
                addbscache_depth,
@@ -100,6 +101,11 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
+  /* -c */
+  option = gt_option_new_uint_min("c", "specify the trusted count threshold",
+      &arguments->trusted_count, 3U, 2U);
+  gt_option_parser_add_option(op, option);
+
   /* -sf */
   option = gt_option_new_uint_min("sf", "specify the sampling factor",
                                   &arguments->samplingfactor, 50U, 1U);
@@ -121,17 +127,36 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   gt_option_exclude(optionmemlimit, optionparts);
   arguments->refoptionmemlimit = gt_option_ref(optionmemlimit);
 
-  /* -checksuftab */
-  option = gt_option_new_bool("checksuftab", "check the suffix table",
-                             &arguments->checksuftab, false);
-  gt_option_parser_add_option(op, option);
-  gt_option_is_development_option(option);
-
   /* -ii */
   option = gt_option_new_string("ii", "specify the input sequence",
                                 arguments->encseqinput, NULL);
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
+
+  /* -forcek */
+  option = gt_option_new_uint("forcek", "specify the kmersize for the bucket "
+      "keys", &arguments->forcek, 0);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -v */
+  v_option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, v_option);
+
+  /* -q */
+  q_option = gt_option_new_bool("q",
+      "suppress standard output messages",
+      &arguments->quiet, false);
+  gt_option_exclude(q_option, v_option);
+  gt_option_parser_add_option(op, q_option);
+
+  /* --- the following options derived from encseq2spm --- */
+
+  /* -checksuftab */
+  option = gt_option_new_bool("checksuftab", "check the suffix table",
+                             &arguments->checksuftab, false);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
 
   /* -onlyaccum */
   option = gt_option_new_bool("onlyaccum", "only accumulate codes",
@@ -174,23 +199,6 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
                               &arguments->radixparts, 1U);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
-
-  /* -forcek */
-  option = gt_option_new_uint("forcek", "specify the kmersize for the bucket "
-      "keys", &arguments->forcek, 0);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
-
-  /* -v */
-  v_option = gt_option_new_verbose(&arguments->verbose);
-  gt_option_parser_add_option(op, v_option);
-
-  /* -q */
-  q_option = gt_option_new_bool("q",
-      "suppress standard output messages",
-      &arguments->quiet, false);
-  gt_option_exclude(q_option, v_option);
-  gt_option_parser_add_option(op, q_option);
 
   gt_option_parser_set_max_args(op, 0);
 
@@ -334,7 +342,8 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
     data_array = gt_malloc(sizeof (*data_array) * threads);
     for (threadcount = 0; threadcount < threads; threadcount++)
     {
-      data_array[threadcount] = gt_randomcodes_correct_data_new();
+      data_array[threadcount] = gt_randomcodes_correct_data_new(encseq,
+          arguments->correction_kmersize, arguments->trusted_count);
     }
     gt_log_log("correction kmersize=%u", arguments->correction_kmersize);
     haserr = gt_seqcorrect_bucketkey_kmersize(arguments,

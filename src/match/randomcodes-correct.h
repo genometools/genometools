@@ -29,7 +29,8 @@ int gt_randomcodes_correct_process_bucket(void *data,
 
 typedef struct GtRandomcodesCorrectData GtRandomcodesCorrectData;
 
-GtRandomcodesCorrectData *gt_randomcodes_correct_data_new();
+GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
+    unsigned int k, unsigned int c);
 void gt_randomcodes_correct_data_delete(GtRandomcodesCorrectData *data);
 
 #endif
