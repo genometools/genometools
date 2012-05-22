@@ -233,7 +233,7 @@ static inline gt_radixsort_str_bucketnum_t
 
 unsigned long gt_radixsort_str_minwidth(void)
 {
-  return (unsigned long) GT_DIV64(GT_RADIXSORT_STR_NOFBUCKETS);
+  return (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS;
 }
 
 static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
