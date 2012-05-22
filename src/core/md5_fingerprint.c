@@ -16,28 +16,33 @@
 */
 
 #include <ctype.h>
+#include <string.h>
 #include "md5.h"
 #include "core/ma.h"
+#include "core/md5_encoder.h"
 #include "core/md5_fingerprint.h"
 #include "core/safearith.h"
 
 char* gt_md5_fingerprint(const char *sequence, unsigned long seqlen)
 {
   unsigned char output[16];
-  char  *upper, *fingerprint;
-  unsigned long i;
-  /* XXX: this could be done more memory efficient by applying md5 to a reused
-     buffer */
-  upper = gt_malloc(seqlen * sizeof (char));
-  for (i = 0; i < seqlen; i++)
-    upper[i] = toupper(sequence[i]);
-  md5(upper, gt_safe_cast2long(seqlen), (char*) output);
-  gt_free(upper);
+  char buf[64];
+  char *fingerprint;
+  GtMD5Encoder *enc;
+  unsigned long i, pos = 0;
+
+  enc = gt_md5_encoder_new();
+  for (i = 0; i < seqlen; i++) {
+    if (pos == 64) {
+      gt_md5_encoder_add_block(enc, buf, 64);
+      pos = 0;
+    }
+    buf[pos++] = toupper(sequence[i]);
+  }
+  gt_md5_encoder_add_block(enc, buf, pos);
   fingerprint = gt_calloc(33, sizeof (char));
-  snprintf(fingerprint, 33,
-           "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-           output[0], output[1], output[2], output[3], output[4], output[5],
-           output[6], output[7], output[8], output[9], output[10], output[11],
-           output[12], output[13], output[14], output[15]);
+  gt_md5_encoder_finish(enc, output, fingerprint);
+
+  gt_md5_encoder_delete(enc);
   return fingerprint;
 }
