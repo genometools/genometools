@@ -28,7 +28,8 @@ struct GtMD5Tab{
   FILE *fingerprints_file; /* used to lock the memory mapped fingerprints */
   char *fingerprints; /* holds memory mapped fingerprints */
   char **md5_fingerprints;
-  unsigned long num_of_md5s;
+  unsigned long num_of_md5s,
+                reference_count;
   bool owns_md5s;
   GtHashmap *md5map; /* maps md5 to index */
 };
@@ -132,10 +133,48 @@ GtMD5Tab* gt_md5_tab_new(const char *sequence_file, void *seqs,
   return md5_tab;
 }
 
+GtMD5Tab* gt_md5_tab_new_from_cache_file(const char *cache_file,
+                                         unsigned long num_of_seqs,
+                                         bool use_file_locking,
+                                         GtError *err)
+{
+  GtMD5Tab *md5_tab;
+  bool reading_succeeded = false;
+  gt_assert(cache_file);
+  gt_error_check(err);
+
+  md5_tab = gt_calloc(1, sizeof *md5_tab);
+  md5_tab->num_of_md5s = num_of_seqs;
+  if (gt_file_exists(cache_file)) {
+    reading_succeeded = read_fingerprints(md5_tab,
+                                          cache_file,
+                                          use_file_locking);
+  }
+  if (!reading_succeeded) {
+    gt_free(md5_tab);
+    gt_error_set(err, "could not read fingerprints file \"%s\" or "
+                      "invalid file contents", cache_file);
+    return NULL;
+  }
+  md5_tab->owns_md5s = false;
+  return md5_tab;
+}
+
+GtMD5Tab* gt_md5_tab_ref(GtMD5Tab *md5_tab)
+{
+  if (!md5_tab) return NULL;
+  md5_tab->reference_count++;
+  return md5_tab;
+}
+
 void gt_md5_tab_delete(GtMD5Tab *md5_tab)
 {
   unsigned long i;
   if (!md5_tab) return;
+  if (md5_tab->reference_count) {
+    md5_tab->reference_count--;
+    return;
+  }
   gt_fa_xmunmap(md5_tab->fingerprints);
   gt_fa_unlock(md5_tab->fingerprints_file);
   gt_fa_xfclose(md5_tab->fingerprints_file);
