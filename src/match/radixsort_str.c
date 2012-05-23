@@ -416,16 +416,15 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
         if (subbucket.width > 0)
         {
           offset = (unsigned long) (subbucket.suffixes - suffixes);
-          if (prevbucketnum == GT_RADIXSORT_STR_SPECIAL_BUCKET)
-          {
-            subbucket.lcp = bucket.lcp;
-          } else
-          {
-            subbucket.lcp = bucket.depth +
-                            gt_radixsort_str_codeslcp(prevbucketnum,bucketnum);
-          }
+          subbucket.lcp = bucket.lcp;
           if (lcpvalues != NULL)
           {
+            if (prevbucketnum != GT_RADIXSORT_STR_SPECIAL_BUCKET)
+            {
+              subbucket.lcp = bucket.depth +
+                              gt_radixsort_str_codeslcp(prevbucketnum,
+                                                        bucketnum);
+            }
             gt_lcptab_update(lcpvalues,subbucketleft,offset,
                              sortmaxdepth == 0
                                ? subbucket.lcp
