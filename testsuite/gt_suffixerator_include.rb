@@ -172,20 +172,21 @@ Test do
   run_test "#{$bin}gt dev sfxmap -ssp -tis -esa sfx"
 end
 
-all_fastafiles.each do |filename|
-  Name "gt suffixerator + sfxmap"
-  Keywords "gt_suffixerator tis"
-  Test do
+
+Name "gt suffixerator + sfxmap"
+Keywords "gt_suffixerator tis"
+Test do
+  all_fastafiles.each do |filename|
     run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
              "#{$testdata}#{filename}"
     run_test "#{$bin}gt dev sfxmap -ssp -tis -esa sfx"
   end
 end
 
-all_fastafiles.each do |filename|
-  Name "gt suffixerator #{filename} all accesstypes"
-  Keywords "gt_suffixerator tis"
-  Test do
+Name "gt suffixerator all accesstypes"
+Keywords "gt_suffixerator tis"
+Test do
+  all_fastafiles.each do |filename|
     ["direct", "bit", "uchar", "ushort", "uint32"].each do |sat|
       run_test "#{$bin}gt suffixerator -tis -indexname sfx -sat #{sat} " +
                "-db #{$testdata}#{filename}"
@@ -210,25 +211,25 @@ Test do
   run "cmp u8.reads.esq u8.reads2.esq"
 end
 
-all_fastafiles.each do |filename|
-  Name "gt suffixerator -dc 64 -dccheck -lcp -parts 1+3 #{filename}"
-  Keywords "gt_suffixerator dc"
-  Test do
+Name "gt suffixerator -dc 64 -dccheck -lcp -parts 1+3"
+Keywords "gt_suffixerator dc"
+Test do
+  all_fastafiles.each do |filename|
     checkdc([filename])
   end
 end
 
-Name "gt suffixerator -dc 64 -dccheck -lcp -parts 1+3 all-fastafiles"
+Name "gt suffixerator -dc 64 -dccheck -lcp -parts 1+3 all files"
 Keywords "gt_suffixerator dc"
 Test do
   checkdc(all_fastafiles)
 end
 
 alldir.each do |dir|
-  all_fastafiles.each do |filename|
-    Name "gt suffixerator #{dir}"
-    Keywords "gt_suffixerator"
-    Test do
+  Name "gt suffixerator single files #{dir}"
+  Keywords "gt_suffixerator"
+  Test do
+    all_fastafiles.each do |filename|
       run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
                "-indexname sfx -pl -db " +
                "#{$testdata}#{filename}"
@@ -248,19 +249,18 @@ faillist = ["-indexname sfx -db /nothing",
             "-dna -db #{$testdata}Random.fna RandomN.fna",
             "-dna -suf -pl 10 -db #{$testdata}Random.fna",
             "-dna -tis -sat plain -db #{$testdata}TTT-small.fna"]
-
-faillist.each do |failcommand|
-  Name "gt suffixerator failure"
-  Keywords "gt_suffixerator"
-  Test do
+Name "gt suffixerator failures"
+Keywords "gt_suffixerator"
+Test do
+  faillist.each do |failcommand|
     run_test "#{$bin}gt suffixerator -tis " + failcommand,:retval => 1
   end
 end
 
-allmultifiles.each do |filename|
-  Name "gt suffixerator sfxmap-failure #{filename}"
-  Keywords "gt_suffixerator"
-  Test do
+Name "gt suffixerator sfxmap failures"
+Keywords "gt_suffixerator"
+Test do
+  allmultifiles.each do |filename|
     run_test "#{$bin}gt suffixerator -tis -dna -des no -sds no -ssp no " +
              "-indexname localidx  -sat direct " +
              "-db #{$testdata}#{filename}"
@@ -326,10 +326,10 @@ end
       else
         cmp=true
       end
-      all_fastafiles.each do |filename|
-        Name "gt suffixerator+map #{filename}#{extraname} #{parts} parts"
-        Keywords "gt_suffixerator"
-        Test do
+      Name "gt suffixerator+map #{extraname} #{parts} parts"
+      Keywords "gt_suffixerator"
+      Test do
+        all_fastafiles.each do |filename|
           checksfx(parts,extra,cmp,[filename])
         end
       end
@@ -479,10 +479,10 @@ small_fastafiles = ["Duplicate.fna",
                     "Small.fna",
                     "Verysmall.fna",
                     "Arabidopsis-C99826.fna"]
-small_fastafiles.each do |file|
-  Name "differencecover sortmaxdepth #{file}"
-  Keywords "differencecover sortmaxdepth"
-  Test do
+Name "differencecover sortmaxdepth"
+Keywords "differencecover sortmaxdepth"
+Test do
+  small_fastafiles.each do |file|
     file = "#{$testdata}/#{file}"
     run "#{$bin}/gt suffixerator -tis -db #{file} -indexname esa"
     [2, 10].each do |maxinsertionsort|
