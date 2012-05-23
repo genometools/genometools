@@ -163,7 +163,7 @@ unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
          readptr < allrandomcodes + numofcodes;
          readptr++)
     {
-      if ((*storeptr ^ *readptr) >> shift)
+      if ((*storeptr ^ *readptr) << shift)
       {
         storeptr++;
         *storeptr = *readptr;

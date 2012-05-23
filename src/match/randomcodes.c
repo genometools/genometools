@@ -270,6 +270,10 @@ const unsigned long *gt_randomcodes_find_insert(const GtRandomcodesinfo *fci,
 
   leftptr = fci->allrandomcodes + fci->currentminindex;
   rightptr = fci->allrandomcodes + fci->currentmaxindex;
+  if (code < *leftptr)
+  {
+    return leftptr;
+  }
   while (leftptr <= rightptr)
   {
     midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
@@ -341,10 +345,9 @@ static void gt_randomcodes_accumulatecounts_flush(void *data)
     gt_radixsort_inplace_sort(fci->radixsort_code,fci->buf.nextfree);
     foundindex = gt_randomcodes_find_accu(fci,fci->buf.spaceGtUlong[0]);
     gt_assert(foundindex != ULONG_MAX);
-    fci->firstcodehits
-      += gt_randomcodes_accumulatecounts_merge(fci,fci->buf.spaceGtUlong,
-          fci->allrandomcodes +
-          foundindex);
+    fci->firstcodehits += gt_randomcodes_accumulatecounts_merge(fci,
+        fci->buf.spaceGtUlong, fci->allrandomcodes + foundindex);
+    gt_assert(fci->firstcodehits == fci->codebuffer_total);
     fci->flushcount++;
     fci->buf.nextfree = 0;
   }
@@ -474,7 +477,7 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        unsigned long maxindex,
                                        unsigned long sumofwidth,
                                        unsigned int correction_kmersize,
-                                       GT_UNUSED unsigned long depth,
+                                       unsigned int bucketkey_kmersize,
                                        GtRandomcodesintervalprocess itvprocess,
                                        GtRandomcodesintervalprocess_end
                                               itvprocess_end,
@@ -498,11 +501,11 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
     if (idx < maxindex)
     {
       next = gt_randomcodes_get_leftborder(rct,idx+1);
-      gt_assert(current < next);
+      gt_assert(current <= next);
       width = next - current;
     } else
     {
-      gt_assert(sumofwidth > current);
+      gt_assert(sumofwidth >= current);
       width = sumofwidth - current;
     }
     sumwidth += width;
@@ -514,8 +517,11 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
       {
         lcpvalue = gt_randomcodes_codelcp(allrandomcodes[idx - 1],
             allrandomcodes[idx]);
+        gt_assert(lcpvalue >= GT_UNITSIN2BITENC - bucketkey_kmersize);
+        lcpvalue -= (GT_UNITSIN2BITENC - (unsigned long) bucketkey_kmersize);
       }
       gt_assert(lcpvalue < GT_UNITSIN2BITENC);
+      gt_assert(lcpvalue < correction_kmersize - 1);
       gt_shortreadsort_firstcodes_sort(&srsresult,
                                        srsw,
                                        snrp,
@@ -523,7 +529,7 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        spmsuftab,
                                        current,
                                        width,
-                                       MIN(depth,lcpvalue));
+                                       lcpvalue);
       if (withsuftabcheck)
       {
         gt_randomcodes_checksuftab_bucket(encseq,
@@ -551,11 +557,29 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
           break;
         }
       }
-    } else
-    {
-      gt_assert(width == 1UL);
     }
-    gt_assert(next != GT_UNDEF_ULONG);
+    else if (width == 1UL)
+    {
+      if (itvprocess != NULL)
+      {
+        unsigned long suftab_value = gt_spmsuftab_get(spmsuftab, current);
+        const uint16_t lcptab_value = 0;
+        if (gt_spmsuftab_usebitsforpositions(spmsuftab))
+        {
+          unsigned long seqnum, relpos;
+          seqnum = gt_encseq_seqnum(encseq, suftab_value);
+          relpos = suftab_value - gt_encseq_seqstartpos(encseq, seqnum);
+          suftab_value = gt_seqnumrelpos_encode(snrp, seqnum, relpos);
+        }
+        if (itvprocess(itvprocessdata, &suftab_value, snrp, &lcptab_value, 1UL,
+                       correction_kmersize, err) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
+    }
+    gt_assert((minindex == maxindex) || next != GT_UNDEF_ULONG);
     current = next;
   }
   if (itvprocess_end != NULL)
@@ -642,11 +666,11 @@ typedef struct
   const GtSeqnumrelpos *snrp;
   const GtRandomcodestab *rct;
   const unsigned long *allrandomcodes;
-  unsigned long depth,
-                minindex,
+  unsigned long minindex,
                 maxindex,
                 sumofwidth;
-  unsigned int correction_kmersize;
+  unsigned int correction_kmersize,
+               bucketkey_kmersize;
   bool withsuftabcheck;
   GtRandomcodesintervalprocess itvprocess;
   GtRandomcodesintervalprocess_end itvprocess_end;
@@ -670,7 +694,7 @@ static void *gt_randomcodes_thread_caller_sortremaining(void *data)
                                   threadinfo->maxindex,
                                   threadinfo->sumofwidth,
                                   threadinfo->correction_kmersize,
-                                  threadinfo->depth,
+                                  threadinfo->bucketkey_kmersize,
                                   threadinfo->itvprocess,
                                   threadinfo->itvprocess_end,
                                   threadinfo->itvprocessdata,
@@ -695,7 +719,7 @@ static int gt_randomcodes_thread_sortremaining(
                                        unsigned long widthofpart,
                                        unsigned long sumofwidth,
                                        unsigned int correction_kmersize,
-                                       unsigned long depth,
+                                       unsigned int bucketkey_kmersize,
                                        GtRandomcodesintervalprocess itvprocess,
                                        GtRandomcodesintervalprocess_end
                                          itvprocess_end,
@@ -729,7 +753,7 @@ static int gt_randomcodes_thread_sortremaining(
     threadinfo[t].readmode = readmode;
     threadinfo[t].withsuftabcheck = withsuftabcheck;
     threadinfo[t].correction_kmersize = correction_kmersize;
-    threadinfo[t].depth = depth;
+    threadinfo[t].bucketkey_kmersize = bucketkey_kmersize;
     threadinfo[t].itvprocess = itvprocess;
     threadinfo[t].itvprocess_end = itvprocess_end;
     if (itvprocessdatatab == NULL)
@@ -935,7 +959,7 @@ static inline unsigned long gt_randomcodes_calculate_nofsamples(
     unsigned long sampling_factor)
 {
   unsigned long nofkmers = totallength,
-                nofnonkmers = (keysize + 1) * nofsequences,
+                nofnonkmers = (keysize + 1) * nofsequences - 1,
                 nofsamples;
   gt_log_log("totallength = %lu", nofkmers);
   gt_log_log("nofsequences = %lu", nofsequences);
@@ -954,16 +978,14 @@ static inline unsigned long gt_randomcodes_calculate_nofsamples(
 
 static void gt_randomcodes_generate_sampling_positions(unsigned long *buffer,
     unsigned long numofsamples, const GtEncseq *encseq,
-    unsigned long sampling_factor, unsigned long keysize, bool sort,
-    GtTimer *timer)
+    unsigned long totallength, unsigned long sampling_factor,
+    unsigned long keysize, bool sort, GtTimer *timer)
 {
-  unsigned long i, randmax = sampling_factor,
-                totallength = gt_encseq_total_length(encseq);
-  if (gt_encseq_is_mirrored(encseq))
-    totallength = GT_DIV2(totallength - 1);
+  unsigned long i, randmax = sampling_factor;
   bool sorted = true;
   randmax = GT_MULT2(sampling_factor) - GT_DIV16(sampling_factor);
-  gt_assert(randmax < totallength);
+  if (randmax >= totallength)
+    randmax = totallength;
   buffer[0] = gt_rand_max(randmax);
   for (i = 1UL; i < numofsamples; i++)
   {
@@ -1009,16 +1031,18 @@ static void gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
 {
   unsigned int numofchars;
   size_t sizeforcodestable;
+  unsigned long totallength = gt_encseq_total_length(encseq),
+                nofsequences = gt_encseq_num_of_sequences(encseq);
+  unsigned long maskright = GT_MASKRIGHT((unsigned long) kmersize);
 
   if (usefirstcodes)
   {
-    fci->numofcodes = gt_encseq_num_of_sequences(encseq) + 1;
+    fci->numofcodes = nofsequences + 1;
   }
   else
   {
     fci->numofcodes = gt_randomcodes_calculate_nofsamples(encseq,
-        gt_encseq_num_of_sequences(encseq), gt_encseq_total_length(encseq),
-        kmersize, sampling_factor) + 1;
+        nofsequences, totallength, kmersize, sampling_factor) + 1;
   }
   sizeforcodestable = sizeof (*fci->allrandomcodes) * fci->numofcodes;
   fci->allrandomcodes = gt_malloc(sizeforcodestable);
@@ -1034,22 +1058,40 @@ static void gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
     unsigned long i;
     const GtTwobitencoding *twobitenc =
         gt_encseq_twobitencoding_export(encseq);
+    unsigned long realtotallength = totallength;
+    if (gt_encseq_is_mirrored(encseq))
+    {
+      realtotallength >>= 1;
+    }
     if (timer != NULL)
       gt_timer_show_progress(timer, "to generate sampling positions", stdout);
     gt_randomcodes_generate_sampling_positions(fci->allrandomcodes,
-        fci->numofcodes - 1, encseq, sampling_factor, kmersize, true, timer);
+        fci->numofcodes - 1, encseq, totallength, sampling_factor, kmersize,
+        true, timer);
     if (timer != NULL)
       gt_timer_show_progress(timer, "to collect sample codes", stdout);
     for (i = 0; i < fci->numofcodes - 1; i++)
     {
+      unsigned long pos = fci->allrandomcodes[i];
+      bool revcompl = false;
+      if (pos > realtotallength)
+      {
+        pos = GT_REVERSEPOS(totallength, pos);
+        revcompl = true;
+      }
       fci->allrandomcodes[i] = gt_kmercode_at_position(twobitenc,
-          fci->allrandomcodes[i], kmersize);
+          pos, kmersize);
+      if (revcompl)
+      {
+        fci->allrandomcodes[i] = gt_kmercode_complement(
+            gt_kmercode_reverse(fci->allrandomcodes[i], kmersize), maskright);
+      }
     }
     fci->countcodes = fci->numofcodes - 1;
   }
   /* add an artificial last bucket to collect suffixes
    * larger than the last code */
-  gt_storerandomcodes(fci, true, /* unused*/ 0, ~((GtCodetype)0));
+  gt_storerandomcodes(fci, true, /* unused*/ 0, maskright);
   gt_logger_log(logger,"have stored %lu bucket keys",fci->countcodes);
   if (timer != NULL)
   {
@@ -1148,6 +1190,7 @@ static void gt_randomcodes_accumulatecounts_run(GtRandomcodesinfo *fci,
                 fci->codebuffer_total,
                 100.0 * (double) fci->codebuffer_total/
                                  gt_encseq_total_length(encseq));
+  gt_assert(fci->firstcodehits == fci->codebuffer_total);
   if (fci->firstcodehits > 0)
   {
     gt_assert(fci->flushcount > 0);
