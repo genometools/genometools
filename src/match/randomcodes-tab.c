@@ -151,27 +151,22 @@ static void checkcodesorder(const unsigned long *tab,unsigned long len,
 #endif
 
 unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
-                                    unsigned long numofcodes,
-                                    GtLogger *logger)
+    unsigned int codesize, unsigned long numofcodes, GtLogger *logger)
 {
-  unsigned long numofdifferentcodes = 0;
+  unsigned long numofdifferentcodes = 0,
+                shift = GT_MULT2(GT_UNITSIN2BITENC - codesize);
   if (numofcodes != 0)
   {
     unsigned long *storeptr, *readptr;
-    bool firstincrement;
 
     for (storeptr = allrandomcodes, readptr = allrandomcodes+1;
          readptr < allrandomcodes + numofcodes;
          readptr++)
     {
-      if (*storeptr != *readptr)
+      if ((*storeptr ^ *readptr) >> shift)
       {
         storeptr++;
         *storeptr = *readptr;
-        firstincrement = true;
-      } else
-      {
-        firstincrement = false;
       }
     }
     numofdifferentcodes = (unsigned long) (storeptr - allrandomcodes + 1);

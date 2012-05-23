@@ -31,16 +31,16 @@
 #include "tools/gt_seqcorrect.h"
 #include "match/randomcodes.h"
 #include "match/randomcodes-correct.h"
-#include "match/randomsamples.h"
 
 typedef struct
 {
-  bool checksuftab,
+  bool usefirstcodes,
        verbose,
        quiet,
        onlyaccum,
        onlyallrandomcodes,
-       radixlarge;
+       radixlarge,
+       checksuftab;
   unsigned int correction_kmersize,
                samplingfactor,
                trusted_count,
@@ -138,6 +138,12 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
       "keys", &arguments->forcek, 0);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
+
+  /* -usefirstcodes */
+  option = gt_option_new_bool("usefirstcodes", "use first codes instead of "
+      "random sampled codes", &arguments->usefirstcodes, true);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
 
   /* -v */
   v_option = gt_option_new_verbose(&arguments->verbose);
@@ -355,19 +361,14 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
             arguments->numofparts,
             arguments->maximumspace,
             arguments->correction_kmersize,
-            /* use false */  arguments->checksuftab,
-            /* use false */  arguments->onlyaccum,
-            /* use false */  arguments->
-            onlyallrandomcodes,
-            /* use 5U */     arguments->
-            addbscache_depth,
-            /* specify the extra space needed for
-               the function processing the interval */
+            arguments->usefirstcodes,
+            arguments->samplingfactor,
+            arguments->checksuftab,
+            arguments->onlyaccum,
+            arguments->onlyallrandomcodes,
+            arguments->addbscache_depth,
             arguments->phase2extra,
-            /* use true */   arguments->radixlarge ?
-            false : true,
-            /* use 2 without threads and
-               use 1 with threads */
+            arguments->radixlarge ? false : true,
             arguments->radixparts,
             gt_randomcodes_correct_process_bucket,
             NULL,

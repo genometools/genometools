@@ -115,7 +115,7 @@ static inline void gt_randomcodes_correct_process_kmergroup_end(
               abspos = cdata->totallength - 1UL - abspos;
               newchar = (GtUchar)3 - newchar;
             }
-            gt_log_log("correct: position %lu char %u", abspos, newchar);
+            /*gt_log_log("correct: position %lu char %u", abspos, newchar);*/
             cdata->nofcorrections++;
           }
         }
@@ -168,8 +168,9 @@ GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
   cdata->firstmirrorpos = cdata->totallength;
   if (gt_encseq_is_mirrored(encseq))
     cdata->firstmirrorpos >>= 1;
-  cdata->kpositions = gt_malloc(sizeof (unsigned long) * cdata->alphasize * c);
-  cdata->count = gt_malloc(sizeof (unsigned int) * cdata->alphasize);
+  cdata->kpositions = gt_malloc(sizeof (*cdata->kpositions) *
+      cdata->alphasize * c);
+  cdata->count = gt_malloc(sizeof (*cdata->count) * cdata->alphasize);
   gt_randomcodes_correct_data_reset(cdata);
   /* stats */
   cdata->nofkmergroups = 0;

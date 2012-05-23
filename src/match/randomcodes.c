@@ -33,19 +33,20 @@
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
 #endif
-#include "firstcodes-buf.h"
-#include "firstcodes-spacelog.h"
-#include "randomcodes-tab.h"
-#include "firstcodes-accum.h"
-#include "randomcodes-insert.h"
-#include "randomcodes.h"
-#include "seqnumrelpos.h"
-#include "randomcodes-sfx-partssuf.h"
-#include "randomcodes-correct.h"
-#include "sfx-shortreadsort.h"
-#include "sfx-suffixer.h"
-#include "spmsuftab.h"
-#include "stamp.h"
+#include "match/firstcodes-buf.h"
+#include "match/firstcodes-spacelog.h"
+#include "match/randomcodes-tab.h"
+#include "match/firstcodes-accum.h"
+#include "match/randomcodes-insert.h"
+#include "match/randomcodes.h"
+#include "match/seqnumrelpos.h"
+#include "match/randomcodes-sfx-partssuf.h"
+#include "match/randomcodes-correct.h"
+#include "match/sfx-shortreadsort.h"
+#include "match/sfx-suffixer.h"
+#include "match/spmsuftab.h"
+#include "match/stamp.h"
+#include "match/kmercodes.h"
 
 typedef struct
 {
@@ -916,17 +917,7 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
   {
     gt_firstcodes_spacelog_start_diff(fci->fcsl);
   }
-  fci->numofcodes = numofsequences + 1;
-  if (!haserr)
-  {
-    size_t sizeforcodestable
-      = sizeof (*fci->allrandomcodes) * fci->numofcodes;
-    fci->allrandomcodes = gt_malloc(sizeforcodestable);
-    GT_FCI_ADDSPLITSPACE(fci->fcsl,"allrandomcodes",sizeforcodestable);
-  } else
-  {
-    fci->allrandomcodes = NULL;
-  }
+  fci->allrandomcodes = NULL;
   gt_randomcodes_countocc_setnull(&fci->tab);
   fci->countcodes = 0;
   fci->firstcodehits = 0;
@@ -936,40 +927,140 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
   return haserr ? -1 : 0;
 }
 
+#define GT_RANDOMCODES_NOFSAMPLES_MIN 2UL
+
+static inline unsigned long gt_randomcodes_calculate_nofsamples(
+    const GtEncseq *encseq, unsigned long nofsequences,
+    unsigned long totallength, unsigned int keysize,
+    unsigned long sampling_factor)
+{
+  unsigned long nofkmers = totallength,
+                nofnonkmers = (keysize + 1) * nofsequences,
+                nofsamples;
+  gt_log_log("totallength = %lu", nofkmers);
+  gt_log_log("nofsequences = %lu", nofsequences);
+  if (nofnonkmers < nofkmers)
+  {
+    nofkmers -= nofnonkmers;
+    gt_log_log("nofkmers = %lu", nofkmers);
+  }
+  else
+  {
+    gt_assert(gt_encseq_min_seq_length(encseq) <= keysize);
+  }
+  nofsamples = nofkmers / sampling_factor;
+  return MAX(GT_RANDOMCODES_NOFSAMPLES_MIN, nofsamples);
+}
+
+static void gt_randomcodes_generate_sampling_positions(unsigned long *buffer,
+    unsigned long numofsamples, const GtEncseq *encseq,
+    unsigned long sampling_factor, unsigned long keysize, bool sort,
+    GtTimer *timer)
+{
+  unsigned long i, randmax = sampling_factor,
+                totallength = gt_encseq_total_length(encseq);
+  if (gt_encseq_is_mirrored(encseq))
+    totallength = GT_DIV2(totallength - 1);
+  bool sorted = true;
+  randmax = GT_MULT2(sampling_factor) - GT_DIV16(sampling_factor);
+  gt_assert(randmax < totallength);
+  buffer[0] = gt_rand_max(randmax);
+  for (i = 1UL; i < numofsamples; i++)
+  {
+    unsigned long sn, sp, sl, rp;
+    buffer[i] = buffer[i-1];
+    while (true)
+    {
+      buffer[i] += (gt_rand_max(randmax) + 1UL);
+      if (buffer[i] >= totallength)
+      {
+        buffer[i] = 0;
+        sorted = false;
+      }
+      if (!gt_encseq_position_is_separator(encseq, buffer[i],
+            GT_READMODE_FORWARD))
+      {
+        sn = gt_encseq_seqnum(encseq, buffer[i]);
+        sp = gt_encseq_seqstartpos(encseq, sn);
+        sl = gt_encseq_seqlength(encseq, sn);
+        rp = buffer[i] - sp;
+        if (rp < sl - keysize)
+          break;
+      }
+    }
+  }
+  if (sort && !sorted)
+  {
+    if (timer != NULL)
+      gt_timer_show_progress(timer, "to sort sampling positions", stdout);
+    gt_radixsort_inplace_ulong(buffer, numofsamples);
+  }
+  if (sorted)
+  {
+    gt_log_log("range of sampling positions = [%lu, %lu]",
+        buffer[0], buffer[numofsamples - 1]);
+  }
+}
+
 static void gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
-                                       const GtEncseq *encseq,
-                                       GtReadmode readmode,
-                                       unsigned int kmersize,
-                                       unsigned int correction_kmersize,
-                                       GtLogger *logger,
-                                       GtTimer *timer)
+    bool usefirstcodes, unsigned long sampling_factor, const GtEncseq *encseq,
+    GtReadmode readmode, unsigned int kmersize,
+    unsigned int correction_kmersize, GtLogger *logger, GtTimer *timer)
 {
   unsigned int numofchars;
+  size_t sizeforcodestable;
 
-  getencseqkmers_twobitencoding(encseq,
-                                readmode,
-                                kmersize,
-                                correction_kmersize,
-                                true,
-                                gt_storerandomcodes,
-                                fci,
-                                NULL,
-                                NULL);
+  if (usefirstcodes)
+  {
+    fci->numofcodes = gt_encseq_num_of_sequences(encseq) + 1;
+  }
+  else
+  {
+    fci->numofcodes = gt_randomcodes_calculate_nofsamples(encseq,
+        gt_encseq_num_of_sequences(encseq), gt_encseq_total_length(encseq),
+        kmersize, sampling_factor) + 1;
+  }
+  sizeforcodestable = sizeof (*fci->allrandomcodes) * fci->numofcodes;
+  fci->allrandomcodes = gt_malloc(sizeforcodestable);
+  GT_FCI_ADDSPLITSPACE(fci->fcsl,"allrandomcodes",sizeforcodestable);
+
+  if (usefirstcodes)
+  {
+    getencseqkmers_twobitencoding(encseq, readmode, kmersize,
+        correction_kmersize, true, gt_storerandomcodes, fci, NULL, NULL);
+  }
+  else
+  {
+    unsigned long i;
+    const GtTwobitencoding *twobitenc =
+        gt_encseq_twobitencoding_export(encseq);
+    if (timer != NULL)
+      gt_timer_show_progress(timer, "to generate sampling positions", stdout);
+    gt_randomcodes_generate_sampling_positions(fci->allrandomcodes,
+        fci->numofcodes - 1, encseq, sampling_factor, kmersize, true, timer);
+    if (timer != NULL)
+      gt_timer_show_progress(timer, "to collect sample codes", stdout);
+    for (i = 0; i < fci->numofcodes - 1; i++)
+    {
+      fci->allrandomcodes[i] = gt_kmercode_at_position(twobitenc,
+          fci->allrandomcodes[i], kmersize);
+    }
+    fci->countcodes = fci->numofcodes - 1;
+  }
   /* add an artificial last bucket to collect suffixes
    * larger than the last code */
   gt_storerandomcodes(fci, true, /* unused*/ 0, ~((GtCodetype)0));
-  gt_logger_log(logger,"have stored %lu prefix codes",fci->countcodes);
+  gt_logger_log(logger,"have stored %lu bucket keys",fci->countcodes);
   if (timer != NULL)
   {
-    gt_timer_show_progress(timer, "to sort initial prefixes",stdout);
+    gt_timer_show_progress(timer, "to sort bucket keys",stdout);
   }
   gt_radixsort_inplace_ulong(fci->allrandomcodes,fci->numofcodes);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   gt_assert(numofchars == 4U);
   gt_assert(fci->allrandomcodes != NULL);
   fci->differentcodes = gt_randomcodes_remdups(fci->allrandomcodes,
-                                             fci->numofcodes,
-                                             logger);
+      kmersize, fci->numofcodes, logger);
   gt_randomcodes_countocc_new(fci->fcsl,&fci->tab,fci->differentcodes);
   if (fci->differentcodes > 0 && fci->differentcodes < fci->numofcodes)
   {
@@ -1358,6 +1449,8 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     unsigned int numofparts,
     unsigned long maximumspace,
     unsigned int correction_kmersize,
+    bool usefirstcodes,
+    unsigned int sampling_factor,
     bool withsuftabcheck,
     bool onlyaccumulation,
     bool onlyallrandomcodes,
@@ -1414,6 +1507,8 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_timer_start(timer);
     }
     gt_randomcodes_collectcodes(&fci,
+                               usefirstcodes,
+                               sampling_factor,
                                encseq,
                                readmode,
                                kmersize,
