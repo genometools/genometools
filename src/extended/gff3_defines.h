@@ -19,11 +19,16 @@
 #ifndef GFF3_DEFINES_H
 #define GFF3_DEFINES_H
 
+#define GT_GFF_META_CHARS          "##"
+
 /* version */
 #define GT_GFF_VERSION             3
+#define GT_GFF_VERSION_STRING      "3"
+#define GT_GVF_VERSION             "1.06"
 
 /* pragmas */
-#define GT_GFF_VERSION_PREFIX      "##gff-version"
+#define GT_GFF_VERSION_DIRECTIVE   "gff-version"
+#define GT_GFF_VERSION_PREFIX      GT_GFF_META_CHARS GT_GFF_VERSION_DIRECTIVE
 #define GT_GFF_FASTA_DIRECTIVE     "##FASTA"
 #define GT_GFF_SEQUENCE_REGION     "##sequence-region"
 #define GT_GFF_SPECIES             "##species"
@@ -33,7 +38,8 @@
 #define GT_GFF_NCBI_TAXONOMY_URI   "##NCBI_Taxonomy_URI"
 #define GT_GFF_GENOME_BUILD        "##genome-build"
 #define GT_GFF_TERMINATOR          "###"
-#define GT_GVF_VERSION_PREFIX      "##gvf-version"
+#define GT_GVF_VERSION_DIRECTIVE   "gvf-version"
+#define GT_GVF_VERSION_PREFIX      GT_GFF_META_CHARS GT_GVF_VERSION_DIRECTIVE
 #define GT_GVF_REFERENCE_FASTA     "##reference-fasta"
 #define GT_GVF_FEATURE_GFF3        "##feature-gff3"
 #define GT_GVF_FILE_VERSION        "##file-version"

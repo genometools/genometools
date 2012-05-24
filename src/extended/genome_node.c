@@ -26,6 +26,7 @@
 #include "core/unused_api.h"
 #include "extended/eof_node.h"
 #include "extended/genome_node_rep.h"
+#include "extended/gff3_defines.h"
 #include "extended/gff3_visitor_api.h"
 #include "extended/region_node_api.h"
 
@@ -81,8 +82,34 @@ static void userdata_delete(void *data)
 static int compare_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 {
   void *rn_a, *rn_b, *sn_a, *sn_b, *en_a, *en_b;
+  GtMetaNode *mn_a, *mn_b;
 
-  /* region nodes first */
+  /* meta nodes first */
+  mn_a = gt_meta_node_try_cast(gn_a);
+  mn_b = gt_meta_node_try_cast(gn_b);
+
+  if (mn_a && !mn_b)
+    return -1;
+  if (!mn_a && mn_b)
+    return 1;
+  if (mn_a && mn_b) {
+    int ret = 0;
+    if (!ret && strcmp(gt_meta_node_get_directive(mn_a),
+                       GT_GFF_VERSION_DIRECTIVE) == 0)
+      ret = -1;
+    if (!ret && strcmp(gt_meta_node_get_directive(mn_b),
+                       GT_GFF_VERSION_DIRECTIVE) == 0)
+      ret = 1;
+    if (!ret && strcmp(gt_meta_node_get_directive(mn_a),
+                       GT_GVF_VERSION_DIRECTIVE) == 0)
+      ret = -1;
+    if (!ret && strcmp(gt_meta_node_get_directive(mn_b),
+                       GT_GVF_VERSION_DIRECTIVE) == 0)
+      ret = 1;
+    return ret;
+  }
+
+  /* then region nodes */
   rn_a = gt_region_node_try_cast(gn_a);
   rn_b = gt_region_node_try_cast(gn_b);
 
