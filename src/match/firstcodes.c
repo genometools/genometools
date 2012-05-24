@@ -345,7 +345,8 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        spmsuftab,
                                        current,
                                        width,
-                                       depth);
+                                       depth,
+                                       0);
       if (withsuftabcheck)
       {
         gt_firstcodes_checksuftab_bucket(encseq,

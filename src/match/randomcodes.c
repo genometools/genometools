@@ -529,7 +529,8 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        spmsuftab,
                                        current,
                                        width,
-                                       lcpvalue);
+                                       lcpvalue,
+                                       correction_kmersize);
       if (withsuftabcheck)
       {
         gt_randomcodes_checksuftab_bucket(encseq,

@@ -6573,7 +6573,8 @@ unsigned int gt_encseq_relpos_extract2bitencvector(
                                           GtArrayGtTwobitencoding *tbereservoir,
                                           const GtEncseq *encseq,
                                           unsigned long seqnum,
-                                          unsigned long relpos)
+                                          unsigned long relpos,
+                                          unsigned long maxnofelem)
 {
   GtEndofTwobitencoding etbecurrent;
   unsigned long pos, twobitencodingstoppos;
@@ -6587,6 +6588,12 @@ unsigned int gt_encseq_relpos_extract2bitencvector(
     twobitencodingstoppos = gt_encseq_total_length(encseq);
   }
   pos = gt_encseq_seqstartpos(encseq,seqnum) + relpos;
+  if (maxnofelem > 0)
+  {
+    unsigned long maxpos = pos + maxnofelem;
+    if (twobitencodingstoppos > maxpos)
+      twobitencodingstoppos = maxpos;
+  }
   for (idx = 0, offset = 0; /* Nothing */; idx++,
        offset += (unsigned int) GT_UNITSIN2BITENC)
   {

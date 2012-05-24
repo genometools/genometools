@@ -69,7 +69,8 @@ void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
                                       const GtSpmsuftab *spmsuftab,
                                       unsigned long subbucketleft,
                                       unsigned long width,
-                                      unsigned long depth);
+                                      unsigned long depth,
+                                      unsigned long maxdepth);
 
 void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
                                         unsigned long bucketleftidx,

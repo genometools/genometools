@@ -680,9 +680,11 @@ void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
                                       const GtSpmsuftab *spmsuftab,
                                       unsigned long subbucketleft,
                                       unsigned long width,
-                                      unsigned long depth)
+                                      unsigned long depth,
+                                      unsigned long maxdepth)
 {
   unsigned long idx, pos, seqnum, relpos, seqnum_relpos;
+  gt_assert(maxdepth == 0 || maxdepth > depth);
 
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
   for (idx = 0; idx < width; idx++)
@@ -707,7 +709,9 @@ void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
       = gt_encseq_relpos_extract2bitencvector(&srsw->tbereservoir,
                                               encseq,
                                               seqnum,
-                                              relpos + depth);
+                                              relpos + depth,
+                                              (maxdepth > 0) ?
+                                              maxdepth - depth : 0);
   }
   srsw->sumofstoredvalues += srsw->tbereservoir.nextfreeGtTwobitencoding;
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, srsw, depth,

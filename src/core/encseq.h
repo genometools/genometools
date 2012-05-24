@@ -254,15 +254,17 @@ unsigned int gt_encseq_extract2bitencvector(
 
 /* The following function extracts the twobitencoding for the
    sequence with sequence number <seqnum> beginning at the relative
-   position <relpos>.  The result is stored in <tbereservoir> which
+   position <relpos>. If <maxnofelem> > 0, then at most <maxnofelem> elements
+   are extracted. The result is stored in <tbereservoir> which
    points to an array of appropriate size. The number of elements
-   is stored at the address <storedvalues> points to. */
+   is stored at the address <storedvalues> points to.  */
 
 unsigned int gt_encseq_relpos_extract2bitencvector(
                                           GtArrayGtTwobitencoding *tbereservoir,
                                           const GtEncseq *encseq,
                                           unsigned long seqnum,
-                                          unsigned long relpos);
+                                          unsigned long relpos,
+                                          unsigned long maxnofelem);
 
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
   and stores the result of the comparison in <commonunits>. The comparison is
