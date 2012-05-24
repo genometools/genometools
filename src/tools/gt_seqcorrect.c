@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "core/fa.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/option_api.h"
@@ -29,8 +30,11 @@
 #include "core/thread.h"
 #endif
 #include "tools/gt_seqcorrect.h"
+#include "match/rdj-twobitenc-editor.h"
 #include "match/randomcodes.h"
 #include "match/randomcodes-correct.h"
+
+#define GT_SEQCORRECT_FILESUFFIX ".cor"
 
 typedef struct
 {
@@ -289,6 +293,52 @@ static int gt_seqcorrect_arguments_check(GT_UNUSED int rest_argc,
   return haserr ? -1 : 0;
 }
 
+static int gt_seqcorrect_apply_corrections(GtEncseq *encseq,
+    const char *indexname, const unsigned int threads,
+    GtError *err)
+{
+  bool haserr = false;
+  GtTwobitencEditor *editor;
+  unsigned int threadcount;
+  editor = gt_twobitenc_editor_new(encseq, indexname, err);
+  if (editor == NULL)
+    haserr = true;
+  for (threadcount = 0; !haserr && threadcount < threads; threadcount++)
+  {
+    FILE *corrections;
+    GtStr *filename;
+    filename = gt_str_new_cstr(indexname);
+    gt_str_append_char(filename, '.');
+    gt_str_append_uint(filename, threadcount);
+    gt_str_append_cstr(filename, GT_SEQCORRECT_FILESUFFIX);
+    corrections = gt_fa_fopen(gt_str_get(filename), "r", err);
+    if (corrections == NULL)
+      haserr = true;
+    else
+    {
+      unsigned long pos;
+      GtUchar newchar;
+      size_t retval;
+      while ((retval = fread(&pos, sizeof (pos), (size_t)1, corrections))
+          == (size_t)1)
+      {
+        newchar = (GtUchar)(pos & 3UL);
+        pos >>= 2;
+        gt_twobitenc_editor_edit(editor, pos, newchar);
+      }
+      if (ferror(corrections) != 0)
+      {
+        gt_error_set(err, "error by reading file %s", gt_str_get(filename));
+        haserr = true;
+      }
+      gt_fa_fclose(corrections);
+    }
+    gt_str_delete(filename);
+  }
+  gt_twobitenc_editor_delete(editor);
+  return haserr ? -1 : 0;
+}
+
 static int gt_seqcorrect_runner(GT_UNUSED int argc,
                                 GT_UNUSED const char **argv,
                                 GT_UNUSED int parsed_args,
@@ -348,10 +398,16 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
 #endif
 
     data_array = gt_malloc(sizeof (*data_array) * threads);
-    for (threadcount = 0; threadcount < threads; threadcount++)
+    for (threadcount = 0; !haserr && threadcount < threads; threadcount++)
     {
       data_array[threadcount] = gt_randomcodes_correct_data_new(encseq,
-          arguments->correction_kmersize, arguments->trusted_count);
+          arguments->correction_kmersize, arguments->trusted_count,
+          gt_str_get(arguments->encseqinput), GT_SEQCORRECT_FILESUFFIX,
+          threadcount, err);
+      if ((data_array[threadcount]) == NULL)
+      {
+        haserr = true;
+      }
     }
     gt_log_log("correction kmersize=%u", arguments->correction_kmersize);
     haserr = gt_seqcorrect_bucketkey_kmersize(arguments,
@@ -383,9 +439,11 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
     }
     for (threadcount = 0; threadcount < threads; threadcount++)
     {
-      gt_randomcodes_correct_data_delete(data_array[threadcount],
-          threadcount, &nofkmergroups, &nofkmeritvs, &nofkmers,
-          &nofcorrections);
+      if (!haserr)
+        gt_randomcodes_correct_data_collect_stats(data_array[threadcount],
+            threadcount, &nofkmergroups, &nofkmeritvs, &nofkmers,
+            &nofcorrections);
+      gt_randomcodes_correct_data_delete(data_array[threadcount]);
     }
     gt_logger_log(verbose_logger, "total number of k-mers: %lu",
         nofkmers);
@@ -396,6 +454,9 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
     gt_logger_log(verbose_logger, "number of kmer corrections: %lu",
         nofcorrections);
     gt_free(data_array);
+    if (!haserr)
+      gt_seqcorrect_apply_corrections(encseq,
+          gt_str_get(arguments->encseqinput), threads, err);
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);

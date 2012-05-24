@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/fa.h"
 #include "core/log_api.h"
+#include "core/xansi_api.h"
 #include "match/randomcodes-correct.h"
 
 struct GtRandomcodesCorrectData {
@@ -28,6 +30,7 @@ struct GtRandomcodesCorrectData {
   unsigned int c;
   unsigned int *count;
   unsigned long *kpositions;
+  FILE *outfile;
 
   unsigned int currentchar;
   bool seprange;
@@ -115,7 +118,11 @@ static inline void gt_randomcodes_correct_process_kmergroup_end(
               abspos = cdata->totallength - 1UL - abspos;
               newchar = (GtUchar)3 - newchar;
             }
-            /*gt_log_log("correct: position %lu char %u", abspos, newchar);*/
+            gt_assert(abspos <= (ULONG_MAX >> 2));
+            gt_assert(newchar < (GtUchar)4);
+            abspos <<= 2;
+            abspos += newchar;
+            gt_xfwrite(&abspos, sizeof (abspos), (size_t)1, cdata->outfile);
             cdata->nofcorrections++;
           }
         }
@@ -157,9 +164,15 @@ int gt_randomcodes_correct_process_bucket(void *data,
 }
 
 GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
-    unsigned int k, unsigned int c)
+    unsigned int k, unsigned int c, const char *indexname, const char *suffix,
+    unsigned int threadnum, GtError *err)
 {
+  bool haserr = false;
   GtRandomcodesCorrectData *cdata = gt_malloc(sizeof *cdata);
+  GtStr *path = gt_str_new_cstr(indexname);
+  gt_str_append_char(path, '.');
+  gt_str_append_uint(path, threadnum);
+  gt_str_append_cstr(path, suffix);
   cdata->k = k;
   cdata->c = c;
   cdata->encseq = encseq;
@@ -177,25 +190,46 @@ GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
   cdata->nofkmeritvs = 0;
   cdata->nofkmers = 0;
   cdata->nofcorrections = 0;
+  cdata->outfile = gt_fa_fopen(gt_str_get(path), "wb", err);
+  if (cdata->outfile == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr && cdata->totallength > (ULONG_MAX >> 2))
+  {
+    gt_error_set(err, "totallength %lu larger than %lu", cdata->totallength,
+        ULONG_MAX >> 2);
+    haserr = true;
+  }
+  gt_str_delete(path);
+  if (haserr)
+    gt_randomcodes_correct_data_delete(cdata);
   return cdata;
 }
 
-#define GT_RANDOMCODES_DELETE_STAT(S)\
+#define GT_RANDOMCODES_COLLECT_STAT(S)\
   gt_log_log("thread %u: " #S " %lu", threadnum, cdata->S);\
   if (S != NULL)\
     *S += cdata->S;
 
-void gt_randomcodes_correct_data_delete(GtRandomcodesCorrectData *cdata,
+void gt_randomcodes_correct_data_collect_stats(GtRandomcodesCorrectData *cdata,
     unsigned int threadnum, unsigned long *nofkmergroups,
     unsigned long *nofkmeritvs, unsigned long *nofkmers,
     unsigned long *nofcorrections)
 {
+  GT_RANDOMCODES_COLLECT_STAT(nofkmergroups);
+  GT_RANDOMCODES_COLLECT_STAT(nofkmeritvs);
+  GT_RANDOMCODES_COLLECT_STAT(nofkmers);
+  GT_RANDOMCODES_COLLECT_STAT(nofcorrections);
+}
+
+void gt_randomcodes_correct_data_delete(GtRandomcodesCorrectData *cdata)
+{
+  if (cdata == NULL)
+    return;
+  if (cdata->outfile != NULL)
+    gt_fa_fclose(cdata->outfile);
   gt_free(cdata->kpositions);
   gt_free(cdata->count);
-  /* output stats */
-  GT_RANDOMCODES_DELETE_STAT(nofkmergroups);
-  GT_RANDOMCODES_DELETE_STAT(nofkmeritvs);
-  GT_RANDOMCODES_DELETE_STAT(nofkmers);
-  GT_RANDOMCODES_DELETE_STAT(nofcorrections);
   gt_free(cdata);
 }
