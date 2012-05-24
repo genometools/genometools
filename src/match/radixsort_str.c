@@ -23,6 +23,7 @@
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/stack-inlined.h"
+#include "core/unused_api.h"
 #include "sfx-lcpvalues.h"
 #include "radixsort_str.h"
 
@@ -75,7 +76,8 @@ typedef uint16_t gt_radixsort_str_bucketnum_t;
           ? GT_RADIXSORT_STR_KMERSIZE\
           : GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(BUCKETNUM))
 
-typedef struct {
+typedef struct
+{
   unsigned long *suffixes;
   unsigned long width;
   unsigned long depth;
@@ -266,12 +268,14 @@ unsigned long gt_radixsort_str_minwidth(void)
   return (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS;
 }
 
+#define WITHOWNINSERTIONSORT
+#ifdef WITHOWNINSERTIONSORT
 static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
-                                           unsigned long sortmaxdepth,
+                                           unsigned long subbucketleft,
                                            const GtRadixsortStrBucketInfo
                                              *bucket,
                                            GtLcpvalues *lcpvalues,
-                                           unsigned long subbucketleft)
+                                           unsigned long sortmaxdepth)
 {
   unsigned long pm, pl, u, v, depth;
 
@@ -349,6 +353,25 @@ static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
     }
   }
 }
+#else
+static void gt_radixsort_str_insertionsort(GT_UNUSED GtRadixsortstringinfo *rsi,
+                                           unsigned long subbucketleft,
+                                           const GtRadixsortStrBucketInfo
+                                             *bucket,
+                                           GtLcpvalues *lcpvalues,
+                                           GT_UNUSED unsigned long sortmaxdepth)
+{
+  if (lcpvalues != NULL)
+  {
+    unsigned long pm;
+
+    for (pm = 1UL; pm < bucket->width; pm++)
+    {
+      gt_lcptab_update(lcpvalues,subbucketleft,pm,0);
+    }
+  }
+}
+#endif
 
 GT_STACK_DECLARESTRUCT(GtRadixsortStrBucketInfo, 1024);
 
@@ -488,10 +511,10 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                 if (subbucket.width <= radixsort_str_insertion_sort_max)
                 {
                   gt_radixsort_str_insertionsort(rsi,
-                                                 sortmaxdepth,
+                                                 subbucketleft + offset,
                                                  &subbucket,
                                                  lcpvalues,
-                                                 subbucketleft + offset);
+                                                 sortmaxdepth);
                 } else
                 {
                   GT_STACK_PUSH(&stack, subbucket);

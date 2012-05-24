@@ -363,7 +363,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
                                      unsigned long subbucketleft,
                                      unsigned long width,
                                      unsigned long offset,
-                                     unsigned long maxdepth)
+                                     unsigned long sortmaxdepth)
 {
   unsigned long sval1, sval2, pm, pl, startpos1, startpos2,
                 lcplen = 0, idx = 0;
@@ -382,12 +382,12 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
       {
         unsigned long endpos1, endpos2;
 
-        endpos1 = sval1+maxdepth;
+        endpos1 = sval1+sortmaxdepth;
         if (endpos1 > bsr->totallength)
         {
           endpos1 = bsr->totallength;
         }
-        endpos2 = sval2+maxdepth;
+        endpos2 = sval2+sortmaxdepth;
         if (endpos2 > bsr->totallength)
         {
           endpos2 = bsr->totallength;
@@ -412,12 +412,12 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
           ccs = DEREFSTOPPOSSEQ(tmp1,startpos1,endpos1,bsr->esr1);
           cct = DEREFSTOPPOSSEQ(tmp2,startpos2,endpos2,bsr->esr2);
           lcplen = startpos2 - sval2;
-          if (lcplen == maxdepth)
+          if (lcplen == sortmaxdepth)
           {
             retval = 0;
             break;
           }
-          gt_assert(lcplen < maxdepth);
+          gt_assert(lcplen < sortmaxdepth);
           if (ccs != cct)
           {
             retval = (ccs < cct) ? -1 : 1;
@@ -428,7 +428,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
         }
       } else
       {
-        gt_assert(offset < maxdepth);
+        gt_assert(offset < sortmaxdepth);
         retval = gt_encseq_compare_viatwobitencoding(&commonunits,
                                                      bsr->encseq,
                                                      bsr->readmode,
@@ -437,10 +437,10 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
                                                      sval1,
                                                      sval2,
                                                      offset,
-                                                     maxdepth);
+                                                     sortmaxdepth);
         lcplen = commonunits.finaldepth;
-        gt_assert(lcplen <= maxdepth);
-        if (lcplen == maxdepth)
+        gt_assert(lcplen <= sortmaxdepth);
+        if (lcplen == sortmaxdepth)
         {
           gt_assert(retval == 0);
         }
@@ -511,7 +511,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
                                             bucketleftidx + subbucketleft
                                                           + idx - 1
                                                           - equalsrangewidth,
-                                            equalsrangewidth + 1, maxdepth);
+                                            equalsrangewidth + 1, sortmaxdepth);
           }
           equalsrangewidth = 0;
         }
@@ -528,7 +528,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
         bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
                                         bucketleftidx + subbucketleft + width
                                                       - 1 - equalsrangewidth,
-                                        equalsrangewidth + 1, maxdepth);
+                                        equalsrangewidth + 1, sortmaxdepth);
       }
     }
   }
@@ -813,17 +813,17 @@ static bool multistrategysort(GtBentsedgresources *bsr,
                               unsigned long subbucketleft,
                               unsigned long width,
                               unsigned long depth,
-                              unsigned long maxdepth)
+                              unsigned long sortmaxdepth)
 {
   gt_assert(width > 1UL);
   if (width <= bsr->sfxstrategy->maxinsertionsort)
   {
-    if (maxdepth == 0)
+    if (sortmaxdepth == 0)
     {
       bs_insertionsort(bsr,subbucketleft,width,depth);
     } else
     {
-      bs_insertionsortmaxdepth(bsr,subbucketleft,width,depth,maxdepth);
+      bs_insertionsortmaxdepth(bsr,subbucketleft,width,depth,sortmaxdepth);
     }
     return true;
   }
@@ -834,7 +834,7 @@ static bool multistrategysort(GtBentsedgresources *bsr,
                             bsr->tableoflcpvalues,
                             width,
                             depth,
-                            maxdepth,
+                            sortmaxdepth,
                             bsr->processunsortedsuffixrangeinfo,
                             bsr->processunsortedsuffixrange);
     bsr->countbltriesort++;
