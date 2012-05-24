@@ -31,6 +31,9 @@ typedef struct GtRandomcodesCorrectData GtRandomcodesCorrectData;
 
 GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
     unsigned int k, unsigned int c);
-void gt_randomcodes_correct_data_delete(GtRandomcodesCorrectData *data);
+void gt_randomcodes_correct_data_delete(GtRandomcodesCorrectData *cdata,
+    unsigned int threadnum, unsigned long *nofkmergroups,
+    unsigned long *nofkmeritvs, unsigned long *nofkmers,
+    unsigned long *nofcorrections);
 
 #endif

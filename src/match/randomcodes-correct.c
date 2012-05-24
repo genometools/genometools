@@ -180,15 +180,22 @@ GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
   return cdata;
 }
 
-void gt_randomcodes_correct_data_delete(
-    GtRandomcodesCorrectData *cdata)
+#define GT_RANDOMCODES_DELETE_STAT(S)\
+  gt_log_log("thread %u: " #S " %lu", threadnum, cdata->S);\
+  if (S != NULL)\
+    *S += cdata->S;
+
+void gt_randomcodes_correct_data_delete(GtRandomcodesCorrectData *cdata,
+    unsigned int threadnum, unsigned long *nofkmergroups,
+    unsigned long *nofkmeritvs, unsigned long *nofkmers,
+    unsigned long *nofcorrections)
 {
   gt_free(cdata->kpositions);
   gt_free(cdata->count);
   /* output stats */
-  gt_log_log("nofkmergroups = %lu", cdata->nofkmergroups);
-  gt_log_log("nofkmeritvs = %lu", cdata->nofkmeritvs);
-  gt_log_log("nofkmers = %lu", cdata->nofkmers);
-  gt_log_log("nofcorrections = %lu", cdata->nofcorrections);
+  GT_RANDOMCODES_DELETE_STAT(nofkmergroups);
+  GT_RANDOMCODES_DELETE_STAT(nofkmeritvs);
+  GT_RANDOMCODES_DELETE_STAT(nofkmers);
+  GT_RANDOMCODES_DELETE_STAT(nofcorrections);
   gt_free(cdata);
 }

@@ -338,6 +338,8 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
   {
     GtRandomcodesCorrectData **data_array = NULL;
     unsigned int bucketkey_kmersize, threadcount;
+    unsigned long nofkmergroups = 0, nofkmeritvs = 0, nofcorrections = 0,
+                  nofkmers = 0;
 
 #ifdef GT_THREADS_ENABLED
     const unsigned int threads = gt_jobs;
@@ -381,8 +383,18 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
     }
     for (threadcount = 0; threadcount < threads; threadcount++)
     {
-      gt_randomcodes_correct_data_delete(data_array[threadcount]);
+      gt_randomcodes_correct_data_delete(data_array[threadcount],
+          threadcount, &nofkmergroups, &nofkmeritvs, &nofkmers,
+          &nofcorrections);
     }
+    gt_logger_log(verbose_logger, "total number of k-mers: %lu",
+        nofkmers);
+    gt_logger_log(verbose_logger, "number of different k-mers: %lu",
+        nofkmeritvs);
+    gt_logger_log(verbose_logger, "number of different k-1-mers: %lu",
+        nofkmergroups);
+    gt_logger_log(verbose_logger, "number of kmer corrections: %lu",
+        nofcorrections);
     gt_free(data_array);
   }
   gt_encseq_delete(encseq);
