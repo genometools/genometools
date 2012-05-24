@@ -201,7 +201,7 @@ static uint32_t gt_randomcodes_countocc_get(const GtRandomcodestab *rct,
 }
 
 #ifdef _LP64
-#define GT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
+#define GT_RCT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
         if ((BUF)->nextfree == (BUF)->allocated)\
         {\
           gt_leftborderbuffer_flush(BUF);\
@@ -209,7 +209,7 @@ static uint32_t gt_randomcodes_countocc_get(const GtRandomcodestab *rct,
         (BUF)->spaceuint32_t[(BUF)->nextfree++]\
           = (uint32_t) ((VALUE) & rct->modvaluemask)
 #else
-#define GT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
+#define GT_RCT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
         if ((BUF)->nextfree == (BUF)->allocated)\
         {\
           gt_leftborderbuffer_flush(BUF);\
@@ -291,7 +291,7 @@ unsigned long gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
                       sizeof (*rct->leftborder_samples) * rct->numofsamples);
   GT_RANDOMCODES_ADD_SAMPLE(partsum);
   leftborderbuffer_all = gt_leftborderbuffer_new("leftborder",fcsl);
-  GT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
+  GT_RCT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
   for (idx = 1UL; idx < rct->differentcodes; idx++)
   {
     currentcount = gt_randomcodes_countocc_get(rct,idx);
@@ -322,9 +322,9 @@ unsigned long gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
     {
       GT_RANDOMCODES_ADD_SAMPLE(partsum);
     }
-    GT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
+    GT_RCT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
   }
-  GT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
+  GT_RCT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
   rct->outfilenameleftborder
       = gt_leftborderbuffer_delete(leftborderbuffer_all,fcsl,
                                    gt_randomcodes_leftborder_entries(rct));

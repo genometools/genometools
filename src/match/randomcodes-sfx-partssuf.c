@@ -34,11 +34,11 @@ typedef struct
                 sumofwidth,
                 minindex,
                 maxindex;
-} GtSuftabpartcomponent;
+} GtSuftabpartcomponent_rc;
 
 struct GtSuftabparts_rc
 {
-  GtSuftabpartcomponent *components;
+  GtSuftabpartcomponent_rc *components;
   bool indexrange_available;
   unsigned int numofparts;
   unsigned long largestsizemappedpartwise,

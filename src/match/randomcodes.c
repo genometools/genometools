@@ -91,7 +91,7 @@ static double gt_randomcodes_round(double d)
 }
 
 static void gt_storerandomcodes(void *processinfo,
-                               bool firstinrange,
+                               GT_UNUSED bool firstinrange,
                                GT_UNUSED unsigned long pos,
                                GtCodetype code)
 {
@@ -618,11 +618,10 @@ static unsigned long gt_randomcodes_findfirstlarger(const GtRandomcodestab *rct,
   return found;
 }
 
-static unsigned long *gt_evenly_divide_part(const GtRandomcodestab *rct,
-                                            unsigned long partminindex,
-                                            unsigned long partmaxindex,
-                                            unsigned long numofsuffixes,
-                                            unsigned int numofparts)
+static unsigned long *gt_randomcodes_evenly_divide_part(
+    const GtRandomcodestab *rct, unsigned long partminindex,
+    unsigned long partmaxindex, unsigned long numofsuffixes,
+    unsigned int numofparts)
 {
   unsigned long *endindexes, widthofpart, offset;
   unsigned int part, remainder;
@@ -677,11 +676,12 @@ typedef struct
   void *itvprocessdata;
   GtError *err;
   GtThread *thread;
-} GtSortRemainingThreadinfo;
+} GtRandomcodesSortRemainingThreadinfo;
 
 static void *gt_randomcodes_thread_caller_sortremaining(void *data)
 {
-  GtSortRemainingThreadinfo *threadinfo = (GtSortRemainingThreadinfo *) data;
+  GtRandomcodesSortRemainingThreadinfo *threadinfo =
+    (GtRandomcodesSortRemainingThreadinfo *) data;
 
   if (gt_randomcodes_sortremaining(threadinfo->srsw,
                                   threadinfo->encseq,
@@ -731,12 +731,12 @@ static int gt_randomcodes_thread_sortremaining(
 {
   unsigned int t;
   unsigned long sum = 0, *endindexes;
-  GtSortRemainingThreadinfo *threadinfo;
+  GtRandomcodesSortRemainingThreadinfo *threadinfo;
   bool haserr = false;
 
   gt_assert(threads >= 2U);
-  endindexes = gt_evenly_divide_part(rct,partminindex,partmaxindex,widthofpart,
-                                     threads);
+  endindexes = gt_randomcodes_evenly_divide_part(rct, partminindex,
+      partmaxindex, widthofpart, threads);
   threadinfo = gt_malloc(sizeof (*threadinfo) * threads);
   for (t=0; t<threads; t++)
   {
@@ -804,7 +804,7 @@ static int gt_randomcodes_thread_sortremaining(
 }
 #endif
 
-static void gt_firstcode_delete_before_end(GtRandomcodesinfo *fci)
+static void gt_randomcodes_delete_before_end(GtRandomcodesinfo *fci)
 {
   if (fci->binsearchcache.spaceGtIndexwithcodeRC != NULL)
   {
@@ -954,7 +954,7 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
 #define GT_RANDOMCODES_NOFSAMPLES_MIN 2UL
 
 static inline unsigned long gt_randomcodes_calculate_nofsamples(
-    const GtEncseq *encseq, unsigned long nofsequences,
+    GT_UNUSED const GtEncseq *encseq, unsigned long nofsequences,
     unsigned long totallength, unsigned int keysize,
     unsigned long sampling_factor)
 {
@@ -1400,7 +1400,7 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
   gt_randomcodes_insertsuffixes_flush(fci);
   if (part == gt_suftabparts_rc_numofparts(suftabparts_rc) - 1)
   {
-    gt_firstcode_delete_before_end(fci);
+    gt_randomcodes_delete_before_end(fci);
   }
   if (timer != NULL)
   {
@@ -1753,7 +1753,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_assert(fci.firstcodeposhits == suftabentries);
     } else
     {
-      gt_firstcode_delete_before_end(&fci);
+      gt_randomcodes_delete_before_end(&fci);
     }
   }
   if (srswtab != NULL)
@@ -1766,7 +1766,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   if (haserr)
   {
-    gt_firstcode_delete_before_end(&fci);
+    gt_randomcodes_delete_before_end(&fci);
     gt_free(fci.allrandomcodes);
     fci.allrandomcodes = NULL;
     gt_Sfxmappedrangelist_delete(sfxmrlist);
