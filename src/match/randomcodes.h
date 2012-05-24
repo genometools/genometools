@@ -44,6 +44,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(
                     unsigned int correction_kmersize,
                     bool usefirstcodes,
                     unsigned int sampling_factor,
+                    bool usemaxdepth,
                     bool withsuftabcheck, /* set to false, only for tests */
                     bool onlyaccumulation, /* set to false, only for tests */
                     bool onlyallrandomcodes, /* set to false, only for tests */

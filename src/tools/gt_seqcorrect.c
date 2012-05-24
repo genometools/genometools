@@ -44,7 +44,8 @@ typedef struct
        onlyaccum,
        onlyallrandomcodes,
        radixlarge,
-       checksuftab;
+       checksuftab,
+       usemaxdepth;
   unsigned int correction_kmersize,
                samplingfactor,
                trusted_count,
@@ -52,13 +53,10 @@ typedef struct
                radixparts,
                addbscache_depth,
                forcek;
-  unsigned long maximumspace,
-                phase2extra;
+  unsigned long maximumspace;
   GtStr *encseqinput,
-        *memlimitarg,
-        *phase2extraarg;
-  GtOption *refoptionmemlimit,
-           *refoptionphase2extra;
+        *memlimitarg;
+  GtOption *refoptionmemlimit;
 } GtSeqcorrectArguments;
 
 static void* gt_seqcorrect_arguments_new(void)
@@ -69,8 +67,6 @@ static void* gt_seqcorrect_arguments_new(void)
   arguments->radixparts = 1U;
   arguments->encseqinput = gt_str_new();
   arguments->memlimitarg = gt_str_new();
-  arguments->phase2extraarg = gt_str_new();
-  arguments->phase2extra = 0UL; /* in bytes */
   arguments->maximumspace = 0UL; /* in bytes */
   return arguments;
 }
@@ -81,9 +77,7 @@ static void gt_seqcorrect_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_str_delete(arguments->encseqinput);
   gt_option_delete(arguments->refoptionmemlimit);
-  gt_option_delete(arguments->refoptionphase2extra);
   gt_str_delete(arguments->memlimitarg);
-  gt_str_delete(arguments->phase2extraarg);
   gt_free(arguments);
 }
 
@@ -145,7 +139,7 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
 
   /* -usefirstcodes */
   option = gt_option_new_bool("usefirstcodes", "use first codes instead of "
-      "random sampled codes", &arguments->usefirstcodes, true);
+      "random sampled codes", &arguments->usefirstcodes, false);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
@@ -160,7 +154,11 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   gt_option_exclude(q_option, v_option);
   gt_option_parser_add_option(op, q_option);
 
-  /* --- the following options derived from encseq2spm --- */
+  /* -usemaxdepth */
+  option = gt_option_new_bool("usemaxdepth", "use maxdepth in sortremaining",
+                             &arguments->usemaxdepth, true);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
 
   /* -checksuftab */
   option = gt_option_new_bool("checksuftab", "check the suffix table",
@@ -184,17 +182,6 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   option = gt_option_new_uint("addbscachedepth", "only determines allcodes",
                               &arguments->addbscache_depth, 5U);
   gt_option_parser_add_option(op, option);
-  gt_option_is_development_option(option);
-
-  /* -phase2extra */
-  option = gt_option_new_string("phase2extra",
-                       "specify  amount of additional space required for "
-                       "the second phase of the computation involving the "
-                       "processing of the intervals (in bytes, "
-                       "the keywords 'MB' and 'GB' are allowed)",
-                       arguments->phase2extraarg, NULL);
-  gt_option_parser_add_option(op, option);
-  arguments->refoptionphase2extra = gt_option_ref(option);
   gt_option_is_development_option(option);
 
   /* -radixlarge */
@@ -268,16 +255,6 @@ static int gt_seqcorrect_arguments_check(GT_UNUSED int rest_argc,
     if (!haserr && !gt_ma_bookkeeping_enabled()) {
       gt_error_set(err, "option '-memlimit' requires "
                         "GT_MEM_BOOKKEEPING=on");
-      haserr = true;
-    }
-  }
-  if (!haserr && gt_option_is_set(arguments->refoptionphase2extra))
-  {
-    if (gt_option_parse_spacespec(&arguments->phase2extra,
-                                  "phase2extra",
-                                  arguments->phase2extraarg,
-                                  err) != 0)
-    {
       haserr = true;
     }
   }
@@ -421,11 +398,12 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
             arguments->correction_kmersize,
             arguments->usefirstcodes,
             arguments->samplingfactor,
+            arguments->usemaxdepth,
             arguments->checksuftab,
             arguments->onlyaccum,
             arguments->onlyallrandomcodes,
             arguments->addbscache_depth,
-            arguments->phase2extra,
+            0,
             arguments->radixlarge ? false : true,
             arguments->radixparts,
             gt_randomcodes_correct_process_bucket,

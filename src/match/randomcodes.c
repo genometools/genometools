@@ -482,6 +482,7 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        GtRandomcodesintervalprocess_end
                                               itvprocess_end,
                                        void *itvprocessdata,
+                                       bool usemaxdepth,
                                        bool withsuftabcheck,
                                        GtError *err)
 {
@@ -530,7 +531,7 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        current,
                                        width,
                                        lcpvalue,
-                                       correction_kmersize);
+                                       usemaxdepth ? correction_kmersize : 0);
       if (withsuftabcheck)
       {
         gt_randomcodes_checksuftab_bucket(encseq,
@@ -671,7 +672,8 @@ typedef struct
                 sumofwidth;
   unsigned int correction_kmersize,
                bucketkey_kmersize;
-  bool withsuftabcheck;
+  bool withsuftabcheck,
+       usemaxdepth;
   GtRandomcodesintervalprocess itvprocess;
   GtRandomcodesintervalprocess_end itvprocess_end;
   void *itvprocessdata;
@@ -699,6 +701,7 @@ static void *gt_randomcodes_thread_caller_sortremaining(void *data)
                                   threadinfo->itvprocess,
                                   threadinfo->itvprocess_end,
                                   threadinfo->itvprocessdata,
+                                  threadinfo->usemaxdepth,
                                   threadinfo->withsuftabcheck,
                                   threadinfo->err) != 0)
   {
@@ -725,6 +728,7 @@ static int gt_randomcodes_thread_sortremaining(
                                        GtRandomcodesintervalprocess_end
                                          itvprocess_end,
                                        void *itvprocessdatatab,
+                                       bool usemaxdepth,
                                        bool withsuftabcheck,
                                        unsigned int threads,
                                        GtLogger *logger,
@@ -753,6 +757,7 @@ static int gt_randomcodes_thread_sortremaining(
     threadinfo[t].maxindex = endindexes[t];
     threadinfo[t].readmode = readmode;
     threadinfo[t].withsuftabcheck = withsuftabcheck;
+    threadinfo[t].usemaxdepth = usemaxdepth;
     threadinfo[t].correction_kmersize = correction_kmersize;
     threadinfo[t].bucketkey_kmersize = bucketkey_kmersize;
     threadinfo[t].itvprocess = itvprocess;
@@ -1345,6 +1350,7 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
                                       GtRandomcodesintervalprocess_end
                                         itvprocess_end,
                                       void *itvprocessdatatab,
+                                      bool usemaxdepth,
                                       GtLogger *logger,
                                       GtTimer *timer,
                                       GtError *err)
@@ -1442,6 +1448,7 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
           itvprocess,
           itvprocess_end,
           itvprocessdatatab,
+          usemaxdepth,
           withsuftabcheck,
           threads,
           logger,
@@ -1469,6 +1476,7 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
           itvprocessdatatab == NULL
           ? NULL
           : ((void **) itvprocessdatatab)[0],
+          usemaxdepth,
           withsuftabcheck,
           err) != 0)
     {
@@ -1495,6 +1503,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     unsigned int correction_kmersize,
     bool usefirstcodes,
     unsigned int sampling_factor,
+    bool usemaxdepth,
     bool withsuftabcheck,
     bool onlyaccumulation,
     bool onlyallrandomcodes,
@@ -1710,6 +1719,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      itvprocess,
                                      itvprocess_end,
                                      itvprocessdatatab,
+                                     usemaxdepth,
                                      logger,
                                      timer,
                                      err) != 0)
