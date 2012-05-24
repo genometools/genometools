@@ -139,9 +139,8 @@ int gt_randomcodes_correct_process_bucket(void *data,
 {
   unsigned long itvstart, next_itvstart;
   unsigned int lcpvalue;
-  bool haserr = false, firstedgefromroot;
+  bool haserr = false;
 
-  firstedgefromroot = true;
   for (itvstart = 0, next_itvstart = 1UL; next_itvstart < numberofsuffixes;
       next_itvstart++)
   {
