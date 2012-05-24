@@ -30,9 +30,6 @@ struct GtMetaNode
   GtStr *meta_str; /* used in gt_meta_node_get_idstr() */
 };
 
-#define gt_meta_node_cast(meta_node) \
-        gt_genome_node_cast(gt_meta_node_class(), meta_node)
-
 static void meta_node_free(GtGenomeNode *gn)
 {
   GtMetaNode *m = gt_meta_node_cast(gn);

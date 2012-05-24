@@ -42,4 +42,12 @@ const char*              gt_meta_node_get_directive(const GtMetaNode
 /* Return the meta data stored in <meta_node>. */
 const char*              gt_meta_node_get_data(const GtMetaNode *meta_node);
 
+#define                  gt_meta_node_cast(genome_node) \
+                         gt_genome_node_cast(gt_meta_node_class(), \
+                                             genome_node)
+
+#define                  gt_meta_node_try_cast(genome_node) \
+                         gt_genome_node_try_cast(gt_meta_node_class(), \
+                                                 genome_node)
+
 #endif
