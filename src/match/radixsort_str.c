@@ -133,12 +133,12 @@ GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
   rsi->twobitencoding = twobitencoding;
   rsi->equallengthplus1 = equallengthplus1;
   rsi->realtotallength = realtotallength;
-  rsi->maxwidth = maxwidth;
+  rsi->maxwidth = maxwidth/2;
   rsi->bytesinsizesofbuckets = sizeof (*rsi->sizesofbuckets) *
                                GT_RADIXSORT_STR_NOFBUCKETS;
   rsi->sizesofbuckets = gt_malloc(rsi->bytesinsizesofbuckets);
-  rsi->sorted = gt_malloc(sizeof (*rsi->sorted) * maxwidth);
-  rsi->oracle = gt_malloc(sizeof (*rsi->oracle) * maxwidth);
+  rsi->sorted = gt_malloc(sizeof (*rsi->sorted) * rsi->maxwidth);
+  rsi->oracle = gt_malloc(sizeof (*rsi->oracle) * rsi->maxwidth);
   rsi->xorvalue2lcp = usecodeslcplookuptable
     ? gt_radixsort_str_init_xorvalue2lcp() : NULL;
   return rsi;
@@ -268,6 +268,11 @@ unsigned long gt_radixsort_str_minwidth(void)
   return (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS;
 }
 
+unsigned long gt_radixsort_str_maxwidth(const GtRadixsortstringinfo *rsi)
+{
+  return rsi->maxwidth;
+}
+
 #define WITHOWNINSERTIONSORT
 #ifdef WITHOWNINSERTIONSORT
 static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
@@ -383,7 +388,7 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                             unsigned long sortmaxdepth,
                             unsigned long width)
 {
-  unsigned long idx, previousbucketsize, offset,
+  unsigned long idx, previousbucketsize,
                 *bucketindex; /* overlay with sizesofbuckets */
   GtStackGtRadixsortStrBucketInfo stack;
   GtRadixsortStrBucketInfo bucket, subbucket;
@@ -468,7 +473,8 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                           : bucketindex[bucketnum];
         if (subbucket.width > 0)
         {
-          offset = (unsigned long) (subbucket.suffixes - suffixes);
+          unsigned long offset
+            = (unsigned long) (subbucket.suffixes - suffixes);
           subbucket.lcp = bucket.lcp;
           if (lcpvalues != NULL)
           {

@@ -165,6 +165,8 @@ typedef struct
                 countcountingsort,
                 countbltriesort,
                 srs_maxremain; /* only relevant for short read sort */
+  unsigned long radixsortminwidth,
+                radixsortmaxwidth;
   GtShortreadsortworkinfo *srsw;
   const GtTwobitencoding *twobitencoding;
   GtRadixsortstringinfo *rsi;
@@ -873,7 +875,8 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       return;
     }
 #endif
-    if (bsr->rsi != NULL && width >= gt_radixsort_str_minwidth())
+    if (bsr->rsi != NULL && width >= bsr->radixsortminwidth
+                         && width <= bsr->radixsortmaxwidth)
     {
       gt_sfx_radixsort_str(bsr->rsi,
                            depth,
@@ -1384,6 +1387,8 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   bsr->prefixlength = prefixlength;
   bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  bsr->radixsortminwidth = gt_radixsort_str_minwidth();
+  bsr->radixsortmaxwidth = 0;
   if (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH)
   {
     bsr->twobitencoding = gt_encseq_twobitencoding_export(bsr->encseq);
@@ -1554,6 +1559,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                    1 + gt_encseq_equallength(bsr.encseq),
                                    gt_bcktab_nonspecialsmaxsize(bcktab),
                                    true);
+    bsr.radixsortmaxwidth = gt_radixsort_str_maxwidth(bsr.rsi);
   }
   if (outlcpinfo != NULL)
   {

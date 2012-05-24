@@ -35,6 +35,8 @@ typedef struct GtRadixsortstringinfo GtRadixsortstringinfo;
 
 unsigned long gt_radixsort_str_minwidth(void);
 
+unsigned long gt_radixsort_str_maxwidth(const GtRadixsortstringinfo *rsi);
+
 GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
                                              *twobitencoding,
                                             unsigned long realtotallength,
