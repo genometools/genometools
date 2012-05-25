@@ -47,7 +47,7 @@ struct GtGFF3Parser {
   GtFeatureInfo *feature_info;
   GtHashmap *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
             *source_to_str_mapping;
-  bool incomplete_node, /* at least on node is potentially incomplete */
+  bool incomplete_node, /* at least one node is potentially incomplete */
        checkids,
        checkregions,
        strict,
