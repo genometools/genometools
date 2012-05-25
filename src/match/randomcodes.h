@@ -57,6 +57,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(
                     GtRandomcodesintervalprocess_end itvprocess_end,
                     void *itvprocessdatatab,
                     GtLogger *logger,
+                    GtTimer *timer,
                     GtError *err);
 
 #endif

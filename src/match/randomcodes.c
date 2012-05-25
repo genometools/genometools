@@ -62,8 +62,8 @@ typedef struct
 
 typedef struct
 {
-  unsigned long firstcodehits,
-                firstcodeposhits,
+  unsigned long total_count,
+                total_inserted,
                 countcodes,
                 numofcodes,
                 codebuffer_total,
@@ -345,9 +345,9 @@ static void gt_randomcodes_accumulatecounts_flush(void *data)
     gt_radixsort_inplace_sort(fci->radixsort_code,fci->buf.nextfree);
     foundindex = gt_randomcodes_find_accu(fci,fci->buf.spaceGtUlong[0]);
     gt_assert(foundindex != ULONG_MAX);
-    fci->firstcodehits += gt_randomcodes_accumulatecounts_merge(fci,
+    fci->total_count += gt_randomcodes_accumulatecounts_merge(fci,
         fci->buf.spaceGtUlong, fci->allrandomcodes + foundindex);
-    gt_assert(fci->firstcodehits == fci->codebuffer_total);
+    gt_assert(fci->total_count == fci->codebuffer_total);
     fci->flushcount++;
     fci->buf.nextfree = 0;
   }
@@ -399,10 +399,9 @@ static void gt_randomcodes_insertsuffixes_flush(void *data)
     gt_radixsort_inplace_sort(fci->radixsort_codepos,fci->buf.nextfree);
     ptr = gt_randomcodes_find_insert(fci,fci->buf.spaceGtUlongPair[0].a);
     gt_assert(ptr != NULL);
-    fci->firstcodeposhits
-      += gt_randomcodes_insertsuffixes_merge(fci,fci->buf.spaceGtUlongPair,
-          ptr);
-    gt_assert(fci->firstcodeposhits == fci->codebuffer_total);
+    fci->total_inserted += gt_randomcodes_insertsuffixes_merge(fci,
+        fci->buf.spaceGtUlongPair, ptr);
+    gt_assert(fci->total_inserted == fci->codebuffer_total);
     fci->flushcount++;
     fci->buf.nextfree = 0;
   }
@@ -950,8 +949,8 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
   fci->allrandomcodes = NULL;
   gt_randomcodes_countocc_setnull(&fci->tab);
   fci->countcodes = 0;
-  fci->firstcodehits = 0;
-  fci->firstcodeposhits = 0;
+  fci->total_count = 0;
+  fci->total_inserted = 0;
   fci->bitsforposref = bitsforseqnum + bitsforrelpos;
   GT_INITARRAY(&fci->binsearchcache,GtIndexwithcodeRC);
   return haserr ? -1 : 0;
@@ -1030,10 +1029,11 @@ static void gt_randomcodes_generate_sampling_positions(unsigned long *buffer,
   }
 }
 
-static void gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
+static int gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
     bool usefirstcodes, unsigned long sampling_factor, const GtEncseq *encseq,
     GtReadmode readmode, unsigned int kmersize,
-    unsigned int correction_kmersize, GtLogger *logger, GtTimer *timer)
+    unsigned int correction_kmersize, size_t maximumspace,
+    GtLogger *logger, GtTimer *timer, GtError *err)
 {
   unsigned int numofchars;
   size_t sizeforcodestable;
@@ -1051,11 +1051,22 @@ static void gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
         nofsequences, totallength, kmersize, sampling_factor) + 1;
   }
   sizeforcodestable = sizeof (*fci->allrandomcodes) * fci->numofcodes;
+  if (gt_firstcodes_spacelog_total(fci->fcsl) + sizeforcodestable >
+      maximumspace)
+  {
+      gt_error_set(err,"already used %.2f MB of memory "
+                       "=> cannot compute index in at most %.2f MB",
+                       GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)),
+                       GT_MEGABYTES(maximumspace));
+      return -1;
+  }
   fci->allrandomcodes = gt_malloc(sizeforcodestable);
   GT_FCI_ADDSPLITSPACE(fci->fcsl,"allrandomcodes",sizeforcodestable);
 
   if (usefirstcodes)
   {
+    if (timer != NULL)
+      gt_timer_show_progress(timer, "to collect first codes", stdout);
     getencseqkmers_twobitencoding(encseq, readmode, kmersize,
         correction_kmersize, true, gt_storerandomcodes, fci, NULL, NULL);
   }
@@ -1109,7 +1120,6 @@ static void gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
   gt_assert(fci->allrandomcodes != NULL);
   fci->differentcodes = gt_randomcodes_remdups(fci->allrandomcodes,
       kmersize, fci->numofcodes, logger);
-  gt_randomcodes_countocc_new(fci->fcsl,&fci->tab,fci->differentcodes);
   if (fci->differentcodes > 0 && fci->differentcodes < fci->numofcodes)
   {
     fci->allrandomcodes = gt_realloc(fci->allrandomcodes,
@@ -1119,6 +1129,8 @@ static void gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
                                  sizeof (*fci->allrandomcodes) *
                                  fci->differentcodes);
   }
+  gt_randomcodes_countocc_new(fci->fcsl,&fci->tab,fci->differentcodes);
+  return 0;
 }
 
 static int gt_randomcodes_allocspace(GtRandomcodesinfo *fci,
@@ -1196,14 +1208,14 @@ static void gt_randomcodes_accumulatecounts_run(GtRandomcodesinfo *fci,
                 fci->codebuffer_total,
                 100.0 * (double) fci->codebuffer_total/
                                  gt_encseq_total_length(encseq));
-  gt_assert(fci->firstcodehits == fci->codebuffer_total);
-  if (fci->firstcodehits > 0)
+  gt_assert(fci->total_count == fci->codebuffer_total);
+  if (fci->total_count > 0)
   {
     gt_assert(fci->flushcount > 0);
-    gt_logger_log(logger,"firstcodehits=%lu (%.3f%% of all suffixes), "
+    gt_logger_log(logger,"total count=%lu (%.3f%% of all suffixes), "
                          "%u rounds (avg length %lu)",
-                         fci->firstcodehits,
-                         100.0 * (double) fci->firstcodehits/
+                         fci->total_count,
+                         100.0 * (double) fci->total_count/
                                           gt_encseq_total_length(encseq),
                          fci->flushcount,
                          fci->codebuffer_total/fci->flushcount);
@@ -1242,11 +1254,12 @@ static int gt_randomcodes_auto_parts(GtRandomcodesinfo *fci,
                                     unsigned int numofparts,
                                     unsigned long *maximumspace,
                                     unsigned long maxbucketsize,
-                                    unsigned int kmersize,
+                                    unsigned int upper_kmersize,
                                     unsigned long totallength,
                                     unsigned long maxseqlength,
                                     unsigned long suftabentries,
                                     unsigned long phase2extra,
+                                    bool usemaxdepth,
                                     GtError *err)
 {
   int retval;
@@ -1257,8 +1270,8 @@ static int gt_randomcodes_auto_parts(GtRandomcodesinfo *fci,
     *maximumspace = (unsigned long)
                     (gt_firstcodes_spacelog_peak(fci->fcsl) +
                      phase2extra +
-                     gt_shortreadsort_size(true,maxbucketsize,
-                                           maxseqlength - kmersize) +
+                     gt_shortreadsort_size(true, maxbucketsize,
+                       usemaxdepth ?  upper_kmersize : maxseqlength) +
                      4 * 4096);
   } else
   {
@@ -1518,9 +1531,9 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     itvprocess_end,
     void *itvprocessdatatab,
     GtLogger *logger,
+    GtTimer *timer,
     GtError *err)
 {
-  GtTimer *timer = NULL;
   GtRandomcodesinfo fci;
   size_t suftab_size = 0;
   unsigned int part, threadcount;
@@ -1553,21 +1566,23 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   if (!haserr)
   {
     sfxmrlist = gt_Sfxmappedrangelist_new();
-    if (gt_showtime_enabled())
-    {
-      timer = gt_timer_new_with_progress_description("to collect initial "
-                                                     "prefixes");
-      gt_timer_start(timer);
-    }
-    gt_randomcodes_collectcodes(&fci,
+    if (gt_randomcodes_collectcodes(&fci,
                                usefirstcodes,
                                sampling_factor,
                                encseq,
                                readmode,
                                kmersize,
                                correction_kmersize,
+                               maximumspace,
                                logger,
-                               timer);
+                               timer,
+                               err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
     if (fci.differentcodes > 0 && onlyallrandomcodes)
     {
       run_allcodes_distribution(fci.allrandomcodes,fci.differentcodes);
@@ -1577,10 +1592,6 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_firstcodes_spacelog_delete(fci.fcsl);
       gt_seqnumrelpos_delete(fci.buf.snrp);
       gt_Sfxmappedrangelist_delete(sfxmrlist);
-      if (timer != NULL)
-      {
-        gt_timer_delete(timer);
-      }
       return 0;
     }
     fci.flushcount = 0;
@@ -1604,8 +1615,8 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                        correction_kmersize,
                                        logger,
                                        timer);
-    suftabentries = fci.firstcodehits;
-    maxbucketsize = gt_randomcodes_partialsums(fci.fcsl,&fci.tab,suftabentries);
+    maxbucketsize = gt_randomcodes_partialsums(fci.fcsl,&fci.tab,
+        fci.total_count);
     gt_logger_log(logger,"maximum space after computing partial sums: %.2f MB",
                   GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
@@ -1617,11 +1628,12 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                             numofparts,
                                             &maximumspace,
                                             maxbucketsize,
-                                            kmersize,
+                                            correction_kmersize,
                                             totallength,
                                             maxseqlength,
-                                            suftabentries,
+                                            fci.total_count,
                                             phase2extra,
+                                            usemaxdepth,
                                             err);
       if (retval < 0)
       {
@@ -1639,7 +1651,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      NULL,
                                      &fci.tab,
                                      sfxmrlist,
-                                     suftabentries,
+                                     fci.total_count,
                                      0,
                                      logger);
     gt_assert(suftabparts_rc != NULL);
@@ -1713,7 +1725,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      part,
                                      maximumspace,
                                      threads,
-                                     suftabentries,
+                                     fci.total_count,
                                      withsuftabcheck,
                                      srswtab,
                                      itvprocess,
@@ -1728,8 +1740,6 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       }
     }
   }
-  gt_log_log("firstcodeposhits=%lu",fci.firstcodeposhits);
-  gt_log_log("codebuffer_total=%lu",fci.codebuffer_total);
   gt_log_log("suftabentries=%lu",suftabentries);
   if (timer != NULL)
   {
@@ -1749,19 +1759,18 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
         gt_shortreadsort_sumofstoredvalues(srswtab[threadcount]);
     }
     gt_logger_log(logger,"average short read depth is %.2f",
-                      (double) sumofstoredvalues/fci.firstcodeposhits);
+                      (double) sumofstoredvalues/fci.total_inserted);
   }
   if (!haserr)
   {
     if (!onlyaccumulation)
     {
-      gt_logger_log(logger,"firstcodeposhits=%lu (%.3f%% of all suffixes), "
+      gt_logger_log(logger,"total inserted=%lu (%.3f%% of all suffixes), "
                            "%u rounds (avg length %lu)",
-                           fci.firstcodeposhits,
-                           100.0 * (double) fci.firstcodeposhits/totallength,
-                           fci.flushcount,
-                           fci.codebuffer_total/fci.flushcount);
-      gt_assert(fci.firstcodeposhits == suftabentries);
+                           fci.total_inserted,
+                           100.0 * (double) fci.total_inserted/totallength,
+                           fci.flushcount, fci.codebuffer_total/fci.flushcount);
+      gt_assert(fci.total_inserted == fci.total_count);
     } else
     {
       gt_randomcodes_delete_before_end(&fci);
@@ -1805,10 +1814,5 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_firstcodes_spacelog_stop_diff(fci.fcsl);
   GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"encseq");
   gt_firstcodes_spacelog_delete(fci.fcsl);
-  if (timer != NULL)
-  {
-    gt_timer_show_progress_final(timer, stdout);
-    gt_timer_delete(timer);
-  }
   return haserr ? -1 : 0;
 }

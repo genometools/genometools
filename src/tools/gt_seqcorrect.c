@@ -410,6 +410,7 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
             NULL,
             data_array,
             verbose_logger,
+            timer,
             err) != 0)
             {
               haserr = true;
