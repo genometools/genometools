@@ -55,6 +55,7 @@ struct GtGFF3Parser {
        fasta_parsing, /* parser is in FASTA parsing mode */
        eof_emitted,
        gvf_mode;
+  GtGenomeNode *gff3_pragma;
   long offset;
   GtMapping *offset_mapping;
   GtOrphanage *orphanage;
@@ -1496,18 +1497,24 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
 }
 
 static int parse_first_gff3_line(const char *line, const char *filename,
-                                 bool *gvf_mode, bool tidy, GtError *err)
+                                 GtQueue *genome_nodes, GtStr *filenamestr,
+                                 unsigned long long *line_number,
+                                 bool *gvf_mode,
+                                 bool tidy, GtError *err)
 {
-  int version, had_err = 0;
+  int had_err = 0;
+  const char *directive;
+  char *data;
   gt_error_check(err);
   gt_assert(line && filename);
+
   if (strncmp(line, GT_GFF_VERSION_PREFIX, strlen(GT_GFF_VERSION_PREFIX))) {
     if (strncmp(line, GT_GVF_VERSION_PREFIX, strlen(GT_GVF_VERSION_PREFIX))) {
       if (tidy) {
         gt_warning("line 1 in file \"%s\" does not begin with \"%s\" or "
                    "\"%s\", create \"%s %d\" line automatically",
                    filename,
-                   GT_GFF_VERSION_PREFIX, GT_GFF_VERSION_PREFIX,
+                   GT_GFF_VERSION_PREFIX, GT_GVF_VERSION_PREFIX,
                    GT_GFF_VERSION_PREFIX, GT_GFF_VERSION);
         return 0;
       }
@@ -1521,6 +1528,20 @@ static int parse_first_gff3_line(const char *line, const char *filename,
       *gvf_mode = true;
     }
   }
+  directive = line + 2;
+  data = strchr(directive, ' ');
+  if (!data)
+    data = strchr(line+2, '\t');
+  if (data) {
+    data[0] = '\0';
+    data++;
+  }
+  else {
+    gt_error_set(err, "version pragma encountered in line %u in file "
+                      "\"%s\" does not have a version number",
+                      (unsigned int) *line_number, filename);
+    had_err = -1;
+  }
   if (!had_err) {
     line += *gvf_mode
               ? strlen(GT_GVF_VERSION_PREFIX)
@@ -1528,12 +1549,22 @@ static int parse_first_gff3_line(const char *line, const char *filename,
     /* skip blanks */
     while (line[0] == ' ')
       line++;
-    had_err = gt_parse_int_line(&version, line, 1, filename, err);
   }
-  if (!had_err && version != GT_GFF_VERSION) {
-    gt_error_set(err, "GFF version %d does not equal required version %u ",
-                 version, GT_GFF_VERSION);
-    had_err = -1;
+  if (!had_err && !(*gvf_mode)) {
+    int version;
+    had_err = gt_parse_int_line(&version, data, (unsigned int) *line_number,
+                                filename, err);
+    if (!had_err && version != GT_GFF_VERSION) {
+      gt_error_set(err, "GFF version %s does not equal required version %s ",
+                   data, GT_GFF_VERSION_STRING);
+      had_err = -1;
+    }
+  }
+  if (!had_err && *gvf_mode) {
+    GtGenomeNode *gn;
+    gn = gt_meta_node_new(directive, data);
+    gt_genome_node_set_origin(gn, filenamestr, (unsigned int) *line_number);
+    gt_queue_add(genome_nodes, gn);
   }
   if (!had_err)
     return 1;
@@ -1843,15 +1874,42 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
   else if (strncmp(line, GT_GVF_VERSION_PREFIX,
                    strlen(GT_GVF_VERSION_PREFIX)) == 0) {
     char *data;
-    data = strchr(line+2, ' ');
-    if (data) {
-      data[0] = '\0';
-      data++;
+    bool make_node = false;
+
+    if (parser->gvf_mode) {
+      if (parser->tidy) {
+        gt_warning("skipping illegal GVF version pragma in line %u of file "
+                   "\"%s\": %s", line_number, filename, line);
+      }
+      else {
+        gt_error_set(err, "illegal GVF version pragma in line %u of file "
+                          "\"%s\": %s", line_number, filename, line);
+        had_err = -1;
+      }
+    } else make_node = true;
+
+    if (make_node) {
+      if (!had_err) {
+        data = strchr(line+2, ' ');
+        if (!data)
+          data = strchr(line+2, '\t');
+        if (data) {
+          data[0] = '\0';
+          data++;
+        } else {
+          gt_error_set(err, "meta-directive encountered in line %u in file "
+                            "\"%s\" does not have data: %s", line_number,
+                            filename, line);
+          had_err = -1;
+        }
+      }
+      if (!had_err) {
+        parser->gvf_mode = true;
+        gn = gt_meta_node_new(line+2, data);
+        gt_genome_node_set_origin(gn, filenamestr, line_number);
+        gt_queue_add(genome_nodes, gn);
+      }
     }
-    parser->gvf_mode = true;
-    gn = gt_meta_node_new(line+2, data);
-    gt_genome_node_set_origin(gn, filenamestr, line_number);
-    gt_queue_add(genome_nodes, gn);
   }
   else {
     char *data;
@@ -1912,7 +1970,8 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
     (*line_number)++;
 
     if (*line_number == 1) {
-      had_err = parse_first_gff3_line(line, filename, &parser->gvf_mode,
+      had_err = parse_first_gff3_line(line, filename, genome_nodes, filenamestr,
+                                      line_number, &parser->gvf_mode,
                                       parser->tidy, err);
       if (had_err == -1) /* error */
         break;

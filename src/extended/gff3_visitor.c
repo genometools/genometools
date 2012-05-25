@@ -323,7 +323,16 @@ static int gff3_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
   gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && mn);
-  gff3_version_string(nv);
+  if (!gff3_visitor->version_string_shown) {
+    if (strncmp(gt_meta_node_get_directive(mn), GT_GFF_VERSION_DIRECTIVE,
+                strlen(GT_GFF_VERSION_DIRECTIVE)) == 0
+          || strncmp(gt_meta_node_get_directive(mn), GT_GVF_VERSION_DIRECTIVE,
+                     strlen(GT_GVF_VERSION_DIRECTIVE)) == 0) {
+      gff3_visitor->version_string_shown = true;
+    } else {
+      gff3_version_string(nv);
+    }
+  }
   gt_file_xprintf(gff3_visitor->outfp, "##%s %s\n",
                   gt_meta_node_get_directive(mn),
                   gt_meta_node_get_data(mn));
