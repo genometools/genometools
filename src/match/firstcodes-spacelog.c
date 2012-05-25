@@ -267,6 +267,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
     }
     if (size > 0)
     {
+      size_t previous_size = entry->size;
       gt_spacelog_updateaddentry(entry,filename,line,title,size,work);
       if (work)
       {
@@ -275,15 +276,15 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
       {
         fcsl->splitspace += size;
       }
-      gt_firstcodes_updatemax(fcsl);
-      if (size > entry->size)
+      if (size > previous_size)
       {
         add = true;
-        size -= entry->size;
+        size -= previous_size;
       } else
       {
-        size = entry->size - size;
+        size = previous_size - size;
       }
+      gt_firstcodes_updatemax(fcsl);
     } else
     {
       size = entry->size;
