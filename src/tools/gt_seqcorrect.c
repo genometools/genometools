@@ -418,10 +418,11 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
     }
     for (threadcount = 0; threadcount < threads; threadcount++)
     {
-      if (!haserr)
+      if (!haserr) {
         gt_randomcodes_correct_data_collect_stats(data_array[threadcount],
             threadcount, &nofkmergroups, &nofkmeritvs, &nofkmers,
             &nofcorrections);
+      }
       gt_randomcodes_correct_data_delete(data_array[threadcount]);
     }
     gt_logger_log(verbose_logger, "total number of k-mers: %lu",
@@ -433,9 +434,12 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
     gt_logger_log(verbose_logger, "number of kmer corrections: %lu",
         nofcorrections);
     gt_free(data_array);
-    if (!haserr)
-      gt_seqcorrect_apply_corrections(encseq,
-          gt_str_get(arguments->encseqinput), threads, err);
+    if (!haserr) {
+      if (gt_seqcorrect_apply_corrections(encseq,
+          gt_str_get(arguments->encseqinput), threads, err) != 0) {
+        haserr = true;
+      }
+    }
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);

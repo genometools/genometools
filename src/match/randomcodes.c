@@ -517,11 +517,12 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
       {
         lcpvalue = gt_randomcodes_codelcp(allrandomcodes[idx - 1],
             allrandomcodes[idx]);
-        gt_assert(lcpvalue >= GT_UNITSIN2BITENC - bucketkey_kmersize);
+        gt_assert(lcpvalue >=
+            (unsigned long)(GT_UNITSIN2BITENC - bucketkey_kmersize));
         lcpvalue -= (GT_UNITSIN2BITENC - (unsigned long) bucketkey_kmersize);
       }
-      gt_assert(lcpvalue < GT_UNITSIN2BITENC);
-      gt_assert(lcpvalue < correction_kmersize - 1);
+      gt_assert(lcpvalue < (unsigned long)GT_UNITSIN2BITENC);
+      gt_assert(lcpvalue < (unsigned long)(correction_kmersize - 1U));
       gt_shortreadsort_firstcodes_sort(&srsresult,
                                        srsw,
                                        snrp,
@@ -530,7 +531,8 @@ static int gt_randomcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        current,
                                        width,
                                        lcpvalue,
-                                       usemaxdepth ? correction_kmersize : 0);
+                                       usemaxdepth ?
+                                       (unsigned long)correction_kmersize : 0);
       if (withsuftabcheck)
       {
         gt_randomcodes_checksuftab_bucket(encseq,
@@ -961,7 +963,7 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
 static inline unsigned long gt_randomcodes_calculate_nofsamples(
     GT_UNUSED const GtEncseq *encseq, unsigned long nofsequences,
     unsigned long totallength, unsigned int keysize,
-    unsigned long sampling_factor)
+    unsigned int sampling_factor)
 {
   unsigned long nofkmers = totallength,
                 nofnonkmers = (keysize + 1) * nofsequences - 1,
@@ -975,7 +977,7 @@ static inline unsigned long gt_randomcodes_calculate_nofsamples(
   }
   else
   {
-    gt_assert(gt_encseq_min_seq_length(encseq) <= keysize);
+    gt_assert(gt_encseq_min_seq_length(encseq) <= (unsigned long)keysize);
   }
   nofsamples = nofkmers / sampling_factor;
   return MAX(GT_RANDOMCODES_NOFSAMPLES_MIN, nofsamples);
@@ -983,12 +985,13 @@ static inline unsigned long gt_randomcodes_calculate_nofsamples(
 
 static void gt_randomcodes_generate_sampling_positions(unsigned long *buffer,
     unsigned long numofsamples, const GtEncseq *encseq,
-    unsigned long totallength, unsigned long sampling_factor,
-    unsigned long keysize, bool sort, GtTimer *timer)
+    unsigned long totallength, unsigned int sampling_factor,
+    unsigned int keysize, bool sort, GtTimer *timer)
 {
-  unsigned long i, randmax = sampling_factor;
+  unsigned long i, randmax;
   bool sorted = true;
-  randmax = GT_MULT2(sampling_factor) - GT_DIV16(sampling_factor);
+  randmax = (unsigned long)(GT_MULT2(sampling_factor) -
+      GT_DIV16(sampling_factor));
   if (randmax >= totallength)
     randmax = totallength;
   buffer[0] = gt_rand_max(randmax);
@@ -1030,7 +1033,7 @@ static void gt_randomcodes_generate_sampling_positions(unsigned long *buffer,
 }
 
 static int gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
-    bool usefirstcodes, unsigned long sampling_factor, const GtEncseq *encseq,
+    bool usefirstcodes, unsigned int sampling_factor, const GtEncseq *encseq,
     GtReadmode readmode, unsigned int kmersize,
     unsigned int correction_kmersize, size_t maximumspace,
     GtLogger *logger, GtTimer *timer, GtError *err)
@@ -1083,8 +1086,8 @@ static int gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
     if (timer != NULL)
       gt_timer_show_progress(timer, "to generate sampling positions", stdout);
     gt_randomcodes_generate_sampling_positions(fci->allrandomcodes,
-        fci->numofcodes - 1, encseq, totallength, sampling_factor, kmersize,
-        true, timer);
+        fci->numofcodes - 1, encseq, totallength, sampling_factor,
+        kmersize, true, timer);
     if (timer != NULL)
       gt_timer_show_progress(timer, "to collect sample codes", stdout);
     for (i = 0; i < fci->numofcodes - 1; i++)
@@ -1271,7 +1274,8 @@ static int gt_randomcodes_auto_parts(GtRandomcodesinfo *fci,
                     (gt_firstcodes_spacelog_peak(fci->fcsl) +
                      phase2extra +
                      gt_shortreadsort_size(true, maxbucketsize,
-                       usemaxdepth ?  upper_kmersize : maxseqlength) +
+                       usemaxdepth ?  (unsigned long)upper_kmersize :
+                       maxseqlength) +
                      4 * 4096);
   } else
   {
@@ -1457,7 +1461,7 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
           gt_suftabparts_rc_widthofpart(part,suftabparts_rc),
           gt_suftabparts_rc_sumofwidth(part,suftabparts_rc),
           correction_kmersize,
-          (unsigned long) kmersize,
+          kmersize,
           itvprocess,
           itvprocess_end,
           itvprocessdatatab,
@@ -1483,7 +1487,7 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
           fci->currentmaxindex,
           gt_suftabparts_rc_sumofwidth(part,suftabparts_rc),
           correction_kmersize,
-          (unsigned long) kmersize,
+          kmersize,
           itvprocess,
           itvprocess_end,
           itvprocessdatatab == NULL
@@ -1573,7 +1577,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                readmode,
                                kmersize,
                                correction_kmersize,
-                               maximumspace,
+                               (size_t)maximumspace,
                                logger,
                                timer,
                                err) != 0)

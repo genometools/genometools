@@ -180,6 +180,6 @@ unsigned long gt_randomcodes_get_sample(const GtRandomcodestab *rct,
                                        unsigned long idx);
 
 unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
-    unsigned int codesize, unsigned long numofsequences, GtLogger *logger);
+    unsigned int codesize, unsigned long numofcodes, GtLogger *logger);
 
 #endif

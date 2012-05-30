@@ -62,10 +62,10 @@ static inline void gt_randomcodes_correct_process_kmer_itv(
   unsigned int i, c = cdata->c;
   cdata->nofkmeritvs++;
   cdata->nofkmers += nofsuffixes;
-  if (nofsuffixes < cdata->c)
+  if (nofsuffixes < (unsigned long)cdata->c)
   {
     cdata->alltrusted = false;
-    c = nofsuffixes;
+    c = (unsigned int)nofsuffixes;
   }
   for (i = 0; i < c; i++)
   {
@@ -106,13 +106,13 @@ static inline void gt_randomcodes_correct_process_kmergroup_end(
         {
           for (j = 0; j < cdata->count[i]; j++)
           {
+            GtUchar newchar = trusted_char;
             const unsigned long
               seqnumrelpos = (cdata->kpositions + i * cdata->c)[j];
             unsigned long abspos;
             abspos = gt_encseq_seqstartpos(cdata->encseq,
                 gt_seqnumrelpos_decode_seqnum(snrp,seqnumrelpos)) +
               gt_seqnumrelpos_decode_relpos(snrp,seqnumrelpos) + cdata->k - 1;
-            GtUchar newchar = trusted_char;
             if (abspos >= cdata->firstmirrorpos)
             {
               abspos = cdata->totallength - 1UL - abspos;

@@ -154,7 +154,7 @@ unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
     unsigned int codesize, unsigned long numofcodes, GtLogger *logger)
 {
   unsigned long numofdifferentcodes = 0,
-                shift = GT_MULT2(GT_UNITSIN2BITENC - codesize);
+                shift = (unsigned long)GT_MULT2(GT_UNITSIN2BITENC - codesize);
   if (numofcodes != 0)
   {
     unsigned long *storeptr, *readptr;
