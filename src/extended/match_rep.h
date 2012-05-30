@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include "core/error_api.h"
 #include "core/range_api.h"
+#include "core/str_api.h"
 #include "extended/match.h"
 #include "extended/match_visitor.h"
 
@@ -37,8 +38,8 @@ struct GtMatchClass
 struct GtMatch
 {
   const GtMatchClass *c_class;
-  char *seqid1,
-       *seqid2;
+  GtStr *seqid1,
+        *seqid2;
   GtRange range_seq1,
           range_seq2;
 };

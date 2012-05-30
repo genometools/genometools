@@ -20,6 +20,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/ma.h"
+#include "core/str.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/match_rep.h"
@@ -66,30 +67,60 @@ void* gt_match_try_cast(GT_UNUSED const GtMatchClass *matchc, GtMatch *match)
   return NULL;
 }
 
-void gt_match_set_seqid1(GtMatch *match, char *seqid)
+void gt_match_set_seqid1(GtMatch *match, const char *seqid)
 {
-  gt_assert(match && seqid && !match->seqid1);
-  match->seqid1 = gt_malloc((strlen(seqid) + 1) * sizeof (char));
-  strcpy(match->seqid1, seqid);
+  gt_assert(match && seqid);
+  if (!match->seqid1)
+    match->seqid1 = gt_str_new_cstr(seqid);
+  else {
+    gt_str_reset(match->seqid1);
+    gt_str_append_cstr(match->seqid1, seqid);
+  }
 }
 
-void gt_match_set_seqid2(GtMatch *match, char *seqid)
+void gt_match_set_seqid2(GtMatch *match, const char *seqid)
 {
-  gt_assert(match && seqid && !match->seqid2);
-  match->seqid2 = gt_malloc((strlen(seqid) + 1) * sizeof (char));
-  strcpy(match->seqid2, seqid);
+  gt_assert(match && seqid);
+  if (!match->seqid2)
+    match->seqid2 = gt_str_new_cstr(seqid);
+  else {
+    gt_str_reset(match->seqid2);
+    gt_str_append_cstr(match->seqid2, seqid);
+  }
+}
+
+void gt_match_set_seqid1_nt(GtMatch *match, const char *seqid,
+                            unsigned long len)
+{
+  gt_assert(match && seqid);
+  if (!match->seqid1)
+    match->seqid1 = gt_str_new();
+  else
+    gt_str_reset(match->seqid1);
+  gt_str_append_cstr_nt(match->seqid1, seqid, len);
+}
+
+void gt_match_set_seqid2_nt(GtMatch *match, const char *seqid,
+                            unsigned long len)
+{
+  gt_assert(match && seqid);
+  if (!match->seqid2)
+    match->seqid2 = gt_str_new();
+  else
+    gt_str_reset(match->seqid2);
+  gt_str_append_cstr_nt(match->seqid2, seqid, len);
 }
 
 const char* gt_match_get_seqid1(GtMatch *match)
 {
   gt_assert(match);
-  return match->seqid1;
+  return gt_str_get(match->seqid1);
 }
 
 const char* gt_match_get_seqid2(GtMatch *match)
 {
   gt_assert(match);
-  return match->seqid2;
+  return gt_str_get(match->seqid2);
 }
 
 void gt_match_get_range_seq1(GtMatch *match, GtRange *range)
@@ -131,8 +162,8 @@ void gt_match_delete(GtMatch *match)
   if (match->c_class->free)
     match->c_class->free(match);
   if (match->seqid1)
-    gt_free(match->seqid1);
+    gt_str_delete(match->seqid1);
   if (match->seqid2)
-    gt_free(match->seqid2);
+    gt_str_delete(match->seqid2);
   gt_free(match);
 }
