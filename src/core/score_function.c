@@ -22,6 +22,7 @@ struct GtScoreFunction {
   GtScoreMatrix *sm;
   int deletion_score,
       insertion_score;
+  unsigned long reference_count;
 };
 
 GtScoreFunction* gt_score_function_new(GtScoreMatrix *sm, int deletion_score,
@@ -33,6 +34,14 @@ GtScoreFunction* gt_score_function_new(GtScoreMatrix *sm, int deletion_score,
   sf->sm = sm;
   sf->deletion_score = deletion_score;
   sf->insertion_score = insertion_score;
+  sf->reference_count = 0;
+  return sf;
+}
+
+GtScoreFunction* gt_score_function_ref(GtScoreFunction *sf)
+{
+  if (!sf) return NULL;
+  sf->reference_count++;
   return sf;
 }
 
@@ -64,6 +73,10 @@ int gt_score_function_get_insertion_score(const GtScoreFunction *sf)
 void gt_score_function_delete(GtScoreFunction *sf)
 {
   if (!sf) return;
+  if (sf->reference_count) {
+    sf->reference_count--;
+    return;
+  }
   gt_score_matrix_delete(sf->sm);
   gt_free(sf);
 }

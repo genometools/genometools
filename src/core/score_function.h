@@ -24,6 +24,7 @@ typedef struct GtScoreFunction GtScoreFunction;
 
 GtScoreFunction* gt_score_function_new(GtScoreMatrix*, /* takes ownership  */
                                        int deletion_score, int insertion_score);
+GtScoreFunction* gt_score_function_ref(GtScoreFunction*);
 int              gt_score_function_get_score(const GtScoreFunction*,
                                            unsigned int, unsigned int);
 const int**      gt_score_function_get_scores(const GtScoreFunction*);
