@@ -39,7 +39,8 @@ GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
                                              *twobitencoding,
                                             unsigned long realtotallength,
                                             unsigned long equallengthplus1,
-                                            unsigned long maxwidth);
+                                            unsigned long maxwidth,
+                                            bool usecodeslcplookuptable);
 
 void gt_radixsort_str_delete(GtRadixsortstringinfo *rsi);
 

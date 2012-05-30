@@ -97,12 +97,12 @@ struct GtRadixsortstringinfo
 
 static uint8_t* gt_radixsort_str_init_xorvalue2lcp(void)
 {
-  const unsigned long nofcodes = GT_POW2(GT_MULT2(GT_RADIXSORT_STR_KMERSIZE));
-  unsigned char *xorvalue2lcp;
-  uint8_t lcp = GT_RADIXSORT_STR_KMERSIZE;
+  const unsigned long nofcodes = (unsigned long)GT_POW2(GT_MULT2(
+        GT_RADIXSORT_STR_KMERSIZE));
+  uint8_t *xorvalue2lcp, lcp = GT_RADIXSORT_STR_KMERSIZE;
   unsigned long i, j = 0, j_bound = 0;
   xorvalue2lcp = gt_malloc(sizeof (*xorvalue2lcp) * nofcodes);
-  for (i = 0; i < GT_RADIXSORT_STR_KMERSIZE; i++)
+  for (i = 0; i < (unsigned long)GT_RADIXSORT_STR_KMERSIZE; i++)
   {
     if (i > 0)
     {
@@ -123,7 +123,8 @@ GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
                                              *twobitencoding,
                                             unsigned long realtotallength,
                                             unsigned long equallengthplus1,
-                                            unsigned long maxwidth)
+                                            unsigned long maxwidth,
+                                            bool usecodeslcplookuptable)
 {
   GtRadixsortstringinfo *rsi = gt_malloc(sizeof(*rsi));
 
@@ -136,7 +137,8 @@ GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
   rsi->sizesofbuckets = gt_malloc(rsi->bytesinsizesofbuckets);
   rsi->sorted = gt_malloc(sizeof (*rsi->sorted) * maxwidth);
   rsi->oracle = gt_malloc(sizeof (*rsi->oracle) * maxwidth);
-  rsi->xorvalue2lcp = gt_radixsort_str_init_xorvalue2lcp();
+  rsi->xorvalue2lcp = usecodeslcplookuptable
+    ? gt_radixsort_str_init_xorvalue2lcp() : NULL;
   return rsi;
 }
 
@@ -222,17 +224,34 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
   }
 }
 
+static uint8_t gt_radixsort_str_xorvalue2lcp(
+    gt_radixsort_str_bucketnum_t xorvalue)
+{
+  uint8_t codeslcp = (uint8_t)GT_RADIXSORT_STR_KMERSIZE, idx;
+  for (idx = (uint8_t)GT_RADIXSORT_STR_KMERSIZE; idx > 0; idx--)
+  {
+    /* + KMERSIZELOG because of overflow bits */
+    if (xorvalue & (3 << (GT_MULT2(idx-1) + GT_RADIXSORT_STR_KMERSIZELOG)))
+    {
+      codeslcp -= idx;
+      break;
+    }
+  }
+  return codeslcp;
+}
+
 /* the following calculates the lcp of two buckets */
 static inline gt_radixsort_str_bucketnum_t
-        gt_radixsort_str_codeslcp(gt_radixsort_str_bucketnum_t a,
-                                  gt_radixsort_str_bucketnum_t b,
-                                  uint8_t *xorvalue2lcp)
+        gt_radixsort_str_codeslcp(GtRadixsortstringinfo *rsi,
+            gt_radixsort_str_bucketnum_t a, gt_radixsort_str_bucketnum_t b)
 {
   if (a != GT_RADIXSORT_STR_SPECIAL_BUCKET &&
       b != GT_RADIXSORT_STR_SPECIAL_BUCKET)
   {
     gt_radixsort_str_bucketnum_t codeslcp, maxcodeslcp, ova, ovb;
-    codeslcp = xorvalue2lcp[a ^ b];
+    codeslcp = (rsi->xorvalue2lcp != NULL)
+      ? rsi->xorvalue2lcp[(a ^ b) >> 2]
+      : gt_radixsort_str_xorvalue2lcp(a ^ b);
     /* now take the overflow into account */
     ova = GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(a);
     ovb = GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(b);
@@ -275,7 +294,7 @@ static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
         vnk = gt_radixsort_str_get_code(rsi->twobitencoding, v, depth,
                                         rsi->equallengthplus1,
                                         rsi->realtotallength);
-        codeslcp = gt_radixsort_str_codeslcp(unk, vnk, rsi->xorvalue2lcp);
+        codeslcp = gt_radixsort_str_codeslcp(rsi, unk, vnk);
         depth += codeslcp;
         if (unk < vnk)
         {
@@ -432,8 +451,8 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
           {
             if (prevbucketnum != GT_RADIXSORT_STR_SPECIAL_BUCKET)
             {
-              subbucket.lcp = bucket.depth + gt_radixsort_str_codeslcp(
-                  prevbucketnum, bucketnum, rsi->xorvalue2lcp);
+              subbucket.lcp = bucket.depth + gt_radixsort_str_codeslcp(rsi,
+                  prevbucketnum, bucketnum);
             }
             gt_lcptab_update(lcpvalues,subbucketleft,offset,
                              sortmaxdepth == 0

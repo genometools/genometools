@@ -1552,7 +1552,8 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                      ? GT_DIV2(bsr.totallength - 1)
                                      : bsr.totallength,
                                    1 + gt_encseq_equallength(bsr.encseq),
-                                   gt_bcktab_nonspecialsmaxsize(bcktab));
+                                   gt_bcktab_nonspecialsmaxsize(bcktab),
+                                   true);
   }
   if (outlcpinfo != NULL)
   {

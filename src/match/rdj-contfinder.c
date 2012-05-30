@@ -1726,7 +1726,7 @@ void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
   rsi = gt_radixsort_str_new(contfinder->twobitencoding,
                              totallength,
                              (unsigned long) contfinder->len,
-                             width);
+                             width, true);
   suffixes = gt_malloc(sizeof (unsigned long) * width);
   for (i = 0; i < width; i++)
   {
