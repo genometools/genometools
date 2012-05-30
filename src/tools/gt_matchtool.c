@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2011 Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
-  Copyright (c) 2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011      Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
+  Copyright (c) 2011-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,15 +17,18 @@
 */
 
 #include <string.h>
+#include "core/encseq.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/match.h"
 #include "extended/match_blast.h"
 #include "extended/match_open.h"
+#include "extended/match_sw.h"
 #include "extended/match_iterator_api.h"
 #include "extended/match_iterator_blast.h"
 #include "extended/match_iterator_open.h"
+#include "extended/match_iterator_sw.h"
 #include "tools/gt_matchtool.h"
 
 typedef struct {
@@ -33,6 +36,8 @@ typedef struct {
         *matchfile,
         *query,
         *db;
+  unsigned long minlen,
+                maxedist;
 } GtMatchtoolArguments;
 
 static void* gt_matchtool_arguments_new(void)
@@ -60,7 +65,8 @@ static GtOptionParser* gt_matchtool_option_parser_new(void *tool_arguments)
 {
   GtMatchtoolArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionfile, *optiondb, *optionquery;
+  GtOption *option, *optionfile, *optiondb, *optionquery, *optionminlen,
+           *optionmaxedist;
   gt_assert(arguments);
 
   static const char *type[] = {
@@ -70,6 +76,7 @@ static GtOptionParser* gt_matchtool_option_parser_new(void *tool_arguments)
     "BLASTALLN",
     "BLASTP",
     "BLASTN",
+    "SW",
     NULL
   };
 
@@ -89,7 +96,8 @@ static GtOptionParser* gt_matchtool_option_parser_new(void *tool_arguments)
                                         "BLASTALLN: invoke BLASTALL with "
                                         "blastn\n"
                                         "BLASTP   : invoke blastp\n"
-                                        "BLASTN   : invoke blastn",
+                                        "BLASTN   : invoke blastn\n"
+                                        "SW       : use Smith-Waternman",
                                 arguments->type, type[0],
                                 type);
   gt_option_parser_add_option(op, option);
@@ -104,6 +112,22 @@ static GtOptionParser* gt_matchtool_option_parser_new(void *tool_arguments)
                                     arguments->db);
   gt_option_parser_add_option(op, optiondb);
 
+  /* -swminlen */
+  optionminlen = gt_option_new_ulong("swminlen",
+                                     "set minimum required alignment length "
+                                     "(for Smith-Waterman alignment)",
+                                     &arguments->minlen,
+                                     10);
+  gt_option_parser_add_option(op, optionminlen);
+
+  /* -swmaxedist */
+  optionmaxedist = gt_option_new_ulong("swmaxedist",
+                                       "set maximum allowed edit distance "
+                                       "(for Smith-Waterman alignment)",
+                                       &arguments->maxedist,
+                                       0);
+  gt_option_parser_add_option(op, optionmaxedist);
+
   /* -query */
   optionquery = gt_option_new_filename("query", "set query file name",
                                        arguments->query);
@@ -111,6 +135,8 @@ static GtOptionParser* gt_matchtool_option_parser_new(void *tool_arguments)
 
   gt_option_imply(optiondb, optionquery);
   gt_option_imply(optionquery, optiondb);
+
+  gt_option_is_mandatory_either(optiondb, optionfile);
 
   gt_option_parser_set_min_max_args(op, 0, 0);
 
@@ -137,11 +163,12 @@ static int gt_matchtool_arguments_check(GT_UNUSED int rest_argc,
   if (strcmp(gt_str_get(arguments->type), "BLASTALLP") == 0 ||
       strcmp(gt_str_get(arguments->type), "BLASTALLN") == 0 ||
       strcmp(gt_str_get(arguments->type), "BLASTP") == 0 ||
+      strcmp(gt_str_get(arguments->type), "SW") == 0 ||
       strcmp(gt_str_get(arguments->type), "BLASTN") == 0) {
     if (gt_str_length(arguments->db) == 0
         || gt_str_length(arguments->query) == 0) {
-      gt_error_set(err, "types BLASTALLP, BLASTALLN, BLASTP, BLASTN require "
-                        "the options -db and -query");
+      gt_error_set(err, "types BLASTALLP, BLASTALLN, BLASTP, BLASTN, SW require"
+                        " the options -db and -query");
       had_err = -1;
     }
   }
@@ -150,9 +177,9 @@ static int gt_matchtool_arguments_check(GT_UNUSED int rest_argc,
 }
 
 static int gt_matchtool_runner(GT_UNUSED int argc,
-                                 GT_UNUSED const char **argv,
-                                 GT_UNUSED int parsed_args,
-                                 void *tool_arguments, GtError *err)
+                               GT_UNUSED const char **argv,
+                               GT_UNUSED int parsed_args,
+                               void *tool_arguments, GtError *err)
 {
   GtMatchtoolArguments *arguments = tool_arguments;
   GtMatchIterator *mp = NULL;
@@ -208,12 +235,44 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
                                        GT_UNDEF_DOUBLE, NULL, err);
     if (!mp)
       had_err = -1;
+  } else if (strcmp(gt_str_get(arguments->type), "SW") == 0) {
+    GtEncseqLoader *el = NULL;
+    GtEncseq *es1 = NULL, *es2 = NULL;
+    GtScoreMatrix *sm = NULL;
+    GtScoreFunction *sf = NULL;
+    el = gt_encseq_loader_new();
+    es1 = gt_encseq_loader_load(el, gt_str_get(arguments->db), err);
+    if (!es1)
+      had_err = -1;
+    if (!had_err) {
+      es2 = gt_encseq_loader_load(el, gt_str_get(arguments->query), err);
+      if (!es2)
+        had_err = -1;
+    }
+    gt_encseq_loader_delete(el);
+    if (!had_err) {
+      unsigned long i, j;
+      GtAlphabet *a;
+      gt_assert(es1 && es2);
+      a = gt_encseq_alphabet(es1);
+      sm = gt_score_matrix_new(a);
+      for (i = 0; i < gt_alphabet_num_of_chars(a); i++)
+        for (j = 0; j < gt_alphabet_num_of_chars(a); j++)
+          gt_score_matrix_set_score(sm, i, j, (i == j) ? 1 : -1);
+      sf = gt_score_function_new(sm, -1, -1);
+      mp = gt_match_iterator_sw_new(es1, es2, sf, arguments->minlen,
+                                    arguments->maxedist, err);
+      if (!mp)
+        had_err = -1;
+    }
+    gt_encseq_delete(es1);
+    gt_encseq_delete(es2);
+    gt_score_function_delete(sf);
   } else {
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  if ((!had_err) && (strcmp(gt_str_get(arguments->type),
-                                                          "OPENMATCH") == 0)) {
+  if ((!had_err) && (strcmp(gt_str_get(arguments->type), "OPENMATCH") == 0)) {
     fprintf(stdout, "seqid1\tseqid2\tstartpos1\tstartpos2\tendpos1\tendpos2\t"
                     "weight\n");
     while ((status = gt_match_iterator_next(mp, &match, err))
@@ -232,6 +291,33 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
                 range_seq1.end,
                 range_seq2.end,
                 gt_match_open_get_weight(matcho));
+        gt_match_delete(match);
+      } else if (status == GT_MATCHER_STATUS_ERROR) {
+        had_err =-1;
+        break;
+      }
+    }
+    gt_match_iterator_delete(mp);
+  } else if ((!had_err) && (strcmp(gt_str_get(arguments->type), "SW") == 0)) {
+    fprintf(stdout, "seqid1\tseqid2\tstartpos1\tstartpos2\tendpos1\tendpos2\t"
+                    "alilen\tedist\n");
+    while ((status = gt_match_iterator_next(mp, &match, err))
+                                                     != GT_MATCHER_STATUS_END) {
+      if (status == GT_MATCHER_STATUS_OK) {
+        GtMatchSW *matchs = gt_match_sw_cast(match);
+        GtRange range_seq1;
+        GtRange range_seq2;
+        gt_match_get_range_seq1(match, &range_seq1);
+        gt_match_get_range_seq2(match, &range_seq2);
+        fprintf(stdout, "%s\t%s\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\n",
+                gt_match_get_seqid1(match),
+                gt_match_get_seqid2(match),
+                range_seq1.start,
+                range_seq2.start,
+                range_seq1.end,
+                range_seq2.end,
+                gt_match_sw_get_alignment_length(matchs),
+                gt_match_sw_get_edist(matchs));
         gt_match_delete(match);
       } else if (status == GT_MATCHER_STATUS_ERROR) {
         had_err =-1;
