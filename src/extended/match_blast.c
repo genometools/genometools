@@ -24,6 +24,21 @@
 #include "extended/match_rep.h"
 #include "extended/match_visitor_rep.h"
 
+const GtMatchClass* gt_match_blast_class(void);
+
+struct GtMatchBlast {
+  GtMatch parent_instance;
+  long double evalue;
+  float bitscore;
+  unsigned long ali_length;
+};
+
+#define gt_match_blast_cast(match) \
+        gt_match_cast(gt_match_blast_class(), match);
+
+#define gt_match_blast_try_cast(match) \
+        gt_match_try_cast(gt_match_blast_class(), match);
+
 static int match_blast_accept(GtMatch *match, GtMatchVisitor *mv, GtError *err)
 {
   GtMatchBlast *mb;
@@ -55,12 +70,9 @@ GtMatch* gt_match_blast_new(char *seqid1,
 {
   GtMatch *match;
   GtMatchBlast *matchb;
-  match = gt_match_create(gt_match_blast_class());
+  match = gt_match_create(gt_match_blast_class(), start_seq1, end_seq1,
+                          start_seq2, end_seq2, seqid1, seqid2);
   matchb = gt_match_blast_cast(match);
-  gt_match_set_seqid1(match, seqid1);
-  gt_match_set_seqid2(match, seqid2);
-  gt_match_set_range_seq1(match, start_seq1, end_seq1);
-  gt_match_set_range_seq2(match, start_seq2, end_seq2);
   matchb->evalue = evalue;
   matchb->bitscore = bitscore;
   matchb->ali_length = length;

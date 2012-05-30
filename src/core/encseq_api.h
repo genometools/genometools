@@ -77,6 +77,9 @@ typedef struct GtEncseqReader GtEncseqReader;
 /* The file suffix used for MD5 fingerprints. */
 #define GT_MD5TABFILESUFFIX ".md5"
 
+/* Returns the indexname (as given at loading time) of <encseq>
+   or "generated" if the GtEncseq was build in memory only. */
+const char*       gt_encseq_indexname(const GtEncseq *encseq);
 /* Returns the total number of characters in all sequences of <encseq>,
    including separators and wildcards. */
 unsigned long     gt_encseq_total_length(const GtEncseq *encseq);

@@ -23,6 +23,19 @@
 #include "extended/match_open.h"
 #include "extended/match_rep.h"
 
+const GtMatchClass* gt_match_open_class(void);
+
+#define gt_match_open_cast(match) \
+        gt_match_cast(gt_match_open_class(), match);
+
+#define gt_match_open_try_cast(match) \
+        gt_match_try_cast(gt_match_open_class(), match);
+
+struct GtMatchOpen {
+  GtMatch parent_instance;
+  long weight;
+};
+
 static int match_open_accept(GtMatch *match, GtMatchVisitor *mv, GtError *err)
 {
   GtMatchOpen *mo;
@@ -52,11 +65,8 @@ GtMatch* gt_match_open_new(char *seqid1,
 {
   GtMatch *match;
   GtMatchOpen *matcho;
-  match = gt_match_create(gt_match_open_class());
-  gt_match_set_seqid1(match, seqid1);
-  gt_match_set_seqid2(match, seqid2);
-  gt_match_set_range_seq1(match, start_seq1, end_seq1);
-  gt_match_set_range_seq2(match, start_seq2, end_seq2);
+  match = gt_match_create(gt_match_open_class(), start_seq1, end_seq1,
+                          start_seq2, end_seq2, seqid1, seqid2);
   matcho = gt_match_open_cast(match);
   matcho->weight = weight;
   return match;

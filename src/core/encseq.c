@@ -688,6 +688,15 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
   }
 }
 
+const char* gt_encseq_indexname(const GtEncseq *encseq)
+{
+  gt_assert(encseq);
+  if (encseq->indexname)
+    return encseq->indexname;
+  else
+    return "generated";
+}
+
 /* The following function is only used in tyr-mkindex.c */
 
 bool gt_encseq_contains_special(const GtEncseq *encseq,
@@ -2059,6 +2068,8 @@ void gt_encseq_delete(GtEncseq *encseq)
   encseq->headerptr.filelengthtab = NULL;
   if (encseq->md5_tab != NULL)
     gt_md5_tab_delete(encseq->md5_tab);
+  if (encseq->indexname)
+    gt_free(encseq->indexname);
   gt_mutex_unlock(encseq->refcount_lock);
   gt_mutex_delete(encseq->refcount_lock);
   gt_free(encseq);
@@ -4297,6 +4308,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq = gt_malloc(sizeof (*encseq));
   encseq->sat = sat;
   encseq->exceptions = NULL;
+  encseq->indexname = NULL;
   encseq->oissat = GT_ACCESS_TYPE_UINT32TABLES;
   encseq->accesstype_via_utables = gt_encseq_access_type_isviautables(sat);
   encseq->satsep = determineoptimalsssptablerep(sat,totallength,
@@ -4812,6 +4824,9 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
     {
       haserr = true;
     }
+  }
+  if (!haserr) {
+    encseq->indexname = gt_cstr_dup(indexname);
   }
   if (!haserr)
   {

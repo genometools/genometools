@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,9 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MATCH_BLAST_H
-#define MATCH_BLAST_H
+#ifndef MATCH_LAST_H
+#define MATCH_LAST_H
 
-#include "extended/match_blast_api.h"
+#include "extended/match.h"
+#include "extended/match_last_api.h"
 
+const GtMatchClass* gt_match_last_class(void);
+
+#define             gt_match_last_cast(match) \
+                    gt_match_cast(gt_match_last_class(), match);
+
+#define             gt_match_last_try_cast(match) \
+                    gt_match_try_cast(gt_match_last_class(), match);
 #endif

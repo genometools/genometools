@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,9 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MATCH_BLAST_H
-#define MATCH_BLAST_H
+#ifndef MATCH_ITERATOR_LAST_H
+#define MATCH_ITERATOR_LAST_H
 
-#include "extended/match_blast_api.h"
+#include "core/encseq_api.h"
+#include "extended/match_iterator_api.h"
+
+typedef struct GtMatchIteratorLast GtMatchIteratorLast;
+
+GtMatchIterator* gt_match_iterator_last_new(GtEncseq *es1, GtEncseq *es2,
+                                            GtError *err);
+
+GtMatchIterator* gt_match_iterator_last_new_fasta(const char *fasta_file1,
+                                                  const char *fasta_file2,
+                                                  GtError *err);
 
 #endif

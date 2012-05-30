@@ -127,6 +127,7 @@ struct GtEncseq
                 numofdbfiles,
                 lengthofdbfilenames,
                 sizeofrep;
+  char *indexname;
 
   GtEncseqHeaderPtr headerptr;
 

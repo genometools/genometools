@@ -46,13 +46,13 @@ void gt_match_blast_set_bitscore(GtMatchBlast *mb, float bits);
 /* Sets <length> to be the alignment length in <mb>. */
 void gt_match_blast_set_align_length(GtMatchBlast *mb, unsigned long length);
 
-/* Returns the E-value stored in <mo>. */
+/* Returns the E-value stored in <mb>. */
 long double gt_match_blast_get_evalue(GtMatchBlast *mb);
 
-/* Returns the bit-score value stored in <mo>. */
+/* Returns the bit-score value stored in <mb>. */
 float gt_match_blast_get_bitscore(GtMatchBlast *mb);
 
-/* Returns the alignment length stored in <mo>. */
+/* Returns the alignment length stored in <mb>. */
 unsigned long gt_match_blast_get_align_length(GtMatchBlast *mb);
 
 #endif

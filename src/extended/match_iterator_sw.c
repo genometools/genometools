@@ -120,7 +120,7 @@ GtMatchIterator* gt_match_iterator_sw_new(GtEncseq *es1, GtEncseq *es2,
                                           GtScoreFunction *sf,
                                           unsigned long min_len,
                                           unsigned long max_edist,
-                                          GtError *err)
+                                          GT_UNUSED GtError *err)
 {
   GtMatchIterator *mi;
   GtMatchIteratorSW *mis;

@@ -23,10 +23,12 @@
 #include "core/unused_api.h"
 #include "extended/match.h"
 #include "extended/match_blast.h"
+#include "extended/match_last.h"
 #include "extended/match_open.h"
 #include "extended/match_sw.h"
 #include "extended/match_iterator_api.h"
 #include "extended/match_iterator_blast.h"
+#include "extended/match_iterator_last.h"
 #include "extended/match_iterator_open.h"
 #include "extended/match_iterator_sw.h"
 #include "tools/gt_matchtool.h"
@@ -76,6 +78,7 @@ static GtOptionParser* gt_matchtool_option_parser_new(void *tool_arguments)
     "BLASTALLN",
     "BLASTP",
     "BLASTN",
+    "LAST",
     "SW",
     NULL
   };
@@ -97,7 +100,8 @@ static GtOptionParser* gt_matchtool_option_parser_new(void *tool_arguments)
                                         "blastn\n"
                                         "BLASTP   : invoke blastp\n"
                                         "BLASTN   : invoke blastn\n"
-                                        "SW       : use Smith-Waternman",
+                                        "LAST     : invoke LAST\n"
+                                        "SW       : use Smith-Waterman",
                                 arguments->type, type[0],
                                 type);
   gt_option_parser_add_option(op, option);
@@ -164,11 +168,12 @@ static int gt_matchtool_arguments_check(GT_UNUSED int rest_argc,
       strcmp(gt_str_get(arguments->type), "BLASTALLN") == 0 ||
       strcmp(gt_str_get(arguments->type), "BLASTP") == 0 ||
       strcmp(gt_str_get(arguments->type), "SW") == 0 ||
+      strcmp(gt_str_get(arguments->type), "LAST") == 0 ||
       strcmp(gt_str_get(arguments->type), "BLASTN") == 0) {
     if (gt_str_length(arguments->db) == 0
         || gt_str_length(arguments->query) == 0) {
-      gt_error_set(err, "types BLASTALLP, BLASTALLN, BLASTP, BLASTN, SW require"
-                        " the options -db and -query");
+      gt_error_set(err, "types BLASTALLP, BLASTALLN, BLASTP, BLASTN, LAST, SW "
+                        "require the options -db and -query");
       had_err = -1;
     }
   }
@@ -268,6 +273,26 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
     gt_encseq_delete(es1);
     gt_encseq_delete(es2);
     gt_score_function_delete(sf);
+  } else if (strcmp(gt_str_get(arguments->type), "LAST") == 0) {
+    GtEncseqLoader *el = NULL;
+    GtEncseq *es1 = NULL, *es2 = NULL;
+    el = gt_encseq_loader_new();
+    es1 = gt_encseq_loader_load(el, gt_str_get(arguments->db), err);
+    if (!es1)
+      had_err = -1;
+    if (!had_err) {
+      es2 = gt_encseq_loader_load(el, gt_str_get(arguments->query), err);
+      if (!es2)
+        had_err = -1;
+    }
+    gt_encseq_loader_delete(el);
+    if (!had_err) {
+      mp = gt_match_iterator_last_new(es1, es2, err);
+      if (!mp)
+        had_err = -1;
+    }
+    gt_encseq_delete(es1);
+    gt_encseq_delete(es2);
   } else {
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -278,7 +303,7 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
     while ((status = gt_match_iterator_next(mp, &match, err))
                                                      != GT_MATCHER_STATUS_END) {
       if (status == GT_MATCHER_STATUS_OK) {
-        GtMatchOpen *matcho = gt_match_open_cast(match);
+        GtMatchOpen *matcho = (GtMatchOpen*) match;
         GtRange range_seq1;
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);
@@ -325,13 +350,39 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
       }
     }
     gt_match_iterator_delete(mp);
+  } else if ((!had_err) && (strcmp(gt_str_get(arguments->type), "LAST") == 0)) {
+    fprintf(stdout, "seqid1\tseqid2\tstartpos1\tstartpos2\tendpos1\tendpos2\t"
+                    "score\n");
+    while ((status = gt_match_iterator_next(mp, &match, err))
+                                                     != GT_MATCHER_STATUS_END) {
+      if (status == GT_MATCHER_STATUS_OK) {
+        GtMatchLAST *matchl = gt_match_last_cast(match);
+        GtRange range_seq1;
+        GtRange range_seq2;
+        gt_match_get_range_seq1(match, &range_seq1);
+        gt_match_get_range_seq2(match, &range_seq2);
+        fprintf(stdout, "%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\n",
+                gt_match_last_get_seqno1(matchl),
+                gt_match_last_get_seqno2(matchl),
+                range_seq1.start,
+                range_seq2.start,
+                range_seq1.end,
+                range_seq2.end,
+                gt_match_last_get_score(matchl));
+        gt_match_delete(match);
+      } else if (status == GT_MATCHER_STATUS_ERROR) {
+        had_err =-1;
+        break;
+      }
+    }
+    gt_match_iterator_delete(mp);
   } else if (!had_err) {
     fprintf(stdout, "query\tdbname2\tq.startpos\td.startpos\tq.endpos\t"
                     "d.endpos\tbit score\tevalue\tali length\n");
     while ((status = gt_match_iterator_next(mp, &match, err)) !=
                                           GT_MATCHER_STATUS_END) {
       if (status == GT_MATCHER_STATUS_OK) {
-        GtMatchBlast *matchb = gt_match_blast_cast(match);
+        GtMatchBlast *matchb = (GtMatchBlast*) match;
         GtRange range_seq1;
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);

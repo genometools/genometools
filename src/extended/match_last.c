@@ -20,70 +20,61 @@
 #include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
-#include "extended/match_sw.h"
+#include "extended/match_last.h"
 #include "extended/match_rep.h"
 
-struct GtMatchSW {
+struct GtMatchLAST {
   GtMatch parent_instance;
   unsigned long seqno1,
                 seqno2,
-                edist,
-                alilen;
+                score;
 };
 
-const GtMatchClass* gt_match_sw_class()
+const GtMatchClass* gt_match_last_class()
 {
   static const GtMatchClass *matchc = NULL;
   if (!matchc)
-    matchc = gt_match_class_new(sizeof (GtMatchSW),
+    matchc = gt_match_class_new(sizeof (GtMatchLAST),
                                 NULL,
                                 NULL);
   return matchc;
 }
 
-GtMatch* gt_match_sw_new(const char *seqid1,
-                         const char *seqid2,
-                         unsigned long seqno1,
-                         unsigned long seqno2,
-                         unsigned long length,
-                         unsigned long edist,
-                         unsigned long start_seq1,
-                         unsigned long start_seq2,
-                         unsigned long end_seq1,
-                         unsigned long end_seq2)
+GtMatch* gt_match_last_new(const char *seqid1,
+                           const char *seqid2,
+                           unsigned long score,
+                           unsigned long seqno1,
+                           unsigned long seqno2,
+                           unsigned long start_seq1,
+                           unsigned long start_seq2,
+                           unsigned long end_seq1,
+                           unsigned long end_seq2)
 {
   GtMatch *match;
-  GtMatchSW *matchs;
-  match = gt_match_create(gt_match_sw_class(), start_seq1, end_seq1,
+  GtMatchLAST *matchs;
+  match = gt_match_create(gt_match_last_class(), start_seq1, end_seq1,
                           start_seq2, end_seq2, seqid1, seqid2);
-  matchs = gt_match_sw_cast(match);
-  matchs->alilen = length;
+  matchs = gt_match_last_cast(match);
   matchs->seqno1 = seqno1;
   matchs->seqno2 = seqno2;
-  matchs->edist = edist;
+  matchs->score = score;
   return match;
 }
 
-unsigned long gt_match_sw_get_seqno1(const GtMatchSW *ms)
+unsigned long gt_match_last_get_seqno1(const GtMatchLAST *ms)
 {
   gt_assert(ms);
   return ms->seqno1;
 }
 
-unsigned long gt_match_sw_get_seqno2(const GtMatchSW *ms)
+unsigned long gt_match_last_get_seqno2(const GtMatchLAST *ms)
 {
   gt_assert(ms);
   return ms->seqno2;
 }
 
-unsigned long gt_match_sw_get_alignment_length(const GtMatchSW *ms)
+unsigned long gt_match_last_get_score(const GtMatchLAST *ms)
 {
   gt_assert(ms);
-  return ms->alilen;
-}
-
-unsigned long gt_match_sw_get_edist(const GtMatchSW *ms)
-{
-  gt_assert(ms);
-  return ms->edist;
+  return ms->score;
 }

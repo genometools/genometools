@@ -38,18 +38,27 @@ const GtMatchClass* gt_match_class_new(size_t size,
   return c_class;
 }
 
-GtMatch* gt_match_create(const GtMatchClass *matchc)
+GtMatch* gt_match_create(const GtMatchClass *matchc,
+                         unsigned long start1, unsigned long end1,
+                         unsigned long start2, unsigned long end2,
+                         const char *seqid1, const char *seqid2)
 {
   GtMatch *match;
   gt_assert(matchc && matchc->size);
   match = gt_malloc(matchc->size);
   match->c_class = matchc;
-  match->seqid1 = NULL;
-  match->seqid2 = NULL;
-  match->range_seq1.start = GT_UNDEF_LONG;
-  match->range_seq1.end = GT_UNDEF_LONG;
-  match->range_seq2.start = GT_UNDEF_LONG;
-  match->range_seq2.end = GT_UNDEF_LONG;
+  if (seqid1)
+    match->seqid1 = gt_str_new_cstr(seqid1);
+  else
+    match->seqid1 = NULL;
+  if (seqid2)
+    match->seqid2 = gt_str_new_cstr(seqid2);
+  else
+    match->seqid2 = NULL;
+  match->range_seq1.start = start1;
+  match->range_seq1.end = end1;
+  match->range_seq2.start = start2;
+  match->range_seq2.end = end2;
   return match;
 }
 

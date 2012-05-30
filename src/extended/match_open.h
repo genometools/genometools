@@ -19,20 +19,5 @@
 #define MATCH_OPEN_H
 
 #include "extended/match_open_api.h"
-#include "extended/match.h"
-#include "extended/match_rep.h"
-
-const GtMatchClass* gt_match_open_class(void);
-
-struct GtMatchOpen {
-  GtMatch parent_instance;
-  long weight;
-};
-
-#define gt_match_open_cast(match) \
-        gt_match_cast(gt_match_open_class(), match);
-
-#define gt_match_open_try_cast(match) \
-        gt_match_try_cast(gt_match_open_class(), match);
 
 #endif
