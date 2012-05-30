@@ -27,9 +27,8 @@
 typedef struct GtAlignment GtAlignment;
 
 GtAlignment*  gt_alignment_new(void);
-GtAlignment*    gt_alignment_new_with_seqs(const GtUchar *u, unsigned long ulen,
-                                           const GtUchar *v,
-                                           unsigned long vlen);
+GtAlignment*  gt_alignment_new_with_seqs(const GtUchar *u, unsigned long ulen,
+                                         const GtUchar *v, unsigned long vlen);
 void          gt_alignment_set_seqs(GtAlignment*, const GtUchar *u,
                                     unsigned long ulen,
                                     const GtUchar *v, unsigned long vlen);
@@ -40,6 +39,7 @@ void          gt_alignment_set_vrange(GtAlignment*, GtRange);
 void          gt_alignment_add_replacement(GtAlignment*);
 void          gt_alignment_add_deletion(GtAlignment*);
 void          gt_alignment_add_insertion(GtAlignment*);
+unsigned long gt_alignment_get_length(const GtAlignment *a);
 /* undo last add operation */
 void          gt_alignment_remove_last(GtAlignment*);
 /* reset list of edit operations to empty */

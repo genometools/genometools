@@ -34,7 +34,8 @@ struct GtAlignment {
   const GtUchar *u,
               *v;
   unsigned long ulen,
-                vlen;
+                vlen,
+                alilen;
   GtRange aligned_range_u,
           aligned_range_v;
   GtArray *eops;
@@ -58,6 +59,7 @@ GtAlignment* gt_alignment_new(void)
   GtAlignment *a;
   a = gt_calloc(1, sizeof (GtAlignment));
   a->eops = gt_array_new(sizeof (Multieop));
+  a->alilen = 0;
   return a;
 }
 
@@ -106,12 +108,19 @@ static void gt_alignment_add_eop(GtAlignment *a, AlignmentEoptype type)
       gt_array_add(a->eops, meop);
     }
   }
+  a->alilen++;
 }
 
 GtRange gt_alignment_get_urange(const GtAlignment *a)
 {
   gt_assert(a);
   return a->aligned_range_u;
+}
+
+unsigned long gt_alignment_get_length(const GtAlignment *a)
+{
+  gt_assert(a);
+  return a->alilen;
 }
 
 void gt_alignment_set_urange(GtAlignment *a, GtRange r)
