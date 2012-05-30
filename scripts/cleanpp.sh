@@ -34,5 +34,5 @@ rm -f *.bdx
 rm -f *.fma
 rm -f *.fmd
 rm -f *.pbt
-rm -f *.fsp
+rm -f *.md5
 rm -f *.[1-9]cxm

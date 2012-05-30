@@ -24,6 +24,7 @@
 #include "core/minmax.h"
 #include "core/stack-inlined.h"
 #include "core/unused_api.h"
+#include "core/qsort-ulong.h"
 #include "sfx-lcpvalues.h"
 #include "radixsort_str.h"
 
@@ -209,6 +210,7 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
       }
     } else
     {
+      gt_assert(pos < GT_MULT2(realtotallength + 1));
       pos = GT_MULT2(realtotallength + 1) - pos - 1;
       pos -= (remaining > (unsigned long) GT_RADIXSORT_STR_KMERSIZE)
                ? (unsigned long) GT_RADIXSORT_STR_KMERSIZE
@@ -319,7 +321,7 @@ static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
             {
               if (GT_RADIXSORT_STR_HAS_OVERFLOW(vnk))
               {
-                uvcmp = -1;
+                uvcmp = (u < v) ? -1 : 1;
               } else
               {
                 uvcmp = 1;
@@ -483,13 +485,21 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
               subbucket.lcp = bucket.depth + gt_radixsort_str_codeslcp(rsi,
                   prevbucketnum, bucketnum);
             }
-            gt_lcptab_update(lcpvalues,subbucketleft,offset,
-                             sortmaxdepth == 0
-                               ? subbucket.lcp
-                               : MIN(subbucket.lcp,sortmaxdepth));
+            if (offset > 0)
+            {
+              gt_lcptab_update(lcpvalues,subbucketleft,offset,
+                               sortmaxdepth == 0
+                                 ? subbucket.lcp
+                                 : MIN(subbucket.lcp,sortmaxdepth));
+            }
           }
           if (GT_RADIXSORT_STR_HAS_OVERFLOW(bucketnum))
           {
+            if (subbucket.width > 1UL)
+            {
+              gt_direct_qsort_ulong (6UL, false, subbucket.suffixes,
+                                     subbucket.width);
+            }
             if (lcpvalues != NULL)
             {
               unsigned long j,
