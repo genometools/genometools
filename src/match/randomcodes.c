@@ -152,7 +152,6 @@ const unsigned long gt_randomcodes_find_accu(const GtRandomcodesinfo *fci,
                                             unsigned long code)
 {
   const unsigned long *found = NULL, *leftptr = NULL, *midptr, *rightptr = NULL;
-  unsigned long previouscode = ULONG_MAX;
 
   if (code <= fci->allrandomcodes[0])
   {
@@ -181,12 +180,10 @@ const unsigned long gt_randomcodes_find_accu(const GtRandomcodesinfo *fci,
           if (leftic > fci->binsearchcache.spaceGtIndexwithcodeRC)
           {
             leftptr = (leftic-1)->ptr + 1;
-            previouscode = (leftic-1)->code;
           } else
           {
             gt_assert(code > fci->allrandomcodes[0]);
             leftptr = fci->allrandomcodes + 1;
-            previouscode = fci->allrandomcodes[0];
           }
           rightptr = rightic->ptr - 1;
           break;
@@ -202,7 +199,6 @@ const unsigned long gt_randomcodes_find_accu(const GtRandomcodesinfo *fci,
           {
             gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
             leftptr = leftic->ptr + 1;
-            previouscode = leftic->code;
             if (rightic < fci->binsearchcache.spaceGtIndexwithcodeRC +
                           fci->binsearchcache.nextfreeGtIndexwithcodeRC - 1)
             {
@@ -224,7 +220,6 @@ const unsigned long gt_randomcodes_find_accu(const GtRandomcodesinfo *fci,
   } else
   {
     leftptr = fci->allrandomcodes + 1;
-    previouscode = fci->allrandomcodes[0];
     rightptr = fci->allrandomcodes + fci->differentcodes - 1;
   }
   while (leftptr <= rightptr)
@@ -897,12 +892,11 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
                               unsigned int correction_kmersize,
                               GtError *err)
 {
-  unsigned long totallength, maxseqlength, maxrelpos, numofsequences;
+  unsigned long maxseqlength, maxrelpos, numofsequences;
   unsigned int bitsforrelpos, bitsforseqnum;
   bool haserr = false;
 
   maxseqlength = gt_encseq_max_seq_length(encseq);
-  totallength = gt_encseq_total_length(encseq);
   if (maxseqlength > (unsigned long) correction_kmersize)
   {
     maxrelpos = maxseqlength - (unsigned long) correction_kmersize;
