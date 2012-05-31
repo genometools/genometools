@@ -1040,14 +1040,16 @@ static int gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
         nofsequences, totallength, kmersize, sampling_factor) + 1;
   }
   sizeforcodestable = sizeof (*fci->allrandomcodes) * fci->numofcodes;
-  if (gt_firstcodes_spacelog_total(fci->fcsl) + sizeforcodestable >
+  if (maximumspace > 0 &&
+      gt_firstcodes_spacelog_total(fci->fcsl) + sizeforcodestable >
       maximumspace)
   {
-      gt_error_set(err,"already used %.2f MB of memory "
-                       "=> cannot compute index in at most %.2f MB",
-                       GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)),
-                       GT_MEGABYTES(maximumspace));
-      return -1;
+    gt_error_set(err,"already used %.2f MB of memory and require %.2f for the "
+        "codes table => cannot compute index in at most %.2f MB",
+        GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)),
+        GT_MEGABYTES(sizeforcodestable),
+        GT_MEGABYTES(maximumspace));
+    return -1;
   }
   fci->allrandomcodes = gt_malloc(sizeforcodestable);
   GT_FCI_ADDSPLITSPACE(fci->fcsl,"allrandomcodes",sizeforcodestable);
