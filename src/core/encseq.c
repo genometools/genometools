@@ -5747,6 +5747,19 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
             gt_md5_encoder_finish(md5enc, md5_output, md5_outbuf);
             gt_xfwrite(md5_outbuf, sizeof (char), (size_t) 33, md5fp);
           }
+          if (equallength->defined) {
+            if (equallength->valueunsignedlong > 0)
+            {
+              if (lengthofcurrentsequence != equallength->valueunsignedlong)
+              {
+                equallength->defined = false;
+              }
+            } else
+            {
+              gt_assert(lengthofcurrentsequence > 0);
+              equallength->valueunsignedlong = lengthofcurrentsequence;
+            }
+          }
         } else /* retval < 0 */
         {
           haserr = true;

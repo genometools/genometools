@@ -6,6 +6,15 @@ Test do
   run "diff #{last_stdout} #{$testdata}foobar.fas"
 end
 
+Name "gt encseq encode|decode eqlen w/ empty seq"
+Keywords "gt_encseq_encode encseq gt_encseq_decode"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo " + \
+      "#{$testdata}gt_encseq_eqlen_last_empty.fas"
+  run "#{$bin}gt encseq decode foo"
+  run "head -n -1 #{last_stdout} | diff - #{$testdata}gt_encseq_eqlen_last_empty.fas"
+end
+
 Name "gt encseq encode multiple files without indexname"
 Keywords "encseq gt_encseq_encode"
 Test do
