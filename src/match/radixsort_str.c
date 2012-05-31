@@ -283,35 +283,35 @@ static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
                                         rsi->realtotallength);
         codeslcp = gt_radixsort_str_codeslcp(rsi, unk, vnk);
         lcpvalue += codeslcp;
-        if (unk < vnk)
+        if (unk == vnk)
         {
-          uvcmp = -1;
-        } else
-        {
-          if (unk > vnk)
+          if (!GT_RADIXSORT_STR_HAS_OVERFLOW(unk))
           {
-            uvcmp = 1;
-          } else
-          {
-            if (GT_RADIXSORT_STR_HAS_OVERFLOW(unk))
+            if (!GT_RADIXSORT_STR_HAS_OVERFLOW(vnk))
             {
-              if (GT_RADIXSORT_STR_HAS_OVERFLOW(vnk))
-              {
-                uvcmp = (u < v) ? -1 : 1;
-              } else
-              {
-                uvcmp = 1;
-              }
+              uvcmp = 0;
             } else
             {
-              if (GT_RADIXSORT_STR_HAS_OVERFLOW(vnk))
-              {
-                uvcmp = -1;
-              } else
-              {
-                uvcmp = 0;
-              }
+              uvcmp = -1;
             }
+          } else
+          {
+            if (!GT_RADIXSORT_STR_HAS_OVERFLOW(vnk))
+            {
+              uvcmp = 1;
+            } else
+            {
+              uvcmp = (u < v) ? -1 : 1;
+            }
+          }
+        } else
+        {
+          if (unk < vnk)
+          {
+            uvcmp = -1;
+          } else
+          {
+            uvcmp = 1;
           }
         }
         gt_assert((uvcmp == 0 && codeslcp == GT_RADIXSORT_STR_KMERSIZE) ||
