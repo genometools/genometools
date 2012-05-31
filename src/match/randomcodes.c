@@ -85,11 +85,6 @@ typedef struct
   GtRandomcodestab tab;
 } GtRandomcodesinfo;
 
-static double gt_randomcodes_round(double d)
-{
-  return floor(d + 0.5);
-}
-
 static void gt_storerandomcodes(void *processinfo,
                                GT_UNUSED bool firstinrange,
                                GT_UNUSED unsigned long pos,
@@ -903,13 +898,11 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
                               GtError *err)
 {
   unsigned long totallength, maxseqlength, maxrelpos, numofsequences;
-  unsigned int logtotallength, bitsforrelpos, bitsforseqnum;
+  unsigned int bitsforrelpos, bitsforseqnum;
   bool haserr = false;
 
   maxseqlength = gt_encseq_max_seq_length(encseq);
   totallength = gt_encseq_total_length(encseq);
-  logtotallength
-    = (unsigned int) gt_randomcodes_round(log((double) totallength));
   if (maxseqlength > (unsigned long) correction_kmersize)
   {
     maxrelpos = maxseqlength - (unsigned long) correction_kmersize;
@@ -1038,7 +1031,6 @@ static int gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
     unsigned int correction_kmersize, size_t maximumspace,
     GtLogger *logger, GtTimer *timer, GtError *err)
 {
-  unsigned int numofchars;
   size_t sizeforcodestable;
   unsigned long totallength = gt_encseq_total_length(encseq),
                 nofsequences = gt_encseq_num_of_sequences(encseq);
@@ -1118,8 +1110,6 @@ static int gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
     gt_timer_show_progress(timer, "to sort bucket keys",stdout);
   }
   gt_radixsort_inplace_ulong(fci->allrandomcodes,fci->numofcodes);
-  numofchars = gt_encseq_alphabetnumofchars(encseq);
-  gt_assert(numofchars == 4U);
   gt_assert(fci->allrandomcodes != NULL);
   fci->differentcodes = gt_randomcodes_remdups(fci->allrandomcodes,
       kmersize, fci->numofcodes, logger);

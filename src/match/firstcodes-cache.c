@@ -254,7 +254,7 @@ unsigned long gt_randomsamples_find_accu(
     unsigned long code)
 {
   unsigned long leftptr = ULONG_MAX, rightptr = ULONG_MAX,
-                foundindex = ULONG_MAX, previouscode = ULONG_MAX;
+                foundindex = ULONG_MAX;
 
   if (code <= codes[0])
   {
@@ -288,12 +288,10 @@ unsigned long gt_randomsamples_find_accu(
           if (leftic > binsearchcache->spaceGtIndexwithcode)
           {
             leftptr = (leftic-1)->afcindex + 1;
-            previouscode = (leftic-1)->code;
           } else
           {
             gt_assert(code > codes[0]);
             leftptr = 1UL;
-            previouscode = codes[0];
           }
           gt_assert(rightic->afcindex > 0);
           rightptr = rightic->afcindex - 1;
@@ -311,7 +309,6 @@ unsigned long gt_randomsamples_find_accu(
             gt_assert(leftic->afcindex != ULONG_MAX &&
                       rightic->afcindex != ULONG_MAX);
             leftptr = leftic->afcindex + 1;
-            previouscode = leftic->code;
             if (rightic < binsearchcache->spaceGtIndexwithcode +
                           binsearchcache->nextfreeGtIndexwithcode - 1)
             {
@@ -335,7 +332,6 @@ unsigned long gt_randomsamples_find_accu(
   } else
   {
     leftptr = 1UL;
-    previouscode = codes[0];
     rightptr = differentcodes - 1;
   }
   while (leftptr <= rightptr)
