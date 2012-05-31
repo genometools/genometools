@@ -1557,8 +1557,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                      ? GT_DIV2(bsr.totallength - 1)
                                      : bsr.totallength,
                                    1 + gt_encseq_equallength(bsr.encseq),
-                                   gt_bcktab_nonspecialsmaxsize(bcktab),
-                                   true);
+                                   gt_bcktab_nonspecialsmaxsize(bcktab));
     bsr.radixsortmaxwidth = gt_radixsort_str_maxwidth(bsr.rsi);
   }
   if (outlcpinfo != NULL)

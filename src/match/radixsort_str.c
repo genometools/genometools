@@ -98,14 +98,15 @@ struct GtRadixsortstringinfo
   uint8_t *xorvalue2lcp;
 };
 
-static uint8_t* gt_radixsort_str_init_xorvalue2lcp(void)
+static uint8_t *gt_radixsort_str_init_xorvalue2lcp(void)
 {
-  const unsigned long nofcodes = (unsigned long)GT_POW2(GT_MULT2(
-        GT_RADIXSORT_STR_KMERSIZE));
+  const unsigned long nofcodes
+    = (unsigned long) GT_POW2(GT_MULT2(GT_RADIXSORT_STR_KMERSIZE));
   uint8_t *xorvalue2lcp, lcp = GT_RADIXSORT_STR_KMERSIZE;
-  unsigned long i, j = 0, j_bound = 0;
+  unsigned long i, j = 0, j_bound = 1UL;
+
   xorvalue2lcp = gt_malloc(sizeof (*xorvalue2lcp) * nofcodes);
-  for (i = 0; i < (unsigned long)GT_RADIXSORT_STR_KMERSIZE; i++)
+  for (i = 0; i < (unsigned long) GT_RADIXSORT_STR_KMERSIZE; i++)
   {
     if (i > 0)
     {
@@ -115,9 +116,12 @@ static uint8_t* gt_radixsort_str_init_xorvalue2lcp(void)
     }
     while (j < j_bound)
     {
-      xorvalue2lcp[j] = lcp;
-      j++;
+      xorvalue2lcp[j++] = lcp;
     }
+  }
+  while (j < nofcodes)
+  {
+    xorvalue2lcp[j++] = 0;
   }
   return xorvalue2lcp;
 }
@@ -126,8 +130,7 @@ GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
                                              *twobitencoding,
                                             unsigned long realtotallength,
                                             unsigned long equallengthplus1,
-                                            unsigned long maxwidth,
-                                            bool usecodeslcplookuptable)
+                                            unsigned long maxwidth)
 {
   GtRadixsortstringinfo *rsi = gt_malloc(sizeof(*rsi));
 
@@ -140,8 +143,7 @@ GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
   rsi->sizesofbuckets = gt_malloc(rsi->bytesinsizesofbuckets);
   rsi->sorted = gt_malloc(sizeof (*rsi->sorted) * rsi->maxwidth);
   rsi->oracle = gt_malloc(sizeof (*rsi->oracle) * rsi->maxwidth);
-  rsi->xorvalue2lcp = usecodeslcplookuptable
-    ? gt_radixsort_str_init_xorvalue2lcp() : NULL;
+  rsi->xorvalue2lcp = gt_radixsort_str_init_xorvalue2lcp();
   return rsi;
 }
 
@@ -228,22 +230,6 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
   }
 }
 
-static uint8_t gt_radixsort_str_xorvalue2lcp(
-    gt_radixsort_str_bucketnum_t xorvalue)
-{
-  uint8_t codeslcp = (uint8_t)GT_RADIXSORT_STR_KMERSIZE, idx;
-  for (idx = (uint8_t)GT_RADIXSORT_STR_KMERSIZE; idx > 0; idx--)
-  {
-    /* + KMERSIZELOG because of overflow bits */
-    if (xorvalue & (3 << (GT_MULT2(idx-1) + GT_RADIXSORT_STR_KMERSIZELOG)))
-    {
-      codeslcp -= idx;
-      break;
-    }
-  }
-  return codeslcp;
-}
-
 /* the following calculates the lcp of two buckets */
 static inline gt_radixsort_str_bucketnum_t
         gt_radixsort_str_codeslcp(GtRadixsortstringinfo *rsi,
@@ -253,9 +239,8 @@ static inline gt_radixsort_str_bucketnum_t
       b != GT_RADIXSORT_STR_SPECIAL_BUCKET)
   {
     gt_radixsort_str_bucketnum_t codeslcp, maxcodeslcp, ova, ovb;
-    codeslcp = (rsi->xorvalue2lcp != NULL)
-      ? rsi->xorvalue2lcp[(a ^ b) >> 2]
-      : gt_radixsort_str_xorvalue2lcp(a ^ b);
+
+    codeslcp = rsi->xorvalue2lcp[GT_DIV4(a ^ b)];
     /* now take the overflow into account */
     ova = GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(a);
     ovb = GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(b);
