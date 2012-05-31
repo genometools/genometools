@@ -1108,7 +1108,7 @@ static int gt_contfinder_output_fasta(GtContfinder *contfinder, GtError *err)
 
   fas_path = gt_str_new_cstr(contfinder->indexname);
   gt_str_append_cstr(fas_path, GT_READJOINER_SUFFIX_PREFILTERED_FAS);
-  gt_log_log("output prefiltered reads to %s", gt_str_get(fas_path));
+  gt_log_log("output MultiFasta %s", gt_str_get(fas_path));
   fas_outfp = gt_file_new(gt_str_get(fas_path), "w", err);
   if (fas_outfp == NULL)
     had_err = -1;
@@ -1128,7 +1128,7 @@ static int gt_contfinder_output_encseq(GtContfinder *contfinder, GtError *err)
       GT_ALPHABETFILESUFFIX, "wb", err);
   int had_err = 0;
   gt_assert(contfinder->len > 0);
-  gt_log_log("output prefiltered reads to encseq %s", contfinder->indexname);
+  gt_log_log("output encseq %s", contfinder->indexname);
   if (a_file == NULL)
     had_err = -1;
   gt_alphabet_output(dna, a_file);

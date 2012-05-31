@@ -32,6 +32,7 @@
 #include "core/warning_api.h"
 #include "core/xposix.h"
 #include "tools/gt_seqcorrect.h"
+#include "match/rdj-contfinder.h"
 #include "match/rdj-twobitenc-editor.h"
 #include "match/randomcodes.h"
 #include "match/randomcodes-correct.h"
@@ -57,8 +58,10 @@ typedef struct
                forcek;
   unsigned long maximumspace;
   GtStr *encseqinput,
-        *memlimitarg;
+        *memlimitarg,
+        *indexname;
   GtOption *refoptionmemlimit;
+  GtStrArray *db;
 } GtSeqcorrectArguments;
 
 static void* gt_seqcorrect_arguments_new(void)
@@ -68,8 +71,10 @@ static void* gt_seqcorrect_arguments_new(void)
   arguments->numofparts = 0;
   arguments->radixparts = 1U;
   arguments->encseqinput = gt_str_new();
+  arguments->indexname = gt_str_new();
   arguments->memlimitarg = gt_str_new();
   arguments->maximumspace = 0UL; /* in bytes */
+  arguments->db = gt_str_array_new();
   return arguments;
 }
 
@@ -78,8 +83,10 @@ static void gt_seqcorrect_arguments_delete(void *tool_arguments)
   GtSeqcorrectArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->encseqinput);
+  gt_str_delete(arguments->indexname);
   gt_option_delete(arguments->refoptionmemlimit);
   gt_str_delete(arguments->memlimitarg);
+  gt_str_array_delete(arguments->db);
   gt_free(arguments);
 }
 
@@ -87,13 +94,34 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
 {
   GtSeqcorrectArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionparts, *optionmemlimit, *q_option, *v_option;
+  GtOption *option, *optionparts, *optionmemlimit, *q_option, *v_option,
+           *db_option;
 
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("-ii <indexname> -k <kmersize> [option ...]",
-                         "K-mer based sequence correction.");
+  op = gt_option_parser_new("(-ii <indexname>|-db <filenames>) "
+      "-k <kmersize> [option ...]", "K-mer based sequence correction.");
+
+  /* -db */
+  db_option = gt_option_new_filename_array("db","specify the input "
+      "fasta files", arguments->db);
+  gt_option_hide_default(db_option);
+  gt_option_parser_add_option(op, db_option);
+
+  /* -indexname */
+  option = gt_option_new_string("indexname", "specify the indexname to use "
+      "for the input\ndefault: first argument of the -db option",
+      arguments->indexname, NULL);
+  gt_option_hide_default(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -ii */
+  option = gt_option_new_string("ii", "specify the input enseq index",
+                                arguments->encseqinput, NULL);
+  gt_option_is_mandatory_either(option, db_option);
+  gt_option_exclude(option, db_option);
+  gt_option_parser_add_option(op, option);
 
   /* -k */
   option = gt_option_new_uint_min("k", "specify the kmer size for the "
@@ -126,12 +154,6 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionmemlimit);
   gt_option_exclude(optionmemlimit, optionparts);
   arguments->refoptionmemlimit = gt_option_ref(optionmemlimit);
-
-  /* -ii */
-  option = gt_option_new_string("ii", "specify the input sequence",
-                                arguments->encseqinput, NULL);
-  gt_option_parser_add_option(op, option);
-  gt_option_is_mandatory(option);
 
   /* -forcek */
   option = gt_option_new_uint("forcek", "specify the kmersize for the bucket "
@@ -346,29 +368,52 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
   verbose_logger =
     gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
 
-  el = gt_encseq_loader_new();
-  gt_encseq_loader_drop_description_support(el);
-  gt_encseq_loader_disable_autosupport(el);
-  encseq = gt_encseq_loader_load(el, gt_str_get(arguments->encseqinput),
-      err);
-  if (encseq == NULL)
+  if (gt_str_array_size(arguments->db) != 0)
   {
-    haserr = true;
+    GtContfinder *cf;
+    if (gt_str_length(arguments->indexname) == 0)
+    {
+      gt_str_append_cstr(arguments->indexname,
+          gt_str_array_get(arguments->db, 0));
+      gt_logger_log(verbose_logger, "indexname = %s",
+          gt_str_get(arguments->indexname));
+    }
+    gt_assert(gt_str_length(arguments->indexname) != 0);
+    cf = gt_contfinder_new(arguments->db, arguments->indexname, true, err);
+    if (cf == NULL)
+      haserr = true;
+    else
+      gt_contfinder_delete(cf);
+    gt_assert(gt_str_length(arguments->encseqinput) == 0);
+    gt_str_append_cstr(arguments->encseqinput,
+        gt_str_get(arguments->indexname));
   }
   if (!haserr)
   {
-    if (gt_encseq_mirror(encseq, err) != 0)
+    el = gt_encseq_loader_new();
+    gt_encseq_loader_drop_description_support(el);
+    gt_encseq_loader_disable_autosupport(el);
+    encseq = gt_encseq_loader_load(el, gt_str_get(arguments->encseqinput),
+        err);
+    if (encseq == NULL)
     {
       haserr = true;
     }
-    if (!haserr && gt_encseq_has_md5_support(encseq))
+    if (!haserr)
     {
-      GtStr *md5path = gt_str_clone(arguments->encseqinput);
-      gt_str_append_cstr(md5path, GT_MD5TABFILESUFFIX);
-      gt_xunlink(gt_str_get(md5path));
-      gt_warning("%s deleted, as correction makes it obsolete",
-          gt_str_get(md5path));
-      gt_str_delete(md5path);
+      if (gt_encseq_mirror(encseq, err) != 0)
+      {
+        haserr = true;
+      }
+      if (!haserr && gt_encseq_has_md5_support(encseq))
+      {
+        GtStr *md5path = gt_str_clone(arguments->encseqinput);
+        gt_str_append_cstr(md5path, GT_MD5TABFILESUFFIX);
+        gt_xunlink(gt_str_get(md5path));
+        gt_warning("%s deleted, as correction makes it obsolete",
+            gt_str_get(md5path));
+        gt_str_delete(md5path);
+      }
     }
   }
   if (!haserr)

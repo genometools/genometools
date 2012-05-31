@@ -189,7 +189,7 @@ function __append_git_info {
   echo -n "# git HEAD is "                      | tee -a $_LOG
   git branch --contains HEAD -v | cut -c 3-     | tee -a $_LOG
   echo -n "# git master is "                    | tee -a $_LOG
-  git branch --contains master -v | cut -c 10-  | tee -a $_LOG
+  git log master --oneline -n 1                 | tee -a $_LOG
   cd - > /dev/null
 }
 
@@ -362,6 +362,19 @@ function run_encseq2spm {
   _READSET=$1
   _CMD="$GT $GTOPTS"
   _CMD_ARGS="encseq2spm -l $MINLEN -v -ii $_READSET $2"
+  __start
+  __append_version_genometools
+  __run
+  __end
+}
+
+function run_seqcorrect {
+  _PIPELINE=rdj
+  _STEP=seqc
+  _READSET=$1
+  __READS=$READSETSDIR/$_READSET.reads.fas
+  _CMD="$GT $GTOPTS"
+  _CMD_ARGS="dev seqcorrect -k $K -v -db $__READS -indexname $_READSET $2"
   __start
   __append_version_genometools
   __run
