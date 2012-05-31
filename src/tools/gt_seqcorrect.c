@@ -29,6 +29,8 @@
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
 #endif
+#include "core/warning_api.h"
+#include "core/xposix.h"
 #include "tools/gt_seqcorrect.h"
 #include "match/rdj-twobitenc-editor.h"
 #include "match/randomcodes.h"
@@ -359,8 +361,16 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
     {
       haserr = true;
     }
+    if (!haserr && gt_encseq_has_md5_support(encseq))
+    {
+      GtStr *md5path = gt_str_clone(arguments->encseqinput);
+      gt_str_append_cstr(md5path, GT_MD5TABFILESUFFIX);
+      gt_xunlink(gt_str_get(md5path));
+      gt_warning("%s deleted, as correction makes it obsolete",
+          gt_str_get(md5path));
+      gt_str_delete(md5path);
+    }
   }
-
   if (!haserr)
   {
     GtRandomcodesCorrectData **data_array = NULL;
