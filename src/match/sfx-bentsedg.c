@@ -1287,11 +1287,13 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
     gt_assert(pb >= pa);
     wtmp = MIN(pa,pb-pa);
     /* move w elements at the left to the middle */
+    gt_assert(pb >= wtmp && wtmp <= pb - wtmp);
     vectorswap(bsr->sssp, subbucketleft, subbucketleft+pb-wtmp, wtmp);
     gt_assert(pd >= pc);
     gt_assert(bucketright >= pd);
     wtmp = MIN(pd-pc, bucketright-pd);
     /* move w elements at the right to the middle */
+    gt_assert(bucketright + 1 >= wtmp && pb + wtmp <= bucketright+1-wtmp);
     vectorswap(bsr->sssp, subbucketleft+pb, subbucketleft+bucketright+1-wtmp,
                wtmp);
 
