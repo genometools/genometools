@@ -19,11 +19,9 @@
 #include <limits.h>
 #include <string.h>
 #include "core/intbits.h"
-#include "core/log.h"
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/stack-inlined.h"
-#include "core/unused_api.h"
 #include "core/qsort-ulong.h"
 #include "sfx-lcpvalues.h"
 #include "radixsort_str.h"
@@ -77,6 +75,16 @@ typedef uint16_t gt_radixsort_str_bucketnum_t;
           ? GT_RADIXSORT_STR_KMERSIZE\
           : GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(BUCKETNUM))
 
+typedef struct
+{
+  unsigned long *suffixes;
+  unsigned long width;
+  unsigned long depth;
+  unsigned long lcp;
+} GtRadixsortStrBucketInfo;
+
+GT_STACK_DECLARESTRUCT(GtRadixsortStrBucketInfo, 1024);
+
 struct GtRadixsortstringinfo
 {
   const GtTwobitencoding *twobitencoding;
@@ -88,6 +96,7 @@ struct GtRadixsortstringinfo
                 *sorted;
   gt_radixsort_str_bucketnum_t *oracle;
   uint8_t *xorvalue2lcp;
+  GtStackGtRadixsortStrBucketInfo stack;
 };
 
 static uint8_t *gt_radixsort_str_init_xorvalue2lcp(void)
@@ -136,6 +145,7 @@ GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
   rsi->sorted = gt_malloc(sizeof (*rsi->sorted) * rsi->maxwidth);
   rsi->oracle = gt_malloc(sizeof (*rsi->oracle) * rsi->maxwidth);
   rsi->xorvalue2lcp = gt_radixsort_str_init_xorvalue2lcp();
+  GT_STACK_INIT(&rsi->stack, 1024UL);
   return rsi;
 }
 
@@ -147,6 +157,7 @@ void gt_radixsort_str_delete(GtRadixsortstringinfo *rsi)
     gt_free(rsi->sorted);
     gt_free(rsi->oracle);
     gt_free(rsi->xorvalue2lcp);
+    GT_STACK_DELETE(&rsi->stack);
     gt_free(rsi);
   }
 }
@@ -338,16 +349,6 @@ static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
   }
 }
 
-typedef struct
-{
-  unsigned long *suffixes;
-  unsigned long width;
-  unsigned long depth;
-  unsigned long lcp;
-} GtRadixsortStrBucketInfo;
-
-GT_STACK_DECLARESTRUCT(GtRadixsortStrBucketInfo, 1024);
-
 void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                             unsigned long *suffixes,
                             GtLcpvalues *lcpvalues,
@@ -358,27 +359,25 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
 {
   unsigned long idx, previousbucketsize,
                 *bucketindex; /* overlay with sizesofbuckets */
-  GtStackGtRadixsortStrBucketInfo stack;
   GtRadixsortStrBucketInfo bucket;
 
   gt_assert(width <= rsi->maxwidth &&
             (sortmaxdepth == 0 ||
             (depth <= sortmaxdepth && sortmaxdepth <= rsi->equallengthplus1)));
 
-  GT_STACK_INIT(&stack, 1024UL);
-
   bucket.suffixes = suffixes;
   bucket.width = width;
   bucket.depth = depth;
   bucket.lcp = depth;
-  GT_STACK_PUSH(&stack, bucket);
+  gt_assert(GT_STACK_ISEMPTY(&rsi->stack));
+  GT_STACK_PUSH(&rsi->stack, bucket);
 
   bucketindex = rsi->sizesofbuckets;
-  while (!GT_STACK_ISEMPTY(&stack))
+  while (!GT_STACK_ISEMPTY(&rsi->stack))
   {
     gt_radixsort_str_bucketnum_t prevbucketnum
       = GT_RADIXSORT_STR_SPECIAL_BUCKET; /* = undefined */
-    bucket = GT_STACK_POP(&stack);
+    bucket = GT_STACK_POP(&rsi->stack);
     memset(rsi->sizesofbuckets, 0, rsi->bytesinsizesofbuckets);
 
     /* Loop A */
@@ -502,7 +501,7 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                                                  sortmaxdepth);
                 } else
                 {
-                  GT_STACK_PUSH(&stack, subbucket);
+                  GT_STACK_PUSH(&rsi->stack, subbucket);
                 }
               } else
               {
@@ -526,5 +525,4 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
       gt_assert(bucket.suffixes + bucket.width == subbucket.suffixes);
     }
   }
-  GT_STACK_DELETE(&stack);
 }
