@@ -77,14 +77,6 @@ typedef uint16_t gt_radixsort_str_bucketnum_t;
           ? GT_RADIXSORT_STR_KMERSIZE\
           : GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(BUCKETNUM))
 
-typedef struct
-{
-  unsigned long *suffixes;
-  unsigned long width;
-  unsigned long depth;
-  unsigned long lcp;
-} GtRadixsortStrBucketInfo;
-
 struct GtRadixsortstringinfo
 {
   const GtTwobitencoding *twobitencoding;
@@ -260,38 +252,37 @@ unsigned long gt_radixsort_str_maxwidth(const GtRadixsortstringinfo *rsi)
   return rsi->maxwidth;
 }
 
-#define WITHOWNINSERTIONSORT
-#ifdef WITHOWNINSERTIONSORT
 static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
+                                           unsigned long *suffixes,
                                            unsigned long subbucketleft,
-                                           const GtRadixsortStrBucketInfo
-                                             *bucket,
+                                           unsigned long width,
+                                           unsigned long depth,
                                            GtLcpvalues *lcpvalues,
                                            unsigned long sortmaxdepth)
 {
-  unsigned long pm, pl, u, v, depth;
+  unsigned long pm, pl, u, v, lcpvalue;
 
-  for (pm = 1UL; pm < bucket->width; pm++)
+  for (pm = 1UL; pm < width; pm++)
   {
     for (pl = pm; pl > 0; pl--)
     {
       gt_radixsort_str_bucketnum_t codeslcp, unk = 0, vnk = 0;
       int uvcmp = 0;
 
-      u = bucket->suffixes[pl-1];
-      v = bucket->suffixes[pl];
-      for (depth = bucket->depth;
-           (sortmaxdepth == 0 || depth <= sortmaxdepth) && uvcmp == 0;
+      u = suffixes[pl-1];
+      v = suffixes[pl];
+      for (lcpvalue = depth;
+           (sortmaxdepth == 0 || lcpvalue <= sortmaxdepth) && uvcmp == 0;
            /* Nothing */)
       {
-        unk = gt_radixsort_str_get_code(rsi->twobitencoding, u, depth,
+        unk = gt_radixsort_str_get_code(rsi->twobitencoding, u, lcpvalue,
                                         rsi->equallengthplus1,
                                         rsi->realtotallength);
-        vnk = gt_radixsort_str_get_code(rsi->twobitencoding, v, depth,
+        vnk = gt_radixsort_str_get_code(rsi->twobitencoding, v, lcpvalue,
                                         rsi->equallengthplus1,
                                         rsi->realtotallength);
         codeslcp = gt_radixsort_str_codeslcp(rsi, unk, vnk);
-        depth += codeslcp;
+        lcpvalue += codeslcp;
         if (unk < vnk)
         {
           uvcmp = -1;
@@ -334,36 +325,26 @@ static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
                            gt_lcptab_getvalue(lcpvalues,subbucketleft,pl));
         }
         gt_lcptab_update(lcpvalues,subbucketleft,pl,
-                         sortmaxdepth == 0 ? depth : MIN(depth,sortmaxdepth));
+                         sortmaxdepth == 0 ? lcpvalue
+                                           : MIN(lcpvalue,sortmaxdepth));
       }
       if (uvcmp < 0)
       {
         break;
       }
-      bucket->suffixes[pl-1] = v;
-      bucket->suffixes[pl] = u;
+      suffixes[pl-1] = v;
+      suffixes[pl] = u;
     }
   }
 }
-#else
-static void gt_radixsort_str_insertionsort(GT_UNUSED GtRadixsortstringinfo *rsi,
-                                           unsigned long subbucketleft,
-                                           const GtRadixsortStrBucketInfo
-                                             *bucket,
-                                           GtLcpvalues *lcpvalues,
-                                           GT_UNUSED unsigned long sortmaxdepth)
-{
-  if (lcpvalues != NULL)
-  {
-    unsigned long pm;
 
-    for (pm = 1UL; pm < bucket->width; pm++)
-    {
-      gt_lcptab_update(lcpvalues,subbucketleft,pm,0);
-    }
-  }
-}
-#endif
+typedef struct
+{
+  unsigned long *suffixes;
+  unsigned long width;
+  unsigned long depth;
+  unsigned long lcp;
+} GtRadixsortStrBucketInfo;
 
 GT_STACK_DECLARESTRUCT(GtRadixsortStrBucketInfo, 1024);
 
@@ -378,11 +359,11 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
   unsigned long idx, previousbucketsize,
                 *bucketindex; /* overlay with sizesofbuckets */
   GtStackGtRadixsortStrBucketInfo stack;
-  GtRadixsortStrBucketInfo bucket, subbucket;
+  GtRadixsortStrBucketInfo bucket;
 
-  gt_assert(width <= rsi->maxwidth);
-  gt_assert(sortmaxdepth == 0 ||
-            (depth <= sortmaxdepth && sortmaxdepth <= rsi->equallengthplus1));
+  gt_assert(width <= rsi->maxwidth &&
+            (sortmaxdepth == 0 ||
+            (depth <= sortmaxdepth && sortmaxdepth <= rsi->equallengthplus1)));
 
   GT_STACK_INIT(&stack, 1024UL);
 
@@ -396,8 +377,7 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
   while (!GT_STACK_ISEMPTY(&stack))
   {
     gt_radixsort_str_bucketnum_t prevbucketnum
-      = GT_RADIXSORT_STR_SPECIAL_BUCKET;
-                                   /* = undefined */
+      = GT_RADIXSORT_STR_SPECIAL_BUCKET; /* = undefined */
     bucket = GT_STACK_POP(&stack);
     memset(rsi->sizesofbuckets, 0, rsi->bytesinsizesofbuckets);
 
@@ -444,12 +424,14 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
 
     memcpy(bucket.suffixes, rsi->sorted, sizeof (*rsi->sorted) * bucket.width);
 
-    subbucket.suffixes = bucket.suffixes;
-    subbucket.depth = bucket.depth + GT_RADIXSORT_STR_KMERSIZE;
     if (bucket.depth < rsi->equallengthplus1)
     {
       gt_radixsort_str_bucketnum_t bucketnum;
+      GtRadixsortStrBucketInfo subbucket;
 
+      subbucket.suffixes = bucket.suffixes;
+      subbucket.depth = bucket.depth + GT_RADIXSORT_STR_KMERSIZE;
+      subbucket.lcp = bucket.lcp;
       for (bucketnum = 0;
            bucketnum < (gt_radixsort_str_bucketnum_t)
                        GT_RADIXSORT_STR_NOFBUCKETS;
@@ -462,13 +444,13 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
         {
           unsigned long offset
             = (unsigned long) (subbucket.suffixes - suffixes);
-          subbucket.lcp = bucket.lcp;
           if (lcpvalues != NULL)
           {
             if (prevbucketnum != GT_RADIXSORT_STR_SPECIAL_BUCKET)
             {
-              subbucket.lcp = bucket.depth + gt_radixsort_str_codeslcp(rsi,
-                  prevbucketnum, bucketnum);
+              subbucket.lcp = bucket.depth +
+                              gt_radixsort_str_codeslcp(rsi,prevbucketnum,
+                                                        bucketnum);
             }
             if (offset > 0)
             {
@@ -512,8 +494,10 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
                 if (subbucket.width <= radixsort_str_insertion_sort_max)
                 {
                   gt_radixsort_str_insertionsort(rsi,
+                                                 subbucket.suffixes,
                                                  subbucketleft + offset,
-                                                 &subbucket,
+                                                 subbucket.width,
+                                                 subbucket.depth,
                                                  lcpvalues,
                                                  sortmaxdepth);
                 } else
