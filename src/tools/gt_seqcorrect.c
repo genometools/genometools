@@ -412,7 +412,7 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
         gt_xunlink(gt_str_get(md5path));
         gt_warning("MD5 support detected -- sequence correction will "
                    "invalidate MD5 table, permanently disabling MD5 support "
-                   "in index %s", gt_str_get(md5path));
+                   "in index %s", gt_str_get(arguments->encseqinput));
         gt_str_delete(md5path);
       }
     }
