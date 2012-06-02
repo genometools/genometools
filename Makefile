@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 # Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -352,12 +352,14 @@ ifeq ($(m32),yes)
   GT_CFLAGS += -m32
   HMMER_CFLAGS += -m32
   GT_LDFLAGS += -m32
+  SQLITE_CFLAGS += -m32
 endif
 
 ifeq ($(m64),yes)
   GT_CFLAGS += -m64
   HMMER_CFLAGS += -m64
   GT_LDFLAGS += -m64
+  SQLITE_CFLAGS += -m64
 endif
 
 ifeq ($(findstring clang,$(CC)),clang)
@@ -742,7 +744,7 @@ obj/src/ltr/pdom.o: src/ltr/pdom.c $(HMMERADDTARGET)
 obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(3) -fPIC
+	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) $(3) -fPIC
 	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
 	  -MT $@ -fPIC
 
