@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011-2012 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,52 +20,32 @@
 
 #include <stdint.h>
 #include "core/file.h"
+#include "match/reads2twobit.h"
 
 typedef struct GtContfinder GtContfinder;
 
-/* totallength: if 0, the sum of the size of the files is used */
-GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
-    bool output_encseq, GtError *err);
+GtContfinder* gt_contfinder_new(GtReads2Twobit *r2t);
 
-typedef enum {
-  GT_CONTFINDER_SEQNUMS,
-  GT_CONTFINDER_2BIT,
-  GT_CONTFINDER_FASTA,
-  GT_CONTFINDER_QUIET
-} GtContfinderOutputFormat;
+void gt_contfinder_run(GtContfinder *contfinder, bool mirrored,
+    bool calculate_copynum);
 
-/*
- * rev: true = reverse complements are also considered
- *
- * format: QUIET = no output; otherwise output to GtFile *outfp
- *         in the specified format (seqnums = newline separated list of seqnums)
- *
- * sorted: false = output non contained reads, in their input order
- *         true = output all reads (including contained), lexicogr. sorted
- *
- * cntlistfilename: NULL = do not output contained reads list
- *                  otherwise = output binary contained reads list to file
- * sepposfilename: NULL = do not output separator positions list
- *                 otherwise = output binary contained reads list to file
- *                 [note: the totallength is output as last value]
- */
-int gt_contfinder_run(GtContfinder *contfinder, bool rev, GtFile *outfp,
-    GtContfinderOutputFormat format, bool sorted, const char *cntlistfilename,
-    const char *sepposfilename, const char *copynumfilename,
-    bool output_encseq, GtError *err);
-
-void gt_contfinder_delete(GtContfinder *contfinder);
-
-unsigned long gt_contfinder_totallength_without_sep(GtContfinder *contfinder);
-
-unsigned long gt_contfinder_nofseqs(GtContfinder *contfinder);
+GtBitsequence *gt_contfinder_contained(GtContfinder *contfinder);
 
 unsigned long gt_contfinder_nofcontained(GtContfinder *contfinder);
 
-unsigned long gt_contfinder_nofdiscarded(GtContfinder *contfinder);
-unsigned long gt_contfinder_discarded_length(GtContfinder *contfinder);
+int gt_contfinder_write_seqnums(GtContfinder *contfinder, bool sorted,
+    GtFile *outfp, GtError *err);
 
-unsigned long gt_contfinder_read_length(GtContfinder *contfinder);
+int gt_contfinder_write_sorted_seqnums(GtContfinder *contfinder, char* path,
+    GtError *err);
+
+int gt_contfinder_write_cntlist(GtContfinder *contfinder, char* path,
+    GtError *err);
+
+int gt_contfinder_write_copynum(GtContfinder *contfinder, char* path,
+    GtError *err);
+
+void gt_contfinder_delete(GtContfinder *contfinder);
 
 void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
     bool mirrored, unsigned long depth,

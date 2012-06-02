@@ -25,13 +25,12 @@
 #include "core/unused_api.h"
 #include "match/rdj-contfinder.h"
 #include "match/rdj-filesuf-def.h"
+#include "match/reads2twobit.h"
 #include "tools/gt_readjoiner_prefilter.h"
 
 typedef struct {
   bool verbose, quiet;
-  bool singlestrand, encodeonly, cntlist, encseqall, encseq, sorted, seqnums,
-       fasta, twobit, seppos, copynum;
-  unsigned long width;
+  bool singlestrand, encodeonly, cntlist, encseq, seqnums, fasta, copynum;
   GtStr *readset;
   GtStrArray *db;
   /* rdj-radixsort test */
@@ -63,11 +62,10 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   GtReadjoinerPrefilterArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *singlestrand_option, *encodeonly_option, *cntlist_option,
-           *fasta_option, *sorted_option, *seqnums_option, *twobit_option,
-           *seppos_option, *encseqall_option, *encseq_option, *readset_option,
-           *v_option, *q_option, *db_option, *testrs_option,
-           *testrs_depth_option, *testrs_print_option, *testrs_maxdepth_option,
-           *copynum_option;
+           *fasta_option, *seqnums_option, *encseq_option, *readset_option,
+           *v_option, *q_option, *db_option, *copynum_option,
+           *testrs_option, *testrs_depth_option, *testrs_print_option,
+           *testrs_maxdepth_option;
 
   gt_assert(arguments);
 
@@ -85,7 +83,9 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
 
   /* -db */
   db_option = gt_option_new_filename_array("db","specify the name of the "
-      "input files (Fasta format)", arguments->db);
+      "input files (Fasta format);\nmate pairs and paired reads sets "
+      "may be specified using the notation file1:file2:insertlength",
+      arguments->db);
   gt_option_hide_default(db_option);
   gt_option_is_mandatory(db_option);
   gt_option_parser_add_option(op, db_option);
@@ -108,69 +108,51 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   gt_option_is_development_option(singlestrand_option);
   gt_option_parser_add_option(op, singlestrand_option);
 
-  /* -sorted */
-  sorted_option = gt_option_new_bool("sorted",
-      "output sorted sequences/sequence numbers\n"
-      "contained reads are not eliminated",
-      &arguments->sorted, false);
-  gt_option_is_development_option(sorted_option);
-  gt_option_parser_add_option(op, sorted_option);
+  /* -encodeonly */
+  encodeonly_option = gt_option_new_bool("encodeonly",
+      "do not remove contained reads",
+      &arguments->encodeonly, false);
+  gt_option_is_development_option(encodeonly_option);
+  gt_option_parser_add_option(op, encodeonly_option);
 
   /* -encseq */
   encseq_option = gt_option_new_bool("encseq",
-      "output in encseq format",
+      "output reads in GtEncseq format",
       &arguments->encseq, true);
   gt_option_is_development_option(encseq_option);
   gt_option_parser_add_option(op, encseq_option);
 
   /* -fasta */
   fasta_option = gt_option_new_bool("fasta",
-      "output in fasta format",
+      "output reads in MultiFasta format",
       &arguments->fasta, false);
   gt_option_is_development_option(fasta_option);
   gt_option_parser_add_option(op, fasta_option);
-
-  /* -seqnums */
-  seqnums_option = gt_option_new_bool("seqnums",
-      "output sequence numbers",
-      &arguments->seqnums, false);
-  gt_option_is_development_option(seqnums_option);
-  gt_option_parser_add_option(op, seqnums_option);
-
-  /* -2bit */
-  twobit_option = gt_option_new_bool("2bit",
-      "output 2bit representation",
-      &arguments->twobit, false);
-  gt_option_is_development_option(twobit_option);
-  gt_option_parser_add_option(op, twobit_option);
 
   /* -cnt */
   cntlist_option = gt_option_new_bool("cnt",
       "output contained reads list",
       &arguments->cntlist, false);
   gt_option_is_development_option(cntlist_option);
+  gt_option_exclude(encodeonly_option, cntlist_option);
   gt_option_parser_add_option(op, cntlist_option);
 
-  /* -seppos */
-  seppos_option = gt_option_new_bool("seppos",
-      "output separator positions",
-      &arguments->seppos, false);
-  gt_option_is_development_option(seppos_option);
-  gt_option_parser_add_option(op, seppos_option);
+  /* -seqnums */
+  seqnums_option = gt_option_new_bool("seqnums",
+      "output sorted sequence numbers",
+      &arguments->seqnums, false);
+  gt_option_is_development_option(seqnums_option);
+  gt_option_exclude(encodeonly_option, seqnums_option);
+  gt_option_parser_add_option(op, seqnums_option);
 
-  /* -encodeonly */
-  encodeonly_option = gt_option_new_bool("encodeonly",
-      "exit after parsing/encoding step (before sorting)",
-      &arguments->encodeonly, false);
-  gt_option_is_development_option(encodeonly_option);
-  gt_option_parser_add_option(op, encodeonly_option);
-
-  /* -encseqall */
-  encseqall_option = gt_option_new_bool("encseqall",
-      "output encseq before containments removal",
-      &arguments->encseqall, false);
-  gt_option_is_development_option(encseqall_option);
-  gt_option_parser_add_option(op, encseqall_option);
+  /* -copynum */
+  copynum_option = gt_option_new_bool("copynum",
+      "[eqlen only] output reads copy number to <readset>"
+      GT_READJOINER_SUFFIX_READSCOPYNUM,
+      &arguments->copynum, false);
+  gt_option_is_development_option(copynum_option);
+  gt_option_exclude(encodeonly_option, copynum_option);
+  gt_option_parser_add_option(op, copynum_option);
 
   /* -testrs */
   testrs_option = gt_option_new_bool("testrs",
@@ -200,36 +182,33 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   gt_option_is_development_option(testrs_maxdepth_option);
   gt_option_parser_add_option(op, testrs_maxdepth_option);
 
-  /* -copynum */
-  copynum_option = gt_option_new_bool("copynum",
-      "[eqlen only] output reads copy number to <readset>"
-      GT_READJOINER_SUFFIX_READSCOPYNUM,
-      &arguments->copynum, false);
-  gt_option_is_development_option(copynum_option);
-  gt_option_parser_add_option(op, copynum_option);
-
   gt_option_parser_set_max_args(op, 0U);
   return op;
 }
 
-static int gt_prefilter_output_varlen_encseq(const char *indexname,
-    GtError *err)
+static void gt_readjoiner_prefilter_list_input_files(
+    GtReadjoinerPrefilterArguments *arguments, GtLogger *verbose_logger)
 {
-  GtStr *fas_path;
-  GtEncseqEncoder *encoder = gt_encseq_encoder_new();
-  GtStrArray *infiles = gt_str_array_new();
-  int had_err = 0;
+  unsigned long i;
+  GtStr *inputfileslist = gt_str_new();
+  for (i = 0; i < gt_str_array_size(arguments->db); i++)
+  {
+    gt_str_append_cstr(inputfileslist, gt_str_array_get(arguments->db, i));
+    if (i + 1 < gt_str_array_size(arguments->db))
+      gt_str_append_cstr(inputfileslist, ", ");
+  }
+  gt_logger_log(verbose_logger, "input files = %s", gt_str_get(inputfileslist));
+  gt_str_delete(inputfileslist);
+}
 
-  fas_path = gt_str_new_cstr(indexname);
-  gt_str_append_cstr(fas_path, GT_READJOINER_SUFFIX_PREFILTERED_FAS);
-  gt_str_array_add(infiles, fas_path);
-  gt_encseq_encoder_disable_description_support(encoder);
-  gt_log_log("encode prefiltered reads to encseq %s", indexname);
-  had_err = gt_encseq_encoder_encode(encoder, infiles, indexname, err);
-  gt_encseq_encoder_delete(encoder);
-  gt_str_delete(fas_path);
-  gt_str_array_delete(infiles);
-  return had_err;
+#define GT_READJOINER_PREFILTER_CF_OUTPUT(FUNC, FILESUF, MSG)\
+{\
+  GtStr *fn;\
+  fn = gt_str_new_cstr(gt_str_get(arguments->readset));\
+  gt_str_append_cstr(fn, (FILESUF));\
+  had_err = (FUNC)(contfinder, gt_str_get(fn), err);\
+  gt_logger_log(verbose_logger, MSG": %s", gt_str_get(fn));\
+  gt_str_delete(fn);\
 }
 
 static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
@@ -237,15 +216,14 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     void *tool_arguments, GtError *err)
 {
   GtReadjoinerPrefilterArguments *arguments = tool_arguments;
-  GtContfinder *contfinder;
   int had_err = 0;
   bool varlen;
-  GtStr *cntlistfilename = NULL;
-  GtStr *copynumfilename = NULL;
-  GtStr *sepposfilename = NULL;
   unsigned long i;
-  unsigned long input_nofreads, output_nofreads;
+  unsigned long nofreads_valid, nofreads_invalid, nofreads_input,
+                nofreads_output,
+                tlen_valid, tlen_invalid, tlen_input;
   GtLogger *default_logger, *verbose_logger;
+  GtReads2Twobit *r2t;
 
   default_logger =
     gt_logger_new(!arguments->quiet, GT_LOGGER_DEFLT_PREFIX, stdout);
@@ -254,136 +232,144 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
 
   gt_logger_log(default_logger, "gt readjoiner prefilter");
 
+  /* default readset name: first db argument */
   if (gt_str_length(arguments->readset) == 0)
     gt_str_append_cstr(arguments->readset, gt_str_array_get(arguments->db, 0));
   gt_logger_log(verbose_logger, "readset name = %s",
       gt_str_get(arguments->readset));
 
   if (arguments->verbose)
-  {
-    GtStr *inputfileslist = gt_str_new();
-    for (i = 0; i < gt_str_array_size(arguments->db); i++)
-    {
-      gt_str_append_cstr(inputfileslist, gt_str_array_get(arguments->db, i));
-      if (i + 1 < gt_str_array_size(arguments->db))
-        gt_str_append_cstr(inputfileslist, ", ");
-    }
-    gt_logger_log(verbose_logger, "input files = %s",
-        gt_str_get(inputfileslist));
-    gt_str_delete(inputfileslist);
-  }
+    gt_readjoiner_prefilter_list_input_files(arguments, verbose_logger);
 
-  if (arguments->cntlist)
+  r2t = gt_reads2twobit_new(arguments->readset);
+  for (i = 0; i < gt_str_array_size(arguments->db) && !had_err; i++)
   {
-    cntlistfilename = gt_str_new_cstr(gt_str_get(arguments->readset));
-    gt_str_append_cstr(cntlistfilename, GT_READJOINER_SUFFIX_CNTLIST);
-  }
-  if (arguments->seppos)
-  {
-    sepposfilename = gt_str_new_cstr(gt_str_get(arguments->readset));
-    gt_str_append_cstr(sepposfilename, GT_READJOINER_SUFFIX_SEPPOS);
-  }
-  if (arguments->copynum)
-  {
-    copynumfilename = gt_str_new_cstr(gt_str_get(arguments->readset));
-    gt_str_append_cstr(copynumfilename, GT_READJOINER_SUFFIX_READSCOPYNUM);
-  }
-
-  contfinder = gt_contfinder_new(arguments->db, arguments->readset,
-      arguments->encseqall, err);
-  varlen = gt_contfinder_read_length(contfinder) == 0;
-
-  input_nofreads = gt_contfinder_nofseqs(contfinder) +
-    gt_contfinder_nofdiscarded(contfinder);
-  output_nofreads = input_nofreads;
-  gt_logger_log(default_logger, "number of reads in complete readset = %lu",
-      input_nofreads);
-  if (varlen)
-    gt_logger_log(verbose_logger, "read length = variable");
-  else
-    gt_logger_log(verbose_logger, "read length = %lu",
-        gt_contfinder_read_length(contfinder));
-  gt_logger_log(verbose_logger, "total length of complete readset = %lu",
-      gt_contfinder_totallength_without_sep(contfinder) +
-      gt_contfinder_discarded_length(contfinder));
-  gt_logger_log(verbose_logger, "reads with ambiguities = %lu "
-      "[%.2f %% of input]", gt_contfinder_nofdiscarded(contfinder),
-      (float)gt_contfinder_nofdiscarded(contfinder) * 100 /
-      (float)input_nofreads);
-  if (!arguments->verbose)
-    gt_logger_log(default_logger, "reads with ambiguities = %lu",
-        gt_contfinder_nofdiscarded(contfinder));
-  output_nofreads -= gt_contfinder_nofdiscarded(contfinder);
-
-  if (contfinder == NULL)
-    had_err = -1;
-  else if (!arguments->encodeonly)
-  {
-    had_err = gt_contfinder_run(contfinder,
-        !arguments->singlestrand, NULL,
-        arguments->twobit ? GT_CONTFINDER_2BIT : (arguments->seqnums
-          ? GT_CONTFINDER_SEQNUMS : (arguments->fasta ? GT_CONTFINDER_FASTA
-            : GT_CONTFINDER_QUIET)), arguments->sorted, arguments->cntlist ?
-        gt_str_get(cntlistfilename) : NULL, arguments->seppos ?
-        gt_str_get(sepposfilename) : NULL, arguments->copynum ?
-        gt_str_get(copynumfilename) : NULL, arguments->encseq, err);
-    gt_logger_log(verbose_logger, "contained reads = %lu "
-        "[%.2f %% of input]",
-        gt_contfinder_nofcontained(contfinder),
-        (float)gt_contfinder_nofcontained(contfinder) * 100 /
-        (float)input_nofreads);
-    if (!had_err)
-    {
-      if (!arguments->verbose)
-      {
-        gt_logger_log(default_logger, "contained reads = %lu",
-            gt_contfinder_nofcontained(contfinder));
-      }
-      output_nofreads -= gt_contfinder_nofcontained(contfinder);
-      gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
-                    output_nofreads);
-
-      if (arguments->encseq)
-      {
-        gt_logger_log(verbose_logger, "encseq saved: %s.(esq|al1%s)",
-                      gt_str_get(arguments->readset), varlen ? "|ssp" : "");
-      }
-      if (arguments->cntlist)
-      {
-        gt_logger_log(verbose_logger, "contained reads list saved: %s",
-                      gt_str_get(cntlistfilename));
-      }
-      if (arguments->copynum)
-      {
-        gt_logger_log(verbose_logger, "reads copy number saved: %s",
-                      gt_str_get(copynumfilename));
-      }
-      if (arguments->seppos)
-      {
-        gt_logger_log(verbose_logger, "separator positions saved: %s",
-                      gt_str_get(sepposfilename));
-      }
-    }
+    GtStr *dbentry = gt_str_array_get_str(arguments->db, i);
+    had_err = gt_reads2twobit_add_library(r2t, dbentry, err);
   }
   if (!had_err)
+    had_err = gt_reads2twobit_encode(r2t, err);
+
+  if (!had_err)
   {
-    if (arguments->testrs)
+    nofreads_valid = gt_reads2twobit_nofseqs(r2t);
+    nofreads_invalid = gt_reads2twobit_nof_invalid_seqs(r2t);
+    nofreads_input = nofreads_valid + nofreads_invalid;
+    tlen_valid = gt_reads2twobit_total_seqlength(r2t) -
+      gt_reads2twobit_nofseqs(r2t);
+    tlen_invalid = gt_reads2twobit_invalid_seqs_totallength(r2t);
+    tlen_input = tlen_valid + tlen_invalid;
+
+    gt_logger_log(default_logger, "number of reads in complete readset = %lu",
+        nofreads_input);
+
+    varlen = (gt_reads2twobit_seqlen_eqlen(r2t) == 0);
+    if (varlen)
+      gt_logger_log(verbose_logger, "read length = variable [%lu..%lu]",
+          gt_reads2twobit_seqlen_min(r2t), gt_reads2twobit_seqlen_max(r2t));
+    else
+      gt_logger_log(verbose_logger, "read length = %lu",
+          gt_reads2twobit_seqlen_eqlen(r2t) - 1UL);
+
+    gt_logger_log(verbose_logger, "total length of complete readset = %lu",
+        tlen_input);
+    gt_logger_log(verbose_logger, "reads with ambiguities = %lu "
+        "[%.2f %% of input]", nofreads_invalid, (float)nofreads_invalid * 100 /
+        (float)nofreads_input);
+    if (!arguments->verbose)
+      gt_logger_log(default_logger, "reads with ambiguities = %lu",
+          nofreads_invalid);
+    nofreads_output = nofreads_valid;
+
+    if (arguments->encodeonly)
     {
-      gt_contfinder_radixsort_str_eqlen_tester(contfinder,
-          !arguments->singlestrand,
-          arguments->testrs_depth, arguments->testrs_maxdepth,
-          arguments->testrs_print);
+      if (!had_err && arguments->fasta)
+      {
+        GtStr *fn;
+        fn = gt_str_new_cstr(gt_str_get(arguments->readset));
+        gt_str_append_cstr(fn, GT_READJOINER_SUFFIX_PREFILTERED_FAS);
+        had_err = gt_reads2twobit_write_fasta(r2t, gt_str_get(fn), NULL, err);
+        gt_logger_log(verbose_logger, "readset saved: %s", gt_str_get(fn));
+        gt_str_delete(fn);
+      }
+      if (!had_err && arguments->encseq)
+      {
+        had_err = gt_reads2twobit_write_encseq(r2t, err);
+        gt_logger_log(verbose_logger, "readset saved: %s.%s",
+            gt_str_get(arguments->readset), varlen ? "(esq|ssp)" : "esq");
+      }
+      gt_logger_log(default_logger, "number of reads in output readset = %lu",
+          nofreads_output);
     }
-    gt_contfinder_delete(contfinder);
-    if (arguments->encseq && varlen)
+    else
     {
-      had_err
-        = gt_prefilter_output_varlen_encseq(gt_str_get(arguments->readset),err);
+      GtContfinder *contfinder;
+      unsigned long nofreads_contained;
+      contfinder = gt_contfinder_new(r2t);
+      gt_contfinder_run(contfinder, !arguments->singlestrand,
+          arguments->copynum);
+
+      nofreads_contained = gt_contfinder_nofcontained(contfinder);
+      nofreads_output -= nofreads_contained;
+
+      gt_logger_log(verbose_logger, "contained reads = %lu [%.2f %% of input]",
+          nofreads_contained, (float)nofreads_contained * 100 /
+          (float)nofreads_input);
+      if (!arguments->verbose)
+        gt_logger_log(default_logger, "contained reads = %lu",
+            nofreads_contained);
+
+      gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
+          nofreads_output);
+
+      if (!had_err && arguments->cntlist)
+      {
+        GT_READJOINER_PREFILTER_CF_OUTPUT(gt_contfinder_write_cntlist,
+            GT_READJOINER_SUFFIX_CNTLIST, "contained reads list saved");
+      }
+      if (!had_err && arguments->copynum)
+      {
+        GT_READJOINER_PREFILTER_CF_OUTPUT(gt_contfinder_write_copynum,
+            GT_READJOINER_SUFFIX_READSCOPYNUM, "reads copy number saved");
+      }
+      if (!had_err && arguments->seqnums)
+      {
+        GT_READJOINER_PREFILTER_CF_OUTPUT(gt_contfinder_write_sorted_seqnums,
+            GT_READJOINER_SUFFIX_SEQNUMS, "sorted sequence numbers "
+            "saved");
+      }
+      if (!had_err && arguments->fasta)
+      {
+        GtStr *fn;
+        fn = gt_str_new_cstr(gt_str_get(arguments->readset));
+        gt_str_append_cstr(fn, GT_READJOINER_SUFFIX_PREFILTERED_FAS);
+        had_err = gt_reads2twobit_write_fasta(r2t, gt_str_get(fn),
+            gt_contfinder_contained(contfinder), err);
+        gt_logger_log(verbose_logger, "suffix-prefix-free readset saved: %s",
+            gt_str_get(fn));
+        gt_str_delete(fn);
+      }
+      if (!had_err && arguments->encseq)
+      {
+        gt_reads2twobit_delete_sequences(r2t,
+            gt_contfinder_contained(contfinder));
+        had_err = gt_reads2twobit_write_encseq(r2t, err);
+        gt_logger_log(verbose_logger, "suffix-prefix-free readset saved: %s.%s",
+            gt_str_get(arguments->readset),
+            varlen ? "(esq|ssp)" : "esq");
+      }
+      if (arguments->testrs)
+      {
+        gt_contfinder_radixsort_str_eqlen_tester(contfinder,
+            !arguments->singlestrand,
+            arguments->testrs_depth, arguments->testrs_maxdepth,
+            arguments->testrs_print);
+      }
+      gt_contfinder_delete(contfinder);
     }
   }
-  gt_str_delete(cntlistfilename);
-  gt_str_delete(copynumfilename);
-  gt_str_delete(sepposfilename);
+
+  gt_reads2twobit_delete(r2t);
   gt_logger_delete(verbose_logger);
   gt_logger_delete(default_logger);
   return had_err;

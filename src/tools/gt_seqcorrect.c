@@ -32,7 +32,7 @@
 #include "core/warning_api.h"
 #include "core/xposix.h"
 #include "tools/gt_seqcorrect.h"
-#include "match/rdj-contfinder.h"
+#include "match/reads2twobit.h"
 #include "match/rdj-twobitenc-editor.h"
 #include "match/randomcodes.h"
 #include "match/randomcodes-correct.h"
@@ -370,7 +370,8 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
 
   if (gt_str_array_size(arguments->db) != 0)
   {
-    GtContfinder *cf;
+    GtReads2Twobit *r2t;
+    unsigned long i;
     if (gt_str_length(arguments->indexname) == 0)
     {
       gt_str_append_cstr(arguments->indexname,
@@ -378,12 +379,19 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
       gt_logger_log(verbose_logger, "indexname = %s",
           gt_str_get(arguments->indexname));
     }
-    gt_assert(gt_str_length(arguments->indexname) != 0);
-    cf = gt_contfinder_new(arguments->db, arguments->indexname, true, err);
-    if (cf == NULL)
-      haserr = true;
-    else
-      gt_contfinder_delete(cf);
+    r2t = gt_reads2twobit_new(arguments->indexname);
+    for (i = 0; i < gt_str_array_size(arguments->db) && !haserr; i++)
+    {
+      GtStr *dbentry = gt_str_array_get_str(arguments->db, i);
+      if (gt_reads2twobit_add_library(r2t, dbentry, err) != 0)
+        haserr = true;
+    }
+    if (!haserr)
+    {
+      if (gt_reads2twobit_encode(r2t, err) != 0)
+        haserr = true;
+    }
+    gt_reads2twobit_delete(r2t);
     gt_assert(gt_str_length(arguments->encseqinput) == 0);
     gt_str_append_cstr(arguments->encseqinput,
         gt_str_get(arguments->indexname));
