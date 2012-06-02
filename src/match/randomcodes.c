@@ -148,8 +148,8 @@ static void gt_randomcodes_fillbinsearchcache(GtRandomcodesinfo *fci,
                    (unsigned long) ((F) - fci->allrandomcodes));\
         }
 
-const unsigned long gt_randomcodes_find_accu(const GtRandomcodesinfo *fci,
-                                            unsigned long code)
+unsigned long gt_randomcodes_find_accu(const GtRandomcodesinfo *fci,
+                                       unsigned long code)
 {
   const unsigned long *found = NULL, *leftptr = NULL, *midptr, *rightptr = NULL;
 
