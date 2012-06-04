@@ -166,7 +166,8 @@ typedef struct
                 countbltriesort,
                 srs_maxremain; /* only relevant for short read sort */
   unsigned long radixsortminwidth,
-                radixsortmaxwidth;
+                radixsortmaxwidth,
+                shortreadsort_maxwidth;
   GtShortreadsortworkinfo *srsw;
   const GtTwobitencoding *twobitencoding;
   GtRadixsortstringinfo *rsi;
@@ -890,8 +891,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
     }
     if (bsr->srsw != NULL &&
         !bsr->sfxstrategy->noshortreadsort &&
-        gt_shortreadsort_size(false,width,
-                              bsr->srs_maxremain) <= bsr->sizeofworkspace)
+        width <= bsr->shortreadsort_maxwidth)
     {
       gt_shortreadsort_sssp_sort(bsr->srsw,
                                  bsr->encseq,
@@ -1415,6 +1415,9 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
                          prefixlength;
   }
   bsr->sizeofworkspace = gt_size_of_sort_workspace (sfxstrategy);
+  bsr->shortreadsort_maxwidth = gt_shortreadsort_maxwidth(false,
+                                                          bsr->srs_maxremain,
+                                                          bsr->sizeofworkspace);
   GT_INITARRAY(&bsr->mkvauxstack,GtMKVstack);
   bsr->countingsortinfo = NULL;
   bsr->medianinfospace = NULL;

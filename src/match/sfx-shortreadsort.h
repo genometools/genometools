@@ -81,4 +81,8 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
                                           processunsortedsuffixrange,
                                         void *processunsortedsuffixrangeinfo);
 
+unsigned long gt_shortreadsort_maxwidth(bool firstcodes,
+                                        unsigned long maxremain,
+                                        size_t sizeofworkspace);
+
 #endif

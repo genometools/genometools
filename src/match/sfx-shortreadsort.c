@@ -47,8 +47,7 @@ struct GtShortreadsortworkinfo
   bool fwd, complement, withmediumsizelcps;
 };
 
-static unsigned long gt_shortreadsort_encoding_size(unsigned long bucketsize,
-                                                    unsigned long maxremain)
+static double gt_shortreadsort_encoding_factor(unsigned long maxremain)
 {
   double factor = 1.0;
 
@@ -59,17 +58,38 @@ static unsigned long gt_shortreadsort_encoding_size(unsigned long bucketsize,
   {
     factor = 1.0;
   }
-  return (unsigned long) (bucketsize * factor);
+  return factor;
+}
+
+static unsigned long gt_shortreadsort_encoding_size(unsigned long bucketsize,
+                                                    unsigned long maxremain)
+{
+  return (unsigned long) (bucketsize *
+                          gt_shortreadsort_encoding_factor(maxremain));
+}
+
+static size_t gt_shortreadsort_size_perbucketentry(bool firstcodes,
+                                                   unsigned long maxremain)
+{
+  return (firstcodes ? sizeof (uint16_t) : 0) +
+         sizeof (GtShortreadsort) + sizeof (unsigned long) +
+         sizeof (GtTwobitencoding) *
+         gt_shortreadsort_encoding_factor(maxremain);
 }
 
 size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize,
                              unsigned long maxremain)
 {
-  size_t sizeforlcpvalues = firstcodes ? sizeof (uint16_t) * bucketsize : 0;
-  return sizeforlcpvalues +
-         (sizeof (GtShortreadsort) + sizeof (unsigned long)) * bucketsize +
-         sizeof (GtTwobitencoding) *
-         gt_shortreadsort_encoding_size(bucketsize,maxremain);
+  return (size_t) bucketsize *
+         gt_shortreadsort_size_perbucketentry(firstcodes,maxremain);
+}
+
+unsigned long gt_shortreadsort_maxwidth(bool firstcodes,
+                                        unsigned long maxremain,
+                                        size_t sizeofworkspace)
+{
+  return (unsigned long) sizeofworkspace/
+         gt_shortreadsort_size_perbucketentry(firstcodes,maxremain);
 }
 
 static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
@@ -103,7 +123,7 @@ static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
   if (srsw->currentbucketsize < bucketsize)
   {
     srsw->tbereservoir.allocatedGtTwobitencoding
-        = gt_shortreadsort_encoding_size(bucketsize,maxremain);
+      = gt_shortreadsort_encoding_size(bucketsize,maxremain);
     srsw->tbereservoir.spaceGtTwobitencoding
       = gt_realloc(srsw->tbereservoir.spaceGtTwobitencoding,
                    sizeof (GtTwobitencoding) *
@@ -348,7 +368,6 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           r = QSORTNAME(qsortcmparr) (pl - 1, pl, data);
           if (data->mediumsizelcpvalues != NULL)
           {
-            gt_assert (data->sssplcpvalues == NULL);
             if (pl < pm && r > 0)
             {
               data->mediumsizelcpvalues[pl+1] = data->mediumsizelcpvalues[pl];
@@ -521,8 +540,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     {
       if (data->mediumsizelcpvalues != NULL)
       {
-        gt_assert (data->sssplcpvalues == NULL &&
-                   depth + greatermaxlcp <= UINT16_MAX);
+        gt_assert (depth + greatermaxlcp <= UINT16_MAX);
         data->mediumsizelcpvalues[pn - s] = (uint16_t) (depth + greatermaxlcp);
       } else
       {
