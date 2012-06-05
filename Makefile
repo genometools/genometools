@@ -466,14 +466,10 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d)
 ifneq ($(useshared),yes)
   LIBGENOMETOOLS_OBJ += $(LIBLUA_OBJ) \
                         $(LIBEXPAT_OBJ) \
-                        $(SAMTOOLS_OBJ) \
-                        $(LIBBZ2_OBJ) \
-                        $(ZLIB_OBJ)
+                        $(SAMTOOLS_OBJ)
   LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
                         $(LIBEXPAT_DEP) \
-                        $(SAMTOOLS_DEP) \
-                        $(LIBBZ2_DEP) \
-                        $(ZLIB_DEP)
+                        $(SAMTOOLS_DEP)
 endif
 
 ifneq ($(with-sqlite),no)
