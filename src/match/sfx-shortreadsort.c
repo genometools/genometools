@@ -192,31 +192,33 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
                                     const GtShortreadsort *bq,
                                     GtShortreadsortworkinfo *srsw)
 {
-  int idx, retval;
   unsigned int maxprefix;
-  GtCommonunits commonunits;
+  GtTwobitencoding *aptr = srsw->tbereservoir.spaceGtTwobitencoding +
+                           aq->tbeidx;
+  GtTwobitencoding *bptr = srsw->tbereservoir.spaceGtTwobitencoding +
+                           bq->tbeidx;
 
-  for (idx=0, maxprefix = (unsigned int) GT_UNITSIN2BITENC;
+  for (maxprefix = (unsigned int) GT_UNITSIN2BITENC;
        /* Nothing */;
-       idx++, maxprefix+=(unsigned int) GT_UNITSIN2BITENC)
+       maxprefix += (unsigned int) GT_UNITSIN2BITENC, aptr++, bptr++)
   {
+    int retval;
+    GtCommonunits commonunits;
+    GtTwobitencoding aval = *aptr;
+    GtTwobitencoding bval = *bptr;
+
     if (aq->unitsnotspecial >= maxprefix &&
         bq->unitsnotspecial >= maxprefix)
     {
-      if (srsw->tbereservoir.spaceGtTwobitencoding[aq->tbeidx + idx] !=
-          srsw->tbereservoir.spaceGtTwobitencoding[bq->tbeidx + idx])
+      if (aval != bval)
       {
         retval = gt_encseq_compare_pairof_different_twobitencodings(
                               srsw->fwd,
                               srsw->complement,
                               &commonunits,
-                              srsw->tbereservoir.spaceGtTwobitencoding[
-                                                      aq->tbeidx + idx],
-                              srsw->tbereservoir.spaceGtTwobitencoding[
-                                                      bq->tbeidx + idx]);
-        srsw->tmplcplen
-          = (unsigned long) (maxprefix - GT_UNITSIN2BITENC +
-                             commonunits.common);
+                              aval,bval);
+        srsw->tmplcplen = (unsigned long) (maxprefix - GT_UNITSIN2BITENC +
+                                           commonunits.common);
         return retval;
       }
     } else
@@ -229,16 +231,12 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
         = aq->unitsnotspecial >= maxprefix
            ? maxprefix
            : aq->unitsnotspecial + GT_UNITSIN2BITENC - maxprefix;
-      tbe_a.tbe = (tbe_a.unitsnotspecial > 0)
-        ? srsw->tbereservoir.spaceGtTwobitencoding[aq->tbeidx + idx]
-        : 0;
+      tbe_a.tbe = tbe_a.unitsnotspecial > 0 ? aval : 0;
       tbe_b.unitsnotspecial
         = bq->unitsnotspecial >= maxprefix
            ? maxprefix
            : bq->unitsnotspecial + GT_UNITSIN2BITENC - maxprefix;
-      tbe_b.tbe = (tbe_b.unitsnotspecial > 0)
-        ? srsw->tbereservoir.spaceGtTwobitencoding[bq->tbeidx + idx]
-        : 0;
+      tbe_b.tbe = tbe_b.unitsnotspecial > 0 ? bval : 0;
       retval = gt_encseq_compare_pairof_twobitencodings(srsw->fwd,
                                                         srsw->complement,
                                                         &commonunits,
@@ -310,13 +308,10 @@ static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
   return QSORTNAME(qsortcmparr) (a, b, data) < 0
            ? (QSORTNAME(qsortcmparr) (b, c, data) < 0
                 ? b
-                : (QSORTNAME(qsortcmparr) (a, c, data) < 0
-                     ? c : a))
+                : (QSORTNAME(qsortcmparr) (a, c, data) < 0 ? c : a))
            : (QSORTNAME(qsortcmparr) (b, c, data) > 0
                 ? b
-                : (QSORTNAME(qsortcmparr) (a, c, data) < 0
-                     ? a
-                     : c));
+                : (QSORTNAME(qsortcmparr) (a, c, data) < 0 ? a : c));
 }
 
 #ifndef GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
@@ -494,14 +489,12 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
       continue;
     }
     pn = current.startindex + current.len;
-    gt_assert(pa >= current.startindex);
-    gt_assert(pb >= pa);
+    gt_assert(pa >= current.startindex && pb >= pa);
     s = MIN ((unsigned long) (pa - current.startindex),
              (unsigned long) (pb - pa));
     gt_assert(pb >= s);
     GT_QSORT_ARR_VECSWAP (arr, current.startindex, pb - s, s);
-    gt_assert(pd >= pc);
-    gt_assert(pn > pd);
+    gt_assert(pd >= pc && pn > pd);
     s = MIN ((unsigned long) (pd - pc), (unsigned long) (pn - pd - 1));
     gt_assert(pn > s);
     GT_QSORT_ARR_VECSWAP (arr, pb, pn - s, s);
@@ -510,7 +503,6 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     {
       if (data->mediumsizelcpvalues != NULL)
       {
-        gt_assert (data->sssplcpvalues == NULL);
         gt_assert(depth + smallermaxlcp <= UINT16_MAX);
         data->mediumsizelcpvalues[current.startindex + s]
           = (uint16_t) (depth + smallermaxlcp);

@@ -6722,8 +6722,8 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
     tbe2 = ptbe2->tbe & mask;
     if (tbe1 == tbe2)
     {
-      gt_assert(ptbe1->unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC);
-      gt_assert(commonunits != NULL);
+      gt_assert(ptbe1->unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC &&
+                commonunits != NULL);
       commonunits->common = ptbe1->unitsnotspecial;
       commonunits->leftspecial = true;
       commonunits->rightspecial = false;
@@ -6744,8 +6744,8 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
     tbe2 = ptbe2->tbe & mask;
     if (tbe1 == tbe2)
     {
-      gt_assert(ptbe2->unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC);
-      gt_assert(commonunits != NULL);
+      gt_assert(ptbe2->unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC &&
+                commonunits != NULL);
       commonunits->common = ptbe2->unitsnotspecial;
       commonunits->leftspecial = false;
       commonunits->rightspecial = true;
@@ -6768,15 +6768,9 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
       gt_assert(commonunits != NULL);
       commonunits->common = ptbe1->unitsnotspecial;
       commonunits->leftspecial = commonunits->rightspecial = true;
-      if (ptbe1->referstartpos < ptbe2->referstartpos)
-      {
-        return -1;
-      }
-      if (ptbe1->referstartpos > ptbe2->referstartpos)
-      {
-        return 1;
-      }
-      return 0;
+      return (ptbe1->referstartpos < ptbe2->referstartpos)
+                ? -1
+                : ((ptbe1->referstartpos > ptbe2->referstartpos) ? 1 : 0);
     }
     return gt_encseq_compare_pairof_different_twobitencodings(fwd,complement,
                                                               commonunits,
