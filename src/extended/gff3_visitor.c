@@ -413,7 +413,8 @@ GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
   gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;
   gff3_visitor->used_ids = gt_cstr_table_new();
-  gff3_visitor->retain_ids = false;
+  /* XXX */
+  gff3_visitor->retain_ids = getenv("GT_RETAINIDS") ? true : false;
   return nv;
 }
 
