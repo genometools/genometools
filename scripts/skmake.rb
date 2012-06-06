@@ -64,7 +64,7 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  fp.print "all:\n\t\${MAKE} -j #{options.jobs} curses=no cairo=no"
+  fp.print "all:\n\t\${MAKE} -j #{options.jobs} with-sqlite=no curses=no cairo=no"
   # fp.print " CFLAGS+=-fstrict-aliasing"
   if options.speed
     fp.print " assert=no amalgamation=yes"
