@@ -174,8 +174,12 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
 {
   unsigned long i, j, sfrom, sto;
   int had_err = 0;
+  bool has_desc;
   GtEncseqReader *esr;
   gt_assert(encseq);
+
+  if (!(has_desc = gt_encseq_has_description_support(encseq)))
+    gt_warning("Missing description support for file %s", filename);
 
   if (strcmp(gt_str_get(args->mode), "fasta") == 0) {
     /* specify a single sequence to extract */
@@ -215,10 +219,9 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
       if (!GT_ISDIRREVERSE(args->rm)) {
         startpos = gt_encseq_seqstartpos(encseq, i);
         len = gt_encseq_seqlength(encseq, i);
-        if (gt_encseq_has_description_support(encseq)) {
+        if (has_desc) {
           desc = gt_encseq_description(encseq, &desclen, i);
         } else {
-          gt_warning("Missing description support for file %s", filename);
           (void) snprintf(buf, BUFSIZ, "sequence %lu", i);
           desclen = strlen(buf);
           desc = buf;
@@ -231,12 +234,11 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
                      - (gt_encseq_seqstartpos(encseq,
                                               gt_encseq_num_of_sequences(
                                                 encseq)-1-i) + len);
-        if (gt_encseq_has_description_support(encseq)) {
+        if (has_desc) {
           desc = gt_encseq_description(encseq,
                                        &desclen,
                                        gt_encseq_num_of_sequences(encseq)-1-i);
         } else {
-          gt_warning("Missing description support for file %s", filename);
           (void) snprintf(buf, BUFSIZ, "sequence %lu", i);
           desclen = strlen(buf);
           desc = buf;
