@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -111,12 +111,13 @@ GtNodeStream* gt_add_ids_stream_new(GtNodeStream *in_stream)
   ns = gt_node_stream_create(gt_add_ids_stream_class(), false);
   add_ids_stream = gt_add_ids_stream_cast(ns);
   add_ids_stream->in_stream = gt_node_stream_ref(in_stream);
-  add_ids_stream->add_ids_visitor = gt_add_ids_visitor_new();
+  add_ids_stream->add_ids_visitor =
+    gt_add_ids_visitor_new(gt_node_stream_is_sorted(in_stream));
   add_ids_stream->add_ids = true;
   return ns;
 }
 
-void  gt_add_ids_stream_disable(GtNodeStream *ns)
+void gt_add_ids_stream_disable(GtNodeStream *ns)
 {
   GtAddIDsStream *add_ids_stream = gt_add_ids_stream_cast(ns);
   add_ids_stream->add_ids = false;

@@ -35,6 +35,7 @@ struct GtAddIDsVisitor {
   GtCstrTable *defined_seqids;
   GtHashmap *undefined_sequence_regions; /* contains all (automatically created)
                                             sequence regions */
+  bool ensure_sorting;
 };
 
 #define add_ids_visitor_cast(GV)\
@@ -87,7 +88,7 @@ static int add_ids_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
 }
 
 static int add_ids_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
-                                        GT_UNUSED GtError *err)
+                                        GtError *err)
 {
   AutomaticSequenceRegion *auto_sr;
   GtAddIDsVisitor *aiv;
@@ -95,6 +96,14 @@ static int add_ids_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   bool is_circular;
   aiv = add_ids_visitor_cast(nv);
   seqid = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) fn));
+  if (aiv->ensure_sorting && !gt_cstr_table_get(aiv->defined_seqids, seqid)) {
+    gt_error_set(err, "the file %s is not sorted (seqid \"%s\" on line %u has "
+                 "not been previously introduced with a \"%s\" line)",
+                 gt_genome_node_get_filename((GtGenomeNode*) fn), seqid,
+                 gt_genome_node_get_line_number((GtGenomeNode*) fn),
+                 GT_GFF_SEQUENCE_REGION);
+    return -1;
+  }
   if (!gt_cstr_table_get(aiv->defined_seqids, seqid)) {
     GtFeatureNodeIterator *fni;
     GtFeatureNode *node;
@@ -227,7 +236,7 @@ const GtNodeVisitorClass* gt_add_ids_visitor_class()
   return nvc;
 }
 
-GtNodeVisitor* gt_add_ids_visitor_new(void)
+GtNodeVisitor* gt_add_ids_visitor_new(bool ensure_sorting)
 {
   GtNodeVisitor *nv = gt_node_visitor_create(gt_add_ids_visitor_class());
   GtAddIDsVisitor *add_ids_visitor = add_ids_visitor_cast(nv);
@@ -236,6 +245,7 @@ GtNodeVisitor* gt_add_ids_visitor_new(void)
   add_ids_visitor->undefined_sequence_regions =
     gt_hashmap_new(GT_HASH_STRING, NULL,
                    (GtFree) automatic_sequence_region_delete);
+  add_ids_visitor->ensure_sorting = ensure_sorting;
   return nv;
 }
 
