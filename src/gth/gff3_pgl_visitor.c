@@ -149,7 +149,7 @@ static void save_pgl_in_gff3(GthPGL *pgl, GthRegionFactory *region_factory,
         ss_feature = gt_feature_node_new(seqid, gt_ft_five_prime_splice_site,
                                          range.start, range.end,
                                          gth_ags_genomic_strand(ags));
-        gt_feature_node_set_source((GtFeatureNode*) ss_feature, seqid);
+        gt_feature_node_set_source((GtFeatureNode*) ss_feature, gthsourcetag);
         gt_feature_node_set_score((GtFeatureNode*) ss_feature,
                                   gth_ags_donor_site_prob(ags, j-1));
         gt_feature_node_add_child(mrna_feature, (GtFeatureNode*) ss_feature);
@@ -160,7 +160,7 @@ static void save_pgl_in_gff3(GthPGL *pgl, GthRegionFactory *region_factory,
         ss_feature = gt_feature_node_new(seqid, gt_ft_three_prime_splice_site,
                                          range.start, range.end,
                                          gth_ags_genomic_strand(ags));
-        gt_feature_node_set_source((GtFeatureNode*) ss_feature, seqid);
+        gt_feature_node_set_source((GtFeatureNode*) ss_feature, gthsourcetag);
         gt_feature_node_set_score((GtFeatureNode*) ss_feature,
                                   gth_ags_acceptor_site_prob(ags, j-1));
         gt_feature_node_add_child(mrna_feature, (GtFeatureNode*) ss_feature);
