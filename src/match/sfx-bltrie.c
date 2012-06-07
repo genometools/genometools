@@ -45,13 +45,13 @@ typedef unsigned int GtBlindtriesnodeptr;
       unsigned long depth;
       GtBlindtriesnodeptr firstchild;
     } internalinfo;
-    struct Leafinfo
+    struct
     {
       unsigned long nodestartpos;
       unsigned int nodestartstopposoffset;
     } leafinfo;
   } either;
-  But as unions are also aligned to work boundaries, this means for
+  But as unions are also aligned to word boundaries, this means for
   -m64 compilations this union requires 16 bytes, which would result in
   32 bytes for a GtBlindtrienode. Instead, in our solution either1 requires
   8 bytes and either2 requires 4 bytes which leads to 24 bytes for the entire
@@ -68,7 +68,7 @@ typedef struct
   } either1;
   union
   {
-    GtBlindtriesnodeptr firstchild;         /* for internal nodes */
+    GtBlindtriesnodeptr firstchild; /* for internal nodes */
     unsigned int nodestartstopposoffset; /* for leaves */
   } either2;
   unsigned int rightsibling:GT_BLINDTRIE_BITSFORRIGHTSIBLING;
@@ -284,8 +284,8 @@ static void blindtrie_copy_either(GtBlindtrie *blindtrie,
                                   GtBlindtriesnodeptr destnode,
                                   GtBlindtriesnodeptr srcnode)
 {
-  gt_assert(destnode < blindtrie->nextfreeBlindtrienode);
-  gt_assert(srcnode < blindtrie->nextfreeBlindtrienode);
+  gt_assert(destnode < blindtrie->nextfreeBlindtrienode &&
+            srcnode < blindtrie->nextfreeBlindtrienode);
   blindtrie->spaceBlindtrienode[destnode].either1
     = blindtrie->spaceBlindtrienode[srcnode].either1;
   blindtrie->spaceBlindtrienode[destnode].either2
