@@ -109,6 +109,14 @@ Test do
   run      "diff #{last_stdout} #{$testdata}U89959_cds.gff3"
 end
 
+Name "gt cds test (not sorted)"
+Keywords "gt_cds"
+Test do
+  run_test "#{$bin}gt cds -seqfile #{$testdata}U89959_genomic.fas " +
+           "#{$testdata}not_sorted.gff3", :retval => 1
+  grep last_stderr, "is not sorted"
+end
+
 if $gttestdata then
   Name "gt cds bug"
   Keywords "gt_cds"

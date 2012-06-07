@@ -1,0 +1,22 @@
+##gff-version 3
+#date 2012-06-06
+#source-version exonerate:est2genome 2.2.0
+contig_43704	exonerate:est2genome	mRNA	332	6404	10204	-	.	ID=gi1051257
+contig_43704	exonerate:est2genome	exon	332	790	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	900	988	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	2295	2373	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	2460	2557	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	2889	2993	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	3084	3170	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	3268	3462	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	3922	4028	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	4574	4769	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	4884	4985	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	5147	5218	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	5299	5355	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	5437	5538	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	5674	5711	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	5822	5933	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	6022	6078	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	6169	6224	.	-	.	Parent=gi1051257
+contig_43704	exonerate:est2genome	exon	6328	6404	.	-	.	Parent=gi1051257

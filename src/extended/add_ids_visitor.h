@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,7 @@ typedef struct GtAddIDsVisitor GtAddIDsVisitor;
 #include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_add_ids_visitor_class(void);
-GtNodeVisitor* gt_add_ids_visitor_new(void);
+GtNodeVisitor* gt_add_ids_visitor_new(bool ensure_sorting);
 unsigned long  gt_add_ids_visitor_node_buffer_size(GtNodeVisitor*);
 GtGenomeNode*  gt_add_ids_visitor_get_node(GtNodeVisitor*);
 void           gt_add_ids_visitor_finalize(GtNodeVisitor*);
