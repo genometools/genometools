@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -994,11 +994,10 @@ static void set_gff3_target_attribute(GthSA *sa, bool md5ids)
     gt_assert(sa->ref_md5);
     gt_str_append_cstr(sa->gff3_target_attribute, GT_MD5_SEQID_PREFIX);
     gt_str_append_str(sa->gff3_target_attribute, sa->ref_md5);
+    gt_str_append_char(sa->gff3_target_attribute, ':');
   }
-  else {
-    gt_gff3_escape(sa->gff3_target_attribute, gt_str_get(sa->ref_id),
-                   gt_str_length(sa->ref_id));
-  }
+  gt_gff3_escape(sa->gff3_target_attribute, gt_str_get(sa->ref_id),
+                 gt_str_length(sa->ref_id));
   gt_str_append_char(sa->gff3_target_attribute, ' ');
   gt_str_append_ulong(sa->gff3_target_attribute,
                       gth_sa_referencecutoff_start(sa) + 1); /* XXX: use

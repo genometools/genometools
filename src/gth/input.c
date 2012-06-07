@@ -387,9 +387,9 @@ void gth_input_save_gen_identifier(GthInput *input, GtStr *id,
     md5 = gth_md5_cache_get(input->gen_md5_cache, seq_num);
     gt_str_append_str(id, md5);
     gt_str_delete(md5);
+    gt_str_append_char(id, ':');
   }
-  else
-    save_sequenceid(id, input->gen_seq_col, seq_num);
+  save_sequenceid(id, input->gen_seq_col, seq_num);
 }
 
 void gth_input_save_ref_id(GthInput *input, GtStr *id,
