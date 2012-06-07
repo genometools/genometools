@@ -897,12 +897,6 @@ static void dc_sortsuffixesonthislevel(GtDifferencecover *dcov,
     dcov->itvinfo[idx].suffixstart = startpos;
     dcov->itvinfo[idx].key
       = dc_inversesuftab_get(dcov,startpos + dcov->currentdepth);
-    /*
-    printf("key=%lu,startpos=%lu,currentdepth=%lu\n",
-                    dcov->itvinfo[idx].key,
-                    startpos,
-                    dcov->currentdepth);
-    */
   }
   qsort(dcov->itvinfo,(size_t) width,sizeof (*dcov->itvinfo),dc_compareitv);
   for (idx=0; idx<width; idx++)
@@ -932,8 +926,15 @@ static void dc_sortsuffixesonthislevel(GtDifferencecover *dcov,
       {
         unsigned long currentsuftabentry
           = dc_suffixptrget(dcov,blisbl+rangestart);
+
+        gt_assert(rangestart + 1 == idx);
         dc_inversesuftab_set(__LINE__,dcov,currentsuftabentry,
                              blisbl+rangestart);
+        if (dcov->samplelcpvalues != NULL)
+        {
+          gt_lcptab_update(dcov->samplelcpvalues,
+                           0,blisbl + idx,dcov->currentdepth);
+        }
       }
       rangestart = idx;
     }
