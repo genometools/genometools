@@ -21,7 +21,9 @@
 #include <glob.h>
 #include <stdio.h>
 #include <time.h>
+#ifndef S_SPLINT_S
 #include <sys/types.h>
+#endif
 #include <sys/resource.h>
 #include <sys/stat.h>
 

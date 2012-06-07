@@ -30,12 +30,16 @@
 #include "core/thread.h"
 #endif
 #include "core/warning_api.h"
+#ifndef S_SPLINT_S
 #include "core/xposix.h"
+#endif
 #include "tools/gt_seqcorrect.h"
 #include "match/reads2twobit.h"
+#include "match/rdj-contfinder.h"
 #include "match/rdj-twobitenc-editor.h"
 #include "match/randomcodes.h"
 #include "match/randomcodes-correct.h"
+#include "tools/gt_seqcorrect.h"
 
 #define GT_SEQCORRECT_FILESUFFIX ".cor"
 
