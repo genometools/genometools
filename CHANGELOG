@@ -1,7 +1,7 @@
-changes in version 1.4.2 (2012-06-05)
+changes in version 1.4.2 (2012-06-07)
 
 - CDS features with multiple parents are split in tidy-mode (if possible)
-- The format for for MD5 sequences IDs has changed.
+- The format for MD5 sequence IDs has changed.
   It now uses md5:063b1024d68e26716b7f38caf958316f:1877523 instead of
   md5:063b1024d68e26716b7f38caf958316f. That is, the ``original'' sequence ID is
   kept after the MD5 hash.
