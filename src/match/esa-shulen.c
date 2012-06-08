@@ -339,7 +339,7 @@ static uint64_t **shulengthdist_new(unsigned long numofdbfiles)
 */
 
 static void shulengthdist_print(const GtStrArray *file_names,
-                                uint64_t **shulengthdist,
+                                const uint64_t * const*shulengthdist,
                                 unsigned long numofdbfiles)
 {
   unsigned long idx1, idx2;
@@ -395,7 +395,8 @@ int gt_multiesa2shulengthdist_print(Sequentialsuffixarrayreader *ssar,
   }
   if (!haserr)
   {
-    shulengthdist_print(NULL,state->shulengthdist,state->numofdbfiles);
+    shulengthdist_print(NULL,(const uint64_t * const*) state->shulengthdist,
+                        state->numofdbfiles);
   }
   gt_array2dim_delete(state->shulengthdist);
 #ifdef GENOMEDIFF_PAPER_IMPL
@@ -644,7 +645,8 @@ void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate)
   }
   gt_assert(bustate->shulengthdist != NULL);
   shulengthdist_print(bustate->unit_info->file_names,
-                      bustate->shulengthdist,bustate->numofdbfiles);
+                      (const uint64_t * const*) bustate->shulengthdist,
+                      bustate->numofdbfiles);
   gt_array2dim_delete(bustate->shulengthdist);
   gt_shu_unit_info_delete(bustate->unit_info);
   gt_GtArrayGtBUItvinfo_delete_shulen(bustate->stack,bustate);
