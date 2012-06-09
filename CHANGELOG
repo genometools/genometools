@@ -1,4 +1,4 @@
-changes in version 1.4.2 (2012-06-07)
+changes in version 1.4.2 (2012-06-10)
 
 - CDS features with multiple parents are split in tidy-mode (if possible)
 - The format for MD5 sequence IDs has changed.
