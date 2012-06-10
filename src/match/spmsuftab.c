@@ -84,7 +84,6 @@ size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
   unsigned int bitsforpositions = gt_determinebitspervalue(maxvalue);
 
   return sizeof (GtSpmsuftab) +
-                gt_GtCompactulongstore_size(numofentries,
-                                            MIN(bitsforpositions,
-                                                bitsforseqnumrelpos));
+         gt_GtCompactulongstore_size(numofentries,
+                                     MIN(bitsforpositions,bitsforseqnumrelpos));
 }

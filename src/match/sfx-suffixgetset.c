@@ -53,19 +53,20 @@ static bool gt_decide_to_use_uint(bool useuint,unsigned long maxvalue)
   return false;
 }
 
-size_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
-                                        unsigned long maxvalue,
-                                        bool useuint)
+uint64_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
+                                          unsigned long maxvalue,
+                                          bool useuint)
 {
-  size_t requiredspace = sizeof (GtSuffixsortspace);
+  uint64_t requiredspace = (uint64_t) sizeof (GtSuffixsortspace);
 
   if (gt_decide_to_use_uint(useuint,maxvalue))
   {
     gt_assert(maxvalue <= (unsigned long) UINT_MAX);
-    requiredspace += numofentries * sizeof (uint32_t);
+    requiredspace += (uint64_t) numofentries * (uint64_t) sizeof (uint32_t);
   } else
   {
-    requiredspace += numofentries * sizeof (unsigned long);
+    requiredspace += (uint64_t) numofentries *
+                     (uint64_t) sizeof (unsigned long);
   }
   return requiredspace;
 }

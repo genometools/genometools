@@ -19,6 +19,7 @@
 #include "core/ma_api.h"
 #include "core/codetype.h"
 #include "core/spacecalc.h"
+#include "core/format64.h"
 #include "core/log.h"
 #include "bcktab.h"
 #include "sfx-suffixgetset.h"
@@ -406,7 +407,7 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
   gt_error_check(err);
   for (parts = 1U; parts <= 500U; parts++)
   {
-    size_t suftabsize;
+    uint64_t suftabsize;
     unsigned long numofentries;
 
     suftabparts = gt_suftabparts_new(parts,
@@ -427,13 +428,13 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
     } else
     {
       gt_assert(fct != NULL);
-      suftabsize = gt_spmsuftab_requiredspace(numofentries,
-                                              totallength,
-                                              bitsforseqnumrelpos);
+      suftabsize = (uint64_t) gt_spmsuftab_requiredspace(numofentries,
+                                                         totallength,
+                                                         bitsforseqnumrelpos);
     }
     if (parts == 1U)
     {
-      if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
+      if (suftabsize + (uint64_t) estimatedspace <= (uint64_t) maximumspace)
       {
         gt_suftabparts_delete(suftabparts);
         return (int) parts;
@@ -442,8 +443,10 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
     {
       unsigned long largest
         = gt_suftabparts_largestsizemappedpartwise(suftabparts);
-      if ((unsigned long) (suftabsize + largest + estimatedspace - size_mapped)
-                           <= maximumspace)
+      if (suftabsize
+          + (uint64_t) largest
+          + (uint64_t) estimatedspace
+          - (uint64_t) size_mapped <= (uint64_t) maximumspace)
       {
         gt_log_log("return parts = %u as suftabsize=%.2f +"
                    "largest=%.2f + estimated=%.2f - size_mapped=%2.f <= %.2f",

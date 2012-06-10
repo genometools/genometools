@@ -123,9 +123,9 @@ unsigned long *gt_suffixsortspace_ulong_get(const GtSuffixsortspace *sssp);
 
 unsigned long gt_suffixsortspace_longest(const GtSuffixsortspace *sssp);
 
-size_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
-                                        unsigned long maxvalue,
-                                        bool useuint);
+uint64_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
+                                          unsigned long maxvalue,
+                                          bool useuint);
 
 int gt_suffixsortspace_to_file (FILE *outfpsuftab,
                                 const GtSuffixsortspace *sssp,
