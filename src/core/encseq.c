@@ -1451,9 +1451,12 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           GtAlphabet *alpha,
                                           GtLogger *logger);
 
-int gt_encseq_write_twobitencoding_to_file(const char *indexname,
+static int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
                                      unsigned long totallength,
+                                     GtEncseqAccessType sat,
                                      unsigned long lengthofsinglesequence,
+                                     unsigned long minseqlen,
+                                     unsigned long maxseqlen,
                                      GtTwobitencoding *twobitencoding,
                                      unsigned long numofsequences,
                                      unsigned long numoffiles,
@@ -1476,23 +1479,34 @@ int gt_encseq_write_twobitencoding_to_file(const char *indexname,
   {
     unsigned long idx;
     Definedunsignedlong equallength;
-    GtAlphabet *a;
+    GtAlphabet *a = gt_alphabet_new_dna();
 
-    a = gt_alphabet_new_dna();
-
-    equallength.defined = true;
-    equallength.valueunsignedlong = lengthofsinglesequence;
-    encseq = determineencseqkeyvalues(GT_ACCESS_TYPE_EQUALLENGTH,
+    if (lengthofsinglesequence > 0)
+    {
+      equallength.defined = true;
+      equallength.valueunsignedlong = lengthofsinglesequence;
+      gt_assert(sat == GT_ACCESS_TYPE_EQUALLENGTH);
+    } else
+    {
+      equallength.defined = false;
+      equallength.valueunsignedlong = 0;
+      gt_assert(sat == GT_ACCESS_TYPE_UCHARTABLES ||
+                sat == GT_ACCESS_TYPE_USHORTTABLES ||
+                sat == GT_ACCESS_TYPE_UINT32TABLES);
+    }
+    encseq = determineencseqkeyvalues(sat,
                                       totallength,
                                       numofsequences,
                                       numoffiles,
                                       determinelengthofdbfilenames(filenametab),
-                                      0,
-                                      0,
-                                      lengthofsinglesequence,
-                                      lengthofsinglesequence,
+                                      0, /* wildcardranges */
+                                      0, /* exceptionranges */
+                                      minseqlen,
+                                      maxseqlen,
                                       false,
-                                      &equallength,
+                                      lengthofsinglesequence > 0
+                                        ? &equallength
+                                        : NULL,
                                       a,
                                       NULL);
     encseq->twobitencoding = twobitencoding;
@@ -1555,6 +1569,33 @@ int gt_encseq_write_twobitencoding_to_file(const char *indexname,
   gt_encseq_delete(encseq);
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
+}
+
+int gt_encseq_equallength_write_twobitencoding_to_file(const char *indexname,
+                                     unsigned long totallength,
+                                     unsigned long lengthofsinglesequence,
+                                     GtTwobitencoding *twobitencoding,
+                                     unsigned long numofsequences,
+                                     unsigned long numoffiles,
+                                     const GtFilelengthvalues *filelengthtab,
+                                     const GtStrArray *filenametab,
+                                     const unsigned long *characterdistribution,
+                                     GtError *err)
+{
+  gt_assert (lengthofsinglesequence > 0);
+  return gt_encseq_generic_write_twobitencoding_to_file(indexname,
+                                     totallength,
+                                     GT_ACCESS_TYPE_EQUALLENGTH,
+                                     lengthofsinglesequence,
+                                     lengthofsinglesequence,
+                                     lengthofsinglesequence,
+                                     twobitencoding,
+                                     numofsequences,
+                                     numoffiles,
+                                     filelengthtab,
+                                     filenametab,
+                                     characterdistribution,
+                                     err);
 }
 
 static int fillencseqmapspecstartptr(GtEncseq *encseq,
@@ -8392,7 +8433,7 @@ int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
     indexnamecopy[indexname_len+1] = '\0';
     gt_assert(encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH &&
               encseq->equallength.defined);
-    if (gt_encseq_write_twobitencoding_to_file(indexnamecopy,
+    if (gt_encseq_equallength_write_twobitencoding_to_file(indexnamecopy,
                                         gt_encseq_total_length(encseq),
                                         encseq->equallength.valueunsignedlong,
                                         encseq->twobitencoding,

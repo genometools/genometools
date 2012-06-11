@@ -179,7 +179,7 @@ size_t gt_encseq_chardistri_mapoffset(const GtEncseq *encseq);
 /* Saves an encoded sequence characterized by the given parameters into the
    index of the given name. Only sequence collections of type eqlength are
    supported. The other parameters must be consistent with this. */
-int gt_encseq_write_twobitencoding_to_file(const char *indexname,
+int gt_encseq_equallength_write_twobitencoding_to_file(const char *indexname,
                                      unsigned long totallength,
                                      unsigned long lengthofsinglesequence,
                                      GtTwobitencoding *twobitencoding,
