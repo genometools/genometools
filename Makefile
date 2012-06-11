@@ -233,11 +233,13 @@ SAMTOOLS_DEP:=$(SAMTOOLS_SRC:%.c=obj/%.d)
 
 # add necessary shared lib dependencies then not building them ourselves
 ifeq ($(useshared),yes)
-  DEPLIBS:=-lbz2 -lz -lexpat -llua5.1-lpeg -llua5.1 -llua5.1-md5  \
+  DEPLIBS:=-lbz2 -lz -lexpat -llua5.1-lpeg -llua5.1 -llua5.1-md5 \
            -llua5.1-filesystem -llua5.1-des56 -lbam
-  EXP_LDLIBS += $(DEPLIBS)
-  GTSHAREDLIB_LIBDEP += $(DEPLIBS)
+else
+  DEPLIBS = -lbz2 -lz
 endif
+EXP_LDLIBS += $(DEPLIBS)
+GTSHAREDLIB_LIBDEP += $(DEPLIBS)
 
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
