@@ -140,4 +140,8 @@ unsigned long gt_reads2twobit_nof_invalid_seqs(const GtReads2Twobit *r2t);
 unsigned long gt_reads2twobit_invalid_seqs_totallength(
     const GtReads2Twobit *r2t);
 
+/* write the libraries information to disk */
+int gt_reads2twobit_write_libraries_table(const GtReads2Twobit *r2t,
+    char *path, GtError *err);
+
 #endif

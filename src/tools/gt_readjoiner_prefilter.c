@@ -25,12 +25,14 @@
 #include "core/unused_api.h"
 #include "match/rdj-contfinder.h"
 #include "match/rdj-filesuf-def.h"
+#include "match/reads_library.h"
 #include "match/reads2twobit.h"
 #include "tools/gt_readjoiner_prefilter.h"
 
 typedef struct {
   bool verbose, quiet;
-  bool singlestrand, encodeonly, cntlist, encseq, seqnums, fasta, copynum;
+  bool singlestrand, encodeonly, cntlist, encseq, seqnums, fasta, copynum,
+       libtable;
   GtStr *readset;
   GtStrArray *db;
   /* rdj-radixsort test */
@@ -63,7 +65,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   GtOptionParser *op;
   GtOption *singlestrand_option, *encodeonly_option, *cntlist_option,
            *fasta_option, *seqnums_option, *encseq_option, *readset_option,
-           *v_option, *q_option, *db_option, *copynum_option,
+           *v_option, *q_option, *db_option, *copynum_option, *libtable_option,
            *testrs_option, *testrs_depth_option, *testrs_print_option,
            *testrs_maxdepth_option;
 
@@ -121,6 +123,13 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
       &arguments->encseq, true);
   gt_option_is_development_option(encseq_option);
   gt_option_parser_add_option(op, encseq_option);
+
+  /* -libtable */
+  libtable_option = gt_option_new_bool("libtable",
+      "output reads libraries table",
+      &arguments->libtable, true);
+  gt_option_is_development_option(libtable_option);
+  gt_option_parser_add_option(op, libtable_option);
 
   /* -fasta */
   fasta_option = gt_option_new_bool("fasta",
@@ -280,7 +289,6 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
       gt_logger_log(default_logger, "reads with ambiguities = %lu",
           nofreads_invalid);
     nofreads_output = nofreads_valid;
-
     if (arguments->encodeonly)
     {
       if (!had_err && arguments->fasta)
@@ -367,8 +375,16 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
       }
       gt_contfinder_delete(contfinder);
     }
+    if (!had_err && arguments->libtable) {
+      GtStr *fn;
+      fn = gt_str_new_cstr(gt_str_get(arguments->readset));
+      gt_str_append_cstr(fn, GT_READS_LIBRARY_TABLE_FILESUFFIX);
+      had_err = gt_reads2twobit_write_libraries_table(r2t, gt_str_get(fn), err);
+      gt_logger_log(verbose_logger, "reads library table saved: %s",
+          gt_str_get(fn));
+      gt_str_delete(fn);
+    }
   }
-
   gt_reads2twobit_delete(r2t);
   gt_logger_delete(verbose_logger);
   gt_logger_delete(default_logger);
