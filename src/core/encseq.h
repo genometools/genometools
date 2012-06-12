@@ -190,6 +190,27 @@ int gt_encseq_equallength_write_twobitencoding_to_file(const char *indexname,
                                      const unsigned long *characterdistribution,
                                      GtError *err);
 
+/* Saves an encoded sequence characterized by the given parameters into the
+   index of the given name. Only sequence collections of type
+   are UCHAR, USHORT, UINT32 are supported. The other parameters must be
+   consistent with this. */
+int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
+                                     unsigned long totallength,
+                                     GtEncseqAccessType sat,
+                                     unsigned long lengthofsinglesequence,
+                                     unsigned long minseqlen,
+                                     unsigned long maxseqlen,
+                                     unsigned long lengthofspecialprefix,
+                                     unsigned long lengthofspecialsuffix,
+                                     unsigned long lengthoflongestnonspecial,
+                                     GtTwobitencoding *twobitencoding,
+                                     unsigned long numofsequences,
+                                     unsigned long numoffiles,
+                                     const GtFilelengthvalues *filelengthtab,
+                                     const GtStrArray *filenametab,
+                                     const unsigned long *characterdistribution,
+                                     GtError *err);
+
 /* The following type is used for computing stoppositions when
    the twobitencoding is used */
 typedef struct GtViatwobitkeyvalues GtViatwobitkeyvalues;
