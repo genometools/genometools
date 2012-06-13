@@ -49,6 +49,9 @@ typedef int (*GtHashmapVisitFunc)(void *key, void *value, void *data,
 GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
                           GtFree valuefree);
 
+/* Increase the reference count of <hm>. */
+GtHashmap* gt_hashmap_ref(GtHashmap *hm);
+
 /* Return the value stored in <hashmap> for <key> or <NULL> if no such key
    exists. */
 void*      gt_hashmap_get(GtHashmap *hashmap, const void *key);

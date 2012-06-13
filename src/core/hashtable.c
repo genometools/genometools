@@ -70,6 +70,7 @@ struct GtHashtable
   union link_data links;
   unsigned short table_size_log, high_fill_mul, low_fill_mul;
   GtRWLock *lock;
+  unsigned long reference_count;
 };
 
 static inline void *
@@ -126,6 +127,7 @@ gt_ht_init(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
 {
   gt_assert(size_log < sizeof (htsize_t) * CHAR_BIT);
   ht->current_fill = 0;
+  ht->reference_count = 0;
   ht->table = ht->links.table = NULL;
   gt_ht_reinit(ht, table_info, size_log, high_mul, low_mul);
 }
@@ -592,22 +594,36 @@ void gt_hashtable_reset(GtHashtable *ht)
   gt_rwlock_unlock(ht->lock);
 }
 
+GtHashtable* gt_hashtable_ref(GtHashtable *ht)
+{
+  if (!ht) return NULL;
+  gt_rwlock_wrlock(ht->lock);
+  ht->reference_count++;
+  gt_rwlock_unlock(ht->lock);
+  return ht;
+}
+
 void gt_hashtable_delete(GtHashtable *ht)
 {
-  if (ht)
-  {
-    FreeFuncWData free_elem_with_data;
-    gt_rwlock_wrlock(ht->lock);
-    free_elem_with_data = ht->table_info.free_op.free_elem_with_data;
-    if (free_elem_with_data)
-      gt_ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
-    gt_ht_destruct(ht);
-    if (ht->table_info.table_data_free)
-      ht->table_info.table_data_free(ht->table_info.table_data);
+  FreeFuncWData free_elem_with_data;
+  if (!ht) return;
+  gt_rwlock_rdlock(ht->lock);
+  if (ht->reference_count) {
+    ht->reference_count--;
     gt_rwlock_unlock(ht->lock);
-    gt_rwlock_delete(ht->lock);
-    gt_free(ht);
+    return;
   }
+  gt_rwlock_unlock(ht->lock);
+  gt_rwlock_wrlock(ht->lock);
+  free_elem_with_data = ht->table_info.free_op.free_elem_with_data;
+  if (free_elem_with_data)
+    gt_ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
+  gt_ht_destruct(ht);
+  if (ht->table_info.table_data_free)
+    ht->table_info.table_data_free(ht->table_info.table_data);
+  gt_rwlock_unlock(ht->lock);
+  gt_rwlock_delete(ht->lock);
+  gt_free(ht);
 }
 
 uint32_t gt_ht_ptr_elem_hash(const void *elem)

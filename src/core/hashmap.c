@@ -73,6 +73,11 @@ GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
   return NULL; /* for stupid compilers nagging too much */
 }
 
+GtHashmap* gt_hashmap_ref(GtHashmap *hm)
+{
+  return (GtHashmap*) gt_hashtable_ref((GtHashtable*) hm);
+}
+
 void* gt_hashmap_get(GtHashmap *hm, const void *key)
 {
   struct map_entry *elem = gt_hashtable_get((GtHashtable*) hm, &key);
