@@ -248,11 +248,6 @@ static int annotate_nodes(GtArray *candidates, GtArray *groups,
   return had_err;
 }
 
-static void free_hash_elem(void *elem)
-{
-  gt_free(elem);
-}
-
 static void delete_hash(void *hash)
 {
   gt_hashmap_delete((GtHashmap*) hash);
@@ -273,7 +268,7 @@ static void add_fnmap_to_candidates(GtArray *candidates)
     if (gt_feature_node_try_cast(gn) == NULL)
       continue;
     first_ltr = true;
-    fnmap = gt_hashmap_new(GT_HASH_STRING, free_hash_elem, NULL);
+    fnmap = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
     fni = gt_feature_node_iterator_new((GtFeatureNode*) gn);
     while ((curnode = gt_feature_node_iterator_next(fni)) != NULL) {
       fnt = gt_feature_node_get_type(curnode);

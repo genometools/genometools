@@ -66,10 +66,6 @@ static GtOptionParser* gt_ltrclustering_option_parser_new(void *tool_arguments)
   /* init */
   op = gt_option_parser_new("[option ...] indexname [GFF3_file ...]",
                             "Cluster features of LTRs.");
-  /* -prefix */
-  option = gt_option_new_string("prefix", "prefix for output",
-                             arguments->file_prefix, NULL);
-  gt_option_parser_add_option(op, option);
 
   /* -psmall */
   option = gt_option_new_ulong_min_max("psmall", "specify how many percent of"
@@ -79,7 +75,6 @@ static GtOptionParser* gt_ltrclustering_option_parser_new(void *tool_arguments)
                                        &arguments->psmall, 0, 0, 100UL);
 
   gt_option_is_mandatory(option);
-
   gt_option_parser_add_option(op, option);
 
   /* -plarge */
@@ -89,26 +84,7 @@ static GtOptionParser* gt_ltrclustering_option_parser_new(void *tool_arguments)
                                        " sequences of the match.",
                                        &arguments->plarge, 0, 0, 100UL);
   gt_option_is_mandatory(option);
-
   gt_option_parser_add_option(op, option);
-
-  /* -xdrop */
-  option = gt_option_new_double("xdrop", "specify xdrop value.",
-                                       (double*) &arguments->xdrop, 20.0);
-  gt_option_is_mandatory(option);
-
-  gt_option_parser_add_option(op, option);
-
-  /* -wordsize */
-  option = gt_option_new_int_min("wordsize", "specify word size.",
-                                       &arguments->wordsize, 4, 4);
-  gt_option_is_mandatory(option);
-
-  gt_option_parser_add_option(op, option);
-
-  /* -identity */
-  option = gt_option_new_double("identity", "specify % sequence identity",
-                                (double*) &arguments->identity, 80.0);
 
   gt_option_is_mandatory(option);
 
@@ -148,21 +124,8 @@ static int gt_ltrclustering_runner(int argc, const char **argv,
                                                                   argv + arg);
     last_stream = ltr_cluster_stream = gt_ltr_cluster_stream_new(last_stream,
                                                          encseq,
-                                                         arguments->file_prefix,
                                                          arguments->plarge,
                                                          arguments->psmall,
-                                                         GT_UNDEF_DOUBLE,
-                                                         false,
-                                                         arguments->wordsize,
-                                                         GT_UNDEF_INT,
-                                                         GT_UNDEF_INT,
-                                                         GT_UNDEF_INT,
-                                                         GT_UNDEF_INT,
-                                                         GT_UNDEF_INT,
-                                                         arguments->xdrop,
-                                                         arguments->identity,
-                                                         NULL,
-                                                         false,
                                                          NULL,
                                                          err);
     last_stream = ltr_classify_stream = gt_ltr_classify_stream_new(last_stream,

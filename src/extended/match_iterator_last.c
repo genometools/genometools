@@ -23,6 +23,7 @@
 #include "core/encseq.h"
 #include "core/fasta.h"
 #include "core/fileutils.h"
+#include "core/hashmap.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/md5_fingerprint.h"
@@ -60,6 +61,7 @@ typedef struct {
         *matchfilename,
         *linebuf;
   GtFile *matchfile;
+  GtHashmap *desc_to_seqno;
 } GtMatchIteratorLastMembers;
 
 struct GtMatchIteratorLast {
@@ -82,36 +84,42 @@ static int get_index_parameterization(GtMatchIteratorLast *mil, GtStr *out,
 }
 
 static int last_prepare_fasta_seqs(const char *filename, GtEncseq *encseq,
+                                   GtHashmap *desc_to_seqno,
                                    GT_UNUSED GtError *err)
 {
   char *seq;
+  const char *desc;
   int had_err = 0;
   GtFile *fp;
-  GtStr *desc = NULL;
+  GtStr *header = NULL;
+  unsigned long desclen;
   gt_assert(filename && encseq);
   gt_error_check(err);
 
-  fp = gt_file_open(GT_FILE_MODE_UNCOMPRESSED,
-                    filename, "w", err);
-  if (!fp)
+  if (!(fp = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, filename, "w", err)))
     had_err = -1;
-  desc = gt_str_new();
+  header = gt_str_new();
   if (!had_err) {
     unsigned long i, length, startpos, endpos;
     for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
+      char *desccpy;
+      desc = gt_encseq_description(encseq, &desclen, i);
+      desccpy = gt_calloc(desclen+1, sizeof (char));
+      strncpy(desccpy, desc, desclen);
       startpos = gt_encseq_seqstartpos(encseq, i);
       length = gt_encseq_seqlength(encseq, i);
+      gt_hashmap_add(desc_to_seqno, desccpy, (void*) i);
       endpos = startpos + length - 1;
       seq = gt_malloc(sizeof (char) * length);
-      gt_str_reset(desc);
-      gt_str_append_ulong(desc, i);
+      gt_str_reset(header);
+      gt_str_append_cstr_nt(header, desc, desclen);
       gt_encseq_extract_decoded(encseq, seq, startpos, endpos);
-      gt_fasta_show_entry(gt_str_get(desc), seq, length, 80, fp);
+      gt_fasta_show_entry(gt_str_get(header), seq, length, 80, fp);
       gt_free(seq);
     }
     gt_file_delete(fp);
   }
-  gt_str_delete(desc);
+  gt_str_delete(header);
 
   return had_err;
 }
@@ -144,7 +152,9 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
                 seqno1 = GT_UNDEF_ULONG,
                 seqno2 = GT_UNDEF_ULONG;
   char strand1 = GT_UNDEF_CHAR,
-       strand2 = GT_UNDEF_CHAR;
+       strand2 = GT_UNDEF_CHAR,
+       seqid1[BUFSIZ],
+       seqid2[BUFSIZ];
 
   gt_assert(mil && mil->pvt->matchfile);
   gt_error_check(err);
@@ -153,12 +163,12 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
   had_err = gt_str_read_next_line_generic(mil->pvt->linebuf,
                                           mil->pvt->matchfile);
   if (!had_err) {
-    if (11 != sscanf(gt_str_get(mil->pvt->linebuf), "%lu %lu %lu %lu %c %lu "
-                                     "%lu %lu %lu %c %lu",
+    if (11 != sscanf(gt_str_get(mil->pvt->linebuf), "%lu %s %lu %lu %c %lu "
+                                     "%s %lu %lu %c %lu",
                                      &score,
-                                     &seqno1, &start1, &mlength1,
+                                     seqid1, &start1, &mlength1,
                                      &strand1, &slength1,
-                                     &seqno2, &start2, &mlength2,
+                                     seqid2, &start2, &mlength2,
                                      &strand2, &slength2)) {
       gt_error_set(err, "error parsing LAST output: "
                         "could not parse line '%s'",
@@ -166,7 +176,13 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
       had_err = -1;
     }
     if (!had_err) {
-      *match = gt_match_last_new("", "", score, seqno1, seqno2, start1, start2,
+      seqno1 = (unsigned long) gt_hashmap_get(mil->pvt->desc_to_seqno, seqid1);
+      gt_assert(seqno1 != GT_UNDEF_ULONG);
+      seqno2 = (unsigned long) gt_hashmap_get(mil->pvt->desc_to_seqno, seqid2);
+      gt_assert(seqno2 != GT_UNDEF_ULONG);
+      *match = gt_match_last_new(seqid1, seqid2, score,
+                                 seqno1, seqno2,
+                                 start1, start2,
                                  start1 + mlength1 - 1, start2 + mlength2 - 1);
     }
   }
@@ -187,7 +203,10 @@ static GtMatchIteratorStatus gt_match_iterator_last_next(GtMatchIterator *gmpi,
   if (!mil->pvt->queryfilename) {
     fn = gt_str_clone(mil->pvt->idxfilename);
     gt_str_append_cstr(fn, ".qry");
-    last_prepare_fasta_seqs(gt_str_get(fn), mil->pvt->es2, err);
+    if (!gt_file_exists(gt_str_get(fn))) {
+      last_prepare_fasta_seqs(gt_str_get(fn), mil->pvt->es2,
+                              mil->pvt->desc_to_seqno, err);
+    }
     mil->pvt->queryfilename = gt_str_ref(fn);
     gt_str_delete(fn);
   }
@@ -222,23 +241,26 @@ static GtMatchIteratorStatus gt_match_iterator_last_next(GtMatchIterator *gmpi,
       if (had_err == -1)
         gt_error_set(err, "error forking the LAST process");
     }
-
-    mil->pvt->matchfile = gt_file_open(GT_FILE_MODE_UNCOMPRESSED,
-                                       gt_str_get(fn), "r", err);
-    if (!mil->pvt->matchfile) {
-      had_err = -1;
+    if (!had_err) {
+      mil->pvt->matchfile = gt_file_open(GT_FILE_MODE_UNCOMPRESSED,
+                                         gt_str_get(fn), "r", err);
+      if (!mil->pvt->matchfile) {
+        had_err = -1;
+      }
     }
   }
   gt_str_delete(fn);
 
-  /* result file should now be open */
-  gt_assert(mil->pvt->matchfile);
-  /* skip all comment lines */
-  while (last_parse_comment_line(mil));
-  /* parse next match */
-  if ((rval = last_parse_match(mil, match, err)) == EOF) {
-    *match = NULL;
-    return GT_MATCHER_STATUS_END;
+  if (!had_err) {
+    /* result file should now be open */
+    gt_assert(mil->pvt->matchfile);
+    /* skip all comment lines */
+    while (last_parse_comment_line(mil));
+    /* parse next match */
+    if ((rval = last_parse_match(mil, match, err)) == EOF) {
+      *match = NULL;
+      return GT_MATCHER_STATUS_END;
+    }
   }
   /* return error if required */
   if (had_err) {
@@ -261,7 +283,16 @@ static int last_prepare_indices(GtMatchIteratorLast *mil,
   if (!had_err) {
     GtStr *cmdline = NULL,
           *fn = NULL;
-    char *hash = gt_md5_fingerprint(gt_str_get(param), gt_str_length(param));
+    char *seq, *hash;
+
+    seq = gt_malloc(sizeof (char) * gt_encseq_total_length(mil->pvt->es1)+1);
+    seq[gt_encseq_total_length(mil->pvt->es1)] = '\0';
+    gt_encseq_extract_decoded(mil->pvt->es1,
+                              seq, 0,
+                              gt_encseq_total_length(mil->pvt->es1)-1);
+    hash = gt_md5_fingerprint(seq, gt_encseq_total_length(mil->pvt->es1));
+    gt_free(seq);
+
     /* XXX: maybe hash the sequence file! */
     gt_str_append_cstr(idxfilename, mil->pvt->tmpdir);
     gt_str_append_cstr(idxfilename, "/");
@@ -271,7 +302,8 @@ static int last_prepare_indices(GtMatchIteratorLast *mil,
     gt_str_append_cstr(fn, "0.suf");
     if (!gt_file_exists(gt_str_get(fn))) {
       had_err = last_prepare_fasta_seqs(gt_str_get(mil->pvt->idxfilename),
-                                        mil->pvt->es1, err);
+                                        mil->pvt->es1, mil->pvt->desc_to_seqno,
+                                        err);
       cmdline = gt_str_new();
       gt_str_append_cstr(cmdline, "lastdb ");
       gt_str_append_str(cmdline, idxfilename);
@@ -316,6 +348,7 @@ GtMatchIterator* gt_match_iterator_last_new(GtEncseq *es1, GtEncseq *es2,
   if (!mil->pvt->tmpdir)
     mil->pvt->tmpdir = "/tmp";
   mil->pvt->linebuf = gt_str_new();
+  mil->pvt->desc_to_seqno = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
 
   /* XXX */ last_prepare_indices(mil, err);
   gt_assert(mil->pvt->idxfilename);
@@ -334,6 +367,7 @@ static void gt_match_iterator_last_free(GtMatchIterator *mp)
   gt_str_delete(mil->pvt->linebuf);
   gt_encseq_delete(mil->pvt->es1);
   gt_encseq_delete(mil->pvt->es2);
+  gt_hashmap_delete(mil->pvt->desc_to_seqno);
   gt_free(mil->pvt);
 }
 

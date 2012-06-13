@@ -24,30 +24,12 @@
 
 typedef struct GtLTRClusterStream GtLTRClusterStream;
 
-/* Implements the <GtNodeStream> interface. <GtLTRClusterStream> first extracts
-   sequences for all features within <GtFeatureNode>. After that
-   <GtMatchIteratorBlast> with BLASTN-process is used to match the sequences for
-   each feature against themself. These matches are stored in <GtMatchBlast>.
-   The match information is used to perform a single linkage clustering based
-   on overlapping of the involved sequences. Finally the features are annotated
-   with clusterids. */
+/* Implements the <GtNodeStream> interface. <GtLTRClusterStream> annotates
+   all LTR features with cluster IDs, based on matches. */
 GtNodeStream* gt_ltr_cluster_stream_new(GtNodeStream *in_stream,
                                         GtEncseq *encseq,
-                                        GtStr *file_prefix,
                                         unsigned long plarge,
                                         unsigned long psmall,
-                                        double evalue,
-                                        bool dust,
-                                        int word_size,
-                                        int gapopen,
-                                        int gapextend,
-                                        int penalty,
-                                        int reward,
-                                        int num_threads,
-                                        double xdrop,
-                                        double identity,
-                                        const char *moreblast,
-                                        bool from_file,
                                         char **current_state,
                                         GtError *err);
 

@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2011 Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011      Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
+  Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +20,7 @@
 #include "core/cstr_api.h"
 #include "core/encseq.h"
 #include "core/hashmap.h"
+#include "core/log.h"
 #include "core/ma.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
@@ -30,35 +32,23 @@
 #include "extended/node_stream_api.h"
 #include "extended/match.h"
 #include "extended/match_iterator_api.h"
-#include "extended/match_iterator_blast.h"
+#include "extended/match_iterator_last.h"
 #include "extended/match_iterator_open.h"
 #include "ltr/ltr_cluster_stream.h"
-#include "ltr/ltr_cluster_visitor.h"
+#include "ltr/ltr_cluster_prepare_seq_visitor.h"
 #include "match/sfx-run.h"
 
 struct GtLTRClusterStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GtLTRClusterVisitor *lcv;
+  GtLTRClusterPrepareSeqVisitor *lcv;
   GtArray *nodes;
-  GtHashmap *feat_to_file;
-  GtStrArray *feat_to_file_keys;
-  bool dust;
-  int word_size,
-      gapopen,
-      gapextend,
-      penalty,
-      reward,
-      num_threads;
-  double evalue,
-         identity,
-         xdrop;
-  bool first_next,
-       from_file;
+  GtHashmap *feat_to_encseq;
+  GtStrArray *feat_to_encseq_keys;
+  bool first_next;
   unsigned long psmall,
                 plarge,
                 next_index;
-  const char *moreblast;
   char **current_state;
 };
 
@@ -281,7 +271,7 @@ GT_UNUSED static int gt_cluster_matches_gap(GtArray *matches,
         if (gap_size > max_gap_size)
           break;
         if (mref[i].matchnum != mref[j].matchnum) {
-          STORECLUSTEREDGEG (mref[i].matchnum, mref[j].matchnum, gap_size);
+          STORECLUSTEREDGEG(mref[i].matchnum, mref[j].matchnum, gap_size);
         }
       }
     }
@@ -390,24 +380,6 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
   return had_err;
 }
 
-static void write_match_to_file(GtMatch *match, GtFile *matchf)
-{
-  char buffer[BUFSIZ];
-  GtRange rng1,
-          rng2;
-
-  gt_match_get_range_seq1(match, &rng1);
-  gt_match_get_range_seq2(match, &rng2);
-  (void) snprintf(buffer, BUFSIZ, " %lu %s %lu c %lu %s %lu 0 0.0e0 0 0.0\n",
-                  gt_range_length(&rng1),
-                  gt_match_get_seqid1(match),
-                  rng1.start,
-                  gt_range_length(&rng2),
-                  gt_match_get_seqid2(match),
-                  rng2.start);
-  gt_file_xfputs(buffer, matchf);
-}
-
 static int process_feature(GtLTRClusterStream *lcs,
                            const char *feature,
                            GtError *err)
@@ -416,93 +388,37 @@ static int process_feature(GtLTRClusterStream *lcs,
   GtMatchIterator *mi = NULL;
   GtMatch *match = NULL;
   GtMatchIteratorStatus status;
-  char *filename,
-       makeblastdb_call[BUFSIZ],
-       *env,
-       tmp[BUFSIZ];
-  const char **argv;
+  GtEncseq *encseq;
   unsigned long i;
   int had_err = 0;
 
   if (lcs->current_state != NULL) {
+    char tmp[BUFSIZ];
     gt_free(*lcs->current_state);
     (void) snprintf(tmp, BUFSIZ, "Clustering feature: %s", feature);
     *lcs->current_state = gt_cstr_dup(tmp);
   }
   matches = gt_array_new(sizeof(GtMatch*));
-  filename = (char*) gt_hashmap_get(lcs->feat_to_file, (void*) feature);
-  if (!lcs->from_file) {
-    argv = gt_malloc((size_t) 5 * sizeof (const char*));
-    argv[0] = gt_cstr_dup("./gt suffixerator");
-    argv[1] = gt_cstr_dup("-db");
-    argv[2] = gt_cstr_dup(filename);
-    argv[3] = gt_cstr_dup("-indexname");
-    argv[4] = gt_cstr_dup(filename);
-    had_err = gt_parseargsandcallsuffixerator(true, 5, argv, err);
-    for (i = 0UL; i < 5UL; i++) {
-      gt_free((void*) argv[i]);
-    }
-    gt_free((void*) argv);
+  encseq = (GtEncseq*) gt_hashmap_get(lcs->feat_to_encseq, feature);
+  gt_log_log("found encseq %p for feature %s", encseq, feature);
+  if (!had_err) {
+    mi = gt_match_iterator_last_new(encseq, encseq, err);
+    if (mi != NULL) {
+      while ((status = gt_match_iterator_next(mi, &match, err))
+             != GT_MATCHER_STATUS_END) {
+        if (status == GT_MATCHER_STATUS_OK) {
+          gt_array_add(matches, match);
+        } else {
+          gt_assert(status == GT_MATCHER_STATUS_ERROR);
+          had_err = -1;
+          break;
+        }
+      }
+    } else
+      had_err = -1;
   }
   if (!had_err) {
-    if (!lcs->from_file) {
-      /* TODO: fix problems with spaces in filename */
-      env = getenv("GT_BLAST_PATH");
-      if (env != NULL) {
-        (void) snprintf(makeblastdb_call, BUFSIZ,
-                        "%s/makeblastdb -in %s -dbtype nucl -logfile "
-                        "makeblastdb.txt",
-                        env, filename);
-      } else {
-        (void) snprintf(makeblastdb_call, BUFSIZ,
-                        "makeblastdb -in %s -dbtype nucl -logfile "
-                        "makeblastdb.txt",
-                        filename);
-      }
-      had_err = system(makeblastdb_call);
-    }
-    if (!had_err) {
-      (void) snprintf(tmp, BUFSIZ, "%s.match", filename);
-      if (lcs->from_file) {
-        mi = gt_match_iterator_open_new(tmp, err);
-      } else
-        mi = gt_match_iterator_blastn_process_new(filename,
-                                                  filename,
-                                                  lcs->evalue,
-                                                  lcs->dust,
-                                                  lcs->word_size,
-                                                  lcs->gapopen,
-                                                  lcs->gapextend,
-                                                  lcs->penalty,
-                                                  lcs->reward,
-                                                  lcs->identity,
-                                                  lcs->num_threads,
-                                                  lcs->xdrop,
-                                                  lcs->moreblast,
-                                                  err);
-      if (mi != NULL) {
-        GtFile *matchf = NULL;
-        if (!lcs->from_file)
-          matchf = gt_file_new(tmp, "w", err);
-        while ((status = gt_match_iterator_next(mi, &match, err))
-               != GT_MATCHER_STATUS_END) {
-          if (status == GT_MATCHER_STATUS_OK) {
-            gt_array_add(matches, match);
-            if (!lcs->from_file)
-              write_match_to_file(match, matchf);
-          }
-        }
-        gt_file_delete(matchf);
-      } else
-        had_err = -1;
-    } else
-      gt_error_set(err, "Could not run makeblastdb.");
-  } else
-    gt_error_set(err, "Could not run suffixerator.");
-  if (!had_err) {
     GtClusteredSet *cs;
-    GtEncseqLoader *encl;
-    GtEncseq *encs;
     GtHashmap *seqdesc2seqnum;
     GtMatch *tmp_match;
     const char *description;
@@ -510,12 +426,10 @@ static int process_feature(GtLTRClusterStream *lcs,
     unsigned long desclen,
                   num_of_seq;
 
-    encl = gt_encseq_loader_new();
-    encs = gt_encseq_loader_load(encl, filename, err);
     seqdesc2seqnum = gt_hashmap_new(GT_HASH_STRING, free_hash, NULL);
-    num_of_seq = gt_encseq_num_of_sequences(encs);
+    num_of_seq = gt_encseq_num_of_sequences(encseq);
     for (i = 0; i < num_of_seq; i++) {
-      description = gt_encseq_description(encs, &desclen, i);
+      description = gt_encseq_description(encseq, &desclen, i);
       output = gt_calloc((size_t) (desclen + 1), sizeof (char));
       strncpy(output, description, (size_t) desclen);
       output[desclen] = '\0';
@@ -526,11 +440,11 @@ static int process_feature(GtLTRClusterStream *lcs,
     cs = gt_clustered_set_union_find_new(num_of_seq, err);
     if (cs != NULL) {
       if (cluster_sequences(matches, cs, seqdesc2seqnum, (unsigned) lcs->psmall,
-                            (unsigned) lcs->plarge, encs, err) != 0) {
+                            (unsigned) lcs->plarge, encseq, err) != 0) {
         had_err = -1;
       }
       if (!had_err) {
-        (void) cluster_annotate_nodes(cs, encs, feature, lcs->nodes, err);
+        (void) cluster_annotate_nodes(cs, encseq, feature, lcs->nodes, err);
       }
     } else
       had_err = -1;
@@ -541,8 +455,6 @@ static int process_feature(GtLTRClusterStream *lcs,
     }
     gt_array_delete(matches);
     matches = NULL;
-    gt_encseq_loader_delete(encl);
-    gt_encseq_delete(encs);
     gt_hashmap_delete(seqdesc2seqnum);
     gt_clustered_set_delete(cs, err);
   }
@@ -574,10 +486,14 @@ static int gt_ltr_cluster_stream_next(GtNodeStream *ns,
         break;
       }
     }
+    lcs->feat_to_encseq =
+                       gt_ltr_cluster_prepare_seq_visitor_get_encseqs(lcs->lcv);
+    lcs->feat_to_encseq_keys =
+                      gt_ltr_cluster_prepare_seq_visitor_get_features(lcs->lcv);
     if (!had_err) {
-      for (i = 0; i < gt_str_array_size(lcs->feat_to_file_keys); i++) {
+      for (i = 0; i < gt_str_array_size(lcs->feat_to_encseq_keys); i++) {
         had_err = process_feature(lcs,
-                                  gt_str_array_get(lcs->feat_to_file_keys, i),
+                                  gt_str_array_get(lcs->feat_to_encseq_keys, i),
                                   err);
         if (had_err)
           break;
@@ -607,8 +523,8 @@ static void gt_ltr_cluster_stream_free(GtNodeStream *ns)
   unsigned long i;
   GtLTRClusterStream *lcs = gt_ltr_cluster_stream_cast(ns);
   gt_node_visitor_delete((GtNodeVisitor*) lcs->lcv);
-  gt_hashmap_delete(lcs->feat_to_file);
-  gt_str_array_delete(lcs->feat_to_file_keys);
+  gt_hashmap_delete(lcs->feat_to_encseq);
+  gt_str_array_delete(lcs->feat_to_encseq_keys);
   for (i = 0; i < gt_array_size(lcs->nodes); i++)
     gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(lcs->nodes, i));
   gt_array_delete(lcs->nodes);
@@ -627,21 +543,8 @@ const GtNodeStreamClass* gt_ltr_cluster_stream_class(void)
 
 GtNodeStream* gt_ltr_cluster_stream_new(GtNodeStream *in_stream,
                                         GtEncseq *encseq,
-                                        GtStr *file_prefix,
                                         unsigned long plarge,
                                         unsigned long psmall,
-                                        double evalue,
-                                        bool dust,
-                                        int word_size,
-                                        int gapopen,
-                                        int gapextend,
-                                        int penalty,
-                                        int reward,
-                                        int num_threads,
-                                        double xdrop,
-                                        double identity,
-                                        const char *moreblast,
-                                        bool from_file,
                                         char **current_state,
                                         GtError *err)
 {
@@ -650,31 +553,15 @@ GtNodeStream* gt_ltr_cluster_stream_new(GtNodeStream *in_stream,
   ns = gt_node_stream_create(gt_ltr_cluster_stream_class(), true);
   lcs = gt_ltr_cluster_stream_cast(ns);
   lcs->in_stream = gt_node_stream_ref(in_stream);
-  lcs->feat_to_file = gt_hashmap_new(GT_HASH_STRING, free_hash, free_hash);
-  lcs->feat_to_file_keys = gt_str_array_new();
+  lcs->feat_to_encseq = NULL;
+  lcs->feat_to_encseq_keys = NULL;
   lcs->nodes = gt_array_new(sizeof(GtGenomeNode*));
-  lcs->lcv =
-      (GtLTRClusterVisitor*) gt_ltr_cluster_visitor_new(encseq,
-                                                        file_prefix,
-                                                        lcs->feat_to_file,
-                                                        lcs->feat_to_file_keys,
-                                                        err);
+  lcs->lcv = gt_ltr_cluster_prepare_seq_visitor_cast(
+                           gt_ltr_cluster_prepare_seq_visitor_new(encseq, err));
   lcs->first_next = true;
-  lcs->from_file = from_file;
   lcs->next_index = 0;
   lcs->plarge = plarge;
   lcs->psmall = psmall;
-  lcs->evalue = evalue;
-  lcs->dust = dust;
-  lcs->gapopen = gapopen;
-  lcs->gapextend = gapextend;
-  lcs->penalty = penalty;
-  lcs->reward = reward;
-  lcs->num_threads = num_threads;
-  lcs->word_size = word_size;
-  lcs->xdrop = xdrop;
-  lcs->identity = identity;
-  lcs->moreblast = moreblast;
   lcs->current_state = current_state;
   return ns;
 }
