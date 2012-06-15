@@ -49,8 +49,10 @@
 */
 
 #define GT_INITARRAY(A,TYPE)\
-        (A)->space##TYPE = NULL;\
-        (A)->allocated##TYPE = (A)->nextfree##TYPE = 0
+        do {\
+          (A)->space##TYPE = NULL;\
+          (A)->allocated##TYPE = (A)->nextfree##TYPE = 0;\
+        } while (false)
 
 /*
   GT_COPYARRAY copies an array.
@@ -67,15 +69,17 @@
 */
 
 #define GT_CHECKARRAYSPACE(A,TYPE,L)\
-        if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
-        {\
-          (A)->allocated##TYPE += L;\
-          (A)->space##TYPE = gt_realloc_mem((A)->space##TYPE,\
-                                            sizeof (TYPE) *\
-                                            (A)->allocated##TYPE,\
-                                            __FILE__, __LINE__);\
-        }\
-        gt_assert((A)->space##TYPE != NULL)
+        do {\
+          if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
+          {\
+            (A)->allocated##TYPE += L;\
+            (A)->space##TYPE = gt_realloc_mem((A)->space##TYPE,\
+                                              sizeof (TYPE) *\
+                                              (A)->allocated##TYPE,\
+                                              __FILE__, __LINE__);\
+          }\
+          gt_assert((A)->space##TYPE != NULL);\
+        } while (false)
 
 /*
   The next macro is a variation of GT_CHECKARRAYSPACE, which checks if the next
@@ -83,14 +87,17 @@
 */
 
 #define GT_CHECKARRAYSPACEMULTI(A,TYPE,L)\
-        if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
-        {\
-          (A)->allocated##TYPE += L;\
-          (A)->space##TYPE = gt_realloc_mem((A)->space##TYPE,\
-                                            sizeof (TYPE) *\
-                                            (A)->allocated##TYPE,\
-                                            __FILE__, __LINE__);\
-        }
+        do {\
+          if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
+          {\
+            (A)->allocated##TYPE += L;\
+            (A)->space##TYPE = gt_realloc_mem((A)->space##TYPE,\
+                                              sizeof (TYPE) *\
+                                              (A)->allocated##TYPE,\
+                                              __FILE__, __LINE__);\
+          }\
+          gt_assert((A)->space##TYPE != NULL);\
+        } while (false)
 
 /*
   This macro checks the space and delivers a pointer P
@@ -98,8 +105,10 @@
 */
 
 #define GT_GETNEXTFREEINARRAY(P,A,TYPE,L)\
-        GT_CHECKARRAYSPACE(A,TYPE,L);\
-        P = (A)->space##TYPE + (A)->nextfree##TYPE++;
+        do {\
+          GT_CHECKARRAYSPACE(A,TYPE,L);\
+          P = (A)->space##TYPE + (A)->nextfree##TYPE++;\
+        } while (false)
 
 /*
   This macro checks the space and stores V in the
@@ -107,20 +116,23 @@
 */
 
 #define GT_STOREINARRAY(A,TYPE,L,VAL)\
-        GT_CHECKARRAYSPACE(A,TYPE,L);\
-        gt_assert((A)->space##TYPE != NULL);\
-        (A)->space##TYPE[(A)->nextfree##TYPE++] = VAL
+        do {\
+          GT_CHECKARRAYSPACE(A,TYPE,L);\
+          (A)->space##TYPE[(A)->nextfree##TYPE++] = VAL;\
+        } while (false)
 
 /*
   This macro frees the space for an array if it is not NULL.
 */
 
 #define GT_FREEARRAY(A,TYPE)\
-        if ((A)->space##TYPE != NULL)\
-        {\
-          gt_free((A)->space##TYPE);\
-          (A)->space##TYPE = NULL;\
-        }
+        do {\
+          if ((A)->space##TYPE != NULL)\
+          {\
+            gt_free((A)->space##TYPE);\
+            (A)->space##TYPE = NULL;\
+          }\
+        } while (false)
 
 /*
   Some declarations for the most common array types.

@@ -113,7 +113,7 @@ int gt_showmatrix(GtArrayMyfrontvalue * fronts,
  ** The other case, saves more space
 
 #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
-        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
+        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1);\
         (A)->space##TYPE[POS] = VAL;\
         (A)->nextfree##TYPE = POS+1;
 */
@@ -123,7 +123,7 @@ int gt_showmatrix(GtArrayMyfrontvalue * fronts,
  nothing will be allocated in addition!
  */
 #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
-        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
+        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1);\
         (A)->space##TYPE[POS] = VAL;
 
 /*

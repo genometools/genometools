@@ -54,8 +54,7 @@ static void* xcalloc(size_t nmemb, size_t size, unsigned long current_size,
 {
   void *p;
   if ((p = calloc(nmemb, size)) == NULL) {
-    fprintf(stderr, "cannot calloc(%zu, %zu) memory: %s\n", nmemb, size,
-            strerror(errno));
+    fprintf(stderr, "cannot calloc(%zu, %zu) memory\n", nmemb, size);
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
            src_file);
     if (current_size)
@@ -70,7 +69,7 @@ static void* xmalloc(size_t size, unsigned long current_size,
 {
   void *p;
   if ((p = malloc(size)) == NULL) {
-    fprintf(stderr, "cannot malloc(%zu) memory: %s\n", size, strerror(errno));
+    fprintf(stderr, "cannot malloc(%zu) memory\n", size);
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
             src_file);
     if (current_size)
@@ -85,7 +84,7 @@ static void* xrealloc(void *ptr, size_t size, unsigned long current_size,
 {
   void *p;
   if ((p = realloc(ptr, size)) == NULL) {
-    fprintf(stderr, "cannot realloc(%zu) memory: %s\n", size, strerror(errno));
+    fprintf(stderr, "cannot realloc(%zu) memory\n", size);
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
             src_file);
     if (current_size)
