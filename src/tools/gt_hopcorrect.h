@@ -1,8 +1,6 @@
 /*
-  Copyright (c) 2011      Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c)      2012 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
-  Copyright (c) 2011      Center for Bioinformatics, University of Hamburg
-  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,21 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SAM_ALIGNMENT_REP_H
-#define SAM_ALIGNMENT_REP_H
+#ifndef GT_HOPCORRECT_H
+#define GT_HOPCORRECT_H
 
-/* The contents of this file is to be considered private implementation detail.
-*/
+#include "core/tool.h"
 
-#include <sam.h>
-#include "core/alphabet_api.h"
-
-struct GtSamAlignment{
-  bam1_t *s_alignment;
-  GtAlphabet *alphabet;
-  GtUchar *seq_buffer, *qual_buffer;
-  unsigned long s_bufsize, q_bufsize;
-  unsigned long rightmost;
-};
+/* the hopcorrect tool */
+GtTool* gt_hopcorrect(void);
 
 #endif

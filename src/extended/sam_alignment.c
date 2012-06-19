@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2011 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011      Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c)      2012 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -42,8 +43,20 @@ GtSamAlignment *gt_sam_alignment_new(GtAlphabet *alphabet)
   sam_alignment->alphabet = gt_alphabet_ref(alphabet);
   sam_alignment->seq_buffer = NULL;
   sam_alignment->qual_buffer = NULL;
-  sam_alignment->buffsize = 0;
+  sam_alignment->s_bufsize = 0;
+  sam_alignment->q_bufsize = 0;
+  sam_alignment->rightmost = GT_UNDEF_ULONG;
   return sam_alignment;
+}
+
+GtSamAlignment *gt_sam_alignment_clone(GtSamAlignment *sam_alignment)
+{
+  GtSamAlignment *clone;
+  gt_assert(sam_alignment != NULL);
+  clone = gt_sam_alignment_new(sam_alignment->alphabet);
+  (void)bam_copy1(clone->s_alignment, sam_alignment->s_alignment);
+  clone->rightmost = sam_alignment->rightmost;
+  return clone;
 }
 
 void gt_sam_alignment_delete(GtSamAlignment *sam_alignment)
@@ -87,6 +100,18 @@ unsigned long gt_sam_alignment_read_length(GtSamAlignment *sam_alignment)
   return (unsigned long) sam_alignment->s_alignment->core.l_qseq;
 }
 
+unsigned long gt_sam_alignment_rightmost_pos(GtSamAlignment *sam_alignment)
+{
+  gt_assert(sam_alignment != NULL);
+  if (sam_alignment->rightmost == GT_UNDEF_ULONG)
+  {
+    sam_alignment->rightmost = (unsigned long)bam_calend(
+        &sam_alignment->s_alignment->core,
+        bam1_cigar(sam_alignment->s_alignment));
+  }
+  return sam_alignment->rightmost;
+}
+
 const char *gt_sam_alignment_identifier(GtSamAlignment *sam_alignment)
 {
   gt_assert(sam_alignment != NULL);
@@ -99,63 +124,63 @@ int32_t gt_sam_alignment_ref_num(GtSamAlignment *sam_alignment)
   return sam_alignment->s_alignment->core.tid;
 }
 
-const GtUchar *gt_sam_alignment_sequence(GtSamAlignment *sam_alignment)
+void gt_sam_alignment_sequence_external_buffer(GtSamAlignment *sam_alignment,
+    GtUchar **seq_buffer, unsigned long *bufsize)
 {
   unsigned long query_len, idx;
   uint8_t *bam_seq;
 
-  gt_assert(sam_alignment != NULL);
-
   query_len = (unsigned long) sam_alignment->s_alignment->core.l_qseq;
-  if (sam_alignment->buffsize < query_len + 1) {
-    sam_alignment->seq_buffer =
-      gt_realloc(sam_alignment->seq_buffer,
-                 sizeof (sam_alignment->seq_buffer) * (query_len + 1));
-    sam_alignment->qual_buffer =
-      gt_realloc(sam_alignment->qual_buffer,
-                 sizeof (sam_alignment->qual_buffer) * (query_len + 1));
-    sam_alignment->buffsize = query_len + 1;
-    gt_assert(sam_alignment->qual_buffer);
-    gt_assert(sam_alignment->seq_buffer);
+  if ((*bufsize) < query_len) {
+    (*seq_buffer) = gt_realloc(*seq_buffer, sizeof (**seq_buffer) *
+                                   (query_len + 1UL));
+    (*bufsize) = query_len;
   }
+  gt_assert((*seq_buffer) != NULL);
 
   bam_seq = bam1_seq(sam_alignment->s_alignment);
 
   for (idx = 0UL; idx < query_len; idx++) {
-    sam_alignment->seq_buffer[idx] =
-      bambase2gtbase((uint8_t) bam1_seqi(bam_seq, idx),
-                     sam_alignment->alphabet);
+    (*seq_buffer)[idx] = bambase2gtbase((uint8_t) bam1_seqi(bam_seq, idx),
+                                      sam_alignment->alphabet);
   }
-  sam_alignment->seq_buffer[query_len] = (GtUchar) '\0';
+  (*seq_buffer)[query_len] = (GtUchar)'\0';
+}
 
+const GtUchar *gt_sam_alignment_sequence(GtSamAlignment *sam_alignment)
+{
+  gt_sam_alignment_sequence_external_buffer(sam_alignment,
+      &sam_alignment->seq_buffer, &sam_alignment->s_bufsize);
   return sam_alignment->seq_buffer;
 }
 
-const GtUchar *gt_sam_alignment_qualitystring(GtSamAlignment *sam_alignment)
+void gt_sam_alignment_qualitystring_external_buffer(
+    GtSamAlignment *sam_alignment, GtUchar **qual_buffer,
+    unsigned long *bufsize)
 {
   unsigned long query_len, idx;
   uint8_t *qual;
 
-  gt_assert(sam_alignment != NULL);
-
+  gt_assert(qual_buffer != NULL);
+  gt_assert(bufsize != NULL);
   query_len = (unsigned long) sam_alignment->s_alignment->core.l_qseq;
-  if (sam_alignment->buffsize < query_len) {
-    sam_alignment->seq_buffer = gt_realloc(sam_alignment->seq_buffer,
-                                   sizeof (sam_alignment->seq_buffer) *
-                                   (query_len + 1));
-    sam_alignment->qual_buffer = gt_realloc(sam_alignment->qual_buffer,
-                                    sizeof (sam_alignment->qual_buffer) *
-                                    (query_len + 1));
-    sam_alignment->buffsize = query_len;
-    gt_assert(sam_alignment->qual_buffer);
-    gt_assert(sam_alignment->seq_buffer);
+  if ((*bufsize) < query_len) {
+    (*qual_buffer) = gt_realloc((*qual_buffer), sizeof (**qual_buffer) *
+        (query_len + 1UL));
+    (*bufsize) = query_len;
   }
+  gt_assert((*qual_buffer) != NULL);
   qual = bam1_qual(sam_alignment->s_alignment);
   for (idx = 0UL; idx < query_len; idx++) {
-    sam_alignment->qual_buffer[idx] = (GtUchar) (qual[idx] + PHREDOFFSET);
+    (*qual_buffer)[idx] = (GtUchar)(qual[idx] + PHREDOFFSET);
   }
-  sam_alignment->qual_buffer[query_len] = (GtUchar) '\0';
+  (*qual_buffer)[query_len] = (GtUchar)'\0';
+}
 
+const GtUchar *gt_sam_alignment_qualitystring(GtSamAlignment *sam_alignment)
+{
+  gt_sam_alignment_qualitystring_external_buffer(sam_alignment,
+      &sam_alignment->qual_buffer, &sam_alignment->q_bufsize);
   return sam_alignment->qual_buffer;
 }
 
@@ -193,7 +218,7 @@ unsigned char gt_sam_alignment_cigar_i_operation(GtSamAlignment *sam_alignment,
     case BAM_CPAD:
       return 'P';
     case BAM_CEQUAL:
-      return 'M';
+      return '=';
     case BAM_CDIFF:
       return 'X';
     default:

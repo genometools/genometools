@@ -24,6 +24,7 @@
 #include "tools/gt_dev.h"
 #include "tools/gt_extracttarget.h"
 #include "tools/gt_guessprot.h"
+#include "tools/gt_hopcorrect.h"
 #include "tools/gt_idxlocali.h"
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_mergeesa.h"
@@ -52,6 +53,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
   gt_toolbox_add_tool(dev_toolbox, "consensus_sa", gt_consensus_sa_tool());
   gt_toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
+  gt_toolbox_add_tool(dev_toolbox, "hopcorrect", gt_hopcorrect());
   gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
   gt_toolbox_add_tool(dev_toolbox, "sortbench", gt_sortbench());

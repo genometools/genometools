@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011      Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
 #include "core/error_api.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
+#include "core/undef_api.h"
 #include "extended/sam_alignment.h"
 #include "extended/sam_alignment_rep.h"
 #include "extended/samfile_iterator.h"
@@ -103,6 +104,7 @@ int gt_samfile_iterator_next(GtSamfileIterator *s_iter,
   int read;
   if (s_iter->current_alignment == NULL)
     s_iter->current_alignment = gt_sam_alignment_new(s_iter->alphabet);
+  s_iter->current_alignment->rightmost = GT_UNDEF_ULONG;
   read = samread(s_iter->samfile, s_iter->current_alignment->s_alignment);
   if (read > 0) {
     *s_alignment = s_iter->current_alignment;
