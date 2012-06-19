@@ -357,7 +357,7 @@ GtNodeStream* gt_ltr_refseq_match_stream_new(GtNodeStream *in_stream,
 {
   GtNodeStream *gs;
   GtLTRRefseqMatchStream *rms;
-  gs = gt_node_stream_create(gt_ltr_refseq_match_stream_class(), true);
+  gs = gt_node_stream_create(gt_ltr_refseq_match_stream_class(), false);
   rms = gt_ltr_refseq_match_stream_cast(gs);
   rms->in_stream = gt_node_stream_ref(in_stream);
   rms->nodes = gt_array_new(sizeof(GtGenomeNode*));

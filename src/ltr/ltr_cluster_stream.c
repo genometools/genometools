@@ -550,7 +550,7 @@ GtNodeStream* gt_ltr_cluster_stream_new(GtNodeStream *in_stream,
 {
   GtNodeStream *ns;
   GtLTRClusterStream *lcs;
-  ns = gt_node_stream_create(gt_ltr_cluster_stream_class(), true);
+  ns = gt_node_stream_create(gt_ltr_cluster_stream_class(), false);
   lcs = gt_ltr_cluster_stream_cast(ns);
   lcs->in_stream = gt_node_stream_ref(in_stream);
   lcs->feat_to_encseq = NULL;
