@@ -32,4 +32,7 @@ GtNodeStream* gt_ltr_orf_annotator_stream_new(GtNodeStream *in_stream,
                                               bool all,
                                               GtError *err);
 
+void          gt_ltr_orf_annotator_stream_set_progress_location(
+                                                       GtLTRORFAnnotatorStream*,
+                                                       unsigned long*);
 #endif

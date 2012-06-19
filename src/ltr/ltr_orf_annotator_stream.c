@@ -22,6 +22,7 @@
 struct GtLTRORFAnnotatorStream {
   const GtNodeStream parent_instance;
   GtNodeStream *orf_stream;
+  unsigned long *progress_loc;
   GtHashmap *types;
 };
 
@@ -36,6 +37,8 @@ static int ltr_orf_annotator_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   GtLTRORFAnnotatorStream *bs;
   gt_error_check(err);
   bs = ltr_orf_annotator_stream_cast(ns);
+  if (bs->progress_loc)
+    (*bs->progress_loc)++;
   return gt_node_stream_next(bs->orf_stream, gn, err);
 }
 
@@ -70,8 +73,17 @@ GtNodeStream* gt_ltr_orf_annotator_stream_new(GtNodeStream *in_stream,
   ns = gt_node_stream_create(gt_ltr_orf_annotator_stream_class(), false);
   bs = ltr_orf_annotator_stream_cast(ns);
   bs->types = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+  bs->progress_loc = NULL;
   gt_hashmap_add(bs->types, "LTR_retrotransposon", (void*) 1);
   bs->orf_stream = gt_orf_finder_stream_new(in_stream, encseq, bs->types, min,
                                             max, all, err);
   return ns;
+}
+
+void gt_ltr_orf_annotator_stream_set_progress_location(
+                                                     GtLTRORFAnnotatorStream *s,
+                                                     unsigned long *loc)
+{
+  gt_assert(s);
+  s->progress_loc = loc;
 }
