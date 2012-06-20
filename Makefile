@@ -944,15 +944,18 @@ EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 SKCORE=${shell grep -l 'Stefan Kurtz' src/core/*.c}
+DWKCORE=${shell grep -l Willrodt src/core/*.c}
 DWTOOLS=${shell grep -l Willrodt src/tools/*.c}
 GGTOOLS=${shell grep -l Gonnella src/tools/*.c}
 SKEXT=${shell grep -l 'Stefan Kurtz' src/extended/*.c}
+DWEXT=${shell grep -l Willrodt src/extended/*.c}
 GGEXT=${shell grep -l Gonnella src/extended/*.c}
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
              ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
              ${wildcard ${CURDIR}/src/ltr/*.c}\
-             ${SKTOOLS} ${SKCORE} ${SKEXT} ${DWTOOLS} \
+             ${SKTOOLS} ${SKCORE} ${SKEXT} \
+						 ${DWTOOLS} ${DWCORE} ${DWEXT} \
              ${GGTOOLS} ${GGEXT} }}}
 
 spgt:${ALLSPLINT}

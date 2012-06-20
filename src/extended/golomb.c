@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
+  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,14 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+/* TODO write stream reader, that returns only, when complete code is read */
 #include <math.h>
 #include "core/divmodmul.h"
 #include "core/ensure.h"
+#include "core/log_api.h"
 #include "core/ma_api.h"
 #include "extended/golomb.h"
 
 struct GtGolomb {
-  unsigned long m;
+  unsigned long median;
+  unsigned long len;
+  unsigned long two_pow_len;
 };
 
 typedef enum {
@@ -30,85 +35,92 @@ typedef enum {
 } GolombStatus;
 
 struct GtGolombBitwiseDecoder {
-  unsigned long m,
+  unsigned long median,
                 cur_r_bit,
-                q,
-                r,
-                l;
+                quotient,
+                remain,
+                len,
+                two_pow_len;
   GolombStatus status;
 };
 
-GtGolomb* gt_golomb_new(unsigned long m)
+GtGolomb* gt_golomb_new(unsigned long median)
 {
-  GtGolomb *gc;
-  gt_assert(m > 0);
-  gc = gt_malloc(sizeof (*gc));
-  gc->m = m;
-  return gc;
+  GtGolomb *golomb;
+  gt_assert(median > 0);
+  golomb = gt_malloc(sizeof (*golomb));
+  golomb->median = median;
+  golomb->len = (unsigned long) ceil(GT_LOG2((double) golomb->median));
+  golomb->two_pow_len = GT_POW2(golomb->len);
+  return golomb;
 }
 
-unsigned long gt_golomb_get_m(GtGolomb *gc)
+unsigned long gt_golomb_get_m(GtGolomb *golomb)
 {
-  gt_assert(gc);
-  return gc->m;
+  gt_assert(golomb);
+  return golomb->median;
 }
 
-GtBittab* gt_golomb_encode(GtGolomb *gc, unsigned long x)
+GtBittab* gt_golomb_encode(GtGolomb *golomb, unsigned long x)
 {
-  unsigned long q,
-                r,
-                l,
-                bit;
-
-  int idx_i;
+  unsigned long quotient,
+                remain,
+                mask,
+                idx_i;
   GtBittab *code;
-  gt_assert(gc);
+  gt_assert(golomb);
 
-  q = (unsigned long) floor (x / gc->m);
-  r = x - q * gc->m;
+  quotient = x / golomb->median;
+  remain = x - quotient * golomb->median;
 
-  l = (unsigned long) ceil(log(gc->m) * 1/log(2));
-
-  if (l == 0) {
-    code = gt_bittab_new((q + 1) + 1);
+  if (golomb->len == 0) {
+    code = gt_bittab_new((quotient + 1) + 1);
   }
-  else if (r < (GT_POW2(l)) - gc->m) {
-    code = gt_bittab_new((q + 1) + (l - 1));
+  else if (remain < golomb->two_pow_len - golomb->median) {
+    code = gt_bittab_new((quotient + 1) + (golomb->len - 1));
 
-    for (idx_i = 0; idx_i < l - 1; idx_i++) {
-      bit = ((r >> idx_i) & 1);
-      if (bit == 1)
-        gt_bittab_set_bit(code, idx_i);
+    mask = 1UL << (golomb->len - 2);
+    for (idx_i = 0; idx_i < golomb->len - 1; idx_i++) {
+      if (remain & mask)
+        gt_bittab_set_bit(code, quotient + 1 + idx_i);
+      mask >>= 1;
     }
   }
   else {
-    code = gt_bittab_new((q + 1) + l);
-    r = r + (GT_POW2(l)) - gc->m;
-    for (idx_i = 0; idx_i < l; idx_i++) {
-      bit = ((r >> idx_i) & 1);
-      if (bit == 1)
-        gt_bittab_set_bit(code, idx_i);
+    code = gt_bittab_new((quotient + 1) + golomb->len);
+
+    remain = remain + (golomb->two_pow_len) - golomb->median;
+
+    mask = 1UL << (golomb->len - 1);
+    for (idx_i = 0; idx_i < golomb->len; idx_i++) {
+      if (remain & mask)
+        gt_bittab_set_bit(code, quotient + 1 + idx_i);
+      mask >>= 1;
     }
   }
 
-  for (idx_i = gt_bittab_size(code) - 1;
-       idx_i >= gt_bittab_size(code) - q;
+  /* write quotient 1s */
+  /* for (idx_i = gt_bittab_size(code) - 1;
+       idx_i >= gt_bittab_size(code) - quotient;
        idx_i--)
+    gt_bittab_set_bit(code, idx_i); */
+  for (idx_i = 0; idx_i < quotient; idx_i++)
     gt_bittab_set_bit(code, idx_i);
   return code;
 }
 
-GtGolombBitwiseDecoder *gt_golomb_bitwise_decoder_new(GtGolomb *gc)
+GtGolombBitwiseDecoder *gt_golomb_bitwise_decoder_new(GtGolomb *golomb)
 {
   GtGolombBitwiseDecoder *gbwd;
-  gt_assert(gc);
+  gt_assert(golomb);
   gbwd = gt_malloc(sizeof (*gbwd));
-  gbwd->m = gc->m;
+  gbwd->median = golomb->median;
   gbwd->status = IN_Q;
   gbwd->cur_r_bit = 0;
-  gbwd->q = 0;
-  gbwd->r = 0;
-  gbwd->l = (unsigned long) ceil(log(gc->m) * 1/log(2));
+  gbwd->quotient = 0;
+  gbwd->remain = 0;
+  gbwd->len = golomb->len;
+  gbwd->two_pow_len = golomb->two_pow_len;
   return gbwd;
 }
 
@@ -117,97 +129,95 @@ int gt_golomb_bitwise_decoder_next(GtGolombBitwiseDecoder *gbwd,
 {
   gt_assert(gbwd);
   if (gbwd->status == IN_Q) {
-    if (bit == true)
-      gbwd->q += 1;
+    if (bit)
+      gbwd->quotient += 1;
     else
       gbwd->status = REMAINDER;
     return 1;
   }
   else if (gbwd->status == REMAINDER) {
-    gbwd->r = gbwd->r << 1;
-    if (bit == true)
-      gbwd->r = gbwd->r | 1;
+    gbwd->remain = gbwd->remain << 1;
+    if (bit)
+      gbwd->remain = gbwd->remain | 1;
     gbwd->cur_r_bit++;
 
-    if (gbwd->l == 0) {
-      *x = gbwd->q * gbwd->m + gbwd->r;
+    if (gbwd->len == 0) {
+      *x = gbwd->quotient * gbwd->median + gbwd->remain;
       gbwd->status = IN_Q;
-      gbwd->q = 0;
-      gbwd->r = 0;
+      gbwd->quotient = 0;
+      gbwd->remain = 0;
       gbwd->cur_r_bit = 0;
       return 0;
     }
-    else if (gbwd->cur_r_bit == gbwd->l - 1) {
-      if (gbwd->r < GT_POW2(gbwd->l) - gbwd->m) {
-        *x = gbwd->q * gbwd->m + gbwd->r;
+    else if (gbwd->cur_r_bit == gbwd->len - 1) {
+      if (gbwd->remain < GT_POW2(gbwd->len) - gbwd->median) {
+        *x = gbwd->quotient * gbwd->median + gbwd->remain;
         gbwd->status = IN_Q;
-        gbwd->q = 0;
-        gbwd->r = 0;
+        gbwd->quotient = 0;
+        gbwd->remain = 0;
         gbwd->cur_r_bit = 0;
         return 0;
       }
       else
         return 1;
     }
-    else if (gbwd->cur_r_bit == gbwd->l) {
-      gbwd->r -= ((GT_POW2(gbwd->l)) - gbwd->m);
-      *x = gbwd->q * gbwd->m + gbwd->r;
+    else if (gbwd->cur_r_bit == gbwd->len) {
+      gbwd->remain -= ((GT_POW2(gbwd->len)) - gbwd->median);
+      *x = gbwd->quotient * gbwd->median + gbwd->remain;
       gbwd->status = IN_Q;
-      gbwd->q = 0;
-      gbwd->r = 0;
+      gbwd->quotient = 0;
+      gbwd->remain = 0;
       gbwd->cur_r_bit = 0;
       return 0;
     }
     return 1;
   }
-  return 1;
+  return -1;
 }
 
-void gt_golomb_delete(GtGolomb *gc)
+void gt_golomb_delete(GtGolomb *golomb)
 {
-  if (!gc)
-    return;
-  gt_free(gc);
+  gt_free(golomb);
 }
 
 void gt_golomb_bitwise_decoder_delete(GtGolombBitwiseDecoder *gbwd)
 {
-  if (!gbwd)
-    return;
   gt_free(gbwd);
 }
 
 int gt_golomb_unit_test(GtError *err)
 {
   int had_err = 0,
-      stat = -1,
-      idx_i;
-  GtGolomb *gc;
+      stat = -1;
+  GtGolomb *golomb;
   GtBittab *code = NULL;
   GtGolombBitwiseDecoder *gbwd = NULL;
-  unsigned long unit_test_x_size = 100,
+  unsigned long unit_test_x_size = 128UL,
+                idx_i,
                 idx_j,
                 idx_k,
                 number = unit_test_x_size + 1,
-                unit_test_b_size = 100;
+                unit_test_b_size = 256UL;
 
-  for (idx_j = 1; idx_j <= unit_test_b_size; idx_j++) {
-    gc = gt_golomb_new(idx_j);
-    gbwd = gt_golomb_bitwise_decoder_new(gc);
-    for (idx_k = 0; idx_k <= unit_test_x_size; idx_k++) {
-      code = gt_golomb_encode(gc, idx_k);
-      for (idx_i = gt_bittab_size(code) - 1; idx_i >=  0 ; idx_i--) {
+  for (idx_j = 1UL; !had_err && idx_j <= unit_test_b_size; idx_j++) {
+    golomb = gt_golomb_new(idx_j);
+    gbwd = gt_golomb_bitwise_decoder_new(golomb);
+    for (idx_k = 0; !had_err && idx_k <= unit_test_x_size; idx_k++) {
+      code = gt_golomb_encode(golomb, idx_k);
+      for (idx_i = 0 ; !had_err && idx_i < gt_bittab_size(code) ; idx_i++) {
         if (gt_bittab_bit_is_set(code, idx_i))
           stat = gt_golomb_bitwise_decoder_next(gbwd, true, &number);
         else
           stat = gt_golomb_bitwise_decoder_next(gbwd, false, &number);
+        gt_ensure(had_err, stat != -1);
       }
+
       gt_ensure(had_err, stat == 0);
       gt_ensure(had_err, number == idx_k);
       gt_bittab_delete(code);
     }
     gt_golomb_bitwise_decoder_delete(gbwd);
-    gt_golomb_delete(gc);
+    gt_golomb_delete(golomb);
   }
   return had_err;
 }

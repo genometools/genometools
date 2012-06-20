@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
+  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,35 +29,35 @@ typedef struct GtGolomb GtGolomb;
    decode golomb encoded integers. */
 typedef struct GtGolombBitwiseDecoder GtGolombBitwiseDecoder;
 
-/* Returns a new <GtGolomb> object. The parameter <m> influences the length
+/* Returns a new <GtGolomb> object. The parameter <median> influences the length
    of generated code words. It has to be the same for encoding and decoding. */
-GtGolomb*               gt_golomb_new(unsigned long m);
+GtGolomb*               gt_golomb_new(unsigned long median);
 
-/* Encodes the non negative integer <x> for the given <gc>, writes it to a new
-   <GtBittab> object and returns it. */
-GtBittab*               gt_golomb_encode(GtGolomb *gc, unsigned long x);
+/* Encodes the non negative integer <x> for the given <golomb>, writes it to a
+   new <GtBittab> object and returns it. */
+GtBittab*               gt_golomb_encode(GtGolomb *golomb, unsigned long x);
 
-/* Returns the parameter <m>, <gc> was initialized with. */
-unsigned long           gt_golomb_get_m(GtGolomb *gc);
+/* Returns the parameter <median>, <golomb> was initialized with. */
+unsigned long           gt_golomb_get_m(GtGolomb *golomb);
 
 /* Returns a new <GtGolombBitwiseDecoder> object. This decoder is meant to
    decode a code word bit by bit.*/
-GtGolombBitwiseDecoder* gt_golomb_bitwise_decoder_new(GtGolomb *gc);
+GtGolombBitwiseDecoder* gt_golomb_bitwise_decoder_new(GtGolomb *golomb);
 
 /* Appends <bit> to the code word currently being decoded. Returns 0 if the
    code word was completely read and writes its decoding to the location
    pointed to by <x>. Returns 1 if more bits are needed to decode the current
    code word. */
 int                     gt_golomb_bitwise_decoder_next(
-                                                   GtGolombBitwiseDecoder *gcbd,
+                                                   GtGolombBitwiseDecoder *gbwd,
                                                    bool bit, unsigned long *x);
 
-/* Deletes <gc>. */
-void                    gt_golomb_delete(GtGolomb *gc);
+/* Deletes <golomb>. */
+void                    gt_golomb_delete(GtGolomb *golomb);
 
 /* Deletes <gcbd>. */
 void                    gt_golomb_bitwise_decoder_delete(
-                                                  GtGolombBitwiseDecoder *gcbd);
+                                                  GtGolombBitwiseDecoder *gbwd);
 
 int                     gt_golomb_unit_test(GtError *err);
 

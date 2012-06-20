@@ -18,6 +18,7 @@
 #ifndef DIVMODMUL_H
 #define DIVMODMUL_H
 
+#include <math.h>
 /*
   This file defines some macros to define division, multiplication,
   and modulo operations by 2, 4, 8, 16, 32 and 64.
@@ -45,5 +46,6 @@
 #define GT_MULT64(N)    ((N) << 6)
 
 #define GT_POW2(N)      ((1) << (N))
+#define GT_LOG2(v)      (log(v) / M_LN2)
 
 #endif

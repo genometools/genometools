@@ -20,6 +20,7 @@
 
 #include "core/error.h"
 #include "core/intbits.h"
+#include "core/bittab_api.h"
 
 /* Class <GtBitOutStream> helps writing variable length encoded data to files,
    it handles the filling of words of size <GtBitsequence>. */
@@ -35,7 +36,14 @@ GtBitOutStream* gt_bitoutstream_new(FILE *fp);
    standard binary encoding. */
 void            gt_bitoutstream_append(GtBitOutStream *bitstream,
                                        GtBitsequence code,
-                                       unsigned long bits_to_write);
+                                       unsigned bits_to_write);
+
+/* Append the bits in <GtBittab> <tab> to the file associated with <bitstream>.
+   <bits_to_write> is the number of bits in <code> that have to be appended.
+   Assumes the bits are stored in the least significant bits of <code> like
+   standard binary encoding. */
+void            gt_bitoutstream_append_bittab(GtBitOutStream *bitstream,
+                                              GtBittab *tab);
 
 /* Write all currently appended <code>s to the <FILE> <fp> associated with
    <GtBitOutStream> <bitstream>. Possibly 'empty' bits in the current word will
@@ -47,8 +55,9 @@ void            gt_bitoutstream_flush(GtBitOutStream *bitstream);
 void            gt_bitoutstream_flush_advance(GtBitOutStream *bitstream);
 
 /* Returns the position of the file pointer <fp> associated with <bitstream>.
-   For reliable results gt_bitoutstream_flush has to be called before! */
-off_t           gt_bitoutstream_pos(const GtBitOutStream *bitstream);
+   For reliable results gt_bitoutstream_flush has to be called before!
+   returns -1 on error */
+long            gt_bitoutstream_pos(const GtBitOutStream *bitstream);
 
 void            gt_bitoutstream_delete(GtBitOutStream *bitstream);
 

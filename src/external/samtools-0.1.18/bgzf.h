@@ -33,6 +33,7 @@
 
 //typedef int8_t bool;
 
+/*@ignore@*/
 typedef struct {
     int file_descriptor;
     char open_mode;  // 'r' or 'w'
@@ -67,14 +68,22 @@ extern "C" {
  * A subsequent bgzf_close will not close the file descriptor.
  * Returns null on error.
  */
+#ifdef S_SPLINT_S
+BGZF* bgzf_fdopen(int fd, const char* mode);
+#else
 BGZF* bgzf_fdopen(int fd, const char* __restrict mode);
+#endif
 
 /*
  * Open the specified file for reading or writing.
  * Mode must be either "r" or "w".
  * Returns null on error.
  */
+#ifdef S_SPLINT_S
+BGZF* bgzf_open(const char* path, const char*  mode);
+#else
 BGZF* bgzf_open(const char* path, const char* __restrict mode);
+#endif
 
 /*
  * Close the BGZ file and free all associated resources.
@@ -153,5 +162,6 @@ static inline int bgzf_getc(BGZF *fp)
     }
 	return c;
 }
+/*@end@*/
 
 #endif

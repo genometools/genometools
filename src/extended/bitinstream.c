@@ -20,59 +20,79 @@
 #include <unistd.h>
 
 #include "core/assert_api.h"
+#include "core/cstr_api.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
 #include "core/log_api.h"
+#include "core/safearith.h"
 #include "core/xansi_api.h"
 #include "extended/bitinstream.h"
 
 struct GtBitInStream {
-  unsigned long cur_bit,
-                cur_bitseq,
-                bufferlength;
-  off_t cur_page;
-  GtBitsequence *bitseqbuffer;
-  off_t filesize;
+  bool last_chunk;
   char *path;
+  GtBitsequence *bitseqbuffer;
+  int cur_bit;
+  unsigned long cur_bitseq,
+                bufferlength,
+                pages_to_map,
+                read_bits;
+  size_t cur_filepos,
+         filesize;
   long pagesize;
-  unsigned long num_of_pages;
 };
 
 GtBitInStream *gt_bitinstream_new(const char* path,
-                                  off_t offset,
+                                  size_t offset,
                                   unsigned long pages_to_map)
 {
   GtBitInStream *bitstream = gt_malloc(sizeof (*bitstream));
 
-  bitstream->pagesize =sysconf(_SC_PAGESIZE);
-  bitstream->filesize = gt_file_estimate_size(path);
-  bitstream->path = strdup(path);
-  bitstream->num_of_pages = pages_to_map;
+  bitstream->pagesize =sysconf((int) _SC_PAGESIZE);
+  bitstream->last_chunk = false;
+  gt_safe_assign(bitstream->filesize, gt_file_estimate_size(path));
+  bitstream->path = gt_cstr_dup(path);
+  bitstream->pages_to_map = pages_to_map;
 
-  if (bitstream->filesize < bitstream->num_of_pages * bitstream->pagesize)
-    bitstream->num_of_pages = (bitstream->filesize / bitstream->pagesize) + 1;
+  if ((unsigned long) bitstream->filesize <
+      (bitstream->pages_to_map * bitstream->pagesize))
+    bitstream->pages_to_map =
+      (unsigned long) ((bitstream->filesize / bitstream->pagesize) + 1);
 
+  bitstream->bitseqbuffer = NULL;
+  bitstream->read_bits = 0;
   gt_bitinstream_reinit(bitstream,
                         offset);
 
-  bitstream->bufferlength = (bitstream->num_of_pages * bitstream->pagesize) /
+  bitstream->bufferlength = (bitstream->pages_to_map * bitstream->pagesize) /
                             sizeof (*bitstream->bitseqbuffer);
   return bitstream;
 }
 
 void gt_bitinstream_reinit(GtBitInStream *bitstream,
-                           off_t offset)
+                           size_t offset)
 {
-  bitstream->cur_page = offset;
-  gt_assert(bitstream->cur_page < bitstream->filesize);
-  gt_assert((bitstream->cur_page % bitstream->pagesize) == 0);
+  size_t mapsize = (size_t) (bitstream->pagesize * bitstream->pages_to_map);
+
+  gt_assert(offset < bitstream->filesize);
+  gt_assert((offset % bitstream->pagesize) == 0);
+
+  bitstream->cur_filepos = offset;
 
   gt_fa_xmunmap(bitstream->bitseqbuffer);
 
-  bitstream->bitseqbuffer = gt_fa_xmmap_read_range(bitstream->path,
-                                                   bitstream->pagesize *
-                                                     bitstream->num_of_pages,
-                                                   bitstream->cur_page);
+  if (bitstream->cur_filepos + mapsize > bitstream->filesize) {
+    mapsize = bitstream->filesize - bitstream->cur_filepos;
+    bitstream->bufferlength = (unsigned long)  mapsize /
+                                sizeof (*bitstream->bitseqbuffer);
+    bitstream->last_chunk = true;
+  }
+  bitstream->bitseqbuffer =
+    gt_fa_xmmap_read_range(bitstream->path,
+                           mapsize,
+                           offset);
+
+  gt_assert(bitstream->bitseqbuffer != NULL);
 
   bitstream->cur_bit = 0;
   bitstream->cur_bitseq = 0;
@@ -88,26 +108,30 @@ int gt_bitinstream_get_next_bit(GtBitInStream *bitstream,
       bitstream->cur_bitseq++;
     }
     else {
-      if (bitstream->filesize <=
-            bitstream->cur_page + (bitstream->num_of_pages *
-              bitstream->pagesize))
+      if (bitstream->last_chunk) {
         return eof;
-      else
+      }
+      else {
         gt_bitinstream_reinit(bitstream,
-                              bitstream->cur_page +
+                              bitstream->cur_filepos +
                                 bitstream->pagesize *
-                                bitstream->num_of_pages);
+                                bitstream->pages_to_map);
+      }
     }
   }
+  gt_assert(bitstream->cur_bitseq != bitstream->bufferlength);
   *bit =  GT_ISBITSET(bitstream->bitseqbuffer[bitstream->cur_bitseq],
-                      bitstream->cur_bit++);
+                      bitstream->cur_bit++) != 0;
+  bitstream->read_bits++;
   return more_to_read;
 }
 
 void gt_bitinstream_delete(GtBitInStream *bitstream)
 {
-  if (!bitstream)
-    return;
-  gt_fa_xmunmap(bitstream->bitseqbuffer);
-  gt_free(bitstream);
+  if (bitstream != NULL) {
+    gt_log_log("read %lu bits", bitstream->read_bits);
+    gt_fa_xmunmap(bitstream->bitseqbuffer);
+    gt_free(bitstream->path);
+    gt_free(bitstream);
+  }
 }

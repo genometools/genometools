@@ -212,7 +212,7 @@ void gt_free_mem(void *ptr, GT_UNUSED const char *src_file,
 {
   MAInfo *mainfo;
   gt_assert(ma);
-  if (!ptr) return;
+  if (ptr == NULL) return;
   if (ma->bookkeeping) {
     gt_rwlock_wrlock(ma->bookkeeping_lock);
     ma->bookkeeping = false;

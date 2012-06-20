@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
+  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -32,7 +33,7 @@ GtBittab*                   gt_elias_gamma_encode(unsigned long x);
 
 /* Returns a new <GtEliasGammaBitwiseDecoder> object. This decoder is
    meant to decode a code word bit by bit.*/
-GtEliasGammaBitwiseDecoder* gt_elias_gamma_bitwise_decoder_new();
+GtEliasGammaBitwiseDecoder* gt_elias_gamma_bitwise_decoder_new(void);
 
 /* Appends <bit> to the code word currently being decoded by <egbd>.
    Returns 0 if the code word was completely read and writes its value to the

@@ -96,7 +96,7 @@ static int gt_sam_interface_arguments_check(GT_UNUSED int rest_argc,
 static int gt_sam_interface_runner(GT_UNUSED int argc,
                                    GT_UNUSED const char **argv,
                                    GT_UNUSED int parsed_args,
-                                   void *tool_arguments, GT_UNUSED GtError *err)
+                                   void *tool_arguments, GtError *err)
 {
   GtSamInterfaceArguments *arguments = tool_arguments;
   int had_err = 0, count_out = 0;
@@ -110,14 +110,16 @@ static int gt_sam_interface_runner(GT_UNUSED int argc,
   if (arguments->bool_is_sam) {
     if (gt_option_is_set(arguments->ref_idxfile))
       sa_iter = gt_samfile_iterator_new_sam(argv[parsed_args], alpha,
-                                        gt_str_get(arguments->indexfilename));
+                                        gt_str_get(arguments->indexfilename),
+                                        err);
     else
       sa_iter  = gt_samfile_iterator_new_sam(argv[parsed_args], alpha,
-                                        NULL);
+                                        NULL,
+                                        err);
 
   }
   else {
-    sa_iter = gt_samfile_iterator_new_bam(argv[parsed_args], alpha);
+    sa_iter = gt_samfile_iterator_new_bam(argv[parsed_args], alpha, err);
   }
   while (gt_samfile_iterator_next(sa_iter, &sa_align) > 0 &&
          arguments->lines - count_out) {
@@ -128,8 +130,8 @@ static int gt_sam_interface_runner(GT_UNUSED int argc,
     printf("%s\t%d\t%s\t",
            gt_sam_alignment_identifier(sa_align),
            (int) gt_sam_alignment_flag(sa_align),
-           gt_samfile_iterator_reference(sa_iter,
-                                     gt_sam_alignment_ref_num(sa_align)));
+           gt_samfile_iterator_reference_name(sa_iter,
+                                         gt_sam_alignment_ref_num(sa_align)));
     if (gt_sam_alignment_is_unmapped(sa_align))
       printf("*");
     else {

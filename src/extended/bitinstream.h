@@ -18,6 +18,8 @@
 #ifndef BITINSTREAM_H
 #define BITINSTREAM_H
 
+#include <sys/types.h>
+
 #include "core/error.h"
 #include "core/intbits.h"
 
@@ -28,14 +30,14 @@ typedef struct GtBitInStream GtBitInStream;
 /* Returns a new <GtBitInStream>,  <path> is a '\0' terminated string with the
    name of the file, <offset> is the page offset where mapping should start, it
    has to be a multiple of pagesize. <pages_to_map> is the number of pages to
-   map at once. If <path> is not valid exits with <EXIT_FAILURE>*/
+   map at once. If <path> is not valid exits with <EXIT_FAILURE> */
 GtBitInStream *gt_bitinstream_new(const char *path,
-                                  off_t offset,
+                                  size_t offset,
                                   unsigned long pages_to_map);
 
 /* Tells <bitstream> to remap the file with a new offset */
 void           gt_bitinstream_reinit(GtBitInStream *bitstream,
-                                     off_t offset);
+                                     size_t offset);
 
 /* Sets <bit>, returns 0 if there are no more bits to read and 1 if
    successfully read one bit. */

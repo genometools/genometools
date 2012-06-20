@@ -70,6 +70,7 @@ typedef gzFile bamFile;
 /* no bam_write/bam_tell/bam_seek() here */
 #endif
 
+/*@ignore@*/
 /*! @typedef
   @abstract Structure for the alignment header.
   @field n_targets   number of reference sequences
@@ -448,15 +449,15 @@ extern "C" {
 	/*! @function
 	  @abstract  Initiate a pointer to bam1_t struct
 	 */
-#define bam_init1() ((bam1_t*)calloc(1, sizeof(bam1_t)))
+#define bam_init1() ((bam1_t*)calloc((size_t) 1, sizeof(bam1_t)))
 
 	/*! @function
 	  @abstract  Free the memory allocated for an alignment.
 	  @param  b  pointer to an alignment
 	 */
 #define bam_destroy1(b) do {					\
-		if (b) { free((b)->data); free(b); }	\
-	} while (0)
+		if (b!=NULL) { free((b)->data); free(b); }	\
+	} while (0==1)
 
 	/*!
 	  @abstract       Format a BAM record in the SAM format
@@ -758,6 +759,7 @@ static inline int bam_aux_type2size(int x)
 	else if (x == 'I' || x == 'i' || x == 'f') return 4;
 	else return 0;
 }
+/*@end@*/
 
 
 #endif

@@ -139,6 +139,7 @@ void*   gt_fa_xmmap_write_func_range(const char *path, size_t len,
                                      const char *src_file, int src_line);
 
 void    gt_fa_xmunmap(void *addr);
+
 #define gt_fa_mmap_generic_fd(fd, filename_to_map, len, offset, mapwritable, \
                               hard_fail, err) \
         gt_fa_mmap_generic_fd_func(fd, filename_to_map, len, offset, \

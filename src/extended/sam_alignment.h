@@ -28,56 +28,60 @@ typedef struct GtSamAlignment GtSamAlignment;
 
 GtSamAlignment* gt_sam_alignment_new(GtAlphabet *alphabet);
 
-const char*     gt_sam_alignment_identifier(GtSamAlignment *s_alignment);
+const char*     gt_sam_alignment_identifier(GtSamAlignment *sam_alignment);
 
 /* Returns the number of the reference sequence this alignment corresponds to,
    mapping of numbers to names is done in the sam/bam-header. Access through
    GtSamfileIterator */
-int32_t         gt_sam_alignment_ref_num(GtSamAlignment *s_alignment);
+int32_t         gt_sam_alignment_ref_num(GtSamAlignment *sam_alignment);
 
 /* Returns the starting position of the alignment in the reference sequence */
-unsigned long   gt_sam_alignment_pos(GtSamAlignment *s_alignment);
+unsigned long   gt_sam_alignment_pos(GtSamAlignment *sam_alignment);
 
 /* Returns length of read, not length of the alignment */
-unsigned long   gt_sam_alignment_read_length(GtSamAlignment *s_alignment);
+unsigned long   gt_sam_alignment_read_length(GtSamAlignment *sam_alignment);
 
-/* Returns encoded read sequence from <s_alignment>. */
-const GtUchar*  gt_sam_alignment_sequence(GtSamAlignment *s_alignment);
+/* Returns encoded read sequence from <sam_alignment>. */
+const GtUchar*  gt_sam_alignment_sequence(GtSamAlignment *sam_alignment);
 
 /* Returns string of qualities in ASCII format as in Sanger FASTQ for the
-   read sequence from <s_alignment>.
+   read sequence from <sam_alignment>.
    The length is the same as the length of the read sequence. */
-const GtUchar*  gt_sam_alignment_qualitystring(GtSamAlignment *s_alignment);
+const GtUchar*  gt_sam_alignment_qualitystring(GtSamAlignment *sam_alignment);
 
-/* Returns the number of CIGAR operations in <s_alignment>. */
-uint16_t        gt_sam_alignment_cigar_length(GtSamAlignment *s_alignment);
+/* Returns the number of CIGAR operations in <sam_alignment>. */
+uint16_t        gt_sam_alignment_cigar_length(GtSamAlignment *sam_alignment);
 
-/* Returns the length of CIGAR operation <i> in <s_alignment>. */
-uint32_t        gt_sam_alignment_cigar_i_length(GtSamAlignment *s_alignment,
+/* Returns the length of CIGAR operation <i> in <sam_alignment>. */
+uint32_t        gt_sam_alignment_cigar_i_length(GtSamAlignment *sam_alignment,
                                                 uint16_t i);
 
-/* Returns the type of CIGAR operation <i> in <s_alignment>.
+/* Returns the type of CIGAR operation <i> in <sam_alignment>.
    type is one of [MIDNSHP=X] (see sam/bam fileformat documentation for
    details) */
-unsigned char   gt_sam_alignment_cigar_i_operation(GtSamAlignment *s_alignment,
-                                                   uint16_t i);
+unsigned char   gt_sam_alignment_cigar_i_operation(
+                                                  GtSamAlignment *sam_alignment,
+                                                  uint16_t i);
 /* For explanation of the flag and how to interpret see samtools
    documentation. */
-uint32_t gt_sam_alignment_flag(GtSamAlignment *s_alignment);
+uint32_t        gt_sam_alignment_flag(GtSamAlignment *sam_alignment);
 
-/* Checks the flag and returns true if bit is set in flag of <s_alignment>. See
-   sam/bam fileformat documentation for explanation of meaning of bits. */
-bool     gt_sam_alignment_is_paired(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_is_proper_paired(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_is_unmapped(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_mate_is_unmapped(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_is_reverse(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_mate_is_reverse(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_is_read1(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_is_read2(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_is_secondary(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_has_qc_failure(GtSamAlignment *s_alignment);
-bool     gt_sam_alignment_is_optical_pcr_duplicate(GtSamAlignment *s_alignment);
+/* Checks the flag and returns true if bit is set in flag of <sam_alignment>.
+   See sam/bam fileformat documentation for explanation of meaning of bits. */
+bool            gt_sam_alignment_is_paired(GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_is_proper_paired(
+                                                 GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_is_unmapped(GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_mate_is_unmapped(
+                                                 GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_is_reverse(GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_mate_is_reverse(GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_is_read1(GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_is_read2(GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_is_secondary(GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_has_qc_failure(GtSamAlignment *sam_alignment);
+bool            gt_sam_alignment_is_optical_pcr_duplicate(
+                                                 GtSamAlignment *sam_alignment);
 
-void            gt_sam_alignment_delete(GtSamAlignment *s_alignment);
+void            gt_sam_alignment_delete(GtSamAlignment *sam_alignment);
 #endif

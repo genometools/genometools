@@ -20,6 +20,7 @@
 #define SAFEARITH_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "core/error.h"
@@ -40,7 +41,7 @@
                     __LINE__);                                              \
             exit(EXIT_FAILURE);                                             \
           }                                                                 \
-        } while (0)
+        } while (false)
 
 /* add <a> to <b> and assign the result to <c> or exit upon overflow */
 #define gt_safe_add(c, a, b)                                              \
@@ -50,7 +51,7 @@
                     __LINE__);                                            \
             exit(EXIT_FAILURE);                                           \
           }                                                               \
-        } while (0)
+        } while (false)
 
 /* subtract <b> from <a> and assign the result to <c> or exit upon overflow */
 #define gt_safe_sub(c, a, b)                                                 \
@@ -60,7 +61,7 @@
                     __LINE__);                                               \
             exit(EXIT_FAILURE);                                              \
           }                                                                  \
-        } while (0)
+        } while (false)
 
 typedef void  (GtOverflowHandlerFunc)(const char *src_file, int src_line,
                                       void *data);

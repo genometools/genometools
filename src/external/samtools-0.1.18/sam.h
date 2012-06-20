@@ -13,6 +13,7 @@
   @copyright Genome Research Ltd.
  */
 
+/*@ignore@*/
 /*! @typedef
   @abstract SAM/BAM file handler
   @field  type    type of the handler; bit 1 for BAM, 2 for reading and bit 3-4 for flag format
@@ -94,5 +95,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+/*@end@*/
 
 #endif

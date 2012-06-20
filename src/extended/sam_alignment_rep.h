@@ -18,6 +18,9 @@
 #ifndef SAM_ALIGNMENT_REP_H
 #define SAM_ALIGNMENT_REP_H
 
+/* The contents of this file is to be considered private implementation detail.
+*/
+
 #include <sam.h>
 #include "core/alphabet_api.h"
 

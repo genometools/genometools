@@ -206,8 +206,8 @@ void gt_fa_fclose(FILE *stream)
 void gt_fa_xfclose(FILE *stream)
 {
   gt_assert(fa);
-  if (!stream) return;
-  xfclose_generic(stream, GT_FILE_MODE_UNCOMPRESSED, fa);
+  if (stream != NULL)
+    xfclose_generic(stream, GT_FILE_MODE_UNCOMPRESSED, fa);
 }
 
 void gt_fa_lock_shared(FILE *stream)
