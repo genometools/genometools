@@ -3,13 +3,17 @@
 # copy this file to .git/hooks (i.e., overwrite the file .git/hooks/pre-commit)
 # to perform source checks before commits
 
-# different versions of git use different letters for deleted/removed files
 FILES=`git diff --cached --name-status HEAD | \
   awk '$1 != "R" && $1 != "D" { print $2 }' | \
   grep -v -e 'src/external'                 | \
   grep -e '.*\.c$' -e '.*\.h$'`
 
-if [ ${#FILES} -gt 0 ]
+
+make -j8 curses=no cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes CC='ccache gcc'
+
+[ $? -eq 0 ] && make -j8 spgt
+
+[ $? -eq 0 ] && if [ ${#FILES} -gt 0 ]
 then
   $PWD/scripts/src_check $FILES
 else
