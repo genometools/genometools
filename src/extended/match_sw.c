@@ -50,12 +50,13 @@ GtMatch* gt_match_sw_new(const char *seqid1,
                          unsigned long start_seq1,
                          unsigned long start_seq2,
                          unsigned long end_seq1,
-                         unsigned long end_seq2)
+                         unsigned long end_seq2,
+                         GtMatchDirection dir)
 {
   GtMatch *match;
   GtMatchSW *matchs;
   match = gt_match_create(gt_match_sw_class(), start_seq1, end_seq1,
-                          start_seq2, end_seq2, seqid1, seqid2);
+                          start_seq2, end_seq2, seqid1, seqid2, dir);
   matchs = gt_match_sw_cast(match);
   matchs->alilen = length;
   matchs->seqno1 = seqno1;

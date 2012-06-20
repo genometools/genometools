@@ -22,20 +22,26 @@
 
 typedef struct GtMatch GtMatch;
 
-void          gt_match_set_seqid1(GtMatch *match, const char *seqid);
-void          gt_match_set_seqid1_nt(GtMatch *match, const char *seqid,
-                                     unsigned long len);
-void          gt_match_set_seqid2(GtMatch *match, const char *seqid);
-void          gt_match_set_seqid2_nt(GtMatch *match, const char *seqid,
-                                     unsigned long len);
-const char*   gt_match_get_seqid1(GtMatch *match);
-const char*   gt_match_get_seqid2(GtMatch *match);
-void          gt_match_set_range_seq1(GtMatch *match, unsigned long start,
-                                      unsigned long end);
-void          gt_match_set_range_seq2(GtMatch *match, unsigned long start,
-                                      unsigned long end);
-void          gt_match_get_range_seq1(GtMatch *match, GtRange *range);
-void          gt_match_get_range_seq2(GtMatch *match, GtRange *range);
-void          gt_match_delete(GtMatch *match);
+typedef enum {
+  GT_MATCH_DIRECT,
+  GT_MATCH_REVERSE
+} GtMatchDirection;
+
+void             gt_match_set_seqid1(GtMatch *match, const char *seqid);
+void             gt_match_set_seqid1_nt(GtMatch *match, const char *seqid,
+                                        unsigned long len);
+void             gt_match_set_seqid2(GtMatch *match, const char *seqid);
+void             gt_match_set_seqid2_nt(GtMatch *match, const char *seqid,
+                                        unsigned long len);
+const char*      gt_match_get_seqid1(const GtMatch *match);
+const char*      gt_match_get_seqid2(const GtMatch *match);
+void             gt_match_set_range_seq1(GtMatch *match, unsigned long start,
+                                         unsigned long end);
+void             gt_match_set_range_seq2(GtMatch *match, unsigned long start,
+                                         unsigned long end);
+void             gt_match_get_range_seq1(const GtMatch *match, GtRange *range);
+void             gt_match_get_range_seq2(const GtMatch *match, GtRange *range);
+GtMatchDirection gt_match_get_direction(const GtMatch *match);
+void             gt_match_delete(GtMatch *match);
 
 #endif

@@ -32,7 +32,8 @@ GtMatch* gt_match_open_new(char *seqid1,
                            unsigned long start_seq2,
                            unsigned long end_seq1,
                            unsigned long end_seq2,
-                           long weight);
+                           long weight,
+                           GtMatchDirection dir);
 
 /* Sets <weight> to be the weight value in <mo>. */
 void gt_match_open_set_weight(GtMatchOpen *mo, long weight);

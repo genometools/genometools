@@ -69,6 +69,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
   long storeinteger[READNUMS], tmp;
   long double e_value;
   float bitscore;
+  bool reverse = false;
   char query_seq[BUFSIZ], db_seq[BUFSIZ], buffer[BUFSIZ];
   int had_err = 0, i = 0, readvalues = 0;
   GtMatchIteratorBlast *m = gt_match_iterator_blast_cast(gm);
@@ -130,11 +131,15 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
   if (!had_err) {
     if (storeinteger[1] > storeinteger[2]) {
       tmp = storeinteger[1];
+      gt_assert(!reverse);
+      reverse = true;
       storeinteger[1] = storeinteger[2];
       storeinteger[2] = tmp;
     }
     if (storeinteger[3] > storeinteger[4]) {
       tmp = storeinteger[3];
+      gt_assert(!reverse);
+      reverse = true;
       storeinteger[3] = storeinteger[4];
       storeinteger[4] = tmp;
     }
@@ -146,7 +151,8 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
                                 storeinteger[4],
                                 e_value,
                                 bitscore,
-                                storeinteger[0]);
+                                storeinteger[0],
+                                reverse ? GT_MATCH_REVERSE : GT_MATCH_DIRECT);
     m->pvt->curpos++;
     return GT_MATCHER_STATUS_OK;
   }

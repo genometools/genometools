@@ -105,7 +105,8 @@ static GtMatchIteratorStatus gt_match_iterator_sw_next(GtMatchIterator *mi,
                            gt_alignment_get_length(ali),
                            gt_alignment_eval(ali),
                            arng.start, brng.start,
-                           arng.end, brng.end);
+                           arng.end, brng.end,
+                           GT_MATCH_DIRECT);
   gt_match_set_seqid1_nt(*match, adesc, seqlen_a);
   gt_match_set_seqid2_nt(*match, bdesc, seqlen_b);
   gt_alignment_delete(ali);

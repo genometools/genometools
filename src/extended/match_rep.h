@@ -22,8 +22,8 @@
 #include "core/error_api.h"
 #include "core/range_api.h"
 #include "core/str_api.h"
-#include "extended/match.h"
 #include "extended/match_visitor.h"
+#include "extended/match.h"
 
 typedef void (*GtMatchFreeFunc) (GtMatch*);
 typedef int  (*GtMatchAcceptFunc) (GtMatch*, GtMatchVisitor*, GtError*);
@@ -42,6 +42,7 @@ struct GtMatch
         *seqid2;
   GtRange range_seq1,
           range_seq2;
+  GtMatchDirection direction;
 };
 
 const GtMatchClass* gt_match_class_new(size_t size,
@@ -51,6 +52,7 @@ const GtMatchClass* gt_match_class_new(size_t size,
 GtMatch* gt_match_create(const GtMatchClass*,
                          unsigned long start1, unsigned long end1,
                          unsigned long start2, unsigned long end2,
-                         const char *seqid1, const char *seqid2);
+                         const char *seqid1, const char *seqid2,
+                         GtMatchDirection dir);
 
 #endif

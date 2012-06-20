@@ -183,7 +183,9 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
       *match = gt_match_last_new(seqid1, seqid2, score,
                                  seqno1, seqno2,
                                  start1, start2,
-                                 start1 + mlength1 - 1, start2 + mlength2 - 1);
+                                 start1 + mlength1 - 1, start2 + mlength2 - 1,
+                                 strand1 == strand2 ? GT_MATCH_DIRECT :
+                                                      GT_MATCH_REVERSE);
     }
   }
   return had_err;

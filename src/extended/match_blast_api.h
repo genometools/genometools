@@ -35,7 +35,8 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             unsigned long end_seq2,
                             double evalue,
                             float bitscore,
-                            unsigned long ali_l);
+                            unsigned long ali_l,
+                            GtMatchDirection dir);
 
 /* Sets <evalue> to be the E-value in <mb>. */
 void gt_match_blast_set_evalue(GtMatchBlast *mb, long double evalue);

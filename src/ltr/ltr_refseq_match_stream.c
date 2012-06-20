@@ -146,6 +146,23 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
   return had_err;
 }
 
+static GtStrand gt_ltr_refseq_match_stream_determine_strand(GtMatchDirection d,
+                                                            GtFeatureNode *fn)
+{
+  gt_assert(fn);
+  if (gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE) {
+    if (d == GT_MATCH_DIRECT)
+      return GT_MATCH_REVERSE;
+    else
+      return GT_MATCH_DIRECT;
+  } else {
+    if (d == GT_MATCH_REVERSE)
+      return GT_MATCH_REVERSE;
+    else
+      return GT_MATCH_DIRECT;
+  }
+}
+
 static void gt_ltr_refseq_match_stream_add_match_to_fn(
                                                     GtLTRRefseqMatchStream *rms,
                                                     GtMatch *match,
@@ -154,6 +171,8 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   GtStr *seq;
   GtFeatureNode *fn;
   GtGenomeNode *new_node;
+  GtMatchDirection dir;
+  GtStrand str;
   GtRange fn_range, match_range1, match_range2;
   char target[BUFSIZ], *tmp, *tmp2;
   const char *seqid1, *seqid2;
@@ -179,10 +198,11 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   gt_match_get_range_seq1(match, &match_range1);
   gt_match_get_range_seq2(match, &match_range2);
   seq = gt_genome_node_get_seqid((GtGenomeNode*) fn);
+  dir = gt_match_get_direction(match);
+  str = gt_ltr_refseq_match_stream_determine_strand(dir, fn);
   new_node = gt_feature_node_new(seq, NEW_FN_TYPE,
                                  fn_range.start + match_range1.start,
-                                 fn_range.start + match_range1.end,
-                                 GT_STRAND_FORWARD);
+                                 fn_range.start + match_range1.end, str);
   gt_feature_node_set_source((GtFeatureNode*) new_node,
                              gt_str_new_cstr(rms->source));
   if (rms->params_id != GT_UNDEF_ULONG) {

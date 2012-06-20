@@ -48,12 +48,13 @@ GtMatch* gt_match_last_new(const char *seqid1,
                            unsigned long start_seq1,
                            unsigned long start_seq2,
                            unsigned long end_seq1,
-                           unsigned long end_seq2)
+                           unsigned long end_seq2,
+                           GtMatchDirection dir)
 {
   GtMatch *match;
   GtMatchLAST *matchs;
   match = gt_match_create(gt_match_last_class(), start_seq1, end_seq1,
-                          start_seq2, end_seq2, seqid1, seqid2);
+                          start_seq2, end_seq2, seqid1, seqid2, dir);
   matchs = gt_match_last_cast(match);
   matchs->seqno1 = seqno1;
   matchs->seqno2 = seqno2;

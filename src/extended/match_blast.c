@@ -66,12 +66,13 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             unsigned long end_seq2,
                             double evalue,
                             float bitscore,
-                            unsigned long length)
+                            unsigned long length,
+                            GtMatchDirection dir)
 {
   GtMatch *match;
   GtMatchBlast *matchb;
   match = gt_match_create(gt_match_blast_class(), start_seq1, end_seq1,
-                          start_seq2, end_seq2, seqid1, seqid2);
+                          start_seq2, end_seq2, seqid1, seqid2, dir);
   matchb = gt_match_blast_cast(match);
   matchb->evalue = evalue;
   matchb->bitscore = bitscore;

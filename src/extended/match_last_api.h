@@ -32,7 +32,8 @@ GtMatch*      gt_match_last_new(const char *seqid1,
                                 unsigned long start_seq1,
                                 unsigned long start_seq2,
                                 unsigned long end_seq1,
-                                unsigned long end_seq2);
+                                unsigned long end_seq2,
+                                GtMatchDirection dir);
 
 /* Returns the sequence number of the match <ms> in the first <GtEncseq>. */
 unsigned long gt_match_last_get_seqno1(const GtMatchLAST *ml);

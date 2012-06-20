@@ -24,6 +24,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/match_rep.h"
+#include "extended/match.h"
 
 const GtMatchClass* gt_match_class_new(size_t size,
                                        GtMatchFreeFunc free,
@@ -41,7 +42,8 @@ const GtMatchClass* gt_match_class_new(size_t size,
 GtMatch* gt_match_create(const GtMatchClass *matchc,
                          unsigned long start1, unsigned long end1,
                          unsigned long start2, unsigned long end2,
-                         const char *seqid1, const char *seqid2)
+                         const char *seqid1, const char *seqid2,
+                         GtMatchDirection dir)
 {
   GtMatch *match;
   gt_assert(matchc && matchc->size);
@@ -59,6 +61,7 @@ GtMatch* gt_match_create(const GtMatchClass *matchc,
   match->range_seq1.end = end1;
   match->range_seq2.start = start2;
   match->range_seq2.end = end2;
+  match->direction = dir;
   return match;
 }
 
@@ -120,26 +123,26 @@ void gt_match_set_seqid2_nt(GtMatch *match, const char *seqid,
   gt_str_append_cstr_nt(match->seqid2, seqid, len);
 }
 
-const char* gt_match_get_seqid1(GtMatch *match)
+const char* gt_match_get_seqid1(const GtMatch *match)
 {
   gt_assert(match);
   return gt_str_get(match->seqid1);
 }
 
-const char* gt_match_get_seqid2(GtMatch *match)
+const char* gt_match_get_seqid2(const GtMatch *match)
 {
   gt_assert(match);
   return gt_str_get(match->seqid2);
 }
 
-void gt_match_get_range_seq1(GtMatch *match, GtRange *range)
+void gt_match_get_range_seq1(const GtMatch *match, GtRange *range)
 {
   gt_assert(match && range);
   range->start = match->range_seq1.start;
   range->end = match->range_seq1.end;
 }
 
-void gt_match_get_range_seq2(GtMatch *match, GtRange *range)
+void gt_match_get_range_seq2(const GtMatch *match, GtRange *range)
 {
   gt_assert(match && range);
   range->start = match->range_seq2.start;
@@ -162,6 +165,12 @@ void gt_match_set_range_seq2(GtMatch *match, unsigned long start,
   gt_assert(start <= end);
   match->range_seq2.start = start;
   match->range_seq2.end = end;
+}
+
+GtMatchDirection gt_match_get_direction(const GtMatch *match)
+{
+  gt_assert(match);
+  return match->direction;
 }
 
 void gt_match_delete(GtMatch *match)

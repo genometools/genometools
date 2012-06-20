@@ -64,7 +64,7 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
   int readnums;
   long storeinteger[READNUMS];
   int had_err = 0, i = 0;
-  char buffer[BUFSIZ], seqid1[BUFSIZ], seqid2[BUFSIZ];
+  char buffer[BUFSIZ], seqid1[BUFSIZ], seqid2[BUFSIZ], matchtype;
   GtMatchIteratorOpen *mpi = gt_match_iterator_open_cast(gmpi);
   gt_assert(mpi);
 
@@ -76,18 +76,19 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
       } else break;
     }
     fseek(mpi->pvt->matchfilep, -1, SEEK_CUR);
-    readnums = fscanf(mpi->pvt->matchfilep," %ld %s %ld %*c %ld %s %ld %*d %*e "
+    readnums = fscanf(mpi->pvt->matchfilep," %ld %s %ld %c %ld %s %ld %*d %*e "
                       "%ld %*f\n",
                       &storeinteger[0],
                       seqid1,
                       &storeinteger[1],
+                      &matchtype,
                       &storeinteger[2],
                       seqid2,
                       &storeinteger[3],
                       &storeinteger[4]);
     if (readnums == EOF)
       return GT_MATCHER_STATUS_END;
-    if (readnums != READNUMS + 2)
+    if (readnums != READNUMS + 3)
     {
       GT_MATCHER_OPEN_CANNOTPARSELINE("invalid format");
       had_err = -1;
@@ -134,7 +135,9 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
                                storeinteger[1] + storeinteger[0] - 1,
                                storeinteger[3],
                                storeinteger[3] + storeinteger[2] - 1,
-                               storeinteger[4]);
+                               storeinteger[4],
+                               matchtype == 'D' ? GT_MATCH_DIRECT :
+                                                  GT_MATCH_REVERSE);
     mpi->pvt->curpos++;
     return GT_MATCHER_STATUS_OK;
   }

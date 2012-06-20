@@ -61,12 +61,13 @@ GtMatch* gt_match_open_new(char *seqid1,
                            unsigned long end_seq1,
                            unsigned long start_seq2,
                            unsigned long end_seq2,
-                           long weight)
+                           long weight,
+                           GtMatchDirection dir)
 {
   GtMatch *match;
   GtMatchOpen *matcho;
   match = gt_match_create(gt_match_open_class(), start_seq1, end_seq1,
-                          start_seq2, end_seq2, seqid1, seqid2);
+                          start_seq2, end_seq2, seqid1, seqid2, dir);
   matcho = gt_match_open_cast(match);
   matcho->weight = weight;
   return match;
