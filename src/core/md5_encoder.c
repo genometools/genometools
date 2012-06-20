@@ -214,7 +214,7 @@ void gt_md5_encoder_reset(GtMD5Encoder *enc)
 void gt_md5_encoder_add_block(GtMD5Encoder *enc, const char *message,
                               unsigned long len)
 {
-  gt_assert(enc && message && len >= 0 && len < 65);
+  gt_assert(enc && message && len < 65);
   if (enc->len > 0) {
     digest(enc->wbuff, enc->d);
     enc->d[0]+=enc->d_old[0]; enc->d[1]+=enc->d_old[1];
