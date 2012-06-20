@@ -329,6 +329,7 @@ GtMatchIterator* gt_match_iterator_last_new(GtEncseq *es1, GtEncseq *es2,
 {
   GtMatchIterator *mp;
   GtMatchIteratorLast *mil;
+  int had_err = 0;
   gt_assert(es1 && es2);
   gt_error_check(err);
 
@@ -352,7 +353,11 @@ GtMatchIterator* gt_match_iterator_last_new(GtEncseq *es1, GtEncseq *es2,
   mil->pvt->linebuf = gt_str_new();
   mil->pvt->desc_to_seqno = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
 
-  /* XXX */ last_prepare_indices(mil, err);
+  had_err = last_prepare_indices(mil, err);
+  if (had_err) {
+    gt_match_iterator_delete(mp);
+    return NULL;
+  }
   gt_assert(mil->pvt->idxfilename);
   return mp;
 }
