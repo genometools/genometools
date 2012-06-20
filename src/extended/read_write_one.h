@@ -21,7 +21,8 @@
 #define WRITE_ONE(element, fp)                                                 \
   gt_xfwrite(&element, sizeof (element), (size_t) 1, fp)
 
-/* Simple makro that will read one element from <fp> and check if it read it. */
+/* Simple makro that will read one element from <fp> and check if it read it.
+   Assumes the existence of <read> of type <size_t>.*/
 #define READ_ONE(element, fp)                                                  \
   do {                                                                         \
     read = gt_xfread(&element, sizeof (element), (size_t) 1, fp);              \
