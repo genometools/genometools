@@ -22,11 +22,12 @@
 #include <fcntl.h>
 
 #include "core/ensure.h"
+#include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
+#include "core/safearith.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "core/log_api.h"
 #include "extended/huffman.h"
 #include "extended/rbtree.h"
 
@@ -36,7 +37,7 @@ typedef struct GtHuffmanSymbol {
 } GtHuffmanSymbol;
 
 typedef struct GtHuffmanCode {
-  unsigned long numofbits;
+  unsigned numofbits;
   GtBitsequence code;
 } GtHuffmanCode;
 
@@ -49,31 +50,28 @@ typedef struct GtHuffmanTree {
 } GtHuffmanTree;
 
 struct GtHuffman {
-  GtHuffmanTree *roothuffmantree;  /* stores the final huffmantree */
-  unsigned long numofsymbols,      /* number of nodes in red black tree, */
-                                   /* e.g. symbols with frequency > 0*/
-                totalnumofsymbols; /* symbols with frequency >= 0 */
-
-  uint64_t totalnumofbits,         /* total bits needed to represent the text */
-           totalnumofchars;        /* total number of characters in text */
-
-  GtRBTree *rbt_root;              /* red black tree*/
-  GtHuffmanCode *code_tab;         /* table for encoding */
+  GtHuffmanTree *root_huffman_tree;  /* stores the final huffmantree */
+  unsigned long num_of_coded_symbols,/* number of nodes in red black tree, */
+                                     /* e.g. symbols with frequency > 0*/
+                num_of_symbols;      /* symbols with frequency >= 0 */
+  uint64_t num_of_text_bits,         /* total bits needed to represent the text
+                                      */
+           num_of_text_symbols;      /* total number of characters in text */
+  GtRBTree *rbt_root;                /* red black tree*/
+  GtHuffmanCode *code_tab;           /* table for encoding */
 };
 
 struct GtHuffmanDecoder {
-  unsigned long cur_bitseq,            /*position in bitsequence*/
-                cur_bit,               /*position in element of bitsequence*/
-                pad_length,            /*number of non data bits in last element
-                                        */
-                length;                /*number of elements in bitsequence*/
-  GtBitsequence *bitsequence;          /*array of bitstrings*/
-  GtHuffman *huffman;                  /*encoding/decoding information*/
-  GtHuffmanTree *cur_node;             /*position in encoding*/
-  GtHuffmanDecoderGetMemFunc mem_func; /*callback to get more data, can be NULL
-                                        */
-  int mem_func_stat;                   /*status of mem_func, 0, 1, -1*/
-  void *info;                          /*info for callback*/
+  int mem_func_stat;
+  unsigned long cur_bitseq,
+                cur_bit,
+                pad_length,
+                length;
+  GtBitsequence *bitsequence;
+  GtHuffman *huffman;
+  GtHuffmanTree *cur_node;
+  GtHuffmanDecoderGetMemFunc mem_func;
+  void *info;
 };
 
 struct GtHuffmanBitwiseDecoder {
@@ -103,19 +101,19 @@ static int huffman_tree_cmp(const void *tree1, const void *tree2,
 
 static void huffman_tree_delete(void *tree)
 {
-  if (!tree)
-    return;
-  GtHuffmanTree *h_tree = (GtHuffmanTree*)tree;
-  if (h_tree->reference_count) {
-    h_tree->reference_count--;
-    return;
+  if (tree != NULL) {
+    GtHuffmanTree *h_tree = (GtHuffmanTree*) tree;
+    if (h_tree->reference_count > 0) {
+      h_tree->reference_count--;
+    }
+    else {
+      if (h_tree->leftchild != NULL)
+        huffman_tree_delete(h_tree->leftchild);
+      if (h_tree->rightchild != NULL)
+        huffman_tree_delete(h_tree->rightchild);
+      gt_free(h_tree);
+    }
   }
-
-  if (h_tree->leftchild != NULL)
-    huffman_tree_delete(h_tree->leftchild);
-  if (h_tree->rightchild != NULL)
-    huffman_tree_delete(h_tree->rightchild);
-  gt_free(h_tree);
 }
 
 static GtHuffmanTree *huffman_tree_new(unsigned long symbol,
@@ -123,7 +121,7 @@ static GtHuffmanTree *huffman_tree_new(unsigned long symbol,
 {
   GtHuffmanTree *huffptr;
   huffptr = gt_malloc(sizeof (GtHuffmanTree));
-  huffptr->code.code = GT_UNDEF_UINT;
+  huffptr->code.code = 0;
   huffptr->code.numofbits = 0;
   huffptr->symbol.symbol = symbol;
   huffptr->symbol.freq = freq;
@@ -144,50 +142,58 @@ static void initialise_rbt(GtHuffman *huffman,
                            const void *distr,
                            GtDistrFunc distrfunc)
 {
-  GtHuffmanTree *huffptr, GT_UNUSED *huffptr2;
+  GtHuffmanTree *huffptr;
+  GT_UNUSED GtHuffmanTree *huffptr2;
   unsigned long i;
-  bool nodecreated = false;
+  unsigned long long ret;
+  bool nodecreated;
 
-  huffman->numofsymbols = 0;
+  huffman->num_of_coded_symbols = 0;
   huffman->rbt_root = gt_rbtree_new(huffman_tree_cmp,
                                     huffman_tree_delete,
                                     NULL);
   gt_assert(huffman->rbt_root);
 
-  for (i = 0; i < huffman->totalnumofsymbols; i++) {
-    if (distrfunc(distr, i) > 0) {
+  for (i = 0; i < huffman->num_of_symbols; i++) {
+    ret = distrfunc(distr, i);
+    if (ret > 0) {
       huffptr = huffman_tree_new(i, distrfunc(distr, i));
+      nodecreated = false;
       huffptr2 = (GtHuffmanTree*)gt_rbtree_search(huffman->rbt_root,
                                                   huffptr,
                                                   &nodecreated);
-      gt_assert(nodecreated && huffptr2);
-      huffman->numofsymbols++;
+      gt_assert(nodecreated && huffptr2 != NULL);
+      huffman->num_of_coded_symbols++;
     }
   }
+  gt_log_log("added %lu of %lu symbols as nodes",
+             huffman->num_of_coded_symbols,
+             huffman->num_of_symbols);
 }
 
-static int make_huffman_tree(GtHuffman *huffman)
+static void make_huffman_tree(GtHuffman *huffman)
 {
   GtHuffmanTree *n1 = NULL,
                 *n2 = NULL,
-                GT_UNUSED *n3 = NULL,
                 *newnode = NULL;
+  GT_UNUSED GtHuffmanTree *n3 = NULL;
   unsigned long i,
                 symbol;
   unsigned long long freq;
   int GT_UNUSED deleted;
   bool nodecreated = false;
+  gt_assert(huffman->num_of_coded_symbols <= huffman->num_of_symbols);
 
-  if (huffman->numofsymbols == 0)
-    huffman->roothuffmantree = NULL;
-  else if (huffman->numofsymbols == 1) {
-    huffman->roothuffmantree =
+  if (huffman->num_of_coded_symbols == 0)
+    huffman->root_huffman_tree = NULL;
+  else if (huffman->num_of_coded_symbols == 1UL) {
+    huffman->root_huffman_tree =
       gt_rbtree_root_key(huffman->rbt_root);
-    huffman->roothuffmantree->code.code = 0;
-    huffman->roothuffmantree->code.numofbits = 1;
+    huffman->root_huffman_tree->code.code = 0;
+    huffman->root_huffman_tree->code.numofbits = 1U;
   }
   else {
-    for (i = 0; i < huffman->numofsymbols - 1; i++) {
+    for (i = 0; i < huffman->num_of_coded_symbols - 1; i++) {
       n1 = gt_rbtree_minimum_key(huffman->rbt_root);
       n1 = huffman_tree_ref(n1);
       deleted = gt_rbtree_erase(huffman->rbt_root,
@@ -215,19 +221,19 @@ static int make_huffman_tree(GtHuffman *huffman)
       n3 = gt_rbtree_search(huffman->rbt_root, newnode, &nodecreated);
       gt_assert(nodecreated && n3);
     }
-    huffman->roothuffmantree = (GtHuffmanTree*)newnode;
-    huffman->roothuffmantree->code.code = 0;
-    huffman->roothuffmantree->code.numofbits = 0;
+    gt_assert(newnode);
+    huffman->root_huffman_tree = (GtHuffmanTree*)newnode;
+    huffman->root_huffman_tree->code.code = 0;
+    huffman->root_huffman_tree->code.numofbits = 0;
   }
-  return 0;
 }
 
-static void print_huff_code(unsigned long length, GtBitsequence code)
+static void print_huff_code(unsigned length, GtBitsequence code)
 {
   if (length > 0) {
-    unsigned long leftbit;
+    unsigned leftbit;
 
-    for (leftbit = 1 << (length-1);
+    for (leftbit = 1U << (length-1);
         leftbit != 0;
         leftbit >>= 1)
       (void) putchar((code & leftbit) ? '1' : '0');
@@ -237,25 +243,32 @@ static void print_huff_code(unsigned long length, GtBitsequence code)
 static int store_codes(unsigned long symbol,
                        GT_UNUSED unsigned long long freq,
                        const GtBitsequence code,
-                       unsigned long code_len,
+                       unsigned code_len,
                        void *huffman)
 {
   GtHuffman *huff = (GtHuffman*)huffman;
   huff->code_tab[symbol].code = code;
-  huff->code_tab[symbol].numofbits = code_len;
+  gt_safe_assign(huff->code_tab[symbol].numofbits, code_len);
   return 0;
 }
 
 static int print_codes(unsigned long symbol,
                        unsigned long long freq,
                        const GtBitsequence code,
-                       unsigned long code_len,
+                       unsigned code_len,
                        GT_UNUSED void *unused)
 {
-  printf("control symbol %lu, freq %llu, codelength %lu: ",
+#ifndef S_SPLINT_S
+  printf("control symbol %lu, freq %llu, codelength %u: ",
          symbol,
          freq,
          code_len);
+#else
+  printf("control symbol %lu, freq %lu, codelength %u: ",
+         symbol,
+         (unsigned long) freq,
+         code_len);
+#endif
   print_huff_code(code_len, code);
 
   printf("\n");
@@ -265,31 +278,33 @@ static int print_codes(unsigned long symbol,
 static int calc_size(GT_UNUSED unsigned long symbol,
                      unsigned long long freq,
                      GT_UNUSED const GtBitsequence code,
-                     unsigned long code_len,
+                     unsigned code_len,
                      void *huffman)
 {
   GtHuffman *huff = (GtHuffman*)huffman;
-  huff->totalnumofbits += code_len * freq;
-  huff->totalnumofchars += freq;
+  huff->num_of_text_bits += code_len * freq;
+  huff->num_of_text_symbols += freq;
   return 0;
 }
 
 static void huffman_tree_set_codes_rec(GtHuffmanTree *h_tree)
 {
   const char leftbit = 0, rightbit = 1;
-  if (h_tree->leftchild != NULL) {
-      h_tree->leftchild->code.code = h_tree->code.code<< 1 | leftbit;
-      h_tree->rightchild->code.code = h_tree->code.code<< 1 | rightbit;
-      h_tree->leftchild->code.numofbits =
-        h_tree->rightchild->code.numofbits = h_tree->code.numofbits + 1;
-      huffman_tree_set_codes_rec(h_tree->leftchild);
-      huffman_tree_set_codes_rec(h_tree->rightchild);
+  if (h_tree != NULL) {
+    if (h_tree->leftchild != NULL) {
+        h_tree->leftchild->code.code = h_tree->code.code<< 1 | leftbit;
+        h_tree->rightchild->code.code = h_tree->code.code<< 1 | rightbit;
+        h_tree->leftchild->code.numofbits =
+          h_tree->rightchild->code.numofbits = h_tree->code.numofbits + 1;
+        huffman_tree_set_codes_rec(h_tree->leftchild);
+        huffman_tree_set_codes_rec(h_tree->rightchild);
+    }
   }
 }
 
-static int huffman_leaf_call_actfunc(GtHuffmanTree *h_tree,
-                                      void *actinfo,
-                                      GtHuffmanActFunc actfun) {
+static inline int huffman_leaf_call_actfunc(GtHuffmanTree *h_tree,
+                                            void *actinfo,
+                                            GtHuffmanActFunc actfun) {
   return actfun(h_tree->symbol.symbol,
                 h_tree->symbol.freq,
                 h_tree->code.code,
@@ -305,8 +320,8 @@ static int visit_huffman_leaves_rec(GtHuffmanTree *h_tree,
 
   if (h_tree->leftchild == NULL) {
       had_err = huffman_leaf_call_actfunc(h_tree,
-                                           actinfo,
-                                           actfun);
+                                          actinfo,
+                                          actfun);
   } else {
     had_err =  visit_huffman_leaves_rec(h_tree->leftchild,
                                         actinfo,
@@ -320,37 +335,35 @@ static int visit_huffman_leaves_rec(GtHuffmanTree *h_tree,
   return had_err;
 }
 
-GtHuffman *gt_huffman_new(const void *distr,
-                          GtDistrFunc distrfunc,
-                          unsigned long totalnumofsymbols)
+GtHuffman *gt_huffman_new(const void *distribution,
+                          GtDistrFunc distr_func,
+                          unsigned long num_of_symbols)
 {
   GtHuffman *huff;
-  unsigned long i;
 
-  gt_assert(distr && distrfunc);
-  gt_assert(totalnumofsymbols > 0);
+  gt_assert(distribution && distr_func != NULL);
+  gt_assert(num_of_symbols > 0);
 
   huff = gt_malloc(sizeof (GtHuffman));
-  huff->totalnumofsymbols = totalnumofsymbols;
-  initialise_rbt(huff, distr, distrfunc);
+  huff->num_of_symbols = num_of_symbols;
+  initialise_rbt(huff, distribution, distr_func);
   make_huffman_tree(huff);
 
-  huff->code_tab = gt_calloc(huff->totalnumofsymbols, sizeof (GtHuffmanCode));
-  for (i = 0; i < huff->totalnumofsymbols; i++)
-    huff->code_tab[i].code = GT_UNDEF_UINT;
+  huff->code_tab = gt_calloc((size_t) huff->num_of_symbols,
+                             sizeof (GtHuffmanCode));
 
-  huff->totalnumofchars = 0;
-  huff->totalnumofbits = 0;
-  huffman_tree_set_codes_rec(huff->roothuffmantree);
-  gt_huffman_iterate(huff, calc_size, huff);
-  gt_huffman_iterate(huff, store_codes, huff);
+  huff->num_of_text_symbols = 0;
+  huff->num_of_text_bits = 0;
+  huffman_tree_set_codes_rec(huff->root_huffman_tree);
+  (void) gt_huffman_iterate(huff, calc_size, huff);
+  (void) gt_huffman_iterate(huff, store_codes, huff);
 
   return huff;
 }
 
 void gt_huffman_delete(GtHuffman *huffman)
 {
-  if (huffman) {
+  if (huffman != NULL) {
     gt_rbtree_delete(huffman->rbt_root);
     gt_free(huffman->code_tab);
   }
@@ -358,56 +371,57 @@ void gt_huffman_delete(GtHuffman *huffman)
 }
 
 int gt_huffman_iterate(const GtHuffman *huffman,
-                       GtHuffmanActFunc actfun,
-                       void *actinfo)
+                       GtHuffmanActFunc action_func,
+                       void *action_info)
 {
-  gt_assert(huffman);
-  gt_assert(actfun);
+  gt_assert(huffman != NULL);
+  gt_assert(action_func != NULL);
 
-  if (huffman->roothuffmantree != NULL) {
-    return visit_huffman_leaves_rec(huffman->roothuffmantree,
-                                    actinfo,
-                                    actfun);
+  if (huffman->root_huffman_tree != NULL) {
+    return visit_huffman_leaves_rec(huffman->root_huffman_tree,
+                                    action_info,
+                                    action_func);
   }
   return 0;
 }
 
 void gt_huffman_size(const GtHuffman *huffman, uint64_t *bits,
-                     unsigned long *chars)
+                     uint64_t *chars)
 {
-  gt_assert(huffman);
+  gt_assert(huffman != NULL);
   if (bits != NULL)
-    *bits = huffman->totalnumofbits;
+    *bits = huffman->num_of_text_bits;
   if (chars != NULL)
-    *chars = huffman->totalnumofchars;
+    *chars = huffman->num_of_text_symbols;
 }
 
 void gt_huffman_print_codes(const GtHuffman *huffman)
 {
-  gt_assert(huffman);
-  gt_huffman_iterate(huffman, print_codes, NULL);
+  gt_assert(huffman != NULL);
+  (void) gt_huffman_iterate(huffman, print_codes, NULL);
 }
 
 void gt_huffman_encode(const GtHuffman *huffman,
                        unsigned long symbol,
                        GtBitsequence *code,
-                       unsigned long *codelength)
+                       unsigned *codelength)
 {
-  gt_assert(huffman && symbol < huffman->totalnumofsymbols);
+  gt_assert(huffman != NULL);
+  gt_assert(symbol < huffman->num_of_symbols);
   *code = huffman->code_tab[symbol].code;
   *codelength = huffman->code_tab[symbol].numofbits;
 }
 
 unsigned long gt_huffman_numofsymbols(const GtHuffman *huffman)
 {
-  gt_assert(huffman);
-  return huffman->numofsymbols;
+  gt_assert(huffman != NULL);
+  return huffman->num_of_coded_symbols;
 }
 
 unsigned long gt_huffman_totalnumofsymbols(const GtHuffman *huffman)
 {
-  gt_assert(huffman);
-  return huffman->totalnumofsymbols;
+  gt_assert(huffman != NULL);
+  return huffman->num_of_symbols;
 }
 
 GtHuffmanDecoder *gt_huffman_decoder_new(GtHuffman *huffman,
@@ -416,19 +430,21 @@ GtHuffmanDecoder *gt_huffman_decoder_new(GtHuffman *huffman,
                                          unsigned long bit_offset,
                                          unsigned long pad_length)
 {
-  GtHuffmanDecoder *hd = gt_malloc(sizeof (*hd));
+  GtHuffmanDecoder *huff_decoder = gt_malloc(sizeof (*huff_decoder));
 
-  hd->huffman = huffman;
-  hd->cur_node = hd->huffman->roothuffmantree;
-  hd->bitsequence = bitsequence;
-  hd->cur_bit = bit_offset;
-  hd->pad_length = pad_length;
-  hd->length = length;
-  hd->mem_func = NULL;
-  hd->info = NULL;
-  hd->cur_bitseq = 0;
-  hd->mem_func_stat = 0;
-  return hd;
+  gt_assert(huffman != NULL);
+
+  huff_decoder->huffman = huffman;
+  huff_decoder->cur_node = huff_decoder->huffman->root_huffman_tree;
+  huff_decoder->bitsequence = bitsequence;
+  huff_decoder->cur_bit = bit_offset;
+  huff_decoder->pad_length = pad_length;
+  huff_decoder->length = length;
+  huff_decoder->mem_func = NULL;
+  huff_decoder->info = NULL;
+  huff_decoder->cur_bitseq = 0;
+  huff_decoder->mem_func_stat = 0;
+  return huff_decoder;
 }
 
 GtHuffmanDecoder *gt_huffman_decoder_new_from_memory(
@@ -437,114 +453,133 @@ GtHuffmanDecoder *gt_huffman_decoder_new_from_memory(
                                      void *info,
                                      GtError *err)
 {
-  GtHuffmanDecoder *hd = gt_malloc(sizeof (*hd));
+  GtHuffmanDecoder *huff_decoder = gt_malloc(sizeof (*huff_decoder));
 
-  hd->huffman = huffman;
-  hd->cur_node = hd->huffman->roothuffmantree;
-  hd->mem_func = mem_func;
-  hd->info = info;
-  hd->cur_bitseq = 0;
-  hd->mem_func_stat = hd->mem_func(&hd->bitsequence,
-                                   &hd->length,
-                                   &hd->cur_bit,
-                                   &hd->pad_length,
-                                   hd->info);
-  if (hd->mem_func_stat == -1) {
+  gt_assert(huffman != NULL);
+
+  huff_decoder->huffman = huffman;
+  huff_decoder->cur_node = huff_decoder->huffman->root_huffman_tree;
+  huff_decoder->mem_func = mem_func;
+  huff_decoder->info = info;
+  huff_decoder->cur_bitseq = 0;
+  huff_decoder->mem_func_stat =
+    huff_decoder->mem_func(&huff_decoder->bitsequence,
+                           &huff_decoder->length,
+                           &huff_decoder->cur_bit,
+                           &huff_decoder->pad_length,
+                           huff_decoder->info);
+  if (huff_decoder->mem_func_stat == -1) {
     gt_error_set(err, "error calling mem_func");
     return NULL;
   }
-  return hd;
+  return huff_decoder;
 }
 
-int gt_huffman_decoder_get_new_mem_chunk(GtHuffmanDecoder *hd, GtError *err)
+int gt_huffman_decoder_get_new_mem_chunk(GtHuffmanDecoder *huff_decoder,
+                                         GtError *err)
 {
-  gt_assert(hd->mem_func);
+  gt_assert(huff_decoder != NULL);
+  gt_assert(huff_decoder->mem_func != NULL);
 
-  hd->mem_func_stat = hd->mem_func(&hd->bitsequence,
-                                   &hd->length,
-                                   &hd->cur_bit,
-                                   &hd->pad_length,
-                                   hd->info);
-  if (hd->mem_func_stat == -1) {
-    gt_error_set(err, "error calling mem_func");
-    return hd->mem_func_stat;
+  huff_decoder->mem_func_stat =
+    huff_decoder->mem_func(&huff_decoder->bitsequence,
+                           &huff_decoder->length,
+                           &huff_decoder->cur_bit,
+                           &huff_decoder->pad_length,
+                           huff_decoder->info);
+  if (huff_decoder->mem_func_stat == -1) {
+    gt_error_set(err, "GtHuffmanDecoder error: error calling callback "
+                      "function to get new memory chunk!");
+    return huff_decoder->mem_func_stat;
   }
   return 0;
 }
 
-int gt_huffman_decoder_next(GtHuffmanDecoder *hd,
+int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
                             GtArray *symbols,
-                            unsigned long symbols2read,
+                            unsigned long symbols_to_read,
                             GtError *err)
 {
-  unsigned long read_symbols = 0,
-                bits_to_read = GT_INTWORDSIZE;
-  int had_err = 0;
+  int had_err = 0,
+      bits_to_read = GT_INTWORDSIZE;
+  unsigned long read_symbols = 0;
 
-  gt_assert((symbols2read > 0) && hd &&
+  gt_assert((symbols_to_read > 0) && huff_decoder &&
             (gt_array_elem_size(symbols) == sizeof (unsigned long)));
 
-  if (hd->cur_bitseq == hd->length - 1)
-    bits_to_read = GT_INTWORDSIZE - hd->pad_length;
+  if (huff_decoder->cur_bitseq == huff_decoder->length - 1)
+    gt_safe_assign(bits_to_read, (GT_INTWORDSIZE - huff_decoder->pad_length));
 
   /* reached end of data in a previous call, didn't get reset */
-  if (hd->cur_bitseq == hd->length) {
-    if (!hd->mem_func)
+  if (huff_decoder->cur_bitseq == huff_decoder->length) {
+    if (!huff_decoder->mem_func)
       return 0;  /*EOF*/
-    else if (hd->mem_func_stat == 0)
+    else if (huff_decoder->mem_func_stat == 0)
       return 0;
     else
-      return -1;
+      had_err = -1;
   }
 
-  while (!had_err && read_symbols < symbols2read) {
+  while (!had_err && read_symbols < symbols_to_read) {
+
+    /* huffman was initialized with empty dist */
+    gt_assert(huff_decoder->cur_node != NULL);
 
     /* symbol found, reset huffman */
-    if (!had_err && hd->cur_node->leftchild == NULL) {
-      gt_array_add(symbols, hd->cur_node->symbol.symbol);
+    if (!had_err && huff_decoder->cur_node->leftchild == NULL) {
+      gt_array_add(symbols, huff_decoder->cur_node->symbol.symbol);
       read_symbols++;
-      hd->cur_node = hd->huffman->roothuffmantree;
+      huff_decoder->cur_node = huff_decoder->huffman->root_huffman_tree;
     }
 
-    if (hd->cur_bit == bits_to_read) {
-      hd->cur_bitseq++;
+    if (!had_err && huff_decoder->cur_bit == (unsigned long) bits_to_read) {
+      huff_decoder->cur_bitseq++;
 
-      if (hd->cur_bitseq == hd->length - 1)
-        bits_to_read = GT_INTWORDSIZE - hd->pad_length;
+      if (huff_decoder->cur_bitseq == huff_decoder->length - 1)
+        gt_safe_assign(bits_to_read,
+                       (GT_INTWORDSIZE - huff_decoder->pad_length));
 
       /* no next bitseq ask for more if possible */
-      if (hd->cur_bitseq == hd->length ) {
-        if (!hd->mem_func) {
+      if (huff_decoder->cur_bitseq == huff_decoder->length ) {
+        if (!huff_decoder->mem_func) {
           return 0;  /*EOF*/
         }
 
-        hd->mem_func_stat = hd->mem_func(&hd->bitsequence,
-                                         &hd->length,
-                                         &hd->cur_bit,
-                                         &hd->pad_length,
-                                         hd->info);
-        if (hd->mem_func_stat == -1) {
+        huff_decoder->mem_func_stat =
+          huff_decoder->mem_func(&huff_decoder->bitsequence,
+                                 &huff_decoder->length,
+                                 &huff_decoder->cur_bit,
+                                 &huff_decoder->pad_length,
+                                 huff_decoder->info);
+        if (huff_decoder->mem_func_stat == -1) {
           gt_error_set(err, "error calling mem_func");
-          had_err = hd->mem_func_stat;
+          had_err = huff_decoder->mem_func_stat;
         }
-        else if (hd->mem_func_stat == 0) {
-          return hd->mem_func_stat; /*EOF*/
+        else if (huff_decoder->mem_func_stat == 0) {
+          return huff_decoder->mem_func_stat; /*EOF*/
         }
 
-        hd->cur_bitseq = 0;
+        huff_decoder->cur_bitseq = 0;
         bits_to_read = GT_INTWORDSIZE;
-        if (hd->cur_bitseq == hd->length - 1)
-          bits_to_read -= hd->pad_length;
+        if (huff_decoder->cur_bitseq == huff_decoder->length - 1)
+          bits_to_read -= huff_decoder->pad_length;
       }
-      hd->cur_bit = 0;
+      huff_decoder->cur_bit = 0;
     }
 
     /* read the next bit */
     else if (!had_err) {
-      if (GT_ISBITSET(hd->bitsequence[hd->cur_bitseq], hd->cur_bit++))
-        hd->cur_node = hd->cur_node->rightchild;
-      else
-        hd->cur_node = hd->cur_node->leftchild;
+      /* nothing to do if huffman tree has only one node, just advance the bits
+       */
+      if (huff_decoder->cur_node->leftchild == NULL)
+        huff_decoder->cur_bit++;
+      else {
+        if (GT_ISBITSET(huff_decoder->bitsequence[huff_decoder->cur_bitseq],
+                        huff_decoder->cur_bit++))
+          huff_decoder->cur_node = huff_decoder->cur_node->rightchild;
+        else
+          huff_decoder->cur_node = huff_decoder->cur_node->leftchild;
+      }
     }
   }
   if (!had_err) {
@@ -554,31 +589,33 @@ int gt_huffman_decoder_next(GtHuffmanDecoder *hd,
   return had_err;
 }
 
-void gt_huffman_decoder_delete(GtHuffmanDecoder *hd)
+void gt_huffman_decoder_delete(GtHuffmanDecoder *huff_decoder)
 {
-  gt_free(hd);
+  gt_free(huff_decoder);
 }
 
 GtHuffmanBitwiseDecoder *gt_huffman_bitwise_decoder_new(GtHuffman *huffman,
                                                         GT_UNUSED GtError *err)
 {
   GtHuffmanBitwiseDecoder *hbwd;
-  gt_assert(huffman && huffman->roothuffmantree);
-  hbwd = gt_calloc(1, sizeof (*hbwd));
+  gt_assert(huffman != NULL);
+  hbwd = gt_calloc((size_t) 1, sizeof (*hbwd));
   hbwd->huffman = huffman;
-  hbwd->cur_node = huffman->roothuffmantree;
+  hbwd->cur_node = huffman->root_huffman_tree;
   return hbwd;
 }
 
 int gt_huffman_bitwise_decoder_next(GtHuffmanBitwiseDecoder *hbwd,
-                                    bool bit, unsigned long *symbol)
+                                    bool bit, unsigned long *symbol,
+                                    GT_UNUSED GtError *err)
 {
-  gt_assert(hbwd);
+  int status = 0;
+  gt_assert(hbwd != NULL);
 
+  gt_assert(hbwd->cur_node != NULL);
   if (hbwd->cur_node->leftchild == NULL) {
     *symbol = hbwd->cur_node->symbol.symbol;
-    hbwd->cur_node = hbwd->huffman->roothuffmantree;
-    return 0;
+    hbwd->cur_node = hbwd->huffman->root_huffman_tree;
   }
   else {
     if (bit)
@@ -588,18 +625,16 @@ int gt_huffman_bitwise_decoder_next(GtHuffmanBitwiseDecoder *hbwd,
 
     if (hbwd->cur_node->leftchild == NULL) {
       *symbol = hbwd->cur_node->symbol.symbol;
-      hbwd->cur_node = hbwd->huffman->roothuffmantree;
-      return 0;
+      hbwd->cur_node = hbwd->huffman->root_huffman_tree;
     }
     else
-      return 1;
+      status = 1;
   }
+  return status;
 }
 
 void gt_huffman_bitwise_decoder_delete(GtHuffmanBitwiseDecoder *hbwd)
 {
-  if (!hbwd)
-    return;
   gt_free(hbwd);
 }
 
@@ -614,83 +649,83 @@ static int test_bitwise(GtError *err)
   int had_err = 0,
       stat;
   unsigned long i,j,
-                symbol,
-                length1 = 0,
-                length2 = 0;
+                symbol;
+  unsigned length1 = 0,
+           length2 = 0;
   GtHuffman *huffman;
   GtHuffmanBitwiseDecoder *hbwd;
   GtBitsequence bitseq;
-  unsigned long long distr[6] = {45, 16, 13, 12, 9, 5};
+  unsigned long long distr[6] = {45ULL, 16ULL, 13ULL, 12ULL, 9ULL, 5ULL};
 
-  huffman = gt_huffman_new(&distr,unit_test_distr_func, 6);
+  huffman = gt_huffman_new(&distr,unit_test_distr_func, 6UL);
 
   hbwd = gt_huffman_bitwise_decoder_new(huffman, err);
   gt_ensure(had_err, hbwd);
-  for (i = 0; !had_err && i < 6; i++) {
+  for (i = 0; !had_err && i < 6UL; i++) {
     gt_huffman_encode(huffman, i, &bitseq, &length2);
     if (i > 0) {
       gt_ensure(had_err, length1 <= length2);
     }
-    j = 1;
+    j = 1UL;
     while (1 == (stat = gt_huffman_bitwise_decoder_next(hbwd,
-                                             (bitseq >> (length2 - j)) & 1,
-                                             &symbol))) {
+                                           ((bitseq >> (length2 - j)) & 1) != 0,
+                                           &symbol, err))) {
       j++;
     }
     gt_ensure(had_err, stat == 0);
-    gt_ensure(had_err, j == length2);
+    gt_ensure(had_err, j == (unsigned long) length2);
     gt_ensure(had_err, symbol == i);
     length1 = length2;
   }
 
-  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
 
   gt_ensure(had_err, stat == 0);
   gt_ensure(had_err, symbol == 0);
 
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 1);
+  gt_ensure(had_err, symbol == 1UL);
 
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 2);
+  gt_ensure(had_err, symbol == 2UL);
 
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
   gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 3);
+  gt_ensure(had_err, symbol == 3UL);
 
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 4);
+  gt_ensure(had_err, symbol == 4UL);
 
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
   gt_ensure(had_err, stat == 1);
-  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol);
+  stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
   gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 5);
+  gt_ensure(had_err, symbol == 5UL);
 
   gt_huffman_delete(huffman);
   gt_huffman_bitwise_decoder_delete(hbwd);
@@ -728,23 +763,24 @@ static int huffman_unit_get_next_block(GtBitsequence **bits,
 
 int test_mem(GtError *err)
 {
-  int had_err = 0,
-      range = 0,
-      decoder_stat = 1;
-  unsigned char bits = sizeof (GtBitsequence) * 8,
+  unsigned char bits = (unsigned char) (sizeof (GtBitsequence) * 8),
                 bits_remain = bits;
-  int const max_num = 1000 * gt_rand_0_to_1() + 100,
-            dist_size = 10 + 10 * gt_rand_0_to_1(),
-            step_size = 10 + 5 * gt_rand_0_to_1();
-  unsigned long idx, idx_j,
-                code_len;
+  unsigned code_len;
+  int decoder_stat = 1,
+      had_err = 0;
+  unsigned long const max_num = (unsigned long) (1000 * gt_rand_0_to_1() + 100),
+                      dist_size = (unsigned long) (10 + 10 * gt_rand_0_to_1()),
+                      step_size = (unsigned long) (10 + 5 * gt_rand_0_to_1());
+  unsigned long range = 0,
+                idx, idx_j;
   uint64_t total_bits;
+  unsigned long long *distribution = gt_malloc(sizeof (*distribution) *
+                                     dist_size);
+  GtBitsequence buffer = 0,
+                code;
   GtArray *numbers = gt_array_new(sizeof (unsigned char));
   GtArray *encoded = gt_array_new(sizeof (unsigned long));
   GtArray *codes = gt_array_new(sizeof (GtBitsequence));
-  GtBitsequence buffer = 0, code;
-  unsigned long long *distribution = gt_malloc(sizeof (*distribution) *
-                                     dist_size);
   GtHuffman *huff = NULL;
   GtHuffmanDecoder *huffdec = NULL;
   HuffmanUnitTestMeminfo *meminfo = gt_malloc(sizeof (*meminfo));
@@ -757,12 +793,12 @@ int test_mem(GtError *err)
   while (gt_array_size(numbers) < max_num) {
     unsigned char x;
     if (range) {
-      x = (dist_size >> 1) * gt_rand_0_to_1();
+      x = (unsigned char) ((dist_size >> 1) * gt_rand_0_to_1());
       range = 0;
     }
     else {
-      x = dist_size * gt_rand_0_to_1();
-      range = 1;
+      x = (unsigned char) (dist_size * gt_rand_0_to_1());
+      range = 1UL;
     }
     gt_array_add(numbers, x);
   }
@@ -771,15 +807,16 @@ int test_mem(GtError *err)
 
   /*calculate distribution*/
   for (idx = 0; !had_err && idx < max_num; idx++) {
-    distribution[*(unsigned char*) gt_array_get(numbers, idx)]++;
+    unsigned char *c = (unsigned char*) gt_array_get(numbers, idx);
+    distribution[*c]++;
   }
 
   if (!had_err) {
-    unsigned long chars;
+    uint64_t chars;
     huff = gt_huffman_new(distribution, unit_test_distr_func, dist_size);
     gt_ensure(had_err, huff);
     gt_huffman_size(huff, &total_bits, &chars);
-    gt_ensure(had_err, chars == max_num);
+    gt_ensure(had_err, chars == (uint64_t) max_num);
   }
 
   for (idx = 0; !had_err && idx < max_num; idx++) {
@@ -802,7 +839,7 @@ int test_mem(GtError *err)
     gt_array_add(codes, buffer);
 
   gt_ensure(had_err,
-            total_bits == gt_array_size(codes) *
+            total_bits == (uint64_t) gt_array_size(codes) *
                           gt_array_elem_size(codes) * 8 - bits_remain);
 
   if (!had_err) {
@@ -832,17 +869,17 @@ int test_mem(GtError *err)
     gt_ensure(had_err, decoder_stat == 1);
     decoder_stat = gt_huffman_decoder_next(huffdec,
                                            encoded,
-                                           step_size,
+                                           (unsigned long) step_size,
                                            err);
     if (decoder_stat == 1)
-      gt_ensure(had_err, gt_array_size(encoded) == step_size);
+      gt_ensure(had_err, gt_array_size(encoded) == (unsigned long) step_size);
     else
       gt_ensure(had_err, decoder_stat == 0);
 
     gt_ensure(had_err, decoder_stat != -1);
     if (!had_err) {
       for (idx_j = 0; !had_err && idx_j < gt_array_size(encoded); idx_j++) {
-        unsigned long ist = *(unsigned long*)gt_array_get(encoded, idx_j);
+        unsigned long ist = *(unsigned long*) gt_array_get(encoded, idx_j);
         unsigned char soll =
           *(unsigned char*)gt_array_get(numbers, idx + idx_j);
         gt_ensure(had_err, (ist == soll));
@@ -854,7 +891,7 @@ int test_mem(GtError *err)
   if (!had_err)
     decoder_stat = gt_huffman_decoder_next(huffdec,
                                            encoded,
-                                           1,
+                                           1UL,
                                            err);
   gt_ensure(had_err, decoder_stat == 0);
 
@@ -896,7 +933,7 @@ int test_mem(GtError *err)
   if (!had_err)
     decoder_stat = gt_huffman_decoder_next(huffdec,
                                            encoded,
-                                           1,
+                                           1UL,
                                            err);
   gt_ensure(had_err, decoder_stat == 0);
 
@@ -917,7 +954,7 @@ int gt_huffman_unit_test(GtError *err)
   had_err = test_bitwise(err);
 
   if (!had_err)
-    test_mem(err);
+    had_err = test_mem(err);
 
   return had_err;
 }
