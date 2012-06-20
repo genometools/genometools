@@ -1,0 +1,13 @@
+@SQ	SN:seq1	LN:16
+@SQ	SN:seq2	LN:16
+@PG	ID:bwa	PN:bwa	VN:0.6.1-r104
+read:5	16	seq1	1	0	8M	*	0	0	AAAACCCC	=<=<=<=<	XT:A:R	NM:i:0	X0:i:2	X1:i:2	XM:i:0	XO:i:0	XG:i:0	MD:Z:8	XA:Z:seq1,+9,8M,0;seq1,+9,7M1S,1;seq1,-2,1S7M,1;
+read:3	0	seq1	5	0	8M	*	0	0	CCCCGGGG	<=<9<(<)	XT:A:R	NM:i:0	X0:i:2	X1:i:2	XM:i:0	XO:i:0	XG:i:0	MD:Z:8	XA:Z:seq1,+5,7M1S,1;seq1,-6,1S7M,1;
+read:2	16	seq1	6	0	9M	*	0	0	CCGGGGGTT	&&%&7907&	XT:A:R	NM:i:1	X0:i:6	X1:i:4	XM:i:1	XO:i:0	XG:i:0	MD:Z:2C6
+read:1	16	seq1	9	0	7M1I1M	*	0	0	GGGGTTTCT	(((((((((	XT:A:R	NM:i:1	X0:i:2	X1:i:1	XM:i:0	XO:i:1	XG:i:1	MD:Z:8	XA:Z:seq1,+1,1M1I7M,1;
+read:8	0	seq2	1	0	8M	*	0	0	AACCGGTT	9999(())	XT:A:R	NM:i:0	X0:i:4	X1:i:4	XM:i:0	XO:i:0	XG:i:0	MD:Z:8
+read:4	0	seq2	3	0	2M1I4M	*	0	0	CCGGGTT	&7097&%	XT:A:R	NM:i:1	X0:i:10	X1:i:16	XM:i:0	XO:i:1	XG:i:1	MD:Z:6
+read:10	0	seq2	5	0	8M	*	0	0	GGTTAACC	;<=9;<=9	XT:A:R	NM:i:0	X0:i:3	X1:i:3	XM:i:0	XO:i:0	XG:i:0	MD:Z:8
+read:7	20	seq2	11	0	8M	*	0	0	CCGGTTAA	<<<<<<<<	XT:A:R	NM:i:0	X0:i:4	X1:i:8	XM:i:0	XO:i:0	XG:i:0	MD:Z:8
+read:6	20	seq2	13	0	8M	*	0	0	GGTTAACC	9999))((	XT:A:R	NM:i:2	X0:i:3	X1:i:3	XM:i:0	XO:i:0	XG:i:0	MD:Z:6A0A0
+read:9	20	seq2	15	0	8M	*	0	0	TTAACCGG	==99==99	XT:A:R	NM:i:4	X0:i:4	X1:i:5	XM:i:0	XO:i:0	XG:i:0	MD:Z:4A0A0A0A0
