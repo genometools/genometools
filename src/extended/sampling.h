@@ -18,8 +18,8 @@
 #define SAMPLING_H
 
 #include "core/intbits.h"
-#define GT_SAMPLING_DEFAULT_REGULAR_RATE 10000
-#define GT_SAMPLING_DEFAULT_PAGE_RATE 100
+#define GT_SAMPLING_DEFAULT_REGULAR_RATE 10000UL
+#define GT_SAMPLING_DEFAULT_PAGE_RATE 100UL
 
 /* Class <GtSampling> can be used to collect Sampling information for variable
    length data that gets written to a file. It stores for each sampled element
