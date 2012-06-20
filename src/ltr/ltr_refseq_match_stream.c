@@ -128,6 +128,7 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
       else
         (void) snprintf(header, BUFSIZ, "%s_%lu_%lu", gt_str_get(seqid),
                         range.start, range.end);
+      gt_cstr_rep(header, ' ', '+');
       gt_hashmap_add(rms->header_to_fn, (void*) gt_cstr_dup(header),
                      (void*) curnode);
       (void) sscanf(gt_str_get(seqid), "seq%lu", &seqnum);
