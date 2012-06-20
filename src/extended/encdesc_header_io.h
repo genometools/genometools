@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,17 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef READ_WRITE_ONE_H
-#define READ_WRITE_ONE_H
+#ifndef ENCDESC_HEADER_IO_H
+#define ENCDESC_HEADER_IO_H
 
-/* Simple makro that will write one element to a <fp>. */
-#define WRITE_ONE(element, fp)                                                 \
-  gt_xfwrite(&element, sizeof (element), (size_t) 1, fp)
+#include "core/error_api.h"
 
-/* Simple makro that will read one element from <fp> and check if it read it. */
-#define READ_ONE(element, fp)                                                  \
-  do {                                                                         \
-    read = gt_xfread(&element, sizeof (element), (size_t) 1, fp);              \
-    gt_assert(read == (size_t) 1);                                             \
-  } while (false)
+#include "extended/encdesc.h"
+
+/* Write header information of <encdesc> to <FILE> <fp>, <err> will not be set,
+   it is necessary for a function call to GtHashmap */
+void encdesc_write_header(GtEncdesc *encdesc, FILE *fp, GtError *err);
+
+/* Read header information of <encdesc> from <FILE> <fp>. */
+void encdesc_read_header(GtEncdesc *encdesc, FILE *fp);
+
 #endif
