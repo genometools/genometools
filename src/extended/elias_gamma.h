@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +22,7 @@
 #include "core/bittab_api.h"
 #include "core/error_api.h"
 
-/* The <GtEliasGammaBitwiseDecoder> class is used to decode elias gamma encoded
+/* The <GtEliasGammaBitwiseDecoder> class is used to decode Elias gamma encoded
    integers. For details see Elias, Peter: "Universal codeword sets and
    representations of the integers", IEEE Transactions on Information Theory,
    21(2):194--203 (1975). */

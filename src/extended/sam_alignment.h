@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -57,8 +58,7 @@ uint32_t        gt_sam_alignment_cigar_i_length(GtSamAlignment *sam_alignment,
                                                 uint16_t i);
 
 /* Returns the type of CIGAR operation <i> in <sam_alignment>.
-   type is one of [MIDNSHP=X] (see sam/bam fileformat documentation for
-   details) */
+   Type is one of [MIDNSHP=X] (see sam/bam format documentation for details) */
 unsigned char   gt_sam_alignment_cigar_i_operation(
                                                   GtSamAlignment *sam_alignment,
                                                   uint16_t i);

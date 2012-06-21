@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +31,7 @@ typedef struct GtRcrEncoder GtRcrEncoder;
 typedef struct GtRcrDecoder GtRcrDecoder;
 
 /* Returns a new GtRcrEncoder object. <ref> points to a reference genome,
-   <alginment> points to a BAM file containing alignments of short reads to
+   <filename> is a BAM file containing alignments of short reads to
    the reference genome. If <vquals> is true, quality values of read
    positions having variations compared to the reference will be preserved.
    If <mquals> is true, the mapping quality of an alignment will be preserved.

@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2012 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -74,7 +75,7 @@ GtEncdesc*        gt_encdesc_load(const char *name,
 unsigned long     gt_encdesc_num_of_descriptions(GtEncdesc *encdesc);
 
 /* Decodes description with number <num> and writes it to <desc>, the <GtStr>
-   will be reset bofore writing to it.
+   will be reset before writing to it.
    Returns 1 on success, 0 on EOF and -1 on error */
 int               gt_encdesc_decode(GtEncdesc *encdesc,
                                     unsigned long num,
@@ -85,6 +86,6 @@ void              gt_encdesc_delete(GtEncdesc *encdesc);
 
 void              gt_encdesc_encoder_delete(GtEncdescEncoder *ee);
 
-int gt_encdesc_unit_test(GtError *err);
+int               gt_encdesc_unit_test(GtError *err);
 
 #endif

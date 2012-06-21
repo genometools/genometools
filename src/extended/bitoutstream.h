@@ -1,6 +1,6 @@
 /*
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -56,7 +56,7 @@ void            gt_bitoutstream_flush_advance(GtBitOutStream *bitstream);
 
 /* Returns the position of the file pointer <fp> associated with <bitstream>.
    For reliable results gt_bitoutstream_flush has to be called before!
-   returns -1 on error */
+   Returns -1 on error */
 long            gt_bitoutstream_pos(const GtBitOutStream *bitstream);
 
 void            gt_bitoutstream_delete(GtBitOutStream *bitstream);

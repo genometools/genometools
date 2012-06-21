@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2010 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +23,7 @@
 #include "extended/samfile_iterator.h"
 
 /* implements <GtCstrIterator> */
-/* iterates over the identifyers of all mapped alignments in a sam/bam file */
+/* iterates over the identifiers of all mapped alignments in a sam/bam file */
 typedef struct GtSamQueryNameIterator GtSamQueryNameIterator;
 
 const GtCstrIteratorClass* gt_sam_query_name_iterator_class(void);

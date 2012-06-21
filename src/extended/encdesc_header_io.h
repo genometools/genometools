@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +24,7 @@
 #include "extended/encdesc.h"
 
 /* Write header information of <encdesc> to <FILE> <fp>, <err> will not be set,
-   it is necessary for a function call to GtHashmap */
+   it is necessary for a function call to <GtHashmap> */
 void encdesc_write_header(GtEncdesc *encdesc, FILE *fp, GtError *err);
 
 /* Read header information of <encdesc> from <FILE> <fp>. */

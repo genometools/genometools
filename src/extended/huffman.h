@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -26,7 +27,7 @@
    efficient variable bit length. */
 typedef struct GtHuffman GtHuffman;
 
-/* Class <GtHuffmanDecoder> is used to decode consecutive symbols from huffman
+/* Class <GtHuffmanDecoder> is used to decode consecutive symbols from Huffman
    encoded data */
 typedef struct GtHuffmanDecoder GtHuffmanDecoder;
 /* Class <GtHuffmanBitwiseDecoder> is used to decode bitstreams bit by bit */
@@ -52,13 +53,13 @@ typedef int (*GtHuffmanActFunc) (unsigned long symbol,
 
 /* Returns a new <GtHuffman> object. <distribution> points to a data
    structure containing the distribution of a set of symbols. <distr_func> is a
-   function returning the number of occurrences for a given symbol. symbols are
+   function returning the number of occurrences for a given symbol. Symbols are
    represented by numbers in range [0,num_of_symbols - 1]. */
 GtHuffman*               gt_huffman_new(const void *distribution,
                                         GtDistrFunc distr_func,
                                         unsigned long num_of_symbols);
 
-/* Traverses the huffman tree and calculates total number of symbols in text and
+/* Traverses the Huffman tree and calculates total number of symbols in text and
    total number of bits needed to represent the text. */
 void                     gt_huffman_size(const GtHuffman *huffman,
                                          uint64_t *bits,
@@ -67,7 +68,7 @@ void                     gt_huffman_size(const GtHuffman *huffman,
 /* Prints the code for each symbol to stdout. One symbol per line. */
 void                     gt_huffman_print_codes(const GtHuffman *huffman);
 
-/* Iterato over all encoded symbols and perform <action_func> with its
+/* Iterate over all encoded symbols and perform <action_func> with its
    statistics. <action_info> can be null or any struct to hold information for
    the action_func*/
 int                      gt_huffman_iterate(const GtHuffman *huffman,
@@ -76,7 +77,7 @@ int                      gt_huffman_iterate(const GtHuffman *huffman,
 
 /* Encodes a single symbol and writes its code to <code> and the number of bits
    for its code to <codelength>. The symbol has to be in the range of the
-   symbols with which the huffman-object was initiated. If the symbol was not
+   symbols with which the Huffman-object was initiated. If the symbol was not
    present in the distribution its code will be 0. */
 void                     gt_huffman_encode(const GtHuffman *huffman,
                                            unsigned long symbol,
@@ -90,7 +91,7 @@ unsigned long            gt_huffman_numofsymbols(const GtHuffman *huffman);
 unsigned long            gt_huffman_totalnumofsymbols(const GtHuffman *huffman);
 
 /* Returns a new <GtHuffmanDecoder> object. This decoder is meant to decode a
-   huffman encoded bitstring. <length> is the number of elements in
+   Huffman encoded bitstring. <length> is the number of elements in
    <bitsequence>. The <bit_offset> tells the decoder at which bit of the first
    <GtBitsequence> to start, <pad_length> is the number of bits in the last
    element of <bitsequence> that are not part of the encoded data. */
@@ -115,9 +116,9 @@ typedef int (*GtHuffmanDecoderGetMemFunc) (GtBitsequence **bitsequence,
 
 /* <mem_func> and <info> are needed if the decoder reaches the end of the
    <bitsequence> but needs more to read, for example if the <bitsequence> is
-   part of mmaped space. <mem_func> will be called initialy to get the first
+   part of mmaped space. <mem_func> will be called initially to get the first
    chunk of data.
-   This type of encoder is helpfull if the encoded data is sampled or read in
+   This type of encoder is helpful if the encoded data is sampled or read in
    chunks from mmapped files. */
 GtHuffmanDecoder*        gt_huffman_decoder_new_from_memory(
                                             GtHuffman *huffman,
@@ -133,7 +134,7 @@ int                      gt_huffman_decoder_get_new_mem_chunk(
 
 /* Decodes at most the next <num_of_symbols> symbols and adds them to
    <symbols> and returns the decoder's status. Returns 0 if EOF was reached, 1
-   if there are more symbols to read and -1 if an error occured. <symbols> must
+   if there are more symbols to read and -1 if an error occurred. <symbols> must
    be an array with type unsigned long. */
 int                      gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
                                                  GtArray *symbols,
@@ -145,7 +146,7 @@ int                      gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
 GtHuffmanBitwiseDecoder* gt_huffman_bitwise_decoder_new(GtHuffman *huffman,
                                                         GtError *err);
 
-/* Moves inside the huffman tree exactly by one node according to <bit>
+/* Moves inside the Huffman tree exactly by one node according to <bit>
   (true: visit right child, false: visit left child). Returns 0 if a leaf was
   reached and then writes the corresponding symbol to <symbol>. Returns 1 if no
   leaf was reached yet.*/

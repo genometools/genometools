@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -33,7 +34,7 @@
 typedef struct GtHcrEncoder GtHcrEncoder;
 typedef struct GtHcrDecoder GtHcrDecoder;
 
-/* <GtQualRange> is a struct to define a range of fastq qualitys that will be
+/* <GtQualRange> is a struct to define a range of fastq qualities that will be
    kept while compressing fastq short reads */
 typedef struct GtQualRange GtQualRange;
 
@@ -47,7 +48,7 @@ struct GtQualRange {
    values smaller or equal to the lower bound will be converted to the lower
    bound. All quality values equal or larger than the upper bound will be
    converted to the upper bound.
-   Reads have to be of constant length, this migth be changed in future updates
+   Reads have to be of constant length, this might be changed in future updates
 */
 GtHcrEncoder* gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
                                  bool descs, GtQualRange qrange,

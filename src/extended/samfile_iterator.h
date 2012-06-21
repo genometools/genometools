@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,16 +29,16 @@ GtSamfileIterator* gt_samfile_iterator_new_bam(const char *filename,
                                                GtAlphabet *alphabet,
                                                GtError *err);
 
-/* Param <auxfilename> can be NULL, but then the samfile has to contain header
-   information. Otherwise it should be the name of a file containing the list of
-   references as produced by 'samtools faidx ref.fa' */
+/* Parameter <auxfilename> can be NULL, but then the samfile has to contain
+   header information. Otherwise it should be the name of a file containing the
+   list of references as produced by 'samtools faidx ref.fa' */
 GtSamfileIterator* gt_samfile_iterator_new_sam(const char *filename,
                                                GtAlphabet *alphabet,
                                                const char *auxfilename,
                                                GtError *err);
 
-/* Returns < 0 if no more alignments can be returned or an error occured and > 0
-   on success.
+/* Returns <0 if no more alignments can be returned or an error occurred and
+   >0 on success.
    <s_alignment> will point to the current alignment. This gets overwritten
    with each next. Retains ownership of <*s_alignment> */
 int                gt_samfile_iterator_next(GtSamfileIterator *s_iter,

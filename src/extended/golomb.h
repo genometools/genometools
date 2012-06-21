@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,12 +22,12 @@
 #include "core/bittab_api.h"
 #include "core/error_api.h"
 
-/* Class <GtGolomb> stores information to encode integers with golomb encoding
+/* Class <GtGolomb> stores information to encode integers with Golomb encoding
    See Golomb, S.W. (1966). , Run-length encodings. */
 typedef struct GtGolomb GtGolomb;
 
 /* Class <GtGolombBitwiseDecoder> takes a <GtGolomb> object and can be used to
-   decode golomb encoded integers. */
+   decode Golomb encoded integers. */
 typedef struct GtGolombBitwiseDecoder GtGolombBitwiseDecoder;
 
 /* Returns a new <GtGolomb> object. The parameter <median> influences the length
