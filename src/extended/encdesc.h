@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2012 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
   Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,22 +24,23 @@
 #include "core/timer_api.h"
 #include "extended/cstr_iterator.h"
 
-/* Class <GtEncdesc> stores fasta header in a compressed form. This can save a
-   lot of disk or ram space for repetitive headers, for example in multiple
-   fasta with short reads. */
+/* Class <GtEncdesc> stores a sequence description, e.g. a FASTA header,
+   in a compressed form. This can save a lot of disk space or memory for
+   repetitive headers, for example in multiple FASTA files with short reads. */
 typedef struct GtEncdesc GtEncdesc;
 
-/* Class <GtEncdescEncoder> can be used to encode fasta header. */
+/* Class <GtEncdescEncoder> can be used to encode FASTA header, delivering a
+   <GtEncdesc>. */
 typedef struct GtEncdescEncoder GtEncdescEncoder;
 
-/* Returns a new <GtEncdescEncoder> object */
+/* Returns a new <GtEncdescEncoder> object. */
 GtEncdescEncoder* gt_encdesc_encoder_new(void);
 
-/* Sets <timer> as the timer in <ee> */
+/* Sets <timer> as the timer to be used in <ee> during the encoding process. */
 void              gt_encdesc_encoder_set_timer(GtEncdescEncoder *ee,
                                                GtTimer *timer);
 
-/* Returns a pointer to the <GtTimer> in <ee>, might be NULL */
+/* Returns the <GtTimer> set in <ee>, might be NULL. */
 GtTimer*          gt_encdesc_encoder_get_timer(GtEncdescEncoder *ee);
 
 /* Set the sampling method of <ee> to either __none__, __page__wise or
@@ -57,26 +58,27 @@ bool              gt_encdesc_encoder_sampling_is_regular(GtEncdescEncoder *ee);
 void              gt_encdesc_encoder_set_sampling_rate(GtEncdescEncoder *ee,
                                                    unsigned long sampling_rate);
 
-/* Returns the samplingrate, undefined if sampling is set to no sampling */
+/* Returns the samplingrate set in <ee>. Returns GT_UNDEF_ULONG if sampling is
+   disabled. */
 unsigned long     gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee);
 
 /* Uses the settings in <ee> to encode the strings provided by <cstr_iterator>
-   and writes them to a file with prefix <name>. */
+   and writes them to a file with prefix <name>. Returns 0 on success, otherwise
+   <err> is set accordingly. */
 int               gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
                                             GtCstrIterator *cstr_iterator,
                                             const char *name,
                                             GtError *err);
 
-/* loads a <GtEncdesc> from file with prefix <name> */
-GtEncdesc*        gt_encdesc_load(const char *name,
-                                  GtError *err);
+/* Loads a <GtEncdesc> from file with prefix <name> */
+GtEncdesc*        gt_encdesc_load(const char *name, GtError *err);
 
-/* returns the number of encoded headers in <encdesc> */
+/* Returns the number of encoded headers in <encdesc> */
 unsigned long     gt_encdesc_num_of_descriptions(GtEncdesc *encdesc);
 
-/* Decodes description with number <num> and writes it to <desc>, the <GtStr>
-   will be reset before writing to it.
-   Returns 1 on success, 0 on EOF and -1 on error */
+/* Decodes description with number <num> and writes it to <desc>, which will be
+   reset before writing to it. Returns 1 on success, 0 on EOF and -1 on
+   error. <err> is set accordingly. */
 int               gt_encdesc_decode(GtEncdesc *encdesc,
                                     unsigned long num,
                                     GtStr *desc,

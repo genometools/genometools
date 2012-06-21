@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
-  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011      Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
+  Copyright (c)      2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,16 +22,17 @@
 #include "core/bittab_api.h"
 #include "core/error_api.h"
 
-/* Class <GtGolomb> stores information to encode integers with Golomb encoding
-   See Golomb, S.W. (1966). , Run-length encodings. */
+/* Class <GtGolomb> stores information to encode integers with Golomb encoding.
+   See Golomb, S.W. (1966), Run-length encodings. */
 typedef struct GtGolomb GtGolomb;
 
-/* Class <GtGolombBitwiseDecoder> takes a <GtGolomb> object and can be used to
-   decode Golomb encoded integers. */
+/* Class <GtGolombBitwiseDecoder> decode Golomb encoded integers given in a
+   <GtGolomb> object. */
 typedef struct GtGolombBitwiseDecoder GtGolombBitwiseDecoder;
 
 /* Returns a new <GtGolomb> object. The parameter <median> influences the length
-   of generated code words. It has to be the same for encoding and decoding. */
+   of generated code words. Identical values are needed for correct encoding and
+   decoding. */
 GtGolomb*               gt_golomb_new(unsigned long median);
 
 /* Encodes the non negative integer <x> for the given <golomb>, writes it to a

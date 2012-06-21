@@ -23,7 +23,7 @@
 #include "core/bittab_api.h"
 
 /* Class <GtBitOutStream> helps writing variable length encoded data to files,
-   it handles the filling of words of size <GtBitsequence>. */
+   handling the filling of words of type <GtBitsequence>. */
 typedef struct GtBitOutStream GtBitOutStream;
 
 /* Returns a new <GtBitOutStream>, <fp> needs to be valid and opened for
@@ -38,25 +38,23 @@ void            gt_bitoutstream_append(GtBitOutStream *bitstream,
                                        GtBitsequence code,
                                        unsigned bits_to_write);
 
-/* Append the bits in <GtBittab> <tab> to the file associated with <bitstream>.
-   <bits_to_write> is the number of bits in <code> that have to be appended.
-   Assumes the bits are stored in the least significant bits of <code> like
-   standard binary encoding. */
+/* Append the bits in <GtBittab> <tab> to the file associated with
+   <bitstream>. */
 void            gt_bitoutstream_append_bittab(GtBitOutStream *bitstream,
                                               GtBittab *tab);
 
-/* Write all currently appended <code>s to the <FILE> <fp> associated with
-   <GtBitOutStream> <bitstream>. Possibly 'empty' bits in the current word will
-   be set to zero and all non empty bits will be shifted to the most significant
-   bits. */
+/* Write all currently appended bitcodes to the file associated with
+   <bitstream>. Possibly 'empty' bits in the current word will be set to zero
+   and all non empty bits will be shifted to the most significant bits. */
 void            gt_bitoutstream_flush(GtBitOutStream *bitstream);
 
-/* Like before but moves file pointer to the next start of a page. */
+/* Like <gt_bitoutstream_flush()> but moves file pointer to the next start of a
+   page. */
 void            gt_bitoutstream_flush_advance(GtBitOutStream *bitstream);
 
-/* Returns the position of the file pointer <fp> associated with <bitstream>.
-   For reliable results gt_bitoutstream_flush has to be called before!
-   Returns -1 on error */
+/* Returns the position in the file associated with <bitstream>. For reliable
+   results gt_bitoutstream_flush needs to be called before. Returns -1 on
+   error. */
 long            gt_bitoutstream_pos(const GtBitOutStream *bitstream);
 
 void            gt_bitoutstream_delete(GtBitOutStream *bitstream);

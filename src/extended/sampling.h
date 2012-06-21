@@ -22,25 +22,25 @@
 #define GT_SAMPLING_DEFAULT_REGULAR_RATE 10000UL
 #define GT_SAMPLING_DEFAULT_PAGE_RATE 100UL
 
-/* Class <GtSampling> can be used to collect Sampling information for variable
-   length data that gets written to a file. It stores for each sampled element
-   the number of that element and the page offset in the file.
-   When read from a file, it helps to find the page offset of a sample. */
+/* Class <GtSampling> can be used to collect sampling information for variable
+   length data that is written to a file. For each sampled element, it stores
+   the number of that element and its page offset in the file. When read from
+   a file, it helps to find the page offset of a sample. */
 typedef struct GtSampling GtSampling;
 
 /* Returns a new <GtSampling> object which uses regular sampling, <rate> sets
    the sampling rate and <first_offset> is the position of the first sample in
-   the file, has to be a multiple of pagesize. */
+   the file, has to be a multiple of the pagesize. */
 GtSampling*   gt_sampling_new_regular(unsigned long rate, off_t first_offset);
 
 /* Returns a new <GtSampling> object which uses page oriented sampling, that is:
    the sampling rate defines how many pages should be filled before sampling the
    next element. <rate> sets the sampling rate and <first_offset> is the
-   position of the first sample in the file, has to be a multiple of pagesize.
-   */
+   position of the first sample in the file, has to be a multiple of the
+   pagesize. */
 GtSampling*   gt_sampling_new_page(unsigned long rate, off_t first_offset);
 
-/* Writes <sampling> to <FILE> <fp> */
+/* Writes <sampling> to <FILE> <fp>. */
 void          gt_sampling_write(GtSampling *sampling, FILE *fp);
 
 /* Reads from <fp> the information previously stored in <fp> by
@@ -85,6 +85,7 @@ void          gt_sampling_add_sample(GtSampling *sampling,
                                      size_t position,
                                      unsigned long element_num);
 
+/* TODO: document me */
 bool          gt_sampling_is_next_element_sample(
                                           GtSampling *sampling,
                                           unsigned long pages_written,

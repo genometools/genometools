@@ -23,24 +23,24 @@
 #include "core/error.h"
 #include "core/intbits.h"
 
-/* Class <GtBitInStream> reads variable length encoded data from a file, the
-   file gets mmaped. */
+/* Class <GtBitInStream> reads variable length encoded data from a mmap()ed
+   file. */
 typedef struct GtBitInStream GtBitInStream;
 
-/* Returns a new <GtBitInStream>,  <path> is a '\0' terminated string with the
-   name of the file, <offset> is the page offset where mapping should start, it
-   has to be a multiple of pagesize. <pages_to_map> is the number of pages to
-   map at once. If <path> is not valid exits with <EXIT_FAILURE> */
+/* Returns a new <GtBitInStream>. <path> is a '\0' terminated string with the
+   name of the file, <offset> is the page offset where mapping should start (a
+   multiple of the page size). <pages_to_map> is the number of pages to map at
+   a time. If <path> is not valid exits with <EXIT_FAILURE>. */
 GtBitInStream *gt_bitinstream_new(const char *path,
                                   size_t offset,
                                   unsigned long pages_to_map);
 
-/* Tells <bitstream> to remap the file with a new offset */
+/* Tells <bitstream> to remap the file with a new offset. */
 void           gt_bitinstream_reinit(GtBitInStream *bitstream,
                                      size_t offset);
 
-/* Sets <bit>, returns 0 if there are no more bits to read and 1 if
-   successfully read one bit. */
+/* Reads one more bit and sets <bit> to the read value. Returns 0 if there are
+   no more bits to read and 1 if successfully read one bit. */
 int           gt_bitinstream_get_next_bit(GtBitInStream *bitstream,
                                           bool *bit);
 
