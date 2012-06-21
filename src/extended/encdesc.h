@@ -21,7 +21,7 @@
 #include "core/error_api.h"
 #include "core/str_array_api.h"
 #include "core/timer_api.h"
-#include "extended/string_iter.h"
+#include "extended/cstr_iterator.h"
 
 /* Class <GtEncdesc> stores fasta header in a compressed form. This can save a
    lot of disk or ram space for repetitive headers, for example in multiple
@@ -59,10 +59,10 @@ void              gt_encdesc_encoder_set_sampling_rate(GtEncdescEncoder *ee,
 /* Returns the samplingrate, undefined if sampling is set to no sampling */
 unsigned long     gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee);
 
-/* Uses the settings in <ee> to encode the strings provided by <str_iter> and
-   writes them to a file with prefix <name>. */
+/* Uses the settings in <ee> to encode the strings provided by <cstr_iterator>
+   and writes them to a file with prefix <name>. */
 int               gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
-                                            GtStringIter *str_iter,
+                                            GtCstrIterator *cstr_iterator,
                                             const char *name,
                                             GtError *err);
 

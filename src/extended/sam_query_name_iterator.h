@@ -15,22 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SAM_MAP_QUERY_ITER_H
-#define SAM_MAP_QUERY_ITER_H
+#ifndef SAM_QUERY_NAME_ITERATOR_H
+#define SAM_QUERY_NAME_ITERATOR_H
 
-#include "extended/string_iter.h"
+#include "extended/cstr_iterator.h"
 #include "extended/samfile_iterator.h"
 
-/* implements <GtStringIter> */
+/* implements <GtCstrIterator> */
 /* iterates over the identifyers of all mapped alignments in a sam/bam file */
-typedef struct GtSamMapQueryIter GtSamMapQueryIter;
+typedef struct GtSamQueryNameIterator GtSamQueryNameIterator;
 
-const GtStringIterClass* gt_sam_map_query_iter_class(void);
+const GtCstrIteratorClass* gt_sam_query_name_iterator_class(void);
 
 /* does not take ownership of <s_iter> */
-GtStringIter*            gt_sam_map_query_iter_new(GtSamfileIterator *s_iter,
-                                                   GtError *err);
+GtCstrIterator*            gt_sam_query_name_iterator_new(
+                                                     GtSamfileIterator *s_iter,
+                                                     GtError *err);
 
-#define                  gt_sam_map_query_iter_cast(GSI) \
-                         gt_string_iter_cast(gt_sam_map_query_iter_class(), GSI)
+#define                    gt_sam_query_name_iterator_cast(GSI) \
+  gt_cstr_iterator_cast(gt_sam_query_name_iterator_class(), GSI)
 #endif

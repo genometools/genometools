@@ -15,21 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef STRING_ITER_REP_H
-#define STRING_ITER_REP_H
+#ifndef CSTR_ITERATOR_REP_H
+#define CSTR_ITERATOR_REP_H
 
-#include "extended/string_iter.h"
+#include "extended/cstr_iterator.h"
 
-struct GtStringIter {
-  const GtStringIterClass *c_class;
-  GtStringIterMembers *members;
+struct GtCstrIterator {
+  const GtCstrIteratorClass *c_class;
+  GtCstrIteratorMembers *members;
 };
 
-struct GtStringIterClass {
+struct GtCstrIteratorClass {
   size_t size;
-  GtStringIterNextFunc next_func;
-  GtStringIterResetFunc reset_func;
-  GtStringIterDeleteFunc delete_func;
+  GtCstrIteratorNextFunc next_func;
+  GtCstrIteratorResetFunc reset_func;
+  GtCstrIteratorDeleteFunc delete_func;
 };
 
 #endif

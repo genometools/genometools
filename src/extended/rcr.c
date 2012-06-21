@@ -47,7 +47,7 @@
 #include "extended/huffman.h"
 #include "extended/rcr.h"
 #include "extended/sam_alignment.h"
-#include "extended/sam_map_query_iter.h"
+#include "extended/sam_query_name_iterator.h"
 #include "extended/samfile_iterator.h"
 #include "external/samtools-0.1.18/sam.h"
 
@@ -130,7 +130,7 @@ struct GtRcrEncoder {
            *varpos_golomb;
   GtSamfileIterator *sam_iter;
   GtBitOutStream *bitstream;
-  GtStringIter *str_iter;
+  GtCstrIterator *cstr_iterator;
   bam1_t *sam_align;
   GtEncdescEncoder *encdesc_enc;
   FILE *output,
@@ -988,7 +988,7 @@ static inline GtRcrEncoder *gt_rcr_encoder_init(const char *filename,
   rcr_enc->readlenghts_huff = NULL;
   rcr_enc->readpos_golomb = NULL;
   rcr_enc->sam_iter = NULL;
-  rcr_enc->str_iter = NULL;
+  rcr_enc->cstr_iterator = NULL;
   rcr_enc->varpos_golomb = NULL;
   rcr_enc->cons_readlength = true;
   rcr_enc->is_verbose = false;
@@ -1084,8 +1084,9 @@ static int gt_rcr_init_desc_encoding(GtRcrEncoder *rcr_enc,
   if (rcr_enc->sam_iter == NULL)
     had_err = -1;
   if (!had_err) {
-    rcr_enc->str_iter = gt_sam_map_query_iter_new(rcr_enc->sam_iter, err);
-    if (rcr_enc->str_iter == NULL)
+    rcr_enc->cstr_iterator = gt_sam_query_name_iterator_new(rcr_enc->sam_iter,
+                                                            err);
+    if (rcr_enc->cstr_iterator == NULL)
       had_err = -1;
   }
   return had_err;
@@ -1385,7 +1386,7 @@ int gt_rcr_encoder_encode(GtRcrEncoder *rcr_enc, const char *name,
   if (!had_err &&
       rcr_enc->encdesc_enc != NULL) {
     had_err = gt_encdesc_encoder_encode(rcr_enc->encdesc_enc,
-                                        rcr_enc->str_iter,
+                                        rcr_enc->cstr_iterator,
                                         name,
                                         err);
   }
@@ -2199,7 +2200,7 @@ void gt_rcr_encoder_delete(GtRcrEncoder *rcr_enc)
     gt_disc_distri_delete(rcr_enc->qual_distr);
 
     gt_samfile_iterator_delete(rcr_enc->sam_iter);
-    gt_string_iter_delete(rcr_enc->str_iter);
+    gt_cstr_iterator_delete(rcr_enc->cstr_iterator);
     gt_encdesc_encoder_delete(rcr_enc->encdesc_enc);
 
     gt_free(rcr_enc->ins_bases);

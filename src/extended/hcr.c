@@ -42,10 +42,10 @@
 #include "core/xansi_api.h"
 #include "extended/bitoutstream.h"
 #include "extended/encdesc.h"
-#include "extended/fasta_desc_iter.h"
+#include "extended/fasta_header_iterator.h"
 #include "extended/hcr.h"
 #include "extended/rbtree.h"
-#include "extended/string_iter.h"
+#include "extended/cstr_iterator.h"
 
 #define HCR_LOWESTQUALVALUE 0
 #define HCR_HIGHESTQUALVALUE 127U
@@ -1230,12 +1230,12 @@ int gt_hcr_encoder_encode(GtHcrEncoder *hcr_enc, const char *name,
   if (timer != NULL)
     gt_timer_show_progress(timer, "write encoding", stdout);
   if (hcr_enc->encdesc_encoder != NULL) {
-    GtStringIter *str_iter = gt_fasta_desc_iter_new(hcr_enc->files,
-                                                    err);
+    GtCstrIterator *cstr_iterator = gt_fasta_header_iterator_new(hcr_enc->files,
+                                                                 err);
     if (gt_encdesc_encoder_encode(hcr_enc->encdesc_encoder,
-                                  str_iter, name, err) != 0)
+                                  cstr_iterator, name, err) != 0)
       return -1;
-    gt_string_iter_delete(str_iter);
+    gt_cstr_iterator_delete(cstr_iterator);
   }
   if (hcr_write_seq_qual_data(name, hcr_enc, timer, err) != 0)
     return -1;

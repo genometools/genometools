@@ -44,7 +44,7 @@
 #include "extended/huffman.h"
 #include "extended/rbtree.h"
 #include "extended/sampling.h"
-#include "extended/string_iter.h"
+#include "extended/cstr_iterator.h"
 
 #define GT_ENCDESC_ARRAY_RESIZE 50
 #define GT_ENCDESC_FILESUFFIX ".ede"
@@ -127,7 +127,7 @@ static int encdesc_hashmap_distr_add(GtHashtable *hm_distri, long key)
 }
 
 static int encdesc_analyze_descs(GtEncdesc *encdesc,
-                                 GtStringIter *str_iter,
+                                 GtCstrIterator *cstr_iterator,
                                  GtError *err)
 {
   int status;
@@ -164,7 +164,8 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
   /* TODO check constant number of fields here */
   /* TODO count totalnumofchars here */
   gt_error_check(err);
-  while ((status = gt_string_iter_next(str_iter, &descbuffer, err)) !=  0) {
+  status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
+  while (status != 0) {
     if (status < 0)
       return status;
     gt_assert(descbuffer != NULL);
@@ -192,6 +193,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
       longest_desc = gt_cstr_dup(descbuffer);
     }
     cur_desc++;
+    status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
   }
   gt_assert(longest_desc != NULL);
   /* gt_log_log("longest: %s", longest_desc); */
@@ -254,13 +256,14 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
 
   gt_free(longest_desc);
 
-  if (gt_string_iter_reset(str_iter, err) != 0)
+  if (gt_cstr_iterator_reset(cstr_iterator, err) != 0)
     return -1;
 
   cur_desc = 0;
 
   /* analyze all descriptions */
-  while ((status = gt_string_iter_next(str_iter, &descbuffer, err)) !=  0) {
+  status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
+  while (status != 0) {
     if (status == -1)
       return -1;
     gt_assert(descbuffer != NULL);
@@ -423,6 +426,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
       cur_field->is_numeric = false;
     }
     cur_desc++;
+    status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
   }
   gt_free(mutable_desc);
   mutable_desc = NULL;
@@ -470,7 +474,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
 }
 
 static int encdesc_write_encoding(GtEncdesc *encdesc,
-                                  GtStringIter *str_iter,
+                                  GtCstrIterator *cstr_iterator,
                                   FILE *fp, GtError *err)
 {
   int had_err = 0, striter_err;
@@ -492,14 +496,14 @@ static int encdesc_write_encoding(GtEncdesc *encdesc,
   /* gt_xfseek(fp, encdesc->start_of_encoding, SEEK_SET); */
   bitstream = gt_bitoutstream_new(fp);
 
-  had_err = gt_string_iter_reset(str_iter, err);
+  had_err = gt_cstr_iterator_reset(cstr_iterator, err);
   if (!had_err) {
 
     for (idx = 0; idx < encdesc->num_of_fields; idx++)
       encdesc->fields[idx].prev_value = 0;
-
-    while ((striter_err = gt_string_iter_next(str_iter, &descbuffer, err))
-           > 0) {
+    for (striter_err = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
+         striter_err > 0;
+         striter_err = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err)) {
       gt_free(info->descbuffer);
       info->descbuffer = gt_cstr_dup(descbuffer);
       info->sample = false;
@@ -1006,7 +1010,7 @@ static void encdesc_init_huffman(GtEncdesc *encdesc)
 }
 
 int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
-                              GtStringIter *str_iter,
+                              GtCstrIterator *cstr_iterator,
                               const char *name, GtError *err)
 {
   int had_err = 0;
@@ -1018,14 +1022,14 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
        pagesize;
   unsigned long dummy = 0;
 
-  gt_assert(ee);
-  gt_assert(str_iter);
-  gt_assert(name);
+  gt_assert(ee != NULL);
+  gt_assert(cstr_iterator != NULL);
+  gt_assert(name != NULL);
   gt_error_check(err);
   if (ee->timer != NULL) {
     gt_timer_show_progress(ee->timer, "analyze descriptions", stdout);
   }
-  had_err = encdesc_analyze_descs(ee->encdesc, str_iter, err);
+  had_err = encdesc_analyze_descs(ee->encdesc, cstr_iterator, err);
 
   if (ee->timer != NULL) {
     gt_timer_show_progress(ee->timer, "write encoding header", stdout);
@@ -1065,7 +1069,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
     else if (ee->regular_sampling)
       ee->encdesc->sampling = gt_sampling_new_regular(ee->sampling_rate,
                                                       start_of_encoding);
-    had_err = encdesc_write_encoding(ee->encdesc, str_iter, fp, err);
+    had_err = encdesc_write_encoding(ee->encdesc, cstr_iterator, fp, err);
   }
   if (!had_err) {
     gt_xfseek(fp, pos, SEEK_SET);

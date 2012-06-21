@@ -15,19 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FASTA_DESC_ITER_H
-#define FASTA_DESC_ITER_H
+#ifndef FASTA_HEADER_ITERATOR_H
+#define FASTA_HEADER_ITERATOR_H
 
-#include "extended/string_iter.h"
+#include "extended/cstr_iterator.h"
 
-/* implements <GtStringIter> */
-typedef struct GtFastaDescIter GtFastaDescIter;
+/* implements <GtCstrIterator> */
+typedef struct GtFastaHeaderIterator GtFastaHeaderIterator;
 
-const GtStringIterClass* gt_fasta_desc_iter_class(void);
+const GtCstrIteratorClass* gt_fasta_header_iterator_class(void);
 
-GtStringIter*            gt_fasta_desc_iter_new(GtStrArray *filenametab,
-                                                GtError *err);
+GtCstrIterator*            gt_fasta_header_iterator_new(GtStrArray *filenametab,
+                                                        GtError *err);
 
-#define                  gt_fasta_desc_iter_cast(GSI) \
-                         gt_string_iter_cast(gt_fasta_desc_iter_class(), GSI)
+#define                    gt_fasta_header_iterator_cast(GSI) \
+  gt_cstr_iterator_cast(gt_fasta_header_iterator_class(), GSI)
 #endif

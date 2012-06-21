@@ -1,0 +1,57 @@
+/*
+  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+#ifndef CSTR_ITERATOR_H
+#define CSTR_ITERATOR_H
+
+/* <GtCstrIterator> is an abstract iterator class for data-structures
+   containing strings */
+typedef struct GtCstrIterator GtCstrIterator;
+
+typedef struct GtCstrIteratorClass GtCstrIteratorClass;
+typedef struct GtCstrIteratorMembers GtCstrIteratorMembers;
+
+typedef int  (*GtCstrIteratorNextFunc)(GtCstrIterator*,
+                                         const char**,
+                                         GtError*);
+typedef int  (*GtCstrIteratorResetFunc)(GtCstrIterator*, GtError*);
+typedef void (*GtCstrIteratorDeleteFunc)(GtCstrIterator*);
+
+/* Sets <string> to the next string, retains ownership, will be overwritten by
+   next call. Returns negative (<0)  on error and sets err acordingly, returns 0
+   if no more strings are available and >0 on success. */
+int                    gt_cstr_iterator_next(GtCstrIterator *cstr_iterator,
+                                             const char **string,
+                                             GtError *err);
+
+/* resets the iterator, a call to the next functien will return the first string
+   again */
+int                    gt_cstr_iterator_reset(GtCstrIterator *cstr_iterator,
+                                              GtError *err);
+
+void                   gt_cstr_iterator_delete(GtCstrIterator *cstr_iterator);
+
+GtCstrIteratorClass* gt_cstr_iterator_class_new(size_t size,
+                                                    GtCstrIteratorNextFunc,
+                                                    GtCstrIteratorResetFunc,
+                                                    GtCstrIteratorDeleteFunc);
+
+GtCstrIterator*      gt_cstr_iterator_create(const GtCstrIteratorClass*);
+
+void*                  gt_cstr_iterator_cast(const GtCstrIteratorClass*,
+                                             GtCstrIterator*);
+#endif

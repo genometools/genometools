@@ -19,24 +19,24 @@
 #include "core/error_api.h"
 #include "core/seqiterator.h"
 #include "core/unused_api.h"
-#include "extended/sam_map_query_iter.h"
+#include "extended/sam_query_name_iterator.h"
 #include "extended/sam_alignment.h"
 #include "extended/samfile_iterator.h"
-#include "extended/string_iter.h"
-#include "extended/string_iter_rep.h"
+#include "extended/cstr_iterator.h"
+#include "extended/cstr_iterator_rep.h"
 
-struct GtSamMapQueryIter {
-  const GtStringIter parent_instance;
+struct GtSamQueryNameIterator {
+  const GtCstrIterator parent_instance;
   GtSamAlignment *alignment;
   GtSamfileIterator *s_iter;
 };
 
-static int gt_sam_map_query_iter_next(GtStringIter *str_iter,
+static int gt_sam_query_name_iterator_next(GtCstrIterator *cstr_iterator,
                                       const char **query_name,
                                       GT_UNUSED GtError *err)
 {
   int read = 0;
-  GtSamMapQueryIter *sqi = gt_sam_map_query_iter_cast(str_iter);
+  GtSamQueryNameIterator *sqi = gt_sam_query_name_iterator_cast(cstr_iterator);
   read = gt_samfile_iterator_next(sqi->s_iter, &sqi->alignment);
   while (read > 0 && gt_sam_alignment_is_unmapped(sqi->alignment)) {
     read = gt_samfile_iterator_next(sqi->s_iter, &sqi->alignment);
@@ -48,41 +48,42 @@ static int gt_sam_map_query_iter_next(GtStringIter *str_iter,
   return 0;
 }
 
-static int gt_sam_map_query_iter_reset(GtStringIter *str_iter,
+static int gt_sam_query_name_iterator_reset(GtCstrIterator *cstr_iterator,
                                        GtError *err)
 {
-  GtSamMapQueryIter *sqi = gt_sam_map_query_iter_cast(str_iter);
+  GtSamQueryNameIterator *sqi = gt_sam_query_name_iterator_cast(cstr_iterator);
   gt_error_check(err);
 
   return gt_samfile_iterator_reset(sqi->s_iter, err);
 }
 
-static void gt_sam_map_query_iter_delete(GtStringIter *str_iter)
+static void gt_sam_query_name_iterator_delete(GtCstrIterator *cstr_iterator)
 {
-  GtSamMapQueryIter *sqi = gt_sam_map_query_iter_cast(str_iter);
+  GtSamQueryNameIterator *sqi = gt_sam_query_name_iterator_cast(cstr_iterator);
   gt_sam_alignment_delete(sqi->alignment);
 }
 
 /* map static local method to interface */
-const GtStringIterClass* gt_sam_map_query_iter_class(void)
+const GtCstrIteratorClass* gt_sam_query_name_iterator_class(void)
 {
-  static const GtStringIterClass *sic = NULL;
+  static const GtCstrIteratorClass *sic = NULL;
   if (sic == NULL) {
-    sic = gt_string_iter_class_new(sizeof (GtSamMapQueryIter),
-                                   gt_sam_map_query_iter_next,
-                                   gt_sam_map_query_iter_reset,
-                                   gt_sam_map_query_iter_delete);
+    sic = gt_cstr_iterator_class_new(sizeof (GtSamQueryNameIterator),
+                                     gt_sam_query_name_iterator_next,
+                                     gt_sam_query_name_iterator_reset,
+                                     gt_sam_query_name_iterator_delete);
   }
   return sic;
 }
 
-GtStringIter* gt_sam_map_query_iter_new(GtSamfileIterator *s_iter,
+GtCstrIterator* gt_sam_query_name_iterator_new(GtSamfileIterator *s_iter,
                                         GtError *err)
 {
-  GtStringIter *str_iter = gt_string_iter_create(gt_sam_map_query_iter_class());
-  GtSamMapQueryIter *sqi = gt_sam_map_query_iter_cast(str_iter);
+  GtCstrIterator *cstr_iterator =
+    gt_cstr_iterator_create(gt_sam_query_name_iterator_class());
+  GtSamQueryNameIterator *sqi = gt_sam_query_name_iterator_cast(cstr_iterator);
   sqi->s_iter = s_iter;
-  if (gt_sam_map_query_iter_reset(str_iter, err) != 0)
+  if (gt_sam_query_name_iterator_reset(cstr_iterator, err) != 0)
     return NULL;
-  return str_iter;
+  return cstr_iterator;
 }
