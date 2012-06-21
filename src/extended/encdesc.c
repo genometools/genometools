@@ -1042,7 +1042,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
   }
 
   if (!had_err) {
-    encdesc_write_header(ee->encdesc, fp, err);
+    encdesc_write_header(ee->encdesc, fp);
     if (ee->timer != NULL) {
       gt_timer_show_progress(ee->timer, "calculate huffmans", stdout);
     }

@@ -195,17 +195,18 @@ static enum iterator_op encdesc_li_ull_hashmap_iter_count(
 {
   unsigned long *count = (unsigned long*) data;
   (void) (*count)++;
+  /* always continue since we cannot fail */
   return CONTINUE_ITERATION;
 }
 
-static unsigned long get_hashmap_distri_size(GtHashtable *h_table,
-                                             GtError *err)
+static unsigned long get_hashmap_distri_size(GtHashtable *h_table)
 {
   unsigned long count = 0;
+  /* error is NULL as encdesc_li_ull_hashmap_iter_count() is sane */
   (void) li_ull_gt_hashmap_foreach(h_table,
                                    encdesc_li_ull_hashmap_iter_count,
                                    &count,
-                                   err);
+                                   NULL);
   return count;
 }
 
@@ -219,19 +220,20 @@ static enum iterator_op encdesc_li_ull_hashmap_iter_write(
   this_data->written_elems++;
   gt_xfwrite(&key, sizeof (key), (size_t) 1, this_data->fp);
   gt_xfwrite(&value, sizeof (value), (size_t) 1, this_data->fp);
+  /* always continue since we use gt_xfwrite() anyway */
   return CONTINUE_ITERATION;
 }
 
 static void write_hashmap_distri(EncsecDistriData *data,
                                  GtHashtable *h_table,
-                                 GT_UNUSED unsigned long size,
-                                 GtError *err)
+                                 GT_UNUSED unsigned long size)
 {
   data->written_elems = 0;
+  /* error is NULL as encdesc_li_ull_hashmap_iter_write() is sane */
   (void) li_ull_gt_hashmap_foreach(h_table,
                                    encdesc_li_ull_hashmap_iter_write,
                                    data,
-                                   err);
+                                   NULL);
   if (data->written_elems != size)
     gt_log_log("%lu != %lu", size, data->written_elems);
   gt_assert(data->written_elems == size);
@@ -320,8 +322,7 @@ static void read_numeric_field_header(DescField *field,
 }
 
 static void write_numeric_field_header(DescField *field,
-                                       FILE *fp,
-                                       GtError *err)
+                                       FILE *fp)
 {
   bool needs_zero_dist = false,
        needs_delta_dist = false,
@@ -345,15 +346,13 @@ static void write_numeric_field_header(DescField *field,
   if (needs_delta_dist) {
     write_hashmap_distri(&data,
                          field->delta_values,
-                         field->delta_values_size,
-                         err);
+                         field->delta_values_size);
   }
 
   if (needs_value_dist) {
     write_hashmap_distri(&data,
                          field->num_values,
-                         field->num_values_size,
-                         err);
+                         field->num_values_size);
   }
 
   if (needs_zero_dist) {
@@ -431,8 +430,7 @@ static void write_field_header_bittab(DescField *field, FILE *fp)
 
 /* TODO combine field_char_dist */
 static void write_field_char_dists(DescField *field,
-                                   FILE *fp,
-                                   GtError *err)
+                                   FILE *fp)
 {
   unsigned long char_idx,
                 distr_len;
@@ -445,12 +443,11 @@ static void write_field_char_dists(DescField *field,
     if (char_idx >= field->len ||
         !gt_bittab_bit_is_set(field->bittab, char_idx)) {
 
-      distr_len = get_hashmap_distri_size(field->chars[char_idx], err);
+      distr_len = get_hashmap_distri_size(field->chars[char_idx]);
       gt_xfwrite(&distr_len, sizeof (distr_len), (size_t) 1, fp);
       write_hashmap_distri(&data,
                            field->chars[char_idx],
-                           distr_len,
-                           err);
+                           distr_len);
     }
   }
 }
@@ -474,7 +471,7 @@ static void read_field_char_dists(DescField *field,
   }
 }
 
-void encdesc_write_header(GtEncdesc *encdesc, FILE *fp, GtError *err)
+void encdesc_write_header(GtEncdesc *encdesc, FILE *fp)
 {
   unsigned long cur_field_num;
   DescField *cur_field;
@@ -493,7 +490,7 @@ void encdesc_write_header(GtEncdesc *encdesc, FILE *fp, GtError *err)
     else {
       gt_xfwrite(&cur_field->is_numeric, sizeof (bool), (size_t) 1, fp);
       if (cur_field->is_numeric) {
-        write_numeric_field_header(cur_field, fp, err);
+        write_numeric_field_header(cur_field, fp);
       }
       else {
 
@@ -503,7 +500,7 @@ void encdesc_write_header(GtEncdesc *encdesc, FILE *fp, GtError *err)
 
         write_field_header_bittab(cur_field, fp);
 
-        write_field_char_dists(cur_field, fp, err);
+        write_field_char_dists(cur_field, fp);
       }
     }
   }

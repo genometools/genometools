@@ -21,8 +21,9 @@
 #include "core/error_api.h"
 #include "extended/encdesc.h"
 
-/* Write header information of <encdesc> to <FILE> <fp>.  */
-void encdesc_write_header(GtEncdesc *encdesc, FILE *fp, GtError *err);
+/* Write header information of <encdesc> to <FILE> <fp>.
+   Fails hard with EXIT_FAILURE if an error occurs. */
+void encdesc_write_header(GtEncdesc *encdesc, FILE *fp);
 
 /* Read header information of <encdesc> from <FILE> <fp>. */
 void encdesc_read_header(GtEncdesc *encdesc, FILE *fp);
