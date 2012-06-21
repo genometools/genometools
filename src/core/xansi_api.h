@@ -57,6 +57,10 @@ void   gt_xfputs(const char*, FILE*);
 /* Similar to <fread(3)>, terminates on error. */
 size_t gt_xfread(void *ptr, size_t size, size_t nmemb, FILE*);
 
+/* shortcut to gt_xfread */
+#define gt_xfread_one(ptr, fp)                  \
+  gt_xfread(ptr, sizeof (*ptr), (size_t) 1, fp)
+
 /* Similar to <fseek(3)>, terminates on error. */
 void   gt_xfseek(FILE*, long offset, int whence);
 
@@ -65,6 +69,10 @@ void   gt_xfsetpos(FILE*, const fpos_t*);
 
 /* Similar to <fwrite(3)>, terminates on error. */
 void   gt_xfwrite(const void *ptr, size_t size, size_t nmemb, FILE*);
+
+/* shortcut to gt_xfwrite */
+#define gt_xfwrite_one(ptr, fp)                  \
+  gt_xfwrite(ptr, sizeof (*ptr), (size_t) 1, fp)
 
 /* Similar to <putchar(3)>, terminates on error. */
 void   gt_xputchar(int);

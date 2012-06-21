@@ -45,7 +45,6 @@
 #include "extended/fasta_desc_iter.h"
 #include "extended/hcr.h"
 #include "extended/rbtree.h"
-#include "extended/read_write_one.h"
 #include "extended/string_iter.h"
 
 #define HCR_LOWESTQUALVALUE 0
@@ -185,7 +184,8 @@ static GtBaseQualDistr* hcr_base_qual_distr_new_from_file(FILE *fp,
   unsigned long numofleaves,
                 i;
   unsigned long long cur_freq;
-  GT_UNUSED size_t read;
+  GT_UNUSED size_t read,
+            one = (size_t) 1;
 
   alpha_size = gt_alphabet_size(alpha);
   bqd = gt_malloc(sizeof (GtBaseQualDistr));
@@ -195,11 +195,15 @@ static GtBaseQualDistr* hcr_base_qual_distr_new_from_file(FILE *fp,
   bqd->qual_offset = HCR_LOWESTQUALVALUE;
   bqd->wildcard_indx = alpha_size - 1;
 
-  READ_ONE(numofleaves, fp);
+  read = gt_xfread_one(&numofleaves, fp);
+  gt_assert(read == one);
   for (i = 0; i < numofleaves; i++) {
-    READ_ONE(read_char_code, fp);
-    READ_ONE(cur_qual, fp);
-    READ_ONE(cur_freq, fp);
+    read = gt_xfread_one(&read_char_code, fp);
+    gt_assert(read == one);
+    read = gt_xfread_one(&cur_qual, fp);
+    gt_assert(read == one);
+    read = gt_xfread_one(&cur_freq, fp);
+    gt_assert(read == one);
     cur_char_code = gt_alphabet_encode(alpha, read_char_code);
     if (cur_char_code == (GtUchar) WILDCARD)
       gt_safe_assign(cur_char_code, bqd->wildcard_indx);
@@ -470,13 +474,13 @@ static int hcr_huffman_write_base_qual_freq(unsigned long symbol,
     base = (GtUchar) WILDCARD;
   gt_safe_assign(base, (toupper(gt_alphabet_decode(info->alpha, base))));
 
-  WRITE_ONE(base, info->output);
+  gt_xfwrite_one(&base, info->output);
 
   gt_safe_assign(qual,
                  (symbol / gt_alphabet_size(info->alpha) + info->qual_offset));
 
-  WRITE_ONE(qual, info->output);
-  WRITE_ONE(freq, info->output);
+  gt_xfwrite_one(&qual, info->output);
+  gt_xfwrite_one(&freq, info->output);
   return 0;
 }
 
@@ -492,7 +496,7 @@ static int hcr_write_seqdistrtab(FILE *fp, GtHcrEncoder *hcr_enc)
   info->output = fp;
 
   numofleaves = gt_huffman_numofsymbols(hcr_enc->seq_encoder->huffman);
-  WRITE_ONE(numofleaves, fp);
+  gt_xfwrite_one(&numofleaves, fp);
 
   had_err = gt_huffman_iterate(hcr_enc->seq_encoder->huffman,
                                hcr_huffman_write_base_qual_freq,
@@ -505,11 +509,11 @@ static void hcr_write_file_info(FILE *fp, GtHcrEncoder *hcr_enc)
 {
   unsigned long i;
 
-  WRITE_ONE(hcr_enc->num_of_files, fp);
+  gt_xfwrite_one(&hcr_enc->num_of_files, fp);
 
   for (i = 0; i < hcr_enc->num_of_files; i++) {
-    WRITE_ONE(hcr_enc->seq_encoder->fileinfos[i].readnum, fp);
-    WRITE_ONE(hcr_enc->seq_encoder->fileinfos[i].readlength, fp);
+    gt_xfwrite_one(&hcr_enc->seq_encoder->fileinfos[i].readnum, fp);
+    gt_xfwrite_one(&hcr_enc->seq_encoder->fileinfos[i].readlength, fp);
   }
 }
 
@@ -539,7 +543,7 @@ static int hcr_write_seq_qual_data(const char *name, GtHcrEncoder *hcr_enc,
       bool is_not_at_pageborder;
 
       pos = ftell(fp);
-      WRITE_ONE(dummy, fp);
+      gt_xfwrite_one(&dummy, fp);
 
       is_not_at_pageborder = (ftell(fp) % hcr_enc->pagesize) != 0;
 
@@ -563,7 +567,7 @@ static int hcr_write_seq_qual_data(const char *name, GtHcrEncoder *hcr_enc,
     if (!had_err) {
       gt_assert(fp);
       gt_xfseek(fp, pos, SEEK_SET);
-      WRITE_ONE(hcr_enc->seq_encoder->startofsamplingtab, fp);
+      gt_xfwrite_one(&hcr_enc->seq_encoder->startofsamplingtab, fp);
     }
     gt_fa_xfclose(fp);
   }
@@ -573,15 +577,19 @@ static int hcr_write_seq_qual_data(const char *name, GtHcrEncoder *hcr_enc,
 static void hcr_read_file_info(GtHcrSeqDecoder *seq_dec, FILE *fp)
 {
   unsigned long i;
-  GT_UNUSED size_t read;
+  GT_UNUSED size_t read,
+            one = (size_t) 1;
 
-  READ_ONE(seq_dec->num_of_files, fp);
+  read = gt_xfread_one(&seq_dec->num_of_files, fp);
+  gt_assert(read == one);
 
   seq_dec->fileinfos = gt_calloc((size_t) seq_dec->num_of_files,
                                           sizeof (*seq_dec->fileinfos));
   for (i = 0; i < seq_dec->num_of_files; i++) {
-    READ_ONE(seq_dec->fileinfos[i].readnum, fp);
-    READ_ONE(seq_dec->fileinfos[i].readlength, fp);
+    read = gt_xfread_one(&seq_dec->fileinfos[i].readnum, fp);
+    gt_assert(read == one);
+    read = gt_xfread_one(&seq_dec->fileinfos[i].readlength, fp);
+    gt_assert(read == one);
   }
   seq_dec->num_of_reads = seq_dec->fileinfos[seq_dec->num_of_files - 1].readnum;
 }
@@ -724,7 +732,8 @@ static GtHcrSeqDecoder *hcr_seq_decoder_new(GtAlphabet *alpha, const char *name,
   GtBaseQualDistr *bqd;
   long end_enc_start_sampling = 0;
   FILE *fp;
-  GT_UNUSED size_t read;
+  GT_UNUSED size_t read,
+            one = (size_t) 1;
 
   seq_dec->alpha = alpha;
   seq_dec->alphabet_size = gt_alphabet_size(alpha);
@@ -742,7 +751,8 @@ static GtHcrSeqDecoder *hcr_seq_decoder_new(GtAlphabet *alpha, const char *name,
   bqd = hcr_base_qual_distr_new_from_file(fp, seq_dec->alpha);
   seq_dec->qual_offset = bqd->qual_offset;
 
-  READ_ONE(end_enc_start_sampling, fp);
+  read = gt_xfread_one(&end_enc_start_sampling, fp);
+  gt_assert(read == one);
 
   seq_dec->start_of_encoding = decoder_calc_start_of_encoded_data(fp);
 
@@ -1116,7 +1126,7 @@ GtHcrEncoder *gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
             break;
           if (len2 != len1) {
             gt_error_set(err, "reads have to be of equal length");
-            had_err = - 1;
+            had_err = -1;
             break;
           }
           if (hcr_base_qual_distr_add(bqd, qual, seq, len1) != 0)

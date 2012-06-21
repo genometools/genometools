@@ -43,7 +43,6 @@
 #include "extended/encdesc_rep.h"
 #include "extended/huffman.h"
 #include "extended/rbtree.h"
-#include "extended/read_write_one.h"
 #include "extended/sampling.h"
 #include "extended/string_iter.h"
 
@@ -1125,7 +1124,8 @@ static void encdesc_read_samplingtab(GtEncdesc *encdesc,
   bool is_not_at_pageborder;
   GT_UNUSED size_t read;
 
-  READ_ONE(encdesc->start_of_encoding, fp);
+  read = gt_xfread_one(&encdesc->start_of_encoding, fp);
+  gt_assert(read == (size_t) 1);
 
   is_not_at_pageborder = (ftell(fp) % encdesc->pagesize) != 0;
   if (is_not_at_pageborder)

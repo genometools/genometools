@@ -46,7 +46,6 @@
 #include "extended/golomb.h"
 #include "extended/huffman.h"
 #include "extended/rcr.h"
-#include "extended/read_write_one.h"
 #include "extended/sam_alignment.h"
 #include "extended/sam_map_query_iter.h"
 #include "extended/samfile_iterator.h"
@@ -1178,50 +1177,50 @@ static int rcr_write_header_to_file(GtRcrEncoder *rcr_enc)
                 m;
   FILE *fp = rcr_enc->output;
 
-  WRITE_ONE(rcr_enc->numofreads, fp);
-  WRITE_ONE(rcr_enc->cons_readlength, fp);
+  gt_xfwrite_one(&rcr_enc->numofreads, fp);
+  gt_xfwrite_one(&rcr_enc->cons_readlength, fp);
 
   if (!rcr_enc->cons_readlength) {
     numofleaves = gt_huffman_numofsymbols(rcr_enc->readlenghts_huff);
-    WRITE_ONE(numofleaves, fp);
-    WRITE_ONE(rcr_enc->max_read_length, fp);
+    gt_xfwrite_one(&numofleaves, fp);
+    gt_xfwrite_one(&rcr_enc->max_read_length, fp);
     if (rcr_write_distr_to_file(fp, rcr_enc->readlenghts_huff) != 0)
       return -1;
   }
   else {
-    WRITE_ONE(rcr_enc->readlength, fp);
+    gt_xfwrite_one(&rcr_enc->readlength, fp);
   }
 
-  WRITE_ONE(rcr_enc->store_all_qual, fp);
-  WRITE_ONE(rcr_enc->store_var_qual, fp);
+  gt_xfwrite_one(&rcr_enc->store_all_qual, fp);
+  gt_xfwrite_one(&rcr_enc->store_var_qual, fp);
 
   if (rcr_enc->store_all_qual || rcr_enc->store_var_qual) {
     numofleaves = gt_huffman_numofsymbols(rcr_enc->qual_huff);
 
-    WRITE_ONE(numofleaves, fp);
+    gt_xfwrite_one(&numofleaves, fp);
     if (rcr_write_distr_to_file(fp, rcr_enc->qual_huff) != 0)
       return -1;
   }
-  WRITE_ONE(rcr_enc->store_mapping_qual, fp);
+  gt_xfwrite_one(&rcr_enc->store_mapping_qual, fp);
 
   if (rcr_enc->store_mapping_qual) {
     numofleaves = gt_huffman_numofsymbols(rcr_enc->qual_mapping_huff);
-    WRITE_ONE(numofleaves, fp);
+    gt_xfwrite_one(&numofleaves, fp);
     if (rcr_write_distr_to_file(fp, rcr_enc->qual_mapping_huff) != 0)
       return -1;
   }
 
   m = gt_golomb_get_m(rcr_enc->readpos_golomb);
-  WRITE_ONE(m, fp);
+  gt_xfwrite_one(&m, fp);
 
   if (rcr_enc->varpos_golomb != NULL)
     m = gt_golomb_get_m(rcr_enc->varpos_golomb);
   else
     m = GT_UNDEF_ULONG;
 
-  WRITE_ONE(m, fp);
+  gt_xfwrite_one(&m, fp);
 
-  gt_xfwrite(rcr_enc->present_cigar_ops, sizeof (unsigned long long),
+  gt_xfwrite(rcr_enc->present_cigar_ops, sizeof (*rcr_enc->present_cigar_ops),
              (size_t) (ENDOFRECORD + 1), fp);
 
   gt_xfwrite(rcr_enc->ins_bases, sizeof (unsigned long long),
@@ -1415,27 +1414,35 @@ static void rcr_read_header(GtRcrDecoder *rcr_dec)
                 symbol,
                 max_read_length;
   unsigned long long freq;
-  GT_UNUSED size_t read;
+  GT_UNUSED size_t read,
+            one = (size_t) 1;
 
   GtDiscDistri *readlength_distr,
                *qual_distr,
                *qual_mapping_distr = NULL;
 
-  READ_ONE(rcr_dec->numofreads, rcr_dec->fp);
-  READ_ONE(rcr_dec->cons_readlength, rcr_dec->fp);
+  read = gt_xfread_one(&rcr_dec->numofreads, rcr_dec->fp);
+  gt_assert(read == one);
+  read = gt_xfread_one(&rcr_dec->cons_readlength, rcr_dec->fp);
+  gt_assert(read == one);
 
   if (rcr_dec->cons_readlength) {
-    READ_ONE(rcr_dec->readlength, rcr_dec->fp);
+    read = gt_xfread_one(&rcr_dec->readlength, rcr_dec->fp);
+    gt_assert(read == one);
   }
   else {
     readlength_distr = gt_disc_distri_new();
-    READ_ONE(numofleaves, rcr_dec->fp);
+    read = gt_xfread_one(&numofleaves, rcr_dec->fp);
+    gt_assert(read == one);
 
-    READ_ONE(max_read_length, rcr_dec->fp);
+    read = gt_xfread_one(&max_read_length, rcr_dec->fp);
+    gt_assert(read == one);
 
     for (i = 0; i < numofleaves; i++) {
-      READ_ONE(symbol, rcr_dec->fp);
-      READ_ONE(freq, rcr_dec->fp);
+      read = gt_xfread_one(&symbol, rcr_dec->fp);
+      gt_assert(read == one);
+      read = gt_xfread_one(&freq, rcr_dec->fp);
+      gt_assert(read == one);
       gt_disc_distri_add_multi(readlength_distr, symbol, freq);
     }
     rcr_dec->readlenghts_huff = gt_huffman_new(readlength_distr,
@@ -1444,18 +1451,23 @@ static void rcr_read_header(GtRcrDecoder *rcr_dec)
     gt_disc_distri_delete(readlength_distr);
   }
 
-  READ_ONE(rcr_dec->store_all_qual, rcr_dec->fp);
+  read = gt_xfread_one(&rcr_dec->store_all_qual, rcr_dec->fp);
+  gt_assert(read == one);
 
-  READ_ONE(rcr_dec->store_var_qual, rcr_dec->fp);
+  read = gt_xfread_one(&rcr_dec->store_var_qual, rcr_dec->fp);
+  gt_assert(read == one);
 
   if (rcr_dec->store_all_qual || rcr_dec->store_var_qual) {
     qual_distr = gt_disc_distri_new();
 
-    READ_ONE(numofleaves, rcr_dec->fp);
+    read = gt_xfread_one(&numofleaves, rcr_dec->fp);
+    gt_assert(read == one);
 
     for (i = 0; i < numofleaves; i++) {
-      READ_ONE(symbol, rcr_dec->fp);
-      READ_ONE(freq, rcr_dec->fp);
+      read = gt_xfread_one(&symbol, rcr_dec->fp);
+      gt_assert(read == one);
+      read = gt_xfread_one(&freq, rcr_dec->fp);
+      gt_assert(read == one);
       gt_disc_distri_add_multi(qual_distr, symbol, freq);
     }
     rcr_dec->qual_huff = gt_huffman_new(qual_distr, rcr_disc_distri_func,
@@ -1463,25 +1475,31 @@ static void rcr_read_header(GtRcrDecoder *rcr_dec)
     gt_disc_distri_delete(qual_distr);
   }
 
-  READ_ONE(rcr_dec->store_mapping_qual, rcr_dec->fp);
+  read = gt_xfread_one(&rcr_dec->store_mapping_qual, rcr_dec->fp);
+  gt_assert(read == one);
 
   if (rcr_dec->store_mapping_qual) {
     qual_mapping_distr= gt_disc_distri_new();
-    READ_ONE(numofleaves, rcr_dec->fp);
+    read = gt_xfread_one(&numofleaves, rcr_dec->fp);
+    gt_assert(read == one);
     for (i = 0; i < numofleaves; i++) {
-      READ_ONE(symbol, rcr_dec->fp);
-      READ_ONE(freq, rcr_dec->fp);
+      read = gt_xfread_one(&symbol, rcr_dec->fp);
+      gt_assert(read == one);
+      read = gt_xfread_one(&freq, rcr_dec->fp);
+      gt_assert(read == one);
       gt_disc_distri_add_multi(qual_mapping_distr, symbol, freq);
     }
     rcr_dec->qual_mapping_huff = gt_huffman_new(qual_mapping_distr,
                                              rcr_disc_distri_func, 256UL);
     gt_disc_distri_delete(qual_mapping_distr);
   }
-  READ_ONE(m, rcr_dec->fp);
+  read = gt_xfread_one(&m, rcr_dec->fp);
+  gt_assert(read == one);
 
   rcr_dec->readpos_golomb = gt_golomb_new(m);
 
-  READ_ONE(m, rcr_dec->fp);
+  read = gt_xfread_one(&m, rcr_dec->fp);
+  gt_assert(read == one);
   if (m != GT_UNDEF_ULONG) {
     rcr_dec->varpos_golomb = gt_golomb_new(m);
   }
