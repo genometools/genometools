@@ -77,6 +77,7 @@ static void gt_ltr_refseq_match_stream_free_hash_elem(void *elem)
 
 static int gt_ltr_refseq_match_stream_extract_sequences(
                                                     GtLTRRefseqMatchStream *rms,
+                                                    unsigned long *n_to_check,
                                                     GtError *err)
 {
   GtStr *seqid;
@@ -136,6 +137,7 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
       startpos = gt_encseq_seqstartpos(encseq, seqnum);
       gt_encseq_extract_decoded(encseq, buffer, startpos + range.start - 1,
                                 startpos + range.end - 1);
+      (*n_to_check)++;
       gt_fasta_show_entry(header, buffer, gt_range_length(&range), 50UL, outfp);
       gt_free(buffer);
       gt_feature_node_iterator_delete(fni);
@@ -305,6 +307,7 @@ static int gt_ltr_refseq_match_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   GtLTRRefseqMatchStream *rms;
   GtGenomeNode *ref_gn;
   int had_err = 0;
+  unsigned long n_to_check = 0;
 
   gt_error_check(err);
   rms = gt_ltr_refseq_match_stream_cast(ns);
@@ -315,14 +318,17 @@ static int gt_ltr_refseq_match_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
       gt_array_add(rms->nodes, ref_gn);
     }
     if (!had_err)
-      had_err = gt_ltr_refseq_match_stream_extract_sequences(rms, err);
-    if (!had_err)
-      had_err = gt_ltr_refseq_match_stream_refseq_match(rms, err);
-    if (!had_err) {
-      *gn = *(GtGenomeNode**) gt_array_get(rms->nodes, rms->next_index);
-      rms->next_index++;
-      rms->first_next = false;
-      return 0;
+      had_err = gt_ltr_refseq_match_stream_extract_sequences(rms, &n_to_check,
+                                                             err);
+    if (n_to_check > 0) {
+      if (!had_err)
+        had_err = gt_ltr_refseq_match_stream_refseq_match(rms, err);
+      if (!had_err) {
+        *gn = *(GtGenomeNode**) gt_array_get(rms->nodes, rms->next_index);
+        rms->next_index++;
+        rms->first_next = false;
+        return 0;
+      }
     }
   } else {
     if (rms->next_index >= gt_array_size(rms->nodes))
