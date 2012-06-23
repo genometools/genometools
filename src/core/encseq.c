@@ -1482,7 +1482,7 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
   {
     unsigned long idx;
     Definedunsignedlong equallength;
-    GtAlphabet *a = gt_alphabet_new_dna();
+    GtAlphabet *alphabet = gt_alphabet_new_dna();
 
     if (lengthofsinglesequence > 0)
     {
@@ -1506,11 +1506,11 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
                                       0, /* exceptionranges */
                                       minseqlen,
                                       maxseqlen,
-                                      false,
+                                      false, /* oistab */
                                       lengthofsinglesequence > 0
                                         ? &equallength
                                         : NULL,
-                                      a,
+                                      alphabet,
                                       NULL);
     encseq->twobitencoding = twobitencoding;
     encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
@@ -1555,7 +1555,8 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
     encseq->specialcharinfo.realexceptionranges = 0UL;
     encseq->minseqlen = minseqlen;
     encseq->maxseqlen = maxseqlen;
-    alphabet_to_key_values(a, &encseq->alphatype, &encseq->lengthofalphadef,
+    alphabet_to_key_values(alphabet, &encseq->alphatype,
+                           &encseq->lengthofalphadef,
                            &encseq->alphadef);
     encseq->lengthofdbfilenames
       = determinelengthofdbfilenames(encseq->filenametab);
@@ -1762,8 +1763,7 @@ typedef struct
 static Gtssptaboutinfo *ssptaboutinfo_new(GtEncseqAccessType sat,
                                           unsigned long totallength,
                                           unsigned long numofsequences,
-                                          GtSWtable *ssptab,
-                                          GT_UNUSED GtError *err)
+                                          GtSWtable *ssptab)
 {
   Gtssptaboutinfo *ssptaboutinfo;
 
@@ -4525,7 +4525,7 @@ typedef struct
 
 typedef struct
 {
-  Fillencseqfunc fillpos;
+  Fillencseqfunc fillposition;
   SeqDelivercharfunc seqdelivercharnospecial,
                      seqdelivercharspecial;
   Containsspecialfunc delivercontainsspecial;
@@ -4539,7 +4539,7 @@ typedef struct
 static GtEncseqfunctions encodedseqfunctab[] =
   {
     { /*  GT_ACCESS_TYPE_DIRECTACCESS */
-      NFCT(fillpos,fillViadirectaccess),
+      NFCT(fillposition,fillViadirectaccess),
       NFCT(seqdelivercharnospecial,seqdelivercharViadirectaccess),
       NFCT(seqdelivercharspecial,seqdelivercharViadirectaccess),
       NFCT(delivercontainsspecial,containsspecialViadirectaccess),
@@ -4552,7 +4552,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_BYTECOMPRESS */
-      NFCT(fillpos,fillViabytecompress),
+      NFCT(fillposition,fillViabytecompress),
       NFCT(seqdelivercharnospecial,seqdelivercharViabytecompress),
       NFCT(seqdelivercharspecial,seqdelivercharViabytecompress),
       NFCT(delivercontainsspecial,containsspecialViabytecompress),
@@ -4565,7 +4565,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_EQUALLENGTH */
-      NFCT(fillpos,fillViaequallength),
+      NFCT(fillposition,fillViaequallength),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharViaequallength),
       NFCT(delivercontainsspecial,containsspecialViaequallength),
@@ -4579,7 +4579,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_BITACCESS */
-      NFCT(fillpos,fillViabitaccess),
+      NFCT(fillposition,fillViabitaccess),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharViabitaccessSpecial),
       NFCT(delivercontainsspecial,containsspecialViabitaccess),
@@ -4592,7 +4592,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_UCHARTABLES */
-      NFCT(fillpos,fillSWtable_uchar),
+      NFCT(fillposition,fillSWtable_uchar),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharSpecial_uchar),
       NFCT(delivercontainsspecial,containsspecialViatables),
@@ -4605,7 +4605,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_USHORTTABLES */
-      NFCT(fillpos,fillSWtable_uint16),
+      NFCT(fillposition,fillSWtable_uint16),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharSpecial_uint16),
       NFCT(delivercontainsspecial,containsspecialViatables),
@@ -4618,7 +4618,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_UINT32TABLES */
-      NFCT(fillpos,fillSWtable_uint32),
+      NFCT(fillposition,fillSWtable_uint32),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharSpecial_uint32),
       NFCT(delivercontainsspecial,containsspecialViatables),
@@ -4790,8 +4790,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
         (outssptab || encseq->accesstype_via_utables))
     {
       ssptaboutinfo = ssptaboutinfo_new(sat,totallength,
-                                        numofsequences,&encseq->ssptab,
-                                        err);
+                                        numofsequences,&encseq->ssptab);
       if (ssptaboutinfo == NULL)
       {
         haserr = true;
@@ -4822,7 +4821,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
   if (!haserr)
   {
     gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alphabet));
-    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,ssptaboutinfo,
+    if (encodedseqfunctab[(int) sat].fillposition.function(encseq,ssptaboutinfo,
                                                       fb,err) != 0)
     {
       haserr = true;
@@ -9461,7 +9460,7 @@ void gt_encseq_builder_reset(GtEncseqBuilder *eb)
   eb->plainseq = NULL;
 }
 
-GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
+GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
 {
   GtEncseq *encseq = NULL;
   const GtEncseqAccessType sat = GT_ACCESS_TYPE_DIRECTACCESS;
@@ -9508,8 +9507,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
     encseq->satsep = determineoptimalsssptablerep(GT_ACCESS_TYPE_UINT32TABLES,
                                                   eb->seqlen, eb->nof_seqs-1);
     ssptaboutinfo = ssptaboutinfo_new(encseq->satsep, eb->seqlen,
-                                      eb->nof_seqs, &encseq->ssptab,
-                                      err);
+                                      eb->nof_seqs, &encseq->ssptab);
     for (i = 0; i < eb->seqlen; i++) {
       if (eb->plainseq[i] == (GtUchar) SEPARATOR)
       {
