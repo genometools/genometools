@@ -4817,9 +4817,6 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
                                        specialcharinfo.exceptioncharacters,
                            true);
     }
-  }
-  if (!haserr)
-  {
     gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alphabet));
     if (encodedseqfunctab[(int) sat].fillposition.function(encseq,ssptaboutinfo,
                                                       fb,err) != 0)
