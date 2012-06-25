@@ -1910,7 +1910,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
   bool bit,
        strand;
   int had_err = 0;
-  uint32_t mapping_qual;
+  uint32_t mapping_qual = 0;
   unsigned long
                 cur_read = 0,
                 i,
@@ -2018,42 +2018,41 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
     }
 
     /* read qual string */
-      if (!had_err && rcr_dec->store_all_qual) {
-        had_err = rcr_huff_read_string(info->qual_hbwd, bitstream, readlength,
-                                       info->qual_string, err);
-      }
+    if (!had_err && rcr_dec->store_all_qual)
+      had_err = rcr_huff_read_string(info->qual_hbwd, bitstream, readlength,
+                                     info->qual_string, err);
 
-      if (!had_err) {
-        /* read strand */
-        if (RCR_NEXT_BIT(bit)) {
-          strand = bit;
-        }
+    if (!had_err) {
+      /* read strand */
+      if (RCR_NEXT_BIT(bit)) {
+        strand = bit;
       }
-      if (!had_err) {
-        /* exact match? */
-        unsigned long seq_i = seqstart + readpos;
-        if (RCR_NEXT_BIT(bit)) {
-          if (bit) {
-            rcr_decode_exact(rcr_dec, info, readlength, seqstart, readpos);
-          }
-          else {
-            had_err = rcr_decode_inexact(rcr_dec, bitstream, info, seq_i,
-                                         readlength, err);
-          }
-          /* write read to file */
-          if (readlength != gt_str_length(info->base_string)) {
-            gt_log_log("readlen: %lu, stringlen: %lu, read: %lu",
-                       readlength, gt_str_length(info->base_string), cur_read);
-          }
-          gt_assert(readlength == gt_str_length(info->base_string));
-          gt_assert(readlength == gt_str_length(info->qual_string));
-          fprintf(rcr_dec->fp, "%s", gt_str_get(qname));
-          fprintf(rcr_dec->fp, "\t%c", strand?'-':'+');
-          fprintf(rcr_dec->fp, "\t%lu", readpos + 1);
-          if (rcr_dec->store_mapping_qual)
+    }
+    if (!had_err) {
+      /* exact match? */
+      unsigned long seq_i = seqstart + readpos;
+      if (RCR_NEXT_BIT(bit)) {
+        if (bit)
+          rcr_decode_exact(rcr_dec, info, readlength, seqstart, readpos);
+        else
+          had_err = rcr_decode_inexact(rcr_dec, bitstream, info, seq_i,
+                                       readlength, err);
+
+        /* write read to file */
+        if (readlength != gt_str_length(info->base_string)) {
+          gt_log_log("readlen: %lu, stringlen: %lu, read: %lu",
+                     readlength, gt_str_length(info->base_string), cur_read);
+        }
+        gt_assert(readlength == gt_str_length(info->base_string));
+        gt_assert(readlength == gt_str_length(info->qual_string));
+        fprintf(rcr_dec->fp, "%s", gt_str_get(qname));
+        fprintf(rcr_dec->fp, "\t%c", strand?'-':'+');
+        fprintf(rcr_dec->fp, "\t%lu", readpos + 1);
+        if (rcr_dec->store_mapping_qual)
           fprintf(rcr_dec->fp, "\t%u", (unsigned) mapping_qual);
         else
           fprintf(rcr_dec->fp, "\t%u", DEFAULTMQUAL);
+
         rcr_convert_cigar_string(info->cigar_string);
         fprintf(rcr_dec->fp, "\t%s", gt_str_get(info->cigar_string));
         fprintf(rcr_dec->fp,"\t%s", gt_str_get(info->base_string));
