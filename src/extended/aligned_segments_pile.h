@@ -54,6 +54,9 @@ const GtDlist *gt_aligned_segments_pile_get(const GtAlignedSegmentsPile *asp);
 /* number of segments currently on the pile */
 unsigned long gt_aligned_segments_pile_size(GtAlignedSegmentsPile *asp);
 
+/* enable edit tracking feature of the aligned segments */
+void gt_aligned_segments_pile_enable_edit_tracking(GtAlignedSegmentsPile *asp);
+
 /* processing function type used by the hook functions */
 typedef void (*GtAlignedSegmentsPileProcessFunc)(GtAlignedSegment *as,
     void *data);

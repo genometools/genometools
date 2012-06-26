@@ -246,51 +246,96 @@ void gt_hpol_processor_enable_segments_output(GtHpolProcessor *hpp,
   hpp->outfp_segments = outfile;
 }
 
-void gt_hpol_processor_enable_statistics_output(GtHpolProcessor *hpp,
-    GtFile *outfile)
+static void gt_hpol_processor_output_stats_header(GtFile *outfp)
 {
-  gt_assert(hpp != NULL);
-  hpp->output_stats = true;
-  hpp->outfp_stats = outfile;
+  gt_file_xprintf(outfp, "# correction statistics\n");
+  gt_file_xprintf(outfp, "# edit =     edit operation (I or D)\n");
+  gt_file_xprintf(outfp, "# r_hpos =   start pos of hpol on reference\n");
+  gt_file_xprintf(outfp, "# r_hlen =   length of hpol on reference\n");
+  gt_file_xprintf(outfp, "# s_hpos =   start pos of hpol on read\n");
+  gt_file_xprintf(outfp, "# s_hend =   end pos of hpol on read\n");
+  gt_file_xprintf(outfp, "# s_hlen =   length of hpol in read\n");
+  gt_file_xprintf(outfp, "# s_char =   hpol character in read\n");
+  gt_file_xprintf(outfp, "# s_or =     orientation of read "
+      "(+ or -; + = same as reference)\n");
+  gt_file_xprintf(outfp, "# s_q_ave =  average quality of read in the hpol "
+      "positions\n");
+  gt_file_xprintf(outfp, "# s_qual =   quality string in read for the hpol "
+      "positions\n");
+  gt_file_xprintf(outfp, "# s_id =     read identifier\n");
+  gt_file_xprintf(outfp, "# coordinates are 1-based\n");
+  gt_file_xprintf(outfp, "#\n");
+  gt_file_xprintf(outfp, "# edit\tr_hpos\tr_hlen\ts_hpos\ts_hend\ts_hlen"
+      "\ts_char\ts_or\ts_q_ave\ts_qual\ts_id\n");
 }
 
-static void gt_hpol_processor_output_stats(unsigned long r_pos,
-    unsigned long r_hlen, char *s, char *q, unsigned long s_offset,
-    unsigned long s_hlen, char c, bool reverse, unsigned long s_q_sum,
-    GtFile *outfp)
+#define GT_HPOL_PROCESSOR_PHREDOFFSET 33UL
+
+static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
+    unsigned long r_pos, unsigned long r_hlen, unsigned long s_hlen,
+    char c, unsigned long s_q_sum, GtFile *outfp)
 {
-  unsigned long i, pos, s_pos = 0;
+  unsigned long i, pos, s_pos = 0, s_offset;
   double s_q_ave;
-  char *s_qual;
-  if (reverse)
+  char *s_qual, *q;
+  const char *r_desc;
+  r_desc = gt_aligned_segment_description(as);
+  q = gt_aligned_segment_qual(as);
+  if (gt_aligned_segment_is_reverse(as))
   {
     GtError *err = gt_error_new();
     (void)gt_complement(&c, c, err);
     gt_error_delete(err);
   }
   gt_assert(s_hlen > 0);
-  s_q_ave = (double)s_q_sum / (double)s_hlen;
+  gt_assert(s_q_sum >= GT_HPOL_PROCESSOR_PHREDOFFSET * s_hlen);
+  s_q_ave = (double)(s_q_sum - GT_HPOL_PROCESSOR_PHREDOFFSET * s_hlen)
+    / (double)s_hlen;
+  s_pos = gt_aligned_segment_orig_seqpos_for_refpos(as, r_pos);
+  s_offset = gt_aligned_segment_offset_for_refpos(as, r_pos);
   s_qual = gt_malloc(sizeof (*s_qual) * (s_hlen + 1UL));
-  for (i = 0, pos = 0; i < s_hlen; i++)
+  if (!gt_aligned_segment_is_reverse(as))
   {
-    if (q[s_offset + i] != GT_UNDEF_CHAR)
+    for (i = 0, pos = 0; pos < s_hlen; i++)
     {
-      s_qual[pos] = q[s_offset + i];
-      pos++;
+      if (q[s_offset + i] != GT_UNDEF_CHAR)
+      {
+        s_qual[pos] = q[s_offset + i];
+        pos++;
+      }
     }
   }
-  s_qual[pos + 1UL] = '\0';
-  for (i = 0; i < s_offset; i++)
+  else
   {
-    if (s[i] != '-')
-      s_pos++;
+    for (i = 0, pos = s_hlen; pos > 0; i++)
+    {
+      if (q[s_offset + i] != GT_UNDEF_CHAR)
+      {
+        s_qual[pos - 1UL] = q[s_offset + i];
+        pos--;
+      }
+    }
   }
-  gt_file_xprintf(outfp, "%lu\t%lu\t%lu\t%lu\t%c\t%.2f\t%s\n",
-      r_pos, r_hlen, s_pos, s_hlen, c, s_q_ave, s_qual);
+  s_qual[s_hlen] = '\0';
+  gt_assert(r_hlen != s_hlen);
+  gt_file_xprintf(outfp, "%c\t%lu\t%lu\t%lu\t%lu\t%lu\t%c\t%c\t%.2f\t%s\t%s\n",
+      r_hlen > s_hlen ? 'I' : 'D', r_pos + 1UL, r_hlen, s_pos + 1UL,
+      s_pos + s_hlen, s_hlen, c, gt_aligned_segment_is_reverse(as) ? '-' : '+',
+      s_q_ave, s_qual, r_desc);
   gt_free(s_qual);
 }
 
-GT_UNUSED
+void gt_hpol_processor_enable_statistics_output(GtHpolProcessor *hpp,
+    GtFile *outfile)
+{
+  gt_assert(hpp != NULL);
+  hpp->output_stats = true;
+  hpp->outfp_stats = outfile;
+  gt_hpol_processor_output_stats_header(hpp->outfp_stats);
+  gt_aligned_segments_pile_enable_edit_tracking(hpp->asp);
+}
+
+#ifdef GG_DEBUG
 static unsigned long gt_hpol_processor_determine_hlen_backwards(char *s,
     char *q, unsigned long pos, char c, unsigned long *q_sum,
     unsigned long *gaps)
@@ -316,6 +361,7 @@ static unsigned long gt_hpol_processor_determine_hlen_backwards(char *s,
   }
   return s_hlen;
 }
+#endif
 
 static unsigned long gt_hpol_processor_determine_hlen_forwards(char *s, char *q,
     unsigned long pos, unsigned long maxpos, char c, unsigned long *q_sum,
@@ -377,7 +423,7 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
     char c, unsigned long r_hstart, unsigned long r_hlen,
     unsigned long max_hlen_diff, bool output_stats, GtFile *outfp_stats)
 {
-  unsigned long left, right, s_hlen, q_sum = 0, s_free = 0;
+  unsigned long left, right, s_hlen = 0, q_sum = 0, s_free = 0;
   char *s, *q;
   left = gt_aligned_segment_offset_for_refpos(as, r_hstart);
   right = gt_aligned_segment_offset_for_refpos(as, r_hstart + r_hlen);
@@ -390,7 +436,10 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   if (left > 0)
     s_hlen = gt_hpol_processor_determine_hlen_backwards(s, q, left - 1UL,
           c, &q_sum, &s_free);
-  gt_assert(s_hlen == 0);
+  if (s_hlen > 0)
+    printf("backwards_hlen = %lu\n", s_hlen);
+  s_free = 0;
+  q_sum = 0;
 #endif
   s_hlen = gt_hpol_processor_determine_hlen_forwards(s, q, left, right, c,
       &q_sum, &s_free);
@@ -411,6 +460,10 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
     printf("[s_hlen=%lu, r_hlen=%lu]\n", s_hlen, r_hlen);
     printf("\n");
   }
+  else
+  {
+    printf("s_hlen == r_hlen = %lu\n\n", s_hlen);
+  }
 #endif
   /* do the editing if necessary and possible */
   if (s_hlen < r_hlen)
@@ -422,8 +475,8 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
       {
         if (output_stats)
         {
-          gt_hpol_processor_output_stats(r_hstart, r_hlen, s, q, left, s_hlen,
-              c, gt_aligned_segment_is_reverse(as), q_sum, outfp_stats);
+          gt_hpol_processor_output_stats(as, r_hstart, r_hlen, s_hlen,
+              c, q_sum, outfp_stats);
         }
         gt_hpol_processor_enlarge_hpol(s, q, left, right,
             MIN(s_free, hlen_diff), c, (char)(q_sum / s_hlen));
@@ -439,8 +492,8 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
     {
       if (output_stats)
       {
-        gt_hpol_processor_output_stats(r_hstart, r_hlen, s, q, left, s_hlen,
-            c, gt_aligned_segment_is_reverse(as), q_sum, outfp_stats);
+        gt_hpol_processor_output_stats(as, r_hstart, r_hlen, s_hlen,
+            c, q_sum, outfp_stats);
       }
       gt_hpol_processor_shrink_hpol(s, q, left, right, hlen_diff, c);
     }
@@ -582,7 +635,7 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
         (double)gt_disc_distri_get(hpp->hdist_e, i) * 100 /
         (double)gt_disc_distri_get(hpp->hdist, i));
   }
-  gt_logger_log(logger, "total: %lu (%lu edited = %.2f%%)",
+  gt_logger_log(logger, "total \t%-11lu\t%-6lu\t(%.2f%%)",
       hpp->nof_h, hpp->nof_h_e, (double)hpp->nof_h_e * 100 /
       (double)hpp->nof_h);
   if (hpp->cds_oracle != NULL)
@@ -632,12 +685,8 @@ int gt_hpol_processor_run(GtHpolProcessor *hpp, GtLogger *logger, GtError *err)
   {
     if (hpp->cds_oracle != NULL)
     {
-      GT_UNUSED bool was_not_coding = !coding;
       had_err = gt_seqpos_classifier_position_is_inside_feature(
           hpp->cds_oracle, i, &coding, &end_of_annotation, err);
-      /* break at boundary:
-      if (was_not_coding && coding)
-        hlen = 0; */
     }
     if (!had_err)
     {

@@ -33,6 +33,8 @@ struct GtAlignedSegment
   bool r_reverse;
   bool has_indels;
   bool s_edited, r_edited;
+  char *s_orig;
+  unsigned long orig_seqlen;
 };
 
 static unsigned long gt_aligned_segment_cigar2alen(GtSamAlignment *sa)
@@ -221,7 +223,23 @@ GtAlignedSegment *gt_aligned_segment_new_from_sa(GtSamAlignment *sa)
   (void)memcpy(as->d, gt_sam_alignment_identifier(sa), sizeof (*as->d) * dlen);
   as->s_edited = false;
   as->r_edited = false;
+  as->s_orig = NULL;
+  as->orig_seqlen = gt_sam_alignment_read_length(sa);
   return as;
+}
+
+void gt_aligned_segment_enable_edit_tracking(GtAlignedSegment *as)
+{
+  gt_assert(as != NULL);
+  gt_assert(as->s_orig == NULL);
+  as->s_orig = gt_malloc(sizeof (*as->s_orig) * (as->alen + 1UL));
+  memcpy(as->s_orig, as->s, (size_t)(as->alen + 1UL));
+}
+
+const char *gt_aligned_segment_orig_seq(GtAlignedSegment *as)
+{
+  gt_assert(as != NULL);
+  return as->s_orig;
 }
 
 char *gt_aligned_segment_seq(GtAlignedSegment *as)
@@ -284,6 +302,36 @@ unsigned long gt_aligned_segment_offset_for_refpos(const GtAlignedSegment *as,
   }
   gt_assert(pos <= as->alen);
   return pos;
+}
+
+unsigned long gt_aligned_segment_orig_seqlen(const GtAlignedSegment *as)
+{
+  gt_assert(as != NULL);
+  return as->orig_seqlen;
+}
+
+unsigned long gt_aligned_segment_orig_seqpos_for_refpos(
+    const GtAlignedSegment *as, unsigned long refpos)
+{
+  unsigned long r_offset, pos, ungapped_pos;
+  gt_assert(as != NULL);
+  gt_assert(as->s_orig != NULL);
+  if (refpos < as->r_left || refpos > as->r_right)
+    return GT_UNDEF_ULONG;
+  r_offset = refpos - as->r_left;
+  pos = 0;
+  ungapped_pos = 0;
+  while (ungapped_pos < r_offset)
+  {
+    if (as->s_orig[pos] != '-')
+      ungapped_pos++;
+    pos++;
+  }
+  gt_assert(pos <= as->alen);
+  if (as->r_reverse)
+    return as->orig_seqlen - 1UL - pos;
+  else
+    return pos;
 }
 
 void gt_aligned_segment_ungap_refregion(GtAlignedSegment *as)
@@ -378,6 +426,7 @@ void gt_aligned_segment_delete(GtAlignedSegment *as)
     gt_free(as->q);
     gt_free(as->r);
     gt_free(as->d);
+    gt_free(as->s_orig);
     gt_free(as);
   }
 }

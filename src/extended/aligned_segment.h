@@ -31,7 +31,7 @@ typedef struct GtAlignedSegment GtAlignedSegment;
 /* create a new GtAlignedSegment instance fetching sequence and alignment
  * information from a SAM alignment. The <refregion> will contain
  * '?' at all positions which cannot be inferred from the data available
- * in the SAM alignment.  * If an unmapped SAM alignment is used,
+ * in the SAM alignment. If an unmapped SAM alignment is used,
  * the refregion will be NULL. */
 GtAlignedSegment *gt_aligned_segment_new_from_sa(GtSamAlignment *sa);
 
@@ -43,6 +43,26 @@ char *gt_aligned_segment_qual(GtAlignedSegment *as);
 
 /* sequence of <refregion> or NULL if segment is unmapped */
 char *gt_aligned_segment_refregion(GtAlignedSegment *as);
+
+/* make a copy of the original status of the segment sequence,
+ * so that an edit script can be computed by comparing with the
+ * edited sequence; this method may be called only once */
+void gt_aligned_segment_enable_edit_tracking(GtAlignedSegment *as);
+
+/* the original (aligned) status of the segment sequence;
+ * if <gt_aligned_enable_edit_tracking> was not called, it returns NULL */
+const char *gt_aligned_segment_orig_seq(GtAlignedSegment *as);
+
+/* length of the unedited segment sequence */
+unsigned long gt_aligned_segment_orig_seqlen(const GtAlignedSegment *as);
+
+/* coordinate on the unedited ungapped segment sequence corresponding to
+ * <refpos> on the reference sequence; returns the correct original segment
+ * coordinates also in the case when the segment is reverse;
+ * returns GT_UNDEF_ULONG if the coordinates are outside the region or
+ * the segment is unmapped */
+unsigned long gt_aligned_segment_orig_seqpos_for_refpos(
+    const GtAlignedSegment *as, unsigned long refpos);
 
 /* coordinates of <refregion> on the reference sequence
  * or GT_UNDEF_ULONG if unmapped */
