@@ -105,6 +105,7 @@
 #include "extended/merge_stream_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/node_visitor_api.h"
+#include "extended/reverse_api.h"
 #include "extended/rdb_api.h"
 #include "extended/rdb_sqlite_api.h"
 #ifdef HAVE_MYSQL

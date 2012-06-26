@@ -21,7 +21,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/minmax.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 #include "ltr/ltrelement.h"
 
 unsigned long gt_ltrelement_length(GtLTRElement *e)

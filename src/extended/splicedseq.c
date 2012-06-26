@@ -20,7 +20,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/str.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 #include "extended/splicedseq.h"
 
 struct Splicedseq {

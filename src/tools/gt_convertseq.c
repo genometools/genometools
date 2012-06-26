@@ -26,7 +26,7 @@
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/progressbar.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 #include "tools/gt_convertseq.h"
 
 typedef struct

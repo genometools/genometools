@@ -35,7 +35,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/globalchaining.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 #include "ltr/pdom.h"
 
 /* HMMER3 related includes */

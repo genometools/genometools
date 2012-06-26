@@ -20,12 +20,12 @@
 #include "core/log_api.h"
 #include "core/ma.h"
 #include "core/minmax.h"
-#include "extended/reverse.h"
 #include "core/undef_api.h"
-#include "extended/feature_type.h"
-#include "extended/seqpos_classifier.h"
 #include "extended/aligned_segments_pile.h"
+#include "extended/feature_type.h"
 #include "extended/hpol_processor.h"
+#include "extended/reverse_api.h"
+#include "extended/seqpos_classifier.h"
 
 struct GtHpolProcessor
 {

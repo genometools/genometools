@@ -26,7 +26,7 @@
 #include "extended/node_stream_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 #include "extended/orf_finder_stream.h"
 #include "extended/orf_finder_visitor.h"
 

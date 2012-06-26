@@ -25,7 +25,7 @@
 #include "core/translator.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 #include "tools/gt_seqtranslate.h"
 
 typedef struct {

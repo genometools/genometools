@@ -22,7 +22,7 @@
 #include "core/minmax.h"
 #include "core/xansi_api.h"
 #include "core/array.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 #include "ltr/ppt.h"
 
 /* This enumeration defines the states in the PPT detection HMM. */

@@ -21,7 +21,7 @@
 #include "extended/gff3_defines.h"
 #include "extended/gff3_parser.h"
 #include "extended/region_mapping_api.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 
 static int extract_join_feature(GtGenomeNode *gn, const char *type,
                                 GtRegionMapping *region_mapping,

@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/complement.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 
 int gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError *err)
 {

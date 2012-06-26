@@ -25,7 +25,7 @@
 #include "core/safearith.h"
 #include "extended/md5set.h"
 #include "extended/md5set_primes_table.h"
-#include "extended/reverse.h"
+#include "extended/reverse_api.h"
 
 typedef struct {
   uint64_t l, h;

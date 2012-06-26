@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef REVERSE_H
-#define REVERSE_H
+#ifndef REVERSE_API_H
+#define REVERSE_API_H
 
 #include "core/error.h"
 
