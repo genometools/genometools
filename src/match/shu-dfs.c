@@ -38,7 +38,7 @@ static inline void add_filenum_count(unsigned long lower,
                                      ShuNode *parent,
                                      BwtSeqpositionextractor *pos_extractor,
                                      unsigned long total_length,
-                                     const GtShuUnitFileInfo_tag *unit_info,
+                                     const GtShuUnitFileInfo *unit_info,
                                      const GtEncseq *encseq)
 {
   long unsigned row;
@@ -158,7 +158,7 @@ static int visit_shu_children(const FMindex *index,
                               unsigned long *rangeOccs,
                               unsigned long **special_pos,
                               GT_UNUSED unsigned long numofchars,
-                              const GtShuUnitFileInfo_tag *unit_info,
+                              const GtShuUnitFileInfo *unit_info,
                               unsigned long total_length,
                               unsigned long max_idx,
                               bool calculate,
@@ -402,7 +402,7 @@ static int initialise_node(void *node)
 
 int gt_pck_calculate_shulen(const FMindex *index,
                             const GtEncseq *encseq,
-                            const GtShuUnitFileInfo_tag *unit_info,
+                            const GtShuUnitFileInfo *unit_info,
                             uint64_t **shulen,
                             unsigned long numofchars,
                             unsigned long total_length,

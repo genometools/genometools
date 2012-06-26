@@ -29,7 +29,7 @@ typedef struct {
   const GtStrArray *file_names;
   /*array holding the mapping of file to genome*/
   unsigned long *map_files;
-} GtShuUnitFileInfo_tag;
+} GtShuUnitFileInfo;
 
 /*
   reads the Unitfile and collects the names of the Genomes, and mapping of
@@ -39,17 +39,17 @@ typedef struct {
   sets err and returns 1 on error
 */
 int gt_read_genomediff_unitfile(const GtStr *unitfile,
-                                GtShuUnitFileInfo_tag *unit_info,
+                                GtShuUnitFileInfo *unit_info,
                                 GT_UNUSED GtLogger *logger,
                                 GtError *err);
 
-void gt_shu_unit_info_files_as_units(GtShuUnitFileInfo_tag *unit_info);
+void gt_shu_unit_info_files_as_units(GtShuUnitFileInfo *unit_info);
 
-GtShuUnitFileInfo_tag *gt_shu_unit_info_new(const GtEncseq *encseq);
+GtShuUnitFileInfo *gt_shu_unit_info_new(const GtEncseq *encseq);
 
 /*
   frees memory of unit_info struct
 */
-void gt_shu_unit_info_delete(GtShuUnitFileInfo_tag *unit_info);
+void gt_shu_unit_info_delete(GtShuUnitFileInfo *unit_info);
 
 #endif

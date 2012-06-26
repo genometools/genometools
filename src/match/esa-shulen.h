@@ -39,7 +39,7 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
 int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
                               const GtEncseq *encseq,
                               uint64_t **shulen,
-                              const GtShuUnitFileInfo_tag *unit_info,
+                              const GtShuUnitFileInfo *unit_info,
                               GtError *err);
 
 GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq);

@@ -39,7 +39,7 @@
 #include "match/shu-genomediff.h"
 
 static int parse_unit(const GtEncseq *encseq,
-                      GtShuUnitFileInfo_tag *unit_info,
+                      GtShuUnitFileInfo *unit_info,
                       const GtGenomediffArguments *arguments,
                       GtTimer *timer,
                       GtLogger *logger,
@@ -86,7 +86,7 @@ int gt_genomediff_shu(GtLogger *logger,
   const GtEncseq *encseq = NULL;
   Genericindex *genericindexSubject = NULL;
   Sequentialsuffixarrayreader *ssar = NULL;
-  GtShuUnitFileInfo_tag *unit_info;
+  GtShuUnitFileInfo *unit_info;
 
   unit_info = gt_malloc(sizeof (*unit_info));
   unit_info->map_files = NULL;

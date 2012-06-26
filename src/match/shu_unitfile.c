@@ -58,7 +58,7 @@ static int load(lua_State *L,
 }
 
 static int traverse_units(lua_State *L,
-                          GtShuUnitFileInfo_tag *unit_info,
+                          GtShuUnitFileInfo *unit_info,
                           GtError *err)
 {
   int had_err = 0,
@@ -163,7 +163,7 @@ static int traverse_units(lua_State *L,
 }
 
 int gt_read_genomediff_unitfile(const GtStr *unitfile,
-                                GtShuUnitFileInfo_tag *unit_info,
+                                GtShuUnitFileInfo *unit_info,
                                 GT_UNUSED GtLogger *logger,
                                 GtError *err)
 {
@@ -182,13 +182,13 @@ int gt_read_genomediff_unitfile(const GtStr *unitfile,
   return had_err;
 }
 
-void gt_shu_unit_info_delete(GtShuUnitFileInfo_tag *unit_info) {
+void gt_shu_unit_info_delete(GtShuUnitFileInfo *unit_info) {
   gt_free(unit_info->map_files);
   gt_str_array_delete(unit_info->genome_names);
   gt_free(unit_info);
 }
 
-void gt_shu_unit_info_files_as_units(GtShuUnitFileInfo_tag *unit_info)
+void gt_shu_unit_info_files_as_units(GtShuUnitFileInfo *unit_info)
 {
   unsigned long i_idx;
 
@@ -201,9 +201,9 @@ void gt_shu_unit_info_files_as_units(GtShuUnitFileInfo_tag *unit_info)
   }
 }
 
-GtShuUnitFileInfo_tag *gt_shu_unit_info_new(const GtEncseq *encseq)
+GtShuUnitFileInfo *gt_shu_unit_info_new(const GtEncseq *encseq)
 {
-  GtShuUnitFileInfo_tag *unit_info = gt_malloc(sizeof (*unit_info));
+  GtShuUnitFileInfo *unit_info = gt_malloc(sizeof (*unit_info));
 
   unit_info->map_files = NULL;
   unit_info->genome_names = NULL;
