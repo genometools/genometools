@@ -88,6 +88,12 @@ void gt_aligned_segments_pile_register_process_unmapped(
 void gt_aligned_segments_pile_flush(GtAlignedSegmentsPile *asp,
     bool skip_remaining);
 
+/* disable deletion of aligned sequence segments after processing;
+ * if this method is called, the user must manually delete each segment
+ * (thus the processing functions hooks are not allowed to be NULL) */
+void gt_aligned_segments_pile_disable_segment_deletion(
+    GtAlignedSegmentsPile *asp);
+
 /* flush and delete the pile */
 void gt_aligned_segments_pile_delete(GtAlignedSegmentsPile *asp);
 

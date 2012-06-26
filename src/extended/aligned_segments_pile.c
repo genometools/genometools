@@ -35,6 +35,7 @@ struct GtAlignedSegmentsPile
   void *process_skipped_data;
   unsigned long position;
   bool enable_edit_tracking;
+  bool delete_processed_segments;
 };
 
 int gt_aligned_segments_pile_compare_as(const void *a, const void *b)
@@ -62,6 +63,7 @@ GtAlignedSegmentsPile *gt_aligned_segments_pile_new(GtSamfileIterator *sfi)
   asp->process_skipped_data = NULL;
   asp->position = GT_UNDEF_ULONG;
   asp->enable_edit_tracking = false;
+  asp->delete_processed_segments = true;
   return asp;
 }
 
@@ -111,7 +113,8 @@ static int gt_aligned_segments_pile_fetch_sa(GtAlignedSegmentsPile *asp)
         if (asp->enable_edit_tracking)
           gt_aligned_segment_enable_edit_tracking(as);
         asp->process_unmapped(as, asp->process_unmapped_data);
-        gt_aligned_segment_delete(as);
+        if (asp->delete_processed_segments)
+          gt_aligned_segment_delete(as);
       }
     }
   }
@@ -144,7 +147,8 @@ static void gt_aligned_segments_pile_delete_finishing_before(
       {
         asp->process_complete(as, asp->process_complete_data);
       }
-      gt_aligned_segment_delete(as);
+      if (asp->delete_processed_segments)
+        gt_aligned_segment_delete(as);
       /* delay elem removal to avoid disrupting list traversal */
       dlistelem_to_remove = dlistelem;
     }
@@ -158,6 +162,16 @@ static void gt_aligned_segments_pile_delete_finishing_before(
     gt_dlist_remove(asp->set, dlistelem_to_remove);
     dlistelem_to_remove = NULL;
   }
+}
+
+void gt_aligned_segments_pile_disable_segment_deletion(
+    GtAlignedSegmentsPile *asp)
+{
+  gt_assert(asp != NULL);
+  gt_assert(asp->process_skipped != NULL);
+  gt_assert(asp->process_complete != NULL);
+  gt_assert(asp->process_unmapped != NULL);
+  asp->delete_processed_segments = false;
 }
 
 void gt_aligned_segments_pile_enable_edit_tracking(GtAlignedSegmentsPile *asp)
@@ -200,7 +214,8 @@ void gt_aligned_segments_pile_move_over_position(
         {
           asp->process_skipped(asp->next_as, asp->process_unmapped_data);
         }
-        gt_aligned_segment_delete(asp->next_as);
+        if (asp->delete_processed_segments)
+          gt_aligned_segment_delete(asp->next_as);
         asp->next_as = NULL;
       }
       else
@@ -241,7 +256,8 @@ void gt_aligned_segments_pile_flush(GtAlignedSegmentsPile *asp,
     {
       asp->process_skipped(asp->next_as, asp->process_skipped_data);
     }
-    gt_aligned_segment_delete(asp->next_as);
+    if (asp->delete_processed_segments)
+      gt_aligned_segment_delete(asp->next_as);
     asp->next_as = NULL;
   }
   if (skip_remaining && asp->process_skipped != NULL)
@@ -254,7 +270,8 @@ void gt_aligned_segments_pile_flush(GtAlignedSegmentsPile *asp,
       {
         asp->process_skipped(asp->next_as, asp->process_skipped_data);
       }
-      gt_aligned_segment_delete(asp->next_as);
+      if (asp->delete_processed_segments)
+        gt_aligned_segment_delete(asp->next_as);
       asp->next_as = NULL;
     }
   }

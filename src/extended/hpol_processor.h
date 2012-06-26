@@ -21,6 +21,7 @@
 #include "core/encseq.h"
 #include "extended/seqpos_classifier.h"
 #include "extended/aligned_segments_pile.h"
+#include "core/seqiterator.h"
 #include "core/logger.h"
 
 /* Homopolymer processor; scans a sequence and searches homopolymers
@@ -32,8 +33,11 @@ typedef struct GtHpolProcessor GtHpolProcessor;
 GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin);
 
 /* Enable the correction of length of the homopolymers in the segments
- * provided by <asp>. The <max_hlen_diff> parameter defines the maximal
+ * provided by <asp>.
+ *
+ * The <max_hlen_diff> parameter defines the maximal
  * difference in length from the reference for a correction to take place.
+ *
  * The <min_alt_consensus> parameter defines the minimal alternative
  * consensus among segments in homopolymer length, by which no correction
  * is done: a value of 0.5 means e.g. 50% consensus. To disable the
@@ -59,6 +63,20 @@ void gt_hpol_processor_restrict_to_feature_type(GtHpolProcessor *hpp,
 /* Output the segments sequence in FastQ format to <outfile> during run. */
 void gt_hpol_processor_enable_segments_output(GtHpolProcessor *hpp,
     GtFile *outfile);
+
+/*
+ * Output the segments sorted by the order in which sequences
+ * are returned by the <reads_iter>.
+ *
+ * Must be called after <gt_hpol_processor_enable_segments_output>.
+ *
+ * The memory requirement will increase from O(max_coverage) to
+ * O(nof_segments), as processed segments are stored and output after the run.
+ *
+ * This method assumes that the sequence ID (first word of the description line)
+ * of each sequence is unique. */
+void gt_hpol_processor_sort_segments_output(GtHpolProcessor *hpp,
+    GtSeqIterator *reads_iter);
 
 /* Output statistics about each correction position.
  * Data is output as TAB-separated table, one row per correction position. */

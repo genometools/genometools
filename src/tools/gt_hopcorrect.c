@@ -17,6 +17,7 @@
 
 #include "core/ma.h"
 #include "core/undef_api.h"
+#include "core/seqiterator_fastq.h"
 #include "core/unused_api.h"
 #include "extended/feature_type.h"
 #include "extended/hpol_processor.h"
@@ -27,6 +28,7 @@ typedef struct {
   unsigned long hmin, max_hlen_diff;
   bool verbose, map_is_bam, rchk, stats;
   double minc;
+  GtStrArray *readset;
 } GtHopcorrectArguments;
 
 static void* gt_hopcorrect_arguments_new(void)
@@ -36,6 +38,7 @@ static void* gt_hopcorrect_arguments_new(void)
   arguments->annotation = gt_str_new();
   arguments->map = gt_str_new();
   arguments->outfilename = gt_str_new();
+  arguments->readset = gt_str_array_new();
   return arguments;
 }
 
@@ -47,6 +50,7 @@ static void gt_hopcorrect_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->annotation);
   gt_str_delete(arguments->map);
   gt_str_delete(arguments->outfilename);
+  gt_str_array_delete(arguments->readset);
   gt_free(arguments);
 }
 
@@ -122,8 +126,8 @@ static GtOptionParser* gt_hopcorrect_option_parser_new(void *tool_arguments)
   option = gt_option_new_double_min_max("minc", "mimimal homopolymer length "
       "consensus in segments to a different value than the length in the "
       "reference, after which no correction to the segments is applied;\n"
-      "expressed as decimal value between 0.0 and 1.0;\ne.g. 0.9 means: do not"
-      "correct any segment if the length of the homopolymer in 90\% or more"
+      "expressed as decimal value between 0.0 and 1.0;\ne.g. 0.9 means: do not "
+      "correct any segment if the length of the homopolymer in 90\% or more "
       "of the segments agrees on a different value than the length in the "
       "reference\ndefault: undefined", &arguments->minc, 2.0D, 0, 1.0D);
 #endif
@@ -134,6 +138,13 @@ static GtOptionParser* gt_hopcorrect_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("stats", "output statistics for each "
       "correction position", &arguments->stats, false);
   gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -outorder */
+  option = gt_option_new_filename_array("outorder",
+      "specify the name of the files (FastQ format) containing the "
+      "uncorrected readset; this allows to output the reads in "
+      "the same order, increasing memory usage", arguments->readset);
   gt_option_parser_add_option(op, option);
 
   /* -v */
@@ -174,6 +185,7 @@ static int gt_hopcorrect_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     GtAlignedSegmentsPile *asp = NULL;
     GtFile *outfile = NULL;
     GtAlphabet *dna = gt_alphabet_new_dna();
+    GtSeqIterator *readset_iter = NULL;
     hpp = gt_hpol_processor_new(encseq, arguments->hmin);
     if (gt_str_length(arguments->map) > 0)
     {
@@ -201,6 +213,14 @@ static int gt_hopcorrect_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
             had_err = -1;
           else
             gt_hpol_processor_enable_segments_output(hpp, outfile);
+          if (!had_err && gt_str_array_size(arguments->readset) > 0)
+          {
+            readset_iter = gt_seqiterator_fastq_new(arguments->readset, err);
+            if (readset_iter == NULL)
+              had_err = -1;
+            else
+              gt_hpol_processor_sort_segments_output(hpp, readset_iter);
+          }
         }
       }
     }
@@ -217,6 +237,7 @@ static int gt_hopcorrect_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     gt_seqpos_classifier_delete(spc);
     gt_file_delete(outfile);
     gt_hpol_processor_delete(hpp);
+    gt_seqiterator_delete(readset_iter);
     gt_alphabet_delete(dna);
   }
   gt_logger_delete(v_logger);
