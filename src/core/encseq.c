@@ -1811,7 +1811,7 @@ static Gtssptaboutinfo *ssptaboutinfo_new(GtEncseqAccessType sat,
                     * ssptaboutinfo->ssptabptr->st_uint32.numofpages);
       break;
     default:
-      fprintf(stderr,"ssptaboutinfo_new(sat = %d is undefined)\n",
+      fprintf(stderr,"%s(sat = %d is undefined)\n",__func__,
                      (int) ssptaboutinfo->satsep);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -4702,6 +4702,37 @@ static unsigned int determineleastprobablecharacter(const GtAlphabet *alpha,
   return minidx;
 }
 
+static void gt_encseq_ssptab_copy(unsigned long totallength,
+                                  unsigned long numofsequences,
+                                  GtEncseqAccessType sat,
+                                  const GtEncseq *encseq)
+{
+  GtSWtable ssptab;
+  Gtssptaboutinfo *ssptaboutinfo;
+  unsigned long seqnum, seppos = 0;
+
+  gt_assert (numofsequences > 1UL && sat != GT_ACCESS_TYPE_EQUALLENGTH);
+
+  initSWtable(&ssptab,totallength,encseq->satsep,numofsequences-1);
+  setencsequtablesNULL(encseq->satsep,&ssptab);
+  ssptaboutinfo = ssptaboutinfo_new(sat,totallength,numofsequences,&ssptab);
+  gt_assert(ssptaboutinfo != NULL);
+
+  for (seqnum=0; seqnum < numofsequences - 1; seqnum++)
+  {
+    unsigned long width = gt_encseq_seqlength(encseq, seqnum);
+    if (seqnum == 0)
+    {
+      seppos = width;
+    } else
+    {
+      seppos += width + 1;
+    }
+    ssptaboutinfo_processseppos(ssptaboutinfo,seppos);
+  }
+  ssptaboutinfo_delete(ssptaboutinfo);
+}
+
 #define SIZEOFFUNCTAB sizeof (encodedseqfunctab)/sizeof (encodedseqfunctab[0])
 
 static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
@@ -4791,21 +4822,12 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
     {
       ssptaboutinfo = ssptaboutinfo_new(sat,totallength,
                                         numofsequences,&encseq->ssptab);
-      if (ssptaboutinfo == NULL)
-      {
-        haserr = true;
-      } else
-      {
-        encseq->has_ssptab = true;
-      }
+      gt_assert (ssptaboutinfo != NULL);
+      encseq->has_ssptab = true;
     } else
     {
       encseq->satsep = GT_ACCESS_TYPE_UNDEFINED;
     }
-  }
-  if (!haserr)
-  {
-    gt_assert(encseq != NULL);
     if (encseq->has_exceptiontable)
     {
       unsigned int bitsforsubalpha
@@ -8472,6 +8494,10 @@ int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
       {
         haserr = true;
       }
+      gt_encseq_ssptab_copy(gt_encseq_total_length(encseq),
+                            gt_encseq_num_of_sequences(encseq),
+                            encseq->sat,
+                            encseq);
     }
     gt_free(indexnamecopy);
   }
@@ -9505,6 +9531,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
                                                   eb->seqlen, eb->nof_seqs-1);
     ssptaboutinfo = ssptaboutinfo_new(encseq->satsep, eb->seqlen,
                                       eb->nof_seqs, &encseq->ssptab);
+    gt_assert(ssptaboutinfo != NULL);
     for (i = 0; i < eb->seqlen; i++) {
       if (eb->plainseq[i] == (GtUchar) SEPARATOR)
       {
