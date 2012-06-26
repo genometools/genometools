@@ -25,7 +25,7 @@
 typedef struct {
   GtStr  *encseqinput, *annotation, *map, *outfilename;
   unsigned long hmin, max_hlen_diff;
-  bool verbose, map_is_bam, rchk;
+  bool verbose, map_is_bam, rchk, stats;
   double minc;
 } GtHopcorrectArguments;
 
@@ -130,6 +130,12 @@ static GtOptionParser* gt_hopcorrect_option_parser_new(void *tool_arguments)
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
+  /* -stats */
+  option = gt_option_new_bool("stats", "output statistics for each "
+      "correction position", &arguments->stats, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -186,6 +192,8 @@ static int gt_hopcorrect_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
               arguments->max_hlen_diff, arguments->minc);
         else
           gt_hpol_processor_enable_aligned_segments_refregionscheck(hpp, asp);
+        if (arguments->stats)
+          gt_hpol_processor_enable_statistics_output(hpp, NULL);
         if (!had_err && gt_str_length(arguments->outfilename) > 0)
         {
           outfile = gt_file_new(gt_str_get(arguments->outfilename), "w", err);

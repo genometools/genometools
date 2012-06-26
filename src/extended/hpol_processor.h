@@ -60,6 +60,11 @@ void gt_hpol_processor_restrict_to_feature_type(GtHpolProcessor *hpp,
 void gt_hpol_processor_enable_segments_output(GtHpolProcessor *hpp,
     GtFile *outfile);
 
+/* Output statistics about each correction position.
+ * Data is output as TAB-separated table, one row per correction position. */
+void gt_hpol_processor_enable_statistics_output(GtHpolProcessor *hpp,
+    GtFile *outfile);
+
 void gt_hpol_processor_delete(GtHpolProcessor *hpp);
 
 #endif

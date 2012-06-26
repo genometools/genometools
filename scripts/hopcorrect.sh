@@ -22,6 +22,7 @@ GT=${GT:=gt}
 SAMTOOLS=${SAMTOOLS:=samtools}
 MIN_HLEN=${MIN_HLEN:=3}
 BWA_T=${BWA_T:=4}
+HOP_PARAMS=${HOP_PARAMS:=""}
 
 if [ $# -lt 2 -o $# -gt 3 ]; then
   echo "Reference based homopolymer length correction in sequencing reads."
@@ -39,6 +40,7 @@ if [ $# -lt 2 -o $# -gt 3 ]; then
   echo " - SAMTOOLS     path to samtools binary      (default: $SAMTOOLS)"
   echo " - MIN_HLEN     minimal homopolymer length   (default: $MIN_HLEN)"
   echo " - BWA_T        number of bwa threads        (default: $BWA_T)"
+  echo " - HOP_PARAMS   additional hopcorrect params (default: $HOP_PARAMS)"
   exit $E_BADARGS
 fi
 
@@ -76,7 +78,8 @@ $GT encseq encode -v $GENOME
 echo
 echo "==== Correct homopolymers..."
 echo
-$GT dev hopcorrect -v -r $GENOME -m sorted.$READS.bam $AOPT -o hopcorrect_$READS
+$GT dev hopcorrect -v -r $GENOME -m sorted.$READS.bam $AOPT \
+    -o hopcorrect_$READS $HOP_PARAMS
 echo
 echo "==== done "
 echo
@@ -86,4 +89,4 @@ rm -f $GENOME.amb $GENOME.ann $GENOME.bwt $GENOME.pac $GENOME.sa
 rm -f $READS.bwa $READS.sam
 rm -f $READS.bam sorted.$READS.bam
 rm -f $GENOME.esq $GENOME.des $GENOME.md5 $GENOME.sds
-rm -f sorted.$ANNOTATION.gff
+rm -f sorted.$ANNOTATION
