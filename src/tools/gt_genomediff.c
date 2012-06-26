@@ -111,19 +111,19 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   arguments->ref_pckindex = gt_option_ref(optionpckindex);
 
   /*-unitfile*/
-  option_unitfile = gt_option_new_filename("unitfile",
-                                           "specifies genomic units, "
-                                           "File is in lua-format like this:\n"
-                                           "units = {\n"
-                                           "  genome1 = { \"file1\", \"file2\""
-                                           " },\n"
-                                           "  genome2 = { \"file3\", \"file4\""
-                                           " }\n"
-                                           "}\n"
-                                           "only give basenames of the files!"
-                                           " comment lines start with '--' and"
-                                           " will be ignored.",
-                                           arguments->unitfile);
+  option_unitfile =
+    gt_option_new_filename("unitfile",
+                           "specifies genomic units, "
+                           "File is in lua-format like this:\n"
+                           "units = {\n"
+                           "  genome1 = { \"file1\", \"file2\" },\n"
+                           "  genome2 = { \"file3\", \"file4\" }\n"
+                           "}\n"
+                           "only give basenames of the files! comment lines "
+                           "start with '--' and will be ignored. See "
+                           "GTDIR/testdata/genomediff/unitfile1.lua for an "
+                           "example.",
+                           arguments->unitfile);
   gt_option_parser_add_option(op, option_unitfile);
 
   /*ref unitfile*/
