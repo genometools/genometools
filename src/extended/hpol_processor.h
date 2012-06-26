@@ -30,6 +30,7 @@
 typedef struct GtHpolProcessor GtHpolProcessor;
 
 GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin);
+
 /* Enable the correction of length of the homopolymers in the segments
  * provided by <asp>. The <max_hlen_diff> parameter defines the maximal
  * difference in length from the reference for a correction to take place.

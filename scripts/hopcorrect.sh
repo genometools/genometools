@@ -16,7 +16,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-
 # default values:
 BWA=${BWA:=bwa}
 GT=${GT:=gt}
