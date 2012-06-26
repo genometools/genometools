@@ -31,25 +31,19 @@ typedef struct {
   unsigned long *map_files;
 } GtShuUnitFileInfo;
 
-/*
-  reads the Unitfile and collects the names of the Genomes, and mapping of
-  file number to genome, file_names and num_of_files has to be set befor
-  calling this function. will allocate space for genome_names and map_files
-  use gt_unit_info_delete to free unit_info.
-  sets err and returns 1 on error
-*/
-int gt_read_genomediff_unitfile(const GtStr *unitfile,
-                                GtShuUnitFileInfo *unit_info,
-                                GT_UNUSED GtLogger *logger,
-                                GtError *err);
+/* Reads the lua <unitfile> and collects the names of the genomes, and mapping
+   of file number within the associated <GtEncseq> to the genomes. Sets <err>
+   and returns -1 on error. */
+int                gt_shu_unit_file_info_read(const GtStr *unitfile,
+                                              GtShuUnitFileInfo *unit_info,
+                                              GT_UNUSED GtLogger *logger,
+                                              GtError *err);
 
-void gt_shu_unit_info_files_as_units(GtShuUnitFileInfo *unit_info);
+/* Initialize and malloc <GtShuUnitFileInfo>, will use filenames as units per
+   default, call gt_shu_unit_file_info_read() to combine files to units. */
+GtShuUnitFileInfo* gt_shu_unit_info_new(const GtEncseq *encseq);
 
-GtShuUnitFileInfo *gt_shu_unit_info_new(const GtEncseq *encseq);
-
-/*
-  frees memory of unit_info struct
-*/
-void gt_shu_unit_info_delete(GtShuUnitFileInfo *unit_info);
+/* frees memory of unit_info struct */
+void               gt_shu_unit_info_delete(GtShuUnitFileInfo *unit_info);
 
 #endif

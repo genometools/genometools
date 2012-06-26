@@ -38,35 +38,21 @@
 
 #include "match/shu-genomediff.h"
 
-static int parse_unit(const GtEncseq *encseq,
-                      GtShuUnitFileInfo *unit_info,
+static int parse_unit(GtShuUnitFileInfo *unit_info,
                       const GtGenomediffArguments *arguments,
-                      GtTimer *timer,
-                      GtLogger *logger,
-                      GtError *err)
+                      GtTimer *timer, GtLogger *logger, GtError *err)
 {
   int had_err = 0;
 
-  unit_info->num_of_files = gt_encseq_num_of_files(encseq);
-  unit_info->file_names = gt_encseq_filenames(encseq);
-  if (arguments->with_units)
-  {
+  if (arguments->with_units) {
     if (timer != NULL)
-    {
       gt_timer_show_progress(timer, "parse unitfile", stdout);
-    }
-    had_err = gt_read_genomediff_unitfile(arguments->unitfile,
-                                          unit_info,
-                                          logger,
-                                          err);
+    had_err = gt_shu_unit_file_info_read(arguments->unitfile,
+                                         unit_info,
+                                         logger,
+                                         err);
     if (!had_err)
-    {
       gt_logger_log(logger, "successfully loaded unitfile");
-    }
-  }
-  else
-  {
-    gt_shu_unit_info_files_as_units(unit_info);
   }
   return had_err;
 }
@@ -139,13 +125,6 @@ int gt_genomediff_shu(GtLogger *logger,
   Sequentialsuffixarrayreader *ssar = NULL;
   GtShuUnitFileInfo *unit_info;
 
-  unit_info = gt_malloc(sizeof (*unit_info));
-  unit_info->map_files = NULL;
-  unit_info->genome_names = NULL;
-  unit_info->num_of_genomes = 0;
-  unit_info->num_of_files = 0;
-  unit_info->file_names = NULL;
-
   /*XXX change esa-functions so that unitfile can be used*/
   if (arguments->with_esa) {
     gt_error_check(err);
@@ -167,26 +146,20 @@ int gt_genomediff_shu(GtLogger *logger,
 
     if (!had_err) {
       encseq = gt_encseqSequentialsuffixarrayreader(ssar);
-      had_err = parse_unit(encseq,
-                           unit_info,
-                           arguments,
-                           timer,
-                           logger,
-                           err);
+      unit_info = gt_shu_unit_info_new(encseq);
+      had_err = parse_unit(unit_info, arguments, timer, logger, err);
     }
     if (!had_err) {
       gt_array2dim_calloc(shulendist,
                           unit_info->num_of_genomes,
                           unit_info->num_of_genomes);
       genome_length = gt_calloc((size_t) unit_info->num_of_genomes,
-                                sizeof (unsigned long));
+                                sizeof (*genome_length));
       if (timer != NULL)
         gt_timer_show_progress(timer, "dfs esa index", stdout);
 
-      if (gt_multiesa2shulengthdist(ssar, encseq, shulendist,
-                                    unit_info, err) != 0) {
-        had_err = -1;
-      }
+      had_err = gt_multiesa2shulengthdist(ssar, encseq, shulendist,
+                                          unit_info, err);
     }
   }
   else {
@@ -210,12 +183,8 @@ int gt_genomediff_shu(GtLogger *logger,
     /*get num of genomes from unitfile or encseq and allocate shulen-matrix*/
     if (!had_err) {
       encseq = genericindex_getencseq(genericindexSubject);
-      had_err = parse_unit(encseq,
-                           unit_info,
-                           arguments,
-                           timer,
-                           logger,
-                           err);
+      unit_info = gt_shu_unit_info_new(encseq);
+      had_err = parse_unit(unit_info, arguments, timer, logger, err);
       gt_array2dim_calloc(shulendist,
                           unit_info->num_of_genomes,
                           unit_info->num_of_genomes);
