@@ -22,7 +22,6 @@
 #include "core/assert_api.h"
 #include "core/log_api.h"
 #include "core/mathsupport.h"
-
 #include "match/shu-divergence.h"
 
 static double pmax(double M, /* M value should be explored by simulation ??? */
@@ -39,8 +38,7 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
   double s = 0.0, ln_x_choose_k;
   double ln, ln1, m1, m, delta;
 
-  if (x > n_s)
-  {
+  if (x > n_s) {
     /* change this to standard GT-behaviour XXX*/
     printf("Error: x = %lu."
            " The maximum number of elements in the array"
@@ -48,21 +46,14 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
   }
   gt_assert(x <= n_s);
   if (s1[x] != 0.0)
-  {
     return s1[x];
-  }
 
-  for (k = 0; k <= x; k++)
-  {
+  for (k = 0; k <= x; k++) {
     double m_a, m_b, m_c, m_d, m_e;
     if (x == k)
-    {
       ln_x_choose_k = 0.0;
-    }
     else
-    {
       ln_x_choose_k =  ln_n_fac[x] - ln_n_fac[k] - ln_n_fac[x-k];
-    }
 
     m_a = pow (2.0, (double) x);
     m_b = pow (p, (double) k);
@@ -72,23 +63,15 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
     m = (m_a * m_b * m_c * pow (1.0 - m_d * m_e, (double) subjectLength));
     /* this is ok even with double, because of next if!*/
     if (m == 0.0)
-    {
       delta = 0.0;
-    }
-    else if (M <= m)
-    {
+    else if (M <= m) {
       ln = log(m);
       if (ln == -HUGE_VAL)
-      {
         delta = 0.0;
-      }
       else
-      {
         delta = exp (ln + ln_x_choose_k);
-      }
     }
-    else
-    {
+    else {
       double delta_a, delta_b;
       m1 = 1 + m;  /* for small values of m - to avoid overflow (-INF) */
       ln1 = log(m1);
@@ -97,8 +80,7 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
       delta = delta_a - delta_b;
     }
     s += delta;
-    if (s >= 1.0)
-    {
+    if (s >= 1.0) {
       s = 1.0;
       *thresholdReached = 1;
       break;
@@ -129,11 +111,9 @@ static double expShulen(double T, /* absolute error */
   probOld  = 0.0;
 
   /*since for i = 0, the whole expression is 0*/
-  for (i = 1LU; i < subjectLength; i++)
-  {
+  for (i = 1LU; i < subjectLength; i++) {
     factor = 1.0 - p_t;
-    if (!thresholdReached)
-    {
+    if (!thresholdReached) {
       prob_i = factor * pmax (M,
                               i,
                               p,
@@ -144,16 +124,12 @@ static double expShulen(double T, /* absolute error */
                               n_s);
     }
     else
-    {
       prob_i = factor;  /* prob_i = factor * s, where s = 1 */
-    }
     delta = (prob_i - probOld) * i;  /* delta should always be positive */
     e += delta;    /* expectation of avg shulen length(Q, S) */
     /* check error */
     if (1.0 <= e && delta / e <= T)
-    {
       break;
-    }
     p_t *= t;
     probOld = prob_i;
   }
@@ -171,8 +147,8 @@ double gt_divergence(double E, /* relative error for divergence calculation */
                    double *ln_n_fac,
                    unsigned long n_s)
 {
-  double p, q;
-  double du, dl, dm, t, d;
+  double p, q,
+         du, dl, dm, d, exp_shulen;
   double *s1;
   s1 = gt_calloc((size_t) n_s + 1, sizeof (double));
 
@@ -180,26 +156,18 @@ double gt_divergence(double E, /* relative error for divergence calculation */
   q = (1.0 - gc) / 2.0;
   du = 0.0;
   dl = 1.0 - (2 * p * p + 2 * q * q);  /* dl < 0.75 */
-  t = threshold;
 
-  while (gt_double_smaller_double(t, (dl - du) / 2.0))
-  {
+  while (gt_double_smaller_double(threshold, (dl - du) / 2.0)) {
     dm = (du + dl) / 2.0;
-    if (gt_double_smaller_double(shulen,
-          expShulen(T, M, dm, p, subjectLength, ln_n_fac, s1, n_s)))
-    {
+    exp_shulen = expShulen(T, M, dm, p, subjectLength, ln_n_fac, s1, n_s);
+    if (gt_double_smaller_double(shulen, exp_shulen))
       du = dm;
-    }
     else
-    {
       dl = dm;
-    }
     /* test the relative error between du and dl; if it is smaller than some
      * threshold, then break !! */
     if (fabs (dl - du) / dl <= E)
-    {
       break;
-    }
   }
   d = (du + dl) / 2.0;
   gt_free(s1);
@@ -212,27 +180,16 @@ double *gt_get_ln_n_fac(unsigned long n)
   double *ln_n_fac;
 
   ln_n_fac = gt_calloc((size_t) n + 1, sizeof (double));
-  gt_assert(ln_n_fac != NULL);
 
-  for (i = 0UL; i <= n; i++)
-  {
-    if (i == 0)
-    {
-      ln_n_fac[i] = log(1.0);
-    }
-    else
-    {
-      ln_n_fac[i] = log((double) i) + ln_n_fac[i-1];
-    }
+  ln_n_fac[0] = log(1.0);
+  for (i = 1UL; i <= n; i++) {
+    ln_n_fac[i] = log((double) i) + ln_n_fac[i-1];
   }
   return ln_n_fac;
 }
 
 double gt_calculateKr(double d)
 {
-  double kr;
-
-  kr = -0.75 * log (1 - 4.0 / 3.0 * d);
-
+  double kr = -0.75 * log (1 - 4.0 / 3.0 * d);
   return kr;
 }

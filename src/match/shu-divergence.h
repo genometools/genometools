@@ -32,8 +32,7 @@ double gt_divergence (double E, /* relative error for shulen length */
 /* Jukes-Cantor transform of divergence: Kr */
 double gt_calculateKr(double d);
 
-/*calculates the ln n choose k table for given max n and k
- * use free from core/array2dim_api.h to free this*/
+/* Calculates ln(n!) for numbers 0 to given n */
 double *gt_get_ln_n_fac(unsigned long n);
 
 #endif

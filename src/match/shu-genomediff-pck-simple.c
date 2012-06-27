@@ -25,12 +25,10 @@
 #include "core/ma.h"
 #include "core/seqiterator.h"
 #include "core/seqiterator_sequence_buffer.h"
-
 #include "match/eis-voiditf.h"
 #include "match/idx-limdfs.h"
 #include "match/shu-dfs.h"
 #include "match/shu-divergence.h"
-
 #include "match/shu-genomediff-pck-simple.h"
 
 int gt_genomediff_pck_shu_simple(GtLogger *logger,
