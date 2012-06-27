@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOMEDIFF_H
-#define GENOMEDIFF_H
+#ifndef GENOMEDIFF_OPT_H
+#define GENOMEDIFF_OPT_H
 
 #include <stdbool.h>
 #include "core/str_array.h"
 #include "core/error.h"
 #include "core/option_api.h"
 
-typedef struct GtGenomediffArguments_tag {
+typedef struct {
   GtOption *ref_esaindex,
            *ref_pckindex,
            *ref_unitfile,

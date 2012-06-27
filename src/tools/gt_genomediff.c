@@ -28,7 +28,7 @@
 #include "core/unused_api.h"
 #include "match/esa-map.h"
 #include "match/esa-shulen.h"
-#include "match/genomediff.h"
+#include "match/genomediff_opt.h"
 #include "match/idx-limdfs.h"
 #include "match/sarr-def.h"
 #include "match/shu-genomediff-pck-simple.h"

@@ -18,7 +18,7 @@
 #ifndef SHU_GENOMEDIFF_H
 #define SHU_GENOMEDIFF_H
 
-#include "match/genomediff.h"
+#include "match/genomediff_opt.h"
 #include "match/idx-limdfs.h"
 
 int gt_genomediff_shu(GtLogger *logger,

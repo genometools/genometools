@@ -21,7 +21,7 @@
 #include "core/logger.h"
 #include "core/encseq_api.h"
 
-#include "match/genomediff.h"
+#include "match/genomediff_opt.h"
 #include "match/idx-limdfs.h"
 
 /* works only with dna */
