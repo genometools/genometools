@@ -454,7 +454,8 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   char *s, *q;
   left = gt_aligned_segment_offset_for_refpos(as, r_hstart);
   right = gt_aligned_segment_offset_for_refpos(as, r_hstart + r_hlen);
-  if (left == GT_UNDEF_ULONG || right == GT_UNDEF_ULONG)
+  if (left == GT_UNDEF_ULONG || left == 0 ||
+      right == GT_UNDEF_ULONG || right == gt_aligned_segment_length(as))
     return false;
   right--;
   s = gt_aligned_segment_seq(as);
