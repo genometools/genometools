@@ -19,8 +19,12 @@
 #define SFX_RUN_H
 #include <stdbool.h>
 #include "core/error.h"
+#include "core/logger.h"
+#include "match/sfx-opt.h"
 
 int gt_parseargsandcallsuffixerator(bool doesa,int argc,
                                     const char **argv,GtError *err);
 
+int runsuffixerator(bool doesa, Suffixeratoroptions *so,
+                    GtLogger *logger, GtError *err);
 #endif

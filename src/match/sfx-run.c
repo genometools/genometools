@@ -33,17 +33,17 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "esa-fileend.h"
+#include "esa-shulen.h"
 #include "giextract.h"
-#include "stamp.h"
 #include "intcode-def.h"
-#include "sfx-suffixer.h"
-#include "sfx-run.h"
+#include "sfx-apfxlen.h"
+#include "sfx-lcpvalues.h"
 #include "sfx-opt.h"
 #include "sfx-outprj.h"
-#include "sfx-apfxlen.h"
+#include "sfx-run.h"
+#include "sfx-suffixer.h"
 #include "sfx-suffixgetset.h"
-#include "sfx-lcpvalues.h"
-#include "esa-shulen.h"
+#include "stamp.h"
 
 #ifndef S_SPLINT_S
 #include "eis-encidxseq.h"
@@ -406,10 +406,10 @@ static int run_packedindexconstruction(GtLogger *logger,
 }
 #endif
 
-static int runsuffixerator(bool doesa,
-                           Suffixeratoroptions *so,
-                           GtLogger *logger,
-                           GtError *err)
+int runsuffixerator(bool doesa,
+                    Suffixeratoroptions *so,
+                    GtLogger *logger,
+                    GtError *err)
 {
   GtTimer *sfxprogress = NULL;
   Outfileinfo outfileinfo;
