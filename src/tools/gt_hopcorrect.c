@@ -122,15 +122,15 @@ static GtOptionParser* gt_hopcorrect_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -minc */
-#ifndef S_SPLINT_S
   option = gt_option_new_double_min_max("minc", "mimimal homopolymer length "
       "consensus in segments to a different value than the length in the "
       "reference, after which no correction to the segments is applied;\n"
       "expressed as decimal value between 0.0 and 1.0;\ne.g. 0.9 means: do not "
       "correct any segment if the length of the homopolymer in 90\% or more "
       "of the segments agrees on a different value than the length in the "
-      "reference\ndefault: undefined", &arguments->minc, 2.0D, 0, 1.0D);
-#endif
+      "reference\ndefault: undefined", &arguments->minc, (double) 2.0,
+      0.0,
+      (double) 1.0);
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 

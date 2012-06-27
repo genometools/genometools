@@ -16,10 +16,12 @@
 */
 
 #include <inttypes.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#endif
 
 #include "core/ensure.h"
 #include "core/log_api.h"

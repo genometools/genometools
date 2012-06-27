@@ -17,8 +17,8 @@
 
 #include <math.h>
 #include <errno.h>
-#include <fcntl.h>
 #ifndef S_SPLINT_S
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -1067,10 +1067,10 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
 
     if (ee->page_sampling)
       ee->encdesc->sampling = gt_sampling_new_page(ee->sampling_rate,
-                                                   start_of_encoding);
+                                                   (off_t) start_of_encoding);
     else if (ee->regular_sampling)
       ee->encdesc->sampling = gt_sampling_new_regular(ee->sampling_rate,
-                                                      start_of_encoding);
+                                                     (off_t) start_of_encoding);
     had_err = encdesc_write_encoding(ee->encdesc, cstr_iterator, fp, err);
   }
   if (!had_err) {

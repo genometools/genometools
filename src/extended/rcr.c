@@ -15,14 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <ctype.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <math.h>
 #include <string.h>
+
+#ifndef S_SPLINT_S
+#include <ctype.h>
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#endif
 
 #include "core/bittab_api.h"
 #include "core/chardef.h"

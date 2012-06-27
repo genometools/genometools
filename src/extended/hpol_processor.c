@@ -70,9 +70,8 @@ GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin)
   hpp->nof_skipped = 0;
   hpp->nof_unmapped = 0;
   hpp->max_hlen_diff = GT_UNDEF_ULONG;
-#ifndef S_SPLINT_S
-  hpp->min_alt_consensus = 2.0D;
-#endif
+  hpp->min_alt_consensus = (double) 2.0;
+  hpp->outfp = NULL;
   hpp->alpha = gt_alphabet_new_dna();
   hpp->adjust_s_hlen = false;
   hpp->output_segments = false;
@@ -654,8 +653,8 @@ static void gt_hpol_processor_process_hpol_end(GtHpolProcessor *hpp,
     piled = gt_aligned_segments_pile_size(hpp->asp);
     if (piled > 0)
     {
-#if !defined(GG_DEBUG) && !defined(S_SPLINT_S)
-      if (min_alt_consensus <= 1.0D)
+#ifndef GG_DEBUG
+      if (min_alt_consensus <= (double) 1.0)
 #endif
       {
         unsigned long alt_s_hlen;

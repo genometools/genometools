@@ -1049,6 +1049,14 @@ obj/%.prepro: ${CURDIR}/src/core/%.c
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
 	indent $@
 
+obj/%.prepro: ${CURDIR}/src/extended/%.c
+	@echo "[generate $@]"
+	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
+	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
+	indent $@
+
+RUBY:=ruby
+
 RUBY:=ruby
 
 test: all

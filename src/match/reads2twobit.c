@@ -1123,8 +1123,9 @@ static void gt_reads2twobit_eqlen_set_separators_to_less_frequent_char(
   sepcode = gt_reads2twobit_less_frequent_char(r2t);
   if (sepcode != r2t->current_sepcode)
   {
-    gt_log_log("changing sepcode from %lu to %lu", r2t->current_sepcode,
-        sepcode);
+    gt_log_log("changing sepcode from %lu to %lu",
+                (unsigned long) r2t->current_sepcode,
+                (unsigned long) sepcode);
     for (seqnum = 1UL; seqnum < r2t->nofseqs; seqnum++)
     {
       pos = seqnum * r2t->seqlen_eqlen - 1UL;

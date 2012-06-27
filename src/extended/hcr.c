@@ -15,14 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
+#include <errno.h>
+#ifndef S_SPLINT_S
+#include <ctype.h>
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#endif
 
 #include "core/array2dim_api.h"
 #include "core/array_api.h"
@@ -556,11 +558,11 @@ static int hcr_write_seq_qual_data(const char *name, GtHcrEncoder *hcr_enc,
       if (hcr_enc->page_sampling)
         hcr_enc->seq_encoder->sampling =
           gt_sampling_new_page(hcr_enc->sampling_rate,
-                               hcr_enc->seq_encoder->start_of_encoding);
+                               (off_t) hcr_enc->seq_encoder->start_of_encoding);
       else if (hcr_enc->regular_sampling)
         hcr_enc->seq_encoder->sampling =
           gt_sampling_new_regular(hcr_enc->sampling_rate,
-                                  hcr_enc->seq_encoder->start_of_encoding);
+                               (off_t) hcr_enc->seq_encoder->start_of_encoding);
 
       had_err = hcr_write_seqs(fp, hcr_enc, err);
     }

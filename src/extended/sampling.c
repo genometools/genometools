@@ -14,7 +14,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif
 
 #include "core/assert_api.h"
 #include "core/log_api.h"
