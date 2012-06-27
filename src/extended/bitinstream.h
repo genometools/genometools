@@ -18,7 +18,9 @@
 #ifndef BITINSTREAM_H
 #define BITINSTREAM_H
 
+#ifndef S_SPLINT_S
 #include <sys/types.h>
+#endif
 
 #include "core/error.h"
 #include "core/intbits.h"

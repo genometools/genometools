@@ -859,28 +859,6 @@ static void gt_contfinder_init_copynum(GtContfinder *contfinder)
       contfinder->nofseqs);
   for (idx = 0; idx < contfinder->nofseqs; idx++)
     contfinder->copynum[idx] = (gt_contfinder_seqnum_t)1;
-  gt_log_log("output encseq %s", contfinder->indexname);
-  if (a_file == NULL)
-    had_err = -1;
-  gt_alphabet_output(dna, a_file);
-  gt_fa_fclose(a_file);
-  gt_alphabet_delete(dna);
-  if (!had_err)
-  {
-    had_err = gt_encseq_equallength_write_twobitencoding_to_file(
-                                contfinder->indexname,
-                                (unsigned long) contfinder->totallength,
-                                (unsigned long) (contfinder->len - 1),
-                                contfinder->twobitencoding,
-                                (unsigned long) contfinder->nofseqs,
-                                gt_str_array_size(contfinder->filenametab),
-                                contfinder->filelengthtab,
-                                contfinder->filenametab,
-                                contfinder->characterdistribution,
-                                err);
-  }
-  return had_err;
->>>>>>> Started to generalize gt_encseq_write_twobitencoding_to_file.
 }
 
 void gt_contfinder_run(GtContfinder *contfinder, bool mirrored,

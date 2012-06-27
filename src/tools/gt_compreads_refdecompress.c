@@ -59,7 +59,8 @@ static void gt_compreads_refdecompress_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_compreads_refdecompress_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_compreads_refdecompress_option_parser_new(
+                                void *tool_arguments)
 {
   GtCsrRcrDecodeArguments *arguments = tool_arguments;
   GtOptionParser *op;

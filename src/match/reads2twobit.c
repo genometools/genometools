@@ -1153,7 +1153,8 @@ static int gt_reads2twobit_write_encseq_eqlen(GtReads2Twobit *r2t,
   gt_reads2twobit_collect_fileinfo(r2t, &filelengthtab, &filenametab);
   gt_reads2twobit_eqlen_set_separators_to_less_frequent_char(r2t);
   gt_reads2twobit_zeropad_tbe(r2t);
-  had_err = gt_encseq_write_twobitencoding_to_file(gt_str_get(r2t->indexname),
+  had_err = gt_encseq_equallength_write_twobitencoding_to_file(
+      gt_str_get(r2t->indexname),
       r2t->total_seqlength, r2t->seqlen_eqlen - 1UL, r2t->twobitencoding,
       r2t->nofseqs, gt_array_size(r2t->collection), filelengthtab,
       filenametab, r2t->chardistri, err);

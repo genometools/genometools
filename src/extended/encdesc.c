@@ -15,12 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <math.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <math.h>
+#ifndef S_SPLINT_S
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#endif
 
 #include "core/arraydef.h"
 #include "core/assert_api.h"
