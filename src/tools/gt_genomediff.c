@@ -22,11 +22,10 @@
 #include "core/encseq_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
-#include "core/timer_api.h"
 #include "core/showtime.h"
 #include "core/str_array_api.h"
+#include "core/timer_api.h"
 #include "core/unused_api.h"
-
 #include "match/esa-map.h"
 #include "match/esa-shulen.h"
 #include "match/genomediff.h"
@@ -34,7 +33,6 @@
 #include "match/sarr-def.h"
 #include "match/shu-genomediff-pck-simple.h"
 #include "match/shu-genomediff.h"
-
 #include "tools/gt_genomediff.h"
 
 static void* gt_genomediff_arguments_new(void)
