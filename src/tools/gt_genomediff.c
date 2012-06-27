@@ -41,6 +41,7 @@ static void* gt_genomediff_arguments_new(void)
   arguments->indexname = gt_str_new();
   arguments->unitfile = gt_str_new();
   arguments->queryname = gt_str_array_new();
+  arguments->with_esa = arguments->with_pck = false;
   return arguments;
 }
 
@@ -53,7 +54,6 @@ static void gt_genomediff_arguments_delete(void *tool_arguments)
   gt_str_array_delete(arguments->queryname);
   gt_option_delete(arguments->ref_esaindex);
   gt_option_delete(arguments->ref_pckindex);
-  gt_option_delete(arguments->ref_queryname);
   gt_option_delete(arguments->ref_unitfile);
   gt_free(arguments);
 }
@@ -62,26 +62,13 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 {
   GtGenomediffArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionquery, *optionesaindex, *optionpckindex,
-           *optiontraverse, *optionscan, *option_unitfile;
+  GtOption *option, *optionesaindex, *optionpckindex,
+           *optionscan, *option_unitfile;
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] -pck|-esa indexname ",
-                            "Calculates shulens of genomes and the Kr.");
-
-  /* -maxdepth */
-  option =  gt_option_new_int("maxdepth", "max depth of .pbi-file",
-                              &arguments->user_max_depth, -1);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
-
-  /* -max_n */
-  option = gt_option_new_ulong("max_n", "Number of precalculated values "
-                             "for ln(n!) and pmax(x)",
-                             &arguments->max_ln_n_fac, 1000UL);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
+  op = gt_option_parser_new("[option ...] basename ",
+                           "Calculates Kr pairwise distances between genomes.");
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -91,12 +78,14 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   optionesaindex = gt_option_new_string("esa",
                                      "Specify index (enhanced suffix array)",
                                      arguments->indexname, NULL);
+  gt_option_is_extended_option(optionesaindex);
   gt_option_parser_add_option(op, optionesaindex);
 
   /* -pck */
   optionpckindex = gt_option_new_string("pck",
                                         "Specify index (packed index)",
                                         arguments->indexname, NULL);
+  gt_option_is_extended_option(optionpckindex);
   gt_option_parser_add_option(op, optionpckindex);
 
   gt_option_exclude(optionesaindex,optionpckindex);
@@ -127,18 +116,30 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   /*ref unitfile*/
   arguments->ref_unitfile = gt_option_ref(option_unitfile);
 
-  /* -query */
-  optionquery = gt_option_new_filename_array("query",
-                                       "Files containing the query sequences "
-                                       "if this option is set a simple "
-                                       "shustring search will be used." ,
-                                       arguments->queryname);
-  gt_option_is_extended_option(optionquery);
-  gt_option_exclude(optionquery, option_unitfile);
-  gt_option_parser_add_option(op, optionquery);
+  /* scan */
+  optionscan = gt_option_new_bool("scan",
+                                  "do not load esa index but scan"
+                                  " it sequentially implys -esa",
+                                  &arguments->scan,
+                                  true);
+  gt_option_is_extended_option(optionscan);
+  gt_option_exclude(optionscan, optionpckindex);
+  gt_option_imply(optionscan, optionesaindex);
+  gt_option_parser_add_option(op, optionscan);
 
-  /* ref query */
-  arguments->ref_queryname = gt_option_ref(optionquery);
+  /* dev options */
+  /* -max_n */
+  option = gt_option_new_ulong("max_n", "Number of precalculated values "
+                             "for ln(n!) and pmax(x)",
+                             &arguments->max_ln_n_fac, 1000UL);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -maxdepth */
+  option =  gt_option_new_int("maxdepth", "max depth of .pbi-file",
+                              &arguments->user_max_depth, -1);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* thresholds */
   /* divergence error */
@@ -147,7 +148,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
                                 "divergence calculation.\n"
                                 "default: 1e-9",
                                 &arguments->divergence_threshold,
-                                pow(10.0, -9.0));
+                                1e-9);
   gt_option_is_extended_option(option);
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
@@ -184,34 +185,6 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
-  /* shulen */
-  option = gt_option_new_bool("shulen",
-                              "prints sum of shulen and stops",
-                              &arguments->shulen_only,
-                              false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
-
-  /* scan */
-  optionscan = gt_option_new_bool("scan",
-                                  "do not load esa index but scan"
-                                  " it sequentially",
-                                  &arguments->scan,
-                                  true);
-  gt_option_exclude(optionscan, optionpckindex);
-  gt_option_parser_add_option(op, optionscan);
-
-  /* traverse */
-  optiontraverse = gt_option_new_bool("traverse",
-                              "traverses the virtual tree without calculating"
-                              " anything, sets GT_ENV_OPTIONS=-showtime"
-                              " does not work with -esa and -query",
-                              &arguments->traverse_only,
-                              false);
-  gt_option_exclude(optiontraverse, optionesaindex);
-  gt_option_exclude(optiontraverse, optionquery);
-  gt_option_is_development_option(optiontraverse);
-  gt_option_parser_add_option(op, optiontraverse);
   /* mail */
   gt_option_parser_set_mail_address(op, "<willrodt@zbh.uni-hamburg.de>");
   return op;
@@ -227,75 +200,16 @@ static int gt_genomediff_arguments_check(GT_UNUSED int rest_argc,
   gt_assert(arguments);
 
   if (gt_option_is_set(arguments->ref_esaindex))
-  {
     arguments->with_esa = true;
-  }
-  else
-  {
-    gt_assert(gt_option_is_set(arguments->ref_pckindex));
-    arguments->with_esa = false;
-  }
-  if (gt_option_is_set(arguments->ref_queryname))
-  {
-    arguments->simplesearch = true;
-  }
-  else
-  {
-    arguments->simplesearch = false;
-  }
-  if (!had_err && arguments->traverse_only &&
-      !gt_showtime_enabled())
-  {
-    printf ("GT_ENV_OPTIONS should be set to -showtime\n");
-    printf ("setting showtime = true\n");
-    gt_showtime_enable();
-  }
+  if (gt_option_is_set(arguments->ref_pckindex))
+    arguments->with_pck = true;
+
   if (!had_err && gt_option_is_set(arguments->ref_unitfile))
-  {
     arguments->with_units = true;
-  }
   else
-  {
     arguments->with_units = false;
-  }
+
   return had_err;
-}
-
-static int callpairswisesshulendist(const char *indexname,
-                                    const GtStrArray *queryfilenames,
-                                    GtLogger *logger,
-                                    GtError *err)
-{
-  bool haserr = false;
-  Suffixarray suffixarray;
-
-  if (gt_mapsuffixarray(&suffixarray,
-                        SARR_SUFTAB |
-                        SARR_ESQTAB,
-                        indexname,
-                        logger,
-                        err) != 0)
-  {
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    unsigned long totalgmatchlength = 0;
-
-    if (gt_esa2shulengthqueryfiles(&totalgmatchlength,
-                                   &suffixarray,
-                                   queryfilenames,
-                                   err) != 0)
-    {
-      haserr = true;
-    }
-    else
-    {
-      printf("%lu\n",totalgmatchlength);
-    }
-  }
-  gt_freesuffixarray(&suffixarray);
-  return haserr ? -1 : 0;
 }
 
 static int gt_genomediff_runner(GT_UNUSED int argc,
@@ -316,53 +230,27 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
                          stdout);
   gt_assert(logger);
 
-  if (gt_showtime_enabled())
-  {
+  if (gt_showtime_enabled()) {
     timer = gt_timer_new_with_progress_description("start");
     gt_timer_start(timer);
     gt_assert(timer);
   }
-  if (arguments->with_units)
-  {
+
+  if (arguments->with_units) {
     gt_logger_log(logger, "unitfile option set, filename is %s\n",
-       gt_str_get(arguments->unitfile));
+                  gt_str_get(arguments->unitfile));
   }
-  if (!had_err)
-  {
-    if (arguments->simplesearch)
-    {
-      if (timer != NULL)
-      {
-        gt_timer_show_progress(timer, "run simple search", stdout);
-      }
-      if (arguments->with_esa)
-      {
-        had_err = callpairswisesshulendist(gt_str_get(arguments->indexname),
-                                           arguments->queryname,
-                                           logger,
-                                           err);
-      }
-      else
-      {
-        had_err = gt_genomediff_pck_shu_simple(logger,
-                                               arguments,
-                                               err);
-      }
-    }
-    else
-    {
-      if (timer != NULL)
-      {
-        gt_timer_show_progress(timer, "start shu search", stdout);
-      }
-      had_err = gt_genomediff_shu(logger,
-                                  arguments,
-                                  timer,
-                                  err);
-    }
+
+  if (!had_err) {
+    if (timer != NULL)
+      gt_timer_show_progress(timer, "start shu search", stdout);
+
+    had_err = gt_genomediff_shu(logger,
+                                arguments,
+                                timer,
+                                err);
   }
-  if (timer != NULL)
-  {
+  if (timer != NULL) {
     gt_timer_show_progress_final(timer, stdout);
     gt_timer_delete(timer);
   }

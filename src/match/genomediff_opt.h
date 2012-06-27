@@ -26,14 +26,11 @@
 typedef struct {
   GtOption *ref_esaindex,
            *ref_pckindex,
-           *ref_unitfile,
-           *ref_queryname;
+           *ref_unitfile;
   bool verbose,
        with_esa,
+       with_pck,
        with_units,
-       simplesearch,
-       shulen_only,
-       traverse_only,
        scan;
   int user_max_depth;
   unsigned long max_ln_n_fac;

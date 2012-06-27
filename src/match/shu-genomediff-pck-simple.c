@@ -71,16 +71,11 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
                                          logger,
                                          err);
   if (genericindexSubject == NULL)
-  {
     had_err = 1;
-  }
   else
-  {
     encseq = genericindex_getencseq(genericindexSubject);
-  }
 
-  if (!had_err)
-  {
+  if (!had_err) {
     subjectLength = genericindex_get_totallength(genericindexSubject) - 1;
     /*subjectLength /= 2;*/
     /*gt_log_log("subject length: %lu", subjectLength);*/
@@ -92,13 +87,11 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
     gt_assert(queries);
     alphabet = gt_encseq_alphabet(encseq);
     /* makes assumption that alphabet is dna, it has to calculate the gc! */
-    if (!gt_alphabet_is_dna(alphabet))
-    {
+    if (!gt_alphabet_is_dna(alphabet)) {
       fprintf(stderr, "error: Sequences need to be dna");
       had_err = 1;
     }
-    else
-    {
+    else {
       symbolmap = gt_alphabet_symbolmap(alphabet);
       gt_seqiterator_set_symbolmap(queries, symbolmap);
       c_sym = gt_alphabet_encode(alphabet, 'c');
@@ -106,19 +99,15 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
     }
   }
 
-  for (queryNo = 0; !had_err; queryNo++)
-  {
+  for (queryNo = 0; !had_err; queryNo++) {
     retval = gt_seqiterator_next(queries,
                                  &currentQuery,
                                  &queryLength,
                                  &description,
                                  err);
-    if ( retval != 1)
-    {
+    if ( retval != 1) {
       if (retval < 0)
-      {
         gt_free(description);
-      }
       break;
     }
     gt_logger_log(logger,
@@ -126,59 +115,48 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
                   queryLength);
     avgShuLength = 0.0;
     gc_query = 0.0;
-    for (currentSuffix = 0; currentSuffix < queryLength; currentSuffix++)
-    {
+    for (currentSuffix = 0; currentSuffix < queryLength; currentSuffix++) {
       currentShuLength = (double) gt_pck_getShuStringLength(
                     subjectindex,
                     &currentQuery[currentSuffix],
                     queryLength - currentSuffix);
       avgShuLength += currentShuLength;
       if (currentQuery[currentSuffix] == c_sym ||
-          currentQuery[currentSuffix] == g_sym)
-      {
+          currentQuery[currentSuffix] == g_sym) {
         gc_query++;
       }
     }
-    if (arguments->shulen_only)
-    {
-      printf("# Query %d sum of shulen:\n %.0f\n",
-             (int) queryNo, avgShuLength);
-    }
-    else
-    {
-      avgShuLength /= (double) queryLength;
-      gc_query /= (double) queryLength;
+    avgShuLength /= (double) queryLength;
+    gc_query /= (double) queryLength;
 
-      gt_logger_log(logger, "Query %d has an average SHUstring length "
-                            "of\n# shulength: %f",
-                            (int) queryNo, avgShuLength);
-      gt_logger_log(logger, "Query description: %s", description);
-      gt_log_log("Query (i): %s", description);
+    gt_logger_log(logger, "Query %d has an average SHUstring length "
+                          "of\n# shulength: %f",
+                          (int) queryNo, avgShuLength);
+    gt_logger_log(logger, "Query description: %s", description);
+    gt_log_log("Query (i): %s", description);
 
-  /* XXX Fehlerabfragen einbauen */
+    /* XXX Fehlerabfragen einbauen */
 
-      if ( !had_err )
-      {
-        double div, kr;
+    if ( !had_err ) {
+      double div, kr;
 
-        gt_logger_log(logger, "shulen:\n%f", avgShuLength);
-        gt_log_log("shu: %f, gc: %f, len: %lu",
-            avgShuLength, gc_query, subjectLength);
-        div =  gt_divergence(arguments->divergence_rel_err,
-                             arguments->divergence_abs_err,
-                             arguments->divergence_m,
-                             arguments->divergence_threshold,
-                             avgShuLength,
-                             subjectLength,
-                             gc_query,
-                             ln_n_fac,
-                             arguments->max_ln_n_fac);
-        gt_logger_log(logger, "divergence:\n%f", div);
+      gt_logger_log(logger, "shulen:\n%f", avgShuLength);
+      gt_log_log("shu: %f, gc: %f, len: %lu",
+          avgShuLength, gc_query, subjectLength);
+      div =  gt_divergence(arguments->divergence_rel_err,
+                           arguments->divergence_abs_err,
+                           arguments->divergence_m,
+                           arguments->divergence_threshold,
+                           avgShuLength,
+                           subjectLength,
+                           gc_query,
+                           ln_n_fac,
+                           arguments->max_ln_n_fac);
+      gt_logger_log(logger, "divergence:\n%f", div);
 
-        kr = gt_calculateKr(div);
+      kr = gt_calculateKr(div);
 
-        printf("# Kr:\n%f\n", kr);
-      }
+      printf("# Kr:\n%f\n", kr);
     }
   }
   gt_free(ln_n_fac);

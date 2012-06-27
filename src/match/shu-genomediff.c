@@ -194,9 +194,7 @@ int gt_genomediff_shu(GtLogger *logger,
     /*check if alphabet is DNA, which is presumed for gc-calculation*/
     if (!had_err) {
       alphabet = gt_encseq_alphabet(encseq);
-      if (!gt_alphabet_is_dna(alphabet) &&
-          (!arguments->traverse_only ||
-           !arguments->shulen_only)) {
+      if (!gt_alphabet_is_dna(alphabet)) {
         gt_error_set(err,"error: sequences need to be dna to calculate gc!");
         had_err = -1;
       }
@@ -217,21 +215,9 @@ int gt_genomediff_shu(GtLogger *logger,
                                         shulendist,
                                         num_of_chars,
                                         total_length,
-                                        !arguments->traverse_only,
                                         timer,
                                         logger,
                                         err);
-    }
-    if (!had_err && arguments->traverse_only) {
-      gt_assert(timer != NULL);
-      gt_logger_log(logger, "stopping after traversal");
-      genericindex_delete(genericindexSubject);
-      gt_free(genome_length);
-      gt_shu_unit_info_delete(unit_info);
-      if (shulendist != NULL)
-        gt_array2dim_delete(shulendist);
-
-      return had_err;
     }
   }
 
@@ -241,14 +227,8 @@ int gt_genomediff_shu(GtLogger *logger,
 
     /*calculate avg shulen or print sum shulen*/
     gt_assert(shulendist);
-    if (timer != NULL) {
-      if (arguments->shulen_only)
-        gt_timer_show_progress(timer, "print sums", stdout);
-      else
-        gt_timer_show_progress(timer, "calculate avg", stdout);
-    }
-    if (arguments->shulen_only)
-      printf("# sum of shulen\n%lu\n", unit_info->num_of_genomes);
+    if (timer != NULL)
+      gt_timer_show_progress(timer, "calculate avg", stdout);
 
     gt_array2dim_calloc(div,
                         unit_info->num_of_genomes,
@@ -257,33 +237,15 @@ int gt_genomediff_shu(GtLogger *logger,
     for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
       unsigned long length_i;
       length_i = genome_length[i_idx];
-      if (arguments->shulen_only)
-        printf("%s\t", gt_str_array_get(unit_info->genome_names, i_idx));
 
       for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++) {
-        if (j_idx == i_idx) {
-          if (arguments->shulen_only)
-            printf("%.6f\t",0.0);
-        }
-        else {
-          if (arguments->shulen_only) {
-            printf(Formatuint64_t"\t", arguments->with_esa ?
-                              PRINTuint64_tcast(shulendist[j_idx][i_idx]) :
-                              PRINTuint64_tcast(shulendist[i_idx][j_idx]));
-          }
-          else {
-            div[i_idx][j_idx]
-              = arguments->with_esa
-                  ? ((double) shulendist[j_idx][i_idx]) / length_i
-                  : ((double) shulendist[i_idx][j_idx]) / length_i;
-          }
-        }
+        div[i_idx][j_idx] = arguments->with_esa
+                               ? ((double) shulendist[j_idx][i_idx]) / length_i
+                               : ((double) shulendist[i_idx][j_idx]) / length_i;
       }
-      if (arguments->shulen_only)
-        printf("\n");
     }
   }
-  if (!arguments->shulen_only && !had_err) {
+  if (!had_err) {
     gt_assert(div);
     if (timer != NULL)
       gt_timer_show_progress(timer, "calculate gc", stdout);

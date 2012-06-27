@@ -161,7 +161,6 @@ static int visit_shu_children(const FMindex *index,
                               const GtShuUnitFileInfo *unit_info,
                               unsigned long total_length,
                               unsigned long max_idx,
-                              bool calculate,
                               GT_UNUSED GtLogger *logger,
                               GT_UNUSED GtError *err)
 {
@@ -191,16 +190,13 @@ static int visit_shu_children(const FMindex *index,
       if (tmpmbtab[idx].lowerbound + 1 ==
           tmpmbtab[idx].upperbound)
       { /* we found a leaf on parent */
-        if (calculate)
-        {
-          add_filenum_count(tmpmbtab[idx].lowerbound,
-                            tmpmbtab[idx].upperbound,
-                            parent,
-                            pos_extractor,
-                            total_length,
-                            unit_info,
-                            encseq);
-        }
+        add_filenum_count(tmpmbtab[idx].lowerbound,
+                          tmpmbtab[idx].upperbound,
+                          parent,
+                          pos_extractor,
+                          total_length,
+                          unit_info,
+                          encseq);
       }
       else
       {
@@ -246,10 +242,7 @@ static int visit_shu_children(const FMindex *index,
       }
     }
   }
-  if (parent->depth > 0 &&
-      num_of_rows > 0 &&
-      calculate)
-  {
+  if (parent->depth > 0 && num_of_rows > 0) {
     unsigned long start_idx;
     /* unsigned long max_idx - already determined*/
 
@@ -406,7 +399,6 @@ int gt_pck_calculate_shulen(const FMindex *index,
                             uint64_t **shulen,
                             unsigned long numofchars,
                             unsigned long total_length,
-                            bool calculate,
                             GtTimer *timer,
                             GtLogger *logger,
                             GtError *err)
@@ -459,8 +451,6 @@ int gt_pck_calculate_shulen(const FMindex *index,
     if (current->process)
     {
       GT_STACK_DECREMENTTOP(&stack);
-      if (calculate)
-      {
         had_err = process_shu_node(current,
                                    &stack,
                                    shulen,
@@ -468,7 +458,6 @@ int gt_pck_calculate_shulen(const FMindex *index,
                                    numofchars,
                                    logger,
                                    err);
-      }
       processed_nodes++;
     }
     else
@@ -485,7 +474,6 @@ int gt_pck_calculate_shulen(const FMindex *index,
                                    unit_info,
                                    total_length,
                                    max_idx,
-                                   calculate,
                                    logger,
                                    err);
     }
