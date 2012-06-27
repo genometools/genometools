@@ -1,3 +1,4 @@
+=begin
 require 'fileutils'
 require 'tempfile'
 require '../scripts/genomediff.rb'
@@ -546,3 +547,4 @@ Test do
     failtest("different results pck-esa #{result[0]},#{result[1]}")
   end
 end
+=end
