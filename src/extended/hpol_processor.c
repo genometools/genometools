@@ -24,6 +24,7 @@
 #include "core/minmax.h"
 #include "core/splitter.h"
 #include "core/undef_api.h"
+#include "core/warning_api.h"
 #include "extended/aligned_segments_pile.h"
 #include "extended/feature_type.h"
 #include "extended/hpol_processor.h"
@@ -37,7 +38,7 @@ struct GtHpolProcessor
   GtDiscDistri *hdist, *hdist_e;
   GtSeqposClassifier *cds_oracle;
   GtAlignedSegmentsPile *asp;
-  unsigned long nof_complete_edited, nof_complete_not_edited,
+  unsigned long nof_complete, nof_complete_edited, nof_complete_not_edited,
                 nof_skipped, nof_unmapped, nof_h, nof_h_e, hlen_max;
   bool adjust_s_hlen;
   double min_alt_consensus;
@@ -63,6 +64,7 @@ GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin)
   hpp->hlen_max = 0;
   hpp->cds_oracle = NULL;
   hpp->asp = NULL;
+  hpp->nof_complete = 0;
   hpp->nof_complete_edited = 0;
   hpp->nof_complete_not_edited = 0;
   hpp->nof_skipped = 0;
@@ -116,7 +118,6 @@ static void gt_hpol_processor_output_segment(GtAlignedSegment *as,
       exit(EXIT_FAILURE);
     }
     gt_error_delete(err);
-
   }
   gt_fastq_show_entry((desc != NULL) ? desc :
       gt_aligned_segment_description(as), gt_aligned_segment_seq(as),
@@ -128,13 +129,14 @@ static void gt_hpol_processor_process_complete_segment(
 {
   GtHpolProcessor *hpp = data;
   gt_assert(hpp != NULL);
+  (hpp->nof_complete)++;
   if (gt_aligned_segment_seq_edited(as))
   {
-    hpp->nof_complete_edited++;
+    (hpp->nof_complete_edited)++;
   }
   else
   {
-    hpp->nof_complete_not_edited++;
+    (hpp->nof_complete_not_edited)++;
   }
   if (hpp->output_segments)
     gt_hpol_processor_output_segment(as, gt_aligned_segment_has_indels(as),
@@ -282,27 +284,30 @@ static void gt_hpol_processor_output_stats_header(GtFile *outfp)
   gt_file_xprintf(outfp, "# s_hpos =   start pos of hpol on read\n");
   gt_file_xprintf(outfp, "# s_hend =   end pos of hpol on read\n");
   gt_file_xprintf(outfp, "# s_hlen =   length of hpol in read\n");
+  gt_file_xprintf(outfp, "# c_len =    correction length\n");
   gt_file_xprintf(outfp, "# s_char =   hpol character in read\n");
   gt_file_xprintf(outfp, "# s_or =     orientation of read "
       "(+ or -; + = same as reference)\n");
   gt_file_xprintf(outfp, "# s_q_ave =  average quality of read in the hpol "
       "positions\n");
+  gt_file_xprintf(outfp, "# s_q_bef =  quality of base before the hpol\n");
+  gt_file_xprintf(outfp, "# s_q_aft =  quality of base after the hpol\n");
   gt_file_xprintf(outfp, "# s_qual =   quality string in read for the hpol "
       "positions\n");
   gt_file_xprintf(outfp, "# s_id =     read identifier\n");
   gt_file_xprintf(outfp, "# coordinates are 1-based\n");
   gt_file_xprintf(outfp, "#\n");
   gt_file_xprintf(outfp, "# edit\tr_hpos\tr_hlen\ts_hpos\ts_hend\ts_hlen"
-      "\ts_char\ts_or\ts_q_ave\ts_qual\ts_id\n");
+      "\tc_len\ts_char\ts_or\ts_q_ave\ts_q_bef\ts_q_aft\ts_qual\ts_id\n");
 }
 
 #define GT_HPOL_PROCESSOR_PHREDOFFSET 33UL
 
 static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
     unsigned long r_pos, unsigned long r_hlen, unsigned long s_hlen,
-    char c, unsigned long s_q_sum, GtFile *outfp)
+    char c, unsigned long s_q_sum, unsigned long c_len, GtFile *outfp)
 {
-  unsigned long i, pos, s_pos = 0, s_offset;
+  unsigned long i, pos, s_pos = 0, s_offset, s_q_bef, s_q_aft;
   double s_q_ave;
   char *s_qual, *q;
   const char *r_desc;
@@ -321,38 +326,61 @@ static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
   s_pos = gt_aligned_segment_orig_seqpos_for_refpos(as, r_pos);
   s_offset = gt_aligned_segment_offset_for_refpos(as, r_pos);
   s_qual = gt_malloc(sizeof (*s_qual) * (s_hlen + 1UL));
+  s_q_bef = GT_UNDEF_ULONG;
+  for (i = s_offset; i > 0; /**/)
+  {
+    i--;
+    if (q[i] != GT_UNDEF_CHAR)
+    {
+      s_q_bef = (unsigned long)q[i] - GT_HPOL_PROCESSOR_PHREDOFFSET;
+      break;
+    }
+  }
+  gt_assert(s_q_bef != GT_UNDEF_ULONG);
   if (!gt_aligned_segment_is_reverse(as))
   {
-    for (i = 0, pos = 0; pos < s_hlen; i++)
+    for (i = s_offset, pos = 0; pos < s_hlen; i++)
     {
-      if (q[s_offset + i] != GT_UNDEF_CHAR)
+      if (q[i] != GT_UNDEF_CHAR)
       {
-        s_qual[pos] = q[s_offset + i];
+        s_qual[pos] = q[i];
         pos++;
       }
     }
   }
   else
   {
-    for (i = 0, pos = s_hlen; pos > 0; i++)
+    for (i = s_offset, pos = s_hlen; pos > 0; i++)
     {
-      if (q[s_offset + i] != GT_UNDEF_CHAR)
+      if (q[i] != GT_UNDEF_CHAR)
       {
-        s_qual[pos - 1UL] = q[s_offset + i];
+        s_qual[pos - 1UL] = q[i];
         pos--;
       }
     }
   }
+  s_q_aft = GT_UNDEF_ULONG;
+  for (/**/; i < gt_aligned_segment_length(as); i++)
+  {
+    if (q[i] != GT_UNDEF_CHAR)
+    {
+      s_q_aft = (unsigned long)q[i] - GT_HPOL_PROCESSOR_PHREDOFFSET;
+      break;
+    }
+  }
+  gt_assert(s_q_aft != GT_UNDEF_ULONG);
   s_qual[s_hlen] = '\0';
   gt_assert(r_hlen != s_hlen);
   s_pos++;
   r_pos++;
-  gt_file_xprintf(outfp, "%c\t%lu\t%lu\t%lu\t%lu\t%lu\t%c\t%c\t%.2f\t%s\t%s\n",
+  gt_file_xprintf(outfp,
+      "%c\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%c\t%c\t%.2f\t%lu\t%lu\t%s\t%s\n",
       r_hlen > s_hlen ? 'I' : 'D', r_pos, r_hlen,
       gt_aligned_segment_is_reverse(as) ? s_pos - s_hlen + 1UL : s_pos,
       gt_aligned_segment_is_reverse(as) ? s_pos : s_pos + s_hlen - 1UL,
-      s_hlen, c, gt_aligned_segment_is_reverse(as) ? '-' : '+',
-      s_q_ave, s_qual, r_desc);
+      s_hlen, c_len, c, gt_aligned_segment_is_reverse(as) ? '-' : '+',
+      s_q_ave, gt_aligned_segment_is_reverse(as) ? s_q_aft : s_q_bef,
+      gt_aligned_segment_is_reverse(as) ? s_q_bef : s_q_aft, s_qual, r_desc);
   gt_free(s_qual);
 }
 
@@ -508,12 +536,13 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
         if (output_stats)
         {
           gt_hpol_processor_output_stats(as, r_hstart, r_hlen, s_hlen,
-              c, q_sum, outfp_stats);
+              c, q_sum, MIN(s_free, hlen_diff), outfp_stats);
         }
+        gt_aligned_segment_seq_set_edited(as);
+        gt_log_log("edited: %s", gt_aligned_segment_description(as));
         gt_hpol_processor_enlarge_hpol(s, q, left, right,
             MIN(s_free, hlen_diff), c, (char)(q_sum / s_hlen));
       }
-      gt_aligned_segment_seq_set_edited(as);
     }
     return true;
   }
@@ -525,11 +554,12 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
       if (output_stats)
       {
         gt_hpol_processor_output_stats(as, r_hstart, r_hlen, s_hlen,
-            c, q_sum, outfp_stats);
+            c, q_sum, hlen_diff, outfp_stats);
       }
+      gt_aligned_segment_seq_set_edited(as);
+      gt_log_log("edited: %s", gt_aligned_segment_description(as));
       gt_hpol_processor_shrink_hpol(s, q, left, right, hlen_diff, c);
     }
-    gt_aligned_segment_seq_set_edited(as);
     return true;
   }
   return false;
@@ -549,10 +579,12 @@ static bool gt_hpol_processor_adjust_hlen_of_all_segments(
     GtAlignedSegment *as;
     as = gt_dlistelem_get_data(dlistelem);
     if (gt_aligned_segment_has_indels(as))
+    {
       edited = gt_hpol_processor_adjust_hlen_of_a_segment(as, c, r_hstart,
           r_hlen, max_hlen_diff, output_stats, outfp_stats);
-    if (edited)
-      any_edited = true;
+      if (edited)
+        any_edited = true;
+    }
   }
   return any_edited;
 }
@@ -682,10 +714,12 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
         hpp->nof_skipped + hpp->nof_unmapped;
     gt_logger_log(logger, "segments in SAM file:       %lu",
         total_segments);
-    gt_logger_log(logger, "- processed and not edited: %-7lu (%.2f%%)",
+    gt_logger_log(logger, "- processed:                %-7lu (%.2f%%)",
+        hpp->nof_complete, (double)hpp->nof_complete * 100 / total_segments);
+    gt_logger_log(logger, "  ... and not edited:       %-7lu (%.2f%%)",
         hpp->nof_complete_not_edited,
         (double)hpp->nof_complete_not_edited * 100 / total_segments);
-    gt_logger_log(logger, "- processed and edited:     %-7lu (%.2f%%)",
+    gt_logger_log(logger, "  ... and edited:           %-7lu (%.2f%%)",
         hpp->nof_complete_edited,
         (double)hpp->nof_complete_edited * 100 / total_segments);
     gt_logger_log(logger, "- not processed:            %-7lu (%.2f%%)",
@@ -719,6 +753,10 @@ static int gt_hpol_processor_output_sorted_segments(GtHpolProcessor *hpp,
     {
       gt_hpol_processor_output_segment(as, true, hpp->outfp_segments,
           gt_str_get(d_str));
+    }
+    else
+    {
+      gt_warning("ID not found: %s", gt_splitter_get_token(spl, 0));
     }
   }
   gt_str_delete(d_str);
@@ -775,6 +813,9 @@ int gt_hpol_processor_run(GtHpolProcessor *hpp, GtLogger *logger, GtError *err)
           hpp->max_hlen_diff, hpp->min_alt_consensus);
   }
   gt_encseq_reader_delete(esr);
+  gt_hpol_processor_process_hpol_end(hpp, prev, i - 1UL, hlen,
+              hpp->max_hlen_diff, hpp->min_alt_consensus);
+  gt_aligned_segments_pile_flush(hpp->asp, true);
   if (!had_err && hpp->processed_segments != NULL)
     had_err = gt_hpol_processor_output_sorted_segments(hpp, err);
   if (logger != NULL && !had_err)

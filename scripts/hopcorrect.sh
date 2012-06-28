@@ -36,6 +36,14 @@ MAPM="${MATES}.${GENOME}"
 # hardcoded values:
 NOGFF='--'
 
+function f_shorthelp {
+  echo "Reference-based correction of homopolymer length in sequencing reads."
+  echo
+  echo "  Usage: $0 $USG"
+  echo
+  echo "Use the \"help\" action for more information."
+}
+
 function f_help {
   echo "Reference-based correction of homopolymer length in sequencing reads."
   echo
@@ -63,6 +71,8 @@ function f_help {
   echo "                   (useful for debugging and evaluation,"
   echo "                   it may be slow and require lot of memory)"
   echo
+  echo "     help          shows this message"
+  echo
   echo " - <genome.fas> is a single sequence Fasta file which"
   echo "   contains the reference against which the correction is done"
   echo
@@ -84,7 +94,7 @@ function f_help {
 }
 
 function f_die {
-  f_help
+  f_shorthelp
   exit $E_BADARGS
 }
 
@@ -179,32 +189,24 @@ function f_run {
   f_clean
 }
 
+# position of fields in correction stats output table
 S_END='$5'
-S_CHAR='$7'
-count_all () {
-  RETVAL=`cat $1 | grep '^'$2 | wc -l`
-}
-count_all_pos () {
-  RETVAL=`cat $1 | awk '/^'$2'/ && ('$S_END' == "'$3'")' | wc -l`
-}
-count () {
-  RETVAL=`cat $1 | awk '/^'$2'/ && ('$S_CHAR' == "'$3'")' | wc -l`
-}
-count_pos () {
-  RETVAL=`cat $1 | \
-  awk '/^'$2'/ && ('$S_END' == "'$3'") && ('$S_CHAR' == "'$4'")' | wc -l`
-}
-nof_seq_long () {
-  RETVAL=`grep "^$2--$2" $1 | awk '{ print $2 }'`
-  if [ "$RETVAL" == "" ]; then RETVAL=0; fi
-}
+S_CHAR='$8'
+S_ID='$14'
 
 function f_pos_stats {
+  count_all () { RETVAL=`grep '^'$2 $1 | wc -l`; }
+  count_all_pos () { RETVAL=`awk '/^'$2'/ && ('$S_END' == "'$3'")' $1 \
+    | wc -l`; }
+  count () { RETVAL=`awk '/^'$2'/ && ('$S_CHAR' == "'$3'")' $1 | wc -l`; }
+  count_pos () { RETVAL=`awk '/^'$2'/ && ('$S_END' == "'$3'") \
+    && ('$S_CHAR' == "'$4'")' $1 | wc -l`; }
+  nof_seq_long () { RETVAL=`grep "^$2--$2" $1 | awk '{ print $2 }'`
+    if [ "$RETVAL" == "" ]; then RETVAL=0; fi; }
   OUTFILE=$2
   MAX_READ_LEN=`grep 'maximum length' $3 | awk '{ print $4 }'`
   NOFSEQ=`grep 'sequences' $3 | awk '{ print $2 }'`
-  nof_seq_long $3 1
-  S=$RETVAL # number of sequence which are shorter than the current length
+  nof_seq_long $3 1; S=$RETVAL
   P=`echo "$S / $NOFSEQ" | bc -l`
   rm -f $OUTFILE
   touch $OUTFILE
@@ -218,63 +220,42 @@ function f_pos_stats {
   H="# pos\t%reads\tedits\tins\tdel"
   H="$H\tinsA\tinsC\tinsG\tinsT\tdelA\tdelC\tdelG\tdelT"
   echo -e "$H" >> $OUTFILE
-  count_all $1 I
-  I=$RETVAL
-  count_all $1 D
-  D=$RETVAL
+  count_all $1 I; I=$RETVAL
+  count_all $1 D; D=$RETVAL
   A=$[$I+ $D]
-  count $1 I a
-  Ia=$RETVAL
-  count $1 I c
-  Ic=$RETVAL
-  count $1 I g
-  Ig=$RETVAL
-  count $1 I t
-  It=$RETVAL
-  count $1 D a
-  Da=$RETVAL
-  count $1 D c
-  Dc=$RETVAL
-  count $1 D g
-  Dg=$RETVAL
-  count $1 D t
-  Dt=$RETVAL
+  count $1 I a; Ia=$RETVAL
+  count $1 I c; Ic=$RETVAL
+  count $1 I g; Ig=$RETVAL
+  count $1 I t; It=$RETVAL
+  count $1 D a; Da=$RETVAL
+  count $1 D c; Dc=$RETVAL
+  count $1 D g; Dg=$RETVAL
+  count $1 D t; Dt=$RETVAL
   echo -e "all\t100.00\t$A\t$I\t$D\t$Ia\t$Ic\t$Ig\t$It\t$Da\t$Dc\t$Dg\t$Dt" \
     >> $OUTFILE
   for ((i = 2; i < $MAX_READ_LEN; i++)); do
     nof_seq_long $3 $i
     S=$[$RETVAL+$S]
     P=`echo "(1.0 - ($S / $NOFSEQ)) * 100" | bc -l`
-    count_all_pos $1 I $i
-    I=$RETVAL
-    count_all_pos $1 D $i
-    D=$RETVAL
+    count_all_pos $1 I $i; I=$RETVAL
+    count_all_pos $1 D $i; D=$RETVAL
     A=$[$I+ $D]
-    count_pos $1 I $i a
-    Ia=$RETVAL
-    count_pos $1 D $i a
-    Da=$RETVAL
-    count_pos $1 I $i c
-    Ic=$RETVAL
-    count_pos $1 D $i c
-    Dc=$RETVAL
-    count_pos $1 I $i g
-    Ig=$RETVAL
-    count_pos $1 D $i g
-    Dg=$RETVAL
-    count_pos $1 I $i t
-    It=$RETVAL
-    count_pos $1 D $i t
-    Dt=$RETVAL
+    count_pos $1 I $i a; Ia=$RETVAL
+    count_pos $1 D $i a; Da=$RETVAL
+    count_pos $1 I $i c; Ic=$RETVAL
+    count_pos $1 D $i c; Dc=$RETVAL
+    count_pos $1 I $i g; Ig=$RETVAL
+    count_pos $1 D $i g; Dg=$RETVAL
+    count_pos $1 I $i t; It=$RETVAL
+    count_pos $1 D $i t; Dt=$RETVAL
     printf "$i\t%.2f\t$A\t$I\t$D\t$Ia\t$Ic\t$Ig\t$It\t$Da\t$Dc\t$Dg\t$Dt\n" $P \
       >> $OUTFILE
   done
 }
 
-function f_corrs_per_read {
-  ID='$11'
-  grep -v '^#' $1 | awk '{ print '$ID' }' | uniq -c > $MAP~tmpfile
-  echo "# corrected reads: `cat $MAP~tmpfile | wc -l`" >> $1
+function f_edits_per_read {
+  grep -v '^#' $1 | awk '{ print '$S_ID' }' | sort | uniq -c > $MAP~tmpfile
+  echo "# edited reads: `cat $MAP~tmpfile | wc -l`" >> $1
   t=0
   for ((i=1;i<10;i++)); do
     c=`awk ' $1 == '$i $MAP~tmpfile | wc -l`
@@ -282,10 +263,10 @@ function f_corrs_per_read {
       break
     else
       t=$[$t+($c*$i)]
-      echo -e "# reads corrected $i time(s): $c" >> $1
+      echo -e "# reads edited $i time(s): $c" >> $1
     fi
   done
-  echo -e "# total corrections: $t" >> $1
+  echo -e "# total edits: $t" >> $1
   rm $MAP~tmpfile
 }
 
@@ -300,7 +281,7 @@ function f_stats {
   $GT dev hopcorrect -v -r $GENOME -m sorted.$MAP.bam $AOPT \
       -o hop_$READS -stats $HOP_PARAMS >| $MAP.hop_stats
   echo
-  f_corrs_per_read $MAP.hop_stats
+  f_edits_per_read $MAP.hop_stats
   echo "==== done "
   echo
   echo "correction statistics:                $MAP.hop_stats"
@@ -322,7 +303,9 @@ function f_dists  {
   echo
 }
 
-if [ $# -lt 4 -o $# -gt 5 ]; then f_die; fi
+if [ "$ACTION" != "help" ]; then
+  if [ $# -lt 4 -o $# -gt 5 ]; then f_die; fi
+fi
 case "$ACTION" in
   'prepare')   f_prepare   ;;
   'correct')   f_correct   ;;
@@ -330,5 +313,6 @@ case "$ACTION" in
   'run')       f_run       ;;
   'stats')     f_stats     ;;
   'dists')     f_dists     ;;
+  'help')      f_help      ;;
   *)           f_die       ;;
 esac
