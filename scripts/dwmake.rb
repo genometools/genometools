@@ -31,7 +31,7 @@ def parseargs(argv)
   options.speed = false
   options.prof = false
   options.ddd = false
-  options.j = 3
+  options.threads = false
   opts = OptionParser.new
   opts.on("-m","--m64","compile 64 bit binary") do |x|
     options.m64 = true
@@ -51,8 +51,9 @@ def parseargs(argv)
     end
     options.ddd = true
   end
-  opts.on("-j n", Integer, "number of processes for make") do |x|
-    options.j = x
+  opts.on("-j [n]", Integer, "number of processes for make") do |x|
+    options.threads = true
+    options.j = x || ""
   end
   rest = opts.parse(argv)
   if not rest.empty?
@@ -63,7 +64,7 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  fp.print "all:\n\t\${MAKE} -j#{options.j} curses=no cairo=no"
+  fp.print "all:\n\t\${MAKE} curses=no cairo=no"
   fp.print " CFLAGS+=-fstrict-aliasing"
   if options.ddd
     fp.print " opt=no"
@@ -76,6 +77,9 @@ def makecompilerflags(fp,options)
   end
   if options.prof
     fp.print " prof=yes"
+  end
+  if options.threads
+    fp.print " -j#{options.j}"
   end
   fp.puts " CC='ccache gcc'"
 end
