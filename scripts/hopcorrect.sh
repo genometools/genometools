@@ -26,12 +26,30 @@ PARAMS=${PARAMS:=""}
 # command line parameters:
 USG="<action> <genome.fas> <CDS.gff> <reads.fastq> [<mates.fastq>]"
 ACTION=$1
+if [[ "$ACTION" =~ "eval" ]]; then
+  USG="eval <sequenced_genome.fas> <reference_genome.fas>"
+  USG="$USG <CDS.gff> <reads.fastq> [<mates.fastq>]"
+  SGENOME=$2
+  shift
+fi
 GENOME=$2
 ANNOTATION=$3
 READS=$4
 MATES=$5
 MAP="${READS}.${GENOME}"
 MAPM="${MATES}.${GENOME}"
+
+function show_globals {
+  echo "USG=$USG"
+  echo "ACTION=$ACTION"
+  echo "SGENOME=$SGENOME"
+  echo "GENOME=$GENOME"
+  echo "ANNOTATION=$ANNOTATION"
+  echo "READS=$READS"
+  echo "MATES=$MATES"
+  echo "MAP=$MAP"
+  echo "MAPM=$MAPM"
+}
 
 # hardcoded values:
 NOGFF='--'
@@ -41,7 +59,48 @@ function f_shorthelp {
   echo
   echo "  Usage: $0 $USG"
   echo
-  echo "Use the \"help\" action for more information."
+  echo "Use \"$0 help\" for more information."
+}
+
+function f_eval_help {
+  echo "Reference-based correction of homopolymer length in sequencing reads."
+  echo
+  echo "  Usage: $0 $USG"
+  echo
+  echo "     eval              evaluate corrections to reads of a known genome"
+  echo
+  echo "     eval-make-gold    prepare golden standard, i.e. evaluation set "
+  echo "                       for reads which have been sequenced from "
+  echo "                       <sequenced_genome.fas>"
+  echo
+  echo "     eval-prepare      prepare for the evaluation of corrections "
+  echo "                       against <reference_genome.fas>"
+  echo
+  echo "     eval-help         show this message"
+  echo
+  echo " - <sequenced_genome.fas> is a single sequence Fasta file which"
+  echo "   contains the genome that has been sequenced"
+  echo
+  echo " - <reference_genome.fas> is a single sequence Fasta file which"
+  echo "   contains the reference against which the correction is done"
+  echo
+  echo " - CDS.gff contains the annotation of genome.fas;"
+  echo "   instead of a filename '$NOGFF' can be specified; in this case,"
+  echo "   homopolymer are corrected in the whole sequence instead of only "
+  echo "   in coding regions; this is however not reccomended"
+  echo
+  echo " - <reads.fastq> contains the reads to correct"
+  echo
+  echo " - <reads2.fastq> contains the mate pairs (if available)"
+  echo
+  echo "Before using eval, both eval-make-gold and eval-prepare must be called."
+  echo
+  echo "Further parameters can be optionally passed using env variables:"
+  echo " - BWA          path to bwa binary             (default: $BWA)"
+  echo " - SAMTOOLS     path to samtools binary        (default: $SAMTOOLS)"
+  echo " - GT           path to GenomeTools binary     (default: $GT)"
+  echo " - BWA_T        number of bwa threads          (default: $BWA_T)"
+  echo " - PARAMS       further params for hopcorrect  (default: $PARAMS)"
 }
 
 function f_help {
@@ -70,6 +129,9 @@ function f_help {
   echo "     stats         collect statistics for each correction position"
   echo "                   (useful for debugging and evaluation,"
   echo "                   it may be slow and require lot of memory)"
+  echo
+  echo "     eval          evaluate corrections to reads of a known genome;"
+  echo "                   use $0 eval-help for more information"
   echo
   echo "     help          shows this message"
   echo
@@ -190,16 +252,18 @@ function f_run {
 }
 
 # position of fields in correction stats output table
-S_END='$5'
+EDIT='$1'
+S_HEND='$5'
+C_LEN='$7'
 S_CHAR='$8'
 S_ID='$14'
 
 function f_pos_stats {
   count_all () { RETVAL=`grep '^'$2 $1 | wc -l`; }
-  count_all_pos () { RETVAL=`awk '/^'$2'/ && ('$S_END' == "'$3'")' $1 \
+  count_all_pos () { RETVAL=`awk '/^'$2'/ && ('$S_HEND' == "'$3'")' $1 \
     | wc -l`; }
   count () { RETVAL=`awk '/^'$2'/ && ('$S_CHAR' == "'$3'")' $1 | wc -l`; }
-  count_pos () { RETVAL=`awk '/^'$2'/ && ('$S_END' == "'$3'") \
+  count_pos () { RETVAL=`awk '/^'$2'/ && ('$S_HEND' == "'$3'") \
     && ('$S_CHAR' == "'$4'")' $1 | wc -l`; }
   nof_seq_long () { RETVAL=`grep "^$2--$2" $1 | awk '{ print $2 }'`
     if [ "$RETVAL" == "" ]; then RETVAL=0; fi; }
@@ -288,6 +352,54 @@ function f_stats {
   echo
 }
 
+stats2eds () {
+  grep -v '^#' $MAP.hop_stats | awk '{ printf("%-30s\t%-5s\t%s\t%s\n", \
+      '$S_ID', '$S_HEND', '$EDIT', '$C_LEN') }' | sort > $MAP.eds
+}
+
+function f_eval_make_gold {
+  GENOME=$SGENOME
+  MAP="${READS}.${GENOME}"
+  ANNOTATION=$NOGFF
+  f_prepare
+  f_stats
+  stats2eds
+}
+
+function f_eval_prepare {
+  f_prepare
+}
+
+function f_eval {
+  f_stats
+  stats2eds
+  SMAP="${READS}.${SGENOME}"
+  EDSDIFF="$SGENOME.$GENOME.eds_diff"
+  INFO="$READS.$SGENOME.$GENOME.eval"
+  diff $SMAP.eds $MAP.eds > $EDSDIFF
+  CORR=`cat $MAP.eds | wc -l`
+  ERR=`cat $SMAP.eds | wc -l`
+  FN=`grep '^<' $EDSDIFF | wc -l`
+  FP=`grep '^>' $EDSDIFF | wc -l`
+  TP=$[$CORR-$FP]
+  echo
+  echo "Statistics of the correction of the reads $READS" | tee $INFO
+  echo "using $GENOME as reference for the correction" | tee -a $INFO
+  echo "and a golden standard correction set based on $SGENOME" | tee -a $INFO
+  echo | tee -a $INFO
+  echo "corrections:      $CORR" | tee -a $INFO
+  echo "errors:           $ERR"  | tee -a $INFO
+  echo "true positives:   $TP"   | tee -a $INFO
+  echo "false positives:  $FP"   | tee -a $INFO
+  echo "false negatives:  $FN"   | tee -a $INFO
+  SN=`echo "$TP * 100 / ($TP + $FN)" | bc -l`
+  PR=`echo "$TP * 100 / ($TP + $FP)" | bc -l`
+  echo | tee -a $INFO
+  printf "sensitivity: %.2f %%\n" $SN | tee -a $INFO
+  printf "precision:   %.2f %%\n" $PR | tee -a $INFO
+  echo
+}
+
 function f_dists  {
   echo "==== Computing distributions..."
   echo
@@ -303,16 +415,20 @@ function f_dists  {
   echo
 }
 
-if [ "$ACTION" != "help" ]; then
+if [ "$ACTION" != "help" -a "$ACTION" != "eval-help" ]; then
   if [ $# -lt 4 -o $# -gt 5 ]; then f_die; fi
 fi
 case "$ACTION" in
-  'prepare')   f_prepare   ;;
-  'correct')   f_correct   ;;
-  'clean')     f_clean     ;;
-  'run')       f_run       ;;
-  'stats')     f_stats     ;;
-  'dists')     f_dists     ;;
-  'help')      f_help      ;;
-  *)           f_die       ;;
+  'prepare')            f_prepare           ;;
+  'correct')            f_correct           ;;
+  'clean')              f_clean             ;;
+  'run')                f_run               ;;
+  'stats')              f_stats             ;;
+  'dists')              f_dists             ;;
+  'help')               f_help              ;;
+  'eval-help')          f_eval_help         ;;
+  'eval-make-gold')     f_eval_make_gold    ;;
+  'eval-prepare')       f_eval_prepare      ;;
+  'eval')               f_eval              ;;
+  *)                    f_die               ;;
 esac
