@@ -147,7 +147,8 @@ static int traverse_units(lua_State *L,
 
   unit_info->map_files = gt_calloc((size_t) unit_info->num_of_files,
                                    sizeof (unit_info->map_files));
-  unit_info->genome_names = gt_str_array_new();
+
+  gt_str_array_reset(unit_info->genome_names);
 
   lua_pushnil(L); /*the first outer key*/
   while (lua_next(L, -2) != 0 && !had_err) {
@@ -168,18 +169,16 @@ static int traverse_units(lua_State *L,
   }
   if (!had_err && files_added != unit_info->num_of_files) {
     had_err = -1;
-    gt_error_set(err, "different number of files in index"
-                      " (%lu) than in unitfile (%lu)!",
-                 unit_info->num_of_files,
-                 files_added);
+    gt_error_set(err, "number of files in index (%lu) and unitfile (%lu)! "
+                 "differ!", unit_info->num_of_files, files_added);
   }
   return had_err;
 }
 
 int gt_shu_unit_file_info_read(const GtStr *unitfile,
-                                GtShuUnitFileInfo *unit_info,
-                                GT_UNUSED GtLogger *logger,
-                                GtError *err)
+                               GtShuUnitFileInfo *unit_info,
+                               GT_UNUSED GtLogger *logger,
+                               GtError *err)
 {
   int had_err = 0;
   /* open Lua */
@@ -223,6 +222,7 @@ GtShuUnitFileInfo *gt_shu_unit_info_new(const GtEncseq *encseq)
   unit_info->num_of_genomes = 0;
   unit_info->num_of_files = gt_encseq_num_of_files(encseq);
   unit_info->file_names = gt_encseq_filenames(encseq);
+  unit_info->encseq = encseq;
   gt_shu_unit_info_files_as_units(unit_info);
   return unit_info;
 }

@@ -29,6 +29,7 @@ typedef struct {
   const GtStrArray *file_names;
   /*array holding the mapping of file to genome*/
   unsigned long *map_files;
+  const GtEncseq *encseq;
 } GtShuUnitFileInfo;
 
 /* Reads the lua <unitfile> and collects the names of the genomes, and mapping
