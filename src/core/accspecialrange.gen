@@ -228,7 +228,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
         += (unsigned long) (exceptiontable->maxrangevalue+1);
     }
 
-    ssptaboutinfo_processsanyposition(ssptaboutinfo,currentposition);
+    ssptaboutinfo_processanyposition(ssptaboutinfo,currentposition);
     bitwise <<= 2;
     if (ISNOTSPECIAL(cc))
     {

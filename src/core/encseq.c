@@ -883,18 +883,26 @@ static void addswtabletomapspectable(GtMapspec *mapspec,
   }
 }
 
+typedef struct
+{
+  unsigned long totallength,
+                numofdbsequences;
+  GtEncseqAccessType satsep;
+  GtSWtable *ssptabptr;
+} Gtssptransferinfo;
+
 static void assignssptabmapspecification(GtMapspec *mapspec,
                                          void *voidinfo,
                                          GT_UNUSED bool writemode)
 {
-  GtEncseq *encseq = (GtEncseq *) voidinfo;
+  Gtssptransferinfo *ssptransferinfo = (Gtssptransferinfo *) voidinfo;
 
   addswtabletomapspectable(mapspec,
-                           &encseq->ssptab,
+                           ssptransferinfo->ssptabptr,
                            false,
                            false,
-                           encseq->totallength,
-                           encseq->satsep);
+                           ssptransferinfo->totallength,
+                           ssptransferinfo->satsep);
 }
 
 #define SIZEOFSWTABLE(BASETYPE,MAXRANGEVALUE)\
@@ -927,7 +935,8 @@ static uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
   }
 }
 
-static int flushssptab2file(const char *indexname,GtEncseq *encseq,
+static int flushssptab2file(const char *indexname,
+                            Gtssptransferinfo *ssptransferinfo,
                             GtError *err)
 {
   FILE *fp;
@@ -944,12 +953,15 @@ static int flushssptab2file(const char *indexname,GtEncseq *encseq,
     unsigned long sizessptab;
 
     sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
-                              gt_encseq_sizeofSWtable(encseq->satsep,
-                                            false,
-                                            false,
-                                            encseq->totallength,
-                                            encseq->numofdbsequences-1));
-    if (gt_mapspec_write(assignssptabmapspecification, fp, encseq, sizessptab,
+                              gt_encseq_sizeofSWtable(ssptransferinfo->satsep,
+                                                      false,
+                                                      false,
+                                                      ssptransferinfo->
+                                                        totallength,
+                                                      ssptransferinfo->
+                                                        numofdbsequences-1));
+    if (gt_mapspec_write(assignssptabmapspecification, fp, ssptransferinfo,
+                         sizessptab,
                          err) != 0)
     {
       haserr = true;
@@ -966,6 +978,7 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
   bool haserr = false;
   GtStr *tmpfilename;
   unsigned long sizessptab;
+  Gtssptransferinfo ssptransferinfo;
 
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(indexname);
@@ -978,7 +991,12 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
                                            false,
                                            encseq->totallength,
                                            encseq->numofdbsequences-1));
-  if (gt_mapspec_read(assignssptabmapspecification, encseq, tmpfilename,
+  ssptransferinfo.totallength = encseq->totallength;
+  ssptransferinfo.numofdbsequences = encseq->numofdbsequences;
+  ssptransferinfo.satsep = encseq->satsep;
+  ssptransferinfo.ssptabptr = &encseq->ssptab;
+  if (gt_mapspec_read(assignssptabmapspecification, &ssptransferinfo,
+                      tmpfilename,
                       sizessptab, &encseq->ssptabmappedptr, err) != 0)
   {
     haserr = true;
@@ -1893,8 +1911,8 @@ static void ssptaboutinfo_setendidx(Gtssptaboutinfo *ssptaboutinfo)
   }
 }
 
-static void ssptaboutinfo_processsanyposition(Gtssptaboutinfo *ssptaboutinfo,
-                                              unsigned long currentposition)
+static void ssptaboutinfo_processanyposition(Gtssptaboutinfo *ssptaboutinfo,
+                                             unsigned long currentposition)
 {
   if (ssptaboutinfo != NULL && currentposition == ssptaboutinfo->nextcheckpos)
   {
@@ -1911,6 +1929,31 @@ static void ssptaboutinfo_finalize(Gtssptaboutinfo *ssptaboutinfo)
     {
       ssptaboutinfo_setendidx(ssptaboutinfo);
     }
+  }
+}
+
+static void gt_ssptab_delete(GtEncseqAccessType satsep,GtSWtable *ssptab)
+{
+  switch (satsep)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      gt_assert(ssptab->st_uchar.rangelengths == NULL);
+      gt_free(ssptab->st_uchar.positions);
+      gt_free(ssptab->st_uchar.endidxinpage);
+      break;
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      gt_assert(ssptab->st_uint16.rangelengths == NULL);
+      gt_free(ssptab->st_uint16.positions);
+      gt_free(ssptab->st_uint16.endidxinpage);
+      break;
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      gt_assert(ssptab->st_uint32.rangelengths == NULL);
+      gt_free(ssptab->st_uint32.positions);
+      gt_free(ssptab->st_uint32.endidxinpage);
+      break;
+    default:
+      gt_assert(satsep == GT_ACCESS_TYPE_UNDEFINED);
+      break;
   }
 }
 
@@ -1986,27 +2029,7 @@ void gt_encseq_delete(GtEncseq *encseq)
       gt_free(encseq->exceptiontable.st_uint32.mappositions);
       gt_free(encseq->exceptiontable.st_uint32.rangelengths);
     }
-    switch (encseq->satsep)
-    {
-      case GT_ACCESS_TYPE_UCHARTABLES:
-        gt_assert(encseq->ssptab.st_uchar.rangelengths == NULL);
-        gt_free(encseq->ssptab.st_uchar.positions);
-        gt_free(encseq->ssptab.st_uchar.endidxinpage);
-        break;
-      case GT_ACCESS_TYPE_USHORTTABLES:
-        gt_assert(encseq->ssptab.st_uint16.rangelengths == NULL);
-        gt_free(encseq->ssptab.st_uint16.positions);
-        gt_free(encseq->ssptab.st_uint16.endidxinpage);
-        break;
-      case GT_ACCESS_TYPE_UINT32TABLES:
-        gt_assert(encseq->ssptab.st_uint32.rangelengths == NULL);
-        gt_free(encseq->ssptab.st_uint32.positions);
-        gt_free(encseq->ssptab.st_uint32.endidxinpage);
-        break;
-      default:
-        gt_assert(encseq->satsep == GT_ACCESS_TYPE_UNDEFINED);
-        break;
-    }
+    gt_ssptab_delete(encseq->satsep,&encseq->ssptab);
   }
   if (encseq->ssptabmappedptr != NULL)
   {
@@ -2263,7 +2286,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
       {
         ssptaboutinfo_processseppos(ssptaboutinfo,currentposition);
       }
-      ssptaboutinfo_processsanyposition(ssptaboutinfo,currentposition);
+      ssptaboutinfo_processanyposition(ssptaboutinfo,currentposition);
     } else
     {
       if (retval < 0)
@@ -2453,7 +2476,7 @@ static int fillViabytecompress(GtEncseq *encseq,
         gt_assert(cc < (GtUchar) numofchars);
       }
       gt_assert(currentposition < encseq->totallength);
-      ssptaboutinfo_processsanyposition(ssptaboutinfo,currentposition);
+      ssptaboutinfo_processanyposition(ssptaboutinfo,currentposition);
       bitpackarray_store_uint32(encseq->bitpackarray,
                                 (BitOffset) currentposition,
                                 (uint32_t) cc);
@@ -2915,7 +2938,7 @@ static int fillViabitaccess(GtEncseq *encseq,
           ssptaboutinfo_processseppos(ssptaboutinfo,currentposition);
         }
       }
-      ssptaboutinfo_processsanyposition(ssptaboutinfo,currentposition);
+      ssptaboutinfo_processanyposition(ssptaboutinfo,currentposition);
       bitwise <<= 2;
       if (ISNOTSPECIAL(cc))
       {
@@ -4714,35 +4737,44 @@ static unsigned int determineleastprobablecharacter(const GtAlphabet *alpha,
   return minidx;
 }
 
-static void gt_encseq_ssptab_copy(unsigned long totallength,
-                                  unsigned long numofsequences,
-                                  GtEncseqAccessType sat,
-                                  const GtEncseq *encseq)
+static int gt_encseq_ssptab_copy(const char *indexname,
+                                 unsigned long totallength,
+                                 unsigned long numofdbsequences,
+                                 GtEncseqAccessType sat,
+                                 const GtEncseq *encseq,
+                                 GtError *err)
 {
   GtSWtable ssptab;
   Gtssptaboutinfo *ssptaboutinfo;
-  unsigned long seqnum, seppos = 0;
+  unsigned long idx, seqnum, seppos = 0;
+  Gtssptransferinfo ssptransferinfo;
+  int ret;
 
-  gt_assert (numofsequences > 1UL && sat != GT_ACCESS_TYPE_EQUALLENGTH);
-
-  initSWtable(&ssptab,totallength,encseq->satsep,numofsequences-1);
+  gt_assert (numofdbsequences > 1UL && sat != GT_ACCESS_TYPE_EQUALLENGTH);
+  initSWtable(&ssptab,totallength,encseq->satsep,numofdbsequences-1);
   setencsequtablesNULL(encseq->satsep,&ssptab);
-  ssptaboutinfo = ssptaboutinfo_new(sat,totallength,numofsequences,&ssptab);
+  ssptaboutinfo = ssptaboutinfo_new(sat,totallength,numofdbsequences,&ssptab);
   gt_assert(ssptaboutinfo != NULL);
-
-  for (seqnum=0; seqnum < numofsequences - 1; seqnum++)
+  for (idx=0, seqnum = 0, seppos = gt_encseq_seqlength(encseq, 0);
+       idx < totallength; idx++)
   {
-    unsigned long width = gt_encseq_seqlength(encseq, seqnum);
-    if (seqnum == 0)
+    if (idx == seppos)
     {
-      seppos = width;
-    } else
-    {
-      seppos += width + 1;
+      ssptaboutinfo_processseppos(ssptaboutinfo,seppos);
+      seqnum++;
+      seppos += gt_encseq_seqlength(encseq, seqnum) + 1;
     }
-    ssptaboutinfo_processseppos(ssptaboutinfo,seppos);
+    ssptaboutinfo_processanyposition(ssptaboutinfo, idx);
   }
+  ssptaboutinfo_finalize(ssptaboutinfo);
   ssptaboutinfo_delete(ssptaboutinfo);
+  ssptransferinfo.totallength = totallength;
+  ssptransferinfo.numofdbsequences = numofdbsequences;
+  ssptransferinfo.satsep = encseq->satsep;
+  ssptransferinfo.ssptabptr = &ssptab;
+  ret = flushssptab2file(indexname, &ssptransferinfo, err);
+  gt_ssptab_delete(encseq->satsep,&ssptab);
+  return ret;
 }
 
 #define SIZEOFFUNCTAB sizeof (encodedseqfunctab)/sizeof (encodedseqfunctab[0])
@@ -8117,10 +8149,18 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
   if (!haserr)
   {
     gt_assert(encseq != NULL);
-    if (encseq->satsep != GT_ACCESS_TYPE_UNDEFINED &&
-        flushssptab2file(indexname,encseq,err) != 0)
+    if (encseq->satsep != GT_ACCESS_TYPE_UNDEFINED)
     {
-      haserr = true;
+      Gtssptransferinfo ssptransferinfo;
+
+      ssptransferinfo.totallength = encseq->totallength;
+      ssptransferinfo.numofdbsequences = encseq->numofdbsequences;
+      ssptransferinfo.satsep = encseq->satsep;
+      ssptransferinfo.ssptabptr = &encseq->ssptab;
+      if (flushssptab2file(indexname,&ssptransferinfo,err) != 0)
+      {
+        haserr = true;
+      }
     }
   }
   if (!haserr && encseq != NULL && encseq->has_exceptiontable)
@@ -8510,10 +8550,15 @@ int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
       {
         haserr = true;
       }
-      gt_encseq_ssptab_copy(gt_encseq_total_length(encseq),
-                            gt_encseq_num_of_sequences(encseq),
-                            encseq->sat,
-                            encseq);
+      if (!haserr && gt_encseq_ssptab_copy(indexnamecopy,
+                                           gt_encseq_total_length(encseq),
+                                           gt_encseq_num_of_sequences(encseq),
+                                           encseq->sat,
+                                           encseq,
+                                           err) != 0)
+      {
+        haserr = true;
+      }
     }
     gt_free(indexnamecopy);
   }
@@ -9553,7 +9598,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
       {
         ssptaboutinfo_processseppos(ssptaboutinfo, i);
       }
-      ssptaboutinfo_processsanyposition(ssptaboutinfo, i);
+      ssptaboutinfo_processanyposition(ssptaboutinfo, i);
     }
     GT_FREEARRAY(&eb->ssptab, GtUlong);
     ssptaboutinfo_finalize(ssptaboutinfo);
