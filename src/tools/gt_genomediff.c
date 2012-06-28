@@ -245,10 +245,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     if (timer != NULL)
       gt_timer_show_progress(timer, "start shu search", stdout);
 
-    had_err = gt_genomediff_shu(logger,
-                                arguments,
-                                timer,
-                                err);
+    had_err = gt_genomediff_shulen_sum(logger, arguments, timer, err);
   }
   if (timer != NULL) {
     gt_timer_show_progress_final(timer, stdout);
