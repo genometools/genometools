@@ -49,6 +49,9 @@ struct GtLTRClusterStream {
   unsigned long psmall,
                 plarge,
                 next_index;
+  int match_score, mismatch_cost, gap_open_cost,
+      gap_ext_cost, xdrop, ydrop, zdrop, mscoregapped,
+      mscoregapless, k;
   char **current_state;
 };
 
@@ -402,7 +405,16 @@ static int process_feature(GtLTRClusterStream *lcs,
   encseq = (GtEncseq*) gt_hashmap_get(lcs->feat_to_encseq, feature);
   gt_log_log("found encseq %p for feature %s", encseq, feature);
   if (!had_err) {
-    mi = gt_match_iterator_last_new(encseq, encseq, err);
+    mi = gt_match_iterator_last_new(encseq, encseq, lcs->match_score,
+                                        lcs->mismatch_cost,
+                                        lcs->gap_open_cost,
+                                        lcs->gap_ext_cost,
+                                        lcs->xdrop,
+                                        lcs->ydrop,
+                                        lcs->zdrop,
+                                        lcs->k,
+                                        lcs->mscoregapped,
+                                        lcs->mscoregapless, err);
     if (mi != NULL) {
       while ((status = gt_match_iterator_next(mi, &match, err))
              != GT_MATCHER_STATUS_END) {
@@ -543,6 +555,16 @@ const GtNodeStreamClass* gt_ltr_cluster_stream_class(void)
 
 GtNodeStream* gt_ltr_cluster_stream_new(GtNodeStream *in_stream,
                                         GtEncseq *encseq,
+                                        int match_score,
+                                        int mismatch_cost,
+                                        int gap_open_cost,
+                                        int gap_ext_cost,
+                                        int xdrop,
+                                        int ydrop,
+                                        int zdrop,
+                                        int k,
+                                        int mscoregapped,
+                                        int mscoregapless,
                                         unsigned long plarge,
                                         unsigned long psmall,
                                         char **current_state,
@@ -560,6 +582,16 @@ GtNodeStream* gt_ltr_cluster_stream_new(GtNodeStream *in_stream,
                            gt_ltr_cluster_prepare_seq_visitor_new(encseq, err));
   lcs->first_next = true;
   lcs->next_index = 0;
+  lcs->match_score = match_score;
+  lcs->mismatch_cost = mismatch_cost;
+  lcs->gap_open_cost = gap_open_cost;
+  lcs->gap_ext_cost = gap_ext_cost;
+  lcs->xdrop = xdrop;
+  lcs->ydrop = ydrop;
+  lcs->zdrop = zdrop;
+  lcs->mscoregapped = mscoregapped;
+  lcs->mscoregapless = mscoregapless;
+  lcs->k = k;
   lcs->plarge = plarge;
   lcs->psmall = psmall;
   lcs->current_state = current_state;

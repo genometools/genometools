@@ -287,7 +287,18 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
     }
     gt_encseq_loader_delete(el);
     if (!had_err) {
-      mp = gt_match_iterator_last_new(es1, es2, err);
+      mp = gt_match_iterator_last_new(es1, es2,
+                                      GT_UNDEF_INT,
+                                      GT_UNDEF_INT,
+                                      GT_UNDEF_INT,
+                                      GT_UNDEF_INT,
+                                      GT_UNDEF_INT,
+                                      GT_UNDEF_INT,
+                                      GT_UNDEF_INT,
+                                      10,
+                                      GT_UNDEF_INT,
+                                      GT_UNDEF_INT,
+                                      err);
       if (!mp)
         had_err = -1;
     }

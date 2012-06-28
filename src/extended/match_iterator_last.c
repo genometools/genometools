@@ -20,6 +20,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include "core/cstr.h"
+#include "core/cstr_array.h"
 #include "core/encseq.h"
 #include "core/fasta.h"
 #include "core/fileutils.h"
@@ -48,7 +50,8 @@ typedef struct {
       xdrop,
       ydrop,
       zdrop,
-      minmatchlen,
+      mscoregapped,
+      mscoregapless,
       k;
 } GtLastOptions;
 
@@ -70,16 +73,89 @@ struct GtMatchIteratorLast {
 };
 
 static int get_index_parameterization(GtMatchIteratorLast *mil, GtStr *out,
-                                      GT_UNUSED GtError *err)
+                                GtError *err)
 {
   int had_err = 0;
   gt_assert(mil);
   gt_error_check(err);
   gt_str_reset(out);
-  /* TODO: read options and insert switches */
   gt_str_append_cstr(out, mil->pvt->tmpdir);
   gt_str_append_cstr(out, "/");
   gt_str_append_cstr(out, gt_encseq_indexname(mil->pvt->es1));
+  return had_err;
+}
+
+static int get_run_parameterization(GtMatchIteratorLast *mil, GtStr *out,
+                                    GtStr *lastbinary,
+                                    const char *indexname, const char *qryname,
+                                    GtError *err)
+{
+  int had_err = 0;
+  const char *env;
+  gt_assert(mil);
+  gt_error_check(err);
+  gt_str_reset(out);
+  gt_str_reset(lastbinary);
+
+  env = getenv("GT_LAST_PATH");
+  if (env) {
+    gt_str_append_cstr(out, env);
+    gt_str_append_cstr(out, "/lastal");
+    if (!gt_file_exists(gt_str_get(out))) {
+      gt_error_set(err, "cannot find LAST executable at %s", gt_str_get(out));
+      had_err = -1;
+    }
+  } else {
+    gt_str_append_cstr(out, "lastal");
+  }
+  gt_str_append_str(lastbinary, out);
+
+  if (!had_err) {
+    if (mil->pvt->op.match_score != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -r ");
+      gt_str_append_int(out, mil->pvt->op.match_score);
+    }
+    if (mil->pvt->op.mismatch_cost != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -q ");
+      gt_str_append_int(out, mil->pvt->op.mismatch_cost);
+    }
+    if (mil->pvt->op.gap_open_cost != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -a ");
+      gt_str_append_int(out, mil->pvt->op.gap_open_cost);
+    }
+    if (mil->pvt->op.gap_ext_cost != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -b ");
+      gt_str_append_int(out, mil->pvt->op.gap_ext_cost);
+    }
+    if (mil->pvt->op.xdrop != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -x ");
+      gt_str_append_int(out, mil->pvt->op.xdrop);
+    }
+    if (mil->pvt->op.ydrop != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -y ");
+      gt_str_append_int(out, mil->pvt->op.ydrop);
+    }
+    if (mil->pvt->op.zdrop != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -z ");
+      gt_str_append_int(out, mil->pvt->op.zdrop);
+    }
+    if (mil->pvt->op.k != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -k ");
+      gt_str_append_int(out, mil->pvt->op.k);
+    }
+    if (mil->pvt->op.mscoregapped != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -e ");
+      gt_str_append_int(out, mil->pvt->op.mscoregapped);
+    }
+    if (mil->pvt->op.mscoregapless != GT_UNDEF_INT) {
+      gt_str_append_cstr(out, " -d ");
+      gt_str_append_int(out, mil->pvt->op.mscoregapless);
+    }
+  }
+  gt_str_append_cstr(out," -f 0 ");
+  gt_str_append_cstr(out, indexname);
+  gt_str_append_cstr(out," ");
+  gt_str_append_cstr(out, qryname);
   return had_err;
 }
 
@@ -197,13 +273,15 @@ static GtMatchIteratorStatus gt_match_iterator_last_next(GtMatchIterator *gmpi,
 {
   int had_err = 0, rval;
   GtMatchIteratorLast *mil;
-  GtStr *fn = NULL;
+  GtStr *tmp = NULL,
+        *lastbinary = NULL,
+        *matchfilename = NULL;
   gt_assert(gmpi && match);
   gt_error_check(err);
   mil = gt_match_iterator_last_cast(gmpi);
 
   if (!mil->pvt->queryfilename) {
-    fn = gt_str_clone(mil->pvt->idxfilename);
+    GtStr *fn = gt_str_clone(mil->pvt->idxfilename);
     gt_str_append_cstr(fn, ".qry");
     if (!gt_file_exists(gt_str_get(fn))) {
       last_prepare_fasta_seqs(gt_str_get(fn), mil->pvt->es2,
@@ -213,17 +291,34 @@ static GtMatchIteratorStatus gt_match_iterator_last_next(GtMatchIterator *gmpi,
     gt_str_delete(fn);
   }
 
-  fn = gt_str_clone(mil->pvt->idxfilename);
-  gt_str_append_cstr(fn, ".match");
-
   if (!mil->pvt->matchfile) {
     int fdout;
     pid_t pid;
     gt_assert(mil->pvt->idxfilename
                 && gt_str_length(mil->pvt->idxfilename) > 0);
 
-    if (!gt_file_exists(gt_str_get(fn))) {
-      fdout = open(gt_str_get(fn), O_WRONLY | O_CREAT, 0600);
+    tmp = gt_str_new();
+    lastbinary = gt_str_new();
+    matchfilename = gt_str_new();
+    had_err = get_run_parameterization(mil, tmp, lastbinary,
+                                       gt_str_get(mil->pvt->idxfilename),
+                                       gt_str_get(mil->pvt->queryfilename),
+                                       err);
+    if (!had_err) {
+      char *matchfilehash;
+      gt_assert(gt_str_length(tmp) > 0);
+      matchfilehash = gt_md5_fingerprint(gt_str_get(tmp), gt_str_length(tmp));
+      gt_assert(matchfilehash && strlen(matchfilehash) > 0);
+      gt_str_append_cstr(matchfilename, mil->pvt->tmpdir);
+      gt_str_append_cstr(matchfilename, "/");
+      gt_str_append_cstr(matchfilename, matchfilehash);
+      gt_str_append_cstr(matchfilename, ".match");
+    }
+
+    if (!had_err && !gt_file_exists(gt_str_get(matchfilename))) {
+      char **args = NULL;
+      args = gt_cstr_split(gt_str_get(tmp), ' ');
+      fdout = open(gt_str_get(matchfilename), O_WRONLY | O_CREAT, 0600);
       switch ((pid = fork())) {
         case -1:
                had_err = -1;
@@ -231,9 +326,7 @@ static GtMatchIteratorStatus gt_match_iterator_last_next(GtMatchIterator *gmpi,
         case 0:
           dup2(fdout, STDOUT_FILENO);
           close(fdout);
-          execlp("lastal", "lastal", "-f", "0", "-k", "10",
-                 gt_str_get(mil->pvt->idxfilename),
-                 gt_str_get(mil->pvt->queryfilename), NULL);
+          execvp(gt_str_get(lastbinary), args);
         default:
         {
           int status;
@@ -242,16 +335,20 @@ static GtMatchIteratorStatus gt_match_iterator_last_next(GtMatchIterator *gmpi,
       }
       if (had_err == -1)
         gt_error_set(err, "error forking the LAST process");
+      gt_cstr_array_delete(args);
     }
     if (!had_err) {
       mil->pvt->matchfile = gt_file_open(GT_FILE_MODE_UNCOMPRESSED,
-                                         gt_str_get(fn), "r", err);
+                                         gt_str_get(matchfilename), "r", err);
       if (!mil->pvt->matchfile) {
         had_err = -1;
       }
     }
+    gt_str_delete(lastbinary);
+    gt_str_delete(tmp);
+
   }
-  gt_str_delete(fn);
+  gt_str_delete(matchfilename);
 
   if (!had_err) {
     /* result file should now be open */
@@ -295,7 +392,7 @@ static int last_prepare_indices(GtMatchIteratorLast *mil,
     hash = gt_md5_fingerprint(seq, gt_encseq_total_length(mil->pvt->es1));
     gt_free(seq);
 
-    /* XXX: maybe hash the sequence file! */
+    /* maybe hash the sequence file! */
     gt_str_append_cstr(idxfilename, mil->pvt->tmpdir);
     gt_str_append_cstr(idxfilename, "/");
     gt_str_append_cstr(idxfilename, hash);
@@ -325,6 +422,16 @@ static int last_prepare_indices(GtMatchIteratorLast *mil,
 }
 
 GtMatchIterator* gt_match_iterator_last_new(GtEncseq *es1, GtEncseq *es2,
+                                            int match_score,
+                                            int mismatch_cost,
+                                            int gap_open_cost,
+                                            int gap_ext_cost,
+                                            int xdrop,
+                                            int ydrop,
+                                            int zdrop,
+                                            int k,
+                                            int mscoregapped,
+                                            int mscoregapless,
                                             GtError *err)
 {
   GtMatchIterator *mp;
@@ -338,15 +445,16 @@ GtMatchIterator* gt_match_iterator_last_new(GtEncseq *es1, GtEncseq *es2,
   mil->pvt = gt_calloc(1, sizeof (GtMatchIteratorLastMembers));
   mil->pvt->es1 = gt_encseq_ref(es1);
   mil->pvt->es2 = gt_encseq_ref(es2);
-  mil->pvt->op.match_score = GT_UNDEF_INT;
-  mil->pvt->op.mismatch_cost = GT_UNDEF_INT;
-  mil->pvt->op.gap_open_cost = GT_UNDEF_INT;
-  mil->pvt->op.gap_ext_cost = GT_UNDEF_INT;
-  mil->pvt->op.xdrop = GT_UNDEF_INT;
-  mil->pvt->op.ydrop = GT_UNDEF_INT;
-  mil->pvt->op.zdrop = GT_UNDEF_INT;
-  mil->pvt->op.minmatchlen = GT_UNDEF_INT;
-  mil->pvt->op.k = GT_UNDEF_INT;
+  mil->pvt->op.match_score = match_score;
+  mil->pvt->op.mismatch_cost = mismatch_cost;
+  mil->pvt->op.gap_open_cost = gap_open_cost;
+  mil->pvt->op.gap_ext_cost = gap_ext_cost;
+  mil->pvt->op.xdrop = xdrop;
+  mil->pvt->op.ydrop = ydrop;
+  mil->pvt->op.zdrop = zdrop;
+  mil->pvt->op.mscoregapped = mscoregapped;
+  mil->pvt->op.mscoregapless = mscoregapless;
+  mil->pvt->op.k = k;
   mil->pvt->tmpdir = getenv("TMPDIR");
   if (!mil->pvt->tmpdir)
     mil->pvt->tmpdir = "/tmp";

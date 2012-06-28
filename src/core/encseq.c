@@ -4825,9 +4825,6 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
       haserr = true;
     }
   }
-  if (!haserr) {
-    encseq->indexname = gt_cstr_dup(indexname);
-  }
   if (!haserr)
   {
     gt_assert(encseq != NULL);
@@ -4955,6 +4952,10 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
     {
       haserr = true;
     }
+  }
+  if (!haserr) {
+    gt_assert(encseq != NULL);
+    encseq->indexname = gt_cstr_dup(indexname);
   }
   if (!haserr)
   {

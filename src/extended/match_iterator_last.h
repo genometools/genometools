@@ -24,10 +24,16 @@
 typedef struct GtMatchIteratorLast GtMatchIteratorLast;
 
 GtMatchIterator* gt_match_iterator_last_new(GtEncseq *es1, GtEncseq *es2,
+                                            int match_score,
+                                            int mismatch_cost,
+                                            int gap_open_cost,
+                                            int gap_ext_cost,
+                                            int xdrop,
+                                            int ydrop,
+                                            int zdrop,
+                                            int k,
+                                            int mscoregapped,
+                                            int mscoregapless,
                                             GtError *err);
-
-GtMatchIterator* gt_match_iterator_last_new_fasta(const char *fasta_file1,
-                                                  const char *fasta_file2,
-                                                  GtError *err);
 
 #endif
