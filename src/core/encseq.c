@@ -1716,17 +1716,13 @@ static void setencsequtablesNULL(GtEncseqAccessType sat,
 }
 
 static GtEncseqAccessType determineoptimalsssptablerep(
-                                  GtEncseqAccessType sat,
                                   unsigned long totallength,
                                   unsigned long numofseparators)
 {
   uint64_t sepsizemin, sepsize;
   GtEncseqAccessType satmin;
 
-  if (numofseparators == 0 || sat == GT_ACCESS_TYPE_EQUALLENGTH)
-  {
-    return GT_ACCESS_TYPE_UNDEFINED;
-  }
+  gt_assert (numofseparators > 0);
   sepsizemin = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_UCHARTABLES,false,false,
                                        totallength,numofseparators);
   satmin = GT_ACCESS_TYPE_UCHARTABLES;
@@ -1787,16 +1783,15 @@ typedef struct
                 numofpages;
 } Gtssptaboutinfo;
 
-static Gtssptaboutinfo *ssptaboutinfo_new(GtEncseqAccessType sat,
-                                          unsigned long totallength,
+static Gtssptaboutinfo *ssptaboutinfo_new(unsigned long totallength,
                                           unsigned long numofsequences,
                                           GtSWtable *ssptab)
 {
   Gtssptaboutinfo *ssptaboutinfo;
 
   ssptaboutinfo = gt_malloc(sizeof (*ssptaboutinfo));
-  ssptaboutinfo->satsep
-    = determineoptimalsssptablerep(sat,totallength,numofsequences-1);
+  ssptaboutinfo->satsep = determineoptimalsssptablerep(totallength,
+                                                       numofsequences-1);
   ssptaboutinfo->ssptabptr = ssptab;
   switch (ssptaboutinfo->satsep)
   {
@@ -1838,7 +1833,7 @@ static Gtssptaboutinfo *ssptaboutinfo_new(GtEncseqAccessType sat,
                     * ssptaboutinfo->ssptabptr->st_uint32.numofpages);
       break;
     default:
-      fprintf(stderr,"%s(sat = %d is undefined)\n",__func__,
+      fprintf(stderr,"%s(satsep = %d is undefined)\n",__func__,
                      (int) ssptaboutinfo->satsep);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -4334,8 +4329,13 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->indexname = NULL;
   encseq->oissat = GT_ACCESS_TYPE_UINT32TABLES;
   encseq->accesstype_via_utables = gt_encseq_access_type_isviautables(sat);
-  encseq->satsep = determineoptimalsssptablerep(sat,totallength,
-                                                numofsequences-1);
+  if (sat == GT_ACCESS_TYPE_EQUALLENGTH || numofsequences == 1UL)
+  {
+    encseq->satsep = GT_ACCESS_TYPE_UNDEFINED;
+  } else
+  {
+    encseq->satsep = determineoptimalsssptablerep(totallength,numofsequences-1);
+  }
   encseq->has_exceptiontable = oistab;
   if (encseq->accesstype_via_utables)
   {
@@ -4753,7 +4753,7 @@ static int gt_encseq_ssptab_copy(const char *indexname,
   gt_assert (numofdbsequences > 1UL && sat != GT_ACCESS_TYPE_EQUALLENGTH);
   initSWtable(&ssptab,totallength,encseq->satsep,numofdbsequences-1);
   setencsequtablesNULL(encseq->satsep,&ssptab);
-  ssptaboutinfo = ssptaboutinfo_new(sat,totallength,numofdbsequences,&ssptab);
+  ssptaboutinfo = ssptaboutinfo_new(totallength,numofdbsequences,&ssptab);
   gt_assert(ssptaboutinfo != NULL);
   for (idx=0, seqnum = 0, seppos = gt_encseq_seqlength(encseq, 0);
        idx < totallength; idx++)
@@ -4864,8 +4864,8 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
         sat != GT_ACCESS_TYPE_EQUALLENGTH &&
         (outssptab || encseq->accesstype_via_utables))
     {
-      ssptaboutinfo = ssptaboutinfo_new(sat,totallength,
-                                        numofsequences,&encseq->ssptab);
+      ssptaboutinfo = ssptaboutinfo_new(totallength,numofsequences,
+                                        &encseq->ssptab);
       gt_assert (ssptaboutinfo != NULL);
       encseq->has_ssptab = true;
     } else
@@ -9588,10 +9588,9 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
   /* create `new style' SSP tab */
   if (eb->nof_seqs > 1UL && eb->wssptab) {
     encseq->hasallocatedssptab = true;
-    encseq->satsep = determineoptimalsssptablerep(GT_ACCESS_TYPE_UINT32TABLES,
-                                                  eb->seqlen, eb->nof_seqs-1);
-    ssptaboutinfo = ssptaboutinfo_new(encseq->satsep, eb->seqlen,
-                                      eb->nof_seqs, &encseq->ssptab);
+    encseq->satsep = determineoptimalsssptablerep(eb->seqlen, eb->nof_seqs-1);
+    ssptaboutinfo = ssptaboutinfo_new(eb->seqlen,eb->nof_seqs,
+                                      &encseq->ssptab);
     gt_assert(ssptaboutinfo != NULL);
     for (i = 0; i < eb->seqlen; i++) {
       if (eb->plainseq[i] == (GtUchar) SEPARATOR)
