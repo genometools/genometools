@@ -24,7 +24,7 @@
 #include "match/eis-voiditf.h"
 #include "match/shu_unitfile.h"
 
-typedef struct ShuNode_tag {
+typedef struct ShuNode {
   bool process;
   unsigned parentOffset;
   unsigned long **countTermSubtree;
@@ -36,7 +36,6 @@ typedef struct ShuNode_tag {
 GT_STACK_DECLARESTRUCT(ShuNode, 256UL);
 
 int gt_pck_calculate_shulen(const FMindex *index,
-                            const GtEncseq *encseq,
                             const GtShuUnitFileInfo *unit_info,
                             uint64_t **shulen,
                             unsigned long numofchars,

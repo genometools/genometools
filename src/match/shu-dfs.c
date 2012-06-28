@@ -394,7 +394,6 @@ static int initialise_node(void *node)
 }
 
 int gt_pck_calculate_shulen(const FMindex *index,
-                            const GtEncseq *encseq,
                             const GtShuUnitFileInfo *unit_info,
                             uint64_t **shulen,
                             unsigned long numofchars,
@@ -414,6 +413,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
                 processed_nodes,
                 max_idx = gt_pck_special_occ_in_nonspecial_intervals(index) - 1;
   BwtSeqpositionextractor *pos_extractor;
+  const GtEncseq *encseq = unit_info->encseq;
 
   gt_assert(max_idx < total_length);
   rangeOccs = gt_calloc((size_t) GT_MULT2(numofchars), sizeof (*rangeOccs));

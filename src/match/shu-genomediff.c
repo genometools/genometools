@@ -210,7 +210,6 @@ int gt_genomediff_shu(GtLogger *logger,
       gt_assert(shulendist);
       gt_assert(subjectindex);
       had_err = gt_pck_calculate_shulen(subjectindex,
-                                        encseq,
                                         unit_info,
                                         shulendist,
                                         num_of_chars,
