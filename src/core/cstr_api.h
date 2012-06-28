@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,6 +26,12 @@
 /* Creates a duplicate of string <cstr> using the GenomeTools memory
    allocator. */
 char*         gt_cstr_dup(const char *cstr);
+
+/* Splits the \0-terminated <cstr> at all positions where <sep> occurs and
+   returns a C string array in which each element is a separate string between
+   the occurrences of <sep>. The string array is terminated by NULL. The caller
+   is responsible to free the result. */
+char**        gt_cstr_split(const char *cstr, char sep);
 
 /* Creates a duplicate of string <cstr> using the GenomeTools memory allocator.
    The string needs not be \0-terminated, instead its <length> must be given. */
