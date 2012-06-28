@@ -345,9 +345,13 @@ static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
   }
   s_qual[s_hlen] = '\0';
   gt_assert(r_hlen != s_hlen);
+  s_pos++;
+  r_pos++;
   gt_file_xprintf(outfp, "%c\t%lu\t%lu\t%lu\t%lu\t%lu\t%c\t%c\t%.2f\t%s\t%s\n",
-      r_hlen > s_hlen ? 'I' : 'D', r_pos + 1UL, r_hlen, s_pos + 1UL,
-      s_pos + s_hlen, s_hlen, c, gt_aligned_segment_is_reverse(as) ? '-' : '+',
+      r_hlen > s_hlen ? 'I' : 'D', r_pos, r_hlen,
+      gt_aligned_segment_is_reverse(as) ? s_pos - s_hlen + 1UL : s_pos,
+      gt_aligned_segment_is_reverse(as) ? s_pos : s_pos + s_hlen - 1UL,
+      s_hlen, c, gt_aligned_segment_is_reverse(as) ? '-' : '+',
       s_q_ave, s_qual, r_desc);
   gt_free(s_qual);
 }
