@@ -154,14 +154,14 @@ static GtStrand gt_ltr_refseq_match_stream_determine_strand(GtMatchDirection d,
   gt_assert(fn);
   if (gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE) {
     if (d == GT_MATCH_DIRECT)
-      return GT_MATCH_REVERSE;
+      return GT_STRAND_REVERSE;
     else
-      return GT_MATCH_DIRECT;
+      return GT_STRAND_FORWARD;
   } else {
     if (d == GT_MATCH_REVERSE)
-      return GT_MATCH_REVERSE;
+      return GT_STRAND_REVERSE;
     else
-      return GT_MATCH_DIRECT;
+      return GT_STRAND_FORWARD;
   }
 }
 

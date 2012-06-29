@@ -691,7 +691,7 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
 const char* gt_encseq_indexname(const GtEncseq *encseq)
 {
   gt_assert(encseq);
-  if (encseq->indexname)
+  if (encseq->indexname != NULL)
     return encseq->indexname;
   else
     return "generated";
@@ -2068,7 +2068,7 @@ void gt_encseq_delete(GtEncseq *encseq)
   encseq->headerptr.filelengthtab = NULL;
   if (encseq->md5_tab != NULL)
     gt_md5_tab_delete(encseq->md5_tab);
-  if (encseq->indexname)
+  if (encseq->indexname != NULL)
     gt_free(encseq->indexname);
   gt_mutex_unlock(encseq->refcount_lock);
   gt_mutex_delete(encseq->refcount_lock);

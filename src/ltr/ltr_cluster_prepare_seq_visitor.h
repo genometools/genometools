@@ -28,7 +28,7 @@ typedef struct GtLTRClusterPrepareSeqVisitor GtLTRClusterPrepareSeqVisitor;
 
 const GtNodeVisitorClass* gt_ltr_cluster_prepare_seq_visitor_class(void);
 
-GtNodeVisitor* gt_ltr_cluster_prepare_seq_visitor_new(GtEncseq *src,
+GtNodeVisitor* gt_ltr_cluster_prepare_seq_visitor_new(GtEncseq *encseq,
                                                       GtError *err);
 GtHashmap*      gt_ltr_cluster_prepare_seq_visitor_get_encseqs(
                                               GtLTRClusterPrepareSeqVisitor *v);

@@ -227,10 +227,10 @@ GtHashmap* gt_ltr_cluster_prepare_seq_visitor_get_encseqs(
   gt_log_log("finishing encseqs");
   if (!v->feat_to_encseq) {
     gt_log_log("starting...");
-    gt_hashmap_foreach(v->encseq_builders,
-                       gt_ltr_cluster_prepare_seq_finish_encseqs,
-                       v,
-                       NULL);
+    (void) gt_hashmap_foreach(v->encseq_builders,
+                              gt_ltr_cluster_prepare_seq_finish_encseqs,
+                              v,
+                              NULL);
   }
   return gt_hashmap_ref(v->feat_to_encseq);
 }

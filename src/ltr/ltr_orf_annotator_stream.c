@@ -37,7 +37,7 @@ static int ltr_orf_annotator_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   GtLTRORFAnnotatorStream *bs;
   gt_error_check(err);
   bs = ltr_orf_annotator_stream_cast(ns);
-  if (bs->progress_loc)
+  if (bs->progress_loc != NULL)
     (*bs->progress_loc)++;
   return gt_node_stream_next(bs->orf_stream, gn, err);
 }
