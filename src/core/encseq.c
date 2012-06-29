@@ -4737,32 +4737,35 @@ static unsigned int determineleastprobablecharacter(const GtAlphabet *alpha,
   return minidx;
 }
 
-static int gt_encseq_ssptab_copy(const char *indexname,
-                                 unsigned long totallength,
-                                 unsigned long numofdbsequences,
-                                 GtEncseqAccessType sat,
-                                 const GtEncseq *encseq,
-                                 GtError *err)
+int gt_encseq_seppos2ssptab(const char *indexname,
+                            unsigned long totallength,
+                            unsigned long numofdbsequences,
+                            const unsigned long *seppostab,
+                            GtError *err)
 {
   GtSWtable ssptab;
   Gtssptaboutinfo *ssptaboutinfo;
-  unsigned long idx, seqnum, seppos = 0;
+  unsigned long idx;
+  const unsigned long *sepposptr;
   Gtssptransferinfo ssptransferinfo;
+  GtEncseqAccessType satsep;
   int ret;
 
-  gt_assert (numofdbsequences > 1UL && sat != GT_ACCESS_TYPE_EQUALLENGTH);
-  initSWtable(&ssptab,totallength,encseq->satsep,numofdbsequences-1);
-  setencsequtablesNULL(encseq->satsep,&ssptab);
+  gt_assert (numofdbsequences > 1UL);
+  satsep = determineoptimalsssptablerep(totallength,numofdbsequences-1);
+  initSWtable(&ssptab,totallength,satsep,numofdbsequences-1);
+  setencsequtablesNULL(satsep,&ssptab);
   ssptaboutinfo = ssptaboutinfo_new(totallength,numofdbsequences,&ssptab);
-  gt_assert(ssptaboutinfo != NULL);
-  for (idx=0, seqnum = 0, seppos = gt_encseq_seqlength(encseq, 0);
-       idx < totallength; idx++)
+  gt_assert(ssptaboutinfo != NULL && seppostab != NULL);
+  for (idx=0, sepposptr = seppostab; idx < totallength; idx++)
   {
-    if (idx == seppos)
+    if (idx == *sepposptr)
     {
-      ssptaboutinfo_processseppos(ssptaboutinfo,seppos);
-      seqnum++;
-      seppos += gt_encseq_seqlength(encseq, seqnum) + 1;
+      ssptaboutinfo_processseppos(ssptaboutinfo,idx);
+      if (sepposptr < seppostab + numofdbsequences - 2)
+      {
+        sepposptr++;
+      }
     }
     ssptaboutinfo_processanyposition(ssptaboutinfo, idx);
   }
@@ -4770,10 +4773,10 @@ static int gt_encseq_ssptab_copy(const char *indexname,
   ssptaboutinfo_delete(ssptaboutinfo);
   ssptransferinfo.totallength = totallength;
   ssptransferinfo.numofdbsequences = numofdbsequences;
-  ssptransferinfo.satsep = encseq->satsep;
+  ssptransferinfo.satsep = satsep;
   ssptransferinfo.ssptabptr = &ssptab;
   ret = flushssptab2file(indexname, &ssptransferinfo, err);
-  gt_ssptab_delete(encseq->satsep,&ssptab);
+  gt_ssptab_delete(satsep,&ssptab);
   return ret;
 }
 
@@ -8507,6 +8510,7 @@ int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
   {
     char *indexnamecopy;
     size_t indexname_len = strlen(indexname);
+    unsigned long numofdbsequences = gt_encseq_num_of_sequences(encseq);
 
     indexnamecopy = gt_malloc(sizeof(char) * (indexname_len+1+1));
     strcpy(indexnamecopy,indexname);
@@ -8519,7 +8523,7 @@ int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
                                         gt_encseq_total_length(encseq),
                                         encseq->equallength.valueunsignedlong,
                                         encseq->twobitencoding,
-                                        gt_encseq_num_of_sequences(encseq),
+                                        numofdbsequences,
                                         gt_encseq_num_of_files(encseq),
                                         encseq->headerptr.filelengthtab,
                                         encseq->filenametab,
@@ -8541,7 +8545,7 @@ int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
                                    gt_encseq_lengthofspecialsuffix(encseq),
                                    gt_encseq_lengthoflongestnonspecial(encseq),
                                    encseq->twobitencoding,
-                                   gt_encseq_num_of_sequences(encseq),
+                                   numofdbsequences,
                                    gt_encseq_num_of_files(encseq),
                                    encseq->headerptr.filelengthtab,
                                    encseq->filenametab,
@@ -8550,14 +8554,31 @@ int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
       {
         haserr = true;
       }
-      if (!haserr && gt_encseq_ssptab_copy(indexnamecopy,
-                                           gt_encseq_total_length(encseq),
-                                           gt_encseq_num_of_sequences(encseq),
-                                           encseq->sat,
-                                           encseq,
-                                           err) != 0)
+      if (!haserr && numofdbsequences > 1UL)
       {
-        haserr = true;
+        unsigned long seqnum, *seppostab;
+
+        seppostab = gt_malloc(sizeof (*seppostab) * (numofdbsequences-1));
+        for (seqnum = 0; seqnum < numofdbsequences - 1; seqnum++)
+        {
+          if (seqnum == 0)
+          {
+            seppostab[seqnum] = gt_encseq_seqlength(encseq,seqnum);
+          } else
+          {
+            seppostab[seqnum] = seppostab[seqnum-1] +
+                                gt_encseq_seqlength(encseq,seqnum) + 1;
+          }
+        }
+        if (gt_encseq_seppos2ssptab(indexnamecopy,
+                                    gt_encseq_total_length(encseq),
+                                    numofdbsequences,
+                                    seppostab,
+                                    err) != 0)
+        {
+          haserr = true;
+        }
+        gt_free(seppostab);
       }
     }
     gt_free(indexnamecopy);
@@ -9589,8 +9610,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
   if (eb->nof_seqs > 1UL && eb->wssptab) {
     encseq->hasallocatedssptab = true;
     encseq->satsep = determineoptimalsssptablerep(eb->seqlen, eb->nof_seqs-1);
-    ssptaboutinfo = ssptaboutinfo_new(eb->seqlen,eb->nof_seqs,
-                                      &encseq->ssptab);
+    ssptaboutinfo = ssptaboutinfo_new(eb->seqlen,eb->nof_seqs, &encseq->ssptab);
     gt_assert(ssptaboutinfo != NULL);
     for (i = 0; i < eb->seqlen; i++) {
       if (eb->plainseq[i] == (GtUchar) SEPARATOR)

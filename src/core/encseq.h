@@ -471,6 +471,13 @@ unsigned long gt_encseq_equallength(const GtEncseq *encseq);
    given <encseq>. */
 GtMD5Tab*  gt_encseq_get_md5_tab(const GtEncseq *encseq, GtError *err);
 
+/* for a given array of at least one separator positions */
+int gt_encseq_seppos2ssptab(const char *indexname,
+                            unsigned long totallength,
+                            unsigned long numofdbsequences,
+                            const unsigned long *seppostab,
+                            GtError *err);
+
 /* The following functions are for testing */
 
 #ifndef NDEBUG
