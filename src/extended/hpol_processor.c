@@ -71,7 +71,6 @@ GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin)
   hpp->nof_unmapped = 0;
   hpp->max_hlen_diff = GT_UNDEF_ULONG;
   hpp->min_alt_consensus = (double) 2.0;
-  hpp->outfp = NULL;
   hpp->alpha = gt_alphabet_new_dna();
   hpp->adjust_s_hlen = false;
   hpp->output_segments = false;
