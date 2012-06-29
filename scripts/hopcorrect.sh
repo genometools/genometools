@@ -161,14 +161,14 @@ function f_die {
 }
 
 function f_index {
-  echo "==== Index the genome..."
+  echo "==== Create bwa genome index..."
   echo
   $BWA index $GENOME
   echo
 }
 
 function f_map {
-  echo "==== Map reads to the genome..."
+  echo "==== Map reads to the genome using bwa..."
   echo
   $BWA aln -t ${BWA_T} $GENOME $READS > $MAP.sai
   if [ "$MATES" != "" ]; then
@@ -181,7 +181,7 @@ function f_map {
 }
 
 function f_sortmap {
-  echo "==== Sort the mapping results..."
+  echo "==== Sort the mapping results using samtools..."
   echo
   $SAMTOOLS view -Shu $MAP.sam > $MAP.bam
   $SAMTOOLS sort $MAP.bam sorted.$MAP
@@ -189,9 +189,16 @@ function f_sortmap {
 }
 
 function f_sortgff {
-  echo "==== Sort the annotation..."
+  echo "==== Process and sort the annotation..."
   echo
-  $GT gff3 -force -o sorted.$ANNOTATION -sort -retainids $ANNOTATION
+  awk '$3 == "CDS" \
+       {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t." }' \
+      $ANNOTATION > tmp_1.$ANNOTATION
+  echo "##gff-version 3" > tmp_2.$ANNOTATION
+  sort -k4 -n tmp_1.$ANNOTATION >> tmp_2.$ANNOTATION
+  $GT gff3 -tidy -force -o sorted.$ANNOTATION tmp_2.$ANNOTATION
+  rm tmp_1.$ANNOTATION
+  rm tmp_2.$ANNOTATION
   echo
 }
 
@@ -370,11 +377,9 @@ function f_eval_prepare {
   f_prepare
 }
 
-function f_eval {
-  f_stats
-  stats2eds
+function f_eval_stats {
   SMAP="${READS}.${SGENOME}"
-  EDSDIFF="$SGENOME.$GENOME.eds_diff"
+  EDSDIFF="$READS.$SGENOME.$GENOME.eds_diff"
   INFO="$READS.$SGENOME.$GENOME.eval"
   diff $SMAP.eds $MAP.eds > $EDSDIFF
   CORR=`cat $MAP.eds | wc -l`
@@ -382,22 +387,67 @@ function f_eval {
   FN=`grep '^<' $EDSDIFF | wc -l`
   FP=`grep '^>' $EDSDIFF | wc -l`
   TP=$[$CORR-$FP]
-  echo
-  echo "Statistics of the correction of the reads $READS" | tee $INFO
-  echo "using $GENOME as reference for the correction" | tee -a $INFO
-  echo "and a golden standard correction set based on $SGENOME" | tee -a $INFO
+  GENOMEDESC=`head -n 1 $GENOME`
+  SGENOMEDESC=`head -n 1 $SGENOME`
+  echo "==== Computing evaluation statistics..."
+  echo | tee $INFO
+  echo "Statistics of the correction of:" | tee -a $INFO
+  if [ "$MATES" == "" ];then
+    echo "- reads:                      $READS" | tee -a $INFO
+  else
+    echo "- reads:                      $READS + $MATES" | tee -a $INFO
+  fi
+  echo "- golden standard based upon: $SGENOMEDESC" | tee -a $INFO
   echo | tee -a $INFO
-  echo "corrections:      $CORR" | tee -a $INFO
-  echo "errors:           $ERR"  | tee -a $INFO
-  echo "true positives:   $TP"   | tee -a $INFO
-  echo "false positives:  $FP"   | tee -a $INFO
-  echo "false negatives:  $FN"   | tee -a $INFO
+  MIN_HLEN=`grep -P -o "(?<=Distribution of homopolymers of length >= )\d+" \
+    $MAP.hop_stats`
+  if [ "$MIN_HLEN" == "" ]; then MIN_HLEN="n.a."; fi
+  NOF_READS=`grep -P -o "(?<=segments in SAM file:)\s+\d+" \
+    $MAP.hop_stats | grep -P -o "\d+"`
+  NOF_NMAP=`grep -P -o "(?<=not mapping:)\s+\d+" \
+    $MAP.hop_stats | grep -P -o "\d+"`
+  if [ "$NOF_READS" != "" -a "$NOF_NMAP" != "" ]; then
+    NOF_MAP=$[$NOF_READS - $NOF_NMAP]
+  else
+    NOF_MAP="n.a."
+  fi
+  if [ "$NOF_READS" == "" ]; then NOF_READS="n.a."; fi
+  if [ "$NOF_NMAP" == "" ]; then NOF_NMAP="n.a."; fi
+  echo "Correction parameters:"      | tee -a $INFO
+  echo "- reference for correction:   $GENOMEDESC" | tee -a $INFO
+  if [ "$ANNOTATION" != "$NOGFF" ]; then
+    echo "- annotation:                 $ANNOTATION" | tee -a $INFO
+  else
+    echo "- annotation:                 none" | tee -a $INFO
+  fi
+  echo "- minimal homopol. length:    ${MIN_HLEN}" | tee -a $INFO
+  echo | tee -a $INFO
+  echo "Mapping results:" | tee -a $INFO
+  echo "- total reads:        $NOF_READS" | tee -a $INFO
+  echo "- mapping:            $NOF_MAP"   | tee -a $INFO
+  echo "- not mapping:        $NOF_NMAP"  | tee -a $INFO
+  echo | tee -a $INFO
+  echo "Correction results:"         | tee -a $INFO
+  echo "- homopol. errors:    $ERR"  | tee -a $INFO
+  echo "- corrected homopol.: $CORR" | tee -a $INFO
+  echo "- true positives:     $TP"   | tee -a $INFO
+  echo "- false positives:    $FP"   | tee -a $INFO
+  echo "- false negatives:    $FN"   | tee -a $INFO
   SN=`echo "$TP * 100 / ($TP + $FN)" | bc -l`
   PR=`echo "$TP * 100 / ($TP + $FP)" | bc -l`
+  printf -- "- sensitivity:        %.2f %%\n" $SN | tee -a $INFO
+  printf -- "- precision:          %.2f %%\n" $PR | tee -a $INFO
   echo | tee -a $INFO
-  printf "sensitivity: %.2f %%\n" $SN | tee -a $INFO
-  printf "precision:   %.2f %%\n" $PR | tee -a $INFO
+  echo "==== done "
   echo
+  echo "evaluation statistics:                $INFO"
+  echo
+}
+
+function f_eval {
+  f_stats
+  stats2eds
+  f_eval_stats
 }
 
 function f_dists  {
@@ -430,5 +480,12 @@ case "$ACTION" in
   'eval-make-gold')     f_eval_make_gold    ;;
   'eval-prepare')       f_eval_prepare      ;;
   'eval')               f_eval              ;;
+  # parts of other actions:
+  'index')              f_index             ;;
+  'map')                f_map               ;;
+  'sortmap')            f_sortmap           ;;
+  'encode')             f_encode            ;;
+  'sortgff')            f_sortgff           ;;
+  'eval-stats')         f_eval_stats        ;;
   *)                    f_die               ;;
 esac
