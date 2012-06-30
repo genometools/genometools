@@ -18,8 +18,14 @@
 #ifndef SAMPLING_H
 #define SAMPLING_H
 
+#ifndef S_SPLINT_S
 #include <sys/types.h>
-#include "core/intbits.h"
+#else
+#ifndef GT_TYPEDEF_OFF_T
+typedef int off_t;
+#define GT_TYPEDEF_OFF_T
+#endif
+#endif
 #define GT_SAMPLING_DEFAULT_REGULAR_RATE 10000UL
 #define GT_SAMPLING_DEFAULT_PAGE_RATE 100UL
 

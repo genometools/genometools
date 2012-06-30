@@ -49,7 +49,7 @@ typedef enum
 typedef struct
 {
   GtTypespec typespec;
-  char *name;
+  const char *function;
   void *startptr;
   size_t sizeofunit;
   unsigned long numofunits;
@@ -97,7 +97,7 @@ static uint64_t detexpectedaccordingtomapspec(const GtArrayGtMapspecification
 static void showmapspec(const GtMapspecification *mapspec)
 {
   printf("(%s,size=%lu,elems=%lu)",
-           mapspec->name,
+           mapspec->function,
            (unsigned long) mapspec->sizeofunit,
            mapspec->numofunits);
 }
@@ -298,7 +298,7 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
        mapspecptr++)
   {
 #ifdef SKDEBUG
-    printf("# gt_mapspec_flushtheindex2file");
+    printf("# %s",__func__);
     showmapspec(mapspecptr);
     printf(" at byteoffset %lu\n",byteoffset);
 #endif
@@ -389,7 +389,7 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
         mapspecptr->startptr = PTR;\
         mapspecptr->sizeofunit = SIZE;\
         mapspecptr->numofunits = ELEMS;\
-        mapspecptr->name = #PTR
+        mapspecptr->function = __func__
 
 void gt_mapspec_add_char_ptr(GtMapspec *mapspec, char **ptr, unsigned long n)
 {

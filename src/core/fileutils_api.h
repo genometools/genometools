@@ -24,7 +24,10 @@
 #ifndef S_SPLINT_S
 #include <sys/types.h>
 #else
+#ifndef GT_TYPEDEF_OFF_T
 typedef int off_t;
+#define GT_TYPEDEF_OFF_T
+#endif
 #endif
 #include "core/str_api.h"
 #include "core/str_array_api.h"

@@ -1542,7 +1542,6 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
     encseq->twobitencoding = twobitencoding;
     encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
     encseq->numofchars = 4U;
-    encseq->numofallchars = 4UL;
     encseq->maxsubalphasize = 1U;
     gt_assert(numofsequences > 0);
     encseq->filenametab = gt_str_array_new();
@@ -1561,9 +1560,14 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
     encseq->headerptr.characterdistribution
       = gt_malloc(encseq->numofchars *
                   sizeof (*encseq->headerptr.characterdistribution));
+    encseq->numofallchars = 0;
     for (idx = 0; idx < (unsigned long) encseq->numofchars; idx++)
     {
       encseq->headerptr.characterdistribution[idx] = characterdistribution[idx];
+      if (encseq->headerptr.characterdistribution[idx] > 0)
+      {
+        encseq->numofallchars++;
+      }
     }
     encseq->specialcharinfo.specialcharacters = numofsequences - 1;
     encseq->specialcharinfo.specialranges = numofsequences - 1;
@@ -1577,8 +1581,8 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
     encseq->specialcharinfo.lengthofwildcardsuffix = 0UL;
     encseq->specialcharinfo.lengthoflongestnonspecial
       = lengthoflongestnonspecial;
-    encseq->specialcharinfo.exceptionranges = 0UL;
     encseq->specialcharinfo.exceptioncharacters = 0UL;
+    encseq->specialcharinfo.exceptionranges = 0UL;
     encseq->specialcharinfo.realexceptionranges = 0UL;
     encseq->minseqlen = minseqlen;
     encseq->maxseqlen = maxseqlen;
