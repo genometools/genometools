@@ -832,6 +832,8 @@ void gt_rbtree_iter_delete (GtRBTreeIter *trav)
   gt_free(trav);
 }
 
+/* Unit test for the red black tree datastructure */
+
 #define GT_RBTREE_PASSES 100
 #define GT_RBTREE_SIZE 100
 
@@ -1036,10 +1038,6 @@ static bool nrbt_mangle_tree(GtRBTreeSearchOrder how, GtRBTreeDoAction what,
 
 #define NRBT_WALKCHECK\
         gt_ensure(had_err,!nrbt_walk_tree(tree, (unsigned long) GT_RBTREE_SIZE))
-
-/**
- * Unit test for the red black tree datastructure
- */
 
 int gt_rbtree_unit_test(GtError *err)
 {
