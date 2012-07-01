@@ -118,15 +118,15 @@ void gt_chain_possiblysortmatches(GtLogger *logger,
    error messages to stderr. */
 
 GtChain2Dimmode *gt_chain_chainmode_new(unsigned long maxgap,
-                                    bool globalset,
-                                    const char *globalargs,
-                                    bool localset,
-                                    const char *localargs,
-                                    GtError *err);
+                                        bool globalset,
+                                        const char *globalargs,
+                                        bool localset,
+                                        const char *localargs,
+                                        GtError *err);
 
 /* the destructor for chainmode objects */
 
-void gt_chain_chainmode_delete(GtChain2Dimmode *GtChain2Dimmode);
+void gt_chain_chainmode_delete(GtChain2Dimmode *chainmode);
 
 /* the constructor for chains */
 
