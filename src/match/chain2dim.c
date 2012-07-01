@@ -211,14 +211,14 @@ void gt_chain_applyweight(double weightfactor,
 #define GT_CHAIN2DIM_TERMINALGAP(IDX)\
         matchtable->matches[IDX].terminalgap
 
-#define GT_CHAIN2DIM_CHECKCHAINSPACE\
-        if (lengthofchain >= chain->chainedmatches.allocatedGtChain2Dimref)\
+#define GT_CHAIN2DIM_CHECKCHAINSPACE(LEN)\
+        if ((LEN) >= chain->chainedmatches.allocatedGtChain2Dimref)\
         {\
-         chain->chainedmatches.spaceGtChain2Dimref = \
-           gt_realloc(chain->chainedmatches.spaceGtChain2Dimref,\
-                      sizeof (*chain->chainedmatches.spaceGtChain2Dimref) *\
-                              lengthofchain);\
-          chain->chainedmatches.allocatedGtChain2Dimref = lengthofchain;\
+          chain->chainedmatches.spaceGtChain2Dimref = \
+            gt_realloc(chain->chainedmatches.spaceGtChain2Dimref,\
+                       sizeof (*chain->chainedmatches.spaceGtChain2Dimref) *\
+                               LEN);\
+          chain->chainedmatches.allocatedGtChain2Dimref = LEN;\
           chain->chainedmatches.nextfreeGtChain2Dimref = 0;\
         }
 
@@ -359,16 +359,13 @@ static void gt_chain2dim_chainingboundarycases(const GtChain2Dimmode *chainmode,
   {
     if (matchtable->nextfree == 1UL)
     {
-      unsigned long lengthofchain;
-
       chain->scoreofchain = matchtable->matches[0].weight;
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
         chain->scoreofchain -= (GT_CHAIN2DIM_INITIALGAP(0)
                                   + GT_CHAIN2DIM_TERMINALGAP(0));
       }
-      lengthofchain = 1UL;
-      GT_CHAIN2DIM_CHECKCHAINSPACE;
+      GT_CHAIN2DIM_CHECKCHAINSPACE(1UL);
       chain->chainedmatches.spaceGtChain2Dimref[0] = 0;
       chain->chainedmatches.nextfreeGtChain2Dimref = 1UL;
     }
@@ -379,25 +376,24 @@ static void gt_chain2dim_retracepreviousinchain(GtChain2Dim *chain,
                                    const GtChain2Dimmatchtable *matchtable,
                                    unsigned long retracestart)
 {
-  unsigned long matchnum, idx, lengthofchain;
+  unsigned long matchnum, lengthofchain;
 
   for (lengthofchain = 0, matchnum = retracestart;
        matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS; lengthofchain++)
   {
     matchnum = matchtable->matches[matchnum].previousinchain;
   }
-  GT_CHAIN2DIM_CHECKCHAINSPACE
-  matchnum = retracestart;
-  idx = lengthofchain;
-  while (matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS)
-  {
-    gt_assert(idx > 0);
-    idx--;
-    chain->chainedmatches.spaceGtChain2Dimref[idx] = matchnum;
-    matchnum = matchtable->matches[matchnum].previousinchain;
-  }
-  gt_assert(idx == 0);
+  GT_CHAIN2DIM_CHECKCHAINSPACE(lengthofchain);
   chain->chainedmatches.nextfreeGtChain2Dimref = lengthofchain;
+  for (matchnum = retracestart;
+       matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS;
+       matchnum = matchtable->matches[matchnum].previousinchain)
+  {
+    gt_assert(lengthofchain > 0);
+    lengthofchain--;
+    chain->chainedmatches.spaceGtChain2Dimref[lengthofchain] = matchnum;
+  }
+  gt_assert(lengthofchain == 0);
 }
 
 static bool gt_chain2dim_checkmaxgapwidth(const GtChain2Dimmatchtable
