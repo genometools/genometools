@@ -222,7 +222,7 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
   const GtAlphabet *alphabet;
   Genericindex *generic_index_subject = NULL;
   Sequentialsuffixarrayreader *ssar = NULL;
-  GtShuUnitFileInfo *unit_info;
+  GtShuUnitFileInfo *unit_info = NULL;
 
   gt_error_check(err);
 
@@ -282,7 +282,7 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
   }
 
   /*calculate sums of shulens*/
-  if (!had_err) {
+  if (!had_err && unit_info != NULL) {
     gt_array2dim_calloc(shulendist,
                         unit_info->num_of_genomes,
                         unit_info->num_of_genomes);
@@ -315,7 +315,7 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
     }
   }
 
-  if (!had_err && shulendist != NULL) {
+  if (!had_err && shulendist != NULL && unit_info != NULL) {
     genome_lengths =
       genomediff_calculate_genome_lengths(unit_info);
 
@@ -343,7 +343,8 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
       had_err = -1;
   }
 
-  if (!had_err && gt_logger_enabled(logger) && div != NULL) {
+  if (!had_err && gt_logger_enabled(logger) &&
+      div != NULL && unit_info != NULL) {
     gt_logger_log(logger, "table of avg shulens");
     for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
       printf("# %s\t", gt_str_array_get(unit_info->genome_names, i_idx));
@@ -357,7 +358,7 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
     }
   }
     /* calculation of divergence */
-  if (!had_err && div != NULL) {
+  if (!had_err && div != NULL && unit_info != NULL) {
     genomediff_calculate_div(unit_info, div, gc_content, genome_lengths,
                              arguments, timer);
 

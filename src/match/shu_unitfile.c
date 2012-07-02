@@ -195,9 +195,11 @@ int gt_shu_unit_file_info_read(const GtStr *unitfile,
 }
 
 void gt_shu_unit_info_delete(GtShuUnitFileInfo *unit_info) {
-  gt_free(unit_info->map_files);
-  gt_str_array_delete(unit_info->genome_names);
-  gt_free(unit_info);
+  if (unit_info != NULL) {
+    gt_free(unit_info->map_files);
+    gt_str_array_delete(unit_info->genome_names);
+    gt_free(unit_info);
+  }
 }
 
 static void gt_shu_unit_info_files_as_units(GtShuUnitFileInfo *unit_info)
