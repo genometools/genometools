@@ -82,7 +82,7 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
     subjectindex = genericindex_get_packedindex(genericindexSubject);
 
     queries = gt_seqiterator_sequence_buffer_new(
-                                          arguments->queryname,
+                                          arguments->filenames,
                                           err);
     gt_assert(queries);
     alphabet = gt_encseq_alphabet(encseq);

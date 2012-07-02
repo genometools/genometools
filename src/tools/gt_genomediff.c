@@ -40,7 +40,7 @@ static void* gt_genomediff_arguments_new(void)
   GtGenomediffArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->indexname = gt_str_new();
   arguments->unitfile = gt_str_new();
-  arguments->queryname = gt_str_array_new();
+  arguments->filenames = gt_str_array_new();
   arguments->with_esa = arguments->with_pck = false;
   return arguments;
 }
@@ -51,7 +51,7 @@ static void gt_genomediff_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_str_delete(arguments->indexname);
   gt_str_delete(arguments->unitfile);
-  gt_str_array_delete(arguments->queryname);
+  gt_str_array_delete(arguments->filenames);
   gt_option_delete(arguments->ref_esaindex);
   gt_option_delete(arguments->ref_pckindex);
   gt_option_delete(arguments->ref_unitfile);
