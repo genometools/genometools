@@ -31,7 +31,6 @@
 #include "match/genomediff_opt.h"
 #include "match/idx-limdfs.h"
 #include "match/sarr-def.h"
-#include "match/shu-genomediff-pck-simple.h"
 #include "match/shu-genomediff.h"
 #include "tools/gt_genomediff.h"
 
