@@ -1,4 +1,3 @@
-=begin
 require 'fileutils'
 require 'tempfile'
 require '../scripts/genomediff.rb'
@@ -8,7 +7,7 @@ Keywords "gt_genomediff pck failure"
 Test do
   run_test "#{$bin}gt suffixerator -suf -lcp -indexname esa " +
            "-db #{$testdata}Atinsert.fna"
-  run_test "#{$bin}gt genomediff -pck esa",:retval=>1
+  run_test "#{$bin}gt genomediff -indextype pck esa",:retval=>1
 end
 
 Name "gt genomediff esa <pck> failure"
@@ -16,7 +15,7 @@ Keywords "gt_genomediff esa failure"
 Test do
   run_test "#{$bin}gt packedindex mkindex -indexname pck " +
            "-db #{$testdata}Atinsert.fna"
-  run_test "#{$bin}gt genomediff -esa pck",:retval=>1
+  run_test "#{$bin}gt genomediff -indextype esa pck",:retval=>1
 end
 
 def reverse_and_concat(file)
@@ -108,7 +107,7 @@ end
 def test_esa(files, param, idxparam)
     run_test "#{$bin}gt suffixerator -db #{files} -indexname esa " +
              "-dna -suf -tis -lcp -ssp #{idxparam}"
-    run_test "#{$bin}gt genomediff #{param} -esa esa"
+    run_test "#{$bin}gt genomediff #{param} -indextype esa esa"
 end
 
 def compare_2d_result(matrix1, matrix2)
@@ -123,110 +122,34 @@ def compare_2d_result(matrix1, matrix2)
   return false
 end
 
-allfilecodes.each do |code|
-  Name "gt genomediff pck traverse #{code.split('/').last}"
-  Keywords "gt_genomediff pck traverse"
-  Test do
-    test_pck("#{code}*.fas", "-traverse", "")
+Name "gt genomediff pck testset"
+Keywords "gt_genomediff pck"
+Test do
+  allfilecodes.each do |code|
+      test_pck("#{code}*.fas", "", "")
+      test_pck("#{code}*.fas", "", "-mirrored")
   end
-  Name "gt genomediff pck shulen #{code.split('/').last}"
-  Keywords "gt_genomediff pck shulen"
-  Test do
-    test_pck("#{code}*.fas", "-shulen", "")
-  end
-  Name "gt genomediff pck fullrun #{code.split('/').last}"
-  Keywords "gt_genomediff pck fullrun"
-  Test do
-    test_pck("#{code}*.fas", "", "")
-  end
-  Name "gt genomediff pck fullrun mirrored #{code.split('/').last}"
-  Keywords "gt_genomediff pck fullrun"
-  Test do
-    test_pck("#{code}*.fas", "", "-mirrored")
-  end
-  Name "gt genomediff esa shulen #{code.split('/').last}"
-  Keywords "gt_genomediff esa shulen"
-  Test do
-    test_esa("#{code}*.fas", "-shulen", "")
-  end
-  Name "gt genomediff esa fullrun #{code.split('/').last}"
-  Keywords "gt_genomediff esa fullrun"
-  Test do
+end
+Name "gt genomediff esa testset"
+Keywords "gt_genomediff esa"
+Test do
+  allfilecodes.each do |code|
     test_esa("#{code}*.fas", "", "")
-  end
-  Name "gt genomediff esa fullrun mirrored #{code.split('/').last}"
-  Keywords "gt_genomediff esa fullrun"
-  Test do
     test_esa("#{code}*.fas", "", "-mirrored")
   end
 end
 
-smallfilecodes.each do |code|
-  Name "gt genomediff pck unitfile correct #{code.split('/').last}"
-  Keywords "gt_genomediff pck unitfile"
-  Test do
-    test_pck("#{code}*fas",
-             "-unitfile #{$testdata}genomediff/unitfile1.lua", "")
-  end
-
-  Name "gt genomediff esa unitfile correct #{code.split('/').last}"
-  Keywords "gt_genomediff esa unitfile"
-  Test do
-    test_esa("#{code}*fas",
-             "-unitfile #{$testdata}genomediff/unitfile1.lua",
-             "")
-  end
-
-  Name "gt genomediff compare esa pck unitfile #{code.split('/').last}"
-  Keywords "gt_genomediff esa pck unitfile check_shulen"
-  Test do
-    numoffiles = 0
-    pck_out = []
-    esa_out = []
-
-    test_pck("#{code}*fas",
-             "-shulen -unitfile #{$testdata}genomediff/unitfile1.lua", "")
-
-    File.open(last_stdout, 'r') do |outfile|
-      while line = outfile.gets do
-        line.chomp!
-        next if line.match /^#/
-        if numoffiles == 0
-          numoffiles = line.match(/^\d+$/)[0].to_i
-        else
-          pck_out << line.split
-        end
-      end
-      if numoffiles == nil or
-        numoffiles != pck_out.length
-        failtest("can't parse output pck #{file1} #{file2}")
-      end
-    end
-    test_esa("#{code}*fas",
-             "-shulen -unitfile #{$testdata}genomediff/unitfile1.lua ",
-             "")
-
-    File.open(last_stdout, 'r') do |outfile|
-      while line = outfile.gets do
-        line.chomp!
-        next if line.match /^#/
-        unless line.match(/^\d+$/)
-          esa_out << line.split
-        end
-      end
-      if numoffiles == NIL or
-        numoffiles != pck_out.length
-        failtest("can't parse output esa #{file1} #{file2}")
-      end
-    end
-    if result = compare_2d_result(pck_out,esa_out)
-      failtest("different results pck-esa #{result[0]},#{result[1]}")
-    end
-  end
-
-  Name "gt genomediff pck unitfile failure1 #{code.split('/').last}"
-  Keywords "gt_genomediff pck unitfile failure"
-  Test do
+code = "000150_001_0.1_010"
+Name "gt genomediff pck unitfile"
+Keywords "gt_genomediff pck unitfile"
+Test do
+  #success
+  test_pck("#{code}*fas",
+           "-unitfile #{$testdata}genomediff/unitfile1.lua", "")
+  test_esa("#{code}*fas",
+           "-unitfile #{$testdata}genomediff/unitfile1.lua",
+           "")
+  #fail 
   run_test("#{$bin}gt       " +
            "packedindex mkindex " +
            "-db #{code}*fas     " +
@@ -242,11 +165,7 @@ smallfilecodes.each do |code|
     "#{$bin}gt genomediff -pck pck " +
     "-unitfile #{$testdata}genomediff/unitfile2.lua",
     :maxtime => 720, :retval=>1)
-  end
-
-  Name "gt genomediff pck unitfile failure2 #{code.split('/').last}"
-  Keywords "gt_genomediff pck unitfile failure"
-  Test do
+  #fail2
   run_test("#{$bin}gt       " +
            "packedindex mkindex " +
            "-db #{code}*fas     " +
@@ -262,11 +181,7 @@ smallfilecodes.each do |code|
     "#{$bin}gt genomediff -pck pck " +
     "-unitfile #{$testdata}genomediff/unitfile3.lua",
     :maxtime => 720, :retval=>1)
-  end
-
-  Name "gt genomediff pck unitfile failure3 #{code.split('/').last}"
-  Keywords "gt_genomediff pck unitfile failure"
-  Test do
+  #fail3
   run_test("#{$bin}gt       " +
            "packedindex mkindex " +
            "-db #{code}*fas     " +
@@ -282,13 +197,59 @@ smallfilecodes.each do |code|
     "#{$bin}gt genomediff -pck pck " +
     "-unitfile #{$testdata}genomediff/unitfile4.lua",
     :maxtime => 720, :retval=>1)
+end
+
+Name "gt genomediff compare esa pck unitfile"
+Keywords "gt_genomediff esa pck unitfile check_shulen"
+Test do
+  numoffiles = 0
+  pck_out = []
+  esa_out = []
+
+  test_pck("#{code}*fas",
+           "-shulen -unitfile #{$testdata}genomediff/unitfile1.lua", "")
+
+  File.open(last_stdout, 'r') do |outfile|
+    while line = outfile.gets do
+      line.chomp!
+      next if line.match /^#/
+      if numoffiles == 0
+        numoffiles = line.match(/^\d+$/)[0].to_i
+      else
+        pck_out << line.split
+      end
+    end
+    if numoffiles == nil or
+      numoffiles != pck_out.length
+      failtest("can't parse output pck #{file1} #{file2}")
+    end
+  end
+  test_esa("#{code}*fas",
+           "-shulen -unitfile #{$testdata}genomediff/unitfile1.lua ",
+           "")
+
+  File.open(last_stdout, 'r') do |outfile|
+    while line = outfile.gets do
+      line.chomp!
+      next if line.match /^#/
+      unless line.match(/^\d+$/)
+        esa_out << line.split
+      end
+    end
+    if numoffiles == NIL or
+      numoffiles != pck_out.length
+      failtest("can't parse output esa #{file1} #{file2}")
+    end
+  end
+  if result = compare_2d_result(pck_out,esa_out)
+    failtest("different results pck-esa #{result[0]},#{result[1]}")
   end
 end
 
-kr_testable_files.each do |code|
-  Name "gt genomediff compare shulen #{code.split('/').last}"
-  Keywords "gt_genomediff esa pck check_shulen simulated_data"
-  Test do
+Name "gt genomediff compare shulen"
+Keywords "gt_genomediff esa pck check_shulen simulated_data"
+Test do
+  kr_testable_files.each do |code|
     pck_out = []
     esa_out =[]
     kr_out = []
@@ -357,10 +318,10 @@ kr_testable_files.each do |code|
   end
 end
 
-kr_testable_files.each do |code|
-  Name "gt genomediff compare kr #{code.split('/').last}"
-  Keywords "gt_genomediff esa pck check_kr simulated_data"
-  Test do
+Name "gt genomediff compare kr #{code.split('/').last}"
+Keywords "gt_genomediff esa pck check_kr simulated_data"
+Test do
+  kr_testable_files.each do |code|
     pck_out = []
     esa_out = []
     kr_out = []
@@ -442,13 +403,13 @@ kr_testable_files.each do |code|
 end
 
 def check_shulen_for_list_pairwise(list)
-  start_idx = 1
-  list.each do |file1|
-    list[start_idx..-1].each do |file2|
-      if file1 != file2
-        Name "gt genomediff pairwise test #{file1} #{file2}"
-        Keywords "gt_genomediff pairwise esa pck check_shulen"
-        Test do
+  Name "gt genomediff pairwise test"
+  Keywords "gt_genomediff pairwise esa pck check_shulen"
+  Test do
+    start_idx = 1
+    list.each do |file1|
+      list[start_idx..-1].each do |file2|
+        if file1 != file2
           numoffiles = 0
           pck_out = []
           esa_out = []
@@ -491,8 +452,8 @@ def check_shulen_for_list_pairwise(list)
           end
         end
       end
+      start_idx += 1
     end
-    start_idx += 1
   end
 end
 
@@ -547,4 +508,3 @@ Test do
     failtest("different results pck-esa #{result[0]},#{result[1]}")
   end
 end
-=end

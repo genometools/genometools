@@ -120,14 +120,12 @@ module Genomediff
 
   def Genomediff.pck_genomediff(idxname,parameter)
     return `$GTDIR/bin/gt genomediff \
-                     -pck #{idxname} \
-                     #{parameter}`
+                     -indextype pck #{parameter} #{idxname}`
   end
 
   def Genomediff.esa_genomediff(idxname,parameter)
     return `$GTDIR/bin/gt genomediff \
-                     -esa #{idxname} \
-                     #{parameter}`
+                     -indextype esa #{parameter} #{idxname}`
   end
 end
 
