@@ -35,7 +35,8 @@ struct GtLTRClusterVisitor {
   GtStr *file_prefix;
 };
 
-static int extract_feature_seq(GtFile *file, const char *header, GtStr *seqid,
+static int gt_ltr_cluster_visitor_extract_feature_seq(GtFile *file,
+                               const char *header, GtStr *seqid,
                                GtEncseq *encseq, GtRange range)
 {
   char *buffer;
@@ -106,7 +107,8 @@ static int gt_ltr_cluster_visitor_feature_node(GtNodeVisitor *nv,
         fname = (char*) gt_hashmap_get(lcv->feat_to_file, (void*) attr);
         file = gt_file_new(fname, "a", err);
       }
-      had_err = extract_feature_seq(file, header, seqid, lcv->encseq, range);
+      had_err = gt_ltr_cluster_visitor_extract_feature_seq(file, header,
+                                                 seqid, lcv->encseq, range);
       gt_file_delete(file);
     } else if (strcmp(fnt, "LTR_retrotransposon") == 0)
       continue;
@@ -142,7 +144,8 @@ static int gt_ltr_cluster_visitor_feature_node(GtNodeVisitor *nv,
         fname = (char*) gt_hashmap_get(lcv->feat_to_file, (void*) tmp);
         file = gt_file_new(fname, "a", err);
       }
-      had_err = extract_feature_seq(file, header, seqid, lcv->encseq, range);
+      had_err = gt_ltr_cluster_visitor_extract_feature_seq(file, header,
+                                                    seqid, lcv->encseq, range);
       gt_free(tmp);
       gt_file_delete(file);
     }

@@ -73,7 +73,7 @@ struct GtMatchIteratorLast {
 };
 
 static int get_index_parameterization(GtMatchIteratorLast *mil, GtStr *out,
-                                GtError *err)
+                                GT_UNUSED GtError *err)
 {
   int had_err = 0;
   gt_assert(mil);
