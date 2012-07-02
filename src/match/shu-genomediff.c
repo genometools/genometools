@@ -231,14 +231,12 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
     if (timer != NULL)
       gt_timer_show_progress(timer, "load sequential sa reader", stdout);
 
-    ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(
-                                                      arguments->indexname),
-                                                    SARR_LCPTAB | SARR_SUFTAB |
-                                                      SARR_ESQTAB | SARR_SSPTAB,
-                                                    arguments->scan ?
-                                                      SEQ_scan : SEQ_mappedboth,
-                                                    logger,
-                                                    err);
+    ssar = gt_newSequentialsuffixarrayreaderfromfile(
+                                    gt_str_array_get(arguments->filenames, 0),
+                                    SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB |
+                                      SARR_SSPTAB,
+                                    arguments->scan ? SEQ_scan : SEQ_mappedboth,
+                                    logger, err);
     if (ssar == NULL)
       had_err = -1;
 
@@ -252,11 +250,11 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
     if (timer != NULL)
       gt_timer_show_progress(timer, "map generic index", stdout);
 
-    generic_index_subject = genericindex_new(gt_str_get(arguments->indexname),
-                                           false, true, false, true,
-                                           arguments->user_max_depth,
-                                           logger,
-                                           err);
+    generic_index_subject =
+      genericindex_new(gt_str_array_get(arguments->filenames, 0),
+                       false, true, false, true,
+                       arguments->user_max_depth,
+                       logger, err);
     if (generic_index_subject == NULL) {
       had_err = -1;
     }

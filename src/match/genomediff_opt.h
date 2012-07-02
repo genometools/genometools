@@ -24,14 +24,13 @@
 #include "core/option_api.h"
 
 typedef struct GtGenomediffArguments {
-  GtOption *ref_esaindex,
-           *ref_pckindex,
-           *ref_unitfile;
-  bool verbose,
+  GtOption *ref_unitfile;
+  bool mirror,
+       scan,
+       verbose,
        with_esa,
        with_pck,
-       with_units,
-       scan;
+       with_units;
   int user_max_depth;
   unsigned long max_ln_n_fac;
   double divergence_abs_err, /* kr2 T */
@@ -40,6 +39,7 @@ typedef struct GtGenomediffArguments {
          divergence_threshold; /* kr2 THRESHOLD */
   GtStrArray *filenames;
   GtStr *indexname,
+        *indextype,
         *unitfile;
 } GtGenomediffArguments;
 
