@@ -304,7 +304,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   GtLogger *logger = NULL;
   GtDiscDistri *lengths = NULL, *starts = NULL;
   GtSimreadsDistvalue *input_distlen = NULL;
-  size_t j, nofvalues = 0;
+  off_t j, nofvalues = 0;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -360,7 +360,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
       gt_logger_log(logger, "read length distribution file: %s",
           gt_str_get(arguments->distlen_filename));
       nofvalues = gt_file_size(gt_str_get(arguments->distlen_filename)) /
-        (sizeof (unsigned long) << 1);
+                       (off_t) (sizeof (unsigned long) << 1);
       input_distlen = gt_malloc(sizeof(GtSimreadsDistvalue) * nofvalues);
       for (j = 0; j < nofvalues; j++)
       {
@@ -369,7 +369,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
         (void)gt_xfread(&(input_distlen[j].value), sizeof (unsigned long),
             (size_t)1, arguments->distlen_file);
       }
-      for (j = (size_t)1; j < nofvalues; j++)
+      for (j = (off_t)1; j < nofvalues; j++)
       {
         input_distlen[j].value += input_distlen[j - 1].value;
       }
