@@ -21,17 +21,12 @@
 #include "core/error.h"
 #include "core/logger.h"
 #include "match/sfx-opt.h"
-#include "match/shu_unitfile.h"
+#include "match/genomediff_opt.h"
 
 int gt_parseargsandcallsuffixerator(bool doesa,int argc,
                                     const char **argv,GtError *err);
 
-typedef struct SuffixeratorGenomediffInfo {
-  GtShuUnitFileInfo *unit_info;
-  uint64_t **shulensums;
-} SuffixeratorGenomediffInfo;
-
 int runsuffixerator(bool doesa, Suffixeratoroptions *so,
-                    SuffixeratorGenomediffInfo *gd_info,
+                    GenomediffInfo *gd_info,
                     GtLogger *logger, GtError *err);
 #endif

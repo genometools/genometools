@@ -24,6 +24,7 @@
 #include "core/str_array.h"
 #include "match/esa-seqread.h"
 #include "match/shu_unitfile.h"
+#include "match/genomediff_opt.h"
 
 typedef struct GtBUstate_shulen GtBUstate_shulen;
 
@@ -42,7 +43,8 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
                               const GtShuUnitFileInfo *unit_info,
                               GtError *err);
 
-GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq);
+GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq,
+                                                   GenomediffInfo *gd_info);
 
 int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
                                   const unsigned long *bucketofsuffixes,
@@ -54,6 +56,7 @@ int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
 int gt_sfx_multiesa2shulengthdist_last(GtBUstate_shulen *bustate,
                                        GtError *err);
 
-void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate);
+void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate,
+                                         GenomediffInfo *gd_info);
 
 #endif

@@ -560,7 +560,8 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq)
+GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq,
+                                            GenomediffInfo *gd_info)
 {
   GtBUstate_shulen *bustate;
 
@@ -572,14 +573,22 @@ GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq)
 #ifdef SHUDEBUG
   bustate->nextid = 0;
 #endif
-  bustate->unit_info = gt_shu_unit_info_new(encseq);
+  if (gd_info == NULL)
+    bustate->unit_info = gt_shu_unit_info_new(encseq);
+  else
+    bustate->unit_info = gd_info->unit_info;
+
   bustate->numofdbfiles = gt_encseq_num_of_files(encseq);
 #ifdef GENOMEDIFF_PAPER_IMPL
   bustate->leafdist
     = gt_malloc(sizeof (*bustate->leafdist) * bustate->numofdbfiles);
 #endif
   bustate->file_to_genome_map = bustate->unit_info->map_files;
-  bustate->shulengthdist = shulengthdist_new(bustate->numofdbfiles);
+  if (gd_info == NULL)
+    bustate->shulengthdist = shulengthdist_new(bustate->numofdbfiles);
+  else
+    bustate->shulengthdist = gd_info->shulensums;
+
   bustate->stack = (void *) gt_GtArrayGtBUItvinfo_new_shulen();
   return bustate;
 }
@@ -637,18 +646,21 @@ int gt_sfx_multiesa2shulengthdist_last(GtBUstate_shulen *bustate,GtError *err)
   return 0;
 }
 
-void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate)
+void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate,
+                                         GenomediffInfo *gd_info)
 {
   if (bustate == NULL)
   {
     return;
   }
   gt_assert(bustate->shulengthdist != NULL);
-  shulengthdist_print(bustate->unit_info->file_names,
-                      (const uint64_t * const*) bustate->shulengthdist,
-                      bustate->numofdbfiles);
-  gt_array2dim_delete(bustate->shulengthdist);
-  gt_shu_unit_info_delete(bustate->unit_info);
+  if (gd_info == NULL) {
+    shulengthdist_print(bustate->unit_info->file_names,
+                        (const uint64_t * const*) bustate->shulengthdist,
+                        bustate->numofdbfiles);
+    gt_array2dim_delete(bustate->shulengthdist);
+    gt_shu_unit_info_delete(bustate->unit_info);
+  }
   gt_GtArrayGtBUItvinfo_delete_shulen(bustate->stack,bustate);
 #ifdef GENOMEDIFF_PAPER_IMPL
   gt_free(bustate->leafdist);

@@ -22,6 +22,7 @@
 #include "core/str_array.h"
 #include "core/error.h"
 #include "core/option_api.h"
+#include "match/shu_unitfile.h"
 
 typedef struct GtGenomediffArguments {
   GtOption *ref_unitfile;
@@ -42,5 +43,10 @@ typedef struct GtGenomediffArguments {
         *indextype,
         *unitfile;
 } GtGenomediffArguments;
+
+typedef struct GenomediffInfo {
+  GtShuUnitFileInfo *unit_info;
+  uint64_t **shulensums;
+} GenomediffInfo;
 
 #endif

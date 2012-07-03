@@ -114,6 +114,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                            unsigned int prefixlength,
                            const GtEncseq *encseq,
                            const Suffixeratoroptions *so,
+                           GenomediffInfo *gd_info,
                            GtError *err)
 {
   bool haserr = false;
@@ -124,7 +125,8 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
     gt_assert(gt_str_get(so->indexname) != NULL || so->genomediff);
     if (so->genomediff)
     {
-      outfileinfo->bustate_shulen = gt_sfx_multiesashulengthdist_new(encseq);
+      outfileinfo->bustate_shulen =
+        gt_sfx_multiesashulengthdist_new(encseq,gd_info);
     }
     outfileinfo->outlcpinfo
       = gt_Outlcpinfo_new(so->genomediff ? NULL : gt_str_get(so->indexname),
@@ -408,7 +410,7 @@ static int run_packedindexconstruction(GtLogger *logger,
 
 int runsuffixerator(bool doesa,
                     Suffixeratoroptions *so,
-                    GT_UNUSED SuffixeratorGenomediffInfo *gd_info,
+                    GenomediffInfo *gd_info,
                     GtLogger *logger,
                     GtError *err)
 {
@@ -586,7 +588,7 @@ int runsuffixerator(bool doesa,
   outfileinfo.encseq = NULL;
   if (!haserr)
   {
-    if (initoutfileinfo(&outfileinfo,prefixlength,encseq,so,err) != 0)
+    if (initoutfileinfo(&outfileinfo,prefixlength,encseq,so,gd_info,err) != 0)
     {
       haserr = true;
     }
@@ -675,7 +677,7 @@ int runsuffixerator(bool doesa,
     }
   }
   gt_Outlcpinfo_delete(outfileinfo.outlcpinfo);
-  gt_sfx_multiesashulengthdist_delete(outfileinfo.bustate_shulen);
+  gt_sfx_multiesashulengthdist_delete(outfileinfo.bustate_shulen,gd_info);
   gt_encseq_delete(encseq);
   encseq = NULL;
   if (!haserr
