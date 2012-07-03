@@ -472,8 +472,7 @@ static void gt_chain2dim_bruteforcechainingscores(
         {
           if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
           {
-            combinable = colinearmatches(matchtable,leftmatch,
-                                           rightmatch);
+            combinable = colinearmatches(matchtable,leftmatch,rightmatch);
           } else
           {
             if (overlappingmatches(matchtable,leftmatch,rightmatch))
@@ -764,8 +763,7 @@ static bool gt_chain2dim_isrightmaximallocalchain(const GtChain2Dimmatchtable
   {
     return true;
   }
-  if (matchtable->matches[currentmatch+1].previousinchain !=
-      currentmatch)
+  if (matchtable->matches[currentmatch+1].previousinchain != currentmatch)
   {
     return true;
   }
