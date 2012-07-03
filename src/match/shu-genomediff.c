@@ -106,8 +106,7 @@ genomediff_calculate_genome_lengths(GtShuUnitFileInfo *unit_info)
   return genome_lengths;
 }
 
-static double *genomediff_calculate_gc(double **div,
-                                       unsigned long *genome_lengths,
+static double *genomediff_calculate_gc(unsigned long *genome_lengths,
                                        GtShuUnitFileInfo *unit_info,
                                        GtError *err)
 {
@@ -116,8 +115,6 @@ static double *genomediff_calculate_gc(double **div,
                 num_of_seq;
   double *seq_gc_content = NULL,
          *gc_content;
-
-  gt_assert(div);
 
   /*count gc, do not calculate ratio*/
   seq_gc_content = gt_encseq_get_gc(unit_info->encseq, false, false, err);
@@ -338,7 +335,7 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
     }
   }
   if (!had_err) {
-    gc_content = genomediff_calculate_gc(div, genome_lengths, unit_info, err);
+    gc_content = genomediff_calculate_gc(genome_lengths, unit_info, err);
     if (gc_content == NULL)
       had_err = -1;
   }
