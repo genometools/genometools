@@ -408,6 +408,7 @@ static int run_packedindexconstruction(GtLogger *logger,
 
 int runsuffixerator(bool doesa,
                     Suffixeratoroptions *so,
+                    GT_UNUSED SuffixeratorGenomediffInfo *gd_info,
                     GtLogger *logger,
                     GtError *err)
 {
@@ -713,7 +714,7 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
 
     gt_logger_log(logger,"sizeof (unsigned long)=%lu",
                   (unsigned long) (sizeof (unsigned long) * CHAR_BIT));
-    if (runsuffixerator(doesa,&so,logger,err) < 0)
+    if (runsuffixerator(doesa,&so,NULL,logger,err) < 0)
     {
       haserr = true;
     }
