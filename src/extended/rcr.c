@@ -456,7 +456,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
                 readlength,
                 readpos,
                 ref_i,
-                rel_readpos,
+                rel_readpos = 0,
                 rel_varpos,
                 varpos;
   GtBitsequence code,

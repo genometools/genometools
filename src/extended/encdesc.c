@@ -1017,7 +1017,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
 {
   int had_err = 0;
   bool is_not_at_pageborder;
-  FILE *fp;
+  FILE *fp = NULL;
   GtStr *name1;
   long pos,
        start_of_encoding,
@@ -1039,7 +1039,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
 
   if (!had_err) {
     fp = gt_fa_fopen_with_suffix(name, GT_ENCDESC_FILESUFFIX, "wb", err);
-    if (!fp)
+    if (fp == NULL)
       had_err = -1;
   }
 
