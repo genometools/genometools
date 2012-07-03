@@ -21,7 +21,7 @@
 #define MARGINS_DEFAULT           10
 #define BAR_HEIGHT_DEFAULT        15
 #define BAR_VSPACE_DEFAULT        10
-#define TOY_TEXT_HEIGHT          8.0
+#define TEXT_SIZE_DEFAULT          8
 #define TRACK_VSPACE_DEFAULT      20
 #define CAPTION_BAR_SPACE_DEFAULT  7
 #define MIN_LEN_BLOCK_DEFAULT     30

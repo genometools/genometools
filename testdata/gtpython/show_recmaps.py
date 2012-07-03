@@ -49,6 +49,7 @@ if __name__ == "__main__":
     image_info = ImageInfo()
     canvas = CanvasCairoFile(style, 800, height, image_info)
     layout.sketch(canvas)
+    canvas.to_file("foo1.png")
 
     for (x1, y1, x2, y2, gn) in image_info.each_hotspot():
         print "x1=%d, y1=%d, x2=%d, y2=%d, gn.type=%s" % (x1, y1, x2, y2,

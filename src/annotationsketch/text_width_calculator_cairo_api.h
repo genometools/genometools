@@ -34,6 +34,7 @@ typedef struct GtTextWidthCalculatorCairo GtTextWidthCalculatorCairo;
    using the text size options given in the <GtStyle>. If the <GtStyle> is NULL,
    the current font settings in the <cairo_t> will be used for all text
    width calculations. */
-GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t*, GtStyle*);
+GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t*, GtStyle*,
+                                                          GtError*);
 
 #endif

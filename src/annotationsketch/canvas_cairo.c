@@ -89,7 +89,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
 
   if (show_track_captions)
   {
-    double theight      = TOY_TEXT_HEIGHT,
+    double theight      = gt_graphics_get_text_height(canvas->pvt->g),
            captionspace = CAPTION_BAR_SPACE_DEFAULT;
     if (gt_style_get_num(canvas->pvt->sty,
                           "format", "track_caption_font_size",
@@ -102,7 +102,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
       return -1;
     }
     gt_graphics_set_font(canvas->pvt->g,
-                         "sans-serif",
+                         "Sans",
                          SLANT_NORMAL,
                          WEIGHT_NORMAL,
                          theight);
@@ -164,7 +164,8 @@ int gt_canvas_cairo_visit_line_pre(GtCanvas *canvas, GtLine *line,
                                    GtError *err)
 {
   int had_err = 0;
-  double lheight, bar_vspace = BAR_VSPACE_DEFAULT, theight = TOY_TEXT_HEIGHT,
+  double lheight, bar_vspace = BAR_VSPACE_DEFAULT,
+         theight = gt_graphics_get_text_height(canvas->pvt->g),
          captionspace = CAPTION_BAR_SPACE_DEFAULT;
   bool show_block_captions = true;
   gt_assert(canvas && line);
@@ -290,7 +291,7 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
     caption = gt_str_get(gt_block_get_caption(block));
     if (caption)
     {
-      double theight = TOY_TEXT_HEIGHT,
+      double theight = gt_graphics_get_text_height(canvas->pvt->g),
              captionspace = CAPTION_BAR_SPACE_DEFAULT;
       if (gt_style_get_num(canvas->pvt->sty,
                            "format", "block_caption_space",
@@ -303,7 +304,7 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
         return -1;
       }
       gt_graphics_set_font(canvas->pvt->g,
-                           "sans-serif",
+                           "Sans",
                            SLANT_NORMAL,
                            WEIGHT_NORMAL,
                            theight);
@@ -413,8 +414,8 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   int had_err = 0, arrow_status = ARROW_NONE;
   GtRange elem_range = gt_element_get_range(elem);
   GtDrawingRange draw_range;
-  double elem_start,
-         elem_width,
+  double elem_start = GT_UNDEF_DOUBLE,
+         elem_width = GT_UNDEF_DOUBLE,
          stroke_width = STROKE_WIDTH_DEFAULT,
          bar_height = BAR_HEIGHT_DEFAULT,
          arrow_width = ARROW_WIDTH_DEFAULT;
@@ -476,6 +477,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   draw_range.end *= (canvas->pvt->width-2*canvas->pvt->margins);
   elem_start = draw_range.start + canvas->pvt->margins;
   elem_width = draw_range.end - draw_range.start;
+  gt_assert(elem_start != GT_UNDEF_DOUBLE && elem_width != GT_UNDEF_DOUBLE);
 
   if (gt_element_is_marked(elem)) {
     if (gt_style_get_color_with_track(canvas->pvt->sty, type, "stroke_marked",
@@ -691,7 +693,7 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 
   if (show_track_captions)
   {
-    double theight = TOY_TEXT_HEIGHT,
+    double theight = gt_graphics_get_text_height(canvas->pvt->g),
            captionspace = CAPTION_BAR_SPACE_DEFAULT;
     if (gt_style_get_num(canvas->pvt->sty,
                          "format", "track_caption_font_size",
@@ -700,7 +702,7 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
     }
     /* draw track title */
     gt_graphics_set_font(canvas->pvt->g,
-                           "sans-serif",
+                           "Sans",
                            SLANT_NORMAL,
                            WEIGHT_NORMAL,
                            theight);
@@ -741,7 +743,8 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
                                 GtError *err)
 {
-  double step, minorstep, vmajor, vminor, theight = TOY_TEXT_HEIGHT;
+  double step, minorstep, vmajor, vminor,
+         theight = gt_graphics_get_text_height(canvas->pvt->g);
   long base_length, tick;
   GtColor rulercol, gridcol;
   GtStr *left_str, *right_str, *unit;
@@ -803,7 +806,7 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
 
   /* reset font to default */
   gt_graphics_set_font(canvas->pvt->g,
-                       "sans-serif",
+                       "Sans",
                        SLANT_NORMAL,
                        WEIGHT_NORMAL,
                        theight);

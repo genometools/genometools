@@ -347,7 +347,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
 
     cr = cairo_create(surf);
     cairo_set_font_size(cr, 8);
-    twc = gt_text_width_calculator_cairo_new(cr, sty);
+    twc = gt_text_width_calculator_cairo_new(cr, sty, err);
     for (start = qry_range.start; start <= qry_range.end;
          start += arguments->width)
     {

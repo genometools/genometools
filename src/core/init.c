@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef WITHOUT_CAIRO
-#include <fontconfig.h>
-#endif
 #ifdef HAVE_MYSQL
 #include <mysql/mysql.h>
+#endif
+#ifndef WITHOUT_CAIRO
+#include <fontconfig.h>
 #endif
 #include <string.h>
 #include "core/init_api.h"
@@ -113,6 +113,9 @@ void gt_lib_init(void)
   gt_log_init();
   if (showtime) gt_showtime_enable();
   gt_symbol_init();
+#ifndef WITHOUT_CAIRO
+  FcInit();
+#endif
   gt_class_prealloc_run();
   gt_ya_rand_init(0);
 #ifdef HAVE_MYSQL

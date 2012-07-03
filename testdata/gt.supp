@@ -33,27 +33,6 @@
    ...
 }
 {
-   toy_font_static_data_problem
-   Memcheck:Leak
-   ...
-   fun:FT_New_Face
-   ...
-}
-{
-   toy_font_static_data_problem
-   Memcheck:Leak
-   ...
-   fun:FT_Load_Glyph
-   ...
-}
-{
-   toy_font_static_data_problem
-   Memcheck:Leak
-   ...
-   fun:cairo_text_extents
-   ...
-}
-{
    <pthreads_mac>
    Memcheck:Cond
    fun:pthread_rwlock_init
@@ -63,23 +42,86 @@
    ...
 }
 {
-   toy_font_static_data_problem
+   Fontconfig_static_data_problem
    Memcheck:Addr4
    ...
    fun:FcConfigParseAndLoad
    ...
 }
 {
-   toy_font_static_data_problem
+   Fontconfig_static_data_problem
    Memcheck:Addr8
    ...
    fun:FcConfigParseAndLoad
    ...
 }
 {
-   toy_font_static_data_problem
+   leak_within_pango1
+   fun:*alloc
+  ...
+   fun:g_type_init_with_debug_flags
+   fun:pango_cairo_font_map_new
+}
+{
+   leak_within_pango3
    Memcheck:Leak
+   fun:*alloc
    ...
-   fun:_cairo_ft_font_face_create_for_toy
+   fun:g_get_language_names
+   fun:g_thread_init_glib
+   fun:g_type_init_with_debug_flags
+   fun:pango_cairo_font_map_new
+}
+{
+   leak_within_pango5
+   Memcheck:Leak
+   fun:*alloc
    ...
+   fun:g_type_register_fundamental
+   ...
+   fun:g_type_init_with_debug_flags
+   fun:pango_cairo_font_map_new
+}
+{
+   leak_within_pango8
+   Memcheck:Leak
+   fun:*alloc
+   ...
+   fun:pango_find_map
+}
+{
+   leak_within_pango13
+   Memcheck:Leak
+   fun:*alloc
+   ...
+   fun:pango_itemize_with_base_dir
+}
+{
+   leak_within_pango15
+   Memcheck:Leak
+   fun:memalign
+   ...
+   fun:g_type_init_with_debug_flags
+   fun:pango_cairo_font_map_new
+}
+{
+   leak_within_pango18
+   Memcheck:Leak
+   fun:*alloc
+   ...
+   fun:pango_cairo_font_map_get_default
+}
+{
+   leak_within_pango19
+   Memcheck:Leak
+   fun:*alloc
+   ...
+   obj:/usr/lib*/libpango*
+}
+{
+   leak_within_pango20
+   Memcheck:Leak
+   fun:memalign
+   ...
+   obj:/usr/lib*/libpango*
 }

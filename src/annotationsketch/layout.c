@@ -198,7 +198,9 @@ GtLayout* gt_layout_new(GtDiagram *diagram,
   gt_assert(diagram && width > 0 && style && err);
   if (check_width(width, style, err) < 0)
     return NULL;
-  twc = gt_text_width_calculator_cairo_new(NULL, style);
+  twc = gt_text_width_calculator_cairo_new(NULL, style, err);
+  if (!twc)
+    return NULL;
   layout = gt_layout_new_with_twc(diagram, width, style, twc, err);
   if (layout)
     layout->own_twc = true;
@@ -216,7 +218,10 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   GtLayout *layout;
   GtHashmap *blocks;
   GtLayoutTraverseInfo lti;
-  gt_assert(diagram && style && twc && err);
+  gt_assert(diagram);
+  gt_assert(style);
+  gt_assert(twc);
+  gt_assert(err);
   if (check_width(width, style, err) < 0)
     return NULL;
   layout = gt_calloc(1, sizeof (GtLayout));
@@ -392,7 +397,7 @@ int gt_layout_get_height(const GtLayout *layout, unsigned long *result,
   /* add custom track space allotment */
   if (show_track_captions)
   {
-    double theight = TOY_TEXT_HEIGHT,
+    double theight = TEXT_SIZE_DEFAULT,
            captionspace = CAPTION_BAR_SPACE_DEFAULT;
     if (gt_style_get_num(layout->style,
                          "format", "track_caption_font_size",

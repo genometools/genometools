@@ -76,12 +76,12 @@ open_file(GtkWidget *widget,  gpointer user_data)
       GtkWidget *w = GTK_WIDGET(area);
       GtkListStore *store;
       GtBioseq *bioseq;
-      seqid = gt_feature_index_get_first_seqid(features);
-      gt_feature_index_get_range_for_seqid(features, &qry_range, seqid);
+      seqid = gt_feature_index_get_first_seqid(features, err);
+      gt_feature_index_get_range_for_seqid(features, &qry_range, seqid, err);
       gt_diagram_delete(d);
       d = gt_diagram_new(features, seqid, &qry_range, sty, err);
-      gtk_widget_queue_draw_area (w, 0, 0, w->allocation.width,
-                                  w->allocation.height);
+      gtk_widget_queue_draw_area(w, 0, 0, w->allocation.width,
+                                 w->allocation.height);
       gtk_widget_destroy(dialog);
     } else {
       GtkWidget *edialog;

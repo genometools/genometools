@@ -393,7 +393,6 @@ int gt_sketch(int argc, const char **argv, GtError *err)
       fprintf(stderr, "# of results: %lu\n", gt_array_size(results));
 
     /* find and load style file */
-
     if (!(sty = gt_style_new(err)))
       had_err = -1;
     if (!had_err && gt_file_exists(gt_str_get(arguments.stylefile))) {

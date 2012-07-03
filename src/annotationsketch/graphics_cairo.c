@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2007-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -29,6 +29,7 @@
 #include <pango/pangocairo.h>
 
 #include <math.h>
+#include "annotationsketch/default_formats.h"
 #include "annotationsketch/graphics_cairo.h"
 #include "annotationsketch/graphics_rep.h"
 #include "core/file.h"
@@ -48,6 +49,11 @@ struct GtGraphicsCairo {
   GtGraphicsOutType type;
   double margin_x, margin_y, height, width;
   bool from_context;
+  PangoLayout *layout;
+  PangoFontMap *fmap;
+  PangoContext *pcontext;
+  PangoFontDescription *desc;
+  int font_height;
 };
 
 #define gt_graphics_cairo_cast(G)\
@@ -64,6 +70,25 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
 
 /* to get crisp lines, round coordinates to .5 */
 #define rnd_to_nhalf(num) (floor(num+0.5)+0.5)
+
+void gt_graphics_cairo_set_font(GtGraphics *gg, const char *family,
+                                FontSlant slant, FontWeight weight, double size)
+{
+  char buf[BUFSIZ];
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  gt_assert(g && family && g->layout);
+
+  snprintf(buf, BUFSIZ, "%s %s %s %d",
+           family,
+           (slant == SLANT_ITALIC) ? "Italic" : "",
+           (weight == WEIGHT_BOLD) ? "Bold" : "",
+           (int) size);
+  g->desc = pango_font_description_from_string(buf);
+  gt_assert(g->desc);
+  pango_layout_set_font_description(g->layout, g->desc);
+  pango_font_description_free(g->desc);
+  g->font_height = (int) size;
+}
 
 void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
                                   unsigned int width, unsigned int height)
@@ -112,8 +137,6 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
   g->margin_x = g->margin_y = 20;
   cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
-  cairo_select_font_face(g->cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL,
-                         CAIRO_FONT_WEIGHT_NORMAL);
   g->type = type;
 }
 
@@ -136,36 +159,37 @@ int gt_graphics_cairo_set_background_color(GtGraphics *gg, GtColor color)
   }
 }
 
-void gt_graphics_cairo_set_font(GtGraphics *gg, const char *family,
-                                FontSlant slant, FontWeight weight, double size)
-{
-  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  gt_assert(g && family);
-  cairo_select_font_face(g->cr, family,
-                         (cairo_font_slant_t) slant,
-                         (cairo_font_weight_t) weight);
-  cairo_set_font_size(g->cr, size);
-}
-
 void gt_graphics_cairo_draw_text(GtGraphics *gg, double x, double y,
                                  const char *text)
 {
+  PangoRectangle ink;
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  cairo_text_extents_t ext;
-  gt_assert(g && text);
-  cairo_text_extents(g->cr, text, &ext);
-  if (gt_double_smaller_double(g->width, x+ext.width))
+  gt_assert(g && text && g->layout);
+
+  pango_layout_set_text(g->layout, text, -1);
+
+  /* get text extents */
+  pango_layout_line_get_pixel_extents(pango_layout_get_line_readonly(g->layout,
+                                                                     0),
+                                      &ink,
+                                      NULL);
+
+  if (gt_double_smaller_double(g->width, x+ink.width))
     return;
+
   cairo_set_source_rgb(g->cr, 0, 0, 0);
-  cairo_move_to(g->cr, x, y);
-  cairo_show_text(g->cr, text);
+  cairo_move_to(g->cr, x, y-g->font_height);
+  pango_cairo_show_layout(g->cr, g->layout);
 }
 
 void gt_graphics_cairo_draw_text_clip(GtGraphics *gg, double x, double y,
                                       const char *text)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  gt_assert(g && text);
+  gt_assert(g && text && g->layout);
+
+  pango_layout_set_text(g->layout, text, -1);
+
   cairo_save(g->cr);
   cairo_rectangle(g->cr,
                   g->margin_x,
@@ -174,47 +198,64 @@ void gt_graphics_cairo_draw_text_clip(GtGraphics *gg, double x, double y,
                   g->height-2*g->margin_y);
   cairo_clip(g->cr);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
-  cairo_move_to(g->cr, x, y);
-  cairo_show_text(g->cr, text);
+  cairo_move_to(g->cr, x, y-g->font_height);
+  pango_cairo_show_layout(g->cr, g->layout);
   cairo_restore(g->cr);
 }
 
 void gt_graphics_cairo_draw_text_centered(GtGraphics *gg, double x, double y,
                                           const char *text)
 {
+  PangoRectangle ink;
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  cairo_text_extents_t ext;
-  gt_assert(g && text);
-  cairo_set_source_rgb(g->cr, 0, 0, 0);
+  gt_assert(g && text && g->layout);
+
+  pango_layout_set_text(g->layout, text, -1);
+
   /* get text extents */
-  cairo_text_extents(g->cr, text, &ext);
+  pango_layout_line_get_pixel_extents(pango_layout_get_line_readonly(g->layout,
+                                                                     0),
+                                      &ink,
+                                      NULL);
+
+  cairo_set_source_rgb(g->cr, 0, 0, 0);
   /* draw text w/ its center at the given coords */
-  cairo_move_to(g->cr, x-(ext.width/2)-1, y);
-  cairo_show_text(g->cr, text);
+  cairo_move_to(g->cr, x-(ink.width/2)-1, y-g->font_height);
+  pango_cairo_show_layout(g->cr, g->layout);
 }
 
 void gt_graphics_cairo_draw_text_right(GtGraphics *gg, double x, double y,
                                        const char *text)
 {
+  PangoRectangle ink;
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  cairo_text_extents_t ext;
-  gt_assert(g && text);
-  cairo_set_source_rgb(g->cr, 0, 0, 0);
+  gt_assert(g && text && g->layout);
+
+  pango_layout_set_text(g->layout, text, -1);
+
   /* get text extents */
-  cairo_text_extents(g->cr, text, &ext);
+  pango_layout_line_get_pixel_extents(pango_layout_get_line_readonly(g->layout,
+                                                                     0),
+                                      &ink,
+                                      NULL);
+
+  cairo_set_source_rgb(g->cr, 0, 0, 0);
   /* draw text w/ its right end at the given coords */
-  cairo_move_to(g->cr, x-(ext.width)-1, y);
-  cairo_show_text(g->cr, text);
+  cairo_move_to(g->cr, x-(ink.width)-1, y-g->font_height);
+  pango_cairo_show_layout(g->cr, g->layout);
 }
 
 void gt_graphics_cairo_draw_colored_text(GtGraphics *gg, double x, double y,
                                          GtColor color, const char *text)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  gt_assert(g && text);
+  gt_assert(g && text && g->layout);
+
+  pango_layout_set_text(g->layout, text, -1);
+
   cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
-  cairo_move_to(g->cr, x, y);
-  cairo_show_text(g->cr, text);
+  cairo_move_to(g->cr, x, y-g->font_height);
+  pango_cairo_show_layout(g->cr, g->layout);
 }
 
 double gt_graphics_cairo_get_image_height(GtGraphics *gg)
@@ -303,21 +344,28 @@ void gt_graphics_cairo_draw_vertical_line(GtGraphics *gg, double x, double y,
 
 double gt_graphics_cairo_get_text_width(GtGraphics *gg, const char* text)
 {
+  PangoLayoutLine *line;
+  PangoRectangle rect;
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  cairo_text_extents_t ext;
-  gt_assert(g);
+  gt_assert(g && text && g->layout);
+
+  pango_layout_set_text(g->layout, text, -1);
   /* get text extents */
-  cairo_text_extents(g->cr, text, &ext);
-  return ext.width;
+  gt_assert(pango_layout_get_line_count(g->layout) > 0);
+  line = pango_layout_get_line_readonly(g->layout, 0);
+  gt_assert(line);
+  pango_layout_line_get_pixel_extents(line, &rect, NULL);
+
+  gt_assert(gt_double_smaller_double(0, rect.width));
+  return rect.width;
 }
 
 double gt_graphics_cairo_get_text_height(GtGraphics *gg)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  cairo_font_extents_t ext;
   gt_assert(g);
-  cairo_font_extents(g->cr, &ext);
-  return ext.height;
+
+  return g->font_height;
 }
 
 void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
@@ -704,6 +752,9 @@ void gt_graphics_cairo_delete(GtGraphics *gg)
     cairo_surface_destroy(g->surf); /* reference counted */
   if (g->outbuf)
     gt_str_delete(g->outbuf);
+  g_object_unref(g->fmap);
+  g_object_unref(g->pcontext);
+  g_object_unref(g->layout);
 }
 
 const GtGraphicsClass* gt_graphics_cairo_class(void)
@@ -747,8 +798,20 @@ GtGraphics* gt_graphics_cairo_new(GtGraphicsOutType type,
                                   unsigned int height)
 {
   GtGraphics *g;
+  GtGraphicsCairo *gc;
+  char buf[64];
   g = gt_graphics_create(gt_graphics_cairo_class());
-  gt_graphics_cairo_initialize(gt_graphics_cairo_cast(g), type, width, height);
+  gc = gt_graphics_cairo_cast(g);
+  gt_graphics_cairo_initialize(g, type, width, height);
+  gc->fmap =  pango_cairo_font_map_new();
+  gc->pcontext = pango_font_map_create_context(gc->fmap);
+  gc->layout = pango_layout_new(gc->pcontext);
+  pango_layout_set_width(gc->layout, -1);
+  gt_assert(gc->layout);
+  snprintf(buf, 64, "Sans %d", TEXT_SIZE_DEFAULT);
+  gc->desc = pango_font_description_from_string(buf);
+  pango_layout_set_font_description(gc->layout, gc->desc);
+  pango_font_description_free(gc->desc);
   return g;
 }
 
@@ -758,6 +821,7 @@ GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
 {
   GtGraphics *g;
   GtGraphicsCairo *gc;
+  char buf[64];
   g = gt_graphics_create(gt_graphics_cairo_class());
   gc = gt_graphics_cairo_cast(g);
   gc->width = width;
@@ -765,10 +829,17 @@ GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
   gc->margin_x = gc->margin_y = 20;
   gc->from_context = true;
   gc->cr = context;
+  gc->fmap =  pango_cairo_font_map_new();
+  gc->pcontext = pango_font_map_create_context(gc->fmap);
+  gc->layout = pango_layout_new(gc->pcontext);
+  pango_layout_set_width(gc->layout, -1);
+  gt_assert(gc->layout);
+  snprintf(buf, 64, "Sans %d", TEXT_SIZE_DEFAULT);
+  gc->desc = pango_font_description_from_string(buf);
+  pango_layout_set_font_description(gc->layout, gc->desc);
+  pango_font_description_free(gc->desc);
   cairo_set_line_join(context, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(context, CAIRO_LINE_CAP_ROUND);
-  cairo_select_font_face(context, "sans", CAIRO_FONT_SLANT_NORMAL,
-                         CAIRO_FONT_WEIGHT_NORMAL);
   return g;
 }
 

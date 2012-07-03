@@ -177,11 +177,14 @@ int gt_track_get_height(const GtTrack *track, double *height,
                         const GtStyle *sty, GtError *err)
 {
   unsigned long i;
-  double track_height = 0, bheight = TOY_TEXT_HEIGHT, theight = TOY_TEXT_HEIGHT,
+  double track_height = 0,
+         bheight = TEXT_SIZE_DEFAULT,
+         theight = TEXT_SIZE_DEFAULT,
          tcaptionspace = CAPTION_BAR_SPACE_DEFAULT,
          bcaptionspace = CAPTION_BAR_SPACE_DEFAULT,
          tmp = TRACK_VSPACE_DEFAULT;
-  bool show_track_captions = true, show_block_captions = true;
+  bool show_track_captions = true,
+       show_block_captions = true;
   gt_assert(track && sty);
   if (gt_style_get_num(sty, "format", "block_caption_font_size", &bheight,
                        NULL, err) == GT_STYLE_QUERY_ERROR) {
@@ -199,12 +202,22 @@ int gt_track_get_height(const GtTrack *track, double *height,
                        NULL, err) == GT_STYLE_QUERY_ERROR) {
     return -1;
   }
+  if (gt_style_get_num(sty, "format", "block_caption_font_size", &bheight,
+                       NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
+  if (gt_style_get_num(sty, "format", "track_caption_font_size", &theight,
+                       NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
   for (i = 0; i < gt_array_size(track->lines); i++)
   {
     double itmp = BAR_VSPACE_DEFAULT,
-          tmp;
+           tmp = 0.0;
     int rval;
-    GtLine *line = *(GtLine**) gt_array_get(track->lines, i);
+    GtLine *line;
+
+    line = *(GtLine**) gt_array_get(track->lines, i);
     rval = gt_line_get_height(line, &tmp, sty, err);
     if (rval < 0)
       return -1;
@@ -262,13 +275,12 @@ int gt_track_unit_test(GtError *err)
   GtTrack *track;
   GtGenomeNode *parent[4], *gn[4];
   GtStr *title;
-  double height;
+  double height, tmp;
   GtStyle *sty;
   unsigned long i;
   GtLineBreaker *lb;
-  double t_rest = TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT
-                                  + TRACK_VSPACE_DEFAULT,
-         l_rest =  BAR_VSPACE_DEFAULT;
+  double t_rest = 0,
+         l_rest = 0;
   gt_error_check(err);
 
   title = gt_str_new_cstr("test");
@@ -304,6 +316,26 @@ int gt_track_unit_test(GtError *err)
   lb = gt_line_breaker_bases_new();
 
   sty = gt_style_new(err);
+
+  if (gt_style_get_num(sty, "format", "track_caption_font_size", &tmp,
+                   NULL, err) == GT_STYLE_QUERY_NOT_SET) {
+    tmp = TEXT_SIZE_DEFAULT;
+  }
+  t_rest += tmp;
+  if (gt_style_get_num(sty, "format", "track_caption_space", &tmp,
+                       NULL, err) == GT_STYLE_QUERY_NOT_SET) {
+    tmp = CAPTION_BAR_SPACE_DEFAULT;
+  }
+  t_rest += tmp;
+  if (gt_style_get_num(sty, "format", "track_vspace", &tmp,
+                       NULL, err) == GT_STYLE_QUERY_NOT_SET) {
+    tmp = TRACK_VSPACE_DEFAULT;
+  }
+  t_rest += tmp;
+  if (gt_style_get_num(sty, "format", "bar_vspace", &l_rest,
+                       NULL, err) == GT_STYLE_QUERY_NOT_SET) {
+    l_rest = BAR_VSPACE_DEFAULT;
+  }
 
   track = gt_track_new(title, GT_UNDEF_ULONG, true, lb);
   gt_ensure(had_err, track);

@@ -100,17 +100,27 @@ GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
   GtCanvas *canvas;
   GtColor bgcolor = {1.0, 1.0, 1.0, 1.0};
   GtCanvasCairoFile *ccf;
+  GtStyleQueryStatus status;
   double margins = 10.0;
   gt_assert(style && width > 0 && height > 0);
-  if (gt_style_get_color(style, "format", "background_color", &bgcolor,
-                         NULL, err)  == GT_STYLE_QUERY_ERROR) {
-    return NULL;
-  }
+
+  status = gt_style_get_color(style, "format", "background_color", &bgcolor,
+                              NULL, err);
+  switch (status) {
+    case GT_STYLE_QUERY_ERROR:
+      return NULL;
+    case GT_STYLE_QUERY_NOT_SET:
+      bgcolor.red = bgcolor.green = bgcolor.blue = bgcolor.alpha = 1.0;
+      break;
+    default:
+      break;
+    }
   if (gt_style_get_num(style,
                        "format", "margins", &margins,
                        NULL, err) == GT_STYLE_QUERY_ERROR) {
     return NULL;
   }
+
   canvas = gt_canvas_create(gt_canvas_cairo_file_class());
   canvas->pvt->g = gt_graphics_cairo_new(output_type, width, height);
   (void) gt_graphics_set_background_color(canvas->pvt->g, bgcolor);

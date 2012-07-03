@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,15 +28,18 @@
 #include "annotationsketch/text_width_calculator_rep.h"
 
 #define GT_TWC_FORMAT CAIRO_FORMAT_ARGB32
-#define GT_TWC_WIDTH  1
-#define GT_TWC_HEIGHT 1
+#define GT_TWC_WIDTH  500
+#define GT_TWC_HEIGHT 60
 
 struct GtTextWidthCalculatorCairo {
   const GtTextWidthCalculator parent_instance;
   GtStyle *style;
-  PangoLayout *layout;
   cairo_t *context;
   cairo_surface_t *mysurf;
+  PangoLayout *layout;
+  PangoFontMap *fmap;
+  PangoContext *pcontext;
+  PangoFontDescription *desc;
   bool own_context;
 };
 
@@ -46,29 +49,26 @@ struct GtTextWidthCalculatorCairo {
 
 double gt_text_width_calculator_cairo_get_text_width(GtTextWidthCalculator *twc,
                                                      const char *text,
-                                                     GtError *err)
+                                                     GT_UNUSED GtError *err)
 {
   GtTextWidthCalculatorCairo *twcc;
-  double theight = TOY_TEXT_HEIGHT;
-  cairo_text_extents_t ext;
+  PangoLayoutLine *line;
+  PangoRectangle rect;
   gt_assert(twc && text);
   twcc = gt_text_width_calculator_cairo_cast(twc);
-  if (twcc->style)
-  {
-    if (gt_style_get_num(twcc->style,
-                         "format", "block_caption_font_size",
-                         &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
-      return -1.0;
-    }
-    cairo_save(twcc->context);
-    cairo_set_font_size(twcc->context, theight);
-  }
-  /* get text extents */
-  cairo_text_extents(twcc->context, text, &ext);
+
+  /* redo layout */
+  pango_layout_set_text(twcc->layout, text, -1);
+  gt_assert(pango_layout_get_line_count(twcc->layout) > 0);
+  line = pango_layout_get_line_readonly(twcc->layout, 0);
+
+  /* get extents */
+  pango_layout_line_get_pixel_extents(line, &rect, NULL);
+
   if (twcc->style)
     cairo_restore(twcc->context);
-  gt_assert(gt_double_smaller_double(0, ext.width));
-  return ext.width;
+  gt_assert(gt_double_smaller_double(0, rect.width));
+  return rect.width;
 }
 
 void gt_text_width_calculator_cairo_delete(GtTextWidthCalculator *twc)
@@ -77,6 +77,8 @@ void gt_text_width_calculator_cairo_delete(GtTextWidthCalculator *twc)
   if (!twc) return;
   twcc = gt_text_width_calculator_cairo_cast(twc);
   g_object_unref(twcc->layout);
+  g_object_unref(twcc->pcontext);
+  g_object_unref(twcc->fmap);
   if (twcc->style)
     gt_style_delete(twcc->style);
   if (twcc->own_context)
@@ -100,10 +102,13 @@ const GtTextWidthCalculatorClass* gt_text_width_calculator_cairo_class(void)
 }
 
 GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context,
-                                                          GtStyle *style)
+                                                          GtStyle *style,
+                                                          GtError *err)
 {
   GtTextWidthCalculatorCairo *twcc;
   GtTextWidthCalculator *twc;
+  double theight = TEXT_SIZE_DEFAULT;
+  char buf[64];
   twc = gt_text_width_calculator_create(gt_text_width_calculator_cairo_class());
   twcc = gt_text_width_calculator_cairo_cast(twc);
   if (style)
@@ -118,6 +123,22 @@ GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context,
     twcc->context = context;
     twcc->own_context = false;
   }
-  twcc->layout = pango_cairo_create_layout(twcc->context);
+  if (twcc->style)
+  {
+    if (gt_style_get_num(twcc->style,
+                         "format", "block_caption_font_size",
+                         &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
+      gt_text_width_calculator_delete(twc);
+      return NULL;
+    }
+    cairo_save(twcc->context);
+  }
+  twcc->fmap = pango_cairo_font_map_get_default();
+  twcc->pcontext = pango_font_map_create_context(twcc->fmap);
+  twcc->layout = pango_layout_new(twcc->pcontext);
+  snprintf(buf, 64, "Sans %d", (int) theight);
+  twcc->desc = pango_font_description_from_string(buf);
+  pango_layout_set_font_description(twcc->layout, twcc->desc);
+  pango_font_description_free(twcc->desc);
   return twc;
 }

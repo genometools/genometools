@@ -35,6 +35,38 @@
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/gt_lua.h"
 
+static char *gt_default_format_style =
+  "style =\n"
+  "{\n"
+  "  format =\n"
+  "  {\n"
+  "    split_lines = true,\n"
+  "    show_block_captions = true,\n"
+  "    show_track_captions = true,\n"
+  "    margins = 30,\n"
+  "    bar_height = 16,\n"
+  "    bar_vspace = 10,\n"
+  "    track_vspace = 15,\n"
+  "    ruler_font_size = 8,\n"
+  "    ruler_space = 20,\n"
+  "    block_caption_font_size = 8,\n"
+  "    block_caption_space = 7,\n"
+  "    track_caption_font_size = 8,\n"
+  "    track_caption_space = 7,\n"
+  "    arrow_width = 6,\n"
+  "    stroke_width = .5,\n"
+  "    unit = \"bp\",\n"
+  "    ruler_left_text = \"5'\",\n"
+  "    ruler_right_text = \"3'\",\n"
+  "    stroke_marked_width = 1.5,\n"
+  "    show_grid = true,\n"
+  "    min_len_block = 20,\n"
+  "    track_title_color     = {red=0.7, green=0.7, blue=0.7, alpha = 1.0},\n"
+  "    default_stroke_color  = {red=0.1, green=0.1, blue=0.1, alpha = 1.0},\n"
+  "    background_color      = {red=1.0, green=1.0, blue=1.0, alpha = 1.0},\n"
+  "  }\n"
+  "}";
+
 struct GtStyle
 {
   lua_State *L;
@@ -86,7 +118,10 @@ static void luaL_opencustomlibs(lua_State *L, const luaL_Reg *lib)
 GtStyle* gt_style_new(GtError *err)
 {
   GtStyle *sty;
+  GtStr *default_formats;
+  int had_err = 0;
   gt_error_check(err);
+
   sty = gt_calloc(1, sizeof (GtStyle));
   sty->filename = NULL;
   sty->L = luaL_newstate();
@@ -100,6 +135,11 @@ GtStyle* gt_style_new(GtError *err)
   }
   else
     luaL_opencustomlibs(sty->L, luasecurelibs);
+
+  default_formats = gt_str_new_cstr(gt_default_format_style);
+  had_err = gt_style_load_str(sty, default_formats, err);
+  gt_assert(!had_err && !gt_error_is_set(err)); /* default style must run */
+  gt_str_delete(default_formats);
   return sty;
 }
 
