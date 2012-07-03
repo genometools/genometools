@@ -334,12 +334,6 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
       }
     }
   }
-  if (!had_err) {
-    gc_content = genomediff_calculate_gc(genome_lengths, unit_info, err);
-    if (gc_content == NULL)
-      had_err = -1;
-  }
-
   if (!had_err && gt_logger_enabled(logger) &&
       div != NULL && unit_info != NULL) {
     gt_logger_log(logger, "table of avg shulens");
@@ -354,6 +348,13 @@ int gt_genomediff_shulen_sum(GtLogger *logger,
       printf("\n");
     }
   }
+
+  if (!had_err) {
+    gc_content = genomediff_calculate_gc(genome_lengths, unit_info, err);
+    if (gc_content == NULL)
+      had_err = -1;
+  }
+
     /* calculation of divergence */
   if (!had_err && div != NULL && unit_info != NULL) {
     genomediff_calculate_div(unit_info, div, gc_content, genome_lengths,
