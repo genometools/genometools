@@ -19,6 +19,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "core/array2dim_api.h"
 #include "core/encseq_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
@@ -33,6 +34,7 @@
 #include "match/idx-limdfs.h"
 #include "match/sarr-def.h"
 #include "match/shu-genomediff.h"
+#include "match/shu_unitfile.h"
 #include "tools/gt_genomediff.h"
 
 static void* gt_genomediff_arguments_new(void)
@@ -234,16 +236,17 @@ static int gt_genomediff_arguments_check(int rest_argc,
   return had_err;
 }
 
-static int gt_genomediff_runner(GT_UNUSED int argc,
-                                GT_UNUSED const char **argv,
-                                GT_UNUSED int parsed_args,
-                                void *tool_arguments, GtError *err)
+static int gt_genomediff_runner(int argc, const char **argv,
+                                int parsed_args, void *tool_arguments,
+                                GtError *err)
 {
-  GtGenomediffArguments *arguments = tool_arguments;
   int had_err = 0,
       i;
-  GtLogger *logger;
-  GtTimer *timer = NULL;
+  GtEncseq              *encseq = NULL;
+  GtGenomediffArguments *arguments = tool_arguments;
+  GtLogger              *logger;
+  GtShuUnitFileInfo     *unit_info;
+  GtTimer               *timer = NULL;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -271,11 +274,51 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
   if (timer != NULL)
     gt_timer_show_progress(timer, "start shu search", stdout);
 
-  if (arguments->with_esa || arguments->with_pck)
-    had_err = gt_genomediff_shulen_sum(logger, arguments, timer, err);
+  if (gt_str_array_size(arguments->filenames) > 1UL) {
+    GtEncseqEncoder *ee = gt_encseq_encoder_new();
+    gt_encseq_encoder_set_timer(ee, timer);
+    gt_encseq_encoder_set_logger(ee, logger);
+    /* kr only makes sense for dna, so we can check this already with ee */
+    gt_encseq_encoder_set_input_dna(ee);
+    had_err = gt_encseq_encoder_encode(ee, arguments->filenames,
+                                       gt_str_get(arguments->indexname), err);
+    gt_encseq_encoder_delete(ee);
+  }
   else {
+    arguments->indexname = gt_str_array_get_str(arguments->filenames, 0);
+  }
+  if (!had_err) {
+    GtEncseqLoader *el = gt_encseq_loader_new();
+    gt_encseq_loader_enable_autosupport(el);
+    if (arguments->mirror)
+      gt_encseq_loader_mirror(el);
+    encseq =
+      gt_encseq_loader_load(el, gt_str_get(arguments->indexname), err);
+    gt_encseq_loader_delete(el);
+  }
+  if (encseq == NULL)
     had_err = -1;
-    gt_error_set(err, "functionality not implemented yet");
+  if (!had_err) {
+    unit_info = gt_shu_unit_info_new(encseq);
+    if (arguments->with_units)
+      had_err = gt_shu_unit_file_info_read(arguments->unitfile, unit_info,
+                                           logger, err);
+  }
+
+  if (!had_err) {
+    uint64_t **shusums = NULL;
+    if (arguments->with_esa || arguments->with_pck)
+      shusums = gt_genomediff_shulen_sum(arguments, unit_info,
+                                         logger, timer, err);
+    else {
+      had_err = -1;
+      gt_error_set(err, "functionality not implemented yet");
+    }
+    if (shusums != NULL) {
+      had_err = gt_genomediff_kr_calc(shusums, arguments, unit_info,
+                                      arguments->with_pck, logger, timer, err);
+      gt_array2dim_delete(shusums);
+    }
   }
 
   if (timer != NULL) {
@@ -283,6 +326,8 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     gt_timer_delete(timer);
   }
   gt_logger_delete(logger);
+  gt_encseq_delete(encseq);
+  gt_shu_unit_info_delete(unit_info);
 
   return had_err;
 }

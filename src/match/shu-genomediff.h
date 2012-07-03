@@ -21,9 +21,17 @@
 #include "match/genomediff_opt.h"
 #include "match/idx-limdfs.h"
 
-int gt_genomediff_shulen_sum(GtLogger *logger,
-                             const GtGenomediffArguments *arguments,
-                             GtTimer *timer,
-                             GtError *err);
+uint64_t **gt_genomediff_shulen_sum(const GtGenomediffArguments *arguments,
+                                    GtShuUnitFileInfo *unit_info,
+                                    GtLogger *logger,
+                                    GtTimer *timer,
+                                    GtError *err);
 
+int gt_genomediff_kr_calc(uint64_t **shulensums,
+                          const GtGenomediffArguments *arguments,
+                          GtShuUnitFileInfo *unit_info,
+                          bool pcktable,
+                          GtLogger *logger,
+                          GtTimer *timer,
+                          GtError *err);
 #endif
