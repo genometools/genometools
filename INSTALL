@@ -29,16 +29,22 @@ Building GenomeTools without the curses library:
 ------------------------------------------------
 
 On systems without an installed curses library invoke make as above with the
-argument curses=no
-
+argument curses=no.
 If you invoked make without curses=no beforehand, do not forget to run `make
 clean` before running `make curses=no`.
 
 
-Building GenomeTools without the sketch tool (if Cairo is not installed):
--------------------------------------------------------------------------
+Building GenomeTools without the sketch tool:
+---------------------------------------------
 
-invoke make as above with the argument cairo=no
+The AnnotationSketch engine requires the Cairo and Pango headers and
+libraries to be installed in order to build GenomeTools. Please
+consult your operating system's package manager for more information on
+how to install these. For example, on Debian the packages ``libcairo2-dev''
+and ``libpango1.0-dev'' must be installed.
+If Cairo and/or Pango headers are not installed on the system, and
+AnnotationSketch support is not required, GenomeTools can be built without
+graphics support by invoking make as above with the argument cairo=no.
 
 
 Building GenomeTools with HMMER:
@@ -48,7 +54,7 @@ To enable protein domain search functionality in the ltrdigest tool please also
 append the with-hmmer=yes option to the make call. This option will make sure
 that a HMMER source package is downloaded and compiled along with the gt binary.
 Note that the wget executable must be available in the current PATH to do so
-(alternatively, you can download HMMER 2.3.2 manually from
+(alternatively, you can download HMMER manually from
 ftp://selab.janelia.org/pub/software/hmmer/CURRENT/ and untar it in the
 src/external/ subdirectory).
 
