@@ -41,7 +41,9 @@ typedef struct
   GtChain2Dimpostype startpos[2], /* start of matches in the 2 dimensions,
                                  userdef */
                  endpos[2];  /* end of matches in the 2 dimensions, userdef */
-  unsigned long firstinchain,   /* first element in chain, compute */
+  unsigned long firstinchain,   /* first element in chain, computed for all
+                                   chainkinds but only used for local chaining
+                                */
                 previousinchain;  /* previous index in chain, compute */
   GtChain2Dimscoretype
          weight, /* weight of match, user defined */
@@ -378,7 +380,7 @@ static void gt_chain2dim_chainingboundarycases(const GtChain2Dimmode *chainmode,
   }
 }
 
-static void gt_chain2dim_retracepreviousinchain(GtChain2Dim *chain,
+static void gt_chain2dim_retrace_previousinchain(GtChain2Dim *chain,
                                    const GtChain2Dimmatchtable *matchtable,
                                    unsigned long retracestart)
 {
@@ -387,12 +389,14 @@ static void gt_chain2dim_retracepreviousinchain(GtChain2Dim *chain,
   for (lengthofchain = 0, matchnum = retracestart;
        matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS; lengthofchain++)
   {
+    /* Use previousinchain */
     matchnum = matchtable->matches[matchnum].previousinchain;
   }
   GT_CHAIN2DIM_CHECKCHAINSPACE(lengthofchain);
   chain->chainedmatches.nextfreeGtChain2Dimref = lengthofchain;
   for (matchnum = retracestart;
        matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS;
+       /* Use previousinchain */
        matchnum = matchtable->matches[matchnum].previousinchain)
   {
     gt_assert(lengthofchain > 0);
@@ -704,10 +708,10 @@ static void gt_chain2dim_evalmatchscore(const GtChain2Dimmode *chainmode,
     if (qmatch2 != NULL)
     {
       if (chainmode->maxgapwidth != 0 &&
-         !gt_chain2dim_checkmaxgapwidth(matchtable,
-                           chainmode->maxgapwidth,
-                           FRAGIDENT(qmatch2),
-                           matchpointident))
+          !gt_chain2dim_checkmaxgapwidth(matchtable,
+                                         chainmode->maxgapwidth,
+                                         FRAGIDENT(qmatch2),
+                                         matchpointident))
       {
         qmatch2 = NULL;
       }
@@ -762,14 +766,15 @@ static void gt_chain2dim_evalmatchscore(const GtChain2Dimmode *chainmode,
   }
 }
 
-static bool gt_chain2dim_isrightmaximallocalchain(const GtChain2Dimmatchtable
-                                                                    *matchtable,
-                                                  unsigned long currentmatch)
+static bool gt_chain2dim_isrightmaximal_chain(
+                                        const GtChain2Dimmatchtable *matchtable,
+                                        unsigned long currentmatch)
 {
   if (currentmatch == matchtable->nextfree - 1)
   {
     return true;
   }
+  /* Use previousinchain */
   if (matchtable->matches[currentmatch+1].previousinchain != currentmatch)
   {
     return true;
@@ -786,7 +791,7 @@ static bool gt_chain2dim_isrightmaximallocalchain(const GtChain2Dimmatchtable
    only function which accesses firstinchain, this component is used
    only for local chaining */
 
-static GtChain2DimBestofclass *gt_chain2dim_getclassrep(
+static GtChain2DimBestofclass *gt_chain2dim_local_getclassrep(
                    GtChain2DimBestofclass *chainequivalenceclasses,
                    const GtChain2Dimmatchtable *matchtable,
                    unsigned long matchnum)
@@ -794,9 +799,9 @@ static GtChain2DimBestofclass *gt_chain2dim_getclassrep(
   return chainequivalenceclasses + matchtable->matches[matchnum].firstinchain;
 }
 
-/* The following function is called only for local chaining */
+/* The following function is called for local chaining only. */
 
-static void gt_chain2dim_determineequivreps(
+static void gt_chain2dim_local_determineequivreps(
                                 GtChain2DimBestofclass *chainequivalenceclasses,
                                 const GtChain2Dimmatchtable *matchtable)
 {
@@ -811,10 +816,10 @@ static void gt_chain2dim_determineequivreps(
   }
   for (matchnum=0; matchnum<matchtable->nextfree; matchnum++)
   {
-    if (gt_chain2dim_isrightmaximallocalchain(matchtable,matchnum))
+    if (gt_chain2dim_isrightmaximal_chain(matchtable,matchnum))
     {
-      classrep = gt_chain2dim_getclassrep(chainequivalenceclasses,
-                                          matchtable,matchnum);
+      classrep = gt_chain2dim_local_getclassrep(chainequivalenceclasses,
+                                                matchtable,matchnum);
       if (!classrep->isavailable ||
           classrep->score < matchtable->matches[matchnum].score)
       {
@@ -825,7 +830,10 @@ static void gt_chain2dim_determineequivreps(
   }
 }
 
-static bool gt_chain2dim_retrievemaximalscore(GtChain2Dimscoretype *maxscore,
+/* The following function is called for local chaining only. */
+
+static bool gt_chain2dim_local_retrievemaximalscore(
+                                 GtChain2Dimscoretype *maxscore,
                                  const GtChain2Dimmode *chainmode,
                                  const GtChain2Dimmatchtable *matchtable)
 {
@@ -836,7 +844,7 @@ static bool gt_chain2dim_retrievemaximalscore(GtChain2Dimscoretype *maxscore,
   *maxscore = 0;
   for (matchnum=0; matchnum<matchtable->nextfree; matchnum++)
   {
-    if (gt_chain2dim_isrightmaximallocalchain(matchtable,matchnum))
+    if (gt_chain2dim_isrightmaximal_chain(matchtable,matchnum))
     {
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
@@ -945,7 +953,9 @@ static void insertDictmaxsize(Dictmaxsize *dict,
   }
 }
 
-static void retrievechainbestscores(bool *minscoredefined,
+/* The following function is called for local chaining only. */
+
+static void retrieve_local_chainbestscores(bool *minscoredefined,
                                     GtChain2Dimscoretype *minscore,
                                     const GtChain2Dimmatchtable *matchtable,
                                     unsigned long howmanybest)
@@ -959,7 +969,7 @@ static void retrievechainbestscores(bool *minscoredefined,
   dictbestmatches = dictmaxsize_new(howmanybest);
   for (idx=0; idx<matchtable->nextfree; idx++)
   {
-    if (gt_chain2dim_isrightmaximallocalchain(matchtable,idx))
+    if (gt_chain2dim_isrightmaximal_chain(matchtable,idx))
     {
       scores[matchnum] = matchtable->matches[idx].score;
       insertDictmaxsize(dictbestmatches,
@@ -996,7 +1006,7 @@ static void gt_chain2dim_retrievechainthreshold(
 
   for (matchnum=0; matchnum < matchtable->nextfree; matchnum++)
   {
-    if (gt_chain2dim_isrightmaximallocalchain(matchtable,matchnum))
+    if (gt_chain2dim_isrightmaximal_chain(matchtable,matchnum))
     {
       GtChain2Dimscoretype tgap;
 
@@ -1012,8 +1022,8 @@ static void gt_chain2dim_retrievechainthreshold(
         if (chainequivalenceclasses != NULL)
         {
           GtChain2DimBestofclass *classrep
-            = gt_chain2dim_getclassrep(chainequivalenceclasses,
-                                       matchtable,matchnum);
+            = gt_chain2dim_local_getclassrep(chainequivalenceclasses,
+                                             matchtable,matchnum);
 
           gt_assert(classrep != NULL &&
                     !chain2dim_chainkind_global(chainmode->chainkind));
@@ -1022,13 +1032,13 @@ static void gt_chain2dim_retrievechainthreshold(
           {
             chain->scoreofchain = classrep->score;
             classrep->isavailable = false;
-            gt_chain2dim_retracepreviousinchain(chain, matchtable, matchnum);
+            gt_chain2dim_retrace_previousinchain(chain, matchtable, matchnum);
             chainprocessor(cpinfo,matchtable,chain);
           }
         } else
         {
           chain->scoreofchain = matchtable->matches[matchnum].score - tgap;
-          gt_chain2dim_retracepreviousinchain(chain, matchtable, matchnum);
+          gt_chain2dim_retrace_previousinchain(chain, matchtable, matchnum);
           chainprocessor(cpinfo,matchtable,chain);
         }
       }
@@ -1150,7 +1160,7 @@ static unsigned int gt_chain2dim_findmaximalscores(
   {
     chainequivalenceclasses = gt_malloc(sizeof (*chainequivalenceclasses) *
                                         matchtable->nextfree);
-    gt_chain2dim_determineequivreps(chainequivalenceclasses, matchtable);
+    gt_chain2dim_local_determineequivreps(chainequivalenceclasses, matchtable);
   } else
   {
     chainequivalenceclasses = NULL;
@@ -1168,21 +1178,23 @@ static unsigned int gt_chain2dim_findmaximalscores(
     case GLOBALCHAININGWITHOVERLAPS:
     case LOCALCHAININGMAX:
       minscoredefined
-        = gt_chain2dim_retrievemaximalscore(&minscore,chainmode,matchtable);
+        = gt_chain2dim_local_retrievemaximalscore(&minscore,chainmode,
+                                                  matchtable);
       break;
     case LOCALCHAININGTHRESHOLD:
       minscore = chainmode->minimumscore;
       minscoredefined = true;
       break;
     case LOCALCHAININGBEST:
-      retrievechainbestscores(&minscoredefined,
-                              &minscore,
-                              matchtable,
-                              chainmode->howmanybest);
+      retrieve_local_chainbestscores(&minscoredefined,
+                                     &minscore,
+                                     matchtable,
+                                     chainmode->howmanybest);
       break;
     case LOCALCHAININGPERCENTAWAY:
       minscoredefined
-        = gt_chain2dim_retrievemaximalscore(&minscore,chainmode,matchtable);
+        = gt_chain2dim_local_retrievemaximalscore(&minscore,chainmode,
+                                                  matchtable);
       if (minscoredefined)
       {
         minscore = (GtChain2Dimscoretype)
@@ -1330,7 +1342,7 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
     if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
     {
       gt_chain2dim_bruteforcechainingscores(chainmode,matchtable,
-                               chaingapcostfunction);
+                                            chaingapcostfunction);
     } else
     {
       fastchainingscores(chainmode,
