@@ -75,6 +75,13 @@ typedef enum
   LOCALCHAININGPERCENTAWAY     /* local chaining; percent away from best */
 } GtChain2Dimkind;
 
+static bool chain2dim_chainkind_global(GtChain2Dimkind chainkind)
+{
+  return (chainkind == GLOBALCHAINING ||
+          chainkind == GLOBALCHAININGWITHGAPCOST ||
+          chainkind == GLOBALCHAININGWITHOVERLAPS) ? true : false;
+}
+
 /*
   The following type defines the chain mode consisting of a chainkind.
   If chainkind = LOCALCHAININGTHRESHOLD, then an additional
@@ -775,6 +782,20 @@ static bool gt_chain2dim_isrightmaximallocalchain(const GtChain2Dimmatchtable
   return false;
 }
 
+/* The following function is called only for local chaining. As it is the
+   only function which accesses firstinchain, this component is used
+   only for local chaining */
+
+static GtChain2DimBestofclass *gt_chain2dim_getclassrep(
+                   GtChain2DimBestofclass *chainequivalenceclasses,
+                   const GtChain2Dimmatchtable *matchtable,
+                   unsigned long matchnum)
+{
+  return chainequivalenceclasses + matchtable->matches[matchnum].firstinchain;
+}
+
+/* The following function is called only for local chaining */
+
 static void gt_chain2dim_determineequivreps(
                                 GtChain2DimBestofclass *chainequivalenceclasses,
                                 const GtChain2Dimmatchtable *matchtable)
@@ -792,8 +813,8 @@ static void gt_chain2dim_determineequivreps(
   {
     if (gt_chain2dim_isrightmaximallocalchain(matchtable,matchnum))
     {
-      classrep = chainequivalenceclasses +
-                 matchtable->matches[matchnum].firstinchain;
+      classrep = gt_chain2dim_getclassrep(chainequivalenceclasses,
+                                          matchtable,matchnum);
       if (!classrep->isavailable ||
           classrep->score < matchtable->matches[matchnum].score)
       {
@@ -991,10 +1012,11 @@ static void gt_chain2dim_retrievechainthreshold(
         if (chainequivalenceclasses != NULL)
         {
           GtChain2DimBestofclass *classrep
-            = chainequivalenceclasses +
-              matchtable->matches[matchnum].firstinchain;
+            = gt_chain2dim_getclassrep(chainequivalenceclasses,
+                                       matchtable,matchnum);
 
-          gt_assert(classrep != NULL);
+          gt_assert(classrep != NULL &&
+                    !chain2dim_chainkind_global(chainmode->chainkind));
           if (classrep->isavailable &&
               classrep->score == matchtable->matches[matchnum].score - tgap)
           {
@@ -1124,20 +1146,11 @@ static unsigned int gt_chain2dim_findmaximalscores(
   unsigned int retval;
   bool minscoredefined = false;
 
-  if (withequivclasses)
+  if (withequivclasses && !chain2dim_chainkind_global(chainmode->chainkind))
   {
-    if (chainmode->chainkind == LOCALCHAININGMAX ||
-        chainmode->chainkind == LOCALCHAININGTHRESHOLD ||
-        chainmode->chainkind == LOCALCHAININGBEST ||
-        chainmode->chainkind == LOCALCHAININGPERCENTAWAY)
-    {
-      chainequivalenceclasses = gt_malloc(sizeof (*chainequivalenceclasses) *
-                                          matchtable->nextfree);
-      gt_chain2dim_determineequivreps(chainequivalenceclasses, matchtable);
-    } else
-    {
-      chainequivalenceclasses = NULL;
-    }
+    chainequivalenceclasses = gt_malloc(sizeof (*chainequivalenceclasses) *
+                                        matchtable->nextfree);
+    gt_chain2dim_determineequivreps(chainequivalenceclasses, matchtable);
   } else
   {
     chainequivalenceclasses = NULL;
@@ -1186,11 +1199,8 @@ static unsigned int gt_chain2dim_findmaximalscores(
   {
     gt_logger_log(logger,
                "compute optimal %s chains with score >= %ld",
-               (chainmode->chainkind == GLOBALCHAINING ||
-                chainmode->chainkind == GLOBALCHAININGWITHGAPCOST ||
-                chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
-                ? "global"
-                : "local",
+                chain2dim_chainkind_global(chainmode->chainkind) ? "global"
+                                                                 : "local",
                minscore);
     gt_chain2dim_retrievechainthreshold(chainmode,
                            matchtable,
