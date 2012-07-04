@@ -66,7 +66,7 @@ GtReadsLibrary* gt_reads_library_table_read(const char *path, GtError *err,
         gt_error_set(err, "library file %s: "
             "error by reading libraries table "
             "(%lu bytes expected, %d bytes read)",
-            path, lib_table_size, freadretval);
+            path, (unsigned long)lib_table_size, freadretval);
         gt_free(lib_table);
         lib_table = NULL;
       }
