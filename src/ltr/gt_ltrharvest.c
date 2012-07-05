@@ -34,35 +34,35 @@
 typedef struct {
   GtOutputFileInfo *ofi;
   GtFile *outfp;
-  GtStr *str_indexname;
+  GtStr *str_indexname,
+        *str_motif,
+        *str_overlaps,
+        *str_fastaoutputfilename,
+        *str_fastaoutputfilenameinnerregion,
+        *str_gff3filename;
   GtRange searchrange;
-  unsigned long minseedlength;
-  unsigned long minltrlength;
-  unsigned long maxltrlength;
-  unsigned long mindistance;
-  unsigned long maxdistance;
+  unsigned long minseedlength,
+                minltrlength,
+                maxltrlength,
+                mindistance,
+                maxdistance,
+                numofboundaries,
+                offset;
   double similaritythreshold;
   int xdropbelowscore;
   Arbitraryscores arbitscores;
-  GtStr *str_motif;
-  unsigned int allowedmismatches;
-  bool verbosemode;
-  unsigned long offset;
   unsigned int minlengthTSD,
-               maxlengthTSD;
-  unsigned long numofboundaries;
+               maxlengthTSD,
+               allowedmismatches;
   unsigned int vicinity;
-  GtStr *str_overlaps;
-  bool bestoverlaps;
-  bool nooverlaps;
-  bool fastaoutput;
-  GtStr *str_fastaoutputfilename;
-  bool fastaoutputinnerregion;
-  GtStr *str_fastaoutputfilenameinnerregion;
-  bool gff3output;
-  GtStr *str_gff3filename;
-  bool longoutput;
-  bool scan;
+  bool bestoverlaps,
+       nooverlaps,
+       fastaoutput,
+       fastaoutputinnerregion,
+       gff3output,
+       longoutput,
+       scan,
+       verbosemode;
   GtOption *optionmotif,
            *optionmotifmis,
            *optionoverlaps,
