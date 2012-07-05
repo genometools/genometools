@@ -1,7 +1,7 @@
 /*
-  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007      David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -62,6 +62,7 @@ typedef struct {
   bool gff3output;
   GtStr *str_gff3filename;
   bool longoutput;
+  bool scan;
   GtOption *optionmotif,
            *optionmotifmis,
            *optionoverlaps,
@@ -201,7 +202,8 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
            *optionlongoutput,
            *optionout,
            *optionoutinner,
-           *optiongff3;
+           *optiongff3,
+           *optionscan;
   GtRange default_ltrsearchseqrange = {0,0};
   static const char *overlaps[] = {
     "best", /* the default */
@@ -435,6 +437,15 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionoffset);
   gt_option_is_extended_option(optionoffset);
 
+  /* -scan */
+  optionscan = gt_option_new_bool("scan",
+                                  "scan the index sequentially instead of "
+                                  "mapping it into memory entirely",
+                                  &arguments->scan,
+                                  true);
+  gt_option_parser_add_option(op, optionscan);
+  gt_option_is_extended_option(optionscan);
+
   /* implications */
   gt_option_imply(optionmaxtsd, optionmintsd);
   gt_option_imply(optionmotifmis, optionmotif);
@@ -585,6 +596,7 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
                                          arguments->verbosemode,
                                          arguments->nooverlaps,
                                          arguments->bestoverlaps,
+                                         arguments->scan,
                                          arguments->offset,
                                          arguments->minlengthTSD,
                                          arguments->maxlengthTSD,
