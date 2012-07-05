@@ -87,9 +87,6 @@ else
   SHARED:=-shared
 endif
 
-# libraries for which we build replacements (that also appear in dependencies)
-EXP_LDLIBS+=-lbz2 -lz
-
 # compiled executables
 GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c src/interactive.c
 GTMAIN_OBJ:=$(GTMAIN_SRC:%.c=obj/%.o)
@@ -244,7 +241,7 @@ ifeq ($(useshared),yes)
   DEPLIBS:=-lbz2 -lz -lexpat -llua5.1-lpeg -llua5.1 -llua5.1-md5 \
            -llua5.1-filesystem -llua5.1-des56 -lbam
 else
-  DEPLIBS = -lbz2 -lz
+  DEPLIBS:=
 endif
 EXP_LDLIBS += $(DEPLIBS)
 GTSHAREDLIB_LIBDEP += $(DEPLIBS)
@@ -484,10 +481,14 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d)
 ifneq ($(useshared),yes)
   LIBGENOMETOOLS_OBJ += $(LIBLUA_OBJ) \
                         $(LIBEXPAT_OBJ) \
-                        $(SAMTOOLS_OBJ)
+                        $(SAMTOOLS_OBJ) \
+                        $(LIBBZ2_OBJ) \
+                        $(ZLIB_OBJ)
   LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
                         $(LIBEXPAT_DEP) \
-                        $(SAMTOOLS_DEP)
+                        $(SAMTOOLS_DEP) \
+                        $(LIBBZ2_DEP) \
+                        $(ZLIB_DEP)
 endif
 
 ifneq ($(with-sqlite),no)
@@ -585,17 +586,18 @@ ifdef RANLIB
 endif
 
 ifneq ($(useshared),yes)
-  ADDITIONAL_SO_DEPS:=lib/libbz2.a \
-                      lib/libexpat.a \
-                      lib/libz.a
+  ADDITIONAL_ZLIBS:=lib/libbz2.a lib/libz.a
+  ADDITIONAL_SO_DEPS:=$(ADDITIONAL_ZLIBS) \
+                      lib/libexpat.a
 endif
 
 lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
                                           $(LIBGENOMETOOLS_OBJ) \
-                                          $(ADDITIONAL_SO_DEPS)
+                                          $(ADDITIONAL_SO_DEPS) \
+                                          $(ADDITIONAL_ZLIBS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(ADDITIONAL_SO_DEPS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
 	-o $@ $(GTSHAREDLIB_LIBDEP)
 
 lib/libtecla.a: $(LIBTECLA_OBJ)
@@ -623,43 +625,53 @@ $(1)_static: $(2)
 endef
 
 $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
-                                             lib/libgenometools.a))
+                                             lib/libgenometools.a \
+                                             $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
                                         lib/libgenometools.a \
-                                        $(GTLIBS)))
+                                        $(GTLIBS) \
+                                        $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/custom_stream, \
                                 obj/src/examples/custom_stream.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a\
+                                $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/gff3sort, \
                                 obj/src/examples/gff3sort.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/gff3validator, \
                                 obj/src/examples/gff3validator.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/noop, \
                                 obj/src/examples/noop.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_constructed, \
                                 obj/src/examples/sketch_constructed.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed, \
                                 obj/src/examples/sketch_parsed.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ctrack, \
                                 obj/src/examples/sketch_parsed_with_ctrack.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ordering, \
                                 obj/src/examples/sketch_parsed_with_ordering.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(ADDITIONAL_ZLIBS)))
 
 bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
