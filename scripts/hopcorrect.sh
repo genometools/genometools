@@ -16,20 +16,22 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+# hardcoded values:
+NOGFF='--'
+
 # default values:
 BWA=${BWA:=bwa}
 GT=${GT:=gt}
 SAMTOOLS=${SAMTOOLS:=samtools}
-THREADS=${THREADS:=4}
 PARAMS=${PARAMS:=""}
-BWA_PARAMS=${BWA_PARAMS:=""}
+BWA_PARAMS=${BWA_PARAMS:="-t 4"}
 
 # command line parameters:
-USG="<action> <genome.fas> <CDS.gff> <reads.fastq> [<mates.fastq>]"
+USG="<action> <genome.fas> (<CDS.gff>|$NOGFF) <reads.fastq> [<mates.fastq>]"
 ACTION=$1
 if [[ "$ACTION" =~ "eval" ]]; then
   USG="eval <sequenced_genome.fas> <reference_genome.fas>"
-  USG="$USG <CDS.gff> <reads.fastq> [<mates.fastq>]"
+  USG="$USG (<CDS.gff>|$NOGFF) <reads.fastq> [<mates.fastq>]"
   SGENOME=$2
   shift
 fi
@@ -52,9 +54,6 @@ function show_globals {
   echo "MAPM=$MAPM"
 }
 
-# hardcoded values:
-NOGFF='--'
-
 function f_help_header {
   echo "Reference-based correction of homopolymer length in sequencing reads."
   echo
@@ -64,13 +63,16 @@ function f_help_header {
 
 function f_help_footer {
   echo
+  echo "Important: this script only works correctly if all files are located"
+  echo "           in the working directory where the script is called"
+  echo "           (you can use symbolic links, of course)"
+  echo
   echo "Further parameters can be optionally passed using env variables:"
   echo " - BWA          path to bwa binary             (default: $BWA)"
   echo " - SAMTOOLS     path to samtools binary        (default: $SAMTOOLS)"
   echo " - GT           path to GenomeTools binary     (default: $GT)"
-  echo " - THREADS      number of threads (bwa aln)    (default: $THREADS)"
-  echo " - BWA_PARAMS   further params for bwa aln     (default: $BWA_PARAMS)"
-  echo " - PARAMS       further params for hopcorrect  (default: $PARAMS)"
+  echo " - BWA_PARAMS   parameters for bwa aln         (default: $BWA_PARAMS)"
+  echo " - PARAMS       parameters for hopcorrect      (default: $PARAMS)"
 }
 
 function f_shorthelp {
@@ -83,7 +85,7 @@ function f_help {
   echo " - <action> is one of the following:"
   echo
   echo "     prepare       prepare the data necessary for the correction"
-  echo "                   (index, mapping, sort gff and mapping results)"
+  echo "                   (index preparation, mapping, sorting, etc)"
   echo
   echo "     correct       run the homopolymer error correction tool;"
   echo "                   (for single-end reads, reads are output in a "
@@ -94,7 +96,8 @@ function f_help {
   echo "                   time and an higher memory requirement)"
   echo
   echo "     clean         remove index, mapping results and intermediate files"
-  echo "                   (BE CAREFUL, no warranty it works correctly)"
+  echo "                   (DISCLAIMER: this may have unintended effects, as"
+  echo "                   it deletes files solely based on their filename)"
   echo
   echo "     run           prepare, correct and clean"
   echo
@@ -102,18 +105,17 @@ function f_help {
   echo "                   (useful for debugging and evaluation,"
   echo "                   it may be slow and require lot of memory)"
   echo
-  echo "     eval          evaluate corrections to reads of a known genome;"
-  echo "                   use $0 eval-help for more information"
+  echo "     eval-help     more information about evaluation actions;"
   echo
   echo "     help          shows this message"
   echo
   echo " - <genome.fas> is a single sequence Fasta file which"
   echo "   contains the reference against which the correction is done"
   echo
-  echo " - CDS.gff contains the annotation of genome.fas;"
+  echo " - CDS.gff contains the annotation of <genome.fas>;"
   echo "   instead of a filename '$NOGFF' can be specified; in this case,"
   echo "   homopolymer are corrected in the whole sequence instead of only "
-  echo "   in coding regions; this is however not reccomended"
+  echo "   in coding regions"
   echo
   echo " - <reads.fastq> contains the reads to correct"
   echo
@@ -127,7 +129,7 @@ function f_eval_help {
   echo
   echo "     eval              evaluate corrections to reads of a known genome"
   echo
-  echo "     eval-make-gold    prepare golden standard, i.e. evaluation set "
+  echo "     eval-make-true    prepare a set of \"true\" corrections"
   echo "                       for reads which have been sequenced from "
   echo "                       <sequenced_genome.fas>"
   echo
@@ -151,7 +153,7 @@ function f_eval_help {
   echo
   echo " - <reads2.fastq> contains the mate pairs (if available)"
   echo
-  echo "Before using eval, both eval-make-gold and eval-prepare must be called."
+  echo "Before using eval, both eval-make-true and eval-prepare must be called."
   f_help_footer
 }
 
@@ -170,9 +172,9 @@ function f_index {
 function f_map {
   echo "==== Map reads to the genome using bwa..."
   echo
-  $BWA aln -t ${THREADS} ${BWA_PARAMS} $GENOME $READS > $MAP.sai
+  $BWA aln ${BWA_PARAMS} $GENOME $READS > $MAP.sai
   if [ "$MATES" != "" ]; then
-    $BWA aln -t ${THREADS} ${BWA_PARAMS} $GENOME $MATES > $MAPM.sai
+    $BWA aln ${BWA_PARAMS} $GENOME $MATES > $MAPM.sai
     $BWA sampe $GENOME $MAP.sai $MAPM.sai $READS $MATES > $MAP.sam
   else
     $BWA samse $GENOME $MAP.sai $READS > $MAP.sam
@@ -260,21 +262,39 @@ function f_run {
 
 # position of fields in correction stats output table
 declare -A FIELD
-FIELD[EDIT]='$1'
-FIELD[R_HPOS]='$2'
-FIELD[R_HLEN]='$3'
-FIELD[S_HPOS]='$4'
-FIELD[S_HEND]='$5'
-FIELD[S_HLEN]='$6'
+FIELD[R_HPOS]='$1'
+FIELD[EDIT]='$2'
+FIELD[S_HPOS]='$3'
+FIELD[S_HEND]='$4'
+FIELD[S_CHAR]='$5'
+FIELD[S_OR]='$6'
 FIELD[C_LEN]='$7'
-FIELD[S_CHAR]='$8'
-FIELD[S_OR]='$9'
-FIELD[S_Q_AVE]='$10'
-FIELD[S_Q_BEF]='$11'
-FIELD[S_Q_AFT]='$12'
-FIELD[S_QUAL]='$13'
-FIELD[S_ID]='$14'
-FIELD[C_CLASS]='$15'
+FIELD[COVERAGE]='$8'
+FIELD[R_HLEN]='$9'
+FIELD[R_SUPP]='$10'
+FIELD[S_HLEN]='$11'
+FIELD[A_HLEN]='$12'
+FIELD[A_SUPP]='$13'
+FIELD[S_MAPQ]='$14'
+FIELD[S_Q_BEF]='$15'
+FIELD[S_Q_FIRST]='$16'
+FIELD[S_Q_MIN]='$17'
+FIELD[S_Q_AVE]='$18'
+FIELD[S_Q_MAX]='$19'
+FIELD[S_Q_RANGE]='$20'
+FIELD[S_Q_LAST]='$21'
+FIELD[S_Q_AFT]='$22'
+FIELD[S_QUAL]='$23'
+FIELD[S_ID]='$24'
+FIELD[C_CLASS]='$25'
+
+# combined fields
+FIELD[EDIT_OP]="${FIELD[EDIT]}\"-\"${FIELD[S_CHAR]}"
+FIELD[MULTIEDIT_OP]="${FIELD[EDIT]}\"-\"${FIELD[S_CHAR]}\"-\"${FIELD[C_LEN]}"
+FIELD[A_HLEN_DIFF]="${FIELD[A_HLEN]}-${FIELD[R_HLEN]}"
+FIELD[S_HLEN_DIFF]="${FIELD[S_HLEN]}-${FIELD[R_HLEN]}"
+FIELD[NON_C_LEN]="(${FIELD[S_HLEN]}>${FIELD[R_HLEN]}?${FIELD[S_HLEN]}-${FIELD[R_HLEN]}:${FIELD[R_HLEN]}-${FIELD[S_HLEN]})-${FIELD[C_LEN]}"
+FIELD[A_SUPP_DIFF]="${FIELD[A_SUPP]}-${FIELD[R_SUPP]}"
 
 function f_pos_stats {
   count_all () { RETVAL=`grep '^'$2 $1 | wc -l`; }
@@ -376,7 +396,7 @@ stats2eds () {
       '${FIELD[EDIT]}', '${FIELD[C_LEN]}') }' | sort > $MAP.eds
 }
 
-function f_eval_make_gold {
+function f_eval_make_true {
   GENOME=$SGENOME
   MAP="${READS}.${GENOME}"
   ANNOTATION=$NOGFF
@@ -428,21 +448,25 @@ function f_eval_proc_marked {
   awk ${FIELD[C_CLASS]}' == "TP"' $MAP.hop_stats_eval > $MAP.hop_stats_TP
   echo "false positive only stats: $MAP.hop_stats_FP"
   echo "true positive only stats: $MAP.hop_stats_TP"
-  MEASURES="S_Q_AVE S_HEND R_HLEN S_HLEN S_HPOS C_LEN S_CHAR S_Q_BEF S_Q_AFT"
-  for MEASURE in $MEASURES; do
+  QUANT_MEASURES="S_HPOS S_HEND C_LEN COVERAGE R_HLEN R_SUPP S_HLEN"
+  QUANT_MEASURES="${QUANT_MEASURES} A_HLEN A_SUPP S_MAPQ S_Q_BEF S_Q_FIRST"
+  QUANT_MEASURES="${QUANT_MEASURES} S_Q_MIN S_Q_AVE S_Q_MAX S_Q_RANGE S_Q_LAST"
+  QUANT_MEASURES="${QUANT_MEASURES} S_Q_AFT A_HLEN_DIFF S_HLEN_DIFF NON_C_LEN"
+  QUANT_MEASURES="${QUANT_MEASURES} A_SUPP_DIFF"
+  for MEASURE in ${QUANT_MEASURES}; do
     awk '{print int('${FIELD[$MEASURE]}')}' $MAP.hop_stats_FP \
       | sort -n | uniq -c > $MAP.hop_FP_${MEASURE}_distri
     awk '{print int('${FIELD[$MEASURE]}')}' $MAP.hop_stats_TP \
       | sort -n | uniq -c > $MAP.hop_TP_${MEASURE}_distri
   done
-  MEASURES="S_CHAR"
-  for MEASURE in $MEASURES; do
+  QUAL_MEASURES="S_CHAR EDIT S_OR EDIT_OP MULTIEDIT_OP"
+  for MEASURE in ${QUAL_MEASURES}; do
     awk '{print '${FIELD[$MEASURE]}'}' $MAP.hop_stats_FP \
       | sort | uniq -c > $MAP.hop_FP_${MEASURE}_distri
     awk '{print '${FIELD[$MEASURE]}'}' $MAP.hop_stats_TP \
       | sort | uniq -c > $MAP.hop_TP_${MEASURE}_distri
   done
-  MEASURES="S_Q_AVE S_HEND R_HLEN S_HLEN S_HPOS C_LEN S_CHAR S_Q_BEF S_Q_AFT"
+  MEASURES="${QUAL_MEASURES} ${QUANT_MEASURES}"
   for MEASURE in $MEASURES; do
     ruby -e "
       f = File.open('$MAP.hop_${MEASURE}_distri', 'w')
@@ -453,7 +477,13 @@ function f_eval_proc_marked {
       IO.read(%Q[$MAP.hop_FP_${MEASURE}_distri]).split(%Q[\n]).
          each{|x| x=x.split; fp[x[1]]=x[0]; tp[x[1]]||=0}
       f.printf(%Q[${MEASURE}\tALL\tTP\tFP\tTPR\tFPR\n])
-      tp.keys.sort.each do |k|
+      keys = tp.keys
+      if (keys[0].to_i.to_s == keys[0])
+        keys = keys.sort_by {|x| x.to_i}
+      else
+        keys.sort!
+      end
+      keys.each do |k|
         f.printf(%Q[#{k}\t%s\t%s\t%s\t%.2f\t%.2f\n],
           tp[k].to_i + fp[k].to_i, tp[k], fp[k],
           tp[k].to_f * 100 / (tp[k].to_f+fp[k].to_f),
@@ -485,7 +515,7 @@ function f_eval_stats {
   else
     echo "- reads:                      $READS + $MATES" | tee -a $INFO
   fi
-  echo "- golden standard based upon: $SGENOMEDESC" | tee -a $INFO
+  echo "- state of truth based upon: $SGENOMEDESC" | tee -a $INFO
   echo | tee -a $INFO
   MIN_HLEN=`grep -P -o "(?<=Distribution of homopolymers of length >= )\d+" \
     $MAP.hop_stats`
@@ -565,7 +595,7 @@ case "$ACTION" in
   'dists')              f_dists             ;;
   'help')               f_help              ;;
   'eval-help')          f_eval_help         ;;
-  'eval-make-gold')     f_eval_make_gold    ;;
+  'eval-make-true')     f_eval_make_true    ;;
   'eval-prepare')       f_eval_prepare      ;;
   'eval')               f_eval              ;;
   # parts of other actions:

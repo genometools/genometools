@@ -25,9 +25,9 @@
 
 typedef struct {
   GtStr  *encseqinput, *annotation, *map, *outfilename;
-  unsigned long hmin, max_hlen_diff;
-  bool verbose, map_is_bam, rchk, stats;
-  double minc;
+  unsigned long hmin, clenmax, read_hmin, covmin, mapqmin;
+  bool verbose, map_is_bam, rchk, stats, allow_partial, allow_multiple;
+  double altmax, refmin;
   GtStrArray *readset;
 } GtHopcorrectArguments;
 
@@ -63,8 +63,8 @@ static GtOptionParser* gt_hopcorrect_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("-r <encseq> [-m <sam|bam>] "
-      "[-a <gff3>] [-o <outfile>]",
-      "Reference-based homopolymer length adjustment.");
+      "[-a <gff3>] [-o <outfile>] [options...]",
+      "Reference-based homopolymer error correction.");
 
   /* -r */
   option = gt_option_new_string("r", "reference sequence\n"
@@ -73,20 +73,20 @@ static GtOptionParser* gt_hopcorrect_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(option);
   gt_option_parser_add_option(op, option);
 
-  /* -a */
-  option = gt_option_new_string("a", "annotation of reference sequence\n"
-      "it must be sorted by coordinates on the reference sequence\n"
-      "(this can be e.g. done using: gt gff3 -sort)\n"
-      "format: sorted GFF3",
-      arguments->annotation, NULL);
-  gt_option_parser_add_option(op, option);
-
   /* -m */
   option = gt_option_new_string("m", "mapping over reference sequence\n"
       "it must be sorted by coordinates on the reference sequence\n"
       "(this can be e.g. done using: samtools sort)\n"
       "format: sorted SAM/BAM",
       arguments->map, NULL);
+  gt_option_parser_add_option(op, option);
+
+  /* -a */
+  option = gt_option_new_string("a", "annotation of reference sequence\n"
+      "it must be sorted by coordinates on the reference sequence\n"
+      "(this can be e.g. done using: gt gff3 -sort)\n"
+      "format: sorted GFF3",
+      arguments->annotation, NULL);
   gt_option_parser_add_option(op, option);
 
   /* -rchk */
@@ -110,34 +110,71 @@ static GtOptionParser* gt_hopcorrect_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -hmin */
-  option = gt_option_new_ulong_min("hmin", "minimal homopolymer length",
+  option = gt_option_new_ulong_min("hmin",
+      "minimal homopolymer length in reference\n"
+      "minimal number of consecutive identical symbols on the reference",
       &arguments->hmin, 3UL, 2UL);
   gt_option_parser_add_option(op, option);
 
-  /* -maxd */
-  option = gt_option_new_ulong("maxd", "maximal difference "
-      "in homopolymer length by which a correction is applied\n"
-      "default: infinite", &arguments->max_hlen_diff, GT_UNDEF_ULONG);
+  /* -read-hmin */
+  option = gt_option_new_ulong_min("read-hmin",
+      "minimal homopolymer length in reads",
+      &arguments->read_hmin, 2UL, 1UL);
+  gt_option_parser_add_option(op, option);
+
+  /* -altmax */
+  option = gt_option_new_double_min_max("altmax",
+      "max support of alternate homopol. length;\n"
+      "e.g. 0.8 means: do not correct any read if homop. length in more than "
+      "80\% of the reads has the same value, different from the reference\n"
+      "if altmax is set to 1.0 reads are always corrected",
+      &arguments->altmax, (double) 0.8, 0.0, (double) 1.0);
+  gt_option_parser_add_option(op, option);
+
+  /* -refmin */
+  option = gt_option_new_double_min_max("refmin",
+      "min support of reference homopol. length;\n"
+      "e.g. 0.1 means: do not correct any read if ref. homop. length "
+      "is not present in at least 10\% of the reads\n"
+      "if refmin is set to 0.0 reads are always corrected",
+      &arguments->refmin, (double) 0.1, 0.0, (double) 1.0);
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
-  /* -minc */
-  option = gt_option_new_double_min_max("minc", "mimimal homopolymer length "
-      "consensus in segments to a different value than the length in the "
-      "reference, after which no correction to the segments is applied;\n"
-      "expressed as decimal value between 0.0 and 1.0;\ne.g. 0.9 means: do not "
-      "correct any segment if the length of the homopolymer in 90\% or more "
-      "of the segments agrees on a different value than the length in the "
-      "reference\ndefault: undefined", &arguments->minc, (double) 2.0,
-      0.0,
-      (double) 1.0);
-  gt_option_hide_default(option);
+  /* -mapqmin */
+  option = gt_option_new_ulong("mapqmin",
+      "minimal mapping quality",
+      &arguments->mapqmin, 21UL);
   gt_option_parser_add_option(op, option);
 
-  /* -stats */
-  option = gt_option_new_bool("stats", "output statistics for each "
-      "correction position", &arguments->stats, false);
-  gt_option_is_development_option(option);
+  /* -covmin */
+  option = gt_option_new_ulong("covmin",
+      "minimal coverage;\n"
+      "e.g. 5 means: do not correct any read if coverage "
+      "(number of reads mapped over whole homopolymer) "
+      "is less than 5\n"
+      "if covmin is set to 0 reads are always corrected",
+      &arguments->covmin, 0);
+  gt_option_parser_add_option(op, option);
+
+  /* -allow-partial */
+  option = gt_option_new_bool("allow-partial",
+      "allow insertions also if there are less gaps in read homopolymer "
+      "than the difference in length with the reference\n"
+      "(at most as many symbols as the gaps will be inserted)",
+      &arguments->allow_partial, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -allow-multiple */
+  option = gt_option_new_bool("allow-muliple",
+      "allow multiple corrections in a read",
+      &arguments->allow_multiple, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -clenmax */
+  option = gt_option_new_ulong("clenmax", "maximal correction length\n"
+      "default: unlimited", &arguments->clenmax, GT_UNDEF_ULONG);
+  gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
   /* -outorder */
@@ -145,6 +182,12 @@ static GtOptionParser* gt_hopcorrect_option_parser_new(void *tool_arguments)
       "specify the name of the files (FastQ format) containing the "
       "uncorrected readset; this allows one to output the reads in "
       "the same order, increasing memory usage", arguments->readset);
+  gt_option_parser_add_option(op, option);
+
+  /* -stats */
+  option = gt_option_new_bool("stats", "output statistics for each "
+      "correction position", &arguments->stats, false);
+  gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   /* -v */
@@ -201,7 +244,9 @@ static int gt_hopcorrect_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
         asp = gt_aligned_segments_pile_new(sfi);
         if (!arguments->rchk)
           gt_hpol_processor_enable_segments_hlen_adjustment(hpp, asp,
-              arguments->max_hlen_diff, arguments->minc);
+              arguments->read_hmin, arguments->altmax, arguments->refmin,
+              arguments->mapqmin, arguments->covmin, arguments->allow_partial,
+              arguments->allow_multiple, arguments->clenmax);
         else
           gt_hpol_processor_enable_aligned_segments_refregionscheck(hpp, asp);
         if (arguments->stats)

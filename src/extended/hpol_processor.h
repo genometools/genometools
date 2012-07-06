@@ -35,16 +35,17 @@ GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin);
 /* Enable the correction of length of the homopolymers in the segments
  * provided by <asp>.
  *
- * The <max_hlen_diff> parameter defines the maximal
+ * The <clenmax> parameter defines the maximal
  * difference in length from the reference for a correction to take place.
  *
- * The <min_alt_consensus> parameter defines the minimal alternative
+ * The <altmax> parameter defines the minimal alternative
  * consensus among segments in homopolymer length, by which no correction
  * is done: a value of 0.5 means e.g. 50% consensus. To disable the
  * feature use a value over 1.0. */
 void gt_hpol_processor_enable_segments_hlen_adjustment(GtHpolProcessor *hpp,
-    GtAlignedSegmentsPile *asp, unsigned long max_hlen_diff,
-    double min_alt_consensus);
+    GtAlignedSegmentsPile *asp, unsigned long read_hmin, double altmax,
+    double refmin, unsigned long mapqmin, unsigned long covmin,
+    bool allow_partial, bool allow_multiple, unsigned long clenmax);
 
 /* Test: compare refregion of the segments with the reference sequence. */
 void gt_hpol_processor_enable_aligned_segments_refregionscheck(

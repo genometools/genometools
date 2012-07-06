@@ -108,6 +108,9 @@ void gt_aligned_segment_assign_refregion_chars(GtAlignedSegment *as,
 /* show the current segment and refregion to file */
 void gt_aligned_segment_show(GtAlignedSegment *as, GtFile *outfp);
 
+/* mapping quality of the segment (GT_UNDEF_ULONG if unmapped) */
+unsigned long gt_aligned_segment_mapping_quality(GtAlignedSegment *as);
+
 /* getter/setter for edited bit of seq and refregion */
 void gt_aligned_segment_seq_set_edited(GtAlignedSegment *as);
 bool gt_aligned_segment_seq_edited(const GtAlignedSegment *as);
