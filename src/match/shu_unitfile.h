@@ -22,7 +22,7 @@
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 
-typedef struct {
+typedef struct GtShuUnitFileInfo {
   unsigned long num_of_genomes,
                 num_of_files;
   GtStrArray *genome_names;
