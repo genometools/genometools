@@ -19,9 +19,11 @@
 #define GENOMEDIFF_OPT_H
 
 #include <stdbool.h>
-#include "core/str_array.h"
+
+#include "core/encseq_options.h"
 #include "core/error.h"
 #include "core/option_api.h"
+#include "core/str_array.h"
 #include "match/shu_unitfile.h"
 
 typedef struct GtGenomediffArguments {

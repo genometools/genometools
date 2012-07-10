@@ -18,24 +18,34 @@
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "core/array2dim_api.h"
-#include "core/encseq_api.h"
+#include "core/cstr_api.h"
+#include "core/encseq.h"
+#include "core/fa.h"
 #include "core/log_api.h"
 #include "core/logger.h"
+#include "core/ma_api.h"
 #include "core/showtime.h"
-#include "core/str_array_api.h"
-#include "core/timer_api.h"
-#include "core/unused_api.h"
 #include "core/warning_api.h"
-#include "match/esa-map.h"
-#include "match/esa-shulen.h"
+#include "match/esa-fileend.h"
 #include "match/genomediff_opt.h"
-#include "match/idx-limdfs.h"
-#include "match/sarr-def.h"
+#include "match/sfx-opt.h"
+#include "match/sfx-run.h"
 #include "match/shu-genomediff.h"
-#include "match/shu_unitfile.h"
 #include "tools/gt_genomediff.h"
+/* #include "core/encseq_api.h" */
+/* #include "core/encseq_options.h" */
+/* #include "core/str_array_api.h" */
+/* #include "core/timer_api.h" */
+/* #include "core/unused_api.h" */
+/* #include "match/esa-map.h" */
+/* #include "match/esa-scanprj.h" */
+/* #include "match/esa-shulen.h" */
+/* #include "match/idx-limdfs.h" */
+/* #include "match/sarr-def.h" */
+/* #include "match/shu_unitfile.h" */
 
 static void* gt_genomediff_arguments_new(void)
 {

@@ -18,6 +18,7 @@
 #ifndef FASTA_HEADER_ITERATOR_H
 #define FASTA_HEADER_ITERATOR_H
 
+#include "core/str_array_api.h"
 #include "extended/cstr_iterator.h"
 
 /* implements <GtCstrIterator> */

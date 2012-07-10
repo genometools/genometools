@@ -19,6 +19,8 @@
 #ifndef CSTR_ITERATOR_H
 #define CSTR_ITERATOR_H
 
+#include "core/error_api.h"
+
 /* <GtCstrIterator> is an abstract iterator class for data-structures
    containing strings */
 typedef struct GtCstrIterator GtCstrIterator;
