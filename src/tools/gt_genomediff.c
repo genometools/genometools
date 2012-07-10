@@ -319,6 +319,7 @@ static int gt_genomediff_runner(int argc, const char **argv,
       }
       gt_str_reset(current_line);
     }
+    gt_str_delete(current_line);
     gt_free(elements);
     gt_fa_xfclose(prj_fp);
   }
