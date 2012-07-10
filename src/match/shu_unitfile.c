@@ -172,6 +172,8 @@ static int traverse_units(lua_State *L,
     gt_error_set(err, "number of files in index (%lu) and unitfile (%lu)! "
                  "differ!", unit_info->num_of_files, files_added);
   }
+  gt_str_delete(mapping_filename);
+  gt_str_delete(basename);
   return had_err;
 }
 

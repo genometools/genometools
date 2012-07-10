@@ -67,6 +67,7 @@ static void gt_genomediff_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->indextype);
   gt_str_array_delete(arguments->filenames);
   gt_option_delete(arguments->ref_unitfile);
+  gt_encseq_options_delete(arguments->loadopts);
   gt_free(arguments);
 }
 
@@ -298,8 +299,8 @@ static int gt_genomediff_runner(int argc, const char **argv,
     const char *buffer;
     char **elements = NULL;
 
-    arguments->indexname = gt_str_ref(
-                             gt_str_array_get_str(arguments->filenames, 0));
+    gt_str_append_str(arguments->indexname,
+                      gt_str_array_get_str(arguments->filenames, 0));
 
     prj_fp = gt_fa_fopen_with_suffix(gt_str_get(arguments->indexname),
                                      PROJECTFILESUFFIX,"rb",err);
@@ -307,6 +308,10 @@ static int gt_genomediff_runner(int argc, const char **argv,
       had_err = -1;
     while (!had_err && gt_str_read_next_line(current_line, prj_fp) != EOF) {
       buffer = gt_str_get(current_line);
+      if (elements != NULL) {
+        gt_free(elements[0]);
+        gt_free(elements[1]);
+      }
       gt_free(elements);
       elements = gt_cstr_split(buffer, '=');
       gt_log_log("%s", elements[0]);
@@ -320,6 +325,10 @@ static int gt_genomediff_runner(int argc, const char **argv,
       gt_str_reset(current_line);
     }
     gt_str_delete(current_line);
+    if (elements != NULL) {
+      gt_free(elements[0]);
+      gt_free(elements[1]);
+    }
     gt_free(elements);
     gt_fa_xfclose(prj_fp);
   }
