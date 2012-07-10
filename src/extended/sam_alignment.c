@@ -100,6 +100,12 @@ unsigned long gt_sam_alignment_read_length(GtSamAlignment *sam_alignment)
   return (unsigned long) sam_alignment->s_alignment->core.l_qseq;
 }
 
+unsigned long gt_sam_alignment_mapping_quality(GtSamAlignment *sam_alignment)
+{
+  gt_assert(sam_alignment != NULL);
+  return (unsigned long) sam_alignment->s_alignment->core.qual;
+}
+
 unsigned long gt_sam_alignment_rightmost_pos(GtSamAlignment *sam_alignment)
 {
   gt_assert(sam_alignment != NULL);

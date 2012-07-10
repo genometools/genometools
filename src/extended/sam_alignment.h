@@ -47,6 +47,9 @@ unsigned long gt_sam_alignment_rightmost_pos(GtSamAlignment *sam_alignment);
 /* Returns length of read, not length of the alignment */
 unsigned long   gt_sam_alignment_read_length(GtSamAlignment *sam_alignment);
 
+/* Returns mapping quality value */
+unsigned long gt_sam_alignment_mapping_quality(GtSamAlignment *sam_alignment);
+
 /* Returns encoded read sequence from <sam_alignment>. */
 const GtUchar*  gt_sam_alignment_sequence(GtSamAlignment *sam_alignment);
 
