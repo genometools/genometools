@@ -27,9 +27,7 @@
 #include "match/shu_unitfile.h"
 
 typedef struct GtGenomediffArguments {
-  GtOption *ref_unitfile;
-  bool mirror,
-       scan,
+  bool scan,
        verbose,
        with_esa,
        with_pck,
@@ -37,13 +35,15 @@ typedef struct GtGenomediffArguments {
   int user_max_depth;
   unsigned long max_ln_n_fac;
   double divergence_abs_err, /* kr2 T */
-         divergence_rel_err, /* kr2 E */
          divergence_m, /* kr2 M */
+         divergence_rel_err, /* kr2 E */
          divergence_threshold; /* kr2 THRESHOLD */
-  GtStrArray *filenames;
+  GtEncseqOptions *loadopts;
+  GtOption *ref_unitfile;
   GtStr *indexname,
         *indextype,
         *unitfile;
+  GtStrArray *filenames;
 } GtGenomediffArguments;
 
 typedef struct GenomediffInfo {

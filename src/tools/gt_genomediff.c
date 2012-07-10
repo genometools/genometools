@@ -89,10 +89,10 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* -index */
   option = gt_option_new_choice("indextype", "specify type of index, one of: "
-                                "esa|pck|encseq. Where enc is an encoded "
+                                "esa|pck|encseq. Where encseq is an encoded "
                                 "sequence and an enhanced suffix array will be "
-                                "constructed temporarily. Will be ignored if "
-                                "sequence files are given.",
+                                "constructed temporarily. Option will be "
+                                "ignored if sequence files are given.",
                                 arguments->indextype, indextypes[2],
                                 indextypes);
 
@@ -103,13 +103,6 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
                                 "files, this will be the basename of the "
                                 "encoded sequence created during index "
                                 "construction.", arguments->indexname, NULL);
-  gt_option_parser_add_option(op, option);
-
-  /* -mirror */
-  option = gt_option_new_bool("mirror", "specify if encseq should be mirrored "
-                              "to include the reverse complement. Ignored with "
-                              "esa and pck index",
-                              &arguments->mirror, false);
   gt_option_parser_add_option(op, option);
 
   /*-unitfile*/
@@ -128,6 +121,10 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
                            arguments->unitfile);
   gt_option_parser_add_option(op, option_unitfile);
   arguments->ref_unitfile = gt_option_ref(option_unitfile);
+
+  /* encseq options */
+  arguments->loadopts =
+    gt_encseq_options_register_loading(op, arguments->indexname);
 
   /* scan */
   option = gt_option_new_bool("scan", "do not load esa index but scan "
@@ -220,23 +217,23 @@ static int gt_genomediff_arguments_check(int rest_argc,
   if (arguments->user_max_depth != -1 && !arguments->with_pck)
     gt_warning("option -maxdepth does only apply to -indextype pck");
 
-  if (prepared_index && arguments->mirror)
-    gt_warning("option -mirror is ignored with esa and pck index");
+  if (prepared_index && gt_encseq_options_mirrored_value(arguments->loadopts))
+    gt_warning("option -mirrored is ignored with esa and pck index");
 
   if (rest_argc == 0) {
     gt_error_set(err, "at least one filename has to be given");
     had_err = -1;
   }
   if (rest_argc > 1) {
-    if (gt_str_length(arguments->indexname) == 0) {
-      had_err = -1;
-      gt_error_set(err, "more than one file given, pleas give a basename for "
-                   "the encseq to be created");
-    }
-    else if (prepared_index) {
+    if (prepared_index) {
       gt_error_set(err, "indextypes esa and pck only accept one filename "
                         "(basename)!");
       had_err = -1;
+    }
+    else if (gt_str_length(arguments->indexname) == 0) {
+      had_err = -1;
+      gt_error_set(err, "more than one file given, pleas give a basename for "
+                   "the encseq to be created");
     }
   }
 
@@ -250,12 +247,13 @@ static int gt_genomediff_runner(int argc, const char **argv,
                                 int parsed_args, void *tool_arguments,
                                 GtError *err)
 {
+  bool mirrored = false;
   int had_err = 0,
       i;
   GtEncseq              *encseq = NULL;
   GtGenomediffArguments *arguments = tool_arguments;
   GtLogger              *logger;
-  GtShuUnitFileInfo     *unit_info;
+  GtShuUnitFileInfo     *unit_info = NULL;
   GtTimer               *timer = NULL;
 
   gt_error_check(err);
@@ -295,12 +293,39 @@ static int gt_genomediff_runner(int argc, const char **argv,
     gt_encseq_encoder_delete(ee);
   }
   else {
-    arguments->indexname = gt_str_array_get_str(arguments->filenames, 0);
+    GtStr *current_line = gt_str_new();
+    FILE *prj_fp;
+    const char *buffer;
+    char **elements = NULL;
+
+    arguments->indexname = gt_str_ref(
+                             gt_str_array_get_str(arguments->filenames, 0));
+
+    prj_fp = gt_fa_fopen_with_suffix(gt_str_get(arguments->indexname),
+                                     PROJECTFILESUFFIX,"rb",err);
+    if (prj_fp == NULL)
+      had_err = -1;
+    while (!had_err && gt_str_read_next_line(current_line, prj_fp) != EOF) {
+      buffer = gt_str_get(current_line);
+      gt_free(elements);
+      elements = gt_cstr_split(buffer, '=');
+      gt_log_log("%s", elements[0]);
+      if (strcmp("mirrored", elements[0]) == 0) {
+        gt_log_log("%s", elements[1]);
+        if (strcmp("1", elements[1]) == 0) {
+          mirrored = true;
+          gt_log_log("sequences are treated as mirrored");
+        }
+      }
+      gt_str_reset(current_line);
+    }
+    gt_free(elements);
+    gt_fa_xfclose(prj_fp);
   }
   if (!had_err) {
-    GtEncseqLoader *el = gt_encseq_loader_new();
-    gt_encseq_loader_enable_autosupport(el);
-    if (arguments->mirror)
+    GtEncseqLoader *el = gt_encseq_loader_new_from_options(arguments->loadopts,
+                                                           err);
+    if (mirrored)
       gt_encseq_loader_mirror(el);
     encseq =
       gt_encseq_loader_load(el, gt_str_get(arguments->indexname), err);
@@ -317,14 +342,33 @@ static int gt_genomediff_runner(int argc, const char **argv,
 
   if (!had_err) {
     uint64_t **shusums = NULL;
-    if (arguments->with_esa || arguments->with_pck)
+    if (arguments->with_esa || arguments->with_pck) {
       shusums = gt_genomediff_shulen_sum(arguments, unit_info,
                                          logger, timer, err);
-    else {
-      had_err = -1;
-      gt_error_set(err, "functionality not implemented yet");
+      if (shusums == NULL)
+        had_err = -1;
     }
-    if (shusums != NULL) {
+    else {
+      bool doesa = true;
+      GenomediffInfo gd_info;
+      Suffixeratoroptions sopts;
+      sopts.beverbose = arguments->verbose;
+      sopts.indexname = NULL;
+      sopts.db = NULL;
+      sopts.encopts = NULL;
+      sopts.genomediff = true;
+      sopts.inputindex = arguments->indexname;
+      sopts.loadopts = arguments->loadopts;
+      sopts.showprogress = false;
+
+      gt_assert(unit_info != NULL);
+      gt_array2dim_calloc(shusums, unit_info->num_of_genomes,
+                          unit_info->num_of_genomes);
+      gd_info.shulensums = shusums;
+      gd_info.unit_info = unit_info;
+      had_err = runsuffixerator(doesa, &sopts, &gd_info, logger, err);
+    }
+    if (!had_err && shusums != NULL) {
       had_err = gt_genomediff_kr_calc(shusums, arguments, unit_info,
                                       arguments->with_pck, logger, timer, err);
       gt_array2dim_delete(shusums);

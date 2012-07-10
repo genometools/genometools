@@ -320,7 +320,7 @@ Test do
            kr_out[i_idx][j_idx].to_f > 0.3
           if (pck_out[i_idx][j_idx].to_f -
               kr_out[i_idx][j_idx].to_f).abs > 0.001
-            failtest("different results #{pck_out[i_idx][j_idx]},"+
+            failtest("different results pck-kr #{pck_out[i_idx][j_idx]},"+
                      "#{kr_out[i_idx][j_idx]}\n"+
                      "#{pck_out[i_idx][j_idx]} #{kr_out[i_idx][j_idx]}")
           end

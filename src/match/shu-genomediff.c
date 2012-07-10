@@ -25,7 +25,6 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/safearith.h"
-
 #include "match/eis-voiditf.h"
 #include "match/esa-seqread.h"
 #include "match/esa-shulen.h"
@@ -34,9 +33,8 @@
 #include "match/shu-dfs.h"
 #include "match/shu-divergence.h"
 #include "match/shu-encseq-gc.h"
-#include "match/shu_unitfile.h"
-
 #include "match/shu-genomediff.h"
+#include "match/shu_unitfile.h"
 
 /* static inline int genomediff_parse_unit(GtShuUnitFileInfo *unit_info,
                                         const GtStr *filename,
@@ -65,7 +63,7 @@ genomediff_calculate_genome_lengths(GtShuUnitFileInfo *unit_info)
                 i_idx;
   unsigned long *genome_lengths = gt_calloc((size_t) unit_info->num_of_genomes,
                                            sizeof (*genome_lengths));
-  for (i_idx = 0ul; i_idx < unit_info->num_of_files; i_idx++) {
+  for (i_idx = 0UL; i_idx < unit_info->num_of_files; i_idx++) {
     eff_file_length = gt_safe_cast2ulong_64(
         gt_encseq_effective_filelength(unit_info->encseq, i_idx));
     filestart = gt_encseq_filestartpos(unit_info->encseq, i_idx);
@@ -94,11 +92,11 @@ genomediff_calculate_genome_lengths(GtShuUnitFileInfo *unit_info)
       genome_lengths[i_idx] = eff_file_length - sep_per_file;
     }
   }
-  for (i_idx = 0ul; i_idx < unit_info->num_of_files && mirrored; i_idx++) {
+  for (i_idx = 0UL; i_idx < unit_info->num_of_genomes && mirrored; i_idx++) {
     genome_lengths[i_idx] += genome_lengths[i_idx];
   }
   if (gt_log_enabled()) {
-    for  (i_idx = 0ul; i_idx < unit_info->num_of_files; i_idx++) {
+    for  (i_idx = 0UL; i_idx < unit_info->num_of_genomes; i_idx++) {
       gt_log_log("file/genome %lu has length %lu",
           i_idx, genome_lengths[i_idx]);
     }
@@ -110,7 +108,7 @@ static double *genomediff_calculate_gc(unsigned long *genome_lengths,
                                        GtShuUnitFileInfo *unit_info,
                                        GtError *err)
 {
-  unsigned long file_idx = 0ul,
+  unsigned long file_idx = 0UL,
                 idx,
                 num_of_seq;
   double *seq_gc_content = NULL,
@@ -211,6 +209,7 @@ uint64_t **gt_genomediff_shulen_sum(const GtGenomediffArguments *arguments,
                                     GtError *err)
 {
   int had_err = 0;
+  unsigned long i_idx, j_idx;
   uint64_t **shulensums = NULL;
   const GtEncseq *encseq = NULL;
   Genericindex *generic_index_subject = NULL;
@@ -301,9 +300,28 @@ uint64_t **gt_genomediff_shulen_sum(const GtGenomediffArguments *arguments,
     genericindex_delete(generic_index_subject);
 
   if (had_err) {
+    gt_log_log("foo");
     if (shulensums != NULL)
       gt_array2dim_delete(shulensums);
     shulensums = NULL;
+  }
+  else {
+    gt_assert(shulensums != NULL);
+    gt_log_log("sum of shulens");
+    if (gt_log_enabled()) {
+      for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
+        fprintf(stderr, "debug: %s\t",
+                gt_str_array_get(unit_info->genome_names, i_idx));
+        for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++) {
+          if (i_idx == j_idx)
+            fprintf(stderr, "0");
+          else
+            fprintf(stderr, Formatuint64_t"\t",
+                    PRINTuint64_tcast(shulensums[i_idx][j_idx]));
+        }
+        fprintf(stderr, "\n");
+      }
+    }
   }
   return shulensums;
 }
