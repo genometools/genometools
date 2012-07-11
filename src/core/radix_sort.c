@@ -40,7 +40,7 @@
    the bins can be sorted by independet threads which have independent
    workspace.
 
-   5) The implementation allows to sort an unsigned long -array and an array
+   5) The implementation allows one to sort an unsigned long -array and an array
    over type <GtUlongPair>, where the component <a> is the soring key.
 */
 

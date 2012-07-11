@@ -1,6 +1,6 @@
 print ([[
 
-The option -keys allows to extract substrings or sequences from the given 
+The option -keys allows one to extract substrings or sequences from the given 
 sequence file or from a fasta index.
 The substrings to be extracted are specified in a key file given
 as argument to this option. The key file must contain lines of the form

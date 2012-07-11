@@ -35,7 +35,7 @@
 /* in revcompl mode the data would be output twice without this;
    e.g. 2 revcompl have same overlap that 2 direct sequences;
    convention: either are both direct, or the one with higher seqnum
-   is allowed to be revcompl; this macro allows to skip other cases */
+   is allowed to be revcompl; this macro allows one to skip other cases */
 
 #define GT_READJOINER_IS_CORRECT_REVCOMPL_CASE(SN,SD,PN,PD)\
         (\

@@ -40,7 +40,7 @@ int gt_strgraph_load_counts(GtStrgraph *strgraph, const char *indexname,
     const char *suffix, GtError *err);
 
 /* to reduce the memory requirement, the encseq may be freed during the life of
- * strgraph and later reloaded; this method allows to communicate the
+ * strgraph and later reloaded; this method allows one to communicate the
  * changes to the strgraph object (set to NULL by deletion) */
 void gt_strgraph_set_encseq(GtStrgraph *strgraph, const GtEncseq *encseq);
 

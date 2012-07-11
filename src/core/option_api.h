@@ -88,10 +88,10 @@ void            gt_option_parser_set_version_func(GtOptionParser *option_parser,
 void            gt_option_parser_set_mail_address(GtOptionParser*,
                                                   const char *mail_address);
 /* Register a <hook_function> with <option_parser>. All registered hook
-   functions are called at the end of <gt_option_parser_parse(>).
-   This allows to have a module which registers a bunch of options in the option
-   parser and automatically performs necessary postprocessing after the option
-   parsing has been done via the hook function. */
+   functions are called at the end of <gt_option_parser_parse()>.
+   This allows one to have a module which registers a bunch of options in the
+   option parser and automatically performs necessary postprocessing after the
+   option parsing has been done via the hook function. */
 void            gt_option_parser_register_hook(GtOptionParser *option_parser,
                                                GtOptionParserHookFunc
                                                hook_function,

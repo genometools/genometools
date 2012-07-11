@@ -18,7 +18,7 @@
 #ifndef TYPE_CHECKER_API_H
 #define TYPE_CHECKER_API_H
 
-/* The <GtTypeChecker> interface, allows to check the validity of (genome
+/* The <GtTypeChecker> interface, allows one to check the validity of (genome
    feature) types. */
 typedef struct GtTypeChecker GtTypeChecker;
 

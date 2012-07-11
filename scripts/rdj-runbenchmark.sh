@@ -114,7 +114,7 @@ function __get_lognumber {
 }
 
 #
-# dividing the run in __start, __run, __end allows to
+# dividing the run in __start, __run, __end allows one to
 # inject additional code, such as remove files (run_leap)
 # or output assembly statistics (_assembly functions)
 #

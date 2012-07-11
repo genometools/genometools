@@ -143,7 +143,7 @@ static GtOptionParser* gt_hopcorrect_option_parser_new(void *tool_arguments)
   /* -outorder */
   option = gt_option_new_filename_array("outorder",
       "specify the name of the files (FastQ format) containing the "
-      "uncorrected readset; this allows to output the reads in "
+      "uncorrected readset; this allows one to output the reads in "
       "the same order, increasing memory usage", arguments->readset);
   gt_option_parser_add_option(op, option);
 

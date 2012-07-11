@@ -31,8 +31,8 @@ typedef GtLicense* (*GtLicenseConstructor)(const char *argv0,
                                            unsigned int minor_version);
 typedef void       (*GtLicenseDestructor)(GtLicense*);
 
-/* The tool driver module allows to compile a tool into a separate binary. This
-   is mostly useful for stand-alone applications like GenomeThreader.
+/* The tool driver module allows one to compile a tool into a separate binary.
+   This is mostly useful for stand-alone applications like GenomeThreader.
    The tool driver creates an GtError object, calls <tool>, and reports errors.
 */
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[]);

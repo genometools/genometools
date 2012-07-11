@@ -11,7 +11,7 @@ feature requests:
 - update design.html, describe interface inheritance
 - check for circles (feature nodes)
 - write proper memory allocator
-- function similary to option_new_choice(), but which allows to set multiple
+- function similary to option_new_choice(), but which allows one to set multiple
   strings from the given set
 - make sure that exons and mRNAs of a gene lie in the range defined by the gene
 - establish naming conventions and use them throughout entire codebase

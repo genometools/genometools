@@ -27,7 +27,7 @@
 #include "core/safearith_imp.h"
 
 /*
-  This module allows to do safe arithmetics in C (preventing overflows).
+  This module allows one to do safe arithmetics in C (preventing overflows).
   For an introduction to the theory behind this see
 
   http://www.fefe.de/intof.html

@@ -18,61 +18,45 @@
 #ifndef SEQPOS_CLASSIFIER_H
 #define SEQPOS_CLASSIFIER_H
 
+/* The <GtSeqposClassifier> class.
+   Given an annotation (GFF3) of a sequence s, it answers the question whether
+   a sequence position i belong to a given type of feature (e.g. CDS) by
+   iterating over all positions of s. The 1-based coordinates in the gff3 are
+   converted to 0-based sequence positions in the process.
+
+   The features of the given type must be sorted by starting position in the
+   GFF3 file, such that when <gt_seqpos_classifier_is_inside_feature()> method
+   is called for each, i must increase.
+   Currently only a single sequence is supported. To remove this limitation,
+   a mapping of sequence regions to sequence positions would be needed. */
 typedef struct GtSeqposClassifier GtSeqposClassifier;
 
-/* Given an annotation (gff3) of a sequence s,
- * by iterating over all positions of the s allows to
- * answer the question: does the sequence position i
- * belong to a given type of feature (e.g. CDS)?
- *
- * The 1-based coordinates in the gff3 are converted
- * to 0-based sequence positions.
- *
- * The requirements/limitations are:
- * - the features of the given type must be available
- *   sorted by starting position in the gff3 file
- * - the _is_inside_feature(i) method is called for each
- *   position i starting from 0, sequentially
- * - a single type of feature is considered, specified
- *   when calling the _new() method
- * - currently a single sequence is supported (to remove this
- *   limitation, a mapping of sequence regions to sequence positions
- *   would be needed)
- *
- */
+/* Creates a new <GtSeqposClassifier> using the annotation in <filename>,
+   recognizing the feature type <feature_type>. If <filename> equals <NULL>,
+   the data is read from <stdin>. */
+GtSeqposClassifier* gt_seqpos_classifier_new(const char *filename,
+                                             const char *feature_type);
 
-/*
- * filename: name of the (sorted) gff3 annotation file
- * feature_type: type of feature to use, e.g. gt_ft_CDS
- *
- */
+/* Tests whether <i> is inside a feature in an annotation as defined by
+   <seqpos_classifier>. If so, <inside> is set to true. If the end of the
+   annotation has been reached, <end_of_annotation> is set to true. In this
+   case, the value of <inside> is undefined. Note that <i> must be increasing
+   for sequential calls of this function.
+   Returns 0 on success, otherwise a different value is returned and <err> is
+   set accordingly. */
+int                 gt_seqpos_classifier_position_is_inside_feature(
+                                          GtSeqposClassifier *seqpos_classifier,
+                                          unsigned long i, bool *inside,
+                                          bool *end_of_annotation,
+                                          GtError *err);
 
-GtSeqposClassifier *gt_seqpos_classifier_new(const char *filename,
-    const char *feature_type);
+/* Returns the number of features of the feature type modeled in
+   <seqpos_classifier> found up to this point, referring to calls of
+   <gt_seqpos_classifier_position_is_inside_feature()>. */
+unsigned long       gt_seqpos_classifier_nof_features_found(
+                                         GtSeqposClassifier *seqpos_classifier);
 
-/*
- * i: the position to test (the function must be called sequentially
- *    for each value of i from 0 to the last position to test)
- *
- * inside: this is set to true if the position is inside a feature
- *         of the feature type specified in the _new function (false otherwise)
- *
- * end_of_annotation: this is set to true if the annotation has been
- *                    completely parsed (false otherwise)
- *                    (in this case, the value of inside is unspecified)
- *
- * return value: 0 on success, another value if an error occurred
- *               in which case <err> is also set
- *
- */
-int gt_seqpos_classifier_position_is_inside_feature(
-    GtSeqposClassifier *seqpos_classifier, unsigned long i, bool *inside,
-    bool *end_of_annotation, GtError *err);
-
-/* returns the number of feature nodes of the specifed feature type found */
-unsigned long gt_seqpos_classifier_nof_features_found(
-    GtSeqposClassifier *seqpos_classifier);
-
-void gt_seqpos_classifier_delete(GtSeqposClassifier *seqpos_classifier);
+void                gt_seqpos_classifier_delete(
+                                         GtSeqposClassifier *seqpos_classifier);
 
 #endif

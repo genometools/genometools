@@ -30,7 +30,7 @@
    In the latter case, the component <a> is the key and <b> is the
    value.
 
-   The implementation of radixsort allows to split the array
+   The implementation of radixsort allows one to split the array
    to be sorted into a given number of at least two parts, which
    are sorted independently. Let <n> be the length of the array and
    <p> be the number of parts.

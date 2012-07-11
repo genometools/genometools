@@ -137,7 +137,7 @@ changes in version 1.3.0 (2008-12-03)
 - `gt bed_to_gff3` has new options -featuretype, -thicktype, and -blocktype
 - `gt sketch` has new option -input
 - many extensions and some changes to the C API. E.g., AnnotationSketch now
-  allows to define track selector functions and custom tracks.
+  allows one to define track selector functions and custom tracks.
 
 
 changes in version 1.2.2 (2008-11-04)
