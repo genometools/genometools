@@ -61,7 +61,7 @@ def get_manpage_for_help(helptext, t)
     opts.gsub!(/^(-[^ ]+)/, "*\\1*::\n")
     opts.gsub!(/(default: .+$)/, "(\\1)")
 
-    desc.collect { |l| l.scan(/.{1,79}/)}.join("\n")
+    desc.collect! { |l| l.scan(/.{1,79}/)}.join("\n")
     desc = desc.join("\n")
     opts.gsub!(/.*\n-+\n/, "")
 
@@ -96,12 +96,11 @@ def get_manpage_for_help(helptext, t)
       f.puts author
     end
   end
-  print "creating manpage for  'gt #{t}'..."
+  print "."
   `a2x --doctype manpage --format manpage #{fname}`
   if $? == 0 then
     File.unlink(fname)
   end
-  puts "done."
 end
 
 gttext = `#{ARGV[0]} -help`
