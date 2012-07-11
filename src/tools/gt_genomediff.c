@@ -70,7 +70,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] -pck|-esa indexname ",
-                            "Calculates shulens of Genomes and the Kr.");
+                            "Calculates shulens of genomes and the Kr.");
 
   /* -maxdepth */
   option =  gt_option_new_int("maxdepth", "max depth of .pbi-file",
@@ -156,7 +156,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* expected shulen error */
   option = gt_option_new_double("abs_err",
-                                "absolut error for epected shulen "
+                                "absolute error for expected shulen "
                                 "calculation.\n"
                                 "default: 1e-5",
                                 &arguments->divergence_abs_err,
@@ -167,7 +167,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* relative expected shulen error */
   option = gt_option_new_double("rel_err",
-                                "relative error for epected shulen "
+                                "relative error for expected shulen "
                                 "calculation.\n"
                                 "default: 1e-3",
                                 &arguments->divergence_rel_err,

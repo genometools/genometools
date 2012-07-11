@@ -175,7 +175,7 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
       if (arguments->srate == GT_UNDEF_ULONG)
         arguments->srate = GT_SAMPLING_DEFAULT_PAGE_RATE;
       else if (arguments->srate == 0) {
-        gt_error_set(err, "page sampling was choosen, but sampling rate was"
+        gt_error_set(err, "page sampling was chosen, but sampling rate was"
                           " set to %lu! this seems wrong.", arguments->srate);
         had_err = -1;
       }
@@ -185,7 +185,7 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
       if (arguments->srate == GT_UNDEF_ULONG)
         arguments->srate = GT_SAMPLING_DEFAULT_REGULAR_RATE;
       else if (arguments->srate == 0) {
-        gt_error_set(err, "regular sampling was choosen, but sampling rate "
+        gt_error_set(err, "regular sampling was chosen, but sampling rate "
                           " was set to %lu! this seems wrong.",
                      arguments->srate);
         had_err = -1;
@@ -195,7 +195,7 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
       if (arguments->srate == GT_UNDEF_ULONG)
         arguments->srate = 0;
       else if (arguments->srate != 0) {
-        gt_error_set(err, "no sampling was choosen, but sampling rate was"
+        gt_error_set(err, "no sampling was chosen, but sampling rate was"
                           " set to %lu! this seems wrong.", arguments->srate);
         had_err = -1;
       }

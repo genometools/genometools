@@ -218,7 +218,7 @@ void gt_strgraph_show_limits(void)
       PRINTGtStrgraphVEdgenumcast(GT_STRGRAPH_V_EDGENUM_MAX));
   printf("# max number of spm: "FormatGtStrgraphEdgenum"\n",
       PRINTGtStrgraphEdgenumcast(GT_STRGRAPH_NOFSPM_MAX));
-  printf("# compile-time choosen representations\n");
+  printf("# compile-time chosen representations\n");
   printf("# - counts: %s\n",   GT_STRGRAPH_COUNTS_REPRESENTATION);
   printf("# - vertices: %s\n", GT_STRGRAPH_VERTICES_REPRESENTATION);
   printf("# - edges: %s\n",    GT_STRGRAPH_EDGES_REPRESENTATION);

@@ -1123,7 +1123,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
     if (strncmp(token, ".", 1) == 0) {
       if (gt_splitter_size(attribute_splitter) > 1) {
         gt_error_set(err, "more than one attribute token defined on line %u in "
-                     "file \"%s\", altough the first one is '.'", line_number,
+                     "file \"%s\", although the first one is '.'", line_number,
                      filename);
         had_err = -1;
       }
