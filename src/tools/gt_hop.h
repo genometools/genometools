@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_HOPCORRECT_H
-#define GT_HOPCORRECT_H
+#ifndef GT_HOP_H
+#define GT_HOP_H
 
 #include "core/tool.h"
 
-/* the hopcorrect tool */
-GtTool* gt_hopcorrect(void);
+/* the hop tool */
+GtTool* gt_hop(void);
 
 #endif

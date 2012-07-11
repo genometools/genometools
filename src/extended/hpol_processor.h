@@ -61,13 +61,17 @@ int gt_hpol_processor_run(GtHpolProcessor *hpp, GtLogger *logger, GtError *err);
 void gt_hpol_processor_restrict_to_feature_type(GtHpolProcessor *hpp,
     GtSeqposClassifier *spc);
 
-/* Output the segments sequence in FastQ format to <outfile> during run. */
+/* Output the segments sequence in FastQ format to <outfile> during run.
+ * This is only useful for the cases in which each read has exactly one
+ * segment. */
 void gt_hpol_processor_enable_segments_output(GtHpolProcessor *hpp,
     GtFile *outfile);
 
 /*
  * Output the segments sorted by the order in which sequences
- * are returned by the <reads_iter>.
+ * are returned by the <reads_iters>. Each GtSeqIterator corresponds
+ * to an input file. The reads from the i-th input file will
+ * be output to the i-th output file.
  *
  * Must be called after <gt_hpol_processor_enable_segments_output>.
  *
@@ -77,7 +81,7 @@ void gt_hpol_processor_enable_segments_output(GtHpolProcessor *hpp,
  * This method assumes that the sequence ID (first word of the description line)
  * of each sequence is unique. */
 void gt_hpol_processor_sort_segments_output(GtHpolProcessor *hpp,
-    GtSeqIterator *reads_iter);
+    unsigned long nfiles, GtSeqIterator **reads_iters, GtFile **outfiles);
 
 /* Output statistics about each correction position.
  * Data is output as TAB-separated table, one row per correction position. */

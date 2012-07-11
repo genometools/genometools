@@ -43,8 +43,9 @@ struct GtHpolProcessor
   unsigned long nof_complete, nof_complete_edited, nof_complete_not_edited,
                 nof_skipped, nof_unmapped, nof_h, nof_h_e, hlen_max;
   bool adjust_s_hlen;
-  GtFile *outfp_segments, *outfp_stats;
-  GtSeqIterator *reads_iter;
+  GtFile *outfp_segments, *outfp_stats, **outfiles;
+  GtSeqIterator **reads_iters;
+  unsigned long nfiles;
   GtHashmap *processed_segments;
   GtAlphabet *alpha;
   bool output_segments, output_stats;
@@ -85,7 +86,9 @@ GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin)
   hpp->output_stats = false;
   hpp->outfp_stats = NULL;
   hpp->processed_segments = NULL;
-  hpp->reads_iter = NULL;
+  hpp->reads_iters = NULL;
+  hpp->outfiles = NULL;
+  hpp->nfiles = 0;
   return hpp;
 }
 
@@ -276,7 +279,7 @@ void gt_hpol_processor_enable_segments_output(GtHpolProcessor *hpp,
 }
 
 void gt_hpol_processor_sort_segments_output(GtHpolProcessor *hpp,
-    GtSeqIterator *reads_iter)
+    unsigned long nfiles, GtSeqIterator **reads_iters, GtFile **outfiles)
 {
   gt_assert(hpp != NULL);
   gt_assert(hpp->output_segments);
@@ -284,7 +287,9 @@ void gt_hpol_processor_sort_segments_output(GtHpolProcessor *hpp,
   gt_aligned_segments_pile_disable_segment_deletion(hpp->asp);
   hpp->processed_segments = gt_hashmap_new(GT_HASH_STRING, NULL,
       (GtFree)gt_aligned_segment_delete);
-  hpp->reads_iter = reads_iter;
+  hpp->reads_iters = reads_iters;
+  hpp->outfiles = outfiles;
+  hpp->nfiles = nfiles;
 }
 
 static void gt_hpol_processor_output_stats_header(GtFile *outfp)
@@ -807,7 +812,7 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
 }
 
 static int gt_hpol_processor_output_sorted_segments(GtHpolProcessor *hpp,
-    GtError *err)
+    GtSeqIterator *reads_iter, GtFile *outfile, GtError *err)
 {
   const GtUchar *s;
   char *d;
@@ -818,9 +823,9 @@ static int gt_hpol_processor_output_sorted_segments(GtHpolProcessor *hpp,
   GtSplitter *spl = gt_splitter_new();
   gt_assert(hpp != NULL);
   gt_assert(hpp->processed_segments != NULL);
-  gt_assert(hpp->reads_iter != NULL);
+  gt_assert(reads_iter != NULL);
   d_str = gt_str_new();
-  while ((next_rval = gt_seqiterator_next(hpp->reads_iter, &s, &len, &d, err))
+  while ((next_rval = gt_seqiterator_next(reads_iter, &s, &len, &d, err))
       > 0)
   {
     gt_str_set(d_str, d);
@@ -828,8 +833,7 @@ static int gt_hpol_processor_output_sorted_segments(GtHpolProcessor *hpp,
     if ((as = gt_hashmap_get(hpp->processed_segments,
             gt_splitter_get_token(spl, 0))) != NULL)
     {
-      gt_hpol_processor_output_segment(as, true, hpp->outfp_segments,
-          gt_str_get(d_str));
+      gt_hpol_processor_output_segment(as, true, outfile, gt_str_get(d_str));
     }
     else
     {
@@ -890,7 +894,12 @@ int gt_hpol_processor_run(GtHpolProcessor *hpp, GtLogger *logger, GtError *err)
   gt_encseq_reader_delete(esr);
   gt_aligned_segments_pile_flush(hpp->asp, true);
   if (!had_err && hpp->processed_segments != NULL)
-    had_err = gt_hpol_processor_output_sorted_segments(hpp, err);
+  {
+    unsigned long i;
+    for (i = 0; i < hpp->nfiles; i++)
+      had_err = gt_hpol_processor_output_sorted_segments(hpp,
+          hpp->reads_iters[i], hpp->outfiles[i], err);
+  }
   if (logger != NULL && !had_err)
     gt_hpol_processor_show_hdist(hpp, logger);
   return had_err;

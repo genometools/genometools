@@ -23,8 +23,9 @@ NOGFF='--'
 BWA=${BWA:=bwa}
 GT=${GT:=gt}
 SAMTOOLS=${SAMTOOLS:=samtools}
-PARAMS=${PARAMS:=""}
+HOP_PARAMS=${HOP_PARAMS:=""}
 BWA_PARAMS=${BWA_PARAMS:="-t 4"}
+USESW=${USESW:=""}
 
 # command line parameters:
 USG="<action> <genome.fas> (<CDS.gff>|$NOGFF) <reads.fastq> [<mates.fastq>]"
@@ -72,7 +73,9 @@ function f_help_footer {
   echo " - SAMTOOLS     path to samtools binary        (default: $SAMTOOLS)"
   echo " - GT           path to GenomeTools binary     (default: $GT)"
   echo " - BWA_PARAMS   parameters for bwa aln         (default: $BWA_PARAMS)"
-  echo " - PARAMS       parameters for hopcorrect      (default: $PARAMS)"
+  echo " - HOP_PARAMS   parameters for hop             (default: $HOP_PARAMS)"
+  echo " - USESW        set to \"TRUE\" to use bwa bwasw instead of bwa aln"
+  echo " - SHOWONLY     set to \"TRUE\" to echo commands, without executing"
 }
 
 function f_shorthelp {
@@ -164,20 +167,40 @@ function f_die {
 
 function f_index {
   echo "==== Create bwa genome index..."
+  CMD="$BWA index $GENOME"
   echo
-  $BWA index $GENOME
+  echo $CMD
+  if [ "$SHOWONLY" != "TRUE" ]; then $CMD; fi
   echo
 }
 
 function f_map {
-  echo "==== Map reads to the genome using bwa..."
-  echo
-  $BWA aln ${BWA_PARAMS} $GENOME $READS > $MAP.sai
-  if [ "$MATES" != "" ]; then
-    $BWA aln ${BWA_PARAMS} $GENOME $MATES > $MAPM.sai
-    $BWA sampe $GENOME $MAP.sai $MAPM.sai $READS $MATES > $MAP.sam
+  if [ "$USESW" == "TRUE" ]; then
+    echo "==== Map reads to the genome using bwasw..."
+    echo
+    CMD="$BWA bwasw ${BWA_PARAMS} $GENOME $READS"
+    echo $CMD '>' $MAP.sam
+    if [ "$SHOWONLY" != "TRUE" ]; then $CMD > $MAP.sam; fi
   else
-    $BWA samse $GENOME $MAP.sai $READS > $MAP.sam
+    echo "==== Map reads to the genome using bwa..."
+    echo
+    CMD="$BWA aln ${BWA_PARAMS} $GENOME $READS"
+    echo $CMD '>' $MAP.sai
+    if [ "$SHOWONLY" != "TRUE" ]; then $CMD > $MAP.sai; fi
+    if [ "$MATES" != "" ]; then
+      CMD1="$BWA aln ${BWA_PARAMS} $GENOME $MATES"
+      CMD2="$BWA sampe $GENOME $MAP.sai $MAPM.sai $READS $MATES"
+      echo $CMD1 '>' $MAPM.sai
+      echo $CMD2 '>' $MAP.sam
+      if [ "$SHOWONLY" != "TRUE" ]; then
+        $CMD1 > $MAPM.sai
+        $CMD2 > $MAP.sam
+      fi
+    else
+      CMD="$BWA samse $GENOME $MAP.sai $READS"
+      echo $CMD '>' $MAP.sam
+      if [ "$SHOWONLY" != "TRUE" ]; then $CMD > $MAP.sam; fi
+    fi
   fi
   echo
 }
@@ -185,8 +208,14 @@ function f_map {
 function f_sortmap {
   echo "==== Sort the mapping results using samtools..."
   echo
-  $SAMTOOLS view -Shu $MAP.sam > $MAP.bam
-  $SAMTOOLS sort $MAP.bam sorted.$MAP
+  CMD1="$SAMTOOLS view -Shu $MAP.sam"
+  CMD2="$SAMTOOLS sort $MAP.bam sorted.$MAP"
+  echo $CMD1 '>' $MAP.bam
+  echo $CMD2
+  if [ "$SHOWONLY" != "TRUE" ]; then
+    $CMD1 > $MAP.bam
+    $CMD2
+  fi
   echo
 }
 
@@ -208,7 +237,9 @@ function f_encode {
   echo
   echo "==== Encode genome in GtEncseq format..."
   echo
-  $GT encseq encode -v $GENOME
+  CMD="$GT encseq encode -v $GENOME"
+  echo $CMD
+  if [ "$SHOWONLY" != "TRUE" ]; then $CMD; fi
   echo
 }
 
@@ -226,14 +257,11 @@ function f_correct {
   if [ "$ANNOTATION" != "$NOGFF" ]; then
     HOP_PARAMS="-a sorted.$ANNOTATION $HOP_PARAMS"
   fi
-  if [ "$MATES" != "" ]; then
-    HOP_PARAMS="-outorder $READS $MATES $HOP_PARAMS"
+  if [ "$MATES" != "" -o "$USESW" == "TRUE" ]; then
+    HOP_PARAMS="-reads $READS $MATES $HOP_PARAMS"
   fi
-  $GT dev hopcorrect -v \
-      -r $GENOME \
-      -m sorted.$MAP.bam \
-      -o hop_$READS \
-      $HOP_PARAMS
+  CMD="$GT dev hop -v -ref $GENOME -map sorted.$MAP.bam -o hop_$READS $HOP_PARAMS"
+  if [ "$SHOWONLY" != "TRUE" ]; then $CMD; fi
   echo
   echo "==== done "
   echo
@@ -380,8 +408,9 @@ function f_stats {
   else
     AOPT=""
   fi
-  $GT dev hopcorrect -v -r $GENOME -m sorted.$MAP.bam $AOPT \
-      -o hop_$READS -stats $HOP_PARAMS >| $MAP.hop_stats
+  CMD="$GT dev hop -v -ref $GENOME -map sorted.$MAP.bam $AOPT -o hop_$READS -stats $HOP_PARAMS"
+  echo "$CMD" '>' $MAP.hop_stats
+  if [ "$SHOWONLY" != "TRUE" ]; then $CMD > $MAP.hop_stats; fi
   echo
   f_edits_per_read $MAP.hop_stats
   echo "==== done "
@@ -399,6 +428,7 @@ stats2eds () {
 function f_eval_make_true {
   GENOME=$SGENOME
   MAP="${READS}.${GENOME}"
+  MAPM="${MATES}.${GENOME}"
   ANNOTATION=$NOGFF
   f_prepare
   f_stats
