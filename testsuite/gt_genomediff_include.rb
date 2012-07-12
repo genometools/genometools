@@ -149,6 +149,8 @@ Test do
   allfilecodes.each do |code|
     test_esq("#{code}*.fas", "-indexname esq")
     test_esq("#{code}*.fas", "-indexname esq -mirrored")
+    test_esq("esq", "")
+    test_esq("esq", "-mirrored")
   end
 end
 
@@ -218,6 +220,7 @@ Test do
   numoffiles = 0
   pck_out = []
   esa_out = []
+  esq_out = []
 
   test_pck("#{code}*fas",
            "-unitfile #{$testdata}genomediff/unitfile1.lua", "")
@@ -254,8 +257,28 @@ Test do
       failtest("can't parse output esa #{file1} #{file2}")
     end
   end
+  test_esq("#{code}*fas",
+           "-indexname esq " +
+           "-unitfile #{$testdata}genomediff/unitfile1.lua ")
+
+  File.open(last_stdout, 'r') do |outfile|
+    while line = outfile.gets do
+      line.chomp!
+      next if line.match /^#/
+      unless line.match(/^\d+$/)
+        esq_out << line.split
+      end
+    end
+    if numoffiles == NIL or
+      numoffiles != pck_out.length
+      failtest("can't parse output esa #{file1} #{file2}")
+    end
+  end
   if result = compare_2d_result(pck_out,esa_out)
     failtest("different results pck-esa #{result[0]},#{result[1]}")
+  end
+  if result = compare_2d_result(pck_out,esq_out)
+    failtest("different results pck-esq #{result[0]},#{result[1]}")
   end
 end
 
@@ -265,6 +288,7 @@ Test do
   kr_testable_files.each do |code|
     pck_out = []
     esa_out = []
+    esq_out = []
     kr_out = []
     numoffiles = 0
     files = " "
@@ -306,6 +330,21 @@ Test do
       end
     end
 
+    test_esq("#{files}", "-indexname esq")
+
+    File.open(last_stdout, 'r') do |outfile|
+      while line = outfile.gets do
+        line.chomp!
+        next if line.match /^#/
+        unless line.match(/^\d+$/)
+          esq_out << line.split
+        end
+      end
+      if numoffiles == nil or
+        numoffiles != pck_out.length
+        failtest("can't parse output or wrong line numbers")
+      end
+    end
     File.open("#{code}-kr.out", 'r') do |krfile|
       line = krfile.gets
       line.chomp!
@@ -324,6 +363,9 @@ Test do
       end
     end
     if result = compare_2d_result(pck_out,esa_out)
+      failtest("different results pck-esa #{result[0]},#{result[1]}")
+    end
+    if result = compare_2d_result(pck_out,esq_out)
       failtest("different results pck-esa #{result[0]},#{result[1]}")
     end
     0.upto(numoffiles - 1) do |i_idx|
