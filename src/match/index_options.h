@@ -32,8 +32,9 @@ typedef struct GtIndexOptions GtIndexOptions;
 
 GtIndexOptions* gt_index_options_register_esa(GtOptionParser *op,
                                               GtEncseqOptions *encopts);
-GtIndexOptions* gt_index_options_register_esa_noout(GtOptionParser *op,
-                                                    GtEncseqOptions *encopts);
+/* this will only options concerning the building of the index, used for
+   genomediff, for example, where no output is produced. */
+GtIndexOptions* gt_index_options_register_esa_noout(GtOptionParser *op);
 GtIndexOptions* gt_index_options_register_packedidx(GtOptionParser *op,
                                                     GtStr *indexname,
                                                     GtEncseqOptions *encopts);

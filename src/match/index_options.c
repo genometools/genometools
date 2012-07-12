@@ -273,9 +273,13 @@ static int gt_index_options_check_set_out_opts(void *oip, GtError *err)
 static GtIndexOptions*
 gt_index_options_register_generic_output(GtOptionParser *op,
                                          GtIndexOptions *idxo,
-                                         GtStr *indexname)
+                                         GtStr *indexname,
+                                         GtEncseqOptions *encopts)
 {
   gt_assert(idxo != NULL);
+  gt_assert(op != NULL && idxo->type != GT_INDEX_OPTIONS_UNDEFINED &&
+            encopts != NULL);
+  idxo->encopts = encopts;
   idxo->indexname = indexname != NULL ? gt_str_ref(indexname) : NULL;
   idxo->optionkys = gt_option_new_string("kys",
                                    "output/sort according to keys of the form "
@@ -346,13 +350,11 @@ gt_index_options_register_generic_output(GtOptionParser *op,
 
 static GtIndexOptions* gt_index_options_register_generic_create(
                                                       GtOptionParser *op,
-                                                      GtIndexOptionsIndexType t,
-                                                      GtEncseqOptions *encopts)
+                                                      GtIndexOptionsIndexType t)
 {
   GtIndexOptions *idxo;
-  gt_assert(op != NULL && t != GT_INDEX_OPTIONS_UNDEFINED && encopts != NULL);
+  gt_assert(op != NULL && t != GT_INDEX_OPTIONS_UNDEFINED);
   idxo = gt_index_options_new();
-  idxo->encopts = encopts;
   idxo->type = t;
   idxo->optionprefixlength = gt_option_new_uint_min("pl",
                                     "specify prefix length for bucket sort\n"
@@ -515,19 +517,16 @@ GtIndexOptions* gt_index_options_register_esa(GtOptionParser *op,
   gt_assert(op != NULL);
 
   idxo = gt_index_options_register_generic_create(op,
-                                                  GT_INDEX_OPTIONS_ESA,
-                                                  encopts);
-  return gt_index_options_register_generic_output(op, idxo, NULL);
+                                                  GT_INDEX_OPTIONS_ESA);
+  return gt_index_options_register_generic_output(op, idxo, NULL, encopts);
 }
 
-GtIndexOptions* gt_index_options_register_esa_noout(GtOptionParser *op,
-                                                    GtEncseqOptions *encopts)
+GtIndexOptions* gt_index_options_register_esa_noout(GtOptionParser *op)
 {
   gt_assert(op != NULL);
 
   return gt_index_options_register_generic_create(op,
-                                                  GT_INDEX_OPTIONS_ESA,
-                                                  encopts);
+                                                  GT_INDEX_OPTIONS_ESA);
 }
 
 GtIndexOptions* gt_index_options_register_packedidx(GtOptionParser *op,
@@ -537,9 +536,8 @@ GtIndexOptions* gt_index_options_register_packedidx(GtOptionParser *op,
   GtIndexOptions *idxo;
   gt_assert(op != NULL);
   idxo = gt_index_options_register_generic_create(op,
-                                                  GT_INDEX_OPTIONS_PACKED,
-                                                  encopts);
-  return gt_index_options_register_generic_output(op, idxo, indexname);
+                                                  GT_INDEX_OPTIONS_PACKED);
+  return gt_index_options_register_generic_output(op, idxo, indexname, encopts);
 }
 
 void gt_index_options_delete(GtIndexOptions *oi)

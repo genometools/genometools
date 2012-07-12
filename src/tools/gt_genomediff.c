@@ -70,7 +70,6 @@ static void gt_genomediff_arguments_delete(void *tool_arguments)
   gt_str_array_delete(arguments->filenames);
   gt_option_delete(arguments->ref_unitfile);
   gt_encseq_options_delete(arguments->loadopts);
-  gt_encseq_options_delete(arguments->encodeopts);
   gt_index_options_delete(arguments->idxopts);
   gt_free(arguments);
 }
@@ -86,7 +85,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] "
-                            "(INDEX| -indexname NAME [SEQFILE[...]]) ",
+                          "(INDEX | -indexname NAME SEQFILE SEQFILE [...]) ",
                           "Calculates Kr: pairwise distances between genomes.");
 
   /* options */
@@ -113,12 +112,10 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   /* encseq options */
   arguments->loadopts =
     gt_encseq_options_register_loading(op, arguments->indexname);
-  arguments->encodeopts =
-    gt_encseq_options_register_encoding(op, arguments->indexname, NULL);
 
   /* esa options */
   arguments->idxopts =
-    gt_index_options_register_esa_noout(op, arguments->encodeopts);
+    gt_index_options_register_esa_noout(op);
 
   /* scan */
   option = gt_option_new_bool("scan", "do not load esa index but scan "
@@ -230,15 +227,13 @@ static int gt_genomediff_arguments_check(int rest_argc,
                  "-indextype esa|pck");
     had_err = -1;
   }
-  if (!had_err && rest_argc > 1 && gt_str_length(arguments->indexname) == 0) {
-    gt_error_set(err, "use -indexname for basename of encseq");
+  if (rest_argc == 1 && gt_str_length(arguments->indexname) != 0) {
+    gt_error_set(err, "Option -indexname is only needed with sequence files, "
+                 "if one file is given as argument, this should be an index.");
     had_err = -1;
   }
-  if (!had_err && (
-        gt_encseq_options_protein_value(arguments->encodeopts) ||
-        gt_encseq_options_plain_value(arguments->encodeopts))) {
-    gt_error_set(err, "Sequence has to be DNA, options -protein -plain can "
-                 "not be used!");
+  if (!had_err && rest_argc > 1 && gt_str_length(arguments->indexname) == 0) {
+    gt_error_set(err, "use -indexname for basename of encseq");
     had_err = -1;
   }
 
@@ -288,8 +283,7 @@ static int gt_genomediff_runner(int argc, const char **argv,
     gt_timer_show_progress(timer, "start shu search", stdout);
 
   if (gt_str_array_size(arguments->filenames) > 1UL) {
-    GtEncseqEncoder *ee =
-      gt_encseq_encoder_new_from_options(arguments->encodeopts, err);
+    GtEncseqEncoder *ee = gt_encseq_encoder_new();
     gt_encseq_encoder_set_timer(ee, timer);
     gt_encseq_encoder_set_logger(ee, logger);
     /* kr only makes sense for dna, so we can check this already with ee */

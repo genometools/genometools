@@ -39,8 +39,7 @@ typedef struct GtGenomediffArguments {
          divergence_m, /* kr2 M */
          divergence_rel_err, /* kr2 E */
          divergence_threshold; /* kr2 THRESHOLD */
-  GtEncseqOptions *loadopts,
-                  *encodeopts;
+  GtEncseqOptions *loadopts;
   GtIndexOptions *idxopts;
   GtOption *ref_unitfile;
   GtStr *indexname,
