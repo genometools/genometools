@@ -1,7 +1,8 @@
 /*
   Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -92,36 +93,37 @@ struct GtIndexOptions
 static GtIndexOptions* gt_index_options_new(void)
 {
   GtIndexOptions *oi = gt_malloc(sizeof *oi);
-  oi->kysargumentstring = gt_str_new();
+  oi->algbounds = gt_str_array_new();
   oi->dir = gt_str_new();
-  oi->outkystab = false;
-  oi->outkyssort = false;
-  oi->numofparts = 1U;
+  oi->indexname = NULL;
+  oi->kysargumentstring = gt_str_new();
+  oi->lcpdist = false;
   oi->maximumspace = 0UL; /* in bytes */
   oi->memlimit = gt_str_new();
-  oi->algbounds = gt_str_array_new();
-  oi->prefixlength = GT_PREFIXLENGTH_AUTOMATIC;
-  oi->outsuftab = false; /* only defined for GT_INDEX_OPTIONS_ESA */
-  oi->outlcptab = false;
-  oi->outbwttab = false;
-  oi->outbcktab = false;
-  oi->lcpdist = false;
-  oi->swallow_tail = false;
+  oi->numofparts = 1U;
   oi->option = NULL;
-  oi->optiondir = NULL;
-  oi->optionoutsuftab = NULL;
-  oi->optionmemlimit = NULL;
-  oi->optionoutlcptab = NULL;
-  oi->optionoutbwttab = NULL;
-  oi->optionoutbcktab = NULL;
-  oi->optionprefixlength = NULL;
+  oi->optionalgbounds = NULL;
   oi->optioncmpcharbychar = NULL;
+  oi->optiondifferencecover = NULL;
+  oi->optiondir = NULL;
+  oi->optionmaxwidthrealmedian = NULL;
+  oi->optionmemlimit = NULL;
+  oi->optionoutbcktab = NULL;
+  oi->optionoutbwttab = NULL;
+  oi->optionoutlcptab = NULL;
+  oi->optionoutsuftab = NULL;
+  oi->optionparts = NULL;
+  oi->optionprefixlength = NULL;
   oi->optionspmopt = NULL;
   oi->optionstorespecialcodes = NULL;
-  oi->optionmaxwidthrealmedian = NULL;
-  oi->optionalgbounds = NULL;
-  oi->optionparts = NULL;
-  oi->optiondifferencecover = NULL;
+  oi->outbcktab = false;
+  oi->outbwttab = false;
+  oi->outkyssort = false;
+  oi->outkystab = false;
+  oi->outlcptab = false;
+  oi->outsuftab = false; /* only defined for GT_INDEX_OPTIONS_ESA */
+  oi->prefixlength = GT_PREFIXLENGTH_AUTOMATIC;
+  oi->swallow_tail = false;
   oi->type = GT_INDEX_OPTIONS_UNDEFINED;
   return oi;
 }
@@ -170,30 +172,12 @@ int gt_parse_algbounds(Sfxstrategy *sfxstrategy,
   return haserr ? -1 : 0;
 }
 
-static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
+static int gt_index_options_check_set_create_opts(void *oip, GtError *err)
 {
   int had_err = 0;
   GtIndexOptions *oi = (GtIndexOptions*) oip;
   gt_assert(oi != NULL && oi->type != GT_INDEX_OPTIONS_UNDEFINED);
   gt_error_check(err);
-
-  if (!had_err && oi->type == GT_INDEX_OPTIONS_PACKED) {
-#ifndef S_SPLINT_S
-    gt_computePackedIndexDefaults(&oi->bwtIdxParams, BWTBaseFeatures);
-#endif
-  }
-  if (!had_err && gt_option_is_set(oi->optionkys)) {
-    oi->outkystab = true;
-    if (strcmp(gt_str_get(oi->kysargumentstring), "sort") == 0) {
-      oi->outkyssort = true;
-    } else {
-      if (strcmp(gt_str_get(oi->kysargumentstring),"nosort") != 0) {
-        gt_error_set(err,"illegal argument to option -kys: either use no "
-                         "argument or argument \"sort\"");
-        had_err = -1;
-      }
-    }
-  }
   if (!had_err) {
     int retval;
     retval = gt_readmode_parse(gt_str_get(oi->dir), err);
@@ -259,17 +243,116 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
   return had_err;
 }
 
+static int gt_index_options_check_set_out_opts(void *oip, GtError *err)
+{
+  int had_err = 0;
+  GtIndexOptions *oi = (GtIndexOptions*) oip;
+  gt_assert(oi != NULL && oi->type != GT_INDEX_OPTIONS_UNDEFINED);
+  gt_error_check(err);
+
+  if (!had_err && oi->type == GT_INDEX_OPTIONS_PACKED) {
+#ifndef S_SPLINT_S
+    gt_computePackedIndexDefaults(&oi->bwtIdxParams, BWTBaseFeatures);
+#endif
+  }
+  if (!had_err && gt_option_is_set(oi->optionkys)) {
+    oi->outkystab = true;
+    if (strcmp(gt_str_get(oi->kysargumentstring), "sort") == 0) {
+      oi->outkyssort = true;
+    } else {
+      if (strcmp(gt_str_get(oi->kysargumentstring),"nosort") != 0) {
+        gt_error_set(err,"illegal argument to option -kys: either use no "
+                         "argument or argument \"sort\"");
+        had_err = -1;
+      }
+    }
+  }
+  return had_err;
+}
+
+static GtIndexOptions*
+gt_index_options_register_generic_output(GtOptionParser *op,
+                                         GtIndexOptions *idxo,
+                                         GtStr *indexname)
+{
+  gt_assert(idxo != NULL);
+  idxo->indexname = indexname != NULL ? gt_str_ref(indexname) : NULL;
+  idxo->optionkys = gt_option_new_string("kys",
+                                   "output/sort according to keys of the form "
+                                   "|key| in fasta header",
+                                   idxo->kysargumentstring,
+                                   "nosort");
+  gt_option_argument_is_optional(idxo->optionkys);
+  gt_option_imply(idxo->optionkys, gt_encseq_options_sds_option(idxo->encopts));
+  gt_option_parser_add_option(op, idxo->optionkys);
+  if (idxo->type == GT_INDEX_OPTIONS_ESA)
+  {
+    idxo->optionoutsuftab = gt_option_new_bool("suf",
+                                   "output suffix array (suftab) to file",
+                                   &idxo->outsuftab,
+                                   false);
+    gt_option_parser_add_option(op, idxo->optionoutsuftab);
+
+    idxo->optionoutlcptab = gt_option_new_bool("lcp",
+                                   "output lcp table (lcptab) to file",
+                                   &idxo->outlcptab,
+                                   false);
+    gt_option_parser_add_option(op, idxo->optionoutlcptab);
+
+    idxo->option = gt_option_new_bool("lcpdist",
+                              "output distributions of values in lcptab",
+                              &idxo->lcpdist,
+                              false);
+    gt_option_is_extended_option(idxo->option);
+    gt_option_imply(idxo->option, idxo->optionoutlcptab);
+    gt_option_parser_add_option(op, idxo->option);
+
+    idxo->option = gt_option_new_bool("swallow-tail",
+                              "swallow the tail of the suffix array and lcptab",
+                              &idxo->swallow_tail,
+                              false);
+    gt_option_is_development_option(idxo->option);
+    gt_option_parser_add_option(op, idxo->option);
+
+    idxo->optionoutbwttab = gt_option_new_bool("bwt",
+                                   "output Burrows-Wheeler Transformation "
+                                   "(bwttab) to file",
+                                   &idxo->outbwttab,
+                                   false);
+    gt_option_exclude(idxo->optionspmopt, idxo->optionoutbwttab);
+    gt_option_parser_add_option(op, idxo->optionoutbwttab);
+
+    idxo->optionoutbcktab = gt_option_new_bool("bck",
+                                "output bucket table to file",
+                                &idxo->outbcktab,
+                                false);
+    gt_option_parser_add_option(op, idxo->optionoutbcktab);
+  } else {
+    idxo->optionoutsuftab
+      = idxo->optionoutlcptab = idxo->optionoutbwttab = NULL;
+    idxo->sfxstrategy.spmopt_minlength = 0;
+#ifndef S_SPLINT_S
+    gt_registerPackedIndexOptions(op,
+                                  &idxo->bwtIdxParams,
+                                  BWTDEFOPT_CONSTRUCTION,
+                                  idxo->indexname);
+#endif
+  }
+
+  gt_option_parser_register_hook(op, gt_index_options_check_set_out_opts, idxo);
+
+  return idxo;
+}
+
 static GtIndexOptions* gt_index_options_register_generic_create(
                                                       GtOptionParser *op,
                                                       GtIndexOptionsIndexType t,
-                                                      GtStr *indexname,
-                                                      GtEncseqOptions *oi)
+                                                      GtEncseqOptions *encopts)
 {
   GtIndexOptions *idxo;
-  gt_assert(op != NULL && t != GT_INDEX_OPTIONS_UNDEFINED && oi != NULL);
+  gt_assert(op != NULL && t != GT_INDEX_OPTIONS_UNDEFINED && encopts != NULL);
   idxo = gt_index_options_new();
-  idxo->indexname =  indexname != NULL ? gt_str_ref(indexname) : NULL;
-  idxo->encopts = oi;
+  idxo->encopts = encopts;
   idxo->type = t;
   idxo->optionprefixlength = gt_option_new_uint_min("pl",
                                     "specify prefix length for bucket sort\n"
@@ -351,56 +434,8 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->optionparts);
   gt_option_parser_add_option(op, idxo->optionparts);
 
-  idxo->optionkys = gt_option_new_string("kys",
-                                   "output/sort according to keys of the form "
-                                   "|key| in fasta header",
-                                   idxo->kysargumentstring,
-                                   "nosort");
-  gt_option_argument_is_optional(idxo->optionkys);
-  gt_option_parser_add_option(op, idxo->optionkys);
-
-  if (t == GT_INDEX_OPTIONS_ESA)
+  if (idxo->type == GT_INDEX_OPTIONS_ESA)
   {
-    idxo->optionoutsuftab = gt_option_new_bool("suf",
-                                   "output suffix array (suftab) to file",
-                                   &idxo->outsuftab,
-                                   false);
-    gt_option_parser_add_option(op, idxo->optionoutsuftab);
-
-    idxo->optionoutlcptab = gt_option_new_bool("lcp",
-                                   "output lcp table (lcptab) to file",
-                                   &idxo->outlcptab,
-                                   false);
-    gt_option_parser_add_option(op, idxo->optionoutlcptab);
-
-    idxo->option = gt_option_new_bool("lcpdist",
-                              "output distributions of values in lcptab",
-                              &idxo->lcpdist,
-                              false);
-    gt_option_is_extended_option(idxo->option);
-    gt_option_imply(idxo->option, idxo->optionoutlcptab);
-    gt_option_parser_add_option(op, idxo->option);
-
-    idxo->option = gt_option_new_bool("swallow-tail",
-                              "swallow the tail of the suffix array and lcptab",
-                              &idxo->swallow_tail,
-                              false);
-    gt_option_is_development_option(idxo->option);
-    gt_option_parser_add_option(op, idxo->option);
-
-    idxo->optionoutbwttab = gt_option_new_bool("bwt",
-                                   "output Burrows-Wheeler Transformation "
-                                   "(bwttab) to file",
-                                   &idxo->outbwttab,
-                                   false);
-    gt_option_parser_add_option(op, idxo->optionoutbwttab);
-
-    idxo->optionoutbcktab = gt_option_new_bool("bck",
-                                "output bucket table to file",
-                                &idxo->outbcktab,
-                                false);
-    gt_option_parser_add_option(op, idxo->optionoutbcktab);
-
     idxo->optionspmopt = gt_option_new_uint_min("spmopt",
                                            "optimize esa-construction for "
                                            "suffix-prefix matching",
@@ -408,7 +443,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                            0,1U);
     gt_option_parser_add_option(op, idxo->optionspmopt);
     gt_option_exclude(idxo->optionspmopt, idxo->optiondifferencecover);
-    gt_option_exclude(idxo->optionspmopt, idxo->optionoutbwttab);
     idxo->optionmemlimit = gt_option_new_string("memlimit",
                            "specify maximal amount of memory to be used during "
                            "index construction (in bytes, the keywords 'MB' "
@@ -416,16 +450,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                            idxo->memlimit, NULL);
     gt_option_parser_add_option(op, idxo->optionmemlimit);
     gt_option_exclude(idxo->optionmemlimit, idxo->optionparts);
-  } else {
-    idxo->optionoutsuftab
-      = idxo->optionoutlcptab = idxo->optionoutbwttab = NULL;
-    idxo->sfxstrategy.spmopt_minlength = 0;
-#ifndef S_SPLINT_S
-    gt_registerPackedIndexOptions(op,
-                                  &idxo->bwtIdxParams,
-                                  BWTDEFOPT_CONSTRUCTION,
-                                  idxo->indexname);
-#endif
   }
 
   gt_encseq_options_add_readmode_option(op, idxo->dir);
@@ -479,31 +503,43 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
-  gt_option_imply(idxo->optionkys, gt_encseq_options_sds_option(idxo->encopts));
-  gt_option_parser_register_hook(op, gt_index_options_checkandsetoptions, idxo);
-
+  gt_option_parser_register_hook(op, gt_index_options_check_set_create_opts,
+                                 idxo);
   return idxo;
 }
 
-GtIndexOptions* gt_index_options_register_esa_create(GtOptionParser *op,
-                                                     GtEncseqOptions *oi)
+GtIndexOptions* gt_index_options_register_esa(GtOptionParser *op,
+                                              GtEncseqOptions *encopts)
 {
+  GtIndexOptions *idxo;
   gt_assert(op != NULL);
-  return gt_index_options_register_generic_create(op,
+
+  idxo = gt_index_options_register_generic_create(op,
                                                   GT_INDEX_OPTIONS_ESA,
-                                                  NULL,
-                                                  oi);
+                                                  encopts);
+  return gt_index_options_register_generic_output(op, idxo, NULL);
 }
 
-GtIndexOptions* gt_index_options_register_packedidx_create(GtOptionParser *op,
-                                                           GtStr *indexname,
-                                                           GtEncseqOptions *oi)
+GtIndexOptions* gt_index_options_register_esa_noout(GtOptionParser *op,
+                                                    GtEncseqOptions *encopts)
 {
   gt_assert(op != NULL);
+
   return gt_index_options_register_generic_create(op,
+                                                  GT_INDEX_OPTIONS_ESA,
+                                                  encopts);
+}
+
+GtIndexOptions* gt_index_options_register_packedidx(GtOptionParser *op,
+                                                    GtStr *indexname,
+                                                    GtEncseqOptions *encopts)
+{
+  GtIndexOptions *idxo;
+  gt_assert(op != NULL);
+  idxo = gt_index_options_register_generic_create(op,
                                                   GT_INDEX_OPTIONS_PACKED,
-                                                  indexname,
-                                                  oi);
+                                                  encopts);
+  return gt_index_options_register_generic_output(op, idxo, indexname);
 }
 
 void gt_index_options_delete(GtIndexOptions *oi)

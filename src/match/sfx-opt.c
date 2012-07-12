@@ -59,13 +59,12 @@ static GtOPrval parse_options(int *parsed_args,
   so->encopts = gt_encseq_options_register_encoding(op, so->indexname, so->db);
   so->loadopts = gt_encseq_options_register_loading(op, so->indexname);
 
-  /* register options for encoded sequence handling */
+  /* register options for index handling */
   if (doesa)
-    so->idxopts = gt_index_options_register_esa_create(op, so->encopts);
+    so->idxopts = gt_index_options_register_esa(op, so->encopts);
   else
-    so->idxopts = gt_index_options_register_packedidx_create(op,
-                                                             so->indexname,
-                                                             so->encopts);
+    so->idxopts = gt_index_options_register_packedidx(op, so->indexname,
+                                                      so->encopts);
 
   /* verbosity */
   option = gt_option_new_verbose(&so->beverbose);

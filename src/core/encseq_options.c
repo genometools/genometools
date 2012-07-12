@@ -321,21 +321,25 @@ void gt_encseq_options_add_readmode_option(GtOptionParser *op, GtStr *readmode)
 }
 
 #ifndef GT_ENCSEQ_OPTS_GETTER_DEFS_DEFINED
+
 #define GT_ENCSEQ_OPTS_GETTER_DEF_OPT(VARNAME) \
 GtOption* gt_encseq_options_##VARNAME##_option(GtEncseqOptions *i) \
 { \
   gt_assert(i != NULL); \
   return i->option##VARNAME; \
 }
+
 #define GT_ENCSEQ_OPTS_GETTER_DEF_VAL(VARNAME, TYPE) \
 TYPE gt_encseq_options_##VARNAME##_value(GtEncseqOptions *i) \
 { \
   gt_assert(i != NULL); \
   return i->VARNAME; \
 }
+
 #define GT_ENCSEQ_OPTS_GETTER_DEF(VARNAME,TYPE) \
 GT_ENCSEQ_OPTS_GETTER_DEF_OPT(VARNAME) \
 GT_ENCSEQ_OPTS_GETTER_DEF_VAL(VARNAME, TYPE)
+
 #define GT_ENCSEQ_OPTS_GETTER_DEFS_DEFINED
 #endif
 

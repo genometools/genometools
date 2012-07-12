@@ -24,6 +24,7 @@
 #include "core/error.h"
 #include "core/option_api.h"
 #include "core/str_array.h"
+#include "match/index_options.h"
 #include "match/shu_unitfile.h"
 
 typedef struct GtGenomediffArguments {
@@ -38,7 +39,9 @@ typedef struct GtGenomediffArguments {
          divergence_m, /* kr2 M */
          divergence_rel_err, /* kr2 E */
          divergence_threshold; /* kr2 THRESHOLD */
-  GtEncseqOptions *loadopts;
+  GtEncseqOptions *loadopts,
+                  *encodeopts;
+  GtIndexOptions *idxopts;
   GtOption *ref_unitfile;
   GtStr *indexname,
         *indextype,

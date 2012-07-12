@@ -51,13 +51,17 @@ void             gt_encseq_options_delete(GtEncseqOptions *oi);
 
 /* XXX: clean this up */
 #ifndef GT_ENCSEQ_OPTS_GETTER_DECLS_DEFINED
+
 #define GT_ENCSEQ_OPTS_GETTER_DECL_OPT(VARNAME) \
 GtOption* gt_encseq_options_##VARNAME##_option(GtEncseqOptions *i);
+
 #define GT_ENCSEQ_OPTS_GETTER_DECL_VAL(VARNAME, TYPE) \
 TYPE gt_encseq_options_##VARNAME##_value(GtEncseqOptions *i);
+
 #define GT_ENCSEQ_OPTS_GETTER_DECL(VARNAME,TYPE) \
 GT_ENCSEQ_OPTS_GETTER_DECL_OPT(VARNAME) \
 GT_ENCSEQ_OPTS_GETTER_DECL_VAL(VARNAME, TYPE)
+
 #define GT_ENCSEQ_OPTS_GETTER_DECLS_DEFINED
 #endif
 
@@ -73,6 +77,6 @@ GT_ENCSEQ_OPTS_GETTER_DECL(protein, bool);
 GT_ENCSEQ_OPTS_GETTER_DECL(plain, bool);
 GT_ENCSEQ_OPTS_GETTER_DECL(mirrored, bool);
 GT_ENCSEQ_OPTS_GETTER_DECL(sat, GtStr*);
-GT_ENCSEQ_OPTS_GETTER_DECL_OPT(db);
+GT_ENCSEQ_OPTS_GETTER_DECL(db, GtStrArray*);
 
 #endif

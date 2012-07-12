@@ -23,20 +23,22 @@
 #include "core/array2dim_api.h"
 #include "core/cstr_api.h"
 #include "core/encseq.h"
+#include "core/encseq_options.h"
 #include "core/fa.h"
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/showtime.h"
 #include "core/warning_api.h"
+#include "extended/gtdatahelp.h"
 #include "match/esa-fileend.h"
 #include "match/genomediff_opt.h"
+#include "match/index_options.h"
 #include "match/sfx-opt.h"
 #include "match/sfx-run.h"
 #include "match/shu-genomediff.h"
 #include "tools/gt_genomediff.h"
 /* #include "core/encseq_api.h" */
-/* #include "core/encseq_options.h" */
 /* #include "core/str_array_api.h" */
 /* #include "core/timer_api.h" */
 /* #include "core/unused_api.h" */
@@ -68,6 +70,8 @@ static void gt_genomediff_arguments_delete(void *tool_arguments)
   gt_str_array_delete(arguments->filenames);
   gt_option_delete(arguments->ref_unitfile);
   gt_encseq_options_delete(arguments->loadopts);
+  gt_encseq_options_delete(arguments->encodeopts);
+  gt_index_options_delete(arguments->idxopts);
   gt_free(arguments);
 }
 
@@ -81,44 +85,27 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] (indexname|filenames) ",
+  op = gt_option_parser_new("[option ...] "
+                            "(INDEX| -indexname NAME [SEQFILE[...]]) ",
                           "Calculates Kr: pairwise distances between genomes.");
 
-  /* -v */
-  option = gt_option_new_verbose(&arguments->verbose);
-  gt_option_parser_add_option(op, option);
-
-  /* -index */
+  /* options */
   option = gt_option_new_choice("indextype", "specify type of index, one of: "
                                 "esa|pck|encseq. Where encseq is an encoded "
                                 "sequence and an enhanced suffix array will be "
-                                "constructed temporarily. Option will be "
-                                "ignored if sequence files are given.",
+                                "constructed only in memory.",
                                 arguments->indextype, indextypes[2],
                                 indextypes);
-
   gt_option_parser_add_option(op, option);
 
-  /* -indexname */
-  option = gt_option_new_string("indexname", "if files given are sequence "
-                                "files, this will be the basename of the "
-                                "encoded sequence created during index "
-                                "construction.", arguments->indexname, NULL);
+  option = gt_option_new_string("indexname", "Basename of encseq to construct.",
+                                arguments->indexname, NULL);
   gt_option_parser_add_option(op, option);
 
   /*-unitfile*/
   option_unitfile =
     gt_option_new_filename("unitfile",
-                           "specifies genomic units, "
-                           "File is in lua-format like this:\n"
-                           "units = {\n"
-                           "  genome1 = { \"file1\", \"file2\" },\n"
-                           "  genome2 = { \"file3\", \"file4\" }\n"
-                           "}\n"
-                           "only give basenames of the files! comment lines "
-                           "start with '--' and will be ignored. See "
-                           "GTDIR/testdata/genomediff/unitfile1.lua for an "
-                           "example.",
+                           "specifies genomic units, see below for description",
                            arguments->unitfile);
   gt_option_parser_add_option(op, option_unitfile);
   arguments->ref_unitfile = gt_option_ref(option_unitfile);
@@ -126,6 +113,12 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   /* encseq options */
   arguments->loadopts =
     gt_encseq_options_register_loading(op, arguments->indexname);
+  arguments->encodeopts =
+    gt_encseq_options_register_encoding(op, arguments->indexname, NULL);
+
+  /* esa options */
+  arguments->idxopts =
+    gt_index_options_register_esa_noout(op, arguments->encodeopts);
 
   /* scan */
   option = gt_option_new_bool("scan", "do not load esa index but scan "
@@ -136,8 +129,8 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   /* dev options */
   /* -max_n */
   option = gt_option_new_ulong("max_n", "Number of precalculated values "
-                             "for ln(n!) and pmax(x)",
-                             &arguments->max_ln_n_fac, 1000UL);
+                               "for ln(n!) and pmax(x)",
+                               &arguments->max_ln_n_fac, 1000UL);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -192,8 +185,14 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
+  /* -v */
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
   /* mail */
   gt_option_parser_set_mail_address(op, "<willrodt@zbh.uni-hamburg.de>");
+  /* doc */
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   return op;
 }
 
@@ -207,6 +206,10 @@ static int gt_genomediff_arguments_check(int rest_argc,
   gt_error_check(err);
   gt_assert(arguments);
 
+  if (rest_argc == 0) {
+    gt_error_set(err, "give at least one file (base)name!");
+    had_err = -1;
+  }
   if (!had_err) {
     if (strcmp("esa", gt_str_get(arguments->indextype)) == 0)
       arguments->with_esa = true;
@@ -215,27 +218,28 @@ static int gt_genomediff_arguments_check(int rest_argc,
   }
   prepared_index = (arguments->with_esa || arguments->with_pck);
 
-  if (arguments->user_max_depth != -1 && !arguments->with_pck)
+  if (!had_err && arguments->user_max_depth != -1 && !arguments->with_pck)
     gt_warning("option -maxdepth does only apply to -indextype pck");
 
-  if (prepared_index && gt_encseq_options_mirrored_value(arguments->loadopts))
+  if (!had_err &&
+      prepared_index && gt_encseq_options_mirrored_value(arguments->loadopts))
     gt_warning("option -mirrored is ignored with esa and pck index");
 
-  if (rest_argc == 0) {
-    gt_error_set(err, "at least one filename has to be given");
+  if (!had_err && prepared_index && rest_argc > 1) {
+    gt_error_set(err, "there should be only one basename argument with "
+                 "-indextype esa|pck");
     had_err = -1;
   }
-  if (rest_argc > 1) {
-    if (prepared_index) {
-      gt_error_set(err, "indextypes esa and pck only accept one filename "
-                        "(basename)!");
-      had_err = -1;
-    }
-    else if (gt_str_length(arguments->indexname) == 0) {
-      had_err = -1;
-      gt_error_set(err, "more than one file given, pleas give a basename for "
-                   "the encseq to be created");
-    }
+  if (!had_err && rest_argc > 1 && gt_str_length(arguments->indexname) == 0) {
+    gt_error_set(err, "use -indexname for basename of encseq");
+    had_err = -1;
+  }
+  if (!had_err && (
+        gt_encseq_options_protein_value(arguments->encodeopts) ||
+        gt_encseq_options_plain_value(arguments->encodeopts))) {
+    gt_error_set(err, "Sequence has to be DNA, options -protein -plain can "
+                 "not be used!");
+    had_err = -1;
   }
 
   if (!had_err)
@@ -284,7 +288,8 @@ static int gt_genomediff_runner(int argc, const char **argv,
     gt_timer_show_progress(timer, "start shu search", stdout);
 
   if (gt_str_array_size(arguments->filenames) > 1UL) {
-    GtEncseqEncoder *ee = gt_encseq_encoder_new();
+    GtEncseqEncoder *ee =
+      gt_encseq_encoder_new_from_options(arguments->encodeopts, err);
     gt_encseq_encoder_set_timer(ee, timer);
     gt_encseq_encoder_set_logger(ee, logger);
     /* kr only makes sense for dna, so we can check this already with ee */
@@ -363,13 +368,14 @@ static int gt_genomediff_runner(int argc, const char **argv,
       GenomediffInfo gd_info;
       Suffixeratoroptions sopts;
       sopts.beverbose = arguments->verbose;
-      sopts.indexname = NULL;
+      sopts.indexname = arguments->indexname;
       sopts.db = NULL;
       sopts.encopts = NULL;
       sopts.genomediff = true;
       sopts.inputindex = arguments->indexname;
       sopts.loadopts = arguments->loadopts;
       sopts.showprogress = false;
+      sopts.idxopts = arguments->idxopts;
 
       gt_assert(unit_info != NULL);
       gt_array2dim_calloc(shusums, unit_info->num_of_genomes,

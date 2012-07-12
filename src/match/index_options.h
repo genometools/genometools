@@ -30,17 +30,19 @@ typedef struct GtIndexOptions GtIndexOptions;
 
 /* This module encapsulates the registration of options for index generation. */
 
-GtIndexOptions* gt_index_options_register_esa_create(GtOptionParser *op,
-                                                     GtEncseqOptions *oi);
-GtIndexOptions* gt_index_options_register_packedidx_create(GtOptionParser *op,
-                                                           GtStr *indexname,
-                                                           GtEncseqOptions *oi);
+GtIndexOptions* gt_index_options_register_esa(GtOptionParser *op,
+                                              GtEncseqOptions *encopts);
+GtIndexOptions* gt_index_options_register_esa_noout(GtOptionParser *op,
+                                                    GtEncseqOptions *encopts);
+GtIndexOptions* gt_index_options_register_packedidx(GtOptionParser *op,
+                                                    GtStr *indexname,
+                                                    GtEncseqOptions *encopts);
 
 void            gt_index_options_delete(GtIndexOptions *oi);
 
-int gt_parse_algbounds(Sfxstrategy *sfxstrategy,
-                       const GtStrArray *algbounds,
-                       GtError *err);
+int             gt_parse_algbounds(Sfxstrategy *sfxstrategy,
+                                   const GtStrArray *algbounds,
+                                   GtError *err);
 
 /* XXX: clean this up */
 #ifndef GT_INDEX_OPTS_GETTER_DECLS_DEFINED

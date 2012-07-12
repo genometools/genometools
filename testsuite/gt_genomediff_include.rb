@@ -105,9 +105,13 @@ def test_pck(files, param, idxparam)
 end
 
 def test_esa(files, param, idxparam)
-    run_test "#{$bin}gt suffixerator -db #{files} -indexname esa " +
-             "-dna -suf -tis -lcp -ssp #{idxparam}"
-    run_test "#{$bin}gt genomediff #{param} -indextype esa esa"
+  run_test "#{$bin}gt suffixerator -db #{files} -indexname esa " +
+           "-dna -suf -tis -lcp -ssp #{idxparam}"
+  run_test "#{$bin}gt genomediff #{param} -indextype esa esa"
+end
+
+def test_esq(files, param)
+  run_test "#$bin/gt genomediff #{param} #{files}"
 end
 
 def compare_2d_result(matrix1, matrix2)
@@ -136,6 +140,15 @@ Test do
   allfilecodes.each do |code|
     test_esa("#{code}*.fas", "", "")
     test_esa("#{code}*.fas", "", "-mirrored")
+  end
+end
+
+Name "gt_genomediff esq testset"
+Keywords "gt_genomediff esq"
+Test do
+  allfilecodes.each do |code|
+    test_esq("#{code}*.fas", "-indexname esq")
+    test_esq("#{code}*.fas", "-indexname esq -mirrored")
   end
 end
 
