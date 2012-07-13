@@ -80,7 +80,6 @@ struct GtIndexOptions
            *optionalgbounds,
            *optionparts,
            *optionmemlimit,
-           *optiondir,
            *optiondifferencecover,
            *optionuserdefinedsortmaxdepth,
            *optionkys;
@@ -94,7 +93,7 @@ static GtIndexOptions* gt_index_options_new(void)
 {
   GtIndexOptions *oi = gt_malloc(sizeof *oi);
   oi->algbounds = gt_str_array_new();
-  oi->dir = gt_str_new();
+  oi->dir = gt_str_new_cstr("fwd");
   oi->indexname = NULL;
   oi->kysargumentstring = gt_str_new();
   oi->lcpdist = false;
@@ -105,7 +104,6 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->optionalgbounds = NULL;
   oi->optioncmpcharbychar = NULL;
   oi->optiondifferencecover = NULL;
-  oi->optiondir = NULL;
   oi->optionmaxwidthrealmedian = NULL;
   oi->optionmemlimit = NULL;
   oi->optionoutbcktab = NULL;
@@ -178,22 +176,6 @@ static int gt_index_options_check_set_create_opts(void *oip, GtError *err)
   GtIndexOptions *oi = (GtIndexOptions*) oip;
   gt_assert(oi != NULL && oi->type != GT_INDEX_OPTIONS_UNDEFINED);
   gt_error_check(err);
-  if (!had_err) {
-    int retval;
-    retval = gt_readmode_parse(gt_str_get(oi->dir), err);
-    if (retval < 0) {
-      had_err = -1;
-    } else {
-      oi->readmode = (GtReadmode) retval;
-      if (oi->type == GT_INDEX_OPTIONS_PACKED
-            && (oi->readmode == GT_READMODE_COMPL
-                  || oi->readmode == GT_READMODE_REVCOMPL)) {
-        gt_error_set(err,"construction of packed index not possible for "
-                         "complemented and for reverse complemented sequences");
-        had_err = -1;
-      }
-    }
-  }
   if (!had_err)
   {
     if (gt_option_is_set(oi->optionalgbounds))
@@ -250,6 +232,22 @@ static int gt_index_options_check_set_out_opts(void *oip, GtError *err)
   gt_assert(oi != NULL && oi->type != GT_INDEX_OPTIONS_UNDEFINED);
   gt_error_check(err);
 
+  if (!had_err) {
+    int retval;
+    retval = gt_readmode_parse(gt_str_get(oi->dir), err);
+    if (retval < 0) {
+      had_err = -1;
+    } else {
+      oi->readmode = (GtReadmode) retval;
+      if (oi->type == GT_INDEX_OPTIONS_PACKED
+            && (oi->readmode == GT_READMODE_COMPL
+                  || oi->readmode == GT_READMODE_REVCOMPL)) {
+        gt_error_set(err,"construction of packed index not possible for "
+                         "complemented and for reverse complemented sequences");
+        had_err = -1;
+      }
+    }
+  }
   if (!had_err && oi->type == GT_INDEX_OPTIONS_PACKED) {
 #ifndef S_SPLINT_S
     gt_computePackedIndexDefaults(&oi->bwtIdxParams, BWTBaseFeatures);
@@ -267,6 +265,7 @@ static int gt_index_options_check_set_out_opts(void *oip, GtError *err)
       }
     }
   }
+
   return had_err;
 }
 
@@ -291,6 +290,8 @@ gt_index_options_register_generic_output(GtOptionParser *op,
   gt_option_parser_add_option(op, idxo->optionkys);
   if (idxo->type == GT_INDEX_OPTIONS_ESA)
   {
+    gt_encseq_options_add_readmode_option(op, idxo->dir);
+
     idxo->optionoutsuftab = gt_option_new_bool("suf",
                                    "output suffix array (suftab) to file",
                                    &idxo->outsuftab,
@@ -439,10 +440,10 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   if (idxo->type == GT_INDEX_OPTIONS_ESA)
   {
     idxo->optionspmopt = gt_option_new_uint_min("spmopt",
-                                           "optimize esa-construction for "
-                                           "suffix-prefix matching",
-                                           &idxo->sfxstrategy.spmopt_minlength,
-                                           0,1U);
+                                            "optimize esa-construction for "
+                                            "suffix-prefix matching",
+                                            &idxo->sfxstrategy.spmopt_minlength,
+                                            0,1U);
     gt_option_parser_add_option(op, idxo->optionspmopt);
     gt_option_exclude(idxo->optionspmopt, idxo->optiondifferencecover);
     idxo->optionmemlimit = gt_option_new_string("memlimit",
@@ -454,54 +455,52 @@ static GtIndexOptions* gt_index_options_register_generic_create(
     gt_option_exclude(idxo->optionmemlimit, idxo->optionparts);
   }
 
-  gt_encseq_options_add_readmode_option(op, idxo->dir);
-
   idxo->option = gt_option_new_bool("iterscan",
-                              "use iteratorbased-kmer scanning",
-                              &idxo->sfxstrategy.iteratorbasedkmerscanning,
-                              false);
+                                   "use iteratorbased-kmer scanning",
+                                   &idxo->sfxstrategy.iteratorbasedkmerscanning,
+                                   false);
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
   idxo->option = gt_option_new_bool("samplewithprefixlengthnull",
-                              "sort sample with prefixlength=0",
-                              &idxo->sfxstrategy.samplewithprefixlengthnull,
-                              false);
+                                  "sort sample with prefixlength=0",
+                                  &idxo->sfxstrategy.samplewithprefixlengthnull,
+                                  false);
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
   idxo->option = gt_option_new_bool("suftabuint",
-                              "use uint32_t for suftab",
-                              &idxo->sfxstrategy.suftabuint,
-                              false);
+                                    "use uint32_t for suftab",
+                                    &idxo->sfxstrategy.suftabuint,
+                                    false);
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
   idxo->option = gt_option_new_bool("onlybucketinsertion",
-                              "perform only bucket insertion",
-                              &idxo->sfxstrategy.onlybucketinsertion,
-                              false);
+                                    "perform only bucket insertion",
+                                    &idxo->sfxstrategy.onlybucketinsertion,
+                                    false);
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
   idxo->option = gt_option_new_bool("kmerswithencseqreader",
-                              "always perform kmerscanning with encseq-reader",
-                              &idxo->sfxstrategy.kmerswithencseqreader,
-                              false);
+                               "always perform kmerscanning with encseq-reader",
+                               &idxo->sfxstrategy.kmerswithencseqreader,
+                               false);
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
   idxo->option = gt_option_new_bool("dccheck",
-                              "check intermediate results in difference cover",
-                              &idxo->sfxstrategy.dccheck,
-                              false);
+                               "check intermediate results in difference cover",
+                               &idxo->sfxstrategy.dccheck,
+                               false);
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
   idxo->option = gt_option_new_bool("withradixsort",
-                              "use radixsort to sort the buckets",
-                              &idxo->sfxstrategy.withradixsort,
-                              false);
+                                    "use radixsort to sort the buckets",
+                                    &idxo->sfxstrategy.withradixsort,
+                                    false);
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
@@ -572,20 +571,21 @@ GT_INDEX_OPTS_GETTER_DEF_VAL(VARNAME, TYPE)
 #endif
 
 /* these are available as options and values */
-GT_INDEX_OPTS_GETTER_DEF(outsuftab, bool);
-GT_INDEX_OPTS_GETTER_DEF(outlcptab, bool);
-GT_INDEX_OPTS_GETTER_DEF(outbwttab, bool);
-GT_INDEX_OPTS_GETTER_DEF(outbcktab, bool);
-GT_INDEX_OPTS_GETTER_DEF(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF(algbounds, GtStrArray*);
+GT_INDEX_OPTS_GETTER_DEF(outbcktab, bool);
+GT_INDEX_OPTS_GETTER_DEF(outbwttab, bool);
+GT_INDEX_OPTS_GETTER_DEF(outlcptab, bool);
+GT_INDEX_OPTS_GETTER_DEF(outsuftab, bool);
+GT_INDEX_OPTS_GETTER_DEF(prefixlength, unsigned int);
+GT_INDEX_OPTS_GETTER_DEF_OPT(spmopt);
 /* these are available as values only, set _after_ option processing */
-GT_INDEX_OPTS_GETTER_DEF_VAL(numofparts, unsigned int);
-GT_INDEX_OPTS_GETTER_DEF_VAL(maximumspace, unsigned long);
-GT_INDEX_OPTS_GETTER_DEF_VAL(outkystab, bool);
-GT_INDEX_OPTS_GETTER_DEF_VAL(outkyssort, bool);
-GT_INDEX_OPTS_GETTER_DEF_VAL(sfxstrategy, Sfxstrategy);
-GT_INDEX_OPTS_GETTER_DEF_VAL(readmode, GtReadmode);
 GT_INDEX_OPTS_GETTER_DEF_VAL(lcpdist, bool);
+GT_INDEX_OPTS_GETTER_DEF_VAL(maximumspace, unsigned long);
+GT_INDEX_OPTS_GETTER_DEF_VAL(numofparts, unsigned int);
+GT_INDEX_OPTS_GETTER_DEF_VAL(outkyssort, bool);
+GT_INDEX_OPTS_GETTER_DEF_VAL(outkystab, bool);
+GT_INDEX_OPTS_GETTER_DEF_VAL(readmode, GtReadmode);
+GT_INDEX_OPTS_GETTER_DEF_VAL(sfxstrategy, Sfxstrategy);
 GT_INDEX_OPTS_GETTER_DEF_VAL(swallow_tail, bool);
 #ifndef S_SPLINT_S
 GT_INDEX_OPTS_GETTER_DEF_VAL(bwtIdxParams, struct bwtOptions);

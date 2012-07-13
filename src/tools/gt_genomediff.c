@@ -113,9 +113,13 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   arguments->loadopts =
     gt_encseq_options_register_loading(op, arguments->indexname);
 
+  gt_option_is_development_option(
+                        gt_encseq_options_lossless_option(arguments->loadopts));
   /* esa options */
   arguments->idxopts =
     gt_index_options_register_esa_noout(op);
+  gt_option_is_development_option(
+                            gt_index_options_spmopt_option(arguments->idxopts));
 
   /* scan */
   option = gt_option_new_bool("scan", "do not load esa index but scan "

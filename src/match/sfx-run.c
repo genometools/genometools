@@ -420,7 +420,6 @@ int runsuffixerator(bool doesa,
   unsigned int prefixlength;
   Sfxstrategy sfxstrategy;
   GtEncseq *encseq = NULL;
-  GtEncseqEncoder *ee = NULL;
   GtReadmode readmode = gt_index_options_readmode_value(so->idxopts);
 
   gt_error_check(err);
@@ -478,6 +477,7 @@ int runsuffixerator(bool doesa,
     }
   } else
   {
+    GtEncseqEncoder *ee = NULL;
     ee = gt_encseq_encoder_new_from_options(so->encopts, err);
     /* '-plain' implies no description support */
     if (gt_encseq_options_plain_value(so->loadopts)) {
@@ -517,6 +517,7 @@ int runsuffixerator(bool doesa,
     {
       haserr = true;
     }
+    gt_encseq_encoder_delete(ee);
   }
   if (!haserr)
   {
@@ -696,7 +697,6 @@ int runsuffixerator(bool doesa,
     gt_timer_show_progress_final(sfxprogress, stdout);
     gt_timer_delete(sfxprogress);
   }
-  gt_encseq_encoder_delete(ee);
   return haserr ? -1 : 0;
 }
 

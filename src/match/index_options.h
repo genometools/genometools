@@ -57,20 +57,21 @@ GT_INDEX_OPTS_GETTER_DECL_VAL(VARNAME, TYPE)
 #define GT_INDEX_OPTS_GETTER_DECLS_DEFINED
 #endif
 
-GT_INDEX_OPTS_GETTER_DECL(outsuftab, bool);
-GT_INDEX_OPTS_GETTER_DECL(outlcptab, bool);
-GT_INDEX_OPTS_GETTER_DECL(outbwttab, bool);
-GT_INDEX_OPTS_GETTER_DECL(outbcktab, bool);
-GT_INDEX_OPTS_GETTER_DECL(outkystab, bool);
-GT_INDEX_OPTS_GETTER_DECL(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DECL(algbounds, GtStrArray*);
-GT_INDEX_OPTS_GETTER_DECL_VAL(numofparts, unsigned int);
-GT_INDEX_OPTS_GETTER_DECL_VAL(maximumspace, unsigned long);
-GT_INDEX_OPTS_GETTER_DECL_VAL(outkyssort, bool);
-GT_INDEX_OPTS_GETTER_DECL_VAL(sfxstrategy, Sfxstrategy);
-GT_INDEX_OPTS_GETTER_DECL_VAL(readmode, GtReadmode);
+GT_INDEX_OPTS_GETTER_DECL(outbcktab, bool);
+GT_INDEX_OPTS_GETTER_DECL(outbwttab, bool);
+GT_INDEX_OPTS_GETTER_DECL(outkystab, bool);
+GT_INDEX_OPTS_GETTER_DECL(outlcptab, bool);
+GT_INDEX_OPTS_GETTER_DECL(outsuftab, bool);
+GT_INDEX_OPTS_GETTER_DECL(prefixlength, unsigned int);
+GT_INDEX_OPTS_GETTER_DECL_OPT(spmopt);
 GT_INDEX_OPTS_GETTER_DECL_VAL(bwtIdxParams, struct bwtOptions);
 GT_INDEX_OPTS_GETTER_DECL_VAL(lcpdist, bool);
+GT_INDEX_OPTS_GETTER_DECL_VAL(maximumspace, unsigned long);
+GT_INDEX_OPTS_GETTER_DECL_VAL(numofparts, unsigned int);
+GT_INDEX_OPTS_GETTER_DECL_VAL(outkyssort, bool);
+GT_INDEX_OPTS_GETTER_DECL_VAL(readmode, GtReadmode);
+GT_INDEX_OPTS_GETTER_DECL_VAL(sfxstrategy, Sfxstrategy);
 GT_INDEX_OPTS_GETTER_DECL_VAL(swallow_tail, bool);
 
 #endif
