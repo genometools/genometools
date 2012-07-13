@@ -288,10 +288,11 @@ gt_index_options_register_generic_output(GtOptionParser *op,
   gt_option_argument_is_optional(idxo->optionkys);
   gt_option_imply(idxo->optionkys, gt_encseq_options_sds_option(idxo->encopts));
   gt_option_parser_add_option(op, idxo->optionkys);
+
+  gt_encseq_options_add_readmode_option(op, idxo->dir);
+
   if (idxo->type == GT_INDEX_OPTIONS_ESA)
   {
-    gt_encseq_options_add_readmode_option(op, idxo->dir);
-
     idxo->optionoutsuftab = gt_option_new_bool("suf",
                                    "output suffix array (suftab) to file",
                                    &idxo->outsuftab,
