@@ -58,7 +58,12 @@ struct GtChain2Dimmatchtable
    GtChain2Dimscoretype largestdim0,
                         largestdim1;
    unsigned long nextfree,
-                 allocated;
+                 allocated,
+                 /* not NULL only for GLOBALCHAININGALLCHAINS */
+                 allprevious,
+                 *previouscount,
+                 *previousbound,
+                 *previoustab;
 };
 
 /*
@@ -71,6 +76,7 @@ typedef enum
   GLOBALCHAINING,              /* global chaining without gap costs */
   GLOBALCHAININGWITHGAPCOST,   /* global chaining with L1 gap costs */
   GLOBALCHAININGWITHOVERLAPS,  /* chaining with overlaps */
+  GLOBALCHAININGALLCHAINS,     /* global chaining with output of all chains */
   LOCALCHAININGMAX,            /* local chaining; one maximum is reported */
   LOCALCHAININGTHRESHOLD,      /* local chaining; all chains >= minscore */
   LOCALCHAININGBEST,           /* local chaining; k best local chains */
@@ -81,7 +87,8 @@ static bool chain2dim_chainkind_global(GtChain2Dimkind chainkind)
 {
   return (chainkind == GLOBALCHAINING ||
           chainkind == GLOBALCHAININGWITHGAPCOST ||
-          chainkind == GLOBALCHAININGWITHOVERLAPS) ? true : false;
+          chainkind == GLOBALCHAININGWITHOVERLAPS ||
+          chainkind == GLOBALCHAININGALLCHAINS) ? true : false;
 }
 
 /*
@@ -130,6 +137,10 @@ GtChain2Dimmatchtable *gt_chain_matchtable_new(unsigned long numberofmatches)
   matchtable->nextfree = 0;
   matchtable->allocated = numberofmatches;
   matchtable->largestdim0 = matchtable->largestdim1 = 0;
+  matchtable->previouscount = NULL;
+  matchtable->previousbound = NULL;
+  matchtable->previoustab = NULL;
+  matchtable->allprevious = 0;
   return matchtable;
 }
 
@@ -138,6 +149,9 @@ void gt_chain_matchtable_delete(GtChain2Dimmatchtable *matchtable)
   if (matchtable != NULL)
   {
     gt_free(matchtable->matches);
+    gt_free(matchtable->previouscount);
+    gt_free(matchtable->previousbound);
+    gt_free(matchtable->previoustab);
     gt_free(matchtable);
   }
 }
@@ -267,9 +281,9 @@ typedef struct
   GtChain2Dimscoretype score;
 } GtChain2DimBestofclass;
 
-static bool overlappingmatches(const GtChain2Dimmatchtable *matchtable,
-                               unsigned long i,
-                               unsigned long j)
+static bool gt_chain2dim_overlapping(const GtChain2Dimmatchtable *matchtable,
+                                     unsigned long i,
+                                     unsigned long j)
 {
   return (GT_CHAIN2DIM_GETSTOREDENDPOINT(0,i)
             >= GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,j) ||
@@ -277,9 +291,18 @@ static bool overlappingmatches(const GtChain2Dimmatchtable *matchtable,
             >= GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,j)) ? true : false;
 }
 
-static bool colinearmatches(const GtChain2Dimmatchtable *matchtable,
-                            unsigned long i,
-                            unsigned long j)
+static bool gt_chain2dim_colinear(const GtChain2Dimmatchtable *matchtable,
+                                  int dim,
+                                  unsigned long i,
+                                  unsigned long j)
+{
+  return (GT_CHAIN2DIM_GETSTOREDENDPOINT(dim,i)
+            < GT_CHAIN2DIM_GETSTOREDSTARTPOINT(dim,j)) ? true : false;
+}
+
+static bool gt_chain2dim_ovl_colinear(const GtChain2Dimmatchtable *matchtable,
+                                      unsigned long i,
+                                      unsigned long j)
 {
   return (GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, i)
             < GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, j) &&
@@ -406,6 +429,33 @@ static void gt_chain2dim_retrace_previousinchain(GtChain2Dim *chain,
   gt_assert(lengthofchain == 0);
 }
 
+static void gt_chain2dim_nd_retrace_allprevious(GtArrayGtUlong *stack,
+                                   GT_UNUSED GtChain2Dim *chain,
+                                   const GtChain2Dimmatchtable *matchtable,
+                                   unsigned long retracestart)
+{
+  unsigned long idx;
+
+  gt_assert(stack->nextfreeGtUlong == 0);
+
+  for (idx = matchtable->previousbound[retracestart];
+       idx < matchtable->previousbound[retracestart] +
+             matchtable->previouscount[retracestart]; idx++)
+  {
+    GT_STOREINARRAY(stack,GtUlong,32UL,matchtable->previoustab[idx]);
+  }
+  while (stack->nextfreeGtUlong > 0)
+  {
+    unsigned long son = stack->spaceGtUlong[--stack->nextfreeGtUlong];
+    for (idx = matchtable->previousbound[son];
+         idx < matchtable->previousbound[son] +
+               matchtable->previouscount[son]; idx++)
+    {
+      GT_STOREINARRAY(stack,GtUlong,32UL,matchtable->previoustab[idx]);
+    }
+  }
+}
+
 static bool gt_chain2dim_checkmaxgapwidth(const GtChain2Dimmatchtable
                                                                     *matchtable,
                                           GtChain2Dimpostype maxgapwidth,
@@ -483,10 +533,11 @@ static void gt_chain2dim_bruteforcechainingscores(
         {
           if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
           {
-            combinable = colinearmatches(matchtable,leftmatch,rightmatch);
+            combinable = gt_chain2dim_ovl_colinear(matchtable,leftmatch,
+                                                   rightmatch);
           } else
           {
-            if (overlappingmatches(matchtable,leftmatch,rightmatch))
+            if (gt_chain2dim_overlapping(matchtable,leftmatch,rightmatch))
             {
               combinable = false;
             } else
@@ -558,6 +609,132 @@ static void gt_chain2dim_bruteforcechainingscores(
           matchtable->matches[rightmatch].score
             -= (GT_CHAIN2DIM_INITIALGAP(rightmatch)
                   + GT_CHAIN2DIM_TERMINALGAP(rightmatch));
+        }
+      }
+    }
+  }
+}
+
+static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
+{
+  if (matchtable->nextfree > 1UL)
+  {
+    unsigned long rightmatch;
+
+    matchtable->matches[0].firstinchain = 0;
+    matchtable->matches[0].previousinchain = GT_CHAIN2DIM_UNDEFPREVIOUS;
+    matchtable->matches[0].score = matchtable->matches[0].weight;
+    matchtable->previouscount
+      = gt_malloc(sizeof (*matchtable->previouscount) * matchtable->nextfree);
+    matchtable->previousbound
+      = gt_malloc(sizeof (*matchtable->previousbound) * matchtable->nextfree);
+    matchtable->previouscount[0] = 0;
+    for (rightmatch=1Ul; rightmatch<matchtable->nextfree; rightmatch++)
+    {
+      const GtChain2Dimscoretype weightright
+        = matchtable->matches[rightmatch].weight;
+      unsigned long leftmatch;
+      GtChain2DimMaxmatchvalue localmaxmatch;
+      unsigned long previouswithbestscore = 0;
+
+      localmaxmatch.defined = false;
+      localmaxmatch.maxscore = 0;
+      localmaxmatch.maxmatchnum = 0;
+      for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
+      {
+        if (gt_chain2dim_colinear(matchtable,0,leftmatch,rightmatch) &&
+            gt_chain2dim_colinear(matchtable,1,leftmatch,rightmatch))
+        {
+          GtChain2Dimscoretype score = matchtable->matches[leftmatch].score;
+          unsigned long previous;
+
+          if (score > 0)
+          {
+            score += weightright;
+            previous = leftmatch;
+          } else
+          {
+            score = weightright;
+            previous = GT_CHAIN2DIM_UNDEFPREVIOUS;
+          }
+          if (!localmaxmatch.defined)
+          {
+            localmaxmatch.maxscore = score;
+            localmaxmatch.maxmatchnum = previous;
+            localmaxmatch.defined = true;
+            previouswithbestscore = 1UL;
+          } else
+          {
+            if (localmaxmatch.maxscore <= score)
+            {
+              localmaxmatch.maxscore = score;
+              localmaxmatch.maxmatchnum = previous;
+              localmaxmatch.defined = true;
+              previouswithbestscore = localmaxmatch.maxscore < score
+                                        ? 1UL : previouswithbestscore+1;
+            }
+          }
+        }
+      }
+      if (localmaxmatch.defined)
+      {
+        matchtable->matches[rightmatch].previousinchain
+          = localmaxmatch.maxmatchnum;
+        matchtable->matches[rightmatch].score = localmaxmatch.maxscore;
+        matchtable->previouscount[rightmatch] = previouswithbestscore;
+      } else
+      {
+        matchtable->matches[rightmatch].previousinchain
+          = GT_CHAIN2DIM_UNDEFPREVIOUS;
+        matchtable->matches[rightmatch].score = weightright;
+        matchtable->previouscount[rightmatch] = 0;
+      }
+    }
+    matchtable->previousbound[0] = matchtable->previouscount[0];
+    for (rightmatch=1UL; rightmatch<matchtable->nextfree; rightmatch++)
+    {
+      printf("previouscount[%lu]=%lu,score=%ld\n",rightmatch,
+              matchtable->previouscount[rightmatch],
+              matchtable->matches[rightmatch].score);
+      matchtable->previousbound[rightmatch]
+        = matchtable->previousbound[rightmatch-1] +
+          matchtable->previouscount[rightmatch];
+    }
+    matchtable->allprevious = matchtable->previousbound[matchtable->nextfree-1];
+    matchtable->previoustab
+      = gt_malloc(sizeof (*matchtable->previoustab) * matchtable->allprevious);
+    for (rightmatch=1Ul; rightmatch<matchtable->nextfree; rightmatch++)
+    {
+      const GtChain2Dimscoretype weightright
+        = matchtable->matches[rightmatch].weight;
+      unsigned long leftmatch;
+      GtChain2DimMaxmatchvalue localmaxmatch;
+
+      localmaxmatch.defined = false;
+      localmaxmatch.maxscore = 0;
+      localmaxmatch.maxmatchnum = 0;
+      for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
+      {
+        if (gt_chain2dim_colinear(matchtable,0,leftmatch,rightmatch) &&
+            gt_chain2dim_colinear(matchtable,1,leftmatch,rightmatch))
+        {
+          GtChain2Dimscoretype score = matchtable->matches[leftmatch].score;
+          unsigned long previous;
+
+          if (score > 0)
+          {
+            score += weightright;
+            previous = leftmatch;
+          } else
+          {
+            score = weightright;
+            previous = GT_CHAIN2DIM_UNDEFPREVIOUS;
+          }
+          if (score == matchtable->matches[rightmatch].score)
+          {
+            matchtable->previoustab[--matchtable->previousbound[rightmatch]]
+              = previous;
+          }
         }
       }
     }
@@ -830,12 +1007,10 @@ static void gt_chain2dim_local_determineequivreps(
   }
 }
 
-/* The following function is called for local chaining only. */
-
-static bool gt_chain2dim_local_retrievemaximalscore(
-                                 GtChain2Dimscoretype *maxscore,
-                                 const GtChain2Dimmode *chainmode,
-                                 const GtChain2Dimmatchtable *matchtable)
+static bool gt_chain2dim_retrievemaximalscore(GtChain2Dimscoretype *maxscore,
+                                              const GtChain2Dimmode *chainmode,
+                                              const GtChain2Dimmatchtable
+                                                *matchtable)
 {
   unsigned long matchnum;
   GtChain2Dimscoretype tgap;
@@ -1003,7 +1178,9 @@ static void gt_chain2dim_retrievechainthreshold(
                              void *cpinfo)
 {
   unsigned long matchnum;
+  GtArrayGtUlong stack;
 
+  GT_INITARRAY(&stack,GtUlong);
   for (matchnum=0; matchnum < matchtable->nextfree; matchnum++)
   {
     if (gt_chain2dim_isrightmaximal_chain(matchtable,matchnum))
@@ -1038,8 +1215,16 @@ static void gt_chain2dim_retrievechainthreshold(
         } else
         {
           chain->scoreofchain = matchtable->matches[matchnum].score - tgap;
-          gt_chain2dim_retrace_previousinchain(chain, matchtable, matchnum);
-          chainprocessor(cpinfo,matchtable,chain);
+          if (chainmode->chainkind != GLOBALCHAININGALLCHAINS)
+          {
+            gt_chain2dim_retrace_previousinchain(chain, matchtable,
+                                                 matchnum);
+            chainprocessor(cpinfo,matchtable,chain);
+          } else
+          {
+            gt_chain2dim_nd_retrace_allprevious(&stack,chain, matchtable,
+                                                matchnum);
+          }
         }
       }
     }
@@ -1176,10 +1361,10 @@ static unsigned int gt_chain2dim_findmaximalscores(
       break;
     case GLOBALCHAININGWITHGAPCOST:
     case GLOBALCHAININGWITHOVERLAPS:
+    case GLOBALCHAININGALLCHAINS:
     case LOCALCHAININGMAX:
       minscoredefined
-        = gt_chain2dim_local_retrievemaximalscore(&minscore,chainmode,
-                                                  matchtable);
+        = gt_chain2dim_retrievemaximalscore(&minscore,chainmode,matchtable);
       break;
     case LOCALCHAININGTHRESHOLD:
       minscore = chainmode->minimumscore;
@@ -1193,8 +1378,7 @@ static unsigned int gt_chain2dim_findmaximalscores(
       break;
     case LOCALCHAININGPERCENTAWAY:
       minscoredefined
-        = gt_chain2dim_local_retrievemaximalscore(&minscore,chainmode,
-                                                  matchtable);
+        = gt_chain2dim_retrievemaximalscore(&minscore,chainmode,matchtable);
       if (minscoredefined)
       {
         minscore = (GtChain2Dimscoretype)
@@ -1210,17 +1394,21 @@ static unsigned int gt_chain2dim_findmaximalscores(
   if (minscoredefined)
   {
     gt_logger_log(logger,
-               "compute optimal %s chains with score >= %ld",
-                chain2dim_chainkind_global(chainmode->chainkind) ? "global"
-                                                                 : "local",
-               minscore);
-    gt_chain2dim_retrievechainthreshold(chainmode,
-                           matchtable,
-                           chain,
-                           minscore,
-                           chainequivalenceclasses,
-                           chainprocessor,
-                           cpinfo);
+                  "compute %soptimal %s chains with score >= %ld",
+                  chainmode->chainkind == GLOBALCHAININGALLCHAINS ? "all " : "",
+                  chain2dim_chainkind_global(chainmode->chainkind) ? "global"
+                                                                   : "local",
+                  minscore);
+    if (chainmode->chainkind != GLOBALCHAININGALLCHAINS)
+    {
+      gt_chain2dim_retrievechainthreshold(chainmode,
+                                          matchtable,
+                                          chain,
+                                          minscore,
+                                          chainequivalenceclasses,
+                                          chainprocessor,
+                                          cpinfo);
+    }
     retval = 0;
   } else
   {
@@ -1288,7 +1476,7 @@ static GtChain2Dimgapcostfunction assignchaingapcostfunction(
   {
     return gt_chain2dim_overlapcost;
   }
-  if (chainkind != GLOBALCHAINING)
+  if (chainkind != GLOBALCHAININGALLCHAINS && chainkind != GLOBALCHAINING)
   {
     if (gapsL1)
     {
@@ -1345,11 +1533,17 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
                                             chaingapcostfunction);
     } else
     {
-      fastchainingscores(chainmode,
-                         matchtable,
-                         &matchstore,
-                         presortdim,
-                         gapsL1);
+      if (chainmode->chainkind == GLOBALCHAININGALLCHAINS)
+      {
+        gt_chain2dim_ndbfchainscores(matchtable);
+      } else
+      {
+        fastchainingscores(chainmode,
+                           matchtable,
+                           &matchstore,
+                           presortdim,
+                           gapsL1);
+      }
     }
     gt_logger_log(logger,"retrieve optimal chains");
     retval = gt_chain2dim_findmaximalscores(chainmode,
@@ -1360,7 +1554,8 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
                                withequivclasses,
                                cpinfo,
                                logger);
-    if (chainmode->chainkind != GLOBALCHAININGWITHOVERLAPS)
+    if (chainmode->chainkind != GLOBALCHAININGWITHOVERLAPS
+        && chainmode->chainkind != GLOBALCHAININGALLCHAINS)
     {
       gt_rbtree_delete(matchstore.dictroot);
     }
@@ -1475,28 +1670,33 @@ static int parseglobalchainingparameter(GtChain2Dimmode *chainmode,
                                         const char *gparam,
                                         GtError *err)
 {
-  if (strcmp(gparam,GAPCOSTSWITCH) == 0)
+  if (strcmp(gparam,GT_CHAIN2DIM_GAPCOSTSWITCH) == 0)
   {
     chainmode->chainkind = GLOBALCHAININGWITHGAPCOST;
     return 0;
   }
-  if (strcmp(gparam,OVERLAPSWITCH) == 0)
+  if (strcmp(gparam,GT_CHAIN2DIM_OVERLAPSWITCH) == 0)
   {
     chainmode->chainkind = GLOBALCHAININGWITHOVERLAPS;
+    return 0;
+  }
+  if (strcmp(gparam,GT_CHAIN2DIM_ALLSWITCH) == 0)
+  {
+    chainmode->chainkind = GLOBALCHAININGALLCHAINS;
     return 0;
   }
   if (err != NULL)
   {
     gt_error_set(err,"argument of option -%s must be %s or %s: ",
                       option,
-                      GAPCOSTSWITCH,
-                      OVERLAPSWITCH);
+                      GT_CHAIN2DIM_GAPCOSTSWITCH,
+                      GT_CHAIN2DIM_OVERLAPSWITCH);
   } else
   {
     fprintf(stderr,"argument of option -%s must be %s or %s: ",
                    option,
-                   GAPCOSTSWITCH,
-                   OVERLAPSWITCH);
+                   GT_CHAIN2DIM_GAPCOSTSWITCH,
+                   GT_CHAIN2DIM_OVERLAPSWITCH);
   }
   return -1;
 }

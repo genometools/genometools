@@ -26,14 +26,16 @@
   for global chaining.
 */
 
-#define GAPCOSTSWITCH        "gc"
+#define GT_CHAIN2DIM_GAPCOSTSWITCH        "gc"
 
 /*
   The following string is used to trigger the use of a chaining algorithm
   allowing for overlaps between the hits.
 */
 
-#define OVERLAPSWITCH        "ov"
+#define GT_CHAIN2DIM_OVERLAPSWITCH        "ov"
+
+#define GT_CHAIN2DIM_ALLSWITCH            "all"
 
 /* the followin type is used for the position values in the matches to be
    chained */

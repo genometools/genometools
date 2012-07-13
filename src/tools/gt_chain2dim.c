@@ -70,7 +70,9 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
                    "optional parameter gc switches\n"
                    "on gap costs (according to L1-model)\n"
                    "optional parameter ov means\n"
-                   "that overlaps between matches are allowed",
+                   "that overlaps between matches are allowed"
+                   "optional parameter all means\n"
+                   "that all optimal chains are processed",
                    arguments->globalargs);
   gt_option_argument_is_optional(optionglobal);
   arguments->refoptionglobal = gt_option_ref (optionglobal);
@@ -172,9 +174,10 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
   {
     gt_error_set(err,
                  "option wf requires either option -local or option -global "
-                 "with argument %s or %s",
-                 GAPCOSTSWITCH,
-                 OVERLAPSWITCH);
+                 "with argument %s or %s or %s",
+                 GT_CHAIN2DIM_GAPCOSTSWITCH,
+                 GT_CHAIN2DIM_OVERLAPSWITCH,
+                 GT_CHAIN2DIM_ALLSWITCH);
     return -1;
   }
   arguments->gtchainmode
