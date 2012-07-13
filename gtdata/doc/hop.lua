@@ -27,4 +27,8 @@ mode to minimize the false positives. An even more conservative set
 of corrections can be achieved using the -ann option (see -help+).
 
 The -expert mode allows to manually set each parameter; the default
-values are the same as in the -conservative mode.]])
+values are the same as in the -conservative mode.
+
+(Finally, for evaluation purposes only, the -state-of-truth mode can be used:
+this mode assumes that the target sequence of the sequencing has been specified
+as reference sequence and outputs an ideal list of corrections.)]])

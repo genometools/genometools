@@ -28,7 +28,7 @@ typedef struct {
   GtStr  *encseqinput, *annotation, *map, *outfilename, *atype, *outprefix;
   unsigned long hmin, clenmax, read_hmin, covmin, mapqmin;
   bool verbose, map_is_sam, rchk, stats, allow_partial, allow_multiple,
-       aggressive, moderate, conservative, expert;
+       aggressive, moderate, conservative, expert, state_of_truth;
   double altmax, refmin;
   GtStrArray *readset;
 } GtHopArguments;
@@ -65,7 +65,8 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   GtHopArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *ann_option, *aggressive_option, *conservative_option,
-           *moderate_option, *expert_option, *o_option, *reads_option;
+           *moderate_option, *expert_option, *o_option, *reads_option,
+           *stats_option;
   gt_assert(arguments);
 
   /* init */
@@ -265,9 +266,25 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -stats */
-  option = gt_option_new_bool("stats", "output statistics for each "
+  stats_option = gt_option_new_bool("stats", "output statistics for each "
       "correction position", &arguments->stats, false);
+  gt_option_is_development_option(stats_option);
+  gt_option_parser_add_option(op, stats_option);
+
+  /* -state-of-truth */
+  option = gt_option_new_bool("state-of-truth",
+      "similar to -stats in -aggressive "
+      "mode, but used to determine the \"state of truth\" set of corrections "
+      "for evaluation; currently the only difference is that if multiple hits "
+      "are present for a read, they are used all independently for "
+      "correction (-reads must be set)",
+      &arguments->state_of_truth, false);
   gt_option_is_development_option(option);
+  gt_option_exclude(option, stats_option);
+  gt_option_exclude(option, aggressive_option);
+  gt_option_exclude(option, moderate_option);
+  gt_option_exclude(option, conservative_option);
+  gt_option_exclude(option, expert_option);
   gt_option_parser_add_option(op, option);
 
   /* -rchk */
@@ -297,13 +314,14 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   if (!args->aggressive &&
       !args->moderate &&
       !args->conservative &&
-      !args->expert)
+      !args->expert &&
+      !args->state_of_truth)
   {
     gt_error_set(err, "Select correction mode: "
         "-aggressive, -moderate, -conservative or -expert");
     had_err = -1;
   }
-  else if (args->aggressive)
+  else if (args->aggressive || args->state_of_truth)
   {
     args->hmin = 3UL;
     args->read_hmin = 1UL;
@@ -419,15 +437,19 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
               arguments->allow_multiple, arguments->clenmax);
         else
           gt_hpol_processor_enable_aligned_segments_refregionscheck(hpp, asp);
-        if (arguments->stats)
-          gt_hpol_processor_enable_statistics_output(hpp, NULL);
+        if (arguments->stats || arguments->state_of_truth)
+          gt_hpol_processor_enable_statistics_output(hpp,
+              arguments->state_of_truth, NULL);
         if (!had_err && gt_str_length(arguments->outfilename) > 0)
         {
           outfile = gt_file_new(gt_str_get(arguments->outfilename), "w", err);
           if (outfile == NULL)
             had_err = -1;
           else
-            gt_hpol_processor_enable_segments_output(hpp, outfile);
+            gt_hpol_processor_enable_direct_segments_output(hpp, outfile);
+        }
+        else if (!had_err)
+        {
           nfiles = gt_str_array_size(arguments->readset);
           if (!had_err && nfiles > 0)
           {
@@ -450,9 +472,11 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                 gt_seqiterator_fastq_new(infiles[i], err);
               if (readset_iters[i] == NULL)
                 had_err = -1;
+              gt_seqiterator_fastq_relax_check_of_quality_description(
+                  (GtSeqIteratorFastQ*)readset_iters[i]);
             }
             if (!had_err)
-              gt_hpol_processor_sort_segments_output(hpp, nfiles,
+              gt_hpol_processor_enable_sorted_segments_output(hpp, nfiles,
                   readset_iters, outfiles);
             gt_str_delete(outfn);
           }

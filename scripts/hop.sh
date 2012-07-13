@@ -255,12 +255,14 @@ function f_correct {
   echo "==== Correct homopolymers..."
   echo
   if [ "$ANNOTATION" != "$NOGFF" ]; then
-    HOP_PARAMS="-a sorted.$ANNOTATION $HOP_PARAMS"
+    HOP_PARAMS="-ann sorted.$ANNOTATION $HOP_PARAMS"
   fi
   if [ "$MATES" != "" -o "$USESW" == "TRUE" ]; then
     HOP_PARAMS="-reads $READS $MATES $HOP_PARAMS"
+  else
+    HOP_PARAMS="-o hop_$READS $HOP_PARAMS"
   fi
-  CMD="$GT dev hop -v -ref $GENOME -map sorted.$MAP.bam -o hop_$READS $HOP_PARAMS"
+  CMD="$GT dev hop -v -ref $GENOME -map sorted.$MAP.bam $HOP_PARAMS"
   if [ "$SHOWONLY" != "TRUE" ]; then $CMD; fi
   echo
   echo "==== done "
@@ -401,18 +403,27 @@ function f_edits_per_read {
 }
 
 function f_stats {
-  echo "==== Correcting and collecting statistics..."
-  echo
+  echo "==== Collecting correction statistics..."
   if [ "$ANNOTATION" != "$NOGFF" ]; then
-    AOPT="-a sorted.$ANNOTATION"
-  else
-    AOPT=""
+    HOP_PARAMS="-ann sorted.$ANNOTATION $HOP_PARAMS"
   fi
-  CMD="$GT dev hop -v -ref $GENOME -map sorted.$MAP.bam $AOPT -o hop_$READS -stats $HOP_PARAMS"
+  if [ "$MAKETRUE" == "TRUE" ]; then
+    HOP_PARAMS="-state-of-truth $HOP_PARAMS"
+  else
+    HOP_PARAMS="-stats $HOP_PARAMS"
+  fi
+  if [ "$MATES" != "" -o "$USESW" == "TRUE" ]; then
+    HOP_PARAMS="-reads $READS $MATES $HOP_PARAMS"
+  else
+    HOP_PARAMS="-o hop_$READS $HOP_PARAMS"
+  fi
+  CMD="$GT dev hop -v -ref $GENOME -map sorted.$MAP.bam $HOP_PARAMS"
   echo "$CMD" '>' $MAP.hop_stats
-  if [ "$SHOWONLY" != "TRUE" ]; then $CMD > $MAP.hop_stats; fi
-  echo
-  f_edits_per_read $MAP.hop_stats
+  if [ "$SHOWONLY" != "TRUE" ]; then
+    $CMD > $MAP.hop_stats
+    echo
+    f_edits_per_read $MAP.hop_stats
+  fi
   echo "==== done "
   echo
   echo "correction statistics:                $MAP.hop_stats"
@@ -430,9 +441,10 @@ function f_eval_make_true {
   MAP="${READS}.${GENOME}"
   MAPM="${MATES}.${GENOME}"
   ANNOTATION=$NOGFF
-  f_prepare
+  if [ "$NOMAP" != "TRUE" ]; then f_prepare; fi
+  MAKETRUE="TRUE"
   f_stats
-  stats2eds
+  if [ "$SHOWONLY" != "TRUE" ]; then stats2eds; fi
 }
 
 function f_eval_prepare {
@@ -594,8 +606,10 @@ function f_eval_stats {
 
 function f_eval {
   f_stats
-  stats2eds
-  f_eval_stats
+  if [ "$SHOWONLY" != "TRUE" ]; then
+    stats2eds
+    f_eval_stats
+  fi
 }
 
 function f_dists  {

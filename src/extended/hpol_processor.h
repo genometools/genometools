@@ -64,7 +64,7 @@ void gt_hpol_processor_restrict_to_feature_type(GtHpolProcessor *hpp,
 /* Output the segments sequence in FastQ format to <outfile> during run.
  * This is only useful for the cases in which each read has exactly one
  * segment. */
-void gt_hpol_processor_enable_segments_output(GtHpolProcessor *hpp,
+void gt_hpol_processor_enable_direct_segments_output(GtHpolProcessor *hpp,
     GtFile *outfile);
 
 /*
@@ -80,13 +80,13 @@ void gt_hpol_processor_enable_segments_output(GtHpolProcessor *hpp,
  *
  * This method assumes that the sequence ID (first word of the description line)
  * of each sequence is unique. */
-void gt_hpol_processor_sort_segments_output(GtHpolProcessor *hpp,
+void gt_hpol_processor_enable_sorted_segments_output(GtHpolProcessor *hpp,
     unsigned long nfiles, GtSeqIterator **reads_iters, GtFile **outfiles);
 
 /* Output statistics about each correction position.
  * Data is output as TAB-separated table, one row per correction position. */
 void gt_hpol_processor_enable_statistics_output(GtHpolProcessor *hpp,
-    GtFile *outfile);
+    bool output_multihit_stats, GtFile *outfile);
 
 void gt_hpol_processor_delete(GtHpolProcessor *hpp);
 
