@@ -211,10 +211,20 @@ static void gt_outputformatchaingeneric(
   {
     GtChain2Dimmatchvalues value;
 
-    for (idx=0; idx < chainlength; idx++)
+    if (gt_chain_storedinreverseorder(chain))
     {
-      gt_chain_extractchainelem(&value, matchtable, chain, idx);
-      gt_chain_printchainelem(stdout,&value);
+      for (idx=chainlength; idx > 0; idx--)
+      {
+        gt_chain_extractchainelem(&value, matchtable, chain, idx - 1);
+        gt_chain_printchainelem(stdout,&value);
+      }
+    } else
+    {
+      for (idx=0; idx < chainlength; idx++)
+      {
+        gt_chain_extractchainelem(&value, matchtable, chain, idx);
+        gt_chain_printchainelem(stdout,&value);
+      }
     }
   }
   counter->chaincounter++;

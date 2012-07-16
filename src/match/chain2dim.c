@@ -127,6 +127,7 @@ struct GtChain2Dim
 {
   GtArrayGtChain2Dimref chainedmatches;
   GtChain2Dimscoretype scoreofchain;
+  bool storedinreverseorder;
 };
 
 GtChain2Dimmatchtable *gt_chain_matchtable_new(unsigned long numberofmatches)
@@ -382,6 +383,7 @@ static void gt_chain2dim_chainingboundarycases(const GtChain2Dimmode *chainmode,
                                   GtChain2Dim *chain,
                                   const GtChain2Dimmatchtable *matchtable)
 {
+  chain->storedinreverseorder = false;
   if (matchtable->nextfree == 0)
   {
     chain->scoreofchain = 0;
@@ -409,6 +411,7 @@ static void gt_chain2dim_retrace_previousinchain(GtChain2Dim *chain,
 {
   unsigned long matchnum, lengthofchain;
 
+  chain->storedinreverseorder = false;
   for (lengthofchain = 0, matchnum = retracestart;
        matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS; lengthofchain++)
   {
@@ -438,6 +441,7 @@ static void gt_chain2dim_nd_retrace_allprevious(GtArrayGtUlong *stack,
 
   gt_assert(stack->nextfreeGtUlong == 0);
 
+  chain->storedinreverseorder = true;
   for (idx = matchtable->previousbound[retracestart];
        idx < matchtable->previousbound[retracestart] +
              matchtable->previouscount[retracestart]; idx++)
@@ -1784,6 +1788,11 @@ GtChain2Dimscoretype gt_chain_chainscore(const GtChain2Dim *chain)
 unsigned long gt_chain_chainlength(const GtChain2Dim *chain)
 {
   return chain->chainedmatches.nextfreeGtChain2Dimref;
+}
+
+bool gt_chain_storedinreverseorder(const GtChain2Dim *chain)
+{
+  return chain->storedinreverseorder;
 }
 
 void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,

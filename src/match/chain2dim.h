@@ -158,6 +158,10 @@ GtChain2Dimscoretype gt_chain_chainscore(const GtChain2Dim *chain);
 
 unsigned long gt_chain_chainlength(const GtChain2Dim *chain);
 
+/* return true iff chain is stored in reverse order */
+
+bool gt_chain_storedinreverseorder(const GtChain2Dim *chain);
+
 /* store the values of element idx in given chain in the first parameter */
 
 void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
