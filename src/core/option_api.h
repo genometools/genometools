@@ -312,6 +312,12 @@ void            gt_option_is_mandatory_either(GtOption *option_a,
 void            gt_option_is_mandatory_either_3(GtOption *option_a,
                                                 const GtOption *option_b,
                                                 const GtOption *option_c);
+/* Make it mandatory, that one of the options <option_a>, <option_b>, <option_c>
+   or <option_d> is used. */
+void            gt_option_is_mandatory_either_4(GtOption *option_a,
+                                                const GtOption *option_b,
+                                                const GtOption *option_c,
+                                                const GtOption *option_d);
 /* Set that <option> is only shown in the output of <-help+>. */
 void            gt_option_is_extended_option(GtOption *option);
 /* Set that <option> is only shown in the output of <-helpdev>. */
@@ -322,6 +328,11 @@ void            gt_option_imply(GtOption *option_a, const GtOption *option_b);
 void            gt_option_imply_either_2(GtOption *option_a,
                                          const GtOption *option_b,
                                          const GtOption *option_c);
+/* Make <option_a> imply either <option_b>, <option_c> or <option_d> */
+void            gt_option_imply_either_3(GtOption *option_a,
+                                         const GtOption *option_b,
+                                         const GtOption *option_c,
+                                         const GtOption *option_d);
 /* Set that the options <option_a> and <option_b> exclude each other. */
 void            gt_option_exclude(GtOption *option_a, GtOption *option_b);
 /* Hide the default value of <option> in <-help> output. */
