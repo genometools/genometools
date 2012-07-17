@@ -33,7 +33,8 @@ struct GtSeqIteratorFastQ
   GtFilelengthvalues *filelengthtab;
   bool complete,
        use_ungetchar,
-       is_color_space;
+       is_color_space,
+       relax_qualdesc_check;
   GtStr *sequencebuffer,
         *descbuffer,
         *qualsbuffer;
@@ -276,6 +277,7 @@ static inline int parse_fastq_block(GtSeqIteratorFastQ *seqit, GtError *err)
     gt_fastq_premature_end_check(had_err, seqit);
   }
   if (!had_err
+      && !seqit->relax_qualdesc_check
       && gt_str_length(seqit->qdescbuffer)
       && gt_str_cmp(seqit->descbuffer, seqit->qdescbuffer) != 0)
   {
@@ -461,7 +463,15 @@ static GtSeqIterator* seqiterator_fastq_new_gen(const GtStrArray *filenametab,
   seqitf->qualsbuffer = gt_str_new();
   seqitf->descbuffer = gt_str_new();
   seqitf->is_color_space = is_color_space;
+  seqitf->relax_qualdesc_check = false;
   return seqit;
+}
+
+void gt_seqiterator_fastq_relax_check_of_quality_description(
+    GtSeqIteratorFastQ *seqitf)
+{
+  gt_assert(seqitf != NULL);
+  seqitf->relax_qualdesc_check = true;
 }
 
 GtSeqIterator* gt_seqiterator_fastq_new(const GtStrArray *filenametab,

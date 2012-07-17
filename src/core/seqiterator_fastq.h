@@ -35,6 +35,11 @@ GtSeqIterator* gt_seqiterator_colorspace_fastq_new(
 
 unsigned long  gt_seqiterator_fastq_get_file_index(GtSeqIteratorFastQ*);
 
+/* disable checking if quality description is equal to read description;
+ * (it should be, but it is not in output of some tools, e.g. Coral) */
+void gt_seqiterator_fastq_relax_check_of_quality_description(
+    GtSeqIteratorFastQ *seqitf);
+
 const GtSeqIteratorClass* gt_seqiterator_fastq_class(void);
 
 #endif
