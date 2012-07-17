@@ -436,13 +436,13 @@ bool gt_feature_node_is_pseudo(const GtFeatureNode *fn)
 
 static void feature_node_set_multi(GtFeatureNode *fn)
 {
-  gt_assert(fn && !gt_feature_node_is_multi(fn));
+  gt_assert(fn);
   fn->bit_field |= 1 << MULTI_FEATURE_OFFSET;
 }
 
 void gt_feature_node_make_multi_representative(GtFeatureNode *fn)
 {
-  gt_assert(fn && !gt_feature_node_is_multi(fn));
+  gt_assert(fn);
   feature_node_set_multi(fn);
   if (fn->observer && fn->observer->multi_changed) {
     fn->observer->multi_changed(fn, gt_feature_node_is_multi(fn),
@@ -453,7 +453,7 @@ void gt_feature_node_make_multi_representative(GtFeatureNode *fn)
 void gt_feature_node_set_multi_representative(GtFeatureNode *fn,
                                               GtFeatureNode *rep)
 {
-  gt_assert(fn && !gt_feature_node_is_multi(fn));
+  gt_assert(fn);
   gt_assert(rep && gt_feature_node_is_multi(rep));
   feature_node_set_multi(fn);
   fn->representative = rep;
