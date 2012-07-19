@@ -24,8 +24,8 @@
 
 /*
  * A GtAlignedSegmentsPile represents a pile of GtAlignedSegment objects,
- * segment sequences (e.g. reads), which are mapped over <position>,
- * according to a given mapping file (SAM or BAM format).
+ * segment sequences (e.g. reads), which are mapped over <position> of
+ * an Encseq, according to a given mapping file (SAM or BAM format).
  *
  * The underlying mapping file is accessed sequentially by a GtSamfileIterator
  * (which is specifed by calling the <gt_aligned_segments_pile_new> method).
@@ -36,11 +36,15 @@
  * A requirement/limitation is that the SAM/BAM sorting order must be
  * "coordinate" (e.g. output of samtools sort).
  *
+ * In order to be able to convert GtEncseq coordinates to SAM sequence numbers
+ * and relative coordinate, a GtSamfileEncseqMapping must be provided.
+ *
  */
 
 typedef struct GtAlignedSegmentsPile GtAlignedSegmentsPile;
 
-GtAlignedSegmentsPile *gt_aligned_segments_pile_new(GtSamfileIterator *sfi);
+GtAlignedSegmentsPile *gt_aligned_segments_pile_new(GtSamfileIterator *sfi,
+    GtSamfileEncseqMapping *sem);
 
 /* moves the pile over <position>, which must be larger than any previous
  * position (if the function has been already called before) */

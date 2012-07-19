@@ -21,6 +21,7 @@
 #include "core/encseq.h"
 #include "core/file.h"
 #include "extended/sam_alignment.h"
+#include "extended/samfile_encseq_mapping.h"
 
 /* AlignedSegment contains an aligned <segment> (e.g. a read) to a <reference>.
  * The segment sequence (<seq>) and quality scores (<qual>) and the
@@ -32,8 +33,10 @@ typedef struct GtAlignedSegment GtAlignedSegment;
  * information from a SAM alignment. The <refregion> will contain
  * '?' at all positions which cannot be inferred from the data available
  * in the SAM alignment. If an unmapped SAM alignment is used,
- * the refregion will be NULL. */
-GtAlignedSegment *gt_aligned_segment_new_from_sa(GtSamAlignment *sa);
+ * the refregion will be NULL. The <sem> mapping will be used to
+ * calculate the coordinates of refregion on the reference. */
+GtAlignedSegment *gt_aligned_segment_new_from_sa(GtSamAlignment *sa,
+    GtSamfileEncseqMapping *sem);
 
 /* sequence of the segment */
 char *gt_aligned_segment_seq(GtAlignedSegment *as);
@@ -59,7 +62,7 @@ unsigned long gt_aligned_segment_orig_seqlen(const GtAlignedSegment *as);
 /* coordinate on the unedited ungapped segment sequence corresponding to
  * <refpos> on the reference sequence; returns the correct original segment
  * coordinates also in the case when the segment is reverse;
- * returns GT_UNDEF_ULONG if the coordinates are outside the region or
+ * returns GT_UNDEF_ULONG if the coordinates are outside the refregion or
  * the segment is unmapped */
 unsigned long gt_aligned_segment_orig_seqpos_for_refpos(
     const GtAlignedSegment *as, unsigned long refpos);

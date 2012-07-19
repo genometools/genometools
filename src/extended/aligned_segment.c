@@ -169,10 +169,12 @@ static void gt_aligned_segment_init_from_unmapped_sa(GtAlignedSegment *as,
 }
 
 static void gt_aligned_segment_init_from_mapped_sa(GtAlignedSegment *as,
-    GtSamAlignment *sa)
+    GtSamAlignment *sa, GtSamfileEncseqMapping *sem)
 {
-  as->r_left = gt_sam_alignment_pos(sa);
-  as->r_right = gt_sam_alignment_rightmost_pos(sa);
+  as->r_left = gt_samfile_encseq_mapping_seqpos(sem,
+      gt_sam_alignment_ref_num(sa), gt_sam_alignment_pos(sa));
+  as->r_right = gt_samfile_encseq_mapping_seqpos(sem,
+      gt_sam_alignment_ref_num(sa), gt_sam_alignment_rightmost_pos(sa));
   as->alen = gt_aligned_segment_cigar2alen(sa);
   as->s = gt_malloc(sizeof (*as->s) * (as->alen + 1UL));
   as->q = gt_malloc(sizeof (*as->q) * (as->alen + 1UL));
@@ -184,7 +186,8 @@ static void gt_aligned_segment_init_from_mapped_sa(GtAlignedSegment *as,
   gt_aligned_segment_align_using_cigar(as, sa);
 }
 
-GtAlignedSegment *gt_aligned_segment_new_from_sa(GtSamAlignment *sa)
+GtAlignedSegment *gt_aligned_segment_new_from_sa(GtSamAlignment *sa,
+    GtSamfileEncseqMapping *sem)
 {
   GtAlignedSegment *as;
   size_t dlen;
@@ -195,7 +198,7 @@ GtAlignedSegment *gt_aligned_segment_new_from_sa(GtSamAlignment *sa)
   if (gt_sam_alignment_is_unmapped(sa))
     gt_aligned_segment_init_from_unmapped_sa(as, sa);
   else
-    gt_aligned_segment_init_from_mapped_sa(as, sa);
+    gt_aligned_segment_init_from_mapped_sa(as, sa, sem);
   dlen = strlen(gt_sam_alignment_identifier(sa)) + 1UL;
   as->d = gt_malloc(sizeof (*as->d) * dlen);
   (void)memcpy(as->d, gt_sam_alignment_identifier(sa), sizeof (*as->d) * dlen);

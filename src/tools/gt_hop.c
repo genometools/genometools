@@ -398,8 +398,6 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
         gt_str_get(arguments->atype), gt_str_get(arguments->annotation));
   gt_assert(gt_str_length(arguments->encseqinput) > 0);
   el = gt_encseq_loader_new();
-  gt_encseq_loader_drop_description_support(el);
-  gt_encseq_loader_disable_autosupport(el);
   encseq = gt_encseq_loader_load(el, gt_str_get(arguments->encseqinput), err);
   if (encseq == NULL)
   {
@@ -410,6 +408,7 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     GtHpolProcessor *hpp;
     GtSeqposClassifier *spc = NULL;
     GtSamfileIterator *sfi = NULL;
+    GtSamfileEncseqMapping *sem = NULL;
     GtAlignedSegmentsPile *asp = NULL;
     GtFile *outfile = NULL;
     GtAlphabet *dna = gt_alphabet_new_dna();
@@ -427,9 +426,12 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
             NULL, err);
       if (sfi == NULL)
         had_err = -1;
-      else
+      sem = gt_samfile_encseq_mapping_new(sfi, encseq, err);
+      if (sem == NULL)
+        had_err = -1;
+      if (!had_err)
       {
-        asp = gt_aligned_segments_pile_new(sfi);
+        asp = gt_aligned_segments_pile_new(sfi, sem);
         if (!arguments->rchk)
           gt_hpol_processor_enable_segments_hlen_adjustment(hpp, asp,
               arguments->read_hmin, arguments->altmax, arguments->refmin,
@@ -493,6 +495,7 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       had_err = gt_hpol_processor_run(hpp, v_logger, err);
     gt_aligned_segments_pile_delete(asp);
     gt_samfile_iterator_delete(sfi);
+    gt_samfile_encseq_mapping_delete(sem);
     gt_seqpos_classifier_delete(spc);
     gt_file_delete(outfile);
     gt_hpol_processor_delete(hpp);

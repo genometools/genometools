@@ -24,6 +24,7 @@
 struct GtAlignedSegmentsPile
 {
   GtSamfileIterator *sfi;
+  GtSamfileEncseqMapping *sem;
   GtDlist *set;
   GtAlignedSegment *next_as;
   bool all_consumed;
@@ -46,12 +47,15 @@ int gt_aligned_segments_pile_compare_as(const void *a, const void *b)
   return (int)((r_a > r_b) - (r_a < r_b));
 }
 
-GtAlignedSegmentsPile *gt_aligned_segments_pile_new(GtSamfileIterator *sfi)
+GtAlignedSegmentsPile *gt_aligned_segments_pile_new(GtSamfileIterator *sfi,
+    GtSamfileEncseqMapping *sem)
 {
   GtAlignedSegmentsPile *asp;
   gt_assert(sfi != NULL);
+  gt_assert(sem != NULL);
   asp = gt_malloc(sizeof (GtAlignedSegmentsPile));
   asp->sfi = sfi;
+  asp->sem = sem;
   asp->set = gt_dlist_new(gt_aligned_segments_pile_compare_as);
   asp->all_consumed = false;
   asp->next_as = NULL;
@@ -109,7 +113,7 @@ static int gt_aligned_segments_pile_fetch_sa(GtAlignedSegmentsPile *asp)
     {
       if (asp->process_unmapped != NULL)
       {
-        GtAlignedSegment *as = gt_aligned_segment_new_from_sa(sa);
+        GtAlignedSegment *as = gt_aligned_segment_new_from_sa(sa, asp->sem);
         if (asp->enable_edit_tracking)
           gt_aligned_segment_enable_edit_tracking(as);
         asp->process_unmapped(as, asp->process_unmapped_data);
@@ -120,7 +124,7 @@ static int gt_aligned_segments_pile_fetch_sa(GtAlignedSegmentsPile *asp)
   }
   if (retvalue != -1)
   {
-    asp->next_as = gt_aligned_segment_new_from_sa(sa);
+    asp->next_as = gt_aligned_segment_new_from_sa(sa, asp->sem);
     if (asp->enable_edit_tracking)
       gt_aligned_segment_enable_edit_tracking(asp->next_as);
   }
