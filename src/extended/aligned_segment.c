@@ -35,6 +35,7 @@ struct GtAlignedSegment
   bool s_edited, r_edited;
   char *s_orig;
   unsigned long orig_seqlen;
+  unsigned long mapq;
 };
 
 static unsigned long gt_aligned_segment_cigar2alen(GtSamAlignment *sa)
@@ -89,6 +90,16 @@ static void gt_aligned_segment_align_using_cigar(GtAlignedSegment *as,
     oplen = gt_sam_alignment_cigar_i_length(sa, opnum);
     switch (opcode)
     {
+      case 'S':
+        if (opnum == 0)
+          as->r_left -= oplen;
+        else if (opnum == clen - 1UL)
+          as->r_right += oplen;
+        else
+          gt_assert(false); /* not allowed by SAM format specification */
+        /*@fallthrough@*/
+      case 'X': /*@fallthrough@*/
+      case '=': /*@fallthrough@*/
       case 'M':
         for (i = 0; i < oplen; i++)
         {
@@ -100,44 +111,11 @@ static void gt_aligned_segment_align_using_cigar(GtAlignedSegment *as,
             as->s[pos] = as->s[srcpos];
             as->q[pos] = as->q[srcpos];
           }
-          as->r[pos] = '?';
+          as->r[pos] = (opcode == '=') ? as->s[srcpos] : '?';
           pos++;
           srcpos++;
         }
         break;
-      case '=':
-        for (i = 0; i < oplen; i++)
-        {
-          if (pos != srcpos)
-          {
-            gt_assert(pos < srcpos);
-            gt_assert(as->s[srcpos] != '-');
-            gt_assert(as->q[srcpos] != GT_UNDEF_CHAR);
-            as->s[pos] = as->s[srcpos];
-            as->q[pos] = as->q[srcpos];
-          }
-          as->r[pos] = as->s[srcpos];
-          pos++;
-          srcpos++;
-        }
-        break;
-      case 'X':
-        for (i = 0; i < oplen; i++)
-        {
-          if (pos != srcpos)
-          {
-            gt_assert(pos < srcpos);
-            gt_assert(as->s[srcpos] != '-');
-            gt_assert(as->q[srcpos] != GT_UNDEF_CHAR);
-            as->s[pos] = as->s[srcpos];
-            as->q[pos] = as->q[srcpos];
-          }
-          as->r[pos] = '?';
-          pos++;
-          srcpos++;
-        }
-        break;
-      case 'S': /*@fallthrough@*/
       case 'I':
         for (i = 0; i < oplen; i++)
         {
@@ -224,6 +202,7 @@ GtAlignedSegment *gt_aligned_segment_new_from_sa(GtSamAlignment *sa)
   as->s_edited = false;
   as->r_edited = false;
   as->s_orig = NULL;
+  as->mapq = gt_sam_alignment_mapping_quality(sa);
   as->orig_seqlen = gt_sam_alignment_read_length(sa);
   return as;
 }
@@ -234,6 +213,12 @@ void gt_aligned_segment_enable_edit_tracking(GtAlignedSegment *as)
   gt_assert(as->s_orig == NULL);
   as->s_orig = gt_malloc(sizeof (*as->s_orig) * (as->alen + 1UL));
   memcpy(as->s_orig, as->s, (size_t)(as->alen + 1UL));
+}
+
+unsigned long gt_aligned_segment_mapping_quality(GtAlignedSegment *as)
+{
+  gt_assert(as != NULL);
+  return as->mapq;
 }
 
 const char *gt_aligned_segment_orig_seq(GtAlignedSegment *as)
@@ -313,25 +298,28 @@ unsigned long gt_aligned_segment_orig_seqlen(const GtAlignedSegment *as)
 unsigned long gt_aligned_segment_orig_seqpos_for_refpos(
     const GtAlignedSegment *as, unsigned long refpos)
 {
-  unsigned long r_offset, pos, ungapped_pos;
+  unsigned long r_offset, gapped_pos, ungapped_pos_on_r, ungapped_pos_on_s_orig;
   gt_assert(as != NULL);
   gt_assert(as->s_orig != NULL);
   if (refpos < as->r_left || refpos > as->r_right)
     return GT_UNDEF_ULONG;
   r_offset = refpos - as->r_left;
-  pos = 0;
-  ungapped_pos = 0;
-  while (ungapped_pos < r_offset)
+  gapped_pos = 0;
+  ungapped_pos_on_r = 0;
+  ungapped_pos_on_s_orig = 0;
+  while (ungapped_pos_on_r < r_offset)
   {
-    if (as->s_orig[pos] != '-')
-      ungapped_pos++;
-    pos++;
+    if (as->r[gapped_pos] != '-')
+      ungapped_pos_on_r++;
+    if (as->s_orig[gapped_pos] != '-')
+      ungapped_pos_on_s_orig++;
+    gapped_pos++;
   }
-  gt_assert(pos <= as->alen);
+  gt_assert(gapped_pos <= as->alen);
   if (as->r_reverse)
-    return as->orig_seqlen - 1UL - pos;
+    return as->orig_seqlen - 1UL - ungapped_pos_on_s_orig;
   else
-    return pos;
+    return ungapped_pos_on_s_orig;
 }
 
 void gt_aligned_segment_ungap_refregion(GtAlignedSegment *as)
@@ -451,8 +439,12 @@ void gt_aligned_segment_assign_refregion_chars(GtAlignedSegment *as,
 void gt_aligned_segment_show(GtAlignedSegment *as, GtFile *outfp)
 {
   gt_assert(as != NULL);
+  if (as->d != NULL)
+    gt_file_xprintf(outfp, "D: %s\n", as->d);
   if (as->r != NULL)
     gt_file_xprintf(outfp, "R: %s\n", as->r);
+  if (as->s_orig != NULL)
+    gt_file_xprintf(outfp, "O: %s\n", as->s_orig);
   gt_file_xprintf(outfp, "S: %s\n", as->s);
   gt_file_xprintf(outfp, "Q: %s\n", as->q);
 }
