@@ -136,6 +136,12 @@ const char* gt_samfile_iterator_reference_name(GtSamfileIterator *s_iter,
   return s_iter->samfile->header->target_name[reference_num];
 }
 
+int32_t gt_samfile_iterator_number_of_references(GtSamfileIterator *s_iter)
+{
+  gt_assert(s_iter != NULL);
+  return s_iter->samfile->header->n_targets;
+}
+
 GtSamfileIterator* gt_samfile_iterator_ref(GtSamfileIterator *s_iter)
 {
   s_iter->ref_count++;

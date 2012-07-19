@@ -53,6 +53,11 @@ int                gt_samfile_iterator_reset(GtSamfileIterator *s_iter,
 const char*        gt_samfile_iterator_reference_name(GtSamfileIterator *s_iter,
                                                       int32_t reference_num);
 
+/* Returns the number of reference sequences stored in the alignment
+ * file processed by <s_iter>.*/
+int32_t            gt_samfile_iterator_number_of_references(
+                                                     GtSamfileIterator *s_iter);
+
 void               gt_samfile_iterator_delete(GtSamfileIterator *s_iter);
 
 /* Returns a reference to <s_iter>, freeing it will first reduce reference
