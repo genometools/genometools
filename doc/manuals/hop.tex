@@ -1,0 +1,180 @@
+\documentclass[12pt,titlepage]{article}
+\usepackage[a4paper,top=30mm,bottom=30mm,left=20mm,right=20mm]{geometry}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{xspace}
+\usepackage{times}
+\usepackage{listings}
+\usepackage{bbm}
+\usepackage{verbatim}
+%\usepackage[dvips]{hyperref}
+\usepackage{optionman}
+
+\newcommand{\GenomeTools}{\textit{GenomeTools}\xspace}
+\newcommand{\Hop}{{HOP}\xspace}
+\newcommand{\Gtcmd}{\texttt{gt}\xspace}
+\newcommand{\Hopcmd}{\texttt{gt hop}\xspace}
+
+\newcommand{\minlen}{\ell}
+
+\title{\Huge{\Hop 1.0:\\ User manual.}\\[3mm]
+\Large{Reference-based homopolymer error correction.}}
+\author{\begin{tabular}{c}
+         \textit{Giorgio Gonnella}\\
+         \textit{Stefan Kurtz}\\
+         \textit{Michael Beckstette}\\[2cm]
+         Center for Bioinformatics\\
+         University of Hamburg\\
+         Bundesstrasse 43\\
+         20146 Hamburg (Germany)\\[1cm]
+         \url{gonnella@zbh.uni-hamburg.de}\\
+         \url{beckstette@zbh.uni-hamburg.de}\\
+         \url{kurtz@zbh.uni-hamburg.de}\\[1cm]
+        \end{tabular}}
+
+\begin{document}
+\maketitle
+
+\section{Introduction} \label{Introduction}
+
+\Hop \cite{HOP} is a tool for the correction of homopolymer errors, such as those typical
+of the Roche 454 and IonTorrent technologies, using a reference sequence.
+
+\section{Installation}
+
+\Hop is provided as 64-bit binary for Linux and as source code.
+
+Besides being available from \url{http://zbh.uni-hamburg.de/hop},
+ \Hop will soon be included in future releases of the \GenomeTools
+source code and binary.
+
+The source code for \Hop is written in \texttt{C} and it is based on the \GenomeTools
+framework \cite{genometools}: as such, it is designed to be compilable on
+any POSIX-compliant operative systems and without external library dependencies.
+Using the \texttt{Makefile} provided with GenomeTools, in the main directory
+of the source code, while a single \texttt{make} may suffice,
+using the following flags will compile \Hop as a 64-bit binary and should work
+on most systems (the amalgamation flag will slightly increase the performance):
+
+\begin{footnotesize}
+\begin{verbatim}
+> make 64bit=yes amalgamation=yes cairo=no curses=no
+\end{verbatim}
+\end{footnotesize}
+
+After downloading \Hop or compiling it from the source code, you
+will have a single binary named \Gtcmd, comprising \Hop and other tools.
+\Hop can be executed, entering \texttt{gt hop} from the command line, e.g.
+the following will output an help text on the available options
+and command line syntax:
+
+\begin{footnotesize}
+\begin{verbatim}
+> gt hop -help
+\end{verbatim}
+\end{footnotesize}
+
+Besides \Hop you will need a read mapping tool (such as \textit{bwa})
+and usually \textit{samtools}, in order to sort the results of the
+mapping as required for \Hop.
+
+\section{Preliminary steps}
+
+\subsection{Preparing the mapping}
+
+Furthermore, \Hop requires a mapping of the reads to the reference sequence.
+This must be in SAM/BAM format and sorted by coordinate on the reference.
+
+Luckily, it is very easy to prepare the mapping as mentioned for example
+using  \texttt{bwa} for the mapping (either using the bwa aln/samse/sampe or
+the bwasw method) and then sorting the resulting SAM file
+using \texttt{samtools}.
+The exact steps depends on which mapping program is used.
+Here an example using bwa paired end mapping:
+
+\begin{footnotesize}
+\begin{verbatim}
+> bwa index refseq.fas
+> bwa aln -t 4 -o 3 -q 15 -f f_reads.sai refseq.fas f_reads.fastq
+> bwa aln -t 4 -o 3 -q 15 -f r_reads.sai refseq.fas r_reads.fastq
+> bwa sampe refseq.fas -f map.sam f_reads.sai r_reads.sai f_reads.fastq r_reads.fastq
+> samtools view -b -o map.bam -S map.sam
+> samtools sort map.sam sorted
+\end{verbatim}
+\end{footnotesize}
+
+The results of this will be \texttt{sorted.bam}, which will be used as
+an input mapping file for \Hop.
+
+Note: on most command line shells, most of the commands shown for the mapping
+and sorting of the map can be combined using piping for an increased efficiency.
+
+\subsection{Preparing the reference sequence}
+
+The reference sequence is provided to \Hop in GtEncseq format.
+Standard sequence formats
+such as Fasta can be converted into GtEncseq as follows (if necessary multiple files can be
+specified as input):
+
+\begin{footnotesize}
+\begin{verbatim}
+> gt encseq encode sequence_file [sequence_file ...]
+\end{verbatim}
+\end{footnotesize}
+
+If the reference comprises multiple sequences, the order of the sequences
+used for the encode step must be the same which is specified in the header
+of the SAM/BAM input file (on normal application scenarios,
+this is not an issue).
+
+\section{Running \Hop}
+
+\Hop requires the following input:
+\begin{itemize}
+\item the reference sequence in GtEncseq format
+\item the sorted SAM/BAM mapping of the reads to the reference sequence.
+\item the uncorrected reads
+\end{itemize}
+
+Furthermore one of the following correction modes must be specified:\\
+\texttt{-aggressive},
+\texttt{-moderate},
+\texttt{-conservative} or
+\texttt{-expert}.
+
+An example call:
+
+\begin{footnotesize}
+\begin{verbatim}
+> gt hop -moderate -ref refseq.fas \
+  -map sorted.bam -reads f_reads.fastq r_reads.fastq
+\end{verbatim}
+\end{footnotesize}
+
+The output will be in this case in the two files
+\texttt{hop\_f\_reads.fastq} and \texttt{hop\_r\_reads.fastq}.
+The prefix added by \Hop can be changed using the \texttt{-outprefix}
+option.
+
+\section{For more information}
+
+Using \texttt{gt hop -help} will output more information regarding
+each command line option. Some command line options are used in
+\texttt{-expert} mode only. To output help also regarding these
+options use \texttt{gt hop -help+}.
+
+\begin{thebibliography}{1}
+
+\bibitem{genometools}
+Gremme, G. (2011).
+\newblock The \textsc{GenomeTools} genome analysis system.
+  \url{http://genometools.org}.
+
+\bibitem{HOP}
+Gonnella G and Kurtz S and Beckstette M (2012).
+\newblock {HOP: a reference-based homopolymer error corrector.}
+\newblock {\em Submitted\/}
+
+\end{thebibliography}
+
+\end{document}

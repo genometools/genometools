@@ -1,4 +1,5 @@
 ALL=readjoiner.pdf\
+		hop.pdf\
     ltrharvest.pdf\
     ltrdigest.pdf\
     uniquesub.pdf\
