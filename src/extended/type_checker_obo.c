@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,7 +25,8 @@
 
 struct GtTypeCheckerOBO {
   const GtTypeChecker parent_instance;
-  GtCstrTable *gt_feature_node_types;
+  GtStr *description;
+  GtCstrTable *feature_node_types;
 };
 
 #define gt_type_checker_obo_cast(FTF)\
@@ -34,7 +35,16 @@ struct GtTypeCheckerOBO {
 static void gt_type_checker_obo_free(GtTypeChecker *tc)
 {
   GtTypeCheckerOBO *tco = gt_type_checker_obo_cast(tc);
-  gt_cstr_table_delete(tco->gt_feature_node_types);
+  gt_cstr_table_delete(tco->feature_node_types);
+  gt_str_delete(tco->description);
+}
+
+static const char* gt_type_checker_obo_description(GtTypeChecker *tc)
+{
+  GtTypeCheckerOBO *tco;
+  gt_assert(tc);
+  tco = gt_type_checker_obo_cast(tc);
+  return gt_str_get(tco->description);
 }
 
 static bool gt_type_checker_obo_is_valid(GtTypeChecker *tc, const char *type)
@@ -42,14 +52,24 @@ static bool gt_type_checker_obo_is_valid(GtTypeChecker *tc, const char *type)
   GtTypeCheckerOBO *tco;
   gt_assert(tc && type);
   tco = gt_type_checker_obo_cast(tc);
-  return gt_cstr_table_get(tco->gt_feature_node_types, type) ? true : false;
+  return gt_cstr_table_get(tco->feature_node_types, type) ? true : false;
+}
+
+static bool gt_type_checker_obo_is_partof(GtTypeChecker *tc,
+                                          const char *parent_type,
+                                          const char *child_type)
+{
+  gt_assert(tc && parent_type && child_type);
+  return false; /* XXX */
 }
 
 const GtTypeCheckerClass* gt_type_checker_obo_class(void)
 {
   static const GtTypeCheckerClass gt_type_checker_class =
     { sizeof (GtTypeCheckerOBO),
+      gt_type_checker_obo_description,
       gt_type_checker_obo_is_valid,
+      gt_type_checker_obo_is_partof,
       gt_type_checker_obo_free };
   return &gt_type_checker_class;
 }
@@ -64,8 +84,8 @@ static void add_feature_node_from_tree(GtTypeCheckerOBO *tco,
   value = gt_obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
                                           stanza_key);
   /* do not add values multiple times (possible for "name" values) */
-  if (!gt_cstr_table_get(tco->gt_feature_node_types, value))
-    gt_cstr_table_add(tco->gt_feature_node_types, value);
+  if (!gt_cstr_table_get(tco->feature_node_types, value))
+    gt_cstr_table_add(tco->feature_node_types, value);
 }
 
 static int create_feature_nodes(GtTypeCheckerOBO *tco,
@@ -102,7 +122,9 @@ GtTypeChecker* gt_type_checker_obo_new(const char *obo_file_path, GtError *err)
   gt_assert(obo_file_path);
   tc = gt_type_checker_create(gt_type_checker_obo_class());
   tco = gt_type_checker_obo_cast(tc);
-  tco->gt_feature_node_types = gt_cstr_table_new();
+  tco->description= gt_str_new_cstr("OBO file ");
+  gt_str_append_cstr(tco->description, obo_file_path);
+  tco->feature_node_types = gt_cstr_table_new();
   if (create_feature_nodes(tco, obo_file_path, err)) {
     gt_type_checker_delete(tc);
     return NULL;

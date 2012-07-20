@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,11 +37,27 @@ GtTypeChecker* gt_type_checker_ref(GtTypeChecker *type_checker)
   return type_checker;
 }
 
+const char* gt_type_checker_description(GtTypeChecker *type_checker)
+{
+  gt_assert(type_checker && type_checker->c_class &&
+            type_checker->c_class->description);
+  return type_checker->c_class->description(type_checker);
+}
+
 bool gt_type_checker_is_valid(GtTypeChecker *type_checker, const char *type)
 {
   gt_assert(type_checker && type_checker->c_class &&
-         type_checker->c_class->is_valid);
+            type_checker->c_class->is_valid);
   return type_checker->c_class->is_valid(type_checker, type);
+}
+
+bool gt_type_checker_is_partof(GtTypeChecker *type_checker,
+                               const char *parent_type, const char *child_type)
+{
+  gt_assert(type_checker && type_checker->c_class &&
+            type_checker->c_class->is_partof);
+  return type_checker->c_class->is_partof(type_checker, parent_type,
+                                          child_type);
 }
 
 void gt_type_checker_delete(GtTypeChecker *type_checker)

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -71,19 +71,35 @@ static const char* type_checker_builtin_find_type(const char *gft_string)
   return NULL;
 }
 
-static bool gt_type_checker_builtin_create_gft(GT_UNUSED GtTypeChecker
-                                               *type_checker,
-                                               const char *type)
+static const char* gt_type_checker_builtin_description(GT_UNUSED GtTypeChecker
+                                                       *tc)
 {
-  gt_assert(type_checker && type);
+  gt_assert(tc);
+  return "built-in";
+}
+
+static bool gt_type_checker_builtin_is_valid(GT_UNUSED GtTypeChecker *tc,
+                                             const char *type)
+{
+  gt_assert(tc && type);
   return type_checker_builtin_find_type(type) ? true : false;
+}
+
+static bool gt_type_checker_builtin_is_partof(GT_UNUSED GtTypeChecker *tc,
+                                              const char *parent_type,
+                                              const char *child_type)
+{
+  gt_assert(tc && parent_type && child_type);
+  return true;
 }
 
 const GtTypeCheckerClass* gt_type_checker_builtin_class(void)
 {
   static const GtTypeCheckerClass gt_type_checker_class =
     { sizeof (GtTypeCheckerBuiltin),
-      gt_type_checker_builtin_create_gft,
+      gt_type_checker_builtin_description,
+      gt_type_checker_builtin_is_valid,
+      gt_type_checker_builtin_is_partof,
       NULL };
   return &gt_type_checker_class;
 }

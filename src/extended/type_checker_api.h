@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008       Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008, 2011-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008            Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,10 +24,16 @@ typedef struct GtTypeChecker GtTypeChecker;
 
 /* Increase the reference count for <type_checker> and return it. */
 GtTypeChecker* gt_type_checker_ref(GtTypeChecker *type_checker);
+/* Return description of <type_checker>. */
+const char*    gt_type_checker_description(GtTypeChecker *type_checker);
 /* Return <true> if <type> is a valid type for the given <type_checker>, <false>
    otherwise. */
 bool           gt_type_checker_is_valid(GtTypeChecker *type_checker,
                                         const char *type);
+/* Return <true> if <child_type> is partof <parent_type>, <false> otherwise. */
+bool           gt_type_checker_is_partof(GtTypeChecker *type_checker,
+                                         const char *parent_type,
+                                         const char *child_type);
 /* Decrease the reference count for <type_checker> or delete it, if this was the
    last reference. */
 void           gt_type_checker_delete(GtTypeChecker *type_checker);

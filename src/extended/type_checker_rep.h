@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,8 +25,11 @@
 
 struct GtTypeCheckerClass {
   size_t size;
-  bool  (*is_valid)(GtTypeChecker*, const char *type);
-  void  (*free)(GtTypeChecker*);
+  const char* (*description)(GtTypeChecker*);
+  bool        (*is_valid)(GtTypeChecker*, const char *type);
+  bool        (*is_partof)(GtTypeChecker*, const char *parent_type,
+                           const char *child_type);
+  void        (*free)(GtTypeChecker*);
 };
 
 struct GtTypeChecker {
