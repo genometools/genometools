@@ -100,6 +100,7 @@
 #include "tools/gt_gff3_to_gtf.h"
 #include "tools/gt_gff3validator.h"
 #include "tools/gt_gtf_to_gff3.h"
+#include "tools/gt_hop.h"
 #include "tools/gt_id_to_md5.h"
 #include "tools/gt_interfeat.h"
 #include "tools/gt_matchtool.h"
@@ -194,6 +195,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "gff3_to_gtf", gt_gff3_to_gtf());
   gt_toolbox_add_tool(tools, "gff3validator", gt_gff3validator());
   gt_toolbox_add_tool(tools, "gtf_to_gff3", gt_gtf_to_gff3());
+  gt_toolbox_add_tool(tools, "hop", gt_hop());
   gt_toolbox_add_tool(tools, "id_to_md5", gt_id_to_md5());
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
   gt_toolbox_add_tool(tools, "ltrclustering", gt_ltrclustering());

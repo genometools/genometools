@@ -262,7 +262,7 @@ function f_correct {
   else
     HOP_PARAMS="-o hop_$READS $HOP_PARAMS"
   fi
-  CMD="$GT dev hop -v -ref $GENOME -map sorted.$MAP.bam $HOP_PARAMS"
+  CMD="$GT hop -v -ref $GENOME -map sorted.$MAP.bam $HOP_PARAMS"
   if [ "$SHOWONLY" != "TRUE" ]; then $CMD; fi
   echo
   echo "==== done "
@@ -417,7 +417,7 @@ function f_stats {
   else
     HOP_PARAMS="-o hop_$READS $HOP_PARAMS"
   fi
-  CMD="$GT dev hop -v -ref $GENOME -map sorted.$MAP.bam $HOP_PARAMS"
+  CMD="$GT hop -v -ref $GENOME -map sorted.$MAP.bam $HOP_PARAMS"
   echo "$CMD" '>' $MAP.hop_stats
   if [ "$SHOWONLY" != "TRUE" ]; then
     $CMD > $MAP.hop_stats
