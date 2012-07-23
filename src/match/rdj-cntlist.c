@@ -41,19 +41,19 @@ static inline void gt_cntlist_show_ascii(GtBitsequence *cntlist,
 void gt_cntlist_write_bin_header(unsigned long nofreads, FILE *file)
 {
   gt_assert(file != NULL);
-  (void)putc(GT_CNTLIST_BIN_HEADER, file);
-  (void)putc((char)sizeof(unsigned long), file);
-  (void)fwrite(&(nofreads), sizeof (unsigned long), (size_t)1, file);
+  gt_xfputc(GT_CNTLIST_BIN_HEADER, file);
+  gt_xfputc((char)sizeof(unsigned long), file);
+  gt_xfwrite(&(nofreads), sizeof (unsigned long), (size_t)1, file);
 }
 
 static inline void gt_cntlist_show_bit(GtBitsequence *cntlist,
     unsigned long nofreads, FILE *file)
 {
   gt_assert(file != NULL);
-  (void)putc(GT_CNTLIST_BIT_HEADER, file);
-  (void)putc((char)sizeof(unsigned long), file);
-  (void)fwrite(&(nofreads), sizeof (unsigned long), (size_t)1, file);
-  (void)fwrite(cntlist, sizeof (GtBitsequence), GT_NUMOFINTSFORBITS(nofreads),
+  gt_xfputc(GT_CNTLIST_BIT_HEADER, file);
+  gt_xfputc((char)sizeof(unsigned long), file);
+  gt_xfwrite(&(nofreads), sizeof (unsigned long), (size_t)1, file);
+  gt_xfwrite(cntlist, sizeof (GtBitsequence), GT_NUMOFINTSFORBITS(nofreads),
       file);
 }
 
