@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/basename_api.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
 #include "core/seqiterator_fastq.h"
@@ -70,8 +71,8 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("-r <encseq> -m <sam|bam> "
-      "-<mode> -o <outfile> [options...]",
+  op = gt_option_parser_new("-<mode> -ref <encseq> -map <sam/bam> "
+      "-reads <fastq> [options...]",
       "Reference-based homopolymer error correction.");
 
   /* -ref */
@@ -134,19 +135,17 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_exclude(expert_option, conservative_option);
   gt_option_parser_add_option(op, expert_option);
 
-  /* -o */
-  o_option = gt_option_new_string("o", "output file for corrected reads\n"
-      "format: FASTQ",
-      arguments->outfilename, NULL);
-  gt_option_parser_add_option(op, o_option);
-
   /* -reads */
   reads_option = gt_option_new_filename_array("reads",
       "uncorrected read file(s) in FastQ format;\n"
-      "not necessary if reads are aligned using bwa aln;\n"
-      "if -reads is not used, reads are output"
-      "in a different order than in the original fastq", arguments->readset);
-  gt_option_exclude(reads_option, o_option);
+      "the corrected reads are output in the currect working directory "
+      "in files which are named as the input files, each prepended "
+      "by a prefix (see -outprefix option)\n"
+      "-reads allows to output the reads in the same order as in the input "
+      "and is mandatory if the SAM contains more than a single primary "
+      "alignment for each read (e.g. output of bwasw)\n"
+      "see also -o option as an alternative",
+      arguments->readset);
   gt_option_parser_add_option(op, reads_option);
 
   /* -outprefix */
@@ -155,9 +154,20 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
       "when -reads is specified\n"
       "the prefix is prepended to each input filename",
       arguments->outprefix, "hop_");
-  gt_option_exclude(option, o_option);
   gt_option_imply(option, reads_option);
   gt_option_parser_add_option(op, option);
+
+  /* -o */
+  o_option = gt_option_new_string("o", "output file for corrected reads\n"
+      "(see also -reads/-outprefix) if -o is used, reads are output "
+      "in a single file in the order they are found in the SAM file "
+      "(which usually differ from the original order)\n"
+      "this will only work if the reads were aligned with a software which "
+      "only includes 1 alignment for each read (e.g. bwa)",
+      arguments->outfilename, NULL);
+  gt_option_exclude(reads_option, o_option);
+  gt_option_is_mandatory_either(reads_option, o_option);
+  gt_option_parser_add_option(op, o_option);
 
   /* -hmin */
   option = gt_option_new_ulong_min("hmin",
@@ -215,16 +225,6 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
       "is less than 5\n"
       "if covmin is set to 1 reads are always corrected",
       &arguments->covmin, 1UL, 1UL);
-  gt_option_is_extended_option(option);
-  gt_option_imply(option, expert_option);
-  gt_option_parser_add_option(op, option);
-
-  /* -allow-partial */
-  option = gt_option_new_bool("allow-partial",
-      "allow insertions also if there are less gaps in read homopolymer "
-      "than the difference in length with the reference\n"
-      "(at most as many symbols as the gaps will be inserted)",
-      &arguments->allow_partial, false);
   gt_option_is_extended_option(option);
   gt_option_imply(option, expert_option);
   gt_option_parser_add_option(op, option);
@@ -294,6 +294,15 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -allow-partial */
+  option = gt_option_new_bool("allow-partial",
+      "allow insertions also if there are less gaps in read homopolymer "
+      "than the difference in length with the reference\n"
+      "(at most as many symbols as the gaps will be inserted)",
+      &arguments->allow_partial, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -330,7 +339,6 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
     args->mapqmin = 0UL;
     args->covmin = 1UL;
     args->clenmax = ULONG_MAX;
-    args->allow_partial = true;
     args->allow_multiple = true;
   }
   else if (args->moderate)
@@ -342,7 +350,6 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
     args->mapqmin = 10UL;
     args->covmin = 1UL;
     args->clenmax = ULONG_MAX;
-    args->allow_partial = false;
     args->allow_multiple = true;
   }
   else if (args->conservative)
@@ -354,7 +361,6 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
     args->mapqmin = 21UL;
     args->covmin = 1UL;
     args->clenmax = ULONG_MAX;
-    args->allow_partial = false;
     args->allow_multiple = false;
   }
 
@@ -389,8 +395,6 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     gt_logger_log(v_logger, "clenmax = unlimited");
   else
     gt_logger_log(v_logger, "clenmax = %lu", arguments->clenmax);
-  gt_logger_log(v_logger, "allow-partial = %s", arguments->allow_partial
-      ? "yes" : "no");
   gt_logger_log(v_logger, "allow-multiple = %s", arguments->allow_multiple
       ? "yes" : "no");
   if (gt_str_length(arguments->annotation) > 0)
@@ -461,12 +465,13 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
             readset_iters = gt_malloc(sizeof (*readset_iters) * nfiles);
             for (i = 0; i < nfiles && !had_err; i++)
             {
+              char *bn;
               gt_str_set(outfn, gt_str_get(arguments->outprefix));
               infiles[i] = gt_str_array_new();
               gt_str_array_add_cstr(infiles[i],
                   gt_str_array_get(arguments->readset, i));
-              gt_str_append_cstr(outfn,
-                  gt_str_array_get(arguments->readset, i));
+              bn = gt_basename(gt_str_array_get(arguments->readset, i));
+              gt_str_append_cstr(outfn, bn);
               outfiles[i] = gt_file_new(gt_str_get(outfn), "w", err);
               if (outfiles[i] == NULL)
                 had_err = -1;
@@ -476,6 +481,7 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                 had_err = -1;
               gt_seqiterator_fastq_relax_check_of_quality_description(
                   (GtSeqIteratorFastQ*)readset_iters[i]);
+              gt_free(bn);
             }
             if (!had_err)
               gt_hpol_processor_enable_sorted_segments_output(hpp, nfiles,

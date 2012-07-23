@@ -263,6 +263,7 @@ function f_correct {
     HOP_PARAMS="-o hop_$READS $HOP_PARAMS"
   fi
   CMD="$GT hop -v -ref $GENOME -map sorted.$MAP.bam $HOP_PARAMS"
+  echo $CMD
   if [ "$SHOWONLY" != "TRUE" ]; then $CMD; fi
   echo
   echo "==== done "

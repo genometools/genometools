@@ -807,7 +807,7 @@ static void gt_hpol_processor_process_hpol_end(GtHpolProcessor *hpp,
                   r_supp_min = 0;
     gt_aligned_segments_pile_move_over_position(hpp->asp, endpos + 1UL);
     piled = gt_aligned_segments_pile_size(hpp->asp);
-    if (piled > hpp->covmin)
+    if (piled >= hpp->covmin)
     {
       gt_hpol_processor_determine_alternative_consensus(hpp, ch,
           endpos + 1UL - hlen, hlen, &a_hlen, &a_supp, &piled,
@@ -838,15 +838,17 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
   gt_assert(hpp->hdist != NULL);
   gt_logger_log(logger, "Distribution of homopolymers of length >= %lu %s",
       hpp->hmin, (hpp->cds_oracle != NULL ?  "in coding sequences" :
-        "in whole reference sequence"));
+        "in reference sequence"));
   gt_logger_log(logger, "length\toccurrences\tedited");
-  for (i = hpp->hmin; i < hpp->hlen_max; i++)
+  for (i = hpp->hmin; i <= hpp->hlen_max; i++)
   {
-    gt_logger_log(logger, "%-6lu\t%-11lu\t%-6lu\t(%.2f%%)", i,
-        (unsigned long)gt_disc_distri_get(hpp->hdist, i),
-        (unsigned long)gt_disc_distri_get(hpp->hdist_e, i),
-        (double)gt_disc_distri_get(hpp->hdist_e, i) * 100 /
-        (double)gt_disc_distri_get(hpp->hdist, i));
+    unsigned long n = (unsigned long)gt_disc_distri_get(hpp->hdist, i);
+    if (n > 0)
+    {
+      gt_logger_log(logger, "%-6lu\t%-11lu\t%-6lu\t(%.2f%%)", i, n,
+          (unsigned long)gt_disc_distri_get(hpp->hdist_e, i),
+          (double)gt_disc_distri_get(hpp->hdist_e, i) * 100 / n);
+    }
   }
   gt_logger_log(logger, "total \t%-11lu\t%-6lu\t(%.2f%%)",
       hpp->nof_h, hpp->nof_h_e, (double)hpp->nof_h_e * 100 /
