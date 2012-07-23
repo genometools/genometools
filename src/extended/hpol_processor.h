@@ -24,70 +24,76 @@
 #include "core/seqiterator.h"
 #include "core/logger.h"
 
-/* Homopolymer processor; scans a sequence and searches homopolymers
- * (defined as stretches of at least <hmin> identical symbols) and
- * processes them. */
+/* <GtHpolProcessor> is an homopolymer processor; it scans a sequence and
+   searches stretches of at least <hmin> identical symbols and
+   processes them: the main purpose is the correction of homopolymer errors
+   in sequencing reads. */
 
 typedef struct GtHpolProcessor GtHpolProcessor;
 
 GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin);
 
-/* Enable the correction of length of the homopolymers in the segments
- * provided by <asp>.
- *
- * The <clenmax> parameter defines the maximal
- * difference in length from the reference for a correction to take place.
- *
- * The <altmax> parameter defines the minimal alternative
- * consensus among segments in homopolymer length, by which no correction
- * is done: a value of 0.5 means e.g. 50% consensus. To disable the
- * feature use a value over 1.0. */
+void gt_hpol_processor_delete(GtHpolProcessor *hpp);
+
+/* Run the scanning over the sequence. If <logger> is not NULL, then verbose
+ * information is output. Returns 0 on success, on error a negative number and
+ * <err> is set. */
+int gt_hpol_processor_run(GtHpolProcessor *hpp, GtLogger *logger, GtError *err);
+
+/* Enables the correction of homopolymers errors in the segments (usually
+   sequencing reads) provided by <asp>.
+   Some thresholds are defined for the correction to take place:
+   the <read_hmin> parameter is the minimal length of the homopolymer in the
+   reads; the <altmax> parameter (maximum alternative consensus) is a value
+   between 0.0 and 1.0 and is the maximal portion of the reads with agree
+   on a different length than the reference; the <refmin> parameter
+   (minimal reference support) is a value between 0.0 and 1.0 and is the
+   minimal portion of the reads which must agree with the reference;
+   the <mapqmin> is the minimal mapping quality; <covmin> is the minimal
+   number of reads covering the homopolymer; <allow_partial> defines the
+   behaviour when an insertion must take place and there are not enough gaps
+   are available in the aligned read (true: insert at most number_of_gaps
+   symbols; false: do not correct); <allow_multiple> defines the behaviour
+   when a read requires multiple corrections (true: correct each time,
+   false: correct only first homopolymer error found); <clenmax> defines
+   the maximal correction length. */
 void gt_hpol_processor_enable_segments_hlen_adjustment(GtHpolProcessor *hpp,
     GtAlignedSegmentsPile *asp, unsigned long read_hmin, double altmax,
     double refmin, unsigned long mapqmin, unsigned long covmin,
     bool allow_partial, bool allow_multiple, unsigned long clenmax);
 
-/* Test: compare refregion of the segments with the reference sequence. */
-void gt_hpol_processor_enable_aligned_segments_refregionscheck(
-    GtHpolProcessor *hpp, GtAlignedSegmentsPile *asp);
-
-/* Run the scanning over the sequence. If <logger> is not NULL, then verbose
- * information is output, including the distribution of homopolymers length.
- * Returns 0 on success, on error a negative number and <err> is set. */
-int gt_hpol_processor_run(GtHpolProcessor *hpp, GtLogger *logger, GtError *err);
-
 /* Restrict processing to homopolymers whose end position is classified
- * by <spc> as "inside" (e.g. inside CDS). */
+   by <spc> as "inside" (e.g. inside CDS). */
 void gt_hpol_processor_restrict_to_feature_type(GtHpolProcessor *hpp,
     GtSeqposClassifier *spc);
 
 /* Output the segments sequence in FastQ format to <outfile> during run.
- * This is only useful for the cases in which each read has exactly one
- * segment. */
+   This mainly is useful for the cases in which each read has exactly one
+   alignment (e.g. output of bwa samse/sampe but not bwasw) - otherwise
+   a single read is output several times. */
 void gt_hpol_processor_enable_direct_segments_output(GtHpolProcessor *hpp,
     GtFile *outfile);
 
-/*
- * Output the segments sorted by the order in which sequences
- * are returned by the <reads_iters>. Each GtSeqIterator corresponds
- * to an input file. The reads from the i-th input file will
- * be output to the i-th output file.
- *
- * Must be called after <gt_hpol_processor_enable_segments_output>.
- *
- * The memory requirement will increase from O(max_coverage) to
- * O(nof_segments), as processed segments are stored and output after the run.
- *
- * This method assumes that the sequence ID (first word of the description line)
- * of each sequence is unique. */
+/* Output the segments sorted by the order in which sequences
+   are returned by the <reads_iters>. This is a most general output mode
+   than the direct segment output, but it is slower and requires more memory
+   as the information is stored during the run and output at the end.
+   The <read_iters> are <nfiles> GtSeqIterator objects (each corresponding
+   to an input file). The reads from the i-th GtSeqIterator will
+   be output to the i-th element of <outfiles>. This method assumes that the
+   sequence ID (first word of the description line) of each sequence is
+   unique. */
 void gt_hpol_processor_enable_sorted_segments_output(GtHpolProcessor *hpp,
     unsigned long nfiles, GtSeqIterator **reads_iters, GtFile **outfiles);
 
-/* Output statistics about each correction position.
- * Data is output as TAB-separated table, one row per correction position. */
+/* Output statistics about each correction position. Data is output as
+   TAB-separated table, one row per correction position. */
 void gt_hpol_processor_enable_statistics_output(GtHpolProcessor *hpp,
     bool output_multihit_stats, GtFile *outfile);
 
-void gt_hpol_processor_delete(GtHpolProcessor *hpp);
+/* Enable a debug mode which is useful to compare refregion of the segments
+   with the reference sequence. */
+void gt_hpol_processor_enable_aligned_segments_refregionscheck(
+    GtHpolProcessor *hpp, GtAlignedSegmentsPile *asp);
 
 #endif

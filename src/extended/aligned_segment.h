@@ -23,18 +23,14 @@
 #include "extended/sam_alignment.h"
 #include "extended/samfile_encseq_mapping.h"
 
-/* AlignedSegment contains an aligned <segment> (e.g. a read) to a <reference>.
- * The segment sequence (<seq>) and quality scores (<qual>) and the
- * aligned region of the reference sequence (this portion will be called here
- * <refregion>) are explicitely stored as NULL terminated editable strings. */
+/* GtAlignedSegment contains a read ("segment") aligned to a
+   region of a reference sequence. The segment sequence
+   and quality scores are NULL terminated editable strings. */
 typedef struct GtAlignedSegment GtAlignedSegment;
 
-/* create a new GtAlignedSegment instance fetching sequence and alignment
- * information from a SAM alignment. The <refregion> will contain
- * '?' at all positions which cannot be inferred from the data available
- * in the SAM alignment. If an unmapped SAM alignment is used,
- * the refregion will be NULL. The <sem> mapping will be used to
- * calculate the coordinates of refregion on the reference. */
+/* Creates a new GtAlignedSegment instance fetching sequence and alignment
+   information from a SAM alignment. The <sem> mapping will be used to
+   calculate the coordinates of refregion on the reference. */
 GtAlignedSegment *gt_aligned_segment_new_from_sa(GtSamAlignment *sa,
     GtSamfileEncseqMapping *sem);
 
@@ -44,81 +40,75 @@ char *gt_aligned_segment_seq(GtAlignedSegment *as);
 /* quality scores of the segment */
 char *gt_aligned_segment_qual(GtAlignedSegment *as);
 
-/* sequence of <refregion> or NULL if segment is unmapped */
+/* sequence of the reference region */
 char *gt_aligned_segment_refregion(GtAlignedSegment *as);
 
-/* make a copy of the original status of the segment sequence,
- * so that an edit script can be computed by comparing with the
- * edited sequence; this method may be called only once */
-void gt_aligned_segment_enable_edit_tracking(GtAlignedSegment *as);
+/* description of the segment */
+const char *gt_aligned_segment_description(const GtAlignedSegment *as);
 
-/* the original (aligned) status of the segment sequence;
- * if <gt_aligned_enable_edit_tracking> was not called, it returns NULL */
-const char *gt_aligned_segment_orig_seq(GtAlignedSegment *as);
-
-/* length of the unedited segment sequence */
+/* original length of the ungapped segment sequence */
 unsigned long gt_aligned_segment_orig_seqlen(const GtAlignedSegment *as);
 
-/* coordinate on the unedited ungapped segment sequence corresponding to
- * <refpos> on the reference sequence; returns the correct original segment
- * coordinates also in the case when the segment is reverse;
- * returns GT_UNDEF_ULONG if the coordinates are outside the refregion or
- * the segment is unmapped */
-unsigned long gt_aligned_segment_orig_seqpos_for_refpos(
-    const GtAlignedSegment *as, unsigned long refpos);
-
-/* coordinates of <refregion> on the reference sequence
- * or GT_UNDEF_ULONG if unmapped */
-unsigned long gt_aligned_segment_refregion_startpos(const GtAlignedSegment *as);
-unsigned long gt_aligned_segment_refregion_endpos(const GtAlignedSegment *as);
-
-/* finds the correct offset in the (eventually gapped) reference region
- * corresponding to a given reference sequence coordinate;
- * returns GT_UNDEF_ULONG if the coordinates are outside the region
- * or the segment is unmapped */
-unsigned long gt_aligned_segment_offset_for_refpos(const GtAlignedSegment *as,
-    unsigned long refpos);
-
-/* total length of the alignment */
+/* current length of the alignment (i.e. including gaps) */
 unsigned long gt_aligned_segment_length(const GtAlignedSegment *as);
-
-/* remove gaps from <refregion>; assumes segment is not unmapped;
- * (after this operation segment and reference are not aligned anymore) */
-void gt_aligned_segment_ungap_refregion(GtAlignedSegment *as);
-
-/* remove gaps from the segment sequence and quality scores
- * (after this operation segment and reference are not aligned anymore) */
-void gt_aligned_segment_ungap_seq_and_qual(GtAlignedSegment *as);
-
-/* true if the alignment has insertions or deletions */
-bool gt_aligned_segment_has_indels(const GtAlignedSegment *as);
 
 /* true if the original alignment is on the opposite strand than the reference
  * sequence; the editable segment and refregion are however stored based the
  * reference strand sequence */
 bool gt_aligned_segment_is_reverse(const GtAlignedSegment *as);
 
-/* description line of the segment */
-const char *gt_aligned_segment_description(const GtAlignedSegment *as);
+/* true if the alignment has insertions or deletions */
+bool gt_aligned_segment_has_indels(const GtAlignedSegment *as);
 
-/* change '?' symbols in refregion to real characters from an encseq;
- * (this only works correctly if refregion has either not been edited,
- * or at least the number of indels in it is balanced); it assumes the
- * segment is not unmapped; */
+/* mapping quality of the segment */
+unsigned long gt_aligned_segment_mapping_quality(GtAlignedSegment *as);
+
+/* sets the edited bit of <as> */
+void gt_aligned_segment_seq_set_edited(GtAlignedSegment *as);
+
+/* gets the edited bit of <as> */
+bool gt_aligned_segment_seq_edited(const GtAlignedSegment *as);
+
+/* starting coordinate of the reference region on the reference sequence */
+unsigned long gt_aligned_segment_refregion_startpos(const GtAlignedSegment *as);
+
+/* ending coordinates of the reference region on the reference sequence */
+unsigned long gt_aligned_segment_refregion_endpos(const GtAlignedSegment *as);
+
+/* coordinates in the reference region of a given reference coordinate
+   taking gaps into account */
+unsigned long gt_aligned_segment_offset_for_refpos(const GtAlignedSegment *as,
+    unsigned long refpos);
+
+/* changes '?' symbols in refregion of <as> to real characters from <encseq>;
+   useful for debug output */
 void gt_aligned_segment_assign_refregion_chars(GtAlignedSegment *as,
     GtEncseq *encseq);
 
-/* show the current segment and refregion to file */
+/* remove gaps from <refregion> for output */
+void gt_aligned_segment_ungap_refregion(GtAlignedSegment *as);
+
+/* remove gaps from the segment sequence and quality scores for output */
+void gt_aligned_segment_ungap_seq_and_qual(GtAlignedSegment *as);
+
+/* output the current segment and refregion to the file <outfp> */
 void gt_aligned_segment_show(GtAlignedSegment *as, GtFile *outfp);
 
-/* mapping quality of the segment (GT_UNDEF_ULONG if unmapped) */
-unsigned long gt_aligned_segment_mapping_quality(GtAlignedSegment *as);
+/* stores a copy of the original status of the segment sequence of <as>,
+   allowing to compute an edit script by comparing with the edited sequence;
+   (this is currently used by HOP -stats option, but can be done more
+   efficiently) */
+void gt_aligned_segment_enable_edit_tracking(GtAlignedSegment *as);
 
-/* getter/setter for edited bit of seq and refregion */
-void gt_aligned_segment_seq_set_edited(GtAlignedSegment *as);
-bool gt_aligned_segment_seq_edited(const GtAlignedSegment *as);
-void gt_aligned_segment_refregion_set_edited(GtAlignedSegment *as);
-bool gt_aligned_segment_refregion_edited(const GtAlignedSegment *as);
+/* the original (aligned) status of the segment sequence;
+ * needs <gt_aligned_enable_edit_tracking> */
+const char *gt_aligned_segment_orig_seq(GtAlignedSegment *as);
+
+/* coordinate in the unedited segment sequence corresponding to <refpos>
+   on the reference sequence; takes gaps into account and works correctly
+   also if the alignment is reverse; needs <gt_aligned_enable_edit_tracking> */
+unsigned long gt_aligned_segment_orig_seqpos_for_refpos(
+    const GtAlignedSegment *as, unsigned long refpos);
 
 /* delete the aligned segment */
 void gt_aligned_segment_delete(GtAlignedSegment *as);
