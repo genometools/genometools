@@ -16,8 +16,10 @@
 */
 
 #include "core/cstr_api.h"
+#include "core/fptr_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
+#include "core/str_array_api.h"
 #include "extended/obo_stanza.h"
 
 struct GtOBOStanza {
@@ -33,7 +35,7 @@ GtOBOStanza* gt_obo_stanza_new(const char *type, unsigned long line,
   GtOBOStanza *obo_stanza = gt_malloc(sizeof *obo_stanza);
   obo_stanza->type = gt_cstr_dup(type);
   obo_stanza->content = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
-                                       gt_free_func);
+                                       (GtFree) gt_str_array_delete);
   obo_stanza->line = line;
   obo_stanza->filename = gt_str_ref(filename);
   return obo_stanza;
@@ -51,10 +53,15 @@ void gt_obo_stanza_delete(GtOBOStanza *obo_stanza)
 void gt_obo_stanza_add(GtOBOStanza *obo_stanza, const char *tag,
                        const char *value)
 {
+  GtStrArray *sa;
   gt_assert(obo_stanza && tag && value);
-  /* XXX: currently duplicate tags are silently skipped */
-  if (!gt_hashmap_get(obo_stanza->content, tag))
-    gt_hashmap_add(obo_stanza->content, gt_cstr_dup(tag), gt_cstr_dup(value));
+  if (!(sa = gt_hashmap_get(obo_stanza->content, tag))) {
+    sa = gt_str_array_new();
+    gt_str_array_add_cstr(sa, value);
+    gt_hashmap_add(obo_stanza->content, gt_cstr_dup(tag), sa);
+  }
+  else
+    gt_str_array_add_cstr(sa, value);
 }
 
 const char* gt_obo_stanza_get_type(const GtOBOStanza *obo_stanza)
@@ -64,10 +71,24 @@ const char* gt_obo_stanza_get_type(const GtOBOStanza *obo_stanza)
 }
 
 const char* gt_obo_stanza_get_value(const GtOBOStanza *obo_stanza,
-                                    const char *stanza_key)
+                                    const char *stanza_key,
+                                    unsigned long num)
 {
+  GtStrArray *sa;
   gt_assert(obo_stanza);
-  return gt_hashmap_get(obo_stanza->content, stanza_key);
+  if ((sa = gt_hashmap_get(obo_stanza->content, stanza_key)))
+    return gt_str_array_get(sa, num);
+  return NULL;
+}
+
+unsigned long gt_obo_stanza_size(const GtOBOStanza *obo_stanza,
+                                 const char *stanza_key)
+{
+  GtStrArray *sa;
+  gt_assert(obo_stanza);
+  if ((sa = gt_hashmap_get(obo_stanza->content, stanza_key)))
+    return gt_str_array_size(sa);
+  return 0;
 }
 
 const char* gt_obo_stanza_filename(const GtOBOStanza *obo_stanza)

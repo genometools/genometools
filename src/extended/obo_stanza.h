@@ -29,7 +29,10 @@ void          gt_obo_stanza_add(GtOBOStanza *obo_stanza,
                                 const char *tag, const char *value);
 const char*   gt_obo_stanza_get_type(const GtOBOStanza *obo_stanza);
 const char*   gt_obo_stanza_get_value(const GtOBOStanza *obo_stanza,
-                                      const char *stanza_key);
+                                      const char *stanza_key,
+                                      unsigned long num);
+unsigned long gt_obo_stanza_size(const GtOBOStanza *obo_stanza,
+                                 const char *stanza_key);
 const char*   gt_obo_stanza_filename(const GtOBOStanza *obo_stanza);
 unsigned long gt_obo_stanza_line(const GtOBOStanza *obo_stanza);
 

@@ -116,7 +116,7 @@ static int validate_value(const GtOBOStanza *obo_stanza, const char *value,
 {
   gt_error_check(err);
   gt_assert(obo_stanza && value);
-  if (!gt_obo_stanza_get_value(obo_stanza, value)) {
+  if (!gt_obo_stanza_get_value(obo_stanza, value, 0)) {
     gt_error_set(err, "%s stanza starting on line %lu in file \"%s\" lacks "
                  "required \"%s\" tag", gt_obo_stanza_get_type(obo_stanza),
                  gt_obo_stanza_line(obo_stanza),
@@ -465,7 +465,7 @@ const char* gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree
   gt_assert(obo_parse_tree);
   return gt_obo_stanza_get_value(*(GtOBOStanza**)
                                  gt_array_get(obo_parse_tree->stanzas,
-                                              stanza_num), stanza_key);
+                                              stanza_num), stanza_key, 0);
 }
 
 unsigned long gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree
