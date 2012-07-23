@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008            Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -155,7 +155,7 @@ struct GtOBOParseTree {
 };
 
 static void gt_obo_parse_tree_add_stanza(GtOBOParseTree *obo_parse_tree,
-                                      OBOStanza *obo_stanza)
+                                         OBOStanza *obo_stanza)
 {
   gt_assert(obo_parse_tree && obo_stanza);
   gt_array_add(obo_parse_tree->stanzas, obo_stanza);
@@ -168,16 +168,15 @@ static int validate_value(const OBOStanza *obo_stanza, const char *value,
   gt_assert(obo_stanza && value);
   if (!obo_stanza_get_value(obo_stanza, value)) {
     gt_error_set(err, "%s stanza starting on line %lu in file \"%s\" lacks "
-              "required \"%s\" tag",
-              obo_stanza_get_type(obo_stanza), obo_stanza->line,
-              gt_str_get(obo_stanza->filename), value);
+                 "required \"%s\" tag", obo_stanza_get_type(obo_stanza),
+                 obo_stanza->line, gt_str_get(obo_stanza->filename), value);
     return -1;
   }
   return 0;
 }
 
 static int gt_obo_parse_tree_validate_stanzas(const GtOBOParseTree
-                                                *obo_parse_tree,
+                                              *obo_parse_tree,
                                               GtError *err)
 {
   unsigned long i;

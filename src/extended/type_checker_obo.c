@@ -82,7 +82,7 @@ static void add_feature_node_from_tree(GtTypeCheckerOBO *tco,
   const char *value;
   gt_assert(tco && obo_parse_tree && stanza_key);
   value = gt_obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
-                                          stanza_key);
+                                             stanza_key);
   /* do not add values multiple times (possible for "name" values) */
   if (!gt_cstr_table_get(tco->feature_node_types, value))
     gt_cstr_table_add(tco->feature_node_types, value);
