@@ -19,10 +19,10 @@
 #include "core/array.h"
 #include "core/cstr_api.h"
 #include "core/fa.h"
-#include "core/hashmap.h"
 #include "core/io.h"
 #include "core/ma.h"
 #include "extended/obo_parse_tree.h"
+#include "extended/obo_stanza.h"
 
 #define OBO_BLANK_CHAR         ' '
 #define OBO_COMMENT_CHAR       '!'
@@ -99,77 +99,28 @@ static int obo_header_validate(OBOHeader *obo_header, const char *obo_filename,
   return 0;
 }
 
-typedef struct {
-  char *type;
-  GtHashmap *content;
-  unsigned long line;
-  GtStr *filename;
-} OBOStanza;
-
-static OBOStanza* obo_stanza_new(const char *type, unsigned long line,
-                                 GtStr *filename)
-{
-  OBOStanza *obo_stanza = gt_malloc(sizeof *obo_stanza);
-  obo_stanza->type = gt_cstr_dup(type);
-  obo_stanza->content = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
-                                       gt_free_func);
-  obo_stanza->line = line;
-  obo_stanza->filename = gt_str_ref(filename);
-  return obo_stanza;
-}
-
-static void obo_stanza_delete(OBOStanza *obo_stanza)
-{
-  if (!obo_stanza) return;
-  gt_str_delete(obo_stanza->filename);
-  gt_hashmap_delete(obo_stanza->content);
-  gt_free(obo_stanza->type);
-  gt_free(obo_stanza);
-}
-
-static void obo_stanza_add(OBOStanza *obo_stanza,
-                          const char *tag, const char *value)
-{
-  gt_assert(obo_stanza && tag && value);
-  /* XXX: currently duplicate tags are silently skipped */
-  if (!gt_hashmap_get(obo_stanza->content, tag))
-    gt_hashmap_add(obo_stanza->content, gt_cstr_dup(tag), gt_cstr_dup(value));
-}
-
-static const char* obo_stanza_get_type(const OBOStanza *obo_stanza)
-{
-  gt_assert(obo_stanza);
-  return obo_stanza->type;
-}
-
-static const char* obo_stanza_get_value(const OBOStanza *obo_stanza,
-                                        const char *stanza_key)
-{
-  gt_assert(obo_stanza);
-  return gt_hashmap_get(obo_stanza->content, stanza_key);
-}
-
 struct GtOBOParseTree {
   OBOHeader *obo_header;
   GtArray *stanzas;
 };
 
 static void gt_obo_parse_tree_add_stanza(GtOBOParseTree *obo_parse_tree,
-                                         OBOStanza *obo_stanza)
+                                         GtOBOStanza *obo_stanza)
 {
   gt_assert(obo_parse_tree && obo_stanza);
   gt_array_add(obo_parse_tree->stanzas, obo_stanza);
 }
 
-static int validate_value(const OBOStanza *obo_stanza, const char *value,
+static int validate_value(const GtOBOStanza *obo_stanza, const char *value,
                           GtError *err)
 {
   gt_error_check(err);
   gt_assert(obo_stanza && value);
-  if (!obo_stanza_get_value(obo_stanza, value)) {
+  if (!gt_obo_stanza_get_value(obo_stanza, value)) {
     gt_error_set(err, "%s stanza starting on line %lu in file \"%s\" lacks "
-                 "required \"%s\" tag", obo_stanza_get_type(obo_stanza),
-                 obo_stanza->line, gt_str_get(obo_stanza->filename), value);
+                 "required \"%s\" tag", gt_obo_stanza_get_type(obo_stanza),
+                 gt_obo_stanza_line(obo_stanza),
+                 gt_obo_stanza_filename(obo_stanza), value);
     return -1;
   }
   return 0;
@@ -185,7 +136,8 @@ static int gt_obo_parse_tree_validate_stanzas(const GtOBOParseTree
   gt_assert(obo_parse_tree);
   for (i = 0; !had_err && i < gt_obo_parse_tree_num_of_stanzas(obo_parse_tree);
        i++) {
-    OBOStanza *stanza = *(OBOStanza**) gt_array_get(obo_parse_tree->stanzas, i);
+    GtOBOStanza *stanza = *(GtOBOStanza**)
+                          gt_array_get(obo_parse_tree->stanzas, i);
     if (!strcmp(gt_obo_parse_tree_get_stanza_type(obo_parse_tree, i), "Term")) {
       had_err = validate_value(stanza, "id", err);
       if (!had_err)
@@ -402,8 +354,9 @@ static int stanza(GtOBOParseTree *obo_parse_tree, GtIO *obo_file, GtError *err)
   stanza_line_number = gt_io_get_line_number(obo_file);
   had_err = stanza_line(obo_file, type, err);
   if (!had_err) {
-    OBOStanza *obo_stanza = obo_stanza_new(gt_str_get(type), stanza_line_number,
-                                           gt_io_get_filename_str(obo_file));
+    GtOBOStanza *obo_stanza =
+      gt_obo_stanza_new(gt_str_get(type), stanza_line_number,
+                        gt_io_get_filename_str(obo_file));
     gt_obo_parse_tree_add_stanza(obo_parse_tree, obo_stanza);
     while (!had_err &&
            (any_char(obo_file, false) ||
@@ -414,7 +367,7 @@ static int stanza(GtOBOParseTree *obo_parse_tree, GtIO *obo_file, GtError *err)
         had_err = comment_line(obo_file, err);
       else {
         had_err = tag_line(obo_file, tag, value, err);
-        obo_stanza_add(obo_stanza, gt_str_get(tag), gt_str_get(value));
+        gt_obo_stanza_add(obo_stanza, gt_str_get(tag), gt_str_get(value));
       }
     }
   }
@@ -471,7 +424,7 @@ GtOBOParseTree* gt_obo_parse_tree_new(const char *obo_file_path, GtError *err)
   obo_file = gt_io_new(obo_file_path, "r");
   obo_parse_tree = gt_malloc(sizeof *obo_parse_tree);
   obo_parse_tree->obo_header = obo_header_new();
-  obo_parse_tree->stanzas = gt_array_new(sizeof (OBOStanza*));
+  obo_parse_tree->stanzas = gt_array_new(sizeof (GtOBOStanza*));
   if (parse_obo_file(obo_parse_tree, obo_file, err)) {
     gt_obo_parse_tree_delete(obo_parse_tree);
     gt_io_delete(obo_file);
@@ -485,8 +438,10 @@ void gt_obo_parse_tree_delete(GtOBOParseTree *obo_parse_tree)
 {
   unsigned long i;
   if (!obo_parse_tree) return;
-  for (i = 0; i < gt_array_size(obo_parse_tree->stanzas); i++)
-    obo_stanza_delete(*(OBOStanza**) gt_array_get(obo_parse_tree->stanzas, i));
+  for (i = 0; i < gt_array_size(obo_parse_tree->stanzas); i++) {
+    gt_obo_stanza_delete(*(GtOBOStanza**)
+                         gt_array_get(obo_parse_tree->stanzas, i));
+  }
   gt_array_delete(obo_parse_tree->stanzas);
   obo_header_delete(obo_parse_tree->obo_header);
   gt_free(obo_parse_tree);
@@ -497,8 +452,9 @@ const char* gt_obo_parse_tree_get_stanza_type(const GtOBOParseTree
                                               unsigned long stanza_num)
 {
   gt_assert(obo_parse_tree);
-  return obo_stanza_get_type(*(OBOStanza**)
-                             gt_array_get(obo_parse_tree->stanzas, stanza_num));
+  return gt_obo_stanza_get_type(*(GtOBOStanza**)
+                                gt_array_get(obo_parse_tree->stanzas,
+                                             stanza_num));
 }
 
 const char* gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree
@@ -507,9 +463,9 @@ const char* gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree
                                                const char *stanza_key)
 {
   gt_assert(obo_parse_tree);
-  return obo_stanza_get_value(*(OBOStanza**)
-                              gt_array_get(obo_parse_tree->stanzas, stanza_num),
-                              stanza_key);
+  return gt_obo_stanza_get_value(*(GtOBOStanza**)
+                                 gt_array_get(obo_parse_tree->stanzas,
+                                              stanza_num), stanza_key);
 }
 
 unsigned long gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree
