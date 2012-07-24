@@ -48,7 +48,7 @@
 -sysunrecog
 -shiftnegative
 -shiftimplementation
-#+posixlib
++posixlib
 -duplicatequals
 -exitarg
 # added to inhibit system errors on Ubuntu lucid, 20100618
