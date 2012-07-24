@@ -27,6 +27,7 @@
 #include "extended/rbtree.h"
 #include "chain2dim.h"
 #include "prsqualint.h"
+#include "stamp.h"
 
 /*
   The basic information required for each match is stored
@@ -399,6 +400,7 @@ static void gt_chain2dim_chainingboundarycases(const GtChain2Dimmode *chainmode,
                                   + GT_CHAIN2DIM_TERMINALGAP(0));
       }
       GT_CHAIN2DIM_CHECKCHAINSPACE(1UL);
+
       chain->chainedmatches.spaceGtChain2Dimref[0] = 0;
       chain->chainedmatches.nextfreeGtChain2Dimref = 1UL;
     }
@@ -432,30 +434,61 @@ static void gt_chain2dim_retrace_previousinchain(GtChain2Dim *chain,
   gt_assert(lengthofchain == 0);
 }
 
-static void gt_chain2dim_nd_retrace_allprevious(GtArrayGtUlong *stack,
-                                   GT_UNUSED GtChain2Dim *chain,
+typedef struct
+{
+  unsigned long level, son;
+} GtChain2DimEdgelevel;
+
+GT_DECLAREARRAYSTRUCT(GtChain2DimEdgelevel);
+
+static void gt_chain2dim_nd_retrace_allprevious(
+                                   GtArrayGtChain2DimEdgelevel *stack,
+                                   GtChain2Dim *chain,
                                    const GtChain2Dimmatchtable *matchtable,
-                                   unsigned long retracestart)
+                                   unsigned long retracestart,
+                                   GtChain2Dimprocessor chainprocessor,
+                                   void *cpinfo)
 {
   unsigned long idx;
+  GtChain2DimEdgelevel *el;
 
-  gt_assert(stack->nextfreeGtUlong == 0);
-
+  if (matchtable->previouscount[retracestart] == 0)
+  {
+    return;
+  }
+  gt_assert(stack->nextfreeGtChain2DimEdgelevel == 0);
   chain->storedinreverseorder = true;
+  GT_CHECKARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,32UL);
+  chain->chainedmatches.spaceGtChain2Dimref[0] = retracestart;
+  chain->chainedmatches.nextfreeGtChain2Dimref = 1UL;
   for (idx = matchtable->previousbound[retracestart];
        idx < matchtable->previousbound[retracestart] +
              matchtable->previouscount[retracestart]; idx++)
   {
-    GT_STOREINARRAY(stack,GtUlong,32UL,matchtable->previoustab[idx]);
+    GT_GETNEXTFREEINARRAY(el,stack,GtChain2DimEdgelevel,32UL);
+    el->level = 1UL;
+    el->son = matchtable->previoustab[idx];
   }
-  while (stack->nextfreeGtUlong > 0)
+  while (stack->nextfreeGtChain2DimEdgelevel > 0)
   {
-    unsigned long son = stack->spaceGtUlong[--stack->nextfreeGtUlong];
-    for (idx = matchtable->previousbound[son];
-         idx < matchtable->previousbound[son] +
-               matchtable->previouscount[son]; idx++)
+    GtChain2DimEdgelevel father
+      = stack->spaceGtChain2DimEdgelevel[--stack->nextfreeGtChain2DimEdgelevel];
+    GT_CHAIN2DIM_CHECKCHAINSPACE(father.son+1);
+    chain->chainedmatches.spaceGtChain2Dimref[father.level] = father.son;
+    chain->chainedmatches.nextfreeGtChain2Dimref = father.level + 1;
+    if (matchtable->previouscount[father.son] == 0)
     {
-      GT_STOREINARRAY(stack,GtUlong,32UL,matchtable->previoustab[idx]);
+      chainprocessor(cpinfo,matchtable,chain);
+    } else
+    {
+      for (idx = matchtable->previousbound[father.son];
+           idx < matchtable->previousbound[father.son] +
+                 matchtable->previouscount[father.son]; idx++)
+      {
+        GT_GETNEXTFREEINARRAY(el,stack,GtChain2DimEdgelevel,32UL);
+        el->level = father.level + 1;
+        el->son = father.son;
+      }
     }
   }
 }
@@ -697,9 +730,6 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
     matchtable->previousbound[0] = matchtable->previouscount[0];
     for (rightmatch=1UL; rightmatch<matchtable->nextfree; rightmatch++)
     {
-      printf("previouscount[%lu]=%lu,score=%ld\n",rightmatch,
-              matchtable->previouscount[rightmatch],
-              matchtable->matches[rightmatch].score);
       matchtable->previousbound[rightmatch]
         = matchtable->previousbound[rightmatch-1] +
           matchtable->previouscount[rightmatch];
@@ -1182,9 +1212,9 @@ static void gt_chain2dim_retrievechainthreshold(
                              void *cpinfo)
 {
   unsigned long matchnum;
-  GtArrayGtUlong stack;
+  GtArrayGtChain2DimEdgelevel stack;
 
-  GT_INITARRAY(&stack,GtUlong);
+  GT_INITARRAY(&stack,GtChain2DimEdgelevel);
   for (matchnum=0; matchnum < matchtable->nextfree; matchnum++)
   {
     if (gt_chain2dim_isrightmaximal_chain(matchtable,matchnum))
@@ -1227,12 +1257,14 @@ static void gt_chain2dim_retrievechainthreshold(
           } else
           {
             gt_chain2dim_nd_retrace_allprevious(&stack,chain, matchtable,
-                                                matchnum);
+                                                matchnum,chainprocessor,
+                                                cpinfo);
           }
         }
       }
     }
   }
+  GT_FREEARRAY(&stack,GtChain2DimEdgelevel);
 }
 
 static int comparestartandend(const Matchchaininfo *sortedstartpoints,
@@ -1403,16 +1435,13 @@ static unsigned int gt_chain2dim_findmaximalscores(
                   chain2dim_chainkind_global(chainmode->chainkind) ? "global"
                                                                    : "local",
                   minscore);
-    if (chainmode->chainkind != GLOBALCHAININGALLCHAINS)
-    {
-      gt_chain2dim_retrievechainthreshold(chainmode,
-                                          matchtable,
-                                          chain,
-                                          minscore,
-                                          chainequivalenceclasses,
-                                          chainprocessor,
-                                          cpinfo);
-    }
+    gt_chain2dim_retrievechainthreshold(chainmode,
+                                        matchtable,
+                                        chain,
+                                        minscore,
+                                        chainequivalenceclasses,
+                                        chainprocessor,
+                                        cpinfo);
     retval = 0;
   } else
   {
