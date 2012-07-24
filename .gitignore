@@ -14,9 +14,7 @@
 *.err
 *.esq
 *.fsp
-*.fsp
 *.gcov
-*.kys
 *.kys
 *.lcp
 *.llv
@@ -31,7 +29,6 @@
 *.polya
 *.polya.info
 *.prj
-*.pyc
 *.pyc
 *.sds
 *.ssp
@@ -72,7 +69,6 @@ gthtestsuite
 massif.*
 nohup.out
 out
-src/external/hmmer*
 src/external/hmmer*
 src/external/hmmer-2.3.2/squid/squid.h
 src/external/hmmer-2.3.2/squid/squidconf.h
