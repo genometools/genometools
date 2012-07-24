@@ -37,7 +37,11 @@ interfaces.
 
   <li><a href="#GtAlphabet">GtAlphabet</a>
 
+  <li><a href="#GtAnnoDBSchema">GtAnnoDBSchema</a>
+
   <li><a href="#GtArray">GtArray</a>
+
+  <li><a href="#GtArrayOutStream">GtArrayOutStream</a>
 
   <li><a href="#GtBEDInStream">GtBEDInStream</a>
 
@@ -135,9 +139,21 @@ interfaces.
 
   <li><a href="#GtMD5ToIDStream">GtMD5ToIDStream</a>
 
+  <li><a href="#GtMatchBlast">GtMatchBlast</a>
+
+  <li><a href="#GtMatchIterator">GtMatchIterator</a>
+
+  <li><a href="#GtMatchLAST">GtMatchLAST</a>
+
+  <li><a href="#GtMatchOpen">GtMatchOpen</a>
+
+  <li><a href="#GtMatchSW">GtMatchSW</a>
+
   <li><a href="#GtMergeFeatureStream">GtMergeFeatureStream</a>
 
   <li><a href="#GtMergeStream">GtMergeStream</a>
+
+  <li><a href="#GtMetaNode">GtMetaNode</a>
 
   <li><a href="#GtNodeStream">GtNodeStream</a>
 
@@ -152,6 +168,8 @@ interfaces.
   <li><a href="#GtPhase">GtPhase</a>
 
   <li><a href="#GtQueue">GtQueue</a>
+
+  <li><a href="#GtRDBVisitor">GtRDBVisitor</a>
 
   <li><a href="#GtRange">GtRange</a>
 
@@ -252,6 +270,54 @@ interfaces.
   <li><a href="#XANSI">XANSI</a>
 
 </ul>
+<h2>Sole functions</h2>
+<a name="gt_orf_iterator_new"></a>
+
+<code>GtORFIterator*       gt_orf_iterator_new(GtCodonIterator *ci,
+                                        GtTranslator *translator)</code>
+<p>
+Return a new <code>GtORFIterator*</code> which detects ORFs.
+</p>
+<hr>
+<a name="gt_orf_iterator_next"></a>
+
+<code>GtORFIteratorStatus  gt_orf_iterator_next(GtORFIterator *orf_iterator,
+                                         GtRange *orf_rng,
+                                         unsigned int *orf_frame,
+                                         GtError *err)</code>
+<p>
+Sets the values of <code>orf_rng.start</code>, <code>orf_rng.end</code> and <code>orf_frame</code> to the
+   current reading position of <code>ci</code> if START/STOP AA is found. The frame in
+   which the ORF is located is written to the position pointed to by
+   <code>orf_frame</code>. This function returns one of three status codes:
+   GT_ORF_ITERATOR_OK    : an ORF was detected successfully(START/STOP AA pair),
+   GT_ORF_ITERATOR_END   : no ORF was detected because the end of the scan
+                           region has been reached,
+   GT_ORF_ITERATOR_ERROR : no ORF was detected because an error occurred during
+                           sequence access. See <code>err</code> for details.
+</p>
+<hr>
+<a name="gt_orf_iterator_delete"></a>
+
+<code>void                 gt_orf_iterator_delete(GtORFIterator *orf_iterator)</code>
+<p>
+Delete <code>orf_iterator</code>.
+</p>
+<hr>
+<a name="gt_reverse_complement"></a>
+
+<code>int  gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError*)</code>
+<p>
+reverse <code>dna_seq</code> of length <code>seqlen</code> in place
+</p>
+<hr>
+<a name="gt_feature_stream_new"></a>
+
+<code>GtNodeStream*  gt_feature_stream_new(GtNodeStream*, GtFeatureIndex*)</code>
+<p>
+create a FeatureStream which writes to GtFeatureIndex
+</p>
+<hr>
 <a name="GtAddIntronsStream"></a>
 <h2>Class GtAddIntronsStream</h2>
 
@@ -550,6 +616,30 @@ Decrease the reference count for <code>alphabet</code> or delete it, if this was
    last reference.
 </p>
 <hr>
+<a name="GtAnnoDBSchema"></a>
+<h2>Class GtAnnoDBSchema</h2>
+
+<p> The ``GtAnnoDBSchema'' interface for a database-backed abstract
+   <code>GtFeatureIndex</code> factory </p>
+
+<hr>
+<a name="gt_anno_db_schema_get_feature_index"></a>
+
+<code>GtFeatureIndex*  gt_anno_db_schema_get_feature_index(GtAnnoDBSchema *schema,
+                                                    GtRDB *db, GtError *err)</code>
+<p>
+Returns a <code>GtFeatureIndex</code> object representing <code>GtRDB</code> object <code>db</code>
+   interpreted as having schema <code>schema</code>. Returns NULL if an error occurred,
+   <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_anno_db_schema_delete"></a>
+
+<code>void             gt_anno_db_schema_delete(GtAnnoDBSchema *schema)</code>
+<p>
+Deletes <code>schema</code> and frees all associated memory.
+</p>
+<hr>
 <a name="GtArray"></a>
 <h2>Class GtArray</h2>
 
@@ -751,11 +841,25 @@ Decrease the reference count for <code>array</code> or delete it, if this was th
    reference.
 </p>
 <hr>
+<a name="GtArrayOutStream"></a>
+<h2>Class GtArrayOutStream</h2>
+<a name="gt_array_out_stream_new"></a>
+
+<code>GtNodeStream*  gt_array_out_stream_new(GtNodeStream *in_stream,
+                                      GtArray *nodes,
+                                      GtError *err)</code>
+<p>
+Implements the <code>GtNodeStream</code> interface. <code>GtArrayOutStream</code> takes
+   <code>GtGenomeNodes</code> of tpe <code>GtFeatureNode</code> from <code>in_stream</code> and adds them to the
+   array <code>nodes</code>. This stream can be used to obtain nodes for processing outside
+   the usual stream flow
+</p>
+<hr>
 <a name="GtBEDInStream"></a>
 <h2>Class GtBEDInStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. A <code>GtBEDInStream</code> allows one to parse
-   a BED file and return it as a stream of <code>GtGenomeNode</code> objects. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtBEDInStream</code> allows one to
+   parse a BED file and return it as a stream of <code>GtGenomeNode</code> objects. </p>
 
 <hr>
 <a name="gt_bed_in_stream_new"></a>
@@ -1088,6 +1192,13 @@ Returns the <code>GtBlock</code>'s top level feature as a <code>GtFeatureNode</c
 <code>unsigned long          gt_block_get_size(const GtBlock*)</code>
 <p>
 Returns the number of elements in the <code>GtBlock</code>.
+</p>
+<hr>
+<a name="gt_block_get_type"></a>
+
+<code>const char*            gt_block_get_type(const GtBlock*)</code>
+<p>
+Returns the feature type of the <code>GtBlock</code>.
 </p>
 <hr>
 <a name="gt_block_delete"></a>
@@ -1681,6 +1792,14 @@ Create a new <code>GtEOFNode*</code> representing an EOF marker.
    sequential fashion. </p>
 
 <hr>
+<a name="gt_encseq_indexname"></a>
+
+<code>const char*        gt_encseq_indexname(const GtEncseq *encseq)</code>
+<p>
+Returns the indexname (as given at loading time) of <code>encseq</code>
+   or "generated" if the GtEncseq was build in memory only.
+</p>
+<hr>
 <a name="gt_encseq_total_length"></a>
 
 <code>unsigned long      gt_encseq_total_length(const GtEncseq *encseq)</code>
@@ -1805,6 +1924,13 @@ Returns <code>true</code> if <code>encseq</code> has multiple sequence support.
 <code>bool               gt_encseq_has_description_support(const GtEncseq *encseq)</code>
 <p>
 Returns <code>true</code> if <code>encseq</code> has description support.
+</p>
+<hr>
+<a name="gt_encseq_has_md5_support"></a>
+
+<code>bool               gt_encseq_has_md5_support(const GtEncseq *encseq)</code>
+<p>
+Returns <code>true</code> if <code>encseq</code> has MD5 support.
 </p>
 <hr>
 <a name="gt_encseq_seqstartpos"></a>
@@ -2284,6 +2410,23 @@ Enables support for lossless reproduction of the original sequence,
    enabled.
 </p>
 <hr>
+<a name="gt_encseq_encoder_enable_md5_support"></a>
+
+<code>void              gt_encseq_encoder_enable_md5_support(GtEncseqEncoder *ee)</code>
+<p>
+Enables support for quick MD5 indexing of the sequences in <code>ee</code>. Activated by
+   default.
+</p>
+<hr>
+<a name="gt_encseq_encoder_disable_md5_support"></a>
+
+<code>void              gt_encseq_encoder_disable_md5_support(GtEncseqEncoder *ee)</code>
+<p>
+Enables support for quick MD5 indexing of the sequences in <code>ee</code>. Encoded
+   sequences created without this support will not be able to be loaded via
+   a <code>GtEncseqLoader</code> with <code>gt_encseq_loader_require_md5_support()</code> enabled.
+</p>
+<hr>
 <a name="gt_encseq_encoder_create_des_tab"></a>
 
 <code>void              gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee)</code>
@@ -2350,6 +2493,29 @@ Disables creation of the .sds table.
 <code>bool              gt_encseq_encoder_sds_tab_requested(const GtEncseqEncoder *ee)</code>
 <p>
 Returns <code>true</code> if the creation of the .sds table has been requested,
+   <code>false</code> otherwise.
+</p>
+<hr>
+<a name="gt_encseq_encoder_create_md5_tab"></a>
+
+<code>void              gt_encseq_encoder_create_md5_tab(GtEncseqEncoder *ee)</code>
+<p>
+Enables creation of the .md5 table containing MD5 sums. Enabled by
+   default.
+</p>
+<hr>
+<a name="gt_encseq_encoder_do_not_create_md5_tab"></a>
+
+<code>void              gt_encseq_encoder_do_not_create_md5_tab(GtEncseqEncoder *ee)</code>
+<p>
+Disables creation of the .md5 table.
+</p>
+<hr>
+<a name="gt_encseq_encoder_md5_tab_requested"></a>
+
+<code>bool              gt_encseq_encoder_md5_tab_requested(const GtEncseqEncoder *ee)</code>
+<p>
+Returns <code>true</code> if the creation of the .md5 table has been requested,
    <code>false</code> otherwise.
 </p>
 <hr>
@@ -2497,6 +2663,26 @@ Disables support for lossless reproduction of the original sequence
    needs not be present.
    However, disabling this support may result in a reduced alphabet
    representation when accessing decoded characters.
+</p>
+<hr>
+<a name="gt_encseq_loader_require_md5_support"></a>
+
+<code>void              gt_encseq_loader_require_md5_support(GtEncseqLoader *el)</code>
+<p>
+Enables support for quick retrieval of the MD5 sums for the sequences in the
+   encoded sequence to be loaded by <code>el</code>. That is, the .md5 table must be
+   present. For example, this table is created by having enabled the
+   <code>gt_encseq_encoder_enable_md5_support()</code> option when encoding.
+   Activated by default.
+</p>
+<hr>
+<a name="gt_encseq_loader_drop_md5_support"></a>
+
+<code>void              gt_encseq_loader_drop_md5_support(GtEncseqLoader *el)</code>
+<p>
+Disables support for quick retrieval of the MD5 sums for the sequences in the
+   encoded sequence to be loaded by <code>el</code>. That is, the .md5 table needs not be
+   present.
 </p>
 <hr>
 <a name="gt_encseq_loader_require_des_tab"></a>
@@ -2776,19 +2962,30 @@ Create a <code>GtExtractFeatureStream*</code> which extracts the corresponding s
 <hr>
 <a name="gt_feature_index_add_region_node"></a>
 
-<code>void         gt_feature_index_add_region_node(GtFeatureIndex *feature_index,
-                                             GtRegionNode *region_node)</code>
+<code>int          gt_feature_index_add_region_node(GtFeatureIndex *feature_index,
+                                             GtRegionNode *region_node,
+                                             GtError *err)</code>
 <p>
 Add <code>region_node</code> to <code>feature_index</code>.
 </p>
 <hr>
 <a name="gt_feature_index_add_feature_node"></a>
 
-<code>void         gt_feature_index_add_feature_node(GtFeatureIndex *feature_index,
-                                              GtFeatureNode *feature_node)</code>
+<code>int          gt_feature_index_add_feature_node(GtFeatureIndex *feature_index,
+                                              GtFeatureNode *feature_node,
+                                              GtError *err)</code>
 <p>
 Add <code>feature_node</code> to <code>feature_index</code>, associating it with a sequence
    region denoted by its identifier string.
+</p>
+<hr>
+<a name="gt_feature_index_remove_node"></a>
+
+<code>int          gt_feature_index_remove_node(GtFeatureIndex *feature_index,
+                                         GtFeatureNode *node,
+                                         GtError *err)</code>
+<p>
+Removes node <code>genome_node</code> from <code>feature_index</code>.
 </p>
 <hr>
 <a name="gt_feature_index_add_gff3file"></a>
@@ -2803,7 +3000,8 @@ Add all features contained in <code>gff3file</code> to <code>feature_index</code
 <a name="gt_feature_index_get_features_for_seqid"></a>
 
 <code>GtArray*     gt_feature_index_get_features_for_seqid(GtFeatureIndex*,
-                                                    const char *seqid)</code>
+                                                    const char *seqid,
+                                                    GtError *err)</code>
 <p>
 Returns an array of <code>GtFeatureNodes</code> associated with a given sequence region
    identifier <code>seqid</code>.
@@ -2824,15 +3022,17 @@ Look up genome features in <code>feature_index</code> for sequence region <code>
 <hr>
 <a name="gt_feature_index_get_first_seqid"></a>
 
-<code>const char*  gt_feature_index_get_first_seqid(const GtFeatureIndex
-                                             *feature_index)</code>
+<code>char*        gt_feature_index_get_first_seqid(const GtFeatureIndex
+                                             *feature_index,
+                                             GtError *err)</code>
 <p>
 Returns the first sequence region identifier added to <code>feature_index</code>.
 </p>
 <hr>
 <a name="gt_feature_index_get_seqids"></a>
 
-<code>GtStrArray*  gt_feature_index_get_seqids(const GtFeatureIndex *feature_index)</code>
+<code>GtStrArray*  gt_feature_index_get_seqids(const GtFeatureIndex *feature_index,
+                                        GtError *err)</code>
 <p>
 Returns a <code>GtStrArray</code> of all sequence region identifiers contained in
    <code>feature_index</code> (in alphabetical order).
@@ -2840,9 +3040,10 @@ Returns a <code>GtStrArray</code> of all sequence region identifiers contained i
 <hr>
 <a name="gt_feature_index_get_range_for_seqid"></a>
 
-<code>void         gt_feature_index_get_range_for_seqid(GtFeatureIndex *feature_index,
+<code>int          gt_feature_index_get_range_for_seqid(GtFeatureIndex *feature_index,
                                                  GtRange *range,
-                                                 const char *seqid)</code>
+                                                 const char *seqid,
+                                                 GtError *err)</code>
 <p>
 Writes the range of all features contained in the <code>feature_index</code> for
    region identifier <code>seqid</code> to the <code>GtRange</code> pointer <code>range</code>.
@@ -2850,11 +3051,20 @@ Writes the range of all features contained in the <code>feature_index</code> for
 <hr>
 <a name="gt_feature_index_has_seqid"></a>
 
-<code>bool         gt_feature_index_has_seqid(const GtFeatureIndex *feature_index,
-                                       const char *seqid)</code>
+<code>int          gt_feature_index_has_seqid(const GtFeatureIndex *feature_index,
+                                       bool *has_seqid,
+                                       const char *seqid,
+                                       GtError *err)</code>
 <p>
-Returns <code>true</code> if the sequence region identified by <code>seqid</code> has been
-  registered in the <code>feature_index</code>.
+Returns <code>has_seqid</code>  to true if the sequence region identified by <code>seqid</code>
+   has been registered in the <code>feature_index</code>.
+</p>
+<hr>
+<a name="gt_feature_index_save"></a>
+
+<code>int          gt_feature_index_save(GtFeatureIndex *feature_index, GtError *err)</code>
+<p>
+TODO: document me
 </p>
 <hr>
 <a name="gt_feature_index_delete"></a>
@@ -2878,6 +3088,16 @@ Deletes the <code>feature_index</code> and all its referenced features.
 <code>GtFeatureIndex*  gt_feature_index_memory_new(void)</code>
 <p>
 Creates a new <code>GtFeatureIndexMemory</code> object.
+</p>
+<hr>
+<a name="gt_feature_index_memory_get_node_by_ptr"></a>
+
+<code>GtFeatureNode*   gt_feature_index_memory_get_node_by_ptr(GtFeatureIndexMemory*,
+                                                        GtFeatureNode *ptr,
+                                                        GtError *err)</code>
+<p>
+Returns <code>ptr</code> if it is a valid node indexed in <code>GtFeatureIndexMemory</code>.
+   Otherwise NULL is returned and <code>err</code> is set accordingly.
 </p>
 <hr>
 <a name="GtFeatureNode"></a>
@@ -3005,6 +3225,25 @@ Set the type of <code>feature_node</code> to <code>type</code>.
 Return <code>true</code> if <code>feature_node</code> has given <code>type</code>, <code>false</code> otherwise.
 </p>
 <hr>
+<a name="gt_feature_node_number_of_children"></a>
+
+<code>unsigned long   gt_feature_node_number_of_children(const GtFeatureNode
+                                                  *feature_node)</code>
+<p>
+Return the number of children for given <code>feature_node</code>.
+</p>
+<hr>
+<a name="gt_feature_node_number_of_children_of_type"></a>
+
+<code>unsigned long   gt_feature_node_number_of_children_of_type(const GtFeatureNode
+                                                          *parent,
+                                                          const GtFeatureNode
+                                                          *node)</code>
+<p>
+Return the number of children of type <code>node</code>
+   for given GtFeatureNode <code>parent</code>.
+</p>
+<hr>
 <a name="gt_feature_node_score_is_defined"></a>
 
 <code>bool            gt_feature_node_score_is_defined(const GtFeatureNode
@@ -3113,6 +3352,16 @@ Set attribute <code>tag</code> to new <code>value</code> in <code>feature_node</
    <code>gt_feature_node_add_child()</code> to denote part-of relationships.
 </p>
 <hr>
+<a name="gt_feature_node_remove_attribute"></a>
+
+<code>void            gt_feature_node_remove_attribute(GtFeatureNode* feature_node,
+                                                const char *tag)</code>
+<p>
+Remove attribute <code>tag</code> from <code>feature_node</code>. <code>feature_node</code> must contain an
+   attribute with the given <code>tag</code> already! You should not remove Parent and ID
+   attributes.
+</p>
+<hr>
 <a name="gt_feature_node_is_multi"></a>
 
 <code>bool            gt_feature_node_is_multi(const GtFeatureNode *feature_node)</code>
@@ -3171,6 +3420,34 @@ Return the representative of the multi-feature <code>feature_node</code>.
 Returns <code>true</code>, if the given <code>feature_node_a</code> has the same seqid, feature
    type, range, strand, and phase as <code>feature_node_b</code>.
    Returns <code>false</code> otherwise.
+</p>
+<hr>
+<a name="gt_feature_node_mark"></a>
+
+<code>void            gt_feature_node_mark(GtFeatureNode*)</code>
+<p>
+Marks the given <code>feature_node</code>.
+</p>
+<hr>
+<a name="gt_feature_node_unmark"></a>
+
+<code>void            gt_feature_node_unmark(GtFeatureNode*)</code>
+<p>
+If the given <code>feature_node</code> is marked it will be unmarked.
+</p>
+<hr>
+<a name="gt_feature_node_contains_marked"></a>
+
+<code>bool            gt_feature_node_contains_marked(GtFeatureNode *feature_node)</code>
+<p>
+Returns <code>true</code> if the given <code>feature_node</code> graph contains a marked node.
+</p>
+<hr>
+<a name="gt_feature_node_is_marked"></a>
+
+<code>bool            gt_feature_node_is_marked(const GtFeatureNode *feature_node)</code>
+<p>
+Returns <code>true</code> if the (top-level) <code>feature_node</code> is marked.
 </p>
 <hr>
 <a name="GtFeatureNodeIterator"></a>
@@ -3667,6 +3944,20 @@ Compare <code>genome_node_a</code> with <code>genome_node_b</code> and return th
    to <code>strcmp(3)</code>). This method is the criterion used to sort genome nodes.
 </p>
 <hr>
+<a name="gt_genome_nodes_sort"></a>
+
+<code>void           gt_genome_nodes_sort(GtArray *nodes)</code>
+<p>
+Sort node array <code>nodes</code>
+</p>
+<hr>
+<a name="gt_genome_nodes_sort_stable"></a>
+
+<code>void           gt_genome_nodes_sort_stable(GtArray *nodes)</code>
+<p>
+Sort node array <code>nodes</code> in a stable way
+</p>
+<hr>
 <a name="gt_genome_node_accept"></a>
 
 <code>int            gt_genome_node_accept(GtGenomeNode *genome_node,
@@ -3979,6 +4270,13 @@ Creates a new <code>GtHashmap</code> object of type <code>keyhashtype</code>. If
    strings are identical, regardless of their address in memory
 </p>
 <hr>
+<a name="gt_hashmap_ref"></a>
+
+<code>GtHashmap*  gt_hashmap_ref(GtHashmap *hm)</code>
+<p>
+Increase the reference count of <code>hm</code>.
+</p>
+<hr>
 <a name="gt_hashmap_get"></a>
 
 <code>void*       gt_hashmap_get(GtHashmap *hashmap, const void *key)</code>
@@ -4183,7 +4481,20 @@ Inserts node <code>node</code> into <code>tree</code>.
                                                           GtArray*)</code>
 <p>
 Collects data pointers of all <code>GtIntervalTreeNode</code>s in the tree which
-   overlapp with the query range (from <code>start</code> to <code>end</code>) in a <code>GtArray</code>.
+   overlap with the query range (from <code>start</code> to <code>end</code>) in a <code>GtArray</code>.
+</p>
+<hr>
+<a name="gt_interval_tree_iterate_overlapping"></a>
+
+<code>void                 gt_interval_tree_iterate_overlapping(GtIntervalTree *it,
+                                                GtIntervalTreeIteratorFunc func,
+                                                unsigned long start,
+                                                unsigned long end,
+                                                void *data)</code>
+<p>
+Call <code>func</code> for all <code>GtIntervalTreeNode</code>s in the tree which overlap with
+   the query range (from <code>start</code> to <code>end</code>). Use <code>data</code> to pass in arbitrary
+   user data.
 </p>
 <hr>
 <a name="gt_interval_tree_traverse"></a>
@@ -4195,6 +4506,19 @@ Collects data pointers of all <code>GtIntervalTreeNode</code>s in the tree which
 Traverses the <code>GtIntervalTree</code> in a depth-first fashion, applying <code>func</code> to
    each node encountered. The <code>data</code> pointer can be used to reference arbitrary
    data needed in the <code>GtIntervalTreeIteratorFunc</code>.
+</p>
+<hr>
+<a name="gt_interval_tree_remove"></a>
+
+<code>void                 gt_interval_tree_remove(GtIntervalTree*,
+                                            GtIntervalTreeNode *node)</code>
+<p>
+Removes the entry referenced by <code>node</code> from the <code>GtIntervalTree</code>.
+   The data attached to <code>node</code> is freed according to the free function defined
+   in the tree.
+   Note that the memory pointed to by <code>node</code> can be re-used internally,
+   referencing other data in the tree. Make sure to handle this pointer as
+   expired after calling <code>gt_interval_tree_remove()</code>!
 </p>
 <hr>
 <a name="gt_interval_tree_delete"></a>
@@ -4398,6 +4722,216 @@ Create a <code>GtMD5toIDStream*</code> which converts MD5 sequence IDs from node
    given <code>region_mapping</code>). Takes ownership of <code>region_mapping</code>!
 </p>
 <hr>
+<a name="GtMatchBlast"></a>
+<h2>Class GtMatchBlast</h2>
+<a name="gt_match_blast_new"></a>
+
+<code>GtMatch*  gt_match_blast_new(char *seqid1,
+                            char *seqid2,
+                            unsigned long start_seq1,
+                            unsigned long start_seq2,
+                            unsigned long end_seq1,
+                            unsigned long end_seq2,
+                            double evalue,
+                            float bitscore,
+                            unsigned long ali_l,
+                            GtMatchDirection dir)</code>
+<p>
+Creates a new <code>GtMatch</code> object meant to store results in the BLAST
+   format. That is, it stores double values <code>evalue</code> for match E-values,
+   <code>bitscore</code>s and the alignment length <code>ali_l</code> in addition to the generic
+   match contents <code>seqid1</code>, <code>seqid2</code>, <code>start_seq1</code>, <code>start_seq2</code>, <code>end_seq1</code>,
+   and <code>end_seq2</code>.
+</p>
+<hr>
+<a name="gt_match_blast_set_evalue"></a>
+
+<code>void  gt_match_blast_set_evalue(GtMatchBlast *mb, long double evalue)</code>
+<p>
+Sets <code>evalue</code> to be the E-value in <code>mb</code>.
+</p>
+<hr>
+<a name="gt_match_blast_set_bitscore"></a>
+
+<code>void  gt_match_blast_set_bitscore(GtMatchBlast *mb, float bits)</code>
+<p>
+Sets <code>bits</code> to be the bit-score in <code>mb</code>.
+</p>
+<hr>
+<a name="gt_match_blast_set_align_length"></a>
+
+<code>void  gt_match_blast_set_align_length(GtMatchBlast *mb, unsigned long length)</code>
+<p>
+Sets <code>length</code> to be the alignment length in <code>mb</code>.
+</p>
+<hr>
+<a name="gt_match_blast_get_evalue"></a>
+
+<code>long double  gt_match_blast_get_evalue(GtMatchBlast *mb)</code>
+<p>
+Returns the E-value stored in <code>mb</code>.
+</p>
+<hr>
+<a name="gt_match_blast_get_bitscore"></a>
+
+<code>float  gt_match_blast_get_bitscore(GtMatchBlast *mb)</code>
+<p>
+Returns the bit-score value stored in <code>mb</code>.
+</p>
+<hr>
+<a name="gt_match_blast_get_align_length"></a>
+
+<code>unsigned long  gt_match_blast_get_align_length(GtMatchBlast *mb)</code>
+<p>
+Returns the alignment length stored in <code>mb</code>.
+</p>
+<hr>
+<a name="GtMatchIterator"></a>
+<h2>Class GtMatchIterator</h2>
+<a name="gt_match_iterator_next"></a>
+
+<code>GtMatchIteratorStatus  gt_match_iterator_next(GtMatchIterator *mp,
+                                             GtMatch **match, GtError *err)</code>
+<p>
+Advances <code>mp</code> by one, returning the next match.
+   Writes a pointer to the next match to the position pointed to by <code>match</code>.
+   Returns GT_MATCHER_STATUS_OK when the match could be delivered and there are
+   more matches to come, GT_MATCHER_STATUS_END when no more matches are
+   available, and GT_MATCHER_STATUS_ERROR if an error occurred. <code>err</code> is set
+   accordingly.
+</p>
+<hr>
+<a name="gt_match_iterator_delete"></a>
+
+<code>void                   gt_match_iterator_delete(GtMatchIterator *mp)</code>
+<p>
+Deletes <code>mp</code>, freeing all associated space.
+</p>
+<hr>
+<a name="GtMatchLAST"></a>
+<h2>Class GtMatchLAST</h2>
+<a name="gt_match_last_new"></a>
+
+<code>GtMatch*       gt_match_last_new(const char *seqid1,
+                                const char *seqid2,
+                                unsigned long score,
+                                unsigned long seqno1,
+                                unsigned long seqno2,
+                                unsigned long start_seq1,
+                                unsigned long start_seq2,
+                                unsigned long end_seq1,
+                                unsigned long end_seq2,
+                                GtMatchDirection dir)</code>
+<p>
+Creates a new <code>GtMatch</code> object meant to store results from the
+   LAST software.
+</p>
+<hr>
+<a name="gt_match_last_get_seqno1"></a>
+
+<code>unsigned long  gt_match_last_get_seqno1(const GtMatchLAST *ml)</code>
+<p>
+Returns the sequence number of the match <code>ms</code> in the first <code>GtEncseq</code>.
+</p>
+<hr>
+<a name="gt_match_last_get_seqno2"></a>
+
+<code>unsigned long  gt_match_last_get_seqno2(const GtMatchLAST *ml)</code>
+<p>
+Returns the sequence number of the match <code>ms</code> in the second <code>GtEncseq</code>.
+</p>
+<hr>
+<a name="gt_match_last_get_score"></a>
+
+<code>unsigned long  gt_match_last_get_score(const GtMatchLAST *ml)</code>
+<p>
+Returns the LAST score of the match <code>ms</code>.
+</p>
+<hr>
+<a name="GtMatchOpen"></a>
+<h2>Class GtMatchOpen</h2>
+<a name="gt_match_open_new"></a>
+
+<code>GtMatch*  gt_match_open_new(char *seqid1,
+                           char *seqid2,
+                           unsigned long start_seq1,
+                           unsigned long start_seq2,
+                           unsigned long end_seq1,
+                           unsigned long end_seq2,
+                           long weight,
+                           GtMatchDirection dir)</code>
+<p>
+Creates a new <code>GtMatch</code> object meant to store results in the OpenMatch
+   format. That is, it stores long values <code>weight</code> in addition to the generic
+   match contents <code>seqid1</code>, <code>seqid2</code>, <code>start_seq1</code>, <code>start_seq2</code>, <code>end_seq1</code>,
+   and <code>end_seq2</code>.
+</p>
+<hr>
+<a name="gt_match_open_set_weight"></a>
+
+<code>void  gt_match_open_set_weight(GtMatchOpen *mo, long weight)</code>
+<p>
+Sets <code>weight</code> to be the weight value in <code>mo</code>.
+</p>
+<hr>
+<a name="gt_match_open_get_weight"></a>
+
+<code>long  gt_match_open_get_weight(GtMatchOpen *mo)</code>
+<p>
+Returns the weight value stored in <code>mo</code>.
+</p>
+<hr>
+<a name="GtMatchSW"></a>
+<h2>Class GtMatchSW</h2>
+<a name="gt_match_sw_new"></a>
+
+<code>GtMatch*       gt_match_sw_new(const char *seqid1,
+                              const char *seqid2,
+                              unsigned long seqno1,
+                              unsigned long seqno2,
+                              unsigned long length,
+                              unsigned long edist,
+                              unsigned long start_seq1,
+                              unsigned long start_seq2,
+                              unsigned long end_seq1,
+                              unsigned long end_seq2,
+                              GtMatchDirection dir)</code>
+<p>
+Creates a new <code>GtMatch</code> object meant to store results from Smith-Waterman
+   matching (using the <code>swalign</code> module). That is, it stores the alignment
+   length <code>length</code>, the edit distance <code>edist</code> and the sequence numbers in the
+   <code>GtEncseqs</code> in addition to the generic match contents <code>seqid1</code>, <code>seqid2</code>,
+   <code>start_seq1</code>, <code>start_seq2</code>, <code>end_seq1</code> and <code>end_seq2</code>.
+</p>
+<hr>
+<a name="gt_match_sw_get_seqno1"></a>
+
+<code>unsigned long  gt_match_sw_get_seqno1(const GtMatchSW *ms)</code>
+<p>
+Returns the sequence number of the match <code>ms</code> in the first <code>GtEncseq</code>.
+</p>
+<hr>
+<a name="gt_match_sw_get_seqno2"></a>
+
+<code>unsigned long  gt_match_sw_get_seqno2(const GtMatchSW *ms)</code>
+<p>
+Returns the sequence number of the match <code>ms</code> in the second <code>GtEncseq</code>.
+</p>
+<hr>
+<a name="gt_match_sw_get_alignment_length"></a>
+
+<code>unsigned long  gt_match_sw_get_alignment_length(const GtMatchSW *ms)</code>
+<p>
+Returns the alignment length of the match <code>ms</code>.
+</p>
+<hr>
+<a name="gt_match_sw_get_edist"></a>
+
+<code>unsigned long  gt_match_sw_get_edist(const GtMatchSW *ms)</code>
+<p>
+Returns the edit distance of the match <code>ms</code>.
+</p>
+<hr>
 <a name="GtMergeFeatureStream"></a>
 <h2>Class GtMergeFeatureStream</h2>
 
@@ -4417,8 +4951,8 @@ Create a <code>GtMergeFeatureStream*</code> which merges adjacent features of th
 <a name="GtMergeStream"></a>
 <h2>Class GtMergeStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. A <code>GtMergeStream</code> allows one to merge a
-   set of sorted streams in a sorted fashion. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtMergeStream</code> allows one to
+   merge a set of sorted streams in a sorted fashion. </p>
 
 <hr>
 <a name="gt_merge_stream_new"></a>
@@ -4427,6 +4961,40 @@ Create a <code>GtMergeFeatureStream*</code> which merges adjacent features of th
 <p>
 Create a <code>GtMergeStream*</code> which merges the given (sorted) <code>node_streams</code> in a
    sorted fashion.
+</p>
+<hr>
+<a name="GtMetaNode"></a>
+<h2>Class GtMetaNode</h2>
+
+<p> Implements the <code>GtGenomeNode</code> interface. Meta nodes correspond to meta
+   lines in GFF3 files (i.e., lines which start with  ``<code>##</code>'') which are not
+   sequence-region lines. </p>
+
+<hr>
+<a name="gt_meta_node_new"></a>
+
+<code>GtGenomeNode*             gt_meta_node_new(const char *meta_directive,
+                                          const char *meta_data)</code>
+<p>
+Return a new <code>GtMetaNode</code> object representing a <code>meta_directive</code> with the
+   corresponding <code>meta_data</code>. Please note that the leading ``<code>##</code>'' which
+   denotes meta lines in GFF3 files should not be part of the
+   <code>meta_directive</code>.
+</p>
+<hr>
+<a name="gt_meta_node_get_directive"></a>
+
+<code>const char*               gt_meta_node_get_directive(const GtMetaNode
+                                                    *meta_node)</code>
+<p>
+Return the meta directive stored in <code>meta_node</code>.
+</p>
+<hr>
+<a name="gt_meta_node_get_data"></a>
+
+<code>const char*               gt_meta_node_get_data(const GtMetaNode *meta_node)</code>
+<p>
+Return the meta data stored in <code>meta_node</code>.
 </p>
 <hr>
 <a name="GtNodeStream"></a>
@@ -4548,6 +5116,15 @@ Visit <code>comment_node</code> with <code>node_visitor</code>.
                                          GtError *err)</code>
 <p>
 Visit <code>feature_node</code> with <code>node_visitor</code>.
+</p>
+<hr>
+<a name="gt_node_visitor_visit_meta_node"></a>
+
+<code>int    gt_node_visitor_visit_meta_node(GtNodeVisitor *node_visitor,
+                                      GtMetaNode *meta_node,
+                                      GtError *err)</code>
+<p>
+Visit <code>meta_node</code> with <code>node_visitor</code>.
 </p>
 <hr>
 <a name="gt_node_visitor_visit_region_node"></a>
@@ -5099,10 +5676,10 @@ Set the <code>mail_address</code> used in the final "Report bugs to" line of the
                                                void *data)</code>
 <p>
 Register a <code>hook_function</code> with <code>option_parser</code>. All registered hook
-   functions are called at the end of <code>gt_option_parser_parse(</code>).
-   This allows one to have a module which registers a bunch of options in the option
-   parser and automatically performs necessary postprocessing after the option
-   parsing has been done via the hook function.
+   functions are called at the end of <code>gt_option_parser_parse()</code>.
+   This allows one to have a module which registers a bunch of options in the
+   option parser and automatically performs necessary postprocessing after the
+   option parsing has been done via the hook function.
 </p>
 <hr>
 <a name="gt_option_parser_set_min_args"></a>
@@ -5235,6 +5812,37 @@ Return the number of elements in <code>queue</code>.
 <code>void           gt_queue_delete(GtQueue *queue)</code>
 <p>
 Delete <code>queue</code>. Elements contained in <code>queue</code> are not freed!
+</p>
+<hr>
+<a name="GtRDBVisitor"></a>
+<h2>Class GtRDBVisitor</h2>
+
+<p> The <code>GtRDBVisitor</code> interface, a visitor for <code>GtRDB</code> objects. </p>
+
+<hr>
+<a name="gt_rdb_visitor_visit_sqlite"></a>
+
+<code>int    gt_rdb_visitor_visit_sqlite(GtRDBVisitor *rdbv, GtRDBSqlite *rdbs,
+                                  GtError *err)</code>
+<p>
+Visit a SQLite database <code>rdbs</code> with <code>rdbv</code>. Returns 0 on success,
+   a negative value otherwise, and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_rdb_visitor_visit_mysql"></a>
+
+<code>int    gt_rdb_visitor_visit_mysql(GtRDBVisitor *rdbv, GtRDBMySQL *rdbm,
+                                 GtError *err)</code>
+<p>
+Visit a MySQL database <code>rdbm</code> with <code>rdbv</code>. Returns 0 on success,
+   a negative value otherwise, and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_rdb_visitor_delete"></a>
+
+<code>void   gt_rdb_visitor_delete(GtRDBVisitor *rdbv)</code>
+<p>
+Delete <code>rdbv</code>.
 </p>
 <hr>
 <a name="GtRange"></a>
@@ -5538,7 +6146,10 @@ Create a new <code>GtRegionNode*</code> representing sequence with ID <code>seqi
                                    double min_gene_score,
                                    double max_gene_score,
                                    double min_average_splice_site_prob,
-                                   unsigned long feature_num)</code>
+                                   unsigned long feature_num,
+                                   GtStrArray *select_files,
+                                   GtStr *select_logic,
+                                   GtError *err)</code>
 <p>
 Create a <code>GtSelectStream</code> object which selects genome nodes it retrieves from
    its <code>in_stream</code> and passes them along if they meet the criteria defined by
@@ -5566,6 +6177,24 @@ Create a <code>GtSelectStream</code> object which selects genome nodes it retrie
    selected.
    If <code>feature_num</code> is defined, just the <code>feature_num</code>th feature node occurring
    in the <code>in_stream</code> is selected.
+   If <code>select_files</code> is defined and has at least one entry, the entries are
+   evaluated as Lua scripts containing functions taking <code>GtGenomeNodes</code> that
+   are evaluated to boolean values to determine selection. <code>select_logic</code>
+   can be "OR" or "AND", defining how the results from the select scripts are
+   combined.
+   Returns a pointer to a new <code>GtSelectStream</code> or NULL on error (<code>err</code> is set
+   accordingly).
+</p>
+<hr>
+<a name="gt_select_stream_set_drophandler"></a>
+
+<code>void           gt_select_stream_set_drophandler(GtSelectStream *sstr,
+                                               GtSelectNodeFunc fp,
+                                               void *data)</code>
+<p>
+Sets <code>fp</code> as a handler function to be called for every <code>GtGenomeNode</code> not
+   selected by <code>sstr</code>. The void pointer <code>data</code> can be used for arbitrary user
+   data.
 </p>
 <hr>
 <a name="GtSequenceNode"></a>
@@ -6081,6 +6710,26 @@ Sets a color value in the <code>GtStyle</code> for section <code>section</code> 
    certain <code>color</code>.
 </p>
 <hr>
+<a name="gt_style_get_color"></a>
+
+<code>GtStyleQueryStatus  gt_style_get_color(const GtStyle *style, const char *section,
+                                      const char *key, GtColor *result,
+                                      GtFeatureNode *fn, GtError *err)</code>
+<p>
+Retrieves a color value from <code>style</code> for key <code>key</code> in section <code>section</code>.
+   The color is written to the location pointed to by <code>result</code>. Optionally, a
+   feature node pointer <code>fn</code> can be specified for handling in node-specific
+   callbacks.
+   Because color definitions can be functions, <code>gt_style_get_color()</code> can fail
+   at runtime. In this case, this function returns GT_STYLE_QUERY_ERROR and
+   <code>err</code> is set accordingly.
+   If the color was not specified in <code>style</code>, a grey default color
+   is written to <code>result</code> and GT_STYLE_QUERY_NOT_SET is returned so the caller
+   can provide a custom default.
+   In case of successful retrieval of an existing color, GT_STYLE_QUERY_OK
+   is returned.
+</p>
+<hr>
 <a name="gt_style_set_str"></a>
 
 <code>void      gt_style_set_str(GtStyle*, const char *section, const char *key,
@@ -6165,6 +6814,15 @@ Set the given <code>tag</code> in <code>tag_value_map</code> to <code>value</cod
 <p>
 Return value corresponding to <code>tag</code> from <code>tag_value_map</code>. If <code>tag_value_map</code>
    does not contain such a value, <code>NULL</code> is returned.
+</p>
+<hr>
+<a name="gt_tag_value_map_remove"></a>
+
+<code>void           gt_tag_value_map_remove(GtTagValueMap *tag_value_map,
+                                      const char *tag)</code>
+<p>
+Removes the given <code>tag</code> from <code>tag_value_map</code>. <code>tag_value_map</code> must contain
+   the given <code>tag</code> already!
 </p>
 <hr>
 <a name="gt_tag_value_map_foreach"></a>
@@ -6716,6 +7374,16 @@ Creates a duplicate of string <code>cstr</code> using the GenomeTools memory
    allocator.
 </p>
 <hr>
+<a name="gt_cstr_split"></a>
+
+<code>char**         gt_cstr_split(const char *cstr, char sep)</code>
+<p>
+Splits the \0-terminated <code>cstr</code> at all positions where <code>sep</code> occurs and
+   returns a C string array in which each element is a separate string between
+   the occurrences of <code>sep</code>. The string array is terminated by NULL. The caller
+   is responsible to free the result.
+</p>
+<hr>
 <a name="gt_cstr_dup_nt"></a>
 
 <code>char*          gt_cstr_dup_nt(const char *cstr, unsigned long length)</code>
@@ -7113,6 +7781,16 @@ Like <code>gt_parse_range</code>, but issues a warning if <code>start</code> is 
    not-positive and sets the corresponding value to 1.
 </p>
 <hr>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
 <a name="Qsort"></a>
 <h2>Module Qsort</h2>
 <a name="gt_qsort_r"></a>
@@ -7369,6 +8047,13 @@ Similar to <code>fputs(3)</code>, terminates on error.
 Similar to <code>fread(3)</code>, terminates on error.
 </p>
 <hr>
+<a name="gt_xfread_one"></a>
+
+<code>#define gt_xfread_one(ptr, fp)</code>
+<p>
+shortcut to gt_xfread
+</p>
+<hr>
 <a name="gt_xfseek"></a>
 
 <code>void    gt_xfseek(FILE*, long offset, int whence)</code>
@@ -7388,6 +8073,13 @@ Similar to <code>fsetpos(3)</code>, terminates on error.
 <code>void    gt_xfwrite(const void *ptr, size_t size, size_t nmemb, FILE*)</code>
 <p>
 Similar to <code>fwrite(3)</code>, terminates on error.
+</p>
+<hr>
+<a name="gt_xfwrite_one"></a>
+
+<code>#define gt_xfwrite_one(ptr, fp)</code>
+<p>
+shortcut to gt_xfwrite
 </p>
 <hr>
 <a name="gt_xputchar"></a>
@@ -7529,6 +8221,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_alphabet_wildcard_show"><code>gt_alphabet_wildcard_show</code></a><br>
 
+  <a href="#gt_anno_db_schema_delete"><code>gt_anno_db_schema_delete</code></a><br>
+
+  <a href="#gt_anno_db_schema_get_feature_index"><code>gt_anno_db_schema_get_feature_index</code></a><br>
+
   <a href="#gt_array2dim_calloc"><code>gt_array2dim_calloc</code></a><br>
 
   <a href="#gt_array2dim_delete"><code>gt_array2dim_delete</code></a><br>
@@ -7560,6 +8256,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_array_get_space"><code>gt_array_get_space</code></a><br>
 
   <a href="#gt_array_new"><code>gt_array_new</code></a><br>
+
+  <a href="#gt_array_out_stream_new"><code>gt_array_out_stream_new</code></a><br>
 
   <a href="#gt_array_pop"><code>gt_array_pop</code></a><br>
 
@@ -7661,6 +8359,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_block_get_top_level_feature"><code>gt_block_get_top_level_feature</code></a><br>
 
+  <a href="#gt_block_get_type"><code>gt_block_get_type</code></a><br>
+
   <a href="#gt_block_has_only_one_fullsize_element"><code>gt_block_has_only_one_fullsize_element</code></a><br>
 
   <a href="#gt_block_merge"><code>gt_block_merge</code></a><br>
@@ -7738,6 +8438,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_cstr_rtrim"><code>gt_cstr_rtrim</code></a><br>
 
   <a href="#gt_cstr_show"><code>gt_cstr_show</code></a><br>
+
+  <a href="#gt_cstr_split"><code>gt_cstr_split</code></a><br>
 
   <a href="#gt_cstr_table_add"><code>gt_cstr_table_add</code></a><br>
 
@@ -7853,6 +8555,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_encoder_create_des_tab"><code>gt_encseq_encoder_create_des_tab</code></a><br>
 
+  <a href="#gt_encseq_encoder_create_md5_tab"><code>gt_encseq_encoder_create_md5_tab</code></a><br>
+
   <a href="#gt_encseq_encoder_create_sds_tab"><code>gt_encseq_encoder_create_sds_tab</code></a><br>
 
   <a href="#gt_encseq_encoder_create_ssp_tab"><code>gt_encseq_encoder_create_ssp_tab</code></a><br>
@@ -7865,9 +8569,13 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_encoder_disable_lossless_support"><code>gt_encseq_encoder_disable_lossless_support</code></a><br>
 
+  <a href="#gt_encseq_encoder_disable_md5_support"><code>gt_encseq_encoder_disable_md5_support</code></a><br>
+
   <a href="#gt_encseq_encoder_disable_multiseq_support"><code>gt_encseq_encoder_disable_multiseq_support</code></a><br>
 
   <a href="#gt_encseq_encoder_do_not_create_des_tab"><code>gt_encseq_encoder_do_not_create_des_tab</code></a><br>
+
+  <a href="#gt_encseq_encoder_do_not_create_md5_tab"><code>gt_encseq_encoder_do_not_create_md5_tab</code></a><br>
 
   <a href="#gt_encseq_encoder_do_not_create_sds_tab"><code>gt_encseq_encoder_do_not_create_sds_tab</code></a><br>
 
@@ -7876,6 +8584,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_encoder_enable_description_support"><code>gt_encseq_encoder_enable_description_support</code></a><br>
 
   <a href="#gt_encseq_encoder_enable_lossless_support"><code>gt_encseq_encoder_enable_lossless_support</code></a><br>
+
+  <a href="#gt_encseq_encoder_enable_md5_support"><code>gt_encseq_encoder_enable_md5_support</code></a><br>
 
   <a href="#gt_encseq_encoder_enable_multiseq_support"><code>gt_encseq_encoder_enable_multiseq_support</code></a><br>
 
@@ -7886,6 +8596,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_encoder_is_input_dna"><code>gt_encseq_encoder_is_input_dna</code></a><br>
 
   <a href="#gt_encseq_encoder_is_input_protein"><code>gt_encseq_encoder_is_input_protein</code></a><br>
+
+  <a href="#gt_encseq_encoder_md5_tab_requested"><code>gt_encseq_encoder_md5_tab_requested</code></a><br>
 
   <a href="#gt_encseq_encoder_new"><code>gt_encseq_encoder_new</code></a><br>
 
@@ -7925,7 +8637,11 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_has_description_support"><code>gt_encseq_has_description_support</code></a><br>
 
+  <a href="#gt_encseq_has_md5_support"><code>gt_encseq_has_md5_support</code></a><br>
+
   <a href="#gt_encseq_has_multiseq_support"><code>gt_encseq_has_multiseq_support</code></a><br>
+
+  <a href="#gt_encseq_indexname"><code>gt_encseq_indexname</code></a><br>
 
   <a href="#gt_encseq_is_64_bit"><code>gt_encseq_is_64_bit</code></a><br>
 
@@ -7949,6 +8665,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_loader_drop_lossless_support"><code>gt_encseq_loader_drop_lossless_support</code></a><br>
 
+  <a href="#gt_encseq_loader_drop_md5_support"><code>gt_encseq_loader_drop_md5_support</code></a><br>
+
   <a href="#gt_encseq_loader_drop_multiseq_support"><code>gt_encseq_loader_drop_multiseq_support</code></a><br>
 
   <a href="#gt_encseq_loader_enable_autosupport"><code>gt_encseq_loader_enable_autosupport</code></a><br>
@@ -7964,6 +8682,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_loader_require_description_support"><code>gt_encseq_loader_require_description_support</code></a><br>
 
   <a href="#gt_encseq_loader_require_lossless_support"><code>gt_encseq_loader_require_lossless_support</code></a><br>
+
+  <a href="#gt_encseq_loader_require_md5_support"><code>gt_encseq_loader_require_md5_support</code></a><br>
 
   <a href="#gt_encseq_loader_require_multiseq_support"><code>gt_encseq_loader_require_multiseq_support</code></a><br>
 
@@ -8033,6 +8753,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_extract_feature_stream_new"><code>gt_extract_feature_stream_new</code></a><br>
 
+  <a href="#gt_fasta_show_entry"><code>gt_fasta_show_entry</code></a><br>
+
   <a href="#gt_feature_index_add_feature_node"><code>gt_feature_index_add_feature_node</code></a><br>
 
   <a href="#gt_feature_index_add_gff3file"><code>gt_feature_index_add_gff3file</code></a><br>
@@ -8053,11 +8775,19 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_index_has_seqid"><code>gt_feature_index_has_seqid</code></a><br>
 
+  <a href="#gt_feature_index_memory_get_node_by_ptr"><code>gt_feature_index_memory_get_node_by_ptr</code></a><br>
+
   <a href="#gt_feature_index_memory_new"><code>gt_feature_index_memory_new</code></a><br>
+
+  <a href="#gt_feature_index_remove_node"><code>gt_feature_index_remove_node</code></a><br>
+
+  <a href="#gt_feature_index_save"><code>gt_feature_index_save</code></a><br>
 
   <a href="#gt_feature_node_add_attribute"><code>gt_feature_node_add_attribute</code></a><br>
 
   <a href="#gt_feature_node_add_child"><code>gt_feature_node_add_child</code></a><br>
+
+  <a href="#gt_feature_node_contains_marked"><code>gt_feature_node_contains_marked</code></a><br>
 
   <a href="#gt_feature_node_get_attribute"><code>gt_feature_node_get_attribute</code></a><br>
 
@@ -8079,6 +8809,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_has_type"><code>gt_feature_node_has_type</code></a><br>
 
+  <a href="#gt_feature_node_is_marked"><code>gt_feature_node_is_marked</code></a><br>
+
   <a href="#gt_feature_node_is_multi"><code>gt_feature_node_is_multi</code></a><br>
 
   <a href="#gt_feature_node_is_pseudo"><code>gt_feature_node_is_pseudo</code></a><br>
@@ -8095,6 +8827,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_make_multi_representative"><code>gt_feature_node_make_multi_representative</code></a><br>
 
+  <a href="#gt_feature_node_mark"><code>gt_feature_node_mark</code></a><br>
+
   <a href="#gt_feature_node_new"><code>gt_feature_node_new</code></a><br>
 
   <a href="#gt_feature_node_new_pseudo"><code>gt_feature_node_new_pseudo</code></a><br>
@@ -8102,6 +8836,12 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_feature_node_new_pseudo_template"><code>gt_feature_node_new_pseudo_template</code></a><br>
 
   <a href="#gt_feature_node_new_standard_gene"><code>gt_feature_node_new_standard_gene</code></a><br>
+
+  <a href="#gt_feature_node_number_of_children"><code>gt_feature_node_number_of_children</code></a><br>
+
+  <a href="#gt_feature_node_number_of_children_of_type"><code>gt_feature_node_number_of_children_of_type</code></a><br>
+
+  <a href="#gt_feature_node_remove_attribute"><code>gt_feature_node_remove_attribute</code></a><br>
 
   <a href="#gt_feature_node_score_is_defined"><code>gt_feature_node_score_is_defined</code></a><br>
 
@@ -8119,9 +8859,13 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_set_type"><code>gt_feature_node_set_type</code></a><br>
 
+  <a href="#gt_feature_node_unmark"><code>gt_feature_node_unmark</code></a><br>
+
   <a href="#gt_feature_node_unset_multi"><code>gt_feature_node_unset_multi</code></a><br>
 
   <a href="#gt_feature_node_unset_score"><code>gt_feature_node_unset_score</code></a><br>
+
+  <a href="#gt_feature_stream_new"><code>gt_feature_stream_new</code></a><br>
 
   <a href="#gt_file_delete"><code>gt_file_delete</code></a><br>
 
@@ -8192,6 +8936,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_genome_node_release_user_data"><code>gt_genome_node_release_user_data</code></a><br>
 
   <a href="#gt_genome_node_set_range"><code>gt_genome_node_set_range</code></a><br>
+
+  <a href="#gt_genome_nodes_sort"><code>gt_genome_nodes_sort</code></a><br>
+
+  <a href="#gt_genome_nodes_sort_stable"><code>gt_genome_nodes_sort_stable</code></a><br>
 
   <a href="#gt_gff3_in_stream_check_id_attributes"><code>gt_gff3_in_stream_check_id_attributes</code></a><br>
 
@@ -8309,6 +9057,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_hashmap_new"><code>gt_hashmap_new</code></a><br>
 
+  <a href="#gt_hashmap_ref"><code>gt_hashmap_ref</code></a><br>
+
   <a href="#gt_hashmap_remove"><code>gt_hashmap_remove</code></a><br>
 
   <a href="#gt_hashmap_reset"><code>gt_hashmap_reset</code></a><br>
@@ -8335,11 +9085,15 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_interval_tree_insert"><code>gt_interval_tree_insert</code></a><br>
 
+  <a href="#gt_interval_tree_iterate_overlapping"><code>gt_interval_tree_iterate_overlapping</code></a><br>
+
   <a href="#gt_interval_tree_new"><code>gt_interval_tree_new</code></a><br>
 
   <a href="#gt_interval_tree_node_get_data"><code>gt_interval_tree_node_get_data</code></a><br>
 
   <a href="#gt_interval_tree_node_new"><code>gt_interval_tree_node_new</code></a><br>
+
+  <a href="#gt_interval_tree_remove"><code>gt_interval_tree_remove</code></a><br>
 
   <a href="#gt_interval_tree_size"><code>gt_interval_tree_size</code></a><br>
 
@@ -8401,11 +9155,59 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_malloc"><code>gt_malloc</code></a><br>
 
+  <a href="#gt_match_blast_get_align_length"><code>gt_match_blast_get_align_length</code></a><br>
+
+  <a href="#gt_match_blast_get_bitscore"><code>gt_match_blast_get_bitscore</code></a><br>
+
+  <a href="#gt_match_blast_get_evalue"><code>gt_match_blast_get_evalue</code></a><br>
+
+  <a href="#gt_match_blast_new"><code>gt_match_blast_new</code></a><br>
+
+  <a href="#gt_match_blast_set_align_length"><code>gt_match_blast_set_align_length</code></a><br>
+
+  <a href="#gt_match_blast_set_bitscore"><code>gt_match_blast_set_bitscore</code></a><br>
+
+  <a href="#gt_match_blast_set_evalue"><code>gt_match_blast_set_evalue</code></a><br>
+
+  <a href="#gt_match_iterator_delete"><code>gt_match_iterator_delete</code></a><br>
+
+  <a href="#gt_match_iterator_next"><code>gt_match_iterator_next</code></a><br>
+
+  <a href="#gt_match_last_get_score"><code>gt_match_last_get_score</code></a><br>
+
+  <a href="#gt_match_last_get_seqno1"><code>gt_match_last_get_seqno1</code></a><br>
+
+  <a href="#gt_match_last_get_seqno2"><code>gt_match_last_get_seqno2</code></a><br>
+
+  <a href="#gt_match_last_new"><code>gt_match_last_new</code></a><br>
+
+  <a href="#gt_match_open_get_weight"><code>gt_match_open_get_weight</code></a><br>
+
+  <a href="#gt_match_open_new"><code>gt_match_open_new</code></a><br>
+
+  <a href="#gt_match_open_set_weight"><code>gt_match_open_set_weight</code></a><br>
+
+  <a href="#gt_match_sw_get_alignment_length"><code>gt_match_sw_get_alignment_length</code></a><br>
+
+  <a href="#gt_match_sw_get_edist"><code>gt_match_sw_get_edist</code></a><br>
+
+  <a href="#gt_match_sw_get_seqno1"><code>gt_match_sw_get_seqno1</code></a><br>
+
+  <a href="#gt_match_sw_get_seqno2"><code>gt_match_sw_get_seqno2</code></a><br>
+
+  <a href="#gt_match_sw_new"><code>gt_match_sw_new</code></a><br>
+
   <a href="#gt_md5_to_id_stream_new"><code>gt_md5_to_id_stream_new</code></a><br>
 
   <a href="#gt_merge_feature_stream_new"><code>gt_merge_feature_stream_new</code></a><br>
 
   <a href="#gt_merge_stream_new"><code>gt_merge_stream_new</code></a><br>
+
+  <a href="#gt_meta_node_get_data"><code>gt_meta_node_get_data</code></a><br>
+
+  <a href="#gt_meta_node_get_directive"><code>gt_meta_node_get_directive</code></a><br>
+
+  <a href="#gt_meta_node_new"><code>gt_meta_node_new</code></a><br>
 
   <a href="#gt_msort"><code>gt_msort</code></a><br>
 
@@ -8432,6 +9234,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_node_visitor_visit_comment_node"><code>gt_node_visitor_visit_comment_node</code></a><br>
 
   <a href="#gt_node_visitor_visit_feature_node"><code>gt_node_visitor_visit_feature_node</code></a><br>
+
+  <a href="#gt_node_visitor_visit_meta_node"><code>gt_node_visitor_visit_meta_node</code></a><br>
 
   <a href="#gt_node_visitor_visit_region_node"><code>gt_node_visitor_visit_region_node</code></a><br>
 
@@ -8547,6 +9351,12 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_option_ref"><code>gt_option_ref</code></a><br>
 
+  <a href="#gt_orf_iterator_delete"><code>gt_orf_iterator_delete</code></a><br>
+
+  <a href="#gt_orf_iterator_new"><code>gt_orf_iterator_new</code></a><br>
+
+  <a href="#gt_orf_iterator_next"><code>gt_orf_iterator_next</code></a><br>
+
   <a href="#gt_parse_double"><code>gt_parse_double</code></a><br>
 
   <a href="#gt_parse_int"><code>gt_parse_int</code></a><br>
@@ -8597,6 +9407,12 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_range_within"><code>gt_range_within</code></a><br>
 
+  <a href="#gt_rdb_visitor_delete"><code>gt_rdb_visitor_delete</code></a><br>
+
+  <a href="#gt_rdb_visitor_visit_mysql"><code>gt_rdb_visitor_visit_mysql</code></a><br>
+
+  <a href="#gt_rdb_visitor_visit_sqlite"><code>gt_rdb_visitor_visit_sqlite</code></a><br>
+
   <a href="#gt_readmode_parse"><code>gt_readmode_parse</code></a><br>
 
   <a href="#gt_readmode_show"><code>gt_readmode_show</code></a><br>
@@ -8633,7 +9449,11 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_region_node_new"><code>gt_region_node_new</code></a><br>
 
+  <a href="#gt_reverse_complement"><code>gt_reverse_complement</code></a><br>
+
   <a href="#gt_select_stream_new"><code>gt_select_stream_new</code></a><br>
+
+  <a href="#gt_select_stream_set_drophandler"><code>gt_select_stream_set_drophandler</code></a><br>
 
   <a href="#gt_sequence_node_get_description"><code>gt_sequence_node_get_description</code></a><br>
 
@@ -8733,6 +9553,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_style_delete"><code>gt_style_delete</code></a><br>
 
+  <a href="#gt_style_get_color"><code>gt_style_get_color</code></a><br>
+
   <a href="#gt_style_is_unsafe"><code>gt_style_is_unsafe</code></a><br>
 
   <a href="#gt_style_load_file"><code>gt_style_load_file</code></a><br>
@@ -8774,6 +9596,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_tag_value_map_get"><code>gt_tag_value_map_get</code></a><br>
 
   <a href="#gt_tag_value_map_new"><code>gt_tag_value_map_new</code></a><br>
+
+  <a href="#gt_tag_value_map_remove"><code>gt_tag_value_map_remove</code></a><br>
 
   <a href="#gt_tag_value_map_set"><code>gt_tag_value_map_set</code></a><br>
 
@@ -8883,11 +9707,15 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_xfread"><code>gt_xfread</code></a><br>
 
+  <a href="#gt_xfread_one"><code>gt_xfread_one</code></a><br>
+
   <a href="#gt_xfseek"><code>gt_xfseek</code></a><br>
 
   <a href="#gt_xfsetpos"><code>gt_xfsetpos</code></a><br>
 
   <a href="#gt_xfwrite"><code>gt_xfwrite</code></a><br>
+
+  <a href="#gt_xfwrite_one"><code>gt_xfwrite_one</code></a><br>
 
   <a href="#gt_xputchar"><code>gt_xputchar</code></a><br>
 
@@ -8904,7 +9732,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-04-12
+Last update: 2012-07-24
 </div>
 </div>
 <!-- Piwik -->
