@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
@@ -16,11 +16,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-tar --owner=root -cf $1.tar $1
+tar --owner=root -cf $1.tar $1 > /dev/null 2>&1
 
 if [ $? -ne 0 ]
 then
-  /usr/bin/gnutar --owner=root -cf $1.tar $1
+  /usr/bin/gnutar --owner=root -cf $1.tar $1 > /dev/null 2>&1
 else
   exit 0
 fi
