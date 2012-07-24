@@ -26,19 +26,22 @@ typedef struct GtSeqIteratorFastQ GtSeqIteratorFastQ;
 
 /* Create a new <GtSeqIteratorQual> for all sequence files in <filenametab>. */
 GtSeqIterator* gt_seqiterator_fastq_new(const GtStrArray *filenametab,
-                                             GtError *err);
+                                        GtError *err);
+
 /* Create a new <GtSeqIteratorFastQ> for all sequence files in <filenametab>
- *containing color space reads. */
+   containing color space reads. */
 GtSeqIterator* gt_seqiterator_colorspace_fastq_new(
                                                 const GtStrArray *filenametab,
                                                 GtError *err);
 
-unsigned long  gt_seqiterator_fastq_get_file_index(GtSeqIteratorFastQ*);
+/* Returns the number of the file in the file name array which <seqit> is
+   currently reading.  */
+unsigned long  gt_seqiterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit);
 
-/* disable checking if quality description is equal to read description;
- * (it should be, but it is not in output of some tools, e.g. Coral) */
-void gt_seqiterator_fastq_relax_check_of_quality_description(
-    GtSeqIteratorFastQ *seqitf);
+/* Disable checking if quality description is equal to read description in
+   <seqit> (it should be, but it is not in output of some tools, e.g. Coral). */
+void           gt_seqiterator_fastq_relax_check_of_quality_description(
+                                                    GtSeqIteratorFastQ *seqit);
 
 const GtSeqIteratorClass* gt_seqiterator_fastq_class(void);
 

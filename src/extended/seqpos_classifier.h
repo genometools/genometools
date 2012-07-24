@@ -23,7 +23,6 @@
    a sequence position i belong to a given type of feature (e.g. CDS) by
    iterating over all positions of s. The 1-based coordinates in the gff3 are
    converted to 0-based sequence positions in the process.
-
    The features of the given type must be sorted by starting position in the
    GFF3 file, such that when <gt_seqpos_classifier_is_inside_feature()> method
    is called for each, i must increase.

@@ -22,78 +22,82 @@
 #include "extended/samfile_iterator.h"
 #include "extended/aligned_segment.h"
 
-/* <GtAlignedSegmentsPile> is a pile of GtAlignedSegment objects,
-   representing sequences mapped over some position of an encseq,
-   according to a given mapping file (SAM or BAM format).
-   The underlying mapping file is accessed sequentially by a GtSamfileIterator.
-   As access is sequential, the positions over which a pile is constructed
-   must be visited in sorted order and the SAM/BAM sorting order must be
-   "coordinate" (e.g. output of samtools sort).
- */
-
+/* The <GtAlignedSegmentsPile> class represents a ``pile'' of <GtAlignedSegment>
+   objects,    representing sequences mapped over some position of a
+   <GtEncseq>, according to a given mapping file (SAM or BAM format).
+   The underlying mapping file is accessed sequentially by a
+   <GtSamfileIterator>. As access is sequential, the positions over which a
+   pile is constructed must be visited in sorted order and the SAM/BAM sorting
+   order must be ``coordinate'' (e.g. output of samtools sort). */
 typedef struct GtAlignedSegmentsPile GtAlignedSegmentsPile;
 
 /* Create a new <GtAlignedSegmentsPile> using the information provided
    by the <sfi> iterator. In order to be able to convert GtEncseq coordinates
-   to SAM coordinates a GtSamfileEncseqMapping (<sem>) is necessary */
-GtAlignedSegmentsPile *gt_aligned_segments_pile_new(GtSamfileIterator *sfi,
-    GtSamfileEncseqMapping *sem);
+   to SAM coordinates a GtSamfileEncseqMapping (<sem>) is necessary. */
+GtAlignedSegmentsPile* gt_aligned_segments_pile_new(GtSamfileIterator *sfi,
+                                                   GtSamfileEncseqMapping *sem);
 
-/* moves the pile over <position>, which must be larger than any previous
-   position if the function has been called before */
-void gt_aligned_segments_pile_move_over_position(
-    GtAlignedSegmentsPile *asp, unsigned long position);
+/* Moves the pile <asp> over <position>, which must be larger than any previous
+   position if the function has been called before. */
+void                   gt_aligned_segments_pile_move_over_position(
+                                                     GtAlignedSegmentsPile *asp,
+                                                     unsigned long position);
 
-/* a double linked list (GtDlist) of GtAlignedSegment objects,
- * sorted by end coordinate on the reference sequence */
-const GtDlist *gt_aligned_segments_pile_get(const GtAlignedSegmentsPile *asp);
+/* Returns a <GtDlist> of <GtAlignedSegment> objects, sorted by end coordinate
+   on the reference sequence. */
+const GtDlist*         gt_aligned_segments_pile_get(
+                                              const GtAlignedSegmentsPile *asp);
 
-/* number of segments currently on the pile */
-unsigned long gt_aligned_segments_pile_size(GtAlignedSegmentsPile *asp);
+/* Returns the number of segments currently on the pile. */
+unsigned long          gt_aligned_segments_pile_size(
+                                                    GtAlignedSegmentsPile *asp);
 
-/* switches on the enable edit tracking feature of the aligned segments in <asp>
-   (see GtAlignedSegment)*/
-void gt_aligned_segments_pile_enable_edit_tracking(GtAlignedSegmentsPile *asp);
+/* Switches on the enable edit tracking feature of the aligned segments in <asp>
+   (see documentation of <GtAlignedSegment>). */
+void                   gt_aligned_segments_pile_enable_edit_tracking(
+                                                    GtAlignedSegmentsPile *asp);
 
-/* processing function type used by the hook functions */
+/* Processing function type used by the hook functions. */
 typedef void (*GtAlignedSegmentsPileProcessFunc)(GtAlignedSegment *as,
-    void *data);
+                                                 void *data);
 
-/* register an hook, which is called each time an alignment rightmost
-   position has been reached and the alignment will thus be removed
-   from the pile */
-void gt_aligned_segments_pile_register_process_complete(
-    GtAlignedSegmentsPile *asp,
-    GtAlignedSegmentsPileProcessFunc process_complete, void *pc_data);
+/* Registers a hook called each time an alignments rightmost position has been
+   reached and the alignment will thus be removed from the pile. */
+void                   gt_aligned_segments_pile_register_process_complete(
+                              GtAlignedSegmentsPile *asp,
+                              GtAlignedSegmentsPileProcessFunc process_complete,
+                              void *pc_data);
 
-/* register an hook, which is called each time the SamfileIterator
-   visits a read which lies completely between the previous
-   and the current <position> of the pile */
-void gt_aligned_segments_pile_register_process_skipped(
-    GtAlignedSegmentsPile *asp,
-    GtAlignedSegmentsPileProcessFunc process_skipped, void *ps_data);
+/* Registers a hook called each time a read is visited which lies completely
+   between the previous and the current <position> of the pile. */
+void                   gt_aligned_segments_pile_register_process_skipped(
+                               GtAlignedSegmentsPile *asp,
+                               GtAlignedSegmentsPileProcessFunc process_skipped,
+                               void *ps_data);
 
-/* register an hook, which is called each time the SamfileIterator
-   visits an unmapped read */
-void gt_aligned_segments_pile_register_process_unmapped(
-    GtAlignedSegmentsPile *asp,
-    GtAlignedSegmentsPileProcessFunc process_unmapped, void *pu_data);
+/* Registers a hook called each time an unmapped read is visited. */
+void                   gt_aligned_segments_pile_register_process_unmapped(
+                              GtAlignedSegmentsPile *asp,
+                              GtAlignedSegmentsPileProcessFunc process_unmapped,
+                              void *pu_data);
 
-/* disables deletion of aligned sequence segments after processing;
-   if this method is called, the user get ownership of the GtAlignedSegment
-   objects created by <asp> (otherwise, the objects are deleted, when
-   they are removed from the pile) */
-void gt_aligned_segments_pile_disable_segment_deletion(
-    GtAlignedSegmentsPile *asp);
+/* Disables deletion of aligned sequence segments after processing;
+   if this method is called the user obtains ownership of the <GtAlignedSegment>
+   objects created by <asp> (otherwise, the objects are deleted, when they are
+   removed from the pile) */
+void                   gt_aligned_segments_pile_disable_segment_deletion(
+                                                    GtAlignedSegmentsPile *asp);
 
-/* prepares <asp> for deletion: move away from current position
-   (calling process_complete for segments on the pile);
-   furthmore if <skip_remaining> it calls process_unmapped / process_skipped
-   for all remaining alignments visited by the GtSamIterator */
-void gt_aligned_segments_pile_flush(GtAlignedSegmentsPile *asp,
-    bool skip_remaining);
+/* Prepares <asp> for deletion: move away from current position
+   (calling process_complete for segments on the pile).
+   If <skip_remaining> is set, it calls the process_unmapped/process_skipped
+   hooks for all remaining alignments visited by the <GtSamIterator>. */
+void                   gt_aligned_segments_pile_flush(
+                                                     GtAlignedSegmentsPile *asp,
+                                                     bool skip_remaining);
 
-/* flushes and deletes the pile */
-void gt_aligned_segments_pile_delete(GtAlignedSegmentsPile *asp);
+/* Flushes and deletes the pile <asp>. */
+void                   gt_aligned_segments_pile_delete(
+                                                    GtAlignedSegmentsPile *asp);
 
 #endif
