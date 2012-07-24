@@ -37,24 +37,38 @@
 
 \section{Introduction} \label{Introduction}
 
-\Hop \cite{HOP} is a tool for the correction of homopolymer errors, such as those typical
-of the Roche 454 and IonTorrent technologies, using a reference sequence.
+\Hop \cite{HOP} is a tool for the correction of homopolymer errors using a
+reference sequence. Homopolymer errors are particularly frequent in
+Roche 454 and IonTorrent sequencing data sets.
 
 \section{Installation}
 
-\Hop is provided as 64-bit binary for Linux and as source code.
+\Hop is provided as 64-bit binary distributions for Linux and Mac and
+as source code. The software is available from
+\url{http://zbh.uni-hamburg.de/hop} and will be included in
+future releases of \GenomeTools.
 
-Besides being available from \url{http://zbh.uni-hamburg.de/hop},
- \Hop will soon be included in future releases of the \GenomeTools
-source code and binary.
+\subsection{Binary distributions}
 
-The source code for \Hop is written in \texttt{C} and it is based on the \GenomeTools
-framework \cite{genometools}: as such, it is designed to be compilable on
-any POSIX-compliant operative systems and without external library dependencies.
-Using the \texttt{Makefile} provided with GenomeTools, in the main directory
-of the source code, while a single \texttt{make} may suffice,
-using the following flags will compile \Hop as a 64-bit binary and should work
-on most systems (the amalgamation flag will slightly increase the performance):
+In the binary distributions, the \texttt{bin} directory contains the
+\GenomeTools binary (\texttt{bin/gt}). The whole \GenomeTools is compiled
+into this single binary, including \Hop. On some systems (not MacOS)
+a statically-linked binary is also available under \texttt{bin/static/gt}.
+See also the \texttt{README} file.
+
+If desired, it may be possible to install the
+\GenomeTools binary system-wide by following the instructions contained
+in \texttt{INSTALL} file.
+
+\subsection{Source code distribution}
+
+The source code for \Hop is written in \texttt{C} and it is based on
+the \GenomeTools framework \cite{genometools}: as such, it is designed to
+be compilable on any POSIX-compliant operative systems.
+
+The compilation can be done using the \texttt{Makefile} provided with
+\GenomeTools. From the main directory of the sources, the following will
+compile \GenomeTools, including \Hop, as a 64bit binary:
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -62,11 +76,22 @@ on most systems (the amalgamation flag will slightly increase the performance):
 \end{verbatim}
 \end{footnotesize}
 
+In principle it is possible to compile \Hop as a 32-bit binary, by
+leaving the \texttt{64bit=yes} flag out, however this is discouraged,
+if a 64-bit system is available. Furthermore, on some systems
+or using some particular compilers, it may be necessary to use the
+\texttt{errorcheck=no} option, if errors deriving from compiler warnings
+arise during the compilation.
+
+\subsection{Checking the installation of \Hop}
+
 After downloading \Hop or compiling it from the source code, you
 will have a single binary named \Gtcmd, comprising \Hop and other tools.
-\Hop can be executed, entering \texttt{gt hop} from the command line, e.g.
-the following will output an help text on the available options
-and command line syntax:
+
+\Hop can be executed, entering \texttt{gt hop} from the command line.
+Thus if everything went fine, and the \GenomeTools binary is in
+the command line path, the following will output an help text on the
+available options and command line syntax:
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -74,23 +99,38 @@ and command line syntax:
 \end{verbatim}
 \end{footnotesize}
 
-Besides \Hop you will need a read mapping tool (such as \textit{bwa})
-and usually \textit{samtools}, in order to sort the results of the
-mapping as required for \Hop.
+\subsection{External programs necessary for the \Hop pipeline}
+
+Besides \Hop you will need a read mapping tool. For our evaluation,
+we used \textit{bwa} (\url{http://bio-bwa.sourceforge.net/}),
+either using the aln/samse/sampe pipeline (for shorter reads, such
+as the IonTorrent reads) or the bwasw tool (for longer reads such as
+the 454 reads). More information can be obtained
+in the BWA manual page (\url{http://bio-bwa.sourceforge.net/bwa.shtml}).
+
+The output of the mapping tool must be, or must be converted into,
+in SAM/BAM format. Before feeding it into \Hop, the output must be sorted
+by reference coordinates. For this purpose, one can use
+the \textit{samtools} (\url{http://samtools.sourceforge.net/}) \texttt{sort}
+tool. For more information, see also the samtools manual page
+(\url{http://samtools.sourceforge.net/samtools.shtml}).
 
 \section{Preliminary steps}
 
-\subsection{Preparing the mapping}
+\subsection{1. Preparing the mapping using BWA and Samtools}
 
-Furthermore, \Hop requires a mapping of the reads to the reference sequence.
-This must be in SAM/BAM format and sorted by coordinate on the reference.
+\Hop corrects homopolymer errors based on a mapping of the reads to a
+reference sequence. This must be in SAM/BAM format and sorted by coordinate
+on the reference.
 
-Luckily, it is very easy to prepare the mapping as mentioned for example
-using  \texttt{bwa} for the mapping (either using the bwa aln/samse/sampe or
-the bwasw method) and then sorting the resulting SAM file
-using \texttt{samtools}.
-The exact steps depends on which mapping program is used.
-Here an example using bwa paired end mapping:
+It is usually quite easy to prepare the mapping as required.
+Say the reads to be corrected are \texttt{f\_reads.fastq} and
+\texttt{r\_reads.fastq}. Furthermore, the reference for the correction
+is in a Fasta file \texttt{refseq.fas}. Then, in the following
+example, the \texttt{bwa} tool will be used for the mapping in paired end mode
+and the results will be sorted using the \texttt{samtools}
+(as a side note, some of the commands could be combined using piping for an
+increased efficiency).
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -103,46 +143,54 @@ Here an example using bwa paired end mapping:
 \end{verbatim}
 \end{footnotesize}
 
-The results of this will be \texttt{sorted.bam}, which will be used as
-an input mapping file for \Hop.
+The results of this pipeline will be in the \texttt{sorted.bam} BAM file,
+which will be used as an input mapping file for \Hop.
 
-Note: on most command line shells, most of the commands shown for the mapping
-and sorting of the map can be combined using piping for an increased efficiency.
+\subsection{2. Preparing the reference sequence}
 
-\subsection{Preparing the reference sequence}
-
-The reference sequence is provided to \Hop in GtEncseq format.
-Standard sequence formats
-such as Fasta can be converted into GtEncseq as follows (if necessary multiple files can be
-specified as input):
+The reference sequence is provided to \Hop in GtEncseq format. Converting
+a sequence in standard sequence formats such as Fasta into GtEncseq is very
+easy. The following will convert the sequence in \texttt{refseq.fas}
+into a GtEncseq (see also \texttt{gt encseq encode -help} for more information):
 
 \begin{footnotesize}
 \begin{verbatim}
-> gt encseq encode sequence_file [sequence_file ...]
+> gt encseq encode refseq.fas
 \end{verbatim}
 \end{footnotesize}
 
-If the reference comprises multiple sequences, the order of the sequences
+If the reference comprises multiple sequences (e.g. contigs,
+or multiple chromosomes), it is important that the order of the sequences
 used for the encode step must be the same which is specified in the header
-of the SAM/BAM input file (on normal application scenarios,
-this is not an issue).
+of the SAM/BAM input file. This is usually not a problem, expecially
+if all reference sequences are contained in a single MultiFasta file,
+which is both used for the mapping tool and the generation of the GtEncseq.
 
 \section{Running \Hop}
 
 \Hop requires the following input:
 \begin{itemize}
-\item the reference sequence in GtEncseq format
-\item the sorted SAM/BAM mapping of the reads to the reference sequence.
+\item the mapping of the reads to the reference (sorted SAM/BAM file)
+\item the reference sequence (GtEncseq format)
 \item the uncorrected reads
 \end{itemize}
 
-Furthermore one of the following correction modes must be specified:\\
+The user shall choose one of the following correction modes:\\
 \texttt{-aggressive},
 \texttt{-moderate},
 \texttt{-conservative} or
 \texttt{-expert}.
+The aggressive, moderate and conservative modes are three presets
+of different correction thresholds parameters. The aggressive mode
+will tend to correct more, but will be less precise. The conservative
+mode is the most precise, although more errors will remain.
+The expert mode allows to setup the parameters manually. For more
+information run \texttt{gt hop -help}.
 
-An example call:
+The following is an example of correction the reads in
+\texttt{f\_reads.fastq} and \texttt{r\_reads.fastq} using \Hop
+and a reference sequence contained in \texttt{refseq.fas}.
+The \texttt{-moderate} option will be used.
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -153,10 +201,66 @@ An example call:
 
 The output will be in this case in the two files
 \texttt{hop\_f\_reads.fastq} and \texttt{hop\_r\_reads.fastq}.
-The prefix added by \Hop can be changed using the \texttt{-outprefix}
+The prefix added by \Hop (in this case \texttt{hop},
+which is the default) can be changed using the \texttt{-outprefix}
 option.
 
-\section{For more information}
+\section{Restricting corrections to coding sequences}
+
+If desired, it is possible to restrict corrections to coding
+sequences only. The idea is that coding sequences tend to be
+more conserved, thus homopolymer length differences of the
+reads to the reference are more likely to be errors in
+corrections. In other words, this will help increasing the
+precision of the correction (reduce false positives),
+but of course the overall sensitivity will be reduced, as
+only errors in coding sequences will be corrected.
+
+Currently, restricting to coding sequences is only
+available if a single reference sequence is used (that
+is no collection of sequences, such as contigs or multiple
+chromosomes). We plan to eliminate this limitation in future
+versions of \Hop.
+
+The annotation must be provided in \texttt{GFF} format, version 3.
+This is a standard annotation format. Furthermore, the
+annotation must be sorted by coordinate, which can be obtained
+using the \texttt{gt gff3} tool, using the \texttt{-sort}
+option. In the following example, the \texttt{refseq.gff} annotation
+will be used to restrict correction to coding sequences:
+
+\begin{footnotesize}
+\begin{verbatim}
+> gt gff3 -sort -o sorted.gff refseq.gff
+> gt hop -moderate -ref refseq.fas -ann sorted.gff \
+  -map sorted.bam -reads f_reads.fastq r_reads.fastq
+\end{verbatim}
+\end{footnotesize}
+
+The default behaviour when the \texttt{-ann} option is used,
+is to limit correction to homopolymers inside the \texttt{CDS}
+features. However, another feature type can be specified,
+e.g. \texttt{exon}, using the \texttt{-ft} option of \Hop.
+
+\subsection{Troubleshooting}
+
+In some cases, the GFF file may be slightly not conforming to
+the standard or suffer under some problems which disrupts parsing.
+In these cases, standard POSIX utilities can be sometimes be
+useful, to obtain a subset of the GFF file, which can be
+used for \Hop. In the following example, using \texttt{awk} and
+\texttt{sort}, a sorted subset of the \texttt{refseq.gff}
+annotation is prepared, and saved as \texttt{cdsonly.gff} which
+only contains the \texttt{CDS} features:
+
+\begin{footnotesize}
+\begin{verbatim}
+> echo '##gff-version 3' > cdsonly.gff
+> awk '$3 == "CDS"' refseq.gff | sort -k4 -n >> cdsonly.gff
+\end{verbatim}
+\end{footnotesize}
+
+\section{Help from the command line}
 
 Using \texttt{gt hop -help} will output more information regarding
 each command line option. Some command line options are used in
