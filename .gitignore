@@ -8,6 +8,7 @@
 *.bwt
 *.core
 *.csv
+*.db
 *.des
 *.diff
 *.err
@@ -31,6 +32,7 @@
 *.polya.info
 *.prj
 *.pyc
+*.pyc
 *.sds
 *.ssp
 *.sti1
@@ -39,6 +41,7 @@
 *.tis
 *~
 .ccache
+.clang_complete
 .gdb_history
 /*.log
 /bin
@@ -70,11 +73,9 @@ massif.*
 nohup.out
 out
 src/external/hmmer*
+src/external/hmmer*
 src/external/hmmer-2.3.2/squid/squid.h
 src/external/hmmer-2.3.2/squid/squidconf.h
 src/external/hmmer-2.3.2/src/config.h
 tags
 testdata/genomediff
-*.pyc
-*.db
-src/external/hmmer*

@@ -287,44 +287,46 @@ static int gt_genomediff_runner(int argc, const char **argv,
     gt_encseq_encoder_delete(ee);
   }
   else {
-    GtStr *current_line = gt_str_new();
-    FILE *prj_fp;
-    const char *buffer;
-    char **elements = NULL;
-
     gt_str_append_str(arguments->indexname,
                       gt_str_array_get_str(arguments->filenames, 0));
+    if (arguments->with_esa || arguments->with_pck) {
+      GtStr *current_line = gt_str_new();
+      FILE *prj_fp;
+      const char *buffer;
+      char **elements = NULL;
 
-    prj_fp = gt_fa_fopen_with_suffix(gt_str_get(arguments->indexname),
-                                     PROJECTFILESUFFIX,"rb",err);
-    if (prj_fp == NULL)
-      had_err = -1;
-    while (!had_err && gt_str_read_next_line(current_line, prj_fp) != EOF) {
-      buffer = gt_str_get(current_line);
+      prj_fp = gt_fa_fopen_with_suffix(gt_str_get(arguments->indexname),
+                                       PROJECTFILESUFFIX,"rb",err);
+      if (prj_fp == NULL)
+        had_err = -1;
+      while (!had_err && gt_str_read_next_line(current_line, prj_fp) != EOF) {
+        buffer = gt_str_get(current_line);
+        if (elements != NULL) {
+          gt_free(elements[0]);
+          gt_free(elements[1]);
+        }
+        gt_free(elements);
+        elements = gt_cstr_split(buffer, '=');
+        gt_log_log("%s", elements[0]);
+        if (strcmp("mirrored", elements[0]) == 0) {
+          gt_log_log("%s", elements[1]);
+          if (strcmp("1", elements[1]) == 0) {
+            mirrored = true;
+            gt_log_log("sequences are treated as mirrored");
+          }
+        }
+        gt_str_reset(current_line);
+      }
+      gt_str_delete(current_line);
       if (elements != NULL) {
         gt_free(elements[0]);
         gt_free(elements[1]);
       }
       gt_free(elements);
-      elements = gt_cstr_split(buffer, '=');
-      gt_log_log("%s", elements[0]);
-      if (strcmp("mirrored", elements[0]) == 0) {
-        gt_log_log("%s", elements[1]);
-        if (strcmp("1", elements[1]) == 0) {
-          mirrored = true;
-          gt_log_log("sequences are treated as mirrored");
-        }
-      }
-      gt_str_reset(current_line);
+      gt_fa_xfclose(prj_fp);
     }
-    gt_str_delete(current_line);
-    if (elements != NULL) {
-      gt_free(elements[0]);
-      gt_free(elements[1]);
-    }
-    gt_free(elements);
-    gt_fa_xfclose(prj_fp);
   }
+
   if (!had_err) {
     GtEncseqLoader *el = gt_encseq_loader_new_from_options(arguments->loadopts,
                                                            err);
@@ -352,7 +354,7 @@ static int gt_genomediff_runner(int argc, const char **argv,
         had_err = -1;
     }
     else {
-      bool doesa = true;
+      const bool doesa = true;
       GenomediffInfo gd_info;
       Suffixeratoroptions sopts;
       sopts.beverbose = arguments->verbose;
