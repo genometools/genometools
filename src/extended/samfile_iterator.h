@@ -24,14 +24,17 @@
 #include "extended/sam_alignment.h"
 
 typedef struct GtSamfileIterator GtSamfileIterator;
-/* XXX check if alphabet is const */
+
+/* Returns new <GtSamfileIterator> for a BAM-file. <alphabet> gets referenced.
+   */
 GtSamfileIterator* gt_samfile_iterator_new_bam(const char *filename,
                                                GtAlphabet *alphabet,
                                                GtError *err);
 
-/* Parameter <auxfilename> can be NULL, but then the samfile has to contain
-   header information. Otherwise it should be the name of a file containing the
-   list of references as produced by 'samtools faidx ref.fa' */
+/* Returns new <GtSamfileIterator> fo a SAM-file. Parameter <auxfilename> can be
+   NULL, but then the samfile has to contain header information. Otherwise it
+   should be the name of a file containing the list of references as produced by
+   'samtools faidx ref.fa'. <alphabet> gets referenced. */
 GtSamfileIterator* gt_samfile_iterator_new_sam(const char *filename,
                                                GtAlphabet *alphabet,
                                                const char *auxfilename,
@@ -50,8 +53,9 @@ int                gt_samfile_iterator_reset(GtSamfileIterator *s_iter,
 
 /* Returns the name of the reference sequence with number <reference_num>
    stored in the alignment file processed by <s_iter>.*/
-const char*        gt_samfile_iterator_reference_name(GtSamfileIterator *s_iter,
-                                                      int32_t reference_num);
+const char*        gt_samfile_iterator_reference_name(
+                                                const GtSamfileIterator *s_iter,
+                                                int32_t reference_num);
 
 /* Returns the number of reference sequences stored in the alignment
  * file processed by <s_iter>.*/

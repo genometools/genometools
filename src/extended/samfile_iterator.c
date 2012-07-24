@@ -128,7 +128,7 @@ int gt_samfile_iterator_reset(GtSamfileIterator *s_iter,
   return 0;
 }
 
-const char* gt_samfile_iterator_reference_name(GtSamfileIterator *s_iter,
+const char* gt_samfile_iterator_reference_name(const GtSamfileIterator *s_iter,
                                                int32_t reference_num)
 {
   gt_assert(reference_num >= 0);
