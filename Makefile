@@ -28,10 +28,10 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/sqlite-3.7.10
 
 ifneq ($(cairo),no)
-  INCLUDEOPT+=$(shell pkg-config --cflags pango) \
-              $(shell pkg-config --cflags cairo) \
-              $(shell pkg-config --cflags pangocairo) \
-              $(shell pkg-config --cflags glib-2.0)
+  INCLUDEOPT+=$(shell pkg-config --cflags-only-I pango) \
+              $(shell pkg-config --cflags-only-I cairo) \
+              $(shell pkg-config --cflags-only-I pangocairo) \
+              $(shell pkg-config --cflags-only-I glib-2.0)
 endif
 
 # these variables are exported by the configuration script
