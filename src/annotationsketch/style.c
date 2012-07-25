@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2007-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "annotationsketch/color_api.h"
+#include "annotationsketch/default_formats.h"
 #include "annotationsketch/style.h"
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
@@ -35,6 +36,9 @@
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/gt_lua.h"
 
+#define GT_STYLE_VAL(x) #x
+#define GT_STYLE_STRINGIFY(x) GT_STYLE_VAL(x)
+
 static char *gt_default_format_style =
   "style =\n"
   "{\n"
@@ -43,24 +47,26 @@ static char *gt_default_format_style =
   "    split_lines = true,\n"
   "    show_block_captions = true,\n"
   "    show_track_captions = true,\n"
-  "    margins = 30,\n"
-  "    bar_height = 16,\n"
-  "    bar_vspace = 10,\n"
-  "    track_vspace = 15,\n"
-  "    ruler_font_size = 8,\n"
+  "    margins = " GT_STYLE_STRINGIFY(MARGINS_DEFAULT) ",\n"
+  "    bar_height = " GT_STYLE_STRINGIFY(BAR_HEIGHT_DEFAULT) ",\n"
+  "    bar_vspace = " GT_STYLE_STRINGIFY(BAR_VSPACE_DEFAULT) ",\n"
+  "    track_vspace = " GT_STYLE_STRINGIFY(TRACK_VSPACE_DEFAULT) ",\n"
+  "    ruler_font_size = " GT_STYLE_STRINGIFY(FONT_SIZE_DEFAULT) ",\n"
   "    ruler_space = 20,\n"
-  "    block_caption_font_size = 8,\n"
-  "    block_caption_space = 7,\n"
-  "    track_caption_font_size = 8,\n"
-  "    track_caption_space = 7,\n"
-  "    arrow_width = 6,\n"
-  "    stroke_width = .5,\n"
+  "    block_caption_font_size = " GT_STYLE_STRINGIFY(FONT_SIZE_DEFAULT) ",\n"
+  "    block_caption_space = " GT_STYLE_STRINGIFY(CAPTION_BAR_SPACE_DEFAULT)
+    ",\n"
+  "    track_caption_font_size = " GT_STYLE_STRINGIFY(FONT_SIZE_DEFAULT) ",\n"
+  "    track_caption_space = " GT_STYLE_STRINGIFY(CAPTION_BAR_SPACE_DEFAULT)
+    ",\n"
+  "    arrow_width = " GT_STYLE_STRINGIFY(ARROW_WIDTH_DEFAULT) ",\n"
+  "    stroke_width = " GT_STYLE_STRINGIFY(STROKE_WIDTH_DEFAULT) ",\n"
   "    unit = \"bp\",\n"
   "    ruler_left_text = \"5'\",\n"
   "    ruler_right_text = \"3'\",\n"
   "    stroke_marked_width = 1.5,\n"
   "    show_grid = true,\n"
-  "    min_len_block = 20,\n"
+  "    min_len_block = " GT_STYLE_STRINGIFY(MIN_LEN_BLOCK_DEFAULT) ",\n"
   "    track_title_color     = {red=0.7, green=0.7, blue=0.7, alpha = 1.0},\n"
   "    default_stroke_color  = {red=0.1, green=0.1, blue=0.1, alpha = 1.0},\n"
   "    background_color      = {red=1.0, green=1.0, blue=1.0, alpha = 1.0},\n"
@@ -85,9 +91,9 @@ static void style_lua_new_table(lua_State *L, const char *key)
 
 static const luaL_Reg luasecurelibs[] = {
   /* Think very hard before adding additional Lua libraries to this list, it
-     might compromise the security of web applications like GenomeViewer!
-     Do not add the 'io', 'os', or 'debug' library under any circumstances!
-     Use the luainsecurelibs list for that. */
+     might compromise application security! Do not add the 'io', 'os', or
+     'debug' library under any circumstances! Use the luainsecurelibs list for
+     that. */
   {"", luaopen_base},
   {LUA_TABLIBNAME, luaopen_table},
   {LUA_STRLIBNAME, luaopen_string},
@@ -866,7 +872,7 @@ int gt_style_unit_test(GtError *err)
   gt_ensure(had_err, gt_style_get_num(sty, "format", "margins", &num, NULL,
                                    testerr) != GT_STYLE_QUERY_ERROR);
   gt_ensure(had_err, !gt_error_is_set(testerr));
-  gt_ensure(had_err, num == 10.0);
+  gt_ensure(had_err, num == MARGINS_DEFAULT);
   gt_ensure(had_err, gt_style_get_bool(sty, "exon", "collapse_to_parent", &val,
                                     NULL, testerr) != GT_STYLE_QUERY_ERROR);
   gt_ensure(had_err, !gt_error_is_set(testerr));

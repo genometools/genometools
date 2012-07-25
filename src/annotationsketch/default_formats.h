@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,16 +18,16 @@
 #ifndef DEFAULT_FORMATS_H
 #define DEFAULT_FORMATS_H
 
-#define MARGINS_DEFAULT           10
-#define BAR_HEIGHT_DEFAULT        15
+#define MARGINS_DEFAULT           30
+#define BAR_HEIGHT_DEFAULT        16
 #define BAR_VSPACE_DEFAULT        10
 #define TEXT_SIZE_DEFAULT          8
-#define TRACK_VSPACE_DEFAULT      20
+#define TRACK_VSPACE_DEFAULT      15
 #define CAPTION_BAR_SPACE_DEFAULT  7
-#define MIN_LEN_BLOCK_DEFAULT     30
+#define MIN_LEN_BLOCK_DEFAULT     20
 #define ARROW_WIDTH_DEFAULT        6
-#define STROKE_WIDTH_DEFAULT     0.6
-#define FONT_SIZE_DEFAULT         10
+#define STROKE_WIDTH_DEFAULT     0.5
+#define FONT_SIZE_DEFAULT          8
 
 #define HEADER_SPACE              40
 #define HEAD_TRACK_SPACE_DEFAULT  15
