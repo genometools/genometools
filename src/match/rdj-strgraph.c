@@ -32,6 +32,7 @@
 #include "core/unused_api.h"
 #include "core/spacecalc.h"
 #include "extended/assembly_stats_calculator.h"
+#include "match/asqg_writer.h"
 #include "match/rdj-contigpaths.h"
 #include "match/rdj-contigs-writer.h"
 #include "match/rdj-ensure-output.h"
@@ -509,11 +510,13 @@ void gt_strgraph_compact(GtStrgraph *strgraph, bool show_progressbar)
 }
 
 static GtFile* gt_strgraph_get_file(const char *indexname, const char *suffix,
-    bool write)
+    bool write, bool gzipped)
 {
-  FILE *outfp = NULL;
+  GtFile *file;
   GtStr *filename;
+  GtError *err;
 
+  err = gt_error_new();
   filename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(filename, suffix);
   if (!write && !gt_file_exists(gt_str_get(filename)))
@@ -521,9 +524,16 @@ static GtFile* gt_strgraph_get_file(const char *indexname, const char *suffix,
     fprintf(stderr, "file %s does not exist\n", gt_str_get(filename));
     exit(EXIT_FAILURE);
   }
-  outfp = gt_fa_xfopen(gt_str_get(filename), write ? "w" : "r");
+  file = gt_file_open(gzipped ? GT_FILE_MODE_GZIP : GT_FILE_MODE_UNCOMPRESSED,
+      gt_str_get(filename), write ? "w" : "r", err);
+  if (file == NULL)
+  {
+    fprintf(stderr, "%s", gt_error_get(err));
+    exit(EXIT_FAILURE);
+  }
   gt_str_delete(filename);
-  return gt_file_new_from_fileptr(outfp);
+  gt_error_delete(err);
+  return file;
 }
 
 GtStrgraph* gt_strgraph_new_from_file(const GtEncseq *encseq,
@@ -538,7 +548,7 @@ GtStrgraph* gt_strgraph_new_from_file(const GtEncseq *encseq,
   gt_assert(sizeof (GtStrgraphLength) >= sizeof (unsigned long) ||
      fixlen <= (unsigned long)GT_STRGRAPH_LENGTH_MAX);
   strgraph->fixlen = (GtStrgraphLength)fixlen;
-  infp = gt_strgraph_get_file(indexname, suffix, false);
+  infp = gt_strgraph_get_file(indexname, suffix, false, false);
   gt_strgraph_load(strgraph, infp);
   gt_file_delete(infp);
   return strgraph;
@@ -634,7 +644,7 @@ int gt_strgraph_save_counts(GtStrgraph *strgraph, const char *indexname,
 
   gt_assert(strgraph != NULL);
   gt_assert(strgraph->state == GT_STRGRAPH_PREPARATION);
-  outfp = gt_strgraph_get_file(indexname, suffix, true);
+  outfp = gt_strgraph_get_file(indexname, suffix, true, false);
   gt_assert(outfp != NULL);
   GT_STRGRAPH_SERIALIZE_COUNTS(strgraph, outfp);
   gt_file_delete(outfp);
@@ -648,7 +658,7 @@ int gt_strgraph_load_counts(GtStrgraph *strgraph, const char *indexname,
 
   gt_assert(strgraph != NULL);
   gt_assert(strgraph->state == GT_STRGRAPH_PREPARATION);
-  infp = gt_strgraph_get_file(indexname, suffix, false);
+  infp = gt_strgraph_get_file(indexname, suffix, false, false);
   gt_assert(infp != NULL);
   GT_STRGRAPH_DESERIALIZE_COUNTS(strgraph, infp);
   gt_file_delete(infp);
@@ -1541,13 +1551,70 @@ static void gt_strgraph_spm_show(const GtStrgraph *strgraph, GtFile *outfp)
   }
 }
 
+static void gt_strgraph_asqg_show(const GtStrgraph *strgraph,
+    const char *indexname, GtFile *outfp)
+{
+  unsigned long sn1, sn2;
+  GtStrgraphVnum i, v2;
+  unsigned long sl2, spm_len;
+  GtStrgraphVEdgenum j;
+  bool is_e1, is_e2;
+  GtError *err;
+  int had_err = 0;
+  GtAsqgWriter *aw = NULL;
+
+  err = gt_error_new();
+  gt_assert(strgraph->encseq != NULL);
+  aw = gt_asqg_writer_new(outfp, strgraph->encseq);
+  had_err = gt_asqg_writer_show_header(aw, 0.0, (unsigned long)
+      strgraph->minmatchlen, indexname, false, false, err);
+  if (!had_err)
+    had_err = gt_asqg_writer_show_vertices(aw, err);
+  for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph) && !had_err; i++)
+  {
+    if (GT_STRGRAPH_V_OUTDEG(strgraph, i) > 0)
+    {
+      sn1 = GT_STRGRAPH_V_READNUM(i);
+      is_e1 = GT_STRGRAPH_V_IS_E(i);
+      for (j = 0; j < GT_STRGRAPH_V_NOFEDGES(strgraph, i) && !had_err; j++)
+      {
+        if (!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph, i, j))
+        {
+          v2 = GT_STRGRAPH_EDGE_DEST(strgraph, i, j);
+          sn2 = GT_STRGRAPH_V_READNUM(v2);
+          sl2 = (unsigned long)GT_STRGRAPH_SEQLEN(strgraph, sn2);
+          spm_len = sl2 - (unsigned long)GT_STRGRAPH_EDGE_LEN(strgraph, i, j);
+          is_e2 = GT_STRGRAPH_V_IS_E(v2);
+          if ((is_e1 && is_e2 && (sn1 >= sn2)) ||
+              (!is_e1 && !is_e2 && (sn1 > sn2)) ||
+              (is_e1 && !is_e2 && (sn1 >= sn2)) ||
+              (!is_e1 &&  is_e2 && (sn1 > sn2)))
+          {
+            /* other E->B / B->E cases, as well as all B-B
+               are not considered to avoid double output */
+            gt_spmproc_show_asgq(sn1, sn2, spm_len, is_e1, is_e2, aw);
+          }
+        }
+      }
+    }
+  }
+  if (had_err)
+  {
+    fprintf(stderr, "%s", gt_error_get(err));
+    exit(EXIT_FAILURE);
+  }
+  gt_asqg_writer_delete(aw);
+  gt_error_delete(err);
+}
+
 void gt_strgraph_show(const GtStrgraph *strgraph, GtStrgraphFormat format,
     const char *indexname, const char *suffix, bool show_progressbar)
 {
   GtFile *outfp = NULL;
 
   gt_assert(strgraph != NULL);
-  outfp = gt_strgraph_get_file(indexname, suffix, true);
+  outfp = gt_strgraph_get_file(indexname, suffix, true,
+      format == GT_STRGRAPH_ASQG_GZ ? true : false);
   switch (format)
   {
     case GT_STRGRAPH_DOT:
@@ -1561,6 +1628,10 @@ void gt_strgraph_show(const GtStrgraph *strgraph, GtStrgraphFormat format,
       break;
     case GT_STRGRAPH_SPM:
       gt_strgraph_spm_show(strgraph, outfp);
+      break;
+    case GT_STRGRAPH_ASQG_GZ: /*@ fallthrough @*/
+    case GT_STRGRAPH_ASQG:
+      gt_strgraph_asqg_show(strgraph, indexname, outfp);
       break;
     case GT_STRGRAPH_BIN:
       gt_strgraph_save(strgraph, outfp);
@@ -1587,7 +1658,7 @@ void gt_strgraph_show_edge_lengths_distribution(const GtStrgraph *strgraph,
   GtStrgraphVnum i;
   GtStrgraphVEdgenum j;
 
-  GtFile *outfp = gt_strgraph_get_file(indexname, suffix, true);
+  GtFile *outfp = gt_strgraph_get_file(indexname, suffix, true, false);
 
   gt_assert(strgraph != NULL);
   gt_assert(sizeof (unsigned long) >= sizeof (GtStrgraphLength));
@@ -1610,7 +1681,7 @@ void gt_strgraph_show_counts_distribution(const GtStrgraph *strgraph,
     const char *indexname, const char *suffix)
 {
   GtDiscDistri *d = gt_disc_distri_new();
-  GtFile *outfp = gt_strgraph_get_file(indexname, suffix, true);
+  GtFile *outfp = gt_strgraph_get_file(indexname, suffix, true, false);
   GtStrgraphVnum i;
 
   gt_assert(strgraph != NULL);
@@ -1636,7 +1707,7 @@ int gt_strgraph_show_context(const GtStrgraph *strgraph,
   gt_assert(strgraph != NULL);
   gt_assert(format == GT_STRGRAPH_DOT);
 
-  outfp = gt_strgraph_get_file(indexname, suffix, true);
+  outfp = gt_strgraph_get_file(indexname, suffix, true, false);
   gt_file_xprintf(outfp, GT_STRGRAPH_DOT_HEADER);
   gt_assert(sizeof (GtStrgraphVnum) >= sizeof (unsigned long));
   for (i = 0; i < (GtStrgraphVnum)nofreadnums; i++)

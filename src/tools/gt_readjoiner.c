@@ -23,6 +23,7 @@
 #include "tools/gt_readjoiner_prefilter.h"
 #include "tools/gt_readjoiner_overlap.h"
 #include "tools/gt_readjoiner_assembly.h"
+#include "tools/gt_readjoiner_asqg.h"
 #include "tools/gt_readjoiner_cnttest.h"
 #include "tools/gt_readjoiner_spmtest.h"
 #include "tools/gt_readjoiner_correct.h"
@@ -34,6 +35,7 @@ static void* gt_readjoiner_arguments_new(void)
       gt_readjoiner_prefilter());
   gt_toolbox_add_tool(readjoiner_toolbox, "overlap", gt_readjoiner_overlap());
   gt_toolbox_add_tool(readjoiner_toolbox, "assembly", gt_readjoiner_assembly());
+  gt_toolbox_add_hidden_tool(readjoiner_toolbox, "asqg", gt_readjoiner_asqg());
   gt_toolbox_add_hidden_tool(readjoiner_toolbox, "cnttest",
       gt_readjoiner_cnttest());
   gt_toolbox_add_hidden_tool(readjoiner_toolbox, "spmtest",
