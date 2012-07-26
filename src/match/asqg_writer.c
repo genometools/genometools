@@ -16,6 +16,7 @@
 */
 
 #include "core/unused_api.h"
+#include "core/log_api.h"
 #include "match/asqg_writer.h"
 
 struct GtAsqgWriter
@@ -52,39 +53,53 @@ static inline void gt_asqg_writer_show_vertex_line(GtFile *file,
       subsequence ? '1' : '0');
 }
 
-int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GtError *err)
+int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
 {
-  GtEncseqReader *esr;
-  unsigned long seqnum = 0, pos = 0;
-  unsigned long i, tlen = gt_encseq_total_length(aw->encseq);
-  char cc, *seqbuffer;
+  const GtTwobitencoding *nextencoded;
+  GtTwobitencoding code;
+  unsigned long seqnum = 0, nofseqs = gt_encseq_num_of_sequences(aw->encseq),
+                pos = 0, next_stop, i,
+                tlen = gt_encseq_total_length(aw->encseq), charsincode = 0;
+  char *seqbuffer;
+  bool last_seq = false;
+  const char code2char[] = "acgt";
   gt_assert(aw != NULL);
-  esr = gt_encseq_create_reader_with_readmode(aw->encseq,
-      GT_READMODE_FORWARD, 0);
-  if (esr == NULL)
-  {
-    gt_error_set(err, "error creating encseq reader");
-    return -1;
-  }
   seqbuffer = gt_malloc(sizeof (*seqbuffer) *
       (gt_encseq_max_seq_length(aw->encseq) + 1UL));
-  for (i = 0; i < tlen; i++)
+  nextencoded = gt_encseq_twobitencoding_export(aw->encseq);
+  i = 0;
+  while (!last_seq)
   {
-    if ((cc = gt_encseq_reader_next_decoded_char(esr)) != (char) SEPARATOR)
+    if (seqnum + 1UL == nofseqs)
     {
-      seqbuffer[pos++] = cc;
+      last_seq = true;
+      next_stop = tlen - 1UL;
     }
     else
+      next_stop = gt_encseq_seqstartpos(aw->encseq, seqnum + 1UL) - 1UL;
+    for (/**/; i < next_stop; i++)
     {
-      seqbuffer[pos] = '\0';
-      gt_asqg_writer_show_vertex_line(aw->file, seqnum, seqbuffer, false);
-      seqnum++;
-      pos = 0;
+      if (charsincode == 0)
+      {
+        code = *(nextencoded++);
+        charsincode = (unsigned long)GT_UNITSIN2BITENC;
+      }
+      seqbuffer[pos++] = code2char[code >> ((--charsincode) << 1) & 3];
     }
+    seqbuffer[pos] = '\0';
+    gt_asqg_writer_show_vertex_line(aw->file, seqnum, seqbuffer, false);
+    pos = 0;
+    /* consume separator */
+    i++;
+    if (charsincode == 0)
+    {
+      code = *(nextencoded++);
+      charsincode = (unsigned long)GT_UNITSIN2BITENC;
+    }
+    charsincode--;
+    seqnum++;
   }
-  gt_asqg_writer_show_vertex_line(aw->file, seqnum, seqbuffer, false);
   gt_free(seqbuffer);
-  gt_encseq_reader_delete(esr);
   return 0;
 }
 
