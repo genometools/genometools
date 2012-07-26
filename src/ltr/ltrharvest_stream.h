@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -48,4 +48,9 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                        GtError *err);
 
 const GtEncseq* gt_ltrharvest_stream_get_encseq(GtNodeStream *ltrh_stream);
+void            gt_ltrharvest_stream_disable_seqids(GtLTRharvestStream*);
+void            gt_ltrharvest_stream_enable_seqids(GtLTRharvestStream*);
+void            gt_ltrharvest_stream_disable_md5_seqids(GtLTRharvestStream*);
+void            gt_ltrharvest_stream_enable_md5_seqids(GtLTRharvestStream*);
+
 #endif

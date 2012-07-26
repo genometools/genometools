@@ -64,7 +64,9 @@ typedef struct {
        longoutput,
        scan,
        verbosemode,
-       tabout;
+       tabout,
+       md5,
+       seqids;
   GtOption *optionmotif,
            *optionmotifmis,
            *optionoverlaps,
@@ -201,6 +203,8 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
            *optiondel,
            *optionv,
            *optiontabout,
+           *optionmd5,
+           *optionseqids,
            *optionoffset,
            *optionlongoutput,
            *optionout,
@@ -405,6 +409,21 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                                     &arguments->tabout,
                                     true);
   gt_option_parser_add_option(op, optiontabout);
+
+  /* -seqids */
+  optionseqids = gt_option_new_bool("seqids",
+                                    "use sequence descriptions instead of "
+                                    "sequence numbers in GFF3 output",
+                                    &arguments->seqids,
+                                    false);
+  gt_option_parser_add_option(op, optionseqids);
+
+  /* -md5 */
+  optionmd5 = gt_option_new_bool("md5",
+                                 "add MD5 hashes to seqids in GFF3 output",
+                                 &arguments->md5,
+                                 false);
+  gt_option_parser_add_option(op, optionmd5);
 
   /* -longoutput */
   optionlongoutput = gt_option_new_bool("longoutput",
@@ -612,6 +631,14 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
                                          err);
   if (ltrh_stream == NULL)
     return -1;
+  if (!arguments->md5)
+    gt_ltrharvest_stream_disable_md5_seqids((GtLTRharvestStream*) ltrh_stream);
+  else
+    gt_ltrharvest_stream_enable_md5_seqids((GtLTRharvestStream*) ltrh_stream);
+  if (!arguments->seqids)
+    gt_ltrharvest_stream_disable_seqids((GtLTRharvestStream*) ltrh_stream);
+  else
+    gt_ltrharvest_stream_enable_seqids((GtLTRharvestStream*) ltrh_stream);
   last_stream = ltrh_stream;
 
   encseq = gt_ltrharvest_stream_get_encseq(ltrh_stream);
