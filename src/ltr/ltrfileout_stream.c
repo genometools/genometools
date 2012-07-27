@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -29,7 +29,9 @@
 #include "core/minmax.h"
 #include "core/range.h"
 #include "core/str.h"
+#include "core/symbol.h"
 #include "core/unused_api.h"
+#include "extended/extract_feature_sequence.h"
 #include "extended/node_stream_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
@@ -37,13 +39,13 @@
 #include "ltr/ltr_visitor.h"
 
 #define GT_FSWIDTH         60UL
-#define GT_MAXFILENAMELEN 256
-#define GT_MAXFASTAHEADER 256
+#define GT_MAXFILENAMELEN   256
+#define GT_MAXFASTAHEADER   256
 
 struct GtLTRFileOutStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GtEncseq *encseq;
+  GtRegionMapping *rmap;
   const char *fileprefix;
   GtFile *metadata_file,
             *tabout_file,
@@ -67,8 +69,8 @@ struct GtLTRFileOutStream {
         gt_node_stream_cast(gt_ltr_fileout_stream_class(), GS)
 
 static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
-                      const char *pdomname, GtEncseq *seq,
-                      unsigned long startpos, char *desc, GtError *err)
+                      const char *pdomname, GT_UNUSED GtRegionMapping *rmap,
+                      char *desc, GtError *err)
 {
   int had_err = 0;
   GtFile *seqfile = NULL,
@@ -148,23 +150,23 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
     GtStr *ali,
           *aaseq;
     GtFeatureNode *fn;
-    char *tmpstr = NULL;
+    int rval;
 
     fn = *(GtFeatureNode**) gt_array_get(pdoms, i);
 
     ali = gt_genome_node_get_user_data((GtGenomeNode*) fn, "pdom_alignment");
     aaseq = gt_genome_node_get_user_data((GtGenomeNode*) fn, "pdom_aaseq");
     pdom_rng = gt_genome_node_get_range((GtGenomeNode*) fn);
-    tmpstr =  gt_ltrelement_get_sequence(pdom_rng.start-1,
-                                         pdom_rng.end-1,
-                                         gt_feature_node_get_strand(fn),
-                                         seq, startpos, err);
-    if (!tmpstr)
+
+    rval = gt_extract_feature_sequence(pdom_seq, (GtGenomeNode*) fn,
+                                       gt_symbol(gt_ft_protein_match), false,
+                                       NULL, NULL, rmap, err);
+
+    if (rval)
     {
       had_err = -1;
       break;
     }
-    gt_str_append_cstr(pdom_seq, tmpstr);
     if (ls->write_pdom_alignments && ali)
     {
       char buf[BUFSIZ];
@@ -185,8 +187,8 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
     gt_genome_node_release_user_data((GtGenomeNode*) fn, "pdom_alignment");
     gt_genome_node_release_user_data((GtGenomeNode*) fn, "pdom_aaseq");
     seq_length += gt_range_length(&pdom_rng);
-    gt_free(tmpstr);
   }
+
   if (!had_err)
   {
     gt_fasta_show_entry(desc,
@@ -212,8 +214,11 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtLTRFileOutStream *ls;
   GtFeatureNode *fn;
-  GtRange lltr_rng, rltr_rng, rng, ppt_rng, pbs_rng;
-  char *ppt_seq, *pbs_seq;
+  GtRange lltr_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
+          rltr_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
+          rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
+          ppt_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
+          pbs_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG};
   int had_err;
   unsigned long i=0;
 
@@ -245,159 +250,166 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
     gt_feature_node_iterator_delete(gni);
   }
 
-  if (ls->element.mainnode != NULL)
+  if (!had_err && ls->element.mainnode != NULL)
   {
-    unsigned long seqnr, seqid_len, seqstartpos;
-    GT_UNUSED unsigned long seqlength;
-    char *outseq,
-         desc[GT_MAXFASTAHEADER];
-    GtRange ltr3_rng, ltr5_rng;
-    GT_UNUSED GtRange elemrng;
+    char desc[GT_MAXFASTAHEADER];
+    GtFeatureNode *ltr3, *ltr5;
+    GtStr *sdesc, *sreg, *seq;
 
     /* find sequence in GtEncseq */
-    const char *sreg = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
-                                                        ls->element.mainnode));
-    (void) sscanf(sreg,"seq%lu", &seqnr);
+    sreg = gt_genome_node_get_seqid((GtGenomeNode*) ls->element.mainnode);
 
-    elemrng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
-    seqstartpos = gt_encseq_seqstartpos(ls->encseq, seqnr);
-    seqlength = gt_encseq_seqlength(ls->encseq, seqnr);
+    sdesc = gt_str_new();
+    had_err = gt_region_mapping_get_description(ls->rmap, sdesc, sreg, err);
 
-    ls->element.seqid = gt_calloc((size_t) ls->seqnamelen+1, sizeof (char));
-    (void) snprintf(ls->element.seqid,
-                    MIN((size_t) seqid_len, (size_t) ls->seqnamelen)+1,
-                    "%s",
-                    gt_encseq_description(ls->encseq, &seqid_len, seqnr));
-    gt_cstr_rep(ls->element.seqid, ' ', '_');
-    if (seqid_len > (unsigned long) ls->seqnamelen)
-      ls->element.seqid[ls->seqnamelen] = '\0';
+    if (!had_err) {
+      ls->element.seqid = gt_calloc((size_t) ls->seqnamelen+1, sizeof (char));
+      (void) snprintf(ls->element.seqid,
+                      MIN((size_t) gt_str_length(sdesc),
+                          (size_t) ls->seqnamelen)+1,
+                      "%s", gt_str_get(sdesc));
+      gt_cstr_rep(ls->element.seqid, ' ', '_');
+      if (gt_str_length(sdesc) > (unsigned long) ls->seqnamelen)
+        ls->element.seqid[ls->seqnamelen] = '\0';
 
-    (void) gt_ltrelement_format_description(&ls->element,
-                                            ls->seqnamelen,
-                                            desc,
-                                            (size_t) (GT_MAXFASTAHEADER-1));
+      (void) gt_ltrelement_format_description(&ls->element,
+                                              ls->seqnamelen,
+                                              desc,
+                                              (size_t) (GT_MAXFASTAHEADER-1));
+      gt_str_delete(sdesc);
 
-    /* output basic retrotransposon data */
-    lltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.leftLTR);
-    rltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.rightLTR);
-    rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
-    gt_file_xprintf(ls->tabout_file,
-                       "%lu\t%lu\t%lu\t%s\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t",
-                       rng.start,
-                       rng.end,
-                       gt_ltrelement_length(&ls->element),
-                       ls->element.seqid,
-                       lltr_rng.start,
-                       lltr_rng.end,
-                       gt_ltrelement_leftltrlen(&ls->element),
-                       rltr_rng.start,
-                       rltr_rng.end,
-                       gt_ltrelement_rightltrlen(&ls->element));
+      /* output basic retrotransposon data */
+      lltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.leftLTR);
+      rltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.rightLTR);
+      rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
+      gt_file_xprintf(ls->tabout_file,
+                         "%lu\t%lu\t%lu\t%s\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t",
+                         rng.start,
+                         rng.end,
+                         gt_ltrelement_length(&ls->element),
+                         ls->element.seqid,
+                         lltr_rng.start,
+                         lltr_rng.end,
+                         gt_ltrelement_leftltrlen(&ls->element),
+                         rltr_rng.start,
+                         rltr_rng.end,
+                         gt_ltrelement_rightltrlen(&ls->element));
+    }
+    seq = gt_str_new();
 
     /* output TSDs */
-    if (ls->element.leftTSD != NULL)
+    if (!had_err && ls->element.leftTSD != NULL)
     {
       GtRange tsd_rng;
-      GtStrand tsd_strand;
-      char *tsd_seq;
-
-      tsd_strand = gt_feature_node_get_strand(ls->element.leftTSD);
       tsd_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.leftTSD);
-      tsd_seq = gt_ltrelement_get_sequence(tsd_rng.start-1, tsd_rng.end-1,
-                                           tsd_strand, ls->encseq, seqstartpos,
-                                           err);
-      gt_file_xprintf(ls->tabout_file,
+      had_err = gt_extract_feature_sequence(seq,
+                                       (GtGenomeNode*) ls->element.leftTSD,
+                                       gt_symbol(gt_ft_target_site_duplication),
+                                       false,
+                                       NULL, NULL, ls->rmap, err);
+      if (!had_err) {
+        gt_file_xprintf(ls->tabout_file,
                          "%lu\t%lu\t%s\t",
                          tsd_rng.start,
                          tsd_rng.end,
-                         tsd_seq);
-      gt_free((char*) tsd_seq);
+                         gt_str_get(seq));
+      }
+    gt_str_reset(seq);
     } else gt_file_xprintf(ls->tabout_file, "\t\t\t");
-    if (ls->element.rightTSD != NULL)
+
+    if (!had_err && ls->element.rightTSD != NULL)
     {
       GtRange tsd_rng;
-      GtStrand tsd_strand;
-      char *tsd_seq;
 
-      tsd_strand = gt_feature_node_get_strand(ls->element.rightTSD);
       tsd_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.rightTSD);
-      tsd_seq = gt_ltrelement_get_sequence(tsd_rng.start-1, tsd_rng.end-1,
-                                           tsd_strand, ls->encseq, seqstartpos,
-                                           err);
-      gt_file_xprintf(ls->tabout_file,
-                         "%lu\t%lu\t%s\t",
-                         tsd_rng.start,
-                         tsd_rng.end,
-                         tsd_seq);
-      gt_free((char*) tsd_seq);
+      had_err = gt_extract_feature_sequence(seq,
+                                       (GtGenomeNode*) ls->element.rightTSD,
+                                       gt_symbol(gt_ft_target_site_duplication),
+                                       false,
+                                       NULL, NULL, ls->rmap, err);
+      if (!had_err) {
+        gt_file_xprintf(ls->tabout_file,
+                           "%lu\t%lu\t%s\t",
+                           tsd_rng.start,
+                           tsd_rng.end,
+                           gt_str_get(seq));
+      }
+      gt_str_reset(seq);
     } else gt_file_xprintf(ls->tabout_file, "\t\t\t");
 
     /* output PPT */
-    if (ls->element.ppt != NULL)
+    if (!had_err && ls->element.ppt != NULL)
     {
-      GtStrand ppt_strand;
-      ppt_strand = gt_feature_node_get_strand(ls->element.ppt);
+      GtStrand ppt_strand = gt_feature_node_get_strand(ls->element.ppt);
+
       ppt_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.ppt);
-      ppt_seq = gt_ltrelement_get_sequence(ppt_rng.start-1, ppt_rng.end-1,
-                                           ppt_strand, ls->encseq, seqstartpos,
-                                           err);
-      gt_fasta_show_entry(desc, ppt_seq, gt_range_length(&ppt_rng),
-                          GT_FSWIDTH, ls->pptout_file);
-      gt_file_xprintf(ls->tabout_file,
-                         "%lu\t%lu\t%s\t%c\t%d\t",
-                         ppt_rng.start,
-                         ppt_rng.end,
-                         ppt_seq,
-                         GT_STRAND_CHARS[ppt_strand],
-                         (ppt_strand == GT_STRAND_FORWARD ?
-                             abs((int) (rltr_rng.start - ppt_rng.end)) :
-                             abs((int) (lltr_rng.end - ppt_rng.start))));
-      gt_free((char*) ppt_seq);
+      had_err = gt_extract_feature_sequence(seq,
+                                            (GtGenomeNode*) ls->element.ppt,
+                                            gt_symbol(gt_ft_RR_tract), false,
+                                            NULL, NULL, ls->rmap, err);
+      if (!had_err) {
+        gt_fasta_show_entry(desc, gt_str_get(seq), gt_range_length(&ppt_rng),
+                            GT_FSWIDTH, ls->pptout_file);
+        gt_file_xprintf(ls->tabout_file,
+                           "%lu\t%lu\t%s\t%c\t%d\t",
+                           ppt_rng.start,
+                           ppt_rng.end,
+                           gt_str_get(seq),
+                           GT_STRAND_CHARS[ppt_strand],
+                           (ppt_strand == GT_STRAND_FORWARD ?
+                               abs((int) (rltr_rng.start - ppt_rng.end)) :
+                               abs((int) (lltr_rng.end - ppt_rng.start))));
+      }
+      gt_str_reset(seq);
     } else gt_file_xprintf(ls->tabout_file, "\t\t\t\t\t");
 
     /* output PBS */
-    if (ls->element.pbs != NULL)
+    if (!had_err && ls->element.pbs != NULL)
     {
       GtStrand pbs_strand;
 
       pbs_strand = gt_feature_node_get_strand(ls->element.pbs);
       pbs_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.pbs);
-      pbs_seq = gt_ltrelement_get_sequence(pbs_rng.start-1, pbs_rng.end-1,
-                                           pbs_strand, ls->encseq, seqstartpos,
-                                           err);
-      gt_fasta_show_entry(desc, pbs_seq, gt_range_length(&pbs_rng),
-                          GT_FSWIDTH, ls->pbsout_file);
-      gt_file_xprintf(ls->tabout_file,
+      had_err = gt_extract_feature_sequence(seq,
+                                           (GtGenomeNode*) ls->element.pbs,
+                                           gt_symbol(gt_ft_primer_binding_site),
+                                           false, NULL, NULL, ls->rmap, err);
+      if (!had_err) {
+        gt_fasta_show_entry(desc, gt_str_get(seq), gt_range_length(&pbs_rng),
+                            GT_FSWIDTH, ls->pbsout_file);
+        gt_file_xprintf(ls->tabout_file,
                          "%lu\t%lu\t%c\t%s\t%s\t%s\t%s\t%s\t",
                          pbs_rng.start,
                          pbs_rng.end,
                          GT_STRAND_CHARS[pbs_strand],
-                      gt_feature_node_get_attribute(ls->element.pbs, "trna"),
-                      pbs_seq,
-                      gt_feature_node_get_attribute(ls->element.pbs,
-                                                    "pbsoffset"),
-                      gt_feature_node_get_attribute(ls->element.pbs,
-                                                    "trnaoffset"),
-                      gt_feature_node_get_attribute(ls->element.pbs, "edist"));
-      gt_free((char*) pbs_seq);
+                         gt_feature_node_get_attribute(ls->element.pbs, "trna"),
+                         gt_str_get(seq),
+                         gt_feature_node_get_attribute(ls->element.pbs,
+                                                       "pbsoffset"),
+                         gt_feature_node_get_attribute(ls->element.pbs,
+                                                       "trnaoffset"),
+                         gt_feature_node_get_attribute(ls->element.pbs,
+                                                       "edist"));
+      }
+      gt_str_reset(seq);
     } else gt_file_xprintf(ls->tabout_file, "\t\t\t\t\t\t\t\t");
 
     /* output protein domains */
-    if (ls->element.pdoms != NULL)
+    if (!had_err && ls->element.pdoms != NULL)
     {
       GtStr *pdomorderstr = gt_str_new();
-      for (i=0;i<gt_array_size(ls->element.pdomorder);i++)
+      for (i=0; !had_err && i<gt_array_size(ls->element.pdomorder); i++)
       {
         const char* key = *(const char**) gt_array_get(ls->element.pdomorder,
                                                        i);
         GtArray *entry = (GtArray*) gt_hashmap_get(ls->element.pdoms, key);
-        (void) write_pdom(ls, entry, key, ls->encseq, seqstartpos, desc, err);
+        had_err = write_pdom(ls, entry, key, ls->rmap, desc, err);
       }
 
       if (GT_STRAND_REVERSE == gt_feature_node_get_strand(ls->element.mainnode))
         gt_array_reverse(ls->element.pdomorder);
 
-      for (i=0;i<gt_array_size(ls->element.pdomorder);i++)
+      for (i=0 ;!had_err && i<gt_array_size(ls->element.pdomorder); i++)
       {
         const char* name = *(const char**) gt_array_get(ls->element.pdomorder,
                                                         i);
@@ -413,48 +425,54 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
     switch (gt_feature_node_get_strand(ls->element.mainnode))
     {
       case GT_STRAND_REVERSE:
-        ltr5_rng = rltr_rng;
-        ltr3_rng = lltr_rng;
+        ltr5 = ls->element.rightLTR;
+        ltr3 = ls->element.leftLTR;
         break;
       case GT_STRAND_FORWARD:
       default:
-        ltr5_rng = lltr_rng;
-        ltr3_rng = rltr_rng;
+        ltr5 = ls->element.leftLTR;
+        ltr3 = ls->element.rightLTR;
         break;
     }
-    outseq = gt_ltrelement_get_sequence(ltr5_rng.start-1,
-                              ltr5_rng.end-1,
-                              gt_feature_node_get_strand(ls->element.mainnode),
-                              ls->encseq, seqstartpos, err);
-    gt_fasta_show_entry(desc,
-                        outseq,
-                        gt_range_length(&ltr5_rng),
-                        GT_FSWIDTH,
-                        ls->ltr5out_file);
-    gt_free(outseq);
-    outseq = gt_ltrelement_get_sequence(rng.start-1,
-                              rng.end-1,
-                              gt_feature_node_get_strand(ls->element.mainnode),
-                              ls->encseq, seqstartpos, err);
-    gt_fasta_show_entry(desc,
-                        outseq,
-                        gt_range_length(&rng),
-                        GT_FSWIDTH,
-                        ls->elemout_file);
-    gt_free(outseq);
+
+    if (!had_err) {
+      had_err = gt_extract_feature_sequence(seq, (GtGenomeNode*) ltr5,
+                                          gt_symbol(gt_ft_long_terminal_repeat),
+                                          false,
+                                          NULL, NULL, ls->rmap, err);
+    }
+    if (!had_err) {
+      gt_fasta_show_entry(desc, gt_str_get(seq), gt_str_length(seq),
+                          GT_FSWIDTH, ls->ltr5out_file);
+      gt_str_reset(seq);
+    }
+    if (!had_err) {
+      had_err = gt_extract_feature_sequence(seq, (GtGenomeNode*) ltr3,
+                                          gt_symbol(gt_ft_long_terminal_repeat),
+                                          false,
+                                          NULL, NULL, ls->rmap, err);
+    }
+    if (!had_err) {
+      gt_fasta_show_entry(desc, gt_str_get(seq), gt_str_length(seq),
+                          GT_FSWIDTH, ls->ltr3out_file);
+      gt_str_reset(seq);
+    }
 
     /* output complete oriented element */
-    outseq = gt_ltrelement_get_sequence(ltr3_rng.start-1,
-                              ltr3_rng.end-1,
-                              gt_feature_node_get_strand(ls->element.mainnode),
-                              ls->encseq, seqstartpos, err);
-    gt_fasta_show_entry(desc,
-                        outseq,
-                        gt_range_length(&ltr3_rng),
-                        GT_FSWIDTH,
-                        ls->ltr3out_file);
-    gt_free(outseq);
+    if (!had_err) {
+      had_err = gt_extract_feature_sequence(seq,
+                                           (GtGenomeNode*) ls->element.mainnode,
+                                           gt_symbol(gt_ft_LTR_retrotransposon),
+                                           false,
+                                           NULL, NULL, ls->rmap, err);
+    }
+    if (!had_err) {
+      gt_fasta_show_entry(desc,gt_str_get(seq), gt_str_length(seq),
+                          GT_FSWIDTH, ls->elemout_file);
+      gt_str_reset(seq);
+    }
     gt_file_xprintf(ls->tabout_file, "\n");
+    gt_free(seq);
   }
   gt_hashmap_delete(ls->element.pdoms);
   gt_array_delete(ls->element.pdomorder);
@@ -470,7 +488,6 @@ static void write_metadata(GtFile *metadata_file,
                            GtPdomOptions *pdom_opts,
 #endif
                            const char *trnafilename,
-                           const char *seqfilename,
                            const char *gfffilename)
 {
   int buflen = 1024;
@@ -485,12 +502,6 @@ static void write_metadata(GtFile *metadata_file,
   gt_assert(buffer && strlen(buffer) > 0);
 
   /* append working dir to relative paths if necessary */
-  if (seqfilename[0] != '/')
-    gt_file_xprintf(metadata_file,
-                       "Sequence file used\t%s/%s\n", buffer, seqfilename);
-  else
-    gt_file_xprintf(metadata_file,
-                       "Sequence file used\t%s\n", seqfilename);
   if (gfffilename[0] != '/')
     gt_file_xprintf(metadata_file,
                        "GFF3 input used\t%s/%s\n", buffer, gfffilename);
@@ -631,7 +642,7 @@ void gt_ltr_fileout_stream_enable_aa_sequence_output(GtNodeStream *ns)
 
 GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                      int tests_to_run,
-                                     GtEncseq *encseq,
+                                     GtRegionMapping *rmap,
                                      char *file_prefix,
                                      GtPPTOptions *ppt_opts,
                                      GtPBSOptions *pbs_opts,
@@ -639,7 +650,6 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                      GtPdomOptions *pdom_opts,
 #endif
                                      const char *trnafilename,
-                                     const char *seqfilename,
                                      const char *gfffilename,
                                      unsigned int seqnamelen,
                                      GtError* err)
@@ -649,18 +659,18 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   char fn[GT_MAXFILENAMELEN];
   gt_error_check(err);
 
-  gt_assert(file_prefix && in_stream && encseq && ppt_opts && pbs_opts
+  gt_assert(file_prefix && in_stream && rmap && ppt_opts && pbs_opts
 #ifdef HAVE_HMMER
     && pdom_opts
 #endif
     );
 
-  ns = gt_node_stream_create(gt_ltr_fileout_stream_class(), true);
+  ns = gt_node_stream_create(gt_ltr_fileout_stream_class(), false);
   ls = gt_ltr_fileout_stream_cast(ns);
 
   /* ref GFF input stream and sequences*/
   ls->in_stream = gt_node_stream_ref(in_stream);
-  ls->encseq = encseq;
+  ls->rmap = rmap;
   ls->tests_to_run = tests_to_run;
   ls->seqnamelen = seqnamelen;
   ls->write_pdom_alignments = false;
@@ -713,7 +723,6 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                  pdom_opts,
 #endif
                  trnafilename,
-                 seqfilename,
                  gfffilename);
 
   /* print tabular outfile headline */

@@ -22,10 +22,12 @@
 #include "core/mathsupport.h"
 #include "core/range.h"
 #include "core/str.h"
+#include "core/symbol.h"
 #include "core/unused_api.h"
-#include "extended/node_stream_api.h"
+#include "extended/extract_feature_sequence.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/node_stream_api.h"
 #include "extended/reverse_api.h"
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"
@@ -35,6 +37,7 @@ struct GtLTRdigestStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtEncseq *encseq;
+  GtRegionMapping *rmap;
   GtPBSOptions *pbs_opts;
   GtPPTOptions *ppt_opts;
 #ifdef HAVE_HMMER
@@ -263,7 +266,7 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
   {
 #ifdef HAVE_HMMER
     /* Protein domain finding
-     * ----------------------*/
+       ---------------------- */
     if (ls->tests_to_run & GT_LTRDIGEST_RUN_PDOM)
     {
       GtPdomResults *pdom_results = NULL;
@@ -303,7 +306,7 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
 #endif
 
     /* PPT finding
-     * -----------*/
+       ----------- */
     if (ls->tests_to_run & GT_LTRDIGEST_RUN_PPT)
     {
       GtPPTResults *ppt_results = NULL;
@@ -318,7 +321,7 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
     }
 
     /* PBS finding
-     * ----------- */
+       ----------- */
     if (ls->tests_to_run & GT_LTRDIGEST_RUN_PBS)
     {
       GtPBSResults *pbs_results = NULL;
@@ -336,11 +339,25 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
   return had_err;
 }
 
+static void set_element_direction(GtFeatureNode *rootnode, GtStrand strand)
+{
+  GtFeatureNodeIterator *fni;
+  GtFeatureNode *fn = rootnode;
+  fni = gt_feature_node_iterator_new(rootnode);
+  for (fn = rootnode; fn != NULL; fn = gt_feature_node_iterator_next(fni)) {
+    GtStrand cur_strand = gt_feature_node_get_strand(fn);
+    if (cur_strand == GT_STRAND_UNKNOWN) {
+      gt_feature_node_set_strand(fn, strand);
+    }
+  }
+  gt_feature_node_iterator_delete(fni);
+}
+
 static int gt_ltrdigest_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                     GtError *err)
 {
   GtLTRdigestStream *ls;
-  GtFeatureNode *fn;
+  GtFeatureNode *fn = NULL;
   int had_err;
 
   gt_error_check(err);
@@ -371,71 +388,23 @@ static int gt_ltrdigest_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 
   if (ls->element.mainnode != NULL)
   {
-    unsigned long seqid;
-    const char *sreg;
-    char *seq;
+    GtStr *seq;
 
-    sreg = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
-                                               ls->element.mainnode));
+    seq = gt_str_new();
+    had_err = gt_extract_feature_sequence(seq,
+                                          (GtGenomeNode*) ls->element.mainnode,
+                                          gt_symbol(gt_ft_LTR_retrotransposon),
+                                          false, NULL, NULL, ls->rmap, err);
 
-    /* we assume that this is the correct numbering! */
-    if (!sscanf(sreg,"seq%lu", &seqid))
-    {
-      gt_error_set(err, "Feature '%s' on line %u has invalid region identifier,"
-                   "must be 'seqX' with X being a sequence number, but was "
-                   "'%s'!",
-                   gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
-                   gt_genome_node_get_line_number((GtGenomeNode*)
-                                                  ls->element.mainnode),
-                   gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
-                                                       ls->element.mainnode)));
-      had_err = -1;
+    if (!had_err) {
+      /* run LTRdigest core routine */
+      had_err = run_ltrdigest(&ls->element, gt_str_get(seq), ls, err);
     }
-    if (!had_err)
-    {
-      if (seqid > gt_encseq_num_of_sequences(ls->encseq)-1) {
-        gt_error_set(err, "Sequence region number exceeds number of sequences "
-                          "in encoded sequence file: 'seq%lu'!", seqid);
-        had_err = -1;
-      }
-    }
-    if (!had_err)
-    {
-      GtUchar *symbolstring;
-      unsigned long length, seqstartpos, seqlength;
-      const GtAlphabet *alpha;
-
-      seqstartpos = gt_encseq_seqstartpos(ls->encseq, seqid);
-      seqlength = gt_encseq_seqlength(ls->encseq, seqid);
-
-      if (ls->element.rightLTR_3 <= seqlength)
-      {
-        alpha        = gt_encseq_alphabet(ls->encseq);
-        length       = gt_ltrelement_length(&ls->element);
-        seq          = gt_malloc((size_t) (length+1) * sizeof (char));
-        symbolstring = gt_malloc((size_t) (length+1) * sizeof (GtUchar));
-        gt_encseq_extract_encoded(ls->encseq,
-                                  symbolstring,
-                                  seqstartpos + (ls->element.leftLTR_5),
-                                  seqstartpos + (ls->element.leftLTR_5)
-                                    + length - 1);
-        gt_alphabet_decode_seq_to_cstr(alpha, seq, symbolstring, length);
-        gt_free(symbolstring);
-
-        /* run LTRdigest core routine */
-        had_err = run_ltrdigest(&ls->element, seq, ls, err);
-
-        gt_free(seq);
-      }
-      else
-      {
-        /* do not process elements whose positions exceed sequence boundaries
-         (obviously annotation and sequence do not match!) */
-        gt_error_set(err,
-                     "Element '%s' exceeds sequence boundaries! (%lu > %lu)",
-                     gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
-                     ls->element.rightLTR_3, seqlength);
-        had_err = -1;
+    gt_str_delete(seq);
+    if (!had_err) {
+      GtStrand ltr_strand = gt_feature_node_get_strand(ls->element.mainnode);
+      if (ltr_strand != GT_STRAND_UNKNOWN) {
+        set_element_direction(fn, ltr_strand);
       }
     }
   }
@@ -472,7 +441,7 @@ const GtNodeStreamClass* gt_ltrdigest_stream_class(void)
 
 GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
-                                      GtEncseq *encseq,
+                                      GtRegionMapping *rmap,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts,
 #ifdef HAVE_HMMER
@@ -498,7 +467,7 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                err);
 #endif
   ls->tests_to_run = tests_to_run;
-  ls->encseq = encseq;
+  ls->rmap = rmap;
   ls->ltrdigest_tag = gt_str_new_cstr(GT_LTRDIGEST_TAG);
   ls->lv = (GtLTRVisitor*) gt_ltr_visitor_new(&ls->element);
 #ifdef HAVE_HMMER

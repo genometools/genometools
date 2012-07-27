@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
 
 #include "core/bioseq.h"
 #include "extended/node_stream_api.h"
+#include "extended/region_mapping_api.h"
 #include "ltr/ltrdigest_def.h"
 #include "core/encseq.h"
 
@@ -30,7 +31,7 @@ const GtNodeStreamClass* gt_ltr_fileout_stream_class(void);
 
 GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                         int tests_to_run,
-                                        GtEncseq *encseq,
+                                        GtRegionMapping *rmap,
                                         char *file_prefix,
                                         GtPPTOptions *ppt_opts,
                                         GtPBSOptions *pbs_opts,
@@ -38,7 +39,6 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                         GtPdomOptions *pdom_opts,
 #endif
                                         const char *trnafilename,
-                                        const char *seqfilename,
                                         const char *gfffilename,
                                         unsigned int seqnamelen,
                                         GtError *err);

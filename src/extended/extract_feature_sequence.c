@@ -76,7 +76,6 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
                                                          target_ids, NULL,
                                                          NULL, "", 0, err);
   }
-
   if (!had_err) {
     if (join) {
       GtFeatureNodeIterator *fni;

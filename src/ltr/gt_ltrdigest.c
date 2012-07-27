@@ -30,6 +30,7 @@
 #include "core/warning_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
+#include "extended/seqid2file.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"
@@ -46,6 +47,7 @@ typedef struct GtLTRdigestOptions {
   bool verbose;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
+  GtSeqid2FileInfo *s2fi;
   unsigned long nthreads;
   unsigned int seqnamelen;
 } GtLTRdigestOptions;
@@ -61,6 +63,7 @@ static void* gt_ltrdigest_arguments_new(void)
   arguments->prefix = gt_str_new();
   arguments->cutoffs = gt_str_new();
   arguments->ofi = gt_output_file_info_new();
+  arguments->s2fi = gt_seqid2file_info_new();
   return arguments;
 }
 
@@ -76,6 +79,7 @@ static void gt_ltrdigest_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->cutoffs);
   gt_file_delete(arguments->outfp);
   gt_output_file_info_delete(arguments->ofi);
+  gt_seqid2file_info_delete(arguments->s2fi);
   gt_free(arguments);
 }
 
@@ -96,7 +100,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] gff3_file indexname",
+  op = gt_option_parser_new("[option ...] gff3_file",
                             "Identifies and annotates sequence features in LTR "
                             "retrotransposon candidates.");
 
@@ -356,7 +360,9 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
-  gt_option_parser_set_min_max_args(op, 2U, 2U);
+  /* region mapping and sequence source options */
+
+  gt_seqid2file_register_options(op, arguments->s2fi);
 
   return op;
 }
@@ -416,21 +422,15 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   int had_err      = 0,
       tests_to_run = 0,
       arg = parsed_args;
-  const char *indexname = argv[arg+1];
   GtLogger *logger = gt_logger_new(arguments->verbose,
                                    GT_LOGGER_DEFLT_PREFIX, stdout);
-  GtEncseqLoader *el;
-  GtEncseq *encseq;
+  GtRegionMapping *rmap;
   gt_error_check(err);
   gt_assert(arguments);
 
-  /* Set sequence encoder options. Defaults are ok. */
-  el = gt_encseq_loader_new();
-  gt_encseq_loader_set_logger(el, logger);
-
-  /* Open sequence file */
-  encseq = gt_encseq_loader_load(el, indexname, err);
-  if (!encseq)
+  /* create region mapping */
+  rmap = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
+  if (!rmap)
     had_err = -1;
 
   /* Always search for PPT. */
@@ -473,7 +473,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
 
     last_stream = ltrdigest_stream = gt_ltrdigest_stream_new(last_stream,
                                                   tests_to_run,
-                                                  encseq,
+                                                  rmap,
                                                   &arguments->pbs_opts,
                                                   &arguments->ppt_opts,
 #ifdef HAVE_HMMER
@@ -491,7 +491,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     {
       last_stream = tab_out_stream = gt_ltr_fileout_stream_new(last_stream,
                                               tests_to_run,
-                                              encseq,
+                                              rmap,
                                               gt_str_get(arguments->prefix),
                                               &arguments->ppt_opts,
                                               &arguments->pbs_opts,
@@ -499,7 +499,6 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                               &arguments->pdom_opts,
 #endif
                                               gt_str_get(arguments->trna_lib),
-                                              argv[arg+1],
                                               argv[arg],
                                               arguments->seqnamelen,
                                               err);
@@ -524,10 +523,8 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     gt_node_stream_delete(tab_out_stream);
   gt_node_stream_delete(gff3_in_stream);
 
-  gt_encseq_loader_delete(el);
-  gt_encseq_delete(encseq);
-  encseq = NULL;
   gt_bioseq_delete(arguments->pbs_opts.trna_lib);
+  gt_region_mapping_delete(rmap);
   gt_logger_delete(logger);
 
   return had_err;

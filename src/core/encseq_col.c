@@ -150,31 +150,31 @@ static int gt_encseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
                                     GtStr *md5_seqid, GtError *err)
 {
   unsigned long seqnum = GT_UNDEF_ULONG;
-  char *seqid = NULL;
+  char seqid[GT_MD5_SEQID_HASH_LEN + 1];
   int had_err = 0;
   GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
   gt_error_check(err);
   gt_assert(esc && seq && start <= end && md5_seqid && err);
   gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
-  /* performance hack to avoid string duplication */
   if (gt_str_length(md5_seqid) >= GT_MD5_SEQID_TOTAL_LEN) {
-    seqid = gt_str_get(md5_seqid);
-    if (seqid[GT_MD5_SEQID_TOTAL_LEN-1] != GT_MD5_SEQID_SEPARATOR) {
+    const char *cstrseqid = gt_str_get(md5_seqid);
+    if (cstrseqid[GT_MD5_SEQID_TOTAL_LEN-1] != GT_MD5_SEQID_SEPARATOR) {
       gt_error_set(err, "MD5 sequence id %s not terminated with '%c'",
                    gt_str_get(md5_seqid), GT_MD5_SEQID_SEPARATOR);
       had_err = -1;
     }
-    if (!had_err)
-      seqid[GT_MD5_SEQID_TOTAL_LEN-1] = '\0';
+    if (!had_err) {
+      strncpy(seqid, cstrseqid + GT_MD5_SEQID_PREFIX_LEN,
+              GT_MD5_SEQID_HASH_LEN);
+      seqid[GT_MD5_SEQID_HASH_LEN] = '\0';
+    }
   }
-  seqnum = gt_md5_tab_map(esc->md5_tab, gt_str_get(md5_seqid) +
-                                          GT_MD5_SEQID_PREFIX_LEN);
+  seqnum = gt_md5_tab_map(esc->md5_tab, seqid);
   if (seqnum != GT_UNDEF_ULONG) {
     unsigned long startpos = gt_encseq_seqstartpos(esc->encseq, seqnum),
                   GT_UNUSED seqlength = gt_encseq_seqlength(esc->encseq,
                                                             seqnum);
-    seqid[GT_MD5_SEQID_TOTAL_LEN-1] = GT_MD5_SEQID_SEPARATOR;
     *seq = gt_calloc(end - start + 1, sizeof (char));
     gt_encseq_extract_decoded(esc->encseq, (char*) *seq, startpos + start,
                               startpos + end);
@@ -189,14 +189,27 @@ static int gt_encseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
                                             GtStr *md5_seqid, GtError *err)
 {
   unsigned long seqnum = GT_UNDEF_ULONG;
+  char seqid[GT_MD5_SEQID_HASH_LEN + 1];
   int had_err = 0;
   GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
   gt_error_check(err);
   gt_assert(esc && desc && md5_seqid && err);
   gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
-  seqnum = gt_md5_tab_map(esc->md5_tab, gt_str_get(md5_seqid) +
-                                          GT_MD5_SEQID_PREFIX_LEN);
+  if (gt_str_length(md5_seqid) >= GT_MD5_SEQID_TOTAL_LEN) {
+    const char *cstrseqid = gt_str_get(md5_seqid);
+    if (cstrseqid[GT_MD5_SEQID_TOTAL_LEN-1] != GT_MD5_SEQID_SEPARATOR) {
+      gt_error_set(err, "MD5 sequence id %s not terminated with '%c'",
+                   gt_str_get(md5_seqid), GT_MD5_SEQID_SEPARATOR);
+      had_err = -1;
+    }
+    if (!had_err) {
+      strncpy(seqid, cstrseqid + GT_MD5_SEQID_PREFIX_LEN,
+              GT_MD5_SEQID_HASH_LEN);
+      seqid[GT_MD5_SEQID_HASH_LEN] = '\0';
+    }
+  }
+  seqnum = gt_md5_tab_map(esc->md5_tab, seqid);
   if (seqnum != GT_UNDEF_ULONG) {
     const char *cdesc;
     unsigned long desc_len;

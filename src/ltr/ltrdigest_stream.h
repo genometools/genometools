@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,12 +20,12 @@
 
 #include "core/error_api.h"
 #include "extended/node_stream_api.h"
+#include "extended/region_mapping_api.h"
 #include "ltr/pbs.h"
 #include "ltr/ppt.h"
 #ifdef HAVE_HMMER
 #include "ltr/pdom.h"
 #endif
-#include "core/encseq.h"
 
 /* implements the ``node stream'' interface */
 typedef struct GtLTRdigestStream GtLTRdigestStream;
@@ -34,7 +34,7 @@ const GtNodeStreamClass* gt_ltrdigest_stream_class(void);
 
 GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
-                                      GtEncseq *encseq,
+                                      GtRegionMapping *rmap,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts,
 #ifdef HAVE_HMMER

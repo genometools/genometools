@@ -360,7 +360,7 @@ GtPPTResults* gt_ppt_find(const char *seq,
   hmm = gt_ppt_hmm_new(alpha, o);
 
   /* do PPT finding on forward strand
-   * -------------------------------- */
+     -------------------------------- */
   ltrlen = gt_ltrelement_rightltrlen(element);
   /* make sure that we do not cross the LTR boundary */
   radius = MIN((unsigned long) o->radius, ltrlen-1);
@@ -382,7 +382,7 @@ GtPPTResults* gt_ppt_find(const char *seq,
   gt_free(decoded);
 
   /* do PPT finding on reverse strand
-   * -------------------------------- */
+     -------------------------------- */
   ltrlen = gt_ltrelement_leftltrlen(element);
   /* make sure that we do not cross the LTR boundary */
   radius = MIN((unsigned long) o->radius, ltrlen-1);
