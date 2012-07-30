@@ -19,6 +19,7 @@
 #include <string.h>
 #include "core/log_api.h"
 #include "core/ma.h"
+#include "core/undef_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/gff3_in_stream_api.h"
@@ -134,7 +135,7 @@ int gt_seqpos_classifier_position_is_inside_feature(
     bool *end_of_annotation, GtError *err)
 {
   int had_err = 0;
-  GtRange next_specified_ft_range;
+  GtRange next_specified_ft_range = { GT_UNDEF_LONG, GT_UNDEF_LONG };
   if (i == 0)
   {
     had_err = gt_seqpos_classifier_next_specified_ft(seqpos_classifier,
