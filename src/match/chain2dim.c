@@ -235,17 +235,6 @@ void gt_chain_applyweight(double weightfactor,
 #define GT_CHAIN2DIM_TERMINALGAP(IDX)\
         matchtable->matches[IDX].terminalgap
 
-#define GT_CHAIN2DIM_CHECKCHAINSPACE(LEN)\
-        if ((LEN) >= chain->chainedmatches.allocatedGtChain2Dimref)\
-        {\
-          chain->chainedmatches.spaceGtChain2Dimref = \
-            gt_realloc(chain->chainedmatches.spaceGtChain2Dimref,\
-                       sizeof (*chain->chainedmatches.spaceGtChain2Dimref) *\
-                               LEN);\
-          chain->chainedmatches.allocatedGtChain2Dimref = LEN;\
-          chain->chainedmatches.nextfreeGtChain2Dimref = 0;\
-        }
-
 typedef GtChain2Dimscoretype (*GtChain2Dimgapcostfunction)(
                                                   const GtChain2Dimmatchtable *,
                                                   unsigned long,
@@ -380,6 +369,19 @@ static GtChain2Dimscoretype gapcostCc(const GtChain2Dimmatchtable *matchtable,
   return (GtChain2Dimscoretype) MAX(value1,value2);
 }
 
+#define GT_MINARRAYSPACE(A,TYPE,MINLEN)\
+        do {\
+          if ((MINLEN) >= (A)->allocated##TYPE)\
+          {\
+            (A)->allocated##TYPE = MINLEN;\
+            (A)->space##TYPE = gt_realloc_mem((A)->space##TYPE,\
+                                              sizeof (TYPE) *\
+                                              (A)->allocated##TYPE,\
+                                              __FILE__, __LINE__);\
+          }\
+          gt_assert((A)->space##TYPE != NULL);\
+        } while (false)
+
 static void gt_chain2dim_chainingboundarycases(const GtChain2Dimmode *chainmode,
                                   GtChain2Dim *chain,
                                   const GtChain2Dimmatchtable *matchtable)
@@ -399,10 +401,8 @@ static void gt_chain2dim_chainingboundarycases(const GtChain2Dimmode *chainmode,
         chain->scoreofchain -= (GT_CHAIN2DIM_INITIALGAP(0)
                                   + GT_CHAIN2DIM_TERMINALGAP(0));
       }
-      GT_CHAIN2DIM_CHECKCHAINSPACE(1UL);
-
-      chain->chainedmatches.spaceGtChain2Dimref[0] = 0;
-      chain->chainedmatches.nextfreeGtChain2Dimref = 1UL;
+      chain->chainedmatches.nextfreeGtChain2Dimref = 0;
+      GT_STOREINARRAY(&chain->chainedmatches,GtChain2Dimref,32UL,0);
     }
   }
 }
@@ -420,7 +420,7 @@ static void gt_chain2dim_retrace_previousinchain(GtChain2Dim *chain,
     /* Use previousinchain */
     matchnum = matchtable->matches[matchnum].previousinchain;
   }
-  GT_CHAIN2DIM_CHECKCHAINSPACE(lengthofchain);
+  GT_MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,lengthofchain);
   chain->chainedmatches.nextfreeGtChain2Dimref = lengthofchain;
   for (matchnum = retracestart;
        matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS;
@@ -458,24 +458,28 @@ static void gt_chain2dim_nd_retrace_allprevious(
   }
   gt_assert(stack->nextfreeGtChain2DimEdgelevel == 0);
   chain->storedinreverseorder = true;
-  GT_CHECKARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,32UL);
+  GT_MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,32UL);
   chain->chainedmatches.spaceGtChain2Dimref[0] = retracestart;
   chain->chainedmatches.nextfreeGtChain2Dimref = 1UL;
   for (idx = matchtable->previousbound[retracestart];
        idx < matchtable->previousbound[retracestart] +
              matchtable->previouscount[retracestart]; idx++)
   {
-    GT_GETNEXTFREEINARRAY(el,stack,GtChain2DimEdgelevel,32UL);
-    el->level = 1UL;
-    el->son = matchtable->previoustab[idx];
+    if (matchtable->previoustab[idx] != GT_CHAIN2DIM_UNDEFPREVIOUS)
+    {
+      GT_GETNEXTFREEINARRAY(el,stack,GtChain2DimEdgelevel,32UL);
+      el->level = 1UL;
+      el->son = matchtable->previoustab[idx];
+    }
   }
   while (stack->nextfreeGtChain2DimEdgelevel > 0)
   {
     GtChain2DimEdgelevel father
       = stack->spaceGtChain2DimEdgelevel[--stack->nextfreeGtChain2DimEdgelevel];
-    GT_CHAIN2DIM_CHECKCHAINSPACE(father.son+1);
+    GT_MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,father.level + 1);
     chain->chainedmatches.spaceGtChain2Dimref[father.level] = father.son;
     chain->chainedmatches.nextfreeGtChain2Dimref = father.level + 1;
+    /*printf("(1) pop=son=%lu,level=%lu\n",father.son,father.level);*/
     if (matchtable->previouscount[father.son] == 0)
     {
       chainprocessor(cpinfo,matchtable,chain);
@@ -485,9 +489,13 @@ static void gt_chain2dim_nd_retrace_allprevious(
            idx < matchtable->previousbound[father.son] +
                  matchtable->previouscount[father.son]; idx++)
       {
-        GT_GETNEXTFREEINARRAY(el,stack,GtChain2DimEdgelevel,32UL);
-        el->level = father.level + 1;
-        el->son = father.son;
+        if (matchtable->previoustab[idx] != GT_CHAIN2DIM_UNDEFPREVIOUS)
+        {
+          GT_GETNEXTFREEINARRAY(el,stack,GtChain2DimEdgelevel,32UL);
+          el->level = father.level + 1;
+          el->son = matchtable->previoustab[idx];
+          /*printf("(1) push=son=%lu,level=%lu\n",el->son,el->level);*/
+        }
       }
     }
   }
@@ -672,13 +680,14 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
         = matchtable->matches[rightmatch].weight;
       unsigned long leftmatch;
       GtChain2DimMaxmatchvalue localmaxmatch;
-      unsigned long previouswithbestscore = 0;
+      unsigned long previouswithbestscore;
 
       localmaxmatch.defined = false;
       localmaxmatch.maxscore = 0;
       localmaxmatch.maxmatchnum = 0;
       for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
       {
+        previouswithbestscore = 0;
         if (gt_chain2dim_colinear(matchtable,0,leftmatch,rightmatch) &&
             gt_chain2dim_colinear(matchtable,1,leftmatch,rightmatch))
         {
@@ -719,6 +728,8 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
           = localmaxmatch.maxmatchnum;
         matchtable->matches[rightmatch].score = localmaxmatch.maxscore;
         matchtable->previouscount[rightmatch] = previouswithbestscore;
+        /*printf("previouscount[%lu]=%lu\n",
+                rightmatch,previouswithbestscore);*/
       } else
       {
         matchtable->matches[rightmatch].previousinchain
@@ -742,11 +753,11 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
       const GtChain2Dimscoretype weightright
         = matchtable->matches[rightmatch].weight;
       unsigned long leftmatch;
-      GtChain2DimMaxmatchvalue localmaxmatch;
 
-      localmaxmatch.defined = false;
-      localmaxmatch.maxscore = 0;
-      localmaxmatch.maxmatchnum = 0;
+      if (matchtable->previouscount[rightmatch] == 0)
+      {
+        continue;
+      }
       for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
       {
         if (gt_chain2dim_colinear(matchtable,0,leftmatch,rightmatch) &&
@@ -768,6 +779,8 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
           {
             matchtable->previoustab[--matchtable->previousbound[rightmatch]]
               = previous;
+            /*printf("previoustab[%lu]=%lu\n",
+               matchtable->previousbound[rightmatch],previous);*/
           }
         }
       }
@@ -1830,7 +1843,9 @@ void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
 {
   const Matchchaininfo *fiptr;
 
-  gt_assert(idx <  gt_chain_chainlength(chain));
+  gt_assert(idx <  gt_chain_chainlength(chain) &&
+            chain->chainedmatches.spaceGtChain2Dimref[idx] <
+            matchtable->nextfree);
   fiptr = matchtable->matches +
           chain->chainedmatches.spaceGtChain2Dimref[idx];
   value->startpos[0] = fiptr->startpos[0];
