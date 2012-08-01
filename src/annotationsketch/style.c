@@ -131,9 +131,6 @@ GtStyle* gt_style_new(GtError *err)
   sty = gt_calloc(1, sizeof (GtStyle));
   sty->filename = NULL;
   sty->L = luaL_newstate();
-  sty->lock = gt_rwlock_new();
-  sty->unsafe = false;
-  sty->clone_lock = gt_rwlock_new();
   if (!sty->L) {
     gt_error_set(err, "out of memory (cannot create new Lua state)");
     gt_free(sty);
@@ -141,12 +138,15 @@ GtStyle* gt_style_new(GtError *err)
   }
   else
     luaL_opencustomlibs(sty->L, luasecurelibs);
+  sty->lock = gt_rwlock_new();
+  sty->unsafe = false;
+  sty->clone_lock = gt_rwlock_new();
 
   default_formats = gt_str_new_cstr(gt_default_format_style);
   had_err = gt_style_load_str(sty, default_formats, err);
   gt_assert(!had_err && !gt_error_is_set(err)); /* default style must run */
   gt_str_delete(default_formats);
-  return sty;
+  return (!had_err ? sty : NULL);
 }
 
 GtStyle* gt_style_new_with_state(lua_State *L)
