@@ -798,11 +798,12 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
 {
   GtAlphabet *alphabet = NULL;
   GtBioseq *bioseq;
-  char file2proc[PATH_MAX+1];
+  GtStr *file2proc;
   unsigned long i, j;
   int had_err = 0;
-
   gt_error_check(err);
+
+  file2proc = gt_str_new();
 
   /* set version number */
   bssm_param->version_num = (unsigned char) MYVERSION;
@@ -826,27 +827,27 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
 
   for (i = 0; !had_err && i < NUMOFFILES; i++) {
     /* process datafile */
-    strcpy(file2proc, path);
+    gt_str_append_cstr(file2proc, path);
     switch (termtype) {
       case GT_DONOR_TYPE:
-        strcat(file2proc, "/GT_donor/");
-        strcat(file2proc, filenames[i]);
+        gt_str_append_cstr(file2proc, "/GT_donor/");
+        gt_str_append_cstr(file2proc, filenames[i]);
         break;
       case GC_DONOR_TYPE:
-        strcat(file2proc, "/GC_donor/");
-        strcat(file2proc, filenames[i]);
+        gt_str_append_cstr(file2proc, "/GC_donor/");
+        gt_str_append_cstr(file2proc, filenames[i]);
         break;
       case AG_ACCEPTOR_TYPE:
-        strcat(file2proc, "/AG_acceptor/");
-        strcat(file2proc, filenames[i]);
+        gt_str_append_cstr(file2proc, "/AG_acceptor/");
+        gt_str_append_cstr(file2proc, filenames[i]);
         break;
       default: gt_assert(0);
     }
 
     if (gzip)
-      strcat(file2proc, ".gz");
+      gt_str_append_cstr(file2proc, ".gz");
 
-    if (!(bioseq = gt_bioseq_new(file2proc, err)))
+    if (!(bioseq = gt_bioseq_new(gt_str_get(file2proc), err)))
       had_err = -1;
 
     if (!had_err)
@@ -860,7 +861,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
       /* check length */
       if (gt_bioseq_get_sequence_length(bioseq, j) != STRINGSIZE) {
         gt_error_set(err, "sequence %lu in file \"%s\" does not have length %u",
-                     j, file2proc, STRINGSIZE);
+                     j, gt_str_get(file2proc), STRINGSIZE);
         had_err = -1;
       }
       seq = gt_bioseq_get_seq(bioseq, j);
@@ -872,7 +873,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
             if (encoded_seq[50] != gt_alphabet_encode(alphabet, 'G') ||
                 encoded_seq[51] != gt_alphabet_encode(alphabet, 'T')) {
               gt_error_set(err, "sequence %lu in file \"%s\" is not a GT "
-                                "sequence", j, file2proc);
+                                "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
             break;
@@ -880,7 +881,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
             if (encoded_seq[50] != gt_alphabet_encode(alphabet, 'G') ||
                 encoded_seq[51] != gt_alphabet_encode(alphabet, 'C')) {
               gt_error_set(err, "sequence %lu in file \"%s\" is not a GC "
-                                "sequence", j, file2proc);
+                                "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
             break;
@@ -888,7 +889,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
             if (encoded_seq[50] != gt_alphabet_encode(alphabet, 'A') ||
                 encoded_seq[51] != gt_alphabet_encode(alphabet, 'G')) {
               gt_error_set(err, "sequence %lu in file \"%s\" is not a AG "
-                                "sequence", j, file2proc);
+                                "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
             break;
@@ -915,6 +916,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
     /* free space */
     gt_bioseq_delete(bioseq);
   }
+  gt_str_delete(file2proc);
 
   return had_err;
 }

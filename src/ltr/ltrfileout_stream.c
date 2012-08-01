@@ -472,21 +472,25 @@ static void write_metadata(GtFile *metadata_file,
                            const char *seqfilename,
                            const char *gfffilename)
 {
-  char buffer[PATH_MAX+1];
-  bool has_cwd;
+  int buflen = 1024;
+  char *buffer;
 
+  buffer = gt_calloc(buflen+1, sizeof (char));
   /* get working directory */
-  memset(buffer, 0, PATH_MAX+1);
-  has_cwd = (getcwd(buffer, PATH_MAX) != NULL);
+  while (getcwd(buffer, buflen) == NULL) {
+    buflen += 1024;
+    buffer = gt_realloc(buffer, (buflen+1) * sizeof (char));
+  }
+  gt_assert(buffer && strlen(buffer) > 0);
 
   /* append working dir to relative paths if necessary */
-  if (seqfilename[0] != '/' && has_cwd)
+  if (seqfilename[0] != '/')
     gt_file_xprintf(metadata_file,
                        "Sequence file used\t%s/%s\n", buffer, seqfilename);
   else
     gt_file_xprintf(metadata_file,
                        "Sequence file used\t%s\n", seqfilename);
-  if (gfffilename[0] != '/' && has_cwd)
+  if (gfffilename[0] != '/')
     gt_file_xprintf(metadata_file,
                        "GFF3 input used\t%s/%s\n", buffer, gfffilename);
   else
@@ -509,7 +513,7 @@ static void write_metadata(GtFile *metadata_file,
 
   if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
-    if (trnafilename[0] != '/' && has_cwd)
+    if (trnafilename[0] != '/')
       gt_file_xprintf(metadata_file,
                          "tRNA library for PBS detection\t%s/%s\n",
                          buffer, trnafilename);
@@ -566,6 +570,7 @@ static void write_metadata(GtFile *metadata_file,
   }
 #endif
   gt_file_xprintf(metadata_file, "\n");
+  gt_free(buffer);
 }
 
 void gt_ltrfileout_stream_free(GtNodeStream *ns)

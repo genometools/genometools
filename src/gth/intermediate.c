@@ -20,8 +20,6 @@
 #include "core/unused_api.h"
 #include "gth/intermediate.h"
 
-#define SHOW_PARSE_FILE_STATUS_BUF_SIZE  PATH_MAX+80
-
 #define SPLICEDALIGNMENT_TAG            "spliced_alignment"
 #define REFERENCEALPHATYPE_TAG          "referencealphatype"
 #define DNA_EOP_TYPE_TAG                "DNA_eop_type"
@@ -610,14 +608,15 @@ static void show_parse_file_status(GthShowVerbose showverbose,
                                    unsigned long numoffiles,
                                    const char *filename)
 {
-  char buf[SHOW_PARSE_FILE_STATUS_BUF_SIZE];
-  GT_UNUSED int rval;
-  rval = snprintf(buf, SHOW_PARSE_FILE_STATUS_BUF_SIZE,
-                  "process file %lu/%lu: %s",  filenum + 1,  numoffiles,
-                  filename);
-  /* buf[SHOW_PARSE_FILE_STATUS_BUF_SIZE] is large enough */
-  gt_assert(rval <  SHOW_PARSE_FILE_STATUS_BUF_SIZE);
-  showverbose(buf);
+  GtStr *buf = gt_str_new();
+  gt_str_append_cstr(buf, "process file ");
+  gt_str_append_ulong(buf, filenum + 1);
+  gt_str_append_char(buf, '/');
+  gt_str_append_ulong(buf, numoffiles);
+  gt_str_append_cstr(buf, ": ");
+  gt_str_append_cstr(buf, filename);
+  showverbose(gt_str_get(buf));
+  gt_str_delete(buf);
 }
 
 /* The following function processes a set of consensus files. If no consensus

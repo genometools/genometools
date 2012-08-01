@@ -29,9 +29,6 @@
 #define RANGE_OPT_CSTR  "range"
 #define DEFAULT_RANGE   5
 
-/* XXX */
-#define SHOW_SPLIT_FILE_BUF_SIZE PATH_MAX+80
-
 typedef enum {
   ALIGNMENTSCORE_SPLIT,
   COVERAGE_SPLIT,
@@ -62,20 +59,21 @@ typedef struct {
 static void close_output_files(Store_in_subset_file_data
                                *store_in_subset_file_data)
 {
-  char buf[SHOW_SPLIT_FILE_BUF_SIZE];
-  GT_UNUSED int rval;
   unsigned long i;
+  GtStr *buf;
 
+  buf = gt_str_new();
   for (i = 0; i < store_in_subset_file_data->num_of_subset_files; i++) {
     if (store_in_subset_file_data->subset_files[i]) {
       if (store_in_subset_file_data->gthsplitinfo->showverbose) {
-        rval = snprintf(buf, (size_t) SHOW_SPLIT_FILE_BUF_SIZE,
-                        "split file created: %s (size=%lu)",
-                        gt_str_get(store_in_subset_file_data
-                                   ->subset_filenames[i]),
-                        store_in_subset_file_data->subset_file_sa_counter[i]);
-        gt_assert(rval <  SHOW_SPLIT_FILE_BUF_SIZE);
-        store_in_subset_file_data->gthsplitinfo->showverbose(buf);
+        gt_str_reset(buf);
+        gt_str_append_cstr(buf, "split file created: ");
+        gt_str_append_str(buf, store_in_subset_file_data->subset_filenames[i]);
+        gt_str_append_cstr(buf, " (size=");
+        gt_str_append_ulong(buf,
+                          store_in_subset_file_data->subset_file_sa_counter[i]);
+        gt_str_append_cstr(buf, ")");
+        store_in_subset_file_data->gthsplitinfo->showverbose(gt_str_get(buf));
       }
       gt_assert(store_in_subset_file_data->subset_filenames[i]);
       /* put XML trailer in file before closing it */
@@ -86,6 +84,7 @@ static void close_output_files(Store_in_subset_file_data
       store_in_subset_file_data->subset_file_sa_counter[i] = 0;
     }
   }
+  gt_str_delete(buf);
 }
 
 static int store_in_subset_file(void *data, GthSA *sa,
