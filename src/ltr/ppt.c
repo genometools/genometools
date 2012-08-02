@@ -272,7 +272,12 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
       {
         case PPT_UBOX:
           if (gt_ubox_ok(cur_hit, results->opts->ubox_len)) {
+            if (potential_ubox) {
+              gt_free(potential_ubox);
+              potential_ubox = NULL;
+            }
             potential_ubox = cur_hit;
+            cur_hit = NULL;
           }
           else
           {
@@ -292,24 +297,37 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
               {
                 /* this PPT has a U-box, handle accordingly */
                 cur_hit->ubox = potential_ubox;
+              } else {
+                gt_free(potential_ubox);
               }
               potential_ubox = NULL;
             }
+            cur_hit = NULL;
           }
           else
           {
+            if (potential_ubox) {
+              gt_free(potential_ubox);
+              potential_ubox = NULL;
+            }
             gt_free(cur_hit);
             cur_hit = NULL;
           }
           break;
         default:
+          if (potential_ubox) {
+                gt_free(potential_ubox);
+                potential_ubox = NULL;
+          }
           gt_free(cur_hit);
           cur_hit = NULL;
           break;
       }
       if (i+2!=2*radius)
       {
-        cur_hit = gt_ppt_hit_new(strand,results);
+        /* we assume that the current hit has been processed */
+        gt_assert(cur_hit == NULL);
+        cur_hit = gt_ppt_hit_new(strand, results);
         cur_hit->rng.start = i+1;
       }
     }
