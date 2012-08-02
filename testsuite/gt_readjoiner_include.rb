@@ -364,7 +364,7 @@ Test do
   assert_empty(last_stderr, "stderr")
 end
 
-Name "gt readjoiner: wildcards"
+Name "gt readjoiner: wildcards (Fasta)"
 Keywords "gt_readjoiner gt_readjoiner_prefilter"
 Test do
   run_prefilter("#$testdata/readjoiner/wildcard1.fas")
@@ -379,6 +379,20 @@ Test do
   # wildcard1 / wildcard2 have a 8 chars match between read 0 and read 1;
   # the current version of readjoiner eliminates the wildcard-containing
   # sequences; update the test if this is changed
+end
+
+Name "gt readjoiner: wildcards (FastQ)"
+Keywords "gt_readjoiner gt_readjoiner_prefilter"
+Test do
+  run_prefilter("#$testdata/readjoiner/wildcard1.fastq")
+  grep last_stdout, 'reads with ambiguities = 1'
+  grep last_stdout, 'number of reads in filtered readset = 1'
+  run_prefilter("#$testdata/readjoiner/wildcard2.fastq")
+  grep last_stdout, 'reads with ambiguities = 1'
+  grep last_stdout, 'number of reads in filtered readset = 1'
+  run_prefilter("#$testdata/readjoiner/wildcards.fastq")
+  grep last_stdout, 'reads with ambiguities = 6'
+  grep last_stdout, 'number of reads in filtered readset = 2'
 end
 
 Name "gt readjoiner overlap: self-match"
@@ -525,6 +539,17 @@ Test do
   run_overlap(4, "-elimtrans false")
   run_assembly("-redtrans")
   run "diff reads.contigs.fas contigs"
+end
+
+Name "gt readjoiner: fastq vs fasta, 70x100nt"
+Keywords "gt_readjoiner"
+Test do
+  run_prefilter("#{$testdata}/readjoiner/70x_100nt.fas")
+  run_overlap(30)
+  run_assembly
+  run_prefilter("#{$testdata}/readjoiner/70x_100nt.fastq")
+  run_overlap(30)
+  run_assembly
 end
 
 Name "gt readjoiner: test different read lengths"
