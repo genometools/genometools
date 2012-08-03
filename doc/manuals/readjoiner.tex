@@ -30,7 +30,7 @@
 
 \newcommand{\minlen}{\ell}
 
-\title{\Huge{\Readjoiner 1.1:\\ User manual.}\\[3mm]
+\title{\Huge{\Readjoiner 1.2:\\ User manual.}\\[3mm]
 \Large{A fast and memory efficient \\string
  graph-based sequence assembler.}}
 \author{\begin{tabular}{c}
@@ -60,23 +60,7 @@ dependencies and may be compiled on any POSIX-compliant operative system.
  \Readjoiner is implemented as a collection of tools, all compiled in the single
 \GenomeTools binary named \Gtcmd.
 
-\subsection{Variable and fixed-length readsets}
-
-Several next generation technologies, such
-as the Illumina Genome Analyzers, are synchronous and thus produce
-readsets, where the read length is constant: in \Readjoiner these
-are called \textit{eqlen} readsets.
-Eqlen reads are fully supported by \Readjoiner.
-
-Other technologies, such as Roche 454, produce
-reads with different read lengths (in \Readjoiner called \textit{varlen}
-readsets). \Readjoiner currently provides only an experimental support for varlen reads.
-
-\subsection{Pipeline overview}
-
-The \Readjoiner assembly pipeline consists in three phases, summarized in the
- following table.
-
+The \Readjoiner assembly pipeline consists in the following phases:\\[3mm]
 \begin{tabular}{lll}
 Phase & Tool & Description \\
 \textit{Prefiltering} & \Rdjprefiltercmd &
@@ -87,33 +71,184 @@ Phase & Tool & Description \\
  build the string graph, output the contigs \\
 \end{tabular}
 
-In the next sections more information about each of the phases is provided.
+\Readjoiner can be installed either from a binary distribution or from the
+source code. In both cases, you will have the binary file \texttt{gt}.
+The rest of the manual assumes this binary is in the command line path.
 
-\subsection{Step 1: Prefiltering}
+The \Readjoiner tools are run using the following syntax:
+\texttt{gt readjoiner <tool> <arguments>}, where \texttt{<tool>}
+is either prefilter, overlap or assembly.
 
-The first step in the \Readjoiner pipeline is the \Rdjprefilter tool.
-The input to \Rdjprefilter shall be a set of sequencing reads in
-one or more MultiFASTA file\footnote{
-  }.
-Input formats different from FASTA can be converted using GenomeTools,
-as explained in Section \ref{nonfastainput}.
+The arguments are different,
+depending on the tool, however some options are common:
+\begin{itemize}
+\item \Showoption{help} will show an useful help message on the command
+line, with a summary of the most important options.
+\item \Showoption{help+} will show an expanded help message, in which
+further less common options are also listed.
+\item \Showoption{v} increases the verbosity.
+\item \Showoption{q} suppresses all output messages.
+\end{itemize}
 
-Contained reads represent redundant sequence information, which is not included
-in the string graph \cite{MYE:2005}. Two categories of contained
-reads can be distinguished: reads which are suffices or prefices of other reads or reverse complements
-of reads (including duplicated reads) and internally contained reads, which
-are equal to an internal substring of other reads or reverse complements of reads.
+\subsection{Installation from the source code}
 
-Reads which are suffixes or prefixes of other reads can be efficiently
-identified by sorting all reads
-and their reverse complements. This is done by \Rdjprefilter.
-Additionally \Rdjprefilter removes any read which include ambiguity codes,
-as these cannot be unambiguosly assembled with other reads.
+For installation from the source code, please read the instruction in the
+\texttt{INSTALL}
+file (in the main directory of the sources). In most cases a 64-bit version
+is necessary, so make sure you use the \texttt{64bit=yes} make flag.
+External dependencies such as cairo and curses are not necessary for
+\Readjoiner, thus if you plan to use only \Readjoiner you may safely choose
+to use the \texttt{cairo=no curses=no} make flags.
 
-The output of the \Rdjprefilter tool is a sequence in
-\GenomeTools encoded sequence format.
+If you use the \texttt{amalgamation=yes} make flag, you will probably notice
+a significative speed-up, thus this option is reccomended. Further improvements
+in the runtime can be achieved by using \texttt{assert=no}: this skips all
+runtime assertions; if you encounter any problem by running \Readjoiner
+then you should (re-)compile using assertions before reporting a bug,
+as assertions are an useful source of information for the developer.
 
-\subsection{Step 2: Overlap phase}
+Using the option \texttt{threads=yes} you can enable multithreading support.
+Currently the overlap phase can be run in parallel mode, thus this option is
+reccomended if \Readjoiner is run on a multi-core or multi-processor
+machine.
+
+\section{Error correction}
+
+Most sequencing technologies generate reads which contain technology-specific
+errors. For example, 454 and IonTorrent reads will contain mainly indels in
+homopolymeric regions, while Illumina reads will contain mainly substitution
+errors. An error correction prior to genome assembly is an essential step,
+and it is very important for Readjoiner, that the input reads have been already
+processed using an error correction tool.
+
+A number of stand-alone error correction tools exists: an example of a tool
+with a good performance on subsitution errors in Quake (Kelley et al., 2010).
+For homopolymer errors if a reference sequence is available, have
+a look to our error corrector HOP, also a part of GenomeTools.
+
+For susbtitution errors there is also an experimental support in Readjoiner
+of k-mer based error correction. If you want to try it,
+run \texttt{gt dev seqcorrect -help} for more information.
+
+%\newpage
+
+\section{Prefiltering}
+
+Readjoiner prefiltering step has the following functions:
+\begin{itemize}
+\item Remove ambiguity-containing reads
+\item Remove redundant information (duplicate and suffix/prefix reads)
+\item Encode the readset in GtEncseq format
+\end{itemize}
+
+\subsection{Describing the read set}
+
+The input to \Rdjprefilter consists of sequencing reads, in
+FastQ or Fasta format.
+The input is specified using the \Showoption{db} option, which
+takes multiple arguments, each argument describes a sequencing
+library.
+
+For single-end libraries, the
+corresponding argument of \Showoption{db} is simply the filename.
+Paired-end libraries are accepted in two variants: \textit{two-files} libraries,
+where a file contains the forward reads and a second file the reverse reads
+in the same order, and \textit{interleaved} libraries, consisting of a single
+file, where the first, third, fifth, etc sequences are the forward reads, the
+second, fourth, sixth, etc sequences are the reverse reads.
+For two-files libraries, the argument of \Showoption{db} is in the format
+\verb|<file1>:<file2>:<mean>[,<std>]| where \verb/<file1|2>/ are
+ filenames, \verb|<mean>| is the average
+insert size and \verb|<std>| is the standard deviation of insert
+sizes (which can be omitted if unknown). For interleaved libraries
+the library is specified as \verb|<file>:<mean>[,<std>]|.
+
+Some examples:\\[3mm]
+\begin{tabular}{p{0.5\textwidth}p{0.45\textwidth}}
+Argument of \Showoption{db} & Meaning:\\
+\hline
+\Showoptionarg{se.fas}
+& single-end library (\texttt{se.fas})\\
+\hline
+\Showoptionarg{pe.fastq:200}
+& interleaved paired-end library with average insert size of 200,
+standard deviation unknown\\
+\hline
+\Showoptionarg{pe\_f.fastq:pe\_r.fastq:10000}
+& a paired-end library in two files,
+with average insert size of about 10kb,
+standard deviation unknown\\
+\hline
+\Showoptionarg{se.fastq pe.fastq:180,20}
+& a single-end library plus
+an interleaved paired-end library with average insert size of 180,
+standard deviation 20\\
+\hline
+\Showoptionarg{short.fastq:100 long\_f.fastq:long\_r.fastq:10000,1200 se.fastq}
+& an interleaved paired-end library with insert size 100 plus
+a two-files paired-end library with insert size 10000, standard
+deviation 1200, and a single-end library\\
+\hline
+\end{tabular}
+
+%\newpage
+
+\subsection{Setting the read set name}
+
+The argument of the option \Showoption{readset}
+is the read set name. This will be used as basename
+for the output and intermediate files and must
+specified in subsequent calls to the \texttt{overlap}
+and \texttt{assembly} tools.
+
+\subsection{Contained reads}
+
+Duplicate reads and suffix/prefix reads (i.e. reads which are suffixes or
+prefixes of other reads) are contained reads, thus
+redundant sequence information, which is not represented in the string graph
+\cite{MYE:2005}. Furthermore, our overlap algorithm assumes that the read set is
+suffix-prefix-free, thus these reads are recognized and eliminated
+in the prefiltering phase.
+
+Reads are hereby considered from both strands,
+thus for example a reads which is equal to the reverse complement of another
+read is also removed.
+Internally contained reads (reads equal to an internal substring of
+other reads / reverse complement) are not identified here, but during
+the \Rdjoverlap step.
+
+In a paired-end library, if a read is contained, its mate pair is
+discarded too, to keep the library balanced.
+
+\subsection{Quality scores}
+
+Readjoiner supports the input formats FastQ and Fasta.
+The FastQ format is assumed to use the standard \textit{phred33} scores.
+As an alternative, \textit{phred64} scores are also supported; in this case
+the option \Showoption{phred64} must be specified. The only limitation is that
+it is not possible to mix libraries with \textit{phred33} scores
+and libraries with \textit{phred64} scores.
+
+The quality scores can be used for quality-based trimming. In order to activate
+this feature, the \Showoption{maxlow} option must be specified, with an
+argument $n$, which is the maximal number of low-quality bases acceptable in a
+read. If a read has more than $n$ low-quality bases, it is discarded. The
+definition of low-quality bases is any base whose associated quality score
+is at most $l$, where $l$ is an user-defined parameter, by default 3, which
+can be set using the \Showoption{lowqual} option.
+
+\subsection{Ambiguous base calls}
+
+Any read containing ambiguities is discarded as low-quality.
+If you want to keep reads containing ambuigities, you will have to split
+them at the ambiguity positions or permutate the ambiguities to a
+random non-ambiguous code using an external program or script.
+In a paired-end library, if a read is discarded, its mate pair is
+discarded too, so that the library is still balanced.
+
+%\newpage
+
+\section{The overlap phase}
 
 To construct the string graph, the suffix-prefix matches (SPM) among all pairs
 of reads must be calculated. Due to the small size of the DNA alphabet (4),
@@ -122,9 +257,9 @@ original DNA molecule are common. Thus, to avoid spurious matches a minimal
 match length pameter $\minlen$ is used.
 
 Transitive edges are not present in the final string graph \cite{MYE:2005}.
- \Rdjoverlap matching algorithm allows one to recognize which SPM would
- correspond to transitive edges in the graph. Thus the graph can be constructed
- only including the irreducible edges, requiring less memory.
+\Rdjoverlap matching algorithm allows one to recognize which SPM would
+correspond to transitive edges in the graph. Thus the graph can be constructed
+only including the irreducible edges, requiring less memory.
 
 The \Rdjoverlap tool computes the list of suffix-prefix matches among
 all pairs of reads using a suffix sorting and scanning approach.
@@ -141,7 +276,46 @@ a good choice..
 However, a memory limit or number of parts can be given as a parameter
 to control this time vs.\ space tradeoff.
 
-\subsection{Step 3: Assembly phase}
+If the binary has been compiled with
+multithreading support, you can specify the number of threads as
+follows: \texttt{gt -j <N> readjoiner overlap <arguments>}.
+
+\subsection{Running the \Rdjoverlap tool}
+
+The input to the \Readjoiner overlap tool is a prefix- and suffix-free readset
+in \GenomeTools encoded sequence format, usually the output of \Rdjprefilter.
+
+The following options shall be used:
+
+\begin{Justshowoptions}
+\Option{readset}{\Showoptionarg{readset}}{
+Specify the readset name. The argument should be the same used for the
+prefilter tool.}
+\Option{l}{\Showoptionarg{minlen}}{
+Specify the minimal SPM length parameter.}
+\end{Justshowoptions}
+
+The minimal SPM length parameter is an essential parameter of the procedure.
+A too large value will make the pipeline faster, but potentially miss some
+important matches. A too small value will make the pipeline too slow, and add
+too many spurious overlaps.
+
+We found that the ideal value is in the range
+$\approx 55-65$ for 100 bp reads. The assembly phase can be repeated using
+different values of the minimal SPM length, without repeating the overlap phase,
+as long as these values are larger than the value used in the overlap phase.
+Therefore, one can choose a little smaller value, e.g. $\approx 50$ during
+the overlap phase and then test the assembly phase using several values
+equal or larger than that.
+
+The output of the overlap phase consists in one or more
+\texttt{.spm} files, containing a binary encoded
+list of the non-redundant irreducible suffix-prefix matches in the readset.
+ It is possible to manually examine the results, by converting
+this list a text format, using the following command:
+\texttt{gt readjoiner spmtest -readset <readsetname> -test showlist}.
+
+\section{The assembly phase}
 
 The \Rdjassembly tool constructs a string graph. Each non-contained read
 in the sequencing readset is represented by a pair of vertices modeling
@@ -150,174 +324,97 @@ by directed edges.
 
 Sequencing errors present in the reads lead to characteristic paths
 in the graph. The error-correction algorithms described in \cite{Edena}
-are experimentally implemented and can be applied to recognize dead ends
-and p-bubbles and remove them. Finally the graph is traversed and sequences
+are implemented and can be applied to recognize dead ends
+and p-bubbles and remove them (option \Showoption{errors}).
+Finally the graph is traversed and sequences
 corresponding to unbranched paths are output.
 
-\section{Usage} \label{Usage}
+\subsection{Running the the \Rdjassembly tool}
 
-In the following text:
+The input consists in SPM lists in \Readjoiner format
+which are the output of \Rdjoverlap.
 
-\begin{itemize}
-\item \texttt{Typewriter font} is used for the names of software tools.
-\item \texttt{\small{Small typewriter font}} is used for file names.
-\item \begin{footnotesize}\texttt{Footnote sized typewriter font}
-      \end{footnotesize} with a leading
-      \begin{footnotesize}\texttt{'-'}\end{footnotesize}
-      is used for program options.
-\item \Showoptionarg{small italic font} is used for the argument(s) of an
-      option.
-\end{itemize}
-
-\subsection{Command-line tools} \label{Overview}
-
-\Readjoiner is a collection of tools (a toolbox) which are part of
-the \Gtcmd binary. Tools are called on the command line as follows:
-
-\texttt{gt} \texttt{readjoiner} \texttt{<toolname>} $[$\Showoption{option}
- \Showoptionarg{arguments(s)}$]+$
-
-where toolname is prefilter, overlap or assembly.
-
-An overview of the most common options of a given tool is output, when the
-option \Showoption{help} is used.
-\footnote{Additional options may be also available, which
- may be displayed using the options \Showoption{help+} and
-  \Showoption{helpdev}. These may be
- in some cases test, experimental or untested parts of the software.}.
-
-\subsection{The \Rdjprefilter tool}
-
-Input: reads (single or multiple uncompressed files) in FASTA format.
-
-\texttt{gt} \texttt{contfilter} $[$\Showoption{option}
- \Showoptionarg{arguments(s)}$]+$
-
-\begin{Justshowoptions}
-\Option{db}{\Showoptionarg{inputfilename}}{
-Specify the name of the MultiFASTA files to be used as input.}
-\Option{readset}{\Showoptionarg{readsetname}}{
-(optional) Specify a name to be used by \Readjoiner for the readset.\\
-Default: first input filename.}
-\Option{v}{}{
-Be verbose.}
-\Option{q}{}{
-Suppress standard output messages.}
-\end{Justshowoptions}
-
-Output: the output consists in a readset
-in \GenomeTools encoded sequence format, containing all reads except the ones which
-are prefixes
-or suffixes of other reads or reverse complements of other reads and the reads
-containing ambuiguity codes.
-
-\subsection{The \Rdjoverlap tool}
-
-Input: a prefix- and suffix-free readset in \GenomeTools encoded sequence format
-(such as the output of \Rdjprefilter).
-
+The following options shall be used:
 \begin{Justshowoptions}
 \Option{readset}{\Showoptionarg{readset}}{
-Specify the readset name.}
-\Option{l}{\Showoptionarg{minlen}}{
-Specify the minimal SPM length parameter.}
-\Option{v}{}{
-Be verbose.}
-\Option{q}{}{
-Suppress standard output messages.}
-\end{Justshowoptions}
-
-Output: the output consists in a \texttt{.spm} file, containing a binary encoded
-list\footnote{To convert the list to a text format, use the following command:
-\texttt{gt readjoiner spmtest -readset <readsetname> -test showlist}.}
- of the non-redundant irreducible suffix-prefix matches in the readset.
-
-\subsection{The \Rdjassembly tool}
-
-Input: a SPM list in \Readjoiner format
-(such as the output of \Rdjoverlap).
-
-\begin{Justshowoptions}
-\Option{readset}{\Showoptionarg{readset}}{
-Specify the readset name}
+Specify the readset name, This must be the same used in the overlap phase.}
 \Option{l}{\Showoptionarg{minlen}}{
 (optional) Specify the minimal SPM length parameter.
 The value should be at least as high as the one used for \Rdjoverlap.
 If an higher value is used, shorter overlaps are not loaded in the
 string graph.}
 \Option{errors}{}{
-Clean short dead ends and remove p-bubbles}
-\Option{v}{}{
-Be verbose.}
-\Option{q}{}{
-Suppress standard output messages.}
+Clean short dead ends and remove p-bubbles. This is reccomended}
+\Option{spmfiles}{\Showoptionarg{n}}{
+If the overlap phase was run using muliple threads, this option is
+mandatory and should be set to the same number of threads used
+by the \Option{j} in the overlap phase.
+}
 \end{Justshowoptions}
 
 \section{Examples}
 
-Consider a dataset containing fixed-length reads (e.g.\ Illumina reads)
-in the files \texttt{ilreads1.fas} and \texttt{ilreads2.fas}.
+Consider a dataset containing paired-end reads with an insert size
+of 1000bp (st.dev. 120bp)
+in the files \texttt{p\_f.fastq} and \texttt{p\_r.fastq}
+and single-end reads
+in the file \texttt{se.fastq}.
+
+This example assumes the reads have been previously error-corrected,
+otherwise the results will be probably very poor.
 
 The first step will be run by \Rdjprefilter.
 
 \begin{footnotesize}
 \begin{verbatim}
-> gt readjoiner prefilter -readset myreadset -db ilreads1.fas ilreads2.fas ilreads3.fas
+> gt readjoiner prefilter -readset myreadset \
+  -db p_f.fastq:p_r.fastq:1000,120 se.fastq
 \end{verbatim}
 \end{footnotesize}
 
 The result is output in
 \GenomeTools encoded sequence format and consist in a \texttt{readset.esq} file.
 The encoded sequence can now be used as input for \Rdjoverlap. We will use
-a minimal SPM lenght of 45 for this example.
+a minimal SPM lenght of 50 for this example and suppose \Readjoiner has been
+compiled with multi-threading support and 8 cores are available.
 
 \begin{footnotesize}
 \begin{verbatim}
-> gt readjoiner overlap -readset readset -l 45
+> gt -j 8 readjoiner overlap -readset readset -l 50
 \end{verbatim}
 \end{footnotesize}
 
-The output will be a file \texttt{readset.spm}, containing
-a list of irreducible non-redundant SPMs in \Readjoiner binary format.
+The output will be a set of files \texttt{readset.<N>.spm}, with N in the
+range 0 to 7, containing
+lists of irreducible non-redundant SPMs in \Readjoiner binary format.
+Note that the \Showoption{j} option is specified in a different position
+(between \texttt{gt} and \texttt{readjoiner}) than the other options.
 
 The next step consists in running the assembly phase using the
 \Rdjassembly tool.
 
 \begin{footnotesize}
 \begin{verbatim}
-> gt readjoiner assembly -readset readset -l 45
+> gt readjoiner assembly -spmfiles 8 -readset readset -l 60
 \end{verbatim}
 \end{footnotesize}
 
-The contigs are saved in FASTA format in \texttt{readset.contigs.fas}.
+The \Showoption{spmfiles} option is only necessary if the overlap phase
+was run using multiple threads: we used the same value for \Showoption{spmfiles}
+which was used for the \Showoption{j} option in the overlap phase.
+
+We used an higher mimimal length value that the one used in the overlap phase.
+If the results are not satisfying, you can repeat the assembly phase
+using a smaller value, such as \Showoption{l} \Showoptionarg{50} or
+ \Showoption{l} \Showoptionarg{55}
+(the minimum that can be used is the value used in the overlap phase)
+and a larger value, such as \Showoption{l} \Showoptionarg{65} or
+ \Showoption{l} \Showoptionarg{70}.
+
+The results are contigs, which are saved in FASTA format
+in \texttt{readset.contigs.fas}.
 Basic statistics of the assembly results, such as the N50 value
 and the total length, are displayed in the standard output.
-
-\section{Experimental features}
-
-\subsection{Variable-length readsets}
-
-The processing of a variable-length readset is identical to the one described
-in the previous section.
-
-\subsection{Real world datasets}
-
-Reads containing sequencing errors, such as the case of real world datasets,
-should first be handled using a sequencing error correction tool.
-Then, the prefilter and overlap tools shall be run as explained.
-In the assembly phase, the \Showoption{errors} option shall be used.
-
-\section{Appendix}
-
-\subsection{Input format conversion}
-\label{nonfastainput}
-
-Sequencing readsets in format different from FASTA must be converted before
-entering the \Readjoiner pipeline.
-
-\GenomeTools provide some convertion tools.
-FASTA with qualities (FASTQ) can be converted into FASTA using the \Gtreadreads
-tool. Other common sequence formats can be converted using \Gtconvertseq.
 
 \begin{thebibliography}{1}
 
@@ -344,10 +441,10 @@ Hernandez D, François P, Farinelli L, Osterås M, and Schrenzel J.
 \newblock {\em Genome Res\/}, {18}(5), 802--809.
 
 \bibitem{Readjoiner}
-Gonnella G and Kurtz S (2011).
+Gonnella G and Kurtz S (2012).
 \newblock {Readjoiner. A fast and memory efficient string
  graph-based sequence assembler.}
-\newblock {\em Submitted\/}
+\newblock {\em BMC Bioinformatics}, {13}:82.
 
 \end{thebibliography}
 
