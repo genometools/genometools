@@ -32,7 +32,7 @@
 typedef struct {
   bool verbose, quiet;
   bool singlestrand, encodeonly, cntlist, encseq, seqnums, fasta, copynum,
-       libtable;
+       libtable, phred64;
   GtStr *readset;
   GtStrArray *db;
   /* rdj-radixsort test */
@@ -67,7 +67,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
            *fasta_option, *seqnums_option, *encseq_option, *readset_option,
            *v_option, *q_option, *db_option, *copynum_option, *libtable_option,
            *testrs_option, *testrs_depth_option, *testrs_print_option,
-           *testrs_maxdepth_option;
+           *testrs_maxdepth_option, *phred64_option;
 
   gt_assert(arguments);
 
@@ -85,7 +85,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
 
   /* -db */
   db_option = gt_option_new_filename_array("db","specify the name of the "
-      "input files (Fasta format);\nmate pairs and paired reads sets "
+      "input files (Fasta/FastQ);\nmate pairs and paired reads sets "
       "may be specified using the notation file1:file2:insertlength",
       arguments->db);
   gt_option_hide_default(db_option);
@@ -102,6 +102,13 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
       &arguments->quiet, false);
   gt_option_exclude(q_option, v_option);
   gt_option_parser_add_option(op, q_option);
+
+  /* -phred64 */
+  phred64_option = gt_option_new_bool("phred64",
+      "use phred64 scores for FastQ format",
+      &arguments->phred64, false);
+  gt_option_is_extended_option(phred64_option);
+  gt_option_parser_add_option(op, phred64_option);
 
   /* -singlestrand */
   singlestrand_option = gt_option_new_bool("singlestrand",
@@ -251,6 +258,10 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     gt_readjoiner_prefilter_list_input_files(arguments, verbose_logger);
 
   r2t = gt_reads2twobit_new(arguments->readset);
+  if (arguments->phred64)
+  {
+    gt_reads2twobit_use_phred64(r2t);
+  }
   for (i = 0; i < gt_str_array_size(arguments->db) && !had_err; i++)
   {
     GtStr *dbentry = gt_str_array_get_str(arguments->db, i);

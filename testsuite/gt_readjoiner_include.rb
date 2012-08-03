@@ -716,6 +716,17 @@ Test do
   run_assembly
 end
 
+Name "gt readjoiner: fastq phred64, 70x161nt"
+Keywords "gt_readjoiner"
+Test do
+  run_prefilter("#{$testdata}/readjoiner/70x_161nt.fas")
+  run_overlap(30)
+  run_assembly
+  run_prefilter("#{$testdata}/readjoiner/70x_161nt_phred64.fastq", "-phred64")
+  run_overlap(30)
+  run_assembly
+end
+
 Name "gt readjoiner: test different read lengths"
 Keywords "gt_readjoiner"
 Test do

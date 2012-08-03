@@ -52,6 +52,9 @@ GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname);
 
 void gt_reads2twobit_delete(GtReads2Twobit *r2t);
 
+/* use phred64 scores instead of phred33 */
+void gt_reads2twobit_use_phred64(GtReads2Twobit *r2t);
+
 #define GT_READS2TWOBIT_LIBNAMESEP ':'
 
 /* adds a pair of filenames to the collection, containing reads with pairing

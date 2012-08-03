@@ -59,6 +59,7 @@ struct GtReads2Twobit
   unsigned long total_seqlength;
   GtTwobitencoding current_sepcode;
   unsigned long invalid_sequences, invalid_total_length;
+  char phredbase;
 };
 
 GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname)
@@ -77,6 +78,7 @@ GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname)
   r2t->seqlen_min = 0;
   r2t->total_seqlength = 0;
   r2t->nofseqs = 0;
+  r2t->phredbase = (char)33;
   return r2t;
 }
 
@@ -247,7 +249,13 @@ static void gt_reads2twobit_init_encode(GtReads2Twobit *r2t,
   state->qbuf_size = 0;
   state->qbuf2 = NULL;
   state->qbuf2_size = 0;
-  state->phredbase = (char)33;
+  state->phredbase = r2t->phredbase;
+}
+
+void gt_reads2twobit_use_phred64(GtReads2Twobit *r2t)
+{
+  gt_assert(r2t != NULL);
+  r2t->phredbase = (char)64;
 }
 
 #define GT_READS2TWOBIT_READBUFFER_SIZE ((size_t)256)
