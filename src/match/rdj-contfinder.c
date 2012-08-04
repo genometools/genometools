@@ -34,7 +34,6 @@
 #include "core/unused_api.h"
 #include "core/stack-inlined.h"
 #include "core/str_array_api.h"
-#include "core/undef_api.h"
 #include "core/xansi_api.h"
 #include "match/rdj-cntlist.h"
 #include "match/rdj-filesuf-def.h"
@@ -452,7 +451,7 @@ static void gt_contfinder_radixsort_eqlen(GtContfinder contfinder,
 
   if (contfinder.len <= GT_CONTFINDER_KMERSIZE)
   {
-    subbucket.depth = (size_t) GT_UNDEF_ULONG;
+    subbucket.depth = 0;
     subbucket.seqnums = all.seqnums;
     subbucket.seqnums_offset = all.seqnums_offset;
     for (i = 0; i < GT_CONTFINDER_NOFBUCKETS(0); ++i)

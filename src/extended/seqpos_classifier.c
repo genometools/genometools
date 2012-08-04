@@ -135,8 +135,7 @@ int gt_seqpos_classifier_position_is_inside_feature(
     bool *end_of_annotation, GtError *err)
 {
   int had_err = 0;
-  GtRange next_specified_ft_range = { (unsigned long) GT_UNDEF_LONG,
-                                      (unsigned long) GT_UNDEF_LONG };
+  GtRange next_specified_ft_range = { GT_UNDEF_ULONG, GT_UNDEF_ULONG };
   if (i == 0)
   {
     had_err = gt_seqpos_classifier_next_specified_ft(seqpos_classifier,
