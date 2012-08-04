@@ -38,9 +38,11 @@
 #define GT_READS2TWOBIT_ALPHASIZE 4U
 
 typedef struct {
+  bool paired;
   GtStr *filename1;
-  GtStr *filename2; /* NULL for unpaired */
+  GtStr *filename2;
   unsigned long insertlength;
+  unsigned long stdev; /* 0 if unknown */
   unsigned long total_filelength;
   unsigned long total_seqlength;
   unsigned long first_seqnum;
@@ -103,18 +105,21 @@ void gt_reads2twobit_delete(GtReads2Twobit *r2t)
   }
 }
 
-void gt_reads2twobit_add_paired(GtReads2Twobit *r2t, const GtStr *filename1,
-    const GtStr *filename2, unsigned long insertlength)
+void gt_reads2twobit_add(GtReads2Twobit *r2t, bool paired,
+    const GtStr *filename1, const GtStr *filename2, unsigned long insertlength,
+    unsigned long stdev)
 {
   GtReadsLibraryInfo rli;
   gt_assert(r2t != NULL);
   gt_assert(filename1 != NULL);
+  rli.paired = paired;
   rli.filename1 = gt_str_clone(filename1);
   if (filename2 != NULL)
     rli.filename2 = gt_str_clone(filename2);
   else
     rli.filename2 = NULL;
   rli.insertlength = insertlength;
+  rli.stdev = stdev;
   rli.total_seqlength = 0;
   rli.first_seqnum = 0;
   rli.nofseqs = 0;
@@ -125,9 +130,9 @@ void gt_reads2twobit_add_paired(GtReads2Twobit *r2t, const GtStr *filename1,
 }
 
 int gt_reads2twobit_add_library(GtReads2Twobit *r2t, const GtStr *libspec,
-                                GtError *err)
+    GtError *err)
 {
-  GtSplitter *s;
+  GtSplitter *s1, *s2;
   char *libspec_copy;
   int had_err = 0;
 
@@ -137,45 +142,78 @@ int gt_reads2twobit_add_library(GtReads2Twobit *r2t, const GtStr *libspec,
   libspec_copy = gt_malloc(sizeof (*libspec_copy) *
       (gt_str_length(libspec) + 1UL));
   (void)strcpy(libspec_copy, gt_str_get(libspec));
-  s = gt_splitter_new();
-  gt_splitter_split(s, libspec_copy, gt_str_length(libspec),
-      GT_READS2TWOBIT_LIBNAMESEP);
+  s1 = gt_splitter_new();
+  gt_splitter_split(s1, libspec_copy, gt_str_length(libspec),
+      GT_READS2TWOBIT_LIBSPECSEP);
   gt_log_log("reads2twobit add library: %s", gt_str_get(libspec));
-  if (gt_splitter_size(s) == 1UL)
+  if (gt_splitter_size(s1) == 1UL)
   {
-    gt_reads2twobit_add_unpaired(r2t, libspec);
+    gt_reads2twobit_add(r2t, false, libspec, NULL, 0, 0);
   }
-  else if (gt_splitter_size(s) == 3UL)
+  else if (gt_splitter_size(s1) < 4UL)
   {
-    GtStr *filename1 = gt_str_new_cstr(gt_splitter_get_token(s, 0)),
-          *filename2 = gt_str_new_cstr(gt_splitter_get_token(s, 1UL));
-    const char *insertlength_str = gt_splitter_get_token(s, 2UL);
-    unsigned long insertlength;
-    had_err = gt_parse_ulong(&insertlength, insertlength_str);
-    if (had_err != 0)
+    GtStr *filename1, *filename2;
+    unsigned long insertlength, stdev = 0;
+    char *insertspec, *insertspec_copy;
+    filename1 = gt_str_new_cstr(gt_splitter_get_token(s1, 0));
+    if (gt_splitter_size(s1) == 3UL)
     {
-      gt_error_set(err, "insertlength specification not valid: %s",
-          insertlength_str);
+      filename2 = gt_str_new_cstr(gt_splitter_get_token(s1, 1UL));
+      insertspec = gt_splitter_get_token(s1, 2UL);
+    }
+    else
+    {
+      filename2 = NULL;
+      insertspec = gt_splitter_get_token(s1, 1UL);
+    }
+    s2 = gt_splitter_new();
+    insertspec_copy = gt_malloc(sizeof (*insertspec_copy) *
+        (strlen(insertspec) + 1UL));
+    (void)strcpy(insertspec_copy, insertspec);
+    gt_splitter_split(s2, insertspec_copy, (unsigned long)strlen(insertspec),
+      GT_READS2TWOBIT_INSERTSEP);
+    if (gt_splitter_size(s2) <= 2UL)
+    {
+      had_err = gt_parse_ulong(&insertlength, gt_splitter_get_token(s2, 0));
+      if (gt_splitter_size(s2) == 2UL && !had_err)
+      {
+        had_err = gt_parse_ulong(&stdev, gt_splitter_get_token(s2, 1UL));
+      }
+    }
+    if (gt_splitter_size(s2) > 2UL || had_err)
+    {
+      gt_error_set(err, "insert specification not valid: %s\nthe correct "
+          "syntax is \"insertlength[%cstdev]\"", insertspec,
+          GT_READS2TWOBIT_INSERTSEP);
     }
     if (!had_err)
     {
-      gt_reads2twobit_add_paired(r2t, filename1, filename2, insertlength);
+      gt_reads2twobit_add(r2t, true, filename1, filename2, insertlength, stdev);
     }
     gt_str_delete(filename1);
     gt_str_delete(filename2);
+    gt_free(insertspec_copy);
+    gt_splitter_delete(s2);
   }
   else
   {
-    gt_error_set(err, "library specification not valid: %s\n"
-        "use a single filename or filename1%cfilename2%cinsertlength\n"
-        "filenames containing %c are not allowed", gt_str_get(libspec),
-      GT_READS2TWOBIT_LIBNAMESEP, GT_READS2TWOBIT_LIBNAMESEP,
-      GT_READS2TWOBIT_LIBNAMESEP);
+    gt_error_set(err, "library specification not valid: %s\nthe correct "
+        "syntax is \"filename[[%cfilename2]%cinsertlength[%cstdev]]\"\n"
+        "(filenames are not allowed to contain \"%c\"",
+        gt_str_get(libspec),
+      GT_READS2TWOBIT_LIBSPECSEP, GT_READS2TWOBIT_LIBSPECSEP,
+      GT_READS2TWOBIT_INSERTSEP, GT_READS2TWOBIT_LIBSPECSEP);
     had_err = -1;
   }
   gt_free(libspec_copy);
-  gt_splitter_delete(s);
+  gt_splitter_delete(s1);
   return had_err;
+}
+
+void gt_reads2twobit_use_phred64(GtReads2Twobit *r2t)
+{
+  gt_assert(r2t != NULL);
+  r2t->phredbase = (char)64;
 }
 
 #define GT_READS2TWOBIT_CODE_UNDEF ((GtTwobitencoding)ULONG_MAX)
@@ -250,12 +288,6 @@ static void gt_reads2twobit_init_encode(GtReads2Twobit *r2t,
   state->qbuf2 = NULL;
   state->qbuf2_size = 0;
   state->phredbase = r2t->phredbase;
-}
-
-void gt_reads2twobit_use_phred64(GtReads2Twobit *r2t)
-{
-  gt_assert(r2t != NULL);
-  r2t->phredbase = (char)64;
 }
 
 #define GT_READS2TWOBIT_READBUFFER_SIZE ((size_t)256)
@@ -662,7 +694,72 @@ static inline int gt_reads2twobit_process_fastq_mate_pair(
   return had_err;
 }
 
-static int gt_reads2twobit_encode_paired_fastq_library(
+static int gt_reads2twobit_encode_interleaved_paired_fastq_library(
+    GtReads2TwobitEncodeState *state, GtReadsLibraryInfo *rli, FILE *file,
+    char *line)
+{
+  int had_err = 0;
+  unsigned long qbuf_next = 0;
+  bool qmode = false;
+  bool processing_mate = true;
+  char *fgetsretval;
+  state->seqlen = 0;
+  do {
+    if (!qmode)
+    {
+      if (line[0] == '@')
+      {
+        if (state->current.nofseqs > rli->first_seqnum && !state->invalid_mode)
+        {
+          gt_reads2twobit_process_sequence_end(state);
+        }
+        GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line, file, fgetsretval);
+        processing_mate = !processing_mate;
+        if (processing_mate)
+        {
+          if (!state->invalid_mode)
+            state->current.nofseqs++;
+          state->seqlen = 0;
+        }
+        else
+        {
+          gt_reads2twobit_prepare_for_new_sequence(state);
+        }
+      }
+      else if (line[0] == '+')
+      {
+        GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line, file, fgetsretval);
+        if (state->seqlen + 1UL > (unsigned long)(state->qbuf_size))
+        {
+          state->qbuf_size = (size_t)state->seqlen + 1;
+          state->qbuf = gt_realloc(state->qbuf, state->qbuf_size);
+        }
+        qmode = true;
+      }
+      else
+      {
+        gt_reads2twobit_process_sequence_line(state, line);
+      }
+    }
+    else
+    {
+      had_err = gt_reads2twobit_process_qualities_line(state, line,
+          state->qbuf, &qbuf_next);
+      if (qbuf_next == state->seqlen)
+      {
+        /* here goes code handling the qualities */
+        qbuf_next = 0;
+        qmode = false;
+      }
+    }
+  } while ((fgetsretval = fgets(line, (int)GT_READS2TWOBIT_READBUFFER_SIZE,
+            file)) == line && !had_err);
+  if (!state->invalid_mode)
+    gt_reads2twobit_process_sequence_end(state);
+  return had_err;
+}
+
+static int gt_reads2twobit_encode_twofile_paired_fastq_library(
     GtReads2TwobitEncodeState *state, GtReadsLibraryInfo *rli, FILE *file1,
     FILE *file2, char *line1)
 {
@@ -670,6 +767,7 @@ static int gt_reads2twobit_encode_paired_fastq_library(
   unsigned long qbuf_next = 0;
   bool qmode = false;
   char *fgetsretval, line2[GT_READS2TWOBIT_READBUFFER_SIZE];
+  line2[0] = '\0';
   state->seqlen = 0;
   do {
     if (!qmode)
@@ -766,11 +864,48 @@ static inline void gt_reads2twobit_process_fasta_mate_pair(
   }
 }
 
-static void gt_reads2twobit_encode_paired_fasta_library(
+static void gt_reads2twobit_encode_interleaved_paired_fasta_library(
+    GtReads2TwobitEncodeState *state, GtReadsLibraryInfo *rli, FILE *file,
+    char *line)
+{
+  char *fgetsretval;
+  bool processing_mate = true;
+  do {
+    if (line[0] == '>')
+    {
+      if (state->current.nofseqs > rli->first_seqnum && !state->invalid_mode)
+      {
+        gt_reads2twobit_process_sequence_end(state);
+      }
+      GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line, file, fgetsretval);
+      processing_mate = !processing_mate;
+      if (processing_mate)
+      {
+        if (!state->invalid_mode)
+          state->current.nofseqs++;
+        state->seqlen = 0;
+      }
+      else
+      {
+        gt_reads2twobit_prepare_for_new_sequence(state);
+      }
+    }
+    else
+    {
+      gt_reads2twobit_process_sequence_line(state, line);
+    }
+  } while ((fgetsretval = fgets(line, (int)GT_READS2TWOBIT_READBUFFER_SIZE,
+            file)) == line);
+  if (!state->invalid_mode)
+    gt_reads2twobit_process_sequence_end(state);
+}
+
+static void gt_reads2twobit_encode_twofile_paired_fasta_library(
     GtReads2TwobitEncodeState *state, GtReadsLibraryInfo *rli, FILE *file1,
     FILE *file2, char *line1)
 {
   char *fgetsretval, line2[GT_READS2TWOBIT_READBUFFER_SIZE];
+  line2[0] = '\0';
   do {
     if (line1[0] == '>')
     {
@@ -804,10 +939,11 @@ static int gt_reads2twobit_encode_paired_library(
 {
   int had_err = 0;
   FILE *file1, *file2 = NULL;
+  gt_assert(rli->filename1 != NULL);
   file1 = gt_fa_fopen(gt_str_get(rli->filename1), "r", err);
   if (file1 == NULL)
     had_err = -1;
-  if (!had_err)
+  if (!had_err && rli->filename2 != NULL)
   {
     file2 = gt_fa_fopen(gt_str_get(rli->filename2), "r", err);
     if (file2 == NULL)
@@ -825,13 +961,33 @@ static int gt_reads2twobit_encode_paired_library(
     {
       if (line1[0] == '>')
       {
-        gt_reads2twobit_encode_paired_fasta_library(state, rli, file1, file2,
-            line1);
+        if (file2 == NULL)
+        {
+          gt_log_log("encode interleaved paired fasta library");
+          gt_reads2twobit_encode_interleaved_paired_fasta_library(state, rli,
+              file1, line1);
+        }
+        else
+        {
+          gt_log_log("encode two-file paired fasta library");
+          gt_reads2twobit_encode_twofile_paired_fasta_library(state, rli, file1,
+              file2, line1);
+        }
       }
       else if (line1[0] == '@')
       {
-        had_err = gt_reads2twobit_encode_paired_fastq_library(state, rli,
-            file1, file2, line1);
+        if (file2 == NULL)
+        {
+          gt_log_log("encode interleaved paired fastQ library");
+          had_err = gt_reads2twobit_encode_interleaved_paired_fastq_library(
+              state, rli, file1, line1);
+        }
+        else
+        {
+          gt_log_log("encode two-file paired fastQ library");
+          had_err = gt_reads2twobit_encode_twofile_paired_fastq_library(
+              state, rli, file1, file2, line1);
+        }
         if (had_err != 0)
           gt_error_set(err, "%s: error in FASTQ format", had_err == -1 ?
               gt_str_get(rli->filename1) : gt_str_get(rli->filename2));
@@ -861,7 +1017,7 @@ static int gt_reads2twobit_encode_paired_library(
     had_err = gt_reads2twobit_close_file(file1, rli->filename1, err);
   else if (file1 != NULL)
     gt_fa_fclose(file1);
-  if (!had_err)
+  if (!had_err && file2 != NULL)
     had_err = gt_reads2twobit_close_file(file2, rli->filename2, err);
   else if (file2 != NULL)
     gt_fa_fclose(file2);
@@ -879,6 +1035,7 @@ static void gt_reads2twobit_tbe_flush_and_realloc(GtReads2Twobit *r2t,
   }
   if (state->current.nofseqs > 0)
   {
+    gt_log_log("realloc tbe, total_seqlength=%lu", r2t->total_seqlength);
     r2t->twobitencoding = gt_realloc(r2t->twobitencoding,
         sizeof (*r2t->twobitencoding) *
         (GT_DIVBYUNITSIN2BITENC(r2t->total_seqlength) + 2UL));
@@ -915,7 +1072,10 @@ static void gt_reads2twobit_finalize_encode(GtReads2Twobit *r2t,
     r2t->seqlen_eqlen = state->seqlen_first;
     r2t->seqlen_max = state->seqlen_first;
     r2t->seqlen_min = state->seqlen_first;
-    r2t->total_seqlength = state->seqlen_first * state->current.nofseqs - 1UL;
+    if (state->seqlen_first > 0)
+      r2t->total_seqlength = state->seqlen_first * state->current.nofseqs - 1UL;
+    else
+      r2t->total_seqlength = 0;
     gt_assert(state->seppos == NULL);
   }
   if (state->qbuf_size > 0)
@@ -939,7 +1099,7 @@ int gt_reads2twobit_encode(GtReads2Twobit *r2t, GtError *err)
   for (libnum = 0; libnum < noflibraries && !had_err; libnum++)
   {
     GtReadsLibraryInfo *rli = gt_array_get(r2t->collection, libnum);
-    if (rli->filename2 == NULL)
+    if (!rli->paired)
     {
       had_err = gt_reads2twobit_encode_unpaired_library(&state, rli, err);
     }
@@ -976,10 +1136,18 @@ static void gt_reads2twobit_collect_fileinfo(const GtReads2Twobit *r2t,
     libname = gt_str_clone(rli->filename1);
     if (rli->filename2 != NULL)
     {
-      gt_str_append_char(libname, GT_READS2TWOBIT_LIBNAMESEP);
+      gt_str_append_char(libname, GT_READS2TWOBIT_LIBSPECSEP);
       gt_str_append_str(libname, rli->filename2);
-      gt_str_append_char(libname, GT_READS2TWOBIT_LIBNAMESEP);
+    }
+    if (rli->paired)
+    {
+      gt_str_append_char(libname, GT_READS2TWOBIT_LIBSPECSEP);
       gt_str_append_ulong(libname, rli->insertlength);
+      if (rli->stdev > 0)
+      {
+        gt_str_append_char(libname, GT_READS2TWOBIT_INSERTSEP);
+        gt_str_append_ulong(libname, rli->stdev);
+      }
     }
     gt_str_array_add(*filenametab, libname);
     gt_str_delete(libname);

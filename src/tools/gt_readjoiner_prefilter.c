@@ -84,9 +84,14 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   gt_option_parser_add_option(op, readset_option);
 
   /* -db */
-  db_option = gt_option_new_filename_array("db","specify the name of the "
-      "input files (Fasta/FastQ);\nmate pairs and paired reads sets "
-      "may be specified using the notation file1:file2:insertlength",
+  db_option = gt_option_new_filename_array("db",
+      "specify a list of input libraries (Fasta/FastQ); "
+      "for single-end libraries use the filename; "
+      "for paired-end libraries with reads interleaved in a single file "
+      "use the notation <file>:<insertlength>[,<stdev>] "
+      "(the stdev may be omitted); for paired-end "
+      "with reads in two files use the notation "
+      "<file_f>:<file_r>:<insertlength>[,<stdev>]",
       arguments->db);
   gt_option_hide_default(db_option);
   gt_option_is_mandatory(db_option);

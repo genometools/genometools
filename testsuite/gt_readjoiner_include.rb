@@ -48,8 +48,74 @@ def compare_encseqs(indexname1, indexname2)
   run "diff #{info1} #{info2}"
 end
 
-Name "gt readjoiner encoder: PE/Fasta/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/Fasta/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db U -readset reads_prefilter"
+  encode_reads("U")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: SE/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db U -readset reads_prefilter"
+  encode_reads("U")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: SE/Fasta/Varlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1v.fas 1v"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db 1v -readset reads_prefilter"
+  pfx = "prefiltered."
+  run "cp #{$testdata}/readjoiner/paired_reads_1v.fas #{pfx}1v"
+  encode_reads("#{pfx}1v")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: SE/FastQ/Varlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1v.fastq 1v"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db 1v -readset reads_prefilter"
+  pfx = "prefiltered."
+  run "cp #{$testdata}/readjoiner/paired_reads_1v.fastq #{pfx}1v"
+  encode_reads("#{pfx}1v")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: PEi/Fasta/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas 1_2"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db 1_2:100 -readset reads_prefilter"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas '1_2:100'"
+  encode_reads("1_2:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: PEi/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fastq 1_2"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db 1_2:100 -readset reads_prefilter"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fastq '1_2:100'"
+  encode_reads("1_2:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: PE2/Fasta/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1.fas 1"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fas 2"
@@ -60,8 +126,8 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: PE/FastQ/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: PE2/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1.fastq 1"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
@@ -72,8 +138,8 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE/Fasta/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE2/Fasta/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1.fas 1"
@@ -85,8 +151,20 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE/FastQ/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/Fasta/Eqlen + PEi/Fasta/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas 1_2"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db U 1_2:100 -readset reads_prefilter"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas '1_2:100'"
+  encode_reads("U 1_2:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE2/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
   run "cp #{$testdata}/readjoiner/paired_reads_1.fastq 1"
@@ -99,8 +177,21 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE/FastQ/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/FastQ/Eqlen + PEi/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fastq 1_2"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db U 1_2:100 -readset reads_prefilter"
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas '1_2:100'"
+  encode_reads("U 1_2:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE2/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1.fastq 1"
@@ -112,8 +203,8 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE/Fasta/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE2/Fasta/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
   run "cp #{$testdata}/readjoiner/paired_reads_1.fas 1"
@@ -126,8 +217,8 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: PE/Fasta/Eqlen + SE/Fasta/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: PE2/Fasta/Eqlen + SE/Fasta/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1.fas 1"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fas 2"
@@ -139,8 +230,8 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: PE/FastQ/Eqlen + SE/FastQ/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: PE2/FastQ/Eqlen + SE/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1.fastq 1"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
@@ -153,8 +244,8 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: 2xPE/Fasta/Eqlen + SE/Fasta/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: 2xPE2/Fasta/Eqlen + SE/Fasta/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1.fas 1"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fas 2"
@@ -167,8 +258,8 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: 2xPE/FastQ/Eqlen + SE/FastQ/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: 2xPE2/FastQ/Eqlen + SE/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1.fastq 1"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
@@ -182,77 +273,118 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: 2xPE/Fasta/Eq/Wild1 + SE/Fasta/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: PE2/fQ/Eq + SE/fQ/Eq + PEi/fQ/Eq"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1.fastq 1"
+  run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fastq '1_2'"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db 1:2:100 U 1_2:10000,1200 -readset reads_prefilter"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas '1:2:100'"
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas '1_2:10000,1200'"
+  encode_reads("1:2:100 U 1_2:10000,1200")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: 2xPE2/Fas/Eq/Wild1 + SE/Fasta/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1N.fas 1N"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fas 2"
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db 1N:2:100 1N:2:200 U -readset reads_prefilter"
-  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.fas '1N:2:100'"
-  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.fas '1N:2:200'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.p.fas '1N:2:100'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.p.fas '1N:2:200'"
   encode_reads("1N:2:100 1N:2:200 U")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: 2xPE/FastQ/Eq/Wild1 + SE/FastQ/Eqlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: PEi/fQ/Eq/Wild1 + SE/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.fastq 1N_2"
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db 1N_2:180,10 U -readset reads_prefilter"
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.p.fas '1N_2:180,10'"
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
+  encode_reads("1N_2:180,10 U")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: 2xPE2/fQ/Eq/Wild1 + SE/FastQ/Eqlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1N.fastq 1N"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
   run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db 1N:2:100 1N:2:200 U -readset reads_prefilter"
-  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.fas '1N:2:100'"
-  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.fas '1N:2:200'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.p.fas '1N:2:100'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.p.fas '1N:2:200'"
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   encode_reads("1N:2:100 1N:2:200 U")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE/Fasta/Eq/Wild1b"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/Fasta/Eqlen + PEi/Fasta/Eq/Wild1b"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
+  run "cp #{$testdata}/readjoiner/paired_reads_1Nb_2.fas 1Nb_2"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db U 1Nb_2:100 -readset reads_prefilter"
+  run "cp #{$testdata}/readjoiner/paired_reads_1Nb_2.p.fas '1Nb_2:100'"
+  encode_reads("U 1Nb_2:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE2/Fasta/Eq/Wild1b"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1Nb.fas 1Nb"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fas 2"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1Nb:2:100 -readset reads_prefilter"
-  run "cp #{$testdata}/readjoiner/paired_reads_1Nb_2.fas '1Nb:2:100'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1Nb_2.p.fas '1Nb:2:100'"
   encode_reads("U 1Nb:2:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE/FastQ/Eq/Wild1b"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE2/FastQ/Eq/Wild1b"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
   run "cp #{$testdata}/readjoiner/paired_reads_1Nb.fastq 1Nb"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1Nb:2:100 -readset reads_prefilter"
-  run "cp #{$testdata}/readjoiner/paired_reads_1Nb_2.fas '1Nb:2:100'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1Nb_2.p.fas '1Nb:2:100'"
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   encode_reads("U 1Nb:2:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE/Fasta/Eq/Wild2"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE2/Fasta/Eq/Wild2"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1.fas 1"
   run "cp #{$testdata}/readjoiner/paired_reads_2N.fas 2N"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1:2N:100 -readset reads_prefilter"
-  run "cp #{$testdata}/readjoiner/paired_reads_1_2N.fas '1:2N:100'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2N.p.fas '1:2N:100'"
   encode_reads("U 1:2N:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE/FastQ/Eq/Wild2"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE2/FastQ/Eq/Wild2"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
   run "cp #{$testdata}/readjoiner/paired_reads_1.fastq 1"
@@ -260,39 +392,39 @@ Test do
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1:2N:100 -readset reads_prefilter"
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
-  run "cp #{$testdata}/readjoiner/paired_reads_1_2N.fas '1:2N:100'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2N.p.fas '1:2N:100'"
   encode_reads("U 1:2N:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE/Fasta/Eq/Wild2b"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE2/Fasta/Eq/Wild2b"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1.fas 1"
   run "cp #{$testdata}/readjoiner/paired_reads_2Nb.fas 2Nb"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1:2Nb:100 -readset reads_prefilter"
-  run "cp #{$testdata}/readjoiner/paired_reads_1_2Nb.fas '1:2Nb:100'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2Nb.p.fas '1:2Nb:100'"
   encode_reads("U 1:2Nb:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE/FastQ/Eq/Wild2b"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE2/FastQ/Eq/Wild2b"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1.fastq 1"
   run "cp #{$testdata}/readjoiner/paired_reads_2Nb.fastq 2Nb"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1:2Nb:100 -readset reads_prefilter"
-  run "cp #{$testdata}/readjoiner/paired_reads_1_2Nb.fas '1:2Nb:100'"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2Nb.p.fas '1:2Nb:100'"
   encode_reads("U 1:2Nb:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE/Fasta/Varlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/Fasta/Eqlen + PE2/Fasta/Varlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1v.fas 1v"
@@ -306,8 +438,8 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE/FastQ/Varlen"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/FastQ/Eqlen + PE2/FastQ/Varlen"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
   run "cp #{$testdata}/readjoiner/paired_reads_1v.fastq 1v"
@@ -321,8 +453,8 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/Fasta/Eq + PE/Fasta/Var/Wild2b"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/Fasta/Eq + PE2/Fasta/Var/Wild2b"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1v.fas 1v"
@@ -331,14 +463,29 @@ Test do
     "-db U 1v:2Nb:100 -readset reads_prefilter"
   pfx = "prefiltered."
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
-  run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.fas "+
+  run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.p.fas "+
     "'#{pfx}1v:2Nb:100'"
   encode_reads("#{pfx}U #{pfx}1v:2Nb:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: SE/FastQ/Eq + PE/FastQ/Var/Wild2b"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: SE/FastQ/Eq + PEi/FastQ/Var/Wild2b"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
+  run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.fastq 1v_2Nb"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db U 1v_2Nb:100 -readset reads_prefilter"
+  pfx = "prefiltered."
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
+  run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.p.fas "+
+    "'#{pfx}1v_2Nb:100'"
+  encode_reads("#{pfx}U #{pfx}1v_2Nb:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: SE/FastQ/Eq + PE2/FastQ/Var/Wild2b"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fastq U"
   run "cp #{$testdata}/readjoiner/paired_reads_1v.fastq 1v"
@@ -347,14 +494,14 @@ Test do
     "-db U 1v:2Nb:100 -readset reads_prefilter"
   pfx = "prefiltered."
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
-  run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.fas "+
+  run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.p.fas "+
     "'#{pfx}1v:2Nb:100'"
   encode_reads("#{pfx}U #{pfx}1v:2Nb:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: PE/Fasta/Var/Wild1N + SE/Fasta/Eq"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: PE2/Fasta/Var/Wild1N + SE/Fasta/Eq"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1Nv.fas 1Nv"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fas 2"
@@ -362,15 +509,15 @@ Test do
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db 1Nv:2:200 U -readset reads_prefilter"
   pfx = "prefiltered."
-  run "cp #{$testdata}/readjoiner/paired_reads_1Nv_2.fas "+
+  run "cp #{$testdata}/readjoiner/paired_reads_1Nv_2.p.fas "+
     "'#{pfx}1Nv:2:200'"
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
   encode_reads("#{pfx}1Nv:2:200 #{pfx}U")
   compare_encseqs("reads", "reads_prefilter")
 end
 
-Name "gt readjoiner encoder: PE/FastQ/Var/Wild1N + SE/Fasta/Eq"
-Keywords "gt_readjoiner gt_readjoiner_prefilter gt_readjoiner_paired"
+Name "gt readjoiner encoder: PE2/FastQ/Var/Wild1N + SE/Fasta/Eq"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
 Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1Nv.fastq 1Nv"
   run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
@@ -378,7 +525,7 @@ Test do
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db 1Nv:2:200 U -readset reads_prefilter"
   pfx = "prefiltered."
-  run "cp #{$testdata}/readjoiner/paired_reads_1Nv_2.fas "+
+  run "cp #{$testdata}/readjoiner/paired_reads_1Nv_2.p.fas "+
     "'#{pfx}1Nv:2:200'"
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
   encode_reads("#{pfx}1Nv:2:200 #{pfx}U")
