@@ -518,6 +518,94 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
+Name "gt readjoiner encoder: quality filter (-maxlow, 1L1)"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1L1.fastq 1"
+  run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
+  run "#{$bin}gt readjoiner prefilter -maxlow 3 -encodeonly "+
+    "-db 1:2:100 -readset reads_prefilter"
+  run "grep 'number of reads in output readset = 4' #{last_stdout}"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas '1:2:100'"
+  encode_reads("1:2:100")
+  compare_encseqs("reads", "reads_prefilter")
+  run "#{$bin}gt readjoiner prefilter -maxlow 0 -encodeonly "+
+    "-db 1:2:100 -readset reads_prefilter"
+  run "grep 'number of reads in output readset = 0' #{last_stdout}"
+end
+
+Name "gt readjoiner encoder: quality filter (-maxlow, 1L2)"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1L2.fastq 1"
+  run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
+  run "#{$bin}gt readjoiner prefilter -maxlow 3 -encodeonly "+
+    "-db 1:2:100 -readset reads_prefilter"
+  run "grep 'number of reads in output readset = 4' #{last_stdout}"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas '1:2:100'"
+  encode_reads("1:2:100")
+  compare_encseqs("reads", "reads_prefilter")
+  run "#{$bin}gt readjoiner prefilter -maxlow 1 -encodeonly "+
+    "-db 1:2:100 -readset reads_prefilter"
+  run "grep 'number of reads in output readset = 2' #{last_stdout}"
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.p.fas '1:2:100'"
+  encode_reads("1:2:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: quality filter (-maxlow, 1L4)"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1L4.fastq 1"
+  run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
+  run "#{$bin}gt readjoiner prefilter -maxlow 3 -encodeonly "+
+    "-db 1:2:100 -readset reads_prefilter"
+  run "grep 'number of reads in output readset = 2' #{last_stdout}"
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.p.fas '1:2:100'"
+  encode_reads("1:2:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: quality filter (-maxlow -lowqual)"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1L1.fastq 1"
+  run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
+  run "#{$bin}gt readjoiner prefilter -maxlow 2 -encodeonly "+
+    "-db 1:2:100 -readset reads_prefilter"
+  run "grep 'number of reads in output readset = 4' #{last_stdout}"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas '1:2:100'"
+  encode_reads("1:2:100")
+  compare_encseqs("reads", "reads_prefilter")
+  run "cp #{$testdata}/readjoiner/paired_reads_1L1.fastq 1"
+  run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
+  run "#{$bin}gt readjoiner prefilter -maxlow 2 -lowqual 10 -encodeonly "+
+    "-db 1:2:100 -readset reads_prefilter"
+  run "grep 'number of reads in output readset = 2' #{last_stdout}"
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.p.fas '1:2:100'"
+  encode_reads("1:2:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
+Name "gt readjoiner encoder: quality filter (-maxlow -phred64)"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1L2_ph64.fastq 1"
+  run "cp #{$testdata}/readjoiner/paired_reads_2_ph64.fastq 2"
+  run "#{$bin}gt readjoiner prefilter -maxlow 3 -phred64 -encodeonly "+
+    "-db 1:2:100 -readset reads_prefilter"
+  run "grep 'number of reads in output readset = 4' #{last_stdout}"
+  run "cp #{$testdata}/readjoiner/paired_reads_1_2.fas '1:2:100'"
+  encode_reads("1:2:100")
+  compare_encseqs("reads", "reads_prefilter")
+  run "#{$bin}gt readjoiner prefilter -maxlow 1 -phred64 -encodeonly "+
+    "-db 1:2:100 -readset reads_prefilter"
+  run "grep 'number of reads in output readset = 2' #{last_stdout}"
+  run "cp #{$testdata}/readjoiner/paired_reads_1N_2.p.fas '1:2:100'"
+  encode_reads("1:2:100")
+  compare_encseqs("reads", "reads_prefilter")
+end
+
 Name "gt readjoiner prefilter: correct encseq output (eqlen)"
 Keywords "gt_readjoiner gt_readjoiner_prefilter"
 Test do
@@ -663,13 +751,13 @@ Name "gt readjoiner: wildcards (Fasta)"
 Keywords "gt_readjoiner gt_readjoiner_prefilter"
 Test do
   run_prefilter("#$testdata/readjoiner/wildcard1.fas")
-  grep last_stdout, 'reads with ambiguities = 1'
+  grep last_stdout, 'low-quality reads = 1'
   grep last_stdout, 'number of reads in filtered readset = 1'
   run_prefilter("#$testdata/readjoiner/wildcard2.fas")
-  grep last_stdout, 'reads with ambiguities = 1'
+  grep last_stdout, 'low-quality reads = 1'
   grep last_stdout, 'number of reads in filtered readset = 1'
   run_prefilter("#$testdata/readjoiner/wildcards.fas")
-  grep last_stdout, 'reads with ambiguities = 6'
+  grep last_stdout, 'low-quality reads = 6'
   grep last_stdout, 'number of reads in filtered readset = 2'
   # wildcard1 / wildcard2 have a 8 chars match between read 0 and read 1;
   # the current version of readjoiner eliminates the wildcard-containing
@@ -680,13 +768,13 @@ Name "gt readjoiner: wildcards (FastQ)"
 Keywords "gt_readjoiner gt_readjoiner_prefilter"
 Test do
   run_prefilter("#$testdata/readjoiner/wildcard1.fastq")
-  grep last_stdout, 'reads with ambiguities = 1'
+  grep last_stdout, 'low-quality reads = 1'
   grep last_stdout, 'number of reads in filtered readset = 1'
   run_prefilter("#$testdata/readjoiner/wildcard2.fastq")
-  grep last_stdout, 'reads with ambiguities = 1'
+  grep last_stdout, 'low-quality reads = 1'
   grep last_stdout, 'number of reads in filtered readset = 1'
   run_prefilter("#$testdata/readjoiner/wildcards.fastq")
-  grep last_stdout, 'reads with ambiguities = 6'
+  grep last_stdout, 'low-quality reads = 6'
   grep last_stdout, 'number of reads in filtered readset = 2'
 end
 

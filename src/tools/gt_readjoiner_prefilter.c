@@ -23,6 +23,7 @@
 #include "core/outputfile.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
+#include "core/undef_api.h"
 #include "match/rdj-contfinder.h"
 #include "match/rdj-filesuf-def.h"
 #include "match/reads_library.h"
@@ -37,7 +38,8 @@ typedef struct {
   GtStrArray *db;
   /* rdj-radixsort test */
   bool testrs, testrs_print;
-  unsigned long testrs_depth, testrs_maxdepth;
+  unsigned long testrs_depth, testrs_maxdepth, maxlow;
+  unsigned lowqual;
 } GtReadjoinerPrefilterArguments;
 
 static void* gt_readjoiner_prefilter_arguments_new(void)
@@ -67,13 +69,14 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
            *fasta_option, *seqnums_option, *encseq_option, *readset_option,
            *v_option, *q_option, *db_option, *copynum_option, *libtable_option,
            *testrs_option, *testrs_depth_option, *testrs_print_option,
-           *testrs_maxdepth_option, *phred64_option;
+           *testrs_maxdepth_option, *phred64_option, *maxlow_option,
+           *lowqual_option;
 
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...]",
-                            "Remove contained reads and reads containing "
-                            "ambiguity codes in given sequence_file(s).");
+                            "Remove contained and low-quality reads "
+                            "and encode read set in GtEncseq format.");
 
   /* -readset */
   readset_option = gt_option_new_string("readset",
@@ -107,6 +110,23 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
       &arguments->quiet, false);
   gt_option_exclude(q_option, v_option);
   gt_option_parser_add_option(op, q_option);
+
+  /* -maxlow */
+  maxlow_option = gt_option_new_ulong("maxlow",
+      "maximal number of low-quality positions in a read\n"
+      "default: infinite",
+      &arguments->maxlow, GT_UNDEF_ULONG);
+  gt_option_hide_default(maxlow_option);
+  gt_option_is_extended_option(maxlow_option);
+  gt_option_parser_add_option(op, maxlow_option);
+
+  /* -lowqual */
+  lowqual_option = gt_option_new_uint_max("lowqual",
+      "maximal quality for a position to be considered low-quality",
+      &arguments->lowqual, 3U, 127U);
+  gt_option_is_extended_option(lowqual_option);
+  gt_option_imply(lowqual_option, maxlow_option);
+  gt_option_parser_add_option(op, lowqual_option);
 
   /* -phred64 */
   phred64_option = gt_option_new_bool("phred64",
@@ -263,15 +283,20 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     gt_readjoiner_prefilter_list_input_files(arguments, verbose_logger);
 
   r2t = gt_reads2twobit_new(arguments->readset);
+
   if (arguments->phred64)
-  {
     gt_reads2twobit_use_phred64(r2t);
-  }
+
+  if (arguments->maxlow != GT_UNDEF_ULONG)
+    gt_reads2twobit_set_quality_filter(r2t, arguments->maxlow,
+        (char)arguments->lowqual);
+
   for (i = 0; i < gt_str_array_size(arguments->db) && !had_err; i++)
   {
     GtStr *dbentry = gt_str_array_get_str(arguments->db, i);
     had_err = gt_reads2twobit_add_library(r2t, dbentry, err);
   }
+
   if (!had_err)
     had_err = gt_reads2twobit_encode(r2t, err);
 
@@ -298,11 +323,11 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
 
     gt_logger_log(verbose_logger, "total length of complete readset = %lu",
         tlen_input);
-    gt_logger_log(verbose_logger, "reads with ambiguities = %lu "
+    gt_logger_log(verbose_logger, "low-quality reads = %lu "
         "[%.2f %% of input]", nofreads_invalid, (float)nofreads_invalid * 100 /
         (float)nofreads_input);
     if (!arguments->verbose)
-      gt_logger_log(default_logger, "reads with ambiguities = %lu",
+      gt_logger_log(default_logger, "low-quality reads = %lu",
           nofreads_invalid);
     nofreads_output = nofreads_valid;
     if (arguments->encodeonly)

@@ -60,6 +60,11 @@ int gt_reads2twobit_add_library(GtReads2Twobit *r2t,
    it must be called before <gt_reads2twobit_encode>. */
 void gt_reads2twobit_use_phred64(GtReads2Twobit *r2t);
 
+/* filter those reads which contain more than <maxlow> positions
+   whose quality is no more than <lowqual>. */
+void gt_reads2twobit_set_quality_filter(GtReads2Twobit *r2t,
+    unsigned long maxlow, char lowqual);
+
 /* Encodes the sequences in the twobit-encoding format in memory;
    can be called only once; returns 0 on success, a negative number on
    error and sets <err> accordingly. */

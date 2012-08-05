@@ -32,6 +32,7 @@
 #include "core/parseutils_api.h"
 #include "core/splitter_api.h"
 #include "core/xansi_api.h"
+#include "core/undef_api.h"
 #include "match/reads_library.h"
 #include "match/reads2twobit.h"
 
@@ -61,7 +62,8 @@ struct GtReads2Twobit
   unsigned long total_seqlength;
   GtTwobitencoding current_sepcode;
   unsigned long invalid_sequences, invalid_total_length;
-  char phredbase;
+  char phredbase, lowqual;
+  unsigned long maxlow;
 };
 
 GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname)
@@ -81,6 +83,8 @@ GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname)
   r2t->total_seqlength = 0;
   r2t->nofseqs = 0;
   r2t->phredbase = (char)33;
+  r2t->maxlow = GT_UNDEF_ULONG;
+  r2t->lowqual = 0;
   return r2t;
 }
 
@@ -216,6 +220,13 @@ void gt_reads2twobit_use_phred64(GtReads2Twobit *r2t)
   r2t->phredbase = (char)64;
 }
 
+void gt_reads2twobit_set_quality_filter(GtReads2Twobit *r2t,
+    unsigned long maxlow, char lowqual)
+{
+  r2t->maxlow = maxlow;
+  r2t->lowqual = lowqual;
+}
+
 #define GT_READS2TWOBIT_CODE_UNDEF ((GtTwobitencoding)ULONG_MAX)
 
 typedef struct {
@@ -240,14 +251,15 @@ typedef struct {
 typedef struct {
   GtTwobitencoding char2code[UCHAR_MAX + 1];
   unsigned long inputfiles_totallength;
-  unsigned long seqlen, seqlen_first;
+  unsigned long seqlen, seqlen_first, seqlen_mate;
   GtReads2TwobitEncodeInfo current, backup;
   bool varlen_mode, invalid_mode;
   unsigned long invalid_sequences, invalid_total_length;
   unsigned long *seppos;
   unsigned long seppos_alloc;
-  char phredbase, *qbuf, *qbuf2;
+  char phredbase, *qbuf, *qbuf2, lowqual;
   size_t qbuf_size, qbuf2_size;
+  unsigned long maxlow;
 } GtReads2TwobitEncodeState;
 
 static void gt_reads2twobit_init_encode(GtReads2Twobit *r2t,
@@ -276,6 +288,7 @@ static void gt_reads2twobit_init_encode(GtReads2Twobit *r2t,
   state->char2code[(unsigned char)'T'] = (GtTwobitencoding)3;
   state->char2code[(unsigned char)'t'] = (GtTwobitencoding)3;
   state->seqlen = 0;
+  state->seqlen_mate = 0;
   state->seqlen_first = 0;
   state->varlen_mode = false;
   state->invalid_mode = false;
@@ -288,6 +301,8 @@ static void gt_reads2twobit_init_encode(GtReads2Twobit *r2t,
   state->qbuf2 = NULL;
   state->qbuf2_size = 0;
   state->phredbase = r2t->phredbase;
+  state->lowqual = r2t->lowqual;
+  state->maxlow = r2t->maxlow;
 }
 
 #define GT_READS2TWOBIT_READBUFFER_SIZE ((size_t)256)
@@ -400,6 +415,7 @@ static inline void gt_reads2twobit_prepare_for_new_sequence(
   GT_READS2TWOBIT_COPY_ENCODE_INFO(state->current, state->backup);
   state->current.nofseqs++;
   state->seqlen = 0;
+  state->seqlen_mate = 0;
   state->invalid_mode = false;
 }
 
@@ -419,6 +435,7 @@ static void gt_reads2twobit_switch_to_invalid_mode(
   state->invalid_mode = true;
   state->invalid_sequences++;
   state->invalid_total_length += state->seqlen;
+  state->invalid_total_length += state->seqlen_mate;
   GT_READS2TWOBIT_COPY_ENCODE_INFO(state->backup, state->current);
 }
 
@@ -428,9 +445,8 @@ static inline int gt_reads2twobit_process_qualities_line(
 {
   unsigned long j = 0;
   char c;
-  while (true)
+  while ((c = line[j++]) != '\0')
   {
-    c = line[j++];
     if (c >= state->phredbase)
     {
       if (*qbuf_next == state->seqlen)
@@ -438,11 +454,19 @@ static inline int gt_reads2twobit_process_qualities_line(
       qbuf[*qbuf_next] = c - state->phredbase;
       (*qbuf_next)++;
     }
-    else if (c == '\0')
-    {
-      return 0;
-    }
   }
+  return 0;
+}
+
+static void gt_reads2twobit_apply_quality_filter(
+    GtReads2TwobitEncodeState *state, const char *qbuf, unsigned long nofq)
+{
+  unsigned long i, low = 0;
+  for (i = 0; i < nofq; i++)
+    if (qbuf[i] <= state->lowqual)
+      low++;
+  if (low > state->maxlow)
+    gt_reads2twobit_switch_to_invalid_mode(state);
 }
 
 static inline void gt_reads2twobit_process_sequence_line(
@@ -530,7 +554,8 @@ static int gt_reads2twobit_encode_unpaired_fastq_library(
           state->qbuf, &qbuf_next);
       if (qbuf_next == state->seqlen)
       {
-        /* here goes code handling the qualities */
+        if (state->maxlow != GT_UNDEF_ULONG)
+          gt_reads2twobit_apply_quality_filter(state, state->qbuf, qbuf_next);
         qbuf_next = 0;
         qmode = false;
       }
@@ -623,7 +648,7 @@ static int gt_reads2twobit_encode_unpaired_library(
 }
 
 static inline int gt_reads2twobit_process_fastq_mate_pair(
-    GtReads2TwobitEncodeState *state, char *line2, FILE *file2)
+    GtReads2TwobitEncodeState *state, char *line2, FILE *file2, bool *file2new)
 {
   int had_err = 0;
   char *fgetsretval = NULL;
@@ -631,21 +656,19 @@ static inline int gt_reads2twobit_process_fastq_mate_pair(
   unsigned long prev_seqlen = state->seqlen;
   unsigned long qbuf2_next = 0;
   bool qmode = false;
-  if (line2[0] != '@')
+  if (*file2new)
   {
     fgetsretval = fgets(line2, (int)GT_READS2TWOBIT_READBUFFER_SIZE, file2);
     gt_assert(fgetsretval == line2);
+    *file2new = false;
   }
   GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line2, file2, fgetsretval);
+  state->seqlen_mate = state->seqlen;
   state->seqlen = 0;
   if (!state->invalid_mode)
-  {
     state->current.nofseqs++;
-  }
   else
-  {
     state->invalid_sequences++;
-  }
   while (!had_err)
   {
     fgetsretval = fgets(line2, (int)GT_READS2TWOBIT_READBUFFER_SIZE, file2);
@@ -676,17 +699,18 @@ static inline int gt_reads2twobit_process_fastq_mate_pair(
           state->qbuf2, &qbuf2_next);
       if (had_err == -1)
         had_err = -2;
-      if (qbuf2_next == state->seqlen)
+      if (!had_err && qbuf2_next == state->seqlen)
       {
-        /* here goes code handling the qualities */
+        if (state->maxlow != GT_UNDEF_ULONG)
+          gt_reads2twobit_apply_quality_filter(state, state->qbuf2, qbuf2_next);
         qbuf2_next = 0;
         qmode = false;
       }
     }
   }
-  if (!state->invalid_mode)
+  if (!had_err && !state->invalid_mode)
     gt_reads2twobit_process_sequence_end(state);
-  if (!was_invalid && state->invalid_mode)
+  if (!had_err && !was_invalid && state->invalid_mode)
   {
     state->invalid_sequences++;
     state->invalid_total_length += (prev_seqlen - 1UL);
@@ -719,6 +743,7 @@ static int gt_reads2twobit_encode_interleaved_paired_fastq_library(
         {
           if (!state->invalid_mode)
             state->current.nofseqs++;
+          state->seqlen_mate = state->seqlen;
           state->seqlen = 0;
         }
         else
@@ -747,14 +772,15 @@ static int gt_reads2twobit_encode_interleaved_paired_fastq_library(
           state->qbuf, &qbuf_next);
       if (qbuf_next == state->seqlen)
       {
-        /* here goes code handling the qualities */
+        if (state->maxlow != GT_UNDEF_ULONG)
+          gt_reads2twobit_apply_quality_filter(state, state->qbuf, qbuf_next);
         qbuf_next = 0;
         qmode = false;
       }
     }
   } while ((fgetsretval = fgets(line, (int)GT_READS2TWOBIT_READBUFFER_SIZE,
             file)) == line && !had_err);
-  if (!state->invalid_mode)
+  if (!had_err && !state->invalid_mode)
     gt_reads2twobit_process_sequence_end(state);
   return had_err;
 }
@@ -766,6 +792,7 @@ static int gt_reads2twobit_encode_twofile_paired_fastq_library(
   int had_err = 0;
   unsigned long qbuf_next = 0;
   bool qmode = false;
+  bool file2new = true;
   char *fgetsretval, line2[GT_READS2TWOBIT_READBUFFER_SIZE];
   line2[0] = '\0';
   state->seqlen = 0;
@@ -779,13 +806,13 @@ static int gt_reads2twobit_encode_twofile_paired_fastq_library(
           if (!state->invalid_mode)
             gt_reads2twobit_process_sequence_end(state);
           had_err = gt_reads2twobit_process_fastq_mate_pair(state, line2,
-              file2);
+              file2, &file2new);
         }
         else
         {
           if (state->invalid_mode)
             had_err = gt_reads2twobit_process_fastq_mate_pair(state, line2,
-                file2);
+                file2, &file2new);
         }
         GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line1, file1, fgetsretval);
         gt_reads2twobit_prepare_for_new_sequence(state);
@@ -811,17 +838,19 @@ static int gt_reads2twobit_encode_twofile_paired_fastq_library(
           state->qbuf, &qbuf_next);
       if (qbuf_next == state->seqlen)
       {
-        /* here goes code handling the qualities */
+        if (state->maxlow != GT_UNDEF_ULONG)
+          gt_reads2twobit_apply_quality_filter(state, state->qbuf, qbuf_next);
         qbuf_next = 0;
         qmode = false;
       }
     }
   } while ((fgetsretval = fgets(line1, (int)GT_READS2TWOBIT_READBUFFER_SIZE,
             file1)) == line1 && !had_err);
-  if (!state->invalid_mode)
+  if (!had_err && !state->invalid_mode)
     gt_reads2twobit_process_sequence_end(state);
   if (!had_err)
-    had_err = gt_reads2twobit_process_fastq_mate_pair(state, line2, file2);
+    had_err = gt_reads2twobit_process_fastq_mate_pair(state, line2, file2,
+        &file2new);
   return had_err;
 }
 
@@ -839,15 +868,12 @@ static inline void gt_reads2twobit_process_fasta_mate_pair(
   }
   gt_assert(line2[0] == '>');
   GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line2, file2, fgetsretval);
+  state->seqlen = 0;
+  state->seqlen_mate = state->seqlen;
   if (!state->invalid_mode)
-  {
     state->current.nofseqs++;
-    state->seqlen = 0;
-  }
   else
-  {
     state->invalid_sequences++;
-  }
   while (true)
   {
     fgetsretval = fgets(line2, (int)GT_READS2TWOBIT_READBUFFER_SIZE, file2);
@@ -883,6 +909,7 @@ static void gt_reads2twobit_encode_interleaved_paired_fasta_library(
       {
         if (!state->invalid_mode)
           state->current.nofseqs++;
+        state->seqlen_mate = state->seqlen;
         state->seqlen = 0;
       }
       else
@@ -1663,6 +1690,11 @@ int gt_reads2twobit_write_encseq(GtReads2Twobit *r2t, GtError *err)
   int had_err = 0;
   gt_error_check(err);
   gt_assert(r2t != NULL);
+  if (r2t->nofseqs == 0)
+  {
+    gt_log_log("filtered read set is empty, no encseq was written");
+    return had_err;
+  }
   gt_assert(r2t->twobitencoding != NULL);
   gt_log_log("write encseq %s", gt_str_get(r2t->indexname));
   gt_log_log("seqlen_eqlen = %lu", r2t->seqlen_eqlen);
@@ -1715,21 +1747,18 @@ GtTwobitencoding *gt_reads2twobit_export_twobitencoding(
     const GtReads2Twobit *r2t)
 {
   gt_assert(r2t != NULL);
-  gt_assert(r2t->twobitencoding != NULL);
   return r2t->twobitencoding;
 }
 
 unsigned long *gt_reads2twobit_export_seppos(const GtReads2Twobit *r2t)
 {
   gt_assert(r2t != NULL);
-  gt_assert(r2t->twobitencoding != NULL);
   return r2t->seppos;
 }
 
 unsigned long gt_reads2twobit_nof_invalid_seqs(const GtReads2Twobit *r2t)
 {
   gt_assert(r2t != NULL);
-  gt_assert(r2t->twobitencoding != NULL);
   return r2t->invalid_sequences;
 }
 
@@ -1737,42 +1766,36 @@ unsigned long gt_reads2twobit_invalid_seqs_totallength(
     const GtReads2Twobit *r2t)
 {
   gt_assert(r2t != NULL);
-  gt_assert(r2t->twobitencoding != NULL);
   return r2t->invalid_total_length;
 }
 
 unsigned long gt_reads2twobit_nofseqs(const GtReads2Twobit *r2t)
 {
   gt_assert(r2t != NULL);
-  gt_assert(r2t->twobitencoding != NULL);
   return r2t->nofseqs;
 }
 
 unsigned long gt_reads2twobit_seqlen_eqlen(const GtReads2Twobit *r2t)
 {
   gt_assert(r2t != NULL);
-  gt_assert(r2t->twobitencoding != NULL);
   return r2t->seqlen_eqlen;
 }
 
 unsigned long gt_reads2twobit_seqlen_max(const GtReads2Twobit *r2t)
 {
   gt_assert(r2t != NULL);
-  gt_assert(r2t->twobitencoding != NULL);
   return r2t->seqlen_max;
 }
 
 unsigned long gt_reads2twobit_seqlen_min(const GtReads2Twobit *r2t)
 {
   gt_assert(r2t != NULL);
-  gt_assert(r2t->twobitencoding != NULL);
   return r2t->seqlen_min;
 }
 
 unsigned long gt_reads2twobit_total_seqlength(const GtReads2Twobit *r2t)
 {
   gt_assert(r2t != NULL);
-  gt_assert(r2t->twobitencoding != NULL);
   return r2t->total_seqlength;
 }
 
