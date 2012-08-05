@@ -1131,6 +1131,8 @@ static void gt_reads2twobit_collect_fileinfo(const GtReads2Twobit *r2t,
     {
       (*filelengthtab)[i].effectivelength =
         (uint64_t)rli->total_seqlength - 1UL;
+      if (r2t->seqlen_eqlen == 0 && i == noflibraries - 1UL)
+        (*filelengthtab)[i].effectivelength--;
       (*filelengthtab)[i].length = (uint64_t)rli->total_filelength;
     }
     libname = gt_str_clone(rli->filename1);
@@ -1178,7 +1180,6 @@ static inline GtTwobitencoding gt_reads2twobit_less_frequent_char(
 static void gt_reads2twobit_zeropad_tbe(GtReads2Twobit *r2t)
 {
   unsigned long pos, codenum, posincode, shift;
-  gt_assert(r2t->total_seqlength > 0);
   pos = r2t->total_seqlength - 1UL;
   codenum = GT_DIVBYUNITSIN2BITENC(pos);
   posincode = GT_MODBYUNITSIN2BITENC(pos);
@@ -1583,16 +1584,20 @@ static void gt_reads2twobit_eqlen_set_separators_to_less_frequent_char(
 {
   unsigned long seqnum, pos, codenum, posincode;
   GtTwobitencoding sepcode, code, mask, shift;
-  gt_assert(r2t->seqlen_eqlen > 0);
   sepcode = gt_reads2twobit_less_frequent_char(r2t);
-  if (sepcode != r2t->current_sepcode)
+  if (sepcode != r2t->current_sepcode && r2t->nofseqs > 1UL)
   {
+    unsigned long from, to;
     gt_log_log("changing sepcode from %lu to %lu",
                 (unsigned long) r2t->current_sepcode,
                 (unsigned long) sepcode);
-    for (seqnum = 1UL; seqnum < r2t->nofseqs; seqnum++)
+    from = r2t->seqlen_eqlen > 0 ? 1UL : 0;
+    to = r2t->seqlen_eqlen > 0 ? r2t->nofseqs - 1UL : r2t->nofseqs - 2UL;
+    for (seqnum = from; seqnum <= to; seqnum++)
     {
-      pos = seqnum * r2t->seqlen_eqlen - 1UL;
+      pos = r2t->seqlen_eqlen > 0
+        ? seqnum * r2t->seqlen_eqlen - 1UL
+        : r2t->seppos[seqnum];
       codenum = GT_DIVBYUNITSIN2BITENC(pos);
       posincode = GT_MODBYUNITSIN2BITENC(pos);
       code = r2t->twobitencoding[codenum];
@@ -1619,62 +1624,36 @@ static int gt_reads2twobit_write_encseq_eqlen(GtReads2Twobit *r2t,
   gt_reads2twobit_eqlen_set_separators_to_less_frequent_char(r2t);
   gt_reads2twobit_zeropad_tbe(r2t);
   had_err = gt_encseq_equallength_write_twobitencoding_to_file(
-      gt_str_get(r2t->indexname),
-      r2t->total_seqlength, r2t->seqlen_eqlen - 1UL, r2t->twobitencoding,
-      r2t->nofseqs, gt_array_size(r2t->collection), filelengthtab,
-      filenametab, r2t->chardistri, err);
+      gt_str_get(r2t->indexname), r2t->total_seqlength,
+      r2t->seqlen_eqlen - 1UL, r2t->twobitencoding, r2t->nofseqs,
+      gt_array_size(r2t->collection), filelengthtab, filenametab,
+      r2t->chardistri, err);
   gt_free(filelengthtab);
   gt_str_array_delete(filenametab);
   return had_err;
 }
 
-static int gt_reads2twobit_write_encseq_varlen(const GtReads2Twobit *r2t,
+static int gt_reads2twobit_write_encseq_varlen(GtReads2Twobit *r2t,
     GtError *err)
 {
-  GtEncseqEncoder *encoder;
-  GtStrArray *infiles;
-  GtStrArray *filenametab;
-  GtStr *fas_path;
   int had_err = 0;
-  unsigned long i, noflibraries = gt_array_size(r2t->collection);
+  GtFilelengthvalues *filelengthtab;
+  GtStrArray *filenametab;
 
-  gt_reads2twobit_collect_fileinfo(r2t, NULL, &filenametab);
-  infiles = gt_str_array_new();
-  fas_path = gt_str_new();
-  for (i = 0; i < noflibraries; i++)
-  {
-    const GtReadsLibraryInfo *rli = gt_array_get(r2t->collection, i);
-    GtFile *fp;
-    char *basename;
-    gt_str_set(fas_path, "prefiltered.");
-    basename = gt_basename(gt_str_array_get(filenametab, i));
-    gt_str_append_cstr(fas_path, basename);
-    fp = gt_file_new(gt_str_get(fas_path), "w", err);
-    if (fp == NULL)
-    {
-      had_err = -1;
-      break;
-    }
-    gt_log_log("decode library %lu to %s", i, gt_str_get(fas_path));
-    gt_reads2twobit_decode_range(r2t, fp, rli->first_seqnum, rli->nofseqs,
-        NULL);
-    gt_free(basename);
-    gt_file_delete(fp);
-    gt_str_array_add(infiles, fas_path);
-  }
-  gt_str_delete(fas_path);
-  encoder = gt_encseq_encoder_new();
-  gt_encseq_encoder_disable_description_support(encoder);
-  gt_encseq_encoder_disable_md5_support(encoder);
-  gt_log_log("encode encseq %s", gt_str_get(r2t->indexname));
-  had_err = gt_encseq_encoder_encode(encoder, infiles,
-      gt_str_get(r2t->indexname), err);
-  gt_encseq_encoder_delete(encoder);
-  for (i = 0; i < noflibraries; i++)
-  {
-    gt_xremove(gt_str_array_get(infiles, i));
-  }
-  gt_str_array_delete(infiles);
+  gt_assert(r2t->seppos != NULL);
+  gt_reads2twobit_collect_fileinfo(r2t, &filelengthtab, &filenametab);
+  gt_reads2twobit_eqlen_set_separators_to_less_frequent_char(r2t);
+  gt_reads2twobit_zeropad_tbe(r2t);
+  had_err = gt_encseq_seppos2ssptab(gt_str_get(r2t->indexname),
+      r2t->total_seqlength, r2t->nofseqs, r2t->seppos, err);
+  if (!had_err)
+    had_err = gt_encseq_generic_write_twobitencoding_to_file(
+        gt_str_get(r2t->indexname), r2t->total_seqlength,
+        GT_ACCESS_TYPE_UCHARTABLES, 0, r2t->seqlen_min - 1UL,
+        r2t->seqlen_max - 1UL, 0, 0, r2t->seqlen_max - 1UL,
+        r2t->twobitencoding, r2t->nofseqs, gt_array_size(r2t->collection),
+        filelengthtab, filenametab, r2t->chardistri, err);
+  gt_free(filelengthtab);
   gt_str_array_delete(filenametab);
   return had_err;
 }

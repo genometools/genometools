@@ -74,9 +74,7 @@ Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1v.fas 1v"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db 1v -readset reads_prefilter"
-  pfx = "prefiltered."
-  run "cp #{$testdata}/readjoiner/paired_reads_1v.fas #{pfx}1v"
-  encode_reads("#{pfx}1v")
+  encode_reads("1v")
   compare_encseqs("reads", "reads_prefilter")
 end
 
@@ -86,9 +84,7 @@ Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1v.fastq 1v"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db 1v -readset reads_prefilter"
-  pfx = "prefiltered."
-  run "cp #{$testdata}/readjoiner/paired_reads_1v.fastq #{pfx}1v"
-  encode_reads("#{pfx}1v")
+  encode_reads("1v")
   compare_encseqs("reads", "reads_prefilter")
 end
 
@@ -431,10 +427,8 @@ Test do
   run "cp #{$testdata}/readjoiner/paired_reads_2.fas 2"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1v:2:100 -readset reads_prefilter"
-  pfx = "prefiltered."
-  run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
-  run "cp #{$testdata}/readjoiner/paired_reads_1v_2.fas '#{pfx}1v:2:100'"
-  encode_reads("#{pfx}U #{pfx}1v:2:100")
+  run "cp #{$testdata}/readjoiner/paired_reads_1v_2.fas '1v:2:100'"
+  encode_reads("U 1v:2:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
@@ -446,10 +440,9 @@ Test do
   run "cp #{$testdata}/readjoiner/paired_reads_2.fastq 2"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1v:2:100 -readset reads_prefilter"
-  pfx = "prefiltered."
-  run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
-  run "cp #{$testdata}/readjoiner/paired_reads_1v_2.fas '#{pfx}1v:2:100'"
-  encode_reads("#{pfx}U #{pfx}1v:2:100")
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
+  run "cp #{$testdata}/readjoiner/paired_reads_1v_2.fas '1v:2:100'"
+  encode_reads("U 1v:2:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
@@ -461,11 +454,9 @@ Test do
   run "cp #{$testdata}/readjoiner/paired_reads_2Nb.fas 2Nb"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1v:2Nb:100 -readset reads_prefilter"
-  pfx = "prefiltered."
-  run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
   run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.p.fas "+
-    "'#{pfx}1v:2Nb:100'"
-  encode_reads("#{pfx}U #{pfx}1v:2Nb:100")
+    "'1v:2Nb:100'"
+  encode_reads("U 1v:2Nb:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
@@ -476,11 +467,10 @@ Test do
   run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.fastq 1v_2Nb"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1v_2Nb:100 -readset reads_prefilter"
-  pfx = "prefiltered."
-  run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.p.fas "+
-    "'#{pfx}1v_2Nb:100'"
-  encode_reads("#{pfx}U #{pfx}1v_2Nb:100")
+    "'1v_2Nb:100'"
+  encode_reads("U 1v_2Nb:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
@@ -492,11 +482,10 @@ Test do
   run "cp #{$testdata}/readjoiner/paired_reads_2Nb.fastq 2Nb"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db U 1v:2Nb:100 -readset reads_prefilter"
-  pfx = "prefiltered."
-  run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "cp #{$testdata}/readjoiner/paired_reads_1v_2Nb.p.fas "+
-    "'#{pfx}1v:2Nb:100'"
-  encode_reads("#{pfx}U #{pfx}1v:2Nb:100")
+    "'1v:2Nb:100'"
+  encode_reads("U 1v:2Nb:100")
   compare_encseqs("reads", "reads_prefilter")
 end
 
@@ -508,11 +497,9 @@ Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db 1Nv:2:200 U -readset reads_prefilter"
-  pfx = "prefiltered."
   run "cp #{$testdata}/readjoiner/paired_reads_1Nv_2.p.fas "+
-    "'#{pfx}1Nv:2:200'"
-  run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
-  encode_reads("#{pfx}1Nv:2:200 #{pfx}U")
+    "'1Nv:2:200'"
+  encode_reads("1Nv:2:200 U")
   compare_encseqs("reads", "reads_prefilter")
 end
 
@@ -524,11 +511,10 @@ Test do
   run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
   run "#{$bin}gt readjoiner prefilter -encodeonly "+
     "-db 1Nv:2:200 U -readset reads_prefilter"
-  pfx = "prefiltered."
   run "cp #{$testdata}/readjoiner/paired_reads_1Nv_2.p.fas "+
-    "'#{pfx}1Nv:2:200'"
-  run "cp #{$testdata}/readjoiner/paired_reads_U.fas #{pfx}U"
-  encode_reads("#{pfx}1Nv:2:200 #{pfx}U")
+    "'1Nv:2:200'"
+  run "cp #{$testdata}/readjoiner/paired_reads_U.fas U"
+  encode_reads("1Nv:2:200 U")
   compare_encseqs("reads", "reads_prefilter")
 end
 
@@ -555,19 +541,17 @@ Test do
                 "#{$testdata}/readjoiner/2x3nt_3.fas")
 end
 
-Name "gt readjoiner prefilter: correct encseq output (not eqlen)"
+Name "gt readjoiner prefilter: correct encseq output (varlen)"
 Keywords "gt_readjoiner gt_readjoiner_prefilter"
 Test do
   run_prefilter("#{$testdata}/readjoiner/30x_long_varlen.fas",
                 "-encseq false -fasta true -q true")
   contfree = "reads.pf.fas"
   run_prefilter(contfree)
-  run "mv reads.esq reads.prefilter.esq"
-  run "mv reads.ssp reads.prefilter.ssp"
-  run "mv #{contfree} prefiltered.#{contfree}"
-  encode_reads("prefiltered.#{contfree}")
-  run "diff reads.esq reads.prefilter.esq"
-  run "diff reads.ssp reads.prefilter.ssp"
+  run "mv reads.esq reads_prefilter.esq"
+  run "mv reads.ssp reads_prefilter.ssp"
+  encode_reads(contfree)
+  compare_encseqs("reads", "reads_prefilter")
 end
 
 Name "gt readjoiner: no crash when no spm found"
