@@ -420,6 +420,8 @@ ifneq ($(cairo),no)
   ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
   STATIC_CAIRO_LIBS := -pthread -lfreetype -lpixman-1 -lpng -static -o $$@
+  SKETCH_EXTRA_BINARIES := bin/examples/sketch_parsed \
+                           bin/examples/sketch_constructed
 else
   EXP_CPPFLAGS += -DWITHOUT_CAIRO
   STEST_FLAGS += -nocairo
@@ -882,11 +884,12 @@ release:
 	git push --tags origin master
 	git push --tags github master
 
-docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
+docs: bin/gt $(SKETCH_EXTRA_BINARIES)
 	bin/gt gtscripts/gtdoc.lua -html $(CURDIR) \
         > www/genometools.org/htdocs/libgenometools.html
 	bin/gt gtscripts/gtdoc.lua -lua -html $(CURDIR) \
         > www/genometools.org/htdocs/docs.html
+ifdef SKETCH_EXTRA_BINARIES
 	bin/examples/sketch_parsed gtdata/sketch/default.style \
           www/genometools.org/htdocs/images/parsed.png \
           testdata/eden.gff3
@@ -896,6 +899,7 @@ docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
           www/genometools.org/htdocs/annotationsketch/callback_examples_with_score.gff3
 	bin/examples/sketch_constructed gtdata/sketch/default.style \
 	  www/genometools.org/htdocs/images/constructed.png
+endif
 	sed -nf scripts/incl.sed \
 	  www/genometools.org/htdocs/examples_tmpl.html | \
           sed 'N;N;s/\n//' > /tmp/tmp.sed.$$$$ && \
