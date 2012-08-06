@@ -272,7 +272,7 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
       {
         case PPT_UBOX:
           if (gt_ubox_ok(cur_hit, results->opts->ubox_len)) {
-            if (potential_ubox) {
+            if (potential_ubox != NULL) {
               gt_free(potential_ubox);
               potential_ubox = NULL;
             }
@@ -306,7 +306,7 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
           }
           else
           {
-            if (potential_ubox) {
+            if (potential_ubox != NULL) {
               gt_free(potential_ubox);
               potential_ubox = NULL;
             }
@@ -315,7 +315,7 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
           }
           break;
         default:
-          if (potential_ubox) {
+          if (potential_ubox != NULL) {
                 gt_free(potential_ubox);
                 potential_ubox = NULL;
           }

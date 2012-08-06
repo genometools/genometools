@@ -452,7 +452,7 @@ static void gt_contfinder_radixsort_eqlen(GtContfinder contfinder,
 
   if (contfinder.len <= GT_CONTFINDER_KMERSIZE)
   {
-    subbucket.depth = GT_UNDEF_ULONG;
+    subbucket.depth = (size_t) GT_UNDEF_ULONG;
     subbucket.seqnums = all.seqnums;
     subbucket.seqnums_offset = all.seqnums_offset;
     for (i = 0; i < GT_CONTFINDER_NOFBUCKETS(0); ++i)

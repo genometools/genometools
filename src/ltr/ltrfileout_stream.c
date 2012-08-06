@@ -475,9 +475,9 @@ static void write_metadata(GtFile *metadata_file,
   int buflen = 1024;
   char *buffer;
 
-  buffer = gt_calloc(buflen+1, sizeof (char));
+  buffer = gt_calloc((size_t) (buflen+1), sizeof (char));
   /* get working directory */
-  while (getcwd(buffer, buflen) == NULL) {
+  while (getcwd(buffer, (size_t) buflen) == NULL) {
     buflen += 1024;
     buffer = gt_realloc(buffer, (buflen+1) * sizeof (char));
   }
