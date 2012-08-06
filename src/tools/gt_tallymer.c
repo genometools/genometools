@@ -578,7 +578,7 @@ static void showitvdistribution(const GtArrayuint64_t *dist,
 {
   unsigned long idx;
 
-  gt_assert(outputvector != NULL && dist->nextfreeuint64_t > 0);
+  gt_assert(outputvector != NULL);
   for (idx=0; idx < dist->nextfreeuint64_t; idx++)
   {
     if (GT_ISIBITSET(outputvector,idx) && dist->spaceuint64_t[idx] > 0)
@@ -607,8 +607,7 @@ static void showitvsumdistributionoftwo(Summode mode,
   unsigned long idx;
   uint64_t sumoftwo, tmp;
 
-  gt_assert(outputvector != NULL && dist1->nextfreeuint64_t > 0
-                              && dist2->nextfreeuint64_t > 0);
+  gt_assert(outputvector != NULL);
   for (idx=0; /* Nothing */; idx++)
   {
     if (GT_ISIBITSET(outputvector,idx))

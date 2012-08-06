@@ -27,7 +27,6 @@
 #include "extended/rbtree.h"
 #include "chain2dim.h"
 #include "prsqualint.h"
-#include "stamp.h"
 
 /*
   The basic information required for each match is stored
