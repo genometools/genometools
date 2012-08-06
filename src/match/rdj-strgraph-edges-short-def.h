@@ -198,6 +198,7 @@ int gt_strgraph_edges_compare_by_length(const void *edgea,
       (STRGRAPH)->__e_mark)
 
 #define GT_STRGRAPH_DESERIALIZE_EDGES(STRGRAPH, FP)\
+  GT_STRGRAPH_ALLOC_EDGES(STRGRAPH);\
   GT_STRGRAPH_DESERIALIZE_DATA((FP),\
       GT_STRGRAPH_NOFEDGES(STRGRAPH), (STRGRAPH)->__e_dest);\
   GT_STRGRAPH_DESERIALIZE_DATA((FP),\

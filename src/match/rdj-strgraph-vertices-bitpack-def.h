@@ -59,24 +59,30 @@ typedef uint64_t GtStrgraphEdgenum;
 #define GT_STRGRAPH__OFFSET_BITS(STRGRAPH)\
   (gt_requiredUInt64Bits((STRGRAPH)->__offset_max))
 
+#define GT_STRGRAPH__DETERMINE_OFFSET_MAX(STRGRAPH)\
+  (STRGRAPH)->__offset_max = gt_strgraph_counts_sum(STRGRAPH)
+
 #define GT_STRGRAPH__ALLOC_OFFSETS(STRGRAPH)\
-  (STRGRAPH)->__offset_max = gt_strgraph_counts_sum(STRGRAPH);\
   (STRGRAPH)->__v_offset = bitpackarray_new(GT_STRGRAPH__OFFSET_BITS(STRGRAPH),\
       (BitOffset)(GT_STRGRAPH_NOFVERTICES(STRGRAPH) + (GtStrgraphVnum)1), true)
 
 #define GT_STRGRAPH__OUTDEG_BITS(STRGRAPH)\
   (gt_requiredUInt64Bits((STRGRAPH)->__outdeg_max))
 
-#define GT_STRGRAPH__ALLOC_OUTDEGS(STRGRAPH)\
+#define GT_STRGRAPH__DETERMINE_OUTDEG_MAX(STRGRAPH)\
   gt_assert(sizeof (GtStrgraphVEdgenum) >= sizeof (GtStrgraphCount));\
   (STRGRAPH)->__outdeg_max = (GtStrgraphVEdgenum)\
-      gt_strgraph_largest_count(STRGRAPH);\
+      gt_strgraph_largest_count(STRGRAPH)
+
+#define GT_STRGRAPH__ALLOC_OUTDEGS(STRGRAPH)\
   (STRGRAPH)->__v_outdeg = bitpackarray_new(GT_STRGRAPH__OUTDEG_BITS(STRGRAPH),\
       (BitOffset)(GT_STRGRAPH_NOFVERTICES(STRGRAPH) + (GtStrgraphVnum)1), true)
 
 #define GT_STRGRAPH_ALLOC_VERTICES(STRGRAPH)\
   GT_STRGRAPH__ALLOC_VMARKS(STRGRAPH);\
+  GT_STRGRAPH__DETERMINE_OFFSET_MAX(STRGRAPH);\
   GT_STRGRAPH__ALLOC_OFFSETS(STRGRAPH);\
+  GT_STRGRAPH__DETERMINE_OUTDEG_MAX(STRGRAPH);\
   GT_STRGRAPH__ALLOC_OUTDEGS(STRGRAPH)
 
 #define GT_STRGRAPH__SIZEOF_OUTDEGS(STRGRAPH)\
@@ -105,26 +111,41 @@ typedef uint64_t GtStrgraphEdgenum;
   GT_STRGRAPH__SIZEOF_OUTDEGS(STRGRAPH))
 
 #define GT_STRGRAPH_SERIALIZE_VERTICES(STRGRAPH, FP)\
+  GT_STRGRAPH_SERIALIZE_DATA((FP), 1, &((STRGRAPH)->__n_vertices));\
+  GT_STRGRAPH_SERIALIZE_DATA((FP), 1, &((STRGRAPH)->__offset_max));\
+  GT_STRGRAPH_SERIALIZE_DATA((FP), 1, &((STRGRAPH)->__outdeg_max));\
   GT_STRGRAPH_SERIALIZE_DATA((FP),\
       bitElemsAllocSize(GT_STRGRAPH_VMARK_BITS * \
-        GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1), (STRGRAPH)->__v_mark);\
+        (GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1)), \
+      (STRGRAPH)->__v_mark->store);\
   GT_STRGRAPH_SERIALIZE_DATA((FP), \
       bitElemsAllocSize(GT_STRGRAPH__OUTDEG_BITS(STRGRAPH) * \
-        GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1), (STRGRAPH)->__v_outdeg);\
+        (GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1)), \
+      (STRGRAPH)->__v_outdeg->store);\
   GT_STRGRAPH_SERIALIZE_DATA((FP), \
       bitElemsAllocSize(GT_STRGRAPH__OFFSET_BITS(STRGRAPH) * \
-        GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1), (STRGRAPH)->__v_offset)
+        (GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1)), \
+      (STRGRAPH)->__v_offset->store)
 
 #define GT_STRGRAPH_DESERIALIZE_VERTICES(STRGRAPH, FP)\
+  GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__n_vertices));\
+  GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__offset_max));\
+  GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__outdeg_max));\
+  GT_STRGRAPH__ALLOC_VMARKS(STRGRAPH);\
+  GT_STRGRAPH__ALLOC_OFFSETS(STRGRAPH);\
+  GT_STRGRAPH__ALLOC_OUTDEGS(STRGRAPH);\
   GT_STRGRAPH_DESERIALIZE_DATA((FP),\
       bitElemsAllocSize(GT_STRGRAPH_VMARK_BITS * \
-        GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1), (STRGRAPH)->__v_mark);\
+        (GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1)), \
+      (STRGRAPH)->__v_mark->store);\
   GT_STRGRAPH_DESERIALIZE_DATA((FP), \
       bitElemsAllocSize(GT_STRGRAPH__OUTDEG_BITS(STRGRAPH) * \
-        GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1), (STRGRAPH)->__v_outdeg);\
+        (GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1)), \
+      (STRGRAPH)->__v_outdeg->store);\
   GT_STRGRAPH_DESERIALIZE_DATA((FP), \
       bitElemsAllocSize(GT_STRGRAPH__OFFSET_BITS(STRGRAPH) * \
-        GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1), (STRGRAPH)->__v_offset)
+        (GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1)), \
+      (STRGRAPH)->__v_offset->store)
 
 #define GT_STRGRAPH_FREE_VERTICES(STRGRAPH)\
   bitpackarray_delete((STRGRAPH)->__v_mark);\

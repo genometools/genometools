@@ -47,6 +47,10 @@ DEFINE_HASHMAP(GtStrgraphVnum, v, GtStrgraphCount__Large, c_,
 
 #define GT_STRGRAPH__COUNT_IS_LARGE ((GtStrgraphCount__Small)255)
 
+#define GT_STRGRAPH_INIT_COUNTS(STRGRAPH)\
+  (STRGRAPH)->__small_counts = NULL;\
+  (STRGRAPH)->__large_counts = NULL
+
 #define GT_STRGRAPH_ALLOC_COUNTS(STRGRAPH, NOFVERTICES)\
   (STRGRAPH)->__small_counts = gt_calloc((size_t)(NOFVERTICES),\
       sizeof (*(STRGRAPH)->__small_counts));\

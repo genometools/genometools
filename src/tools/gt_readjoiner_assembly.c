@@ -36,7 +36,7 @@ typedef struct {
   unsigned int minmatchlength;
   unsigned int lengthcutoff, depthcutoff;
   GtStr  *readset, *buffersizearg;
-  bool errors, paths2seq, redtrans, elendistri;
+  bool errors, paths2seq, redtrans, elendistri, save, load, dot;
   unsigned int deadend, bubble, deadend_depth;
   GtOption *refoptionbuffersize;
   unsigned long buffersize;
@@ -180,6 +180,25 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -load */
+  option = gt_option_new_bool("load", "save the string graph from file",
+      &arguments->load, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -save */
+  option = gt_option_new_bool("save", "save the string graph to file",
+      &arguments->save, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -dot */
+  option = gt_option_new_bool("dot",
+      "export the string graph in GraphViz format",
+      &arguments->dot, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   gt_option_parser_set_version_func(op, gt_readjoiner_show_version);
   gt_option_parser_set_max_args(op, 0);
 
@@ -213,6 +232,12 @@ static int gt_readjoiner_assembly_arguments_check(GT_UNUSED int rest_argc,
   "pump encseq through cache"
 #define GT_READJOINER_MSG_OUTPUTCONTIGS \
   "save contig sequences"
+#define GT_READJOINER_MSG_LOADSG \
+  "load string graph from file"
+#define GT_READJOINER_MSG_SAVESG \
+  "save string graph to file"
+#define GT_READJOINER_MSG_DOTSG \
+  "export string graph in GraphViz format"
 
 static int gt_readjoiner_assembly_count_spm(const char *readset, bool eqlen,
     unsigned int minmatchlength, unsigned int nspmfiles, GtStrgraph *strgraph,
@@ -352,6 +377,83 @@ static inline void gt_readjoiner_assembly_show_current_space(const char *label)
   }
 }
 
+static int gt_readjoiner_assembly_build_graph(
+    GtReadjoinerAssemblyArguments *arguments, GtStrgraph **strgraph,
+    GtEncseq *reads, const char *readset, bool eqlen, unsigned long rlen,
+    unsigned long nreads, GtBitsequence *contained, GtLogger *default_logger,
+    GtLogger *verbose_logger, GtTimer *timer, GtError *err)
+{
+  int had_err = 0;
+  *strgraph = gt_strgraph_new(nreads);
+
+  if (arguments->minmatchlength > 0)
+    gt_logger_log(verbose_logger, "SPM length cutoff = %u",
+        arguments->minmatchlength);
+
+  had_err = gt_readjoiner_assembly_count_spm(readset, eqlen,
+      arguments->minmatchlength, arguments->nspmfiles, *strgraph, contained,
+      default_logger, err);
+  gt_readjoiner_assembly_show_current_space("(edges counted)");
+  if (gt_showtime_enabled())
+    gt_timer_show_progress(timer, GT_READJOINER_MSG_BUILDSG, stdout);
+  gt_logger_log(default_logger, GT_READJOINER_MSG_BUILDSG);
+
+  if (had_err == 0)
+  {
+    gt_assert((eqlen && rlen > 0 && reads == NULL) ||
+        (!eqlen && rlen == 0 && reads != NULL));
+    gt_strgraph_allocate_graph(*strgraph, rlen, reads);
+    gt_readjoiner_assembly_show_current_space("(graph allocated)");
+    had_err = gt_strgraph_load_spm_from_file(*strgraph,
+        (unsigned long)arguments->minmatchlength, arguments->redtrans,
+        contained, readset, arguments->nspmfiles,
+        GT_READJOINER_SUFFIX_SPMLIST, err);
+  }
+  return had_err;
+}
+
+static void gt_readjoiner_assembly_load_graph(GtStrgraph **strgraph,
+    GtEncseq *reads, const char *readset, unsigned long rlen,
+    GtLogger *default_logger, GtTimer *timer)
+{
+  *strgraph = gt_strgraph_new_from_file(reads, rlen, readset,
+      GT_READJOINER_SUFFIX_SG);
+
+  if (gt_showtime_enabled())
+    gt_timer_show_progress(timer, GT_READJOINER_MSG_LOADSG, stdout);
+  gt_logger_log(default_logger, GT_READJOINER_MSG_LOADSG);
+
+  gt_readjoiner_assembly_show_current_space("(graph loaded)");
+}
+
+static int gt_readjoiner_assembly_build_contained_reads_list(
+    GtReadjoinerAssemblyArguments *arguments, GtBitsequence **contained,
+    GtError *err)
+{
+  int had_err = 0;
+  unsigned int i;
+  unsigned long nofreads, nofreads_i;
+  GtStr *filename;
+
+  filename = gt_str_clone(arguments->readset);
+  gt_str_append_cstr(filename, ".0" GT_READJOINER_SUFFIX_CNTLIST);
+  had_err = gt_cntlist_parse(gt_str_get(filename), true, contained,
+    &nofreads, err);
+  for (i = 1U; i < arguments->nspmfiles && had_err == 0; i++)
+  {
+    gt_str_reset(filename);
+    gt_str_append_str(filename, arguments->readset);
+    gt_str_append_char(filename, '.');
+    gt_str_append_uint(filename, i);
+    gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_CNTLIST);
+    had_err = gt_cntlist_parse(gt_str_get(filename), false, contained,
+        &nofreads_i, err);
+    gt_assert(nofreads == nofreads_i);
+  }
+  gt_str_delete(filename);
+  return had_err;
+}
+
 static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     GT_UNUSED const char **argv, GT_UNUSED int parsed_args,
     void *tool_arguments, GtError *err)
@@ -378,6 +480,13 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
       stdout);
   gt_logger_log(verbose_logger, "verbose output activated");
   gt_logger_log(verbose_logger, "readset name = %s", readset);
+  if (gt_showtime_enabled())
+  {
+    timer = gt_timer_new_with_progress_description(
+        GT_READJOINER_MSG_COUNTSPM);
+    gt_timer_start(timer);
+    gt_timer_show_cpu_time_by_progress(timer);
+  }
 
   if (!arguments->paths2seq)
   {
@@ -403,25 +512,8 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     }
     else
     {
-      unsigned int i;
-      unsigned long nofreads;
-      GtStr *filename = gt_str_clone(arguments->readset);
-      gt_str_append_cstr(filename, ".0" GT_READJOINER_SUFFIX_CNTLIST);
-      had_err = gt_cntlist_parse(gt_str_get(filename), true, &contained,
-          &nofreads, err);
-      for (i = 1U; i < arguments->nspmfiles && had_err == 0; i++)
-      {
-        unsigned long nofreads_i;
-        gt_str_reset(filename);
-        gt_str_append_str(filename, arguments->readset);
-        gt_str_append_char(filename, '.');
-        gt_str_append_uint(filename, i);
-        gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_CNTLIST);
-        had_err = gt_cntlist_parse(gt_str_get(filename), false, &contained,
-            &nofreads_i, err);
-        gt_assert(nofreads == nofreads_i);
-      }
-      gt_str_delete(filename);
+      had_err = gt_readjoiner_assembly_build_contained_reads_list(
+        arguments, &contained, err);
       rlen = 0;
       gt_logger_log(verbose_logger, "read length = variable");
       gt_assert(reads != NULL);
@@ -429,37 +521,19 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
 
     if (had_err == 0)
     {
-      if (arguments->minmatchlength > 0)
-        gt_logger_log(verbose_logger, "SPM length cutoff = %u",
-            arguments->minmatchlength);
-
-      strgraph = gt_strgraph_new(nreads);
-      if (gt_showtime_enabled())
+      if (!arguments->load)
       {
-        timer = gt_timer_new_with_progress_description(
-            GT_READJOINER_MSG_COUNTSPM);
-        gt_timer_start(timer);
-        gt_timer_show_cpu_time_by_progress(timer);
+        had_err = gt_readjoiner_assembly_build_graph(arguments, &strgraph,
+            reads, readset, eqlen, rlen, nreads, contained, default_logger,
+            verbose_logger, timer, err);
       }
-      had_err = gt_readjoiner_assembly_count_spm(readset, eqlen,
-         arguments->minmatchlength, arguments->nspmfiles, strgraph, contained,
-         default_logger, err);
-      gt_readjoiner_assembly_show_current_space("(edges counted)");
-      if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_MSG_BUILDSG, stdout);
-      gt_logger_log(default_logger, GT_READJOINER_MSG_BUILDSG);
+      else
+      {
+        gt_readjoiner_assembly_load_graph(&strgraph, reads, readset, rlen,
+            default_logger, timer);
+      }
     }
-    if (had_err == 0)
-    {
-      gt_assert((eqlen && rlen > 0 && reads == NULL) ||
-          (!eqlen && rlen == 0 && reads != NULL));
-      gt_strgraph_allocate_graph(strgraph, rlen, reads);
-      gt_readjoiner_assembly_show_current_space("(graph allocated)");
-      had_err = gt_strgraph_load_spm_from_file(strgraph,
-            (unsigned long)arguments->minmatchlength, arguments->redtrans,
-            contained, readset, arguments->nspmfiles,
-            GT_READJOINER_SUFFIX_SPMLIST, err);
-    }
+
     if (had_err == 0)
     {
       if (arguments->elendistri)
@@ -496,6 +570,24 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
       had_err = gt_readjoiner_assembly_error_correction(strgraph,
           arguments->bubble, arguments->deadend, arguments->deadend_depth,
           verbose_logger);
+    }
+
+    if (had_err == 0 && arguments->save)
+    {
+      if (gt_showtime_enabled())
+        gt_timer_show_progress(timer, GT_READJOINER_MSG_SAVESG, stdout);
+      gt_logger_log(default_logger, GT_READJOINER_MSG_SAVESG);
+      gt_strgraph_show(strgraph, GT_STRGRAPH_BIN,
+          gt_str_get(arguments->readset), GT_READJOINER_SUFFIX_SG, false);
+    }
+
+    if (had_err == 0 && arguments->dot)
+    {
+      if (gt_showtime_enabled())
+        gt_timer_show_progress(timer, GT_READJOINER_MSG_DOTSG, stdout);
+      gt_logger_log(default_logger, GT_READJOINER_MSG_DOTSG);
+      gt_strgraph_show(strgraph, GT_STRGRAPH_DOT,
+          gt_str_get(arguments->readset), GT_READJOINER_SUFFIX_SG_DOT, false);
     }
 
     if (!eqlen && reads != NULL)

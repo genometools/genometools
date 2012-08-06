@@ -97,6 +97,7 @@ typedef uint64_t GtStrgraphVnum;
  * GT_STRGRAPH...           type:
  * _COUNTS_REPRESENTATION
  * _DECLARE_COUNTS
+ * _INIT_COUNTS             (necessary if counts are not used)
  * _(ALLOC|FREE)_COUNTS
  * _(GET|INC)_COUNT         GtStrgraphCount
  * _[DE]SERIALIZE_COUNTS
@@ -243,6 +244,7 @@ typedef enum {
   GT_STRGRAPH_PREPARATION,
   GT_STRGRAPH_CONSTRUCTION,
   GT_STRGRAPH_SORTED_BY_L,
+  GT_STRGRAPH_LOADED_FROM_FILE,
 } GtStrgraphState;
 
 struct GtStrgraph {
@@ -446,22 +448,14 @@ void gt_strgraph_delete(GtStrgraph *strgraph)
 static void gt_strgraph_save(const GtStrgraph *strgraph, GtFile *outfp)
 {
   gt_assert(strgraph != NULL);
-  gt_file_xwrite(outfp, (void*)&(GT_STRGRAPH_NOFVERTICES(strgraph)),
-      sizeof (GtStrgraphVnum));
   GT_STRGRAPH_SERIALIZE_VERTICES(strgraph, outfp);
   GT_STRGRAPH_SERIALIZE_EDGES(strgraph, outfp);
 }
 
 static void gt_strgraph_load(GtStrgraph *strgraph, GtFile *infp)
 {
-  GT_UNUSED int read;
-  GtStrgraphVnum n_vertices;
-  read = gt_file_xread(infp, (void*)&n_vertices, sizeof (GtStrgraphVnum));
-  gt_assert(read == (int)sizeof (GtStrgraphVnum));
-  GT_STRGRAPH_SET_NOFVERTICES(strgraph, n_vertices);
-  GT_STRGRAPH_ALLOC_VERTICES(strgraph);
+  gt_assert(strgraph != NULL);
   GT_STRGRAPH_DESERIALIZE_VERTICES(strgraph, infp);
-  GT_STRGRAPH_ALLOC_EDGES(strgraph);
   GT_STRGRAPH_DESERIALIZE_EDGES(strgraph, infp);
 }
 
@@ -525,7 +519,7 @@ static GtFile* gt_strgraph_get_file(const char *indexname, const char *suffix,
     exit(EXIT_FAILURE);
   }
   file = gt_file_open(gzipped ? GT_FILE_MODE_GZIP : GT_FILE_MODE_UNCOMPRESSED,
-      gt_str_get(filename), write ? "w" : "r", err);
+      gt_str_get(filename), write ? "wb" : "r", err);
   if (file == NULL)
   {
     fprintf(stderr, "%s", gt_error_get(err));
@@ -535,7 +529,6 @@ static GtFile* gt_strgraph_get_file(const char *indexname, const char *suffix,
   gt_error_delete(err);
   return file;
 }
-
 GtStrgraph* gt_strgraph_new_from_file(const GtEncseq *encseq,
     unsigned long fixlen, const char *indexname, const char *suffix)
 {
@@ -543,11 +536,17 @@ GtStrgraph* gt_strgraph_new_from_file(const GtEncseq *encseq,
   GtFile *infp;
 
   gt_assert(encseq != NULL || fixlen > 0);
-  strgraph = gt_malloc(sizeof (GtStrgraph));
-  strgraph->encseq = encseq;
   gt_assert(sizeof (GtStrgraphLength) >= sizeof (unsigned long) ||
      fixlen <= (unsigned long)GT_STRGRAPH_LENGTH_MAX);
+  gt_strgraph_show_limits_debug_log();
+
+  strgraph = gt_calloc((size_t)1, sizeof (GtStrgraph));
+  strgraph->state = GT_STRGRAPH_LOADED_FROM_FILE;
+  strgraph->load_self_spm = false;
+  strgraph->minmatchlen = GT_STRGRAPH_LENGTH_MAX;
+  strgraph->encseq = encseq;
   strgraph->fixlen = (GtStrgraphLength)fixlen;
+  GT_STRGRAPH_INIT_COUNTS(strgraph);
   infp = gt_strgraph_get_file(indexname, suffix, false, false);
   gt_strgraph_load(strgraph, infp);
   gt_file_delete(infp);

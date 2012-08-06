@@ -43,7 +43,7 @@ typedef uint64_t GtStrgraphLength;
 #define GT_STRGRAPH_DECLARE_EDGES\
   BitPackArray       *__e_info;\
   GtStrgraphLength   __len_max;\
-  GtStrgraphEdgenum   __n_edges
+  GtStrgraphEdgenum  __n_edges
 
 #define GT_STRGRAPH_SET_NOFEDGES(STRGRAPH, VALUE) \
   (STRGRAPH)->__n_edges = (VALUE)
@@ -68,11 +68,17 @@ typedef uint64_t GtStrgraphLength;
    GT_STRGRAPH__DEST_BITS(STRGRAPH) + \
    1 /* mark */)
 
-#define GT_STRGRAPH_ALLOC_EDGES(STRGRAPH)\
+#define GT_STRGRAPH__DETERMINE_LEN_MAX(STRGRAPH)\
   (STRGRAPH)->__len_max = gt_strgraph_longest_read(STRGRAPH) - \
     (STRGRAPH)->minmatchlen + 1;\
+
+#define GT_STRGRAPH__ALLOC_E_INFO(STRGRAPH)\
   (STRGRAPH)->__e_info = bitpackarray_new(GT_STRGRAPH__EDGE_BITS(STRGRAPH),\
       (BitOffset)GT_STRGRAPH_NOFEDGES(STRGRAPH), true)
+
+#define GT_STRGRAPH_ALLOC_EDGES(STRGRAPH)\
+  GT_STRGRAPH__DETERMINE_LEN_MAX(STRGRAPH);\
+  GT_STRGRAPH__ALLOC_E_INFO(STRGRAPH)
 
 #define GT_STRGRAPH_SIZEOF_EDGES(STRGRAPH) \
   (sizeofbitarray(GT_STRGRAPH__EDGE_BITS(STRGRAPH),\
@@ -80,16 +86,21 @@ typedef uint64_t GtStrgraphLength;
 
 #define GT_STRGRAPH_SERIALIZE_EDGES(STRGRAPH, FP)\
   do {\
+    GT_STRGRAPH_SERIALIZE_DATA((FP), 1, &((STRGRAPH)->__n_edges));\
+    GT_STRGRAPH_SERIALIZE_DATA((FP), 1, &((STRGRAPH)->__len_max));\
     GT_STRGRAPH_SERIALIZE_DATA((FP),\
         bitElemsAllocSize(GT_STRGRAPH__EDGE_BITS(STRGRAPH) * \
-          GT_STRGRAPH_NOFEDGES(STRGRAPH)), (STRGRAPH)->__e_info);\
+          GT_STRGRAPH_NOFEDGES(STRGRAPH)), (STRGRAPH)->__e_info->store);\
   } while (false)
 
 #define GT_STRGRAPH_DESERIALIZE_EDGES(STRGRAPH, FP)\
   do {\
+    GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__n_edges));\
+    GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__len_max));\
+    GT_STRGRAPH__ALLOC_E_INFO(STRGRAPH);\
     GT_STRGRAPH_DESERIALIZE_DATA((FP),\
-        bitElemsAllocSize(GT_STRGRAPH__DEST_BITS(STRGRAPH) * \
-          GT_STRGRAPH_NOFEDGES(STRGRAPH)), (STRGRAPH)->__e_info);\
+        bitElemsAllocSize(GT_STRGRAPH__EDGE_BITS(STRGRAPH) * \
+          GT_STRGRAPH_NOFEDGES(STRGRAPH)), (STRGRAPH)->__e_info->store);\
   } while (false)
 
 #define GT_STRGRAPH_SHRINK_EDGES(STRGRAPH, NEWSIZE)\

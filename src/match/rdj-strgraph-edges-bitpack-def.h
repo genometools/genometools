@@ -45,7 +45,7 @@ typedef uint64_t GtStrgraphLength;
   BitPackArray       *__e_dest;\
   GtBitsequence      *__e_mark;\
   GtStrgraphLength   __len_max;\
-  GtStrgraphEdgenum   __n_edges
+  GtStrgraphEdgenum  __n_edges
 
 #define GT_STRGRAPH_SET_NOFEDGES(STRGRAPH, VALUE) \
   (STRGRAPH)->__n_edges = (VALUE)
@@ -62,9 +62,11 @@ typedef uint64_t GtStrgraphLength;
 #define GT_STRGRAPH__EDGE_REDUCED(STRGRAPH) \
   GT_STRGRAPH__UNDEF_EDGE_LEN(STRGRAPH)
 
-#define GT_STRGRAPH__ALLOC_LENGTHSLIST(STRGRAPH)\
+#define GT_STRGRAPH__DETERMINE_LEN_MAX(STRGRAPH)\
   (STRGRAPH)->__len_max = gt_strgraph_longest_read(STRGRAPH) - \
     (STRGRAPH)->minmatchlen + 1;\
+
+#define GT_STRGRAPH__ALLOC_LENGTHSLIST(STRGRAPH)\
   (STRGRAPH)->__e_len = bitpackarray_new(GT_STRGRAPH__LEN_BITS(STRGRAPH),\
       (BitOffset)GT_STRGRAPH_NOFEDGES(STRGRAPH), true)
 
@@ -75,10 +77,14 @@ typedef uint64_t GtStrgraphLength;
   (STRGRAPH)->__e_dest = bitpackarray_new(GT_STRGRAPH__DEST_BITS(STRGRAPH),\
       (BitOffset)GT_STRGRAPH_NOFEDGES(STRGRAPH), true)
 
+#define GT_STRGRAPH__ALLOC_E_MARKS(STRGRAPH)\
+  GT_INITBITTAB((STRGRAPH)->__e_mark, GT_STRGRAPH_NOFEDGES(STRGRAPH))
+
 #define GT_STRGRAPH_ALLOC_EDGES(STRGRAPH)\
   GT_STRGRAPH__ALLOC_NEIGHBOURSLIST(STRGRAPH);\
+  GT_STRGRAPH__DETERMINE_LEN_MAX(STRGRAPH);\
   GT_STRGRAPH__ALLOC_LENGTHSLIST(STRGRAPH);\
-  GT_INITBITTAB((STRGRAPH)->__e_mark, GT_STRGRAPH_NOFEDGES(STRGRAPH))
+  GT_STRGRAPH__ALLOC_E_MARKS(STRGRAPH)
 
 #define GT_STRGRAPH__SIZEOF_LENGTHSLIST(STRGRAPH)\
   (sizeofbitarray(GT_STRGRAPH__LEN_BITS(STRGRAPH),\
@@ -104,6 +110,8 @@ typedef uint64_t GtStrgraphLength;
 
 #define GT_STRGRAPH_SERIALIZE_EDGES(STRGRAPH, FP)\
   do {\
+    GT_STRGRAPH_SERIALIZE_DATA((FP), 1, (STRGRAPH)->__n_edges);\
+    GT_STRGRAPH_SERIALIZE_DATA((FP), 1, (STRGRAPH)->__len_max);\
     GT_STRGRAPH_SERIALIZE_DATA((FP),\
         bitElemsAllocSize(GT_STRGRAPH__DEST_BITS(STRGRAPH) * \
           GT_STRGRAPH_NOFEDGES(STRGRAPH)), (STRGRAPH)->__e_dest);\
@@ -117,6 +125,11 @@ typedef uint64_t GtStrgraphLength;
 
 #define GT_STRGRAPH_DESERIALIZE_EDGES(STRGRAPH, FP)\
   do {\
+    GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, (STRGRAPH)->__n_edges);\
+    GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, (STRGRAPH)->__len_max);\
+    GT_STRGRAPH__ALLOC_NEIGHBOURSLIST(STRGRAPH);\
+    GT_STRGRAPH__ALLOC_LENGTHSLIST(STRGRAPH);\
+    GT_STRGRAPH__ALLOC_E_MARKS(STRGRAPH);\
     GT_STRGRAPH_DESERIALIZE_DATA((FP),\
         bitElemsAllocSize(GT_STRGRAPH__DEST_BITS(STRGRAPH) * \
           GT_STRGRAPH_NOFEDGES(STRGRAPH)), (STRGRAPH)->__e_dest);\
