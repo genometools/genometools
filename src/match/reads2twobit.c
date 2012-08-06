@@ -793,7 +793,8 @@ static int gt_reads2twobit_encode_twofile_paired_fastq_library(
   unsigned long qbuf_next = 0;
   bool qmode = false;
   bool file2new = true;
-  char *fgetsretval, line2[GT_READS2TWOBIT_READBUFFER_SIZE];
+  char *fgetsretval = NULL,
+       line2[GT_READS2TWOBIT_READBUFFER_SIZE];
   line2[0] = '\0';
   state->seqlen = 0;
   do {
