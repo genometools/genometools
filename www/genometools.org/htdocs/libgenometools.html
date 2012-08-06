@@ -6897,7 +6897,8 @@ Deletes a <code>GtTextWidthCalculator</code> instance.
 <hr>
 <a name="gt_text_width_calculator_cairo_new"></a>
 
-<code>GtTextWidthCalculator*  gt_text_width_calculator_cairo_new(cairo_t*, GtStyle*)</code>
+<code>GtTextWidthCalculator*  gt_text_width_calculator_cairo_new(cairo_t*, GtStyle*,
+                                                          GtError*)</code>
 <p>
 Creates a new <code>GtTextWidthCalculatorCairo</code> object for the given context
    using the text size options given in the <code>GtStyle</code>. If the <code>GtStyle</code> is NULL,
@@ -9732,7 +9733,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-07-24
+Last update: 2012-08-06
 </div>
 </div>
 <!-- Piwik -->
