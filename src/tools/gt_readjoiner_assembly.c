@@ -277,7 +277,7 @@ static int gt_readjoiner_assembly_error_correction(GtStrgraph *strgraph,
         "%lu", i + 1, retval);
   }
   gt_logger_log(verbose_logger,
-      "removed dead-end path edges [%u rounds] = %lu", i, retval);
+      "removed dead-end path edges [%u rounds] = %lu", i, retval_sum);
   return 0;
 }
 

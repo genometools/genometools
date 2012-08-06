@@ -311,7 +311,7 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
         total_nof_irr_spm +=
           gt_spmfind_eqlen_nof_irr_spm(state_table[threadcount]);
         total_nof_trans_spm +=
-          gt_spmfind_eqlen_nof_irr_spm(state_table[threadcount]);
+          gt_spmfind_eqlen_nof_trans_spm(state_table[threadcount]);
         gt_spmfind_eqlen_state_delete(state_table[threadcount]);
       }
       gt_free(state_table);
@@ -345,9 +345,9 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
       {
         gt_spmfind_varlen_state_delete(state_table[threadcount]);
         total_nof_irr_spm +=
-          gt_spmfind_eqlen_nof_irr_spm(state_table[threadcount]);
+          gt_spmfind_varlen_nof_irr_spm(state_table[threadcount]);
         total_nof_trans_spm +=
-          gt_spmfind_eqlen_nof_irr_spm(state_table[threadcount]);
+          gt_spmfind_varlen_nof_trans_spm(state_table[threadcount]);
       }
       gt_free(state_table);
     }
@@ -356,6 +356,10 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
   {
     gt_logger_log(default_logger, "number of %ssuffix-prefix matches = %lu",
         arguments->elimtrans ? "irreducible " : "", total_nof_irr_spm);
+    gt_logger_log(default_logger, "average %sSPM/read = %.2f",
+        arguments->elimtrans ? "irreducible " : "", (float)total_nof_irr_spm /
+        (arguments->singlestrand ? gt_encseq_num_of_sequences(encseq)
+        : GT_DIV2(gt_encseq_num_of_sequences(encseq))));
     if (arguments->elimtrans)
       gt_logger_log(default_logger, "number of transitive suffix-prefix "
           "matches = %lu", total_nof_trans_spm);
