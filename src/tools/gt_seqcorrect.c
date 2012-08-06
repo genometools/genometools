@@ -26,6 +26,7 @@
 #include "core/intbits.h"
 #include "core/minmax.h"
 #include "core/showtime.h"
+#include "core/undef_api.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
 #endif
@@ -66,6 +67,9 @@ typedef struct
         *indexname;
   GtOption *refoptionmemlimit;
   GtStrArray *db;
+  bool phred64;
+  unsigned long maxlow;
+  unsigned int lowqual;
 } GtSeqcorrectArguments;
 
 static void* gt_seqcorrect_arguments_new(void)
@@ -99,7 +103,7 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   GtSeqcorrectArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *optionparts, *optionmemlimit, *q_option, *v_option,
-           *db_option;
+           *db_option, *maxlow_option;
 
   gt_assert(arguments);
 
@@ -108,8 +112,8 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
       "-k <kmersize> [option ...]", "K-mer based sequence correction.");
 
   /* -db */
-  db_option = gt_option_new_filename_array("db","specify the input "
-      "fasta files", arguments->db);
+  db_option = gt_option_new_filename_array("db",
+      GT_READS2TWOBIT_LIBSPEC_HELPMSG, arguments->db);
   gt_option_hide_default(db_option);
   gt_option_parser_add_option(op, db_option);
 
@@ -181,6 +185,29 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
       &arguments->quiet, false);
   gt_option_exclude(q_option, v_option);
   gt_option_parser_add_option(op, q_option);
+
+  /* -maxlow */
+  maxlow_option = gt_option_new_ulong("maxlow",
+      "maximal number of low-quality positions in a read\n"
+      "default: infinite",
+      &arguments->maxlow, GT_UNDEF_ULONG);
+  gt_option_hide_default(maxlow_option);
+  gt_option_is_extended_option(maxlow_option);
+  gt_option_parser_add_option(op, maxlow_option);
+
+  /* -lowqual */
+  option = gt_option_new_uint_max("lowqual",
+      "maximal quality for a position to be considered low-quality",
+      &arguments->lowqual, 3U, 127U);
+  gt_option_is_extended_option(option);
+  gt_option_imply(option, maxlow_option);
+  gt_option_parser_add_option(op, option);
+
+  /* -phred64 */
+  option = gt_option_new_bool("phred64", "use phred64 scores for FastQ format",
+      &arguments->phred64, false);
+  gt_option_is_extended_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* -usemaxdepth */
   option = gt_option_new_bool("usemaxdepth", "use maxdepth in sortremaining",
@@ -308,6 +335,7 @@ static int gt_seqcorrect_apply_corrections(GtEncseq *encseq,
   editor = gt_twobitenc_editor_new(encseq, indexname, err);
   if (editor == NULL)
     haserr = true;
+  gt_log_log("number of correction lists: %u", threads);
   for (threadcount = 0; !haserr && threadcount < threads; threadcount++)
   {
     FILE *corrections;
@@ -317,6 +345,8 @@ static int gt_seqcorrect_apply_corrections(GtEncseq *encseq,
     gt_str_append_uint(filename, threadcount);
     gt_str_append_cstr(filename, GT_SEQCORRECT_FILESUFFIX);
     corrections = gt_fa_fopen(gt_str_get(filename), "r", err);
+    gt_log_log("apply corrections list %s.%u.%s", indexname, threadcount,
+        GT_SEQCORRECT_FILESUFFIX);
     if (corrections == NULL)
       haserr = true;
     else
@@ -371,19 +401,33 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
   gt_logger_log(default_logger, "gt seqcorrect");
   verbose_logger =
     gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
+  gt_logger_log(verbose_logger, "verbose output enabled");
 
   if (gt_str_array_size(arguments->db) != 0)
   {
     GtReads2Twobit *r2t;
     unsigned long i;
+    bool autoindexname = false;
+    gt_logger_log(verbose_logger, "input is a list of libraries");
     if (gt_str_length(arguments->indexname) == 0)
     {
+      autoindexname = true;
       gt_str_append_cstr(arguments->indexname,
           gt_str_array_get(arguments->db, 0));
-      gt_logger_log(verbose_logger, "indexname = %s",
-          gt_str_get(arguments->indexname));
     }
+    gt_logger_log(verbose_logger, "indexname: %s [%s]",
+          gt_str_get(arguments->indexname), autoindexname ?
+          "first input library" : "user-specified");
+
     r2t = gt_reads2twobit_new(arguments->indexname);
+
+    if (arguments->phred64)
+      gt_reads2twobit_use_phred64(r2t);
+
+    if (arguments->maxlow != GT_UNDEF_ULONG)
+      gt_reads2twobit_set_quality_filter(r2t, arguments->maxlow,
+          (char)arguments->lowqual);
+
     for (i = 0; i < gt_str_array_size(arguments->db) && !haserr; i++)
     {
       GtStr *dbentry = gt_str_array_get_str(arguments->db, i);
@@ -395,10 +439,61 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
       if (gt_reads2twobit_encode(r2t, err) != 0)
         haserr = true;
     }
-    gt_reads2twobit_delete(r2t);
     gt_assert(gt_str_length(arguments->encseqinput) == 0);
     gt_str_append_cstr(arguments->encseqinput,
         gt_str_get(arguments->indexname));
+    if (!haserr)
+    {
+      unsigned long nofreads_valid, nofreads_invalid, nofreads_input,
+                    tlen_valid;
+      bool varlen;
+      nofreads_valid = gt_reads2twobit_nofseqs(r2t);
+      nofreads_invalid = gt_reads2twobit_nof_invalid_seqs(r2t);
+      nofreads_input = nofreads_valid + nofreads_invalid;
+      tlen_valid = gt_reads2twobit_total_seqlength(r2t) -
+        gt_reads2twobit_nofseqs(r2t);
+
+      gt_logger_log(default_logger, "number of reads in original read set "
+          "= %lu", nofreads_input);
+
+      varlen = (gt_reads2twobit_seqlen_eqlen(r2t) == 0);
+      if (varlen)
+        gt_logger_log(verbose_logger, "read length = variable [%lu..%lu]",
+            gt_reads2twobit_seqlen_min(r2t), gt_reads2twobit_seqlen_max(r2t));
+      else
+        gt_logger_log(verbose_logger, "read length = %lu",
+            gt_reads2twobit_seqlen_eqlen(r2t) - 1UL);
+
+      gt_logger_log(verbose_logger, "total length of original read set = %lu",
+          tlen_valid + gt_reads2twobit_invalid_seqs_totallength(r2t));
+      gt_logger_log(verbose_logger, "low-quality reads = %lu "
+          "[%.2f %% of input]", nofreads_invalid, (float)nofreads_invalid *
+          100 / (float)nofreads_input);
+      if (!arguments->verbose)
+        gt_logger_log(default_logger, "low-quality reads = %lu",
+            nofreads_invalid);
+      if (!haserr)
+      {
+        if (gt_reads2twobit_write_encseq(r2t, err) != 0)
+          haserr = true;
+        if (!haserr)
+        {
+          gt_logger_log(verbose_logger,
+              "number of reads in output read set = %lu", nofreads_valid);
+          gt_logger_log(verbose_logger,
+              "total length of output read set = %lu", tlen_valid);
+          gt_logger_log(verbose_logger, "read set saved as GtEncseq: %s.%s",
+              gt_str_get(arguments->indexname), varlen ?
+              "(esq|ssp)" : "esq");
+        }
+      }
+    }
+    gt_reads2twobit_delete(r2t);
+  }
+  else
+  {
+    gt_logger_log(verbose_logger, "input is an encseq: %s",
+        gt_str_get(arguments->encseqinput));
   }
   if (!haserr)
   {

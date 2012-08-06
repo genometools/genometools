@@ -39,7 +39,7 @@ typedef struct {
   /* rdj-radixsort test */
   bool testrs, testrs_print;
   unsigned long testrs_depth, testrs_maxdepth, maxlow;
-  unsigned lowqual;
+  unsigned int lowqual;
 } GtReadjoinerPrefilterArguments;
 
 static void* gt_readjoiner_prefilter_arguments_new(void)
@@ -88,14 +88,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
 
   /* -db */
   db_option = gt_option_new_filename_array("db",
-      "specify a list of input libraries (Fasta/FastQ); "
-      "for single-end libraries use the filename; "
-      "for paired-end libraries with reads interleaved in a single file "
-      "use the notation <file>:<insertlength>[,<stdev>] "
-      "(the stdev may be omitted); for paired-end "
-      "with reads in two files use the notation "
-      "<file_f>:<file_r>:<insertlength>[,<stdev>]",
-      arguments->db);
+      GT_READS2TWOBIT_LIBSPEC_HELPMSG, arguments->db);
   gt_option_hide_default(db_option);
   gt_option_is_mandatory(db_option);
   gt_option_parser_add_option(op, db_option);

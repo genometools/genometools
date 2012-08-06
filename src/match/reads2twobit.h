@@ -136,4 +136,12 @@ unsigned long *gt_reads2twobit_export_seppos(const GtReads2Twobit *r2t);
 int gt_reads2twobit_write_libraries_table(const GtReads2Twobit *r2t,
     char *path, GtError *err);
 
+#define GT_READS2TWOBIT_LIBSPEC_HELPMSG \
+  "specify a list of input libraries (Fasta/FastQ); for single-end " \
+  "libraries use the filename (which is not allowed to contain ':' " \
+  "symbols); for paired-end libraries with reads interleaved (f,r,f,r,...) "\
+  "in a single file use the notation <filename>:<insertlength>[,<stdev>] " \
+  "(stdev may be omitted); for paired-end with reads in two files (f, r) " \
+  "use the notation <file_f>:<file_r>:<insertlength>[,<stdev>]"
+
 #endif
