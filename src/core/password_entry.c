@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/termios.h>
+#include <termios.h>
 #include <core/password_entry.h>
 #include <core/unused_api.h>
 
