@@ -17,6 +17,7 @@
 
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include "core/dynalloc.h"
 #include "core/eansi.h"
 #include "core/ebzlib.h"
@@ -297,6 +298,15 @@ void gt_fa_xbzclose(BZFILE *stream)
 
 static const char genometools_tmptemplate[] = "/genometools.XXXXXXXXXX";
 
+static inline const char* gt_fa_try_tmpdir(const char *dirname)
+{
+  if (!dirname)
+    return NULL;
+  if (access(dirname, R_OK | W_OK | X_OK) == 0)
+    return dirname;
+  return NULL;
+}
+
 FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
                              const char *src_file, int src_line)
 {
@@ -315,9 +325,22 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
     else
       template = gt_str_new();
     {
-      const char *tmpdir = getenv("TMPDIR");
+      const char *tmpdir = NULL;
       if (!tmpdir)
-        tmpdir = P_tmpdir;
+        tmpdir = gt_fa_try_tmpdir(getenv("TMPDIR"));
+      if (!tmpdir)
+        tmpdir = gt_fa_try_tmpdir(getenv("TMP"));
+      if (!tmpdir)
+        tmpdir = gt_fa_try_tmpdir(P_tmpdir);
+      if (!tmpdir)
+        tmpdir = gt_fa_try_tmpdir("/tmp");
+      if (!tmpdir)
+        tmpdir = gt_fa_try_tmpdir("/var/tmp");
+      if (!tmpdir)
+        tmpdir = gt_fa_try_tmpdir("/usr/tmp");
+      if (!tmpdir)
+        tmpdir = gt_fa_try_tmpdir(".");
+      gt_assert(tmpdir);
       gt_str_set(template, tmpdir);
     }
     gt_str_append_cstr(template, genometools_tmptemplate);
