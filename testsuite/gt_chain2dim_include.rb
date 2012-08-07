@@ -16,23 +16,18 @@ def runchain2dim(args,matchfile)
   end
 end
 
-def runchain2dimvschain2dim(args,matchfile)
-  Name "gt chain2dim #{args}"
-  Keywords "gt_chain2dim"
-  Test do
-    run "rf2
-    run_test "#{$bin}gt chain2dim -m #{matchfile} " + args
-    run "cp #{last_stdout} gtchain.out"
-    run "/Users/stefan/bin-ops/i686-apple-darwin/chain2dim.x " + args + 
-        " #{matchfile}"
-    run "cp #{last_stdout} vschain.out"
-    run "cmp -s gtchain.out vschain.out"
-  end
-end
-
 def runchain2dimall(params,matchfile)
   params.each do |args|
     runchain2dim(args,matchfile)
+  end
+end
+
+Name "gt chain2dim all"
+Keywords "gt_chain2dim all"
+Test do
+  [283,298,304,753,758,759,763,945,1815,3709,3710].each do |lines|
+    run "head -n #{lines} #{$testdata}ecolicmp250.of | sed -e 's/[0-9]*$/1/'"
+    run_test "#{$bin}gt chain2dim -global all -m #{last_stdout}"
   end
 end
 
