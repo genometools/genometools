@@ -61,17 +61,18 @@ static void gt_aligned_segment_fetch_s_and_q_from_sa(GtAlignedSegment *as,
     GtSamAlignment *sa)
 {
   unsigned long alen = as->alen, slen = gt_sam_alignment_read_length(sa);
-  char *s = as->s + (alen - slen), *q = as->q + (alen - slen);
+  GtUchar *s = (GtUchar*) (as->s + (alen - slen)),
+          *q = (GtUchar*) (as->q + (alen - slen));
   GtAlphabet *alpha;
-  gt_sam_alignment_sequence_external_buffer(sa, (GtUchar**)(&s), &alen);
+  gt_sam_alignment_sequence_external_buffer(sa, &s, &alen);
   gt_assert(as->alen == alen);
-  gt_assert(s == as->s + (alen - slen));
-  gt_sam_alignment_qualitystring_external_buffer(sa, (GtUchar**)(&q),
+  gt_assert(s == (GtUchar*) (as->s + (alen - slen)));
+  gt_sam_alignment_qualitystring_external_buffer(sa, &q,
       &alen);
   gt_assert(as->alen == alen);
-  gt_assert(q == as->q + (alen - slen));
+  gt_assert(q == (GtUchar*) (as->q + (alen - slen)));
   alpha = gt_alphabet_new_dna();
-  gt_alphabet_decode_seq_to_cstr(alpha, s, (GtUchar*)s, slen);
+  gt_alphabet_decode_seq_to_cstr(alpha, (char*) s, s, slen);
   gt_alphabet_delete(alpha);
 }
 

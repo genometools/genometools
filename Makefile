@@ -453,7 +453,10 @@ ifneq ($(with-sqlite),no)
     OVERRIDELIBS += lib/libsqlite.a
   endif
   EXP_CPPFLAGS += -DHAVE_SQLITE -DSQLITE_THREADSAFE=1
-  EXP_LDLIBS += -lpthread -ldl
+  EXP_LDLIBS += -lpthread
+  ifneq ($(SYSTEM),FreeBSD)
+    EXP_LDLIBS += -ldl
+  endif
   STEST_FLAGS += -sqlite
 endif
 

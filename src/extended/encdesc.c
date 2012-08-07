@@ -1198,7 +1198,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
            bits_to_read;
   long tmp = 0;
   unsigned long cur_field_num,
-                fieldlen,
+                fieldlen = 0,
                 idx,
                 numoffields,
                 nearestsample,

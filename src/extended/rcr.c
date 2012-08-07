@@ -1920,7 +1920,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
                 l,
                 prev_readpos = 0,
                 readlength,
-                readpos,
+                readpos = 0,
                 refnum = 0,
                 rel_readpos,
                 seqstart = 0,

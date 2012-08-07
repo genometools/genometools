@@ -56,7 +56,7 @@ static inline void gt_asqg_writer_show_vertex_line(GtFile *file,
 int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
 {
   const GtTwobitencoding *nextencoded;
-  GtTwobitencoding code;
+  GtTwobitencoding code = 0;
   unsigned long seqnum = 0, nofseqs = gt_encseq_num_of_sequences(aw->encseq),
                 pos = 0, next_stop, i,
                 tlen = gt_encseq_total_length(aw->encseq), charsincode = 0;

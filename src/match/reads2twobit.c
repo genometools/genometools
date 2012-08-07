@@ -519,7 +519,7 @@ static int gt_reads2twobit_encode_unpaired_fastq_library(
   int had_err = 0;
   unsigned long qbuf_next = 0;
   bool qmode = false;
-  char *fgetsretval;
+  char *fgetsretval = NULL;
   state->seqlen = 0;
   do {
     if (!qmode)
@@ -569,7 +569,7 @@ static void gt_reads2twobit_encode_unpaired_fasta_library(
     GtReads2TwobitEncodeState *state, GtReadsLibraryInfo *rli, FILE *file,
     char *line)
 {
-  char *fgetsretval;
+  char *fgetsretval = NULL;
   do {
     if (line[0] == '>')
     {
@@ -895,7 +895,7 @@ static void gt_reads2twobit_encode_interleaved_paired_fasta_library(
     GtReads2TwobitEncodeState *state, GtReadsLibraryInfo *rli, FILE *file,
     char *line)
 {
-  char *fgetsretval;
+  char *fgetsretval = NULL;
   bool processing_mate = true;
   do {
     if (line[0] == '>')
@@ -932,7 +932,8 @@ static void gt_reads2twobit_encode_twofile_paired_fasta_library(
     GtReads2TwobitEncodeState *state, GtReadsLibraryInfo *rli, FILE *file1,
     FILE *file2, char *line1)
 {
-  char *fgetsretval, line2[GT_READS2TWOBIT_READBUFFER_SIZE];
+  char *fgetsretval = NULL,
+       line2[GT_READS2TWOBIT_READBUFFER_SIZE];
   line2[0] = '\0';
   do {
     if (line1[0] == '>')

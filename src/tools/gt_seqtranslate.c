@@ -167,12 +167,12 @@ static int gt_seqtranslate_runner(int argc, const char **argv, int parsed_args,
       had_err = -1;
   }
   if (!had_err) {
-    char *sequence,
-         *desc;
+    char *desc;
+    const GtUchar *sequence;
     unsigned long len;
     while (!had_err && (rval = gt_seqiterator_next(si,
-                                                   (const GtUchar**) &sequence,
-                                                    &len, &desc, err))) {
+                                                   &sequence,
+                                                   &len, &desc, err))) {
       if (rval < 0) {
         had_err = -1;
         break;
@@ -181,10 +181,11 @@ static int gt_seqtranslate_runner(int argc, const char **argv, int parsed_args,
         gt_warning("sequence '%s' is shorter than codon length of %d, skipping",
                    desc, GT_CODON_LENGTH);
       } else {
-        had_err = gt_seqtranslate_do_translation(arguments, sequence, len, desc,
-                                              translations, false, err);
+        had_err = gt_seqtranslate_do_translation(arguments, (char*) sequence,
+                                                 len, desc,
+                                                 translations, false, err);
         if (!had_err && arguments->reverse) {
-          char *revseq = gt_cstr_dup_nt(sequence, len);
+          char *revseq = gt_cstr_dup_nt((char*) sequence, len);
           had_err = gt_reverse_complement(revseq, len, err);
           if (!had_err) {
             had_err = gt_seqtranslate_do_translation(arguments, revseq, len,
