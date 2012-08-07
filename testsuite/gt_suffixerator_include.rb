@@ -421,6 +421,23 @@ AAFILE    = {:filename => "#{$testdata}trembl.faa",
                   "ushort" => "as the sequence is not DNA",
                   "uint32" => "as the sequence is not DNA"}}
 
+excludefiles = ["RandomN.fna","Small.fna","Verysmall.fna"]
+
+Name "gt sfxmap ownencseq"
+Keywords "gt_suffixerator ownencseq"
+Test do
+  all_fastafiles.each do |filename|
+    if not excludefiles.member?(filename)
+      run "#{$scriptsdir}rmwildcard.rb #{$testdata}#{filename}"
+      run_test "#{$bin}/gt suffixerator -db #{last_stdout} -dna -v -tis -sds no -des no -md5 no -indexname sfx"
+      run_test "#{$bin}/gt dev sfxmap -ownencseq2file -esa sfx"
+      if File.exists?("sfx.ssp")
+        run "cmp -s sfx.ssp sfx2.ssp"
+      end
+    end
+  end
+end
+
 SATTESTFILES = [EQLENDNAFILE, DNAFILE, EQLENAAFILE, AAFILE]
 
 SATTESTFILES.each do |file|
