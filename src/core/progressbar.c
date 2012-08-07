@@ -21,7 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <sys/termios.h>
+#include <termios.h>
 #include "core/assert_api.h"
 #include "core/process.h"
 #include "core/unused_api.h"
