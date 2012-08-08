@@ -281,11 +281,6 @@ static int gt_encseq2spm_arguments_check(int rest_argc,
     {
       haserr = true;
     }
-    if (!haserr && !gt_ma_bookkeeping_enabled()) {
-      gt_error_set(err, "option '-memlimit' requires "
-                        "GT_MEM_BOOKKEEPING=on");
-      haserr = true;
-    }
   }
   if (!haserr && gt_option_is_set(arguments->refoptionphase2extra))
   {
