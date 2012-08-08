@@ -36,7 +36,7 @@ typedef struct {
   unsigned int minmatchlength;
   unsigned int lengthcutoff, depthcutoff;
   GtStr  *readset, *buffersizearg;
-  bool errors, paths2seq, redtrans, elendistri, save, load, dot;
+  bool errors, paths2seq, redtrans, save, load, vd;
   unsigned int deadend, bubble, deadend_depth;
   GtOption *refoptionbuffersize;
   unsigned long buffersize;
@@ -163,6 +163,12 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
   gt_option_parser_add_option(op, option);
   arguments->refoptionbuffersize = gt_option_ref(option);
 
+  /* -vd */
+  option = gt_option_new_bool("vd", "use verbose descriptions for contigs",
+      &arguments->vd, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -v */
   v_option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, v_option);
@@ -173,13 +179,6 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
   gt_option_parser_add_option(op, q_option);
   gt_option_exclude(q_option, v_option);
 
-  /* -elendistri */
-  option = gt_option_new_bool("elendistri", "output edges lenght"
-      "distribution to <indexname>" GT_READJOINER_SUFFIX_ELEN_DISTRI,
-      &arguments->elendistri, false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
-
   /* -load */
   option = gt_option_new_bool("load", "save the string graph from file",
       &arguments->load, false);
@@ -189,13 +188,6 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
   /* -save */
   option = gt_option_new_bool("save", "save the string graph to file",
       &arguments->save, false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
-
-  /* -dot */
-  option = gt_option_new_bool("dot",
-      "export the string graph in GraphViz format",
-      &arguments->dot, false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -218,26 +210,24 @@ static int gt_readjoiner_assembly_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-#define GT_READJOINER_MSG_COUNTSPM \
+#define GT_READJOINER_ASSEMBLY_MSG_COUNTSPM \
   "calculate edges space for each vertex"
-#define GT_READJOINER_MSG_BUILDSG \
+#define GT_READJOINER_ASSEMBLY_MSG_BUILDSG \
   "build string graph"
-#define GT_READJOINER_MSG_REDTRANS \
+#define GT_READJOINER_ASSEMBLY_MSG_REDTRANS \
   "reduce transitive edges"
-#define GT_READJOINER_MSG_CLEANSG \
+#define GT_READJOINER_ASSEMBLY_MSG_CLEANSG \
   "correct sequencing errors"
-#define GT_READJOINER_MSG_TRAVERSESG \
+#define GT_READJOINER_ASSEMBLY_MSG_TRAVERSESG \
   "save contig paths"
-#define GT_READJOINER_MSG_PUMPENCSEQ \
+#define GT_READJOINER_ASSEMBLY_MSG_PUMPENCSEQ \
   "pump encseq through cache"
-#define GT_READJOINER_MSG_OUTPUTCONTIGS \
+#define GT_READJOINER_ASSEMBLY_MSG_OUTPUTCONTIGS \
   "save contig sequences"
-#define GT_READJOINER_MSG_LOADSG \
+#define GT_READJOINER_ASSEMBLY_MSG_LOADSG \
   "load string graph from file"
-#define GT_READJOINER_MSG_SAVESG \
+#define GT_READJOINER_ASSEMBLY_MSG_SAVESG \
   "save string graph to file"
-#define GT_READJOINER_MSG_DOTSG \
-  "export string graph in GraphViz format"
 
 static int gt_readjoiner_assembly_count_spm(const char *readset, bool eqlen,
     unsigned int minmatchlength, unsigned int nspmfiles, GtStrgraph *strgraph,
@@ -247,7 +237,7 @@ static int gt_readjoiner_assembly_count_spm(const char *readset, bool eqlen,
   int had_err = 0;
   unsigned int i;
   GtStr *filename = gt_str_new();
-  gt_logger_log(default_logger, GT_READJOINER_MSG_COUNTSPM);
+  gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_COUNTSPM);
   if (!eqlen)
   {
     skipdata.out.e.proc = gt_spmproc_strgraph_count;
@@ -326,7 +316,7 @@ static void gt_readjoiner_assembly_pump_encseq_through_cache(
 }
 
 static int gt_readjoiner_assembly_paths2seq(const char *readset,
-    unsigned long lengthcutoff, unsigned long buffersize,
+    unsigned long lengthcutoff, bool showpaths, unsigned long buffersize,
     GtLogger *default_logger, GtTimer **timer, GtError *err)
 {
   int had_err;
@@ -339,14 +329,15 @@ static int gt_readjoiner_assembly_paths2seq(const char *readset,
     if (*timer == NULL) /* paths2seq */
     {
       *timer = gt_timer_new_with_progress_description(
-          GT_READJOINER_MSG_PUMPENCSEQ);
+          GT_READJOINER_ASSEMBLY_MSG_PUMPENCSEQ);
       gt_timer_show_cpu_time_by_progress(*timer);
       gt_timer_start(*timer);
     }
     else
-      gt_timer_show_progress(*timer, GT_READJOINER_MSG_PUMPENCSEQ, stdout);
+      gt_timer_show_progress(*timer, GT_READJOINER_ASSEMBLY_MSG_PUMPENCSEQ,
+          stdout);
   }
-  gt_logger_log(default_logger, GT_READJOINER_MSG_PUMPENCSEQ);
+  gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_PUMPENCSEQ);
   gt_encseq_loader_drop_description_support(el);
   gt_encseq_loader_disable_autosupport(el);
   gt_encseq_loader_mirror(el);
@@ -354,10 +345,11 @@ static int gt_readjoiner_assembly_paths2seq(const char *readset,
   gt_assert(reads != NULL);
   gt_readjoiner_assembly_pump_encseq_through_cache(reads);
   if (gt_showtime_enabled())
-    gt_timer_show_progress(*timer, GT_READJOINER_MSG_OUTPUTCONTIGS, stdout);
-  gt_logger_log(default_logger, GT_READJOINER_MSG_OUTPUTCONTIGS);
+    gt_timer_show_progress(*timer, GT_READJOINER_ASSEMBLY_MSG_OUTPUTCONTIGS,
+        stdout);
+  gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_OUTPUTCONTIGS);
   had_err = gt_contigpaths_to_fasta(readset, GT_READJOINER_SUFFIX_CONTIG_PATHS,
-      GT_READJOINER_SUFFIX_CONTIGS, reads, lengthcutoff, false,
+      GT_READJOINER_SUFFIX_CONTIGS, reads, lengthcutoff, showpaths,
       (size_t)buffersize, default_logger, err);
   gt_encseq_delete(reads);
   gt_encseq_loader_delete(el);
@@ -395,8 +387,8 @@ static int gt_readjoiner_assembly_build_graph(
       default_logger, err);
   gt_readjoiner_assembly_show_current_space("(edges counted)");
   if (gt_showtime_enabled())
-    gt_timer_show_progress(timer, GT_READJOINER_MSG_BUILDSG, stdout);
-  gt_logger_log(default_logger, GT_READJOINER_MSG_BUILDSG);
+    gt_timer_show_progress(timer, GT_READJOINER_ASSEMBLY_MSG_BUILDSG, stdout);
+  gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_BUILDSG);
 
   if (had_err == 0)
   {
@@ -420,8 +412,8 @@ static void gt_readjoiner_assembly_load_graph(GtStrgraph **strgraph,
       GT_READJOINER_SUFFIX_SG);
 
   if (gt_showtime_enabled())
-    gt_timer_show_progress(timer, GT_READJOINER_MSG_LOADSG, stdout);
-  gt_logger_log(default_logger, GT_READJOINER_MSG_LOADSG);
+    gt_timer_show_progress(timer, GT_READJOINER_ASSEMBLY_MSG_LOADSG, stdout);
+  gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_LOADSG);
 
   gt_readjoiner_assembly_show_current_space("(graph loaded)");
 }
@@ -483,7 +475,7 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
   if (gt_showtime_enabled())
   {
     timer = gt_timer_new_with_progress_description(
-        GT_READJOINER_MSG_COUNTSPM);
+        GT_READJOINER_ASSEMBLY_MSG_COUNTSPM);
     gt_timer_start(timer);
     gt_timer_show_cpu_time_by_progress(timer);
   }
@@ -534,15 +526,6 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
       }
     }
 
-    if (had_err == 0)
-    {
-      if (arguments->elendistri)
-        gt_strgraph_show_edge_lengths_distribution(strgraph, readset,
-            GT_READJOINER_SUFFIX_ELEN_DISTRI);
-      gt_strgraph_log_stats(strgraph, verbose_logger);
-      gt_strgraph_log_space(strgraph);
-    }
-
     if (!eqlen && reads != NULL && !arguments->errors)
     {
       gt_encseq_delete(reads);
@@ -554,7 +537,8 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     if (had_err == 0 && arguments->redtrans)
     {
       if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_MSG_REDTRANS, stdout);
+        gt_timer_show_progress(timer, GT_READJOINER_ASSEMBLY_MSG_REDTRANS,
+            stdout);
       gt_strgraph_sort_edges_by_len(strgraph, false);
       (void)gt_strgraph_redtrans(strgraph, false);
       (void)gt_strgraph_redself(strgraph, false);
@@ -565,8 +549,9 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     if (had_err == 0 && arguments->errors)
     {
       if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_MSG_CLEANSG, stdout);
-      gt_logger_log(default_logger, GT_READJOINER_MSG_CLEANSG);
+        gt_timer_show_progress(timer, GT_READJOINER_ASSEMBLY_MSG_CLEANSG,
+            stdout);
+      gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_CLEANSG);
       had_err = gt_readjoiner_assembly_error_correction(strgraph,
           arguments->bubble, arguments->deadend, arguments->deadend_depth,
           verbose_logger);
@@ -575,19 +560,11 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     if (had_err == 0 && arguments->save)
     {
       if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_MSG_SAVESG, stdout);
-      gt_logger_log(default_logger, GT_READJOINER_MSG_SAVESG);
+        gt_timer_show_progress(timer, GT_READJOINER_ASSEMBLY_MSG_SAVESG,
+            stdout);
+      gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_SAVESG);
       gt_strgraph_show(strgraph, GT_STRGRAPH_BIN,
           gt_str_get(arguments->readset), GT_READJOINER_SUFFIX_SG, false);
-    }
-
-    if (had_err == 0 && arguments->dot)
-    {
-      if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_MSG_DOTSG, stdout);
-      gt_logger_log(default_logger, GT_READJOINER_MSG_DOTSG);
-      gt_strgraph_show(strgraph, GT_STRGRAPH_DOT,
-          gt_str_get(arguments->readset), GT_READJOINER_SUFFIX_SG_DOT, false);
     }
 
     if (!eqlen && reads != NULL)
@@ -601,11 +578,12 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     if (had_err == 0)
     {
       if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_MSG_TRAVERSESG, stdout);
-      gt_logger_log(default_logger, GT_READJOINER_MSG_TRAVERSESG);
+        gt_timer_show_progress(timer, GT_READJOINER_ASSEMBLY_MSG_TRAVERSESG,
+            stdout);
+      gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_TRAVERSESG);
       gt_readjoiner_assembly_show_current_space("(before traversal)");
       gt_strgraph_spell(strgraph, (unsigned long)arguments->depthcutoff,
-          (unsigned long)arguments->lengthcutoff, false, readset,
+          (unsigned long)arguments->lengthcutoff, arguments->vd, readset,
           GT_READJOINER_SUFFIX_CONTIG_PATHS, NULL, true, false,
           verbose_logger);
     }
@@ -622,7 +600,7 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
   {
     gt_readjoiner_assembly_show_current_space("(before paths2seq)");
     had_err = gt_readjoiner_assembly_paths2seq(readset,
-        (unsigned long)arguments->lengthcutoff,
+        (unsigned long)arguments->lengthcutoff, arguments->vd,
         arguments->buffersize, default_logger, &timer, err);
   }
 

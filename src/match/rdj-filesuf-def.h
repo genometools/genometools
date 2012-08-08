@@ -38,37 +38,20 @@
 
 #define GT_READJOINER_SUFFIX_CNTLIST           ".cnt"
 #define GT_READJOINER_SUFFIX_SPMCOUNTS         ".nofspm"
-#define GT_READJOINER_SUFFIX_SPMCOUNTS_DISTRI  ".nofspm.distri"
-#define GT_READJOINER_SUFFIX_ELEN_DISTRI       ".elen.distri"
+#define GT_READJOINER_SUFFIX_SPMCOUNTS_DISTRI  ".scd"
 #define GT_READJOINER_SUFFIX_SEPPOS            ".sep"
 #define GT_READJOINER_SUFFIX_TWOBIT            ".2bit"
-#define GT_READJOINER_SUFFIX_SEQNUMS           ".seqnums"
-#define GT_READJOINER_SUFFIX_WSIZE_DISTRI      ".wsize.distri"
+#define GT_READJOINER_SUFFIX_SEQNUMS           ".sn"
+#define GT_READJOINER_SUFFIX_WSIZE_DISTRI      ".wsd"
 
 /* string graph: */
 
-/* before transitive reduction (u=unreduced) */
-#define GT_READJOINER_SUFFIX_U_SG              ".u.sg"
-#define GT_READJOINER_SUFFIX_U_SG_DOT          ".u.dot"
-#define GT_READJOINER_SUFFIX_U_SG_SPMLIST      ".u.sg.spm"
-#define GT_READJOINER_SUFFIX_U_SG_ADJLIST      ".u.adj"
-
-/* without submax edges reduction (m=multigraph) */
-#define GT_READJOINER_SUFFIX_M_SG              ".m.sg"
-#define GT_READJOINER_SUFFIX_M_SG_DOT          ".m.dot"
-#define GT_READJOINER_SUFFIX_M_SG_SPMLIST      ".m.sg.spm"
-#define GT_READJOINER_SUFFIX_M_SG_ADJLIST      ".m.adj"
-
-/* reduced graph */
 #define GT_READJOINER_SUFFIX_SG                ".sg"
-#define GT_READJOINER_SUFFIX_SG_DOT            ".dot"
+#define GT_READJOINER_SUFFIX_SG_MONO_DOT       ".m.dot"
+#define GT_READJOINER_SUFFIX_SG_BI_DOT         ".b.dot"
+#define GT_READJOINER_SUFFIX_SG_SUB_DOT        ".s.dot"
 #define GT_READJOINER_SUFFIX_SG_SPMLIST        ".sg.spm"
 #define GT_READJOINER_SUFFIX_SG_ADJLIST        ".adj"
-
-/* after error correction */
-#define GT_READJOINER_SUFFIX_C_SG              ".c.sg"
-#define GT_READJOINER_SUFFIX_C_SG_DOT          ".c.dot"
-#define GT_READJOINER_SUFFIX_C_SG_SPMLIST      ".c.sg.spm"
-#define GT_READJOINER_SUFFIX_C_SG_ADJLIST      ".c.adj"
+#define GT_READJOINER_SUFFIX_SG_ELEN_DISTRI    ".eld"
 
 #endif
