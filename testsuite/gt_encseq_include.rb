@@ -382,3 +382,10 @@ Test do
   run_test "#{$bin}gt encseq md5 foo", :retval => 1
   grep last_stderr, /does not have MD5 support/
 end
+
+Name "gt encseq colorspace FASTQ failure"
+Keywords "encseq gt_encseq colorspace"
+Test do
+  run_test "#{$bin}gt encseq encode -indexname foo #{$testdata}solid_color_reads.fastq", :retval => 1
+  grep last_stderr, /illegal character \'3\'/
+end

@@ -76,9 +76,10 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
     const char *overflowedstring;
     char cc;
     overflowedstring = gt_str_get(sbfq->overflowbuffer);
-    while ((cc = *(overflowedstring++)) != '\0')
+    while (!had_err && (cc = *(overflowedstring++)) != '\0')
     {
-      process_char(sb, currentoutpos, cc, err);
+      if ((had_err = process_char(sb, currentoutpos, cc, err)))
+          return had_err;
       currentoutpos++;
       currentfileadd++;
       currentfileread++;
@@ -126,7 +127,8 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
       if (currentoutpos >= (unsigned long) OUTBUFSIZE) {
         gt_str_append_char(sbfq->overflowbuffer, seq[cnt]);
       } else {
-        process_char(sb, currentoutpos, seq[cnt], err);
+        if ((had_err = process_char(sb, currentoutpos, seq[cnt], err)))
+          return had_err;
         currentoutpos++;
         currentfileadd++;
         currentfileread++;
@@ -215,6 +217,7 @@ GtSequenceBuffer* gt_sequence_buffer_fastq_new(const GtStrArray *sequences)
   sbfq = gt_sequence_buffer_fastq_cast(sb);
   sbfq->seqit = NULL;
   sbfq->sequences = sequences;
+  sb->pvt->filenametab = sequences;
   sbfq->overflowbuffer = gt_str_new();
   sb->pvt->filenum = 0;
   sb->pvt->nextread = sb->pvt->nextfree = 0;
