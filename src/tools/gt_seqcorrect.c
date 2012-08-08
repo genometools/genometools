@@ -58,7 +58,8 @@ typedef struct
                numofparts,
                radixparts,
                addbscache_depth,
-               forcek;
+               forcek,
+               iterations;
   unsigned long maximumspace;
   GtStr *encseqinput,
         *memlimitarg,
@@ -138,6 +139,11 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   /* -c */
   option = gt_option_new_uint_min("c", "specify the trusted count threshold",
       &arguments->trusted_count, 3U, 2U);
+  gt_option_parser_add_option(op, option);
+
+  /* -iter */
+  option = gt_option_new_uint_min("iter", "specify the number of iterations",
+      &arguments->iterations, 1U, 1U);
   gt_option_parser_add_option(op, option);
 
   /* -sf */
@@ -338,7 +344,7 @@ static int gt_seqcorrect_apply_corrections(GtEncseq *encseq,
     gt_str_append_uint(filename, threadcount);
     gt_str_append_cstr(filename, GT_SEQCORRECT_FILESUFFIX);
     corrections = gt_fa_fopen(gt_str_get(filename), "r", err);
-    gt_log_log("apply corrections list %s.%u.%s", indexname, threadcount,
+    gt_log_log("apply corrections list %s.%u%s", indexname, threadcount,
         GT_SEQCORRECT_FILESUFFIX);
     if (corrections == NULL)
       haserr = true;
@@ -360,6 +366,7 @@ static int gt_seqcorrect_apply_corrections(GtEncseq *encseq,
         haserr = true;
       }
       gt_fa_fclose(corrections);
+      gt_xunlink(gt_str_get(filename));
     }
     gt_str_delete(filename);
   }
@@ -510,92 +517,114 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
         GtStr *md5path = gt_str_clone(arguments->encseqinput);
         gt_str_append_cstr(md5path, GT_MD5TABFILESUFFIX);
         gt_xunlink(gt_str_get(md5path));
-        gt_warning("MD5 support detected -- sequence correction will "
-                   "invalidate MD5 table, permanently disabling MD5 support "
-                   "in index %s", gt_str_get(arguments->encseqinput));
+        gt_warning("the input encseq %s had MD5 support, however sequence "
+                   "invalidates the MD5 table, thus MD5 support will "
+                   "be disabled", gt_str_get(arguments->encseqinput));
         gt_str_delete(md5path);
       }
     }
   }
   if (!haserr)
   {
-    GtRandomcodesCorrectData **data_array = NULL;
-    unsigned int bucketkey_kmersize, threadcount;
-    unsigned long nofkmergroups = 0, nofkmeritvs = 0, nofcorrections = 0,
-                  nofkmers = 0;
-
 #ifdef GT_THREADS_ENABLED
     const unsigned int threads = gt_jobs;
 #else
     const unsigned int threads = 1U;
 #endif
+    unsigned int iteration;
+    unsigned int bucketkey_kmersize;
+    unsigned long cumulative_nofcorrections = 0;
+    GtRandomcodesCorrectData **data_array = NULL;
 
     data_array = gt_malloc(sizeof (*data_array) * threads);
-    for (threadcount = 0; !haserr && threadcount < threads; threadcount++)
-    {
-      data_array[threadcount] = gt_randomcodes_correct_data_new(encseq,
-          arguments->correction_kmersize, arguments->trusted_count,
-          gt_str_get(arguments->encseqinput), GT_SEQCORRECT_FILESUFFIX,
-          threadcount, err);
-      if ((data_array[threadcount]) == NULL)
-      {
-        haserr = true;
-      }
-    }
     gt_log_log("correction kmersize=%u", arguments->correction_kmersize);
     haserr = gt_seqcorrect_bucketkey_kmersize(arguments,
         &bucketkey_kmersize, err);
-    if (!haserr)
+    gt_logger_log(verbose_logger, "%u threads will be used",
+          threads);
+    gt_logger_log(verbose_logger, "%u iterations will be run",
+        arguments->iterations);
+
+    for (iteration = 1U; iteration <= arguments->iterations && !haserr;
+        iteration++)
     {
-      if (storerandomcodes_getencseqkmers_twobitencoding(encseq,
-            bucketkey_kmersize,
-            arguments->numofparts,
-            arguments->maximumspace,
-            arguments->correction_kmersize,
-            arguments->usefirstcodes,
-            arguments->samplingfactor,
-            arguments->usemaxdepth,
-            arguments->checksuftab,
-            arguments->onlyaccum,
-            arguments->onlyallrandomcodes,
-            arguments->addbscache_depth,
-            0,
-            arguments->radixlarge ? false : true,
-            arguments->radixparts,
-            gt_randomcodes_correct_process_bucket,
-            NULL,
-            data_array,
-            verbose_logger,
-            timer,
-            err) != 0)
-            {
-              haserr = true;
-            }
-    }
-    for (threadcount = 0; threadcount < threads; threadcount++)
-    {
+      unsigned int threadcount;
+      unsigned long nofkmergroups = 0, nofkmeritvs = 0, nofcorrections = 0,
+                    nofkmers = 0;
+
+      gt_logger_log(verbose_logger, "iteration %u will now start...",
+          iteration);
+
+      for (threadcount = 0; !haserr && threadcount < threads; threadcount++)
+      {
+        data_array[threadcount] = gt_randomcodes_correct_data_new(encseq,
+            arguments->correction_kmersize, arguments->trusted_count,
+            gt_str_get(arguments->encseqinput), GT_SEQCORRECT_FILESUFFIX,
+            threadcount, err);
+        if ((data_array[threadcount]) == NULL)
+        {
+          haserr = true;
+        }
+      }
+      if (!haserr)
+      {
+        if (storerandomcodes_getencseqkmers_twobitencoding(encseq,
+              bucketkey_kmersize,
+              arguments->numofparts,
+              arguments->maximumspace,
+              arguments->correction_kmersize,
+              arguments->usefirstcodes,
+              arguments->samplingfactor,
+              arguments->usemaxdepth,
+              arguments->checksuftab,
+              arguments->onlyaccum,
+              arguments->onlyallrandomcodes,
+              arguments->addbscache_depth,
+              0,
+              arguments->radixlarge ? false : true,
+              arguments->radixparts,
+              gt_randomcodes_correct_process_bucket,
+              NULL,
+              data_array,
+              verbose_logger,
+              timer,
+              err) != 0)
+              {
+                haserr = true;
+              }
+      }
+      for (threadcount = 0; threadcount < threads; threadcount++)
+      {
+        if (!haserr) {
+          gt_randomcodes_correct_data_collect_stats(data_array[threadcount],
+              threadcount, &nofkmergroups, &nofkmeritvs, &nofkmers,
+              &nofcorrections);
+        }
+        gt_randomcodes_correct_data_delete(data_array[threadcount]);
+      }
+      cumulative_nofcorrections += nofcorrections;
+
+      gt_logger_log(verbose_logger, "[iteration %u] "
+          "total number of k-mers: %lu", iteration, nofkmers);
+      gt_logger_log(verbose_logger, "[iteration %u] "
+          "number of different k-mers: %lu", iteration, nofkmeritvs);
+      gt_logger_log(verbose_logger, "[iteration %u] "
+          "number of different k-1-mers: %lu", iteration, nofkmergroups);
+      gt_logger_log(verbose_logger, "[iteration %u] "
+          "number of kmer corrections: %lu", iteration, nofcorrections);
+
       if (!haserr) {
-        gt_randomcodes_correct_data_collect_stats(data_array[threadcount],
-            threadcount, &nofkmergroups, &nofkmeritvs, &nofkmers,
-            &nofcorrections);
+        gt_logger_log(verbose_logger, "[iteration %u] apply corrections...",
+            iteration);
+        if (gt_seqcorrect_apply_corrections(encseq,
+            gt_str_get(arguments->encseqinput), threads, err) != 0) {
+          haserr = true;
+        }
       }
-      gt_randomcodes_correct_data_delete(data_array[threadcount]);
     }
-    gt_logger_log(verbose_logger, "total number of k-mers: %lu",
-        nofkmers);
-    gt_logger_log(verbose_logger, "number of different k-mers: %lu",
-        nofkmeritvs);
-    gt_logger_log(verbose_logger, "number of different k-1-mers: %lu",
-        nofkmergroups);
-    gt_logger_log(verbose_logger, "number of kmer corrections: %lu",
-        nofcorrections);
+    gt_logger_log(verbose_logger, "total corrections: %lu",
+        cumulative_nofcorrections);
     gt_free(data_array);
-    if (!haserr) {
-      if (gt_seqcorrect_apply_corrections(encseq,
-          gt_str_get(arguments->encseqinput), threads, err) != 0) {
-        haserr = true;
-      }
-    }
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
