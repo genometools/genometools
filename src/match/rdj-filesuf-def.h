@@ -49,7 +49,7 @@
 #define GT_READJOINER_SUFFIX_SG                ".sg"
 #define GT_READJOINER_SUFFIX_SG_MONO_DOT       ".m.dot"
 #define GT_READJOINER_SUFFIX_SG_BI_DOT         ".b.dot"
-#define GT_READJOINER_SUFFIX_SG_SUB_DOT        ".s.dot"
+#define GT_READJOINER_SUFFIX_SG_SUB_DOT        ".sub.dot"
 #define GT_READJOINER_SUFFIX_SG_SPMLIST        ".sg.spm"
 #define GT_READJOINER_SUFFIX_SG_ADJLIST        ".adj"
 #define GT_READJOINER_SUFFIX_SG_ELEN_DISTRI    ".eld"

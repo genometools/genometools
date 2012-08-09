@@ -1327,7 +1327,58 @@ unsigned long gt_strgraph_redpbubbles(GtStrgraph *strgraph,
 
 #define GT_STRGRAPH_DOT_HEADER     "digraph StringGraph {\n"
 #define GT_STRGRAPH_DOT_BI_HEADER  "graph StringGraph {\n"
+#define GT_STRGRAPH_DOT_BC_HEADER  GT_STRGRAPH_DOT_BI_HEADER\
+                                   "concentrate=true\n"
 #define GT_STRGRAPH_DOT_FOOTER     "}\n"
+
+#define GT_STRGRAPH_DOT_VSHAPE_INTERNAL    "ellipse"
+#define GT_STRGRAPH_DOT_VSHAPE_JUNCTION    "box"
+#define GT_STRGRAPH_DOT_VSHAPE_END         "triangle"
+
+#define GT_STRGRAPH_DOT_SELECT_VSHAPE(STRGRAPH, V) \
+  (GT_STRGRAPH_V_IS_INTERNAL(STRGRAPH, V) ? \
+    GT_STRGRAPH_DOT_VSHAPE_INTERNAL : \
+    (GT_STRGRAPH_V_IS_JUNCTION(STRGRAPH, V) ? \
+      GT_STRGRAPH_DOT_VSHAPE_JUNCTION : \
+      GT_STRGRAPH_DOT_VSHAPE_END))
+
+#define GT_STRGRAPH_DOT_VCOLOR_GROUP_1   "palegreen"
+#define GT_STRGRAPH_DOT_VCOLOR_GROUP_2   "lightskyblue"
+#define GT_STRGRAPH_DOT_VCOLOR_MARKED    "moccasin"
+
+#define GT_STRGRAPH_DOT_VCOLOR_ATTRS(C) "style=filled,fillcolor="C
+
+/* color selection rules:
+ * if depth > 1: generic color,
+ * otherwise if marked: marked color,
+ * otherwise if group is 1: group 1 color,
+ * otherwise group 2 color */
+#define GT_STRGRAPH_DOT_SELECT_VCOLOR(STRGRAPH, V, DEPTH, GROUP) \
+  ((DEPTH) > 1UL ? "" : \
+   (GT_STRGRAPH_V_MARK(STRGRAPH, V) == GT_STRGRAPH_V_MARKED ? \
+    GT_STRGRAPH_DOT_VCOLOR_ATTRS(GT_STRGRAPH_DOT_VCOLOR_MARKED) : \
+    ((GROUP) == 1UL ? \
+     GT_STRGRAPH_DOT_VCOLOR_ATTRS(GT_STRGRAPH_DOT_VCOLOR_GROUP_1) : \
+     GT_STRGRAPH_DOT_VCOLOR_ATTRS(GT_STRGRAPH_DOT_VCOLOR_GROUP_2))))
+
+static inline void gt_strgraph_dot_show_vertex(GtFile *outfp,
+    GtStrgraphFormat format, GtStrgraph *strgraph, GtStrgraphVnum v,
+    unsigned long depth, unsigned long group)
+{
+  const char *shape = GT_STRGRAPH_DOT_SELECT_VSHAPE(strgraph, v),
+             *color = GT_STRGRAPH_DOT_SELECT_VCOLOR(strgraph, v, depth, group);
+  if (format == GT_STRGRAPH_DOT)
+  {
+    gt_file_xprintf(outfp, " \"%lu%c\" [shape=%s,%s]\n",
+        GT_STRGRAPH_V_READNUM(v), GT_STRGRAPH_V_CHAR(v), shape, color);
+  }
+  else
+  {
+    gt_assert(format == GT_STRGRAPH_DOT_BI);
+    gt_file_xprintf(outfp, " %lu [shape=%s,%s]\n",
+        GT_STRGRAPH_V_READNUM(v), shape, color);
+  }
+}
 
 static inline void gt_strgraph_dot_show_edge(GtFile *outfp,
     GtStrgraphVnum from, GtStrgraphVnum to, GtStrgraphLength length)
@@ -1336,10 +1387,18 @@ static inline void gt_strgraph_dot_show_edge(GtFile *outfp,
       " \"%lu%c\" -> \"%lu%c\" "
       "[label="FormatGtStrgraphLength"];\n",
       GT_STRGRAPH_V_READNUM(from),
-      GT_STRGRAPH_V_IS_E(from) ? 'E' : 'B',
+      GT_STRGRAPH_V_CHAR(from),
       GT_STRGRAPH_V_READNUM(to),
-      GT_STRGRAPH_V_IS_E(to) ? 'E' : 'B',
+      GT_STRGRAPH_V_CHAR(to),
       PRINTGtStrgraphLengthcast(length));
+}
+
+static inline void gt_strgraph_dot_bi_show_edge(GtFile *outfp,
+    unsigned long sn1, bool towards1, unsigned long sn2,
+    bool towards2)
+{
+  gt_file_xprintf(outfp, " %lu -- %lu [arrowtail=%s,arrowhead=%s,dir=both];\n",
+      sn1, sn2, towards1 ? "normal" : "inv", towards2 ? "normal" : "inv");
 }
 
 static void gt_strgraph_dot_show(const GtStrgraph *strgraph, GtFile *outfp,
@@ -1373,14 +1432,6 @@ static void gt_strgraph_dot_show(const GtStrgraph *strgraph, GtFile *outfp,
 
   if (show_progressbar)
     gt_progressbar_stop();
-}
-
-static inline void gt_strgraph_dot_bi_show_edge(GtFile *outfp,
-    unsigned long sn1, bool towards1, unsigned long sn2,
-    bool towards2)
-{
-  gt_file_xprintf(outfp, " %lu -- %lu [arrowtail=%s,arrowhead=%s];\n",
-      sn1, sn2, towards1 ? "normal" : "inv", towards2 ? "normal" : "inv");
 }
 
 static void gt_strgraph_dot_bi_show(const GtStrgraph *strgraph, GtFile *outfp,
@@ -1438,44 +1489,112 @@ typedef struct {
   unsigned long d;
 } GtStrgraphVnumAndDepth;
 
-static void gt_strgraph_dot_show_context(const GtStrgraph *strgraph,
-    GtFile *outfp, unsigned long readnum, unsigned long depth)
+#define GT_STRGRAPH_DOT_VISITED(V) \
+  (GT_STRGRAPH_V_MARK(strgraph, V) == GT_STRGRAPH_V_ELIMINATED ||\
+   GT_STRGRAPH_V_MARK(strgraph, V) == GT_STRGRAPH_V_MARKED)
+
+#define GT_STRGRAPH_DOT_SET_VISITED(V, D) \
+  ((D) == 1UL ? \
+    GT_STRGRAPH_V_SET_MARK(strgraph, V, GT_STRGRAPH_V_MARKED) : \
+    GT_STRGRAPH_V_SET_MARK(strgraph, V, GT_STRGRAPH_V_ELIMINATED))
+
+static int gt_strgraph_dot_show_context(GtStrgraph *strgraph,
+    GtStrgraphFormat format, GtFile *outfp, unsigned long *readnums,
+    unsigned long nofreadnums, unsigned long maxdepth, bool extend,
+    unsigned long group, GtError *err)
 {
+  int had_err = 0;
   GtArray *stack;
   GtStrgraphVnumAndDepth to_add, *current;
-  GtStrgraphVnum v;
+  GtStrgraphVnum v, w;
   GtStrgraphVEdgenum j;
   unsigned long d;
+  unsigned long sn1, sn2, readnum, i;
+  bool is_e1, is_e2;
 
+  gt_assert(format == GT_STRGRAPH_DOT || format == GT_STRGRAPH_DOT_BI);
   stack = gt_array_new(sizeof (GtStrgraphVnumAndDepth));
-  to_add.v = GT_STRGRAPH_V_B(readnum);
-  to_add.d = 1UL;
-  gt_array_add(stack, to_add);
-  to_add.v = GT_STRGRAPH_V_E(readnum);
-  to_add.d = 1UL;
-  gt_array_add(stack, to_add);
+  for (i = 0; i < nofreadnums; i++)
+  {
+    readnum = readnums[i];
+    if (readnum >= (unsigned long)GT_STRGRAPH_NOFREADS(strgraph))
+    {
+      had_err = -1;
+      gt_error_set(err, "Can't show context of read %lu "
+          "because the readset has "FormatGtStrgraphVnum" reads", readnum,
+          GT_STRGRAPH_NOFREADS(strgraph));
+      break;
+    }
+    to_add.v = GT_STRGRAPH_V_B(readnum);
+    to_add.d = 1UL;
+    gt_array_add(stack, to_add);
+    gt_strgraph_dot_show_vertex(outfp, format, strgraph, to_add.v, 1UL, group);
+    to_add.v = GT_STRGRAPH_V_E(readnum);
+    to_add.d = 1UL;
+    gt_array_add(stack, to_add);
+    gt_strgraph_dot_show_vertex(outfp, format, strgraph, to_add.v, 1UL, group);
+  }
+  if (had_err)
+  {
+    gt_array_delete(stack);
+    return had_err;
+  }
   while (gt_array_size(stack) > 0)
   {
     current = gt_array_pop(stack);
     v = current->v;
     d = current->d;
-    for (j = 0; j < GT_STRGRAPH_V_NOFEDGES(strgraph, v); j++)
+    if (!GT_STRGRAPH_DOT_VISITED(v))
     {
-      if (!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph, v, j))
+      sn1 = GT_STRGRAPH_V_READNUM(v);
+      if (d > 1UL)
       {
-        gt_strgraph_dot_show_edge(outfp, v,
-            GT_STRGRAPH_EDGE_DEST(strgraph, v, j),
-            GT_STRGRAPH_EDGE_LEN(strgraph, v, j));
-        if (d < depth)
+        gt_strgraph_dot_show_vertex(outfp, format, strgraph, v, d, 0);
+      }
+      if (GT_STRGRAPH_V_OUTDEG(strgraph, v) > 0)
+      {
+        is_e1 = GT_STRGRAPH_V_IS_E(v);
+        for (j = 0; j < GT_STRGRAPH_V_NOFEDGES(strgraph, v); j++)
         {
-          to_add.v = GT_STRGRAPH_EDGE_DEST(strgraph, v, j);
-          to_add.d = d + 1;
-          gt_array_add(stack, to_add);
+          if (!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph, v, j))
+          {
+            w = GT_STRGRAPH_EDGE_DEST(strgraph, v, j);
+            sn2 = GT_STRGRAPH_V_READNUM(w);
+            is_e2 = GT_STRGRAPH_V_IS_E(w);
+            if (format == GT_STRGRAPH_DOT)
+            {
+              gt_strgraph_dot_show_edge(outfp, v, w,
+                  GT_STRGRAPH_EDGE_LEN(strgraph, v, j));
+            }
+            else
+            {
+              gt_strgraph_dot_bi_show_edge(outfp, sn1, !is_e1, sn2, is_e2);
+            }
+            if (d < maxdepth ||
+                (extend && GT_STRGRAPH_V_IS_INTERNAL(strgraph, v)))
+            {
+              if (!GT_STRGRAPH_DOT_VISITED(w))
+              {
+                to_add.v = w;
+                to_add.d = d + 1;
+                gt_array_add(stack, to_add);
+              }
+              w = GT_STRGRAPH_V_OTHER(w);
+              if (!GT_STRGRAPH_DOT_VISITED(w))
+              {
+                to_add.v = w;
+                to_add.d = d + 1;
+                gt_array_add(stack, to_add);
+              }
+            }
+          }
         }
       }
     }
+    GT_STRGRAPH_DOT_SET_VISITED(v, d);
   }
   gt_array_delete(stack);
+  return had_err;
 }
 
 /* format: read[E|B] [numofedges]: neighbor1[E|B], neighbor2[E|B]... */
@@ -1694,33 +1813,32 @@ void gt_strgraph_show_counts_distribution(const GtStrgraph *strgraph,
   gt_file_delete(outfp);
 }
 
-int gt_strgraph_show_context(const GtStrgraph *strgraph,
-    GT_UNUSED /* only in assertions */ GtStrgraphFormat format,
+int gt_strgraph_show_context(GtStrgraph *strgraph, GtStrgraphFormat format,
     const char *indexname, const char *suffix, unsigned long *readnums,
-    unsigned long nofreadnums, unsigned long depth, GtError *err)
+    unsigned long nofreadnums, unsigned long *otherreadnums,
+    unsigned long nofotherreadnums, unsigned long maxdepth, bool extend,
+    GtError *err)
 {
-  GtStrgraphVnum i;
   int had_err = 0;
   GtFile *outfp = NULL;
+  GtStrgraphVnum i;
 
   gt_assert(strgraph != NULL);
-  gt_assert(format == GT_STRGRAPH_DOT);
+  gt_assert(format == GT_STRGRAPH_DOT || format == GT_STRGRAPH_DOT_BI);
 
   outfp = gt_strgraph_get_file(indexname, suffix, true, false);
-  gt_file_xprintf(outfp, GT_STRGRAPH_DOT_HEADER);
+  gt_file_xprintf(outfp, format == GT_STRGRAPH_DOT ?
+      GT_STRGRAPH_DOT_HEADER : GT_STRGRAPH_DOT_BC_HEADER);
   gt_assert(sizeof (GtStrgraphVnum) >= sizeof (unsigned long));
-  for (i = 0; i < (GtStrgraphVnum)nofreadnums; i++)
-  {
-    if (i >= GT_STRGRAPH_NOFREADS(strgraph))
-    {
-      had_err = -1;
-      gt_error_set(err, "Can't show context of read "FormatGtStrgraphVnum" "
-          "because the readset has "FormatGtStrgraphVnum" reads", i,
-          GT_STRGRAPH_NOFREADS(strgraph));
-      break;
-    }
-    gt_strgraph_dot_show_context(strgraph, outfp, readnums[i], depth);
-  }
+
+  for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
+    GT_STRGRAPH_V_SET_MARK(strgraph, i, GT_STRGRAPH_V_VACANT);
+
+  had_err = gt_strgraph_dot_show_context(strgraph, format, outfp, readnums,
+      nofreadnums, maxdepth, extend, 1UL, err);
+  if (!had_err && nofotherreadnums > 0)
+    had_err = gt_strgraph_dot_show_context(strgraph, format, outfp,
+        otherreadnums, nofotherreadnums, maxdepth, extend, 2UL, err);
   gt_file_xprintf(outfp, GT_STRGRAPH_DOT_FOOTER);
   gt_file_delete(outfp);
   return had_err;

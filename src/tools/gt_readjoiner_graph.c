@@ -33,9 +33,9 @@
 typedef struct {
   GtStr  *readset;
   bool limits, verbose, quiet, errors, redtrans, eld,
-       save, dot, mdot, adj, spm;
+       save, dot, mdot, adj, spm, subgraph_mono, subgraph_extend;
   unsigned int deadend, bubble, deadend_depth;
-  GtStrArray *subgraph;
+  GtStrArray *subgraph, *subgraph_other;
   unsigned long subgraph_depth;
 } GtReadjoinerGraphArguments;
 
@@ -45,6 +45,7 @@ static void* gt_readjoiner_graph_arguments_new(void)
       sizeof *arguments);
   arguments->readset = gt_str_new();
   arguments->subgraph = gt_str_array_new();
+  arguments->subgraph_other = gt_str_array_new();
   return arguments;
 }
 
@@ -55,6 +56,7 @@ static void gt_readjoiner_graph_arguments_delete(void *tool_arguments)
     return;
   gt_str_delete(arguments->readset);
   gt_str_array_delete(arguments->subgraph);
+  gt_str_array_delete(arguments->subgraph_other);
   gt_free(arguments);
 }
 
@@ -65,7 +67,7 @@ static GtOptionParser* gt_readjoiner_graph_option_parser_new(
   GtOptionParser *op;
   GtOption *option, *errors_option, *deadend_option, *v_option,
            *q_option, *bubble_option, *deadend_depth_option,
-           *subgraph_option;
+           *subgraph_option, *sother_option;
   gt_assert(arguments);
 
   /* init */
@@ -96,17 +98,41 @@ static GtOptionParser* gt_readjoiner_graph_option_parser_new(
 
   /* -subgraph */
   subgraph_option = gt_option_new_string_array("subgraph",
-      "output subgraph for the specified reads"
-      "as monodirected graph in GraphViz format\n"
+      "output subgraph for the specified reads "
+      "in GraphViz format\n"
       "(<readset>"GT_READJOINER_SUFFIX_SG_SUB_DOT")",
       arguments->subgraph);
   gt_option_parser_add_option(op, subgraph_option);
 
   /* -sdepth */
-  option = gt_option_new_ulong_min("sdepth", "subgraph depth",
-      &(arguments->subgraph_depth), 1UL, 1UL);
+  option = gt_option_new_ulong("sdepth", "subgraph depth\n"
+      "(use 0 for infinite depth == whole connected component)",
+      &(arguments->subgraph_depth), 1UL);
   gt_option_imply(option, subgraph_option);
   gt_option_parser_add_option(op, option);
+
+  /* -sextend */
+  option = gt_option_new_bool("sextend", "extend subgraph "
+      "beyond depth along internal vertices",
+      &arguments->subgraph_extend, false);
+  gt_option_imply(option, subgraph_option);
+  gt_option_parser_add_option(op, option);
+
+  /* -smono */
+  option = gt_option_new_bool("smono", "subgraph shall be "
+      "output as monodirectional graph",
+      &arguments->subgraph_mono, false);
+  gt_option_imply(option, subgraph_option);
+  gt_option_parser_add_option(op, option);
+
+  /* -sother */
+  sother_option = gt_option_new_string_array("sother",
+      "also add specified reads to subgraph, but coloring "
+      "them differently\n"
+      "(<readset>"GT_READJOINER_SUFFIX_SG_SUB_DOT")",
+      arguments->subgraph_other);
+  gt_option_imply(sother_option, subgraph_option);
+  gt_option_parser_add_option(op, sother_option);
 
   /* -spm */
   option = gt_option_new_bool("spm",
@@ -210,8 +236,14 @@ static GtOptionParser* gt_readjoiner_graph_option_parser_new(
 #define GT_READJOINER_GRAPH_MSG_SPMSG \
   "output SPM list from graph"
 
+#define GT_READJOINER_GRAPH_ERR_SUBGRAPH_GENERIC(OPT) \
+  "argument to "OPT" must be a list of read numbers"
+
 #define GT_READJOINER_GRAPH_ERR_SUBGRAPH \
-  "argument to -subgraph must be a list of read numbers"
+  GT_READJOINER_GRAPH_ERR_SUBGRAPH_GENERIC("subgraph")
+
+#define GT_READJOINER_GRAPH_ERR_SOTHER \
+  GT_READJOINER_GRAPH_ERR_SUBGRAPH_GENERIC("sother")
 
 static int gt_readjoiner_graph_error_correction(GtStrgraph *strgraph,
     unsigned int bubble, unsigned int deadend, unsigned int deadend_depth,
@@ -277,31 +309,50 @@ static void gt_readjoiner_graph_load_graph(GtStrgraph **strgraph,
 }
 
 static int gt_readjoiner_graph_show_subgraph(GtStrgraph *strgraph,
-    GtStrArray *subgraph, unsigned long subgraph_depth, const char *readsetname,
-    GtLogger *default_logger, GtTimer *timer, GtError *err)
+    GtStrArray *subgraph, GtStrArray *subgraph_other,
+    unsigned long subgraph_depth, bool subgraph_mono, bool subgraph_extend,
+    const char *readsetname, GtLogger *default_logger, GtTimer *timer,
+    GtError *err)
 {
   int had_err = 0;
-  unsigned long *rlist, r, rlistsize = gt_str_array_size(subgraph);
-  const char *rstr;
+  unsigned long i, *rlist, rlistsize = gt_str_array_size(subgraph),
+                *olist = NULL, olistsize = gt_str_array_size(subgraph_other);
+  const char *num;
   gt_assert(rlistsize > 0);
   if (gt_showtime_enabled())
     gt_timer_show_progress(timer, GT_READJOINER_GRAPH_MSG_SDOTSG, stdout);
   gt_logger_log(default_logger, GT_READJOINER_GRAPH_MSG_SDOTSG);
   rlist = gt_malloc(sizeof (*rlist) * rlistsize);
-  for (r = 0; r < rlistsize && !had_err; r++)
+  for (i = 0; i < rlistsize && !had_err; i++)
   {
-    rstr = gt_str_array_get(subgraph, r);
-    if (sscanf(rstr, "%lu", rlist + r) != 1)
+    num = gt_str_array_get(subgraph, i);
+    if (sscanf(num, "%lu", rlist + i) != 1)
     {
       gt_error_set(err, GT_READJOINER_GRAPH_ERR_SUBGRAPH);
       had_err = -1;
     }
   }
+  if (olistsize > 0)
+  {
+    olist = gt_malloc(sizeof (*olist) * olistsize);
+    for (i = 0; i < olistsize && !had_err; i++)
+    {
+      num = gt_str_array_get(subgraph_other, i);
+      if (sscanf(num, "%lu", olist + i) != 1)
+      {
+        gt_error_set(err, GT_READJOINER_GRAPH_ERR_SOTHER);
+        had_err = -1;
+      }
+    }
+  }
   if (!had_err)
-    had_err = gt_strgraph_show_context(strgraph, GT_STRGRAPH_DOT,
-        readsetname, GT_READJOINER_SUFFIX_SG_SUB_DOT,
-        rlist, rlistsize, subgraph_depth, err);
+    had_err = gt_strgraph_show_context(strgraph, subgraph_mono ?
+        GT_STRGRAPH_DOT : GT_STRGRAPH_DOT_BI, readsetname,
+        GT_READJOINER_SUFFIX_SG_SUB_DOT, rlist, rlistsize,
+        olist, olistsize, subgraph_depth == 0 ? ULONG_MAX : subgraph_depth,
+        subgraph_extend, err);
   gt_free(rlist);
+  gt_free(olist);
   return had_err;
 }
 
@@ -444,8 +495,9 @@ static int gt_readjoiner_graph_runner(GT_UNUSED int argc,
   if (had_err == 0 && gt_str_array_size(arguments->subgraph) > 0)
   {
     had_err = gt_readjoiner_graph_show_subgraph(strgraph, arguments->subgraph,
-        arguments->subgraph_depth, gt_str_get(arguments->readset),
-        default_logger, timer, err);
+        arguments->subgraph_other, arguments->subgraph_depth,
+        arguments->subgraph_mono, arguments->subgraph_extend,
+        gt_str_get(arguments->readset), default_logger, timer, err);
   }
 
   if (had_err == 0 && arguments->adj)

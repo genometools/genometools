@@ -99,9 +99,10 @@ typedef enum {
 void gt_strgraph_show(const GtStrgraph *strgraph, GtStrgraphFormat format,
     const char *indexname, const char *suffix, bool show_progressbar);
 
-int gt_strgraph_show_context(const GtStrgraph *strgraph,
-    GtStrgraphFormat format, const char *indexname, const char *suffix,
-    unsigned long *readnums, unsigned long nofreadnums, unsigned long depth,
+int gt_strgraph_show_context(GtStrgraph *strgraph, GtStrgraphFormat format,
+    const char *indexname, const char *suffix, unsigned long *readnums,
+    unsigned long nofreadnums, unsigned long *otherreadnums,
+    unsigned long nofotherreadnums, unsigned long maxdepth, bool extend,
     GtError *err);
 
 /* --- load from file --- */
