@@ -38,6 +38,7 @@
 #include "match/stamp.h"
 #include "match/test-mappedstr.pr"
 #include "match/twobits2kmers.h"
+#include "match/sfx-linlcp.h"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
@@ -612,6 +613,10 @@ static int gt_checkentiresuftab(const char *filename,
   }
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
+  if (numberofsuffixes == totallength)
+  {
+    gt_suftab_lighweightcheck(encseq, readmode, totallength,suftab);
+  }
   return haserr ? -1 : 0;
   /*
   printf("# gt_checkentiresuftab with mode 'specials are %s'\n",

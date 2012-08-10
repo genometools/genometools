@@ -29,4 +29,9 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
                                  unsigned long totallength,
                                  const GtSuffixsortspace *sortedsuffixes);
 
+void gt_suftab_lighweightcheck(const GtEncseq *encseq,
+                               GtReadmode readmode,
+                               unsigned long totallength,
+                               const ESASuffixptr *suftab);
+
 #endif

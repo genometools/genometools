@@ -21,6 +21,7 @@
 
 #include "core/encseq.h"
 #include "compressedtab.h"
+#include "sarr-def.h"
 #include "sfx-linlcp.h"
 
 unsigned long *gt_lcp13_manzini(const GtEncseq *encseq,
@@ -402,4 +403,74 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
   return lcptab;
+}
+
+void gt_suftab_lighweightcheck(const GtEncseq *encseq,
+                               GtReadmode readmode,
+                               unsigned long totallength,
+                               const ESASuffixptr *suftab)
+{
+  unsigned long idx, countbitsset = 0, previouspos = 0;
+  GtBitsequence *startposoccurs;
+  GtUchar previouscc = 0;
+
+  printf("%s\n",__func__);
+  GT_INITBITTAB(startposoccurs,totallength+1);
+  for (idx = 0; idx < totallength; idx++)
+  {
+    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+    GtUchar cc;
+
+    if (GT_ISIBITSET(startposoccurs,position))
+    {
+      fprintf(stderr,"ERROR: suffix with startpos %lu already occurs\n",
+              ESASUFFIXPTRGET(suftab,idx));
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+    GT_SETIBIT(startposoccurs,position);
+    countbitsset++;
+    cc = gt_encseq_get_encoded_char(encseq,position,readmode);
+    if (idx > 0)
+    {
+      if (ISSPECIAL(cc))
+      {
+        if (ISSPECIAL(previouscc))
+        {
+          if (previouspos > position)
+          {
+            fprintf(stderr,"incorrect order: %lu = %lu=SPECIAL > SPECIAL=%lu "
+                           " = %lu\n",
+                      idx-1,position,previouspos,idx);
+            exit(GT_EXIT_PROGRAMMING_ERROR);
+          }
+        }
+      } else
+      {
+        if (ISSPECIAL(previouscc))
+        {
+          fprintf(stderr,"incorrect order: %lu=%lu=SPECIAL > %u=%lu=%lu\n",
+                    idx-1,position,(unsigned int) cc,previouspos,idx);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+        } else
+        {
+          if (previouscc > cc)
+          {
+            fprintf(stderr,"incorrect order: %lu = %lu=%u > %u=%lu=%lu\n",
+                      idx-1,position,(unsigned int) previouscc,
+                      (unsigned int) cc,previouspos,idx);
+            exit(GT_EXIT_PROGRAMMING_ERROR);
+          }
+        }
+      }
+    }
+    previouscc = cc;
+    previouspos = position;
+  }
+  if (countbitsset != totallength)
+  {
+    fprintf(stderr,"ERROR: only %lu of %lu suffixes occur\n",countbitsset,
+                                totallength);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  gt_free(startposoccurs);
 }
