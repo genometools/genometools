@@ -930,11 +930,11 @@ static void dc_sortsuffixesonthislevel(GtDifferencecover *dcov,
         gt_assert(rangestart + 1 == idx);
         dc_inversesuftab_set(dcov,currentsuftabentry,
                              blisbl+rangestart);
-        if (dcov->samplelcpvalues != NULL)
-        {
-          gt_lcptab_update(dcov->samplelcpvalues,
-                           0,blisbl + idx,dcov->currentdepth);
-        }
+      }
+      if (dcov->samplelcpvalues != NULL)
+      {
+        gt_lcptab_update(dcov->samplelcpvalues,
+                         0,blisbl + idx,dcov->currentdepth);
       }
       rangestart = idx;
     }

@@ -1,14 +1,12 @@
 #!/usr/bin/ruby
 
 def listdirectory(directory)
-  # prepare regexp for entries to ignore 
+  # prepare regexp for entries to ignore
   # saves time for repeated regexp use, since it stays the same
   ignore_dirs = Regexp.compile(/^\.\.?$/)
-  stack = [directory]
-  loop do
-    if stack.empty? 
-      break
-    end
+  stack = Array.new
+  stack.push(directory)
+  while not stack.empty?
     d = stack.pop
     Dir.foreach(d) do |entry|
       if not ignore_dirs.match(entry)
@@ -23,7 +21,7 @@ def listdirectory(directory)
 end
 
 def listselected(dirname,excludelist)
-  suffixes = ["fastq","fasta","fna","fa","fsa.gz","fsa","FASTA.gz"]
+  suffixes = ["fastq","fasta","fna","fa","fsa.gz","fsa","FASTA.gz","FASTA"]
   listdirectory(dirname) do |filename|
     suffixes.each do |suffix|
       if filename.match(/\.#{suffix}$/) and
@@ -49,8 +47,9 @@ listselected("testdata",testdata_exclude) do |filename|
   puts filename
 end
 
-gttestdata_exclude = ["trembl-section.fsa.gz"]
-
-listselected(ENV["GTTESTDATA"],gttestdata_exclude) do |filename|
-  puts filename
+if ENV.has_key?("GTTESTDATA")
+  gttestdata_exclude = ["trembl-section.fsa.gz"]
+  listselected(ENV["GTTESTDATA"],gttestdata_exclude) do |filename|
+    puts filename
+  end
 end
