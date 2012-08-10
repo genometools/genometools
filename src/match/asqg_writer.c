@@ -62,7 +62,7 @@ int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
                 tlen = gt_encseq_total_length(aw->encseq), charsincode = 0;
   char *seqbuffer;
   bool last_seq = false;
-  const char code2char[] = "acgt";
+  const char code2char[] = "ACGT";
   gt_assert(aw != NULL);
   seqbuffer = gt_malloc(sizeof (*seqbuffer) *
       (gt_encseq_max_seq_length(aw->encseq) + 1UL));
@@ -73,7 +73,7 @@ int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
     if (seqnum + 1UL == nofseqs)
     {
       last_seq = true;
-      next_stop = tlen - 1UL;
+      next_stop = tlen;
     }
     else
       next_stop = gt_encseq_seqstartpos(aw->encseq, seqnum + 1UL) - 1UL;
