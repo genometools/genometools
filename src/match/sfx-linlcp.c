@@ -405,13 +405,35 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
   return lcptab;
 }
 
+/*static void gt_check_merged_sorted_range(const GtEncseq *encseq,
+                                         GtReadmode readmode,
+                                         unsigned long totallength,
+                                         const ESASuffixptr *suftab,
+                                         unsigned long start,
+                                         unsigned long end)
+{
+  unsigned long idx, ref = 0;
+
+  for (idx = start; idx <= end; idx++)
+  {
+    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+
+    while (position + 1 != ESASUFFIXPTRGET(suftab,ref))
+    {
+      ref++;
+    }
+  }
+}*/
+
 void gt_suftab_lighweightcheck(const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned long totallength,
                                const ESASuffixptr *suftab)
 {
-  unsigned long idx, countbitsset = 0, previouspos = 0;
+  unsigned long idx, countbitsset = 0, previouspos = 0,
+                firstspecial = totallength;
   GtBitsequence *startposoccurs;
+  unsigned long rangestart = 0;
   GtUchar previouscc = 0;
 
   printf("%s\n",__func__);
@@ -434,6 +456,10 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
     {
       if (ISSPECIAL(cc))
       {
+        if (firstspecial == totallength)
+        {
+          firstspecial = idx;
+        }
         if (ISSPECIAL(previouscc))
         {
           if (previouspos > position)
@@ -473,4 +499,19 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_free(startposoccurs);
+  previouscc = 0;
+  for (idx = 0; idx < firstspecial; idx++)
+  {
+    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+    GtUchar cc;
+
+    cc = gt_encseq_get_encoded_char(encseq,position,readmode);
+    if (idx > 0 && cc != previouscc)
+    {
+      printf("%lu %lu\n",rangestart,idx-1);
+      rangestart = idx;
+    }
+    previouscc = cc;
+  }
+  printf("%lu %lu\n",rangestart,firstspecial-1);
 }

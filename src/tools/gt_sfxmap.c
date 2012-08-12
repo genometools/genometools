@@ -613,7 +613,7 @@ static int gt_checkentiresuftab(const char *filename,
   }
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
-  if (numberofsuffixes == totallength)
+  if (numberofsuffixes == totallength + 1)
   {
     gt_suftab_lighweightcheck(encseq, readmode, totallength,suftab);
   }
