@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,10 +32,12 @@
 
 typedef struct
 {
-  bool verbose,
+  bool reduce_wc_dna,
+       reduce_wc_prot,
+       revcomp,
        showflv,
        showseq,
-       revcomp;
+       verbose;
   unsigned long fastawidth;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
@@ -64,12 +67,22 @@ static GtOPrval parse_options(ConvertseqOptions *opts, int *parsed_args,
                          &opts->showflv, false);
   gt_option_parser_add_option(op, o);
 
-    o = gt_option_new_bool("noseq","do not show sequences",
+  o = gt_option_new_bool("noseq","do not show sequences",
                          &opts->showseq, false);
   gt_option_parser_add_option(op, o);
 
   o = gt_option_new_ulong("fastawidth","FASTA output line width",
-                         &opts->fastawidth, 60);
+                         &opts->fastawidth, 60UL);
+  gt_option_parser_add_option(op, o);
+
+  o = gt_option_new_bool("reduceWCdna", "replace stretches of WildCards with"
+                         " just one 'N'.",
+                         &opts->reduce_wc_dna, false);
+  gt_option_parser_add_option(op, o);
+
+  o = gt_option_new_bool("reduceWCprot", "replace stretches of WildCards with"
+                         " just one 'X'.",
+                         &opts->reduce_wc_prot, false);
   gt_option_parser_add_option(op, o);
 
   gt_outputfile_register_options(op, &opts->outfp, opts->ofi);
@@ -118,7 +131,8 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   }
   totalsize = gt_files_estimate_total_size(files);
 
-  flv = gt_calloc(gt_str_array_size(files), sizeof (GtFilelengthvalues));
+  flv = gt_calloc((size_t) gt_str_array_size(files),
+                  sizeof (GtFilelengthvalues));
 
   sb = gt_sequence_buffer_new_guess_type(files, err);
   if (!sb) {
@@ -139,27 +153,75 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
     {
       GtUchar *seq = NULL;
       desc = NULL;
-      i = 0; j = 1;
+      i = 0; j = 1UL;
       had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
       if (had_err != 1)
         break;
       if (opts.revcomp) {
-        GtUchar *newseq = gt_calloc(len+1, sizeof (GtUchar));
-        memcpy(newseq, sequence, len*sizeof (GtUchar));
+        GtUchar *newseq = gt_calloc((size_t) len+1, sizeof (GtUchar));
+        memcpy(newseq, sequence, (size_t) len*sizeof (GtUchar));
         had_err = gt_reverse_complement((char*) newseq, len, err);
         if (had_err)
           break;
         seq = newseq;
       } else seq = (GtUchar*) sequence;
+
       if (!opts.showseq) {
+        bool in_wildcard = false;
         gt_file_xprintf(opts.outfp, ">%s\n", desc);
-        for (i = 0;i < len;i++) {
-          gt_file_xfputc(seq[i], opts.outfp);
+        for (i = 0; (unsigned long) i < len; i++) {
+          if (opts.reduce_wc_dna) {
+            switch (seq[i]) {
+              case 'a':
+              case 'A':
+              case 'c':
+              case 'C':
+              case 'g':
+              case 'G':
+              case 't':
+              case 'u':
+              case 'T':
+              case 'U':
+                if (in_wildcard) in_wildcard = false;
+                gt_file_xfputc((int) seq[i], opts.outfp);
+                j++;
+                break;
+              default:
+                if (!in_wildcard) {
+                  in_wildcard = true;
+                  gt_file_xfputc((int) 'N', opts.outfp);
+                  j++;
+                }
+            }
+          }
+          else if (opts.reduce_wc_prot) {
+            switch (seq[i]) {
+              case 'X':
+              case 'x':
+              case 'B':
+              case 'b':
+              case 'Z':
+              case 'z':
+                if (!in_wildcard) {
+                  in_wildcard = true;
+                  gt_file_xfputc((int) 'N', opts.outfp);
+                  j++;
+                }
+                break;
+              default:
+                if (in_wildcard) in_wildcard = false;
+                gt_file_xfputc((int) seq[i], opts.outfp);
+                j++;
+            }
+          }
+          else {
+            gt_file_xfputc((int) seq[i], opts.outfp);
+            j++;
+          }
           if ((j % opts.fastawidth) == 0) {
             j = 0;
             gt_file_xprintf(opts.outfp, "\n");
           }
-          j++;
         }
         gt_file_xprintf(opts.outfp, "\n");
       }
@@ -168,7 +230,6 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
       }
     }
     if (opts.showflv) {
-      unsigned long j;
       for (j=0;j<gt_str_array_size(files);j++) {
         fprintf(stderr, "file %lu (%s): %lu/%lu\n",
                j,
