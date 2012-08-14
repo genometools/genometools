@@ -29,9 +29,12 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
                                  unsigned long totallength,
                                  const GtSuffixsortspace *sortedsuffixes);
 
-void gt_suftab_lighweightcheck(const GtEncseq *encseq,
+void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned long totallength,
                                const ESASuffixptr *suftab);
+
+int gt_lcptab_lightweightcheck(const char *esaindexname,
+                               GtLogger *logger,GtError *err);
 
 #endif

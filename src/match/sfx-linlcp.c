@@ -21,6 +21,8 @@
 #include "core/encseq.h"
 #include "core/range.h"
 #include "core/mathsupport.h"
+#include "core/logger.h"
+#include "esa-seqread.h"
 #include "compressedtab.h"
 #include "sarr-def.h"
 #include "sfx-linlcp.h"
@@ -425,7 +427,7 @@ static unsigned long gt_check_for_range_occurrence(const ESASuffixptr *suftab,
   return ULONG_MAX;
 }
 
-void gt_suftab_lighweightcheck(const GtEncseq *encseq,
+void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned long totallength,
                                const ESASuffixptr *suftab)
@@ -569,4 +571,41 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
   /*printf("# numofcomparisons = %lu (%.2f)\n",numofcomparisons,
                                     (double) numofcomparisons/totallength);*/
   gt_free(rangestore);
+}
+
+int gt_lcptab_lightweightcheck(const char *esaindexname,
+                               GtLogger *logger,GtError *err)
+{
+  bool haserr = false;
+  Sequentialsuffixarrayreader *ssar;
+
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(esaindexname,
+                                                   SARR_LCPTAB,
+                                                   SEQ_scan,
+                                                   logger,
+                                                   err);
+  if (ssar == NULL)
+  {
+    haserr = true;
+  }
+  while (true)
+  {
+    unsigned long lcpvalue;
+    int retval = gt_nextSequentiallcpvalue(&lcpvalue,ssar,err);
+
+    if (retval < 0)
+    {
+      haserr = true;
+      break;
+    }
+    if (retval == 0)
+    {
+      break;
+    }
+  }
+  if (ssar != NULL)
+  {
+    gt_freeSequentialsuffixarrayreader(&ssar);
+  }
+  return haserr ? -1 : 0;
 }

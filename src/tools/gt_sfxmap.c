@@ -613,10 +613,6 @@ static int gt_checkentiresuftab(const char *filename,
   }
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
-  if (numberofsuffixes == totallength + 1)
-  {
-    gt_suftab_lighweightcheck(encseq, readmode, totallength,suftab);
-  }
   return haserr ? -1 : 0;
   /*
   printf("# gt_checkentiresuftab with mode 'specials are %s'\n",
@@ -680,6 +676,7 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
       deletethespranges(suffixarray.encseq,arguments->delspranges);
     } else
     {
+      unsigned long totallength = gt_encseq_total_length(suffixarray.encseq);
       if (!haserr && arguments->inputsuf && !arguments->usestream)
       {
         Sequentialsuffixarrayreader *ssar;
@@ -717,16 +714,28 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
         {
           gt_freeSequentialsuffixarrayreader(&ssar);
         }
-        gt_logger_log(logger, "okay");
+        if (suffixarray.numberofallsortedsuffixes == totallength + 1)
+        {
+          gt_suftab_lightweightcheck(suffixarray.encseq, suffixarray.readmode,
+                                     totallength,suffixarray.suftab);
+          if (gt_lcptab_lightweightcheck(gt_str_get(arguments->esaindexname),
+                                         logger,err) != 0)
+          {
+            haserr = true;
+          }
+        }
+        if (!haserr)
+        {
+          gt_logger_log(logger, "okay");
+        }
       }
       if (!haserr && arguments->inputbwt)
       {
-        unsigned long totallength, bwtdifferentconsecutive = 0, idx;
+        unsigned long bwtdifferentconsecutive = 0, idx;
         GT_UNUSED unsigned long longest;
 
         gt_assert(suffixarray.longest.defined);
         longest = suffixarray.longest.valueunsignedlong;
-        totallength = gt_encseq_total_length(suffixarray.encseq);
         if (!haserr && arguments->inputsuf && !arguments->usestream)
         {
           gt_assert(suffixarray.numberofallsortedsuffixes == totallength+1);
