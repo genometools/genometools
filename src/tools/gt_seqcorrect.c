@@ -51,7 +51,8 @@ typedef struct
        onlyallrandomcodes,
        radixlarge,
        checksuftab,
-       usemaxdepth;
+       usemaxdepth,
+       list;
   unsigned int correction_kmersize,
                samplingfactor,
                trusted_count,
@@ -139,6 +140,12 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   /* -c */
   option = gt_option_new_uint_min("c", "specify the trusted count threshold",
       &arguments->trusted_count, 3U, 2U);
+  gt_option_parser_add_option(op, option);
+
+  /* -list */
+  option = gt_option_new_bool("list", "instead of correcting, "
+      "prepare a list of read numbers of all reads which contain seldom k-mers",
+      &arguments->list, false);
   gt_option_parser_add_option(op, option);
 
   /* -iter */
@@ -374,10 +381,210 @@ static int gt_seqcorrect_apply_corrections(GtEncseq *encseq,
   return haserr ? -1 : 0;
 }
 
+static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
+    GtLogger *default_logger, GtLogger *verbose_logger, GtError *err)
+{
+  bool haserr = false;
+  GtReads2Twobit *r2t;
+  unsigned long i;
+  bool autoindexname = false;
+
+  gt_logger_log(verbose_logger, "input is a list of libraries");
+  if (gt_str_length(arguments->indexname) == 0)
+  {
+    autoindexname = true;
+    gt_str_append_cstr(arguments->indexname,
+        gt_str_array_get(arguments->db, 0));
+  }
+  gt_logger_log(verbose_logger, "indexname: %s [%s]",
+      gt_str_get(arguments->indexname), autoindexname ?
+      "first input library" : "user-specified");
+
+  r2t = gt_reads2twobit_new(arguments->indexname);
+
+  if (arguments->phred64)
+    gt_reads2twobit_use_phred64(r2t);
+
+  if (arguments->maxlow != GT_UNDEF_ULONG)
+    gt_reads2twobit_set_quality_filter(r2t, arguments->maxlow,
+        (char)arguments->lowqual);
+
+  for (i = 0; i < gt_str_array_size(arguments->db) && !haserr; i++)
+  {
+    GtStr *dbentry = gt_str_array_get_str(arguments->db, i);
+    if (gt_reads2twobit_add_library(r2t, dbentry, err) != 0)
+      haserr = true;
+  }
+  if (!haserr)
+  {
+    if (gt_reads2twobit_encode(r2t, err) != 0)
+      haserr = true;
+  }
+  gt_assert(gt_str_length(arguments->encseqinput) == 0);
+  gt_str_append_cstr(arguments->encseqinput,
+      gt_str_get(arguments->indexname));
+
+  if (!haserr)
+  {
+    unsigned long nofreads_valid, nofreads_invalid, nofreads_input,
+                  tlen_valid;
+    bool varlen;
+    nofreads_valid = gt_reads2twobit_nofseqs(r2t);
+    nofreads_invalid = gt_reads2twobit_nof_invalid_seqs(r2t);
+    nofreads_input = nofreads_valid + nofreads_invalid;
+    tlen_valid = gt_reads2twobit_total_seqlength(r2t) -
+      gt_reads2twobit_nofseqs(r2t);
+
+    gt_logger_log(default_logger, "number of reads in original read set "
+        "= %lu", nofreads_input);
+
+    varlen = (gt_reads2twobit_seqlen_eqlen(r2t) == 0);
+    if (varlen)
+      gt_logger_log(verbose_logger, "read length = variable [%lu..%lu]",
+          gt_reads2twobit_seqlen_min(r2t), gt_reads2twobit_seqlen_max(r2t));
+    else
+      gt_logger_log(verbose_logger, "read length = %lu",
+          gt_reads2twobit_seqlen_eqlen(r2t) - 1UL);
+
+    gt_logger_log(verbose_logger, "total length of original read set = %lu",
+        tlen_valid + gt_reads2twobit_invalid_seqs_totallength(r2t));
+    gt_logger_log(verbose_logger, "low-quality reads = %lu "
+        "[%.2f %% of input]", nofreads_invalid, (float)nofreads_invalid *
+        100 / (float)nofreads_input);
+    if (!arguments->verbose)
+      gt_logger_log(default_logger, "low-quality reads = %lu",
+          nofreads_invalid);
+    if (!haserr)
+    {
+      if (gt_reads2twobit_write_encseq(r2t, err) != 0)
+        haserr = true;
+      if (!haserr)
+      {
+        gt_logger_log(verbose_logger,
+            "number of reads in output read set = %lu", nofreads_valid);
+        gt_logger_log(verbose_logger,
+            "total length of output read set = %lu", tlen_valid);
+        gt_logger_log(verbose_logger, "read set saved as GtEncseq: %s.%s",
+            gt_str_get(arguments->indexname), varlen ?
+            "(esq|ssp)" : "esq");
+      }
+    }
+  }
+  gt_reads2twobit_delete(r2t);
+
+  return haserr;
+}
+
+static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
+    GtEncseq *encseq, GtLogger *verbose_logger, GtTimer *timer, GtError *err)
+{
+  bool haserr = false;
+#ifdef GT_THREADS_ENABLED
+    const unsigned int threads = gt_jobs;
+#else
+  const unsigned int threads = 1U;
+#endif
+  unsigned int iteration;
+  unsigned int bucketkey_kmersize;
+  unsigned long cumulative_nofcorrections = 0;
+  GtRandomcodesCorrectData **data_array = NULL;
+
+  data_array = gt_malloc(sizeof (*data_array) * threads);
+  gt_log_log("correction kmersize=%u", arguments->correction_kmersize);
+  haserr = gt_seqcorrect_bucketkey_kmersize(arguments,
+      &bucketkey_kmersize, err);
+  gt_logger_log(verbose_logger, "%u threads will be used",
+      threads);
+  gt_logger_log(verbose_logger, "%u iterations will be run",
+      arguments->iterations);
+
+  for (iteration = 1U; iteration <= arguments->iterations && !haserr;
+      iteration++)
+  {
+    unsigned int threadcount;
+    unsigned long nofkmergroups = 0, nofkmeritvs = 0, nofcorrections = 0,
+                  nofkmers = 0;
+
+    gt_logger_log(verbose_logger, "iteration %u will now start...",
+        iteration);
+
+    for (threadcount = 0; !haserr && threadcount < threads; threadcount++)
+    {
+      data_array[threadcount] = gt_randomcodes_correct_data_new(encseq,
+          arguments->correction_kmersize, arguments->trusted_count,
+          gt_str_get(arguments->encseqinput), GT_SEQCORRECT_FILESUFFIX,
+          threadcount, err);
+      if ((data_array[threadcount]) == NULL)
+      {
+        haserr = true;
+      }
+    }
+    if (!haserr)
+    {
+      if (storerandomcodes_getencseqkmers_twobitencoding(encseq,
+            bucketkey_kmersize,
+            arguments->numofparts,
+            arguments->maximumspace,
+            arguments->correction_kmersize,
+            arguments->usefirstcodes,
+            arguments->samplingfactor,
+            arguments->usemaxdepth,
+            arguments->checksuftab,
+            arguments->onlyaccum,
+            arguments->onlyallrandomcodes,
+            arguments->addbscache_depth,
+            0,
+            arguments->radixlarge ? false : true,
+            arguments->radixparts,
+            gt_randomcodes_correct_process_bucket,
+            NULL,
+            data_array,
+            verbose_logger,
+            timer,
+            err) != 0)
+            {
+              haserr = true;
+            }
+    }
+    for (threadcount = 0; threadcount < threads; threadcount++)
+    {
+      if (!haserr) {
+        gt_randomcodes_correct_data_collect_stats(data_array[threadcount],
+            threadcount, &nofkmergroups, &nofkmeritvs, &nofkmers,
+            &nofcorrections);
+      }
+      gt_randomcodes_correct_data_delete(data_array[threadcount]);
+    }
+    cumulative_nofcorrections += nofcorrections;
+
+    gt_logger_log(verbose_logger, "[iteration %u] "
+        "total number of k-mers: %lu", iteration, nofkmers);
+    gt_logger_log(verbose_logger, "[iteration %u] "
+        "number of different k-mers: %lu", iteration, nofkmeritvs);
+    gt_logger_log(verbose_logger, "[iteration %u] "
+        "number of different k-1-mers: %lu", iteration, nofkmergroups);
+    gt_logger_log(verbose_logger, "[iteration %u] "
+        "number of kmer corrections: %lu", iteration, nofcorrections);
+
+    if (!haserr) {
+      gt_logger_log(verbose_logger, "[iteration %u] apply corrections...",
+          iteration);
+      if (gt_seqcorrect_apply_corrections(encseq,
+            gt_str_get(arguments->encseqinput), threads, err) != 0) {
+        haserr = true;
+      }
+    }
+  }
+  gt_logger_log(verbose_logger, "total corrections: %lu",
+      cumulative_nofcorrections);
+  gt_free(data_array);
+  return haserr;
+}
+
 static int gt_seqcorrect_runner(GT_UNUSED int argc,
-                                GT_UNUSED const char **argv,
-                                GT_UNUSED int parsed_args,
-                                void *tool_arguments,
+    GT_UNUSED const char **argv,
+    GT_UNUSED int parsed_args,
+    void *tool_arguments,
                                 GtError *err)
 {
   GtSeqcorrectArguments *arguments = tool_arguments;
@@ -405,90 +612,8 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
 
   if (gt_str_array_size(arguments->db) != 0)
   {
-    GtReads2Twobit *r2t;
-    unsigned long i;
-    bool autoindexname = false;
-    gt_logger_log(verbose_logger, "input is a list of libraries");
-    if (gt_str_length(arguments->indexname) == 0)
-    {
-      autoindexname = true;
-      gt_str_append_cstr(arguments->indexname,
-          gt_str_array_get(arguments->db, 0));
-    }
-    gt_logger_log(verbose_logger, "indexname: %s [%s]",
-          gt_str_get(arguments->indexname), autoindexname ?
-          "first input library" : "user-specified");
-
-    r2t = gt_reads2twobit_new(arguments->indexname);
-
-    if (arguments->phred64)
-      gt_reads2twobit_use_phred64(r2t);
-
-    if (arguments->maxlow != GT_UNDEF_ULONG)
-      gt_reads2twobit_set_quality_filter(r2t, arguments->maxlow,
-          (char)arguments->lowqual);
-
-    for (i = 0; i < gt_str_array_size(arguments->db) && !haserr; i++)
-    {
-      GtStr *dbentry = gt_str_array_get_str(arguments->db, i);
-      if (gt_reads2twobit_add_library(r2t, dbentry, err) != 0)
-        haserr = true;
-    }
-    if (!haserr)
-    {
-      if (gt_reads2twobit_encode(r2t, err) != 0)
-        haserr = true;
-    }
-    gt_assert(gt_str_length(arguments->encseqinput) == 0);
-    gt_str_append_cstr(arguments->encseqinput,
-        gt_str_get(arguments->indexname));
-    if (!haserr)
-    {
-      unsigned long nofreads_valid, nofreads_invalid, nofreads_input,
-                    tlen_valid;
-      bool varlen;
-      nofreads_valid = gt_reads2twobit_nofseqs(r2t);
-      nofreads_invalid = gt_reads2twobit_nof_invalid_seqs(r2t);
-      nofreads_input = nofreads_valid + nofreads_invalid;
-      tlen_valid = gt_reads2twobit_total_seqlength(r2t) -
-        gt_reads2twobit_nofseqs(r2t);
-
-      gt_logger_log(default_logger, "number of reads in original read set "
-          "= %lu", nofreads_input);
-
-      varlen = (gt_reads2twobit_seqlen_eqlen(r2t) == 0);
-      if (varlen)
-        gt_logger_log(verbose_logger, "read length = variable [%lu..%lu]",
-            gt_reads2twobit_seqlen_min(r2t), gt_reads2twobit_seqlen_max(r2t));
-      else
-        gt_logger_log(verbose_logger, "read length = %lu",
-            gt_reads2twobit_seqlen_eqlen(r2t) - 1UL);
-
-      gt_logger_log(verbose_logger, "total length of original read set = %lu",
-          tlen_valid + gt_reads2twobit_invalid_seqs_totallength(r2t));
-      gt_logger_log(verbose_logger, "low-quality reads = %lu "
-          "[%.2f %% of input]", nofreads_invalid, (float)nofreads_invalid *
-          100 / (float)nofreads_input);
-      if (!arguments->verbose)
-        gt_logger_log(default_logger, "low-quality reads = %lu",
-            nofreads_invalid);
-      if (!haserr)
-      {
-        if (gt_reads2twobit_write_encseq(r2t, err) != 0)
-          haserr = true;
-        if (!haserr)
-        {
-          gt_logger_log(verbose_logger,
-              "number of reads in output read set = %lu", nofreads_valid);
-          gt_logger_log(verbose_logger,
-              "total length of output read set = %lu", tlen_valid);
-          gt_logger_log(verbose_logger, "read set saved as GtEncseq: %s.%s",
-              gt_str_get(arguments->indexname), varlen ?
-              "(esq|ssp)" : "esq");
-        }
-      }
-    }
-    gt_reads2twobit_delete(r2t);
+    haserr =
+      gt_seqcorrect_encode(arguments, default_logger, verbose_logger, err);
   }
   else
   {
@@ -526,105 +651,8 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-#ifdef GT_THREADS_ENABLED
-    const unsigned int threads = gt_jobs;
-#else
-    const unsigned int threads = 1U;
-#endif
-    unsigned int iteration;
-    unsigned int bucketkey_kmersize;
-    unsigned long cumulative_nofcorrections = 0;
-    GtRandomcodesCorrectData **data_array = NULL;
-
-    data_array = gt_malloc(sizeof (*data_array) * threads);
-    gt_log_log("correction kmersize=%u", arguments->correction_kmersize);
-    haserr = gt_seqcorrect_bucketkey_kmersize(arguments,
-        &bucketkey_kmersize, err);
-    gt_logger_log(verbose_logger, "%u threads will be used",
-          threads);
-    gt_logger_log(verbose_logger, "%u iterations will be run",
-        arguments->iterations);
-
-    for (iteration = 1U; iteration <= arguments->iterations && !haserr;
-        iteration++)
-    {
-      unsigned int threadcount;
-      unsigned long nofkmergroups = 0, nofkmeritvs = 0, nofcorrections = 0,
-                    nofkmers = 0;
-
-      gt_logger_log(verbose_logger, "iteration %u will now start...",
-          iteration);
-
-      for (threadcount = 0; !haserr && threadcount < threads; threadcount++)
-      {
-        data_array[threadcount] = gt_randomcodes_correct_data_new(encseq,
-            arguments->correction_kmersize, arguments->trusted_count,
-            gt_str_get(arguments->encseqinput), GT_SEQCORRECT_FILESUFFIX,
-            threadcount, err);
-        if ((data_array[threadcount]) == NULL)
-        {
-          haserr = true;
-        }
-      }
-      if (!haserr)
-      {
-        if (storerandomcodes_getencseqkmers_twobitencoding(encseq,
-              bucketkey_kmersize,
-              arguments->numofparts,
-              arguments->maximumspace,
-              arguments->correction_kmersize,
-              arguments->usefirstcodes,
-              arguments->samplingfactor,
-              arguments->usemaxdepth,
-              arguments->checksuftab,
-              arguments->onlyaccum,
-              arguments->onlyallrandomcodes,
-              arguments->addbscache_depth,
-              0,
-              arguments->radixlarge ? false : true,
-              arguments->radixparts,
-              gt_randomcodes_correct_process_bucket,
-              NULL,
-              data_array,
-              verbose_logger,
-              timer,
-              err) != 0)
-              {
-                haserr = true;
-              }
-      }
-      for (threadcount = 0; threadcount < threads; threadcount++)
-      {
-        if (!haserr) {
-          gt_randomcodes_correct_data_collect_stats(data_array[threadcount],
-              threadcount, &nofkmergroups, &nofkmeritvs, &nofkmers,
-              &nofcorrections);
-        }
-        gt_randomcodes_correct_data_delete(data_array[threadcount]);
-      }
-      cumulative_nofcorrections += nofcorrections;
-
-      gt_logger_log(verbose_logger, "[iteration %u] "
-          "total number of k-mers: %lu", iteration, nofkmers);
-      gt_logger_log(verbose_logger, "[iteration %u] "
-          "number of different k-mers: %lu", iteration, nofkmeritvs);
-      gt_logger_log(verbose_logger, "[iteration %u] "
-          "number of different k-1-mers: %lu", iteration, nofkmergroups);
-      gt_logger_log(verbose_logger, "[iteration %u] "
-          "number of kmer corrections: %lu", iteration, nofcorrections);
-
-      if (!haserr) {
-        gt_logger_log(verbose_logger, "[iteration %u] apply corrections...",
-            iteration);
-        if (gt_seqcorrect_apply_corrections(encseq,
-            gt_str_get(arguments->encseqinput), threads, err) != 0) {
-          haserr = true;
-        }
-      }
-    }
-    gt_logger_log(verbose_logger, "total corrections: %lu",
-        cumulative_nofcorrections);
-    gt_free(data_array);
+    haserr = gt_seqcorrect_correct(arguments, encseq, verbose_logger, timer,
+        err);
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
