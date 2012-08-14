@@ -719,6 +719,9 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
           gt_suftab_lightweightcheck(suffixarray.encseq, suffixarray.readmode,
                                      totallength,suffixarray.suftab);
           if (gt_lcptab_lightweightcheck(gt_str_get(arguments->esaindexname),
+                                         suffixarray.encseq,
+                                         suffixarray.readmode,
+                                         suffixarray.suftab,
                                          logger,err) != 0)
           {
             haserr = true;

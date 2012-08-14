@@ -20,14 +20,13 @@
 
 #include "core/encseq.h"
 #include "compressedtab.h"
-#include "sfx-suffixgetset.h"
 
 Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  unsigned long partwidth,
                                  unsigned long totallength,
-                                 const GtSuffixsortspace *sortedsuffixes);
+                                 const ESASuffixptr *suftab);
 
 void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                                GtReadmode readmode,
@@ -35,6 +34,10 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                                const ESASuffixptr *suftab);
 
 int gt_lcptab_lightweightcheck(const char *esaindexname,
-                               GtLogger *logger,GtError *err);
+                               const GtEncseq *encseq,
+                               GtReadmode readmode,
+                               const ESASuffixptr *suftab,
+                               GtLogger *logger,
+                               GtError *err);
 
 #endif
