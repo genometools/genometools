@@ -582,7 +582,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
   unsigned long partwidth, totallength = gt_encseq_total_length(encseq),
-                specials = gt_encseq_specialcharacters(encseq);
+                idx, specials = gt_encseq_specialcharacters(encseq);
   Compressedtable *lcptab = NULL;
 
   gt_assert(specials <= totallength);
@@ -605,9 +605,9 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
   {
     haserr = true;
   }
-  while (true)
+  for (idx = 1UL; /* Nothing */; idx++)
   {
-    unsigned long lcpvalue;
+    unsigned long mlcpvalue, lcpvalue;
     int retval = gt_nextSequentiallcpvalue(&lcpvalue,ssar,err);
 
     if (retval < 0)
@@ -618,6 +618,19 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
     if (retval == 0)
     {
       break;
+    }
+    if (idx < partwidth)
+    {
+      mlcpvalue = compressedtable_get(lcptab,idx);
+    } else
+    {
+      mlcpvalue = 0;
+    }
+    if (mlcpvalue != lcpvalue)
+    {
+      fprintf(stderr,"%lu: mlcpvalue = %lu != %lu = lcpvalue\n",
+                       idx,mlcpvalue,lcpvalue);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
   if (ssar != NULL)
