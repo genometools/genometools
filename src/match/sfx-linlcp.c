@@ -20,6 +20,7 @@
 #include "core/ma_api.h"
 #include "core/encseq.h"
 #include "core/range.h"
+#include "core/mathsupport.h"
 #include "compressedtab.h"
 #include "sarr-def.h"
 #include "sfx-linlcp.h"
@@ -405,25 +406,27 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
   return lcptab;
 }
 
-/*static void gt_check_merged_sorted_range(const GtEncseq *encseq,
-                                         GtReadmode readmode,
-                                         unsigned long totallength,
-                                         const ESASuffixptr *suftab,
-                                         unsigned long start,
-                                         unsigned long end)
+static unsigned long numofcomparisons = 0;
+
+static unsigned long gt_check_for_range_occurrence(const ESASuffixptr *suftab,
+                                                   unsigned long suffix,
+                                                   unsigned long start,
+                                                   unsigned long end)
 {
-  unsigned long idx, ref = 0;
+  unsigned long idx;
 
   for (idx = start; idx <= end; idx++)
   {
     unsigned long position = ESASUFFIXPTRGET(suftab,idx);
 
-    while (position + 1 != ESASUFFIXPTRGET(suftab,ref))
+    if (suffix == position)
     {
-      ref++;
+      numofcomparisons++;
+      return idx;
     }
   }
-}*/
+  return ULONG_MAX;
+}
 
 void gt_suftab_lighweightcheck(const GtEncseq *encseq,
                                GtReadmode readmode,
@@ -432,10 +435,11 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
 {
   unsigned long idx, countbitsset = 0, previouspos = 0,
                 firstspecial = totallength, rangestart = 0;
-  unsigned int numofchars, rangeidx = 0;
+  unsigned int numofchars, charidx, rangeidx = 0, numofranges;
   GtBitsequence *startposoccurs;
   GtUchar previouscc = 0;
   GtRange *rangestore;
+  double ratio;
 
   printf("%s\n",__func__);
   GT_INITBITTAB(startposoccurs,totallength+1);
@@ -526,12 +530,46 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
   gt_assert(rangeidx < numofchars+1);
   rangestore[rangeidx].start = firstspecial;
   rangestore[rangeidx++].end = totallength;
-  gt_assert(rangeidx == numofchars+1);
+  numofranges = rangeidx;
   printf("%lu %lu\n",firstspecial,totallength);
-  for (rangeidx = 0; rangeidx < numofchars; rangeidx++)
+  rangeidx = 0;
+  for (charidx = 0; charidx < numofchars; charidx++)
   {
-    gt_assert(rangestore[rangeidx].end - rangestore[rangeidx].start + 1
-              == gt_encseq_charcount(encseq,(GtUchar) rangeidx));
+    if (gt_encseq_charcount(encseq,(GtUchar) charidx) != 0)
+    {
+      gt_assert(rangestore[rangeidx].end - rangestore[rangeidx].start + 1
+              == gt_encseq_charcount(encseq,(GtUchar) charidx));
+      rangeidx++;
+    }
   }
+  for (rangeidx = 0; rangeidx < numofranges-1; rangeidx++)
+  {
+    unsigned long start = 0;
+
+    for (idx = rangestore[rangeidx].start; idx <= rangestore[rangeidx].end;
+         idx++)
+    {
+      unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+
+      if (position + 1 <= totallength)
+      {
+        unsigned long newstart = gt_check_for_range_occurrence(suftab,
+                                                               position + 1,
+                                                               start,
+                                                               totallength);
+        if (newstart == ULONG_MAX)
+        {
+          fprintf(stderr,"Cannot find position+1=%lu in range [%lu,%lu]\n",
+                            position+1,start,totallength);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+        }
+        start = newstart + 1;
+      }
+    }
+  }
+  ratio = (double) numofcomparisons/totallength;
+  gt_assert(gt_double_compare(ratio,1.0) <= 0);
+  printf("# numofcomparisons = %lu (%.2f)\n",numofcomparisons,
+                                         (double) numofcomparisons/totallength);
   gt_free(rangestore);
 }
