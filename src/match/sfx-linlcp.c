@@ -522,9 +522,16 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
   gt_assert(rangeidx < numofchars+1);
   rangestore[rangeidx].start = rangestart;
   rangestore[rangeidx++].end = firstspecial-1;
+  printf("%lu %lu\n",rangestart,firstspecial-1);
   gt_assert(rangeidx < numofchars+1);
   rangestore[rangeidx].start = firstspecial;
   rangestore[rangeidx++].end = totallength;
-  printf("%lu %lu\n",rangestart,firstspecial-1);
+  gt_assert(rangeidx == numofchars+1);
+  printf("%lu %lu\n",firstspecial,totallength);
+  for (rangeidx = 0; rangeidx < numofchars; rangeidx++)
+  {
+    gt_assert(rangestore[rangeidx].end - rangestore[rangeidx].start + 1
+              == gt_encseq_charcount(encseq,(GtUchar) rangeidx));
+  }
   gt_free(rangestore);
 }
