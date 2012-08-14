@@ -406,8 +406,6 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
   return lcptab;
 }
 
-static unsigned long numofcomparisons = 0;
-
 static unsigned long gt_check_for_range_occurrence(const ESASuffixptr *suftab,
                                                    unsigned long suffix,
                                                    unsigned long start,
@@ -421,7 +419,6 @@ static unsigned long gt_check_for_range_occurrence(const ESASuffixptr *suftab,
 
     if (suffix == position)
     {
-      numofcomparisons++;
       return idx;
     }
   }
@@ -434,14 +431,14 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
                                const ESASuffixptr *suftab)
 {
   unsigned long idx, countbitsset = 0, previouspos = 0,
-                firstspecial = totallength, rangestart = 0;
+                firstspecial = totallength, rangestart = 0,
+                numofcomparisons = 0;
   unsigned int numofchars, charidx, rangeidx = 0, numofranges;
   GtBitsequence *startposoccurs;
   GtUchar previouscc = 0;
   GtRange *rangestore;
   double ratio;
 
-  printf("%s\n",__func__);
   GT_INITBITTAB(startposoccurs,totallength+1);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   rangestore = gt_malloc(sizeof(GtRange) * (numofchars+1));
@@ -518,7 +515,6 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
       gt_assert(rangeidx < numofchars+1);
       rangestore[rangeidx].start = rangestart;
       rangestore[rangeidx++].end = idx-1;
-      printf("%lu %lu\n",rangestart,idx-1);
       rangestart = idx;
     }
     previouscc = cc;
@@ -526,12 +522,10 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
   gt_assert(rangeidx < numofchars+1);
   rangestore[rangeidx].start = rangestart;
   rangestore[rangeidx++].end = firstspecial-1;
-  printf("%lu %lu\n",rangestart,firstspecial-1);
   gt_assert(rangeidx < numofchars+1);
   rangestore[rangeidx].start = firstspecial;
   rangestore[rangeidx++].end = totallength;
   numofranges = rangeidx;
-  printf("%lu %lu\n",firstspecial,totallength);
   rangeidx = 0;
   for (charidx = 0; charidx < numofchars; charidx++)
   {
@@ -562,14 +556,17 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
           fprintf(stderr,"Cannot find position+1=%lu in range [%lu,%lu]\n",
                             position+1,start,totallength);
           exit(GT_EXIT_PROGRAMMING_ERROR);
+        } else
+        {
+          numofcomparisons += newstart - start + 1;
         }
         start = newstart + 1;
       }
     }
   }
   ratio = (double) numofcomparisons/totallength;
-  gt_assert(gt_double_compare(ratio,1.0) <= 0);
-  printf("# numofcomparisons = %lu (%.2f)\n",numofcomparisons,
-                                         (double) numofcomparisons/totallength);
+  gt_assert(gt_double_compare(ratio,(double) numofchars) <= 0);
+  /*printf("# numofcomparisons = %lu (%.2f)\n",numofcomparisons,
+                                    (double) numofcomparisons/totallength);*/
   gt_free(rangestore);
 }
