@@ -18,8 +18,8 @@
 #include <stdio.h>
 #include "core/chardef.h"
 #include "core/ma_api.h"
-
 #include "core/encseq.h"
+#include "core/range.h"
 #include "compressedtab.h"
 #include "sarr-def.h"
 #include "sfx-linlcp.h"
@@ -431,13 +431,16 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
                                const ESASuffixptr *suftab)
 {
   unsigned long idx, countbitsset = 0, previouspos = 0,
-                firstspecial = totallength;
+                firstspecial = totallength, rangestart = 0;
+  unsigned int numofchars, rangeidx = 0;
   GtBitsequence *startposoccurs;
-  unsigned long rangestart = 0;
   GtUchar previouscc = 0;
+  GtRange *rangestore;
 
   printf("%s\n",__func__);
   GT_INITBITTAB(startposoccurs,totallength+1);
+  numofchars = gt_encseq_alphabetnumofchars(encseq);
+  rangestore = gt_malloc(sizeof(GtRange) * (numofchars+1));
   for (idx = 0; idx < totallength; idx++)
   {
     unsigned long position = ESASUFFIXPTRGET(suftab,idx);
@@ -508,10 +511,20 @@ void gt_suftab_lighweightcheck(const GtEncseq *encseq,
     cc = gt_encseq_get_encoded_char(encseq,position,readmode);
     if (idx > 0 && cc != previouscc)
     {
+      gt_assert(rangeidx < numofchars+1);
+      rangestore[rangeidx].start = rangestart;
+      rangestore[rangeidx++].end = idx-1;
       printf("%lu %lu\n",rangestart,idx-1);
       rangestart = idx;
     }
     previouscc = cc;
   }
+  gt_assert(rangeidx < numofchars+1);
+  rangestore[rangeidx].start = rangestart;
+  rangestore[rangeidx++].end = firstspecial-1;
+  gt_assert(rangeidx < numofchars+1);
+  rangestore[rangeidx].start = firstspecial;
+  rangestore[rangeidx++].end = totallength;
   printf("%lu %lu\n",rangestart,firstspecial-1);
+  gt_free(rangestore);
 }
