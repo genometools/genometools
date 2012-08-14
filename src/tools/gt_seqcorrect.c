@@ -34,13 +34,15 @@
 #include "core/xposix.h"
 #include "tools/gt_seqcorrect.h"
 #include "match/reads2twobit.h"
-#include "match/rdj-contfinder.h"
 #include "match/rdj-twobitenc-editor.h"
 #include "match/randomcodes.h"
 #include "match/randomcodes-correct.h"
+#include "match/randomcodes-find-seldom.h"
+#include "match/rdj-cntlist.h"
 #include "tools/gt_seqcorrect.h"
 
-#define GT_SEQCORRECT_FILESUFFIX ".cor"
+#define GT_SEQCORRECT_CORRECTIONSLIST_FILESUFFIX ".cor"
+#define GT_SEQCORRECT_SELDOMREADS_FILESUFFIX     ".sld"
 
 typedef struct
 {
@@ -52,7 +54,7 @@ typedef struct
        radixlarge,
        checksuftab,
        usemaxdepth,
-       list;
+       find_seldom;
   unsigned int correction_kmersize,
                samplingfactor,
                trusted_count,
@@ -142,10 +144,10 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
       &arguments->trusted_count, 3U, 2U);
   gt_option_parser_add_option(op, option);
 
-  /* -list */
-  option = gt_option_new_bool("list", "instead of correcting, "
-      "prepare a list of read numbers of all reads which contain seldom k-mers",
-      &arguments->list, false);
+  /* -find-seldom */
+  option = gt_option_new_bool("find-seldom", "do not try to correct, only "
+      "prepare a list of all reads containing seldom k-mers",
+      &arguments->find_seldom, false);
   gt_option_parser_add_option(op, option);
 
   /* -iter */
@@ -328,6 +330,13 @@ static int gt_seqcorrect_arguments_check(GT_UNUSED int rest_argc,
     }
   }
 #endif
+  if (!haserr) {
+    if (arguments->find_seldom && arguments->iterations != 1U)
+    {
+      gt_error_set(err, "The '-find-seldom' option implies '-iter 1'");
+      haserr = true;
+    }
+  }
   return haserr ? -1 : 0;
 }
 
@@ -349,10 +358,10 @@ static int gt_seqcorrect_apply_corrections(GtEncseq *encseq,
     filename = gt_str_new_cstr(indexname);
     gt_str_append_char(filename, '.');
     gt_str_append_uint(filename, threadcount);
-    gt_str_append_cstr(filename, GT_SEQCORRECT_FILESUFFIX);
+    gt_str_append_cstr(filename, GT_SEQCORRECT_CORRECTIONSLIST_FILESUFFIX);
     corrections = gt_fa_fopen(gt_str_get(filename), "r", err);
     gt_log_log("apply corrections list %s.%u%s", indexname, threadcount,
-        GT_SEQCORRECT_FILESUFFIX);
+        GT_SEQCORRECT_CORRECTIONSLIST_FILESUFFIX);
     if (corrections == NULL)
       haserr = true;
     else
@@ -512,8 +521,8 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
     {
       data_array[threadcount] = gt_randomcodes_correct_data_new(encseq,
           arguments->correction_kmersize, arguments->trusted_count,
-          gt_str_get(arguments->encseqinput), GT_SEQCORRECT_FILESUFFIX,
-          threadcount, err);
+          gt_str_get(arguments->encseqinput),
+          GT_SEQCORRECT_CORRECTIONSLIST_FILESUFFIX, threadcount, err);
       if ((data_array[threadcount]) == NULL)
       {
         haserr = true;
@@ -581,11 +590,110 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
   return haserr;
 }
 
+static bool gt_seqcorrect_find_seldom(GtSeqcorrectArguments *arguments,
+    GtEncseq *encseq, GtLogger *verbose_logger, GtTimer *timer, GtError *err)
+{
+  bool haserr = false;
+#ifdef GT_THREADS_ENABLED
+    const unsigned int threads = gt_jobs;
+#else
+  const unsigned int threads = 1U;
+#endif
+  unsigned int bucketkey_kmersize;
+  GtRandomcodesFindSeldomData **data_array = NULL;
+  unsigned int threadcount;
+  unsigned long nofseldomkmers = 0;
+  GtBitsequence **seldom_reads = NULL;
+  unsigned long nofreads = GT_DIV2(gt_encseq_num_of_sequences(encseq));
+  size_t seldomsize = GT_NUMOFINTSFORBITS(nofreads);
+
+  data_array = gt_malloc(sizeof (*data_array) * threads);
+  seldom_reads = gt_malloc(sizeof (**seldom_reads) * threads);
+  gt_log_log("seldom finder kmersize=%u", arguments->correction_kmersize);
+  haserr = gt_seqcorrect_bucketkey_kmersize(arguments,
+      &bucketkey_kmersize, err);
+  gt_logger_log(verbose_logger, "%u threads will be used",
+      threads);
+
+  for (threadcount = 0; !haserr && threadcount < threads; threadcount++)
+  {
+    GT_INITBITTAB(seldom_reads[threadcount], nofreads);
+    data_array[threadcount] = gt_randomcodes_find_seldom_data_new(encseq,
+        arguments->correction_kmersize, arguments->trusted_count,
+        seldom_reads[threadcount]);
+    if ((data_array[threadcount]) == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    if (storerandomcodes_getencseqkmers_twobitencoding(encseq,
+          bucketkey_kmersize,
+          arguments->numofparts,
+          arguments->maximumspace,
+          arguments->correction_kmersize,
+          arguments->usefirstcodes,
+          arguments->samplingfactor,
+          arguments->usemaxdepth,
+          arguments->checksuftab,
+          arguments->onlyaccum,
+          arguments->onlyallrandomcodes,
+          arguments->addbscache_depth,
+          0,
+          arguments->radixlarge ? false : true,
+          arguments->radixparts,
+          gt_randomcodes_find_seldom_process_bucket,
+          NULL,
+          data_array,
+          verbose_logger,
+          timer,
+          err) != 0)
+          {
+            haserr = true;
+          }
+  }
+  for (threadcount = 0; threadcount < threads; threadcount++)
+  {
+    if (!haserr) {
+      gt_randomcodes_find_seldom_data_collect_stats(data_array[threadcount],
+          threadcount, &nofseldomkmers);
+    }
+    gt_randomcodes_find_seldom_data_delete(data_array[threadcount]);
+    if (threadcount > 0)
+    {
+      size_t pos;
+      for (pos = 0; pos < seldomsize; pos++)
+        seldom_reads[0][pos] |= seldom_reads[threadcount][pos];
+      gt_free(seldom_reads[threadcount]);
+    }
+  }
+
+  if (!haserr)
+  {
+    GtStr *filename = gt_str_clone(arguments->encseqinput);
+    gt_logger_log(verbose_logger, "total seldom k-mers: %lu", nofseldomkmers);
+    gt_str_append_cstr(filename, GT_SEQCORRECT_SELDOMREADS_FILESUFFIX);
+    if (gt_cntlist_show(seldom_reads[0], nofreads, gt_str_get(filename),
+          false, err) != 0)
+    {
+      haserr = true;
+    }
+    gt_str_delete(filename);
+  }
+
+  gt_free(data_array);
+  gt_free(seldom_reads[0]);
+  gt_free(seldom_reads);
+
+  return haserr;
+}
+
 static int gt_seqcorrect_runner(GT_UNUSED int argc,
     GT_UNUSED const char **argv,
     GT_UNUSED int parsed_args,
     void *tool_arguments,
-                                GtError *err)
+    GtError *err)
 {
   GtSeqcorrectArguments *arguments = tool_arguments;
   GtEncseqLoader *el = NULL;
@@ -651,8 +759,12 @@ static int gt_seqcorrect_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-    haserr = gt_seqcorrect_correct(arguments, encseq, verbose_logger, timer,
-        err);
+    if (!arguments->find_seldom)
+      haserr = gt_seqcorrect_correct(arguments, encseq, verbose_logger, timer,
+          err);
+    else
+      haserr = gt_seqcorrect_find_seldom(arguments, encseq, verbose_logger,
+          timer, err);
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
