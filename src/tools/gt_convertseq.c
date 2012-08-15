@@ -75,13 +75,13 @@ static GtOPrval parse_options(ConvertseqOptions *opts, int *parsed_args,
                          &opts->fastawidth, 60UL);
   gt_option_parser_add_option(op, o);
 
-  o = gt_option_new_bool("reduceWCdna", "replace stretches of WildCards with"
-                         " just one 'N'.",
+  o = gt_option_new_bool("contractdnawc", "replace stretches of DNA wildcards "
+                                          "with a single 'N'",
                          &opts->reduce_wc_dna, false);
   gt_option_parser_add_option(op, o);
 
-  o = gt_option_new_bool("reduceWCprot", "replace stretches of WildCards with"
-                         " just one 'X'.",
+  o = gt_option_new_bool("contractproteinwc", "replace stretches of protein "
+                                              "wildcards with a single 'X'",
                          &opts->reduce_wc_prot, false);
   gt_option_parser_add_option(op, o);
 
