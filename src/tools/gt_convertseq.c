@@ -16,6 +16,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
+#include <ctype.h>
+#else
+#ifndef GT_ISUPPER_DEFINED
+#define GT_ISUPPER_DEFINED
+int isupper(int c);
+#endif
+#endif
 #include <string.h>
 #include "core/fileutils_api.h"
 #include "core/filelengthvalues.h"
@@ -182,14 +190,17 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
               case 'u':
               case 'T':
               case 'U':
-                if (in_wildcard) in_wildcard = false;
+                in_wildcard = false;
                 gt_file_xfputc((int) seq[i], opts.outfp);
                 j++;
                 break;
               default:
                 if (!in_wildcard) {
                   in_wildcard = true;
-                  gt_file_xfputc((int) 'N', opts.outfp);
+                  if (isupper((int) seq[i]))
+                    gt_file_xfputc((int) 'N', opts.outfp);
+                  else
+                    gt_file_xfputc((int) 'n', opts.outfp);
                   j++;
                 }
             }
@@ -197,19 +208,25 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
           else if (opts.reduce_wc_prot) {
             switch (seq[i]) {
               case 'X':
-              case 'x':
               case 'B':
-              case 'b':
               case 'Z':
-              case 'z':
                 if (!in_wildcard) {
                   in_wildcard = true;
                   gt_file_xfputc((int) 'N', opts.outfp);
                   j++;
                 }
                 break;
+              case 'x':
+              case 'b':
+              case 'z':
+                if (!in_wildcard) {
+                  in_wildcard = true;
+                  gt_file_xfputc((int) 'n', opts.outfp);
+                  j++;
+                }
+                break;
               default:
-                if (in_wildcard) in_wildcard = false;
+                in_wildcard = false;
                 gt_file_xfputc((int) seq[i], opts.outfp);
                 j++;
             }
