@@ -1250,6 +1250,8 @@ static void gt_reads2twobit_seek_sequence(const GtReads2Twobit *r2t,
   *firstcode = *((*nextcode_ptr)++);
 }
 
+/* decodes the specified sequence in Fasta format; the <decoded> buffer
+   must be large enough */
 void gt_reads2twobit_decode_sequence(const GtReads2Twobit *r2t,
     unsigned long seqnum, char *decoded)
 {
@@ -1297,6 +1299,9 @@ static unsigned long gt_reads2twobit_subtract_from_chardistri(
   return seqlen;
 }
 
+/* decodes the sequences <seqnum_from> to <seqnum_from>+<nofseqs>-1
+   in MultiFasta format and outputs to <outfp>; if <skip> is not NULL,
+   then skips any sequence for which the corresponding bit is set */
 void gt_reads2twobit_decode_range(const GtReads2Twobit *r2t,
     GtFile *outfp, unsigned long seqnum_from, unsigned long nofseqs,
     const GtBitsequence *skip)

@@ -22,6 +22,11 @@
 #include "core/intbits.h"
 #include "core/str.h"
 
+#define GT_READS2TWOBIT_LIBSPECSEP ':'
+#define GT_READS2TWOBIT_INSERTSEP  ','
+
+typedef struct GtReads2Twobit GtReads2Twobit;
+
 /* The <GtReads2Twobit> class is a specialized encoder for large collections of
    sequencing reads in FastQ and Fasta format. After encoding, the information
    is accessible as a GtTwobitencoding representation in memory and can be
@@ -39,14 +44,9 @@
    sequence is encoded, whose length is not the same of the previous
    sequences. */
 
-typedef struct GtReads2Twobit GtReads2Twobit;
+GtReads2Twobit*   gt_reads2twobit_new(GtStr *indexname);
 
-GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname);
-
-void gt_reads2twobit_delete(GtReads2Twobit *r2t);
-
-#define GT_READS2TWOBIT_LIBSPECSEP ':'
-#define GT_READS2TWOBIT_INSERTSEP  ','
+void              gt_reads2twobit_delete(GtReads2Twobit *r2t);
 
 /* Adds the library described by <libspec> to the collection.
    If <libspec> contains at least a ':' is is assumed to be in the
@@ -54,56 +54,64 @@ void gt_reads2twobit_delete(GtReads2Twobit *r2t);
    on success 0 is returned, if a parsing error occurs, -1 is returned.
    If <libspec> does not contain any ':', it is assumed to be a filename
    of a single-end library; in this case the function returns 0. */
-int gt_reads2twobit_add_library(GtReads2Twobit *r2t,
-                                const GtStr *libspec,
-                                GtError *err);
+int               gt_reads2twobit_add_library(GtReads2Twobit *r2t,
+                                              const GtStr *libspec,
+                                              GtError *err);
 
 /* Use phred64 scores instead of phred33;
    it must be called before <gt_reads2twobit_encode>. */
-void gt_reads2twobit_use_phred64(GtReads2Twobit *r2t);
+void              gt_reads2twobit_use_phred64(GtReads2Twobit *r2t);
 
 /* filter those reads which contain more than <maxlow> positions
    whose quality is no more than <lowqual>. */
-void gt_reads2twobit_set_quality_filter(GtReads2Twobit *r2t,
-    unsigned long maxlow, char lowqual);
+void              gt_reads2twobit_set_quality_filter(GtReads2Twobit *r2t,
+                                                     unsigned long maxlow,
+                                                     char lowqual);
 
 /* Encodes the sequences in the twobit-encoding format in memory;
    can be called only once; returns 0 on success, a negative number on
    error and sets <err> accordingly. */
-int gt_reads2twobit_encode(GtReads2Twobit *r2t, GtError *err);
+int               gt_reads2twobit_encode(GtReads2Twobit *r2t,
+                                         GtError *err);
 
 /* encoding statistics, must be called after <gt_reads2twobit_encode> */
-unsigned long gt_reads2twobit_nofseqs(const GtReads2Twobit *r2t);
-unsigned long gt_reads2twobit_seqlen_eqlen(const GtReads2Twobit *r2t);
-unsigned long gt_reads2twobit_seqlen_max(const GtReads2Twobit *r2t);
-unsigned long gt_reads2twobit_seqlen_min(const GtReads2Twobit *r2t);
-unsigned long gt_reads2twobit_total_seqlength(const GtReads2Twobit *r2t);
-unsigned long gt_reads2twobit_nof_invalid_seqs(const GtReads2Twobit *r2t);
-unsigned long gt_reads2twobit_invalid_seqs_totallength(
-    const GtReads2Twobit *r2t);
+unsigned long     gt_reads2twobit_nofseqs(const GtReads2Twobit *r2t);
+unsigned long     gt_reads2twobit_seqlen_eqlen(const GtReads2Twobit *r2t);
+unsigned long     gt_reads2twobit_seqlen_max(const GtReads2Twobit *r2t);
+unsigned long     gt_reads2twobit_seqlen_min(const GtReads2Twobit *r2t);
+unsigned long     gt_reads2twobit_total_seqlength(const GtReads2Twobit *r2t);
+unsigned long     gt_reads2twobit_nof_invalid_seqs(const GtReads2Twobit *r2t);
+unsigned long     gt_reads2twobit_invalid_seqs_totallength(
+                                            const GtReads2Twobit *r2t);
 
 /* Writes the sequence collection to disk in a GtEncseq-compatible format;
    sets the separator positions to the less frequent character when needed;
    it must be called after <gt_reads2twobit_encode>; returns 0 on success. */
-int gt_reads2twobit_write_encseq(GtReads2Twobit *r2t, GtError *err);
+int               gt_reads2twobit_write_encseq(GtReads2Twobit *r2t,
+                                               GtError *err);
 
 /* writes the sequence collection to disk in MultiFasta format;
    it must be called after <gt_reads2twobit_encode>; if <skip> is not NULL,
    then skips any sequence for which the corresponding bit is set */
-int gt_reads2twobit_write_fasta(const GtReads2Twobit *r2t, char *path,
-    GtBitsequence *skip, GtError *err);
+int               gt_reads2twobit_write_fasta(const GtReads2Twobit *r2t,
+                                              char *path,
+                                              GtBitsequence *skip,
+                                              GtError *err);
 
 /* decodes the specified sequence in Fasta format; the <decoded> buffer
    must be large enough */
-void gt_reads2twobit_decode_sequence(const GtReads2Twobit *r2t,
-    unsigned long seqnum, char *decoded);
+void              gt_reads2twobit_decode_sequence(const GtReads2Twobit *r2t,
+                                                  unsigned long seqnum,
+                                                  char *decoded);
 
 /* decodes the sequences <seqnum_from> to <seqnum_from>+<nofseqs>-1
    in MultiFasta format and outputs to <outfp>; if <skip> is not NULL,
    then skips any sequence for which the corresponding bit is set */
-void gt_reads2twobit_decode_range(const GtReads2Twobit *r2t,
-    GtFile *outfp, unsigned long seqnum_from, unsigned long nofseqs,
-    const GtBitsequence *skip);
+void              gt_reads2twobit_decode_range(const GtReads2Twobit *r2t,
+                                               GtFile *outfp,
+                                               unsigned long seqnum_from,
+                                               unsigned long nofseqs,
+                                               const GtBitsequence *skip);
 
 /* writes the sequence <seqnum> to <outputbuffer>; starts writing at
   the <outputoffset>-th character encoded by the <outputbuffer> code;
@@ -112,35 +120,43 @@ void gt_reads2twobit_decode_range(const GtReads2Twobit *r2t,
   (which can be used as <outputoffset> for subsequent calls to the function)
  */
 GtTwobitencoding* gt_reads2twobit_write_encoded(GtReads2Twobit *r2t,
-    unsigned long seqnum, GtTwobitencoding *outputbuffer,
-    GtTwobitencoding outputoffset, GtTwobitencoding *lastcodeoffsetptr);
+                                                unsigned long seqnum,
+                                                GtTwobitencoding *outputbuffer,
+                                                GtTwobitencoding outputoffset,
+                                          GtTwobitencoding *lastcodeoffsetptr);
 
 /* outputs the seppos array to <path>;
   if <skip> is not NULL, then skips any position
   for which the corresponding bit is set */
-int gt_reads2twobit_write_seppos(GtReads2Twobit *r2t, char* path,
-    GtBitsequence *skip, GtError *err);
+int               gt_reads2twobit_write_seppos(GtReads2Twobit *r2t,
+                                               char* path,
+                                               GtBitsequence *skip,
+                                               GtError *err);
 
 /* delete the sequences for which a bit is set in the list;
    for paired reads: both members of a pair are deleted */
-void gt_reads2twobit_delete_sequences(GtReads2Twobit *r2t, GtBitsequence *list);
+void              gt_reads2twobit_delete_sequences(GtReads2Twobit *r2t,
+                                                   GtBitsequence *list);
 
 /* pointer to the internal twobitencoding representation;
    it must be called after <gt_reads2twobit_encode> */
-GtTwobitencoding *gt_reads2twobit_export_twobitencoding(
-    const GtReads2Twobit *r2t);
+GtTwobitencoding* gt_reads2twobit_export_twobitencoding(
+                                            const GtReads2Twobit *r2t);
 
 /* pointer to the internal seppos array;
    it must be called after <gt_reads2twobit_encode> */
-unsigned long *gt_reads2twobit_export_seppos(const GtReads2Twobit *r2t);
+unsigned long*    gt_reads2twobit_export_seppos(const GtReads2Twobit *r2t);
 
 /* sort the sequences according to the specified comparator function <cmp> */
-void gt_reads2twobit_sort(GtReads2Twobit *r2t, GtCompareWithData cmp,
-    void *cmp_data);
+void              gt_reads2twobit_sort(GtReads2Twobit *r2t,
+                                       GtCompareWithData cmp,
+                                       void *cmp_data);
 
 /* write the libraries information to disk */
-int gt_reads2twobit_write_libraries_table(const GtReads2Twobit *r2t,
-    char *path, GtError *err);
+int               gt_reads2twobit_write_libraries_table(
+                                            const GtReads2Twobit *r2t,
+                                            char *path,
+                                            GtError *err);
 
 #define GT_READS2TWOBIT_LIBSPEC_HELPMSG \
   "specify a list of input libraries (Fasta/FastQ); for single-end " \
