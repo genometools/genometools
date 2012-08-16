@@ -24,21 +24,31 @@
 
 typedef struct GtContigsWriter GtContigsWriter;
 
-GtContigsWriter *gt_contigs_writer_new(const GtEncseq *reads, GtFile *outfp,
-    bool showpaths);
-void gt_contigs_writer_delete(GtContigsWriter *contigs_writer);
+GtContigsWriter* gt_contigs_writer_new(const GtEncseq *reads,
+                                       GtFile *outfp);
 
-void gt_contigs_writer_start(GtContigsWriter *contigs_writer,
-    unsigned long seqnum);
+void             gt_contigs_writer_delete(GtContigsWriter *contigs_writer);
 
-void gt_contigs_writer_append(GtContigsWriter *contigs_writer,
-    unsigned long seqnum, unsigned long nofchars);
+void             gt_contigs_writer_enable_complete_path_output(
+                                             GtContigsWriter *contigs_writer);
 
-void gt_contigs_writer_write(GtContigsWriter *contigs_writer);
+void             gt_contigs_writer_enable_astat_calculation(
+                                             GtContigsWriter *contigs_writer,
+                                             double coverage,
+                                             unsigned char *rcn);
 
-void gt_contigs_writer_abort(GtContigsWriter *contigs_writer);
+void             gt_contigs_writer_start(GtContigsWriter *contigs_writer,
+                                         unsigned long seqnum);
 
-void gt_contigs_writer_show_stats(GtContigsWriter *contigs_writer,
-    GtLogger *logger);
+void             gt_contigs_writer_append(GtContigsWriter *contigs_writer,
+                                          unsigned long seqnum,
+                                          unsigned long nofchars);
+
+void             gt_contigs_writer_write(GtContigsWriter *contigs_writer);
+
+void             gt_contigs_writer_abort(GtContigsWriter *contigs_writer);
+
+void             gt_contigs_writer_show_stats(GtContigsWriter *contigs_writer,
+                                              GtLogger *logger);
 
 #endif

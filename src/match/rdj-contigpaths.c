@@ -17,10 +17,12 @@
 
 #include "core/arraydef.h"
 #include "core/fasta_separator.h"
+#include "core/log_api.h"
 #include "core/xansi_api.h"
 #include "core/str.h"
 #include "extended/assembly_stats_calculator.h"
 #include "match/rdj-contigs-writer.h"
+#include "match/rdj-filesuf-def.h"
 #include "match/rdj-contigpaths.h"
 
 static GtFile* gt_contigpaths_get_file(const char *indexname,
@@ -41,13 +43,15 @@ static GtFile* gt_contigpaths_get_file(const char *indexname,
 int gt_contigpaths_to_fasta(const char *indexname,
     const char *contigpaths_suffix, const char *fasta_suffix,
     const GtEncseq *encseq, unsigned long min_contig_length, bool showpaths,
-    size_t buffersize, GtLogger *logger, GtError *err)
+    bool astat, double coverage, bool load_copynum, size_t buffersize,
+    GtLogger *logger, GtError *err)
 {
   unsigned long nofchars, seqnum, contig_length = 0;
   GtFile *infp, *outfp;
   int nvalues, i;
   GtContigsWriter *cw;
   GtContigpathElem *buffer;
+  unsigned char *rcn = NULL;
 
   if (buffersize == 0)
     buffersize = GT_CONTIGPATHS_BUFFERSIZE * sizeof (GtContigpathElem);
@@ -73,8 +77,32 @@ int gt_contigpaths_to_fasta(const char *indexname,
     gt_file_delete(infp);
     return -1;
   }
-
-  cw = gt_contigs_writer_new(encseq, outfp, showpaths);
+  if (load_copynum)
+  {
+    GtFile *rcnfp;
+    size_t nbytes;
+    rcnfp = gt_contigpaths_get_file(indexname,
+        GT_READJOINER_SUFFIX_READSCOPYNUM, "r", err);
+    if (rcnfp == NULL)
+    {
+      gt_file_delete(infp);
+      gt_file_delete(outfp);
+      gt_file_delete(rcnfp);
+      return -1;
+    }
+    gt_log_log("load reads copy number from file");
+    nbytes = sizeof (*rcn) * gt_encseq_num_of_sequences(encseq);
+    if (gt_encseq_is_mirrored(encseq))
+      nbytes = GT_DIV2(nbytes);
+    rcn = gt_malloc(nbytes);
+    (void)gt_file_xread(rcnfp, rcn, nbytes);
+    gt_file_delete(rcnfp);
+  }
+  cw = gt_contigs_writer_new(encseq, outfp);
+  if (showpaths)
+    gt_contigs_writer_enable_complete_path_output(cw);
+  if (astat)
+    gt_contigs_writer_enable_astat_calculation(cw, coverage, rcn);
 
   while ((nvalues = gt_file_xread(infp, buffer, buffersize)) > 0)
   {
@@ -111,5 +139,6 @@ int gt_contigpaths_to_fasta(const char *indexname,
   gt_file_delete(infp);
   gt_file_delete(outfp);
   gt_free(buffer);
+  gt_free(rcn);
   return 0;
 }

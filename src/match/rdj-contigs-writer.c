@@ -17,6 +17,7 @@
 
 #include "core/arraydef.h"
 #include "core/fasta.h"
+#include "core/log_api.h"
 #include "core/ma.h"
 #include "core/str.h"
 #include "extended/assembly_stats_calculator.h"
@@ -26,18 +27,19 @@ struct GtContigsWriter
 {
   const GtEncseq *reads;
   GtFile *outfp;
-  bool showpaths;
+  bool show_paths, calculate_astat;
   GtAssemblyStatsCalculator *asc;
   GtEncseqReader *esr;
   GtArraychar contig;
   GtStr *contig_desc, *path_desc;
-  unsigned long contignum, contigdepth, lastseqnum, nofseqs;
+  unsigned long contignum, contigdepth, lastseqnum, nofseqs, rlen;
+  double arrival_rate, k;
+  unsigned char *rcn;
 };
 
 #define GT_CONTIGS_WRITER_CONTIG_INC 16384UL
 
-GtContigsWriter *gt_contigs_writer_new(const GtEncseq *reads, GtFile *outfp,
-    bool showpaths)
+GtContigsWriter *gt_contigs_writer_new(const GtEncseq *reads, GtFile *outfp)
 {
   GtContigsWriter *contigs_writer;
 
@@ -46,17 +48,44 @@ GtContigsWriter *gt_contigs_writer_new(const GtEncseq *reads, GtFile *outfp,
   contigs_writer = gt_malloc(sizeof (GtContigsWriter));
   contigs_writer->reads = reads;
   contigs_writer->outfp = outfp;
-  contigs_writer->showpaths = showpaths;
+  contigs_writer->show_paths = false;
   contigs_writer->nofseqs = gt_encseq_num_of_sequences(contigs_writer->reads);
   contigs_writer->contignum = 0;
   contigs_writer->contigdepth = 0;
+  contigs_writer->arrival_rate = (double)0;
+  contigs_writer->k = (double)0;
+  contigs_writer->rlen = 0;
+  contigs_writer->calculate_astat = false;
   GT_INITARRAY(&contigs_writer->contig, char);
   contigs_writer->contig_desc = gt_str_new();
   contigs_writer->path_desc = gt_str_new();
   contigs_writer->asc = gt_assembly_stats_calculator_new();
   contigs_writer->esr = gt_encseq_create_reader_with_readmode(reads,
       GT_READMODE_FORWARD, 0);
+  contigs_writer->rcn = NULL;
   return contigs_writer;
+}
+
+void gt_contigs_writer_enable_complete_path_output(
+    GtContigsWriter *contigs_writer)
+{
+  contigs_writer->show_paths = true;
+}
+
+void gt_contigs_writer_enable_astat_calculation(GtContigsWriter *contigs_writer,
+    double coverage, unsigned char *rcn)
+{
+  contigs_writer->calculate_astat = true;
+  if (gt_encseq_accesstype_get(contigs_writer->reads) ==
+      GT_ACCESS_TYPE_EQUALLENGTH)
+    contigs_writer->rlen = gt_encseq_equallength(contigs_writer->reads);
+  else
+    contigs_writer->rlen = gt_encseq_total_length(contigs_writer->reads) /
+      gt_encseq_num_of_sequences(contigs_writer->reads);
+  contigs_writer->arrival_rate = coverage / (double)contigs_writer->rlen;
+  gt_log_log("arrival_rate = %.4f", contigs_writer->arrival_rate);
+  if (rcn != NULL)
+    contigs_writer->rcn = rcn;
 }
 
 void gt_contigs_writer_delete(GtContigsWriter *contigs_writer)
@@ -78,6 +107,7 @@ static void gt_contigs_writer_reset_buffers(GtContigsWriter *contigs_writer)
   gt_str_reset(contigs_writer->contig_desc);
   gt_str_reset(contigs_writer->path_desc);
   contigs_writer->contigdepth = 0;
+  contigs_writer->k = (double)0;
 }
 
 void gt_contigs_writer_abort(GtContigsWriter *contigs_writer)
@@ -129,8 +159,36 @@ void gt_contigs_writer_write(GtContigsWriter *contigs_writer)
     gt_str_append_cstr(contigs_writer->contig_desc, " depth=");
     gt_str_append_ulong(contigs_writer->contig_desc,
         contigs_writer->contigdepth);
+    if (contigs_writer->rcn != NULL)
+    {
+      contigs_writer->k -= contigs_writer->rcn[
+        GT_CONTIGS_WRITER_READNUM(contigs_writer->lastseqnum,
+            contigs_writer->nofseqs)];
+      gt_str_append_cstr(contigs_writer->contig_desc, " k=");
+      gt_str_append_double(contigs_writer->contig_desc, contigs_writer->k, 2);
+    }
+    if (contigs_writer->calculate_astat)
+    {
+      double astat;
+      double k = (double)0;
+      if (contigs_writer->rcn != NULL)
+        k = contigs_writer->k;
+      else
+      {
+        if (contigs_writer->contigdepth > 2UL)
+          k = (double)(contigs_writer->contigdepth - 2UL);
+      }
+      astat = - (k * log((double)2));
+      if (contigs_writer->contig.nextfreechar + 1UL > contigs_writer->rlen)
+      {
+        astat += contigs_writer->arrival_rate * (
+            contigs_writer->contig.nextfreechar + 1UL - contigs_writer->rlen);
+      }
+      gt_str_append_cstr(contigs_writer->contig_desc, " astat=");
+      gt_str_append_double(contigs_writer->contig_desc, astat, 6);
+    }
     gt_str_append_cstr(contigs_writer->contig_desc, " ");
-    if (!contigs_writer->showpaths)
+    if (!contigs_writer->show_paths)
     {
       /* show path summary only */
       gt_str_append_cstr(contigs_writer->path_desc, "-->...-->");
@@ -167,7 +225,12 @@ void gt_contigs_writer_append(GtContigsWriter *contigs_writer,
         GT_READMODE_FORWARD)["acgt"];
   }
   contigs_writer->contigdepth++;
-  if (contigs_writer->showpaths)
+  if (contigs_writer->rcn != NULL)
+  {
+    contigs_writer->k += contigs_writer->rcn[
+      GT_CONTIGS_WRITER_READNUM(seqnum, contigs_writer->nofseqs)];
+  }
+  if (contigs_writer->show_paths)
   {
     gt_str_append_cstr(contigs_writer->path_desc, "-(");
     gt_str_append_ulong(contigs_writer->path_desc, nofchars);

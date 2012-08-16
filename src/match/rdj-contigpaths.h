@@ -29,6 +29,7 @@ typedef uint32_t GtContigpathElem;
 int gt_contigpaths_to_fasta(const char *indexname,
     const char *contigpaths_suffix, const char *fasta_suffix,
     const GtEncseq *encseq, unsigned long min_contig_length, bool showpaths,
-    size_t buffersize, GtLogger *logger, GtError *err);
+    bool astat, double coverage, bool load_copynum, size_t buffersize,
+    GtLogger *logger, GtError *err);
 
 #endif

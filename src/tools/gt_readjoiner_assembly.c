@@ -36,11 +36,12 @@ typedef struct {
   unsigned int minmatchlength;
   unsigned int lengthcutoff, depthcutoff;
   GtStr  *readset, *buffersizearg;
-  bool errors, paths2seq, redtrans, save, load, vd;
+  bool errors, paths2seq, redtrans, save, load, vd, astat, copynum;
   unsigned int deadend, bubble, deadend_depth;
   GtOption *refoptionbuffersize;
   unsigned long buffersize;
   unsigned int nspmfiles;
+  double coverage;
 } GtReadjoinerAssemblyArguments;
 
 static void* gt_readjoiner_assembly_arguments_new(void)
@@ -166,6 +167,25 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
   /* -vd */
   option = gt_option_new_bool("vd", "use verbose descriptions for contigs",
       &arguments->vd, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -astat */
+  option = gt_option_new_bool("astat", "calculate A-statistics for each contig",
+      &arguments->astat, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -cov */
+  option = gt_option_new_double("cov", "average coverage value to use for the "
+      "A-statistics calculation", &arguments->coverage, (double)0);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -copynum */
+  option = gt_option_new_bool("copynum", "load reads copy numbers list from "
+      "file for the A-statistics calculation",
+      &arguments->copynum, false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -316,7 +336,8 @@ static void gt_readjoiner_assembly_pump_encseq_through_cache(
 }
 
 static int gt_readjoiner_assembly_paths2seq(const char *readset,
-    unsigned long lengthcutoff, bool showpaths, unsigned long buffersize,
+    unsigned long lengthcutoff, bool showpaths, bool astat,
+    double coverage, bool load_copynum, unsigned long buffersize,
     GtLogger *default_logger, GtTimer **timer, GtError *err)
 {
   int had_err;
@@ -350,7 +371,7 @@ static int gt_readjoiner_assembly_paths2seq(const char *readset,
   gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_OUTPUTCONTIGS);
   had_err = gt_contigpaths_to_fasta(readset, GT_READJOINER_SUFFIX_CONTIG_PATHS,
       GT_READJOINER_SUFFIX_CONTIGS, reads, lengthcutoff, showpaths,
-      (size_t)buffersize, default_logger, err);
+      astat, coverage, load_copynum, (size_t)buffersize, default_logger, err);
   gt_encseq_delete(reads);
   gt_encseq_loader_delete(el);
   return had_err;
@@ -601,6 +622,7 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     gt_readjoiner_assembly_show_current_space("(before paths2seq)");
     had_err = gt_readjoiner_assembly_paths2seq(readset,
         (unsigned long)arguments->lengthcutoff, arguments->vd,
+        arguments->astat, arguments->coverage, arguments->copynum,
         arguments->buffersize, default_logger, &timer, err);
   }
 

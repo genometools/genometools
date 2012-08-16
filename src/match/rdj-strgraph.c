@@ -2249,7 +2249,9 @@ static void gt_strgraph_show_contigs(GtStrgraph *strgraph,
   GtStrgraphSpellData sdata;
 
   gt_strgraph_set_encseq(strgraph, encseq);
-  sdata.cw = gt_contigs_writer_new(encseq, outfp, showpaths);
+  sdata.cw = gt_contigs_writer_new(encseq, outfp);
+  if (showpaths)
+    gt_contigs_writer_enable_complete_path_output(sdata.cw);
   sdata.strgraph = strgraph;
   sdata.total_depth = 0;
   sdata.current_depth = 0;

@@ -836,7 +836,8 @@ int gt_contfinder_write_copynum(GtContfinder *contfinder, char* path,
 #endif
       }
     }
-    gt_assert(n_noncontained == contfinder->nofseqs);
+    gt_assert(n_noncontained == contfinder->nofseqs -
+        gt_contfinder_nofcontained(contfinder));
     gt_assert(had_overflow || (cnsum == (unsigned long)contfinder->nofseqs));
     gt_fa_fclose(file);
   }
