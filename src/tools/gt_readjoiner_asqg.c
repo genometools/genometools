@@ -256,7 +256,8 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
     if (had_err == 0)
     {
       filename = gt_str_clone(arguments->readset);
-      gt_str_append_cstr(filename, arguments->gz ? ".asqg.gz" : ".asqg");
+      gt_str_append_cstr(filename, arguments->gz ?
+          GT_READJOINER_SUFFIX_SG_ASQG_GZ : GT_READJOINER_SUFFIX_SG_ASQG);
       file = gt_file_open(arguments->gz ? GT_FILE_MODE_GZIP :
           GT_FILE_MODE_UNCOMPRESSED, gt_str_get(filename), "w", err);
       if (file == NULL)
@@ -327,7 +328,8 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
       gt_strgraph_set_encseq(strgraph, reads);
       gt_strgraph_show(strgraph, arguments->gz ? GT_STRGRAPH_ASQG_GZ :
           GT_STRGRAPH_ASQG, gt_str_get(arguments->readset),
-          arguments->gz ? ".asqg.gz" : ".asqg", false);
+          arguments->gz ? GT_READJOINER_SUFFIX_SG_ASQG_GZ :
+          GT_READJOINER_SUFFIX_SG_ASQG, false);
       gt_readjoiner_asqg_show_current_space(GT_READJOINER_ASQG_MSG_OUTPUT);
     }
   }

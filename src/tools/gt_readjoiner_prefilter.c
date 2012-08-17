@@ -415,7 +415,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     if (!had_err && arguments->libtable) {
       GtStr *fn;
       fn = gt_str_new_cstr(gt_str_get(arguments->readset));
-      gt_str_append_cstr(fn, GT_READS_LIBRARY_TABLE_FILESUFFIX);
+      gt_str_append_cstr(fn, GT_READJOINER_SUFFIX_READSLIBRARYTABLE);
       had_err = gt_reads2twobit_write_libraries_table(r2t, gt_str_get(fn), err);
       gt_logger_log(verbose_logger, "reads library table saved: %s",
           gt_str_get(fn));

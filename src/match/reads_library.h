@@ -20,8 +20,6 @@
 
 #include "core/error_api.h"
 
-#define GT_READS_LIBRARY_TABLE_FILESUFFIX ".rlt"
-
 typedef struct {
   unsigned long first_seqnum;
   unsigned long nofseqs;

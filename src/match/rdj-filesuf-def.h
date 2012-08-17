@@ -18,40 +18,29 @@
 #ifndef RDJ_FILESUF_DEF_H
 #define RDJ_FILESUF_DEF_H
 
-/*
- * Filename suffices relevant to Readjoiner are defined here
- *
- */
+/* Suffix of Readjoiner output and intermediate files */
 
-/* -- main output -- */
+#define GT_READJOINER_SUFFIX_SPMLIST            ".spm"
+#define GT_READJOINER_SUFFIX_CONTIGS            ".contigs.fas"
+#define GT_READJOINER_SUFFIX_CONTIG_PATHS       ".paths"
+#define GT_READJOINER_SUFFIX_READSCOPYNUM       ".rcn"
+#define GT_READJOINER_SUFFIX_READSLIBRARYTABLE  ".rlt"
+#define GT_READJOINER_SUFFIX_SPMCOUNTS          ".nofspm"
+#define GT_READJOINER_SUFFIX_SPMCOUNTS_DISTRI   ".sc.dsr"
+#define GT_READJOINER_SUFFIX_WSIZE_DISTRI       ".ws.dsr"
+#define GT_READJOINER_SUFFIX_PREFILTERED_FAS    ".p.fas"
+#define GT_READJOINER_SUFFIX_SEQNUMS            ".sn"
+#define GT_READJOINER_SUFFIX_CNTLIST            ".cnt"
 
-#define GT_READJOINER_SUFFIX_SPMLIST           ".spm"
-#define GT_READJOINER_SUFFIX_CONTIG_PATHS      ".paths"
-#define GT_READJOINER_SUFFIX_CONTIGS           ".contigs.fas"
-
-/* -- prefilter -- */
-
-#define GT_READJOINER_SUFFIX_PREFILTERED_FAS   ".pf.fas"
-#define GT_READJOINER_SUFFIX_READSCOPYNUM      ".rcn"
-
-/* -- test / debug / development output -- */
-
-#define GT_READJOINER_SUFFIX_CNTLIST           ".cnt"
-#define GT_READJOINER_SUFFIX_SPMCOUNTS         ".nofspm"
-#define GT_READJOINER_SUFFIX_SPMCOUNTS_DISTRI  ".scd"
-#define GT_READJOINER_SUFFIX_SEPPOS            ".sep"
-#define GT_READJOINER_SUFFIX_TWOBIT            ".2bit"
-#define GT_READJOINER_SUFFIX_SEQNUMS           ".sn"
-#define GT_READJOINER_SUFFIX_WSIZE_DISTRI      ".wsd"
-
-/* string graph: */
-
-#define GT_READJOINER_SUFFIX_SG                ".sg"
-#define GT_READJOINER_SUFFIX_SG_MONO_DOT       ".m.dot"
-#define GT_READJOINER_SUFFIX_SG_BI_DOT         ".b.dot"
-#define GT_READJOINER_SUFFIX_SG_SUB_DOT        ".sub.dot"
-#define GT_READJOINER_SUFFIX_SG_SPMLIST        ".sg.spm"
-#define GT_READJOINER_SUFFIX_SG_ADJLIST        ".adj"
-#define GT_READJOINER_SUFFIX_SG_ELEN_DISTRI    ".eld"
+/* string graph */
+#define GT_READJOINER_SUFFIX_SG                 ".sg"
+#define GT_READJOINER_SUFFIX_SG_MONO_DOT        ".m.dot"
+#define GT_READJOINER_SUFFIX_SG_BI_DOT          ".b.dot"
+#define GT_READJOINER_SUFFIX_SG_SUB_DOT         ".sub.dot"
+#define GT_READJOINER_SUFFIX_SG_SPMLIST         ".sg.spm"
+#define GT_READJOINER_SUFFIX_SG_ADJLIST         ".adj"
+#define GT_READJOINER_SUFFIX_SG_ELEN_DISTRI     ".el.dsr"
+#define GT_READJOINER_SUFFIX_SG_ASQG            ".asqg"
+#define GT_READJOINER_SUFFIX_SG_ASQG_GZ         ".asqg.gz"
 
 #endif
