@@ -105,6 +105,11 @@ int gt_strgraph_show_context(GtStrgraph *strgraph, GtStrgraphFormat format,
     unsigned long nofotherreadnums, unsigned long maxdepth, bool extend,
     GtError *err);
 
+/* --- reads library table --- */
+
+int gt_strgraph_load_reads_library_table(GtStrgraph *strgraph,
+    const char *indexname, GtError *err);
+
 /* --- load from file --- */
 
 GtStrgraph* gt_strgraph_new_from_file(const GtEncseq *encseq,

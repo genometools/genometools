@@ -263,12 +263,19 @@ typedef struct {
   unsigned long maxlow;
 } GtReads2TwobitEncodeState;
 
+static int gt_reads2twobit_rli_cmp(const void *a, const void *b)
+{
+  const GtReadsLibraryInfo *rli_a = a, *rli_b = b;
+  return (int)(rli_b->paired - rli_a->paired);
+}
+
 static void gt_reads2twobit_init_encode(GtReads2Twobit *r2t,
     GtReads2TwobitEncodeState *state)
 {
   const unsigned long noflibraries = gt_array_size(r2t->collection);
   unsigned long i;
   state->inputfiles_totallength = 0;
+  gt_array_sort(r2t->collection, gt_reads2twobit_rli_cmp);
   for (i = 0; i < noflibraries; i++)
   {
     const GtReadsLibraryInfo *rli = gt_array_get(r2t->collection, i);
@@ -1893,8 +1900,9 @@ int gt_reads2twobit_write_libraries_table(const GtReads2Twobit *r2t,
     rli = gt_array_get(r2t->collection, lnum);
     lib_table[lnum].first_seqnum = rli->first_seqnum;
     lib_table[lnum].nofseqs = rli->nofseqs;
-    lib_table[lnum].paired = (rli->filename2 != NULL) ? true : false;
+    lib_table[lnum].paired = rli->paired;
     lib_table[lnum].insertlength = rli->insertlength;
+    lib_table[lnum].stdev = rli->stdev;
   }
   had_err = gt_reads_library_table_write(lib_table, noflibs, path, err);
   gt_free(lib_table);

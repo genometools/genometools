@@ -23,8 +23,9 @@
 typedef struct {
   unsigned long first_seqnum;
   unsigned long nofseqs;
-  unsigned long insertlength;
   bool paired;
+  unsigned long insertlength;
+  unsigned long stdev;
 } GtReadsLibrary;
 
 int gt_reads_library_table_write(GtReadsLibrary *lib_table,

@@ -33,9 +33,11 @@
 #include "core/spacecalc.h"
 #include "extended/assembly_stats_calculator.h"
 #include "match/asqg_writer.h"
+#include "match/reads_library.h"
 #include "match/rdj-contigpaths.h"
 #include "match/rdj-contigs-writer.h"
 #include "match/rdj-ensure-output.h"
+#include "match/rdj-filesuf-def.h"
 #include "match/rdj-spmlist.h"
 #include "match/rdj-strgraph.h"
 
@@ -256,6 +258,8 @@ struct GtStrgraph {
   bool               load_self_spm;
   bool               binary_spmlist;
   GtStrgraphLength   minmatchlen;
+  GtReadsLibrary     *rlt;
+  unsigned long      rlt_size;
   GT_STRGRAPH_DECLARE_COUNTS;
   GT_STRGRAPH_DECLARE_VERTICES;
   GT_STRGRAPH_DECLARE_EDGES;
@@ -384,6 +388,7 @@ GtStrgraph* gt_strgraph_new(unsigned long nofreads)
   strgraph->state = GT_STRGRAPH_PREPARATION;
   strgraph->load_self_spm = false;
   strgraph->minmatchlen = GT_STRGRAPH_LENGTH_MAX;
+  strgraph->rlt = NULL;
   gt_strgraph_show_limits_debug_log();
   GT_STRGRAPH_CHECK_NOFREADS(nofreads);
   GT_STRGRAPH_SET_NOFVERTICES(strgraph, (GtStrgraphVnum)nofreads << 1);
@@ -441,8 +446,22 @@ void gt_strgraph_delete(GtStrgraph *strgraph)
     GT_STRGRAPH_FREE_VERTICES(strgraph);
     GT_STRGRAPH_FREE_EDGES(strgraph);
     GT_STRGRAPH_FREE_COUNTS(strgraph);
+    gt_free(strgraph->rlt);
     gt_free(strgraph);
   }
+}
+
+int gt_strgraph_load_reads_library_table(GtStrgraph *strgraph,
+    const char *indexname, GtError *err)
+{
+  GtStr *path;
+  gt_assert(strgraph != NULL);
+  path = gt_str_new_cstr(indexname);
+  gt_str_append_cstr(path, GT_READJOINER_SUFFIX_READSLIBRARYTABLE);
+  strgraph->rlt = gt_reads_library_table_read(gt_str_get(path), err,
+      &strgraph->rlt_size);
+  gt_str_delete(path);
+  return (strgraph->rlt == NULL) ? -1 : 0;
 }
 
 static void gt_strgraph_save(const GtStrgraph *strgraph, GtFile *outfp)
@@ -529,6 +548,7 @@ static GtFile* gt_strgraph_get_file(const char *indexname, const char *suffix,
   gt_error_delete(err);
   return file;
 }
+
 GtStrgraph* gt_strgraph_new_from_file(const GtEncseq *encseq,
     unsigned long fixlen, const char *indexname, const char *suffix)
 {
@@ -544,6 +564,7 @@ GtStrgraph* gt_strgraph_new_from_file(const GtEncseq *encseq,
   strgraph->state = GT_STRGRAPH_LOADED_FROM_FILE;
   strgraph->load_self_spm = false;
   strgraph->minmatchlen = GT_STRGRAPH_LENGTH_MAX;
+  strgraph->rlt = NULL;
   strgraph->encseq = encseq;
   strgraph->fixlen = (GtStrgraphLength)fixlen;
   GT_STRGRAPH_INIT_COUNTS(strgraph);
