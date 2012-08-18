@@ -70,18 +70,28 @@ unsigned long *gt_lcp13_manzini(const GtEncseq *encseq,
   return lcptab;
 }
 
-static unsigned long *computeocclesstab(const GtEncseq *encseq)
+static unsigned long *computeocclesstab(const GtEncseq *encseq,
+                                        GtReadmode readmode)
 {
-  unsigned long *occless, numofchars, idx;
+  unsigned long *occless, numofchars, charidx;
 
   numofchars = (unsigned long)
                   gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   occless = gt_malloc(sizeof (unsigned long) * numofchars);
   occless[0] = 0;
-  for (idx = 1UL; idx < numofchars; idx++)
+  for (charidx = 1UL; charidx < numofchars; charidx++)
   {
-    occless[idx] = occless[idx-1] +
-                   gt_encseq_charcount(encseq,(GtUchar) (idx-1));
+    unsigned long count;
+
+    if (GT_ISDIRCOMPLEMENT(readmode))
+    {
+      count = gt_encseq_charcount(encseq,
+                                  (GtUchar) GT_COMPLEMENTBASE(charidx-1));
+    } else
+    {
+      count = gt_encseq_charcount(encseq,(GtUchar) (charidx-1));
+    }
+    occless[charidx] = occless[charidx-1] + count;
   }
   return occless;
 }
@@ -120,6 +130,15 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
   }
 }
 
+static void gt_range_reverse(unsigned long totallength,GtRange *range)
+{
+  unsigned long tmp;
+
+  tmp = range->start;
+  range->start = GT_REVERSEPOS(totallength,range->end) + 1;
+  range->end = GT_REVERSEPOS(totallength,tmp) + 1;
+}
+
 static unsigned long *fillrightofpartwidth(
                                          const Compressedtable *rightposinverse,
                                          const GtEncseq *encseq,
@@ -131,26 +150,37 @@ static unsigned long *fillrightofpartwidth(
   GtRange range;
   unsigned long realspecialranges, *rightofpartwidth = NULL;
   unsigned long countranges = 0, nextrightofpartwidth = 0;
+  size_t allocsize;
 
   realspecialranges = gt_encseq_realspecialranges(encseq);
   sri = gt_specialrangeiterator_new(encseq,
-                                GT_ISDIRREVERSE(readmode) ? false : true);
+                                    GT_ISDIRREVERSE(readmode) ? false : true);
   while (gt_specialrangeiterator_next(sri,&range))
   {
+    if (GT_ISDIRREVERSE(readmode))
+    {
+      gt_range_reverse(totallength,&range);
+    }
     if (range.end < partwidth)
     {
       countranges++;
-    } else
+    }
+  }
+  gt_specialrangeiterator_delete(sri);
+  allocsize = sizeof (unsigned long) * (realspecialranges - countranges);
+  rightofpartwidth = gt_malloc(allocsize);
+  /*printf("allocated %lu bytes for rightofpartwidth (%.2f)\n",
+      (unsigned long) allocsize, (double) allocsize/totallength);*/
+  sri = gt_specialrangeiterator_new(encseq,
+                                    GT_ISDIRREVERSE(readmode) ? false : true);
+  while (gt_specialrangeiterator_next(sri,&range))
+  {
+    if (GT_ISDIRREVERSE(readmode))
     {
-      if (nextrightofpartwidth == 0)
-      {
-        size_t allocsize =
-                     sizeof (unsigned long) * (realspecialranges - countranges);
-        rightofpartwidth = gt_malloc(allocsize);
-        printf("allocated %lu bytes for rightofpartwidth (%.2f)\n",
-                 (unsigned long) allocsize,
-                 (double) allocsize/totallength);
-      }
+      gt_range_reverse(totallength,&range);
+    }
+    if (range.end >= partwidth)
+    {
       gt_assert(rightofpartwidth != NULL
                    && (unsigned long) nextrightofpartwidth <
                       (realspecialranges - countranges));
@@ -174,21 +204,24 @@ static void inversesuffixarray2specialranknext(
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    unsigned long GT_UNUSED specialcharacters, idx, *rightofpartwidth = NULL;
-    unsigned long specialranklistindex, nextrightofpartwidth = 0;
+    unsigned long idx, *rightofpartwidth = NULL,
+                  specialranklistindex, nextrightofpartwidth = 0;
 
     rightofpartwidth = fillrightofpartwidth(rightposinverse,
                                             encseq,
                                             readmode,
                                             partwidth,
                                             totallength);
-    specialcharacters = gt_encseq_specialcharacters(encseq);
     specialranklistindex = partwidth;
     sri = gt_specialrangeiterator_new(encseq,
                                       GT_ISDIRREVERSE(readmode) ? false : true);
     nextrightofpartwidth = 0;
     while (gt_specialrangeiterator_next(sri,&range))
     {
+      if (GT_ISDIRREVERSE(readmode))
+      {
+        gt_range_reverse(totallength,&range);
+      }
       gt_assert(range.end <= totallength);
       for (idx = range.start; idx < range.end-1; idx++)
       {
@@ -201,15 +234,7 @@ static void inversesuffixarray2specialranknext(
       if (range.end < partwidth)
       {
         compressedtable_update(ranknext,specialranklistindex,
-                               compressedtable_get(rightposinverse,
-                                                   range.end));
-        /*
-        printf("(2) set ranknext[%lu] = %lu = rightposinverse[%lu]\n",
-                  (unsigned long) specialranklistindex,
-                  (unsigned long) ranknext[specialranklistindex],
-                  (unsigned long) range.end);
-        fflush(stdout);
-        */
+                               compressedtable_get(rightposinverse,range.end));
       } else
       {
         compressedtable_update(ranknext,specialranklistindex,
@@ -235,7 +260,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
 
   gt_assert(partwidth > 0);
 
-  occless = computeocclesstab(encseq);
+  occless = computeocclesstab(encseq,readmode);
   /* now inveresuftab is not used any more, and thus the
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < partwidth; idx++)
@@ -247,12 +272,6 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
       if (ISNOTSPECIAL(cc))
       {
         gt_assert(occless[cc] < (unsigned long) partwidth);
-        /*
-        printf("(2) cc=%u: set ranknext[%lu]=%lu\n",
-                        (unsigned int) cc,
-                        (unsigned long) occless[cc],
-                        (unsigned long) idx);
-        */
         compressedtable_update(ranknext,(unsigned long) occless[cc],idx);
         occless[cc]++;
       }
@@ -268,11 +287,15 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
     unsigned long specialidx, specialpos;
 
     sri = gt_specialrangeiterator_new(encseq,
-                                  GT_ISDIRREVERSE(readmode) ? false : true);
+                                      GT_ISDIRREVERSE(readmode) ? false : true);
     gt_assert(partwidth > 0); /* otherwise all lcps would be 0 */
     specialidx = partwidth;
     while (gt_specialrangeiterator_next(sri,&range))
     {
+      if (GT_ISDIRREVERSE(readmode))
+      {
+        gt_range_reverse(totallength,&range);
+      }
       for (specialpos = range.start; specialpos < range.end;
            specialpos++)
       {
@@ -295,7 +318,10 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
         specialidx++;
       }
     }
-    if (gt_encseq_lengthofspecialsuffix(encseq))
+    if ((GT_ISDIRREVERSE(readmode) &&
+         gt_encseq_lengthofspecialprefix(encseq) > 0) ||
+        (!GT_ISDIRREVERSE(readmode) &&
+         gt_encseq_lengthofspecialsuffix(encseq) > 0))
     {
       compressedtable_update(ranknext,totallength-1,totallength);
     }
@@ -336,7 +362,6 @@ Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
                                      totallength);
   fillpos = sa2ranknext(ranknext,encseq,readmode,partwidth,totallength,
                         suftab);
-  printf("longest=%lu\n",fillpos);
   lcptab = ranknext;
   /* now ranknext and lcptab point to the same memory area. After reading
      ranknext at position fillpos, the same cell is used for storing
@@ -530,10 +555,19 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   rangeidx = 0;
   for (charidx = 0; charidx < numofchars; charidx++)
   {
-    if (gt_encseq_charcount(encseq,(GtUchar) charidx) != 0)
+    unsigned long count;
+
+    if (GT_ISDIRCOMPLEMENT(readmode))
+    {
+      count = gt_encseq_charcount(encseq,(GtUchar) GT_COMPLEMENTBASE(charidx));
+    } else
+    {
+      count = gt_encseq_charcount(encseq,(GtUchar) charidx);
+    }
+    if (count != 0)
     {
       gt_assert(rangestore[rangeidx].end - rangestore[rangeidx].start + 1
-              == gt_encseq_charcount(encseq,(GtUchar) charidx));
+                == count);
       rangeidx++;
     }
   }
@@ -567,8 +601,6 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   }
   ratio = (double) numofcomparisons/totallength;
   gt_assert(gt_double_compare(ratio,(double) numofchars) <= 0);
-  /*printf("# numofcomparisons = %lu (%.2f)\n",numofcomparisons,
-                                    (double) numofcomparisons/totallength);*/
   gt_free(rangestore);
 }
 

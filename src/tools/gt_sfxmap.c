@@ -44,6 +44,7 @@
 typedef struct
 {
   bool usestream,
+       bfcheck,
        verbose,
        cmpsuf,
        cmplcp,
@@ -155,7 +156,8 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optionsortmaxdepth, *optionalgbounds, *optiondiffcov,
          *optionwholeleafcheck,
          *optionenumlcpitvs, *optionenumlcpitvtree, *optionenumlcpitvtreeBU,
-         *optionscanesa, *optionspmitv, *optionownencseq2file;
+         *optionscanesa, *optionspmitv, *optionownencseq2file,
+         *optionbfcheck;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -197,6 +199,12 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
   optionstream = gt_option_new_bool("stream","stream the index",
                                     &arguments->usestream,false);
   gt_option_parser_add_option(op, optionstream);
+
+  optionbfcheck = gt_option_new_bool("bfcheck",
+                                     "perform check by brute force algorithm "
+                                     "(this can be slow if lcps are long)",
+                                     &arguments->bfcheck,false);
+  gt_option_parser_add_option(op, optionbfcheck);
 
   optiondelspranges = gt_option_new_ulong("delspranges",
                                           "delete ranges of special values",
@@ -679,52 +687,62 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
       unsigned long totallength = gt_encseq_total_length(suffixarray.encseq);
       if (!haserr && arguments->inputsuf && !arguments->usestream)
       {
-        Sequentialsuffixarrayreader *ssar;
-
-        if (arguments->inputlcp)
+        if (suffixarray.numberofallsortedsuffixes != totallength + 1 ||
+            arguments->bfcheck)
         {
-          ssar = gt_newSequentialsuffixarrayreaderfromfile(
-                                        gt_str_get(arguments->esaindexname),
-                                        SARR_LCPTAB | SARR_ESQTAB,
-                                        SEQ_scan,
-                                        logger,
-                                        err);
+          Sequentialsuffixarrayreader *ssar;
+
+          if (arguments->inputlcp)
+          {
+            ssar = gt_newSequentialsuffixarrayreaderfromfile(
+                                          gt_str_get(arguments->esaindexname),
+                                          SARR_LCPTAB | SARR_ESQTAB,
+                                          SEQ_scan,
+                                          logger,
+                                          err);
+          } else
+          {
+            ssar = NULL;
+          }
+          gt_logger_log(logger, "checkentiresuftab");
+          if (gt_checkentiresuftab(__FILE__,
+                                   __LINE__,
+                                   suffixarray.encseq,
+                                   suffixarray.readmode,
+                                   suffixarray.suftab,
+                                   suffixarray.numberofallsortedsuffixes,
+                                   arguments->wholeleafcheck,
+                                   ssar,
+                                   false, /* specialsareequal  */
+                                   false,  /* specialsareequalatdepth0 */
+                                   0,
+                                   err) != 0)
+          {
+            fprintf(stderr,"gt_checkentiresuftab failed\n");
+            exit(GT_EXIT_PROGRAMMING_ERROR);
+          }
+          if (ssar != NULL)
+          {
+            gt_freeSequentialsuffixarrayreader(&ssar);
+          }
         } else
         {
-          ssar = NULL;
-        }
-        gt_logger_log(logger, "checkentiresuftab");
-        if (gt_checkentiresuftab(__FILE__,
-                                 __LINE__,
-                                 suffixarray.encseq,
-                                 suffixarray.readmode,
-                                 suffixarray.suftab,
-                                 suffixarray.numberofallsortedsuffixes,
-                                 arguments->wholeleafcheck,
-                                 ssar,
-                                 false, /* specialsareequal  */
-                                 false,  /* specialsareequalatdepth0 */
-                                 0,
-                                 err) != 0)
-        {
-          fprintf(stderr,"gt_checkentiresuftab failed\n");
-          exit(GT_EXIT_PROGRAMMING_ERROR);
-        }
-        if (ssar != NULL)
-        {
-          gt_freeSequentialsuffixarrayreader(&ssar);
-        }
-        if (suffixarray.numberofallsortedsuffixes == totallength + 1)
-        {
-          gt_suftab_lightweightcheck(suffixarray.encseq, suffixarray.readmode,
-                                     totallength,suffixarray.suftab);
-          if (gt_lcptab_lightweightcheck(gt_str_get(arguments->esaindexname),
-                                         suffixarray.encseq,
-                                         suffixarray.readmode,
-                                         suffixarray.suftab,
-                                         logger,err) != 0)
+          if (suffixarray.numberofallsortedsuffixes == totallength + 1)
           {
-            haserr = true;
+            gt_suftab_lightweightcheck(suffixarray.encseq, suffixarray.readmode,
+                                       totallength,suffixarray.suftab);
+            if (arguments->inputlcp)
+            {
+              if (gt_lcptab_lightweightcheck(
+                                      gt_str_get(arguments->esaindexname),
+                                      suffixarray.encseq,
+                                      suffixarray.readmode,
+                                      suffixarray.suftab,
+                                      logger,err) != 0)
+              {
+                haserr = true;
+              }
+            }
           }
         }
         if (!haserr)
