@@ -1409,10 +1409,15 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
     }
   } else
   {
-    gt_assert(gt_encseq_lengthoflongestnonspecial(encseq) >
-             (unsigned long) prefixlength);
-    bsr->srs_maxremain = gt_encseq_lengthoflongestnonspecial(encseq) -
-                         prefixlength;
+    if (gt_encseq_lengthoflongestnonspecial(encseq) >
+        (unsigned long) prefixlength)
+    {
+      bsr->srs_maxremain = gt_encseq_lengthoflongestnonspecial(encseq) -
+                           prefixlength;
+    } else
+    {
+      bsr->srs_maxremain = 0;
+    }
   }
   bsr->sizeofworkspace = gt_size_of_sort_workspace (sfxstrategy);
   bsr->shortreadsort_maxwidth = gt_shortreadsort_maxwidth(false,
