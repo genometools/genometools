@@ -451,6 +451,12 @@ static unsigned long gt_check_for_range_occurrence(const ESASuffixptr *suftab,
   return ULONG_MAX;
 }
 
+typedef struct
+{
+  unsigned long start, end;
+  GtUchar firstchar;
+} GtRangewithchar;
+
 void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned long totallength,
@@ -458,16 +464,16 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
 {
   unsigned long idx, countbitsset = 0, previouspos = 0,
                 firstspecial = totallength, rangestart = 0,
-                numofcomparisons = 0;
+                numofcomparisons = 0, *nexttab = NULL;
   unsigned int numofchars, charidx, rangeidx = 0, numofranges;
   GtBitsequence *startposoccurs;
   GtUchar previouscc = 0;
-  GtRange *rangestore;
+  GtRangewithchar *rangestore;
   double ratio;
 
   GT_INITBITTAB(startposoccurs,totallength+1);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
-  rangestore = gt_malloc(sizeof(GtRange) * (numofchars+1));
+  rangestore = gt_malloc(sizeof(*rangestore) * numofchars);
   for (idx = 0; idx < totallength; idx++)
   {
     unsigned long position = ESASUFFIXPTRGET(suftab,idx);
@@ -518,6 +524,12 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
           }
         }
       }
+    } else
+    {
+      if (ISSPECIAL(cc))
+      {
+        firstspecial = 0;
+      }
     }
     previouscc = cc;
     previouspos = position;
@@ -538,19 +550,21 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
     cc = gt_encseq_get_encoded_char(encseq,position,readmode);
     if (idx > 0 && cc != previouscc)
     {
-      gt_assert(rangeidx < numofchars+1);
+      gt_assert(rangeidx < numofchars);
       rangestore[rangeidx].start = rangestart;
-      rangestore[rangeidx++].end = idx-1;
+      rangestore[rangeidx].end = idx-1;
+      rangestore[rangeidx++].firstchar = previouscc;
       rangestart = idx;
     }
     previouscc = cc;
   }
-  gt_assert(rangeidx < numofchars+1);
-  rangestore[rangeidx].start = rangestart;
-  rangestore[rangeidx++].end = firstspecial-1;
-  gt_assert(rangeidx < numofchars+1);
-  rangestore[rangeidx].start = firstspecial;
-  rangestore[rangeidx++].end = totallength;
+  if (firstspecial > 0)
+  {
+    gt_assert(rangeidx < numofchars);
+    rangestore[rangeidx].start = rangestart;
+    rangestore[rangeidx].end = firstspecial-1;
+    rangestore[rangeidx++].firstchar = previouscc;
+  }
   numofranges = rangeidx;
   rangeidx = 0;
   for (charidx = 0; charidx < numofchars; charidx++)
@@ -566,12 +580,13 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
     }
     if (count != 0)
     {
+      gt_assert(rangestore[rangeidx].firstchar == (GtUchar) charidx);
       gt_assert(rangestore[rangeidx].end - rangestore[rangeidx].start + 1
                 == count);
       rangeidx++;
     }
   }
-  for (rangeidx = 0; rangeidx < numofranges-1; rangeidx++)
+  for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
   {
     unsigned long start = 0;
 
@@ -601,6 +616,34 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   }
   ratio = (double) numofcomparisons/totallength;
   gt_assert(gt_double_compare(ratio,(double) numofchars) <= 0);
+  nexttab = gt_calloc((size_t) numofchars,sizeof(*nexttab));
+  for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
+  {
+    nexttab[rangestore[rangeidx].firstchar] = rangestore[rangeidx].start;
+  }
+  for (idx = 0; idx < totallength; idx++)
+  {
+    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+
+    if (position > 0)
+    {
+      GtUchar cc = gt_encseq_get_encoded_char(encseq,position - 1,readmode);
+      if (ISNOTSPECIAL(cc))
+      {
+        unsigned long checkpos;
+
+        checkpos = ESASUFFIXPTRGET(suftab,nexttab[(int) cc]) + 1;
+        if (checkpos != position)
+        {
+          fprintf(stderr,"idx=%lu,checkpos=%lu,position=%lu\n",
+                          idx,checkpos,position);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+        }
+        nexttab[(int) cc]++;
+      }
+    }
+  }
+  gt_free(nexttab);
   gt_free(rangestore);
 }
 
