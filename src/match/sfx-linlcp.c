@@ -468,12 +468,13 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   unsigned int numofchars, charidx, rangeidx = 0, numofranges;
   GtBitsequence *startposoccurs;
   GtUchar previouscc = 0;
-  GtRangewithchar *rangestore;
+  GtRangewithchar *rangestore, *rangestore2;
   double ratio;
 
   GT_INITBITTAB(startposoccurs,totallength+1);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   rangestore = gt_malloc(sizeof(*rangestore) * numofchars);
+  rangestore2 = gt_malloc(sizeof(*rangestore2) * numofchars);
   for (idx = 0; idx < totallength; idx++)
   {
     unsigned long position = ESASUFFIXPTRGET(suftab,idx);
@@ -521,6 +522,16 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                       idx-1,position,(unsigned int) previouscc,
                       (unsigned int) cc,previouspos,idx);
             exit(GT_EXIT_PROGRAMMING_ERROR);
+          } else
+          {
+            if (previouscc < cc)
+            {
+              gt_assert(rangeidx < numofchars);
+              rangestore[rangeidx].start = rangestart;
+              rangestore[rangeidx].end = idx-1;
+              rangestore[rangeidx++].firstchar = previouscc;
+              rangestart = idx;
+            }
           }
         }
       }
@@ -542,7 +553,8 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   }
   gt_free(startposoccurs);
   previouscc = 0;
-  for (idx = 0; idx < firstspecial; idx++)
+  rangestart = 0;
+  for (idx = 0, rangeidx = 0; idx < firstspecial; idx++)
   {
     unsigned long position = ESASUFFIXPTRGET(suftab,idx);
     GtUchar cc;
@@ -551,9 +563,9 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
     if (idx > 0 && cc != previouscc)
     {
       gt_assert(rangeidx < numofchars);
-      rangestore[rangeidx].start = rangestart;
-      rangestore[rangeidx].end = idx-1;
-      rangestore[rangeidx++].firstchar = previouscc;
+      rangestore2[rangeidx].start = rangestart;
+      rangestore2[rangeidx].end = idx-1;
+      rangestore2[rangeidx++].firstchar = previouscc;
       rangestart = idx;
     }
     previouscc = cc;
@@ -563,9 +575,25 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
     gt_assert(rangeidx < numofchars);
     rangestore[rangeidx].start = rangestart;
     rangestore[rangeidx].end = firstspecial-1;
-    rangestore[rangeidx++].firstchar = previouscc;
+    rangestore[rangeidx].firstchar = previouscc;
+    rangestore2[rangeidx].start = rangestart;
+    rangestore2[rangeidx].end = firstspecial-1;
+    rangestore2[rangeidx].firstchar = previouscc;
+    rangeidx++;
   }
   numofranges = rangeidx;
+  for (charidx = 0; charidx < numofranges; charidx++)
+  {
+    if (rangestore[charidx].start != rangestore2[charidx].start)
+    {
+      fprintf(stderr,"charidx=%u: rangestore = %lu != %lu = rangestore2\n",
+                       charidx,rangestore[charidx].start,
+                       rangestore2[charidx].start);
+    }
+    gt_assert(rangestore[charidx].start == rangestore2[charidx].start);
+    gt_assert(rangestore[charidx].end == rangestore2[charidx].end);
+    gt_assert(rangestore[charidx].firstchar == rangestore2[charidx].firstchar);
+  }
   rangeidx = 0;
   for (charidx = 0; charidx < numofchars; charidx++)
   {
@@ -645,6 +673,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   }
   gt_free(nexttab);
   gt_free(rangestore);
+  gt_free(rangestore2);
 }
 
 int gt_lcptab_lightweightcheck(const char *esaindexname,
