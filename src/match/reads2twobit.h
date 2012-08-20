@@ -153,10 +153,9 @@ void              gt_reads2twobit_sort(GtReads2Twobit *r2t,
                                        void *cmp_data);
 
 /* write the libraries information to disk */
-int               gt_reads2twobit_write_libraries_table(
+void              gt_reads2twobit_write_libraries_table(
                                             const GtReads2Twobit *r2t,
-                                            char *path,
-                                            GtError *err);
+                                            FILE *rlt_fp);
 
 #define GT_READS2TWOBIT_LIBSPEC_HELPMSG \
   "specify a list of input libraries (Fasta/FastQ); for single-end " \

@@ -16,6 +16,7 @@
 */
 
 #include "core/arraydef.h"
+#include "core/fa.h"
 #include "core/fasta_separator.h"
 #include "core/log_api.h"
 #include "core/xansi_api.h"
@@ -47,18 +48,24 @@ int gt_contigpaths_to_fasta(const char *indexname,
     GtLogger *logger, GtError *err)
 {
   unsigned long nofchars, seqnum, contig_length = 0;
-  GtFile *infp, *outfp;
+  GtFile *infp = NULL, *outfp = NULL;
+  FILE *depthinfo_fp = NULL;
   int nvalues, i;
-  GtContigsWriter *cw;
-  GtContigpathElem *buffer;
+  GtContigsWriter *cw = NULL;
+  GtContigpathElem *buffer = NULL;
   unsigned char *rcn = NULL;
+  int had_err = 0;
 
   if (buffersize == 0)
+  {
     buffersize = GT_CONTIGPATHS_BUFFERSIZE * sizeof (GtContigpathElem);
+    gt_log_log("buffersize = default (%lu bytes)", buffersize);
+  }
   else
   {
     size_t bsmod = buffersize % sizeof (GtContigpathElem);
     buffersize -= bsmod;
+    gt_log_log("buffersize = %lu bytes", buffersize);
   }
   gt_assert(buffersize > 0);
   gt_assert(buffersize % sizeof (GtContigpathElem) == 0);
@@ -70,71 +77,93 @@ int gt_contigpaths_to_fasta(const char *indexname,
 
   infp = gt_contigpaths_get_file(indexname, contigpaths_suffix, "r", err);
   if (infp == NULL)
-    return -1;
-  outfp = gt_contigpaths_get_file(indexname, fasta_suffix, "w", err);
-  if (outfp == NULL)
+    had_err = -1;
+  if (!had_err)
   {
-    gt_file_delete(infp);
-    return -1;
+    outfp = gt_contigpaths_get_file(indexname, fasta_suffix, "w", err);
+    if (outfp == NULL)
+    {
+      gt_file_delete(infp);
+      had_err = -1;
+    }
   }
-  if (load_copynum)
+  if (!had_err && load_copynum)
   {
-    GtFile *rcnfp;
+    GtFile *rcnfp = NULL;
     size_t nbytes;
     rcnfp = gt_contigpaths_get_file(indexname,
         GT_READJOINER_SUFFIX_READSCOPYNUM, "r", err);
     if (rcnfp == NULL)
     {
-      gt_file_delete(infp);
-      gt_file_delete(outfp);
-      gt_file_delete(rcnfp);
-      return -1;
+      had_err = -1;
     }
-    gt_log_log("load reads copy number from file");
-    nbytes = sizeof (*rcn) * gt_encseq_num_of_sequences(encseq);
-    if (gt_encseq_is_mirrored(encseq))
-      nbytes = GT_DIV2(nbytes);
-    rcn = gt_malloc(nbytes);
-    (void)gt_file_xread(rcnfp, rcn, nbytes);
-    gt_file_delete(rcnfp);
-  }
-  cw = gt_contigs_writer_new(encseq, outfp);
-  if (showpaths)
-    gt_contigs_writer_enable_complete_path_output(cw);
-  if (astat)
-    gt_contigs_writer_enable_astat_calculation(cw, coverage, rcn);
-
-  while ((nvalues = gt_file_xread(infp, buffer, buffersize)) > 0)
-  {
-    gt_assert((size_t)nvalues <= buffersize);
-    nvalues /= (sizeof (GtContigpathElem) << 1);
-    for (i = 0; i < nvalues; i++)
+    else
     {
-      nofchars = (unsigned long)buffer[(i << 1)];
-      seqnum = (unsigned long)buffer[(i << 1) + 1];
-      if (nofchars == 0)
+      gt_log_log("load reads copy number from file");
+      nbytes = sizeof (*rcn) * gt_encseq_num_of_sequences(encseq);
+      if (gt_encseq_is_mirrored(encseq))
+        nbytes = GT_DIV2(nbytes);
+      rcn = gt_malloc(nbytes);
+      (void)gt_file_xread(rcnfp, rcn, nbytes);
+      gt_file_delete(rcnfp);
+    }
+  }
+  if (!had_err)
+  {
+    cw = gt_contigs_writer_new(encseq, outfp);
+    if (showpaths)
+      gt_contigs_writer_enable_complete_path_output(cw);
+    if (astat)
+    {
+      depthinfo_fp = gt_fa_fopen_with_suffix(indexname,
+          GT_READJOINER_SUFFIX_DEPTHINFO, "w", err);
+      if (depthinfo_fp == NULL)
       {
-        /* end of contig */
-        if (contig_length >= min_contig_length)
-          gt_contigs_writer_write(cw);
-        else
-          gt_contigs_writer_abort(cw);
-        gt_contigs_writer_start(cw, seqnum);
-        contig_length = gt_encseq_seqlength(encseq, seqnum);
+        had_err = -1;
       }
-      else
+      if (!had_err)
       {
-        contig_length += nofchars;
-        gt_contigs_writer_append(cw, seqnum, nofchars);
+        gt_contigs_writer_enable_astat_calculation(cw, coverage, rcn,
+            depthinfo_fp);
       }
     }
   }
+  if (!had_err)
+  {
+    while ((nvalues = gt_file_xread(infp, buffer, buffersize)) > 0)
+    {
+      gt_assert((size_t)nvalues <= buffersize);
+      nvalues /= (sizeof (GtContigpathElem) << 1);
+      for (i = 0; i < nvalues; i++)
+      {
+        nofchars = (unsigned long)buffer[(i << 1)];
+        seqnum = (unsigned long)buffer[(i << 1) + 1];
+        if (nofchars == 0)
+        {
+          /* end of contig */
+          if (contig_length >= min_contig_length)
+            gt_contigs_writer_write(cw);
+          else
+            gt_contigs_writer_abort(cw);
+          gt_contigs_writer_start(cw, seqnum);
+          contig_length = gt_encseq_seqlength(encseq, seqnum);
+        }
+        else
+        {
+          contig_length += nofchars;
+          gt_contigs_writer_append(cw, seqnum, nofchars);
+        }
+      }
+    }
 
-  if (contig_length >= min_contig_length)
-    gt_contigs_writer_write(cw);
-  else
-    gt_contigs_writer_abort(cw);
-  gt_contigs_writer_show_stats(cw, logger);
+    if (contig_length >= min_contig_length)
+      gt_contigs_writer_write(cw);
+    else
+      gt_contigs_writer_abort(cw);
+    gt_contigs_writer_show_stats(cw, logger);
+  }
+  if (depthinfo_fp != NULL)
+    gt_fa_fclose(depthinfo_fp);
   gt_contigs_writer_delete(cw);
   gt_file_delete(infp);
   gt_file_delete(outfp);

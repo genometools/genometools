@@ -43,4 +43,13 @@
 #define GT_READJOINER_SUFFIX_SG_ASQG            ".asqg"
 #define GT_READJOINER_SUFFIX_SG_ASQG_GZ         ".asqg.gz"
 
+/* contig graph */
+#define GT_READJOINER_SUFFIX_JUNCTIONS          ".jnc"
+#define GT_READJOINER_SUFFIX_CJ_I_LINKS         ".cji"
+#define GT_READJOINER_SUFFIX_CJ_O_LINKS         ".cjo"
+#define GT_READJOINER_SUFFIX_DEPTHINFO          ".dpt"
+#define GT_READJOINER_SUFFIX_CG_DOT             ".cg.dot"
+#define GT_READJOINER_SUFFIX_CG_SUB_DOT         ".cg.sub.dot"
+#define GT_READJOINER_SUFFIX_CG_PATHS           ".cg.paths"
+
 #endif

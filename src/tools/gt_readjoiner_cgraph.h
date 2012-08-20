@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2012 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
-  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,23 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef READS_LIBRARY_H
-#define READS_LIBRARY_H
+#ifndef GT_READJOINER_CGRAPH_H
+#define GT_READJOINER_CGRAPH_H
 
-#include "core/error_api.h"
+#include "core/tool.h"
 
-typedef struct {
-  unsigned long first_seqnum;
-  unsigned long nofseqs;
-  bool paired;
-  unsigned long insertlength;
-  unsigned long stdev;
-} GtReadsLibrary;
-
-int gt_reads_library_table_write(GtReadsLibrary *lib_table,
-    unsigned long noflibs, const char *path, GtError *err);
-
-GtReadsLibrary* gt_reads_library_table_read(const char *path, GtError *err,
-    unsigned long *noflibs);
+/* the readjoiner_cgraph tool */
+GtTool* gt_readjoiner_cgraph(void);
 
 #endif

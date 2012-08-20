@@ -35,7 +35,8 @@ void             gt_contigs_writer_enable_complete_path_output(
 void             gt_contigs_writer_enable_astat_calculation(
                                              GtContigsWriter *contigs_writer,
                                              double coverage,
-                                             unsigned char *rcn);
+                                             unsigned char *rcn,
+                                             FILE *depthinfo_fp);
 
 void             gt_contigs_writer_start(GtContigsWriter *contigs_writer,
                                          unsigned long seqnum);

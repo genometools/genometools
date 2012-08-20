@@ -108,7 +108,7 @@ int gt_strgraph_show_context(GtStrgraph *strgraph, GtStrgraphFormat format,
 /* --- reads library table --- */
 
 int gt_strgraph_load_reads_library_table(GtStrgraph *strgraph,
-    const char *indexname, GtError *err);
+    FILE *rlt_fp, GtError *err);
 
 /* --- load from file --- */
 

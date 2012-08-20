@@ -23,6 +23,19 @@
 #include "core/logger.h"
 #include "core/error_api.h"
 
+/*
+ * File format:
+ *
+ * ELEM1 ELEM2
+ *
+ * ELEM1: 0   --> start new contig, from seq with seqnum ELEM2
+ *        >0  --> read chars (lastchar - ELEM1 + 1)..lastchar
+ *                from seq with seqnum ELEM2
+ * ELEM2: seqnum using encseq mirrored sequence numbering
+ *        (thus allowing to use reverse complements)
+ *
+ */
+
 typedef uint32_t GtContigpathElem;
 #define GT_CONTIGPATH_ELEM_MAX (GtContigpathElem)UINT32_MAX
 

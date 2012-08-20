@@ -304,6 +304,20 @@ function run_readjoiner_assembly {
   __end
 }
 
+function run_readjoiner_cgraph {
+  _PIPELINE=rdj
+  _STEP=rdjA
+  _READSET=$1
+  _CMD="$GT $GTOPTS"
+  _CMD_ARGS="readjoiner cgraph -smp2 -readset $_READSET $2"
+  __start
+  __append_version_genometools
+  $GT $GTOPTS encseq encode -indexname $_READSET.cg $_READSET.contigs.fas
+  __run
+  $GT $GTOPTS readjoiner assembly -readset $_READSET.cg -paths2seq
+  __end
+}
+
 function run_diff_encseq {
   _PIPELINE=rdj
   _STEP=diff_encseq

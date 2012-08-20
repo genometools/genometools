@@ -27,7 +27,7 @@
 #include "match/rdj-contfinder.h"
 #include "match/rdj-filesuf-def.h"
 #include "match/rdj-version.h"
-#include "match/reads_library.h"
+#include "match/reads_libraries_table.h"
 #include "match/reads2twobit.h"
 #include "tools/gt_readjoiner_prefilter.h"
 
@@ -412,13 +412,22 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
       }
       gt_contfinder_delete(contfinder);
     }
-    if (!had_err && arguments->libtable) {
+    if (!had_err && arguments->libtable)
+    {
       GtStr *fn;
+      FILE *rlt_fp;
       fn = gt_str_new_cstr(gt_str_get(arguments->readset));
       gt_str_append_cstr(fn, GT_READJOINER_SUFFIX_READSLIBRARYTABLE);
-      had_err = gt_reads2twobit_write_libraries_table(r2t, gt_str_get(fn), err);
-      gt_logger_log(verbose_logger, "reads library table saved: %s",
-          gt_str_get(fn));
+      rlt_fp = gt_fa_fopen(gt_str_get(fn), "w", err);
+      if (rlt_fp == NULL)
+        had_err = -1;
+      else
+      {
+        gt_reads2twobit_write_libraries_table(r2t, rlt_fp);
+        gt_logger_log(verbose_logger, "reads library table saved: %s",
+            gt_str_get(fn));
+        gt_fa_fclose(rlt_fp);
+      }
       gt_str_delete(fn);
     }
   }

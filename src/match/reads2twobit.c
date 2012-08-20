@@ -34,7 +34,7 @@
 #include "core/splitter_api.h"
 #include "core/xansi_api.h"
 #include "core/undef_api.h"
-#include "match/reads_library.h"
+#include "match/reads_libraries_table.h"
 #include "match/reads2twobit.h"
 
 #define GT_READS2TWOBIT_ALPHASIZE 4U
@@ -1885,26 +1885,21 @@ unsigned long gt_reads2twobit_total_seqlength(const GtReads2Twobit *r2t)
   return r2t->total_seqlength;
 }
 
-int gt_reads2twobit_write_libraries_table(const GtReads2Twobit *r2t,
-    char *path, GtError *err)
+void gt_reads2twobit_write_libraries_table(const GtReads2Twobit *r2t,
+    FILE *rlt_fp)
 {
-  int had_err = 0;
   unsigned long noflibs, lnum;
-  GtReadsLibrary *lib_table;
+  GtReadsLibrariesTable *rlt;
   noflibs = gt_array_size(r2t->collection);
   gt_assert(noflibs > 0);
-  lib_table = gt_malloc(sizeof (*lib_table) * noflibs);
+  rlt = gt_reads_libraries_table_new(noflibs);
   for (lnum = 0; lnum < noflibs; lnum++)
   {
     GtReadsLibraryInfo *rli;
     rli = gt_array_get(r2t->collection, lnum);
-    lib_table[lnum].first_seqnum = rli->first_seqnum;
-    lib_table[lnum].nofseqs = rli->nofseqs;
-    lib_table[lnum].paired = rli->paired;
-    lib_table[lnum].insertlength = rli->insertlength;
-    lib_table[lnum].stdev = rli->stdev;
+    gt_reads_libraries_table_add(rlt, rli->first_seqnum, rli->insertlength,
+        rli->stdev, rli->paired);
   }
-  had_err = gt_reads_library_table_write(lib_table, noflibs, path, err);
-  gt_free(lib_table);
-  return had_err;
+  gt_reads_libraries_table_save(rlt, rlt_fp);
+  gt_reads_libraries_table_delete(rlt);
 }
