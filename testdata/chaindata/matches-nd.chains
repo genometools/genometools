@@ -1,0 +1,24 @@
+# chain 0: length 2 score 2
+0 32 530 551 1
+33 75 654 695 1
+# chain 1: length 2 score 2
+0 32 618 639 1
+33 75 654 695 1
+# chain 2: length 2 score 2
+0 32 530 551 1
+33 75 679 695 1
+# chain 3: length 2 score 2
+0 32 618 639 1
+33 75 679 695 1
+# chain 4: length 2 score 2
+0 32 530 551 1
+33 75 723 750 1
+# chain 5: length 2 score 2
+0 32 618 639 1
+33 75 723 750 1
+# chain 6: length 2 score 2
+0 32 530 551 1
+33 75 727 758 1
+# chain 7: length 2 score 2
+0 32 618 639 1
+33 75 727 758 1

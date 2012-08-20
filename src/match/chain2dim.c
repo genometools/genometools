@@ -478,7 +478,6 @@ static void gt_chain2dim_nd_retrace_allprevious(
     GT_MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,father.level + 1);
     chain->chainedmatches.spaceGtChain2Dimref[father.level] = father.son;
     chain->chainedmatches.nextfreeGtChain2Dimref = father.level + 1;
-    /*printf("(1) pop=son=%lu,level=%lu\n",father.son,father.level);*/
     if (matchtable->previouscount[father.son] == 0)
     {
       chainprocessor(cpinfo,matchtable,chain);
@@ -493,7 +492,6 @@ static void gt_chain2dim_nd_retrace_allprevious(
           GT_GETNEXTFREEINARRAY(el,stack,GtChain2DimEdgelevel,32UL);
           el->level = father.level + 1;
           el->son = matchtable->previoustab[idx];
-          /*printf("(1) push=son=%lu,level=%lu\n",el->son,el->level);*/
         }
       }
     }
@@ -684,9 +682,9 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
       localmaxmatch.defined = false;
       localmaxmatch.maxscore = 0;
       localmaxmatch.maxmatchnum = 0;
+      previouswithbestscore = 0;
       for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
       {
-        previouswithbestscore = 0;
         if (gt_chain2dim_colinear(matchtable,0,leftmatch,rightmatch) &&
             gt_chain2dim_colinear(matchtable,1,leftmatch,rightmatch))
         {
@@ -710,25 +708,28 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
             previouswithbestscore = 1UL;
           } else
           {
-            if (localmaxmatch.maxscore <= score)
+            if (localmaxmatch.maxscore < score)
             {
               localmaxmatch.maxscore = score;
               localmaxmatch.maxmatchnum = previous;
-              localmaxmatch.defined = true;
-              previouswithbestscore = localmaxmatch.maxscore < score
-                                        ? 1UL : previouswithbestscore+1;
+              previouswithbestscore = 1UL;
+            } else
+            {
+              if (localmaxmatch.maxscore == score)
+              {
+                previouswithbestscore++;
+              }
             }
           }
         }
       }
       if (localmaxmatch.defined)
       {
+        gt_assert(previouswithbestscore > 0);
         matchtable->matches[rightmatch].previousinchain
           = localmaxmatch.maxmatchnum;
         matchtable->matches[rightmatch].score = localmaxmatch.maxscore;
         matchtable->previouscount[rightmatch] = previouswithbestscore;
-        /*printf("previouscount[%lu]=%lu\n",
-                rightmatch,previouswithbestscore);*/
       } else
       {
         matchtable->matches[rightmatch].previousinchain
@@ -776,10 +777,9 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
           }
           if (score == matchtable->matches[rightmatch].score)
           {
+            gt_assert(matchtable->previousbound[rightmatch] > 0);
             matchtable->previoustab[--matchtable->previousbound[rightmatch]]
               = previous;
-            /*printf("previoustab[%lu]=%lu\n",
-               matchtable->previousbound[rightmatch],previous);*/
           }
         }
       }
@@ -1671,11 +1671,14 @@ void gt_chain_possiblysortmatches(GtLogger *logger,
     }
     if (!matchesaresorted)
     {
-      gt_logger_log(logger,"input matches are not yet sorted => "
-                              "sort them");
+      gt_logger_log(logger,"input matches are not yet sorted => sort them");
+      qsort(matchtable->matches,(size_t) matchtable->nextfree,
+            sizeof (*matchtable->matches),qsortcomparefunction);
+    } else
+    {
+      gt_logger_log(logger,"matches are already sorted w.r.t. dimension %u",
+                    presortdim);
     }
-    qsort(matchtable->matches,(size_t) matchtable->nextfree,
-          sizeof (*matchtable->matches),qsortcomparefunction);
   }
 }
 

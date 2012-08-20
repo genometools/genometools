@@ -22,10 +22,17 @@ def runchain2dimall(params,matchfile)
   end
 end
 
-Name "gt chain2dim all"
+Name "gt chain2dim small all"
 Keywords "gt_chain2dim all"
 Test do
-  [283,298,304,753,758,759,763,945,1815,3709,3710].each do |lines|
+  run_test "#{$bin}gt chain2dim -global all -m #{$testdata}chaindata/matches-nd.txt"
+  run "cmp -s #{last_stdout} #{$testdata}chaindata/matches-nd.chains"
+end
+
+Name "gt chain2dim ecoli all"
+Keywords "gt_chain2dim all"
+Test do
+  [283,298,304,753].each do |lines|
     run "head -n #{lines} #{$testdata}ecolicmp250.of | sed -e 's/[0-9]*$/1/'"
     run_test "#{$bin}gt chain2dim -global all -m #{last_stdout}"
   end
