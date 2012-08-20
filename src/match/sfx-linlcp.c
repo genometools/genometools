@@ -468,13 +468,12 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   unsigned int numofchars, charidx, rangeidx = 0, numofranges;
   GtBitsequence *startposoccurs;
   GtUchar previouscc = 0;
-  GtRangewithchar *rangestore, *rangestore2;
+  GtRangewithchar *rangestore;
   double ratio;
 
   GT_INITBITTAB(startposoccurs,totallength+1);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   rangestore = gt_malloc(sizeof(*rangestore) * numofchars);
-  rangestore2 = gt_malloc(sizeof(*rangestore2) * numofchars);
   for (idx = 0; idx < totallength; idx++)
   {
     unsigned long position = ESASUFFIXPTRGET(suftab,idx);
@@ -496,6 +495,10 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
         if (firstspecial == totallength)
         {
           firstspecial = idx;
+          gt_assert(rangeidx < numofchars);
+          rangestore[rangeidx].start = rangestart;
+          rangestore[rangeidx].end = idx-1;
+          rangestore[rangeidx++].firstchar = previouscc;
         }
         if (ISSPECIAL(previouscc))
         {
@@ -552,50 +555,15 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_free(startposoccurs);
-  previouscc = 0;
-  rangestart = 0;
-  for (idx = 0, rangeidx = 0; idx < firstspecial; idx++)
+  if (firstspecial == totallength)
   {
-    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
-    GtUchar cc;
-
-    cc = gt_encseq_get_encoded_char(encseq,position,readmode);
-    if (idx > 0 && cc != previouscc)
-    {
-      gt_assert(rangeidx < numofchars);
-      rangestore2[rangeidx].start = rangestart;
-      rangestore2[rangeidx].end = idx-1;
-      rangestore2[rangeidx++].firstchar = previouscc;
-      rangestart = idx;
-    }
-    previouscc = cc;
-  }
-  if (firstspecial > 0)
-  {
-    gt_assert(rangeidx < numofchars);
+    gt_assert(firstspecial > 0 && rangeidx < numofchars);
     rangestore[rangeidx].start = rangestart;
     rangestore[rangeidx].end = firstspecial-1;
-    rangestore[rangeidx].firstchar = previouscc;
-    rangestore2[rangeidx].start = rangestart;
-    rangestore2[rangeidx].end = firstspecial-1;
-    rangestore2[rangeidx].firstchar = previouscc;
-    rangeidx++;
+    rangestore[rangeidx++].firstchar = previouscc;
   }
   numofranges = rangeidx;
-  for (charidx = 0; charidx < numofranges; charidx++)
-  {
-    if (rangestore[charidx].start != rangestore2[charidx].start)
-    {
-      fprintf(stderr,"charidx=%u: rangestore = %lu != %lu = rangestore2\n",
-                       charidx,rangestore[charidx].start,
-                       rangestore2[charidx].start);
-    }
-    gt_assert(rangestore[charidx].start == rangestore2[charidx].start);
-    gt_assert(rangestore[charidx].end == rangestore2[charidx].end);
-    gt_assert(rangestore[charidx].firstchar == rangestore2[charidx].firstchar);
-  }
-  rangeidx = 0;
-  for (charidx = 0; charidx < numofchars; charidx++)
+  for (charidx = 0, rangeidx = 0; charidx < numofchars; charidx++)
   {
     unsigned long count;
 
@@ -673,7 +641,6 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   }
   gt_free(nexttab);
   gt_free(rangestore);
-  gt_free(rangestore2);
 }
 
 int gt_lcptab_lightweightcheck(const char *esaindexname,
