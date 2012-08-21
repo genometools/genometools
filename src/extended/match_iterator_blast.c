@@ -32,7 +32,7 @@
 #include "extended/match_iterator_rep.h"
 
 #define READNUMS 5
-#define READVALUES 9
+#define READVALUES 10
 
 #define GT_MATCHER_BLAST_CANNOTPARSECOLUMN(S)\
         gt_error_set(err,"file %s, line %lu, column %lu: %s", \
@@ -68,7 +68,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
   unsigned long columncount = 0;
   long storeinteger[READNUMS], tmp;
   long double e_value;
-  float bitscore;
+  float bitscore, identity;
   bool reverse = false;
   char query_seq[BUFSIZ], db_seq[BUFSIZ], buffer[BUFSIZ];
   int had_err = 0, i = 0, readvalues = 0;
@@ -86,8 +86,9 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
     if (!m->pvt->process)
       fseek(m->pvt->matchfilep, -1, SEEK_CUR);
     readvalues = fscanf(m->pvt->matchfilep,
-                        "%s %s %*f %ld %*d %*d %ld %ld %ld %ld "
-                        "%Lg %f\n", query_seq, db_seq, &storeinteger[0],
+                        "%s %s %f %ld %*d %*d %ld %ld %ld %ld "
+                        "%Lg %f\n", query_seq, db_seq, &identity,
+                        &storeinteger[0],
                         &storeinteger[1], &storeinteger[2], &storeinteger[3],
                         &storeinteger[4], &e_value, &bitscore);
     if (readvalues == EOF)
@@ -110,8 +111,9 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
         i = 0;
       } else break;
     }
-    if ((readvalues = sscanf(buffer,"%s %s %*f %ld %*d %*d %ld %ld %ld %ld %Lg "
-                             "%f\n", query_seq, db_seq, &storeinteger[0],
+    if ((readvalues = sscanf(buffer,"%s %s %f %ld %*d %*d %ld %ld %ld %ld %Lg "
+                             "%f\n", query_seq, db_seq, &identity,
+                             &storeinteger[0],
                              &storeinteger[1], &storeinteger[2],
                              &storeinteger[3], &storeinteger[4], &e_value,
                              &bitscore)) != READVALUES) {
@@ -152,6 +154,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
                                 e_value,
                                 bitscore,
                                 storeinteger[0],
+                                identity,
                                 reverse ? GT_MATCH_REVERSE : GT_MATCH_DIRECT);
     m->pvt->curpos++;
     return GT_MATCHER_STATUS_OK;

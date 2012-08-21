@@ -36,6 +36,7 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             double evalue,
                             float bitscore,
                             unsigned long ali_l,
+                            double similarity,
                             GtMatchDirection dir);
 
 /* Sets <evalue> to be the E-value in <mb>. */
@@ -47,6 +48,9 @@ void gt_match_blast_set_bitscore(GtMatchBlast *mb, float bits);
 /* Sets <length> to be the alignment length in <mb>. */
 void gt_match_blast_set_align_length(GtMatchBlast *mb, unsigned long length);
 
+/* Sets <similarity> to be the match similarity in <mb>. */
+void gt_match_blast_set_similarity(GtMatchBlast *mb, double similarity);
+
 /* Returns the E-value stored in <mb>. */
 long double gt_match_blast_get_evalue(GtMatchBlast *mb);
 
@@ -55,5 +59,8 @@ float gt_match_blast_get_bitscore(GtMatchBlast *mb);
 
 /* Returns the alignment length stored in <mb>. */
 unsigned long gt_match_blast_get_align_length(GtMatchBlast *mb);
+
+/* Returns the alignment similarity stored in <mb>. */
+double gt_match_blast_get_similarity(GtMatchBlast *mb);
 
 #endif

@@ -176,11 +176,12 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   GtMatchDirection dir;
   GtStrand str;
   GtRange fn_range, match_range1, match_range2;
-  char target[BUFSIZ], *tmp, *tmp2;
+  char target[BUFSIZ], *tmp, *tmp2, buf[BUFSIZ];
   const char *seqid1, *seqid2;
   unsigned long ali_length,
                 fn_length,
                 min_ali_length;
+  double similarity;
 
   gt_assert(rms && match);
   gt_error_check(err);
@@ -202,9 +203,12 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   seq = gt_genome_node_get_seqid((GtGenomeNode*) fn);
   dir = gt_match_get_direction(match);
   str = gt_ltr_refseq_match_stream_determine_strand(dir, fn);
+  similarity = gt_match_blast_get_similarity((GtMatchBlast*) match);
   new_node = gt_feature_node_new(seq, NEW_FN_TYPE,
                                  fn_range.start + match_range1.start,
                                  fn_range.start + match_range1.end, str);
+  snprintf(buf, BUFSIZ, "%.2f", similarity);
+  gt_feature_node_set_attribute((GtFeatureNode*) new_node, "identity", buf);
   gt_feature_node_set_source((GtFeatureNode*) new_node,
                              gt_str_new_cstr(rms->source));
   if (rms->params_id != GT_UNDEF_ULONG) {

@@ -31,6 +31,7 @@ struct GtMatchBlast {
   long double evalue;
   float bitscore;
   unsigned long ali_length;
+  double similarity;
 };
 
 #define gt_match_blast_cast(match) \
@@ -67,6 +68,7 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             double evalue,
                             float bitscore,
                             unsigned long length,
+                            double similarity,
                             GtMatchDirection dir)
 {
   GtMatch *match;
@@ -77,6 +79,7 @@ GtMatch* gt_match_blast_new(char *seqid1,
   matchb->evalue = evalue;
   matchb->bitscore = bitscore;
   matchb->ali_length = length;
+  matchb->similarity = similarity;
   return match;
 }
 
@@ -98,6 +101,12 @@ void gt_match_blast_set_align_length(GtMatchBlast *mb, unsigned long length)
   mb->ali_length = length;
 }
 
+void gt_match_blast_set_similarity(GtMatchBlast *mb, double similarity)
+{
+  gt_assert(mb);
+  mb->similarity = similarity;
+}
+
 long double gt_match_blast_get_evalue(GtMatchBlast *mb)
 {
   gt_assert(mb);
@@ -114,4 +123,10 @@ unsigned long gt_match_blast_get_align_length(GtMatchBlast *mb)
 {
   gt_assert(mb);
   return mb->ali_length;
+}
+
+double gt_match_blast_get_similarity(GtMatchBlast *mb)
+{
+  gt_assert(mb);
+  return mb->similarity;
 }
