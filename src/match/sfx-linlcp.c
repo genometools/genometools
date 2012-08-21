@@ -457,19 +457,135 @@ typedef struct
   GtUchar firstchar;
 } GtRangewithchar;
 
+/* The following funktion implements the linear time algorithm of
+   @INPROCEEDINGS{BUR:KAER:2003,
+   author = {Burkhardt, S. and K{\"a}rkk{\"a}inen, J.},
+   title = {{Fast Lightweight Suffix Array Construction and Checking}},
+   booktitle = {{Proceedings of the 14th Annual Symposium on Combinatorial
+                 Pattern Matching (CPM)}},
+   year = {2003},
+   editor = {{Baeza-Yates, R. and Ch{\'a}vez, E. and Crochemore, M.}},
+   volume = {2676},
+   series = {LNCS},
+   pages = {200-210},
+   publisher = {Springer-Verlag}
+   }
+   to check the following suffix-order condition of the sorted suffix array:
+   For all characters c, if SA[i,j] contains the suffixes starting
+   with charcter c, then SA[i]+1, SA[i+1]+1, \ldots, SA[j]+1 occur
+   in SA in this order (but not consecutively in general).
+   The running time of the algorithm is independent of the alphabet size.
+   The main problem is that it requires random access to the sequence
+   which slows it down.
+*/
+
+static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
+                                     GtReadmode readmode,
+                                     unsigned long totallength,
+                                     unsigned int numofchars,
+                                     const ESASuffixptr *suftab,
+                                     const GtRangewithchar *rangestore,
+                                     unsigned int numofranges)
+{
+  unsigned int rangeidx;
+  unsigned long idx, *nexttab = gt_calloc((size_t) numofchars,sizeof(*nexttab));
+
+  for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
+  {
+    nexttab[rangestore[rangeidx].firstchar] = rangestore[rangeidx].start;
+  }
+  for (idx = 0; idx < totallength; idx++)
+  {
+    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+
+    if (position > 0)
+    {
+      GtUchar cc = gt_encseq_get_encoded_char(encseq,position - 1,readmode);
+      if (ISNOTSPECIAL(cc))
+      {
+        unsigned long checkpos;
+
+        checkpos = ESASUFFIXPTRGET(suftab,nexttab[(int) cc]) + 1;
+        if (checkpos != position)
+        {
+          fprintf(stderr,"idx=%lu,checkpos=%lu,position=%lu\n",
+                          idx,checkpos,position);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+        }
+        nexttab[(int) cc]++;
+      }
+    }
+  }
+  gt_free(nexttab);
+}
+
+/* The following function checks the suffix-order condition described
+   above using an O(\sigma n) algorithm where \sigma is the alphabet size
+   and n is the length of the suffix array. The algorithm does not
+   access the sequence and performs \sigma linear scans of the suffix array.
+   This makes it faster than the previous method. It is probably possible
+   to perform the check in one linear scan.
+*/
+
+static void gt_suftab_sk_suffixorder(unsigned long totallength,
+                                     unsigned int numofchars,
+                                     const ESASuffixptr *suftab,
+                                     const GtRangewithchar *rangestore,
+                                     unsigned int numofranges)
+{
+  unsigned int rangeidx;
+  unsigned long numofcomparisons = 0;
+  double ratio;
+
+  for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
+  {
+    unsigned long idx, start = 0;
+
+    for (idx = rangestore[rangeidx].start; idx <= rangestore[rangeidx].end;
+         idx++)
+    {
+      unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+
+      if (position + 1 <= totallength)
+      {
+        unsigned long found = gt_check_for_range_occurrence(suftab,
+                                                            position + 1,
+                                                            start,
+                                                            totallength);
+        if (found == ULONG_MAX)
+        {
+          fprintf(stderr,"Cannot find position+1=%lu in range [%lu,%lu]\n",
+                            position+1,start,totallength);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+        }
+        numofcomparisons += found - start + 1;
+        start = found + 1;
+      }
+    }
+  }
+  ratio = (double) numofcomparisons/totallength;
+  if (gt_double_compare(ratio,(double) numofchars) > 0)
+  {
+    fprintf(stderr,"gt_double_compare(%.2f,%u) = %d > 0 not exected\n",
+                    ratio,numofchars,
+                    gt_double_compare(ratio,(double) numofchars));
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+}
+
 void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned long totallength,
-                               const ESASuffixptr *suftab)
+                               const ESASuffixptr *suftab,
+                               GtLogger *logger)
 {
   unsigned long idx, countbitsset = 0, previouspos = 0,
-                firstspecial = totallength, rangestart = 0,
-                numofcomparisons = 0, *nexttab = NULL;
+                firstspecial = totallength, rangestart = 0;
   unsigned int numofchars, charidx, rangeidx = 0, numofranges;
   GtBitsequence *startposoccurs;
   GtUchar previouscc = 0;
   GtRangewithchar *rangestore;
-  double ratio;
+  const bool skcheck = true;
 
   GT_INITBITTAB(startposoccurs,totallength+1);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
@@ -582,64 +698,26 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
       rangeidx++;
     }
   }
-  for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
+  gt_logger_log(logger,"suftab-check, first phase done");
+  if (skcheck)
   {
-    unsigned long start = 0;
-
-    for (idx = rangestore[rangeidx].start; idx <= rangestore[rangeidx].end;
-         idx++)
-    {
-      unsigned long position = ESASUFFIXPTRGET(suftab,idx);
-
-      if (position + 1 <= totallength)
-      {
-        unsigned long newstart = gt_check_for_range_occurrence(suftab,
-                                                               position + 1,
-                                                               start,
-                                                               totallength);
-        if (newstart == ULONG_MAX)
-        {
-          fprintf(stderr,"Cannot find position+1=%lu in range [%lu,%lu]\n",
-                            position+1,start,totallength);
-          exit(GT_EXIT_PROGRAMMING_ERROR);
-        } else
-        {
-          numofcomparisons += newstart - start + 1;
-        }
-        start = newstart + 1;
-      }
-    }
-  }
-  ratio = (double) numofcomparisons/totallength;
-  gt_assert(gt_double_compare(ratio,(double) numofchars) <= 0);
-  nexttab = gt_calloc((size_t) numofchars,sizeof(*nexttab));
-  for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
+    gt_suftab_sk_suffixorder(totallength,
+                             numofchars,
+                             suftab,
+                             rangestore,
+                             numofranges);
+    gt_logger_log(logger,"suftab-check, second phase (sk-method) done");
+  } else
   {
-    nexttab[rangestore[rangeidx].firstchar] = rangestore[rangeidx].start;
+    gt_suftab_bk_suffixorder(encseq,
+                             readmode,
+                             totallength,
+                             numofchars,
+                             suftab,
+                             rangestore,
+                             numofranges);
+    gt_logger_log(logger,"suftab-check, second phase (bk-method) done");
   }
-  for (idx = 0; idx < totallength; idx++)
-  {
-    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
-
-    if (position > 0)
-    {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,position - 1,readmode);
-      if (ISNOTSPECIAL(cc))
-      {
-        unsigned long checkpos;
-
-        checkpos = ESASUFFIXPTRGET(suftab,nexttab[(int) cc]) + 1;
-        if (checkpos != position)
-        {
-          fprintf(stderr,"idx=%lu,checkpos=%lu,position=%lu\n",
-                          idx,checkpos,position);
-          exit(GT_EXIT_PROGRAMMING_ERROR);
-        }
-        nexttab[(int) cc]++;
-      }
-    }
-  }
-  gt_free(nexttab);
   gt_free(rangestore);
 }
 
@@ -666,6 +744,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
                            partwidth,
                            totallength,
                            suftab);
+    gt_logger_log(logger,"computed reference lcp table with manzini algorithm");
   }
   ssar = gt_newSequentialsuffixarrayreaderfromfile(esaindexname,
                                                    SARR_LCPTAB,
@@ -704,6 +783,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
+  gt_logger_log(logger,"compare lcp-values against reference");
   if (ssar != NULL)
   {
     gt_freeSequentialsuffixarrayreader(&ssar);

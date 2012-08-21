@@ -730,7 +730,8 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
           if (suffixarray.numberofallsortedsuffixes == totallength + 1)
           {
             gt_suftab_lightweightcheck(suffixarray.encseq, suffixarray.readmode,
-                                       totallength,suffixarray.suftab);
+                                       totallength,suffixarray.suftab,
+                                       logger);
             if (arguments->inputlcp)
             {
               if (gt_lcptab_lightweightcheck(
