@@ -148,11 +148,10 @@ static unsigned long *fillrightofpartwidth(
 {
   GtSpecialrangeiterator *sri;
   GtRange range;
-  unsigned long realspecialranges, *rightofpartwidth = NULL;
-  unsigned long countranges = 0, nextrightofpartwidth = 0;
-  size_t allocsize;
+  unsigned long countlargeranges, *rightofpartwidth = NULL,
+                nextrightofpartwidth = 0;
 
-  realspecialranges = gt_encseq_realspecialranges(encseq);
+  countlargeranges = gt_encseq_realspecialranges(encseq);
   sri = gt_specialrangeiterator_new(encseq,
                                     GT_ISDIRREVERSE(readmode) ? false : true);
   while (gt_specialrangeiterator_next(sri,&range))
@@ -163,27 +162,18 @@ static unsigned long *fillrightofpartwidth(
     }
     if (range.end < partwidth)
     {
-      countranges++;
-    }
-  }
-  gt_specialrangeiterator_delete(sri);
-  allocsize = sizeof (unsigned long) * (realspecialranges - countranges);
-  rightofpartwidth = gt_malloc(allocsize);
-  /*printf("allocated %lu bytes for rightofpartwidth (%.2f)\n",
-      (unsigned long) allocsize, (double) allocsize/totallength);*/
-  sri = gt_specialrangeiterator_new(encseq,
-                                    GT_ISDIRREVERSE(readmode) ? false : true);
-  while (gt_specialrangeiterator_next(sri,&range))
-  {
-    if (GT_ISDIRREVERSE(readmode))
+      gt_assert(countlargeranges > 0);
+      countlargeranges--;
+    } else
     {
-      gt_range_reverse(totallength,&range);
-    }
-    if (range.end >= partwidth)
-    {
-      gt_assert(rightofpartwidth != NULL
-                   && (unsigned long) nextrightofpartwidth <
-                      (realspecialranges - countranges));
+      if (rightofpartwidth == NULL)
+      {
+        size_t allocsize = sizeof (*rightofpartwidth) * countlargeranges;
+        rightofpartwidth = gt_malloc(allocsize);
+        /*printf("allocated %lu bytes for rightofpartwidth (%.2f)\n",
+            (unsigned long) allocsize, (double) allocsize/totallength);*/
+      }
+      gt_assert(nextrightofpartwidth < countlargeranges);
       rightofpartwidth[nextrightofpartwidth++]
         = compressedtable_get(rightposinverse,range.end);
     }
@@ -284,7 +274,7 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    unsigned long specialidx, specialpos;
+    unsigned long specialidx;
 
     sri = gt_specialrangeiterator_new(encseq,
                                       GT_ISDIRREVERSE(readmode) ? false : true);
@@ -296,27 +286,23 @@ static unsigned long sa2ranknext(Compressedtable *ranknext,
       {
         gt_range_reverse(totallength,&range);
       }
-      for (specialpos = range.start; specialpos < range.end;
-           specialpos++)
+      gt_assert(range.start < range.end);
+      if (range.start > 0)
       {
-        if (specialpos > 0)
+        GtUchar cc = gt_encseq_get_encoded_char(encseq,range.start-1,readmode);
+        if (ISNOTSPECIAL(cc))
         {
-          GtUchar cc = gt_encseq_get_encoded_char(encseq,specialpos-1,
-                                                         readmode);
-          if (ISNOTSPECIAL(cc))
-          {
-            gt_assert(occless[cc] < (unsigned long) partwidth);
-            compressedtable_update(ranknext,
-                                   (unsigned long) occless[cc],
-                                   specialidx);
-            occless[cc]++;
-          }
-        } else
-        {
-          longest = partwidth;
+          gt_assert(occless[cc] < (unsigned long) partwidth);
+          compressedtable_update(ranknext,
+                                 (unsigned long) occless[cc],
+                                 specialidx);
+          occless[cc]++;
         }
-        specialidx++;
+      } else
+      {
+        longest = partwidth;
       }
+      specialidx += range.end - range.start;
     }
     if ((GT_ISDIRREVERSE(readmode) &&
          gt_encseq_lengthofspecialprefix(encseq) > 0) ||
