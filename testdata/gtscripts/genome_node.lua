@@ -17,6 +17,17 @@
 
 -- testing the Lua bindings for the GenomeNode interface
 
+function count_children(parent)
+  count = 0
+  gfi = gt.feature_node_iterator_new(parent)
+  curnode = gfi:next()
+  while not(curnode == nil) do
+      count = count + 1
+      curnode = gfi:next()
+  end
+  return count
+end
+
 -- testing gt.feature_node_new
 range = gt.range_new(1, 100)
 rval, err = pcall(gt.feature_node_new, nil, nil, range:get_start(), range:get_end(), "+")
@@ -50,6 +61,25 @@ assert(parent:contains_marked(parent))
 rval, fn = pcall(gn.get_filename, gn)
 assert(rval)
 assert(string.find(fn, "^generated$"))
+
+-- testing genome_node:remove_leaf
+-- testing removal of leaves which are direct children
+parent = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
+child  = gt.feature_node_new("seqid", "exon", range:get_start(), range:get_end(), "+")
+parent:add_child(child)
+child  = gt.feature_node_new("seqid", "exon", range:get_start(), range:get_end(), "+")
+parent:add_child(child)
+assert(count_children(parent) == 3)
+parent:remove_leaf(child)
+assert(count_children(parent) == 2)
+parent:add_child(child)
+assert(count_children(parent) == 3)
+-- testing removal of leaves which are non-direct children
+newchild = gt.feature_node_new("seqid", "exon", range:get_start(), range:get_end(), "+")
+child:add_child(newchild)
+assert(count_children(parent) == 4)
+parent:remove_leaf(newchild)
+assert(count_children(parent) == 3)
 
 -- testing gt.region_node_new
 range = gt.range_new(1, 100)

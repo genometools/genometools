@@ -310,6 +310,21 @@ static int feature_node_lua_extract_sequence(lua_State *L)
   return 1;
 }
 
+static int feature_node_lua_remove_leaf(lua_State *L)
+{
+  GtGenomeNode **parent, **leaf;
+  GtFeatureNode *pf, *lf;
+  parent = check_genome_node(L, 1);
+  leaf  = check_genome_node(L, 2);
+  pf = gt_feature_node_try_cast(*parent);
+  luaL_argcheck(L, pf, 1, "not a feature node");
+  lf = gt_feature_node_try_cast(*leaf);
+  luaL_argcheck(L, lf, 2, "not a feature node");
+  gt_feature_node_remove_leaf(pf, lf);
+  gt_genome_node_delete((GtGenomeNode*) lf);
+  return 0;
+}
+
 static int genome_node_lua_delete(lua_State *L)
 {
   GtGenomeNode **gn;
@@ -342,6 +357,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "output_leading", feature_node_lua_output_leading },
   { "get_type", feature_node_lua_get_type },
   { "extract_sequence", feature_node_lua_extract_sequence },
+  { "remove_leaf", feature_node_lua_remove_leaf },
   { NULL, NULL }
 };
 
