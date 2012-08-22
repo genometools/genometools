@@ -38,7 +38,7 @@ struct GtLTRClusterPrepareSeqVisitor {
 
 static int extract_feature_seq(GtEncseqBuilder *b, const char *header,
                                GtStr *seqid, GtEncseq *encseq, GtRange range,
-                               GT_UNUSED const char *fnt)
+                               GT_UNUSED const char *fnt, GtError *err)
 {
   char *buffer;
   int had_err = 0;
@@ -46,19 +46,28 @@ static int extract_feature_seq(GtEncseqBuilder *b, const char *header,
                 startpos;
 
   (void) sscanf(gt_str_get(seqid), "seq%lu", &seqnum);
-  buffer = gt_calloc((size_t) gt_range_length(&range) + 1, sizeof (char));
-  startpos = gt_encseq_seqstartpos(encseq, seqnum);
-  gt_encseq_extract_decoded(encseq, buffer, startpos + range.start,
-                            startpos + range.end);
-  gt_encseq_builder_add_cstr(b, buffer, gt_range_length(&range), header);
-  gt_free(buffer);
+  if (seqnum >= gt_encseq_num_of_sequences(encseq)) {
+    gt_error_set(err, "annotation encountered for sequence %lu, but the "
+                      "supplied encoded sequence only contains sequences "
+                      "0-%lu", seqnum, gt_encseq_num_of_sequences(encseq)-1);
+    had_err = -1;
+  }
+
+  if (!had_err) {
+    buffer = gt_calloc((size_t) gt_range_length(&range) + 1, sizeof (char));
+    startpos = gt_encseq_seqstartpos(encseq, seqnum);
+    gt_encseq_extract_decoded(encseq, buffer, startpos + range.start,
+                              startpos + range.end);
+    gt_encseq_builder_add_cstr(b, buffer, gt_range_length(&range), header);
+    gt_free(buffer);
+  }
 
   return had_err;
 }
 
 static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
                                                GtFeatureNode *fn,
-                                               GT_UNUSED GtError *err)
+                                               GtError *err)
 {
   GtLTRClusterPrepareSeqVisitor *lcv;
   GtFeatureNode *curnode;
@@ -68,6 +77,7 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
   char buffer[BUFSIZ];
   int had_err = 0;
   bool first_ltr = true;
+  gt_error_check(err);
 
   lcv = gt_ltr_cluster_prepare_seq_visitor_cast(nv);
   gt_assert(lcv);
@@ -108,7 +118,7 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
         eb = (GtEncseqBuilder*) gt_hashmap_get(lcv->encseq_builders, attr);
       }
       had_err = extract_feature_seq(eb, header, seqid, lcv->src_encseq, range,
-                                    fnt);
+                                    fnt, err);
       gt_file_delete(file);
     } else if (strcmp(fnt, "LTR_retrotransposon") == 0)
       continue;
@@ -144,7 +154,7 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
         eb = (GtEncseqBuilder*) gt_hashmap_get(lcv->encseq_builders, tmp);
       }
       had_err = extract_feature_seq(eb, header, seqid, lcv->src_encseq, range,
-                                    fnt);
+                                    fnt, err);
       gt_free(tmp);
       gt_file_delete(file);
     }
