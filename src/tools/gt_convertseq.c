@@ -161,7 +161,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
     {
       GtUchar *seq = NULL;
       desc = NULL;
-      i = 0; j = 1UL;
+      i = 0; j = 0UL;
       had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
       if (had_err != 1)
         break;
@@ -236,7 +236,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
             j++;
           }
           if ((j % opts.fastawidth) == 0) {
-            j = 1;
+            j = 0;
             gt_file_xprintf(opts.outfp, "\n");
           }
         }
