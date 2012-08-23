@@ -726,7 +726,7 @@ static int gt_reads2twobit_encode_interleaved_paired_fastq_library(
   unsigned long qbuf_next = 0;
   bool qmode = false;
   bool processing_mate = true;
-  char *fgetsretval;
+  char *fgetsretval = NULL;
   state->seqlen = 0;
   do {
     if (!qmode)
