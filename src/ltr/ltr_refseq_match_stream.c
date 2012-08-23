@@ -207,7 +207,7 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   new_node = gt_feature_node_new(seq, NEW_FN_TYPE,
                                  fn_range.start + match_range1.start,
                                  fn_range.start + match_range1.end, str);
-  snprintf(buf, BUFSIZ, "%.2f", similarity);
+  (void) snprintf(buf, BUFSIZ, "%.2f", similarity);
   gt_feature_node_set_attribute((GtFeatureNode*) new_node, "identity", buf);
   gt_feature_node_set_source((GtFeatureNode*) new_node,
                              gt_str_new_cstr(rms->source));
