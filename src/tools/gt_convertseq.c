@@ -236,7 +236,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
             j++;
           }
           if ((j % opts.fastawidth) == 0) {
-            j = 0;
+            j = 1;
             gt_file_xprintf(opts.outfp, "\n");
           }
         }
