@@ -18,6 +18,7 @@
 #include "core/encseq.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
+#include "core/logger.h"
 #include "match/intcode-def.h"  /* XXX */
 #include "match/test-mappedstr.pr"  /* XXX */
 #include "tools/gt_encseq_check.h"
@@ -26,6 +27,8 @@ typedef struct {
   unsigned long scantrials,
                 multicharcmptrials,
                 prefixlength;
+  bool verbose,
+       nocheckunit;
 } GtEncseqCheckArguments;
 
 static void* gt_encseq_check_arguments_new(void)
@@ -68,6 +71,13 @@ static GtOptionParser* gt_encseq_check_option_parser_new(void *tool_arguments)
                                        0, MAXPREFIXLENGTH);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_bool("nocheckunit","do not run checkextractunitatpos",
+                              &arguments->nocheckunit, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
   gt_option_parser_set_min_args(op, 1);
 
   return op;
@@ -81,27 +91,35 @@ static int gt_encseq_check_runner(GT_UNUSED int argc, const char **argv,
   int had_err = 0;
   GtEncseqLoader *encseq_loader;
   GtEncseq *encseq;
+  GtLogger *logger = NULL;
+
   gt_error_check(err);
   gt_assert(arguments);
 
+  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   encseq_loader = gt_encseq_loader_new();
   if (!(encseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args], err)))
     had_err = -1;
   if (!had_err) {
     int readmode;
-    gt_encseq_check_startpositions(encseq);
+
+    gt_encseq_check_startpositions(encseq,logger);
     for (readmode = 0; readmode < 4; readmode++)
     {
       if (gt_alphabet_is_dna(gt_encseq_alphabet(encseq)) ||
            ((GtReadmode) readmode) == GT_READMODE_FORWARD ||
            ((GtReadmode) readmode) == GT_READMODE_REVERSE)
       {
+        gt_logger_log(logger,"check consistency for readmode %s",
+                      gt_readmode_show((GtReadmode) readmode));
         if (gt_encseq_check_consistency(encseq,
                            gt_encseq_filenames(encseq),
                            (GtReadmode) readmode,
                            arguments->scantrials,
                            arguments->multicharcmptrials,
                            gt_encseq_has_multiseq_support(encseq),
+                           !arguments->nocheckunit,
+                           logger,
                            err) != 0)
         {
           had_err = -1;
@@ -134,6 +152,7 @@ static int gt_encseq_check_runner(GT_UNUSED int argc, const char **argv,
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(encseq_loader);
+  gt_logger_delete(logger);
   return had_err;
 }
 

@@ -527,8 +527,9 @@ void gt_encseq_check_markpos(const GtEncseq *encseq);
 void gt_encseq_check_specialranges(const GtEncseq *encseq);
 
 /* Checks whether the information given by gt_encseq_seqstartpos() agrees
-   with the actual positions of separators in the encoded sequence. */
-void gt_encseq_check_startpositions(const GtEncseq *encseq);
+   with the actual positions of separators in the encoded sequence.
+   A logger allows to report the state of the computation. */
+void gt_encseq_check_startpositions(const GtEncseq *encseq,GtLogger *logger);
 
 /* Checks whether the minima/maxima given by gt_encseq_(min,max)_seq_length()
    agree with the sequence lengths in the encoded sequence. */
@@ -549,6 +550,8 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
                                 unsigned long scantrials,
                                 unsigned long multicharcmptrials,
                                 bool withseqnumcheck,
+                                bool withcheckunit,
+                                GtLogger *logger,
                                 GtError *err);
 
 /* The following checks if the function to write an own encoded

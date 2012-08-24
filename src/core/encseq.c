@@ -5180,7 +5180,7 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
   gt_free(copydestab);
 }
 
-void gt_encseq_check_startpositions(const GtEncseq *encseq)
+void gt_encseq_check_startpositions(const GtEncseq *encseq,GtLogger *logger)
 {
   unsigned long *startpostable, i, pos = 0;
   GtEncseqReader *esr;
@@ -5189,12 +5189,16 @@ void gt_encseq_check_startpositions(const GtEncseq *encseq)
                         * gt_encseq_num_of_sequences(encseq));
   esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD, 0);
   startpostable[pos++] = 0;
+  gt_logger_log(logger,"sequential iteration of sequence of length %lu ...",
+                 gt_encseq_total_length(encseq));
   for (i = 0; i < gt_encseq_total_length(encseq); i++) {
     if (gt_encseq_reader_next_encoded_char(esr) == (GtUchar) SEPARATOR) {
       startpostable[pos++] = i+1;
     }
   }
   gt_encseq_reader_delete(esr);
+  gt_logger_log(logger,"checking start posititions over %lu sequences ...",
+                 gt_encseq_num_of_sequences(encseq));
   for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
     unsigned long ssp1 = gt_encseq_seqstartpos(encseq, i),
                   ssp2 = startpostable[i];
@@ -8469,6 +8473,8 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
                                 unsigned long scantrials,
                                 unsigned long multicharcmptrials,
                                 bool withseqnumcheck,
+                                bool withcheckunit,
+                                GtLogger *logger,
                                 GtError *err)
 {
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
@@ -8477,24 +8483,33 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
   if (encseq->sat != GT_ACCESS_TYPE_DIRECTACCESS &&
       encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS)
   {
-    checkextractunitatpos(encseq,readmode);
+    if (withcheckunit)
+    {
+      gt_logger_log(logger,"run checkextractunitatpos");
+      checkextractunitatpos(encseq,readmode);
+    }
     if (multicharcmptrials > 0)
     {
+      gt_logger_log(logger,"run testmulticharactercompare");
       testmulticharactercompare(encseq,readmode,multicharcmptrials);
     }
   }
   if (!complement)
   {
+    gt_logger_log(logger,"run checkextractspecialbits");
     checkextractspecialbits(encseq,fwd);
   }
   if (scantrials > 0)
   {
+    gt_logger_log(logger,"run testscanatpos for %lu trials",scantrials);
     testscanatpos(encseq,readmode,scantrials);
   }
   if (withseqnumcheck && readmode == GT_READMODE_FORWARD)
   {
+    gt_logger_log(logger,"run testseqnumextraction");
     testseqnumextraction(encseq);
   }
+  gt_logger_log(logger,"run testfullscan");
   return testfullscan(filenametab,encseq,readmode,err);
 }
 
