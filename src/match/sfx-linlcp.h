@@ -19,9 +19,9 @@
 #define SFX_LINLCP_H
 
 #include "core/encseq.h"
-#include "compressedtab.h"
+#include "core/compactulongstore.h"
 
-Compressedtable *gt_lcp9_manzini(Compressedtable *spacefortab,
+GtCompactUlongstore *gt_lcp9_manzini(GtCompactUlongstore *spacefortab,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  unsigned long partwidth,
