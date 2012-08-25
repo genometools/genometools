@@ -110,7 +110,7 @@ static unsigned long GT_APPENDINT(gt_encseq_seqstartposSW)(
 {
   return (seqnum > 0)
            ? GT_APPENDINT(sepnum2pageoffset)(swtable,seqnum - 1) *
-             (swtable->maxrangevalue + 1) +
+             (swtable->maxrangevalue + 1UL) +
              swtable->positions[seqnum - 1] + 1
            : 0;
 }

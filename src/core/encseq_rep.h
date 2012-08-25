@@ -47,7 +47,7 @@ typedef struct
   unsigned long *mappositions;
   unsigned long numofpages;
   unsigned long numofpositionstostore;
-  unsigned int maxrangevalue;  /* maximal value of special type */
+  unsigned long maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uchar;
 
 typedef struct
@@ -58,7 +58,7 @@ typedef struct
   unsigned long *mappositions;
   unsigned long numofpages;
   unsigned long numofpositionstostore;
-  unsigned int maxrangevalue;  /* maximal value of special type */
+  unsigned long maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uint16;
 
 typedef struct
@@ -69,7 +69,7 @@ typedef struct
   unsigned long *mappositions;
   unsigned long numofpages;
   unsigned long numofpositionstostore;
-  unsigned int maxrangevalue;  /* maximal value of special type */
+  unsigned long maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uint32;
 
 typedef union

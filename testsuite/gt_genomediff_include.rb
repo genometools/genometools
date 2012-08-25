@@ -143,7 +143,7 @@ Test do
   end
 end
 
-Name "gt_genomediff esq testset"
+Name "gt genomediff esq testset"
 Keywords "gt_genomediff esq"
 Test do
   allfilecodes.each do |code|

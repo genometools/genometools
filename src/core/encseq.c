@@ -1755,19 +1755,19 @@ static void initSWtable(GtSWtable *swtable,
   switch (sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      swtable->st_uchar.maxrangevalue = (unsigned int) UCHAR_MAX;
+      swtable->st_uchar.maxrangevalue = (unsigned long) UCHAR_MAX;
       swtable->st_uchar.numofpages
         = totallength/swtable->st_uchar.maxrangevalue + 1;
       swtable->st_uchar.numofpositionstostore = items;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      swtable->st_uint16.maxrangevalue = (unsigned int) USHRT_MAX;
+      swtable->st_uint16.maxrangevalue = (unsigned long) USHRT_MAX;
       swtable->st_uint16.numofpages
         = totallength/swtable->st_uint16.maxrangevalue + 1;
       swtable->st_uint16.numofpositionstostore = items;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      swtable->st_uint32.maxrangevalue = (unsigned int) UINT32_MAX;
+      swtable->st_uint32.maxrangevalue = (unsigned long) UINT32_MAX;
       swtable->st_uint32.numofpages
         = totallength/swtable->st_uint32.maxrangevalue + 1;
       swtable->st_uint32.numofpositionstostore = items;
@@ -1801,7 +1801,7 @@ static Gtssptaboutinfo *ssptaboutinfo_new(unsigned long totallength,
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
       ssptaboutinfo->nextcheckincrement
-        = (unsigned long) ssptaboutinfo->ssptabptr->st_uchar.maxrangevalue+1;
+        = ssptaboutinfo->ssptabptr->st_uchar.maxrangevalue+1;
       ssptaboutinfo->numofpages = ssptaboutinfo->ssptabptr->st_uchar.numofpages;
       ssptaboutinfo->ssptabptr->st_uchar.positions
         = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_uchar.positions)
@@ -1812,7 +1812,7 @@ static Gtssptaboutinfo *ssptaboutinfo_new(unsigned long totallength,
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       ssptaboutinfo->nextcheckincrement
-        = (unsigned long) ssptaboutinfo->ssptabptr->st_uint16.maxrangevalue+1;
+        = ssptaboutinfo->ssptabptr->st_uint16.maxrangevalue+1;
       ssptaboutinfo->numofpages
         = ssptaboutinfo->ssptabptr->st_uint16.numofpages;
       ssptaboutinfo->ssptabptr->st_uint16.positions
@@ -1825,7 +1825,7 @@ static Gtssptaboutinfo *ssptaboutinfo_new(unsigned long totallength,
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       ssptaboutinfo->nextcheckincrement
-        = (unsigned long) ssptaboutinfo->ssptabptr->st_uint32.maxrangevalue+1;
+        = ssptaboutinfo->ssptabptr->st_uint32.maxrangevalue+1;
       ssptaboutinfo->numofpages
         = ssptaboutinfo->ssptabptr->st_uint32.numofpages;
       ssptaboutinfo->ssptabptr->st_uint32.positions
@@ -1864,12 +1864,12 @@ static void ssptaboutinfo_processseppos(Gtssptaboutinfo *ssptaboutinfo,
       case GT_ACCESS_TYPE_UCHARTABLES:
         ssptaboutinfo->ssptabptr->st_uchar.positions[ssptaboutinfo->fillpos++]
           = (GtUchar) (seppos &
-                             ssptaboutinfo->ssptabptr->st_uchar.maxrangevalue);
+                       ssptaboutinfo->ssptabptr->st_uchar.maxrangevalue);
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
         ssptaboutinfo->ssptabptr->st_uint16.positions[ssptaboutinfo->fillpos++]
           = (uint16_t) (seppos &
-                             ssptaboutinfo->ssptabptr->st_uint16.maxrangevalue);
+                        ssptaboutinfo->ssptabptr->st_uint16.maxrangevalue);
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         ssptaboutinfo->ssptabptr->st_uint32.positions[ssptaboutinfo->fillpos++]
@@ -2149,17 +2149,17 @@ static void showallSWtablewithpages(GtEncseqAccessType sat,
   switch (sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      printf("uchar pages of maximum value %u\n",
+      printf("uchar pages of maximum value %lu\n",
               swtable->st_uchar.maxrangevalue);
       showallSWtablewithpages_uchar(&swtable->st_uchar);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      printf("ushort pages of maximum value %u\n",
+      printf("ushort pages of maximum value %lu\n",
               swtable->st_uint16.maxrangevalue);
       showallSWtablewithpages_uint16(&swtable->st_uint16);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      printf("uint32 pages of maximum value %u\n",
+      printf("uint32 pages of maximum value %lu\n",
               swtable->st_uint32.maxrangevalue);
       showallSWtablewithpages_uint32(&swtable->st_uint32);
       break;
@@ -2216,7 +2216,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
   int retval;
   GtUchar cc;
   char orig;
-  unsigned int lastexceptionrangelength = 0;
+  unsigned long lastexceptionrangelength = 0;
   GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   gt_error_check(err);
 
@@ -2233,7 +2233,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
                               gt_malloc(sizeof (*exceptiontable->mappositions) *
                                         exceptiontable->numofpositionstostore);
 
-    nextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
+    nextcheckpos = exceptiontable->maxrangevalue;
   }
 
   encseq->plainseq = gt_malloc(sizeof (*encseq->plainseq) *
@@ -2261,7 +2261,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
               = (uint32_t) (currentposition & exceptiontable->maxrangevalue);
             exceptiontable->mappositions[fillexceptionrangeidx-1]
               = (mapposition);
-            lastexceptionrangelength = 1U;
+            lastexceptionrangelength = 1UL;
           } else /* extend exception range */
           {
             if (lastexceptionrangelength == exceptiontable->maxrangevalue)
@@ -2310,7 +2310,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
     {
       exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
       pagenumber++;
-      nextcheckpos += (unsigned long) (exceptiontable->maxrangevalue+1);
+      nextcheckpos += 1UL + exceptiontable->maxrangevalue;
     }
   }
   if (encseq->has_exceptiontable) {
@@ -2396,7 +2396,7 @@ static int fillViabytecompress(GtEncseq *encseq,
   unsigned int numofchars;
   GtUchar cc;
   char orig;
-  unsigned int lastexceptionrangelength = 0;
+  unsigned long lastexceptionrangelength = 0;
   GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   gt_error_check(err);
 
@@ -2413,7 +2413,7 @@ static int fillViabytecompress(GtEncseq *encseq,
                               gt_malloc(sizeof (*exceptiontable->mappositions) *
                                         exceptiontable->numofpositionstostore);
 
-    nextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
+    nextcheckpos = exceptiontable->maxrangevalue;
   }
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   encseq->bitpackarray
@@ -2441,7 +2441,7 @@ static int fillViabytecompress(GtEncseq *encseq,
               = (uint32_t) (currentposition & exceptiontable->maxrangevalue);
             exceptiontable->mappositions[fillexceptionrangeidx-1]
               = (mapposition);
-            lastexceptionrangelength = 1U;
+            lastexceptionrangelength = 1UL;
           } else /* extend exception range */
           {
             if (lastexceptionrangelength == exceptiontable->maxrangevalue)
@@ -2503,7 +2503,7 @@ static int fillViabytecompress(GtEncseq *encseq,
     {
       exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
       pagenumber++;
-      nextcheckpos += (unsigned long) (exceptiontable->maxrangevalue+1);
+      nextcheckpos += 1UL + exceptiontable->maxrangevalue;
     }
   }
   if (encseq->has_exceptiontable) {
@@ -2617,7 +2617,7 @@ static int fillViaequallength(GtEncseq *encseq,
                 nextcheckpos = GT_UNDEF_ULONG,
                 pagenumber = 0;
   int retval;
-  unsigned int lastexceptionrangelength = 0;
+  unsigned long lastexceptionrangelength = 0;
   GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   DECLARESEQBUFFER(encseq->twobitencoding); /* in fillViaequallength */
   gt_error_check(err);
@@ -2635,7 +2635,7 @@ static int fillViaequallength(GtEncseq *encseq,
                               gt_malloc(sizeof (*exceptiontable->mappositions) *
                                         exceptiontable->numofpositionstostore);
 
-    nextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
+    nextcheckpos = exceptiontable->maxrangevalue;
   }
   gt_assert(encseq->equallength.defined);
   for (pos=0; /* Nothing */; pos++)
@@ -2660,7 +2660,7 @@ static int fillViaequallength(GtEncseq *encseq,
               = (uint32_t) (pos & exceptiontable->maxrangevalue);
             exceptiontable->mappositions[fillexceptionrangeidx-1]
               = (mapposition);
-            lastexceptionrangelength = 1U;
+            lastexceptionrangelength = 1UL;
           } else /* extend exception range */
           {
             if (lastexceptionrangelength == exceptiontable->maxrangevalue)
@@ -2721,7 +2721,7 @@ static int fillViaequallength(GtEncseq *encseq,
     {
       exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
       pagenumber++;
-      nextcheckpos += (unsigned long) (exceptiontable->maxrangevalue+1);
+      nextcheckpos += 1UL + exceptiontable->maxrangevalue;
     }
   }
   if (encseq->has_exceptiontable) {
@@ -2859,7 +2859,7 @@ static int fillViabitaccess(GtEncseq *encseq,
   int retval;
   GtUchar cc;
   char orig;
-  unsigned int lastexceptionrangelength = 0;
+  unsigned long lastexceptionrangelength = 0;
   GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   DECLARESEQBUFFER(encseq->twobitencoding); /* in fillViabitaccess */
   gt_error_check(err);
@@ -2877,7 +2877,7 @@ static int fillViabitaccess(GtEncseq *encseq,
                               gt_malloc(sizeof (*exceptiontable->mappositions) *
                                         exceptiontable->numofpositionstostore);
 
-    nextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
+    nextcheckpos = exceptiontable->maxrangevalue;
   }
 
   gt_error_check(err);
@@ -2910,7 +2910,7 @@ static int fillViabitaccess(GtEncseq *encseq,
               = (uint32_t) (currentposition & exceptiontable->maxrangevalue);
             exceptiontable->mappositions[fillexceptionrangeidx-1]
               = (mapposition);
-            lastexceptionrangelength = 1U;
+            lastexceptionrangelength = 1UL;
           } else /* extend exception range */
           {
             if (lastexceptionrangelength == exceptiontable->maxrangevalue)
@@ -2978,7 +2978,7 @@ static int fillViabitaccess(GtEncseq *encseq,
       {
         exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
         pagenumber++;
-        nextcheckpos += (unsigned long) (exceptiontable->maxrangevalue+1);
+        nextcheckpos += 1UL + exceptiontable->maxrangevalue;
       }
       break;
     }
@@ -5336,15 +5336,15 @@ static unsigned long currentspecialrangevalue(unsigned long len,
     gt_assert(len - 1 <= UINT32_MAX);
     return occcount;
   }
-  if (len <= maxrangevalue+1)
+  if (len <= maxrangevalue+1UL)
   {
     return occcount;
   }
-  if (len % (maxrangevalue+1) == 0)
+  if (len % (maxrangevalue+1UL) == 0)
   {
-    return len/(maxrangevalue+1) * occcount;
+    return len/(maxrangevalue+1UL) * occcount;
   }
-  return (1UL + len/(maxrangevalue+1)) * occcount;
+  return (1UL + len/(maxrangevalue+1UL)) * occcount;
 }
 
 typedef struct
