@@ -1302,7 +1302,7 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
 static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
                                      const GtUchar *pattern,
                                      unsigned long patternlength,
-                                     const GtUchar *dbsubstring,
+                                     GT_UNUSED const GtUchar *dbsubstring,
                                      ProcessIdxMatch processmatch,
                                      void *processmatchinfo)
 {
@@ -1323,7 +1323,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
   nomatches = gt_isemptymmsearchiterator(mmsi);
   match.dbabsolute = true;
   match.dblen = (unsigned long) patternlength;
-  match.dbsubstring = dbsubstring;
+  match.dbsubstring = pattern;
   match.querystartpos = 0;
   match.querylen = patternlength;
   match.distance = 0;

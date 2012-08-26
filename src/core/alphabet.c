@@ -699,7 +699,8 @@ void gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet, FILE *fpout,
 {
   unsigned long i;
   const GtUchar *characters;
-  gt_assert(fpout);
+  gt_assert(fpout != NULL && (len == 0 || src != NULL));
+
   if (alphabet == NULL)
   {
     characters = (const GtUchar *) "acgt";
