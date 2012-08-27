@@ -74,7 +74,6 @@
 #include "ltr/ltrelement.h"
 #include "ltr/pbs.h"
 #include "ltr/ppt.h"
-#include "match/rdj-pairwise.h"
 #include "match/rdj-spmlist.h"
 #include "match/rdj-strgraph.h"
 #include "match/shu-encseq-gc.h"
@@ -295,8 +294,6 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "ltrelement module", gt_ltrelement_unit_test);
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
   gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
-  gt_hashmap_add(unit_tests, "rdj: pairwise overlaps finder modules",
-                                                     gt_rdj_pairwise_unit_test);
   gt_hashmap_add(unit_tests, "rdj: suffix-prefix matches list module",
                                                           gt_spmlist_unit_test);
   gt_hashmap_add(unit_tests, "rdj: string graph class", gt_strgraph_unit_test);

@@ -954,11 +954,23 @@ Test do
   run_assembly
 end
 
+Name "gt readjoiner spmtest pw"
+Keywords "gt_readjoiner gt_readjoiner_spmtest"
+Test do
+  encode_reads("#$testdata/readjoiner/pw.fas")
+  run_test "#{spmtest} -test bruteforce -readset reads -l 3", :retval => 0
+  bf = last_stdout
+  run_test "#{spmtest} -test kmp -readset reads -l 3", :retval => 0
+  kmp = last_stdout
+  run "diff #{kmp} #{bf}"
+  run "diff #{bf} #$testdata/readjoiner/pw-ex.spm"
+end
+
 # spmtest
 [true, false].each do |mirrored|
   %w{contained_eqlen contained_varlen 30x_800nt 70x_100nt}.each do |fasta|
     Name "gt readjoiner spmtest#{' singlestrand' if !mirrored}: #{fasta}"
-    Keywords "gt readjoiner gt_readjoiner_spmtest"
+    Keywords "gt_readjoiner gt_readjoiner_spmtest"
     Test do
       spmtest += " -singlestrand" if !mirrored
       encode_reads("#$testdata/readjoiner/#{fasta}.fas")

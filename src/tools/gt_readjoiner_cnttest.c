@@ -164,10 +164,9 @@ static int gt_readjoiner_cnttest_runner(GT_UNUSED int argc,
       had_err = -1;
     else
     {
-      had_err = gt_rdj_pairwise_exact(GT_OVLFIND_CNT, reads, NULL,
-          !arguments->singlestrand, false, arguments->test ==
-          GT_READJOINER_CNTTEST_KMP, 1UL, true,
-          NULL, NULL, false, NULL, &bits, &nofreads, err);
+      gt_rdj_pairwise_exact(GT_OVLFIND_CNT, reads, !arguments->singlestrand,
+          false, arguments->test == GT_READJOINER_CNTTEST_KMP, 1UL, true,
+          NULL, NULL, false, NULL, &bits, &nofreads);
     }
     gt_encseq_delete(reads);
     gt_encseq_loader_delete(el);

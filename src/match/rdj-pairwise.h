@@ -18,7 +18,6 @@
 #ifndef RDJ_PAIRWISE_H
 #define RDJ_PAIRWISE_H
 
-#include "core/error_api.h"              /* GtError */
 #include "match/rdj-spmproc.h"           /* GtSpmproc and GtSpmprocA */
 #include "core/intbits.h"                /* GtBitsequence */
 #include "core/encseq.h"                 /* GtEncseq */
@@ -44,8 +43,6 @@ GtOvlfindMode;
 
 m:          mode, see GtOvlfindMode definition
 encseq:     pointer to a GtEncseq
-filename:   filename of a fasta file containing at least 2 sequences
-            (alternative to encseq)
 revcompl:   if true, the second half of the fasta file must contain
             the reverse complements of the sequences in the first half
 show_progressbar: if true, a progressbar is displayed
@@ -83,24 +80,18 @@ cntreads_out: if not NULL, the address of the contained reads list
 nofreads:    if not NULL, the number of direct reads is written here
              (which is also the number of elements of the cntreads list)
 
-return value: success: 0
-              failure: non 0 and err is set
 */
 
-int gt_rdj_pairwise_exact(GtOvlfindMode m, GtEncseq *encseq,
-    const char *filename, bool revcompl, bool show_progressbar,
-    bool use_kmp, unsigned long min_length, bool find_nonmaximal,
-    GtSpmproc proc, void* procdata, bool cntfilter,
-    GtBitsequence *cntreads_in, GtBitsequence **cntreads_out,
-    unsigned long *nofreads, GtError *err);
+void gt_rdj_pairwise_exact(GtOvlfindMode m, GtEncseq *encseq,
+    bool revcompl, bool show_progressbar, bool use_kmp,
+    unsigned long min_length, bool find_nonmaximal, GtSpmproc proc,
+    void *procdata, bool cntfilter, GtBitsequence *cntreads_in,
+    GtBitsequence **cntreads_out, unsigned long *nofreads);
 
-int gt_rdj_pairwise_approx(GtOvlfindMode m, GtEncseq *encseq,
-    const char *filename, bool revcompl, bool show_progressbar,
-    double max_error, unsigned long min_length, bool find_nonmaximal,
-    GtSpmprocA proc, void* procdata, bool cntfilter,
+void gt_rdj_pairwise_approx(GtOvlfindMode m,  GtEncseq *encseq, bool revcompl,
+    bool show_progressbar, double max_error, unsigned long min_length,
+    bool find_nonmaximal, GtSpmprocA proc, void* procdata, bool cntfilter,
     GtBitsequence *cntreads_in, GtBitsequence **cntreads_out,
-    unsigned long *nofreads, GtError *err);
-
-int gt_rdj_pairwise_unit_test(GtError *err);
+    unsigned long *nofreads);
 
 #endif

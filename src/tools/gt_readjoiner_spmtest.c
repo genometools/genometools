@@ -173,16 +173,14 @@ static int gt_readjoiner_spmtest_runner(GT_UNUSED int argc,
     switch (arguments->test)
     {
       case GT_READJOINER_SPMTEST_BRUTEFORCE:
-        had_err = gt_rdj_pairwise_exact(GT_OVLFIND_SPM, reads, NULL,
-            !arguments->singlestrand, false, false,
-            (unsigned long)arguments->minmatchlength, true,
-            gt_spmproc_show_ascii, NULL, false, NULL, NULL, NULL, err);
+        gt_rdj_pairwise_exact(GT_OVLFIND_SPM, reads, !arguments->singlestrand,
+            false, false, (unsigned long)arguments->minmatchlength, true,
+            gt_spmproc_show_ascii, NULL, false, NULL, NULL, NULL);
         break;
       case GT_READJOINER_SPMTEST_KMP:
-        had_err = gt_rdj_pairwise_exact(GT_OVLFIND_SPM, reads, NULL,
-            !arguments->singlestrand, false, true,
-            (unsigned long)arguments->minmatchlength, true,
-            gt_spmproc_show_ascii, NULL, false, NULL, NULL, NULL, err);
+        gt_rdj_pairwise_exact(GT_OVLFIND_SPM, reads, !arguments->singlestrand,
+            false, true, (unsigned long)arguments->minmatchlength, true,
+            gt_spmproc_show_ascii, NULL, false, NULL, NULL, NULL);
         break;
       case GT_READJOINER_SPMTEST_GUSFIELD:
         ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(
