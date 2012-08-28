@@ -5899,7 +5899,10 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
               }
             } else
             {
-              gt_assert(lengthofcurrentsequence > 0);
+              if (lengthofcurrentsequence == 0) {
+                gt_error_set(err, "sequence must not be empty");
+                haserr = true;
+              }
               equallength->valueunsignedlong = lengthofcurrentsequence;
             }
           }

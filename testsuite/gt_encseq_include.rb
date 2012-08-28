@@ -6,8 +6,17 @@ Test do
   run "diff #{last_stdout} #{$testdata}foobar.fas"
 end
 
+Name "gt encseq encode|decode w/ empty seq"
+Keywords "gt_encseq_encode encseq gt_encseq_decode empty"
+Test do
+  run_test "#{$bin}gt encseq encode -indexname foo " + \
+           "#{$testdata}empty_seq.fas", \
+           :retval => 1
+  grep(last_stderr, /sequence must not be empty/)
+end
+
 Name "gt encseq encode|decode eqlen w/ empty seq"
-Keywords "gt_encseq_encode encseq gt_encseq_decode"
+Keywords "gt_encseq_encode encseq gt_encseq_decode empty"
 Test do
   run "#{$bin}gt encseq encode -indexname foo " + \
       "#{$testdata}gt_encseq_eqlen_last_empty.fas"
