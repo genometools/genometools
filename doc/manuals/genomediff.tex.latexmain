@@ -1,0 +1,9 @@
+let g:Tex_ProjectSourceFiles = ''
+
+let g:Tex_Com_Gdiff = "\\Gdiff<++>"
+let g:Tex_Com_Encseq = "\\Encseq<++>"
+let g:Tex_Com_Suff = "\\Suff<++>"
+let g:Tex_Com_Mki = "\\Mki<++>"
+let g:Tex_Com_Gt = "\\Gt<++>"
+let g:Tex_Com_Kr = "\\Kr<++>"
+" vim:tw=0:syntax=vim
