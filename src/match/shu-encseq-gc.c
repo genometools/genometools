@@ -98,6 +98,7 @@ unsigned long *gt_encseq_gc_count(const GtEncseq *encseq)
        gt_assert(gc_count_per_seq[seq_idx] != 0);
     }
   }
+  gt_encseq_reader_delete(reader);
   return gc_count_per_seq;
 }
 

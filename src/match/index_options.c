@@ -176,6 +176,8 @@ static int gt_index_options_check_set_create_opts(void *oip, GtError *err)
   GtIndexOptions *oi = (GtIndexOptions*) oip;
   gt_assert(oi != NULL && oi->type != GT_INDEX_OPTIONS_UNDEFINED);
   gt_error_check(err);
+  /* readmode needs to be initialized to fwd */
+  oi->readmode = (GtReadmode) 0;
   if (!had_err)
   {
     if (gt_option_is_set(oi->optionalgbounds))
