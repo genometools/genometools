@@ -114,18 +114,18 @@ static double expShulen(double T, /* absolute error */
   for (i = 1LU; i < subjectLength; i++) {
     factor = 1.0 - p_t;
     if (!thresholdReached) {
-      prob_i = factor * pmax (M,
-                              i,
-                              p,
-                              subjectLength,
-                              &thresholdReached,
-                              ln_n_fac,
-                              s1,
-                              n_s);
+      prob_i = factor * pmax(M, i, p,
+                             subjectLength,
+                             &thresholdReached,
+                             ln_n_fac,
+                             s1,
+                             n_s);
     }
     else
       prob_i = factor;  /* prob_i = factor * s, where s = 1 */
     delta = (prob_i - probOld) * i;  /* delta should always be positive */
+    gt_assert(gt_double_equals_double(delta, 0.0) ||
+              gt_double_larger_double(delta, 0.0));
     e += delta;    /* expectation of avg shulen length(Q, S) */
     /* check error */
     if (1.0 <= e && delta / e <= T)

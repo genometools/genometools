@@ -27,6 +27,13 @@ uint64_t **gt_genomediff_shulen_sum(const GtGenomediffArguments *arguments,
                                     GtTimer *timer,
                                     GtError *err);
 
+int gt_genomediff_calculate_div_from_avg(double **avgshu,
+                                         const GtGenomediffArguments *arguments,
+                                         GtShuUnitFileInfo *unit_info,
+                                         GtLogger *logger,
+                                         GtTimer *timer,
+                                         GtError *err);
+
 int gt_genomediff_kr_calc(uint64_t **shulensums,
                           const GtGenomediffArguments *arguments,
                           GtShuUnitFileInfo *unit_info,

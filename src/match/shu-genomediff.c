@@ -79,8 +79,10 @@ genomediff_calculate_genome_lengths(GtShuUnitFileInfo *unit_info)
     }
     else {
       seqs_upto_fileend = gt_encseq_seqnum(unit_info->encseq,
-          filestart +
-          eff_file_length - 1 ) + 1;
+                                           filestart +
+                                           eff_file_length - 1)
+                          + 1;
+
       sep_per_file = seqs_upto_fileend - seqs_passed - 1;
       seqs_passed = seqs_upto_fileend;
     }
@@ -92,8 +94,10 @@ genomediff_calculate_genome_lengths(GtShuUnitFileInfo *unit_info)
       genome_lengths[i_idx] = eff_file_length - sep_per_file;
     }
   }
-  for (i_idx = 0UL; i_idx < unit_info->num_of_genomes && mirrored; i_idx++) {
-    genome_lengths[i_idx] += genome_lengths[i_idx];
+  if (mirrored) {
+    for (i_idx = 0UL; i_idx < unit_info->num_of_genomes; i_idx++) {
+      genome_lengths[i_idx] += genome_lengths[i_idx];
+    }
   }
   if (gt_log_enabled()) {
     for  (i_idx = 0UL; i_idx < unit_info->num_of_genomes; i_idx++) {
@@ -106,36 +110,56 @@ genomediff_calculate_genome_lengths(GtShuUnitFileInfo *unit_info)
 
 static double *genomediff_calculate_gc(unsigned long *genome_lengths,
                                        GtShuUnitFileInfo *unit_info,
-                                       GtError *err)
+                                       GT_UNUSED GtError *err)
 {
   unsigned long file_idx = 0UL,
+                genome_idx,
                 idx,
-                num_of_seq;
-  double *seq_gc_content = NULL,
-         *gc_content;
+                *seq_gc_content = NULL,
+                num_of_seq,
+                *genome_gc_content;
+  double *gc_content;
+
+  gt_assert(genome_lengths != NULL);
+  gt_assert(unit_info != NULL);
+
+  gt_assert(genome_lengths != NULL);
+  gt_assert(unit_info != NULL);
 
   /*count gc, do not calculate ratio*/
-  seq_gc_content = gt_encseq_get_gc(unit_info->encseq, false, false, err);
+  seq_gc_content = gt_encseq_gc_count(unit_info->encseq);
 
   if (seq_gc_content == NULL)
     return NULL;
 
   gc_content = gt_calloc((size_t)unit_info->num_of_genomes,
                          sizeof (*gc_content));
+  genome_gc_content = gt_calloc((size_t)unit_info->num_of_genomes,
+                                sizeof (*genome_gc_content));
   num_of_seq = gt_encseq_num_of_sequences(unit_info->encseq);
+
   for (idx = 0; idx < num_of_seq; idx++) {
     file_idx = gt_encseq_filenum(unit_info->encseq,
                                  gt_encseq_seqstartpos(unit_info->encseq, idx));
     if (unit_info->map_files != NULL)
-      gc_content[unit_info->map_files[file_idx]] += seq_gc_content[idx];
+      genome_idx = unit_info->map_files[file_idx];
     else
-      gc_content[file_idx] += seq_gc_content[idx];
+      genome_idx = file_idx;
+    gt_safe_add(genome_gc_content[genome_idx],
+                genome_gc_content[genome_idx],
+                seq_gc_content[idx]);
   }
-  gt_assert(genome_lengths != NULL);
   for (idx = 0; idx < unit_info->num_of_genomes; idx++) {
-    gc_content[idx] /= (double) genome_lengths[idx];
+    gt_log_log("file/genome %lu has gc %lu", idx, genome_gc_content[idx]);
+  }
+
+  for (idx = 0; idx < unit_info->num_of_genomes; idx++) {
+    gt_assert(genome_gc_content[idx] <= genome_lengths[idx]);
+    gc_content[idx] = (double) genome_gc_content[idx] /
+                      (double) genome_lengths[idx];
   }
   gt_free(seq_gc_content);
+  gt_free(genome_gc_content);
   return gc_content;
 }
 
@@ -161,13 +185,11 @@ static void genomediff_calculate_div(GtShuUnitFileInfo *unit_info,
   for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
     for (j_idx = i_idx+1; j_idx < unit_info->num_of_genomes; j_idx++) {
       /* query is the one with smaller avg shulen */
-      if (gt_double_smaller_double(div[i_idx][j_idx],
-                                   div[j_idx][i_idx])) {
+      if (gt_double_smaller_double(div[i_idx][j_idx], div[j_idx][i_idx])) {
         subject = j_idx;
         query = i_idx;
       }
-      else if (gt_double_smaller_double(div[j_idx][i_idx],
-                                        div[i_idx][j_idx])) {
+      else if (gt_double_smaller_double(div[j_idx][i_idx], div[i_idx][j_idx])) {
           subject = i_idx;
           query = j_idx;
       }
@@ -343,6 +365,68 @@ static void genomediff_print_table(double **tab,
   }
 }
 
+int gt_genomediff_calculate_div_from_avg(double **avgshu,
+                                         const GtGenomediffArguments *arguments,
+                                         GtShuUnitFileInfo *unit_info,
+                                         GtLogger *logger,
+                                         GtTimer *timer,
+                                         GtError *err)
+{
+  int had_err = 0;
+  const GtAlphabet *alphabet;
+  double *gc_content = NULL;
+  unsigned long i_idx, j_idx;
+  unsigned long *genome_lengths = NULL;
+
+  genome_lengths = genomediff_calculate_genome_lengths(unit_info);
+
+  /*get alphabet and check if alphabet is dna, which is presumed for
+    gc-calculation*/
+  alphabet = gt_encseq_alphabet(unit_info->encseq);
+  if (!gt_alphabet_is_dna(alphabet)) {
+    gt_error_set(err,"error: sequences need to be dna to calculate gc!");
+    had_err = -1;
+  }
+
+  if (!had_err && timer != NULL)
+    gt_timer_show_progress(timer, "calculate gc", stdout);
+  if (!had_err) {
+    gc_content = genomediff_calculate_gc(genome_lengths, unit_info, err);
+    if (gc_content == NULL)
+      had_err = -1;
+  }
+
+    /* calculation of divergence */
+  if (!had_err) {
+    genomediff_calculate_div(unit_info, avgshu, gc_content, genome_lengths,
+                             arguments, timer);
+
+    if (gt_logger_enabled(logger)) {
+      gt_logger_log(logger, "table of divergences");
+      genomediff_print_table(avgshu, unit_info);
+    }
+  }
+
+  if (!had_err && timer != NULL)
+    gt_timer_show_progress(timer, "calculate kr", stdout);
+
+  if (!had_err) {
+    printf("# Table of Kr\n# %lu\n", unit_info->num_of_genomes);
+    for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
+      printf("%s\t", gt_str_array_get(unit_info->genome_names, i_idx));
+      for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++) {
+        if ( i_idx == j_idx )
+          printf("%.6f\t",0.0);
+        else
+          printf("%f\t", gt_calculateKr(avgshu[i_idx][j_idx]));
+      }
+      printf("\n");
+    }
+  }
+  gt_free(gc_content);
+  return had_err;
+}
+
 int gt_genomediff_kr_calc(uint64_t **shulensums,
                           const GtGenomediffArguments *arguments,
                           GtShuUnitFileInfo *unit_info,
@@ -394,6 +478,8 @@ int gt_genomediff_kr_calc(uint64_t **shulensums,
     had_err = -1;
   }
 
+  if (!had_err && timer != NULL)
+    gt_timer_show_progress(timer, "calculate gc", stdout);
   if (!had_err) {
     gc_content = genomediff_calculate_gc(genome_lengths, unit_info, err);
     if (gc_content == NULL)
@@ -415,7 +501,7 @@ int gt_genomediff_kr_calc(uint64_t **shulensums,
     gt_timer_show_progress(timer, "calculate kr", stdout);
 
   if (!had_err) {
-    printf("# Table of Kr\n%lu\n", unit_info->num_of_genomes);
+    printf("# Table of Kr\n# %lu\n", unit_info->num_of_genomes);
     for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
       printf("%s\t", gt_str_array_get(unit_info->genome_names, i_idx));
       for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++) {

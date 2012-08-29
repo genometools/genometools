@@ -23,14 +23,12 @@
 #include "core/encseq_api.h"
 #include "core/unused_api.h"
 
-/* returns the per sequence gc-content of encseq, if calculate is false, will
- * return the total count of 'g' and 'c' so calculation can be done later
- * (filewise for example. with_special sets if calculation is done on the
- * whole sequence gc/(total_length) (with wildcards) or gc/(at+gc) */
-double *gt_encseq_get_gc(const GtEncseq *encseq,
-                         bool with_special,
-                         bool calculate,
-                         GT_UNUSED GtError *err);
+/* returns the count of g's and c's per sequence. */
+unsigned long *gt_encseq_gc_count(const GtEncseq *encseq);
+
+/* returns the per sequence relative gc-content of encseq (#gc / totallength) */
+double *gt_encseq_get_rel_gc(const GtEncseq *encseq,
+                             GtError *err);
 
 int gt_encseq_gc_unit_test(GtError *err);
 

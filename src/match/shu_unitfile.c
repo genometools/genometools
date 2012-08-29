@@ -23,6 +23,7 @@
 #include "core/basename_api.h"
 #include "core/encseq_api.h"
 #include "core/fileutils_api.h"
+#include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/str_api.h"
 #include "core/str_array.h"
@@ -58,7 +59,6 @@ static int shu_unitfile_compare_inner_key_filenames(lua_State *L,
                                                    GtShuUnitFileInfo *unit_info,
                                                    bool *file_set,
                                                    GtStr *mapping_filename,
-                                                   GtStr *basename,
                                                    unsigned long genome_idx,
                                                    GtError *err)
 {
@@ -66,7 +66,6 @@ static int shu_unitfile_compare_inner_key_filenames(lua_State *L,
   int had_err = 0;
   unsigned long file_idx;
   GtStr *encseq_filename;
-  char *encseq_basename;
 
   gt_str_reset(mapping_filename);
   gt_str_append_cstr(mapping_filename, lua_tostring(L, -1));
@@ -76,11 +75,7 @@ static int shu_unitfile_compare_inner_key_filenames(lua_State *L,
        file_idx++) {
 
     encseq_filename = gt_str_array_get_str(unit_info->file_names, file_idx);
-    encseq_basename = gt_basename(gt_str_get(encseq_filename));
-    gt_str_reset(basename);
-    gt_str_append_cstr(basename, encseq_basename);
-    gt_free(encseq_basename);
-    if (gt_str_cmp(basename, mapping_filename) == 0) {
+    if (gt_str_cmp(encseq_filename, mapping_filename) == 0) {
       if (file_set[file_idx] != false) {
         gt_error_set(err, "file %s double entry",
                      gt_str_get(mapping_filename));
@@ -107,7 +102,6 @@ static int shu_unitfile_traverse_inner_keys(lua_State *L,
                                             GtShuUnitFileInfo *unit_info,
                                             bool *file_set,
                                             GtStr *mapping_filename,
-                                            GtStr *basename,
                                             unsigned long genome_idx,
                                             unsigned long *files_added,
                                             GtError *err)
@@ -120,7 +114,7 @@ static int shu_unitfile_traverse_inner_keys(lua_State *L,
   while (lua_next(L, -2) != 0 && !had_err) {
     had_err = shu_unitfile_compare_inner_key_filenames(L, unit_info, file_set,
                                                        mapping_filename,
-                                                       basename, genome_idx,
+                                                       genome_idx,
                                                        err);
     if (!had_err)
       (*files_added)++;
@@ -137,8 +131,7 @@ static int traverse_units(lua_State *L,
   unsigned long genome_idx = 0,
                 files_added = 0;
   bool *file_set;
-  GtStr *mapping_filename = gt_str_new(),
-        *basename = gt_str_new();
+  GtStr *mapping_filename = gt_str_new();
 
   gt_assert(unit_info->file_names);
 
@@ -153,7 +146,7 @@ static int traverse_units(lua_State *L,
   lua_pushnil(L); /*the first outer key*/
   while (lua_next(L, -2) != 0 && !had_err) {
     had_err = shu_unitfile_traverse_inner_keys(L, unit_info, file_set,
-                                               mapping_filename, basename,
+                                               mapping_filename,
                                                genome_idx, &files_added, err);
     lua_pop(L, 1);
     genome_idx++;
@@ -172,8 +165,16 @@ static int traverse_units(lua_State *L,
     gt_error_set(err, "number of files in index (%lu) and unitfile (%lu)! "
                  "differ!", unit_info->num_of_files, files_added);
   }
+  if (!had_err) {
+    unsigned long file_idx;
+    for (file_idx = 0; file_idx < unit_info->num_of_files; file_idx++) {
+      gt_log_log("file: %lu belongs to genome: %s",
+                 file_idx,
+                 gt_str_array_get(unit_info->genome_names,
+                                  unit_info->map_files[file_idx]));
+    }
+  }
   gt_str_delete(mapping_filename);
-  gt_str_delete(basename);
   return had_err;
 }
 
