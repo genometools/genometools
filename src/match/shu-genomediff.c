@@ -501,7 +501,7 @@ int gt_genomediff_kr_calc(uint64_t **shulensums,
     gt_timer_show_progress(timer, "calculate kr", stdout);
 
   if (!had_err) {
-    printf("# Table of Kr\n# %lu\n", unit_info->num_of_genomes);
+    printf("# Table of Kr\n%lu\n", unit_info->num_of_genomes);
     for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
       printf("%s\t", gt_str_array_get(unit_info->genome_names, i_idx));
       for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++) {
