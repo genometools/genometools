@@ -1676,7 +1676,7 @@ static int rcr_decode_mismatch_qual(GtRcrDecoder *rcr_dec,
                                     GtError *err)
 {
   int had_err = 0;
-  unsigned long symbol;
+  unsigned long symbol = 0;
 
   if (rcr_dec->store_var_qual) {
     had_err = rcr_huff_read(info->qual_hbwd, bitstream, &symbol, err);
@@ -1696,7 +1696,7 @@ static int rcr_decode_insert_var(GtRcrDecoder *rcr_dec,
                                  GtError *err)
 {
   int had_err = 0;
-  unsigned long symbol, i;
+  unsigned long symbol = 0, i;
   GtUchar base;
 
   info->inserted_bases = 0;
@@ -1835,7 +1835,7 @@ static inline int rcr_decode_inexact(GtRcrDecoder *rcr_dec,
   unsigned long end,
                 prev_varpos = 0,
                 read_i = 0,
-                rel_varpos,
+                rel_varpos = 0,
                 symbol,
                 varpos;
 

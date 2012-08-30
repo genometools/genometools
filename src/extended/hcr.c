@@ -900,11 +900,11 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
 int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, unsigned long readnum,
                           char *seq, char *qual, GtStr *desc, GtError *err)
 {
-  unsigned long nearestsample,
+  unsigned long nearestsample = 0,
                 reads_to_read = 0,
                 idx,
                 current_read = hcr_dec->seq_dec->cur_read ;
-  size_t startofnearestsample;
+  size_t startofnearestsample = 0;
   GtSampling *sampling;
   HcrHuffDataIterator *data_iter;
   GtHuffmanDecoder *huff_dec;

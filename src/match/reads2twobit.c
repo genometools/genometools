@@ -158,7 +158,7 @@ int gt_reads2twobit_add_library(GtReads2Twobit *r2t, const GtStr *libspec,
   else if (gt_splitter_size(s1) < 4UL)
   {
     GtStr *filename1, *filename2;
-    unsigned long insertlength, stdev = 0;
+    unsigned long insertlength = 0, stdev = 0;
     char *insertspec, *insertspec_copy;
     filename1 = gt_str_new_cstr(gt_splitter_get_token(s1, 0));
     if (gt_splitter_size(s1) == 3UL)

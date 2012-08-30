@@ -633,7 +633,7 @@ static void prepare_write_data_and_count_bits(GtEncdesc *encdesc,
 static inline void prepare_numeric_field(GtEncdesc *encdesc,
                                          EncdescWriteInfo *info)
 {
-  long value;
+  long value = 0;
   unsigned long to_store;
   DescField *cur_field = &encdesc->fields[info->cur_field_num];
 
@@ -1203,7 +1203,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
                 numoffields,
                 nearestsample,
                 zero_count,
-                tmp_symbol;
+                tmp_symbol = 0;
   size_t startofnearestsample;
   /* GtStr *descbuffer = NULL; */
   GtBitsequence bitseq;
@@ -1454,9 +1454,9 @@ int gt_encdesc_decode(GtEncdesc *encdesc,
 {
   int had_err = 0;
   unsigned long descs2read = 0,
-                nearestsample,
+                nearestsample = 0,
                 idx;
-  size_t startofnearestsample;
+  size_t startofnearestsample = 0;
 
   gt_assert(encdesc);
   gt_assert(desc);
@@ -1580,7 +1580,7 @@ int gt_encdesc_unit_test(GtError *err)
 
   /* test parse_number_out_of_current_field */
   if (!had_err) {
-    long retval;
+    long retval = 0;
     info->descbuffer = "abc00666";
     info->cur_field_start_pos = 3UL;
     parse_number_out_of_current_field(info, &retval);
