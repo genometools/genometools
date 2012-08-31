@@ -907,7 +907,7 @@ static void assignssptabmapspecification(GtMapspec *mapspec,
 
 #define SIZEOFSWTABLE(BASETYPE,MAXRANGEVALUE)\
         (withrangelength ? 2 : 1) * ((uint64_t) sizeof (BASETYPE) * items) +\
-        (uint64_t) sizeof (unsigned long) * (totallength/MAXRANGEVALUE+1) +\
+        (uint64_t) sizeof (unsigned long) * (totallength/(MAXRANGEVALUE)+1) +\
         (withmappositions ? 1 : 0) * ((uint64_t) sizeof (unsigned long) * items)
 
 static uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
@@ -1020,23 +1020,23 @@ static void assignoistabmapspecification(GtMapspec *mapspec,
   if (writemode)
   {
     encseq->exceptionheaderptr.classstartpositionsptr
-              = gt_malloc(UCHAR_MAX * sizeof (unsigned long));
+      = gt_malloc(UCHAR_MAX * sizeof (unsigned long));
     memcpy(encseq->exceptionheaderptr.classstartpositionsptr,
            encseq->classstartpositions,
            UCHAR_MAX * sizeof (unsigned long));
 
     encseq->exceptionheaderptr.maxcharsptr
-            = gt_malloc(UCHAR_MAX * sizeof (char));
+      = gt_malloc(UCHAR_MAX * sizeof (char));
     memcpy(encseq->exceptionheaderptr.maxcharsptr, encseq->maxchars,
             UCHAR_MAX * sizeof (char));
 
     encseq->exceptionheaderptr.allcharsptr
-            = gt_malloc((size_t) encseq->numofallchars * sizeof (char));
+      = gt_malloc((size_t) encseq->numofallchars * sizeof (char));
     memcpy(encseq->exceptionheaderptr.allcharsptr, encseq->allchars,
            (size_t) encseq->numofallchars * sizeof (char));
 
     encseq->exceptionheaderptr.subsymbolmapptr
-            = gt_malloc((size_t) UCHAR_MAX * sizeof (unsigned char));
+      = gt_malloc((size_t) UCHAR_MAX * sizeof (unsigned char));
     memcpy(encseq->exceptionheaderptr.subsymbolmapptr, encseq->subsymbolmap,
            (size_t) UCHAR_MAX * sizeof (unsigned char));
   }
@@ -2106,6 +2106,7 @@ static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
 
 #define GT_APPENDINT(V)          V##_uchar
 #define GT_SPECIALTABLETYPE      GtUchar
+#define GT_PAGENUM2OFFSET(P)     ((P) << 8)
 #define GT_POS2PAGENUM(V)        ((V) >> 8)
 
 #include "core/accspecialrange.gen"
@@ -2113,10 +2114,12 @@ static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
+#undef GT_PAGENUM2OFFSET
 #undef GT_POS2PAGENUM
 
 #define GT_APPENDINT(V)          V##_uint16
 #define GT_SPECIALTABLETYPE      uint16_t
+#define GT_PAGENUM2OFFSET(P)     ((P) << 16)
 #define GT_POS2PAGENUM(V)        ((V) >> 16)
 
 #include "core/accspecialrange.gen"
@@ -2124,13 +2127,16 @@ static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
+#undef GT_PAGENUM2OFFSET
 #undef GT_POS2PAGENUM
 
 #define GT_APPENDINT(V)          V##_uint32
 #define GT_SPECIALTABLETYPE      uint32_t
 #ifdef  _LP64
+#define GT_PAGENUM2OFFSET(P)     ((P) << 32)
 #define GT_POS2PAGENUM(V)        ((V) >> 32)
 #else
+#define GT_PAGENUM2OFFSET(P)     (P)
 #define GT_POS2PAGENUM(V)        0
 #endif
 
@@ -2139,6 +2145,7 @@ static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
+#undef GT_PAGENUM2OFFSET
 #undef GT_POS2PAGENUM
 
 #ifdef GT_RANGEDEBUG
@@ -2449,7 +2456,7 @@ static int fillViabytecompress(GtEncseq *encseq,
             {
               gt_assert(fillexceptionrangeidx > 0);
               exceptiontable->rangelengths[fillexceptionrangeidx-1]
-                 = (uint32_t) exceptiontable->maxrangevalue;
+                = (uint32_t) exceptiontable->maxrangevalue;
               lastexceptionrangelength = 0;
             } else
             {
@@ -2882,7 +2889,6 @@ static int fillViabitaccess(GtEncseq *encseq,
     nextcheckpos = exceptiontable->maxrangevalue;
   }
 
-  gt_error_check(err);
   GT_INITBITTAB(encseq->specialbits,encseq->totallength + GT_INTWORDSIZE);
   for (currentposition = encseq->totallength;
        currentposition < encseq->totallength + GT_INTWORDSIZE;
@@ -6094,7 +6100,7 @@ static inline GtTwobitencoding calctbeforward(const GtTwobitencoding *tbe,
 static inline GtTwobitencoding calctbereverse(const GtTwobitencoding *tbe,
                                               unsigned long startpos)
 {
-  unsigned long remain = (unsigned long) GT_MODBYUNITSIN2BITENC(startpos);
+  unsigned long remain = GT_MODBYUNITSIN2BITENC(startpos);
 
   if (remain < (unsigned long) (GT_UNITSIN2BITENC - 1)) /* right end of word */
   {
