@@ -2212,11 +2212,11 @@ static int fillViadirectaccess(GtEncseq *encseq,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
                 nextcheckpos = GT_UNDEF_ULONG,
-                pagenumber = 0;
+                pagenumber = 0,
+                lastexceptionrangelength = 0;
   int retval;
   GtUchar cc;
   char orig;
-  unsigned long lastexceptionrangelength = 0;
   GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   gt_error_check(err);
 
@@ -2248,7 +2248,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
         if (orig == encseq->maxchars[cc]) {
           if (lastexceptionrangelength > 0) {
             exceptiontable->rangelengths[fillexceptionrangeidx-1]
-                           = (uint32_t) (lastexceptionrangelength-1);
+              = (uint32_t) (lastexceptionrangelength-1);
             lastexceptionrangelength = 0;
           }
         } else {
@@ -2260,7 +2260,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
             exceptiontable->positions[fillexceptionrangeidx++]
               = (uint32_t) (currentposition & exceptiontable->maxrangevalue);
             exceptiontable->mappositions[fillexceptionrangeidx-1]
-              = (mapposition);
+              = mapposition;
             lastexceptionrangelength = 1UL;
           } else /* extend exception range */
           {
@@ -2268,7 +2268,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
             {
               gt_assert(fillexceptionrangeidx > 0);
               exceptiontable->rangelengths[fillexceptionrangeidx-1]
-                 = (uint32_t) exceptiontable->maxrangevalue;
+                = (uint32_t) exceptiontable->maxrangevalue;
               lastexceptionrangelength = 0;
             } else
             {
@@ -2276,8 +2276,9 @@ static int fillViadirectaccess(GtEncseq *encseq,
             }
           }
           bitpackarray_store_uint32(encseq->exceptions,
-                                   (BitOffset) (mapposition++),
+                                   (BitOffset) mapposition,
                                    (uint32_t) encseq->subsymbolmap[(int) orig]);
+          mapposition++;
         }
       }
       encseq->plainseq[currentposition] = cc;
@@ -2298,10 +2299,10 @@ static int fillViadirectaccess(GtEncseq *encseq,
       if (encseq->has_exceptiontable && lastexceptionrangelength > 0)
       {
         /* note that we store one less than the length to prevent overflows */
-        gt_assert(fillexceptionrangeidx > 0);
-        gt_assert(fillexceptionrangeidx - 1 <
+        gt_assert(fillexceptionrangeidx > 0 &&
+                  fillexceptionrangeidx <=
                   exceptiontable->numofpositionstostore);
-                  exceptiontable->rangelengths[fillexceptionrangeidx-1]
+        exceptiontable->rangelengths[fillexceptionrangeidx-1]
           = (uint32_t) (lastexceptionrangelength-1);
       }
       break;
@@ -2391,12 +2392,12 @@ static int fillViabytecompress(GtEncseq *encseq,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
                 nextcheckpos = GT_UNDEF_ULONG,
-                pagenumber = 0;
+                pagenumber = 0,
+                lastexceptionrangelength = 0;
   int retval;
   unsigned int numofchars;
   GtUchar cc;
   char orig;
-  unsigned long lastexceptionrangelength = 0;
   GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   gt_error_check(err);
 
@@ -2428,7 +2429,7 @@ static int fillViabytecompress(GtEncseq *encseq,
         if (orig == encseq->maxchars[cc]) {
           if (lastexceptionrangelength > 0) {
             exceptiontable->rangelengths[fillexceptionrangeidx-1]
-                           = (uint32_t) (lastexceptionrangelength-1);
+              = (uint32_t) (lastexceptionrangelength-1);
             lastexceptionrangelength = 0;
           }
         } else {
@@ -2440,7 +2441,7 @@ static int fillViabytecompress(GtEncseq *encseq,
             exceptiontable->positions[fillexceptionrangeidx++]
               = (uint32_t) (currentposition & exceptiontable->maxrangevalue);
             exceptiontable->mappositions[fillexceptionrangeidx-1]
-              = (mapposition);
+              = mapposition;
             lastexceptionrangelength = 1UL;
           } else /* extend exception range */
           {
@@ -2456,8 +2457,9 @@ static int fillViabytecompress(GtEncseq *encseq,
             }
           }
           bitpackarray_store_uint32(encseq->exceptions,
-                                   (BitOffset) (mapposition++),
+                                   (BitOffset) mapposition,
                                    (uint32_t) encseq->subsymbolmap[(int) orig]);
+          mapposition++;
         }
       }
       if (ISSPECIAL(cc))
@@ -2490,10 +2492,10 @@ static int fillViabytecompress(GtEncseq *encseq,
       if (encseq->has_exceptiontable && lastexceptionrangelength > 0)
       {
         /* note that we store one less than the length to prevent overflows */
-        gt_assert(fillexceptionrangeidx > 0);
-        gt_assert(fillexceptionrangeidx - 1 <
+        gt_assert(fillexceptionrangeidx > 0 &&
+                  fillexceptionrangeidx <=
                   exceptiontable->numofpositionstostore);
-                  exceptiontable->rangelengths[fillexceptionrangeidx-1]
+        exceptiontable->rangelengths[fillexceptionrangeidx-1]
           = (uint32_t) (lastexceptionrangelength-1);
       }
       gt_assert(retval == 0);
@@ -2615,9 +2617,9 @@ static int fillViaequallength(GtEncseq *encseq,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
                 nextcheckpos = GT_UNDEF_ULONG,
-                pagenumber = 0;
+                pagenumber = 0,
+                lastexceptionrangelength = 0;
   int retval;
-  unsigned long lastexceptionrangelength = 0;
   GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   DECLARESEQBUFFER(encseq->twobitencoding); /* in fillViaequallength */
   gt_error_check(err);
@@ -2647,7 +2649,7 @@ static int fillViaequallength(GtEncseq *encseq,
         if (orig == encseq->maxchars[cc]) {
           if (lastexceptionrangelength > 0) {
             exceptiontable->rangelengths[fillexceptionrangeidx-1]
-                           = (uint32_t) (lastexceptionrangelength-1);
+              = (uint32_t) (lastexceptionrangelength-1);
             lastexceptionrangelength = 0;
           }
         } else {
@@ -2659,7 +2661,7 @@ static int fillViaequallength(GtEncseq *encseq,
             exceptiontable->positions[fillexceptionrangeidx++]
               = (uint32_t) (pos & exceptiontable->maxrangevalue);
             exceptiontable->mappositions[fillexceptionrangeidx-1]
-              = (mapposition);
+              = mapposition;
             lastexceptionrangelength = 1UL;
           } else /* extend exception range */
           {
@@ -2667,7 +2669,7 @@ static int fillViaequallength(GtEncseq *encseq,
             {
               gt_assert(fillexceptionrangeidx > 0);
               exceptiontable->rangelengths[fillexceptionrangeidx-1]
-                 = (uint32_t) exceptiontable->maxrangevalue;
+                = (uint32_t) exceptiontable->maxrangevalue;
               lastexceptionrangelength = 0;
             } else
             {
@@ -2675,8 +2677,9 @@ static int fillViaequallength(GtEncseq *encseq,
             }
           }
           bitpackarray_store_uint32(encseq->exceptions,
-                                   (BitOffset) (mapposition++),
+                                   (BitOffset) mapposition,
                                    (uint32_t) encseq->subsymbolmap[(int) orig]);
+          mapposition++;
         }
       }
       bitwise <<= 2;
@@ -2709,10 +2712,10 @@ static int fillViaequallength(GtEncseq *encseq,
       if (encseq->has_exceptiontable && lastexceptionrangelength > 0)
       {
         /* note that we store one less than the length to prevent overflows */
-        gt_assert(fillexceptionrangeidx > 0);
-        gt_assert(fillexceptionrangeidx - 1 <
+        gt_assert(fillexceptionrangeidx > 0 &&
+                  fillexceptionrangeidx <=
                   exceptiontable->numofpositionstostore);
-                  exceptiontable->rangelengths[fillexceptionrangeidx-1]
+        exceptiontable->rangelengths[fillexceptionrangeidx-1]
           = (uint32_t) (lastexceptionrangelength-1);
       }
       break;
@@ -2855,11 +2858,11 @@ static int fillViabitaccess(GtEncseq *encseq,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
                 nextcheckpos = GT_UNDEF_ULONG,
-                pagenumber = 0;
+                pagenumber = 0,
+                lastexceptionrangelength = 0;
   int retval;
   GtUchar cc;
   char orig;
-  unsigned long lastexceptionrangelength = 0;
   GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   DECLARESEQBUFFER(encseq->twobitencoding); /* in fillViabitaccess */
   gt_error_check(err);
@@ -2897,7 +2900,7 @@ static int fillViabitaccess(GtEncseq *encseq,
         if (orig == encseq->maxchars[cc]) {
           if (lastexceptionrangelength > 0) {
             exceptiontable->rangelengths[fillexceptionrangeidx-1]
-                           = (uint32_t) (lastexceptionrangelength-1);
+              = (uint32_t) (lastexceptionrangelength-1);
             lastexceptionrangelength = 0;
           }
         } else {
@@ -2909,7 +2912,7 @@ static int fillViabitaccess(GtEncseq *encseq,
             exceptiontable->positions[fillexceptionrangeidx++]
               = (uint32_t) (currentposition & exceptiontable->maxrangevalue);
             exceptiontable->mappositions[fillexceptionrangeidx-1]
-              = (mapposition);
+              = mapposition;
             lastexceptionrangelength = 1UL;
           } else /* extend exception range */
           {
@@ -2917,7 +2920,7 @@ static int fillViabitaccess(GtEncseq *encseq,
             {
               gt_assert(fillexceptionrangeidx > 0);
               exceptiontable->rangelengths[fillexceptionrangeidx-1]
-                 = (uint32_t) exceptiontable->maxrangevalue;
+                = (uint32_t) exceptiontable->maxrangevalue;
               lastexceptionrangelength = 0;
             } else
             {
@@ -2925,8 +2928,9 @@ static int fillViabitaccess(GtEncseq *encseq,
             }
           }
           bitpackarray_store_uint32(encseq->exceptions,
-                                   (BitOffset) (mapposition++),
+                                   (BitOffset) mapposition,
                                    (uint32_t) encseq->subsymbolmap[(int) orig]);
+          mapposition++;
         }
       }
       if (ISSPECIAL(cc))
@@ -2967,10 +2971,10 @@ static int fillViabitaccess(GtEncseq *encseq,
       if (encseq->has_exceptiontable && lastexceptionrangelength > 0)
       {
         /* note that we store one less than the length to prevent overflows */
-        gt_assert(fillexceptionrangeidx > 0);
-        gt_assert(fillexceptionrangeidx - 1 <
+        gt_assert(fillexceptionrangeidx > 0 &&
+                  fillexceptionrangeidx <=
                   exceptiontable->numofpositionstostore);
-                  exceptiontable->rangelengths[fillexceptionrangeidx-1]
+        exceptiontable->rangelengths[fillexceptionrangeidx-1]
           = (uint32_t) (lastexceptionrangelength-1);
       }
       gt_assert(retval == 0);
