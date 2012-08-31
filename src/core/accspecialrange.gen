@@ -162,7 +162,6 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
           }
         } else
         {
-          gt_assert(cc == (GtUchar) SEPARATOR);
           if (lastwildcardrangelength > 0)
           {
           /* when seeing the first character after a wildcard range, process
@@ -185,8 +184,8 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
         if (lastwildcardrangelength > 0)
         {
           /* note that we store one less than the length to prevent overflows */
-          gt_assert(fillwildcardrangeidx > 0);
-          gt_assert(fillwildcardrangeidx - 1 <
+          gt_assert(fillwildcardrangeidx > 0 &&
+                    fillwildcardrangeidx <=
                     wildcardrangetable->numofpositionstostore);
           wildcardrangetable->rangelengths[fillwildcardrangeidx-1]
             = (GT_SPECIALTABLETYPE) (lastwildcardrangelength-1);
@@ -197,16 +196,15 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
         if (lastexceptionrangelength > 0)
         {
           /* note that we store one less than the length to prevent overflows */
-          gt_assert(fillexceptionrangeidx > 0);
-          gt_assert(fillexceptionrangeidx - 1 <
+          gt_assert(fillexceptionrangeidx > 0 &&
+                    fillexceptionrangeidx <=
                     exceptiontable->numofpositionstostore);
-                    exceptiontable->rangelengths[fillexceptionrangeidx-1]
+          exceptiontable->rangelengths[fillexceptionrangeidx-1]
             = (uint32_t) (lastexceptionrangelength-1);
         }
         break;
       }
-      gt_assert(retval < 0);
-      gt_assert(gt_error_is_set(err));
+      gt_assert(retval < 0 && gt_error_is_set(err));
       return -1;
     }
 
@@ -231,7 +229,6 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
       bitwise |= (GtTwobitencoding) cc;
     } else
     {
-      gt_assert(encseq->leastprobablecharacter < encseq->numofchars);
       bitwise |= (GtTwobitencoding) encseq->leastprobablecharacter;
     }
     if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
@@ -278,7 +275,6 @@ static void GT_APPENDINT(showSWtablewithpages)
           pgnum, last - first + 1, offset);
   for (idx=first; idx<=last; idx++)
   {
-    gt_assert(idx < swtable->numofpositionstostore);
     startpos = (unsigned long) swtable->positions[idx];
     range.start = offset + startpos;
     range.end = range.start + ((swtable->rangelengths == NULL)
@@ -375,18 +371,16 @@ static bool GT_APPENDINT(checkspecialrange)(
       if (found != NULL)
       {
         unsigned long rangeend
-               = (unsigned long) *found
-                 + (unsigned long) swtable->rangelengths
-                                  [(unsigned long) (found - swtable->positions)]
-                 + 1;
+          = (unsigned long) *found
+            + (unsigned long) swtable->rangelengths
+                              [(unsigned long) (found - swtable->positions)]
+            + 1;
         if (swtable->mappositions != NULL) {
-          unsigned long rstart, remainder;
-          rstart = (1UL + swtable->maxrangevalue) * pagenumber
-                   + (unsigned long) *found;
-          remainder = pos - rstart;
+          unsigned long rstart = (1UL + swtable->maxrangevalue) * pagenumber
+                                 + (unsigned long) *found;
           *mappos = swtable->mappositions
-                                 [(unsigned long) (found - swtable->positions)]
-                    + remainder;
+                    [(unsigned long) (found - swtable->positions)]
+                    + pos - rstart;
         }
         if (pos < rangeend)
         {
@@ -409,23 +403,18 @@ static bool GT_APPENDINT(checkspecialrange)(
                         (GT_SPECIALTABLETYPE) pos);
       if (found != NULL)
       {
-        unsigned long rangeend
-               = (1UL + swtable->maxrangevalue) * pagenumber
-                 + (unsigned long) *found
-                 + (unsigned long) swtable->rangelengths
-                                  [(unsigned long) (found - swtable->positions)]
-                 + 1;
+        unsigned long rangeend, rstart;
+
+        rstart = (1UL + swtable->maxrangevalue) * pagenumber
+                 + (unsigned long) *found;
         if (swtable->mappositions != NULL) {
-          unsigned long rstart, remainder;
-          rstart = (1UL + swtable->maxrangevalue) * pagenumber
-                  + (unsigned long) *found;
-          remainder = pos - rstart;
-          gt_log_log("pos: %lu, found: %lu, remainder: %lu",
-                     pos, (unsigned long) *found, remainder);
           *mappos = swtable->mappositions
-                                 [(unsigned long) (found - swtable->positions)]
-                     + remainder;
+                    [(unsigned long) (found - swtable->positions)]
+                    + pos - rstart;
         }
+        rangeend = rstart +
+                   (unsigned long) swtable->rangelengths
+                             [(unsigned long) (found - swtable->positions)] + 1;
         if (pos < rangeend)
         {
           return true;
@@ -439,7 +428,6 @@ static bool GT_APPENDINT(checkspecialrange)(
         unsigned long idx, rangeend;
 
         idx = swtable->endidxinpage[0] - 1;
-        gt_assert(idx < swtable->numofpositionstostore);
         rangeend = (unsigned long) swtable->positions[idx] +
                    (unsigned long) swtable->rangelengths[idx] + 1;
         if (pos < rangeend)
@@ -455,7 +443,6 @@ static bool GT_APPENDINT(checkspecialrange)(
         unsigned long idx, rangeend;
 
         idx = swtable->endidxinpage[pagenumber-1] - 1;
-        gt_assert(idx < swtable->numofpositionstostore);
         rangeend = (1UL + swtable->maxrangevalue) * (pagenumber-1)
                    + (unsigned long) swtable->positions[idx]
                    + (unsigned long) swtable->rangelengths[idx]

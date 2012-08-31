@@ -2689,7 +2689,6 @@ static int fillViaequallength(GtEncseq *encseq,
       } else
       {
         gt_assert(cc == (GtUchar) SEPARATOR);
-        gt_assert(encseq->leastprobablecharacter < encseq->numofchars);
         bitwise |= (GtTwobitencoding) encseq->leastprobablecharacter;
       }
       if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
