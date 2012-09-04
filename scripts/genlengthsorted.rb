@@ -31,7 +31,7 @@ end
 totallength = ARGV[0].to_i
 currentlen = 100
 currentseqnum = 0
-seqnumofthislength = 10
+seqnumofthislength = 1 + rand(10)
 sumlen = 0
 seqnum = 0
 while sumlen < totallength
@@ -42,7 +42,7 @@ while sumlen < totallength
     currentseqnum+=1
   else
     currentseqnum=0
-    seqnumofthislength+=1
+    seqnumofthislength = 1 + rand(10)
     currentlen += 43
   end
 end

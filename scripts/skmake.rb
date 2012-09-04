@@ -33,7 +33,7 @@ def parseargs(argv)
   options.prof = false
   options.jobs = 4
   options.fileargs = nil
-  options.threads = true
+  options.threads = false
   opts = OptionParser.new
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true

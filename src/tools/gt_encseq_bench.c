@@ -165,10 +165,16 @@ GtSortedlengthinfo *gt_sortedlengthinfo_new(const GtEncseq *encseq,
       }
       previousseqlen = seqlen;
     }
-    sortedlengthinfo->seqlenwithcount
-      = gt_calloc((size_t) countdifferentlength,
-                  sizeof (*sortedlengthinfo->seqlenwithcount));
-    if (countdifferentlength >= 2UL)
+    if (!had_err)
+    {
+      sortedlengthinfo->seqlenwithcount
+        = gt_calloc((size_t) countdifferentlength,
+                    sizeof (*sortedlengthinfo->seqlenwithcount));
+    } else
+    {
+      sortedlengthinfo->seqlenwithcount = NULL;
+    }
+    if (!had_err && countdifferentlength >= 2UL)
     {
       sortedlengthinfo->seqlenseppos
         = gt_malloc(sizeof (*sortedlengthinfo->seqlenseppos) *
@@ -178,62 +184,60 @@ GtSortedlengthinfo *gt_sortedlengthinfo_new(const GtEncseq *encseq,
       sortedlengthinfo->seqlenseppos = NULL;
     }
     sortedlengthinfo->numofdifferentseqlen = 0;
-    for (seqnum = 0; seqnum < gt_encseq_num_of_sequences(encseq); seqnum++)
+    if (!had_err)
     {
-      seqlen = gt_encseq_seqlength(encseq,seqnum);
-
-      if (seqnum > 0)
+      gt_assert(sortedlengthinfo->seqlenseppos != NULL &&
+                sortedlengthinfo->seqlenwithcount != NULL);
+      for (seqnum = 0; seqnum < gt_encseq_num_of_sequences(encseq); seqnum++)
       {
-        if (previousseqlen < seqlen)
+        seqlen = gt_encseq_seqlength(encseq,seqnum);
+
+        if (seqnum > 0)
         {
-          printf("%lu < %lu\n",previousseqlen,seqlen);
-          gt_assert(sortedlengthinfo->numofdifferentseqlen <
-                    countdifferentlength-1 &&
-                    sortedlengthinfo->seqlenseppos != NULL);
-          sortedlengthinfo->seqlenseppos[
-            sortedlengthinfo->numofdifferentseqlen++] = currentpos;
-          sortedlengthinfo->seqlenwithcount[
-             sortedlengthinfo->numofdifferentseqlen].count = 1UL;
-          sortedlengthinfo->seqlenwithcount[
-             sortedlengthinfo->numofdifferentseqlen].seqlen = seqlen;
-          gt_assert(gt_encseq_get_encoded_char(encseq,currentpos,
-                                               GT_READMODE_FORWARD)
-                    == (GtUchar) SEPARATOR);
+          if (previousseqlen < seqlen)
+          {
+            gt_assert(sortedlengthinfo->numofdifferentseqlen <
+                      countdifferentlength-1);
+            sortedlengthinfo->seqlenseppos[
+              sortedlengthinfo->numofdifferentseqlen++] = currentpos;
+            sortedlengthinfo->seqlenwithcount[
+               sortedlengthinfo->numofdifferentseqlen].count = 1UL;
+            sortedlengthinfo->seqlenwithcount[
+               sortedlengthinfo->numofdifferentseqlen].seqlen = seqlen;
+            gt_assert(gt_encseq_get_encoded_char(encseq,currentpos,
+                                                 GT_READMODE_FORWARD)
+                      == (GtUchar) SEPARATOR);
+          } else
+          {
+            gt_assert(sortedlengthinfo->numofdifferentseqlen <
+                      countdifferentlength);
+            sortedlengthinfo->seqlenwithcount[
+               sortedlengthinfo->numofdifferentseqlen].count++;
+          }
+          currentpos += 1UL + seqlen;
         } else
         {
-          gt_assert(sortedlengthinfo->numofdifferentseqlen <
-                    countdifferentlength);
-          sortedlengthinfo->seqlenwithcount[
-             sortedlengthinfo->numofdifferentseqlen].count++;
+          sortedlengthinfo->seqlenwithcount[0].count = 1UL;
+          sortedlengthinfo->seqlenwithcount[0].seqlen = seqlen;
+          currentpos = seqlen;
         }
-        currentpos += 1UL + seqlen;
-      } else
-      {
-        sortedlengthinfo->seqlenwithcount[0].count = 1UL;
-        sortedlengthinfo->seqlenwithcount[0].seqlen = seqlen;
-        currentpos = seqlen;
+        previousseqlen = seqlen;
       }
-      previousseqlen = seqlen;
-    }
-    sortedlengthinfo->numofdifferentseqlen++;
-    for (idx = 1UL; idx < sortedlengthinfo->numofdifferentseqlen; idx++)
-    {
-      sortedlengthinfo->seqlenwithcount[idx].count +=
-        sortedlengthinfo->seqlenwithcount[idx-1].count;
-    }
-    for (idx = 0; idx < sortedlengthinfo->numofdifferentseqlen; idx++)
-    {
-      printf("# %lu %lu\n",sortedlengthinfo->seqlenwithcount[idx].seqlen,
-                           sortedlengthinfo->seqlenwithcount[idx].count);
+      sortedlengthinfo->numofdifferentseqlen++;
+      for (idx = 1UL; idx < sortedlengthinfo->numofdifferentseqlen; idx++)
+      {
+        sortedlengthinfo->seqlenwithcount[idx].count +=
+          sortedlengthinfo->seqlenwithcount[idx-1].count;
+      }
     }
   }
   gt_encseq_metadata_delete(emd);
-  if (had_err)
+  if (!had_err)
   {
-    gt_sortedlengthinfo_delete(sortedlengthinfo);
-    sortedlengthinfo = NULL;
+    return sortedlengthinfo;
   }
-  return sortedlengthinfo;
+  gt_sortedlengthinfo_delete(sortedlengthinfo);
+  return NULL;
 }
 
 unsigned long gt_sortedlengthinfo_seqnum(const GtEncseq *encseq,
@@ -249,10 +253,18 @@ unsigned long gt_sortedlengthinfo_seqnum(const GtEncseq *encseq,
     return ULONG_MAX;
   }
   recordnum = gt_encseq_sep2seqnum(sortedlengthinfo->seqlenseppos,
-                                   sortedlengthinfo->numofdifferentseqlen-1,
+                                   sortedlengthinfo->numofdifferentseqlen,
                                    totallength,
                                    position);
-  return recordnum;
+  if (recordnum == 0)
+  {
+    return position/(sortedlengthinfo->seqlenwithcount[0].seqlen+1);
+  } else
+  {
+    return sortedlengthinfo->seqlenwithcount[recordnum-1].count +
+           (position - sortedlengthinfo->seqlenseppos[recordnum-1])/
+           (sortedlengthinfo->seqlenwithcount[recordnum].seqlen+1);
+  }
 }
 
 static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
@@ -277,16 +289,32 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
   {
     if (arguments->sortlenprepare)
     {
+      unsigned long position;
       GtSortedlengthinfo *sortedlengthinfo
         = gt_sortedlengthinfo_new(encseq,indexname,err);
 
       if (sortedlengthinfo == NULL)
       {
         had_err = -1;
-      } else
-      {
-        gt_sortedlengthinfo_delete(sortedlengthinfo);
       }
+      for (position = 0; !had_err && position < gt_encseq_total_length(encseq);
+           position++)
+      {
+        unsigned long seqnum = gt_sortedlengthinfo_seqnum(encseq,
+                                                          sortedlengthinfo,
+                                                          position);
+        if (seqnum != ULONG_MAX)
+        {
+          unsigned long seqnum2 = gt_encseq_seqnum(encseq,position);
+          if (seqnum2 != seqnum)
+          {
+            fprintf(stderr,"position %lu: seqnum2 = %lu != %lu = seqnum\n",
+                    position,seqnum,seqnum2);
+            exit(GT_EXIT_PROGRAMMING_ERROR);
+          }
+        }
+      }
+      gt_sortedlengthinfo_delete(sortedlengthinfo);
     }
     if (!had_err && arguments->ccext > 0)
     {
