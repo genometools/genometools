@@ -127,7 +127,6 @@ static unsigned long GT_APPENDINT(position2seqnum)(
   {
     return 0;
   }
-  gt_assert(numofrecords > 1UL);
   if (position > recordseps[numofrecords-2])
   {
     return numofrecords - 1;

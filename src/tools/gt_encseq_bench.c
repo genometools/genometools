@@ -21,12 +21,13 @@
 #include "core/encseq_metadata.h"
 #include "core/mathsupport.h"
 #include "core/showtime.h"
+#include "core/logger.h"
 #include "tools/gt_encseq_bench.h"
 
 typedef struct
 {
   unsigned long ccext;
-  bool sortlenprepare;
+  bool sortlenprepare, verbose;
 } GtEncseqBenchArguments;
 
 static void* gt_encseq_bench_arguments_new(void)
@@ -65,6 +66,9 @@ static GtOptionParser* gt_encseq_bench_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("solepr", "prepare data structure for sequences "
                                          "ordered by their length",
                                &arguments->sortlenprepare, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
   gt_option_parser_set_min_max_args(op, 1U, 1U);
@@ -276,6 +280,7 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
   GtEncseq *encseq;
   int had_err = 0;
   const char *indexname;
+  GtLogger *logger = NULL;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -296,7 +301,12 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
       if (sortedlengthinfo == NULL)
       {
         had_err = -1;
+      } else
+      {
+        logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX,
+                               stdout);
       }
+      gt_logger_log(logger,"prepare sorted length info");
       for (position = 0; !had_err && position < gt_encseq_total_length(encseq);
            position++)
       {
@@ -314,15 +324,18 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
           }
         }
       }
+      gt_logger_log(logger,"perform checks");
       gt_sortedlengthinfo_delete(sortedlengthinfo);
     }
     if (!had_err && arguments->ccext > 0)
     {
+      gt_logger_log(logger,"perform character extractions");
       gt_bench_character_extractions(encseq,arguments->ccext);
     }
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(encseq_loader);
+  gt_logger_delete(logger);
   return had_err;
 }
 
