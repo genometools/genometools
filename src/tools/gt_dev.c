@@ -34,6 +34,7 @@
 #include "tools/gt_regioncov.h"
 #include "tools/gt_sam_interface.h"
 #include "tools/gt_seqcorrect.h"
+#include "tools/gt_seqlensort.h"
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
 #include "tools/gt_trieins.h"
@@ -58,6 +59,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());
   gt_toolbox_add_tool(dev_toolbox, "sambam", gt_sam_interface());
   gt_toolbox_add_tool(dev_toolbox, "seqcorrect", gt_seqcorrect());
+  gt_toolbox_add_tool(dev_toolbox, "seqlensort", gt_seqlensort());
   gt_toolbox_add_tool(dev_toolbox, "sfxmap", gt_sfxmap());
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   return dev_toolbox;

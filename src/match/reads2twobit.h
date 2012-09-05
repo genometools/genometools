@@ -18,6 +18,8 @@
 #ifndef READS2TWOBIT_H
 #define READS2TWOBIT_H
 
+#include "core/fptr_api.h"
+#include "core/intbits.h"
 #include "core/str.h"
 
 /* The <GtReads2Twobit> class is a specialized encoder for large collections of
@@ -105,11 +107,11 @@ void gt_reads2twobit_decode_range(const GtReads2Twobit *r2t,
 
 /* writes the sequence <seqnum> to <outputbuffer>; starts writing at
   the <outputoffset>-th character encoded by the <outputbuffer> code;
-  returns the number of codes which have been written and sets
-  <*lastcodeoffsetptr> to the offset of the last code
+  returns a pointer to the next buffer position where a code is not complete
+  and sets <*lastcodeoffsetptr> to the offset of the last code
   (which can be used as <outputoffset> for subsequent calls to the function)
  */
-unsigned long gt_reads2twobit_write_encoded(GtReads2Twobit *r2t,
+GtTwobitencoding* gt_reads2twobit_write_encoded(GtReads2Twobit *r2t,
     unsigned long seqnum, GtTwobitencoding *outputbuffer,
     GtTwobitencoding outputoffset, GtTwobitencoding *lastcodeoffsetptr);
 
@@ -131,6 +133,10 @@ GtTwobitencoding *gt_reads2twobit_export_twobitencoding(
 /* pointer to the internal seppos array;
    it must be called after <gt_reads2twobit_encode> */
 unsigned long *gt_reads2twobit_export_seppos(const GtReads2Twobit *r2t);
+
+/* sort the sequences according to the specified comparator function <cmp> */
+void gt_reads2twobit_sort(GtReads2Twobit *r2t, GtCompareWithData cmp,
+    void *cmp_data);
 
 /* write the libraries information to disk */
 int gt_reads2twobit_write_libraries_table(const GtReads2Twobit *r2t,

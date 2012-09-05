@@ -30,6 +30,7 @@
 #include "core/log_api.h"
 #include "core/minmax.h"
 #include "core/parseutils_api.h"
+#include "core/qsort_r_api.h"
 #include "core/splitter_api.h"
 #include "core/xansi_api.h"
 #include "core/undef_api.h"
@@ -1470,7 +1471,7 @@ static void gt_reads2twobit_write_encoded_rightcodesshift(
   }
 }
 
-unsigned long gt_reads2twobit_write_encoded(GtReads2Twobit *r2t,
+GtTwobitencoding* gt_reads2twobit_write_encoded(GtReads2Twobit *r2t,
     unsigned long seqnum, GtTwobitencoding *outputbuffer,
     GtTwobitencoding outputoffset, GtTwobitencoding *lastcodeoffsetptr)
 {
@@ -1513,7 +1514,7 @@ unsigned long gt_reads2twobit_write_encoded(GtReads2Twobit *r2t,
         outputbuffer, inputoffset, outputoffset, firstcodeidx, lastcodeidx);
     *lastcodeoffsetptr = GT_MODBYUNITSIN2BITENC(outputoffset + seqlen);
   }
-  return GT_DIVBYUNITSIN2BITENC(seqlen + outputoffset + GT_UNITSIN2BITENC - 1);
+  return outputbuffer + GT_DIVBYUNITSIN2BITENC(outputoffset + seqlen);
 }
 
 static inline void gt_reads2twobit_handle_deleted_mates(
@@ -1608,7 +1609,7 @@ void gt_reads2twobit_delete_sequences(GtReads2Twobit *r2t, GtBitsequence *list)
   }
 }
 
-static void gt_reads2twobit_eqlen_set_separators_to_less_frequent_char(
+static void gt_reads2twobit_set_separators_to_less_frequent_char(
     GtReads2Twobit *r2t)
 {
   unsigned long seqnum, pos, codenum, posincode;
@@ -1650,7 +1651,7 @@ static int gt_reads2twobit_write_encseq_eqlen(GtReads2Twobit *r2t,
 
   gt_assert(r2t->seqlen_eqlen > 0);
   gt_reads2twobit_collect_fileinfo(r2t, &filelengthtab, &filenametab);
-  gt_reads2twobit_eqlen_set_separators_to_less_frequent_char(r2t);
+  gt_reads2twobit_set_separators_to_less_frequent_char(r2t);
   gt_reads2twobit_zeropad_tbe(r2t);
   had_err = gt_encseq_equallength_write_twobitencoding_to_file(
       gt_str_get(r2t->indexname), r2t->total_seqlength,
@@ -1695,7 +1696,7 @@ static int gt_reads2twobit_write_encseq_varlen(GtReads2Twobit *r2t,
   sizeofrep = GT_READS2TWOBIT_SIZEOFREP(GT_ACCESS_TYPE_UINT32TABLES);
   if (sizeofrep < minsizeofrep)
     sat = GT_ACCESS_TYPE_UINT32TABLES;
-  gt_reads2twobit_eqlen_set_separators_to_less_frequent_char(r2t);
+  gt_reads2twobit_set_separators_to_less_frequent_char(r2t);
   gt_reads2twobit_zeropad_tbe(r2t);
   had_err = gt_encseq_seppos2ssptab(gt_str_get(r2t->indexname),
       r2t->total_seqlength, r2t->nofseqs, r2t->seppos, err);
@@ -1717,7 +1718,7 @@ int gt_reads2twobit_write_encseq(GtReads2Twobit *r2t, GtError *err)
   gt_assert(r2t != NULL);
   if (r2t->nofseqs == 0)
   {
-    gt_log_log("filtered read set is empty, no encseq was written");
+    gt_log_log("read set is empty, no encseq was written");
     return had_err;
   }
   gt_assert(r2t->twobitencoding != NULL);
@@ -1732,6 +1733,54 @@ int gt_reads2twobit_write_encseq(GtReads2Twobit *r2t, GtError *err)
     had_err = gt_reads2twobit_write_encseq_varlen(r2t, err);
   }
   return had_err;
+}
+
+void gt_reads2twobit_sort(GtReads2Twobit *r2t, GtCompareWithData cmp,
+    void *cmp_data)
+{
+  GtTwobitencoding *tbe, *tbe_next, offset;
+  unsigned long i, *order;
+
+  gt_assert(r2t != NULL);
+
+  order = gt_malloc(sizeof (*order) * r2t->nofseqs);
+  for (i = 0; i < r2t->nofseqs; i++)
+    order[i] = i;
+
+  gt_qsort_r(order, (size_t)r2t->nofseqs, sizeof *order, cmp_data, cmp);
+
+  tbe = gt_malloc(sizeof (*tbe) *
+      GT_DIVBYUNITSIN2BITENC(r2t->total_seqlength) + 2UL);
+
+  offset = 0;
+  tbe_next = tbe;
+  for (i = 0; i < r2t->nofseqs; i++)
+  {
+    tbe_next = gt_reads2twobit_write_encoded(r2t, order[i], tbe_next, offset,
+        &offset);
+    if (r2t->seqlen_eqlen == 0)
+    {
+      /* recycle order memory to store new seppos */
+      order[i] = (order[i] == 0)
+        ? r2t->seppos[0]
+        : r2t->seppos[order[i]] - (r2t->seppos[order[i] - 1UL] + 1UL);
+      if (i > 0)
+        order[i] += (order[i - 1UL] + 1UL);
+    }
+  }
+
+  gt_free(r2t->twobitencoding);
+  r2t->twobitencoding = tbe;
+
+  if (r2t->seqlen_eqlen == 0)
+  {
+    gt_free(r2t->seppos);
+    r2t->seppos = order;
+  }
+  else
+  {
+    gt_free(order);
+  }
 }
 
 int gt_reads2twobit_write_seppos(GtReads2Twobit *r2t, char* path,
