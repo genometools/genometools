@@ -27,7 +27,7 @@
 typedef struct
 {
   unsigned long ccext;
-  bool sortlenprepare, verbose;
+  bool sortlenprepare, countlabels, verbose;
 } GtEncseqBenchArguments;
 
 static void* gt_encseq_bench_arguments_new(void)
@@ -66,6 +66,11 @@ static GtOptionParser* gt_encseq_bench_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("solepr", "prepare data structure for sequences "
                                          "ordered by their length",
                                &arguments->sortlenprepare, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("labels", "count labels for all positions of "
+                                        "sequence",
+                               &arguments->countlabels, false);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_verbose(&arguments->verbose);
@@ -287,6 +292,47 @@ unsigned long gt_sortedlengthinfo_seqstart(const GtEncseq *encseq,
   }
 }
 
+static void gt_count_sain_labels(const GtEncseq *encseq)
+{
+  unsigned long position,
+                countS = 0,
+                countSstar = 0,
+                nextcc = GT_UNIQUEINT(SEPARATOR),
+                totallength = gt_encseq_total_length(encseq);
+  bool nextisS = true, currentisS;
+  GtEncseqReader *esr;
+
+  esr = gt_encseq_create_reader_with_readmode(encseq,GT_READMODE_REVERSE,0);
+  for (position = totallength-1; /* Nothing */; position--)
+  {
+    GtUchar cc = gt_encseq_reader_next_encoded_char(esr);
+    unsigned long currentcc
+      = ISSPECIAL(cc) ? GT_UNIQUEINT(cc) : (unsigned long) cc;
+
+    if (currentcc < nextcc || (currentcc == nextcc && nextisS))
+    {
+      countS++;
+      currentisS = true;
+    } else
+    {
+      currentisS = false;
+    }
+    if (!currentisS && nextisS)
+    {
+      countSstar++;
+    }
+    nextisS = currentisS;
+    nextcc = currentcc;
+    if (position == 0)
+    {
+      break;
+    }
+  }
+  printf("S-type: %lu (%.2f)\n",countS,(double) countS/totallength);
+  printf("Sstar-type: %lu (%.2f)\n",countSstar,(double) countSstar/countS);
+  gt_encseq_reader_delete(esr);
+}
+
 static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
                                   int parsed_args, void *tool_arguments,
                                   GtError *err)
@@ -354,6 +400,10 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
       }
       gt_logger_log(logger,"perform seqstart check");
       gt_sortedlengthinfo_delete(sortedlengthinfo);
+    }
+    if (arguments->countlabels)
+    {
+      gt_count_sain_labels(encseq);
     }
     if (!had_err && arguments->ccext > 0)
     {
