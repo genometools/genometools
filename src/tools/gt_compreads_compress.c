@@ -248,12 +248,12 @@ static int gt_compreads_compress_runner(GT_UNUSED int argc,
     alpha = gt_alphabet_new_from_file_no_suffix(gt_str_get(arguments->smap),
                                                 err);
     if (!alpha)
-      had_err = -1;
+      had_err = 1;
   }
   else {
     alpha = gt_alphabet_new_dna();
     if (!alpha)
-      had_err = -1;
+      had_err = 1;
   }
   if (!had_err) {
     if (timer != NULL)
@@ -261,7 +261,7 @@ static int gt_compreads_compress_runner(GT_UNUSED int argc,
     hcre = gt_hcr_encoder_new(arguments->files, alpha, arguments->descs,
                               arguments->qrng, timer, err);
     if (!hcre)
-      had_err = -1;
+      had_err = 1;
     else {
       if (arguments->pagewise)
         gt_hcr_encoder_set_sampling_page(hcre);
@@ -272,7 +272,7 @@ static int gt_compreads_compress_runner(GT_UNUSED int argc,
 
       if (gt_hcr_encoder_encode(hcre, gt_str_get(arguments->name),
                                 timer, err) != 0)
-        had_err = -1;
+        had_err = 1;
     }
     gt_hcr_encoder_delete(hcre);
   }

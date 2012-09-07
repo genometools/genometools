@@ -727,46 +727,74 @@ static void seq_decoder_init_huffman(GtHcrSeqDecoder *seq_dec,
                                                 seq_dec->data_iter, err);
 }
 
+static void hcr_seq_decoder_delete(GtHcrSeqDecoder *seq_dec)
+{
+  if (seq_dec != NULL) {
+    gt_free(seq_dec->fileinfos);
+    gt_huffman_decoder_delete(seq_dec->huff_dec);
+    gt_huffman_delete(seq_dec->huffman);
+    gt_sampling_delete(seq_dec->sampling);
+    gt_rbtree_delete(seq_dec->file_info_rbt);
+    gt_str_delete(seq_dec->filename);
+    data_iterator_delete(seq_dec->data_iter);
+    gt_array_delete(seq_dec->symbols);
+    gt_free(seq_dec);
+  }
+}
+
 static GtHcrSeqDecoder *hcr_seq_decoder_new(GtAlphabet *alpha, const char *name,
                                             GtError *err)
 {
   GtHcrSeqDecoder *seq_dec = gt_malloc(sizeof (GtHcrSeqDecoder));
-  GtBaseQualDistr *bqd;
+  GtBaseQualDistr *bqd = NULL;
   long end_enc_start_sampling = 0;
-  FILE *fp;
+  FILE *fp = NULL;
   GT_UNUSED size_t read,
             one = (size_t) 1;
 
   seq_dec->alpha = alpha;
   seq_dec->alphabet_size = gt_alphabet_size(alpha);
-  seq_dec->filename = gt_str_new_cstr(name);
-  gt_str_append_cstr(seq_dec->filename, HCRFILESUFFIX);
   seq_dec->cur_read = 0;
+  seq_dec->data_iter = NULL;
+  seq_dec->file_info_rbt = NULL;
+  seq_dec->fileinfos = NULL;
+  seq_dec->filename = gt_str_new_cstr(name);
+  seq_dec->huff_dec = NULL;
+  seq_dec->huffman = NULL;
+  seq_dec->sampling = NULL;
   seq_dec->symbols = NULL;
+  gt_str_append_cstr(seq_dec->filename, HCRFILESUFFIX);
 
   fp = gt_fa_fopen_with_suffix(name, HCRFILESUFFIX, "rb", err);
-  if (gt_error_is_set(err))
-    return NULL;
+  if (gt_error_is_set(err)) {
+    hcr_seq_decoder_delete(seq_dec);
+    seq_dec = NULL;
+  }
+  else {
+    hcr_read_file_info(seq_dec, fp);
 
-  hcr_read_file_info(seq_dec, fp);
+    bqd = hcr_base_qual_distr_new_from_file(fp, seq_dec->alpha);
+    seq_dec->qual_offset = bqd->qual_offset;
 
-  bqd = hcr_base_qual_distr_new_from_file(fp, seq_dec->alpha);
-  seq_dec->qual_offset = bqd->qual_offset;
+    read = gt_xfread_one(&end_enc_start_sampling, fp);
+    gt_assert(read == one);
 
-  read = gt_xfread_one(&end_enc_start_sampling, fp);
-  gt_assert(read == one);
+    seq_dec->start_of_encoding = decoder_calc_start_of_encoded_data(fp);
 
-  seq_dec->start_of_encoding = decoder_calc_start_of_encoded_data(fp);
+    seq_decoder_init_huffman(seq_dec, end_enc_start_sampling, bqd, err);
+    if (gt_error_is_set(err)) {
+      hcr_seq_decoder_delete(seq_dec);
+      seq_dec = NULL;
+    }
+  }
 
-  seq_decoder_init_huffman(seq_dec, end_enc_start_sampling, bqd, err);
-  if (gt_error_is_set(err))
-    return NULL;
+  if (seq_dec != NULL) {
+    gt_xfseek(fp, end_enc_start_sampling, SEEK_SET);
+    seq_dec->sampling = gt_sampling_read(fp);
 
-  gt_xfseek(fp, end_enc_start_sampling, SEEK_SET);
-  seq_dec->sampling = gt_sampling_read(fp);
-
-  seq_dec->file_info_rbt = seq_decoder_init_file_info(seq_dec->fileinfos,
-                                                      seq_dec->num_of_files);
+    seq_dec->file_info_rbt = seq_decoder_init_file_info(seq_dec->fileinfos,
+                                                        seq_dec->num_of_files);
+  }
 
   hcr_base_qual_distr_delete(bqd);
   gt_fa_fclose(fp);
@@ -787,20 +815,19 @@ GtHcrDecoder *gt_hcr_decoder_new(const char *name, GtAlphabet *alpha,
 
   if (descs) {
     hcr_dec->encdesc = gt_encdesc_load(name, err);
-    if (gt_error_is_set(err))
+    if (gt_error_is_set(err)) {
       had_err = -1;
+    }
   }
   else
     hcr_dec->encdesc = NULL;
 
   if (!had_err) {
-
     hcr_dec->seq_dec = hcr_seq_decoder_new(alpha, name, err);
-    if (gt_error_is_set(err))
-      return NULL;
-
-    return hcr_dec;
+    if (!gt_error_is_set(err))
+      return hcr_dec;
   }
+  gt_hcr_decoder_delete(hcr_dec);
   return NULL;
 }
 
@@ -1098,6 +1125,7 @@ GtHcrEncoder *gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
 
   hcr_enc->seq_encoder = gt_malloc(sizeof (GtHcrSeqEncoder));
   hcr_enc->seq_encoder->alpha = alpha;
+  hcr_enc->seq_encoder->sampling = NULL;
   hcr_enc->seq_encoder->fileinfos = gt_calloc((size_t) hcr_enc->num_of_files,
                                    sizeof (*(hcr_enc->seq_encoder->fileinfos)));
   hcr_enc->seq_encoder->qrange = qrange;
@@ -1227,6 +1255,7 @@ unsigned long gt_hcr_encoder_get_sampling_rate(GtHcrEncoder *hcr_enc)
 int gt_hcr_encoder_encode(GtHcrEncoder *hcr_enc, const char *name,
                           GtTimer *timer, GtError *err)
 {
+  int had_err = 0;
   GtStr *name1;
   gt_error_check(err);
   if (timer != NULL)
@@ -1234,14 +1263,15 @@ int gt_hcr_encoder_encode(GtHcrEncoder *hcr_enc, const char *name,
   if (hcr_enc->encdesc_encoder != NULL) {
     GtCstrIterator *cstr_iterator = gt_fasta_header_iterator_new(hcr_enc->files,
                                                                  err);
-    if (gt_encdesc_encoder_encode(hcr_enc->encdesc_encoder,
-                                  cstr_iterator, name, err) != 0)
-      return -1;
+    had_err = gt_encdesc_encoder_encode(hcr_enc->encdesc_encoder,
+                                        cstr_iterator, name, err);
     gt_cstr_iterator_delete(cstr_iterator);
   }
-  if (hcr_write_seq_qual_data(name, hcr_enc, timer, err) != 0)
-    return -1;
-  if (gt_log_enabled()) {
+
+  if (!had_err)
+    had_err = hcr_write_seq_qual_data(name, hcr_enc, timer, err);
+
+  if (!had_err && gt_log_enabled()) {
     name1 = gt_str_new_cstr(name);
     gt_str_append_cstr(name1, HCRFILESUFFIX);
     gt_log_log("sequences with qualities encoding overview:");
@@ -1265,7 +1295,7 @@ int gt_hcr_encoder_encode(GtHcrEncoder *hcr_enc, const char *name,
     gt_log_log("<**");
     gt_str_delete(name1);
   }
-  return 0;
+  return had_err;
 }
 
 void gt_hcr_encoder_delete(GtHcrEncoder *hcr_enc)
@@ -1278,21 +1308,6 @@ void gt_hcr_encoder_delete(GtHcrEncoder *hcr_enc)
   gt_free(hcr_enc->seq_encoder);
   gt_encdesc_encoder_delete(hcr_enc->encdesc_encoder);
   gt_free(hcr_enc);
-}
-
-static void hcr_seq_decoder_delete(GtHcrSeqDecoder *seq_dec)
-{
-  if (seq_dec != NULL) {
-    gt_free(seq_dec->fileinfos);
-    gt_huffman_decoder_delete(seq_dec->huff_dec);
-    gt_huffman_delete(seq_dec->huffman);
-    gt_sampling_delete(seq_dec->sampling);
-    gt_rbtree_delete(seq_dec->file_info_rbt);
-    gt_str_delete(seq_dec->filename);
-    data_iterator_delete(seq_dec->data_iter);
-    gt_array_delete(seq_dec->symbols);
-    gt_free(seq_dec);
-  }
 }
 
 void gt_hcr_decoder_delete(GtHcrDecoder *hcr_dec)

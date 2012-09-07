@@ -37,16 +37,17 @@
 #include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/undef_api.h"
+#include "core/warning_api.h"
 #include "core/xansi_api.h"
 #include "extended/bitinstream.h"
 #include "extended/bitoutstream.h"
+#include "extended/cstr_iterator.h"
 #include "extended/encdesc.h"
 #include "extended/encdesc_header_io.h"
 #include "extended/encdesc_rep.h"
 #include "extended/huffman.h"
 #include "extended/rbtree.h"
 #include "extended/sampling.h"
-#include "extended/cstr_iterator.h"
 
 #define GT_ENCDESC_ARRAY_RESIZE 50
 #define GT_ENCDESC_FILESUFFIX ".ede"
@@ -132,7 +133,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
                                  GtCstrIterator *cstr_iterator,
                                  GtError *err)
 {
-  int status;
+  int status, had_err = 0;
   unsigned zero_count;
   unsigned long cur_desc = 0,
                 j_idx,
@@ -197,282 +198,291 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
     cur_desc++;
     status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
   }
-  gt_assert(longest_desc != NULL);
-  /* gt_log_log("longest: %s", longest_desc); */
-
-  encdesc->fields = gt_calloc((size_t) encdesc->num_of_fields,
-                              sizeof (*encdesc->fields));
-
-  /* analyze description with maximum number of fields and initialize fields */
-  desclength = (unsigned long) strlen(longest_desc);
-  start_pos = 0;
-
-  for (desc_char_idx = 0; desc_char_idx <= desclength; desc_char_idx++) {
-    found = false;
-    for (sep_idx = 0; sep_idx < GT_ENCDESC_NUMOFSEPS; sep_idx++)
-      if (longest_desc[desc_char_idx] == sep[sep_idx]) {
-        if (desc_char_idx - start_pos > 0)
-          found = true;
-      }
-
-    if (found) {
-      cur_field = &encdesc->fields[longest_desc_field_idx];
-      cur_field->sep = longest_desc[desc_char_idx];
-      longest_desc[desc_char_idx] = '\0';
-      cur_field->len = desc_char_idx - start_pos;
-      cur_field->data = gt_cstr_dup(longest_desc + start_pos);
-
-      cur_field->max_len = cur_field->len;
-      cur_field->min_len = cur_field->len;
-      cur_field->is_cons = true;
-      cur_field->fieldlen_is_const = true;
-      cur_field->has_zero_padding = false;
-      cur_field->chars =
-        gt_calloc((size_t) cur_field->max_len, sizeof (cur_field->chars));
-
-      for (j_idx = 0; j_idx < cur_field->max_len; j_idx++)
-        cur_field->chars[j_idx] = li_ull_gt_hashmap_new();
-
-      cur_field->num_values = li_ull_gt_hashmap_new();
-      cur_field->delta_values = li_ull_gt_hashmap_new();
-      cur_field->zero_count = gt_disc_distri_new();
-      cur_field->max_zero = 0;
-      cur_field->num_values_size = 0;
-      cur_field->delta_values_size = 0;
-      if (gt_parse_long(&out, cur_field->data) == 0) {
-        cur_field->is_numeric = true;
-        cur_field->max_value = out;
-        cur_field->min_value = out;
-      }
-      cur_field->bittab = gt_bittab_new(cur_field->len);
-      gt_assert(cur_field->bittab != NULL);
-      /* Set all bits to 1*/
-      gt_bittab_complement(cur_field->bittab,
-                           cur_field->bittab);
-
-      start_pos = desc_char_idx + 1;
-      longest_desc_field_idx++;
-    }
+  if (encdesc->num_of_fields == 0) {
+    gt_error_set(err, "The file given seems to have no descriptions, there is "
+                      "nothing to compress, aborting.");
+    had_err = 1;
   }
-  gt_assert(encdesc->num_of_fields == longest_desc_field_idx);
+  else
+    gt_assert(longest_desc != NULL);
 
-  gt_free(longest_desc);
+  if (!had_err) {
+    encdesc->fields = gt_calloc((size_t) encdesc->num_of_fields,
+                                sizeof (*encdesc->fields));
 
-  if (gt_cstr_iterator_reset(cstr_iterator, err) != 0)
-    return -1;
-
-  cur_desc = 0;
-
-  /* analyze all descriptions */
-  status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
-  while (status != 0) {
-    if (status == -1)
-      return -1;
-    gt_assert(descbuffer != NULL);
-
-    gt_free(mutable_desc);
-    desclength = (unsigned long) strlen(descbuffer);
-    encdesc->total_num_of_chars += desclength;
-    mutable_desc = gt_cstr_dup(descbuffer);
-
-    cur_field_num = 0;
+    /* analyze description with maximum number of fields and initialize fields
+     */
+    desclength = (unsigned long) strlen(longest_desc);
     start_pos = 0;
 
-    for (desc_char_idx = 0;
-         desc_char_idx <= desclength && cur_field_num < longest_desc_field_idx;
-         desc_char_idx++) {
-      cur_field = &encdesc->fields[cur_field_num];
-      /* check for end of string, if there are less fields then in longest */
-      if (mutable_desc[desc_char_idx] ==  cur_field->sep ||
-          mutable_desc[desc_char_idx] == '\0') {
-        mutable_desc[desc_char_idx] = '\0';
-
-        /* gt_log_log("field text: %s", mutable_desc + start_pos); */
-        chars_len = desc_char_idx - start_pos;
-        if (chars_len > cur_field->max_len) {
-          cur_field->is_cons = false;
-          cur_field->fieldlen_is_const = false;
-          cur_field->chars =
-            gt_realloc(cur_field->chars,
-                       (size_t) chars_len * sizeof (GtHashtable*));
-          for (k_idx = cur_field->max_len; k_idx < chars_len; k_idx++)
-            cur_field->chars[k_idx] = li_ull_gt_hashmap_new();
-
-          cur_field->max_len = chars_len;
-        }
-        else if (chars_len < cur_field->min_len) {
-          cur_field->is_cons = false;
-          cur_field->fieldlen_is_const = false;
-          cur_field->min_len = chars_len;
+    for (desc_char_idx = 0; desc_char_idx <= desclength; desc_char_idx++) {
+      found = false;
+      for (sep_idx = 0; sep_idx < GT_ENCDESC_NUMOFSEPS; sep_idx++)
+        if (longest_desc[desc_char_idx] == sep[sep_idx]) {
+          if (desc_char_idx - start_pos > 0)
+            found = true;
         }
 
-        for (k_idx = 0; k_idx < chars_len; k_idx++) {
-          (void) encdesc_hashmap_distr_add(cur_field->chars[k_idx],
-                                        (long) mutable_desc[start_pos + k_idx]);
-        }
+      if (found) {
+        cur_field = &encdesc->fields[longest_desc_field_idx];
+        cur_field->sep = longest_desc[desc_char_idx];
+        longest_desc[desc_char_idx] = '\0';
+        cur_field->len = desc_char_idx - start_pos;
+        cur_field->data = gt_cstr_dup(longest_desc + start_pos);
 
-        if (cur_field->is_cons) {
-          if (chars_len != cur_field->len) {
+        cur_field->max_len = cur_field->len;
+        cur_field->min_len = cur_field->len;
+        cur_field->is_cons = true;
+        cur_field->fieldlen_is_const = true;
+        cur_field->has_zero_padding = false;
+        cur_field->chars =
+          gt_calloc((size_t) cur_field->max_len, sizeof (cur_field->chars));
+
+        for (j_idx = 0; j_idx < cur_field->max_len; j_idx++)
+          cur_field->chars[j_idx] = li_ull_gt_hashmap_new();
+
+        cur_field->num_values = li_ull_gt_hashmap_new();
+        cur_field->delta_values = li_ull_gt_hashmap_new();
+        cur_field->zero_count = gt_disc_distri_new();
+        cur_field->max_zero = 0;
+        cur_field->num_values_size = 0;
+        cur_field->delta_values_size = 0;
+        if (gt_parse_long(&out, cur_field->data) == 0) {
+          cur_field->is_numeric = true;
+          cur_field->max_value = out;
+          cur_field->min_value = out;
+        }
+        cur_field->bittab = gt_bittab_new(cur_field->len);
+        gt_assert(cur_field->bittab != NULL);
+        /* Set all bits to 1*/
+        gt_bittab_complement(cur_field->bittab,
+                             cur_field->bittab);
+
+        start_pos = desc_char_idx + 1;
+        longest_desc_field_idx++;
+      }
+    }
+    gt_assert(encdesc->num_of_fields == longest_desc_field_idx);
+
+    gt_free(longest_desc);
+
+    if (gt_cstr_iterator_reset(cstr_iterator, err) != 0)
+      had_err = 1;
+  }
+
+  if (!had_err) {
+    cur_desc = 0;
+
+    /* analyze all descriptions */
+    status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
+    while (status != 0) {
+      if (status == -1)
+        return -1;
+      gt_assert(descbuffer != NULL);
+
+      gt_free(mutable_desc);
+      desclength = (unsigned long) strlen(descbuffer);
+      encdesc->total_num_of_chars += desclength;
+      mutable_desc = gt_cstr_dup(descbuffer);
+
+      cur_field_num = 0;
+      start_pos = 0;
+
+      for (desc_char_idx = 0;
+           desc_char_idx <= desclength &&
+             cur_field_num < longest_desc_field_idx;
+           desc_char_idx++) {
+        cur_field = &encdesc->fields[cur_field_num];
+        /* check for end of string, if there are less fields then in longest */
+        if (mutable_desc[desc_char_idx] ==  cur_field->sep ||
+            mutable_desc[desc_char_idx] == '\0') {
+          mutable_desc[desc_char_idx] = '\0';
+
+          /* gt_log_log("field text: %s", mutable_desc + start_pos); */
+          chars_len = desc_char_idx - start_pos;
+          if (chars_len > cur_field->max_len) {
             cur_field->is_cons = false;
             cur_field->fieldlen_is_const = false;
+            cur_field->chars =
+              gt_realloc(cur_field->chars,
+                         (size_t) chars_len * sizeof (GtHashtable*));
+            for (k_idx = cur_field->max_len; k_idx < chars_len; k_idx++)
+              cur_field->chars[k_idx] = li_ull_gt_hashmap_new();
+
+            cur_field->max_len = chars_len;
           }
-          else {
-            if (strcmp(cur_field->data, mutable_desc + start_pos) != 0)
+          else if (chars_len < cur_field->min_len) {
+            cur_field->is_cons = false;
+            cur_field->fieldlen_is_const = false;
+            cur_field->min_len = chars_len;
+          }
+
+          for (k_idx = 0; k_idx < chars_len; k_idx++) {
+            (void) encdesc_hashmap_distr_add(cur_field->chars[k_idx],
+                                        (long) mutable_desc[start_pos + k_idx]);
+          }
+
+          if (cur_field->is_cons) {
+            if (chars_len != cur_field->len) {
               cur_field->is_cons = false;
-          }
-        }
-
-        if (cur_field->is_numeric) {
-          if (gt_parse_long(&out, (mutable_desc + start_pos)) != 0)
-            cur_field->is_numeric = false;
-          else {
-
-            value = out;
-
-            zero_count = count_leading_zeros((mutable_desc + start_pos));
-            if (zero_count > 0)
-              cur_field->has_zero_padding = true;
-            if (zero_count > cur_field->max_zero)
-              cur_field->max_zero = zero_count;
-            gt_disc_distri_add(cur_field->zero_count,
-                               (unsigned long) zero_count);
-
-            if (cur_desc == 0) {
-              cur_field->global_value =
-              cur_field->min_value =
-              cur_field->max_value = value;
-              cur_field->is_value_cons = true;
+              cur_field->fieldlen_is_const = false;
             }
             else {
-              value_delta = value - cur_field->prev_value;
-              if (value < cur_field->min_value) {
-                cur_field->is_value_cons = false;
-                cur_field->min_value = value;
-              }
-              else if (value > cur_field->max_value) {
-                cur_field->is_value_cons = false;
+              if (strcmp(cur_field->data, mutable_desc + start_pos) != 0)
+                cur_field->is_cons = false;
+            }
+          }
+
+          if (cur_field->is_numeric) {
+            if (gt_parse_long(&out, (mutable_desc + start_pos)) != 0)
+              cur_field->is_numeric = false;
+            else {
+
+              value = out;
+
+              zero_count = count_leading_zeros((mutable_desc + start_pos));
+              if (zero_count > 0)
+                cur_field->has_zero_padding = true;
+              if (zero_count > cur_field->max_zero)
+                cur_field->max_zero = zero_count;
+              gt_disc_distri_add(cur_field->zero_count,
+                                 (unsigned long) zero_count);
+
+              if (cur_desc == 0) {
+                cur_field->global_value =
+                cur_field->min_value =
                 cur_field->max_value = value;
+                cur_field->is_value_cons = true;
               }
+              else {
+                value_delta = value - cur_field->prev_value;
+                if (value < cur_field->min_value) {
+                  cur_field->is_value_cons = false;
+                  cur_field->min_value = value;
+                }
+                else if (value > cur_field->max_value) {
+                  cur_field->is_value_cons = false;
+                  cur_field->max_value = value;
+                }
 
-              if (cur_desc == 1UL) {
-                cur_field->max_delta =
-                cur_field->min_delta =
-                cur_field->global_delta = value_delta;
-                cur_field->is_delta_cons = true;
-              }
-              else if (value_delta > cur_field->max_delta) {
+                if (cur_desc == 1UL) {
+                  cur_field->max_delta =
+                  cur_field->min_delta =
+                  cur_field->global_delta = value_delta;
+                  cur_field->is_delta_cons = true;
+                }
+                else if (value_delta > cur_field->max_delta) {
+                    cur_field->is_delta_cons = false;
+                    cur_field->max_delta = value_delta;
+                }
+                else if (value_delta < cur_field->min_delta) {
                   cur_field->is_delta_cons = false;
-                  cur_field->max_delta = value_delta;
-              }
-              else if (value_delta < cur_field->min_delta) {
-                cur_field->is_delta_cons = false;
-                cur_field->min_delta = value_delta;
-              }
+                  cur_field->min_delta = value_delta;
+                }
 
-              if (cur_field->delta_values_size > 0 || cur_desc == 1UL) {
-                if (encdesc_hashmap_distr_add(cur_field->delta_values,
-                                              value_delta) == 1)
-                  cur_field->delta_values_size++;
+                if (cur_field->delta_values_size > 0 || cur_desc == 1UL) {
+                  if (encdesc_hashmap_distr_add(cur_field->delta_values,
+                                                value_delta) == 1)
+                    cur_field->delta_values_size++;
 
-                if (cur_field->delta_values_size > GT_ENCDESC_MAX_NUM_VAL_HUF) {
-                  /* gt_hashtable_delete(cur_field->delta_values); */
-                  /* cur_field->delta_values = li_ull_gt_hashmap_new(); */
-                  cur_field->delta_values_size = 0;
+                  if (cur_field->delta_values_size >
+                        GT_ENCDESC_MAX_NUM_VAL_HUF) {
+                    cur_field->delta_values_size = 0;
+                  }
                 }
               }
-            }
-            if (cur_field->num_values_size > 0 || cur_desc == 0) {
-              if (encdesc_hashmap_distr_add(cur_field->num_values, value) == 1)
-                cur_field->num_values_size++;
-              if (cur_field->num_values_size > GT_ENCDESC_MAX_NUM_VAL_HUF) {
-                /* gt_hashtable_delete(cur_field->num_values); */
-                /* cur_field->num_values = li_ull_gt_hashmap_new(); */
-                cur_field->num_values_size = 0;
+              if (cur_field->num_values_size > 0 || cur_desc == 0) {
+                if (encdesc_hashmap_distr_add(cur_field->num_values,
+                                              value) == 1)
+                  cur_field->num_values_size++;
+                if (cur_field->num_values_size > GT_ENCDESC_MAX_NUM_VAL_HUF) {
+                  cur_field->num_values_size = 0;
+                }
               }
+              cur_field->prev_value = value;
             }
-            cur_field->prev_value = value;
           }
-        }
 
-        /* unmark non constant positions */
-        if (!cur_field->is_cons) {
-          for (k_idx = 0; k_idx < cur_field->len; k_idx++) {
-            if (k_idx < chars_len) {
-              if (cur_field->data[k_idx] != mutable_desc[k_idx + start_pos])
+          /* unmark non constant positions */
+          if (!cur_field->is_cons) {
+            for (k_idx = 0; k_idx < cur_field->len; k_idx++) {
+              if (k_idx < chars_len) {
+                if (cur_field->data[k_idx] != mutable_desc[k_idx + start_pos])
+                  gt_bittab_unset_bit(cur_field->bittab, k_idx);
+              }
+              else
                 gt_bittab_unset_bit(cur_field->bittab, k_idx);
             }
-            else
-              gt_bittab_unset_bit(cur_field->bittab, k_idx);
+
           }
-
+          start_pos = desc_char_idx + 1;
+          cur_field_num++;
         }
-        start_pos = desc_char_idx + 1;
-        cur_field_num++;
       }
+
+      if ((cur_field_num != longest_desc_field_idx) ||
+          (desc_char_idx != desclength))
+        encdesc->num_of_fields_is_cons = false;
+
+      GT_STOREINARRAY(&encdesc->num_of_fields_tab, GtUlong, 128 ,cur_field_num);
+
+      /* TODO this heuristic is bad, if the 2nd field is missing, all following
+         fields are missing too! */
+      /* change this so a field can be absent in a single description */
+      /* absent fields are non constant */
+      for (;cur_field_num < encdesc->num_of_fields;cur_field_num++) {
+        cur_field = &encdesc->fields[cur_field_num];
+        cur_field->is_cons = false;
+        cur_field->fieldlen_is_const = false;
+        cur_field->is_numeric = false;
+      }
+      cur_desc++;
+      status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
+    }
+    gt_free(mutable_desc);
+    mutable_desc = NULL;
+
+    encdesc->num_of_descs = cur_desc;
+    if (encdesc->num_of_fields_is_cons) {
+      GT_FREEARRAY(&encdesc->num_of_fields_tab, GtUlong);
     }
 
-    if ((cur_field_num != longest_desc_field_idx) ||
-        (desc_char_idx != desclength))
-      encdesc->num_of_fields_is_cons = false;
-
-    GT_STOREINARRAY(&encdesc->num_of_fields_tab, GtUlong, 128 ,cur_field_num);
-
-    /* TODO this heuristic is bad, if the 2nd field is missing, all following
-       fields are missing too! */
-    /* change this so a field can be absent in a single description */
-    /* absent fields are non constant */
-    for (;cur_field_num < encdesc->num_of_fields;cur_field_num++) {
+    for (cur_field_num = 0;
+         cur_field_num < encdesc->num_of_fields;
+         cur_field_num++) {
       cur_field = &encdesc->fields[cur_field_num];
-      cur_field->is_cons = false;
-      cur_field->fieldlen_is_const = false;
-      cur_field->is_numeric = false;
-    }
-    cur_desc++;
-    status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
-  }
-  gt_free(mutable_desc);
-  mutable_desc = NULL;
-
-  encdesc->num_of_descs = cur_desc;
-  if (encdesc->num_of_fields_is_cons) {
-    GT_FREEARRAY(&encdesc->num_of_fields_tab, GtUlong);
-  }
-
-  for (cur_field_num = 0;
-       cur_field_num < encdesc->num_of_fields;
-       cur_field_num++) {
-    cur_field = &encdesc->fields[cur_field_num];
-    gt_assert(cur_field->bittab != NULL);
-    if (!cur_field->is_numeric) {
-      if (!cur_field->is_cons) {
-        len_diff = cur_field->max_len - cur_field->min_len;
-        cur_field->bits_per_len =
-          encdesc_digits_per_value((unsigned long) len_diff, 2UL);
-      }
-    }
-    else {
-      /* TODO range can be large, but the size of the dist is more important for
-       * huffman coding */
-      long value_range, delta_range;
-      value_range = labs(cur_field->max_value - cur_field->min_value);
-      delta_range = labs(cur_field->max_delta - cur_field->min_delta);
-      if (value_range < delta_range || cur_field->delta_values_size == 0) {
-        cur_field->use_delta_coding = false;
-        value_diff = value_range;
+      gt_assert(cur_field->bittab != NULL);
+      if (!cur_field->is_numeric) {
+        if (!cur_field->is_cons) {
+          len_diff = cur_field->max_len - cur_field->min_len;
+          cur_field->bits_per_len =
+            encdesc_digits_per_value((unsigned long) len_diff, 2UL);
+        }
       }
       else {
-        cur_field->use_delta_coding = true;
-        value_diff = delta_range;
+        /* TODO range can be large, but the size of the dist is more important
+           for huffman coding */
+        long value_range, delta_range;
+        value_range = labs(cur_field->max_value - cur_field->min_value);
+        delta_range = labs(cur_field->max_delta - cur_field->min_delta);
+        if (value_range < delta_range || cur_field->delta_values_size == 0) {
+          cur_field->use_delta_coding = false;
+          value_diff = value_range;
+        }
+        else {
+          cur_field->use_delta_coding = true;
+          value_diff = delta_range;
+        }
+        cur_field->bits_per_num =
+          encdesc_digits_per_value((unsigned long) value_diff, 2UL);
+        cur_field->bits_per_value =
+          encdesc_digits_per_value((unsigned long) value_range, 2UL);
       }
-      cur_field->bits_per_num =
-        encdesc_digits_per_value((unsigned long) value_diff, 2UL);
-      cur_field->bits_per_value =
-        encdesc_digits_per_value((unsigned long) value_range, 2UL);
     }
+    encdesc->bits_per_field =
+      encdesc_digits_per_value(encdesc->num_of_fields, 2UL);
   }
-  encdesc->bits_per_field =
-    encdesc_digits_per_value(encdesc->num_of_fields, 2UL);
-  return 0;
+  return had_err;
 }
 
 static int encdesc_write_encoding(GtEncdesc *encdesc,
@@ -1033,11 +1043,11 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
   }
   had_err = encdesc_analyze_descs(ee->encdesc, cstr_iterator, err);
 
-  if (ee->timer != NULL) {
-    gt_timer_show_progress(ee->timer, "write encoding header", stdout);
-  }
-
   if (!had_err) {
+    if (ee->timer != NULL) {
+      gt_timer_show_progress(ee->timer, "write encoding header", stdout);
+    }
+
     fp = gt_fa_fopen_with_suffix(name, GT_ENCDESC_FILESUFFIX, "wb", err);
     if (fp == NULL)
       had_err = -1;
@@ -1085,43 +1095,45 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
   }
 
   gt_fa_xfclose(fp);
-  if (ee->timer != NULL) {
-    gt_timer_show_progress(ee->timer, "description encoding finished", stdout);
-  }
-  if (gt_log_enabled()) {
-    unsigned long rate;
-    name1 = gt_str_new_cstr(name);
-    gt_str_append_cstr(name1, GT_ENCDESC_FILESUFFIX);
-    gt_log_log("description encoding overview:");
-    gt_log_log("==>");
-    if (ee->encdesc->sampling != NULL) {
-      rate = gt_sampling_get_rate(ee->encdesc->sampling);
-      if (gt_sampling_is_regular(ee->encdesc->sampling)) {
-        gt_log_log("applied sampling technique:"
-                   " sampling every %luth description",
-                   rate);
+  if (!had_err) {
+    if (ee->timer != NULL) {
+      gt_timer_show_progress(ee->timer, "description encoding finished", stdout);
+    }
+    if (gt_log_enabled()) {
+      unsigned long rate;
+      name1 = gt_str_new_cstr(name);
+      gt_str_append_cstr(name1, GT_ENCDESC_FILESUFFIX);
+      gt_log_log("description encoding overview:");
+      gt_log_log("==>");
+      if (ee->encdesc->sampling != NULL) {
+        rate = gt_sampling_get_rate(ee->encdesc->sampling);
+        if (gt_sampling_is_regular(ee->encdesc->sampling)) {
+          gt_log_log("applied sampling technique:"
+                     " sampling every %luth description",
+                     rate);
+        }
+        else {
+          gt_log_log("applied sampling technique:"
+                     " sampling every %luth page",
+                     rate);
+        }
       }
       else {
-        gt_log_log("applied sampling technique:"
-                   " sampling every %luth page",
-                   rate);
+        gt_log_log("applied sampling technique: none");
       }
-    }
-    else {
-      gt_log_log("applied sampling technique: none");
-    }
 
-    gt_log_log("total number of encoded descriptions: %lu",
-               ee->encdesc->num_of_descs);
-    gt_log_log("total number of encoded characters: %llu",
-               ee->encdesc->total_num_of_chars);
-    gt_log_log("bits per character encoding: %f",
-               (gt_file_estimate_size(gt_str_get(name1)) * 8.0) /
-               ee->encdesc->total_num_of_chars);
-    gt_log_log("<==");
-    gt_str_delete(name1);
+      gt_log_log("total number of encoded descriptions: %lu",
+                 ee->encdesc->num_of_descs);
+      gt_log_log("total number of encoded characters: %llu",
+                 ee->encdesc->total_num_of_chars);
+      gt_log_log("bits per character encoding: %f",
+                 (gt_file_estimate_size(gt_str_get(name1)) * 8.0) /
+                 ee->encdesc->total_num_of_chars);
+      gt_log_log("<==");
+      gt_str_delete(name1);
+    }
   }
-  return 0;
+  return had_err;
 }
 
 static void encdesc_read_samplingtab(GtEncdesc *encdesc,
