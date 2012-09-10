@@ -203,10 +203,9 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
                       "nothing to compress, aborting.");
     had_err = 1;
   }
-  else
-    gt_assert(longest_desc != NULL);
 
   if (!had_err) {
+    gt_assert(longest_desc != NULL);
     encdesc->fields = gt_calloc((size_t) encdesc->num_of_fields,
                                 sizeof (*encdesc->fields));
 
@@ -1097,7 +1096,8 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
   gt_fa_xfclose(fp);
   if (!had_err) {
     if (ee->timer != NULL) {
-      gt_timer_show_progress(ee->timer, "description encoding finished", stdout);
+      gt_timer_show_progress(ee->timer,
+                             "description encoding finished", stdout);
     }
     if (gt_log_enabled()) {
       unsigned long rate;

@@ -34,12 +34,13 @@
 #include "tools/gt_compreads_decompress.h"
 
 typedef struct {
+  bool descs,
+       verbose;
+  unsigned long bench;
   GtStr  *file,
          *smap,
          *alphabet,
          *name;
-  bool descs,
-       verbose;
   GtRange rng;
 } GtCsrHcrDecodeArguments;
 
@@ -51,6 +52,7 @@ static void* gt_compreads_decompress_arguments_new(void)
   arguments->name = gt_str_new();
   arguments->rng.start = GT_UNDEF_ULONG;
   arguments->rng.end = GT_UNDEF_ULONG;
+  arguments->bench = 0;
 
   return arguments;
 }
@@ -109,8 +111,51 @@ gt_compreads_decompress_option_parser_new(void *tool_arguments)
                                &arguments->rng, NULL);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_ulong("benchmark", "decode given number random reads "
+                               "and report the time to do this",
+                               &arguments->bench, 0);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   gt_option_parser_set_min_max_args(op, 0U, 0U);
   return op;
+}
+
+static int gt_compreads_decompress_benchmark(GtHcrDecoder *hcrd,
+                                             unsigned long amount,
+                                             GtTimer *timer,
+                                             GtError *err) {
+  char qual[BUFSIZ] = {0},
+       seq[BUFSIZ] = {0};
+  int had_err = 0;
+  unsigned long rand,
+                max_rand = gt_hcr_decoder_num_of_reads(hcrd) - 1,
+                count;
+
+  GtStr *timer_comment = gt_str_new_cstr("extracting ");
+  GtStr *desc = gt_str_new();
+
+  gt_str_append_ulong(timer_comment, amount);
+  gt_str_append_cstr(timer_comment, " reads!");
+
+  if (timer == NULL) {
+    timer = gt_timer_new_with_progress_description(gt_str_get(timer_comment));
+    gt_timer_start(timer);
+  }
+  else {
+    gt_timer_show_progress(timer, gt_str_get(timer_comment), stdout);
+  }
+
+  for (count = 0; count < amount; count++) {
+    if (!had_err) {
+      rand = gt_rand_max(max_rand);
+      had_err = gt_hcr_decoder_decode(hcrd, rand, seq, qual, desc, err);
+    }
+  }
+  if (!had_err) {
+    gt_timer_show_progress(timer, NULL, stdout);
+  }
+  return had_err;
 }
 
 static int gt_compreads_decompress_runner(GT_UNUSED int argc,
@@ -159,33 +204,40 @@ static int gt_compreads_decompress_runner(GT_UNUSED int argc,
     }
     hcrd = gt_hcr_decoder_new(gt_str_get(arguments->file), alpha,
                               arguments->descs, timer, err);
-    if (!hcrd)
+    if (hcrd == NULL)
       had_err = -1;
     else {
-      if (arguments->rng.start != GT_UNDEF_ULONG
-          && arguments->rng.end != GT_UNDEF_ULONG) {
-        if (arguments->rng.start >= gt_hcr_decoder_num_of_reads(hcrd)
-              || arguments->rng.end >= gt_hcr_decoder_num_of_reads(hcrd)) {
-          gt_error_set(err, "range %lu-%lu includes a read number exceeding "
-                            "the total number of reads (%lu)",
-                            arguments->rng.start,
-                            arguments->rng.end,
-                            gt_hcr_decoder_num_of_reads(hcrd));
-          had_err = -1;
-        }
-        start = arguments->rng.start;
-        end = arguments->rng.end;
+      if (arguments->bench != 0) {
+        had_err = gt_compreads_decompress_benchmark(hcrd,
+                                                    arguments->bench,
+                                                    timer, err);
       }
       else {
-        start = 0;
-        end = gt_hcr_decoder_num_of_reads(hcrd) - 1;
-      }
-      if (!had_err) {
-        gt_log_log("filebasename: %s", gt_str_get(arguments->name));
-        if (gt_hcr_decoder_decode_range(hcrd, gt_str_get(arguments->name),
-                                        start, end, timer, err)
-          != 0)
-          had_err = -1;
+        if (arguments->rng.start != GT_UNDEF_ULONG
+            && arguments->rng.end != GT_UNDEF_ULONG) {
+          if (arguments->rng.start >= gt_hcr_decoder_num_of_reads(hcrd)
+                || arguments->rng.end >= gt_hcr_decoder_num_of_reads(hcrd)) {
+            gt_error_set(err, "range %lu-%lu includes a read number exceeding "
+                              "the total number of reads (%lu)",
+                              arguments->rng.start,
+                              arguments->rng.end,
+                              gt_hcr_decoder_num_of_reads(hcrd));
+            had_err = -1;
+          }
+          start = arguments->rng.start;
+          end = arguments->rng.end;
+        }
+        else {
+          start = 0;
+          end = gt_hcr_decoder_num_of_reads(hcrd) - 1;
+        }
+        if (!had_err) {
+          gt_log_log("filebasename: %s", gt_str_get(arguments->name));
+          if (gt_hcr_decoder_decode_range(hcrd, gt_str_get(arguments->name),
+                                          start, end, timer, err)
+            != 0)
+            had_err = -1;
+        }
       }
     }
     gt_hcr_decoder_delete(hcrd);
