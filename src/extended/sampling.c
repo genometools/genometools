@@ -207,8 +207,6 @@ static void get_regular_page(GtSampling *sampling,
     sampling->current_sample_elementnum =
     sampling->current_sample_num * sampling->sampling_rate;
 
-  gt_assert(sampling->current_sample_elementnum < sampling->numofsamples);
-
   *position = sampling->samplingtab[sampling->current_sample_num];
 }
 

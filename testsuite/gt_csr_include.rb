@@ -3,7 +3,8 @@ require 'tempfile'
 
 hcr_testfiles = [
   "csr_testcase.fastq",
-  "description_test.fastq"
+  "description_test.fastq",
+  "description_test2.fastq"
 ]
 
 Name "gt hcr reads"
@@ -53,6 +54,17 @@ Test do
   run_test "#$bin/gt compreads decompress -descs -file test"
   `cat #{files.join(' ')} > original`
   run_test "diff test.fastq original"
+end
+
+Name "gt hcr decompress benchmark"
+Keywords "gt_csr hcr benchmark"
+Test do
+  hcr_testfiles.each do |file|
+    run_test "#$bin/gt compreads compress -descs" +
+             " -files #$testdata/#{file} -name test_#{file}"
+    run_test "#$bin/gt compreads decompress -descs -benchmark 10000" +
+             " -file test_#{file}"
+  end
 end
 
 rcr_testfiles = {
@@ -131,4 +143,3 @@ Test do
              " -qnames"
   end
 end
-

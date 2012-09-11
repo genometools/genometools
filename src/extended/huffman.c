@@ -474,12 +474,17 @@ GtHuffmanDecoder *gt_huffman_decoder_new_from_memory(
     gt_error_set(err, "error calling mem_func");
     return NULL;
   }
+  gt_log_log("%lu, %lu, %lu",huff_decoder->length,huff_decoder->cur_bit,
+             huff_decoder->pad_length);
+  gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
+  gt_assert(huff_decoder->mem_func_stat == 1);
   return huff_decoder;
 }
 
 int gt_huffman_decoder_get_new_mem_chunk(GtHuffmanDecoder *huff_decoder,
                                          GtError *err)
 {
+  int had_err = 0;
   gt_assert(huff_decoder != NULL);
   gt_assert(huff_decoder->mem_func != NULL);
 
@@ -494,7 +499,11 @@ int gt_huffman_decoder_get_new_mem_chunk(GtHuffmanDecoder *huff_decoder,
                       "function to get new memory chunk!");
     return huff_decoder->mem_func_stat;
   }
-  return 0;
+  huff_decoder->cur_bitseq = 0;
+  gt_log_log("%lu, %lu, %lu",huff_decoder->length,huff_decoder->cur_bit,
+             huff_decoder->pad_length);
+  gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
+  return had_err;
 }
 
 int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
@@ -518,21 +527,16 @@ int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
       return 0;  /*EOF*/
     else if (huff_decoder->mem_func_stat == 0)
       return 0;
-    else
+    else {
       had_err = -1;
+      gt_error_set(err, "huff decoder reached EOF");
+    }
   }
 
   while (!had_err && read_symbols < symbols_to_read) {
 
     /* huffman was initialized with empty dist */
     gt_assert(huff_decoder->cur_node != NULL);
-
-    /* symbol found, reset huffman */
-    if (!had_err && huff_decoder->cur_node->leftchild == NULL) {
-      gt_array_add(symbols, huff_decoder->cur_node->symbol.symbol);
-      read_symbols++;
-      huff_decoder->cur_node = huff_decoder->huffman->root_huffman_tree;
-    }
 
     if (!had_err && huff_decoder->cur_bit == (unsigned long) bits_to_read) {
       huff_decoder->cur_bitseq++;
@@ -547,12 +551,15 @@ int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
           return 0;  /*EOF*/
         }
 
+        gt_log_log("reset because end of block");
         huff_decoder->mem_func_stat =
           huff_decoder->mem_func(&huff_decoder->bitsequence,
                                  &huff_decoder->length,
                                  &huff_decoder->cur_bit,
                                  &huff_decoder->pad_length,
                                  huff_decoder->info);
+        gt_log_log("%lu, %lu, %lu",huff_decoder->length,huff_decoder->cur_bit,
+                   huff_decoder->pad_length);
         if (huff_decoder->mem_func_stat == -1) {
           gt_error_set(err, "error calling mem_func");
           had_err = huff_decoder->mem_func_stat;
@@ -582,6 +589,13 @@ int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
         else
           huff_decoder->cur_node = huff_decoder->cur_node->leftchild;
       }
+    }
+
+    /* symbol found, reset huffman */
+    if (!had_err && huff_decoder->cur_node->leftchild == NULL) {
+      gt_array_add(symbols, huff_decoder->cur_node->symbol.symbol);
+      read_symbols++;
+      huff_decoder->cur_node = huff_decoder->huffman->root_huffman_tree;
     }
   }
   if (!had_err) {

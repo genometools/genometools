@@ -136,25 +136,33 @@ static int gt_compreads_decompress_benchmark(GtHcrDecoder *hcrd,
   GtStr *desc = gt_str_new();
 
   gt_str_append_ulong(timer_comment, amount);
-  gt_str_append_cstr(timer_comment, " reads!");
+  gt_str_append_cstr(timer_comment, " reads of ");
+  gt_str_append_ulong(timer_comment, max_rand + 1);
+  gt_str_append_cstr(timer_comment, "!");
 
   if (timer == NULL) {
-    timer = gt_timer_new_with_progress_description(gt_str_get(timer_comment));
+    timer = gt_timer_new_with_progress_description("extract random reads");
     gt_timer_start(timer);
   }
   else {
-    gt_timer_show_progress(timer, gt_str_get(timer_comment), stdout);
+    gt_timer_show_progress(timer, "extract random reads", stdout);
   }
 
+  gt_log_log("%s",gt_str_get(timer_comment));
   for (count = 0; count < amount; count++) {
     if (!had_err) {
-      rand = gt_rand_max(max_rand);
+      rand = 2;
+      gt_log_log("get read: %lu", rand);
       had_err = gt_hcr_decoder_decode(hcrd, rand, seq, qual, desc, err);
+      gt_log_log("%s",gt_str_get(desc));
+      gt_log_log("%s",seq);
+      gt_log_log("%s",qual);
     }
   }
-  if (!had_err) {
-    gt_timer_show_progress(timer, NULL, stdout);
-  }
+  gt_str_delete(timer_comment);
+  gt_str_delete(desc);
+  if (!gt_showtime_enabled())
+    gt_timer_delete(timer);
   return had_err;
 }
 
@@ -247,6 +255,8 @@ static int gt_compreads_decompress_runner(GT_UNUSED int argc,
     gt_timer_show_progress_final(timer, stdout);
     gt_timer_delete(timer);
   }
+  if (had_err)
+    gt_assert(gt_error_is_set(err));
   return had_err;
 }
 

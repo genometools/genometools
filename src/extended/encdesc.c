@@ -172,7 +172,6 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
     if (status < 0)
       return status;
     gt_assert(descbuffer != NULL);
-    /* gt_log_log("desc to analyse: %s", descbuffer); */
 
     desclength = (unsigned long) strlen(descbuffer);
 
@@ -297,7 +296,6 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
             mutable_desc[desc_char_idx] == '\0') {
           mutable_desc[desc_char_idx] = '\0';
 
-          /* gt_log_log("field text: %s", mutable_desc + start_pos); */
           chars_len = desc_char_idx - start_pos;
           if (chars_len > cur_field->max_len) {
             cur_field->is_cons = false;
@@ -618,7 +616,6 @@ static void prepare_write_data_and_count_bits(GtEncdesc *encdesc,
             regular_field_prepare_length(encdesc, info,
                                          (unsigned long) desc_char_idx);
           }
-          /* gt_log_log("field_len: %lu", cur_field->len); */
           for (field_char_idx = 0;
                field_char_idx < desc_char_idx - info->cur_field_start_pos;
                field_char_idx++) {
@@ -794,11 +791,6 @@ static void inline regular_field_prepare_char(GtEncdesc *encdesc,
   unsigned length;
   GtHuffman *huffman = field->huffman_chars[char_pos];
   char cur_char = info->descbuffer[info->cur_field_start_pos + char_pos];
-
-  /* gt_log_log("cur_desc: %lu; cur_field_num: %lu; char: %lu",
-             info->cur_desc,
-             info->cur_field_num,
-             char_pos); */
 
   gt_assert(huffman != NULL);
   gt_huffman_encode(huffman,
@@ -1005,7 +997,6 @@ static void encdesc_init_huffman(GtEncdesc *encdesc)
       else {
         field->huffman_chars = gt_calloc((size_t) (field->max_len + 1),
                                          sizeof (field->huffman_chars));
-        /* gt_log_log("init %lu char huffs", field->max_len); */
         for (char_idx = 0; char_idx < field->max_len; char_idx++) {
           if (char_idx >= field->len ||
               !gt_bittab_bit_is_set(field->bittab, char_idx)) {
@@ -1199,7 +1190,6 @@ GtEncdesc* gt_encdesc_load(const char *name,
   return encdesc;
 }
 
-/* TODO change desc to GtStr?? */
 static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
 {
   int stat, had_err = 0;
@@ -1217,12 +1207,14 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
                 zero_count,
                 tmp_symbol = 0;
   size_t startofnearestsample;
-  /* GtStr *descbuffer = NULL; */
   GtBitsequence bitseq;
   GtHuffmanBitwiseDecoder *huff_bitwise_decoder;
 
-  if (encdesc->cur_desc == encdesc->num_of_descs)
+  gt_log_log("current_desc: %lu", encdesc->cur_desc);
+  if (encdesc->cur_desc == encdesc->num_of_descs) {
+    gt_error_set(err,"nothing done, eof?");
     return had_err;
+  }
 
   if (encdesc->sampling != NULL &&
       encdesc->cur_desc == gt_sampling_get_next_elementnum(encdesc->sampling)) {
@@ -1239,7 +1231,9 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
       had_err = sample_status;
   }
 
-  /* descbuffer = gt_str_new(); */
+  if (had_err)
+    gt_error_set(err, "sampling did not work");
+
   if (desc != NULL)
     gt_str_reset(desc);
   if (!had_err && !encdesc->num_of_fields_is_cons) {
@@ -1283,8 +1277,10 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
           else {
             stat = gt_huffman_bitwise_decoder_next(huff_bitwise_decoder, bit,
                                                    &zero_count, err);
-            if (stat == -1)
+            if (stat == -1) {
               had_err = stat;
+              gt_assert(gt_error_is_set(err));
+            }
           }
         }
         gt_huffman_bitwise_decoder_delete(huff_bitwise_decoder);
@@ -1330,8 +1326,10 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
                 else {
                   stat = gt_huffman_bitwise_decoder_next(huff_bitwise_decoder,
                                                          bit, &tmp_symbol, err);
-                  if (stat == -1)
+                  if (stat == -1) {
                     had_err = stat;
+                    gt_assert(gt_error_is_set(err));
+                  }
                   else
                     tmp = (long) tmp_symbol;
                 }
@@ -1388,7 +1386,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
         continue;
       }
     }
-    /* variable cur_field_num */
+    /* variable cur_field len */
     if (!cur_field->fieldlen_is_const) {
       bits_to_read = cur_field->bits_per_len;
       bitseq = 0;
@@ -1411,9 +1409,10 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
       fieldlen = cur_field->len;
 
     for (idx = 0; !had_err && idx < fieldlen; idx++) {
-      if (desc != NULL && idx < cur_field->len &&
+      if (idx < cur_field->len &&
           gt_bittab_bit_is_set(cur_field->bittab, idx)) {
-        gt_str_append_char(desc, cur_field->data[idx]);
+        if (desc != NULL)
+          gt_str_append_char(desc, cur_field->data[idx]);
       }
       else {
         huff_bitwise_decoder = gt_huffman_bitwise_decoder_new(
@@ -1427,8 +1426,10 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
           else {
             stat = gt_huffman_bitwise_decoder_next(huff_bitwise_decoder,
                                                    bit, &tmp_symbol,err);
-            if (stat == -1)
+            if (stat == -1) {
+              gt_assert(gt_error_is_set(err));
               had_err = stat;
+            }
             else
               tmp = (long) tmp_symbol;
           }
@@ -1443,7 +1444,8 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
     if (!had_err && desc != NULL)
       gt_str_append_char(desc, cur_field->sep);
   }
-  gt_str_set_length(desc, gt_str_length(desc) - 1);
+  if (desc != NULL)
+    gt_str_set_length(desc, gt_str_length(desc) - 1);
   if (!had_err) {
     encdesc->cur_desc++;
   }
@@ -1497,21 +1499,26 @@ int gt_encdesc_decode(GtEncdesc *encdesc,
     if (encdesc->cur_desc <= num)
       descs2read = num - encdesc->cur_desc;
     else {
-      descs2read = num;
       gt_bitinstream_reinit(encdesc->bitinstream,
                             (size_t) encdesc->start_of_encoding);
+      descs2read = num;
       encdesc->cur_desc = 0;
     }
   }
 
   /* decode all description until the requested */
   for (idx = 0; !had_err && idx < descs2read; idx++) {
-    had_err = encdesc_next_desc(encdesc, NULL, err);
+    if (encdesc_next_desc(encdesc, NULL, err) != 1)
+      had_err = -1;
   }
 
   /* decode the requested description */
-  if (!had_err)
-    had_err = encdesc_next_desc(encdesc, desc, err);
+  if (!had_err) {
+    if (encdesc_next_desc(encdesc, desc, err) != 1)
+      had_err = -1;
+  }
+  else
+    gt_assert(gt_error_is_set(err));
   return had_err;
 }
 

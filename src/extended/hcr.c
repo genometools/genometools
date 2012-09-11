@@ -293,9 +293,9 @@ static int hcr_cmp_FastqFileInfo(const void *node1, const void *node2,
   gt_assert(n1 && n2);
 
   if (n1->readnum < n2->readnum)
-    return (int) -1;
+    return -1;
   if (n1->readnum > n2->readnum)
-    return (int) 1;
+    return 1;
   return 0;
 }
 
@@ -628,6 +628,7 @@ static int get_next_file_chunk_for_huffman(GtBitsequence **bits,
   gt_assert(bits && length && offset && pad_length);
   data_iter = (HcrHuffDataIterator*) meminfo;
 
+  gt_log_log("pos in iter: %lu", data_iter->pos);
   if (data_iter->pos < data_iter->end) {
     gt_fa_xmunmap(data_iter->data);
     data_iter->data = NULL;
@@ -664,6 +665,7 @@ static void reset_data_iterator_to_pos(HcrHuffDataIterator *data_iter,
   gt_assert(pos < data_iter->end);
   gt_assert(data_iter->start <= pos);
   gt_fa_xmunmap(data_iter->data);
+  gt_log_log("reset to pos: %lu", (unsigned long) pos);
   data_iter->data = NULL;
   data_iter->pos = pos;
 }
@@ -880,6 +882,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
       gt_array_reset(seq_dec->symbols);
 
     cur_read.readnum = seq_dec->cur_read;
+    gt_log_log("cur_read: %lu",seq_dec->cur_read);
     fileinfo = (FastqFileInfo *)gt_rbtree_next_key(seq_dec->file_info_rbt,
                                                    &cur_read,
                                                    hcr_cmp_FastqFileInfo,
@@ -889,6 +892,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
     /* reset huffman_decoder if next read is sampled */
     if (gt_sampling_get_next_elementnum(seq_dec->sampling) ==
           seq_dec->cur_read) {
+      gt_log_log("reset because sampled read is next");
       (void) gt_sampling_get_next_sample(seq_dec->sampling,
                                          &nearestsample,
                                          &startofnearestsample);
@@ -897,29 +901,33 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
       if (gt_error_is_set(err))
         status = ERROR;
     }
-    if (status != ERROR &&
-        gt_huffman_decoder_next(seq_dec->huff_dec, seq_dec->symbols,
-                                fileinfo->readlength, err) != 1)
-      status = ERROR;
-    else {
-      if (qual || seq) {
-        for (i = 0; i < gt_array_size(seq_dec->symbols); i++) {
-          symbol = (unsigned long*) gt_array_get(seq_dec->symbols, i);
-          if (qual != NULL)
-            qual[i] = get_qual_from_symbol(seq_dec, *symbol);
-          if (seq != NULL) {
-            base = get_base_from_symbol(seq_dec, *symbol);
-            seq[i] = (char)toupper(gt_alphabet_decode(seq_dec->alpha,
-                                                      (GtUchar) base));
-          }
-        }
-        if (qual != NULL)
-          qual[gt_array_size(seq_dec->symbols)] = '\0';
-        if (seq != NULL)
-          seq[gt_array_size(seq_dec->symbols)] = '\0';
-      }
-      seq_dec->cur_read++;
+    if (status != ERROR) {
+      int ret;
+      ret =  gt_huffman_decoder_next(seq_dec->huff_dec, seq_dec->symbols,
+                                     fileinfo->readlength, err);
+      if (ret != 1)
+        status = ERROR;
+      if (ret == 0)
+        gt_error_set(err, "reached end of file");
     }
+    if (qual || seq) {
+      gt_log_log("set strings");
+      for (i = 0; i < gt_array_size(seq_dec->symbols); i++) {
+        symbol = (unsigned long*) gt_array_get(seq_dec->symbols, i);
+        if (qual != NULL)
+          qual[i] = get_qual_from_symbol(seq_dec, *symbol);
+        if (seq != NULL) {
+          base = get_base_from_symbol(seq_dec, *symbol);
+          seq[i] = (char)toupper(gt_alphabet_decode(seq_dec->alpha,
+                                                    (GtUchar) base));
+        }
+      }
+      if (qual != NULL)
+        qual[gt_array_size(seq_dec->symbols)] = '\0';
+      if (seq != NULL)
+        seq[gt_array_size(seq_dec->symbols)] = '\0';
+    }
+    seq_dec->cur_read++;
   }
   return (int) status;
 }
@@ -939,9 +947,11 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, unsigned long readnum,
   gt_error_check(err);
   gt_assert(hcr_dec);
   gt_assert(readnum < hcr_dec->seq_dec->num_of_reads);
+  gt_assert(seq != NULL && qual != NULL);
 
   if (current_read == readnum) {
     if (hcr_next_seq_qual(hcr_dec->seq_dec, seq, qual, err) == -1) {
+      gt_assert(gt_error_is_set(err));
       return -1;
     }
   }
@@ -963,32 +973,35 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, unsigned long readnum,
         (void) gt_huffman_decoder_get_new_mem_chunk(huff_dec, err);
         if (gt_error_is_set(err))
           return -1;
+        reads_to_read = readnum - nearestsample;
+        hcr_dec->seq_dec->cur_read = nearestsample;
       }
+      gt_log_log("reads to read: %lu, nearest sample: %lu",reads_to_read,nearestsample);
+      gt_log_log("start of nearest: %lu", startofnearestsample);
     }
     else {
       if (current_read <= readnum)
         reads_to_read = readnum - current_read;
       else {
-        reads_to_read = readnum;
         reset_data_iterator_to_start(data_iter);
         (void) gt_huffman_decoder_get_new_mem_chunk(huff_dec, err);
         if (gt_error_is_set(err))
           return -1;
+        reads_to_read = readnum;
         hcr_dec->seq_dec->cur_read = 0;
       }
     }
 
     for (idx = 0; idx < reads_to_read; idx++) {
-      if (hcr_next_seq_qual(hcr_dec->seq_dec, NULL, NULL, err) == -1) {
-        gt_error_set(err, "cannot retrieve base and quality string with "
-                          "number %lu. (%d)", readnum, __LINE__);
+      if (hcr_next_seq_qual(hcr_dec->seq_dec, seq,qual, err) == -1) {
+        gt_assert(gt_error_is_set(err));
         return -1;
       }
+      gt_log_log("seq:\n%s\nqual:\n%s", seq, qual);
     }
 
     if (hcr_next_seq_qual(hcr_dec->seq_dec, seq, qual, err) == -1) {
-      gt_error_set(err, "cannot retrieve base and quality string with "
-                        "number %lu. (%d)", readnum, __LINE__);
+      gt_assert(gt_error_is_set(err));
       return -1;
     }
   }
