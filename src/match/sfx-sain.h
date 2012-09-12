@@ -15,14 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_SAIS_H
-#define SFX_SAIS_H
+#ifndef SFX_SAIN_H
+#define SFX_SAIN_H
 
 #include "core/encseq.h"
 
 typedef struct GtSainlabels GtSainlabels;
 
 GtSainlabels *gt_sain_labels_new(const GtEncseq *encseq);
+
 void gt_sain_labels_delete(GtSainlabels *sainlabels);
+
+void gt_sain_labels_show(const GtSainlabels *sainlabels);
 
 #endif

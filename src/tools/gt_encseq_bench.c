@@ -364,6 +364,8 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
     if (arguments->countlabels)
     {
       GtSainlabels *sainlabels = gt_sain_labels_new(encseq);
+
+      gt_sain_labels_show(sainlabels);
       gt_sain_labels_delete(sainlabels);
     }
     if (!had_err && arguments->ccext > 0)
