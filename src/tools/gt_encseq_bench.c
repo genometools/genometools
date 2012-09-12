@@ -298,30 +298,37 @@ static void gt_count_sain_labels(const GtEncseq *encseq)
                 countS = 0,
                 countSstar = 0,
                 nextcc = GT_UNIQUEINT(SEPARATOR),
+                nextSstartypepos,
+                totalSstarlength = 0,
                 totallength = gt_encseq_total_length(encseq);
-  bool nextisS = true, currentisS;
+  bool nextisStype = true;
   GtEncseqReader *esr;
 
   esr = gt_encseq_create_reader_with_readmode(encseq,GT_READMODE_REVERSE,0);
+  nextSstartypepos = totallength;
   for (position = totallength-1; /* Nothing */; position--)
   {
     GtUchar cc = gt_encseq_reader_next_encoded_char(esr);
+    bool currentisStype;
     unsigned long currentcc
       = ISSPECIAL(cc) ? GT_UNIQUEINT(cc) : (unsigned long) cc;
 
-    if (currentcc < nextcc || (currentcc == nextcc && nextisS))
+    if (currentcc < nextcc || (currentcc == nextcc && nextisStype))
     {
       countS++;
-      currentisS = true;
+      currentisStype = true;
     } else
     {
-      currentisS = false;
+      currentisStype = false;
     }
-    if (!currentisS && nextisS)
+    if (!currentisStype && nextisStype)
     {
       countSstar++;
+      gt_assert(position < nextSstartypepos);
+      totalSstarlength += nextSstartypepos - position + 1;
+      nextSstartypepos = position;
     }
-    nextisS = currentisS;
+    nextisStype = currentisStype;
     nextcc = currentcc;
     if (position == 0)
     {
@@ -330,6 +337,8 @@ static void gt_count_sain_labels(const GtEncseq *encseq)
   }
   printf("S-type: %lu (%.2f)\n",countS,(double) countS/totallength);
   printf("Sstar-type: %lu (%.2f)\n",countSstar,(double) countSstar/countS);
+  printf("Sstar-type.length: %lu (%.2f)\n",totalSstarlength,
+                   (double) totalSstarlength/countSstar);
   gt_encseq_reader_delete(esr);
 }
 
