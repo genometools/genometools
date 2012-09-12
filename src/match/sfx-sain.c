@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "sfx-sais.h"
+#include "sfx-sain.h"
 #include "core/intbits.h"
 
 struct GtSainlabels

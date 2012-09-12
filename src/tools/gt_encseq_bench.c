@@ -22,7 +22,7 @@
 #include "core/mathsupport.h"
 #include "core/showtime.h"
 #include "core/logger.h"
-#include "match/sfx-sais.h"
+#include "match/sfx-sain.h"
 #include "tools/gt_encseq_bench.h"
 
 typedef struct
