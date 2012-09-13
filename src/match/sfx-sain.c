@@ -232,21 +232,42 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
   for (idx = 0; idx < regularpositions; idx++)
   {
     position = suftab[idx];
-    if (position != ULONG_MAX)
+    if (position != ULONG_MAX &&
+        position > 0 && !gt_sain_labels_isStype(sainlabels,position-1))
     {
-      if (position > 0 && !gt_sain_labels_isStype(sainlabels,position-1))
+      GtUchar cc = gt_encseq_get_encoded_char(encseq,
+                                              position-1,
+                                              GT_READMODE_FORWARD);
+      if (ISNOTSPECIAL(cc))
       {
-        GtUchar cc = gt_encseq_get_encoded_char(encseq,
-                                                position-1,
-                                                GT_READMODE_FORWARD);
-        if (ISNOTSPECIAL(cc))
-        {
-          unsigned long putidx = leftborder[cc]++;
-          gt_assert(putidx + 1 < regularpositions);
-          suftab[putidx+1] = position-1;
-          printf("1: suftab[%lu]=%lu\n",putidx+1,position-1);
-        }
+        unsigned long putidx = leftborder[cc]++;
+        gt_assert(putidx + 1 < regularpositions);
+        suftab[putidx+1] = position-1;
+        printf("1: suftab[%lu]=%lu\n",putidx+1,position-1);
       }
+    }
+  }
+  gt_sain_endbuckets(leftborder,bucketsize,numofchars);
+  for (idx = regularpositions - 1; /* Nothing */; idx--)
+  {
+    position = suftab[idx];
+    if (position != ULONG_MAX &&
+        position > 0 && gt_sain_labels_isStype(sainlabels,position-1))
+    {
+      GtUchar cc = gt_encseq_get_encoded_char(encseq,
+                                              position-1,
+                                              GT_READMODE_FORWARD);
+      if (ISNOTSPECIAL(cc))
+      {
+        unsigned long putidx = --leftborder[cc];
+        gt_assert(putidx + 1 < regularpositions);
+        suftab[putidx+1] = position-1;
+        printf("2: suftab[%lu]=%lu\n",putidx+1,position-1);
+      }
+    }
+    if (idx == 0)
+    {
+      break;
     }
   }
   gt_sain_labels_delete(sainlabels);
