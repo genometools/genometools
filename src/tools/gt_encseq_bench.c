@@ -28,7 +28,7 @@
 typedef struct
 {
   unsigned long ccext;
-  bool sortlenprepare, countlabels, verbose;
+  bool sortlenprepare, countlabels, sain, verbose;
 } GtEncseqBenchArguments;
 
 static void* gt_encseq_bench_arguments_new(void)
@@ -72,6 +72,10 @@ static GtOptionParser* gt_encseq_bench_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("labels", "count labels for all positions of "
                                         "sequence",
                                &arguments->countlabels, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("sain", "run induced suffix sorting",
+                               &arguments->sain, false);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_verbose(&arguments->verbose);
@@ -367,6 +371,10 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
 
       gt_sain_labels_show(sainlabels);
       gt_sain_labels_delete(sainlabels);
+    }
+    if (arguments->sain)
+    {
+      gt_sain_sortstarsuffixes(encseq);
     }
     if (!had_err && arguments->ccext > 0)
     {

@@ -28,4 +28,6 @@ void gt_sain_labels_delete(GtSainlabels *sainlabels);
 
 void gt_sain_labels_show(const GtSainlabels *sainlabels);
 
+void gt_sain_sortstarsuffixes(const GtEncseq *encseq);
+
 #endif
