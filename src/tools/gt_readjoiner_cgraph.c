@@ -29,7 +29,7 @@
 #include "tools/gt_readjoiner_cgraph.h"
 
 typedef struct {
-  bool verbose, quiet, dot, smp, dotdel, ext;
+  bool verbose, quiet, dot, smp1, smp2, dotdel, ext;
   GtStr  *readset;
   GtStrArray *subgraph;
   unsigned long subgraph_depth;
@@ -95,9 +95,14 @@ static GtOptionParser* gt_readjoiner_cgraph_option_parser_new(
       &arguments->dot, false);
   gt_option_parser_add_option(op, option);
 
-  /* -smp */
-  option = gt_option_new_bool("smp", "simplify",
-      &arguments->smp, false);
+  /* -smp1 */
+  option = gt_option_new_bool("smp1", "simplify (algorithm 1)",
+      &arguments->smp1, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -smp2 */
+  option = gt_option_new_bool("smp2", "simplify (algorithm 2)",
+      &arguments->smp2, false);
   gt_option_parser_add_option(op, option);
 
   /* -ext */
@@ -177,12 +182,17 @@ static int gt_readjoiner_cgraph_runner(GT_UNUSED int argc,
     gt_fa_fclose(rlt_fp);
   if (di_fp != NULL)
     gt_fa_fclose(di_fp);
-  if (!had_err && arguments->smp)
+  if (!had_err && arguments->smp1)
   {
-    gt_contigs_graph_simplify(cg);
-    gt_contigs_graph_simplify(cg);
+    gt_contigs_graph_simplify(cg, false);
     if (arguments->ext)
-      gt_contigs_graph_extend_contigs(cg);
+      gt_contigs_graph_extend_contigs(cg, true);
+  }
+  if (!had_err && arguments->smp2)
+  {
+    gt_contigs_graph_simplify(cg, true);
+    if (arguments->ext)
+      gt_contigs_graph_extend_contigs(cg, false);
   }
   if (!had_err && arguments->dotdel)
     gt_contigs_graph_enable_dot_show_deleted(cg);

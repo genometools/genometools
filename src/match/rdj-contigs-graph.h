@@ -33,9 +33,11 @@ GtContigsGraph* gt_contigs_graph_new(FILE *cjl_i_fp,
                                      FILE *depthinfo_fp,
                                      GtError *err);
 
-void            gt_contigs_graph_simplify(GtContigsGraph *cg);
+void            gt_contigs_graph_simplify(GtContigsGraph *cg,
+                                          bool restrict_rm_optionals);
 
-void            gt_contigs_graph_extend_contigs(GtContigsGraph *cg);
+void            gt_contigs_graph_extend_contigs(GtContigsGraph *cg,
+                                                bool use_only_internal);
 
 void            gt_contigs_graph_show_dot(GtContigsGraph *cg,
                                           GtFile *outfp);

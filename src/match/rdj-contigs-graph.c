@@ -62,6 +62,8 @@ typedef struct {
   /* traversal markers (must be reset each time before traversal) */
   bool selected  : 1;
   bool processed : 1;
+  bool visited   : 1;
+  bool marked    : 1;
   bool mark0     : 1;
   bool mark1     : 1;
 } GtContigsGraphMarks;
@@ -94,6 +96,14 @@ typedef enum {
   GT_CONTIGS_GRAPH_MULTIPLE_END,
   GT_CONTIGS_GRAPH_CIRCULAR,
 } GtContigsGraphPathEndType;
+
+typedef struct {
+  unsigned long dest;
+  unsigned int dir;
+  bool extended;
+} GtContigsGraphPathElem;
+
+GT_DECLAREARRAYSTRUCT(GtContigsGraphPathElem);
 
 typedef struct {
   unsigned long cnum, dest, depth;
@@ -721,12 +731,15 @@ void gt_contigs_graph_rm_optional_neighbours(GtContigsGraph *cg,
    ((INCOMING) == 1U && !(CG)->v_m[CNUM].mark1))
 
 void gt_contigs_graph_simplify_from_contig(GtContigsGraph *cg,
-    unsigned long cnum, unsigned int incoming)
+    unsigned long cnum, unsigned int incoming, bool restrict_rm_optionals)
 {
+  unsigned long src = cnum;
   while (true)
   {
-    /*gt_log_log("cnum = %lu, incoming=%u", cnum, incoming);*/
     GtContigsGraphSpmEdge *edge;
+    if (cg->v_m[cnum].visited)
+      break;
+    cg->v_m[cnum].visited = true;
     if (cg->v_spm[incoming][cnum].deg == (uint64_t)1)
     {
       edge = gt_contigs_graph_find_only_spm_edge(cg, cnum, incoming);
@@ -745,9 +758,15 @@ void gt_contigs_graph_simplify_from_contig(GtContigsGraph *cg,
     }
     else
     {
-      if (gt_contigs_graph_nof_optional_neighbours(cg, cnum, incoming) <
-          cg->v_spm[incoming][cnum].deg)
+      if (gt_contigs_graph_nof_optional_neighbours(cg, cnum, incoming) ==
+          cg->v_spm[incoming][cnum].deg - 1U)
       {
+        if (restrict_rm_optionals && gt_contigs_graph_nof_optional_neighbours(
+              cg, cnum, GT_CONTIGS_GRAPH_OTHER_DIR(incoming)) != cg->v_spm[
+            incoming][cnum].deg - 1U)
+        {
+          break;
+        }
         gt_contigs_graph_rm_optional_neighbours(cg, cnum, incoming);
         if (cg->v_spm[incoming][cnum].deg != (uint64_t)1)
         {
@@ -763,9 +782,21 @@ void gt_contigs_graph_simplify_from_contig(GtContigsGraph *cg,
       }
     }
   }
+  /* reset visited mark */
+  cnum = src;
+  while (true)
+  {
+    GtContigsGraphSpmEdge *edge;
+    if (!cg->v_m[cnum].visited)
+      break;
+    cg->v_m[cnum].visited = false;
+    if (cg->v_spm[incoming][cnum].deg != (uint64_t)1)
+      break;
+    edge = gt_contigs_graph_find_only_spm_edge(cg, cnum, incoming);
+    cnum = (unsigned long)edge->dest;
+    incoming = GT_CONTIGS_GRAPH_VALID_PATH_DIR(incoming, edge->reverse);
+  }
 }
-
-void gt_contigs_graph_extend_contigs(GtContigsGraph *cg);
 
 /*
  * From each (=1)-contig.
@@ -776,7 +807,7 @@ void gt_contigs_graph_extend_contigs(GtContigsGraph *cg);
  *   - otherwise break traversal
  *
  */
-void gt_contigs_graph_simplify(GtContigsGraph *cg)
+void gt_contigs_graph_simplify(GtContigsGraph *cg, bool restrict_rm_optionals)
 {
   unsigned long cnum;
   gt_assert(cg != NULL);
@@ -784,6 +815,7 @@ void gt_contigs_graph_simplify(GtContigsGraph *cg)
   {
     cg->v_m[cnum].mark0 = false;
     cg->v_m[cnum].mark1 = false;
+    cg->v_m[cnum].visited = false;
   }
   for (cnum = 0; cnum < cg->nof_v; cnum++)
   {
@@ -794,42 +826,68 @@ void gt_contigs_graph_simplify(GtContigsGraph *cg)
       {
         /*gt_log_log("simplify from contig %lu (incoming=0, deg=%u)", cnum,
               cg->v_spm[0U][cnum].deg);*/
-        gt_contigs_graph_simplify_from_contig(cg, cnum, 0U);
+        gt_contigs_graph_simplify_from_contig(cg, cnum, 0U,
+            restrict_rm_optionals);
       }
       if (!cg->v_m[cnum].mark1)
       {
         /*gt_log_log("simplify from contig %lu (incoming=1, deg=%u)", cnum,
               cg->v_spm[1U][cnum].deg);*/
-        gt_contigs_graph_simplify_from_contig(cg, cnum, 1U);
+        gt_contigs_graph_simplify_from_contig(cg, cnum, 1U,
+            restrict_rm_optionals);
       }
     }
   }
 }
 
+#define GT_CONTIGS_GRAPH_PATHELEM_INC 256
+
 void gt_contigs_graph_find_path_end(GtContigsGraphPathEndInfo *info,
-    GtContigsGraph *cg, unsigned long cnum, unsigned int incoming)
+    GtArrayGtContigsGraphPathElem *path, GtContigsGraph *cg,
+    unsigned long cnum, unsigned int incoming, bool use_only_internal)
 {
+  bool extended = false;
   gt_assert(cg->v_spm[incoming][cnum].deg == (uint64_t)1);
   info->cnum = cnum;
   info->dir = incoming;
   info->t = GT_CONTIGS_GRAPH_JUNCTION;
   info->depth = 0;
   gt_log_log("find_path_end(cnum=%lu, incoming=%u)", cnum, incoming);
+  path->nextfreeGtContigsGraphPathElem = 0;
   do {
     GtContigsGraphSpmEdge *edge;
+    GtContigsGraphPathElem *elem;
+    GT_GETNEXTFREEINARRAY(elem, path, GtContigsGraphPathElem,
+      GT_CONTIGS_GRAPH_PATHELEM_INC);
+    if (incoming == 1U)
+      elem->dest = info->cnum;
     edge = gt_contigs_graph_find_only_spm_edge(cg, info->cnum, info->dir);
     info->depth++;
     info->dest = info->cnum;
     info->cnum = (unsigned long)edge->dest;
+    elem->extended = extended;
+    if (incoming == 0)
+    {
+      elem->dest = info->cnum;
+      elem->dir = info->dir;
+    }
     info->dir = GT_CONTIGS_GRAPH_VALID_PATH_DIR(info->dir, edge->reverse);
-    if (info->cnum == cnum)
+    if (incoming == 1U)
+      elem->dir = GT_CONTIGS_GRAPH_OTHER_DIR(info->dir);
+    if (info->cnum == cnum || cg->v_m[info->cnum].visited)
     {
       info->t = GT_CONTIGS_GRAPH_CIRCULAR;
       break;
     }
-  } while ((cg->v_spm[info->dir][info->cnum].deg == (uint64_t)1)
-          && (cg->v_spm[GT_CONTIGS_GRAPH_OTHER_DIR(info->dir)][info->cnum].deg
-            == (uint64_t)1));
+    if (cg->v_spm[GT_CONTIGS_GRAPH_OTHER_DIR(info->dir)][
+        info->cnum].deg != (uint64_t)1)
+    {
+      extended = true;
+      if (use_only_internal)
+        break;
+    }
+    cg->v_m[info->cnum].visited = true;
+  } while (cg->v_spm[info->dir][info->cnum].deg == (uint64_t)1);
   if (cg->v_spm[info->dir][info->cnum].deg == 0)
   {
     if (cg->v_spm[GT_CONTIGS_GRAPH_OTHER_DIR(info->dir)][
@@ -846,7 +904,7 @@ void gt_contigs_graph_find_path_end(GtContigsGraphPathEndInfo *info,
 }
 
 void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
-    GtContigsGraphPathEndInfo *info)
+    GtArrayGtContigsGraphPathElem *path, GtContigsGraphPathEndInfo *info)
 {
   unsigned long offset, cnum, nof_units, i, new_cnum;
   unsigned int dir;
@@ -893,13 +951,28 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
     GtContigsGraphSeqUnit *unit;
     unit = cg->units + cg->v_cmp[new_cnum - cg->nof_simple_v].ptr + i;
     unit->seqnum = cnum;
-    unit->revcomp = (dir == 1U);
+    if (i == 0)
+      unit->revcomp = (info[1].dir == 1U);
+    else if (i == nof_units - 1U)
+      unit->revcomp = (info[0].dir == 0);
+    else
+      unit->revcomp = (dir == 1U);
     unit->offset = offset;
     if (i + 1 < nof_units)
     {
       GtContigsGraphSpmEdge *edge;
-      edge = (i == 0) ? gt_contigs_graph_find_spm_edge(cg, cnum, dir,
-          info[1].dest) : gt_contigs_graph_find_only_spm_edge(cg, cnum, dir);
+      unsigned long dest;
+      if (i < info[1].depth)
+      {
+        dest = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dest;
+        dir = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dir;
+      }
+      else if (i >= info[1].depth)
+      {
+        dest = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dest;
+        dir = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dir;
+      }
+      edge = gt_contigs_graph_find_spm_edge(cg, cnum, dir, dest);
       cnum = (unsigned long)edge->dest;
       dir = GT_CONTIGS_GRAPH_VALID_PATH_DIR(dir, edge->reverse);
       offset = (unsigned long)edge->ovlen;
@@ -920,16 +993,33 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
   {
     GtContigsGraphSpmEdge *edge;
     unsigned long src = cnum;
-    edge = (i == 0) ? gt_contigs_graph_find_spm_edge(cg, cnum, dir,
-          info[1].dest) : gt_contigs_graph_find_only_spm_edge(cg, cnum, dir);
+    unsigned long dest;
+    GT_UNUSED bool extended;
+    if (i < info[1].depth)
+    {
+      dest = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dest;
+      dir = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dir;
+      extended = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].
+        extended;
+    }
+    else if (i >= info[1].depth)
+    {
+      dest = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dest;
+      dir = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dir;
+      extended = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].
+        extended;
+    }
+    edge = gt_contigs_graph_find_spm_edge(cg, cnum, dir, dest);
     cnum = (unsigned long)edge->dest;
     gt_log_log("traverse edge %lu -- %lu", src, cnum);
-    dir = GT_CONTIGS_GRAPH_VALID_PATH_DIR(dir, edge->reverse);
+    /*dir = GT_CONTIGS_GRAPH_VALID_PATH_DIR(dir, edge->reverse);*/
     if (cg->v_spm[0][src].deg == (uint64_t)1 &&
         cg->v_spm[1][src].deg == (uint64_t)1)
     {
       gt_log_log("mark vertex %lu (internal)", src);
       cg->v_m[src].selected = true;
+     /* if (!extended && i > 1 && i < nof_units - 2)
+        cg->v_m[src].processed = true;*/
     }
   }
   if (info[1].t != GT_CONTIGS_GRAPH_CIRCULAR)
@@ -984,12 +1074,17 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
 #endif
 }
 
-void gt_contigs_graph_extend_contigs(GtContigsGraph *cg)
+void gt_contigs_graph_extend_contigs(GtContigsGraph *cg, bool use_only_internal)
 {
   unsigned long cnum, nof_v_before;
+  GtArrayGtContigsGraphPathElem path[2];
+  GT_INITARRAY(&(path[0]), GtContigsGraphPathElem);
+  GT_INITARRAY(&(path[1]), GtContigsGraphPathElem);
   for (cnum = 0; cnum < cg->nof_v; cnum++)
   {
     cg->v_m[cnum].selected = false;
+    cg->v_m[cnum].processed = false;
+    cg->v_m[cnum].visited = false;
   }
   nof_v_before = cg->nof_v;
   gt_log_log("nof_v before extending contigs = %lu", cg->nof_v);
@@ -1002,7 +1097,6 @@ void gt_contigs_graph_extend_contigs(GtContigsGraph *cg)
     deg[1] = (unsigned long)cg->v_spm[1][cnum].deg;
     if ((cg->v_m[cnum].deleted) ||
         (cg->v_m[cnum].optional) ||
-        (cg->v_m[cnum].selected) ||
         (deg[0] > 1UL) || /* junction */
         (deg[1] > 1UL) || /* junction */
         (deg[0] == 0 && deg[1] == 0)) /* isolated */
@@ -1023,16 +1117,35 @@ void gt_contigs_graph_extend_contigs(GtContigsGraph *cg)
       }
       else
       {
-        gt_contigs_graph_find_path_end(&(info[startdir]), cg, cnum, startdir);
+        {
+          unsigned long cnum2;
+          for (cnum2 = 0; cnum2 < nof_v_before; cnum2++)
+          {
+            cg->v_m[cnum2].visited = false;
+          }
+        }
+        gt_contigs_graph_find_path_end(&(info[startdir]), &(path[startdir]),
+            cg, cnum, startdir, use_only_internal);
       }
     }
-    gt_contigs_graph_create_composite_vertex(cg, info);
+    gt_contigs_graph_create_composite_vertex(cg, path, info);
+    {
+      unsigned long cnum2;
+      for (cnum2 = 0; cnum2 < nof_v_before; cnum2++)
+      {
+        if (cg->v_m[cnum2].processed && !cg->v_m[cnum2].deleted
+        && info[0].t != GT_CONTIGS_GRAPH_CIRCULAR)
+          gt_contigs_graph_rm_vertex(cg, cnum2);
+      }
+    }
   }
   for (cnum = 0; cnum < nof_v_before; cnum++)
   {
-    if (cg->v_m[cnum].selected)
+    if (cg->v_m[cnum].selected && !cg->v_m[cnum].deleted)
       gt_contigs_graph_rm_vertex(cg, cnum);
   }
+  GT_FREEARRAY(&path[0], GtContigsGraphPathElem);
+  GT_FREEARRAY(&path[1], GtContigsGraphPathElem);
 }
 
 int gt_contigs_graph_show_dot_subgraph(GtContigsGraph *cg,
