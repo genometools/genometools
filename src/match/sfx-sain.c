@@ -18,6 +18,7 @@
 #include <limits.h>
 #include "sfx-sain.h"
 #include "core/intbits.h"
+#include "stamp.h"
 
 #define GT_SSTARLENGTH_MAX 100
 
@@ -183,13 +184,102 @@ static void gt_sain_startbuckets(unsigned long *leftborder,
   }
 }
 
+static int gt_sain_compareSstarstrings(const GtEncseq *encseq,
+                                       const GtSainlabels *sainlabels,
+                                       unsigned long start1,
+                                       unsigned long start2)
+{
+  bool firstcmp = true;
+  gt_assert(start1 <= sainlabels->totallength &&
+            start2 <= sainlabels->totallength && start1 != start2);
+
+  while (true)
+  {
+    GtUchar cc;
+    unsigned long cc1, cc2;
+
+    if (start1 == sainlabels->totallength)
+    {
+      return -1;
+    }
+    if (start2 == sainlabels->totallength)
+    {
+      return 1;
+    }
+    cc = gt_encseq_get_encoded_char(encseq,start1,GT_READMODE_FORWARD);
+    cc1 = ISSPECIAL(cc) ? GT_UNIQUEINT(cc) : (unsigned long) cc;
+    cc = gt_encseq_get_encoded_char(encseq,start2,GT_READMODE_FORWARD);
+    cc2 = ISSPECIAL(cc) ? GT_UNIQUEINT(cc) : (unsigned long) cc;
+    if (cc1 < cc2)
+    {
+      return -1;
+    }
+    if (cc1 > cc2)
+    {
+      return 1;
+    }
+    if (gt_sain_labels_isStype(sainlabels,start1))
+    {
+      if (gt_sain_labels_isStype(sainlabels,start2))
+      {
+        if (firstcmp)
+        {
+          start1++;
+          start2++;
+        } else
+        {
+          if (gt_sain_labels_isSstartype(sainlabels,start1))
+          {
+            if (gt_sain_labels_isSstartype(sainlabels,start2))
+            {
+              /* strings are of equal length */
+              return 0;
+            } else
+            {
+              /* first is shorter than second */
+              return -1;
+            }
+          } else
+          {
+            if (gt_sain_labels_isSstartype(sainlabels,start2))
+            {
+              /* first is longer than second */
+              return 1;
+            } else
+            {
+              start1++;
+              start2++;
+            }
+          }
+        }
+      } else
+      {
+        /* S > L */
+        return 1;
+      }
+    } else
+    {
+      if (gt_sain_labels_isStype(sainlabels,start2))
+      {
+        /* L < S */
+        return -1;
+      } else
+      {
+        start1++;
+        start2++;
+      }
+    }
+    firstcmp = false;
+  }
+}
+
 void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
 {
   unsigned int charidx;
   const unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned long specialcharacters = gt_encseq_specialcharacters(encseq);
-  unsigned long position, idx, regularpositions,
-                *bucketsize, *leftborder, *suftab;
+  unsigned long position, previouspos = ULONG_MAX, idx, regularpositions,
+                currentlabel = 0, *bucketsize, *leftborder, *suftab;
   GtSainlabels *sainlabels;
 
   bucketsize = gt_malloc(sizeof (*bucketsize) * numofchars);
@@ -268,6 +358,28 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
     if (idx == 0)
     {
       break;
+    }
+  }
+  for (idx = 0; idx < regularpositions; idx++)
+  {
+    position = suftab[idx];
+    if (position != ULONG_MAX &&
+        gt_sain_labels_isSstartype(sainlabels,position))
+    {
+      if (previouspos != ULONG_MAX)
+      {
+        int cmp = gt_sain_compareSstarstrings(encseq,
+                                              sainlabels,
+                                              previouspos,
+                                              position);
+        gt_assert(cmp != 1);
+        if (cmp == -1)
+        {
+          currentlabel++;
+        }
+      }
+      printf("Sstar %lu with label %lu\n",position,currentlabel);
+      previouspos = position;
     }
   }
   gt_sain_labels_delete(sainlabels);
