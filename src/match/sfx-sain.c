@@ -53,7 +53,7 @@ GtSainlabels *gt_sain_labels_new(const GtEncseq *encseq)
   GT_INITBITTAB(sainlabels->isStype,sainlabels->totallength+1);
   GT_SETIBIT(sainlabels->isStype,sainlabels->totallength);
   nextSstartypepos = sainlabels->totallength;
-  printf("%lu: S\n",sainlabels->totallength);
+  /*printf("%lu: S\n",sainlabels->totallength);*/
   for (idx = 0; idx<=(unsigned long) GT_SSTARLENGTH_MAX; idx++)
   {
     sainlabels->lendist[idx] = 0;
@@ -71,11 +71,11 @@ GtSainlabels *gt_sain_labels_new(const GtEncseq *encseq)
       sainlabels->countStype++;
       currentisStype = true;
       GT_SETIBIT(sainlabels->isStype,position);
-      printf("%lu: S\n",position);
+      /*printf("%lu: S\n",position);*/
     } else
     {
       currentisStype = false;
-      printf("%lu: L\n",position);
+      /*printf("%lu: L\n",position);*/
     }
     if (!currentisStype && nextisStype)
     {
@@ -85,7 +85,7 @@ GtSainlabels *gt_sain_labels_new(const GtEncseq *encseq)
       gt_assert(position < nextSstartypepos);
       currentlen = nextSstartypepos - position;
       sainlabels->totalSstarlength += currentlen;
-      printf("Sstar: %lu\n",position+1);
+      /*printf("Sstar: %lu\n",position+1);*/
       if (currentlen <= (unsigned long) GT_SSTARLENGTH_MAX)
       {
         sainlabels->lendist[currentlen]++;
@@ -140,8 +140,8 @@ void gt_sain_labels_show(const GtSainlabels *sainlabels)
   }
 }
 
-bool gt_sain_labels_isSstartype(const GtSainlabels *sainlabels,
-                                unsigned long position)
+static bool gt_sain_labels_isSstartype(const GtSainlabels *sainlabels,
+                                       unsigned long position)
 {
   gt_assert(position <= sainlabels->totallength);
   return position == sainlabels->totallength ||
@@ -150,8 +150,8 @@ bool gt_sain_labels_isSstartype(const GtSainlabels *sainlabels,
          !GT_ISIBITSET(sainlabels->isStype,position-1)) ? true : false;
 }
 
-bool gt_sain_labels_isStype(const GtSainlabels *sainlabels,
-                            unsigned long position)
+static bool gt_sain_labels_isStype(const GtSainlabels *sainlabels,
+                                   unsigned long position)
 {
   return GT_ISIBITSET(sainlabels->isStype,position) ? true : false;
 }
@@ -163,11 +163,9 @@ static void gt_sain_endbuckets(unsigned long *leftborder,
   unsigned int charidx;
 
   leftborder[0] = bucketsize[0];
-  printf("leftborder[0]=%lu\n",leftborder[0]);
   for (charidx = 1U; charidx<numofchars; charidx++)
   {
     leftborder[charidx] = leftborder[charidx-1] + bucketsize[charidx];
-    printf("leftborder[charidx]=%lu\n",leftborder[charidx]);
   }
 }
 
@@ -278,8 +276,9 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
   unsigned int charidx;
   const unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned long specialcharacters = gt_encseq_specialcharacters(encseq);
-  unsigned long position, previouspos = ULONG_MAX, idx, regularpositions,
-                currentlabel = 0, *bucketsize, *leftborder, *suftab;
+  unsigned long position, idx, regularpositions, currentname = 0,
+                previouspos = ULONG_MAX,
+                *bucketsize, *leftborder, *suftab;
   GtSainlabels *sainlabels;
 
   bucketsize = gt_malloc(sizeof (*bucketsize) * numofchars);
@@ -312,12 +311,12 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
         putidx = --leftborder[cc];
         gt_assert(putidx + 1 < regularpositions);
         suftab[putidx+1] = position;
-        printf("Sstar.suftab[%lu]=%lu\n",putidx+1,position);
+        /*printf("Sstar.suftab[%lu]=%lu\n",putidx+1,position);*/
       }
     }
   }
   suftab[0] = sainlabels->totallength;
-  printf("Sstar.suftab[0]=%lu\n",sainlabels->totallength);
+  /*printf("Sstar.suftab[0]=%lu\n",sainlabels->totallength);*/
   gt_sain_startbuckets(leftborder,bucketsize,numofchars);
   for (idx = 0; idx < regularpositions; idx++)
   {
@@ -333,7 +332,7 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
         unsigned long putidx = leftborder[cc]++;
         gt_assert(putidx + 1 < regularpositions);
         suftab[putidx+1] = position-1;
-        printf("1: suftab[%lu]=%lu\n",putidx+1,position-1);
+        /*printf("1: suftab[%lu]=%lu\n",putidx+1,position-1);*/
       }
     }
   }
@@ -352,7 +351,7 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
         unsigned long putidx = --leftborder[cc];
         gt_assert(putidx + 1 < regularpositions);
         suftab[putidx+1] = position-1;
-        printf("2: suftab[%lu]=%lu\n",putidx+1,position-1);
+        /*printf("2: suftab[%lu]=%lu\n",putidx+1,position-1);*/
       }
     }
     if (idx == 0)
@@ -375,13 +374,15 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
         gt_assert(cmp != 1);
         if (cmp == -1)
         {
-          currentlabel++;
+          currentname++;
         }
       }
-      printf("Sstar %lu with label %lu\n",position,currentlabel);
+      /*printf("Sstar %lu with label %lu\n",position,currentname);*/
       previouspos = position;
     }
   }
+  gt_sain_labels_show(sainlabels);
+  printf("number of names: %lu\n",currentname);
   gt_sain_labels_delete(sainlabels);
   gt_free(leftborder);
   gt_free(bucketsize);
