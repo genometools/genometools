@@ -183,6 +183,143 @@ static void gt_sain_startbuckets(unsigned long *leftborder,
   }
 }
 
+static void insertSstarsuffixes(const GtSainlabels *sainlabels,
+                                const GtEncseq *encseq,
+                                unsigned long *suftab,
+                                unsigned long *leftborder,
+                                unsigned long regularpositions)
+{
+  unsigned long position;
+
+  for (position = 0; position < sainlabels->totallength; position++)
+  {
+    if (gt_sain_labels_isSstartype(sainlabels,position))
+    {
+      GtUchar cc = gt_encseq_get_encoded_char(encseq,
+                                              position,
+                                              GT_READMODE_FORWARD);
+      if (ISNOTSPECIAL(cc))
+      {
+        unsigned long putidx;
+
+        gt_assert(leftborder[cc] > 0);
+        putidx = --leftborder[cc];
+        gt_assert(putidx + 1 < regularpositions);
+        suftab[putidx+1] = position;
+        /*printf("Sstar.suftab[%lu]=%lu\n",putidx+1,position);*/
+      }
+    }
+  }
+}
+
+static void induceLtypesuffixes(const GtSainlabels *sainlabels,
+                                const GtEncseq *encseq,
+                                unsigned long *suftab,
+                                unsigned long *leftborder,
+                                unsigned long regularpositions)
+{
+  unsigned long idx;
+
+  for (idx = 0; idx < regularpositions; idx++)
+  {
+    unsigned long position = suftab[idx];
+    if (position != ULONG_MAX &&
+        position > 0 && !gt_sain_labels_isStype(sainlabels,position-1))
+    {
+      GtUchar cc = gt_encseq_get_encoded_char(encseq,
+                                              position-1,
+                                              GT_READMODE_FORWARD);
+      if (ISNOTSPECIAL(cc))
+      {
+        unsigned long putidx = leftborder[cc]++;
+        gt_assert(putidx + 1 < regularpositions);
+        suftab[putidx+1] = position-1;
+        /*printf("1: suftab[%lu]=%lu\n",putidx+1,position-1);*/
+      }
+    }
+  }
+}
+
+static void induceStypesuffixes(const GtSainlabels *sainlabels,
+                                const GtEncseq *encseq,
+                                unsigned long *suftab,
+                                unsigned long *leftborder,
+                                unsigned long regularpositions)
+{
+  unsigned long idx;
+
+  for (idx = regularpositions - 1; /* Nothing */; idx--)
+  {
+    unsigned long position = suftab[idx];
+    if (position != ULONG_MAX &&
+        position > 0 && gt_sain_labels_isStype(sainlabels,position-1))
+    {
+      GtUchar cc = gt_encseq_get_encoded_char(encseq,
+                                              position-1,
+                                              GT_READMODE_FORWARD);
+      if (ISNOTSPECIAL(cc))
+      {
+        unsigned long putidx = --leftborder[cc];
+        gt_assert(putidx + 1 < regularpositions);
+        suftab[putidx+1] = position-1;
+        /*printf("2: suftab[%lu]=%lu\n",putidx+1,position-1);*/
+      }
+    }
+    if (idx == 0)
+    {
+      break;
+    }
+  }
+}
+
+static void sain_setundefined(unsigned long *suftab,
+                              unsigned long from, unsigned long to)
+{
+  unsigned long idx;
+
+  for (idx = from; idx <= to; idx++)
+  {
+    suftab[idx] = ULONG_MAX;
+  }
+}
+
+static void moveSstar2front(const GtSainlabels *sainlabels,
+                            unsigned long *suftab,
+                            unsigned long regularpositions)
+{
+  unsigned long ridx, position;
+
+  for (ridx = 0; ridx < regularpositions; ridx++)
+  {
+    position = suftab[ridx];
+    gt_assert(position != ULONG_MAX);
+    if (!gt_sain_labels_isSstartype(sainlabels,position))
+    {
+      break;
+    }
+  }
+  if (ridx < sainlabels->countSstartype)
+  {
+    unsigned long widx;
+    for (widx = ridx, ridx++; /* Nothing */; ridx++)
+    {
+      gt_assert (widx < ridx && ridx < regularpositions);
+      position = suftab[ridx];
+      gt_assert(position != ULONG_MAX);
+      if (gt_sain_labels_isSstartype(sainlabels,position))
+      {
+        suftab[widx++] = position;
+        suftab[ridx] = ULONG_MAX;
+        if (widx == sainlabels->countSstartype)
+        {
+          break;
+        }
+      }
+    }
+  }
+  sain_setundefined(suftab,sainlabels->countSstartype, regularpositions-1);
+}
+
 static int gt_sain_compareSstarstrings(const GtEncseq *encseq,
                                        const GtSainlabels *sainlabels,
                                        unsigned long start1,
@@ -272,46 +409,6 @@ static int gt_sain_compareSstarstrings(const GtEncseq *encseq,
   }
 }
 
-static void moveSstar2front(const GtSainlabels *sainlabels,
-                            unsigned long *suftab,
-                            unsigned long regularpositions)
-{
-  unsigned long ridx, position;
-
-  for (ridx = 0; ridx < regularpositions; ridx++)
-  {
-    position = suftab[ridx];
-    gt_assert(position != ULONG_MAX);
-    if (!gt_sain_labels_isSstartype(sainlabels,position))
-    {
-      break;
-    }
-  }
-  if (ridx < sainlabels->countSstartype)
-  {
-    unsigned long widx;
-    for (widx = ridx, ridx++; /* Nothing */; ridx++)
-    {
-      gt_assert (widx < ridx && ridx < regularpositions);
-      position = suftab[ridx];
-      gt_assert(position != ULONG_MAX);
-      if (gt_sain_labels_isSstartype(sainlabels,position))
-      {
-        suftab[widx++] = position;
-        suftab[ridx] = ULONG_MAX;
-        if (widx == sainlabels->countSstartype)
-        {
-          break;
-        }
-      }
-    }
-  }
-  for (ridx = sainlabels->countSstartype; ridx < regularpositions; ridx++)
-  {
-    suftab[ridx] = ULONG_MAX;
-  }
-}
-
 static void assignSstarnames(const GtSainlabels *sainlabels,
                              const GtEncseq *encseq,
                              unsigned long *suftab,
@@ -373,8 +470,7 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
   unsigned int charidx;
   const unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned long specialcharacters = gt_encseq_specialcharacters(encseq);
-  unsigned long position, idx, regularpositions, *bucketsize,
-                *leftborder, *suftab;
+  unsigned long regularpositions, *bucketsize, *leftborder, *suftab;
   GtSainlabels *sainlabels;
 
   bucketsize = gt_malloc(sizeof (*bucketsize) * numofchars);
@@ -387,74 +483,16 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
   sainlabels = gt_sain_labels_new(encseq);
   gt_assert(sainlabels->totallength >= specialcharacters);
   regularpositions = sainlabels->totallength + 1 - specialcharacters;
+  gt_assert(regularpositions > 0);
   suftab = gt_malloc(sizeof (*suftab) * regularpositions);
-  for (idx = 0; idx < regularpositions; idx++)
-  {
-    suftab[idx] = ULONG_MAX;
-  }
-  for (position = 0; position < sainlabels->totallength; position++)
-  {
-    if (gt_sain_labels_isSstartype(sainlabels,position))
-    {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,
-                                              position,
-                                              GT_READMODE_FORWARD);
-      if (ISNOTSPECIAL(cc))
-      {
-        unsigned long putidx;
-
-        gt_assert(leftborder[cc] > 0);
-        putidx = --leftborder[cc];
-        gt_assert(putidx + 1 < regularpositions);
-        suftab[putidx+1] = position;
-        /*printf("Sstar.suftab[%lu]=%lu\n",putidx+1,position);*/
-      }
-    }
-  }
   suftab[0] = sainlabels->totallength;
+  sain_setundefined(suftab,1UL,regularpositions-1);
+  insertSstarsuffixes(sainlabels, encseq, suftab, leftborder, regularpositions);
   /*printf("Sstar.suftab[0]=%lu\n",sainlabels->totallength);*/
   gt_sain_startbuckets(leftborder,bucketsize,numofchars);
-  for (idx = 0; idx < regularpositions; idx++)
-  {
-    position = suftab[idx];
-    if (position != ULONG_MAX &&
-        position > 0 && !gt_sain_labels_isStype(sainlabels,position-1))
-    {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,
-                                              position-1,
-                                              GT_READMODE_FORWARD);
-      if (ISNOTSPECIAL(cc))
-      {
-        unsigned long putidx = leftborder[cc]++;
-        gt_assert(putidx + 1 < regularpositions);
-        suftab[putidx+1] = position-1;
-        /*printf("1: suftab[%lu]=%lu\n",putidx+1,position-1);*/
-      }
-    }
-  }
+  induceLtypesuffixes(sainlabels, encseq, suftab, leftborder, regularpositions);
   gt_sain_endbuckets(leftborder,bucketsize,numofchars);
-  for (idx = regularpositions - 1; /* Nothing */; idx--)
-  {
-    position = suftab[idx];
-    if (position != ULONG_MAX &&
-        position > 0 && gt_sain_labels_isStype(sainlabels,position-1))
-    {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,
-                                              position-1,
-                                              GT_READMODE_FORWARD);
-      if (ISNOTSPECIAL(cc))
-      {
-        unsigned long putidx = --leftborder[cc];
-        gt_assert(putidx + 1 < regularpositions);
-        suftab[putidx+1] = position-1;
-        /*printf("2: suftab[%lu]=%lu\n",putidx+1,position-1);*/
-      }
-    }
-    if (idx == 0)
-    {
-      break;
-    }
-  }
+  induceStypesuffixes(sainlabels, encseq, suftab, leftborder, regularpositions);
   moveSstar2front(sainlabels,suftab,regularpositions);
   assignSstarnames(sainlabels,encseq,suftab,regularpositions);
   movenames2front(sainlabels,suftab,regularpositions);
