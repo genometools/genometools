@@ -16,9 +16,10 @@
 */
 
 #include <limits.h>
-#include "sfx-sain.h"
 #include "core/intbits.h"
+#include "core/unused_api.h"
 #include "stamp.h"
+#include "sfx-sain.h"
 
 #define GT_SSTARLENGTH_MAX 100
 
@@ -271,14 +272,79 @@ static int gt_sain_compareSstarstrings(const GtEncseq *encseq,
   }
 }
 
+static void moveSstar2front(const GtSainlabels *sainlabels,
+                            unsigned long *suftab,
+                            unsigned long regularpositions)
+{
+  unsigned long ridx, position;
+
+  for (ridx = 0; ridx < regularpositions; ridx++)
+  {
+    position = suftab[ridx];
+    gt_assert(position != ULONG_MAX);
+    if (!gt_sain_labels_isSstartype(sainlabels,position))
+    {
+      break;
+    }
+  }
+  if (ridx < sainlabels->countSstartype)
+  {
+    unsigned long widx;
+    for (widx = ridx, ridx++; /* Nothing */; ridx++)
+    {
+      gt_assert (widx < ridx && ridx < regularpositions);
+      position = suftab[ridx];
+      gt_assert(position != ULONG_MAX);
+      if (gt_sain_labels_isSstartype(sainlabels,position))
+      {
+        suftab[widx++] = position;
+        suftab[ridx] = ULONG_MAX;
+        if (widx == sainlabels->countSstartype)
+        {
+          break;
+        }
+      }
+    }
+  }
+  for (ridx = sainlabels->countSstartype; ridx < regularpositions; ridx++)
+  {
+    suftab[ridx] = ULONG_MAX;
+  }
+}
+
+static void movenames2front(const GtSainlabels *sainlabels,
+                            unsigned long *suftab,
+                            GT_UNUSED unsigned long regularpositions)
+{
+  unsigned long ridx, widx,
+                maxridx = sainlabels->countSstartype +
+                          GT_DIV2(sainlabels->totallength);
+  for (ridx = widx = sainlabels->countSstartype; ridx <= maxridx; ridx++)
+  {
+    if (suftab[ridx] != ULONG_MAX)
+    {
+      if (widx < ridx)
+      {
+        gt_assert(widx < regularpositions);
+        suftab[widx++] = suftab[ridx];
+      } else
+      {
+        widx++;
+      }
+    }
+  }
+  gt_assert(widx < regularpositions);
+  suftab[widx++] = 0;
+  gt_assert (widx == GT_MULT2(sainlabels->countSstartype));
+}
+
 void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
 {
   unsigned int charidx;
   const unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned long specialcharacters = gt_encseq_specialcharacters(encseq);
   unsigned long position, idx, regularpositions, currentname = 0,
-                previouspos = ULONG_MAX,
-                *bucketsize, *leftborder, *suftab;
+                previouspos, *bucketsize, *leftborder, *suftab;
   GtSainlabels *sainlabels;
 
   bucketsize = gt_malloc(sizeof (*bucketsize) * numofchars);
@@ -359,30 +425,32 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
       break;
     }
   }
-  for (idx = 0; idx < regularpositions; idx++)
+  moveSstar2front(sainlabels,suftab,regularpositions);
+  previouspos = suftab[0];
+  gt_assert(gt_sain_labels_isSstartype(sainlabels,previouspos));
+  for (idx = 1UL; idx < sainlabels->countSstartype; idx++)
   {
+    int cmp;
+
     position = suftab[idx];
-    if (position != ULONG_MAX &&
-        gt_sain_labels_isSstartype(sainlabels,position))
+    gt_assert(gt_sain_labels_isSstartype(sainlabels,position));
+    cmp = gt_sain_compareSstarstrings(encseq,sainlabels,previouspos,position);
+    gt_assert(cmp != 1);
+    if (cmp == -1)
     {
-      if (previouspos != ULONG_MAX)
-      {
-        int cmp = gt_sain_compareSstarstrings(encseq,
-                                              sainlabels,
-                                              previouspos,
-                                              position);
-        gt_assert(cmp != 1);
-        if (cmp == -1)
-        {
-          currentname++;
-        }
-      }
-      /*printf("Sstar %lu with label %lu\n",position,currentname);*/
-      previouspos = position;
+      currentname++;
     }
+    gt_assert(sainlabels->countSstartype + GT_DIV2(position) <
+              regularpositions);
+    suftab[sainlabels->countSstartype + GT_DIV2(position)] = currentname;
+    /*printf("%03lu: Sstar %lu with name %lu\n",
+                  sainlabels->countSstartype + GT_DIV2(position),
+                  position,currentname);*/
+    previouspos = position;
   }
   gt_sain_labels_show(sainlabels);
   printf("number of names: %lu\n",currentname);
+  movenames2front(sainlabels,suftab,regularpositions);
   gt_sain_labels_delete(sainlabels);
   gt_free(leftborder);
   gt_free(bucketsize);
