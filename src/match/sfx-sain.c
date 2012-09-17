@@ -34,6 +34,15 @@ struct GtSainlabels
                 lendist[GT_SSTARLENGTH_MAX+1];
 };
 
+/* 
+   Abstract function from encseq with the following access functions
+   gt_encseq_total_length
+   gt_encseq_get_encoded_char
+   gt_encseq_specialcharacters
+   gt_encseq_alphabetnumofchars
+   gt_encseq_charcount
+*/
+
 GtSainlabels *gt_sain_labels_new(const GtEncseq *encseq)
 {
   unsigned long position,
