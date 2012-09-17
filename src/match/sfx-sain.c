@@ -124,7 +124,7 @@ void gt_sain_labels_show(const GtSainlabels *sainlabels)
   printf("S-type: %lu (%.2f)\n",sainlabels->countStype,
                       (double) sainlabels->countStype/sainlabels->totallength);
   printf("Sstar-type: %lu (%.2f)\n",sainlabels->countSstartype,
-                    (double) sainlabels->countSstartype/sainlabels->countStype);
+                   (double) sainlabels->countSstartype/sainlabels->totallength);
   printf("Sstar-type.length: %lu (%.2f)\n",sainlabels->totalSstarlength,
               (double) sainlabels->totalSstarlength/sainlabels->countSstartype);
   for (idx = 0; idx <= (unsigned long) GT_SSTARLENGTH_MAX; idx++)
@@ -150,6 +150,38 @@ static bool gt_sain_labels_isSstartype(const GtSainlabels *sainlabels,
          (position > 0 &&
          GT_ISIBITSET(sainlabels->isStype,position) &&
          !GT_ISIBITSET(sainlabels->isStype,position-1)) ? true : false;
+}
+
+unsigned long countDcriticalsubstrings (const GtSainlabels *sainlabels,
+                                        unsigned long d)
+{
+  unsigned long int i = 0, j = 0;
+
+  gt_assert(d >= 2UL);
+  while (i < sainlabels->totallength)
+  {
+    unsigned long h;
+    bool isLMS = false;
+
+    for (h = 1UL; h <= d; h++)
+    {
+      if (gt_sain_labels_isSstartype(sainlabels,i+h))
+      {
+        isLMS = true;
+        break;
+      }
+    }
+    if (j == 0 && !isLMS)
+    {
+      i += d;
+      continue;
+    }
+    i = isLMS ? i + h : i + d;
+    gt_assert(i>0);
+    /*printf("crititical %lu\n",i-1);*/
+    j++;
+  }
+  return j;
 }
 
 static bool gt_sain_labels_isStype(const GtSainlabels *sainlabels,
@@ -492,7 +524,7 @@ static void movenames2front(const GtSainlabels *sainlabels,
 
 void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
 {
-  unsigned long specialcharacters, idx, regularpositions, numofchars,
+  unsigned long specialcharacters, idx, d, regularpositions, numofchars,
                 suftabentries, *bucketsize, *leftborder, *suftab;
   GtSainlabels *sainlabels;
 
@@ -507,6 +539,12 @@ void gt_sain_sortstarsuffixes(const GtEncseq *encseq)
   gt_sain_endbuckets(leftborder,bucketsize,numofchars);
   sainlabels = gt_sain_labels_new(encseq);
   gt_sain_labels_show(sainlabels);
+  for (d=2UL; d<10UL; d++)
+  {
+    unsigned long critical = countDcriticalsubstrings (sainlabels,d);
+    printf("d=%lu,critical=%lu (%.2f)\n",d,critical,
+                              (double) critical/sainlabels->totallength);
+  }
   gt_assert(sainlabels->totallength >= specialcharacters);
   regularpositions = sainlabels->totallength + 1 - specialcharacters;
   suftabentries = sainlabels->countSstartype +
