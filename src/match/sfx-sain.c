@@ -229,7 +229,7 @@ static void insertSstarsuffixes(const GtSainlabels *sainlabels,
                                 const GtEncseq *encseq,
                                 unsigned long *suftab,
                                 unsigned long *leftborder,
-                                unsigned long regularpositions)
+                                GT_UNUSED unsigned long regularpositions)
 {
   unsigned long position;
 
