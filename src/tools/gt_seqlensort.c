@@ -84,7 +84,7 @@ static int gt_seqlensort_cmp(const void *a, const void *b, void *data)
   unsigned long seqlen_a = GT_SEQLENSORT_SEQLEN(seqnum_a, (unsigned long*)data),
                 seqlen_b = GT_SEQLENSORT_SEQLEN(seqnum_b, (unsigned long*)data);
   if (seqlen_a == seqlen_b)
-    return (int)(seqnum_a > seqnum_b) - (seqnum_a < seqnum_b);
+    return (int)((seqnum_a > seqnum_b) - (seqnum_a < seqnum_b));
   return (int)((seqlen_a > seqlen_b) - (seqlen_a < seqlen_b));
 }
 
