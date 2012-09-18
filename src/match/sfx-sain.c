@@ -34,7 +34,7 @@ struct GtSainlabels
                 lendist[GT_SSTARLENGTH_MAX+1];
 };
 
-/* 
+/*
    Abstract function from encseq with the following access functions
    gt_encseq_total_length
    gt_encseq_get_encoded_char
