@@ -1,4 +1,4 @@
-def compare_encseqs(indexname1, indexname2, cmpinfos)
+def compare_encseqs3(indexname1, indexname2, cmpinfos)
   run "#{$bin}gt encseq decode #{indexname1}"
   decoded1 = last_stdout
   run "#{$bin}gt encseq decode #{indexname2}"
@@ -23,5 +23,5 @@ Test do
   run "cp #{$testdata}/gt_seqlensort_test_sorted.fas sequences"
   run "#{$bin}gt encseq encode -des no -sds no -md5 no "+
       "-indexname encseq_encode sequences"
-  compare_encseqs("seqlensort", "encseq_encode", true)
+  compare_encseqs3("seqlensort", "encseq_encode", true)
 end
