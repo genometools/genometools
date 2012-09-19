@@ -20,14 +20,6 @@
 
 #include "core/encseq.h"
 
-typedef struct GtSainlabels GtSainlabels;
-
-GtSainlabels *gt_sain_labels_new(const GtEncseq *encseq);
-
-void gt_sain_labels_delete(GtSainlabels *sainlabels);
-
-void gt_sain_labels_show(const GtSainlabels *sainlabels);
-
 void gt_sain_sortstarsuffixes(const GtEncseq *encseq);
 
 #endif

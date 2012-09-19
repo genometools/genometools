@@ -23,7 +23,7 @@
 
 #define GT_SSTARLENGTH_MAX 50
 
-struct GtSainlabels
+typedef struct
 {
   GtBitsequence *isStype;
   unsigned long countStype,
@@ -32,7 +32,7 @@ struct GtSainlabels
                 totallength,
                 longerthanmax,
                 lendist[GT_SSTARLENGTH_MAX+1];
-};
+} GtSainlabels;
 
 /*
    Abstract function from encseq with the following access functions
@@ -43,7 +43,7 @@ struct GtSainlabels
    gt_encseq_charcount
 */
 
-GtSainlabels *gt_sain_labels_new(const GtEncseq *encseq)
+static GtSainlabels *gt_sain_labels_new(const GtEncseq *encseq)
 {
   unsigned long position,
                 idx,
@@ -117,7 +117,7 @@ GtSainlabels *gt_sain_labels_new(const GtEncseq *encseq)
   return sainlabels;
 }
 
-void gt_sain_labels_delete(GtSainlabels *sainlabels)
+static void gt_sain_labels_delete(GtSainlabels *sainlabels)
 {
   if (sainlabels != NULL)
   {
@@ -126,7 +126,7 @@ void gt_sain_labels_delete(GtSainlabels *sainlabels)
   }
 }
 
-void gt_sain_labels_show(const GtSainlabels *sainlabels)
+static void gt_sain_labels_show(const GtSainlabels *sainlabels)
 {
   unsigned long idx;
 
