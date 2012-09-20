@@ -362,7 +362,7 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
     }
     if (arguments->sain)
     {
-      gt_sain_sortstarsuffixes(encseq);
+      gt_sain_sortsuffixes(encseq);
     }
     if (!had_err && arguments->ccext > 0)
     {

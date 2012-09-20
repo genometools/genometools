@@ -20,6 +20,6 @@
 
 #include "core/encseq.h"
 
-void gt_sain_sortstarsuffixes(const GtEncseq *encseq);
+void gt_sain_sortsuffixes(const GtEncseq *encseq);
 
 #endif
