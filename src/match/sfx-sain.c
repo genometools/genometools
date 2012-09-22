@@ -477,7 +477,7 @@ static int gt_sain_compare_Sstarstrings(const GtSaininfo *saininfo,
                                         unsigned long start1,
                                         unsigned long start2)
 {
-  bool firstcmp = true;
+  bool firstcmp = true, previousisS = true;
   gt_assert(start1 <= saininfo->sainseq->totallength &&
             start2 <= saininfo->sainseq->totallength && start1 != start2);
 
@@ -507,32 +507,13 @@ static int gt_sain_compare_Sstarstrings(const GtSaininfo *saininfo,
     {
       if (gt_sain_info_isStype(saininfo,start2))
       {
-        if (firstcmp)
+        if (firstcmp || previousisS)
         {
           start1++;
           start2++;
         } else
         {
-          /* now one only has to check if start1-1/start-2 is an Stype */
-          gt_assert(start1 > 0 && start2 > 0);
-          if (gt_sain_info_isStype(saininfo,start1-1))
-          {
-            /* start1 is not Sstar */
-            if (gt_sain_info_isStype(saininfo,start2-1))
-            {
-              /* start2 is not Sstar */
-              start1++;
-              start2++;
-            } else
-            {
-              /* start2 is Sstar */
-              /* first is longer than second */
-              return 1;
-            }
-          } else
-          {
-            return 0;
-          }
+          return 0; /* previous is L => Sstar in both stop with equality */
         }
       } else
       {
@@ -547,6 +528,8 @@ static int gt_sain_compare_Sstarstrings(const GtSaininfo *saininfo,
         return -1;
       } else
       {
+        /* L == L */
+        previousisS = false;
         start1++;
         start2++;
       }
