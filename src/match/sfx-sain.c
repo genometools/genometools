@@ -58,6 +58,34 @@ static GtSainseq *gt_sain_seq_new_from_encseq(const GtEncseq *encseq)
   return sainseq;
 }
 
+/*
+static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
+                                             unsigned long len,
+                                             unsigned long numofchars)
+{
+  unsigned long idx;
+  GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
+
+  sainseq->hasencseq = false;
+  sainseq->seq.encseq = NULL;
+  sainseq->totallength = len;
+  sainseq->specialcharacters = 0;
+  sainseq->numofchars = numofchars;
+  sainseq->bucketsize = gt_malloc(sizeof (*sainseq->bucketsize) *
+                                  sainseq->numofchars);
+  for (idx = 0; idx<numofchars; idx++)
+  {
+    sainseq->bucketsize[idx] = 0;
+  }
+  for (idx = 0; idx<len; idx++)
+  {
+    gt_assert(arr[idx] < numofchars);
+    sainseq->bucketsize[arr[idx]]++;
+  }
+  return sainseq;
+}
+*/
+
 static void gt_sain_seq_delete(GtSainseq *sainseq)
 {
   if (sainseq != NULL)
@@ -445,9 +473,9 @@ static void moveSstar2front(const GtSaininfo *saininfo,
   sain_setundefined(suftab,saininfo->countSstartype, suftabentries-1);
 }
 
-static int gt_sain_compareSstarstrings(const GtSaininfo *saininfo,
-                                       unsigned long start1,
-                                       unsigned long start2)
+static int gt_sain_compare_Sstarstrings(const GtSaininfo *saininfo,
+                                        unsigned long start1,
+                                        unsigned long start2)
 {
   bool firstcmp = true;
   gt_assert(start1 <= saininfo->sainseq->totallength &&
@@ -485,28 +513,25 @@ static int gt_sain_compareSstarstrings(const GtSaininfo *saininfo,
           start2++;
         } else
         {
-          if (gt_sain_info_isSstartype(saininfo,start1))
+          /* now one only has to check if start1-1/start-2 is an Stype */
+          gt_assert(start1 > 0 && start2 > 0);
+          if (gt_sain_info_isStype(saininfo,start1-1))
           {
-            if (gt_sain_info_isSstartype(saininfo,start2))
+            /* start1 is not Sstar */
+            if (gt_sain_info_isStype(saininfo,start2-1))
             {
-              /* strings are of equal length */
-              return 0;
+              /* start2 is not Sstar */
+              start1++;
+              start2++;
             } else
             {
-              /* first is shorter than second */
-              return -1;
+              /* start2 is Sstar */
+              /* first is longer than second */
+              return 1;
             }
           } else
           {
-            if (gt_sain_info_isSstartype(saininfo,start2))
-            {
-              /* first is longer than second */
-              return 1;
-            } else
-            {
-              start1++;
-              start2++;
-            }
+            return 0;
           }
         }
       } else
@@ -542,7 +567,7 @@ static unsigned long assignSstarnames(const GtSaininfo *saininfo,
     unsigned long position = suftab[idx];
 
     gt_assert(gt_sain_info_isSstartype(saininfo,position));
-    cmp = gt_sain_compareSstarstrings(saininfo,previouspos,position);
+    cmp = gt_sain_compare_Sstarstrings(saininfo,previouspos,position);
     gt_assert(cmp != 1);
     if (cmp == -1)
     {
@@ -607,17 +632,40 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,unsigned long *suftab,
   movenames2front(saininfo,suftab,suftabentries);
   gt_free(leftborder);
   gt_assert(numberofnames <= saininfo->countSstartype);
-  if (numberofnames == saininfo->countSstartype)
+  /* Now the name sequence is in the range from
+     saininfo->countSstartype .. 2 * saininfo->countSstartype - 1 */
+  /*
+  if (numberofnames < saininfo->countSstartype)
   {
-    printf("%lu Sstarsuffixes already sorted\n",saininfo->countSstartype);
-  } else
-  {
+    unsigned long idx,
+                  *subseq = suftab + saininfo->countSstartype,
+                  *suftab_rec = gt_malloc(sizeof (*suftab_rec) *
+                                          (saininfo->countSstartype+1));
+    GtSainseq *sainseq_rec;
+    GtSaininfo *saininfo_rec;
+
+    sainseq_rec = gt_sain_seq_new_from_array(subseq,
+                                             saininfo->countSstartype,
+                                             numberofnames);
+    saininfo_rec = gt_sain_info_new(sainseq_rec);
+    gt_sain_info_show(saininfo_rec);
+    gt_sain_rec_sortsuffixes(saininfo_rec,suftab_rec,
+                             saininfo->countSstartype+1,
+                             saininfo->countSstartype+1);
+    for (idx = 0; idx < saininfo->countSstartype; idx++)
+    {
+      suftab[saininfo->countSstartype + idx] = suftab[suftab_rec[idx]];
+    }
+    gt_free(suftab_rec);
+    gt_sain_seq_delete(sainseq_rec);
     printf("recursively sort the named sequence of length %lu over %lu "
            "symbols (%.2f)\n",saininfo->countSstartype,numberofnames,
                        (double) numberofnames/saininfo->countSstartype);
+  } else
+  {
+    printf("%lu Sstarsuffixes already sorted\n",saininfo->countSstartype);
   }
-  /* Now the name sequence is in the range from
-     saininfo->countSstartype .. 2 * saininfo->countSstartype - 1 */
+  */
 }
 
 void gt_sain_sortsuffixes(const GtEncseq *encseq)
