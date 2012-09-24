@@ -78,7 +78,6 @@ void gt_text_width_calculator_cairo_delete(GtTextWidthCalculator *twc)
   twcc = gt_text_width_calculator_cairo_cast(twc);
   g_object_unref(twcc->layout);
   g_object_unref(twcc->pcontext);
-  g_object_unref(twcc->fmap);
   if (twcc->style)
     gt_style_delete(twcc->style);
   if (twcc->own_context)

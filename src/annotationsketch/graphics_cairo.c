@@ -752,7 +752,6 @@ void gt_graphics_cairo_delete(GtGraphics *gg)
     cairo_surface_destroy(g->surf); /* reference counted */
   if (g->outbuf)
     gt_str_delete(g->outbuf);
-  g_object_unref(g->fmap);
   g_object_unref(g->pcontext);
   g_object_unref(g->layout);
 }
@@ -803,7 +802,7 @@ GtGraphics* gt_graphics_cairo_new(GtGraphicsOutType type,
   g = gt_graphics_create(gt_graphics_cairo_class());
   gc = gt_graphics_cairo_cast(g);
   gt_graphics_cairo_initialize(g, type, width, height);
-  gc->fmap =  pango_cairo_font_map_new();
+  gc->fmap =  pango_cairo_font_map_get_default();
   gc->pcontext = pango_font_map_create_context(gc->fmap);
   gc->layout = pango_layout_new(gc->pcontext);
   pango_layout_set_width(gc->layout, -1);
