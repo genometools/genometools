@@ -85,7 +85,8 @@ static int elemcmp(const void *a, const void *b, void *data)
   return 1;
 }
 
-int gt_block_compare(const GtBlock *block1, const GtBlock *block2)
+int gt_block_compare(const GtBlock *block1, const GtBlock *block2,
+                     GT_UNUSED void *data)
 {
   GtRange range_a, range_b;
   int ret = 0;

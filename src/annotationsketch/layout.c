@@ -67,13 +67,18 @@ struct GtLayout {
   unsigned int width;
   GtRWLock *lock;
   GtTrackOrderingFunc track_ordering_func;
-  void *cmp_data;
+  GtBlockOrderingFunc block_ordering_func;
+  void *t_cmp_data,
+       *b_cmp_data;
 };
 
-static int blocklist_block_compare(const void *item1, const void *item2)
+static int blocklist_block_compare(const void *item1, const void *item2,
+                                   void *data)
 {
   gt_assert(item1 && item2);
-  return gt_block_compare(*(GtBlock**) item1, *(GtBlock**) item2);
+  GtLayout *l = (GtLayout*) data;
+  return l->block_ordering_func(*(GtBlock**) item1, *(GtBlock**) item2,
+                                l->b_cmp_data);
 }
 
 static int add_tracklines(GT_UNUSED void *key, void *value,
@@ -104,7 +109,10 @@ static int layout_tracks(void *key, void *value, void *data,
   gt_assert(list);
 
   /* to get a deterministic layout, we sort the GtBlocks for each type */
-  gt_array_sort_stable(list, blocklist_block_compare);
+  if (lti->layout->block_ordering_func) {
+    gt_array_sort_stable_with_data(list, blocklist_block_compare,
+                                   lti->layout);
+  }
 
   block = *(GtBlock**) gt_array_get(list, 0);
   gt_track_key = gt_str_new_cstr((char*) key);
@@ -231,7 +239,9 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   layout->viewrange = gt_diagram_get_range(diagram);
   layout->nof_tracks = 0;
   layout->track_ordering_func = NULL;
-  layout->cmp_data = NULL;
+  layout->block_ordering_func = gt_block_compare;
+  layout->t_cmp_data = NULL;
+  layout->b_cmp_data = NULL;
   layout->lock = gt_rwlock_new();
   lti.layout = layout;
   lti.twc = twc;
@@ -277,7 +287,7 @@ static int track_cmp_wrapper(const void *t1, const void *t2, void *data)
   const char *s1 = (const char*) t1, *s2 = (const char*) t2;
   GtLayoutTraverseInfo *lti = (GtLayoutTraverseInfo*) data;
   gt_assert(t1 && t2 && lti && lti->layout);
-  return lti->layout->track_ordering_func(s1, s2, lti->layout->cmp_data);
+  return lti->layout->track_ordering_func(s1, s2, lti->layout->t_cmp_data);
 }
 
 int gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas, GtError *err)
@@ -317,14 +327,30 @@ void gt_layout_set_track_ordering_func(GtLayout *layout,
 {
   gt_assert(layout && track_ordering_func);
   layout->track_ordering_func = track_ordering_func;
-  layout->cmp_data = data;
+  layout->t_cmp_data = data;
 }
 
 void gt_layout_unset_track_ordering_func(GtLayout *layout)
 {
   gt_assert(layout);
   layout->track_ordering_func = NULL;
-  layout->cmp_data = NULL;
+  layout->t_cmp_data = NULL;
+}
+
+void gt_layout_set_block_ordering_func(GtLayout *layout,
+                                       GtBlockOrderingFunc block_ordering_func,
+                                       void *data)
+{
+  gt_assert(layout && block_ordering_func);
+  layout->block_ordering_func = block_ordering_func;
+  layout->b_cmp_data = data;
+}
+
+void gt_layout_unset_block_ordering_func(GtLayout *layout)
+{
+  gt_assert(layout);
+  layout->block_ordering_func = NULL;
+  layout->b_cmp_data = NULL;
 }
 
 int gt_layout_get_number_of_tracks(const GtLayout *layout)

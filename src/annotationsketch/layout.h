@@ -18,8 +18,20 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
+#include "annotationsketch/block_api.h"
 #include "annotationsketch/layout_api.h"
 
+typedef int (*GtBlockOrderingFunc)(const GtBlock *b1, const GtBlock *b2,
+                                   void *data);
+
+/* Sets the ordering function in the layout which determines in what order
+   the blocks (per track) are inserted into lines. The default is to
+   sort using <gt_block_compare()>. Set to NULL to keep initial order of
+   top-level nodes. */
+void                   gt_layout_set_block_ordering_func(GtLayout*,
+                                                         GtBlockOrderingFunc,
+                                                         void *data);
+void                   gt_layout_unset_block_ordering_func(GtLayout*);
 /* Returns the interval shown in the layout. */
 GtRange                gt_layout_get_range(const GtLayout*);
 /* Returns the TextWidthCalculator object used in the layout. */

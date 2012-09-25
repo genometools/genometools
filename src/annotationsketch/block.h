@@ -27,7 +27,8 @@
 void        gt_block_insert_element(GtBlock*, GtFeatureNode *node);
 void        gt_block_set_range(GtBlock*, GtRange r);
 void        gt_block_set_type(GtBlock*, const char *type);
-int         gt_block_compare(const GtBlock*, const GtBlock*);
+int         gt_block_compare(const GtBlock *block1, const GtBlock *block2,
+                             void *data);
 int         gt_block_sketch(GtBlock*, GtCanvas*, GtError*);
 int         gt_block_get_max_height(const GtBlock *block,
                                     double *result,
