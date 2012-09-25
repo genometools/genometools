@@ -140,7 +140,10 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq)
   GT_SETIBIT(saininfo->isStype,saininfo->sainseq->totallength);
   nextSstartypepos = saininfo->sainseq->totallength;
   nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength);
-  /*printf("%lu: S\n",saininfo->sainseq->totallength);*/
+#undef SAINSHOWSTATE
+#ifdef SAINSHOWSTATE
+  printf("%lu: S\n",saininfo->sainseq->totallength);
+#endif
   for (idx = 0; idx <= (unsigned long) GT_SSTARLENGTH_MAX; idx++)
   {
     saininfo->lendist[idx] = 0;
@@ -157,11 +160,15 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq)
       saininfo->countStype++;
       currentisStype = true;
       GT_SETIBIT(saininfo->isStype,position);
-      /*printf("%lu: S\n",position);*/
+#ifdef SAINSHOWSTATE
+      printf("%lu: S\n",position);
+#endif
     } else
     {
       currentisStype = false;
-      /*printf("%lu: L\n",position);*/
+#ifdef SAINSHOWSTATE
+      printf("%lu: L\n",position);
+#endif
     }
     if (!currentisStype && nextisStype)
     {
@@ -171,7 +178,9 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq)
       gt_assert(position < nextSstartypepos);
       currentlen = nextSstartypepos - position;
       saininfo->totalSstarlength += currentlen;
-      /*printf("Sstar: %lu\n",position+1);*/
+#ifdef SAINSHOWSTATE
+      printf("Sstar: %lu\n",position+1);
+#endif
       if (currentlen <= (unsigned long) GT_SSTARLENGTH_MAX)
       {
         saininfo->lendist[currentlen]++;
@@ -330,7 +339,9 @@ static void insertSstarsuffixes(const GtSaininfo *saininfo,
       putidx = --leftborder[cc];
       gt_assert(putidx + 1 < nonspecialentries);
       suftab[putidx+1] = position; /* firstsmaller */
-      /*printf("Sstar.suftab[%lu]=%lu\n",putidx+1,position);*/
+#ifdef SHOWSTATE
+      printf("Sstar.suftab[%lu]=%lu\n",putidx,position);
+#endif
     }
   }
 }
@@ -358,7 +369,9 @@ static void induceLtypesuffixes(const GtSaininfo *saininfo,
           unsigned long putidx = leftborder[cc]++;
           gt_assert(putidx + 1 < nonspecialentries);
           suftab[putidx+1] = position-1; /* firstsmaller */
-          /*printf("L-induce: suftab[%lu]=%lu\n",putidx+1,position-1);*/
+#ifdef SHOWSTATE
+          printf("L-induce: suftab[%lu]=%lu\n",putidx,position-1);
+#endif
         }
       }
     }
@@ -390,9 +403,11 @@ static void induceStypesfromspecialranges(GT_UNUSED const GtSaininfo *saininfo,
         gt_assert(ISNOTSPECIAL(cc) && leftborder[cc] > 0);
         putidx = --leftborder[cc];
         gt_assert(putidx + 1 < nonspecialentries); /* firstsmaller */
-        /*printf("Srange-induce: suftab[%lu]=%lu in %d-bucket\n",putidx+1,
-                          range.start-1,(int) cc);*/
         suftab[putidx+1] = range.start-1;
+#ifdef SHOWSTATE
+        printf("Srange-induce: suftab[%lu]=%lu in %d-bucket\n",putidx+1,
+                          range.start-1,(int) cc);
+#endif
       }
     }
     gt_specialrangeiterator_delete(sri);
@@ -424,7 +439,9 @@ static void induceStypesuffixes(const GtSaininfo *saininfo,
         unsigned long putidx = --leftborder[cc];
         gt_assert(putidx + 1 < nonspecialentries);
         suftab[putidx+1] = position-1; /* firstsmaller */
-        /*printf("S-induce: suftab[%lu]=%lu\n",putidx+1,position-1);*/
+#ifdef SHOWSTATE
+        printf("S-induce: suftab[%lu]=%lu\n",putidx+1,position-1);
+#endif
       }
     }
     if (idx == 0)
