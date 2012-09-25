@@ -210,6 +210,7 @@ static bool gt_sain_info_isSstartype(const GtSaininfo *saininfo,
          !GT_ISIBITSET(saininfo->isStype,position-1)) ? true : false;
 }
 
+#ifdef CRITICAL
 unsigned long countDcriticalsubstrings (const GtSaininfo *saininfo,
                                         unsigned long d)
 {
@@ -241,10 +242,11 @@ unsigned long countDcriticalsubstrings (const GtSaininfo *saininfo,
   }
   return j;
 }
+#endif
 
 static void gt_sain_info_show(const GtSaininfo *saininfo)
 {
-  unsigned long d, idx;
+  unsigned long idx;
 
   printf("S-type: %lu (%.2f)\n",saininfo->countStype,
                 (double) saininfo->countStype/saininfo->sainseq->totallength);
@@ -265,12 +267,17 @@ static void gt_sain_info_show(const GtSaininfo *saininfo)
     printf(">%d %lu (%.2f)\n",GT_SSTARLENGTH_MAX,saininfo->longerthanmax,
                  (double) saininfo->longerthanmax/saininfo->countSstartype);
   }
-  for (d=2UL; d<10UL; d++)
+#ifdef CRITICAL
   {
-    unsigned long critical = countDcriticalsubstrings (saininfo,d);
-    printf("d=%lu,critical=%lu (%.2f)\n",d,critical,
-                              (double) critical/saininfo->sainseq->totallength);
+    unsigned long d;
+    for (d=2UL; d<10UL; d++)
+    {
+      unsigned long critical = countDcriticalsubstrings (saininfo,d);
+      printf("d=%lu,critical=%lu (%.2f)\n",d,critical,
+                        (double) critical/saininfo->sainseq->totallength);
+    }
   }
+#endif
 }
 
 static bool gt_sain_info_isStype(const GtSaininfo *saininfo,
@@ -358,7 +365,7 @@ static void induceLtypesuffixes(const GtSaininfo *saininfo,
   }
 }
 
-static void induceStypesfromspecialranges(const GtSaininfo *saininfo,
+static void induceStypesfromspecialranges(GT_UNUSED const GtSaininfo *saininfo,
                                           const GtEncseq *encseq,
                                           unsigned long *suftab,
                                           unsigned long *leftborder,
@@ -600,6 +607,7 @@ static void movenames2front(const GtSaininfo *saininfo,
   gt_assert (widx == GT_MULT2(saininfo->countSstartype));
 }
 
+#ifdef SAINORDERCHECK
 static void gt_sain_checkorder(const GtSaininfo *saininfo,
                                const unsigned long *suftab,
                                unsigned long start,
@@ -615,10 +623,12 @@ static void gt_sain_checkorder(const GtSaininfo *saininfo,
     gt_assert(cmp == -1);
   }
 }
+#endif
 
 static void insertsortedSstarsuffixes(const GtSaininfo *saininfo,
                                       unsigned long *suftab,
                                       unsigned long *leftborder,
+                                      GT_UNUSED
                                       unsigned long nonspecialsuffixes)
 {
   unsigned long idx;
@@ -724,7 +734,9 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,unsigned long *suftab,
     suftab[0] = saininfo->sainseq->totallength; /* firstsmaller */
   }
   gt_assert(saininfo->countSstartype > 0);
+#ifdef SAINORDERCHECK
   gt_sain_checkorder(saininfo,suftab,0,saininfo->countSstartype-1);
+#endif
   sain_setundefined(suftab,saininfo->countSstartype,suftabentries - 1);
   gt_sain_endbuckets(leftborder,saininfo->sainseq->bucketsize,
                      saininfo->sainseq->numofchars);
@@ -736,7 +748,9 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,unsigned long *suftab,
                      saininfo->sainseq->numofchars);
   induceStypesuffixes(saininfo, suftab, leftborder, nonspecialentries);
   gt_free(leftborder);
+#ifdef SAINORDERCHECK
   gt_sain_checkorder(saininfo,suftab,0,nonspecialentries-1);
+#endif
 }
 
 void gt_sain_sortsuffixes(const GtEncseq *encseq)
