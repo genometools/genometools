@@ -194,6 +194,7 @@ int gt_canvas_cairo_visit_line_pre(GtCanvas *canvas, GtLine *line,
     if (gt_line_has_captions(line) && show_block_captions)
       canvas->pvt->y +=  theight + captionspace;
     canvas->pvt->bt = gt_bittab_new(canvas->pvt->width);
+    gt_bittab_unset(canvas->pvt->bt);
     canvas->pvt->y += lheight/2;
   }
   return had_err;
@@ -316,62 +317,62 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
     }
   }
 
-  /* optimise drawing for very narrow blocks,
-     if <= 1px/pt width, draw as simple lines */
-  if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
-  {
-    if ((unsigned long) draw_range.start > gt_bittab_size(canvas->pvt->bt))
-      return had_err;
-    if (gt_bittab_bit_is_set(canvas->pvt->bt, (unsigned long) draw_range.start))
-      return had_err;
-    gt_graphics_draw_vertical_line(canvas->pvt->g,
-                                   block_start,
-                                   canvas->pvt->y - bar_height/2,
-                                   strokecolor,
-                                   bar_height,
-                                   stroke_width);
-    gt_bittab_set_bit(canvas->pvt->bt, (unsigned long) draw_range.start);
-    return had_err;
-  }
-
   /* do not draw further details in very small blocks */
   if (!gt_block_has_only_one_fullsize_element(block)
        && gt_double_smaller_double(block_width, min_len_block))
   {
-    if (gt_style_get_color_with_track(canvas->pvt->sty,
-                           btype, "fill",
-                           &fillcolor,
-                           gt_block_get_top_level_feature(block),
-                           gt_track_get_title(canvas->pvt->current_track),
-                           err) == GT_STYLE_QUERY_ERROR) {
-      return -1;
+    /* optimise drawing for very narrow blocks,
+       if <= 1px/pt width, draw as simple lines */
+    if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
+    {
+      if (!gt_bittab_bit_is_set(canvas->pvt->bt,
+                                (unsigned long) draw_range.start)) {
+        gt_graphics_draw_vertical_line(canvas->pvt->g,
+                                       block_start,
+                                       canvas->pvt->y - bar_height/2,
+                                       strokecolor,
+                                       bar_height,
+                                       stroke_width);
+        gt_bittab_set_bit(canvas->pvt->bt, (unsigned long) draw_range.start);
+      }
+    } else {
+      if (gt_style_get_color_with_track(canvas->pvt->sty,
+                             btype, "fill",
+                             &fillcolor,
+                             gt_block_get_top_level_feature(block),
+                             gt_track_get_title(canvas->pvt->current_track),
+                             err) == GT_STYLE_QUERY_ERROR) {
+        return -1;
+      }
+
+      gt_graphics_draw_box(canvas->pvt->g,
+                           block_start,
+                           canvas->pvt->y - bar_height/2,
+                           block_width,
+                           bar_height,
+                           fillcolor,
+                           arrow_status,
+                           arrow_width,
+                           stroke_width,
+                           strokecolor,
+                           true);
+
+      /* draw arrowheads at clipped margins */
+      if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
+          gt_graphics_draw_arrowhead(canvas->pvt->g,
+                                     canvas->pvt->margins - 10,
+                                     canvas->pvt->y - 4,
+                                     grey,
+                                     ARROW_LEFT);
+      if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
+          gt_graphics_draw_arrowhead(canvas->pvt->g,
+                                     canvas->pvt->width-canvas->pvt->margins
+                                       + 10,
+                                     canvas->pvt->y - 4,
+                                     grey,
+                                     ARROW_RIGHT);
     }
 
-    gt_graphics_draw_box(canvas->pvt->g,
-                         block_start,
-                         canvas->pvt->y - bar_height/2,
-                         block_width,
-                         bar_height,
-                         fillcolor,
-                         arrow_status,
-                         arrow_width,
-                         stroke_width,
-                         strokecolor,
-                         true);
-
-    /* draw arrowheads at clipped margins */
-    if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
-        gt_graphics_draw_arrowhead(canvas->pvt->g,
-                                   canvas->pvt->margins - 10,
-                                   canvas->pvt->y - 4,
-                                   grey,
-                                   ARROW_LEFT);
-    if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
-        gt_graphics_draw_arrowhead(canvas->pvt->g,
-                                   canvas->pvt->width-canvas->pvt->margins + 10,
-                                   canvas->pvt->y - 4,
-                                   grey,
-                                   ARROW_RIGHT);
     /* register coordinates in GtImageInfo object if available */
     if (canvas->pvt->ii)
     {
@@ -525,7 +526,8 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
     return -1;
   }
 
-  if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
+  if (canvas->pvt->bt &&
+          gt_double_smaller_double(draw_range.end-draw_range.start, 1.1))
   {
     if ((unsigned long) draw_range.start > gt_bittab_size(canvas->pvt->bt))
       return had_err;
@@ -549,7 +551,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
                                   (GtFeatureNode*)
                                     gt_element_get_node_ref(elem));
     gt_image_info_add_rec_map(canvas->pvt->ii, rm);
-  }
+    }
 
   if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
   {
