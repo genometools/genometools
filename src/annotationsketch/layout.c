@@ -59,9 +59,11 @@ typedef struct {
 struct GtLayout {
   GtStyle *style;
   GtTextWidthCalculator *twc;
-  bool own_twc;
+  bool own_twc,
+       layout_done;
   GtArray *custom_tracks;
-  GtHashmap *tracks;
+  GtHashmap *tracks,
+            *blocks;
   GtRange viewrange;
   unsigned long nof_tracks;
   unsigned int width;
@@ -153,6 +155,22 @@ static int layout_tracks(void *key, void *value, void *data,
   return had_err;
 }
 
+static int layout_all_tracks(GtLayout *layout, GtError *err)
+{
+  int had_err = 0;
+  GtLayoutTraverseInfo lti;
+  gt_assert(layout && layout->blocks);
+  gt_error_check(err);
+
+  if (!layout->layout_done) {
+    lti.layout = layout;
+    lti.twc = layout->twc;
+    had_err = gt_hashmap_foreach(layout->blocks, layout_tracks, &lti, err);
+    layout->layout_done = true;
+  }
+  return had_err;
+}
+
 static int render_tracks(GT_UNUSED void *key, void *value, void *data,
                          GtError *err)
 {
@@ -225,7 +243,6 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
 {
   GtLayout *layout;
   GtHashmap *blocks;
-  GtLayoutTraverseInfo lti;
   gt_assert(diagram);
   gt_assert(style);
   gt_assert(twc);
@@ -236,6 +253,7 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   layout->twc = twc;
   layout->style = style;
   layout->width = width;
+  layout->blocks = NULL;
   layout->viewrange = gt_diagram_get_range(diagram);
   layout->nof_tracks = 0;
   layout->track_ordering_func = NULL;
@@ -243,9 +261,8 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   layout->t_cmp_data = NULL;
   layout->b_cmp_data = NULL;
   layout->lock = gt_rwlock_new();
-  lti.layout = layout;
-  lti.twc = twc;
   layout->own_twc = false;
+  layout->layout_done = false;
   layout->custom_tracks = gt_array_ref(gt_diagram_get_custom_tracks(diagram));
   /* XXX: use other container type here! */
   layout->tracks = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
@@ -253,19 +270,11 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   blocks = gt_diagram_get_blocks(diagram, err);
   if (!blocks) {
     gt_array_delete(layout->custom_tracks);
-    gt_rwlock_unlock(layout->lock);
     gt_hashmap_delete(layout->tracks);
     gt_free(layout);
     return NULL;
-  }
-  gt_hashmap_foreach(blocks, layout_tracks, &lti, err);
-  if (gt_error_is_set(err)) {
-    gt_array_delete(layout->custom_tracks);
-    gt_rwlock_unlock(layout->lock);
-    gt_hashmap_delete(layout->tracks);
-    gt_free(layout);
-    return NULL;
-  }
+  } else
+    layout->blocks = gt_hashmap_ref(blocks);
   return layout;
 }
 
@@ -277,6 +286,8 @@ void gt_layout_delete(GtLayout *layout)
     gt_text_width_calculator_delete(layout->twc);
   gt_hashmap_delete(layout->tracks);
   gt_array_delete(layout->custom_tracks);
+  if (layout->blocks)
+    gt_hashmap_delete(layout->blocks);
   gt_rwlock_unlock(layout->lock);
   gt_rwlock_delete(layout->lock);
   gt_free(layout);
@@ -296,27 +307,31 @@ int gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas, GtError *err)
   unsigned long i;
   GtRenderTraverseInfo rti;
   gt_assert(layout && target_canvas);
-  rti.layout = layout;
-  rti.canvas = target_canvas;
-  had_err = gt_canvas_visit_layout_pre(target_canvas, layout, err);
-  if (had_err) return had_err;
 
-  if (layout->track_ordering_func == NULL) {
-    had_err = gt_hashmap_foreach_in_key_order(layout->tracks, render_tracks,
-                                              &rti, err);
-  } else {
-    had_err = gt_hashmap_foreach_ordered(layout->tracks, render_tracks,
-                                         &rti, (GtCompare) track_cmp_wrapper,
-                                         err);
-  }
-  if (had_err) return had_err;
-  had_err = gt_canvas_visit_layout_post(target_canvas, layout, err);
-  if (had_err) return had_err;
-  for (i=0;i<gt_array_size(layout->custom_tracks);i++)
-  {
-    GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
-                                                        i);
-    had_err = render_custom_tracks(NULL, ct, &rti, err);
+  had_err = layout_all_tracks(layout, err);
+  if (!had_err) {
+    rti.layout = layout;
+    rti.canvas = target_canvas;
+    had_err = gt_canvas_visit_layout_pre(target_canvas, layout, err);
+    if (had_err) return had_err;
+
+    if (layout->track_ordering_func == NULL) {
+      had_err = gt_hashmap_foreach_in_key_order(layout->tracks, render_tracks,
+                                                &rti, err);
+    } else {
+      had_err = gt_hashmap_foreach_ordered(layout->tracks, render_tracks,
+                                           &rti, (GtCompare) track_cmp_wrapper,
+                                           err);
+    }
+    if (had_err) return had_err;
+    had_err = gt_canvas_visit_layout_post(target_canvas, layout, err);
+    if (had_err) return had_err;
+    for (i=0;i<gt_array_size(layout->custom_tracks);i++)
+    {
+      GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
+                                                          i);
+      had_err = render_custom_tracks(NULL, ct, &rti, err);
+    }
   }
   return had_err ? -1 : 0;
 }
@@ -353,22 +368,10 @@ void gt_layout_unset_block_ordering_func(GtLayout *layout)
   layout->b_cmp_data = NULL;
 }
 
-int gt_layout_get_number_of_tracks(const GtLayout *layout)
-{
-  gt_assert(layout);
-  return layout->nof_tracks;
-}
-
 GtRange gt_layout_get_range(const GtLayout *layout)
 {
   gt_assert(layout);
   return layout->viewrange;
-}
-
-unsigned int gt_layout_get_width(const GtLayout *layout)
-{
-  gt_assert(layout);
-  return layout->width;
 }
 
 GtTextWidthCalculator* gt_layout_get_twc(const GtLayout *layout)
@@ -377,9 +380,10 @@ GtTextWidthCalculator* gt_layout_get_twc(const GtLayout *layout)
   return layout->twc;
 }
 
-int gt_layout_get_height(const GtLayout *layout, unsigned long *result,
+int gt_layout_get_height(GtLayout *layout, unsigned long *result,
                          GtError *err)
 {
+  int had_err = 0;
   GtTracklineInfo lines;
   double tmp, head_track_space = HEAD_TRACK_SPACE_DEFAULT;
   bool show_track_captions = true;
@@ -388,76 +392,81 @@ int gt_layout_get_height(const GtLayout *layout, unsigned long *result,
                 i;
   gt_assert(layout);
 
-  /* get dynamic heights from tracks */
-  lines.style = layout->style;
-  lines.height = 0;
-  if (gt_hashmap_foreach(layout->tracks, add_tracklines, &lines, err) < 0) {
-    return -1;
-  }
-  height = lines.height;
+  had_err = layout_all_tracks(layout, err);
+  if (!had_err) {
+    /* get dynamic heights from tracks */
+    lines.style = layout->style;
+    lines.height = 0;
+    if (gt_hashmap_foreach(layout->tracks, add_tracklines, &lines, err) < 0) {
+      return -1;
+    }
+    height = lines.height;
 
-  /* obtain line height and spacer from style */
-  tmp = BAR_HEIGHT_DEFAULT;
-  if (gt_style_get_num(layout->style,
-                       "format", "bar_height",
-                       &tmp, NULL, err) == GT_STYLE_QUERY_ERROR) {
-    return -1;
-  }
-  line_height = tmp;
-
-  tmp = BAR_VSPACE_DEFAULT;
-  if (gt_style_get_num(layout->style,
-                       "format", "bar_vspace",
-                       &tmp, NULL, err) == GT_STYLE_QUERY_ERROR) {
-    return -1;
-  }
-  line_height += tmp;
-
-  if (gt_style_get_bool(layout->style,
-                        "format","show_track_captions",
-                        &show_track_captions,
-                        NULL, err) == GT_STYLE_QUERY_ERROR) {
-    return -1;
-  }
-
-  /* add custom track space allotment */
-  if (show_track_captions)
-  {
-    double theight = TEXT_SIZE_DEFAULT,
-           captionspace = CAPTION_BAR_SPACE_DEFAULT;
+    /* obtain line height and spacer from style */
+    tmp = BAR_HEIGHT_DEFAULT;
     if (gt_style_get_num(layout->style,
-                         "format", "track_caption_font_size",
-                         &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
+                         "format", "bar_height",
+                         &tmp, NULL, err) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
+    line_height = tmp;
+
+    tmp = BAR_VSPACE_DEFAULT;
     if (gt_style_get_num(layout->style,
-                         "format", "track_caption_space",
-                         &captionspace, NULL, err) == GT_STYLE_QUERY_ERROR) {
+                         "format", "bar_vspace",
+                         &tmp, NULL, err) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
-    height += gt_array_size(layout->custom_tracks)
-                  * (theight + captionspace);
-  }
+    line_height += tmp;
 
-  for (i=0;i<gt_array_size(layout->custom_tracks);i++)
-  {
-    GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
-                                                        i);
-    height += gt_custom_track_get_height(ct);
-    if (gt_style_get_num(layout->style, "format", "track_vspace", &tmp,
-                         NULL, err) == GT_STYLE_QUERY_ERROR) {
+    if (gt_style_get_bool(layout->style,
+                          "format","show_track_captions",
+                          &show_track_captions,
+                          NULL, err) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
-    height += tmp;
-  }
 
-  /* add header space and footer */
-  if (gt_style_get_num(layout->style, "format", "ruler_space",
-                       &head_track_space, NULL, err) == GT_STYLE_QUERY_ERROR) {
-    return -1;
-  }
-  height += HEADER_SPACE + head_track_space + FOOTER_SPACE;
+    /* add custom track space allotment */
+    if (show_track_captions)
+    {
+      double theight = TEXT_SIZE_DEFAULT,
+             captionspace = CAPTION_BAR_SPACE_DEFAULT;
+      if (gt_style_get_num(layout->style,
+                           "format", "track_caption_font_size",
+                           &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
+        return -1;
+      }
+      if (gt_style_get_num(layout->style,
+                           "format", "track_caption_space",
+                           &captionspace, NULL, err) == GT_STYLE_QUERY_ERROR) {
+        return -1;
+      }
+      height += gt_array_size(layout->custom_tracks)
+                    * (theight + captionspace);
+    }
 
-  *result = height;
-  return 0;
+    for (i=0;i<gt_array_size(layout->custom_tracks);i++)
+    {
+      GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
+                                                          i);
+      height += gt_custom_track_get_height(ct);
+      if (gt_style_get_num(layout->style, "format", "track_vspace", &tmp,
+                           NULL, err) == GT_STYLE_QUERY_ERROR) {
+        return -1;
+      }
+      height += tmp;
+    }
+
+    /* add header space and footer */
+    if (gt_style_get_num(layout->style, "format", "ruler_space",
+                         &head_track_space, NULL,
+                         err) == GT_STYLE_QUERY_ERROR) {
+      return -1;
+    }
+    height += HEADER_SPACE + head_track_space + FOOTER_SPACE;
+
+    *result = height;
+    return 0;
+  }
+  return had_err;
 }

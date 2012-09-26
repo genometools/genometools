@@ -26,11 +26,12 @@ typedef int (*GtBlockOrderingFunc)(const GtBlock *b1, const GtBlock *b2,
 
 /* Sets the ordering function in the layout which determines in what order
    the blocks (per track) are inserted into lines. The default is to
-   sort using <gt_block_compare()>. Set to NULL to keep initial order of
-   top-level nodes. */
+   sort using <gt_block_compare()>. */
 void                   gt_layout_set_block_ordering_func(GtLayout*,
                                                          GtBlockOrderingFunc,
                                                          void *data);
+/* Unsets any block ordering function, processing the blocks in the order they
+   were inserted. */
 void                   gt_layout_unset_block_ordering_func(GtLayout*);
 /* Returns the interval shown in the layout. */
 GtRange                gt_layout_get_range(const GtLayout*);
