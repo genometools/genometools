@@ -4598,7 +4598,7 @@ Sets the <code>GtTrackOrderingFunc</code> comparator function <code>func</code> 
 <hr>
 <a name="gt_layout_get_height"></a>
 
-<code>int            gt_layout_get_height(const GtLayout *layout,
+<code>int            gt_layout_get_height(GtLayout *layout,
                                    unsigned long *result,
                                    GtError *err)</code>
 <p>
@@ -4735,6 +4735,7 @@ Create a <code>GtMD5toIDStream*</code> which converts MD5 sequence IDs from node
                             double evalue,
                             float bitscore,
                             unsigned long ali_l,
+                            double similarity,
                             GtMatchDirection dir)</code>
 <p>
 Creates a new <code>GtMatch</code> object meant to store results in the BLAST
@@ -4765,6 +4766,13 @@ Sets <code>bits</code> to be the bit-score in <code>mb</code>.
 Sets <code>length</code> to be the alignment length in <code>mb</code>.
 </p>
 <hr>
+<a name="gt_match_blast_set_similarity"></a>
+
+<code>void  gt_match_blast_set_similarity(GtMatchBlast *mb, double similarity)</code>
+<p>
+Sets <code>similarity</code> to be the match similarity in <code>mb</code>.
+</p>
+<hr>
 <a name="gt_match_blast_get_evalue"></a>
 
 <code>long double  gt_match_blast_get_evalue(GtMatchBlast *mb)</code>
@@ -4784,6 +4792,13 @@ Returns the bit-score value stored in <code>mb</code>.
 <code>unsigned long  gt_match_blast_get_align_length(GtMatchBlast *mb)</code>
 <p>
 Returns the alignment length stored in <code>mb</code>.
+</p>
+<hr>
+<a name="gt_match_blast_get_similarity"></a>
+
+<code>double  gt_match_blast_get_similarity(GtMatchBlast *mb)</code>
+<p>
+Returns the alignment similarity stored in <code>mb</code>.
 </p>
 <hr>
 <a name="GtMatchIterator"></a>
@@ -9162,6 +9177,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_match_blast_get_evalue"><code>gt_match_blast_get_evalue</code></a><br>
 
+  <a href="#gt_match_blast_get_similarity"><code>gt_match_blast_get_similarity</code></a><br>
+
   <a href="#gt_match_blast_new"><code>gt_match_blast_new</code></a><br>
 
   <a href="#gt_match_blast_set_align_length"><code>gt_match_blast_set_align_length</code></a><br>
@@ -9169,6 +9186,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_match_blast_set_bitscore"><code>gt_match_blast_set_bitscore</code></a><br>
 
   <a href="#gt_match_blast_set_evalue"><code>gt_match_blast_set_evalue</code></a><br>
+
+  <a href="#gt_match_blast_set_similarity"><code>gt_match_blast_set_similarity</code></a><br>
 
   <a href="#gt_match_iterator_delete"><code>gt_match_iterator_delete</code></a><br>
 
@@ -9733,7 +9752,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-08-06
+Last update: 2012-09-26
 </div>
 </div>
 <!-- Piwik -->
