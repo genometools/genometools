@@ -292,10 +292,6 @@ ifeq ($(prof),yes)
   GT_LDFLAGS += -pg
 endif
 
-ifeq ($(static),yes)
-  GT_LDFLAGS += -static
-endif
-
 ifeq ($(curl),yes)
   EXP_CPPFLAGS += -DCURLDEF
   GT_CPPFLAGS += -I/usr/include/curl -I/usr/local/include/curl
@@ -419,7 +415,6 @@ ifneq ($(cairo),no)
                                bin/examples/sketch_parsed
   ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
-  STATIC_CAIRO_LIBS := -pthread -lfreetype -lpixman-1 -lpng -static -o $$@
   SKETCH_EXTRA_BINARIES := bin/examples/sketch_parsed \
                            bin/examples/sketch_constructed
 else
@@ -537,12 +532,6 @@ all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
      $(ANNOTATIONSKETCH_EXAMPLES) \
      $(ADDITIONAL_BINARIES)
 
-ifdef NO_STATIC_LINKING
-static:
-else
-static: bin/gt_static
-endif
-
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -622,13 +611,6 @@ $(1): $(2)
 	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
 	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
 	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -o $$@
-
-$(1)_static: $(2)
-	@echo "[link $$(@F)]"
-	@test -d $$(@D) || mkdir -p $$(@D)
-	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
-	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
-	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) $$(STATIC_CAIRO_LIBS) -static -o $$@
 endef
 
 $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
@@ -850,7 +832,7 @@ DISTDIR:="$(CURDIR)/dist/$(SYSTEMNAME)"
 SCRIPTSDIR:="$(CURDIR)/scripts"
 GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
 
-dist: all manuals static
+dist: all manuals
 	@echo "[build distribution]"
 	@rm -rf $(GTDISTDIR)
 	@rm -rf $(DISTDIR)/$(GTDISTBASENAME).tar.gz
@@ -861,11 +843,6 @@ dist: all manuals static
 	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
 	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin
 	@strip $(GTDISTDIR)/bin/gt
-ifndef NO_STATIC_LINKING
-	@mkdir -p $(GTDISTDIR)/bin/static
-	@cp bin/gt_static $(GTDISTDIR)/bin/static/gt
-	@strip $(GTDISTDIR)/bin/static/gt
-endif
 	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
 	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)
