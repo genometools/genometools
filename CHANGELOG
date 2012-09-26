@@ -1,5 +1,20 @@
-changes in version 1.4.2 (2012-06-10)
+changes in version 1.4.2 (2012-09-27)
 
+- bugfixes and cleanups
+- GFF3 parser now correctly handles GVF input
+- GtMD5Encoder added
+- GtRDB relational database wrapper added
+- database-backed feature index implementation added (SQLite, MySQL)
+- scripting bindings now support GtMetaNode and GtEOFNode
+- AnnotationSketch now uses Pango instead of the Cairo toy API for font
+  rendering
+- `gt convertseq` tool has new options -contract{protein,dna}wc
+- `gt select` tool can use custom filters defined in Lua
+- `gt hop` tool added
+- LTRharvest is more space-efficient using streaming of indexes
+- LTR filtering, clustering and classification code added, used e.g. in the
+  LTRsift software (http://www.zbh.uni-hamburg.de/LTRsift)
+- match iterators for BLAST and LAST added
 - CDS features with multiple parents are split in tidy-mode (if possible)
 - The format for MD5 sequence IDs has changed.
   It now uses md5:063b1024d68e26716b7f38caf958316f:1877523 instead of
