@@ -33,6 +33,15 @@
    ...
 }
 {
+   <zlib>
+   Memcheck:Cond
+   fun:longest_match
+   fun:deflate_slow
+   ...
+   fun:gt_graphics_cairo_save_to_*
+   ...
+}
+{
    <pthreads_mac>
    Memcheck:Cond
    fun:pthread_rwlock_init
@@ -124,4 +133,21 @@
    fun:memalign
    ...
    obj:/usr/lib*/libpango*
+}
+{
+   freetype_leak
+   Memcheck:Leak
+   fun:*alloc
+   ...
+   obj:*lib/libfreetype*
+   ...
+   obj:*lib/libcairo*
+}
+{
+   fontconfig_leak
+   Memcheck:Leak
+   fun:*alloc
+   ...
+   obj:*lib/libfontconfig*
+   ...
 }
