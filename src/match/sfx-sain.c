@@ -753,9 +753,7 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,unsigned long *suftab,
     {
     /* Now the name sequence is in the range from
        saininfo->countSstartype .. 2 * saininfo->countSstartype - 1 */
-      unsigned long position, *subseq = suftab + saininfo->countSstartype,
-                    *suftab_rec = gt_malloc(sizeof (*suftab_rec) *
-                                            saininfo->countSstartype);
+      unsigned long position, *subseq = suftab + saininfo->countSstartype;
       GtSainseq *sainseq_rec;
       GtSaininfo *saininfo_rec;
 
@@ -763,23 +761,22 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,unsigned long *suftab,
                                                saininfo->countSstartype,
                                                numberofnames);
       saininfo_rec = gt_sain_info_new(sainseq_rec);
-      sain_setundefined(suftab_rec,0,saininfo->countSstartype-1);
+      sain_setundefined(suftab,0,saininfo->countSstartype-1);
       gt_sain_info_show(saininfo_rec);
       printf("recursively sort the named sequence of length %lu over %lu "
              "symbols (%.2f)\n",saininfo->countSstartype,numberofnames,
                          (double) numberofnames/saininfo->countSstartype);
-      gt_sain_rec_sortsuffixes(saininfo_rec,suftab_rec,
+      gt_sain_rec_sortsuffixes(saininfo_rec,suftab,
                                saininfo->countSstartype,
                                saininfo->countSstartype,
                                sainmode);
-      for (idx = 0; idx < saininfo->countSstartype; idx++)
-      {
-        gt_assert(saininfo->countSstartype + suftab_rec[idx] < suftabentries);
-        suftab[saininfo->countSstartype + suftab_rec[idx]] = idx;
-      }
-      gt_free(suftab_rec);
       gt_sain_info_delete(saininfo_rec);
       gt_sain_seq_delete(sainseq_rec);
+      for (idx = 0; idx < saininfo->countSstartype; idx++)
+      {
+        gt_assert(saininfo->countSstartype + suftab[idx] < suftabentries);
+        suftab[saininfo->countSstartype + suftab[idx]] = idx;
+      }
       for (idx = saininfo->countSstartype, position = 0;
            position < saininfo->sainseq->totallength;
            position++)
