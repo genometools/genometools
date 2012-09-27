@@ -20,6 +20,7 @@
 
 #include "core/encseq.h"
 #include "core/compactulongstore.h"
+#include "match/sarr-def.h"
 
 GtCompactUlongstore *gt_lcp9_manzini(GtCompactUlongstore *spacefortab,
                                  const GtEncseq *encseq,

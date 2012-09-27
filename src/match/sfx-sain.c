@@ -19,6 +19,7 @@
 #include "core/intbits.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
+#include "sfx-linlcp.h"
 #include "sfx-sain.h"
 
 #define GT_SSTARLENGTH_MAX 50
@@ -696,6 +697,35 @@ static void insertsortedSstarsuffixes(const GtSaininfo *saininfo,
   }
 }
 
+static void gt_sain_filltailsuffixes(unsigned long *suftabtail,
+                                     const GtEncseq *encseq)
+{
+  unsigned long specialcharacters = gt_encseq_specialcharacters(encseq),
+                totallength = gt_encseq_total_length(encseq);
+
+  if (gt_encseq_has_specialranges(encseq))
+  {
+    GtSpecialrangeiterator *sri;
+    GtRange range;
+    unsigned long countspecial = 0;
+
+    sri = gt_specialrangeiterator_new(encseq,true);
+    while (gt_specialrangeiterator_next(sri,&range))
+    {
+      unsigned long idx;
+
+      for (idx = range.start; idx < range.end; idx++)
+      {
+        gt_assert(countspecial < specialcharacters && idx < totallength);
+        suftabtail[countspecial++] = idx;
+      }
+    }
+    gt_assert(countspecial == specialcharacters);
+    gt_specialrangeiterator_delete(sri);
+  }
+  suftabtail[specialcharacters] = totallength;
+}
+
 static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,unsigned long *suftab,
                                      unsigned long nonspecialentries,
                                      unsigned long suftabentries,
@@ -780,11 +810,31 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,unsigned long *suftab,
                      saininfo->sainseq->numofchars);
   induceStypesuffixes(saininfo, suftab, leftborder, nonspecialentries);
   gt_free(leftborder);
-  if (sainmode == 1U && nonspecialentries > 0)
+  if (nonspecialentries > 0)
   {
-    gt_sain_checkorder(saininfo,suftab,0,nonspecialentries-1);
+    if (sainmode == 1U)
+    {
+      gt_sain_checkorder(saininfo,suftab,0,nonspecialentries-1);
+    } else
+    {
+      if (saininfo->sainseq->hasencseq && sainmode == 2U)
+      {
+        gt_sain_filltailsuffixes(suftab + nonspecialentries,
+                                 saininfo->sainseq->seq.encseq);
+        gt_suftab_lightweightcheck(saininfo->sainseq->seq.encseq,
+                                   GT_READMODE_FORWARD,
+                                   saininfo->sainseq->totallength,
+                                   suftab,
+                                   NULL);
+      }
+    }
   }
 }
+
+/* sainmode = 1: check with own gt_sain_checkorder
+   sainmode = 2: check with gt_suftab_lightweightcheck
+   sainmode = 3: no check
+*/
 
 void gt_sain_sortsuffixes(const GtEncseq *encseq,unsigned int sainmode)
 {
@@ -798,7 +848,14 @@ void gt_sain_sortsuffixes(const GtEncseq *encseq,unsigned int sainmode)
   requiredentries = saininfo->countSstartype +
                     GT_DIV2(saininfo->sainseq->totallength) + 1;
   suftabentries = MAX(nonspecialentries,requiredentries);
-  suftab = gt_malloc(sizeof (*suftab) * suftabentries);
+  if (sainmode == 2U)
+  {
+    suftab = gt_malloc(sizeof (*suftab) * (saininfo->sainseq->totallength+1));
+    printf("allocated %lu elements\n",saininfo->sainseq->totallength+1);
+  } else
+  {
+    suftab = gt_malloc(sizeof (*suftab) * suftabentries);
+  }
   sain_setundefined(suftab,0,suftabentries - 1);
   gt_sain_rec_sortsuffixes(saininfo,suftab,nonspecialentries,suftabentries,
                            sainmode);
