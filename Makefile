@@ -394,21 +394,14 @@ ifeq ($(with-hmmer),yes)
 endif
 
 ifneq ($(cairo),no)
-  GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo -lfontconfig \
+  GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) \
                        $(shell pkg-config --libs pango) \
                        $(shell pkg-config --libs cairo) \
-                       $(shell pkg-config --libs pangocairo) \
-                       $(shell pkg-config --libs glib-2.0)
-  GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo \
-                 -I/sw/include/cairo -I/opt/local/include/cairo \
-                 -I/usr/include/fontconfig -I/usr/local/include/fontconfig \
-                 -I/sw/lib/fontconfig2/include/fontconfig \
-                 -I/opt/local/include/fontconfig
-  EXP_LDLIBS:=-lcairo -lfontconfig $(EXP_LDLIBS) \
+                       $(shell pkg-config --libs pangocairo)
+  EXP_LDLIBS:=$(EXP_LDLIBS) \
                $(shell pkg-config --libs pango) \
                $(shell pkg-config --libs cairo) \
-               $(shell pkg-config --libs pangocairo) \
-               $(shell pkg-config --libs glib-2.0)
+               $(shell pkg-config --libs pangocairo)
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed_with_ctrack \
                                bin/examples/sketch_parsed_with_ordering \
