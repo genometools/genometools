@@ -340,7 +340,7 @@ static void insertSstarsuffixes(const GtSaininfo *saininfo,
       gt_assert(leftborder[cc] > 0);
       putidx = --leftborder[cc];
       gt_assert(putidx < nonspecialentries);
-      suftab[putidx] = position; /* firstsmaller */
+      suftab[putidx] = position;
 #ifdef SAINSHOWSTATE
       printf("Sstar.suftab[%lu]=%lu\n",putidx,position);
 #endif
@@ -370,7 +370,7 @@ static void induceLtypesuffixes(const GtSaininfo *saininfo,
         {
           unsigned long putidx = leftborder[cc]++;
           gt_assert(putidx < nonspecialentries);
-          suftab[putidx] = position-1; /* firstsmaller */
+          suftab[putidx] = position-1;
 #ifdef SAINSHOWSTATE
           printf("L-induce: suftab[%lu]=%lu\n",putidx,position-1);
 #endif
@@ -404,7 +404,7 @@ static void induceStypesfromspecialranges(GT_UNUSED const GtSaininfo *saininfo,
                                         GT_READMODE_FORWARD);
         gt_assert(ISNOTSPECIAL(cc) && leftborder[cc] > 0);
         putidx = --leftborder[cc];
-        gt_assert(putidx < nonspecialentries); /* firstsmaller */
+        gt_assert(putidx < nonspecialentries);
         suftab[putidx] = range.start-1;
 #ifdef SAINSHOWSTATE
         printf("Srange-induce: suftab[%lu]=%lu in %d-bucket\n",putidx,
@@ -429,7 +429,7 @@ static void induceStypesuffixes(const GtSaininfo *saininfo,
   {
     unsigned long putidx = --leftborder[cc];
     gt_assert(putidx < nonspecialentries);
-    suftab[putidx] = saininfo->sainseq->totallength-1; /* firstsmaller */
+    suftab[putidx] = saininfo->sainseq->totallength-1;
 #ifdef SAINSHOWSTATE
     printf("end S-induce: suftab[%lu]=%lu\n",putidx,
                                          saininfo->sainseq->totallength-1);
@@ -457,7 +457,7 @@ static void induceStypesuffixes(const GtSaininfo *saininfo,
         {
           unsigned long putidx = --leftborder[cc];
           gt_assert(putidx < nonspecialentries);
-          suftab[putidx] = position-1; /* firstsmaller */
+          suftab[putidx] = position-1;
 #ifdef SAINSHOWSTATE
           printf("S-induce: suftab[%lu]=%lu\n",putidx,position-1);
 #endif
@@ -681,7 +681,7 @@ static void insertsortedSstarsuffixes(const GtSaininfo *saininfo,
     if (idx < putidx)
     {
       gt_assert(putidx < nonspecialsuffixes);
-      suftab[putidx] = position; /* firstsmaller */
+      suftab[putidx] = position;
       suftab[idx] = ULONG_MAX;
 #ifdef SAINSHOWSTATE
       printf("insertsorted: suftab[%lu]=%lu\n",putidx,position);
@@ -785,7 +785,7 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
           unsigned long putidx = suftab[idx];
 
           gt_assert(putidx < nonspecialentries);
-          suftab[putidx] = position; /* firstsmaller */
+          suftab[putidx] = position;
           idx++;
         }
       }
