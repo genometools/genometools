@@ -130,6 +130,8 @@
           if ((A)->space##TYPE != NULL)\
           {\
             gt_free((A)->space##TYPE);\
+            (A)->allocated##TYPE = 0;\
+            (A)->nextfree##TYPE = 0;\
             (A)->space##TYPE = NULL;\
           }\
         } while (false)

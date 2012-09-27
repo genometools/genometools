@@ -193,23 +193,22 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
                                     GtShortreadsortworkinfo *srsw)
 {
   unsigned int maxprefix;
-  GtTwobitencoding *aptr = srsw->tbereservoir.spaceGtTwobitencoding +
-                           aq->tbeidx;
-  GtTwobitencoding *bptr = srsw->tbereservoir.spaceGtTwobitencoding +
-                           bq->tbeidx;
+  GtTwobitencoding *aptr, *bptr;
 
+  aptr = srsw->tbereservoir.spaceGtTwobitencoding + aq->tbeidx;
+  bptr = srsw->tbereservoir.spaceGtTwobitencoding + bq->tbeidx;
   for (maxprefix = (unsigned int) GT_UNITSIN2BITENC;
        /* Nothing */;
        maxprefix += (unsigned int) GT_UNITSIN2BITENC, aptr++, bptr++)
   {
     int retval;
     GtCommonunits commonunits;
-    GtTwobitencoding aval = *aptr;
-    GtTwobitencoding bval = *bptr;
 
     if (aq->unitsnotspecial >= maxprefix &&
         bq->unitsnotspecial >= maxprefix)
     {
+      GtTwobitencoding aval = *aptr, bval = *bptr;
+
       if (aval != bval)
       {
         retval = gt_encseq_compare_pairof_different_twobitencodings(
@@ -231,12 +230,12 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
         = aq->unitsnotspecial >= maxprefix
            ? maxprefix
            : aq->unitsnotspecial + GT_UNITSIN2BITENC - maxprefix;
-      tbe_a.tbe = tbe_a.unitsnotspecial > 0 ? aval : 0;
+      tbe_a.tbe = tbe_a.unitsnotspecial > 0 ? *aptr : 0;
       tbe_b.unitsnotspecial
         = bq->unitsnotspecial >= maxprefix
            ? maxprefix
            : bq->unitsnotspecial + GT_UNITSIN2BITENC - maxprefix;
-      tbe_b.tbe = tbe_b.unitsnotspecial > 0 ? bval : 0;
+      tbe_b.tbe = tbe_b.unitsnotspecial > 0 ? *bptr : 0;
       retval = gt_encseq_compare_pairof_twobitencodings(srsw->fwd,
                                                         srsw->complement,
                                                         &commonunits,
