@@ -668,7 +668,13 @@ static void gt_sain_checkorder(const GtSaininfo *saininfo,
     int cmp
       = gt_sain_compare_substrings(saininfo,false,suftab[idx-1],suftab[idx]);
 
-    gt_assert(cmp == -1);
+    if (cmp != -1)
+    {
+      fprintf(stderr,"%s: check interval [%lu,%lu] at idx=%lu: suffix "
+                     "%lu >= %lu\n",__func__,start,end,idx,suftab[idx-1],
+                     suftab[idx]);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
   }
 }
 
@@ -742,7 +748,7 @@ static unsigned long *gt_sain_possiblereclaimspace(
                                     unsigned long *suftab,
                                     unsigned long availableentries,
                                     unsigned long suftabentries,
-                                    unsigned long totallength,
+                                    GT_UNUSED unsigned long totallength,
                                     unsigned long required)
 {
   unsigned long maxused = GT_MULT2(availableentries);
