@@ -731,24 +731,24 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
                                      unsigned long suftabentries,
                                      unsigned int sainmode)
 {
-  unsigned long idx, *leftborder, numberofnames;
+  unsigned long idx, *leftborder, numberofnames, maxused;
   bool leftborderpoints2suftab = false;
 
-  /*
-  if (GT_MULT2(availableentries) < suftabentries &&
-      suftabentries - GT_MULT2(availableentries) >=
-        saininfo->sainseq->numofchars)
+  maxused = GT_MULT2(availableentries);
+  gt_assert(maxused >= availableentries +
+            GT_DIV2(saininfo->sainseq->totallength));
+  if (maxused < suftabentries && suftabentries - maxused >=
+      saininfo->sainseq->numofchars)
   {
-    leftborder = suftab + GT_MULT2(availableentries);
+    leftborder = suftab + suftabentries - saininfo->sainseq->numofchars;
     leftborderpoints2suftab = true;
+    printf("leftborder references suftab at %lu\n",
+              suftabentries - saininfo->sainseq->numofchars);
   } else
   {
     leftborder = gt_malloc(sizeof (*leftborder) *
                            saininfo->sainseq->numofchars);
   }
-  */
-    leftborder = gt_malloc(sizeof (*leftborder) *
-                           saininfo->sainseq->numofchars);
   if (saininfo->countSstartype > 0)
   {
     gt_sain_endbuckets(leftborder,saininfo->sainseq->bucketsize,
@@ -760,6 +760,11 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
     gt_sain_endbuckets(leftborder,saininfo->sainseq->bucketsize,
                          saininfo->sainseq->numofchars);
     induceStypesuffixes(saininfo, suftab, leftborder, nonspecialentries);
+    if (leftborderpoints2suftab)
+    {
+      sain_setundefined(suftab,suftabentries - saininfo->sainseq->numofchars,
+                        suftabentries-1);
+    }
     moveSstar2front(saininfo,suftab,nonspecialentries);
     numberofnames = assignSstarnames(saininfo,suftab,availableentries);
     movenames2front(saininfo,suftab,availableentries);
