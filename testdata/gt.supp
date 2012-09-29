@@ -141,7 +141,6 @@
    ...
    obj:*lib/libfreetype*
    ...
-   obj:*lib/libcairo*
 }
 {
    fontconfig_leak
