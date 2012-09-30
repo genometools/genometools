@@ -29,6 +29,7 @@ typedef struct
   unsigned long totallength,
                 specialcharacters,
                 numofchars,
+                startoccupied,
                 *bucketsize,
                 *leftborder;
   union
@@ -37,6 +38,7 @@ typedef struct
     const unsigned long *array;
   } seq;
   bool leftborderpoints2suftab,
+       bucketsizepoints2suftab,
        hasencseq;
 } GtSainseq;
 
@@ -56,6 +58,7 @@ static GtSainseq *gt_sain_seq_new_from_encseq(const GtEncseq *encseq)
   sainseq->leftborder = gt_malloc(sizeof (*sainseq->leftborder) *
                                   sainseq->numofchars);
   sainseq->leftborderpoints2suftab = false;
+  sainseq->bucketsizepoints2suftab = false;
   for (idx = 0; idx<sainseq->numofchars; idx++)
   {
     sainseq->bucketsize[idx] = gt_encseq_charcount(encseq,(GtUchar) idx);
@@ -63,28 +66,25 @@ static GtSainseq *gt_sain_seq_new_from_encseq(const GtEncseq *encseq)
   return sainseq;
 }
 
-/*
-static unsigned long *gt_sain_possiblereclaimspace(
-                                    unsigned long *suftab,
-                                    unsigned long availableentries,
-                                    unsigned long suftabentries,
-                                    GT_UNUSED unsigned long totallength,
-                                    unsigned long required)
+static void sain_determinebucketsize(GtSainseq *sainseq)
 {
-  unsigned long maxused = GT_MULT2(availableentries);
+  unsigned long idx;
 
-  gt_assert(maxused >= availableentries + GT_DIV2(totallength));
-  if (maxused < suftabentries && suftabentries - maxused >= required)
+  for (idx = 0; idx < sainseq->numofchars; idx++)
   {
-    printf("line %d: reclaim suftab at %lu for %lu elements\n",
-            line,suftabentries - required,required);
-    return suftab + suftabentries - required;
-  } else
+    sainseq->bucketsize[idx] = 0;
+  }
+  for (idx = 0; idx<sainseq->totallength; idx++)
   {
-    return NULL;
+    if (sainseq->seq.array[idx] >= sainseq->numofchars)
+    {
+      printf("seq[%lu]=%lu>=%lu\n",idx,
+              sainseq->seq.array[idx],sainseq->numofchars);
+    }
+    gt_assert(sainseq->seq.array[idx] < sainseq->numofchars);
+    sainseq->bucketsize[sainseq->seq.array[idx]]++;
   }
 }
-*/
 
 static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
                                              unsigned long len,
@@ -92,7 +92,7 @@ static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
                                              unsigned long *suftab,
                                              unsigned long suftabentries)
 {
-  unsigned long idx, maxused = GT_MULT2(len);
+  unsigned long maxused = GT_MULT2(len);
   GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
 
   sainseq->hasencseq = false;
@@ -100,43 +100,66 @@ static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
   sainseq->totallength = len;
   sainseq->specialcharacters = 0;
   sainseq->numofchars = numofchars;
-  sainseq->bucketsize = gt_malloc(sizeof (*sainseq->bucketsize) *
-                                  sainseq->numofchars);
-  if (maxused < suftabentries && suftabentries - maxused >= numofchars)
+  sainseq->leftborderpoints2suftab = false;
+  sainseq->bucketsizepoints2suftab = false;
+  sainseq->startoccupied = suftabentries;
+  if (maxused < suftabentries)
   {
-    printf("leftborder: reclaim suftab at %lu for %lu elements\n",
-            suftabentries - numofchars,numofchars);
-    sainseq->leftborder = suftab + suftabentries - numofchars;
-    sainseq->leftborderpoints2suftab = true;
-  } else
-  {
-    sainseq->leftborder = gt_malloc(sizeof (*sainseq->leftborder) *
-                                    sainseq->numofchars);
-    sainseq->leftborderpoints2suftab = false;
+    if (suftabentries - maxused >= numofchars)
+    {
+      printf("bucketsize: reclaim suftab at %lu for %lu elements\n",
+              suftabentries - numofchars,numofchars);
+      sainseq->bucketsize = suftab + suftabentries - numofchars;
+      sainseq->bucketsizepoints2suftab = true;
+      sainseq->startoccupied = suftabentries - numofchars;
+    }
+    if (suftabentries - maxused >= GT_MULT2(numofchars))
+    {
+      printf("leftborder: reclaim suftab at %lu for %lu elements\n",
+              suftabentries - GT_MULT2(numofchars),GT_MULT2(numofchars));
+      sainseq->leftborder = suftab + suftabentries - GT_MULT2(numofchars);
+      sainseq->leftborderpoints2suftab = true;
+      sainseq->startoccupied = suftabentries - GT_MULT2(numofchars);
+    }
   }
-  for (idx = 0; idx<numofchars; idx++)
+  if (!sainseq->leftborderpoints2suftab)
   {
-    sainseq->bucketsize[idx] = 0;
+    sainseq->leftborder = gt_malloc(sizeof (*sainseq->leftborder) * numofchars);
+    printf("leftborder requires %lu bytes\n",
+           (unsigned long) sizeof (*sainseq->leftborder) * numofchars);
   }
-  for (idx = 0; idx<len; idx++)
+  if (!sainseq->bucketsizepoints2suftab)
   {
-    gt_assert(arr[idx] < numofchars);
-    sainseq->bucketsize[arr[idx]]++;
+    sainseq->bucketsize = gt_malloc(sizeof (*sainseq->bucketsize) * numofchars);
+    printf("bucketsize requires %lu bytes\n",
+           (unsigned long) sizeof (*sainseq->bucketsize) * numofchars);
   }
+  sain_determinebucketsize(sainseq);
   return sainseq;
 }
 
-static void gt_sain_seq_delete(GtSainseq *sainseq)
+static unsigned long gt_sain_seq_delete(GtSainseq *sainseq)
 {
+  unsigned long ret = ULONG_MAX;
+
   if (sainseq != NULL)
   {
     if (!sainseq->leftborderpoints2suftab)
     {
       gt_free(sainseq->leftborder);
     }
-    gt_free(sainseq->bucketsize);
+    if (!sainseq->bucketsizepoints2suftab)
+    {
+      gt_free(sainseq->bucketsize);
+    }
+    if (sainseq->bucketsizepoints2suftab ||
+        sainseq->bucketsizepoints2suftab)
+    {
+      ret = sainseq->startoccupied;
+    }
     gt_free(sainseq);
   }
+  return ret;
 }
 
 static unsigned long gt_sain_seq_getchar(const GtSainseq *sainseq,
@@ -725,6 +748,11 @@ static void insertsortedSstarsuffixes(const GtSaininfo *saininfo,
     gt_assert(idx <= putidx);
     if (idx < putidx)
     {
+      if (putidx >= nonspecialsuffixes)
+      {
+        printf("putidx=%lu>=%lu,position=%lu,idx=%lu\n",
+                putidx,nonspecialsuffixes,position,idx);
+      }
       gt_assert(putidx < nonspecialsuffixes);
       suftab[putidx] = position;
       suftab[idx] = ULONG_MAX;
@@ -780,17 +808,21 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
 
   if (saininfo->countSstartype > 0)
   {
+    unsigned long startoccupied;
+
     gt_sain_endbuckets(saininfo->sainseq);
     insertSstarsuffixes(saininfo, suftab, nonspecialentries);
     gt_sain_startbuckets(saininfo->sainseq);
     induceLtypesuffixes(saininfo, suftab, nonspecialentries);
     gt_sain_endbuckets(saininfo->sainseq);
     induceStypesuffixes(saininfo, suftab, nonspecialentries);
-    if (saininfo->sainseq->leftborderpoints2suftab)
+    /*if (saininfo->sainseq->leftborderpoints2suftab ||
+        saininfo->sainseq->bucketsizepoints2suftab)
     {
-      sain_setundefined(suftab,suftabentries - saininfo->sainseq->numofchars,
+      sain_setundefined(suftab,saininfo->sainseq->startoccupied,
                         suftabentries-1);
     }
+    */
     moveSstar2front(saininfo,suftab,nonspecialentries);
     numberofnames = assignSstarnames(saininfo,suftab,availableentries);
     movenames2front(saininfo,suftab,availableentries);
@@ -803,12 +835,10 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
       GtSainseq *sainseq_rec;
       GtSaininfo *saininfo_rec;
 
-      /*bucketsizemem = gt_sain_possiblereclaimspace(__LINE__,
-                                          suftab,
-                                          saininfo->countSstartype,
-                                          suftabentries,
-                                          saininfo->countSstartype,
-                                          numberofnames);*/
+      printf("new seq of length %lu over %lu symbols at offset %lu\n",
+                                               saininfo->countSstartype,
+                                               numberofnames,
+                                               saininfo->countSstartype);
       sainseq_rec = gt_sain_seq_new_from_array(subseq,
                                                saininfo->countSstartype,
                                                numberofnames,
@@ -826,7 +856,8 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
                                suftabentries,
                                sainmode);
       gt_sain_info_delete(saininfo_rec);
-      gt_sain_seq_delete(sainseq_rec);
+      startoccupied = gt_sain_seq_delete(sainseq_rec);
+      sain_setundefined(suftab,startoccupied,suftabentries-1);
       for (idx = 0; idx < saininfo->countSstartype; idx++)
       {
         gt_assert(saininfo->countSstartype + suftab[idx] < nonspecialentries);
@@ -845,11 +876,18 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
           idx++;
         }
       }
+    } else
+    {
+      printf("sequence alread sorted\n");
     }
   }
   if (sainmode == 1U && saininfo->countSstartype > 0)
   {
     gt_sain_checkorder(saininfo,suftab,0,saininfo->countSstartype-1);
+  }
+  if (!saininfo->sainseq->hasencseq)
+  {
+    sain_determinebucketsize(saininfo->sainseq);
   }
   sain_setundefined(suftab,saininfo->countSstartype,availableentries - 1);
   gt_sain_endbuckets(saininfo->sainseq);
@@ -907,6 +945,6 @@ void gt_sain_sortsuffixes(const GtEncseq *encseq,unsigned int sainmode)
   gt_sain_rec_sortsuffixes(saininfo,suftab,nonspecialentries,suftabentries,
                            suftabentries,sainmode);
   gt_sain_info_delete(saininfo);
-  gt_sain_seq_delete(sainseq);
+  (void) gt_sain_seq_delete(sainseq);
   gt_free(suftab);
 }
