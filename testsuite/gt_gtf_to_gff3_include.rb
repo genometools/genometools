@@ -13,8 +13,7 @@ if $gttestdata then
       "> ref_sorted.gff3"
   run_test("#{$bin}gt gtf_to_gff3 " +
            "#{$gttestdata}gtf/Drosophila_melanogaster.BDGP5.4.50.gtf " +
-           "| #{$bin}gt gff3 -sort ",
-           :maxtime => 500)
+           "| #{$bin}gt gff3 -sort ", :maxtime => 1200)
   run "diff #{last_stdout} " +
       "ref_sorted.gff3"
   end
@@ -24,7 +23,7 @@ if $gttestdata then
   Test do
   run_test "#{$bin}gt gtf_to_gff3 " +
            "#{$gttestdata}gtf/gencode.v11.annotation.gtf.gz " +
-           "| #{$bin}gt gff3 -sort -tidy", :maxtime => 500
+           "| #{$bin}gt gff3 -sort -tidy", :maxtime => 1200
   run "diff #{last_stdout} #{$gttestdata}gff3/gencode.v11.annotation.gff3"
   end
 end
