@@ -67,12 +67,12 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
 
   optionglobal = gt_option_new_string_array("global",
                    "perform global chaining\n"
-                   "optional parameter gc switches\n"
-                   "on gap costs (according to L1-model)\n"
-                   "optional parameter ov means\n"
-                   "that overlaps between matches are allowed"
-                   "optional parameter all means\n"
-                   "that all optimal chains are processed",
+                   "- optional parameter gc switches\n"
+                   "  on gap costs (according to L1-model)\n"
+                   "- optional parameter ov means\n"
+                   "  that overlaps between matches are allowed\n"
+                   "- optional parameter all means\n"
+                   "  that all optimal chains are processed",
                    arguments->globalargs);
   gt_option_argument_is_optional(optionglobal);
   arguments->refoptionglobal = gt_option_ref (optionglobal);
@@ -81,17 +81,18 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
   optionlocal = gt_option_new_string_array("local",
                    "perform local chaining\n"
                    "compute local chains (according to L1-model).\n"
-                   "If no parameter is given, compute local chains with\n"
-                   "maximums score.\n"
-                   "If parameter is given, this must be a positive number\n"
-                   "optionally followed by the character b or p.\n"
-                   "If only the number, say k, is given, this is the minimum\n"
-                   "score of the chains output.\n"
-                   "If a number is followed by character b, then output all\n"
-                   "chains with the largest k scores.\n"
-                   "If a number is followed by character p, then output all\n"
-                   "chains with scores at most k percent away\n"
-                   "from the best score.",
+                   "- If no parameter is given, compute local chains with\n"
+                   "  maximums score.\n"
+                   "- If parameter is given, this must be a positive number\n"
+                   "  optionally followed by the character b or p.\n"
+                   "- If only the number, say k, is given, this is the "
+                   "minimum\n"
+                   "  score of the chains output.\n"
+                   "- If a number is followed by character b, then output all\n"
+                   "  chains with the largest k scores.\n"
+                   "- If a number is followed by character p, then output all\n"
+                   "  chains with scores at most k percent away\n"
+                   "  from the best score.",
                    arguments->localargs);
   gt_option_argument_is_optional(optionlocal);
   gt_option_parser_add_option(op, optionlocal);
@@ -99,7 +100,7 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
   gt_option_exclude(optionlocal,optionglobal);
   option = gt_option_new_double("wf","specify weight factor > 0.0 to obtain "
                                      "score of a fragment\nrequires one of "
-                                     "the options\n-localconst\n-global "
+                                     "the options\n-local const\n-global "
                                      "gc\n-global ov",
                                      &arguments->weightfactor,1.0);
   arguments->refoptionweightfactor = gt_option_ref (option);

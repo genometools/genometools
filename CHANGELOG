@@ -24,7 +24,12 @@ changes in version 1.4.2 (2012-09-27)
 - Added tools for compression of short reads (with quality, fastq) either
   direct: tool `gt compreads compress` or using a reference genome: tool `gt
   compreads refcompress`.
-
+- improved running time and space requirement in suffix-prefix match
+  computation
+- added argument all to option -global in gt chain2dim: this allows
+  for computing all best chains rather than a single best chain
+- add linear time functions to check the suffix array and the lcptable
+- added radixsort as new method when sorting buckets of suffixes
 
 changes in version 1.4.1 (2012-04-12)
 
