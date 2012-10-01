@@ -662,9 +662,9 @@ static void gt_sain_setundefined(unsigned long *suftab,
   }
 }
 
-static unsigned long assignSstarnames(const GtSaininfo *saininfo,
-                                      unsigned long *suftab,
-                                      unsigned long availableentries)
+static unsigned long gt_sain_assignSstarnames(const GtSaininfo *saininfo,
+                                              unsigned long *suftab,
+                                              unsigned long availableentries)
 {
   unsigned long idx, previouspos, currentname = 0;
 
@@ -692,13 +692,14 @@ static unsigned long assignSstarnames(const GtSaininfo *saininfo,
   return currentname+1;
 }
 
-static void movenames2front(const GtSaininfo *saininfo,
-                            unsigned long *suftab,
-                            GT_UNUSED unsigned long availableentries)
+static void gt_sain_movenames2front(const GtSaininfo *saininfo,
+                                    unsigned long *suftab,
+                                    GT_UNUSED unsigned long availableentries)
 {
-  unsigned long ridx, widx,
-                maxridx = saininfo->countSstartype +
-                          GT_DIV2(saininfo->sainseq->totallength);
+  unsigned long ridx, widx;
+  const unsigned long maxridx = saininfo->countSstartype +
+                                GT_DIV2(saininfo->sainseq->totallength);
+
   for (ridx = widx = saininfo->countSstartype; ridx <= maxridx; ridx++)
   {
     if (suftab[ridx] != ULONG_MAX)
@@ -822,8 +823,8 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
     gt_sain_endbuckets(saininfo->sainseq);
     gt_sain_induceStypesuffixes(saininfo, suftab, nonspecialentries);
     gt_sain_moveSstar2front(saininfo,suftab,nonspecialentries);
-    numberofnames = assignSstarnames(saininfo,suftab,availableentries);
-    movenames2front(saininfo,suftab,availableentries);
+    numberofnames = gt_sain_assignSstarnames(saininfo,suftab,availableentries);
+    gt_sain_movenames2front(saininfo,suftab,availableentries);
     gt_assert(numberofnames <= saininfo->countSstartype);
     if (numberofnames < saininfo->countSstartype)
     {
