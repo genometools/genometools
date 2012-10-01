@@ -42,6 +42,16 @@
    ...
 }
 {
+   <zlib>
+   Memcheck:Cond
+   ...
+   fun:deflate_slow
+   fun:deflate
+   ...
+   obj:*lib/*libcairo*
+   ...
+}
+{
    <pthreads_mac>
    Memcheck:Cond
    fun:pthread_rwlock_init
@@ -67,7 +77,7 @@
 {
    leak_within_pango1
    fun:*alloc
-  ...
+   ...
    fun:g_type_init_with_debug_flags
    fun:pango_cairo_font_map_new
 }
