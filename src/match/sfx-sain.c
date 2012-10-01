@@ -76,11 +76,6 @@ static void sain_determinebucketsize(GtSainseq *sainseq)
   }
   for (idx = 0; idx<sainseq->totallength; idx++)
   {
-    if (sainseq->seq.array[idx] >= sainseq->numofchars)
-    {
-      printf("seq[%lu]=%lu>=%lu\n",idx,
-              sainseq->seq.array[idx],sainseq->numofchars);
-    }
     gt_assert(sainseq->seq.array[idx] < sainseq->numofchars);
     sainseq->bucketsize[sainseq->seq.array[idx]]++;
   }
@@ -163,8 +158,7 @@ static unsigned long gt_sain_seq_delete(GtSainseq *sainseq)
 }
 
 static unsigned long gt_sain_seq_getchar(const GtSainseq *sainseq,
-                                         unsigned long position,
-                                         GT_UNUSED bool assertnospecial)
+                                         unsigned long position)
 {
   gt_assert(position < sainseq->totallength);
   if (sainseq->hasencseq)
@@ -172,8 +166,23 @@ static unsigned long gt_sain_seq_getchar(const GtSainseq *sainseq,
     GtUchar cc = gt_encseq_get_encoded_char(sainseq->seq.encseq,
                                             position,
                                             GT_READMODE_FORWARD);
-    gt_assert(!assertnospecial || ISNOTSPECIAL(cc));
     return ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (unsigned long) cc;
+  } else
+  {
+    return sainseq->seq.array[position];
+  }
+}
+
+static unsigned long gt_sain_seq_getchar_nospecial(const GtSainseq *sainseq,
+                                                   unsigned long position)
+{
+  gt_assert(position < sainseq->totallength);
+  if (sainseq->hasencseq)
+  {
+    return (unsigned long)
+           gt_encseq_get_encoded_char_nospecial(sainseq->seq.encseq,
+                                                position,
+                                                GT_READMODE_FORWARD);
   } else
   {
     return sainseq->seq.array[position];
@@ -223,7 +232,7 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq)
     bool currentisStype;
     unsigned long currentcc;
 
-    currentcc = gt_sain_seq_getchar(saininfo->sainseq,position,false);
+    currentcc = gt_sain_seq_getchar(saininfo->sainseq,position);
     if (currentcc < nextcc || (currentcc == nextcc && nextisStype))
     {
       saininfo->countStype++;
@@ -402,7 +411,8 @@ static void insertSstarsuffixes(const GtSaininfo *saininfo,
     if (gt_sain_info_isSstartype(saininfo,position))
     {
       unsigned long putidx,
-                    cc = gt_sain_seq_getchar(saininfo->sainseq,position,true);
+                    cc = gt_sain_seq_getchar_nospecial(saininfo->sainseq,
+                                                       position);
       gt_assert(saininfo->sainseq->leftborder[cc] > 0);
       putidx = --saininfo->sainseq->leftborder[cc];
       gt_assert(putidx < nonspecialentries);
@@ -429,8 +439,7 @@ static void induceLtypesuffixes(const GtSaininfo *saininfo,
       gt_assert(position < saininfo->sainseq->totallength);
       if (!gt_sain_info_isStype(saininfo,position-1))
       {
-        unsigned long cc = gt_sain_seq_getchar(saininfo->sainseq,position-1,
-                                               false);
+        unsigned long cc = gt_sain_seq_getchar(saininfo->sainseq,position-1);
         if (cc < saininfo->sainseq->numofchars)
         {
           unsigned long putidx = saininfo->sainseq->leftborder[cc]++;
@@ -486,8 +495,7 @@ static void induceStypesuffixes(const GtSaininfo *saininfo,
 {
   unsigned long idx, cc;
 
-  cc = gt_sain_seq_getchar(saininfo->sainseq,saininfo->sainseq->totallength-1,
-                           false);
+  cc = gt_sain_seq_getchar(saininfo->sainseq,saininfo->sainseq->totallength-1);
   if (cc < saininfo->sainseq->numofchars)
   {
     unsigned long putidx = --saininfo->sainseq->leftborder[cc];
@@ -515,7 +523,7 @@ static void induceStypesuffixes(const GtSaininfo *saininfo,
     {
       if (gt_sain_info_isStype(saininfo,position-1))
       {
-        cc = gt_sain_seq_getchar(saininfo->sainseq,position-1,false);
+        cc = gt_sain_seq_getchar(saininfo->sainseq,position-1);
         if (cc < saininfo->sainseq->numofchars)
         {
           unsigned long putidx = --saininfo->sainseq->leftborder[cc];
@@ -595,8 +603,8 @@ static int gt_sain_compare_substrings(const GtSaininfo *saininfo,
       gt_assert(start1 < start2);
       return -1;
     }
-    cc1 = gt_sain_seq_getchar(saininfo->sainseq,start1,false);
-    cc2 = gt_sain_seq_getchar(saininfo->sainseq,start2,false);
+    cc1 = gt_sain_seq_getchar(saininfo->sainseq,start1);
+    cc2 = gt_sain_seq_getchar(saininfo->sainseq,start2);
     if (cc1 < cc2)
     {
       return -1;
@@ -742,17 +750,12 @@ static void insertsortedSstarsuffixes(const GtSaininfo *saininfo,
   {
     unsigned long position = suftab[idx], putidx, cc;
 
-    cc = gt_sain_seq_getchar(saininfo->sainseq,position,false);
+    cc = gt_sain_seq_getchar_nospecial(saininfo->sainseq,position);
     gt_assert(saininfo->sainseq->leftborder[cc] > 0);
     putidx = --saininfo->sainseq->leftborder[cc];
     gt_assert(idx <= putidx);
     if (idx < putidx)
     {
-      if (putidx >= nonspecialsuffixes)
-      {
-        printf("putidx=%lu>=%lu,position=%lu,idx=%lu\n",
-                putidx,nonspecialsuffixes,position,idx);
-      }
       gt_assert(putidx < nonspecialsuffixes);
       suftab[putidx] = position;
       suftab[idx] = ULONG_MAX;
@@ -804,11 +807,9 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
                                      unsigned long suftabentries,
                                      unsigned int sainmode)
 {
-  unsigned long idx, numberofnames;
-
   if (saininfo->countSstartype > 0)
   {
-    unsigned long startoccupied;
+    unsigned long idx, startoccupied, numberofnames;
 
     gt_sain_endbuckets(saininfo->sainseq);
     insertSstarsuffixes(saininfo, suftab, nonspecialentries);
@@ -816,13 +817,6 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
     induceLtypesuffixes(saininfo, suftab, nonspecialentries);
     gt_sain_endbuckets(saininfo->sainseq);
     induceStypesuffixes(saininfo, suftab, nonspecialentries);
-    /*if (saininfo->sainseq->leftborderpoints2suftab ||
-        saininfo->sainseq->bucketsizepoints2suftab)
-    {
-      sain_setundefined(suftab,saininfo->sainseq->startoccupied,
-                        suftabentries-1);
-    }
-    */
     moveSstar2front(saininfo,suftab,nonspecialentries);
     numberofnames = assignSstarnames(saininfo,suftab,availableentries);
     movenames2front(saininfo,suftab,availableentries);
@@ -835,10 +829,6 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
       GtSainseq *sainseq_rec;
       GtSaininfo *saininfo_rec;
 
-      printf("new seq of length %lu over %lu symbols at offset %lu\n",
-                                               saininfo->countSstartype,
-                                               numberofnames,
-                                               saininfo->countSstartype);
       sainseq_rec = gt_sain_seq_new_from_array(subseq,
                                                saininfo->countSstartype,
                                                numberofnames,
@@ -876,9 +866,6 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
           idx++;
         }
       }
-    } else
-    {
-      printf("sequence alread sorted\n");
     }
   }
   if (sainmode == 1U && saininfo->countSstartype > 0)
