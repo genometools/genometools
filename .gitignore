@@ -35,6 +35,7 @@
 *.sti1
 *.suf
 *.swp
+*.tags*
 *.tis
 *~
 .ccache
