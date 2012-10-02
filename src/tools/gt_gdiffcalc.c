@@ -277,8 +277,8 @@ static int gt_gdiffcalc_runner(int argc, const char **argv, int parsed_args,
     }
   }
   if (!had_err) {
-    unsigned long num_of_seq,
-                  file_idx, seq_idx, oldpos = 0, startpos;
+    unsigned long num_of_seq, file_idx, seq_idx, startpos;
+    GT_UNUSED unsigned long oldpos = 0;
 
     gt_assert(unit_info != NULL);
     gt_assert(lcounter == zcounter);
