@@ -1288,7 +1288,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt gff3 -tidy -sort " +
              "#{$gttestdata}gff3testruns/TAIR10_GFF3_genes.gff",
-             :maxtime => 600
+             :maxtime => 3600
     run      "diff #{last_stdout} #{$gttestdata}gff3testruns/tair.gff3"
   end
 
@@ -1296,7 +1296,7 @@ if $gttestdata then
   Keywords "gt_gff3"
   Test do
     run_test "#{$bin}gt gff3 -sort #{$gttestdata}gff3testruns/EST.gff",
-             :maxtime => 1200
+             :maxtime => 3600
     run      "diff #{last_stdout} #{$gttestdata}gff3testruns/fruitfly.gff3"
   end
 
@@ -1305,7 +1305,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt gff3 -sort " +
              "#{$gttestdata}gff3testruns/Homo_sapiens_ENSEMBL.gff3",
-             :maxtime => 1800
+             :maxtime => 3600
     run      "diff #{last_stdout} #{$gttestdata}gff3testruns/ensembl.gff3"
   end
 end
