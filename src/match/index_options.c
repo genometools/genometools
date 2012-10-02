@@ -364,7 +364,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                     "specify prefix length for bucket sort\n"
                                     "recommendation: use without argument;\n"
                                     "then a reasonable prefix length is "
-                                    "automatically determined",
+                                    "automatically determined.",
                                     &idxo->prefixlength,
                                     GT_PREFIXLENGTH_AUTOMATIC,
                                     1U);
@@ -372,7 +372,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_parser_add_option(op, idxo->optionprefixlength);
 
   idxo->optionuserdefinedsortmaxdepth
-    = gt_option_new_uint_min("sortmaxdepth","sort only up to the given depth",
+    = gt_option_new_uint_min("sortmaxdepth","sort only up to the given depth.",
                              &idxo->sfxstrategy.userdefinedsortmaxdepth,
                              0,
                              1U);

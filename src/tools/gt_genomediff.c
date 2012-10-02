@@ -94,7 +94,8 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   /*-unitfile*/
   option_unitfile =
     gt_option_new_filename("unitfile",
-                           "specifies genomic units, see below for description",
+                           "specifies genomic units, "
+                           "see below for description.",
                            arguments->unitfile);
   gt_option_parser_add_option(op, option_unitfile);
   arguments->ref_unitfile = gt_option_ref(option_unitfile);
@@ -113,21 +114,21 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* scan */
   option = gt_option_new_bool("scan", "do not load esa index but scan "
-                              "it sequentially", &arguments->scan, true);
+                              "it sequentially.", &arguments->scan, true);
   gt_option_is_extended_option(option);
   gt_option_parser_add_option(op, option);
 
   /* dev options */
   /* -max_n */
   option = gt_option_new_ulong("max_n", "Number of precalculated values "
-                               "for ln(n!) and pmax(x)",
+                               "for ln(n!) and pmax(x).",
                                &arguments->max_ln_n_fac, 1000UL);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   /* -maxdepth */
   option =  gt_option_new_int("maxdepth", "max depth of .pbi-file, use with "
-                              "-indextype pck",
+                              "-indextype pck.",
                               &arguments->user_max_depth, -1);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
