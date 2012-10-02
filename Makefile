@@ -394,6 +394,9 @@ ifeq ($(with-hmmer),yes)
 endif
 
 ifneq ($(cairo),no)
+  ifeq ($(SYSTEM),Darwin)
+    EXP_LDFLAGS:=
+  endif
   GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) \
                        $(shell pkg-config --libs pango) \
                        $(shell pkg-config --libs cairo) \
