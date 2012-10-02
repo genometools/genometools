@@ -976,7 +976,8 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, unsigned long readnum,
         reads_to_read = readnum - nearestsample;
         hcr_dec->seq_dec->cur_read = nearestsample;
       }
-      gt_log_log("reads to read: %lu, nearest sample: %lu",reads_to_read,nearestsample);
+      gt_log_log("reads to read: %lu, nearest sample: %lu",
+                 reads_to_read,nearestsample);
       gt_log_log("start of nearest: %lu", startofnearestsample);
     }
     else {
