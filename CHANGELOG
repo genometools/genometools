@@ -20,6 +20,10 @@ changes in version 1.4.2 (2012-09-27)
   It now uses md5:063b1024d68e26716b7f38caf958316f:1877523 instead of
   md5:063b1024d68e26716b7f38caf958316f. That is, the ``original'' sequence ID is
   kept after the MD5 hash.
+- `gt genomediff` tool has changed options and improved performance.
+- Added tools for compression of short reads (with quality, fastq) either
+  direct: tool `gt compreads compress` or using a reference genome: tool `gt
+  compreads refcompress`.
 
 
 changes in version 1.4.1 (2012-04-12)
