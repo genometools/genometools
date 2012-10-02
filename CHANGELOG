@@ -1,4 +1,4 @@
-changes in version 1.4.2 (2012-09-27)
+changes in version 1.4.2 (2012-10-02)
 
 - bugfixes and cleanups
 - GFF3 parser now correctly handles GVF input
@@ -16,18 +16,18 @@ changes in version 1.4.2 (2012-09-27)
   LTRsift software (http://www.zbh.uni-hamburg.de/LTRsift)
 - match iterators for BLAST and LAST added
 - CDS features with multiple parents are split in tidy-mode (if possible)
-- The format for MD5 sequence IDs has changed.
+- changed format for MD5 sequence IDs:
   It now uses md5:063b1024d68e26716b7f38caf958316f:1877523 instead of
   md5:063b1024d68e26716b7f38caf958316f. That is, the ``original'' sequence ID is
   kept after the MD5 hash.
 - `gt genomediff` tool has changed options and improved performance.
-- Added tools for compression of short reads (with quality, fastq) either
+- added tools for compression of short reads (with quality, fastq) either
   direct: tool `gt compreads compress` or using a reference genome: tool `gt
   compreads refcompress`.
-- improved running time and space requirement in suffix-prefix match
+- improved running time and space requirements in suffix-prefix match
   computation
-- added argument all to option -global in gt chain2dim: this allows
-  for computing all best chains rather than a single best chain
+- `gt chain2dim` has new option -global all, allowing for computing all best
+  chains rather than a single best chain
 - add linear time functions to check the suffix array and the lcptable
 - added radixsort as new method when sorting buckets of suffixes
 
