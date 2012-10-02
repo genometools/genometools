@@ -151,7 +151,7 @@ static int gt_compreads_decompress_benchmark(GtHcrDecoder *hcrd,
   gt_log_log("%s",gt_str_get(timer_comment));
   for (count = 0; count < amount; count++) {
     if (!had_err) {
-      rand = 2;
+      rand = gt_rand_max(max_rand);
       gt_log_log("get read: %lu", rand);
       had_err = gt_hcr_decoder_decode(hcrd, rand, seq, qual, desc, err);
       gt_log_log("%s",gt_str_get(desc));
