@@ -685,6 +685,9 @@ static unsigned long gt_sain_assignSstarnames(const GtSaininfo *saininfo,
     {
       currentname++;
     }
+    /* write the names in order of positions. As the positions of
+       the Sstar suffixes differ by at least 2, the used address
+       is unique */
     gt_assert(saininfo->countSstartype + GT_DIV2(position) < availableentries);
     suftab[saininfo->countSstartype + GT_DIV2(position)] = currentname;
     previouspos = position;
