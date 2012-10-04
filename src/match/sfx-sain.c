@@ -624,7 +624,51 @@ static void gt_sain_moveSstar2front(const GtSaininfo *saininfo,
   }
 }
 
-static int gt_sain_compare_substrings(const GtSaininfo *saininfo,
+static int gt_sain_compare_Sstarstrings(const GtSainseq *sainseq,
+                                        unsigned long start1,
+                                        unsigned long start2,
+                                        unsigned long len)
+{
+  unsigned long end1 = start1 + len;
+
+  gt_assert(start1 <= sainseq->totallength &&
+            start2 <= sainseq->totallength &&
+            start1 != start2);
+
+  while (start1 < end1)
+  {
+    unsigned long cc1, cc2;
+
+    if (start1 == sainseq->totallength)
+    {
+      gt_assert(start1 > start2);
+      return 1;
+    }
+    if (start2 == sainseq->totallength)
+    {
+      gt_assert(start1 < start2);
+      return -1;
+    }
+    cc1 = gt_sain_seq_getchar(sainseq,start1);
+    cc2 = gt_sain_seq_getchar(sainseq,start2);
+    if (cc1 < cc2)
+    {
+      return -1;
+    }
+    if (cc1 > cc2)
+    {
+      return 1;
+    }
+    start1++;
+    start2++;
+  }
+  return 0;
+}
+
+/* The following function has been used previously, but is
+   no used. As we maybe use it later, we keep it for now. */
+
+int gt_sain_compare_substrings(const GtSaininfo *saininfo,
                                       bool withtype,
                                       unsigned long *lenptr,
                                       unsigned long start1,
@@ -699,6 +743,43 @@ static int gt_sain_compare_substrings(const GtSaininfo *saininfo,
   }
 }
 
+static int gt_sain_compare_suffixes(const GtSaininfo *saininfo,
+                                    unsigned long start1,
+                                    unsigned long start2)
+{
+  gt_assert(start1 <= saininfo->sainseq->totallength &&
+            start2 <= saininfo->sainseq->totallength &&
+            start1 != start2);
+
+  while (true)
+  {
+    unsigned long cc1, cc2;
+
+    if (start1 == saininfo->sainseq->totallength)
+    {
+      gt_assert(start1 > start2);
+      return 1;
+    }
+    if (start2 == saininfo->sainseq->totallength)
+    {
+      gt_assert(start1 < start2);
+      return -1;
+    }
+    cc1 = gt_sain_seq_getchar(saininfo->sainseq,start1);
+    cc2 = gt_sain_seq_getchar(saininfo->sainseq,start2);
+    if (cc1 < cc2)
+    {
+      return -1;
+    }
+    if (cc1 > cc2)
+    {
+      return 1;
+    }
+    start1++;
+    start2++;
+  }
+}
+
 static void gt_sain_setundefined(unsigned long *suftab,
                                  unsigned long start, unsigned long end)
 {
@@ -763,37 +844,28 @@ static unsigned long gt_sain_assignSstarnames(const GtSaininfo *saininfo,
   for (idx = 1UL; idx < saininfo->countSstartype; idx++)
   {
     int cmp;
-    unsigned long lenvalue = 0, position = suftab[idx];
+    unsigned long currentlen = 0, position = suftab[idx];
 
     gt_assert(gt_sain_info_isSstartype(saininfo,position));
-    cmp = gt_sain_compare_substrings(saininfo,true,&lenvalue,
-                                     previouspos,position);
-    gt_assert(cmp != 1);
+    currentlen = suftab[saininfo->countSstartype + GT_DIV2(position)];
+    if (previouslen == currentlen)
+    {
+      cmp = gt_sain_compare_Sstarstrings(saininfo->sainseq,previouspos,position,
+                                         currentlen);
+      gt_assert(cmp != 1);
+    } else
+    {
+      cmp = -1;
+    }
     if (cmp == -1)
     {
       currentname++;
-    } else
-    {
-      if (lenvalue != previouslen)
-      {
-        printf("previouspos=%lu,previouslen=%lu != %lu = lenvalue at pos %lu\n",
-                previouspos,previouslen,lenvalue,position);
-      }
-      gt_assert(lenvalue == previouslen);
-      if (lenvalue != suftab[saininfo->countSstartype + GT_DIV2(position)])
-      {
-        printf("position=%lu,currentlen=%lu != %lu = lenvalue at pos %lu\n",
-                position,suftab[saininfo->countSstartype + GT_DIV2(position)],
-                lenvalue,position);
-      }
-      gt_assert(lenvalue ==
-                suftab[saininfo->countSstartype + GT_DIV2(position)]);
     }
     /* write the names in order of positions. As the positions of
        the Sstar suffixes differ by at least 2, the used address
        is unique */
+    previouslen = currentlen;
     gt_assert(saininfo->countSstartype + GT_DIV2(position) < availableentries);
-    previouslen = suftab[saininfo->countSstartype + GT_DIV2(position)];
     suftab[saininfo->countSstartype + GT_DIV2(position)] = currentname;
     previouspos = position;
   }
@@ -836,8 +908,7 @@ static void gt_sain_checkorder(const GtSaininfo *saininfo,
   for (idx = start+1; idx <= end; idx++)
   {
     int cmp
-      = gt_sain_compare_substrings(saininfo,false,NULL,
-                                   suftab[idx-1],suftab[idx]);
+      = gt_sain_compare_suffixes(saininfo,suftab[idx-1],suftab[idx]);
 
     if (cmp != -1)
     {
