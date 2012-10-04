@@ -24,6 +24,13 @@
 
 #define GT_SSTARLENGTH_MAX 50
 
+typedef enum
+{
+  GT_SAIN_ENCSEQ,
+  GT_SAIN_PLAINSEQ,
+  GT_SAIN_INTSEQ
+} GtSainSeqtype;
+
 typedef struct
 {
   unsigned long totallength,
@@ -35,11 +42,12 @@ typedef struct
   union
   {
     const GtEncseq *encseq;
+    const GtUchar *plainseq;
     const unsigned long *array;
   } seq;
+  GtSainSeqtype seqtype;
   bool leftborderpoints2suftab,
-       bucketsizepoints2suftab,
-       hasencseq;
+       bucketsizepoints2suftab;
 } GtSainseq;
 
 static GtSainseq *gt_sain_seq_new_from_encseq(const GtEncseq *encseq)
@@ -47,7 +55,7 @@ static GtSainseq *gt_sain_seq_new_from_encseq(const GtEncseq *encseq)
   unsigned long idx;
   GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
 
-  sainseq->hasencseq = true;
+  sainseq->seqtype = GT_SAIN_ENCSEQ;
   sainseq->seq.encseq = encseq;
   sainseq->totallength = gt_encseq_total_length(encseq);
   sainseq->specialcharacters = gt_encseq_specialcharacters(encseq);
@@ -62,6 +70,34 @@ static GtSainseq *gt_sain_seq_new_from_encseq(const GtEncseq *encseq)
   for (idx = 0; idx<sainseq->numofchars; idx++)
   {
     sainseq->bucketsize[idx] = gt_encseq_charcount(encseq,(GtUchar) idx);
+  }
+  return sainseq;
+}
+
+static GtSainseq *gt_sain_seq_new_from_plainseq(const GtUchar *plainseq,
+                                                unsigned long len)
+{
+  unsigned long idx;
+  GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
+
+  sainseq->seqtype = GT_SAIN_PLAINSEQ;
+  sainseq->seq.plainseq = plainseq;
+  sainseq->totallength = len;
+  sainseq->specialcharacters = 0;
+  sainseq->numofchars = UCHAR_MAX+1;
+  sainseq->bucketsize = gt_malloc(sizeof (*sainseq->bucketsize) *
+                                  sainseq->numofchars);
+  sainseq->leftborder = gt_malloc(sizeof (*sainseq->leftborder) *
+                                  sainseq->numofchars);
+  sainseq->leftborderpoints2suftab = false;
+  sainseq->bucketsizepoints2suftab = false;
+  for (idx = 0; idx<sainseq->numofchars; idx++)
+  {
+    sainseq->bucketsize[idx] = 0;
+  }
+  for (idx = 0; idx<sainseq->totallength; idx++)
+  {
+    sainseq->bucketsize[sainseq->seq.plainseq[idx]]++;
   }
   return sainseq;
 }
@@ -90,7 +126,7 @@ static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
   unsigned long maxused = GT_MULT2(len);
   GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
 
-  sainseq->hasencseq = false;
+  sainseq->seqtype = GT_SAIN_INTSEQ;
   sainseq->seq.array = arr;
   sainseq->totallength = len;
   sainseq->specialcharacters = 0;
@@ -161,15 +197,19 @@ static unsigned long gt_sain_seq_getchar(const GtSainseq *sainseq,
                                          unsigned long position)
 {
   gt_assert(position < sainseq->totallength);
-  if (sainseq->hasencseq)
+  switch (sainseq->seqtype)
   {
-    GtUchar cc = gt_encseq_get_encoded_char(sainseq->seq.encseq,
-                                            position,
-                                            GT_READMODE_FORWARD);
-    return ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (unsigned long) cc;
-  } else
-  {
-    return sainseq->seq.array[position];
+    case GT_SAIN_ENCSEQ:
+      {
+        GtUchar cc = gt_encseq_get_encoded_char(sainseq->seq.encseq,
+                                                position,
+                                                GT_READMODE_FORWARD);
+        return ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (unsigned long) cc;
+      }
+    case GT_SAIN_PLAINSEQ:
+      return (unsigned long) sainseq->seq.plainseq[position];
+    case GT_SAIN_INTSEQ:
+      return sainseq->seq.array[position];
   }
 }
 
@@ -177,15 +217,17 @@ static unsigned long gt_sain_seq_getchar_nospecial(const GtSainseq *sainseq,
                                                    unsigned long position)
 {
   gt_assert(position < sainseq->totallength);
-  if (sainseq->hasencseq)
+  switch (sainseq->seqtype)
   {
+    case GT_SAIN_ENCSEQ:
     return (unsigned long)
            gt_encseq_get_encoded_char_nospecial(sainseq->seq.encseq,
                                                 position,
                                                 GT_READMODE_FORWARD);
-  } else
-  {
-    return sainseq->seq.array[position];
+    case GT_SAIN_PLAINSEQ:
+      return (unsigned long) sainseq->seq.plainseq[position];
+    case GT_SAIN_INTSEQ:
+      return sainseq->seq.array[position];
   }
 }
 
@@ -508,7 +550,7 @@ static void gt_sain_induceStypesuffixes(const GtSaininfo *saininfo,
                                          saininfo->sainseq->totallength-1);
 #endif
   }
-  if (saininfo->sainseq->hasencseq)
+  if (saininfo->sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypesfromspecialranges(saininfo,
                                           saininfo->sainseq->seq.encseq,
@@ -885,7 +927,7 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
   {
     gt_sain_checkorder(saininfo,suftab,0,saininfo->countSstartype-1);
   }
-  if (!saininfo->sainseq->hasencseq)
+  if (saininfo->sainseq->seqtype == GT_SAIN_INTSEQ)
   {
     gt_sain_determinebucketsize(saininfo->sainseq);
   }
@@ -902,7 +944,7 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
     {
       gt_sain_checkorder(saininfo,suftab,0,nonspecialentries-1);
     }
-    if (saininfo->sainseq->hasencseq && finalcheck)
+    if (saininfo->sainseq->seqtype == GT_SAIN_ENCSEQ && finalcheck)
     {
       gt_sain_filltailsuffixes(suftab + nonspecialentries,
                                saininfo->sainseq->seq.encseq);
@@ -915,8 +957,8 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
   }
 }
 
-void gt_sain_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
-                          bool finalcheck)
+void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
+                                 bool finalcheck)
 {
   unsigned long nonspecialentries, requiredentries, suftabentries, *suftab;
   GtSainseq *sainseq = gt_sain_seq_new_from_encseq(encseq);
@@ -926,11 +968,11 @@ void gt_sain_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
   gt_sain_info_show(saininfo);
   nonspecialentries = sainseq->totallength - sainseq->specialcharacters;
   requiredentries = saininfo->countSstartype +
-                    GT_DIV2(saininfo->sainseq->totallength) + 1;
+                    GT_DIV2(sainseq->totallength) + 1;
   suftabentries = MAX(nonspecialentries,requiredentries);
   if (finalcheck)
   {
-    suftab = gt_malloc(sizeof (*suftab) * (saininfo->sainseq->totallength+1));
+    suftab = gt_malloc(sizeof (*suftab) * (sainseq->totallength+1));
   } else
   {
     suftab = gt_malloc(sizeof (*suftab) * suftabentries);
@@ -938,6 +980,25 @@ void gt_sain_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
   gt_sain_setundefined(suftab,0,suftabentries - 1);
   gt_sain_rec_sortsuffixes(saininfo,suftab,nonspecialentries,suftabentries,
                            suftabentries,intermediatecheck,finalcheck);
+  gt_sain_info_delete(saininfo);
+  (void) gt_sain_seq_delete(sainseq);
+  gt_free(suftab);
+}
+
+void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
+                                unsigned long len, bool intermediatecheck)
+{
+  unsigned long suftabentries, *suftab;
+  GtSainseq *sainseq = gt_sain_seq_new_from_plainseq(plainseq,len);
+  GtSaininfo *saininfo;
+
+  saininfo = gt_sain_info_new(sainseq);
+  gt_sain_info_show(saininfo);
+  suftabentries = sainseq->totallength+1;
+  suftab = gt_malloc(sizeof (*suftab) * suftabentries);
+  gt_sain_setundefined(suftab,0,suftabentries - 1);
+  gt_sain_rec_sortsuffixes(saininfo,suftab,suftabentries,suftabentries,
+                           suftabentries,intermediatecheck,false);
   gt_sain_info_delete(saininfo);
   (void) gt_sain_seq_delete(sainseq);
   gt_free(suftab);
