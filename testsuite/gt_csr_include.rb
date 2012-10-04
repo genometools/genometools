@@ -14,7 +14,7 @@ Test do
     run_test "#$bin/gt compreads compress -files #$testdata/#{file} -name test"
     run_test "#$bin/gt compreads decompress -file test"
     `grep -v @ #$testdata/#{file} > original`
-    `grep -v @ test.fastq > test_out` 
+    `grep -v @ test.fastq > test_out`
     run_test "diff test_out original"
   end
 end
@@ -26,7 +26,7 @@ Test do
   run_test "#$bin/gt compreads compress -files #{files.join(' ')} -name test"
   run_test "#$bin/gt compreads decompress -file test"
   `grep -h -v @ #{files.join(' ')} > original`
-  `grep -v @ test.fastq > test_out` 
+  `grep -v @ test.fastq > test_out`
   run_test "diff test_out original"
 end
 
@@ -38,7 +38,7 @@ Test do
              " -files #$testdata/#{file} -name test"
     run_test "#$bin/gt compreads decompress -file test"
     `grep -v @ #$testdata/#{file} > original`
-    `grep -v @ test.fastq > test_out` 
+    `grep -v @ test.fastq > test_out`
     run_test "diff test_out original"
     run_test "#$bin/gt compreads decompress -descs -file test"
     run_test "diff test.fastq #$testdata/#{file}"
@@ -63,7 +63,7 @@ Test do
     run_test "#$bin/gt compreads compress -descs" +
              " -files #$testdata/#{file} -name test_#{file}"
     run_test "#$bin/gt compreads decompress -descs -benchmark 10000" +
-             " -file test_#{file}"
+             " -file test_#{file}", :maxtime => 300
   end
 end
 
@@ -83,7 +83,7 @@ Test do
              " -ref ./#{rcr_testfiles[file]}" +
              " -bam #$testdata/#{file}" +
              " -name #{file}"
-    run_test "#$bin/gt compreads refdecompress" + 
+    run_test "#$bin/gt compreads refdecompress" +
              " -ref ./#{rcr_testfiles[file]}" +
              " -rcr ./#{file}"
   end
@@ -101,7 +101,7 @@ Test do
              " -bam #$testdata/#{file}" +
              " -mquals -quals" +
              " -name #{file}"
-    run_test "#$bin/gt compreads refdecompress" + 
+    run_test "#$bin/gt compreads refdecompress" +
              " -ref ./#{rcr_testfiles[file]}" +
              " -rcr ./#{file}"
   end
@@ -119,7 +119,7 @@ Test do
              " -bam #$testdata/#{file}" +
              " -mquals -vquals" +
              " -name #{file}"
-    run_test "#$bin/gt compreads refdecompress" + 
+    run_test "#$bin/gt compreads refdecompress" +
              " -ref ./#{rcr_testfiles[file]}" +
              " -rcr ./#{file}"
   end
@@ -137,7 +137,7 @@ Test do
              " -bam #$testdata/#{file}" +
              " -mquals -vquals -descs" +
              " -name #{file}"
-    run_test "#$bin/gt compreads refdecompress" + 
+    run_test "#$bin/gt compreads refdecompress" +
              " -ref ./#{rcr_testfiles[file]}" +
              " -rcr ./#{file}"
              " -qnames"
