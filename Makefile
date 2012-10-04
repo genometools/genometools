@@ -449,6 +449,8 @@ ifneq ($(with-sqlite),no)
     EXP_LDLIBS += -ldl
   endif
   STEST_FLAGS += -sqlite
+else
+  SQLITE_FILTER_OUT:=src/extended/rdb_sqlite.c
 endif
 
 ifeq ($(with-mysql),yes)
@@ -468,6 +470,10 @@ LIBGENOMETOOLS_PRESRC:=$(filter-out $(CAIRO_FILTER_OUT),\
 # remove MySQL-only files
 LIBGENOMETOOLS_PRESRC:=$(filter-out $(MYSQL_FILTER_OUT),\
                          $(LIBGENOMETOOLS_PRESRC))
+# remove SQLite-only files
+LIBGENOMETOOLS_PRESRC:=$(filter-out $(SQLITE_FILTER_OUT),\
+                         $(LIBGENOMETOOLS_PRESRC))
+
 ifeq ($(amalgamation),yes)
   LIBGENOMETOOLS_SRC:=obj/amalgamation.c
 else
