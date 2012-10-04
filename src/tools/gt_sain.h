@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_SAIN_H
-#define SFX_SAIN_H
+#ifndef GT_SAIN_H
+#define GT_SAIN_H
 
-#include "core/encseq.h"
+#include "core/tool.h"
 
-void gt_sain_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
-                          bool finalcheck);
+/* the sain tool */
+GtTool* gt_sain(void);
 
 #endif

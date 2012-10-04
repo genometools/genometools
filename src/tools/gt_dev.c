@@ -32,6 +32,7 @@
 #include "tools/gt_patternmatch.h"
 #include "tools/gt_readreads.h"
 #include "tools/gt_regioncov.h"
+#include "tools/gt_sain.h"
 #include "tools/gt_sam_interface.h"
 #include "tools/gt_seqcorrect.h"
 #include "tools/gt_seqlensort.h"
@@ -58,6 +59,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
   gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());
+  gt_toolbox_add_tool(dev_toolbox, "sain", gt_sain());
   gt_toolbox_add_tool(dev_toolbox, "sambam", gt_sam_interface());
   gt_toolbox_add_tool(dev_toolbox, "seqcorrect", gt_seqcorrect());
   gt_toolbox_add_tool(dev_toolbox, "seqlensort", gt_seqlensort());

@@ -1,3 +1,7 @@
+changes in version 1.4.3 (??)
+
+- added development tool sain to run the induced suffix array sorting alg.
+
 changes in version 1.4.2 (2012-10-02)
 
 - bugfixes and cleanups

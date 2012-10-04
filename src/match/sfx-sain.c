@@ -833,7 +833,8 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
                                      unsigned long nonspecialentries,
                                      unsigned long availableentries,
                                      unsigned long suftabentries,
-                                     unsigned int sainmode)
+                                     bool intermediatecheck,
+                                     bool finalcheck)
 {
   if (saininfo->countSstartype > 0)
   {
@@ -872,14 +873,15 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
                                saininfo->countSstartype,
                                saininfo->countSstartype,
                                suftabentries,
-                               sainmode);
+                               intermediatecheck,
+                               finalcheck);
       gt_sain_info_delete(saininfo_rec);
       startoccupied = gt_sain_seq_delete(sainseq_rec);
       gt_sain_setundefined(suftab,startoccupied,suftabentries-1);
       gt_sain_expandorder2original(saininfo,suftab);
     }
   }
-  if (sainmode == 1U && saininfo->countSstartype > 0)
+  if (intermediatecheck && saininfo->countSstartype > 0)
   {
     gt_sain_checkorder(saininfo,suftab,0,saininfo->countSstartype-1);
   }
@@ -896,31 +898,25 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
   gt_sain_induceStypesuffixes(saininfo, suftab, nonspecialentries);
   if (nonspecialentries > 0)
   {
-    if (sainmode == 1U)
+    if (intermediatecheck)
     {
       gt_sain_checkorder(saininfo,suftab,0,nonspecialentries-1);
-    } else
+    }
+    if (saininfo->sainseq->hasencseq && finalcheck)
     {
-      if (saininfo->sainseq->hasencseq && sainmode == 2U)
-      {
-        gt_sain_filltailsuffixes(suftab + nonspecialentries,
-                                 saininfo->sainseq->seq.encseq);
-        gt_suftab_lightweightcheck(saininfo->sainseq->seq.encseq,
-                                   GT_READMODE_FORWARD,
-                                   saininfo->sainseq->totallength,
-                                   suftab,
-                                   NULL);
-      }
+      gt_sain_filltailsuffixes(suftab + nonspecialentries,
+                               saininfo->sainseq->seq.encseq);
+      gt_suftab_lightweightcheck(saininfo->sainseq->seq.encseq,
+                                 GT_READMODE_FORWARD,
+                                 saininfo->sainseq->totallength,
+                                 suftab,
+                                 NULL);
     }
   }
 }
 
-/* sainmode = 1: check with own gt_sain_checkorder
-   sainmode = 2: check with gt_suftab_lightweightcheck
-   sainmode = 3: no check
-*/
-
-void gt_sain_sortsuffixes(const GtEncseq *encseq,unsigned int sainmode)
+void gt_sain_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
+                          bool finalcheck)
 {
   unsigned long nonspecialentries, requiredentries, suftabentries, *suftab;
   GtSainseq *sainseq = gt_sain_seq_new_from_encseq(encseq);
@@ -932,7 +928,7 @@ void gt_sain_sortsuffixes(const GtEncseq *encseq,unsigned int sainmode)
   requiredentries = saininfo->countSstartype +
                     GT_DIV2(saininfo->sainseq->totallength) + 1;
   suftabentries = MAX(nonspecialentries,requiredentries);
-  if (sainmode == 2U)
+  if (finalcheck)
   {
     suftab = gt_malloc(sizeof (*suftab) * (saininfo->sainseq->totallength+1));
   } else
@@ -941,7 +937,7 @@ void gt_sain_sortsuffixes(const GtEncseq *encseq,unsigned int sainmode)
   }
   gt_sain_setundefined(suftab,0,suftabentries - 1);
   gt_sain_rec_sortsuffixes(saininfo,suftab,nonspecialentries,suftabentries,
-                           suftabentries,sainmode);
+                           suftabentries,intermediatecheck,finalcheck);
   gt_sain_info_delete(saininfo);
   (void) gt_sain_seq_delete(sainseq);
   gt_free(suftab);

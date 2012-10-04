@@ -22,13 +22,11 @@
 #include "core/mathsupport.h"
 #include "core/showtime.h"
 #include "core/logger.h"
-#include "match/sfx-sain.h"
 #include "tools/gt_encseq_bench.h"
 
 typedef struct
 {
   unsigned long ccext;
-  unsigned int sainmode;
   bool sortlenprepare, verbose;
 } GtEncseqBenchArguments;
 
@@ -68,11 +66,6 @@ static GtOptionParser* gt_encseq_bench_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("solepr", "prepare data structure for sequences "
                                          "ordered by their length",
                                &arguments->sortlenprepare, false);
-  gt_option_parser_add_option(op, option);
-
-  option = gt_option_new_uint("sain", "run induced suffix sorting in "
-                                      "given mode",
-                               &arguments->sainmode, 0);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_verbose(&arguments->verbose);
@@ -361,10 +354,6 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
       }
       gt_logger_log(logger,"perform seqstart check");
       gt_sortedlengthinfo_delete(sortedlengthinfo);
-    }
-    if (arguments->sainmode > 0)
-    {
-      gt_sain_sortsuffixes(encseq,arguments->sainmode);
     }
     if (!had_err && arguments->ccext > 0)
     {
