@@ -23,7 +23,7 @@
 
 typedef struct
 {
-  bool icheck, fcheck;
+  bool icheck, fcheck, verbose;
   GtStr *encseqfile, *plainseqfile;
 } GtSainArguments;
 
@@ -80,6 +80,10 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   gt_option_imply(optionfcheck, optionesq);
   gt_option_exclude(optionesq,optionfile);
 
+  /* -v */
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
   return op;
 }
 
@@ -109,7 +113,8 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
       had_err = -1;
     } else
     {
-      gt_sain_encseq_sortsuffixes(encseq,arguments->icheck,arguments->fcheck);
+      gt_sain_encseq_sortsuffixes(encseq,arguments->icheck,arguments->fcheck,
+                                  arguments->verbose);
     }
     gt_encseq_delete(encseq);
     gt_encseq_loader_delete(el);
@@ -126,7 +131,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
     } else
     {
       gt_sain_plain_sortsuffixes(plainseq,(unsigned long) len,
-                                 arguments->icheck);
+                                 arguments->icheck,arguments->verbose);
       gt_fa_xmunmap(plainseq);
     }
   }
