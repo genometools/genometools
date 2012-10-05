@@ -18,13 +18,16 @@
 #ifndef SFX_SAIN_H
 #define SFX_SAIN_H
 
+#include "core/timer_api.h"
 #include "core/encseq.h"
 
 void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
-                                 bool finalcheck,bool verbose);
+                                 bool finalcheck,bool verbose,
+                                 GtTimer *timer);
 
 void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                                 unsigned long len, bool intermediatecheck,
-                                bool verbose);
+                                bool verbose,
+                                GtTimer *timer);
 
 #endif

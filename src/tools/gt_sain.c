@@ -18,6 +18,8 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/fa.h"
+#include "core/timer_api.h"
+#include "core/showtime.h"
 #include "tools/gt_sain.h"
 #include "match/sfx-sain.h"
 
@@ -101,38 +103,54 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
   {
     gt_error_set(err,"superfluous arguments");
     had_err = -1;
-  }
-  if (gt_str_length(arguments->encseqfile) > 0)
+  } else
   {
-    GtEncseqLoader *el = gt_encseq_loader_new();
-    GtEncseq *encseq = gt_encseq_loader_load(el,
-                                             gt_str_get(arguments->encseqfile),
-                                             err);
-    if (encseq == NULL)
+    if (gt_str_length(arguments->encseqfile) > 0)
     {
-      had_err = -1;
-    } else
-    {
-      gt_sain_encseq_sortsuffixes(encseq,arguments->icheck,arguments->fcheck,
-                                  arguments->verbose);
+      GtEncseqLoader *el = gt_encseq_loader_new();
+      GtEncseq *encseq
+        = gt_encseq_loader_load(el,gt_str_get(arguments->encseqfile),err);
+      if (encseq == NULL)
+      {
+        had_err = -1;
+      } else
+      {
+        gt_sain_encseq_sortsuffixes(encseq,arguments->icheck,arguments->fcheck,
+                                    arguments->verbose,NULL);
+      }
+      gt_encseq_delete(encseq);
+      gt_encseq_loader_delete(el);
     }
-    gt_encseq_delete(encseq);
-    gt_encseq_loader_delete(el);
-  }
-  if (gt_str_length(arguments->plainseqfile) > 0)
-  {
-    GtUchar *plainseq;
-    size_t len;
+    if (gt_str_length(arguments->plainseqfile) > 0)
+    {
+      GtUchar *plainseq;
+      size_t len;
 
-    plainseq = gt_fa_mmap_read(gt_str_get(arguments->plainseqfile),&len,err);
-    if (plainseq == NULL)
-    {
-      had_err = -1;
-    } else
-    {
-      gt_sain_plain_sortsuffixes(plainseq,(unsigned long) len,
-                                 arguments->icheck,arguments->verbose);
-      gt_fa_xmunmap(plainseq);
+      plainseq = gt_fa_mmap_read(gt_str_get(arguments->plainseqfile),&len,err);
+      if (plainseq == NULL)
+      {
+        had_err = -1;
+      } else
+      {
+        GtTimer *timer = NULL;
+
+        if (gt_showtime_enabled())
+        {
+          timer = gt_timer_new_with_progress_description(
+                           "determine Sstar suffixes");
+          gt_timer_start(timer);
+        }
+        gt_sain_plain_sortsuffixes(plainseq,(unsigned long) len,
+                                   arguments->icheck,arguments->verbose,
+                                   timer);
+        if (timer != NULL)
+        {
+          gt_timer_show_progress_final(timer, stdout);
+          gt_timer_stop(timer);
+        }
+        gt_timer_delete(timer);
+        gt_fa_xmunmap(plainseq);
+      }
     }
   }
   return had_err;
