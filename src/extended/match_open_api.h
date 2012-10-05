@@ -18,14 +18,15 @@
 #ifndef MATCH_OPEN_API_H
 #define MATCH_OPEN_API_H
 
+ /* The <GtMatchOpen> class, implementing the <GtMatch> interface, is meant to
+    store results in the OpenMatch format, e.g. as output by Vmatch. */
 typedef struct GtMatchOpen GtMatchOpen;
 
 #include "extended/match_api.h"
 
-/* Creates a new <GtMatch> object meant to store results in the OpenMatch
-   format. That is, it stores long values <weight> in addition to the generic
-   match contents <seqid1>, <seqid2>, <start_seq1>, <start_seq2>, <end_seq1>,
-   and <end_seq2>. */
+/* Creates a new <GtMatchOpen> object, storing long values <weight> in addition
+   to the generic match contents <seqid1>, <seqid2>, <start_seq1>, <start_seq2>,
+   <end_seq1>, and <end_seq2>. */
 GtMatch* gt_match_open_new(char *seqid1,
                            char *seqid2,
                            unsigned long start_seq1,

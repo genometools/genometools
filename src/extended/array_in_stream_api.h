@@ -22,8 +22,14 @@
 #include "core/error_api.h"
 #include "extended/node_stream_api.h"
 
+/* Implements the <GtNodeStream> interface. <GtArrayOutStream> takes
+   an array of <GtGenomeNodes> and delivers them when used as an input stream.
+   This stream can be used to feed nodes from outside into a stream flow. */
 typedef struct GtArrayInStream GtArrayInStream;
 
+/* Creates a new <GtArrayInStream>, delivering nodes from <nodes>. Note that
+   the array must contain pointers to <GtGenomeNode>s! For every node passed,
+   the value pointed to by <progress> is incremented by 1. */
 GtNodeStream* gt_array_in_stream_new(GtArray *nodes, unsigned long *progress,
                                      GtError *err);
 

@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2011 Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011      Sascha Kastens <mail@skastens.de>
+  Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +21,11 @@
 
 #include "core/range_api.h"
 
+/* The <GtMatch> interface defines a generic set of functions for a data
+   structure designed to hold matches, that is, two similar locations on two
+   sequences which are further described by additional data specific to the
+   matching engine. Matches have a direction, e.g. direct or reverse
+   (palindromic). */
 typedef struct GtMatch GtMatch;
 
 typedef enum {
@@ -27,21 +33,46 @@ typedef enum {
   GT_MATCH_REVERSE
 } GtMatchDirection;
 
+/* Sets the sequence ID of the first sequence involved in the match <match> to
+   <seqid>. The string <seqid> must be null-terminated. */
 void             gt_match_set_seqid1(GtMatch *match, const char *seqid);
+/* Sets the sequence ID of the first sequence involved in the match <match> to
+   <seqid>. The string <seqid> needs not be null-terminated, its length is
+   given by <len>. */
 void             gt_match_set_seqid1_nt(GtMatch *match, const char *seqid,
                                         unsigned long len);
+/* Sets the sequence ID of the second sequence involved in the match <match> to
+   <seqid>. The string <seqid> must be null-terminated. */
 void             gt_match_set_seqid2(GtMatch *match, const char *seqid);
+/* Sets the sequence ID of the second sequence involved in the match <match> to
+   <seqid>. The string <seqid> needs not be null-terminated, its length is
+   given by <len>. */
 void             gt_match_set_seqid2_nt(GtMatch *match, const char *seqid,
                                         unsigned long len);
+/* Returns the sequence ID of the first sequence involved in the match
+   <match>. */
 const char*      gt_match_get_seqid1(const GtMatch *match);
+/* Returns the sequence ID of the second sequence involved in the match
+   <match>. */
 const char*      gt_match_get_seqid2(const GtMatch *match);
+/* Sets the range of the first sequence involved in the match <match> to
+   <start>-<end>. */
 void             gt_match_set_range_seq1(GtMatch *match, unsigned long start,
                                          unsigned long end);
+/* Sets the range of the second sequence involved in the match <match> to
+   <start>-<end>. */
 void             gt_match_set_range_seq2(GtMatch *match, unsigned long start,
                                          unsigned long end);
+/* Writes the range of the first sequence involved in the match <match> to the
+   location pointed to by <range>. */
 void             gt_match_get_range_seq1(const GtMatch *match, GtRange *range);
+/* Writes the range of the second sequence involved in the match <match> to the
+   location pointed to by <range>. */
 void             gt_match_get_range_seq2(const GtMatch *match, GtRange *range);
+/* Returns the match direction of <match>. */
 GtMatchDirection gt_match_get_direction(const GtMatch *match);
+
+/* Deletes the match <match>, freeing all associated memory. */
 void             gt_match_delete(GtMatch *match);
 
 #endif

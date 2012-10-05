@@ -18,14 +18,15 @@
 #ifndef MATCH_SW_API_H
 #define MATCH_SW_API_H
 
+ /* The <GtMatchSW> class, implementing the <GtMatch> interface, is meant to
+    store results from Smith-Waterman matching (using the <swalign> module). */
 typedef struct GtMatchSW GtMatchSW;
 
 #include "extended/match_api.h"
 
-/* Creates a new <GtMatch> object meant to store results from Smith-Waterman
-   matching (using the <swalign> module). That is, it stores the alignment
-   length <length>, the edit distance <edist> and the sequence numbers in the
-   <GtEncseqs> in addition to the generic match contents <seqid1>, <seqid2>,
+/* Creates a new <GtMatch> object, storing the alignment length <length>,
+   the edit distance <edist> and the sequence numbers in the sequence
+   collections in addition to the generic match contents <seqid1>, <seqid2>,
    <start_seq1>, <start_seq2>, <end_seq1> and <end_seq2>. */
 GtMatch*      gt_match_sw_new(const char *seqid1,
                               const char *seqid2,
@@ -39,10 +40,10 @@ GtMatch*      gt_match_sw_new(const char *seqid1,
                               unsigned long end_seq2,
                               GtMatchDirection dir);
 
-/* Returns the sequence number of the match <ms> in the first <GtEncseq>. */
+/* Returns the sequence number of the match <ms> in the first sequence set. */
 unsigned long gt_match_sw_get_seqno1(const GtMatchSW *ms);
 
-/* Returns the sequence number of the match <ms> in the second <GtEncseq>. */
+/* Returns the sequence number of the match <ms> in the second sequence set. */
 unsigned long gt_match_sw_get_seqno2(const GtMatchSW *ms);
 
 /* Returns the alignment length of the match <ms>. */

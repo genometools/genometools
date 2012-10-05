@@ -22,14 +22,16 @@
 #include "core/error_api.h"
 #include "extended/node_stream_api.h"
 
+/* The <GtArrayOutStream> class implements the <GtNodeStream> interface.
+   <GtArrayOutStream> takes <GtGenomeNodes> of type <GtFeatureNode> from
+   <in_stream> and adds them to <nodes>. This stream can be used to obtain
+   nodes for processing outside of the usual stream flow. */
 typedef struct GtArrayOutStream GtArrayOutStream;
 
-/* Implements the <GtNodeStream> interface. <GtArrayOutStream> takes
-   <GtGenomeNodes> of tpe <GtFeatureNode> from <in_stream> and adds them to the
-   array <nodes>. This stream can be used to obtain nodes for processing outside
-   the usual stream flow */
+/* Creates a new <GtArrayInStream>, storing new references to nodes from
+   <in_stream> into <nodes>. Note that the array must be set up to contain
+   pointers to <GtGenomeNode>s! */
 GtNodeStream* gt_array_out_stream_new(GtNodeStream *in_stream,
-                                      GtArray *nodes,
-                                      GtError *err);
+                                      GtArray *nodes, GtError *err);
 
 #endif

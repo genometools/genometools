@@ -37,9 +37,13 @@ interfaces.
 
   <li><a href="#GtAlphabet">GtAlphabet</a>
 
+  <li><a href="#GtAnnoDBGFFlike">GtAnnoDBGFFlike</a>
+
   <li><a href="#GtAnnoDBSchema">GtAnnoDBSchema</a>
 
   <li><a href="#GtArray">GtArray</a>
+
+  <li><a href="#GtArrayInStream">GtArrayInStream</a>
 
   <li><a href="#GtArrayOutStream">GtArrayOutStream</a>
 
@@ -139,6 +143,8 @@ interfaces.
 
   <li><a href="#GtMD5ToIDStream">GtMD5ToIDStream</a>
 
+  <li><a href="#GtMatch">GtMatch</a>
+
   <li><a href="#GtMatchBlast">GtMatchBlast</a>
 
   <li><a href="#GtMatchIterator">GtMatchIterator</a>
@@ -148,6 +154,8 @@ interfaces.
   <li><a href="#GtMatchOpen">GtMatchOpen</a>
 
   <li><a href="#GtMatchSW">GtMatchSW</a>
+
+  <li><a href="#GtMatchVisitor">GtMatchVisitor</a>
 
   <li><a href="#GtMergeFeatureStream">GtMergeFeatureStream</a>
 
@@ -161,6 +169,8 @@ interfaces.
 
   <li><a href="#GtNodeVisitor">GtNodeVisitor</a>
 
+  <li><a href="#GtORFIterator">GtORFIterator</a>
+
   <li><a href="#GtOption">GtOption</a>
 
   <li><a href="#GtOptionParser">GtOptionParser</a>
@@ -168,6 +178,10 @@ interfaces.
   <li><a href="#GtPhase">GtPhase</a>
 
   <li><a href="#GtQueue">GtQueue</a>
+
+  <li><a href="#GtRDBMySQL">GtRDBMySQL</a>
+
+  <li><a href="#GtRDBSqlite">GtRDBSqlite</a>
 
   <li><a href="#GtRDBVisitor">GtRDBVisitor</a>
 
@@ -271,37 +285,15 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="gt_orf_iterator_new"></a>
+<a name="gt_feature_index_gfflike_get_all_features"></a>
 
-<code>GtORFIterator*       gt_orf_iterator_new(GtCodonIterator *ci,
-                                        GtTranslator *translator)</code>
+<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
+                                                          GtArray *results,
+                                                          GtError *err)</code>
 <p>
-Return a new <code>GtORFIterator*</code> which detects ORFs.
-</p>
-<hr>
-<a name="gt_orf_iterator_next"></a>
-
-<code>GtORFIteratorStatus  gt_orf_iterator_next(GtORFIterator *orf_iterator,
-                                         GtRange *orf_rng,
-                                         unsigned int *orf_frame,
-                                         GtError *err)</code>
-<p>
-Sets the values of <code>orf_rng.start</code>, <code>orf_rng.end</code> and <code>orf_frame</code> to the
-   current reading position of <code>ci</code> if START/STOP AA is found. The frame in
-   which the ORF is located is written to the position pointed to by
-   <code>orf_frame</code>. This function returns one of three status codes:
-   GT_ORF_ITERATOR_OK    : an ORF was detected successfully(START/STOP AA pair),
-   GT_ORF_ITERATOR_END   : no ORF was detected because the end of the scan
-                           region has been reached,
-   GT_ORF_ITERATOR_ERROR : no ORF was detected because an error occurred during
-                           sequence access. See <code>err</code> for details.
-</p>
-<hr>
-<a name="gt_orf_iterator_delete"></a>
-
-<code>void                 gt_orf_iterator_delete(GtORFIterator *orf_iterator)</code>
-<p>
-Delete <code>orf_iterator</code>.
+Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
+   success, a negative value otherwise. The message in <code>err</code> is set
+   accordingly.
 </p>
 <hr>
 <a name="gt_reverse_complement"></a>
@@ -616,11 +608,26 @@ Decrease the reference count for <code>alphabet</code> or delete it, if this was
    last reference.
 </p>
 <hr>
+<a name="GtAnnoDBGFFlike"></a>
+<h2>Class GtAnnoDBGFFlike</h2>
+
+<p> The <code>GtAnnoDBGFFlike</code> class implements the <code>GtAnnoDBSchema</code> interface,
+   using a database schema specifically tailored to store GenomeTools
+   annotations. </p>
+
+<hr>
+<a name="gt_anno_db_gfflike_new"></a>
+
+<code>GtAnnoDBSchema*  gt_anno_db_gfflike_new(void)</code>
+<p>
+Creates a new <code>GtAnnoDBGFFlike</code> schema object.
+</p>
+<hr>
 <a name="GtAnnoDBSchema"></a>
 <h2>Class GtAnnoDBSchema</h2>
 
-<p> The ``GtAnnoDBSchema'' interface for a database-backed abstract
-   <code>GtFeatureIndex</code> factory </p>
+<p> The <code>GtAnnoDBSchema</code> interface for a database-backed abstract
+   <code>GtFeatureIndex</code> factory. </p>
 
 <hr>
 <a name="gt_anno_db_schema_get_feature_index"></a>
@@ -841,18 +848,41 @@ Decrease the reference count for <code>array</code> or delete it, if this was th
    reference.
 </p>
 <hr>
+<a name="GtArrayInStream"></a>
+<h2>Class GtArrayInStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. <code>GtArrayOutStream</code> takes
+   an array of <code>GtGenomeNodes</code> and delivers them when used as an input stream.
+   This stream can be used to feed nodes from outside into a stream flow. </p>
+
+<hr>
+<a name="gt_array_in_stream_new"></a>
+
+<code>GtNodeStream*  gt_array_in_stream_new(GtArray *nodes, unsigned long *progress,
+                                     GtError *err)</code>
+<p>
+Creates a new <code>GtArrayInStream</code>, delivering nodes from <code>nodes</code>. Note that
+   the array must contain pointers to <code>GtGenomeNode</code>s! For every node passed,
+   the value pointed to by <code>progress</code> is incremented by 1.
+</p>
+<hr>
 <a name="GtArrayOutStream"></a>
 <h2>Class GtArrayOutStream</h2>
+
+<p> The <code>GtArrayOutStream</code> class implements the <code>GtNodeStream</code> interface.
+   <code>GtArrayOutStream</code> takes <code>GtGenomeNodes</code> of type <code>GtFeatureNode</code> from
+   <code>in_stream</code> and adds them to <code>nodes</code>. This stream can be used to obtain
+   nodes for processing outside of the usual stream flow. </p>
+
+<hr>
 <a name="gt_array_out_stream_new"></a>
 
 <code>GtNodeStream*  gt_array_out_stream_new(GtNodeStream *in_stream,
-                                      GtArray *nodes,
-                                      GtError *err)</code>
+                                      GtArray *nodes, GtError *err)</code>
 <p>
-Implements the <code>GtNodeStream</code> interface. <code>GtArrayOutStream</code> takes
-   <code>GtGenomeNodes</code> of tpe <code>GtFeatureNode</code> from <code>in_stream</code> and adds them to the
-   array <code>nodes</code>. This stream can be used to obtain nodes for processing outside
-   the usual stream flow
+Creates a new <code>GtArrayInStream</code>, storing new references to nodes from
+   <code>in_stream</code> into <code>nodes</code>. Note that the array must be set up to contain
+   pointers to <code>GtGenomeNode</code>s!
 </p>
 <hr>
 <a name="GtBEDInStream"></a>
@@ -4722,6 +4752,116 @@ Create a <code>GtMD5toIDStream*</code> which converts MD5 sequence IDs from node
    given <code>region_mapping</code>). Takes ownership of <code>region_mapping</code>!
 </p>
 <hr>
+<a name="GtMatch"></a>
+<h2>Class GtMatch</h2>
+
+<p> The <code>GtMatch</code> interface defines a generic set of functions for a data
+   structure designed to hold matches, that is, two similar locations on two
+   sequences which are further described by additional data specific to the
+   matching engine. Matches have a direction, e.g. direct or reverse
+   (palindromic). </p>
+
+<hr>
+<a name="gt_match_set_seqid1"></a>
+
+<code>void              gt_match_set_seqid1(GtMatch *match, const char *seqid)</code>
+<p>
+Sets the sequence ID of the first sequence involved in the match <code>match</code> to
+   <code>seqid</code>. The string <code>seqid</code> must be null-terminated.
+</p>
+<hr>
+<a name="gt_match_set_seqid1_nt"></a>
+
+<code>void              gt_match_set_seqid1_nt(GtMatch *match, const char *seqid,
+                                        unsigned long len)</code>
+<p>
+Sets the sequence ID of the first sequence involved in the match <code>match</code> to
+   <code>seqid</code>. The string <code>seqid</code> needs not be null-terminated, its length is
+   given by <code>len</code>.
+</p>
+<hr>
+<a name="gt_match_set_seqid2"></a>
+
+<code>void              gt_match_set_seqid2(GtMatch *match, const char *seqid)</code>
+<p>
+Sets the sequence ID of the second sequence involved in the match <code>match</code> to
+   <code>seqid</code>. The string <code>seqid</code> must be null-terminated.
+</p>
+<hr>
+<a name="gt_match_set_seqid2_nt"></a>
+
+<code>void              gt_match_set_seqid2_nt(GtMatch *match, const char *seqid,
+                                        unsigned long len)</code>
+<p>
+Sets the sequence ID of the second sequence involved in the match <code>match</code> to
+   <code>seqid</code>. The string <code>seqid</code> needs not be null-terminated, its length is
+   given by <code>len</code>.
+</p>
+<hr>
+<a name="gt_match_get_seqid1"></a>
+
+<code>const char*       gt_match_get_seqid1(const GtMatch *match)</code>
+<p>
+Returns the sequence ID of the first sequence involved in the match
+   <code>match</code>.
+</p>
+<hr>
+<a name="gt_match_get_seqid2"></a>
+
+<code>const char*       gt_match_get_seqid2(const GtMatch *match)</code>
+<p>
+Returns the sequence ID of the second sequence involved in the match
+   <code>match</code>.
+</p>
+<hr>
+<a name="gt_match_set_range_seq1"></a>
+
+<code>void              gt_match_set_range_seq1(GtMatch *match, unsigned long start,
+                                         unsigned long end)</code>
+<p>
+Sets the range of the first sequence involved in the match <code>match</code> to
+   <code>start</code>-<code>end</code>.
+</p>
+<hr>
+<a name="gt_match_set_range_seq2"></a>
+
+<code>void              gt_match_set_range_seq2(GtMatch *match, unsigned long start,
+                                         unsigned long end)</code>
+<p>
+Sets the range of the second sequence involved in the match <code>match</code> to
+   <code>start</code>-<code>end</code>.
+</p>
+<hr>
+<a name="gt_match_get_range_seq1"></a>
+
+<code>void              gt_match_get_range_seq1(const GtMatch *match, GtRange *range)</code>
+<p>
+Writes the range of the first sequence involved in the match <code>match</code> to the
+   location pointed to by <code>range</code>.
+</p>
+<hr>
+<a name="gt_match_get_range_seq2"></a>
+
+<code>void              gt_match_get_range_seq2(const GtMatch *match, GtRange *range)</code>
+<p>
+Writes the range of the second sequence involved in the match <code>match</code> to the
+   location pointed to by <code>range</code>.
+</p>
+<hr>
+<a name="gt_match_get_direction"></a>
+
+<code>GtMatchDirection  gt_match_get_direction(const GtMatch *match)</code>
+<p>
+Returns the match direction of <code>match</code>.
+</p>
+<hr>
+<a name="gt_match_delete"></a>
+
+<code>void              gt_match_delete(GtMatch *match)</code>
+<p>
+Deletes the match <code>match</code>, freeing all associated memory.
+</p>
+<hr>
 <a name="GtMatchBlast"></a>
 <h2>Class GtMatchBlast</h2>
 <a name="gt_match_blast_new"></a>
@@ -4825,6 +4965,11 @@ Deletes <code>mp</code>, freeing all associated space.
 <hr>
 <a name="GtMatchLAST"></a>
 <h2>Class GtMatchLAST</h2>
+
+<p> The <code>GtMatchLAST</code> class, implementing the <code>GtMatch</code> interface, is meant to
+    store results given in the format as output by LAST. </p>
+
+<hr>
 <a name="gt_match_last_new"></a>
 
 <code>GtMatch*       gt_match_last_new(const char *seqid1,
@@ -4846,14 +4991,14 @@ Creates a new <code>GtMatch</code> object meant to store results from the
 
 <code>unsigned long  gt_match_last_get_seqno1(const GtMatchLAST *ml)</code>
 <p>
-Returns the sequence number of the match <code>ms</code> in the first <code>GtEncseq</code>.
+Returns the sequence number of the match <code>ms</code> in the first sequence set.
 </p>
 <hr>
 <a name="gt_match_last_get_seqno2"></a>
 
 <code>unsigned long  gt_match_last_get_seqno2(const GtMatchLAST *ml)</code>
 <p>
-Returns the sequence number of the match <code>ms</code> in the second <code>GtEncseq</code>.
+Returns the sequence number of the match <code>ms</code> in the second sequence set.
 </p>
 <hr>
 <a name="gt_match_last_get_score"></a>
@@ -4865,6 +5010,11 @@ Returns the LAST score of the match <code>ms</code>.
 <hr>
 <a name="GtMatchOpen"></a>
 <h2>Class GtMatchOpen</h2>
+
+<p> The <code>GtMatchOpen</code> class, implementing the <code>GtMatch</code> interface, is meant to
+    store results in the OpenMatch format, e.g. as output by Vmatch. </p>
+
+<hr>
 <a name="gt_match_open_new"></a>
 
 <code>GtMatch*  gt_match_open_new(char *seqid1,
@@ -4876,10 +5026,9 @@ Returns the LAST score of the match <code>ms</code>.
                            long weight,
                            GtMatchDirection dir)</code>
 <p>
-Creates a new <code>GtMatch</code> object meant to store results in the OpenMatch
-   format. That is, it stores long values <code>weight</code> in addition to the generic
-   match contents <code>seqid1</code>, <code>seqid2</code>, <code>start_seq1</code>, <code>start_seq2</code>, <code>end_seq1</code>,
-   and <code>end_seq2</code>.
+Creates a new <code>GtMatchOpen</code> object, storing long values <code>weight</code> in addition
+   to the generic match contents <code>seqid1</code>, <code>seqid2</code>, <code>start_seq1</code>, <code>start_seq2</code>,
+   <code>end_seq1</code>, and <code>end_seq2</code>.
 </p>
 <hr>
 <a name="gt_match_open_set_weight"></a>
@@ -4898,6 +5047,11 @@ Returns the weight value stored in <code>mo</code>.
 <hr>
 <a name="GtMatchSW"></a>
 <h2>Class GtMatchSW</h2>
+
+<p> The <code>GtMatchSW</code> class, implementing the <code>GtMatch</code> interface, is meant to
+    store results from Smith-Waterman matching (using the <code>swalign</code> module). </p>
+
+<hr>
 <a name="gt_match_sw_new"></a>
 
 <code>GtMatch*       gt_match_sw_new(const char *seqid1,
@@ -4912,10 +5066,9 @@ Returns the weight value stored in <code>mo</code>.
                               unsigned long end_seq2,
                               GtMatchDirection dir)</code>
 <p>
-Creates a new <code>GtMatch</code> object meant to store results from Smith-Waterman
-   matching (using the <code>swalign</code> module). That is, it stores the alignment
-   length <code>length</code>, the edit distance <code>edist</code> and the sequence numbers in the
-   <code>GtEncseqs</code> in addition to the generic match contents <code>seqid1</code>, <code>seqid2</code>,
+Creates a new <code>GtMatch</code> object, storing the alignment length <code>length</code>,
+   the edit distance <code>edist</code> and the sequence numbers in the sequence
+   collections in addition to the generic match contents <code>seqid1</code>, <code>seqid2</code>,
    <code>start_seq1</code>, <code>start_seq2</code>, <code>end_seq1</code> and <code>end_seq2</code>.
 </p>
 <hr>
@@ -4923,14 +5076,14 @@ Creates a new <code>GtMatch</code> object meant to store results from Smith-Wate
 
 <code>unsigned long  gt_match_sw_get_seqno1(const GtMatchSW *ms)</code>
 <p>
-Returns the sequence number of the match <code>ms</code> in the first <code>GtEncseq</code>.
+Returns the sequence number of the match <code>ms</code> in the first sequence set.
 </p>
 <hr>
 <a name="gt_match_sw_get_seqno2"></a>
 
 <code>unsigned long  gt_match_sw_get_seqno2(const GtMatchSW *ms)</code>
 <p>
-Returns the sequence number of the match <code>ms</code> in the second <code>GtEncseq</code>.
+Returns the sequence number of the match <code>ms</code> in the second sequence set.
 </p>
 <hr>
 <a name="gt_match_sw_get_alignment_length"></a>
@@ -4945,6 +5098,39 @@ Returns the alignment length of the match <code>ms</code>.
 <code>unsigned long  gt_match_sw_get_edist(const GtMatchSW *ms)</code>
 <p>
 Returns the edit distance of the match <code>ms</code>.
+</p>
+<hr>
+<a name="GtMatchVisitor"></a>
+<h2>Class GtMatchVisitor</h2>
+
+<p> The <code>GtMatchVisitor</code> class allows to distinguish a <code>GtMatch</code> implementation,
+   e.g. BLAST or OpenMatch, and to call different code for each
+   implementation. </p>
+
+<hr>
+<a name="gt_match_visitor_visit_match_blast"></a>
+
+<code>int  gt_match_visitor_visit_match_blast(GtMatchVisitor *match_visitor,
+                                       GtMatchBlast *match_blast,
+                                       GtError *err)</code>
+<p>
+Visit <code>match_blast</code> with <code>match_visitor</code>.
+</p>
+<hr>
+<a name="gt_match_visitor_visit_match_open"></a>
+
+<code>int  gt_match_visitor_visit_match_open(GtMatchVisitor *match_visitor,
+                                      GtMatchOpen *match_open,
+                                      GtError *err)</code>
+<p>
+Visit <code>match_open</code> with <code>match_visitor</code>.
+</p>
+<hr>
+<a name="gt_match_visitor_delete"></a>
+
+<code>void  gt_match_visitor_delete(GtMatchVisitor *match_visitor)</code>
+<p>
+Deletes <code>match_visitor</code> freeing all associated space.
 </p>
 <hr>
 <a name="GtMergeFeatureStream"></a>
@@ -5165,6 +5351,48 @@ Visit <code>sequence_node</code> with <code>node_visitor</code>.
 <code>void   gt_node_visitor_delete(GtNodeVisitor *node_visitor)</code>
 <p>
 Delete <code>node_visitor</code>.
+</p>
+<hr>
+<a name="GtORFIterator"></a>
+<h2>Class GtORFIterator</h2>
+
+<p> The <code>GtORFIterator</code> class is used to enumerate open reading frames (ORFs)
+   in codon streams as delivered by a <code>GtCodonIterator</code> using a translation
+   process as defined by a <code>GtTranslator</code>. </p>
+
+<hr>
+<a name="gt_orf_iterator_new"></a>
+
+<code>GtORFIterator*       gt_orf_iterator_new(GtCodonIterator *ci,
+                                        GtTranslator *translator)</code>
+<p>
+Return a new <code>GtORFIterator*</code> using the codons delivered by <code>ci</code> and
+   translated by <code>translator</code>.
+</p>
+<hr>
+<a name="gt_orf_iterator_next"></a>
+
+<code>GtORFIteratorStatus  gt_orf_iterator_next(GtORFIterator *orf_iterator,
+                                         GtRange *orf_rng,
+                                         unsigned int *orf_frame,
+                                         GtError *err)</code>
+<p>
+Sets the values of <code>orf_rng.start</code>, <code>orf_rng.end</code> and <code>orf_frame</code> to the
+   current reading position of <code>ci</code> if a START/STOP codon is found. The frame
+   in which the ORF is located is written to the position pointed to by
+   <code>orf_frame</code>. This function returns one of three status codes:
+   <code>GT_ORF_ITERATOR_OK</code> if an ORF was detected successfully(START/STOP AA pair),
+   <code>GT_ORF_ITERATOR_END</code> if no ORF was detected because the end of the scan
+                           region has been reached, or
+   <code>GT_ORF_ITERATOR_ERROR</code> if no ORF was detected because an error occurred
+                           during sequence access. See <code>err</code> for details.
+</p>
+<hr>
+<a name="gt_orf_iterator_delete"></a>
+
+<code>void                 gt_orf_iterator_delete(GtORFIterator *orf_iterator)</code>
+<p>
+Delete <code>orf_iterator</code> and frees all associated memory.
 </p>
 <hr>
 <a name="GtOption"></a>
@@ -5827,6 +6055,42 @@ Return the number of elements in <code>queue</code>.
 <code>void           gt_queue_delete(GtQueue *queue)</code>
 <p>
 Delete <code>queue</code>. Elements contained in <code>queue</code> are not freed!
+</p>
+<hr>
+<a name="GtRDBMySQL"></a>
+<h2>Class GtRDBMySQL</h2>
+
+<p> The <code>GtRDBMySQL</code> class implements the <code>GtRDB</code> interface using the
+   MySQL client backend. This implementation is only available if
+   compiled with the option ``with-mysql=yes''. </p>
+
+<hr>
+<a name="gt_rdb_mysql_new"></a>
+
+<code>GtRDB*  gt_rdb_mysql_new(const char *server, unsigned int port,
+                        const char *database, const char *username,
+                        const char *password, GtError *err)</code>
+<p>
+Creates a new <code>GtRDBSqlite</code> object from the database accessible on <code>server</code>
+   port <code>port</code>, selecting the database <code>database</code> using the credentials given
+   by <code>username</code> and <code>password</code>. Returns NULL on error, <code>err</code> is set
+   accordingly.
+</p>
+<hr>
+<a name="GtRDBSqlite"></a>
+<h2>Class GtRDBSqlite</h2>
+
+<p> The <code>GtRDBSqlite</code> class implements the <code>GtRDB</code> interface using the
+   SQLite embedded database backend. This implementation is only available if
+   compiled with the option ``with-sqlite=yes''. </p>
+
+<hr>
+<a name="gt_rdb_sqlite_new"></a>
+
+<code>GtRDB*  gt_rdb_sqlite_new(const char *dbpath, GtError *err)</code>
+<p>
+Creates a new <code>GtRDBSqlite</code> object from the database file located at
+   <code>dbpath</code>. Returns NULL on error, <code>err</code> is set accordingly.
 </p>
 <hr>
 <a name="GtRDBVisitor"></a>
@@ -8237,6 +8501,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_alphabet_wildcard_show"><code>gt_alphabet_wildcard_show</code></a><br>
 
+  <a href="#gt_anno_db_gfflike_new"><code>gt_anno_db_gfflike_new</code></a><br>
+
   <a href="#gt_anno_db_schema_delete"><code>gt_anno_db_schema_delete</code></a><br>
 
   <a href="#gt_anno_db_schema_get_feature_index"><code>gt_anno_db_schema_get_feature_index</code></a><br>
@@ -8270,6 +8536,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_array_get_last"><code>gt_array_get_last</code></a><br>
 
   <a href="#gt_array_get_space"><code>gt_array_get_space</code></a><br>
+
+  <a href="#gt_array_in_stream_new"><code>gt_array_in_stream_new</code></a><br>
 
   <a href="#gt_array_new"><code>gt_array_new</code></a><br>
 
@@ -8789,6 +9057,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_index_get_seqids"><code>gt_feature_index_get_seqids</code></a><br>
 
+  <a href="#gt_feature_index_gfflike_get_all_features"><code>gt_feature_index_gfflike_get_all_features</code></a><br>
+
   <a href="#gt_feature_index_has_seqid"><code>gt_feature_index_has_seqid</code></a><br>
 
   <a href="#gt_feature_index_memory_get_node_by_ptr"><code>gt_feature_index_memory_get_node_by_ptr</code></a><br>
@@ -9189,6 +9459,18 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_match_blast_set_similarity"><code>gt_match_blast_set_similarity</code></a><br>
 
+  <a href="#gt_match_delete"><code>gt_match_delete</code></a><br>
+
+  <a href="#gt_match_get_direction"><code>gt_match_get_direction</code></a><br>
+
+  <a href="#gt_match_get_range_seq1"><code>gt_match_get_range_seq1</code></a><br>
+
+  <a href="#gt_match_get_range_seq2"><code>gt_match_get_range_seq2</code></a><br>
+
+  <a href="#gt_match_get_seqid1"><code>gt_match_get_seqid1</code></a><br>
+
+  <a href="#gt_match_get_seqid2"><code>gt_match_get_seqid2</code></a><br>
+
   <a href="#gt_match_iterator_delete"><code>gt_match_iterator_delete</code></a><br>
 
   <a href="#gt_match_iterator_next"><code>gt_match_iterator_next</code></a><br>
@@ -9207,6 +9489,18 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_match_open_set_weight"><code>gt_match_open_set_weight</code></a><br>
 
+  <a href="#gt_match_set_range_seq1"><code>gt_match_set_range_seq1</code></a><br>
+
+  <a href="#gt_match_set_range_seq2"><code>gt_match_set_range_seq2</code></a><br>
+
+  <a href="#gt_match_set_seqid1"><code>gt_match_set_seqid1</code></a><br>
+
+  <a href="#gt_match_set_seqid1_nt"><code>gt_match_set_seqid1_nt</code></a><br>
+
+  <a href="#gt_match_set_seqid2"><code>gt_match_set_seqid2</code></a><br>
+
+  <a href="#gt_match_set_seqid2_nt"><code>gt_match_set_seqid2_nt</code></a><br>
+
   <a href="#gt_match_sw_get_alignment_length"><code>gt_match_sw_get_alignment_length</code></a><br>
 
   <a href="#gt_match_sw_get_edist"><code>gt_match_sw_get_edist</code></a><br>
@@ -9216,6 +9510,12 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_match_sw_get_seqno2"><code>gt_match_sw_get_seqno2</code></a><br>
 
   <a href="#gt_match_sw_new"><code>gt_match_sw_new</code></a><br>
+
+  <a href="#gt_match_visitor_delete"><code>gt_match_visitor_delete</code></a><br>
+
+  <a href="#gt_match_visitor_visit_match_blast"><code>gt_match_visitor_visit_match_blast</code></a><br>
+
+  <a href="#gt_match_visitor_visit_match_open"><code>gt_match_visitor_visit_match_open</code></a><br>
 
   <a href="#gt_md5_to_id_stream_new"><code>gt_md5_to_id_stream_new</code></a><br>
 
@@ -9426,6 +9726,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_range_overlap_delta"><code>gt_range_overlap_delta</code></a><br>
 
   <a href="#gt_range_within"><code>gt_range_within</code></a><br>
+
+  <a href="#gt_rdb_mysql_new"><code>gt_rdb_mysql_new</code></a><br>
+
+  <a href="#gt_rdb_sqlite_new"><code>gt_rdb_sqlite_new</code></a><br>
 
   <a href="#gt_rdb_visitor_delete"><code>gt_rdb_visitor_delete</code></a><br>
 
@@ -9752,7 +10056,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-09-26
+Last update: 2012-10-05
 </div>
 </div>
 <!-- Piwik -->

@@ -18,16 +18,23 @@
 #ifndef ANNO_DB_GFFLIKE_API_H
 #define ANNO_DB_GFFLIKE_API_H
 
-/* Implements the <GtAnnoDBSchema> interface. */
+/* The <GtAnnoDBGFFlike> class implements the <GtAnnoDBSchema> interface,
+   using a database schema specifically tailored to store GenomeTools
+   annotations. */
 typedef struct GtAnnoDBGFFlike GtAnnoDBGFFlike;
 
 #include "core/error_api.h"
 #include "extended/anno_db_schema_api.h"
 
+/* Creates a new <GtAnnoDBGFFlike> schema object. */
 GtAnnoDBSchema* gt_anno_db_gfflike_new(void);
-int gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
-                                              GtArray *results,
-                                              GtError *err);
+
+/* Retrieves all features contained in <gfi> into <results>. Returns 0 on
+   success, a negative value otherwise. The message in <err> is set
+   accordingly. */
+int             gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
+                                                          GtArray *results,
+                                                          GtError *err);
 
 int             gt_anno_db_gfflike_unit_test(GtError *err);
 

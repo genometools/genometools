@@ -22,8 +22,8 @@
 #include "core/error_api.h"
 #include "extended/rdb_api.h"
 
-/* The ``GtAnnoDBSchema'' interface for a database-backed abstract
-   <GtFeatureIndex> factory */
+/* The <GtAnnoDBSchema> interface for a database-backed abstract
+   <GtFeatureIndex> factory. */
 typedef struct GtAnnoDBSchema GtAnnoDBSchema;
 
 /* Returns a <GtFeatureIndex> object representing <GtRDB> object <db>

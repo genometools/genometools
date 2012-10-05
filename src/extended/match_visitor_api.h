@@ -18,19 +18,25 @@
 #ifndef MATCH_VISITOR_API_H
 #define MATCH_VISITOR_API_H
 
+/* The <GtMatchVisitor> class allows to distinguish a <GtMatch> implementation,
+   e.g. BLAST or OpenMatch, and to call different code for each
+   implementation. */
 typedef struct GtMatchVisitor GtMatchVisitor;
 
 #include "extended/match_blast_api.h"
 #include "extended/match_open_api.h"
 
+/* Visit <match_blast> with <match_visitor>. */
 int gt_match_visitor_visit_match_blast(GtMatchVisitor *match_visitor,
                                        GtMatchBlast *match_blast,
                                        GtError *err);
 
+/* Visit <match_open> with <match_visitor>. */
 int gt_match_visitor_visit_match_open(GtMatchVisitor *match_visitor,
                                       GtMatchOpen *match_open,
                                       GtError *err);
 
+/* Deletes <match_visitor> freeing all associated space. */
 void gt_match_visitor_delete(GtMatchVisitor *match_visitor);
 
 #endif

@@ -18,6 +18,8 @@
 #ifndef MATCH_LAST_API_H
 #define MATCH_LAST_API_H
 
+/* The <GtMatchLAST> class, implementing the <GtMatch> interface, is meant to
+    store results given in the format as output by LAST. */
 typedef struct GtMatchLAST GtMatchLAST;
 
 #include "extended/match_api.h"
@@ -35,10 +37,10 @@ GtMatch*      gt_match_last_new(const char *seqid1,
                                 unsigned long end_seq2,
                                 GtMatchDirection dir);
 
-/* Returns the sequence number of the match <ms> in the first <GtEncseq>. */
+/* Returns the sequence number of the match <ms> in the first sequence set. */
 unsigned long gt_match_last_get_seqno1(const GtMatchLAST *ml);
 
-/* Returns the sequence number of the match <ms> in the second <GtEncseq>. */
+/* Returns the sequence number of the match <ms> in the second sequence set. */
 unsigned long gt_match_last_get_seqno2(const GtMatchLAST *ml);
 
 /* Returns the LAST score of the match <ms>. */
