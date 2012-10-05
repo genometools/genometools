@@ -137,7 +137,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         if (gt_showtime_enabled())
         {
           timer = gt_timer_new_with_progress_description(
-                           "determine Sstar suffixes");
+                           "allocate suftab and set undefined");
           gt_timer_start(timer);
         }
         gt_sain_plain_sortsuffixes(plainseq,(unsigned long) len,
