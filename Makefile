@@ -757,13 +757,14 @@ obj/src/ltr/pdom.o: src/ltr/pdom.c $(HMMERADDTARGET)
 	  ${shell grep -s "SIMDFLAGS " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
     $(3) -MM -MP -MT $@
 
-# SQLite does not compile with -Werror, removing this for now...
+# SQLite needs special attention
 obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY  $(3) -fPIC
-	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
-	  -MT $@ -fPIC
+	@$(CC) -c $< -o $@ -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
+	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY  $(3) -fPIC
+	@$(CC) -c $< -o $(@:.o=.d) -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
+	  $(GT_CPPFLAGS) $(3) -MM -MP -MT $@ -fPIC
 
 define COMPILE_template
 $(1): $(2)
