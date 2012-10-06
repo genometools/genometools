@@ -490,18 +490,36 @@ static void gt_sain_induceLtypesuffixes(const GtSaininfo *saininfo,
                                         unsigned long *suftab,
                                         unsigned long nonspecialentries)
 {
-  unsigned long idx;
+  unsigned long idx, nextcc, nextccbucketend = 0;
 
+  if (nonspecialentries > 0)
+  {
+    for (nextcc = 0; nextcc < saininfo->sainseq->numofchars &&
+                     saininfo->sainseq->bucketsize[nextcc] == 0; nextcc++)
+         /* Nothing */ ;
+    gt_assert(saininfo->sainseq->bucketsize[nextcc] > 0);
+    nextccbucketend = saininfo->sainseq->bucketsize[nextcc];
+  }
   for (idx = 0; idx < nonspecialentries; idx++)
   {
     unsigned long position = suftab[idx];
 
+    gt_assert(idx <= nextccbucketend);
+    if (idx == nextccbucketend)
+    {
+      for (nextcc++; nextcc < saininfo->sainseq->numofchars &&
+                     saininfo->sainseq->bucketsize[nextcc] == 0; nextcc++)
+       /* Nothing */ ;
+      nextccbucketend += saininfo->sainseq->bucketsize[nextcc];
+    }
     if (position != ULONG_MAX && position > 0)
     {
+      unsigned long cc;
+
       gt_assert(position < saininfo->sainseq->totallength);
-      if (!gt_sain_info_isStype(saininfo,position-1))
+      cc = gt_sain_seq_getchar(saininfo->sainseq,position-1);
+      if (cc >= nextcc)
       {
-        unsigned long cc = gt_sain_seq_getchar(saininfo->sainseq,position-1);
         if (cc < saininfo->sainseq->numofchars)
         {
           unsigned long putidx = saininfo->sainseq->bucketfillptr[cc]++;
