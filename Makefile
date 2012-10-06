@@ -300,6 +300,9 @@ endif
 
 ifneq ($(curses),no)
   EXP_CPPFLAGS += -DCURSES
+  ifeq ($(findstring CYGWIN,$(SYSTEM)),CYGWIN)
+    EXP_CPPFLAGS += $(shell pkg-config --cflags-only-I ncurses)
+  endif
   EXP_LDLIBS += -lncurses
   GTLIBS := lib/libtecla.a
 endif
