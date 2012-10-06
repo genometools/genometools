@@ -216,7 +216,9 @@ static unsigned long gt_sain_seq_getchar(const GtSainseq *sainseq,
         return ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (unsigned long) cc;
       }
   }
+  /*@ignore@*/
   return 0;
+  /*@end@*/
 }
 
 static unsigned long gt_sain_seq_getchar_nospecial(const GtSainseq *sainseq,
@@ -236,7 +238,9 @@ static unsigned long gt_sain_seq_getchar_nospecial(const GtSainseq *sainseq,
                                                 position,
                                                 GT_READMODE_FORWARD);
   }
+  /*@ignore@*/
   return 0;
+  /*@end@*/
 }
 
 static void gt_sain_endbuckets(GtSainseq *sainseq)
