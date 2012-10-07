@@ -270,7 +270,9 @@ static void gt_sain_startbuckets(GtSainseq *sainseq)
 
 typedef struct
 {
+#ifndef NDEBUG
   GtBitsequence *isStype;
+#endif
   unsigned long countStype,
                 countSstartype,
                 totalSstarlength,
@@ -280,7 +282,7 @@ typedef struct
 } GtSaininfo;
 
 static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq,unsigned long *suftab,
-                                    unsigned long nonspecialentries)
+                                    GT_UNUSED unsigned long nonspecialentries)
 {
   unsigned long position,
                 idx,
@@ -295,8 +297,10 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq,unsigned long *suftab,
   saininfo->countStype = 1UL;
   saininfo->countSstartype = 0;
   saininfo->longerthanmax = 0;
+#ifndef NDEBUG
   GT_INITBITTAB(saininfo->isStype,saininfo->sainseq->totallength+1);
   GT_SETIBIT(saininfo->isStype,saininfo->sainseq->totallength);
+#endif
   nextSstartypepos = saininfo->sainseq->totallength;
   nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength);
   for (idx = 0; idx <= (unsigned long) GT_SSTARLENGTH_MAX; idx++)
@@ -316,7 +320,9 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq,unsigned long *suftab,
     {
       currentisStype = true;
       saininfo->countStype++;
+#ifndef NDEBUG
       GT_SETIBIT(saininfo->isStype,position);
+#endif
     } else
     {
       currentisStype = false;
@@ -362,11 +368,14 @@ static void gt_sain_info_delete(GtSaininfo *saininfo)
 {
   if (saininfo != NULL)
   {
+#ifndef NDEBUG
     gt_free(saininfo->isStype);
+#endif
     gt_free(saininfo);
   }
 }
 
+#ifndef NDEBUG
 static bool gt_sain_info_isSstartype(const GtSaininfo *saininfo,
                                      unsigned long position)
 {
@@ -376,6 +385,7 @@ static bool gt_sain_info_isSstartype(const GtSaininfo *saininfo,
          GT_ISIBITSET(saininfo->isStype,position) &&
          !GT_ISIBITSET(saininfo->isStype,position-1)) ? true : false;
 }
+#endif
 
 #ifdef CRITICAL
 unsigned long gt_sain_countDcriticalsubstrings (const GtSaininfo *saininfo,
@@ -447,12 +457,14 @@ static void gt_sain_info_show(const GtSaininfo *saininfo)
 #endif
 }
 
+#ifndef NDEBUG
 static bool gt_sain_info_isStype(const GtSaininfo *saininfo,
                                  unsigned long position)
 {
   gt_assert(position <= saininfo->sainseq->totallength);
   return GT_ISIBITSET(saininfo->isStype,position) ? true : false;
 }
+#endif
 
 static void gt_sain_induceLtypesuffixes(const GtSaininfo *saininfo,
                                         unsigned long *suftab,
@@ -702,6 +714,7 @@ static int gt_sain_compare_Sstarstrings(const GtSainseq *sainseq,
 /* The following function has been used previously, but is
    no used. As we maybe use it later, we keep it for now. */
 
+#ifndef NDEBUG
 int gt_sain_compare_substrings(const GtSaininfo *saininfo,
                                       bool withtype,
                                       unsigned long *lenptr,
@@ -776,6 +789,7 @@ int gt_sain_compare_substrings(const GtSaininfo *saininfo,
     start2++;
   }
 }
+#endif
 
 static int gt_sain_compare_suffixes(const GtSainseq *sainseq,
                                     unsigned long start1,
@@ -1204,7 +1218,6 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
   unsigned long suftabentries, *suftab;
   GtSainseq *sainseq;
 
-  GT_SAIN_SHOWTIMER("allocate suftab and set undefined");
   suftabentries = len+1;
   suftab = gt_malloc(sizeof (*suftab) * suftabentries);
   gt_sain_setundefined(suftab,0,suftabentries - 1);
