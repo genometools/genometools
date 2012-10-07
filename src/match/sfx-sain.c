@@ -270,8 +270,7 @@ static void gt_sain_startbuckets(GtSainseq *sainseq)
 
 typedef struct
 {
-  GtBitsequence *isStype,
-                *previousisLtype;
+  GtBitsequence *isStype;
   unsigned long countStype,
                 countSstartype,
                 totalSstarlength,
@@ -296,7 +295,6 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq)
   saininfo->countSstartype = 0;
   saininfo->longerthanmax = 0;
   GT_INITBITTAB(saininfo->isStype,saininfo->sainseq->totallength+1);
-  GT_INITBITTAB(saininfo->previousisLtype,saininfo->sainseq->totallength+1);
   GT_SETIBIT(saininfo->isStype,saininfo->sainseq->totallength);
   nextSstartypepos = saininfo->sainseq->totallength;
   nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength);
@@ -366,7 +364,6 @@ static void gt_sain_info_delete(GtSaininfo *saininfo)
   if (saininfo != NULL)
   {
     gt_free(saininfo->isStype);
-    gt_free(saininfo->previousisLtype);
     gt_free(saininfo);
   }
 }
@@ -577,7 +574,8 @@ static void gt_sain_induceStypesfromspecialranges(GT_UNUSED const GtSaininfo
 
 static void gt_sain_induceStypesuffixes(const GtSaininfo *saininfo,
                                         unsigned long *suftab,
-                                        unsigned long nonspecialentries)
+                                        unsigned long nonspecialentries,
+                                        bool firstphase)
 {
   unsigned long idx, cc, nextcc = saininfo->sainseq->numofchars - 1,
                 nextccbucketstart = nonspecialentries;
@@ -632,7 +630,10 @@ static void gt_sain_induceStypesuffixes(const GtSaininfo *saininfo,
 #endif
       } else
       {
-        GT_SETIBIT(saininfo->previousisLtype,idx);
+        if (firstphase)
+        {
+          suftab[idx] |= GT_FIRSTBIT; /* position-1 is L-Ltype */
+        }
       }
     }
     if (idx == 0)
@@ -659,8 +660,8 @@ static void gt_sain_induceStypesuffixes(const GtSaininfo *saininfo,
   }
 }
 
-static void gt_checkStarlist(const  GtSaininfo *saininfo,
-                             const unsigned long *suftab)
+static void gt_checkStarlist(const GtSaininfo *saininfo,
+                             unsigned long *suftab)
 {
   unsigned long charidx, countSstartype = 0, bucketend = 0, bucketstart = 0;
 
@@ -673,23 +674,21 @@ static void gt_checkStarlist(const  GtSaininfo *saininfo,
     stypesuffixes = bucketend - saininfo->sainseq->bucketfillptr[charidx];
     for (idx = bucketstart; idx < bucketend; idx++)
     {
-      if (gt_sain_info_isStype(saininfo,suftab[idx]))
+      unsigned long position;
+
+      gt_assert(suftab[idx] != ULONG_MAX);
+      position = suftab[idx] & ~GT_FIRSTBIT;
+      if (idx >= saininfo->sainseq->bucketfillptr[charidx]) /* S-type suffix */
       {
-        break;
+        gt_assert(gt_sain_info_isStype(saininfo,position));
+        if (position > 0 && (suftab[idx] & GT_FIRSTBIT))
+        {
+          gt_assert(gt_sain_info_isSstartype(saininfo,position));
+          countSstartype++;
+        }
+        countstypesuffixes++;
       }
-    }
-    gt_assert(stypesuffixes == bucketend - idx);
-    for (idx = saininfo->sainseq->bucketfillptr[charidx];
-         idx < bucketend; idx++)
-    {
-      unsigned long position = suftab[idx];
-      gt_assert(gt_sain_info_isStype(saininfo,position));
-      if (position > 0 && GT_ISIBITSET(saininfo->previousisLtype,idx))
-      {
-        gt_assert(gt_sain_info_isSstartype(saininfo,position));
-        countSstartype++;
-      }
-      countstypesuffixes++;
+      suftab[idx] = position;
     }
     gt_assert(stypesuffixes == countstypesuffixes);
     bucketstart = bucketend;
@@ -1143,7 +1142,7 @@ static void gt_sain_deriveorder(GtSaininfo *saininfo,
   gt_sain_induceLtypesuffixes(saininfo, suftab, nonspecialentries);
   gt_sain_endbuckets(saininfo->sainseq);
   GT_SAIN_SHOWTIMER("induce S suffixes");
-  gt_sain_induceStypesuffixes(saininfo, suftab, nonspecialentries);
+  gt_sain_induceStypesuffixes(saininfo, suftab, nonspecialentries,firstphase);
 }
 
 static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
