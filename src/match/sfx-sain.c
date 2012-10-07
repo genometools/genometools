@@ -298,10 +298,6 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq)
   GT_SETIBIT(saininfo->isStype,saininfo->sainseq->totallength);
   nextSstartypepos = saininfo->sainseq->totallength;
   nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength);
-#undef SAINSHOWSTATE
-#ifdef SAINSHOWSTATE
-  printf("%lu: S\n",saininfo->sainseq->totallength);
-#endif
   for (idx = 0; idx <= (unsigned long) GT_SSTARLENGTH_MAX; idx++)
   {
     saininfo->lendist[idx] = 0;
@@ -317,15 +313,9 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq)
       saininfo->countStype++;
       currentisStype = true;
       GT_SETIBIT(saininfo->isStype,position);
-#ifdef SAINSHOWSTATE
-      printf("%lu: S\n",position);
-#endif
     } else
     {
       currentisStype = false;
-#ifdef SAINSHOWSTATE
-      printf("%lu: L\n",position);
-#endif
     }
     if (!currentisStype && nextisStype)
     {
@@ -335,9 +325,6 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq)
       gt_assert(position + 1 < nextSstartypepos);
       currentlen = nextSstartypepos - position;
       saininfo->totalSstarlength += currentlen;
-#ifdef SAINSHOWSTATE
-      printf("Sstar: %lu\n",position+1);
-#endif
       if (currentlen <= (unsigned long) GT_SSTARLENGTH_MAX)
       {
         saininfo->lendist[currentlen]++;
@@ -660,78 +647,34 @@ static void gt_sain_induceStypesuffixes(const GtSaininfo *saininfo,
   }
 }
 
-static void gt_checkStarlist(const GtSaininfo *saininfo,
-                             unsigned long *suftab)
+static void gt_sain_moveSstar2front(const GtSaininfo *saininfo,
+                                    unsigned long *suftab)
 {
-  unsigned long charidx, countSstartype = 0, bucketend = 0, bucketstart = 0;
+  unsigned long charidx, bucketend = 0, bucketstart = 0, writeindex = 0;
 
   for (charidx = 0; charidx < saininfo->sainseq->numofchars; charidx++)
   {
-    unsigned long idx, stypesuffixes, countstypesuffixes = 0;
+    unsigned long idx;
 
     bucketend += saininfo->sainseq->bucketsize[charidx];
     gt_assert(saininfo->sainseq->bucketfillptr[charidx] <= bucketend);
-    stypesuffixes = bucketend - saininfo->sainseq->bucketfillptr[charidx];
-    for (idx = bucketstart; idx < bucketend; idx++)
+    for (idx = saininfo->sainseq->bucketfillptr[charidx]; idx < bucketend;
+         idx++)
     {
       unsigned long position;
 
       gt_assert(suftab[idx] != ULONG_MAX);
       position = suftab[idx] & ~GT_FIRSTBIT;
-      if (idx >= saininfo->sainseq->bucketfillptr[charidx]) /* S-type suffix */
+      gt_assert(gt_sain_info_isStype(saininfo,position));
+      if (position > 0 && (suftab[idx] & GT_FIRSTBIT))
       {
-        gt_assert(gt_sain_info_isStype(saininfo,position));
-        if (position > 0 && (suftab[idx] & GT_FIRSTBIT))
-        {
-          gt_assert(gt_sain_info_isSstartype(saininfo,position));
-          countSstartype++;
-        }
-        countstypesuffixes++;
+        gt_assert(gt_sain_info_isSstartype(saininfo,position));
+        suftab[writeindex++] = position;
       }
-      suftab[idx] = position;
     }
-    gt_assert(stypesuffixes == countstypesuffixes);
     bucketstart = bucketend;
   }
-  gt_assert(countSstartype == saininfo->countSstartype);
-}
-
-static void gt_sain_moveSstar2front(const GtSaininfo *saininfo,
-                                    unsigned long *suftab,
-                                    unsigned long nonspecialentries)
-{
-  unsigned long ridx, position;
-
-  for (ridx = 0; ridx < nonspecialentries; ridx++)
-  {
-    position = suftab[ridx];
-    gt_assert(position != ULONG_MAX);
-    /* Use bit which marks all Sstar suffixes */
-    if (!gt_sain_info_isSstartype(saininfo,position))
-    {
-      break;
-    }
-  }
-  if (ridx < saininfo->countSstartype)
-  {
-    unsigned long widx;
-
-    for (widx = ridx, ridx++; /* Nothing */; ridx++)
-    {
-      gt_assert(widx < ridx && ridx < nonspecialentries);
-      position = suftab[ridx];
-      gt_assert(position != ULONG_MAX);
-      if (gt_sain_info_isSstartype(saininfo,position))
-      {
-        suftab[widx++] = position;
-        suftab[ridx] = ULONG_MAX;
-        if (widx == saininfo->countSstartype)
-        {
-          break;
-        }
-      }
-    }
-  }
+  gt_assert(writeindex == saininfo->countSstartype);
 }
 
 static int gt_sain_compare_Sstarstrings(const GtSainseq *sainseq,
@@ -1160,9 +1103,8 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
     unsigned long startoccupied, numberofnames;
 
     gt_sain_deriveorder(saininfo,suftab,nonspecialentries,true,timer);
-    gt_checkStarlist(saininfo,suftab);
     GT_SAIN_SHOWTIMER("moverStar2front");
-    gt_sain_moveSstar2front(saininfo,suftab,nonspecialentries);
+    gt_sain_moveSstar2front(saininfo,suftab);
     gt_assert(availableentries > 0);
     gt_sain_setundefined(suftab,saininfo->countSstartype,availableentries-1);
     GT_SAIN_SHOWTIMER("assignSstarlength");

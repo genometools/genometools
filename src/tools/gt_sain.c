@@ -89,6 +89,20 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   return op;
 }
 
+static int gt_sain_checkmaxsequencelength(unsigned long len,GtError *err)
+{
+  const unsigned long maxsequencelength = (unsigned long) (~GT_FIRSTBIT) - 1;
+
+  if (len > maxsequencelength)
+  {
+    gt_error_set(err,"sequence of size %lu is too long: sain algorithm "
+                     "can only compute sequence of length up to %lu",
+                     len,maxsequencelength);
+    return -1;
+  }
+  return 0;
+}
+
 static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                           int parsed_args, void *tool_arguments, GtError *err)
 {
@@ -115,8 +129,16 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         had_err = -1;
       } else
       {
-        gt_sain_encseq_sortsuffixes(encseq,arguments->icheck,arguments->fcheck,
-                                    arguments->verbose,NULL);
+        if (gt_sain_checkmaxsequencelength(gt_encseq_total_length(encseq),err)
+                       != 0)
+        {
+          had_err = -1;
+        }
+        {
+          gt_sain_encseq_sortsuffixes(encseq,arguments->icheck,
+                                      arguments->fcheck,arguments->verbose,
+                                      NULL);
+        }
       }
       gt_encseq_delete(encseq);
       gt_encseq_loader_delete(el);
@@ -132,25 +154,31 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         had_err = -1;
       } else
       {
-        GtTimer *timer = NULL;
+        if (gt_sain_checkmaxsequencelength((unsigned long) len,err) != 0)
+        {
+          had_err = -1;
+        } else
+        {
+          GtTimer *timer = NULL;
 
-        if (gt_showtime_enabled())
-        {
-          timer = gt_timer_new_with_progress_description(
-                           "determine Sstar sequences");
-          gt_timer_start(timer);
+          if (gt_showtime_enabled())
+          {
+            timer = gt_timer_new_with_progress_description(
+                             "determine Sstar sequences");
+            gt_timer_start(timer);
+          }
+          gt_sain_plain_sortsuffixes(plainseq,(unsigned long) len,
+                                     arguments->icheck,arguments->verbose,
+                                     timer);
+          if (timer != NULL)
+          {
+            gt_timer_show_progress_final(timer, stdout);
+            gt_timer_stop(timer);
+          }
+          gt_timer_delete(timer);
         }
-        gt_sain_plain_sortsuffixes(plainseq,(unsigned long) len,
-                                   arguments->icheck,arguments->verbose,
-                                   timer);
-        if (timer != NULL)
-        {
-          gt_timer_show_progress_final(timer, stdout);
-          gt_timer_stop(timer);
-        }
-        gt_timer_delete(timer);
-        gt_fa_xmunmap(plainseq);
       }
+      gt_fa_xmunmap(plainseq);
     }
   }
   return had_err;
