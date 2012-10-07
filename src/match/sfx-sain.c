@@ -1122,7 +1122,7 @@ static void gt_sain_deriveorder(GtSaininfo *saininfo,
   gt_sain_induceStypesuffixes(saininfo, suftab, nonspecialentries,firstphase);
 }
 
-static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
+static void gt_sain_rec_sortsuffixes(GtSainseq *sainseq,
                                      unsigned long *suftab,
                                      unsigned long nonspecialentries,
                                      unsigned long availableentries,
@@ -1132,6 +1132,12 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
                                      bool verbose,
                                      GtTimer *timer)
 {
+  GtSaininfo *saininfo = gt_sain_info_new(sainseq);
+
+  if (verbose)
+  {
+    gt_sain_info_show(saininfo);
+  }
   if (saininfo->countSstartype > 0)
   {
     unsigned long startoccupied, numberofnames;
@@ -1154,24 +1160,18 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
        saininfo->countSstartype .. 2 * saininfo->countSstartype - 1 */
       unsigned long *subseq = suftab + saininfo->countSstartype;
       GtSainseq *sainseq_rec;
-      GtSaininfo *saininfo_rec;
 
       GT_SAIN_SHOWTIMER("determineSstar suffixes");
+      printf("recursively sort the named sequence of length %lu over %lu "
+             "symbols (%.2f)\n",saininfo->countSstartype,numberofnames,
+                         (double) numberofnames/saininfo->countSstartype);
+      gt_sain_setundefined(suftab,0,saininfo->countSstartype-1);
       sainseq_rec = gt_sain_seq_new_from_array(subseq,
                                                saininfo->countSstartype,
                                                numberofnames,
                                                suftab,
                                                suftabentries);
-      saininfo_rec = gt_sain_info_new(sainseq_rec);
-      if (verbose)
-      {
-        gt_sain_info_show(saininfo_rec);
-      }
-      printf("recursively sort the named sequence of length %lu over %lu "
-             "symbols (%.2f)\n",saininfo->countSstartype,numberofnames,
-                         (double) numberofnames/saininfo->countSstartype);
-      gt_sain_setundefined(suftab,0,saininfo->countSstartype-1);
-      gt_sain_rec_sortsuffixes(saininfo_rec,suftab,
+      gt_sain_rec_sortsuffixes(sainseq_rec,suftab,
                                saininfo->countSstartype,
                                saininfo->countSstartype,
                                suftabentries,
@@ -1179,7 +1179,6 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
                                finalcheck,
                                verbose,
                                timer);
-      gt_sain_info_delete(saininfo_rec);
       startoccupied = gt_sain_seq_delete(sainseq_rec);
       gt_sain_setundefined(suftab,startoccupied,suftabentries-1);
       GT_SAIN_SHOWTIMER("expandorder2original");
@@ -1215,30 +1214,25 @@ static void gt_sain_rec_sortsuffixes(GtSaininfo *saininfo,
                                  NULL);
     }
   }
+  gt_sain_info_delete(saininfo);
 }
 
 void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
                                  bool finalcheck,bool verbose,
                                  GtTimer *timer)
 {
-  unsigned long nonspecialentries, suftabentries, *suftab;
-  GtSainseq *sainseq = gt_sain_seq_new_from_encseq(encseq);
-  GtSaininfo *saininfo;
+  unsigned long nonspecialentries, suftabentries, totallength, *suftab;
+  GtSainseq *sainseq;
 
-  saininfo = gt_sain_info_new(sainseq);
-  if (verbose)
-  {
-    gt_sain_info_show(saininfo);
-  }
-  nonspecialentries = sainseq->totallength -
-                      gt_encseq_specialcharacters(sainseq->seq.encseq);
-  suftabentries = sainseq->totallength+1;
+  totallength = gt_encseq_total_length(encseq);
+  nonspecialentries = totallength - gt_encseq_specialcharacters(encseq);
+  suftabentries = totallength+1;
   suftab = gt_malloc(sizeof (*suftab) * suftabentries);
   gt_sain_setundefined(suftab,0,suftabentries-1);
-  gt_sain_rec_sortsuffixes(saininfo,suftab,nonspecialentries,suftabentries,
+  sainseq = gt_sain_seq_new_from_encseq(encseq);
+  gt_sain_rec_sortsuffixes(sainseq,suftab,nonspecialentries,suftabentries,
                            suftabentries,intermediatecheck,finalcheck,verbose,
                            timer);
-  gt_sain_info_delete(saininfo);
   (void) gt_sain_seq_delete(sainseq);
   gt_free(suftab);
 }
@@ -1249,23 +1243,17 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                                 GtTimer *timer)
 {
   unsigned long suftabentries, *suftab;
-  GtSainseq *sainseq = gt_sain_seq_new_from_plainseq(plainseq,len);
-  GtSaininfo *saininfo;
+  GtSainseq *sainseq;
 
-  saininfo = gt_sain_info_new(sainseq);
-  if (verbose)
-  {
-    gt_sain_info_show(saininfo);
-  }
   GT_SAIN_SHOWTIMER("allocate suftab and set undefined");
-  suftabentries = sainseq->totallength+1;
+  suftabentries = len+1;
   suftab = gt_malloc(sizeof (*suftab) * suftabentries);
   gt_sain_setundefined(suftab,0,suftabentries - 1);
   printf("rec_sort(n=%lu,asize=%lu)\n",len,(unsigned long) (UCHAR_MAX+1));
-  gt_sain_rec_sortsuffixes(saininfo,suftab,sainseq->totallength,suftabentries,
+  sainseq = gt_sain_seq_new_from_plainseq(plainseq,len);
+  gt_sain_rec_sortsuffixes(sainseq,suftab,sainseq->totallength,suftabentries,
                            suftabentries,intermediatecheck,false,verbose,
                            timer);
-  gt_sain_info_delete(saininfo);
   printf("countcharaccess=%lu (%.2f)\n",gt_sain_countcharaccess,
           (double) gt_sain_countcharaccess/sainseq->totallength);
   (void) gt_sain_seq_delete(sainseq);
