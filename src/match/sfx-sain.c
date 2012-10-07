@@ -531,13 +531,9 @@ static void gt_sain_induceLtypesuffixes(const GtSaininfo *saininfo,
         unsigned long putidx = saininfo->sainseq->bucketfillptr[cc]++;
         gt_assert(putidx < nonspecialentries);
         suftab[putidx] = position-1;
-        GT_SETIBIT(saininfo->previousisLtype,idx);
 #ifdef SAINSHOWSTATE
         printf("L-induce: suftab[%lu]=%lu\n",putidx,position-1);
 #endif
-      } else
-      {
-        GT_UNSETIBIT(saininfo->previousisLtype,idx);
       }
     }
   }
@@ -634,7 +630,6 @@ static void gt_sain_induceStypesuffixes(const GtSaininfo *saininfo,
 #ifdef SAINSHOWSTATE
         printf("S-induce: suftab[%lu]=%lu\n",putidx,position-1);
 #endif
-        GT_UNSETIBIT(saininfo->previousisLtype,idx);
       } else
       {
         GT_SETIBIT(saininfo->previousisLtype,idx);
