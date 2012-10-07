@@ -1055,15 +1055,29 @@ static void gt_sain_expandorder2original(GtSaininfo *saininfo,
                                          unsigned long *suftab)
 {
   unsigned long idx = saininfo->countSstartype - 1, position,
+                nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength),
                 *sstarsuffixes = suftab + saininfo->countSstartype;
+  bool nextisStype = true;
 
-  for (position = saininfo->sainseq->totallength - 1; /* Nothing */; position--)
+  for (position = saininfo->sainseq->totallength-1; /* Nothing */; position--)
   {
-    /* Can be replaced by scan of sequence */
-    if (gt_sain_info_isSstartype(saininfo,position))
+    bool currentisStype;
+    unsigned long currentcc;
+
+    currentcc = gt_sain_seq_getchar(saininfo->sainseq,position);
+    if (currentcc < nextcc || (currentcc == nextcc && nextisStype))
     {
-      sstarsuffixes[idx--] = position;
+      currentisStype = true;
+    } else
+    {
+      currentisStype = false;
     }
+    if (!currentisStype && nextisStype)
+    {
+      sstarsuffixes[idx--] = position+1;
+    }
+    nextisStype = currentisStype;
+    nextcc = currentcc;
     if (position == 0)
     {
       break;
