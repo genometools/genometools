@@ -310,8 +310,8 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq)
     currentcc = gt_sain_seq_getchar(saininfo->sainseq,position);
     if (currentcc < nextcc || (currentcc == nextcc && nextisStype))
     {
-      saininfo->countStype++;
       currentisStype = true;
+      saininfo->countStype++;
       GT_SETIBIT(saininfo->isStype,position);
     } else
     {
@@ -447,25 +447,38 @@ static void gt_sain_insertSstarsuffixes(const GtSaininfo *saininfo,
                                         GT_UNUSED unsigned long
                                                   nonspecialentries)
 {
-  unsigned long position;
+  unsigned long position,
+                nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength);
+  bool nextisStype = true;
 
-  for (position = saininfo->sainseq->totallength - 1; /* Nothing */; position--)
+  for (position = saininfo->sainseq->totallength-1; /* Nothing */; position--)
   {
-    /* Can get rid of the following call, as a scan from the
-       right can be used to determine if position is Sstar */
-    if (gt_sain_info_isSstartype(saininfo,position))
+    bool currentisStype;
+    unsigned long currentcc;
+
+    currentcc = gt_sain_seq_getchar(saininfo->sainseq,position);
+    if (currentcc < nextcc || (currentcc == nextcc && nextisStype))
+    {
+      currentisStype = true;
+    } else
+    {
+      currentisStype = false;
+    }
+    if (!currentisStype && nextisStype)
     {
       unsigned long putidx,
                     cc = gt_sain_seq_getchar_nospecial(saininfo->sainseq,
-                                                       position);
+                                                       position+1);
       gt_assert(saininfo->sainseq->bucketfillptr[cc] > 0);
       putidx = --saininfo->sainseq->bucketfillptr[cc];
       gt_assert(putidx < nonspecialentries);
-      suftab[putidx] = position;
+      suftab[putidx] = position+1;
 #ifdef SAINSHOWSTATE
-      printf("Sstar.suftab[%lu]=%lu\n",putidx,position);
+      printf("Sstar.suftab[%lu]=%lu\n",putidx,position+1);
 #endif
     }
+    nextisStype = currentisStype;
+    nextcc = currentcc;
     if (position == 0)
     {
       break;
