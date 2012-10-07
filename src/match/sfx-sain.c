@@ -1096,6 +1096,13 @@ static void gt_sain_deriveorder(GtSaininfo *saininfo,
                                 GtTimer *timer)
 {
   gt_sain_endbuckets(saininfo->sainseq);
+  if (saininfo->sainseq->bucketfillptr[saininfo->sainseq->numofchars-1]
+            != nonspecialentries)
+  {
+    printf("bucketfillptr=%lu != %lu = nonspecialentries\n",
+         saininfo->sainseq->bucketfillptr[saininfo->sainseq->numofchars-1],
+         nonspecialentries);
+  }
   gt_assert(saininfo->sainseq->bucketfillptr[saininfo->sainseq->numofchars-1]
             == nonspecialentries);
   if (firstphase)
@@ -1214,7 +1221,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
                                  bool finalcheck,bool verbose,
                                  GtTimer *timer)
 {
-  unsigned long nonspecialentries, requiredentries, suftabentries, *suftab;
+  unsigned long nonspecialentries, suftabentries, *suftab;
   GtSainseq *sainseq = gt_sain_seq_new_from_encseq(encseq);
   GtSaininfo *saininfo;
 
@@ -1223,19 +1230,10 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
   {
     gt_sain_info_show(saininfo);
   }
-  gt_assert(sainseq->seqtype == GT_SAIN_ENCSEQ);
   nonspecialentries = sainseq->totallength -
                       gt_encseq_specialcharacters(sainseq->seq.encseq);
-  requiredentries = saininfo->countSstartype +
-                    GT_DIV2(sainseq->totallength) + 1;
-  suftabentries = MAX(nonspecialentries,requiredentries);
-  if (finalcheck)
-  {
-    suftab = gt_malloc(sizeof (*suftab) * (sainseq->totallength+1));
-  } else
-  {
-    suftab = gt_malloc(sizeof (*suftab) * suftabentries);
-  }
+  suftabentries = sainseq->totallength+1;
+  suftab = gt_malloc(sizeof (*suftab) * suftabentries);
   gt_sain_setundefined(suftab,0,suftabentries-1);
   gt_sain_rec_sortsuffixes(saininfo,suftab,nonspecialentries,suftabentries,
                            suftabentries,intermediatecheck,finalcheck,verbose,
