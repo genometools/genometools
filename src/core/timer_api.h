@@ -19,6 +19,7 @@
 #ifndef TIMER_API_H
 #define TIMER_API_H
 
+#include <stdarg.h>
 #include <stdio.h>
 
 /* The <GtTimer> class encapsulates a timer which can be used for run-time
