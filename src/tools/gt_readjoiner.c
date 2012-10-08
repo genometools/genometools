@@ -17,9 +17,10 @@
 
 #include "core/cstr_array.h"
 #include "core/option_api.h"
-#include "core/versionfunc.h"
 #include "core/unused_api.h"
 #include "extended/toolbox.h"
+#include "extended/gtdatahelp.h"
+#include "match/rdj-version.h"
 #include "tools/gt_readjoiner_prefilter.h"
 #include "tools/gt_readjoiner_overlap.h"
 #include "tools/gt_readjoiner_assembly.h"
@@ -52,13 +53,14 @@ static void gt_readjoiner_arguments_delete(void *tool_arguments)
   gt_toolbox_delete(readjoiner_toolbox);
 }
 
-static GtOptionParser* gt_readjoiner_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_readjoiner_option_parser_new(GT_UNUSED
+    void *tool_arguments)
 {
   GtOptionParser *op;
-  GtToolbox *toolbox = tool_arguments;
   op = gt_option_parser_new("[option ...] tool [argument ...]",
-                            "String graph based sequencing reads assembler.");
-  gt_option_parser_set_comment_func(op, gt_toolbox_show, toolbox);
+                 "Readjoiner: a string graph-based sequence assembler.");
+  gt_option_parser_set_version_func(op, gt_readjoiner_show_version);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_args(op, 1);
   return op;
 }

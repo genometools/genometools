@@ -27,9 +27,10 @@
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
 #endif
-#include "tools/gt_readjoiner_overlap.h"
 #include "match/rdj-spmfind.h"
+#include "match/rdj-version.h"
 #include "match/firstcodes.h"
+#include "tools/gt_readjoiner_overlap.h"
 
 typedef struct {
   bool singlestrand,
@@ -182,6 +183,7 @@ static GtOptionParser* gt_readjoiner_overlap_option_parser_new(
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  gt_option_parser_set_version_func(op, gt_readjoiner_show_version);
   return op;
 }
 
@@ -255,7 +257,8 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
 
   default_logger = gt_logger_new(!arguments->quiet, GT_LOGGER_DEFLT_PREFIX,
       stdout);
-  gt_logger_log(default_logger, "gt readjoiner overlap");
+  gt_logger_log(default_logger,
+      "gt readjoiner overlap (version "GT_READJOINER_VERSION")");
   verbose_logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX,
       stdout);
   gt_logger_log(verbose_logger, "verbose output activated");

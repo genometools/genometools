@@ -24,6 +24,7 @@
 #include "match/rdj-ovlfind-gusfield.h"
 #include "match/rdj-pairwise.h"
 #include "match/rdj-spmlist.h"
+#include "match/rdj-version.h"
 #include "tools/gt_readjoiner_spmtest.h"
 
 typedef enum {
@@ -103,6 +104,7 @@ static GtOptionParser* gt_readjoiner_spmtest_option_parser_new(
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
+  gt_option_parser_set_version_func(op, gt_readjoiner_show_version);
   gt_option_parser_set_max_args(op, 0);
 
   return op;

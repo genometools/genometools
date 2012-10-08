@@ -29,6 +29,7 @@
 #include "match/rdj-spmlist.h"
 #include "match/rdj-strgraph.h"
 #include "match/rdj-filesuf-def.h"
+#include "match/rdj-version.h"
 #include "tools/gt_readjoiner_asqg.h"
 
 typedef struct {
@@ -109,6 +110,7 @@ static GtOptionParser* gt_readjoiner_asqg_option_parser_new(
   gt_option_exclude(option, v_option);
   gt_option_parser_add_option(op, option);
 
+  gt_option_parser_set_version_func(op, gt_readjoiner_show_version);
   gt_option_parser_set_max_args(op, 0);
 
   return op;

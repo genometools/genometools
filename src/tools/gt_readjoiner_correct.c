@@ -21,6 +21,7 @@
 #include "core/unused_api.h"
 #include "match/esa-seqread.h"
 #include "match/rdj-errfind.h"
+#include "match/rdj-version.h"
 #include "tools/gt_readjoiner_correct.h"
 
 #define GT_READJOINER_CORRECT_TAG ".corrected"
@@ -82,6 +83,7 @@ static GtOptionParser* gt_readjoiner_correct_option_parser_new(
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  gt_option_parser_set_version_func(op, gt_readjoiner_show_version);
   gt_option_parser_set_max_args(op, 0);
 
   return op;

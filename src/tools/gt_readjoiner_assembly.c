@@ -28,6 +28,7 @@
 #include "match/rdj-spmlist.h"
 #include "match/rdj-strgraph.h"
 #include "match/rdj-filesuf-def.h"
+#include "match/rdj-version.h"
 #include "tools/gt_readjoiner_assembly.h"
 
 typedef struct {
@@ -179,6 +180,7 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  gt_option_parser_set_version_func(op, gt_readjoiner_show_version);
   gt_option_parser_set_max_args(op, 0);
 
   return op;
@@ -370,7 +372,8 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
   gt_error_check(err);
   default_logger = gt_logger_new(!arguments->quiet, GT_LOGGER_DEFLT_PREFIX,
       stdout);
-  gt_logger_log(default_logger, "gt readjoiner assembly");
+  gt_logger_log(default_logger,
+      "gt readjoiner assembly (version "GT_READJOINER_VERSION")");
   verbose_logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX,
       stdout);
   gt_logger_log(verbose_logger, "verbose output activated");

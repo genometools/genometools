@@ -26,6 +26,7 @@
 #include "core/undef_api.h"
 #include "match/rdj-contfinder.h"
 #include "match/rdj-filesuf-def.h"
+#include "match/rdj-version.h"
 #include "match/reads_library.h"
 #include "match/reads2twobit.h"
 #include "tools/gt_readjoiner_prefilter.h"
@@ -216,6 +217,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   gt_option_is_development_option(testrs_maxdepth_option);
   gt_option_parser_add_option(op, testrs_maxdepth_option);
 
+  gt_option_parser_set_version_func(op, gt_readjoiner_show_version);
   gt_option_parser_set_max_args(op, 0U);
   return op;
 }
@@ -264,7 +266,8 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
   verbose_logger =
     gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
 
-  gt_logger_log(default_logger, "gt readjoiner prefilter");
+  gt_logger_log(default_logger,
+      "gt readjoiner prefilter (version "GT_READJOINER_VERSION")");
 
   /* default readset name: first db argument */
   if (gt_str_length(arguments->readset) == 0)
