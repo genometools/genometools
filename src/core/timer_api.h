@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -47,6 +48,14 @@ void     gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp);
    description. The timer is not stopped, but updated with <desc> to be the
    next description. */
 void     gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp);
+/* Like <gt_timer_show_progress()>, but allows to format the description in a
+   <printf()>-like fashion. */
+void     gt_timer_show_progress_formatted(GtTimer *t, FILE *fp,
+                                          const char *desc, ...);
+/* Like <gt_timer_show_progress()>, but allows to format the description in a
+   <vprintf()>-like fashion using a va_list argument <ap>. */
+void     gt_timer_show_progress_va(GtTimer *t, FILE *fp, const char *desc,
+                                   va_list ap);
 /* Output the overall time measured with <t> from start to now on <fp>. */
 void     gt_timer_show_progress_final(GtTimer *t, FILE *fp);
 /* Show also user and sys time in output of gt_timer_show_progress[_final] */

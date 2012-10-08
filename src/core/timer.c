@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +17,7 @@
 */
 
 #include <sys/time.h>
+#include "core/cstr_api.h"
 #include "core/ma.h"
 #include "core/timer.h"
 #include "core/unused_api.h"
@@ -34,7 +36,7 @@ struct GtTimer {
                  start_ru,
                  stop_ru;
   Timerstate state;
-  const char *statedesc;
+  char *statedesc;
   bool has_desc;
   bool omit_last_stage;
   bool show_cpu_time;
@@ -54,7 +56,7 @@ GtTimer* gt_timer_new(void)
 GtTimer* gt_timer_new_with_progress_description(const char* desc)
 {
   GtTimer *t = gt_timer_new();
-  t->statedesc = desc;
+  t->statedesc = gt_cstr_dup(desc);
   t->has_desc = true;
   return t;
 }
@@ -153,7 +155,26 @@ static void gt_timer_print_progress_report(GtTimer *t,
 
 void gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)
 {
+  gt_timer_show_progress_formatted(t, fp, "%s", desc);
+}
+
+void gt_timer_show_progress_formatted(GtTimer *t, FILE *fp,
+                                      const char *desc, ...)
+{
+  va_list ap;
+  gt_assert(t && desc);
+  va_start(ap, desc);
+  gt_timer_show_progress_va(t, fp, desc, ap);
+  va_end(ap);
+}
+
+void gt_timer_show_progress_va(GtTimer *t, FILE *fp, const char *desc,
+                               va_list ap)
+{
+  char buf[BUFSIZ];
   struct timeval elapsed_tv, elapsed_user_tv, elapsed_sys_tv;
+  gt_assert(t && desc);
+
   gettimeofday(&t->stop_tv, NULL);
   gt_xgetrusage(RUSAGE_SELF, &t->stop_ru);
   timeval_subtract(&elapsed_tv, &t->stop_tv, &t->start_tv);
@@ -163,7 +184,10 @@ void gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)
     &t->start_ru.ru_stime);
   gt_timer_print_progress_report(t, &elapsed_tv, &elapsed_user_tv,
     &elapsed_sys_tv, t->statedesc, fp);
-  t->statedesc = desc;
+  if (t->statedesc)
+    gt_free(t->statedesc);
+  (void) vsnprintf(buf, BUFSIZ, desc, ap);
+  t->statedesc = gt_cstr_dup(buf);
   gettimeofday(&t->start_tv, NULL);
   gt_xgetrusage(RUSAGE_SELF, &t->start_ru);
 }
@@ -205,5 +229,7 @@ void gt_timer_omit_last_stage(GtTimer *t)
 void gt_timer_delete(GtTimer *t)
 {
   if (!t) return;
+  if (t->statedesc)
+    gt_free(t->statedesc);
   gt_free(t);
 }
