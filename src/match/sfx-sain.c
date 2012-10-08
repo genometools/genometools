@@ -643,7 +643,8 @@ static void gt_sain_induceStypesuffixes(const GtSaininfo *saininfo,
 static void gt_sain_moveSstar2front(const GtSaininfo *saininfo,
                                     unsigned long *suftab)
 {
-  unsigned long charidx, bucketend = 0, bucketstart = 0, writeindex = 0;
+  unsigned long charidx, bucketend = 0, writeindex = 0;
+  GT_UNUSED unsigned long bucketstart = 0;
 
   for (charidx = 0; charidx < saininfo->sainseq->numofchars; charidx++)
   {
