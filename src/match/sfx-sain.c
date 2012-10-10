@@ -348,6 +348,7 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq,unsigned long *suftab,
       putidx = --saininfo->sainseq->bucketfillptr[cc];
       gt_assert(putidx < nonspecialentries);
       suftab[putidx] = position+1;
+#undef SAINSHOWSTATE
 #ifdef SAINSHOWSTATE
       printf("Sstar.suftab[%lu]=%lu\n",putidx,position+1);
 #endif
@@ -506,7 +507,8 @@ static void gt_sain_induceLtypesuffixes(const GtSaininfo *saininfo,
       if (cc >= nextcc && cc < saininfo->sainseq->numofchars)
       {
         unsigned long putidx = saininfo->sainseq->bucketfillptr[cc]++;
-        gt_assert(putidx < nonspecialentries);
+        gt_assert(putidx < nonspecialentries && suftab[putidx] == ULONG_MAX);
+        gt_assert(putidx != idx);
         suftab[putidx] = position-1;
 #ifdef SAINSHOWSTATE
         printf("L-induce: suftab[%lu]=%lu\n",putidx,position-1);
@@ -598,12 +600,12 @@ static void gt_sain_induceStypesuffixes(const GtSaininfo *saininfo,
     if (position != ULONG_MAX && position > 0)
     {
       cc = gt_sain_seq_getchar(saininfo->sainseq,position-1);
-      if (cc < saininfo->sainseq->numofchars &&
-          (cc < nextcc || (cc == nextcc &&
-                          saininfo->sainseq->bucketfillptr[cc] <= idx)))
+      if (cc < nextcc || (cc == nextcc &&
+                          saininfo->sainseq->bucketfillptr[cc] <= idx))
       {
         unsigned long putidx = --saininfo->sainseq->bucketfillptr[cc];
-        gt_assert(putidx < nonspecialentries);
+
+        gt_assert(putidx < nonspecialentries && putidx != idx);
         suftab[putidx] = position-1;
 #ifdef SAINSHOWSTATE
         printf("S-induce: suftab[%lu]=%lu\n",putidx,position-1);
