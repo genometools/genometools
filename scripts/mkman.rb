@@ -12,7 +12,7 @@ def each_tool(binary)
   loop do
     w = vals.shift
     break if w.nil? or w.strip == ""
-    tools << w
+    tools << w.split(/\s+/)[0]
   end
 
   tools.each do |t|
@@ -23,7 +23,7 @@ end
 def get_manpage_for_help(helptext, t)
   fname = "gt-#{t}.1.txt"
   File.open(fname, "w") do |f|
-    outlines = helptext.split(/\n/)
+    outlines = helptext.gsub(/-{3,}/,'').split(/\n/)
     short = outlines[1].tr("<>", "[]")
     synopsis = "gt " + outlines[0][7+ARGV[0].length+1..outlines[0].length-1]
     outlines.shift
@@ -96,7 +96,6 @@ def get_manpage_for_help(helptext, t)
       f.puts author
     end
   end
-  print "."
   `a2x --doctype manpage --format manpage #{fname}`
   if $? == 0 then
     File.unlink(fname)
