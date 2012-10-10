@@ -1074,28 +1074,6 @@ static void gt_sain_expandorder2original(GtSaininfo *saininfo,
   }
 }
 
-static void gt_sain_deriveorder(GtSaininfo *saininfo,
-                                unsigned long *suftab,
-                                unsigned long nonspecialentries,
-                                bool firstphase,
-                                GtTimer *timer)
-{
-  if (!firstphase)
-  {
-    gt_sain_endbuckets(saininfo->sainseq);
-    gt_assert(saininfo->sainseq->bucketfillptr[saininfo->sainseq->numofchars-1]
-            == nonspecialentries);
-    GT_SAIN_SHOWTIMER("insert sorted Sstar suffixes");
-    gt_sain_insertsortedSstarsuffixes (saininfo, suftab, nonspecialentries);
-  }
-  gt_sain_startbuckets(saininfo->sainseq);
-  GT_SAIN_SHOWTIMER("induce L suffixes");
-  gt_sain_induceLtypesuffixes(saininfo, suftab, nonspecialentries);
-  gt_sain_endbuckets(saininfo->sainseq);
-  GT_SAIN_SHOWTIMER("induce S suffixes");
-  gt_sain_induceStypesuffixes(saininfo, suftab, nonspecialentries,firstphase);
-}
-
 static void gt_sain_rec_sortsuffixes(unsigned int level,
                                      GtSainseq *sainseq,
                                      unsigned long *suftab,
@@ -1122,7 +1100,12 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   {
     unsigned long startoccupied, numberofnames;
 
-    gt_sain_deriveorder(saininfo,suftab,nonspecialentries,true,timer);
+    gt_sain_startbuckets(saininfo->sainseq);
+    GT_SAIN_SHOWTIMER("induce L suffixes");
+    gt_sain_induceLtypesuffixes(saininfo, suftab, nonspecialentries);
+    gt_sain_endbuckets(saininfo->sainseq);
+    GT_SAIN_SHOWTIMER("induce S suffixes");
+    gt_sain_induceStypesuffixes(saininfo, suftab, nonspecialentries,true);
     GT_SAIN_SHOWTIMER("moverStar2front");
     gt_sain_moveSstar2front(saininfo,suftab);
     gt_assert(availableentries > 0);
@@ -1170,7 +1153,17 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     gt_sain_determinebucketsize(saininfo->sainseq);
   }
   gt_sain_setundefined(suftab,saininfo->countSstartype,availableentries-1);
-  gt_sain_deriveorder(saininfo,suftab,nonspecialentries,false,timer);
+  gt_sain_endbuckets(saininfo->sainseq);
+  gt_assert(saininfo->sainseq->bucketfillptr[saininfo->sainseq->numofchars-1]
+            == nonspecialentries);
+  GT_SAIN_SHOWTIMER("insert sorted Sstar suffixes");
+  gt_sain_insertsortedSstarsuffixes (saininfo, suftab, nonspecialentries);
+  gt_sain_startbuckets(saininfo->sainseq);
+  GT_SAIN_SHOWTIMER("induce L suffixes");
+  gt_sain_induceLtypesuffixes(saininfo, suftab, nonspecialentries);
+  gt_sain_endbuckets(saininfo->sainseq);
+  GT_SAIN_SHOWTIMER("induce S suffixes");
+  gt_sain_induceStypesuffixes(saininfo, suftab, nonspecialentries,false);
   if (nonspecialentries > 0)
   {
     if (intermediatecheck)
