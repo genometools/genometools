@@ -141,7 +141,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
       "the corrected reads are output in the currect working directory "
       "in files which are named as the input files, each prepended "
       "by a prefix (see -outprefix option)\n"
-      "-reads allows to output the reads in the same order as in the input "
+      "-reads allows one to output the reads in the same order as in the input "
       "and is mandatory if the SAM contains more than a single primary "
       "alignment for each read (e.g. output of bwasw)\n"
       "see also -o option as an alternative",
