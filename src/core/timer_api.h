@@ -21,6 +21,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 /* The <GtTimer> class encapsulates a timer which can be used for run-time
    measurements. */
