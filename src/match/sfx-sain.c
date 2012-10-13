@@ -913,7 +913,7 @@ static void gt_sain_checkSstarorder(const GtSaininfo *saininfo,
 {
   unsigned long idx;
 
-  for (idx = 0; idx < saininfo->countStype; idx++)
+  for (idx = 0; idx < saininfo->countSstartype; idx++)
   {
     gt_assert((unsigned long) shadow[idx] == suftab[idx]);
   }
