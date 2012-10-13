@@ -872,10 +872,9 @@ static void gt_sain_induceStypesuffixes1new(const GtSaininfo *saininfo,
   }
 }
 
-static void gt_sain_checkSstarorder(const GtSaininfo *saininfo,
-                                    const unsigned long *suftab,
-                                    long *shadow,
-                                    unsigned long nonspecialentries)
+static void gt_sain_moveSstar2frontnew(const GtSaininfo *saininfo,
+                                       long *shadow,
+                                       unsigned long nonspecialentries)
 {
   unsigned long idx, writeidx = 0;
   long position;
@@ -906,7 +905,15 @@ static void gt_sain_checkSstarorder(const GtSaininfo *saininfo,
     writeidx = idx;
   }
   gt_assert(writeidx == saininfo->countSstartype);
-  for (idx = 0; idx < writeidx; idx++)
+}
+
+static void gt_sain_checkSstarorder(const GtSaininfo *saininfo,
+                                    const unsigned long *suftab,
+                                    const long *shadow)
+{
+  unsigned long idx;
+
+  for (idx = 0; idx < saininfo->countStype; idx++)
   {
     gt_assert((unsigned long) shadow[idx] == suftab[idx]);
   }
@@ -1470,7 +1477,8 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     gt_sain_induceStypesuffixes1new(saininfo, shadow, nonspecialentries);
     GT_SAIN_SHOWTIMER("moverStar2front");
     gt_sain_moveSstar2front(saininfo,suftab);
-    gt_sain_checkSstarorder(saininfo, suftab, shadow, nonspecialentries);
+    gt_sain_moveSstar2frontnew(saininfo,shadow,nonspecialentries);
+    gt_sain_checkSstarorder(saininfo, suftab, shadow);
     gt_assert(availableentries > 0);
     gt_sain_setundefined(suftab,saininfo->countSstartype,availableentries-1);
     GT_SAIN_SHOWTIMER("assignSstarlength");
