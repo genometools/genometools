@@ -866,6 +866,35 @@ static void gt_sain_induceStypesuffixes1(const GtSaininfo *saininfo,
   }
 }
 
+static void gt_sain_singleSinduction1(const GtSaininfo *saininfo,
+                                      long *shadow,
+                                      long position,
+                                      GT_UNUSED unsigned long nonspecialentries,
+                                      unsigned long idx)
+{
+  unsigned long nextcc = gt_sain_seq_getchar(saininfo->sainseq,
+                                             (unsigned long) position);
+
+  if (nextcc < saininfo->sainseq->numofchars)
+  {
+    unsigned long cc;
+    unsigned long putidx = --saininfo->sainseq->shadowbucketfillptr[nextcc];
+
+    gt_assert(putidx < nonspecialentries && position > 0);
+    position--;
+    cc = gt_sain_seq_getchar(saininfo->sainseq,(unsigned long) position);
+    shadow[putidx] = (cc > nextcc) ? ~(position+1) : position;
+#ifdef SAINSHOWSTATE
+    printf("end S-induce: shadow[%lu]=%ld\n",putidx,shadow[putidx]);
+#endif
+    gt_assert (idx == ULONG_MAX || putidx < idx);
+  }
+  if (idx != ULONG_MAX)
+  {
+    shadow[idx] = 0;
+  }
+}
+
 static void gt_sain_induceStypesfromspecialrangesshadow(
                                    GT_UNUSED const GtSaininfo *saininfo,
                                    const GtEncseq *encseq,
@@ -881,6 +910,13 @@ static void gt_sain_induceStypesfromspecialrangesshadow(
     {
       if (range.start > 1UL)
       {
+        /*
+        gt_sain_singleSinduction1(saininfo,
+                                  shadow,
+                                  (unsigned long) (range.start - 1),
+                                  nonspecialentries,
+                                  ULONG_MAX);
+        */
         unsigned long putidx;
         GtUchar cc, nextcc;
         long position = (long) (range.start - 1);
@@ -910,26 +946,13 @@ static void gt_sain_induceStypesuffixes1new(const GtSaininfo *saininfo,
                                         long *shadow,
                                         unsigned long nonspecialentries)
 {
-  unsigned long idx, lastcc;
+  unsigned long idx;
 
-  lastcc = gt_sain_seq_getchar(saininfo->sainseq,
-                               saininfo->sainseq->totallength-1);
-  if (lastcc < saininfo->sainseq->numofchars)
-  {
-    long position;
-    unsigned long cc;
-    unsigned long putidx = --saininfo->sainseq->shadowbucketfillptr[lastcc];
-
-    gt_assert(putidx < nonspecialentries);
-    gt_assert(saininfo->sainseq->totallength >= 2UL);
-    cc = gt_sain_seq_getchar(saininfo->sainseq,
-                             saininfo->sainseq->totallength-2);
-    position = (long) saininfo->sainseq->totallength-2;
-    shadow[putidx] = (cc > lastcc) ? ~(position+1) : position;
-#ifdef SAINSHOWSTATE
-    printf("end S-induce: shadow[%lu]=%ld\n",putidx,shadow[putidx]);
-#endif
-  }
+  gt_sain_singleSinduction1(saininfo,
+                            shadow,
+                            (long) (saininfo->sainseq->totallength-1),
+                            nonspecialentries,
+                            ULONG_MAX);
   if (saininfo->sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypesfromspecialrangesshadow(saininfo,
@@ -947,24 +970,11 @@ static void gt_sain_induceStypesuffixes1new(const GtSaininfo *saininfo,
 
     if (position > 0)
     {
-      unsigned long cc,
-                    nextcc = gt_sain_seq_getchar(saininfo->sainseq,
-                                                 (unsigned long) position);
-
-      if (nextcc < saininfo->sainseq->numofchars)
-      {
-        unsigned long putidx = --saininfo->sainseq->shadowbucketfillptr[nextcc];
-
-        position--;
-        cc = gt_sain_seq_getchar(saininfo->sainseq,(unsigned long) position);
-        gt_assert(putidx < nonspecialentries);
-        shadow[putidx] = (cc > nextcc) ? ~(position+1) : position;
-#ifdef SAINSHOWSTATE
-        printf("S-induce: shadow[%lu]=%ld\n",putidx,shadow[putidx]);
-#endif
-        gt_assert (idx > putidx);
-      }
-      shadow[idx] = 0;
+      gt_sain_singleSinduction1(saininfo,
+                                shadow,
+                                position,
+                                nonspecialentries,
+                                idx);
     }
     if (idx == 0)
     {
