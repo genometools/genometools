@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010      Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -164,6 +164,13 @@ int gt_encseq_decode_arguments_check(GT_UNUSED int rest_argc,
         && strcmp(gt_str_get(args->mode), "fasta") != 0) {
     gt_error_set(err, "'-seq' and '-seqrange' can only be used with the "
                       "'-output fasta' option");
+    had_err = -1;
+  }
+  if (!had_err && (args->rng.start != GT_UNDEF_ULONG ||
+        args->rng.end != GT_UNDEF_ULONG)
+        && strcmp(gt_str_get(args->mode), "concat") != 0) {
+    gt_error_set(err, "'-range' can only be used with the "
+                      "'-output concat' option");
     had_err = -1;
   }
   return had_err;
