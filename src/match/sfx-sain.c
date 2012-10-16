@@ -1128,34 +1128,48 @@ static void gt_sain_induceStypesuffixes2(const GtSaininfo *saininfo,
   }
 }
 
-static void gt_sain_induceStypesuffixes2new(const GtSaininfo *saininfo,
-                                            long *shadow,
-                                            unsigned long nonspecialentries)
+static void gt_sain_singleSinduction2(const GtSaininfo *saininfo,
+                                      long *shadow,
+                                      long position,
+                                      GT_UNUSED unsigned long nonspecialentries,
+                                      GT_UNUSED unsigned long idx)
 {
-  unsigned long idx, lastcc;
+  unsigned long nextcc;
 
-  lastcc = gt_sain_seq_getchar(saininfo->sainseq,
-                               saininfo->sainseq->totallength-1);
-  if (lastcc < saininfo->sainseq->numofchars)
+  position--;
+  nextcc = gt_sain_seq_getchar(saininfo->sainseq,(unsigned long) position);
+  if (nextcc < saininfo->sainseq->numofchars)
   {
-    unsigned long putidx = --saininfo->sainseq->shadowbucketfillptr[lastcc];
+    unsigned long putidx = --saininfo->sainseq->shadowbucketfillptr[nextcc];
 
-    gt_assert(putidx < nonspecialentries);
-    if (saininfo->sainseq->totallength == 1UL)
+    gt_assert(putidx < nonspecialentries &&
+              (idx == ULONG_MAX || idx >= putidx));
+    if (position == 0)
     {
       shadow[putidx] = ~0L;
     } else
     {
-      unsigned long cc;
-      long position = (long) saininfo->sainseq->totallength-1;
-
-      cc = gt_sain_seq_getchar(saininfo->sainseq,(unsigned long) (position-1));
-      shadow[putidx] = (cc > lastcc) ? ~position : position;
+      unsigned long cc = gt_sain_seq_getchar(saininfo->sainseq,
+                                             (unsigned long) (position-1));
+      shadow[putidx] = (cc > nextcc) ? ~position : position;
     }
 #ifdef SAINSHOWSTATE
     printf("end S-induce: shadow[%lu]=%ld\n",putidx,shadow[putidx]);
 #endif
   }
+}
+
+static void gt_sain_induceStypesuffixes2new(const GtSaininfo *saininfo,
+                                            long *shadow,
+                                            unsigned long nonspecialentries)
+{
+  unsigned long idx;
+
+  gt_sain_singleSinduction2(saininfo,
+                            shadow,
+                            saininfo->sainseq->totallength,
+                            nonspecialentries,
+                            ULONG_MAX);
   if (saininfo->sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypesfromspecialrangesshadow(saininfo,
@@ -1173,29 +1187,11 @@ static void gt_sain_induceStypesuffixes2new(const GtSaininfo *saininfo,
 
     if (position > 0)
     {
-      unsigned long nextcc;
-
-      position--;
-      nextcc = gt_sain_seq_getchar(saininfo->sainseq,
-                                   (unsigned long) position);
-      if (nextcc < saininfo->sainseq->numofchars)
-      {
-        unsigned long putidx = --saininfo->sainseq->shadowbucketfillptr[nextcc];
-        gt_assert(putidx < nonspecialentries);
-        gt_assert (idx >= putidx);
-        if (position == 0)
-        {
-          shadow[putidx] = ~0L;
-        } else
-        {
-          unsigned long cc = gt_sain_seq_getchar(saininfo->sainseq,
-                                   (unsigned long) (position-1));
-          shadow[putidx] = (cc > nextcc) ? ~position : position;
-        }
-#ifdef SAINSHOWSTATE
-        printf("S-induce: shadow[%lu]=%ld\n",putidx,shadow[putidx]);
-#endif
-      }
+      gt_sain_singleSinduction2(saininfo,
+                                shadow,
+                                position,
+                                nonspecialentries,
+                                idx);
     } else
     {
       shadow[idx] = ~position;
