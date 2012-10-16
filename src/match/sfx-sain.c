@@ -895,7 +895,7 @@ static void gt_sain_singleSinduction1(const GtSaininfo *saininfo,
   }
 }
 
-static void gt_sain_induceStypesfromspecialrangesshadow(
+static void gt_sain_induceStypes1fromspecialrangesshadow(
                                    GT_UNUSED const GtSaininfo *saininfo,
                                    const GtEncseq *encseq,
                                    long *shadow,
@@ -910,32 +910,11 @@ static void gt_sain_induceStypesfromspecialrangesshadow(
     {
       if (range.start > 1UL)
       {
-        /*
         gt_sain_singleSinduction1(saininfo,
                                   shadow,
-                                  (unsigned long) (range.start - 1),
+                                  (long) (range.start - 1),
                                   nonspecialentries,
                                   ULONG_MAX);
-        */
-        unsigned long putidx;
-        GtUchar cc, nextcc;
-        long position = (long) (range.start - 1);
-
-        gt_assert(gt_sain_info_isStype(saininfo,range.start-1));
-        nextcc = gt_encseq_get_encoded_char(encseq,(unsigned long) position,
-                                            GT_READMODE_FORWARD);
-        gt_assert(ISNOTSPECIAL(nextcc) &&
-                  saininfo->sainseq->shadowbucketfillptr[nextcc] > 0);
-        putidx = --saininfo->sainseq->shadowbucketfillptr[nextcc];
-        gt_assert(putidx < nonspecialentries);
-        position--;
-        cc = gt_encseq_get_encoded_char(encseq,(unsigned long) position,
-                                        GT_READMODE_FORWARD);
-        shadow[putidx] = (cc > nextcc) ? ~(position+1) : position;
-#ifdef SAINSHOWSTATE
-        printf("Srange-induce: suftab[%lu]=%lu in %d-bucket\n",putidx,
-                          range.start-1,(int) cc);
-#endif
       }
     }
     gt_specialrangeiterator_delete(sri);
@@ -943,8 +922,8 @@ static void gt_sain_induceStypesfromspecialrangesshadow(
 }
 
 static void gt_sain_induceStypesuffixes1new(const GtSaininfo *saininfo,
-                                        long *shadow,
-                                        unsigned long nonspecialentries)
+                                            long *shadow,
+                                            unsigned long nonspecialentries)
 {
   unsigned long idx;
 
@@ -955,7 +934,7 @@ static void gt_sain_induceStypesuffixes1new(const GtSaininfo *saininfo,
                             ULONG_MAX);
   if (saininfo->sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
-    gt_sain_induceStypesfromspecialrangesshadow(saininfo,
+    gt_sain_induceStypes1fromspecialrangesshadow(saininfo,
                                           saininfo->sainseq->seq.encseq,
                                           shadow,
                                           nonspecialentries);
@@ -1159,6 +1138,32 @@ static void gt_sain_singleSinduction2(const GtSaininfo *saininfo,
   }
 }
 
+static void gt_sain_induceStypes2fromspecialrangesshadow(
+                                   GT_UNUSED const GtSaininfo *saininfo,
+                                   const GtEncseq *encseq,
+                                   long *shadow,
+                                   GT_UNUSED unsigned long nonspecialentries)
+{
+  if (gt_encseq_has_specialranges(encseq))
+  {
+    GtSpecialrangeiterator *sri;
+    GtRange range;
+    sri = gt_specialrangeiterator_new(encseq,false);
+    while (gt_specialrangeiterator_next(sri,&range))
+    {
+      if (range.start > 0)
+      {
+        gt_sain_singleSinduction2(saininfo,
+                                  shadow,
+                                  (long) range.start,
+                                  nonspecialentries,
+                                  ULONG_MAX);
+      }
+    }
+    gt_specialrangeiterator_delete(sri);
+  }
+}
+
 static void gt_sain_induceStypesuffixes2new(const GtSaininfo *saininfo,
                                             long *shadow,
                                             unsigned long nonspecialentries)
@@ -1167,12 +1172,12 @@ static void gt_sain_induceStypesuffixes2new(const GtSaininfo *saininfo,
 
   gt_sain_singleSinduction2(saininfo,
                             shadow,
-                            saininfo->sainseq->totallength,
+                            (long) saininfo->sainseq->totallength,
                             nonspecialentries,
                             ULONG_MAX);
   if (saininfo->sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
-    gt_sain_induceStypesfromspecialrangesshadow(saininfo,
+    gt_sain_induceStypes2fromspecialrangesshadow(saininfo,
                                           saininfo->sainseq->seq.encseq,
                                           shadow,
                                           nonspecialentries);
