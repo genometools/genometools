@@ -380,15 +380,6 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq,unsigned long *suftab,
       break;
     }
   }
-  /* reset the first entry */
-  /*for (idx = 0; idx < nonspecialentries; idx++)
-  {
-    if (shadow[idx] > 0)
-    {
-      shadow[idx] = 0;
-      break;
-    }
-  }*/
   gt_assert(GT_MULT2(saininfo->countSstartype) <=
             saininfo->sainseq->totallength);
   return saininfo;
@@ -862,7 +853,7 @@ static void gt_sain_singleSinduction1(const GtSaininfo *saininfo,
 }
 
 static void gt_sain_induceStypes1fromspecialrangesshadow(
-                                   GT_UNUSED const GtSaininfo *saininfo,
+                                   const GtSaininfo *saininfo,
                                    const GtEncseq *encseq,
                                    long *shadow,
                                    GT_UNUSED unsigned long nonspecialentries)
@@ -1516,10 +1507,6 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSaininfo *saininfo,
   if (saininfo->countSstartype == 0)
   {
     return;
-  }
-  for (idx = 0; idx < nonspecialsuffixes; idx++)
-  {
-    shadow[idx] = 0;
   }
   for (idx = saininfo->countSstartype - 1; /* Nothing */; idx--)
   {
