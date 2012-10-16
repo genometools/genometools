@@ -327,10 +327,6 @@ static GtSaininfo *gt_sain_info_new(GtSainseq *sainseq,unsigned long *suftab,
   gt_sain_endbuckets(saininfo->sainseq);
   gt_assert(saininfo->sainseq->bucketfillptr[saininfo->sainseq->numofchars-1]
             == nonspecialentries);
-  for (idx = 0; idx < nonspecialentries; idx++)
-  {
-    shadow[idx] = 0;
-  }
   for (position = saininfo->sainseq->totallength-1; /* Nothing */; position--)
   {
     bool currentisStype;
@@ -606,15 +602,6 @@ static void gt_sain_induceLtypesuffixes2(const GtSaininfo *saininfo,
     gt_assert(saininfo->sainseq->bucketsize[nextcc] > 0);
     nextccbucketend = saininfo->sainseq->bucketsize[nextcc];
   }
-  /*printf("suftab before L-induction\n");
-  for (idx = 0; idx < nonspecialentries; idx++)
-  {
-    if (suftab[idx] != ULONG_MAX)
-    {
-      printf("%lu %lu\n",idx,suftab[idx]);
-    }
-  }
-  */
   for (idx = 0; idx < nonspecialentries; idx++)
   {
     unsigned long position = suftab[idx];
@@ -648,13 +635,6 @@ static void gt_sain_induceLtypesuffixes2(const GtSaininfo *saininfo,
       }
     }
   }
-  /*
-  printf("suftab after L-induction\n");
-  for (idx = 0; idx < nonspecialentries; idx++)
-  {
-    printf("%lu %lu\n",idx,suftab[idx]);
-  }
-  */
 }
 
 static void gt_sain_induceLtypesuffixes2new(const GtSaininfo *saininfo,
@@ -663,14 +643,6 @@ static void gt_sain_induceLtypesuffixes2new(const GtSaininfo *saininfo,
 {
   unsigned long idx;
 
-  /*printf("shadow before L-induction\n");
-  for (idx = 0; idx < nonspecialentries; idx++)
-  {
-    if (shadow[idx] != 0)
-    {
-      printf("%lu %ld\n",idx,shadow[idx]);
-    }
-  }*/
   for (idx = 0; idx < nonspecialentries; idx++)
   {
     long position = shadow[idx];
@@ -704,17 +676,11 @@ static void gt_sain_induceLtypesuffixes2new(const GtSaininfo *saininfo,
       }
     }
   }
-  /*printf("shadow after L-induction\n");
-  for (idx = 0; idx < nonspecialentries; idx++)
-  {
-    printf("%lu %ld\n",idx,shadow[idx]);
-  }
-  */
 }
 
-void checkafterLinduction(const unsigned long *suftab,
-                                 const long *shadow,
-                                 unsigned long nonspecialentries)
+static void gt_sain_checkafterLinduction(const unsigned long *suftab,
+                                         const long *shadow,
+                                         unsigned long nonspecialentries)
 {
   unsigned long idx;
 
@@ -1231,7 +1197,6 @@ static void gt_sain_moveSstar2front(const GtSaininfo *saininfo,
       if (position > 0 && (suftab[idx] & GT_FIRSTBIT))
       {
         gt_assert(gt_sain_info_isSstartype(saininfo,position));
-        /*printf("ordered Sstar: %lu\n",position);*/
         suftab[writeindex++] = position;
       }
     }
@@ -1570,8 +1535,6 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSaininfo *saininfo,
       suftab[putidx] = position;
       suftab[idx] = ULONG_MAX;
       shadow[putidx] = (long) position;
-      /*printf("assigned sorted Sstar-position shadow[%lu]=%ld\n",
-              putidx,shadow[putidx]);*/
       shadow[idx] = 0;
 #ifdef SAINSHOWSTATE
       printf("insertsorted: suftab[%lu]=%lu\n",putidx,position);
@@ -1752,7 +1715,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   GT_SAIN_SHOWTIMER("induce L suffixes");
   gt_sain_induceLtypesuffixes2(saininfo, suftab, nonspecialentries);
   gt_sain_induceLtypesuffixes2new(saininfo,shadow,nonspecialentries);
-  checkafterLinduction(suftab,shadow,nonspecialentries);
+  gt_sain_checkafterLinduction(suftab,shadow,nonspecialentries);
   gt_sain_endbuckets(saininfo->sainseq);
   GT_SAIN_SHOWTIMER("induce S suffixes");
   gt_sain_induceStypesuffixes2(saininfo, suftab, nonspecialentries,false);
