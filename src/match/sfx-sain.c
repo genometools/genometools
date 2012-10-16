@@ -1630,7 +1630,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   }
   if (saininfo->countSstartype > 0)
   {
-    unsigned long startoccupied, numberofnames;
+    unsigned long startoccupied, numberofnames, numberofnames2;
 
     gt_sain_startbuckets(saininfo->sainseq);
     GT_SAIN_SHOWTIMER("induce L suffixes");
@@ -1649,8 +1649,13 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                          availableentries-1);
     GT_SAIN_SHOWTIMER("assignSstarlength");
     gt_sain_assignSstarlength(suftab + saininfo->countSstartype,saininfo);
+    gt_sain_assignSstarlength((unsigned long *)
+                              (shadow + saininfo->countSstartype),saininfo);
     GT_SAIN_SHOWTIMER("assignSstarnames");
     numberofnames = gt_sain_assignSstarnames(saininfo,suftab,availableentries);
+    numberofnames2 = gt_sain_assignSstarnames(saininfo,(unsigned long *)
+                                              shadow,availableentries);
+    gt_assert(numberofnames == numberofnames2);
     GT_SAIN_SHOWTIMER("movenames2front");
     gt_sain_movenames2front(saininfo,suftab,availableentries);
     gt_assert(numberofnames <= saininfo->countSstartype);
