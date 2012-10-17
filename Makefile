@@ -363,10 +363,12 @@ endif
 
 ifeq ($(m64),yes)
   ifneq ($(MACHINE),ia64)
-    GT_CFLAGS += -m64
-    HMMER_CFLAGS += -m64
-    GT_LDFLAGS += -m64
-    SQLITE_CFLAGS += -m64
+    ifneq ($(MACHINE),alpha)
+      GT_CFLAGS += -m64
+      HMMER_CFLAGS += -m64
+      GT_LDFLAGS += -m64
+      SQLITE_CFLAGS += -m64
+    endif
   endif
 endif
 
