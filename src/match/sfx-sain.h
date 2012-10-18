@@ -25,9 +25,19 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,bool intermediatecheck,
                                  bool finalcheck,bool verbose,
                                  GtTimer *timer);
 
+void gt_sain_encseq_sortsuffixesnew(const GtEncseq *encseq,
+                                    bool intermediatecheck,
+                                    bool finalcheck,bool verbose,
+                                    GtTimer *timer);
+
 void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                                 unsigned long len, bool intermediatecheck,
                                 bool verbose,
                                 GtTimer *timer);
+
+void gt_sain_plain_sortsuffixesnew(const GtUchar *plainseq,
+                                   unsigned long len, bool intermediatecheck,
+                                   bool verbose,
+                                   GtTimer *timer);
 
 #endif

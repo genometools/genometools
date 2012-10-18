@@ -25,7 +25,7 @@
 
 typedef struct
 {
-  bool icheck, fcheck, verbose;
+  bool icheck, fcheck, verbose, oldimplementation, newimplementation;
   GtStr *encseqfile, *plainseqfile;
 } GtSainArguments;
 
@@ -50,7 +50,8 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
 {
   GtSainArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionfcheck, *optionesq, *optionfile;
+  GtOption *option, *optionfcheck, *optionesq, *optionfile,
+           *optionold, *optionnew;
   gt_assert(arguments);
 
   /* init */
@@ -63,6 +64,16 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   optionesq = gt_option_new_string("esq", "specify encseq file",
                              arguments->encseqfile, NULL);
   gt_option_parser_add_option(op, optionesq);
+
+  /* -old */
+  optionold = gt_option_new_bool("old", "old implementation",
+                                 &arguments->oldimplementation, NULL);
+  gt_option_parser_add_option(op, optionold);
+
+  /* -new */
+  optionnew = gt_option_new_bool("new", "new implementation",
+                                 &arguments->newimplementation, NULL);
+  gt_option_parser_add_option(op, optionnew);
 
   /* -file */
   optionfile = gt_option_new_string("file", "specify filename",
@@ -135,9 +146,22 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           had_err = -1;
         }
         {
-          gt_sain_encseq_sortsuffixes(encseq,arguments->icheck,
-                                      arguments->fcheck,arguments->verbose,
-                                      NULL);
+          if (arguments->oldimplementation)
+          {
+            gt_sain_encseq_sortsuffixes(encseq,
+                                        arguments->icheck,
+                                        arguments->fcheck,
+                                        arguments->verbose,
+                                        NULL);
+          }
+          if (arguments->newimplementation)
+          {
+            gt_sain_encseq_sortsuffixesnew(encseq,
+                                           arguments->icheck,
+                                           arguments->fcheck,
+                                           arguments->verbose,
+                                           NULL);
+          }
         }
       }
       gt_encseq_delete(encseq);
@@ -167,9 +191,22 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                              "allocate suftab and undef entries");
             gt_timer_start(timer);
           }
-          gt_sain_plain_sortsuffixes(plainseq,(unsigned long) len,
-                                     arguments->icheck,arguments->verbose,
-                                     timer);
+          if (arguments->oldimplementation)
+          {
+            gt_sain_plain_sortsuffixes(plainseq,
+                                       (unsigned long) len,
+                                       arguments->icheck,
+                                       arguments->verbose,
+                                       timer);
+          }
+          if (arguments->newimplementation)
+          {
+            gt_sain_plain_sortsuffixesnew(plainseq,
+                                          (unsigned long) len,
+                                          arguments->icheck,
+                                          arguments->verbose,
+                                          timer);
+          }
           if (timer != NULL)
           {
             gt_timer_show_progress_final(timer, stdout);
@@ -187,8 +224,8 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
 GtTool* gt_sain(void)
 {
   return gt_tool_new(gt_sain_arguments_new,
-                  gt_sain_arguments_delete,
-                  gt_sain_option_parser_new,
-                  NULL,
-                  gt_sain_runner);
+                     gt_sain_arguments_delete,
+                     gt_sain_option_parser_new,
+                     NULL,
+                     gt_sain_runner);
 }
