@@ -100,11 +100,18 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_sain_checkmaxsequencelength(unsigned long len,GtError *err)
+static int gt_sain_checkmaxsequencelength(unsigned long len,bool forencseq,
+                                          GtError *err)
 {
-  const unsigned long maxsequencelength
-    = (unsigned long) (~GT_FIRSTBIT) - 1 - UCHAR_MAX;
+  unsigned long maxsequencelength;
 
+  if (forencseq)
+  {
+    maxsequencelength = (unsigned long) (~GT_FIRSTBIT) - 1 - GT_COMPAREOFFSET;
+  } else
+  {
+    maxsequencelength = (unsigned long) (~GT_FIRSTBIT) - 1;
+  }
   if (len > maxsequencelength)
   {
     gt_error_set(err,"sequence of size %lu is too long: sain algorithm "
@@ -141,7 +148,8 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         had_err = -1;
       } else
       {
-        if (gt_sain_checkmaxsequencelength(gt_encseq_total_length(encseq),err)
+        if (gt_sain_checkmaxsequencelength(gt_encseq_total_length(encseq),true,
+                                           err)
                        != 0)
         {
           had_err = -1;
@@ -179,7 +187,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         had_err = -1;
       } else
       {
-        if (gt_sain_checkmaxsequencelength((unsigned long) len,err) != 0)
+        if (gt_sain_checkmaxsequencelength((unsigned long) len,false,err) != 0)
         {
           had_err = -1;
         } else
