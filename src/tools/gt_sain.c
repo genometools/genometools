@@ -102,7 +102,8 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
 
 static int gt_sain_checkmaxsequencelength(unsigned long len,GtError *err)
 {
-  const unsigned long maxsequencelength = (unsigned long) (~GT_FIRSTBIT) - 1;
+  const unsigned long maxsequencelength
+    = (unsigned long) (~GT_FIRSTBIT) - 1 - UCHAR_MAX;
 
   if (len > maxsequencelength)
   {
