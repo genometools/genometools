@@ -111,28 +111,13 @@ static GtSainseq *gt_sain_seq_new_from_plainseq(const GtUchar *plainseq,
   return sainseq;
 }
 
-static void gt_sain_determinebucketsize(GtSainseq *sainseq)
-{
-  unsigned long idx;
-
-  for (idx = 0; idx < sainseq->numofchars; idx++)
-  {
-    sainseq->bucketsize[idx] = 0;
-  }
-  for (idx = 0; idx<sainseq->totallength; idx++)
-  {
-    gt_assert(sainseq->seq.array[idx] < sainseq->numofchars);
-    sainseq->bucketsize[sainseq->seq.array[idx]]++;
-  }
-}
-
 static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
                                              unsigned long len,
                                              unsigned long numofchars,
                                              unsigned long *suftab,
                                              unsigned long suftabentries)
 {
-  unsigned long maxused = GT_MULT2(len);
+  unsigned long charidx, maxused = GT_MULT2(len);
   GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
 
   sainseq->seqtype = GT_SAIN_INTSEQ;
@@ -175,7 +160,16 @@ static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
            (unsigned long) sizeof (*sainseq->bucketsize) * numofchars);
   }
   sainseq->sstarfirstcharcount = NULL;
-  gt_sain_determinebucketsize(sainseq);
+  for (charidx = 0; charidx < sainseq->numofchars; charidx++)
+  {
+    sainseq->bucketsize[charidx] = 0;
+  }
+  for (charidx = 0; charidx<sainseq->totallength; charidx++)
+  {
+    unsigned long cc = sainseq->seq.array[charidx];
+    gt_assert(cc < sainseq->numofchars);
+    sainseq->bucketsize[cc]++;
+  }
   return sainseq;
 }
 
@@ -1077,7 +1071,7 @@ static void gt_sain_expandorder2original(const GtSaininfo *saininfo,
                 nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength),
                 *sstarsuffixes = suftab + saininfo->countSstartype;
   bool nextisStype = true;
-  unsigned long *sstarfirstcharcount = NULL;
+  unsigned long *sstarfirstcharcount = NULL, *bucketsize = NULL;
 
   if (saininfo->sainseq->seqtype == GT_SAIN_INTSEQ)
   {
@@ -1086,9 +1080,11 @@ static void gt_sain_expandorder2original(const GtSaininfo *saininfo,
     gt_assert(saininfo->sainseq->sstarfirstcharcount == NULL);
     sstarfirstcharcount = saininfo->sainseq->sstarfirstcharcount
                         = saininfo->sainseq->bucketfillptr;
+    bucketsize = saininfo->sainseq->bucketsize;
     for (charidx = 0; charidx < saininfo->sainseq->numofchars; charidx++)
     {
       sstarfirstcharcount[charidx] = 0;
+      bucketsize[charidx] = 0;
     }
   }
   for (position = saininfo->sainseq->totallength-1; /* Nothing */; position--)
@@ -1097,6 +1093,10 @@ static void gt_sain_expandorder2original(const GtSaininfo *saininfo,
     unsigned long currentcc;
 
     currentcc = gt_sain_seq_getchar(saininfo->sainseq,position);
+    if (bucketsize != NULL)
+    {
+      bucketsize[currentcc]++;
+    }
     if (currentcc < nextcc || (currentcc == nextcc && nextisStype))
     {
       currentisStype = true;
@@ -1138,6 +1138,7 @@ static void gt_sain_determineSstarfirstchardist(GtSainseq *sainseq)
     unsigned long currentcc;
 
     currentcc = sainseq->seq.array[position];
+    sainseq->bucketsize[currentcc]++;
     if (currentcc < nextcc || (currentcc == nextcc && nextisStype))
     {
       currentisStype = true;
@@ -1320,6 +1321,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
         for (charidx = 0; charidx < sainseq->numofchars; charidx++)
         {
           sainseq->sstarfirstcharcount[charidx] = 0;
+          sainseq->bucketsize[charidx] = 0;
         }
         gt_sain_determineSstarfirstchardist(sainseq);
       }
@@ -1329,11 +1331,6 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   {
     gt_sain_checkorder(sainseq,suftab,0,saininfo->countSstartype-1);
   }
-  if (sainseq->seqtype == GT_SAIN_INTSEQ)
-  {
-    gt_sain_determinebucketsize(sainseq);
-  }
-  /*gt_sain_setundefined(suftab,saininfo->countSstartype,availableentries-1);*/
   GT_SAIN_SHOWTIMER("insert sorted Sstar suffixes");
   gt_sain_insertsortedSstarsuffixes (saininfo, suftab ,nonspecialentries);
   gt_sain_startbuckets(sainseq);
