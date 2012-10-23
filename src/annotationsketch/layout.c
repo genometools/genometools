@@ -116,9 +116,12 @@ static int layout_tracks(void *key, void *value, void *data,
                                    lti->layout);
   }
 
+  /* XXX: get first block for track property lookups, this should be reworked
+     to allow arbitrary track keys! */
   block = *(GtBlock**) gt_array_get(list, 0);
   gt_track_key = gt_str_new_cstr((char*) key);
 
+  /* obtain default settings*/
   if (gt_style_get_bool(lti->layout->style, "format", "split_lines", &split,
                          NULL, err) == GT_STYLE_QUERY_ERROR) {
     had_err = 1;
@@ -130,6 +133,23 @@ static int layout_tracks(void *key, void *value, void *data,
       had_err = 1;
     }
   }
+  /* obtain track-specific settings, should be changed to query arbitrary
+     track keys! */
+  if (!had_err) {
+    if (gt_style_get_bool(lti->layout->style, gt_block_get_type(block),
+                          "split_lines",  &split, NULL,
+                          err) == GT_STYLE_QUERY_ERROR) {
+      had_err = 1;
+    }
+  }
+  if (!had_err) {
+    if (gt_style_get_num(lti->layout->style, gt_block_get_type(block),
+                         "max_num_lines", &tmp, NULL,
+                         err) == GT_STYLE_QUERY_ERROR) {
+      had_err = 1;
+    }
+  }
+
   if (!had_err) {
     max = (unsigned long) tmp;
     track = gt_track_new(gt_track_key, max, split,
