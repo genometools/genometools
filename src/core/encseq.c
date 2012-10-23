@@ -5231,7 +5231,8 @@ bool gt_encseq_has_multiseq_support(const GtEncseq *encseq)
 bool gt_encseq_has_description_support(const GtEncseq *encseq)
 {
   bool ret = (encseq->destab != NULL
-                && (encseq->numofdbsequences == 1 || encseq->sdstab != NULL));
+                && (encseq->numofdbsequences == 1UL
+                      || encseq->sdstab != NULL));
   return ret;
 }
 
