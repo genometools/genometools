@@ -1,4 +1,5 @@
-if not $arguments["nocairo"] then
+rv = RUBY_VERSION.match(/^(\d+\.\d+)/)
+if (!rv.nil? && rv[1].to_f < 1.9) and not $arguments["nocairo"] then
   Name "gtruby: genome_stream bindings (output stream)"
   Keywords "gt_ruby"
   Test do

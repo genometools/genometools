@@ -17,8 +17,8 @@
 #
 
 # the GenomeTools test suite (employs ``stest'').
-
 if $0 == __FILE__
+  $:<< "."            # favor the local stest version
   require 'stest'
   at_exit do
     OnError do exit 1 end

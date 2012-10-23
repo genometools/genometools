@@ -268,68 +268,71 @@ Name "Python runtime style failures"
   end
 end
 
-Name "sketch_constructed (Ruby)"
-Keywords "gt_sketch gt_ruby annotationsketch"
-Test do
-  run_ruby "#{$cur}/gtruby/sketch_constructed.rb " + \
-           "#{$cur}/gtdata/sketch/default.style sketch_constructed.png", \
-           :maxtime => 600
-end
-
-Name "sketch_parsed (Ruby)"
-Keywords "gt_sketch gt_ruby annotationsketch"
-Test do
-  run_ruby "#{$cur}/gtruby/sketch_parsed.rb " + \
-           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
-           "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
-           :maxtime => 600
-end
-
-Name "sketch_parsed reverse order (Ruby)"
-Keywords "gt_sketch gt_ruby annotationsketch"
-Test do
-  run_ruby "#{$testdata}gtruby/sketch_parsed_with_ordering.rb " + \
-           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
-           "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
-           :maxtime => 600
-end
-
-Name "sketch_parsed invalid order (Ruby, string != numeric)"
-Keywords "gt_sketch gt_ruby annotationsketch"
-Test do
-  run_ruby "#{$testdata}gtruby/sketch_parsed_with_invalid_ordering.rb " + \
-           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
-           "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
-           :maxtime => 600, :retval => 1
-  grep(last_stderr, /Track ordering callback must return a number/)
-end
-
-Name "sketch_parsed invalid order (Ruby, nil)"
-Keywords "gt_sketch gt_ruby annotationsketch"
-Test do
-  run_ruby "#{$testdata}gtruby/sketch_parsed_with_invalid_ordering_2.rb " + \
-           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
-           "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
-           :maxtime => 600, :retval => 1
-  grep(last_stderr, /Track ordering callback must return a number/)
-end
-
-Name "Ruby runtime style failures"
-Keywords "gt_sketch gt_ruby annotationsketch"
-Test do
-  Dir.glob("#{$testdata}fail*style") do |file|
-    run_ruby "#{$cur}/gtruby/sketch_parsed.rb " + \
-             "#{file} sketch_parsed.png " + \
-             "#{$testdata}eden.gff3", \
-             :maxtime => 600, :retval => 1
-    grep(last_stderr, 'attempt to call global \'fail\'')
-
+rv = RUBY_VERSION.match(/^(\d+\.\d+)/)
+if (!rv.nil? && rv[1].to_f < 1.9) and not $arguments["nocairo"] then
+  Name "sketch_constructed (Ruby)"
+  Keywords "gt_sketch gt_ruby annotationsketch"
+  Test do
     run_ruby "#{$cur}/gtruby/sketch_constructed.rb " + \
-             "#{file} sketch_constructed.png", \
-             :maxtime => 600, :retval => 1
-    grep(last_stderr, 'attempt to call global \'fail\'')
+             "#{$cur}/gtdata/sketch/default.style sketch_constructed.png", \
+             :maxtime => 600
+  end
 
-    run_ruby "#{$testdata}gtruby/style_serialize.rb #{file}", :retval => 1
-    grep(last_stderr, 'expected boolean, number, or string')
+  Name "sketch_parsed (Ruby)"
+  Keywords "gt_sketch gt_ruby annotationsketch"
+  Test do
+    run_ruby "#{$cur}/gtruby/sketch_parsed.rb " + \
+             "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+             "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+             :maxtime => 600
+  end
+
+  Name "sketch_parsed reverse order (Ruby)"
+  Keywords "gt_sketch gt_ruby annotationsketch"
+  Test do
+    run_ruby "#{$testdata}gtruby/sketch_parsed_with_ordering.rb " + \
+             "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+             "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+             :maxtime => 600
+  end
+
+  Name "sketch_parsed invalid order (Ruby, string != numeric)"
+  Keywords "gt_sketch gt_ruby annotationsketch"
+  Test do
+    run_ruby "#{$testdata}gtruby/sketch_parsed_with_invalid_ordering.rb " + \
+             "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+             "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+             :maxtime => 600, :retval => 1
+    grep(last_stderr, /Track ordering callback must return a number/)
+  end
+
+  Name "sketch_parsed invalid order (Ruby, nil)"
+  Keywords "gt_sketch gt_ruby annotationsketch"
+  Test do
+    run_ruby "#{$testdata}gtruby/sketch_parsed_with_invalid_ordering_2.rb " + \
+             "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+             "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+             :maxtime => 600, :retval => 1
+    grep(last_stderr, /Track ordering callback must return a number/)
+  end
+
+  Name "Ruby runtime style failures"
+  Keywords "gt_sketch gt_ruby annotationsketch"
+  Test do
+    Dir.glob("#{$testdata}fail*style") do |file|
+      run_ruby "#{$cur}/gtruby/sketch_parsed.rb " + \
+               "#{file} sketch_parsed.png " + \
+               "#{$testdata}eden.gff3", \
+               :maxtime => 600, :retval => 1
+      grep(last_stderr, 'attempt to call global \'fail\'')
+
+      run_ruby "#{$cur}/gtruby/sketch_constructed.rb " + \
+               "#{file} sketch_constructed.png", \
+               :maxtime => 600, :retval => 1
+      grep(last_stderr, 'attempt to call global \'fail\'')
+
+      run_ruby "#{$testdata}gtruby/style_serialize.rb #{file}", :retval => 1
+      grep(last_stderr, 'expected boolean, number, or string')
+    end
   end
 end
