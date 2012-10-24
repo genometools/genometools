@@ -628,7 +628,7 @@ static int get_next_file_chunk_for_huffman(GtBitsequence **bits,
   gt_assert(bits && length && offset && pad_length);
   data_iter = (HcrHuffDataIterator*) meminfo;
 
-  gt_log_log("pos in iter: %lu", data_iter->pos);
+  gt_log_log("pos in iter: %lu", (unsigned long) data_iter->pos);
   if (data_iter->pos < data_iter->end) {
     gt_fa_xmunmap(data_iter->data);
     data_iter->data = NULL;
@@ -978,7 +978,7 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, unsigned long readnum,
       }
       gt_log_log("reads to read: %lu, nearest sample: %lu",
                  reads_to_read,nearestsample);
-      gt_log_log("start of nearest: %lu", startofnearestsample);
+      gt_log_log("start of nearest: %lu", (unsigned long) startofnearestsample);
     }
     else {
       if (current_read <= readnum)
