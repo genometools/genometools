@@ -1076,17 +1076,17 @@ static void assignoistabmapspecification(GtMapspec *mapspec,
 static void alphabet_to_key_values(const GtAlphabet *alpha,
                                    unsigned long *alphatype,
                                    unsigned long *lengthofalphadef,
-                                   char **alphadef)
+                                   char **alphadef, bool customalphabet)
 {
   gt_assert(alpha);
-  if (gt_alphabet_is_dna(alpha)) {
+  if (!customalphabet && gt_alphabet_is_dna(alpha)) {
     if (alphatype != NULL)
       *alphatype = 0UL;
     if (alphadef != NULL)
       *alphadef = NULL;
     if (lengthofalphadef != NULL)
       *lengthofalphadef = 0UL;
-  } else if (gt_alphabet_is_protein(alpha)) {
+  } else if (!customalphabet && gt_alphabet_is_protein(alpha)) {
     if (alphatype != NULL)
       *alphatype = 1UL;
     if (alphadef != NULL)
@@ -1476,6 +1476,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           const Definedunsignedlong
                                              *equallength,
                                           GtAlphabet *alpha,
+                                          bool customalphabet,
                                           GtLogger *logger);
 
 int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
@@ -1538,6 +1539,7 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
                                         ? &equallength
                                         : NULL,
                                       alphabet,
+                                      false,
                                       NULL);
     encseq->twobitencoding = twobitencoding;
     encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
@@ -1588,7 +1590,7 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
     encseq->maxseqlen = maxseqlen;
     alphabet_to_key_values(alphabet, &encseq->alphatype,
                            &encseq->lengthofalphadef,
-                           &encseq->alphadef);
+                           &encseq->alphadef, false);
     encseq->lengthofdbfilenames
       = determinelengthofdbfilenames(encseq->filenametab);
     if (gt_mapspec_write(gt_assignencseqmapspecification, fp, encseq,
@@ -4330,6 +4332,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           const Definedunsignedlong
                                              *equallength,
                                           GtAlphabet *alpha,
+                                          bool customalphabet,
                                           GtLogger *logger)
 {
   double spaceinbitsperchar;
@@ -4401,7 +4404,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   }
   encseq->alpha = alpha;
   alphabet_to_key_values(alpha, &encseq->alphatype, &encseq->lengthofalphadef,
-                         &encseq->alphadef);
+                         &encseq->alphadef, customalphabet);
   encseq->totallength = totallength;
   encseq->logicaltotallength = totallength;
   encseq->numofdbsequences = numofsequences;
@@ -4803,6 +4806,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
                                        unsigned long numofsequences,
                                        const Definedunsignedlong *equallength,
                                        GtAlphabet *alphabet,
+                                       bool customalphabet,
                                        GtEncseqAccessType sat,
                                        unsigned long *characterdistribution,
                                        unsigned long *classstartpositions,
@@ -4842,6 +4846,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
                                       outoistab,
                                       equallength,
                                       alphabet,
+                                      customalphabet,
                                       logger);
     ALLASSIGNAPPENDFUNC(sat,encseq->satsep);
     encseq->getexceptionmapping =
@@ -4991,6 +4996,7 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
                                  withoistab,
                                  &equallength,
                                  alpha,
+                                 gt_encseq_metadata_has_custom_alphabet(emd),
                                  logger);
     alpha = NULL;
     ALLASSIGNAPPENDFUNC(gt_encseq_metadata_accesstype(emd),encseq->satsep);
@@ -5721,6 +5727,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            const GtStrArray *filenametab,
                                            GtFilelengthvalues **filelengthtab,
                                            const GtAlphabet *alpha,
+                                           bool customalphabet,
                                            bool plainformat,
                                            bool outdestab,
                                            bool outsdstab,
@@ -5906,7 +5913,8 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     gt_md5_encoder_delete(md5enc);
   }
   if (!haserr) {
-    alphabet_to_key_values(alpha, NULL, &lengthofalphadef, NULL);
+    alphabet_to_key_values(alpha, NULL, &lengthofalphadef, NULL,
+                           customalphabet);
   }
   if (!haserr)
   {
@@ -7999,7 +8007,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
   unsigned int forcetable = GT_UNDEF_UINT;
   GtSpecialcharinfo specialcharinfo = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   GtAlphabet *alphabet = NULL;
-  bool alphabetisbound = false;
+  bool alphabetisbound = false, customalphabet = false;
   GtFilelengthvalues *filelengthtab = NULL;
   unsigned long totallength = 0, specialrangestab[3], wildcardrangestab[3],
                 numofseparators = 0,
@@ -8043,6 +8051,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
     } else if (isprotein) {
       alphabet = gt_alphabet_new_protein();
     } else if (gt_str_length(str_smap) > 0UL) {
+      customalphabet = true;
       alphabet = gt_alphabet_new_from_file_no_suffix(gt_str_get(str_smap), err);
     } else {
       alphabet = gt_alphabet_new_from_sequence(filenametab, err);
@@ -8070,6 +8079,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                         filenametab,
                                         &filelengthtab,
                                         alphabet,
+                                        customalphabet,
                                         isplain,
                                         outdestab,
                                         outsdstab,
@@ -8105,7 +8115,8 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
       gt_timer_show_progress(sfxprogress, "computing sequence encoding",
                              stdout);
     }
-    alphabet_to_key_values(alphabet, NULL, &lengthofalphadef, NULL);
+    alphabet_to_key_values(alphabet, NULL, &lengthofalphadef, NULL,
+                           customalphabet);
     retcode
       = gt_encseq_access_type_determine(&specialranges,
                                       &wildcardranges,
@@ -8140,6 +8151,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                    numofseparators+1,
                                    &equallength,
                                    alphabet,
+                                   customalphabet,
                                    sat,
                                    characterdistribution,
                                    classstartpositions,
@@ -9618,6 +9630,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
                                     false,
                                     NULL,
                                     gt_alphabet_ref(eb->alpha),
+                                    true,
                                     eb->logger);
   encseq->specialcharinfo = samplespecialcharinfo;
   encseq->plainseq = eb->plainseq;

@@ -25,7 +25,8 @@
 typedef struct {
   bool nomap,
        mirror,
-       noindexname;
+       noindexname,
+       show_alphabet;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtEncseqInfoArguments;
@@ -71,6 +72,10 @@ static GtOptionParser* gt_encseq_info_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_bool("noindexname", "do not output index name",
                               &arguments->noindexname, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("show_alphabet", "output alphabet definition",
+                              &arguments->show_alphabet, false);
   gt_option_parser_add_option(op, option);
 
   /* output file options */
@@ -146,6 +151,14 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       if (gt_alphabet_is_protein(alpha))
         gt_file_xprintf(arguments->outfp, " (Protein)");
       gt_file_xprintf(arguments->outfp, "\n");
+      if (arguments->show_alphabet) {
+        GtStr *out = gt_str_new();
+        gt_alphabet_to_str(alpha, out);
+        gt_file_xprintf(arguments->outfp, "alphabet definition:\n");
+        gt_file_xprintf(arguments->outfp, "%s\n", gt_str_get(out));
+        gt_str_delete(out);
+      }
+
     }
     gt_encseq_metadata_delete(emd);
   } else {
@@ -220,6 +233,13 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       if (gt_alphabet_is_protein(alpha))
         gt_file_xprintf(arguments->outfp, " (Protein)");
       gt_file_xprintf(arguments->outfp, "\n");
+      if (arguments->show_alphabet) {
+        GtStr *out = gt_str_new();
+        gt_alphabet_to_str(alpha, out);
+        gt_file_xprintf(arguments->outfp, "alphabet definition:\n");
+        gt_file_xprintf(arguments->outfp, "%s\n", gt_str_get(out));
+        gt_str_delete(out);
+      }
 
       gt_file_xprintf(arguments->outfp, "character distribution:\n");
       for (i = 0; i < gt_alphabet_num_of_chars(alpha); i++) {

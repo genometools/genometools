@@ -389,3 +389,18 @@ Test do
   run_test "#{$bin}gt encseq encode -indexname foo #{$testdata}solid_color_reads.fastq", :retval => 1
   grep last_stderr, /illegal character \'3\'/
 end
+
+Name "gt encseq custom alphabet storage"
+Keywords "encseq gt_encseq alphabet custom_alphabet"
+Test do
+  Dir.glob("#{$cur}/gtdata/trans/TransDNA*") do |file|
+    run_test "#{$bin}gt encseq encode -smap #{file} -indexname foo #{$testdata}at100K1"
+    run "#{$bin}gt encseq info -show_alphabet foo"
+    alphainesq = File.open(last_stdout).read.match(/alphabet definition:\n([-1-9_a-zA-Z\n]+)\n\n/)
+    if alphainesq.nil? then
+      raise "saved alphabet definition is empty for file #{file}"
+    elsif alphainesq[1]+"\n" != File.read(file) then
+      raise "saved alphabet definition is not properly preserved for file #{file}"
+    end
+  end
+end

@@ -37,6 +37,10 @@ unsigned long        gt_encseq_metadata_min_seq_length(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_length_of_filenames(
                                                          GtEncseqMetadata *emd);
+bool                 gt_encseq_metadata_has_custom_alphabet(
+                                                         GtEncseqMetadata *emd);
+unsigned long        gt_encseq_metadata_length_of_alphadef(
+                                                         GtEncseqMetadata *emd);
 GtEncseqAccessType   gt_encseq_metadata_accesstype(GtEncseqMetadata *emd);
 GtSpecialcharinfo    gt_encseq_metadata_specialcharinfo(GtEncseqMetadata *emd);
 void                 gt_encseq_metadata_delete(GtEncseqMetadata *emd);

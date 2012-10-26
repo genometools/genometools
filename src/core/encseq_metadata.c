@@ -33,8 +33,10 @@ struct GtEncseqMetadata
                 numofdbsequences,
                 numofdbfiles,
                 lengthofdbfilenames,
+                lengthofalphadef,
                 minseqlen,
                 maxseqlen;
+  bool customalphabet;
   GtAlphabet *alpha;
   GtSpecialcharinfo specialcharinfo;
 };
@@ -77,7 +79,7 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
 {
   FILE *fp;
   bool had_err = false;
-  unsigned long cc, byteoffset = 0, alphatype, lengthofalphadef;
+  unsigned long cc, byteoffset = 0, alphatype;
   char *alphadef;
 
   gt_error_check(err);
@@ -144,7 +146,7 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
     }
   }
   if (!had_err) {
-    NEXTFREAD(lengthofalphadef);
+    NEXTFREAD(emd->lengthofalphadef);
     switch (alphatype) {
       case 0:
         emd->alpha = gt_alphabet_new_dna();
@@ -153,10 +155,12 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
         emd->alpha = gt_alphabet_new_protein();
         break;
       case 2:
-        gt_assert(lengthofalphadef > 0);
-        alphadef = gt_malloc(sizeof (char) * lengthofalphadef);
-        NEXTFREADWSIZE(*(alphadef), lengthofalphadef);
-        emd->alpha = gt_alphabet_new_from_string(alphadef, lengthofalphadef,
+        gt_assert(emd->lengthofalphadef > 0);
+        emd->customalphabet = true;
+        alphadef = gt_malloc(sizeof (char) * emd->lengthofalphadef);
+        NEXTFREADWSIZE(*(alphadef), emd->lengthofalphadef);
+        emd->alpha = gt_alphabet_new_from_string(alphadef,
+                                                 emd->lengthofalphadef,
                                                  err);
         if (!emd->alpha) {
           had_err = true;
@@ -177,6 +181,7 @@ GtEncseqMetadata* gt_encseq_metadata_new(const char *indexname, GtError *err)
   gt_assert(indexname);
   encseq_metadata = gt_malloc(sizeof (GtEncseqMetadata));
   encseq_metadata->alpha = NULL;
+  encseq_metadata->customalphabet = false;
   had_err = readfirstvaluesfromfile(encseq_metadata, indexname, err);
   if (had_err) {
     gt_assert(gt_error_is_set(err));
@@ -238,6 +243,18 @@ unsigned long gt_encseq_metadata_length_of_filenames(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->lengthofdbfilenames;
+}
+
+unsigned long gt_encseq_metadata_length_of_alphadef(GtEncseqMetadata *emd)
+{
+  gt_assert(emd != NULL);
+  return emd->lengthofdbfilenames;
+}
+
+bool gt_encseq_metadata_has_custom_alphabet(GtEncseqMetadata *emd)
+{
+  gt_assert(emd != NULL);
+  return emd->customalphabet;
 }
 
 GtEncseqAccessType gt_encseq_metadata_accesstype(GtEncseqMetadata *emd)
