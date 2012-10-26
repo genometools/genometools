@@ -88,7 +88,7 @@ int            gt_alphabet_to_file(const GtAlphabet *alphabet,
                                    GtError *err);
 /* Writes a representation of <alphabet> to the <GtStr> as specified
    by <dest>. */
-void            gt_alphabet_to_str(const GtAlphabet *alphabet, GtStr *dest);
+void           gt_alphabet_to_str(const GtAlphabet *alphabet, GtStr *dest);
 /* Returns the printable character specified in <alphabet> for <currentchar>. */
 GtUchar        gt_alphabet_pretty_symbol(const GtAlphabet *alphabet,
                                          unsigned int currentchar);
