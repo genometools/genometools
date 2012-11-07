@@ -246,7 +246,7 @@ endif
 EXP_LDLIBS += $(DEPLIBS)
 GTSHAREDLIB_LIBDEP += $(DEPLIBS)
 
-SERVER=gordon@genometools.org
+SERVER=satta@genometools.org
 WWWBASEDIR=/var/www/servers
 
 # process arguments
