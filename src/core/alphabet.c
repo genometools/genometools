@@ -332,25 +332,30 @@ static void assign_dna_symbolmap(GtUchar *symbolmap)
   }
 }
 
-GtAlphabet *gt_alphabet_clone(const GtAlphabet *alphabet)
+GtAlphabet* gt_alphabet_clone(const GtAlphabet *alphabet)
 {
   unsigned int i;
   GtAlphabet *newalpha;
+  gt_assert(alphabet);
 
   newalpha = gt_malloc(sizeof *newalpha);
   newalpha->domainsize = alphabet->domainsize;
   newalpha->mapsize = alphabet->mapsize;
   newalpha->mappedwildcards = alphabet->mappedwildcards;
   newalpha->wildcardshow = alphabet->wildcardshow;
+  newalpha->bitspersymbol = alphabet->bitspersymbol;
+  newalpha->alphadef = gt_str_ref(alphabet->alphadef);
   newalpha->reference_count = 0;
   for (i=0; i<=(unsigned int) GT_MAXALPHABETCHARACTER; i++)
   {
     newalpha->symbolmap[i] = alphabet->symbolmap[i];
   }
+  newalpha->characters = gt_malloc(alphabet->mapsize * sizeof (GtUchar));
   for (i=0; i<newalpha->mapsize; i++)
   {
     newalpha->characters[i] = alphabet->characters[i];
   }
+  newalpha->mapdomain = gt_malloc(alphabet->domainsize * sizeof (GtUchar));
   for (i=0; i<newalpha->domainsize; i++)
   {
     newalpha->mapdomain[i] = alphabet->mapdomain[i];
