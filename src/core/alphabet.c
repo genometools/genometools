@@ -26,6 +26,7 @@
 #include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/cstr_api.h"
+#include "core/ensure.h"
 #include "core/fileutils_api.h"
 #include "core/fa.h"
 #include "core/gtdatapath.h"
@@ -368,6 +369,25 @@ GtAlphabet* gt_alphabet_ref(GtAlphabet *alphabet)
   gt_assert(alphabet);
   alphabet->reference_count++;
   return alphabet;
+}
+
+bool gt_alphabet_equals(const GtAlphabet *a, const GtAlphabet *b)
+{
+  gt_assert(a && b);
+  if (a->domainsize != b->domainsize) return false;
+  if (a->mapsize != b->mapsize) return false;
+  if (a->mappedwildcards != b->mappedwildcards) return false;
+  if (a->wildcardshow != b->wildcardshow) return false;
+  if (memcmp(a->symbolmap, b->symbolmap,
+             GT_MAXALPHABETCHARACTER * sizeof (GtUchar)))
+    return false;
+  if (memcmp(a->characters, b->characters,
+             a->mapsize * sizeof (GtUchar)))
+    return false;
+  if (memcmp(a->mapdomain, b->mapdomain,
+             a->domainsize * sizeof (GtUchar)))
+    return false;
+  return true;
 }
 
 void gt_alphabet_add_mapping(GtAlphabet *alphabet, const char *characters)
@@ -1045,18 +1065,26 @@ void gt_alphabet_delete(GtAlphabet *alphabet)
   gt_free(alphabet);
 }
 
-/* int gt_alphabet_unit_test(GtError *err)
+int gt_alphabet_unit_test(GtError *err)
 {
   int had_err = 0;
-  GtAlphabet *a;
-  const char *alpha1 = "aA\ncC\ngG\ntTuU\nnsywrkvbdhmNSYWRKVBDHM",
-             *alpha2 = "";
-  unsigned long alpha1len,
-                alpha2len;
+  GtAlphabet *a, *b, *c;
   gt_error_check(err);
 
-  alpha1len = strlen(alpha1);
-  alpha2len = strlen(alpha2);
+  a = gt_alphabet_new_dna();
+  b = gt_alphabet_new_protein();
+  c = gt_alphabet_clone(a);
+
+  gt_ensure(had_err, gt_alphabet_equals(a, a));
+  gt_ensure(had_err, gt_alphabet_equals(b, b));
+  gt_ensure(had_err, gt_alphabet_equals(c, c));
+
+  gt_ensure(had_err, !gt_alphabet_equals(a, b));
+  gt_ensure(had_err, gt_alphabet_equals(a, c));
+
+  gt_alphabet_delete(a);
+  gt_alphabet_delete(b);
+  gt_alphabet_delete(c);
 
   return had_err;
-}*/
+}

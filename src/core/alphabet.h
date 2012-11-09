@@ -31,4 +31,6 @@
 /* the size of the DNA alphabet */
 #define GT_DNAALPHASIZE        4U
 
+int gt_alphabet_unit_test(GtError *err);
+
 #endif

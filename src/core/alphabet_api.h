@@ -57,6 +57,9 @@ GtAlphabet*    gt_alphabet_new_from_sequence(const GtStrArray *filenametab,
 GtAlphabet*    gt_alphabet_guess(const char *sequence, unsigned long seqlen);
 /* Return a clone of <alphabet>. */
 GtAlphabet*    gt_alphabet_clone(const GtAlphabet *alphabet);
+/* Returns TRUE if <a> and <b> are equal (i.e. have the same symbol
+   mapping), FALSE otherwise. */
+bool           gt_alphabet_equals(const GtAlphabet *a, const GtAlphabet *b);
 /* Increase the reference count for <alphabet> and return it. */
 GtAlphabet*    gt_alphabet_ref(GtAlphabet *alphabet);
 /* Add the mapping of all given <characters> to the given <alphabet>. The first

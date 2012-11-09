@@ -16,6 +16,7 @@
 */
 
 #include "gtt.h"
+#include "core/alphabet.h"
 #include "core/array.h"
 #include "core/array2dim_api.h"
 #include "core/array2dim_sparse.h"
@@ -243,7 +244,7 @@ GtHashmap* gtt_unit_tests(void)
 
   gt_hashmap_add(unit_tests, "compactulongstore class",
                                               gt_GtCompactulongstore_unit_test);
-  gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
+  gt_hashmap_add(unit_tests, "alphabet class", gt_alphabet_unit_test);
   gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
   gt_hashmap_add(unit_tests, "array class", gt_array_unit_test);
   gt_hashmap_add(unit_tests, "array example", gt_array_example);
