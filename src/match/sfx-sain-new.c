@@ -821,7 +821,10 @@ static unsigned long gt_sain_simple_assignSstarnames(const GtSaininfo *saininfo,
         gt_assert(currentname > 0);
         currentname--;
       }
-      suftab[saininfo->countSstartype + GT_DIV2(position)] = currentname;
+      if (currentname <= saininfo->namecount)
+      {
+        suftab[saininfo->countSstartype + GT_DIV2(position)] = currentname;
+      }
       if (idx == 0)
       {
         break;
@@ -1241,22 +1244,15 @@ static void gt_sain_movenames2front(const GtSaininfo *saininfo,
 
   for (ridx = widx = saininfo->countSstartype; ridx <= maxridx; ridx++)
   {
-    if (suftab[ridx] != 0 && (saininfo->sainseq->dtable == NULL ||
-                              suftab[ridx] <= saininfo->namecount))
+    unsigned long position = suftab[ridx];
+
+    if (position > 0)
     {
-      if (widx < ridx)
-      {
-        gt_assert(widx < availableentries);
-        suftab[widx++] = suftab[ridx] - 1UL; /* As we have used names with
-                                                offset 1 to distinguish them
-                                                from the undefined values
-                                                signified by 0 */
-      } else
-      {
-        gt_assert(widx == ridx);
-        suftab[widx]--;
-        widx++;
-      }
+      gt_assert(widx < availableentries);
+      suftab[widx++] = position - 1UL; /* As we have used names with
+                                          offset 1 to distinguish them
+                                          from the undefined values
+                                          signified by 0 */
     }
   }
   gt_assert(widx == GT_MULT2(saininfo->countSstartype));
