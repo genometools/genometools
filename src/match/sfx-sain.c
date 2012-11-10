@@ -22,6 +22,7 @@
 #include "core/timer_api.h"
 #include "sfx-linlcp.h"
 #include "sfx-sain.h"
+#include "stamp.h"
 
 #define GT_SSTARLENGTH_MAX 50
 
@@ -123,10 +124,10 @@ static void gt_sain_determinebucketsize(GtSainseq *sainseq)
 static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
                                              unsigned long len,
                                              unsigned long numofchars,
-                                             unsigned long *suftab,
+                                             GT_UNUSED unsigned long *suftab,
                                              unsigned long suftabentries)
 {
-  unsigned long maxused = GT_MULT2(len);
+  /*unsigned long maxused = GT_MULT2(len);*/
   GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
 
   sainseq->seqtype = GT_SAIN_INTSEQ;
@@ -136,6 +137,7 @@ static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
   sainseq->bucketfillptrpoints2suftab = false;
   sainseq->bucketsizepoints2suftab = false;
   sainseq->startoccupied = suftabentries;
+#ifdef NOOVERLAY
   if (maxused < suftabentries)
   {
     if (suftabentries - maxused >= numofchars)
@@ -155,6 +157,7 @@ static GtSainseq *gt_sain_seq_new_from_array(unsigned long *arr,
       sainseq->startoccupied = suftabentries - GT_MULT2(numofchars);
     }
   }
+#endif
   if (!sainseq->bucketfillptrpoints2suftab)
   {
     sainseq->bucketfillptr = gt_malloc(sizeof (*sainseq->bucketfillptr) *
@@ -1296,6 +1299,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   }
   if (intermediatecheck && saininfo->countSstartype > 0)
   {
+    STAMP;
     gt_sain_checkorder(saininfo->sainseq,suftab,0,saininfo->countSstartype-1);
   }
   if (saininfo->sainseq->seqtype == GT_SAIN_INTSEQ)
@@ -1322,6 +1326,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   {
     if (intermediatecheck)
     {
+      STAMP;
       gt_sain_checkorder(saininfo->sainseq,suftab,0,nonspecialentries-1);
     }
     if (saininfo->sainseq->seqtype == GT_SAIN_ENCSEQ && finalcheck)
