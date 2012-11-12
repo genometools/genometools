@@ -671,7 +671,7 @@ static void gt_sain_induceStypes1fromspecialranges(
                                    GtSainseq *sainseq,
                                    const GtEncseq *encseq,
                                    long *suftab,
-                                   GT_UNUSED unsigned long nonspecialentries)
+                                   unsigned long nonspecialentries)
 {
   if (gt_encseq_has_specialranges(encseq))
   {
@@ -748,7 +748,7 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
 
 static void gt_sain_moveSstar2front(GtSaininfo *saininfo,
                                     long *suftab,
-                                    unsigned long nonspecialentries)
+                                    GT_UNUSED unsigned long nonspecialentries)
 {
   unsigned long idx, namecount = 0, writeidx = 0;
   long position;
@@ -918,7 +918,7 @@ static void gt_sain_induceStypes2fromspecialranges(
                                    const GtSainseq *sainseq,
                                    const GtEncseq *encseq,
                                    long *suftab,
-                                   GT_UNUSED unsigned long nonspecialentries)
+                                   unsigned long nonspecialentries)
 {
   if (gt_encseq_has_specialranges(encseq))
   {
