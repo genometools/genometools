@@ -25,8 +25,7 @@
 
 typedef struct
 {
-  bool icheck, fcheck, verbose, oldimplementation, newimplementation,
-       fastinducepostprocess;
+  bool icheck, fcheck, verbose, fastinducepostprocess;
   GtStr *encseqfile, *plainseqfile;
 } GtSainArguments;
 
@@ -51,8 +50,8 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
 {
   GtSainArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionfcheck, *optionesq, *optionfile,
-           *optionold, *optionnew;
+  GtOption *option, *optionfcheck, *optionesq, *optionfile;
+
   gt_assert(arguments);
 
   /* init */
@@ -65,16 +64,6 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   optionesq = gt_option_new_string("esq", "specify encseq file",
                              arguments->encseqfile, NULL);
   gt_option_parser_add_option(op, optionesq);
-
-  /* -old */
-  optionold = gt_option_new_bool("old", "old implementation",
-                                 &arguments->oldimplementation, NULL);
-  gt_option_parser_add_option(op, optionold);
-
-  /* -new */
-  optionnew = gt_option_new_bool("new", "new implementation",
-                                 &arguments->newimplementation, NULL);
-  gt_option_parser_add_option(op, optionnew);
 
   /* -file */
   optionfile = gt_option_new_string("file", "specify filename",
@@ -162,23 +151,12 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           had_err = -1;
         }
         {
-          if (arguments->oldimplementation)
-          {
-            gt_sain_encseq_sortsuffixes(encseq,
-                                        arguments->icheck,
-                                        arguments->fcheck,
-                                        arguments->verbose,
-                                        NULL);
-          }
-          if (arguments->newimplementation)
-          {
-            gt_sain_encseq_sortsuffixesnew(encseq,
-                                           arguments->icheck,
-                                           arguments->fcheck,
-                                           arguments->fastinducepostprocess,
-                                           arguments->verbose,
-                                           NULL);
-          }
+          gt_sain_encseq_sortsuffixes(encseq,
+                                      arguments->icheck,
+                                      arguments->fcheck,
+                                      arguments->fastinducepostprocess,
+                                      arguments->verbose,
+                                      NULL);
         }
       }
       gt_encseq_delete(encseq);
@@ -208,23 +186,12 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                              "allocate suftab and undef entries");
             gt_timer_start(timer);
           }
-          if (arguments->oldimplementation)
-          {
-            gt_sain_plain_sortsuffixes(plainseq,
-                                       (unsigned long) len,
-                                       arguments->icheck,
-                                       arguments->verbose,
-                                       timer);
-          }
-          if (arguments->newimplementation)
-          {
-            gt_sain_plain_sortsuffixesnew(plainseq,
-                                          (unsigned long) len,
-                                          arguments->icheck,
-                                          arguments->fastinducepostprocess,
-                                          arguments->verbose,
-                                          timer);
-          }
+          gt_sain_plain_sortsuffixes(plainseq,
+                                     (unsigned long) len,
+                                     arguments->icheck,
+                                     arguments->fastinducepostprocess,
+                                     arguments->verbose,
+                                     timer);
           if (timer != NULL)
           {
             gt_timer_show_progress_final(timer, stdout);
