@@ -22,7 +22,6 @@
 #include "core/timer_api.h"
 #include "sfx-linlcp.h"
 #include "sfx-sain.h"
-#include "stamp.h"
 
 #define GT_SSTARLENGTH_MAX 50
 
@@ -1299,7 +1298,6 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   }
   if (intermediatecheck && saininfo->countSstartype > 0)
   {
-    STAMP;
     gt_sain_checkorder(saininfo->sainseq,suftab,0,saininfo->countSstartype-1);
   }
   if (saininfo->sainseq->seqtype == GT_SAIN_INTSEQ)
@@ -1326,7 +1324,6 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   {
     if (intermediatecheck)
     {
-      STAMP;
       gt_sain_checkorder(saininfo->sainseq,suftab,0,nonspecialentries-1);
     }
     if (saininfo->sainseq->seqtype == GT_SAIN_ENCSEQ && finalcheck)
