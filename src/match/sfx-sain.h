@@ -24,14 +24,12 @@
 void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                                  bool intermediatecheck,
                                  bool finalcheck,
-                                 bool fastinducepostprocess,
                                  bool verbose,
                                  GtTimer *timer);
 
 void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                                 unsigned long len,
                                 bool intermediatecheck,
-                                bool fastinducepostprocess,
                                 bool verbose,
                                 GtTimer *timer);
 

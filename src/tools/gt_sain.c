@@ -25,7 +25,7 @@
 
 typedef struct
 {
-  bool icheck, fcheck, verbose, fastinducepostprocess;
+  bool icheck, fcheck, verbose;
   GtStr *encseqfile, *plainseqfile;
 } GtSainArguments;
 
@@ -76,15 +76,9 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
                               &arguments->icheck, false);
   gt_option_parser_add_option(op, option);
 
-  /* -fipp */
-  option = gt_option_new_bool("fipp",
-                              "run fast postprocessing of induced suffixes",
-                              &arguments->fastinducepostprocess, false);
-  gt_option_parser_add_option(op, option);
-
   /* -fcheck */
   optionfcheck = gt_option_new_bool("fcheck", "final check of suffix array",
-                              &arguments->fcheck, false);
+                                    &arguments->fcheck, false);
   gt_option_parser_add_option(op, optionfcheck);
   gt_option_imply(optionfcheck, optionesq);
   gt_option_exclude(optionesq,optionfile);
@@ -154,7 +148,6 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           gt_sain_encseq_sortsuffixes(encseq,
                                       arguments->icheck,
                                       arguments->fcheck,
-                                      arguments->fastinducepostprocess,
                                       arguments->verbose,
                                       NULL);
         }
@@ -189,7 +182,6 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           gt_sain_plain_sortsuffixes(plainseq,
                                      (unsigned long) len,
                                      arguments->icheck,
-                                     arguments->fastinducepostprocess,
                                      arguments->verbose,
                                      timer);
           if (timer != NULL)
