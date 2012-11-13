@@ -1041,7 +1041,7 @@ static int gt_sain_compare_Sstarstrings(const GtSainseq *sainseq,
 }
 
 /* The following function has been used previously, but is
-   no used. As we maybe use it later, we keep it for now. */
+   not used anymore. As we maybe use it later, we keep it for now. */
 
 #ifndef NDEBUG
 int gt_sain_compare_substrings_new(const GtSaininfo *saininfo,
