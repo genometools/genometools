@@ -640,7 +640,6 @@ static void gt_sain_singleSinduction1(GtSainseq *sainseq,
                                       long *suftab,
                                       long position,
                                       GT_UNUSED unsigned long nonspecialentries,
-                                      bool specialrightcontext,
                                       unsigned long idx)
 {
   unsigned long nextcc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
@@ -663,7 +662,7 @@ static void gt_sain_singleSinduction1(GtSainseq *sainseq,
         sainseq->roundtable[t] = sainseq->currentround;
       } else
       {
-        if (specialrightcontext)
+        if (idx == ULONG_MAX)
         {
           position += sainseq->totallength;
         }
@@ -705,7 +704,6 @@ static void gt_sain_induceStypes1fromspecialranges(
                                   suftab,
                                   (long) (range.start - 1),
                                   nonspecialentries,
-                                  true,
                                   ULONG_MAX);
       }
     }
@@ -723,7 +721,6 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
                             suftab,
                             (long) (sainseq->totallength-1),
                             nonspecialentries,
-                            false,
                             ULONG_MAX);
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
@@ -754,7 +751,6 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
                                   suftab,
                                   position,
                                   nonspecialentries,
-                                  false,
                                   idx);
       }
     }
