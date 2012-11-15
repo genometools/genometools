@@ -579,4 +579,7 @@ void gt_encseq_relpos_seqnum_check(const char *filename,int line,
 #define GT_UNIQUEINT(POS)        ((unsigned long) ((POS) + GT_COMPAREOFFSET))
 #define GT_ISUNIQUEINT(POS)      ((POS) >= GT_COMPAREOFFSET)
 
+/* Reverse the range with respect to the given total length */
+void gt_range_reverse(unsigned long totallength,GtRange *range);
+
 #endif

@@ -26,7 +26,8 @@
 typedef struct
 {
   bool icheck, fcheck, verbose;
-  GtStr *encseqfile, *plainseqfile;
+  GtStr *encseqfile, *plainseqfile, *dir;
+  GtReadmode readmode;
 } GtSainArguments;
 
 static void* gt_sain_arguments_new(void)
@@ -34,16 +35,22 @@ static void* gt_sain_arguments_new(void)
   GtSainArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->encseqfile = gt_str_new();
   arguments->plainseqfile = gt_str_new();
+  arguments->dir = gt_str_new_cstr("fwd");
+  arguments->readmode = GT_READMODE_FORWARD;
   return arguments;
 }
 
 static void gt_sain_arguments_delete(void *tool_arguments)
 {
   GtSainArguments *arguments = tool_arguments;
-  if (!arguments) return;
-  gt_str_delete(arguments->encseqfile);
-  gt_str_delete(arguments->plainseqfile);
-  gt_free(arguments);
+
+  if (arguments != NULL)
+  {
+    gt_str_delete(arguments->encseqfile);
+    gt_str_delete(arguments->plainseqfile);
+    gt_str_delete(arguments->dir);
+    gt_free(arguments);
+  }
 }
 
 static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
@@ -52,7 +59,7 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *optionfcheck, *optionesq, *optionfile;
 
-  gt_assert(arguments);
+  gt_assert(arguments != NULL);
 
   /* init */
   op = gt_option_parser_new("[option ...] [file]", /* XXX */
@@ -64,6 +71,9 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   optionesq = gt_option_new_string("esq", "specify encseq file",
                              arguments->encseqfile, NULL);
   gt_option_parser_add_option(op, optionesq);
+
+  /* -dir */
+  gt_encseq_options_add_readmode_option(op, arguments->dir);
 
   /* -file */
   optionfile = gt_option_new_string("file", "specify filename",
@@ -88,6 +98,29 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   return op;
+}
+
+static int gt_sain_option_parser_check(int rest_argc,
+                                       void *tool_arguments, GtError *err)
+{
+  int retval;
+  GtSainArguments *arguments = tool_arguments;
+
+  if (rest_argc > 0)
+  {
+    gt_error_set(err,"%d superfluous argument%s",
+                 rest_argc,rest_argc > 1 ? "s" : "");
+    return -1;
+  }
+  retval = gt_readmode_parse(gt_str_get(arguments->dir), err);
+  if (retval < 0)
+  {
+    return -1;
+  } else
+  {
+    arguments->readmode = (GtReadmode) retval;
+    return 0;
+  }
 }
 
 static int gt_sain_checkmaxsequencelength(unsigned long len,bool forencseq,
@@ -145,7 +178,19 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           had_err = -1;
         }
         {
+          if (!gt_alphabet_is_dna(gt_encseq_alphabet(encseq)) &&
+              (arguments->readmode == GT_READMODE_COMPL ||
+               arguments->readmode == GT_READMODE_REVCOMPL))
+          {
+            gt_error_set(err,"option -dir cpl and -dir rcl is only "
+                             "possible for DNA sequences");
+            had_err = -1;
+          }
+        }
+        if (!had_err)
+        {
           gt_sain_encseq_sortsuffixes(encseq,
+                                      arguments->readmode,
                                       arguments->icheck,
                                       arguments->fcheck,
                                       arguments->verbose,
@@ -171,8 +216,15 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           had_err = -1;
         } else
         {
+          if (arguments->readmode != GT_READMODE_FORWARD)
+          {
+            gt_error_set(err,"option -dir and -file exclude each other");
+            had_err = -1;
+          }
+        }
+        if (!had_err)
+        {
           GtTimer *timer = NULL;
-
           if (gt_showtime_enabled())
           {
             timer = gt_timer_new_with_progress_description(
@@ -203,6 +255,6 @@ GtTool* gt_sain(void)
   return gt_tool_new(gt_sain_arguments_new,
                      gt_sain_arguments_delete,
                      gt_sain_option_parser_new,
-                     NULL,
+                     gt_sain_option_parser_check,
                      gt_sain_runner);
 }

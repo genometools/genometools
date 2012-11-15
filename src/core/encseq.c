@@ -10108,3 +10108,12 @@ bool gt_encseq_is_mirrored(const GtEncseq *encseq)
   gt_assert(encseq);
   return encseq->hasmirror;
 }
+
+void gt_range_reverse(unsigned long totallength,GtRange *range)
+{
+  unsigned long tmp;
+
+  tmp = range->start;
+  range->start = GT_REVERSEPOS(totallength,range->end) + 1;
+  range->end = GT_REVERSEPOS(totallength,tmp) + 1;
+}

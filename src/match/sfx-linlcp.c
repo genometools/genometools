@@ -130,15 +130,6 @@ static void setrelevantfrominversetab(GtCompactUlongstore *rightposinverse,
   }
 }
 
-static void gt_range_reverse(unsigned long totallength,GtRange *range)
-{
-  unsigned long tmp;
-
-  tmp = range->start;
-  range->start = GT_REVERSEPOS(totallength,range->end) + 1;
-  range->end = GT_REVERSEPOS(totallength,tmp) + 1;
-}
-
 static unsigned long *fillrightofpartwidth(
                                      const GtCompactUlongstore *rightposinverse,
                                      const GtEncseq *encseq,

@@ -22,6 +22,7 @@
 #include "core/encseq.h"
 
 void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
+                                 GtReadmode readmode,
                                  bool intermediatecheck,
                                  bool finalcheck,
                                  bool verbose,

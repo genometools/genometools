@@ -53,6 +53,7 @@ typedef struct
     const GtUchar *plainseq;
     const unsigned long *array;
   } seq;
+  GtReadmode readmode; /* only relevant for encseq */
   GtSainSeqtype seqtype;
   bool bucketfillptrpoints2suftab,
        bucketsizepoints2suftab,
@@ -66,13 +67,15 @@ static bool gt_sain_decideforfastmethod(unsigned long maxvalue,
     ? true : false;
 }
 
-static GtSainseq *gt_sain_seq_new_from_encseq(const GtEncseq *encseq)
+static GtSainseq *gt_sain_seq_new_from_encseq(const GtEncseq *encseq,
+                                              GtReadmode readmode)
 {
   unsigned long idx;
   GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
 
   sainseq->seqtype = GT_SAIN_ENCSEQ;
   sainseq->seq.encseq = encseq;
+  sainseq->readmode = readmode;
   sainseq->totallength = gt_encseq_total_length(encseq);
   sainseq->numofchars = (unsigned long) gt_encseq_alphabetnumofchars(encseq);
   sainseq->bucketsize = gt_malloc(sizeof (*sainseq->bucketsize) *
@@ -96,7 +99,14 @@ static GtSainseq *gt_sain_seq_new_from_encseq(const GtEncseq *encseq)
   sainseq->roundtablepoints2suftab = false;
   for (idx = 0; idx<sainseq->numofchars; idx++)
   {
-    sainseq->bucketsize[idx] = gt_encseq_charcount(encseq,(GtUchar) idx);
+    if (GT_ISDIRCOMPLEMENT(readmode))
+    {
+      sainseq->bucketsize[idx]
+        = gt_encseq_charcount(encseq,(GtUchar) GT_COMPLEMENTBASE(idx));
+    } else
+    {
+      sainseq->bucketsize[idx] = gt_encseq_charcount(encseq,(GtUchar)idx);
+    }
   }
   return sainseq;
 }
@@ -272,7 +282,7 @@ static unsigned long gt_sain_seq_getchar(const GtSainseq *sainseq,
       {
         GtUchar cc = gt_encseq_get_encoded_char(sainseq->seq.encseq,
                                                 position,
-                                                GT_READMODE_FORWARD);
+                                                sainseq->readmode);
         return ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (unsigned long) cc;
       }
   }
@@ -695,9 +705,15 @@ static void gt_sain_induceStypes1fromspecialranges(
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    sri = gt_specialrangeiterator_new(encseq,false);
+    sri = gt_specialrangeiterator_new(encseq,
+                                      GT_ISDIRREVERSE(sainseq->readmode)
+                                        ? true : false);
     while (gt_specialrangeiterator_next(sri,&range))
     {
+      if (GT_ISDIRREVERSE(sainseq->readmode))
+      {
+        gt_range_reverse(sainseq->totallength,&range);
+      }
       if (range.start > 1UL)
       {
         gt_sain_singleSinduction1(sainseq,
@@ -939,9 +955,15 @@ static void gt_sain_induceStypes2fromspecialranges(
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    sri = gt_specialrangeiterator_new(encseq,false);
+    sri = gt_specialrangeiterator_new(encseq,
+                                      GT_ISDIRREVERSE(sainseq->readmode)
+                                        ? true : false);
     while (gt_specialrangeiterator_next(sri,&range))
     {
+      if (GT_ISDIRREVERSE(sainseq->readmode))
+      {
+        gt_range_reverse(sainseq->totallength,&range);
+      }
       if (range.start > 0)
       {
         gt_sain_singleSinduction2(sainseq,
@@ -1439,7 +1461,8 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSainseq *sainseq,
 }
 
 static void gt_sain_filltailsuffixes(unsigned long *suftabtail,
-                                     const GtEncseq *encseq)
+                                     const GtEncseq *encseq,
+                                     GtReadmode readmode)
 {
   unsigned long specialcharacters = gt_encseq_specialcharacters(encseq),
                 totallength = gt_encseq_total_length(encseq);
@@ -1450,11 +1473,16 @@ static void gt_sain_filltailsuffixes(unsigned long *suftabtail,
     GtRange range;
     unsigned long countspecial = 0;
 
-    sri = gt_specialrangeiterator_new(encseq,true);
+    sri = gt_specialrangeiterator_new(encseq,
+                                      GT_ISDIRREVERSE(readmode) ? false : true);
     while (gt_specialrangeiterator_next(sri,&range))
     {
       unsigned long idx;
 
+      if (GT_ISDIRREVERSE(readmode))
+      {
+        gt_range_reverse(totallength,&range);
+      }
       for (idx = range.start; idx < range.end; idx++)
       {
         gt_assert(countspecial < specialcharacters && idx < totallength);
@@ -1614,10 +1642,12 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     if (sainseq->seqtype == GT_SAIN_ENCSEQ && finalcheck)
     {
       GT_SAIN_SHOWTIMER("fill tail suffixes");
-      gt_sain_filltailsuffixes(suftab + nonspecialentries,sainseq->seq.encseq);
+      gt_sain_filltailsuffixes(suftab + nonspecialentries,
+                               sainseq->seq.encseq,
+                               sainseq->readmode);
       GT_SAIN_SHOWTIMER("check suffix order");
       gt_suftab_lightweightcheck(sainseq->seq.encseq,
-                                 GT_READMODE_FORWARD,
+                                 sainseq->readmode,
                                  sainseq->totallength,
                                  suftab,
                                  NULL);
@@ -1627,6 +1657,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
 }
 
 void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
+                                 GtReadmode readmode,
                                  bool intermediatecheck,
                                  bool finalcheck,
                                  bool verbose,
@@ -1640,7 +1671,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
   suftabentries = totallength+1;
   suftab = gt_malloc(sizeof (*suftab) * suftabentries);
   gt_sain_setundefined(suftab,0,suftabentries-1);
-  sainseq = gt_sain_seq_new_from_encseq(encseq);
+  sainseq = gt_sain_seq_new_from_encseq(encseq,readmode);
   gt_sain_rec_sortsuffixes(0,
                            sainseq,
                            suftab,
