@@ -569,8 +569,9 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
           cc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
           if (sainseq->roundtable != NULL)
           {
-            unsigned long t = (nextcc << 1) | ((cc < nextcc) ? 1UL : 0);
+            unsigned long t = (nextcc << 1) | (cc < nextcc ? 1UL : 0);
 
+            gt_assert(nextcc > 0);
             gt_assert(sainseq->roundtable[t] <= sainseq->currentround);
             if (sainseq->roundtable[t] == 0 ||
                 sainseq->roundtable[t] < sainseq->currentround)
@@ -664,7 +665,7 @@ static void gt_sain_singleSinduction1(GtSainseq *sainseq,
     cc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
     if (sainseq->roundtable != NULL)
     {
-      unsigned long t = (nextcc << 1) | ((cc > nextcc) ? 1UL : 0);
+      unsigned long t = (nextcc << 1) | (cc > nextcc ? 1UL : 0);
 
       if (sainseq->roundtable[t] != sainseq->currentround)
       {
@@ -901,6 +902,7 @@ static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
         {
           unsigned long cc = gt_sain_seq_getchar(sainseq,
                                                  (unsigned long) (position-1));
+          gt_assert(nextcc > 0);
           suftab[putidx] = (cc < nextcc) ? ~position : position;
         } else
         {
@@ -930,14 +932,15 @@ static void gt_sain_singleSinduction2(const GtSainseq *sainseq,
 
     gt_assert(putidx < nonspecialentries &&
               (idx == ULONG_MAX || idx >= putidx));
-    if (position == 0)
-    {
-      suftab[putidx] = ~0L;
-    } else
+    if (position > 0)
     {
       unsigned long cc = gt_sain_seq_getchar(sainseq,
                                              (unsigned long) (position-1));
       suftab[putidx] = (cc > nextcc) ? ~position : position;
+    } else
+    {
+      gt_assert(position == 0);
+      suftab[putidx] = ~0L;
     }
 #ifdef SAINSHOWSTATE
     printf("end S-induce: suftab[%lu]=%ld\n",putidx,suftab[putidx]);
@@ -1683,6 +1686,8 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                            finalcheck,
                            verbose,
                            timer);
+  printf("countcharaccess=%lu (%.2f)\n",gt_sain_countcharaccess,
+          (double) gt_sain_countcharaccess/sainseq->totallength);
   (void) gt_sain_seq_delete(sainseq);
   gt_free(suftab);
 }
