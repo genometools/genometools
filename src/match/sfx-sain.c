@@ -732,7 +732,8 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
                                          long *suftab,
                                          unsigned long nonspecialentries)
 {
-  unsigned long idx;
+  unsigned long idx, previouscc = 0, *fillptr = sainseq->bucketfillptr;
+  long *bptr = NULL;
 
   gt_sain_special_singleSinduction1(sainseq,
                                     suftab,
@@ -766,8 +767,7 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
 
         if (nextcc < sainseq->numofchars)
         {
-          unsigned long cc,
-                        putidx = --sainseq->bucketfillptr[nextcc];
+          unsigned long cc;
 
           position--;
           cc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
@@ -781,10 +781,12 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
               sainseq->roundtable[t] = sainseq->currentround;
             }
           }
-          gt_assert(putidx < idx);
-          suftab[putidx] = (cc > nextcc) ? ~(position+1) : position;
+          GT_SAINUPDATEBUCKETPTR
+          gt_assert(bptr != NULL && bptr - 1 < suftab + idx);
+          *(--bptr) = (cc > nextcc) ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-          printf("S-induce: suftab[%lu]=%ld\n",putidx,suftab[putidx]);
+          printf("S-induce: suftab[%lu]=%ld\n",(unsigned long) (bptr - suftab),
+                                               *bptr);
 #endif
         }
         suftab[idx] = 0;
