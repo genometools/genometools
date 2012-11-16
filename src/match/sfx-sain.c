@@ -535,6 +535,21 @@ static void gt_sain_incrementfirstSstar(GtSainseq *sainseq,
   }
 }
 
+#define GT_SAINUPDATEBUCKETPTR\
+        if (bptr != NULL)\
+        {\
+          if (nextcc != previouscc)\
+          {\
+            fillptr[previouscc] = (unsigned long) (bptr - suftab);\
+            bptr = suftab + fillptr[nextcc];\
+            previouscc = nextcc;\
+          }\
+        } else\
+        {\
+          bptr = suftab + fillptr[nextcc];\
+          previouscc = nextcc;\
+        }
+
 static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
                                          long *suftab,
                                          unsigned long nonspecialentries)
@@ -895,24 +910,16 @@ static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
       nextcc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
       if (nextcc < sainseq->numofchars)
       {
-        if (bptr != NULL)
-        {
-          if (nextcc != previouscc)
-          {
-            fillptr[previouscc] = (unsigned long) (bptr - suftab);
-            bptr = suftab + fillptr[previouscc = nextcc];
-          }
-        } else
-        {
-          bptr = suftab + fillptr[previouscc = nextcc];
-        }
         gt_assert(nextcc > 0);
+        GT_SAINUPDATEBUCKETPTR;
         *bptr++ = (position > 0 &&
                    gt_sain_seq_getchar(sainseq,
                                        (unsigned long) (position-1)) < nextcc)
                    ? ~position : position;
 #ifdef SAINSHOWSTATE
-        printf("L-induce: suftab[%lu]=%ld\n",putidx,suftab[putidx]);
+        gt_assert(bptr != NULL);
+        printf("L-induce: suftab[%lu]=%ld\n",(unsigned long) (bptr-1-suftab),
+                                             *(bptr-1));
 #endif
       }
     }
@@ -1008,25 +1015,15 @@ static void gt_sain_induceStypesuffixes2(const GtSainseq *sainseq,
       nextcc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
       if (nextcc < sainseq->numofchars)
       {
-        if (bptr != NULL)
-        {
-          if (nextcc != previouscc)
-          {
-            fillptr[previouscc] = (unsigned long) (bptr - suftab);
-            bptr = suftab + fillptr[nextcc];
-            previouscc = nextcc;
-          }
-        } else
-        {
-          bptr = suftab + fillptr[nextcc];
-          previouscc = nextcc;
-        }
+        GT_SAINUPDATEBUCKETPTR;
         *(--bptr) = (position == 0 ||
                      gt_sain_seq_getchar(sainseq,
                                          (unsigned long) (position-1)) > nextcc)
                      ? ~position : position;
 #ifdef SAINSHOWSTATE
-    printf("S-induce: suftab[%lu]=%ld\n",putidx,suftab[putidx]);
+        gt_assert(bptr != NULL);
+        printf("S-induce: suftab[%lu]=%ld\n",(unsigned long) (bptr-suftab),
+                                             *bptr);
 #endif
       }
     } else
