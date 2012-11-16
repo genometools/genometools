@@ -665,11 +665,9 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
   }
 }
 
-static void gt_sain_singleSinduction1(GtSainseq *sainseq,
-                                      long *suftab,
-                                      long position,
-                                      GT_UNUSED unsigned long nonspecialentries,
-                                      unsigned long idx)
+static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
+                                              long *suftab,
+                                              long position)
 {
   unsigned long nextcc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
 
@@ -691,34 +689,20 @@ static void gt_sain_singleSinduction1(GtSainseq *sainseq,
         sainseq->roundtable[t] = sainseq->currentround;
       } else
       {
-        if (idx == ULONG_MAX)
-        {
-          position += sainseq->totallength;
-        }
+        position += sainseq->totallength;
       }
     }
-    gt_assert(putidx < nonspecialentries &&
-              (idx == ULONG_MAX || putidx < idx));
     suftab[putidx] = (cc > nextcc) ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-    if (idx == ULONG_MAX)
-    {
-      printf("end ");
-    }
-    printf("S-induce: suftab[%lu]=%ld\n",putidx,suftab[putidx]);
+    printf("end S-induce: suftab[%lu]=%ld\n",putidx,suftab[putidx]);
 #endif
-  }
-  if (idx != ULONG_MAX)
-  {
-    suftab[idx] = 0;
   }
 }
 
 static void gt_sain_induceStypes1fromspecialranges(
                                    GtSainseq *sainseq,
                                    const GtEncseq *encseq,
-                                   long *suftab,
-                                   unsigned long nonspecialentries)
+                                   long *suftab)
 {
   if (gt_encseq_has_specialranges(encseq))
   {
@@ -735,11 +719,9 @@ static void gt_sain_induceStypes1fromspecialranges(
       }
       if (range.start > 1UL)
       {
-        gt_sain_singleSinduction1(sainseq,
-                                  suftab,
-                                  (long) (range.start - 1),
-                                  nonspecialentries,
-                                  ULONG_MAX);
+        gt_sain_special_singleSinduction1(sainseq,
+                                          suftab,
+                                          (long) (range.start - 1));
       }
     }
     gt_specialrangeiterator_delete(sri);
@@ -752,17 +734,14 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
 {
   unsigned long idx;
 
-  gt_sain_singleSinduction1(sainseq,
-                            suftab,
-                            (long) (sainseq->totallength-1),
-                            nonspecialentries,
-                            ULONG_MAX);
+  gt_sain_special_singleSinduction1(sainseq,
+                                    suftab,
+                                    (long) (sainseq->totallength-1));
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypes1fromspecialranges(sainseq,
                                            sainseq->seq.encseq,
-                                           suftab,
-                                           nonspecialentries);
+                                           suftab);
   }
   if (nonspecialentries == 0)
   {
@@ -782,11 +761,33 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
       }
       if (position > 0)
       {
-        gt_sain_singleSinduction1(sainseq,
-                                  suftab,
-                                  position,
-                                  nonspecialentries,
-                                  idx);
+        unsigned long nextcc = gt_sain_seq_getchar(sainseq,
+                                                   (unsigned long) position);
+
+        if (nextcc < sainseq->numofchars)
+        {
+          unsigned long cc,
+                        putidx = --sainseq->bucketfillptr[nextcc];
+
+          position--;
+          cc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
+          if (sainseq->roundtable != NULL)
+          {
+            unsigned long t = (nextcc << 1) | (cc > nextcc ? 1UL : 0);
+
+            if (sainseq->roundtable[t] != sainseq->currentround)
+            {
+              position += sainseq->totallength;
+              sainseq->roundtable[t] = sainseq->currentround;
+            }
+          }
+          gt_assert(putidx < idx);
+          suftab[putidx] = (cc > nextcc) ? ~(position+1) : position;
+#ifdef SAINSHOWSTATE
+          printf("S-induce: suftab[%lu]=%ld\n",putidx,suftab[putidx]);
+#endif
+        }
+        suftab[idx] = 0;
       }
     }
     if (idx == 0)
