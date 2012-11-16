@@ -554,7 +554,8 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
                                          long *suftab,
                                          unsigned long nonspecialentries)
 {
-  unsigned long idx, *fillptr;
+  unsigned long idx, previouscc = 0, *fillptr;
+  long *bptr = NULL;
 
   fillptr = sainseq->bucketfillptr;
   for (idx = 0, sainseq->currentround = 0; idx < nonspecialentries; idx++)
@@ -576,10 +577,9 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
       {
         if (position > 0)
         {
-          unsigned long cc, putidx;
+          unsigned long cc;
 
-          putidx = fillptr[nextcc]++;
-          gt_assert(position > 0 && putidx < nonspecialentries && idx < putidx);
+          gt_assert(position > 0);
           position--;
           cc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
           if (sainseq->roundtable != NULL)
@@ -595,12 +595,15 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
               sainseq->roundtable[t] = sainseq->currentround;
             }
           }
+          GT_SAINUPDATEBUCKETPTR
           /* negative => position does not derive L-suffix
              positive => position may derive L-suffix */
-          suftab[putidx] = (cc < nextcc) ? ~position : position;
+          gt_assert(suftab + idx < bptr);
+          *bptr++ = (cc < nextcc) ? ~position : position;
           suftab[idx] = 0;
 #ifdef SAINSHOWSTATE
-          printf("L-induce: suftab[%lu]=%ld\n",putidx,suftab[putidx]);
+          printf("L-induce: suftab[%lu]=%ld\n",(unsigned long) (bptr-1-suftab),
+                                               *(bptr-1));
 #endif
         }
       } else
@@ -912,6 +915,7 @@ static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
       {
         gt_assert(nextcc > 0);
         GT_SAINUPDATEBUCKETPTR;
+        gt_assert(bptr != NULL && suftab + idx < bptr);
         *bptr++ = (position > 0 &&
                    gt_sain_seq_getchar(sainseq,
                                        (unsigned long) (position-1)) < nextcc)
@@ -1016,6 +1020,7 @@ static void gt_sain_induceStypesuffixes2(const GtSainseq *sainseq,
       if (nextcc < sainseq->numofchars)
       {
         GT_SAINUPDATEBUCKETPTR;
+        gt_assert(bptr != NULL && bptr - 1 < suftab + idx);
         *(--bptr) = (position == 0 ||
                      gt_sain_seq_getchar(sainseq,
                                          (unsigned long) (position-1)) > nextcc)
