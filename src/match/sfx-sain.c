@@ -879,7 +879,9 @@ static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
                                          long *suftab,
                                          unsigned long nonspecialentries)
 {
-  unsigned long idx, *fillptr = sainseq->bucketfillptr;
+  unsigned long previouscc = sainseq->numofchars,
+                idx, *fillptr = sainseq->bucketfillptr;
+  long *bptr = NULL;
 
   for (idx = 0; idx < nonspecialentries; idx++)
   {
@@ -894,20 +896,22 @@ static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
       nextcc = gt_sain_seq_getchar(sainseq,(unsigned long) position);
       if (nextcc < sainseq->numofchars)
       {
-        unsigned long putidx;
-
-        putidx = fillptr[nextcc]++;
-        gt_assert(putidx < nonspecialentries && idx < putidx);
-        if (position > 0)
+        if (bptr != NULL)
         {
-          unsigned long cc = gt_sain_seq_getchar(sainseq,
-                                                 (unsigned long) (position-1));
-          gt_assert(nextcc > 0);
-          suftab[putidx] = (cc < nextcc) ? ~position : position;
+          if (nextcc != previouscc)
+          {
+            fillptr[previouscc] = (unsigned long) (bptr - suftab);
+            bptr = suftab + fillptr[previouscc = nextcc];
+          }
         } else
         {
-          suftab[putidx] = position;
+          bptr = suftab + fillptr[previouscc = nextcc];
         }
+        gt_assert(nextcc > 0);
+        *bptr++ = (position > 0 &&
+                   gt_sain_seq_getchar(sainseq,
+                                       (unsigned long) (position-1)) < nextcc)
+                   ? ~position : position;
 #ifdef SAINSHOWSTATE
         printf("L-induce: suftab[%lu]=%ld\n",putidx,suftab[putidx]);
 #endif
