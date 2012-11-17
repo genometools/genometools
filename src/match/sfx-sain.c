@@ -22,8 +22,6 @@
 #include "sfx-linlcp.h"
 #include "sfx-sain.h"
 
-#define GT_SSTARLENGTH_MAX 50
-
 #define GT_SAIN_SHOWTIMER(DESC)\
         if (timer != NULL)\
         {\
@@ -320,20 +318,14 @@ typedef struct
   unsigned long countStype,
                 countSstartype,
                 totalSstarlength,
-                longerthanmax,
-                namecount,
-                lendist[GT_SSTARLENGTH_MAX+1];
+                namecount;
   GtSainseq *sainseq;
-#ifndef NDEBUG
-  GtBitsequence *isStype;
-#endif
 } GtSaininfo;
 
 static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
                                    GT_UNUSED unsigned long nonspecialentries)
 {
   unsigned long position,
-                idx,
                 nextcc,
                 nextSstartypepos,
                 *fillptr = sainseq->bucketfillptr;
@@ -345,17 +337,8 @@ static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
   saininfo->totalSstarlength = 0;
   saininfo->countStype = 1UL;
   saininfo->countSstartype = 0;
-  saininfo->longerthanmax = 0;
-#ifndef NDEBUG
-  GT_INITBITTAB(saininfo->isStype,saininfo->sainseq->totallength+1);
-  GT_SETIBIT(saininfo->isStype,saininfo->sainseq->totallength);
-#endif
   nextSstartypepos = saininfo->sainseq->totallength;
   nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength);
-  for (idx = 0; idx <= (unsigned long) GT_SSTARLENGTH_MAX; idx++)
-  {
-    saininfo->lendist[idx] = 0;
-  }
   gt_sain_endbuckets(saininfo->sainseq);
   for (position = saininfo->sainseq->totallength-1; /* Nothing */; position--)
   {
@@ -367,9 +350,6 @@ static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
     {
       currentisStype = true;
       saininfo->countStype++;
-#ifndef NDEBUG
-      GT_SETIBIT(saininfo->isStype,position);
-#endif
     } else
     {
       currentisStype = false;
@@ -378,31 +358,21 @@ static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
                                            currentisStype ? 'S' : 'L');*/
     if (!currentisStype && nextisStype)
     {
-      unsigned long currentlen, putidx;
+      unsigned long currentlen;
 
       saininfo->countSstartype++;
       gt_assert(position + 1 < nextSstartypepos);
       currentlen = nextSstartypepos - position;
       saininfo->totalSstarlength += currentlen;
-      if (currentlen <= (unsigned long) GT_SSTARLENGTH_MAX)
-      {
-        saininfo->lendist[currentlen]++;
-      } else
-      {
-        saininfo->longerthanmax++;
-      }
       nextSstartypepos = position + 1;
       if (sainseq->sstarfirstcharcount != NULL)
       {
         sainseq->sstarfirstcharcount[nextcc]++;
       }
-      gt_assert(fillptr[nextcc] > 0);
-      putidx = --fillptr[nextcc];
-      gt_assert(putidx < nonspecialentries);
-      suftab[putidx] = position;
+      suftab[--fillptr[nextcc]] = position;
 #undef SAINSHOWSTATE
 #ifdef SAINSHOWSTATE
-      printf("Sstar.suftab[%lu]=%lu\n",putidx,position+1);
+      printf("Sstar.suftab[%lu]=%lu\n",fillptr[nextcc],position+1);
 #endif
     }
     nextisStype = currentisStype;
@@ -421,80 +391,18 @@ static void gt_saininfo_delete(GtSaininfo *saininfo)
 {
   if (saininfo != NULL)
   {
-#ifndef NDEBUG
-    gt_free(saininfo->isStype);
-#endif
     gt_free(saininfo);
   }
 }
 
-#ifdef CRITICAL
-static bool gt_saininfo_isSstartype(const GtSaininfo *saininfo,
-                                    unsigned long position)
-{
-  gt_assert(position <= saininfo->sainseq->totallength);
-  return position == saininfo->sainseq->totallength ||
-         (position > 0 &&
-         GT_ISIBITSET(saininfo->isStype,position) &&
-         !GT_ISIBITSET(saininfo->isStype,position-1)) ? true : false;
-}
-
-unsigned long gt_sain_countDcriticalsubstrings (const GtSaininfo *saininfo,
-                                                unsigned long d)
-{
-  unsigned long int i = 0, j = 0;
-
-  gt_assert(d >= 2UL);
-  while (i < saininfo->sainseq->totallength)
-  {
-    unsigned long h;
-    bool isLMS = false;
-
-    for (h = 1UL; h <= d; h++)
-    {
-      if (gt_saininfo_isSstartype(saininfo,i+h))
-      {
-        isLMS = true;
-        break;
-      }
-    }
-    if (j == 0 && !isLMS)
-    {
-      i += d;
-      continue;
-    }
-    i = isLMS ? i + h : i + d;
-    gt_assert(i>0);
-    /*printf("crititical %lu\n",i-1);*/
-    j++;
-  }
-  return j;
-}
-#endif
-
 static void gt_saininfo_show(const GtSaininfo *saininfo)
 {
-  unsigned long idx;
-
   printf("S-type: %lu (%.2f)\n",saininfo->countStype,
                 (double) saininfo->countStype/saininfo->sainseq->totallength);
   printf("Sstar-type: %lu (%.2f)\n",saininfo->countSstartype,
               (double) saininfo->countSstartype/saininfo->sainseq->totallength);
   printf("Sstar-type.length: %lu (%.2f)\n",saininfo->totalSstarlength,
               (double) saininfo->totalSstarlength/saininfo->countSstartype);
-  for (idx = 0; idx <= (unsigned long) GT_SSTARLENGTH_MAX; idx++)
-  {
-    if (saininfo->lendist[idx] > 0)
-    {
-      printf("%lu %lu (%.2f)\n",idx,saininfo->lendist[idx],
-               (double) saininfo->lendist[idx]/saininfo->countSstartype);
-    }
-  }
-  if (saininfo->longerthanmax)
-  {
-    printf(">%d %lu (%.2f)\n",GT_SSTARLENGTH_MAX,saininfo->longerthanmax,
-                 (double) saininfo->longerthanmax/saininfo->countSstartype);
-  }
 #ifdef CRITICAL
   {
     unsigned long d;
@@ -507,15 +415,6 @@ static void gt_saininfo_show(const GtSaininfo *saininfo)
   }
 #endif
 }
-
-#ifndef NDEBUG
-static bool gt_saininfo_isStype(const GtSaininfo *saininfo,
-                                unsigned long position)
-{
-  gt_assert(position <= saininfo->sainseq->totallength);
-  return GT_ISIBITSET(saininfo->isStype,position) ? true : false;
-}
-#endif
 
 static void gt_sain_incrementfirstSstar(GtSainseq *sainseq,
                                         unsigned long *suftab)
@@ -1095,86 +994,6 @@ static int gt_sain_compare_Sstarstrings(const GtSainseq *sainseq,
   }
   return 0;
 }
-
-/* The following function has been used previously, but is
-   not used anymore. As we maybe use it later, we keep it for now. */
-
-#ifndef NDEBUG
-int gt_sain_compare_substrings_new(const GtSaininfo *saininfo,
-                                      bool withtype,
-                                      unsigned long *lenptr,
-                                      unsigned long start1,
-                                      unsigned long start2)
-{
-  unsigned long len = 0;
-  bool firstcmp = true, previousisS = true;
-
-  gt_assert(start1 <= saininfo->sainseq->totallength &&
-            start2 <= saininfo->sainseq->totallength &&
-            start1 != start2);
-
-  for (len=0; /* Nothing */; len++)
-  {
-    unsigned long cc1, cc2;
-
-    if (start1 == saininfo->sainseq->totallength)
-    {
-      gt_assert(start1 > start2);
-      return 1;
-    }
-    if (start2 == saininfo->sainseq->totallength)
-    {
-      gt_assert(start1 < start2);
-      return -1;
-    }
-    cc1 = gt_sainseq_getchar(saininfo->sainseq,start1);
-    cc2 = gt_sainseq_getchar(saininfo->sainseq,start2);
-    if (cc1 < cc2)
-    {
-      return -1;
-    }
-    if (cc1 > cc2)
-    {
-      return 1;
-    }
-    if (withtype)
-    {
-      if (gt_saininfo_isStype(saininfo,start1))
-      {
-        if (gt_saininfo_isStype(saininfo,start2))
-        {
-          if (!firstcmp && !previousisS)
-          {
-            if (lenptr != NULL)
-            {
-              *lenptr = len+1;
-            }
-            return 0; /* previous is L => Sstar in both stop with equality */
-          }
-        } else
-        {
-          /* S > L */
-          return 1;
-        }
-      } else
-      {
-        if (gt_saininfo_isStype(saininfo,start2))
-        {
-          /* L < S */
-          return -1;
-        } else
-        {
-          /* L == L */
-          previousisS = false;
-        }
-      }
-      firstcmp = false;
-    }
-    start1++;
-    start2++;
-  }
-}
-#endif
 
 static int gt_sain_compare_suffixes(const GtSainseq *sainseq,
                                     unsigned long start1,
