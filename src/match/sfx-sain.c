@@ -317,7 +317,6 @@ typedef struct
 {
   unsigned long countStype,
                 countSstartype,
-                totalSstarlength,
                 namecount;
   GtSainseq *sainseq;
 } GtSaininfo;
@@ -327,17 +326,14 @@ static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
 {
   unsigned long position,
                 nextcc,
-                nextSstartypepos,
                 *fillptr = sainseq->bucketfillptr;
   bool nextisStype = true;
   GtSaininfo *saininfo;
 
   saininfo = gt_malloc(sizeof *saininfo);
   saininfo->sainseq = sainseq;
-  saininfo->totalSstarlength = 0;
   saininfo->countStype = 1UL;
   saininfo->countSstartype = 0;
-  nextSstartypepos = saininfo->sainseq->totallength;
   nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength);
   gt_sain_endbuckets(saininfo->sainseq);
   for (position = saininfo->sainseq->totallength-1; /* Nothing */; position--)
@@ -358,13 +354,7 @@ static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
                                            currentisStype ? 'S' : 'L');*/
     if (!currentisStype && nextisStype)
     {
-      unsigned long currentlen;
-
       saininfo->countSstartype++;
-      gt_assert(position + 1 < nextSstartypepos);
-      currentlen = nextSstartypepos - position;
-      saininfo->totalSstarlength += currentlen;
-      nextSstartypepos = position + 1;
       if (sainseq->sstarfirstcharcount != NULL)
       {
         sainseq->sstarfirstcharcount[nextcc]++;
@@ -401,8 +391,6 @@ static void gt_saininfo_show(const GtSaininfo *saininfo)
                 (double) saininfo->countStype/saininfo->sainseq->totallength);
   printf("Sstar-type: %lu (%.2f)\n",saininfo->countSstartype,
               (double) saininfo->countSstartype/saininfo->sainseq->totallength);
-  printf("Sstar-type.length: %lu (%.2f)\n",saininfo->totalSstarlength,
-              (double) saininfo->totalSstarlength/saininfo->countSstartype);
 #ifdef CRITICAL
   {
     unsigned long d;
