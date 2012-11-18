@@ -19,6 +19,7 @@
 #include "core/minmax.h"
 #include "core/unused_api.h"
 #include "core/timer_api.h"
+#include "core/mathsupport.h"
 #include "sfx-linlcp.h"
 #include "sfx-sain.h"
 
@@ -321,6 +322,107 @@ typedef struct
   GtSainseq *sainseq;
 } GtSaininfo;
 
+typedef struct
+{
+  unsigned long buf_size, numofchars, cachesize, *values, *fillptr, *suftab;
+  uint16_t *nextidx;
+  int log_bufsize;
+  size_t size;
+} GtSainbuffer;
+
+static GtSainbuffer *gt_sainbuffer_new(unsigned long *suftab,
+                                       unsigned long *fillptr,
+                                       unsigned long numofchars)
+{
+  if (numofchars <= UCHAR_MAX+1)
+  {
+    GtSainbuffer *buf = gt_malloc(sizeof (*buf));
+
+    buf->size = sizeof (*buf);
+    buf->fillptr = fillptr;
+    buf->suftab = suftab;
+    buf->log_bufsize = 18 - (sizeof (unsigned long) == (size_t) 4 ? 1 : 2) -
+                             (int) gt_determinebitspervalue(numofchars);
+    buf->buf_size = 1UL << buf->log_bufsize;
+    buf->numofchars = numofchars;
+    gt_assert(buf->buf_size <= UINT16_MAX);
+    buf->cachesize = numofchars << buf->log_bufsize;
+    buf->values = gt_malloc(sizeof (*buf->values) * buf->cachesize);
+    buf->size += sizeof (*buf->values) * buf->cachesize;
+    buf->nextidx = gt_calloc((size_t) numofchars,sizeof (*buf->nextidx));
+    buf->size += sizeof (*buf->nextidx) * numofchars;
+    printf("used buffer of %lu bytes (bufsize=%lu)\n",
+               (unsigned long) buf->size,buf->buf_size);
+    return buf;
+  } else
+  {
+    return NULL;
+  }
+}
+
+static void gt_sainbuffer_update(GtSainbuffer *buf,
+                                 unsigned long charidx,
+                                 unsigned long value)
+{
+  const unsigned long offset = charidx << buf->log_bufsize;
+
+  buf->values[offset + (unsigned long) buf->nextidx[charidx]] = value;
+  if ((unsigned long) buf->nextidx[charidx] < buf->buf_size - 1)
+  {
+    buf->nextidx[charidx]++;
+  } else
+  {
+    unsigned long *writeptr = buf->suftab + buf->fillptr[charidx] - 1,
+                  *readptr = buf->values + offset;
+    const unsigned long *readend = readptr + buf->buf_size;
+
+    while (readptr < readend)
+    {
+      *(writeptr--) = *(readptr++);
+    }
+    buf->nextidx[charidx] = 0;
+    buf->fillptr[charidx] -= buf->buf_size;
+  }
+}
+
+static void gt_sainbuffer_flushall(GtSainbuffer *buf)
+{
+  unsigned long charidx;
+
+  if (buf == NULL)
+  {
+    return;
+  }
+  for (charidx = 0; charidx < buf->numofchars; charidx++)
+  {
+    const unsigned long bufleft = (unsigned long) buf->nextidx[charidx];
+
+    if (bufleft > 0)
+    {
+      unsigned long *writeptr = buf->suftab + buf->fillptr[charidx] - 1,
+                    *readptr = buf->values + (charidx << buf->log_bufsize);
+      const unsigned long *readend = readptr + bufleft;
+
+      while (readptr < readend)
+      {
+        *(writeptr--) = *(readptr++);
+      }
+      buf->nextidx[charidx] = 0;
+      buf->fillptr[charidx] -= bufleft;
+    }
+  }
+}
+
+static void gt_sainbuffer_delete(GtSainbuffer *buf)
+{
+  if (buf != NULL)
+  {
+    gt_free(buf->values);
+    gt_free(buf->nextidx);
+    gt_free(buf);
+  }
+}
+
 static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
                                    GT_UNUSED unsigned long nonspecialentries)
 {
@@ -329,6 +431,8 @@ static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
                 *fillptr = sainseq->bucketfillptr;
   bool nextisStype = true;
   GtSaininfo *saininfo;
+  GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
+                                               sainseq->numofchars);
 
   saininfo = gt_malloc(sizeof *saininfo);
   saininfo->sainseq = sainseq;
@@ -359,7 +463,13 @@ static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
       {
         sainseq->sstarfirstcharcount[nextcc]++;
       }
-      suftab[--fillptr[nextcc]] = position;
+      if (sainbuffer != NULL)
+      {
+        gt_sainbuffer_update(sainbuffer,nextcc,position);
+      } else
+      {
+        suftab[--fillptr[nextcc]] = position;
+      }
 #undef SAINSHOWSTATE
 #ifdef SAINSHOWSTATE
       printf("Sstar.suftab[%lu]=%lu\n",fillptr[nextcc],position+1);
@@ -372,6 +482,8 @@ static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
       break;
     }
   }
+  gt_sainbuffer_flushall(sainbuffer);
+  gt_sainbuffer_delete(sainbuffer);
   gt_assert(GT_MULT2(saininfo->countSstartype) <=
             saininfo->sainseq->totallength);
   return saininfo;
