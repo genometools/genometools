@@ -81,7 +81,7 @@ def makecompilerflags(fp,options)
   if options.threads
     fp.print " -j#{options.j}"
   end
-  fp.puts " CC='ccache clang'"
+  fp.puts " CC='clang'"
 end
 
 if File.exists?('LocalMakefile')
