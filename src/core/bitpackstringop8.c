@@ -350,6 +350,9 @@ gt_bsGetNonUniformInt8Array(
     }
   }
 }
+/*
+vim: ft=c
+ */
 
 /*
   Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
@@ -627,6 +630,9 @@ gt_bsStoreNonUniformUInt8Array(
     *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);
   }
 }
+/*
+vim: ft=c
+ */
 
 /*
   Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
@@ -839,3 +845,6 @@ gt_bsGetNonUniformInt8ArrayAdd(
     }
   }
 }
+/*
+vim: ft=c
+ */

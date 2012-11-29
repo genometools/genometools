@@ -209,3 +209,6 @@ gt_bsGetNonUniform@iTypeTag@Array@VecOpName@(
     }
   }
 }
+/*
+vim: ft=c
+ */

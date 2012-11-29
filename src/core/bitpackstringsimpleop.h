@@ -158,43 +158,43 @@ gt_requiredInt64Bits(int64_t v)
 
 static inline void
 gt_bsStoreUniformInt8Array(BitString str, BitOffset offset, unsigned numBits,
-                        size_t numValues, const int8_t val[])
+                           size_t numValues, const int8_t val[])
 {
   gt_bsStoreUniformUInt8Array(str, offset, numBits, numValues,
-                           (const uint8_t *)val);
+                              (const uint8_t *)val);
 }
 
 static inline void
 gt_bsStoreUniformInt16Array(BitString str, BitOffset offset, unsigned numBits,
-                         size_t numValues, const int16_t val[])
+                            size_t numValues, const int16_t val[])
 {
   gt_bsStoreUniformUInt16Array(str, offset, numBits, numValues,
-                            (const uint16_t *)val);
+                               (const uint16_t *)val);
 }
 
 static inline void
 gt_bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
-                         size_t numValues, const int32_t val[])
+                            size_t numValues, const int32_t val[])
 {
   gt_bsStoreUniformUInt32Array(str, offset, numBits, numValues,
-                            (const uint32_t *)val);
+                               (const uint32_t *)val);
 }
 
 static inline void
 gt_bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
-                         size_t numValues, const int64_t val[])
+                            size_t numValues, const int64_t val[])
 {
   gt_bsStoreUniformUInt64Array(str, offset, numBits, numValues,
-                            (const uint64_t *)val);
+                               (const uint64_t *)val);
 }
 
 static inline void
 gt_bsStoreNonUniformInt8Array(BitString str, BitOffset offset, size_t numValues,
-                           BitOffset totalBits, unsigned *numBitsList,
-                           const int8_t val[])
+                              BitOffset totalBits, unsigned *numBitsList,
+                              const int8_t val[])
 {
   gt_bsStoreNonUniformUInt8Array(str, offset, numValues, totalBits, numBitsList,
-                              (const uint8_t *)val);
+                                 (const uint8_t *)val);
 }
 
 static inline void
@@ -262,7 +262,7 @@ bsSignExpandArray64(int64_t val[], size_t numValues, unsigned numBits)
 
 static inline void
 gt_bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
-                      size_t numValues, int8_t val[])
+                         size_t numValues, int8_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
   int blockSize = 16 * getpagesize() / sizeof (val[0]);
@@ -273,14 +273,14 @@ gt_bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
   while (revIndex > blockSize)
   {
     gt_bsGetUniformUInt8Array(str, offsetTemp, numBits,
-                            blockSize, (uint8_t *)blockPtr);
+                              blockSize, (uint8_t *)blockPtr);
     bsSignExpandArray8(blockPtr, blockSize, numBits);
     blockPtr += blockSize;
     revIndex -= blockSize;
     offsetTemp += blockSize * numBits;
   }
   gt_bsGetUniformUInt8Array(str, offsetTemp, numBits,
-                         revIndex, (uint8_t *)blockPtr);
+                            revIndex, (uint8_t *)blockPtr);
   bsSignExpandArray8(blockPtr, revIndex, numBits);
 }
 
@@ -297,14 +297,14 @@ gt_bsGetUniformInt16Array(constBitString str, BitOffset offset,
   while (revIndex > blockSize)
   {
     gt_bsGetUniformUInt16Array(str, offsetTemp, numBits,
-                            blockSize, (uint16_t *)blockPtr);
+                               blockSize, (uint16_t *)blockPtr);
     bsSignExpandArray16(blockPtr, blockSize, numBits);
     blockPtr += blockSize;
     revIndex -= blockSize;
     offsetTemp += blockSize * numBits;
   }
   gt_bsGetUniformUInt16Array(str, offsetTemp, numBits,
-                        revIndex, (uint16_t *)blockPtr);
+                             revIndex, (uint16_t *)blockPtr);
   bsSignExpandArray16(blockPtr, revIndex, numBits);
 }
 
@@ -321,14 +321,14 @@ gt_bsGetUniformInt32Array(constBitString str, BitOffset offset,
   while (revIndex > blockSize)
   {
     gt_bsGetUniformUInt32Array(str, offsetTemp, numBits,
-                            blockSize, (uint32_t *)blockPtr);
+                               blockSize, (uint32_t *)blockPtr);
     bsSignExpandArray32(blockPtr, blockSize, numBits);
     blockPtr += blockSize;
     revIndex -= blockSize;
     offsetTemp += blockSize * numBits;
   }
   gt_bsGetUniformUInt32Array(str, offsetTemp, numBits,
-                        revIndex, (uint32_t *)blockPtr);
+                             revIndex, (uint32_t *)blockPtr);
   bsSignExpandArray32(blockPtr, revIndex, numBits);
 }
 
@@ -345,14 +345,14 @@ gt_bsGetUniformInt64Array(constBitString str, BitOffset offset,
   while (revIndex > blockSize)
   {
     gt_bsGetUniformUInt64Array(str, offsetTemp, numBits,
-                            blockSize, (uint64_t *)blockPtr);
+                               blockSize, (uint64_t *)blockPtr);
     bsSignExpandArray64(blockPtr, blockSize, numBits);
     blockPtr += blockSize;
     revIndex -= blockSize;
     offsetTemp += blockSize * numBits;
   }
   gt_bsGetUniformUInt64Array(str, offsetTemp, numBits,
-                        revIndex, (uint64_t *)blockPtr);
+                             revIndex, (uint64_t *)blockPtr);
   bsSignExpandArray64(blockPtr, revIndex, numBits);
 }
 
@@ -401,10 +401,10 @@ static inline unsigned
 bitCountUInt32(uint32_t v)
 {
   v = v - ((v >> 1) & (uint32_t)0x55555555UL);   /* reuse input as temporary */
-  v = (v & (uint32_t)0x33333333UL)
-    + ((v >> 2) & (uint32_t)0x33333333UL);       /* temp  */
-  return (((v + (v >> 4)) & (uint32_t)0xF0F0F0FUL)
-          * (uint32_t)0x1010101UL) >> 24;        /* count */
+  v = (v & (uint32_t)0x33333333UL) +
+      ((v >> 2) & (uint32_t)0x33333333UL);       /* temp  */
+  return (((v + (v >> 4)) & (uint32_t)0xF0F0F0FUL) *
+         (uint32_t)0x1010101UL) >> 24;           /* count */
 }
 
 #endif

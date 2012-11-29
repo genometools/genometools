@@ -70,18 +70,14 @@ static inline BitPackArray *
 bitpackarray_new(unsigned bits, BitOffset numValues, bool withstorealloc)
 {
   BitPackArray *newBPA = gt_malloc(sizeof (*newBPA));
-  if (newBPA)
-  {
-    if (withstorealloc)
-    {
+  if (newBPA) {
+    if (withstorealloc) {
       if (!(newBPA->store = gt_calloc(bitElemsAllocSize(bits*numValues),
-                                      sizeof (BitElem))))
-      {
+                                      sizeof (BitElem)))) {
         gt_free(newBPA);
         return NULL;
       }
-    } else
-    {
+    } else {
       newBPA->store = NULL;
     }
     newBPA->bitsPerElem = bits;
@@ -109,9 +105,11 @@ static inline void
 bitpackarray_store_uint32(BitPackArray *array, BitOffset index, uint32_t val)
 {
   gt_assert(array && index < array->numElems
-         && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
-  gt_bsStoreUInt32(array->store, array->bitsPerElem * index,
-                array->bitsPerElem, val);
+            && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
+  gt_bsStoreUInt32(array->store,
+                   array->bitsPerElem * index,
+                   array->bitsPerElem,
+                   val);
 }
 
 /**
@@ -125,9 +123,9 @@ static inline uint32_t
 bitpackarray_get_uint32(const BitPackArray *array, BitOffset index)
 {
   gt_assert(array && index < array->numElems
-         && array->bitsPerElem <= sizeof (uint32_t)*CHAR_BIT);
+            && array->bitsPerElem <= sizeof (uint32_t)*CHAR_BIT);
   return gt_bsGetUInt32(array->store, array->bitsPerElem * index,
-                     array->bitsPerElem);
+                        array->bitsPerElem);
 }
 
 /**
@@ -141,9 +139,9 @@ static inline void
 bitpackarray_store_uint64(BitPackArray *array, BitOffset index, uint64_t val)
 {
   gt_assert(array && index < array->numElems
-         && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
+            && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
   gt_bsStoreUInt64(array->store, array->bitsPerElem * index,
-                array->bitsPerElem, val);
+                   array->bitsPerElem, val);
 }
 
 /**
@@ -157,9 +155,9 @@ static inline uint64_t
 bitpackarray_get_uint64(const BitPackArray *array, BitOffset index)
 {
   gt_assert(array && index < array->numElems
-         && array->bitsPerElem <= sizeof (uint64_t)*CHAR_BIT);
+            && array->bitsPerElem <= sizeof (uint64_t)*CHAR_BIT);
   return gt_bsGetUInt64(array->store, array->bitsPerElem * index,
-                     array->bitsPerElem);
+                        array->bitsPerElem);
 }
 
 /**

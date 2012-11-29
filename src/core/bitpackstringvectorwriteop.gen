@@ -274,3 +274,6 @@ gt_bsStoreNonUniform@uTypeTag@Array(
     *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);
   }
 }
+/*
+vim: ft=c
+ */
