@@ -27,11 +27,19 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/samtools-0.1.18 \
             -I$(CURDIR)/src/external/sqlite-3.7.10
 
+ifeq ($(shell pkg-config --version > /dev/null 2> /dev/null; echo $$?),0)
+  HAS_PKGCONFIG:=yes
+else
+  HAS_PKGCONFIG:=no
+endif
+
 ifneq ($(cairo),no)
-  INCLUDEOPT+=$(shell pkg-config --cflags-only-I pango) \
-              $(shell pkg-config --cflags-only-I cairo) \
-              $(shell pkg-config --cflags-only-I pangocairo) \
-              $(shell pkg-config --cflags-only-I glib-2.0)
+  ifeq ($(HAS_PKGCONFIG),yes)
+	INCLUDEOPT+=$(shell pkg-config --cflags-only-I pango) \
+	            $(shell pkg-config --cflags-only-I cairo) \
+	            $(shell pkg-config --cflags-only-I pangocairo) \
+	            $(shell pkg-config --cflags-only-I glib-2.0)
+  endif
 endif
 
 # these variables are exported by the configuration script
@@ -399,14 +407,16 @@ ifneq ($(cairo),no)
   ifeq ($(SYSTEM),Darwin)
     EXP_LDFLAGS:=
   endif
-  GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) \
-                       $(shell pkg-config --libs pango) \
-                       $(shell pkg-config --libs cairo) \
-                       $(shell pkg-config --libs pangocairo)
-  EXP_LDLIBS:=$(EXP_LDLIBS) \
-               $(shell pkg-config --libs pango) \
-               $(shell pkg-config --libs cairo) \
-               $(shell pkg-config --libs pangocairo)
+  ifeq ($(HAS_PKGCONFIG),yes)
+    GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) \
+                         $(shell pkg-config --libs pango) \
+                         $(shell pkg-config --libs cairo) \
+                         $(shell pkg-config --libs pangocairo)
+    EXP_LDLIBS:=$(EXP_LDLIBS) \
+                $(shell pkg-config --libs pango) \
+                $(shell pkg-config --libs cairo) \
+                $(shell pkg-config --libs pangocairo)
+  endif
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed_with_ctrack \
                                bin/examples/sketch_parsed_with_ordering \
