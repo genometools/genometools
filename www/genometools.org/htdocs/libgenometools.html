@@ -406,6 +406,14 @@ Try to guess which type the given <code>sequence</code> with <code>length</code>
 Return a clone of <code>alphabet</code>.
 </p>
 <hr>
+<a name="gt_alphabet_equals"></a>
+
+<code>bool            gt_alphabet_equals(const GtAlphabet *a, const GtAlphabet *b)</code>
+<p>
+Returns TRUE if <code>a</code> and <code>b</code> are equal (i.e. have the same symbol
+   mapping), FALSE otherwise.
+</p>
+<hr>
 <a name="gt_alphabet_ref"></a>
 
 <code>GtAlphabet*     gt_alphabet_ref(GtAlphabet *alphabet)</code>
@@ -492,7 +500,7 @@ Writes a representation of <code>alphabet</code> to the .al1 output file as spec
 <hr>
 <a name="gt_alphabet_to_str"></a>
 
-<code>void             gt_alphabet_to_str(const GtAlphabet *alphabet, GtStr *dest)</code>
+<code>void            gt_alphabet_to_str(const GtAlphabet *alphabet, GtStr *dest)</code>
 <p>
 Writes a representation of <code>alphabet</code> to the <code>GtStr</code> as specified
    by <code>dest</code>.
@@ -7250,6 +7258,24 @@ Output the current state of <code>t</code> on <code>fp</code> since the last cal
    next description.
 </p>
 <hr>
+<a name="gt_timer_show_progress_formatted"></a>
+
+<code>void      gt_timer_show_progress_formatted(GtTimer *t, FILE *fp,
+                                          const char *desc, ...)</code>
+<p>
+Like <code>gt_timer_show_progress()</code>, but allows to format the description in a
+   <code>printf()</code>-like fashion.
+</p>
+<hr>
+<a name="gt_timer_show_progress_va"></a>
+
+<code>void      gt_timer_show_progress_va(GtTimer *t, FILE *fp, const char *desc,
+                                   va_list ap)</code>
+<p>
+Like <code>gt_timer_show_progress()</code>, but allows to format the description in a
+   <code>vprintf()</code>-like fashion using a va_list argument <code>ap</code>.
+</p>
+<hr>
 <a name="gt_timer_show_progress_final"></a>
 
 <code>void      gt_timer_show_progress_final(GtTimer *t, FILE *fp)</code>
@@ -7568,6 +7594,16 @@ An example for usage of the <code>Array2dim</code> module.
 <p>
 Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
+</p>
+<hr>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
 </p>
 <hr>
 <a name="Assert"></a>
@@ -8061,16 +8097,6 @@ Like <code>gt_parse_range</code>, but issues a warning if <code>start</code> is 
    not-positive and sets the corresponding value to 1.
 </p>
 <hr>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
-</p>
-<hr>
 <a name="Qsort"></a>
 <h2>Module Qsort</h2>
 <a name="gt_qsort_r"></a>
@@ -8460,6 +8486,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_alphabet_encode"><code>gt_alphabet_encode</code></a><br>
 
   <a href="#gt_alphabet_encode_seq"><code>gt_alphabet_encode_seq</code></a><br>
+
+  <a href="#gt_alphabet_equals"><code>gt_alphabet_equals</code></a><br>
 
   <a href="#gt_alphabet_guess"><code>gt_alphabet_guess</code></a><br>
 
@@ -9951,6 +9979,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_timer_show_progress_final"><code>gt_timer_show_progress_final</code></a><br>
 
+  <a href="#gt_timer_show_progress_formatted"><code>gt_timer_show_progress_formatted</code></a><br>
+
+  <a href="#gt_timer_show_progress_va"><code>gt_timer_show_progress_va</code></a><br>
+
   <a href="#gt_timer_start"><code>gt_timer_start</code></a><br>
 
   <a href="#gt_timer_stop"><code>gt_timer_stop</code></a><br>
@@ -10056,7 +10088,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-10-05
+Last update: 2012-11-29
 </div>
 </div>
 <!-- Piwik -->
