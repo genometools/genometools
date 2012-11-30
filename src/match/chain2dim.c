@@ -1105,9 +1105,7 @@ typedef struct
   unsigned long currentdictsize,     /* current size of the dictionary */
                 maxdictsize;         /* maximal size of the dictionary */
   GtRBTree  *root;                    /* root of tree */
-  void      *worstelement,           /* reference to worst key */
-            *lastcallinsertedelem,   /* element inserted in last call */
-            *lastcalldeletedelem;    /* element deleted in last call */
+  void      *worstelement;           /* reference to worst key */
 } Dictmaxsize;
 
 static Dictmaxsize *dictmaxsize_new(unsigned long maxsize)
@@ -1118,8 +1116,6 @@ static Dictmaxsize *dictmaxsize_new(unsigned long maxsize)
   dict->currentdictsize = 0;
   dict->maxdictsize = maxsize;
   dict->root = gt_rbtree_new(comparescores, NULL, NULL);
-  dict->lastcallinsertedelem = NULL;
-  dict->lastcalldeletedelem = NULL;
   dict->worstelement = NULL;
   return dict;
 }
@@ -1148,7 +1144,6 @@ static void insertDictmaxsize(Dictmaxsize *dict,
     if (nodecreated)
     {
       dict->currentdictsize++;
-      dict->lastcallinsertedelem = elemin;
     }
   } else
   {
@@ -1161,13 +1156,11 @@ static void insertDictmaxsize(Dictmaxsize *dict,
       (void) gt_rbtree_search(dict->root, elemin, &nodecreated);
       if (nodecreated)
       {
-        dict->lastcallinsertedelem = elemin;
         if (gt_rbtree_erase(dict->root, dict->worstelement) != 0)
         {
           fprintf(stderr,"insertDictmaxsize: deletion failed\n");
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
-        dict->lastcalldeletedelem = dict->worstelement;
         dict->worstelement = gt_rbtree_minimum_key(dict->root);
       }
     }
