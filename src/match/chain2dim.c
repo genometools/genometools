@@ -25,6 +25,7 @@
 #include "core/arraydef.h"
 #include "core/logger.h"
 #include "extended/rbtree.h"
+#include "extended/ranked_list.h"
 #include "chain2dim.h"
 #include "prsqualint.h"
 
@@ -1100,73 +1101,6 @@ static int comparescores(const void *key1,
   return 0;
 }
 
-typedef struct
-{
-  unsigned long currentdictsize,     /* current size of the dictionary */
-                maxdictsize;         /* maximal size of the dictionary */
-  GtRBTree  *root;                    /* root of tree */
-  void      *worstelement;           /* reference to worst key */
-} Dictmaxsize;
-
-static Dictmaxsize *dictmaxsize_new(unsigned long maxsize)
-{
-  Dictmaxsize *dict;
-
-  dict = gt_malloc(sizeof (*dict));
-  dict->currentdictsize = 0;
-  dict->maxdictsize = maxsize;
-  dict->root = gt_rbtree_new(comparescores, NULL, NULL);
-  dict->worstelement = NULL;
-  return dict;
-}
-
-static void dictmaxsize_delete(Dictmaxsize *dict)
-{
-  gt_rbtree_delete(dict->root);
-  gt_free(dict);
-}
-
-static void insertDictmaxsize(Dictmaxsize *dict,
-                              GtRBTreeCompareFunc comparefunction,
-                              void *cmpinfo,
-                              void *elemin)
-{
-  bool nodecreated = false;
-
-  if (dict->currentdictsize < dict->maxdictsize)
-  {
-    if (dict->currentdictsize == 0 ||
-        comparefunction(elemin,dict->worstelement,cmpinfo) < 0)
-    {
-      dict->worstelement = elemin;
-    }
-    (void) gt_rbtree_search(dict->root, elemin, &nodecreated);
-    if (nodecreated)
-    {
-      dict->currentdictsize++;
-    }
-  } else
-  {
-/*
-  new element is not as bad as worst element, so insert it and
-  and delete the worst element
-*/
-    if (comparefunction(dict->worstelement,elemin,cmpinfo) < 0)
-    {
-      (void) gt_rbtree_search(dict->root, elemin, &nodecreated);
-      if (nodecreated)
-      {
-        if (gt_rbtree_erase(dict->root, dict->worstelement) != 0)
-        {
-          fprintf(stderr,"insertDictmaxsize: deletion failed\n");
-          exit(GT_EXIT_PROGRAMMING_ERROR);
-        }
-        dict->worstelement = gt_rbtree_minimum_key(dict->root);
-      }
-    }
-  }
-}
-
 /* The following function is called for local chaining only. */
 
 static void retrieve_local_chainbestscores(bool *minscoredefined,
@@ -1176,20 +1110,18 @@ static void retrieve_local_chainbestscores(bool *minscoredefined,
 {
   unsigned long idx, matchnum = 0;
   GtChain2Dimscoretype *scores;
-  Dictmaxsize *dictbestmatches;
+  GtRankedlist *dictbestmatches;
   void *minkey;
 
   scores = gt_malloc(sizeof (*scores) * matchtable->nextfree);
-  dictbestmatches = dictmaxsize_new(howmanybest);
+  dictbestmatches = gt_ranked_list_new(howmanybest,comparescores,NULL);
   for (idx=0; idx<matchtable->nextfree; idx++)
   {
     if (gt_chain2dim_isrightmaximal_chain(matchtable,idx))
     {
       scores[matchnum] = matchtable->matches[idx].score;
-      insertDictmaxsize(dictbestmatches,
-                        comparescores,
-                        NULL,
-                        (void *) (scores + matchnum));
+      gt_ranked_list_insert(dictbestmatches,
+                            (void *) (scores + matchnum));
       matchnum++;
     }
   }
@@ -1198,12 +1130,12 @@ static void retrieve_local_chainbestscores(bool *minscoredefined,
     *minscoredefined = false;
   } else
   {
-    minkey = gt_rbtree_minimum_key(dictbestmatches->root);
+    minkey = gt_ranked_list_minimum_key(dictbestmatches);
     gt_assert(minkey != NULL);
     *minscore = *((GtChain2Dimscoretype *) minkey);
     *minscoredefined = true;
   }
-  dictmaxsize_delete(dictbestmatches);
+  gt_ranked_list_delete(dictbestmatches);
   gt_free(scores);
 }
 
