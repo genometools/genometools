@@ -82,7 +82,6 @@ GtRBTreeIter*  gt_rbtree_iter_new_from_first(GtRBTree *tree);
 GtRBTreeIter*  gt_rbtree_iter_new_from_last(GtRBTree *tree);
 void*          gt_rbtree_iter_next(GtRBTreeIter *trav);
 void*          gt_rbtree_iter_prev(GtRBTreeIter *trav);
-void*          gt_rbtree_iter_key(GtRBTreeIter *trav);
 void           gt_rbtree_iter_delete(GtRBTreeIter *trav);
 
 #endif

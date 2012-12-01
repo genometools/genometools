@@ -1,3 +1,20 @@
+/*
+  Copyright (c) 2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 #include "core/ma_api.h"
 #include "extended/rbtree.h"
 #include "extended/ranked_list.h"
@@ -6,14 +23,14 @@ struct GtRankedlist
 {
   unsigned long currentsize,           /* current size of the ranked list */
                 maxsize;               /* maximal size of the ranked list */
-  GtRBTree  *root;                     /* root of tree */
-  GtRBTreeCompareFunc comparefunction; /* comparefunction */
+  GtRBTree *root;                     /* root of tree */
+  GtRankedlistCompareFunc comparefunction;
   void *worstelement,                  /* reference to worst key */
        *compareinfo;                   /* info needed by compare function */
 };
 
 GtRankedlist *gt_ranked_list_new(unsigned long maxsize,
-                                 GtRBTreeCompareFunc comparefunction,
+                                 GtRankedlistCompareFunc comparefunction,
                                  void *compareinfo)
 {
   GtRankedlist *ranked_list;
@@ -71,6 +88,36 @@ void gt_ranked_list_insert(GtRankedlist *ranked_list,void *elemin)
 void *gt_ranked_list_minimum_key(const GtRankedlist *ranked_list)
 {
   return gt_rbtree_minimum_key(ranked_list->root);
+}
+
+void *gt_ranked_list_maximum_key(const GtRankedlist *ranked_list)
+{
+  return gt_rbtree_maximum_key(ranked_list->root);
+}
+
+unsigned long gt_ranked_list_currentsize(const GtRankedlist *ranked_list)
+{
+  return ranked_list->currentsize;
+}
+
+GtRankedListIter *gt_ranked_list_iter_new_from_first(GtRankedlist *ranked_list)
+{
+  return gt_rbtree_iter_new_from_first(ranked_list->root);
+}
+
+GtRankedListIter *gt_ranked_list_iter_new_from_last(GtRankedlist *ranked_list)
+{
+  return gt_rbtree_iter_new_from_last(ranked_list->root);
+}
+
+void *gt_ranked_list_iter_next(GtRankedListIter *trav)
+{
+  return gt_rbtree_iter_next(trav);
+}
+
+void *gt_ranked_list_iter_prev(GtRankedListIter *trav)
+{
+  return gt_rbtree_iter_prev(trav);
 }
 
 void gt_ranked_list_delete(GtRankedlist *ranked_list)
