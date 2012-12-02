@@ -26,7 +26,7 @@ typedef struct GtRankedlist GtRankedlist;
 
 GtRankedlist *gt_ranked_list_new(unsigned long maxsize,
                                  GtRBTreeCompareFunc comparefunction,
-                                 void *cmpinfo);
+                                 void *compareinfo);
 
 void gt_ranked_list_insert(GtRankedlist *ranked_list,void *elemin);
 
