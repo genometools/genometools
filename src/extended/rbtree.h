@@ -20,6 +20,7 @@
 #define RBTREE_H
 
 #include "core/error.h"
+#include "core/fptr_api.h"
 
 typedef enum
 {
@@ -34,24 +35,22 @@ typedef struct GtRBTreeIter GtRBTreeIter;
 
 typedef int   (*GtRBTreeAction)(void *key, GtRBTreeContext, unsigned long,
                                 void*);
-typedef int   (*GtRBTreeCompareFunc)(const void *p1, const void *p2,
-                                     void *info);
 typedef void  (*GtRBTreeFreeFunc)(void *p);
 
-GtRBTree*      gt_rbtree_new(GtRBTreeCompareFunc cmp, GtRBTreeFreeFunc free,
+GtRBTree*      gt_rbtree_new(GtCompareWithData cmp, GtRBTreeFreeFunc free,
                              void *info);
 void           gt_rbtree_delete(GtRBTree *tree);
 void           gt_rbtree_clear(GtRBTree *tree);
 void*          gt_rbtree_find(GtRBTree *tree, void *key);
 void*          gt_rbtree_find_with_cmp(GtRBTree *tree, void *key,
-                                       GtRBTreeCompareFunc cmpfunc, void *info);
+                                       GtCompareWithData cmpfunc, void *info);
 int            gt_rbtree_insert(GtRBTree *tree, void *key);
 int            gt_rbtree_insert_with_cmp(GtRBTree *tree, void *key,
-                                         GtRBTreeCompareFunc cmpfunc,
+                                         GtCompareWithData cmpfunc,
                                          void *info);
 void*          gt_rbtree_search(GtRBTree *tree, void *key, bool *nodecreated);
 void*          gt_rbtree_search_with_cmp(GtRBTree *tree, void *key,
-                                         GtRBTreeCompareFunc cmpfunc,
+                                         GtCompareWithData cmpfunc,
                                          void *info, bool *nodecreated);
 int            gt_rbtree_erase(GtRBTree *tree, void *key);
 size_t         gt_rbtree_size(GtRBTree *tree);
@@ -65,16 +64,16 @@ void*          gt_rbtree_minimum_key(GtRBTree *tree);
 void*          gt_rbtree_maximum_key(GtRBTree *tree);
 void*          gt_rbtree_root_key(GtRBTree *tree);
 void*          gt_rbtree_next_key(GtRBTree *tree, void *key,
-                                  GtRBTreeCompareFunc cmpfun,
+                                  GtCompareWithData cmpfun,
                                   void *cmpinfo);
 void*          gt_rbtree_next_equal_key(GtRBTree *tree, void *key,
-                                        GtRBTreeCompareFunc cmpfun,
+                                        GtCompareWithData cmpfun,
                                         void *cmpinfo);
 void*          gt_rbtree_previous_key(GtRBTree *tree, void *key,
-                                      GtRBTreeCompareFunc cmpfun,
+                                      GtCompareWithData cmpfun,
                                       void *cmpinfo);
 void*          gt_rbtree_previous_equal_key(GtRBTree *tree, void *key,
-                                            GtRBTreeCompareFunc cmpfun,
+                                            GtCompareWithData cmpfun,
                                             void *cmpinfo);
 int            gt_rbtree_unit_test(GtError *err);
 

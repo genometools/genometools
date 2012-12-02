@@ -72,7 +72,7 @@ typedef struct GtRBTreeNode
 struct GtRBTree
 {
   GtRBTreeNode *root;
-  GtRBTreeCompareFunc cmp;
+  GtCompareWithData cmp;
   GtRBTreeFreeFunc free;
   size_t size;
   void *info;
@@ -121,7 +121,7 @@ static GtRBTreeNode *gt_rbtree_new_node(void *key)
   return rn;
 }
 
-GtRBTree *gt_rbtree_new(GtRBTreeCompareFunc cmp, GtRBTreeFreeFunc free,
+GtRBTree *gt_rbtree_new(GtCompareWithData cmp, GtRBTreeFreeFunc free,
                         void *info)
 {
   GtRBTree *rt = (GtRBTree *) gt_malloc(sizeof *rt);
@@ -177,7 +177,7 @@ void gt_rbtree_clear(GtRBTree *tree)
 }
 
 static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *key,
-                                              GtRBTreeCompareFunc cmpfunc,
+                                              GtCompareWithData cmpfunc,
                                               void *info)
 {
   GtRBTreeNode *it = tree->root;
@@ -197,7 +197,7 @@ static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *key,
 }
 
 void *gt_rbtree_find_with_cmp(GtRBTree *tree, void *key,
-                              GtRBTreeCompareFunc cmpfunc, void *info)
+                              GtCompareWithData cmpfunc, void *info)
 {
   gt_assert(tree);
   gt_assert(cmpfunc);
@@ -214,7 +214,7 @@ void *gt_rbtree_find(GtRBTree *tree, void *key)
 
 static inline int gt_rbtree_insert_g(GtRBTree *tree, void *key,
                                      bool *nodecreated,
-                                     GtRBTreeCompareFunc cmpfunc,
+                                     GtCompareWithData cmpfunc,
                                      void *info)
 {
   *nodecreated = false;
@@ -303,7 +303,7 @@ int gt_rbtree_insert(GtRBTree *tree, void *key)
 }
 
 int gt_rbtree_insert_with_cmp(GtRBTree *tree, void *key,
-                              GtRBTreeCompareFunc cmpfunc, void *info)
+                              GtCompareWithData cmpfunc, void *info)
 {
   GT_UNUSED bool nodecreated;
   gt_assert(tree);
@@ -327,7 +327,7 @@ void* gt_rbtree_search(GtRBTree *tree, void *key, bool *nodecreated)
 }
 
 void* gt_rbtree_search_with_cmp(GtRBTree *tree, void *key,
-                                GtRBTreeCompareFunc cmpfunc, void *info,
+                                GtCompareWithData cmpfunc, void *info,
                                 bool *nodecreated)
 {
   gt_assert(tree);
@@ -612,7 +612,7 @@ void* gt_rbtree_root_key(GtRBTree *tree)
 }
 
 void* gt_rbtree_previous_key(GtRBTree *tree, void *key,
-                             GtRBTreeCompareFunc cmpfun, void *cmpinfo)
+                             GtCompareWithData cmpfun, void *cmpinfo)
 {
   int cmp;
   const GtRBTreeNode *current,
@@ -648,7 +648,7 @@ void* gt_rbtree_previous_key(GtRBTree *tree, void *key,
 }
 
 void* gt_rbtree_previous_equal_key(GtRBTree *tree, void *key,
-                                   GtRBTreeCompareFunc cmpfun, void *cmpinfo)
+                                   GtCompareWithData cmpfun, void *cmpinfo)
 {
   int cmp;
   const GtRBTreeNode *current,
@@ -677,7 +677,7 @@ void* gt_rbtree_previous_equal_key(GtRBTree *tree, void *key,
   return found->key;
 }
 
-void* gt_rbtree_next_key(GtRBTree *tree, void *key, GtRBTreeCompareFunc cmpfun,
+void* gt_rbtree_next_key(GtRBTree *tree, void *key, GtCompareWithData cmpfun,
                          void *cmpinfo)
 {
   int cmp;
@@ -714,7 +714,7 @@ void* gt_rbtree_next_key(GtRBTree *tree, void *key, GtRBTreeCompareFunc cmpfun,
 }
 
 void* gt_rbtree_next_equal_key(GtRBTree *tree, void *key,
-                               GtRBTreeCompareFunc cmpfun, void *cmpinfo)
+                               GtCompareWithData cmpfun, void *cmpinfo)
 {
   int cmp;
   const GtRBTreeNode *current,

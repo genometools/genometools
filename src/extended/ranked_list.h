@@ -20,30 +20,53 @@
 
 #include "extended/rbtree.h"
 
-typedef GtRBTreeCompareFunc GtRankedlistCompareFunc;
+/* The <GtRankedListIter> class implements an iterator over the elements of
+   a <GtRankedList>. */
 typedef GtRBTreeIter GtRankedListIter;
-typedef struct GtRankedlist GtRankedlist;
 
-GtRankedlist *gt_ranked_list_new(unsigned long maxsize,
-                                 GtRBTreeCompareFunc comparefunction,
+/* The <GtRankedList> class holds a dynamic sorted collection of <n> items
+   such that the <n> items with the highest rank are kept. */
+typedef struct GtRankedList GtRankedList;
+
+/* Returns a new <GtRankedList> object with maximumsize <maxsize>. The
+   comparator function <comparefunction> is used to define an order on the
+   inserted elements, with <compareinfo> to be used as additional external
+   data. */
+GtRankedList* gt_ranked_list_new(unsigned long maxsize,
+                                 GtCompareWithData comparefunction,
                                  void *compareinfo);
 
-void gt_ranked_list_insert(GtRankedlist *ranked_list,void *elemin);
+/* Inserts <elem> into <ranked_list>. Does not take ownership of <elem>. */
+void          gt_ranked_list_insert(GtRankedList *ranked_list, void *elem);
 
-void *gt_ranked_list_minimum_key(const GtRankedlist *ranked_list);
+/* Returns the element in <ranked_list> with the highest rank. */
+void*         gt_ranked_list_first(const GtRankedList *ranked_list);
 
-void *gt_ranked_list_maximum_key(const GtRankedlist *ranked_list);
+/* Returns the element in <ranked_list> with the lowest rank. */
+void*         gt_ranked_list_last(const GtRankedList *ranked_list);
 
-unsigned long gt_ranked_list_currentsize(const GtRankedlist *ranked_list);
+/* Returns the number of elements currently stored in <ranked_list>. */
+unsigned long gt_ranked_list_size(const GtRankedList *ranked_list);
 
-GtRankedListIter *gt_ranked_list_iter_new_from_first(GtRankedlist *ranked_list);
+/* Deletes <ranked_list> and frees all associated memory. */
+void          gt_ranked_list_delete(GtRankedList *ranked_list);
 
-GtRankedListIter *gt_ranked_list_iter_new_from_last(GtRankedlist *ranked_list);
+int           gt_ranked_list_unit_test(GtError *err);
 
-void *gt_ranked_list_iter_next(GtRankedListIter *trav);
+/* Returns a new <GtRankedListIter>, initialized to the element in <ranked_list>
+   with the highest rank. The object is deleted along with <ranked_list> and
+   thus does not need to be freed. */
+GtRankedListIter* gt_ranked_list_iter_new_from_first(GtRankedList *ranked_list);
 
-void *gt_ranked_list_iter_prev(GtRankedListIter *trav);
+/* Returns a new <GtRankedListIter>, initialized to the element in <ranked_list>
+   with the lowest rank. The object is deleted along with <ranked_list> and
+   thus does not need to be freed */
+GtRankedListIter* gt_ranked_list_iter_new_from_last(GtRankedList *ranked_list);
 
-void gt_ranked_list_delete(GtRankedlist *ranked_list);
+/* Returns the next element according to <ranked_list_iter>. */
+void*             gt_ranked_list_iter_next(GtRankedListIter *ranked_list_iter);
+
+/* Returns the previous element according to <ranked_list_iter>. */
+void*             gt_ranked_list_iter_prev(GtRankedListIter *ranked_list_iter);
 
 #endif

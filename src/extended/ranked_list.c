@@ -15,25 +15,27 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/ensure.h"
 #include "core/ma_api.h"
-#include "extended/rbtree.h"
+#include "core/unused_api.h"
 #include "extended/ranked_list.h"
+#include "extended/rbtree.h"
 
-struct GtRankedlist
+struct GtRankedList
 {
   unsigned long currentsize,           /* current size of the ranked list */
                 maxsize;               /* maximal size of the ranked list */
-  GtRBTree *root;                     /* root of tree */
-  GtRankedlistCompareFunc comparefunction;
+  GtRBTree *root;                      /* root of tree */
+  GtCompareWithData comparefunction;
   void *worstelement,                  /* reference to worst key */
        *compareinfo;                   /* info needed by compare function */
 };
 
-GtRankedlist *gt_ranked_list_new(unsigned long maxsize,
-                                 GtRankedlistCompareFunc comparefunction,
+GtRankedList* gt_ranked_list_new(unsigned long maxsize,
+                                 GtCompareWithData comparefunction,
                                  void *compareinfo)
 {
-  GtRankedlist *ranked_list;
+  GtRankedList *ranked_list;
 
   ranked_list = gt_malloc(sizeof (*ranked_list));
   ranked_list->currentsize = 0;
@@ -45,19 +47,19 @@ GtRankedlist *gt_ranked_list_new(unsigned long maxsize,
   return ranked_list;
 }
 
-void gt_ranked_list_insert(GtRankedlist *ranked_list,void *elemin)
+void gt_ranked_list_insert(GtRankedList *ranked_list, void *elem)
 {
   bool nodecreated = false;
 
   if (ranked_list->currentsize < ranked_list->maxsize)
   {
     if (ranked_list->currentsize == 0 ||
-        ranked_list->comparefunction(elemin,ranked_list->worstelement,
+        ranked_list->comparefunction(elem,ranked_list->worstelement,
                                      ranked_list->compareinfo) < 0)
     {
-      ranked_list->worstelement = elemin;
+      ranked_list->worstelement = elem;
     }
-    (void) gt_rbtree_search(ranked_list->root, elemin, &nodecreated);
+    (void) gt_rbtree_search(ranked_list->root, elem, &nodecreated);
     if (nodecreated)
     {
       ranked_list->currentsize++;
@@ -68,10 +70,10 @@ void gt_ranked_list_insert(GtRankedlist *ranked_list,void *elemin)
   new element is not as bad as worst element, so insert it and
   and delete the worst element
 */
-    if (ranked_list->comparefunction(ranked_list->worstelement,elemin,
+    if (ranked_list->comparefunction(ranked_list->worstelement, elem,
                                      ranked_list->compareinfo) < 0)
     {
-      (void) gt_rbtree_search(ranked_list->root, elemin, &nodecreated);
+      (void) gt_rbtree_search(ranked_list->root, elem, &nodecreated);
       if (nodecreated)
       {
         if (gt_rbtree_erase(ranked_list->root, ranked_list->worstelement) != 0)
@@ -85,43 +87,83 @@ void gt_ranked_list_insert(GtRankedlist *ranked_list,void *elemin)
   }
 }
 
-void *gt_ranked_list_minimum_key(const GtRankedlist *ranked_list)
+void* gt_ranked_list_last(const GtRankedList *ranked_list)
 {
   return gt_rbtree_minimum_key(ranked_list->root);
 }
 
-void *gt_ranked_list_maximum_key(const GtRankedlist *ranked_list)
+void* gt_ranked_list_first(const GtRankedList *ranked_list)
 {
   return gt_rbtree_maximum_key(ranked_list->root);
 }
 
-unsigned long gt_ranked_list_currentsize(const GtRankedlist *ranked_list)
+unsigned long gt_ranked_list_size(const GtRankedList *ranked_list)
 {
   return ranked_list->currentsize;
 }
 
-GtRankedListIter *gt_ranked_list_iter_new_from_first(GtRankedlist *ranked_list)
+GtRankedListIter* gt_ranked_list_iter_new_from_first(GtRankedList *ranked_list)
 {
   return gt_rbtree_iter_new_from_first(ranked_list->root);
 }
 
-GtRankedListIter *gt_ranked_list_iter_new_from_last(GtRankedlist *ranked_list)
+GtRankedListIter *gt_ranked_list_iter_new_from_last(GtRankedList *ranked_list)
 {
   return gt_rbtree_iter_new_from_last(ranked_list->root);
 }
 
-void *gt_ranked_list_iter_next(GtRankedListIter *trav)
+void *gt_ranked_list_iter_next(GtRankedListIter *ranked_list_iter)
 {
-  return gt_rbtree_iter_next(trav);
+  return gt_rbtree_iter_next(ranked_list_iter);
 }
 
-void *gt_ranked_list_iter_prev(GtRankedListIter *trav)
+void *gt_ranked_list_iter_prev(GtRankedListIter *ranked_list_iter)
 {
-  return gt_rbtree_iter_prev(trav);
+  return gt_rbtree_iter_prev(ranked_list_iter);
 }
 
-void gt_ranked_list_delete(GtRankedlist *ranked_list)
+void gt_ranked_list_delete(GtRankedList *ranked_list)
 {
   gt_rbtree_delete(ranked_list->root);
   gt_free(ranked_list);
+}
+
+static int gt_ranked_list_cmp_numbers(const void *n1, const void *n2,
+                                      GT_UNUSED void *info)
+{
+  int l1 = *(int*) n1;
+  int l2 = *(int*) n2;
+  if (l1 == l2)
+    return 0;
+  else if (l1 < l2)
+    return -1;
+  else
+    return 1;
+}
+
+int gt_ranked_list_unit_test(GtError *err)
+{
+  int had_err = 0;
+  GtRankedList *rl;
+  int values[8] = {-3, 4, 1, 545, 24, 33, 22, 42},
+      i;
+  gt_error_check(err);
+
+  rl = gt_ranked_list_new(5UL, gt_ranked_list_cmp_numbers, NULL);
+  gt_ensure(had_err, rl != NULL);
+  gt_ensure(had_err, gt_ranked_list_size(rl) == 0);
+
+  for (i = 0; i < 8; i++) {
+    gt_ranked_list_insert(rl, values+i);
+    if (i < 5)
+      gt_ensure(had_err, gt_ranked_list_size(rl) == (unsigned long) i + 1UL);
+    else
+      gt_ensure(had_err, gt_ranked_list_size(rl) == 5UL);
+  }
+  gt_ensure(had_err, (*(int*) gt_ranked_list_first(rl)) == 545);
+  gt_ensure(had_err, (*(int*) gt_ranked_list_last(rl)) == 22);
+
+  gt_ranked_list_delete(rl);
+
+  return had_err;
 }

@@ -1110,7 +1110,7 @@ static void retrieve_local_chainbestscores(bool *minscoredefined,
 {
   unsigned long idx, matchnum = 0;
   GtChain2Dimscoretype *scores;
-  GtRankedlist *dictbestmatches;
+  GtRankedList *dictbestmatches;
   void *minkey;
 
   scores = gt_malloc(sizeof (*scores) * matchtable->nextfree);
@@ -1130,7 +1130,7 @@ static void retrieve_local_chainbestscores(bool *minscoredefined,
     *minscoredefined = false;
   } else
   {
-    minkey = gt_ranked_list_minimum_key(dictbestmatches);
+    minkey = gt_ranked_list_last(dictbestmatches);
     gt_assert(minkey != NULL);
     *minscore = *((GtChain2Dimscoretype *) minkey);
     *minscoredefined = true;

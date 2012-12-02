@@ -63,6 +63,7 @@
 #include "extended/hmm.h"
 #include "extended/huffman.h"
 #include "extended/luaserialize.h"
+#include "extended/ranked_list.h"
 #include "extended/rbtree.h"
 #include "extended/rmq.h"
 #include "extended/splicedseq.h"
@@ -303,6 +304,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
   gt_hashmap_add(unit_tests, "quality module", gt_quality_unit_test);
   gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);
+  gt_hashmap_add(unit_tests, "ranked list class", gt_ranked_list_unit_test);
   gt_hashmap_add(unit_tests, "red-black tree class", gt_rbtree_unit_test);
   gt_hashmap_add(unit_tests, "range minimum query class", gt_rmq_unit_test);
   gt_hashmap_add(unit_tests, "safearith module", gt_safearith_unit_test);
