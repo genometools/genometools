@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2007-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007      Malte Mader <mader@zbh.uni-hamburg.de>
   Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -591,9 +591,17 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
           }
         }
       } else {
-        if (add_to_current(d, node, parent, err) < 0) {
+        if (gt_feature_node_is_pseudo(parent)
+              && gt_feature_node_is_multi(node))
+        {
+          if (add_to_rep(d, node, parent, err) < 0) {
             return -1;
           }
+        } else {
+          if (add_to_current(d, node, parent, err) < 0) {
+            return -1;
+          }
+        }
       }
     } else {
       /* root nodes always get their own block */
