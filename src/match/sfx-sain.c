@@ -794,8 +794,8 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
                   (unsigned long) (bucketptr - suftab),*bucketptr);
 #endif
         }
-        suftab[idx] = 0;
       }
+      suftab[idx] = 0;
     }
     if (idx == 0)
     {
@@ -842,6 +842,9 @@ static void gt_sain_moveSstar2front(GtSaininfo *saininfo,
         {
           break;
         }
+      } else
+      {
+        suftab[readidx] = 0;
       }
     }
   } else
@@ -1491,8 +1494,6 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     gt_sain_moveSstar2front(saininfo,(long *) suftab,nonspecialentries);
     if (saininfo->sainseq->roundtable == NULL)
     {
-      gt_assert(availableentries > 0);
-      gt_sain_setundefined(suftab,saininfo->countSstartype,availableentries-1);
       GT_SAIN_SHOWTIMER("assignSstarlength");
       gt_sain_assignSstarlength(saininfo->sainseq,
                                 suftab + saininfo->countSstartype);
@@ -1501,7 +1502,6 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                                                availableentries);
     } else
     {
-      gt_sain_setundefined(suftab,saininfo->countSstartype,availableentries-1);
       if (!saininfo->sainseq->roundtablepoints2suftab)
       {
         gt_free(saininfo->sainseq->roundtable);
@@ -1520,20 +1520,20 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
       GtSainseq *sainseq_rec;
 
       GT_SAIN_SHOWTIMER("movenames2front");
+      gt_sain_setundefined(suftab,0,saininfo->countSstartype-1);
       gt_sain_movenames2front(suftab,saininfo->countSstartype,
                               saininfo->sainseq->totallength,
                               availableentries);
-      gt_sain_setundefined(suftab,0,saininfo->countSstartype-1);
       if (level == 0)
       {
         firstusable = GT_MULT2(saininfo->countSstartype);
       }
       sainseq_rec = gt_sainseq_new_from_array(subseq,
-                                               saininfo->countSstartype,
-                                               numberofnames,
-                                               suftab,
-                                               firstusable,
-                                               suftabentries);
+                                              saininfo->countSstartype,
+                                              numberofnames,
+                                              suftab,
+                                              firstusable,
+                                              suftabentries);
       gt_sain_rec_sortsuffixes(level+1,
                                sainseq_rec,
                                suftab,
@@ -1546,7 +1546,6 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                                verbose,
                                timer);
       startoccupied = gt_sainseq_delete(sainseq_rec);
-      gt_sain_setundefined(suftab,startoccupied,suftabentries-1);
       GT_SAIN_SHOWTIMER("expandorder2original");
       gt_sain_expandorder2original(saininfo->sainseq,saininfo->countSstartype,
                                    suftab);
@@ -1622,8 +1621,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
   totallength = gt_encseq_total_length(encseq);
   nonspecialentries = totallength - gt_encseq_specialcharacters(encseq);
   suftabentries = totallength+1;
-  suftab = gt_malloc(sizeof (*suftab) * suftabentries);
-  gt_sain_setundefined(suftab,0,suftabentries-1);
+  suftab = gt_calloc((size_t) suftabentries,sizeof (*suftab));
   sainseq = gt_sainseq_new_from_encseq(encseq,readmode);
   gt_sain_rec_sortsuffixes(0,
                            sainseq,
@@ -1652,8 +1650,7 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
   GtSainseq *sainseq;
 
   suftabentries = len+1;
-  suftab = gt_malloc(sizeof (*suftab) * suftabentries);
-  gt_sain_setundefined(suftab,0,suftabentries - 1);
+  suftab = gt_calloc((size_t) suftabentries,sizeof (*suftab));
   sainseq = gt_sainseq_new_from_plainseq(plainseq,len);
   gt_sain_rec_sortsuffixes(0,
                            sainseq,
