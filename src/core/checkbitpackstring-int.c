@@ -673,3 +673,6 @@ gt_bitPackStringInt_unit_test(GtError *err)
   }
   freeResourcesAndReturn(had_err);
 }
+/*
+vim: ft=c
+ */
