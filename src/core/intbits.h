@@ -158,8 +158,7 @@ typedef GtBitsequence GtTwobitencoding;
   unsigned int i;
   unsigned char mask;
 
-  for (i=0, mask = (unsigned char) 128; i < 8U; i++, mask >>= 1)
-  {
+  for (i=0, mask = (unsigned char) 128; i < 8U; i++, mask >>= 1) {
     buffer[i] = (bs & mask) ? '1' : '0';
   }
   buffer[8] = '\0';
@@ -173,27 +172,25 @@ typedef GtBitsequence GtTwobitencoding;
 
   for (i=0, mask = GT_FIRSTBIT;
        i < (unsigned int) GT_INTWORDSIZE;
-       i++, mask >>= 1)
-  {
+       i++, mask >>= 1) {
     buffer[i] = (bs & mask) ? '1' : '0';
   }
   buffer[GT_INTWORDSIZE] = '\0';
 }
 
-/*@unused@*/ static inline void gt_bitsequence_tostring_units(char *buffer,
-                                                        GtBitsequence bs,
-                                                        unsigned int units)
+/*@unused@*/
+static inline void gt_bitsequence_tostring_units(char *buffer,
+                                                 GtBitsequence bs,
+                                                 unsigned int units)
 {
   unsigned int idx, unit = 0;
   GtBitsequence mask;
 
   for (idx=0, unit = 1U, mask = GT_FIRSTBIT;
        mask > 0;
-       unit++, mask >>= 1)
-  {
+       unit++, mask >>= 1) {
     buffer[idx++] = (bs & mask) ? '1' : '0';
-    if (unit % units == 0)
-    {
+    if (unit % units == 0) {
       buffer[idx++] = ' ';
     }
   }
@@ -201,12 +198,11 @@ typedef GtBitsequence GtTwobitencoding;
 }
 
 /*@unused@*/ static inline unsigned long gt_unitsoftwobitencoding(unsigned long
-                                                                    totallength)
+                                                                  totallength)
 {
   uint64_t unitsoftwobitencoding;
 
-  if (totallength < (unsigned long) GT_UNITSIN2BITENC)
-  {
+  if (totallength < (unsigned long) GT_UNITSIN2BITENC) {
     return 2UL;
   }
   unitsoftwobitencoding = (uint64_t) (2 +

@@ -57,8 +57,7 @@ binomialCoeff(unsigned long n, unsigned long k)
     return 1;
   else if (k < n/2)
     return binomialCoeff(n, n - k);
-  else
-  {
+  else {
     unsigned long i = k;
     accum = ++i;
     while (i < n)
@@ -86,13 +85,11 @@ multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
   unsigned long binSum = 0;
 #endif
   gt_assert(n > 0 && numBins > 0 && binSizes);
-  for (i = 0; i < numBins; ++i)
-  {
+  for (i = 0; i < numBins; ++i) {
 #ifndef NDEBUG
     binSum += binSizes[i];
 #endif
-    if (binSizes[i] > maxBinSize)
-    {
+    if (binSizes[i] > maxBinSize) {
       maxBinSize = binSizes[i];
       maxBin = i;
     }
@@ -110,8 +107,7 @@ static inline unsigned long long
 iPow(unsigned long long x, unsigned i)
 {
    unsigned long long result = 1;
-   while (i)
-   {
+   while (i) {
      if (i & 1)
        result *= x;
      x *= x;
