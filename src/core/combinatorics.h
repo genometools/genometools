@@ -76,7 +76,7 @@ unsigned long gt_binomialCoeff(unsigned long n, unsigned long k);
  * represent the \f$k_i\f$
  * @return \f$n\choose{k_1, k_2,\dots,k_m}\f$
  */
-static inline unsigned long
+/*@unused@*/ static inline unsigned long
 multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
 {
   unsigned long accum = 1UL, nfac;
@@ -103,7 +103,7 @@ multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
   return accum;
 }
 
-static inline unsigned long long
+/*@unused@*/ static inline unsigned long long
 iPow(unsigned long long x, unsigned i)
 {
    unsigned long long result = 1ULL;

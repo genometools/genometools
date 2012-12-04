@@ -966,7 +966,7 @@ EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 SKCORE=${shell grep -l 'Stefan Kurtz' src/core/*.c}
-DWKCORE=${shell grep -l Willrodt src/core/*.c}
+DWCORE=${shell grep -l Willrodt src/core/*.c}
 DWTOOLS=${shell grep -l Willrodt src/tools/*.c}
 GGTOOLS=${shell grep -l Gonnella src/tools/*.c}
 SKEXT=${shell grep -l 'Stefan Kurtz' src/extended/*.c}
@@ -982,6 +982,10 @@ ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
 
 spgt:${ALLSPLINT}
 
+ifeq ($(64bit), yes)
+SPLINTD:=-D_LP64
+endif
+				
 scgt:
 	src_check src/core/*
 	src_check src/match/*
@@ -994,27 +998,27 @@ splintclean:
 
 obj/%.splint: ${CURDIR}/src/match/%.c
 	@echo "splint $<"
-	@splint -DGT_THREADS_ENABLED $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c
 	@echo "splint $<"
-	@splint $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/ltr/%.c
 	@echo "splint $<"
-	@splint $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/core/%.c
 	@echo "splint $<"
-	@splint $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/extended/%.c
 	@echo "splint $<"
-	@splint $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 

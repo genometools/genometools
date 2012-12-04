@@ -161,7 +161,7 @@ int gt_colorspace_decode_string(GtStr *color_string, GtStr *result,
   {
     gt_str_append_char(result, cd->current->self);
 
-    for (idx = 1; !had_err && idx < str_len; idx++)
+    for (idx = 1UL; !had_err && idx < str_len; idx++)
     {
       had_err = set_next_state(cd, input[idx], err);
       gt_str_append_char(result, cd->current->self);

@@ -170,7 +170,7 @@ typedef GtBitsequence GtTwobitencoding;
   unsigned int i;
   GtBitsequence mask;
 
-  for (i=0, mask = GT_FIRSTBIT;
+  for (i=0, mask = (GtBitsequence) GT_FIRSTBIT;
        i < (unsigned int) GT_INTWORDSIZE;
        i++, mask >>= 1) {
     buffer[i] = (bs & mask) ? '1' : '0';

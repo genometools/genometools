@@ -65,7 +65,7 @@ DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
             /* Nothing */ ;
 #endif
 
-#define GT_MODVALUEBITS 32
+#define GT_MODVALUEBITS 32U
 #define GT_MODVALUEMASK UINT32_MAX
 
 GT_UNUSED

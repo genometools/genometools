@@ -132,9 +132,11 @@ unsigned long gt_binomialCoeff(unsigned long n, unsigned long k)
   result = n - k + 1;
   for (idx = 2UL; idx <= k; idx++) {
 #ifdef _LP64
-    result = gt_safe_mult_u64(result, (n - k + idx));
+    result = (unsigned long) gt_safe_mult_u64((uint64_t) result,
+                                              (uint64_t) (n - k + idx));
 #else
-    result = gt_safe_mult_u32((uint32_t) result, (n - k + idx));
+    result = (unsigned long) gt_safe_mult_u32((uint32_t) result,
+                                              (uint32_t) (n - k + idx));
 #endif
     result /= idx;
   }
@@ -145,7 +147,7 @@ int gt_combinatorics_unit_test(GT_UNUSED GtError *err)
 {
   unsigned long n,k;
   static const unsigned long max_n = GT_BINOMIAL_MAX_N,
-                             max_fac_stable = 47;
+                             max_fac_stable = 47UL;
   for (n = 0; n <= max_n; n++) {
     for (k = 0; k <= GT_DIV2(n); k++) {
       unsigned long a = gt_binomialCoeff_dp(n, k),
