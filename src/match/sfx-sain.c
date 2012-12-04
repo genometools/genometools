@@ -1135,14 +1135,23 @@ static int gt_sain_compare_suffixes(const GtSainseq *sainseq,
   }
 }
 
-static void gt_sain_setundefined(unsigned long *suftab,
+static void gt_sain_setundefined(bool fwd,unsigned long *suftab,
                                  unsigned long start, unsigned long end)
 {
-  unsigned long idx;
+  unsigned long *ptr;
 
-  for (idx = start; idx <= end; idx++)
+  if (fwd)
   {
-    suftab[idx] = 0;
+    for (ptr = suftab + start; ptr <= suftab + end; ptr++)
+    {
+      *ptr = 0;
+    }
+  } else
+  {
+    for (ptr = suftab + end; ptr >= suftab + start; ptr--)
+    {
+      *ptr = 0;
+    }
   }
 }
 
@@ -1404,7 +1413,7 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSainseq *sainseq,
               sainseq->sstarfirstcharcount[cc]);
     if (sainseq->bucketsize[cc] > sainseq->sstarfirstcharcount[cc])
     {
-      gt_sain_setundefined(suftab,fillidx,
+      gt_sain_setundefined(false,suftab,fillidx,
                            fillidx + sainseq->bucketsize[cc] -
                            sainseq->sstarfirstcharcount[cc] - 1);
     }
@@ -1520,7 +1529,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
       GtSainseq *sainseq_rec;
 
       GT_SAIN_SHOWTIMER("movenames2front");
-      gt_sain_setundefined(suftab,0,saininfo->countSstartype-1);
+      gt_sain_setundefined(true,suftab,0,saininfo->countSstartype-1);
       gt_sain_movenames2front(suftab,saininfo->countSstartype,
                               saininfo->sainseq->totallength,
                               availableentries);
@@ -1573,7 +1582,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   GT_SAIN_SHOWTIMER("insert sorted Sstar suffixes");
   if (saininfo->countSstartype > 0)
   {
-    gt_sain_insertsortedSstarsuffixes (saininfo->sainseq, suftab ,
+    gt_sain_insertsortedSstarsuffixes (saininfo->sainseq, suftab,
                                        saininfo->countSstartype - 1,
                                        nonspecialentries);
   }
