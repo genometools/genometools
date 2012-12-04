@@ -168,7 +168,7 @@ gt_initCompositionList(struct compList *newList, unsigned blockSize,
   bitsPerComp = alphabetSize * (bitsPerCount = gt_requiredUIntBits(blockSize));
   newList->bitsPerCount = bitsPerCount;
   numCompositions = newList->numCompositions =
-    binomialCoeff(blockSize + maxSym, maxSym);
+    gt_binomialCoeff(blockSize + maxSym, maxSym);
   numTotalPermutations = iPow(alphabetSize, blockSize);
   newList->compositionIdxBits = gt_requiredUInt64Bits(numCompositions - 1);
   newList->bitsPerSymbol = gt_requiredUIntBits(maxSym);

@@ -18,7 +18,19 @@
 #define COMBINATORICS_H
 
 #include "core/assert_api.h"
+#include "core/error_api.h"
 #include "core/minmax.h"
+#include "core/unused_api.h"
+
+#ifdef _LP64
+#define GT_BINOMIAL_MAX_N_LN 66UL
+#define GT_BINOMIAL_MAX_N 62UL
+#define GT_BINOMIAL_MAX_N_DP 67UL
+#else
+#define GT_BINOMIAL_MAX_N_LN 32UL
+#define GT_BINOMIAL_MAX_N 30UL
+#define GT_BINOMIAL_MAX_N_DP 33UL
+#endif
 
 /**
  * \file combinatorics.h
@@ -33,38 +45,26 @@
  * @return \f$n!\f$
  */
 static inline unsigned long
-factorial(int n)
+factorial(unsigned n)
 {
-  unsigned long k = 1;
-  while (n > 1)
+  unsigned long k = 1UL;
+  while (n > 1U)
     k *= n--;
   return k;
 }
 
-/**
- * \brief Compute binomial coefficient \f[{n\choose k} = \frac{n!}{k!\cdot (n
- * - k)!}\f]
- * @param n
- * @param k
- * @return \f$n\choose{k}\f$
- */
-static inline unsigned long
-binomialCoeff(unsigned long n, unsigned long k)
-{
-  unsigned long accum;
-  gt_assert(k <= n);
-  if (k == 0 || k == n)
-    return 1;
-  else if (k < n/2)
-    return binomialCoeff(n, n - k);
-  else {
-    unsigned long i = k;
-    accum = ++i;
-    while (i < n)
-      accum *= ++i;
-    return accum /= factorial(n - k);
-  }
-}
+/* calculate n choose k using exp(ln(n!) - ln(k!) - ln((n-k)!)). Returned value
+   might deviate from correct result for large n. Overflows for
+   n > GT_BINOMIAL_MAX_N_LN */
+unsigned long gt_binomialCoeff_with_ln(unsigned long n, unsigned long k);
+
+/* calculate n choose k using a dp table. Overflows for
+   n> GT_BINOMIAL_MAX_N_DP */
+unsigned long gt_binomialCoeff_dp(unsigned long n, unsigned long k);
+
+/* naive implementation of n choose k, but already somewhat optimised.
+   Overflows for n> GT_BINOMIAL_MAX_N */
+unsigned long gt_binomialCoeff(unsigned long n, unsigned long k);
 
 /**
  * \brief Compute multinomial coefficient
@@ -79,7 +79,7 @@ binomialCoeff(unsigned long n, unsigned long k)
 static inline unsigned long
 multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
 {
-  unsigned long accum = 1, nfac;
+  unsigned long accum = 1UL, nfac;
   size_t i, maxBin = 0, maxBinSize = 0;
 #ifndef NDEBUG
   unsigned long binSum = 0;
@@ -89,13 +89,13 @@ multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
 #ifndef NDEBUG
     binSum += binSizes[i];
 #endif
-    if (binSizes[i] > maxBinSize) {
-      maxBinSize = binSizes[i];
+    if ((size_t) binSizes[i] > maxBinSize) {
+      maxBinSize = (size_t) binSizes[i];
       maxBin = i;
     }
   }
-  gt_assert(binSum <= n);
-  for (nfac = maxBinSize + 1; nfac <= n; ++nfac)
+  gt_assert(binSum <= (unsigned long) n);
+  for (nfac = (unsigned long) maxBinSize + 1; nfac <= (unsigned long) n; ++nfac)
     accum *= nfac;
   for (i = 0; i < numBins; ++i)
     if (i != maxBin)
@@ -106,7 +106,7 @@ multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
 static inline unsigned long long
 iPow(unsigned long long x, unsigned i)
 {
-   unsigned long long result = 1;
+   unsigned long long result = 1ULL;
    while (i) {
      if (i & 1)
        result *= x;
@@ -116,4 +116,7 @@ iPow(unsigned long long x, unsigned i)
    return result;
 }
 
+int gt_combinatorics_unit_test(GT_UNUSED GtError *err);
+void gt_combinatorics_init(void);
+void gt_combinatorics_clean(void);
 #endif

@@ -22,12 +22,13 @@
 /* #include <fontconfig.h> */
 #endif
 #include <string.h>
-#include "core/init_api.h"
 #include "core/class_alloc.h"
 #include "core/class_prealloc.h"
+#include "core/combinatorics.h"
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
 #include "core/fa.h"
+#include "core/init_api.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/option_api.h"
@@ -121,6 +122,7 @@ void gt_lib_init(void)
 #ifdef HAVE_MYSQL
   mysql_library_init(0, NULL, NULL);
 #endif
+  gt_combinatorics_init();
 }
 
 static void gt_lib_atexit_func(void)
@@ -150,6 +152,7 @@ int gt_lib_clean(void)
   gt_ya_rand_clean();
   gt_log_clean();
   gt_spacepeak_clean();
+  gt_combinatorics_clean();
   gt_rval = gt_ma_check_space_leak();
   gt_ma_clean();
 #ifndef WITHOUT_CAIRO

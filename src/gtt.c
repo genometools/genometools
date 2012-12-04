@@ -29,6 +29,7 @@
 #include "core/codon_iterator_encseq.h"
 #include "core/codon_iterator_simple.h"
 #include "core/colorspace.h"
+#include "core/combinatorics.h"
 #include "core/compactulongstore.h"
 #include "core/countingsort.h"
 #include "core/cstr.h"
@@ -70,9 +71,9 @@
 #include "extended/string_matching.h"
 #include "extended/tag_value_map.h"
 #include "extended/uint64hashtable.h"
+#include "ltr/gt_ltrclustering.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/gt_ltrharvest.h"
-#include "ltr/gt_ltrclustering.h"
 #include "ltr/ltrelement.h"
 #include "ltr/pbs.h"
 #include "ltr/ppt.h"
@@ -84,10 +85,10 @@
 #include "tools/gt_chain2dim.h"
 #include "tools/gt_chseqids.h"
 #include "tools/gt_clean.h"
+#include "tools/gt_compreads.h"
 #include "tools/gt_congruence.h"
 #include "tools/gt_convertseq.h"
 #include "tools/gt_csa.h"
-#include "tools/gt_compreads.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_dupfeat.h"
 #include "tools/gt_encseq.h"
@@ -116,8 +117,8 @@
 #include "tools/gt_orffinder.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_prebwt.h"
-#include "tools/gt_script_filter.h"
 #include "tools/gt_readjoiner.h"
+#include "tools/gt_script_filter.h"
 #include "tools/gt_select.h"
 #include "tools/gt_seq.h"
 #include "tools/gt_seqfilter.h"
@@ -264,6 +265,7 @@ GtHashmap* gtt_unit_tests(void)
                                             gt_codon_iterator_simple_unit_test);
   gt_hashmap_add(unit_tests, "codon iterator class, encoded",
                                             gt_codon_iterator_encseq_unit_test);
+  gt_hashmap_add(unit_tests, "combinatorics", gt_combinatorics_unit_test);
   gt_hashmap_add(unit_tests, "countingsort module", gt_countingsort_unit_test);
   gt_hashmap_add(unit_tests, "cstr table class", gt_cstr_table_unit_test);
   gt_hashmap_add(unit_tests, "cstr module", gt_cstr_unit_test);
