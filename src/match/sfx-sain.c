@@ -40,7 +40,6 @@ typedef struct
 {
   unsigned long totallength,
                 numofchars,
-                startoccupied,
                 currentround,
                 *bucketsize,
                 *bucketfillptr,
@@ -163,7 +162,6 @@ static GtSainseq *gt_sainseq_new_from_array(unsigned long *arr,
   sainseq->seq.array = arr;
   sainseq->totallength = len;
   sainseq->numofchars = numofchars;
-  sainseq->startoccupied = suftabentries;
   gt_assert(firstusable < suftabentries);
   if (suftabentries - firstusable >= numofchars)
   {
@@ -171,7 +169,6 @@ static GtSainseq *gt_sainseq_new_from_array(unsigned long *arr,
             suftabentries - numofchars,suftabentries-1);*/
     sainseq->bucketsize = suftab + suftabentries - numofchars;
     sainseq->bucketsizepoints2suftab = true;
-    sainseq->startoccupied = suftabentries - numofchars;
   } else
   {
     printf("bucketsize requires %lu entries and only %lu are left\n",
@@ -186,7 +183,6 @@ static GtSainseq *gt_sainseq_new_from_array(unsigned long *arr,
             suftabentries - numofchars -1);*/
     sainseq->bucketfillptr = suftab + suftabentries - GT_MULT2(numofchars);
     sainseq->bucketfillptrpoints2suftab = true;
-    sainseq->startoccupied = suftabentries - GT_MULT2(numofchars);
   } else
   {
     /*printf("bucketfillptr requires %lu entries and only %lu are left\n",
@@ -204,7 +200,6 @@ static GtSainseq *gt_sainseq_new_from_array(unsigned long *arr,
               suftabentries - GT_MULT2(numofchars) - 1);*/
       sainseq->roundtable = suftab + suftabentries - GT_MULT4(numofchars);
       sainseq->roundtablepoints2suftab = true;
-      sainseq->startoccupied = suftabentries - GT_MULT4(numofchars);
     } else
     {
       sainseq->roundtablepoints2suftab = false;
@@ -231,10 +226,8 @@ static GtSainseq *gt_sainseq_new_from_array(unsigned long *arr,
   return sainseq;
 }
 
-static unsigned long gt_sainseq_delete(GtSainseq *sainseq)
+static void gt_sainseq_delete(GtSainseq *sainseq)
 {
-  unsigned long ret = ULONG_MAX;
-
   if (sainseq != NULL)
   {
     if (!sainseq->bucketfillptrpoints2suftab)
@@ -249,19 +242,12 @@ static unsigned long gt_sainseq_delete(GtSainseq *sainseq)
     {
       gt_free(sainseq->roundtable);
     }
-    if (sainseq->bucketsizepoints2suftab ||
-        sainseq->bucketsizepoints2suftab ||
-        sainseq->roundtablepoints2suftab)
-    {
-      ret = sainseq->startoccupied;
-    }
     if (sainseq->seqtype != GT_SAIN_INTSEQ)
     {
       gt_free(sainseq->sstarfirstcharcount);
     }
     gt_free(sainseq);
   }
-  return ret;
 }
 
 static unsigned long gt_sain_countcharaccess = 0;
@@ -1524,8 +1510,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     {
     /* Now the name sequence is in the range from
        saininfo->countSstartype .. 2 * saininfo->countSstartype - 1 */
-      unsigned long startoccupied,
-                    *subseq = suftab + saininfo->countSstartype;
+      unsigned long *subseq = suftab + saininfo->countSstartype;
       GtSainseq *sainseq_rec;
 
       GT_SAIN_SHOWTIMER("movenames2front");
@@ -1554,7 +1539,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                                finalcheck,
                                verbose,
                                timer);
-      startoccupied = gt_sainseq_delete(sainseq_rec);
+      gt_sainseq_delete(sainseq_rec);
       GT_SAIN_SHOWTIMER("expandorder2original");
       gt_sain_expandorder2original(saininfo->sainseq,saininfo->countSstartype,
                                    suftab);
@@ -1645,7 +1630,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                            timer);
   printf("countcharaccess=%lu (%.2f)\n",gt_sain_countcharaccess,
           (double) gt_sain_countcharaccess/sainseq->totallength);
-  (void) gt_sainseq_delete(sainseq);
+  gt_sainseq_delete(sainseq);
   gt_free(suftab);
 }
 
@@ -1674,6 +1659,6 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                            timer);
   printf("countcharaccess=%lu (%.2f)\n",gt_sain_countcharaccess,
           (double) gt_sain_countcharaccess/sainseq->totallength);
-  (void) gt_sainseq_delete(sainseq);
+  gt_sainseq_delete(sainseq);
   gt_free(suftab);
 }
