@@ -21,22 +21,32 @@
 
 #include "core/error_api.h"
 
+/* Class <GtCompactUlongStore> stores fixed bit witdh unsigned integer. Maximum
+   bitwidth is sizeof(unsigned long) */
 typedef struct GtCompactUlongStore GtCompactUlongStore;
 
+/* Return a new <GtCompactUlongStore> object with <numofentries> elements of
+   <bitsperentry> bit width */
 GtCompactUlongStore *gt_compact_ulong_store_new(unsigned long numofentries,
                                                 unsigned int bitsperentry);
 
-void gt_compact_ulong_store_delete(GtCompactUlongStore *cus);
+/* Deletes <cus> object and frees all associated memory */
+void                 gt_compact_ulong_store_delete(GtCompactUlongStore *cus);
 
-size_t gt_compact_ulong_store_size(unsigned long numofentries,
-                                   unsigned int bitsperentry);
+/* Calculates the size in bytes for a <GtCompactUlongStore> with <numofentries>
+   elements of <bitsperentry> bit width */
+size_t               gt_compact_ulong_store_size(unsigned long numofentries,
+                                                 unsigned int bitsperentry);
 
-unsigned long gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
-                                         unsigned long idx);
+/* Return element stored in <cus> at position <idx> cast to unsigned long */
+unsigned long        gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
+                                                unsigned long idx);
 
-void gt_compact_ulong_store_update(GtCompactUlongStore *cus,
-                                   unsigned long idx,unsigned long value);
+/* Set element at position <idx> in <cus> to <value> */
+void                 gt_compact_ulong_store_update(GtCompactUlongStore *cus,
+                                                   unsigned long idx,
+                                                   unsigned long value);
 
-int gt_compact_ulong_store_unit_test(GtError *err);
+int                  gt_compact_ulong_store_unit_test(GtError *err);
 
 #endif
