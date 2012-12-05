@@ -42,6 +42,7 @@ GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
      code is used. Better use the 64-bit version by compiling with
      64bit=yes */
   gt_assert(numofentries <= ULONG_MAX/bitsperentry);
+  gt_assert(bitsperentry <= (unsigned int) GT_INTWORDSIZE);
   totalbits = numofentries * bitsperentry;
   cus = gt_malloc(sizeof (*cus));
   cus->numofentries = numofentries;
@@ -52,7 +53,6 @@ GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
   }
   cus->tab = gt_calloc((size_t) arraysize,sizeof (*cus->tab));
   cus->bitsperentry = bitsperentry;
-  gt_assert(bitsperentry <= (unsigned int) GT_INTWORDSIZE);
   cus->bitsleft = (unsigned int) GT_INTWORDSIZE - cus->bitsperentry;
   cus->maskright = ~0UL >> cus->bitsleft;
   return cus;
