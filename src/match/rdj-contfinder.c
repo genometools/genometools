@@ -21,7 +21,7 @@
 #include <errno.h>
 #include <string.h>
 #include "core/error_api.h"
-#include "core/compactulongstore.h"
+#include "core/compact_ulong_store.h"
 #include "core/encseq.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
@@ -41,17 +41,17 @@
 #include "match/rdj-contfinder.h"
 
 #ifdef GT_READJOINER_LARGE_READSET /* > 2^32 reads */
-typedef GtCompactUlongstore GtReadjoinerContfinderSeqnumsType;
+typedef GtCompactUlongStore GtReadjoinerContfinderSeqnumsType;
 typedef uint64_t gt_contfinder_seqnum_t;
 #define GT_READJOINER_CONTFINDER_ALLOC_SEQNUMS(ARR, NOFSEQS)\
-  (ARR) = gt_GtCompactulongstore_new((NOFSEQS),\
+  (ARR) = gt_compact_ulong_store_new((NOFSEQS),\
       gt_determinebitspervalue(NOFSEQS))
 #define GT_READJOINER_CONTFINDER_GET_SEQNUM(ARR, POS)\
-  gt_GtCompactulongstore_get((ARR), (POS))
+  gt_compact_ulong_store_get((ARR), (POS))
 #define GT_READJOINER_CONTFINDER_SET_SEQNUM(ARR, POS, VALUE) \
-  gt_GtCompactulongstore_update((ARR), (POS), (VALUE))
+  gt_compact_ulong_store_update((ARR), (POS), (VALUE))
 #define GT_READJOINER_CONTFINDER_FREE_SEQNUMS(ARR)\
-  gt_GtCompactulongstore_delete(ARR)
+  gt_compact_ulong_store_delete(ARR)
 #else
 typedef uint32_t GtReadjoinerContfinderSeqnumsType;
 typedef uint32_t gt_contfinder_seqnum_t;

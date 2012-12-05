@@ -16,27 +16,27 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COMPACTULONGSTORE_H
-#define COMPACTULONGSTORE_H
+#ifndef COMPACT_ULONG_STORE_H
+#define COMPACT_ULONG_STORE_H
 
 #include "core/error_api.h"
 
-typedef struct GtCompactUlongstore GtCompactUlongstore;
+typedef struct GtCompactUlongStore GtCompactUlongStore;
 
-GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
+GtCompactUlongStore *gt_compact_ulong_store_new(unsigned long numofentries,
                                                 unsigned int bitsperentry);
 
-void gt_GtCompactulongstore_delete(GtCompactUlongstore *cus);
+void gt_compact_ulong_store_delete(GtCompactUlongStore *cus);
 
-size_t gt_GtCompactulongstore_size(unsigned long numofentries,
+size_t gt_compact_ulong_store_size(unsigned long numofentries,
                                    unsigned int bitsperentry);
 
-unsigned long gt_GtCompactulongstore_get(const GtCompactUlongstore *cus,
+unsigned long gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
                                          unsigned long idx);
 
-void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
+void gt_compact_ulong_store_update(GtCompactUlongStore *cus,
                                    unsigned long idx,unsigned long value);
 
-int gt_GtCompactulongstore_unit_test(GtError *err);
+int gt_compact_ulong_store_unit_test(GtError *err);
 
 #endif

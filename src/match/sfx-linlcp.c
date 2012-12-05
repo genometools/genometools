@@ -22,7 +22,7 @@
 #include "core/range.h"
 #include "core/mathsupport.h"
 #include "core/logger.h"
-#include "core/compactulongstore.h"
+#include "core/compact_ulong_store.h"
 #include "esa-seqread.h"
 #include "sarr-def.h"
 #include "sfx-linlcp.h"
@@ -32,7 +32,7 @@ unsigned long *gt_lcp13_manzini(const GtEncseq *encseq,
                                 unsigned long partwidth,
                                 unsigned long totallength,
                                 const ESASuffixptr *suftab,
-                                GtCompactUlongstore *inversesuftab)
+                                GtCompactUlongStore *inversesuftab)
 {
   unsigned long pos, lcpvalue = 0, *lcptab;
 
@@ -40,7 +40,7 @@ unsigned long *gt_lcp13_manzini(const GtEncseq *encseq,
   lcptab[0] = 0;
   for (pos=0; pos <= totallength; pos++)
   {
-    unsigned long fillpos = gt_GtCompactulongstore_get(inversesuftab,pos);
+    unsigned long fillpos = gt_compact_ulong_store_get(inversesuftab,pos);
     if (fillpos > 0 && fillpos < partwidth)
     {
       unsigned long previousstart = ESASUFFIXPTRGET(suftab,fillpos-1);
@@ -105,7 +105,7 @@ static unsigned long *computeocclesstab(const GtEncseq *encseq,
    we obtain these values by the following function:
 */
 
-static void setrelevantfrominversetab(GtCompactUlongstore *rightposinverse,
+static void setrelevantfrominversetab(GtCompactUlongStore *rightposinverse,
                                       const GtEncseq *encseq,
                                       GtReadmode readmode,
                                       const ESASuffixptr *suftab,
@@ -123,7 +123,7 @@ static void setrelevantfrominversetab(GtCompactUlongstore *rightposinverse,
         GtUchar cc = gt_encseq_get_encoded_char(encseq,pos-1,readmode);
         if (ISSPECIAL(cc))
         {
-          gt_GtCompactulongstore_update(rightposinverse,pos,idx);
+          gt_compact_ulong_store_update(rightposinverse,pos,idx);
         }
       }
     }
@@ -131,7 +131,7 @@ static void setrelevantfrominversetab(GtCompactUlongstore *rightposinverse,
 }
 
 static unsigned long *fillrightofpartwidth(
-                                     const GtCompactUlongstore *rightposinverse,
+                                     const GtCompactUlongStore *rightposinverse,
                                      const GtEncseq *encseq,
                                      GtReadmode readmode,
                                      unsigned long partwidth,
@@ -166,7 +166,7 @@ static unsigned long *fillrightofpartwidth(
       }
       gt_assert(nextrightofpartwidth < countlargeranges);
       rightofpartwidth[nextrightofpartwidth++]
-        = gt_GtCompactulongstore_get(rightposinverse,range.end);
+        = gt_compact_ulong_store_get(rightposinverse,range.end);
     }
   }
   gt_specialrangeiterator_delete(sri);
@@ -174,8 +174,8 @@ static unsigned long *fillrightofpartwidth(
 }
 
 static void inversesuffixarray2specialranknext(
-                         const GtCompactUlongstore *rightposinverse,
-                         GtCompactUlongstore *ranknext,
+                         const GtCompactUlongStore *rightposinverse,
+                         GtCompactUlongStore *ranknext,
                          const GtEncseq *encseq,
                          GtReadmode readmode,
                          unsigned long partwidth,
@@ -207,19 +207,19 @@ static void inversesuffixarray2specialranknext(
       for (idx = range.start; idx < range.end-1; idx++)
       {
         gt_assert(specialranklistindex < totallength);
-        gt_GtCompactulongstore_update(ranknext,specialranklistindex,
+        gt_compact_ulong_store_update(ranknext,specialranklistindex,
                                       specialranklistindex + 1);
         specialranklistindex++;
       }
       gt_assert(specialranklistindex < totallength);
       if (range.end < partwidth)
       {
-        gt_GtCompactulongstore_update(ranknext,specialranklistindex,
-                                      gt_GtCompactulongstore_get(
+        gt_compact_ulong_store_update(ranknext,specialranklistindex,
+                                      gt_compact_ulong_store_get(
                                              rightposinverse,range.end));
       } else
       {
-        gt_GtCompactulongstore_update(ranknext,specialranklistindex,
+        gt_compact_ulong_store_update(ranknext,specialranklistindex,
                                       rightofpartwidth[nextrightofpartwidth]);
         nextrightofpartwidth++;
       }
@@ -231,7 +231,7 @@ static void inversesuffixarray2specialranknext(
   }
 }
 
-static unsigned long sa2ranknext(GtCompactUlongstore *ranknext,
+static unsigned long sa2ranknext(GtCompactUlongStore *ranknext,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  unsigned long partwidth,
@@ -254,7 +254,7 @@ static unsigned long sa2ranknext(GtCompactUlongstore *ranknext,
       if (ISNOTSPECIAL(cc))
       {
         gt_assert(occless[cc] < partwidth);
-        gt_GtCompactulongstore_update(ranknext,occless[cc],idx);
+        gt_compact_ulong_store_update(ranknext,occless[cc],idx);
         occless[cc]++;
       }
     } else
@@ -285,7 +285,7 @@ static unsigned long sa2ranknext(GtCompactUlongstore *ranknext,
         if (ISNOTSPECIAL(cc))
         {
           gt_assert(occless[cc] < partwidth);
-          gt_GtCompactulongstore_update(ranknext, occless[cc], specialidx);
+          gt_compact_ulong_store_update(ranknext, occless[cc], specialidx);
           occless[cc]++;
         }
       } else
@@ -299,7 +299,7 @@ static unsigned long sa2ranknext(GtCompactUlongstore *ranknext,
         (!GT_ISDIRREVERSE(readmode) &&
          gt_encseq_lengthofspecialsuffix(encseq) > 0))
     {
-      gt_GtCompactulongstore_update(ranknext,totallength-1,totallength);
+      gt_compact_ulong_store_update(ranknext,totallength-1,totallength);
     }
     gt_specialrangeiterator_delete(sri);
   }
@@ -307,7 +307,7 @@ static unsigned long sa2ranknext(GtCompactUlongstore *ranknext,
   return longest;
 }
 
-GtCompactUlongstore *gt_lcp9_manzini(GtCompactUlongstore *spacefortab,
+GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  unsigned long partwidth,
@@ -316,7 +316,7 @@ GtCompactUlongstore *gt_lcp9_manzini(GtCompactUlongstore *spacefortab,
 {
   unsigned long pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0,
                 previouscc1pos, previouscc2pos;
-  GtCompactUlongstore *lcptab, *ranknext, *rightposinverse;
+  GtCompactUlongStore *lcptab, *ranknext, *rightposinverse;
   GtUchar cc1, cc2;
   GtEncseqReader *esr1, *esr2;
 
@@ -324,8 +324,8 @@ GtCompactUlongstore *gt_lcp9_manzini(GtCompactUlongstore *spacefortab,
   {
     unsigned int bitsperentry = gt_determinebitspervalue(totallength);
     rightposinverse = ranknext
-                    = gt_GtCompactulongstore_new(totallength+1,bitsperentry);
-    gt_GtCompactulongstore_update(ranknext,totallength,totallength);
+                    = gt_compact_ulong_store_new(totallength+1,bitsperentry);
+    gt_compact_ulong_store_update(ranknext,totallength,totallength);
     setrelevantfrominversetab(rightposinverse,encseq,readmode,suftab,
                               partwidth);
   } else
@@ -354,7 +354,7 @@ GtCompactUlongstore *gt_lcp9_manzini(GtCompactUlongstore *spacefortab,
   {
     if (pos < totallength - 1)
     {
-      nextfillpos = gt_GtCompactulongstore_get(ranknext,fillpos);
+      nextfillpos = gt_compact_ulong_store_get(ranknext,fillpos);
     }
     if (fillpos > 0 && fillpos - 1 < partwidth)
     {
@@ -396,7 +396,7 @@ GtCompactUlongstore *gt_lcp9_manzini(GtCompactUlongstore *spacefortab,
         }
         lcpvalue++;
       }
-      gt_GtCompactulongstore_update(lcptab,fillpos,lcpvalue);
+      gt_compact_ulong_store_update(lcptab,fillpos,lcpvalue);
       if (lcpvalue > 0)
       {
         lcpvalue--;
@@ -709,7 +709,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
   Sequentialsuffixarrayreader *ssar;
   unsigned long partwidth, totallength = gt_encseq_total_length(encseq),
                 idx, specials = gt_encseq_specialcharacters(encseq);
-  GtCompactUlongstore *lcptab = NULL;
+  GtCompactUlongStore *lcptab = NULL;
 
   gt_assert(specials <= totallength);
   partwidth = totallength - specials;
@@ -748,7 +748,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
     }
     if (idx < partwidth)
     {
-      mlcpvalue = gt_GtCompactulongstore_get(lcptab,idx);
+      mlcpvalue = gt_compact_ulong_store_get(lcptab,idx);
     } else
     {
       mlcpvalue = 0;
@@ -765,6 +765,6 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
   {
     gt_freeSequentialsuffixarrayreader(&ssar);
   }
-  gt_GtCompactulongstore_delete(lcptab);
+  gt_compact_ulong_store_delete(lcptab);
   return haserr ? -1 : 0;
 }

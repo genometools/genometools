@@ -21,9 +21,9 @@
 #include "mathsupport.h"
 #include "ensure.h"
 #include "assert_api.h"
-#include "compactulongstore.h"
+#include "compact_ulong_store.h"
 
-struct GtCompactUlongstore
+struct GtCompactUlongStore
 {
   unsigned long *tab,
                 numofentries,
@@ -32,10 +32,10 @@ struct GtCompactUlongstore
                bitsleft;
 };
 
-GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
+GtCompactUlongStore *gt_compact_ulong_store_new(unsigned long numofentries,
                                                 unsigned int bitsperentry)
 {
-  GtCompactUlongstore *cus;
+  GtCompactUlongStore *cus;
   unsigned long arraysize, totalbits;
 
   /* if this assertion appears, then probably the 32-bit version of the
@@ -58,7 +58,7 @@ GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
   return cus;
 }
 
-size_t gt_GtCompactulongstore_size(unsigned long numofentries,
+size_t gt_compact_ulong_store_size(unsigned long numofentries,
                                    unsigned int bitsperentry)
 {
   unsigned long arraysize, totalbits;
@@ -73,10 +73,10 @@ size_t gt_GtCompactulongstore_size(unsigned long numofentries,
   {
     arraysize++;
   }
-  return sizeof (GtCompactUlongstore) + sizeof (unsigned long) * arraysize;
+  return sizeof (GtCompactUlongStore) + sizeof (unsigned long) * arraysize;
 }
 
-void gt_GtCompactulongstore_delete(GtCompactUlongstore *cus)
+void gt_compact_ulong_store_delete(GtCompactUlongStore *cus)
 {
   if (cus != NULL)
   {
@@ -85,7 +85,7 @@ void gt_GtCompactulongstore_delete(GtCompactUlongstore *cus)
   }
 }
 
-unsigned long gt_GtCompactulongstore_get(const GtCompactUlongstore *cus,
+unsigned long gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
                                          unsigned long idx)
 {
   unsigned int unitoffset;
@@ -111,7 +111,7 @@ unsigned long gt_GtCompactulongstore_get(const GtCompactUlongstore *cus,
   }
 }
 
-void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
+void gt_compact_ulong_store_update(GtCompactUlongStore *cus,
                                    unsigned long idx,unsigned long value)
 {
   unsigned int unitoffset;
@@ -141,9 +141,9 @@ void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
   }
 }
 
-int gt_GtCompactulongstore_unit_test(GtError *err)
+int gt_compact_ulong_store_unit_test(GtError *err)
 {
-  GtCompactUlongstore *cus;
+  GtCompactUlongStore *cus;
   const unsigned long constnums = 100000UL;
   unsigned int bits;
   unsigned long value, nums, idx, numforbits, *checknumbers;
@@ -154,20 +154,20 @@ int gt_GtCompactulongstore_unit_test(GtError *err)
   {
     numforbits = 1UL << bits;
     nums = numforbits < constnums ? numforbits : constnums;
-    cus = gt_GtCompactulongstore_new(nums,bits);
+    cus = gt_compact_ulong_store_new(nums,bits);
     for (idx = 0; idx < nums; idx++)
     {
       checknumbers[idx] = nums == constnums ? gt_rand_max(numforbits-1) : idx;
-      gt_GtCompactulongstore_update(cus,idx,checknumbers[idx]);
-      value = gt_GtCompactulongstore_get(cus,idx);
+      gt_compact_ulong_store_update(cus,idx,checknumbers[idx]);
+      value = gt_compact_ulong_store_get(cus,idx);
       gt_ensure(had_err,checknumbers[idx] == value);
     }
     for (idx = 0; had_err == 0 && idx < nums; idx++)
     {
-      value = gt_GtCompactulongstore_get(cus,idx);
+      value = gt_compact_ulong_store_get(cus,idx);
       gt_ensure(had_err,checknumbers[idx] == value);
     }
-    gt_GtCompactulongstore_delete(cus);
+    gt_compact_ulong_store_delete(cus);
   }
   gt_free(checknumbers);
   return had_err;

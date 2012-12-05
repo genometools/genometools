@@ -19,10 +19,10 @@
 #define SFX_LINLCP_H
 
 #include "core/encseq.h"
-#include "core/compactulongstore.h"
+#include "core/compact_ulong_store.h"
 #include "match/sarr-def.h"
 
-GtCompactUlongstore *gt_lcp9_manzini(GtCompactUlongstore *spacefortab,
+GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  unsigned long partwidth,

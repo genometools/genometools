@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/combinatorics.h"
-#include "core/compactulongstore.h"
+#include "core/compact_ulong_store.h"
 #include "core/error_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"
@@ -27,7 +27,7 @@
 
 struct GtPopcountTab
 {
-  GtCompactUlongstore *blocks;
+  GtCompactUlongStore *blocks;
   unsigned long *offsets;
 };
 
@@ -72,13 +72,13 @@ static unsigned long perm_start(unsigned char bits)
 
 static unsigned long gen_blocks(unsigned char popcount, unsigned long idx,
                                 unsigned long blockmask,
-                                GtCompactUlongstore *blocks)
+                                GtCompactUlongStore *blocks)
 {
   unsigned long v, init;
 
   v = init = perm_start(popcount);
   while (v >= init) {
-    gt_GtCompactulongstore_update(blocks, idx++, v);
+    gt_compact_ulong_store_update(blocks, idx++, v);
     if (popcount == 1U)
       v = (v << 1) & blockmask;
     else
@@ -87,18 +87,18 @@ static unsigned long gen_blocks(unsigned char popcount, unsigned long idx,
   return idx;
 }
 
-static unsigned long init_blocks_tab(GtCompactUlongstore *blocks,
+static unsigned long init_blocks_tab(GtCompactUlongStore *blocks,
                                      unsigned char blocksize)
 {
   unsigned long idx = 1UL,
                 blockmask;
   unsigned char popcount = (unsigned char)1;
   blockmask = perm_start(blocksize);
-  gt_GtCompactulongstore_update(blocks, 0, 0);
+  gt_compact_ulong_store_update(blocks, 0, 0);
   while (popcount < blocksize) {
     idx = gen_blocks(popcount++, idx, blockmask, blocks);
   }
-  gt_GtCompactulongstore_update(blocks, idx++, blockmask);
+  gt_compact_ulong_store_update(blocks, idx++, blockmask);
   return idx;
 }
 
@@ -109,7 +109,7 @@ GtPopcountTab *gt_popcount_tab_new(unsigned char blocksize)
   GT_UNUSED unsigned long idx_check;
   gt_assert(blocksize <= (unsigned char) GT_INTWORDSIZE);
   popcount_tab = gt_malloc(sizeof (GtPopcountTab));
-  popcount_tab->blocks = gt_GtCompactulongstore_new(num_of_blocks, blocksize);
+  popcount_tab->blocks = gt_compact_ulong_store_new(num_of_blocks, blocksize);
   popcount_tab->offsets = gt_malloc(sizeof (popcount_tab->offsets) * blocksize);
   init_offset_tab(popcount_tab->offsets, blocksize, num_of_blocks);
   idx_check = init_blocks_tab(popcount_tab->blocks, blocksize);
@@ -121,7 +121,7 @@ void gt_popcount_tab_delete(GtPopcountTab *popcount_tab)
 {
   if (popcount_tab != NULL) {
     gt_free(popcount_tab->offsets);
-    gt_GtCompactulongstore_delete(popcount_tab->blocks);
+    gt_compact_ulong_store_delete(popcount_tab->blocks);
     gt_free(popcount_tab);
   }
 }

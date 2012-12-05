@@ -30,7 +30,7 @@
 #include "core/codon_iterator_simple.h"
 #include "core/colorspace.h"
 #include "core/combinatorics.h"
-#include "core/compactulongstore.h"
+#include "core/compact_ulong_store.h"
 #include "core/countingsort.h"
 #include "core/cstr.h"
 #include "core/cstr_table.h"
@@ -245,7 +245,7 @@ GtHashmap* gtt_unit_tests(void)
   /* add unit tests */
 
   gt_hashmap_add(unit_tests, "compactulongstore class",
-                                              gt_GtCompactulongstore_unit_test);
+                                              gt_compact_ulong_store_unit_test);
   gt_hashmap_add(unit_tests, "alphabet class", gt_alphabet_unit_test);
   gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
   gt_hashmap_add(unit_tests, "array class", gt_array_unit_test);

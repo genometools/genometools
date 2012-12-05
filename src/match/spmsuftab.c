@@ -40,7 +40,7 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
                          "(%u bits each,%lu bytes total)",
                          numofentries,bitsforpositions,required);
     spmsuftab->bitpackarray
-      = gt_GtCompactulongstore_new(numofentries,bitsforpositions);
+      = gt_compact_ulong_store_new(numofentries,bitsforpositions);
     spmsuftab->usebitsforpositions = true;
     spmsuftab->maxvalue = maxvalue;
   } else
@@ -49,7 +49,7 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
                          "seqnum/relpos-pairs (%u bits each,%lu bytes total)",
                          numofentries,bitsforseqnumrelpos,required);
     spmsuftab->bitpackarray
-      = gt_GtCompactulongstore_new(numofentries,bitsforseqnumrelpos);
+      = gt_compact_ulong_store_new(numofentries,bitsforseqnumrelpos);
     spmsuftab->usebitsforpositions = false;
     spmsuftab->maxvalue = (1UL << bitsforseqnumrelpos) - 1;
   }
@@ -62,7 +62,7 @@ void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab)
 {
   if (spmsuftab != NULL)
   {
-    gt_GtCompactulongstore_delete(spmsuftab->bitpackarray);
+    gt_compact_ulong_store_delete(spmsuftab->bitpackarray);
     gt_free(spmsuftab);
   }
 }
@@ -84,6 +84,6 @@ size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
   unsigned int bitsforpositions = gt_determinebitspervalue(maxvalue);
 
   return sizeof (GtSpmsuftab) +
-         gt_GtCompactulongstore_size(numofentries,
+         gt_compact_ulong_store_size(numofentries,
                                      MIN(bitsforpositions,bitsforseqnumrelpos));
 }

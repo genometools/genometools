@@ -20,13 +20,13 @@
 
 #include "core/unused_api.h"
 #include "core/logger_api.h"
-#include "core/compactulongstore.h"
+#include "core/compact_ulong_store.h"
 
 typedef struct
 {
   unsigned long partoffset, numofentries, maxvalue;
   bool usebitsforpositions;
-  GtCompactUlongstore *bitpackarray;
+  GtCompactUlongStore *bitpackarray;
 } GtSpmsuftab;
 
 GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
@@ -37,7 +37,7 @@ GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
   idx -= spmsuftab->partoffset;
   gt_assert(idx < spmsuftab->numofentries && value <= spmsuftab->maxvalue);
   gt_assert(spmsuftab->bitpackarray != NULL);
-  gt_GtCompactulongstore_update(spmsuftab->bitpackarray,idx,value);
+  gt_compact_ulong_store_update(spmsuftab->bitpackarray,idx,value);
 }
 
 GT_UNUSED static inline unsigned long gt_spmsuftab_get(
@@ -47,7 +47,7 @@ GT_UNUSED static inline unsigned long gt_spmsuftab_get(
   gt_assert(idx >= spmsuftab->partoffset);
   idx -= spmsuftab->partoffset;
   gt_assert(idx < spmsuftab->numofentries);
-  return gt_GtCompactulongstore_get(spmsuftab->bitpackarray,idx);
+  return gt_compact_ulong_store_get(spmsuftab->bitpackarray,idx);
 }
 
 GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
