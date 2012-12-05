@@ -18,9 +18,25 @@
 #ifndef POPCOUNT_TAB_H
 #define POPCOUNT_TAB_H
 
+/* Class <GtPopcountTab> stores a table of unsigned values of fixed bit width
+   sorted by popcount value. Values are sorted by increasing value within one
+   popcount class. */
 typedef struct GtPopcountTab GtPopcountTab;
 
+/* Returns <GtPopcountTab> object with tables for unsigned values of <blocksize>
+   bit width */
 GtPopcountTab *gt_popcount_tab_new(unsigned char blocksize) ;
+
+/* Deletes <popcount_tab> and frees all associated memory */
 void gt_popcount_tab_delete(GtPopcountTab *popcount_tab);
 
+/* Return unsigned long with <popcount> bits, there might be more than one value
+   with that <popcount>, <offset> defines which to return, <offset> = 0 beeing
+   the smallest value. <offset> has to be in range
+   0..(blocksize choose popcount) */
+unsigned long gt_popcount_tab_get(GtPopcountTab *popcount_tab,
+                                  unsigned char popcount,
+                                  unsigned long offset);
+
+int gt_popcount_tab_unit_test(GtError *err);
 #endif

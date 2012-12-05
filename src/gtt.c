@@ -64,6 +64,7 @@
 #include "extended/hmm.h"
 #include "extended/huffman.h"
 #include "extended/luaserialize.h"
+#include "extended/popcount_tab.h"
 #include "extended/ranked_list.h"
 #include "extended/rbtree.h"
 #include "extended/rmq.h"
@@ -265,10 +266,11 @@ GtHashmap* gtt_unit_tests(void)
                                             gt_codon_iterator_simple_unit_test);
   gt_hashmap_add(unit_tests, "codon iterator class, encoded",
                                             gt_codon_iterator_encseq_unit_test);
+  gt_hashmap_add(unit_tests, "color space module", gt_colorspace_unit_test);
   gt_hashmap_add(unit_tests, "combinatorics", gt_combinatorics_unit_test);
   gt_hashmap_add(unit_tests, "countingsort module", gt_countingsort_unit_test);
-  gt_hashmap_add(unit_tests, "cstr table class", gt_cstr_table_unit_test);
   gt_hashmap_add(unit_tests, "cstr module", gt_cstr_unit_test);
+  gt_hashmap_add(unit_tests, "cstr table class", gt_cstr_table_unit_test);
   gt_hashmap_add(unit_tests, "description buffer class",
                                                       gt_desc_buffer_unit_test);
   gt_hashmap_add(unit_tests, "disc distri class", gt_disc_distri_unit_test);
@@ -276,10 +278,11 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "dlist example", gt_dlist_example);
   gt_hashmap_add(unit_tests, "dynamic bittab class", gt_dynbittab_unit_test);
   gt_hashmap_add(unit_tests, "elias gamma class", gt_elias_gamma_unit_test);
-  gt_hashmap_add(unit_tests, "evaluator class", gt_evaluator_unit_test);
   gt_hashmap_add(unit_tests, "encdesc class", gt_encdesc_unit_test);
   gt_hashmap_add(unit_tests, "encseq builder class",
                                                    gt_encseq_builder_unit_test);
+  gt_hashmap_add(unit_tests, "encseq gc module", gt_encseq_gc_unit_test);
+  gt_hashmap_add(unit_tests, "evaluator class", gt_evaluator_unit_test);
   gt_hashmap_add(unit_tests, "feature node iterator example",
                                              gt_feature_node_iterator_example);
   gt_hashmap_add(unit_tests, "feature node class", gt_feature_node_unit_test);
@@ -300,17 +303,19 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
   gt_hashmap_add(unit_tests, "rdj: suffix-prefix matches list module",
                                                           gt_spmlist_unit_test);
-  gt_hashmap_add(unit_tests, "rdj: string graph class", gt_strgraph_unit_test);
-  gt_hashmap_add(unit_tests, "PPT finder module", gt_ppt_unit_test);
   gt_hashmap_add(unit_tests, "PBS finder module", gt_pbs_unit_test);
-  gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
+  gt_hashmap_add(unit_tests, "PPT finder module", gt_ppt_unit_test);
+  gt_hashmap_add(unit_tests, "popcount sorted tab", gt_popcount_tab_unit_test);
   gt_hashmap_add(unit_tests, "quality module", gt_quality_unit_test);
+  gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
   gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);
   gt_hashmap_add(unit_tests, "ranked list class", gt_ranked_list_unit_test);
   gt_hashmap_add(unit_tests, "red-black tree class", gt_rbtree_unit_test);
   gt_hashmap_add(unit_tests, "range minimum query class", gt_rmq_unit_test);
-  gt_hashmap_add(unit_tests, "safearith module", gt_safearith_unit_test);
+  gt_hashmap_add(unit_tests, "rdj: string graph class", gt_strgraph_unit_test);
+  gt_hashmap_add(unit_tests, "red-black tree class", gt_rbtree_unit_test);
   gt_hashmap_add(unit_tests, "safearith example", gt_safearith_example);
+  gt_hashmap_add(unit_tests, "safearith module", gt_safearith_unit_test);
   gt_hashmap_add(unit_tests, "sequence buffer class",
                                                   gt_sequence_buffer_unit_test);
   gt_hashmap_add(unit_tests, "splicedseq class", gt_splicedseq_unit_test);
@@ -323,8 +328,6 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
   gt_hashmap_add(unit_tests, "translator class", gt_translator_unit_test);
-  gt_hashmap_add(unit_tests, "encseq gc module", gt_encseq_gc_unit_test);
-  gt_hashmap_add(unit_tests, "color space module", gt_colorspace_unit_test);
   gt_hashmap_add(unit_tests, "uint64hashtable", gt_uint64hashtable_unit_test);
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);

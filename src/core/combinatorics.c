@@ -22,6 +22,7 @@
 #include "core/array2dim_api.h"
 #include "core/combinatorics.h"
 #include "core/divmodmul.h"
+#include "core/ensure.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
@@ -79,6 +80,10 @@ void gt_combinatorics_clean(void)
 static inline unsigned long binomialCoeff_dp_rec(unsigned long n,
                                                  unsigned long k)
 {
+  if (k == 0 || n <= k)
+    return 1UL;
+  if (n == 0)
+    return 0;
   if (binomial_dp_tab[n][k] == UNDEFTABVALUE) {
     if (binomial_dp_tab[n - 1][k - 1] == UNDEFTABVALUE)
       binomial_dp_tab[n - 1][k - 1] = binomialCoeff_dp_rec(n - 1, k - 1);
@@ -143,22 +148,24 @@ unsigned long gt_binomialCoeff(unsigned long n, unsigned long k)
   return result;
 }
 
-int gt_combinatorics_unit_test(GT_UNUSED GtError *err)
+int gt_combinatorics_unit_test(GtError *err)
 {
+  int had_err = 0;
   unsigned long n,k;
   static const unsigned long max_n = GT_BINOMIAL_MAX_N,
                              max_fac_stable = 47UL;
+  gt_error_check(err);
   for (n = 0; n <= max_n; n++) {
     for (k = 0; k <= GT_DIV2(n); k++) {
       unsigned long a = gt_binomialCoeff_dp(n, k),
                     b = gt_binomialCoeff(n, k),
                     c;
-      gt_assert(a == b);
+      gt_ensure(had_err, a == b);
       if (n < max_fac_stable) {
         c = gt_binomialCoeff_with_ln(n,k);
-        gt_assert(c == a);
+        gt_ensure(had_err, c == a);
       }
     }
   }
-  return 0;
+  return had_err;
 }
