@@ -48,6 +48,8 @@ unsigned       gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
                                       unsigned popcount_c,
                                       unsigned long offset,
                                       unsigned pos);
+
+/* Return size of a <GtPopcountTab> with <blocksize> in bytes */
 size_t         gt_popcount_tab_get_size(unsigned blocksize);
 
 int            gt_popcount_tab_unit_test(GtError *err);
