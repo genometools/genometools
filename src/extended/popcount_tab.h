@@ -18,27 +18,37 @@
 #ifndef POPCOUNT_TAB_H
 #define POPCOUNT_TAB_H
 
-/* Class <GtPopcountTab> stores a table of unsigned values of fixed bit width
-   sorted by popcount value. Values are sorted by increasing value within one
-   popcount class. */
+/* Class <GtPopcountTab> stores a table of unsigned long values of fixed bit
+   width sorted by popcount value. Values are sorted by increasing value within
+   one popcount class. */
 typedef struct GtPopcountTab GtPopcountTab;
 
-/* Returns <GtPopcountTab> object with tables for unsigned values of <blocksize>
-   bit width */
-GtPopcountTab* gt_popcount_tab_new(unsigned char blocksize) ;
+/* Returns <GtPopcountTab> object with tables for unsigned long values of
+   <blocksize> bit width */
+GtPopcountTab* gt_popcount_tab_new(unsigned blocksize) ;
 
 /* Deletes <popcount_tab> and frees all associated memory */
 void           gt_popcount_tab_delete(GtPopcountTab *popcount_tab);
 
-/* Return unsigned long with <popcount> bits, there might be more than one value
-   with that <popcount>, <offset> defines which to return, <offset> = 0 beeing
-   the smallest value. <offset> has to be in range
+/* Return unsigned long with <popcount_c> bits, there might be more than one
+   value with that <popcount_c>, <offset> defines which to return, <offset> = 0
+   beeing the smallest value. <offset> has to be in range
    0..(blocksize choose popcount) */
 unsigned long  gt_popcount_tab_get(GtPopcountTab *popcount_tab,
-                                  unsigned char popcount,
+                                  unsigned popcount_c,
                                   unsigned long offset);
 
-size_t         gt_popcount_tab_get_size(unsigned char blocksize);
+/* Return rank of 1s or 0s in block given by <popcount_c> and <offset> up to
+   (including) <pos>. <pos> <= blocksize of <popcount_tab>. */
+unsigned       gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
+                                      unsigned popcount_c,
+                                      unsigned long offset,
+                                      unsigned pos);
+unsigned       gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
+                                      unsigned popcount_c,
+                                      unsigned long offset,
+                                      unsigned pos);
+size_t         gt_popcount_tab_get_size(unsigned blocksize);
 
 int            gt_popcount_tab_unit_test(GtError *err);
 #endif

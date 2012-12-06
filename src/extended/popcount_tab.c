@@ -26,9 +26,78 @@
 #include "core/unused_api.h"
 #include "extended/popcount_tab.h"
 
+#ifdef POPCOUNT_TL
+static const uint8_t B1CntBytes[] = {
+  0, (uint8_t) 1, (uint8_t) 1, (uint8_t) 2,
+  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
+  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
+  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
+  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
+  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
+  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
+  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 7, (uint8_t) 7, (uint8_t) 8
+};
+#endif
+
 struct GtPopcountTab
 {
-  unsigned char blocksize;
+  unsigned blocksize;
   unsigned long num_of_blocks;
   GtCompactUlongStore *blocks;
   unsigned long *offsets;
@@ -38,7 +107,7 @@ static void init_offset_tab(GtPopcountTab *popcount_tab)
 {
   unsigned long idx, class_size,
                 *offsets = popcount_tab->offsets,
-                blocksize = popcount_tab->blocksize,
+                blocksize = (unsigned long) popcount_tab->blocksize,
                 num_of_blocks = popcount_tab->num_of_blocks;
 
   offsets[0] = 1UL;
@@ -69,21 +138,21 @@ static unsigned long next_perm(unsigned long v)
   return head | tail;
 }
 
-static unsigned long perm_start(unsigned char bits)
+static unsigned long perm_start(unsigned bits)
 {
   return (1UL << bits) - 1;
 }
 
-static unsigned long gen_blocks(unsigned char popcount, unsigned long idx,
+static unsigned long gen_blocks(unsigned popcount_c, unsigned long idx,
                                 unsigned long blockmask,
                                 GtCompactUlongStore *blocks)
 {
   unsigned long v, init;
 
-  v = init = perm_start(popcount);
+  v = init = perm_start(popcount_c);
   while (v >= init) {
     gt_compact_ulong_store_update(blocks, idx++, v);
-    if (popcount == 1U)
+    if (popcount_c == 1U)
       v = (v << 1) & blockmask;
     else
       v = next_perm(v) & blockmask;
@@ -92,25 +161,25 @@ static unsigned long gen_blocks(unsigned char popcount, unsigned long idx,
 }
 
 static unsigned long init_blocks_tab(GtCompactUlongStore *blocks,
-                                     unsigned char blocksize)
+                                     unsigned blocksize)
 {
   unsigned long idx = 1UL,
                 blockmask;
-  unsigned char popcount = (unsigned char)1;
+  unsigned popcount_c = 1U;
   blockmask = perm_start(blocksize);
   gt_compact_ulong_store_update(blocks, 0, 0);
-  while (popcount < blocksize) {
-    idx = gen_blocks(popcount++, idx, blockmask, blocks);
+  while (popcount_c < blocksize) {
+    idx = gen_blocks(popcount_c++, idx, blockmask, blocks);
   }
   gt_compact_ulong_store_update(blocks, idx++, blockmask);
   return idx;
 }
 
-GtPopcountTab *gt_popcount_tab_new(unsigned char blocksize)
+GtPopcountTab *gt_popcount_tab_new(unsigned blocksize)
 {
   GtPopcountTab *popcount_tab;
   GT_UNUSED unsigned long idx_check;
-  gt_assert(blocksize <= (unsigned char) GT_INTWORDSIZE);
+  gt_assert(blocksize <= (unsigned) GT_INTWORDSIZE);
   popcount_tab = gt_malloc(sizeof (GtPopcountTab));
   popcount_tab->num_of_blocks = 1UL << blocksize;
   popcount_tab->blocksize = blocksize;
@@ -133,55 +202,154 @@ void gt_popcount_tab_delete(GtPopcountTab *popcount_tab)
 }
 
 unsigned long gt_popcount_tab_get(GtPopcountTab *popcount_tab,
-                                  unsigned char popcount,
+                                  unsigned popcount_c,
                                   unsigned long offset) {
-  gt_assert(popcount <= popcount_tab->blocksize);
-  if (popcount == 0) {
+  gt_assert(popcount_c <= popcount_tab->blocksize);
+  if (popcount_c == 0) {
     gt_assert(offset == 0);
     return 0;
   }
-  if (popcount < popcount_tab->blocksize)
-    gt_assert(offset < popcount_tab->offsets[popcount] -
-                       popcount_tab->offsets[popcount - 1]);
+  if (popcount_c < popcount_tab->blocksize)
+    gt_assert(offset < popcount_tab->offsets[popcount_c] -
+                       popcount_tab->offsets[popcount_c - 1]);
   else
     gt_assert(offset == 0);
   return gt_compact_ulong_store_get(popcount_tab->blocks,
-                                    popcount_tab->offsets[popcount - 1] +
+                                    popcount_tab->offsets[popcount_c - 1] +
                                       offset);
 }
 
-size_t gt_popcount_tab_get_size(unsigned char blocksize) {
+size_t gt_popcount_tab_get_size(unsigned blocksize) {
   unsigned long num_of_blocks = 1UL << blocksize;
   size_t size = gt_compact_ulong_store_size(num_of_blocks, blocksize);
   size += sizeof (GtPopcountTab);
-  size += blocksize * sizeof (unsigned long);
+  size += sizeof (unsigned long) * blocksize;
   return size;
+}
+
+static inline unsigned popcount(unsigned long val)
+{
+// see page 11, Knuth TAOCP Vol 4 F1A
+{
+  uint64_t x = (uint64_t) val;
+#ifdef __SSE4_2__
+  return __builtin_popcountll(val);
+#else
+#ifdef POPCOUNT_TL
+  return (unsigned long)
+         B1CntBytes[x         & 0xFFULL] +
+         B1CntBytes[(x >>  8) & 0xFFULL] +
+         B1CntBytes[(x >> 16) & 0xFFULL] +
+         B1CntBytes[(x >> 24) & 0xFFULL] +
+         B1CntBytes[(x >> 32) & 0xFFULL] +
+         B1CntBytes[(x >> 40) & 0xFFULL] +
+         B1CntBytes[(x >> 48) & 0xFFULL] +
+         B1CntBytes[(x >> 56) & 0xFFULL];
+#else
+  x = x - ((x >> 1) & (uint64_t) 0x5555555555555555);
+  x = (x & (uint64_t) 0x3333333333333333) +
+      ((x >> 2) & (uint64_t) 0x3333333333333333);
+  x = (x + (x >> 4)) & (uint64_t) 0x0f0f0f0f0f0f0f0f;
+  return (unsigned) ((uint64_t) 0x0101010101010101 * x >> 56);
+#endif
+#endif
+}
+}
+static inline unsigned rank_1(GtPopcountTab *popcount_tab,
+                              unsigned popcount_c,
+                              unsigned long offset,
+                              unsigned pos)
+{
+  unsigned long block;
+  block = gt_compact_ulong_store_get(popcount_tab->blocks,
+                                     popcount_tab->offsets[popcount_c - 1] +
+                                       offset);
+  block >>= popcount_tab->blocksize - pos - 1;
+  return popcount(block);
+}
+
+unsigned gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
+                                     unsigned popcount_c,
+                                     unsigned long offset,
+                                     unsigned pos) {
+  gt_assert(pos < popcount_tab->blocksize);
+  gt_assert(popcount_c <= popcount_tab->blocksize);
+  gt_assert(popcount_c != 0);
+  if (popcount_c < popcount_tab->blocksize)
+    gt_assert(offset < popcount_tab->offsets[popcount_c] -
+                       popcount_tab->offsets[popcount_c - 1]);
+  else {
+    gt_assert(offset == 0);
+    return popcount_c;
+  }
+  return rank_1(popcount_tab, popcount_c, offset, pos);
+}
+unsigned gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
+                                      unsigned popcount_c,
+                                      unsigned long offset,
+                                      unsigned pos) {
+  gt_assert(pos < popcount_tab->blocksize);
+  gt_assert(popcount_c < popcount_tab->blocksize);
+  if (popcount_c == 0)
+    return pos;
+  return pos + 1 - rank_1(popcount_tab, popcount_c, offset, pos);
+}
+
+/*@unused@*/
+void print_bin(unsigned long x, unsigned bits)
+{
+  unsigned idx;
+  gt_assert(bits <= (unsigned) sizeof (unsigned long) * 8U);
+
+  for (idx = 1U; idx <= bits; idx++) {
+    printf("%lu", (x & (1UL << (bits - idx))) >> (bits - idx));
+  }
+  printf("\n");
 }
 
 int gt_popcount_tab_unit_test(GtError *err)
 {
   int had_err = 0;
-  unsigned long idx, jdx;
-  unsigned char popcount;
-  static const unsigned char blocksize = (unsigned char) 4;
+  unsigned long idx, jdx, popc_perm, init,
+                blockmask = perm_start(16U);
+  unsigned popcount_c;
+  static const unsigned blocksize = 4U;
   static const unsigned long blocksize_four[] =
-    {0,1UL,2UL,4UL,8UL,3UL,5UL,6UL,9UL,10UL,12UL,7UL,11UL,13UL,14UL,15UL};
-  GtPopcountTab *popcount_t = gt_popcount_tab_new(blocksize);
+    {0, 1UL, 2UL, 4UL, 8UL, 3UL, 5UL, 6UL,
+     9UL, 10UL, 12UL, 7UL, 11UL, 13UL, 14UL, 15UL};
+  GtPopcountTab *popcount_t = gt_popcount_tab_new((unsigned) blocksize);
 
   for (idx = 0; idx < (1UL << blocksize); idx++) {
     gt_ensure(had_err, blocksize_four[idx] ==
               gt_compact_ulong_store_get(popcount_t->blocks, idx));
   }
-  for (popcount = (unsigned char) 0, idx = 0;
-       !had_err && popcount <= blocksize;
-       idx += gt_binomialCoeff_with_ln(blocksize, popcount), popcount++) {
+  for (popcount_c = 0, idx = 0;
+       !had_err && popcount_c <= blocksize;
+       idx += gt_binomialCoeff_with_ln((unsigned long) blocksize,
+                                       (unsigned long) popcount_c),
+                                       popcount_c++) {
     for (jdx = 0;
-         !had_err && jdx < gt_binomialCoeff_with_ln(blocksize, popcount);
+         !had_err && jdx < gt_binomialCoeff_with_ln((unsigned long) blocksize,
+                                                    (unsigned long) popcount_c);
          jdx++) {
       gt_ensure(had_err, blocksize_four[idx + jdx] ==
-                         gt_popcount_tab_get(popcount_t, popcount, jdx));
+                         gt_popcount_tab_get(popcount_t, popcount_c, jdx));
     }
   }
+  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 0UL, 1U) == 0);
+  gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 0UL, 1U) == 2U);
+  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 0) == 0);
+  gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 0) == 1U);
+  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 1U) == 1U);
+  gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 1U) == 1U);
+  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 2U) == 1U);
+  gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 2U) == 2U);
   gt_popcount_tab_delete(popcount_t);
+
+  popc_perm = init = perm_start(5U);
+  while (!had_err && popc_perm >= init) {
+    gt_ensure(had_err, 5U == popcount(popc_perm));
+    popc_perm = next_perm(popc_perm) & blockmask;
+  }
   return had_err;
 }
