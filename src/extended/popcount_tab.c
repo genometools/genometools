@@ -231,10 +231,10 @@ static inline unsigned popcount(unsigned long val)
 {
 // see page 11, Knuth TAOCP Vol 4 F1A
 {
-  uint64_t x = (uint64_t) val;
 #ifdef __SSE4_2__
   return __builtin_popcountll(val);
 #else
+  uint64_t x = (uint64_t) val;
 #ifdef POPCOUNT_TL
   return (unsigned long)
          B1CntBytes[x         & 0xFFULL] +
