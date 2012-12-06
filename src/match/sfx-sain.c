@@ -250,30 +250,27 @@ static void gt_sainseq_delete(GtSainseq *sainseq)
   }
 }
 
+#ifdef GT_SAIN_WITHCOUNTS
 static unsigned long gt_sain_countcharaccess = 0;
+#endif
 
 static unsigned long gt_sainseq_getchar(const GtSainseq *sainseq,
                                         unsigned long position)
 {
+  GtUchar cc;
+
+#ifdef GT_SAIN_WITHCOUNTS
   gt_assert(position < sainseq->totallength);
   gt_sain_countcharaccess++;
-  switch (sainseq->seqtype)
-  {
-    case GT_SAIN_PLAINSEQ:
-      return (unsigned long) sainseq->seq.plainseq[position];
-    case GT_SAIN_INTSEQ:
-      return sainseq->seq.array[position];
-    case GT_SAIN_ENCSEQ:
-      {
-        GtUchar cc = gt_encseq_get_encoded_char(sainseq->seq.encseq,
-                                                position,
-                                                sainseq->readmode);
-        return ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (unsigned long) cc;
-      }
-  }
-  /*@ignore@*/
-  return 0;
-  /*@end@*/
+#endif
+  return (sainseq->seqtype == GT_SAIN_PLAINSEQ)
+         ? (unsigned long) sainseq->seq.plainseq[position]
+         : ((sainseq->seqtype == GT_SAIN_INTSEQ)
+            ? sainseq->seq.array[position]
+            : ISSPECIAL(cc = gt_encseq_get_encoded_char(sainseq->seq.encseq,
+                                                        position,
+                                                        sainseq->readmode))
+               ? GT_UNIQUEINT(position) : (unsigned long) cc);
 }
 
 static void gt_sain_endbuckets(GtSainseq *sainseq)
@@ -1628,8 +1625,10 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                            finalcheck,
                            verbose,
                            timer);
+#ifdef GT_SAIN_WITHCOUNTS
   printf("countcharaccess=%lu (%.2f)\n",gt_sain_countcharaccess,
           (double) gt_sain_countcharaccess/sainseq->totallength);
+#endif
   gt_sainseq_delete(sainseq);
   gt_free(suftab);
 }
@@ -1657,8 +1656,10 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                            false,
                            verbose,
                            timer);
+#ifdef GT_SAIN_WITHCOUNTS
   printf("countcharaccess=%lu (%.2f)\n",gt_sain_countcharaccess,
           (double) gt_sain_countcharaccess/sainseq->totallength);
+#endif
   gt_sainseq_delete(sainseq);
   gt_free(suftab);
 }
