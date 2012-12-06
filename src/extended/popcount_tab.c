@@ -150,6 +150,14 @@ unsigned long gt_popcount_tab_get(GtPopcountTab *popcount_tab,
                                       offset);
 }
 
+size_t gt_popcount_tab_get_size(unsigned char blocksize) {
+  unsigned long num_of_blocks = 1UL << blocksize;
+  size_t size = gt_compact_ulong_store_size(num_of_blocks, blocksize);
+  size += sizeof (GtPopcountTab);
+  size += blocksize * sizeof (unsigned long);
+  return size;
+}
+
 int gt_popcount_tab_unit_test(GtError *err)
 {
   int had_err = 0;

@@ -25,18 +25,20 @@ typedef struct GtPopcountTab GtPopcountTab;
 
 /* Returns <GtPopcountTab> object with tables for unsigned values of <blocksize>
    bit width */
-GtPopcountTab *gt_popcount_tab_new(unsigned char blocksize) ;
+GtPopcountTab* gt_popcount_tab_new(unsigned char blocksize) ;
 
 /* Deletes <popcount_tab> and frees all associated memory */
-void gt_popcount_tab_delete(GtPopcountTab *popcount_tab);
+void           gt_popcount_tab_delete(GtPopcountTab *popcount_tab);
 
 /* Return unsigned long with <popcount> bits, there might be more than one value
    with that <popcount>, <offset> defines which to return, <offset> = 0 beeing
    the smallest value. <offset> has to be in range
    0..(blocksize choose popcount) */
-unsigned long gt_popcount_tab_get(GtPopcountTab *popcount_tab,
+unsigned long  gt_popcount_tab_get(GtPopcountTab *popcount_tab,
                                   unsigned char popcount,
                                   unsigned long offset);
 
-int gt_popcount_tab_unit_test(GtError *err);
+size_t         gt_popcount_tab_get_size(unsigned char blocksize);
+
+int            gt_popcount_tab_unit_test(GtError *err);
 #endif
