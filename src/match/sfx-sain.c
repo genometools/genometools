@@ -551,8 +551,7 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
 
             gt_assert(currentcc > 0 &&
                       sainseq->roundtable[t] <= sainseq->currentround);
-            if (sainseq->roundtable[t] == 0 ||
-                sainseq->roundtable[t] < sainseq->currentround)
+            if (sainseq->roundtable[t] < sainseq->currentround)
             {
               position += (long) sainseq->totallength;
               sainseq->roundtable[t] = sainseq->currentround;
@@ -628,7 +627,8 @@ static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
       unsigned long t = (currentcc << 1) |
                         (leftcontextcc > currentcc ? 1UL : 0);
 
-      if (sainseq->roundtable[t] != sainseq->currentround)
+      gt_assert (sainseq->roundtable[t] <= sainseq->currentround);
+      if (sainseq->roundtable[t] < sainseq->currentround)
       {
         position += sainseq->totallength;
         sainseq->roundtable[t] = sainseq->currentround;
@@ -722,7 +722,8 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
             unsigned long t = (currentcc << 1) |
                               (leftcontextcc > currentcc ? 1UL : 0);
 
-            if (sainseq->roundtable[t] != sainseq->currentround)
+            gt_assert(sainseq->roundtable[t] <= sainseq->currentround);
+            if (sainseq->roundtable[t] < sainseq->currentround)
             {
               position += sainseq->totallength;
               sainseq->roundtable[t] = sainseq->currentround;
