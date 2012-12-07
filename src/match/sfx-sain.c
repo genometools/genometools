@@ -292,8 +292,7 @@ static void gt_sain_startbuckets(GtSainseq *sainseq)
 
 typedef struct
 {
-  unsigned long countStype,
-                countSstartype,
+  unsigned long countSstartype,
                 namecount;
   GtSainseq *sainseq;
 } GtSaininfo;
@@ -399,8 +398,7 @@ static void gt_sainbuffer_delete(GtSainbuffer *buf)
   }
 }
 
-static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
-                                   GT_UNUSED unsigned long nonspecialentries)
+static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab)
 {
   unsigned long position,
                 nextcc,
@@ -412,24 +410,14 @@ static GtSaininfo *gt_saininfo_new(GtSainseq *sainseq,unsigned long *suftab,
 
   saininfo = gt_malloc(sizeof *saininfo);
   saininfo->sainseq = sainseq;
-  saininfo->countStype = 1UL;
   saininfo->countSstartype = 0;
   nextcc = GT_UNIQUEINT(saininfo->sainseq->totallength);
   gt_sain_endbuckets(saininfo->sainseq);
   for (position = saininfo->sainseq->totallength-1; /* Nothing */; position--)
   {
-    bool currentisStype;
-    unsigned long currentcc;
-
-    currentcc = gt_sainseq_getchar(saininfo->sainseq,position);
-    if (currentcc < nextcc || (currentcc == nextcc && nextisStype))
-    {
-      currentisStype = true;
-      saininfo->countStype++;
-    } else
-    {
-      currentisStype = false;
-    }
+    unsigned long currentcc = gt_sainseq_getchar(saininfo->sainseq,position);
+    bool currentisStype = (currentcc < nextcc ||
+                           (currentcc == nextcc && nextisStype)) ? true : false;
     /*printf("position %lu, char=%lu is %c-type\n",position,currentcc,
                                            currentisStype ? 'S' : 'L');*/
     if (!currentisStype && nextisStype)
@@ -475,8 +463,6 @@ static void gt_saininfo_delete(GtSaininfo *saininfo)
 
 static void gt_saininfo_show(const GtSaininfo *saininfo)
 {
-  printf("S-type: %lu (%.2f)\n",saininfo->countStype,
-                (double) saininfo->countStype/saininfo->sainseq->totallength);
   printf("Sstar-type: %lu (%.2f)\n",saininfo->countSstartype,
               (double) saininfo->countSstartype/saininfo->sainseq->totallength);
 #ifdef CRITICAL
@@ -1111,12 +1097,9 @@ static void gt_sain_assignSstarlength(GtSainseq *sainseq,
 
   for (position = sainseq->totallength-1; /* Nothing */; position--)
   {
-    bool currentisStype;
-    unsigned long currentcc;
-
-    currentcc = gt_sainseq_getchar(sainseq,position);
-    currentisStype = (currentcc < nextcc ||
-                      (currentcc == nextcc && nextisStype)) ? true : false;
+    unsigned long currentcc = gt_sainseq_getchar(sainseq,position);
+    bool currentisStype = (currentcc < nextcc ||
+                           (currentcc == nextcc && nextisStype)) ? true : false;
     if (!currentisStype && nextisStype)
     {
       gt_assert(position < nextSstartypepos);
@@ -1245,16 +1228,10 @@ static void gt_sain_expandorder2original(GtSainseq *sainseq,
   }
   for (position = sainseq->totallength-1; /* Nothing */; position--)
   {
-    bool currentisStype;
-    unsigned long currentcc;
+    unsigned long currentcc = gt_sainseq_getchar(sainseq,position);
+    bool currentisStype = (currentcc < nextcc ||
+                           (currentcc == nextcc && nextisStype)) ? true : false;
 
-    currentcc = gt_sainseq_getchar(sainseq,position);
-    if (bucketsize != NULL)
-    {
-      bucketsize[currentcc]++;
-    }
-    currentisStype = (currentcc < nextcc ||
-                      (currentcc == nextcc && nextisStype)) ? true : false;
     if (!currentisStype && nextisStype)
     {
       if (sstarfirstcharcount != NULL)
@@ -1262,6 +1239,10 @@ static void gt_sain_expandorder2original(GtSainseq *sainseq,
         sstarfirstcharcount[nextcc]++;
       }
       sstarsuffixes[writeidx--] = position+1;
+    }
+    if (bucketsize != NULL)
+    {
+      bucketsize[currentcc]++;
     }
     nextisStype = currentisStype;
     nextcc = currentcc;
@@ -1286,17 +1267,14 @@ static void gt_sain_determineSstarfirstchardist(GtSainseq *sainseq)
   for (seqptr = sainseq->seq.array + sainseq->totallength - 1;
        seqptr >= sainseq->seq.array; seqptr--)
   {
-    bool currentisStype;
-    unsigned long currentcc;
-
-    currentcc = *seqptr;
-    sainseq->bucketsize[currentcc]++;
-    currentisStype = (currentcc < nextcc ||
-                      (currentcc == nextcc && nextisStype)) ? true : false;
+    unsigned long currentcc = *seqptr;
+    bool currentisStype = (currentcc < nextcc ||
+                           (currentcc == nextcc && nextisStype)) ? true : false;
     if (!currentisStype && nextisStype)
     {
       sainseq->sstarfirstcharcount[nextcc]++;
     }
+    sainseq->bucketsize[currentcc]++;
     nextisStype = currentisStype;
     nextcc = currentcc;
   }
@@ -1403,7 +1381,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
           level,sainseq->totallength,sainseq->numofchars,
           (double) sainseq->numofchars/sainseq->totallength);
   GT_SAIN_SHOWTIMER("insert Sstar suffixes");
-  saininfo = gt_saininfo_new(sainseq,suftab,nonspecialentries);
+  saininfo = gt_saininfo_new(sainseq,suftab);
   if (verbose)
   {
     gt_saininfo_show(saininfo);
