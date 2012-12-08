@@ -395,14 +395,13 @@ static unsigned long gt_sain_insertSstarsuffixes(GtSainseq *sainseq,
                                                  unsigned long *suftab)
 {
   unsigned long position,
-                nextcc,
+                nextcc = GT_UNIQUEINT(sainseq->totallength),
                 countSstartype = 0,
                 *fillptr = sainseq->bucketfillptr;
-  bool nextisStype = true;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
                                                sainseq->numofchars);
+  bool nextisStype = true;
 
-  nextcc = GT_UNIQUEINT(sainseq->totallength);
   gt_sain_endbuckets(sainseq);
   for (position = sainseq->totallength-1; /* Nothing */; position--)
   {
