@@ -434,11 +434,14 @@ static unsigned long gt_sain_insertSstarsuffixes(GtSainseq *sainseq,
   switch (sainseq->seqtype)
   {
     case GT_SAIN_PLAINSEQ:
-      return gt_sain_PLAINSEQ_insertSstarsuffixes(sainseq,suftab);
+      return gt_sain_PLAINSEQ_insertSstarsuffixes(sainseq,sainseq->seq.plainseq,
+                                                  suftab);
     case GT_SAIN_ENCSEQ:
-      return gt_sain_ENCSEQ_insertSstarsuffixes(sainseq,suftab);
+      return gt_sain_ENCSEQ_insertSstarsuffixes(sainseq,sainseq->seq.encseq,
+                                                suftab);
     case GT_SAIN_INTSEQ:
-      return gt_sain_INTSEQ_insertSstarsuffixes(sainseq,suftab);
+      return gt_sain_INTSEQ_insertSstarsuffixes(sainseq,sainseq->seq.array,
+                                                suftab);
   }
   /*@ignore@*/
   return 0;
@@ -473,19 +476,19 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
       (sainseq->roundtable == NULL
         ? gt_sain_PLAINSEQ_induceLtypesuffixes1
         : gt_sain_PLAINSEQ_fast_induceLtypesuffixes1)
-           (sainseq,suftab,nonspecialentries);
+           (sainseq,sainseq->seq.plainseq,suftab,nonspecialentries);
       break;
     case GT_SAIN_ENCSEQ:
       (sainseq->roundtable == NULL
         ? gt_sain_ENCSEQ_induceLtypesuffixes1
         : gt_sain_ENCSEQ_fast_induceLtypesuffixes1)
-           (sainseq,suftab,nonspecialentries);
+           (sainseq,sainseq->seq.encseq,suftab,nonspecialentries);
       break;
     case GT_SAIN_INTSEQ:
       (sainseq->roundtable == NULL
         ? gt_sain_INTSEQ_induceLtypesuffixes1
         : gt_sain_INTSEQ_fast_induceLtypesuffixes1)
-           (sainseq,suftab,nonspecialentries);
+           (sainseq,sainseq->seq.array,suftab,nonspecialentries);
       break;
   }
 }
@@ -592,19 +595,19 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
       (sainseq->roundtable == NULL
         ? gt_sain_PLAINSEQ_induceStypesuffixes1
         : gt_sain_PLAINSEQ_fast_induceStypesuffixes1)
-           (sainseq,suftab,nonspecialentries);
+           (sainseq,sainseq->seq.plainseq,suftab,nonspecialentries);
       break;
     case GT_SAIN_ENCSEQ:
       (sainseq->roundtable == NULL
         ? gt_sain_ENCSEQ_induceStypesuffixes1
         : gt_sain_ENCSEQ_fast_induceStypesuffixes1)
-           (sainseq,suftab,nonspecialentries);
+           (sainseq,sainseq->seq.encseq,suftab,nonspecialentries);
       break;
     case GT_SAIN_INTSEQ:
       (sainseq->roundtable == NULL
         ? gt_sain_INTSEQ_induceStypesuffixes1
         : gt_sain_INTSEQ_fast_induceStypesuffixes1)
-           (sainseq,suftab,nonspecialentries);
+           (sainseq,sainseq->seq.array,suftab,nonspecialentries);
       break;
   }
 }
@@ -748,13 +751,16 @@ static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
   switch (sainseq->seqtype)
   {
     case GT_SAIN_PLAINSEQ:
-      gt_sain_PLAINSEQ_induceLtypesuffixes2(sainseq,suftab,nonspecialentries);
+      gt_sain_PLAINSEQ_induceLtypesuffixes2(sainseq,sainseq->seq.plainseq,
+                                            suftab,nonspecialentries);
       break;
     case GT_SAIN_ENCSEQ:
-      gt_sain_ENCSEQ_induceLtypesuffixes2(sainseq,suftab,nonspecialentries);
+      gt_sain_ENCSEQ_induceLtypesuffixes2(sainseq,sainseq->seq.encseq,suftab,
+                                          nonspecialentries);
       break;
     case GT_SAIN_INTSEQ:
-      gt_sain_INTSEQ_induceLtypesuffixes2(sainseq,suftab,nonspecialentries);
+      gt_sain_INTSEQ_induceLtypesuffixes2(sainseq,sainseq->seq.array,
+                                          suftab,nonspecialentries);
       break;
   }
 }
@@ -823,13 +829,16 @@ static void gt_sain_induceStypesuffixes2(const GtSainseq *sainseq,
   switch (sainseq->seqtype)
   {
     case GT_SAIN_PLAINSEQ:
-      gt_sain_PLAINSEQ_induceStypesuffixes2(sainseq,suftab,nonspecialentries);
+      gt_sain_PLAINSEQ_induceStypesuffixes2(sainseq,sainseq->seq.plainseq,
+                                            suftab,nonspecialentries);
       break;
     case GT_SAIN_ENCSEQ:
-      gt_sain_ENCSEQ_induceStypesuffixes2(sainseq,suftab,nonspecialentries);
+      gt_sain_ENCSEQ_induceStypesuffixes2(sainseq,sainseq->seq.encseq,suftab,
+                                          nonspecialentries);
       break;
     case GT_SAIN_INTSEQ:
-      gt_sain_INTSEQ_induceStypesuffixes2(sainseq,suftab,nonspecialentries);
+      gt_sain_INTSEQ_induceStypesuffixes2(sainseq,sainseq->seq.array,
+                                          suftab,nonspecialentries);
       break;
   }
 }
@@ -1050,13 +1059,16 @@ static void gt_sain_expandorder2original(GtSainseq *sainseq,
   switch (sainseq->seqtype)
   {
     case GT_SAIN_PLAINSEQ:
-      gt_sain_PLAINSEQ_expandorder2original(sainseq,numberofsuffixes,suftab);
+      gt_sain_PLAINSEQ_expandorder2original(sainseq,sainseq->seq.plainseq,
+                                            numberofsuffixes,suftab);
       break;
     case GT_SAIN_ENCSEQ:
-      gt_sain_ENCSEQ_expandorder2original(sainseq,numberofsuffixes,suftab);
+      gt_sain_ENCSEQ_expandorder2original(sainseq,sainseq->seq.encseq,
+                                          numberofsuffixes,suftab);
       break;
     case GT_SAIN_INTSEQ:
-      gt_sain_INTSEQ_expandorder2original(sainseq,numberofsuffixes,suftab);
+      gt_sain_INTSEQ_expandorder2original(sainseq,sainseq->seq.array,
+                                          numberofsuffixes,suftab);
       break;
   }
 }

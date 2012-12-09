@@ -2,14 +2,24 @@
 
 keylist = ["PLAINSEQ","ENCSEQ","INTSEQ"]
 
+def getc_param(key)
+  if key == "PLAINSEQ"
+    return "const GtUchar *plainseq"
+  elsif key == "INTSEQ"
+    return "const unsigned long *array"
+  else
+    return "const GtEncseq *encseq"
+  end
+end
+
 def getc_call(key,posexpr)
   if key == "PLAINSEQ"
-    return "(unsigned long)\nsainseq->seq.plainseq[#{posexpr}]"
+    return "(unsigned long)\nplainseq[#{posexpr}]"
   elsif key == "INTSEQ"
-    return "sainseq->seq.array[#{posexpr}]"
+    return "array[#{posexpr}]"
   else
     return "ISSPECIAL(tmpcc = gt_encseq_get_encoded_char(\n" +
-                                  "sainseq->seq.encseq,\n" +
+                                  "encseq,\n" +
                                   "#{posexpr},\n" +
                                   "sainseq->readmode))\n" +
                "  ? GT_UNIQUEINT(#{posexpr}) : (unsigned long) tmpcc"
@@ -34,6 +44,7 @@ end
 keylist.each do |key|
 fo.puts <<CCODE
 static unsigned long gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
+                                                 #{getc_param(key)},
                                                  unsigned long *suftab)
 {
   unsigned long position,
@@ -83,6 +94,7 @@ static unsigned long gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
 }
 
 static void gt_sain_#{key}_fast_induceLtypesuffixes1(GtSainseq *sainseq,
+                                                 #{getc_param(key)},
                                          long *suftab,
                                          unsigned long nonspecialentries)
 {
@@ -148,6 +160,7 @@ static void gt_sain_#{key}_fast_induceLtypesuffixes1(GtSainseq *sainseq,
 }
 
 static void gt_sain_#{key}_induceLtypesuffixes1(GtSainseq *sainseq,
+                                                 #{getc_param(key)},
                                          long *suftab,
                                          unsigned long nonspecialentries)
 {
@@ -197,6 +210,7 @@ static void gt_sain_#{key}_induceLtypesuffixes1(GtSainseq *sainseq,
 }
 
 static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
+                                                 #{getc_param(key)},
                                          long *suftab,
                                          unsigned long nonspecialentries)
 {
@@ -256,6 +270,7 @@ static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
 }
 
 static void gt_sain_#{key}_induceStypesuffixes1(GtSainseq *sainseq,
+                                                 #{getc_param(key)},
                                          long *suftab,
                                          unsigned long nonspecialentries)
 {
@@ -301,6 +316,7 @@ static void gt_sain_#{key}_induceStypesuffixes1(GtSainseq *sainseq,
 }
 
 static void gt_sain_#{key}_induceLtypesuffixes2(const GtSainseq *sainseq,
+                                                 #{getc_param(key)},
                                          long *suftab,
                                          unsigned long nonspecialentries)
 {
@@ -338,6 +354,7 @@ static void gt_sain_#{key}_induceLtypesuffixes2(const GtSainseq *sainseq,
 }
 
 static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
+                                                 #{getc_param(key)},
                                          long *suftab,
                                          unsigned long nonspecialentries)
 {
@@ -391,6 +408,7 @@ static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
 }
 
 static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
+                                                 #{getc_param(key)},
                                          unsigned long numberofsuffixes,
                                          unsigned long *suftab)
 {
