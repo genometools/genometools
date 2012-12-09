@@ -631,7 +631,7 @@ static void gt_sain_moveSstar2front(unsigned long countSstartype,
   gt_assert(writeidx == countSstartype);
 }
 
-static unsigned long gt_sain_simple_moveSstar2front(
+static unsigned long gt_sain_fast_moveSstar2front(
                                       unsigned long totallength,
                                       unsigned long countSstartype,
                                       long *suftab,
@@ -682,12 +682,11 @@ static unsigned long gt_sain_simple_moveSstar2front(
   return namecount;
 }
 
-static void gt_sain_simple_assignSstarnames(unsigned long totallength,
-                                            unsigned long countSstartype,
-                                            unsigned long *suftab,
-                                            unsigned long numberofnames,
-                                            unsigned long
-                                            nonspecialentries)
+static void gt_sain_fast_assignSstarnames(unsigned long totallength,
+                                          unsigned long countSstartype,
+                                          unsigned long *suftab,
+                                          unsigned long numberofnames,
+                                          unsigned long nonspecialentries)
 {
   unsigned long *suftabptr, *secondhalf = suftab + countSstartype;
 
@@ -698,9 +697,9 @@ static void gt_sain_simple_assignSstarnames(unsigned long totallength,
     for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
          suftabptr--)
     {
-      unsigned long position = *suftabptr;
+      unsigned long position;
 
-      if (position >= totallength)
+      if ((position = *suftabptr) >= totallength)
       {
         position -= totallength;
         gt_assert(currentname > 0);
@@ -1182,7 +1181,8 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
       gt_sain_incrementfirstSstar(sainseq,suftab);
     }
     gt_sain_startbuckets(sainseq);
-    GT_SAIN_SHOWTIMER("induce L suffixes");
+    GT_SAIN_SHOWTIMER(sainseq->roundtable == NULL
+                      ? "induce L suffixes" : "fast induce L suffixes");
 
     gt_sain_induceLtypesuffixes1(sainseq,(long *) suftab,nonspecialentries);
     if (sainseq->roundtable != NULL)
@@ -1191,31 +1191,32 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                            nonspecialentries);
     }
     gt_sain_endbuckets(sainseq);
-    GT_SAIN_SHOWTIMER("induce S suffixes");
+    GT_SAIN_SHOWTIMER(sainseq->roundtable == NULL
+                      ? "induce S suffixes" : "fast induce S suffixes");
     gt_sain_induceStypesuffixes1(sainseq,(long *) suftab,nonspecialentries);
     if (sainseq->roundtable == NULL)
     {
-      GT_SAIN_SHOWTIMER("moverSstar2front");
+      GT_SAIN_SHOWTIMER("simple moverSstar2front");
       gt_sain_moveSstar2front(countSstartype,(long *) suftab,nonspecialentries);
-      GT_SAIN_SHOWTIMER("assignSstarlength");
+      GT_SAIN_SHOWTIMER("simple assignSstarlength");
       gt_sain_assignSstarlength(sainseq,suftab + countSstartype);
-      GT_SAIN_SHOWTIMER("assignSstarnames");
+      GT_SAIN_SHOWTIMER("simple assignSstarnames");
       numberofnames = gt_sain_assignSstarnames(sainseq,countSstartype,suftab);
     } else
     {
-      GT_SAIN_SHOWTIMER("simple_moveSstar2front");
-      numberofnames = gt_sain_simple_moveSstar2front(sainseq->totallength,
-                                                     countSstartype,
-                                                     (long *) suftab,
-                                                     nonspecialentries);
+      GT_SAIN_SHOWTIMER("fast moveSstar2front");
+      numberofnames = gt_sain_fast_moveSstar2front(sainseq->totallength,
+                                                   countSstartype,
+                                                   (long *) suftab,
+                                                   nonspecialentries);
       if (!sainseq->roundtablepoints2suftab)
       {
         gt_free(sainseq->roundtable);
         sainseq->roundtable = NULL;
       }
-      GT_SAIN_SHOWTIMER("simple_assignSstarnames");
-      gt_sain_simple_assignSstarnames(sainseq->totallength,countSstartype,
-                                      suftab,numberofnames,nonspecialentries);
+      GT_SAIN_SHOWTIMER("fast assignSstarnames");
+      gt_sain_fast_assignSstarnames(sainseq->totallength,countSstartype,
+                                    suftab,numberofnames,nonspecialentries);
     }
     gt_assert(numberofnames <= countSstartype);
     if (numberofnames < countSstartype)
