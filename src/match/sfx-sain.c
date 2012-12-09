@@ -470,13 +470,22 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
   switch (sainseq->seqtype)
   {
     case GT_SAIN_PLAINSEQ:
-      gt_sain_PLAINSEQ_induceLtypesuffixes1(sainseq,suftab,nonspecialentries);
+      (sainseq->roundtable == NULL
+        ? gt_sain_PLAINSEQ_induceLtypesuffixes1
+        : gt_sain_PLAINSEQ_fast_induceLtypesuffixes1)
+           (sainseq,suftab,nonspecialentries);
       break;
     case GT_SAIN_ENCSEQ:
-      gt_sain_ENCSEQ_induceLtypesuffixes1(sainseq,suftab,nonspecialentries);
+      (sainseq->roundtable == NULL
+        ? gt_sain_ENCSEQ_induceLtypesuffixes1
+        : gt_sain_ENCSEQ_fast_induceLtypesuffixes1)
+           (sainseq,suftab,nonspecialentries);
       break;
     case GT_SAIN_INTSEQ:
-      gt_sain_INTSEQ_induceLtypesuffixes1(sainseq,suftab,nonspecialentries);
+      (sainseq->roundtable == NULL
+        ? gt_sain_INTSEQ_induceLtypesuffixes1
+        : gt_sain_INTSEQ_fast_induceLtypesuffixes1)
+           (sainseq,suftab,nonspecialentries);
       break;
   }
 }
@@ -580,13 +589,22 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
   switch (sainseq->seqtype)
   {
     case GT_SAIN_PLAINSEQ:
-      gt_sain_PLAINSEQ_induceStypesuffixes1(sainseq,suftab,nonspecialentries);
+      (sainseq->roundtable == NULL
+        ? gt_sain_PLAINSEQ_induceStypesuffixes1
+        : gt_sain_PLAINSEQ_fast_induceStypesuffixes1)
+           (sainseq,suftab,nonspecialentries);
       break;
     case GT_SAIN_ENCSEQ:
-      gt_sain_ENCSEQ_induceStypesuffixes1(sainseq,suftab,nonspecialentries);
+      (sainseq->roundtable == NULL
+        ? gt_sain_ENCSEQ_induceStypesuffixes1
+        : gt_sain_ENCSEQ_fast_induceStypesuffixes1)
+           (sainseq,suftab,nonspecialentries);
       break;
     case GT_SAIN_INTSEQ:
-      gt_sain_INTSEQ_induceStypesuffixes1(sainseq,suftab,nonspecialentries);
+      (sainseq->roundtable == NULL
+        ? gt_sain_INTSEQ_induceStypesuffixes1
+        : gt_sain_INTSEQ_fast_induceStypesuffixes1)
+           (sainseq,suftab,nonspecialentries);
       break;
   }
 }
