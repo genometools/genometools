@@ -9,7 +9,7 @@ then
   exit 1
 fi
 
-gtime -o ${TMP} -f "# TIME overall %U" mkesa -p mkesa-idx -b D -g suf -v -d $1 |\
+/usr/bin/time -o ${TMP} -f "# TIME overall %U" mkesa -p mkesa-idx -b D -g suf -v -d $1 |\
                              mkesa-fmt.rb
 cat ${TMP}
 rm -f ${TMP}

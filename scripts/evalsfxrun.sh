@@ -31,23 +31,23 @@ code2file()
     at1MB)
       echo "${GTDIR}/testdata/at1MB";;
     mfd)
-      echo "${PROJECT}/gi/seqcmpprojects/MouthFootDisease/mfdallpart.fna.gz";;
+      echo "${HOME}/seqcmpprojects/MouthFootDisease/mfdallpart.fna.gz";;
     yeast)
-      echo "${PROJECT}/gi/seqcmpprojects/yeast.fna.gz";;
+      echo "${HOME}/seqcmpprojects/yeast.fna.gz";;
     human2)
-      echo "${PROJECT}/biodata/genomes/H_sapiens-build36.54-2009/Homo_sapiens.NCBI36.54.dna.chromosome.02.fa.gz";;
+      echo "${PROJECT}/genomes/primate/H_sapiens-build36.54-2009/Homo_sapiens.NCBI36.54.dna.chromosome.02.fa.gz";;
     human22)
-      echo "${PROJECT}/biodata/genomes/H_sapiens-build36.54-2009/Homo_sapiens.NCBI36.54.dna.chromosome.22.fa.gz";;
+      echo "${PROJECT}/genomes/primate/H_sapiens-build36.54-2009/Homo_sapiens.NCBI36.54.dna.chromosome.22.fa.gz";;
     dmel)
-      echo "${PROJECT}/gi/seqcmpprojects/d_mel.fna.gz";;
+      echo "${HOME}/seqcmpprojects/d_mel.fna.gz";;
     ecoli1)
-      echo "${PROJECT}/biodata/genomes/Bacteria/Escherichia_coli_K12/NC_000913.fna";;
+      echo "${PROJECT}/genomes/Bacteria/Escherichia_coli_K12/NC_000913.fna";;
     ecoli2)
-      echo "${PROJECT}/biodata/genomes/Bacteria/Ecoli_O157_H7/AE005174.fna";;
+      echo "${PROJECT}/genomes/Bacteria/Ecoli_O157_H7/AE005174.fna";;
     swiss1MB)
       echo "${GTTESTDATA}/swissprot/swiss1MB";;
     paradoxus)
-      echo "${PROJECT}/gi/seqcmpprojects/S-paradoxus.fna.gz";;
+      echo "${HOME}/seqcmpprojects/S-paradoxus.fna.gz";;
     *)
       echo "$0: illegal filecode $1"
       exit 1;;
@@ -89,7 +89,7 @@ do
   fn=`code2file ${rfc}`
   if test ! -f ${fn}
   then
-    echo "FAILURE: ${fn} does not exist"
+    echo "$0: ${fn} does not exist"
     exit 1
   fi
 done
@@ -110,6 +110,6 @@ do
   do
     suffixerator ${rfc} -dc ${dc}
   done
-  # mkesa ${rfc}
-  # rm -f sfx-idx.* mkesa-idx.*
+  mkesa ${rfc}
+  rm -f sfx-idx.* mkesa-idx.*
 done
