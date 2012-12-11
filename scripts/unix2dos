@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+regex = /\r\n/
+newstring = "\n"
+newregex = /\n/
+string = "\r\n"
+
+ARGF.each{ |line|
+  line.gsub!(regex, newstring)
+  line.gsub!(newregex, string)
+  puts line
+}

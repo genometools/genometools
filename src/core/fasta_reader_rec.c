@@ -46,8 +46,10 @@ static int parse_fasta_description(GtStr *description, GtIO *seqio,
     return -1;
   }
   /* read description */
-  while (!gt_io_get_char(seqio, &cc) && cc != '\n')
-    gt_str_append_char(description, cc);
+  while (!gt_io_get_char(seqio, &cc) && cc != '\n') {
+    if (cc != '\r')
+      gt_str_append_char(description, cc);
+  }
   return 0;
 }
 
@@ -59,7 +61,7 @@ static int parse_fasta_sequence(GtStr *sequence, GtIO *seqio, GtError *err)
   gt_assert(!gt_str_length(sequence));
   /* read sequence */
   while (!gt_io_get_char(seqio, &cc) && cc != GT_FASTA_SEPARATOR) {
-    if (cc != '\n' && cc != ' ')
+    if (cc != '\n' && cc != ' ' && cc != '\r')
       gt_str_append_char(sequence, cc);
   }
   if (!gt_str_length(sequence)) {

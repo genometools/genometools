@@ -26,6 +26,7 @@
 
 #define FASTASEPARATOR    '>'
 #define NEWLINESYMBOL     '\n'
+#define CRSYMBOL          '\r'
 
 struct GtSequenceBufferFasta {
   const GtSequenceBuffer parent_instance;
@@ -115,12 +116,11 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
           {
             if (currentchar == NEWLINESYMBOL)
             {
-              /* gt_queue_add(pvt->descptr,
-                           gt_cstr_dup(gt_str_get(sbf->headerbuffer))); */
               gt_desc_buffer_finish(pvt->descptr);
             } else
             {
-              gt_desc_buffer_append_char(pvt->descptr, currentchar);
+              if (currentchar != CRSYMBOL)
+                gt_desc_buffer_append_char(pvt->descptr, currentchar);
             }
           }
         } else

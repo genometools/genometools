@@ -92,7 +92,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
             state = READING_SEQUENCE_AFTER_NEWLINE;
           }
         }
-        else if (proc_description)
+        else if (proc_description && cc != '\r')
           gt_str_append_char(description, cc);
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:
@@ -137,7 +137,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
                 break;
               gt_str_reset(sequence);
             }
-            if (cc != ' ')
+            if (cc != ' ' && cc != '\r')
               gt_str_append_char(sequence, cc);
           }
         }

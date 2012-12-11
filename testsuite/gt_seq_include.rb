@@ -21,6 +21,15 @@ end
   end
 end
 
+Name "gt seq (DOS line breaks)"
+Keywords "gt_seq"
+Test do
+  run "#{$scriptsdir}dos2unix #{$testdata}tRNA.dos.fas > ./tRNA.unix.fas"
+  run_test "#{$bin}gt seq -showfasta -width 60 #{$testdata}tRNA.dos.fas"
+  run "diff #{last_stdout} tRNA.unix.fas"
+  run "diff #{last_stdout} #{$testdata}tRNA.dos.fas", :retval => 1
+end
+
 Name "gt seq test 1"
 Keywords "gt_seq"
 Test do
