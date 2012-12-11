@@ -21,6 +21,7 @@
 #include "core/error_api.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
+#include "core/safearith.h"
 
 #ifdef _LP64
 #define GT_BINOMIAL_MAX_N_LN 66UL
@@ -32,91 +33,47 @@
 #define GT_BINOMIAL_MAX_N_DP 33UL
 #endif
 
-/**
- * \file combinatorics.h
- * \brief Simple routines for distribution computations relevant to
- * combinatorial problems.
- * \author Thomas Jahns <Thomas.Jahns@gmx.net>
- */
+/* Module Combinatorics includes some standard aproaches for combinatorical
+   problems. Some functions have efficient implementations.
+   Some of the simpler functions are meant to be used inline. */
 
-/**
- * Computes \f$n! = 1 \cdot 2 \cdot \dots \cdot (n - 1) \cdot n\f$
- * @param n number of which to compute factorial
- * @return \f$n!\f$
- */
-static inline unsigned long
-factorial(unsigned n)
-{
-  unsigned long k = 1UL;
-  while (n > 1U)
-    k *= n--;
-  return k;
-}
+/* Returns n! = 1 * 2 * ... * (n - 1) * n
+   <n> number of which to compute factorial */
+static inline unsigned long gt_combinatorics_factorial(unsigned n);
 
 /* calculate n choose k using exp(ln(n!) - ln(k!) - ln((n-k)!)). Returned value
    might deviate from correct result for large n. Overflows for
    n > GT_BINOMIAL_MAX_N_LN */
-unsigned long gt_binomialCoeff_with_ln(unsigned long n, unsigned long k);
+unsigned long                    gt_combinatorics_binomial_ln(unsigned long n,
+                                                              unsigned long k);
 
 /* calculate n choose k using a dp table. Overflows for
    n> GT_BINOMIAL_MAX_N_DP */
-unsigned long gt_binomialCoeff_dp(unsigned long n, unsigned long k);
+unsigned long                    gt_combinatorics_binomial_dp(unsigned long n,
+                                                              unsigned long k);
 
 /* naive implementation of n choose k, but already somewhat optimised.
    Overflows for n> GT_BINOMIAL_MAX_N */
-unsigned long gt_binomialCoeff(unsigned long n, unsigned long k);
+unsigned long                    gt_combinatorics_binomial_simple(
+                                                               unsigned long n,
+                                                               unsigned long k);
 
-/**
- * \brief Compute multinomial coefficient
- * \f[{n\choose k_1, k_2,\dots,k_m} = \frac{n!}{k_1!\cdot
- * k_2!\cdot\dots\cdot k_m!}\f] where \f$m\f$ equals \link numBins\endlink
- * @param n
- * @param numBins
- * @param binSizes points to array containing \link numBins\endlink values which
- * represent the \f$k_i\f$
- * @return \f$n\choose{k_1, k_2,\dots,k_m}\f$
- */
-/*@unused@*/ static inline unsigned long
-multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
-{
-  unsigned long accum = 1UL, nfac;
-  size_t i, maxBin = 0, maxBinSize = 0;
-#ifndef NDEBUG
-  unsigned long binSum = 0;
-#endif
-  gt_assert(n > 0 && numBins > 0 && binSizes);
-  for (i = 0; i < numBins; ++i) {
-#ifndef NDEBUG
-    binSum += binSizes[i];
-#endif
-    if ((size_t) binSizes[i] > maxBinSize) {
-      maxBinSize = (size_t) binSizes[i];
-      maxBin = i;
-    }
-  }
-  gt_assert(binSum <= (unsigned long) n);
-  for (nfac = (unsigned long) maxBinSize + 1; nfac <= (unsigned long) n; ++nfac)
-    accum *= nfac;
-  for (i = 0; i < numBins; ++i)
-    if (i != maxBin)
-      accum /= factorial(binSizes[i]);
-  return accum;
-}
+/* Returns multinomial coefficient
+   n choose k_1, k_2 ... k_m = n! / k_1! * k_2! * ... * k_m!
+   <numBins> equals m, <binSizes> points to array which contains the k_i. */
+static inline unsigned long      gt_combinatorics_multinomial(
+                                                     unsigned n,
+                                                     size_t numBins,
+                                                     const unsigned binSizes[]);
 
-/*@unused@*/ static inline unsigned long long
-iPow(unsigned long long x, unsigned i)
-{
-   unsigned long long result = 1ULL;
-   while (i) {
-     if (i & 1)
-       result *= x;
-     x *= x;
-     i >>= 1;
-   }
-   return result;
-}
+/* Returns <x>^<i> */
+static inline unsigned long long gt_combinatorics_i_pow(unsigned long long x,
+                                                        unsigned i);
 
-int gt_combinatorics_unit_test(GT_UNUSED GtError *err);
-void gt_combinatorics_init(void);
-void gt_combinatorics_clean(void);
+int                              gt_combinatorics_unit_test(
+                                                        GT_UNUSED GtError *err);
+void                             gt_combinatorics_init(void);
+void                             gt_combinatorics_clean(void);
+
+#include "core/combinatorics_impl.h"
 #endif

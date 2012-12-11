@@ -77,8 +77,8 @@ void gt_combinatorics_clean(void)
   binomial_dp_tab = NULL;
 }
 
-static inline unsigned long binomialCoeff_dp_rec(unsigned long n,
-                                                 unsigned long k)
+static inline unsigned long gt_combinatorics_binomial_dp_rec(unsigned long n,
+                                                             unsigned long k)
 {
   if (k == 0 || n <= k)
     return 1UL;
@@ -86,9 +86,10 @@ static inline unsigned long binomialCoeff_dp_rec(unsigned long n,
     return 0;
   if (binomial_dp_tab[n][k] == UNDEFTABVALUE) {
     if (binomial_dp_tab[n - 1][k - 1] == UNDEFTABVALUE)
-      binomial_dp_tab[n - 1][k - 1] = binomialCoeff_dp_rec(n - 1, k - 1);
+      binomial_dp_tab[n - 1][k - 1] =
+        gt_combinatorics_binomial_dp_rec(n - 1, k - 1);
     if (binomial_dp_tab[n - 1][k] == UNDEFTABVALUE)
-      binomial_dp_tab[n - 1][k] = binomialCoeff_dp_rec(n - 1, k);
+      binomial_dp_tab[n - 1][k] = gt_combinatorics_binomial_dp_rec(n - 1, k);
     gt_safe_add(binomial_dp_tab[n][k],
                 binomial_dp_tab[n - 1][k - 1],
                 binomial_dp_tab[n - 1][k]);
@@ -96,7 +97,7 @@ static inline unsigned long binomialCoeff_dp_rec(unsigned long n,
   return binomial_dp_tab[n][k];
 }
 
-unsigned long gt_binomialCoeff_dp(unsigned long n, unsigned long k)
+unsigned long gt_combinatorics_binomial_dp(unsigned long n, unsigned long k)
 {
   if (k == 0 || n <= k)
     return 1UL;
@@ -105,10 +106,10 @@ unsigned long gt_binomialCoeff_dp(unsigned long n, unsigned long k)
   gt_assert(n <= GT_BINOMIAL_MAX_N_DP);
   if (GT_DIV2(n) < k)
     k = n - k;
-  return binomialCoeff_dp_rec(n, k);
+  return gt_combinatorics_binomial_dp_rec(n, k);
 }
 
-unsigned long gt_binomialCoeff_with_ln(unsigned long n, unsigned long k)
+unsigned long gt_combinatorics_binomial_ln(unsigned long n, unsigned long k)
 {
   if (k == 0 || n <= k)
     return 1UL;
@@ -123,7 +124,7 @@ unsigned long gt_binomialCoeff_with_ln(unsigned long n, unsigned long k)
                                       ln_n_fac_tab[n - k])));
 }
 
-unsigned long gt_binomialCoeff(unsigned long n, unsigned long k)
+unsigned long gt_combinatorics_binomial_simple(unsigned long n, unsigned long k)
 {
   unsigned long idx;
   unsigned long result;
@@ -157,12 +158,12 @@ int gt_combinatorics_unit_test(GtError *err)
   gt_error_check(err);
   for (n = 0; n <= max_n; n++) {
     for (k = 0; k <= GT_DIV2(n); k++) {
-      unsigned long a = gt_binomialCoeff_dp(n, k),
-                    b = gt_binomialCoeff(n, k),
+      unsigned long a = gt_combinatorics_binomial_dp(n, k),
+                    b = gt_combinatorics_binomial_simple(n, k),
                     c;
       gt_ensure(had_err, a == b);
       if (n < max_fac_stable) {
-        c = gt_binomialCoeff_with_ln(n,k);
+        c = gt_combinatorics_binomial_ln(n,k);
         gt_ensure(had_err, c == a);
       }
     }

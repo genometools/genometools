@@ -168,8 +168,8 @@ gt_initCompositionList(struct compList *newList, unsigned blockSize,
   bitsPerComp = alphabetSize * (bitsPerCount = gt_requiredUIntBits(blockSize));
   newList->bitsPerCount = bitsPerCount;
   numCompositions = newList->numCompositions =
-    gt_binomialCoeff(blockSize + maxSym, maxSym);
-  numTotalPermutations = iPow(alphabetSize, blockSize);
+    gt_combinatorics_binomial_simple(blockSize + maxSym, maxSym);
+  numTotalPermutations = gt_combinatorics_i_pow(alphabetSize, blockSize);
   newList->compositionIdxBits = gt_requiredUInt64Bits(numCompositions - 1);
   newList->bitsPerSymbol = gt_requiredUIntBits(maxSym);
   bitsPerPerm = newList->bitsPerSymbol * blockSize;
@@ -319,7 +319,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
                      unsigned bitsPerSymbol)
 {
   size_t numPermutations = permutation->numPermutations =
-    multinomialCoeff(blockSize, alphabetSize, composition);
+    gt_combinatorics_multinomial(blockSize, alphabetSize, composition);
   if (numPermutations > 1)
     permutation->permIdxBits = gt_requiredUInt64Bits(numPermutations - 1);
   else
