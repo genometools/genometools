@@ -1019,7 +1019,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
   bool is_not_at_pageborder;
   FILE *fp = NULL;
   GtStr *name1;
-  long pos,
+  long pos = 0,
        start_of_encoding,
        pagesize;
   unsigned long dummy = 0;
