@@ -285,6 +285,13 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
+<a name="gt_reverse_complement"></a>
+
+<code>int  gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError*)</code>
+<p>
+reverse <code>dna_seq</code> of length <code>seqlen</code> in place
+</p>
+<hr>
 <a name="gt_feature_index_gfflike_get_all_features"></a>
 
 <code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
@@ -294,13 +301,6 @@ interfaces.
 Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
    success, a negative value otherwise. The message in <code>err</code> is set
    accordingly.
-</p>
-<hr>
-<a name="gt_reverse_complement"></a>
-
-<code>int  gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError*)</code>
-<p>
-reverse <code>dna_seq</code> of length <code>seqlen</code> in place
 </p>
 <hr>
 <a name="gt_feature_stream_new"></a>
@@ -7596,16 +7596,6 @@ Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
 </p>
 <hr>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
-</p>
-<hr>
 <a name="Assert"></a>
 <h2>Module Assert</h2>
 <a name="gt_assert"></a>
@@ -8095,6 +8085,16 @@ Parse a range given by <code>start</code> and <code>end</code>, writing the resu
 Like <code>gt_parse_range</code>, but issues a warning if <code>start</code> is larger then <code>end</code>
    and swaps both values. It also issues a warning, if <code>start</code> and/or <code>end</code> is
    not-positive and sets the corresponding value to 1.
+</p>
+<hr>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
 </p>
 <hr>
 <a name="Qsort"></a>
@@ -10088,7 +10088,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-11-29
+Last update: 2012-12-11
 </div>
 </div>
 <!-- Piwik -->

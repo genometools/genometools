@@ -20,9 +20,10 @@
 
 #include "core/error_api.h"
 
-/* Class <GtPopcountTab> stores a table of values of fixed bit
-   width sorted by popcount (number of bits set to 1). Values are sorted by
-   increasing value within one popcount class. */
+/* The <GtPopcountTab> class represents a table of values of a fixed bit
+   width sorted by their popcount (number of bits set to 1). Values are sorted
+   by increasing value within one popcount class (set of values with the
+   same popcount). */
 typedef struct GtPopcountTab GtPopcountTab;
 
 /* Returns <GtPopcountTab> object with tables for unsigned values of
@@ -35,13 +36,17 @@ unsigned long  gt_popcount_tab_get(GtPopcountTab *popcount_tab,
                                    unsigned popcount_c,
                                    unsigned long i);
 
-/* Return rank of 1s or 0s in <i>-th block given for <popcount_c> bits set
+/* Return rank of 1s in <i>-th block given for <popcount_c> bits set
    upto and including <pos>, which is a relative bit position within that block.
    Note that <pos> <= blocksize of <popcount_tab>. */
 unsigned       gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
                                       unsigned popcount_c,
                                       unsigned long i,
                                       unsigned pos);
+
+/* Return rank of 0s in <i>-th block given for <popcount_c> bits set
+   upto and including <pos>, which is a relative bit position within that block.
+   Note that <pos> <= blocksize of <popcount_tab>. */
 unsigned       gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
                                       unsigned popcount_c,
                                       unsigned long i,
@@ -54,4 +59,5 @@ size_t         gt_popcount_tab_calculate_size(unsigned blocksize);
 void           gt_popcount_tab_delete(GtPopcountTab *popcount_tab);
 
 int            gt_popcount_tab_unit_test(GtError *err);
+
 #endif
