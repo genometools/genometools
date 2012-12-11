@@ -342,15 +342,12 @@ ifeq ($(64bit),yes)
   ifneq ($(MACHINE),x86_64)
     m64=yes
   endif
+  BIT=64bit
+  SPLINTD:=-D_LP64
 else
   ifeq ($(MACHINE),x86_64)
     m32=yes
   endif
-endif
-
-ifeq ($(64bit),yes)
-  BIT=64bit
-else
   BIT=32bit
 endif
 
@@ -982,10 +979,6 @@ ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
 
 spgt:${ALLSPLINT}
 
-ifeq ($(64bit), yes)
-SPLINTD:=-D_LP64
-endif
-				
 scgt:
 	src_check src/core/*
 	src_check src/match/*
