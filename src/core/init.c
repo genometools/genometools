@@ -114,9 +114,6 @@ void gt_lib_init(void)
   gt_log_init();
   if (showtime) gt_showtime_enable();
   gt_symbol_init();
-#ifndef WITHOUT_CAIRO
-  /* FcInit(); */
-#endif
   gt_class_prealloc_run();
   gt_ya_rand_init(0);
 #ifdef HAVE_MYSQL
@@ -155,9 +152,6 @@ int gt_lib_clean(void)
   gt_combinatorics_clean();
   gt_rval = gt_ma_check_space_leak();
   gt_ma_clean();
-#ifndef WITHOUT_CAIRO
-  /* FcFini(); */
-#endif
 #ifdef HAVE_MYSQL
   mysql_library_end();
 #endif
