@@ -23,44 +23,40 @@
 #include "core/unused_api.h"
 #include "core/safearith.h"
 
-#ifdef _LP64
-#define GT_BINOMIAL_MAX_N_LN 66UL
-#define GT_BINOMIAL_MAX_N 62UL
-#define GT_BINOMIAL_MAX_N_DP 67UL
-#else
-#define GT_BINOMIAL_MAX_N_LN 32UL
-#define GT_BINOMIAL_MAX_N 30UL
-#define GT_BINOMIAL_MAX_N_DP 33UL
-#endif
+/* The combinatorics module implements some standard approaches for
+   combinatorics problems, some with efficient implementations. */
 
-/* Module Combinatorics includes some standard aproaches for combinatorical
-   problems. Some functions have efficient implementations.
-   Some of the simpler functions are meant to be used inline. */
+/* Initializes static data needed for efficient combinatorics calculations. */
+void                             gt_combinatorics_init(void);
 
-/* Returns n! = 1 * 2 * ... * (n - 1) * n
-   <n> number of which to compute factorial */
-static inline unsigned long gt_combinatorics_factorial(unsigned n);
+/* Cleans up static data needed for efficient combinatorics calculations. */
+void                             gt_combinatorics_clean(void);
 
-/* calculate n choose k using exp(ln(n!) - ln(k!) - ln((n-k)!)). Returned value
-   might deviate from correct result for large n. Overflows for
-   n > GT_BINOMIAL_MAX_N_LN */
+/* Returns n! = 1 * 2 * ... * (n - 1) * n, where <n> number for which to
+   compute factorial. */
+static inline unsigned long      gt_combinatorics_factorial(unsigned n);
+
+/* Returns <n> choose <k> using exp(ln(n!) - ln(k!) - ln((n-k)!)).
+   Returned value might deviate from correct result for large <n>. Overflows for
+   n > 66 (64bit) or n > 32 (32bit). */
 unsigned long                    gt_combinatorics_binomial_ln(unsigned long n,
                                                               unsigned long k);
 
-/* calculate n choose k using a dp table. Overflows for
-   n> GT_BINOMIAL_MAX_N_DP */
+/* Returns <n> choose <k> using a DP table. Overflows for n > 67 (64bit) or
+   n > 33 (32bit) */
 unsigned long                    gt_combinatorics_binomial_dp(unsigned long n,
                                                               unsigned long k);
 
-/* naive implementation of n choose k, but already somewhat optimised.
-   Overflows for n> GT_BINOMIAL_MAX_N */
+/* Naive implementation of <n> choose <k>, but already somewhat optimised.
+   Overflows for n > 62 (64bit) or n > 30 (32bit)*/
 unsigned long                    gt_combinatorics_binomial_simple(
                                                                unsigned long n,
                                                                unsigned long k);
 
 /* Returns multinomial coefficient
-   n choose k_1, k_2 ... k_m = n! / k_1! * k_2! * ... * k_m!
-   <numBins> equals m, <binSizes> points to array which contains the k_i. */
+   n choose k_1, k_2 ... k_m = n! / k_1! * k_2! * ... * k_m! where
+   <numBins> equals m and <binSizes> points to array which contains the <k_i>
+   values. */
 static inline unsigned long      gt_combinatorics_multinomial(
                                                      unsigned n,
                                                      size_t numBins,
@@ -72,8 +68,6 @@ static inline unsigned long long gt_combinatorics_i_pow(unsigned long long x,
 
 int                              gt_combinatorics_unit_test(
                                                         GT_UNUSED GtError *err);
-void                             gt_combinatorics_init(void);
-void                             gt_combinatorics_clean(void);
 
 #include "core/combinatorics_impl.h"
 #endif

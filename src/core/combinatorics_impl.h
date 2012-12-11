@@ -18,6 +18,16 @@
 #ifndef COMBINATORICS_IMPL_H
 #define COMBINATORICS_IMPL_H
 
+#ifdef _LP64
+#define GT_BINOMIAL_MAX_N_LN 66UL
+#define GT_BINOMIAL_MAX_N 62UL
+#define GT_BINOMIAL_MAX_N_DP 67UL
+#else
+#define GT_BINOMIAL_MAX_N_LN 32UL
+#define GT_BINOMIAL_MAX_N 30UL
+#define GT_BINOMIAL_MAX_N_DP 33UL
+#endif
+
 static inline unsigned long gt_combinatorics_factorial(unsigned n)
 {
   unsigned long k = 1UL;
@@ -41,7 +51,7 @@ static inline unsigned long long gt_combinatorics_i_pow(unsigned long long x,
 }
 
 /*@unused@*/
-static inline unsigned long      gt_combinatorics_multinomial(
+static inline unsigned long gt_combinatorics_multinomial(
                                                       unsigned n,
                                                       size_t numBins,
                                                       const unsigned binSizes[])
@@ -69,4 +79,5 @@ static inline unsigned long      gt_combinatorics_multinomial(
       accum /= gt_combinatorics_factorial(binSizes[i]);
   return accum;
 }
+
 #endif
