@@ -18,6 +18,8 @@
 #ifndef POPCOUNT_TAB_H
 #define POPCOUNT_TAB_H
 
+#include "core/error_api.h"
+
 /* Class <GtPopcountTab> stores a table of values of fixed bit
    width sorted by popcount (number of bits set to 1). Values are sorted by
    increasing value within one popcount class. */
