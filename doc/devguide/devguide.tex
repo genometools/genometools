@@ -47,7 +47,7 @@
 This document describes design properties and coding guidelines for the \Gt
 genome analysis system. The goal of the \Gt environment is to provide a
 well understandable, comprehensive and most importantly reusable set of classes
-and modules to aid in the development of C-based bioinformatics applications. 
+and modules to aid in the development of C-based bioinformatics applications.
 
 The expected gain in productivity is only possible to achieve if all
 components of the \Gt behave in a similar way -- or so to say -- in a way which
@@ -478,7 +478,7 @@ int main(int argc, char *argv[])
                                                  with interface type */
   gt_example_run(my_e);                       /* call an interface method */
   gt_example_delete(my_e);
-  
+
   return 0;
 }
 \end{lstlisting}
@@ -744,7 +744,7 @@ $ gt example -bool true -string foo bar baz
 
 \section{Directory structure}
 All of these directories are given as subdirectories of the root directory of
-the \Gt source distribution. 
+the \Gt source distribution.
 \begin{itemize}
 \item[\texttt{bin/}] This subdirectory contains the \Gt binary executable \texttt{gt}
      as dynamic and static variants as well as the example executables built
@@ -764,7 +764,7 @@ the \Gt source distribution.
               \texttt{gtdata/sketch}), and
        \item alphabet definition files for character mappings
              (in \texttt{gtdata/trans}).
-     \end{itemize}     
+     \end{itemize}
 \item[\texttt{gtpython/}]
      This subdirectory contains the Python bindings to selected parts of the \Gt
      library, as well as the Python test suite. See the \texttt{README} file in
@@ -817,10 +817,29 @@ the \Gt source distribution.
              patches, and
        \item the \texttt{tools} subdir with code for all the tools included with
              \Gt .
-     \end{itemize}     
+     \end{itemize}
 \item[\texttt{testdata/}]
+     This subdirectory contains test data used in the testsuite. Please refrain
+     from storing large files ($>1$MB) in this directory, but use the
+     \keyword{gttestdata} repo instead (see~\ref{gttestdata}). Special
+     subdirectories:
+     \begin{itemize}
+       \item The \texttt{testdata/gtscripts} subdir contains test scripts used
+       in the Lua test cases,
+       \item the \texttt{testdata/gtruby} subdir contains test scripts used
+       in the Ruby test cases, and
+       \item the \texttt{testdata/gtpython} subdir contains test scripts used
+       in the Python test cases.
+     \end{itemize}
 \item[\texttt{testsuite/}]
+     This subdirectory contains the test suite definitions as Ruby files as
+     well as the test engine and temporary data created using test runs.
+     After starting a test suite run, the \keyword{testsuite/stest_testsuite}
+     subdirectory then contains a directory named \keyword{test<n>} for each
+     test, where \keyword{<n>} is the test number. See~\ref{testdefinitions}
+     for more details.
 \item[\texttt{www/}]
+     This subdirectory contains the content of the \Gt website.
 \end{itemize}
 
 
@@ -838,11 +857,11 @@ high-level at this point. To ensure compatibility with future versions of the
 \Gt library, the public API is supposed to be subject to as little change as
 possible. That is, interface changes should be made very sparsely, and interface
 design should `look forward' to make such changes unneccessary. For example,
-interface functions which could fail in theory should receive error handling facilities
-in their signature (such as a return code and a \keyword{GtError} object), even
-if their current (and maybe only) implementation cannot fail. This leaves room
-for implementations that \emph{may} fail without having to break the API when
-the new implementation finds its way into the \Gt .
+interface functions which could fail in theory should receive error handling
+facilities in their signature (such as a return code and a \keyword{GtError}
+object), even if their current (and maybe only) implementation cannot fail. This
+leaves room for implementations that \emph{may} fail without having to break the
+API when the new implementation finds its way into the \Gt .
 
 All public API functions for a given class must be declared in a prototype
 header file named \keyword{<class>_api.h}. This header file must only include
@@ -939,13 +958,14 @@ gt_array_equal(const GtArray *a, const GtArray *b, GtCompare cmpfunc)
 Use the \keyword{scripts/src_check} and \keyword{scripts/src_clean} scripts
 regularly to check your source code for style violations.
 \item
-Use the \keyword{scripts/pre-commit} git hook to automatically run a \keyword{src_check}
+Use the \keyword{scripts/pre-commit} git hook to automatically run a
+\keyword{src_check}
 before each commit. The commit will be canceled if errors are found.\\
 To enable the git hook, copy the file \keyword{scripts/pre-commit} into the
 \keyword{.git/hooks} subdirectory of your \Gt repository.
 \item
-Static variables inside functions are not allowed. An exception are class structs, which
-must be static.
+Static variables inside functions are not allowed. An exception are class
+structs, which must be static.
 \item
 All functions except those which should be callable publicly should be declared
 as \keyword{static}. All non-static functions must be documented in a
@@ -1004,7 +1024,8 @@ name, use underscores in the respective file name, e.g.\
 Variable names and function names must be all lower-case.
 \item
 Variable names and function names should use underscores to separate words
-(e.g., \keyword{get_first_five_chars} instead of \keyword{getfirstfivechars}).
+(e.g. use the function name \keyword{get_first_five_chars} instead of
+\keyword{getfirstfivechars}).
 \item
 The names of public (i.e.\ non-static) functions must be prefixed by the string
 `\keyword{gt_}' to avoid namespace clashes when linking the \Gt library with
@@ -1050,8 +1071,8 @@ features, refactoring, or fixing bugs which require large rewrites) should
 give his/her name and email address, updating the given year ranges in the
 process.
 \item The "Center for Bioinformatics" copyright line is only required for
-developers employed by it, because only in this cases the University gains any
-copyright .
+developers employed by it, because only in this case the University gains any
+copyright.
 \end{itemize}
 
 \subsection{Header files}
@@ -1122,6 +1143,37 @@ Also, keywords can be marked as strong (bold) by putting them between
 three underscores (\keyword{___}\dots\keyword{___}) or emphasized (italic) by
 using two underscores (\keyword{__}\dots\keyword{__}).
 \end{itemize}
+\item
+The comment line should briefly describe
+\begin{itemize}
+\item
+what the method does (e.g.\ ``Calculates and returns X\dots'',
+``Delivers the next element in order\dots'', ``Adds element X\dots''),
+\item
+what \emph{all} parameters are supposed to be (ideally given in the context of
+what the method does),
+\item
+what the return value is,
+\item
+potential side-effects, and
+\item
+if the function receives or returns a pointer, whether ownership is taken or
+retained for the accepted or returned memory (i.e.\ ``takes ownership of
+parameter X'' or ``X must be deleted by the caller'').
+\end{itemize}
+\item
+Do not group multiple functions beneath one comment line, even if they are
+largely similar and differ only in minor details. If required, repeat the
+comment above each function to ensure that both get an entry in the generated
+documentation.
+\item
+Stars (\keyword{*}) are \emph{not} to be continued on every line of the comment,
+as many editors like to do by default. Doing so anyway will lead to interspersed
+star symbols in the generated output.
+\item
+Please refrain from using other markup formats such as Doxygen or Javadoc style.
+It may look alright in the plain text, but will most certainly come out weird in
+the generated LaTeX or HTML documents.
 \item
 Use the \keyword{docs} target in the \Gt Makefile to build the API
 documentation, which is then found in \keyword{www/genometools.org/htdocs}
@@ -1208,8 +1260,8 @@ can lead to nasty bugs that are hard to track down.
 Other special cases are expected to come up sooner or later. For example, a user
 may specify a file name for input or output which is not readable or writable,
 or which does not exist. Typically, it is not intended to terminate program
-execution at that point, but to react in a graceful way (e.g.\ by creating a
-new file, reporting a proper error message, or asking for a different file name).
+execution at that point, but to react in a graceful way (e.g.\ by creating a new
+file, reporting a proper error message, or asking for a different file name).
 These are run-time errors.
 
 \subsection{Programming errors}
@@ -1301,13 +1353,13 @@ The error object should always be the last parameter and should be named
 \subsection{Allocation/deallocation}
 \begin{itemize}
 \item
-Space allocation is only allowed using the \keyword{gt_malloc()}, \keyword{gt_calloc()},
-\keyword{gt_realloc()} functions in \keyword{core/ma_api.h}. Use \keyword{gt_free()} to
-deallocate memory.
+Space allocation is only allowed using the \keyword{gt_malloc()},
+\keyword{gt_calloc()}, \keyword{gt_realloc()} functions in
+\keyword{core/ma_api.h}. Use \keyword{gt_free()} to deallocate memory.
 These methods are analog to \keyword{malloc(3)}, \keyword{calloc(3)} and
 \keyword{realloc(3)} from the C standard library, except that they never return
 \keyword{NULL} upon failure.
-\item 
+\item
 The \keyword{gt_ma_get_space_peak()}, \keyword{gt_ma_show_space_peak()} and
 \keyword{gt_ma_check_space_leak()} functions in \keyword{core/ma_api.h} can be
 used to evaluate memory usage and check for memory leaks.
@@ -1393,12 +1445,12 @@ must be properly freed when done using the \Gt . This is usually done by the
 runtime by calling initializers when a tool is run using the \keyword{gt}
 binary.
 
-Now consider that \Gt can also be used as a library, called \keyword{libgenometools}.
-That means, it is possible to link an external code with the static or shared
-object file and call functions from there, without going through the tool
-runtime.
-It is now crucial that the necessary initializations have taken place before
-using functions, and that the required cleanup is done at the end.
+Now consider that \Gt can also be used as a library, called
+\keyword{libgenometools}. That means, it is possible to link an external code
+with the static or shared object file and call functions from there, without
+going through the tool runtime. It is now crucial that the necessary
+initializations have taken place before using functions, and that the required
+cleanup is done at the end.
 
 There are two functions in the \keyword{core/init.[ch]} module in \Gt used to
 accomplish this:
@@ -1480,14 +1532,14 @@ int  (*UnitTestFunc)(GtError *err);
 \end{lstlisting}
 
 They must return 0 if the test was successful and -1 if the test has failed.
-The \keyword{ensure} helper macro makes writing unit tests easier. To use it,
+The \keyword{gt_ensure} helper macro makes writing unit tests easier. To use it,
 \keyword{#include} the file \keyword{core/ensure.h}. Then write your unit test:
 
 \begin{lstlisting}
 int gt_class_unit_test(GtError *err) /* must be called 'err'! */
 {
   int had_err = 0;
-  gt_error_check(err);               /* will abort if error was already set */           
+  gt_error_check(err);               /* will abort if error was already set */
 
   gt_ensure(had_err, 1 + 1 == 2);    /* will succeed */
   gt_ensure(had_err, 1 + 1 == 3);    /* will fail */
@@ -1497,11 +1549,11 @@ int gt_class_unit_test(GtError *err) /* must be called 'err'! */
 \end{lstlisting}
 
 Similarly to \keyword{gt_assert()}, if the expression given to
-\keyword{ensure()} as a second parameter evaluates to false, the test will fail
-with an error message, giving the location at which the first condition failed.
-Because \keyword{ensure()} is implemented as a macro relying on certain naming
-conventions, it is mandatory that the \keyword{GtError} object passed to the
-test function is called \keyword{err}.
+\keyword{gt_ensure()} as a second parameter evaluates to false, the test will
+fail with an error message, giving the location at which the first condition
+failed. Because \keyword{gt_ensure()} is implemented as a macro relying on
+certain naming conventions, it is mandatory that the \keyword{GtError} object
+passed to the test function is called \keyword{err}.
 
 The unit tests are added to the test suite in the function
 \keyword{gtt_unit_tests()} in \keyword{gtt.c} and loaded into the \Gt runtime
@@ -1514,7 +1566,8 @@ function prototype) in \keyword{gtt.c} and add the following line in
 gt_hashmap_add(unit_tests, "example class", gt_class_unit_test);
 \end{lstlisting}
 
-The tests registered in this hash table can be executed on the command line with:
+The tests registered in this hash table can be executed on the command line
+with:
 
 \begin{lstlisting}[language=sh]
 $ gt -test
@@ -1528,6 +1581,7 @@ $ gt -test -only 'example class'
 \end{lstlisting}%$
 
 \subsection{Testing on the tool level -- the test suite}
+
 While the unit tests check the correctness of the classes and modules on the
 code level, the Ruby-based test suite is used to run tests on the tools
 themselves. That means that they run tools with example data or invalid
@@ -1540,6 +1594,7 @@ Large files, such as whole chromosome annotations go into another repository
 (see~\ref{gttestdata}).
 
 \subsubsection{Test definitions}
+\label{testdefinitions}
 
 Tests are defined in the \keyword{gt_<toolname>_include.rb} files in the
 \keyword{testsuite/} directory. They contain test definitions written in a
@@ -1575,10 +1630,10 @@ conditions:
 \item
 \keyword{options} are a hash specifying test constraints.
 The key \keyword{:retval} specifies the expected error code for this run (0 is
-the
-default). The option \keyword{:maxtime} specifies the maximal time in seconds that the
-started program may run before it is killed, resulting in a failed test (60 is
-the default). This allows one to detect infinite loops without stopping the testing progress.
+the default). The option \keyword{:maxtime} specifies the maximal time in
+seconds that the started program may run before it is killed, resulting in a
+failed test (60 is the default). This allows one to detect infinite loops
+without stopping the testing progress.
 \end{itemize}
 This command runs the command specified in \keyword{runstring}, and causes the
 test to fail if the returned error code does not equal the expected one.
@@ -1652,17 +1707,23 @@ The following \keyword{make} switches influence the test runs:
 \begin{itemize}
 \item
 \keyword{memcheck=yes} enables memory access checking via \emph{valgrind},
-\item 
+\item
+\keyword{testthreads=<n>} enables multithreaded testing with \keyword{<n>}
+threads in parallel to speed up test runs,
+\item
 \keyword{gttestdata=<path>} tells the test suite to look for large test data in
 \keyword{<path>}. This must be where a copy of the \keyword{gttestdata}
 repository is installed.
+
 \end{itemize}
 
 The tool tests can also be run using the \keyword{testsuite/testsuite.rb}
 script. Use the \keyword{-keywords <keywords>} parameter to only run these
 tests tagged with the given keywords. OR and AND operators can be used to
 specify the tests in a more detailed way. The \keyword{-select <n>} parameter
-can be used to run only the one test with number \keyword{n}.
+can be used to run only the one test with number \keyword{n}, and the
+\keyword{-threads <n>} will run the testsuite with \keyword{n} threads in
+parallel.
 
 \subsection{Header inclusion dependencies}
 Often function prototypes in the \Gt header files use types declared in
@@ -1678,7 +1739,7 @@ message so the problem can be fixed.
 
 \subsection{Debug symbols}
 Compilation with debug symbols is enabled by default.
-To make sure that line numbers are correct when using a debugger, e.g. 
+To make sure that line numbers are correct when using a debugger, e.g.
 \keyword{gdb}, use the \keyword{opt=no} option in the \keyword{make} call to
 disable compile-time optimization. The \keyword{opt} option is enabled by
 default.
@@ -1693,11 +1754,12 @@ using \emph{gprof}\footnote{See
 information.}.
 
 \subsection{Logging}
-Use the \keyword{gt_log_*()} functions in \keyword{core/log_api.h} to log
-debug messages to the screen or files. Output of debugging information defined using
+
+Use the \keyword{gt_log_*()} functions in \keyword{core/log_api.h} to log debug
+messages to the screen or files. Output of debugging information defined using
 these functions can then be enabled or disabled via the \keyword{-debug} option
-of the \keyword{gt} binary.
-That is, to run tool \keyword{mytool} with debug output enabled, run
+of the \keyword{gt} binary. That is, to run tool \keyword{mytool} with debug
+output enabled, run
 
 \begin{lstlisting}
 $ gt -debug mytool
@@ -1722,11 +1784,11 @@ also creates manuals for some published tools in \Gt (see
 \keyword{install}, which installs the compiled \Gt binaries, libraries and
 headers into the directory specified by the \keyword{prefix=<path>} option,
 \item
-\keyword{dist}, which creates a tarball with a binary \Gt distribution, which will
-then reside in the \keyword{dist/} subdirectory of the \Gt root,
+\keyword{dist}, which creates a tarball with a binary \Gt distribution, which
+will then reside in the \keyword{dist/} subdirectory of the \Gt root,
 \item
-\keyword{srcdist}, which creates a tarball with a source \Gt distribution, which will
-then reside in the working directory,
+\keyword{srcdist}, which creates a tarball with a source \Gt distribution, which
+will then reside in the working directory,
 \item
 \keyword{spgt}, which checks selected files in the \keyword{core/} and
 \keyword{match/} subdirectories using the splint static
@@ -1820,8 +1882,8 @@ not be -- and almost never is --  correct in typical development environments
 (i.e.\ \keyword{user@workstation.zbh.uni-hamburg.de} instead of
 \keyword{user@maildomain.org}).
 
-Use the \keyword{git config} commands while in your \Gt Git repository to set them
-to a correct value:
+Use the \keyword{git config} commands while in your \Gt Git repository to set
+them to a correct value:
 
 \begin{lstlisting}
 $ git config user.name "Hans Mustermann"
@@ -1847,16 +1909,18 @@ it easy to chain branches later via \keyword{git rebase} in any order.
 \item
 Try to keep commits atomic. Every commit should either add a single feature or
 fix a single bug. That makes two things easier:
-  \begin{enumerate}
+\begin{enumerate}
   \item
   Locating the exact commit which introduces a bug, e.g.\ using
   \keyword{git bisect}. If there are too many changes in one commit, bugs
   become more tedious to track down.
   \item
   Reverting single commits if new features introduce bugs.
-  \end{enumerate}
-If you made several incomplete commits and want to reorder or combine them into one afterwards,
-use interactive rebasing via \keyword{git rebase -i}\footnote{See \url{http://book.git-scm.com/4_interactive_rebasing.html} for an explanation.}.
+\end{enumerate}
+If you made several incomplete commits and want to reorder or combine them into
+one afterwards, use interactive rebasing via \keyword{git rebase
+-i}\footnote{See \url{http://book.git-scm.com/4_interactive_rebasing.html} for
+an explanation.}.
 \item
 Needless to say, every commit should compile cleanly. Again, bisecting can become
 very tedious if the code has to be fixed at each stop to get it to even compile.
@@ -1886,7 +1950,7 @@ e.g.\ ``gtpython: add bindings for GtFoo class''.
 For bugfixes for bugs also listed in the \Gt Lighthouse bug tracking web
 app\footnote{\url{http://genometools.lighthouseapp.com}}, commit messages can
 be used to update the ticket status. See the Lighthouse
-documentation\footnote{\url{http://help.lighthouseapp.com/faqs/ticket-workflow/ticket-keyword-updates}} 
+documentation\footnote{\url{http://help.lighthouseapp.com/faqs/ticket-workflow/ticket-keyword-updates}}
 for details.
 \end{itemize}
 
@@ -1924,8 +1988,6 @@ Small changes can also be submitted as patches which must be applicable using
 \keyword{git apply}. You will then be credited in the commit message. Such
 patches can be created conveniently -- ready to be sent via mail -- via git
 only using \keyword{git format-patch} or \keyword{git diff}.
-
-A web-based pipeline for code submission and review is being prepared. 
 
 \subsubsection{Test data submission}
 
