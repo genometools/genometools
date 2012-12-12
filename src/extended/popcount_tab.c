@@ -97,7 +97,7 @@ static const uint8_t B1CntBytes[] = {
 
 struct GtPopcountTab
 {
-  unsigned blocksize;
+  unsigned int blocksize;
   unsigned long num_of_blocks;
   GtCompactUlongStore *blocks;
   unsigned long *offsets;
@@ -138,12 +138,12 @@ static unsigned long gt_popcount_tab_next_perm(unsigned long v)
   return head | tail;
 }
 
-static unsigned long gt_popcount_tab_perm_start(unsigned bits)
+static unsigned long gt_popcount_tab_perm_start(unsigned int bits)
 {
   return (1UL << bits) - 1;
 }
 
-static unsigned long gt_popcount_tab_gen_blocks(unsigned popcount_c,
+static unsigned long gt_popcount_tab_gen_blocks(unsigned int popcount_c,
                                                 unsigned long idx,
                                                 unsigned long blockmask,
                                                 GtCompactUlongStore *blocks)
@@ -163,11 +163,11 @@ static unsigned long gt_popcount_tab_gen_blocks(unsigned popcount_c,
 
 static unsigned long gt_popcount_tab_init_blocks_tab(
                                                     GtCompactUlongStore *blocks,
-                                                    unsigned blocksize)
+                                                    unsigned int blocksize)
 {
   unsigned long idx = 1UL,
                 blockmask;
-  unsigned popcount_c = 1U;
+  unsigned int popcount_c = 1U;
   blockmask = gt_popcount_tab_perm_start(blocksize);
   gt_compact_ulong_store_update(blocks, 0, 0);
   while (popcount_c < blocksize) {
@@ -177,7 +177,7 @@ static unsigned long gt_popcount_tab_init_blocks_tab(
   return idx;
 }
 
-GtPopcountTab *gt_popcount_tab_new(unsigned blocksize)
+GtPopcountTab *gt_popcount_tab_new(unsigned int blocksize)
 {
   GtPopcountTab *popcount_tab;
   GT_UNUSED unsigned long idx_check;
@@ -205,7 +205,7 @@ void gt_popcount_tab_delete(GtPopcountTab *popcount_tab)
 }
 
 unsigned long gt_popcount_tab_get(GtPopcountTab *popcount_tab,
-                                  unsigned popcount_c,
+                                  unsigned int popcount_c,
                                   unsigned long i) {
   gt_assert(popcount_c <= popcount_tab->blocksize);
   if (popcount_c == 0) {
@@ -222,7 +222,7 @@ unsigned long gt_popcount_tab_get(GtPopcountTab *popcount_tab,
                                       i);
 }
 
-size_t gt_popcount_tab_calculate_size(unsigned blocksize) {
+size_t gt_popcount_tab_calculate_size(unsigned int blocksize) {
   unsigned long num_of_blocks = 1UL << blocksize;
   size_t size = gt_compact_ulong_store_size(num_of_blocks, blocksize);
   size += sizeof (GtPopcountTab);
@@ -230,7 +230,7 @@ size_t gt_popcount_tab_calculate_size(unsigned blocksize) {
   return size;
 }
 
-static inline unsigned gt_popcount_tab_popcount(unsigned long val)
+static inline unsigned int gt_popcount_tab_popcount(unsigned long val)
 {
 #ifdef __SSE4_2__
   return __builtin_popcountll(val);
@@ -257,10 +257,10 @@ static inline unsigned gt_popcount_tab_popcount(unsigned long val)
 #endif
 }
 
-static inline unsigned _gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
-                              unsigned popcount_c,
-                              unsigned long i,
-                              unsigned pos)
+static inline unsigned int _gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
+                                                   unsigned int popcount_c,
+                                                   unsigned long i,
+                                                   unsigned int pos)
 {
   unsigned long block;
   block = gt_compact_ulong_store_get(popcount_tab->blocks,
@@ -270,10 +270,10 @@ static inline unsigned _gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
   return gt_popcount_tab_popcount(block);
 }
 
-unsigned gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
-                                     unsigned popcount_c,
-                                     unsigned long i,
-                                     unsigned pos) {
+unsigned int gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
+                                    unsigned int popcount_c,
+                                    unsigned long i,
+                                    unsigned int pos) {
   gt_assert(pos < popcount_tab->blocksize);
   gt_assert(popcount_c <= popcount_tab->blocksize);
   gt_assert(popcount_c != 0);
@@ -286,10 +286,10 @@ unsigned gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
   }
   return _gt_popcount_tab_rank_1(popcount_tab, popcount_c, i, pos);
 }
-unsigned gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
-                                      unsigned popcount_c,
-                                      unsigned long i,
-                                      unsigned pos) {
+unsigned int gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
+                                    unsigned int popcount_c,
+                                    unsigned long i,
+                                    unsigned int pos) {
   gt_assert(pos < popcount_tab->blocksize);
   gt_assert(popcount_c < popcount_tab->blocksize);
   if (popcount_c == 0)
@@ -302,8 +302,8 @@ int gt_popcount_tab_unit_test(GtError *err)
   int had_err = 0;
   unsigned long idx, jdx, popc_perm, init,
                 blockmask = gt_popcount_tab_perm_start(16U);
-  unsigned popcount_c;
-  static const unsigned blocksize = 4U;
+  unsigned int popcount_c;
+  static const unsigned int blocksize = 4U;
   static const unsigned long blocksize_four[] =
     {0, 1UL, 2UL, 4UL, 8UL, 3UL, 5UL, 6UL,
      9UL, 10UL, 12UL, 7UL, 11UL, 13UL, 14UL, 15UL};
@@ -340,7 +340,7 @@ int gt_popcount_tab_unit_test(GtError *err)
 
   popc_perm = init = gt_popcount_tab_perm_start(5U);
   while (!had_err && popc_perm >= init) {
-    gt_ensure(had_err, 5U == gt_popcount_tab_popcount(popc_perm));
+    gt_ensure(had_err, gt_popcount_tab_popcount(popc_perm) == 5U);
     popc_perm = gt_popcount_tab_next_perm(popc_perm) & blockmask;
   }
   return had_err;

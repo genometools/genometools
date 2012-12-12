@@ -48,7 +48,7 @@ typedef unsigned long long (*GtDistrFunc) (const void *distribution,
 typedef int (*GtHuffmanActFunc) (unsigned long symbol,
                                  unsigned long long freq,
                                  GtBitsequence code,
-                                 unsigned code_length,
+                                 unsigned int code_length,
                                  void *action_info);
 
 /* Returns a new <GtHuffman> object. <distribution> points to a data
@@ -82,7 +82,7 @@ int                      gt_huffman_iterate(const GtHuffman *huffman,
 void                     gt_huffman_encode(const GtHuffman *huffman,
                                            unsigned long symbol,
                                            GtBitsequence *code,
-                                           unsigned *codelength);
+                                           unsigned int *codelength);
 
 /* Returns the number of symbols with frequency > 0. */
 unsigned long            gt_huffman_numofsymbols(const GtHuffman *huffman);
@@ -96,10 +96,10 @@ unsigned long            gt_huffman_totalnumofsymbols(const GtHuffman *huffman);
    <GtBitsequence> to start, <pad_length> is the number of bits in the last
    element of <bitsequence> that are not part of the encoded data. */
 GtHuffmanDecoder*        gt_huffman_decoder_new(GtHuffman *huffman,
-                                                 GtBitsequence *bitsequence,
-                                                 unsigned long length,
-                                                 unsigned long bit_offset,
-                                                 unsigned long pad_length);
+                                                GtBitsequence *bitsequence,
+                                                unsigned long length,
+                                                unsigned long bit_offset,
+                                                unsigned long pad_length);
 
 /* Function type, used by <GtHuffmanDecoder> to ask for a pointer to
    <GtBitsequence> to read. Sets <bitsequence> to the new memory, <length> to

@@ -39,8 +39,8 @@ double        gt_rand_max_double(double maximal_value);
 double        gt_rand_0_to_1(void);
 /* Returns a random character from 'a' to 'z'. */
 char          gt_rand_char(void);
-/* Find the log base 2 of an integer in O(wordsize) operations */
-unsigned int  gt_determinebitspervalue(unsigned long maxvalue);
+/* Retuns the log base 2 of an integer <maxvalue> in O(wordsize) operations */
+unsigned int gt_determinebitspervalue(unsigned long maxvalue);
 /* Determine pow(base,exponent) for small values of exponent */
 unsigned long gt_power_for_small_exponents(unsigned int base,
                                            unsigned int exponent);

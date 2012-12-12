@@ -38,10 +38,10 @@ static inline unsigned long gt_combinatorics_factorial(unsigned n)
 
 /*@unused@*/
 static inline unsigned long long gt_combinatorics_i_pow(unsigned long long x,
-                                                        unsigned i)
+                                                        unsigned int i)
 {
    unsigned long long result = 1ULL;
-   while (i) {
+   while (i != 0) {
      if (i & 1)
        result *= x;
      x *= x;

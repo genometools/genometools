@@ -39,7 +39,7 @@ typedef struct GtHuffmanSymbol {
 } GtHuffmanSymbol;
 
 typedef struct GtHuffmanCode {
-  unsigned numofbits;
+  unsigned int numofbits;
   GtBitsequence code;
 } GtHuffmanCode;
 
@@ -48,7 +48,7 @@ typedef struct GtHuffmanTree {
   GtHuffmanCode code;
   struct GtHuffmanTree *leftchild,
                        *rightchild;
-  unsigned reference_count;
+  unsigned int reference_count;
 } GtHuffmanTree;
 
 struct GtHuffman {
@@ -245,7 +245,7 @@ static void print_huff_code(unsigned length, GtBitsequence code)
 static int store_codes(unsigned long symbol,
                        GT_UNUSED unsigned long long freq,
                        const GtBitsequence code,
-                       unsigned code_len,
+                       unsigned int code_len,
                        void *huffman)
 {
   GtHuffman *huff = (GtHuffman*)huffman;
@@ -257,7 +257,7 @@ static int store_codes(unsigned long symbol,
 static int print_codes(unsigned long symbol,
                        unsigned long long freq,
                        const GtBitsequence code,
-                       unsigned code_len,
+                       unsigned int code_len,
                        GT_UNUSED void *unused)
 {
 #ifndef S_SPLINT_S
@@ -280,7 +280,7 @@ static int print_codes(unsigned long symbol,
 static int calc_size(GT_UNUSED unsigned long symbol,
                      unsigned long long freq,
                      GT_UNUSED const GtBitsequence code,
-                     unsigned code_len,
+                     unsigned int code_len,
                      void *huffman)
 {
   GtHuffman *huff = (GtHuffman*)huffman;
@@ -406,7 +406,7 @@ void gt_huffman_print_codes(const GtHuffman *huffman)
 void gt_huffman_encode(const GtHuffman *huffman,
                        unsigned long symbol,
                        GtBitsequence *code,
-                       unsigned *codelength)
+                       unsigned int *codelength)
 {
   gt_assert(huffman != NULL);
   gt_assert(symbol < huffman->num_of_symbols);
@@ -781,7 +781,7 @@ int test_mem(GtError *err)
 {
   unsigned char bits = (unsigned char) (sizeof (GtBitsequence) * 8),
                 bits_remain = bits;
-  unsigned code_len;
+  unsigned int code_len;
   int decoder_stat = 1,
       had_err = 0;
   unsigned long const max_num = (unsigned long) (1000 * gt_rand_0_to_1() + 100),

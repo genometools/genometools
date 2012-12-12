@@ -151,8 +151,7 @@ unsigned long gt_power_for_small_exponents(unsigned int base,
 {
   unsigned int logvalue = 0;
 
-  if (exponent == 0)
-  {
+  if (exponent == 0) {
     return 1UL;
   }
   switch (base)
@@ -182,16 +181,13 @@ unsigned long gt_power_for_small_exponents(unsigned int base,
       logvalue = 8U;
       break;
   }
-  if (logvalue > 0)
-  {
+  if (logvalue > 0) {
     gt_assert(logvalue * exponent < sizeof (void *) * 8);
     return 1UL << (logvalue * exponent);
-  } else
-  {
+  } else {
     unsigned long powervalue = (unsigned long) base;
 
-    while (exponent > 1U)
-    {
+    while (exponent > 1U) {
       powervalue *= base;
       exponent--;
     }
@@ -227,23 +223,19 @@ void gt_out_power_for_small_exponents(void)
 {
   unsigned int exponent;
 
-  for (exponent=1U; exponent<64U; exponent++)
-  {
+  for (exponent=1U; exponent<64U; exponent++) {
     printf("pow(2UL,%u)=%lu\n",exponent,
             gt_power_for_small_exponents(2U,exponent));
   }
-  for (exponent=1U; exponent<32U; exponent++)
-  {
+  for (exponent=1U; exponent<32U; exponent++) {
     printf("pow(4UL,%u)=%lu\n",exponent,
             gt_power_for_small_exponents(4U,exponent));
   }
-  for (exponent=1U; exponent<16U; exponent++)
-  {
+  for (exponent=1U; exponent<16U; exponent++) {
     printf("pow(8UL,%u)=%lu\n",exponent,
             gt_power_for_small_exponents(8U,exponent));
   }
-  for (exponent=1U; exponent<32U; exponent++)
-  {
+  for (exponent=1U; exponent<32U; exponent++) {
     printf("pow(3UL,%u)=%lu\n",exponent,
             gt_power_for_small_exponents(3U,exponent));
   }

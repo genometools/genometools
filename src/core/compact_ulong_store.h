@@ -21,13 +21,13 @@
 
 #include "core/error_api.h"
 
-/* Class <GtCompactUlongStore> stores fixed bit witdh unsigned integer. Maximum
+/* Class <GtCompactUlongStore> stores fixed bit witdh unsigned integers. Maximum
    bitwidth is sizeof (unsigned long) */
 typedef struct GtCompactUlongStore GtCompactUlongStore;
 
 /* Return a new <GtCompactUlongStore> object with <numofentries> elements of
    <bitsperentry> bit width */
-GtCompactUlongStore *gt_compact_ulong_store_new(unsigned long numofentries,
+GtCompactUlongStore* gt_compact_ulong_store_new(unsigned long numofentries,
                                                 unsigned int bitsperentry);
 
 /* Deletes <cus> object and frees all associated memory */

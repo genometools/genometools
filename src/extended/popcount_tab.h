@@ -33,27 +33,27 @@ GtPopcountTab* gt_popcount_tab_new(unsigned int blocksize) ;
 /* Return the <i>-th value from <popcount_tab> with <popcount_c> bits set, <i>
    has to be in range 0..(blocksize choose popcount). */
 unsigned long  gt_popcount_tab_get(GtPopcountTab *popcount_tab,
-                                   unsigned popcount_c,
+                                   unsigned int popcount_c,
                                    unsigned long i);
 
 /* Return rank of 1s in <i>-th block given for <popcount_c> bits set
    upto and including <pos>, which is a relative bit position within that block.
    Note that <pos> <= blocksize of <popcount_tab>. */
-unsigned       gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
-                                      unsigned popcount_c,
+unsigned int   gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
+                                      unsigned int popcount_c,
                                       unsigned long i,
-                                      unsigned pos);
+                                      unsigned int pos);
 
 /* Return rank of 0s in <i>-th block given for <popcount_c> bits set
    upto and including <pos>, which is a relative bit position within that block.
    Note that <pos> <= blocksize of <popcount_tab>. */
-unsigned       gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
-                                      unsigned popcount_c,
+unsigned int   gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
+                                      unsigned int popcount_c,
                                       unsigned long i,
-                                      unsigned pos);
+                                      unsigned int pos);
 
 /* Return size of a <GtPopcountTab> with <blocksize> in bytes. */
-size_t         gt_popcount_tab_calculate_size(unsigned blocksize);
+size_t         gt_popcount_tab_calculate_size(unsigned int blocksize);
 
 /* Deletes <popcount_tab> and frees all associated memory. */
 void           gt_popcount_tab_delete(GtPopcountTab *popcount_tab);
