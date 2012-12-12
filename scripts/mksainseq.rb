@@ -45,14 +45,15 @@ keylist.each do |key|
 fo.puts <<CCODE
 static unsigned long gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
                                                  #{getc_param(key)},
-                                                 unsigned long *suftab)
+                                                 unsigned long *suftab,
+                                                 GtLogger *logger)
 {
   unsigned long position,
                 nextcc = GT_UNIQUEINT(sainseq->totallength),
                 countSstartype = 0,
                 *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
-                                               sainseq->numofchars);
+                                               sainseq->numofchars,logger);
   #{declare_tmpcc(key,"bool nextisStype = true")}
 
   gt_sain_endbuckets(sainseq);

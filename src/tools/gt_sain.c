@@ -20,6 +20,7 @@
 #include "core/fa.h"
 #include "core/timer_api.h"
 #include "core/showtime.h"
+#include "core/logger.h"
 #include "tools/gt_sain.h"
 #include "match/sfx-sain.h"
 
@@ -176,7 +177,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                        != 0)
         {
           had_err = -1;
-        }
+        } else
         {
           if (!gt_alphabet_is_dna(gt_encseq_alphabet(encseq)) &&
               (arguments->readmode == GT_READMODE_COMPL ||
@@ -193,7 +194,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                       arguments->readmode,
                                       arguments->icheck,
                                       arguments->fcheck,
-                                      arguments->verbose,
+                                      NULL,
                                       NULL);
         }
       }
@@ -225,6 +226,8 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         if (!had_err)
         {
           GtTimer *timer = NULL;
+          GtLogger *logger = gt_logger_new(arguments->verbose,
+                                           GT_LOGGER_DEFLT_PREFIX,stdout);
           if (gt_showtime_enabled())
           {
             timer = gt_timer_new_with_progress_description(
@@ -234,7 +237,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           gt_sain_plain_sortsuffixes(plainseq,
                                      (unsigned long) len,
                                      arguments->icheck,
-                                     arguments->verbose,
+                                     logger,
                                      timer);
           if (timer != NULL)
           {
@@ -242,6 +245,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
             gt_timer_stop(timer);
           }
           gt_timer_delete(timer);
+          gt_logger_delete(logger);
         }
       }
       gt_fa_xmunmap(plainseq);

@@ -19,19 +19,20 @@
 #define SFX_SAIN_H
 
 #include "core/timer_api.h"
+#include "core/logger_api.h"
 #include "core/encseq.h"
 
 void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  bool intermediatecheck,
                                  bool finalcheck,
-                                 bool verbose,
+                                 GtLogger *logger,
                                  GtTimer *timer);
 
 void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                                 unsigned long len,
                                 bool intermediatecheck,
-                                bool verbose,
+                                GtLogger *logger,
                                 GtTimer *timer);
 
 #endif

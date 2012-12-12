@@ -1,13 +1,14 @@
 static unsigned long gt_sain_PLAINSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtUchar *plainseq,
-                                                 unsigned long *suftab)
+                                                 unsigned long *suftab,
+                                                 GtLogger *logger)
 {
   unsigned long position,
                 nextcc = GT_UNIQUEINT(sainseq->totallength),
                 countSstartype = 0,
                 *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
-                                               sainseq->numofchars);
+                                               sainseq->numofchars,logger);
   bool nextisStype = true;
 
   gt_sain_endbuckets(sainseq);
@@ -434,14 +435,15 @@ plainseq[position];
 }
 static unsigned long gt_sain_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
-                                                 unsigned long *suftab)
+                                                 unsigned long *suftab,
+                                                 GtLogger *logger)
 {
   unsigned long position,
                 nextcc = GT_UNIQUEINT(sainseq->totallength),
                 countSstartype = 0,
                 *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
-                                               sainseq->numofchars);
+                                               sainseq->numofchars,logger);
   GtUchar tmpcc;
 bool nextisStype = true;
 
@@ -918,14 +920,15 @@ sainseq->readmode))
 }
 static unsigned long gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const unsigned long *array,
-                                                 unsigned long *suftab)
+                                                 unsigned long *suftab,
+                                                 GtLogger *logger)
 {
   unsigned long position,
                 nextcc = GT_UNIQUEINT(sainseq->totallength),
                 countSstartype = 0,
                 *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
-                                               sainseq->numofchars);
+                                               sainseq->numofchars,logger);
   bool nextisStype = true;
 
   gt_sain_endbuckets(sainseq);

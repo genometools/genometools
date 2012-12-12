@@ -300,7 +300,8 @@ typedef struct
 
 static GtSainbuffer *gt_sainbuffer_new(unsigned long *suftab,
                                        unsigned long *fillptr,
-                                       unsigned long numofchars)
+                                       unsigned long numofchars,
+                                       GtLogger *logger)
 {
   if (numofchars <= UCHAR_MAX+1)
   {
@@ -319,8 +320,8 @@ static GtSainbuffer *gt_sainbuffer_new(unsigned long *suftab,
     buf->size += sizeof (*buf->values) * buf->cachesize;
     buf->nextidx = gt_calloc((size_t) numofchars,sizeof (*buf->nextidx));
     buf->size += sizeof (*buf->nextidx) * numofchars;
-    printf("used buffer of %lu bytes (bufsize=%lu)\n",
-               (unsigned long) buf->size,buf->buf_size);
+    gt_logger_log(logger,"used buffer of %lu bytes (bufsize=%lu)",
+                         (unsigned long) buf->size,buf->buf_size);
     return buf;
   } else
   {
@@ -429,19 +430,20 @@ static void gt_sain_induceStypes2fromspecialranges(
 #include "match/sfx-sain.inc"
 
 static unsigned long gt_sain_insertSstarsuffixes(GtSainseq *sainseq,
-                                                 unsigned long *suftab)
+                                                 unsigned long *suftab,
+                                                 GtLogger *logger)
 {
   switch (sainseq->seqtype)
   {
     case GT_SAIN_PLAINSEQ:
       return gt_sain_PLAINSEQ_insertSstarsuffixes(sainseq,sainseq->seq.plainseq,
-                                                  suftab);
+                                                  suftab,logger);
     case GT_SAIN_ENCSEQ:
       return gt_sain_ENCSEQ_insertSstarsuffixes(sainseq,sainseq->seq.encseq,
-                                                suftab);
+                                                suftab,logger);
     case GT_SAIN_INTSEQ:
       return gt_sain_INTSEQ_insertSstarsuffixes(sainseq,sainseq->seq.array,
-                                                suftab);
+                                                suftab,logger);
   }
   /*@ignore@*/
   return 0;
@@ -1187,21 +1189,19 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                                      unsigned long suftabentries,
                                      bool intermediatecheck,
                                      bool finalcheck,
-                                     bool verbose,
+                                     GtLogger *logger,
                                      GtTimer *timer)
 {
   unsigned long countSstartype;
 
   GT_SAIN_SHOWTIMER("insert Sstar suffixes");
-  countSstartype = gt_sain_insertSstarsuffixes(sainseq,suftab);
-  printf("level %u: sort sequence of length %lu over %lu symbols (%.2f)\n",
+  countSstartype = gt_sain_insertSstarsuffixes(sainseq,suftab,logger);
+  gt_logger_log(logger,"level %u: sort sequence of length %lu over "
+                       "%lu symbols (%.2f)",
           level,sainseq->totallength,sainseq->numofchars,
           (double) sainseq->numofchars/sainseq->totallength);
-  if (verbose)
-  {
-    printf("Sstar-type: %lu (%.2f)\n",countSstartype,
-              (double) countSstartype/sainseq->totallength);
-  }
+  gt_logger_log(logger,"Sstar-type: %lu (%.2f)",countSstartype,
+                 (double) countSstartype/sainseq->totallength);
   if (countSstartype > 0)
   {
     unsigned long numberofnames;
@@ -1276,7 +1276,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                                suftabentries,
                                intermediatecheck,
                                finalcheck,
-                               verbose,
+                               logger,
                                timer);
       gt_sainseq_delete(sainseq_rec);
       GT_SAIN_SHOWTIMER("expandorder2original");
@@ -1341,7 +1341,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  bool intermediatecheck,
                                  bool finalcheck,
-                                 bool verbose,
+                                 GtLogger *logger,
                                  GtTimer *timer)
 {
   unsigned long nonspecialentries, suftabentries, totallength, *suftab;
@@ -1360,7 +1360,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                            suftabentries,
                            intermediatecheck,
                            finalcheck,
-                           verbose,
+                           logger,
                            timer);
 #ifdef GT_SAIN_WITHCOUNTS
   printf("countcharaccess=%lu (%.2f)\n",gt_sain_countcharaccess,
@@ -1373,7 +1373,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
 void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                                 unsigned long len,
                                 bool intermediatecheck,
-                                bool verbose,
+                                GtLogger *logger,
                                 GtTimer *timer)
 {
   unsigned long suftabentries, *suftab;
@@ -1390,7 +1390,7 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                            suftabentries,
                            intermediatecheck,
                            false,
-                           verbose,
+                           logger,
                            timer);
 #ifdef GT_SAIN_WITHCOUNTS
   printf("countcharaccess=%lu (%.2f)\n",gt_sain_countcharaccess,
