@@ -22,7 +22,6 @@
 
 typedef struct GtESALcpintervalsVisitor GtESALcpintervalsVisitor;
 
-const GtESAVisitorClass* gt_esa_lcpitvs_visitor_class(void);
 GtESAVisitor*            gt_esa_lcpitvs_visitor_new(void);
 
 #endif

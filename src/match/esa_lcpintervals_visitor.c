@@ -58,7 +58,7 @@ static int gt_esa_lcpitvs_visitor_processbranchingedge(
   return 0;
 }
 
-const GtESAVisitorClass* gt_esa_lcpitvs_visitor_class()
+static const GtESAVisitorClass* gt_esa_lcpitvs_visitor_class(void)
 {
   static const GtESAVisitorClass *esc = NULL;
   if (!esc) {
