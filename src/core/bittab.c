@@ -37,7 +37,7 @@ GtBittab* gt_bittab_new(unsigned long num_of_bits)
 {
   GtBittab *b;
 
-  gt_assert(num_of_bits);
+  gt_assert(num_of_bits != 0);
 
   b = gt_malloc(sizeof (GtBittab));
   b->num_of_bits = num_of_bits;

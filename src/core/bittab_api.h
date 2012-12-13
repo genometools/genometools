@@ -25,7 +25,8 @@
 /* Implements arbitrary-length bit arrays and various operations on them. */
 typedef struct GtBittab GtBittab;
 
-/* Return a new <GtBittab> of length <num_of_bits>, initialised to 0. */
+/* Return a new <GtBittab> of length <num_of_bits>, initialised to 0.
+   <num_of_bits> has to be > 0 */
 GtBittab*     gt_bittab_new(unsigned long num_of_bits);
 
 /* Set bit <i> in <bittab> to 1. */
