@@ -72,8 +72,60 @@ suffixerator()
   fc=$1
   filename=`code2file $1`
   shift
-  printf "# RUN $fc $*\n"
+  printf "# RUN $fc sfx $*\n"
   GT_ENV_OPTIONS=-showtime ${RUNNER} ${GTDIR}/bin/gt suffixerator -v -indexname sfx-id -tis -suf -db ${filename} $* | egrep '# TIME overall|# space peak'
+}
+
+sainesq()
+{
+  fc=$1
+  filename=`code2file $1`
+  shift
+  printf "# RUN ${fc} sainesq\n"
+  ${GTDIR}/bin/gt encseq encode -indexname sfx-id ${filename}
+  GT_ENV_OPTIONS=-showtime ${RUNNER} ${GTDIR}/bin/gt dev sain -esq sfx-id | egrep '# TIME overall|# space peak'
+}
+
+sainfile()
+{
+  fc=$1
+  filename=`code2file $1`
+  shift
+  printf "# RUN ${fc} sainfile\n"
+  GT_ENV_OPTIONS=-showtime ${RUNNER} ${GTDIR}/bin/gt dev sain -file ${filename} | egrep '# TIME overall|# space peak'
+}
+
+sais()
+{
+  fc=$1
+  filename=`code2file $1`
+  shift
+  printf "# RUN ${fc} sais-lite\n"
+  ${ETC}/Ccode/SAIS-lite/sais.x ${filename} | egrep '# TIME overall|# space peak'
+}
+
+afconstruct()
+{
+  fc=$1
+  filename=`code2file $1`
+  shift
+  printf "# RUN ${fc} afconstruct\n"
+  Structatordir=${HOME}/Software/Structator1.1
+  TMPFILE=`mktemp /tmp/fastafile.XXXXXX`
+  echo ${filename} | egrep '\.gz$' > /dev/null
+  if test $? -eq 0
+  then
+    cmd="gzip -c -d ${filename}"
+  else
+    cmd="cat ${filename}"
+  fi
+  ${cmd} > ${TMPFILE}
+  if test $? -ne 0
+  then
+    echo "Failure: ${cmd}"
+    exit 1
+  fi
+  ${Structatordir}/construct/afconstruct ${TMPFILE} -suf -alph ${Structatordir}/testdata/rna.alphab -time | egrep '# TIME overall'
 }
 
 mkesa()
@@ -110,6 +162,10 @@ do
   do
     suffixerator ${rfc} -dc ${dc}
   done
+  sainesq ${rfc}
+  sainfile ${rfc}
+  sais ${rfc}
   mkesa ${rfc}
+  afconstruct ${rfc}
   rm -f sfx-idx.* mkesa-idx.*
 done
