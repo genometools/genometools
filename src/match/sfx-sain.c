@@ -24,7 +24,7 @@
 #include "sfx-sain.h"
 
 #define GT_SAIN_SHOWTIMER(DESC)\
-        if (timer != NULL)\
+        if (timer != NULL && gt_logger_enabled(logger))\
         {\
           gt_timer_show_progress(timer,DESC,stdout);\
         }

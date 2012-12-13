@@ -146,6 +146,46 @@ static int gt_sain_checkmaxsequencelength(unsigned long len,bool forencseq,
   return 0;
 }
 
+typedef struct
+{
+  GtTimer *timer;
+  GtLogger *logger;
+} GtSainTimerandLogger;
+
+static GtSainTimerandLogger *gt_sain_timer_logger_new(bool verbose)
+{
+  GtSainTimerandLogger *tl = gt_malloc(sizeof (*tl));
+
+  tl->timer = NULL;
+  tl->logger = gt_logger_new(verbose,GT_LOGGER_DEFLT_PREFIX,stdout);
+  if (gt_showtime_enabled())
+  {
+    if (verbose)
+    {
+      tl->timer = gt_timer_new_with_progress_description(
+                                       "allocate suftab and undef entries");
+    } else
+    {
+      tl->timer = gt_timer_new();
+      gt_timer_omit_last_stage(tl->timer);
+    }
+    gt_timer_start(tl->timer);
+  }
+  return tl;
+}
+
+static void gt_sain_timer_logger_delete(GtSainTimerandLogger *tl)
+{
+  if (tl->timer != NULL)
+  {
+    gt_timer_show_progress_final(tl->timer, stdout);
+    gt_timer_stop(tl->timer);
+    gt_timer_delete(tl->timer);
+  }
+  gt_logger_delete(tl->logger);
+  gt_free(tl);
+}
+
 static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                           int parsed_args, void *tool_arguments, GtError *err)
 {
@@ -190,12 +230,15 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         }
         if (!had_err)
         {
+          GtSainTimerandLogger *tl
+            = gt_sain_timer_logger_new(arguments->verbose);
           gt_sain_encseq_sortsuffixes(encseq,
                                       arguments->readmode,
                                       arguments->icheck,
                                       arguments->fcheck,
-                                      NULL,
-                                      NULL);
+                                      tl->logger,
+                                      tl->timer);
+          gt_sain_timer_logger_delete(tl);
         }
       }
       gt_encseq_delete(encseq);
@@ -225,27 +268,14 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         }
         if (!had_err)
         {
-          GtTimer *timer = NULL;
-          GtLogger *logger = gt_logger_new(arguments->verbose,
-                                           GT_LOGGER_DEFLT_PREFIX,stdout);
-          if (gt_showtime_enabled())
-          {
-            timer = gt_timer_new_with_progress_description(
-                             "allocate suftab and undef entries");
-            gt_timer_start(timer);
-          }
+          GtSainTimerandLogger *tl
+            = gt_sain_timer_logger_new(arguments->verbose);
           gt_sain_plain_sortsuffixes(plainseq,
                                      (unsigned long) len,
                                      arguments->icheck,
-                                     logger,
-                                     timer);
-          if (timer != NULL)
-          {
-            gt_timer_show_progress_final(timer, stdout);
-            gt_timer_stop(timer);
-          }
-          gt_timer_delete(timer);
-          gt_logger_delete(logger);
+                                     tl->logger,
+                                     tl->timer);
+          gt_sain_timer_logger_delete(tl);
         }
       }
       gt_fa_xmunmap(plainseq);
