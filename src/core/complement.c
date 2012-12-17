@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include "core/complement.h"
 
 int gt_complement(char *reverse_char, char dna_char, GtError *err)
@@ -54,8 +55,12 @@ int gt_complement(char *reverse_char, char dna_char, GtError *err)
     case 'v': *reverse_char = 'b'; return 0; /* not T/U */
     case 'n': *reverse_char = 'n'; return 0; /* any */
     default:
-      gt_error_set(err, "complement of DNA character '%c' not defined",
-                   dna_char);
+      if (isspace(dna_char)) {
+        gt_error_set(err, "complement of whitespace character not defined");
+      } else {
+        gt_error_set(err, "complement of DNA character '%c' not defined",
+                     dna_char);
+      }
       return -1;
   }
 }
