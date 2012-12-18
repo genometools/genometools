@@ -18,6 +18,7 @@
 #ifndef RANKED_LIST_H
 #define RANKED_LIST_H
 
+#include "core/fptr_api.h"
 #include "extended/rbtree.h"
 
 /* The <GtRankedListIter> class implements an iterator over the elements of
@@ -31,12 +32,14 @@ typedef struct GtRankedList GtRankedList;
 /* Returns a new <GtRankedList> object with maximumsize <maxsize>. The
    comparator function <comparefunction> is used to define an order on the
    inserted elements, with <compareinfo> to be used as additional external
-   data. */
+   data. When an element is dropped from the list, <free_func> is called on the
+   object if it is not NULL. */
 GtRankedList* gt_ranked_list_new(unsigned long maxsize,
                                  GtCompareWithData comparefunction,
+                                 GtFree free_func,
                                  void *compareinfo);
 
-/* Inserts <elem> into <ranked_list>. Does not take ownership of <elem>. */
+/* Inserts <elem> into <ranked_list>. */
 void          gt_ranked_list_insert(GtRankedList *ranked_list, void *elem);
 
 /* Returns the element in <ranked_list> with the highest rank. */

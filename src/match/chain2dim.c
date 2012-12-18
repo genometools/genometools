@@ -1114,7 +1114,7 @@ static void retrieve_local_chainbestscores(bool *minscoredefined,
   void *minkey;
 
   scores = gt_malloc(sizeof (*scores) * matchtable->nextfree);
-  dictbestmatches = gt_ranked_list_new(howmanybest,comparescores,NULL);
+  dictbestmatches = gt_ranked_list_new(howmanybest,comparescores,NULL,NULL);
   for (idx=0; idx<matchtable->nextfree; idx++)
   {
     if (gt_chain2dim_isrightmaximal_chain(matchtable,idx))
