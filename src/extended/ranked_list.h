@@ -23,7 +23,7 @@
 
 /* The <GtRankedListIter> class implements an iterator over the elements of
    a <GtRankedList>. */
-typedef GtRBTreeIter GtRankedListIter;
+typedef struct GtRankedListIter GtRankedListIter;
 
 /* The <GtRankedList> class holds a dynamic sorted collection of <n> items
    such that the <n> items with the highest rank are kept. */
@@ -57,8 +57,7 @@ void          gt_ranked_list_delete(GtRankedList *ranked_list);
 int           gt_ranked_list_unit_test(GtError *err);
 
 /* Returns a new <GtRankedListIter>, initialized to the element in <ranked_list>
-   with the highest rank. The object is deleted along with <ranked_list> and
-   thus does not need to be freed. */
+   with the highest rank. */
 GtRankedListIter* gt_ranked_list_iter_new_from_first(GtRankedList *ranked_list);
 
 /* Returns a new <GtRankedListIter>, initialized to the element in <ranked_list>
@@ -71,5 +70,9 @@ void*             gt_ranked_list_iter_next(GtRankedListIter *ranked_list_iter);
 
 /* Returns the previous element according to <ranked_list_iter>. */
 void*             gt_ranked_list_iter_prev(GtRankedListIter *ranked_list_iter);
+
+/* Deletes <ranked_list_iter> and frees all associated memory. */
+void              gt_ranked_list_iter_delete(GtRankedListIter
+                                                             *ranked_list_iter);
 
 #endif
