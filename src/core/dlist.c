@@ -26,9 +26,10 @@
 #define MAX_SIZE      1024
 
 struct GtDlist {
-  GtCompare cmp_func;
+  GtCompareWithData cmp_func;
   GtDlistelem *first,
               *last;
+  void *data;
   unsigned long size;
 };
 
@@ -38,10 +39,27 @@ struct GtDlistelem {
   void *data;
 };
 
+static int gt_dlist_cmp_wrapper(const void *a, const void *b, void *data)
+{
+  return ((GtCompare) data)(a, b);
+}
+
 GtDlist* gt_dlist_new(GtCompare cmp_func)
 {
   GtDlist *dlist = gt_calloc(1, sizeof (GtDlist));
+  if (cmp_func == NULL)
+    dlist->cmp_func = NULL;
+  else
+    dlist->cmp_func = gt_dlist_cmp_wrapper;
+  dlist->data = cmp_func;
+  return dlist;
+}
+
+GtDlist* gt_dlist_new_with_data(GtCompareWithData cmp_func, void *data)
+{
+  GtDlist *dlist = gt_calloc(1, sizeof (GtDlist));
   dlist->cmp_func = cmp_func;
+  dlist->data = data;
   return dlist;
 }
 
@@ -65,7 +83,7 @@ GtDlistelem* gt_dlist_find(const GtDlist *dlist, void *new_data)
   for (dlistelem = gt_dlist_first(dlist); dlistelem != NULL;
        dlistelem = gt_dlistelem_next(dlistelem)) {
     old_data = gt_dlistelem_get_data(dlistelem);
-    if (dlist->cmp_func && !dlist->cmp_func(old_data, new_data))
+    if (dlist->cmp_func && !dlist->cmp_func(old_data, new_data, dlist->data))
       return dlistelem;
     else if (old_data == new_data)
       return dlistelem;
@@ -94,14 +112,14 @@ void gt_dlist_add(GtDlist *dlist, void *data)
     gt_assert(dlist->first && dlist->last);
     if (dlist->cmp_func) {
       /* compare function defined -> find place to add new element */
-      if (dlist->cmp_func(data, dlist->first->data) < 0) {
+      if (dlist->cmp_func(data, dlist->first->data, dlist->data) < 0) {
         /* the new element is smaller then the first element */
         gt_assert(!dlist->first->previous);
         dlist->first->previous = newelem;
         newelem->next = dlist->first;
         dlist->first = newelem;
       }
-      else if (dlist->cmp_func(dlist->last->data, data) <= 0) {
+      else if (dlist->cmp_func(dlist->last->data, data, dlist->data) <= 0) {
         /* the new element is larger or equal then the last element */
         gt_assert(!dlist->last->next);
         dlist->last->next = newelem;
@@ -113,7 +131,7 @@ void gt_dlist_add(GtDlist *dlist, void *data)
         oldelem = dlist->last->previous;
         gt_assert(oldelem);
         while (oldelem) {
-          if (dlist->cmp_func(oldelem->data, data) <= 0) {
+          if (dlist->cmp_func(oldelem->data, data, dlist->data) <= 0) {
             /* position found */
             gt_assert(oldelem->next);
             newelem->next = oldelem->next;

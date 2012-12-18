@@ -30,6 +30,11 @@ typedef struct GtDlistelem GtDlistelem;
    <compar> equals <NULL>, no sorting is enforced. */
 GtDlist*      gt_dlist_new(GtCompare compar);
 
+/* Return a new <GtDlist> object sorted according to <compar> function. If
+   <compar> equals <NULL>, no sorting is enforced. Use <data> to supply
+   additional data to the comparator function. */
+GtDlist*      gt_dlist_new_with_data(GtCompareWithData compar, void *data);
+
 /* Return the first <GtDlistelem> object in <dlist>. */
 GtDlistelem*  gt_dlist_first(const GtDlist *dlist);
 
