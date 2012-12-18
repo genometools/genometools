@@ -28,6 +28,7 @@
 +matchanyintegral
 -mayaliasunique
 -mustfreefresh
+-mustmod
 -mustfreeonly
 -namechecks
 -noeffect

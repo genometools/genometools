@@ -49,7 +49,7 @@ void         gt_ya_rand_clean(void);
 
 #else /* not GCC2 - implement frand using a global variable.*/
 
-static double _frand_tmp_;
+/*@unused@*/ static double _frand_tmp_;
 # define frand(f)                                                       \
   (_frand_tmp_ = ((((double) random()) * ((double) (f))) /              \
                   ((double) ((unsigned int)~0))),                       \

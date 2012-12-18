@@ -54,3 +54,4 @@
 # added to inhibit system errors on Ubuntu lucid, 20100618
 -incondefs
 -fixedformalarray
+-mustmod
