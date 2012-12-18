@@ -61,8 +61,7 @@ int           gt_ranked_list_unit_test(GtError *err);
 GtRankedListIter* gt_ranked_list_iter_new_from_first(GtRankedList *ranked_list);
 
 /* Returns a new <GtRankedListIter>, initialized to the element in <ranked_list>
-   with the lowest rank. The object is deleted along with <ranked_list> and
-   thus does not need to be freed */
+   with the lowest rank. */
 GtRankedListIter* gt_ranked_list_iter_new_from_last(GtRankedList *ranked_list);
 
 /* Returns the next element according to <ranked_list_iter>. */
