@@ -27,6 +27,7 @@
 #include "extended/node_visitor_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_type.h"
 #include "ltr/ltrharvest_tabout_visitor.h"
 
 struct GtLTRharvestTaboutVisitor {
@@ -93,7 +94,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
   while (!had_err && (curnode = gt_feature_node_iterator_next(fni))) {
     fnt = gt_feature_node_get_type(curnode);
 
-    if (strcmp(fnt, "LTR_retrotransposon") == 0)
+    if (strcmp(fnt, gt_ft_LTR_retrotransposon) == 0)
     {
       const char *val;
       ltr_retrotrans = curnode;
@@ -106,7 +107,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
         (void) gt_parse_ulong(&seqnum, val);
       }
     }
-    if (strcmp(fnt, "long_terminal_repeat") == 0)
+    if (strcmp(fnt, gt_ft_long_terminal_repeat) == 0)
     {
       switch (added_ltr) {
         case 0:
@@ -122,7 +123,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
       }
       added_ltr++;
     }
-    if (strcmp(fnt, "inverted_repeat") == 0)
+    if (strcmp(fnt, gt_ft_inverted_repeat) == 0)
     {
       switch (added_motifs) {
         case 0:
@@ -145,7 +146,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
       }
       added_motifs++;
     }
-    if (strcmp(fnt, "target_site_duplication") == 0)
+    if (strcmp(fnt, gt_ft_target_site_duplication) == 0)
     {
       switch (added_tsd) {
         case 0:

@@ -29,6 +29,7 @@
 #include "extended/clustered_set_uf.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_type.h"
 #include "extended/node_stream_api.h"
 #include "extended/match.h"
 #include "extended/match_iterator_api.h"
@@ -308,7 +309,7 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
   gt_error_check(err);
 
   if ((strcmp(feature, "lLTR") == 0) || (strcmp(feature, "rLTR") == 0))
-    real_feature = gt_cstr_dup("long_terminal_repeat");
+    real_feature = gt_cstr_dup(gt_ft_long_terminal_repeat);
   else
     real_feature = gt_cstr_dup(feature);
 
@@ -321,14 +322,14 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
     while ((curnode = gt_feature_node_iterator_next(fni)) != NULL) {
       char header[BUFSIZ];
       fnt = gt_feature_node_get_type(curnode);
-      if (strcmp(fnt, "repeat_region") == 0) {
+      if (strcmp(fnt, gt_ft_repeat_region) == 0) {
         const char *rid;
         unsigned long id;
         seqid = gt_genome_node_get_seqid((GtGenomeNode*) curnode);
         rid = gt_feature_node_get_attribute(curnode, "ID");
         (void) sscanf(rid, "repeat_region%lu", &id);
         (void) snprintf(buffer, BUFSIZ, "%s_%lu", gt_str_get(seqid), id);
-      } else if (strcmp(fnt, "protein_match") == 0) {
+      } else if (strcmp(fnt, gt_ft_protein_match) == 0) {
         GtRange range;
         const char *attr;
         attr = gt_feature_node_get_attribute(curnode, "name");

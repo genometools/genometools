@@ -25,6 +25,7 @@
 #include "core/str_array.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_type.h"
 #include "extended/node_visitor_api.h"
 #include "ltr/ltr_cluster_prepare_seq_visitor.h"
 
@@ -87,14 +88,14 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
   while (!had_err && (curnode = gt_feature_node_iterator_next(fni))) {
     GtFile *file = NULL;
     fnt = gt_feature_node_get_type(curnode);
-    if (strcmp(fnt, "repeat_region") == 0) {
+    if (strcmp(fnt, gt_ft_repeat_region) == 0) {
       const char *rid;
       unsigned long id;
       seqid = gt_genome_node_get_seqid((GtGenomeNode*) curnode);
       rid = gt_feature_node_get_attribute(curnode, "ID");
       (void) sscanf(rid, "repeat_region%lu", &id);
       (void) snprintf(buffer, BUFSIZ, "%s_%lu", gt_str_get(seqid), id);
-    } else if (strcmp(fnt, "protein_match") == 0) {
+    } else if (strcmp(fnt, gt_ft_protein_match) == 0) {
       GtRange range;
       const char *attr;
       GtEncseqBuilder *eb;
@@ -120,14 +121,14 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
       had_err = extract_feature_seq(eb, header, seqid, lcv->src_encseq, range,
                                     fnt, err);
       gt_file_delete(file);
-    } else if (strcmp(fnt, "LTR_retrotransposon") == 0)
+    } else if (strcmp(fnt, gt_ft_LTR_retrotransposon) == 0)
       continue;
     else {
       char *tmp;
       GtRange range;
       GtEncseqBuilder *eb;
       char header[BUFSIZ];  /* XXX: use GtStr for safety */
-      if (strcmp(fnt, "long_terminal_repeat") == 0) {
+      if (strcmp(fnt, gt_ft_long_terminal_repeat) == 0) {
         if (first_ltr) {
           tmp = gt_cstr_dup("lLTR");
           first_ltr = false;

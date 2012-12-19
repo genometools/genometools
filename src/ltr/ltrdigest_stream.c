@@ -80,7 +80,6 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
     aastring = gt_str_new();
     frame = gt_pdom_single_hit_get_phase(singlehit);
     rng = gt_pdom_single_hit_get_range(singlehit);
-
     gt_pdom_single_hit_format_alignment(singlehit, GT_ALIWIDTH,
                                         alignmentstring);
     gt_pdom_single_hit_get_aaseq(singlehit, aastring);
@@ -90,7 +89,7 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
           || ls->pdom_opts->output_all_chains) {
       gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                         ls->element.mainnode),
-                               GT_PDOM_TYPE,
+                               gt_ft_protein_match,
                                rng.start,
                                rng.end,
                                strand);
@@ -168,7 +167,7 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
   pbs_range.start++; pbs_range.end++;  /* GFF3 is 1-based */
   gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                     element->mainnode),
-                           GT_PBS_TYPE,
+                           gt_ft_primer_binding_site,
                            pbs_range.start,
                            pbs_range.end,
                            gt_pbs_hit_get_strand(hit));
@@ -219,7 +218,7 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
   ppt_range.start++; ppt_range.end++;  /* GFF3 is 1-based */
   gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                     element->mainnode),
-                           GT_PPT_TYPE,
+                           gt_ft_RR_tract,
                            ppt_range.start,
                            ppt_range.end,
                            gt_ppt_hit_get_strand(hit));
@@ -231,7 +230,7 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
     ubox_range.start++; ubox_range.end++;
     gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                       element->mainnode),
-                             GT_UBOX_TYPE,
+                             gt_ft_U_box,
                              ubox_range.start,
                              ubox_range.end,
                              gt_ppt_hit_get_strand(ubox));

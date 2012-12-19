@@ -25,6 +25,7 @@
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_type.h"
 #include "extended/genome_node.h"
 #include "ltr/ltr_classify_stream.h"
 
@@ -84,15 +85,15 @@ static bool ltr_candidates_compatible(GtGenomeNode *candidate1,
 
   while ((curnode1 = gt_feature_node_iterator_next(fni1)) != NULL) {
     fnt = gt_feature_node_get_type(curnode1);
-    if ((strcmp(fnt, "LTR_retrotransposon") == 0))
+    if ((strcmp(fnt, gt_ft_LTR_retrotransposon) == 0))
       continue;
-    else if (strcmp(fnt, "long_terminal_repeat") == 0) {
+    else if (strcmp(fnt, gt_ft_long_terminal_repeat) == 0) {
       if (first_ltr) {
         fnt = "lLTR";
         first_ltr = false;
       } else
         fnt = "rLTR";
-    } else if (strcmp(fnt, "protein_match") == 0) {
+    } else if (strcmp(fnt, gt_ft_protein_match) == 0) {
       fnt = gt_feature_node_get_attribute(curnode1, "name");
     }
     if (!fnt)
@@ -225,7 +226,7 @@ static int annotate_nodes(GtArray *candidates, GtArray *groups,
       gn = *(GtGenomeNode**) gt_array_get(candidates, index);
       fni = gt_feature_node_iterator_new((GtFeatureNode*) gn);
       curnode = gt_feature_node_iterator_next(fni);
-      if (strcmp(gt_feature_node_get_type(curnode), "repeat_region") == 0) {
+      if (strcmp(gt_feature_node_get_type(curnode), gt_ft_repeat_region) == 0) {
         char fam[BUFSIZ];
         if (famprefix != NULL)
           (void) snprintf(fam, BUFSIZ, "%s%lu", famprefix, famno);
@@ -272,16 +273,16 @@ static void add_fnmap_to_candidates(GtArray *candidates)
     fni = gt_feature_node_iterator_new((GtFeatureNode*) gn);
     while ((curnode = gt_feature_node_iterator_next(fni)) != NULL) {
       fnt = gt_feature_node_get_type(curnode);
-      if ((strcmp(fnt, "repeat_region") == 0) ||
-          (strcmp(fnt, "LTR_retrotransposon") == 0))
+      if ((strcmp(fnt, gt_ft_repeat_region) == 0) ||
+          (strcmp(fnt, gt_ft_LTR_retrotransposon) == 0))
         continue;
-      else if (strcmp(fnt, "long_terminal_repeat") == 0) {
+      else if (strcmp(fnt, gt_ft_long_terminal_repeat) == 0) {
         if (first_ltr) {
           fnt = "lLTR";
           first_ltr = false;
         } else
           fnt = "rLTR";
-      } else if (strcmp(fnt, "protein_match") == 0)
+      } else if (strcmp(fnt, gt_ft_protein_match) == 0)
         fnt = gt_feature_node_get_attribute(curnode, "name");
       if (!fnt)
         continue;

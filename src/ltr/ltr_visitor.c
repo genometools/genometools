@@ -21,6 +21,7 @@
 #include "core/ma.h"
 #include "core/range.h"
 #include "core/unused_api.h"
+#include "extended/feature_type.h"
 #include "extended/node_visitor_api.h"
 #include "extended/region_node.h"
 #include "ltr/ltr_visitor.h"
@@ -47,10 +48,10 @@ static int gt_ltr_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
 
   fnt = gt_feature_node_get_type(fn);
 
-  if (strcmp(fnt, "LTR_retrotransposon") == 0)
+  if (strcmp(fnt, gt_ft_LTR_retrotransposon) == 0)
   {
     lv->element->mainnode = fn;
-  } else if (strcmp(fnt, "long_terminal_repeat") == 0)
+  } else if (strcmp(fnt, gt_ft_long_terminal_repeat) == 0)
   {
     if (lv->element->leftLTR == NULL)
     {
@@ -68,7 +69,7 @@ static int gt_ltr_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
       lv->element->rightLTR_5 = node_range.start - 1;
       lv->element->rightLTR_3 = node_range.end - 1;
     }
-  } else if (strcmp(fnt, "target_site_duplication") == 0)
+  } else if (strcmp(fnt, gt_ft_target_site_duplication) == 0)
   {
     if (lv->element->leftTSD == NULL)
     {
@@ -78,19 +79,19 @@ static int gt_ltr_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
     {
       lv->element->rightTSD = fn;
     }
-  } else if (strcmp(fnt, "RR_tract") == 0)
+  } else if (strcmp(fnt, gt_ft_RR_tract) == 0)
   {
     if (lv->element->ppt == NULL)
     {
       lv->element->ppt = fn;
     }
-  } else if (strcmp(fnt, "primer_binding_site") == 0)
+  } else if (strcmp(fnt, gt_ft_primer_binding_site) == 0)
   {
     if (lv->element->pbs == NULL)
     {
       lv->element->pbs = fn;
     }
-  } else if (strcmp(fnt,"protein_match") == 0)
+  } else if (strcmp(fnt, gt_ft_protein_match) == 0)
   {
     if (!lv->element->pdoms)
     {

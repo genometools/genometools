@@ -30,6 +30,7 @@
 #include "extended/node_visitor_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_type.h"
 #include "ltr/ltrharvest_fasta_out_visitor.h"
 
 struct GtLTRharvestFastaOutVisitor {
@@ -68,7 +69,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
   while (!had_err && (curnode = gt_feature_node_iterator_next(fni))) {
     fnt = gt_feature_node_get_type(curnode);
 
-    if (strcmp(fnt, "LTR_retrotransposon") == 0)
+    if (strcmp(fnt, gt_ft_LTR_retrotransposon) == 0)
     {
       const char *val;
       ltr_retrotrans = curnode;
@@ -81,7 +82,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
         (void) gt_parse_ulong(&seqnum, val);
       }
     }
-    if (strcmp(fnt, "long_terminal_repeat") == 0)
+    if (strcmp(fnt, gt_ft_long_terminal_repeat) == 0)
     {
       switch (added_ltr) {
         case 0:

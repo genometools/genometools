@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,8 +19,6 @@
 #ifndef FEATURE_TYPE_H
 #define FEATURE_TYPE_H
 
-#include <stdbool.h>
-
 /* Some predefined feature type strings. */
 #define gt_ft_CDS                      "CDS"
 #define gt_ft_EST_match                "EST_match"
@@ -35,11 +34,14 @@
 #define gt_ft_inverted_repeat          "inverted_repeat"
 #define gt_ft_long_terminal_repeat     "long_terminal_repeat"
 #define gt_ft_mRNA                     "mRNA"
+#define gt_ft_primer_binding_site      "primer_binding_site"
+#define gt_ft_RR_tract                 "RR_tract"
 #define gt_ft_protein_match            "protein_match"
 #define gt_ft_repeat_region            "repeat_region"
 #define gt_ft_target_site_duplication  "target_site_duplication"
 #define gt_ft_three_prime_UTR          "three_prime_UTR"
 #define gt_ft_three_prime_splice_site  "three_prime_splice_site"
 #define gt_ft_transcript               "transcript"
+#define gt_ft_U_box                    "U_box"
 
 #endif
