@@ -504,9 +504,9 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                               arguments->seqnamelen,
                                               err);
 #ifdef HAVE_HMMER
-    if (&arguments->pdom_opts.write_alignments)
+    if (arguments->pdom_opts.write_alignments)
       gt_ltr_fileout_stream_enable_pdom_alignment_output(tab_out_stream);
-    if (&arguments->pdom_opts.write_aaseqs)
+    if (arguments->pdom_opts.write_aaseqs)
       gt_ltr_fileout_stream_enable_aa_sequence_output(tab_out_stream);
 #endif
     }

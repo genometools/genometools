@@ -110,7 +110,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
   }
 
   /* get amino acid sequence output file */
-  if (ls->write_pdom_alignments)
+  if (ls->write_pdom_aaseqs)
   {
     aafile = (GtFile*) gt_hashmap_get(ls->pdomaa_files, pdomname);
     if (aafile == NULL)
