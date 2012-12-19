@@ -139,12 +139,12 @@ void gt_pdom_single_hit_format_alignment(const GtPdomSingleHit *sh,
 
   modellen = gt_str_length(sh->aa_seq_model);
   matchlen = gt_str_length(sh->aa_seq_matched);
-  len = MAX(modellen, matchlen)-3; /* -3 to remove the '<-*' */
+  len = MAX(modellen, matchlen);
 
   match_end = sh->range.start - 1;
   if (width > len)
     width = len;
-  for (pos = 3; pos + width < len; pos += width) /* 3 to remove the '*->' */
+  for (pos = 0; pos + width < len; pos += width)
   {
     match_start = match_end + 1;
     for (i = pos; i < pos + width && matched[i] != '\0'; i++)
