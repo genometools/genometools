@@ -10,7 +10,7 @@ def translate_dna(sequence)
   'ACA'=>'T', 'ACC'=>'T', 'ACG'=>'T', 'ACT'=>'T',
   'AAC'=>'N', 'AAT'=>'N', 'AAA'=>'K', 'AAG'=>'K',
   'AGC'=>'S', 'AGT'=>'S', 'AGA'=>'R', 'AGG'=>'R',
-  'CTA'=>'L', 'CTC'=>'L', 'CTG'=>'L', 'CTT'=>'L', 
+  'CTA'=>'L', 'CTC'=>'L', 'CTG'=>'L', 'CTT'=>'L',
   'CCA'=>'P', 'CCC'=>'P', 'CCG'=>'P', 'CCT'=>'P',
   'CAC'=>'H', 'CAT'=>'H', 'CAA'=>'Q', 'CAG'=>'Q',
   'CGA'=>'R', 'CGC'=>'R', 'CGG'=>'R', 'CGT'=>'R',
@@ -262,7 +262,7 @@ if $gttestdata then
       run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
       grep(last_stderr, /missing argument/)
     end
-  
+
     Name "gt ltrdigest pHMM implied options"
     Keywords "gt_ltrdigest"
     Test do
@@ -328,7 +328,7 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_2L.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     grep(last_stderr, "exceeds sequence boundaries!")
   end
-  
+
   # positive test for all D.mel chromosomes -> must match reference
   chromosomes_dmel = ["2L","2R","3L","3R","4","X"]
   chromosomes_dmel.each do |chr|
@@ -338,7 +338,7 @@ if $gttestdata then
       Test do
         run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :maxtime => 600
         run_test "#{$bin}gt ltrdigest -outfileprefix result#{chr} -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
-        check_ppt_pbs(last_stdout, chr)       
+        check_ppt_pbs(last_stdout, chr)
         #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref.gff3"
       end
     else
@@ -360,7 +360,8 @@ if $gttestdata then
       Keywords "gt_ltrdigest aminoacidout"
       Test do
         run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v " + \
-                 "-db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :maxtime => 600
+                 "-db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
+                 :maxtime => 600
         run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result#{chr} " + \
                  "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm " + \
                  "-aaout yes " + \
@@ -368,6 +369,58 @@ if $gttestdata then
                  " #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
                  :retval => 0, :maxtime => 12000
         check_amino_acid_output(last_stdout, chr, ["RVT_1"])
+      end
+    end
+  end
+
+  if $arguments["hmmer"] then
+    Name "gt ltrdigest -aliout"
+    Keywords "gt_ltrdigest aminoacidout aliout"
+    Test do
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v " + \
+               "-db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :maxtime => 600
+      run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
+               "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm -- " + \
+               "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
+               "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :retval => 0, :maxtime => 12000
+      if File.exists?("result4_pdom_RVT_1.ali") then
+        raise TestFailed, "file \"result4_pdom_RVT_1.ali\" should not exist"
+      end
+      run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
+               "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm " + \
+               "-aliout yes " + \
+               "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
+               "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :retval => 0, :maxtime => 12000
+      if !File.exists?("result4_pdom_RVT_1.ali") then
+        raise TestFailed, "file \"result4_pdom_RVT_1.ali\" does not exist"
+      end
+    end
+
+    Name "gt ltrdigest -aaout"
+    Keywords "gt_ltrdigest aminoacidout aaout"
+    Test do
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v " + \
+               "-db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :maxtime => 600
+      run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
+               "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm -- " + \
+               "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
+               "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :retval => 0, :maxtime => 12000
+      if File.exists?("result4_pdom_RVT_1_aa.fas") then
+        raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" should not exist"
+      end
+      run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
+               "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm " + \
+               "-aaout yes " + \
+               "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
+               "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :retval => 0, :maxtime => 12000
+      if !File.exists?("result4_pdom_RVT_1_aa.fas") then
+        raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" does not exist"
       end
     end
   end
