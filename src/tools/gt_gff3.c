@@ -28,6 +28,7 @@
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gff3_parser.h"
 #include "extended/gtdatahelp.h"
+#include "extended/load_stream.h"
 #include "extended/merge_feature_stream_api.h"
 #include "extended/sort_stream_api.h"
 #include "extended/type_checker_builtin.h"
@@ -36,6 +37,7 @@
 
 typedef struct {
   bool sort,
+       load,
        retainids,
        checkids,
        addids,
@@ -79,9 +81,9 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 {
   GFF3Arguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *sort_option, *strict_option, *tidy_option, *mergefeat_option,
-           *addintrons_option, *offset_option, *offsetfile_option,
-           *typecheck_option, *built_in_option, *option;
+  GtOption *sort_option, *load_option, *strict_option, *tidy_option,
+           *mergefeat_option, *addintrons_option, *offset_option,
+           *offsetfile_option, *typecheck_option, *built_in_option, *option;
   gt_assert(arguments);
 
   /* init */
@@ -149,6 +151,14 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_option_imply(mergefeat_option, sort_option);
   gt_option_parser_add_option(op, mergefeat_option);
 
+  /* -load */
+  load_option = gt_option_new_bool("load", "load the GFF3 features into memory "
+                                   "(requires space proportional to the input "
+                                   "file size(s))",
+                                   &arguments->load, false);
+  gt_option_is_development_option(load_option);
+  gt_option_parser_add_option(op, load_option);
+
   /* -addintrons */
   addintrons_option = gt_option_new_bool("addintrons", "add intron features "
                                          "between existing exon features",
@@ -212,6 +222,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   GtTypeChecker *type_checker = NULL;
   GtNodeStream *gff3_in_stream,
                *sort_stream = NULL,
+               *load_stream = NULL,
                *merge_feature_stream = NULL,
                *add_introns_stream = NULL,
                *gff3_out_stream = NULL,
@@ -267,9 +278,15 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   if (!had_err && arguments->fixboundaries)
     gt_gff3_in_stream_fix_region_boundaries((GtGFF3InStream*) gff3_in_stream);
 
+  /* create load stream (if necessary) */
+  if (!had_err && arguments->load) {
+    load_stream = gt_sort_stream_new(last_stream);
+    last_stream = load_stream;
+  }
+
   /* create sort stream (if necessary) */
   if (!had_err && arguments->sort) {
-    sort_stream = gt_sort_stream_new(gff3_in_stream);
+    sort_stream = gt_sort_stream_new(last_stream);
     last_stream = sort_stream;
   }
 
@@ -304,6 +321,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   /* free */
   gt_node_stream_delete(gff3_out_stream);
   gt_node_stream_delete(sort_stream);
+  gt_node_stream_delete(load_stream);
   gt_node_stream_delete(merge_feature_stream);
   gt_node_stream_delete(add_introns_stream);
   gt_node_stream_delete(gff3_in_stream);
