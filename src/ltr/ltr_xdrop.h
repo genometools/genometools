@@ -20,7 +20,6 @@
 
 #include "core/arraydef.h"
 #include "core/unused_api.h"
-
 #include "core/encseq.h"
 
 typedef struct
@@ -74,7 +73,7 @@ typedef int Xdropscore;
 
 GT_DECLAREARRAYSTRUCT(Xdropscore);
 
-int gt_showmatrix(GtArrayMyfrontvalue * fronts,
+int gt_showmatrix(GtArrayMyfrontvalue *fronts,
                int distance,
                unsigned char *useq,
                unsigned char *vseq,
@@ -98,49 +97,31 @@ void gt_calculateallowedMININFINITYINTgenerations(
    any more.
 */
 
-void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,
-                               Myxdropbest * xdropbest,
-                               GtArrayMyfrontvalue * fronts,
-                               const GtEncseq *str_useq,
-                               const GtEncseq *str_vseq,
-                               unsigned long useq,
-                               unsigned long vseq,
-                               int ulen,
-                               int vlen,
-                               Xdropscore xdropbelowscore);
+#define GT_XDROP_EVALXDROPARBITSCORESRIGHT\
+        void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
+                                          Myxdropbest *xdropbest,\
+                                          GtArrayMyfrontvalue *fronts,\
+                                          const GtEncseq *str_useq,\
+                                          const GtEncseq *str_vseq,\
+                                          unsigned long useq,\
+                                          unsigned long vseq,\
+                                          int ulen,\
+                                          int vlen,\
+                                          Xdropscore xdropbelowscore)
 
-#define EVALXDROPARBITSCORESRIGHT\
-      void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
-                                     Myxdropbest * xdropbest,\
-                                     GtArrayMyfrontvalue * fronts,\
-                                     const GtEncseq *str_useq,\
-                                     const GtEncseq *str_vseq,\
-                                     unsigned long useq,\
-                                     unsigned long vseq,\
-                                     int ulen,\
-                                     int vlen,\
-                                     Xdropscore xdropbelowscore)
+#define GT_XDROP_EVALXDROPARBITSCORESLEFT\
+        void gt_evalxdroparbitscoresleft(Arbitraryscores *arbitscores,\
+                                         Myxdropbest *xdropbest,\
+                                         GtArrayMyfrontvalue *fronts,\
+                                         const GtEncseq *str_useq,\
+                                         const GtEncseq *str_vseq,\
+                                         unsigned long useq,\
+                                         unsigned long vseq,\
+                                         int ulen,\
+                                         int vlen,\
+                                         Xdropscore xdropbelowscore)
 
-void gt_evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
-                              Myxdropbest * xdropbest,
-                              GtArrayMyfrontvalue * fronts,
-                              const GtEncseq *str_useq,
-                              const GtEncseq *str_vseq,
-                              unsigned long useq,
-                              unsigned long vseq,
-                              int ulen,
-                              int vlen,
-                              Xdropscore xdropbelowscore);
+GT_XDROP_EVALXDROPARBITSCORESLEFT;
+GT_XDROP_EVALXDROPARBITSCORESRIGHT;
 
-#define EVALXDROPARBITSCORESLEFT\
-       void gt_evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
-                                     Myxdropbest * xdropbest,\
-                                     GtArrayMyfrontvalue * fronts,\
-                                     const GtEncseq *str_useq,\
-                                     const GtEncseq *str_vseq,\
-                                     unsigned long useq,\
-                                     unsigned long vseq,\
-                                     int ulen,\
-                                     int vlen,\
-                                     Xdropscore xdropbelowscore)
 #endif

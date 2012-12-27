@@ -159,10 +159,10 @@ void gt_calculatedistancesfromscores(Arbitraryscores *arbitscores,
   /* if mat is odd double all scores */
   if (GT_MOD2((unsigned int)arbitscores->mat))
   {
-    mat = arbitscores->mat  * (int)2;
-    mis = arbitscores->mis  * (int)2;
-    ins = arbitscores->ins  * (int)2;
-    del = arbitscores->del  * (int)2;
+    mat = arbitscores->mat * 2;
+    mis = arbitscores->mis * 2;
+    ins = arbitscores->ins * 2;
+    del = arbitscores->del * 2;
   }
   else
   {
@@ -204,17 +204,23 @@ void gt_calculateallowedMININFINITYINTgenerations(
   (*allowedMININFINITYINTgenerations)--;
 }
 
+#define GT_XDROP_EVAL(K,D)\
+        ((K) * arbitscores->mat/2 - (D) * arbitscores->gcd)
+#define GT_XDROP_SETDBACK(XDROPBELOWSCORE)\
+        (XDROPBELOWSCORE + arbitscores->mat/2) / arbitscores->gcd + 1
+
 /*
  The following macro checks for wildcard and separator symbols.
  */
-#define COMPARESYMBOLSSEP(I,J)\
-        USEQ(a,I);\
+
+#define GT_XDROP_COMPARESYMBOLSSEP(I,J)\
+        GT_XDROP_USEQ(a,I);\
         if (a == (GtUchar) SEPARATOR)\
         {\
           ulen = I;\
           break;\
         }\
-        VSEQ(b,J);\
+        GT_XDROP_VSEQ(b,J);\
         if (b == (GtUchar) SEPARATOR)\
         {\
           vlen = J;\
@@ -225,35 +231,19 @@ void gt_calculateallowedMININFINITYINTgenerations(
           break;\
         }
 
-#ifdef XDROPDEF_H
-  #undef MATCHSCORE
-  #undef HALFMATCHSCORE
-  #undef MISMATCHSCORE
-  #undef S
-  #undef SETDBACK
-#endif
-
-#define MATCHSCORE arbitscores->mat
-#define HALFMATCHSCORE arbitscores->mat/2
-#define GCD arbitscores->gcd
-#define S(K,D)\
-        ((K) * HALFMATCHSCORE - (D) * GCD)
-#define SETDBACK(XDROPBELOWSCORE)\
-        (XDROPBELOWSCORE + HALFMATCHSCORE) / GCD + 1
-
-#define EVALXDROPARBITSCORES EVALXDROPARBITSCORESRIGHT
-#define USEQ(A,I) A = gt_encseq_get_encoded_char(str_useq, \
-                                                       useq+(unsigned long)(I),\
-                                                       GT_READMODE_FORWARD)
-#define VSEQ(A,J) A = gt_encseq_get_encoded_char(str_vseq, \
-                                                       vseq+(unsigned long)(J),\
-                                                       GT_READMODE_FORWARD)
+#define GT_XDROP_EVALXDROPARBITSCORES GT_XDROP_EVALXDROPARBITSCORESRIGHT
+#define GT_XDROP_USEQ(VAR,I) VAR = gt_encseq_get_encoded_char(str_useq,\
+                                                              useq + (I),\
+                                                           GT_READMODE_FORWARD)
+#define GT_XDROP_VSEQ(VAR,J) VAR = gt_encseq_get_encoded_char(str_vseq,\
+                                                              vseq + (J),\
+                                                           GT_READMODE_FORWARD)
 
 #include "myxdrop.gen"
 
-#undef EVALXDROPARBITSCORES
-#undef USEQ
-#undef VSEQ
+#undef GT_XDROP_EVALXDROPARBITSCORES
+#undef GT_XDROP_USEQ
+#undef GT_XDROP_VSEQ
 
 /*
   Now we redefine the macros to compute the left to right
@@ -262,12 +252,12 @@ void gt_calculateallowedMININFINITYINTgenerations(
   with the last character of the strings under consideration.
 */
 
-#define EVALXDROPARBITSCORES EVALXDROPARBITSCORESLEFT
-#define USEQ(A,I) A = gt_encseq_get_encoded_char(str_useq, \
-                                                     useq-(unsigned long)1-(I),\
+#define GT_XDROP_EVALXDROPARBITSCORES GT_XDROP_EVALXDROPARBITSCORESLEFT
+#define GT_XDROP_USEQ(VAR,I) VAR = gt_encseq_get_encoded_char(str_useq,\
+                                                     useq - 1UL - (I),\
                                                      GT_READMODE_FORWARD)
-#define VSEQ(A,J) A = gt_encseq_get_encoded_char(str_vseq, \
-                                                     vseq-(unsigned long)1-(J),\
+#define GT_XDROP_VSEQ(VAR,J) VAR = gt_encseq_get_encoded_char(str_vseq,\
+                                                     vseq - 1UL - (J),\
                                                      GT_READMODE_FORWARD)
 
 #include "myxdrop.gen"

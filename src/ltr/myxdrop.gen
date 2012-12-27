@@ -15,17 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-EVALXDROPARBITSCORES
+GT_XDROP_EVALXDROPARBITSCORES
 {
-  int integermax, integermin, i ,     /* index i */
-    j = 0,                            /* index j */
-    k = 0,                            /* diagonal */
-    end_k = ulen - vlen,              /* diagonal of endpoint (ulen, vlen) */
-    lbound = 0,                       /* diagonal lower bound */
-    ubound = 0,                       /* diagonal upper bound */
-    lboundtmp = 0,
-    uboundtmp = 0,
-    tmprow;                           /* temporary row index */
+  int integermax,
+      integermin,
+      i ,     /* index i */
+      j = 0,                            /* index j */
+      k = 0,                            /* diagonal */
+      end_k = ulen - vlen,              /* diagonal of endpoint (ulen, vlen) */
+      lbound = 0,                       /* diagonal lower bound */
+      ubound = 0,                       /* diagonal upper bound */
+      lboundtmp = 0,
+      uboundtmp = 0,
+      tmprow;                           /* temporary row index */
   GtUchar a, b;
   Myfrontvalue tmpfront;
   Arbitrarydistances arbitdistances;
@@ -40,10 +42,10 @@ EVALXDROPARBITSCORES
 
   gt_calculatedistancesfromscores(arbitscores, &arbitdistances);
   gt_calculateallowedMININFINITYINTgenerations(
-     &allowedMININFINITYINTgenerations,
-     &arbitdistances);
+                                      &allowedMININFINITYINTgenerations,
+                                      &arbitdistances);
 
-  dback = SETDBACK(xdropbelowscore);
+  dback = GT_XDROP_SETDBACK(xdropbelowscore);
 
   GT_INITARRAY (&big_t, Xdropscore);
   integermax = MAX (ulen, vlen);
@@ -52,11 +54,11 @@ EVALXDROPARBITSCORES
   /* "phase" 0 */
   for (i = 0; i < MIN(ulen,vlen); i++)
   {
-    COMPARESYMBOLSSEP(i,i);
+    GT_XDROP_COMPARESYMBOLSSEP(i,i);
   }
 
   /* alignment already finished */
-  if (i >= ulen || i >= vlen )
+  if (i >= ulen || i >= vlen)
   {
     lbound =  1;
     ubound = -1;
@@ -66,7 +68,7 @@ EVALXDROPARBITSCORES
   tmpfront.dptabdirection = (GtUchar) 0;   /* no predecessor */
 
   STOREINARRAYFRONTS (fronts, 0, Myfrontvalue, tmpfront);
-  xdropbest->score = bigt_tmp = S (i + i, 0);
+  xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + i, 0);
   xdropbest->ivalue = xdropbest->jvalue = (unsigned int) i;
 
   GT_STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
@@ -156,21 +158,21 @@ EVALXDROPARBITSCORES
         tmpfront.dptabrow = MINUSINFINITYINT;
       }
       /* alignment score smaller than T - X */
-      else if ( d_pre > 0 &&
-              big_t.spaceXdropscore != NULL &&
-              (S (i + j, d) < big_t.spaceXdropscore[d_pre] - xdropbelowscore)
-             )
+      else if (d_pre > 0 &&
+               big_t.spaceXdropscore != NULL &&
+               (GT_XDROP_EVAL (i + j, d) <
+                big_t.spaceXdropscore[d_pre] - xdropbelowscore))
       {
         tmpfront.dptabrow = MINUSINFINITYINT;
       }
-      else if (( k <= -d || k >= d ) || /* not correct boundaries for
-                                           ACCESTOFRONT(d-1,k) */
+      else if ((k <= -d || k >= d) || /* not correct boundaries for
+                                         ACCESTOFRONT(d-1,k) */
                ((fronts->spaceMyfrontvalue[ACCESSTOFRONT(d-1, k)].dptabrow < i)
                  && (i <= MIN(ulen,vlen + k))))
       {
         while (i < ulen && j < vlen)
         {
-          COMPARESYMBOLSSEP(i,j);
+          GT_XDROP_COMPARESYMBOLSSEP(i,j);
           i++;
           j++;
         }
@@ -178,10 +180,9 @@ EVALXDROPARBITSCORES
         alwaysMININFINITYINT = false;
         tmpfront.dptabrow = i;
 
-        /* MAX(bigt_tmp, S(i+j,d)); */
-        if (S (i + j, d) > bigt_tmp)
+        if (GT_XDROP_EVAL(i + j, d) > bigt_tmp)
         {
-          xdropbest->score = bigt_tmp = S (i + j, d);
+          xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + j, d);
           xdropbest->ivalue = (unsigned int) i;
           xdropbest->jvalue = (unsigned int) j;
         }
