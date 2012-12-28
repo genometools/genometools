@@ -30,22 +30,18 @@
 /* CAUTION: fronts, that run over the matrix boundaries are not shown in
    the printed matrix.
  */
-int gt_showmatrix(GtArrayMyfrontvalue * fronts,
-               int distance,
-               unsigned char *useq,
-               unsigned char *vseq,
-               int ulen,
-               int vlen)
+int gt_showfrontvalues(GtArrayMyfrontvalue * fronts,
+                       int distance,
+                       unsigned char *useq,
+                       unsigned char *vseq,
+                       int ulen,
+                       int vlen)
 {
-  int i, j, k, d = distance + 1, filled = 0;
   unsigned long l;
-  int integermax, integermin;
+  int i, j, k, d = distance + 1, filled = 0, integermax = MAX (ulen,vlen),
+      integermin = -integermax;
 
-  integermax = MAX (ulen, vlen), integermin = -integermax;
-
-  printf( ": Fronten, die ueber die boundaries gehen,"
-                  " erscheinen nicht in Matrix.\n");
-  printf("matrix:\n");
+  printf("frontvalues:\n");
   printf("        ");
   printf("%-3c ", vseq[0]);
   /* print vseq */
@@ -53,7 +49,6 @@ int gt_showmatrix(GtArrayMyfrontvalue * fronts,
   {
     printf("%-3c ", vseq[i]);
   }
-
   for (i = 0; i <= ulen; i++)
   {
     printf("\n");
@@ -61,8 +56,7 @@ int gt_showmatrix(GtArrayMyfrontvalue * fronts,
     if (i != 0)
     {
       printf("%-3c ", useq[i - 1]);
-    }
-    else
+    } else
     {
       printf("    ");
     }
@@ -80,11 +74,7 @@ int gt_showmatrix(GtArrayMyfrontvalue * fronts,
         {
           for (d = 0; d <= distance; d++)
           {
-            if ((k < -d) || (k > d))
-            {
-              continue;
-            }
-            if (l == ACCESSTOFRONT (d, i - j))
+            if (k >= -d && k <= d && l == ACCESSTOFRONT (d, i - j))
             {
               printf("%-3d ", d);
               l = fronts->nextfreeMyfrontvalue;
@@ -100,22 +90,20 @@ int gt_showmatrix(GtArrayMyfrontvalue * fronts,
       }
     }
   }
-
   printf("\n%.2f percent of matrix filled\n",
            filled * 100.00 / ((ulen + 1) * (vlen + 1)));
-
   return 0;
 }
 
-/* If gt_showmatrix funktion = "True", then
+/* If gt_showfrontvalues = "True", then
     (A)->nextfree##TYPE = POS+1; must be set:
 
  ** The other case, saves more space
 
-#define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
-        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1);\
-        (A)->space##TYPE[POS] = VAL;\
-        (A)->nextfree##TYPE = POS+1;
+   #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
+           GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1);\
+           (A)->space##TYPE[POS] = VAL;\
+           (A)->nextfree##TYPE = POS+1
 */
 
 /*
@@ -124,7 +112,7 @@ int gt_showmatrix(GtArrayMyfrontvalue * fronts,
  */
 #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
         GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1);\
-        (A)->space##TYPE[POS] = VAL;
+        (A)->space##TYPE[POS] = VAL
 
 /*
  The following macro swaps two values.
@@ -163,8 +151,7 @@ void gt_calculatedistancesfromscores(Arbitraryscores *arbitscores,
     mis = arbitscores->mis * 2;
     ins = arbitscores->ins * 2;
     del = arbitscores->del * 2;
-  }
-  else
+  } else
   {
     mat = arbitscores->mat;
     mis = arbitscores->mis;
@@ -213,20 +200,20 @@ void gt_calculateallowedMININFINITYINTgenerations(
  The following macro checks for wildcard and separator symbols.
  */
 
-#define GT_XDROP_COMPARESYMBOLSSEP(I,J)\
-        GT_XDROP_USEQ(a,I);\
-        if (a == (GtUchar) SEPARATOR)\
+#define GT_XDROP_COMPARESYMBOLSSEP(VARA,VARB,I,J)\
+        GT_XDROP_USEQ(VARA,I);\
+        if (VARA == (GtUchar) SEPARATOR)\
         {\
           ulen = I;\
           break;\
         }\
-        GT_XDROP_VSEQ(b,J);\
-        if (b == (GtUchar) SEPARATOR)\
+        GT_XDROP_VSEQ(VARB,J);\
+        if (VARB == (GtUchar) SEPARATOR)\
         {\
           vlen = J;\
           break;\
         }\
-        if (a != b || a == (GtUchar) WILDCARD)\
+        if (VARA != VARB || VARA == (GtUchar) WILDCARD)\
         {\
           break;\
         }

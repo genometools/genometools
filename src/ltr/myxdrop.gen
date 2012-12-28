@@ -54,7 +54,7 @@ GT_XDROP_EVALXDROPARBITSCORES
   /* "phase" 0 */
   for (i = 0; i < MIN(ulen,vlen); i++)
   {
-    GT_XDROP_COMPARESYMBOLSSEP(i,i);
+    GT_XDROP_COMPARESYMBOLSSEP(a,b,i,i);
   }
 
   /* alignment already finished */
@@ -128,26 +128,22 @@ GT_XDROP_EVALXDROPARBITSCORES
         if ((tmpfront.dptabdirection & MYDELETIONBIT)
             || (tmpfront.dptabdirection & MYREPLACEMENTBIT))
         {
-          tmprow =
-            fronts->spaceMyfrontvalue[ACCESSTOFRONT (d - arbitdistances.ins,
-                                                     k + 1)].dptabrow;
+          tmprow
+            = fronts->spaceMyfrontvalue[ACCESSTOFRONT (d-arbitdistances.ins,
+                                                       k + 1)].dptabrow;
           if (tmprow > i)
           {
             i = tmprow;
             tmpfront.dptabdirection = MYINSERTIONBIT;
           }
-        }
-        else
+        } else
         {
-          i =
-            fronts->spaceMyfrontvalue[ACCESSTOFRONT (d - arbitdistances.ins,
-                                                     k + 1)].dptabrow;
+          i = fronts->spaceMyfrontvalue[ACCESSTOFRONT (d - arbitdistances.ins,
+                                                       k + 1)].dptabrow;
           tmpfront.dptabdirection = MYINSERTIONBIT;
         }
       }
-
       j = i - k;
-
       /* if i = MINUSINFINITYINY or MINUSINFINITYINY + 1 */
       if (i < 0)
       {
@@ -156,54 +152,49 @@ GT_XDROP_EVALXDROPARBITSCORES
           alwaysMININFINITYINT = false;
         }
         tmpfront.dptabrow = MINUSINFINITYINT;
-      }
-      /* alignment score smaller than T - X */
-      else if (d_pre > 0 &&
-               big_t.spaceXdropscore != NULL &&
-               (GT_XDROP_EVAL (i + j, d) <
-                big_t.spaceXdropscore[d_pre] - xdropbelowscore))
+      } else
       {
-        tmpfront.dptabrow = MINUSINFINITYINT;
-      }
-      else if ((k <= -d || k >= d) || /* not correct boundaries for
+        /* alignment score smaller than T - X */
+        if (d_pre > 0 &&
+            big_t.spaceXdropscore != NULL &&
+            (GT_XDROP_EVAL (i + j, d) <
+             big_t.spaceXdropscore[d_pre] - xdropbelowscore))
+        {
+          tmpfront.dptabrow = MINUSINFINITYINT;
+        } else
+        {
+          if ((k <= -d || k >= d) || /* not correct boundaries for
                                          ACCESTOFRONT(d-1,k) */
-               ((fronts->spaceMyfrontvalue[ACCESSTOFRONT(d-1, k)].dptabrow < i)
-                 && (i <= MIN(ulen,vlen + k))))
-      {
-        while (i < ulen && j < vlen)
-        {
-          GT_XDROP_COMPARESYMBOLSSEP(i,j);
-          i++;
-          j++;
-        }
-
-        alwaysMININFINITYINT = false;
-        tmpfront.dptabrow = i;
-
-        if (GT_XDROP_EVAL(i + j, d) > bigt_tmp)
-        {
-          xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + j, d);
-          xdropbest->ivalue = (unsigned int) i;
-          xdropbest->jvalue = (unsigned int) j;
+              ((fronts->spaceMyfrontvalue[ACCESSTOFRONT(d-1, k)].dptabrow < i)
+               && (i <= MIN(ulen,vlen + k))))
+          {
+            while (i < ulen && j < vlen)
+            {
+              GT_XDROP_COMPARESYMBOLSSEP(a,b,i,j);
+              i++;
+              j++;
+            }
+            alwaysMININFINITYINT = false;
+            tmpfront.dptabrow = i;
+            if (GT_XDROP_EVAL(i + j, d) > bigt_tmp)
+            {
+              xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + j, d);
+              xdropbest->ivalue = (unsigned int) i;
+              xdropbest->jvalue = (unsigned int) j;
+            }
+          } else
+          {
+            alwaysMININFINITYINT = false;
+            tmpfront.dptabrow =
+              fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - 1, k)].dptabrow;
+          }
         }
       }
-
-      else
-      {
-        alwaysMININFINITYINT = false;
-        tmpfront.dptabrow =
-          fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - 1, k)].dptabrow;
-      }
-
-      STOREINARRAYFRONTS (fronts, ACCESSTOFRONT (d, k), Myfrontvalue,
-                            tmpfront);
-
+      STOREINARRAYFRONTS (fronts, ACCESSTOFRONT (d,k), Myfrontvalue, tmpfront);
       /* delete value for test for */
       /* INSERTIONBIT/REPLACEMENTBIT/DELETIONBIT above
       tmpfront.dptabdirection = (GtUchar) 0; */
-
-    }   /* end for loop */
-
+    }
     /* if all front values are MINUSINFINITYINT,
        aligment prematurely finished if allowedMININFINITYINTgenerations
        exceeded
@@ -213,11 +204,10 @@ GT_XDROP_EVALXDROPARBITSCORES
       currentMININFINITYINTgeneration++;
       if (currentMININFINITYINTgeneration > allowedMININFINITYINTgenerations)
       {
-        d = d - currentMININFINITYINTgeneration;
+        d -= currentMININFINITYINTgeneration;
         break;
       }
-    }
-    else
+    } else
     {
       currentMININFINITYINTgeneration = 0;
       alwaysMININFINITYINT = true;
@@ -238,14 +228,12 @@ GT_XDROP_EVALXDROPARBITSCORES
       STOREINARRAYFRONTS (fronts, ACCESSTOFRONT (d, k), Myfrontvalue,
                           tmpfront);
     }
-
     /* alignment finished */
-    if ((-d <= end_k && end_k <= d) &&
+    if (-d <= end_k && end_k <= d &&
         fronts->spaceMyfrontvalue[ACCESSTOFRONT (d, end_k)].dptabrow == ulen)
     {
       break;
     }
-
     /* pruning lower bound
        lbound may decrease by one or increase/stays the same */
     for (k = lbound - 1; k <= ubound + 1; k++)
@@ -276,8 +264,6 @@ GT_XDROP_EVALXDROPARBITSCORES
     {
       if (fronts->spaceMyfrontvalue[ACCESSTOFRONT (d, k)].dptabrow == vlen + k)
       {
-        /* debugging 12.11.06, vorher:
-           lboundtmp = k + 2; bei Zhang so */
         lboundtmp = k;
         break;
       }
@@ -289,16 +275,12 @@ GT_XDROP_EVALXDROPARBITSCORES
     {
       if (fronts->spaceMyfrontvalue[ACCESSTOFRONT (d, k)].dptabrow == ulen)
       {
-        /* debugging 12.11.06, vorher:
-           uboundtmp = k - 2; bei Zhang so */
         uboundtmp = k;
         break;
       }
     }
-
     lbound = MAX (lbound, lboundtmp);
     ubound = MIN (ubound, uboundtmp);
   }
-
   GT_FREEARRAY (&big_t, Xdropscore);
 }
