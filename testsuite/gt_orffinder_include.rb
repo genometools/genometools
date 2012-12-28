@@ -66,7 +66,7 @@ if $gttestdata then
   Keywords "gt_orffinder"
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/3R_genomic_dmel_RELEASE3-1.FASTA.gz"
-    run_test "#{$bin}gt orffinder -allorfs -types long_terminal_repeat -- 3R_genomic_dmel_RELEASE3-1.FASTA.gz #{$gttestdata}orffinder/chr3R.gff3", :maxtime => 120
+    run_test "#{$bin}gt orffinder -allorfs -types long_terminal_repeat -- 3R_genomic_dmel_RELEASE3-1.FASTA.gz #{$gttestdata}orffinder/chr3R.gff3", :maxtime => 200
     run "diff #{last_stdout} #{$gttestdata}orffinder/chr3R_all_orfs_longterminalrepeat.orffinder"
   end
 
@@ -74,7 +74,7 @@ if $gttestdata then
   Keywords "gt_orffinder"
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/3R_genomic_dmel_RELEASE3-1.FASTA.gz"
-    run_test "#{$bin}gt orffinder -types long_terminal_repeat -- 3R_genomic_dmel_RELEASE3-1.FASTA.gz #{$gttestdata}orffinder/chr3R.gff3", :maxtime => 120
+    run_test "#{$bin}gt orffinder -types long_terminal_repeat -- 3R_genomic_dmel_RELEASE3-1.FASTA.gz #{$gttestdata}orffinder/chr3R.gff3", :maxtime => 200
     run "diff #{last_stdout} #{$gttestdata}orffinder/chr3R_longest_orfs_longterminalrepeat.orffinder"
   end
 
