@@ -29,13 +29,13 @@ GT_XDROP_EVALXDROPARBITSCORES
       uboundtmp = 0,
       tmprow;                           /* temporary row index */
   GtUchar a, b;
-  Myfrontvalue tmpfront;
-  Arbitrarydistances arbitdistances;
+  GtXdropfrontvalue tmpfront;
+  GtXdropArbitrarydistances arbitdistances;
   int d = 0,                         /* distance */
       d_pre = 0,                     /* distance previous */
       dback;
-  Xdropscore bigt_tmp;               /* best score T' seen already */
-  GtArrayXdropscore big_t;           /* array T[d] of best score T for each d */
+  GtXdropscore bigt_tmp;        /* best score T' seen already */
+  GtArrayGtXdropscore big_t;    /* array T[d] of best score T for each d */
   bool alwaysMININFINITYINT = true;
   int allowedMININFINITYINTgenerations = 0,
       currentMININFINITYINTgeneration = 0;
@@ -44,10 +44,8 @@ GT_XDROP_EVALXDROPARBITSCORES
   gt_calculateallowedMININFINITYINTgenerations(
                                       &allowedMININFINITYINTgenerations,
                                       &arbitdistances);
-
   dback = GT_XDROP_SETDBACK(xdropbelowscore);
-
-  GT_INITARRAY (&big_t, Xdropscore);
+  GT_INITARRAY (&big_t, GtXdropscore);
   integermax = MAX (ulen, vlen);
   integermin = -integermax;
 
@@ -67,11 +65,11 @@ GT_XDROP_EVALXDROPARBITSCORES
   tmpfront.dptabrow = i;
   tmpfront.dptabdirection = (GtUchar) 0;   /* no predecessor */
 
-  STOREINARRAYFRONTS (fronts, 0, Myfrontvalue, tmpfront);
+  STOREINARRAYFRONTS (fronts, 0, GtXdropfrontvalue, tmpfront);
   xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + i, 0);
   xdropbest->ivalue = xdropbest->jvalue = (unsigned int) i;
 
-  GT_STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
+  GT_STOREINARRAY (&big_t, GtXdropscore, 10, bigt_tmp);
 
   /* "phase" d > 0 */
   while (lbound <= ubound)
@@ -90,9 +88,8 @@ GT_XDROP_EVALXDROPARBITSCORES
            (( -(d - arbitdistances.del) <= k - 1) &&
             (k - 1 <= d - arbitdistances.del)))
       {
-        i =
-          fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.del,
-                                                  k - 1)].dptabrow + 1;
+        i = fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d - arbitdistances.del,
+                                                         k - 1)].dptabrow + 1;
         tmpfront.dptabdirection = MYDELETIONBIT;
       }
       /* case 2: REPLACEMENT-EDGE */
@@ -102,9 +99,9 @@ GT_XDROP_EVALXDROPARBITSCORES
         /* test, if case 1 has happened. */
         if (tmpfront.dptabdirection & MYDELETIONBIT)
         {
-          tmprow =
-            fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.mis,
-                                                    k)].dptabrow + 1;
+          tmprow
+            = fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d-arbitdistances.mis,
+                                                           k)].dptabrow + 1;
           if (tmprow > i)
           {
             i = tmprow;
@@ -113,9 +110,8 @@ GT_XDROP_EVALXDROPARBITSCORES
         }
         else
         {
-          i =
-            fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.mis, k)]
-            .dptabrow + 1;
+          i = fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d-arbitdistances.mis,
+                                                           k)].dptabrow + 1;
           tmpfront.dptabdirection = MYREPLACEMENTBIT;
         }
 
@@ -129,8 +125,8 @@ GT_XDROP_EVALXDROPARBITSCORES
             || (tmpfront.dptabdirection & MYREPLACEMENTBIT))
         {
           tmprow
-            = fronts->spaceMyfrontvalue[ACCESSTOFRONT (d-arbitdistances.ins,
-                                                       k + 1)].dptabrow;
+            = fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d-arbitdistances.ins,
+                                                           k + 1)].dptabrow;
           if (tmprow > i)
           {
             i = tmprow;
@@ -138,8 +134,8 @@ GT_XDROP_EVALXDROPARBITSCORES
           }
         } else
         {
-          i = fronts->spaceMyfrontvalue[ACCESSTOFRONT (d - arbitdistances.ins,
-                                                       k + 1)].dptabrow;
+          i = fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d-arbitdistances.ins,
+                                                           k + 1)].dptabrow;
           tmpfront.dptabdirection = MYINSERTIONBIT;
         }
       }
@@ -156,16 +152,17 @@ GT_XDROP_EVALXDROPARBITSCORES
       {
         /* alignment score smaller than T - X */
         if (d_pre > 0 &&
-            big_t.spaceXdropscore != NULL &&
+            big_t.spaceGtXdropscore != NULL &&
             (GT_XDROP_EVAL (i + j, d) <
-             big_t.spaceXdropscore[d_pre] - xdropbelowscore))
+             big_t.spaceGtXdropscore[d_pre] - xdropbelowscore))
         {
           tmpfront.dptabrow = MINUSINFINITYINT;
         } else
         {
           if ((k <= -d || k >= d) || /* not correct boundaries for
                                          ACCESTOFRONT(d-1,k) */
-              ((fronts->spaceMyfrontvalue[ACCESSTOFRONT(d-1, k)].dptabrow < i)
+              ((fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d-1,k)].dptabrow
+                < i)
                && (i <= MIN(ulen,vlen + k))))
           {
             while (i < ulen && j < vlen)
@@ -185,12 +182,12 @@ GT_XDROP_EVALXDROPARBITSCORES
           } else
           {
             alwaysMININFINITYINT = false;
-            tmpfront.dptabrow =
-              fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - 1, k)].dptabrow;
+            tmpfront.dptabrow
+              = fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d-1, k)].dptabrow;
           }
         }
       }
-      STOREINARRAYFRONTS (fronts, ACCESSTOFRONT (d,k), Myfrontvalue, tmpfront);
+      STOREINARRAYFRONTS (fronts,ACCESSTOFRONT(d,k),GtXdropfrontvalue,tmpfront);
       /* delete value for test for */
       /* INSERTIONBIT/REPLACEMENTBIT/DELETIONBIT above
       tmpfront.dptabdirection = (GtUchar) 0; */
@@ -212,25 +209,25 @@ GT_XDROP_EVALXDROPARBITSCORES
       currentMININFINITYINTgeneration = 0;
       alwaysMININFINITYINT = true;
     }
-    GT_STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
+    GT_STOREINARRAY (&big_t, GtXdropscore, 10, bigt_tmp);
 
     /* fill out of bounds values of MINUSINFINITYINT
        needed for gt_showmatrix function */
     for (k = -d; k < lbound - 1; k++)
     {
       tmpfront.dptabrow = MINUSINFINITYINT;
-      STOREINARRAYFRONTS (fronts, ACCESSTOFRONT (d, k), Myfrontvalue,
+      STOREINARRAYFRONTS (fronts, ACCESSTOFRONT(d, k), GtXdropfrontvalue,
                           tmpfront);
     }
     for (k = ubound + 2; k <= d; k++)
     {
       tmpfront.dptabrow = MINUSINFINITYINT;
-      STOREINARRAYFRONTS (fronts, ACCESSTOFRONT (d, k), Myfrontvalue,
+      STOREINARRAYFRONTS (fronts, ACCESSTOFRONT(d, k), GtXdropfrontvalue,
                           tmpfront);
     }
     /* alignment finished */
     if (-d <= end_k && end_k <= d &&
-        fronts->spaceMyfrontvalue[ACCESSTOFRONT (d, end_k)].dptabrow == ulen)
+        fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d,end_k)].dptabrow == ulen)
     {
       break;
     }
@@ -238,7 +235,7 @@ GT_XDROP_EVALXDROPARBITSCORES
        lbound may decrease by one or increase/stays the same */
     for (k = lbound - 1; k <= ubound + 1; k++)
     {
-      if (fronts->spaceMyfrontvalue[ACCESSTOFRONT (d, k)].dptabrow >
+      if (fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d, k)].dptabrow >
           MINUSINFINITYINT)
       {
         lbound = k;
@@ -250,7 +247,7 @@ GT_XDROP_EVALXDROPARBITSCORES
        ubound may increase by one or decrease/stays the same */
     for (k = ubound + 1; k >= lbound - 1; k--)
     {
-      if (fronts->spaceMyfrontvalue[ACCESSTOFRONT (d, k)].dptabrow >
+      if (fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d, k)].dptabrow >
           MINUSINFINITYINT)
       {
         ubound = k;
@@ -262,7 +259,8 @@ GT_XDROP_EVALXDROPARBITSCORES
     lboundtmp = lbound;
     for (k = 0; k >= lbound; k--)
     {
-      if (fronts->spaceMyfrontvalue[ACCESSTOFRONT (d, k)].dptabrow == vlen + k)
+      if (fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d, k)].dptabrow ==
+                                         vlen + k)
       {
         lboundtmp = k;
         break;
@@ -273,7 +271,7 @@ GT_XDROP_EVALXDROPARBITSCORES
     uboundtmp = ubound;
     for (k = 0; k <= ubound; k++)
     {
-      if (fronts->spaceMyfrontvalue[ACCESSTOFRONT (d, k)].dptabrow == ulen)
+      if (fronts->spaceGtXdropfrontvalue[ACCESSTOFRONT(d, k)].dptabrow == ulen)
       {
         uboundtmp = k;
         break;
@@ -282,5 +280,5 @@ GT_XDROP_EVALXDROPARBITSCORES
     lbound = MAX (lbound, lboundtmp);
     ubound = MIN (ubound, uboundtmp);
   }
-  GT_FREEARRAY (&big_t, Xdropscore);
+  GT_FREEARRAY (&big_t, GtXdropscore);
 }

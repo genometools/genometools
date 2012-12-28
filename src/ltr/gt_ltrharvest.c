@@ -50,7 +50,7 @@ typedef struct {
                 offset;
   double similaritythreshold;
   int xdropbelowscore;
-  Arbitraryscores arbitscores;
+  GtXdropArbitraryscores arbitscores;
   unsigned int minlengthTSD,
                maxlengthTSD,
                allowedmismatches;

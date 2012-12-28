@@ -116,7 +116,7 @@ struct GtLTRharvestStream
   unsigned long minseedlength;
   double similaritythreshold;
   int xdropbelowscore;
-  Arbitraryscores arbitscores;
+  GtXdropArbitraryscores arbitscores;
   unsigned int allowedmismatches;
   GtLTRFourCharMotif *motif;
   unsigned long offset;
@@ -980,8 +980,8 @@ static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
   return true;
 }
 
-static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
-                                               Myxdropbest xdropbest_right,
+static void adjustboundariesfromXdropextension(GtXdropbest xdropbest_left,
+                                               GtXdropbest xdropbest_right,
                                                unsigned long seed1_startpos,
                                                unsigned long seed2_startpos,
                                                unsigned long seed1_endpos,
@@ -1007,9 +1007,9 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                              GtError *err)
 {
   unsigned long repeatcounter;
-  GtArrayMyfrontvalue fronts;
-  Myxdropbest xdropbest_left;
-  Myxdropbest xdropbest_right;
+  GtArrayGtXdropfrontvalue fronts;
+  GtXdropbest xdropbest_left;
+  GtXdropbest xdropbest_right;
   unsigned long alilen = 0,
          totallength,
          ulen,
@@ -1033,7 +1033,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     alilen = ((unsigned long)lo->repeatinfo.lmax) - repeatptr->len;
 
     /**** left (reverse) xdrop alignment ****/
-    GT_INITARRAY (&fronts, Myfrontvalue);
+    GT_INITARRAY (&fronts, GtXdropfrontvalue);
     if (alilen <= repeatptr->pos1)
     {
       gt_evalxdroparbitscoresleft(&lo->arbitscores,
@@ -1045,7 +1045,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                repeatptr->pos1 + repeatptr->offset,
                                (int) alilen,
                                (int) alilen,
-                               (Xdropscore)lo->xdropbelowscore);
+                               (GtXdropscore) lo->xdropbelowscore);
     }
     else /* do not align over left sequence boundary */
     {
@@ -1058,12 +1058,12 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                repeatptr->pos1 + repeatptr->offset,
                                (int) repeatptr->pos1,
                                (int) (repeatptr->pos1 + repeatptr->offset),
-                               (Xdropscore)lo->xdropbelowscore);
+                               (GtXdropscore) lo->xdropbelowscore);
     }
-    GT_FREEARRAY (&fronts, Myfrontvalue);
+    GT_FREEARRAY (&fronts, GtXdropfrontvalue);
 
     /**** right xdrop alignment ****/
-    GT_INITARRAY (&fronts, Myfrontvalue);
+    GT_INITARRAY (&fronts, GtXdropfrontvalue);
     totallength = gt_encseq_total_length(encseq);
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
                                 repeatptr->len) )
@@ -1097,7 +1097,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                  repeatptr->len)),
                                 lo->xdropbelowscore);
     }
-    GT_FREEARRAY (&fronts, Myfrontvalue);
+    GT_FREEARRAY (&fronts, GtXdropfrontvalue);
 
     GT_GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);
 
@@ -1655,7 +1655,7 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                        unsigned long maxdistance,
                                        double similaritythreshold,
                                        int xdropbelowscore,
-                                       Arbitraryscores arbitscores,
+                                       GtXdropArbitraryscores arbitscores,
                                        GtLTRFourCharMotif *motif,
                                        bool verbosemode,
                                        bool nooverlaps,

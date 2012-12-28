@@ -26,26 +26,26 @@
 typedef struct GtLTRharvestStream GtLTRharvestStream;
 
 const GtNodeStreamClass* gt_ltrharvest_stream_class(void);
-GtNodeStream*            gt_ltrharvest_stream_new(GtStr *str_indexname,
-                                                  GtRange searchrange,
-                                                  unsigned long minseedlength,
-                                                  unsigned long minltrlength,
-                                                  unsigned long maxltrlength,
-                                                  unsigned long mindistance,
-                                                  unsigned long maxdistance,
-                                                  double similaritythreshold,
-                                                  int xdropbelowscore,
-                                                  Arbitraryscores arbitscores,
-                                                  GtLTRFourCharMotif *motif,
-                                                  bool verbosemode,
-                                                  bool nooverlaps,
-                                                  bool bestoverlaps,
-                                                  bool scan,
-                                                  unsigned long offset,
-                                                  unsigned int minlengthTSD,
-                                                  unsigned int maxlengthTSD,
-                                                  unsigned long vicinity,
-                                                  GtError *err);
-const GtEncseq*          gt_ltrharvest_stream_get_encseq(GtNodeStream
-                                                                  *ltrh_stream);
+GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
+                                       GtRange searchrange,
+                                       unsigned long minseedlength,
+                                       unsigned long minltrlength,
+                                       unsigned long maxltrlength,
+                                       unsigned long mindistance,
+                                       unsigned long maxdistance,
+                                       double similaritythreshold,
+                                       int xdropbelowscore,
+                                       GtXdropArbitraryscores arbitscores,
+                                       GtLTRFourCharMotif *motif,
+                                       bool verbosemode,
+                                       bool nooverlaps,
+                                       bool bestoverlaps,
+                                       bool scan,
+                                       unsigned long offset,
+                                       unsigned int minlengthTSD,
+                                       unsigned int maxlengthTSD,
+                                       unsigned long vicinity,
+                                       GtError *err);
+
+const GtEncseq* gt_ltrharvest_stream_get_encseq(GtNodeStream *ltrh_stream);
 #endif

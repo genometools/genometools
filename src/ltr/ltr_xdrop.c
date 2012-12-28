@@ -21,8 +21,25 @@
 #include "core/minmax.h"
 #include "ltr_xdrop.h"
 
-#define MINUSINFINITYINT ((int)integermin)
+typedef struct
+{
+  int mis,
+      ins,
+      del;
+} GtXdropArbitrarydistances;
+
+#define GT_XDROP_MINUSINFINITYINT ((int)integermin)
 #define ACCESSTOFRONT(D,K) ((unsigned long) (D) * (D) + (D) + (K))
+
+/*
+  For each entry in the DP-matrix we store a single byte, and
+  use the three rightmost bits to mark which edge in the edit distance
+  graph to trace back.
+*/
+
+#define MYREPLACEMENTBIT   ((unsigned char) 1)          /* replacement */
+#define MYDELETIONBIT      (((unsigned char) 1) << 1)   /* deletion */
+#define MYINSERTIONBIT     (((unsigned char) 1) << 2)   /* insertion */
 
 /*
  The following function shows the matrix of the calculated fronts.
@@ -30,7 +47,7 @@
 /* CAUTION: fronts, that run over the matrix boundaries are not shown in
    the printed matrix.
  */
-int gt_showfrontvalues(GtArrayMyfrontvalue * fronts,
+int gt_showfrontvalues(GtArrayGtXdropfrontvalue * fronts,
                        int distance,
                        unsigned char *useq,
                        unsigned char *vseq,
@@ -64,20 +81,21 @@ int gt_showfrontvalues(GtArrayMyfrontvalue * fronts,
     {
       d = distance + 1;
       k = i - j;
-      for (l = 0; l < fronts->nextfreeMyfrontvalue; l++)
+      for (l = 0; l < fronts->nextfreeGtXdropfrontvalue; l++)
       {
-        if (MINUSINFINITYINT == fronts->spaceMyfrontvalue[l].dptabrow)
+        if (fronts->spaceGtXdropfrontvalue[l].dptabrow ==
+            GT_XDROP_MINUSINFINITYINT)
         {
           continue;
         }
-        if (i == fronts->spaceMyfrontvalue[l].dptabrow)
+        if (i == fronts->spaceGtXdropfrontvalue[l].dptabrow)
         {
           for (d = 0; d <= distance; d++)
           {
-            if (k >= -d && k <= d && l == ACCESSTOFRONT (d, i - j))
+            if (k >= -d && k <= d && l == ACCESSTOFRONT(d, i - j))
             {
               printf("%-3d ", d);
-              l = fronts->nextfreeMyfrontvalue;
+              l = fronts->nextfreeGtXdropfrontvalue;
               filled++;
               break;
             }
@@ -138,8 +156,9 @@ int gt_showfrontvalues(GtArrayMyfrontvalue * fronts,
 /*
  The following function calculates the distance from the given scores.
  */
-void gt_calculatedistancesfromscores(Arbitraryscores *arbitscores,
-                                     Arbitrarydistances *arbitdistances)
+static void gt_calculatedistancesfromscores(
+                                    GtXdropArbitraryscores *arbitscores,
+                                    GtXdropArbitrarydistances *arbitdistances)
 {
   unsigned int m, n, r;
   int mat, mis, ins, del;
@@ -170,9 +189,9 @@ void gt_calculatedistancesfromscores(Arbitraryscores *arbitscores,
 
   arbitscores->gcd = (int) m;
 
-  arbitdistances->mis  = (mat - mis) / arbitscores->gcd;
-  arbitdistances->ins  = (mat/2 - ins)  / arbitscores->gcd;
-  arbitdistances->del  = (mat/2 - del)  / arbitscores->gcd;
+  arbitdistances->mis = (mat - mis) / arbitscores->gcd;
+  arbitdistances->ins = (mat/2 - ins) / arbitscores->gcd;
+  arbitdistances->del = (mat/2 - del) / arbitscores->gcd;
 
 }
 
@@ -180,9 +199,9 @@ void gt_calculatedistancesfromscores(Arbitraryscores *arbitscores,
  The following function calculates the maximal allowed number of
  generations with all front values equal minus infinity.
  */
-void gt_calculateallowedMININFINITYINTgenerations(
-   int *allowedMININFINITYINTgenerations,
-   Arbitrarydistances *arbitdistances)
+static void gt_calculateallowedMININFINITYINTgenerations(
+                   int *allowedMININFINITYINTgenerations,
+                   GtXdropArbitrarydistances *arbitdistances)
 {
   *allowedMININFINITYINTgenerations = MAX(arbitdistances->mis,
                                           arbitdistances->ins);

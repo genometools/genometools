@@ -19,7 +19,6 @@
 #define LTR_XDROP_H
 
 #include "core/arraydef.h"
-#include "core/unused_api.h"
 #include "core/encseq.h"
 
 typedef struct
@@ -29,28 +28,7 @@ typedef struct
       ins,
       del,
       gcd;  /* greatest common divisor */
-} Arbitraryscores;
-
-typedef struct
-{
-  int mis,
-      ins,
-      del;
-} Arbitrarydistances;
-
-/*
-  For each entry in the DP-matrix we store a single byte, and
-  use the three rightmost bits to mark which edge in the edit distance
-  graph to trace back.
-*/
-
-#define MYREPLACEMENTBIT   ((unsigned char) 1)          /* replacement */
-#define MYDELETIONBIT      (((unsigned char) 1) << 1)   /* deletion */
-#define MYINSERTIONBIT     (((unsigned char) 1) << 2)   /* insertion */
-#define MYLENBIT           (((unsigned char) 1) << 3)
-                                     /* length of identical substring */
-#define MYMATCHBIT         (((unsigned char) 1) << 4)   /* match */
-#define MYMISMATCHBIT      (((unsigned char) 1) << 5)   /* mismatch */
+} GtXdropArbitraryscores;
 
 typedef struct
 {
@@ -58,38 +36,24 @@ typedef struct
   unsigned char dptabdirection; /* one of the bits REPLACEMENTBIT,
                                                    DELETIONBIT,
                                                    INSERTIONBIT */
-} Myfrontvalue;
+} GtXdropfrontvalue;
 
-GT_DECLAREARRAYSTRUCT(Myfrontvalue);
+GT_DECLAREARRAYSTRUCT(GtXdropfrontvalue);
 
 typedef struct
 {
-    unsigned int ivalue, jvalue;
-    int score;
-} Myxdropbest;
+  unsigned int ivalue, jvalue;
+  int score;
+} GtXdropbest;
 
 /* This is the type for the xdrop scores. */
-typedef int Xdropscore;
+typedef int GtXdropscore;
 
-GT_DECLAREARRAYSTRUCT(Xdropscore);
-
-int gt_showmatrix(GtArrayMyfrontvalue *fronts,
-               int distance,
-               unsigned char *useq,
-               unsigned char *vseq,
-               int ulen,
-               int vlen);
-
-void gt_calculatedistancesfromscores(Arbitraryscores *arbitscores,
-    Arbitrarydistances *arbitdistances);
-
-void gt_calculateallowedMININFINITYINTgenerations(
-   int *allowedMININFINITYINTgenerations,
-   Arbitrarydistances *arbitdistances);
+GT_DECLAREARRAYSTRUCT(GtXdropscore);
 
 /*
    The following functions extend seeds to the right and to the left,
-   respectively. xdropbest stores information about the best match
+   respectively. GtXdropbest stores information about the best match
    found. useq is the first sequence position and vseq is the
    second sequence position. ulen and vlen are the
    remaining sequence length to align. If an alignment has score smaller than
@@ -98,28 +62,29 @@ void gt_calculateallowedMININFINITYINTgenerations(
 */
 
 #define GT_XDROP_EVALXDROPARBITSCORESRIGHT\
-        void gt_evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
-                                          Myxdropbest *xdropbest,\
-                                          GtArrayMyfrontvalue *fronts,\
-                                          const GtEncseq *str_useq,\
-                                          const GtEncseq *str_vseq,\
-                                          unsigned long useq,\
-                                          unsigned long vseq,\
-                                          int ulen,\
-                                          int vlen,\
-                                          Xdropscore xdropbelowscore)
+        void gt_evalxdroparbitscoresright(\
+                                        GtXdropArbitraryscores *arbitscores,\
+                                        GtXdropbest *xdropbest,\
+                                        GtArrayGtXdropfrontvalue *fronts,\
+                                        const GtEncseq *str_useq,\
+                                        const GtEncseq *str_vseq,\
+                                        unsigned long useq,\
+                                        unsigned long vseq,\
+                                        int ulen,\
+                                        int vlen,\
+                                        GtXdropscore xdropbelowscore)
 
 #define GT_XDROP_EVALXDROPARBITSCORESLEFT\
-        void gt_evalxdroparbitscoresleft(Arbitraryscores *arbitscores,\
-                                         Myxdropbest *xdropbest,\
-                                         GtArrayMyfrontvalue *fronts,\
+        void gt_evalxdroparbitscoresleft(GtXdropArbitraryscores *arbitscores,\
+                                         GtXdropbest *xdropbest,\
+                                         GtArrayGtXdropfrontvalue *fronts,\
                                          const GtEncseq *str_useq,\
                                          const GtEncseq *str_vseq,\
                                          unsigned long useq,\
                                          unsigned long vseq,\
                                          int ulen,\
                                          int vlen,\
-                                         Xdropscore xdropbelowscore)
+                                         GtXdropscore xdropbelowscore)
 
 GT_XDROP_EVALXDROPARBITSCORESLEFT;
 GT_XDROP_EVALXDROPARBITSCORESRIGHT;
