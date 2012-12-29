@@ -29,7 +29,7 @@ typedef struct
 } GtXdropArbitrarydistances;
 
 #define GT_XDROP_MINUSINFINITYINT ((int)integermin)
-#define ACCESSTOFRONT(D,K) ((unsigned long) (D) * (D) + (D) + (K))
+#define GT_XDROP_FRONTIDX(D,K) ((unsigned long) (D) * (D) + (D) + (K))
 
 /*
   For each entry in the DP-matrix we store a single byte, and
@@ -37,9 +37,9 @@ typedef struct
   graph to trace back.
 */
 
-#define MYREPLACEMENTBIT   ((unsigned char) 1)          /* replacement */
-#define MYDELETIONBIT      (((unsigned char) 1) << 1)   /* deletion */
-#define MYINSERTIONBIT     (((unsigned char) 1) << 2)   /* insertion */
+#define GT_XDROP_REPLACEMENTBIT   ((unsigned char) 1)
+#define GT_XDROP_DELETIONBIT      (((unsigned char) 1) << 1)
+#define GT_XDROP_INSERTIONBIT     (((unsigned char) 1) << 2)
 
 /*
  The following function shows the matrix of the calculated fronts.
@@ -47,10 +47,10 @@ typedef struct
 /* CAUTION: fronts, that run over the matrix boundaries are not shown in
    the printed matrix.
  */
-int gt_showfrontvalues(GtArrayGtXdropfrontvalue * fronts,
+int gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
                        int distance,
-                       unsigned char *useq,
-                       unsigned char *vseq,
+                       const unsigned char *useq,
+                       const unsigned char *vseq,
                        int ulen,
                        int vlen)
 {
@@ -92,7 +92,7 @@ int gt_showfrontvalues(GtArrayGtXdropfrontvalue * fronts,
         {
           for (d = 0; d <= distance; d++)
           {
-            if (k >= -d && k <= d && l == ACCESSTOFRONT(d, i - j))
+            if (k >= -d && k <= d && l == GT_XDROP_FRONTIDX(d, i - j))
             {
               printf("%-3d ", d);
               l = fronts->nextfreeGtXdropfrontvalue;
@@ -132,26 +132,25 @@ int gt_showfrontvalues(GtArrayGtXdropfrontvalue * fronts,
         GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1);\
         (A)->space##TYPE[POS] = VAL
 
-/*
- The following macro swaps two values.
- */
-#define SWAPMAYBE\
-        if (m < n)\
-        {\
-          r = m;\
-          m = n;\
-          n = r;\
-        }
-/*
- The following macro determines the greatest common divisor.
- */
-#define GGT\
-        do\
-        {\
-          r = m % n;\
-          m = n;\
-          n = r;\
-        } while (r != 0)
+static unsigned int gt_xdrop_gcd(unsigned int m, unsigned int n)
+{
+  unsigned int r;
+
+  if (m < n)
+  {
+    r = m;
+    m = n;
+    n = r;
+  }
+  do
+  {
+    gt_assert(m >= n);
+    r = m % n;
+    m = n;
+    n = r;
+  } while (r != 0);
+  return m;
+}
 
 /*
  The following function calculates the distance from the given scores.
@@ -160,11 +159,10 @@ static void gt_calculatedistancesfromscores(
                                     GtXdropArbitraryscores *arbitscores,
                                     GtXdropArbitrarydistances *arbitdistances)
 {
-  unsigned int m, n, r;
   int mat, mis, ins, del;
 
   /* if mat is odd double all scores */
-  if (GT_MOD2((unsigned int)arbitscores->mat))
+  if (GT_MOD2((unsigned int) arbitscores->mat) > 0)
   {
     mat = arbitscores->mat * 2;
     mis = arbitscores->mis * 2;
@@ -177,22 +175,14 @@ static void gt_calculatedistancesfromscores(
     ins = arbitscores->ins;
     del = arbitscores->del;
   }
-
-  m = (unsigned int)(mat - mis);
-  n = (unsigned int)(mat/2 - ins);
-  SWAPMAYBE
-  GGT;
-
-  n = (unsigned int)(mat/2 - del);
-  SWAPMAYBE
-  GGT;
-
-  arbitscores->gcd = (int) m;
-
+  gt_assert(mat >= mis && mat/2 >= ins && mat/2 >= del);
+  arbitscores->gcd
+    = (int) gt_xdrop_gcd(gt_xdrop_gcd((unsigned int) (mat-mis),
+                                      (unsigned int) (mat/2-ins)),
+                         (unsigned int) (mat/2-del));
   arbitdistances->mis = (mat - mis) / arbitscores->gcd;
   arbitdistances->ins = (mat/2 - ins) / arbitscores->gcd;
   arbitdistances->del = (mat/2 - del) / arbitscores->gcd;
-
 }
 
 /*
