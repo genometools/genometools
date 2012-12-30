@@ -33,7 +33,7 @@
 struct GtHpolProcessor
 {
   GtEncseq *encseq;
-  unsigned long hmin, clenmax, read_hmin, mapqmin, covmin;
+  unsigned long hmin, clenmax, read_hmin, mapqmin, covmin, qmax;
   bool allow_partial, allow_multiple;
   double altmax, refmin;
   GtDiscDistri *hdist, *hdist_e;
@@ -60,6 +60,7 @@ GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin)
   hpp->encseq = encseq;
   hpp->hmin = hmin;
   hpp->read_hmin = 0;
+  hpp->qmax = 0;
   hpp->mapqmin = 0;
   hpp->covmin = 0;
   hpp->allow_partial = false;
@@ -301,8 +302,8 @@ void gt_hpol_processor_enable_aligned_segments_refregionscheck(
 }
 
 void gt_hpol_processor_enable_segments_hlen_adjustment(GtHpolProcessor *hpp,
-    GtAlignedSegmentsPile *asp, unsigned long read_hmin, double altmax,
-    double refmin, unsigned long mapqmin, unsigned long covmin,
+    GtAlignedSegmentsPile *asp, unsigned long read_hmin, unsigned long qmax,
+    double altmax, double refmin, unsigned long mapqmin, unsigned long covmin,
     bool allow_partial, bool allow_multiple, unsigned long clenmax)
 {
   gt_assert(hpp != NULL);
@@ -311,6 +312,7 @@ void gt_hpol_processor_enable_segments_hlen_adjustment(GtHpolProcessor *hpp,
   hpp->adjust_s_hlen = true;
   hpp->asp = asp;
   hpp->read_hmin = read_hmin;
+  hpp->qmax = qmax;
   hpp->altmax = altmax;
   hpp->refmin = refmin;
   hpp->mapqmin = mapqmin;
@@ -391,13 +393,12 @@ static void gt_hpol_processor_output_stats_header(GtFile *outfp)
 static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
     unsigned long r_hpos, unsigned long coverage, unsigned long r_hlen,
     unsigned long r_supp, unsigned long s_hlen, unsigned long a_hlen,
-    unsigned long a_supp, char s_char, unsigned long s_q_sum,
+    unsigned long a_supp, char s_char, double s_q_ave,
     unsigned long c_len, GtFile *outfp)
 {
   unsigned long i, pos, s_hpos = 0, s_offset, s_q_bef, s_q_aft, s_q_value,
                 s_q_min, s_q_max, s_q_range, s_q_first, s_q_last = 0, s_hend,
                 s_mapq;
-  double s_q_ave;
   char *s_qual, *q, edit, s_or;
   const char *s_id;
   gt_assert(r_hlen != s_hlen);
@@ -409,9 +410,6 @@ static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
   s_mapq = gt_aligned_segment_mapping_quality(as);
   q = gt_aligned_segment_qual(as);
   gt_assert(s_hlen > 0);
-  gt_assert(s_q_sum >= GT_HPOL_PROCESSOR_PHREDOFFSET * s_hlen);
-  s_q_ave = (double)(s_q_sum - GT_HPOL_PROCESSOR_PHREDOFFSET * s_hlen)
-    / (double)s_hlen;
   s_hpos = gt_aligned_segment_orig_seqpos_for_refpos(as, r_hpos);
   s_offset = gt_aligned_segment_offset_for_refpos(as, r_hpos);
   s_qual = gt_malloc(sizeof (*s_qual) * (s_hlen + 1UL));
@@ -616,12 +614,13 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
     char c, unsigned long r_hstart, unsigned long coverage,
     unsigned long r_hlen, unsigned long r_supp, unsigned long a_hlen,
     unsigned long a_supp, unsigned long clenmax, bool allow_partial,
-    bool allow_multiple, unsigned long s_hmin, bool output_stats,
-    GtFile *outfp_stats)
+    bool allow_multiple, unsigned long s_hmin, unsigned long qmax,
+    bool output_stats, GtFile *outfp_stats)
 {
   unsigned long left, right, s_hlen = 0, q_sum = 0, s_free = 0;
   char *s, *q;
   bool edited = false;
+  double q_ave = 0;
   left = gt_aligned_segment_offset_for_refpos(as, r_hstart);
   right = gt_aligned_segment_offset_for_refpos(as, r_hstart + r_hlen);
   if (left == GT_UNDEF_ULONG || left == 0 ||
@@ -664,19 +663,22 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   }
 #endif
   /* do the editing if necessary and possible */
+  q_ave = (double)(q_sum - GT_HPOL_PROCESSOR_PHREDOFFSET * s_hlen)
+    / (double)s_hlen;
   if (s_hlen < r_hlen)
   {
     if (s_free > 0)
     {
       unsigned long hlen_diff = r_hlen - s_hlen;
       if (hlen_diff < clenmax &&
+          (q_ave <= (double)qmax) &&
           (s_free >= hlen_diff || allow_partial) &&
           (!gt_aligned_segment_seq_edited(as) || allow_multiple))
       {
         if (output_stats)
         {
           gt_hpol_processor_output_stats(as, r_hstart, coverage, r_hlen, r_supp,
-              s_hlen, a_hlen, a_supp, c, q_sum, MIN(s_free, hlen_diff),
+              s_hlen, a_hlen, a_supp, c, q_ave, MIN(s_free, hlen_diff),
               outfp_stats);
         }
         gt_aligned_segment_seq_set_edited(as);
@@ -690,12 +692,13 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   {
     unsigned long hlen_diff = s_hlen - r_hlen;
     if (hlen_diff < clenmax &&
+       (q_ave <= (double)qmax) &&
        (!gt_aligned_segment_seq_edited(as) || allow_multiple))
     {
       if (output_stats)
       {
         gt_hpol_processor_output_stats(as, r_hstart, coverage, r_hlen, r_supp,
-            s_hlen, a_hlen, a_supp, c, q_sum, hlen_diff, outfp_stats);
+            s_hlen, a_hlen, a_supp, c, q_ave, hlen_diff, outfp_stats);
       }
       gt_aligned_segment_seq_set_edited(as);
       gt_hpol_processor_shrink_hpol(s, q, left, right, hlen_diff, c);
@@ -710,8 +713,9 @@ static bool gt_hpol_processor_adjust_hlen_of_all_segments(
     unsigned long coverage, unsigned long r_hlen, unsigned long r_supp,
     unsigned long a_hlen, unsigned long a_supp, unsigned long clenmax,
     bool allow_partial, bool allow_multiple, unsigned long s_hmin,
-    unsigned long mapqmin, bool output_stats, GtFile *outfp_stats,
-    GtHashmap *processed_segments, bool output_multihit_stats)
+    unsigned long qmax, unsigned long mapqmin, bool output_stats,
+    GtFile *outfp_stats, GtHashmap *processed_segments,
+    bool output_multihit_stats)
 {
   GtDlistelem *dlistelem;
   bool any_edited = false, edited;
@@ -737,7 +741,7 @@ static bool gt_hpol_processor_adjust_hlen_of_all_segments(
       }
       edited = gt_hpol_processor_adjust_hlen_of_a_segment(as, c, r_hstart,
           coverage, r_hlen, r_supp, a_hlen, a_supp, clenmax, allow_partial,
-          allow_multiple, s_hmin, output_stats_for_as, outfp_stats);
+          allow_multiple, s_hmin, qmax, output_stats_for_as, outfp_stats);
       if (edited)
         any_edited = true;
     }
@@ -819,8 +823,9 @@ static void gt_hpol_processor_process_hpol_end(GtHpolProcessor *hpp,
         edited = gt_hpol_processor_adjust_hlen_of_all_segments(hpp->asp, ch,
             endpos + 1UL - hlen, piled, hlen, r_supp, a_hlen, a_supp,
             hpp->clenmax, hpp->allow_partial, hpp->allow_multiple,
-            hpp->read_hmin, hpp->mapqmin, hpp->output_stats, hpp->outfp_stats,
-            hpp->processed_segments, hpp->output_multihit_stats);
+            hpp->read_hmin, hpp->qmax, hpp->mapqmin, hpp->output_stats,
+            hpp->outfp_stats, hpp->processed_segments,
+            hpp->output_multihit_stats);
       }
     }
   }

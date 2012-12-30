@@ -27,7 +27,7 @@
 
 typedef struct {
   GtStr  *encseqinput, *annotation, *map, *outfilename, *atype, *outprefix;
-  unsigned long hmin, clenmax, read_hmin, covmin, mapqmin;
+  unsigned long hmin, clenmax, read_hmin, covmin, mapqmin, qmax;
   bool verbose, map_is_sam, chk, stats, allow_partial, allow_multiple,
        aggressive, moderate, conservative, expert, state_of_truth;
   double altmax, cogmin;
@@ -185,6 +185,14 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_imply(option, expert_option);
   gt_option_parser_add_option(op, option);
 
+  /* -qmax */
+  option = gt_option_new_ulong("qmax",
+      "maximal average quality of homopolymer in a read",
+      &arguments->qmax, 120UL);
+  gt_option_is_extended_option(option);
+  gt_option_imply(option, expert_option);
+  gt_option_parser_add_option(op, option);
+
   /* -altmax */
   option = gt_option_new_double_min_max("altmax",
       "max support of alternate homopol. length;\n"
@@ -332,6 +340,7 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   {
     args->hmin = 3UL;
     args->read_hmin = 1UL;
+    args->qmax = 120UL;
     args->altmax = (double) 1.00;
     args->cogmin = (double) 0.00;
     args->mapqmin = 0UL;
@@ -343,6 +352,7 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   {
     args->hmin = 3UL;
     args->read_hmin = 1UL;
+    args->qmax = 120UL;
     args->altmax = (double) 0.99;
     args->cogmin = (double) 0.00;
     args->mapqmin = 10UL;
@@ -354,6 +364,7 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   {
     args->hmin = 3UL;
     args->read_hmin = 2UL;
+    args->qmax = 120UL;
     args->altmax = (double) 0.80;
     args->cogmin = (double) 0.10;
     args->mapqmin = 21UL;
@@ -388,6 +399,7 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_logger_log(v_logger, "altmax = %.2f", arguments->altmax);
   gt_logger_log(v_logger, "cogmin = %.2f", arguments->cogmin);
   gt_logger_log(v_logger, "mapqmin = %lu", arguments->mapqmin);
+  gt_logger_log(v_logger, "qmax = %lu", arguments->qmax);
   gt_logger_log(v_logger, "covmin = %lu", arguments->covmin);
   if (arguments->clenmax == ULONG_MAX)
     gt_logger_log(v_logger, "clenmax = unlimited");
@@ -436,9 +448,10 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
         asp = gt_aligned_segments_pile_new(sfi, sem);
         if (!arguments->chk)
           gt_hpol_processor_enable_segments_hlen_adjustment(hpp, asp,
-              arguments->read_hmin, arguments->altmax, arguments->cogmin,
-              arguments->mapqmin, arguments->covmin, arguments->allow_partial,
-              arguments->allow_multiple, arguments->clenmax);
+              arguments->read_hmin, arguments->qmax, arguments->altmax,
+              arguments->cogmin, arguments->mapqmin, arguments->covmin,
+              arguments->allow_partial, arguments->allow_multiple,
+              arguments->clenmax);
         else
           gt_hpol_processor_enable_aligned_segments_refregionscheck(hpp, asp);
         if (arguments->stats || arguments->state_of_truth)

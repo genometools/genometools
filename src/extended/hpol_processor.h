@@ -62,6 +62,7 @@ void             gt_hpol_processor_enable_segments_hlen_adjustment(
                                                      GtHpolProcessor *hpp,
                                                      GtAlignedSegmentsPile *asp,
                                                      unsigned long read_hmin,
+                                                     unsigned long qmax,
                                                      double altmax,
                                                      double refmin,
                                                      unsigned long mapqmin,
