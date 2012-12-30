@@ -24,9 +24,9 @@
 #include "core/option_api.h"
 #include "core/tool.h"
 #include "core/versionfunc.h"
+#include "core/format64.h"
 #include "match/esa-seqread.h"
 #include "match/esa-mmsearch.h"
-#include "core/format64.h"
 #include "match/esa-maxpairs.h"
 #include "match/test-maxpairs.pr"
 #include "match/querymatch.h"
@@ -63,13 +63,13 @@ static int gt_simpleexactselfmatchoutput(void *info,
   seqlength = gt_encseq_seqlength(encseq, queryseqnum);
   gt_assert(pos2 >= seqstartpos);
   gt_querymatch_fill(querymatch,
-                  len,
-                  pos1,
-                  GT_READMODE_FORWARD,
-                  true,
-                  (uint64_t) queryseqnum,
-                  pos2 - seqstartpos,
-                  seqlength);
+                     len,
+                     pos1,
+                     GT_READMODE_FORWARD,
+                     true,
+                     (uint64_t) queryseqnum,
+                     pos2 - seqstartpos,
+                     seqlength);
   return gt_querymatch_output(info, encseq, querymatch, err);
 }
 
@@ -99,6 +99,7 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
   if (relpos1 == 0)
   {
     unsigned long seqlen2 = gt_encseq_seqlength(encseq,seqnum2);
+
     if (relpos2 + matchlen == seqlen2)
     {
       printf("%lu %lu %lu\n",seqnum2,seqnum1,matchlen);
@@ -108,6 +109,7 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
     if (relpos2 == 0)
     {
       unsigned long seqlen1 = gt_encseq_seqlength(encseq,seqnum1);
+
       if (relpos1 + matchlen == seqlen1)
       {
         printf("%lu %lu %lu\n",seqnum1,seqnum2,matchlen);
@@ -130,14 +132,14 @@ static int callenummaxpairs(const char *indexname,
 
   gt_error_check(err);
   ssar = gt_newSequentialsuffixarrayreaderfromfile(indexname,
-                                                SARR_LCPTAB |
-                                                SARR_SUFTAB |
-                                                SARR_ESQTAB |
-                                                SARR_SSPTAB,
-                                                scanfile
-                                                  ? SEQ_scan : SEQ_mappedboth,
-                                                logger,
-                                                err);
+                                                   SARR_LCPTAB |
+                                                   SARR_SUFTAB |
+                                                   SARR_ESQTAB |
+                                                   SARR_SSPTAB,
+                                                   scanfile ? SEQ_scan 
+                                                            : SEQ_mappedboth,
+                                                   logger,
+                                                   err);
   if (ssar == NULL)
   {
     haserr = true;

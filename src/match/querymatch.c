@@ -19,16 +19,15 @@
 #include "core/unused_api.h"
 #include "core/types_api.h"
 #include "core/readmode.h"
-
 #include "querymatch.h"
 #include "core/format64.h"
 
 struct Querymatch
 {
    unsigned long len,
-          dbstart,
-          querystart,
-          querytotallength;
+                 dbstart,
+                 querystart,
+                 querytotallength;
    bool selfmatch;
    uint64_t queryseqnum;
    GtReadmode readmode;
@@ -40,13 +39,13 @@ Querymatch *gt_querymatch_new(void)
 }
 
 void gt_querymatch_fill(Querymatch *querymatch,
-                     unsigned long len,
-                     unsigned long dbstart,
-                     GtReadmode readmode,
-                     bool selfmatch,
-                     uint64_t queryseqnum,
-                     unsigned long querystart,
-                     unsigned long querytotallength)
+                        unsigned long len,
+                        unsigned long dbstart,
+                        GtReadmode readmode,
+                        bool selfmatch,
+                        uint64_t queryseqnum,
+                        unsigned long querystart,
+                        unsigned long querytotallength)
 {
   querymatch->len = len;
   querymatch->dbstart = dbstart;
@@ -79,34 +78,28 @@ static void verifymatch(const GtEncseq *encseq,
                   seqstartpos,
                   totallength = gt_encseq_total_length(encseq);
     GtUchar cc1, cc2;
+
     seqstartpos = gt_encseq_seqstartpos(encseq, seqnum2);
     pos2 += seqstartpos;
     for (offset = 0; offset < len; offset++)
     {
       gt_assert(pos1 + len - 1 < totallength);
       gt_assert(pos2 + len - 1 < totallength);
-      cc1 = gt_encseq_get_encoded_char(encseq,
-                                              pos1+offset,
-                                              GT_READMODE_FORWARD);
-      cc2 = gt_encseq_get_encoded_char(encseq,
-                                              pos2+len-1-offset,
-                                              GT_READMODE_FORWARD);
+      cc1 = gt_encseq_get_encoded_char(encseq,pos1+offset,GT_READMODE_FORWARD);
+      cc2 = gt_encseq_get_encoded_char(encseq,pos2+len-1-offset,
+                                       GT_READMODE_FORWARD);
       gt_assert(cc1 == cc2 && ISNOTSPECIAL(cc1));
     }
     if (pos1 + len < totallength)
     {
-      cc1 = gt_encseq_get_encoded_char(encseq,
-                                              pos1+len,
-                                              GT_READMODE_FORWARD);
+      cc1 = gt_encseq_get_encoded_char(encseq,pos1+len,GT_READMODE_FORWARD);
     } else
     {
       cc1 = SEPARATOR;
     }
     if (pos2 > 0)
     {
-      cc2 = gt_encseq_get_encoded_char(encseq,
-                                              pos2-1,
-                                              GT_READMODE_FORWARD);
+      cc2 = gt_encseq_get_encoded_char(encseq,pos2-1,GT_READMODE_FORWARD);
     } else
     {
       cc2 = SEPARATOR;
@@ -117,9 +110,9 @@ static void verifymatch(const GtEncseq *encseq,
 #endif
 
 int gt_querymatch_output(GT_UNUSED void *info,
-                      const GtEncseq *encseq,
-                      const Querymatch *querymatch,
-                      GT_UNUSED GtError *err)
+                         const GtEncseq *encseq,
+                         const Querymatch *querymatch,
+                         GT_UNUSED GtError *err)
 {
   const char *outflag = "FRCP";
   unsigned long dbseqnum, querystart, dbstart_relative, seqstartpos;
