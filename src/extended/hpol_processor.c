@@ -275,7 +275,7 @@ static void gt_hpol_processor_refregioncheck(
         fprintf(stderr, " ");
     }
     fprintf(stderr, "\n");
-    fprintf(stderr, "reference = ");
+    fprintf(stderr, "cognate = ");
     for (i = 0; i < rlen; i++)
     {
       fprintf(stderr, "%c", gt_encseq_get_decoded_char(hpp->encseq,
@@ -349,16 +349,16 @@ void gt_hpol_processor_enable_sorted_segments_output(GtHpolProcessor *hpp,
 static void gt_hpol_processor_output_stats_header(GtFile *outfp)
 {
   gt_file_xprintf(outfp, "# correction statistics\n");
-  gt_file_xprintf(outfp, "# r_hpos =    start pos of hpol on reference\n");
+  gt_file_xprintf(outfp, "# r_hpos =    start pos of hpol on cognate\n");
   gt_file_xprintf(outfp, "# edit =      edit operation on the read (I or D)\n");
   gt_file_xprintf(outfp, "# s_hpos =    first pos of hpol on read\n");
   gt_file_xprintf(outfp, "# s_hend =    last pos of hpol on read\n");
   gt_file_xprintf(outfp, "# s_char =    hpol character in read\n");
   gt_file_xprintf(outfp, "# s_or =      orientation of read "
-      "(+ or -; + = same as reference)\n");
+      "(+ or -; + = same as cognate)\n");
   gt_file_xprintf(outfp, "# c_len =     correction length\n");
   gt_file_xprintf(outfp, "# coverage =  number of reads over entire hpol\n");
-  gt_file_xprintf(outfp, "# r_hlen =    length of hpol on reference\n");
+  gt_file_xprintf(outfp, "# r_hlen =    length of hpol on cognate\n");
   gt_file_xprintf(outfp, "# r_supp =    %% reads with ref hpol length\n");
   gt_file_xprintf(outfp, "# s_hlen =    length of hpol in read\n");
   gt_file_xprintf(outfp, "# a_hlen =    alt consensus hpol length in reads\n");
@@ -838,7 +838,7 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
   gt_assert(hpp->hdist != NULL);
   gt_logger_log(logger, "Distribution of homopolymers of length >= %lu %s",
       hpp->hmin, (hpp->cds_oracle != NULL ?  "in coding sequences" :
-        "in reference sequence"));
+        "in cognate sequence"));
   gt_logger_log(logger, "length\toccurrences\tedited");
   for (i = hpp->hmin; i <= hpp->hlen_max; i++)
   {

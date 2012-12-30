@@ -7,7 +7,7 @@ must be selected.
 
 The '-aggressive', '-moderate' and '-conservative' modes are presets of
 the criteria by which it is decided if an observed discrepancy in
-homopolymer length between reference and a read shall be corrected
+homopolymer length between cognate sequence and a read shall be corrected
 or not. A description of the single criteria is provided by using
 the '-help+'' option. The presets are equivalent to the following settings:
 
@@ -29,5 +29,5 @@ The '-expert' mode allows to manually set each parameter; the default
 values are the same as in the '-conservative' mode.
 
 (Finally, for evaluation purposes only, the '-state-of-truth' mode can be used:
-this mode assumes that the target sequence of the sequencing has been specified
-as reference sequence and outputs an ideal list of corrections.)]])
+this mode assumes that the sequenced genome has been specified
+as cognate sequence and outputs an ideal list of corrections.)]])

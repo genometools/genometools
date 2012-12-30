@@ -28,9 +28,9 @@
 typedef struct {
   GtStr  *encseqinput, *annotation, *map, *outfilename, *atype, *outprefix;
   unsigned long hmin, clenmax, read_hmin, covmin, mapqmin;
-  bool verbose, map_is_sam, rchk, stats, allow_partial, allow_multiple,
+  bool verbose, map_is_sam, chk, stats, allow_partial, allow_multiple,
        aggressive, moderate, conservative, expert, state_of_truth;
-  double altmax, refmin;
+  double altmax, cogmin;
   GtStrArray *readset;
 } GtHopArguments;
 
@@ -71,14 +71,14 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("-<mode> -ref <encseq> -map <sam/bam> "
+  op = gt_option_parser_new("-<mode> -c <encseq> -map <sam/bam> "
       "-reads <fastq> [options...]",
-      "Reference-based homopolymer error correction.");
+      "Cognate sequence-based homopolymer error correction.");
 
-  /* -ref */
-  option = gt_option_new_string("ref",
-      "reference sequence in GtEncseq format\n"
-      "(can be prepared using gt encseq encode)",
+  /* -c */
+  option = gt_option_new_string("c",
+      "cognate sequence\n"
+      "(encoded using gt encseq encode)",
       arguments->encseqinput, NULL);
   gt_option_is_mandatory(option);
   gt_option_hide_default(option);
@@ -86,7 +86,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
 
   /* -map */
   option = gt_option_new_string("map",
-      "mapping of reads to reference\n"
+      "mapping of reads to the cognate sequence\n"
       "it must be in SAM/BAM format, and sorted by coordinate\n"
       "(can be prepared e.g. using: samtools sort)",
       arguments->map, NULL);
@@ -171,8 +171,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
 
   /* -hmin */
   option = gt_option_new_ulong_min("hmin",
-      "minimal homopolymer length in reference\n"
-      "minimal number of consecutive identical symbols on the reference",
+      "minimal homopolymer length in cognate sequence",
       &arguments->hmin, 3UL, 2UL);
   gt_option_is_extended_option(option);
   gt_option_imply(option, expert_option);
@@ -190,20 +189,20 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   option = gt_option_new_double_min_max("altmax",
       "max support of alternate homopol. length;\n"
       "e.g. 0.8 means: do not correct any read if homop. length in more than "
-      "80\% of the reads has the same value, different from the reference\n"
+      "80\% of the reads has the same value, different from the cognate\n"
       "if altmax is set to 1.0 reads are always corrected",
       &arguments->altmax, (double) 0.8, 0.0, (double) 1.0);
   gt_option_is_extended_option(option);
   gt_option_imply(option, expert_option);
   gt_option_parser_add_option(op, option);
 
-  /* -refmin */
-  option = gt_option_new_double_min_max("refmin",
-      "min support of reference homopol. length;\n"
-      "e.g. 0.1 means: do not correct any read if ref. homop. length "
+  /* -cogmin */
+  option = gt_option_new_double_min_max("cogmin",
+      "min support of cognate sequence homopol. length;\n"
+      "e.g. 0.1 means: do not correct any read if cognate homop. length "
       "is not present in at least 10\% of the reads\n"
-      "if refmin is set to 0.0 reads are always corrected",
-      &arguments->refmin, (double) 0.1, 0.0, (double) 1.0);
+      "if cogmin is set to 0.0 reads are always corrected",
+      &arguments->cogmin, (double) 0.1, 0.0, (double) 1.0);
   gt_option_hide_default(option);
   gt_option_is_extended_option(option);
   gt_option_imply(option, expert_option);
@@ -247,8 +246,8 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
 
   /* -ann */
   ann_option = gt_option_new_string("ann",
-      "annotation of reference sequence\n"
-      "it must be sorted by coordinates on the reference sequence\n"
+      "annotation of cognate sequence\n"
+      "it must be sorted by coordinates on the cognate sequence\n"
       "(this can be e.g. done using: gt gff3 -sort)\n"
       "if -ann is used, corrections will be limited to homopolymers starting"
       "or ending inside the feature type indicated by -ft option"
@@ -287,17 +286,17 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_exclude(option, expert_option);
   gt_option_parser_add_option(op, option);
 
-  /* -rchk */
-  option = gt_option_new_bool("rchk", "debug option; check that ref region "
+  /* -chk */
+  option = gt_option_new_bool("chk", "debug option; check that cognate region "
       "of aligned segments is compatible with encseq data",
-      &arguments->rchk, false);
+      &arguments->chk, false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   /* -allow-partial */
   option = gt_option_new_bool("allow-partial",
       "allow insertions also if there are less gaps in read homopolymer "
-      "than the difference in length with the reference\n"
+      "than the difference in length with the cognate sequence\n"
       "(at most as many symbols as the gaps will be inserted)",
       &arguments->allow_partial, false);
   gt_option_is_development_option(option);
@@ -335,7 +334,7 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
     args->hmin = 3UL;
     args->read_hmin = 1UL;
     args->altmax = (double) 1.00;
-    args->refmin = (double) 0.00;
+    args->cogmin = (double) 0.00;
     args->mapqmin = 0UL;
     args->covmin = 1UL;
     args->clenmax = ULONG_MAX;
@@ -346,7 +345,7 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
     args->hmin = 3UL;
     args->read_hmin = 1UL;
     args->altmax = (double) 0.99;
-    args->refmin = (double) 0.00;
+    args->cogmin = (double) 0.00;
     args->mapqmin = 10UL;
     args->covmin = 1UL;
     args->clenmax = ULONG_MAX;
@@ -357,7 +356,7 @@ int gt_hop_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
     args->hmin = 3UL;
     args->read_hmin = 2UL;
     args->altmax = (double) 0.80;
-    args->refmin = (double) 0.10;
+    args->cogmin = (double) 0.10;
     args->mapqmin = 21UL;
     args->covmin = 1UL;
     args->clenmax = ULONG_MAX;
@@ -388,7 +387,7 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_logger_log(v_logger, "hmin = %lu", arguments->hmin);
   gt_logger_log(v_logger, "read-hmin = %lu", arguments->read_hmin);
   gt_logger_log(v_logger, "altmax = %.2f", arguments->altmax);
-  gt_logger_log(v_logger, "refmin = %.2f", arguments->refmin);
+  gt_logger_log(v_logger, "cogmin = %.2f", arguments->cogmin);
   gt_logger_log(v_logger, "mapqmin = %lu", arguments->mapqmin);
   gt_logger_log(v_logger, "covmin = %lu", arguments->covmin);
   if (arguments->clenmax == ULONG_MAX)
@@ -436,9 +435,9 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       if (!had_err)
       {
         asp = gt_aligned_segments_pile_new(sfi, sem);
-        if (!arguments->rchk)
+        if (!arguments->chk)
           gt_hpol_processor_enable_segments_hlen_adjustment(hpp, asp,
-              arguments->read_hmin, arguments->altmax, arguments->refmin,
+              arguments->read_hmin, arguments->altmax, arguments->cogmin,
               arguments->mapqmin, arguments->covmin, arguments->allow_partial,
               arguments->allow_multiple, arguments->clenmax);
         else

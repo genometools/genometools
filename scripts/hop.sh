@@ -31,7 +31,7 @@ USESW=${USESW:=""}
 USG="<action> <genome.fas> (<CDS.gff>|$NOGFF) <reads.fastq> [<mates.fastq>]"
 ACTION=$1
 if [[ "$ACTION" =~ "eval" ]]; then
-  USG="eval <sequenced_genome.fas> <reference_genome.fas>"
+  USG="eval <sequenced_genome.fas> <cognate_genome.fas>"
   USG="$USG (<CDS.gff>|$NOGFF) <reads.fastq> [<mates.fastq>]"
   SGENOME=$2
   shift
@@ -56,7 +56,7 @@ function show_globals {
 }
 
 function f_help_header {
-  echo "Reference-based correction of homopolymer length in sequencing reads."
+  echo "Cognate sequence-based correction of homopolymer errors."
   echo
   echo "  Usage: $0 $USG"
   echo
@@ -113,7 +113,7 @@ function f_help {
   echo "     help          shows this message"
   echo
   echo " - <genome.fas> is a single sequence Fasta file which"
-  echo "   contains the reference against which the correction is done"
+  echo "   contains the cognate sequence against which the correction is done"
   echo
   echo " - CDS.gff contains the annotation of <genome.fas>;"
   echo "   instead of a filename '$NOGFF' can be specified; in this case,"
@@ -137,15 +137,15 @@ function f_eval_help {
   echo "                       <sequenced_genome.fas>"
   echo
   echo "     eval-prepare      prepare for the evaluation of corrections "
-  echo "                       against <reference_genome.fas>"
+  echo "                       against <cognate_genome.fas>"
   echo
   echo "     eval-help         show this message"
   echo
   echo " - <sequenced_genome.fas> is a single sequence Fasta file which"
   echo "   contains the genome that has been sequenced"
   echo
-  echo " - <reference_genome.fas> is a single sequence Fasta file which"
-  echo "   contains the reference against which the correction is done"
+  echo " - <cognate_genome.fas> is a single sequence Fasta file which"
+  echo "   contains the cognate against which the correction is done"
   echo
   echo " - CDS.gff contains the annotation of genome.fas;"
   echo "   instead of a filename '$NOGFF' can be specified; in this case,"
@@ -575,7 +575,7 @@ function f_eval_stats {
   if [ "$NOF_READS" == "" ]; then NOF_READS="n.a."; fi
   if [ "$NOF_NMAP" == "" ]; then NOF_NMAP="n.a."; fi
   echo "Correction parameters:"      | tee -a $INFO
-  echo "- reference for correction:   $GENOMEDESC" | tee -a $INFO
+  echo "- cognate sequence:   $GENOMEDESC" | tee -a $INFO
   if [ "$ANNOTATION" != "$NOGFF" ]; then
     echo "- annotation:                 $ANNOTATION" | tee -a $INFO
   else

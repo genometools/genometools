@@ -18,7 +18,7 @@
 \newcommand{\minlen}{\ell}
 
 \title{\Huge{\Hop 1.0:\\ User manual.}\\[3mm]
-\Large{Reference-based homopolymer error correction.}}
+\Large{Cognate sequence-based homopolymer error correction.}}
 \author{\begin{tabular}{c}
          \textit{Giorgio Gonnella}\\
          \textit{Stefan Kurtz}\\
@@ -38,8 +38,11 @@
 \section{Introduction} \label{Introduction}
 
 \Hop \cite{HOP} is a tool for the correction of homopolymer errors using a
-reference sequence. Homopolymer errors are particularly frequent in
-Roche 454 and IonTorrent sequencing data sets.
+cognate sequence such as the genome of a related strain or species.
+Homopolymer errors are particularly frequent in
+Roche 454 and IonTorrent sequencing data sets. Currently HOP is mainly
+suitable for bacterial sequencings and aimed at improving the
+results of de novo assembling of the reads.
 
 \section{Installation}
 
@@ -110,7 +113,8 @@ in the BWA manual page (\url{http://bio-bwa.sourceforge.net/bwa.shtml}).
 
 The output of the mapping tool must be, or must be converted into,
 in SAM/BAM format. Before feeding it into \Hop, the output must be sorted
-by reference coordinates. For this purpose, one can use
+by genomic coordinates (i.e. coordinate on the cognate sequence).
+For this purpose, one can use
 the \textit{samtools} (\url{http://samtools.sourceforge.net/}) \texttt{sort}
 tool. For more information, see also the samtools manual page
 (\url{http://samtools.sourceforge.net/samtools.shtml}).
@@ -120,13 +124,13 @@ tool. For more information, see also the samtools manual page
 \subsection{1. Preparing the mapping using BWA and Samtools}
 
 \Hop corrects homopolymer errors based on a mapping of the reads to a
-reference sequence. This must be in SAM/BAM format and sorted by coordinate
-on the reference.
+cognate sequence. This must be in SAM/BAM format and sorted by coordinate
+on the cognate sequence.
 
 It is usually quite easy to prepare the mapping as required.
 Say the reads to be corrected are \texttt{f\_reads.fastq} and
-\texttt{r\_reads.fastq}. Furthermore, the reference for the correction
-is in a Fasta file \texttt{refseq.fas}. Then, in the following
+\texttt{r\_reads.fastq}. Furthermore, the cognate sequence
+is in a Fasta file \texttt{cognate.fas}. Then, in the following
 example, the \texttt{bwa} tool will be used for the mapping in paired end mode
 and the results will be sorted using the \texttt{samtools}
 (as a side note, some of the commands could be combined using piping for an
@@ -134,10 +138,10 @@ increased efficiency).
 
 \begin{footnotesize}
 \begin{verbatim}
-> bwa index refseq.fas
-> bwa aln -t 4 -o 3 -q 15 -f f_reads.sai refseq.fas f_reads.fastq
-> bwa aln -t 4 -o 3 -q 15 -f r_reads.sai refseq.fas r_reads.fastq
-> bwa sampe refseq.fas -f map.sam f_reads.sai r_reads.sai f_reads.fastq r_reads.fastq
+> bwa index cognate.fas
+> bwa aln -t 4 -o 3 -q 15 -f f_reads.sai cognate.fas f_reads.fastq
+> bwa aln -t 4 -o 3 -q 15 -f r_reads.sai cognate.fas r_reads.fastq
+> bwa sampe cognate.fas -f map.sam f_reads.sai r_reads.sai f_reads.fastq r_reads.fastq
 > samtools view -b -o map.bam -S map.sam
 > samtools sort map.sam sorted
 \end{verbatim}
@@ -146,32 +150,32 @@ increased efficiency).
 The results of this pipeline will be in the \texttt{sorted.bam} BAM file,
 which will be used as an input mapping file for \Hop.
 
-\subsection{2. Preparing the reference sequence}
+\subsection{2. Preparing the cognate sequence}
 
-The reference sequence is provided to \Hop in GtEncseq format. Converting
+The cognate sequence is provided to \Hop in GtEncseq format. Converting
 a sequence in standard sequence formats such as Fasta into GtEncseq is very
-easy. The following will convert the sequence in \texttt{refseq.fas}
+easy. The following will convert the sequence in \texttt{cognate.fas}
 into a GtEncseq (see also \texttt{gt encseq encode -help} for more information):
 
 \begin{footnotesize}
 \begin{verbatim}
-> gt encseq encode refseq.fas
+> gt encseq encode cognate.fas
 \end{verbatim}
 \end{footnotesize}
 
-If the reference comprises multiple sequences (e.g. contigs,
+If the cognate sequence comprises multiple sequences (e.g. contigs,
 or multiple chromosomes), it is important that the order of the sequences
 used for the encode step must be the same which is specified in the header
 of the SAM/BAM input file. This is usually not a problem, expecially
-if all reference sequences are contained in a single MultiFasta file,
+if all sequences are contained in a single MultiFasta file,
 which is both used for the mapping tool and the generation of the GtEncseq.
 
 \section{Running \Hop}
 
 \Hop requires the following input:
 \begin{itemize}
-\item the mapping of the reads to the reference (sorted SAM/BAM file)
-\item the reference sequence (GtEncseq format)
+\item the mapping of the reads to the cognate sequence (sorted SAM/BAM file)
+\item the cognate sequence (GtEncseq format)
 \item the uncorrected reads
 \end{itemize}
 
@@ -189,12 +193,12 @@ information run \texttt{gt hop -help}.
 
 The following is an example of correction the reads in
 \texttt{f\_reads.fastq} and \texttt{r\_reads.fastq} using \Hop
-and a reference sequence contained in \texttt{refseq.fas}.
+and a cognate sequence contained in \texttt{cognate.fas}.
 The \texttt{-moderate} option will be used.
 
 \begin{footnotesize}
 \begin{verbatim}
-> gt hop -moderate -ref refseq.fas \
+> gt hop -moderate -c cognate.fas \
   -map sorted.bam -reads f_reads.fastq r_reads.fastq
 \end{verbatim}
 \end{footnotesize}
@@ -210,14 +214,14 @@ option.
 If desired, it is possible to restrict corrections to coding
 sequences only. The idea is that coding sequences tend to be
 more conserved, thus homopolymer length differences of the
-reads to the reference are more likely to be errors in
+reads to the cognate are more likely to be errors in
 corrections. In other words, this will help increasing the
 precision of the correction (reduce false positives),
 but of course the overall sensitivity will be reduced, as
 only errors in coding sequences will be corrected.
 
 Currently, restricting to coding sequences is only
-available if a single reference sequence is used (that
+available if a single cognate sequence is used (that
 is no collection of sequences, such as contigs or multiple
 chromosomes). We plan to eliminate this limitation in future
 versions of \Hop.
@@ -226,13 +230,13 @@ The annotation must be provided in \texttt{GFF} format, version 3.
 This is a standard annotation format. Furthermore, the
 annotation must be sorted by coordinate, which can be obtained
 using the \texttt{gt gff3} tool, using the \texttt{-sort}
-option. In the following example, the \texttt{refseq.gff} annotation
+option. In the following example, the \texttt{cognate.gff} annotation
 will be used to restrict correction to coding sequences:
 
 \begin{footnotesize}
 \begin{verbatim}
-> gt gff3 -sort -o sorted.gff refseq.gff
-> gt hop -moderate -ref refseq.fas -ann sorted.gff \
+> gt gff3 -sort -o sorted.gff cognate.gff
+> gt hop -moderate -ref cognate.fas -ann sorted.gff \
   -map sorted.bam -reads f_reads.fastq r_reads.fastq
 \end{verbatim}
 \end{footnotesize}
@@ -249,14 +253,14 @@ the standard or suffer under some problems which disrupts parsing.
 In these cases, standard POSIX utilities can be sometimes be
 useful, to obtain a subset of the GFF file, which can be
 used for \Hop. In the following example, using \texttt{awk} and
-\texttt{sort}, a sorted subset of the \texttt{refseq.gff}
+\texttt{sort}, a sorted subset of the \texttt{cognate.gff}
 annotation is prepared, and saved as \texttt{cdsonly.gff} which
 only contains the \texttt{CDS} features:
 
 \begin{footnotesize}
 \begin{verbatim}
 > echo '##gff-version 3' > cdsonly.gff
-> awk '$3 == "CDS"' refseq.gff | sort -k4 -n >> cdsonly.gff
+> awk '$3 == "CDS"' cognate.gff | sort -k4 -n >> cdsonly.gff
 \end{verbatim}
 \end{footnotesize}
 
@@ -276,7 +280,7 @@ Gremme, G. (2011).
 
 \bibitem{HOP}
 Gonnella G and Kurtz S and Beckstette M (2012).
-\newblock {HOP: a reference-based homopolymer error corrector.}
+\newblock {HOP: a cognate sequence-based homopolymer error corrector.}
 \newblock {\em Submitted\/}
 
 \end{thebibliography}
