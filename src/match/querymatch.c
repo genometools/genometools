@@ -28,6 +28,7 @@ struct Querymatch
                  dbstart,
                  querystart,
                  querytotallength;
+   int score;
    bool selfmatch;
    uint64_t queryseqnum;
    GtReadmode readmode;
@@ -42,6 +43,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         unsigned long len,
                         unsigned long dbstart,
                         GtReadmode readmode,
+                        int score,
                         bool selfmatch,
                         uint64_t queryseqnum,
                         unsigned long querystart,
@@ -50,6 +52,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
   querymatch->len = len;
   querymatch->dbstart = dbstart;
   querymatch->readmode = readmode;
+  querymatch->score = score;
   querymatch->selfmatch = selfmatch;
   querymatch->queryseqnum = queryseqnum;
   querymatch->querystart = querystart;

@@ -66,6 +66,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
                      len,
                      pos1,
                      GT_READMODE_FORWARD,
+                     0,
                      true,
                      (uint64_t) queryseqnum,
                      pos2 - seqstartpos,
@@ -136,7 +137,7 @@ static int callenummaxpairs(const char *indexname,
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB |
                                                    SARR_SSPTAB,
-                                                   scanfile ? SEQ_scan 
+                                                   scanfile ? SEQ_scan
                                                             : SEQ_mappedboth,
                                                    logger,
                                                    err);

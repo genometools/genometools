@@ -62,17 +62,16 @@ GT_DECLAREARRAYSTRUCT(GtXdropscore);
 */
 
 #define GT_XDROP_EVALXDROPARBITSCORESRIGHT\
-        void gt_evalxdroparbitscoresright(\
-                                        GtXdropArbitraryscores *arbitscores,\
-                                        GtXdropbest *xdropbest,\
-                                        GtArrayGtXdropfrontvalue *fronts,\
-                                        const GtEncseq *str_useq,\
-                                        const GtEncseq *str_vseq,\
-                                        unsigned long useq,\
-                                        unsigned long vseq,\
-                                        int ulen,\
-                                        int vlen,\
-                                        GtXdropscore xdropbelowscore)
+        void gt_evalxdroparbitscoresright(GtXdropArbitraryscores *arbitscores,\
+                                          GtXdropbest *xdropbest,\
+                                          GtArrayGtXdropfrontvalue *fronts,\
+                                          const GtEncseq *str_useq,\
+                                          const GtEncseq *str_vseq,\
+                                          unsigned long useq,\
+                                          unsigned long vseq,\
+                                          int ulen,\
+                                          int vlen,\
+                                          GtXdropscore xdropbelowscore)
 
 #define GT_XDROP_EVALXDROPARBITSCORESLEFT\
         void gt_evalxdroparbitscoresleft(GtXdropArbitraryscores *arbitscores,\
