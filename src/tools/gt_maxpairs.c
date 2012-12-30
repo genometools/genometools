@@ -36,7 +36,7 @@ typedef struct
 {
   unsigned int userdefinedleastlength;
   unsigned long samples;
-  bool scanfile, beverbose, forward, reverse, searchspm;
+  bool scanfile, beverbose, forward, reverse, searchspm, extendseed;
   GtStr *indexname;
   GtStrArray *queryfiles;
   GtOption *refforwardoption;
@@ -190,7 +190,7 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
 static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
-  GtOption *option, *reverseoption, *queryoption,
+  GtOption *option, *reverseoption, *queryoption, *extendseedoption,
            *scanoption, *sampleoption, *forwardoption, *spmoption;
   Maxpairsoptions *arguments = tool_arguments;
 
@@ -227,6 +227,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                        false);
   gt_option_is_development_option(spmoption);
   gt_option_parser_add_option(op, spmoption);
+
+  extendseedoption = gt_option_new_bool("extend","Extend seed to both sides",
+                                        &arguments->extendseed,
+                                    false);
+  gt_option_is_development_option(extendseedoption);
+  gt_option_parser_add_option(op, extendseedoption);
 
   scanoption = gt_option_new_bool("scan","scan index rather than mapping "
                                          "it to main memory",
