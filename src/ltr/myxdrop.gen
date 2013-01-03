@@ -50,8 +50,7 @@ GT_XDROP_EVALXDROPARBITSCORES
   /* phase 0 */
   for (i = 0; i < MIN(ulen,vlen); i++)
   {
-    GtUchar a, b;
-    GT_XDROP_COMPARESYMBOLSSEP(a,b,i,i);
+    GT_XDROP_COMPARESYMBOLSSEP(i,i);
   }
   /* alignment already finished */
   if (i >= ulen || i >= vlen)
@@ -157,8 +156,7 @@ GT_XDROP_EVALXDROPARBITSCORES
           {
             while (i < ulen && j < vlen)
             {
-              GtUchar a, b;
-              GT_XDROP_COMPARESYMBOLSSEP(a,b,i,j);
+              GT_XDROP_COMPARESYMBOLSSEP(i,j);
               i++;
               j++;
             }

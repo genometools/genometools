@@ -405,6 +405,7 @@ static int runquerysubstringmatch(bool selfmatch,
                            0,
                            selfmatch,
                            localqueryunitnum,
+                           extend + minmatchlength,
                            localqueryoffset,
                            queryrep->length);
         if (processquerymatch(processquerymatchinfo,

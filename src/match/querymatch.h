@@ -29,12 +29,13 @@ typedef struct Querymatch Querymatch;
 Querymatch *gt_querymatch_new(void);
 
 void gt_querymatch_fill(Querymatch *querymatch,
-                        unsigned long len,
+                        unsigned long dblen,
                         unsigned long dbstart,
                         GtReadmode readmode,
                         int score,
                         bool selfmatch,
                         uint64_t queryseqnum,
+                        unsigned long querylen,
                         unsigned long querystart,
                         unsigned long querytotallength);
 

@@ -30,6 +30,7 @@
 #include "match/esa-maxpairs.h"
 #include "match/test-maxpairs.pr"
 #include "match/querymatch.h"
+#include "ltr/ltr_xdrop.h"
 #include "tools/gt_maxpairs.h"
 
 typedef struct
@@ -69,9 +70,93 @@ static int gt_simpleexactselfmatchoutput(void *info,
                      0,
                      true,
                      (uint64_t) queryseqnum,
+                     len,
                      pos2 - seqstartpos,
                      seqlength);
   return gt_querymatch_output(info, encseq, querymatch, err);
+}
+
+typedef struct
+{
+  Querymatch *querymatchspaceptr;
+  GtXdropArbitraryscores arbitscores;
+  GtXdropbest best_left;
+  GtXdropbest best_right;
+  GtArrayGtXdropfrontvalue fronts;
+  GtXdropscore belowscore;
+} GtXdropmatchinfo;
+
+static int gt_simplexdropselfmatchoutput(void *info,
+                                         const GtEncseq *encseq,
+                                         unsigned long len,
+                                         unsigned long pos1,
+                                         unsigned long pos2,
+                                         GtError *err)
+{
+  GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
+  unsigned long querystart, queryseqnum, seqstartpos;
+  const unsigned long totallength = gt_encseq_total_length(encseq);
+
+  if (pos1 > pos2)
+  {
+    unsigned long tmp = pos1;
+    pos1 = pos2;
+    pos2 = tmp;
+  }
+  GT_INITARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
+  gt_evalxdroparbitscoresleft(&xdropmatchinfo->arbitscores,
+                              &xdropmatchinfo->best_left,
+                              &xdropmatchinfo->fronts,
+                              encseq,
+                              encseq,
+                              pos1,
+                              pos2,
+                              (int) pos1,
+                              (int) pos2,
+                              xdropmatchinfo->belowscore);
+  GT_FREEARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
+  if (pos1 + len < totallength && pos2 + len < totallength)
+  {
+    GT_INITARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
+    gt_evalxdroparbitscoresright(&xdropmatchinfo->arbitscores,
+                                 &xdropmatchinfo->best_right,
+                                 &xdropmatchinfo->fronts,
+                                 encseq,
+                                 encseq,
+                                 pos1 + len,
+                                 pos2 + len,
+                                 (int) (totallength - (pos1 + len)),
+                                 (int) (totallength - (pos2 + len)),
+                                 xdropmatchinfo->belowscore);
+    GT_FREEARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
+  } else
+  {
+    xdropmatchinfo->best_right.ivalue = 0;
+    xdropmatchinfo->best_right.jvalue = 0;
+    xdropmatchinfo->best_right.score = 0;
+  }
+  gt_assert(pos1 >= (unsigned long) xdropmatchinfo->best_left.ivalue &&
+            pos2 >= (unsigned long) xdropmatchinfo->best_left.jvalue);
+  querystart = pos2 - xdropmatchinfo->best_left.jvalue;
+  queryseqnum = gt_encseq_seqnum(encseq,querystart);
+  seqstartpos = gt_encseq_seqstartpos(encseq, queryseqnum);
+  gt_assert(querystart >= seqstartpos);
+  gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
+                     len + xdropmatchinfo->best_left.ivalue +
+                           xdropmatchinfo->best_right.ivalue,
+                     pos1 - xdropmatchinfo->best_left.ivalue,
+                     GT_READMODE_FORWARD,
+                     (int) len * xdropmatchinfo->arbitscores.mat +
+                     xdropmatchinfo->best_left.score +
+                     xdropmatchinfo->best_right.score,
+                     true,
+                     (uint64_t) queryseqnum,
+                     len + xdropmatchinfo->best_left.jvalue
+                         + xdropmatchinfo->best_right.jvalue,
+                     querystart - seqstartpos,
+                     gt_encseq_seqlength(encseq, queryseqnum));
+  return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
+                              err);
 }
 
 static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
@@ -125,7 +210,7 @@ static int callenummaxpairs(const char *indexname,
                             bool scanfile,
                             Processmaxpairs processmaxpairs,
                             void *processmaxpairsinfo,
-                            GT_UNUSED GtLogger *logger,
+                            GtLogger *logger,
                             GtError *err)
 {
   bool haserr = false;
@@ -290,8 +375,16 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   Maxpairsoptions *arguments = tool_arguments;
   GtLogger *logger = NULL;
   Querymatch *querymatchspaceptr = gt_querymatch_new();
+  GtXdropmatchinfo xdropmatchinfo;
 
   gt_error_check(err);
+  xdropmatchinfo.querymatchspaceptr = querymatchspaceptr;
+  xdropmatchinfo.arbitscores.mat = 2;
+  xdropmatchinfo.arbitscores.mis = -2;
+  xdropmatchinfo.arbitscores.ins = -3;
+  xdropmatchinfo.arbitscores.del = -3;
+  xdropmatchinfo.arbitscores.gcd = 0;
+  xdropmatchinfo.belowscore = 5;
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (parsed_args < argc)
   {
@@ -311,8 +404,12 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                arguments->scanfile,
                                arguments->searchspm
                                  ? gt_simplesuffixprefixmatchoutput
-                                 : gt_simpleexactselfmatchoutput,
-                               querymatchspaceptr,
+                                 : (arguments->extendseed
+                                     ? gt_simplexdropselfmatchoutput
+                                     : gt_simpleexactselfmatchoutput),
+                               arguments->extendseed
+                                 ? (void *) &xdropmatchinfo
+                                 : (void *) querymatchspaceptr,
                                logger,
                                err) != 0)
           {

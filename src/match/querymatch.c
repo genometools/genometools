@@ -24,8 +24,9 @@
 
 struct Querymatch
 {
-   unsigned long len,
+   unsigned long dblen,
                  dbstart,
+                 querylen,
                  querystart,
                  querytotallength;
    int score;
@@ -40,21 +41,23 @@ Querymatch *gt_querymatch_new(void)
 }
 
 void gt_querymatch_fill(Querymatch *querymatch,
-                        unsigned long len,
+                        unsigned long dblen,
                         unsigned long dbstart,
                         GtReadmode readmode,
                         int score,
                         bool selfmatch,
                         uint64_t queryseqnum,
+                        unsigned long querylen,
                         unsigned long querystart,
                         unsigned long querytotallength)
 {
-  querymatch->len = len;
+  querymatch->dblen = dblen;
   querymatch->dbstart = dbstart;
   querymatch->readmode = readmode;
   querymatch->score = score;
   querymatch->selfmatch = selfmatch;
   querymatch->queryseqnum = queryseqnum;
+  querymatch->querylen = querylen;
   querymatch->querystart = querystart;
   querymatch->querytotallength = querytotallength;
 }
@@ -127,10 +130,10 @@ int gt_querymatch_output(GT_UNUSED void *info,
   if (querymatch->readmode == GT_READMODE_REVERSE ||
       querymatch->readmode == GT_READMODE_REVCOMPL)
   {
-    gt_assert(querymatch->querystart + querymatch->len <=
+    gt_assert(querymatch->querystart + querymatch->querylen <=
               querymatch->querytotallength);
     querystart = querymatch->querytotallength -
-                 querymatch->querystart - querymatch->len;
+                 querymatch->querystart - querymatch->querylen;
   } else
   {
     querystart = querymatch->querystart;
@@ -149,21 +152,28 @@ int gt_querymatch_output(GT_UNUSED void *info,
                 querystart,
                 querymatch->readmode);
 #endif
-    printf("%lu %lu %lu %c %lu " Formatuint64_t " %lu\n",
-           querymatch->len,
+    printf("%lu %lu %lu %c %lu " Formatuint64_t " %lu",
+           querymatch->dblen,
            dbseqnum,
            dbstart_relative,
            outflag[querymatch->readmode],
-           querymatch->len,
+           querymatch->querylen,
            PRINTuint64_tcast(querymatch->queryseqnum),
            querystart);
+    if (querymatch->score > 0)
+    {
+      printf(" %d\n",querymatch->score);
+    } else
+    {
+      printf("\n");
+    }
   }
   return 0;
 }
 
 unsigned long gt_querymatch_len(const Querymatch *querymatch)
 {
-  return querymatch->len;
+  return querymatch->querylen;
 }
 
 unsigned long gt_querymatch_dbstart(const Querymatch *querymatch)

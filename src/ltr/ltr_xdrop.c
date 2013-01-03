@@ -209,22 +209,25 @@ static void gt_calculateallowedMININFINITYINTgenerations(
  The following macro checks for wildcard and separator symbols.
  */
 
-#define GT_XDROP_COMPARESYMBOLSSEP(VARA,VARB,I,J)\
-        GT_XDROP_USEQ(VARA,I);\
-        if (VARA == (GtUchar) SEPARATOR)\
+#define GT_XDROP_COMPARESYMBOLSSEP(I,J)\
         {\
-          ulen = I;\
-          break;\
-        }\
-        GT_XDROP_VSEQ(VARB,J);\
-        if (VARB == (GtUchar) SEPARATOR)\
-        {\
-          vlen = J;\
-          break;\
-        }\
-        if (VARA != VARB || VARA == (GtUchar) WILDCARD)\
-        {\
-          break;\
+          GtUchar a, b;\
+          GT_XDROP_USEQ(a,I);\
+          if (a == (GtUchar) SEPARATOR)\
+          {\
+            ulen = I;\
+            break;\
+          }\
+          GT_XDROP_VSEQ(b,J);\
+          if (b == (GtUchar) SEPARATOR)\
+          {\
+            vlen = J;\
+            break;\
+          }\
+          if (a != b || a == (GtUchar) WILDCARD)\
+          {\
+            break;\
+          }\
         }
 
 #define GT_XDROP_EVALXDROPARBITSCORES GT_XDROP_EVALXDROPARBITSCORESRIGHT
