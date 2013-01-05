@@ -19,10 +19,21 @@
 #define GREEDYEDIST_H
 
 #include "core/types_api.h"
+#include "core/encseq_api.h"
 
-unsigned long greedyunitedist(const GtUchar *useq,
-                              unsigned long ulenvalue,
-                              const GtUchar *vseq,
-                              unsigned long vlenvalue);
+typedef struct GtGreedyedistSeq GtGreedyedistSeq;
+
+GtGreedyedistSeq *gt_greedyedist_seq_new_ptr(const GtUchar *ptr,
+                                             unsigned long len);
+
+GtGreedyedistSeq *gt_greedyedist_seq_new_encseq(const GtEncseq *encseq,
+                                                unsigned long len);
+
+void gt_greedyedist_seq_delete(GtGreedyedistSeq *greedyedistseq);
+
+unsigned long gt_greedyedist_length_get(const GtGreedyedistSeq *greedyedistseq);
+
+unsigned long greedyunitedist(const GtGreedyedistSeq *useq,
+                              const GtGreedyedistSeq *vseq);
 
 #endif

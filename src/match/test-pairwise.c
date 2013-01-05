@@ -165,8 +165,10 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
                           unsigned long vlen)
 {
   unsigned long edist1, edist2;
+  GtGreedyedistSeq *greedyedistuseq = gt_greedyedist_seq_new_ptr(useq,ulen),
+                   *greedyedistvseq = gt_greedyedist_seq_new_ptr(vseq,vlen);
 
-  edist1 = greedyunitedist(useq,ulen,vseq,vlen);
+  edist1 = greedyunitedist(greedyedistuseq,greedyedistvseq);
   edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);
 #ifdef SKDEBUG
   printf("edist = %lu\n",edist1);
@@ -177,4 +179,6 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
                    edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+  gt_greedyedist_seq_delete(greedyedistuseq);
+  gt_greedyedist_seq_delete(greedyedistvseq);
 }

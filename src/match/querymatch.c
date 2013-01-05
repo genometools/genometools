@@ -60,6 +60,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
   querymatch->querylen = querylen;
   querymatch->querystart = querystart;
   querymatch->querytotallength = querytotallength;
+
 }
 
 void gt_querymatch_delete(Querymatch *querymatch)

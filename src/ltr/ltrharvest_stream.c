@@ -1021,6 +1021,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   unsigned long edist;
   Repeat *repeatptr;
   LTRboundaries *boundaries;
+  GtGreedyedistSeq *guseq, *gvseq;
   bool haserr = false;
 
   gt_error_check(err);
@@ -1182,14 +1183,15 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       ALLOCASSIGNSPACE(vseq, vseq, GtUchar, maxvlen);
     }
 
-    gt_encseq_extract_encoded(encseq, useq,
-                                         boundaries->leftLTR_5,
-                                         boundaries->leftLTR_3);
-    gt_encseq_extract_encoded(encseq, vseq,
-                                         boundaries->rightLTR_5,
-                                         boundaries->rightLTR_3);
-    edist = greedyunitedist(useq,(unsigned long) ulen, /*Implement for encseq */
-                            vseq,(unsigned long) vlen);
+    gt_encseq_extract_encoded(encseq, useq, boundaries->leftLTR_5,
+                                            boundaries->leftLTR_3);
+    gt_encseq_extract_encoded(encseq, vseq, boundaries->rightLTR_5,
+                                            boundaries->rightLTR_3);
+    guseq = gt_greedyedist_seq_new_ptr(useq,ulen);
+    gvseq = gt_greedyedist_seq_new_ptr(vseq,vlen);
+    edist = greedyunitedist(guseq,gvseq);
+    gt_greedyedist_seq_delete(guseq);
+    gt_greedyedist_seq_delete(gvseq);
 
     /* determine similarity */
     boundaries->similarity = 100.0 * (1 - (((double) edist)/(MAX(ulen,vlen))));
@@ -1200,7 +1202,6 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       /* delete this LTR-pair candidate */
       arrayLTRboundaries->nextfreeLTRboundaries--;
     }
-
   }
   FREESPACE(useq);
   FREESPACE(vseq);
