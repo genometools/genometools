@@ -23,11 +23,25 @@
 
 typedef struct GtGreedyedistSeq GtGreedyedistSeq;
 
+GtGreedyedistSeq *gt_greedyedist_seq_new_empty(void);
+
+void gt_greedyedist_seq_reinit_ptr(GtGreedyedistSeq *greedyedistseq,
+                                   const GtUchar *ptr,
+                                   unsigned long len,
+                                   unsigned long offset);
+
 GtGreedyedistSeq *gt_greedyedist_seq_new_ptr(const GtUchar *ptr,
-                                             unsigned long len);
+                                             unsigned long len,
+                                             unsigned long offset);
+
+void gt_greedyedist_seq_reinit_encseq(GtGreedyedistSeq *greedyedistseq,
+                                      const GtEncseq *encseq,
+                                      unsigned long len,
+                                      unsigned long offset);
 
 GtGreedyedistSeq *gt_greedyedist_seq_new_encseq(const GtEncseq *encseq,
-                                                unsigned long len);
+                                                unsigned long len,
+                                                unsigned long offset);
 
 void gt_greedyedist_seq_delete(GtGreedyedistSeq *greedyedistseq);
 

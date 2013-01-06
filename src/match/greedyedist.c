@@ -26,7 +26,7 @@
 struct GtGreedyedistSeq
 {
   bool isptr;
-  unsigned long len;
+  unsigned long len, offset;
   union
   {
     const GtUchar *ptr;
@@ -34,25 +34,56 @@ struct GtGreedyedistSeq
   } seq;
 };
 
-GtGreedyedistSeq *gt_greedyedist_seq_new_ptr(const GtUchar *ptr,
-                                             unsigned long len)
+GtGreedyedistSeq *gt_greedyedist_seq_new_empty(void)
 {
   GtGreedyedistSeq *greedyedistseq = gt_malloc(sizeof *greedyedistseq);
 
   greedyedistseq->isptr = true;
-  greedyedistseq->len = len;
-  greedyedistseq->seq.ptr = ptr;
+  greedyedistseq->len = 0;
+  greedyedistseq->offset = 0;
+  greedyedistseq->seq.ptr = NULL;
   return greedyedistseq;
 }
 
-GtGreedyedistSeq *gt_greedyedist_seq_new_encseq(const GtEncseq *encseq,
-                                                unsigned long len)
+void gt_greedyedist_seq_reinit_ptr(GtGreedyedistSeq *greedyedistseq,
+                                   const GtUchar *ptr,
+                                   unsigned long len,
+                                   unsigned long offset)
+{
+  greedyedistseq->isptr = true;
+  greedyedistseq->len = len;
+  greedyedistseq->offset = offset;
+  greedyedistseq->seq.ptr = ptr + offset;
+}
+
+GtGreedyedistSeq *gt_greedyedist_seq_new_ptr(const GtUchar *ptr,
+                                             unsigned long len,
+                                             unsigned long offset)
 {
   GtGreedyedistSeq *greedyedistseq = gt_malloc(sizeof *greedyedistseq);
 
+  gt_greedyedist_seq_reinit_ptr(greedyedistseq,ptr,len,offset);
+  return greedyedistseq;
+}
+
+void gt_greedyedist_seq_reinit_encseq(GtGreedyedistSeq *greedyedistseq,
+                                      const GtEncseq *encseq,
+                                      unsigned long len,
+                                      unsigned long offset)
+{
   greedyedistseq->isptr = false;
   greedyedistseq->len = len;
+  greedyedistseq->offset = offset;
   greedyedistseq->seq.encseq = encseq;
+}
+
+GtGreedyedistSeq *gt_greedyedist_seq_new_encseq(const GtEncseq *encseq,
+                                                unsigned long len,
+                                                unsigned long offset)
+{
+  GtGreedyedistSeq *greedyedistseq = gt_malloc(sizeof *greedyedistseq);
+
+  gt_greedyedist_seq_reinit_encseq(greedyedistseq, encseq, len, offset);
   return greedyedistseq;
 }
 
@@ -73,7 +104,8 @@ static GtUchar gt_greedyedist_encoded_char(
   return greedyedistseq->isptr
            ? greedyedistseq->seq.ptr[idx]
            : gt_encseq_get_encoded_char(greedyedistseq->seq.encseq,
-                                        idx,GT_READMODE_FORWARD);
+                                        greedyedistseq->offset + idx,
+                                        GT_READMODE_FORWARD);
 }
 
 #define COMPARESYMBOLS(A,B)\
@@ -310,7 +342,7 @@ static void firstfrontforward(const GtGreedyedistSeq *useq,
   unsigned long uidx, vidx;
 
   fspec->left = fspec->offset = 0;
-  fspec->width = (long) 1;
+  fspec->width = 1L;
   if (gl->ulen == 0 || gl->vlen == 0)
   {
     STOREFRONT(gl,ROWVALUE(&gl->frontspace[0]),0);

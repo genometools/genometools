@@ -310,7 +310,7 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
                tmp_motifmismatchesrightLTR,
                hitcounter = 0;
 
-  if (info->repeats.nextfreeRepeat > 0 )
+  if (info->repeats.nextfreeRepeat > 0)
   {
     boundaries->tsd = true;
   }
@@ -373,7 +373,7 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
           /* TSD length not too big */
           if (tsd_len <= (unsigned long)info->lmax)
           {
-            if ( !boundaries->motif_near_tsd )
+            if (!boundaries->motif_near_tsd)
             {
               unsigned long max, min;
 
@@ -451,8 +451,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
     unsigned long startrightLTR,
     unsigned long endrightLTR,
     unsigned int *motifmismatchesleftLTR,
-    unsigned int *motifmismatchesrightLTR
-    )
+    unsigned int *motifmismatchesrightLTR)
 {
   bool motif1 = false,
        motif2 = false;
@@ -486,7 +485,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
                                 <= lo->motif->allowedmismatches)
     {
        /* first hit */
-       if ( !motif1 )
+       if (!motif1)
        {
          unsigned long max, min;
 
@@ -507,7 +506,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
          minval = MIN(oldleftLTR_5, idx);
          difffromnewboundary = maxval - minval;
 
-         if ( difffromnewboundary < difffromoldboundary )
+         if (difffromnewboundary < difffromoldboundary)
          {
            motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
            boundaries->leftLTR_5 = idx;
@@ -540,7 +539,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
                                    <= lo->motif->allowedmismatches)
     {
        /* first hit */
-       if ( !motif2 )
+       if (!motif2)
        {
          unsigned long max, min;
 
@@ -560,7 +559,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
          maxval = MAX(oldrightLTR_3, idx);
          minval = MIN(oldrightLTR_3, idx);
          difffromnewboundary = maxval - minval;
-         if ( difffromnewboundary < difffromoldboundary )
+         if (difffromnewboundary < difffromoldboundary)
          {
            motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
            boundaries->rightLTR_3 = idx;
@@ -647,7 +646,7 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
 
   for (idx = startleftLTR + 1; idx <= endleftLTR; idx++)
   {
-    tmp_motifmismatchesleftLTR = (unsigned int)0;
+    tmp_motifmismatchesleftLTR = 0;
     if (gt_encseq_get_encoded_char(/* XXX */ encseq, idx,
                                           GT_READMODE_FORWARD)
                        != lo->motif->secondright)
@@ -665,7 +664,7 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
                                 <= lo->motif->allowedmismatches)
     {
        /* first hit */
-       if ( !motif1 )
+       if (!motif1)
        {
          unsigned long maxval, minval;
 
@@ -686,7 +685,7 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
          minval = MIN(oldleftLTR_3, idx);
          difffromnewboundary = maxval - minval;
 
-         if ( difffromnewboundary < difffromoldboundary )
+         if (difffromnewboundary < difffromoldboundary)
          {
            motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
            boundaries->leftLTR_3 = idx;
@@ -719,7 +718,7 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
                                    <= lo->motif->allowedmismatches)
     {
        /* first hit */
-       if ( !motif2 )
+       if (!motif2)
        {
          unsigned long maxval, minval;
 
@@ -740,7 +739,7 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
          minval = MIN(oldrightLTR_5, idx);
          difffromnewboundary = maxval - minval;
 
-         if ( difffromnewboundary < difffromoldboundary )
+         if (difffromnewboundary < difffromoldboundary)
          {
            motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
            boundaries->rightLTR_5 = idx;
@@ -797,7 +796,7 @@ static int searchforTSDandorMotifoutside(
   {
     /* do not align over left sequence boundary,
        in case of need decrease alignment length */
-    if ( boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries)
+    if (boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries)
     {
       startleftLTR = seqstartpos;
     } else
@@ -809,27 +808,25 @@ static int searchforTSDandorMotifoutside(
   {
     /* do not align over left separator symbol
        in case of need decrease alignment length */
-    if ( boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries )
+    if (boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries)
     {
       startleftLTR = seqstartpos;
     }
     else
     {
-      if ( ((startleftLTR =
+      if (((startleftLTR =
               boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries) <
                 seqstartpos)
             &&
-          (boundaries->leftLTR_5 >= seqstartpos)
-        )
+          (boundaries->leftLTR_5 >= seqstartpos))
       {
         startleftLTR = seqstartpos;
       }
     }
   }
   /* do not align over 3'-border of left LTR */
-  if ( (endleftLTR = boundaries->leftLTR_5 + lo->vicinityforcorrectboundaries)
-       > boundaries->leftLTR_3 - 2 /* -2 because of possible motif */
-    )
+  if ((endleftLTR = boundaries->leftLTR_5 + lo->vicinityforcorrectboundaries)
+       > boundaries->leftLTR_3 - 2) /* -2 because of possible motif */
   {
     endleftLTR = boundaries->leftLTR_3 - 2;
   }
@@ -837,10 +834,9 @@ static int searchforTSDandorMotifoutside(
 
   /* vicinity of 3'-border of right LTR
      do not align over 5'border of right LTR */
-  if ( (startrightLTR =
+  if ((startrightLTR =
          boundaries->rightLTR_3 - lo->vicinityforcorrectboundaries) <
-      boundaries->rightLTR_5 + 2  /* +2 because of possible motif */
-    )
+      boundaries->rightLTR_5 + 2)  /* +2 because of possible motif */
   {
     startrightLTR = boundaries->rightLTR_5 + 2;
   }
@@ -937,13 +933,13 @@ static int gt_findcorrectboundaries(GtLTRharvestStream *lo,
                                     encseq,
                                     &motifmismatchesleftLTR,
                                     &motifmismatchesrightLTR,
-                                    err) != 0 )
+                                    err) != 0)
   {
     return -1;
   }
 
   /* second: 3'-border of left LTR and 5'-border of right LTR */
-  if ( lo->motif->allowedmismatches < (unsigned int)4 )
+  if (lo->motif->allowedmismatches < 4U)
   {
     gt_log_log("second: searching for motif only around 3'border of left LTR "
                "and 5'-border of right LTR...\n");
@@ -1002,26 +998,29 @@ static void adjustboundariesfromXdropextension(GtXdropbest xdropbest_left,
  to all candidate pairs.
 */
 static int gt_searchforLTRs(GtLTRharvestStream *lo,
-                             GtArrayLTRboundaries *arrayLTRboundaries,
-                             const GtEncseq *encseq,
-                             GtError *err)
+                            GtArrayLTRboundaries *arrayLTRboundaries,
+                            const GtEncseq *encseq,
+                            GtError *err)
 {
   unsigned long repeatcounter;
   GtArrayGtXdropfrontvalue fronts;
   GtXdropbest xdropbest_left;
   GtXdropbest xdropbest_right;
   unsigned long alilen = 0,
-         totallength,
-         ulen,
-         vlen,
-         maxulen = 0,
-         maxvlen = 0;
+                totallength,
+                ulen,
+                vlen;
+#define GT_GREEDY_BUFFER
+#ifdef GT_GREEDY_BUFFER
+  unsigned long maxulen = 0, maxvlen = 0;
   GtUchar *useq = NULL,
-        *vseq = NULL;
+          *vseq = NULL;
+#endif
+  GtGreedyedistSeq *guseq = gt_greedyedist_seq_new_empty(),
+                   *gvseq = gt_greedyedist_seq_new_empty();
   unsigned long edist;
   Repeat *repeatptr;
   LTRboundaries *boundaries;
-  GtGreedyedistSeq *guseq, *gvseq;
   bool haserr = false;
 
   gt_error_check(err);
@@ -1067,7 +1066,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     GT_INITARRAY (&fronts, GtXdropfrontvalue);
     totallength = gt_encseq_total_length(encseq);
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
-                                repeatptr->len) )
+                                repeatptr->len))
     {
       gt_evalxdroparbitscoresright (&lo->arbitscores,
                                  &xdropbest_right,
@@ -1127,27 +1126,27 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                    boundaries);
 
     /* if search for motif and/or TSD */
-    if ( lo->motif->allowedmismatches < 4U || lo->minlengthTSD > 1U)
+    if (lo->motif->allowedmismatches < 4U || lo->minlengthTSD > 1U)
     {
-      if ( gt_findcorrectboundaries(lo, boundaries, encseq, err) != 0 )
+      if (gt_findcorrectboundaries(lo, boundaries, encseq, err) != 0)
       {
         haserr = true;
         break;
       }
 
       /* if search for TSDs and (not) motif */
-      if ( boundaries->tsd &&
-          (lo->motif->allowedmismatches >= (unsigned int)4 ||
-          (boundaries->motif_near_tsd && boundaries->motif_far_tsd)) )
+      if (boundaries->tsd &&
+          (lo->motif->allowedmismatches >= 4U ||
+          (boundaries->motif_near_tsd && boundaries->motif_far_tsd)))
       {
         /* predicted as full LTR-pair, keep it */
       }
       else
       {
         /* if search for motif only (and not TSD) */
-        if ( lo->minlengthTSD <= 1U &&
+        if (lo->minlengthTSD <= 1U &&
             boundaries->motif_near_tsd &&
-            boundaries->motif_far_tsd )
+            boundaries->motif_far_tsd)
         {
           /* predicted as full LTR-pair, keep it */
         }
@@ -1172,6 +1171,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
        copy LTR sequences for greedyunitedist function */
     ulen = boundaries->leftLTR_3 - boundaries->leftLTR_5 + 1;
     vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
+#ifdef GT_GREEDY_BUFFER
     if (ulen > maxulen)
     {
       maxulen = ulen;
@@ -1182,16 +1182,17 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       maxvlen = vlen;
       ALLOCASSIGNSPACE(vseq, vseq, GtUchar, maxvlen);
     }
-
     gt_encseq_extract_encoded(encseq, useq, boundaries->leftLTR_5,
                                             boundaries->leftLTR_3);
     gt_encseq_extract_encoded(encseq, vseq, boundaries->rightLTR_5,
                                             boundaries->rightLTR_3);
-    guseq = gt_greedyedist_seq_new_ptr(useq,ulen);
-    gvseq = gt_greedyedist_seq_new_ptr(vseq,vlen);
+    gt_greedyedist_seq_reinit_ptr(guseq,useq,ulen,0);
+    gt_greedyedist_seq_reinit_ptr(gvseq,vseq,vlen,0);
+#else
+    gt_greedyedist_seq_reinit_encseq(guseq,encseq,ulen,boundaries->leftLTR_5);
+    gt_greedyedist_seq_reinit_encseq(gvseq,encseq,vlen,boundaries->rightLTR_5);
+#endif
     edist = greedyunitedist(guseq,gvseq);
-    gt_greedyedist_seq_delete(guseq);
-    gt_greedyedist_seq_delete(gvseq);
 
     /* determine similarity */
     boundaries->similarity = 100.0 * (1 - (((double) edist)/(MAX(ulen,vlen))));
@@ -1203,9 +1204,12 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       arrayLTRboundaries->nextfreeLTRboundaries--;
     }
   }
+#ifdef GT_GREEDY_BUFFER
   FREESPACE(useq);
   FREESPACE(vseq);
-
+#endif
+  gt_greedyedist_seq_delete(guseq);
+  gt_greedyedist_seq_delete(gvseq);
   return haserr ? -1 : 0;
 }
 
@@ -1224,7 +1228,7 @@ static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
   for (i = 0; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
   {
     boundaries_i = &(arrayLTRboundaries->spaceLTRboundaries[i]);
-    if ( boundaries_i->skipped )
+    if (boundaries_i->skipped)
     {
       continue;
     }
@@ -1234,7 +1238,7 @@ static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
     for (j = i + 1; j < arrayLTRboundaries->nextfreeLTRboundaries; j++)
     {
       boundaries_j = &(arrayLTRboundaries->spaceLTRboundaries[j]);
-      if ( boundaries_j->skipped )
+      if (boundaries_j->skipped)
       {
         continue;
       }
@@ -1255,8 +1259,7 @@ static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
  */
 static void gt_removeoverlapswithlowersimilarity(
   GtArrayLTRboundaries *arrayLTRboundaries,
-  bool nooverlapallowed
-  )
+  bool nooverlapallowed)
 {
   unsigned long i, j;
   unsigned long startpos_i, endpos_i, startpos_j, endpos_j;
@@ -1266,7 +1269,7 @@ static void gt_removeoverlapswithlowersimilarity(
   for (i = 0; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
   {
     boundaries_i = &(arrayLTRboundaries->spaceLTRboundaries[i]);
-    if ( boundaries_i->skipped )
+    if (boundaries_i->skipped)
     {
       continue;
     }
@@ -1276,7 +1279,7 @@ static void gt_removeoverlapswithlowersimilarity(
     for (j = i + 1; j < arrayLTRboundaries->nextfreeLTRboundaries; j++)
     {
       boundaries_j = &(arrayLTRboundaries->spaceLTRboundaries[j]);
-      if ( boundaries_j->skipped )
+      if (boundaries_j->skipped)
       {
         continue;
       }
@@ -1284,7 +1287,7 @@ static void gt_removeoverlapswithlowersimilarity(
       endpos_j   = boundaries_j->rightLTR_3;
 
       /* if overlap */
-      if ( !((endpos_i < startpos_j) || (endpos_j < startpos_i)) )
+      if (!((endpos_i < startpos_j) || (endpos_j < startpos_i)))
       {
         if (nooverlapallowed)
         {
@@ -1307,7 +1310,7 @@ static void gt_removeoverlapswithlowersimilarity(
         else
         {
           /* take prediction with higher similarity */
-          if ( boundaries_i->similarity >= boundaries_j->similarity )
+          if (boundaries_i->similarity >= boundaries_j->similarity)
           {
             boundaries_j->skipped = true;
           }

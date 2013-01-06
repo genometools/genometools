@@ -165,8 +165,8 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
                           unsigned long vlen)
 {
   unsigned long edist1, edist2;
-  GtGreedyedistSeq *greedyedistuseq = gt_greedyedist_seq_new_ptr(useq,ulen),
-                   *greedyedistvseq = gt_greedyedist_seq_new_ptr(vseq,vlen);
+  GtGreedyedistSeq *greedyedistuseq = gt_greedyedist_seq_new_ptr(useq,ulen,0),
+                   *greedyedistvseq = gt_greedyedist_seq_new_ptr(vseq,vlen,0);
 
   edist1 = greedyunitedist(greedyedistuseq,greedyedistvseq);
   edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);

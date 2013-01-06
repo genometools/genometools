@@ -19,8 +19,8 @@
 #include "core/unused_api.h"
 #include "core/types_api.h"
 #include "core/readmode.h"
-#include "querymatch.h"
 #include "core/format64.h"
+#include "querymatch.h"
 
 struct Querymatch
 {
