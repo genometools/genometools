@@ -1016,8 +1016,8 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   GtUchar *useq = NULL,
           *vseq = NULL;
 #endif
-  GtGreedyedistSeq *guseq = gt_greedyedist_seq_new_empty(),
-                   *gvseq = gt_greedyedist_seq_new_empty();
+  GtSeqabstract *guseq = gt_seqabstract_new_empty(),
+                *gvseq = gt_seqabstract_new_empty();
   unsigned long edist;
   Repeat *repeatptr;
   LTRboundaries *boundaries;
@@ -1186,11 +1186,11 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                             boundaries->leftLTR_3);
     gt_encseq_extract_encoded(encseq, vseq, boundaries->rightLTR_5,
                                             boundaries->rightLTR_3);
-    gt_greedyedist_seq_reinit_ptr(guseq,useq,ulen,0);
-    gt_greedyedist_seq_reinit_ptr(gvseq,vseq,vlen,0);
+    gt_seqabstract_reinit_ptr(guseq,useq,ulen,0);
+    gt_seqabstract_reinit_ptr(gvseq,vseq,vlen,0);
 #else
-    gt_greedyedist_seq_reinit_encseq(guseq,encseq,ulen,boundaries->leftLTR_5);
-    gt_greedyedist_seq_reinit_encseq(gvseq,encseq,vlen,boundaries->rightLTR_5);
+    gt_seqabstract_reinit_encseq(guseq,encseq,ulen,boundaries->leftLTR_5);
+    gt_seqabstract_reinit_encseq(gvseq,encseq,vlen,boundaries->rightLTR_5);
 #endif
     edist = greedyunitedist(guseq,gvseq);
 
@@ -1208,8 +1208,8 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   FREESPACE(useq);
   FREESPACE(vseq);
 #endif
-  gt_greedyedist_seq_delete(guseq);
-  gt_greedyedist_seq_delete(gvseq);
+  gt_seqabstract_delete(guseq);
+  gt_seqabstract_delete(gvseq);
   return haserr ? -1 : 0;
 }
 

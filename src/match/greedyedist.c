@@ -23,91 +23,6 @@
 #include "greedyedist.h"
 #include "spacedef.h"
 
-struct GtGreedyedistSeq
-{
-  bool isptr;
-  unsigned long len, offset;
-  union
-  {
-    const GtUchar *ptr;
-    const GtEncseq *encseq;
-  } seq;
-};
-
-GtGreedyedistSeq *gt_greedyedist_seq_new_empty(void)
-{
-  GtGreedyedistSeq *greedyedistseq = gt_malloc(sizeof *greedyedistseq);
-
-  greedyedistseq->isptr = true;
-  greedyedistseq->len = 0;
-  greedyedistseq->offset = 0;
-  greedyedistseq->seq.ptr = NULL;
-  return greedyedistseq;
-}
-
-void gt_greedyedist_seq_reinit_ptr(GtGreedyedistSeq *greedyedistseq,
-                                   const GtUchar *ptr,
-                                   unsigned long len,
-                                   unsigned long offset)
-{
-  greedyedistseq->isptr = true;
-  greedyedistseq->len = len;
-  greedyedistseq->offset = offset;
-  greedyedistseq->seq.ptr = ptr + offset;
-}
-
-GtGreedyedistSeq *gt_greedyedist_seq_new_ptr(const GtUchar *ptr,
-                                             unsigned long len,
-                                             unsigned long offset)
-{
-  GtGreedyedistSeq *greedyedistseq = gt_malloc(sizeof *greedyedistseq);
-
-  gt_greedyedist_seq_reinit_ptr(greedyedistseq,ptr,len,offset);
-  return greedyedistseq;
-}
-
-void gt_greedyedist_seq_reinit_encseq(GtGreedyedistSeq *greedyedistseq,
-                                      const GtEncseq *encseq,
-                                      unsigned long len,
-                                      unsigned long offset)
-{
-  greedyedistseq->isptr = false;
-  greedyedistseq->len = len;
-  greedyedistseq->offset = offset;
-  greedyedistseq->seq.encseq = encseq;
-}
-
-GtGreedyedistSeq *gt_greedyedist_seq_new_encseq(const GtEncseq *encseq,
-                                                unsigned long len,
-                                                unsigned long offset)
-{
-  GtGreedyedistSeq *greedyedistseq = gt_malloc(sizeof *greedyedistseq);
-
-  gt_greedyedist_seq_reinit_encseq(greedyedistseq, encseq, len, offset);
-  return greedyedistseq;
-}
-
-unsigned long gt_greedyedist_length_get(const GtGreedyedistSeq *greedyedistseq)
-{
-  return greedyedistseq->len;
-}
-
-void gt_greedyedist_seq_delete(GtGreedyedistSeq *greedyedistseq)
-{
-  gt_free(greedyedistseq);
-}
-
-static GtUchar gt_greedyedist_encoded_char(
-                                       const GtGreedyedistSeq *greedyedistseq,
-                                       unsigned long idx)
-{
-  return greedyedistseq->isptr
-           ? greedyedistseq->seq.ptr[idx]
-           : gt_encseq_get_encoded_char(greedyedistseq->seq.encseq,
-                                        greedyedistseq->offset + idx,
-                                        GT_READMODE_FORWARD);
-}
-
 #define COMPARESYMBOLS(A,B)\
         if ((A) == (GtUchar) SEPARATOR)\
         {\
@@ -213,8 +128,8 @@ static long accessfront(const FrontResource *gl,
   forward direction.
 */
 
-static void evalentryforward(const GtGreedyedistSeq *useq,
-                             const GtGreedyedistSeq *vseq,
+static void evalentryforward(const GtSeqabstract *useq,
+                             const GtSeqabstract *vseq,
                              FrontResource *gl,
                              Frontvalue *fval,
                              const Frontspec *fspec,
@@ -267,8 +182,8 @@ static void evalentryforward(const GtGreedyedistSeq *useq,
       for (/* Nothing */; uidx < gl->ubound && vidx < gl->vbound;
            uidx++, vidx++)
       {
-        a = gt_greedyedist_encoded_char(useq,uidx);
-        b = gt_greedyedist_encoded_char(vseq,vidx);
+        a = gt_seqabstract_encoded_char(useq,uidx);
+        b = gt_seqabstract_encoded_char(vseq,vidx);
         COMPARESYMBOLS(a,b);
       }
       t = (long) uidx;
@@ -288,8 +203,8 @@ static void evalentryforward(const GtGreedyedistSeq *useq,
   It returns true if any of the returned values is at least 0.
 */
 
-static bool evalfrontforward(const GtGreedyedistSeq *useq,
-                             const GtGreedyedistSeq *vseq,
+static bool evalfrontforward(const GtSeqabstract *useq,
+                             const GtSeqabstract *vseq,
                              FrontResource *gl,
                              const Frontspec *prevfspec,
                              const Frontspec *fspec,
@@ -334,8 +249,8 @@ static bool evalfrontforward(const GtGreedyedistSeq *useq,
   forward direction.
 */
 
-static void firstfrontforward(const GtGreedyedistSeq *useq,
-                              const GtGreedyedistSeq *vseq,
+static void firstfrontforward(const GtSeqabstract *useq,
+                              const GtSeqabstract *vseq,
                               FrontResource *gl,Frontspec *fspec)
 {
   GtUchar a, b;
@@ -351,8 +266,8 @@ static void firstfrontforward(const GtGreedyedistSeq *useq,
     for (uidx = 0, vidx = 0; uidx < gl->ubound && vidx < gl->vbound;
          uidx++, vidx++)
     {
-      a = gt_greedyedist_encoded_char(useq,uidx);
-      b = gt_greedyedist_encoded_char(vseq,vidx);
+      a = gt_seqabstract_encoded_char(useq,uidx);
+      b = gt_seqabstract_encoded_char(vseq,vidx);
       COMPARESYMBOLS(a,b);
     }
     STOREFRONT(gl,ROWVALUE(&gl->frontspace[0]),(long) uidx);
@@ -362,8 +277,8 @@ static void firstfrontforward(const GtGreedyedistSeq *useq,
 #endif
 }
 
-unsigned long greedyunitedist(const GtGreedyedistSeq *useq,
-                              const GtGreedyedistSeq *vseq)
+unsigned long greedyunitedist(const GtSeqabstract *useq,
+                              const GtSeqabstract *vseq)
 {
   unsigned long currentallocated, realdistance;
   FrontResource gl;
@@ -377,12 +292,12 @@ unsigned long greedyunitedist(const GtGreedyedistSeq *useq,
 #ifdef SKDEBUG
   printf("unitedistcheckSEPgeneric(ulen=%lu,vlen=%lu)\n",ulenvalue,vlenvalue);
 #endif
-  gt_assert(useq->len < (unsigned long) LONG_MAX);
-  gt_assert(vseq->len < (unsigned long) LONG_MAX);
+  gt_assert(gt_seqabstract_length_get(useq) < (unsigned long) LONG_MAX);
+  gt_assert(gt_seqabstract_length_get(vseq) < (unsigned long) LONG_MAX);
   currentallocated = 1UL;
   ALLOCASSIGNSPACE(gl.frontspace,NULL,Frontvalue,currentallocated);
-  gl.ubound = gt_greedyedist_length_get(useq);
-  gl.vbound = gt_greedyedist_length_get(vseq);
+  gl.ubound = gt_seqabstract_length_get(useq);
+  gl.vbound = gt_seqabstract_length_get(vseq);
   gl.ulen = (long) gl.ubound;
   gl.vlen = (long) gl.vbound;
   gl.integermin = -MAX(gl.ulen,gl.vlen);

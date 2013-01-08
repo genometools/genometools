@@ -18,36 +18,9 @@
 #ifndef GREEDYEDIST_H
 #define GREEDYEDIST_H
 
-#include "core/types_api.h"
-#include "core/encseq_api.h"
+#include "match/seqabstract.h"
 
-typedef struct GtGreedyedistSeq GtGreedyedistSeq;
-
-GtGreedyedistSeq *gt_greedyedist_seq_new_empty(void);
-
-void gt_greedyedist_seq_reinit_ptr(GtGreedyedistSeq *greedyedistseq,
-                                   const GtUchar *ptr,
-                                   unsigned long len,
-                                   unsigned long offset);
-
-GtGreedyedistSeq *gt_greedyedist_seq_new_ptr(const GtUchar *ptr,
-                                             unsigned long len,
-                                             unsigned long offset);
-
-void gt_greedyedist_seq_reinit_encseq(GtGreedyedistSeq *greedyedistseq,
-                                      const GtEncseq *encseq,
-                                      unsigned long len,
-                                      unsigned long offset);
-
-GtGreedyedistSeq *gt_greedyedist_seq_new_encseq(const GtEncseq *encseq,
-                                                unsigned long len,
-                                                unsigned long offset);
-
-void gt_greedyedist_seq_delete(GtGreedyedistSeq *greedyedistseq);
-
-unsigned long gt_greedyedist_length_get(const GtGreedyedistSeq *greedyedistseq);
-
-unsigned long greedyunitedist(const GtGreedyedistSeq *useq,
-                              const GtGreedyedistSeq *vseq);
+unsigned long greedyunitedist(const GtSeqabstract *useq,
+                              const GtSeqabstract *vseq);
 
 #endif

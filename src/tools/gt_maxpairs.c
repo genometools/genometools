@@ -86,7 +86,7 @@ typedef struct
   GtXdropbest best_right;
   GtArrayGtXdropfrontvalue fronts;
   GtXdropscore belowscore;
-  GtGreedyedistSeq *useq, *vseq;
+  GtSeqabstract *useq, *vseq;
 } GtXdropmatchinfo;
 
 static int gt_simplexdropselfmatchoutput(void *info,
@@ -154,11 +154,11 @@ static int gt_simplexdropselfmatchoutput(void *info,
   score = (int) len * xdropmatchinfo->arbitscores.mat +
           xdropmatchinfo->best_left.score +
           xdropmatchinfo->best_right.score;
-  gt_greedyedist_seq_reinit_encseq(xdropmatchinfo->useq,
+  gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                    encseq,
                                    dblen,
                                    dbstart);
-  gt_greedyedist_seq_reinit_encseq(xdropmatchinfo->vseq,
+  gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
                                    encseq,
                                    querylen,
                                    querystart);
@@ -397,8 +397,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
 
   gt_error_check(err);
   xdropmatchinfo.querymatchspaceptr = querymatchspaceptr;
-  xdropmatchinfo.useq = gt_greedyedist_seq_new_empty();
-  xdropmatchinfo.vseq = gt_greedyedist_seq_new_empty();
+  xdropmatchinfo.useq = gt_seqabstract_new_empty();
+  xdropmatchinfo.vseq = gt_seqabstract_new_empty();
   xdropmatchinfo.arbitscores.mat = 2;
   xdropmatchinfo.arbitscores.mis = -2;
   xdropmatchinfo.arbitscores.ins = -3;
@@ -478,8 +478,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
     }
   }
   gt_querymatch_delete(querymatchspaceptr);
-  gt_greedyedist_seq_delete(xdropmatchinfo.useq);
-  gt_greedyedist_seq_delete(xdropmatchinfo.vseq);
+  gt_seqabstract_delete(xdropmatchinfo.useq);
+  gt_seqabstract_delete(xdropmatchinfo.vseq);
   gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
