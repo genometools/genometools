@@ -20,6 +20,7 @@
 #include "core/types_api.h"
 #include "core/readmode.h"
 #include "core/format64.h"
+#include "core/minmax.h"
 #include "querymatch.h"
 
 struct Querymatch
@@ -28,7 +29,8 @@ struct Querymatch
                  dbstart,
                  querylen,
                  querystart,
-                 querytotallength;
+                 querytotallength,
+                 edist;
    int score;
    bool selfmatch;
    uint64_t queryseqnum;
@@ -45,6 +47,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         unsigned long dbstart,
                         GtReadmode readmode,
                         int score,
+                        unsigned long edist,
                         bool selfmatch,
                         uint64_t queryseqnum,
                         unsigned long querylen,
@@ -55,6 +58,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
   querymatch->dbstart = dbstart;
   querymatch->readmode = readmode;
   querymatch->score = score;
+  querymatch->edist = edist;
   querymatch->selfmatch = selfmatch;
   querymatch->queryseqnum = queryseqnum;
   querymatch->querylen = querylen;
@@ -163,7 +167,11 @@ int gt_querymatch_output(GT_UNUSED void *info,
            querystart);
     if (querymatch->score > 0)
     {
-      printf(" %d\n",querymatch->score);
+      double similarity = querymatch->edist == 0
+        ? 100.0
+        : 100.0 * (1.0 - querymatch->edist/
+                         (double) MIN(querymatch->dblen,querymatch->querylen));
+      printf(" %d %lu %.2f\n",querymatch->score,querymatch->edist,similarity);
     } else
     {
       printf("\n");

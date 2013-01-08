@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,7 @@
 #include "match/esa-maxpairs.h"
 #include "match/test-maxpairs.pr"
 #include "match/querymatch.h"
+#include "match/greedyedist.h"
 #include "ltr/ltr_xdrop.h"
 #include "tools/gt_maxpairs.h"
 
@@ -68,6 +69,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
                      pos1,
                      GT_READMODE_FORWARD,
                      0,
+                     0,
                      true,
                      (uint64_t) queryseqnum,
                      len,
@@ -84,6 +86,7 @@ typedef struct
   GtXdropbest best_right;
   GtArrayGtXdropfrontvalue fronts;
   GtXdropscore belowscore;
+  GtGreedyedistSeq *useq, *vseq;
 } GtXdropmatchinfo;
 
 static int gt_simplexdropselfmatchoutput(void *info,
@@ -94,7 +97,9 @@ static int gt_simplexdropselfmatchoutput(void *info,
                                          GtError *err)
 {
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
-  unsigned long querystart, queryseqnum, seqstartpos;
+  int score;
+  unsigned long dbstart, dblen, querystart, queryseqnum, querylen,
+                queryseqstartpos;
   const unsigned long totallength = gt_encseq_total_length(encseq);
 
   if (pos1 > pos2)
@@ -139,21 +144,34 @@ static int gt_simplexdropselfmatchoutput(void *info,
             pos2 >= (unsigned long) xdropmatchinfo->best_left.jvalue);
   querystart = pos2 - xdropmatchinfo->best_left.jvalue;
   queryseqnum = gt_encseq_seqnum(encseq,querystart);
-  seqstartpos = gt_encseq_seqstartpos(encseq, queryseqnum);
-  gt_assert(querystart >= seqstartpos);
+  queryseqstartpos = gt_encseq_seqstartpos(encseq, queryseqnum);
+  gt_assert(querystart >= queryseqstartpos);
+  dblen = len + xdropmatchinfo->best_left.ivalue
+              + xdropmatchinfo->best_right.ivalue;
+  dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
+  querylen = len + xdropmatchinfo->best_left.jvalue
+                 + xdropmatchinfo->best_right.jvalue,
+  score = (int) len * xdropmatchinfo->arbitscores.mat +
+          xdropmatchinfo->best_left.score +
+          xdropmatchinfo->best_right.score;
+  gt_greedyedist_seq_reinit_encseq(xdropmatchinfo->useq,
+                                   encseq,
+                                   dblen,
+                                   dbstart);
+  gt_greedyedist_seq_reinit_encseq(xdropmatchinfo->vseq,
+                                   encseq,
+                                   querylen,
+                                   querystart);
   gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
-                     len + xdropmatchinfo->best_left.ivalue +
-                           xdropmatchinfo->best_right.ivalue,
-                     pos1 - xdropmatchinfo->best_left.ivalue,
+                     dblen,
+                     dbstart,
                      GT_READMODE_FORWARD,
-                     (int) len * xdropmatchinfo->arbitscores.mat +
-                     xdropmatchinfo->best_left.score +
-                     xdropmatchinfo->best_right.score,
+                     score,
+                     greedyunitedist(xdropmatchinfo->useq,xdropmatchinfo->vseq),
                      true,
                      (uint64_t) queryseqnum,
-                     len + xdropmatchinfo->best_left.jvalue
-                         + xdropmatchinfo->best_right.jvalue,
-                     querystart - seqstartpos,
+                     querylen,
+                     querystart - queryseqstartpos,
                      gt_encseq_seqlength(encseq, queryseqnum));
   return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
                               err);
@@ -379,6 +397,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
 
   gt_error_check(err);
   xdropmatchinfo.querymatchspaceptr = querymatchspaceptr;
+  xdropmatchinfo.useq = gt_greedyedist_seq_new_empty();
+  xdropmatchinfo.vseq = gt_greedyedist_seq_new_empty();
   xdropmatchinfo.arbitscores.mat = 2;
   xdropmatchinfo.arbitscores.mis = -2;
   xdropmatchinfo.arbitscores.ins = -3;
@@ -458,6 +478,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
     }
   }
   gt_querymatch_delete(querymatchspaceptr);
+  gt_greedyedist_seq_delete(xdropmatchinfo.useq);
+  gt_greedyedist_seq_delete(xdropmatchinfo.vseq);
   gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
