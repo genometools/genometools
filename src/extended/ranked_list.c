@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -47,6 +48,7 @@ GtRankedList* gt_ranked_list_new(unsigned long maxsize,
                                  void *compareinfo)
 {
   GtRankedList *ranked_list;
+  gt_assert(maxsize > 0 && comparefunction != NULL);
 
   ranked_list = gt_malloc(sizeof (*ranked_list));
   ranked_list->currentsize = 0;
@@ -243,6 +245,20 @@ int gt_ranked_list_unit_test(GtError *err)
   rl = gt_ranked_list_new(5UL, gt_ranked_list_cmp_numbers, NULL, NULL);
   gt_ensure(had_err, rl != NULL);
   gt_ensure(had_err, gt_ranked_list_size(rl) == 0);
+
+  iter = gt_ranked_list_iter_new_from_first(rl);
+  mystr = gt_ranked_list_iter_next(iter);
+  gt_ensure(had_err, mystr == NULL);
+  mystr = gt_ranked_list_iter_next(iter);
+  gt_ensure(had_err, mystr == NULL);
+  gt_ranked_list_iter_delete(iter);
+
+  iter = gt_ranked_list_iter_new_from_last(rl);
+  mystr = gt_ranked_list_iter_prev(iter);
+  gt_ensure(had_err, mystr == NULL);
+  mystr = gt_ranked_list_iter_prev(iter);
+  gt_ensure(had_err, mystr == NULL);
+  gt_ranked_list_iter_delete(iter);
 
   for (i = 0; i < 8; i++) {
     gt_ranked_list_insert(rl, values+i);
