@@ -52,7 +52,8 @@ typedef int GtXdropscore;
 GT_DECLAREARRAYSTRUCT(GtXdropscore);
 
 /*
-   The following functions extend seeds to the right and to the left,
+   The following functions extend seeds to the right (forward = true)
+   and to the left (forward = false),
    respectively. GtXdropbest stores information about the best match
    found. useq is the first sequence position and vseq is the
    second sequence position. ulen and vlen are the
@@ -61,27 +62,14 @@ GT_DECLAREARRAYSTRUCT(GtXdropscore);
    any more.
 */
 
-#define GT_XDROP_EVALXDROPARBITSCORESRIGHT\
-        void gt_evalxdroparbitscoresright(GtXdropArbitraryscores *arbitscores,\
-                                          GtXdropbest *xdropbest,\
-                                          GtArrayGtXdropfrontvalue *fronts,\
-                                          const GtSeqabstract *useq,\
-                                          const GtSeqabstract *vseq,\
-                                          unsigned long uoffset,\
-                                          unsigned long voffset,\
-                                          GtXdropscore xdropbelowscore)
-
-#define GT_XDROP_EVALXDROPARBITSCORESLEFT\
-        void gt_evalxdroparbitscoresleft(GtXdropArbitraryscores *arbitscores,\
-                                         GtXdropbest *xdropbest,\
-                                         GtArrayGtXdropfrontvalue *fronts,\
-                                         const GtSeqabstract *useq,\
-                                         const GtSeqabstract *vseq,\
-                                         unsigned long uoffset,\
-                                         unsigned long voffset,\
-                                         GtXdropscore xdropbelowscore)
-
-GT_XDROP_EVALXDROPARBITSCORESLEFT;
-GT_XDROP_EVALXDROPARBITSCORESRIGHT;
+void gt_evalxdroparbitscoresextend(bool forward,
+                                   GtXdropArbitraryscores *arbitscores,
+                                   GtXdropbest *xdropbest,
+                                   GtArrayGtXdropfrontvalue *fronts,
+                                   const GtSeqabstract *useq,
+                                   const GtSeqabstract *vseq,
+                                   unsigned long uoffset,
+                                   unsigned long voffset,
+                                   GtXdropscore xdropbelowscore);
 
 #endif

@@ -111,7 +111,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
   GT_INITARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
   gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,pos1,0);
   gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,pos2,0);
-  gt_evalxdroparbitscoresleft(&xdropmatchinfo->arbitscores,
+  gt_evalxdroparbitscoresextend(false,&xdropmatchinfo->arbitscores,
                               &xdropmatchinfo->best_left,
                               &xdropmatchinfo->fronts,
                               xdropmatchinfo->useq,
@@ -127,7 +127,8 @@ static int gt_simplexdropselfmatchoutput(void *info,
                                  encseq,totallength - (pos1 + len),0);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
                                  encseq,totallength - (pos2 + len),0);
-    gt_evalxdroparbitscoresright(&xdropmatchinfo->arbitscores,
+    gt_evalxdroparbitscoresextend(true,
+                                 &xdropmatchinfo->arbitscores,
                                  &xdropmatchinfo->best_right,
                                  &xdropmatchinfo->fronts,
                                  xdropmatchinfo->useq,

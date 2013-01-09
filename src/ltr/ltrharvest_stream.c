@@ -1025,7 +1025,8 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     {
       gt_seqabstract_reinit_encseq(sa_useq,encseq,alilen,0);
       gt_seqabstract_reinit_encseq(sa_vseq,encseq,alilen,0);
-      gt_evalxdroparbitscoresleft(&lo->arbitscores,
+      gt_evalxdroparbitscoresextend(false,
+                                  &lo->arbitscores,
                                   &xdropbest_left,
                                   &fronts,
                                   sa_useq,
@@ -1038,7 +1039,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       gt_seqabstract_reinit_encseq(sa_useq,encseq,repeatptr->pos1,0);
       gt_seqabstract_reinit_encseq(sa_vseq,encseq,
                                    repeatptr->pos1 + repeatptr->offset,0);
-      gt_evalxdroparbitscoresleft(&lo->arbitscores,
+      gt_evalxdroparbitscoresextend(false,&lo->arbitscores,
                                   &xdropbest_left,
                                   &fronts,
                                   sa_useq,
@@ -1057,7 +1058,8 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     {
       gt_seqabstract_reinit_encseq(sa_useq,encseq,alilen,0);
       gt_seqabstract_reinit_encseq(sa_vseq,encseq,alilen,0);
-      gt_evalxdroparbitscoresright(&lo->arbitscores,
+      gt_evalxdroparbitscoresextend(true,
+                                   &lo->arbitscores,
                                    &xdropbest_right,
                                    &fronts,
                                    sa_useq,
@@ -1075,7 +1077,8 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                            (repeatptr->pos1 +
                                             repeatptr->offset +
                                             repeatptr->len),0);
-      gt_evalxdroparbitscoresright(&lo->arbitscores,
+      gt_evalxdroparbitscoresextend(true,
+                                   &lo->arbitscores,
                                    &xdropbest_right,
                                    &fronts,
                                    sa_useq,

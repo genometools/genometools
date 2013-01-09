@@ -29,8 +29,8 @@ typedef struct
       del;
 } GtXdropArbitrarydistances;
 
-#define GT_XDROP_MINUSINFINITYINT ((int)integermin)
-#define GT_XDROP_FRONTIDX(D,K) ((unsigned long) (D) * (D) + (D) + (K))
+#define GT_XDROP_MINUSINFINITYINT ((int) integermin)
+#define GT_XDROP_FRONTIDX(D,K)    ((unsigned long) (D) * (D) + (D) + (K))
 
 /*
   For each entry in the DP-matrix we store a single byte, and
@@ -114,24 +114,14 @@ int gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
   return 0;
 }
 
-/* If gt_showfrontvalues = "True", then
-    (A)->nextfree##TYPE = POS+1; must be set:
-
- ** The other case, saves more space
-
-   #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
-           GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1);\
-           (A)->space##TYPE[POS] = VAL;\
-           (A)->nextfree##TYPE = POS+1
-*/
-
 /*
  POS+1 necessary, since at POS = 0 and nextfree##TYPE = 0
  nothing will be allocated in addition!
  */
-#define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
-        GT_CHECKARRAYSPACEMULTI(A,TYPE,POS+1);\
-        (A)->space##TYPE[POS] = VAL
+
+#define STOREINARRAYFRONTS(POS,VAL)\
+        GT_CHECKARRAYSPACEMULTI(fronts,GtXdropfrontvalue,POS+1);\
+        fronts->spaceGtXdropfrontvalue[POS] = VAL
 
 static unsigned int gt_xdrop_gcd(unsigned int m, unsigned int n)
 {
@@ -210,6 +200,10 @@ static void gt_calculateallowedMININFINITYINTgenerations(
  The following macro checks for wildcard and separator symbols.
  */
 
+#define GT_XDROP_SEQACC(SEQ,OFF,IDX)\
+        gt_seqabstract_encoded_char(SEQ,forward ? (OFF) + (IDX)\
+                                                : (OFF) - 1UL - (IDX))
+
 #define GT_XDROP_COMPARESYMBOLSSEP(I,J)\
         {\
           GtUchar a, b;\
@@ -231,24 +225,269 @@ static void gt_calculateallowedMININFINITYINTgenerations(
           }\
         }
 
-#define GT_XDROP_EVALXDROPARBITSCORES GT_XDROP_EVALXDROPARBITSCORESRIGHT
-#define GT_XDROP_SEQACC(SEQ,OFF,IDX)\
-        gt_seqabstract_encoded_char(SEQ,(OFF)+(IDX))
+void gt_evalxdroparbitscoresextend(bool forward,
+                                   GtXdropArbitraryscores *arbitscores,
+                                   GtXdropbest *xdropbest,
+                                   GtArrayGtXdropfrontvalue *fronts,
+                                   const GtSeqabstract *useq,
+                                   const GtSeqabstract *vseq,
+                                   unsigned long uoffset,
+                                   unsigned long voffset,
+                                   GtXdropscore xdropbelowscore)
+{
+  int integermax,
+      integermin,
+      ulen,
+      vlen,
+      i,
+      j = 0,
+      k = 0,         /* diagonal */
+      end_k,         /* diagonal of endpoint (ulen, vlen) */
+      lbound = 0,    /* diagonal lower bound */
+      ubound = 0,    /* diagonal upper bound */
+      lboundtmp = 0,
+      uboundtmp = 0,
+      tmprow,
+      d = 0,         /* distance */
+      d_pre = 0,     /* previous distance */
+      dback,
+      allowedMININFINITYINTgenerations = 0,
+      currentMININFINITYINTgeneration = 0;
+  GtXdropfrontvalue tmpfront;
+  GtXdropArbitrarydistances arbitdistances;
+  GtXdropscore bigt_tmp;        /* best score T' seen already */
+  GtArrayGtXdropscore big_t;    /* array T[d] of best score T for each d */
+  bool alwaysMININFINITYINT = true;
 
-#include "xdrop-inc.gen"
-
-#undef GT_XDROP_EVALXDROPARBITSCORES
-#undef GT_XDROP_SEQACC
-
-/*
-  Now we redefine the macros to compute the left to right
-  we use macros to abstract from the differences. The
-  following 3 macros are defined for the right to left extension beginning
-  with the last character of the strings under consideration.
-*/
-
-#define GT_XDROP_EVALXDROPARBITSCORES GT_XDROP_EVALXDROPARBITSCORESLEFT
-#define GT_XDROP_SEQACC(SEQ,OFF,IDX)\
-        gt_seqabstract_encoded_char(SEQ,(OFF) - 1UL - (IDX))
-
-#include "xdrop-inc.gen"
+  ulen = (int) gt_seqabstract_length_get(useq);
+  vlen = (int) gt_seqabstract_length_get(vseq);
+  end_k = ulen - vlen;              /* diagonal of endpoint (ulen, vlen) */
+  gt_calculatedistancesfromscores(arbitscores, &arbitdistances);
+  gt_calculateallowedMININFINITYINTgenerations(
+                                      &allowedMININFINITYINTgenerations,
+                                      &arbitdistances);
+  dback = GT_XDROP_SETDBACK(xdropbelowscore);
+  GT_INITARRAY (&big_t, GtXdropscore);
+  integermax = MAX(ulen, vlen);
+  integermin = -integermax;
+  /* phase 0 */
+  for (i = 0; i < MIN(ulen,vlen); i++)
+  {
+    GT_XDROP_COMPARESYMBOLSSEP(i,i);
+  }
+  /* alignment already finished */
+  if (i >= ulen || i >= vlen)
+  {
+    lbound =  1;
+    ubound = -1;
+  }
+  tmpfront.dptabrow = i;
+  tmpfront.dptabdirection = (GtUchar) 0;   /* no predecessor */
+  STOREINARRAYFRONTS (0, tmpfront);
+  xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + i, 0);
+  gt_assert(i >= 0);
+  xdropbest->ivalue = xdropbest->jvalue = (unsigned int) i;
+  GT_STOREINARRAY (&big_t, GtXdropscore, 10, bigt_tmp);
+  /* phase d > 0 */
+  while (lbound <= ubound)
+  {
+    d++;
+    d_pre = d - dback;
+    /* calculate fronts */
+    for (k = lbound - 1; k <= ubound + 1; k++)
+    {
+      i = GT_XDROP_MINUSINFINITYINT;
+      /* case 1 : DELETION-EDGE  */
+      if (lbound < k &&
+          d - arbitdistances.del >= 0 &&
+          -(d - arbitdistances.del) <= k - 1 &&
+          k - 1 <= d - arbitdistances.del)
+      {
+        i = fronts->spaceGtXdropfrontvalue[
+                    GT_XDROP_FRONTIDX(d-arbitdistances.del,k-1)].dptabrow + 1;
+        tmpfront.dptabdirection = GT_XDROP_DELETIONBIT;
+      }
+      /* case 2: REPLACEMENT-EDGE */
+      if (lbound <= k && k <= ubound && d - arbitdistances.mis >= 0 &&
+          -(d - arbitdistances.mis) <= k && k <= d - arbitdistances.mis)
+      {
+        /* test, if case 1 has happened. */
+        if (tmpfront.dptabdirection & GT_XDROP_DELETIONBIT)
+        {
+          tmprow = fronts->spaceGtXdropfrontvalue[
+                        GT_XDROP_FRONTIDX(d-arbitdistances.mis,k)].dptabrow + 1;
+          if (tmprow > i)
+          {
+            i = tmprow;
+            tmpfront.dptabdirection = GT_XDROP_REPLACEMENTBIT;
+          }
+        } else
+        {
+          i = fronts->spaceGtXdropfrontvalue[
+                      GT_XDROP_FRONTIDX(d-arbitdistances.mis,k)].dptabrow + 1;
+          tmpfront.dptabdirection = GT_XDROP_REPLACEMENTBIT;
+        }
+      }
+      /* case 3: INSERTION-EDGE */
+      if (k < ubound &&
+          d - arbitdistances.ins >= 0 &&
+          -(d - arbitdistances.ins) <= k + 1 &&
+           k + 1 <= d - arbitdistances.ins)
+      {
+        if (tmpfront.dptabdirection & (GT_XDROP_DELETIONBIT |
+                                       GT_XDROP_REPLACEMENTBIT))
+        {
+          tmprow = fronts->spaceGtXdropfrontvalue[
+                          GT_XDROP_FRONTIDX(d-arbitdistances.ins,k+1)].dptabrow;
+          if (tmprow > i)
+          {
+            i = tmprow;
+            tmpfront.dptabdirection = GT_XDROP_INSERTIONBIT;
+          }
+        } else
+        {
+          i = fronts->spaceGtXdropfrontvalue[
+                      GT_XDROP_FRONTIDX(d-arbitdistances.ins,k+1)].dptabrow;
+          tmpfront.dptabdirection = GT_XDROP_INSERTIONBIT;
+        }
+      }
+      j = i - k;
+      /* if i = MINUSINFINITYINY or MINUSINFINITYINY + 1 */
+      if (i < 0)
+      {
+        if (tmpfront.dptabdirection == (GtUchar) 0)
+        {
+          alwaysMININFINITYINT = false;
+        }
+        tmpfront.dptabrow = GT_XDROP_MINUSINFINITYINT;
+      } else
+      {
+        /* alignment score smaller than T - X */
+        if (d_pre > 0 &&
+            big_t.spaceGtXdropscore != NULL &&
+            (GT_XDROP_EVAL (i + j, d) <
+             big_t.spaceGtXdropscore[d_pre] - xdropbelowscore))
+        {
+          tmpfront.dptabrow = GT_XDROP_MINUSINFINITYINT;
+        } else
+        {
+          if (k <= -d || k >= d || /* not correct boundaries for
+                                      ACCESTOFRONT(d-1,k) */
+              (fronts->spaceGtXdropfrontvalue[
+                       GT_XDROP_FRONTIDX(d-1,k)].dptabrow < i
+               && i <= MIN(ulen,vlen + k)))
+          {
+            while (i < ulen && j < vlen)
+            {
+              GT_XDROP_COMPARESYMBOLSSEP(i,j);
+              i++;
+              j++;
+            }
+            alwaysMININFINITYINT = false;
+            tmpfront.dptabrow = i;
+            if (GT_XDROP_EVAL(i + j, d) > bigt_tmp)
+            {
+              xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + j, d);
+              gt_assert(i >= 0 && j >= 0);
+              xdropbest->ivalue = (unsigned int) i;
+              xdropbest->jvalue = (unsigned int) j;
+            }
+          } else
+          {
+            alwaysMININFINITYINT = false;
+            tmpfront.dptabrow = fronts->spaceGtXdropfrontvalue[
+                                        GT_XDROP_FRONTIDX(d-1,k)].dptabrow;
+          }
+        }
+      }
+      STOREINARRAYFRONTS (GT_XDROP_FRONTIDX(d,k),tmpfront);
+      /* delete value for test for */
+      /* INSERTIONBIT/REPLACEMENTBIT/DELETIONBIT above
+      tmpfront.dptabdirection = (GtUchar) 0; */
+    }
+    /* if all front values are GT_XDROP_MINUSINFINITYINT,
+       aligment prematurely finished if allowedMININFINITYINTgenerations
+       exceeded
+       (full front has already ended at d - currentMININFINITYINTgeneration). */
+    if (alwaysMININFINITYINT)
+    {
+      currentMININFINITYINTgeneration++;
+      if (currentMININFINITYINTgeneration > allowedMININFINITYINTgenerations)
+      {
+        d -= currentMININFINITYINTgeneration;
+        break;
+      }
+    } else
+    {
+      currentMININFINITYINTgeneration = 0;
+      alwaysMININFINITYINT = true;
+    }
+    GT_STOREINARRAY (&big_t, GtXdropscore, 10, bigt_tmp);
+    /* fill out of bounds values of GT_XDROP_MINUSINFINITYINT
+       needed for gt_showfrontvalues function */
+    for (k = -d; k < lbound - 1; k++)
+    {
+      tmpfront.dptabrow = GT_XDROP_MINUSINFINITYINT;
+      STOREINARRAYFRONTS (GT_XDROP_FRONTIDX(d, k), tmpfront);
+    }
+    for (k = ubound + 2; k <= d; k++)
+    {
+      tmpfront.dptabrow = GT_XDROP_MINUSINFINITYINT;
+      STOREINARRAYFRONTS (GT_XDROP_FRONTIDX(d, k), tmpfront);
+    }
+    /* alignment finished */
+    if (-d <= end_k && end_k <= d &&
+        fronts->spaceGtXdropfrontvalue[
+                GT_XDROP_FRONTIDX(d,end_k)].dptabrow == ulen)
+    {
+      break;
+    }
+    /* pruning lower bound
+       lbound may decrease by one or increase/stays the same */
+    for (k = lbound - 1; k <= ubound + 1; k++)
+    {
+      if (fronts->spaceGtXdropfrontvalue[GT_XDROP_FRONTIDX(d, k)].dptabrow >
+          GT_XDROP_MINUSINFINITYINT)
+      {
+        lbound = k;
+        break;
+      }
+    }
+    /* pruning upper bound
+       ubound may increase by one or decrease/stays the same */
+    for (k = ubound + 1; k >= lbound - 1; k--)
+    {
+      if (fronts->spaceGtXdropfrontvalue[GT_XDROP_FRONTIDX(d, k)].dptabrow >
+          GT_XDROP_MINUSINFINITYINT)
+      {
+        ubound = k;
+        break;
+      }
+    }
+    /* handling boundaries lower bound */
+    lboundtmp = lbound;
+    for (k = 0; k >= lbound; k--)
+    {
+      if (fronts->spaceGtXdropfrontvalue[GT_XDROP_FRONTIDX(d, k)].dptabrow ==
+                                         vlen + k)
+      {
+        lboundtmp = k;
+        break;
+      }
+    }
+    /* handling boundaries upper bound */
+    uboundtmp = ubound;
+    for (k = 0; k <= ubound; k++)
+    {
+      if (fronts->spaceGtXdropfrontvalue[GT_XDROP_FRONTIDX(d, k)].dptabrow ==
+                                         ulen)
+      {
+        uboundtmp = k;
+        break;
+      }
+    }
+    lbound = MAX(lbound, lboundtmp);
+    ubound = MIN(ubound, uboundtmp);
+  }
+  GT_FREEARRAY (&big_t, GtXdropscore);
+}
