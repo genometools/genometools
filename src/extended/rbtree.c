@@ -1047,7 +1047,7 @@ int gt_rbtree_unit_test(GtError *err)
   gt_error_check (err);
 
   gt_rbtree_xtab = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_xtab));
-  gt_rbtree_ytab = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_ytab));
+  gt_rbtree_ytab = gt_malloc(2*GT_RBTREE_SIZE * sizeof (*gt_rbtree_ytab));
   gt_rbtree_ztab = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_ztab));
   gt_rbtree_depths = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_depths));
 
