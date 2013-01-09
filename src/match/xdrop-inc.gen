@@ -19,17 +19,19 @@ GT_XDROP_EVALXDROPARBITSCORES
 {
   int integermax,
       integermin,
+      ulen,
+      vlen,
       i,
       j = 0,
-      k = 0,                            /* diagonal */
-      end_k = ulen - vlen,              /* diagonal of endpoint (ulen, vlen) */
-      lbound = 0,                       /* diagonal lower bound */
-      ubound = 0,                       /* diagonal upper bound */
+      k = 0,         /* diagonal */
+      end_k,         /* diagonal of endpoint (ulen, vlen) */
+      lbound = 0,    /* diagonal lower bound */
+      ubound = 0,    /* diagonal upper bound */
       lboundtmp = 0,
       uboundtmp = 0,
       tmprow,
-      d = 0,                            /* distance */
-      d_pre = 0,                        /* previous distance */
+      d = 0,         /* distance */
+      d_pre = 0,     /* previous distance */
       dback,
       allowedMININFINITYINTgenerations = 0,
       currentMININFINITYINTgeneration = 0;
@@ -39,6 +41,9 @@ GT_XDROP_EVALXDROPARBITSCORES
   GtArrayGtXdropscore big_t;    /* array T[d] of best score T for each d */
   bool alwaysMININFINITYINT = true;
 
+  ulen = (int) gt_seqabstract_length_get(useq);
+  vlen = (int) gt_seqabstract_length_get(vseq);
+  end_k = ulen - vlen;              /* diagonal of endpoint (ulen, vlen) */
   gt_calculatedistancesfromscores(arbitscores, &arbitdistances);
   gt_calculateallowedMININFINITYINTgenerations(
                                       &allowedMININFINITYINTgenerations,

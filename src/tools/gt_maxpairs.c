@@ -109,29 +109,31 @@ static int gt_simplexdropselfmatchoutput(void *info,
     pos2 = tmp;
   }
   GT_INITARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
+  gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,pos1,0);
+  gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,pos2,0);
   gt_evalxdroparbitscoresleft(&xdropmatchinfo->arbitscores,
                               &xdropmatchinfo->best_left,
                               &xdropmatchinfo->fronts,
-                              encseq,
-                              encseq,
+                              xdropmatchinfo->useq,
+                              xdropmatchinfo->vseq,
                               pos1,
                               pos2,
-                              (int) pos1,
-                              (int) pos2,
                               xdropmatchinfo->belowscore);
   GT_FREEARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
   if (pos1 + len < totallength && pos2 + len < totallength)
   {
     GT_INITARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                                 encseq,totallength - (pos1 + len),0);
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
+                                 encseq,totallength - (pos2 + len),0);
     gt_evalxdroparbitscoresright(&xdropmatchinfo->arbitscores,
                                  &xdropmatchinfo->best_right,
                                  &xdropmatchinfo->fronts,
-                                 encseq,
-                                 encseq,
+                                 xdropmatchinfo->useq,
+                                 xdropmatchinfo->vseq,
                                  pos1 + len,
                                  pos2 + len,
-                                 (int) (totallength - (pos1 + len)),
-                                 (int) (totallength - (pos2 + len)),
                                  xdropmatchinfo->belowscore);
     GT_FREEARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
   } else
@@ -155,13 +157,13 @@ static int gt_simplexdropselfmatchoutput(void *info,
           xdropmatchinfo->best_left.score +
           xdropmatchinfo->best_right.score;
   gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                   encseq,
-                                   dblen,
-                                   dbstart);
+                               encseq,
+                               dblen,
+                               dbstart);
   gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
-                                   encseq,
-                                   querylen,
-                                   querystart);
+                               encseq,
+                               querylen,
+                               querystart);
   gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
                      dblen,
                      dbstart,

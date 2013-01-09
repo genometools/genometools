@@ -19,7 +19,7 @@
 #define XDROP_H
 
 #include "core/arraydef.h"
-#include "core/encseq.h"
+#include "match/seqabstract.h"
 
 typedef struct
 {
@@ -65,24 +65,20 @@ GT_DECLAREARRAYSTRUCT(GtXdropscore);
         void gt_evalxdroparbitscoresright(GtXdropArbitraryscores *arbitscores,\
                                           GtXdropbest *xdropbest,\
                                           GtArrayGtXdropfrontvalue *fronts,\
-                                          const GtEncseq *str_useq,\
-                                          const GtEncseq *str_vseq,\
-                                          unsigned long useq,\
-                                          unsigned long vseq,\
-                                          int ulen,\
-                                          int vlen,\
+                                          const GtSeqabstract *useq,\
+                                          const GtSeqabstract *vseq,\
+                                          unsigned long uoffset,\
+                                          unsigned long voffset,\
                                           GtXdropscore xdropbelowscore)
 
 #define GT_XDROP_EVALXDROPARBITSCORESLEFT\
         void gt_evalxdroparbitscoresleft(GtXdropArbitraryscores *arbitscores,\
                                          GtXdropbest *xdropbest,\
                                          GtArrayGtXdropfrontvalue *fronts,\
-                                         const GtEncseq *str_useq,\
-                                         const GtEncseq *str_vseq,\
-                                         unsigned long useq,\
-                                         unsigned long vseq,\
-                                         int ulen,\
-                                         int vlen,\
+                                         const GtSeqabstract *useq,\
+                                         const GtSeqabstract *vseq,\
+                                         unsigned long uoffset,\
+                                         unsigned long voffset,\
                                          GtXdropscore xdropbelowscore)
 
 GT_XDROP_EVALXDROPARBITSCORESLEFT;

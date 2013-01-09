@@ -398,8 +398,7 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
               difffromoldboundary2 = max - min;
 
               hitcounter++;
-            }
-            else
+            } else
             {
               unsigned long max, min, difffromnewboundary1,
                    difffromnewboundary2;
@@ -495,9 +494,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
          max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
          min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
          difffromoldboundary = max - min;
-       }
-       /* next hit */
-       else
+       } else /* next hit */
        {
          unsigned long maxval, minval, difffromnewboundary;
 
@@ -549,9 +546,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
          max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
          min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
          difffromoldboundary = max - min;
-       }
-       /* next hit */
-       else
+       } else /* next hit */
        {
          unsigned long maxval, minval, difffromnewboundary;
 
@@ -577,8 +572,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
   if (motif1 && motif2)
   {
     boundaries->motif_near_tsd = true;
-  }
-  else
+  } else
   {
     boundaries->motif_near_tsd = false;
   }
@@ -674,9 +668,7 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
          maxval = MAX(oldleftLTR_3, boundaries->leftLTR_3);
          minval = MIN(oldleftLTR_3, boundaries->leftLTR_3);
          difffromoldboundary = maxval - minval;
-       }
-       /* next hit */
-       else
+       } else /* next hit */
        {
          unsigned long maxval, minval, difffromnewboundary;
 
@@ -728,9 +720,7 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
          maxval = MAX(oldrightLTR_5, boundaries->rightLTR_5);
          minval = MIN(oldrightLTR_5, boundaries->rightLTR_5);
          difffromoldboundary = maxval - minval;
-       }
-       /* next hit */
-       else
+       } else /* next hit */
        {
          unsigned long maxval, minval, difffromnewboundary;
 
@@ -752,8 +742,7 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
   if (motif1 && motif2)
   {
     boundaries->motif_far_tsd = true;
-  }
-  else
+  } else
   {
     boundaries->motif_far_tsd = false;
   }
@@ -803,16 +792,14 @@ static int searchforTSDandorMotifoutside(
     {
       startleftLTR = boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries;
     }
-  }
-  else
+  } else
   {
     /* do not align over left separator symbol
        in case of need decrease alignment length */
     if (boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries)
     {
       startleftLTR = seqstartpos;
-    }
-    else
+    } else
     {
       if (((startleftLTR =
               boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries) <
@@ -1010,14 +997,14 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                 totallength,
                 ulen,
                 vlen;
-#define GT_GREEDY_BUFFER
+#undef GT_GREEDY_BUFFER
 #ifdef GT_GREEDY_BUFFER
   unsigned long maxulen = 0, maxvlen = 0;
   GtUchar *useq = NULL,
           *vseq = NULL;
 #endif
-  GtSeqabstract *guseq = gt_seqabstract_new_empty(),
-                *gvseq = gt_seqabstract_new_empty();
+  GtSeqabstract *sa_useq = gt_seqabstract_new_empty(),
+                *sa_vseq = gt_seqabstract_new_empty();
   unsigned long edist;
   Repeat *repeatptr;
   LTRboundaries *boundaries;
@@ -1036,29 +1023,29 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     GT_INITARRAY (&fronts, GtXdropfrontvalue);
     if (alilen <= repeatptr->pos1)
     {
+      gt_seqabstract_reinit_encseq(sa_useq,encseq,alilen,0);
+      gt_seqabstract_reinit_encseq(sa_vseq,encseq,alilen,0);
       gt_evalxdroparbitscoresleft(&lo->arbitscores,
-                               &xdropbest_left,
-                               &fronts,
-                               encseq,
-                               encseq,
-                               repeatptr->pos1,
-                               repeatptr->pos1 + repeatptr->offset,
-                               (int) alilen,
-                               (int) alilen,
-                               (GtXdropscore) lo->xdropbelowscore);
-    }
-    else /* do not align over left sequence boundary */
+                                  &xdropbest_left,
+                                  &fronts,
+                                  sa_useq,
+                                  sa_vseq,
+                                  repeatptr->pos1,
+                                  repeatptr->pos1 + repeatptr->offset,
+                                  (GtXdropscore) lo->xdropbelowscore);
+    } else /* do not align over left sequence boundary */
     {
+      gt_seqabstract_reinit_encseq(sa_useq,encseq,repeatptr->pos1,0);
+      gt_seqabstract_reinit_encseq(sa_vseq,encseq,
+                                   repeatptr->pos1 + repeatptr->offset,0);
       gt_evalxdroparbitscoresleft(&lo->arbitscores,
-                               &xdropbest_left,
-                               &fronts,
-                               encseq,
-                               encseq,
-                               repeatptr->pos1,
-                               repeatptr->pos1 + repeatptr->offset,
-                               (int) repeatptr->pos1,
-                               (int) (repeatptr->pos1 + repeatptr->offset),
-                               (GtXdropscore) lo->xdropbelowscore);
+                                  &xdropbest_left,
+                                  &fronts,
+                                  sa_useq,
+                                  sa_vseq,
+                                  repeatptr->pos1,
+                                  repeatptr->pos1 + repeatptr->offset,
+                                  (GtXdropscore) lo->xdropbelowscore);
     }
     GT_FREEARRAY (&fronts, GtXdropfrontvalue);
 
@@ -1068,39 +1055,38 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
                                 repeatptr->len))
     {
-      gt_evalxdroparbitscoresright (&lo->arbitscores,
-                                 &xdropbest_right,
-                                 &fronts,
-                                 encseq,
-                                 encseq,
-                                 repeatptr->pos1 + repeatptr->len,
-                                 repeatptr->pos1 + repeatptr->offset +
-                                 repeatptr->len,
-                                 (int) alilen,
-                                 (int) alilen,
-                                 lo->xdropbelowscore);
-    }
-    else /* do not align over right sequence boundary */
-    {
+      gt_seqabstract_reinit_encseq(sa_useq,encseq,alilen,0);
+      gt_seqabstract_reinit_encseq(sa_vseq,encseq,alilen,0);
       gt_evalxdroparbitscoresright(&lo->arbitscores,
-                                &xdropbest_right,
-                                &fronts,
-                                encseq,
-                                encseq,
-                                repeatptr->pos1 + repeatptr->len,
-                                repeatptr->pos1 + repeatptr->offset +
-                                repeatptr->len,
-                                (int) (totallength -
-                                (repeatptr->pos1 + repeatptr->len)),
-                                (int) (totallength -
-                                (repeatptr->pos1 + repeatptr->offset +
-                                 repeatptr->len)),
-                                lo->xdropbelowscore);
+                                   &xdropbest_right,
+                                   &fronts,
+                                   sa_useq,
+                                   sa_vseq,
+                                   repeatptr->pos1 + repeatptr->len,
+                                   repeatptr->pos1 + repeatptr->offset +
+                                   repeatptr->len,
+                                   lo->xdropbelowscore);
+    } else /* do not align over right sequence boundary */
+    {
+      gt_seqabstract_reinit_encseq(sa_useq,encseq,totallength -
+                                                  (repeatptr->pos1 +
+                                                   repeatptr->len),0);
+      gt_seqabstract_reinit_encseq(sa_vseq,encseq,totallength -
+                                           (repeatptr->pos1 +
+                                            repeatptr->offset +
+                                            repeatptr->len),0);
+      gt_evalxdroparbitscoresright(&lo->arbitscores,
+                                   &xdropbest_right,
+                                   &fronts,
+                                   sa_useq,
+                                   sa_vseq,
+                                   repeatptr->pos1 + repeatptr->len,
+                                   repeatptr->pos1 + repeatptr->offset +
+                                   repeatptr->len,
+                                   lo->xdropbelowscore);
     }
     GT_FREEARRAY (&fronts, GtXdropfrontvalue);
-
     GT_GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);
-
     boundaries->contignumber = repeatptr->contignumber;
     boundaries->leftLTR_5 = (unsigned long) 0;
     boundaries->leftLTR_3 = (unsigned long) 0;
@@ -1140,8 +1126,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
           (boundaries->motif_near_tsd && boundaries->motif_far_tsd)))
       {
         /* predicted as full LTR-pair, keep it */
-      }
-      else
+      } else
       {
         /* if search for motif only (and not TSD) */
         if (lo->minlengthTSD <= 1U &&
@@ -1149,8 +1134,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
             boundaries->motif_far_tsd)
         {
           /* predicted as full LTR-pair, keep it */
-        }
-        else
+        } else
         {
           /* delete this LTR-pair candidate */
           arrayLTRboundaries->nextfreeLTRboundaries--;
@@ -1186,13 +1170,13 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                             boundaries->leftLTR_3);
     gt_encseq_extract_encoded(encseq, vseq, boundaries->rightLTR_5,
                                             boundaries->rightLTR_3);
-    gt_seqabstract_reinit_ptr(guseq,useq,ulen,0);
-    gt_seqabstract_reinit_ptr(gvseq,vseq,vlen,0);
+    gt_seqabstract_reinit_ptr(sa_useq,useq,ulen,0);
+    gt_seqabstract_reinit_ptr(sa_vseq,vseq,vlen,0);
 #else
-    gt_seqabstract_reinit_encseq(guseq,encseq,ulen,boundaries->leftLTR_5);
-    gt_seqabstract_reinit_encseq(gvseq,encseq,vlen,boundaries->rightLTR_5);
+    gt_seqabstract_reinit_encseq(sa_useq,encseq,ulen,boundaries->leftLTR_5);
+    gt_seqabstract_reinit_encseq(sa_vseq,encseq,vlen,boundaries->rightLTR_5);
 #endif
-    edist = greedyunitedist(guseq,gvseq);
+    edist = greedyunitedist(sa_useq,sa_vseq);
 
     /* determine similarity */
     boundaries->similarity = 100.0 * (1 - (((double) edist)/(MAX(ulen,vlen))));
@@ -1208,8 +1192,8 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   FREESPACE(useq);
   FREESPACE(vseq);
 #endif
-  gt_seqabstract_delete(guseq);
-  gt_seqabstract_delete(gvseq);
+  gt_seqabstract_delete(sa_useq);
+  gt_seqabstract_delete(sa_vseq);
   return haserr ? -1 : 0;
 }
 
@@ -1306,15 +1290,13 @@ static void gt_removeoverlapswithlowersimilarity(
           /* delete both predictions */
           boundaries_i->skipped = true;
           boundaries_j->skipped = true;
-        }
-        else
+        } else
         {
           /* take prediction with higher similarity */
           if (boundaries_i->similarity >= boundaries_j->similarity)
           {
             boundaries_j->skipped = true;
-          }
-          else
+          } else
           {
             boundaries_i->skipped = true;
             break;
@@ -1394,20 +1376,25 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
       GtGenomeNode *rn;
       GtStr *seqid;
       seqnum = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
-      if (ltrh_stream->prevseqnum == GT_UNDEF_ULONG) {
+      if (ltrh_stream->prevseqnum == GT_UNDEF_ULONG)
+      {
         ltrh_stream->prevseqnum = seqnum;
-      } else {
-        while (ltrh_stream->prevseqnum == seqnum) {
+      } else
+      {
+        while (ltrh_stream->prevseqnum == seqnum)
+        {
           ltrh_stream->cur_elem_index++;
-          if (ltrh_stream->cur_elem_index >= ltrh_stream->numofboundaries) {
+          if (ltrh_stream->cur_elem_index >= ltrh_stream->numofboundaries)
+          {
             skip = true;
             break;
           }
-          seqnum =
-               ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
+          seqnum
+            = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
         }
       }
-      if (!skip) {
+      if (!skip)
+      {
         ltrh_stream->prevseqnum = seqnum;
         seqlength = gt_encseq_seqlength(ltrh_stream->encseq, seqnum);
         seqid = gt_str_new_cstr("seq");
@@ -1419,12 +1406,14 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
         gt_str_delete(seqid);
         *gn = rn;
         ltrh_stream->cur_elem_index++;
-      } else {
+      } else
+      {
         ltrh_stream->cur_elem_index = 0;
         ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_COMMENTS;
         *gn = NULL;
       }
-    } else {
+    } else
+    {
       ltrh_stream->cur_elem_index = 0;
       ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_COMMENTS;
       *gn = NULL;
@@ -1432,28 +1421,35 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
   }
 
   /* then stream out the comment nodes */
-  if (!had_err && ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_COMMENTS) {
+  if (!had_err && ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_COMMENTS)
+  {
     bool skip = false;
-    if (ltrh_stream->cur_elem_index < ltrh_stream->numofboundaries) {
+    if (ltrh_stream->cur_elem_index < ltrh_stream->numofboundaries)
+    {
       const char *desc;
       char buf[BUFSIZ];
       unsigned long desclen, seqnum;
       GtGenomeNode *cn;
       seqnum = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
-      if (ltrh_stream->prevseqnum == GT_UNDEF_ULONG) {
+      if (ltrh_stream->prevseqnum == GT_UNDEF_ULONG)
+      {
         ltrh_stream->prevseqnum = seqnum;
-      } else {
-        while (ltrh_stream->prevseqnum == seqnum) {
+      } else
+      {
+        while (ltrh_stream->prevseqnum == seqnum)
+        {
           ltrh_stream->cur_elem_index++;
-          if (ltrh_stream->cur_elem_index >= ltrh_stream->numofboundaries) {
+          if (ltrh_stream->cur_elem_index >= ltrh_stream->numofboundaries)
+          {
             skip = true;
             break;
           }
-          seqnum =
-               ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
+          seqnum
+            = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
         }
       }
-      if (!skip) {
+      if (!skip)
+      {
         ltrh_stream->prevseqnum = seqnum;
         desc = gt_encseq_description(ltrh_stream->encseq, &desclen, seqnum);
         (void) strncpy(buf, desc, (size_t) (desclen * sizeof (char)));
@@ -1461,12 +1457,14 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
         cn = gt_comment_node_new(buf);
         *gn = cn;
         ltrh_stream->cur_elem_index++;
-      } else {
+      } else
+      {
         ltrh_stream->cur_elem_index = 0;
         ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_FEATURES;
         *gn = NULL;
       }
-    } else {
+    } else
+    {
       ltrh_stream->cur_elem_index = 0;
       ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_FEATURES;
       *gn = NULL;
@@ -1474,8 +1472,10 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
   }
 
   /* finally, stream out the features */
-  if (!had_err && ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_FEATURES) {
-    if (ltrh_stream->cur_elem_index <  ltrh_stream->numofboundaries) {
+  if (!had_err && ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_FEATURES)
+  {
+    if (ltrh_stream->cur_elem_index <  ltrh_stream->numofboundaries)
+    {
       GtStr *seqid, *source;
       char buf[BUFSIZ];
       GtGenomeNode *node, *parent;
@@ -1503,7 +1503,8 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
       gt_feature_node_set_source((GtFeatureNode*) node, source);
       *gn = node;
       parent = node;
-      if (ltrh_stream->motif->allowedmismatches < 4U) {
+      if (ltrh_stream->motif->allowedmismatches < 4U)
+      {
         node = gt_feature_node_new(seqid,
                                    gt_ft_inverted_repeat,
                                    elem->leftLTR_5 - seqstartpos + 1
@@ -1546,7 +1547,8 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
                                   (GtFeatureNode*) node);
       }
       /* target_site_duplication */
-      if (ltrh_stream->minlengthTSD > 1U) {
+      if (ltrh_stream->minlengthTSD > 1U)
+      {
         node = gt_feature_node_new(seqid,
                                    gt_ft_target_site_duplication,
                                    elem->leftLTR_5 - seqstartpos + 1
@@ -1614,7 +1616,8 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
       gt_str_delete(seqid);
       gt_str_delete(source);
       ltrh_stream->cur_elem_index++;
-    } else {
+    } else
+    {
       *gn = NULL;
     }
   }
@@ -1634,7 +1637,8 @@ static void gt_ltrharvest_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_ltrharvest_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
-  if (!nsc) {
+  if (!nsc)
+  {
     nsc = gt_node_stream_class_new(sizeof (GtLTRharvestStream),
                                    gt_ltrharvest_stream_free,
                                    gt_ltrharvest_stream_next);
@@ -1718,7 +1722,8 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
 
   /* encode motif according to encseq alphabet */
   had_err = gt_ltr_four_char_motif_encode(motif, ltrh_stream->encseq, err);
-  if (had_err) {
+  if (had_err)
+  {
     gt_node_stream_delete(ns);
     return NULL;
   }

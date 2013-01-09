@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2007 David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -49,8 +50,8 @@ typedef struct
  */
 int gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
                        int distance,
-                       const unsigned char *useq,
-                       const unsigned char *vseq,
+                       const unsigned char *useqptr,
+                       const unsigned char *vseqptr,
                        int ulen,
                        int vlen)
 {
@@ -60,11 +61,11 @@ int gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
 
   printf("frontvalues:\n");
   printf("        ");
-  printf("%-3c ", vseq[0]);
+  printf("%-3c ", vseqptr[0]);
   /* print vseq */
   for (i = 1; i < vlen; i++)
   {
-    printf("%-3c ", vseq[i]);
+    printf("%-3c ", vseqptr[i]);
   }
   for (i = 0; i <= ulen; i++)
   {
@@ -72,7 +73,7 @@ int gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
     /* print useq */
     if (i != 0)
     {
-      printf("%-3c ", useq[i - 1]);
+      printf("%-3c ", useqptr[i - 1]);
     } else
     {
       printf("    ");
@@ -212,13 +213,13 @@ static void gt_calculateallowedMININFINITYINTgenerations(
 #define GT_XDROP_COMPARESYMBOLSSEP(I,J)\
         {\
           GtUchar a, b;\
-          GT_XDROP_USEQ(a,I);\
+          a = GT_XDROP_SEQACC(useq,uoffset,I);\
           if (a == (GtUchar) SEPARATOR)\
           {\
             ulen = I;\
             break;\
           }\
-          GT_XDROP_VSEQ(b,J);\
+          b = GT_XDROP_SEQACC(vseq,voffset,J);\
           if (b == (GtUchar) SEPARATOR)\
           {\
             vlen = J;\
@@ -231,32 +232,23 @@ static void gt_calculateallowedMININFINITYINTgenerations(
         }
 
 #define GT_XDROP_EVALXDROPARBITSCORES GT_XDROP_EVALXDROPARBITSCORESRIGHT
-#define GT_XDROP_USEQ(VAR,I) VAR = gt_encseq_get_encoded_char(str_useq,\
-                                                              useq + (I),\
-                                                           GT_READMODE_FORWARD)
-#define GT_XDROP_VSEQ(VAR,J) VAR = gt_encseq_get_encoded_char(str_vseq,\
-                                                              vseq + (J),\
-                                                           GT_READMODE_FORWARD)
+#define GT_XDROP_SEQACC(SEQ,OFF,IDX)\
+        gt_seqabstract_encoded_char(SEQ,(OFF)+(IDX))
 
 #include "xdrop-inc.gen"
 
 #undef GT_XDROP_EVALXDROPARBITSCORES
-#undef GT_XDROP_USEQ
-#undef GT_XDROP_VSEQ
+#undef GT_XDROP_SEQACC
 
 /*
   Now we redefine the macros to compute the left to right
   we use macros to abstract from the differences. The
-  following 4 macros are defined for the right to left extension beginning
+  following 3 macros are defined for the right to left extension beginning
   with the last character of the strings under consideration.
 */
 
 #define GT_XDROP_EVALXDROPARBITSCORES GT_XDROP_EVALXDROPARBITSCORESLEFT
-#define GT_XDROP_USEQ(VAR,I) VAR = gt_encseq_get_encoded_char(str_useq,\
-                                                     useq - 1UL - (I),\
-                                                     GT_READMODE_FORWARD)
-#define GT_XDROP_VSEQ(VAR,J) VAR = gt_encseq_get_encoded_char(str_vseq,\
-                                                     vseq - 1UL - (J),\
-                                                     GT_READMODE_FORWARD)
+#define GT_XDROP_SEQACC(SEQ,OFF,IDX)\
+        gt_seqabstract_encoded_char(SEQ,(OFF) - 1UL - (IDX))
 
 #include "xdrop-inc.gen"
