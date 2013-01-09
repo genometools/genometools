@@ -128,7 +128,7 @@ end
 Name "gt paircmp"
 Keywords "gt_paircmp"
 Test do
-  run_test "#{$bin}gt dev paircmp -a ac 11" # mv to idx 
+  run_test "#{$bin}gt dev paircmp -a ac 11" # mv to idx
 end
 
 Name "gt patternmatch"
@@ -156,6 +156,14 @@ Test do
 end
 
 if $gttestdata then
+  Name "gt repfind extend at1MB"
+  Keywords "gt_repfind extend"
+  Test do
+    run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB " +
+             "-indexname sfx -dna -tis -suf -lcp"
+    run_test "#{$bin}gt repfind -l 20 -extend -ii sfx"
+    run "diff #{last_stdout} #{$testdata}repfind-20-extend.txt"
+  end
   repfindtestfiles.each do |reffile|
     Name "gt repfind #{reffile}"
     Keywords "gt_repfind gttestdata"
