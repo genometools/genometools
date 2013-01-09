@@ -31,7 +31,7 @@
 #include "match/test-maxpairs.pr"
 #include "match/querymatch.h"
 #include "match/greedyedist.h"
-#include "ltr/ltr_xdrop.h"
+#include "match/xdrop.h"
 #include "tools/gt_maxpairs.h"
 
 typedef struct

@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LTR_XDROP_H
-#define LTR_XDROP_H
+#ifndef XDROP_H
+#define XDROP_H
 
 #include "core/arraydef.h"
 #include "core/encseq.h"

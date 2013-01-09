@@ -18,9 +18,9 @@
 #ifndef LTRHARVEST_STREAM_H
 #define LTRHARVEST_STREAM_H
 
+#include "match/xdrop.h"
 #include "extended/node_stream_api.h"
 #include "ltr/ltr_four_char_motif.h"
-#include "ltr/ltr_xdrop.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct GtLTRharvestStream GtLTRharvestStream;

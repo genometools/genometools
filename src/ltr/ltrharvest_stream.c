@@ -38,8 +38,8 @@
 #include "match/esa-mmsearch.h"
 #include "match/greedyedist.h"
 #include "match/spacedef.h"
+#include "match/xdrop.h"
 #include "ltr/ltrharvest_stream.h"
-#include "ltr/ltr_xdrop.h"
 
 #define GT_LTRHARVEST_NAME "LTRharvest"
 

@@ -19,7 +19,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "ltr_xdrop.h"
+#include "xdrop.h"
 
 typedef struct
 {
@@ -238,7 +238,7 @@ static void gt_calculateallowedMININFINITYINTgenerations(
                                                               vseq + (J),\
                                                            GT_READMODE_FORWARD)
 
-#include "myxdrop.gen"
+#include "xdrop-inc.gen"
 
 #undef GT_XDROP_EVALXDROPARBITSCORES
 #undef GT_XDROP_USEQ
@@ -259,4 +259,4 @@ static void gt_calculateallowedMININFINITYINTgenerations(
                                                      vseq - 1UL - (J),\
                                                      GT_READMODE_FORWARD)
 
-#include "myxdrop.gen"
+#include "xdrop-inc.gen"
