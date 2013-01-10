@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012-2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2012-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +30,7 @@ typedef struct GtPopcountTab GtPopcountTab;
    <blocksize> bit width. */
 GtPopcountTab* gt_popcount_tab_new(unsigned int blocksize);
 
-/* Returns the class (i.e. the popcount) of a given <block>. value of <block>
+/* Returns the class (i.e. the popcount) of a given <block>. Value of <block>
    must be smaller than 2^<blocksize> */
 unsigned int   gt_popcount_tab_class(unsigned long block,
                                      unsigned int blocksize);
@@ -48,20 +48,25 @@ unsigned long  gt_popcount_tab_get(GtPopcountTab *popcount_tab,
                                    unsigned long i);
 
 /* Return rank of 1s in <i>-th block given for <popcount_c> bits set
-   upto and including <pos>, which is a relative bit position within that block.
-   Note that <pos> <= blocksize of <popcount_tab>. */
+   up to and including <pos>, which is a relative bit position within that
+   block. Note that <pos> <= blocksize of <popcount_tab>. */
 unsigned int   gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
                                       unsigned int popcount_c,
                                       unsigned long i,
                                       unsigned int pos);
 
 /* Return rank of 0s in <i>-th block given for <popcount_c> bits set
-   upto and including <pos>, which is a relative bit position within that block.
-   Note that <pos> <= blocksize of <popcount_tab>. */
+   up to and including <pos>, which is a relative bit position within that
+   block.  Note that <pos> <= blocksize of <popcount_tab>. */
 unsigned int   gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
                                       unsigned int popcount_c,
                                       unsigned long i,
                                       unsigned int pos);
+
+/* Return the offset of a <block> within its class. Note that
+   <block> < 2^blocksize of <popcount_tab> */
+unsigned long  gt_popcount_tab_get_offset_for_block(GtPopcountTab *popcount_tab,
+                                                    unsigned long block);
 
 /* Return size of a <GtPopcountTab> with <blocksize> in bytes. */
 size_t         gt_popcount_tab_calculate_size(unsigned int blocksize);

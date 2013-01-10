@@ -279,7 +279,7 @@ function getColorNo(tr) {
 
 var colorsFreq = [0, 0, 0];
 /**
- * return one of given possible colors (curently least used one)
+ * return one of given possible colors (currently least used one)
  * example: chooseColorNoFrom(2, 3) returns 2 or 3
  *
  * @param {Number[]} arguments: one or more numbers
