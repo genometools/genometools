@@ -149,15 +149,15 @@ GtNodeStream* gt_gff3_in_stream_new_unsorted(int num_of_files,
   GtNodeStream *ns = gt_node_stream_create(gt_gff3_in_stream_class(), false);
   GtGFF3InStream *is = gff3_in_stream_cast(ns);
   is->fix_region_stream = NULL;
-  is->gff3_in_stream_plain = gt_gff3_in_stream_plain_new_unsorted(num_of_files,
-                                                                  filenames);
+  is->last_stream = is->gff3_in_stream_plain =
+                  gt_gff3_in_stream_plain_new_unsorted(num_of_files, filenames);
   gt_gff3_in_stream_plain_check_region_boundaries(
                                (GtGFF3InStreamPlain*) is->gff3_in_stream_plain);
-  is->add_ids_stream = gt_add_ids_stream_new(is->gff3_in_stream_plain);
-  is->cds_check_stream = gt_cds_check_stream_new(is->add_ids_stream);
+  is->last_stream = is->add_ids_stream = gt_add_ids_stream_new(is->last_stream);
   is->last_stream = is->multi_sanitize_stream =
-              gt_visitor_stream_new(is->cds_check_stream,
-                                    gt_multi_sanitizer_visitor_new());
+       gt_visitor_stream_new(is->last_stream, gt_multi_sanitizer_visitor_new());
+  is->last_stream = is->cds_check_stream =
+                                       gt_cds_check_stream_new(is->last_stream);
   return ns;
 }
 
@@ -166,13 +166,14 @@ GtNodeStream* gt_gff3_in_stream_new_sorted(const char *filename)
   GtNodeStream *ns = gt_node_stream_create(gt_gff3_in_stream_class(), true);
   GtGFF3InStream *is = gff3_in_stream_cast(ns);
   is->fix_region_stream = NULL;
-  is->gff3_in_stream_plain = gt_gff3_in_stream_plain_new_sorted(filename);
-  is->add_ids_stream = gt_add_ids_stream_new(is->gff3_in_stream_plain);
+  is->last_stream = is->gff3_in_stream_plain =
+                                   gt_gff3_in_stream_plain_new_sorted(filename);
   gt_gff3_in_stream_plain_check_region_boundaries(
                                (GtGFF3InStreamPlain*) is->gff3_in_stream_plain);
-  is->cds_check_stream = gt_cds_check_stream_new(is->add_ids_stream);
+  is->last_stream = is->add_ids_stream = gt_add_ids_stream_new(is->last_stream);
   is->last_stream = is->multi_sanitize_stream =
-              gt_visitor_stream_new(is->cds_check_stream,
-                                    gt_multi_sanitizer_visitor_new());
+       gt_visitor_stream_new(is->last_stream, gt_multi_sanitizer_visitor_new());
+  is->last_stream = is->cds_check_stream =
+                                       gt_cds_check_stream_new(is->last_stream);
   return ns;
 }
