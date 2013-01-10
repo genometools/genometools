@@ -28,7 +28,18 @@ typedef struct GtPopcountTab GtPopcountTab;
 
 /* Returns <GtPopcountTab> object with tables for unsigned values of
    <blocksize> bit width. */
-GtPopcountTab* gt_popcount_tab_new(unsigned int blocksize) ;
+GtPopcountTab* gt_popcount_tab_new(unsigned int blocksize);
+
+/* Returns the class (i.e. the popcount) of a given <block>. value of <block>
+   must be smaller than 2^<blocksize> */
+unsigned int   gt_popcount_tab_class(unsigned long block,
+                                     unsigned int blocksize);
+
+/* Returns the bits needed to store the offsets for a given <class> (i.e.
+   popcount) and <blocksize>. <class> <= <blocksize> and might overflow for
+   large values, (<blocksize> choose <class>) */
+unsigned int   gt_popcount_tab_offset_bits(unsigned int blocksize,
+                                           unsigned int class);
 
 /* Return the <i>-th value from <popcount_tab> with <popcount_c> bits set, <i>
    has to be in range 0..(blocksize choose popcount). */

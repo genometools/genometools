@@ -23,6 +23,7 @@
 #include "core/intbits.h"
 #include "core/log_api.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "extended/popcount_tab.h"
 
@@ -233,7 +234,7 @@ size_t gt_popcount_tab_calculate_size(unsigned int blocksize) {
 static inline unsigned int gt_popcount_tab_popcount(unsigned long val)
 {
 #ifdef __SSE4_2__
-  return __builtin_popcountll(val);
+  return __builtin_popcountl(val);
 #else
   uint64_t x = (uint64_t) val;
 #ifdef POPCOUNT_TL
@@ -254,6 +255,28 @@ static inline unsigned int gt_popcount_tab_popcount(unsigned long val)
   x = (x + (x >> 4)) & (uint64_t) 0x0f0f0f0f0f0f0f0fULL;
   return (unsigned) ((uint64_t) 0x0101010101010101ULL * x >> 56);
 #endif
+#endif
+}
+
+unsigned int gt_popcount_tab_class(unsigned long block,
+                                   unsigned int blocksize)
+{
+  gt_assert(block >> blocksize == 0);
+  return gt_popcount_tab_popcount(block);
+}
+
+unsigned int gt_popcount_tab_offset_bits(unsigned int blocksize,
+                                         unsigned int class)
+{
+  gt_assert(class <= blocksize);
+#ifdef __SSE4__
+  return (unsigned int) (sizeof (unsigned long) * CHAR_BIT -
+      __builtin_clzl(gt_combinatorics_binomial_ln((unsigned long) blocksize,
+                                                  (unsigned long) class)));
+#else
+  return gt_determinebitspervalue(
+      gt_combinatorics_binomial_ln((unsigned long) blocksize,
+                                   (unsigned long) class));
 #endif
 }
 
