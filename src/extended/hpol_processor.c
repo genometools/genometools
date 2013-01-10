@@ -620,7 +620,7 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   unsigned long left, right, s_hlen = 0, q_sum = 0, s_free = 0;
   char *s, *q;
   bool edited = false;
-  double q_ave = 0;
+  double q_ave = 0.0;
   left = gt_aligned_segment_offset_for_refpos(as, r_hstart);
   right = gt_aligned_segment_offset_for_refpos(as, r_hstart + r_hlen);
   if (left == GT_UNDEF_ULONG || left == 0 ||
@@ -663,6 +663,7 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   }
 #endif
   /* do the editing if necessary and possible */
+  gt_assert(q_sum > GT_HPOL_PROCESSOR_PHREDOFFSET * s_hlen);
   q_ave = (double)(q_sum - GT_HPOL_PROCESSOR_PHREDOFFSET * s_hlen)
     / (double)s_hlen;
   if (s_hlen < r_hlen)
@@ -670,7 +671,7 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
     if (s_free > 0)
     {
       unsigned long hlen_diff = r_hlen - s_hlen;
-      if (hlen_diff < clenmax &&
+      if (hlen_diff <= clenmax &&
           (q_ave <= (double)qmax) &&
           (s_free >= hlen_diff || allow_partial) &&
           (!gt_aligned_segment_seq_edited(as) || allow_multiple))
@@ -691,7 +692,7 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   else if (s_hlen > r_hlen)
   {
     unsigned long hlen_diff = s_hlen - r_hlen;
-    if (hlen_diff < clenmax &&
+    if (hlen_diff <= clenmax &&
        (q_ave <= (double)qmax) &&
        (!gt_aligned_segment_seq_edited(as) || allow_multiple))
     {
