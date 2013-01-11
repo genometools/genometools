@@ -167,5 +167,5 @@ do
   sais ${rfc}
   mkesa ${rfc}
   afconstruct ${rfc}
-  rm -f sfx-idx.* mkesa-idx.*
+  rm -f sfx-id.* mkesa-idx.*
 done
