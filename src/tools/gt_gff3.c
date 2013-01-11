@@ -280,7 +280,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 
   /* create load stream (if necessary) */
   if (!had_err && arguments->load) {
-    load_stream = gt_sort_stream_new(last_stream);
+    load_stream = gt_load_stream_new(last_stream);
     last_stream = load_stream;
   }
 
