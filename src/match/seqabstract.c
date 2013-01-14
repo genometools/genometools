@@ -34,73 +34,73 @@ struct GtSeqabstract
 
 GtSeqabstract *gt_seqabstract_new_empty(void)
 {
-  GtSeqabstract *greedyedistseq = gt_malloc(sizeof *greedyedistseq);
+  GtSeqabstract *sa = gt_malloc(sizeof *sa);
 
-  greedyedistseq->isptr = true;
-  greedyedistseq->len = 0;
-  greedyedistseq->offset = 0;
-  greedyedistseq->seq.ptr = NULL;
-  return greedyedistseq;
+  sa->isptr = true;
+  sa->len = 0;
+  sa->offset = 0;
+  sa->seq.ptr = NULL;
+  return sa;
 }
 
-void gt_seqabstract_reinit_ptr(GtSeqabstract *greedyedistseq,
+void gt_seqabstract_reinit_ptr(GtSeqabstract *sa,
                                    const GtUchar *ptr,
                                    unsigned long len,
                                    unsigned long offset)
 {
-  greedyedistseq->isptr = true;
-  greedyedistseq->len = len;
-  greedyedistseq->offset = offset;
-  greedyedistseq->seq.ptr = ptr + offset;
+  sa->isptr = true;
+  sa->len = len;
+  sa->offset = offset;
+  sa->seq.ptr = ptr + offset;
 }
 
 GtSeqabstract *gt_seqabstract_new_ptr(const GtUchar *ptr,
                                              unsigned long len,
                                              unsigned long offset)
 {
-  GtSeqabstract *greedyedistseq = gt_malloc(sizeof *greedyedistseq);
+  GtSeqabstract *sa = gt_malloc(sizeof *sa);
 
-  gt_seqabstract_reinit_ptr(greedyedistseq,ptr,len,offset);
-  return greedyedistseq;
+  gt_seqabstract_reinit_ptr(sa,ptr,len,offset);
+  return sa;
 }
 
-void gt_seqabstract_reinit_encseq(GtSeqabstract *greedyedistseq,
+void gt_seqabstract_reinit_encseq(GtSeqabstract *sa,
                                       const GtEncseq *encseq,
                                       unsigned long len,
                                       unsigned long offset)
 {
-  greedyedistseq->isptr = false;
-  greedyedistseq->len = len;
-  greedyedistseq->offset = offset;
-  greedyedistseq->seq.encseq = encseq;
+  sa->isptr = false;
+  sa->len = len;
+  sa->offset = offset;
+  sa->seq.encseq = encseq;
 }
 
 GtSeqabstract *gt_seqabstract_new_encseq(const GtEncseq *encseq,
                                                 unsigned long len,
                                                 unsigned long offset)
 {
-  GtSeqabstract *greedyedistseq = gt_malloc(sizeof *greedyedistseq);
+  GtSeqabstract *sa = gt_malloc(sizeof *sa);
 
-  gt_seqabstract_reinit_encseq(greedyedistseq, encseq, len, offset);
-  return greedyedistseq;
+  gt_seqabstract_reinit_encseq(sa, encseq, len, offset);
+  return sa;
 }
 
-unsigned long gt_seqabstract_length_get(const GtSeqabstract *greedyedistseq)
+unsigned long gt_seqabstract_length_get(const GtSeqabstract *sa)
 {
-  return greedyedistseq->len;
+  return sa->len;
 }
 
-void gt_seqabstract_delete(GtSeqabstract *greedyedistseq)
+void gt_seqabstract_delete(GtSeqabstract *sa)
 {
-  gt_free(greedyedistseq);
+  gt_free(sa);
 }
 
-GtUchar gt_seqabstract_encoded_char(const GtSeqabstract *greedyedistseq,
+GtUchar gt_seqabstract_encoded_char(const GtSeqabstract *sa,
                                     unsigned long idx)
 {
-  return greedyedistseq->isptr
-           ? greedyedistseq->seq.ptr[idx]
-           : gt_encseq_get_encoded_char(greedyedistseq->seq.encseq,
-                                        greedyedistseq->offset + idx,
+  return sa->isptr
+           ? sa->seq.ptr[idx]
+           : gt_encseq_get_encoded_char(sa->seq.encseq,
+                                        sa->offset + idx,
                                         GT_READMODE_FORWARD);
 }

@@ -23,31 +23,31 @@
 
 typedef struct GtSeqabstract GtSeqabstract;
 
-GtSeqabstract *gt_seqabstract_new_empty(void);
+GtSeqabstract* gt_seqabstract_new_empty(void);
 
-void gt_seqabstract_reinit_ptr(GtSeqabstract *greedyedistseq,
-                                   const GtUchar *ptr,
-                                   unsigned long len,
-                                   unsigned long offset);
-
-GtSeqabstract *gt_seqabstract_new_ptr(const GtUchar *ptr,
+GtSeqabstract* gt_seqabstract_new_ptr(const GtUchar *ptr,
                                       unsigned long len,
                                       unsigned long offset);
 
-void gt_seqabstract_reinit_encseq(GtSeqabstract *greedyedistseq,
-                                  const GtEncseq *encseq,
-                                  unsigned long len,
-                                  unsigned long offset);
-
-GtSeqabstract *gt_seqabstract_new_encseq(const GtEncseq *encseq,
+GtSeqabstract* gt_seqabstract_new_encseq(const GtEncseq *encseq,
                                          unsigned long len,
                                          unsigned long offset);
 
-void gt_seqabstract_delete(GtSeqabstract *greedyedistseq);
+void           gt_seqabstract_reinit_ptr(GtSeqabstract *sa,
+                                         const GtUchar *ptr,
+                                         unsigned long len,
+                                         unsigned long offset);
 
-unsigned long gt_seqabstract_length_get(const GtSeqabstract *greedyedistseq);
+void           gt_seqabstract_reinit_encseq(GtSeqabstract *sa,
+                                            const GtEncseq *encseq,
+                                            unsigned long len,
+                                            unsigned long offset);
 
-GtUchar gt_seqabstract_encoded_char(const GtSeqabstract *greedyedistseq,
-                                    unsigned long idx);
+unsigned long  gt_seqabstract_length_get(const GtSeqabstract *sa);
+
+GtUchar        gt_seqabstract_encoded_char(const GtSeqabstract *sa,
+                                          unsigned long idx);
+
+void           gt_seqabstract_delete(GtSeqabstract *sa);
 
 #endif
