@@ -97,7 +97,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
                                          GtError *err)
 {
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
-  int score;
+  GtXdropscore score;
   unsigned long dbstart, dblen, querystart, queryseqnum, querylen,
                 queryseqstartpos;
   const unsigned long totallength = gt_encseq_total_length(encseq);
@@ -154,7 +154,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
   dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
   querylen = len + xdropmatchinfo->best_left.jvalue
                  + xdropmatchinfo->best_right.jvalue,
-  score = (int) len * xdropmatchinfo->arbitscores.mat +
+  score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
           xdropmatchinfo->best_left.score +
           xdropmatchinfo->best_right.score;
   gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
@@ -407,7 +407,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   xdropmatchinfo.arbitscores.ins = -3;
   xdropmatchinfo.arbitscores.del = -3;
   xdropmatchinfo.arbitscores.gcd = 0;
-  xdropmatchinfo.belowscore = 5;
+  xdropmatchinfo.belowscore = 5L;
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (parsed_args < argc)
   {

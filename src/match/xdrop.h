@@ -32,7 +32,7 @@ typedef struct
 
 typedef struct
 {
-  int dptabrow;
+  long dptabrow;
   unsigned char dptabdirection; /* one of the bits REPLACEMENTBIT,
                                                    DELETIONBIT,
                                                    INSERTIONBIT */
@@ -40,14 +40,14 @@ typedef struct
 
 GT_DECLAREARRAYSTRUCT(GtXdropfrontvalue);
 
+/* This is the type for the xdrop scores. */
+typedef long GtXdropscore;
+
 typedef struct
 {
-  unsigned int ivalue, jvalue;
-  int score;
+  unsigned long ivalue, jvalue;
+  GtXdropscore score;
 } GtXdropbest;
-
-/* This is the type for the xdrop scores. */
-typedef int GtXdropscore;
 
 GT_DECLAREARRAYSTRUCT(GtXdropscore);
 

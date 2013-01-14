@@ -31,7 +31,7 @@ struct Querymatch
                  querystart,
                  querytotallength,
                  edist;
-   int score;
+   long score;
    bool selfmatch;
    uint64_t queryseqnum;
    GtReadmode readmode;
@@ -46,7 +46,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         unsigned long dblen,
                         unsigned long dbstart,
                         GtReadmode readmode,
-                        int score,
+                        long score,
                         unsigned long edist,
                         bool selfmatch,
                         uint64_t queryseqnum,
@@ -171,7 +171,7 @@ int gt_querymatch_output(GT_UNUSED void *info,
         ? 100.0
         : 100.0 * (1.0 - querymatch->edist/
                          (double) MIN(querymatch->dblen,querymatch->querylen));
-      printf(" %d %lu %.2f\n",querymatch->score,querymatch->edist,similarity);
+      printf(" %ld %lu %.2f\n",querymatch->score,querymatch->edist,similarity);
     } else
     {
       printf("\n");

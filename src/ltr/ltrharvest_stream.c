@@ -171,8 +171,8 @@ static int gt_simpleexactselfmatchstore(void *info,
                                          unsigned long pos2,
                                          GT_UNUSED GtError *err)
 {
-  unsigned long tmp;
-  unsigned long contignumber = 0,
+  unsigned long tmp,
+                contignumber = 0,
                 seqnum1,
                 seqnum2;
   bool samecontig = false;
@@ -200,9 +200,6 @@ static int gt_simpleexactselfmatchstore(void *info,
   seqnum2 = gt_encseq_seqnum(repeatinfo->encseq,pos2);
   if (seqnum1 == seqnum2)
   {
-    gt_log_log("accepted:\n");
-    gt_log_log("pos1: %lu\n", pos1);
-    gt_log_log("pos2: %lu\n", pos2);
     samecontig = true;
     contignumber = seqnum1;
   }
@@ -217,12 +214,6 @@ static int gt_simpleexactselfmatchstore(void *info,
 
     GT_GETNEXTFREEINARRAY(nextfreerepeatptr, &repeatinfo->repeats,
                        Repeat, 10);
-    gt_log_log("maximal repeat pos1: %lu\n",
-               pos1);
-    gt_log_log("maximal repeat pos2: %lu\n",
-               pos2);
-    gt_log_log("len: %lu\n", len);
-    gt_log_log("seq number: %lu\n\n", contignumber);
     nextfreerepeatptr->pos1 = pos1;
     nextfreerepeatptr->offset = tmp;
     nextfreerepeatptr->len = len;
@@ -563,12 +554,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
        }
     }
   }
-  if (idx > endrightLTR && (!motif2))
-  {
-    gt_log_log("no right motif found.\n");
-  }
   *motifmismatchesrightLTR += motifmismatches_frombestmatch;
-
   if (motif1 && motif2)
   {
     boundaries->motif_near_tsd = true;
@@ -1067,7 +1053,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                    repeatptr->pos1 + repeatptr->len,
                                    repeatptr->pos1 + repeatptr->offset +
                                    repeatptr->len,
-                                   lo->xdropbelowscore);
+                                   (GtXdropscore) lo->xdropbelowscore);
     } else /* do not align over right sequence boundary */
     {
       gt_seqabstract_reinit_encseq(sa_useq,encseq,totallength -
@@ -1086,7 +1072,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                    repeatptr->pos1 + repeatptr->len,
                                    repeatptr->pos1 + repeatptr->offset +
                                    repeatptr->len,
-                                   lo->xdropbelowscore);
+                                   (GtXdropscore) lo->xdropbelowscore);
     }
     GT_FREEARRAY (&fronts, GtXdropfrontvalue);
     GT_GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);

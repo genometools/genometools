@@ -353,8 +353,8 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
   optionxdrop = gt_option_new_int_min("xdrop",
                         "specify xdropbelowscore for extension-alignment",
                         &arguments->xdropbelowscore,
-                        (int)5,
-                        (int)0);
+                        5,
+                        0);
   gt_option_parser_add_option(op, optionxdrop);
 
   /* -mat */
