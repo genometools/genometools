@@ -1711,6 +1711,15 @@ Return a new <code>GtDlist</code> object sorted according to <code>compar</code>
    <code>compar</code> equals <code>NULL</code>, no sorting is enforced.
 </p>
 <hr>
+<a name="gt_dlist_new_with_data"></a>
+
+<code>GtDlist*       gt_dlist_new_with_data(GtCompareWithData compar, void *data)</code>
+<p>
+Return a new <code>GtDlist</code> object sorted according to <code>compar</code> function. If
+   <code>compar</code> equals <code>NULL</code>, no sorting is enforced. Use <code>data</code> to supply
+   additional data to the comparator function.
+</p>
+<hr>
 <a name="gt_dlist_first"></a>
 
 <code>GtDlistelem*   gt_dlist_first(const GtDlist *dlist)</code>
@@ -8804,6 +8813,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_dlist_new"><code>gt_dlist_new</code></a><br>
 
+  <a href="#gt_dlist_new_with_data"><code>gt_dlist_new_with_data</code></a><br>
+
   <a href="#gt_dlist_remove"><code>gt_dlist_remove</code></a><br>
 
   <a href="#gt_dlist_size"><code>gt_dlist_size</code></a><br>
@@ -10089,7 +10100,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-12-13
+Last update: 2013-01-15
 </div>
 </div>
 <!-- Piwik -->
