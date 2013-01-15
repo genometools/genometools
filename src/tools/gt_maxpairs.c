@@ -406,7 +406,6 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   xdropmatchinfo.arbitscores.mis = -2;
   xdropmatchinfo.arbitscores.ins = -3;
   xdropmatchinfo.arbitscores.del = -3;
-  xdropmatchinfo.arbitscores.gcd = 0;
   xdropmatchinfo.belowscore = 5L;
   GT_INITARRAY (&xdropmatchinfo.fronts, GtXdropfrontvalue);
   GT_INITARRAY (&xdropmatchinfo.big_t, GtXdropscore);

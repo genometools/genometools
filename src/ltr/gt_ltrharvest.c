@@ -358,8 +358,6 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionxdrop);
 
   /* -mat */
-  arguments->arbitscores.gcd  = 1;      /* set only for initialization,
-                                        do not change! */
   optionmat = gt_option_new_int_min("mat",
                         "specify matchscore for extension-alignment",
                         &arguments->arbitscores.mat,

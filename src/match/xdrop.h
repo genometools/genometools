@@ -26,8 +26,7 @@ typedef struct
   int mat,
       mis,
       ins,
-      del,
-      gcd;  /* greatest common divisor */
+      del;
 } GtXdropArbitraryscores;
 
 typedef struct
@@ -63,7 +62,7 @@ GT_DECLAREARRAYSTRUCT(GtXdropscore);
 */
 
 void gt_evalxdroparbitscoresextend(bool forward,
-                                   GtXdropArbitraryscores *arbitscores,
+                                   const GtXdropArbitraryscores *arbitscores,
                                    GtXdropbest *xdropbest,
                                    GtArrayGtXdropfrontvalue *fronts,
                                    GtArrayGtXdropscore *big_t,

@@ -26,7 +26,8 @@ typedef struct
 {
   int mis,
       ins,
-      del;
+      del,
+      gcd;  /* greatest common divisor */
 } GtXdropArbitrarydistances;
 
 #define GT_XDROP_FRONTIDX(D,K)    ((unsigned long) (D) * (D) + (D) + (K))
@@ -144,7 +145,7 @@ static unsigned int gt_xdrop_gcd(unsigned int m, unsigned int n)
  The following function calculates the distance from the given scores.
  */
 static void gt_calculatedistancesfromscores(
-                                    GtXdropArbitraryscores *arbitscores,
+                                    const GtXdropArbitraryscores *arbitscores,
                                     GtXdropArbitrarydistances *arbitdistances)
 {
   int mat, mis, ins, del;
@@ -165,13 +166,13 @@ static void gt_calculatedistancesfromscores(
     del = arbitscores->del;
   }
   gt_assert(mat >= mis && mat/2 >= ins && mat/2 >= del);
-  arbitscores->gcd
+  arbitdistances->gcd
     = (int) gt_xdrop_gcd(gt_xdrop_gcd((unsigned int) (mat-mis),
                                       (unsigned int) (mat/2-ins)),
                          (unsigned int) (mat/2-del));
-  arbitdistances->mis = (mat - mis) / arbitscores->gcd;
-  arbitdistances->ins = (mat/2 - ins) / arbitscores->gcd;
-  arbitdistances->del = (mat/2 - del) / arbitscores->gcd;
+  arbitdistances->mis = (mat - mis) / arbitdistances->gcd;
+  arbitdistances->ins = (mat/2 - ins) / arbitdistances->gcd;
+  arbitdistances->del = (mat/2 - del) / arbitdistances->gcd;
 }
 
 /*
@@ -187,9 +188,9 @@ static int gt_calculateallowedMININFINITYINTgenerations(
 }
 
 #define GT_XDROP_EVAL(K,D)\
-        ((K) * arbitscores->mat/2 - (D) * arbitscores->gcd)
+        ((K) * arbitscores->mat/2 - (D) * arbitdistances.gcd)
 #define GT_XDROP_SETDBACK(XDROPBELOWSCORE)\
-        (XDROPBELOWSCORE + arbitscores->mat/2) / arbitscores->gcd + 1
+        (XDROPBELOWSCORE + arbitscores->mat/2) / arbitdistances.gcd + 1
 
 /*
  The following macro checks for wildcard and separator symbols.
@@ -221,7 +222,7 @@ static int gt_calculateallowedMININFINITYINTgenerations(
         }
 
 void gt_evalxdroparbitscoresextend(bool forward,
-                                   GtXdropArbitraryscores *arbitscores,
+                                   const GtXdropArbitraryscores *arbitscores,
                                    GtXdropbest *xdropbest,
                                    GtArrayGtXdropfrontvalue *fronts,
                                    GtArrayGtXdropscore *big_t,
