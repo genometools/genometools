@@ -224,6 +224,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
                                    GtXdropArbitraryscores *arbitscores,
                                    GtXdropbest *xdropbest,
                                    GtArrayGtXdropfrontvalue *fronts,
+                                   GtArrayGtXdropscore *big_t,
                                    const GtSeqabstract *useq,
                                    const GtSeqabstract *vseq,
                                    unsigned long uoffset,
@@ -251,7 +252,6 @@ void gt_evalxdroparbitscoresextend(bool forward,
   GtXdropfrontvalue tmpfront;
   GtXdropArbitrarydistances arbitdistances;
   GtXdropscore bigt_tmp;        /* best score T' seen already */
-  GtArrayGtXdropscore big_t;    /* array T[d] of best score T for each d */
   bool alwaysMININFINITYINT = true;
 
   ulen = (long) gt_seqabstract_length_get(useq);
@@ -261,7 +261,8 @@ void gt_evalxdroparbitscoresextend(bool forward,
   allowedMININFINITYINTgenerations
     = gt_calculateallowedMININFINITYINTgenerations(&arbitdistances);
   dback = GT_XDROP_SETDBACK(xdropbelowscore);
-  GT_INITARRAY (&big_t, GtXdropscore);
+  big_t->nextfreeGtXdropscore = 0;
+  fronts->nextfreeGtXdropfrontvalue = 0;
   integermax = MAX(ulen, vlen);
   integermin = -integermax;
   /* phase 0 */
@@ -281,7 +282,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
   xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + i, 0);
   gt_assert(i >= 0);
   xdropbest->ivalue = xdropbest->jvalue = (unsigned long) i;
-  GT_STOREINARRAY (&big_t, GtXdropscore, 10, bigt_tmp);
+  GT_STOREINARRAY (big_t, GtXdropscore, 10, bigt_tmp);
   /* phase d > 0 */
   while (lbound <= ubound)
   {
@@ -358,9 +359,9 @@ void gt_evalxdroparbitscoresextend(bool forward,
       {
         /* alignment score smaller than T - X */
         if (d_pre > 0 &&
-            big_t.spaceGtXdropscore != NULL &&
-            (GT_XDROP_EVAL (i + j, d) <
-             big_t.spaceGtXdropscore[d_pre] - xdropbelowscore))
+            big_t->spaceGtXdropscore != NULL &&
+            GT_XDROP_EVAL (i + j, d) <
+            big_t->spaceGtXdropscore[d_pre] - xdropbelowscore)
         {
           tmpfront.dptabrow = integermin;
         } else
@@ -416,7 +417,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
       currentMININFINITYINTgeneration = 0;
       alwaysMININFINITYINT = true;
     }
-    GT_STOREINARRAY (&big_t, GtXdropscore, 10, bigt_tmp);
+    GT_STOREINARRAY (big_t, GtXdropscore, 10, bigt_tmp);
     /* fill out of bounds values of integermin
        needed for gt_showfrontvalues function */
     for (k = -d; k < lbound - 1; k++)
@@ -483,5 +484,4 @@ void gt_evalxdroparbitscoresextend(bool forward,
     lbound = MAX(lbound, lboundtmp);
     ubound = MIN(ubound, uboundtmp);
   }
-  GT_FREEARRAY (&big_t, GtXdropscore);
 }

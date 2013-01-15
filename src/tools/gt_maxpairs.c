@@ -85,6 +85,7 @@ typedef struct
   GtXdropbest best_left;
   GtXdropbest best_right;
   GtArrayGtXdropfrontvalue fronts;
+  GtArrayGtXdropscore big_t;
   GtXdropscore belowscore;
   GtSeqabstract *useq, *vseq;
 } GtXdropmatchinfo;
@@ -108,35 +109,34 @@ static int gt_simplexdropselfmatchoutput(void *info,
     pos1 = pos2;
     pos2 = tmp;
   }
-  GT_INITARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
   gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,pos1,0);
   gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,pos2,0);
-  gt_evalxdroparbitscoresextend(false,&xdropmatchinfo->arbitscores,
-                              &xdropmatchinfo->best_left,
-                              &xdropmatchinfo->fronts,
-                              xdropmatchinfo->useq,
-                              xdropmatchinfo->vseq,
-                              pos1,
-                              pos2,
-                              xdropmatchinfo->belowscore);
-  GT_FREEARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
+  gt_evalxdroparbitscoresextend(false,
+                                &xdropmatchinfo->arbitscores,
+                                &xdropmatchinfo->best_left,
+                                &xdropmatchinfo->fronts,
+                                &xdropmatchinfo->big_t,
+                                xdropmatchinfo->useq,
+                                xdropmatchinfo->vseq,
+                                pos1,
+                                pos2,
+                                xdropmatchinfo->belowscore);
   if (pos1 + len < totallength && pos2 + len < totallength)
   {
-    GT_INITARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  encseq,totallength - (pos1 + len),0);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
                                  encseq,totallength - (pos2 + len),0);
     gt_evalxdroparbitscoresextend(true,
-                                 &xdropmatchinfo->arbitscores,
-                                 &xdropmatchinfo->best_right,
-                                 &xdropmatchinfo->fronts,
-                                 xdropmatchinfo->useq,
-                                 xdropmatchinfo->vseq,
-                                 pos1 + len,
-                                 pos2 + len,
-                                 xdropmatchinfo->belowscore);
-    GT_FREEARRAY (&xdropmatchinfo->fronts, GtXdropfrontvalue);
+                                  &xdropmatchinfo->arbitscores,
+                                  &xdropmatchinfo->best_right,
+                                  &xdropmatchinfo->fronts,
+                                  &xdropmatchinfo->big_t,
+                                  xdropmatchinfo->useq,
+                                  xdropmatchinfo->vseq,
+                                  pos1 + len,
+                                  pos2 + len,
+                                  xdropmatchinfo->belowscore);
   } else
   {
     xdropmatchinfo->best_right.ivalue = 0;
@@ -408,6 +408,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   xdropmatchinfo.arbitscores.del = -3;
   xdropmatchinfo.arbitscores.gcd = 0;
   xdropmatchinfo.belowscore = 5L;
+  GT_INITARRAY (&xdropmatchinfo.fronts, GtXdropfrontvalue);
+  GT_INITARRAY (&xdropmatchinfo.big_t, GtXdropscore);
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (parsed_args < argc)
   {
@@ -483,6 +485,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   gt_querymatch_delete(querymatchspaceptr);
   gt_seqabstract_delete(xdropmatchinfo.useq);
   gt_seqabstract_delete(xdropmatchinfo.vseq);
+  GT_FREEARRAY (&xdropmatchinfo.fronts, GtXdropfrontvalue);
+  GT_FREEARRAY (&xdropmatchinfo.big_t, GtXdropscore);
   gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
