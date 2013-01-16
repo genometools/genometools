@@ -53,7 +53,7 @@ void gt_bool_matrix_set(GtBoolMatrix *boolmatrix, unsigned long firstdim,
 
   gt_assert(boolmatrix);
   /* make sure first dimension is large enough */
-  if (firstdim <= gt_array_size(boolmatrix->dyn_bittabs)) {
+  if (firstdim >= gt_array_size(boolmatrix->dyn_bittabs)) {
     elems_to_add = firstdim - gt_array_size(boolmatrix->dyn_bittabs) + 1;
     for (i = 0; i < elems_to_add; i++) {
       bt = gt_dyn_bittab_new();
