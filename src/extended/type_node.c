@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "core/array_api.h"
+#include "core/hashmap_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/str_array_api.h"
@@ -27,6 +28,7 @@ struct GtTypeNode {
   GtStrArray *is_a_list,
              *part_of_list;
   GtArray *parents;
+  GtHashmap *cache;
 };
 
 GtTypeNode* gt_type_node_new(const char *id)
@@ -39,6 +41,7 @@ GtTypeNode* gt_type_node_new(const char *id)
 void  gt_type_node_delete(GtTypeNode *type_node)
 {
   if (!type_node) return;
+  gt_hashmap_delete(type_node->cache);
   gt_array_delete(type_node->parents);
   gt_str_array_delete(type_node->part_of_list);
   gt_str_array_delete(type_node->is_a_list);
@@ -101,18 +104,36 @@ void gt_type_node_add_vertex(GtTypeNode *src, const GtTypeNode *dst)
 bool gt_type_node_has_parent(GtTypeNode *type_node, const char *id)
 {
   unsigned long i;
+  bool *result;
   gt_assert(type_node && id);
   gt_log_log("check if node %s has parent %s", type_node->id, id);
+
+  /* try cache */
+  if (type_node->cache) {
+    if ((result = gt_hashmap_get(type_node->cache, id)))
+      return *result;
+  }
+  else
+    type_node->cache = gt_hashmap_new(GT_HASH_STRING, NULL, gt_free_func);
+  result = gt_malloc(sizeof (bool));
+
+  /* no cache hit found */
   if (!strcmp(type_node->id, id)) {
+    *result = true;
+    gt_hashmap_add(type_node->cache, (char*) id, result);
     gt_log_log("return true");
     return true;
   }
   for (i = 0; i < gt_array_size(type_node->parents); i++) {
     GtTypeNode *parent = *(GtTypeNode**) gt_array_get(type_node->parents, i);
     if (gt_type_node_has_parent(parent, id)) {
+      *result = true;
+      gt_hashmap_add(type_node->cache, (char*) id, result);
       gt_log_log("return true");
       return true;
     }
   }
+  *result = false;
+  gt_hashmap_add(type_node->cache, (char*) id, result);
   return false;
 }
