@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DYNBITTAB_H
-#define DYNBITTAB_H
+#ifndef DYN_BITTAB_H
+#define DYN_BITTAB_H
 
 #include <stdbool.h>
 #include "core/error.h"
@@ -24,11 +24,11 @@
 /* a bittab which grows on demand */
 typedef struct GtDynBittab GtDynBittab;
 
-GtDynBittab* gt_dynbittab_new(void);
-void         gt_dynbittab_set_bit(GtDynBittab*, unsigned long);
-void         gt_dynbittab_unset_bit(GtDynBittab*, unsigned long);
-bool         gt_dynbittab_bit_is_set(const GtDynBittab*, unsigned long);
-int          gt_dynbittab_unit_test(GtError*);
-void         gt_dynbittab_delete(GtDynBittab*);
+GtDynBittab* gt_dyn_bittab_new(void);
+void         gt_dyn_bittab_set_bit(GtDynBittab*, unsigned long);
+void         gt_dyn_bittab_unset_bit(GtDynBittab*, unsigned long);
+bool         gt_dyn_bittab_bit_is_set(const GtDynBittab*, unsigned long);
+int          gt_dyn_bittab_unit_test(GtError*);
+void         gt_dyn_bittab_delete(GtDynBittab*);
 
 #endif

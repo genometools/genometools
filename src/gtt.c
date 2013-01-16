@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,7 +37,7 @@
 #include "core/desc_buffer.h"
 #include "core/disc_distri.h"
 #include "core/dlist.h"
-#include "core/dynbittab.h"
+#include "core/dyn_bittab.h"
 #include "core/encseq.h"
 #include "core/grep_api.h"
 #include "core/hashmap.h"
@@ -276,7 +276,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "disc distri class", gt_disc_distri_unit_test);
   gt_hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
   gt_hashmap_add(unit_tests, "dlist example", gt_dlist_example);
-  gt_hashmap_add(unit_tests, "dynamic bittab class", gt_dynbittab_unit_test);
+  gt_hashmap_add(unit_tests, "dynamic bittab class", gt_dyn_bittab_unit_test);
   gt_hashmap_add(unit_tests, "elias gamma class", gt_elias_gamma_unit_test);
   gt_hashmap_add(unit_tests, "encdesc class", gt_encdesc_unit_test);
   gt_hashmap_add(unit_tests, "encseq builder class",
