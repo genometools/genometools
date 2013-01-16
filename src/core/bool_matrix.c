@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2007, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2007       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,23 +16,23 @@
 */
 
 #include "core/array.h"
+#include "core/bool_matrix.h"
 #include "core/dyn_bittab.h"
 #include "core/ma.h"
-#include "gth/gthboolmatrix.h"
 
-struct GthBoolMatrix {
+struct GtBoolMatrix {
   GtArray *dyn_bittabs;
 };
 
-GthBoolMatrix* gthboolmatrix_new(void)
+GtBoolMatrix* gt_bool_matrix_new(void)
 {
-  GthBoolMatrix *boolmatrix;
-  boolmatrix = gt_malloc(sizeof (GthBoolMatrix));
+  GtBoolMatrix *boolmatrix;
+  boolmatrix = gt_malloc(sizeof (GtBoolMatrix));
   boolmatrix->dyn_bittabs = gt_array_new(sizeof (GtDynBittab*));
   return boolmatrix;
 }
 
-bool gthboolmatrix_get(GthBoolMatrix *boolmatrix, unsigned long firstdim,
+bool gt_bool_matrix_get(GtBoolMatrix *boolmatrix, unsigned long firstdim,
                        unsigned long seconddim)
 {
   GtDynBittab *bt;
@@ -45,7 +45,7 @@ bool gthboolmatrix_get(GthBoolMatrix *boolmatrix, unsigned long firstdim,
   return false;
 }
 
-void gthboolmatrix_set(GthBoolMatrix *boolmatrix, unsigned long firstdim,
+void gt_bool_matrix_set(GtBoolMatrix *boolmatrix, unsigned long firstdim,
                        unsigned long seconddim, bool b)
 {
   GtDynBittab *bt;
@@ -70,10 +70,10 @@ void gthboolmatrix_set(GthBoolMatrix *boolmatrix, unsigned long firstdim,
     gt_dyn_bittab_unset_bit(bt, seconddim);
 
   /* value has been set */
-  gt_assert(gthboolmatrix_get(boolmatrix, firstdim, seconddim) == b);
+  gt_assert(gt_bool_matrix_get(boolmatrix, firstdim, seconddim) == b);
 }
 
-void gthboolmatrix_delete(GthBoolMatrix *boolmatrix)
+void gt_bool_matrix_delete(GtBoolMatrix *boolmatrix)
 {
   unsigned long i;
   if (!boolmatrix) return;

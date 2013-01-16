@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2007, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2007       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,20 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTHBOOLMATRIX_H
-#define GTHBOOLMATRIX_H
+#ifndef BOOL_MATRIX_H
+#define BOOL_MATRIX_H
 
 #include <stdbool.h>
 #include "core/error.h"
 
 /* a two-dimensional matrix containing boolean values */
-typedef struct GthBoolMatrix GthBoolMatrix;
+typedef struct GtBoolMatrix GtBoolMatrix;
 
-GthBoolMatrix* gthboolmatrix_new(void);
-bool           gthboolmatrix_get(GthBoolMatrix*, unsigned long firstdim,
+GtBoolMatrix* gt_bool_matrix_new(void);
+bool          gt_bool_matrix_get(GtBoolMatrix*, unsigned long firstdim,
                                  unsigned long seconddim);
-void           gthboolmatrix_set(GthBoolMatrix*, unsigned long firstdim,
+void          gt_bool_matrix_set(GtBoolMatrix*, unsigned long firstdim,
                                  unsigned long seconddim, bool);
-void           gthboolmatrix_delete(GthBoolMatrix*);
+void          gt_bool_matrix_delete(GtBoolMatrix*);
 
 #endif
