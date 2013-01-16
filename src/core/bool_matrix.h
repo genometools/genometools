@@ -29,6 +29,13 @@ bool          gt_bool_matrix_get(GtBoolMatrix*, unsigned long firstdim,
                                  unsigned long seconddim);
 void          gt_bool_matrix_set(GtBoolMatrix*, unsigned long firstdim,
                                  unsigned long seconddim, bool);
+unsigned long gt_bool_matrix_get_first_column(const GtBoolMatrix*,
+                                              unsigned long firstdim);
+unsigned long gt_bool_matrix_get_last_column(const GtBoolMatrix*,
+                                             unsigned long firstdim);
+unsigned long gt_bool_matrix_get_next_column(const GtBoolMatrix*,
+                                             unsigned long firstdim,
+                                             unsigned long i);
 void          gt_bool_matrix_delete(GtBoolMatrix*);
 
 #endif

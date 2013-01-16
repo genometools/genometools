@@ -19,6 +19,7 @@
 #include "core/bool_matrix.h"
 #include "core/dyn_bittab.h"
 #include "core/ma.h"
+#include "core/undef_api.h"
 
 struct GtBoolMatrix {
   GtArray *dyn_bittabs;
@@ -26,43 +27,43 @@ struct GtBoolMatrix {
 
 GtBoolMatrix* gt_bool_matrix_new(void)
 {
-  GtBoolMatrix *boolmatrix;
-  boolmatrix = gt_malloc(sizeof (GtBoolMatrix));
-  boolmatrix->dyn_bittabs = gt_array_new(sizeof (GtDynBittab*));
-  return boolmatrix;
+  GtBoolMatrix *bm;
+  bm = gt_malloc(sizeof (GtBoolMatrix));
+  bm->dyn_bittabs = gt_array_new(sizeof (GtDynBittab*));
+  return bm;
 }
 
-bool gt_bool_matrix_get(GtBoolMatrix *boolmatrix, unsigned long firstdim,
-                       unsigned long seconddim)
+bool gt_bool_matrix_get(GtBoolMatrix *bm, unsigned long firstdim,
+                        unsigned long seconddim)
 {
   GtDynBittab *bt;
-  gt_assert(boolmatrix);
-  if (firstdim < gt_array_size(boolmatrix->dyn_bittabs)) {
-    bt = *(GtDynBittab**) gt_array_get(boolmatrix->dyn_bittabs, firstdim);
+  gt_assert(bm);
+  if (firstdim < gt_array_size(bm->dyn_bittabs)) {
+    bt = *(GtDynBittab**) gt_array_get(bm->dyn_bittabs, firstdim);
     if (bt && gt_dyn_bittab_bit_is_set(bt, seconddim))
       return true;
   }
   return false;
 }
 
-void gt_bool_matrix_set(GtBoolMatrix *boolmatrix, unsigned long firstdim,
-                       unsigned long seconddim, bool b)
+void gt_bool_matrix_set(GtBoolMatrix *bm, unsigned long firstdim,
+                        unsigned long seconddim, bool b)
 {
   GtDynBittab *bt;
   unsigned long i, elems_to_add;
 
-  gt_assert(boolmatrix);
+  gt_assert(bm);
   /* make sure first dimension is large enough */
-  if (firstdim >= gt_array_size(boolmatrix->dyn_bittabs)) {
-    elems_to_add = firstdim - gt_array_size(boolmatrix->dyn_bittabs) + 1;
+  if (firstdim >= gt_array_size(bm->dyn_bittabs)) {
+    elems_to_add = firstdim - gt_array_size(bm->dyn_bittabs) + 1;
     for (i = 0; i < elems_to_add; i++) {
       bt = gt_dyn_bittab_new();
-      gt_array_add(boolmatrix->dyn_bittabs, bt);
+      gt_array_add(bm->dyn_bittabs, bt);
     }
   }
 
   /* set bit, if necessary */
-  bt = *(GtDynBittab**) gt_array_get(boolmatrix->dyn_bittabs, firstdim);
+  bt = *(GtDynBittab**) gt_array_get(bm->dyn_bittabs, firstdim);
   gt_assert(bt);
   if (b)
     gt_dyn_bittab_set_bit(bt, seconddim);
@@ -70,17 +71,52 @@ void gt_bool_matrix_set(GtBoolMatrix *boolmatrix, unsigned long firstdim,
     gt_dyn_bittab_unset_bit(bt, seconddim);
 
   /* value has been set */
-  gt_assert(gt_bool_matrix_get(boolmatrix, firstdim, seconddim) == b);
+  gt_assert(gt_bool_matrix_get(bm, firstdim, seconddim) == b);
 }
 
-void gt_bool_matrix_delete(GtBoolMatrix *boolmatrix)
+unsigned long gt_bool_matrix_get_first_column(const GtBoolMatrix *bm,
+                                              unsigned long firstdim)
+{
+  GtDynBittab *bt;
+  gt_assert(bm);
+  if (firstdim < gt_array_size(bm->dyn_bittabs)) {
+    if ((bt = *(GtDynBittab**) gt_array_get(bm->dyn_bittabs, firstdim)))
+      return gt_dyn_bittab_get_first_bitnum(bt);
+  }
+  return GT_UNDEF_ULONG;
+}
+
+unsigned long gt_bool_matrix_get_last_column(const GtBoolMatrix *bm,
+                                             unsigned long firstdim)
+{
+  GtDynBittab *bt;
+  gt_assert(bm);
+  if (firstdim < gt_array_size(bm->dyn_bittabs)) {
+    if ((bt = *(GtDynBittab**) gt_array_get(bm->dyn_bittabs, firstdim)))
+      return gt_dyn_bittab_get_last_bitnum(bt);
+  }
+  return GT_UNDEF_ULONG;
+}
+
+unsigned long gt_bool_matrix_get_next_column(const GtBoolMatrix *bm,
+                                             unsigned long firstdim,
+                                             unsigned long i)
+{
+  GtDynBittab *bt;
+  gt_assert(bm);
+  if (firstdim < gt_array_size(bm->dyn_bittabs)) {
+    if ((bt = *(GtDynBittab**) gt_array_get(bm->dyn_bittabs, firstdim)))
+      return gt_dyn_bittab_get_next_bitnum(bt, i);
+  }
+  return GT_UNDEF_ULONG;
+}
+
+void gt_bool_matrix_delete(GtBoolMatrix *bm)
 {
   unsigned long i;
-  if (!boolmatrix) return;
-  for (i = 0; i < gt_array_size(boolmatrix->dyn_bittabs); i++) {
-    gt_dyn_bittab_delete(*(GtDynBittab**)
-                        gt_array_get(boolmatrix->dyn_bittabs, i));
-  }
-  gt_array_delete(boolmatrix->dyn_bittabs);
-  gt_free(boolmatrix);
+  if (!bm) return;
+  for (i = 0; i < gt_array_size(bm->dyn_bittabs); i++)
+    gt_dyn_bittab_delete(*(GtDynBittab**) gt_array_get(bm->dyn_bittabs, i));
+  gt_array_delete(bm->dyn_bittabs);
+  gt_free(bm);
 }
