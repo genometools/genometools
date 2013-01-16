@@ -116,8 +116,8 @@ static void gt_popcount_tab_init_offset_tab(GtPopcountTab *popcount_tab)
   offsets[0] = 0;
   offsets[1] = 1UL;
   offsets[2] = blocksize + 1UL;
-  for (idx = 3UL; idx < blocksize - 2; idx++) {
-    class_size = gt_combinatorics_binomial_ln(blocksize, idx);
+  for (idx = 3UL; idx < blocksize - 1; idx++) {
+    class_size = gt_combinatorics_binomial_ln(blocksize, idx - 1);
     offsets[idx] = offsets[idx - 1] + class_size;
   }
   offsets[blocksize - 1] = num_of_blocks - blocksize - 1;
@@ -362,7 +362,7 @@ int gt_popcount_tab_unit_test(GtError *err)
   int had_err = 0;
   unsigned long idx, jdx, popc_perm, init, offset,
                 blockmask = gt_popcount_tab_perm_start(16U);
-  unsigned int popcount_c;
+  unsigned int popcount_c, class_size;
   static const unsigned int blocksize = 4U;
   static const unsigned long blocksize_four[] =
     {0, 1UL, 2UL, 4UL, 8UL, 3UL, 5UL, 6UL,
@@ -377,13 +377,13 @@ int gt_popcount_tab_unit_test(GtError *err)
   }
   for (popcount_c = 0, idx = 0;
        !had_err && popcount_c <= blocksize;
-       idx += gt_combinatorics_binomial_ln((unsigned long) blocksize,
-                                       (unsigned long) popcount_c),
-                                       popcount_c++) {
+       idx += class_size,
+       popcount_c++) {
+    class_size = (unsigned int)
+      gt_combinatorics_binomial_ln((unsigned long) blocksize,
+                                   (unsigned long) popcount_c);
     for (jdx = 0;
-         !had_err && jdx <
-           gt_combinatorics_binomial_ln((unsigned long) blocksize,
-                                        (unsigned long) popcount_c);
+         !had_err && jdx < (unsigned long) class_size;
          jdx++) {
       gt_ensure(had_err, blocksize_four[idx + jdx] ==
                          gt_popcount_tab_get(popcount_t, popcount_c, jdx));
@@ -404,6 +404,14 @@ int gt_popcount_tab_unit_test(GtError *err)
   gt_ensure(had_err, offset == 0);
   gt_popcount_tab_delete(popcount_t);
 
+  popcount_t = gt_popcount_tab_new(10U);
+  for (idx = 0; !had_err && idx < 1UL<<10UL; idx++) {
+    offset = gt_popcount_tab_get_offset_for_block(popcount_t, idx);
+    popcount_c = gt_popcount_tab_popcount(idx);
+    jdx = gt_popcount_tab_get(popcount_t, popcount_c, offset);
+    gt_ensure(had_err, idx == jdx);
+  }
+  gt_popcount_tab_delete(popcount_t);
   popc_perm = init = gt_popcount_tab_perm_start(5U);
   while (!had_err && popc_perm >= init) {
     gt_ensure(had_err, gt_popcount_tab_popcount(popc_perm) == 5U);
