@@ -64,21 +64,6 @@ void gt_type_graph_delete(GtTypeGraph *type_graph)
   gt_free(type_graph);
 }
 
-static bool so_prefix_matches(const char *type)
-{
-  bool match;
-#ifndef NDEBUG
-  int rval;
-#endif
-  gt_assert(type);
-#ifndef NDEBUG
-  rval =
-#endif
-    gt_grep(&match, "^SO:", type, NULL);
-  gt_assert(!rval); /* should not happen */
-  return match;
-}
-
 void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
                               const GtOBOStanza *stanza)
 {
@@ -92,9 +77,7 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
   id_value = gt_symbol(gt_obo_stanza_get_value(stanza, "id", 0));
   name_value = gt_symbol(gt_obo_stanza_get_value(stanza, "name", 0));
   gt_assert(id_value);
-  gt_assert(so_prefix_matches(id_value));
   gt_assert(name_value);
-  gt_assert(!so_prefix_matches(name_value));
   gt_assert(!gt_hashmap_get(type_graph->nodemap, id_value));
   node = gt_type_node_new(gt_array_size(type_graph->nodes), id_value);
   gt_hashmap_add(type_graph->name2id, (char*) name_value, (char*) id_value);
@@ -127,7 +110,6 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
       gt_assert(!rval); /* should not happen */
       if (match) {
         const char *part_of = rel + strlen(PART_OF) + 1;
-        gt_assert(so_prefix_matches(part_of));
         gt_str_append_cstr_nt(buf, part_of, strcspn(part_of, " \n"));
         gt_type_node_part_of_add(node, gt_symbol(gt_str_get(buf)));
         continue;
@@ -140,7 +122,6 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
       gt_assert(!rval); /* should not happen */
       if (match) {
         const char *member_of = rel + strlen(MEMBER_OF) + 1;
-        gt_assert(so_prefix_matches(member_of));
         gt_str_append_cstr_nt(buf, member_of, strcspn(member_of, " \n"));
         gt_type_node_part_of_add(node, gt_symbol(gt_str_get(buf)));
         continue;
@@ -153,7 +134,6 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
       gt_assert(!rval); /* should not happen */
       if (match) {
         const char *integral_part_of = rel + strlen(INTEGRAL_PART_OF) + 1;
-        gt_assert(so_prefix_matches(integral_part_of));
         gt_str_append_cstr_nt(buf, integral_part_of,
                               strcspn(integral_part_of, " \n"));
         gt_type_node_part_of_add(node, gt_symbol(gt_str_get(buf)));
@@ -203,19 +183,11 @@ bool gt_type_graph_is_partof(GtTypeGraph *type_graph, const char *parent_type,
     create_vertices(type_graph);
     type_graph->ready = true;
   }
-  /* get parent ID */
-  if (!so_prefix_matches(parent_type)) {
-    parent_id = gt_hashmap_get(type_graph->name2id, parent_type);
-    gt_assert(parent_id);
-  }
-  else
+  /* get parent ID, if the type is not mappable to an ID, assume it is the ID */
+  if (!(parent_id = gt_hashmap_get(type_graph->name2id, parent_type)))
     parent_id = parent_type;
-  /* get child ID */
-  if (!so_prefix_matches(child_type)) {
-    child_id = gt_hashmap_get(type_graph->name2id, child_type);
-    gt_assert(child_id);
-  }
-  else
+  /* get child ID, if the type is not mappable to an ID, assmue it is the ID */
+  if (!(child_id = gt_hashmap_get(type_graph->name2id, child_type)))
     child_id = child_type;
   /* get child node */
   child_node = gt_hashmap_get(type_graph->nodemap, child_id);
