@@ -24,8 +24,9 @@
 #include "extended/type_graph.h"
 #include "extended/type_node.h"
 
-#define PART_OF    "part_of"
-#define MEMBER_OF  "member_of"
+#define PART_OF           "part_of"
+#define MEMBER_OF         "member_of"
+#define INTEGRAL_PART_OF  "integral_part_of"
 
 struct GtTypeGraph {
   GtHashmap *name2id, /* maps from name to SO ID */
@@ -101,6 +102,7 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
       const char *rel = gt_obo_stanza_get_value(stanza, "relationship", i);
       bool match;
       int rval;
+      /* match part_of */
       rval = gt_grep(&match, "^"PART_OF, rel, NULL);
       gt_assert(!rval); /* should not happen */
       if (match) {
@@ -109,12 +111,23 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
         gt_type_node_part_of_add(node, part_of, strcspn(part_of, " \n"));
         continue;
       }
+      /* match member_of */
       rval = gt_grep(&match, "^"MEMBER_OF, rel, NULL);
       gt_assert(!rval); /* should not happen */
       if (match) {
         const char *member_of = rel + strlen(MEMBER_OF) + 1;
         gt_assert(so_prefix_matches(member_of));
         gt_type_node_part_of_add(node, member_of, strcspn(member_of, " \n"));
+        continue;
+      }
+      /* match integral_part_of */
+      rval = gt_grep(&match, "^"INTEGRAL_PART_OF, rel, NULL);
+      gt_assert(!rval); /* should not happen */
+      if (match) {
+        const char *integral_part_of = rel + strlen(INTEGRAL_PART_OF) + 1;
+        gt_assert(so_prefix_matches(integral_part_of));
+        gt_type_node_part_of_add(node, integral_part_of,
+                                 strcspn(integral_part_of, " \n"));
       }
     }
   }
