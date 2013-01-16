@@ -478,6 +478,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   gt_querymatch_delete(querymatchspaceptr);
   gt_seqabstract_delete(xdropmatchinfo.useq);
   gt_seqabstract_delete(xdropmatchinfo.vseq);
+  gt_xdrop_resources_delete(xdropmatchinfo.res);
   gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }

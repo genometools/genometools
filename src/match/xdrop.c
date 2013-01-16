@@ -208,6 +208,7 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
 {
   GT_FREEARRAY (&res->fronts, GtXdropfrontvalue);
   GT_FREEARRAY (&res->big_t, GtXdropscore);
+  gt_free(res);
 }
 
 /*
