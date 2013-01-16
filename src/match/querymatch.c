@@ -34,7 +34,9 @@ struct Querymatch
    long score;
    bool selfmatch;
    uint64_t queryseqnum;
-   GtReadmode readmode;
+   const GtUchar *querysequence; /* pointer to query or NULL if query is 
+                                    represented by encseq */
+   GtReadmode readmode; /* refers to reference sequence */
 };
 
 Querymatch *gt_querymatch_new(void)
@@ -52,6 +54,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         uint64_t queryseqnum,
                         unsigned long querylen,
                         unsigned long querystart,
+                        const GtUchar *querysequence,
                         unsigned long querytotallength)
 {
   querymatch->dblen = dblen;
@@ -63,6 +66,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
   querymatch->queryseqnum = queryseqnum;
   querymatch->querylen = querylen;
   querymatch->querystart = querystart;
+  querymatch->querysequence = querysequence; /* may be NULL */
   querymatch->querytotallength = querytotallength;
 }
 

@@ -405,6 +405,7 @@ static int gt_runquerysubstringmatch(bool selfmatch,
                            localqueryunitnum,
                            extend + minmatchlength,
                            localqueryoffset,
+                           queryrep->sequence,
                            queryrep->length);
         if (processquerymatch(processquerymatchinfo,
                               dbencseq,

@@ -37,6 +37,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         uint64_t queryseqnum,
                         unsigned long querylen,
                         unsigned long querystart,
+                        const GtUchar *querysequence,
                         unsigned long querytotallength);
 
 void gt_querymatch_delete(Querymatch *querymatch);

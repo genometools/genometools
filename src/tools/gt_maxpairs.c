@@ -74,6 +74,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
                      (uint64_t) queryseqnum,
                      len,
                      pos2 - seqstartpos,
+                     NULL,
                      seqlength);
   return gt_querymatch_output(info, encseq, querymatch, err);
 }
@@ -170,6 +171,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
                      (uint64_t) queryseqnum,
                      querylen,
                      querystart - queryseqstartpos,
+                     NULL,
                      gt_encseq_seqlength(encseq, queryseqnum));
   return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
                               err);
