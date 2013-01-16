@@ -213,7 +213,8 @@ void gt_popcount_tab_delete(GtPopcountTab *popcount_tab)
 
 unsigned long gt_popcount_tab_get(GtPopcountTab *popcount_tab,
                                   unsigned int popcount_c,
-                                  unsigned long i) {
+                                  unsigned long i)
+{
   gt_assert(popcount_c <= popcount_tab->blocksize);
   if (popcount_c == 0) {
     gt_assert(i == 0);

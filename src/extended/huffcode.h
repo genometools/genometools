@@ -30,6 +30,7 @@ typedef struct GtHuffman GtHuffman;
 /* Class <GtHuffmanDecoder> is used to decode consecutive symbols from Huffman
    encoded data */
 typedef struct GtHuffmanDecoder GtHuffmanDecoder;
+
 /* Class <GtHuffmanBitwiseDecoder> is used to decode bitstreams bit by bit */
 typedef struct GtHuffmanBitwiseDecoder GtHuffmanBitwiseDecoder;
 
