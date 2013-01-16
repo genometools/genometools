@@ -108,14 +108,6 @@ static int gt_simplexdropselfmatchoutput(void *info,
     pos1 = pos2;
     pos2 = tmp;
   }
-  /*
-  if (gt_encseq_seqnum(encseq,pos1) == 90UL)
-  {
-    printf("call gt_seqabstract_reinit_encseq(left,len1=%lu,len2=%lu"
-           ",uoffset=%lu,voffset=%lu\n",
-            pos1,pos2,pos1,pos2);
-  }
-  */
   gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,pos1,0);
   gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,pos2,0);
   gt_evalxdroparbitscoresextend(false,
@@ -128,16 +120,6 @@ static int gt_simplexdropselfmatchoutput(void *info,
                                 xdropmatchinfo->belowscore);
   if (pos1 + len < totallength && pos2 + len < totallength)
   {
-    /*if (gt_encseq_seqnum(encseq,pos1) == 90UL)
-    {
-      printf("call gt_seqabstract_reinit_encseq(right,len1=%lu,len2=%lu,"
-             "uoffset=%lu,voffset=%lu\n",
-              totallength - (pos1 + len),
-              totallength - (pos2 + len),
-              pos1 + len,
-              pos2 + len);
-    }
-    */
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  encseq,totallength - (pos1 + len),0);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
