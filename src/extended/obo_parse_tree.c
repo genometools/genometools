@@ -468,6 +468,14 @@ const char* gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree
                                               stanza_num), stanza_key, 0);
 }
 
+const GtOBOStanza* gt_obo_parse_tree_get_stanza(const GtOBOParseTree
+                                                *obo_parse_tree,
+                                                unsigned long stanza_num)
+{
+  gt_assert(obo_parse_tree);
+  return *(GtOBOStanza**) gt_array_get(obo_parse_tree->stanzas, stanza_num);
+}
+
 unsigned long gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree
                                                *obo_parse_tree)
 {

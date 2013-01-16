@@ -22,11 +22,13 @@
 #include "extended/obo_parse_tree.h"
 #include "extended/type_checker_obo.h"
 #include "extended/type_checker_rep.h"
+#include "extended/type_graph.h"
 
 struct GtTypeCheckerOBO {
   const GtTypeChecker parent_instance;
   GtStr *description;
   GtCstrTable *feature_node_types;
+  GtTypeGraph *type_graph;
 };
 
 #define gt_type_checker_obo_cast(FTF)\
@@ -35,6 +37,7 @@ struct GtTypeCheckerOBO {
 static void gt_type_checker_obo_free(GtTypeChecker *tc)
 {
   GtTypeCheckerOBO *tco = gt_type_checker_obo_cast(tc);
+  gt_type_graph_delete(tco->type_graph);
   gt_cstr_table_delete(tco->feature_node_types);
   gt_str_delete(tco->description);
 }
@@ -59,8 +62,10 @@ static bool gt_type_checker_obo_is_partof(GtTypeChecker *tc,
                                           const char *parent_type,
                                           const char *child_type)
 {
+  GtTypeCheckerOBO *tco;
   gt_assert(tc && parent_type && child_type);
-  return false; /* XXX */
+  tco = gt_type_checker_obo_cast(tc);
+  return gt_type_graph_is_partof(tco->type_graph, parent_type, child_type);
 }
 
 const GtTypeCheckerClass* gt_type_checker_obo_class(void)
@@ -86,6 +91,8 @@ static void add_feature_node_from_tree(GtTypeCheckerOBO *tco,
   /* do not add values multiple times (possible for "name" values) */
   if (!gt_cstr_table_get(tco->feature_node_types, value))
     gt_cstr_table_add(tco->feature_node_types, value);
+  else
+    puts(value);
 }
 
 static int create_feature_nodes(GtTypeCheckerOBO *tco,
@@ -103,8 +110,11 @@ static int create_feature_nodes(GtTypeCheckerOBO *tco,
           gt_obo_parse_tree_get_stanza_value(obo_parse_tree, i, "is_obsolete");
         /* do not add obsolete types */
         if (!is_obsolete || strcmp(is_obsolete, "true")) {
+          const GtOBOStanza *stanza;
           add_feature_node_from_tree(tco, obo_parse_tree, i, "id");
           add_feature_node_from_tree(tco, obo_parse_tree, i, "name");
+          stanza = gt_obo_parse_tree_get_stanza(obo_parse_tree, i);
+          gt_type_graph_add_stanza(tco->type_graph, stanza);
         }
       }
     }
@@ -125,6 +135,7 @@ GtTypeChecker* gt_type_checker_obo_new(const char *obo_file_path, GtError *err)
   tco->description= gt_str_new_cstr("OBO file ");
   gt_str_append_cstr(tco->description, obo_file_path);
   tco->feature_node_types = gt_cstr_table_new();
+  tco->type_graph = gt_type_graph_new();
   if (create_feature_nodes(tco, obo_file_path, err)) {
     gt_type_checker_delete(tc);
     return NULL;
