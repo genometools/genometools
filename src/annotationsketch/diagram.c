@@ -178,7 +178,7 @@ static int get_caption_display_status(GtDiagram *d, const char *gft,
   {
     unsigned long threshold = GT_UNDEF_ULONG;
     double tmp = GT_UNDEF_DOUBLE;
-    status = gt_malloc(sizeof (bool*));
+    status = gt_malloc(sizeof (bool));
     *status = true;
     if (gt_style_get_bool(d->style, "format", "show_block_captions", status,
                           NULL, err) == GT_STYLE_QUERY_ERROR) {
