@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008       Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008, 2012-2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008            Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,28 +31,28 @@ struct GtTypeCheckerBuiltin {
 #define gt_type_checker_builtin_cast(FTF)\
         gt_type_checker_cast(gt_type_checker_builtin_class(), FTF)
 
-static const char *gt_feature_node_type_strings[] = { "CDS",
-                                                     "EST_match",
-                                                     "LTR_retrotransposon",
-                                                     "SNP",
-                                                     "TF_binding_site",
-                                                     "cDNA_match",
-                                                     "exon",
-                                                     "five_prime_UTR",
-                                                     "five_prime_splice_site",
-                                                     "gene",
-                                                     "intron",
-                                                     "inverted_repeat",
-                                                     "long_terminal_repeat",
-                                                     "mRNA",
-                                                     "protein_match",
-                                                     "repeat_region",
-                                                     "target_site_duplication",
-                                                     "three_prime_UTR",
-                                                     "three_prime_splice_site",
-                                                     "transcript",
-                                                     "undefined"
-                                                   };
+static const char *gt_feature_node_type_strings[] =
+  { "CDS",
+    "EST_match",
+    "LTR_retrotransposon",
+    "SNP",
+    "TF_binding_site",
+    "cDNA_match",
+    "exon",
+    "five_prime_UTR",
+    "five_prime_cis_splice_site",
+    "gene",
+    "intron",
+    "inverted_repeat",
+    "long_terminal_repeat",
+    "mRNA",
+    "protein_match",
+    "repeat_region",
+    "target_site_duplication",
+    "three_prime_UTR",
+    "three_prime_cis_splice_site",
+    "transcript",
+    "undefined" };
 
 static const char* type_checker_builtin_find_type(const char *gft_string)
 {

@@ -203,11 +203,11 @@ style =
     max_num_lines      = 10,
   },
 --------------------------------------
-  five_prime_splice_site = {
+  five_prime_cis_splice_site = {
     collapse_to_parent = true,
   },
 --------------------------------------
-  three_prime_splice_site = {
+  three_prime_cis_splice_site = {
     collapse_to_parent = true,
   },
 --------------------------------------

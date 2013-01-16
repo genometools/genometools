@@ -13,14 +13,14 @@ datadir = op.abspath(op.join(op.dirname(__file__), "..", "..",
 ###
 1877523 gth gene    25221   26100   1   +   .   ID=gene12;Target=8690053 1 521 +
 1877523 gth exon    25221   25310   1   +   .   Parent=gene12
-1877523 gth five_prime_splice_site  25311   25312   0.993   +   .   Parent=gene12
-1877523 gth three_prime_splice_site 25508   25509   0.439   +   .   Parent=gene12
+1877523 gth five_prime_cis_splice_site  25311   25312   0.993   +   .   Parent=gene12
+1877523 gth three_prime_cis_splice_site 25508   25509   0.439   +   .   Parent=gene12
 1877523 gth exon    25510   25626   1   +   .   Parent=gene12
-1877523 gth five_prime_splice_site  25627   25628   0.998   +   .   Parent=gene12
-1877523 gth three_prime_splice_site 25711   25712   0.996   +   .   Parent=gene12
+1877523 gth five_prime_cis_splice_site  25627   25628   0.998   +   .   Parent=gene12
+1877523 gth three_prime_cis_splice_site 25711   25712   0.996   +   .   Parent=gene12
 1877523 gth exon    25713   25841   1   +   .   Parent=gene12
-1877523 gth five_prime_splice_site  25842   25843   0.63    +   .   Parent=gene12
-1877523 gth three_prime_splice_site 25914   25915   0.926   +   .   Parent=gene12
+1877523 gth five_prime_cis_splice_site  25842   25843   0.63    +   .   Parent=gene12
+1877523 gth three_prime_cis_splice_site 25914   25915   0.926   +   .   Parent=gene12
 1877523 gth exon    25916   26100   1   +   .   Parent=gene12
 ###
 """
@@ -44,7 +44,7 @@ class FeatureNodeIteratorTest(unittest.TestCase):
         found = dfi.next()
         self.assertEqual(found.type, 'exon')
         found = dfi.next()
-        self.assertEqual(found.type, 'five_prime_splice_site')
+        self.assertEqual(found.type, 'five_prime_cis_splice_site')
         found = dfi.next()
         found = dfi.next()
         self.assertEqual(found.type, 'exon')
@@ -60,8 +60,8 @@ class FeatureNodeIteratorTest(unittest.TestCase):
         #self.assert_('gene' in types)
 
         self.assert_('exon' in types)
-        self.assert_('five_prime_splice_site' in types)
-        self.assert_('three_prime_splice_site' in types)
+        self.assert_('five_prime_cis_splice_site' in types)
+        self.assert_('three_prime_cis_splice_site' in types)
 
         self.assertEqual(found, None)
 

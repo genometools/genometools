@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -731,8 +731,11 @@ bool gt_feature_node_has_CDS(const GtFeatureNode *fn)
 
 bool gt_feature_node_has_splice_site(const GtFeatureNode *fn)
 {
-  static const char *gfts[] = { gt_ft_five_prime_splice_site,
-                                gt_ft_three_prime_splice_site, NULL };
+  static const char *gfts[] = { gt_ft_five_prime_cis_splice_site,
+                                gt_ft_five_prime_splice_site,
+                                gt_ft_three_prime_cis_splice_site,
+                                gt_ft_three_prime_splice_site,
+                                NULL };
   return feature_node_has_gft(fn, gfts);
 }
 
@@ -746,7 +749,9 @@ double gt_feature_node_average_splice_site_prob(const GtFeatureNode *fn,
   gt_assert(fn);
   fni = gt_feature_node_iterator_new(fn);
   while ((child = gt_feature_node_iterator_next(fni))) {
-    if (gt_feature_node_has_type(child, gt_ft_five_prime_splice_site) ||
+    if (gt_feature_node_has_type(child, gt_ft_five_prime_cis_splice_site) ||
+        gt_feature_node_has_type(child, gt_ft_five_prime_splice_site) ||
+        gt_feature_node_has_type(child, gt_ft_three_prime_cis_splice_site) ||
         gt_feature_node_has_type(child, gt_ft_three_prime_splice_site)) {
       averagessp += gt_feature_node_get_score((GtFeatureNode*) child);
       num_of_splice_sites++;

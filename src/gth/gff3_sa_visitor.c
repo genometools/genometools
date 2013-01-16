@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2004-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2004-2011, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -92,7 +92,7 @@ static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
       /* donor site */
       range = gth_sa_donor_site_range(sa, i-1),
       range = gt_range_offset(&range, offset);
-      ss_feature = gt_feature_node_new(seqid, gt_ft_five_prime_splice_site,
+      ss_feature = gt_feature_node_new(seqid, gt_ft_five_prime_cis_splice_site,
                                        range.start, range.end,
                                        gth_sa_gen_strand(sa));
       gt_feature_node_set_source((GtFeatureNode*) ss_feature, gthsourcetag);
@@ -103,7 +103,7 @@ static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
       /* acceptor site */
       range = gth_sa_acceptor_site_range(sa, i-1),
       range = gt_range_offset(&range, offset);
-      ss_feature = gt_feature_node_new(seqid, gt_ft_three_prime_splice_site,
+      ss_feature = gt_feature_node_new(seqid, gt_ft_three_prime_cis_splice_site,
                                        range.start, range.end,
                                        gth_sa_gen_strand(sa));
       gt_feature_node_set_source((GtFeatureNode*) ss_feature, gthsourcetag);

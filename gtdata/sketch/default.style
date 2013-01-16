@@ -183,7 +183,15 @@ style =
     max_show_width     = nil,
   },
 --------------------------------------
+  five_prime_cis_splice_site = {
+    collapse_to_parent = true,
+  },
+--------------------------------------
   five_prime_splice_site = {
+    collapse_to_parent = true,
+  },
+--------------------------------------
+  three_prime_cis_splice_site = {
     collapse_to_parent = true,
   },
 --------------------------------------
