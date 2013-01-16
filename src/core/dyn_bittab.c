@@ -19,6 +19,7 @@
 #include "core/dyn_bittab.h"
 #include "core/ensure.h"
 #include "core/ma.h"
+#include "core/undef_api.h"
 
 struct GtDynBittab {
   unsigned long *tabptr,
@@ -75,6 +76,43 @@ bool gt_dyn_bittab_bit_is_set(const GtDynBittab *b, unsigned long bit)
     return true;
   }
   return false;
+}
+
+unsigned long gt_dyn_bittab_get_first_bitnum(const GtDynBittab *b)
+{
+  unsigned long i, rval = GT_UNDEF_ULONG;
+  gt_assert(b);
+  for (i = 0; i < b->num_of_bits; i++)
+    if (gt_dyn_bittab_bit_is_set(b, i)) {
+      rval = i;
+      break;
+    }
+  if (rval == GT_UNDEF_ULONG)
+    return b->num_of_bits;
+  return rval;
+}
+
+unsigned long gt_dyn_bittab_get_last_bitnum(const GtDynBittab *b)
+{
+  gt_assert(b);
+  return b->num_of_bits;
+}
+
+unsigned long gt_dyn_bittab_get_next_bitnum(const GtDynBittab *b,
+                                            unsigned long curnum)
+{
+  unsigned long i, rval = GT_UNDEF_ULONG;
+
+  gt_assert(b);
+  gt_assert(curnum < b->num_of_bits);
+  for (i = curnum + 1; i < b->num_of_bits; i++)
+    if (gt_dyn_bittab_bit_is_set(b, i)) {
+      rval = i;
+      break;
+    }
+  if (rval == GT_UNDEF_ULONG)
+    return b->num_of_bits;
+  return rval;
 }
 
 int gt_dyn_bittab_unit_test(GtError *err)
