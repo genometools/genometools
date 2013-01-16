@@ -41,6 +41,8 @@ static inline unsigned long long gt_combinatorics_i_pow(unsigned long long x,
                                                         unsigned int i)
 {
    unsigned long long result = 1ULL;
+   if (x == 2ULL)
+     return 1ULL << (unsigned long long) i;
    while (i != 0) {
      if (i & 1)
        result *= x;
