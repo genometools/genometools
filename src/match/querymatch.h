@@ -21,7 +21,6 @@
 #include <inttypes.h>
 #include "core/error_api.h"
 #include "core/readmode.h"
-
 #include "core/encseq.h"
 
 typedef struct Querymatch Querymatch;
