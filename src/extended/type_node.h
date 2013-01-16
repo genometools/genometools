@@ -21,10 +21,10 @@ typedef struct GtTypeNode GtTypeNode;
 
 GtTypeNode*   gt_type_node_new(const char *id);
 void          gt_type_node_delete(GtTypeNode*);
-void          gt_type_node_is_a_add(GtTypeNode*, const char*, unsigned long);
+void          gt_type_node_is_a_add(GtTypeNode*, const char*);
 const char*   gt_type_node_is_a_get(const GtTypeNode*, unsigned long);
 unsigned long gt_type_node_is_a_size(const GtTypeNode*);
-void          gt_type_node_part_of_add(GtTypeNode*, const char*, unsigned long);
+void          gt_type_node_part_of_add(GtTypeNode*, const char*);
 const char*   gt_type_node_part_of_get(const GtTypeNode*, unsigned long);
 unsigned long gt_type_node_part_of_size(const GtTypeNode*);
 void          gt_type_node_add_vertex(GtTypeNode *src, const GtTypeNode *dst);

@@ -19,13 +19,12 @@
 #include "core/hashmap_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/str_array_api.h"
 #include "extended/type_node.h"
 
 struct GtTypeNode {
   const char *id;
-  GtStrArray *is_a_list,
-             *part_of_list;
+  GtArray *is_a_list,
+          *part_of_list;
   GtArray *parents;
   GtHashmap *cache;
 };
@@ -42,54 +41,51 @@ void  gt_type_node_delete(GtTypeNode *type_node)
   if (!type_node) return;
   gt_hashmap_delete(type_node->cache);
   gt_array_delete(type_node->parents);
-  gt_str_array_delete(type_node->part_of_list);
-  gt_str_array_delete(type_node->is_a_list);
+  gt_array_delete(type_node->part_of_list);
+  gt_array_delete(type_node->is_a_list);
   gt_free(type_node);
 }
 
-void gt_type_node_is_a_add(GtTypeNode *type_node, const char *id,
-                           unsigned long length)
+void gt_type_node_is_a_add(GtTypeNode *type_node, const char *id)
 {
   gt_assert(type_node && id);
   if (!type_node->is_a_list)
-    type_node->is_a_list = gt_str_array_new();
-  gt_str_array_add_cstr_nt(type_node->is_a_list, id, length);
+    type_node->is_a_list = gt_array_new(sizeof (const char*));
+  gt_array_add(type_node->is_a_list, id);
 }
 
 const char* gt_type_node_is_a_get(const GtTypeNode *type_node,
                                   unsigned long idx)
 {
   gt_assert(type_node && idx < gt_type_node_is_a_size(type_node));
-  return gt_str_array_get(type_node->is_a_list, idx);
+  return *(const char**) gt_array_get(type_node->is_a_list, idx);
 }
 
 unsigned long gt_type_node_is_a_size(const GtTypeNode *type_node)
 {
   gt_assert(type_node);
-  return (type_node->is_a_list) ? gt_str_array_size(type_node->is_a_list) : 0;
+  return (type_node->is_a_list) ? gt_array_size(type_node->is_a_list) : 0;
 }
 
-void gt_type_node_part_of_add(GtTypeNode *type_node, const char *id,
-                              unsigned long length)
+void gt_type_node_part_of_add(GtTypeNode *type_node, const char *id)
 {
   gt_assert(type_node && id);
   if (!type_node->part_of_list)
-    type_node->part_of_list = gt_str_array_new();
-  gt_str_array_add_cstr_nt(type_node->part_of_list, id, length);
+    type_node->part_of_list = gt_array_new(sizeof (const char*));
+  gt_array_add(type_node->part_of_list, id);
 }
 
 const char* gt_type_node_part_of_get(const GtTypeNode *type_node,
                                   unsigned long idx)
 {
   gt_assert(type_node && idx < gt_type_node_part_of_size(type_node));
-  return gt_str_array_get(type_node->part_of_list, idx);
+  return *(const char**) gt_array_get(type_node->part_of_list, idx);
 }
 
 unsigned long gt_type_node_part_of_size(const GtTypeNode *type_node)
 {
   gt_assert(type_node);
-  return (type_node->part_of_list) ? gt_str_array_size(type_node->part_of_list)
-                                   : 0;
+  return (type_node->part_of_list) ? gt_array_size(type_node->part_of_list) : 0;
 }
 
 void gt_type_node_add_vertex(GtTypeNode *src, const GtTypeNode *dst)

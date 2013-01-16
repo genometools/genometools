@@ -20,6 +20,7 @@
 #include "core/grep_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
+#include "core/symbol_api.h"
 #include "extended/type_graph.h"
 #include "extended/type_node.h"
 
@@ -37,8 +38,8 @@ struct GtTypeGraph {
 GtTypeGraph* gt_type_graph_new(void)
 {
   GtTypeGraph *type_graph = gt_malloc(sizeof (GtTypeGraph));
-  type_graph->name2id = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
-  type_graph->nodemap = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
+  type_graph->name2id = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
+  type_graph->nodemap = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
   type_graph->nodes = gt_array_new(sizeof (GtTypeNode*));
   type_graph->ready = false;
   return type_graph;
@@ -76,28 +77,31 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
 {
   const char *id_value, *name_value;
   unsigned long i, size;
-  char *id_dup;
   GtTypeNode *node;
+  GtStr *buf;
   gt_assert(type_graph && stanza && !type_graph->ready);
   gt_assert(gt_obo_stanza_size(stanza, "id") == 1);
   gt_assert(gt_obo_stanza_size(stanza, "name") == 1);
-  id_value = gt_obo_stanza_get_value(stanza, "id", 0);
-  name_value = gt_obo_stanza_get_value(stanza, "name", 0);
+  id_value = gt_symbol(gt_obo_stanza_get_value(stanza, "id", 0));
+  name_value = gt_symbol(gt_obo_stanza_get_value(stanza, "name", 0));
   gt_assert(id_value);
   gt_assert(so_prefix_matches(id_value));
   gt_assert(name_value);
   gt_assert(!so_prefix_matches(name_value));
   gt_assert(!gt_hashmap_get(type_graph->nodemap, id_value));
-  id_dup = gt_cstr_dup(id_value);
-  node = gt_type_node_new(id_dup);
-  gt_hashmap_add(type_graph->name2id, gt_cstr_dup(name_value), id_dup);
-  gt_hashmap_add(type_graph->nodemap, id_dup, node);
+  node = gt_type_node_new(id_value);
+  gt_hashmap_add(type_graph->name2id, (char*) name_value, (char*) id_value);
+  gt_hashmap_add(type_graph->nodemap, (char*) id_value, node);
+
   gt_array_add(type_graph->nodes, node);
+  buf = gt_str_new();
   /* store is_a entries in node, if necessary */
   if ((size = gt_obo_stanza_size(stanza, "is_a"))) {
     for (i = 0; i < size; i++) {
       const char *id = gt_obo_stanza_get_value(stanza, "is_a", i);
-      gt_type_node_is_a_add(node, id, strcspn(id, " \n"));
+      gt_str_reset(buf);
+      gt_str_append_cstr_nt(buf, id, strcspn(id, " \n"));
+      gt_type_node_is_a_add(node, gt_symbol(gt_str_get(buf)));
     }
   }
   /* store part_of entries in node, if necessary */
@@ -108,6 +112,7 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
 #ifndef NDEBUG
       int rval;
 #endif
+      gt_str_reset(buf);
       /* match part_of */
 #ifndef NDEBUG
       rval =
@@ -117,7 +122,8 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
       if (match) {
         const char *part_of = rel + strlen(PART_OF) + 1;
         gt_assert(so_prefix_matches(part_of));
-        gt_type_node_part_of_add(node, part_of, strcspn(part_of, " \n"));
+        gt_str_append_cstr_nt(buf, part_of, strcspn(part_of, " \n"));
+        gt_type_node_part_of_add(node, gt_symbol(gt_str_get(buf)));
         continue;
       }
       /* match member_of */
@@ -129,7 +135,8 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
       if (match) {
         const char *member_of = rel + strlen(MEMBER_OF) + 1;
         gt_assert(so_prefix_matches(member_of));
-        gt_type_node_part_of_add(node, member_of, strcspn(member_of, " \n"));
+        gt_str_append_cstr_nt(buf, member_of, strcspn(member_of, " \n"));
+        gt_type_node_part_of_add(node, gt_symbol(gt_str_get(buf)));
         continue;
       }
       /* match integral_part_of */
@@ -141,11 +148,13 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
       if (match) {
         const char *integral_part_of = rel + strlen(INTEGRAL_PART_OF) + 1;
         gt_assert(so_prefix_matches(integral_part_of));
-        gt_type_node_part_of_add(node, integral_part_of,
-                                 strcspn(integral_part_of, " \n"));
+        gt_str_append_cstr_nt(buf, integral_part_of,
+                              strcspn(integral_part_of, " \n"));
+        gt_type_node_part_of_add(node, gt_symbol(gt_str_get(buf)));
       }
     }
   }
+  gt_str_delete(buf);
 }
 
 static void create_vertices(GtTypeGraph *type_graph)
@@ -154,7 +163,6 @@ static void create_vertices(GtTypeGraph *type_graph)
   GtTypeNode *parent;
   const char *id;
   gt_assert(type_graph && !type_graph->ready);
-  gt_assert(gt_hashmap_get(type_graph->nodemap, "SO:0000110"));
   /* iterate over nodes */
   for (i = 0; i < gt_array_size(type_graph->nodes); i++) {
     GtTypeNode *node = *(GtTypeNode**) gt_array_get(type_graph->nodes, i);
