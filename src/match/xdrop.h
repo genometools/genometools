@@ -21,6 +21,8 @@
 #include "core/arraydef.h"
 #include "match/seqabstract.h"
 
+typedef struct GtXdropresources GtXdropresources;
+
 typedef struct
 {
   int mat,
@@ -28,16 +30,6 @@ typedef struct
       ins,
       del;
 } GtXdropArbitraryscores;
-
-typedef struct
-{
-  long dptabrow;
-  unsigned char dptabdirection; /* one of the bits REPLACEMENTBIT,
-                                                   DELETIONBIT,
-                                                   INSERTIONBIT */
-} GtXdropfrontvalue;
-
-GT_DECLAREARRAYSTRUCT(GtXdropfrontvalue);
 
 /* This is the type for the xdrop scores. */
 typedef long GtXdropscore;
@@ -61,15 +53,17 @@ GT_DECLAREARRAYSTRUCT(GtXdropscore);
    any more.
 */
 
+GtXdropresources *gt_xdrop_resources_new(const GtXdropArbitraryscores *scores);
+
 void gt_evalxdroparbitscoresextend(bool forward,
-                                   const GtXdropArbitraryscores *arbitscores,
                                    GtXdropbest *xdropbest,
-                                   GtArrayGtXdropfrontvalue *fronts,
-                                   GtArrayGtXdropscore *big_t,
+                                   GtXdropresources *res,
                                    const GtSeqabstract *useq,
                                    const GtSeqabstract *vseq,
                                    unsigned long uoffset,
                                    unsigned long voffset,
                                    GtXdropscore xdropbelowscore);
+
+void gt_xdrop_resources_delete(GtXdropresources *);
 
 #endif
