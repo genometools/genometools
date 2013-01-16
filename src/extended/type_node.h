@@ -17,17 +17,24 @@
 #ifndef TYPE_NODE_H
 #define TYPE_NODE_H
 
+#include "core/bool_matrix.h"
+
 typedef struct GtTypeNode GtTypeNode;
 
-GtTypeNode*   gt_type_node_new(const char *id);
+GtTypeNode*   gt_type_node_new(unsigned long num, const char *id);
 void          gt_type_node_delete(GtTypeNode*);
+unsigned long gt_type_node_num(const GtTypeNode*);
 void          gt_type_node_is_a_add(GtTypeNode*, const char*);
 const char*   gt_type_node_is_a_get(const GtTypeNode*, unsigned long);
 unsigned long gt_type_node_is_a_size(const GtTypeNode*);
 void          gt_type_node_part_of_add(GtTypeNode*, const char*);
 const char*   gt_type_node_part_of_get(const GtTypeNode*, unsigned long);
 unsigned long gt_type_node_part_of_size(const GtTypeNode*);
-void          gt_type_node_add_vertex(GtTypeNode *src, const GtTypeNode *dst);
-bool          gt_type_node_has_parent(GtTypeNode*, const char *id);
+void          gt_type_node_add_is_a_vertex(GtTypeNode *src,
+                                           const GtTypeNode *dst);
+bool          gt_type_node_has_parent(GtTypeNode*, const char *id,
+                                      GtBoolMatrix *part_of_out_edges,
+                                      GtBoolMatrix *part_of_in_edges,
+                                      GtArray *node_list);
 
 #endif

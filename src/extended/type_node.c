@@ -22,16 +22,18 @@
 #include "extended/type_node.h"
 
 struct GtTypeNode {
+  unsigned long num;
   const char *id;
   GtArray *is_a_list,
           *part_of_list;
-  GtArray *parents;
+  GtArray *is_a_out_edges;
   GtHashmap *cache;
 };
 
-GtTypeNode* gt_type_node_new(const char *id)
+GtTypeNode* gt_type_node_new(unsigned long num, const char *id)
 {
   GtTypeNode *node = gt_calloc(1, sizeof *node);
+  node->num = num;
   node->id = id;
   return node;
 }
@@ -40,10 +42,16 @@ void  gt_type_node_delete(GtTypeNode *type_node)
 {
   if (!type_node) return;
   gt_hashmap_delete(type_node->cache);
-  gt_array_delete(type_node->parents);
+  gt_array_delete(type_node->is_a_out_edges);
   gt_array_delete(type_node->part_of_list);
   gt_array_delete(type_node->is_a_list);
   gt_free(type_node);
+}
+
+unsigned long gt_type_node_num(const GtTypeNode *type_node)
+{
+  gt_assert(type_node);
+  return type_node->num;
 }
 
 void gt_type_node_is_a_add(GtTypeNode *type_node, const char *id)
@@ -88,47 +96,67 @@ unsigned long gt_type_node_part_of_size(const GtTypeNode *type_node)
   return (type_node->part_of_list) ? gt_array_size(type_node->part_of_list) : 0;
 }
 
-void gt_type_node_add_vertex(GtTypeNode *src, const GtTypeNode *dst)
+void gt_type_node_add_is_a_vertex(GtTypeNode *src, const GtTypeNode *dst)
 {
   gt_assert(src && dst);
-  if (!src->parents)
-    src->parents = gt_array_new(sizeof (GtTypeNode*));
-  gt_array_add(src->parents, dst);
+  if (!src->is_a_out_edges)
+    src->is_a_out_edges = gt_array_new(sizeof (GtTypeNode*));
+  gt_array_add(src->is_a_out_edges, dst);
 }
 
-bool gt_type_node_has_parent(GtTypeNode *type_node, const char *id)
+bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
+                             GtBoolMatrix *part_of_out_edges,
+                             GtBoolMatrix *part_of_in_edges,
+                             GtArray *node_list)
 {
+  GtTypeNode *parent;
   unsigned long i;
   bool *result;
-  gt_assert(type_node && id);
-  gt_log_log("check if node %s has parent %s", type_node->id, id);
+  gt_assert(node && id);
+  gt_log_log("check if node %s has parent %s", node->id, id);
 
   /* try cache */
-  if (type_node->cache) {
-    if ((result = gt_hashmap_get(type_node->cache, id)))
+  if (node->cache) {
+    if ((result = gt_hashmap_get(node->cache, id)))
       return *result;
   }
   else
-    type_node->cache = gt_hashmap_new(GT_HASH_STRING, NULL, gt_free_func);
+    node->cache = gt_hashmap_new(GT_HASH_DIRECT, NULL, gt_free_func);
   result = gt_malloc(sizeof (bool));
 
   /* no cache hit found */
-  if (!strcmp(type_node->id, id)) {
+  if (node->id == id) {
     *result = true;
-    gt_hashmap_add(type_node->cache, (char*) id, result);
+    gt_hashmap_add(node->cache, (char*) id, result);
     gt_log_log("return true");
     return true;
   }
-  for (i = 0; i < gt_array_size(type_node->parents); i++) {
-    GtTypeNode *parent = *(GtTypeNode**) gt_array_get(type_node->parents, i);
-    if (gt_type_node_has_parent(parent, id)) {
+  /* traversal of part_of out edges */
+  for (i  = gt_bool_matrix_get_first_column(part_of_out_edges, node->num);
+       i != gt_bool_matrix_get_last_column(part_of_out_edges, node->num);
+       i  = gt_bool_matrix_get_next_column(part_of_out_edges, node->num, i)) {
+    parent = *(GtTypeNode**) gt_array_get(node_list, i);
+    if (gt_type_node_has_parent(parent, id, part_of_out_edges, part_of_in_edges,
+                                node_list)) {
       *result = true;
-      gt_hashmap_add(type_node->cache, (char*) id, result);
+      gt_hashmap_add(node->cache, (char*) id, result);
       gt_log_log("return true");
       return true;
     }
   }
+  /* traversal of is_a out edges */
+  for (i = 0; i < gt_array_size(node->is_a_out_edges); i++) {
+    parent = *(GtTypeNode**) gt_array_get(node->is_a_out_edges, i);
+    if (gt_type_node_has_parent(parent, id, part_of_out_edges, part_of_in_edges,
+                                node_list)) {
+      *result = true;
+      gt_hashmap_add(node->cache, (char*) id, result);
+      gt_log_log("return true");
+      return true;
+    }
+  }
+  /* no result found */
   *result = false;
-  gt_hashmap_add(type_node->cache, (char*) id, result);
+  gt_hashmap_add(node->cache, (char*) id, result);
   return false;
 }

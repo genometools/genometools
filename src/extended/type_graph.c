@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include "core/array_api.h"
+#include "core/bool_matrix.h"
 #include "core/cstr_api.h"
 #include "core/grep_api.h"
 #include "core/hashmap_api.h"
@@ -32,6 +33,8 @@ struct GtTypeGraph {
   GtHashmap *name2id, /* maps from name to SO ID */
             *nodemap; /* maps SO ID to actual node */
   GtArray *nodes;
+  GtBoolMatrix *part_of_out_edges,
+               *part_of_in_edges;
   bool ready;
 };
 
@@ -41,6 +44,8 @@ GtTypeGraph* gt_type_graph_new(void)
   type_graph->name2id = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
   type_graph->nodemap = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
   type_graph->nodes = gt_array_new(sizeof (GtTypeNode*));
+  type_graph->part_of_out_edges = gt_bool_matrix_new();
+  type_graph->part_of_in_edges = gt_bool_matrix_new();
   type_graph->ready = false;
   return type_graph;
 }
@@ -49,6 +54,8 @@ void gt_type_graph_delete(GtTypeGraph *type_graph)
 {
   unsigned long i;
   if (!type_graph) return;
+  gt_bool_matrix_delete(type_graph->part_of_in_edges);
+  gt_bool_matrix_delete(type_graph->part_of_out_edges);
   for (i = 0; i < gt_array_size(type_graph->nodes); i++)
     gt_type_node_delete(*(GtTypeNode**) gt_array_get(type_graph->nodes, i));
   gt_array_delete(type_graph->nodes);
@@ -89,10 +96,9 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
   gt_assert(name_value);
   gt_assert(!so_prefix_matches(name_value));
   gt_assert(!gt_hashmap_get(type_graph->nodemap, id_value));
-  node = gt_type_node_new(id_value);
+  node = gt_type_node_new(gt_array_size(type_graph->nodes), id_value);
   gt_hashmap_add(type_graph->name2id, (char*) name_value, (char*) id_value);
   gt_hashmap_add(type_graph->nodemap, (char*) id_value, node);
-
   gt_array_add(type_graph->nodes, node);
   buf = gt_str_new();
   /* store is_a entries in node, if necessary */
@@ -171,14 +177,17 @@ static void create_vertices(GtTypeGraph *type_graph)
       id = gt_type_node_is_a_get(node, j);
       parent = gt_hashmap_get(type_graph->nodemap, id);
       gt_assert(parent);
-      gt_type_node_add_vertex(node, parent);
+      gt_type_node_add_is_a_vertex(node, parent);
     }
     /* process part_of parents */
     for (j = 0; j < gt_type_node_part_of_size(node); j++) {
       id = gt_type_node_part_of_get(node, j);
       parent = gt_hashmap_get(type_graph->nodemap, id);
       gt_assert(parent);
-      gt_type_node_add_vertex(node, parent);
+      gt_bool_matrix_set(type_graph->part_of_out_edges, gt_type_node_num(node),
+                         gt_type_node_num(parent), true);
+      gt_bool_matrix_set(type_graph->part_of_in_edges, gt_type_node_num(parent),
+                         gt_type_node_num(node), true);
     }
   }
 }
@@ -212,5 +221,8 @@ bool gt_type_graph_is_partof(GtTypeGraph *type_graph, const char *parent_type,
   child_node = gt_hashmap_get(type_graph->nodemap, child_id);
   gt_assert(child_node);
   /* check for parent */
-  return gt_type_node_has_parent(child_node, parent_id);
+  return gt_type_node_has_parent(child_node, parent_id,
+                                 type_graph->part_of_out_edges,
+                                 type_graph->part_of_in_edges,
+                                 type_graph->nodes);
 }
