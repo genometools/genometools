@@ -86,8 +86,8 @@ static bool gt_type_checker_builtin_is_valid(GT_UNUSED GtTypeChecker *tc,
 }
 
 static bool gt_type_checker_builtin_is_partof(GT_UNUSED GtTypeChecker *tc,
-                                              const char *parent_type,
-                                              const char *child_type)
+                                              GT_UNUSED const char *parent_type,
+                                              GT_UNUSED const char *child_type)
 {
   gt_assert(tc && parent_type && child_type);
   return true;

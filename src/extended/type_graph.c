@@ -60,9 +60,14 @@ void gt_type_graph_delete(GtTypeGraph *type_graph)
 static bool so_prefix_matches(const char *type)
 {
   bool match;
+#ifndef NDEBUG
   int rval;
+#endif
   gt_assert(type);
-  rval = gt_grep(&match, "^SO:", type, NULL);
+#ifndef NDEBUG
+  rval =
+#endif
+    gt_grep(&match, "^SO:", type, NULL);
   gt_assert(!rval); /* should not happen */
   return match;
 }
@@ -101,9 +106,14 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
     for (i = 0; i < size; i++) {
       const char *rel = gt_obo_stanza_get_value(stanza, "relationship", i);
       bool match;
+#ifndef NDEBUG
       int rval;
+#endif
       /* match part_of */
-      rval = gt_grep(&match, "^"PART_OF, rel, NULL);
+#ifndef NDEBUG
+      rval =
+#endif
+        gt_grep(&match, "^"PART_OF, rel, NULL);
       gt_assert(!rval); /* should not happen */
       if (match) {
         const char *part_of = rel + strlen(PART_OF) + 1;
@@ -112,7 +122,10 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
         continue;
       }
       /* match member_of */
-      rval = gt_grep(&match, "^"MEMBER_OF, rel, NULL);
+#ifndef NDEBUG
+      rval =
+#endif
+        gt_grep(&match, "^"MEMBER_OF, rel, NULL);
       gt_assert(!rval); /* should not happen */
       if (match) {
         const char *member_of = rel + strlen(MEMBER_OF) + 1;
@@ -121,7 +134,10 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
         continue;
       }
       /* match integral_part_of */
-      rval = gt_grep(&match, "^"INTEGRAL_PART_OF, rel, NULL);
+#ifndef NDEBUG
+      rval =
+#endif
+        gt_grep(&match, "^"INTEGRAL_PART_OF, rel, NULL);
       gt_assert(!rval); /* should not happen */
       if (match) {
         const char *integral_part_of = rel + strlen(INTEGRAL_PART_OF) + 1;
