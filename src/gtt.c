@@ -54,6 +54,7 @@
 #include "core/translator.h"
 #include "extended/alignment.h"
 #include "extended/anno_db_gfflike_api.h"
+#include "extended/compressed_bitsequence.h"
 #include "extended/elias_gamma.h"
 #include "extended/encdesc.h"
 #include "extended/evaluator.h"
@@ -273,6 +274,8 @@ GtHashmap* gtt_unit_tests(void)
                                             gt_codon_iterator_encseq_unit_test);
   gt_hashmap_add(unit_tests, "color space module", gt_colorspace_unit_test);
   gt_hashmap_add(unit_tests, "combinatorics", gt_combinatorics_unit_test);
+  gt_hashmap_add(unit_tests, "compressed bitsequence",
+                                           gt_compressed_bitsequence_unit_test);
   gt_hashmap_add(unit_tests, "countingsort module", gt_countingsort_unit_test);
   gt_hashmap_add(unit_tests, "cstr module", gt_cstr_unit_test);
   gt_hashmap_add(unit_tests, "cstr table class", gt_cstr_table_unit_test);
