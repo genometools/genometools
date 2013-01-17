@@ -248,11 +248,11 @@ static inline unsigned gt_popcount_tab_popcount(unsigned long val)
          B1CntBytes[(x >> 56) & 0xFFULL];
 #else
   /* see page 11, Knuth TAOCP Vol 4 F1A */
-  x = x - ((x >> 1) & (uint64_t) 0x5555555555555555);
-  x = (x & (uint64_t) 0x3333333333333333) +
-      ((x >> 2) & (uint64_t) 0x3333333333333333);
-  x = (x + (x >> 4)) & (uint64_t) 0x0f0f0f0f0f0f0f0f;
-  return (unsigned) ((uint64_t) 0x0101010101010101 * x >> 56);
+  x = x - ((x >> 1) & (uint64_t) 0x5555555555555555ULL);
+  x = (x & (uint64_t) 0x3333333333333333ULL) +
+      ((x >> 2) & (uint64_t) 0x3333333333333333ULL);
+  x = (x + (x >> 4)) & (uint64_t) 0x0f0f0f0f0f0f0f0fULL;
+  return (unsigned) ((uint64_t) 0x0101010101010101ULL * x >> 56);
 #endif
 #endif
 }
