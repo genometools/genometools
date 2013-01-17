@@ -101,7 +101,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
   GtXdropscore score;
   unsigned long dbstart, dblen, querystart, queryseqnum, querylen,
                 queryseqstartpos;
-  const unsigned long totallength = gt_encseq_total_length(encseq);
+  const unsigned long dbtotallength = gt_encseq_total_length(encseq);
 
   if (pos1 > pos2)
   {
@@ -119,12 +119,12 @@ static int gt_simplexdropselfmatchoutput(void *info,
                                 pos1,
                                 pos2,
                                 xdropmatchinfo->belowscore);
-  if (pos1 + len < totallength && pos2 + len < totallength)
+  if (pos1 + len < dbtotallength && pos2 + len < dbtotallength)
   {
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,totallength - (pos1 + len),0);
+                                 encseq,dbtotallength - (pos1 + len),0);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
-                                 encseq,totallength - (pos2 + len),0);
+                                 encseq,dbtotallength - (pos2 + len),0);
     gt_evalxdroparbitscoresextend(true,
                                   &xdropmatchinfo->best_right,
                                   xdropmatchinfo->res,
@@ -173,6 +173,88 @@ static int gt_simplexdropselfmatchoutput(void *info,
                      querystart - queryseqstartpos,
                      NULL,
                      gt_encseq_seqlength(encseq, queryseqnum));
+  return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
+                              err);
+}
+
+static int gt_processxdropquerymatches(void *info,
+                                       const GtEncseq *encseq,
+                                       const Querymatch *querymatch,
+                                       GtError *err)
+{
+  GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
+  GtXdropscore score;
+  unsigned long querystart, dblen, dbstart, querylen;
+  unsigned long pos1 = gt_querymatch_dbstart(querymatch);
+  unsigned long pos2 = gt_querymatch_querystart(querymatch);
+  unsigned long len = gt_querymatch_len(querymatch);
+  unsigned long querytotallength = gt_querymatch_querytotallength(querymatch);
+  const unsigned long dbtotallength = gt_encseq_total_length(encseq);
+  uint64_t queryseqnum;
+  const GtUchar *querysequence = gt_querymatch_querysequence(querymatch);
+
+  gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,pos1,0);
+  gt_seqabstract_reinit_ptr(xdropmatchinfo->vseq,querysequence,pos2,0);
+  gt_evalxdroparbitscoresextend(false,
+                                &xdropmatchinfo->best_left,
+                                xdropmatchinfo->res,
+                                xdropmatchinfo->useq,
+                                xdropmatchinfo->vseq,
+                                pos1,
+                                pos2,
+                                xdropmatchinfo->belowscore);
+  if (pos1 + len < dbtotallength && pos2 + len < querytotallength)
+  {
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                                 encseq,dbtotallength - (pos1 + len),0);
+    gt_seqabstract_reinit_ptr(xdropmatchinfo->vseq,
+                              querysequence,querytotallength - (pos2 + len),0);
+    gt_evalxdroparbitscoresextend(true,
+                                  &xdropmatchinfo->best_right,
+                                  xdropmatchinfo->res,
+                                  xdropmatchinfo->useq,
+                                  xdropmatchinfo->vseq,
+                                  pos1 + len,
+                                  pos2 + len,
+                                  xdropmatchinfo->belowscore);
+  } else
+  {
+    xdropmatchinfo->best_right.ivalue = 0;
+    xdropmatchinfo->best_right.jvalue = 0;
+    xdropmatchinfo->best_right.score = 0;
+  }
+  gt_assert(pos1 >= (unsigned long) xdropmatchinfo->best_left.ivalue &&
+            pos2 >= (unsigned long) xdropmatchinfo->best_left.jvalue);
+  querystart = pos2 - xdropmatchinfo->best_left.jvalue;
+  queryseqnum = gt_querymatch_queryseqnum(querymatch);
+  dblen = len + xdropmatchinfo->best_left.ivalue
+              + xdropmatchinfo->best_right.ivalue;
+  dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
+  querylen = len + xdropmatchinfo->best_left.jvalue
+                 + xdropmatchinfo->best_right.jvalue,
+  score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
+          xdropmatchinfo->best_left.score +
+          xdropmatchinfo->best_right.score;
+  gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                               encseq,
+                               dblen,
+                               dbstart);
+  gt_seqabstract_reinit_ptr(xdropmatchinfo->vseq,
+                            querysequence,
+                            querylen,
+                            querystart);
+  gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
+                     dblen,
+                     dbstart,
+                     GT_READMODE_FORWARD,
+                     score,
+                     greedyunitedist(xdropmatchinfo->useq,xdropmatchinfo->vseq),
+                     false,
+                     queryseqnum,
+                     querylen,
+                     querystart,
+                     NULL,
+                     querytotallength);
   return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
                               err);
 }
@@ -468,8 +550,12 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                   arguments->queryfiles,
                                   false,
                                   arguments->userdefinedleastlength,
-                                  gt_querymatch_output,
-                                  NULL,
+                                  arguments->extendseed
+                                    ? gt_processxdropquerymatches
+                                    : gt_querymatch_output,
+                                  arguments->extendseed
+                                    ? (void *) &xdropmatchinfo
+                                    : NULL,
                                   logger,
                                   err) != 0)
       {

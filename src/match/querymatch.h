@@ -55,4 +55,8 @@ unsigned long gt_querymatch_querystart(const Querymatch *querymatch);
 
 uint64_t gt_querymatch_queryseqnum(const Querymatch *querymatch);
 
+const GtUchar *gt_querymatch_querysequence(const Querymatch *querymatch);
+
+unsigned long gt_querymatch_querytotallength(const Querymatch *querymatch);
+
 #endif

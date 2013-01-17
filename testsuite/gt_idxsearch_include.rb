@@ -163,6 +163,9 @@ if $gttestdata then
              "-indexname sfx -dna -tis -suf -lcp"
     run_test "#{$bin}gt repfind -l 20 -extend -ii sfx"
     run "diff #{last_stdout} #{$testdata}repfind-20-extend.txt"
+    run_test "#{$bin}gt repfind -l 20 -extend -ii sfx -q " +
+             "#{$testdata}/U89959_genomic.fas"
+    run "diff #{last_stdout} #{$testdata}repfind-20-query-extend.txt"
   end
   repfindtestfiles.each do |reffile|
     Name "gt repfind #{reffile}"
