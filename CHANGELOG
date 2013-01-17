@@ -1,6 +1,9 @@
 changes in version 1.4.3 (??)
 
 - added development tool sain to run the induced suffix array sorting alg.
+- the -typecheck option in the `gt gff3` and `gt gff3validator` tools now also
+  validates parent (part-of) relationships, see -help output for details
+
 
 changes in version 1.4.2 (2012-10-02)
 
@@ -34,6 +37,7 @@ changes in version 1.4.2 (2012-10-02)
   chains rather than a single best chain
 - add linear time functions to check the suffix array and the lcptable
 - added radixsort as new method when sorting buckets of suffixes
+
 
 changes in version 1.4.1 (2012-04-12)
 
