@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -31,8 +31,7 @@
 #include "extended/load_stream.h"
 #include "extended/merge_feature_stream_api.h"
 #include "extended/sort_stream_api.h"
-#include "extended/type_checker_builtin.h"
-#include "extended/type_checker_obo_api.h"
+#include "extended/typecheck_info.h"
 #include "tools/gt_gff3.h"
 
 typedef struct {
@@ -44,15 +43,14 @@ typedef struct {
        mergefeat,
        addintrons,
        verbose,
-       typecheck_built_in,
        strict,
        tidy,
        show,
        fixboundaries;
   long offset;
-  GtStr *offsetfile,
-        *typecheck;
+  GtStr *offsetfile;
   unsigned long width;
+  GtTypecheckInfo *tci;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GFF3Arguments;
@@ -61,7 +59,7 @@ static void* gt_gff3_arguments_new(void)
 {
   GFF3Arguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->offsetfile = gt_str_new();
-  arguments->typecheck = gt_str_new();
+  arguments->tci = gt_typecheck_info_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -72,7 +70,7 @@ static void gt_gff3_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
-  gt_str_delete(arguments->typecheck);
+  gt_typecheck_info_delete(arguments->tci);
   gt_str_delete(arguments->offsetfile);
   gt_free(arguments);
 }
@@ -83,7 +81,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *sort_option, *load_option, *strict_option, *tidy_option,
            *mergefeat_option, *addintrons_option, *offset_option,
-           *offsetfile_option, *typecheck_option, *built_in_option, *option;
+           *offsetfile_option, *option;
   gt_assert(arguments);
 
   /* init */
@@ -178,20 +176,8 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, offsetfile_option);
   gt_option_exclude(offset_option, offsetfile_option);
 
-  /* -typecheck */
-  typecheck_option = gt_option_new_filename("typecheck", "check GFF3 types "
-                                            "against \"id\" and \"name\" tags "
-                                            "in given OBO file",
-                                            arguments->typecheck);
-  gt_option_parser_add_option(op, typecheck_option);
-
-  /* -typecheck-built-in */
-  built_in_option = gt_option_new_bool("typecheck-built-in", "use built-in "
-                                       "type checker",
-                                       &arguments->typecheck_built_in, false);
-  gt_option_is_development_option(built_in_option);
-  gt_option_parser_add_option(op, built_in_option);
-  gt_option_exclude(typecheck_option, built_in_option);
+  /* typecheck options */
+  gt_typecheck_info_register_options(arguments->tci, op);
 
   /* -show */
   option = gt_option_new_bool("show", "show GFF3 output", &arguments->show,
@@ -245,13 +231,8 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   last_stream = gff3_in_stream;
 
   /* set different type checker if necessary */
-  if (arguments->typecheck_built_in) {
-      type_checker = gt_type_checker_builtin_new();
-      gt_gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
-  }
-  if (gt_str_length(arguments->typecheck)) {
-    type_checker = gt_type_checker_obo_new(gt_str_get(arguments->typecheck),
-                                           err);
+  if (gt_typecheck_info_option_used(arguments->tci)) {
+    type_checker = gt_typecheck_info_create_type_checker(arguments->tci, err);
     if (!type_checker)
       had_err = -1;
     if (!had_err)

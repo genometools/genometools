@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,18 +18,18 @@
 #include "core/ma.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/type_checker_obo_api.h"
+#include "extended/typecheck_info.h"
 #include "tools/gt_gff3validator.h"
 
 typedef struct {
-  GtStr *typecheck;
+  GtTypecheckInfo *tci;
   bool strict;
 } GFF3ValidatorArguments;
 
 static void* gt_gff3validator_arguments_new(void)
 {
   GFF3ValidatorArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->typecheck = gt_str_new();
+  arguments->tci = gt_typecheck_info_new();
   return arguments;
 }
 
@@ -37,7 +37,7 @@ static void gt_gff3validator_arguments_delete(void *tool_arguments)
 {
   GFF3ValidatorArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_str_delete(arguments->typecheck);
+  gt_typecheck_info_delete(arguments->tci);
   gt_free(arguments);
 }
 
@@ -52,12 +52,8 @@ static GtOptionParser* gt_gff3validator_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Strictly validate given GFF3 files.");
 
-  /* -typecheck */
-  option = gt_option_new_filename("typecheck",
-                               "check GFF3 types against \"id\" "
-                               "and \"name\" tags in given OBO file",
-                               arguments->typecheck);
-  gt_option_parser_add_option(op, option);
+  /* typecheck options */
+  gt_typecheck_info_register_options(arguments->tci, op);
 
   /* -strict */
   option = gt_option_new_bool("strict", "be very strict during GFF3 parsing "
@@ -86,9 +82,8 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
   gt_gff3_in_stream_check_id_attributes((GtGFF3InStream*) gff3_in_stream);
 
   /* set different type checker if necessary */
-  if (gt_str_length(arguments->typecheck)) {
-    type_checker = gt_type_checker_obo_new(gt_str_get(arguments->typecheck),
-                                           err);
+  if (gt_typecheck_info_option_used(arguments->tci)) {
+    type_checker = gt_typecheck_info_create_type_checker(arguments->tci, err);
     if (!type_checker)
       had_err = -1;
     if (!had_err)
