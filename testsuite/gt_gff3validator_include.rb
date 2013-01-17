@@ -11,21 +11,21 @@ end
 Name "gt gff3validator -typecheck sofa.obo"
 Keywords "gt_gff3validator typecheck"
 Test do
-  run_test "#{$bin}gt gff3validator -typecheck #{$obodir}sofa.obo #{obo_gff3_file}"
+  run_test "#{$bin}gt gff3validator -typecheck sofa #{obo_gff3_file}"
   grep last_stdout, "input is valid GFF3"
 end
 
 Name "gt gff3validator -typecheck so.obo"
 Keywords "gt_gff3validator typecheck"
 Test do
-  run_test "#{$bin}gt gff3validator -typecheck #{$obodir}so.obo #{obo_gff3_file}"
+  run_test "#{$bin}gt gff3validator -typecheck so #{obo_gff3_file}"
   grep last_stdout, "input is valid GFF3"
 end
 
 Name "gt gff3validator -typecheck so-xp.obo"
 Keywords "gt_gff3validator typecheck"
 Test do
-  run_test "#{$bin}gt gff3validator -typecheck #{$obodir}so-xp.obo #{obo_gff3_file}"
+  run_test "#{$bin}gt gff3validator -typecheck so-xp #{obo_gff3_file}"
   grep last_stdout, "input is valid GFF3"
 end
 

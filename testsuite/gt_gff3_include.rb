@@ -600,22 +600,22 @@ Test do
            "#{$testdata}obo_files/comment_in_stanza.obo #{$testdata}header.gff3"
 end
 
-Name "gt gff3 -typecheck sofa.obo"
+Name "gt gff3 -typecheck sofa"
 Keywords "gt_gff3 typecheck"
 Test do
-  run_test "#{$bin}gt gff3 -typecheck #{$obodir}sofa.obo #{obo_gff3_file}"
+  run_test "#{$bin}gt gff3 -typecheck sofa #{obo_gff3_file}"
 end
 
-Name "gt gff3 -typecheck so.obo"
+Name "gt gff3 -typecheck so"
 Keywords "gt_gff3 typecheck"
 Test do
-  run_test "#{$bin}gt gff3 -typecheck #{$obodir}so.obo #{obo_gff3_file}"
+  run_test "#{$bin}gt gff3 -typecheck so #{obo_gff3_file}"
 end
 
-Name "gt gff3 -typecheck so-xp.obo"
+Name "gt gff3 -typecheck so-xp"
 Keywords "gt_gff3 typecheck"
 Test do
-  run_test "#{$bin}gt gff3 -typecheck #{$obodir}so-xp.obo #{obo_gff3_file}"
+  run_test "#{$bin}gt gff3 -typecheck so-xp #{obo_gff3_file}"
 end
 
 Name "gt gff3 blank attributes"
