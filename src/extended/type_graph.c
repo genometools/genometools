@@ -18,7 +18,6 @@
 #include "core/array_api.h"
 #include "core/bool_matrix.h"
 #include "core/cstr_api.h"
-#include "core/grep_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
 #include "core/symbol_api.h"
@@ -97,42 +96,23 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
   if ((size = gt_obo_stanza_size(stanza, "relationship"))) {
     for (i = 0; i < size; i++) {
       const char *rel = gt_obo_stanza_get_value(stanza, "relationship", i);
-      bool match;
-#ifndef NDEBUG
-      int rval;
-#endif
       gt_str_reset(buf);
       /* match part_of */
-#ifndef NDEBUG
-      rval =
-#endif
-        gt_grep(&match, "^"PART_OF, rel, NULL);
-      gt_assert(!rval); /* should not happen */
-      if (match) {
+      if (!strncmp(rel, PART_OF, strlen(PART_OF))) {
         const char *part_of = rel + strlen(PART_OF) + 1;
         gt_str_append_cstr_nt(buf, part_of, strcspn(part_of, " \n"));
         gt_type_node_part_of_add(node, gt_symbol(gt_str_get(buf)));
         continue;
       }
       /* match member_of */
-#ifndef NDEBUG
-      rval =
-#endif
-        gt_grep(&match, "^"MEMBER_OF, rel, NULL);
-      gt_assert(!rval); /* should not happen */
-      if (match) {
+      if (!strncmp(rel, MEMBER_OF, strlen(MEMBER_OF))) {
         const char *member_of = rel + strlen(MEMBER_OF) + 1;
         gt_str_append_cstr_nt(buf, member_of, strcspn(member_of, " \n"));
         gt_type_node_part_of_add(node, gt_symbol(gt_str_get(buf)));
         continue;
       }
       /* match integral_part_of */
-#ifndef NDEBUG
-      rval =
-#endif
-        gt_grep(&match, "^"INTEGRAL_PART_OF, rel, NULL);
-      gt_assert(!rval); /* should not happen */
-      if (match) {
+      if (!strncmp(rel, INTEGRAL_PART_OF, strlen(INTEGRAL_PART_OF))) {
         const char *integral_part_of = rel + strlen(INTEGRAL_PART_OF) + 1;
         gt_str_append_cstr_nt(buf, integral_part_of,
                               strcspn(integral_part_of, " \n"));
