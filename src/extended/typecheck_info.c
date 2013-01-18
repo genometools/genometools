@@ -97,6 +97,7 @@ static GtStr* get_obo_path(GtError *err)
   obo_path = gt_get_gtdata_path(gt_str_get(prog), err);
   if (obo_path)
     gt_str_append_cstr(obo_path, "/obo_files/");
+  gt_str_delete(prog);
   return obo_path;
 }
 
