@@ -913,6 +913,9 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
       }
     }
 
+    /* reset */
+    gt_str_reset(file2proc);
+
     /* free space */
     gt_bioseq_delete(bioseq);
   }
