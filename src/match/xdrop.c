@@ -288,6 +288,15 @@ void gt_evalxdroparbitscoresextend(bool forward,
   GtXdropscore bigt_tmp;        /* best score T' seen already */
   bool alwaysMININFINITYINT = true;
 
+#undef DEBUG_POSTEL
+#ifdef DEBUG_POSTEL
+  printf("%s(forward=%s,useq.len=%lu,uoffset=%lu,vseq.len=%lu,voffset=%lu)\n",
+          __func__,forward ? "true" : "false",
+          gt_seqabstract_length_get(useq),
+          uoffset,
+          gt_seqabstract_length_get(vseq),
+          voffset);
+#endif
   ulen = (long) gt_seqabstract_length_get(useq);
   vlen = (long) gt_seqabstract_length_get(vseq);
   end_k = ulen - vlen;              /* diagonal of endpoint (ulen, vlen) */

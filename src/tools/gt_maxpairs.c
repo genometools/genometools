@@ -109,16 +109,24 @@ static int gt_simplexdropselfmatchoutput(void *info,
     pos1 = pos2;
     pos2 = tmp;
   }
-  gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,pos1,0);
-  gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,pos2,0);
-  gt_evalxdroparbitscoresextend(false,
-                                &xdropmatchinfo->best_left,
-                                xdropmatchinfo->res,
-                                xdropmatchinfo->useq,
-                                xdropmatchinfo->vseq,
-                                pos1,
-                                pos2,
-                                xdropmatchinfo->belowscore);
+  if (pos1 > 0 && pos2 > 0)
+  {
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,pos1,0);
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,pos2,0);
+    gt_evalxdroparbitscoresextend(false,
+                                  &xdropmatchinfo->best_left,
+                                  xdropmatchinfo->res,
+                                  xdropmatchinfo->useq,
+                                  xdropmatchinfo->vseq,
+                                  pos1,
+                                  pos2,
+                                  xdropmatchinfo->belowscore);
+  } else
+  {
+    xdropmatchinfo->best_left.ivalue = 0;
+    xdropmatchinfo->best_left.jvalue = 0;
+    xdropmatchinfo->best_left.score = 0;
+  }
   if (pos1 + len < dbtotallength && pos2 + len < dbtotallength)
   {
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
@@ -193,16 +201,28 @@ static int gt_processxdropquerymatches(void *info,
   uint64_t queryseqnum;
   const GtUchar *querysequence = gt_querymatch_querysequence(querymatch);
 
-  gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,pos1,0);
-  gt_seqabstract_reinit_ptr(xdropmatchinfo->vseq,querysequence,pos2,0);
-  gt_evalxdroparbitscoresextend(false,
-                                &xdropmatchinfo->best_left,
-                                xdropmatchinfo->res,
-                                xdropmatchinfo->useq,
-                                xdropmatchinfo->vseq,
-                                pos1,
-                                pos2,
-                                xdropmatchinfo->belowscore);
+#undef DEBUG_POSTEL
+#ifdef DEBUG_POSTEL
+  printf("seed: len=%lu,dbstart=%lu,querystart=%lu\n",len,pos1,pos2);
+#endif
+  if (pos1 > 0 && pos2 > 0)
+  {
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,pos1,0);
+    gt_seqabstract_reinit_ptr(xdropmatchinfo->vseq,querysequence,pos2,0);
+    gt_evalxdroparbitscoresextend(false,
+                                  &xdropmatchinfo->best_left,
+                                  xdropmatchinfo->res,
+                                  xdropmatchinfo->useq,
+                                  xdropmatchinfo->vseq,
+                                  pos1,
+                                  pos2,
+                                  xdropmatchinfo->belowscore);
+  } else
+  {
+    xdropmatchinfo->best_left.ivalue = 0;
+    xdropmatchinfo->best_left.jvalue = 0;
+    xdropmatchinfo->best_left.score = 0;
+  }
   if (pos1 + len < dbtotallength && pos2 + len < querytotallength)
   {
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
@@ -523,8 +543,12 @@ static int gt_repfind_runner(GT_UNUSED int argc,
           if (gt_callenumselfmatches(gt_str_get(arguments->indexname),
                                      GT_READMODE_REVERSE,
                                      arguments->userdefinedleastlength,
-                                     gt_querymatch_output,
-                                     NULL,
+                                     /*arguments->extendseed
+                                       ? gt_processxdropquerymatches
+                                       :*/ gt_querymatch_output,
+                                     /*arguments->extendseed
+                                       ? (void *) &xdropmatchinfo
+                                       :*/ NULL,
                                      logger,
                                      err) != 0)
           {
