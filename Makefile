@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 # Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -16,7 +16,7 @@
 #
 
 INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
-            -I$(CURDIR)/src/external/zlib-1.2.3 \
+            -I$(CURDIR)/src/external/zlib-1.2.7 \
             -I$(CURDIR)/src/external/md5-1.1.2/src \
             -I$(CURDIR)/src/external/lua-5.1.4/src \
             -I$(CURDIR)/src/external/luafilesystem-1.5.0/src \
@@ -213,9 +213,10 @@ EASEL_SRC:=$(EASEL_DIR)/easel.c $(EASEL_DIR)/esl_randomseq.c \
            $(EASEL_DIR)/esl_random.c
 EASEL_OBJ:=$(EASEL_SRC:%.c=%.o)
 
-ZLIB_DIR:=src/external/zlib-1.2.3
+ZLIB_DIR:=src/external/zlib-1.2.7
 ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
-          $(ZLIB_DIR)/gzio.c $(ZLIB_DIR)/uncompr.c $(ZLIB_DIR)/deflate.c \
+          $(ZLIB_DIR)/gzclose.c $(ZLIB_DIR)/gzlib.c $(ZLIB_DIR)/gzread.c \
+          $(ZLIB_DIR)/gzwrite.c $(ZLIB_DIR)/uncompr.c $(ZLIB_DIR)/deflate.c \
           $(ZLIB_DIR)/trees.c $(ZLIB_DIR)/zutil.c $(ZLIB_DIR)/inflate.c \
           $(ZLIB_DIR)/infback.c $(ZLIB_DIR)/inftrees.c $(ZLIB_DIR)/inffast.c
 ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
