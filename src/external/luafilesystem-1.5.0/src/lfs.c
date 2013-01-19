@@ -28,7 +28,7 @@
 #endif
 #endif
 
-#define _LARGEFILE64_SOURCE
+/* #define _LARGEFILE64_SOURCE */
 
 #include <errno.h>
 #include <stdio.h>
