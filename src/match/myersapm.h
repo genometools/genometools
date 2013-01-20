@@ -31,7 +31,7 @@ Myersonlineresources *gt_newMyersonlineresources(
                         void *processmatchinfo);
 
 void gt_freeMyersonlineresources(
-                                Myersonlineresources **ptrmyersonlineresources);
+                                Myersonlineresources *ptrmyersonlineresources);
 
 void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
                             const GtUchar *pattern,

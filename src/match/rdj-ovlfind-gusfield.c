@@ -22,7 +22,6 @@
 #include "core/progressbar.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "match/spacedef.h"
 #include "core/intbits.h"
 #include "match/esa-splititv.h"
 #include "match/rdj-revcompl-def.h"
@@ -233,7 +232,7 @@ void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
   }
   GT_SETIBIT(sspbittab, totallength);
 
-  matchlen_stacks = gt_malloc(sizeof (GtArrayGtUlong) * nofsequences);
+  matchlen_stacks = gt_malloc(sizeof *matchlen_stacks * nofsequences);
   GT_INITBITTAB(has_match, nofsequences);
 
   for (idx = 0UL; idx < nofsequences; idx++)
@@ -250,8 +249,8 @@ void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
   GT_INITARRAY(&stack, RdjGusfieldIndexBounds);
 
   /* prepare bwci array */
-  ALLOCASSIGNSPACE(bwci.spaceBoundswithchar, NULL,
-                   Boundswithchar, numofchars + 1);
+  bwci.spaceBoundswithchar = gt_malloc(sizeof *bwci.spaceBoundswithchar *
+                                       (numofchars + 1));
   bwci.nextfreeBoundswithchar = 0UL;
   bwci.allocatedBoundswithchar = (unsigned long) (numofchars + 1);
 

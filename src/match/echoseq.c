@@ -20,7 +20,6 @@
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/seqiterator_sequence_buffer.h"
-#include "spacedef.h"
 #include "core/encseq.h"
 
 void gt_symbolstring2fasta(FILE *fpout,

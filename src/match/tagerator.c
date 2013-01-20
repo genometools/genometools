@@ -761,10 +761,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       gt_freeLimdfsresources(&limdfsresources,dfst);
     }
   }
-  if (mor != NULL)
-  {
-    gt_freeMyersonlineresources(&mor);
-  }
+  gt_freeMyersonlineresources(mor);
   if (genericindex == NULL)
   {
     if (encseq != NULL)

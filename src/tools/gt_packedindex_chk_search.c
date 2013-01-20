@@ -25,7 +25,7 @@
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-param.h"
 #include "core/encseq.h"
-#include "match/enum-patt-def.h"
+#include "match/enum-patt.h"
 #include "match/esa-mmsearch.h"
 #include "match/sarr-def.h"
 #include "match/esa-map.h"
@@ -252,7 +252,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
   } while (0);
   if (EMIterInitialized) gt_destructEMIterator(&EMIter);
   if (saIsLoaded) gt_freesuffixarray(&suffixarray);
-  if (epi) gt_freeEnumpatterniterator(&epi);
+  gt_freeEnumpatterniterator(epi);
   if (bwtSeq) gt_deleteBWTSeq(bwtSeq);
   if (logger) gt_logger_delete(logger);
   if (inputProject) gt_str_delete(inputProject);

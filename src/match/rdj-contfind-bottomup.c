@@ -16,7 +16,6 @@
 */
 
 #include "core/progressbar.h"
-#include "match/spacedef.h"
 #include "match/esa-seqread.h"
 #include "match/esa-bottomup.h"
 #include "match/rdj-revcompl-def.h"

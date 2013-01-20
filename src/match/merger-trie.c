@@ -21,9 +21,8 @@
 #include "core/divmodmul.h"
 #include "core/format64.h"
 #include "core/intbits.h"
-#include "spacedef.h"
 #include "core/encseq.h"
-
+#include "core/ma_api.h"
 #include "merger-trie.h"
 
 #define MTRIE_ISLEAF(NODE) ((NODE)->firstchild == NULL)
@@ -652,18 +651,23 @@ void gt_mergertrie_initnodetable(Mergertrierep *trierep,
   trierep->numofindexes = numofindexes;
   trierep->allocatedMergertrienode
     = (unsigned int) GT_MULT2(numofsuffixes + 1) + 1;
-  ALLOCASSIGNSPACE(trierep->nodetable,NULL,Mergertrienode,
-                   trierep->allocatedMergertrienode);
+  trierep->nodetable = gt_malloc(sizeof *trierep->nodetable
+                                 * trierep->allocatedMergertrienode);
   trierep->nextfreeMergertrienode = 0;
   trierep->root = NULL;
   trierep->nextunused = 0;
-  ALLOCASSIGNSPACE(trierep->unusedMergertrienodes,NULL,Mergertrienodeptr,
-                   trierep->allocatedMergertrienode);
+  trierep->unusedMergertrienodes
+    = gt_malloc(sizeof *trierep->unusedMergertrienodes
+                * trierep->allocatedMergertrienode);
 }
 
 void gt_mergertrie_delete(Mergertrierep *trierep)
 {
-  FREESPACE(trierep->nodetable);
-  FREESPACE(trierep->unusedMergertrienodes);
-  FREESPACE(trierep->encseqreadinfo);
+  if (trierep != NULL)
+  {
+    gt_free(trierep->nodetable);
+    gt_free(trierep->unusedMergertrienodes);
+    gt_free(trierep->encseqreadinfo);
+    trierep->encseqreadinfo = NULL;
+  }
 }

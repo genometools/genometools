@@ -32,6 +32,6 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
                                       const ESASuffixptr *suftabptr,
                                       unsigned long numberofsuffixes);
 
-void gt_freeLcpvalueiterator(Lcpvalueiterator **lvi);
+void gt_freeLcpvalueiterator(Lcpvalueiterator *lvi);
 
 #endif

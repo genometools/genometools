@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ENUM_PATT_DEF_H
-#define ENUM_PATT_DEF_H
+#ifndef ENUM_PATT_H
+#define ENUM_PATT_H
 
 typedef struct Enumpatterniterator Enumpatterniterator;
 
@@ -30,6 +30,6 @@ const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
 
 void gt_showPatterndistribution(const Enumpatterniterator *epi);
 
-void gt_freeEnumpatterniterator(Enumpatterniterator **epi);
+void gt_freeEnumpatterniterator(Enumpatterniterator *epi);
 
 #endif

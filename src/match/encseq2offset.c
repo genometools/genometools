@@ -16,7 +16,7 @@
 */
 
 #include "core/chardef.h"
-#include "spacedef.h"
+#include "core/ma_api.h"
 #include "sarr-def.h"
 #include "core/safecast-gen.h"
 
@@ -38,7 +38,7 @@ unsigned long *gt_encseqtable2sequenceoffsets(
            tmpoffset;
 
   gt_assert(numofindexes > 0);
-  ALLOCASSIGNSPACE(sequenceoffsettable,NULL,unsigned long,numofindexes);
+  sequenceoffsettable = gt_malloc(sizeof (*sequenceoffsettable) * numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);
   tmpwildcards = 0;
   tmpspecialranges = 0;

@@ -18,13 +18,13 @@
 #include <stdio.h>
 #include <limits.h>
 #include "core/unused_api.h"
-#include "sarr-def.h"
-#include "spacedef.h"
-#include "emimergeesa.h"
+#include "core/logger.h"
 #include "core/encseq.h"
+#include "core/ma_api.h"
+#include "sarr-def.h"
+#include "emimergeesa.h"
 #include "merger-trie.h"
 #include "lcpoverflow.h"
-#include "core/logger.h"
 
 #include "esa-map.h"
 
@@ -245,8 +245,9 @@ int gt_emissionmergedesa_init(Emissionmergedesa *emmesa,
   emmesa->numofentries = numofindexes;
   emmesa->ident = (uint64_t) numofindexes;
   emmesa->trierep.encseqreadinfo = NULL;
-  ALLOCASSIGNSPACE(emmesa->suffixarraytable,NULL,Suffixarray,numofindexes);
-  ALLOCASSIGNSPACE(emmesa->nextpostable,NULL,unsigned long,numofindexes);
+  emmesa->suffixarraytable = gt_malloc(sizeof *emmesa->suffixarraytable
+                                       * numofindexes);
+  emmesa->nextpostable = gt_malloc(sizeof *emmesa->nextpostable * numofindexes);
   if (inputthesequences(&emmesa->numofchars,
                         emmesa->nextpostable,
                         emmesa->suffixarraytable,
@@ -262,8 +263,8 @@ int gt_emissionmergedesa_init(Emissionmergedesa *emmesa,
   {
     unsigned int idx;
 
-    ALLOCASSIGNSPACE(emmesa->trierep.encseqreadinfo,NULL,Encseqreadinfo,
-                     numofindexes);
+    emmesa->trierep.encseqreadinfo
+      = gt_malloc(sizeof *emmesa->trierep.encseqreadinfo * numofindexes);
     for (idx = 0; idx < numofindexes; idx++)
     {
       emmesa->trierep.encseqreadinfo[idx].encseqptr
@@ -279,14 +280,15 @@ int gt_emissionmergedesa_init(Emissionmergedesa *emmesa,
                            numofindexes,
                            err) != 0)
     {
-      FREESPACE(emmesa->trierep.encseqreadinfo);
+      gt_free(emmesa->trierep.encseqreadinfo);
+      emmesa->trierep.encseqreadinfo = NULL;
       haserr = true;
     }
   }
   if (haserr)
   {
-    FREESPACE(emmesa->suffixarraytable);
-    FREESPACE(emmesa->nextpostable);
+    gt_free(emmesa->suffixarraytable);
+    gt_free(emmesa->nextpostable);
   }
   return haserr ? -1 : 0;
 }
@@ -299,11 +301,12 @@ void gt_emissionmergedesa_wrap(Emissionmergedesa *emmesa)
   {
     gt_freesuffixarray(emmesa->suffixarraytable + idx);
   }
-  FREESPACE(emmesa->suffixarraytable);
-  FREESPACE(emmesa->trierep.encseqreadinfo);
+  gt_free(emmesa->suffixarraytable);
+  gt_free(emmesa->trierep.encseqreadinfo);
+  emmesa->trierep.encseqreadinfo = NULL;
   if (emmesa->numofindexes > 1U)
   {
     gt_mergertrie_delete(&emmesa->trierep);
   }
-  FREESPACE(emmesa->nextpostable);
+  gt_free(emmesa->nextpostable);
 }

@@ -18,12 +18,12 @@
 #include <string.h>
 #include <inttypes.h>
 #include "core/error.h"
+#include "core/ma_api.h"
 #include "core/versionfunc.h"
 #include "core/option_api.h"
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
-#include "match/spacedef.h"
 #include "match/test-pairwise.h"
 #include "tools/gt_paircmp.h"
 
@@ -145,7 +145,7 @@ static GtOPrval parse_options(int *parsed_args,
                          "option -a requires charlist and length argument");
             oprval = GT_OPTION_PARSER_ERROR;
           }
-          ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
+          pw->charlistlen = gt_malloc(sizeof *pw->charlistlen);
           pw->charlistlen->charlist =
             gt_str_ref(gt_str_array_get_str(charlistlen,
                                                                   0));
@@ -187,7 +187,7 @@ static void freesimpleoption(Cmppairwiseopt *cmppairwise)
   if (cmppairwise->charlistlen != NULL)
   {
     gt_str_delete(cmppairwise->charlistlen->charlist);
-    FREESPACE(cmppairwise->charlistlen);
+    gt_free(cmppairwise->charlistlen);
   }
 }
 

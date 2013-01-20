@@ -17,7 +17,6 @@
 
 #include "core/encseq.h"
 #include "core/unused_api.h"
-#include "spacedef.h"
 #include "esa-lcpval.h"
 
  struct Lcpvalueiterator
@@ -34,7 +33,7 @@ Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
 {
   Lcpvalueiterator *lvi;
 
-  ALLOCASSIGNSPACE(lvi,NULL,Lcpvalueiterator,1);
+  lvi = gt_malloc(sizeof *lvi);
   lvi->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   lvi->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   lvi->encseq = encseq;
@@ -96,10 +95,12 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
   return lcpvalue;
 }
 
-void gt_freeLcpvalueiterator(Lcpvalueiterator **lvi)
+void gt_freeLcpvalueiterator(Lcpvalueiterator *lvi)
 {
-  gt_assert((*lvi) != NULL);
-  gt_encseq_reader_delete((*lvi)->esr1);
-  gt_encseq_reader_delete((*lvi)->esr2);
-  FREESPACE(*lvi);
+  if (lvi != NULL)
+  {
+    gt_encseq_reader_delete(lvi->esr1);
+    gt_encseq_reader_delete(lvi->esr2);
+    gt_free(lvi);
+  }
 }

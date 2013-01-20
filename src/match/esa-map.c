@@ -24,6 +24,7 @@
 #include "core/endianess_api.h"
 #include "core/error.h"
 #include "core/fa.h"
+#include "core/ma_api.h"
 #ifndef S_SPLINT_S
 #include "core/fileutils.h"
 #endif
@@ -33,8 +34,6 @@
 #include "esa-fileend.h"
 #include "esa-scanprj.h"
 #include "sarr-def.h"
-#include "spacedef.h"
-#include "stamp.h"
 
 #define DBFILEKEY "dbfile="
 
@@ -48,8 +47,9 @@
         {\
           (STREAM)->nextread = 0;\
           (STREAM)->nextfree = 0;\
-          ALLOCASSIGNSPACE((STREAM)->bufferedfilespace,NULL,TYPE,\
-                           FILEBUFFERSIZE);\
+          (STREAM)->bufferedfilespace\
+            = gt_malloc(sizeof *((STREAM)->bufferedfilespace)\
+                        * (FILEBUFFERSIZE));\
         }
 
 static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
@@ -269,21 +269,21 @@ void gt_freesuffixarray(Suffixarray *suffixarray)
   suffixarray->bwttab = NULL;
   gt_fa_xfclose(suffixarray->suftabstream_GtUlong.fp);
   suffixarray->suftabstream_GtUlong.fp = NULL;
-  FREESPACE(suffixarray->suftabstream_GtUlong.bufferedfilespace);
+  gt_free(suffixarray->suftabstream_GtUlong.bufferedfilespace);
 #ifdef _LP64
   gt_fa_xfclose(suffixarray->suftabstream_uint32_t.fp);
   suffixarray->suftabstream_uint32_t.fp = NULL;
-  FREESPACE(suffixarray->suftabstream_uint32_t.bufferedfilespace);
+  gt_free(suffixarray->suftabstream_uint32_t.bufferedfilespace);
 #endif
   gt_fa_xfclose(suffixarray->lcptabstream.fp);
   suffixarray->lcptabstream.fp = NULL;
-  FREESPACE(suffixarray->lcptabstream.bufferedfilespace);
+  gt_free(suffixarray->lcptabstream.bufferedfilespace);
   gt_fa_xfclose(suffixarray->llvtabstream.fp);
   suffixarray->llvtabstream.fp = NULL;
-  FREESPACE(suffixarray->llvtabstream.bufferedfilespace);
+  gt_free(suffixarray->llvtabstream.bufferedfilespace);
   gt_fa_xfclose(suffixarray->bwttabstream.fp);
   suffixarray->bwttabstream.fp = NULL;
-  FREESPACE(suffixarray->bwttabstream.bufferedfilespace);
+  gt_free(suffixarray->bwttabstream.bufferedfilespace);
   gt_encseq_delete(suffixarray->encseq);
   suffixarray->encseq = NULL;
   if (suffixarray->bcktab != NULL)

@@ -20,8 +20,8 @@
 #include "core/encseq.h"
 #include "core/fa.h"
 #include "core/unused_api.h"
+#include "core/ma_api.h"
 #include "sfx-apfxlen.h"
-#include "spacedef.h"
 #include "tyr-basic.h"
 #include "tyr-map.h"
 
@@ -65,7 +65,7 @@ Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err)
   Tyrindex *tyrindex;
 
   gt_error_check(err);
-  ALLOCASSIGNSPACE(tyrindex,NULL,Tyrindex,1);
+  tyrindex = gt_malloc(sizeof *tyrindex);
   tyrindex->indexfilename = tyrindexname;
   tyrindex->mappedfileptr = gt_fa_mmap_read_with_suffix(tyrindexname,MERSUFFIX,
                                                      &numofbytes,err);
@@ -122,7 +122,7 @@ Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err)
       gt_fa_xmunmap(tyrindex->mappedfileptr);
       tyrindex->mappedfileptr = NULL;
     }
-    FREESPACE(tyrindex);
+    gt_free(tyrindex);
   }
   return haserr ? NULL : tyrindex;
 }
@@ -178,7 +178,7 @@ void gt_tyrindex_delete(Tyrindex **tyrindexptr)
 
   gt_fa_xmunmap(tyrindex->mappedfileptr);
   tyrindex->mappedfileptr = NULL;
-  FREESPACE(tyrindex);
+  gt_free(tyrindex);
   *tyrindexptr = NULL;
 }
 
@@ -192,7 +192,7 @@ Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
   Tyrcountinfo *tyrcountinfo;
 
   gt_error_check(err);
-  ALLOCASSIGNSPACE(tyrcountinfo,NULL,Tyrcountinfo,1);
+  tyrcountinfo = gt_malloc(sizeof *tyrcountinfo);
   tyrcountinfo->indexfilename = tyrindexname;
   tyrcountinfo->mappedmctfileptr
     = gt_fa_mmap_read_with_suffix(tyrindexname,COUNTSSUFFIX,&numofbytes,err);
@@ -234,7 +234,7 @@ Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
       gt_fa_xmunmap(tyrcountinfo->mappedmctfileptr);
       tyrcountinfo->mappedmctfileptr = NULL;
     }
-    FREESPACE(tyrcountinfo);
+    gt_free(tyrcountinfo);
   }
   return haserr ? NULL : tyrcountinfo;
 }
@@ -296,7 +296,7 @@ void gt_tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr)
 
   gt_fa_xmunmap(tyrcountinfo->mappedmctfileptr);
   tyrcountinfo->mappedmctfileptr = NULL;
-  FREESPACE(tyrcountinfo);
+  gt_free(tyrcountinfo);
   *tyrcountinfoptr = NULL;
 }
 

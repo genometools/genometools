@@ -20,7 +20,7 @@
 #include "core/seqiterator.h"
 #include "core/chardef.h"
 #include "core/codetype.h"
-#include "spacedef.h"
+#include "core/ma_api.h"
 #include "substriter.h"
 #include "qgram2code.h"
 #include "initbasepower.h"
@@ -38,7 +38,8 @@ struct Substriter
 Substriter *gt_substriter_new(const GtAlphabet *alphabet,unsigned int qvalue)
 {
   Substriter *substriter;
-  ALLOCASSIGNSPACE(substriter,NULL,Substriter,1);
+
+  substriter = gt_malloc(sizeof *substriter);
   substriter->qvalue = qvalue;
   substriter->numofchars = gt_alphabet_num_of_chars(alphabet);
   substriter->multimappower = gt_initmultimappower(substriter->numofchars,
@@ -82,8 +83,11 @@ int gt_substriter_next(Substriter *substriter)
   return 1;
 }
 
-void gt_substriter_delete(Substriter **substriter)
+void gt_substriter_delete(Substriter *substriter)
 {
-  gt_multimappowerfree(&(*substriter)->multimappower);
-  FREESPACE(*substriter);
+  if (substriter != NULL)
+  {
+    gt_multimappower_delete(substriter->multimappower);
+    gt_free(substriter);
+  }
 }

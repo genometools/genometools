@@ -25,7 +25,7 @@
 #include "core/logger.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
-#include "spacedef.h"
+#include "core/ma_api.h"
 #include "esa-mmsearch.h"
 #include "echoseq.h"
 #include "sfx-suffixer.h"
@@ -351,7 +351,7 @@ static unsigned long *sequence2markpositions(unsigned long *numofsequences,
     return NULL;
   }
   allocatedmarkpos = (*numofsequences)-1;
-  ALLOCASSIGNSPACE(spacemarkpos,NULL,unsigned long,allocatedmarkpos);
+  spacemarkpos = gt_malloc(sizeof *spacemarkpos * allocatedmarkpos);
   for (idx=0, nextfreemarkpos = 0; idx<seqlen; idx++)
   {
     if (seq[idx] == (GtUchar) SEPARATOR)
@@ -401,8 +401,8 @@ int gt_testmaxpairs(const char *indexname,
     {
       substringlength = totallength/2;
     }
-    ALLOCASSIGNSPACE(dbseq,NULL,GtUchar,substringlength);
-    ALLOCASSIGNSPACE(query,NULL,GtUchar,substringlength);
+    dbseq = gt_malloc(sizeof *dbseq * substringlength);
+    query = gt_malloc(sizeof *query * substringlength);
   }
   for (s=0; s<samples && !haserr; s++)
   {
@@ -478,13 +478,13 @@ int gt_testmaxpairs(const char *indexname,
                          width);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    FREESPACE(maxmatchselfinfo.querymarkpos);
+    gt_free(maxmatchselfinfo.querymarkpos);
     printf("# numberofmatches=%lu\n",gt_array_size(tabmaxquerymatches));
     gt_array_delete(tabmaxquerymatches);
     gt_array_delete(maxmatchselfinfo.results);
   }
-  FREESPACE(dbseq);
-  FREESPACE(query);
+  gt_free(dbseq);
+  gt_free(query);
   gt_encseq_delete(encseq);
   encseq = NULL;
   return haserr ? -1 : 0;

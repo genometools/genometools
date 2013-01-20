@@ -33,6 +33,6 @@ void gt_substriter_init(Substriter *substriter,const GtUchar *start,
 
 int gt_substriter_next(Substriter *substriter);
 
-void gt_substriter_delete(Substriter **substriter);
+void gt_substriter_delete(Substriter *substriter);
 
 #endif

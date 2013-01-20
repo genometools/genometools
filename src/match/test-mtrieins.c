@@ -17,10 +17,10 @@
 
 #include "core/alphabet.h"
 #include "core/unused_api.h"
-#include "spacedef.h"
+#include "core/encseq.h"
+#include "core/ma_api.h"
 #include "sarr-def.h"
 #include "merger-trie.h"
-#include "core/encseq.h"
 #include "esa-map.h"
 
 static void maketrie(Mergertrierep *trierep,
@@ -95,9 +95,9 @@ int gt_test_trieins(bool onlyins,const char *indexname,GtError *err)
     Mergertrierep trierep;
     const GtUchar *characters;
 
-    ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
-    trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
-    trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
+    trierep.encseqreadinfo = gt_malloc(sizeof *trierep.encseqreadinfo);
+    trierep.encseqreadinfo->encseqptr = suffixarray.encseq;
+    trierep.encseqreadinfo->readmode = suffixarray.readmode;
     characters
       = gt_alphabet_characters(gt_encseq_alphabet(suffixarray.encseq));
     gt_mergertrie_initnodetable(&trierep,totallength,1U);

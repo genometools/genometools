@@ -17,8 +17,8 @@
 
 #include <limits.h>
 #include "core/unused_api.h"
+#include "core/ma_api.h"
 #include "sarr-def.h"
-#include "spacedef.h"
 #include "esa-seqread.h"
 #include "esa-lcpval.h"
 #include "lcpoverflow.h"
@@ -33,8 +33,8 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
 {
   Sequentialsuffixarrayreader *ssar;
 
-  ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
-  ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
+  ssar = gt_malloc(sizeof *ssar);
+  ssar->suffixarray = gt_malloc(sizeof *ssar->suffixarray);
   gt_assert(seqactype == SEQ_mappedboth || seqactype == SEQ_scan);
   if ((seqactype == SEQ_mappedboth
          ? gt_mapsuffixarray : streamsuffixarray)(ssar->suffixarray,
@@ -43,8 +43,8 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                                   logger,
                                                   err) != 0)
   {
-    FREESPACE(ssar->suffixarray);
-    FREESPACE(ssar);
+    gt_free(ssar->suffixarray);
+    gt_free(ssar);
     return NULL;
   }
   ssar->nextsuftabindex = 0;
@@ -68,7 +68,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
 {
   Sequentialsuffixarrayreader *ssar;
 
-  ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
+  ssar = gt_malloc(sizeof *ssar);
   ssar->lvi = gt_newLcpvalueiterator(encseq,readmode);
   ssar->suffixarray = NULL;
   ssar->nextlcptabindex = 1UL; /* not required here */
@@ -105,13 +105,10 @@ void gt_freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
   if ((*ssar)->suffixarray != NULL)
   {
     gt_freesuffixarray((*ssar)->suffixarray);
-    FREESPACE((*ssar)->suffixarray);
+    gt_free((*ssar)->suffixarray);
   }
-  if ((*ssar)->lvi != NULL)
-  {
-    gt_freeLcpvalueiterator(&(*ssar)->lvi);
-  }
-  FREESPACE(*ssar);
+  gt_freeLcpvalueiterator((*ssar)->lvi);
+  gt_free(*ssar);
 }
 
 int gt_nextSequentiallcpvalue(unsigned long *currentlcp,

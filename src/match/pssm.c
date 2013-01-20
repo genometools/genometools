@@ -22,8 +22,6 @@
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/arraydef.h"
-
-#include "spacedef.h"
 #include "core/encseq.h"
 #include "absdfstrans-imp.h"
 
@@ -80,7 +78,7 @@ void gt_makeitmthresholds(Profilematrix *prof,
             score,
             *maxscore;
 
-  ALLOCASSIGNSPACE(maxscore,NULL,ProfScore,prof->dimension);
+  maxscore = gt_malloc(sizeof *maxscore * prof->dimension);
   for (d=0; d<prof->dimension; d++)
   {
     for (a=0; a<prof->numofcharacters; a++)
@@ -99,7 +97,7 @@ void gt_makeitmthresholds(Profilematrix *prof,
     prof->itmthreshold[ddown] = minscore - partsum;
     partsum += maxscore[ddown];
   }
-  FREESPACE(maxscore);
+  gt_free(maxscore);
 }
 
 void gt_lookaheadsearchPSSM(const GtEncseq *encseq,
@@ -113,7 +111,7 @@ void gt_lookaheadsearchPSSM(const GtEncseq *encseq,
   GtUchar *buffer;
 
   esr = gt_encseq_create_reader_with_readmode(encseq,GT_READMODE_FORWARD,0);
-  ALLOCASSIGNSPACE(buffer,NULL,GtUchar,prof->dimension);
+  buffer = gt_malloc(sizeof *buffer * prof->dimension);
   firstpos = bufsize = 0;
   for (pos=0; pos < totallength; pos++)
   {
@@ -137,5 +135,5 @@ void gt_lookaheadsearchPSSM(const GtEncseq *encseq,
     }
   }
   gt_encseq_reader_delete(esr);
-  FREESPACE(buffer);
+  gt_free(buffer);
 }

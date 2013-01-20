@@ -22,8 +22,8 @@
 #include "core/logger.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "core/ma_api.h"
 #include "sarr-def.h"
-#include "spacedef.h"
 #include "emimergeesa.h"
 #include "esa-fileend.h"
 #include "lcpoverflow.h"
@@ -180,7 +180,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
         break;
       }
     }
-    FREESPACE(sequenceoffsettable);
+    gt_free(sequenceoffsettable);
   }
   freeNameandFILE(&mergeoutinfo.outsuf);
   freeNameandFILE(&mergeoutinfo.outlcp);

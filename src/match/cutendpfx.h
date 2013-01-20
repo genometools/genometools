@@ -35,6 +35,6 @@ Bucketenumerator *gt_newbucketenumerator(const GtBcktab *bcktab,
 bool gt_nextbucketenumerator(Lcpinterval *itv,
                              Bucketenumerator *bucketenumerator);
 
-void gt_freebucketenumerator(Bucketenumerator **bucketenumerator);
+void gt_freebucketenumerator(Bucketenumerator *bucketenumerator);
 
 #endif

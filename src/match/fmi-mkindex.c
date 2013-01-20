@@ -19,11 +19,9 @@
 #include "core/divmodmul.h"
 #include "core/option_api.h"
 #include "core/versionfunc.h"
-#include "fmindex.h"
 #include "core/logger.h"
-#include "spacedef.h"
-#include "stamp.h"
-
+#include "core/ma_api.h"
+#include "fmindex.h"
 #include "fmi-save.pr"
 #include "fmi-keyval.pr"
 #include "fmi-sufbwtstream.pr"
@@ -151,13 +149,13 @@ static int levedescl2levelnum(const char *name,
 static void freeconstructedfmindex(Fmindex *fm)
 {
   GT_FREEARRAY (&fm->specpos, GtPairBwtidx);
-  FREESPACE (fm->bfreq);
-  FREESPACE (fm->superbfreq);
-  FREESPACE (fm->tfreq);
-  FREESPACE (fm->markpostable);
+  gt_free (fm->bfreq);
+  gt_free (fm->superbfreq);
+  gt_free (fm->tfreq);
+  gt_free (fm->markpostable);
   if (fm->suffixlength > 0)
   {
-    FREESPACE(fm->boundarray);
+    gt_free(fm->boundarray);
   }
 }
 

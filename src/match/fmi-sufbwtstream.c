@@ -25,11 +25,11 @@
 #include "core/fa.h"
 #include "core/str.h"
 #include "core/xansi_api.h"
+#include "core/ma_api.h"
 
 #include "emimergeesa.h"
 #include "esa-fileend.h"
 #include "fmindex.h"
-#include "spacedef.h"
 #include "esa-map.h"
 
 #include "encseq2offset.pr"
@@ -92,13 +92,14 @@ static void allocatefmtables(Fmindex *fm,
                              const GtSpecialcharinfo *specialcharinfo,
                              bool storeindexpos)
 {
-  ALLOCASSIGNSPACE (fm->tfreq, NULL, unsigned long,TFREQSIZE(fm->mapsize));
-  ALLOCASSIGNSPACE (fm->superbfreq, NULL, unsigned long ,
-                    SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
+  fm->tfreq = gt_malloc(sizeof *fm->tfreq * TFREQSIZE(fm->mapsize));
+  fm->superbfreq = gt_malloc(sizeof *fm->superbfreq
+                             * SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
   if (storeindexpos)
   {
-    ALLOCASSIGNSPACE (fm->markpostable,NULL,unsigned long,
-                      MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
+    fm->markpostable = gt_malloc(sizeof *fm->markpostable
+                                 * MARKPOSTABLELENGTH(fm->bwtlength,
+                                                      fm->markdist));
     fm->specpos.nextfreeGtPairBwtidx = 0;
     fm->specpos.allocatedGtPairBwtidx
       = (unsigned long) gt_determinenumberofspecialstostore(specialcharinfo);
@@ -109,15 +110,16 @@ static void allocatefmtables(Fmindex *fm,
             (double) (specialcharinfo->specialcharacters -
                       fm->specpos.allocatedGtPairBwtidx)/
                      specialcharinfo->specialcharacters);
-    ALLOCASSIGNSPACE(fm->specpos.spaceGtPairBwtidx,NULL,GtPairBwtidx,
-                     fm->specpos.allocatedGtPairBwtidx);
+    fm->specpos.spaceGtPairBwtidx
+      = gt_malloc(sizeof *fm->specpos.spaceGtPairBwtidx
+                  * fm->specpos.allocatedGtPairBwtidx);
   } else
   {
     GT_INITARRAY(&fm->specpos,GtPairBwtidx);
     fm->markpostable = NULL;
   }
-  ALLOCASSIGNSPACE (fm->bfreq, NULL, GtUchar,
-                    BFREQSIZE(fm->mapsize,fm->nofblocks));
+  fm->bfreq = gt_malloc(sizeof *fm->bfreq
+                        * BFREQSIZE(fm->mapsize,fm->nofblocks));
 }
 
 static void set0frequencies(Fmindex *fm)
@@ -499,8 +501,8 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
     finalizefmfrequencies(fmindex);
     if (fmindex->suffixlength > 0)
     {
-      ALLOCASSIGNSPACE(fmindex->boundarray,NULL,GtUlongBound,
-                       fmindex->numofcodes);
+      fmindex->boundarray = gt_malloc(sizeof *fmindex->boundarray
+                                      * fmindex->numofcodes);
     }
     if (numofindexes == 1U)
     {
@@ -521,7 +523,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
       gt_emissionmergedesa_wrap(&emmesa);
     }
   }
-  FREESPACE(sequenceoffsettable);
-  FREESPACE(tmpfilename);
+  gt_free(sequenceoffsettable);
+  gt_free(tmpfilename);
   return haserr ? -1 : 0;
 }

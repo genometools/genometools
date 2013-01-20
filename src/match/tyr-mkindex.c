@@ -25,8 +25,8 @@
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "core/ma_api.h"
 #include "esa-seqread.h"
-#include "spacedef.h"
 #include "esa-mmsearch.h"
 #include "tyr-basic.h"
 #include "tyr-mkindex.h"
@@ -153,7 +153,7 @@ static /*@null@*/ ListUlong *insertListUlong(ListUlong *liststart,
 {
   ListUlong *newnode;
 
-  ALLOCASSIGNSPACE(newnode,NULL,ListUlong,1);
+  newnode = gt_malloc(sizeof *newnode);
   newnode->position = position;
   newnode->nextptr = liststart;
   return newnode;
@@ -169,11 +169,11 @@ static void wrapListUlong(ListUlong *node)
     {
       if (node->nextptr == NULL)
       {
-        FREESPACE(node);
+        gt_free(node);
         break;
       }
       tmpnext = node->nextptr;
-      FREESPACE(node);
+      gt_free(node);
       node = tmpnext;
     }
   }
@@ -299,12 +299,13 @@ static void incrementdistribcounts(GtArrayCountwithpositions *occdistribution,
 {
   if (countocc >= occdistribution->allocatedCountwithpositions)
   {
-    const unsigned long addamount = (unsigned long) 128;
+    const unsigned long addamount = 128UL;
     unsigned long idx;
 
-    ALLOCASSIGNSPACE(occdistribution->spaceCountwithpositions,
-                     occdistribution->spaceCountwithpositions,
-                     Countwithpositions,countocc+addamount);
+    occdistribution->spaceCountwithpositions
+      = gt_realloc(occdistribution->spaceCountwithpositions,
+                   sizeof *occdistribution->spaceCountwithpositions
+                   * (countocc+addamount));
     for (idx=occdistribution->allocatedCountwithpositions;
          idx<countocc+addamount; idx++)
     {
@@ -412,14 +413,14 @@ static Dfsinfo* tyr_allocateDfsinfo(GT_UNUSED Dfsstate *state)
 {
   TyrDfsinfo *dfsinfo;
 
-  ALLOCASSIGNSPACE(dfsinfo,NULL,TyrDfsinfo,1);
+  dfsinfo = gt_malloc(sizeof *dfsinfo);
   return (Dfsinfo*) dfsinfo;
 }
 
 static void tyr_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 {
   TyrDfsinfo *dfsinfo = (TyrDfsinfo*) adfsinfo;
-  FREESPACE(dfsinfo);
+  gt_free(dfsinfo);
 }
 
 static int tyr_processleafedge(GT_UNUSED bool firstsucc,
@@ -553,11 +554,13 @@ static int enumeratelcpintervals(const char *inputindex,
   } else
   {
     state->sizeofbuffer = MERBYTES(mersize);
-    ALLOCASSIGNSPACE(state->bytebuffer,NULL,GtUchar,state->sizeofbuffer);
+    state->bytebuffer = gt_malloc(sizeof *state->bytebuffer
+                                  * state->sizeofbuffer);
   }
   if (performtest)
   {
-    ALLOCASSIGNSPACE(state->currentmer,NULL,GtUchar,state->mersize);
+    state->currentmer = gt_malloc(sizeof *state->currentmer
+                                  * state->mersize);
     state->suftab = gt_suftabSequentialsuffixarrayreader(ssar);
   } else
   {
@@ -651,8 +654,8 @@ static int enumeratelcpintervals(const char *inputindex,
   gt_fa_xfclose(state->merindexfpout);
   gt_fa_xfclose(state->countsfilefpout);
   GT_FREEARRAY(&state->occdistribution,Countwithpositions);
-  FREESPACE(state->currentmer);
-  FREESPACE(state->bytebuffer);
+  gt_free(state->currentmer);
+  gt_free(state->bytebuffer);
   GT_FREEARRAY(&state->largecounts,Largecount);
   gt_encseq_reader_delete(state->esrspace);
   gt_free(state);

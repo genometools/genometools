@@ -42,7 +42,6 @@
 #include "extended/reverse_api.h"
 #include "extended/orf_finder_visitor.h"
 #include "extended/orf_iterator_api.h"
-#include "match/spacedef.h"
 
 struct GtORFFinderVisitor {
   const GtNodeVisitor parent_instance;

@@ -18,8 +18,7 @@
 #include <limits.h>
 #include "core/types_api.h"
 #include "core/unused_api.h"
-
-#include "spacedef.h"
+#include "core/ma_api.h"
 #include "esa-seqread.h"
 #include "esa-dfs.h"
 
@@ -61,7 +60,7 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
   unsigned long i;
   Itvinfo *itvinfo;
 
-  ALLOCASSIGNSPACE(itvinfo,ptr,Itvinfo,allocated);
+  itvinfo = gt_realloc(ptr,sizeof *ptr * allocated);
   if (allocateDfsinfo != NULL)
   {
     gt_assert(allocated > currentallocated);
@@ -85,7 +84,7 @@ static void freeItvinfo(Itvinfo *ptr,
   {
     freeDfsinfo(ptr[i].dfsinfo,state);
   }
-  FREESPACE(ptr);
+  gt_free(ptr);
 }
 
 int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,

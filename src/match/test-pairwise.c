@@ -21,9 +21,8 @@
 #include "core/fa.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
-#include "spacedef.h"
+#include "core/ma_api.h"
 #include "test-pairwise.h"
-
 #include "greedyedist.h"
 #include "squarededist.h"
 
@@ -110,8 +109,8 @@ static unsigned long applyall(const char *alpha,
   GtUchar *text;
   bool stop = false;
 
-  ALLOCASSIGNSPACE(w,NULL,unsigned long,textlen+1);
-  ALLOCASSIGNSPACE(text,NULL,GtUchar,textlen+1);
+  w = gt_malloc(sizeof *w * (textlen+1));
+  text = gt_malloc(sizeof *text * (textlen+1));
   for (i=0; i<=textlen; i++)
   {
     w[i] = 0;
@@ -143,8 +142,8 @@ static unsigned long applyall(const char *alpha,
       }
     }
   }
-  FREESPACE(w);
-  FREESPACE(text);
+  gt_free(w);
+  gt_free(text);
   return testcases;
 }
 

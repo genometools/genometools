@@ -17,9 +17,9 @@
 
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "esa-seqread.h"
 #include "core/logger.h"
-#include "spacedef.h"
+#include "core/ma_api.h"
+#include "esa-seqread.h"
 #include "tyr-occratio.h"
 
 typedef struct /* information stored for each node of the lcp interval tree */
@@ -47,14 +47,14 @@ static Dfsinfo* occ_allocateDfsinfo(GT_UNUSED Dfsstate *state)
 {
   OccDfsinfo *dfsinfo;
 
-  ALLOCASSIGNSPACE(dfsinfo,NULL,OccDfsinfo,1);
-  return (Dfsinfo*) dfsinfo;
+  dfsinfo = gt_malloc(sizeof *dfsinfo);
+  return (Dfsinfo *) dfsinfo;
 }
 
 static void occ_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 {
   OccDfsinfo *dfsinfo = (OccDfsinfo*) adfsinfo;
-  FREESPACE(dfsinfo);
+  gt_free(dfsinfo);
 }
 
 static void adddistributionuint64_t(GtArrayuint64_t *occdistribution,
@@ -66,9 +66,10 @@ static void adddistributionuint64_t(GtArrayuint64_t *occdistribution,
     const unsigned long addamount = 128UL;
     unsigned long idx;
 
-    ALLOCASSIGNSPACE(occdistribution->spaceuint64_t,
-                     occdistribution->spaceuint64_t,
-                     uint64_t,countocc+addamount);
+    occdistribution->spaceuint64_t
+      = gt_realloc(occdistribution->spaceuint64_t,
+                   sizeof *occdistribution->spaceuint64_t *
+                   (countocc+addamount));
     for (idx=occdistribution->allocateduint64_t;
          idx<countocc+addamount; idx++)
     {

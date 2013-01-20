@@ -161,7 +161,7 @@ void gt_Enumcodeatposition_delete(Enumcodeatposition *ecp)
   if (ecp != NULL)
   {
     gt_free(ecp->filltable);
-    gt_multimappowerfree(&ecp->multimappower);
+    gt_multimappower_delete(ecp->multimappower);
     gt_free(ecp);
   }
 }

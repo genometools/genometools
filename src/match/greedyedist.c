@@ -18,10 +18,10 @@
 #include <limits.h>
 #include <stdio.h>
 #include "core/chardef.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/types_api.h"
 #include "greedyedist.h"
-#include "spacedef.h"
 
 #define COMPARESYMBOLS(A,B)\
         if ((A) == (GtUchar) SEPARATOR)\
@@ -295,7 +295,7 @@ unsigned long greedyunitedist(const GtSeqabstract *useq,
   gt_assert(gt_seqabstract_length_get(useq) < (unsigned long) LONG_MAX);
   gt_assert(gt_seqabstract_length_get(vseq) < (unsigned long) LONG_MAX);
   currentallocated = 1UL;
-  ALLOCASSIGNSPACE(gl.frontspace,NULL,Frontvalue,currentallocated);
+  gl.frontspace = gt_malloc(sizeof (*gl.frontspace) * currentallocated);
   gl.ubound = gt_seqabstract_length_get(useq);
   gl.vbound = gt_seqabstract_length_get(vseq);
   gl.ulen = (long) gl.ubound;
@@ -323,8 +323,8 @@ unsigned long greedyunitedist(const GtSeqabstract *useq,
              >= currentallocated)
       {
         currentallocated += (kval+1);
-        ALLOCASSIGNSPACE(gl.frontspace,gl.frontspace,
-                         Frontvalue,currentallocated);
+        gl.frontspace = gt_realloc(gl.frontspace,sizeof (*gl.frontspace) *
+                                   currentallocated);
       }
       (void) evalfrontforward(useq,vseq,&gl,prevfspec,fspec,r);
       fptr = gl.frontspace + fspec->offset - fspec->left;
@@ -345,6 +345,6 @@ unsigned long greedyunitedist(const GtSeqabstract *useq,
 #ifdef SKDEBUG
   printf("unitedistfrontSEP returns %ld\n",realdistance);
 #endif
-  FREESPACE(gl.frontspace);
+  gt_free(gl.frontspace);
   return realdistance;
 }

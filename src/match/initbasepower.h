@@ -31,6 +31,6 @@ GtCodetype *gt_initfilltable(unsigned int numofchars,unsigned int prefixlength);
 
 GtCodetype **gt_initmultimappower(unsigned int numofchars,unsigned int qvalue);
 
-void gt_multimappowerfree(GtCodetype ***multimappower);
+void gt_multimappower_delete(GtCodetype **multimappower);
 
 #endif

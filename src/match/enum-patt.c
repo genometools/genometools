@@ -19,8 +19,7 @@
 #include "core/chardef.h"
 #include "core/types_api.h"
 #include "core/encseq.h"
-#include "spacedef.h"
-#include "enum-patt-def.h"
+#include "enum-patt.h"
 
  struct Enumpatterniterator
 {
@@ -50,18 +49,18 @@ Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
                     minpatternlen);
     return NULL;
   }
-  ALLOCASSIGNSPACE(epi,NULL,Enumpatterniterator,1);
+  epi = gt_malloc(sizeof *epi);
   epi->totallength = gt_encseq_total_length(encseq);
   if (epi->totallength <= (unsigned long) maxpatternlen)
   {
     gt_error_set(err,"totallength=%lu <= maxpatternlen = %lu",
                     epi->totallength,
                     maxpatternlen);
-    FREESPACE(epi);
+    gt_free(epi);
     return NULL;
   }
-  ALLOCASSIGNSPACE(epi->patternspace,NULL,GtUchar,maxpatternlen);
-  ALLOCASSIGNSPACE(epi->patternstat,NULL,unsigned long,maxpatternlen+1);
+  epi->patternspace = gt_malloc(sizeof *epi->patternspace * maxpatternlen);
+  epi->patternstat = gt_malloc(sizeof *epi->patternstat * (maxpatternlen+1));
   for (i=0; i<=maxpatternlen; i++)
   {
     epi->patternstat[i] = 0;
@@ -158,11 +157,11 @@ void gt_showPatterndistribution(const Enumpatterniterator *epi)
   }
 }
 
-void gt_freeEnumpatterniterator(Enumpatterniterator **epi)
+void gt_freeEnumpatterniterator(Enumpatterniterator *epi)
 {
-  if (!(*epi)) return;
-  FREESPACE((*epi)->patternspace);
-  FREESPACE((*epi)->patternstat);
-  gt_encseq_reader_delete(((*epi)->esr));
-  FREESPACE(*epi);
+  if (!epi) return;
+  gt_free(epi->patternspace);
+  gt_free(epi->patternstat);
+  gt_encseq_reader_delete(epi->esr);
+  gt_free(epi);
 }

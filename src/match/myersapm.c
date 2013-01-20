@@ -17,11 +17,10 @@
 
 #include "core/chardef.h"
 #include "core/types_api.h"
-
-#include "spacedef.h"
 #include "core/encseq.h"
-#include "myersapm.h"
 #include "core/defined-types.h"
+#include "core/ma_api.h"
+#include "myersapm.h"
 #include "procmatch.h"
 #include "dist-short.h"
 #include "initeqsvec.h"
@@ -47,9 +46,9 @@ Myersonlineresources *gt_newMyersonlineresources(unsigned int numofchars,
 {
   Myersonlineresources *mor;
 
-  ALLOCASSIGNSPACE(mor,NULL,Myersonlineresources,1);
-  ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,numofchars);
-  ALLOCASSIGNSPACE(mor->eqsvector,NULL,unsigned long,numofchars);
+  mor = gt_malloc(sizeof *mor);
+  mor->eqsvectorrev = gt_malloc(sizeof *mor->eqsvectorrev * numofchars);
+  mor->eqsvector = gt_malloc(sizeof *mor->eqsvector * numofchars);
   mor->encseq = encseq;
   mor->esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_REVERSE,
                                                    0);
@@ -62,14 +61,15 @@ Myersonlineresources *gt_newMyersonlineresources(unsigned int numofchars,
   return mor;
 }
 
-void gt_freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
+void gt_freeMyersonlineresources(Myersonlineresources *ptrmyersonlineresources)
 {
-  Myersonlineresources *mor = *ptrmyersonlineresources;
-
-  FREESPACE(mor->eqsvectorrev);
-  FREESPACE(mor->eqsvector);
-  gt_encseq_reader_delete(mor->esr);
-  FREESPACE(*ptrmyersonlineresources);
+  if (ptrmyersonlineresources != NULL)
+  {
+    gt_free(ptrmyersonlineresources->eqsvectorrev);
+    gt_free(ptrmyersonlineresources->eqsvector);
+    gt_encseq_reader_delete(ptrmyersonlineresources->esr);
+    gt_free(ptrmyersonlineresources);
+  }
 }
 
 void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,

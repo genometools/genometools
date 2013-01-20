@@ -23,14 +23,11 @@
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "match/cutendpfx.h"
-#include "match/enum-patt-def.h"
+#include "match/enum-patt.h"
 #include "match/esa-map.h"
 #include "match/esa-mmsearch.h"
 #include "match/qgram2code.h"
 #include "match/sarr-def.h"
-#include "match/spacedef.h"
-#include "match/stamp.h"
-
 #include "tools/gt_patternmatch.h"
 
 typedef struct
@@ -168,7 +165,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
               }
             }
           }
-          gt_freebucketenumerator(&bucketenumerator);
+          gt_freebucketenumerator(bucketenumerator);
         } else
         {
           firstspecial = qgram2code(&code,
@@ -237,7 +234,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     {
       gt_showPatterndistribution(epi);
     }
-    gt_freeEnumpatterniterator(&epi);
+    gt_freeEnumpatterniterator(epi);
   }
   gt_freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;

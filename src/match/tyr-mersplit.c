@@ -27,7 +27,7 @@
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "spacedef.h"
+#include "core/ma_api.h"
 #include "tyr-map.h"
 #include "tyr-mersplit.h"
 
@@ -355,8 +355,8 @@ int gt_constructmerbuckets(const char *inputindex,
     tyrbckinfo.mappedmbdfileptr = NULL;
     printf("# numofcodes = %lu\n",tyrbckinfo.numofcodes);
     gt_tyrindex_show(tyrindex);
-    ALLOCASSIGNSPACE(tyrbckinfo.bounds,NULL,unsigned long,
-                     tyrbckinfo.numofcodes+1);
+    tyrbckinfo.bounds = gt_malloc(sizeof *tyrbckinfo.bounds
+                                  * (tyrbckinfo.numofcodes+1));
     GT_INITBITTAB(tyrbckinfo.boundisdefined,tyrbckinfo.numofcodes+1);
     splitmerinterval(&tyrbckinfo,tyrindex);
     bucketfp = gt_fa_fopen_with_suffix(inputindex,BUCKETSUFFIX,"wb",err);
@@ -388,7 +388,7 @@ int gt_constructmerbuckets(const char *inputindex,
   {
     gt_tyrindex_delete(&tyrindex);
   }
-  FREESPACE(tyrbckinfo.bounds);
+  gt_free(tyrbckinfo.bounds);
   gt_free(tyrbckinfo.boundisdefined);
   return haserr ? -1 : 0;
 }
@@ -400,7 +400,7 @@ Tyrbckinfo *gt_tyrbckinfo_new(const char *tyrindexname,unsigned int alphasize,
   Tyrbckinfo *tyrbckinfo;
   bool haserr = false;
 
-  ALLOCASSIGNSPACE(tyrbckinfo,NULL,Tyrbckinfo,1);
+  tyrbckinfo = gt_malloc(sizeof *tyrbckinfo);
   tyrbckinfo->mappedmbdfileptr = gt_fa_mmap_read_with_suffix(tyrindexname,
                                                           BUCKETSUFFIX,
                                                           &numofbytes,err);
@@ -434,7 +434,7 @@ Tyrbckinfo *gt_tyrbckinfo_new(const char *tyrindexname,unsigned int alphasize,
   }
   if (haserr)
   {
-    FREESPACE(tyrbckinfo);
+    gt_free(tyrbckinfo);
     return NULL;
   }
   return tyrbckinfo;
@@ -446,6 +446,6 @@ void gt_tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr)
 
   gt_fa_xmunmap(tyrbckinfo->mappedmbdfileptr);
   tyrbckinfo->mappedmbdfileptr = NULL;
-  FREESPACE(tyrbckinfo);
+  gt_free(tyrbckinfo);
   *tyrbckinfoptr = NULL;
 }

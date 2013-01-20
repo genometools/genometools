@@ -24,11 +24,11 @@
 #include "core/unused_api.h"
 #include "core/defined-types.h"
 #include "core/codetype.h"
-#include "spacedef.h"
-#include "optionargmode.h"
-#include "core/format64.h"
-#include "greedyfwdmat.h"
 #include "core/encseq.h"
+#include "core/format64.h"
+#include "core/ma_api.h"
+#include "optionargmode.h"
+#include "greedyfwdmat.h"
 #include "initbasepower.h"
 
 typedef struct
@@ -364,7 +364,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
       }
     }
   }
-  gt_substriter_delete(&substriter);
+  gt_substriter_delete(substriter);
   return haserr ? -1 : 0;
 }
 

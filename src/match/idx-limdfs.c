@@ -20,16 +20,14 @@
 #include "core/divmodmul.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
+#include "core/defined-types.h"
+#include "core/ma_api.h"
 #include "sarr-def.h"
-
-#include "spacedef.h"
 #include "esa-splititv.h"
 #include "eis-voiditf.h"
-#include "core/defined-types.h"
 #include "esa-mmsearch.h"
 #include "absdfstrans-imp.h"
 #include "idx-limdfs.h"
-#include "stamp.h"
 #include "esa-map.h"
 #include "idxlocalidp.h"
 #include "esa-minunique.pr"
@@ -231,9 +229,10 @@ Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
 
   encseq = genericindex->suffixarray->encseq;
   numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
-  ALLOCASSIGNSPACE(limdfsresources,NULL,Limdfsresources,1);
-  ALLOCASSIGNSPACE(limdfsresources->bwci.spaceBoundswithchar,NULL,
-                   Boundswithchar,numofchars+1);
+  limdfsresources = gt_malloc(sizeof *limdfsresources);
+  limdfsresources->bwci.spaceBoundswithchar
+    = gt_malloc(sizeof *limdfsresources->bwci.spaceBoundswithchar
+                * (numofchars+1));
   limdfsresources->bwci.nextfreeBoundswithchar = 0;
   limdfsresources->bwci.allocatedBoundswithchar
     = (unsigned long) (numofchars+1);
@@ -251,8 +250,9 @@ Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
   limdfsresources->keepexpandedonstack = keepexpandedonstack;
   if (maxpathlength > 0)
   {
-    ALLOCASSIGNSPACE(limdfsresources->currentpathspace,NULL,GtUchar,
-                     maxpathlength);
+    limdfsresources->currentpathspace
+      = gt_malloc(sizeof *limdfsresources->currentpathspace
+                  * maxpathlength);
     limdfsresources->allocatedpathspace = maxpathlength;
   } else
   {
@@ -266,14 +266,16 @@ Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
     limdfsresources->rangeOccs = NULL;
   } else
   {
-    ALLOCASSIGNSPACE(limdfsresources->rangeOccs,NULL,GtUlong,
-                     GT_MULT2(limdfsresources->alphasize));
+    limdfsresources->rangeOccs
+      = gt_malloc(sizeof *limdfsresources->rangeOccs
+                  * GT_MULT2(limdfsresources->alphasize));
   }
   GT_INITARRAY(&limdfsresources->mstatspos,GtUlong);
   if (maxintervalwidth > 0)
   {
-    ALLOCASSIGNSPACE(limdfsresources->mstatspos.spaceGtUlong,NULL,GtUlong,
-                     maxintervalwidth);
+    limdfsresources->mstatspos.spaceGtUlong
+      = gt_malloc(sizeof *limdfsresources->mstatspos.spaceGtUlong
+                  * maxintervalwidth);
     limdfsresources->mstatspos.allocatedGtUlong = maxintervalwidth;
   }
   if (adfst->initLimdfsstackelem != NULL &&
@@ -328,10 +330,10 @@ static Lcpintervalwithinfo *allocateStackspace(Limdfsresources *limdfsresources,
     unsigned long idx;
     const unsigned long addelems = 32UL;
 
-    ALLOCASSIGNSPACE(stack->spaceLcpintervalwithinfo,
-                     stack->spaceLcpintervalwithinfo,
-                     Lcpintervalwithinfo,
-                     stack->allocatedLcpintervalwithinfo + addelems);
+    stack->spaceLcpintervalwithinfo
+      = gt_realloc(stack->spaceLcpintervalwithinfo,
+                   sizeof *stack->spaceLcpintervalwithinfo
+                   * (stack->allocatedLcpintervalwithinfo + addelems));
     if (adfst->initLimdfsstackelem != NULL)
     {
       for (idx = stack->allocatedLcpintervalwithinfo;
@@ -395,10 +397,10 @@ void gt_freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
     }
   }
   GT_FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
-  FREESPACE(limdfsresources->rangeOccs);
-  FREESPACE(limdfsresources->currentpathspace);
+  gt_free(limdfsresources->rangeOccs);
+  gt_free(limdfsresources->currentpathspace);
   GT_FREEARRAY(&limdfsresources->mstatspos,GtUlong);
-  FREESPACE(*ptrlimdfsresources);
+  gt_free(*ptrlimdfsresources);
 }
 
 /* enumerate the suffixes in an LCP-interval */

@@ -16,8 +16,8 @@
 */
 
 #include "core/types_api.h"
+#include "core/ma_api.h"
 #include "squarededist.h"
-#include "spacedef.h"
 
 static unsigned long gt_squarededistunit2 (const GtUchar *u, unsigned long m,
                                         const GtUchar *v, unsigned long n)
@@ -25,7 +25,7 @@ static unsigned long gt_squarededistunit2 (const GtUchar *u, unsigned long m,
   unsigned long val, we, nw, *ecol, *ecolptr;
   const GtUchar *uptr, *vptr;
 
-  ALLOCASSIGNSPACE(ecol,NULL,unsigned long,m+1);
+  ecol = gt_malloc(sizeof *ecol * (m+1));
   for (*ecol = 0, ecolptr = ecol+1, uptr = u; uptr < u + m; ecolptr++, uptr++)
   {
     *ecolptr = *(ecolptr-1) + 1;
@@ -57,7 +57,7 @@ static unsigned long gt_squarededistunit2 (const GtUchar *u, unsigned long m,
     }
   }
   val = *(ecolptr-1);
-  FREESPACE(ecol);
+  gt_free(ecol);
   return val;
 }
 

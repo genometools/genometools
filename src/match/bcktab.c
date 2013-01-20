@@ -857,10 +857,7 @@ void gt_bcktab_delete(GtBcktab *bcktab)
   bcktab->ulongdistpfxidx = NULL;
   gt_free(bcktab->uintdistpfxidx);
   bcktab->uintdistpfxidx = NULL;
-  if (bcktab->multimappower != NULL)
-  {
-    gt_multimappowerfree(&bcktab->multimappower);
-  }
+  gt_multimappower_delete(bcktab->multimappower);
   gt_free(bcktab->filltable);
   bcktab->filltable = NULL;
   gt_free(bcktab->basepower);

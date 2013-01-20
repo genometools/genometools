@@ -20,14 +20,14 @@
 #include "core/unused_api.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/chardef.h"
-#include "revcompl.h"
 #include "core/format64.h"
 #include "core/encseq.h"
+#include "core/ma_api.h"
+#include "revcompl.h"
 #include "tyr-map.h"
 #include "tyr-search.h"
 #include "tyr-show.h"
 #include "tyr-mersplit.h"
-#include "spacedef.h"
 
 typedef struct
 {
@@ -54,15 +54,20 @@ static void gt_tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
   tyrsearchinfo->showmode = showmode;
   tyrsearchinfo->searchstrand = searchstrand;
   tyrsearchinfo->dnaalpha = gt_alphabet_new_dna();
-  ALLOCASSIGNSPACE(tyrsearchinfo->bytecode,NULL,GtUchar,merbytes);
-  ALLOCASSIGNSPACE(tyrsearchinfo->rcbuf,NULL,GtUchar,tyrsearchinfo->mersize);
+  tyrsearchinfo->bytecode = gt_malloc(sizeof *tyrsearchinfo->bytecode
+                                      * merbytes);
+  tyrsearchinfo->rcbuf = gt_malloc(sizeof *tyrsearchinfo->rcbuf
+                                   * tyrsearchinfo->mersize);
 }
 
-void gt_tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
+static void gt_tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
 {
-  gt_alphabet_delete(tyrsearchinfo->dnaalpha);
-  FREESPACE(tyrsearchinfo->bytecode);
-  FREESPACE(tyrsearchinfo->rcbuf);
+  if (tyrsearchinfo != NULL)
+  {
+    gt_alphabet_delete(tyrsearchinfo->dnaalpha);
+    gt_free(tyrsearchinfo->bytecode);
+    gt_free(tyrsearchinfo->rcbuf);
+  }
 }
 
 /*@null@*/ const GtUchar *gt_searchsinglemer(const GtUchar *qptr,

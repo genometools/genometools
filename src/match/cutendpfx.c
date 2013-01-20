@@ -21,7 +21,7 @@
 #include "core/codetype.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
-#include "spacedef.h"
+#include "core/ma_api.h"
 #include "bcktab.h"
 #include "cutendpfx.h"
 
@@ -67,7 +67,7 @@ Bucketenumerator *gt_newbucketenumerator(const GtBcktab *bcktab,
   Bucketenumerator *bucketenumerator;
   GT_UNUSED unsigned int firstspecial;
 
-  ALLOCASSIGNSPACE(bucketenumerator,NULL,Bucketenumerator,1);
+  bucketenumerator = gt_malloc(sizeof *bucketenumerator);
   bucketenumerator->bcktab = bcktab;
   bucketenumerator->prefixlength = prefixlength;
   bucketenumerator->demandprefixlength = demandprefixlength;
@@ -108,7 +108,7 @@ bool gt_nextbucketenumerator(Lcpinterval *itv,
   return false;
 }
 
-void gt_freebucketenumerator(Bucketenumerator **bucketenumerator)
+void gt_freebucketenumerator(Bucketenumerator *bucketenumerator)
 {
-  FREESPACE(*bucketenumerator);
+  gt_free(bucketenumerator);
 }

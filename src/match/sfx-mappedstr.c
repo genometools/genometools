@@ -400,7 +400,7 @@ static void shiftrightwithchar(Kmerstream *spwp,GtUchar charcode)
 static void kmerstream_delete(Kmerstream *spwp)
 {
   gt_free(spwp->filltable);
-  gt_multimappowerfree(&spwp->multimappower);
+  gt_multimappower_delete(spwp->multimappower);
   specialwrapqueue(&spwp->spos);
   gt_free(spwp);
 }

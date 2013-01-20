@@ -16,13 +16,12 @@
 */
 
 #include "core/unused_api.h"
-#include "extended/alignment.h"
 #include "core/encseq.h"
-#include "spacedef.h"
+#include "core/ma_api.h"
 #include "core/format64.h"
+#include "extended/alignment.h"
 #include "idxlocalisw.h"
 #include "procmatch.h"
-#include "stamp.h"
 
 #define REPLACEMENTBIT   ((GtUchar) 1)
 #define DELETIONBIT      (((GtUchar) 1) << 1)
@@ -353,10 +352,12 @@ static void applysmithwaterman(SWdpresource *dpresource,
   if (dpresource->allocatedswcol < querylen + 1)
   {
     dpresource->allocatedswcol = querylen + 1;
-    ALLOCASSIGNSPACE(dpresource->swcol,dpresource->swcol,Scoretype,
-                     dpresource->allocatedswcol);
-    ALLOCASSIGNSPACE(dpresource->swentrycol,dpresource->swentrycol,DPpoint,
-                     dpresource->allocatedswcol);
+    dpresource->swcol = gt_realloc(dpresource->swcol,
+                                   sizeof *dpresource->swcol
+                                   * dpresource->allocatedswcol);
+    dpresource->swentrycol = gt_realloc(dpresource->swentrycol,
+                                        sizeof *dpresource->swentrycol
+                                        * dpresource->allocatedswcol);
   }
   score = swlocalsimilarityscore(dpresource->swcol,&maxpair,
                                  &dpresource->scorevalues,
@@ -386,15 +387,19 @@ static void applysmithwaterman(SWdpresource *dpresource,
       {
         dpresource->allocatedmaxedges
           = (maxentry.len1 + 1) * (maxentry.len2 + 1);
-        ALLOCASSIGNSPACE(dpresource->maxedges,dpresource->maxedges,Retracebits,
-                         dpresource->allocatedmaxedges);
+        dpresource->maxedges
+          = gt_realloc(dpresource->maxedges,
+                       sizeof *dpresource->maxedges
+                       * dpresource->allocatedmaxedges);
       }
       gt_alignment_reset(dpresource->alignment);
       if (dpresource->allocateddbsubstring < (unsigned long) maxentry.len2)
       {
         dpresource->allocateddbsubstring = (unsigned long) maxentry.len2;
-        ALLOCASSIGNSPACE(dpresource->dbsubstring,dpresource->dbsubstring,
-                         GtUchar,dpresource->allocateddbsubstring);
+        dpresource->dbsubstring
+          = gt_realloc(dpresource->dbsubstring,
+                       sizeof *dpresource->dbsubstring
+                       * dpresource->allocateddbsubstring);
       }
       swproducealignment(dpresource->alignment,
                          dpresource->dbsubstring,
@@ -452,7 +457,7 @@ SWdpresource *gt_newSWdpresource(Scoretype matchscore,
 {
   SWdpresource *swdpresource;
 
-  ALLOCASSIGNSPACE(swdpresource,NULL,SWdpresource,1);
+  swdpresource = gt_malloc(sizeof *swdpresource);
   swdpresource->showalignment = showalignment;
   swdpresource->scorevalues.matchscore = matchscore;
   swdpresource->scorevalues.mismatchscore = mismatchscore;
@@ -475,11 +480,11 @@ void gt_freeSWdpresource(SWdpresource *swdpresource)
 {
   gt_alignment_delete(swdpresource->alignment);
   swdpresource->alignment = NULL;
-  FREESPACE(swdpresource->swcol);
-  FREESPACE(swdpresource->swentrycol);
-  FREESPACE(swdpresource->maxedges);
-  FREESPACE(swdpresource->dbsubstring);
+  gt_free(swdpresource->swcol);
+  gt_free(swdpresource->swentrycol);
+  gt_free(swdpresource->maxedges);
+  gt_free(swdpresource->dbsubstring);
   swdpresource->allocatedswcol = 0;
   swdpresource->allocatedmaxedges = 0;
-  FREESPACE(swdpresource);
+  gt_free(swdpresource);
 }

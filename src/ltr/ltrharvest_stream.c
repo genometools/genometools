@@ -37,7 +37,6 @@
 #include "match/esa-maxpairs.h"
 #include "match/esa-mmsearch.h"
 #include "match/greedyedist.h"
-#include "match/spacedef.h"
 #include "match/xdrop.h"
 #include "ltr/ltrharvest_stream.h"
 
@@ -829,9 +828,8 @@ static int searchforTSDandorMotifoutside(
   /* search for TSDs and/or motif */
   if (lo->minlengthTSD > 1U)
   {
-    GtUchar *dbseq, *query;
-    ALLOCASSIGNSPACE(dbseq,NULL,GtUchar,leftlen);
-    ALLOCASSIGNSPACE(query,NULL,GtUchar,rightlen);
+    GtUchar *dbseq = gt_malloc(sizeof (*dbseq) * leftlen),
+            *query = gt_malloc(sizeof (*query) * rightlen);
 
     gt_encseq_extract_encoded(encseq,dbseq,startleftLTR,endleftLTR);
     gt_encseq_extract_encoded(encseq,query,startrightLTR,
@@ -857,8 +855,8 @@ static int searchforTSDandorMotifoutside(
        haserr = true;
     }
 
-    FREESPACE(dbseq);
-    FREESPACE(query);
+    gt_free(dbseq);
+    gt_free(query);
 
     if (!haserr)
     {
@@ -1139,12 +1137,12 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     if (ulen > maxulen)
     {
       maxulen = ulen;
-      ALLOCASSIGNSPACE(useq, useq, GtUchar, maxulen);
+      useq = gt_realloc(useq, sizeof (*useq) * maxulen);
     }
     if (vlen > maxvlen)
     {
       maxvlen = vlen;
-      ALLOCASSIGNSPACE(vseq, vseq, GtUchar, maxvlen);
+      vseq = gt_realloc(vseq, sizeof (*vseq) * maxvlen);
     }
     gt_encseq_extract_encoded(encseq, useq, boundaries->leftLTR_5,
                                             boundaries->leftLTR_3);
