@@ -206,9 +206,12 @@ GtXdropresources *gt_xdrop_resources_new(const GtXdropArbitraryscores *scores)
 
 void gt_xdrop_resources_delete(GtXdropresources *res)
 {
-  GT_FREEARRAY (&res->fronts, GtXdropfrontvalue);
-  GT_FREEARRAY (&res->big_t, GtXdropscore);
-  gt_free(res);
+  if (res != NULL)
+  {
+    GT_FREEARRAY (&res->fronts, GtXdropfrontvalue);
+    GT_FREEARRAY (&res->big_t, GtXdropscore);
+    gt_free(res);
+  }
 }
 
 /*

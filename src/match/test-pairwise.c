@@ -158,16 +158,17 @@ unsigned long gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
 }
 
 void gt_checkgreedyunitedist(GT_UNUSED bool forward,
-                          const GtUchar *useq,
-                          unsigned long ulen,
-                          const GtUchar *vseq,
-                          unsigned long vlen)
+                             const GtUchar *useq,
+                             unsigned long ulen,
+                             const GtUchar *vseq,
+                             unsigned long vlen)
 {
   unsigned long edist1, edist2;
+  GtFrontResource *frontresource = gt_frontresource_new(10UL);
   GtSeqabstract *greedyedistuseq = gt_seqabstract_new_ptr(useq,ulen,0),
                 *greedyedistvseq = gt_seqabstract_new_ptr(vseq,vlen,0);
 
-  edist1 = greedyunitedist(greedyedistuseq,greedyedistvseq);
+  edist1 = greedyunitedist(frontresource,greedyedistuseq,greedyedistvseq);
   edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);
 #ifdef SKDEBUG
   printf("edist = %lu\n",edist1);
@@ -180,4 +181,5 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
   }
   gt_seqabstract_delete(greedyedistuseq);
   gt_seqabstract_delete(greedyedistvseq);
+  gt_frontresource_delete(frontresource);
 }

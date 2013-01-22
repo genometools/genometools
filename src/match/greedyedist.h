@@ -20,7 +20,14 @@
 
 #include "match/seqabstract.h"
 
-unsigned long greedyunitedist(const GtSeqabstract *useq,
+typedef struct GtFrontResource GtFrontResource;
+
+GtFrontResource *gt_frontresource_new(unsigned long maxdist);
+
+void gt_frontresource_delete(GtFrontResource *ftres);
+
+unsigned long greedyunitedist(GtFrontResource *ftres,
+                              const GtSeqabstract *useq,
                               const GtSeqabstract *vseq);
 
 #endif

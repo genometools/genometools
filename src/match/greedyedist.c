@@ -23,30 +23,26 @@
 #include "core/types_api.h"
 #include "greedyedist.h"
 
-#define COMPARESYMBOLS(A,B)\
+#define GT_FRONT_COMPARESYMBOLS(A,B)\
         if ((A) == (GtUchar) SEPARATOR)\
         {\
-          gl->ubound = uidx;\
+          ftres->ubound = uidx;\
         }\
         if ((B) == (GtUchar) SEPARATOR)\
         {\
-          gl->vbound = vidx;\
+          ftres->vbound = vidx;\
         }\
         if ((A) != (B) || ISSPECIAL(A))\
         {\
           break;\
         }
 
-#define STOREFRONT(GL,F,V)            F = V
-#define ROWVALUE(FVAL)                *(FVAL)
+#define GT_FRONT_STORE(GL,F,V)         F = V
+#define GT_FRONT_ROWVALUE(FVAL)        *(FVAL)
 
-#define MINUSINFINITYFRONT(GL)        ((GL)->integermin)
+#define GT_FRONT_MINUSINFINITY(GL)     ((GL)->integermin)
 
-typedef long Frontvalue;
-
-/*
-  A structure to store the global values.
-*/
+typedef long GtFrontvalue;
 
 typedef struct
 {
@@ -54,32 +50,69 @@ typedef struct
        width,    /* width of the front */
        left;     /* left boundary (negative), */
                  /* -left is relative address of entry */
-} Frontspec;     /* \Typedef{Frontspec} */
+} GtFrontspec;
 
-typedef struct
+/*
+  A structure to store the global values.
+*/
+
+struct GtFrontResource
 {
-  unsigned long ubound,
+  unsigned long currentallocated,
+                ubound,
                 vbound;
   long ulen,
        vlen,
        integermin;
-  Frontvalue *frontspace;
-} FrontResource;
+  GtFrontvalue *frontspace;
+};
+
+static unsigned long sumofoddnumbers(unsigned long max)
+{
+  unsigned long idx, sum = 0, oddnum = 1UL;
+
+  for (idx = 1UL; idx <= max; idx++)
+  {
+    sum += oddnum;
+    oddnum += 2;
+  }
+  gt_assert(max * max == sum);
+  return sum;
+}
+
+GtFrontResource *gt_frontresource_new(unsigned long maxdist)
+{
+  GtFrontResource *ftres = gt_malloc(sizeof *ftres);
+
+  ftres->currentallocated = sumofoddnumbers(maxdist);
+  ftres->frontspace = gt_malloc(sizeof *ftres->frontspace
+                                * ftres->currentallocated);
+  return ftres;
+}
+
+void gt_frontresource_delete(GtFrontResource *ftres)
+{
+  if (ftres != NULL)
+  {
+    gt_free(ftres->frontspace);
+    gt_free(ftres);
+  }
+}
 
 #ifdef SKDEBUG
-static void showfront(const FrontResource *gl,
-                      const Frontspec *fspec,
+static void showfront(const GtFrontResource *ftres,
+                      const GtFrontspec *fspec,
                       long r)
 {
-  Frontvalue *fval;
+  GtFrontvalue *fval;
   long k;
 
-  for (fval = gl->frontspace + fspec->offset, k=fspec->left;
+  for (fval = ftres->frontspace + fspec->offset, k=fspec->left;
        k < fspec->left + fspec->width; k++, fval++)
   {
     if (r <= 0 || k <= -r || k >= r)
     {
-      printf("(k=%ld)%ld ",k,ROWVALUE(fval));
+      printf("(k=%ld)%ld ",k,GT_FRONT_ROWVALUE(fval));
     } else
     {
       printf("(k=%ld)undef ",k);
@@ -89,8 +122,8 @@ static void showfront(const FrontResource *gl,
 }
 #endif
 
-static void frontspecparms(const FrontResource *gl,
-                           Frontspec *fspec,
+static void frontspecparms(const GtFrontResource *ftres,
+                           GtFrontspec *fspec,
                            long p,
                            long r)
 {
@@ -100,8 +133,8 @@ static void frontspecparms(const FrontResource *gl,
     fspec->width = p + p + 1;
   } else
   {
-    fspec->left = MAX(-gl->ulen,-p);
-    fspec->width = MIN(gl->vlen,p) - fspec->left + 1;
+    fspec->left = MAX(-ftres->ulen,-p);
+    fspec->width = MIN(ftres->vlen,p) - fspec->left + 1;
   }
 #ifdef SKDEBUG
   printf("p=%ld,offset=%ld,left=%ld,width=%ld\n",p,
@@ -111,16 +144,16 @@ static void frontspecparms(const FrontResource *gl,
 #endif
 }
 
-static long accessfront(const FrontResource *gl,
-                        Frontvalue *fval,
-                        const Frontspec *fspec,
+static long accessfront(const GtFrontResource *ftres,
+                        GtFrontvalue *fval,
+                        const GtFrontspec *fspec,
                         long k)
 {
   if (fspec->left <= k && k < fspec->left + fspec->width)
   {
-    return ROWVALUE(fval+k);
+    return GT_FRONT_ROWVALUE(fval+k);
   }
-  return MINUSINFINITYFRONT(gl);
+  return GT_FRONT_MINUSINFINITY(ftres);
 }
 
 /*
@@ -130,26 +163,26 @@ static long accessfront(const FrontResource *gl,
 
 static void evalentryforward(const GtSeqabstract *useq,
                              const GtSeqabstract *vseq,
-                             FrontResource *gl,
-                             Frontvalue *fval,
-                             const Frontspec *fspec,
+                             GtFrontResource *ftres,
+                             GtFrontvalue *fval,
+                             const GtFrontspec *fspec,
                              long k)
 {
   long value, t;
   unsigned long uidx, vidx;
   GtUchar a, b;
-  Frontvalue *fptr;
+  GtFrontvalue *fptr;
 
 #ifdef SKDEBUG
   printf("evalentryforward(k=%ld)\n",k);
 #endif
-  fptr = gl->frontspace + fspec->offset - fspec->left;
-  t = accessfront(gl,fptr,fspec,k) + 1;         /* same diagonal */
+  fptr = ftres->frontspace + fspec->offset - fspec->left;
+  t = accessfront(ftres,fptr,fspec,k) + 1;         /* same diagonal */
 #ifdef SKDEBUG
   printf("same: access(k=%ld)=%ld\n",k,t-1);
 #endif
 
-  value = accessfront(gl,fptr,fspec,k-1);       /* diagonal below */
+  value = accessfront(ftres,fptr,fspec,k-1);       /* diagonal below */
 #ifdef SKDEBUG
   printf("below: access(k=%ld)=%ld\n",k-1,value);
 #endif
@@ -157,7 +190,7 @@ static void evalentryforward(const GtSeqabstract *useq,
   {
     t = value;
   }
-  value = accessfront(gl,fptr,fspec,k+1) + 1;     /* diagonal above */
+  value = accessfront(ftres,fptr,fspec,k+1) + 1;     /* diagonal above */
 #ifdef SKDEBUG
   printf("above: access(k=%ld)=%ld\n",k+1,value-1);
 #endif
@@ -170,30 +203,31 @@ static void evalentryforward(const GtSeqabstract *useq,
 #endif
   if (t < 0 || t+k < 0)             /* no negative value */
   {
-    STOREFRONT(gl,ROWVALUE(fval),MINUSINFINITYFRONT(gl));
+    GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(fval),GT_FRONT_MINUSINFINITY(ftres));
   } else
   {
     gt_assert(t >= 0);
     uidx = (unsigned long) t;
     gt_assert(t + k >= 0);
     vidx = (unsigned long) (t + k);
-    if (gl->ulen != 0 && gl->vlen != 0)  /* only for nonempty strings */
+    if (ftres->ulen != 0 && ftres->vlen != 0)  /* only for nonempty strings */
     {
-      for (/* Nothing */; uidx < gl->ubound && vidx < gl->vbound;
+      for (/* Nothing */; uidx < ftres->ubound && vidx < ftres->vbound;
            uidx++, vidx++)
       {
         a = gt_seqabstract_encoded_char(useq,uidx);
         b = gt_seqabstract_encoded_char(vseq,vidx);
-        COMPARESYMBOLS(a,b);
+        GT_FRONT_COMPARESYMBOLS(a,b);
       }
       t = (long) uidx;
     }
-    if (t > (long) gl->ubound || t + k > (long) gl->vbound)
+    if (t > (long) ftres->ubound || t + k > (long) ftres->vbound)
     {
-      STOREFRONT(gl,ROWVALUE(fval),MINUSINFINITYFRONT(gl));
+      GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(fval),
+                     GT_FRONT_MINUSINFINITY(ftres));
     } else
     {
-      STOREFRONT(gl,ROWVALUE(fval),t);
+      GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(fval),t);
     }
   }
 }
@@ -205,41 +239,42 @@ static void evalentryforward(const GtSeqabstract *useq,
 
 static bool evalfrontforward(const GtSeqabstract *useq,
                              const GtSeqabstract *vseq,
-                             FrontResource *gl,
-                             const Frontspec *prevfspec,
-                             const Frontspec *fspec,
+                             GtFrontResource *ftres,
+                             const GtFrontspec *prevfspec,
+                             const GtFrontspec *fspec,
                              long r)
 {
   long k;
   bool defined = false;
-  Frontvalue *fval;
+  GtFrontvalue *fval;
 
-  for (fval = gl->frontspace + fspec->offset, k = fspec->left;
+  for (fval = ftres->frontspace + fspec->offset, k = fspec->left;
        k < fspec->left + fspec->width; k++, fval++)
   {
     if (r <= 0 || k <= -r || k >= r)
     {
-      evalentryforward(useq,vseq,gl,fval,prevfspec,k);
-      if (ROWVALUE(fval) >= 0)
+      evalentryforward(useq,vseq,ftres,fval,prevfspec,k);
+      if (GT_FRONT_ROWVALUE(fval) >= 0)
       {
         defined = true;
       }
 #ifdef SKDEBUG
-      printf("store front[k=%ld]=%ld ",k,ROWVALUE(fval));
-      printf("at index %ld\n",(long) (fval-gl->frontspace));
+      printf("store front[k=%ld]=%ld ",k,GT_FRONT_ROWVALUE(fval));
+      printf("at index %ld\n",(long) (fval-ftres->frontspace));
 #endif
     } else
     {
 #ifdef SKDEBUG
-      printf("store front[k=%ld]=MINUSINFINITYFRONT ",k);
-      printf("at index %ld\n",(long) (fval-gl->frontspace));
+      printf("store front[k=%ld]=GT_FRONT_MINUSINFINITY ",k);
+      printf("at index %ld\n",(long) (fval-ftres->frontspace));
 #endif
-      STOREFRONT(gl,ROWVALUE(fval),MINUSINFINITYFRONT(gl));
+      GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(fval),
+                     GT_FRONT_MINUSINFINITY(ftres));
     }
   }
 #ifdef SKDEBUG
   printf("frontvalues[r=%ld]=",r);
-  showfront(gl,fspec,r);
+  showfront(ftres,fspec,r);
 #endif
   return defined;
 }
@@ -251,64 +286,62 @@ static bool evalfrontforward(const GtSeqabstract *useq,
 
 static void firstfrontforward(const GtSeqabstract *useq,
                               const GtSeqabstract *vseq,
-                              FrontResource *gl,Frontspec *fspec)
+                              GtFrontResource *ftres,
+                              GtFrontspec *fspec)
 {
   GtUchar a, b;
   unsigned long uidx, vidx;
 
   fspec->left = fspec->offset = 0;
   fspec->width = 1L;
-  if (gl->ulen == 0 || gl->vlen == 0)
+  if (ftres->ulen == 0 || ftres->vlen == 0)
   {
-    STOREFRONT(gl,ROWVALUE(&gl->frontspace[0]),0);
+    GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),0);
   } else
   {
-    for (uidx = 0, vidx = 0; uidx < gl->ubound && vidx < gl->vbound;
+    for (uidx = 0, vidx = 0; uidx < ftres->ubound && vidx < ftres->vbound;
          uidx++, vidx++)
     {
       a = gt_seqabstract_encoded_char(useq,uidx);
       b = gt_seqabstract_encoded_char(vseq,vidx);
-      COMPARESYMBOLS(a,b);
+      GT_FRONT_COMPARESYMBOLS(a,b);
     }
-    STOREFRONT(gl,ROWVALUE(&gl->frontspace[0]),(long) uidx);
+    GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),(long) uidx);
   }
 #ifdef SKDEBUG
-  printf("forward front[0]=%ld\n",ROWVALUE(&gl->frontspace[0]));
+  printf("forward front[0]=%ld\n",GT_FRONT_ROWVALUE(&ftres->frontspace[0]));
 #endif
 }
 
-unsigned long greedyunitedist(const GtSeqabstract *useq,
+unsigned long greedyunitedist(GtFrontResource *ftres,
+                              const GtSeqabstract *useq,
                               const GtSeqabstract *vseq)
 {
-  unsigned long currentallocated, realdistance;
-  FrontResource gl;
-  Frontspec frontspecspace[2],
-            *fspec,
-            *prevfspec;
-  Frontvalue *fptr;
-  unsigned long kval;
+  unsigned long realdistance, kval;
   long r;
+  GtFrontspec frontspecspace[2], *fspec, *prevfspec;
+  GtFrontvalue *fptr;
 
 #ifdef SKDEBUG
   printf("unitedistcheckSEPgeneric(ulen=%lu,vlen=%lu)\n",ulenvalue,vlenvalue);
 #endif
   gt_assert(gt_seqabstract_length_get(useq) < (unsigned long) LONG_MAX);
   gt_assert(gt_seqabstract_length_get(vseq) < (unsigned long) LONG_MAX);
-  currentallocated = 1UL;
-  gl.frontspace = gt_malloc(sizeof (*gl.frontspace) * currentallocated);
-  gl.ubound = gt_seqabstract_length_get(useq);
-  gl.vbound = gt_seqabstract_length_get(vseq);
-  gl.ulen = (long) gl.ubound;
-  gl.vlen = (long) gl.vbound;
-  gl.integermin = -MAX(gl.ulen,gl.vlen);
+  ftres->ubound = gt_seqabstract_length_get(useq);
+  ftres->vbound = gt_seqabstract_length_get(vseq);
+  ftres->ulen = (long) ftres->ubound;
+  ftres->vlen = (long) ftres->vbound;
+  ftres->integermin = -MAX(ftres->ulen,ftres->vlen);
   prevfspec = &frontspecspace[0];
-  firstfrontforward(useq,vseq,&gl,prevfspec);
-  if (gl.ulen == gl.vlen && ROWVALUE(&gl.frontspace[0]) == gl.vlen)
+  firstfrontforward(useq,vseq,ftres,prevfspec);
+  if (ftres->ulen == ftres->vlen &&
+      GT_FRONT_ROWVALUE(ftres->frontspace) == ftres->vlen)
   {
     realdistance = 0;
   } else
   {
-    for (kval=1UL, r=1-MIN(gl.ulen,gl.vlen); /* Nothing */ ; kval++, r++)
+    for (kval=1UL, r=1-MIN(ftres->ulen,ftres->vlen);
+         /* Nothing */ ; kval++, r++)
     {
       if (prevfspec == &frontspecspace[0])
       {
@@ -318,17 +351,19 @@ unsigned long greedyunitedist(const GtSeqabstract *useq,
         fspec = &frontspecspace[0];
       }
       fspec->offset = prevfspec->offset + prevfspec->width;
-      frontspecparms(&gl,fspec,(long) kval,r);
+      frontspecparms(ftres,fspec,(long) kval,r);
       while ((unsigned long) (fspec->offset + fspec->width)
-             >= currentallocated)
+             >= ftres->currentallocated)
       {
-        currentallocated += (kval+1);
-        gl.frontspace = gt_realloc(gl.frontspace,sizeof (*gl.frontspace) *
-                                   currentallocated);
+        ftres->currentallocated += kval+1;
+        ftres->frontspace
+          = gt_realloc(ftres->frontspace,
+                       sizeof *ftres->frontspace * ftres->currentallocated);
       }
-      (void) evalfrontforward(useq,vseq,&gl,prevfspec,fspec,r);
-      fptr = gl.frontspace + fspec->offset - fspec->left;
-      if (accessfront(&gl,fptr,fspec,gl.vlen - gl.ulen) == gl.ulen)
+      (void) evalfrontforward(useq,vseq,ftres,prevfspec,fspec,r);
+      fptr = ftres->frontspace + fspec->offset - fspec->left;
+      if (accessfront(ftres,fptr,fspec,ftres->vlen - ftres->ulen)
+          == ftres->ulen)
       {
         realdistance = kval;
         break;
@@ -345,6 +380,5 @@ unsigned long greedyunitedist(const GtSeqabstract *useq,
 #ifdef SKDEBUG
   printf("unitedistfrontSEP returns %ld\n",realdistance);
 #endif
-  gt_free(gl.frontspace);
   return realdistance;
 }

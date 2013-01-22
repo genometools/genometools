@@ -84,6 +84,7 @@ typedef struct
   Querymatch *querymatchspaceptr;
   GtXdropArbitraryscores arbitscores;
   GtXdropresources *res;
+  GtFrontResource *frontresource;
   GtXdropbest best_left;
   GtXdropbest best_right;
   GtXdropscore belowscore;
@@ -174,7 +175,8 @@ static int gt_simplexdropselfmatchoutput(void *info,
                      dbstart,
                      GT_READMODE_FORWARD,
                      score,
-                     greedyunitedist(xdropmatchinfo->useq,xdropmatchinfo->vseq),
+                     greedyunitedist(xdropmatchinfo->frontresource,
+                                     xdropmatchinfo->useq,xdropmatchinfo->vseq),
                      true,
                      (uint64_t) queryseqnum,
                      querylen,
@@ -268,7 +270,8 @@ static int gt_processxdropquerymatches(void *info,
                      dbstart,
                      GT_READMODE_FORWARD,
                      score,
-                     greedyunitedist(xdropmatchinfo->useq,xdropmatchinfo->vseq),
+                     greedyunitedist(xdropmatchinfo->frontresource,
+                                     xdropmatchinfo->useq,xdropmatchinfo->vseq),
                      false,
                      queryseqnum,
                      querylen,
@@ -505,6 +508,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   xdropmatchinfo.arbitscores.mis = -2;
   xdropmatchinfo.arbitscores.ins = -3;
   xdropmatchinfo.arbitscores.del = -3;
+  xdropmatchinfo.frontresource = gt_frontresource_new(100UL);
   xdropmatchinfo.res = gt_xdrop_resources_new(&xdropmatchinfo.arbitscores);
   xdropmatchinfo.belowscore = 5L;
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
@@ -591,6 +595,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   gt_seqabstract_delete(xdropmatchinfo.useq);
   gt_seqabstract_delete(xdropmatchinfo.vseq);
   gt_xdrop_resources_delete(xdropmatchinfo.res);
+  gt_frontresource_delete(xdropmatchinfo.frontresource);
   gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }

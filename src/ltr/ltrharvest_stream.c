@@ -991,10 +991,10 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   unsigned long edist;
   Repeat *repeatptr;
   LTRboundaries *boundaries;
+  GtFrontResource *frontresource = gt_frontresource_new(100UL);
   bool haserr = false;
 
   gt_error_check(err);
-
   xdropresources = gt_xdrop_resources_new(&lo->arbitscores);
   for (repeatcounter = 0; repeatcounter < lo->repeatinfo.repeats.nextfreeRepeat;
        repeatcounter++)
@@ -1154,7 +1154,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     gt_seqabstract_reinit_encseq(sa_useq,encseq,ulen,boundaries->leftLTR_5);
     gt_seqabstract_reinit_encseq(sa_vseq,encseq,vlen,boundaries->rightLTR_5);
 #endif
-    edist = greedyunitedist(sa_useq,sa_vseq);
+    edist = greedyunitedist(frontresource,sa_useq,sa_vseq);
 
     /* determine similarity */
     boundaries->similarity = 100.0 * (1 - (((double) edist)/(MAX(ulen,vlen))));
@@ -1173,6 +1173,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   gt_xdrop_resources_delete(xdropresources);
   gt_seqabstract_delete(sa_useq);
   gt_seqabstract_delete(sa_vseq);
+  gt_frontresource_delete(frontresource);
   return haserr ? -1 : 0;
 }
 
