@@ -13,7 +13,7 @@
 
 #define pcRel(pc, p)	(cast(int, (pc) - (p)->code) - 1)
 
-#define lua_getline(f,pc)	(((f)->lineinfo) ? (f)->lineinfo[pc] : 0)
+#define lgetline(f,pc)	(((f)->lineinfo) ? (f)->lineinfo[pc] : 0)
 
 #define resethookcount(L)	(L->hookcount = L->basehookcount)
 

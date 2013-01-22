@@ -18,7 +18,7 @@
 INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/zlib-1.2.7 \
             -I$(CURDIR)/src/external/md5-1.1.2/src \
-            -I$(CURDIR)/src/external/lua-5.1.4/src \
+            -I$(CURDIR)/src/external/lua-5.1.5/src \
             -I$(CURDIR)/src/external/luafilesystem-1.5.0/src \
             -I$(CURDIR)/src/external/lpeg-0.10.2 \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
@@ -129,7 +129,7 @@ LIBLUA_SRC=src/lualib.c\
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
 LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
-LUAMAIN_SRC:=src/external/lua-5.1.4/etc/all.c
+LUAMAIN_SRC:=src/external/lua-5.1.5/etc/all.c
 LUAMAIN_OBJ:=$(LUAMAIN_SRC:%.c=obj/%.o)
 LUAMAIN_DEP:=$(LUAMAIN_SRC:%.c=obj/%.d)
 
