@@ -229,14 +229,12 @@ int gt_parse_score(bool *score_is_defined, float *score_value,
                    const char *score, unsigned int line_number,
                    const char *filename, GtError *err)
 {
-  int rval;
-
   gt_assert(score && filename);
   gt_error_check(err);
 
   if (strlen(score) == 1 && score[0] == '.')
     *score_is_defined = false;
-  else if ((rval = sscanf(score, "%f", score_value)) != 1) {
+  else if (sscanf(score, "%f", score_value) != 1) {
     gt_error_set(err, "could not parse score '%s' on line %u in file '%s'",
                  score, line_number, filename);
     return -1;
@@ -298,12 +296,10 @@ int gt_parse_int_line(int *int_value, const char *integer,
                       unsigned int line_number, const char *filename,
                       GtError *err)
 {
-  int rval;
-
   gt_error_check(err);
   gt_assert(integer && filename);
 
-  if ((rval = sscanf(integer, "%d", int_value)) != 1) {
+  if (sscanf(integer, "%d", int_value) != 1) {
     gt_error_set(err, "could not parse integer '%s' on line %u in file '%s'",
               integer, line_number, filename);
     return -1;
