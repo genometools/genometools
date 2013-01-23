@@ -180,7 +180,11 @@ static unsigned int transnum2index[] =
 
 static GtTranslationScheme* getschemetable(unsigned int transnum, GtError *err)
 {
-  gt_assert(transnum < GT_SIZEOFTRANSRANGE);
+  if (transnum >= GT_SIZEOFTRANSRANGE) {
+    gt_error_set(err, "'%u' is not a valid translation table number!",
+                 transnum);
+    return NULL;
+  }
   if (transnum2index[transnum] == GT_UNDEFTRANSNUM) {
     gt_error_set(err, "'%u' is not a valid translation table number!",
                  transnum);
