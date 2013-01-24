@@ -320,7 +320,7 @@ unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
       }
     }
   }
-  gt_qsort_r(table->sortedhspace,next,sizeof(*table->sortedhspace),
+  gt_qsort_r(table->sortedhspace,next,sizeof (*table->sortedhspace),
              table->hspace,compareGtUint64hashstoredvalue);
   gt_assert(next > 0);
   if (table->zero_occurs)
