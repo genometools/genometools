@@ -18,6 +18,7 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+#include "core/error_api.h"
 #include "core/symbol_api.h"
 
 void        gt_symbol_init(void);
