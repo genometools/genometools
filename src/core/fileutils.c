@@ -179,7 +179,7 @@ static int file_find_in_env_generic(GtStr *path, const char *file,
       gt_str_append_cstr(path, pathcomponent);
     }
     else {
-      /* file not found in path  */
+      /* file not found in path */
       gt_str_reset(path);
     }
   }
