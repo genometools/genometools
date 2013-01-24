@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2006-2009, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c)      2012       Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2012       Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012-2013       Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2013       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,7 @@
 #define gt_ft_EST_match                    "EST_match"
 #define gt_ft_LTR_retrotransposon          "LTR_retrotransposon"
 #define gt_ft_SNP                          "SNP"
+#define gt_ft_SNV                          "SNV"
 #define gt_ft_TF_binding_site              "TF_binding_site"
 #define gt_ft_cDNA_match                   "cDNA_match"
 #define gt_ft_exon                         "exon"
