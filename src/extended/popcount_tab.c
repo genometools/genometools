@@ -302,7 +302,7 @@ static inline unsigned int _gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
                        popcount_tab->offsets[popcount_c]);
   else {
     gt_assert(i == 0);
-    return pos;
+    return pos+1;
   }
   block = gt_compact_ulong_store_get(popcount_tab->blocks,
                                      popcount_tab->offsets[popcount_c] + i);
@@ -401,7 +401,7 @@ int gt_popcount_tab_unit_test(GtError *err)
   gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 1U) == 1U);
   gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 2U) == 1U);
   gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 2U) == 2U);
-  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 4U, 0UL, 2U) == 2U);
+  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 4U, 0UL, 1U) == 2U);
 
   for (idx = 0; !had_err && idx < (1UL << blocksize); idx++) {
     popcount_c = gt_popcount_tab_class(idx, blocksize);
