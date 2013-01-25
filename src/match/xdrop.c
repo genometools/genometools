@@ -226,6 +226,8 @@ static int gt_calculateallowedMININFINITYINTgenerations(
              arbitdistances->del) - 1;
 }
 
+#define LOOKAHEAD 10
+
 #define GT_XDROP_EVAL(K,D)\
         ((K) * res->arbitscores->mat/2 - (D) * res->arbitdistances.gcd)
 #define GT_XDROP_SETDBACK(XDROPBELOWSCORE)\
@@ -235,6 +237,60 @@ static int gt_calculateallowedMININFINITYINTgenerations(
  The following macro checks for wildcard and separator symbols.
  */
 
+#undef GT_XDROP_CHECKINCREMENT
+#ifdef GT_XDROP_CHECKINCREMENT
+#define GT_XDROP_UINCREMENT(I)\
+          characcess++;\
+          if (forward)\
+          {\
+            if (lastaccess_useq != ULONG_MAX)\
+            {\
+              if (lastaccess_useq > uoffset + (I))\
+              {\
+                unsigned long goback = lastaccess_useq - (uoffset + (I));\
+                if (maxgoback < goback)\
+                {\
+                  maxgoback = goback;\
+                }\
+              } else\
+              {\
+                if (lastaccess_useq + LOOKAHEAD >= uoffset + (I))\
+                {\
+                  consecutive++;\
+                }\
+              }\
+            }\
+            lastaccess_useq = uoffset + (I);\
+          }
+
+#define GT_XDROP_VINCREMENT(J)\
+          characcess++;\
+          if (forward)\
+          {\
+            if (lastaccess_vseq != ULONG_MAX)\
+            {\
+              if (lastaccess_vseq > voffset + (J))\
+              {\
+                unsigned long goback = lastaccess_vseq - (voffset + (J));\
+                if (maxgoback < goback)\
+                {\
+                  maxgoback = goback;\
+                }\
+              } else\
+              {\
+                if (lastaccess_vseq + LOOKAHEAD >= voffset + (J))\
+                {\
+                  consecutive++;\
+                }\
+              }\
+            }\
+            lastaccess_vseq = voffset + (J);\
+          }
+#else
+#define GT_XDROP_UINCREMENT(I) /* Nothing */
+#define GT_XDROP_VINCREMENT(J) /* Nothing */
+#endif
+
 #define GT_XDROP_SEQACC(SEQ,OFF,IDX)\
         gt_seqabstract_encoded_char(SEQ,forward ? (OFF) + (IDX)\
                                                 : (OFF) - 1UL - (IDX))
@@ -243,12 +299,14 @@ static int gt_calculateallowedMININFINITYINTgenerations(
         {\
           GtUchar a, b;\
           a = GT_XDROP_SEQACC(useq,uoffset,I);\
+          GT_XDROP_UINCREMENT(I)\
           if (a == (GtUchar) SEPARATOR)\
           {\
             ulen = I;\
             break;\
           }\
           b = GT_XDROP_SEQACC(vseq,voffset,J);\
+          GT_XDROP_VINCREMENT(J)\
           if (b == (GtUchar) SEPARATOR)\
           {\
             vlen = J;\
@@ -259,6 +317,11 @@ static int gt_calculateallowedMININFINITYINTgenerations(
             break;\
           }\
         }
+
+static long gt_xdrop_frontvalue(const GtXdropresources *res,long d,long k)
+{
+  return res->fronts.spaceGtXdropfrontvalue[GT_XDROP_FRONTIDX(d,k)].dptabrow;
+}
 
 void gt_evalxdroparbitscoresextend(bool forward,
                                    GtXdropbest *xdropbest,
@@ -290,6 +353,12 @@ void gt_evalxdroparbitscoresextend(bool forward,
   GtXdropfrontvalue tmpfront;
   GtXdropscore bigt_tmp;        /* best score T' seen already */
   bool alwaysMININFINITYINT = true;
+#ifdef GT_XDROP_CHECKINCREMENT
+  unsigned long lastaccess_useq = ULONG_MAX,
+                lastaccess_vseq = ULONG_MAX,
+                maxgoback = 0;
+  unsigned long characcess = 0, consecutive = 0;
+#endif
 
 #undef DEBUG_POSTEL
 #ifdef DEBUG_POSTEL
@@ -323,7 +392,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
   }
   tmpfront.dptabrow = i;
   tmpfront.dptabdirection = (GtUchar) 0;   /* no predecessor */
-  STOREINARRAYFRONTS (0, tmpfront);
+  STOREINARRAYFRONTS(0, tmpfront);
   xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + i, 0);
   gt_assert(i >= 0);
   xdropbest->ivalue = xdropbest->jvalue = (unsigned long) i;
@@ -343,29 +412,22 @@ void gt_evalxdroparbitscoresextend(bool forward,
           -(d - res->arbitdistances.del) <= k - 1 &&
           k - 1 <= d - res->arbitdistances.del)
       {
-        i = res->fronts.spaceGtXdropfrontvalue[
-               GT_XDROP_FRONTIDX(d - res->arbitdistances.del,k-1)].dptabrow + 1;
+        i = gt_xdrop_frontvalue(res,d - res->arbitdistances.del,k-1) + 1;
         tmpfront.dptabdirection = GT_XDROP_DELETIONBIT;
       }
       /* case 2: REPLACEMENT-EDGE */
-      if (lbound <= k && k <= ubound && d - res->arbitdistances.mis >= 0 &&
+      if (lbound <= k &&
+          k <= ubound &&
+          d - res->arbitdistances.mis >= 0 &&
           -(d - res->arbitdistances.mis) <= k &&
           k <= d - res->arbitdistances.mis)
       {
         /* test, if case 1 has happened. */
-        if (tmpfront.dptabdirection & GT_XDROP_DELETIONBIT)
+        tmprow = gt_xdrop_frontvalue(res,d - res->arbitdistances.mis,k) + 1;
+        if (!(tmpfront.dptabdirection & GT_XDROP_DELETIONBIT) ||
+            tmprow > i)
         {
-          tmprow = res->fronts.spaceGtXdropfrontvalue[
-                GT_XDROP_FRONTIDX(d - res->arbitdistances.mis,k)].dptabrow + 1;
-          if (tmprow > i)
-          {
-            i = tmprow;
-            tmpfront.dptabdirection = GT_XDROP_REPLACEMENTBIT;
-          }
-        } else
-        {
-          i = res->fronts.spaceGtXdropfrontvalue[
-                 GT_XDROP_FRONTIDX(d - res->arbitdistances.mis,k)].dptabrow + 1;
+          i = tmprow;
           tmpfront.dptabdirection = GT_XDROP_REPLACEMENTBIT;
         }
       }
@@ -375,20 +437,12 @@ void gt_evalxdroparbitscoresextend(bool forward,
           -(d - res->arbitdistances.ins) <= k + 1 &&
            k + 1 <= d - res->arbitdistances.ins)
       {
-        if (tmpfront.dptabdirection & (GT_XDROP_DELETIONBIT |
-                                       GT_XDROP_REPLACEMENTBIT))
+        tmprow = gt_xdrop_frontvalue(res,d - res->arbitdistances.ins,k+1);
+        if (!(tmpfront.dptabdirection & (GT_XDROP_DELETIONBIT |
+                                         GT_XDROP_REPLACEMENTBIT)) ||
+            tmprow > i)
         {
-          tmprow = res->fronts.spaceGtXdropfrontvalue[
-                  GT_XDROP_FRONTIDX(d - res->arbitdistances.ins,k+1)].dptabrow;
-          if (tmprow > i)
-          {
-            i = tmprow;
-            tmpfront.dptabdirection = GT_XDROP_INSERTIONBIT;
-          }
-        } else
-        {
-          i = res->fronts.spaceGtXdropfrontvalue[
-                   GT_XDROP_FRONTIDX(d - res->arbitdistances.ins,k+1)].dptabrow;
+          i = tmprow;
           tmpfront.dptabdirection = GT_XDROP_INSERTIONBIT;
         }
       }
@@ -414,9 +468,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
         {
           if (k <= -d || k >= d || /* not correct boundaries for
                                       ACCESTOFRONT(d-1,k) */
-              (res->fronts.spaceGtXdropfrontvalue[
-                       GT_XDROP_FRONTIDX(d-1,k)].dptabrow < i
-               && i <= MIN(ulen,vlen + k)))
+              (gt_xdrop_frontvalue(res,d-1,k) < i && i <= MIN(ulen,vlen + k)))
           {
             while (i < ulen && j < vlen)
             {
@@ -436,12 +488,11 @@ void gt_evalxdroparbitscoresextend(bool forward,
           } else
           {
             alwaysMININFINITYINT = false;
-            tmpfront.dptabrow = res->fronts.spaceGtXdropfrontvalue[
-                                        GT_XDROP_FRONTIDX(d-1,k)].dptabrow;
+            tmpfront.dptabrow = gt_xdrop_frontvalue(res,d-1,k);
           }
         }
       }
-      STOREINARRAYFRONTS (GT_XDROP_FRONTIDX(d,k),tmpfront);
+      STOREINARRAYFRONTS(GT_XDROP_FRONTIDX(d,k),tmpfront);
       /* delete value for test for */
       /* INSERTIONBIT/REPLACEMENTBIT/DELETIONBIT above
       tmpfront.dptabdirection = (GtUchar) 0; */
@@ -469,17 +520,15 @@ void gt_evalxdroparbitscoresextend(bool forward,
     for (k = -d; k < lbound - 1; k++)
     {
       tmpfront.dptabrow = integermin;
-      STOREINARRAYFRONTS (GT_XDROP_FRONTIDX(d, k), tmpfront);
+      STOREINARRAYFRONTS(GT_XDROP_FRONTIDX(d,k), tmpfront);
     }
     for (k = ubound + 2; k <= d; k++)
     {
       tmpfront.dptabrow = integermin;
-      STOREINARRAYFRONTS (GT_XDROP_FRONTIDX(d, k), tmpfront);
+      STOREINARRAYFRONTS(GT_XDROP_FRONTIDX(d,k), tmpfront);
     }
     /* alignment finished */
-    if (-d <= end_k && end_k <= d &&
-        res->fronts.spaceGtXdropfrontvalue[
-                GT_XDROP_FRONTIDX(d,end_k)].dptabrow == ulen)
+    if (-d <= end_k && end_k <= d && gt_xdrop_frontvalue(res,d,end_k) == ulen)
     {
       break;
     }
@@ -487,8 +536,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
        lbound may decrease by one or increase/stays the same */
     for (k = lbound - 1; k <= ubound + 1; k++)
     {
-      if (res->fronts.spaceGtXdropfrontvalue[GT_XDROP_FRONTIDX(d, k)].dptabrow >
-          integermin)
+      if (gt_xdrop_frontvalue(res,d,k) > integermin)
       {
         lbound = k;
         break;
@@ -498,8 +546,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
        ubound may increase by one or decrease/stays the same */
     for (k = ubound + 1; k >= lbound - 1; k--)
     {
-      if (res->fronts.spaceGtXdropfrontvalue[GT_XDROP_FRONTIDX(d, k)].dptabrow >
-          integermin)
+      if (gt_xdrop_frontvalue(res,d,k) > integermin)
       {
         ubound = k;
         break;
@@ -509,8 +556,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
     lboundtmp = lbound;
     for (k = 0; k >= lbound; k--)
     {
-      if (res->fronts.spaceGtXdropfrontvalue[GT_XDROP_FRONTIDX(d,k)].dptabrow ==
-                                         vlen + k)
+      if (gt_xdrop_frontvalue(res,d,k) == vlen + k)
       {
         lboundtmp = k;
         break;
@@ -520,8 +566,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
     uboundtmp = ubound;
     for (k = 0; k <= ubound; k++)
     {
-      if (res->fronts.spaceGtXdropfrontvalue[GT_XDROP_FRONTIDX(d,k)].dptabrow ==
-                                         ulen)
+      if (gt_xdrop_frontvalue(res,d,k) == ulen)
       {
         uboundtmp = k;
         break;
@@ -530,4 +575,12 @@ void gt_evalxdroparbitscoresextend(bool forward,
     lbound = MAX(lbound, lboundtmp);
     ubound = MIN(ubound, uboundtmp);
   }
+#ifdef GT_XDROP_CHECKINCREMENT
+  if (maxgoback > 0)
+  {
+    printf("maxgoback = %lu\n",maxgoback);
+  }
+  printf("characcess=%lu,consecutive=%lu(%.2f)\n",characcess,consecutive,
+                                       100.0 * (double) consecutive/characcess);
+#endif
 }
