@@ -60,7 +60,7 @@ double gt_text_width_calculator_cairo_get_text_width(GtTextWidthCalculator *twc,
   /* redo layout */
   pango_layout_set_text(twcc->layout, text, -1);
   gt_assert(pango_layout_get_line_count(twcc->layout) > 0);
-  line = pango_layout_get_line_readonly(twcc->layout, 0);
+  line = pango_layout_get_line(twcc->layout, 0);
 
   /* get extents */
   pango_layout_line_get_pixel_extents(line, &rect, NULL);
@@ -133,7 +133,8 @@ GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context,
     cairo_save(twcc->context);
   }
   twcc->fmap = pango_cairo_font_map_get_default();
-  twcc->pcontext = pango_font_map_create_context(twcc->fmap);
+  twcc->pcontext = pango_context_new();
+  pango_context_set_font_map(twcc->pcontext, twcc->fmap);
   twcc->layout = pango_layout_new(twcc->pcontext);
   snprintf(buf, 64, "Sans %d", (int) theight);
   twcc->desc = pango_font_description_from_string(buf);

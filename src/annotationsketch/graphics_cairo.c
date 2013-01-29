@@ -169,8 +169,7 @@ void gt_graphics_cairo_draw_text(GtGraphics *gg, double x, double y,
   pango_layout_set_text(g->layout, text, -1);
 
   /* get text extents */
-  pango_layout_line_get_pixel_extents(pango_layout_get_line_readonly(g->layout,
-                                                                     0),
+  pango_layout_line_get_pixel_extents(pango_layout_get_line(g->layout, 0),
                                       &ink,
                                       NULL);
 
@@ -213,8 +212,7 @@ void gt_graphics_cairo_draw_text_centered(GtGraphics *gg, double x, double y,
   pango_layout_set_text(g->layout, text, -1);
 
   /* get text extents */
-  pango_layout_line_get_pixel_extents(pango_layout_get_line_readonly(g->layout,
-                                                                     0),
+  pango_layout_line_get_pixel_extents(pango_layout_get_line(g->layout, 0),
                                       &ink,
                                       NULL);
 
@@ -234,8 +232,7 @@ void gt_graphics_cairo_draw_text_right(GtGraphics *gg, double x, double y,
   pango_layout_set_text(g->layout, text, -1);
 
   /* get text extents */
-  pango_layout_line_get_pixel_extents(pango_layout_get_line_readonly(g->layout,
-                                                                     0),
+  pango_layout_line_get_pixel_extents(pango_layout_get_line(g->layout, 0),
                                       &ink,
                                       NULL);
 
@@ -352,7 +349,7 @@ double gt_graphics_cairo_get_text_width(GtGraphics *gg, const char* text)
   pango_layout_set_text(g->layout, text, -1);
   /* get text extents */
   gt_assert(pango_layout_get_line_count(g->layout) > 0);
-  line = pango_layout_get_line_readonly(g->layout, 0);
+  line = pango_layout_get_line(g->layout, 0);
   gt_assert(line);
   pango_layout_line_get_pixel_extents(line, &rect, NULL);
 
@@ -803,7 +800,8 @@ GtGraphics* gt_graphics_cairo_new(GtGraphicsOutType type,
   gc = gt_graphics_cairo_cast(g);
   gt_graphics_cairo_initialize(g, type, width, height);
   gc->fmap =  pango_cairo_font_map_get_default();
-  gc->pcontext = pango_font_map_create_context(gc->fmap);
+  gc->pcontext = pango_context_new();
+  pango_context_set_font_map(gc->pcontext, gc->fmap);
   gc->layout = pango_layout_new(gc->pcontext);
   pango_layout_set_width(gc->layout, -1);
   gt_assert(gc->layout);
@@ -829,7 +827,8 @@ GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
   gc->from_context = true;
   gc->cr = context;
   gc->fmap =  pango_cairo_font_map_new();
-  gc->pcontext = pango_font_map_create_context(gc->fmap);
+  gc->pcontext = pango_context_new();
+  pango_context_set_font_map(gc->pcontext, gc->fmap);
   gc->layout = pango_layout_new(gc->pcontext);
   pango_layout_set_width(gc->layout, -1);
   gt_assert(gc->layout);
