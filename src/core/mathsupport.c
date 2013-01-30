@@ -198,12 +198,19 @@ unsigned long gt_power_for_small_exponents(unsigned int base,
     return powervalue;
   }
 }
-#endif /* S_SPLINT_S */
+
+static inline double gt_round(double x)
+{
+  double integer = ceil(x);
+  if (0.0 - x < GT_DBL_MAX_ABS_ERROR)
+    return integer - x > 0.5 ? integer - 1.0 : integer;
+  return integer - x >= 0.5 ? integer - 1.0 : integer;
+}
 
 long int gt_round_to_long(double x)
 {
   int64_t intgr;
-  double rounded = round(x);
+  double rounded = gt_round(x);
   intgr = (int64_t) rounded;
   /* If the fractional part is exactly 0.5, we need to check whether
   the rounded result is even. If it is not we need to add 1 to
@@ -215,7 +222,6 @@ long int gt_round_to_long(double x)
   return (long int) intgr;
 }
 
-#ifndef S_SPLINT_S
 /* Make some unit tests for this? */
 void gt_out_power_for_small_exponents(void)
 {
