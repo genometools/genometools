@@ -200,15 +200,18 @@ unsigned long gt_power_for_small_exponents(unsigned int base,
 }
 #endif /* S_SPLINT_S */
 
-long int      gt_round_to_long(double x) {
-  uint64_t intgr;
+long int gt_round_to_long(double x)
+{
+  int64_t intgr;
   double rounded = round(x);
-  intgr = (uint64_t) rounded;
+  intgr = (int64_t) rounded;
   /* If the fractional part is exactly 0.5, we need to check whether
   the rounded result is even. If it is not we need to add 1 to
   negative values and subtract one from positive values. */
-  if ((fabs((double) intgr - x) == 0.5) & intgr)
-    intgr -= ((intgr >> 62) | 1); /* 1 with the sign of result, i.e. -1 or 1. */
+  if ((fabs(((double) intgr) - x) == 0.5) & intgr) {
+    /* 1 with the sign of result, i.e. -1 or 1. */
+    intgr -= ((intgr >> 62) | ((int64_t) 1));
+  }
   return (long int) intgr;
 }
 
@@ -280,6 +283,14 @@ int gt_mathsupport_unit_test(GtError *err)
   gt_ensure(had_err, gt_double_smaller_double(-1.1, -1.0));
   gt_ensure(had_err, !gt_double_smaller_double(-1.0, -1.1));
   gt_ensure(had_err, !gt_double_smaller_double(1.0-less_than_epsilon, 1.0));
+
+  gt_ensure(had_err,  0L == gt_round_to_long(0.5));
+  gt_ensure(had_err,  1L == gt_round_to_long(0.51));
+  gt_ensure(had_err, -1L == gt_round_to_long(-0.51));
+  gt_ensure(had_err,  0L == gt_round_to_long(-0.5));
+  gt_ensure(had_err, -2L == gt_round_to_long(-1.5));
+  gt_ensure(had_err, -2L == gt_round_to_long(-2.5));
+  gt_ensure(had_err, -3L == gt_round_to_long(-2.51));
 
   return had_err;
 }
