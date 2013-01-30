@@ -133,7 +133,7 @@ GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context,
     cairo_save(twcc->context);
   }
   twcc->fmap = pango_cairo_font_map_get_default();
-  twcc->pcontext = pango_context_new();
+  twcc->pcontext = pango_cairo_create_context(twcc->context);
   pango_context_set_font_map(twcc->pcontext, twcc->fmap);
   twcc->layout = pango_layout_new(twcc->pcontext);
   snprintf(buf, 64, "Sans %d", (int) theight);

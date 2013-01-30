@@ -800,7 +800,7 @@ GtGraphics* gt_graphics_cairo_new(GtGraphicsOutType type,
   gc = gt_graphics_cairo_cast(g);
   gt_graphics_cairo_initialize(g, type, width, height);
   gc->fmap =  pango_cairo_font_map_get_default();
-  gc->pcontext = pango_context_new();
+  gc->pcontext = pango_cairo_create_context(gc->cr);
   pango_context_set_font_map(gc->pcontext, gc->fmap);
   gc->layout = pango_layout_new(gc->pcontext);
   pango_layout_set_width(gc->layout, -1);
@@ -827,7 +827,7 @@ GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
   gc->from_context = true;
   gc->cr = context;
   gc->fmap =  pango_cairo_font_map_new();
-  gc->pcontext = pango_context_new();
+  gc->pcontext = pango_cairo_create_context(gc->cr);
   pango_context_set_font_map(gc->pcontext, gc->fmap);
   gc->layout = pango_layout_new(gc->pcontext);
   pango_layout_set_width(gc->layout, -1);
