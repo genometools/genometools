@@ -26,6 +26,8 @@
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/layout.h"
 
+typedef struct GtCanvasClass GtCanvasClass;
+
 typedef int  (*GtCanvasVisitLayoutFunc)(GtCanvas*, GtLayout*, GtError*);
 typedef int  (*GtCanvasVisitTrackFunc)(GtCanvas*, GtTrack*, GtError*);
 typedef int  (*GtCanvasVisitLineFunc)(GtCanvas*, GtLine*, GtError*);
@@ -55,6 +57,7 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
                                          GtCanvasDrawRulerFunc draw_ruler_func,
                                          GtCanvasFreeFunc free);
 GtCanvas* gt_canvas_create(const GtCanvasClass*);
-void*     gt_canvas_cast(const GtCanvasClass*, GtCanvas*);
+void*     gt_canvas_cast(const GtCanvasClass *cc, GtCanvas *c);
+void*     gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
 
 #endif

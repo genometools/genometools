@@ -19,7 +19,7 @@
 #ifndef SAM_QUERY_NAME_ITERATOR_H
 #define SAM_QUERY_NAME_ITERATOR_H
 
-#include "extended/cstr_iterator.h"
+#include "extended/cstr_iterator_rep.h"
 #include "extended/samfile_iterator.h"
 
 /* implements <GtCstrIterator> */

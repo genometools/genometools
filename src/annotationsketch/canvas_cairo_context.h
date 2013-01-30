@@ -19,7 +19,7 @@
 #define CANVAS_CAIRO_CONTEXT_H
 
 #include <cairo.h>
-#include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_rep.h"
 #include "annotationsketch/canvas_cairo_context_api.h"
 
 const GtCanvasClass* gt_canvas_cairo_context_class(void);

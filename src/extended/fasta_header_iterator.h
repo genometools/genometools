@@ -19,7 +19,7 @@
 #define FASTA_HEADER_ITERATOR_H
 
 #include "core/str_array_api.h"
-#include "extended/cstr_iterator.h"
+#include "extended/cstr_iterator_rep.h"
 
 /* implements <GtCstrIterator> */
 typedef struct GtFastaHeaderIterator GtFastaHeaderIterator;

@@ -25,15 +25,6 @@
    containing strings */
 typedef struct GtCstrIterator GtCstrIterator;
 
-typedef struct GtCstrIteratorClass GtCstrIteratorClass;
-typedef struct GtCstrIteratorMembers GtCstrIteratorMembers;
-
-typedef int    (*GtCstrIteratorNextFunc)(GtCstrIterator*,
-                                         const char**,
-                                         GtError*);
-typedef int    (*GtCstrIteratorResetFunc)(GtCstrIterator*, GtError*);
-typedef void   (*GtCstrIteratorDeleteFunc)(GtCstrIterator*);
-
 /* Sets <string> to the next string, retains ownership, will be overwritten by
    next call. Returns negative (<0)  on error and sets err accordingly, returns
    0 if no more strings are available and >0 on success. */
@@ -46,15 +37,7 @@ int                  gt_cstr_iterator_next(GtCstrIterator *cstr_iterator,
 int                  gt_cstr_iterator_reset(GtCstrIterator *cstr_iterator,
                                             GtError *err);
 
+/* Deletes <cstr_iterator> and frees all associated memory. */
 void                 gt_cstr_iterator_delete(GtCstrIterator *cstr_iterator);
 
-GtCstrIteratorClass* gt_cstr_iterator_class_new(size_t size,
-                                                GtCstrIteratorNextFunc,
-                                                GtCstrIteratorResetFunc,
-                                                GtCstrIteratorDeleteFunc);
-
-GtCstrIterator*      gt_cstr_iterator_create(const GtCstrIteratorClass*);
-
-void*                gt_cstr_iterator_cast(const GtCstrIteratorClass*,
-                                           GtCstrIterator*);
 #endif

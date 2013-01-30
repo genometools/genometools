@@ -21,6 +21,15 @@
 
 #include "extended/cstr_iterator.h"
 
+typedef struct GtCstrIteratorClass GtCstrIteratorClass;
+typedef struct GtCstrIteratorMembers GtCstrIteratorMembers;
+
+typedef int    (*GtCstrIteratorNextFunc)(GtCstrIterator*,
+                                         const char**,
+                                         GtError*);
+typedef int    (*GtCstrIteratorResetFunc)(GtCstrIterator*, GtError*);
+typedef void   (*GtCstrIteratorDeleteFunc)(GtCstrIterator*);
+
 struct GtCstrIterator {
   const GtCstrIteratorClass *c_class;
   GtCstrIteratorMembers *members;
@@ -33,4 +42,13 @@ struct GtCstrIteratorClass {
   GtCstrIteratorDeleteFunc delete_func;
 };
 
+GtCstrIteratorClass* gt_cstr_iterator_class_new(size_t size,
+                                                GtCstrIteratorNextFunc,
+                                                GtCstrIteratorResetFunc,
+                                                GtCstrIteratorDeleteFunc);
+
+GtCstrIterator*      gt_cstr_iterator_create(const GtCstrIteratorClass*);
+
+void*                gt_cstr_iterator_cast(const GtCstrIteratorClass*,
+                                           GtCstrIterator*);
 #endif
