@@ -39,21 +39,15 @@ double        gt_rand_max_double(double maximal_value);
 double        gt_rand_0_to_1(void);
 /* Returns a random character from 'a' to 'z'. */
 char          gt_rand_char(void);
-
 /* Find the log base 2 of an integer in O(wordsize) operations */
-
 unsigned int  gt_determinebitspervalue(unsigned long maxvalue);
-
 /* Determine pow(base,exponent) for small values of exponent */
-
 unsigned long gt_power_for_small_exponents(unsigned int base,
                                            unsigned int exponent);
+/* Return <x> rounded to the nearest long integer, similar to
+   <lrint()> which may not be available on older glibc versions. */
+long          gt_round_to_long(double x);
 
-/* Returns <x> rounded to the nearest integer, similar to
-   long int lrint(double x);
-   from math.h. Implemented because lrint is not available on old glibc
-   versions. */
-long int      gt_round_to_long(double x);
-int gt_mathsupport_unit_test(GtError *err);
+int           gt_mathsupport_unit_test(GtError *err);
 
 #endif
