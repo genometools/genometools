@@ -25,6 +25,7 @@
 #include "core/ensure.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
+#include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/safearith.h"
 #include "core/warning_api.h"
@@ -119,9 +120,9 @@ unsigned long gt_combinatorics_binomial_ln(unsigned long n, unsigned long k)
   if (GT_DIV2(n) < k)
     k = n - k;
 
-  return gt_safe_cast2ulong(lrint(exp(ln_n_fac_tab[n] -
-                                      ln_n_fac_tab[k] -
-                                      ln_n_fac_tab[n - k])));
+  return gt_safe_cast2ulong(gt_round_to_long(exp(ln_n_fac_tab[n] -
+                                                 ln_n_fac_tab[k] -
+                                                 ln_n_fac_tab[n - k])));
 }
 
 unsigned long gt_combinatorics_binomial_simple(unsigned long n, unsigned long k)

@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -41,13 +42,18 @@ char          gt_rand_char(void);
 
 /* Find the log base 2 of an integer in O(wordsize) operations */
 
-unsigned int gt_determinebitspervalue(unsigned long maxvalue);
+unsigned int  gt_determinebitspervalue(unsigned long maxvalue);
 
 /* Determine pow(base,exponent) for small values of exponent */
 
 unsigned long gt_power_for_small_exponents(unsigned int base,
                                            unsigned int exponent);
 
+/* Returns <x> rounded to the nearest integer, similar to
+   long int lrint(double x);
+   from math.h. Implemented because lrint is not available on old glibc
+   versions. */
+long int      gt_round_to_long(double x);
 int gt_mathsupport_unit_test(GtError *err);
 
 #endif

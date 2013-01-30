@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +27,7 @@
 #define GT_DBL_MAX_ABS_ERROR 1.0E-100
 #define GT_DBL_MAX_REL_ERROR 1.0E-8
 
+#ifndef S_SPLINT_S
 double gt_logsum(double p1, double p2)
 {
   if (p1 > p2)
@@ -196,9 +198,22 @@ unsigned long gt_power_for_small_exponents(unsigned int base,
     return powervalue;
   }
 }
+#endif /* S_SPLINT_S */
 
+long int      gt_round_to_long(double x) {
+  uint64_t intgr;
+  double rounded = round(x);
+  intgr = (uint64_t) rounded;
+  /* If the fractional part is exactly 0.5, we need to check whether
+  the rounded result is even. If it is not we need to add 1 to
+  negative values and subtract one from positive values. */
+  if ((fabs((double) intgr - x) == 0.5) & intgr)
+    intgr -= ((intgr >> 62) | 1); /* 1 with the sign of result, i.e. -1 or 1. */
+  return (long int) intgr;
+}
+
+#ifndef S_SPLINT_S
 /* Make some unit tests for this? */
-
 void gt_out_power_for_small_exponents(void)
 {
   unsigned int exponent;
@@ -268,3 +283,4 @@ int gt_mathsupport_unit_test(GtError *err)
 
   return had_err;
 }
+#endif /* S_SPLINT_S */
