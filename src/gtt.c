@@ -44,6 +44,7 @@
 #include "core/hashtable.h"
 #include "core/interval_tree.h"
 #include "core/mathsupport.h"
+#include "core/md5_seqid.h"
 #include "core/quality.h"
 #include "core/queue.h"
 #include "core/sequence_buffer.h"
@@ -301,6 +302,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "ltrelement module", gt_ltrelement_unit_test);
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
   gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
+  gt_hashmap_add(unit_tests, "MD5 seqid module", gt_md5_seqid_unit_test);
   gt_hashmap_add(unit_tests, "rdj: suffix-prefix matches list module",
                                                           gt_spmlist_unit_test);
   gt_hashmap_add(unit_tests, "PBS finder module", gt_pbs_unit_test);

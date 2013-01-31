@@ -21,6 +21,7 @@
 #include "core/ensure.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
+#include "core/md5_seqid.h"
 #include "core/msort.h"
 #include "core/queue_api.h"
 #include "core/unused_api.h"
@@ -136,14 +137,16 @@ int gt_genome_node_cmp(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 {
   GtRange range_a, range_b;
   int rval;
+  const char *id_a, *id_b;
   gt_assert(gn_a && gn_b);
   /* ensure that region nodes come first and sequence nodes come last,
      otherwise we don't get a valid GFF3 stream */
   if ((rval = compare_genome_node_type(gn_a, gn_b)))
     return rval;
 
-  if ((rval = gt_str_cmp(gt_genome_node_get_idstr(gn_a),
-                         gt_genome_node_get_idstr(gn_b)))) {
+  id_a = gt_str_get(gt_genome_node_get_idstr(gn_a));
+  id_b = gt_str_get(gt_genome_node_get_idstr(gn_b));
+  if ((rval = gt_md5_seqid_cmp_seqids(id_a, id_b))) {
     return rval;
   }
   range_a = gt_genome_node_get_range(gn_a),
@@ -157,14 +160,16 @@ static int compare_genome_nodes_with_delta(GtGenomeNode *gn_a,
 {
   GtRange range_a, range_b;
   int rval;
+  const char *id_a, *id_b;
   gt_assert(gn_a && gn_b);
   /* ensure that sequence regions come first, otherwise we don't get a valid
      gff3 stream */
   if ((rval = compare_genome_node_type(gn_a, gn_b)))
     return rval;
 
-  if ((rval = gt_str_cmp(gt_genome_node_get_idstr(gn_a),
-                         gt_genome_node_get_idstr(gn_b)))) {
+  id_a = gt_str_get(gt_genome_node_get_idstr(gn_a));
+  id_b = gt_str_get(gt_genome_node_get_idstr(gn_b));
+  if ((rval = gt_md5_seqid_cmp_seqids(id_a, id_b))) {
     return rval;
   }
   range_a = gt_genome_node_get_range(gn_a);

@@ -1,5 +1,7 @@
 /*
-  Copyright (c) 2010, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010      Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +20,7 @@
 #define MD5_SEQID_H
 
 #include <stdbool.h>
+#include "core/error_api.h"
 
 #define GT_MD5_SEQID_PREFIX      "md5:"
 #define GT_MD5_SEQID_PREFIX_LEN  4
@@ -29,5 +32,13 @@
 /* Returns <true> if <seqid> has the prefix used to denote MD5 sequence IDs,
    <false> otherwise. */
 bool gt_md5_seqid_has_prefix(const char *seqid);
+
+/* Compares \0-terminated seqid strings <id_a> and <id_b> (similarly to
+   strcmp(3)), but is aware of MD5 prefixes. That is, if both seqids have MD5
+   prefixes, only the MD5 prefixes will be compared. If at least one seqid has
+   no MD5 prefix, the MD5 prefixes are ignored for both. */
+int  gt_md5_seqid_cmp_seqids(const char *id_a, const char *id_b);
+
+int  gt_md5_seqid_unit_test(GtError *err);
 
 #endif
