@@ -32,12 +32,12 @@ int gt_gth(int argc, const char **argv, const GthPlugins *plugins, GtError *err)
   int parsed_args, had_err = 0;
 
   gt_error_check(err);
-  gt_assert(plugins && plugins->file_preprocessor && plugins->seq_col_new);
+  gt_assert(plugins && plugins->file_preprocessor && plugins->seq_con_new);
   gt_assert(plugins->gth_version_func);
 
   /* init data structures */
   call_info = gth_call_info_new(argv[0]);
-  input = gth_input_new(plugins->file_preprocessor, plugins->seq_col_new);
+  input = gth_input_new(plugins->file_preprocessor, plugins->seq_con_new);
   stat = gth_stat_new();
 
   /* parse the options */

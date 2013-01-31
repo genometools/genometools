@@ -25,25 +25,25 @@ struct GthMD5Cache {
   GtStrCache *str_cache;
 };
 
-static const char* seq_col_get_seq(void *seqs, unsigned long index)
+static const char* seq_con_get_seq(void *seqs, unsigned long index)
 {
-  GthSeqCol *seq_col = seqs;
+  GthSeqCon *seq_con = seqs;
   const char *seq;
-  gt_assert(seq_col);
-  seq = (const char*) gth_seq_col_get_orig_seq(seq_col, index);
+  gt_assert(seq_con);
+  seq = (const char*) gth_seq_con_get_orig_seq(seq_con, index);
   if (!seq) {
-    gth_seq_col_demand_orig_seq(seq_col);
-    seq = (const char*) gth_seq_col_get_orig_seq(seq_col, index);
+    gth_seq_con_demand_orig_seq(seq_con);
+    seq = (const char*) gth_seq_con_get_orig_seq(seq_con, index);
     gt_assert(seq);
   }
   return seq;
 }
 
-static unsigned long seq_col_get_seq_len(void *seqs, unsigned long index)
+static unsigned long seq_con_get_seq_len(void *seqs, unsigned long index)
 {
-  GthSeqCol *seq_col = seqs;
-  gt_assert(seq_col);
-  return gth_seq_col_get_length(seq_col, index);
+  GthSeqCon *seq_con = seqs;
+  gt_assert(seq_con);
+  return gth_seq_con_get_length(seq_con, index);
 }
 
 static GtStr* get_md5_str(void *str_source, unsigned long index)
@@ -53,14 +53,14 @@ static GtStr* get_md5_str(void *str_source, unsigned long index)
   return gt_str_new_cstr(gt_md5_tab_get(md5_tab, index));
 }
 
-GthMD5Cache* gth_md5_cache_new(const char *indexname, GthSeqCol *seq_col)
+GthMD5Cache* gth_md5_cache_new(const char *indexname, GthSeqCon *seq_con)
 {
   GthMD5Cache *md5_cache;
-  gt_assert(indexname && seq_col);
+  gt_assert(indexname && seq_con);
   md5_cache = gt_malloc(sizeof *md5_cache);
-  md5_cache->md5_tab = gt_md5_tab_new(indexname, seq_col, seq_col_get_seq,
-                                      seq_col_get_seq_len,
-                                      gth_seq_col_num_of_seqs(seq_col), true,
+  md5_cache->md5_tab = gt_md5_tab_new(indexname, seq_con, seq_con_get_seq,
+                                      seq_con_get_seq_len,
+                                      gth_seq_con_num_of_seqs(seq_con), true,
                                       !getenv(GTHNOFLOCKENVNAME));
   md5_cache->str_cache = gt_str_cache_new(md5_cache->md5_tab, get_md5_str,
                                           gt_md5_tab_size(md5_cache->md5_tab));

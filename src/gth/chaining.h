@@ -68,12 +68,12 @@ typedef struct {
   GthJumpTableDelete jump_table_delete;
 
   /* can be filled and used by matcher */
-  GthSeqCol *gen_seq_col,
-            *ref_seq_col;
+  GthSeqCon *gen_seq_con,
+            *ref_seq_con;
 } GthMatchProcessorInfo;
 
 /* the matcher has to call this */
-int gth_match_processor(GthMatchProcessorInfo *info, GthSeqCol *gen_seq_col,
-                        GthSeqCol *ref_seq_col, GthMatch *match);
+int gth_match_processor(GthMatchProcessorInfo *info, GthSeqCon *gen_seq_con,
+                        GthSeqCon *ref_seq_con, GthMatch *match);
 
 #endif

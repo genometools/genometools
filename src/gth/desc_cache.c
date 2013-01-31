@@ -25,20 +25,20 @@ struct GthDescCache {
 static GtStr* get_desc_str(void *str_source, unsigned long index)
 {
   GtStr *str;
-  GthSeqCol *seq_col = str_source;
-  gt_assert(seq_col);
+  GthSeqCon *seq_con = str_source;
+  gt_assert(seq_con);
   str = gt_str_new();
-  gth_seq_col_get_description(seq_col, index, str);
+  gth_seq_con_get_description(seq_con, index, str);
   return str;
 }
 
-GthDescCache* gth_desc_cache_new(GthSeqCol *seq_col)
+GthDescCache* gth_desc_cache_new(GthSeqCon *seq_con)
 {
   GthDescCache *desc_cache;
-  gt_assert(seq_col);
+  gt_assert(seq_con);
   desc_cache = gt_malloc(sizeof *desc_cache);
-  desc_cache->str_cache = gt_str_cache_new(seq_col, get_desc_str,
-                                           gth_seq_col_num_of_seqs(seq_col));
+  desc_cache->str_cache = gt_str_cache_new(seq_con, get_desc_str,
+                                           gth_seq_con_num_of_seqs(seq_con));
   return desc_cache;
 }
 

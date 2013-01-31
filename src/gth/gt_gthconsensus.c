@@ -90,7 +90,7 @@ int gt_gthconsensus(int argc, const char **argv, const GthPlugins *plugins,
 
   /* init data structures */
   call_info = gth_call_info_new(argv[0]);
-  input = gth_input_new(plugins->file_preprocessor, plugins->seq_col_new);
+  input = gth_input_new(plugins->file_preprocessor, plugins->seq_con_new);
   stat = gth_stat_new();
   consensusfiles = gt_str_array_new();
 

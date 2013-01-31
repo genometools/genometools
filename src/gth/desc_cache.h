@@ -17,11 +17,11 @@
 #ifndef DESC_CACHE_H
 #define DESC_CACHE_H
 
-#include "gth/seq_col.h"
+#include "gth/seq_con.h"
 
 typedef struct GthDescCache GthDescCache;
 
-GthDescCache* gth_desc_cache_new(GthSeqCol *seq_col);
+GthDescCache* gth_desc_cache_new(GthSeqCon *seq_con);
 void          gth_desc_cache_delete(GthDescCache *desc_cache);
 GtStr*        gth_desc_cache_get(GthDescCache *desc_cache,
                                  unsigned long seq_num);

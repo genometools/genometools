@@ -25,7 +25,7 @@
 #include "gth/duplicate_check.h"
 #include "gth/gthoutput.h"
 #include "gth/gthalphatype.h"
-#include "gth/seq_col.h"
+#include "gth/seq_con.h"
 
 typedef struct GthInput GthInput;
 
@@ -41,7 +41,7 @@ typedef int (*GthInputFilePreprocessor)(GthInput *input,
                                         GthOutput *out, GtError*);
 
 GthInput*      gth_input_new(GthInputFilePreprocessor file_preprocessor,
-                             GthSeqColConstructor seq_col_constructor);
+                             GthSeqConConstructor seq_con_constructor);
 int            gth_input_preprocess(GthInput*,
                                     bool gthconsensus,
                                     bool noautoindex,
@@ -181,8 +181,8 @@ void           gth_input_delete_current(GthInput*);
 void           gth_input_delete_complete(GthInput*);
 
 /* deprecated interfaces */
-GthSeqCol*           gth_input_current_gen_seq_col(GthInput*);
-GthSeqCol*           gth_input_current_ref_seq_col(GthInput*);
+GthSeqCon*           gth_input_current_gen_seq_con(GthInput*);
+GthSeqCon*           gth_input_current_ref_seq_con(GthInput*);
 const unsigned char* gth_input_current_gen_seq_tran(const GthInput*);
 const unsigned char* gth_input_current_gen_seq_tran_rc(const GthInput*);
 const unsigned char* gth_input_current_gen_seq_orig(const GthInput*);

@@ -171,7 +171,7 @@ static void outputbuckets(GtArray *buckets, GthMatch *sortedmatches,
    the opposite strand. This is necessary for proper chaining (only if
    palindromic matches have been calculated). */
 static void transform_refseq_positions(GtArray *matches,
-                                       GthSeqCol *ref_seq_col)
+                                       GthSeqCon *ref_seq_con)
 {
   unsigned long i, referencelength, referenceoffset;
   GtRange original, transformed;
@@ -181,7 +181,7 @@ static void transform_refseq_positions(GtArray *matches,
   for (i = 0; i < gt_array_size(matches); i++) {
     match = gt_array_get(matches, i);
     /* get necessary data for transformation */
-    range = gth_seq_col_get_range(ref_seq_col, match->Storeseqnumreference);
+    range = gth_seq_con_get_range(ref_seq_con, match->Storeseqnumreference);
     referencelength = range.end - range.start + 1;
     referenceoffset = range.start;
 
@@ -358,8 +358,8 @@ static void showmatches(GthMatch *matches, unsigned long numofmatches,
 static void calc_chains_from_matches(GthChainCollection *chain_collection,
                                      GtArray *matches,
                                      GthChainingInfo *chaining_info,
-                                     GthSeqCol *gen_seq_col,
-                                     GthSeqCol *ref_seq_col,
+                                     GthSeqCon *gen_seq_con,
+                                     GthSeqCon *ref_seq_con,
                                      unsigned long rare,
                                      double fragweightfactor,
                                      GthJumpTableNew jump_table_new,
@@ -400,7 +400,7 @@ static void calc_chains_from_matches(GthChainCollection *chain_collection,
       gt_file_xprintf(outfp, "%c\n", COMMENTCHAR);
     }
 
-    transform_refseq_positions(matches, ref_seq_col);
+    transform_refseq_positions(matches, ref_seq_con);
 
     /* output transformed matches */
     if (chaining_info->call_info->out->comments) {
@@ -461,8 +461,8 @@ static void calc_chains_from_matches(GthChainCollection *chain_collection,
         /* this expression gives an upper bound on the number of chains
            (because we do not know the exact number here) */
         numofchains = chaining_info->bucketnum +
-                      gth_seq_col_num_of_seqs(gen_seq_col) *
-                      (gth_seq_col_num_of_seqs(ref_seq_col) - bucket->seqnum1);
+                      gth_seq_con_num_of_seqs(gen_seq_con) *
+                      (gth_seq_con_num_of_seqs(ref_seq_con) - bucket->seqnum1);
 
         if (numofchains > chaining_info->maxbucketnum)
           numofchains = chaining_info->maxbucketnum;
@@ -495,12 +495,12 @@ static void calc_chains_from_matches(GthChainCollection *chain_collection,
                        ->Storeseqnumreference;
 
     /* store genomic offset */
-    range = gth_seq_col_get_range(gen_seq_col, info.gen_seq_num);
+    range = gth_seq_con_get_range(gen_seq_con, info.gen_seq_num);
     info.gen_total_length = range.end - range.start + 1;
     info.gen_offset       = range.start;
 
     /* store length of reference sequence */
-    range = gth_seq_col_get_range(ref_seq_col, info.ref_seq_num);
+    range = gth_seq_con_get_range(ref_seq_con, info.ref_seq_num);
     info.ref_total_length = range.end - range.start + 1;
     info.ref_offset       = range.start;
     info.referencelength  = range.end - range.start + 1;
@@ -556,8 +556,8 @@ static void match_processor_info_init(GthMatchProcessorInfo
   match_processor_info->rare                   = rare;
   match_processor_info->lastrefseqnum          = 0;
   match_processor_info->fragweightfactor       = fragweightfactor;
-  match_processor_info->gen_seq_col            = NULL;
-  match_processor_info->ref_seq_col            = NULL;
+  match_processor_info->gen_seq_con            = NULL;
+  match_processor_info->ref_seq_con            = NULL;
   match_processor_info->jump_table_new         = jump_table_new;
   match_processor_info->jump_table_new_reverse = jump_table_new_reverse;
   match_processor_info->jump_table_delete      = jump_table_delete;
@@ -569,8 +569,8 @@ static void match_processor_info_init(GthMatchProcessorInfo
   array.
 */
 
-int gth_match_processor(GthMatchProcessorInfo *info, GthSeqCol *gen_seq_col,
-                        GthSeqCol *ref_seq_col, GthMatch *match)
+int gth_match_processor(GthMatchProcessorInfo *info, GthSeqCon *gen_seq_con,
+                        GthSeqCon *ref_seq_con, GthMatch *match)
 {
   if (info->matchnumcounter) {
     info->matchnumcounter[match->Storeseqnumreference]++;
@@ -590,7 +590,7 @@ int gth_match_processor(GthMatchProcessorInfo *info, GthSeqCol *gen_seq_col,
 
     /* chain all current matches */
     calc_chains_from_matches(info->chain_collection, info->matches,
-                             info->chaining_info, gen_seq_col, ref_seq_col,
+                             info->chaining_info, gen_seq_con, ref_seq_con,
                              info->rare, info->fragweightfactor,
                              info->jump_table_new, info->jump_table_new_reverse,
                              info->jump_table_delete);
@@ -713,8 +713,8 @@ void gth_chaining(GthChainCollection *chain_collection,
   plugins->matcher_arguments_delete(matcher_arguments);
 
   /* free sequence collections (if they have been filled by the matcher) */
-  gth_seq_col_delete(match_processor_info.gen_seq_col);
-  gth_seq_col_delete(match_processor_info.ref_seq_col);
+  gth_seq_con_delete(match_processor_info.gen_seq_con);
+  gth_seq_con_delete(match_processor_info.ref_seq_con);
 
   /* save match numbers of match number distribution, if necessary */
   if (gth_stat_get_matchnumdistri(stat)) {
@@ -745,8 +745,8 @@ void gth_chaining(GthChainCollection *chain_collection,
 
   /* compute chains from matches */
   calc_chains_from_matches(chain_collection, matches, &chaining_info,
-                           gth_input_current_gen_seq_col(input),
-                           gth_input_current_ref_seq_col(input),
+                           gth_input_current_gen_seq_con(input),
+                           gth_input_current_ref_seq_con(input),
                            call_info->simfilterparam.rare,
                            call_info->fragweightfactor,
                            plugins->jump_table_new,

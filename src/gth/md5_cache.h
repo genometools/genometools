@@ -17,11 +17,11 @@
 #ifndef MD5_CACHE_H
 #define MD5_CACHE_H
 
-#include "gth/seq_col.h"
+#include "gth/seq_con.h"
 
 typedef struct GthMD5Cache GthMD5Cache;
 
-GthMD5Cache* gth_md5_cache_new(const char *indexname, GthSeqCol *seq_col);
+GthMD5Cache* gth_md5_cache_new(const char *indexname, GthSeqCon *seq_con);
 void         gth_md5_cache_delete(GthMD5Cache *md5_cache);
 GtStr*       gth_md5_cache_get(GthMD5Cache *md5_cache, unsigned long seq_num);
 

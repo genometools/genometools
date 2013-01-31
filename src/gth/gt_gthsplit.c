@@ -337,7 +337,7 @@ static int gthsplit_process_files(Gthsplitinfo *gthsplitinfo,
   gt_error_check(err);
 
   /* initialization */
-  inputinfo = gth_input_new(plugins->file_preprocessor, plugins->seq_col_new);
+  inputinfo = gth_input_new(plugins->file_preprocessor, plugins->seq_con_new);
   store_in_subset_file_data.gthsplitinfo           = gthsplitinfo;
   store_in_subset_file_data.num_of_subset_files    = 100 / gthsplitinfo->range;
   store_in_subset_file_data.sa_filter              = gthsplitinfo->sa_filter;

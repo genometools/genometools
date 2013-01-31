@@ -14,8 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQ_COL_H
-#define SEQ_COL_H
+#ifndef SEQ_CON_H
+#define SEQ_CON_H
 
 #include "core/alphabet.h"
 #include "core/file.h"
@@ -23,35 +23,36 @@
 #include "core/str_api.h"
 #include "core/types_api.h"
 
-typedef struct GthSeqColClass GthSeqColClass;
-typedef struct GthSeqCol GthSeqCol;
+/* The sequence container class */
+typedef struct GthSeqConClass GthSeqConClass;
+typedef struct GthSeqCon GthSeqCon;
 
-typedef GthSeqCol* (*GthSeqColConstructor)(const char *indexname,
+typedef GthSeqCon* (*GthSeqConConstructor)(const char *indexname,
                                            bool assign_rc, bool orig_seq,
                                            bool tran_seq);
 
-void          gth_seq_col_delete(GthSeqCol*);
-void          gth_seq_col_demand_orig_seq(GthSeqCol *seq_col);
-GtUchar*      gth_seq_col_get_orig_seq(GthSeqCol *seq_col,
+void          gth_seq_con_delete(GthSeqCon*);
+void          gth_seq_con_demand_orig_seq(GthSeqCon *seq_con);
+GtUchar*      gth_seq_con_get_orig_seq(GthSeqCon *seq_con,
                                        unsigned long seq_num);
-GtUchar*      gth_seq_col_get_tran_seq(GthSeqCol *seq_col,
+GtUchar*      gth_seq_con_get_tran_seq(GthSeqCon *seq_con,
                                        unsigned long seq_num);
-GtUchar*      gth_seq_col_get_orig_seq_rc(GthSeqCol *seq_col,
+GtUchar*      gth_seq_con_get_orig_seq_rc(GthSeqCon *seq_con,
                                           unsigned long seq_num);
-GtUchar*      gth_seq_col_get_tran_seq_rc(GthSeqCol *seq_col,
+GtUchar*      gth_seq_con_get_tran_seq_rc(GthSeqCon *seq_con,
                                           unsigned long seq_num);
-void          gth_seq_col_get_description(GthSeqCol *seq_col,
+void          gth_seq_con_get_description(GthSeqCon *seq_con,
                                           unsigned long seq_num, GtStr *desc);
-void          gth_seq_col_echo_description(GthSeqCol *seq_col,
+void          gth_seq_con_echo_description(GthSeqCon *seq_con,
                                            unsigned long seq_num,
                                            GtFile *outfp);
-unsigned long gth_seq_col_num_of_seqs(GthSeqCol *seq_col);
-unsigned long gth_seq_col_total_length(GthSeqCol *seq_col);
-GtRange       gth_seq_col_get_range(GthSeqCol *seq_col, unsigned long seq_num);
+unsigned long gth_seq_con_num_of_seqs(GthSeqCon *seq_con);
+unsigned long gth_seq_con_total_length(GthSeqCon *seq_con);
+GtRange       gth_seq_con_get_range(GthSeqCon *seq_con, unsigned long seq_num);
 
-GtRange       gth_seq_col_get_relative_range(GthSeqCol *seq_col,
+GtRange       gth_seq_con_get_relative_range(GthSeqCon *seq_con,
                                              unsigned long seq_num);
-unsigned long gth_seq_col_get_length(GthSeqCol *seq_col, unsigned long seq_num);
-GtAlphabet*   gth_seq_col_get_alphabet(GthSeqCol *seq_col);
+unsigned long gth_seq_con_get_length(GthSeqCon *seq_con, unsigned long seq_num);
+GtAlphabet*   gth_seq_con_get_alphabet(GthSeqCon *seq_con);
 
 #endif

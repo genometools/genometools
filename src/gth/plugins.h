@@ -22,11 +22,11 @@
 #include "gth/input.h"
 #include "gth/jump_table.h"
 #include "gth/matcher.h"
-#include "gth/seq_col.h"
+#include "gth/seq_con.h"
 
 typedef struct {
   GthInputFilePreprocessor file_preprocessor;         /* required */
-  GthSeqColConstructor seq_col_new;                   /* required */
+  GthSeqConConstructor seq_con_new;                   /* required */
   GthMatcherArgumentsNew matcher_arguments_new;       /* required */
   GthMatcherArgumentsDelete matcher_arguments_delete; /* required */
   GthMatcherRunner matcher_runner;                    /* required */

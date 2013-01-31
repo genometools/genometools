@@ -1113,7 +1113,7 @@ void gth_sa_echo_alignment(const GthSA *sa, unsigned long showintronmaxlen,
                 referencestartcutoff, referenceendcutoff, referencetotalcutoff;
   bool reverse_subject_pos = false;
   const unsigned char *gen_seq_orig, *ref_seq_orig;
-  GthSeqCol *ref_seq_col;
+  GthSeqCon *ref_seq_con;
   GtAlphabet *ref_alphabet;
 
   gt_assert(sa && input);
@@ -1128,7 +1128,7 @@ void gth_sa_echo_alignment(const GthSA *sa, unsigned long showintronmaxlen,
 
   /* make sure that the correct files are loaded */
   gth_input_load_reference_file(input, gth_sa_ref_file_num(sa), false);
-  ref_seq_col = gth_input_current_ref_seq_col(input);
+  ref_seq_con = gth_input_current_ref_seq_con(input);
   ref_alphabet = gth_input_current_ref_alphabet(input);
 
   /* If the reverse complement of the genomic DNA is considered, this
@@ -1146,11 +1146,11 @@ void gth_sa_echo_alignment(const GthSA *sa, unsigned long showintronmaxlen,
   /* get reference sequence */
   if (gth_sa_ref_strand_forward(sa)) {
     ref_seq_orig =
-      gth_seq_col_get_orig_seq(ref_seq_col, gth_sa_ref_seq_num(sa));
+      gth_seq_con_get_orig_seq(ref_seq_con, gth_sa_ref_seq_num(sa));
   }
   else {
     ref_seq_orig =
-      gth_seq_col_get_orig_seq_rc(ref_seq_col, gth_sa_ref_seq_num(sa));
+      gth_seq_con_get_orig_seq_rc(ref_seq_con, gth_sa_ref_seq_num(sa));
   }
 
   switch (gth_sa_alphatype(sa)) {
@@ -1216,11 +1216,11 @@ unsigned long gth_sa_get_alignment_lines(const GthSA *sa,
   /* sequences */
   unsigned char *gen_seq_orig, *ref_seq_orig;
   unsigned long cols = 0;
-  GthSeqCol *ref_seq_col;
+  GthSeqCon *ref_seq_con;
 
   /* make sure that the correct files are loaded */
   gth_input_load_reference_file(input, gth_sa_ref_file_num(sa), false);
-  ref_seq_col = gth_input_current_ref_seq_col(input);
+  ref_seq_con = gth_input_current_ref_seq_con(input);
 
   /* If the reverse complement of the genomic DNA is considered, this
      opition is needed for correct output of the genomic sequence positions
@@ -1237,11 +1237,11 @@ unsigned long gth_sa_get_alignment_lines(const GthSA *sa,
   /* get reference sequence */
   if (gth_sa_ref_strand_forward(sa)) {
     ref_seq_orig =
-      gth_seq_col_get_orig_seq(ref_seq_col, gth_sa_ref_seq_num(sa));
+      gth_seq_con_get_orig_seq(ref_seq_con, gth_sa_ref_seq_num(sa));
   }
   else {
     ref_seq_orig =
-      gth_seq_col_get_orig_seq_rc(ref_seq_col, gth_sa_ref_seq_num(sa));
+      gth_seq_con_get_orig_seq_rc(ref_seq_con, gth_sa_ref_seq_num(sa));
   }
 
   switch (gth_sa_alphatype(sa)) {

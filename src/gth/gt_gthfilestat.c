@@ -99,7 +99,7 @@ static int gthfilestat_process_files(GthFileStatInfo *file_stat_info,
 
   /* initialization */
   sa_collection = gth_sa_collection_new(GTH_DC_NONE);
-  input = gth_input_new(plugins->file_preprocessor, plugins->seq_col_new);
+  input = gth_input_new(plugins->file_preprocessor, plugins->seq_con_new);
   stat = gth_stat_new();
   gth_stat_enable_sa_stats(stat);
   gth_stat_enable_gthfilestat_mode(stat);

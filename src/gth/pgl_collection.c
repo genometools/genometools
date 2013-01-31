@@ -214,11 +214,11 @@ void gth_pgl_collection_traverse(const GthPGLCollection *pgl_collection,
   for (i = 0; i < gth_pgl_collection_size(pgl_collection); i++) {
     GtRegionMapping *region_mapping;
     unsigned long file_num, seq_num, offset = 1;
-    GthSeqCol *seq_col;
+    GthSeqCon *seq_con;
     GthPGL *pgl = gth_pgl_collection_get(pgl_collection, i);
     file_num = gth_pgl_filenum(pgl);
     gth_input_load_genomic_file(input, file_num, false);
-    seq_col = gth_input_current_gen_seq_col(input);
+    seq_con = gth_input_current_gen_seq_con(input);
     seq_num = gth_pgl_seqnum(pgl);
     if (use_desc_ranges) {
       GtRange descrange;
@@ -230,8 +230,8 @@ void gth_pgl_collection_traverse(const GthPGLCollection *pgl_collection,
     }
     region_mapping =
       gt_region_mapping_new_rawseq((const char*)
-                                   gth_seq_col_get_orig_seq(seq_col, seq_num),
-                                   gth_seq_col_get_length(seq_col, seq_num),
+                                   gth_seq_con_get_orig_seq(seq_con, seq_num),
+                                   gth_seq_con_get_length(seq_con, seq_num),
                                    offset);
     gth_pgl_visitor_set_region_mapping(pgl_visitor, region_mapping);
     gth_pgl_visitor_visit_pgl(pgl_visitor, pgl, i);
