@@ -63,6 +63,8 @@ int gt_md5_seqid_unit_test(GtError *err) {
              *seqid1_wrongmd5 = "md5:c157a79031e1c40f85931829bc5fc552:foo";
   gt_error_check(err);
 
+  gt_ensure(had_err, !gt_md5_seqid_has_prefix(seqid1));
+  gt_ensure(had_err, gt_md5_seqid_has_prefix(seqid1_md5));
   gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1, seqid1) == 0);
   gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1, seqid1_diffptr+1) == 0);
   gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1, seqid1_md5) == 0);
