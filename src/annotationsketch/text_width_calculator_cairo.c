@@ -37,8 +37,6 @@ struct GtTextWidthCalculatorCairo {
   cairo_t *context;
   cairo_surface_t *mysurf;
   PangoLayout *layout;
-  PangoFontMap *fmap;
-  PangoContext *pcontext;
   PangoFontDescription *desc;
   bool own_context;
 };
@@ -77,7 +75,6 @@ void gt_text_width_calculator_cairo_delete(GtTextWidthCalculator *twc)
   if (!twc) return;
   twcc = gt_text_width_calculator_cairo_cast(twc);
   g_object_unref(twcc->layout);
-  g_object_unref(twcc->pcontext);
   if (twcc->style)
     gt_style_delete(twcc->style);
   if (twcc->own_context)
@@ -132,10 +129,7 @@ GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context,
     }
     cairo_save(twcc->context);
   }
-  twcc->fmap = pango_cairo_font_map_get_default();
-  twcc->pcontext = pango_cairo_create_context(twcc->context);
-  pango_context_set_font_map(twcc->pcontext, twcc->fmap);
-  twcc->layout = pango_layout_new(twcc->pcontext);
+  twcc->layout = pango_cairo_create_layout(twcc->context);
   snprintf(buf, 64, "Sans %d", (int) theight);
   twcc->desc = pango_font_description_from_string(buf);
   pango_layout_set_font_description(twcc->layout, twcc->desc);
