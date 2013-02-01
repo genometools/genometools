@@ -30,8 +30,7 @@ bool gt_md5_seqid_has_prefix(const char *seqid)
 
 int gt_md5_seqid_cmp_seqids(const char *id_a, const char *id_b)
 {
-  int rval = GT_UNDEF_INT,
-      md5_ctr = 0;
+  int md5_ctr = 0;
   const char *id_a_p = id_a,
              *id_b_p = id_b;
   gt_assert(id_a && id_b);
@@ -48,11 +47,10 @@ int gt_md5_seqid_cmp_seqids(const char *id_a, const char *id_b)
     md5_ctr++;
   }
   if (md5_ctr == 2)
-    rval = strncmp(id_a, id_b, GT_MD5_SEQID_TOTAL_LEN);
+    return strncmp(id_a, id_b, GT_MD5_SEQID_TOTAL_LEN);
   else
-    rval = strcmp(id_a_p, id_b_p);
-  gt_assert(rval != GT_UNDEF_INT);
-  return rval;
+    return strcmp(id_a_p, id_b_p);
+  return 0; /* cannot happen */
 }
 
 int gt_md5_seqid_unit_test(GtError *err) {
