@@ -58,9 +58,8 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
 {
   SeqArguments *arguments = tool_arguments;
   GtOption *option, *option_recreate, *option_showfasta, *option_showseqnum,
-           *option_width, *option_stat, *option_reader;
+           *option_width, *option_stat;
   GtOptionParser *op;
-  static const char *reader_types[] = { "rec", "fsm", "seqit", NULL };
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...]",
@@ -106,19 +105,10 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   option_width = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, option_width);
 
-  /* -reader */
-  option_reader = gt_option_new_choice("reader", "set fasta reader type\n"
-                                       "choose rec|fsm|seqit",
-                                       arguments->reader, reader_types[0],
-                                       reader_types);
-  gt_option_is_development_option(option_reader);
-  gt_option_parser_add_option(op, option_reader);
-
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   /* option implications */
-  gt_option_imply(option_reader, option_recreate);
   gt_option_imply_either_2(option_width, option_showfasta, option_showseqnum);
 
   /* option exclusions */
@@ -152,26 +142,14 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
 {
   SeqArguments *arguments = tool_arguments;
   GtBioseq *bioseq;
-  GtFastaReaderType reader_type = GT_FASTA_READER_REC;
   int arg = parsed_args, had_err = 0;
   gt_error_check(err);
   gt_assert(tool_arguments);
 
-  /* determine fasta reader type */
-  if (!strcmp(gt_str_get(arguments->reader), "rec"))
-    reader_type = GT_FASTA_READER_REC;
-  else if (!strcmp(gt_str_get(arguments->reader), "fsm"))
-    reader_type = GT_FASTA_READER_FSM;
-  else if (!strcmp(gt_str_get(arguments->reader), "seqit"))
-    reader_type = GT_FASTA_READER_SEQIT;
-  else {
-    gt_assert(0); /* cannot happen */
-  }
-
   while (!had_err && arg < argc) {
     /* bioseq construction */
     if (arguments->recreate)
-      bioseq = gt_bioseq_new_with_fasta_reader(argv[arg], reader_type, err);
+      bioseq = gt_bioseq_new_recreate(argv[arg], err);
     else
       bioseq = gt_bioseq_new(argv[arg], err);
     if (!bioseq)

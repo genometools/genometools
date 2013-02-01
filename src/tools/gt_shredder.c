@@ -123,7 +123,7 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
     for (i = 0; i < arguments->coverage; i++) {
       GtShredder *shredder;
       unsigned long fragment_length;
-      const char *fragment;
+      char *fragment;
       shredder = gt_shredder_new(bioseq, arguments->minlength,
                               arguments->maxlength);
       gt_shredder_set_overlap(shredder, arguments->overlap);
@@ -133,6 +133,7 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
         gt_str_append_cstr(desc, " [shreddered fragment]");
         gt_fasta_show_entry(gt_str_get(desc), fragment, fragment_length,
                             arguments->width, arguments->outfp);
+        gt_free(fragment);
       }
       gt_shredder_delete(shredder);
     }

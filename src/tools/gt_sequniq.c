@@ -122,13 +122,12 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
       if (!had_err) {
         GtMD5SetStatus retval;
         for (j = 0; j < gt_bioseq_number_of_sequences(bs) && !had_err; j++) {
-          retval = gt_md5set_add_sequence(md5set,
-              gt_bioseq_get_sequence(bs, j),
-              gt_bioseq_get_sequence_length(bs, j),
-              arguments->rev, err);
+          char *seq = gt_bioseq_get_sequence(bs, j);
+          retval = gt_md5set_add_sequence(md5set, seq,
+                                          gt_bioseq_get_sequence_length(bs, j),
+                                          arguments->rev, err);
           if (retval == GT_MD5SET_NOT_FOUND)
-            gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
-                                gt_bioseq_get_sequence(bs, j),
+            gt_fasta_show_entry(gt_bioseq_get_description(bs, j), seq,
                                 gt_bioseq_get_sequence_length(bs, j),
                                 arguments->width, arguments->outfp);
           else if (retval != GT_MD5SET_ERROR)
@@ -136,6 +135,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
           else
             had_err = -1;
           num_of_sequences++;
+          gt_free(seq);
         }
         gt_bioseq_delete(bs);
       }

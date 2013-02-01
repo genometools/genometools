@@ -105,16 +105,19 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
 
   while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
     for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
+      char *seq;
       if ((arguments->minlength == GT_UNDEF_ULONG ||
            gt_bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
           (arguments->maxlength == GT_UNDEF_ULONG ||
            gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength) &&
           (arguments->maxseqnum == GT_UNDEF_ULONG ||
            passed + 1 <= arguments->maxseqnum)) {
+        seq = gt_bioseq_get_sequence(bioseq, i);
         gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),
-                            gt_bioseq_get_sequence(bioseq, i),
+                            seq,
                             gt_bioseq_get_sequence_length(bioseq, i),
                             arguments->width, arguments->outfp);
+        gt_free(seq);
         passed++;
       }
       else

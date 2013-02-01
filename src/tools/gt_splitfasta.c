@@ -116,6 +116,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
 
   for (i = 0; !had_err && i < gt_bioseq_number_of_sequences(bioseq); i++) {
     GtFile *outfp;
+    char *seq;
     gt_str_reset(descname);
     gt_str_append_str(descname, splitdesc);
     gt_str_append_char(descname, '/');
@@ -126,10 +127,11 @@ static int split_description(const char *filename, GtStr *splitdesc,
       had_err = -1;
       break;
     }
-    gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),
-                        gt_bioseq_get_sequence(bioseq, i),
+    seq = gt_bioseq_get_sequence(bioseq, i);
+    gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i), seq,
                         gt_bioseq_get_sequence_length(bioseq, i), width,
                         outfp);
+    gt_free(seq);
     gt_file_delete(outfp);
   }
 

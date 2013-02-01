@@ -91,7 +91,8 @@ static int gt_seqtransform_runner(int argc, const char **argv, int parsed_args,
     alphabet = gt_bioseq_get_alphabet(bioseq);
     is_protein = gt_alphabet_is_protein(alphabet);
     for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
-      const char *desc, *seq, *suffix = NULL;
+      const char *desc, *suffix = NULL;
+      char *seq;
       unsigned long seqlen;
       desc = gt_bioseq_get_description(bioseq, i);
       seq = gt_bioseq_get_sequence(bioseq, i);
@@ -102,6 +103,7 @@ static int gt_seqtransform_runner(int argc, const char **argv, int parsed_args,
       }
       gt_fasta_show_entry_with_suffix(desc, seq, seqlen, suffix,
                                       arguments->width, arguments->outfp);
+      gt_free(seq);
     }
     gt_bioseq_delete(bioseq);
   }

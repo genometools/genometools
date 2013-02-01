@@ -61,28 +61,29 @@ void gt_shredder_set_sample_probability(GtShredder *shredder,
   shredder->sample_probability = probability;
 }
 
-static const char* generate_fragment(GtShredder *shredder,
-                                     unsigned long *fragment_length,
-                                     GtStr *desc)
+static char* generate_fragment(GtShredder *shredder,
+                               unsigned long *fragment_length,
+                               GtStr *desc)
 {
   gt_assert(shredder && fragment_length);
   if (shredder->seqnum < gt_bioseq_number_of_sequences(shredder->bioseq)) {
     unsigned long seqlen, fraglen;
-    const char *frag;
+    char *frag;
     seqlen = gt_bioseq_get_sequence_length(shredder->bioseq, shredder->seqnum);
     fraglen = (shredder->maxlength == shredder->minlength
                ? 0 : gt_rand_max(shredder->maxlength - shredder->minlength))
               + shredder->minlength;
     gt_assert(fraglen >= shredder->minlength);
-    frag = gt_bioseq_get_sequence(shredder->bioseq, shredder->seqnum)
-           + shredder->pos;
     if (shredder->pos + fraglen > seqlen)
       fraglen = seqlen - shredder->pos;
     *fragment_length = fraglen;
     gt_str_reset(desc);
     gt_str_append_cstr(desc, gt_bioseq_get_description(shredder->bioseq,
-                                                 shredder->seqnum));
+                                                       shredder->seqnum));
     gt_assert(shredder->pos + fraglen <= seqlen);
+    frag = gt_bioseq_get_sequence_range(shredder->bioseq, shredder->seqnum,
+                                        shredder->pos,
+                                        shredder->pos + fraglen -1);
     if (shredder->pos + fraglen == seqlen) { /* last fragment */
       shredder->seqnum++;
       shredder->pos = 0;
@@ -98,17 +99,16 @@ static const char* generate_fragment(GtShredder *shredder,
   return NULL;
 }
 
-const char* gt_shredder_shred(GtShredder *shredder,
-                              unsigned long *fragment_length,
-                              GtStr *desc)
+char* gt_shredder_shred(GtShredder *shredder, unsigned long *fragment_length,
+                        GtStr *desc)
 {
-  const char *frag;
+  char *frag;
   gt_assert(shredder && fragment_length);
   while ((frag = generate_fragment(shredder, fragment_length, desc))) {
     if (shredder->sample_probability == 1.0 ||
         gt_rand_0_to_1() <= shredder->sample_probability) {
       return frag;
-    }
+    } else gt_free(frag);
   }
   return NULL;
 }

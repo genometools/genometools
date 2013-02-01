@@ -64,7 +64,7 @@ Name "gt extractseq test corrupt"
 Keywords "gt_extractseq"
 Test do
   run_test("#{$bin}gt extractseq -match foo #{$testdata}corrupt.fas", :retval => 1)
-  grep last_stderr, "first character"
+  grep last_stderr, "cannot guess"
 end
 
 Name "gt extractseq test corrupt (stdin)"

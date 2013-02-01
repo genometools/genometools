@@ -25,7 +25,8 @@ typedef struct Splicedseq Splicedseq;
 Splicedseq*   gt_splicedseq_new(void);
 /* adds an ``exon'' to the spliced sequence */
 void          gt_splicedseq_add(Splicedseq*, unsigned long start,
-                             unsigned long end, const char *original_sequence);
+                                unsigned long end,
+                                const char *original_sequence);
 char*         gt_splicedseq_get(const Splicedseq*);
 bool          gt_splicedseq_pos_is_border(const Splicedseq*, unsigned long);
 /* maps the given position back to the original coordinate system */

@@ -18,6 +18,7 @@
 #include "core/assert_api.h"
 #include "core/codon.h"
 #include "core/codon_iterator_simple.h"
+#include "core/ma.h"
 #include "core/orf.h"
 #include "core/translator.h"
 #include "core/trans_table.h"
@@ -56,8 +57,7 @@ static int extract_cds_if_necessary(GtFeatureNode *fn, void *data,
 {
   GtCDSVisitor *v = (GtCDSVisitor*) data;
   GtRange range;
-  const char *raw_sequence;
-  unsigned long raw_sequence_length;
+  char *outsequence;
   int had_err = 0;
 
   gt_error_check(err);
@@ -68,29 +68,13 @@ static int extract_cds_if_necessary(GtFeatureNode *fn, void *data,
        gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE)) {
     range = gt_genome_node_get_range((GtGenomeNode*) fn);
     gt_assert(v->region_mapping);
-    had_err = gt_region_mapping_get_raw_sequence(v->region_mapping,
-                                                 &raw_sequence,
-                                                 &raw_sequence_length,
-                                                 &v->offset,
+    had_err = gt_region_mapping_get_sequence(v->region_mapping, &outsequence,
                                    gt_genome_node_get_seqid((GtGenomeNode*) fn),
-                                                 &range, err);
-    if (!had_err) {
-      if (range.end >= raw_sequence_length + v->offset) {
-        gt_error_set(err, "the feature on sequence '%s' defined on line %u in "
-                     "file \"%s\" lies outside its corresponding sequence. Has "
-                     "the sequence-region to sequence mapping been defined "
-                     "correctly?",
-                     gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) fn)),
-                     gt_genome_node_get_line_number((GtGenomeNode*) fn),
-                     gt_genome_node_get_filename((GtGenomeNode*) fn));
-        had_err = -1;
-      }
-    }
+                                   range.start, range.end, err);
     if (!had_err) {
       gt_assert(range.start && range.end); /* 1-based coordinates */
-      gt_assert(range.end - v->offset < raw_sequence_length);
-      gt_splicedseq_add(v->splicedseq, range.start - v->offset,
-                        range.end - v->offset, raw_sequence);
+      gt_splicedseq_add(v->splicedseq, range.start, range.end, outsequence);
+      gt_free(outsequence);
     }
   }
   return had_err;

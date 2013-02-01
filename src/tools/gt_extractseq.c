@@ -143,18 +143,78 @@ static int extractseq_pos(GtFile *outfp, GtBioseq *bs,
                           unsigned long width, GtError *err)
 {
   int had_err = 0;
-  gt_error_check(err);
+  GtStr *buf;
+  char *out = NULL;
+  unsigned long accupos = 0,
+                newstartpos = 0,
+                len = topos - frompos + 1,
+                i = 0;
   gt_assert(bs);
-  if (topos > gt_bioseq_get_raw_sequence_length(bs)) {
-    gt_error_set(err,
-              "argument %lu to option '-%s' is larger than sequence length %lu",
-              topos, TOPOS_OPTION_STR, gt_bioseq_get_raw_sequence_length(bs));
-    had_err = -1;
+  gt_error_check(err);
+
+  if (frompos > gt_bioseq_get_total_length(bs)
+        || topos > gt_bioseq_get_total_length(bs)) {
+    gt_error_set(err, "invalid position pair %lu-%lu one value is larger than "
+                      "sequence length %lu", frompos, topos,
+                      gt_bioseq_get_total_length(bs));
+    return -1;
   }
-  if (!had_err) {
-    gt_fasta_show_entry(NULL, gt_bioseq_get_raw_sequence(bs) + frompos - 1,
-                        topos - frompos + 1, width, outfp);
+  frompos--; topos--;
+  buf = gt_str_new();
+
+  /* look for beginning of sequence */
+  while (accupos + gt_bioseq_get_sequence_length(bs, i) <= frompos
+            && i < gt_bioseq_number_of_sequences(bs)) {
+    accupos += gt_bioseq_get_sequence_length(bs, i);
+    i++;
   }
+  if (i == 0) {
+    newstartpos = frompos;
+    accupos = frompos;
+  } else {
+    gt_assert(accupos > 0);
+    newstartpos = frompos - accupos;
+  }
+
+  /* do we need to cross a sequence boundary to print the full output? */
+  if (len <= gt_bioseq_get_sequence_length(bs, i) - newstartpos) {
+    /* no, just print */
+    out = gt_bioseq_get_sequence_range(bs, i, newstartpos,
+                                       newstartpos + len - 1);
+    gt_str_append_cstr_nt(buf, out, len);
+    gt_free(out);
+  } else {
+    /* yes, first output the part on this sequence... */
+    unsigned long restlen = gt_bioseq_get_sequence_length(bs, i) - newstartpos,
+                  restfulllen = topos - accupos + 1;
+    out = gt_bioseq_get_sequence_range(bs, i, newstartpos,
+                                       newstartpos + restlen - 1);
+    restfulllen -= restlen;
+    gt_str_append_cstr_nt(buf, out, restlen);
+    gt_free(out);
+
+    i++;
+    /* ...then determine whether we need to output full seqs in between... */
+    while (restfulllen > gt_bioseq_get_sequence_length(bs, i)
+             && i < gt_bioseq_number_of_sequences(bs) - 1) {
+      unsigned long thislen = gt_bioseq_get_sequence_length(bs, i);
+      out = gt_bioseq_get_sequence_range(bs, i, 0, thislen - 1);
+      gt_str_append_cstr_nt(buf, out, thislen);
+      gt_free(out);
+      restfulllen -= thislen;
+      i++;
+    }
+
+    /* ...then output the last sequence */
+    if (restfulllen > 0) {
+      out = gt_bioseq_get_sequence_range(bs, i, 0, restfulllen - 1);
+      gt_str_append_cstr_nt(buf, out, restfulllen);
+      gt_free(out);
+    }
+  }
+
+  gt_fasta_show_entry(NULL, gt_str_get(buf), gt_str_length(buf), width, outfp);
+  gt_str_delete(buf);
   return had_err;
 }
 
@@ -175,8 +235,10 @@ static int extractseq_match(GtFile *outfp, GtBioseq *bs,
     gt_assert(desc);
     had_err = gt_grep(&match, pattern, desc, err);
     if (!had_err && match) {
-      gt_fasta_show_entry(desc, gt_bioseq_get_sequence(bs, i),
-                          gt_bioseq_get_sequence_length(bs, i), width, outfp);
+      char *out = gt_bioseq_get_sequence(bs, i);
+      gt_fasta_show_entry(desc, out, gt_bioseq_get_sequence_length(bs, i),
+                          width, outfp);
+      gt_free(out);
     }
   }
 

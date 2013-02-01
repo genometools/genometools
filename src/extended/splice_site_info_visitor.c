@@ -19,6 +19,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/fasta.h"
+#include "core/ma_api.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
@@ -56,8 +57,7 @@ static void splice_site_info_visitor_free(GtNodeVisitor *nv)
 static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
                           GtError *err)
 {
-  const char *sequence;
-  unsigned long seqlen, offset;
+  char *sequence = NULL;
   GtStrand strand;
   GtRange range;
   char site[5];
@@ -70,30 +70,17 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   gt_assert(range.start); /* 1-based coordinates */
   if (gt_range_length(&range) >= 4) {
     seqid = gt_genome_node_get_seqid(intron);
-    had_err = gt_region_mapping_get_raw_sequence(ssiv->region_mapping,
-                                                 &sequence, &seqlen, &offset,
-                                                 seqid, &range, err);
+    had_err = gt_region_mapping_get_sequence(ssiv->region_mapping, &sequence,
+                                             seqid, range.start, range.end,
+                                             err);
     if (!had_err) {
-      if (range.end >= seqlen + offset) {
-        gt_error_set(err, "the intron on sequence '%s' defined on line %u in "
-                          "file \"%s\" lies outside its corresponding "
-                          "sequence. Has the sequence-region to sequence "
-                          "mapping been defined correctly?",
-                          gt_str_get(seqid),
-                          gt_genome_node_get_line_number(intron),
-                          gt_genome_node_get_filename(intron));
-        had_err = -1;
-      }
-    }
-    if (!had_err) {
-      gt_assert(range.end - offset < seqlen);
       strand = gt_feature_node_get_strand((GtFeatureNode*) intron);
       if (strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE) {
         /* fill site */
-        site[0] = tolower(sequence[range.start-offset]);
-        site[1] = tolower(sequence[range.start-offset+1]);
-        site[2] = tolower(sequence[range.end-offset-1]);
-        site[3] = tolower(sequence[range.end-offset]);
+        site[0] = tolower(sequence[0]);
+        site[1] = tolower(sequence[1]);
+        site[2] = tolower(sequence[gt_range_length(&range)-2]);
+        site[3] = tolower(sequence[gt_range_length(&range)-1]);
         site[4] = '\0';
         if (strand == GT_STRAND_REVERSE)
           had_err = gt_reverse_complement(site, 4, err);
@@ -111,6 +98,7 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
                    "(file '%s', line %u)", gt_genome_node_get_filename(intron),
                    gt_genome_node_get_line_number(intron));
       }
+      gt_free(sequence);
     }
   }
   return had_err;

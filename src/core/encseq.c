@@ -10035,6 +10035,17 @@ unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
   return 0;
 }
 
+unsigned long gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
+                                             unsigned long filenum)
+{
+  gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
+  if (filenum > 0)
+  {
+    return gt_encseq_seqnum(encseq, encseq->fsptab[filenum-1] + 1);
+  }
+  return 0;
+}
+
 unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq)
 {
   return encseq->sizeofrep;

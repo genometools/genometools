@@ -19,18 +19,26 @@
 
 #include "core/bioseq.h"
 #include "core/range_api.h"
+#include "core/seq_col.h"
 
-/* Helper class which maps a sequence id to a sequence number.
-   Currently based to GtBioseq, but as a matter of principle independent from
-   it. */
+/* Helper class which maps a sequence id to a sequence number. */
 typedef struct GtSeqid2SeqnumMapping GtSeqid2SeqnumMapping;
 
+/* Create a new <GtSeqid2SeqnumMapping*> object which is able to map the
+   sequence ids given in <seqcol> to the corresponding sequence and file
+   numbers.
+   The descriptions are parsed for ``description ranges'' and the corresponding
+   offsets are stored (descriptions without a description range have an offset
+   of 1). */
+GtSeqid2SeqnumMapping* gt_seqid2seqnum_mapping_new_seqcol(GtSeqCol *seq_col,
+                                                          GtError*);
 /* Create a new <GtSeqid2SeqnumMapping*> object which is able to map the
    sequence ids given in <bioseq> to the corresponding sequence numbers.
    The descriptions are parsed for ``description ranges'' and the corresponding
    offsets are stored (descriptions without a description range have an offset
    of 1). */
-GtSeqid2SeqnumMapping* gt_seqid2seqnum_mapping_new(GtBioseq *bioseq, GtError*);
+GtSeqid2SeqnumMapping* gt_seqid2seqnum_mapping_new_bioseq(GtBioseq *bioseq,
+                                                          GtError*);
 /* Delete the given <seqid2seqnum_mapping> object. */
 void                   gt_seqid2seqnum_mapping_delete(GtSeqid2SeqnumMapping
                                                       *seqid2seqnum_mapping);
@@ -43,6 +51,7 @@ int                    gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping
                                                    const char *seqid,
                                                    const GtRange *range,
                                                    unsigned long *seqnum,
+                                                   unsigned long *filenum,
                                                    unsigned long *offset,
                                                    GtError *err);
 

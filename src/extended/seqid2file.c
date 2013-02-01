@@ -24,6 +24,7 @@ struct GtSeqid2FileInfo {
   bool matchdesc,
        usedesc;
   GtStr *seqfile,
+        *encseq,
         *region_mapping;
 };
 
@@ -32,6 +33,7 @@ GtSeqid2FileInfo* gt_seqid2file_info_new(void)
   GtSeqid2FileInfo *s2fi = gt_calloc(1, sizeof *s2fi);
   s2fi->seqfiles = gt_str_array_new();
   s2fi->seqfile = gt_str_new();
+  s2fi->encseq = gt_str_new();
   s2fi->region_mapping = gt_str_new();
   return s2fi;
 }
@@ -41,6 +43,7 @@ void gt_seqid2file_info_delete(GtSeqid2FileInfo *s2fi)
   if (!s2fi) return;
   gt_str_delete(s2fi->region_mapping);
   gt_str_delete(s2fi->seqfile);
+  gt_str_delete(s2fi->encseq);
   gt_str_array_delete(s2fi->seqfiles);
   gt_free(s2fi);
 }
@@ -61,17 +64,26 @@ void gt_seqid2file_register_options_ext(GtOptionParser *op,
                                         GtSeqid2FileInfo *s2fi,
                                         bool mandatory, bool debug)
 {
-  GtOption *seqfile_option, *seqfiles_option, *matchdesc_option,
+  GtOption *seqfile_option, *encseq_option, *seqfiles_option, *matchdesc_option,
            *usedesc_option, *region_mapping_option;
   gt_assert(op && s2fi);
 
   /* -seqfile */
   seqfile_option = gt_option_new_filename("seqfile", "set the sequence file "
-                                          "from which to extract the features",
+                                          "from which to take the sequences",
                                           s2fi->seqfile);
   if (debug)
     gt_option_is_development_option(seqfile_option);
   gt_option_parser_add_option(op, seqfile_option);
+
+  /* -encseq */
+  encseq_option = gt_option_new_filename("encseq", "set the encoded sequence "
+                                         "indexname from which to take the "
+                                         "sequences",
+                                          s2fi->encseq);
+  if (debug)
+    gt_option_is_development_option(encseq_option);
+  gt_option_parser_add_option(op, encseq_option);
 
   /* -seqfiles */
   seqfiles_option = gt_option_new_filename_array("seqfiles", "set the sequence "
@@ -117,8 +129,8 @@ void gt_seqid2file_register_options_ext(GtOptionParser *op,
 
   /* either option -seqfile, -seqfiles or -regionmapping is mandatory */
   if (mandatory) {
-    gt_option_is_mandatory_either_3(seqfile_option, seqfiles_option,
-                                    region_mapping_option);
+    gt_option_is_mandatory_either_4(seqfile_option, encseq_option,
+                                    seqfiles_option, region_mapping_option);
   }
 
   /* the options -seqfile and -regionmapping exclude each other */
@@ -127,17 +139,28 @@ void gt_seqid2file_register_options_ext(GtOptionParser *op,
   /* the options -seqfiles and -regionmapping exclude each other */
   gt_option_exclude(seqfiles_option, region_mapping_option);
 
-  /* the options -seqfile and -seqfiles */
+  /* the options -seqfile and -seqfiles exclude each other */
   gt_option_exclude(seqfile_option, seqfiles_option);
+
+  /* the options -encseq and -regionmapping exclude each other */
+  gt_option_exclude(encseq_option, region_mapping_option);
+
+  /* the options -encseq and -seqfile exclude each other */
+  gt_option_exclude(encseq_option, seqfile_option);
+
+  /* the options -encseq and -seqfiles exclude each other */
+  gt_option_exclude(encseq_option, seqfiles_option);
 
   /* the options -matchdesc and -usedesc exclude each other */
   gt_option_exclude(matchdesc_option, usedesc_option);
 
-  /* option -matchdesc implies option -seqfile or -seqfiles*/
-  gt_option_imply_either_2(matchdesc_option, seqfile_option, seqfiles_option);
+  /* option -matchdesc implies option -seqfile, -encseq or -seqfiles*/
+  gt_option_imply_either_3(matchdesc_option, seqfile_option, seqfiles_option,
+                           encseq_option);
 
-  /* option -usedesc implies option -seqfile or -seqfiles */
-  gt_option_imply_either_2(usedesc_option, seqfile_option, seqfiles_option);
+  /* option -usedesc implies option -seqfile, -encseq or -seqfiles */
+  gt_option_imply_either_3(usedesc_option, seqfile_option, seqfiles_option,
+                           encseq_option);
 
   /* set hook function */
   gt_option_parser_register_hook(op, seqid2file_check, s2fi);
@@ -158,13 +181,32 @@ bool gt_seqid2file_option_used(GtSeqid2FileInfo *s2fi)
 GtRegionMapping* gt_seqid2file_region_mapping_new(GtSeqid2FileInfo *s2fi,
                                                   GtError *err)
 {
+  GtRegionMapping *rm = NULL;
   gt_error_check(err);
   gt_assert(s2fi);
   /* create region mapping */
   if (gt_str_array_size(s2fi->seqfiles)) {
-    return gt_region_mapping_new_seqfiles(s2fi->seqfiles, s2fi->matchdesc,
+    rm = gt_region_mapping_new_seqfiles(s2fi->seqfiles, s2fi->matchdesc,
                                           s2fi->usedesc);
+  } else if (gt_str_length(s2fi->encseq)) {
+    GtEncseqLoader *el;
+    GtEncseq *encseq;
+    el = gt_encseq_loader_new();
+    gt_encseq_loader_disable_autosupport(el);
+    gt_encseq_loader_require_md5_support(el);
+    gt_encseq_loader_require_description_support(el);
+    encseq = gt_encseq_loader_load(el, gt_str_get(s2fi->encseq), err);
+    gt_encseq_loader_delete(el);
+    if (!encseq)
+      rm = NULL;
+    else {
+      rm = gt_region_mapping_new_encseq(encseq, s2fi->matchdesc,
+                                        s2fi->usedesc);
+      gt_encseq_delete(encseq);
+    }
+  } else {
+    rm = gt_region_mapping_new_mapping(s2fi->region_mapping, err);
   }
-  else
-    return gt_region_mapping_new_mapping(s2fi->region_mapping, err);
+  gt_assert(rm || gt_error_is_set(err));
+  return rm;
 }

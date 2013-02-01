@@ -43,9 +43,9 @@ void gt_splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
 {
   unsigned long i;
   gt_assert(ss && start <= end && original_sequence);
-  gt_str_append_cstr_nt(ss->splicedseq, original_sequence + start,
+  gt_str_append_cstr_nt(ss->splicedseq, original_sequence,
                         end - start + 1);
-  /* make sure elemnts are added in ascending order */
+  /* make sure elements are added in ascending order */
   gt_assert(!gt_array_size(ss->positionmapping) ||
             start > *(unsigned long*) gt_array_get_last(ss->positionmapping));
   for (i = start; i <= end; i++)
@@ -116,8 +116,8 @@ static int check_splicedseq(Splicedseq *ss, GtError *err)
   static char *origseq = "aaccaagtga", *splicedseq = "ccgtg";
   int had_err = 0;
   gt_error_check(err);
-  gt_splicedseq_add(ss, 2, 3, origseq);
-  gt_splicedseq_add(ss, 6, 8, origseq);
+  gt_splicedseq_add(ss, 2, 3, origseq + 2);
+  gt_splicedseq_add(ss, 6, 8, origseq + 6);
   gt_ensure(had_err, strcmp(gt_splicedseq_get(ss), splicedseq) == 0);
   gt_ensure(had_err, !gt_splicedseq_pos_is_border(ss, 0));
   gt_ensure(had_err,  gt_splicedseq_pos_is_border(ss, 1));

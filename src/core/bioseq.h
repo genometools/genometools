@@ -19,14 +19,11 @@
 #define BIOSEQ_H
 
 #include "core/alphabet.h"
+#include "core/encseq.h"
 #include "core/error.h"
 #include "core/fasta_reader.h"
 #include "core/seq.h"
 #include "core/str.h"
-
-/* GtBioseq file endings */
-#define GT_BIOSEQ_INDEX        ".bsi"
-#define GT_BIOSEQ_RAW          ".bsr"
 
 typedef struct GtBioseq GtBioseq;
 
@@ -35,25 +32,25 @@ GtBioseq*     gt_bioseq_new(const char *sequence_file, GtError*);
 /* Construct a new bioseq object (and always create the the bioseq files). */
 GtBioseq*     gt_bioseq_new_recreate(const char *sequence_file, GtError*);
 GtBioseq*     gt_bioseq_new_str(GtStr* sequence_file, GtError*);
-/* Construct a new bioseq object (and always create the bioseq files)
-   with a certain <fasta_reader>. */
-GtBioseq*     gt_bioseq_new_with_fasta_reader(const char *sequence_file,
-                                              GtFastaReaderType fasta_reader,
-                                              GtError*);
 void          gt_bioseq_delete(GtBioseq*);
+void          gt_bioseq_delete_indices(GtBioseq*);
 GtAlphabet*   gt_bioseq_get_alphabet(GtBioseq*);
 GtSeq*        gt_bioseq_get_seq(GtBioseq*, unsigned long);
+GtSeq*        gt_bioseq_get_seq_range(GtBioseq*, unsigned long index,
+                                      unsigned long start, unsigned long end);
 const char*   gt_bioseq_get_description(GtBioseq*, unsigned long);
 /* Return sequence with given <index> (not '\0' terminated). */
-const char*   gt_bioseq_get_sequence(const GtBioseq*, unsigned long index);
-const char*   gt_bioseq_get_raw_sequence(GtBioseq*);
+char*         gt_bioseq_get_sequence(const GtBioseq*, unsigned long index);
+char*         gt_bioseq_get_sequence_range(const GtBioseq*, unsigned long index,
+                                           unsigned long start,
+                                           unsigned long end);
 /* Return MD5 fingerprint of sequence with given <index>. */
 const char*   gt_bioseq_get_md5_fingerprint(GtBioseq*, unsigned long index);
 /* Return filename of sequence file underlying <bioseq>. */
 const char*   gt_bioseq_filename(const GtBioseq *bioseq);
 unsigned long gt_bioseq_get_sequence_length(const GtBioseq*,
                                             unsigned long index);
-unsigned long gt_bioseq_get_raw_sequence_length(GtBioseq*);
+unsigned long gt_bioseq_get_total_length(const GtBioseq*);
 unsigned long gt_bioseq_number_of_sequences(GtBioseq*);
 /* Return the index of the (first) sequence with given <MD5> contained in
    <bioseq>, if it exists. Otherwise <GT_UNDEF_ULONG> is returned. */

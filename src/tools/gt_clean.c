@@ -78,14 +78,12 @@ int gt_clean(int argc, const char **argv, GtError *err)
   }
   gt_assert(parsed_args == 1);
 
-  /* remove GT_BIOSEQ_INDEX files */
-  remove_pattern_in_current_dir(GT_BIOSEQ_INDEX);
-
-  /* remove GT_BIOSEQ_RAW files */
-  remove_pattern_in_current_dir(GT_BIOSEQ_RAW);
-
-  /* remove MD5 table files */
-  remove_pattern_in_current_dir(GT_MD5_TAB_FILE_SUFFIX);
+  remove_pattern_in_current_dir(GT_ENCSEQFILESUFFIX);
+  remove_pattern_in_current_dir(GT_SSPTABFILESUFFIX);
+  remove_pattern_in_current_dir(GT_DESTABFILESUFFIX);
+  remove_pattern_in_current_dir(GT_SDSTABFILESUFFIX);
+  remove_pattern_in_current_dir(GT_OISTABFILESUFFIX);
+  remove_pattern_in_current_dir(GT_MD5TABFILESUFFIX);
 
   return 0;
 }

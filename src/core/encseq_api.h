@@ -172,6 +172,10 @@ unsigned long     gt_encseq_filestartpos(const GtEncseq *encseq,
    GtEncseq <encseq>. */
 unsigned long     gt_encseq_filenum(const GtEncseq *encseq,
                                     unsigned long position);
+/* Returns the first sequence number of the sequences in file <filenum> for a
+   given GtEncseq <encseq>. */
+unsigned long     gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
+                                                 unsigned long filenum);
 /* Returns the <GtAlphabet> associated with <encseq>. */
 GtAlphabet*       gt_encseq_alphabet(const GtEncseq *encseq);
 /* Extends <encseq>  by virtual reverse complement sequences.

@@ -18,6 +18,7 @@
 #ifndef REGION_MAPPING_API_H
 #define REGION_MAPPING_API_H
 
+#include "core/encseq_api.h"
 #include "core/range_api.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
@@ -45,6 +46,11 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
 GtRegionMapping* gt_region_mapping_new_seqfiles(GtStrArray *sequence_filenames,
                                                 bool matchdesc, bool usedesc);
 
+/* Like <gt_region_mapping_new_seqfiles()>, but using <encseq> as a sequence
+   source. */
+GtRegionMapping* gt_region_mapping_new_encseq(GtEncseq *encseq, bool matchdesc,
+                                              bool usedesc);
+
 /* Return a new <GtRegionMapping> object which maps to the given sequence
    <rawseq> with the corresponding <length> and <offset>. */
 GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
@@ -54,18 +60,14 @@ GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
 /* Increase the reference count for <region_mapping> and return it. */
 GtRegionMapping* gt_region_mapping_ref(GtRegionMapping *region_mapping);
 
-/* Use <region_mapping> to map the given sequence ID <seqid> and its
-   corresponding <range> to an actual sequence. The sequence is returned in
-   <rawseq>, its length and offset in <length> and <offset>.
+/* Use <region_mapping> to extract the sequence from <start> to <end> of the
+    given sequence ID <seqid> into a buffer written to <seq>.
    In the case of an error, -1 is returned and <err> is set accordingly. */
-int              gt_region_mapping_get_raw_sequence(GtRegionMapping
-                                                    *region_mapping,
-                                                    const char **rawseq,
-                                                    unsigned long *length,
-                                                    unsigned long *offset,
-                                                    GtStr *seqid,
-                                                    const GtRange *range,
-                                                    GtError *err);
+int              gt_region_mapping_get_sequence(GtRegionMapping *region_mapping,
+                                                char **seq, GtStr *seqid,
+                                                unsigned long start,
+                                                unsigned long end,
+                                                GtError *err);
 
 /* Use <region_mapping> to get the description of the MD5 sequence ID <seqid>.
    The description is appended to <desc>.

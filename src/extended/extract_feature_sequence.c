@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/ma.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
@@ -28,8 +29,7 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
                                 GtStr *sequence, bool *reverse_strand,
                                 GtError *err)
 {
-  const char *raw_sequence;
-  unsigned long raw_sequence_length, offset;
+  char *outsequence;
   GtFeatureNode *fn;
   GtRange range;
   int had_err = 0;
@@ -40,26 +40,12 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
 
   if (gt_feature_node_has_type(fn, type)) {
     range = gt_genome_node_get_range(gn);
-    had_err = gt_region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
-                                                 &raw_sequence_length, &offset,
-                                                 gt_genome_node_get_seqid(gn),
-                                                 &range, err);
+    had_err = gt_region_mapping_get_sequence(region_mapping, &outsequence,
+                                             gt_genome_node_get_seqid(gn),
+                                             range.start, range.end, err);
     if (!had_err) {
-      if (range.end >= raw_sequence_length + offset) {
-        gt_error_set(err, "the feature on sequence '%s' defined on line %u in "
-                     "file \"%s\" lies outside its corresponding sequence. Has "
-                     "the sequence-region to sequence mapping been defined "
-                     "correctly?", gt_str_get(gt_genome_node_get_seqid(gn)),
-                     gt_genome_node_get_line_number(gn),
-                     gt_genome_node_get_filename(gn));
-        had_err = -1;
-      }
-    }
-    if (!had_err) {
-      gt_assert(range.start); /* 1-based coordinates */
-      raw_sequence += range.start - offset;
-      gt_assert(range.end - offset < raw_sequence_length);
-      gt_str_append_cstr_nt(sequence, raw_sequence, gt_range_length(&range));
+      gt_str_append_cstr_nt(sequence, outsequence, gt_range_length(&range));
+      gt_free(outsequence);
       if (gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE)
         *reverse_strand = true;
     }
@@ -74,8 +60,8 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
 {
   GtFeatureNode *fn;
   GtRange range;
-  const char *raw_sequence, *target;
-  unsigned long raw_sequence_length, offset;
+  char *outsequence;
+  const char *target;
   int had_err = 0;
 
   gt_error_check(err);
@@ -129,28 +115,12 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
       /* otherwise we only have to look this feature */
       range = gt_genome_node_get_range(gn);
       gt_assert(range.start); /* 1-based coordinates */
-      had_err = gt_region_mapping_get_raw_sequence(region_mapping,
-                                                   &raw_sequence,
-                                                   &raw_sequence_length,
-                                                   &offset,
-                                                   gt_genome_node_get_seqid(gn),
-                                                   &range, err);
+      had_err = gt_region_mapping_get_sequence(region_mapping, &outsequence,
+                                             gt_genome_node_get_seqid(gn),
+                                             range.start, range.end, err);
       if (!had_err) {
-        if (range.end >= raw_sequence_length + offset) {
-          gt_error_set(err, "the feature on sequence '%s' defined on line %u "
-                       "in file \"%s\" lies outside its corresponding "
-                       "sequence. Has the sequence-region to sequence mapping "
-                       "been defined correctly?",
-                       gt_str_get(gt_genome_node_get_seqid(gn)),
-                       gt_genome_node_get_line_number(gn),
-                       gt_genome_node_get_filename(gn));
-          had_err = -1;
-        }
-      }
-      if (!had_err) {
-        gt_assert(range.end - offset < raw_sequence_length);
-        gt_str_append_cstr_nt(sequence, raw_sequence + range.start - offset,
-                              gt_range_length(&range));
+        gt_str_append_cstr_nt(sequence, outsequence, gt_range_length(&range));
+        gt_free(outsequence);
         if (gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE) {
           had_err = gt_reverse_complement(gt_str_get(sequence),
                                           gt_str_length(sequence), err);

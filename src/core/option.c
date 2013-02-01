@@ -603,7 +603,8 @@ static int check_mandatory_either_options(GtOptionParser *op, GtError *err)
           meo_a = *(GtOption**) gt_array_get(o->mandatory_either_options, 0);
           meo_b = *(GtOption**) gt_array_get(o->mandatory_either_options, 1);
           meo_c = *(GtOption**) gt_array_get(o->mandatory_either_options, 2);
-          if (!o->is_set && !meo_a->is_set && !meo_b->is_set) {
+          if (!o->is_set && !meo_a->is_set && !meo_b->is_set
+                && !meo_c->is_set) {
             gt_error_set(err, "either option \"-%s\", option \"-%s\", option "
                               "\"-%s\" or option \"-%s\" is mandatory",
                               gt_str_get(o->option_str),

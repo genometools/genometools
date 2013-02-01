@@ -1,5 +1,6 @@
 /*
-  Copyright (c) 2010, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BIOSEQ_COL_H
-#define BIOSEQ_COL_H
+#ifndef ENCSEQ_COL_H
+#define ENCSEQ_COL_H
 
+#include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/seq_col.h"
-#include "core/str_array_api.h"
 
-typedef struct GtBioseqCol GtBioseqCol;
+typedef struct GtEncseqCol GtEncseqCol;
 
-GtSeqCol*  gt_bioseq_col_new(GtStrArray *sequence_files, GtError *err);
+GtSeqCol*  gt_encseq_col_new(GtEncseq *encseq, GtError *err);
 
 #endif

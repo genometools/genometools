@@ -285,7 +285,7 @@ GtPBSResults* gt_pbs_find(const char *seq,
                            (unsigned long) (2*o->radius + 1),
                            a);
 
-    for (j=0;j<gt_bioseq_number_of_sequences(o->trna_lib);j++)
+  for (j=0;j<gt_bioseq_number_of_sequences(o->trna_lib);j++)
   {
     GtSeq *trna_seq, *trna_from3;
     char *trna_from3_full;
@@ -312,6 +312,7 @@ GtPBSResults* gt_pbs_find(const char *seq,
                    results);
     gt_alignment_delete(ali);
 
+    gt_seq_delete(trna_seq);
     gt_seq_delete(trna_from3);
   }
   gt_seq_delete(seq_forward);
