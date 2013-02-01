@@ -18,11 +18,12 @@
 #ifndef FA_H
 #define FA_H
 
+#ifndef S_SPLINT_S
 #include <bzlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <zlib.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/str.h"
 
 /* the file allocator module */
@@ -170,4 +171,5 @@ unsigned long gt_fa_get_space_current(void);
 void    gt_fa_show_space_peak(FILE*);
 void    gt_fa_clean(void);
 
+#endif
 #endif

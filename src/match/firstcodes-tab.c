@@ -15,15 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
 #include "core/xansi_api.h"
-#endif
 #include "core/fa.h"
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
-#ifdef SKDEBIG
+#ifdef SKDEBUG
 #include "core/disc_distri.h"
 #endif
 #include "core/log.h"

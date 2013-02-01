@@ -52,6 +52,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include "core/msort.h"
 
 #define ISIZE sizeof (int)

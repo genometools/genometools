@@ -17,12 +17,12 @@
 
 #include <string.h>
 #include <inttypes.h>
+#include "core/fa.h"
 #include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/encseq_metadata.h"
 #include "core/error.h"
-#include "core/fa.h"
 #include "core/str.h"
 #include "core/xansi_api.h"
 #include "core/ma_api.h"

@@ -16,6 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <sam.h>
 #include "core/alphabet_api.h"
 #include "core/ensure.h"
 #include "core/ma_api.h"
@@ -23,7 +24,6 @@
 #include "core/undef_api.h"
 #include "extended/sam_alignment_rep.h"
 #include "extended/sam_alignment.h"
-#include <sam.h>
 
 #define BAMBASEA 1
 #define BAMBASEC 2

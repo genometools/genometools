@@ -15,12 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <stdio.h>
+#endif
+#include "core/fa.h"
 #include "core/str_api.h"
 #include "core/xansi_api.h"
 #include "core/ma.h"
 #include "core/log.h"
-#include "core/fa.h"
 #include "firstcodes-psbuf.h"
 #include "firstcodes-spacelog.h"
 

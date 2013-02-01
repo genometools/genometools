@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <sam.h>
 #include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/error_api.h"
@@ -24,7 +25,6 @@
 #include "extended/sam_alignment.h"
 #include "extended/sam_alignment_rep.h"
 #include "extended/samfile_iterator.h"
-#include <sam.h>
 
 struct GtSamfileIterator {
   samfile_t *samfile;

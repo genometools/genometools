@@ -21,14 +21,9 @@
 #include <string.h>
 #ifndef S_SPLINT_S
 #include <fcntl.h>
+#endif
 #include "core/xposix.h"
 #include "core/fileutils_api.h"
-#else
-#ifndef GT_TYPEDEF_OFF_T
-typedef int off_t;
-#define GT_TYPEDEF_OFF_T
-#endif
-#endif
 #include "core/xansi_api.h"
 #include "core/ma.h"
 #include "core/splitter.h"

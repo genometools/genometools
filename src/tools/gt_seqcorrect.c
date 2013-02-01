@@ -31,9 +31,7 @@
 #include "core/thread.h"
 #endif
 #include "core/warning_api.h"
-#ifndef S_SPLINT_S
 #include "core/xposix.h"
-#endif
 #include "tools/gt_seqcorrect.h"
 #include "match/reads2twobit.h"
 #include "match/rdj-contfinder.h"

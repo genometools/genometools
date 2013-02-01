@@ -61,7 +61,9 @@ typedef BGZF *bamFile;
 #define bam_seek(fp, pos, dir) bgzf_seek(fp, pos, dir)
 #else
 #define BAM_TRUE_OFFSET
+#ifndef S_SPLINT_S
 #include <zlib.h>
+#endif
 typedef gzFile bamFile;
 #define bam_open(fn, mode) gzopen(fn, mode)
 #define bam_dopen(fd, mode) gzdopen(fd, mode)

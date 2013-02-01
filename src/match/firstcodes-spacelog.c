@@ -15,9 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <string.h>
-#include "core/ma.h"
+#endif
 #include "core/fa.h"
+#include "core/ma.h"
 #include "core/log_api.h"
 #include "core/spacecalc.h"
 #include "core/spacepeak.h"

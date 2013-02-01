@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <stdbool.h>
+#endif
 #include "core/fa.h"
 #include "core/error_api.h"
 #include "chain2dim.h"

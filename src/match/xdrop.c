@@ -300,6 +300,62 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
           }\
         }
 
+unsigned long gt_xdrop_lcp(bool *leftsep,
+                                  bool *rightsep,
+                                  bool forward,
+                                  const GtSeqabstract *useq,
+                                  const GtSeqabstract *vseq,
+                                  unsigned long leftstart,
+                                  unsigned long rightstart,
+                                  unsigned long leftend,
+                                  unsigned long rightend)
+{
+  unsigned long i = forward ? leftstart : leftend,
+                j = forward ? rightstart : rightend;
+  GtUchar a, b;
+
+  *leftsep = false;
+  *rightsep = false;
+  while (true)
+  {
+    a = gt_seqabstract_encoded_char(useq,i);
+    if (a == (GtUchar) SEPARATOR)
+    {
+      *leftsep = true;
+      break;
+    }
+    b = gt_seqabstract_encoded_char(vseq,j);
+    if (b == (GtUchar) SEPARATOR)
+    {
+      *rightsep = true;
+      break;
+    }
+    if (a != b || a == (GtUchar) WILDCARD)
+    {
+      return forward ? i - leftstart : leftend - i;
+    }
+    if (forward)
+    {
+      if (i == leftend || j == rightend)
+      {
+        return i - leftstart;
+      }
+      i++;
+      j++;
+    } else
+    {
+      if (i == leftstart || j == rightstart)
+      {
+        return leftend - i;
+      }
+      i--;
+      j--;
+    }
+  }
+  gt_assert(false);
+  return 0;
+}
+
 static long gt_xdrop_frontvalue_get(const GtXdropresources *res,long d,long k)
 {
   const unsigned long frontidx = GT_XDROP_FRONTIDX(d,k);

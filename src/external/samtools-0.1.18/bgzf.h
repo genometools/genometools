@@ -26,7 +26,9 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#ifndef S_SPLINT_S
 #include <zlib.h>
+#endif
 #ifdef _USE_KNETFILE
 #include "knetfile.h"
 #endif

@@ -21,11 +21,9 @@
 #include <limits.h>
 #ifndef S_SPLINT_S
 #include <sys/types.h>
+#endif
 #include "core/fileutils_api.h"
 #include "core/xposix.h"
-#else
-typedef int off_t;
-#endif
 #include "core/fa.h"
 #include "core/ma.h"
 #include "core/versionfunc.h"

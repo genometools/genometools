@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <errno.h>
+#include <string.h>
 #ifndef S_SPLINT_S
 #include <ctype.h>
 #endif
-#include <errno.h>
-#include <string.h>
+#include "core/fa.h"
 #include "core/error_api.h"
 #include "core/compact_ulong_store.h"
 #include "core/encseq.h"
-#include "core/fa.h"
 #include "core/filelengthvalues.h"
 #include "core/fileutils.h"
 #include "core/intbits.h"

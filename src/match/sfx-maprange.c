@@ -18,9 +18,9 @@
 #include <errno.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
+#endif
 #include "core/xposix.h"
 #include "core/xansi_api.h"
-#endif
 #include "core/fa.h"
 #include "core/intbits.h"
 #include "core/log.h"

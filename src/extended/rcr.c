@@ -15,11 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <errno.h>
 #include <math.h>
 #include <string.h>
-
-#ifndef S_SPLINT_S
 #include <ctype.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -27,10 +26,12 @@
 #include <unistd.h>
 #endif
 
+#include <sam.h>
+
+#include "core/fa.h"
 #include "core/bittab_api.h"
 #include "core/chardef.h"
 #include "core/disc_distri.h"
-#include "core/fa.h"
 #include "core/hashmap-generic.h"
 #include "core/log_api.h"
 #include "core/ma.h"
@@ -48,11 +49,10 @@
 #include "extended/encdesc.h"
 #include "extended/golomb.h"
 #include "extended/huffman.h"
-#include "extended/rcr.h"
 #include "extended/sam_alignment.h"
 #include "extended/sam_query_name_iterator.h"
 #include "extended/samfile_iterator.h"
-#include "external/samtools-0.1.18/sam.h"
+#include "extended/rcr.h"
 
 #define BAMBASEA 1
 #define BAMBASEC 2

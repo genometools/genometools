@@ -15,15 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <math.h>
-#include <string.h>
-#include <errno.h>
 #ifndef S_SPLINT_S
+#include <math.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <string.h>
 #endif
+#include "core/fa.h"
 #include "core/chardef.h"
 #include "core/error.h"
-#include "core/fa.h"
 #include "core/format64.h"
 #include "core/mapspec.h"
 #include "core/mathsupport.h"

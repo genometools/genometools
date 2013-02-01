@@ -24,8 +24,8 @@
 #include <errno.h>
 #ifndef S_SPLINT_S
 #include <ctype.h>
-#include "core/xposix.h"
 #endif
+#include "core/xposix.h"
 #include "core/types_api.h"
 #include "core/fa.h"
 #include "core/alphabet.h"

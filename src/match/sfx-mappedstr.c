@@ -17,10 +17,10 @@
 
 #ifndef S_SPLINT_S
 #include <ctype.h>
+#include <zlib.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
-#include <zlib.h>
 #include <stdbool.h>
 #include "core/assert_api.h"
 #include "core/chardef.h"

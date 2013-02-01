@@ -18,12 +18,11 @@
 #ifndef XPOSIX_H
 #define XPOSIX_H
 
+#ifndef S_SPLINT_S
 #include <glob.h>
 #include <stdio.h>
 #include <time.h>
-#ifndef S_SPLINT_S
 #include <sys/types.h>
-#endif
 #include <sys/resource.h>
 #include <sys/stat.h>
 
@@ -54,4 +53,5 @@ time_t gt_xtime(time_t *tloc);
 void   gt_xunlink(const char *path);
 void   gt_xwrite(int d, const void *buf, size_t nbytes);
 
+#endif
 #endif

@@ -15,19 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <stdio.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <limits.h>
 #include <string.h>
+#endif
+#include "core/fa.h"
+#include "core/fileutils.h"
 #include "core/array.h"
 #include "core/endianess_api.h"
 #include "core/error.h"
-#include "core/fa.h"
 #include "core/ma_api.h"
-#ifndef S_SPLINT_S
-#include "core/fileutils.h"
-#endif
 #include "core/format64.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
