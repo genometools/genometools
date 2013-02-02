@@ -187,8 +187,8 @@ static int gt_simpleexactselfmatchstore(void *info,
   if (repeatinfo->ltrsearchseqrange.start != 0 ||
       repeatinfo->ltrsearchseqrange.end != 0)
   {
-    if (pos1 < (unsigned long) repeatinfo->ltrsearchseqrange.start  ||
-        pos2 + len - 1 > (unsigned long) repeatinfo->ltrsearchseqrange.end)
+    if (pos1 < repeatinfo->ltrsearchseqrange.start  ||
+        pos2 + len - 1 > repeatinfo->ltrsearchseqrange.end)
     {
       return 0;
     }
@@ -205,9 +205,9 @@ static int gt_simpleexactselfmatchstore(void *info,
 
   /*test maximal length of candidate pair and distance constraints*/
   if (samecontig
-        && len <= (unsigned long) repeatinfo->lmax
-        && (unsigned long) repeatinfo->dmin <= tmp
-        && tmp <= (unsigned long) repeatinfo->dmax)
+        && len <= repeatinfo->lmax
+        && repeatinfo->dmin <= tmp
+        && tmp <= repeatinfo->dmax)
   {
     Repeat *nextfreerepeatptr;
 
@@ -361,7 +361,7 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
           tsd_len = info->repeats.spaceRepeat[i].len - back - forward;
 
           /* TSD length not too big */
-          if (tsd_len <= (unsigned long)info->lmax)
+          if (tsd_len <= info->lmax)
           {
             if (!boundaries->motif_near_tsd)
             {
@@ -844,7 +844,7 @@ static int searchforTSDandorMotifoutside(
     if (gt_sarrquerysubstringmatch(dbseq,
                                 leftlen,
                                 query,
-                                (unsigned long) rightlen,
+                                rightlen,
                                 lo->minlengthTSD,
                                 gt_encseq_alphabet(encseq),
                                 gt_subsimpleexactselfmatchstore,
@@ -929,12 +929,12 @@ static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
   ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1;
   vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
   dist_between_LTRs = boundaries->rightLTR_5 - boundaries->leftLTR_5;
-  if (ulen > (unsigned long)repeatinfo->lmax
-        || vlen > (unsigned long)repeatinfo->lmax
-        || ulen < (unsigned long)repeatinfo->lmin
-        || vlen < (unsigned long)repeatinfo->lmin
-        || dist_between_LTRs > (unsigned long)repeatinfo->dmax
-        || dist_between_LTRs < (unsigned long)repeatinfo->dmin
+  if (ulen > repeatinfo->lmax
+        || vlen > repeatinfo->lmax
+        || ulen < repeatinfo->lmin
+        || vlen < repeatinfo->lmin
+        || dist_between_LTRs > repeatinfo->dmax
+        || dist_between_LTRs < repeatinfo->dmin
         || boundaries->leftLTR_3 >= boundaries->rightLTR_5)
   {
     boundaries->lengthdistconstraint = false;
@@ -977,7 +977,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   GtXdropresources *xdropresources;
   GtXdropbest xdropbest_left, xdropbest_right;
   unsigned long alilen = 0,
-                totallength,
+                totallength = gt_encseq_total_length(encseq),
                 ulen,
                 vlen;
 #undef GT_GREEDY_BUFFER
@@ -1001,13 +1001,21 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   {
 
     repeatptr = &(lo->repeatinfo.repeats.spaceRepeat[repeatcounter]);
-    alilen = ((unsigned long)lo->repeatinfo.lmax) - repeatptr->len;
+    alilen = lo->repeatinfo.lmax - repeatptr->len;
 
     /**** left (reverse) xdrop alignment ****/
-    if (alilen <= repeatptr->pos1)
+    if (repeatptr->pos1 > 0)
     {
-      gt_seqabstract_reinit_encseq(sa_useq,encseq,alilen,0);
-      gt_seqabstract_reinit_encseq(sa_vseq,encseq,alilen,0);
+      if (alilen <= repeatptr->pos1)
+      {
+        gt_seqabstract_reinit_encseq(sa_useq,encseq,alilen,0);
+        gt_seqabstract_reinit_encseq(sa_vseq,encseq,alilen,0);
+      } else
+      {
+        gt_seqabstract_reinit_encseq(sa_useq,encseq,repeatptr->pos1,0);
+        gt_seqabstract_reinit_encseq(sa_vseq,encseq,
+                                     repeatptr->pos1 + repeatptr->offset,0);
+      }
       gt_evalxdroparbitscoresextend(false,
                                     &xdropbest_left,
                                     xdropresources,
@@ -1016,26 +1024,29 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                     repeatptr->pos1,
                                     repeatptr->pos1 + repeatptr->offset,
                                     (GtXdropscore) lo->xdropbelowscore);
-    } else /* do not align over left sequence boundary */
+    } else
     {
-      gt_seqabstract_reinit_encseq(sa_useq,encseq,repeatptr->pos1,0);
-      gt_seqabstract_reinit_encseq(sa_vseq,encseq,
-                                   repeatptr->pos1 + repeatptr->offset,0);
-      gt_evalxdroparbitscoresextend(false,
-                                    &xdropbest_left,
-                                    xdropresources,
-                                    sa_useq,
-                                    sa_vseq,
-                                    repeatptr->pos1,
-                                    repeatptr->pos1 + repeatptr->offset,
-                                    (GtXdropscore) lo->xdropbelowscore);
+      xdropbest_left.ivalue = 0;
+      xdropbest_left.jvalue = 0;
+      xdropbest_left.score = 0;
     }
-    totallength = gt_encseq_total_length(encseq);
-    if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
-                                repeatptr->len))
+    if (repeatptr->pos1 + repeatptr->len > 0)
     {
-      gt_seqabstract_reinit_encseq(sa_useq,encseq,alilen,0);
-      gt_seqabstract_reinit_encseq(sa_vseq,encseq,alilen,0);
+      if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
+                                   repeatptr->len))
+      {
+        gt_seqabstract_reinit_encseq(sa_useq,encseq,alilen,0);
+        gt_seqabstract_reinit_encseq(sa_vseq,encseq,alilen,0);
+      } else
+      {
+        gt_seqabstract_reinit_encseq(sa_useq,encseq,totallength -
+                                                    (repeatptr->pos1 +
+                                                     repeatptr->len),0);
+        gt_seqabstract_reinit_encseq(sa_vseq,encseq,totallength -
+                                             (repeatptr->pos1 +
+                                              repeatptr->offset +
+                                              repeatptr->len),0);
+      }
       gt_evalxdroparbitscoresextend(true,
                                     &xdropbest_right,
                                     xdropresources,
@@ -1045,33 +1056,20 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                     repeatptr->pos1 + repeatptr->offset +
                                     repeatptr->len,
                                     (GtXdropscore) lo->xdropbelowscore);
-    } else /* do not align over right sequence boundary */
+    } else
     {
-      gt_seqabstract_reinit_encseq(sa_useq,encseq,totallength -
-                                                  (repeatptr->pos1 +
-                                                   repeatptr->len),0);
-      gt_seqabstract_reinit_encseq(sa_vseq,encseq,totallength -
-                                           (repeatptr->pos1 +
-                                            repeatptr->offset +
-                                            repeatptr->len),0);
-      gt_evalxdroparbitscoresextend(true,
-                                    &xdropbest_right,
-                                    xdropresources,
-                                    sa_useq,
-                                    sa_vseq,
-                                    repeatptr->pos1 + repeatptr->len,
-                                    repeatptr->pos1 + repeatptr->offset +
-                                    repeatptr->len,
-                                    (GtXdropscore) lo->xdropbelowscore);
+      xdropbest_right.ivalue = 0;
+      xdropbest_right.jvalue = 0;
+      xdropbest_right.score = 0;
     }
     GT_GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);
     boundaries->contignumber = repeatptr->contignumber;
-    boundaries->leftLTR_5 = (unsigned long) 0;
-    boundaries->leftLTR_3 = (unsigned long) 0;
-    boundaries->rightLTR_5 = (unsigned long) 0;
-    boundaries->rightLTR_3 = (unsigned long) 0;
-    boundaries->lenleftTSD = (unsigned long) 0;
-    boundaries->lenrightTSD = (unsigned long) 0;
+    boundaries->leftLTR_5 = 0;
+    boundaries->leftLTR_3 = 0;
+    boundaries->rightLTR_5 = 0;
+    boundaries->rightLTR_3 = 0;
+    boundaries->lenleftTSD = 0;
+    boundaries->lenrightTSD = 0;
     boundaries->tsd = false;
     boundaries->motif_near_tsd = false;
     boundaries->motif_far_tsd = false;
@@ -1380,9 +1378,8 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
         seqid = gt_str_new_cstr("seq");
         gt_str_append_ulong(seqid, seqnum);
         rn = gt_region_node_new(seqid,
-                                1 + (unsigned long) ltrh_stream->offset,
-                                seqlength
-                                  + (unsigned long) ltrh_stream->offset);
+                                1 + ltrh_stream->offset,
+                                seqlength + ltrh_stream->offset);
         gt_str_delete(seqid);
         *gn = rn;
         ltrh_stream->cur_elem_index++;
@@ -1475,10 +1472,10 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
                                  gt_ft_repeat_region,
                                  elem->leftLTR_5 - seqstartpos + 1
                                    - elem->lenleftTSD
-                                   + (unsigned long) ltrh_stream->offset,
+                                   + ltrh_stream->offset,
                                  elem->rightLTR_3 - seqstartpos + 1
                                    + elem->lenrightTSD
-                                   + (unsigned long) ltrh_stream->offset,
+                                   + ltrh_stream->offset,
                                  GT_STRAND_UNKNOWN);
       gt_feature_node_set_source((GtFeatureNode*) node, source);
       *gn = node;
@@ -1488,9 +1485,9 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
         node = gt_feature_node_new(seqid,
                                    gt_ft_inverted_repeat,
                                    elem->leftLTR_5 - seqstartpos + 1
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    elem->leftLTR_5 - seqstartpos + 2
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    GT_STRAND_UNKNOWN);
         gt_feature_node_set_source((GtFeatureNode*) node, source);
         gt_feature_node_add_child((GtFeatureNode*) parent,
@@ -1498,9 +1495,9 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
         node = gt_feature_node_new(seqid,
                                    gt_ft_inverted_repeat,
                                    elem->leftLTR_3 - seqstartpos
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    elem->leftLTR_3 - seqstartpos + 1
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    GT_STRAND_UNKNOWN);
         gt_feature_node_set_source((GtFeatureNode*) node, source);
         gt_feature_node_add_child((GtFeatureNode*) parent,
@@ -1508,9 +1505,9 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
         node = gt_feature_node_new(seqid,
                                    gt_ft_inverted_repeat,
                                    elem->rightLTR_5 - seqstartpos + 1
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    elem->rightLTR_5 - seqstartpos + 2
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    GT_STRAND_UNKNOWN);
         gt_feature_node_set_source((GtFeatureNode*) node, source);
         gt_feature_node_add_child((GtFeatureNode*) parent,
@@ -1518,9 +1515,9 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
         node = gt_feature_node_new(seqid,
                                    gt_ft_inverted_repeat,
                                    elem->rightLTR_3 - seqstartpos
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    elem->rightLTR_3 - seqstartpos + 1
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    GT_STRAND_UNKNOWN);
         gt_feature_node_set_source((GtFeatureNode*) node, source);
         gt_feature_node_add_child((GtFeatureNode*) parent,
@@ -1533,9 +1530,9 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
                                    gt_ft_target_site_duplication,
                                    elem->leftLTR_5 - seqstartpos + 1
                                      - elem->lenleftTSD
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    elem->leftLTR_5 - seqstartpos
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    GT_STRAND_UNKNOWN);
         gt_feature_node_set_source((GtFeatureNode*) node, source);
         gt_feature_node_add_child((GtFeatureNode*) parent,
@@ -1543,10 +1540,10 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
         node = gt_feature_node_new(seqid,
                                    gt_ft_target_site_duplication,
                                    elem->rightLTR_3 - seqstartpos + 2
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    elem->rightLTR_3 - seqstartpos + 1
                                      + elem->lenrightTSD
-                                     + (unsigned long) ltrh_stream->offset,
+                                     + ltrh_stream->offset,
                                    GT_STRAND_UNKNOWN);
         gt_feature_node_set_source((GtFeatureNode*) node, source);
         gt_feature_node_add_child((GtFeatureNode*) parent,
@@ -1556,9 +1553,9 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
       node = gt_feature_node_new(seqid,
                                  gt_ft_LTR_retrotransposon,
                                  elem->leftLTR_5 - seqstartpos + 1
-                                   + (unsigned long) ltrh_stream->offset,
+                                   + ltrh_stream->offset,
                                  elem->rightLTR_3 - seqstartpos + 1
-                                   + (unsigned long) ltrh_stream->offset,
+                                   + ltrh_stream->offset,
                                  GT_STRAND_UNKNOWN);
       gt_feature_node_set_source((GtFeatureNode*) node, source);
       (void) snprintf(buf, BUFSIZ-1, "%.2f", elem->similarity);
@@ -1576,9 +1573,9 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
       node = gt_feature_node_new(seqid,
                                  gt_ft_long_terminal_repeat,
                                  elem->leftLTR_5 - seqstartpos + 1
-                                   + (unsigned long) ltrh_stream->offset,
+                                   + ltrh_stream->offset,
                                  elem->leftLTR_3 - seqstartpos + 1
-                                   + (unsigned long) ltrh_stream->offset,
+                                   + ltrh_stream->offset,
                                  GT_STRAND_UNKNOWN);
       gt_feature_node_set_source((GtFeatureNode*) node, source);
       gt_feature_node_add_child((GtFeatureNode*) parent,
@@ -1586,9 +1583,9 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
       node = gt_feature_node_new(seqid,
                                  gt_ft_long_terminal_repeat,
                                  elem->rightLTR_5 - seqstartpos + 1
-                                   + (unsigned long) ltrh_stream->offset,
+                                   + ltrh_stream->offset,
                                  elem->rightLTR_3 - seqstartpos + 1
-                                   + (unsigned long) ltrh_stream->offset,
+                                   + ltrh_stream->offset,
                                  GT_STRAND_UNKNOWN);
       gt_feature_node_set_source((GtFeatureNode*) node, source);
       gt_feature_node_add_child((GtFeatureNode*) parent,

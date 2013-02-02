@@ -9,5 +9,5 @@ shift
 echo "break exit" >> ${TMPFILE}
 echo "run $*" >> ${TMPFILE}
 echo "bt" >> ${TMPFILE}
-cat ${TMPFILE} | gdb bin/gt
+cat ${TMPFILE} | gdb ${GTDIR}/bin/gt
 rm -f ${TMPFILE}

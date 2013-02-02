@@ -300,7 +300,9 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
           }\
         }
 
-unsigned long gt_xdrop_lcp(bool *leftsep,
+#define WITHLCP
+#ifdef WITHLCP
+static unsigned long gt_xdrop_lcp_generic(bool *leftsep,
                                   bool *rightsep,
                                   bool forward,
                                   const GtSeqabstract *useq,
@@ -310,51 +312,90 @@ unsigned long gt_xdrop_lcp(bool *leftsep,
                                   unsigned long leftend,
                                   unsigned long rightend)
 {
-  unsigned long i = forward ? leftstart : leftend,
-                j = forward ? rightstart : rightend;
+  unsigned long leftidx = leftstart, rightidx = rightstart;
   GtUchar a, b;
 
   *leftsep = false;
   *rightsep = false;
+  if ((forward && (leftstart > leftend || rightstart > rightend)) ||
+      (!forward && (leftstart < leftend || rightstart < rightend)))
+  {
+    return 0;
+  }
   while (true)
   {
-    a = gt_seqabstract_encoded_char(useq,i);
+    a = gt_seqabstract_encoded_char(useq,leftidx);
     if (a == (GtUchar) SEPARATOR)
     {
       *leftsep = true;
-      break;
+      return forward ? leftidx - leftstart : leftstart - leftidx;
     }
-    b = gt_seqabstract_encoded_char(vseq,j);
+    b = gt_seqabstract_encoded_char(vseq,rightidx);
     if (b == (GtUchar) SEPARATOR)
     {
       *rightsep = true;
-      break;
+      return forward ? leftidx - leftstart : leftstart - leftidx;
     }
     if (a != b || a == (GtUchar) WILDCARD)
     {
-      return forward ? i - leftstart : leftend - i;
+      return forward ? leftidx - leftstart : leftstart - leftidx;
+    }
+    if (leftidx == leftend || rightidx == rightend)
+    {
+      return 1UL + (forward ? leftidx - leftstart : leftstart - leftidx);
     }
     if (forward)
     {
-      if (i == leftend || j == rightend)
-      {
-        return i - leftstart;
-      }
-      i++;
-      j++;
+      leftidx++;
+      rightidx++;
     } else
     {
-      if (i == leftstart || j == rightstart)
-      {
-        return leftend - i;
-      }
-      i--;
-      j--;
+      leftidx--;
+      rightidx--;
     }
   }
-  gt_assert(false);
+  /*@ignore@*/
   return 0;
+  /*@end@*/
 }
+
+static unsigned long gt_xdrop_lcp(bool *leftsep,
+                                  bool *rightsep,
+                                  bool forward,
+                                  const GtSeqabstract *useq,
+                                  const GtSeqabstract *vseq,
+                                  unsigned long uoffset,
+                                  unsigned long voffset,
+                                  unsigned long ulen,
+                                  unsigned long vlen)
+{
+  if (forward)
+  {
+    gt_assert(uoffset + ulen > 0 && voffset + vlen > 0);
+    return gt_xdrop_lcp_generic(leftsep,
+                                rightsep,
+                                forward,
+                                useq,
+                                vseq,
+                                uoffset,
+                                voffset,
+                                uoffset + ulen - 1,
+                                voffset + vlen - 1);
+  } else
+  {
+    gt_assert(uoffset > 0 && voffset > 0 && uoffset >= ulen && voffset >= vlen);
+    return gt_xdrop_lcp_generic(leftsep,
+                                rightsep,
+                                forward,
+                                useq,
+                                vseq,
+                                uoffset - 1,
+                                voffset - 1,
+                                uoffset - ulen,
+                                voffset - vlen);
+  }
+}
+#endif
 
 static long gt_xdrop_frontvalue_get(const GtXdropresources *res,long d,long k)
 {
@@ -405,6 +446,9 @@ void gt_evalxdroparbitscoresextend(bool forward,
               = MAX(MAX(res->arbitdistances.mis,res->arbitdistances.ins),
                     res->arbitdistances.del) - 1;
   int currentMININFINITYINTgeneration = 0;
+  unsigned long lcp;
+  bool leftsep, rightsep;
+  long starti;
   GtXdropfrontvalue tmpfront;
   GtXdropscore bigt_tmp;        /* best score T' seen already */
   bool alwaysMININFINITYINT = true;
@@ -432,10 +476,24 @@ void gt_evalxdroparbitscoresextend(bool forward,
   res->big_t.nextfreeGtXdropscore = 0;
   res->fronts.nextfreeGtXdropfrontvalue = 0;
   /* phase 0 */
+#ifdef WITHLCP
+  lcp = gt_xdrop_lcp(&leftsep,
+                     &rightsep,
+                     forward,
+                     useq,
+                     vseq,
+                     uoffset,
+                     voffset,
+                     (unsigned long) ulen,
+                     (unsigned long) vlen);
+#endif
   for (idx = 0; idx < MIN(ulen,vlen); idx++)
   {
     GT_XDROP_COMPARESYMBOLSSEP(idx,idx);
   }
+#ifdef WITHLCP
+  gt_assert(lcp == (unsigned long) idx);
+#endif
   /* alignment already finished */
   if (idx >= ulen || idx >= vlen)
   {
@@ -531,12 +589,31 @@ void gt_evalxdroparbitscoresextend(bool forward,
               (gt_xdrop_frontvalue_get(res,currd-1,k) < i &&
                i <= MIN(ulen,vlen + k)))
           {
+#ifdef WITHLCP
+            if (ulen >= i && vlen >= j)
+            {
+              lcp = gt_xdrop_lcp(&leftsep,
+                                 &rightsep,
+                                 forward,
+                                 useq,
+                                 vseq,
+                                 forward ? uoffset + i : uoffset - i,
+                                 forward ? voffset + j : voffset - j,
+                                 (unsigned long) (ulen - i),
+                                 (unsigned long) (vlen - j));
+            } else
+            {
+              lcp = 0;
+            }
+            starti = i;
+#endif
             while (i < ulen && j < vlen)
             {
               GT_XDROP_COMPARESYMBOLSSEP(i,j);
               i++;
               j++;
             }
+            gt_assert(lcp == (unsigned long) (i - starti));
             alwaysMININFINITYINT = false;
             tmpfront.row = i;
             if (GT_XDROP_EVAL(i + j, currd) > bigt_tmp)
