@@ -167,9 +167,7 @@ void gt_graphics_cairo_draw_text(GtGraphics *gg, double x, double y,
   pango_layout_set_text(g->layout, text, -1);
 
   /* get text extents */
-  pango_layout_line_get_pixel_extents(pango_layout_get_line(g->layout, 0),
-                                      &ink,
-                                      NULL);
+  pango_layout_get_pixel_extents(g->layout, &ink, NULL);
 
   if (gt_double_smaller_double(g->width, x+ink.width))
     return;
@@ -210,9 +208,7 @@ void gt_graphics_cairo_draw_text_centered(GtGraphics *gg, double x, double y,
   pango_layout_set_text(g->layout, text, -1);
 
   /* get text extents */
-  pango_layout_line_get_pixel_extents(pango_layout_get_line(g->layout, 0),
-                                      &ink,
-                                      NULL);
+  pango_layout_get_pixel_extents(g->layout, &ink, NULL);
 
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   /* draw text w/ its center at the given coords */
@@ -230,9 +226,7 @@ void gt_graphics_cairo_draw_text_right(GtGraphics *gg, double x, double y,
   pango_layout_set_text(g->layout, text, -1);
 
   /* get text extents */
-  pango_layout_line_get_pixel_extents(pango_layout_get_line(g->layout, 0),
-                                      &ink,
-                                      NULL);
+  pango_layout_get_pixel_extents(g->layout, &ink, NULL);
 
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   /* draw text w/ its right end at the given coords */
@@ -339,17 +333,14 @@ void gt_graphics_cairo_draw_vertical_line(GtGraphics *gg, double x, double y,
 
 double gt_graphics_cairo_get_text_width(GtGraphics *gg, const char* text)
 {
-  PangoLayoutLine *line;
   PangoRectangle rect;
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g && text && g->layout);
 
   pango_layout_set_text(g->layout, text, -1);
   /* get text extents */
-  gt_assert(pango_layout_get_line_count(g->layout) > 0);
-  line = pango_layout_get_line(g->layout, 0);
-  gt_assert(line);
-  pango_layout_line_get_pixel_extents(line, &rect, NULL);
+
+  pango_layout_get_pixel_extents(g->layout, &rect, NULL);
 
   gt_assert(gt_double_smaller_double(0, rect.width));
   return rect.width;

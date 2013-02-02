@@ -50,18 +50,15 @@ double gt_text_width_calculator_cairo_get_text_width(GtTextWidthCalculator *twc,
                                                      GT_UNUSED GtError *err)
 {
   GtTextWidthCalculatorCairo *twcc;
-  PangoLayoutLine *line;
   PangoRectangle rect;
   gt_assert(twc && text);
   twcc = gt_text_width_calculator_cairo_cast(twc);
 
   /* redo layout */
   pango_layout_set_text(twcc->layout, text, -1);
-  gt_assert(pango_layout_get_line_count(twcc->layout) > 0);
-  line = pango_layout_get_line(twcc->layout, 0);
 
   /* get extents */
-  pango_layout_line_get_pixel_extents(line, &rect, NULL);
+  pango_layout_get_pixel_extents(twcc->layout, &rect, NULL);
 
   if (twcc->style)
     cairo_restore(twcc->context);
