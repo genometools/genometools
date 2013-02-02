@@ -1,8 +1,20 @@
-changes in version 1.4.3 (??)
+changes in version 1.5.0 (??)
 
-- added development tool sain to run the induced suffix array sorting alg.
+- bugfixes and cleanups
+- development tool `gt sain' added to run an induced suffix array sorting
+  algorithm
 - the -typecheck option in the `gt gff3` and `gt gff3validator` tools now also
   validates parent (part-of) relationships, see -help output for details
+- new option -encseq besides -seqfile(s) and -regionmapping to select a
+  encseq index as a sequence source
+- GtBioseq backend switched to GtEncseq
+- GtSeqCol is now an interface, GtEncseqCol added
+- GtRankedList added
+- GtSNPAnnotatorStream and `gt snpper' tool added
+- node sorting code is now aware of MD5 hash presence
+- compatibility with old Pango versions inproved
+- Lua updated to 5.1.5
+- zlib updated to 1.2.7
 
 
 changes in version 1.4.2 (2012-10-02)
