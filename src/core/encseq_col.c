@@ -56,6 +56,7 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, unsigned long *filenum,
   bool match;
   int had_err = 0;
   gt_error_check(err);
+
   gt_assert(esc && filenum && seqnum && seqid);
   /* create cache */
   if (!esc->grep_cache)
@@ -74,7 +75,7 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, unsigned long *filenum,
     desc = gt_encseq_description(esc->encseq, &desc_len, j);
     buf = gt_calloc(desc_len + 1, sizeof (char));
     memcpy(buf, desc, desc_len * sizeof (char));
-    had_err = gt_grep(&match, gt_str_get(seqid), desc, err);
+    had_err = gt_grep(&match, gt_str_get(seqid), buf, err);
     gt_free(buf);
     if (!had_err && match) {
       *filenum = seq_info.filenum =
@@ -106,7 +107,7 @@ static int gt_encseq_col_grep_desc(GtSeqCol *sc, char **seq,
   gt_assert(esc && seq && seqid);
   had_err = gt_encseq_col_do_grep_desc(esc, &filenum, &seqnum, seqid, err);
   if (!had_err) {
-    *seq = gt_seq_col_get_sequence(sc, seqnum, filenum, start, end);
+    *seq = gt_seq_col_get_sequence(sc, filenum, seqnum, start, end);
   }
   return had_err;
 }
