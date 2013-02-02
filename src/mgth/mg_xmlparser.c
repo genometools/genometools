@@ -507,15 +507,15 @@ static void XMLCALL endElement(void *data, const char *name)
         if ((query_nr_p = gt_cstr_nofree_ulp_gt_hashmap_get(
                PARSESTRUCT(queryhash), gt_str_get(PARSESTRUCT(buf_ptr)))))
         {
+          char *seq;
           query_nr = **query_nr_p;
+          seq = gt_bioseq_get_sequence(PARSESTRUCT(queryseq), query_nr);
           /* Abspeichern der zur Query-Def passenden Query-DNA */
-          gt_str_append_cstr_nt(MATRIXSTRUCT(query_dna),
-                             gt_bioseq_get_sequence(PARSESTRUCT(queryseq),
-                                                 query_nr),
-                             gt_bioseq_get_sequence_length(PARSESTRUCT
-                                                        (queryseq),
-                                                        query_nr));
-
+          gt_str_append_cstr_nt(MATRIXSTRUCT(query_dna), seq,
+                                gt_bioseq_get_sequence_length(PARSESTRUCT
+                                                              (queryseq),
+                                                              query_nr));
+          gt_free(seq);
           mg_outputwriter(parsestruct_ptr, NULL, NULL, NULL, 'q', err);
         }
         else
@@ -725,16 +725,16 @@ static void XMLCALL endElement(void *data, const char *name)
         if ((query_nr_p = gt_cstr_nofree_ulp_gt_hashmap_get(
                PARSESTRUCT(hithash), gt_str_get(hit_tmp))))
         {
+          char *seq;
           /* Positionsbestimmung des Eintrages in der GtBioseq-Struktur */
           hit_nr = **query_nr_p;
-
+          seq = gt_bioseq_get_sequence(PARSESTRUCT(hitseq), hit_nr);
           /* auslesen der Sequenzinformation */
-          gt_str_append_cstr_nt(hit_dna_tmp,
-                             gt_bioseq_get_sequence(PARSESTRUCT(hitseq),
-                                                 hit_nr),
-                             gt_bioseq_get_sequence_length(PARSESTRUCT
-                                                        (hitseq),
-                                                        hit_nr));
+          gt_str_append_cstr_nt(hit_dna_tmp, seq,
+                                gt_bioseq_get_sequence_length(PARSESTRUCT
+                                                              (hitseq),
+                                                              hit_nr));
+          gt_free(seq);
           /* abspeichern der Hit-DNA in der Matrix-Info Struktur */
           gt_str_array_add_cstr(MATRIXSTRUCT(hit_dna), gt_str_get(hit_dna_tmp));
         }
