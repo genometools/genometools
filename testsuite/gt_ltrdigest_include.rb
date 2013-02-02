@@ -229,7 +229,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}ltrdigest/corrupt_trna.fas #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep(last_stderr, /the first character of fasta file/)
+    grep(last_stderr, /cannot guess file type of file/)
   end
 
   Name "gt ltrdigest tRNA implied options"
