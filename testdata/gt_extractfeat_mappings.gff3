@@ -1,0 +1,9 @@
+##gff-version   3
+##sequence-region bar 1 100
+##sequence-region baz 1 100
+##sequence-region foo 1 100
+##sequence-region quux 1 100
+bar	.	gene	1	10	.	.	.	.
+baz	.	gene	1	10	.	.	.	.
+foo	.	gene	1	10	.	.	.	.
+quux	.	gene	1	10	.	.	.	.
