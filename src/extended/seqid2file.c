@@ -194,6 +194,7 @@ GtRegionMapping* gt_seqid2file_region_mapping_new(GtSeqid2FileInfo *s2fi,
     el = gt_encseq_loader_new();
     gt_encseq_loader_disable_autosupport(el);
     gt_encseq_loader_require_md5_support(el);
+    gt_encseq_loader_require_lossless_support(el);
     gt_encseq_loader_require_description_support(el);
     encseq = gt_encseq_loader_load(el, gt_str_get(s2fi->encseq), err);
     gt_encseq_loader_delete(el);
