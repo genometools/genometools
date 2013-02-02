@@ -1,0 +1,9 @@
+##gff-version   3
+##sequence-region   md5:9448bcca4c03ff54d1384378051e2a89:bar 1 100
+##sequence-region   md5:99d681c067dc0429579ac0f192c2d8c8:quux 1 100
+##sequence-region   md5:a39f549be076d51150511e802807cf51:foo 1 100
+##sequence-region   md5:acff2b1574e4418ecdd8b31111c7bb7a:baz 1 100
+md5:9448bcca4c03ff54d1384378051e2a89:bar	.	gene	1	10	.	.	.	.
+md5:99d681c067dc0429579ac0f192c2d8c8:quux	.	gene	1	10	.	.	.	.
+md5:a39f549be076d51150511e802807cf51:foo	.	gene	1	10	.	.	.	.
+md5:acff2b1574e4418ecdd8b31111c7bb7a:baz	.	gene	1	10	.	.	.	.

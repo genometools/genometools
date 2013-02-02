@@ -153,26 +153,29 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_seqid_target.fas"
 end
 
-Name "gt extractfeat compare query methods"
+Name "gt extractfeat compare query method combinations"
 Keywords "gt_extractfeat query_methods"
 Test do
-  ["-usedesc","-matchdesc"].each do |method|
-    run "#{$bin}gt extractfeat #{method} -seqfile #{$testdata}gt_extractfeat_mappings.fas " +
-        "-type gene #{$testdata}gt_extractfeat_mappings.gff3 "
-    run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref.fas"
-    run "#{$bin}gt extractfeat #{method} -seqfiles " +
-        "#{$testdata}gt_extractfeat_mappings_sep1.fas " +
-        "#{$testdata}gt_extractfeat_mappings_sep2.fas " +
-        "-type gene #{$testdata}gt_extractfeat_mappings.gff3 "
-    run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref.fas"
-    run "#{$bin}gt encseq encode -lossless -indexname ./idx " +
-        "#{$testdata}gt_extractfeat_mappings.fas"
-    run "#{$bin}gt extractfeat #{method} -encseq idx " +
-        "-type gene #{$testdata}gt_extractfeat_mappings.gff3 "
-    run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref.fas"
+  run "#{$bin}gt encseq encode -lossless -indexname ./idx " +
+      "#{$testdata}gt_extractfeat_mappings.fas"
+  ["", ".md5"].each do |md5|
+    ["-usedesc","-matchdesc"].each do |method|
+      run "#{$bin}gt extractfeat #{method} " +
+          "-seqfile #{$testdata}gt_extractfeat_mappings.fas " +
+          "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
+      run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
+      run "#{$bin}gt extractfeat #{method} -seqfiles " +
+          "#{$testdata}gt_extractfeat_mappings_sep1.fas " +
+          "#{$testdata}gt_extractfeat_mappings_sep2.fas " +
+          "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
+      run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
+      run "#{$bin}gt extractfeat #{method} -encseq idx " +
+          "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
+      run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
+    end
+    run "env GT_TESTDATA=#{$testdata} #{$memcheck} #{$bin}gt extractfeat " +
+        "-regionmapping #{$testdata}gt_extractfeat_mappings_seprm.lua " +
+        "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
+    run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
   end
-  run "env GT_TESTDATA=#{$testdata} #{$memcheck} #{$bin}gt extractfeat " +
-      "-regionmapping #{$testdata}gt_extractfeat_mappings_seprm.lua " +
-      "-type gene #{$testdata}gt_extractfeat_mappings.gff3 "
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref.fas"
 end
