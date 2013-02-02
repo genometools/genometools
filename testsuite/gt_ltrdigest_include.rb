@@ -347,7 +347,7 @@ if $gttestdata then
       Test do
         run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :maxtime => 600
         run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result#{chr} -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
-       :retval => 0, :maxtime => 500
+       :retval => 0, :maxtime => 700
         check_ppt_pbs(last_stdout, chr)
         #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref_noHMM.gff3"
       end
