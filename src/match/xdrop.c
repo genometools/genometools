@@ -219,60 +219,6 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
  The following macro checks for wildcard and separator symbols.
  */
 
-#undef GT_XDROP_CHECKINCREMENT
-#ifdef GT_XDROP_CHECKINCREMENT
-#define GT_XDROP_UINCREMENT(I)\
-          characcess++;\
-          if (forward)\
-          {\
-            if (lastaccess_useq != ULONG_MAX)\
-            {\
-              if (lastaccess_useq > uoffset + (I))\
-              {\
-                unsigned long goback = lastaccess_useq - (uoffset + (I));\
-                if (maxgoback < goback)\
-                {\
-                  maxgoback = goback;\
-                }\
-              } else\
-              {\
-                if (lastaccess_useq + LOOKAHEAD >= uoffset + (I))\
-                {\
-                  consecutive++;\
-                }\
-              }\
-            }\
-            lastaccess_useq = uoffset + (I);\
-          }
-
-#define GT_XDROP_VINCREMENT(J)\
-          characcess++;\
-          if (forward)\
-          {\
-            if (lastaccess_vseq != ULONG_MAX)\
-            {\
-              if (lastaccess_vseq > voffset + (J))\
-              {\
-                unsigned long goback = lastaccess_vseq - (voffset + (J));\
-                if (maxgoback < goback)\
-                {\
-                  maxgoback = goback;\
-                }\
-              } else\
-              {\
-                if (lastaccess_vseq + LOOKAHEAD >= voffset + (J))\
-                {\
-                  consecutive++;\
-                }\
-              }\
-            }\
-            lastaccess_vseq = voffset + (J);\
-          }
-#else
-#define GT_XDROP_UINCREMENT(I) /* Nothing */
-#define GT_XDROP_VINCREMENT(J) /* Nothing */
-#endif
-
 #define GT_XDROP_SEQACC(SEQ,OFF,IDX)\
         gt_seqabstract_encoded_char(SEQ,forward ? (OFF) + (IDX)\
                                                 : (OFF) - 1UL - (IDX))
@@ -281,14 +227,12 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
         {\
           GtUchar a, b;\
           a = GT_XDROP_SEQACC(useq,uoffset,I);\
-          GT_XDROP_UINCREMENT(I)\
           if (a == (GtUchar) SEPARATOR)\
           {\
             ulen = I;\
             break;\
           }\
           b = GT_XDROP_SEQACC(vseq,voffset,J);\
-          GT_XDROP_VINCREMENT(J)\
           if (b == (GtUchar) SEPARATOR)\
           {\
             vlen = J;\
@@ -300,102 +244,45 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
           }\
         }
 
-#define WITHLCP
-#ifdef WITHLCP
-static unsigned long gt_xdrop_lcp_generic(bool *leftsep,
+static unsigned long gt_xdrop_lcp(bool *leftsep,
                                   bool *rightsep,
                                   bool forward,
                                   const GtSeqabstract *useq,
                                   const GtSeqabstract *vseq,
                                   unsigned long leftstart,
                                   unsigned long rightstart,
-                                  unsigned long leftend,
-                                  unsigned long rightend)
+                                  unsigned long minlen)
 {
-  unsigned long leftidx = leftstart, rightidx = rightstart;
+  unsigned long lcp;
   GtUchar a, b;
 
   *leftsep = false;
   *rightsep = false;
-  if ((forward && (leftstart > leftend || rightstart > rightend)) ||
-      (!forward && (leftstart < leftend || rightstart < rightend)))
+  for (lcp = 0; lcp < minlen; lcp++)
   {
-    return 0;
-  }
-  while (true)
-  {
-    a = gt_seqabstract_encoded_char(useq,leftidx);
-    if (a == (GtUchar) SEPARATOR)
+    a = gt_seqabstract_encoded_char(useq,forward ? leftstart + lcp
+                                                 : leftstart - lcp);
+    if (ISSPECIAL(a))
     {
-      *leftsep = true;
-      return forward ? leftidx - leftstart : leftstart - leftidx;
+      if (a == (GtUchar) SEPARATOR)
+      {
+        *leftsep = true;
+      }
+      break;
     }
-    b = gt_seqabstract_encoded_char(vseq,rightidx);
-    if (b == (GtUchar) SEPARATOR)
+    b = gt_seqabstract_encoded_char(vseq,forward ? rightstart + lcp
+                                                 : rightstart - lcp);
+    if (a != b || ISSPECIAL(a))
     {
-      *rightsep = true;
-      return forward ? leftidx - leftstart : leftstart - leftidx;
-    }
-    if (a != b || a == (GtUchar) WILDCARD)
-    {
-      return forward ? leftidx - leftstart : leftstart - leftidx;
-    }
-    if (leftidx == leftend || rightidx == rightend)
-    {
-      return 1UL + (forward ? leftidx - leftstart : leftstart - leftidx);
-    }
-    if (forward)
-    {
-      leftidx++;
-      rightidx++;
-    } else
-    {
-      leftidx--;
-      rightidx--;
+      if (b == (GtUchar) SEPARATOR)
+      {
+        *rightsep = true;
+      }
+      break;
     }
   }
-  /*@ignore@*/
-  return 0;
-  /*@end@*/
+  return lcp;
 }
-
-static unsigned long gt_xdrop_lcp(bool *leftsep,
-                                  bool *rightsep,
-                                  bool forward,
-                                  const GtSeqabstract *useq,
-                                  const GtSeqabstract *vseq,
-                                  unsigned long uoffset,
-                                  unsigned long voffset,
-                                  unsigned long ulen,
-                                  unsigned long vlen)
-{
-  if (forward)
-  {
-    gt_assert(uoffset + ulen > 0 && voffset + vlen > 0);
-    return gt_xdrop_lcp_generic(leftsep,
-                                rightsep,
-                                forward,
-                                useq,
-                                vseq,
-                                uoffset,
-                                voffset,
-                                uoffset + ulen - 1,
-                                voffset + vlen - 1);
-  } else
-  {
-    gt_assert(uoffset > 0 && voffset > 0 && uoffset >= ulen && voffset >= vlen);
-    return gt_xdrop_lcp_generic(leftsep,
-                                rightsep,
-                                forward,
-                                useq,
-                                vseq,
-                                uoffset - 1,
-                                voffset - 1,
-                                uoffset - ulen,
-                                voffset - vlen);
-  }
-}
-#endif
 
 static long gt_xdrop_frontvalue_get(const GtXdropresources *res,long d,long k)
 {
@@ -446,28 +333,13 @@ void gt_evalxdroparbitscoresextend(bool forward,
               = MAX(MAX(res->arbitdistances.mis,res->arbitdistances.ins),
                     res->arbitdistances.del) - 1;
   int currentMININFINITYINTgeneration = 0;
-  unsigned long lcp;
   bool leftsep, rightsep;
+  unsigned long lcp;
   long starti;
   GtXdropfrontvalue tmpfront;
   GtXdropscore bigt_tmp;        /* best score T' seen already */
   bool alwaysMININFINITYINT = true;
-#ifdef GT_XDROP_CHECKINCREMENT
-  unsigned long lastaccess_useq = ULONG_MAX,
-                lastaccess_vseq = ULONG_MAX,
-                maxgoback = 0;
-  unsigned long characcess = 0, consecutive = 0;
-#endif
 
-#undef DEBUG_POSTEL
-#ifdef DEBUG_POSTEL
-  printf("%s(forward=%s,useq.len=%lu,uoffset=%lu,vseq.len=%lu,voffset=%lu)\n",
-          __func__,forward ? "true" : "false",
-          gt_seqabstract_length_get(useq),
-          uoffset,
-          gt_seqabstract_length_get(vseq),
-          voffset);
-#endif
   ulen = (long) gt_seqabstract_length_get(useq);
   vlen = (long) gt_seqabstract_length_get(vseq);
   end_k = ulen - vlen;              /* diagonal of endpoint (ulen, vlen) */
@@ -476,24 +348,19 @@ void gt_evalxdroparbitscoresextend(bool forward,
   res->big_t.nextfreeGtXdropscore = 0;
   res->fronts.nextfreeGtXdropfrontvalue = 0;
   /* phase 0 */
-#ifdef WITHLCP
   lcp = gt_xdrop_lcp(&leftsep,
                      &rightsep,
                      forward,
                      useq,
                      vseq,
-                     uoffset,
-                     voffset,
-                     (unsigned long) ulen,
-                     (unsigned long) vlen);
-#endif
+                     forward ? uoffset : uoffset - 1,
+                     forward ? voffset : voffset - 1,
+                     (unsigned long) MIN(ulen,vlen));
   for (idx = 0; idx < MIN(ulen,vlen); idx++)
   {
     GT_XDROP_COMPARESYMBOLSSEP(idx,idx);
   }
-#ifdef WITHLCP
   gt_assert(lcp == (unsigned long) idx);
-#endif
   /* alignment already finished */
   if (idx >= ulen || idx >= vlen)
   {
@@ -589,24 +456,23 @@ void gt_evalxdroparbitscoresextend(bool forward,
               (gt_xdrop_frontvalue_get(res,currd-1,k) < i &&
                i <= MIN(ulen,vlen + k)))
           {
-#ifdef WITHLCP
             if (ulen >= i && vlen >= j)
             {
+              gt_assert(forward || (uoffset > (unsigned long) i &&
+                                    voffset > (unsigned long) j));
               lcp = gt_xdrop_lcp(&leftsep,
                                  &rightsep,
                                  forward,
                                  useq,
                                  vseq,
-                                 forward ? uoffset + i : uoffset - i,
-                                 forward ? voffset + j : voffset - j,
-                                 (unsigned long) (ulen - i),
-                                 (unsigned long) (vlen - j));
+                                 forward ? uoffset + i : uoffset - i - 1,
+                                 forward ? voffset + j : voffset - j - 1,
+                                 (unsigned long) MIN(ulen - i,vlen - j));
             } else
             {
               lcp = 0;
             }
             starti = i;
-#endif
             while (i < ulen && j < vlen)
             {
               GT_XDROP_COMPARESYMBOLSSEP(i,j);
@@ -706,12 +572,4 @@ void gt_evalxdroparbitscoresextend(bool forward,
       }
     }
   }
-#ifdef GT_XDROP_CHECKINCREMENT
-  if (maxgoback > 0)
-  {
-    printf("maxgoback = %lu\n",maxgoback);
-  }
-  printf("characcess=%lu,consecutive=%lu(%.2f)\n",characcess,consecutive,
-                                       100.0 * (double) consecutive/characcess);
-#endif
 }
