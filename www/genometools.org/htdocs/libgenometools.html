@@ -18,6 +18,7 @@
 <li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
 <li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
 <li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
 <li><a href="license.html">License</a></li>
 </ul>
 </div>
@@ -285,6 +286,13 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
+<a name="gt_reverse_complement"></a>
+
+<code>int  gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError*)</code>
+<p>
+reverse <code>dna_seq</code> of length <code>seqlen</code> in place
+</p>
+<hr>
 <a name="gt_feature_index_gfflike_get_all_features"></a>
 
 <code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
@@ -294,13 +302,6 @@ interfaces.
 Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
    success, a negative value otherwise. The message in <code>err</code> is set
    accordingly.
-</p>
-<hr>
-<a name="gt_reverse_complement"></a>
-
-<code>int  gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError*)</code>
-<p>
-reverse <code>dna_seq</code> of length <code>seqlen</code> in place
 </p>
 <hr>
 <a name="gt_feature_stream_new"></a>
@@ -2052,6 +2053,15 @@ Returns the start position of the sequences of the  <code>filenum</code>-th file
 <p>
 Returns the file number from the given <code>position</code> for a given
    GtEncseq <code>encseq</code>.
+</p>
+<hr>
+<a name="gt_encseq_filenum_first_seqnum"></a>
+
+<code>unsigned long      gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
+                                                 unsigned long filenum)</code>
+<p>
+Returns the first sequence number of the sequences in file <code>filenum</code> for a
+   given GtEncseq <code>encseq</code>.
 </p>
 <hr>
 <a name="gt_encseq_alphabet"></a>
@@ -5773,6 +5783,17 @@ Make it mandatory, that one of the options <code>option_a</code>, <code>option_b
    <code>option_c</code> is used.
 </p>
 <hr>
+<a name="gt_option_is_mandatory_either_4"></a>
+
+<code>void             gt_option_is_mandatory_either_4(GtOption *option_a,
+                                                const GtOption *option_b,
+                                                const GtOption *option_c,
+                                                const GtOption *option_d)</code>
+<p>
+Make it mandatory, that one of the options <code>option_a</code>, <code>option_b</code>, <code>option_c</code>
+   or <code>option_d</code> is used.
+</p>
+<hr>
 <a name="gt_option_is_extended_option"></a>
 
 <code>void             gt_option_is_extended_option(GtOption *option)</code>
@@ -5801,6 +5822,16 @@ Make <code>option_a</code> imply <code>option_b</code>.
                                          const GtOption *option_c)</code>
 <p>
 Make <code>option_a</code> imply either <code>option_b</code> or <code>option_c</code>
+</p>
+<hr>
+<a name="gt_option_imply_either_3"></a>
+
+<code>void             gt_option_imply_either_3(GtOption *option_a,
+                                         const GtOption *option_b,
+                                         const GtOption *option_c,
+                                         const GtOption *option_d)</code>
+<p>
+Make <code>option_a</code> imply either <code>option_b</code>, <code>option_c</code> or <code>option_d</code>
 </p>
 <hr>
 <a name="gt_option_exclude"></a>
@@ -6333,6 +6364,15 @@ Return a new <code>GtRegionMapping</code> object for the sequence files given in
    <code>matchdesc</code> and <code>usedesc</code> cannot be <code>true</code> at the same time.
 </p>
 <hr>
+<a name="gt_region_mapping_new_encseq"></a>
+
+<code>GtRegionMapping*  gt_region_mapping_new_encseq(GtEncseq *encseq, bool matchdesc,
+                                              bool usedesc)</code>
+<p>
+Like <code>gt_region_mapping_new_seqfiles()</code>, but using <code>encseq</code> as a sequence
+   source.
+</p>
+<hr>
 <a name="gt_region_mapping_new_rawseq"></a>
 
 <code>GtRegionMapping*  gt_region_mapping_new_rawseq(const char *rawseq,
@@ -6350,20 +6390,16 @@ Return a new <code>GtRegionMapping</code> object which maps to the given sequenc
 Increase the reference count for <code>region_mapping</code> and return it.
 </p>
 <hr>
-<a name="gt_region_mapping_get_raw_sequence"></a>
+<a name="gt_region_mapping_get_sequence"></a>
 
-<code>int               gt_region_mapping_get_raw_sequence(GtRegionMapping
-                                                    *region_mapping,
-                                                    const char **rawseq,
-                                                    unsigned long *length,
-                                                    unsigned long *offset,
-                                                    GtStr *seqid,
-                                                    const GtRange *range,
-                                                    GtError *err)</code>
+<code>int               gt_region_mapping_get_sequence(GtRegionMapping *region_mapping,
+                                                char **seq, GtStr *seqid,
+                                                unsigned long start,
+                                                unsigned long end,
+                                                GtError *err)</code>
 <p>
-Use <code>region_mapping</code> to map the given sequence ID <code>seqid</code> and its
-   corresponding <code>range</code> to an actual sequence. The sequence is returned in
-   <code>rawseq</code>, its length and offset in <code>length</code> and <code>offset</code>.
+Use <code>region_mapping</code> to extract the sequence from <code>start</code> to <code>end</code> of the
+    given sequence ID <code>seqid</code> into a buffer written to <code>seq</code>.
    In the case of an error, -1 is returned and <code>err</code> is set accordingly.
 </p>
 <hr>
@@ -7499,6 +7535,13 @@ Delete <code>translator</code>.
 Increase the reference count for <code>type_checker</code> and return it.
 </p>
 <hr>
+<a name="gt_type_checker_description"></a>
+
+<code>const char*     gt_type_checker_description(GtTypeChecker *type_checker)</code>
+<p>
+Return description of <code>type_checker</code>.
+</p>
+<hr>
 <a name="gt_type_checker_is_valid"></a>
 
 <code>bool            gt_type_checker_is_valid(GtTypeChecker *type_checker,
@@ -7506,6 +7549,15 @@ Increase the reference count for <code>type_checker</code> and return it.
 <p>
 Return <code>true</code> if <code>type</code> is a valid type for the given <code>type_checker</code>, <code>false</code>
    otherwise.
+</p>
+<hr>
+<a name="gt_type_checker_is_partof"></a>
+
+<code>bool            gt_type_checker_is_partof(GtTypeChecker *type_checker,
+                                         const char *parent_type,
+                                         const char *child_type)</code>
+<p>
+Return <code>true</code> if <code>child_type</code> is partof <code>parent_type</code>, <code>false</code> otherwise.
 </p>
 <hr>
 <a name="gt_type_checker_delete"></a>
@@ -7604,16 +7656,6 @@ An example for usage of the <code>Array2dim</code> module.
 <p>
 Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
-</p>
-<hr>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
 </p>
 <hr>
 <a name="Assert"></a>
@@ -7853,17 +7895,17 @@ Guesse if the sequences contained in the files given in <code>filenames</code> a
    0 if <code>a</code> is <em>equal</em> to <code>b</code>, and greater 0 if <code>a</code> is <em>larger</em> than <code>b</code>.
    Thereby, the operators <em>smaller</em>, <em>equal</em>, and <em>larger</em> are
    implementation dependent.
-   Do not count on these functions to return -1, 0, or 1!  
+   Do not count on these functions to return -1, 0, or 1!
 </p>
 <hr>
 <code>int  (*GtCompareWithData)(const void*, const void*, void *data)</code>
 <p>
- Similar to <code>GtCompare</code>, but with an additional <code>data</code> pointer. 
+ Similar to <code>GtCompare</code>, but with an additional <code>data</code> pointer.
 </p>
 <hr>
 <code>void (*GtFree)(void*)</code>
 <p>
- The generic free function pointer type. 
+ The generic free function pointer type.
 </p>
 <hr>
 <a name="Grep"></a>
@@ -8107,6 +8149,16 @@ Like <code>gt_parse_range</code>, but issues a warning if <code>start</code> is 
    not-positive and sets the corresponding value to 1.
 </p>
 <hr>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
 <a name="Qsort"></a>
 <h2>Module Qsort</h2>
 <a name="gt_qsort_r"></a>
@@ -8241,7 +8293,7 @@ Check that the <em>GenomeTools</em> library in use is compatible with the given
 <h2>Module Warning</h2>
 <code>void (*GtWarningHandler)(void *data, const char *format, va_list ap)</code>
 <p>
- Handler type used to process warnings. 
+ Handler type used to process warnings.
 </p>
 <hr>
 <a name="gt_warning"></a>
@@ -8953,6 +9005,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_filenum"><code>gt_encseq_filenum</code></a><br>
 
+  <a href="#gt_encseq_filenum_first_seqnum"><code>gt_encseq_filenum_first_seqnum</code></a><br>
+
   <a href="#gt_encseq_filestartpos"><code>gt_encseq_filestartpos</code></a><br>
 
   <a href="#gt_encseq_get_decoded_char"><code>gt_encseq_get_decoded_char</code></a><br>
@@ -9615,6 +9669,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_option_imply_either_2"><code>gt_option_imply_either_2</code></a><br>
 
+  <a href="#gt_option_imply_either_3"><code>gt_option_imply_either_3</code></a><br>
+
   <a href="#gt_option_is_development_option"><code>gt_option_is_development_option</code></a><br>
 
   <a href="#gt_option_is_extended_option"><code>gt_option_is_extended_option</code></a><br>
@@ -9624,6 +9680,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_option_is_mandatory_either"><code>gt_option_is_mandatory_either</code></a><br>
 
   <a href="#gt_option_is_mandatory_either_3"><code>gt_option_is_mandatory_either_3</code></a><br>
+
+  <a href="#gt_option_is_mandatory_either_4"><code>gt_option_is_mandatory_either_4</code></a><br>
 
   <a href="#gt_option_is_set"><code>gt_option_is_set</code></a><br>
 
@@ -9801,7 +9859,9 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_region_mapping_get_md5_fingerprint"><code>gt_region_mapping_get_md5_fingerprint</code></a><br>
 
-  <a href="#gt_region_mapping_get_raw_sequence"><code>gt_region_mapping_get_raw_sequence</code></a><br>
+  <a href="#gt_region_mapping_get_sequence"><code>gt_region_mapping_get_sequence</code></a><br>
+
+  <a href="#gt_region_mapping_new_encseq"><code>gt_region_mapping_new_encseq</code></a><br>
 
   <a href="#gt_region_mapping_new_mapping"><code>gt_region_mapping_new_mapping</code></a><br>
 
@@ -10031,6 +10091,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_type_checker_delete"><code>gt_type_checker_delete</code></a><br>
 
+  <a href="#gt_type_checker_description"><code>gt_type_checker_description</code></a><br>
+
+  <a href="#gt_type_checker_is_partof"><code>gt_type_checker_is_partof</code></a><br>
+
   <a href="#gt_type_checker_is_valid"><code>gt_type_checker_is_valid</code></a><br>
 
   <a href="#gt_type_checker_obo_new"><code>gt_type_checker_obo_new</code></a><br>
@@ -10100,7 +10164,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2013-01-15
+Last update: 2013-02-04
 </div>
 </div>
 <!-- Piwik -->
