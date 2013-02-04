@@ -28,16 +28,16 @@ typedef struct GtCstrIterator GtCstrIterator;
 /* Sets <string> to the next string, retains ownership, will be overwritten by
    next call. Returns negative (<0)  on error and sets err accordingly, returns
    0 if no more strings are available and >0 on success. */
-int                  gt_cstr_iterator_next(GtCstrIterator *cstr_iterator,
-                                           const char **string,
-                                           GtError *err);
+int  gt_cstr_iterator_next(GtCstrIterator *cstr_iterator,
+                           const char **string,
+                           GtError *err);
 
 /* resets the iterator, a call to the next function will return the first string
    again */
-int                  gt_cstr_iterator_reset(GtCstrIterator *cstr_iterator,
-                                            GtError *err);
+int  gt_cstr_iterator_reset(GtCstrIterator *cstr_iterator,
+                            GtError *err);
 
 /* Deletes <cstr_iterator> and frees all associated memory. */
-void                 gt_cstr_iterator_delete(GtCstrIterator *cstr_iterator);
+void gt_cstr_iterator_delete(GtCstrIterator *cstr_iterator);
 
 #endif

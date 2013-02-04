@@ -16,7 +16,9 @@
 #
 
 require "erb"
-$CONFIG = ENV["GT_CODEGEN_CONFIG"] || "~/.gitconfig"
+
+$:.unshift File.join(File.dirname(__FILE__), ".")
+require "codegen_module.rb"
 
 $help = <<-END_HELP
 \nCode generator for:
@@ -27,7 +29,7 @@ $help = <<-END_HELP
 
 It requires name and email of the user, that are expected
 to be found in the [user] section of the user-specific git
-configuration file (#$CONFIG). You may specify another file
+configuration file (#$GITCONFIG). You may specify another file
 using the env variable GT_CODEGEN_CONFIG.
 
 Usage:
@@ -46,84 +48,6 @@ Existing files are not overwritten or modified.
 Report bugs to <gonnella@zbh.uni-hamburg.de>.
 END_HELP
 
-$license = <<-END_LICENSE
-/*
-  Copyright (c) <%=year%> <%=name%> <<%=email%>>
-  Copyright (c) <%=year%> Center for Bioinformatics, University of Hamburg
-
-  Permission to use, copy, modify, and distribute this software for any
-  purpose with or without fee is hereby granted, provided that the above
-  copyright notice and this permission notice appear in all copies.
-
-  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
-END_LICENSE
-
-$hwrapper = <<-END_HWRAPPER
-#ifndef <%=guard_macro%>
-#define <%=guard_macro%>
-<%=content%>
-#endif
-END_HWRAPPER
-
-$gt_class_c = <<-END_GT_CLASS_C
-
-#include "core/ma.h"
-
-struct <%=klass%>
-{
-};
-
-<%=creatordecl%>
-{
-  <%=klass%> *<%=basename%>;
-  <%=basename%> = gt_malloc(sizeof (<%=klass%>));
-  return <%=basename%>;
-}
-
-<%=destructordecl%>
-{
-  gt_free(<%=basename%>);
-}
-END_GT_CLASS_C
-
-$gt_class_h = <<-END_GT_CLASS_H
-
-typedef struct <%=klass%> <%=klass%>;
-
-<%=creatordecl%>;
-<%=destructordecl%>;
-END_GT_CLASS_H
-
-def perror(msg)
-  STDERR.puts "#$0: error: #{msg}"
-  STDERR.puts "Use '#$0 help' to print usage instructions"
-  exit(1)
-end
-
-def find_user_data
-  configfile = File.expand_path($CONFIG)
-  if File.exist?(configfile)
-    name = nil
-    email = nil
-    File.open(configfile) do |f|
-      while (line = f.gets) && (!name||!email) do
-        name = $1  if !name  && line =~ /\s*name\s*=\s*(.*)\s*\n/
-        email = $1 if !email && line =~ /\s*email\s*=\s*(.*)\s*\n/
-      end
-    end
-    return name, email
-  else
-    perror("#$CONFIG file not found")
-  end
-end
-
 def find_src_directory
   scripts_dir = File.dirname(File.expand_path($0))
   src_dir = File.join(scripts_dir, "..", "src")
@@ -132,24 +56,24 @@ end
 
 def parse_args
   generators = %w{header module class tool help}
-  perror("not enough arguments") if ARGV.size < 1
+  CodeGen.perror("not enough arguments") if ARGV.size < 1
   generator = ARGV[0]
   if (generator=="help")
     puts($help)
     exit(0)
   end
-  perror("generator #{generator} unknown") if !generators.include?(generator)
-  perror("not enough arguments") if ARGV.size < 3
-  perror("too many arguments") if ARGV.size > 3
+  CodeGen.perror("generator #{generator} unknown") if !generators.include?(generator)
+  CodeGen.perror("not enough arguments") if ARGV.size < 3
+  CodeGen.perror("too many arguments") if ARGV.size > 3
   path = File.join(find_src_directory, ARGV[1])
-  perror("Directory #{path} not found") if !File.directory?(path)
+  CodeGen.perror("Directory #{path} not found") if !File.directory?(path)
   basename = ARGV[2]
   return generator, path, basename
 end
 
 def check_file(path, basename, extension)
   filename = File.join(path, basename+"."+extension)
-  perror("File #{filename} exists already") if File.exist?(filename)
+  CodeGen.perror("File #{filename} exists already") if File.exist?(filename)
 end
 
 def write_file(path, basename, extension, content)
@@ -189,7 +113,7 @@ end
 def prepare_tool_c(path, basename)
   tools_dir = File.join(find_src_directory, "tools")
   gt_template_c = File.expand_path(File.join(tools_dir, "gt_template.c"))
-  perror("File #{gt_template_c} not found") if !File.exists?(gt_template_c)
+  CodeGen.perror("File #{gt_template_c} not found") if !File.exists?(gt_template_c)
   # skip license template:
   c_template = IO.read(gt_template_c)
   c_template =~ /(.*?)(#include.*)/m
@@ -203,7 +127,7 @@ end
 def prepare_tool_h(path, basename)
   tools_dir = File.join(find_src_directory, "tools")
   gt_template_h = File.expand_path(File.join(tools_dir, "gt_template.h"))
-  perror("File #{gt_template_h} not found") if !File.exists?(gt_template_h)
+  CodeGen.perror("File #{gt_template_h} not found") if !File.exists?(gt_template_h)
   h_template = IO.read(gt_template_h)
   # skip license template:
   h_template =~ /(.*?)(#ifndef.*)/m
@@ -222,7 +146,7 @@ end
 
 # main
 generator, path, basename = parse_args
-name, email = find_user_data
+name, email = CodeGen.find_user_data
 year = Time.now.year
 $license = ERB.new($license).result
 send("gen_#{generator}", path, basename)

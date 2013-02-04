@@ -22,7 +22,6 @@
 #include "extended/sam_query_name_iterator.h"
 #include "extended/sam_alignment.h"
 #include "extended/samfile_iterator.h"
-#include "extended/cstr_iterator.h"
 #include "extended/cstr_iterator_rep.h"
 
 struct GtSamQueryNameIterator {
