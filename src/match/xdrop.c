@@ -246,44 +246,6 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
           }\
         }
 
-static unsigned long gt_xdrop_lcp(bool *leftsep,
-                                  bool *rightsep,
-                                  bool forward,
-                                  const GtSeqabstract *useq,
-                                  const GtSeqabstract *vseq,
-                                  unsigned long leftstart,
-                                  unsigned long rightstart,
-                                  unsigned long minlen)
-{
-  unsigned long lcp;
-  GtUchar a, b;
-
-  *leftsep = false;
-  *rightsep = false;
-  for (lcp = 0; lcp < minlen; lcp++)
-  {
-    a = gt_seqabstract_encoded_char(useq,forward ? leftstart + lcp
-                                                 : leftstart - lcp);
-    if (a == (GtUchar) SEPARATOR)
-    {
-      *leftsep = true;
-      break;
-    }
-    b = gt_seqabstract_encoded_char(vseq,forward ? rightstart + lcp
-                                                 : rightstart - lcp);
-    if (b == (GtUchar) SEPARATOR)
-    {
-      *rightsep = true;
-      break;
-    }
-    if (a != b || a == (GtUchar) WILDCARD)
-    {
-      break;
-    }
-  }
-  return lcp;
-}
-
 static long gt_xdrop_frontvalue_get(const GtXdropresources *res,long d,long k)
 {
   const unsigned long frontidx = GT_XDROP_FRONTIDX(d,k);
@@ -348,14 +310,14 @@ void gt_evalxdroparbitscoresextend(bool forward,
   res->big_t.nextfreeGtXdropscore = 0;
   res->fronts.nextfreeGtXdropfrontvalue = 0;
   /* phase 0 */
-  lcp = gt_xdrop_lcp(&leftsep2,
-                     &rightsep2,
-                     forward,
-                     useq,
-                     vseq,
-                     forward ? uoffset : uoffset - 1,
-                     forward ? voffset : voffset - 1,
-                     (unsigned long) MIN(ulen,vlen));
+  lcp = gt_seqabstract_lcp(&leftsep2,
+                           &rightsep2,
+                           forward,
+                           useq,
+                           vseq,
+                           forward ? uoffset : uoffset - 1,
+                           forward ? voffset : voffset - 1,
+                           (unsigned long) MIN(ulen,vlen));
   leftsep = false;
   rightsep = false;
   for (idx = 0; idx < MIN(ulen,vlen); idx++)
@@ -464,14 +426,14 @@ void gt_evalxdroparbitscoresextend(bool forward,
             {
               gt_assert(forward || (uoffset > (unsigned long) i &&
                                     voffset > (unsigned long) j));
-              lcp = gt_xdrop_lcp(&leftsep2,
-                                 &rightsep2,
-                                 forward,
-                                 useq,
-                                 vseq,
-                                 forward ? uoffset + i : uoffset - i - 1,
-                                 forward ? voffset + j : voffset - j - 1,
-                                 (unsigned long) MIN(ulen - i,vlen - j));
+              lcp = gt_seqabstract_lcp(&leftsep2,
+                                       &rightsep2,
+                                       forward,
+                                       useq,
+                                       vseq,
+                                       forward ? uoffset + i : uoffset - i - 1,
+                                       forward ? voffset + j : voffset - j - 1,
+                                       (unsigned long) MIN(ulen - i,vlen - j));
             } else
             {
               lcp = 0;

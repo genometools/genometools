@@ -104,3 +104,41 @@ GtUchar gt_seqabstract_encoded_char(const GtSeqabstract *sa,
                                         sa->offset + idx,
                                         GT_READMODE_FORWARD);
 }
+
+unsigned long gt_seqabstract_lcp(bool *leftsep,
+                                 bool *rightsep,
+                                 bool forward,
+                                 const GtSeqabstract *useq,
+                                 const GtSeqabstract *vseq,
+                                 unsigned long leftstart,
+                                 unsigned long rightstart,
+                                 unsigned long minlen)
+{
+  unsigned long lcp;
+  GtUchar a, b;
+
+  *leftsep = false;
+  *rightsep = false;
+  for (lcp = 0; lcp < minlen; lcp++)
+  {
+    a = gt_seqabstract_encoded_char(useq,forward ? leftstart + lcp
+                                                 : leftstart - lcp);
+    if (a == (GtUchar) SEPARATOR)
+    {
+      *leftsep = true;
+      break;
+    }
+    b = gt_seqabstract_encoded_char(vseq,forward ? rightstart + lcp
+                                                 : rightstart - lcp);
+    if (b == (GtUchar) SEPARATOR)
+    {
+      *rightsep = true;
+      break;
+    }
+    if (a != b || a == (GtUchar) WILDCARD)
+    {
+      break;
+    }
+  }
+  return lcp;
+}
