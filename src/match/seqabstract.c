@@ -105,6 +105,19 @@ GtUchar gt_seqabstract_encoded_char(const GtSeqabstract *sa,
                                         GT_READMODE_FORWARD);
 }
 
+#define GT_SEQABSTRACT_CHECK_SEP(VAR,SEP)\
+        if ((VAR) == (GtUchar) SEPARATOR)\
+        {\
+          *(SEP) = true;\
+          break;\
+        }
+
+#define GT_SEQABSTRACT_CMPCHAR(VARA,VARB)\
+        if ((VARA) != (VARB) || (VARA) == (GtUchar) WILDCARD)\
+        {\
+          break;\
+        }
+
 unsigned long gt_seqabstract_lcp(bool *leftsep,
                                  bool *rightsep,
                                  bool forward,
@@ -119,25 +132,67 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
 
   *leftsep = false;
   *rightsep = false;
-  for (lcp = 0; lcp < minlen; lcp++)
+  if (useq->isptr)
   {
-    a = gt_seqabstract_encoded_char(useq,forward ? leftstart + lcp
-                                                 : leftstart - lcp);
-    if (a == (GtUchar) SEPARATOR)
+    if (vseq->isptr)
     {
-      *leftsep = true;
-      break;
+      for (lcp = 0; lcp < minlen; lcp++)
+      {
+        a = useq->seq.ptr[forward ? leftstart + lcp : leftstart - lcp];
+        GT_SEQABSTRACT_CHECK_SEP(a,leftsep);
+        b = vseq->seq.ptr[forward ? rightstart + lcp : rightstart - lcp];
+        GT_SEQABSTRACT_CHECK_SEP(b,rightsep);
+        GT_SEQABSTRACT_CMPCHAR(a,b);
+      }
+    } else
+    {
+      for (lcp = 0; lcp < minlen; lcp++)
+      {
+        a = useq->seq.ptr[forward ? leftstart + lcp : leftstart - lcp];
+        GT_SEQABSTRACT_CHECK_SEP(a,leftsep);
+        b = gt_encseq_get_encoded_char(vseq->seq.encseq,
+                                       vseq->offset +
+                                       (forward ? rightstart + lcp
+                                                : rightstart - lcp),
+                                       GT_READMODE_FORWARD);
+        GT_SEQABSTRACT_CHECK_SEP(b,rightsep);
+        GT_SEQABSTRACT_CMPCHAR(a,b);
+      }
     }
-    b = gt_seqabstract_encoded_char(vseq,forward ? rightstart + lcp
-                                                 : rightstart - lcp);
-    if (b == (GtUchar) SEPARATOR)
+  } else
+  {
+    if (vseq->isptr)
     {
-      *rightsep = true;
-      break;
-    }
-    if (a != b || a == (GtUchar) WILDCARD)
+      for (lcp = 0; lcp < minlen; lcp++)
+      {
+        a = gt_encseq_get_encoded_char(useq->seq.encseq,
+                                       useq->offset +
+                                       (forward ? leftstart + lcp
+                                                : leftstart - lcp),
+                                       GT_READMODE_FORWARD);
+        GT_SEQABSTRACT_CHECK_SEP(a,leftsep);
+        b = vseq->seq.ptr[forward ? rightstart + lcp : rightstart - lcp];
+        GT_SEQABSTRACT_CHECK_SEP(b,rightsep);
+        GT_SEQABSTRACT_CMPCHAR(a,b);
+      }
+    } else
     {
-      break;
+      for (lcp = 0; lcp < minlen; lcp++)
+      {
+        a = gt_encseq_get_encoded_char(useq->seq.encseq,
+                                       useq->offset +
+                                       (forward ? leftstart + lcp
+                                                : leftstart - lcp),
+                                       GT_READMODE_FORWARD);
+        GT_SEQABSTRACT_CHECK_SEP(a,leftsep);
+        b = gt_encseq_get_encoded_char(vseq->seq.encseq,
+                                       vseq->offset +
+                                       (forward ? rightstart + lcp
+                                                : rightstart - lcp),
+                                       GT_READMODE_FORWARD);
+        GT_SEQABSTRACT_CHECK_SEP(b,rightsep);
+        GT_SEQABSTRACT_CMPCHAR(a,b);
+      }
     }
   }
   return lcp;
