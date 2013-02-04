@@ -153,6 +153,14 @@
    ...
 }
 {
+   cairo_catchall_static_leaks
+   Memcheck:Leak
+   fun:malloc
+   ...
+   obj:*lib/libcairo*
+   ...
+}
+{
    fontconfig_leak
    Memcheck:Leak
    fun:*alloc
