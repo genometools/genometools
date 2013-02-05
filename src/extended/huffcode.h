@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef HUFFMAN_H
-#define HUFFMAN_H
+#ifndef HUFFCODE_H
+#define HUFFCODE_H
 
 #include "core/array_api.h"
 #include "core/intbits.h"

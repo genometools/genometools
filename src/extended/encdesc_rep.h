@@ -27,7 +27,7 @@
 #include "extended/bitinstream.h"
 #include "extended/bitoutstream.h"
 #include "extended/encdesc.h"
-#include "extended/huffman.h"
+#include "extended/huffcode.h"
 #include "extended/sampling.h"
 
 #define GT_ENCDESC_MAX_NUM_VAL_HUF 512UL

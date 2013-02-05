@@ -30,7 +30,7 @@
 #include "core/safearith.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "extended/huffman.h"
+#include "extended/huffcode.h"
 #include "extended/rbtree.h"
 
 typedef struct GtHuffmanSymbol {

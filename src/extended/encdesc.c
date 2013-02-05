@@ -45,7 +45,7 @@
 #include "extended/encdesc.h"
 #include "extended/encdesc_header_io.h"
 #include "extended/encdesc_rep.h"
-#include "extended/huffman.h"
+#include "extended/huffcode.h"
 #include "extended/rbtree.h"
 #include "extended/sampling.h"
 

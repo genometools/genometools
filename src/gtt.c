@@ -63,7 +63,7 @@
 #include "extended/gff3_escaping.h"
 #include "extended/golomb.h"
 #include "extended/hmm.h"
-#include "extended/huffman.h"
+#include "extended/huffcode.h"
 #include "extended/luaserialize.h"
 #include "extended/popcount_tab.h"
 #include "extended/ranked_list.h"

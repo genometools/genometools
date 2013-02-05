@@ -23,7 +23,7 @@
 #include "core/error.h"
 #include "core/str_api.h"
 #include "core/timer_api.h"
-#include "extended/huffman.h"
+#include "extended/huffcode.h"
 #include "extended/sampling.h"
 
 #define HCRFILESUFFIX ".hcr"

@@ -48,7 +48,7 @@
 #include "extended/elias_gamma.h"
 #include "extended/encdesc.h"
 #include "extended/golomb.h"
-#include "extended/huffman.h"
+#include "extended/huffcode.h"
 #include "extended/sam_alignment.h"
 #include "extended/sam_query_name_iterator.h"
 #include "extended/samfile_iterator.h"
