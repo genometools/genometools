@@ -17,6 +17,8 @@
 <li><a href="libgenometools.html">C API</a></li>
 <li><a id="current" href="docs.html"><tt>gtscript</tt> docs</a></li>
 <li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
 <li><a href="license.html">License</a></li>
 </ul>
 </div>

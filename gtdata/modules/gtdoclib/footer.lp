@@ -1,6 +1,6 @@
 <div id="footer">
-Copyright &copy; 2008-2011
-<a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
+Copyright &copy; 2008-2013
+The <i>GenomeTools</i> authors.
 Last update: <%=os.date("%Y-%m-%d")%>
 </div>
 </div>
