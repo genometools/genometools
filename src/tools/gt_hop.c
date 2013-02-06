@@ -279,7 +279,6 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
       "correction (-reads must be set)",
       &arguments->state_of_truth, false);
   gt_option_is_development_option(option);
-  gt_option_exclude(option, stats_option);
   gt_option_exclude(option, aggressive_option);
   gt_option_exclude(option, moderate_option);
   gt_option_exclude(option, conservative_option);
