@@ -63,7 +63,8 @@ typedef struct {
        gff3output,
        longoutput,
        scan,
-       verbosemode;
+       verbosemode,
+       tabout;
   GtOption *optionmotif,
            *optionmotifmis,
            *optionoverlaps,
@@ -199,6 +200,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
            *optionins,
            *optiondel,
            *optionv,
+           *optiontabout,
            *optionoffset,
            *optionlongoutput,
            *optionout,
@@ -396,6 +398,14 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                            false);
   gt_option_parser_add_option(op, optionv);
 
+  /* -tabout */
+  optiontabout = gt_option_new_bool("tabout",
+                                    "show 'old' tabular output instead "
+                                    "of GFF3 on stdout",
+                                    &arguments->tabout,
+                                    true);
+  gt_option_parser_add_option(op, optiontabout);
+
   /* -longoutput */
   optionlongoutput = gt_option_new_bool("longoutput",
                            "additional motif/TSD output",
@@ -565,11 +575,10 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
 {
   GtNodeStream *ltrh_stream,
                *gff3_out_stream = NULL,
-               *tabout_stream = NULL,
+               *out_stream = NULL,
                *fasta_out_stream = NULL,
                *fasta_inner_out_stream = NULL,
                *last_stream;
-  GtNodeVisitor *tabout_visitor = NULL;
   GtFile *gff3file = NULL,
          *fastaoutfile = NULL,
          *fastainneroutfile = NULL;
@@ -607,16 +616,21 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
 
   encseq = gt_ltrharvest_stream_get_encseq(ltrh_stream);
 
-  /* set visitors according to output parameter */
-  if (!had_err && arguments->longoutput) {
-    tabout_visitor = gt_ltrharvest_tabout_visitor_new_longoutput(encseq);
-  } else {
-    tabout_visitor = gt_ltrharvest_tabout_visitor_new();
-  }
+  if (arguments->tabout) {
+    GtNodeVisitor *tabout_visitor = NULL;
+    /* set visitors according to output parameter */
+    if (!had_err && arguments->longoutput) {
+      tabout_visitor = gt_ltrharvest_tabout_visitor_new_longoutput(encseq);
+    } else {
+      tabout_visitor = gt_ltrharvest_tabout_visitor_new();
+    }
 
-  /* create tabular output stream (traditional LTRharvest format) */
-  tabout_stream = gt_ltrharvest_tabout_stream_new(last_stream, tabout_visitor);
-  last_stream = tabout_stream;
+    /* create tabular output stream (traditional LTRharvest format) */
+    out_stream = gt_ltrharvest_tabout_stream_new(last_stream, tabout_visitor);
+  } else {
+    out_stream = gt_gff3_out_stream_new(last_stream, NULL);
+  }
+  last_stream = out_stream;
 
   /* attach GFF3 output stream if requested */
   if (!had_err && arguments->gff3output) {
@@ -668,14 +682,15 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
   }
 
   /* output arguments line */
-  gt_ltrharvest_showargsline(argc, argv);
+  if (!had_err && arguments->tabout)
+    gt_ltrharvest_showargsline(argc, argv);
 
   /* show long parameters */
-  if (arguments->verbosemode)
+  if (!had_err && arguments->tabout && arguments->verbosemode)
     gt_ltrharvest_showopts(arguments);
 
   /* print tabular output header */
-  if (!had_err) {
+  if (!had_err && arguments->tabout) {
     if (arguments->longoutput) {
       gt_ltrharvest_tabout_stream_printlongheader(arguments->minlengthTSD > 1U,
                                              arguments->allowedmismatches < 4U);
@@ -690,7 +705,7 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
-  gt_node_stream_delete(tabout_stream);
+  gt_node_stream_delete(out_stream);
   gt_node_stream_delete(fasta_out_stream);
   gt_node_stream_delete(fasta_inner_out_stream);
   gt_node_stream_delete(ltrh_stream);
