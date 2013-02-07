@@ -4,8 +4,15 @@ changes in version 1.5.2 (2013-XX-XX)
 - options `-j' and GT_MEM_BOOKKEEPING now usable together in a multithreaded
   environment
 - automatic man page building (`gt -createman') implemented
-- update samtools to 0.1.19
-
+- LTRharvest seed extension now multithreaded , use `gt -j'
+- LTRharvest internal pipeline restructured to be deterministic during
+  multithreaded runs
+- LTRharvest optionally outputs GFF3 on stdout for piping (option `-tabout')
+- LTRharvest now outputs sequence IDs (optionally MD5 tagged, options `-seqids'
+  and `-md5')
+- LTRdigest now accepts `-seqfile(s)', `-regionmapping', `-encseq',
+  `-matchdesc', `-usedesc' options
+- samtools updated to 0.1.19
 
 changes in version 1.5.1 (2013-03-07)
 
