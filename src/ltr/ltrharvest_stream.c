@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2010-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007      David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
-  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,7 +28,9 @@
 #include "core/log.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
+#include "core/multithread_api.h"
 #include "core/str_api.h"
+#include "core/thread_api.h"
 #include "core/types_api.h"
 #include "core/undef_api.h"
 #include "extended/feature_type.h"
@@ -930,8 +932,12 @@ static void adjustboundariesfromXdropextension(GtXdropbest xdropbest_left,
 */
 static int gt_searchforLTRs(GtLTRharvestStream *lo,
                             GtArrayLTRboundaries *arrayLTRboundaries,
+                            GT_UNUSED GtMutex *rmutex,
+                            GT_UNUSED GtMutex *wmutex,
+                            unsigned long *cur_seed,
                             GtError *err)
 {
+  unsigned long my_seed;
   GtXdropresources *xdropresources;
   GtXdropbest xdropbest_left, xdropbest_right;
 #undef GT_GREEDY_BUFFER
@@ -942,29 +948,37 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
 #endif
   GtSeqabstract *sa_useq = gt_seqabstract_new_empty(),
                 *sa_vseq = gt_seqabstract_new_empty();
-  unsigned long edist;
+  unsigned long edist,
+                alilen = 0;
   Repeat *repeatptr;
-  LTRboundaries *boundaries;
+  LTRboundaries boundaries, *boundaries_ptr;
   GtFrontResource *frontresource = gt_frontresource_new(100UL);
   bool haserr = false;
 
   gt_error_check(err);
   xdropresources = gt_xdrop_resources_new(&lo->arbitscores);
-  for (repeatptr = lo->repeatinfo.repeats.spaceRepeat;
-       repeatptr < lo->repeatinfo.repeats.spaceRepeat +
-                   lo->repeatinfo.repeats.nextfreeRepeat; repeatptr++)
-  {
-    unsigned long alilen,
-                  ulen,
+
+  /* XXX: do thread-synchronized error checking */
+  while (true) {
+    unsigned long ulen,
                   vlen,
                   seqend,
-                  seqstart = gt_encseq_seqstartpos(lo->encseq,
-                                                   repeatptr->contignumber);
+                  seqstart;
+    gt_mutex_lock(rmutex);
+    if (*cur_seed < lo->repeatinfo.repeats.nextfreeRepeat)
+      my_seed = (*cur_seed)++;
+    else {
+      gt_mutex_unlock(rmutex);
+      break;
+    }
+    gt_mutex_unlock(rmutex);
 
-    seqend = seqstart + gt_encseq_seqlength(lo->encseq,
-                                            repeatptr->contignumber);
+    repeatptr = &(lo->repeatinfo.repeats.spaceRepeat[my_seed]);
+    seqstart = gt_encseq_seqstartpos(lo->encseq, repeatptr->contignumber);
+    seqend = seqstart + gt_encseq_seqlength(lo->encseq,repeatptr->contignumber);
     gt_assert(lo->repeatinfo.lmax >= repeatptr->len);
     alilen = lo->repeatinfo.lmax - repeatptr->len;
+
     /**** left (reverse) xdrop alignment ****/
     if (repeatptr->pos1 > 0)
     {
@@ -1028,19 +1042,19 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       xdropbest_right.jvalue = 0;
       xdropbest_right.score = 0;
     }
-    GT_GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);
-    boundaries->contignumber = repeatptr->contignumber;
-    boundaries->leftLTR_5 = 0;
-    boundaries->leftLTR_3 = 0;
-    boundaries->rightLTR_5 = 0;
-    boundaries->rightLTR_3 = 0;
-    boundaries->lenleftTSD = 0;
-    boundaries->lenrightTSD = 0;
-    boundaries->tsd = false;
-    boundaries->motif_near_tsd = false;
-    boundaries->motif_far_tsd = false;
-    boundaries->skipped = false;
-    boundaries->similarity = 0.0;
+
+    boundaries.contignumber = repeatptr->contignumber;
+    boundaries.leftLTR_5 = (unsigned long) 0;
+    boundaries.leftLTR_3 = (unsigned long) 0;
+    boundaries.rightLTR_5 = (unsigned long) 0;
+    boundaries.rightLTR_3 = (unsigned long) 0;
+    boundaries.lenleftTSD = (unsigned long) 0;
+    boundaries.lenrightTSD = (unsigned long) 0;
+    boundaries.tsd = false;
+    boundaries.motif_near_tsd = false;
+    boundaries.motif_far_tsd = false;
+    boundaries.skipped = false;
+    boundaries.similarity = 0.0;
 
     /* store new boundaries-positions in boundaries */
     adjustboundariesfromXdropextension(
@@ -1050,53 +1064,49 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                    repeatptr->pos1 + repeatptr->offset, /*seed2 startpos*/
                    repeatptr->pos1 + repeatptr->len - 1, /*seed1 endpos*/
                    repeatptr->pos1 + repeatptr->offset + repeatptr->len - 1,
-                                                         /*seed2 endpos*/
-                   boundaries);
+                                                           /*seed2 endpos*/
+                   &boundaries);
 
     /* if search for motif and/or TSD */
     if (lo->motif->allowedmismatches < 4U || lo->minlengthTSD > 1U)
     {
-      if (gt_findcorrectboundaries(lo, boundaries, err) != 0)
+      if (gt_findcorrectboundaries(lo, &boundaries, err) != 0)
       {
         haserr = true;
         break;
       }
 
       /* if search for TSDs and (not) motif */
-      if (boundaries->tsd &&
+      if (boundaries.tsd &&
           (lo->motif->allowedmismatches >= 4U ||
-          (boundaries->motif_near_tsd && boundaries->motif_far_tsd)))
+          (boundaries.motif_near_tsd && boundaries.motif_far_tsd)))
       {
         /* predicted as full LTR-pair, keep it */
       } else
       {
         /* if search for motif only (and not TSD) */
         if (lo->minlengthTSD <= 1U &&
-            boundaries->motif_near_tsd &&
-            boundaries->motif_far_tsd)
+            boundaries.motif_near_tsd &&
+            boundaries.motif_far_tsd)
         {
           /* predicted as full LTR-pair, keep it */
         } else
         {
-          /* delete this LTR-pair candidate */
-          arrayLTRboundaries->nextfreeLTRboundaries--;
           continue;
         }
       }
     }
 
     /* check length and distance constraints again */
-    if (!checklengthanddistanceconstraints(boundaries, &lo->repeatinfo))
+    if (!checklengthanddistanceconstraints(&boundaries, &lo->repeatinfo))
     {
-      /* delete this LTR-pair candidate */
-      arrayLTRboundaries->nextfreeLTRboundaries--;
       continue;
     }
 
     /* check similarity from candidate pair
        copy LTR sequences for greedyunitedist function */
-    ulen = boundaries->leftLTR_3 - boundaries->leftLTR_5 + 1;
-    vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
+    ulen = boundaries.leftLTR_3 - boundaries.leftLTR_5 + 1;
+    vlen = boundaries.rightLTR_3 - boundaries.rightLTR_5 + 1;
 #ifdef GT_GREEDY_BUFFER
     if (ulen > maxulen)
     {
@@ -1108,27 +1118,30 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       maxvlen = vlen;
       vseq = gt_realloc(vseq, sizeof (*vseq) * maxvlen);
     }
-    gt_encseq_extract_encoded(lo->encseq, useq, boundaries->leftLTR_5,
-                                            boundaries->leftLTR_3);
-    gt_encseq_extract_encoded(lo->encseq, vseq, boundaries->rightLTR_5,
-                                            boundaries->rightLTR_3);
+    gt_encseq_extract_encoded(encseq, useq, boundaries.leftLTR_5,
+                                            boundaries.leftLTR_3);
+    gt_encseq_extract_encoded(encseq, vseq, boundaries.rightLTR_5,
+                                            boundaries.rightLTR_3);
     gt_seqabstract_reinit_ptr(sa_useq,useq,ulen,0);
     gt_seqabstract_reinit_ptr(sa_vseq,vseq,vlen,0);
 #else
-    gt_seqabstract_reinit_encseq(sa_useq,lo->encseq,ulen,boundaries->leftLTR_5);
-    gt_seqabstract_reinit_encseq(sa_vseq,lo->encseq,vlen,
-                                 boundaries->rightLTR_5);
+    gt_seqabstract_reinit_encseq(sa_useq, lo->encseq, ulen,
+                                 boundaries.leftLTR_5);
+    gt_seqabstract_reinit_encseq(sa_vseq, lo->encseq, vlen,
+                                 boundaries.rightLTR_5);
 #endif
     edist = greedyunitedist(frontresource,sa_useq,sa_vseq);
 
     /* determine similarity */
-    boundaries->similarity = 100.0 * (1.0 - (double) edist/MAX(ulen,vlen));
+    boundaries.similarity = 100.0 * (1.0 - (double) edist/MAX(ulen,vlen));
 
-    if (gt_double_smaller_double(boundaries->similarity,
-                                 lo->similaritythreshold))
+    if (!gt_double_smaller_double(boundaries.similarity,
+                                  lo->similaritythreshold))
     {
-      /* delete this LTR-pair candidate */
-      arrayLTRboundaries->nextfreeLTRboundaries--;
+      gt_mutex_lock(wmutex);
+      GT_GETNEXTFREEINARRAY(boundaries_ptr,arrayLTRboundaries,LTRboundaries,5);
+      *boundaries_ptr = boundaries;
+      gt_mutex_unlock(wmutex);
     }
   }
 #ifdef GT_GREEDY_BUFFER
@@ -1140,6 +1153,23 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   gt_seqabstract_delete(sa_vseq);
   gt_frontresource_delete(frontresource);
   return haserr ? -1 : 0;
+}
+
+typedef struct {
+  GtLTRharvestStream *lo;
+  GtArrayLTRboundaries *arrayLTRboundaries;
+  const GtEncseq *encseq;
+  GtError *err;
+  GtMutex *rmutex, *wmutex;
+  unsigned long cur_seed;
+} GtLTRharvestThreadInfo;
+
+static void* gt_searchforLTRs_threadfunc(void *data) {
+  GtLTRharvestThreadInfo *info = (GtLTRharvestThreadInfo*) data;
+  gt_assert(info);
+  gt_searchforLTRs(info->lo, info->arrayLTRboundaries, info->rmutex,
+                   info->wmutex, &info->cur_seed, info->err);
+  return NULL;
 }
 
 /*
@@ -1256,9 +1286,9 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
                                      GtGenomeNode **gn,
                                      GtError *err)
 {
-  int had_err = 0;
   GtLTRharvestStream *ltrh_stream = gt_ltrharvest_stream_cast(ns);
-
+  GtLTRharvestThreadInfo threadinfo;
+  int had_err = 0;
   gt_error_check(err);
   /* LTRharvest run */
   if (ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_START) {
@@ -1276,13 +1306,21 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
       had_err = -1;
     }
 
+    threadinfo.lo = ltrh_stream;
+    threadinfo.encseq = ltrh_stream->encseq;
+    threadinfo.arrayLTRboundaries = &ltrh_stream->arrayLTRboundaries;
+    threadinfo.err = err;
+    threadinfo.cur_seed = 0;
+    threadinfo.rmutex = gt_mutex_new();
+    threadinfo.wmutex = gt_mutex_new();
     /* apply the filter algorithms */
-    if (!had_err && gt_searchforLTRs(ltrh_stream,
-                                     &ltrh_stream->arrayLTRboundaries,
-                                     err) != 0)
+    if (!had_err && gt_multithread(gt_searchforLTRs_threadfunc,
+                                   &threadinfo, err) != 0)
     {
       had_err = -1;
     }
+    gt_mutex_delete(threadinfo.rmutex);
+    gt_mutex_delete(threadinfo.wmutex);
 
     /* not needed any longer */
     GT_FREEARRAY(&ltrh_stream->repeatinfo.repeats, Repeat);
