@@ -33,6 +33,7 @@
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/str_array.h"
+#include "core/thread_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 
@@ -51,6 +52,7 @@ struct GtAlphabet {
           symbolmap[GT_MAXALPHABETCHARACTER+1], /* mapping of the symbols */
           *mapdomain,                        /* list of characters mapped */
           *characters;                       /* array of characters to show */
+  GtMutex *refmutex;
   GtStr *alphadef;
 };
 
@@ -347,6 +349,7 @@ GtAlphabet* gt_alphabet_clone(const GtAlphabet *alphabet)
   newalpha->bitspersymbol = alphabet->bitspersymbol;
   newalpha->alphadef = gt_str_ref(alphabet->alphadef);
   newalpha->reference_count = 0;
+  newalpha->refmutex = gt_mutex_new();
   for (i=0; i<=(unsigned int) GT_MAXALPHABETCHARACTER; i++)
   {
     newalpha->symbolmap[i] = alphabet->symbolmap[i];
@@ -367,7 +370,9 @@ GtAlphabet* gt_alphabet_clone(const GtAlphabet *alphabet)
 GtAlphabet* gt_alphabet_ref(GtAlphabet *alphabet)
 {
   gt_assert(alphabet);
+  gt_mutex_lock(alphabet->refmutex);
   alphabet->reference_count++;
+  gt_mutex_unlock(alphabet->refmutex);
   return alphabet;
 }
 
@@ -593,6 +598,7 @@ GtAlphabet* gt_alphabet_new_empty(void)
   a->mappedwildcards = 0;
   a->bitspersymbol = 0;
   a->reference_count = 0;
+  a->refmutex = gt_mutex_new();
   a->wildcardshow = (GtUchar) UNDEFCHAR;
   memset(a->symbolmap, (int) UNDEFCHAR, (size_t) GT_MAXALPHABETCHARACTER+1);
   a->mapdomain = NULL;
@@ -1054,14 +1060,18 @@ int gt_alphabet_to_file(const GtAlphabet *alphabet, const char *indexname,
 void gt_alphabet_delete(GtAlphabet *alphabet)
 {
   if (!alphabet) return;
+  gt_mutex_lock(alphabet->refmutex);
   if (alphabet->reference_count) {
     alphabet->reference_count--;
+    gt_mutex_unlock(alphabet->refmutex);
     return;
   }
+  gt_mutex_unlock(alphabet->refmutex);
   gt_free(alphabet->mapdomain);
   gt_free(alphabet->characters);
   if (alphabet->alphadef != NULL)
     gt_str_delete(alphabet->alphadef);
+  gt_mutex_delete(alphabet->refmutex);
   gt_free(alphabet);
 }
 
