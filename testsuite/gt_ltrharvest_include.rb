@@ -69,7 +69,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/s_cer/#{v}"\
              + " -dna -suf -lcp -tis -des -sds -ssp", :maxtime => 720
-      run_test "#{$bin}gt ltrharvest -index #{v} -seed 100 -minlenltr 100"\
+      run_test "#{$bin}gt -j 2 ltrharvest -index #{v} -seed 100 -minlenltr 100"\
              + " -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 80"\
              + " -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60"\
              + " -overlaps best -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3 -v"\
@@ -92,7 +92,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/s_cer/#{v}"\
              + " -dna -suf -lcp -tis -des -sds -ssp", :maxtime => 540
-      run_test "#{$bin}gt ltrharvest -longoutput -index #{v} -seed 100 "\
+      run_test "#{$bin}gt -j 2 ltrharvest -longoutput -index #{v} -seed 100 "\
              + " -minlenltr 100 -maxlenltr 1000 -mindistltr 1500"\
              + " -maxdistltr 15000 -similar 80"\
              + " -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60"\
