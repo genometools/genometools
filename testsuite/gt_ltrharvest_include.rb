@@ -284,15 +284,6 @@ Test do
   grep(last_stderr, "cannot open file descriptor 'Random159.fna.suf'")
 end
 
-Name "gt ltrharvest missing tables (des)"
-Keywords "gt_ltrharvest"
-Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random159.fna -dna -ssp -sds -tis -lcp -suf -des"
-  File.unlink("Random159.fna.des")
-  run_test "#{$bin}gt ltrharvest -index Random159.fna", :retval => 1
-  grep(last_stderr, "cannot open file \"Random159.fna.des\"")
-end
-
 # test all combinations of options, test only some of them
 outlist = (["-seed 100",
             "-minlenltr 100",# "-maxlenltr 1000",
