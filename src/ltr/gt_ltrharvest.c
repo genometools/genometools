@@ -482,8 +482,6 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
 
   gt_option_parser_refer_to_manual(op);
 
-  /* gt_output_file_register_options(op, &arguments->outfp, arguments->ofi); */
-
   return op;
 }
 
