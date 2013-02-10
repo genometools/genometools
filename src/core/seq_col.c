@@ -30,6 +30,7 @@ const GtSeqColClass* gt_seq_col_class_new(size_t size,
                                                                grep_desc_seqlen,
                                           GtSeqColMD5ToSeqFunc md5_to_seq,
                                           GtSeqColMD5ToDescFunc md5_to_desc,
+                                          GtSeqColMD5ToSeqlenFunc md5_to_seqlen,
                                           GtSeqColNumFilesFunc num_files,
                                           GtSeqColNumSeqsFunc num_seqs,
                                           GtSeqColGetMD5Func get_md5,
@@ -45,6 +46,7 @@ const GtSeqColClass* gt_seq_col_class_new(size_t size,
   c_class->grep_desc_seqlen = grep_desc_seqlen;
   c_class->md5_to_desc = md5_to_desc;
   c_class->md5_to_seq = md5_to_seq;
+  c_class->md5_to_seqlen = md5_to_seqlen;
   c_class->num_files = num_files;
   c_class->num_seqs = num_seqs;
   c_class->get_md5 = get_md5;
@@ -121,6 +123,15 @@ int gt_seq_col_md5_to_description(GtSeqCol *sc, GtStr *desc, GtStr *md5_seqid,
   gt_assert(sc && desc && md5_seqid);
   if (sc->c_class->md5_to_desc)
     return sc->c_class->md5_to_desc(sc, desc, md5_seqid, err);
+  return 0;
+}
+
+int gt_seq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
+                                      GtStr *md5_seqid, GtError *err)
+{
+  gt_assert(sc && len && md5_seqid);
+  if (sc->c_class->md5_to_seqlen)
+    return sc->c_class->md5_to_seqlen(sc, len, md5_seqid, err);
   return 0;
 }
 

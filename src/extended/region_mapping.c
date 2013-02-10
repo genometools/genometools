@@ -292,9 +292,17 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
   gt_error_check(err);
   GT_UNUSED GtRange range;
   gt_assert(rm && seqid);
-  gt_assert(!rm->userawseq); /* not implemented */
-  gt_assert(!gt_md5_seqid_has_prefix(gt_str_get(seqid))); /* not implemented */
+  if (rm->userawseq) {
+    return rm->rawlength;
+  }
   had_err = update_seq_col_if_necessary(rm, seqid, err);
+  if (!had_err) {
+    if (gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
+      had_err = gt_seq_col_md5_to_sequence_length(rm->seq_col, length, seqid,
+                                                  err);
+    }
+    return had_err;
+  }
   if (!had_err) {
     if (rm->usedesc) {
       gt_assert(rm->seqid2seqnum_mapping);
@@ -306,18 +314,8 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
         *length = gt_seq_col_get_sequence_length(rm->seq_col, filenum, seqnum);
     }
     else if (rm->matchdesc) {
-      if (!rm->seq_col) {
-        if (rm->encseq) {
-          if (!(rm->seq_col = gt_encseq_col_new(rm->encseq, err)))
-            had_err = -1;
-        } else {
-          if (!(rm->seq_col = gt_bioseq_col_new(rm->sequence_filenames, err)))
-            had_err = -1;
-        }
-      }
-      if (!had_err)
-        had_err = gt_seq_col_grep_desc_sequence_length(rm->seq_col, length,
-                                                       seqid, err);
+      had_err = gt_seq_col_grep_desc_sequence_length(rm->seq_col, length,
+                                                     seqid, err);
     }
     else {
       if (!had_err)
@@ -335,18 +333,7 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
   gt_assert(rm && desc && md5_seqid);
   /* this method is only implemented for MD5 seqids */
   gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
-  if (!rm->seq_col) {
-    if (rm->encseq) {
-      if (!(rm->seq_col = gt_encseq_col_new(rm->encseq, err)))
-        had_err = -1;
-    } else {
-      if (!(rm->seq_col = gt_bioseq_col_new(rm->sequence_filenames, err)))
-        had_err = -1;
-    }
-  }
-  if (!had_err) {
-    had_err = gt_seq_col_md5_to_description(rm->seq_col, desc, md5_seqid, err);
-  }
+  had_err = gt_seq_col_md5_to_description(rm->seq_col, desc, md5_seqid, err);
   return had_err;
 }
 

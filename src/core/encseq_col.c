@@ -209,6 +209,28 @@ static int gt_encseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
   return had_err;
 }
 
+int gt_encseq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
+                                         GtStr *md5_seqid, GtError *err)
+{
+  unsigned long seqnum = GT_UNDEF_ULONG;
+  int had_err = 0;
+  GtEncseqCol *esc;
+  esc = gt_encseq_col_cast(sc);
+  gt_error_check(err);
+  gt_assert(esc && len && md5_seqid && err);
+  gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
+  seqnum = gt_md5_tab_map(esc->md5_tab, gt_str_get(md5_seqid) +
+                                          GT_MD5_SEQID_PREFIX_LEN);
+  if (seqnum != GT_UNDEF_ULONG) {
+    gt_assert(seqnum < gt_encseq_num_of_sequences(esc->encseq));
+    *len = gt_encseq_seqlength(esc->encseq, seqnum);
+  } else {
+    gt_error_set(err, "sequence %s not found", gt_str_get(md5_seqid));
+    had_err = -1;
+  }
+  return had_err;
+}
+
 static unsigned long gt_encseq_col_num_of_files(const GtSeqCol *sc)
 {
   const GtEncseqCol *esc;
@@ -309,6 +331,7 @@ const GtSeqColClass* gt_encseq_col_class(void)
                                        gt_encseq_col_grep_desc_sequence_length,
                                        gt_encseq_col_md5_to_seq,
                                        gt_encseq_col_md5_to_description,
+                                       gt_encseq_col_md5_to_sequence_length,
                                        gt_encseq_col_num_of_files,
                                        gt_encseq_col_num_of_seqs,
                                        gt_encseq_col_get_md5_fingerprint,

@@ -228,6 +228,33 @@ static int gt_bioseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
   return had_err;
 }
 
+int gt_bioseq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
+                                         GtStr *md5_seqid, GtError *err)
+{
+  unsigned long i, seqnum = GT_UNDEF_ULONG;
+  int had_err = 0;
+  GtBioseq *bioseq;
+  GtBioseqCol *bsc;
+  bsc = gt_bioseq_col_cast(sc);
+  gt_error_check(err);
+  gt_assert(bsc && len && md5_seqid && err);
+  gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
+  for (i = 0; i < bsc->num_of_seqfiles; i++) {
+    bioseq = bsc->bioseqs[i];
+    seqnum = gt_bioseq_md5_to_index(bioseq, gt_str_get(md5_seqid) +
+                                    GT_MD5_SEQID_PREFIX_LEN);
+    if (seqnum != GT_UNDEF_ULONG)
+      break;
+  }
+  if (seqnum != GT_UNDEF_ULONG)
+    *len = gt_bioseq_get_sequence_length(bioseq, seqnum);
+  else  {
+    gt_error_set(err, "sequence %s not found", gt_str_get(md5_seqid));
+    had_err = -1;
+  }
+  return had_err;
+}
+
 static unsigned long gt_bioseq_col_num_of_files(const GtSeqCol *sc)
 {
   const GtBioseqCol *bsc;
@@ -299,6 +326,7 @@ const GtSeqColClass* gt_bioseq_col_class(void)
                                        gt_bioseq_col_grep_desc_sequence_length,
                                        gt_bioseq_col_md5_to_seq,
                                        gt_bioseq_col_md5_to_description,
+                                       gt_bioseq_col_md5_to_sequence_length,
                                        gt_bioseq_col_num_of_files,
                                        gt_bioseq_col_num_of_seqs,
                                        gt_bioseq_col_get_md5_fingerprint,

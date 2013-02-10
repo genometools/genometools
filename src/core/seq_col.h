@@ -38,6 +38,8 @@ int           gt_seq_col_md5_to_seq(GtSeqCol*, char **seq,
                                     GtStr *md5_seqid, GtError *err);
 int           gt_seq_col_md5_to_description(GtSeqCol*, GtStr *desc,
                                             GtStr *md5_seqid, GtError *err);
+int           gt_seq_col_md5_to_sequence_length(GtSeqCol*, unsigned long *len,
+                                                GtStr *md5_seqid, GtError *err);
 unsigned long gt_seq_col_num_of_files(const GtSeqCol*);
 unsigned long gt_seq_col_num_of_seqs(const GtSeqCol*, unsigned long filenum);
 const char*   gt_seq_col_get_md5_fingerprint(const GtSeqCol*,
