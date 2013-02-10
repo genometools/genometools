@@ -29,6 +29,10 @@ int           gt_seq_col_grep_desc(GtSeqCol*, char **seq,
                                    GtStr *seqid, GtError*);
 int           gt_seq_col_grep_desc_md5(GtSeqCol*, const char **md5,
                                        GtStr *seqid, GtError*);
+int           gt_seq_col_grep_desc_sequence_length(GtSeqCol *sc,
+                                                   unsigned long *length,
+                                                   GtStr *seqid,
+                                                   GtError *err);
 int           gt_seq_col_md5_to_seq(GtSeqCol*, char **seq,
                                     unsigned long start, unsigned long end,
                                     GtStr *md5_seqid, GtError *err);

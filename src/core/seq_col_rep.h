@@ -30,6 +30,8 @@ typedef int           (*GtSeqColGrepDescFunc)(GtSeqCol*, char **seq,
                                               GtStr *seqid, GtError*);
 typedef int           (*GtSeqColGrepDescMD5Func)(GtSeqCol*, const char **md5,
                                                  GtStr *seqid, GtError*);
+typedef int           (*GtSeqColGrepDescSeqlenFunc)(GtSeqCol*, unsigned long*,
+                                                    GtStr *, GtError*);
 typedef int           (*GtSeqColMD5ToSeqFunc)(GtSeqCol*, char **seq,
                                               unsigned long start,
                                               unsigned long end,
@@ -59,6 +61,7 @@ struct GtSeqColClass {
   GtSeqColFreeFunc free;
   GtSeqColGrepDescFunc grep_desc;
   GtSeqColGrepDescMD5Func grep_desc_md5;
+  GtSeqColGrepDescSeqlenFunc grep_desc_seqlen;
   GtSeqColMD5ToSeqFunc md5_to_seq;
   GtSeqColMD5ToDescFunc md5_to_desc;
   GtSeqColNumFilesFunc num_files;
@@ -77,6 +80,8 @@ const GtSeqColClass* gt_seq_col_class_new(size_t size,
                                           GtSeqColFreeFunc free,
                                           GtSeqColGrepDescFunc grep_desc,
                                           GtSeqColGrepDescMD5Func grep_desc_md5,
+                                          GtSeqColGrepDescSeqlenFunc
+                                                               grep_desc_seqlen,
                                           GtSeqColMD5ToSeqFunc md5_to_seq,
                                           GtSeqColMD5ToDescFunc md5_to_desc,
                                           GtSeqColNumFilesFunc num_files,

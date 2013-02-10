@@ -26,6 +26,8 @@ const GtSeqColClass* gt_seq_col_class_new(size_t size,
                                           GtSeqColFreeFunc free,
                                           GtSeqColGrepDescFunc grep_desc,
                                           GtSeqColGrepDescMD5Func grep_desc_md5,
+                                          GtSeqColGrepDescSeqlenFunc
+                                                               grep_desc_seqlen,
                                           GtSeqColMD5ToSeqFunc md5_to_seq,
                                           GtSeqColMD5ToDescFunc md5_to_desc,
                                           GtSeqColNumFilesFunc num_files,
@@ -40,6 +42,7 @@ const GtSeqColClass* gt_seq_col_class_new(size_t size,
   c_class->free = free;
   c_class->grep_desc = grep_desc;
   c_class->grep_desc_md5 = grep_desc_md5;
+  c_class->grep_desc_seqlen = grep_desc_seqlen;
   c_class->md5_to_desc = md5_to_desc;
   c_class->md5_to_seq = md5_to_seq;
   c_class->num_files = num_files;
@@ -90,6 +93,15 @@ int gt_seq_col_grep_desc_md5(GtSeqCol *sc, const char **md5, GtStr *seqid,
   gt_assert(sc && md5 && seqid);
   if (sc->c_class->grep_desc_md5)
     return sc->c_class->grep_desc_md5(sc, md5, seqid, err);
+  return 0;
+}
+
+int gt_seq_col_grep_desc_sequence_length(GtSeqCol *sc, unsigned long *length,
+                                         GtStr *seqid, GtError *err)
+{
+  gt_assert(sc && length && seqid);
+  if (sc->c_class->grep_desc_seqlen)
+    return sc->c_class->grep_desc_seqlen(sc, length, seqid, err);
   return 0;
 }
 

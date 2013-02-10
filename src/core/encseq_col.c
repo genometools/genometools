@@ -127,6 +127,23 @@ static int gt_encseq_col_grep_desc_md5(GtSeqCol *sc, const char **md5,
   return had_err;
 }
 
+static int gt_encseq_col_grep_desc_sequence_length(GtSeqCol *sc,
+                                                   unsigned long *length,
+                                                   GtStr *seqid,
+                                                   GtError *err)
+{
+  unsigned long filenum = 0, seqnum = 0;
+  int had_err;
+  GtEncseqCol *esc;
+  esc = gt_encseq_col_cast(sc);
+  gt_error_check(err);
+  gt_assert(esc && length && seqid);
+  had_err = gt_encseq_col_do_grep_desc(esc, &filenum, &seqnum, seqid, err);
+  if (!had_err)
+    *length = gt_seq_col_get_sequence_length(sc, seqnum, filenum);
+  return had_err;
+}
+
 static int gt_encseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
                                     unsigned long start, unsigned long end,
                                     GtStr *md5_seqid, GtError *err)
@@ -289,6 +306,7 @@ const GtSeqColClass* gt_encseq_col_class(void)
                                        gt_encseq_col_delete,
                                        gt_encseq_col_grep_desc,
                                        gt_encseq_col_grep_desc_md5,
+                                       gt_encseq_col_grep_desc_sequence_length,
                                        gt_encseq_col_md5_to_seq,
                                        gt_encseq_col_md5_to_description,
                                        gt_encseq_col_num_of_files,

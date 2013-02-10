@@ -69,6 +69,15 @@ int              gt_region_mapping_get_sequence(GtRegionMapping *region_mapping,
                                                 unsigned long end,
                                                 GtError *err);
 
+/* Use <region_mapping> to retrieve the sequence length of the given
+   sequence ID   <seqid> and store the result in <length>.
+   In the case of an error, -1 is returned and <err> is set accordingly. */
+int              gt_region_mapping_get_sequence_length(GtRegionMapping
+                                                                *region_mapping,
+                                                       unsigned long *length,
+                                                       GtStr *seqid,
+                                                       GtError *err);
+
 /* Use <region_mapping> to get the description of the MD5 sequence ID <seqid>.
    The description is appended to <desc>.
    In the case of an error, -1 is returned and <err> is set accordingly. */

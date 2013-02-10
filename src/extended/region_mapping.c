@@ -124,9 +124,8 @@ static GtStr* region_mapping_map(GtRegionMapping *rm,
     return gt_mapping_map_string(rm->mapping, sequence_region, err);
 }
 
-GT_UNUSED static int update_seq_col_if_necessary(GtRegionMapping *rm,
-                                                GtStr *seqid,
-                                                GtError *err)
+static int update_seq_col_if_necessary(GtRegionMapping *rm, GtStr *seqid,
+                                       GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -279,6 +278,50 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
                                          end - offset);
         }
       }
+    }
+  }
+  return had_err;
+}
+
+int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
+                                          unsigned long *length, GtStr *seqid,
+                                          GtError *err)
+{
+  int had_err;
+  unsigned long filenum, seqnum, GT_UNUSED offset;
+  gt_error_check(err);
+  GT_UNUSED GtRange range;
+  gt_assert(rm && seqid);
+  gt_assert(!rm->userawseq); /* not implemented */
+  gt_assert(!gt_md5_seqid_has_prefix(gt_str_get(seqid))); /* not implemented */
+  had_err = update_seq_col_if_necessary(rm, seqid, err);
+  if (!had_err) {
+    if (rm->usedesc) {
+      gt_assert(rm->seqid2seqnum_mapping);
+      had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
+                                            gt_str_get(seqid), &range, &seqnum,
+                                            &filenum,
+                                            &offset, err);
+      if (!had_err)
+        *length = gt_seq_col_get_sequence_length(rm->seq_col, filenum, seqnum);
+    }
+    else if (rm->matchdesc) {
+      if (!rm->seq_col) {
+        if (rm->encseq) {
+          if (!(rm->seq_col = gt_encseq_col_new(rm->encseq, err)))
+            had_err = -1;
+        } else {
+          if (!(rm->seq_col = gt_bioseq_col_new(rm->sequence_filenames, err)))
+            had_err = -1;
+        }
+      }
+      if (!had_err)
+        had_err = gt_seq_col_grep_desc_sequence_length(rm->seq_col, length,
+                                                       seqid, err);
+    }
+    else {
+      if (!had_err)
+        *length = gt_seq_col_get_sequence_length(rm->seq_col, 0, 0);
     }
   }
   return had_err;
