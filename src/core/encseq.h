@@ -570,9 +570,6 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
 int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
                                                     GtError *err);
 
-/* the following function returns a count value */
-unsigned long countgt_encseq_compare_viatwobitencoding_get(void);
-
 uint64_t gt_encseq_pairbitsum(const GtEncseq *encseq);
 
 /* the following function checks if a sequence number and relative

@@ -6937,13 +6937,6 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
           SPECIAL = true;\
         }
 
-static unsigned long countgt_encseq_compare_viatwobitencoding = 0;
-
-unsigned long countgt_encseq_compare_viatwobitencoding_get(void)
-{
-  return countgt_encseq_compare_viatwobitencoding;
-}
-
 struct GtViatwobitkeyvalues
 {
   unsigned long pos,
@@ -7039,7 +7032,6 @@ int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   GtUchar tmp;
 
-  countgt_encseq_compare_viatwobitencoding++;
   ptbe1.referstartpos = vtk1->pos;
   ptbe2.referstartpos = vtk2->pos;
   do
