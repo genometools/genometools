@@ -333,7 +333,9 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
   gt_assert(rm && desc && md5_seqid);
   /* this method is only implemented for MD5 seqids */
   gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
-  had_err = gt_seq_col_md5_to_description(rm->seq_col, desc, md5_seqid, err);
+  had_err = update_seq_col_if_necessary(rm, md5_seqid, err);
+  if (!had_err)
+    had_err = gt_seq_col_md5_to_description(rm->seq_col, desc, md5_seqid, err);
   return had_err;
 }
 
