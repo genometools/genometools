@@ -6760,15 +6760,16 @@ unsigned int gt_encseq_relpos_extract2bitencvector(
   }
 }
 
-#define MASKPREFIX(PREFIX)\
+#define GT_ENCSEQ_MASKPREFIX(PREFIX)\
       (GtTwobitencoding)\
      (~((((GtTwobitencoding) 1) << GT_MULT2(GT_UNITSIN2BITENC - (PREFIX))) - 1))
 
-#define MASKSUFFIX(SUFFIX)\
+#define GT_ENCSEQ_MASKSUFFIX(SUFFIX)\
         ((((GtTwobitencoding) 1) << GT_MULT2((int) SUFFIX)) - 1)
 
-#define MASKEND(FWD,END)\
-        (((END) == 0) ? 0 : ((FWD) ? MASKPREFIX(END) : MASKSUFFIX(END)))
+#define GT_ENCSEQ_MASKEND(FWD,END)\
+        (((END) == 0) ? 0 : ((FWD) ? GT_ENCSEQ_MASKPREFIX(END)\
+                                   : GT_ENCSEQ_MASKSUFFIX(END)))
 
 static int prefixofdifferenttwobitencodings(bool complement,
                                             GtCommonunits *commonunits,
@@ -6851,7 +6852,7 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
   {
     GtTwobitencoding tbe1, tbe2;
 
-    mask = MASKEND(fwd,ptbe1->unitsnotspecial);
+    mask = GT_ENCSEQ_MASKEND(fwd,ptbe1->unitsnotspecial);
     tbe1 = ptbe1->tbe & mask;
     tbe2 = ptbe2->tbe & mask;
     if (tbe1 == tbe2)
@@ -6873,7 +6874,7 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
   {
     GtTwobitencoding tbe1, tbe2;
 
-    mask = MASKEND(fwd,ptbe2->unitsnotspecial);
+    mask = GT_ENCSEQ_MASKEND(fwd,ptbe2->unitsnotspecial);
     tbe1 = ptbe1->tbe & mask;
     tbe2 = ptbe2->tbe & mask;
     if (tbe1 == tbe2)
@@ -6894,7 +6895,7 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
   {
     GtTwobitencoding tbe1, tbe2;
 
-    mask = MASKEND(fwd,ptbe1->unitsnotspecial);
+    mask = GT_ENCSEQ_MASKEND(fwd,ptbe1->unitsnotspecial);
     tbe1 = ptbe1->tbe & mask;
     tbe2 = ptbe2->tbe & mask;
     if (tbe1 == tbe2)
@@ -7448,10 +7449,10 @@ static bool checktbe(bool fwd,GtTwobitencoding tbe1,GtTwobitencoding tbe2,
   }
   if (fwd)
   {
-    mask = MASKPREFIX(unitsnotspecial);
+    mask = GT_ENCSEQ_MASKPREFIX(unitsnotspecial);
   } else
   {
-    mask = MASKSUFFIX(unitsnotspecial);
+    mask = GT_ENCSEQ_MASKSUFFIX(unitsnotspecial);
   }
   gt_assert(mask > 0);
   if ((tbe1 & mask) == (tbe2 & mask))
