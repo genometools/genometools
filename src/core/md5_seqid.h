@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2010      Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c)      2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -36,7 +36,8 @@ bool gt_md5_seqid_has_prefix(const char *seqid);
 /* Compares \0-terminated seqid strings <id_a> and <id_b> (similarly to
    strcmp(3)), but is aware of MD5 prefixes. That is, if both seqids have MD5
    prefixes, only the MD5 prefixes will be compared. If at least one seqid has
-   no MD5 prefix, the MD5 prefixes are ignored for both. */
+   no MD5 prefix, the sequd without the prefix will sort before the other
+   one. */
 int  gt_md5_seqid_cmp_seqids(const char *id_a, const char *id_b);
 
 int  gt_md5_seqid_unit_test(GtError *err);

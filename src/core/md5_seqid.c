@@ -30,26 +30,28 @@ bool gt_md5_seqid_has_prefix(const char *seqid)
 
 int gt_md5_seqid_cmp_seqids(const char *id_a, const char *id_b)
 {
-  int md5_ctr = 0;
-  const char *id_a_p = id_a,
-             *id_b_p = id_b;
+  int md5_status = 0;
   gt_assert(id_a && id_b);
 
   if (id_a == id_b)
     return 0;
+  if (gt_md5_seqid_has_prefix(id_a))
+    md5_status += 1;
+  if (gt_md5_seqid_has_prefix(id_b))
+    md5_status += 2;
 
-  if (gt_md5_seqid_has_prefix(id_a)) {
-    id_a_p += GT_MD5_SEQID_TOTAL_LEN;
-    md5_ctr++;
+  switch (md5_status) {
+    case 0:
+      return strcmp(id_a, id_b);
+    case 1:
+      return 1;
+    case 2:
+      return -1;
+    case 3:
+      return strncmp(id_a, id_b, GT_MD5_SEQID_TOTAL_LEN);
+    default:
+      gt_assert(false);   /* cannot happen */
   }
-  if (gt_md5_seqid_has_prefix(id_b)) {
-    id_b_p += GT_MD5_SEQID_TOTAL_LEN;
-    md5_ctr++;
-  }
-  if (md5_ctr == 2)
-    return strncmp(id_a, id_b, GT_MD5_SEQID_TOTAL_LEN);
-  else
-    return strcmp(id_a_p, id_b_p);
   return 0; /* cannot happen */
 }
 
@@ -65,8 +67,8 @@ int gt_md5_seqid_unit_test(GtError *err) {
   gt_ensure(had_err, gt_md5_seqid_has_prefix(seqid1_md5));
   gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1, seqid1) == 0);
   gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1, seqid1_diffptr+1) == 0);
-  gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1, seqid1_md5) == 0);
-  gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1_md5, seqid1) == 0);
+  gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1, seqid1_md5) == -1);
+  gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1_md5, seqid1) == 1);
   gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1_md5, seqid1_md5) == 0);
   gt_ensure(had_err, gt_md5_seqid_cmp_seqids(seqid1_md5, seqid1_wrongmd5) > 0);
 
