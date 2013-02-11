@@ -7018,7 +7018,8 @@ void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk)
 }
 
 int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
-                                    const GtEncseq *encseq,
+                                    const GtEncseq *encseq1,
+                                    const GtEncseq *encseq2,
                                     GtReadmode readmode,
                                     unsigned long depth,
                                     unsigned long maxdepth,
@@ -7041,10 +7042,10 @@ int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
       if (vtk2->pos < vtk2->endpos)
       {
         vtk1->twobitcurrentpos
-           = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,vtk1->twobitcurrentpos,
+           = gt_encseq_extract2bitenc(&ptbe1,encseq1,fwd,vtk1->twobitcurrentpos,
                                       vtk1->twobitencodingstoppos);
         vtk2->twobitcurrentpos
-           = gt_encseq_extract2bitenc(&ptbe2,encseq,fwd,vtk2->twobitcurrentpos,
+           = gt_encseq_extract2bitenc(&ptbe2,encseq2,fwd,vtk2->twobitcurrentpos,
                                       vtk2->twobitencodingstoppos);
         retval = gt_encseq_compare_pairof_twobitencodings(fwd,complement,
                                                           commonunits,
@@ -7062,8 +7063,8 @@ int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
         }
       } else
       {
-        GT_ENCSEQ_DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,encseq,readmode,
-                               vtk1->pos);
+        GT_ENCSEQ_DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,encseq1,
+                               readmode,vtk1->pos);
         cc2 = GT_UNIQUEINT(vtk2->pos);
         commonunits->rightspecial = true;
         gt_assert(cc1 != cc2);
@@ -7076,7 +7077,7 @@ int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
       commonunits->leftspecial = true;
       if (vtk2->pos < vtk2->endpos)
       {
-        GT_ENCSEQ_DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,encseq,
+        GT_ENCSEQ_DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,encseq2,
                                readmode,vtk2->pos);
       } else
       {
@@ -7113,7 +7114,8 @@ size_t gt_encseq_chardistri_mapoffset(const GtEncseq *encseq)
 }
 
 int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
-                                        const GtEncseq *encseq,
+                                        const GtEncseq *encseq1,
+                                        const GtEncseq *encseq2,
                                         GtReadmode readmode,
                                         GtEncseqReader *esr1,
                                         GtEncseqReader *esr2,
@@ -7125,12 +7127,13 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
   GtViatwobitkeyvalues vtk1, vtk2;
 
   gt_assert(pos1 != pos2);
-  gt_Viatwobitkeyvalues_reinit_without_stoppos(&vtk1,encseq,readmode,esr1,
+  gt_Viatwobitkeyvalues_reinit_without_stoppos(&vtk1,encseq1,readmode,esr1,
                                                pos1,depth,maxdepth);
-  gt_Viatwobitkeyvalues_reinit_without_stoppos(&vtk2,encseq,readmode,esr2,
+  gt_Viatwobitkeyvalues_reinit_without_stoppos(&vtk2,encseq2,readmode,esr2,
                                                pos2,depth,maxdepth);
   return gt_encseq_twobitencoding_strcmp(commonunits,
-                                         encseq,
+                                         encseq1,
+                                         encseq2,
                                          readmode,
                                          depth,
                                          maxdepth,

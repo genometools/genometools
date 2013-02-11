@@ -682,6 +682,7 @@ static unsigned long blindtrie_twobitencoding_getlcp(
                                currenttwobitencodingstoppos);
   (void) gt_encseq_twobitencoding_strcmp(&commonunits,
                                          blindtrie->encseq,
+                                         blindtrie->encseq,
                                          blindtrie->readmode,
                                          depth,
                                          blindtrie->sortmaxdepthminusoffset,

@@ -145,8 +145,8 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
                                        unsigned long frompos,
                                        unsigned int prefixlength);
 
-/* The following function compares two substrings beginning
-  at position <pos1>+<depth> and <pos2>+<depth> in <encseq>.
+/* The following function compares two substrings in <encseq1> and
+  <encseq2> beginning at position <pos1>+<depth> and <pos2>+<depth>, resp.
   <esr1> and <esr2> refer to memory areas for storeing a GtEncseqReader.
   The information about the length of the longest common prefix is stored
   in <commonunits>. <fwd> and <complement> specify if the sequence is
@@ -157,7 +157,8 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
   If <madepth> is 0, then the entire suffixes are compared. Otherwise, the
   comparison is restricted to the prefixes of length <maxdepth>. */
 int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
-                                        const GtEncseq *encseq,
+                                        const GtEncseq *encseq1,
+                                        const GtEncseq *encseq2,
                                         GtReadmode readmode,
                                         GtEncseqReader *esr1,
                                         GtEncseqReader *esr2,
@@ -232,8 +233,9 @@ void gt_Viatwobitkeyvalues_reinit(GtViatwobitkeyvalues *vtk,
 void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk);
 
 /* The following function compare two substrings of the given encseqs
+   <encseq1> and <encseq2>
    refered to via the <GtViatwobitkeyvalues>-parameters. The comparison
-   only works for sequences represented as a two bit encoding. It
+   only works for sequences represented as a two bit encodings. It
    starts with offset <depth> and stops at offset <maxdepth>, whenever
    <maxdepth> is larger than 0. If <maxdepth> is 0, then the comparison
    stops at the end of the sequence or at the first special character.
@@ -242,7 +244,8 @@ void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk);
    common prefix is computed (whenever <GT_ISDIRREVERSE(readmode)> is false).
 */
 int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
-                                    const GtEncseq *encseq,
+                                    const GtEncseq *encseq1,
+                                    const GtEncseq *encseq2,
                                     GtReadmode readmode,
                                     unsigned long depth,
                                     unsigned long maxdepth,

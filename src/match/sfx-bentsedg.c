@@ -330,6 +330,7 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
 #endif
         retval = gt_encseq_compare_viatwobitencoding(&commonunits,
                                                      bsr->encseq,
+                                                     bsr->encseq,
                                                      bsr->readmode,
                                                      bsr->esr1,
                                                      bsr->esr2,
@@ -431,6 +432,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
       {
         gt_assert(offset < sortmaxdepth);
         retval = gt_encseq_compare_viatwobitencoding(&commonunits,
+                                                     bsr->encseq,
                                                      bsr->encseq,
                                                      bsr->readmode,
                                                      bsr->esr1,

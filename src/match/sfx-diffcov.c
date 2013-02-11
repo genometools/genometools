@@ -1521,6 +1521,7 @@ static void dc_fill_samplelcpvalues(bool cmpcharbychar,GtDifferencecover *dcov)
           {
             retval = gt_encseq_compare_viatwobitencoding(&commonunits,
                                                          dcov->encseq,
+                                                         dcov->encseq,
                                                          dcov->readmode,
                                                          dcov->esr1,
                                                          dcov->esr2,

@@ -74,7 +74,7 @@ GtSeqabstract *gt_seqabstract_new_ptr(const GtUchar *ptr,
                                       unsigned long len,
                                       unsigned long offset)
 {
-  GtSeqabstract *sa = gt_malloc(sizeof *sa);
+  GtSeqabstract *sa = gt_seqabstract_new_empty();
 
   gt_seqabstract_reinit_ptr(sa,ptr,len,offset);
   return sa;
@@ -111,7 +111,7 @@ GtSeqabstract *gt_seqabstract_new_encseq(const GtEncseq *encseq,
                                          unsigned long len,
                                          unsigned long offset)
 {
-  GtSeqabstract *sa = gt_malloc(sizeof *sa);
+  GtSeqabstract *sa = gt_seqabstract_new_empty();
 
   gt_seqabstract_reinit_encseq(sa, encseq, len, offset);
   return sa;
@@ -275,6 +275,7 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
 
           (void) gt_encseq_compare_viatwobitencoding(&commonunits,
                                                      useq->seq.encseq,
+                                                     vseq->seq.encseq,
                                                      GT_READMODE_FORWARD,
                                                      useq->esr,
                                                      vseq->esr,
