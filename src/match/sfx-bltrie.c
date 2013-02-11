@@ -680,13 +680,13 @@ static unsigned long blindtrie_twobitencoding_getlcp(
                                depth,
                                blindtrie->sortmaxdepthminusoffset,
                                currenttwobitencodingstoppos);
-  (void) gt_encseq_process_viatwobitencoding(&commonunits,
-                                             blindtrie->encseq,
-                                             blindtrie->readmode,
-                                             depth,
-                                             blindtrie->sortmaxdepthminusoffset,
-                                             blindtrie->vtk1,
-                                             blindtrie->vtk2);
+  (void) gt_encseq_twobitencoding_strcmp(&commonunits,
+                                         blindtrie->encseq,
+                                         blindtrie->readmode,
+                                         depth,
+                                         blindtrie->sortmaxdepthminusoffset,
+                                         blindtrie->vtk1,
+                                         blindtrie->vtk2);
   if (blindtrie_isleftofboundary(blindtrie,leafpos,commonunits.finaldepth) &&
       !commonunits.leftspecial)
   {
@@ -931,7 +931,7 @@ GtBlindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
   blindtrie->nextfreeBlindtrienode = 0;
   blindtrie->encseq = encseq;
   blindtrie->has_twobitencoding_stoppos_support
-    = gt_has_twobitencoding_stoppos_support(encseq);
+    = gt_encseq_has_twobitencoding_stoppos_support(encseq);
   blindtrie->readmode = readmode;
   blindtrie->esr1 = esr1;
   blindtrie->esr2 = esr2;

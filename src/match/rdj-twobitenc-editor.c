@@ -29,7 +29,7 @@ struct GtTwobitencEditor
 static int gt_twobitenc_editor_check(const GtEncseq *encseq, GtError *err)
 {
   int had_err = 0;
-  if (!gt_has_twobitencoding(encseq))
+  if (!gt_encseq_has_twobitencoding(encseq))
   {
     gt_error_set(err, "encseq correction is only "
         "possible if the sequence has a twobitencoding");

@@ -1442,7 +1442,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                         gt_bcktab_sizeofworkspace(prefixlength);
     }
     SHOWCURRENTSPACE;
-    if (prefixlength > 1U && gt_has_twobitencoding(sfi->encseq) &&
+    if (prefixlength > 1U && gt_encseq_has_twobitencoding(sfi->encseq) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
       unsigned int suffixchars = 0, additionalsuffixchars = 2U;
@@ -1564,7 +1564,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       }
     } else
     {
-      if (gt_has_twobitencoding(encseq) &&
+      if (gt_encseq_has_twobitencoding(encseq) &&
           !sfi->sfxstrategy.kmerswithencseqreader)
       {
         if (sfi->sfxstrategy.spmopt_minlength == 0)
@@ -1841,7 +1841,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   SHOWACTUALSPACE;
   sfi->exportptr = gt_suffixsortspace_exportptr(0,sfi->suffixsortspace);
   if (sfi->prefixlength > 1U
-      && gt_has_twobitencoding(sfi->encseq)
+      && gt_encseq_has_twobitencoding(sfi->encseq)
       && !sfi->sfxstrategy.kmerswithencseqreader)
   {
     insertsuffix_getencseqkmers_twobitencoding(

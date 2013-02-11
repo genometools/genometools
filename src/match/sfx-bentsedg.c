@@ -316,9 +316,7 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
       } else
       {
 #ifdef SKDEBUG
-        printf("gt_encseq_compare_viatwobitencoding[%lu,%lu] "
-               "at offset %lu\n",
-                sval1,sval2,offset);
+        printf("%s[%lu,%lu] at offset %lu\n",__func__,sval1,sval2,offset);
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
                                  bsr->complement,
@@ -1433,7 +1431,8 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   {
     const bool withmediumsizelcps = (sortmaxdepth > 0 && !withlcps)
                                     ? true : false;
-    if (sortmaxdepth == 0 || gt_has_twobitencoding_stoppos_support(encseq))
+    if (sortmaxdepth == 0 ||
+        gt_encseq_has_twobitencoding_stoppos_support(encseq))
     {
       bsr->srsw = gt_shortreadsort_new(0,bsr->srs_maxremain,readmode,false,
                                        withmediumsizelcps);

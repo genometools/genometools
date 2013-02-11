@@ -231,17 +231,27 @@ void gt_Viatwobitkeyvalues_reinit(GtViatwobitkeyvalues *vtk,
 /* The following is the destructor for the latter type */
 void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk);
 
-int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
-                                        const GtEncseq *encseq,
-                                        GtReadmode readmode,
-                                        unsigned long depth,
-                                        unsigned long maxdepth,
-                                        GtViatwobitkeyvalues *vtk1,
-                                        GtViatwobitkeyvalues *vtk2);
+/* The following function compare two substrings of the given encseqs
+   refered to via the <GtViatwobitkeyvalues>-parameters. The comparison
+   only works for sequences represented as a two bit encoding. It
+   starts with offset <depth> and stops at offset <maxdepth>, whenever
+   <maxdepth> is larger than 0. If <maxdepth> is 0, then the comparison
+   stops at the end of the sequence or at the first special character.
+   The encoded sequence is given via the parameter <encseq> and it is
+   accessed via the given <readmode> which also determines if the longest
+   common prefix is computed (whenever <GT_ISDIRREVERSE(readmode)> is false).
+*/
+int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
+                                    const GtEncseq *encseq,
+                                    GtReadmode readmode,
+                                    unsigned long depth,
+                                    unsigned long maxdepth,
+                                    GtViatwobitkeyvalues *vtk1,
+                                    GtViatwobitkeyvalues *vtk2);
 
-bool gt_has_twobitencoding(const GtEncseq *encseq);
+bool gt_encseq_has_twobitencoding(const GtEncseq *encseq);
 
-bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq);
+bool gt_encseq_has_twobitencoding_stoppos_support(const GtEncseq *encseq);
 
 unsigned long gt_getnexttwobitencodingstoppos(bool fwd, GtEncseqReader *esr);
 

@@ -790,7 +790,7 @@ static int getsatforcevalue(const char *str,GtError *err)
   }
 }
 
-bool gt_has_twobitencoding(const GtEncseq *encseq)
+bool gt_encseq_has_twobitencoding(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
   return (encseq->accesstype_via_utables ||
@@ -798,7 +798,7 @@ bool gt_has_twobitencoding(const GtEncseq *encseq)
           encseq->sat == GT_ACCESS_TYPE_BITACCESS) ? true : false;
 }
 
-bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq)
+bool gt_encseq_has_twobitencoding_stoppos_support(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL && encseq->sat != GT_ACCESS_TYPE_UNDEFINED);
   return (encseq->accesstype_via_utables ||
@@ -6534,16 +6534,6 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
   bool mirrored = false;
   unsigned long pos;
 
-  /*
-  printf("currentpos=%lu\n",currentpos);
-  if (currentpos >= encseq->logicaltotallength)
-  {
-    fprintf(stderr,"currentpos = %lu >= %lu = logicaltotallength\n",
-               currentpos,encseq->logicaltotallength);
-    printf(NULL);
-    exit(EXIT_FAILURE);
-  }
-  */
   gt_assert(currentpos < encseq->logicaltotallength);
   if (encseq->hasmirror && currentpos >= encseq->totallength) {
     if (currentpos == encseq->totallength) {
@@ -6605,7 +6595,7 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
   gt_assert(pos < encseq->logicaltotallength);
   fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,pos);
-  if (gt_has_twobitencoding_stoppos_support(encseq))
+  if (gt_encseq_has_twobitencoding_stoppos_support(encseq))
   {
     twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
   } else
@@ -6649,7 +6639,7 @@ unsigned int gt_encseq_extract2bitencvector(
   }
   fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,pos);
-  if (gt_has_twobitencoding_stoppos_support(encseq))
+  if (gt_encseq_has_twobitencoding_stoppos_support(encseq))
   {
     twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
   } else
@@ -6697,9 +6687,6 @@ unsigned int gt_encseq_extract2bitencvector(
         return offset;
       }
     }
-    /*
-    printf("pos=%lu,twobitencodingstoppos=%lu\n",pos,twobitencodingstoppos);
-    */
     (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd, pos,
                                     twobitencodingstoppos);
     GT_STOREINARRAY(tbereservoir,GtTwobitencoding,32UL,etbecurrent.tbe);
@@ -7000,7 +6987,7 @@ static void gt_Viatwobitkeyvalues_reinit_without_stoppos(
   {
     bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
 
-    if (esr != NULL && gt_has_twobitencoding_stoppos_support(encseq))
+    if (esr != NULL && gt_encseq_has_twobitencoding_stoppos_support(encseq))
     {
       gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
       vtk->twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
@@ -7037,13 +7024,13 @@ void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk)
   }
 }
 
-int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
-                                        const GtEncseq *encseq,
-                                        GtReadmode readmode,
-                                        unsigned long depth,
-                                        unsigned long maxdepth,
-                                        GtViatwobitkeyvalues *vtk1,
-                                        GtViatwobitkeyvalues *vtk2)
+int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
+                                    const GtEncseq *encseq,
+                                    GtReadmode readmode,
+                                    unsigned long depth,
+                                    unsigned long maxdepth,
+                                    GtViatwobitkeyvalues *vtk1,
+                                    GtViatwobitkeyvalues *vtk2)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
@@ -7150,13 +7137,13 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                                pos1,depth,maxdepth);
   gt_Viatwobitkeyvalues_reinit_without_stoppos(&vtk2,encseq,readmode,esr2,
                                                pos2,depth,maxdepth);
-  return gt_encseq_process_viatwobitencoding(commonunits,
-                                             encseq,
-                                             readmode,
-                                             depth,
-                                             maxdepth,
-                                             &vtk1,
-                                             &vtk2);
+  return gt_encseq_twobitencoding_strcmp(commonunits,
+                                         encseq,
+                                         readmode,
+                                         depth,
+                                         maxdepth,
+                                         &vtk1,
+                                         &vtk2);
 }
 
 /* now some functions for testing the different functions follow */
@@ -7575,7 +7562,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
     {
       esr->currentpos = GT_REVERSEPOS(encseq->totallength,startpos);
     }
-    if (gt_has_twobitencoding_stoppos_support(encseq))
+    if (gt_encseq_has_twobitencoding_stoppos_support(encseq))
     {
       twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
     } else
@@ -7684,7 +7671,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
   esr1 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos1);
-  if (gt_has_twobitencoding_stoppos_support(encseq))
+  if (gt_encseq_has_twobitencoding_stoppos_support(encseq))
   {
     twobitencodingstoppos1 = gt_getnexttwobitencodingstoppos (fwd, esr1);
   } else
@@ -7696,7 +7683,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
                                               esr1->currentpos,
                                               twobitencodingstoppos1);
   esr2 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos2);
-  if (gt_has_twobitencoding_stoppos_support(encseq))
+  if (gt_encseq_has_twobitencoding_stoppos_support(encseq))
   {
     twobitencodingstoppos2 = gt_getnexttwobitencodingstoppos (fwd, esr2);
   } else
@@ -9774,7 +9761,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, !gt_encseq_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* two unencoded sequences */
@@ -9808,7 +9795,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, !gt_encseq_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* one preencoded sequence */
@@ -9842,7 +9829,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, !gt_encseq_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* mix unencoded/preencoded sequences, partial */
@@ -9876,7 +9863,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, !gt_encseq_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* mix unencoded/preencoded sequences, partial */
@@ -9914,7 +9901,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, !gt_encseq_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* mix unencoded/preencoded sequences, partial */
@@ -9962,7 +9949,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
   gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, !gt_encseq_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* changed min/max order */

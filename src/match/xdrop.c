@@ -324,9 +324,9 @@ void gt_evalxdroparbitscoresextend(bool forward,
   {
     GT_XDROP_COMPARESYMBOLSSEP(idx,idx);
   }
+  gt_assert(lcp == (unsigned long) idx);
   gt_assert((leftsep && leftsep2) || (!leftsep && !leftsep2));
   gt_assert((rightsep && rightsep2) || (!rightsep && !rightsep2));
-  gt_assert(lcp == (unsigned long) idx);
   /* alignment already finished */
   if (idx >= ulen || idx >= vlen)
   {
@@ -422,7 +422,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
               (gt_xdrop_frontvalue_get(res,currd-1,k) < i &&
                i <= MIN(ulen,vlen + k)))
           {
-            if (ulen >= i && vlen >= j)
+            if (ulen > i && vlen > j)
             {
               gt_assert(forward || (uoffset > (unsigned long) i &&
                                     voffset > (unsigned long) j));
@@ -446,6 +446,12 @@ void gt_evalxdroparbitscoresextend(bool forward,
               GT_XDROP_COMPARESYMBOLSSEP(i,j);
               i++;
               j++;
+            }
+            if (lcp != (unsigned long) (i - starti))
+            {
+              printf("forward = %s: lcp = %lu != %lu = correct\n",
+                       forward ? "true" : "false",lcp,
+                       (unsigned long) (i-starti));
             }
             gt_assert(lcp == (unsigned long) (i - starti));
             alwaysMININFINITYINT = false;
