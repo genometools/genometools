@@ -6926,7 +6926,7 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
   return 0;
 }
 
-#define GT_ENCSEQ_DEREFSTOPPOS(VAR,SPECIAL,TMPVAR,ENCSEQ,READMODE,POS)\
+#define GT_ENCSEQ_DEREF_STOPPOS(VAR,SPECIAL,TMPVAR,ENCSEQ,READMODE,POS)\
         TMPVAR = gt_encseq_get_encoded_char(ENCSEQ,POS,READMODE);\
         if (ISNOTSPECIAL(TMPVAR))\
         {\
@@ -7064,8 +7064,8 @@ int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
         }
       } else
       {
-        GT_ENCSEQ_DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,encseq1,
-                               readmode,vtk1->pos);
+        GT_ENCSEQ_DEREF_STOPPOS(cc1,commonunits->leftspecial,tmp,encseq1,
+                                readmode,vtk1->pos);
         cc2 = GT_UNIQUEINT(vtk2->pos);
         commonunits->rightspecial = true;
         gt_assert(cc1 != cc2);
@@ -7078,8 +7078,8 @@ int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
       commonunits->leftspecial = true;
       if (vtk2->pos < vtk2->endpos)
       {
-        GT_ENCSEQ_DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,encseq2,
-                               readmode,vtk2->pos);
+        GT_ENCSEQ_DEREF_STOPPOS(cc2,commonunits->rightspecial,tmp,encseq2,
+                                readmode,vtk2->pos);
       } else
       {
         cc2 = GT_UNIQUEINT(vtk2->pos);
