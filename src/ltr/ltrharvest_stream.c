@@ -44,10 +44,10 @@
 
 typedef struct
 {
-  unsigned long pos1;         /* first position of maximal repeat (seed) */
-  unsigned long offset;       /* second position = pos1 + offset */
-  unsigned long len;          /* length of maximal repeat  */
-  unsigned long contignumber; /* number of contig for this repeat */
+  unsigned long pos1,         /* first position of maximal repeat (seed) */
+                offset,       /* second position = pos1 + offset */
+                len,          /* length of maximal repeat  */
+                contignumber; /* number of contig for this repeat */
 } Repeat;
 
 GT_DECLAREARRAYSTRUCT(Repeat);
@@ -57,10 +57,16 @@ GT_DECLAREARRAYSTRUCT(Repeat);
 typedef struct
 {
   GtArrayRepeat repeats; /* array of maximal repeats (seeds) */
-  unsigned long lmin;        /* minimum allowed length of a LTR */
-  unsigned long lmax;        /* maximum allowed length of a LTR */
-  unsigned long dmin;        /* minimum distance between LTRs */
-  unsigned long dmax;        /* maximum distance between LTRs */
+  unsigned long lmin,        /* minimum allowed length of a LTR */
+                lmax,        /* maximum allowed length of a LTR */
+                dmin,        /* minimum distance between LTRs */
+                dmax,        /* maximum distance between LTRs */
+                max_contiglength;/* maximum length of sequence in encseq,
+                                    defines upper bound of two positions on the
+                                    same contig. If the distance is larger
+                                    then this value, the repeat instances
+                                    are on different contigs and can be
+                                    discarded */
   GtRange ltrsearchseqrange; /* if start and end are 0, then no range */
 } RepeatInfo;
 
@@ -169,22 +175,18 @@ static int gt_simpleexactselfmatchstore(void *info,
                                         unsigned long pos2,
                                         GT_UNUSED GtError *err)
 {
-  unsigned long tmp,
-                contignumber = 0,
-                seqnum1,
-                seqnum2;
-  bool samecontig = false;
+  unsigned long distance;
   RepeatInfo *repeatinfo = (RepeatInfo *) info;
 
   gt_error_check(err);
   if (pos1 > pos2)
   {
-    tmp = pos1;
+    unsigned long tmp = pos1;
     pos1 = pos2;
     pos2 = tmp;
   }
-  if (repeatinfo->ltrsearchseqrange.start != 0 ||
-      repeatinfo->ltrsearchseqrange.end != 0)
+  if (repeatinfo->ltrsearchseqrange.start > 0 ||
+      repeatinfo->ltrsearchseqrange.end > 0)
   {
     if (pos1 < repeatinfo->ltrsearchseqrange.start  ||
         pos2 + len - 1 > repeatinfo->ltrsearchseqrange.end)
@@ -192,27 +194,26 @@ static int gt_simpleexactselfmatchstore(void *info,
       return 0;
     }
   }
-
-  tmp = pos2 - pos1;
-  seqnum1 = gt_encseq_seqnum(encseq,pos1);
-  seqnum2 = gt_encseq_seqnum(encseq,pos2);
-  if (seqnum1 == seqnum2)
-  {
-    samecontig = true;
-    contignumber = seqnum1;
-  }
+  distance = pos2 - pos1;
   /*test maximal length of candidate pair and distance constraints*/
-  if (samecontig && len <= repeatinfo->lmax
-                 && repeatinfo->dmin <= tmp
-                 && tmp <= repeatinfo->dmax)
+  if (distance <= repeatinfo->max_contiglength
+        && len <= repeatinfo->lmax
+        && repeatinfo->dmin <= distance
+        && distance <= repeatinfo->dmax)
   {
-    Repeat *nextfreerepeatptr;
+    const unsigned long seqnum1 = gt_encseq_seqnum(encseq,pos1);
+    const unsigned long seqnum2 = gt_encseq_seqnum(encseq,pos2);
 
-    GT_GETNEXTFREEINARRAY(nextfreerepeatptr, &repeatinfo->repeats, Repeat, 10);
-    nextfreerepeatptr->pos1 = pos1;
-    nextfreerepeatptr->offset = tmp;
-    nextfreerepeatptr->len = len;
-    nextfreerepeatptr->contignumber = contignumber;
+    if (seqnum1 == seqnum2)
+    {
+      Repeat *nextfreerepeatptr;
+
+      GT_GETNEXTFREEINARRAY(nextfreerepeatptr,&repeatinfo->repeats,Repeat,32);
+      nextfreerepeatptr->pos1 = pos1;
+      nextfreerepeatptr->offset = distance;
+      nextfreerepeatptr->len = len;
+      nextfreerepeatptr->contignumber = seqnum1;
+    }
   }
   return 0;
 }
@@ -228,8 +229,9 @@ static int gt_subsimpleexactselfmatchstore(void *info,
   GT_GETNEXTFREEINARRAY (nextfreerepeatptr, &sri->repeats, Repeat, 10);
   nextfreerepeatptr->pos1 = sri->offset1 + gt_querymatch_dbstart(querymatch);
   nextfreerepeatptr->offset = sri->offset2 +
-                             gt_querymatch_querystart(querymatch) -
-                             (sri->offset1 + gt_querymatch_dbstart(querymatch));
+                              gt_querymatch_querystart(querymatch) -
+                              (sri->offset1 +
+                               gt_querymatch_dbstart(querymatch));
   nextfreerepeatptr->len = gt_querymatch_len(querymatch);
   return 0;
 }
@@ -283,8 +285,8 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
                                                 unsigned int
                                                 *motifmismatchesrightLTR)
 {
-  unsigned long i;
-  unsigned long motifpos1,
+  unsigned long i,
+         motifpos1,
          motifpos2,
          back, forward,
          oldleftLTR_5  = boundaries->leftLTR_5,
@@ -747,7 +749,6 @@ static int searchforTSDandorMotifoutside(
          sequenceendpos,
          seqstartpos,
          seqlength;
-  unsigned long contignumber = boundaries->contignumber;
   SubRepeatInfo subrepeatinfo;
   bool haserr = false;
 
@@ -756,9 +757,9 @@ static int searchforTSDandorMotifoutside(
   /* check border cases */
 
   /* vicinity of 5'-border of left LTR */
-  seqstartpos = gt_encseq_seqstartpos(lo->encseq, contignumber);
-  seqlength = gt_encseq_seqlength(lo->encseq, contignumber);
-  if (contignumber == 0)
+  seqstartpos = gt_encseq_seqstartpos(lo->encseq, boundaries->contignumber);
+  seqlength = gt_encseq_seqlength(lo->encseq, boundaries->contignumber);
+  if (boundaries->contignumber == 0)
   {
     /* do not align over left sequence boundary,
        in case of need decrease alignment length */
@@ -778,19 +779,16 @@ static int searchforTSDandorMotifoutside(
       startleftLTR = seqstartpos;
     } else
     {
-      if (((startleftLTR =
-              boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries) <
-                seqstartpos)
-            &&
-          (boundaries->leftLTR_5 >= seqstartpos))
+      startleftLTR = boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries;
+      if (startleftLTR < seqstartpos && boundaries->leftLTR_5 >= seqstartpos)
       {
         startleftLTR = seqstartpos;
       }
     }
   }
   /* do not align over 3'-border of left LTR */
-  if ((endleftLTR = boundaries->leftLTR_5 + lo->vicinityforcorrectboundaries)
-       > boundaries->leftLTR_3 - 2) /* -2 because of possible motif */
+  endleftLTR = boundaries->leftLTR_5 + lo->vicinityforcorrectboundaries;
+  if (endleftLTR > boundaries->leftLTR_3 - 2) /* -2 because of possible motif */
   {
     endleftLTR = boundaries->leftLTR_3 - 2;
   }
@@ -798,9 +796,8 @@ static int searchforTSDandorMotifoutside(
 
   /* vicinity of 3'-border of right LTR
      do not align over 5'border of right LTR */
-  if ((startrightLTR =
-         boundaries->rightLTR_3 - lo->vicinityforcorrectboundaries) <
-      boundaries->rightLTR_5 + 2)  /* +2 because of possible motif */
+  startrightLTR = boundaries->rightLTR_3 - lo->vicinityforcorrectboundaries;
+  if (startrightLTR < boundaries->rightLTR_5 + 2) /* +2 for possible motif */
   {
     startrightLTR = boundaries->rightLTR_5 + 2;
   }
@@ -808,8 +805,7 @@ static int searchforTSDandorMotifoutside(
   /* do not align into next sequence in case of need decrease alignment
      length */
   endrightLTR = boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries;
-  if (endrightLTR > sequenceendpos &&
-      boundaries->rightLTR_3 <= sequenceendpos)
+  if (endrightLTR > sequenceendpos && boundaries->rightLTR_3 <= sequenceendpos)
   {
     endrightLTR = sequenceendpos;
   }
@@ -833,19 +829,18 @@ static int searchforTSDandorMotifoutside(
     subrepeatinfo.offset2 = startrightLTR;
 
     if (gt_sarrquerysubstringmatch(dbseq,
-                                leftlen,
-                                query,
-                                rightlen,
-                                lo->minlengthTSD,
-                                gt_encseq_alphabet(lo->encseq),
-                                gt_subsimpleexactselfmatchstore,
-                                &subrepeatinfo,
-                                NULL,
-                                err) != 0)
+                                   leftlen,
+                                   query,
+                                   rightlen,
+                                   lo->minlengthTSD,
+                                   gt_encseq_alphabet(lo->encseq),
+                                   gt_subsimpleexactselfmatchstore,
+                                   &subrepeatinfo,
+                                   NULL,
+                                   err) != 0)
     {
        haserr = true;
     }
-
     gt_free(dbseq);
     gt_free(query);
 
@@ -909,7 +904,7 @@ static int gt_findcorrectboundaries(GtLTRharvestStream *lo,
 }
 
 static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
-                                             RepeatInfo *repeatinfo)
+                                              const RepeatInfo *repeatinfo)
 {
   unsigned long ulen, vlen, dist_between_LTRs;
 
@@ -930,8 +925,8 @@ static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
   } else
   {
     boundaries->lengthdistconstraint = true;
+    return true;
   }
-  return true;
 }
 
 static void adjustboundariesfromXdropextension(GtXdropbest xdropbest_left,
@@ -982,7 +977,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
   gt_error_check(err);
   xdropresources = gt_xdrop_resources_new(&lo->arbitscores);
   for (repeatptr = lo->repeatinfo.repeats.spaceRepeat;
-       repeatptr < lo->repeatinfo.repeats.spaceRepeat + 
+       repeatptr < lo->repeatinfo.repeats.spaceRepeat +
                    lo->repeatinfo.repeats.nextfreeRepeat; repeatptr++)
   {
     alilen = lo->repeatinfo.lmax - repeatptr->len;
@@ -1270,15 +1265,14 @@ static void gt_removeoverlapswithlowersimilarity(
   }
 }
 
-static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
+static int gt_ltrharvest_stream_next(GtNodeStream *ns,
                                      GtGenomeNode **gn,
                                      GtError *err)
 {
-  GtLTRharvestStream *ltrh_stream;
   int had_err = 0;
-  gt_error_check(err);
-  ltrh_stream = gt_ltrharvest_stream_cast(ns);
+  GtLTRharvestStream *ltrh_stream = gt_ltrharvest_stream_cast(ns);
 
+  gt_error_check(err);
   /* LTRharvest run */
   if (ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_START) {
 
@@ -1679,6 +1673,8 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
   }
   /* get encseq associated with suffix array */
   ltrh_stream->encseq = gt_encseqSequentialsuffixarrayreader(ltrh_stream->ssar);
+  ltrh_stream->repeatinfo.max_contiglength
+    = gt_encseq_max_seq_length(ltrh_stream->encseq);
 
   /* encode motif according to encseq alphabet */
   had_err = gt_ltr_four_char_motif_encode(motif, ltrh_stream->encseq, err);
