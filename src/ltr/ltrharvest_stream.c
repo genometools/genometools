@@ -75,8 +75,8 @@ typedef struct
 typedef struct
 {
   GtArrayRepeat repeats; /* array of maximal repeats for TSDs */
-  unsigned long lmin,    /* minimal length of TSD */
-                lmax,    /* maximal length of TSD */
+  unsigned long tsd_lmin,    /* minimal length of TSD */
+                tsd_lmax,    /* maximal length of TSD */
                 offset1, /* offset1 for absolute position 1 in sequence */
                 offset2; /* offset2 for absolute position 2 in sequence */
                          /* pos1 < pos2 */
@@ -277,53 +277,51 @@ static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
  a simple motif check at the boundaries of the TSDs is performed.
  */
 
-static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
-                                                GtLTRharvestStream *lo,
+static void searchforbestTSDandormotifatborders(const SubRepeatInfo
+                                                   *subrepeatinfo,
+                                                const GtLTRharvestStream *lo,
                                                 LTRboundaries *boundaries,
                                                 unsigned int
                                                 *motifmismatchesleftLTR,
                                                 unsigned int
                                                 *motifmismatchesrightLTR)
 {
-  unsigned long i,
-         motifpos1,
-         motifpos2,
-         back, forward,
-         oldleftLTR_5  = boundaries->leftLTR_5,
-         oldrightLTR_3 = boundaries->rightLTR_3,
-         difffromoldboundary1 = 0,
-         difffromoldboundary2 = 0;
+  unsigned long motifpos1,
+                motifpos2,
+                back, forward,
+                oldleftLTR_5  = boundaries->leftLTR_5,
+                oldrightLTR_3 = boundaries->rightLTR_3,
+                difffromoldboundary1 = 0,
+                difffromoldboundary2 = 0;
   unsigned int tmp_motifmismatchesleftLTR,
                tmp_motifmismatchesrightLTR,
                hitcounter = 0;
+  Repeat *rep;
 
-  if (info->repeats.nextfreeRepeat > 0)
+  if (subrepeatinfo->repeats.nextfreeRepeat > 0)
   {
     boundaries->tsd = true;
   }
   boundaries->motif_near_tsd = false;
 
-  for (i = 0; i < info->repeats.nextfreeRepeat; i++)
+  for (rep = subrepeatinfo->repeats.spaceRepeat;
+       rep < subrepeatinfo->repeats.spaceRepeat +
+             subrepeatinfo->repeats.nextfreeRepeat; rep++)
   {
     /* motifpos1 is the first position after the left repeat */
-    motifpos1 = info->repeats.spaceRepeat[i].pos1 +
-                           info->repeats.spaceRepeat[i].len;
+    motifpos1 = rep->pos1 + rep->len;
     /* motifpos2 is two positions before the right repeat */
-    motifpos2 = info->repeats.spaceRepeat[i].pos1
-                  + info->repeats.spaceRepeat[i].offset - 2;
+    motifpos2 = rep->pos1 + rep->offset - 2;
 
-    for (back = 0;
-         back < info->repeats.spaceRepeat[i].len - info->lmin + 1;
-         back++)
+    for (back = 0; back < rep->len - subrepeatinfo->tsd_lmin + 1; back++)
     {
       for (forward = 0;
-           forward < info->repeats.spaceRepeat[i].len -
-                     info->lmin + 1 - back;
+           forward < rep->len - subrepeatinfo->tsd_lmin + 1 - back;
            forward++)
       {
         tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
         if (gt_encseq_get_encoded_char(/* Random access */ lo->encseq,
-                            motifpos1 - back, GT_READMODE_FORWARD)
+                                       motifpos1 - back, GT_READMODE_FORWARD)
             != lo->motif->firstleft)
         {
           tmp_motifmismatchesleftLTR++;
@@ -354,18 +352,17 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
             &&
             tmp_motifmismatchesrightLTR <= lo->motif->allowedmismatches)
         {
-          unsigned long tsd_len;
-          tsd_len = info->repeats.spaceRepeat[i].len - back - forward;
+          const unsigned long tsd_len = rep->len - back - forward;
 
           /* TSD length not too big */
-          if (tsd_len <= info->lmax)
+          if (tsd_len <= subrepeatinfo->tsd_lmax)
           {
             if (!boundaries->motif_near_tsd)
             {
               unsigned long max, min;
 
               /* save number of mismatches */
-              *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
+              *motifmismatchesleftLTR = tmp_motifmismatchesleftLTR;
               *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
 
               /* adjust boundaries */
@@ -391,11 +388,11 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
                    difffromnewboundary2;
 
               /* test if hit is nearer to old boundaries than previous hit */
-              max = MAX(oldleftLTR_5, (motifpos1 - back));
-              min = MIN(oldleftLTR_5, (motifpos1 - back));
+              max = MAX(oldleftLTR_5, motifpos1 - back);
+              min = MIN(oldleftLTR_5, motifpos1 - back);
               difffromnewboundary1 = max - min;
-              max = MAX(oldrightLTR_3, (motifpos2 + 1 + forward));
-              min = MIN(oldrightLTR_3, (motifpos2 + 1 + forward));
+              max = MAX(oldrightLTR_3, motifpos2 + 1 + forward);
+              min = MIN(oldrightLTR_3, motifpos2 + 1 + forward);
               difffromnewboundary2 = max - min;
 
               if (difffromnewboundary1 + difffromnewboundary2 <
@@ -429,7 +426,7 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
  at the 5'-border of left LTR and 3'-border of right LTR.
  */
 
-static void searchformotifonlyborders(GtLTRharvestStream *lo,
+static void searchformotifonlyborders(const GtLTRharvestStream *lo,
     LTRboundaries *boundaries,
     unsigned long startleftLTR,
     unsigned long endleftLTR,
@@ -466,7 +463,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
     {
       tmp_motifmismatchesleftLTR++;
     }
-    if (tmp_motifmismatchesleftLTR + (*motifmismatchesleftLTR)
+    if (tmp_motifmismatchesleftLTR + *motifmismatchesleftLTR
                                 <= lo->motif->allowedmismatches)
     {
        /* first hit */
@@ -564,7 +561,7 @@ static void searchformotifonlyborders(GtLTRharvestStream *lo,
  3'-border of left LTR and the 5'-border of right LTR.
  */
 
-static void searchformotifonlyinside(GtLTRharvestStream *lo,
+static void searchformotifonlyinside(const GtLTRharvestStream *lo,
                                      LTRboundaries *boundaries,
                                      unsigned int *motifmismatchesleftLTR,
                                      unsigned int *motifmismatchesrightLTR)
@@ -734,7 +731,7 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
  */
 
 static int searchforTSDandorMotifoutside(
-  GtLTRharvestStream *lo,
+  const GtLTRharvestStream *lo,
   LTRboundaries *boundaries,
   unsigned int *motifmismatchesleftLTR,
   unsigned int *motifmismatchesrightLTR,
@@ -822,8 +819,8 @@ static int searchforTSDandorMotifoutside(
     gt_encseq_extract_encoded(lo->encseq,dbseq,startleftLTR,endleftLTR);
     gt_encseq_extract_encoded(lo->encseq,query,startrightLTR,endrightLTR);
     GT_INITARRAY(&subrepeatinfo.repeats, Repeat);
-    subrepeatinfo.lmin = (unsigned long) lo->minlengthTSD;
-    subrepeatinfo.lmax = (unsigned long) lo->maxlengthTSD;
+    subrepeatinfo.tsd_lmin = (unsigned long) lo->minlengthTSD;
+    subrepeatinfo.tsd_lmax = (unsigned long) lo->maxlengthTSD;
     gt_assert(startleftLTR < startrightLTR);
     subrepeatinfo.offset1 = startleftLTR;
     subrepeatinfo.offset2 = startrightLTR;
@@ -871,9 +868,9 @@ static int searchforTSDandorMotifoutside(
  The following function searches for TSD and/or a specified palindromic motif
  at the borders of left LTR and the right LTR, respectively.
  */
-static int gt_findcorrectboundaries(GtLTRharvestStream *lo,
-                                     LTRboundaries *boundaries,
-                                     GtError *err)
+static int gt_findcorrectboundaries(const GtLTRharvestStream *lo,
+                                    LTRboundaries *boundaries,
+                                    GtError *err)
 {
   unsigned int motifmismatchesleftLTR = 0,
                motifmismatchesrightLTR = 0;
@@ -1135,7 +1132,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     edist = greedyunitedist(frontresource,sa_useq,sa_vseq);
 
     /* determine similarity */
-    boundaries->similarity = 100.0 * (1 - (((double) edist)/(MAX(ulen,vlen))));
+    boundaries->similarity = 100.0 * (1.0 - (double) edist/MAX(ulen,vlen));
 
     if (gt_double_smaller_double(boundaries->similarity,
                                  lo->similaritythreshold))
