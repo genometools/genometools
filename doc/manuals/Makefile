@@ -96,6 +96,7 @@ tagerator.dvi:${TAGERATORTMP}.tex
 
 clean:
 	${RM} *.aux  *.log *.bbl  *.blg *.dvi *.mer *.mct *.mbd comment.cut
+	${RM} *.out *.toc
 	${RM} U89959.fna read[12].fna 
 	${RM} reads.al1 reads.esq reads.lcp reads.llv reads.prj reads.suf
 	${RM} ${TALLYMERTMP}.tex

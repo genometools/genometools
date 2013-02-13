@@ -1089,8 +1089,6 @@ obj/%.prepro: ${CURDIR}/src/extended/%.c
 
 RUBY:=ruby
 
-RUBY:=ruby
-
 test: all
 	GT_MEM_BOOKKEEPING=on bin/gt -test
 	cd testsuite && env -i GT_MEM_BOOKKEEPING=on MAKE=$(MAKE) PATH=$(PATH) \
@@ -1103,7 +1101,20 @@ clean:
 	rm -rf obj
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 	$(MAKE) -s -C $(CURDIR)/doc/devguide clean
+	$(MAKE) -s -C $(CURDIR)/doc/manuals cleanup
 	test -d "$(HMMER_BASE)" && $(MAKE) -s -C $(HMMER_BASE) clean || true
+
+cleangenerated:
+	rm -f doc/manuals/api_reference.tex \
+          doc/manuals/gtscript_reference.tex
+	find doc . -name "*.toc" -delete
+	rm -f www/genometools.org/htdocs/images/callbacks.png \
+          www/genometools.org/htdocs/images/parsed.png    \
+          www/genometools.org/htdocs/images/constructed.png \
+          doc/manuals/annotationsketch.pdf
+	rm -f www/genometools.org/htdocs/docs.html \
+          www/genometools.org/htdocs/examples.html \
+          www/genometools.org/htdocs/libgenometools.html
 
 gtkviewer:
 	@echo "[compile $(notdir $@)]"
@@ -1111,8 +1122,9 @@ gtkviewer:
   src/examples/gtkviewer.c  -lcairo `pkg-config --cflags --libs gtk+-2.0` \
   -lgenometools
 
-cleanup: clean
+cleanup: clean cleangenerated
 	rm -rf lib bin
+	rm -rf gtpython/build
 
 hmmer_get:
 	@echo "[check for HMMER3]"
