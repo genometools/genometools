@@ -61,7 +61,7 @@ GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
 GtRegionMapping* gt_region_mapping_ref(GtRegionMapping *region_mapping);
 
 /* Use <region_mapping> to extract the sequence from <start> to <end> of the
-    given sequence ID <seqid> into a buffer written to <seq>.
+   given sequence ID <seqid> into a buffer written to <seq>.
    In the case of an error, -1 is returned and <err> is set accordingly. */
 int              gt_region_mapping_get_sequence(GtRegionMapping *region_mapping,
                                                 char **seq, GtStr *seqid,
@@ -73,7 +73,7 @@ int              gt_region_mapping_get_sequence(GtRegionMapping *region_mapping,
    sequence ID   <seqid> and store the result in <length>.
    In the case of an error, -1 is returned and <err> is set accordingly. */
 int              gt_region_mapping_get_sequence_length(GtRegionMapping
-                                                                *region_mapping,
+                                                       *region_mapping,
                                                        unsigned long *length,
                                                        GtStr *seqid,
                                                        GtError *err);
