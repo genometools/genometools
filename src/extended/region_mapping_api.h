@@ -70,7 +70,7 @@ int              gt_region_mapping_get_sequence(GtRegionMapping *region_mapping,
                                                 GtError *err);
 
 /* Use <region_mapping> to retrieve the sequence length of the given
-   sequence ID   <seqid> and store the result in <length>.
+   sequence ID <seqid> and store the result in <length>.
    In the case of an error, -1 is returned and <err> is set accordingly. */
 int              gt_region_mapping_get_sequence_length(GtRegionMapping
                                                        *region_mapping,

@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2007-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2012-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -326,16 +326,58 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
 }
 
 int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
-                                      GtStr *md5_seqid, GtError *err)
+                                      GtStr *seqid, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(rm && desc && md5_seqid);
-  /* this method is only implemented for MD5 seqids */
-  gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
-  had_err = update_seq_col_if_necessary(rm, md5_seqid, err);
-  if (!had_err)
-    had_err = gt_seq_col_md5_to_description(rm->seq_col, desc, md5_seqid, err);
+  gt_assert(rm && desc && seqid);
+  if (rm->userawseq) {
+    gt_str_append_cstr(desc, "<rawseq>");
+    return 0;
+  }
+  had_err = update_seq_col_if_necessary(rm, seqid, err);
+  if (!had_err) {
+    if (gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
+      had_err = gt_seq_col_md5_to_description(rm->seq_col, desc, seqid,
+                                              err);
+    }
+    return had_err;
+  }
+  if (!had_err) {
+    if (rm->usedesc) {
+      unsigned long filenum, seqnum;
+      gt_assert(rm->seqid2seqnum_mapping);
+      had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
+                                            gt_str_get(seqid), NULL, &seqnum,
+                                            &filenum,
+                                            NULL, err);
+      if (!had_err) {
+        char *cdesc;
+        cdesc = gt_seq_col_get_description(rm->seq_col, filenum, seqnum);
+        gt_assert(cdesc);
+        gt_str_append_cstr(desc, cdesc);
+        gt_free(cdesc);
+      }
+    } else if (rm->matchdesc) {
+      const char *md5;
+      /* XXX: not beautiful, but works -- this may be LOTS faster */
+      had_err = gt_seq_col_grep_desc_md5(rm->seq_col, &md5, seqid, err);
+      if (!had_err) {
+        GtStr *md5_seqid = gt_str_new_cstr(md5);
+        had_err = gt_seq_col_md5_to_description(rm->seq_col, desc, md5_seqid,
+                                                err);
+        gt_str_delete(md5_seqid);
+      }
+    } else {
+      if (!had_err) {
+        char *cdesc;
+        cdesc = gt_seq_col_get_description(rm->seq_col, 0, 0);
+        gt_assert(cdesc);
+        gt_str_append_cstr(desc, cdesc);
+        gt_free(cdesc);
+      }
+    }
+  }
   return had_err;
 }
 
