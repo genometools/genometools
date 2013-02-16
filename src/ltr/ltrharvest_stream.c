@@ -930,10 +930,6 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
 {
   GtXdropresources *xdropresources;
   GtXdropbest xdropbest_left, xdropbest_right;
-  unsigned long alilen = 0,
-                totallength = gt_encseq_total_length(lo->encseq),
-                ulen,
-                vlen;
 #undef GT_GREEDY_BUFFER
 #ifdef GT_GREEDY_BUFFER
   unsigned long maxulen = 0, maxvlen = 0;
@@ -954,20 +950,32 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
        repeatptr < lo->repeatinfo.repeats.spaceRepeat +
                    lo->repeatinfo.repeats.nextfreeRepeat; repeatptr++)
   {
-    alilen = lo->repeatinfo.lmax - repeatptr->len;
+    unsigned long alilen,
+                  ulen,
+                  vlen,
+                  seqend,
+                  seqstart = gt_encseq_seqstartpos(lo->encseq,
+                                                   repeatptr->contignumber);
 
+    seqend = seqstart + gt_encseq_seqlength(lo->encseq,
+                                            repeatptr->contignumber);
+    gt_assert(lo->repeatinfo.lmax >= repeatptr->len);
+    alilen = lo->repeatinfo.lmax - repeatptr->len;
     /**** left (reverse) xdrop alignment ****/
     if (repeatptr->pos1 > 0)
     {
-      if (alilen <= repeatptr->pos1)
+      gt_assert(seqstart <= repeatptr->pos1);
+      if (alilen <= repeatptr->pos1 - seqstart)
       {
         gt_seqabstract_reinit_encseq(sa_useq,lo->encseq,alilen,0);
         gt_seqabstract_reinit_encseq(sa_vseq,lo->encseq,alilen,0);
       } else
       {
-        gt_seqabstract_reinit_encseq(sa_useq,lo->encseq,repeatptr->pos1,0);
+        gt_seqabstract_reinit_encseq(sa_useq,lo->encseq,
+                                     repeatptr->pos1 - seqstart,0);
         gt_seqabstract_reinit_encseq(sa_vseq,lo->encseq,
-                                     repeatptr->pos1 + repeatptr->offset,0);
+                                     repeatptr->pos1 + repeatptr->offset
+                                                     - seqstart,0);
       }
       gt_evalxdroparbitscoresextend(false,
                                     &xdropbest_left,
@@ -985,20 +993,21 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     }
     if (repeatptr->pos1 + repeatptr->len > 0)
     {
-      if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
-                                   repeatptr->len))
+      gt_assert(seqend >= repeatptr->pos1 + repeatptr->offset + repeatptr->len);
+      if (alilen <= seqend - (repeatptr->pos1 + repeatptr->offset +
+                              repeatptr->len))
       {
         gt_seqabstract_reinit_encseq(sa_useq,lo->encseq,alilen,0);
         gt_seqabstract_reinit_encseq(sa_vseq,lo->encseq,alilen,0);
       } else
       {
-        gt_seqabstract_reinit_encseq(sa_useq,lo->encseq,totallength -
-                                                    (repeatptr->pos1 +
-                                                     repeatptr->len),0);
-        gt_seqabstract_reinit_encseq(sa_vseq,lo->encseq,totallength -
-                                             (repeatptr->pos1 +
-                                              repeatptr->offset +
-                                              repeatptr->len),0);
+        gt_seqabstract_reinit_encseq(sa_useq,lo->encseq,
+                                     seqend - (repeatptr->pos1+repeatptr->len),
+                                     0);
+        gt_seqabstract_reinit_encseq(sa_vseq,lo->encseq,
+                                     seqend - (repeatptr->pos1 +
+                                               repeatptr->offset +
+                                               repeatptr->len),0);
       }
       gt_evalxdroparbitscoresextend(true,
                                     &xdropbest_right,
