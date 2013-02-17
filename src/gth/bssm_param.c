@@ -705,7 +705,6 @@ static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
   unsigned long i, j, k, /* Iterator variables */
                 num_entries = gt_bioseq_number_of_sequences(bioseq);
   const GtUchar *encoded_seq;
-  GtSeq *seq;
 
   /* Inits of local variables */
   for (i = 0; i < (STRINGSIZE-1); i++) {
@@ -719,20 +718,22 @@ static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
   /* mononucleotides */
   for (i = 0; i < (STRINGSIZE-1); i++) {
     for (j = 0; j < num_entries; j++) {
-      seq = gt_bioseq_get_seq(bioseq, j);
+      GtSeq *seq = gt_bioseq_get_seq(bioseq, j);
       encoded_seq = gt_seq_get_encoded(seq);
       gt_assert(encoded_seq[i] < ALPHSIZE);
       mono_ct[i][encoded_seq[i]]++;
+      gt_seq_delete(seq);
     }
   }
 
   /* dinucleotides */
   for (i = 0; i < (STRINGSIZE-1); i++) {
     for (j = 0; j < num_entries; j++) {
-      seq = gt_bioseq_get_seq(bioseq, j);
+      GtSeq *seq = gt_bioseq_get_seq(bioseq, j);
       encoded_seq = gt_seq_get_encoded(seq);
       di_ct[i][encoded_seq[i]]
               [encoded_seq[i + 1]]++;
+      gt_seq_delete(seq);
     }
   }
 
@@ -896,6 +897,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
           default: gt_assert(0);
         }
       }
+      gt_seq_delete(seq);
     }
 
     if (!had_err) {
