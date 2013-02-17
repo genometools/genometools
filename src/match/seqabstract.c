@@ -211,10 +211,10 @@ unsigned long gt_seqabstract_lcp(bool forward,
       }
     } else
     {
-      if (useq->seq.encseq == vseq->seq.encseq && !useq->cmpcharbychar &&
-          forward)
+      if (forward && !useq->cmpcharbychar && !vseq->cmpcharbychar)
       {
-        if (useq->offset + leftstart == vseq->offset + rightstart)
+        if (useq->seq.encseq == vseq->seq.encseq &&
+            useq->offset + leftstart == vseq->offset + rightstart)
         {
           if (useq->stoppossupport)
           {
