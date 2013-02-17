@@ -703,8 +703,9 @@ static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
   double mono_freq,      /* Mononuc relative freq */
          di_freq;        /* Dinuc relative freq */
   unsigned long i, j, k, /* Iterator variables */
+                len, curlen = 0,
                 num_entries = gt_bioseq_number_of_sequences(bioseq);
-  const GtUchar *encoded_seq;
+  GtUchar *encoded_seq = NULL;
 
   /* Inits of local variables */
   for (i = 0; i < (STRINGSIZE-1); i++) {
@@ -716,26 +717,34 @@ static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
   }
 
   /* mononucleotides */
-  for (i = 0; i < (STRINGSIZE-1); i++) {
-    for (j = 0; j < num_entries; j++) {
-      GtSeq *seq = gt_bioseq_get_seq(bioseq, j);
-      encoded_seq = gt_seq_get_encoded(seq);
+  for (j = 0; j < num_entries; j++) {
+    for (i = 0; i < (STRINGSIZE-1); i++) {
+      len = gt_bioseq_get_sequence_length(bioseq, j);
+      if (len > curlen) {
+        encoded_seq = gt_realloc(encoded_seq, len);
+        curlen = len;
+      }
+      gt_bioseq_get_encoded_sequence(bioseq, encoded_seq, j);
       gt_assert(encoded_seq[i] < ALPHSIZE);
       mono_ct[i][encoded_seq[i]]++;
-      gt_seq_delete(seq);
     }
   }
 
   /* dinucleotides */
-  for (i = 0; i < (STRINGSIZE-1); i++) {
-    for (j = 0; j < num_entries; j++) {
-      GtSeq *seq = gt_bioseq_get_seq(bioseq, j);
-      encoded_seq = gt_seq_get_encoded(seq);
+  for (j = 0; j < num_entries; j++) {
+    for (i = 0; i < (STRINGSIZE-1); i++) {
+      len = gt_bioseq_get_sequence_length(bioseq, j);
+      if (len > curlen) {
+        encoded_seq = gt_realloc(encoded_seq, len);
+        curlen = len;
+      }
+      gt_bioseq_get_encoded_sequence(bioseq, encoded_seq, j);
       di_ct[i][encoded_seq[i]]
               [encoded_seq[i + 1]]++;
-      gt_seq_delete(seq);
     }
   }
+
+  gt_free(encoded_seq);
 
   /* Record equilibrium frequencies (1st ``slot" in transition freqs) */
   for (i = 0; i < ALPHSIZE; i++) {
@@ -857,38 +866,36 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
     /* check here if all sequences have the length 102 and correct bases at
        positions 51 and 52 (i.e., GT, GC, or AG) */
     for (j = 0; !had_err && j < gt_bioseq_number_of_sequences(bioseq); j++) {
-      const GtUchar *encoded_seq;
-      GtSeq *seq;
+      GtUchar encoded_seq[2];
       /* check length */
       if (gt_bioseq_get_sequence_length(bioseq, j) != STRINGSIZE) {
         gt_error_set(err, "sequence %lu in file \"%s\" does not have length %u",
                      j, gt_str_get(file2proc), STRINGSIZE);
         had_err = -1;
       }
-      seq = gt_bioseq_get_seq(bioseq, j);
-      encoded_seq = gt_seq_get_encoded(seq);
+      gt_bioseq_get_encoded_sequence_range(bioseq, encoded_seq, j, 50, 51);
       if (!had_err) {
         /* check base correctness */
         switch (termtype) {
           case GT_DONOR_TYPE:
-            if (encoded_seq[50] != gt_alphabet_encode(alphabet, 'G') ||
-                encoded_seq[51] != gt_alphabet_encode(alphabet, 'T')) {
+            if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'G') ||
+                encoded_seq[1] != gt_alphabet_encode(alphabet, 'T')) {
               gt_error_set(err, "sequence %lu in file \"%s\" is not a GT "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
             break;
           case GC_DONOR_TYPE:
-            if (encoded_seq[50] != gt_alphabet_encode(alphabet, 'G') ||
-                encoded_seq[51] != gt_alphabet_encode(alphabet, 'C')) {
+            if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'G') ||
+                encoded_seq[1] != gt_alphabet_encode(alphabet, 'C')) {
               gt_error_set(err, "sequence %lu in file \"%s\" is not a GC "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
             break;
           case AG_ACCEPTOR_TYPE:
-            if (encoded_seq[50] != gt_alphabet_encode(alphabet, 'A') ||
-                encoded_seq[51] != gt_alphabet_encode(alphabet, 'G')) {
+            if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'A') ||
+                encoded_seq[1] != gt_alphabet_encode(alphabet, 'G')) {
               gt_error_set(err, "sequence %lu in file \"%s\" is not a AG "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
@@ -897,7 +904,6 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
           default: gt_assert(0);
         }
       }
-      gt_seq_delete(seq);
     }
 
     if (!had_err) {
