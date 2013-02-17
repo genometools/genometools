@@ -195,9 +195,8 @@ static int bioseq_fill(GtBioseq *bs, bool recreate, GtError *err)
   return had_err;
 }
 
-static GtBioseq* gt_bioseq_new_with_recreate_and_type(GtStr *sequence_file,
-                                                      bool recreate,
-                                                      GtError *err)
+static GtBioseq* bioseq_new_with_recreate_and_type(GtStr *sequence_file,
+                                                   bool recreate, GtError *err)
 {
   GtBioseq *bs;
   int had_err = 0;
@@ -230,7 +229,7 @@ GtBioseq* gt_bioseq_new(const char *sequence_file, GtError *err)
   GtStr *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
-  bs = gt_bioseq_new_with_recreate_and_type(seqfile, false, err);
+  bs = bioseq_new_with_recreate_and_type(seqfile, false, err);
   gt_str_delete(seqfile);
   return bs;
 }
@@ -241,14 +240,14 @@ GtBioseq* gt_bioseq_new_recreate(const char *sequence_file, GtError *err)
   GtStr *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
-  bs = gt_bioseq_new_with_recreate_and_type(seqfile, true, err);
+  bs = bioseq_new_with_recreate_and_type(seqfile, true, err);
   gt_str_delete(seqfile);
   return bs;
 }
 
 GtBioseq* gt_bioseq_new_str(GtStr *sequence_file, GtError *err)
 {
-  return gt_bioseq_new_with_recreate_and_type(sequence_file, false, err);
+  return bioseq_new_with_recreate_and_type(sequence_file, false, err);
 }
 
 void gt_bioseq_delete(GtBioseq *bs)
