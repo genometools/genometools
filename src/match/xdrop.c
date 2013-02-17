@@ -227,20 +227,9 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
         {\
           GtUchar a, b;\
           a = GT_XDROP_SEQACC(useq,uoffset,I);\
-          if (a == (GtUchar) SEPARATOR)\
-          {\
-            ulen = I;\
-            leftsep = true;\
-            break;\
-          }\
           b = GT_XDROP_SEQACC(vseq,voffset,J);\
-          if (b == (GtUchar) SEPARATOR)\
-          {\
-            vlen = J;\
-            rightsep = true;\
-            break;\
-          }\
-          if (a != b || a == (GtUchar) WILDCARD)\
+          gt_assert(a != (GtUchar) SEPARATOR && b != (GtUchar) SEPARATOR);\
+          if (a != b || ISSPECIAL(a))\
           {\
             break;\
           }\
@@ -279,54 +268,42 @@ void gt_evalxdroparbitscoresextend(bool forward,
                                    unsigned long voffset,
                                    GtXdropscore xdropbelowscore)
 {
-  long integermax,
-      integermin,
-      ulen,
-      vlen,
-      idx,
-      end_k,     /* diagonal of endpoint (ulen, vlen) */
-      lbound,    /* diagonal lower bound */
-      ubound,    /* diagonal upper bound */
-      currd = 0; /* distance */
-  const long dback = GT_XDROP_SETDBACK(xdropbelowscore);
+  const long ulen = (long) gt_seqabstract_length_get(useq),
+             vlen = (long) gt_seqabstract_length_get(vseq),
+             end_k = ulen - vlen, /* diagonal of endpoint (ulen, vlen) */
+             integermax = MAX(ulen, vlen),
+             integermin = -integermax,
+             dback = GT_XDROP_SETDBACK(xdropbelowscore);
+  long idx,
+       lbound,    /* diagonal lower bound */
+       ubound,    /* diagonal upper bound */
+       starti,
+       currd = 0; /* distance */
   /*The following function calculates the maximal allowed number of
     generations with all front values equal minus infinity.*/
   const int allowedMININFINITYINTgenerations
               = MAX(MAX(res->arbitdistances.mis,res->arbitdistances.ins),
                     res->arbitdistances.del) - 1;
   int currentMININFINITYINTgeneration = 0;
-  bool leftsep, rightsep, leftsep2, rightsep2;
   unsigned long lcp;
-  long starti;
   GtXdropfrontvalue tmpfront;
   GtXdropscore bigt_tmp;        /* best score T' seen already */
   bool alwaysMININFINITYINT = true;
 
-  ulen = (long) gt_seqabstract_length_get(useq);
-  vlen = (long) gt_seqabstract_length_get(vseq);
-  end_k = ulen - vlen;              /* diagonal of endpoint (ulen, vlen) */
-  integermax = MAX(ulen, vlen);
-  integermin = -integermax;
   res->big_t.nextfreeGtXdropscore = 0;
   res->fronts.nextfreeGtXdropfrontvalue = 0;
   /* phase 0 */
-  lcp = gt_seqabstract_lcp(&leftsep2,
-                           &rightsep2,
-                           forward,
+  lcp = gt_seqabstract_lcp(forward,
                            useq,
                            vseq,
                            forward ? uoffset : uoffset - 1,
                            forward ? voffset : voffset - 1,
                            (unsigned long) MIN(ulen,vlen));
-  leftsep = false;
-  rightsep = false;
   for (idx = 0; idx < MIN(ulen,vlen); idx++)
   {
     GT_XDROP_COMPARESYMBOLSSEP(idx,idx);
   }
   gt_assert(lcp == (unsigned long) idx);
-  gt_assert((leftsep && leftsep2) || (!leftsep && !leftsep2));
-  gt_assert((rightsep && rightsep2) || (!rightsep && !rightsep2));
   /* alignment already finished */
   if (idx >= ulen || idx >= vlen)
   {
@@ -426,9 +403,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
             {
               gt_assert(forward || (uoffset > (unsigned long) i &&
                                     voffset > (unsigned long) j));
-              lcp = gt_seqabstract_lcp(&leftsep2,
-                                       &rightsep2,
-                                       forward,
+              lcp = gt_seqabstract_lcp(forward,
                                        useq,
                                        vseq,
                                        forward ? uoffset + i : uoffset - i - 1,
@@ -439,8 +414,6 @@ void gt_evalxdroparbitscoresextend(bool forward,
               lcp = 0;
             }
             starti = i;
-            leftsep = false;
-            rightsep = false;
             while (i < ulen && j < vlen)
             {
               GT_XDROP_COMPARESYMBOLSSEP(i,j);

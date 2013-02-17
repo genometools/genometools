@@ -138,22 +138,13 @@ GtUchar gt_seqabstract_encoded_char(const GtSeqabstract *sa,
                                         GT_READMODE_FORWARD);
 }
 
-#define GT_SEQABSTRACT_CHECK_SEP(VAR,SEP)\
-        if ((VAR) == (GtUchar) SEPARATOR)\
-        {\
-          *(SEP) = true;\
-          break;\
-        }
-
 #define GT_SEQABSTRACT_CMPCHAR(VARA,VARB)\
-        if ((VARA) != (VARB) || (VARA) == (GtUchar) WILDCARD)\
+        if ((VARA) != (VARB) || ISSPECIAL(VARA))\
         {\
           break;\
         }
 
-unsigned long gt_seqabstract_lcp(bool *leftsep,
-                                 bool *rightsep,
-                                 bool forward,
+unsigned long gt_seqabstract_lcp(bool forward,
                                  const GtSeqabstract *useq,
                                  const GtSeqabstract *vseq,
                                  unsigned long leftstart,
@@ -163,8 +154,6 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
   unsigned long lcp;
   GtUchar a, b;
 
-  *leftsep = false;
-  *rightsep = false;
   if (minlen == 0)
   {
     return 0;
@@ -189,9 +178,7 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
         for (lcp = 0; lcp < minlen; lcp++)
         {
           a = useq->seq.ptr[forward ? leftstart + lcp : leftstart - lcp];
-          GT_SEQABSTRACT_CHECK_SEP(a,leftsep);
           b = vseq->seq.ptr[forward ? rightstart + lcp : rightstart - lcp];
-          GT_SEQABSTRACT_CHECK_SEP(b,rightsep);
           GT_SEQABSTRACT_CMPCHAR(a,b);
         }
       }
@@ -200,13 +187,11 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
       for (lcp = 0; lcp < minlen; lcp++)
       {
         a = useq->seq.ptr[forward ? leftstart + lcp : leftstart - lcp];
-        GT_SEQABSTRACT_CHECK_SEP(a,leftsep);
         b = gt_encseq_get_encoded_char(vseq->seq.encseq,
                                        vseq->offset +
                                        (forward ? rightstart + lcp
                                                 : rightstart - lcp),
                                        GT_READMODE_FORWARD);
-        GT_SEQABSTRACT_CHECK_SEP(b,rightsep);
         GT_SEQABSTRACT_CMPCHAR(a,b);
       }
     }
@@ -221,9 +206,7 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
                                        (forward ? leftstart + lcp
                                                 : leftstart - lcp),
                                        GT_READMODE_FORWARD);
-        GT_SEQABSTRACT_CHECK_SEP(a,leftsep);
         b = vseq->seq.ptr[forward ? rightstart + lcp : rightstart - lcp];
-        GT_SEQABSTRACT_CHECK_SEP(b,rightsep);
         GT_SEQABSTRACT_CMPCHAR(a,b);
       }
     } else
@@ -244,13 +227,6 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
             stoppos = gt_getnexttwobitencodingstoppos(true,useq->esr);
             gt_assert(useq->offset + leftstart <= stoppos);
             lcp = stoppos - (useq->offset + leftstart);
-            a = gt_encseq_get_encoded_char(useq->seq.encseq,
-                                           stoppos,
-                                           GT_READMODE_FORWARD);
-            if (a == (GtUchar) SEPARATOR)
-            {
-              *leftsep = true;
-            }
           } else
           {
             for (lcp = 0; lcp < minlen; lcp++)
@@ -258,12 +234,7 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
               a = gt_encseq_get_encoded_char(useq->seq.encseq,
                                              useq->offset + leftstart + lcp,
                                              GT_READMODE_FORWARD);
-              if (a == (GtUchar) SEPARATOR)
-              {
-                *leftsep = true;
-                break;
-              }
-              if (a == (GtUchar) WILDCARD)
+              if (ISSPECIAL(a))
               {
                 break;
               }
@@ -284,24 +255,6 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
                                                      0,
                                                      minlen);
           lcp = commonunits.finaldepth;
-          if (commonunits.leftspecial &&
-              (useq->offset + leftstart + lcp == useq->totallength ||
-               gt_encseq_position_is_separator(useq->seq.encseq,
-                                               useq->offset + leftstart + lcp,
-                                               GT_READMODE_FORWARD)))
-          {
-            *leftsep = true;
-          } else
-          {
-            if (commonunits.rightspecial &&
-                (vseq->offset + rightstart + lcp == vseq->totallength ||
-                 gt_encseq_position_is_separator(vseq->seq.encseq,
-                                                 vseq->offset+ rightstart + lcp,
-                                                 GT_READMODE_FORWARD)))
-            {
-              *rightsep = true;
-            }
-          }
         }
       } else
       {
@@ -312,13 +265,11 @@ unsigned long gt_seqabstract_lcp(bool *leftsep,
                                          (forward ? leftstart + lcp
                                                   : leftstart - lcp),
                                          GT_READMODE_FORWARD);
-          GT_SEQABSTRACT_CHECK_SEP(a,leftsep);
           b = gt_encseq_get_encoded_char(vseq->seq.encseq,
                                          vseq->offset +
                                          (forward ? rightstart + lcp
                                                   : rightstart - lcp),
                                          GT_READMODE_FORWARD);
-          GT_SEQABSTRACT_CHECK_SEP(b,rightsep);
           GT_SEQABSTRACT_CMPCHAR(a,b);
         }
       }

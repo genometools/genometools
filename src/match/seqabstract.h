@@ -50,9 +50,7 @@ GtUchar        gt_seqabstract_encoded_char(const GtSeqabstract *sa,
 
 void           gt_seqabstract_delete(GtSeqabstract *sa);
 
-unsigned long gt_seqabstract_lcp(bool *leftsep,
-                                 bool *rightsep,
-                                 bool forward,
+unsigned long gt_seqabstract_lcp(bool forward,
                                  const GtSeqabstract *useq,
                                  const GtSeqabstract *vseq,
                                  unsigned long leftstart,
