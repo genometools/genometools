@@ -342,6 +342,30 @@ char* gt_bioseq_get_sequence_range(const GtBioseq *bs, unsigned long idx,
   return out;
 }
 
+void gt_bioseq_get_encoded_sequence(const GtBioseq *bs, GtUchar *out,
+                                    unsigned long idx)
+{
+  unsigned long startpos;
+  gt_assert(bs);
+  gt_assert(idx < gt_encseq_num_of_sequences(bs->encseq));
+  startpos = gt_encseq_seqstartpos(bs->encseq, idx);
+  gt_encseq_extract_encoded(bs->encseq, out, startpos,
+                            startpos
+                              + gt_encseq_seqlength(bs->encseq, idx) - 1);
+}
+
+void gt_bioseq_get_encoded_sequence_range(const GtBioseq *bs, GtUchar *out,
+                                          unsigned long idx,
+                                          unsigned long start,
+                                          unsigned long end)
+{
+  unsigned long startpos;
+  gt_assert(bs);
+  gt_assert(idx < gt_encseq_num_of_sequences(bs->encseq) && end >= start);
+  startpos = gt_encseq_seqstartpos(bs->encseq, idx);
+  gt_encseq_extract_encoded(bs->encseq, out, startpos + start, startpos + end);
+}
+
 const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
 {
   gt_assert(bs && idx < gt_bioseq_number_of_sequences(bs));

@@ -44,6 +44,13 @@ char*         gt_bioseq_get_sequence(const GtBioseq*, unsigned long index);
 char*         gt_bioseq_get_sequence_range(const GtBioseq*, unsigned long index,
                                            unsigned long start,
                                            unsigned long end);
+void          gt_bioseq_get_encoded_sequence(const GtBioseq*, GtUchar *out,
+                                             unsigned long index);
+void          gt_bioseq_get_encoded_sequence_range(const GtBioseq*,
+                                                   GtUchar *out,
+                                                   unsigned long index,
+                                                   unsigned long start,
+                                                   unsigned long end);
 /* Return MD5 fingerprint of sequence with given <index>. */
 const char*   gt_bioseq_get_md5_fingerprint(GtBioseq*, unsigned long index);
 /* Return filename of sequence file underlying <bioseq>. */
