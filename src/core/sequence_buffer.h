@@ -47,7 +47,7 @@ GtSequenceBuffer*  gt_sequence_buffer_new_guess_type(const GtStrArray*,
 /* Fetches next character from <GtSequenceBuffer>.
    Returns 1 if a new character could be read, 0 if all files are exhausted, or
    -1 on error (see the <GtError> object for details). */
-int gt_sequence_buffer_next(GtSequenceBuffer*, GtUchar*, GtError*);
+int           gt_sequence_buffer_next(GtSequenceBuffer*, GtUchar*, GtError*);
 
 /* Fetches next character from <GtSequenceBuffer>.
    This method also always delivers the original character at the current
@@ -96,8 +96,8 @@ uint64_t      gt_sequence_buffer_get_lastspeciallength(const GtSequenceBuffer*);
 const unsigned long long*
               gt_sequence_buffer_get_counter(const GtSequenceBuffer *si);
 
-int           gt_sequence_buffer_unit_test(GtError*);
-
 void          gt_sequence_buffer_delete(GtSequenceBuffer*);
+
+int           gt_sequence_buffer_unit_test(GtError*);
 
 #endif
