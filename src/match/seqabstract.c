@@ -21,6 +21,7 @@
 #include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/encseq.h"
+#include "stamp.h"
 #include "greedyedist.h"
 
 struct GtSeqabstract
@@ -211,7 +212,7 @@ unsigned long gt_seqabstract_lcp(bool forward,
       }
     } else
     {
-      if (forward && !useq->cmpcharbychar && !vseq->cmpcharbychar)
+      if (!useq->cmpcharbychar && !vseq->cmpcharbychar)
       {
         if (useq->seq.encseq == vseq->seq.encseq &&
             useq->offset + leftstart == vseq->offset + rightstart)
@@ -219,20 +220,33 @@ unsigned long gt_seqabstract_lcp(bool forward,
           if (useq->stoppossupport)
           {
             unsigned long stoppos;
+            const unsigned long startpos
+               = forward ? (useq->offset + leftstart)
+                         : GT_REVERSEPOS(useq->totallength,
+                                         useq->offset + leftstart);
 
             gt_encseq_reader_reinit_with_readmode(useq->esr,
                                                   useq->seq.encseq,
-                                                  GT_READMODE_FORWARD,
-                                                  useq->offset + leftstart);
-            stoppos = gt_getnexttwobitencodingstoppos(true,useq->esr);
-            gt_assert(useq->offset + leftstart <= stoppos);
-            lcp = stoppos - (useq->offset + leftstart);
+                                                  forward
+                                                    ? GT_READMODE_FORWARD
+                                                    : GT_READMODE_REVERSE,
+                                                  startpos);
+            stoppos = gt_getnexttwobitencodingstoppos(forward,useq->esr);
+            if (!forward)
+            {
+              stoppos = GT_REVERSEPOS(useq->totallength+1,stoppos);
+            }
+            gt_assert(startpos <= stoppos);
+            lcp = stoppos - startpos;
           } else
           {
+            unsigned long startpos = forward ? (useq->offset + leftstart)
+                                             : (useq->offset - leftstart);
             for (lcp = 0; lcp < minlen; lcp++)
             {
               a = gt_encseq_get_encoded_char(useq->seq.encseq,
-                                             useq->offset + leftstart + lcp,
+                                             forward ? (startpos + lcp)
+                                                     : (startpos - lcp),
                                              GT_READMODE_FORWARD);
               if (ISSPECIAL(a))
               {
@@ -242,19 +256,38 @@ unsigned long gt_seqabstract_lcp(bool forward,
           }
         } else
         {
-          GtCommonunits commonunits;
+          if (forward)
+          {
+            GtCommonunits commonunits;
 
-          (void) gt_encseq_compare_viatwobitencoding(&commonunits,
-                                                     useq->seq.encseq,
-                                                     vseq->seq.encseq,
-                                                     GT_READMODE_FORWARD,
-                                                     useq->esr,
-                                                     vseq->esr,
-                                                     useq->offset + leftstart,
-                                                     vseq->offset + rightstart,
-                                                     0,
-                                                     minlen);
-          lcp = commonunits.finaldepth;
+            (void) gt_encseq_compare_viatwobitencoding(&commonunits,
+                                                       useq->seq.encseq,
+                                                       vseq->seq.encseq,
+                                                       GT_READMODE_FORWARD,
+                                                       useq->esr,
+                                                       vseq->esr,
+                                                       useq->offset + leftstart,
+                                                       vseq->offset+ rightstart,
+                                                       0,
+                                                       minlen);
+            lcp = commonunits.finaldepth;
+          } else
+          {
+            for (lcp = 0; lcp < minlen; lcp++)
+            {
+              a = gt_encseq_get_encoded_char(useq->seq.encseq,
+                                             useq->offset +
+                                             (forward ? leftstart + lcp
+                                                      : leftstart - lcp),
+                                             GT_READMODE_FORWARD);
+              b = gt_encseq_get_encoded_char(vseq->seq.encseq,
+                                             vseq->offset +
+                                             (forward ? rightstart + lcp
+                                                      : rightstart - lcp),
+                                             GT_READMODE_FORWARD);
+              GT_SEQABSTRACT_CMPCHAR(a,b);
+            }
+          }
         }
       } else
       {
