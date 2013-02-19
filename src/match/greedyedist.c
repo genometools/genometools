@@ -24,14 +24,6 @@
 #include "greedyedist.h"
 
 #define GT_FRONT_COMPARESYMBOLS(A,B)\
-        if ((A) == (GtUchar) SEPARATOR)\
-        {\
-          ftres->ubound = uidx;\
-        }\
-        if ((B) == (GtUchar) SEPARATOR)\
-        {\
-          ftres->vbound = vidx;\
-        }\
         if ((A) != (B) || ISSPECIAL(A))\
         {\
           break;\
@@ -58,9 +50,7 @@ typedef struct
 
 struct GtFrontResource
 {
-  unsigned long currentallocated,
-                ubound,
-                vbound;
+  unsigned long currentallocated;
   long ulen,
        vlen,
        integermin;
@@ -69,15 +59,7 @@ struct GtFrontResource
 
 static unsigned long sumofoddnumbers(unsigned long max)
 {
-  unsigned long idx, sum = 0, oddnum = 1UL;
-
-  for (idx = 1UL; idx <= max; idx++)
-  {
-    sum += oddnum;
-    oddnum += 2;
-  }
-  gt_assert(max * max == sum);
-  return sum;
+  return max * max;
 }
 
 GtFrontResource *gt_frontresource_new(unsigned long maxdist)
@@ -212,7 +194,8 @@ static void evalentryforward(const GtSeqabstract *useq,
     vidx = (unsigned long) (t + k);
     if (ftres->ulen != 0 && ftres->vlen != 0)  /* only for nonempty strings */
     {
-      for (/* Nothing */; uidx < ftres->ubound && vidx < ftres->vbound;
+      for (/* Nothing */; uidx < (unsigned long) ftres->ulen &&
+                          vidx < (unsigned long) ftres->vlen;
            uidx++, vidx++)
       {
         a = gt_seqabstract_encoded_char(useq,uidx);
@@ -221,7 +204,7 @@ static void evalentryforward(const GtSeqabstract *useq,
       }
       t = (long) uidx;
     }
-    if (t > (long) ftres->ubound || t + k > (long) ftres->vbound)
+    if (t > ftres->ulen || t + k > ftres->vlen)
     {
       GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(fval),
                      GT_FRONT_MINUSINFINITY(ftres));
@@ -299,7 +282,8 @@ static void firstfrontforward(const GtSeqabstract *useq,
     GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),0);
   } else
   {
-    for (uidx = 0, vidx = 0; uidx < ftres->ubound && vidx < ftres->vbound;
+    for (uidx = 0, vidx = 0; uidx < (unsigned long) ftres->ulen &&
+                             vidx < (unsigned long) ftres->vlen;
          uidx++, vidx++)
     {
       a = gt_seqabstract_encoded_char(useq,uidx);
@@ -327,10 +311,8 @@ unsigned long greedyunitedist(GtFrontResource *ftres,
 #endif
   gt_assert(gt_seqabstract_length_get(useq) < (unsigned long) LONG_MAX);
   gt_assert(gt_seqabstract_length_get(vseq) < (unsigned long) LONG_MAX);
-  ftres->ubound = gt_seqabstract_length_get(useq);
-  ftres->vbound = gt_seqabstract_length_get(vseq);
-  ftres->ulen = (long) ftres->ubound;
-  ftres->vlen = (long) ftres->vbound;
+  ftres->ulen = (long) gt_seqabstract_length_get(useq);
+  ftres->vlen = (long) gt_seqabstract_length_get(vseq);
   ftres->integermin = -MAX(ftres->ulen,ftres->vlen);
   prevfspec = &frontspecspace[0];
   firstfrontforward(useq,vseq,ftres,prevfspec);
