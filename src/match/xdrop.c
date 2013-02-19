@@ -205,35 +205,11 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
   }
 }
 
-/*
- */
-
-#define LOOKAHEAD 10
-
 #define GT_XDROP_EVAL(K,D)\
         ((K) * res->arbitscores->mat/2 - (D) * res->arbitdistances.gcd)
+
 #define GT_XDROP_SETDBACK(XDROPBELOWSCORE)\
         (XDROPBELOWSCORE + res->arbitscores->mat/2)/res->arbitdistances.gcd + 1
-
-/*
- The following macro checks for wildcard and separator symbols.
- */
-
-#define GT_XDROP_SEQACC(SEQ,OFF,IDX)\
-        gt_seqabstract_encoded_char(SEQ,forward ? (OFF) + (IDX)\
-                                                : (OFF) - 1UL - (IDX))
-
-#define GT_XDROP_COMPARESYMBOLSSEP(I,J)\
-        {\
-          GtUchar a, b;\
-          a = GT_XDROP_SEQACC(useq,uoffset,I);\
-          b = GT_XDROP_SEQACC(vseq,voffset,J);\
-          gt_assert(a != (GtUchar) SEPARATOR && b != (GtUchar) SEPARATOR);\
-          if (a != b || ISSPECIAL(a))\
-          {\
-            break;\
-          }\
-        }
 
 static long gt_xdrop_frontvalue_get(const GtXdropresources *res,long d,long k)
 {
@@ -277,7 +253,6 @@ void gt_evalxdroparbitscoresextend(bool forward,
   long idx,
        lbound,    /* diagonal lower bound */
        ubound,    /* diagonal upper bound */
-       starti,
        currd = 0; /* distance */
   /*The following function calculates the maximal allowed number of
     generations with all front values equal minus infinity.*/
@@ -285,7 +260,6 @@ void gt_evalxdroparbitscoresextend(bool forward,
               = MAX(MAX(res->arbitdistances.mis,res->arbitdistances.ins),
                     res->arbitdistances.del) - 1;
   int currentMININFINITYINTgeneration = 0;
-  unsigned long lcp;
   GtXdropfrontvalue tmpfront;
   GtXdropscore bigt_tmp;        /* best score T' seen already */
   bool alwaysMININFINITYINT = true;
@@ -293,17 +267,12 @@ void gt_evalxdroparbitscoresextend(bool forward,
   res->big_t.nextfreeGtXdropscore = 0;
   res->fronts.nextfreeGtXdropfrontvalue = 0;
   /* phase 0 */
-  lcp = gt_seqabstract_lcp(forward,
-                           useq,
-                           vseq,
-                           forward ? uoffset : uoffset - 1,
-                           forward ? voffset : voffset - 1,
-                           (unsigned long) MIN(ulen,vlen));
-  for (idx = 0; idx < MIN(ulen,vlen); idx++)
-  {
-    GT_XDROP_COMPARESYMBOLSSEP(idx,idx);
-  }
-  gt_assert(lcp == (unsigned long) idx);
+  idx = (long) gt_seqabstract_lcp(forward,
+                                  useq,
+                                  vseq,
+                                  forward ? uoffset : uoffset - 1,
+                                  forward ? voffset : voffset - 1,
+                                  (unsigned long) MIN(ulen,vlen));
   /* alignment already finished */
   if (idx >= ulen || idx >= vlen)
   {
@@ -401,6 +370,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
           {
             if (ulen > i && vlen > j)
             {
+              unsigned long lcp;
               gt_assert(forward || (uoffset > (unsigned long) i &&
                                     voffset > (unsigned long) j));
               lcp = gt_seqabstract_lcp(forward,
@@ -409,24 +379,9 @@ void gt_evalxdroparbitscoresextend(bool forward,
                                        forward ? uoffset + i : uoffset - i - 1,
                                        forward ? voffset + j : voffset - j - 1,
                                        (unsigned long) MIN(ulen - i,vlen - j));
-            } else
-            {
-              lcp = 0;
+              i += lcp;
+              j += lcp;
             }
-            starti = i;
-            while (i < ulen && j < vlen)
-            {
-              GT_XDROP_COMPARESYMBOLSSEP(i,j);
-              i++;
-              j++;
-            }
-            if (lcp != (unsigned long) (i - starti))
-            {
-              printf("forward = %s: lcp = %lu != %lu = correct\n",
-                       forward ? "true" : "false",lcp,
-                       (unsigned long) (i-starti));
-            }
-            gt_assert(lcp == (unsigned long) (i - starti));
             alwaysMININFINITYINT = false;
             tmpfront.row = i;
             if (GT_XDROP_EVAL(i + j, currd) > bigt_tmp)
