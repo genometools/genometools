@@ -237,7 +237,7 @@ unsigned long gt_seqabstract_lcp(bool forward,
               stoppos = GT_REVERSEPOS(useq->totallength+1,stoppos);
             }
             gt_assert(startpos <= stoppos);
-            lcp = stoppos - startpos;
+            lcp = MIN(minlen,stoppos - startpos);
           } else
           {
             unsigned long startpos = useq->offset + leftstart;
@@ -281,6 +281,7 @@ unsigned long gt_seqabstract_lcp(bool forward,
                                                      0,
                                                      minlen);
           lcp = commonunits.finaldepth;
+          gt_assert(lcp <= minlen);
         }
       } else
       {
