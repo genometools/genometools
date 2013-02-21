@@ -41,6 +41,7 @@
 .ccache
 .clang_complete
 .gdb_history
+.ycm_extra_conf.py
 /*.log
 /bin
 /dist
