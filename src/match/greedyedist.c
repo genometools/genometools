@@ -23,15 +23,8 @@
 #include "core/types_api.h"
 #include "greedyedist.h"
 
-#define GT_FRONT_COMPARESYMBOLS(A,B)\
-        if ((A) != (B) || ISSPECIAL(A))\
-        {\
-          break;\
-        }
-
 #define GT_FRONT_STORE(GL,F,V)         F = V
 #define GT_FRONT_ROWVALUE(FVAL)        *(FVAL)
-
 #define GT_FRONT_MINUSINFINITY(GL)     ((GL)->integermin)
 
 typedef long GtFrontvalue;
@@ -151,8 +144,6 @@ static void evalentryforward(const GtSeqabstract *useq,
                              long k)
 {
   long value, t;
-  unsigned long uidx, vidx;
-  GtUchar a, b;
   GtFrontvalue *fptr;
 
 #ifdef SKDEBUG
@@ -188,46 +179,18 @@ static void evalentryforward(const GtSeqabstract *useq,
     GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(fval),GT_FRONT_MINUSINFINITY(ftres));
   } else
   {
-    gt_assert(t >= 0);
-    uidx = (unsigned long) t;
-    gt_assert(t + k >= 0);
-    vidx = (unsigned long) (t + k);
-    if (ftres->ulen != 0 && ftres->vlen != 0)  /* only for nonempty strings */
+    if (ftres->ulen != 0 && ftres->vlen != 0 &&
+        t < ftres->ulen && t + k < ftres->vlen)
     {
-      unsigned long uidxprev = uidx, vidxprev = vidx, lcp;
-
-      if (uidx < (unsigned long) ftres->ulen &&
-          vidx < (unsigned long) ftres->vlen)
-      {
-        unsigned long minlen = MIN((unsigned long) ftres->ulen - uidx,
-                                   (unsigned long) ftres->vlen - vidx);
-        lcp = gt_seqabstract_lcp(true,
-                                 useq,
-                                 vseq,
-                                 uidx,
-                                 vidx,
-                                 minlen);
-      } else
-      {
-        lcp = 0;
-      }
-      for (/* Nothing */; uidx < (unsigned long) ftres->ulen &&
-                          vidx < (unsigned long) ftres->vlen;
-           uidx++, vidx++)
-      {
-        a = gt_seqabstract_encoded_char(useq,uidx);
-        b = gt_seqabstract_encoded_char(vseq,vidx);
-        GT_FRONT_COMPARESYMBOLS(a,b);
-      }
-      if (lcp != uidx - uidxprev)
-      {
-        printf("lcp = %lu != %lu = %lu - %lu=uidx-uidxprev,vidx=%lu, "
-               "vidxprev=%lu,ulen=%ld,vlen=%ld\n",
-               lcp,uidx - uidxprev,uidx,uidxprev,vidx,vidxprev,
-               ftres->ulen,ftres->vlen);
-      }
-      gt_assert(lcp == uidx - uidxprev);
-      t = (long) uidx;
+      unsigned long lcp, minlen
+        = (unsigned long) MIN(ftres->ulen - t,ftres->vlen - (t + k));
+      lcp = gt_seqabstract_lcp(true,
+                               useq,
+                               vseq,
+                               (unsigned long) t,
+                               (unsigned long) (t + k),
+                               minlen);
+      t += lcp;
     }
     if (t > ftres->ulen || t + k > ftres->vlen)
     {
@@ -297,9 +260,6 @@ static void firstfrontforward(const GtSeqabstract *useq,
                               GtFrontResource *ftres,
                               GtFrontspec *fspec)
 {
-  GtUchar a, b;
-  unsigned long uidx, vidx;
-
   fspec->left = fspec->offset = 0;
   fspec->width = 1L;
   if (ftres->ulen == 0 || ftres->vlen == 0)
@@ -314,16 +274,7 @@ static void firstfrontforward(const GtSeqabstract *useq,
                                            0,
                                            (unsigned long)
                                            MIN(ftres->ulen,ftres->vlen));
-    for (uidx = 0, vidx = 0; uidx < (unsigned long) ftres->ulen &&
-                             vidx < (unsigned long) ftres->vlen;
-         uidx++, vidx++)
-    {
-      a = gt_seqabstract_encoded_char(useq,uidx);
-      b = gt_seqabstract_encoded_char(vseq,vidx);
-      GT_FRONT_COMPARESYMBOLS(a,b);
-    }
-    gt_assert(uidx == lcp);
-    GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),(long) uidx);
+    GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),(long) lcp);
   }
 #ifdef SKDEBUG
   printf("forward front[0]=%ld\n",GT_FRONT_ROWVALUE(&ftres->frontspace[0]));
