@@ -265,7 +265,7 @@ static inline unsigned int gt_popcount_tab_popcount(unsigned long val)
 }
 
 unsigned int gt_popcount_tab_class(unsigned long block,
-                                   unsigned int blocksize)
+                                   GT_UNUSED unsigned int blocksize)
 {
   gt_assert(block >> blocksize == 0);
   return gt_popcount_tab_popcount(block);
