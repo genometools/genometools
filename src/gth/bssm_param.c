@@ -696,8 +696,9 @@ static void set_window_sizes_in_Bssmmodel(GthBSSMModel *bssm_model)
 }
 
 /* updates the BSSM parameterization file */
-static void build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
-                       unsigned int hypothesisnum)
+static int build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
+                      unsigned int hypothesisnum, const char *path,
+                      Termtype termtype, GtAlphabet *alphabet, GtError *err)
 {
   unsigned long mono_ct[STRINGSIZE-1][ALPHSIZE],         /* Mononuc freq */
                 di_ct[STRINGSIZE-1][ALPHSIZE][ALPHSIZE]; /* Dinuc freq */
@@ -707,7 +708,7 @@ static void build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
                 seqlen, num_entries = 0;
   const GtUchar *seq;
   char *desc;
-  int rval;
+  int rval, had_err = 0;
 
   /* Inits of local variables */
   for (i = 0; i < (STRINGSIZE-1); i++) {
@@ -718,23 +719,68 @@ static void build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
     }
   }
 
-  while ((rval = gt_seqiterator_next(seqit, &seq, &seqlen, &desc, NULL))) {
-    gt_assert(rval > 0); /* checked earlier */
-    /* mononucleotides */
-    for (i = 0; i < (STRINGSIZE-1); i++) {
-      gt_assert(seq[i] < ALPHSIZE);
-      mono_ct[i][seq[i]]++;
+  j = 0;
+  while (!had_err &&
+         (rval = gt_seqiterator_next(seqit, &seq, &seqlen, &desc, err))) {
+    if (rval < 0)
+      break;
+    j++;
+
+    /* check length */
+    if (seqlen != STRINGSIZE) {
+      gt_error_set(err, "sequence %lu in file \"%s\" does not have length %u",
+                   j, path, STRINGSIZE);
+      had_err = -1;
     }
-    /* dinucleotides */
-    for (i = 0; i < (STRINGSIZE-1); i++) {
-      di_ct[i][seq[i]]
-              [seq[i + 1]]++;
+
+    if (!had_err) {
+      /* check base correctness */
+      switch (termtype) {
+        case GT_DONOR_TYPE:
+          if (seq[50] != gt_alphabet_encode(alphabet, 'G') ||
+              seq[51] != gt_alphabet_encode(alphabet, 'T')) {
+            gt_error_set(err, "sequence %lu in file \"%s\" is not a GT "
+                              "sequence", j, path);
+            had_err = -1;
+          }
+          break;
+        case GC_DONOR_TYPE:
+          if (seq[50] != gt_alphabet_encode(alphabet, 'G') ||
+              seq[51] != gt_alphabet_encode(alphabet, 'C')) {
+            gt_error_set(err, "sequence %lu in file \"%s\" is not a GC "
+                              "sequence", j, path);
+            had_err = -1;
+          }
+          break;
+        case AG_ACCEPTOR_TYPE:
+          if (seq[50] != gt_alphabet_encode(alphabet, 'A') ||
+              seq[51] != gt_alphabet_encode(alphabet, 'G')) {
+            gt_error_set(err, "sequence %lu in file \"%s\" is not a AG "
+                              "sequence", j, path);
+            had_err = -1;
+          }
+          break;
+        default: gt_assert(0);
+      }
     }
-    num_entries++;
+
+    if (!had_err) {
+      /* mononucleotides */
+      for (i = 0; i < (STRINGSIZE-1); i++) {
+        gt_assert(seq[i] < ALPHSIZE);
+        mono_ct[i][seq[i]]++;
+      }
+      /* dinucleotides */
+      for (i = 0; i < (STRINGSIZE-1); i++) {
+        di_ct[i][seq[i]]
+                [seq[i + 1]]++;
+      }
+      num_entries++;
+    }
   }
 
   /* Record equilibrium frequencies (1st ``slot" in transition freqs) */
-  for (i = 0; i < ALPHSIZE; i++) {
+  for (i = 0; !had_err && i < ALPHSIZE; i++) {
     for (j = 0; j < ALPHSIZE; j++) {
       bssm_model->hypotables
       .hypo7table[hypothesisnum][0][i][j] = (GthFlt)
@@ -743,7 +789,7 @@ static void build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
   }
 
   /* Populate the remaining transition frequencies */
-  for (k = 1; k < STRINGSIZE; k++) {
+  for (k = 1; !had_err && k < STRINGSIZE; k++) {
     for (i = 0; i < ALPHSIZE; i++) {
       mono_freq = (double) mono_ct[k-1][i] / num_entries;
       for (j = 0; j < ALPHSIZE; j++) {
@@ -788,6 +834,8 @@ static void build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
       }
     }
   }
+
+  return had_err;
 }
 
 int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
@@ -796,7 +844,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
   GtStrArray *filenametab;
   GtAlphabet *alphabet;
   GtStr *file2proc;
-  unsigned long i, j;
+  unsigned long i;
   int had_err = 0;
   gt_error_check(err);
 
@@ -826,10 +874,6 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
 
   for (i = 0; !had_err && i < NUMOFFILES; i++) {
     GtSeqIterator *seqit;
-    unsigned long seqlen;
-    const GtUchar *seq;
-    char *desc;
-    int rval;
 
     /* process datafile */
     gt_str_append_cstr(file2proc, path);
@@ -860,73 +904,19 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
     if (!had_err)
       gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
 
-    /* check here if all sequences have the length 102 and correct bases at
-       positions 51 and 52 (i.e., GT, GC, or AG) */
-    j = 0;
-    while (!had_err &&
-           (rval = gt_seqiterator_next(seqit, &seq, &seqlen, &desc, err))) {
-      if (rval < 0)
-        break;
-      j++;
-
-      /* check length */
-      if (seqlen != STRINGSIZE) {
-        gt_error_set(err, "sequence %lu in file \"%s\" does not have length %u",
-                     j, gt_str_get(file2proc), STRINGSIZE);
-        had_err = -1;
-      }
-
-      if (!had_err) {
-        /* check base correctness */
-        switch (termtype) {
-          case GT_DONOR_TYPE:
-            if (seq[50] != gt_alphabet_encode(alphabet, 'G') ||
-                seq[51] != gt_alphabet_encode(alphabet, 'T')) {
-              gt_error_set(err, "sequence %lu in file \"%s\" is not a GT "
-                                "sequence", j, gt_str_get(file2proc));
-              had_err = -1;
-            }
-            break;
-          case GC_DONOR_TYPE:
-            if (seq[50] != gt_alphabet_encode(alphabet, 'G') ||
-                seq[51] != gt_alphabet_encode(alphabet, 'C')) {
-              gt_error_set(err, "sequence %lu in file \"%s\" is not a GC "
-                                "sequence", j, gt_str_get(file2proc));
-              had_err = -1;
-            }
-            break;
-          case AG_ACCEPTOR_TYPE:
-            if (seq[50] != gt_alphabet_encode(alphabet, 'A') ||
-                seq[51] != gt_alphabet_encode(alphabet, 'G')) {
-              gt_error_set(err, "sequence %lu in file \"%s\" is not a AG "
-                                "sequence", j, gt_str_get(file2proc));
-              had_err = -1;
-            }
-            break;
-          default: gt_assert(0);
-        }
-      }
-    }
-
-    /* reset seqiterator */
-    if (!had_err) {
-      gt_seqiterator_delete(seqit);
-      if (!(seqit = gt_seqiterator_sequence_buffer_new(filenametab, err)))
-        had_err = -1;
-    }
-    if (!had_err)
-      gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
-
     if (!had_err) {
       switch (termtype) {
         case GT_DONOR_TYPE:
-          build_bssm(seqit, &bssm_param->gt_donor_model, i);
+          had_err = build_bssm(seqit, &bssm_param->gt_donor_model, i,
+                               gt_str_get(file2proc), termtype, alphabet, err);
           break;
         case GC_DONOR_TYPE:
-          build_bssm(seqit, &bssm_param->gc_donor_model, i);
+          had_err = build_bssm(seqit, &bssm_param->gc_donor_model, i,
+                               gt_str_get(file2proc), termtype, alphabet, err);
           break;
         case AG_ACCEPTOR_TYPE:
-          build_bssm(seqit, &bssm_param->ag_acceptor_model, i);
+          had_err = build_bssm(seqit, &bssm_param->ag_acceptor_model, i,
+                               gt_str_get(file2proc), termtype, alphabet, err);
           break;
         default: gt_assert(0);
       }
