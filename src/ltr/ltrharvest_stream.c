@@ -146,7 +146,7 @@ struct GtLTRharvestStream
 #define gt_ltrharvest_stream_cast(GS)\
         gt_node_stream_cast(gt_ltrharvest_stream_class(), GS);
 
-static int bdptrcompare(const void *a, const void *b)
+GT_UNUSED static int bdptrcompare(const void *a, const void *b)
 {
   const LTRboundaries **bda, **bdb;
 
@@ -160,11 +160,56 @@ static int bdptrcompare(const void *a, const void *b)
   {
     return 1;
   }
+  gt_assert((*bda)->contignumber == (*bdb)->contignumber);
   if ((*bda)->leftLTR_5 < (*bdb)->leftLTR_5)
   {
     return -1;
   }
   if ((*bda)->leftLTR_5 > (*bdb)->leftLTR_5)
+  {
+    return 1;
+  }
+  gt_assert((*bda)->leftLTR_5 == (*bdb)->leftLTR_5);
+  if ((*bda)->rightLTR_3 < (*bdb)->rightLTR_3)
+  {
+    return -1;
+  }
+  if ((*bda)->rightLTR_3 > (*bdb)->rightLTR_3)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+static int bdcompare(const void *a, const void *b)
+{
+  const LTRboundaries *bda, *bdb;
+
+  bda = (const LTRboundaries *) a;
+  bdb = (const LTRboundaries *) b;
+  if (bda->contignumber < bdb->contignumber)
+  {
+    return -1;
+  }
+  if (bda->contignumber > bdb->contignumber)
+  {
+    return 1;
+  }
+  gt_assert(bda->contignumber == bdb->contignumber);
+  if (bda->leftLTR_5 < bdb->leftLTR_5)
+  {
+    return -1;
+  }
+  if (bda->leftLTR_5 > bdb->leftLTR_5)
+  {
+    return 1;
+  }
+  gt_assert(bda->leftLTR_5 == bdb->leftLTR_5);
+  if (bda->rightLTR_3 < bdb->rightLTR_3)
+  {
+    return -1;
+  }
+  if (bda->rightLTR_3 > bdb->rightLTR_3)
   {
     return 1;
   }
@@ -264,8 +309,8 @@ static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
       bdptrtab[nextfill++] = bd;
     }
   }
-  qsort(bdptrtab,(size_t) countboundaries, sizeof (LTRboundaries *),
-        bdptrcompare);
+  /* qsort(bdptrtab,(size_t) countboundaries, sizeof (LTRboundaries *),
+        bdptrcompare); */
   *numofboundaries = countboundaries;
   return bdptrtab;
 }
@@ -1283,11 +1328,24 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
     /* not needed any longer */
     GT_FREEARRAY(&ltrh_stream->repeatinfo.repeats, Repeat);
 
-    /* remove exact duplicates */
+     /* remove exact duplicates */
     if (!had_err)
     {
       gt_removeduplicates(&ltrh_stream->arrayLTRboundaries);
     }
+
+    qsort(threadinfo.arrayLTRboundaries->spaceLTRboundaries,
+          (size_t) threadinfo.arrayLTRboundaries->nextfreeLTRboundaries - 1,
+           sizeof (LTRboundaries),  bdcompare);
+
+    /* unsigned long i;
+    for (i = 0; i < threadinfo.arrayLTRboundaries->nextfreeLTRboundaries; i++) {
+      if (!threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].skipped)
+        printf(">>>> %lu:%lu-%lu\n",
+             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].contignumber,
+             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].leftLTR_5,
+             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].rightLTR_3);
+    } */
 
     /* remove overlapping predictions if desired */
     if (!had_err && (ltrh_stream->nooverlaps || ltrh_stream->bestoverlaps))
