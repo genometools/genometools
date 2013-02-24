@@ -92,6 +92,7 @@
 #include "tools/gt_convertseq.h"
 #include "tools/gt_csa.h"
 #include "tools/gt_dev.h"
+#include "tools/gt_dot.h"
 #include "tools/gt_dupfeat.h"
 #include "tools/gt_encseq.h"
 #include "tools/gt_encseq2spm.h"
@@ -188,6 +189,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "compreads", gt_compreads());
   gt_toolbox_add_tool(tools, "congruence", gt_congruence());
   gt_toolbox_add_tool(tools, "csa", gt_csa());
+  gt_toolbox_add_tool(tools, "dot", gt_dot());
   gt_toolbox_add_tool(tools, "dupfeat", gt_dupfeat());
   gt_toolbox_add_tool(tools, "encseq", gt_encseq());
   gt_toolbox_add_tool(tools, "encseq2spm", gt_encseq2spm());
