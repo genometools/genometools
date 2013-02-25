@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2003-2011, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2005       Michael E Sparks <mespar1@iastate.edu>
-  Copyright (c) 2003-2008       Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2005 Michael E Sparks <mespar1@iastate.edu>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,11 +17,10 @@
 */
 
 #include "lauxlib.h"
-#include "core/alphabet_api.h"
+#include "core/bioseq.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
 #include "core/ma_api.h"
-#include "core/seqiterator_sequence_buffer.h"
 #include "core/xansi_api.h"
 #include "gth/bssm_param_hard_coded.h"
 #include "gth/bssm_param.h"
@@ -696,7 +695,7 @@ static void set_window_sizes_in_Bssmmodel(GthBSSMModel *bssm_model)
 }
 
 /* updates the BSSM parameterization file */
-static void build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
+static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
                        unsigned int hypothesisnum)
 {
   unsigned long mono_ct[STRINGSIZE-1][ALPHSIZE],         /* Mononuc freq */
@@ -704,10 +703,9 @@ static void build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
   double mono_freq,      /* Mononuc relative freq */
          di_freq;        /* Dinuc relative freq */
   unsigned long i, j, k, /* Iterator variables */
-                seqlen, num_entries = 0;
-  const GtUchar *seq;
-  char *desc;
-  int rval;
+                len, curlen = 0,
+                num_entries = gt_bioseq_number_of_sequences(bioseq);
+  GtUchar *encoded_seq = NULL;
 
   /* Inits of local variables */
   for (i = 0; i < (STRINGSIZE-1); i++) {
@@ -718,20 +716,35 @@ static void build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
     }
   }
 
-  while ((rval = gt_seqiterator_next(seqit, &seq, &seqlen, &desc, NULL))) {
-    gt_assert(rval > 0); /* checked earlier */
-    /* mononucleotides */
+  /* mononucleotides */
+  for (j = 0; j < num_entries; j++) {
     for (i = 0; i < (STRINGSIZE-1); i++) {
-      gt_assert(seq[i] < ALPHSIZE);
-      mono_ct[i][seq[i]]++;
+      len = gt_bioseq_get_sequence_length(bioseq, j);
+      if (len > curlen) {
+        encoded_seq = gt_realloc(encoded_seq, len);
+        curlen = len;
+      }
+      gt_bioseq_get_encoded_sequence(bioseq, encoded_seq, j);
+      gt_assert(encoded_seq[i] < ALPHSIZE);
+      mono_ct[i][encoded_seq[i]]++;
     }
-    /* dinucleotides */
-    for (i = 0; i < (STRINGSIZE-1); i++) {
-      di_ct[i][seq[i]]
-              [seq[i + 1]]++;
-    }
-    num_entries++;
   }
+
+  /* dinucleotides */
+  for (j = 0; j < num_entries; j++) {
+    for (i = 0; i < (STRINGSIZE-1); i++) {
+      len = gt_bioseq_get_sequence_length(bioseq, j);
+      if (len > curlen) {
+        encoded_seq = gt_realloc(encoded_seq, len);
+        curlen = len;
+      }
+      gt_bioseq_get_encoded_sequence(bioseq, encoded_seq, j);
+      di_ct[i][encoded_seq[i]]
+              [encoded_seq[i + 1]]++;
+    }
+  }
+
+  gt_free(encoded_seq);
 
   /* Record equilibrium frequencies (1st ``slot" in transition freqs) */
   for (i = 0; i < ALPHSIZE; i++) {
@@ -793,16 +806,14 @@ static void build_bssm(GtSeqIterator *seqit, GthBSSMModel *bssm_model,
 int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
                                 Termtype termtype, bool gzip, GtError *err)
 {
-  GtStrArray *filenametab;
-  GtAlphabet *alphabet;
+  GtAlphabet *alphabet = NULL;
+  GtBioseq *bioseq;
   GtStr *file2proc;
   unsigned long i, j;
   int had_err = 0;
   gt_error_check(err);
 
   file2proc = gt_str_new();
-  alphabet = gt_alphabet_new_dna();
-  filenametab = gt_str_array_new();
 
   /* set version number */
   bssm_param->version_num = (unsigned char) MYVERSION;
@@ -825,12 +836,6 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
   }
 
   for (i = 0; !had_err && i < NUMOFFILES; i++) {
-    GtSeqIterator *seqit;
-    unsigned long seqlen;
-    const GtUchar *seq;
-    char *desc;
-    int rval;
-
     /* process datafile */
     gt_str_append_cstr(file2proc, path);
     switch (termtype) {
@@ -852,52 +857,45 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
     if (gzip)
       gt_str_append_cstr(file2proc, ".gz");
 
-    gt_str_array_add(filenametab, file2proc);
-
-    if (!(seqit = gt_seqiterator_sequence_buffer_new(filenametab, err)))
+    if (!(bioseq = gt_bioseq_new(gt_str_get(file2proc), err)))
       had_err = -1;
 
     if (!had_err)
-      gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
+      alphabet = gt_bioseq_get_alphabet(bioseq);
 
     /* check here if all sequences have the length 102 and correct bases at
        positions 51 and 52 (i.e., GT, GC, or AG) */
-    j = 0;
-    while (!had_err &&
-           (rval = gt_seqiterator_next(seqit, &seq, &seqlen, &desc, err))) {
-      if (rval < 0)
-        break;
-      j++;
-
+    for (j = 0; !had_err && j < gt_bioseq_number_of_sequences(bioseq); j++) {
+      GtUchar encoded_seq[2];
       /* check length */
-      if (seqlen != STRINGSIZE) {
+      if (gt_bioseq_get_sequence_length(bioseq, j) != STRINGSIZE) {
         gt_error_set(err, "sequence %lu in file \"%s\" does not have length %u",
                      j, gt_str_get(file2proc), STRINGSIZE);
         had_err = -1;
       }
-
+      gt_bioseq_get_encoded_sequence_range(bioseq, encoded_seq, j, 50, 51);
       if (!had_err) {
         /* check base correctness */
         switch (termtype) {
           case GT_DONOR_TYPE:
-            if (seq[50] != gt_alphabet_encode(alphabet, 'G') ||
-                seq[51] != gt_alphabet_encode(alphabet, 'T')) {
+            if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'G') ||
+                encoded_seq[1] != gt_alphabet_encode(alphabet, 'T')) {
               gt_error_set(err, "sequence %lu in file \"%s\" is not a GT "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
             break;
           case GC_DONOR_TYPE:
-            if (seq[50] != gt_alphabet_encode(alphabet, 'G') ||
-                seq[51] != gt_alphabet_encode(alphabet, 'C')) {
+            if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'G') ||
+                encoded_seq[1] != gt_alphabet_encode(alphabet, 'C')) {
               gt_error_set(err, "sequence %lu in file \"%s\" is not a GC "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
             break;
           case AG_ACCEPTOR_TYPE:
-            if (seq[50] != gt_alphabet_encode(alphabet, 'A') ||
-                seq[51] != gt_alphabet_encode(alphabet, 'G')) {
+            if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'A') ||
+                encoded_seq[1] != gt_alphabet_encode(alphabet, 'G')) {
               gt_error_set(err, "sequence %lu in file \"%s\" is not a AG "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
@@ -908,25 +906,16 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
       }
     }
 
-    /* reset seqiterator */
-    if (!had_err) {
-      gt_seqiterator_delete(seqit);
-      if (!(seqit = gt_seqiterator_sequence_buffer_new(filenametab, err)))
-        had_err = -1;
-    }
-    if (!had_err)
-      gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
-
     if (!had_err) {
       switch (termtype) {
         case GT_DONOR_TYPE:
-          build_bssm(seqit, &bssm_param->gt_donor_model, i);
+          build_bssm(bioseq, &bssm_param->gt_donor_model, i);
           break;
         case GC_DONOR_TYPE:
-          build_bssm(seqit, &bssm_param->gc_donor_model, i);
+          build_bssm(bioseq, &bssm_param->gc_donor_model, i);
           break;
         case AG_ACCEPTOR_TYPE:
-          build_bssm(seqit, &bssm_param->ag_acceptor_model, i);
+          build_bssm(bioseq, &bssm_param->ag_acceptor_model, i);
           break;
         default: gt_assert(0);
       }
@@ -934,14 +923,10 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
 
     /* reset */
     gt_str_reset(file2proc);
-    gt_str_array_reset(filenametab);
 
     /* free space */
-    gt_seqiterator_delete(seqit);
+    gt_bioseq_delete(bioseq);
   }
-
-  gt_str_array_delete(filenametab);
-  gt_alphabet_delete(alphabet);
   gt_str_delete(file2proc);
 
   return had_err;
