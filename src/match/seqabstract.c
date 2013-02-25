@@ -255,33 +255,20 @@ unsigned long gt_seqabstract_lcp(bool forward,
           }
         } else
         {
-          GtCommonunits commonunits;
-          unsigned long ustartpos, vstartpos;
-
-          if (forward)
+          for (lcp = 0; lcp < minlen; lcp++)
           {
-            ustartpos = useq->offset + leftstart;
-            vstartpos = vseq->offset + rightstart;
-          } else
-          {
-            ustartpos = GT_REVERSEPOS(useq->totallength,useq->offset+leftstart);
-            vstartpos = GT_REVERSEPOS(vseq->totallength,
-                                      vseq->offset+rightstart);
+            a = gt_encseq_get_encoded_char(useq->seq.encseq,
+                                           useq->offset +
+                                           (forward ? leftstart + lcp
+                                                    : leftstart - lcp),
+                                           GT_READMODE_FORWARD);
+            b = gt_encseq_get_encoded_char(vseq->seq.encseq,
+                                           vseq->offset +
+                                           (forward ? rightstart + lcp
+                                                    : rightstart - lcp),
+                                           GT_READMODE_FORWARD);
+            GT_SEQABSTRACT_CMPCHAR(a,b);
           }
-          (void) gt_encseq_compare_viatwobitencoding(&commonunits,
-                                                     useq->seq.encseq,
-                                                     vseq->seq.encseq,
-                                                     forward
-                                                       ? GT_READMODE_FORWARD
-                                                       : GT_READMODE_REVERSE,
-                                                     useq->esr,
-                                                     vseq->esr,
-                                                     ustartpos,
-                                                     vstartpos,
-                                                     0,
-                                                     minlen);
-          lcp = commonunits.finaldepth;
-          gt_assert(lcp <= minlen);
         }
       } else
       {
