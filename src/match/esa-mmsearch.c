@@ -33,6 +33,7 @@
 typedef struct
 {
   const GtUchar *sequence;
+  const char *description;
   const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long startpos, length;
@@ -236,6 +237,7 @@ MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
   const ESASuffixptr *suftab = (const ESASuffixptr *) voidsuftab; /* XXX */
 
   queryrep.sequence = pattern;
+  queryrep.description = NULL;
   queryrep.encseq = NULL;
   queryrep.readmode = GT_READMODE_FORWARD;
   queryrep.startpos = 0;
@@ -406,7 +408,8 @@ static int gt_runquerysubstringmatch(bool selfmatch,
                            extend + minmatchlength,
                            localqueryoffset,
                            queryrep->sequence,
-                           queryrep->length);
+                           queryrep->length,
+                           queryrep->description);
         if (processquerymatch(processquerymatchinfo,
                               dbencseq,
                               querymatchspaceptr,
@@ -505,6 +508,7 @@ int gt_callenumquerymatches(const char *indexname,
           GtQueryrep queryrep;
 
           queryrep.sequence = query;
+          queryrep.description = desc;
           queryrep.encseq = NULL;
           queryrep.readmode = GT_READMODE_FORWARD;
           queryrep.startpos = 0;
@@ -567,6 +571,7 @@ int gt_callenumselfmatches(const char *indexname,
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
     queryrep.sequence = NULL;
+    queryrep.description = NULL;
     queryrep.encseq = suffixarray.encseq;
     queryrep.readmode = queryreadmode;
     for (seqnum = 0; seqnum < numofsequences; seqnum++)
@@ -643,6 +648,7 @@ static int gt_constructsarrandrunmmsearch(
   {
     const GtSuffixsortspace *suffixsortspace;
     queryrep.sequence = query;
+    queryrep.description = NULL;
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;
     queryrep.startpos = 0;

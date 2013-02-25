@@ -38,7 +38,8 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         unsigned long querylen,
                         unsigned long querystart,
                         const GtUchar *querysequence,
-                        unsigned long querytotallength);
+                        unsigned long querytotallength,
+                        const char *description);
 
 void gt_querymatch_delete(Querymatch *querymatch);
 
@@ -58,5 +59,7 @@ uint64_t gt_querymatch_queryseqnum(const Querymatch *querymatch);
 const GtUchar *gt_querymatch_querysequence(const Querymatch *querymatch);
 
 unsigned long gt_querymatch_querytotallength(const Querymatch *querymatch);
+
+const char *gt_querymatch_querydescription(const Querymatch *querymatch);
 
 #endif
