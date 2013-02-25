@@ -26,8 +26,6 @@
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/layout.h"
 
-typedef struct GtCanvasClass GtCanvasClass;
-
 typedef int  (*GtCanvasVisitLayoutFunc)(GtCanvas*, GtLayout*, GtError*);
 typedef int  (*GtCanvasVisitTrackFunc)(GtCanvas*, GtTrack*, GtError*);
 typedef int  (*GtCanvasVisitLineFunc)(GtCanvas*, GtLine*, GtError*);
