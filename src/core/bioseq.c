@@ -315,6 +315,17 @@ const char* gt_bioseq_get_description(GtBioseq *bs, unsigned long idx)
   return (const char*) mydesc;
 }
 
+char gt_bioseq_get_char(const GtBioseq *bs, unsigned long index,
+                        unsigned long position)
+{
+  unsigned long startpos;
+  gt_assert(bs);
+  gt_assert(index < gt_encseq_num_of_sequences(bs->encseq));
+  startpos = gt_encseq_seqstartpos(bs->encseq, index);
+  return gt_encseq_get_decoded_char(bs->encseq, startpos + position,
+                                    GT_READMODE_FORWARD);
+}
+
 char* gt_bioseq_get_sequence(const GtBioseq *bs, unsigned long idx)
 {
   char *out;
@@ -340,6 +351,17 @@ char* gt_bioseq_get_sequence_range(const GtBioseq *bs, unsigned long idx,
   startpos = gt_encseq_seqstartpos(bs->encseq, idx);
   gt_encseq_extract_decoded(bs->encseq, out, startpos + start, startpos + end);
   return out;
+}
+
+GtUchar gt_bioseq_get_encoded_char(const GtBioseq *bs, unsigned long index,
+                                   unsigned long position)
+{
+  unsigned long startpos;
+  gt_assert(bs);
+  gt_assert(index < gt_encseq_num_of_sequences(bs->encseq));
+  startpos = gt_encseq_seqstartpos(bs->encseq, index);
+  return gt_encseq_get_encoded_char(bs->encseq, startpos + position,
+                                    GT_READMODE_FORWARD);
 }
 
 void gt_bioseq_get_encoded_sequence(const GtBioseq *bs, GtUchar *out,

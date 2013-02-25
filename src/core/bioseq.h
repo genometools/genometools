@@ -40,10 +40,14 @@ GtSeq*        gt_bioseq_get_seq_range(GtBioseq*, unsigned long index,
                                       unsigned long start, unsigned long end);
 const char*   gt_bioseq_get_description(GtBioseq*, unsigned long);
 /* Return sequence with given <index> (not '\0' terminated). */
+char          gt_bioseq_get_char(const GtBioseq*, unsigned long index,
+                                 unsigned long position);
 char*         gt_bioseq_get_sequence(const GtBioseq*, unsigned long index);
 char*         gt_bioseq_get_sequence_range(const GtBioseq*, unsigned long index,
                                            unsigned long start,
                                            unsigned long end);
+GtUchar       gt_bioseq_get_encoded_char(const GtBioseq*, unsigned long index,
+                                         unsigned long position);
 void          gt_bioseq_get_encoded_sequence(const GtBioseq*, GtUchar *out,
                                              unsigned long index);
 void          gt_bioseq_get_encoded_sequence_range(const GtBioseq*,

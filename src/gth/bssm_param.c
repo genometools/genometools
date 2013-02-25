@@ -718,13 +718,14 @@ static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
 
   /* mononucleotides */
   for (j = 0; j < num_entries; j++) {
+    len = gt_bioseq_get_sequence_length(bioseq, j);
+    gt_assert(len == STRINGSIZE);
+    if (len > curlen) {
+      encoded_seq = gt_realloc(encoded_seq, len);
+      curlen = len;
+    }
+    gt_bioseq_get_encoded_sequence(bioseq, encoded_seq, j);
     for (i = 0; i < (STRINGSIZE-1); i++) {
-      len = gt_bioseq_get_sequence_length(bioseq, j);
-      if (len > curlen) {
-        encoded_seq = gt_realloc(encoded_seq, len);
-        curlen = len;
-      }
-      gt_bioseq_get_encoded_sequence(bioseq, encoded_seq, j);
       gt_assert(encoded_seq[i] < ALPHSIZE);
       mono_ct[i][encoded_seq[i]]++;
     }
@@ -732,13 +733,14 @@ static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
 
   /* dinucleotides */
   for (j = 0; j < num_entries; j++) {
+    len = gt_bioseq_get_sequence_length(bioseq, j);
+    gt_assert(len == STRINGSIZE);
+    if (len > curlen) {
+      encoded_seq = gt_realloc(encoded_seq, len);
+      curlen = len;
+    }
+    gt_bioseq_get_encoded_sequence(bioseq, encoded_seq, j);
     for (i = 0; i < (STRINGSIZE-1); i++) {
-      len = gt_bioseq_get_sequence_length(bioseq, j);
-      if (len > curlen) {
-        encoded_seq = gt_realloc(encoded_seq, len);
-        curlen = len;
-      }
-      gt_bioseq_get_encoded_sequence(bioseq, encoded_seq, j);
       di_ct[i][encoded_seq[i]]
               [encoded_seq[i + 1]]++;
     }
@@ -873,7 +875,8 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
                      j, gt_str_get(file2proc), STRINGSIZE);
         had_err = -1;
       }
-      gt_bioseq_get_encoded_sequence_range(bioseq, encoded_seq, j, 50, 51);
+      encoded_seq[0] = gt_bioseq_get_encoded_char(bioseq, j, 50);
+      encoded_seq[1] = gt_bioseq_get_encoded_char(bioseq, j, 51);
       if (!had_err) {
         /* check base correctness */
         switch (termtype) {
