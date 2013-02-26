@@ -24,6 +24,7 @@
 /* the toolbox class */
 typedef struct GtToolbox GtToolbox;
 
+/* deprecated */
 typedef int (*GtToolfunc)(int argc, const char **argv, GtError*);
 
 GtToolbox* gt_toolbox_new(void);
