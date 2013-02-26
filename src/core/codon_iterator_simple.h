@@ -19,6 +19,7 @@
 #define CODON_ITERATOR_SIMPLE_H
 
 #include "core/codon_iterator_api.h"
+#include "core/error_api.h"
 
 typedef struct GtCodonIteratorSimple GtCodonIteratorSimple;
 

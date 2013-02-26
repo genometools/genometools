@@ -18,9 +18,9 @@
 #ifndef SEQITERATOR_FASTQ_H
 #define SEQITERATOR_FASTQ_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/seqiterator.h"
-#include "core/str_array.h"
+#include "core/str_array_api.h"
 
 typedef struct GtSeqIteratorFastQ GtSeqIteratorFastQ;
 

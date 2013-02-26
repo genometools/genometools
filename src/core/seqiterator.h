@@ -21,9 +21,8 @@
 #define SEQITERATOR_H
 
 #include <inttypes.h>
-#include "core/queue.h"
-#include "core/str_array.h"
-#include "core/sequence_buffer.h"
+#include "core/queue_api.h"
+#include "core/str_array_api.h"
 #include "core/types_api.h"
 
 typedef struct GtSeqIterator GtSeqIterator;

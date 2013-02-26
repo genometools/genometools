@@ -15,9 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/chardef.h"
 #include "core/colorspace.h"
 #include "core/cstr_api.h"
 #include "core/file.h"
+#include "core/filelengthvalues.h"
 #include "core/seqiterator_fastq.h"
 #include "core/seqiterator_rep.h"
 #include "core/str_array.h"

@@ -19,8 +19,8 @@
 #ifndef DISC_DISTRI_H
 #define DISC_DISTRI_H
 
-#include "core/error.h"
-#include "core/file.h"
+#include "core/error_api.h"
+#include "core/file_api.h"
 
 /* The <GtDiscDistri> class represents a discrete distribution of integer
    values. */
