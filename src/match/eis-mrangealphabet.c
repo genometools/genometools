@@ -21,7 +21,7 @@
 #include "core/alphabet.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"
-#include "core/dataalign.h"
+#include "match/dataalign.h"
 #include "core/ma_api.h"
 #include "core/str.h"
 #include "core/types_api.h"

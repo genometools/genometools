@@ -18,7 +18,7 @@
 #include <limits.h>
 
 #include "core/assert_api.h"
-#include "core/dataalign.h"
+#include "match/dataalign.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
 

@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "core/dataalign.h"
+#include "match/dataalign.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
 #include "core/logger.h"

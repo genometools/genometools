@@ -18,7 +18,7 @@
 #define DATAALIGN_H
 
 #include <stdlib.h>
-#include "minmax.h"
+#include "core/minmax.h"
 
 /*
  * functionality to layout data at correct alignment (=> fewer

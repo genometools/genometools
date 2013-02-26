@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "core/bitpackstring.h"
-#include "core/dataalign.h"
+#include "match/dataalign.h"
 #include "core/fa.h"
 #include "core/str.h"
 #include "core/xansi_api.h"
