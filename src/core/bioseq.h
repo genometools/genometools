@@ -39,9 +39,9 @@ GtSeq*        gt_bioseq_get_seq(GtBioseq*, unsigned long);
 GtSeq*        gt_bioseq_get_seq_range(GtBioseq*, unsigned long index,
                                       unsigned long start, unsigned long end);
 const char*   gt_bioseq_get_description(GtBioseq*, unsigned long);
-/* Return sequence with given <index> (not '\0' terminated). */
 char          gt_bioseq_get_char(const GtBioseq*, unsigned long index,
                                  unsigned long position);
+/* Return sequence with given <index> (not '\0' terminated). */
 char*         gt_bioseq_get_sequence(const GtBioseq*, unsigned long index);
 char*         gt_bioseq_get_sequence_range(const GtBioseq*, unsigned long index,
                                            unsigned long start,
