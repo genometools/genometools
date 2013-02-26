@@ -19,7 +19,6 @@
 #define RANKED_LIST_H
 
 #include "core/fptr_api.h"
-#include "extended/rbtree.h"
 
 /* The <GtRankedListIter> class implements an iterator over the elements of
    a <GtRankedList>. */
@@ -29,7 +28,7 @@ typedef struct GtRankedListIter GtRankedListIter;
    such that the <n> items with the highest rank are kept. */
 typedef struct GtRankedList GtRankedList;
 
-/* Returns a new <GtRankedList> object with maximumsize <maxsize>. The
+/* Returns a new <GtRankedList> object with maximum size <maxsize>. The
    comparator function <comparefunction> is used to define an order on the
    inserted elements, with <compareinfo> to be used as additional external
    data. When an element is dropped from the list, <free_func> is called on the
