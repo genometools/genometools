@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
 #include "extended/sequence_node_api.h"
 #include "extended/genome_node_rep.h"
@@ -66,6 +67,7 @@ static int sequence_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv,
 const GtGenomeNodeClass* gt_sequence_node_class()
 {
   static const GtGenomeNodeClass *gnc = NULL;
+  gt_class_alloc_lock_enter();
   if (!gnc) {
     gnc = gt_genome_node_class_new(sizeof (GtSequenceNode),
                                    sequence_node_free,
@@ -76,6 +78,7 @@ const GtGenomeNodeClass* gt_sequence_node_class()
                                    sequence_node_change_seqid,
                                    sequence_node_accept);
   }
+  gt_class_alloc_lock_leave();
   return gnc;
 }
 

@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
@@ -115,6 +116,7 @@ static int gt_ltr_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
 const GtNodeVisitorClass* gt_ltr_visitor_class(void)
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtLTRVisitor),
                                     NULL,
@@ -124,6 +126,7 @@ const GtNodeVisitorClass* gt_ltr_visitor_class(void)
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

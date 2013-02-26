@@ -18,6 +18,7 @@
 #ifdef HAVE_MYSQL
 #include <string.h>
 #include <mysql/mysql.h>
+#include "core/class_alloc_lock.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/minmax.h"
@@ -617,6 +618,7 @@ static int gt_rdb_stmt_mysql_exec(GtRDBStmt *st, GtError *err)
 const GtRDBClass* gt_rdb_mysql_class(void)
 {
   static const GtRDBClass *rdbm = NULL;
+  gt_class_alloc_lock_enter();
   if (!rdbm) {
     rdbm = gt_rdb_class_new(sizeof (GtRDBMySQL),
                             gt_rdb_mysql_delete,
@@ -626,12 +628,14 @@ const GtRDBClass* gt_rdb_mysql_class(void)
                             gt_rdb_mysql_get_indexes,
                             gt_rdb_mysql_get_tables);
   }
+  gt_class_alloc_lock_leave();
   return rdbm;
 }
 
 const GtRDBStmtClass* gt_rdb_stmt_mysql_class(void)
 {
   static const GtRDBStmtClass *rdbms = NULL;
+  gt_class_alloc_lock_enter();
   if (!rdbms) {
     rdbms = gt_rdb_stmt_class_new(sizeof (GtRDBStmtMySQL),
                                   gt_rdb_stmt_mysql_reset,
@@ -646,6 +650,7 @@ const GtRDBStmtClass* gt_rdb_stmt_mysql_class(void)
                                   gt_rdb_stmt_mysql_get_double,
                                   gt_rdb_stmt_mysql_delete);
   }
+  gt_class_alloc_lock_leave();
   return rdbms;
 }
 

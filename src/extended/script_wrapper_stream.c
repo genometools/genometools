@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/script_wrapper_stream.h"
@@ -52,11 +54,13 @@ static void script_wrapper_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_script_wrapper_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtScriptWrapperStream),
                                    script_wrapper_stream_free,
                                    script_wrapper_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

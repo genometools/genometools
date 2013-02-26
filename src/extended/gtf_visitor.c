@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/fptr_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
@@ -157,6 +158,7 @@ static int gtf_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
 const GtNodeVisitorClass* gt_gtf_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtGTFVisitor),
                                     gtf_visitor_free,
@@ -166,6 +168,7 @@ const GtNodeVisitorClass* gt_gtf_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

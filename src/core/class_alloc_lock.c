@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,11 +15,28 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CLASS_PREALLOC_H
-#define CLASS_PREALLOC_H
+#include "core/thread.h"
 
-/* Called to eliminate concurrency issues with lazy class allocation
-   by making sure that class singletons are preinstantiated. */
-void gt_class_prealloc_run(void);
+static GtMutex* gt_class_alloc_lock = NULL;
 
-#endif
+void gt_class_alloc_lock_init(void)
+{
+  gt_class_alloc_lock = gt_mutex_new();
+}
+
+void gt_class_alloc_lock_clean(void)
+{
+  gt_mutex_delete(gt_class_alloc_lock);
+}
+
+void gt_class_alloc_lock_enter_func(void)
+{
+  gt_assert(gt_class_alloc_lock);
+  gt_mutex_lock(gt_class_alloc_lock);
+}
+
+void gt_class_alloc_lock_leave_func(void)
+{
+  gt_assert(gt_class_alloc_lock);
+  gt_mutex_unlock(gt_class_alloc_lock);
+}

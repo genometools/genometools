@@ -1,4 +1,4 @@
-/*
+  /*
   Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
@@ -17,6 +17,7 @@
 
 #include "annotationsketch/custom_track_script_wrapper.h"
 #include "annotationsketch/custom_track_rep.h"
+#include "core/class_alloc_lock.h"
 
 struct GtCustomTrackScriptWrapper {
   const GtCustomTrack parent_instance;
@@ -70,6 +71,7 @@ void gt_custom_track_script_wrapper_delete(GtCustomTrack *ct)
 const GtCustomTrackClass* gt_custom_track_script_wrapper_class(void)
 {
   static const GtCustomTrackClass *ctc = NULL;
+  gt_class_alloc_lock_enter();
   if (!ctc)
   {
     ctc = gt_custom_track_class_new(sizeof (GtCustomTrackScriptWrapper),
@@ -78,6 +80,7 @@ const GtCustomTrackClass* gt_custom_track_script_wrapper_class(void)
                                     gt_custom_track_script_wrapper_get_title,
                                     gt_custom_track_script_wrapper_delete);
   }
+  gt_class_alloc_lock_leave();
   return ctc;
 }
 

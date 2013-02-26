@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/codon.h"
 #include "core/complement.h"
 #include "core/cstr_api.h"
@@ -276,6 +277,7 @@ static int snp_annotator_visitor_feature_node(GtNodeVisitor *nv,
 const GtNodeVisitorClass* gt_snp_annotator_visitor_class()
 {
   static GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtSNPAnnotatorVisitor),
                                     snp_annotator_visitor_free,
@@ -285,6 +287,7 @@ const GtNodeVisitorClass* gt_snp_annotator_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

@@ -17,8 +17,9 @@
 */
 
 #include <math.h>
-#include "core/unused_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/mathsupport.h"
+#include "core/unused_api.h"
 #include "esa-seqread.h"
 #include "esa-spmitvs.h"
 #include "esa-bottomup.h"
@@ -161,6 +162,7 @@ void gt_esa_spmitvs_visitor_delete(GtESAVisitor *ev)
 const GtESAVisitorClass* gt_esa_spmitvs_visitor_class()
 {
   static const GtESAVisitorClass *esc = NULL;
+  gt_class_alloc_lock_enter();
   if (!esc) {
     esc = gt_esa_visitor_class_new(sizeof (GtESASpmitvsVisitor),
                                    gt_esa_spmitvs_visitor_delete,
@@ -170,6 +172,7 @@ const GtESAVisitorClass* gt_esa_spmitvs_visitor_class()
                                    NULL,
                                    NULL);
   }
+  gt_class_alloc_lock_leave();
   return esc;
 }
 

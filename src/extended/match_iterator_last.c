@@ -17,9 +17,9 @@
 
 #include <stdio.h>
 #include <unistd.h>
-//#include <sys/types.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include "core/class_alloc_lock.h"
 #include "core/cstr.h"
 #include "core/cstr_array.h"
 #include "core/encseq.h"
@@ -501,11 +501,12 @@ static void gt_match_iterator_last_free(GtMatchIterator *mp)
 const GtMatchIteratorClass* gt_match_iterator_last_class(void)
 {
   static const GtMatchIteratorClass *mpc;
-
+  gt_class_alloc_lock_enter();
   if (!mpc) {
     mpc = gt_match_iterator_class_new(sizeof (GtMatchIteratorLast),
                                gt_match_iterator_last_next,
                                gt_match_iterator_last_free);
   }
+  gt_class_alloc_lock_leave();
   return mpc;
 }

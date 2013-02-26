@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/encseq.h"
 #include "core/ensure.h"
 #include "core/ma.h"
@@ -88,6 +89,7 @@ static void gt_codon_iterator_encseq_delete(GtCodonIterator *ci)
 const GtCodonIteratorClass* gt_codon_iterator_encseq_class(void)
 {
   static const GtCodonIteratorClass *cic = NULL;
+  gt_class_alloc_lock_enter();
   if (!cic)
   {
     cic = gt_codon_iterator_class_new(sizeof (GtCodonIteratorEncseq),
@@ -97,6 +99,7 @@ const GtCodonIteratorClass* gt_codon_iterator_encseq_class(void)
                                       gt_codon_iterator_encseq_rewind,
                                       gt_codon_iterator_encseq_next);
   }
+  gt_class_alloc_lock_leave();
   return cic;
 }
 

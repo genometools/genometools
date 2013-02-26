@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "extended/genome_node_rep.h"
 #include "extended/region_node.h"
 
@@ -71,6 +72,7 @@ static int region_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv, GtError *err)
 const GtGenomeNodeClass* gt_region_node_class()
 {
   static const GtGenomeNodeClass *gnc = NULL;
+  gt_class_alloc_lock_enter();
   if (!gnc) {
     gnc = gt_genome_node_class_new(sizeof (GtRegionNode),
                                    region_node_free,
@@ -81,6 +83,7 @@ const GtGenomeNodeClass* gt_region_node_class()
                                    region_node_change_seqid,
                                    region_node_accept);
   }
+  gt_class_alloc_lock_leave();
   return gnc;
 }
 

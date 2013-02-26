@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include "core/array_api.h"
 #include "core/bittab_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
@@ -285,8 +286,8 @@ int gt_clustered_set_union_find_merge_clusters(GtClusteredSet *cs,
 const GtClusteredSetClass* gt_clustered_set_union_find_class(void)
 {
 
-  static const GtClusteredSetClass *csc;
-
+  static const GtClusteredSetClass *csc = NULL;
+  gt_class_alloc_lock_enter();
   if (!csc) {
     csc = gt_clustered_set_class_new(sizeof (GtClusteredSetUF),
       gt_clustered_set_union_find_num_of_clusters,
@@ -296,6 +297,7 @@ const GtClusteredSetClass* gt_clustered_set_union_find_class(void)
       gt_clustered_set_union_find_num_of_elements,
       gt_clustered_set_union_find_cluster_num);
   }
+  gt_class_alloc_lock_leave();
   return csc;
 }
 

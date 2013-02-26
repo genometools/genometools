@@ -16,10 +16,11 @@
 */
 
 #include <math.h>
+#include "core/class_alloc_lock.h"
+#include "core/unused_api.h"
 #include "annotationsketch/coords.h"
 #include "annotationsketch/custom_track_example.h"
 #include "annotationsketch/custom_track_rep.h"
-#include "core/unused_api.h"
 
 struct GtCustomTrackExample {
   const GtCustomTrack parent_instance;
@@ -107,6 +108,7 @@ void gt_custom_track_example_delete(GtCustomTrack *ct)
 const GtCustomTrackClass* gt_custom_track_example_class(void)
 {
   static const GtCustomTrackClass *ctc = NULL;
+  gt_class_alloc_lock_enter();
   if (!ctc)
   {
     ctc = gt_custom_track_class_new(sizeof (GtCustomTrackExample),
@@ -115,6 +117,7 @@ const GtCustomTrackClass* gt_custom_track_example_class(void)
                                     gt_custom_track_example_get_title,
                                     gt_custom_track_example_delete);
   }
+  gt_class_alloc_lock_leave();
   return ctc;
 }
 

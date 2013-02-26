@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/queue_api.h"
 #include "extended/buffer_stream.h"
 #include "extended/node_stream_api.h"
@@ -57,11 +58,13 @@ static void buffer_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_buffer_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtBufferStream),
                                    buffer_stream_free,
                                    buffer_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

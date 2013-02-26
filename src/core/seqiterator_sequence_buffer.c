@@ -18,6 +18,7 @@
 
 #include "core/arraydef.h"
 #include "core/chardef.h"
+#include "core/class_alloc_lock.h"
 #include "core/desc_buffer.h"
 #include "core/minmax.h"
 #include "core/seqiterator_rep.h"
@@ -212,6 +213,7 @@ static void gt_seqiterator_sequence_buffer_delete(GtSeqIterator *si)
 const GtSeqIteratorClass* gt_seqiterator_sequence_buffer_class(void)
 {
   static const GtSeqIteratorClass *sic = NULL;
+  gt_class_alloc_lock_enter();
   if (!sic) {
     sic = gt_seqiterator_class_new(sizeof (GtSeqIteratorSequenceBuffer),
                              gt_seqiterator_sequence_buffer_set_symbolmap,
@@ -221,5 +223,6 @@ const GtSeqIteratorClass* gt_seqiterator_sequence_buffer_class(void)
                              NULL,
                              gt_seqiterator_sequence_buffer_delete);
   }
+  gt_class_alloc_lock_leave();
   return sic;
 }

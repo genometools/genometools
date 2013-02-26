@@ -16,6 +16,7 @@
 
 #include "core/bioseq.h"
 #include "core/bioseq_col.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/grep_api.h"
 #include "core/hashmap_api.h"
@@ -318,6 +319,7 @@ static unsigned long gt_bioseq_col_get_sequence_length(const GtSeqCol *sc,
 const GtSeqColClass* gt_bioseq_col_class(void)
 {
   static const GtSeqColClass *bsc_class = NULL;
+  gt_class_alloc_lock_enter();
   if (!bsc_class) {
       bsc_class = gt_seq_col_class_new(sizeof (GtBioseqCol),
                                        gt_bioseq_col_delete,
@@ -334,6 +336,7 @@ const GtSeqColClass* gt_bioseq_col_class(void)
                                        gt_bioseq_col_get_description,
                                        gt_bioseq_col_get_sequence_length);
   }
+  gt_class_alloc_lock_leave();
   return bsc_class;
 }
 

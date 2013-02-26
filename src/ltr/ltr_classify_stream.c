@@ -18,6 +18,7 @@
 #include <string.h>
 #include "core/array.h"
 #include "core/bittab.h"
+#include "core/class_alloc_lock.h"
 #include "core/ma.h"
 #include "core/cstr_api.h"
 #include "core/hashmap.h"
@@ -422,10 +423,13 @@ static void gt_ltr_classify_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_ltr_classify_stream_class(void)
 {
   static const GtNodeStreamClass *nsc;
-  if (!nsc)
+  gt_class_alloc_lock_enter();
+  if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof(GtLTRClassifyStream),
                                    gt_ltr_classify_stream_free,
                                    gt_ltr_classify_stream_next);
+  }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

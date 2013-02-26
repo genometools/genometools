@@ -22,6 +22,7 @@
 #include "core/array_api.h"
 #include "core/arraydef.h"
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/log.h"
@@ -1574,12 +1575,13 @@ static void gt_ltrharvest_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_ltrharvest_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
-  if (!nsc)
-  {
+  gt_class_alloc_lock_enter();
+  if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtLTRharvestStream),
                                    gt_ltrharvest_stream_free,
                                    gt_ltrharvest_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

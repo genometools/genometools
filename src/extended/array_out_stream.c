@@ -16,6 +16,7 @@
 */
 
 #include "core/array.h"
+#include "core/class_alloc_lock.h"
 #include "core/error_api.h"
 #include "core/unused_api.h"
 #include "extended/array_out_stream.h"
@@ -61,10 +62,13 @@ static void gt_array_out_stream_free(GtNodeStream *gs)
 const GtNodeStreamClass* gt_array_out_stream_class(void)
 {
   static const GtNodeStreamClass *gsc = NULL;
-  if (!gsc)
+  gt_class_alloc_lock_enter();
+  if (!gsc) {
     gsc = gt_node_stream_class_new(sizeof (GtArrayOutStream),
                                    gt_array_out_stream_free,
                                    gt_array_out_stream_next);
+  }
+  gt_class_alloc_lock_leave();
   return gsc;
 }
 

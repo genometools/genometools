@@ -17,15 +17,11 @@
 
 #ifndef WITHOUT_CAIRO
 #include <string.h>
-#include "core/assert_api.h"
-#include "core/unused_api.h"
-#include "extended/anno_db_gfflike_api.h"
-#include "extended/anno_db_prepared_stmt.h"
-#include "extended/anno_db_schema_rep.h"
-#include "extended/rdb_visitor_rep.h"
 #include "annotationsketch/feature_index_rep.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_visitor.h"
+#include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/fileutils_api.h"
@@ -40,8 +36,12 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/fa.h"
+#include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/xposix.h"
+#include "extended/anno_db_gfflike_api.h"
+#include "extended/anno_db_prepared_stmt.h"
+#include "extended/anno_db_schema_rep.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/feature_node.h"
@@ -49,6 +49,7 @@
 #include "extended/feature_node_iterator_api.h"
 #include "extended/rdb_api.h"
 #include "extended/rdb_sqlite_api.h"
+#include "extended/rdb_visitor_rep.h"
 
 struct GtAnnoDBGFFlike {
   const GtAnnoDBSchema parent_instance;
@@ -1989,23 +1990,27 @@ GtFeatureIndex* anno_db_gfflike_build(GtAnnoDBSchema *schema, GtRDB *db,
 const GtAnnoDBSchemaClass* gt_anno_db_gfflike_class()
 {
   static const GtAnnoDBSchemaClass *adbsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!adbsc) {
     adbsc = gt_anno_db_schema_class_new(sizeof (GtAnnoDBGFFlike),
                                         anno_db_gfflike_free,
                                         anno_db_gfflike_build);
   }
+  gt_class_alloc_lock_leave();
   return adbsc;
 }
 
 static const GtRDBVisitorClass* gfflike_setup_visitor_class()
 {
   static const GtRDBVisitorClass *svc = NULL;
+  gt_class_alloc_lock_enter();
   if (!svc) {
     svc = gt_rdb_visitor_class_new(sizeof (GtAnnoDBGFFlike),
                                    NULL,
                                    anno_db_gfflike_init_sqlite,
                                    anno_db_gfflike_init_mysql);
   }
+  gt_class_alloc_lock_leave();
   return svc;
 }
 

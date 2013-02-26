@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/error_api.h"
 #include "core/seqiterator.h"
 #include "core/seqiterator_sequence_buffer.h"
@@ -64,12 +65,14 @@ static void gt_fasta_header_iterator_delete(GtCstrIterator *cstr_iterator)
 const GtCstrIteratorClass* gt_fasta_header_iterator_class(void)
 {
   static const GtCstrIteratorClass *sic = NULL;
+  gt_class_alloc_lock_enter();
   if (sic == NULL) {
     sic = gt_cstr_iterator_class_new(sizeof (GtFastaHeaderIterator),
                                      gt_fasta_header_iterator_next,
                                      gt_fasta_header_iterator_reset,
                                      gt_fasta_header_iterator_delete);
   }
+  gt_class_alloc_lock_leave();
   return sic;
 }
 

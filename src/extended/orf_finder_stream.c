@@ -17,6 +17,7 @@
 */
 
 #include <string.h>
+#include "core/class_alloc_lock.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -69,10 +70,13 @@ static void gt_orf_finder_stream_free(GtNodeStream *gs)
 const GtNodeStreamClass* gt_orf_finder_stream_class(void)
 {
   static const GtNodeStreamClass *gsc;
-  if (!gsc)
+  gt_class_alloc_lock_enter();
+  if (!gsc) {
     gsc = gt_node_stream_class_new(sizeof (GtORFFinderStream),
                                    gt_orf_finder_stream_free,
                                    gt_orf_finder_stream_next);
+  }
+  gt_class_alloc_lock_leave();
   return gsc;
 }
 

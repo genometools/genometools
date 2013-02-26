@@ -15,11 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
+#include "core/cstr_table.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gff3_visitor_api.h"
 #include "extended/node_stream_api.h"
-#include "core/cstr_table.h"
 
 struct GtGFF3OutStream {
   const GtNodeStream parent_instance;
@@ -53,11 +54,13 @@ static void gff3_out_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_gff3_out_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtGFF3OutStream),
                                    gff3_out_stream_free,
                                    gff3_out_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

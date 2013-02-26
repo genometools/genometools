@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
@@ -81,11 +82,13 @@ static void bed_in_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_bed_in_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtBEDInStream),
                                    bed_in_stream_free,
                                    bed_in_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

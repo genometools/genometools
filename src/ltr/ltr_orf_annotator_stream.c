@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/hashmap_api.h"
 #include "extended/feature_type.h"
 #include "extended/orf_finder_stream.h"
@@ -53,11 +54,13 @@ static void ltr_orf_annotator_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_ltr_orf_annotator_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtLTRORFAnnotatorStream),
                                    ltr_orf_annotator_stream_free,
                                    ltr_orf_annotator_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include "core/array_api.h"
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/queue.h"
@@ -225,11 +226,13 @@ static void snp_annotator_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_snp_annotator_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtSNPAnnotatorStream),
                                    snp_annotator_stream_free,
                                    snp_annotator_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

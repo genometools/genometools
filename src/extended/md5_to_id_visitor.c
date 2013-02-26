@@ -15,6 +15,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/md5_seqid.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
@@ -184,6 +185,7 @@ static int md5_to_id_visitor_region_node(GtNodeVisitor *nv,
 const GtNodeVisitorClass* gt_md5_to_id_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtMD5ToSeqidsVisitor),
                                     md5_to_id_visitor_free,
@@ -193,6 +195,7 @@ const GtNodeVisitorClass* gt_md5_to_id_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/error_api.h"
 #include "core/undef_api.h"
 #include "extended/match_blast.h"
@@ -52,10 +53,13 @@ static int match_blast_accept(GtMatch *match, GtMatchVisitor *mv, GtError *err)
 const GtMatchClass* gt_match_blast_class()
 {
   static const GtMatchClass *matchc = NULL;
-  if (!matchc)
+  gt_class_alloc_lock_enter();
+  if (!matchc) {
     matchc = gt_match_class_new(sizeof (GtMatchBlast),
                                 NULL,
                                 match_blast_accept);
+  }
+  gt_class_alloc_lock_leave();
   return matchc;
 }
 

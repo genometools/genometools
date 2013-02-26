@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/dlist.h"
 #include "core/hashmap.h"
@@ -169,11 +170,13 @@ static void targetbest_select_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_targetbest_select_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtTargetbestSelectStream),
                                    targetbest_select_stream_free,
                                    targetbest_select_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/hashmap_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
@@ -288,6 +289,7 @@ static void cds_check_visitor_free(GtNodeVisitor *nv)
 const GtNodeVisitorClass* gt_cds_check_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtCDSCheckVisitor),
                                     cds_check_visitor_free,
@@ -297,6 +299,7 @@ const GtNodeVisitorClass* gt_cds_check_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

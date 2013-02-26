@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "extended/feature_node.h"
 #include "extended/node_stream_api.h"
 #include "extended/visitor_stream.h"
@@ -55,11 +56,13 @@ static void visitor_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_visitor_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtVisitorStream),
                                    visitor_stream_free,
                                    visitor_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

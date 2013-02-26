@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/codon.h"
@@ -73,6 +74,7 @@ static void gt_codon_iterator_simple_rewind(GtCodonIterator *ci)
 const GtCodonIteratorClass* gt_codon_iterator_simple_class(void)
 {
   static const GtCodonIteratorClass *cic = NULL;
+  gt_class_alloc_lock_enter();
   if (!cic)
   {
     cic = gt_codon_iterator_class_new(sizeof (GtCodonIteratorSimple),
@@ -82,6 +84,7 @@ const GtCodonIteratorClass* gt_codon_iterator_simple_class(void)
                                       gt_codon_iterator_simple_rewind,
                                       gt_codon_iterator_simple_next);
   }
+  gt_class_alloc_lock_leave();
   return cic;
 }
 

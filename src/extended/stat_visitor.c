@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_table_api.h"
 #include "core/disc_distri.h"
 #include "core/unused_api.h"
@@ -190,6 +191,7 @@ static int stat_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
 const GtNodeVisitorClass* gt_stat_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtStatVisitor),
                                     stat_visitor_free,
@@ -199,6 +201,7 @@ const GtNodeVisitorClass* gt_stat_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

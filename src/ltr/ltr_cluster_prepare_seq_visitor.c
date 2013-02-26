@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "core/array.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/encseq_api.h"
 #include "core/hashmap.h"
@@ -178,7 +179,8 @@ void gt_ltr_cluster_prepare_seq_visitor_free(GtNodeVisitor *v)
 const GtNodeVisitorClass* gt_ltr_cluster_prepare_seq_visitor_class(void)
 {
   static const GtNodeVisitorClass *nvc;
-  if (!nvc)
+  gt_class_alloc_lock_enter();
+  if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof(GtLTRClusterPrepareSeqVisitor),
                                 gt_ltr_cluster_prepare_seq_visitor_free,
                                 NULL,
@@ -186,6 +188,8 @@ const GtNodeVisitorClass* gt_ltr_cluster_prepare_seq_visitor_class(void)
                                 NULL,
                                 NULL,
                                 NULL);
+  }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

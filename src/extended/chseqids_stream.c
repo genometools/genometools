@@ -17,6 +17,7 @@
 
 #include "core/array.h"
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
 #include "extended/chseqids_stream.h"
 #include "extended/feature_node.h"
@@ -158,11 +159,13 @@ static void chseqids_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_chseqids_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtChseqidsStream),
                                    chseqids_stream_free,
                                    chseqids_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

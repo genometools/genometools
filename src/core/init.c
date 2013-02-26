@@ -23,7 +23,7 @@
 #endif
 #include <string.h>
 #include "core/class_alloc.h"
-#include "core/class_prealloc.h"
+#include "core/class_alloc_lock.h"
 #include "core/combinatorics.h"
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
@@ -114,7 +114,7 @@ void gt_lib_init(void)
   gt_log_init();
   if (showtime) gt_showtime_enable();
   gt_symbol_init();
-  gt_class_prealloc_run();
+  gt_class_alloc_lock_init();
   gt_ya_rand_init(0);
 #ifdef HAVE_MYSQL
   mysql_library_init(0, NULL, NULL);
@@ -146,6 +146,7 @@ int gt_lib_clean(void)
   gt_fa_clean();
   gt_symbol_clean();
   gt_class_alloc_clean();
+  gt_class_alloc_lock_clean();
   gt_ya_rand_clean();
   gt_log_clean();
   gt_spacepeak_clean();

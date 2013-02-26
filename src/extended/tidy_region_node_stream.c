@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "extended/feature_node.h"
 #include "extended/tidy_region_node_stream.h"
 #include "extended/tidy_region_node_visitor.h"
@@ -75,11 +76,13 @@ static void tidy_region_node_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_tidy_region_node_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtTidyRegionNodeStream),
                                    tidy_region_node_stream_free,
                                    tidy_region_node_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

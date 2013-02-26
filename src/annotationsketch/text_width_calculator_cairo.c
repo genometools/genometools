@@ -17,6 +17,7 @@
 
 #include <cairo.h>
 #include <pango/pangocairo.h>
+#include "core/class_alloc_lock.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -84,6 +85,7 @@ void gt_text_width_calculator_cairo_delete(GtTextWidthCalculator *twc)
 const GtTextWidthCalculatorClass* gt_text_width_calculator_cairo_class(void)
 {
   static const GtTextWidthCalculatorClass *twcc = NULL;
+  gt_class_alloc_lock_enter();
   if (!twcc)
   {
     twcc = gt_text_width_calculator_class_new(
@@ -91,6 +93,7 @@ const GtTextWidthCalculatorClass* gt_text_width_calculator_cairo_class(void)
                                   gt_text_width_calculator_cairo_get_text_width,
                                   gt_text_width_calculator_cairo_delete);
   }
+  gt_class_alloc_lock_leave();
   return twcc;
 }
 

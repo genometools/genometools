@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "extended/csa_stream_api.h"
 #include "extended/csa_visitor.h"
 #include "extended/consensus_sa.h"
@@ -82,11 +83,13 @@ static void csa_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_csa_stream_class(void)
 {
   static const GtNodeStreamClass *nsc= NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtCSAStream),
                                    csa_stream_free,
                                    csa_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

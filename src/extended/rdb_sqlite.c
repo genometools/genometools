@@ -20,6 +20,7 @@
 #include <sqlite3.h>
 #include <string.h>
 #include "core/array_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
 #include "extended/rdb_rep.h"
 #include "extended/rdb_sqlite_api.h"
@@ -385,6 +386,7 @@ static GtCstrTable* gt_rdb_sqlite_get_tables(GtRDB *rdb, GtError *err)
 const GtRDBClass* gt_rdb_sqlite_class(void)
 {
   static const GtRDBClass *rdbs = NULL;
+  gt_class_alloc_lock_enter();
   if (!rdbs) {
     rdbs = gt_rdb_class_new(sizeof (GtRDBSqlite),
                             gt_rdb_sqlite_delete,
@@ -394,12 +396,14 @@ const GtRDBClass* gt_rdb_sqlite_class(void)
                             gt_rdb_sqlite_get_indexes,
                             gt_rdb_sqlite_get_tables);
   }
+  gt_class_alloc_lock_leave();
   return rdbs;
 }
 
 const GtRDBStmtClass* gt_rdb_stmt_sqlite_class(void)
 {
   static const GtRDBStmtClass *rdbss = NULL;
+  gt_class_alloc_lock_enter();
   if (!rdbss) {
     rdbss = gt_rdb_stmt_class_new(sizeof (GtRDBStmtSqlite),
                                   gt_rdb_stmt_sqlite_reset,
@@ -414,6 +418,7 @@ const GtRDBStmtClass* gt_rdb_stmt_sqlite_class(void)
                                   gt_rdb_stmt_sqlite_get_double,
                                   gt_rdb_stmt_sqlite_delete);
   }
+  gt_class_alloc_lock_leave();
   return rdbss;
 }
 

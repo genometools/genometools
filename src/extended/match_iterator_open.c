@@ -17,6 +17,7 @@
 */
 
 #include <stdio.h>
+#include "core/class_alloc_lock.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/bittab_api.h"
@@ -192,11 +193,12 @@ static void gt_match_iterator_open_free(GtMatchIterator *mp)
 const GtMatchIteratorClass* gt_match_iterator_open_class(void)
 {
   static const GtMatchIteratorClass *mpc;
-
+  gt_class_alloc_lock_enter();
   if (!mpc) {
     mpc = gt_match_iterator_class_new(sizeof (GtMatchIteratorOpen),
                                gt_match_iterator_open_next,
                                gt_match_iterator_open_free);
   }
+  gt_class_alloc_lock_leave();
   return mpc;
 }

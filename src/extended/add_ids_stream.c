@@ -15,9 +15,10 @@
 */
 
 #include "core/assert_api.h"
-#include "extended/feature_node.h"
+#include "core/class_alloc_lock.h"
 #include "extended/add_ids_stream.h"
 #include "extended/add_ids_visitor.h"
+#include "extended/feature_node.h"
 #include "extended/node_stream_api.h"
 
 struct GtAddIDsStream {
@@ -95,11 +96,13 @@ static void add_ids_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_add_ids_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtAddIDsStream),
                                    add_ids_stream_free,
                                    add_ids_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "core/array_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/encseq_api.h"
 #include "core/ma.h"
@@ -254,6 +255,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
 const GtNodeVisitorClass* gt_ltrharvest_tabout_visitor_class(void)
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtLTRharvestTaboutVisitor),
                                     NULL,
@@ -263,6 +265,7 @@ const GtNodeVisitorClass* gt_ltrharvest_tabout_visitor_class(void)
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

@@ -21,6 +21,7 @@
 #endif
 #include <stdio.h>
 #include <string.h>
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/hashmap.h"
@@ -600,10 +601,13 @@ void gt_ltrfileout_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_ltr_fileout_stream_class(void)
 {
   static const GtNodeStreamClass *nsc;
-  if (!nsc)
+  gt_class_alloc_lock_enter();
+  if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtLTRFileOutStream),
                                    gt_ltrfileout_stream_free,
                                    gt_ltrfileout_stream_next );
+  }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

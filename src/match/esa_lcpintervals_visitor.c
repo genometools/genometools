@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
 #include "esa_visitor_rep.h"
 #include "esa_lcpintervals_visitor.h"
@@ -61,6 +62,7 @@ static int gt_esa_lcpitvs_visitor_processbranchingedge(
 static const GtESAVisitorClass* gt_esa_lcpitvs_visitor_class(void)
 {
   static const GtESAVisitorClass *esc = NULL;
+  gt_class_alloc_lock_enter();
   if (!esc) {
     esc = gt_esa_visitor_class_new(sizeof (GtESALcpintervalsVisitor),
                                    NULL,
@@ -70,6 +72,7 @@ static const GtESAVisitorClass* gt_esa_lcpitvs_visitor_class(void)
                                    NULL,
                                    NULL);
   }
+  gt_class_alloc_lock_leave();
   return esc;
 }
 

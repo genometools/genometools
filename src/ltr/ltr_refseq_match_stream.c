@@ -16,6 +16,7 @@
 */
 
 #include "core/array.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/encseq.h"
 #include "core/fasta.h"
@@ -358,10 +359,13 @@ static void gt_ltr_refseq_match_stream_free(GtNodeStream *gs)
 const GtNodeStreamClass* gt_ltr_refseq_match_stream_class(void)
 {
   static const GtNodeStreamClass *gsc = NULL;
-  if (!gsc)
+  gt_class_alloc_lock_enter();
+  if (!gsc) {
     gsc = gt_node_stream_class_new(sizeof (GtLTRRefseqMatchStream),
                                    gt_ltr_refseq_match_stream_free,
                                    gt_ltr_refseq_match_stream_next);
+  }
+  gt_class_alloc_lock_leave();
   return gsc;
 }
 

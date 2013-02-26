@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "extended/eof_node.h"
 #include "extended/genome_node_rep.h"
 #include "extended/node_visitor.h"
@@ -36,6 +37,7 @@ static int eof_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv, GtError *err)
 const GtGenomeNodeClass* gt_eof_node_class()
 {
   static const GtGenomeNodeClass *gnc = NULL;
+  gt_class_alloc_lock_enter();
   if (!gnc) {
     gnc = gt_genome_node_class_new(sizeof (GtEOFNode),
                                    NULL,
@@ -46,6 +48,7 @@ const GtGenomeNodeClass* gt_eof_node_class()
                                    NULL,
                                    eof_node_accept);
   }
+  gt_class_alloc_lock_leave();
   return gnc;
 }
 

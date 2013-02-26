@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
@@ -66,6 +67,7 @@ static int meta_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv, GtError *err)
 const GtGenomeNodeClass* gt_meta_node_class()
 {
   static const GtGenomeNodeClass *gnc = NULL;
+  gt_class_alloc_lock_enter();
   if (!gnc) {
     gnc = gt_genome_node_class_new(sizeof (GtMetaNode),
                                    meta_node_free,
@@ -76,6 +78,7 @@ const GtGenomeNodeClass* gt_meta_node_class()
                                    NULL,
                                    meta_node_accept);
   }
+  gt_class_alloc_lock_leave();
   return gnc;
 }
 

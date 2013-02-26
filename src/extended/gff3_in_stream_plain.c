@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_table.h"
 #include "core/fileutils_api.h"
 #include "core/queue.h"
@@ -208,11 +209,13 @@ static void gff3_in_stream_plain_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_gff3_in_stream_plain_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtGFF3InStreamPlain),
                                    gff3_in_stream_plain_free,
                                    gff3_in_stream_plain_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

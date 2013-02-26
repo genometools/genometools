@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/interval_tree.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
@@ -79,6 +80,7 @@ void gt_line_breaker_bases_delete(GtLineBreaker *lb)
 const GtLineBreakerClass* gt_line_breaker_bases_class(void)
 {
   static const GtLineBreakerClass *lbc = NULL;
+  gt_class_alloc_lock_enter();
   if (!lbc)
   {
     lbc = gt_line_breaker_class_new(sizeof (GtLineBreakerBases),
@@ -86,6 +88,7 @@ const GtLineBreakerClass* gt_line_breaker_bases_class(void)
                                     gt_line_breaker_bases_register_block,
                                     gt_line_breaker_bases_delete);
   }
+  gt_class_alloc_lock_leave();
   return lbc;
 }
 

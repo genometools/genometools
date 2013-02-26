@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
 #include "extended/match_last.h"
@@ -33,10 +34,13 @@ struct GtMatchLAST {
 const GtMatchClass* gt_match_last_class()
 {
   static const GtMatchClass *matchc = NULL;
-  if (!matchc)
+  gt_class_alloc_lock_enter();
+  if (!matchc) {
     matchc = gt_match_class_new(sizeof (GtMatchLAST),
                                 NULL,
                                 NULL);
+  }
+  gt_class_alloc_lock_leave();
   return matchc;
 }
 

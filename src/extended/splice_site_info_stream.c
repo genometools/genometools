@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
 #include "extended/splice_site_info_stream.h"
@@ -62,11 +63,13 @@ static void gt_splice_site_info_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_splice_site_info_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtSpliceSiteInfoStream),
                                    gt_splice_site_info_stream_free,
                                    gt_splice_site_info_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

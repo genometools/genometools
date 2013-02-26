@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "extended/feature_node.h"
 #include "extended/node_stream_api.h"
 #include "extended/select_stream_api.h"
@@ -79,11 +80,13 @@ static void select_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_select_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtSelectStream),
                                    select_stream_free,
                                    select_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

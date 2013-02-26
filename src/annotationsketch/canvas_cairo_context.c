@@ -18,6 +18,7 @@
 #include <math.h>
 #include <string.h>
 #include "core/bittab.h"
+#include "core/class_alloc_lock.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/minmax.h"
@@ -42,6 +43,7 @@ struct GtCanvasCairoContext {
 const GtCanvasClass* gt_canvas_cairo_context_class(void)
 {
   static const GtCanvasClass *canvas_class = NULL;
+  gt_class_alloc_lock_enter();
   if (!canvas_class) {
     canvas_class = gt_canvas_class_new(sizeof (GtCanvasCairoContext),
                                        gt_canvas_cairo_visit_layout_pre,
@@ -56,6 +58,7 @@ const GtCanvasClass* gt_canvas_cairo_context_class(void)
                                        gt_canvas_cairo_draw_ruler,
                                        NULL);
   }
+  gt_class_alloc_lock_leave();
   return canvas_class;
 }
 

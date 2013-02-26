@@ -23,6 +23,7 @@
 #include "annotationsketch/feature_index_rep.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_stream_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_table.h"
 #include "core/cstr_api.h"
 #include "core/ensure.h"
@@ -345,6 +346,7 @@ void gt_feature_index_memory_delete(GtFeatureIndex *gfi)
 const GtFeatureIndexClass* gt_feature_index_memory_class(void)
 {
   static const GtFeatureIndexClass *fic = NULL;
+  gt_class_alloc_lock_enter();
   if (!fic) {
     fic = gt_feature_index_class_new(sizeof (GtFeatureIndexMemory),
                      gt_feature_index_memory_add_region_node,
@@ -359,6 +361,7 @@ const GtFeatureIndexClass* gt_feature_index_memory_class(void)
                      gt_feature_index_memory_has_seqid,
                      gt_feature_index_memory_delete);
   }
+  gt_class_alloc_lock_leave();
   return fic;
 }
 

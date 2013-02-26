@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/codon.h"
 #include "core/codon_iterator_simple.h"
 #include "core/ma.h"
@@ -305,6 +306,7 @@ static int cds_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
 const GtNodeVisitorClass* gt_cds_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtCDSVisitor),
                                     cds_visitor_free,
@@ -314,6 +316,7 @@ const GtNodeVisitorClass* gt_cds_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

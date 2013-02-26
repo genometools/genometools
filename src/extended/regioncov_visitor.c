@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
@@ -87,6 +88,7 @@ static int gt_regioncov_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
 const GtNodeVisitorClass* gt_regioncov_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtRegionCovVisitor),
                                     gt_regioncov_visitor_free,
@@ -96,6 +98,7 @@ const GtNodeVisitorClass* gt_regioncov_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/fasta.h"
 #include "core/ma_api.h"
 #include "core/string_distri.h"
@@ -127,6 +128,7 @@ static int splice_site_info_visitor_feature_node(GtNodeVisitor *nv,
 const GtNodeVisitorClass* gt_splice_site_info_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
    nvc = gt_node_visitor_class_new(sizeof (GtSpliceSiteInfoVisitor),
                                    splice_site_info_visitor_free,
@@ -136,6 +138,7 @@ const GtNodeVisitorClass* gt_splice_site_info_visitor_class()
                                    NULL,
                                    NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

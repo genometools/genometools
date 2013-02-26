@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/error_api.h"
 #include "core/seqiterator.h"
 #include "core/unused_api.h"
@@ -66,12 +67,14 @@ static void gt_sam_query_name_iterator_delete(GtCstrIterator *cstr_iterator)
 const GtCstrIteratorClass* gt_sam_query_name_iterator_class(void)
 {
   static const GtCstrIteratorClass *sic = NULL;
-  if (sic == NULL) {
+  gt_class_alloc_lock_enter();
+  if (!sic) {
     sic = gt_cstr_iterator_class_new(sizeof (GtSamQueryNameIterator),
                                      gt_sam_query_name_iterator_next,
                                      gt_sam_query_name_iterator_reset,
                                      gt_sam_query_name_iterator_delete);
   }
+  gt_class_alloc_lock_leave();
   return sic;
 }
 

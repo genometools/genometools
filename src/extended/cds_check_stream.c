@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "extended/cds_check_stream.h"
 #include "extended/cds_check_visitor.h"
 #include "extended/genome_node.h"
@@ -56,11 +57,13 @@ static void cds_check_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_cds_check_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtCDSCheckStream),
                                    cds_check_stream_free,
                                    cds_check_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

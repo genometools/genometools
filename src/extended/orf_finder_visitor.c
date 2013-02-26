@@ -17,6 +17,7 @@
 */
 
 #include <string.h>
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
@@ -327,6 +328,7 @@ static int gt_orf_finder_visitor_feature_node(GtNodeVisitor *gv,
 const GtNodeVisitorClass* gt_orf_finder_visitor_class(void)
 {
   static const GtNodeVisitorClass *gvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!gvc) {
     gvc = gt_node_visitor_class_new(sizeof (GtORFFinderVisitor),
                                     NULL,
@@ -336,6 +338,7 @@ const GtNodeVisitorClass* gt_orf_finder_visitor_class(void)
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return gvc;
 }
 

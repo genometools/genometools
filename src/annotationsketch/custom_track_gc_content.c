@@ -20,6 +20,7 @@
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/custom_track_gc_content.h"
 #include "annotationsketch/custom_track_rep.h"
+#include "core/class_alloc_lock.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -185,6 +186,7 @@ void gt_custom_track_gc_content_delete(GtCustomTrack *ct)
 const GtCustomTrackClass* gt_custom_track_gc_content_class(void)
 {
   static const GtCustomTrackClass *ctc = NULL;
+  gt_class_alloc_lock_enter();
   if (!ctc)
   {
     ctc = gt_custom_track_class_new(sizeof (GtCustomTrackGcContent),
@@ -193,6 +195,7 @@ const GtCustomTrackClass* gt_custom_track_gc_content_class(void)
                                     gt_custom_track_gc_content_get_title,
                                     gt_custom_track_gc_content_delete);
   }
+  gt_class_alloc_lock_leave();
   return ctc;
 }
 

@@ -16,6 +16,7 @@
 */
 
 #include <math.h>
+#include "core/class_alloc_lock.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -116,6 +117,7 @@ void gt_line_breaker_captions_delete(GtLineBreaker *lb)
 const GtLineBreakerClass* gt_line_breaker_captions_class(void)
 {
   static const GtLineBreakerClass *lbc = NULL;
+  gt_class_alloc_lock_enter();
   if (!lbc)
   {
     lbc = gt_line_breaker_class_new(sizeof (GtLineBreakerCaptions),
@@ -123,6 +125,7 @@ const GtLineBreakerClass* gt_line_breaker_captions_class(void)
                                    gt_line_breaker_captions_register_block,
                                    gt_line_breaker_captions_delete);
   }
+  gt_class_alloc_lock_leave();
   return lbc;
 }
 

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/encseq_col.h"
 #include "core/grep_api.h"
@@ -323,6 +324,7 @@ static unsigned long gt_encseq_col_get_sequence_length(const GtSeqCol *sc,
 const GtSeqColClass* gt_encseq_col_class(void)
 {
   static const GtSeqColClass *esc_class = NULL;
+  gt_class_alloc_lock_enter();
   if (!esc_class) {
       esc_class = gt_seq_col_class_new(sizeof (GtEncseqCol),
                                        gt_encseq_col_delete,
@@ -339,6 +341,7 @@ const GtSeqColClass* gt_encseq_col_class(void)
                                        gt_encseq_col_get_description,
                                        gt_encseq_col_get_sequence_length);
   }
+  gt_class_alloc_lock_leave();
   return esc_class;
 }
 

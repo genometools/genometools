@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/hashtable.h"
@@ -197,6 +198,7 @@ void gt_feature_node_unset_observer(GtFeatureNode *fn)
 const GtGenomeNodeClass* gt_feature_node_class()
 {
   static const GtGenomeNodeClass *gnc = NULL;
+  gt_class_alloc_lock_enter();
   if (!gnc) {
     gnc = gt_genome_node_class_new(sizeof (GtFeatureNode),
                                    feature_node_free,
@@ -207,6 +209,7 @@ const GtGenomeNodeClass* gt_feature_node_class()
                                    feature_node_change_seqid,
                                    feature_node_accept);
   }
+  gt_class_alloc_lock_leave();
   return gnc;
 }
 

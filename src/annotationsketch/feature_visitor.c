@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/region_node.h"
@@ -58,6 +59,7 @@ static int feature_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
 const GtNodeVisitorClass* gt_feature_visitor_class()
 {
   static const GtNodeVisitorClass *gvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!gvc) {
     gvc = gt_node_visitor_class_new(sizeof (GtFeatureVisitor),
                                     feature_visitor_free,
@@ -67,6 +69,7 @@ const GtNodeVisitorClass* gt_feature_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return gvc;
 }
 

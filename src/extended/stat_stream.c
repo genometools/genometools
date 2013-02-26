@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "extended/eof_node.h"
 #include "extended/genome_node.h"
 #include "extended/stat_stream_api.h"
@@ -63,11 +64,13 @@ static void stat_stream_free(GtNodeStream *ns)
 const GtNodeStreamClass* gt_stat_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nsc) {
     nsc = gt_node_stream_class_new(sizeof (GtStatStream),
                                    stat_stream_free,
                                    stat_stream_next);
   }
+  gt_class_alloc_lock_leave();
   return nsc;
 }
 

@@ -16,6 +16,7 @@
 */
 
 #include "core/chardef.h"
+#include "core/class_alloc_lock.h"
 #include "core/colorspace.h"
 #include "core/cstr_api.h"
 #include "core/file.h"
@@ -436,6 +437,7 @@ void gt_seqiterator_fastq_delete(GtSeqIterator *si)
 const GtSeqIteratorClass* gt_seqiterator_fastq_class(void)
 {
   static const GtSeqIteratorClass *sic = NULL;
+  gt_class_alloc_lock_enter();
   if (!sic) {
     sic = gt_seqiterator_class_new(sizeof (GtSeqIteratorFastQ),
                              gt_seqiterator_fastq_set_symbolmap,
@@ -445,6 +447,7 @@ const GtSeqIteratorClass* gt_seqiterator_fastq_class(void)
                              gt_seqiterator_fastq_set_quality_buffer,
                              gt_seqiterator_fastq_delete);
   }
+  gt_class_alloc_lock_leave();
   return sic;
 }
 

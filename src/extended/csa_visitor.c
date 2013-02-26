@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/log.h"
 #include "core/queue_api.h"
 #include "core/undef_api.h"
@@ -148,6 +149,7 @@ static int csa_visitor_eof_node(GtNodeVisitor *nv, GtEOFNode *eofn,
 const GtNodeVisitorClass* gt_csa_visitor_class()
 {
   static GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (CSAVisitor),
                                     csa_visitor_free,
@@ -158,6 +160,7 @@ const GtNodeVisitorClass* gt_csa_visitor_class()
                                     csa_visitor_eof_node);
     gt_node_visitor_class_set_meta_node_func(nvc, csa_visitor_meta_node);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

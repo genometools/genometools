@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "extended/script_wrapper_visitor.h"
 #include "extended/node_visitor_api.h"
 
@@ -123,6 +124,7 @@ static int script_wrapper_visitor_eof_node(GtNodeVisitor *nv,
 const GtNodeVisitorClass* gt_script_wrapper_visitor_class()
 {
   static GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtScriptWrapperVisitor),
                                     script_wrapper_visitor_free,
@@ -134,6 +136,7 @@ const GtNodeVisitorClass* gt_script_wrapper_visitor_class()
     gt_node_visitor_class_set_meta_node_func(nvc,
                                              script_wrapper_visitor_meta_node);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 

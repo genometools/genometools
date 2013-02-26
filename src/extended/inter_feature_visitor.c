@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/ma_api.h"
 #include "core/undef_api.h"
@@ -133,6 +134,7 @@ static int inter_feature_visitor_feature_node(GtNodeVisitor *nv,
 const GtNodeVisitorClass* gt_inter_feature_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
+  gt_class_alloc_lock_enter();
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtInterFeatureVisitor),
                                     inter_feature_visitor_free,
@@ -142,6 +144,7 @@ const GtNodeVisitorClass* gt_inter_feature_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
 
