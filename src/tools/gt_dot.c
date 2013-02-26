@@ -40,7 +40,7 @@ static void gt_dot_arguments_delete(void *tool_arguments)
 
 static GtOptionParser* gt_dot_option_parser_new(void *tool_arguments)
 {
-  GtDotArguments *arguments = tool_arguments;
+  GT_UNUSED GtDotArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GT_UNUSED GtOption *option;
   gt_assert(arguments);
@@ -52,8 +52,8 @@ static GtOptionParser* gt_dot_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_dot_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
-                         GT_UNUSED void *tool_arguments, GT_UNUSED GtError *err)
+static int gt_dot_runner(int argc, const char **argv, int parsed_args,
+                         void *tool_arguments, GtError *err)
 {
   GT_UNUSED GtDotArguments *arguments = tool_arguments;
   GtNodeStream *vs = NULL, *ins = NULL;
