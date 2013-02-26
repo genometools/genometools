@@ -22,10 +22,13 @@
 
 typedef struct GtCodonIteratorSimple GtCodonIteratorSimple;
 
+/* Creates a new <GtCodonIterator> traversing <seq> over a length of <len>.
+   If an error occurs, NULL is returned and <err> is set accordingly. */
 GtCodonIterator*            gt_codon_iterator_simple_new(const char *seq,
                                                          unsigned long len,
                                                          GtError *err);
 
 const GtCodonIteratorClass* gt_codon_iterator_simple_class(void);
 int                         gt_codon_iterator_simple_unit_test(GtError *err);
+
 #endif

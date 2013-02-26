@@ -23,18 +23,26 @@
 
 typedef struct GtCodonIteratorEncseq GtCodonIteratorEncseq;
 
+/* Creates a new <GtCodonIterator> traversing <encseq> over a length of <len>
+   starting at concatenated position <startpos>. If an error occurs, NULL is
+   returned and <err> is set accordingly. */
 GtCodonIterator*            gt_codon_iterator_encseq_new(GtEncseq *encseq,
                                                          unsigned long startpos,
                                                          unsigned long length,
                                                          GtError *err);
 
+/* Creates a new <GtCodonIterator> traversing <encseq> over a length of <len>
+   starting at concatenated position <startpos>. <readmode> specified reading
+   direction. If an error occurs, NULL is returned and <err> is set
+   accordingly. */
 GtCodonIterator*            gt_codon_iterator_encseq_new_with_readmode(
                                                         GtEncseq *encseq,
                                                         unsigned long startpos,
                                                         unsigned long length,
                                                         GtReadmode readmode,
-                                                        GT_UNUSED GtError *err);
+                                                        GtError *err);
 
 const GtCodonIteratorClass* gt_codon_iterator_encseq_class(void);
 int                         gt_codon_iterator_encseq_unit_test(GtError *err);
+
 #endif

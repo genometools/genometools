@@ -18,13 +18,24 @@
 #ifndef MD5_ENCODER_H
 #define MD5_ENCODER_H
 
+/* The <GtMD5Encoder> class implements a stateful encoder for MD5 hashes
+   for strings build by iterative addition of blocks. */
 typedef struct GtMD5Encoder GtMD5Encoder;
 
+/* Returns a new <GtMD5Encoder> object. */
 GtMD5Encoder* gt_md5_encoder_new(void);
+/* Processes <message> of length <len> (max. block length 64 bytes) to be
+   incorporated in the hash currently represented by <enc>. */
 void          gt_md5_encoder_add_block(GtMD5Encoder *enc, const char *message,
                                        unsigned long len);
+/* Finishes <enc> to produce the final MD5 value, written to the 16-byte array
+   <output>. If <outstr> is not NULL, a \0-terminated string representation of
+   the hash will be written to the 32-byte string buffer it points to. */
 void          gt_md5_encoder_finish(GtMD5Encoder *enc, unsigned char *output,
                                     char *outstr);
+/* Discards the current state of <enc> and resets it to represent the MD5 hash
+   of the empty string. */
 void          gt_md5_encoder_reset(GtMD5Encoder *enc);
+/* Deletes <enc> and frees all associated space. */
 void          gt_md5_encoder_delete(GtMD5Encoder *enc);
 #endif

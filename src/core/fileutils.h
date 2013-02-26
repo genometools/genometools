@@ -22,22 +22,20 @@
 /* Find regular executable <file> in $PATH, if it has no dirname; set <path> to
    dirname otherwise. Sets <path> to the empty string if regular executable
    <file> could not be found in $PATH. */
-int            gt_file_find_exec_in_path(GtStr *path, const char *file,
-                                         GtError*);
+int    gt_file_find_exec_in_path(GtStr *path, const char *file, GtError*);
 
 /* Returns true if the file with the name composed of the concatenation of
    <path> and <suffix> exists, false otherwise. */
-bool           gt_file_with_suffix_exists(const char *path, const char *suffix);
+bool   gt_file_with_suffix_exists(const char *path, const char *suffix);
 
 /* Returns the size of the file whose name name is composed of the
   concatenation of <path> and <suffix>. */
-off_t          gt_file_with_suffix_size(const char *path, const char *suffix);
+off_t  gt_file_with_suffix_size(const char *path, const char *suffix);
 
 /* Return the size of <file>. */
-off_t          gt_file_size(const char *file);
+off_t  gt_file_size(const char *file);
 
-/* Compare two files bytewise */
-
-void gt_xfile_cmp(const char *file1,const char *file2);
+/* Compare two files bytewise. */
+void   gt_xfile_cmp(const char *file1, const char *file2);
 
 #endif

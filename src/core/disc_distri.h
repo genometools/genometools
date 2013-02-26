@@ -22,27 +22,40 @@
 #include "core/error.h"
 #include "core/file.h"
 
-/* A discrete distribution */
+/* The <GtDiscDistri> class represents a discrete distribution of integer
+   values. */
 typedef struct GtDiscDistri GtDiscDistri;
 
+/* Callback function called during iteration over each item of the
+   distribution, where <key> is the counted value and <value> is the count. */
 typedef void (*GtDiscDistriIterFunc)(unsigned long key,
                                      unsigned long long value,
                                      void *data);
 
+/* Creates a new, empty <GtDiscDistri>. */
 GtDiscDistri*      gt_disc_distri_new(void);
-void               gt_disc_distri_add(GtDiscDistri*, unsigned long);
-void               gt_disc_distri_add_multi(GtDiscDistri*, unsigned long,
-                                        unsigned long long);
-unsigned long long gt_disc_distri_get(const GtDiscDistri*, unsigned long);
-void               gt_disc_distri_show(const GtDiscDistri*, GtFile*);
-void               gt_disc_distri_foreach(const GtDiscDistri*,
-                                          GtDiscDistriIterFunc,
+/* Adds one count of <key> to <d>. */
+void               gt_disc_distri_add(GtDiscDistri *d, unsigned long key);
+/* Adds <occurrences> counts of <key> to <d>. */
+void               gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
+                                            unsigned long long occurrences);
+/* Return the current count of <key> as stored in <d>. */
+unsigned long long gt_disc_distri_get(const GtDiscDistri *d, unsigned long key);
+/* Prints the current state of <d> to <outfile>. If <outfp> is NULL,
+   stdout will be used for output. */
+void               gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp);
+/* Iterate over all non-empty entries in <d>, calling <func> for each one,
+   from the smallest to the largest key. The <data> pointer can be used to pass
+   arbitrary data to <func>. */
+void               gt_disc_distri_foreach(const GtDiscDistri *d,
+                                          GtDiscDistriIterFunc func,
                                           void *data);
-/* same as foreach, but from the longest to the smallest key: */
+/* Same as foreach, but from the longest to the smallest key. */
 void               gt_disc_distri_foreach_in_reverse_order(const
-                                                           GtDiscDistri *d,
+                                                                GtDiscDistri *d,
                                                            GtDiscDistriIterFunc
-                                                           func, void *data);
+                                                                           func,
+                                                           void *data);
 int                gt_disc_distri_unit_test(GtError*);
 void               gt_disc_distri_delete(GtDiscDistri*);
 
