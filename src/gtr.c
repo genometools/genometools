@@ -33,7 +33,7 @@
 #include "core/gtdatapath.h"
 #include "core/log.h"
 #include "core/ma.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 #include "core/unit_testing.h"
 #include "core/versionfunc.h"
 #include "core/xansi_api.h"

@@ -30,7 +30,7 @@
 #include "core/qsort-ulong.h"
 #include "tools/gt_sortbench.h"
 #ifdef GT_THREADS_ENABLED
-#include "core/thread.h"
+#include "core/thread_api.h"
 #endif
 
 typedef struct {

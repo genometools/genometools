@@ -19,7 +19,7 @@
 #include "core/cstr_table.h"
 #include "core/mathsupport.h"
 #include "core/symbol.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 #include "core/unused_api.h"
 
 static GtCstrTable *symbols = NULL;

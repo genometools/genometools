@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/array_api.h"
 #include "core/ma_api.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 #include "core/unused_api.h"
 
 unsigned int gt_jobs = 1;

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/thread.h"
+#include "core/thread_api.h"
 
 static GtMutex* gt_class_alloc_lock = NULL;
 

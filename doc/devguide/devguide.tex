@@ -1471,7 +1471,7 @@ which will call \keyword{gt_lib_clean()} automatically.
 \section{Threads}
 The \Gt contain functions allowing developers to write their programs in a
 multi-threaded way, by wrapping the POSIX threads library \keyword{libpthread}.
-See \keyword{core/thread.h} for more information.
+See \keyword{core/thread\_api.h} for more information.
 
 Any function with this signature:
 
@@ -1493,7 +1493,7 @@ Some more useful information:
 \begin{itemize}
 \item
 For synchronization during parallel execution of multiple threads, \Gt provides
-classes for mutexes and read-write-locks. See \keyword{core/thread.h} for a
+classes for mutexes and read-write-locks. See \keyword{core/thread\_api.h} for a
 description of the interface of the \keyword{GtMutex} and \keyword{GtRWLock}
 classes.
 \item

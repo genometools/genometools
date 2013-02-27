@@ -26,7 +26,7 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/qsort_r.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 
 union link_data
 {

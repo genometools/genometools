@@ -37,7 +37,7 @@
 #include "core/str_array_api.h"
 #include "core/defined-types.h"
 #include "core/types_api.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 
 typedef struct
 {

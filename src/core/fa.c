@@ -26,7 +26,7 @@
 #include "core/fa.h"
 #include "core/ma.h"
 #include "core/spacepeak.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/xbsd.h"

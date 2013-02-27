@@ -31,7 +31,7 @@
 #include "core/unused_api.h"
 #include "core/minmax.h"
 #ifdef GT_THREADS_ENABLED
-#include "core/thread.h"
+#include "core/thread_api.h"
 #endif
 #include "firstcodes-buf.h"
 #include "firstcodes-spacelog.h"

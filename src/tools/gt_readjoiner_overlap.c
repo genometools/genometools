@@ -25,7 +25,7 @@
 #include "core/logger.h"
 #include "core/minmax.h"
 #ifdef GT_THREADS_ENABLED
-#include "core/thread.h"
+#include "core/thread_api.h"
 #endif
 #include "match/rdj-spmfind.h"
 #include "match/rdj-version.h"

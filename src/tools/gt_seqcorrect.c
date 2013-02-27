@@ -28,7 +28,7 @@
 #include "core/showtime.h"
 #include "core/undef_api.h"
 #ifdef GT_THREADS_ENABLED
-#include "core/thread.h"
+#include "core/thread_api.h"
 #endif
 #include "core/warning_api.h"
 #include "core/xposix.h"

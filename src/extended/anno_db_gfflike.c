@@ -32,7 +32,7 @@
 #include "core/ma.h"
 #include "core/range.h"
 #include "core/strand_api.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/fa.h"

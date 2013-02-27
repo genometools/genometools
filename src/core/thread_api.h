@@ -14,17 +14,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef THREAD_H
-#define THREAD_H
+#ifndef THREAD_API_H
+#define THREAD_API_H
 
 #include "core/error_api.h"
 
 extern unsigned int gt_jobs; /* number of parallel threads to be used */
 
+/* The <GtThread> class represents a handle to a single thread of execution. */
 typedef struct GtThread GtThread;
+/* The <GtRWLock> class represents a read/write lock. */
 typedef struct GtRWLock GtRWLock;
+/* The <GtMutex> class represents a simple mutex structure. */
 typedef struct GtMutex GtMutex;
 
+/* A function to be multithreaded. */
 typedef void* (*GtThreadFunc)(void *data);
 
 /* Execute <function> (with <data> passed to it) in <gt_jobs> many parallel
@@ -40,6 +44,8 @@ GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err);
 /* Delete the given <thread> handle. Does not stop the thread itself! */
 void      gt_thread_delete(GtThread *thread);
 
+/* Wait for <thread> to terminate before continuing execution of the current
+   thread. */
 void      gt_thread_join(GtThread *thread);
 
 /* Return a new <GtRWLock*> object. */
@@ -48,8 +54,8 @@ GtRWLock* gt_rwlock_new(void);
 /* Delete the given <rwlock>. */
 void      gt_rwlock_delete(GtRWLock *rwlock);
 
-/* Acquire a read lock for <rwlock>. */
 #ifdef GT_THREADS_ENABLED
+/* Acquire a read lock for <rwlock>. */
 #define   gt_rwlock_rdlock(rwlock) \
           gt_rwlock_rdlock_func(rwlock)
 void      gt_rwlock_rdlock_func(GtRWLock *rwlock);
@@ -58,8 +64,8 @@ void      gt_rwlock_rdlock_func(GtRWLock *rwlock);
           ((void) 0)
 #endif
 
-/* Acquire a write lock for <rwlock>. */
 #ifdef GT_THREADS_ENABLED
+/* Acquire a write lock for <rwlock>. */
 #define   gt_rwlock_wrlock(rwlock) \
           gt_rwlock_wrlock_func(rwlock)
 void      gt_rwlock_wrlock_func(GtRWLock *rwlock);
@@ -68,8 +74,8 @@ void      gt_rwlock_wrlock_func(GtRWLock *rwlock);
           ((void) 0)
 #endif
 
-/* Unlock the given <rwlock>. */
 #ifdef GT_THREADS_ENABLED
+/* Unlock the given <rwlock>. */
 #define   gt_rwlock_unlock(rwlock) \
           gt_rwlock_unlock_func(rwlock)
 void      gt_rwlock_unlock_func(GtRWLock *rwlock);
@@ -84,8 +90,8 @@ GtMutex*  gt_mutex_new(void);
 /* Delete the given <mutex>. */
 void      gt_mutex_delete(GtMutex *mutex);
 
-/* Lock the given <mutex>. */
 #ifdef GT_THREADS_ENABLED
+/* Lock the given <mutex>. */
 #define   gt_mutex_lock(mutex) \
           gt_mutex_lock_func(mutex)
 void      gt_mutex_lock_func(GtMutex *mutex);
@@ -94,8 +100,8 @@ void      gt_mutex_lock_func(GtMutex *mutex);
           ((void) 0)
 #endif
 
-/* Unlock the given <mutex>. */
 #ifdef GT_THREADS_ENABLED
+/* Unlock the given <mutex>. */
 #define   gt_mutex_unlock(mutex) \
           gt_mutex_unlock_func(mutex)
 void      gt_mutex_unlock_func(GtMutex *mutex);

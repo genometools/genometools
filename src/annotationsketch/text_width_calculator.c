@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/ma.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 #include "core/unused_api.h"
 
 struct GtTextWidthCalculatorMembers {

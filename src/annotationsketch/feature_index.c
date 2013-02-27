@@ -21,7 +21,7 @@
 #include "core/array.h"
 #include "core/ensure.h"
 #include "core/ma.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 #include "core/unused_api.h"
 #include "annotationsketch/feature_index_rep.h"
 #include "annotationsketch/feature_visitor.h"

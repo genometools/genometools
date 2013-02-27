@@ -28,7 +28,7 @@
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/luahelper.h"

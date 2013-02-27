@@ -25,7 +25,7 @@
 #include "core/minmax.h"
 #include "core/showtime.h"
 #ifdef GT_THREADS_ENABLED
-#include "core/thread.h"
+#include "core/thread_api.h"
 #endif
 #include "tools/gt_encseq2spm.h"
 #include "match/firstcodes.h"

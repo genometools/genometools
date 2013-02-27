@@ -19,7 +19,7 @@
 #include "core/spacepeak.h"
 #include "core/ma.h"
 #include "core/spacecalc.h"
-#include "core/thread.h"
+#include "core/thread_api.h"
 
 typedef struct
 {

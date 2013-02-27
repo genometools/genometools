@@ -53,7 +53,7 @@
 #include <unistd.h>  /* for getpid() */
 #include <sys/time.h> /* for gettimeofday() */
 
-#include "core/thread.h"
+#include "core/thread_api.h"
 #include "core/yarandom.h"
 # undef gt_ya_rand_init
 
