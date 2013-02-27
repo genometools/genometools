@@ -18,6 +18,7 @@
 #ifndef FILE_API_H
 #define FILE_API_H
 
+#include <stdio.h>
 #include "core/error_api.h"
 
 /* This class defines (generic) files in __GenomeTools__. A generic file is is a
@@ -32,6 +33,9 @@ typedef struct GtFile GtFile;
    compression if it ends with '.bz2', and uncompressed otherwise). */
 GtFile* gt_file_new(const char *path, const char *mode, GtError *err);
 
+/* Create a new <GtFile> object from a normal file pointer <fp>. */
+GtFile* gt_file_new_from_fileptr(FILE *fp);
+
 /* <printf(3)> for generic <file>. */
 void    gt_file_xprintf(GtFile *file, const char *format, ...)
   __attribute__ ((format (printf, 2, 3)));
@@ -39,6 +43,10 @@ void    gt_file_xprintf(GtFile *file, const char *format, ...)
 /* Write <\0>-terminated C string <cstr> to <file>. Similar to <fputs(3)>, but
    terminates on error. */
 void    gt_file_xfputs(const char *cstr, GtFile *file);
+
+/* Write single character <c> to <file>. Similar to <fputc(3)>, but terminates
+   on error. */
+void    gt_file_xfputc(int c, GtFile *file);
 
 /* Return next character from <file> or <EOF>, if end-of-file is reached. */
 int     gt_file_xfgetc(GtFile *file);
@@ -55,5 +63,8 @@ void    gt_file_xrewind(GtFile *file);
 
 /* Close the underlying file handle and destroy the <file> object. */
 void    gt_file_delete(GtFile *file);
+
+/* Destroy the file handle object, but do not close the underlying handle. */
+void    gt_file_delete_without_handle(GtFile*);
 
 #endif

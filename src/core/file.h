@@ -18,7 +18,6 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include "core/file_api.h"
 
@@ -57,18 +56,11 @@ GtFile*     gt_file_xopen_file_mode(GtFileMode file_mode, const char *path,
    automatically via gt_file_mode_determine(path). */
 GtFile*     gt_file_xopen(const char *path, const char *mode);
 
-/* Create a new GtFile object from a normal file pointer. */
-GtFile*     gt_file_new_from_fileptr(FILE*);
-
-GtFileMode  gt_file_mode(const GtFile*);
+/* Returns the mode of the given <file>. */
+GtFileMode  gt_file_mode(const GtFile *file);
 
 /* Unget character <c> to <file> (which obviously cannot be <NULL>).
    Can only be used once at a time. */
 void        gt_file_unget_char(GtFile *file, char c);
-
-void        gt_file_xfputc(int c, GtFile*);
-
-/* Destroy the file handle object, but do not close the underlying handle. */
-void        gt_file_delete_without_handle(GtFile*);
 
 #endif
