@@ -361,7 +361,7 @@ static int inputsuffixarray(bool map,
     } else
     {
 #ifdef _LP64
-      off_t filesize = gt_file_with_suffix_size(indexname,SUFTABSUFFIX);
+      off_t filesize = gt_file_size_with_suffix(indexname,SUFTABSUFFIX);
 
       if (filesize == (off_t) sizeof (uint32_t) *
                               suffixarray->numberofallsortedsuffixes)

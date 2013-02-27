@@ -57,7 +57,7 @@ static bool file_exists_and_is_regular_executable(const char *path)
   return is_exec;
 }
 
-bool gt_file_with_suffix_exists(const char *path, const char *suffix)
+bool gt_file_exists_with_suffix(const char *path, const char *suffix)
 {
   struct stat statbuf;
   GtStr *tmpfilename;
@@ -262,7 +262,7 @@ void gt_xfile_cmp(const char *file1,const char *file2)
   gt_xfclose(fp2);
 }
 
-off_t gt_file_with_suffix_size(const char *path, const char *suffix)
+off_t gt_file_size_with_suffix(const char *path, const char *suffix)
 {
   GtStr *tmpfilename;
   off_t tmpsize;
