@@ -18,11 +18,13 @@
 #ifndef FEATURE_STREAM_API_H
 #define FEATURE_STREAM_API_H
 
-#include <stdio.h>
 #include "annotationsketch/feature_index_api.h"
 #include "extended/node_stream_api.h"
 
-/* create a FeatureStream which writes to GtFeatureIndex */
-GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex*);
+typedef struct GtFeatureStream GtFeatureStream;
+
+/* Create a new <GtFeatureStream> which writes all passed nodes to
+   <GtFeatureIndex> <fi>. */
+GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex *fi);
 
 #endif
