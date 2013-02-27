@@ -1,0 +1,2 @@
+#!/bin/bash
+find src/core -name '*.h' | xargs grep '#include' | grep '"' | egrep -v '"core/'
