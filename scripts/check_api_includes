@@ -1,0 +1,2 @@
+#!/bin/bash
+find src/ -name '*_api.h' | xargs grep include | grep '"' | grep -v 'api.h"'
