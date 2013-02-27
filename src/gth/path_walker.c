@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "gth/path_walker.h"
 
 struct GthPathWalker {

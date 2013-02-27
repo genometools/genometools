@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "gth/gthtravalign.h"
 
 bool gt_eops_equal_referencelength(Editoperation *alignment,

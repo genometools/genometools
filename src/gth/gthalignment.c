@@ -21,7 +21,7 @@
 #include <ctype.h>
 #include <math.h>
 #include "core/chardef.h"
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "core/minmax.h"
 #include "core/translator_api.h"
 #include "core/unused_api.h"

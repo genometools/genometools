@@ -15,14 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CODON_H
-#define CODON_H
+#ifndef CODON_API_H
+#define CODON_API_H
 
+/* The length of a codon. */
 #define GT_CODON_LENGTH  3
-
-#define GT_T_CODE  0
-#define GT_C_CODE  1
-#define GT_A_CODE  2
-#define GT_G_CODE  3
 
 #endif

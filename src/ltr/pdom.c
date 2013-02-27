@@ -24,7 +24,7 @@
 #include <float.h>
 #include <unistd.h>
 
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "core/codon_iterator_simple.h"
 #include "core/log.h"
 #include "core/ma.h"

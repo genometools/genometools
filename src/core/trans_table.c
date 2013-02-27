@@ -16,12 +16,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/trans_table.h"
 
 #define GT_AMINOACIDFAIL            -1
+
+/* The integer which a T is encoded to. */
+#define GT_T_CODE  0
+#define GT_C_CODE  1
+#define GT_A_CODE  2
+#define GT_G_CODE  3
 
 #define GT_NUMOFTRANSSCHEMES\
         ((unsigned int) (sizeof (schemetable)/sizeof (schemetable[0])))

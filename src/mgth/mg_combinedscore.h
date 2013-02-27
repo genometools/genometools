@@ -18,7 +18,7 @@
 #ifndef MG_COMBINEDSCORE_H
 #define MG_COMBINEDSCORE_H
 
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "metagenomethreader.h"
 #include "mg_computepath.h"
 

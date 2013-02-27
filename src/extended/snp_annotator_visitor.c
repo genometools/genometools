@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "core/complement.h"
 #include "core/cstr_api.h"
 #include "core/hashmap.h"

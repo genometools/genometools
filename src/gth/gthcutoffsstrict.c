@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"
 #include "gth/gthcutoffsstrict.h"

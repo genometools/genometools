@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "core/codon_iterator_simple.h"
 #include "core/cstr_api.h"
 #include "core/fasta.h"

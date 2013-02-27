@@ -18,7 +18,7 @@
 */
 
 #include <string.h>
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "core/codon_iterator_simple.h"
 #include "core/ensure.h"
 #include "core/ma.h"

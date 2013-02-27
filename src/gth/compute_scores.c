@@ -16,7 +16,7 @@
 */
 
 #include <math.h>
-#include "core/codon.h"
+#include "core/codon_api.h"
 #include "core/safearith.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
