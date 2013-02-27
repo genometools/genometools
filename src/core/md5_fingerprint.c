@@ -19,7 +19,7 @@
 #include <string.h>
 #include "md5.h"
 #include "core/ma.h"
-#include "core/md5_encoder.h"
+#include "core/md5_encoder_api.h"
 #include "core/md5_fingerprint.h"
 #include "core/safearith.h"
 

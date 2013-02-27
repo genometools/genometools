@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MD5_ENCODER_H
-#define MD5_ENCODER_H
+#ifndef MD5_ENCODER_API_H
+#define MD5_ENCODER_API_H
 
 /* The <GtMD5Encoder> class implements a stateful encoder for MD5 hashes
    for strings build by iterative addition of blocks. */

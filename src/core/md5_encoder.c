@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "core/md5_encoder.h"
+#include "core/md5_encoder_api.h"
 #include "core/assert_api.h"
 
 #define GT_MD5_WORD 32
