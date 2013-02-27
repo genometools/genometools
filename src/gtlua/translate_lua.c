@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "lauxlib.h"
-#include "core/codon_iterator_simple.h"
+#include "core/codon_iterator_simple_api.h"
 #include "core/translator.h"
 #include "gtlua/translate_lua.h"
 

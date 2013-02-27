@@ -16,7 +16,7 @@
 */
 
 #include "core/codon_api.h"
-#include "core/codon_iterator_simple.h"
+#include "core/codon_iterator_simple_api.h"
 #include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/ma.h"

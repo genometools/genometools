@@ -19,7 +19,7 @@
 
 #include <string.h>
 #include "core/codon_api.h"
-#include "core/codon_iterator_simple.h"
+#include "core/codon_iterator_simple_api.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/translator.h"

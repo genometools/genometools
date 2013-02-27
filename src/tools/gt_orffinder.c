@@ -18,7 +18,7 @@
 
 #include <ctype.h>
 #include <string.h>
-#include "core/codon_iterator_encseq.h"
+#include "core/codon_iterator_encseq_api.h"
 #include "core/encseq.h"
 #include "core/fileutils_api.h"
 #include "core/hashmap.h"

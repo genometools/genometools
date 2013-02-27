@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CODON_ITERATOR_ENCSEQ_H
-#define CODON_ITERATOR_ENCSEQ_H
+#ifndef CODON_ITERATOR_ENCSEQ_API_H
+#define CODON_ITERATOR_ENCSEQ_API_H
 
 #include "core/encseq_api.h"
 #include "core/error_api.h"

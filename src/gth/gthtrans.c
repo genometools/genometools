@@ -16,7 +16,7 @@
 */
 
 #include "core/codon_api.h"
-#include "core/codon_iterator_simple.h"
+#include "core/codon_iterator_simple_api.h"
 #include "core/translator_api.h"
 #include "core/trans_table.h"
 #include "core/unused_api.h"

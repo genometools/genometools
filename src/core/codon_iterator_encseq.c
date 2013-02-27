@@ -20,7 +20,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/codon_api.h"
-#include "core/codon_iterator_encseq.h"
+#include "core/codon_iterator_encseq_api.h"
 #include "core/codon_iterator_rep.h"
 
 struct GtCodonIteratorEncseq {
