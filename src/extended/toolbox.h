@@ -20,31 +20,15 @@
 
 #include "core/error.h"
 #include "core/tool_api.h"
-
-/* the toolbox class */
-typedef struct GtToolbox GtToolbox;
+#include "extended/toolbox_api.h"
 
 /* deprecated */
 typedef int (*GtToolfunc)(int argc, const char **argv, GtError*);
-
-GtToolbox* gt_toolbox_new(void);
-
-/* Add <tool> with name <toolname> to <toolbox>. Takes ownership of <tool>. */
-void       gt_toolbox_add_tool(GtToolbox*, const char *toolname, GtTool *tool);
-/* Add (hidden) <tool> with name <toolname> to <toolbox>. Hidden tools are not
-   shown in the output of <gt_toolbox_show()>. Takes ownership of <tool>. */
-void       gt_toolbox_add_hidden_tool(GtToolbox*, const char *toolname,
-                                      GtTool *tool);
-/* Get GtTool with name <toolname> from <toolbox>. */
-GtTool*    gt_toolbox_get_tool(GtToolbox*, const char *toolname);
 /* deprecated */
 bool       gt_toolbox_has_tool(const GtToolbox*, const char *toolname);
 /* deprecated */
 void       gt_toolbox_add(GtToolbox*, const char *toolname, GtToolfunc);
 /* deprecated */
 GtToolfunc gt_toolbox_get(const GtToolbox*, const char *toolname);
-/* Show all tools except the hidden ones. */
-int        gt_toolbox_show(const char *progname, void *toolbox, GtError*);
-void       gt_toolbox_delete(GtToolbox*);
 
 #endif

@@ -121,7 +121,7 @@ static int show_tool_name(void *key, void *value, GT_UNUSED void *data,
 }
 
 int gt_toolbox_show(GT_UNUSED const char *progname, void *toolbox,
-                 GT_UNUSED GtError *err)
+                    GT_UNUSED GtError *err)
 {
   GtToolbox *tb;
   GT_UNUSED int had_err = 0;

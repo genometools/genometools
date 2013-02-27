@@ -40,6 +40,7 @@
 #include "core/yarandom.h"
 #include "extended/gtdatahelp.h"
 #include "extended/luahelper.h"
+#include "extended/toolbox.h"
 #include "gtlua/gt_lua.h"
 
 #ifndef WITHOUT_CAIRO
