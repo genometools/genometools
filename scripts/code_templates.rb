@@ -282,7 +282,7 @@ $implement_src = <<-IMPLEMENT_SRC
 #include "core/unused_api.h"
 
 struct <%=iclassN%> {
-  <%=classN%> *parent_instance;
+  <%=classN%> parent_instance;
   /* TODO: add implementation members */
 };
 
@@ -307,11 +307,12 @@ static <%=funcname%>\
 <%=     parameter%>\
 <%    end %>\
 <%    if parameter.match /^\#{classN}\\*$/ %>\
-<%=     ifkt_pref %>\
+<%=     icvar %>\
 <%    else %>\
  para<%=idx%> /*TODO: name*/\
 <%    end %>\
-<%  end %>) {
+<%  end %>)
+{
   /* TODO: add functionality */
   return\
 <%  if type.match /[*]/ %>\
