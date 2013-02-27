@@ -18,7 +18,7 @@
 #ifndef GT_DEV_H
 #define GT_DEV_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the development tool */
 GtTool* gt_dev(void);

@@ -18,7 +18,7 @@
 #ifndef GT_SIMREADS_H
 #define GT_SIMREADS_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the simreads tool */
 GtTool* gt_simreads(void);

@@ -18,7 +18,7 @@
 #ifndef GT_GFF3_H
 #define GT_GFF3_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the GFF3 tool */
 GtTool* gt_gff3(void);

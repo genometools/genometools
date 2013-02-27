@@ -18,7 +18,7 @@
 #ifndef GT_SEQLENSORT_H
 #define GT_SEQLENSORT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the seqlensort tool */
 GtTool* gt_seqlensort(void);

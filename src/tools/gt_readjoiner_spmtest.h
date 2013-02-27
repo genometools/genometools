@@ -18,7 +18,7 @@
 #ifndef GT_READJOINER_SPMTEST_H
 #define GT_READJOINER_SPMTEST_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the readjoiner_spmtest tool */
 GtTool* gt_readjoiner_spmtest(void);

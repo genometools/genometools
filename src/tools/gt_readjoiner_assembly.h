@@ -18,7 +18,7 @@
 #ifndef GT_READJOINER_ASSEMBLY_H
 #define GT_READJOINER_ASSEMBLY_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the readjoiner_assembly tool */
 GtTool* gt_readjoiner_assembly(void);

@@ -18,7 +18,7 @@
 #ifndef GT_LTRCLUSTERING_H
 #define GT_LTRCLUSTERING_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the ltrclustering tool */
 GtTool* gt_ltrclustering(void);

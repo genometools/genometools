@@ -17,7 +17,7 @@
 #ifndef GT_DUPFEAT_H
 #define GT_DUPFEAT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the duplicate feature tool */
 GtTool* gt_dupfeat(void);

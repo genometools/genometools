@@ -18,7 +18,7 @@
 #ifndef GT_HOP_H
 #define GT_HOP_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the hop tool */
 GtTool* gt_hop(void);

@@ -19,7 +19,7 @@
 #ifndef GT_COMPREADS_COMPRESS_H
 #define GT_COMPREADS_COMPRESS_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the compreads_compress toolbox */
 GtTool* gt_compreads_compress(void);

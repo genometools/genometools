@@ -17,7 +17,7 @@
 #ifndef GT_ENCSEQ_ENCODE_H
 #define GT_ENCSEQ_ENCODE_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the encseq encode tool */
 GtTool* gt_encseq_encode(void);

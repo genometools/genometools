@@ -18,7 +18,7 @@
 #ifndef GT_DOT_H
 #define GT_DOT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the dot tool */
 GtTool* gt_dot(void);

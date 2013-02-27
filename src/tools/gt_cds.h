@@ -18,7 +18,7 @@
 #ifndef GT_CDS_H
 #define GT_CDS_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the coding sequence (CDS) tool */
 GtTool* gt_cds(void);

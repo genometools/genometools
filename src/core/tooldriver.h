@@ -19,7 +19,7 @@
 #define TOOLDRIVER_H
 
 #include "core/error.h"
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* The prototype of a tool function. */
 typedef int (*GtToolFunc)(int argc, const char **argv, GtError *err);

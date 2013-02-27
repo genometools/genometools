@@ -18,7 +18,7 @@
 #ifndef GT_GFF3VALIDATOR_H
 #define GT_GFF3VALIDATOR_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the GFF3 validator tool */
 GtTool* gt_gff3validator(void);

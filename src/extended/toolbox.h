@@ -19,7 +19,7 @@
 #define TOOLBOX_H
 
 #include "core/error.h"
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the toolbox class */
 typedef struct GtToolbox GtToolbox;

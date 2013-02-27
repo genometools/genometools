@@ -17,7 +17,7 @@
 #ifndef GT_INTERFEAT_H
 #define GT_INTERFEAT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the intermediary feature tool */
 GtTool* gt_interfeat(void);

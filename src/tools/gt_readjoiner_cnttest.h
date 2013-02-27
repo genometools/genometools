@@ -18,7 +18,7 @@
 #ifndef GT_READJOINER_CNTTEST_H
 #define GT_READJOINER_CNTTEST_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the readjoiner_cnttest tool */
 GtTool* gt_readjoiner_cnttest(void);

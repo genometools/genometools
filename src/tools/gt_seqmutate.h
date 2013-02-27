@@ -18,7 +18,7 @@
 #ifndef GT_SEQMUTATE_H
 #define GT_SEQMUTATE_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the seqmutate tool */
 GtTool* gt_seqmutate(void);

@@ -19,7 +19,7 @@
 #ifndef GT_READJOINER_OVERLAP_H
 #define GT_READJOINER_OVERLAP_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the readjoiner overlap tool */
 GtTool* gt_readjoiner_overlap(void);

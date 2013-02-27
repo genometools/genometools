@@ -17,7 +17,7 @@
 #ifndef GT_ID_TO_MD5_H
 #define GT_ID_TO_MD5_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the seqids to MD5s tool */
 GtTool* gt_id_to_md5(void);

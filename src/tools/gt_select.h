@@ -18,7 +18,7 @@
 #ifndef GT_SELECT_H
 #define GT_SELECT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the select tool */
 GtTool* gt_select(void);

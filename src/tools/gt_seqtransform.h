@@ -17,7 +17,7 @@
 #ifndef GT_SEQTRANSFORM_H
 #define GT_SEQTRANSFORM_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the seqtransform tool */
 GtTool* gt_seqtransform(void);

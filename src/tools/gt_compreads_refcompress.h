@@ -19,7 +19,7 @@
 #ifndef GT_COMPREADS_REFCOMPRESS_H
 #define GT_COMPREADS_REFCOMPRESS_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the compreads_refcompress toolbox */
 GtTool* gt_compreads_refcompress(void);

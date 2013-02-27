@@ -18,7 +18,7 @@
 #ifndef GT_SNPPER_H
 #define GT_SNPPER_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the SNPPER tool */
 GtTool* gt_snpper(void);

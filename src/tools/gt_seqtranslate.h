@@ -18,7 +18,7 @@
 #ifndef GT_SEQTRANSLATE_H
 #define GT_SEQTRANSLATE_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the seqtranslate tool */
 GtTool* gt_seqtranslate(void);

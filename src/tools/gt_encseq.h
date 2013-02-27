@@ -18,7 +18,7 @@
 #ifndef GT_ENCSEQ_H
 #define GT_ENCSEQ_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the encseq toolbox */
 GtTool* gt_encseq(void);

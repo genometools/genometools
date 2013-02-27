@@ -18,7 +18,7 @@
 #ifndef GT_ENCSEQ2SPM_H
 #define GT_ENCSEQ2SPM_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the encseq2spm tool */
 GtTool* gt_encseq2spm(void);

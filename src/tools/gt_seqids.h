@@ -18,7 +18,7 @@
 #ifndef GT_SEQIDS_H
 #define GT_SEQIDS_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the print sequence ids (seqids) tool */
 GtTool* gt_seqids(void);

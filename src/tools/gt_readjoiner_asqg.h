@@ -18,7 +18,7 @@
 #ifndef GT_READJOINER_ASQG_H
 #define GT_READJOINER_ASQG_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the readjoiner_asqg tool */
 GtTool* gt_readjoiner_asqg(void);

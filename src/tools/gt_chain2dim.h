@@ -19,7 +19,7 @@
 #define GT_CHAIN2DIM_H
 
 #include <stdbool.h>
-#include "core/tool.h"
+#include "core/tool_api.h"
 #include "core/str_array_api.h"
 #include "core/option_api.h"
 #include "match/chain2dim.h"

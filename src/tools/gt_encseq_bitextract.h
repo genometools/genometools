@@ -18,7 +18,7 @@
 #ifndef GT_ENCSEQ_BITEXTRACT_H
 #define GT_ENCSEQ_BITEXTRACT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the encseq bitextract tool */
 GtTool* gt_encseq_bitextract(void);

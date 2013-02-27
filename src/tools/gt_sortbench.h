@@ -18,7 +18,7 @@
 #ifndef GT_SORTBENCH_H
 #define GT_SORTBENCH_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the sortbench tool */
 GtTool* gt_sortbench(void);

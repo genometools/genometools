@@ -18,7 +18,7 @@
 #ifndef GT_LTRHARVEST_H
 #define GT_LTRHARVEST_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the LTRharvest tool */
 GtTool* gt_ltrharvest(void);

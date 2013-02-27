@@ -22,7 +22,7 @@
 #include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/option_api.h"
-#include "core/tool.h"
+#include "core/tool_api.h"
 #include "core/versionfunc.h"
 #include "core/format64.h"
 #include "match/esa-seqread.h"

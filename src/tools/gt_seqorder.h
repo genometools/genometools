@@ -18,7 +18,7 @@
 #ifndef GT_SEQORDER_H
 #define GT_SEQORDER_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the seqorder tool */
 GtTool* gt_seqorder(void);

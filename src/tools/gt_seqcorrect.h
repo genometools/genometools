@@ -18,7 +18,7 @@
 #ifndef GT_SEQCORRECT_H
 #define GT_SEQCORRECT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the seqcorrect tool */
 GtTool* gt_seqcorrect(void);

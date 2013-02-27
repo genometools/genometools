@@ -18,7 +18,7 @@
 #ifndef GT_FINGERPRINT_H
 #define GT_FINGERPRINT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the fingerprint tool */
 GtTool* gt_fingerprint(void);

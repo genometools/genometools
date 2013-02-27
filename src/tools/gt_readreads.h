@@ -18,7 +18,7 @@
 #ifndef GT_READREADS_H
 #define GT_READREADS_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the readreads tool */
 GtTool* gt_readreads(void);

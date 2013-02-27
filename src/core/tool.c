@@ -17,7 +17,7 @@
 
 #include "core/ma.h"
 #include "core/versionfunc.h"
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 struct GtTool {
   GtToolArgumentsNew tool_arguments_new;

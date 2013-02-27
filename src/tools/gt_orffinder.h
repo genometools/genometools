@@ -19,7 +19,7 @@
 #ifndef GT_ORFFINDER_H
 #define GT_ORFFINDER_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the ORF finder tool */
 GtTool* gt_orffinder(void);

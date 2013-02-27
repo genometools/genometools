@@ -18,7 +18,7 @@
 #ifndef GT_LTRDIGEST_H
 #define GT_LTRDIGEST_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the LTRdigest tool */
 GtTool* gt_ltrdigest(void);

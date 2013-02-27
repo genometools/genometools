@@ -17,7 +17,7 @@
 #ifndef GT_MERGEFEAT_H
 #define GT_MERGEFEAT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the merge feature tool */
 GtTool* gt_mergefeat(void);

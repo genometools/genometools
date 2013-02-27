@@ -18,7 +18,7 @@
 #ifndef GT_MKFEATUREINDEX_H
 #define GT_MKFEATUREINDEX_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the mkfeatureindex tool */
 GtTool* gt_mkfeatureindex(void);

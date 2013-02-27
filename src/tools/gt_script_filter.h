@@ -18,7 +18,7 @@
 #ifndef GT_SCRIPT_FILTER_H
 #define GT_SCRIPT_FILTER_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the script_filter tool */
 GtTool* gt_script_filter(void);

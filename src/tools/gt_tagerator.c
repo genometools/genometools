@@ -19,7 +19,7 @@
 #include "core/ma.h"
 #include "core/str_array.h"
 #include "core/unused_api.h"
-#include "core/tool.h"
+#include "core/tool_api.h"
 #include "match/tagerator.h"
 #include "match/optionargmode.h"
 #include "tools/gt_tagerator.h"

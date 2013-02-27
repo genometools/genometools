@@ -18,7 +18,7 @@
 #ifndef GT_SAM_INTERFACE_H
 #define GT_SAM_INTERFACE_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the sam_interface tool */
 GtTool* gt_sam_interface(void);

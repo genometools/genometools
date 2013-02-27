@@ -18,7 +18,7 @@
 #ifndef GT_TALLYMER_H
 #define GT_TALLYMER_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 GtTool* gt_tallymer(void);
 

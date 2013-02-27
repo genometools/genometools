@@ -18,7 +18,7 @@
 #ifndef GT_EVAL_H
 #define GT_EVAL_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the evaluation tool */
 GtTool* gt_eval(void);

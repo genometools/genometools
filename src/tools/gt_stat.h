@@ -18,7 +18,7 @@
 #ifndef GT_STAT_H
 #define GT_STAT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the stat tool */
 GtTool* gt_stat(void);

@@ -20,7 +20,7 @@
 #include "core/encseq_metadata.h"
 #include "core/ma.h"
 #include "core/str.h"
-#include "core/tool.h"
+#include "core/tool_api.h"
 #include "match/pckbucket.h"
 #include "match/eis-voiditf.h"
 

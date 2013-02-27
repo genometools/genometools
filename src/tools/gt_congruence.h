@@ -18,7 +18,7 @@
 #ifndef GT_CONGRUENCE_H
 #define GT_CONGRUENCE_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 GtTool* gt_congruence(void);
 

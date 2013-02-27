@@ -18,7 +18,7 @@
 #ifndef GT_GENOMEDIFF_H
 #define GT_GENOMEDIFF_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the genomediff tool */
 GtTool* gt_genomediff(void);

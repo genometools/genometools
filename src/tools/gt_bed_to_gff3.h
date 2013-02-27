@@ -17,7 +17,7 @@
 #ifndef GT_BED_TO_GFF3_H
 #define GT_BED_TO_GFF3_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the BED to GFF3 tool */
 GtTool* gt_bed_to_gff3(void);

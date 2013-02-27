@@ -18,7 +18,7 @@
 #ifndef GT_SAIN_H
 #define GT_SAIN_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the sain tool */
 GtTool* gt_sain(void);

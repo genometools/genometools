@@ -18,7 +18,7 @@
 #ifndef GT_READJOINER_CORRECT_H
 #define GT_READJOINER_CORRECT_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the readjoiner_correct tool */
 GtTool* gt_readjoiner_correct(void);

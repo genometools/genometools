@@ -18,7 +18,7 @@
 #ifndef GT_ENCSEQ_MD5_H
 #define GT_ENCSEQ_MD5_H
 
-#include "core/tool.h"
+#include "core/tool_api.h"
 
 /* the encseq md5 tool */
 GtTool* gt_encseq_md5(void);
