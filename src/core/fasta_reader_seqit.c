@@ -19,7 +19,7 @@
 #include "core/fasta_reader_seqit.h"
 #include "core/fasta_reader_rep.h"
 #include "core/ma.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/str_array.h"
 
 struct GtFastaReaderSeqIt {
@@ -51,7 +51,7 @@ static int gt_fasta_reader_seqit_run(GtFastaReader *fasta_reader,
   /* at least one function has to be defined */
   gt_assert(proc_description || proc_sequence_part || proc_sequence_length);
 
-  while ((rval = gt_seqiterator_next(gt_fasta_reader_seqit->seqit, &sequence,
+  while ((rval = gt_seq_iterator_next(gt_fasta_reader_seqit->seqit, &sequence,
                                      &len, &desc, err))) {
     if (rval < 0) {
       had_err = -1;
@@ -77,7 +77,7 @@ static void gt_fasta_reader_seqit_free(GtFastaReader *fr)
 {
   GtFastaReaderSeqIt *gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fr);
   gt_str_array_delete(gt_fasta_reader_seqit->filenametab);
-  gt_seqiterator_delete(gt_fasta_reader_seqit->seqit);
+  gt_seq_iterator_delete(gt_fasta_reader_seqit->seqit);
 }
 
 const GtFastaReaderClass* gt_fasta_reader_seqit_class(void)
@@ -98,7 +98,7 @@ GtFastaReader* gt_fasta_reader_seqit_new(GtStr *sequence_filename)
   gt_fasta_reader_seqit->filenametab = gt_str_array_new();
   gt_str_array_add_cstr(gt_fasta_reader_seqit->filenametab,
                        gt_str_get(sequence_filename));
-  gt_fasta_reader_seqit->seqit = gt_seqiterator_sequence_buffer_new(
+  gt_fasta_reader_seqit->seqit = gt_seq_iterator_sequence_buffer_new(
                                              gt_fasta_reader_seqit->filenametab,
                                              NULL);
   return fr;

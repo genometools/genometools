@@ -17,7 +17,7 @@
 
 #include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "extended/alignment.h"
 #include "sarr-def.h"
 #include "core/intbits.h"
@@ -251,17 +251,17 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                            NULL, /* processresult info */
                                            dfst);
     }
-    seqit = gt_seqiterator_sequence_buffer_new(idxlocalioptions->queryfiles,
+    seqit = gt_seq_iterator_sequence_buffer_new(idxlocalioptions->queryfiles,
                                                err);
     if (!seqit)
       haserr = true;
     if (!haserr)
     {
-      gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(a));
+      gt_seq_iterator_set_symbolmap(seqit, gt_alphabet_symbolmap(a));
       for (showmatchinfo.queryunit = 0; /* Nothing */;
            showmatchinfo.queryunit++)
       {
-        retval = gt_seqiterator_next(seqit,
+        retval = gt_seq_iterator_next(seqit,
                                      &query,
                                      &querylen,
                                      &desc,
@@ -308,7 +308,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
         gt_freeSWdpresource(swdpresource);
         swdpresource = NULL;
       }
-      gt_seqiterator_delete(seqit);
+      gt_seq_iterator_delete(seqit);
     }
     if (idxlocalioptions->docompare)
     {

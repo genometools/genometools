@@ -18,8 +18,8 @@
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/error_api.h"
-#include "core/seqiterator.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/unused_api.h"
 #include "extended/fasta_header_iterator.h"
 #include "extended/cstr_iterator.h"
@@ -37,7 +37,7 @@ static int gt_fasta_header_iterator_next(GtCstrIterator *cstr_iterator,
 {
   GtFastaHeaderIterator *fhi = gt_fasta_header_iterator_cast(cstr_iterator);
   GT_UNUSED unsigned long len;
-  return gt_seqiterator_next(fhi->seq_iter, NULL, &len,
+  return gt_seq_iterator_next(fhi->seq_iter, NULL, &len,
                              (char **) desc_str, err);
 }
 
@@ -46,18 +46,18 @@ static int gt_fasta_header_iterator_reset(GtCstrIterator *cstr_iterator,
 {
   GtFastaHeaderIterator *fhi = gt_fasta_header_iterator_cast(cstr_iterator);
   gt_error_check(err);
-  gt_seqiterator_delete(fhi->seq_iter);
-  fhi->seq_iter = gt_seqiterator_sequence_buffer_new(fhi->filenametab, err);
+  gt_seq_iterator_delete(fhi->seq_iter);
+  fhi->seq_iter = gt_seq_iterator_sequence_buffer_new(fhi->filenametab, err);
   if (fhi->seq_iter == NULL)
     return -1;
-  gt_seqiterator_set_sequence_output(fhi->seq_iter, false);
+  gt_seq_iterator_set_sequence_output(fhi->seq_iter, false);
   return 0;
 }
 
 static void gt_fasta_header_iterator_delete(GtCstrIterator *cstr_iterator)
 {
   GtFastaHeaderIterator *fhi = gt_fasta_header_iterator_cast(cstr_iterator);
-  gt_seqiterator_delete(fhi->seq_iter);
+  gt_seq_iterator_delete(fhi->seq_iter);
   gt_str_array_delete(fhi->filenametab);
 }
 

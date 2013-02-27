@@ -37,7 +37,7 @@
 #include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/safearith.h"
-#include "core/seqiterator_fastq.h"
+#include "core/seq_iterator_fastq.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
@@ -369,19 +369,19 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
   gt_xfseek(fp, hcr_enc->seq_encoder->start_of_encoding, SEEK_SET);
   bitstream = gt_bitoutstream_new(fp);
 
-  seqit = gt_seqiterator_fastq_new(hcr_enc->files, err);
+  seqit = gt_seq_iterator_fastq_new(hcr_enc->files, err);
   if (!seqit) {
     gt_assert(gt_error_is_set(err));
     had_err = -1;
   }
 
   if (!had_err) {
-    gt_seqiterator_set_quality_buffer(seqit, &qual);
-    gt_seqiterator_set_symbolmap(seqit,
+    gt_seq_iterator_set_quality_buffer(seqit, &qual);
+    gt_seq_iterator_set_symbolmap(seqit,
                             gt_alphabet_symbolmap(hcr_enc->seq_encoder->alpha));
     hcr_enc->seq_encoder->total_num_of_symbols = 0;
     while (!had_err &&
-           (seqit_err = gt_seqiterator_next(seqit,
+           (seqit_err = gt_seq_iterator_next(seqit,
                                             &seq,
                                             &len,
                                             &desc, err)) == 1) {
@@ -457,7 +457,7 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
     }
   }
   gt_bitoutstream_delete(bitstream);
-  gt_seqiterator_delete(seqit);
+  gt_seq_iterator_delete(seqit);
   return had_err;
 }
 
@@ -1150,20 +1150,20 @@ GtHcrEncoder *gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
   for (i = 0; i < hcr_enc->num_of_files; i++) {
     file = gt_str_array_new();
     gt_str_array_add(file, gt_str_array_get_str(files, i));
-    seqit = gt_seqiterator_fastq_new(file, err);
+    seqit = gt_seq_iterator_fastq_new(file, err);
     if (!seqit) {
       gt_error_set(err, "cannot initialize GtSeqIteratorFastQ object");
       had_err = -1;
     }
     if (!had_err) {
-      gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alpha));
-      gt_seqiterator_set_quality_buffer(seqit, &qual);
-      status = gt_seqiterator_next(seqit, &seq, &len1, &desc, err);
+      gt_seq_iterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alpha));
+      gt_seq_iterator_set_quality_buffer(seqit, &qual);
+      status = gt_seq_iterator_next(seqit, &seq, &len1, &desc, err);
 
       if (status == 1) {
         num_of_reads = 1UL;
         while (!had_err) {
-          status = gt_seqiterator_next(seqit, &seq, &len2, &desc, err);
+          status = gt_seq_iterator_next(seqit, &seq, &len2, &desc, err);
           if (status == -1)
             had_err = -1;
           if (status != 1)
@@ -1193,7 +1193,7 @@ GtHcrEncoder *gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
     }
     hcr_enc->num_of_reads += num_of_reads;
     gt_str_array_delete(file);
-    gt_seqiterator_delete(seqit);
+    gt_seq_iterator_delete(seqit);
   }
   if (!had_err)
     hcr_base_qual_distr_trim(bqd);

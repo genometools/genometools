@@ -21,8 +21,8 @@
 #include "core/class_alloc_lock.h"
 #include "core/desc_buffer.h"
 #include "core/minmax.h"
-#include "core/seqiterator_rep.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_rep.h"
+#include "core/seq_iterator_sequence_buffer.h"
 
 struct GtSeqIteratorSequenceBuffer
 {
@@ -38,30 +38,31 @@ struct GtSeqIteratorSequenceBuffer
                      maxread;
 };
 
-#define gt_seqiterator_sequence_buffer_cast(SI)\
-        gt_seqiterator_cast(gt_seqiterator_sequence_buffer_class(), SI);
+#define gt_seq_iterator_sequence_buffer_cast(SI)\
+        gt_seq_iterator_cast(gt_seq_iterator_sequence_buffer_class(), SI);
 
-const GtSeqIteratorClass* gt_seqiterator_sequence_buffer_class(void);
+const GtSeqIteratorClass* gt_seq_iterator_sequence_buffer_class(void);
 
-GtSeqIterator* gt_seqiterator_sequence_buffer_new(const GtStrArray *filenametab,
+GtSeqIterator* gt_seq_iterator_sequence_buffer_new(const GtStrArray
+                                                                   *filenametab,
                                                   GtError *err)
 {
   GtSeqIterator *si;
   GtSequenceBuffer *sb = gt_sequence_buffer_new_guess_type(filenametab, err);
   if (!sb)
     return NULL;
-  si = gt_seqiterator_sequence_buffer_new_with_buffer(sb);
+  si = gt_seq_iterator_sequence_buffer_new_with_buffer(sb);
   gt_sequence_buffer_delete(sb); /* drop this reference */
   return si;
 }
 
-GtSeqIterator* gt_seqiterator_sequence_buffer_new_with_buffer(
+GtSeqIterator* gt_seq_iterator_sequence_buffer_new_with_buffer(
                                                        GtSequenceBuffer *buffer)
 {
   GtSeqIterator *si;
   GtSeqIteratorSequenceBuffer *seqit;
-  si = gt_seqiterator_create(gt_seqiterator_sequence_buffer_class());
-  seqit = gt_seqiterator_sequence_buffer_cast(si);
+  si = gt_seq_iterator_create(gt_seq_iterator_sequence_buffer_class());
+  seqit = gt_seq_iterator_sequence_buffer_cast(si);
   GT_INITARRAY(&seqit->sequencebuffer, GtUchar);
   seqit->descptr = gt_desc_buffer_new();
   seqit->fb = gt_sequence_buffer_ref(buffer);
@@ -74,27 +75,27 @@ GtSeqIterator* gt_seqiterator_sequence_buffer_new_with_buffer(
   return si;
 }
 
-static void gt_seqiterator_sequence_buffer_set_symbolmap(GtSeqIterator *si,
+static void gt_seq_iterator_sequence_buffer_set_symbolmap(GtSeqIterator *si,
                                                          const GtUchar
                                                            *symbolmap)
 {
   GtSeqIteratorSequenceBuffer *seqit;
   gt_assert(si);
-  seqit = gt_seqiterator_sequence_buffer_cast(si);
+  seqit = gt_seq_iterator_sequence_buffer_cast(si);
   gt_sequence_buffer_set_symbolmap(seqit->fb, symbolmap);
 }
 
-static void gt_seqiterator_sequence_buffer_set_sequence_output(
+static void gt_seq_iterator_sequence_buffer_set_sequence_output(
                                                           GtSeqIterator *si,
                                                           bool withsequence)
 {
   GtSeqIteratorSequenceBuffer *seqit;
   gt_assert(si);
-  seqit = gt_seqiterator_sequence_buffer_cast(si);
+  seqit = gt_seq_iterator_sequence_buffer_cast(si);
   seqit->withsequence = withsequence;
 }
 
-static int gt_seqiterator_sequence_buffer_next(GtSeqIterator *si,
+static int gt_seq_iterator_sequence_buffer_next(GtSeqIterator *si,
                                                const GtUchar **sequence,
                                                unsigned long *len,
                                                char **desc,
@@ -107,7 +108,7 @@ static int gt_seqiterator_sequence_buffer_next(GtSeqIterator *si,
   gt_assert(si);
   gt_assert(len && desc);
 
-  seqit = gt_seqiterator_sequence_buffer_cast(si);
+  seqit = gt_seq_iterator_sequence_buffer_cast(si);
   gt_assert((sequence && seqit->withsequence) || !seqit->withsequence);
 
   if (seqit->exhausted)
@@ -189,39 +190,39 @@ static int gt_seqiterator_sequence_buffer_next(GtSeqIterator *si,
 }
 
 static const unsigned long long*
-gt_seqiterator_sequence_buffer_getcurrentcounter(GtSeqIterator *si,
+gt_seq_iterator_sequence_buffer_getcurrentcounter(GtSeqIterator *si,
                                                  unsigned long long maxread)
 {
   GtSeqIteratorSequenceBuffer *seqit;
   gt_assert(si);
-  seqit = gt_seqiterator_sequence_buffer_cast(si);
+  seqit = gt_seq_iterator_sequence_buffer_cast(si);
   seqit->maxread = maxread;
   return &seqit->currentread;
 }
 
-static void gt_seqiterator_sequence_buffer_delete(GtSeqIterator *si)
+static void gt_seq_iterator_sequence_buffer_delete(GtSeqIterator *si)
 {
   GtSeqIteratorSequenceBuffer *seqit;
   if (!si) return;
-  seqit = gt_seqiterator_sequence_buffer_cast(si);
+  seqit = gt_seq_iterator_sequence_buffer_cast(si);
   gt_desc_buffer_delete(seqit->descptr);
   gt_sequence_buffer_delete(seqit->fb);
   GT_FREEARRAY(&seqit->sequencebuffer, GtUchar);
   seqit->currentread = seqit->maxread;
 }
 
-const GtSeqIteratorClass* gt_seqiterator_sequence_buffer_class(void)
+const GtSeqIteratorClass* gt_seq_iterator_sequence_buffer_class(void)
 {
   static const GtSeqIteratorClass *sic = NULL;
   gt_class_alloc_lock_enter();
   if (!sic) {
-    sic = gt_seqiterator_class_new(sizeof (GtSeqIteratorSequenceBuffer),
-                             gt_seqiterator_sequence_buffer_set_symbolmap,
-                             gt_seqiterator_sequence_buffer_set_sequence_output,
-                             gt_seqiterator_sequence_buffer_next,
-                             gt_seqiterator_sequence_buffer_getcurrentcounter,
-                             NULL,
-                             gt_seqiterator_sequence_buffer_delete);
+    sic = gt_seq_iterator_class_new(sizeof (GtSeqIteratorSequenceBuffer),
+                            gt_seq_iterator_sequence_buffer_set_symbolmap,
+                            gt_seq_iterator_sequence_buffer_set_sequence_output,
+                            gt_seq_iterator_sequence_buffer_next,
+                            gt_seq_iterator_sequence_buffer_getcurrentcounter,
+                            NULL,
+                            gt_seq_iterator_sequence_buffer_delete);
   }
   gt_class_alloc_lock_leave();
   return sic;

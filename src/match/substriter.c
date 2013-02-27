@@ -17,7 +17,7 @@
 
 #include <inttypes.h>
 #include "core/str_array.h"
-#include "core/seqiterator.h"
+#include "core/seq_iterator.h"
 #include "core/chardef.h"
 #include "core/codetype.h"
 #include "core/ma_api.h"

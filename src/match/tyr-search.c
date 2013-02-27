@@ -18,7 +18,7 @@
 #include "core/alphabet.h"
 #include "core/fa.h"
 #include "core/unused_api.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/chardef.h"
 #include "core/format64.h"
 #include "core/encseq.h"
@@ -277,16 +277,16 @@ int gt_tyrsearch(const char *tyrindexname,
 
     gt_assert(tyrindex != NULL);
     gt_tyrsearchinfo_init(&tyrsearchinfo,tyrindex,showmode,searchstrand);
-    seqit = gt_seqiterator_sequence_buffer_new(queryfilenames, err);
+    seqit = gt_seq_iterator_sequence_buffer_new(queryfilenames, err);
     if (!seqit)
       haserr = true;
     if (!haserr)
     {
-      gt_seqiterator_set_symbolmap(seqit,
+      gt_seq_iterator_set_symbolmap(seqit,
                                  gt_alphabet_symbolmap(tyrsearchinfo.dnaalpha));
       for (unitnum = 0; /* Nothing */; unitnum++)
       {
-        retval = gt_seqiterator_next(seqit,
+        retval = gt_seq_iterator_next(seqit,
                                      &query,
                                      &querylen,
                                      &desc,
@@ -309,7 +309,7 @@ int gt_tyrsearch(const char *tyrindexname,
                            querylen,
                            desc);
       }
-      gt_seqiterator_delete(seqit);
+      gt_seq_iterator_delete(seqit);
     }
     gt_tyrsearchinfo_delete(&tyrsearchinfo);
   }

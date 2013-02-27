@@ -19,7 +19,7 @@
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/error.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/encseq.h"
 
 void gt_symbolstring2fasta(FILE *fpout,
@@ -166,12 +166,12 @@ int gt_echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
   bool haserr = false;
   int retval;
 
-  seqit = gt_seqiterator_sequence_buffer_new(filenametab, err);
+  seqit = gt_seq_iterator_sequence_buffer_new(filenametab, err);
   if (!seqit)
     return -1;
   while (true)
   {
-    retval = gt_seqiterator_next(seqit,
+    retval = gt_seq_iterator_next(seqit,
                                  &sequence,
                                  &seqlen,
                                  &desc,
@@ -187,6 +187,6 @@ int gt_echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
     }
     gt_symbolstring2fasta(stdout,desc,NULL,sequence,seqlen,70UL);
   }
-  gt_seqiterator_delete(seqit);
+  gt_seq_iterator_delete(seqit);
   return haserr ? -1 : 0;
 }

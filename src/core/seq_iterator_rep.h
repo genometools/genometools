@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQITERATOR_REP_H
-#define SEQITERATOR_REP_H
+#ifndef SEQ_ITERATOR_REP_H
+#define SEQ_ITERATOR_REP_H
 
-#include "core/seqiterator.h"
+#include "core/seq_iterator.h"
 
 typedef void       (*GtSeqIteratorSetSymbolmapFunc)(GtSeqIterator*,
                                                     const GtUchar *symbolmap);
@@ -38,10 +38,10 @@ struct GtSeqIterator {
   const GtSeqIteratorClass *c_class;
 };
 
-GtSeqIterator*            gt_seqiterator_create(const GtSeqIteratorClass*);
-void*                     gt_seqiterator_cast(const GtSeqIteratorClass*,
+GtSeqIterator*            gt_seq_iterator_create(const GtSeqIteratorClass*);
+void*                     gt_seq_iterator_cast(const GtSeqIteratorClass*,
                                               GtSeqIterator*);
-const GtSeqIteratorClass* gt_seqiterator_class_new(size_t size,
+const GtSeqIteratorClass* gt_seq_iterator_class_new(size_t size,
                          GtSeqIteratorSetSymbolmapFunc set_symbolmap,
                          GtSeqIteratorSetSequenceOutFunc set_seqout,
                          GtSeqIteratorNextFunc next_func,

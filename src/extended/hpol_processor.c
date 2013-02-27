@@ -900,7 +900,7 @@ static int gt_hpol_processor_output_sorted_segments(GtHpolProcessor *hpp,
   gt_assert(hpp->processed_segments != NULL);
   gt_assert(reads_iter != NULL);
   d_str = gt_str_new();
-  while ((next_rval = gt_seqiterator_next(reads_iter, &s, &len, &d, err))
+  while ((next_rval = gt_seq_iterator_next(reads_iter, &s, &len, &d, err))
       > 0)
   {
     gt_str_set(d_str, d);

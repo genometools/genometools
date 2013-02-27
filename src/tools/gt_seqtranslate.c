@@ -21,7 +21,7 @@
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/output_file_api.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/translator.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
@@ -162,7 +162,7 @@ static int gt_seqtranslate_runner(int argc, const char **argv, int parsed_args,
   if (!sb)
     had_err = -1;
   if (!had_err) {
-    si = gt_seqiterator_sequence_buffer_new_with_buffer(sb);
+    si = gt_seq_iterator_sequence_buffer_new_with_buffer(sb);
     if (!si)
       had_err = -1;
   }
@@ -170,7 +170,7 @@ static int gt_seqtranslate_runner(int argc, const char **argv, int parsed_args,
     char *desc;
     const GtUchar *sequence;
     unsigned long len;
-    while (!had_err && (rval = gt_seqiterator_next(si,
+    while (!had_err && (rval = gt_seq_iterator_next(si,
                                                    &sequence,
                                                    &len, &desc, err))) {
       if (rval < 0) {
@@ -201,7 +201,7 @@ static int gt_seqtranslate_runner(int argc, const char **argv, int parsed_args,
   gt_str_delete(translations[1]);
   gt_str_delete(translations[2]);
   gt_str_array_delete(infiles);
-  gt_seqiterator_delete(si);
+  gt_seq_iterator_delete(si);
   gt_sequence_buffer_delete(sb);
   return had_err;
 }

@@ -23,7 +23,7 @@
 #include "core/format64.h"
 #include "core/intbits.h"
 #include "core/ma_api.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/str_array.h"
 #include "core/unused_api.h"
 #include "apmeoveridx.h"
@@ -673,7 +673,8 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     gt_getsetargmodekeywords(tageratoroptions->modedesc,
                              tageratoroptions->numberofmodedescentries,
                              tageratoroptions->outputmode);
-    seqit = gt_seqiterator_sequence_buffer_new(tageratoroptions->tagfiles, err);
+    seqit = gt_seq_iterator_sequence_buffer_new(tageratoroptions->tagfiles,
+                                                err);
     if (!seqit)
     {
       haserr = true;
@@ -682,7 +683,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     {
       for (tagnumber = 0; !haserr; tagnumber++)
       {
-        retval = gt_seqiterator_next(seqit, &currenttag, &twl.taglen, &desc,
+        retval = gt_seq_iterator_next(seqit, &currenttag, &twl.taglen, &desc,
                                      err);
         if (retval != 1)
         {
@@ -751,7 +752,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                           &storeonline,
                           &storeoffline);
       }
-      gt_seqiterator_delete(seqit);
+      gt_seq_iterator_delete(seqit);
     }
     GT_FREEARRAY(&storeonline,TgrSimplematch);
     GT_FREEARRAY(&storeoffline,TgrSimplematch);

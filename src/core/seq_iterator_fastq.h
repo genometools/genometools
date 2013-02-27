@@ -15,34 +15,34 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQITERATOR_FASTQ_H
-#define SEQITERATOR_FASTQ_H
+#ifndef SEQ_ITERATOR_FASTQ_H
+#define SEQ_ITERATOR_FASTQ_H
 
 #include "core/error_api.h"
-#include "core/seqiterator.h"
+#include "core/seq_iterator.h"
 #include "core/str_array_api.h"
 
 typedef struct GtSeqIteratorFastQ GtSeqIteratorFastQ;
 
 /* Create a new <GtSeqIteratorQual> for all sequence files in <filenametab>. */
-GtSeqIterator* gt_seqiterator_fastq_new(const GtStrArray *filenametab,
+GtSeqIterator* gt_seq_iterator_fastq_new(const GtStrArray *filenametab,
                                         GtError *err);
 
 /* Create a new <GtSeqIteratorFastQ> for all sequence files in <filenametab>
    containing color space reads. */
-GtSeqIterator* gt_seqiterator_colorspace_fastq_new(
+GtSeqIterator* gt_seq_iterator_colorspace_fastq_new(
                                                 const GtStrArray *filenametab,
                                                 GtError *err);
 
 /* Returns the number of the file in the file name array which <seqit> is
    currently reading.  */
-unsigned long  gt_seqiterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit);
+unsigned long  gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit);
 
 /* Disable checking if quality description is equal to read description in
    <seqit> (it should be, but it is not in output of some tools, e.g. Coral). */
-void           gt_seqiterator_fastq_relax_check_of_quality_description(
+void           gt_seq_iterator_fastq_relax_check_of_quality_description(
                                                     GtSeqIteratorFastQ *seqit);
 
-const GtSeqIteratorClass* gt_seqiterator_fastq_class(void);
+const GtSeqIteratorClass* gt_seq_iterator_fastq_class(void);
 
 #endif

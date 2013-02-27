@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "core/array2dim_api.h"
 #include "core/logger.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/format64.h"
 #undef SHUDEBUG
 #ifdef SHUDEBUG
@@ -497,17 +497,17 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
   gt_error_check(err);
   alphabet = gt_encseq_alphabet(suffixarray->encseq);
   gt_assert(gt_str_array_size(queryfilenames) == 1UL);
-  seqit = gt_seqiterator_sequence_buffer_new(queryfilenames, err);
+  seqit = gt_seq_iterator_sequence_buffer_new(queryfilenames, err);
   if (!seqit)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
+    gt_seq_iterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
     for (; /* Nothing */; )
     {
-      retval = gt_seqiterator_next(seqit,
+      retval = gt_seq_iterator_next(seqit,
                                    &query,
                                    &querylen,
                                    &desc,
@@ -523,7 +523,7 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
       }
       *totalgmatchlength += gt_esa2shulengthquery(suffixarray,query,querylen);
     }
-    gt_seqiterator_delete(seqit);
+    gt_seq_iterator_delete(seqit);
   }
   return haserr ? -1 : 0;
 }

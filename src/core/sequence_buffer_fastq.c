@@ -22,7 +22,7 @@
 #include "core/sequence_buffer_inline.h"
 #include "core/sequence_buffer_rep.h"
 #include "core/sequence_buffer_fastq.h"
-#include "core/seqiterator_fastq.h"
+#include "core/seq_iterator_fastq.h"
 #include "core/undef_api.h"
 
 #define FASTQ_START_SYMBOL '@'
@@ -57,7 +57,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
 
   if (!sbfq->seqit) {
     sbfq->seqit = (GtSeqIteratorFastQ*)
-                         gt_seqiterator_fastq_new(sbfq->sequences, err);
+                         gt_seq_iterator_fastq_new(sbfq->sequences, err);
     if (!sbfq->seqit) return -1;
   }
 
@@ -93,9 +93,9 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
 
   /* iterate over sequences */
   while (true) {
-    had_err = gt_seqiterator_next((GtSeqIterator*) sbfq->seqit, &seq, &seqlen,
+    had_err = gt_seq_iterator_next((GtSeqIterator*) sbfq->seqit, &seq, &seqlen,
                                   &desc, err);
-    newfilenum = gt_seqiterator_fastq_get_file_index(sbfq->seqit);
+    newfilenum = gt_seq_iterator_fastq_get_file_index(sbfq->seqit);
 
     /* update current file info */
     if (pvt->filenum != newfilenum) {
@@ -181,7 +181,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
 static void gt_sequence_buffer_fastq_free(GtSequenceBuffer *sb)
 {
   GtSequenceBufferFastQ *sbfq = gt_sequence_buffer_fastq_cast(sb);
-  gt_seqiterator_delete((GtSeqIterator*) sbfq->seqit);
+  gt_seq_iterator_delete((GtSeqIterator*) sbfq->seqit);
   gt_str_delete(sbfq->overflowbuffer);
 }
 
@@ -191,7 +191,7 @@ gt_sequence_buffer_fastq_get_file_index(GtSequenceBuffer *sb)
   GtSequenceBufferFastQ *sbfq;
   gt_assert(sb);
   sbfq = gt_sequence_buffer_fastq_cast(sb);
-  return gt_seqiterator_fastq_get_file_index((GtSeqIteratorFastQ*)
+  return gt_seq_iterator_fastq_get_file_index((GtSeqIteratorFastQ*)
                                               sbfq->seqit);
 }
 

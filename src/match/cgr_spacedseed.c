@@ -17,7 +17,7 @@
 
 #include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "cgr_spacedseed.h"
 #include "sarr-def.h"
 #include "core/intbits.h"
@@ -246,16 +246,16 @@ int gt_matchspacedseed(bool withesa,
                                          NULL, /* processresult info */
                                          dfst);
     encseq = genericindex_getencseq(genericindex);
-    seqit = gt_seqiterator_sequence_buffer_new(queryfilenames, err);
+    seqit = gt_seq_iterator_sequence_buffer_new(queryfilenames, err);
     if (!seqit)
       haserr = true;
     if (!haserr)
     {
       GtAlphabet *a = gt_encseq_alphabet(encseq);
-      gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(a));
+      gt_seq_iterator_set_symbolmap(seqit, gt_alphabet_symbolmap(a));
       for (unitnum = 0; /* Nothing */; unitnum++)
       {
-        retval = gt_seqiterator_next(seqit,
+        retval = gt_seq_iterator_next(seqit,
                                      &query,
                                      &querylen,
                                      &desc,
@@ -279,7 +279,7 @@ int gt_matchspacedseed(bool withesa,
       {
         gt_freeLimdfsresources(&limdfsresources,dfst);
       }
-      gt_seqiterator_delete(seqit);
+      gt_seq_iterator_delete(seqit);
     }
   }
   genericindex_delete(genericindex);

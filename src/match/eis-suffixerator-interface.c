@@ -25,7 +25,7 @@
 #include "core/filelengthvalues.h"
 #include "core/logger.h"
 #include "core/minmax.h"
-#include "core/seqiterator.h"
+#include "core/seq_iterator.h"
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"

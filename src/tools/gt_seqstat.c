@@ -27,8 +27,8 @@
 #include "core/fa.h"
 #include "core/ma.h"
 #include "core/versionfunc.h"
-#include "core/seqiterator_sequence_buffer.h"
-#include "core/seqiterator_fastq.h"
+#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_fastq.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/xansi_api.h"
@@ -288,7 +288,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
   }
   if (!had_err) {
     /* read input using seqiterator */
-    seqit = gt_seqiterator_sequence_buffer_new(files, err);
+    seqit = gt_seq_iterator_sequence_buffer_new(files, err);
     if (!seqit)
       had_err = -1;
     if (!had_err)
@@ -311,7 +311,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
       }
       if (arguments.verbose)
       {
-        gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
+        gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
                                                             (unsigned long long)
                                                             totalsize),
                              (unsigned long long) totalsize);
@@ -319,7 +319,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
       while (true)
       {
         desc = NULL;
-        had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
+        had_err = gt_seq_iterator_next(seqit, &sequence, &len, &desc, err);
         if (had_err != 1) break; /* 0: finished; 1: error */
         if (arguments.dodistlen || arguments.docstats)
         {
@@ -352,7 +352,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
       {
         gt_progressbar_stop();
       }
-      gt_seqiterator_delete(seqit);
+      gt_seq_iterator_delete(seqit);
     }
   }
   gt_str_array_delete(files);

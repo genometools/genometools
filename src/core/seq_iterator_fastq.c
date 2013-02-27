@@ -21,8 +21,8 @@
 #include "core/cstr_api.h"
 #include "core/file.h"
 #include "core/filelengthvalues.h"
-#include "core/seqiterator_fastq.h"
-#include "core/seqiterator_rep.h"
+#include "core/seq_iterator_fastq.h"
+#include "core/seq_iterator_rep.h"
 #include "core/str_array.h"
 #include "core/unused_api.h"
 
@@ -57,10 +57,10 @@ struct GtSeqIteratorFastQ
   const GtUchar *symbolmap, **qualities;
 };
 
-#define gt_seqiterator_fastq_cast(SI)\
-        gt_seqiterator_cast(gt_seqiterator_fastq_class(), SI);
+#define gt_seq_iterator_fastq_cast(SI)\
+        gt_seq_iterator_cast(gt_seq_iterator_fastq_class(), SI);
 
-const GtSeqIteratorClass* gt_seqiterator_fastq_class(void);
+const GtSeqIteratorClass* gt_seq_iterator_fastq_class(void);
 
 #define GT_FASTQ_BLOCK_START_CHAR      '@'
 #define GT_FASTQ_QUAL_SEPARATOR_CHAR   '+'
@@ -307,48 +307,48 @@ static inline int parse_fastq_block(GtSeqIteratorFastQ *seqit, GtError *err)
   return had_err;
 }
 
-unsigned long gt_seqiterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit)
+unsigned long gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit)
 {
   gt_assert(seqit);
   return seqit->filenum;
 }
 
-void gt_seqiterator_fastq_set_quality_buffer(GtSeqIterator *si,
+void gt_seq_iterator_fastq_set_quality_buffer(GtSeqIterator *si,
                                              const GtUchar **qualities)
 {
   GtSeqIteratorFastQ *seqit;
   gt_assert(si);
-  seqit = gt_seqiterator_fastq_cast(si);
+  seqit = gt_seq_iterator_fastq_cast(si);
   seqit->qualities = qualities;
 }
 
-void gt_seqiterator_fastq_set_symbolmap(GtSeqIterator *si,
+void gt_seq_iterator_fastq_set_symbolmap(GtSeqIterator *si,
                                         const GtUchar *symbolmap)
 {
   GtSeqIteratorFastQ *seqit;
   gt_assert(si);
-  seqit = gt_seqiterator_fastq_cast(si);
+  seqit = gt_seq_iterator_fastq_cast(si);
   seqit->symbolmap = symbolmap;
 }
 
-void gt_seqiterator_fastq_set_chardisttab(GtSeqIterator *si,
+void gt_seq_iterator_fastq_set_chardisttab(GtSeqIterator *si,
                                           unsigned long *chardist)
 {
   GtSeqIteratorFastQ *seqit;
   gt_assert(si && chardist);
-  seqit = gt_seqiterator_fastq_cast(si);
+  seqit = gt_seq_iterator_fastq_cast(si);
   seqit->chardisttab = chardist;
 }
 
-uint64_t gt_seqiterator_fastq_get_lastspeciallength(const GtSeqIterator *si)
+uint64_t gt_seq_iterator_fastq_get_lastspeciallength(const GtSeqIterator *si)
 {
   GtSeqIteratorFastQ *seqit;
   gt_assert(si);
-  seqit = gt_seqiterator_fastq_cast((GtSeqIterator*) si);
+  seqit = gt_seq_iterator_fastq_cast((GtSeqIterator*) si);
   return seqit->lastspeciallength;
 }
 
-int gt_seqiterator_fastq_next(GtSeqIterator *seqit,
+int gt_seq_iterator_fastq_next(GtSeqIterator *seqit,
                               const GtUchar **sequence,
                               unsigned long *len,
                               char **desc,
@@ -357,10 +357,10 @@ int gt_seqiterator_fastq_next(GtSeqIterator *seqit,
   int errstatus = 0;
   GtSeqIteratorFastQ *seqitf;
   gt_assert(seqit);
-  seqitf = gt_seqiterator_fastq_cast((GtSeqIterator*) seqit);
+  seqitf = gt_seq_iterator_fastq_cast((GtSeqIterator*) seqit);
   gt_assert(seqit && len && desc);
 
-  seqitf = gt_seqiterator_fastq_cast(seqit);
+  seqitf = gt_seq_iterator_fastq_cast(seqit);
   gt_str_reset(seqitf->qualsbuffer);
   gt_str_reset(seqitf->qdescbuffer);
   gt_str_reset(seqitf->sequencebuffer);
@@ -410,21 +410,21 @@ int gt_seqiterator_fastq_next(GtSeqIterator *seqit,
 }
 
 const unsigned long long*
-gt_seqiterator_fastq_getcurrentcounter(GtSeqIterator *si,
+gt_seq_iterator_fastq_getcurrentcounter(GtSeqIterator *si,
                                        unsigned long long maxread)
 {
   GtSeqIteratorFastQ *seqit;
   gt_assert(si);
-  seqit = gt_seqiterator_fastq_cast(si);
+  seqit = gt_seq_iterator_fastq_cast(si);
   seqit->maxread = maxread;
   return &seqit->currentread;
 }
 
-void gt_seqiterator_fastq_delete(GtSeqIterator *si)
+void gt_seq_iterator_fastq_delete(GtSeqIterator *si)
 {
   GtSeqIteratorFastQ *seqit;
   if (!si) return;
-  seqit = gt_seqiterator_fastq_cast(si);
+  seqit = gt_seq_iterator_fastq_cast(si);
   gt_str_delete(seqit->qdescbuffer);
   gt_str_delete(seqit->sequencebuffer);
   gt_str_delete(seqit->qualsbuffer);
@@ -434,18 +434,18 @@ void gt_seqiterator_fastq_delete(GtSeqIterator *si)
   seqit->currentread = seqit->maxread;
 }
 
-const GtSeqIteratorClass* gt_seqiterator_fastq_class(void)
+const GtSeqIteratorClass* gt_seq_iterator_fastq_class(void)
 {
   static const GtSeqIteratorClass *sic = NULL;
   gt_class_alloc_lock_enter();
   if (!sic) {
-    sic = gt_seqiterator_class_new(sizeof (GtSeqIteratorFastQ),
-                             gt_seqiterator_fastq_set_symbolmap,
+    sic = gt_seq_iterator_class_new(sizeof (GtSeqIteratorFastQ),
+                             gt_seq_iterator_fastq_set_symbolmap,
                              NULL,
-                             gt_seqiterator_fastq_next,
-                             gt_seqiterator_fastq_getcurrentcounter,
-                             gt_seqiterator_fastq_set_quality_buffer,
-                             gt_seqiterator_fastq_delete);
+                             gt_seq_iterator_fastq_next,
+                             gt_seq_iterator_fastq_getcurrentcounter,
+                             gt_seq_iterator_fastq_set_quality_buffer,
+                             gt_seq_iterator_fastq_delete);
   }
   gt_class_alloc_lock_leave();
   return sic;
@@ -458,8 +458,8 @@ static GtSeqIterator* seqiterator_fastq_new_gen(const GtStrArray *filenametab,
   GtSeqIterator *seqit;
   GtSeqIteratorFastQ *seqitf;
   gt_assert(filenametab);
-  seqit = gt_seqiterator_create(gt_seqiterator_fastq_class());
-  seqitf = gt_seqiterator_fastq_cast(seqit);
+  seqit = gt_seq_iterator_create(gt_seq_iterator_fastq_class());
+  seqitf = gt_seq_iterator_fastq_cast(seqit);
   seqitf->qdescbuffer = gt_str_new();
   seqitf->curfile = gt_file_xopen(gt_str_array_get(filenametab, 0), "r");
   seqitf->filenametab = filenametab;
@@ -472,14 +472,14 @@ static GtSeqIterator* seqiterator_fastq_new_gen(const GtStrArray *filenametab,
   return seqit;
 }
 
-void gt_seqiterator_fastq_relax_check_of_quality_description(
+void gt_seq_iterator_fastq_relax_check_of_quality_description(
     GtSeqIteratorFastQ *seqitf)
 {
   gt_assert(seqitf != NULL);
   seqitf->relax_qualdesc_check = true;
 }
 
-GtSeqIterator* gt_seqiterator_fastq_new(const GtStrArray *filenametab,
+GtSeqIterator* gt_seq_iterator_fastq_new(const GtStrArray *filenametab,
                                      GtError *err)
 {
   return seqiterator_fastq_new_gen(filenametab,
@@ -487,7 +487,7 @@ GtSeqIterator* gt_seqiterator_fastq_new(const GtStrArray *filenametab,
                                    err);
 }
 
-GtSeqIterator* gt_seqiterator_colorspace_fastq_new(
+GtSeqIterator* gt_seq_iterator_colorspace_fastq_new(
                                                 const GtStrArray *filenametab,
                                                 GtError *err)
 {

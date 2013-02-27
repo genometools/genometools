@@ -23,7 +23,7 @@
 #include "core/output_file_api.h"
 #include "core/option_api.h"
 #include "core/progressbar.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
 #include "extended/md5set.h"
@@ -153,19 +153,19 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     for (i = parsed_args; i < argc; i++)
       gt_str_array_add_cstr(files, argv[i]);
     totalsize = gt_files_estimate_total_size(files);
-    seqit = gt_seqiterator_sequence_buffer_new(files, err);
+    seqit = gt_seq_iterator_sequence_buffer_new(files, err);
     if (!seqit)
       had_err = -1;
     if (!had_err) {
       if (arguments->verbose) {
-        gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
+        gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
                                                             (unsigned long long)
                                                             totalsize),
                              (unsigned long long) totalsize);
       }
       while (!had_err) {
         GtMD5SetStatus retval;
-        if ((gt_seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
+        if ((gt_seq_iterator_next(seqit, &sequence, &len, &desc, err)) != 1)
           break;
 
         retval = gt_md5set_add_sequence(md5set, (const char*) sequence, len,
@@ -181,7 +181,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
       }
       if (arguments->verbose)
         gt_progressbar_stop();
-      gt_seqiterator_delete(seqit);
+      gt_seq_iterator_delete(seqit);
     }
     gt_str_array_delete(files);
   }

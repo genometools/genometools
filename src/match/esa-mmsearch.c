@@ -18,7 +18,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/types_api.h"
 #include "core/timer_api.h"
 #include "core/format64.h"
@@ -474,19 +474,19 @@ int gt_callenumquerymatches(const char *indexname,
     int retval;
     uint64_t queryunitnum;
 
-    seqit = gt_seqiterator_sequence_buffer_new(queryfiles, err);
+    seqit = gt_seq_iterator_sequence_buffer_new(queryfiles, err);
     if (seqit == NULL)
     {
       haserr = true;
     }
     if (!haserr)
     {
-      gt_seqiterator_set_symbolmap(seqit,
+      gt_seq_iterator_set_symbolmap(seqit,
                       gt_alphabet_symbolmap(gt_encseq_alphabet(
                                                           suffixarray.encseq)));
       for (queryunitnum = 0; /* Nothing */; queryunitnum++)
       {
-        retval = gt_seqiterator_next(seqit,
+        retval = gt_seq_iterator_next(seqit,
                                      &query,
                                      &querylen,
                                      &desc,
@@ -527,7 +527,7 @@ int gt_callenumquerymatches(const char *indexname,
           }
         }
       }
-      gt_seqiterator_delete(seqit);
+      gt_seq_iterator_delete(seqit);
     }
   }
   gt_querymatch_delete(querymatchspaceptr);

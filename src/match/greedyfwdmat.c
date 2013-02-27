@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/alphabet.h"
 #include "core/error.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/unused_api.h"
 #include "core/defined-types.h"
 #include "core/codetype.h"
@@ -248,15 +248,15 @@ int gt_findsubquerygmatchforward(const GtEncseq *encseq,
   substringinfo.processinfo = &rangespecinfo;
   substringinfo.gmatchforward = gmatchforward;
   substringinfo.encseq = encseq;
-  seqit = gt_seqiterator_sequence_buffer_new(queryfilenames, err);
+  seqit = gt_seq_iterator_sequence_buffer_new(queryfilenames, err);
   if (!seqit)
     haserr = true;
   if (!haserr)
   {
-    gt_seqiterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
+    gt_seq_iterator_set_symbolmap(seqit, gt_alphabet_symbolmap(alphabet));
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
-      retval = gt_seqiterator_next(seqit,
+      retval = gt_seq_iterator_next(seqit,
                                 &query,
                                 &querylen,
                                 &desc,
@@ -276,7 +276,7 @@ int gt_findsubquerygmatchforward(const GtEncseq *encseq,
                                 querylen,
                                 desc);
     }
-    gt_seqiterator_delete(seqit);
+    gt_seq_iterator_delete(seqit);
   }
   return haserr ? -1 : 0;
 }
@@ -301,7 +301,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   GtCodetype maxcode;
   GtBucketspecification bucketspec;
 
-  substriter->seqit = gt_seqiterator_new(filenames,
+  substriter->seqit = gt_seq_iterator_new(filenames,
                                       getsymbolmapAlphabet(alphabet),
                                       true);
   substriter = gt_substriter_new(queryfilenames,alphabet,prefixlength);
@@ -392,11 +392,11 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   GtBucketspecification bucketspec;
   bool haserr = false;
 
-  seqit = gt_seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),
+  seqit = gt_seq_iterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),
   *                          true);
   for (unitnum = 0; ; unitnum++)
   {
-    retval = gt_seqiterator_next(seqit,
+    retval = gt_seq_iterator_next(seqit,
                               &query,
                               &querylen,
                               &desc,
@@ -411,7 +411,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
       break;
     }
   }
-  gt_seqiterator_delete(seqit);
+  gt_seq_iterator_delete(seqit);
   return haserr ? -1 : 0;
 }
 #endif

@@ -20,7 +20,7 @@
 #include "core/arraydef.h"
 #include "core/class_alloc.h"
 #include "core/types_api.h"
-#include "core/seqiterator_rep.h"
+#include "core/seq_iterator_rep.h"
 #include "core/unused_api.h"
 
 struct GtSeqIteratorClass {
@@ -34,7 +34,7 @@ struct GtSeqIteratorClass {
 };
 
 const GtSeqIteratorClass*
-gt_seqiterator_class_new(size_t size,
+gt_seq_iterator_class_new(size_t size,
                          GtSeqIteratorSetSymbolmapFunc set_symbolmap,
                          GtSeqIteratorSetSequenceOutFunc set_seqout,
                          GtSeqIteratorNextFunc next_func,
@@ -54,7 +54,7 @@ gt_seqiterator_class_new(size_t size,
   return c_class;
 }
 
-GtSeqIterator* gt_seqiterator_create(const GtSeqIteratorClass *sic)
+GtSeqIterator* gt_seq_iterator_create(const GtSeqIteratorClass *sic)
 {
   GtSeqIterator *si;
   gt_assert(sic && sic->size);
@@ -63,14 +63,14 @@ GtSeqIterator* gt_seqiterator_create(const GtSeqIteratorClass *sic)
   return si;
 }
 
-void* gt_seqiterator_cast(GT_UNUSED const GtSeqIteratorClass *sic,
+void* gt_seq_iterator_cast(GT_UNUSED const GtSeqIteratorClass *sic,
                           GtSeqIterator *si)
 {
   gt_assert(sic && si && si->c_class == sic);
   return si;
 }
 
-void gt_seqiterator_set_symbolmap(GtSeqIterator *seqit,
+void gt_seq_iterator_set_symbolmap(GtSeqIterator *seqit,
                                   const GtUchar *symbolmap)
 {
   gt_assert(seqit);
@@ -78,27 +78,28 @@ void gt_seqiterator_set_symbolmap(GtSeqIterator *seqit,
     seqit->c_class->set_symbolmap(seqit, symbolmap);
 }
 
-bool gt_seqiterator_has_qualities(GtSeqIterator *seqit)
+bool gt_seq_iterator_has_qualities(GtSeqIterator *seqit)
 {
   gt_assert(seqit);
   return (seqit->c_class->set_qual_buffer_func != NULL);
 }
 
-void gt_seqiterator_set_quality_buffer(GtSeqIterator *seqit,
+void gt_seq_iterator_set_quality_buffer(GtSeqIterator *seqit,
                                        const GtUchar **qualities)
 {
-  gt_assert(seqit && qualities && gt_seqiterator_has_qualities(seqit));
+  gt_assert(seqit && qualities && gt_seq_iterator_has_qualities(seqit));
   seqit->c_class->set_qual_buffer_func(seqit, qualities);
 }
 
-void gt_seqiterator_set_sequence_output(GtSeqIterator *seqit, bool withsequence)
+void gt_seq_iterator_set_sequence_output(GtSeqIterator *seqit,
+                                         bool withsequence)
 {
   gt_assert(seqit);
   if (seqit->c_class && seqit->c_class->set_symbolmap)
     seqit->c_class->set_seqout(seqit, withsequence);
 }
 
-int gt_seqiterator_next(GtSeqIterator *seqit,
+int gt_seq_iterator_next(GtSeqIterator *seqit,
                         const GtUchar **sequence,
                         unsigned long *len,
                         char **description,
@@ -111,9 +112,10 @@ int gt_seqiterator_next(GtSeqIterator *seqit,
     return 0;
 }
 
-const unsigned long long *gt_seqiterator_getcurrentcounter(GtSeqIterator *seqit,
+const unsigned long long *gt_seq_iterator_getcurrentcounter(GtSeqIterator
+                                                                         *seqit,
                                                            unsigned long long
-                                                           maxread)
+                                                                        maxread)
 {
   gt_assert(seqit);
   if (seqit->c_class && seqit->c_class->get_curr_counter_func)
@@ -122,7 +124,7 @@ const unsigned long long *gt_seqiterator_getcurrentcounter(GtSeqIterator *seqit,
     return NULL;
 }
 
-void gt_seqiterator_delete(GtSeqIterator *seqit)
+void gt_seq_iterator_delete(GtSeqIterator *seqit)
 {
   if (!seqit) return;
   gt_assert(seqit->c_class);

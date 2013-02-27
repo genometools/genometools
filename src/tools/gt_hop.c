@@ -18,7 +18,7 @@
 #include "core/basename_api.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
-#include "core/seqiterator_fastq.h"
+#include "core/seq_iterator_fastq.h"
 #include "core/unused_api.h"
 #include "extended/feature_type.h"
 #include "extended/gtdatahelp.h"
@@ -476,10 +476,10 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
               if (outfiles[i] == NULL)
                 had_err = -1;
               readset_iters[i] =
-                gt_seqiterator_fastq_new(infiles[i], err);
+                gt_seq_iterator_fastq_new(infiles[i], err);
               if (readset_iters[i] == NULL)
                 had_err = -1;
-              gt_seqiterator_fastq_relax_check_of_quality_description(
+              gt_seq_iterator_fastq_relax_check_of_quality_description(
                   (GtSeqIteratorFastQ*)readset_iters[i]);
               gt_free(bn);
             }
@@ -511,7 +511,7 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       gt_assert(readset_iters != NULL);
       gt_assert(outfiles != NULL);
       gt_str_array_delete(infiles[i]);
-      gt_seqiterator_delete(readset_iters[i]);
+      gt_seq_iterator_delete(readset_iters[i]);
       gt_file_delete(outfiles[i]);
     }
     gt_free(infiles);

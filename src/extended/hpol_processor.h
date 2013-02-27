@@ -21,7 +21,7 @@
 #include "core/encseq.h"
 #include "extended/seqpos_classifier.h"
 #include "extended/aligned_segments_pile.h"
-#include "core/seqiterator.h"
+#include "core/seq_iterator.h"
 #include "core/logger.h"
 
 /* The <GtHpolProcessor> class implements an homopolymer processor.
@@ -93,7 +93,7 @@ void             gt_hpol_processor_enable_direct_segments_output(
    be output to the i-th element of <outfiles>. This method assumes that the
    sequence ID (first word of the description line) of each sequence is
    unique.
-   XXX: use a single input iterator and gt_seqiterator_fastq_get_file_index()*/
+   XXX: use a single input iterator and gt_seq_iterator_fastq_get_file_index()*/
 void             gt_hpol_processor_enable_sorted_segments_output(
                                                     GtHpolProcessor *hpp,
                                                     unsigned long nfiles,

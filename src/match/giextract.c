@@ -32,7 +32,7 @@
 #include "core/format64.h"
 #include "core/ma_api.h"
 #include "core/progressbar.h"
-#include "core/seqiterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer.h"
 #include "core/xansi_api.h"
 #include "giextract.h"
 #include "echoseq.h"
@@ -860,14 +860,14 @@ int gt_extractkeysfromfastafile(bool verbose,
     printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
   }
-  seqit = gt_seqiterator_sequence_buffer_new(referencefiletab, err);
+  seqit = gt_seq_iterator_sequence_buffer_new(referencefiletab, err);
   if (!seqit)
   {
     had_err = -1;
   }
   if (!had_err && verbose)
   {
-    gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
+    gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
                                                           (unsigned long long)
                                                           totalsize),
                                                           (unsigned long long)
@@ -875,7 +875,7 @@ int gt_extractkeysfromfastafile(bool verbose,
   }
   while (had_err != -1 && countmarkhit < numofqueries)
   {
-    had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
+    had_err = gt_seq_iterator_next(seqit, &sequence, &len, &desc, err);
     if (had_err != 1)
     {
       break;
@@ -964,6 +964,6 @@ int gt_extractkeysfromfastafile(bool verbose,
     outputnonmarked(fastakeyqueries,numofqueries);
   }
   fastakeyqueries_delete(fastakeyqueries,numofqueries);
-  gt_seqiterator_delete(seqit);
+  gt_seq_iterator_delete(seqit);
   return had_err;
 }
