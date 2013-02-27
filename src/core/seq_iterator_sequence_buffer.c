@@ -22,7 +22,7 @@
 #include "core/desc_buffer.h"
 #include "core/minmax.h"
 #include "core/seq_iterator_rep.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 
 struct GtSeqIteratorSequenceBuffer
 {

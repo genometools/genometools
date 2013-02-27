@@ -31,7 +31,7 @@ int isupper(int c);
 #include "core/option_api.h"
 #include "core/output_file_api.h"
 #include "core/sequence_buffer.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/progressbar.h"

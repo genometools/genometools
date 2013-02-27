@@ -21,7 +21,7 @@
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/output_file_api.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/translator.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"

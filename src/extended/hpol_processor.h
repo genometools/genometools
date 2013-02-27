@@ -21,7 +21,7 @@
 #include "core/encseq.h"
 #include "extended/seqpos_classifier.h"
 #include "extended/aligned_segments_pile.h"
-#include "core/seq_iterator.h"
+#include "core/seq_iterator_api.h"
 #include "core/logger.h"
 
 /* The <GtHpolProcessor> class implements an homopolymer processor.

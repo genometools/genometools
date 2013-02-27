@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/progressbar.h"
 #include "core/quality.h"
-#include "core/seq_iterator_fastq.h"
+#include "core/seq_iterator_fastq_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 #include "core/fasta.h"

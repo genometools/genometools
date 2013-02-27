@@ -18,7 +18,7 @@
 #include "core/basename_api.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
-#include "core/seq_iterator_fastq.h"
+#include "core/seq_iterator_fastq_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_type.h"
 #include "extended/gtdatahelp.h"

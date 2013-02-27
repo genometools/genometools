@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/error_api.h"
-#include "core/seq_iterator.h"
+#include "core/seq_iterator_api.h"
 #include "core/unused_api.h"
 #include "extended/sam_query_name_iterator.h"
 #include "extended/sam_alignment.h"

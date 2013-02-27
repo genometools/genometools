@@ -21,7 +21,7 @@
 #include "core/cstr_api.h"
 #include "core/file.h"
 #include "core/filelengthvalues.h"
-#include "core/seq_iterator_fastq.h"
+#include "core/seq_iterator_fastq_api.h"
 #include "core/seq_iterator_rep.h"
 #include "core/str_array.h"
 #include "core/unused_api.h"

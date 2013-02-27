@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "core/array2dim_api.h"
 #include "core/logger.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/format64.h"
 #undef SHUDEBUG
 #ifdef SHUDEBUG

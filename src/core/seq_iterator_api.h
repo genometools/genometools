@@ -17,8 +17,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQ_ITERATOR_H
-#define SEQ_ITERATOR_H
+#ifndef SEQ_ITERATOR_API_H
+#define SEQ_ITERATOR_API_H
 
 #include <inttypes.h>
 #include "core/queue_api.h"

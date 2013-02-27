@@ -17,7 +17,7 @@
 
 #include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 #include "cgr_spacedseed.h"
 #include "sarr-def.h"
 #include "core/intbits.h"

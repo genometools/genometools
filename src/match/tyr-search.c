@@ -18,7 +18,7 @@
 #include "core/alphabet.h"
 #include "core/fa.h"
 #include "core/unused_api.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/chardef.h"
 #include "core/format64.h"
 #include "core/encseq.h"

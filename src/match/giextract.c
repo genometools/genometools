@@ -32,7 +32,7 @@
 #include "core/format64.h"
 #include "core/ma_api.h"
 #include "core/progressbar.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/xansi_api.h"
 #include "giextract.h"
 #include "echoseq.h"

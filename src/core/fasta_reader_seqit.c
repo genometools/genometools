@@ -19,7 +19,7 @@
 #include "core/fasta_reader_seqit.h"
 #include "core/fasta_reader_rep.h"
 #include "core/ma.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/str_array.h"
 
 struct GtFastaReaderSeqIt {

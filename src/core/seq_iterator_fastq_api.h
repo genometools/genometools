@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQ_ITERATOR_FASTQ_H
-#define SEQ_ITERATOR_FASTQ_H
+#ifndef SEQ_ITERATOR_FASTQ_API_H
+#define SEQ_ITERATOR_FASTQ_API_H
 
 #include "core/error_api.h"
-#include "core/seq_iterator.h"
+#include "core/seq_iterator_api.h"
 #include "core/str_array_api.h"
 
 typedef struct GtSeqIteratorFastQ GtSeqIteratorFastQ;

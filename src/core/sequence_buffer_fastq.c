@@ -22,7 +22,7 @@
 #include "core/sequence_buffer_inline.h"
 #include "core/sequence_buffer_rep.h"
 #include "core/sequence_buffer_fastq.h"
-#include "core/seq_iterator_fastq.h"
+#include "core/seq_iterator_fastq_api.h"
 #include "core/undef_api.h"
 
 #define FASTQ_START_SYMBOL '@'

@@ -19,7 +19,7 @@
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/error.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/encseq.h"
 
 void gt_symbolstring2fasta(FILE *fpout,

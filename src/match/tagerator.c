@@ -23,7 +23,7 @@
 #include "core/format64.h"
 #include "core/intbits.h"
 #include "core/ma_api.h"
-#include "core/seq_iterator_sequence_buffer.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/str_array.h"
 #include "core/unused_api.h"
 #include "apmeoveridx.h"

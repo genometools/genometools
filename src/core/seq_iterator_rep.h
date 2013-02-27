@@ -18,7 +18,7 @@
 #ifndef SEQ_ITERATOR_REP_H
 #define SEQ_ITERATOR_REP_H
 
-#include "core/seq_iterator.h"
+#include "core/seq_iterator_api.h"
 
 typedef void       (*GtSeqIteratorSetSymbolmapFunc)(GtSeqIterator*,
                                                     const GtUchar *symbolmap);
