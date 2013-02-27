@@ -16,6 +16,7 @@
 */
 
 #include "core/cstr_array.h"
+#include "core/error.h"
 #include "core/option_api.h"
 #include "core/versionfunc.h"
 #include "extended/toolbox_api.h"

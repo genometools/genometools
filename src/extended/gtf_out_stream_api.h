@@ -18,7 +18,7 @@
 #ifndef GTF_OUT_STREAM_API_H
 #define GTF_OUT_STREAM_API_H
 
-#include "core/file.h"
+#include "core/file_api.h"
 #include "extended/node_stream_api.h"
 
 /* Implements the <GtNodeStream> interface. A <GtGTFOutStream> produces GTF2.2

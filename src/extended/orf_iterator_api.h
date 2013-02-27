@@ -20,7 +20,7 @@
 #define ORF_ITERATOR_API_H
 
 #include "core/codon_iterator_api.h"
-#include "core/translator.h"
+#include "core/translator_api.h"
 #include "core/range_api.h"
 #include "core/error_api.h"
 

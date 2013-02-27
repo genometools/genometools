@@ -18,7 +18,7 @@
 #ifndef TOOLBOX_API_H
 #define TOOLBOX_API_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/tool_api.h"
 
 /* The <GtToolbox> class groups several tools into one and can be used to

@@ -1072,6 +1072,6 @@ int gt_bitPackStringInt32_unit_test(GtError*);
  */
 int gt_bitPackStringInt64_unit_test(GtError*);
 
-#include "bitpackstringsimpleop.h"
+#include "core/bitpackstringsimpleop.h"
 
 #endif
