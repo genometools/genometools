@@ -15,8 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MD5_FINGERPRINT_H
-#define MD5_FINGERPRINT_H
+#ifndef MD5_FINGERPRINT_API_H
+#define MD5_FINGERPRINT_API_H
+
+/* MD5Fingerprint module */
 
 /* Returns an MD5 fingerprint of <sequence> with length <seqlen> transformed to
    upper case letters (with toupper(3)).

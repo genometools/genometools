@@ -20,7 +20,7 @@
 #include "md5.h"
 #include "core/ma.h"
 #include "core/md5_encoder_api.h"
-#include "core/md5_fingerprint.h"
+#include "core/md5_fingerprint_api.h"
 #include "core/safearith.h"
 
 char* gt_md5_fingerprint(const char *sequence, unsigned long seqlen)

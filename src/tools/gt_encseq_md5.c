@@ -17,7 +17,7 @@
 
 #include "core/encseq.h"
 #include "core/ma.h"
-#include "core/md5_fingerprint.h"
+#include "core/md5_fingerprint_api.h"
 #include "core/outputfile.h"
 #include "core/unused_api.h"
 #include "tools/gt_encseq_md5.h"

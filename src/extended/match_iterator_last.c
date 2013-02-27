@@ -28,7 +28,7 @@
 #include "core/hashmap.h"
 #include "core/log.h"
 #include "core/ma.h"
-#include "core/md5_fingerprint.h"
+#include "core/md5_fingerprint_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/match.h"
