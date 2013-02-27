@@ -16,7 +16,7 @@
 */
 
 #include "core/str.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/encseq.h"
 #include "core/fasta.h"
 #include "core/fa.h"

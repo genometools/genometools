@@ -20,7 +20,7 @@
 #include <string.h>
 #include "core/bioseq.h"
 #include "core/cstr_api.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/dynalloc.h"
 #include "core/encseq.h"
 #include "core/fa.h"

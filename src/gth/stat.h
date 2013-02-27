@@ -19,7 +19,7 @@
 #define STAT_H
 
 #include <stdbool.h>
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/error.h"
 
 /* stores all kinds of gth related statistical information */

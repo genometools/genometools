@@ -31,7 +31,7 @@
 #include "core/fa.h"
 #include "core/bittab_api.h"
 #include "core/chardef.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/hashmap-generic.h"
 #include "core/log_api.h"
 #include "core/ma.h"

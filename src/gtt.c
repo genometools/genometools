@@ -35,7 +35,7 @@
 #include "core/cstr.h"
 #include "core/cstr_table.h"
 #include "core/desc_buffer.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/dlist.h"
 #include "core/dyn_bittab.h"
 #include "core/encseq.h"

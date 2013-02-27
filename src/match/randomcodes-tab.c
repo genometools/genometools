@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #ifdef SKDEBUG
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #endif
 #include "core/log.h"
 #include "core/spacecalc.h"

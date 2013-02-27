@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DISC_DISTRI_H
-#define DISC_DISTRI_H
+#ifndef DISC_DISTRI_API_H
+#define DISC_DISTRI_API_H
 
 #include "core/error_api.h"
 #include "core/file_api.h"

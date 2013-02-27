@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_table_api.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/node_visitor_api.h"

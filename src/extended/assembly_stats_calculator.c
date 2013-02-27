@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/format64.h"
 #include "core/ma.h"
 #include "extended/assembly_stats_calculator.h"

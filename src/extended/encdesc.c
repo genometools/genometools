@@ -28,7 +28,7 @@
 #include "core/assert_api.h"
 #include "core/bittab_api.h"
 #include "core/cstr_api.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/ensure.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"

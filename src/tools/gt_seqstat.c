@@ -36,7 +36,7 @@
 #include "core/format64.h"
 #include "core/unused_api.h"
 #include "core/types_api.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/option_api.h"
 #include "core/error_api.h"
 #include "core/logger.h"

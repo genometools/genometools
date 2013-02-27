@@ -16,7 +16,7 @@
 */
 
 #include "core/complement.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/fastq.h"
 #include "core/hashmap_api.h"
 #include "core/log_api.h"

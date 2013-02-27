@@ -20,7 +20,7 @@
 
 #include "core/arraydef.h"
 #include "core/bittab_api.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/hashmap-generic.h"
 #include "core/hashtable.h"
 #include "core/intbits.h"

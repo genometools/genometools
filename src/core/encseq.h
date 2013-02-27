@@ -23,7 +23,7 @@
 #include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/codetype.h"
-#include "core/disc_distri.h"
+#include "core/disc_distri_api.h"
 #include "core/encseq_api.h"
 #include "core/encseq_access_type.h"
 #include "core/encseq_options.h"
