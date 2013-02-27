@@ -31,6 +31,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         unsigned long dblen,
                         unsigned long dbstart,
                         GtReadmode readmode,
+                        bool query_asreversecopy,
                         long score,
                         unsigned long edist,
                         bool selfmatch,
@@ -61,5 +62,10 @@ const GtUchar *gt_querymatch_querysequence(const Querymatch *querymatch);
 unsigned long gt_querymatch_querytotallength(const Querymatch *querymatch);
 
 const char *gt_querymatch_querydescription(const Querymatch *querymatch);
+
+unsigned long gt_querymatch_dbseqnum(const GtEncseq *encseq,
+                                     const Querymatch *querymatch);
+
+bool gt_querymatch_queryreverse(const Querymatch *querymatch);
 
 #endif

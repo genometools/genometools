@@ -49,6 +49,8 @@ void gt_freemmsearchiterator(MMsearchiterator **mmsi);
 
 int gt_callenumquerymatches(const char *indexname,
                             const GtStrArray *queryfiles,
+                            bool forwardstrand,
+                            bool reversestrand,
                             bool echoquery,
                             unsigned int userdefinedleastlength,
                             Processquerymatch processquerymatch,

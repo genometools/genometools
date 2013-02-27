@@ -23,6 +23,7 @@
 #include "core/timer_api.h"
 #include "core/format64.h"
 #include "sarr-def.h"
+#include "revcompl.h"
 #include "lcpinterval.h"
 #include "esa-map.h"
 #include "echoseq.h"
@@ -33,6 +34,7 @@
 typedef struct
 {
   const GtUchar *sequence;
+  bool reversecopy;
   const char *description;
   const GtEncseq *encseq;
   GtReadmode readmode;
@@ -237,6 +239,7 @@ MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
   const ESASuffixptr *suftab = (const ESASuffixptr *) voidsuftab; /* XXX */
 
   queryrep.sequence = pattern;
+  queryrep.reversecopy = false;
   queryrep.description = NULL;
   queryrep.encseq = NULL;
   queryrep.readmode = GT_READMODE_FORWARD;
@@ -401,6 +404,7 @@ static int gt_runquerysubstringmatch(bool selfmatch,
                            extend + minmatchlength,
                            dbstart,
                            queryrep->readmode,
+                           queryrep->reversecopy,
                            0,
                            0,
                            selfmatch,
@@ -437,13 +441,15 @@ static int gt_runquerysubstringmatch(bool selfmatch,
 }
 
 int gt_callenumquerymatches(const char *indexname,
-                         const GtStrArray *queryfiles,
-                         bool echoquery,
-                         unsigned int userdefinedleastlength,
-                         Processquerymatch processquerymatch,
-                         void *processquerymatchinfo,
-                         GtLogger *logger,
-                         GtError *err)
+                            const GtStrArray *queryfiles,
+                            bool forwardstrand,
+                            bool reversestrand,
+                            bool echoquery,
+                            unsigned int userdefinedleastlength,
+                            Processquerymatch processquerymatch,
+                            void *processquerymatchinfo,
+                            GtLogger *logger,
+                            GtError *err)
 {
   Suffixarray suffixarray;
   unsigned long totallength = 0;
@@ -484,6 +490,10 @@ int gt_callenumquerymatches(const char *indexname,
     }
     if (!haserr)
     {
+      GtUchar *queryreverse = NULL;
+      unsigned long queryreverse_length = 0;
+      int mode;
+
       gt_seq_iterator_set_symbolmap(seqit,
                       gt_alphabet_symbolmap(gt_encseq_alphabet(
                                                           suffixarray.encseq)));
@@ -507,31 +517,59 @@ int gt_callenumquerymatches(const char *indexname,
         {
           GtQueryrep queryrep;
 
-          queryrep.sequence = query;
-          queryrep.description = desc;
           queryrep.encseq = NULL;
           queryrep.readmode = GT_READMODE_FORWARD;
           queryrep.startpos = 0;
-          queryrep.length = (unsigned long) querylen;
-          if (gt_runquerysubstringmatch(false,
-                                        suffixarray.encseq,
-                                        suffixarray.suftab,
-                                        suffixarray.readmode,
-                                        totallength+1,
-                                        queryunitnum,
-                                        &queryrep,
-                                        (unsigned long) userdefinedleastlength,
-                                        processquerymatch,
-                                        processquerymatchinfo,
-                                        querymatchspaceptr,
-                                        err) != 0)
+          queryrep.length = querylen;
+          queryrep.description = desc;
+          for (mode = 0; mode <= 1; mode++)
           {
-            haserr = true;
-            break;
+            if (mode == 0 && forwardstrand)
+            {
+              queryrep.sequence = query;
+              queryrep.reversecopy = false;
+            } else
+            {
+              if (mode == 1 && reversestrand)
+              {
+                if (querylen > queryreverse_length)
+                {
+                  queryreverse = gt_realloc(queryreverse,
+                                            sizeof (*queryreverse) * querylen);
+                  queryreverse_length = querylen;
+                }
+                gt_copy_reversecomplement(queryreverse,query,querylen);
+                queryrep.sequence = queryreverse;
+                queryrep.reversecopy = true;
+              } else
+              {
+                queryrep.sequence = NULL;
+                queryrep.reversecopy = false;
+              }
+            }
+            if (queryrep.sequence != NULL &&
+                gt_runquerysubstringmatch(false,
+                                          suffixarray.encseq,
+                                          suffixarray.suftab,
+                                          suffixarray.readmode,
+                                          totallength+1,
+                                          queryunitnum,
+                                          &queryrep,
+                                          (unsigned long) 
+                                             userdefinedleastlength,
+                                          processquerymatch,
+                                          processquerymatchinfo,
+                                          querymatchspaceptr,
+                                          err) != 0)
+            {
+              haserr = true;
+              break;
+            }
           }
         }
       }
       gt_seq_iterator_delete(seqit);
+      gt_free(queryreverse);
     }
   }
   gt_querymatch_delete(querymatchspaceptr);
@@ -571,6 +609,7 @@ int gt_callenumselfmatches(const char *indexname,
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
     queryrep.sequence = NULL;
+    queryrep.reversecopy = false;
     queryrep.description = NULL;
     queryrep.encseq = suffixarray.encseq;
     queryrep.readmode = queryreadmode;
@@ -648,6 +687,7 @@ static int gt_constructsarrandrunmmsearch(
   {
     const GtSuffixsortspace *suffixsortspace;
     queryrep.sequence = query;
+    queryrep.reversecopy = false;
     queryrep.description = NULL;
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;

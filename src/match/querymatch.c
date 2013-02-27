@@ -33,11 +33,12 @@ struct Querymatch
                  edist;
    const char *querydescription;
    long score;
-   bool selfmatch;
    uint64_t queryseqnum;
    const GtUchar *querysequence; /* pointer to query or NULL if query is
                                     represented by encseq */
    GtReadmode readmode; /* refers to reference sequence */
+   bool selfmatch,
+        query_asreversecopy;
 };
 
 Querymatch *gt_querymatch_new(void)
@@ -49,6 +50,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         unsigned long dblen,
                         unsigned long dbstart,
                         GtReadmode readmode,
+                        bool query_asreversecopy,
                         long score,
                         unsigned long edist,
                         bool selfmatch,
@@ -62,6 +64,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
   querymatch->dblen = dblen;
   querymatch->dbstart = dbstart;
   querymatch->readmode = readmode;
+  querymatch->query_asreversecopy = query_asreversecopy;
   querymatch->score = score;
   querymatch->edist = edist;
   querymatch->selfmatch = selfmatch;
@@ -126,6 +129,12 @@ static void verifymatch(const GtEncseq *encseq,
 }
 #endif
 
+unsigned long gt_querymatch_dbseqnum(const GtEncseq *encseq,
+                                     const Querymatch *querymatch)
+{
+  return gt_encseq_seqnum(encseq,querymatch->dbstart);
+}
+
 int gt_querymatch_output(GT_UNUSED void *info,
                          const GtEncseq *encseq,
                          const Querymatch *querymatch,
@@ -135,7 +144,7 @@ int gt_querymatch_output(GT_UNUSED void *info,
   unsigned long dbseqnum, querystart, dbstart_relative, seqstartpos;
 
   gt_assert(encseq != NULL);
-  dbseqnum = gt_encseq_seqnum(encseq,querymatch->dbstart);
+  dbseqnum = gt_querymatch_dbseqnum(encseq,querymatch);
   seqstartpos = gt_encseq_seqstartpos(encseq, dbseqnum);
   gt_assert((int) querymatch->readmode < 4);
   if (querymatch->readmode == GT_READMODE_REVERSE ||
@@ -220,4 +229,9 @@ unsigned long gt_querymatch_querytotallength(const Querymatch *querymatch)
 const char *gt_querymatch_querydescription(const Querymatch *querymatch)
 {
   return querymatch->querydescription;
+}
+
+bool gt_querymatch_queryreverse(const Querymatch *querymatch)
+{
+  return querymatch->query_asreversecopy;
 }
