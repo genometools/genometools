@@ -119,7 +119,6 @@ char gt_rand_char(void)
   where N is the number of bits. There are faster methods, see
   \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
 */
-
 unsigned int gt_determinebitspervalue(unsigned long maxvalue)
 {
   unsigned int bits = 0;
