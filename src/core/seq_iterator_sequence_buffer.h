@@ -16,21 +16,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQ_ITERATOR_SEQUENCE_BUFFER_API_H
-#define SEQ_ITERATOR_SEQUENCE_BUFFER_API_H
+#ifndef SEQ_ITERATOR_SEQUENCE_BUFFER_H
+#define SEQ_ITERATOR_SEQUENCE_BUFFER_H
 
-#include "core/error_api.h"
-#include "core/seq_iterator_api.h"
-#include "core/str_array_api.h"
+#include "core/seq_iterator_sequence_buffer_api.h"
+#include "core/sequence_buffer.h"
 
-typedef struct GtSeqIteratorSequenceBuffer GtSeqIteratorSequenceBuffer;
-
-/* Create a new <GtSeqIterator> for all sequence files in <filenametab>.
-   All files have to be of the same format, which will be guessed by examining
-   the beginning of the first file. If an error occurs, NULL is returned (see
-   the <err> object for details). */
-GtSeqIterator* gt_seq_iterator_sequence_buffer_new(const GtStrArray
-                                                                   *filenametab,
-                                                  GtError *err);
+/* Create a new <GtSeqIterator> for files in <filenametab> using the
+   <GtSequenceBuffer> implementation <buffer>. */
+GtSeqIterator* gt_seq_iterator_sequence_buffer_new_with_buffer(
+                                                      GtSequenceBuffer *buffer);
 
 #endif
