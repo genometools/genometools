@@ -15,7 +15,7 @@
 */
 
 #include "core/ma_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "extended/feature_type.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
@@ -30,7 +30,7 @@ typedef struct {
 static void* gt_mergefeat_arguments_new(void)
 {
   InterFeatArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -39,7 +39,7 @@ static void gt_mergefeat_arguments_delete(void *tool_arguments)
   InterFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -56,7 +56,7 @@ static GtOptionParser* gt_mergefeat_option_parser_new(void *tool_arguments)
                             "given GFF3 file(s).");
 
   /* output file options */
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   return op;
 }

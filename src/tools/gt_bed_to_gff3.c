@@ -16,7 +16,7 @@
 
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/bed_parser.h"
@@ -38,7 +38,7 @@ static void *gt_bed_to_gff3_arguments_new(void)
   arguments->feature_type = gt_str_new();
   arguments->thick_feature_type = gt_str_new();
   arguments->block_type = gt_str_new();
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -47,7 +47,7 @@ static void gt_bed_to_gff3_arguments_delete(void *tool_arguments)
   BEDToGFF3Arguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_str_delete(arguments->block_type);
   gt_str_delete(arguments->thick_feature_type);
   gt_str_delete(arguments->feature_type);
@@ -77,7 +77,7 @@ static GtOptionParser* gt_bed_to_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, o);
 
   /* output file options */
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_max_args(op, 1);
 

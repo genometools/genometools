@@ -18,7 +18,7 @@
 #include "core/encseq.h"
 #include "core/encseq_metadata.h"
 #include "core/ma.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/unused_api.h"
 #include "tools/gt_encseq_info.h"
 
@@ -34,7 +34,7 @@ typedef struct {
 static void* gt_encseq_info_arguments_new(void)
 {
   GtEncseqInfoArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -43,7 +43,7 @@ static void gt_encseq_info_arguments_delete(void *tool_arguments)
   GtEncseqInfoArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -79,7 +79,7 @@ static GtOptionParser* gt_encseq_info_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_min_max_args(op, 1, 1);
   return op;

@@ -27,7 +27,7 @@
 #include "core/ma.h"
 #include "core/option_api.h"
 #include "core/str_array.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/safearith.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
@@ -51,7 +51,7 @@ typedef struct {
 static void* gt_orffinder_arguments_new(void)
 {
   GtOrffinderArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   arguments->types = gt_str_array_new();
   return arguments;
 }
@@ -61,7 +61,7 @@ static void gt_orffinder_arguments_delete(void *tool_arguments)
   GtOrffinderArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_str_array_delete(arguments->types);
   gt_free(arguments);
 }
@@ -106,7 +106,7 @@ static GtOptionParser* gt_orffinder_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_min_args(op, 1U);
 

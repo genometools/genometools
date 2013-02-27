@@ -20,7 +20,7 @@
 #include "core/ma.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/undef_api.h"
 #include "core/versionfunc.h"
 #include "extended/genome_node.h"
@@ -142,7 +142,7 @@ static void gt_ltrharvest_showopts(const LTRharvestArguments *lo)
 static void* gt_ltrharvest_arguments_new(void)
 {
   LTRharvestArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   arguments->str_motif = gt_str_new();
   arguments->str_overlaps = gt_str_new();
   arguments->str_indexname = gt_str_new();
@@ -158,7 +158,7 @@ static void gt_ltrharvest_arguments_delete(void *tool_arguments)
   LTRharvestArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_str_delete(arguments->str_motif);
   gt_str_delete(arguments->str_overlaps);
   gt_str_delete(arguments->str_indexname);
@@ -453,7 +453,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
 
   gt_option_parser_refer_to_manual(op);
 
-  /* gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi); */
+  /* gt_output_file_register_options(op, &arguments->outfp, arguments->ofi); */
 
   return op;
 }

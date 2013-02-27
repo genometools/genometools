@@ -23,7 +23,7 @@
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/seq_info_cache.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
@@ -46,7 +46,7 @@ static void* gt_fingerprint_arguments_new(void)
   FingerprintArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->checklist = gt_str_new();
   arguments->extract = gt_str_new();
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -55,7 +55,7 @@ static void gt_fingerprint_arguments_delete(void *tool_arguments)
   FingerprintArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_str_delete(arguments->extract);
   gt_str_delete(arguments->checklist);
   gt_free(arguments);
@@ -110,7 +110,7 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
   width_option = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, width_option);
 
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   /* option exclusions */
   gt_option_exclude(check_option, duplicates_option);

@@ -20,7 +20,7 @@
 #include "core/encseq.h"
 #include "core/fa.h"
 #include "core/ma.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
 #include "core/undef_api.h"

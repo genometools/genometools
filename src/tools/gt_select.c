@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/genome_node.h"
@@ -71,7 +71,7 @@ static void* gt_select_arguments_new(void)
   arguments->strand = GT_NUM_OF_STRAND_TYPES;
   arguments->targetgt_strand_char = gt_str_new();
   arguments->targetstrand = GT_NUM_OF_STRAND_TYPES;
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   arguments->filter_files = gt_str_array_new();
   arguments->filter_logic = gt_str_new();
   arguments->dropped_file = gt_str_new();
@@ -83,7 +83,7 @@ static void gt_select_arguments_delete(void *tool_arguments)
   SelectArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_str_delete(arguments->targetgt_strand_char);
   gt_str_delete(arguments->gt_strand_char);
   gt_str_delete(arguments->source);
@@ -256,7 +256,7 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
   gt_option_imply(singleintron_option, minaveragessp_option);
 
   /* output file options */
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
 

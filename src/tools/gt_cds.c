@@ -17,7 +17,7 @@
 
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/unused_api.h"
 #include "extended/cds_stream_api.h"
 #include "extended/genome_node.h"
@@ -44,7 +44,7 @@ static void* gt_cds_arguments_new(void)
 {
   CDSArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->s2fi = gt_seqid2file_info_new();
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -53,7 +53,7 @@ static void gt_cds_arguments_delete(void *tool_arguments)
   CDSArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_seqid2file_info_delete(arguments->s2fi);
   gt_free(arguments);
 }
@@ -102,7 +102,7 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_max_args(op, 1);

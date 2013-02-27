@@ -19,7 +19,7 @@
 #include "core/file.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/warning_api.h"
 
 struct GtOutputFileInfo {
@@ -30,7 +30,7 @@ struct GtOutputFileInfo {
   GtFile **outfp;
 };
 
-GtOutputFileInfo* gt_outputfileinfo_new(void)
+GtOutputFileInfo* gt_output_file_info_new(void)
 {
   GtOutputFileInfo *ofi = gt_malloc(sizeof *ofi);
   ofi->output_filename = gt_str_new();
@@ -80,7 +80,7 @@ static int determine_outfp(void *data, GtError *err)
   return had_err;
 }
 
-void gt_outputfile_register_options(GtOptionParser *op, GtFile **outfp,
+void gt_output_file_register_options(GtOptionParser *op, GtFile **outfp,
                                     GtOutputFileInfo *ofi)
 {
   GtOption *opto, *optgzip, *optbzip2, *optforce;
@@ -113,14 +113,14 @@ void gt_outputfile_register_options(GtOptionParser *op, GtFile **outfp,
   gt_option_parser_register_hook(op, determine_outfp, ofi);
 }
 
-void gt_outputfileinfo_delete(GtOutputFileInfo *ofi)
+void gt_output_file_info_delete(GtOutputFileInfo *ofi)
 {
   if (!ofi) return;
   gt_str_delete(ofi->output_filename);
   gt_free(ofi);
 }
 
-GtFile* gt_outputfile_xopen_forcecheck(const char *path, const char *mode,
+GtFile* gt_output_file_xopen_forcecheck(const char *path, const char *mode,
                                        bool force, GtError *err)
 {
   gt_error_check(err);

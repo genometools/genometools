@@ -17,7 +17,7 @@
 
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "extended/add_introns_stream_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
@@ -42,7 +42,7 @@ typedef struct {
 static void* gt_stat_argument_new(void)
 {
   StatArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -51,7 +51,7 @@ static void gt_stat_arguments_delete(void *tool_arguments)
   StatArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -117,7 +117,7 @@ static GtOptionParser* gt_stat_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   return op;
 }

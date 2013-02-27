@@ -21,7 +21,7 @@
 #include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "tools/gt_splitfasta.h"
@@ -122,7 +122,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
     gt_str_append_char(descname, '/');
     gt_str_append_cstr(descname, gt_bioseq_get_description(bioseq, i));
     gt_str_append_cstr(descname, gt_file_suffix(filename));
-    if (!(outfp = gt_outputfile_xopen_forcecheck(gt_str_get(descname), "w",
+    if (!(outfp = gt_output_file_xopen_forcecheck(gt_str_get(descname), "w",
                                                  force, err))) {
       had_err = -1;
       break;
@@ -179,7 +179,8 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
     gt_str_append_ulong(destfilename, ++filenum);
     gt_str_append_cstr(destfilename,
                        gt_file_mode_suffix(gt_file_mode(srcfp)));
-    if (!(destfp = gt_outputfile_xopen_forcecheck(gt_str_get(destfilename), "w",
+    if (!(destfp = gt_output_file_xopen_forcecheck(gt_str_get(destfilename),
+                                                  "w",
                                                   force, err))) {
       had_err = -1;
     }
@@ -206,7 +207,7 @@ static int split_fasta_file(const char *filename, unsigned long max_filesize,
           gt_str_append_cstr(destfilename,
                              gt_file_mode_suffix(gt_file_mode(srcfp)));
           if (!(destfp =
-                  gt_outputfile_xopen_forcecheck(gt_str_get(destfilename), "w",
+                  gt_output_file_xopen_forcecheck(gt_str_get(destfilename), "w",
                                                  force, err))) {
             had_err = -1;
             break;

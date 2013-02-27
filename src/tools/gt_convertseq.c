@@ -29,7 +29,7 @@ int isupper(int c);
 #include "core/filelengthvalues.h"
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/sequence_buffer.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/unused_api.h"
@@ -93,7 +93,7 @@ static GtOPrval parse_options(ConvertseqOptions *opts, int *parsed_args,
                          &opts->reduce_wc_prot, false);
   gt_option_parser_add_option(op, o);
 
-  gt_outputfile_register_options(op, &opts->outfp, opts->ofi);
+  gt_output_file_register_options(op, &opts->outfp, opts->ofi);
 
   gt_option_parser_set_min_args(op, 1U);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
@@ -114,7 +114,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   GtFilelengthvalues *flv;
   GtSeqIterator *seqit;
   GtSequenceBuffer *sb = NULL;
-  opts.ofi = gt_outputfileinfo_new();
+  opts.ofi = gt_output_file_info_new();
   opts.outfp = NULL;
 
   gt_error_check(err);
@@ -124,11 +124,11 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR:
         gt_file_delete(opts.outfp);
-        gt_outputfileinfo_delete(opts.ofi);
+        gt_output_file_info_delete(opts.ofi);
         return -1;
     case GT_OPTION_PARSER_REQUESTS_EXIT:
         gt_file_delete(opts.outfp);
-        gt_outputfileinfo_delete(opts.ofi);
+        gt_output_file_info_delete(opts.ofi);
         return 0;
   }
 
@@ -263,7 +263,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
     }
   }
   gt_file_delete(opts.outfp);
-  gt_outputfileinfo_delete(opts.ofi);
+  gt_output_file_info_delete(opts.ofi);
   gt_str_array_delete(files);
   gt_free(flv);
   return had_err;

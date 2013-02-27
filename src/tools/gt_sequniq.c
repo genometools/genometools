@@ -20,7 +20,7 @@
 #include "core/fasta.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/option_api.h"
 #include "core/progressbar.h"
 #include "core/seqiterator_sequence_buffer.h"
@@ -39,7 +39,7 @@ typedef struct {
 static void* gt_sequniq_arguments_new(void)
 {
   GtSequniqArguments *arguments = gt_calloc((size_t)1, sizeof *arguments);
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -48,7 +48,7 @@ static void gt_sequniq_arguments_delete(void *tool_arguments)
   GtSequniqArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -92,7 +92,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   width_option = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, width_option);
 
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   /* option implications */
   gt_option_imply(verbose_option, seqit_option);

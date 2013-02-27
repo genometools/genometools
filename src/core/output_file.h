@@ -15,26 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef OUTPUTFILE_H
-#define OUTPUTFILE_H
+#ifndef OUTPUT_FILE_H
+#define OUTPUT_FILE_H
 
-#include "core/file_api.h"
-#include "core/option_api.h"
-
-#define GT_FORCE_OPT_CSTR  "force"
-
-typedef struct GtOutputFileInfo GtOutputFileInfo;
-
-GtOutputFileInfo* gt_outputfileinfo_new(void);
-void              gt_outputfile_register_options(GtOptionParser*,
-                                                 GtFile **outfp,
-                                                 GtOutputFileInfo*);
-void              gt_outputfileinfo_delete(GtOutputFileInfo*);
+#include "core/error_api.h"
+#include "core/output_file_api.h"
 
 /* Helper function for (rare) tools which do not use the full <GtOutputFileInfo>
    (usually if directories are involved). */
-GtFile*           gt_outputfile_xopen_forcecheck(const char *path,
-                                                 const char *mode, bool force,
-                                                 GtError *err);
+GtFile*           gt_output_file_xopen_forcecheck(const char *path,
+                                                  const char *mode, bool force,
+                                                  GtError *err);
 
 #endif

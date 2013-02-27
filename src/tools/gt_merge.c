@@ -16,7 +16,7 @@
 */
 
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/versionfunc.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
@@ -33,11 +33,11 @@ static GtOPrval parse_options(int *parsed_args, GtFile **outfp, int argc,
   gt_error_check(err);
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.");
-  ofi = gt_outputfileinfo_new();
-  gt_outputfile_register_options(op, outfp, ofi);
+  ofi = gt_output_file_info_new();
+  gt_output_file_register_options(op, outfp, ofi);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
-  gt_outputfileinfo_delete(ofi);
+  gt_output_file_info_delete(ofi);
   gt_option_parser_delete(op);
   return oprval;
 }

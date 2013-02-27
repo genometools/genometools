@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/undef_api.h"
 #include "gth/default.h"
 #include "gth/gthdef.h"
@@ -243,7 +243,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                               "alignments to consensus spliced alignments.");
   }
 
-  ofi = gt_outputfileinfo_new();
+  ofi = gt_output_file_info_new();
   genomic_files   = gt_str_array_new();
   cdna_files      = gt_str_array_new();
   protein_files   = gt_str_array_new();
@@ -410,7 +410,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   gt_option_parser_add_option(op, optmd5ids);
 
   /* output file options */
-  gt_outputfile_register_options(op, &call_info->out->outfp, ofi);
+  gt_output_file_register_options(op, &call_info->out->outfp, ofi);
 
   /* -skipalignmentout */
   optskipalignmentout = gt_option_new_bool("skipalignmentout", "skip output of "
@@ -1602,7 +1602,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   gt_str_array_delete(protein_files);
   gt_str_array_delete(cdna_files);
   gt_str_array_delete(genomic_files);
-  gt_outputfileinfo_delete(ofi);
+  gt_output_file_info_delete(ofi);
   gt_option_parser_delete(op);
 
   return oprval;

@@ -16,7 +16,7 @@
 */
 
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/versionfunc.h"
 #include "extended/chseqids_stream.h"
 #include "extended/genome_node.h"
@@ -47,7 +47,7 @@ static GtOPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   op = gt_option_parser_new("[option ...] mapping_file [GFF3_file]",
                          "Change sequence ids by the mapping given in "
                          "mapping_file.");
-  ofi = gt_outputfileinfo_new();
+  ofi = gt_output_file_info_new();
 
   /* -sort */
   option = gt_option_new_bool("sort",
@@ -62,7 +62,7 @@ static GtOPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  gt_outputfile_register_options(op, &arguments->outfp, ofi);
+  gt_output_file_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
@@ -71,7 +71,7 @@ static GtOPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
                                   err);
 
   /* free */
-  gt_outputfileinfo_delete(ofi);
+  gt_output_file_info_delete(ofi);
   gt_option_parser_delete(op);
 
   return oprval;

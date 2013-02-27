@@ -17,7 +17,7 @@
 
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gtf_out_stream_api.h"
@@ -31,7 +31,7 @@ typedef struct {
 static void* gt_gff3_to_gtf_arguments_new(void)
 {
   GFF3ToGTFArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -40,7 +40,7 @@ static void gt_gff3_to_gtf_arguments_delete(void *tool_arguments)
   GFF3ToGTFArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -50,7 +50,7 @@ static GtOptionParser* gt_gff3_to_gtf_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   op = gt_option_parser_new("[GFF3_file ...]",
                             "Parse GFF3 file(s) and show them as GTF2.2.");
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
   return op;
 }
 

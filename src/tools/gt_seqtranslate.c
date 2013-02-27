@@ -20,7 +20,7 @@
 #include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/ma.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/translator.h"
 #include "core/unused_api.h"
@@ -38,7 +38,7 @@ typedef struct {
 static void* gt_seqtranslate_arguments_new(void)
 {
   GtTranslateArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -46,7 +46,7 @@ static void gt_seqtranslate_arguments_delete(void *tool_arguments)
 {
   GtTranslateArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_file_delete(arguments->outfp);
   gt_free(arguments);
 }
@@ -71,7 +71,7 @@ static GtOptionParser* gt_seqtranslate_option_parser_new(void *tool_arguments)
                               &arguments->fasta_width, 60);
   gt_option_parser_add_option(op, option);
 
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
   gt_option_parser_set_min_args(op, 1);
 
   return op;

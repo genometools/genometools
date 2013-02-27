@@ -24,7 +24,7 @@
 #include "core/logger.h"
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
@@ -60,7 +60,7 @@ static void* gt_ltrdigest_arguments_new(void)
   arguments->trna_lib = gt_str_new();
   arguments->prefix = gt_str_new();
   arguments->cutoffs = gt_str_new();
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -75,7 +75,7 @@ static void gt_ltrdigest_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->prefix);
   gt_str_delete(arguments->cutoffs);
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -354,7 +354,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   /* output file options */
 
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_min_max_args(op, 2U, 2U);
 

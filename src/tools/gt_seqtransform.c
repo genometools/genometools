@@ -18,7 +18,7 @@
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/option_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/trans_table.h"
 #include "tools/gt_seqtransform.h"
 
@@ -32,7 +32,7 @@ typedef struct {
 static void* gt_seqtransform_arguments_new(void)
 {
   SeqtransformArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->ofi = gt_outputfileinfo_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -41,7 +41,7 @@ static void gt_seqtransform_arguments_delete(void *tool_arguments)
   SeqtransformArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
-  gt_outputfileinfo_delete(arguments->ofi);
+  gt_output_file_info_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -66,7 +66,7 @@ static GtOptionParser* gt_seqtransform_option_parser_new(void *tool_arguments)
   o = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, o);
 
-  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
 
   return op;
 }

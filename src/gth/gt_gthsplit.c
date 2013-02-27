@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "core/cstr_api.h"
-#include "core/outputfile.h"
+#include "core/output_file_api.h"
 #include "core/unused_api.h"
 #include "gth/gthxml.h"
 #include "gth/gthverbosefunc.h"
