@@ -1193,11 +1193,12 @@ static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
   for (i = 1; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
   {
     boundaries = &(arrayLTRboundaries->spaceLTRboundaries[i]);
-    if (boundaries->skipped) continue;
-    if (oldboundaries->leftLTR_5 == boundaries->leftLTR_5
-          && oldboundaries->rightLTR_3 == boundaries->rightLTR_3)
-    {
-      boundaries->skipped = true;
+    if (!boundaries->skipped) {
+      if (oldboundaries->leftLTR_5 == boundaries->leftLTR_5
+            && oldboundaries->rightLTR_3 == boundaries->rightLTR_3)
+      {
+        boundaries->skipped = true;
+      }
     }
     oldboundaries = boundaries;
   }
