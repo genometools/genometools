@@ -1185,36 +1185,21 @@ static void* gt_searchforLTRs_threadfunc(void *data) {
    same boundary coordinates. */
 static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
 {
-  unsigned long i, j;
-  unsigned long startpos_i, endpos_i, startpos_j, endpos_j;
-  LTRboundaries *boundaries_i,
-                *boundaries_j;
+  unsigned long i;
+  LTRboundaries *oldboundaries,
+                *boundaries;
 
-  for (i = 0; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
+  oldboundaries = &(arrayLTRboundaries->spaceLTRboundaries[0]);
+  for (i = 1; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
   {
-    boundaries_i = &(arrayLTRboundaries->spaceLTRboundaries[i]);
-    if (boundaries_i->skipped)
+    boundaries = &(arrayLTRboundaries->spaceLTRboundaries[i]);
+    if (boundaries->skipped) continue;
+    if (oldboundaries->leftLTR_5 == boundaries->leftLTR_5
+          && oldboundaries->rightLTR_3 == boundaries->rightLTR_3)
     {
-      continue;
+      boundaries->skipped = true;
     }
-    startpos_i = boundaries_i->leftLTR_5;
-    endpos_i   = boundaries_i->rightLTR_3;
-
-    for (j = i + 1; j < arrayLTRboundaries->nextfreeLTRboundaries; j++)
-    {
-      boundaries_j = &(arrayLTRboundaries->spaceLTRboundaries[j]);
-      if (boundaries_j->skipped)
-      {
-        continue;
-      }
-      startpos_j = boundaries_j->leftLTR_5;
-      endpos_j   = boundaries_j->rightLTR_3;
-
-      if (startpos_i == startpos_j && endpos_i == endpos_j)
-      {
-        boundaries_j->skipped = true;
-      }
-    }
+    oldboundaries = boundaries;
   }
 }
 
@@ -1328,17 +1313,26 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
     /* not needed any longer */
     GT_FREEARRAY(&ltrh_stream->repeatinfo.repeats, Repeat);
 
-     /* remove exact duplicates */
-    if (!had_err)
-    {
-      gt_removeduplicates(&ltrh_stream->arrayLTRboundaries);
-    }
-
     qsort(threadinfo.arrayLTRboundaries->spaceLTRboundaries,
           (size_t) threadinfo.arrayLTRboundaries->nextfreeLTRboundaries - 1,
            sizeof (LTRboundaries),  bdcompare);
 
     /* unsigned long i;
+    for (i = 0; i < threadinfo.arrayLTRboundaries->nextfreeLTRboundaries; i++) {
+      if (!threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].skipped)
+        printf(">>>> %lu:%lu-%lu\n",
+             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].contignumber,
+             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].leftLTR_5,
+             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].rightLTR_3);
+    } */
+
+    /* remove exact duplicates */
+    if (!had_err)
+    {
+      gt_removeduplicates(&ltrh_stream->arrayLTRboundaries);
+    }
+
+    /*
     for (i = 0; i < threadinfo.arrayLTRboundaries->nextfreeLTRboundaries; i++) {
       if (!threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].skipped)
         printf(">>>> %lu:%lu-%lu\n",
