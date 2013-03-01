@@ -257,7 +257,8 @@ const <%=classN%>Class *gt_<%=fkt_pref%>_class_new(size_t size\
 end%>\
 <%end %>)
 {
-  <%=classN%>Class *<%=fkt_pref%>_c = gt_malloc(size);
+  <%=classN%>Class *<%=fkt_pref%>_c = gt_malloc(sizeof (*<%=fkt_pref%>_c);
+  <%=fkt_pref%>_c->size = size;
 <%functions.each do |func, paras| %>\
 <% name = func.gsub(/(^|.)([A-Z])/) do
   rep = ''
