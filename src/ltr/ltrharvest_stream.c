@@ -1180,9 +1180,9 @@ static void* gt_searchforLTRs_threadfunc(void *data) {
   return NULL;
 }
 
-/* The following function removes exact duplicates from the array of predicted
-   LTR elements. Exact duplicates occur when different seeds are extended to
-   same boundary coordinates. */
+/* The following function removes exact duplicates from the (sorted!)
+   array of predicted LTR elements. Exact duplicates occur when different seeds
+   are extended to same boundary coordinates. */
 static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
 {
   unsigned long i;
