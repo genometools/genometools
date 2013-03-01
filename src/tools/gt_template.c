@@ -48,16 +48,16 @@ static GtOptionParser* gt_template_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] [file]", /* XXX */
-                         "DESCRIBE YOUR TOOL IN ONE LINE HERE."); /* XXX */
+                            "DESCRIBE YOUR TOOL IN ONE LINE HERE."); /* XXX */
 
   /* -bool */
   option = gt_option_new_bool("bool", "bool option template",
-                           &arguments->bool_option_template, false);
+                              &arguments->bool_option_template, false);
   gt_option_parser_add_option(op, option);
 
   /* -str */
   option = gt_option_new_string("str", "str option template",
-                             arguments->str_option_template, NULL);
+                                arguments->str_option_template, NULL);
   gt_option_parser_add_option(op, option);
 
   return op;
@@ -100,8 +100,8 @@ static int gt_template_runner(int argc, const char **argv, int parsed_args,
 GtTool* gt_template(void)
 {
   return gt_tool_new(gt_template_arguments_new,
-                  gt_template_arguments_delete,
-                  gt_template_option_parser_new,
-                  gt_template_arguments_check,
-                  gt_template_runner);
+                     gt_template_arguments_delete,
+                     gt_template_option_parser_new,
+                     gt_template_arguments_check,
+                     gt_template_runner);
 }
