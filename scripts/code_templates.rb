@@ -47,13 +47,15 @@ struct <%=classN%>Class {
 struct <%=classN%>Members {<% if options.refcount %>\n  unsigned long refcount;<% end %>
 };
 
-<%=classN%>Class* gt_<%=fkt_pref%>_class_new(size_t size,
-<%=" "*(classN.length+fkt_pref.length+20)%>/* XXfunctionPtrXX do not change */);
+const <%=classN%>Class* gt_<%=fkt_pref%>_class_new(size_t size,
+<%= " "*(classN.length + fkt_pref.length + 26) %>\
+/* XXfunctionPtrXX do not change */);
 
-<%=classN%>*      gt_<%=fkt_pref%>_create(const <%=classN%>Class*);
+<%=classN%>*            gt_<%=fkt_pref%>_create(const <%=classN%>Class*);
 
-void*<%=" "*(classN.length+2)%>gt_<%=fkt_pref%>_cast(const <%=classN%>Class*,
-<%=" "*(classN.length+fkt_pref.length+16)%><%=classN%>*);
+void*<%= ' ' * (classN.length + 8) %>\
+gt_<%=fkt_pref%>_cast(const <%=classN%>Class*,
+<%= ' ' * (classN.length + fkt_pref.length + 22) %><%=classN%>*);
 END_REPFILE
 
 $hwrapper = <<-END_HWRAPPER
@@ -121,6 +123,7 @@ gt_<%=fkt_pref%>_ref(<%=classN%> *<%=fkt_pref%>);\
 <%=     ' ' * funcname.length%>\
 <%    end %>\
 <%    if parameter[-1] == '*' %>\
+<% puts parameter %>\
 <%=     parameter.chop%> *\
 <%    else %>\
 <%=     parameter%>\
@@ -128,7 +131,7 @@ gt_<%=fkt_pref%>_ref(<%=classN%> *<%=fkt_pref%>);\
 <%    if parameter.match /^\#{classN}\\*$/ %>\
 <%=     fkt_pref %>\
 <%    else %>\
- para<%=idx%> /*TODO: name*/\
+para<%=idx%> /*TODO: name*/\
 <%    end %>\
 <%  end %>);\
 <%end %>
@@ -243,6 +246,30 @@ end %>(\
 }
 INTERFACE_FUNC
 
+$class_new_fkt = <<-CLASS_NEW_FKT
+const <%=classN%>Class *gt_<%=fkt_pref%>_class_new(size_t size\
+<%functions.each do |func, paras| %>,
+<%=  ' ' * (27 + classN.length + fkt_pref.length)%>\
+<%=classN%><%=func%> <%=func.gsub(/(^|.)([A-Z])/) do
+  rep = ''
+  rep = $1+'_' if $1.length > 0
+  rep += $2.downcase
+end%>\
+<%end %>)
+{
+  <%=classN%>Class *<%=fkt_pref%>_c = gt_malloc(size);
+<%functions.each do |func, paras| %>\
+<% name = func.gsub(/(^|.)([A-Z])/) do
+  rep = ''
+  rep = $1+'_' if $1.length >0
+  rep += $2.downcase
+end %>\
+  <%=fkt_pref%>_c-><%=name%> = <%=name%>;
+<%end %>\
+  return <%=fkt_pref%>_c;
+}
+CLASS_NEW_FKT
+
 $interface_file = <<-INTERFACE_CODE
 #include "<%=subdir%>/<%=fkt_pref%>_rep.h"
 
@@ -256,6 +283,7 @@ $interface_file = <<-INTERFACE_CODE
 <% end %>\
 <%=cast_func%>\
 <%=interface_funcs%>
+<%=class_new_fkt%>
 <%=delete_func%>
 INTERFACE_CODE
 
@@ -346,7 +374,7 @@ const <%=classN%>Class* <%=ifkt_pref%>_class(void)
 #define <%=ifkt_pref%>_cast(cvar) \\
         <%=fkt_pref%>_cast(<%=ifkt_pref%>_class(), cvar)
 
-<%=classN%>* <%=fkt_pref%>_new(void /* TODO: add parameters */)
+<%=classN%>* <%=ifkt_pref%>_new(void /* TODO: add parameters */)
 {
   <%=classN%> *<%=cvar%>;
   <%=iclassN%> *<%=icvar%>;

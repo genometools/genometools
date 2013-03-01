@@ -204,6 +204,7 @@ def create_interface_code(options)
   ref_func = ERB.new($ref_func).result(binding)
   cast_func = ERB.new($cast_func).result(binding)
   delete_func = ERB.new($delete_func).result(binding)
+  class_new_fkt = ERB.new($class_new_fkt).result(binding)
   subdir = options.subdir
   i_code_file << ERB.new($interface_file).result(binding)
   i_code_file.close
