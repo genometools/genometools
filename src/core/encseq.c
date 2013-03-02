@@ -1193,7 +1193,7 @@ static int filloistabmapspecstartptr(GtEncseq *encseq,
   return haserr ? -1 : 0;
 }
 
-static void gt_encseq_assignheaderforwriting(GtMapspec *mapspec,
+static void gt_encseq_assign_header_mapspec(GtMapspec *mapspec,
                                              GtEncseqHeaderPtr *headerptr,
                                              bool writemode,
                                              GtEncseqAccessType sat,
@@ -1345,32 +1345,13 @@ static void gt_encseq_headerptr_delete(GtEncseqHeaderPtr *headerptr)
   headerptr->numofallcharsptr = NULL;
 }
 
-static void gt_assignencseqmapspecification(GtMapspec *mapspec,
-                                            void *data,
-                                            bool writemode)
+static void gt_encseq_assign_sequence_mapspec(GtMapspec *mapspec,
+                                              void *data,
+                                              bool writemode)
 {
   GtEncseq *encseq = (GtEncseq *) data;
   unsigned long numofunits;
   unsigned int bitspersymbol;
-
-  gt_encseq_assignheaderforwriting(mapspec,
-                                   &encseq->headerptr,
-                                   writemode,
-                                   encseq->sat,
-                                   encseq->totallength,
-                                   gt_encseq_alphabetnumofchars(encseq),
-                                   encseq->numofdbsequences,
-                                   encseq->numofdbfiles,
-                                   encseq->lengthofdbfilenames,
-                                   encseq->minseqlen,
-                                   encseq->maxseqlen,
-                                   encseq->maxsubalphasize,
-                                   encseq->numofallchars,
-                                   &encseq->specialcharinfo,
-                                   encseq->filenametab,
-                                   encseq->lengthofalphadef,
-                                   encseq->alphadef,
-                                   encseq->alphatype);
 
   switch (encseq->sat)
   {
@@ -1425,9 +1406,38 @@ static void gt_assignencseqmapspecification(GtMapspec *mapspec,
   }
 }
 
-static int flushencseq2file(const char *indexname,
-                            GtEncseq *encseq,
-                            GtError *err)
+static void gt_encseq_assign_mapspec(GtMapspec *mapspec,
+                                     void *data,
+                                     bool writemode)
+{
+  GtEncseq *encseq = (GtEncseq *) data;
+
+  gt_encseq_assign_header_mapspec(mapspec,
+                                   &encseq->headerptr,
+                                   writemode,
+                                   encseq->sat,
+                                   encseq->totallength,
+                                   gt_encseq_alphabetnumofchars(encseq),
+                                   encseq->numofdbsequences,
+                                   encseq->numofdbfiles,
+                                   encseq->lengthofdbfilenames,
+                                   encseq->minseqlen,
+                                   encseq->maxseqlen,
+                                   encseq->maxsubalphasize,
+                                   encseq->numofallchars,
+                                   &encseq->specialcharinfo,
+                                   encseq->filenametab,
+                                   encseq->lengthofalphadef,
+                                   encseq->alphadef,
+                                   encseq->alphatype);
+
+  gt_encseq_assign_sequence_mapspec(mapspec,data,writemode);
+}
+
+static int gt_encseq_flush2file(const char *indexname,
+                                GtEncseq *encseq,
+                                bool esq_no_header,
+                                GtError *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -1440,7 +1450,10 @@ static int flushencseq2file(const char *indexname,
   }
   if (!haserr)
   {
-    if (gt_mapspec_write(gt_assignencseqmapspecification, fp, encseq,
+    if (gt_mapspec_write(esq_no_header
+                           ? gt_encseq_assign_sequence_mapspec
+                           : gt_encseq_assign_mapspec,
+                         fp, encseq,
                          encseq->sizeofrep, err) != 0)
     {
       haserr = true;
@@ -1473,6 +1486,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long minseqlen,
                                           unsigned long maxseqlen,
                                           bool oistab,
+                                          bool no_esq_header,
                                           const Definedunsignedlong
                                              *equallength,
                                           GtAlphabet *alpha,
@@ -1535,6 +1549,7 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
                                       minseqlen,
                                       maxseqlen,
                                       false, /* oistab */
+                                      false,
                                       lengthofsinglesequence > 0
                                         ? &equallength
                                         : NULL,
@@ -1593,7 +1608,7 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
                            &encseq->alphadef, false);
     encseq->lengthofdbfilenames
       = determinelengthofdbfilenames(encseq->filenametab);
-    if (gt_mapspec_write(gt_assignencseqmapspecification, fp, encseq,
+    if (gt_mapspec_write(gt_encseq_assign_mapspec, fp, encseq,
                          encseq->sizeofrep, err) != 0)
     {
       haserr = true;
@@ -1652,7 +1667,7 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(tmpfilename,GT_ENCSEQFILESUFFIX);
-  if (gt_mapspec_read(gt_assignencseqmapspecification,
+  if (gt_mapspec_read(gt_encseq_assign_mapspec,
                       encseq,
                       tmpfilename,
                       encseq->sizeofrep,
@@ -4329,6 +4344,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long minseqlen,
                                           unsigned long maxseqlen,
                                           bool oistab,
+                                          bool no_esq_header,
                                           const Definedunsignedlong
                                              *equallength,
                                           GtAlphabet *alpha,
@@ -4337,7 +4353,6 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
 {
   double spaceinbitsperchar;
   GtEncseq *encseq;
-  uint64_t sizeofrep_uint64;
 
   encseq = gt_malloc(sizeof (*encseq));
   encseq->sat = sat;
@@ -4414,17 +4429,23 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->numofchars = gt_alphabet_num_of_chars(alpha);
   encseq->minseqlen = minseqlen;
   encseq->maxseqlen = maxseqlen;
-  sizeofrep_uint64
-    = gt_encseq_determine_size(sat,
-                               totallength,
-                               numofsequences,
-                               numofdbfiles,
-                               lengthofdbfilenames,
-                               wildcardranges,
-                               encseq->numofchars,
-                               gt_alphabet_bits_per_symbol(alpha),
-                               encseq->lengthofalphadef);
-  encseq->sizeofrep = CALLCASTFUNC(uint64_t, unsigned_long, sizeofrep_uint64);
+  if (no_esq_header)
+  {
+    encseq->sizeofrep = totallength;
+  } else
+  {
+    uint64_t sizeofrep_uint64
+      = gt_encseq_determine_size(sat,
+                                 totallength,
+                                 numofsequences,
+                                 numofdbfiles,
+                                 lengthofdbfilenames,
+                                 wildcardranges,
+                                 encseq->numofchars,
+                                 gt_alphabet_bits_per_symbol(alpha),
+                                 encseq->lengthofalphadef);
+    encseq->sizeofrep = CALLCASTFUNC(uint64_t, unsigned_long, sizeofrep_uint64);
+  }
   encseq->satname = gt_encseq_access_type_str(sat);
   encseq->twobitencoding = NULL;
   if (sat == GT_ACCESS_TYPE_DIRECTACCESS || sat == GT_ACCESS_TYPE_BYTECOMPRESS)
@@ -4803,6 +4824,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
                                        bool plainformat,
                                        unsigned long totallength,
                                        bool outssptab,
+                                       bool no_esq_header,
                                        unsigned long numofsequences,
                                        const Definedunsignedlong *equallength,
                                        GtAlphabet *alphabet,
@@ -4844,6 +4866,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
                                       minseqlength,
                                       maxseqlength,
                                       outoistab,
+                                      no_esq_header,
                                       equallength,
                                       alphabet,
                                       customalphabet,
@@ -4994,6 +5017,7 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
                                  gt_encseq_metadata_min_seq_length(emd),
                                  gt_encseq_metadata_max_seq_length(emd),
                                  withoistab,
+                                 false,
                                  &equallength,
                                  alpha,
                                  gt_encseq_metadata_has_custom_alphabet(emd),
@@ -7986,6 +8010,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                           bool outssptab,
                                           bool outoistab,
                                           bool outmd5tab,
+                                          bool esq_no_header,
                                           GtLogger *logger,
                                           GtError *err)
 {
@@ -8134,6 +8159,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                    isplain,
                                    totallength,
                                    outssptab,
+                                   esq_no_header,
                                    numofseparators+1,
                                    &equallength,
                                    alphabet,
@@ -8161,7 +8187,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
   if (!haserr)
   {
     alphabetisbound = true;
-    if (flushencseq2file(indexname,encseq,err) != 0)
+    if (gt_encseq_flush2file(indexname,encseq,esq_no_header,err) != 0)
     {
       haserr = true;
     }
@@ -8699,7 +8725,8 @@ struct GtEncseqEncoder {
        md5tab,
        isdna,
        isprotein,
-       isplain;
+       isplain,
+       esq_no_header;
   GtStr *sat,
         *smapfile;
   GtLogger *logger;
@@ -8713,6 +8740,7 @@ GtEncseqEncoder* gt_encseq_encoder_new()
   gt_encseq_encoder_enable_description_support(ee);
   gt_encseq_encoder_enable_md5_support(ee);
   gt_encseq_encoder_disable_lossless_support(ee);
+  ee->esq_no_header = false;
   ee->isdna = ee->isprotein = ee->isplain = false;
   ee->sat = gt_str_new();
   ee->smapfile = gt_str_new();
@@ -8885,6 +8913,12 @@ void gt_encseq_encoder_disable_description_support(GtEncseqEncoder *ee)
   gt_encseq_encoder_do_not_create_sds_tab(ee);
 }
 
+void gt_encseq_encoder_disable_esq_header(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->esq_no_header = true;
+}
+
 void gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
@@ -9024,6 +9058,7 @@ int gt_encseq_encoder_encode(GtEncseqEncoder *ee, GtStrArray *seqfiles,
                                     ee->ssptab,
                                     ee->oistab,
                                     ee->md5tab,
+                                    ee->esq_no_header,
                                     ee->logger,
                                     err);
   if (!encseq)
@@ -9613,6 +9648,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
                                     0,
                                     eb->minseqlen,
                                     eb->maxseqlen,
+                                    false,
                                     false,
                                     NULL,
                                     gt_alphabet_ref(eb->alpha),

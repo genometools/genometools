@@ -56,6 +56,11 @@ GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
 GtEncseqLoader* gt_encseq_loader_new_from_options(GtEncseqOptions *opts,
                                                   GtError *err);
 
+/* Do not output the header of the esq-file. This is needed
+   for generating testcases for Timo Beller. */
+
+void gt_encseq_encoder_disable_esq_header(GtEncseqEncoder *ee);
+
 /* The following type stores a two bit encoding in <tbe> with information
   about the number of two bit units which do not store a special
   character in <unitsnotspecial>. To allow the comparison of these

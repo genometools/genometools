@@ -555,7 +555,7 @@ int gt_callenumquerymatches(const char *indexname,
                                           totallength+1,
                                           queryunitnum,
                                           &queryrep,
-                                          (unsigned long) 
+                                          (unsigned long)
                                              userdefinedleastlength,
                                           processquerymatch,
                                           processquerymatchinfo,

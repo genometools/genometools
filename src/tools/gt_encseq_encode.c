@@ -30,6 +30,7 @@
 typedef struct {
   GtEncseqOptions *eopts;
   bool showstats,
+       no_esq_header,
        verbose;
   GtStr *indexname;
 } GtEncseqEncodeArguments;
@@ -69,6 +70,14 @@ static GtOptionParser* gt_encseq_encode_option_parser_new(void *tool_arguments)
                               false);
   gt_option_parser_add_option(op, option);
 
+  /* -no_esq_header */
+  option = gt_option_new_bool("no_esq_header",
+                              "omit the header in the .esq file",
+                              &arguments->no_esq_header,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* encoded sequence options */
   arguments->eopts = gt_encseq_options_register_encoding(op,
                                                          arguments->indexname,
@@ -85,6 +94,7 @@ static GtOptionParser* gt_encseq_encode_option_parser_new(void *tool_arguments)
 
 static int encode_sequence_files(GtStrArray *infiles, GtEncseqOptions *opts,
                                  const char *indexname, bool verbose,
+                                 bool esq_no_header,
                                  GtError *err)
 {
   GtEncseqEncoder *encseq_encoder;
@@ -98,6 +108,10 @@ static int encode_sequence_files(GtStrArray *infiles, GtEncseqOptions *opts,
     had_err = -1;
   if (!had_err) {
     gt_encseq_encoder_set_logger(encseq_encoder, logger);
+    if (esq_no_header)
+    {
+      gt_encseq_encoder_disable_esq_header(encseq_encoder);
+    }
     had_err = gt_encseq_encoder_encode(encseq_encoder, infiles, indexname, err);
   }
   gt_encseq_encoder_delete(encseq_encoder);
@@ -172,6 +186,7 @@ static int gt_encseq_encode_runner(GT_UNUSED int argc, const char **argv,
                                     arguments->eopts,
                                     gt_str_get(arguments->indexname),
                                     arguments->verbose,
+                                    arguments->no_esq_header,
                                     err);
   }
 
