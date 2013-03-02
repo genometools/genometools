@@ -1459,7 +1459,10 @@ static int gt_encseq_flush2file(const char *indexname,
       haserr = true;
     }
   }
-  gt_encseq_headerptr_delete(&encseq->headerptr);
+  if (!esq_no_header)
+  {
+    gt_encseq_headerptr_delete(&encseq->headerptr);
+  }
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
 }
