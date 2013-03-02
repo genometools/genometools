@@ -446,6 +446,7 @@ int gt_callenumquerymatches(const char *indexname,
                             bool reversestrand,
                             bool echoquery,
                             unsigned int userdefinedleastlength,
+                            void (*showqueryheader)(const char *,bool),
                             Processquerymatch processquerymatch,
                             void *processquerymatchinfo,
                             GtLogger *logger,
@@ -479,7 +480,6 @@ int gt_callenumquerymatches(const char *indexname,
     GtSeqIterator *seqit;
     const GtUchar *query;
     unsigned long querylen;
-    char *desc = NULL;
     int retval;
     uint64_t queryunitnum;
 
@@ -492,6 +492,7 @@ int gt_callenumquerymatches(const char *indexname,
     {
       GtUchar *queryreverse = NULL;
       unsigned long queryreverse_length = 0;
+      char *desc = NULL;
       int mode;
 
       gt_seq_iterator_set_symbolmap(seqit,
@@ -528,6 +529,10 @@ int gt_callenumquerymatches(const char *indexname,
             {
               queryrep.sequence = query;
               queryrep.reversecopy = false;
+              if (showqueryheader != NULL)
+              {
+                showqueryheader(desc,true);
+              }
             } else
             {
               if (mode == 1 && reversestrand)
@@ -541,6 +546,10 @@ int gt_callenumquerymatches(const char *indexname,
                 gt_copy_reversecomplement(queryreverse,query,querylen);
                 queryrep.sequence = queryreverse;
                 queryrep.reversecopy = true;
+                if (showqueryheader != NULL)
+                {
+                  showqueryheader(desc,false);
+                }
               } else
               {
                 queryrep.sequence = NULL;

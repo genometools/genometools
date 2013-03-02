@@ -611,6 +611,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                   false,
                                   false,
                                   arguments->userdefinedleastlength,
+                                  NULL,
                                   arguments->extendseed
                                     ? gt_processxdropquerymatches
                                     : gt_querymatch_output,
