@@ -31,7 +31,6 @@ struct Querymatch
                  querystart,
                  querytotallength,
                  edist;
-   const char *querydescription;
    long score;
    uint64_t queryseqnum;
    const GtUchar *querysequence; /* pointer to query or NULL if query is
@@ -58,8 +57,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         unsigned long querylen,
                         unsigned long querystart,
                         const GtUchar *querysequence,
-                        unsigned long querytotallength,
-                        const char *description)
+                        unsigned long querytotallength)
 {
   querymatch->dblen = dblen;
   querymatch->dbstart = dbstart;
@@ -73,7 +71,6 @@ void gt_querymatch_fill(Querymatch *querymatch,
   querymatch->querystart = querystart;
   querymatch->querysequence = querysequence; /* may be NULL */
   querymatch->querytotallength = querytotallength;
-  querymatch->querydescription = description;
 }
 
 void gt_querymatch_delete(Querymatch *querymatch)
@@ -224,11 +221,6 @@ const GtUchar *gt_querymatch_querysequence(const Querymatch *querymatch)
 unsigned long gt_querymatch_querytotallength(const Querymatch *querymatch)
 {
   return querymatch->querytotallength;
-}
-
-const char *gt_querymatch_querydescription(const Querymatch *querymatch)
-{
-  return querymatch->querydescription;
 }
 
 bool gt_querymatch_queryreverse(const Querymatch *querymatch)

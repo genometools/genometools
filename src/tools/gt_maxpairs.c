@@ -76,8 +76,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
                      len,
                      pos2 - seqstartpos,
                      NULL,
-                     seqlength,
-                     NULL);
+                     seqlength);
   return gt_querymatch_output(info, encseq, querymatch, err);
 }
 
@@ -207,8 +206,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
                      querylen,
                      querystart - queryseqstartpos,
                      NULL,
-                     gt_encseq_seqlength(encseq, queryseqnum),
-                     NULL);
+                     gt_encseq_seqlength(encseq, queryseqnum));
   return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
                               err);
 }
@@ -307,8 +305,7 @@ static int gt_processxdropquerymatches(void *info,
                      querylen,
                      querystart,
                      NULL,
-                     querytotallength,
-                     gt_querymatch_querydescription(querymatch));
+                     querytotallength);
   return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
                               err);
 }

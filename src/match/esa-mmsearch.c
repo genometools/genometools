@@ -36,7 +36,6 @@ typedef struct
 {
   const GtUchar *sequence;
   bool reversecopy;
-  const char *description;
   const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long startpos, length;
@@ -241,7 +240,6 @@ MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
 
   queryrep.sequence = pattern;
   queryrep.reversecopy = false;
-  queryrep.description = NULL;
   queryrep.encseq = NULL;
   queryrep.readmode = GT_READMODE_FORWARD;
   queryrep.startpos = 0;
@@ -435,8 +433,7 @@ static int gt_runqueryuniquematch(const Suffixarray *suffixarray,
                          matchlen,
                          localqueryoffset,
                          queryrep->sequence,
-                         queryrep->length,
-                         queryrep->description);
+                         queryrep->length);
       if (processquerymatch(processquerymatchinfo,
                             suffixarray->encseq,
                             querymatchspaceptr,
@@ -522,8 +519,7 @@ static int gt_runquerysubstringmatch(bool selfmatch,
                            extend + minmatchlength,
                            localqueryoffset,
                            queryrep->sequence,
-                           queryrep->length,
-                           queryrep->description);
+                           queryrep->length);
         if (processquerymatch(processquerymatchinfo,
                               dbencseq,
                               querymatchspaceptr,
@@ -634,7 +630,6 @@ int gt_callenumquerymatches(const char *indexname,
           queryrep.readmode = GT_READMODE_FORWARD;
           queryrep.startpos = 0;
           queryrep.length = querylen;
-          queryrep.description = desc;
           for (mode = 0; mode <= 1; mode++)
           {
             if (mode == 0 && forwardstrand)
@@ -749,7 +744,6 @@ int gt_callenumselfmatches(const char *indexname,
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
     queryrep.sequence = NULL;
     queryrep.reversecopy = false;
-    queryrep.description = NULL;
     queryrep.encseq = suffixarray.encseq;
     queryrep.readmode = queryreadmode;
     for (seqnum = 0; seqnum < numofsequences; seqnum++)
@@ -827,7 +821,6 @@ static int gt_constructsarrandrunmmsearch(
     const GtSuffixsortspace *suffixsortspace;
     queryrep.sequence = query;
     queryrep.reversecopy = false;
-    queryrep.description = NULL;
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;
     queryrep.startpos = 0;
