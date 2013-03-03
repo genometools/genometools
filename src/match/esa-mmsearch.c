@@ -188,7 +188,7 @@ static bool gt_mmsearch(const GtEncseq *dbencseq,
   return true;
 }
 
-struct MMsearchiterator
+struct GtMMsearchiterator
 {
   Lcpinterval lcpitv;
   unsigned long sufindex;
@@ -196,7 +196,7 @@ struct MMsearchiterator
   GtEncseqReader *esr;
 };
 
-static MMsearchiterator *newmmsearchiterator_generic(
+static GtMMsearchiterator *newmmsearchiterator_generic(
                                        const GtEncseq *dbencseq,
                                        const ESASuffixptr *suftab,
                                        unsigned long leftbound,
@@ -207,7 +207,7 @@ static MMsearchiterator *newmmsearchiterator_generic(
                                        unsigned long minmatchlength)
 
 {
-  MMsearchiterator *mmsi = gt_malloc(sizeof *mmsi);
+  GtMMsearchiterator *mmsi = gt_malloc(sizeof *mmsi);
 
   mmsi->lcpitv.left = leftbound;
   mmsi->lcpitv.right = rightbound;
@@ -224,7 +224,7 @@ static MMsearchiterator *newmmsearchiterator_generic(
   return mmsi;
 }
 
-MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
+GtMMsearchiterator *gt_mmsearchiterator_new_complete_olain(
                                    const GtEncseq *dbencseq,
                                    const void *voidsuftab, /* XXX */
                                    unsigned long leftbound,
@@ -256,7 +256,7 @@ MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
                                      patternlength);
 }
 
-unsigned long gt_countmmsearchiterator(const MMsearchiterator *mmsi)
+unsigned long gt_mmsearchiterator_count(const GtMMsearchiterator *mmsi)
 {
   if (mmsi->lcpitv.left > mmsi->lcpitv.right)
   {
@@ -265,7 +265,7 @@ unsigned long gt_countmmsearchiterator(const MMsearchiterator *mmsi)
   return mmsi->lcpitv.right - mmsi->lcpitv.left + 1;
 }
 
-bool gt_nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi)
+bool gt_mmsearchiterator_next(unsigned long *dbstart,GtMMsearchiterator *mmsi)
 {
   if (mmsi->sufindex <= mmsi->lcpitv.right)
   {
@@ -275,26 +275,13 @@ bool gt_nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi)
   return false;
 }
 
-bool gt_nextmmsearchiteratorwithdepth(unsigned long *dbstart,
-                                      unsigned long *depth,
-                                      MMsearchiterator *mmsi)
-{
-  if (mmsi->sufindex <= mmsi->lcpitv.right)
-  {
-    *depth = mmsi->lcpitv.offset;
-    *dbstart = ESASUFFIXPTRGET(mmsi->suftab,mmsi->sufindex++);
-    return true;
-  }
-  return false;
-}
-
-bool gt_isemptymmsearchiterator(const MMsearchiterator *mmsi)
+bool gt_mmsearchiterator_isempty(const GtMMsearchiterator *mmsi)
 {
   return mmsi == NULL || mmsi->lcpitv.left > mmsi->lcpitv.right;
 }
 
-bool gt_identicalmmsearchiterators(const MMsearchiterator *mmsi1,
-                                   const MMsearchiterator *mmsi2)
+bool gt_mmsearchiterator_identical(const GtMMsearchiterator *mmsi1,
+                                   const GtMMsearchiterator *mmsi2)
 {
   gt_assert(mmsi1 != NULL);
   gt_assert(mmsi2 != NULL);
@@ -302,11 +289,13 @@ bool gt_identicalmmsearchiterators(const MMsearchiterator *mmsi1,
          mmsi1->lcpitv.right == mmsi2->lcpitv.right;
 }
 
-void gt_freemmsearchiterator(MMsearchiterator **mmsi)
+void gt_mmsearchiterator_delete(GtMMsearchiterator *mmsi)
 {
-  gt_assert((*mmsi) != NULL);
-  gt_encseq_reader_delete((*mmsi)->esr);
-  gt_free(*mmsi);
+  if (mmsi != NULL)
+  {
+    gt_encseq_reader_delete(mmsi->esr);
+    gt_free(mmsi);
+  }
 }
 
 static bool gt_mmsearch_isleftmaximal(const GtEncseq *dbencseq,
@@ -470,7 +459,7 @@ static int gt_runquerysubstringmatch(bool selfmatch,
                                      Querymatch *querymatchspaceptr,
                                      GtError *err)
 {
-  MMsearchiterator *mmsi;
+  GtMMsearchiterator *mmsi;
   unsigned long totallength, localqueryoffset = 0;
   uint64_t localqueryunitnum = queryunitnum;
   GtQuerysubstring querysubstring;
@@ -493,7 +482,7 @@ static int gt_runquerysubstringmatch(bool selfmatch,
                                        readmode,
                                        &querysubstring,
                                        minmatchlength);
-    while (!haserr && gt_nextmmsearchiterator(&dbstart,mmsi))
+    while (!haserr && gt_mmsearchiterator_next(&dbstart,mmsi))
     {
       if (gt_mmsearch_isleftmaximal(dbencseq,
                                     readmode,
@@ -529,7 +518,8 @@ static int gt_runquerysubstringmatch(bool selfmatch,
         }
       }
     }
-    gt_freemmsearchiterator(&mmsi);
+    gt_mmsearchiterator_delete(mmsi);
+    mmsi = NULL;
     if (!haserr)
     {
       if (gt_mmsearch_accessquery(queryrep,querysubstring.offset)

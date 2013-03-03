@@ -176,8 +176,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       for (trial = 0; !had_err && trial < params.numOfSamples; ++trial)
       {
         const GtUchar *pptr = gt_nextEnumpatterniterator(&patternLen, epi);
-        MMsearchiterator *mmsi =
-          gt_newmmsearchiteratorcomplete_plain(suffixarray.encseq,
+        GtMMsearchiterator *mmsi =
+          gt_mmsearchiterator_new_complete_olain(suffixarray.encseq,
                                             suffixarray.suftab,
                                             0,  /* leftbound */
                                             totalLen, /* rightbound */
@@ -198,8 +198,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                     gt_BWTSeqMatchCount(bwtSeq, pptr, patternLen,
                                         false));
           gt_assert(gt_EMINumMatchesTotal(&EMIter)
-                      == gt_countmmsearchiterator(mmsi));
-          while (gt_nextmmsearchiterator(&dbstart,mmsi))
+                      == gt_mmsearchiterator_count(mmsi));
+          while (gt_mmsearchiterator_next(&dbstart,mmsi))
           {
             unsigned long matchPos = 0;
             bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
@@ -232,7 +232,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
           unsigned long numFMIMatches = gt_BWTSeqMatchCount(bwtSeq, pptr,
                                                          patternLen,
                                                          false),
-            numMMSearchMatches = gt_countmmsearchiterator(mmsi);
+            numMMSearchMatches = gt_mmsearchiterator_count(mmsi);
           if ((had_err = numFMIMatches != numMMSearchMatches))
           {
             gt_error_set(err, "Number of matches not equal for suffix array ("
@@ -240,7 +240,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                       numFMIMatches, numMMSearchMatches);
           }
         }
-        gt_freemmsearchiterator(&mmsi);
+        gt_mmsearchiterator_delete(mmsi);
+        mmsi = NULL;
         if (params.progressInterval && !((trial + 1) % params.progressInterval))
           putc('.', stderr);
       }

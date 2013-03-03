@@ -26,9 +26,9 @@ typedef int (*Processquerymatch)(void *,
                                  const Querymatch *,
                                  GtError *);
 
-typedef struct MMsearchiterator MMsearchiterator;
+typedef struct GtMMsearchiterator GtMMsearchiterator;
 
-MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
+GtMMsearchiterator *gt_mmsearchiterator_new_complete_olain(
                                     const GtEncseq *dbencseq,
                                     const void *voidsuftab, /* XXX */
                                     unsigned long leftbound,
@@ -38,16 +38,16 @@ MMsearchiterator *gt_newmmsearchiteratorcomplete_plain(
                                     const GtUchar *pattern,
                                     unsigned long patternlength);
 
-bool gt_nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi);
+bool gt_mmsearchiterator_next(unsigned long *dbstart,GtMMsearchiterator *mmsi);
 
-bool gt_isemptymmsearchiterator(const MMsearchiterator *mmsi);
+bool gt_mmsearchiterator_isempty(const GtMMsearchiterator *mmsi);
 
-bool gt_identicalmmsearchiterators(const MMsearchiterator *mmsi1,
-                                   const MMsearchiterator *mmsi2);
+bool gt_mmsearchiterator_identical(const GtMMsearchiterator *mmsi1,
+                                   const GtMMsearchiterator *mmsi2);
 
-void gt_freemmsearchiterator(MMsearchiterator **mmsi);
+void gt_mmsearchiterator_delete(GtMMsearchiterator *mmsi);
 
-unsigned long gt_countmmsearchiterator(const MMsearchiterator *mmsi);
+unsigned long gt_mmsearchiterator_count(const GtMMsearchiterator *mmsi);
 
 int gt_callenumquerymatches(const char *indexname,
                             const GtStrArray *queryfiles,

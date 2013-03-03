@@ -1308,13 +1308,13 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
                                      ProcessIdxMatch processmatch,
                                      void *processmatchinfo)
 {
-  MMsearchiterator *mmsi;
+  GtMMsearchiterator *mmsi;
   unsigned long dbstartpos,
          totallength = gt_encseq_total_length(suffixarray->encseq);
   bool nomatches;
   GtIdxMatch match;
 
-  mmsi = gt_newmmsearchiteratorcomplete_plain(suffixarray->encseq,
+  mmsi = gt_mmsearchiterator_new_complete_olain(suffixarray->encseq,
                                            suffixarray->suftab,
                                            0,  /* leftbound */
                                            totallength, /* rightbound */
@@ -1322,7 +1322,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
                                            suffixarray->readmode,
                                            pattern,
                                            patternlength);
-  nomatches = gt_isemptymmsearchiterator(mmsi);
+  nomatches = gt_mmsearchiterator_isempty(mmsi);
   match.dbabsolute = true;
   match.dblen = (unsigned long) patternlength;
   match.dbsubstring = pattern;
@@ -1330,13 +1330,13 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
   match.querylen = patternlength;
   match.distance = 0;
   match.alignment = NULL;
-  while (gt_nextmmsearchiterator(&dbstartpos,mmsi))
+  while (gt_mmsearchiterator_next(&dbstartpos,mmsi))
   {
     /* call processmatch */
     match.dbstartpos = dbstartpos;
     processmatch(processmatchinfo,&match);
   }
-  gt_freemmsearchiterator(&mmsi);
+  gt_mmsearchiterator_delete(mmsi);
   return nomatches ? false : true;
 }
 
@@ -1422,11 +1422,11 @@ unsigned long genericindex_get_totallength(const Genericindex *genericindex)
 unsigned long esa_exact_pattern_count(const Suffixarray *suffixarray,
                                       const GtUchar *pattern,
                                       unsigned long patternlength) {
-  MMsearchiterator *mmsi;
+  GtMMsearchiterator *mmsi;
   unsigned long count,
                 totallength = gt_encseq_total_length(suffixarray->encseq);
 
-  mmsi = gt_newmmsearchiteratorcomplete_plain(suffixarray->encseq,
+  mmsi = gt_mmsearchiterator_new_complete_olain(suffixarray->encseq,
                                            suffixarray->suftab,
                                            0,  /* leftbound */
                                            totallength, /* rightbound */
@@ -1435,8 +1435,8 @@ unsigned long esa_exact_pattern_count(const Suffixarray *suffixarray,
                                            pattern,
                                            patternlength);
 
-  count = gt_countmmsearchiterator(mmsi);
-  gt_freemmsearchiterator(&mmsi);
+  count = gt_mmsearchiterator_count(mmsi);
+  gt_mmsearchiterator_delete(mmsi);
   return count;
 }
 

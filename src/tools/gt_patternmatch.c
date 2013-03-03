@@ -37,24 +37,24 @@ typedef struct
   GtStr *indexname;
 } Pmatchoptions;
 
-static void comparemmsis(const MMsearchiterator *mmsi1,
-                         const MMsearchiterator *mmsi2)
+static void comparemmsis(const GtMMsearchiterator *mmsi1,
+                         const GtMMsearchiterator *mmsi2)
 {
-  if (gt_isemptymmsearchiterator(mmsi1))
+  if (gt_mmsearchiterator_isempty(mmsi1))
   {
-    if (!gt_isemptymmsearchiterator(mmsi2))
+    if (!gt_mmsearchiterator_isempty(mmsi2))
     {
       fprintf(stderr,"mmsi1 is empty but mmsi2 not\n");
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   } else
   {
-    if (gt_isemptymmsearchiterator(mmsi2))
+    if (gt_mmsearchiterator_isempty(mmsi2))
     {
       fprintf(stderr,"mmsi2 is empty but mmsi1 not\n");
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    if (!gt_identicalmmsearchiterators(mmsi1,mmsi2))
+    if (!gt_mmsearchiterator_identical(mmsi1,mmsi2))
     {
       fprintf(stderr,"mmsi1 and mmsi2 are different\n");
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -94,7 +94,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     unsigned long dbstart;
     Enumpatterniterator *epi;
     GT_UNUSED unsigned int firstspecial;
-    MMsearchiterator *mmsibck, *mmsiimm;
+    GtMMsearchiterator *mmsibck, *mmsiimm;
     GtBucketspecification bucketspec;
     Bucketenumerator *bucketenumerator;
     Lcpinterval itv;
@@ -182,7 +182,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
           } else
           {
             mmsibck
-              = gt_newmmsearchiteratorcomplete_plain(
+              = gt_mmsearchiterator_new_complete_olain(
                                        suffixarray.encseq,
                                        suffixarray.suftab,
                                        bucketspec.left,
@@ -197,7 +197,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
       }
       if (pmopt->immediate)
       {
-        mmsiimm = gt_newmmsearchiteratorcomplete_plain(
+        mmsiimm = gt_mmsearchiterator_new_complete_olain(
                                             suffixarray.encseq,
                                             suffixarray.suftab,
                                             0,  /* leftbound */
@@ -213,19 +213,21 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
       }
       if (pmopt->usebcktab && mmsibck != NULL)
       {
-        while (gt_nextmmsearchiterator(&dbstart,mmsibck))
+        while (gt_mmsearchiterator_next(&dbstart,mmsibck))
         {
           /* Nothing */;
         }
-        gt_freemmsearchiterator(&mmsibck);
+        gt_mmsearchiterator_delete(mmsibck);
+        mmsibck = NULL;
       }
       if (pmopt->immediate)
       {
-        while (gt_nextmmsearchiterator(&dbstart,mmsiimm))
+        while (gt_mmsearchiterator_next(&dbstart,mmsiimm))
         {
           /* Nothing */;
         }
-        gt_freemmsearchiterator(&mmsiimm);
+        gt_mmsearchiterator_delete(mmsiimm);
+        mmsiimm = NULL;
       }
     }
     gt_encseq_reader_delete(esr1);

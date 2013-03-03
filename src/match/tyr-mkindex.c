@@ -122,7 +122,7 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
                                      unsigned long countocc,
                                      unsigned long position)
 {
-  MMsearchiterator *mmsi;
+  GtMMsearchiterator *mmsi;
   unsigned long idx, bfcount;
 
   for (idx = 0; idx < dfsstate->mersize; idx++)
@@ -131,7 +131,7 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
               gt_encseq_get_encoded_char(dfsstate->encseq,position+idx,
                                                 dfsstate->readmode);
   }
-  mmsi = gt_newmmsearchiteratorcomplete_plain(dfsstate->encseq,
+  mmsi = gt_mmsearchiterator_new_complete_olain(dfsstate->encseq,
                                               dfsstate->suftab,
                                               0,
                                               dfsstate->totallength,
@@ -139,13 +139,13 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
                                               dfsstate->readmode,
                                               dfsstate->currentmer,
                                               dfsstate->mersize);
-  bfcount = gt_countmmsearchiterator(mmsi);
+  bfcount = gt_mmsearchiterator_count(mmsi);
   if (bfcount != countocc)
   {
     fprintf(stderr,"bfcount = %lu != %lu = countocc\n",bfcount,countocc);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  gt_freemmsearchiterator(&mmsi);
+  gt_mmsearchiterator_delete(mmsi);
 }
 
 static /*@null@*/ ListUlong *insertListUlong(ListUlong *liststart,
