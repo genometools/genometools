@@ -221,7 +221,7 @@ static int gt_processxdropquerymatches(void *info,
   unsigned long querystart, dblen, dbstart, querylen;
   unsigned long pos1 = gt_querymatch_dbstart(querymatch);
   unsigned long pos2 = gt_querymatch_querystart(querymatch);
-  unsigned long len = gt_querymatch_len(querymatch);
+  unsigned long len = gt_querymatch_querylen(querymatch);
   unsigned long querytotallength = gt_querymatch_querytotallength(querymatch);
   const unsigned long dbtotallength = gt_encseq_total_length(encseq);
   uint64_t queryseqnum;

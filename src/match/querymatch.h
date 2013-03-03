@@ -48,7 +48,7 @@ int gt_querymatch_output(void *info,
                          const Querymatch *querymatch,
                          GtError *err);
 
-unsigned long gt_querymatch_len(const Querymatch *querymatch);
+unsigned long gt_querymatch_querylen(const Querymatch *querymatch);
 
 unsigned long gt_querymatch_dbstart(const Querymatch *querymatch);
 

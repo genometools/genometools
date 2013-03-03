@@ -192,7 +192,7 @@ int gt_querymatch_output(GT_UNUSED void *info,
   return 0;
 }
 
-unsigned long gt_querymatch_len(const Querymatch *querymatch)
+unsigned long gt_querymatch_querylen(const Querymatch *querymatch)
 {
   return querymatch->querylen;
 }

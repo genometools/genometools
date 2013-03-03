@@ -228,7 +228,7 @@ static int gt_subsimpleexactselfmatchstore(void *info,
                               gt_querymatch_querystart(querymatch) -
                               (sri->offset1 +
                                gt_querymatch_dbstart(querymatch));
-  nextfreerepeatptr->len = gt_querymatch_len(querymatch);
+  nextfreerepeatptr->len = gt_querymatch_querylen(querymatch);
   return 0;
 }
 

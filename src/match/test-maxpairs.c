@@ -205,7 +205,7 @@ static int storemaxmatchquery(void *info,
   GtArray *tab = (GtArray *) info;
   Substringmatch subm;
 
-  subm.len = gt_querymatch_len(querymatch);
+  subm.len = gt_querymatch_querylen(querymatch);
   subm.dbstart = gt_querymatch_dbstart(querymatch);
   subm.querystart = gt_querymatch_querystart(querymatch);
   subm.queryseqnum = gt_querymatch_queryseqnum(querymatch);
