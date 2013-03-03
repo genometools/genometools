@@ -30,7 +30,7 @@
 #include "idx-limdfs.h"
 #include "esa-map.h"
 #include "idxlocalidp.h"
-#include "esa-minunique.pr"
+#include "esa-minunique.h"
 
 #define DECLAREDFSSTATE(V)\
         Aliasdfsstate V[5]

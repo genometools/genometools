@@ -21,6 +21,7 @@
 #include "sarr-def.h"
 
 #include "esa-splititv.h"
+#include "esa-minunique.h"
 
 unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
                                        unsigned long offset,
@@ -94,6 +95,47 @@ unsigned long gt_suffixarraymstats (const void *genericindex,
                                       itv.left,itv.right))
     {
       if (witnessposition != NULL)
+      {
+        *witnessposition = ESASUFFIXPTRGET(suffixarray->suftab,itv.left);
+      }
+      break;
+    }
+  }
+  return offset;
+}
+
+unsigned long gt_suffixarrayfindmums (const void *genericindex,
+                                      unsigned long offset,
+                                      unsigned long left,
+                                      unsigned long right,
+                                      unsigned long *witnessposition,
+                                      const GtUchar *qstart,
+                                      const GtUchar *qend)
+{
+  const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
+  Simplelcpinterval itv;
+  const GtUchar *qptr;
+  unsigned long totallength;
+
+  itv.left = left;
+  itv.right = right;
+  totallength = gt_encseq_total_length(suffixarray->encseq);
+  *witnessposition = ULONG_MAX;
+  for (qptr = qstart; /* Nothing */; qptr++, offset++)
+  {
+    gt_assert(itv.left <= itv.right);
+    if (qptr >= qend || ISSPECIAL(*qptr) ||
+        !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
+                                      suffixarray->readmode,
+                                      totallength,
+                                      suffixarray->suftab,
+                                      &itv,
+                                      *qptr,
+                                      offset,
+                                      itv.left,
+                                      itv.right))
+    {
+      if (itv.left == itv.right)
       {
         *witnessposition = ESASUFFIXPTRGET(suffixarray->suftab,itv.left);
       }

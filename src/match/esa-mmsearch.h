@@ -43,12 +43,15 @@ bool gt_nextmmsearchiterator(unsigned long *dbstart,MMsearchiterator *mmsi);
 bool gt_isemptymmsearchiterator(const MMsearchiterator *mmsi);
 
 bool gt_identicalmmsearchiterators(const MMsearchiterator *mmsi1,
-                                const MMsearchiterator *mmsi2);
+                                   const MMsearchiterator *mmsi2);
 
 void gt_freemmsearchiterator(MMsearchiterator **mmsi);
 
+unsigned long gt_countmmsearchiterator(const MMsearchiterator *mmsi);
+
 int gt_callenumquerymatches(const char *indexname,
                             const GtStrArray *queryfiles,
+                            bool findmums,
                             bool forwardstrand,
                             bool reversestrand,
                             bool echoquery,
@@ -78,7 +81,5 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                void *processquerymatchinfo,
                                GtLogger *logger,
                                GtError *err);
-
-unsigned long gt_countmmsearchiterator(const MMsearchiterator *mmsi);
 
 #endif
