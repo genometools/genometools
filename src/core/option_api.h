@@ -37,15 +37,14 @@ typedef struct GtOption GtOption;
    option parsing, and <GT_OPTION_PARSER_REQUESTS_EXIT> that the option parser
    requests an exit, because option <-help>, <-help+>, <-helpdev> or <-version>
    was used. */
-typedef enum GtOPrval GtOPrval;
 
-enum GtOPrval{
+typedef enum {
   GT_OPTION_PARSER_OK,           /* Everything went fine. */
   GT_OPTION_PARSER_ERROR,        /* An error occured during option parsing. */
   GT_OPTION_PARSER_REQUESTS_EXIT /* The option parser requests an exit, because
                                     option -help, -help+, -helpdev, or -version
                                     was used. */
-};
+} GtOPrval;
 
 typedef void (*GtShowVersionFunc)(const char *progname);
 typedef int  (*GtShowCommentFunc)(const char *progname, void *data, GtError*);

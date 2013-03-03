@@ -21,15 +21,14 @@
 /* This enum type defines the possible strands. The following strands are
    defined: <GT_STRAND_FORWARD>, <GT_STRAND_REVERSE>, <GT_STRAND_BOTH>, and
    <GT_STRAND_UNKNOWN>. */
-typedef enum GtStrand GtStrand;
 
-enum GtStrand {
+typedef enum {
   GT_STRAND_FORWARD, /* '+' */
   GT_STRAND_REVERSE, /* '-' */
   GT_STRAND_BOTH,    /* '.' */
   GT_STRAND_UNKNOWN, /* '?' */
   GT_NUM_OF_STRAND_TYPES
-};
+} GtStrand;
 
 /* Use this string to map strand enum types to their corresponding character. */
 #define GT_STRAND_CHARS \
