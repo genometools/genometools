@@ -446,7 +446,8 @@ int gt_callenumquerymatches(const char *indexname,
                             bool reversestrand,
                             bool echoquery,
                             unsigned int userdefinedleastlength,
-                            void (*showqueryheader)(const char *,bool),
+                            void (*showqueryheader)(void *,const char *,
+                                                    unsigned long,bool),
                             Processquerymatch processquerymatch,
                             void *processquerymatchinfo,
                             GtLogger *logger,
@@ -531,7 +532,7 @@ int gt_callenumquerymatches(const char *indexname,
               queryrep.reversecopy = false;
               if (showqueryheader != NULL)
               {
-                showqueryheader(desc,true);
+                showqueryheader(processquerymatchinfo,desc,querylen,true);
               }
             } else
             {
@@ -548,7 +549,7 @@ int gt_callenumquerymatches(const char *indexname,
                 queryrep.reversecopy = true;
                 if (showqueryheader != NULL)
                 {
-                  showqueryheader(desc,false);
+                  showqueryheader(processquerymatchinfo,desc,querylen,false);
                 }
               } else
               {
