@@ -416,8 +416,8 @@ static int gt_runqueryuniquematch(bool selfmatch,
                          dbstart,
                          queryrep->readmode,
                          queryrep->reversecopy,
-                         0,
-                         0,
+                         0, /* score */
+                         0, /* edist */
                          selfmatch,
                          localqueryunitnum,
                          matchlen,
@@ -499,15 +499,15 @@ static int gt_runquerysubstringmatch_generic(
                                                        &querysubstring,
                                                        minmatchlength);
         gt_querymatch_fill(querymatchspaceptr,
-                           extend + minmatchlength,
+                           minmatchlength + extend,
                            dbstart,
                            queryrep->readmode,
                            queryrep->reversecopy,
-                           0,
-                           0,
+                           0, /* score */
+                           0, /* edist */
                            selfmatch,
                            localqueryunitnum,
-                           extend + minmatchlength,
+                           minmatchlength + extend,
                            localqueryoffset,
                            queryrep->sequence,
                            queryrep->length);
