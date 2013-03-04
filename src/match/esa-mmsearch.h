@@ -21,10 +21,12 @@
 #include "core/encseq.h"
 #include "querymatch.h"
 
-typedef int (*Processquerymatch)(void *,
-                                 const GtEncseq *,
-                                 const Querymatch *,
-                                 GtError *);
+typedef int (*GtProcessquerymatch)(void *,
+                                   const GtEncseq *,
+                                   const Querymatch *,
+                                   GtError *);
+
+typedef void (*GtProcessqueryheader)(void *,const char *,unsigned long,bool);
 
 typedef struct GtMMsearchiterator GtMMsearchiterator;
 
@@ -55,9 +57,8 @@ int gt_callenumquerymatches(const char *indexname,
                             bool forwardstrand,
                             bool reversestrand,
                             unsigned int userdefinedleastlength,
-                            void (*showqueryheader)(void *,const char *,
-                                                    unsigned long,bool),
-                            Processquerymatch processquerymatch,
+                            GtProcessqueryheader processqueryheader,
+                            GtProcessquerymatch processquerymatch,
                             void *processquerymatchinfo,
                             GtLogger *logger,
                             GtError *err);
@@ -65,7 +66,7 @@ int gt_callenumquerymatches(const char *indexname,
 int gt_callenumselfmatches(const char *indexname,
                            GtReadmode queryreadmode,
                            unsigned int userdefinedleastlength,
-                           Processquerymatch processquerymatch,
+                           GtProcessquerymatch processquerymatch,
                            void *processquerymatchinfo,
                            GtLogger *logger,
                            GtError *err);
@@ -76,7 +77,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                unsigned long querylen,
                                unsigned int minlength,
                                GtAlphabet *alpha,
-                               Processquerymatch processquerymatch,
+                               GtProcessquerymatch processquerymatch,
                                void *processquerymatchinfo,
                                GtLogger *logger,
                                GtError *err);

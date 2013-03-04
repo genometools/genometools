@@ -196,7 +196,7 @@ struct GtMMsearchiterator
   GtEncseqReader *esr;
 };
 
-static GtMMsearchiterator *newmmsearchiterator_generic(
+static GtMMsearchiterator *gt_mmsearchiterator_new_generic(
                                        const GtEncseq *dbencseq,
                                        const ESASuffixptr *suftab,
                                        unsigned long leftbound,
@@ -246,14 +246,14 @@ GtMMsearchiterator *gt_mmsearchiterator_new_complete_olain(
   queryrep.length = (unsigned long) patternlength;
   querysubstring.queryrep = &queryrep;
   querysubstring.offset = 0;
-  return newmmsearchiterator_generic(dbencseq,
-                                     suftab,
-                                     leftbound,
-                                     rightbound,
-                                     itvoffset,
-                                     readmode,
-                                     &querysubstring,
-                                     patternlength);
+  return gt_mmsearchiterator_new_generic(dbencseq,
+                                         suftab,
+                                         leftbound,
+                                         rightbound,
+                                         itvoffset,
+                                         readmode,
+                                         &querysubstring,
+                                         patternlength);
 }
 
 unsigned long gt_mmsearchiterator_count(const GtMMsearchiterator *mmsi)
@@ -374,25 +374,24 @@ static unsigned long gt_mmsearch_extendright(const GtEncseq *dbencseq,
   return dbpos - dbend;
 }
 
-static int gt_runqueryuniquematch(GT_UNUSED bool selfmatch,
+static int gt_runqueryuniquematch(bool selfmatch,
                                   const Suffixarray *suffixarray,
                                   uint64_t queryunitnum,
                                   const GtQueryrep *queryrep,
                                   unsigned long minmatchlength,
-                                  Processquerymatch processquerymatch,
+                                  GtProcessquerymatch processquerymatch,
                                   void *processquerymatchinfo,
                                   Querymatch *querymatchspaceptr,
                                   GtError *err)
 {
-  unsigned long offset, totallength, localqueryoffset = 0;
+  unsigned long offset,
+                totallength = gt_encseq_total_length(suffixarray->encseq),
+                localqueryoffset = 0;
   uint64_t localqueryunitnum = queryunitnum;
   bool haserr = false;
 
-  gt_assert(queryrep->length >= minmatchlength);
-  totallength = gt_encseq_total_length(suffixarray->encseq);
-  for (offset = 0;
-       offset <= queryrep->length - minmatchlength;
-       offset++)
+  gt_assert(!selfmatch && queryrep->length >= minmatchlength);
+  for (offset = 0; offset <= queryrep->length - minmatchlength; offset++)
   {
     unsigned long matchlen, dbstart;
 
@@ -418,7 +417,7 @@ static int gt_runqueryuniquematch(GT_UNUSED bool selfmatch,
                          queryrep->reversecopy,
                          0,
                          0,
-                         false,
+                         selfmatch,
                          localqueryunitnum,
                          matchlen,
                          localqueryoffset,
@@ -456,7 +455,7 @@ static int gt_runquerysubstringmatch_generic(
                                      uint64_t queryunitnum,
                                      const GtQueryrep *queryrep,
                                      unsigned long minmatchlength,
-                                     Processquerymatch processquerymatch,
+                                     GtProcessquerymatch processquerymatch,
                                      void *processquerymatchinfo,
                                      Querymatch *querymatchspaceptr,
                                      GtError *err)
@@ -476,14 +475,14 @@ static int gt_runquerysubstringmatch_generic(
   {
     unsigned long dbstart;
 
-    mmsi = newmmsearchiterator_generic(dbencseq,
-                                       suftabpart,
-                                       0, /* leftbound */
-                                       numberofsuffixes-1, /* rightbound */
-                                       0, /* offset */
-                                       readmode,
-                                       &querysubstring,
-                                       minmatchlength);
+    mmsi = gt_mmsearchiterator_new_generic(dbencseq,
+                                           suftabpart,
+                                           0, /* leftbound */
+                                           numberofsuffixes-1, /* rightbound */
+                                           0, /* offset */
+                                           readmode,
+                                           &querysubstring,
+                                           minmatchlength);
     while (!haserr && gt_mmsearchiterator_next(&dbstart,mmsi))
     {
       if (gt_mmsearch_isleftmaximal(dbencseq,
@@ -543,7 +542,7 @@ static int gt_runquerysubstringmatch(bool selfmatch,
                                      uint64_t queryunitnum,
                                      const GtQueryrep *queryrep,
                                      unsigned long minmatchlength,
-                                     Processquerymatch processquerymatch,
+                                     GtProcessquerymatch processquerymatch,
                                      void *processquerymatchinfo,
                                      Querymatch *querymatchspaceptr,
                                      GtError *err)
@@ -562,22 +561,155 @@ static int gt_runquerysubstringmatch(bool selfmatch,
                               err);
 }
 
+static int gt_callenumquerymatches_withindex(
+                            const Suffixarray *suffixarray,
+                            const GtStrArray *queryfiles,
+                            bool findmums,
+                            bool forwardstrand,
+                            bool reversestrand,
+                            unsigned int userdefinedleastlength,
+                            GtProcessqueryheader processqueryheader,
+                            GtProcessquerymatch processquerymatch,
+                            void *processquerymatchinfo,
+                            GtError *err)
+{
+  GtSeqIterator *seqit;
+  bool haserr = false;
+
+  seqit = gt_seq_iterator_sequence_buffer_new(queryfiles, err);
+  if (seqit == NULL)
+  {
+    haserr = true;
+  } else
+  {
+    Querymatch *querymatchspaceptr = gt_querymatch_new();
+    const GtUchar *query;
+    unsigned long querylen;
+    int retval;
+    uint64_t queryunitnum;
+    GtUchar *queryreverse = NULL;
+    unsigned long queryreverse_length = 0;
+    char *desc = NULL;
+    int mode;
+
+    gt_seq_iterator_set_symbolmap(seqit,
+                    gt_alphabet_symbolmap(gt_encseq_alphabet(
+                                                        suffixarray->encseq)));
+    for (queryunitnum = 0; /* Nothing */; queryunitnum++)
+    {
+      retval = gt_seq_iterator_next(seqit,
+                                   &query,
+                                   &querylen,
+                                   &desc,
+                                   err);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      if (querylen >= (unsigned long) userdefinedleastlength)
+      {
+        GtQueryrep queryrep;
+
+        queryrep.encseq = NULL;
+        queryrep.readmode = GT_READMODE_FORWARD;
+        queryrep.startpos = 0;
+        queryrep.length = querylen;
+        for (mode = 0; mode <= 1; mode++)
+        {
+          if (mode == 0 && forwardstrand)
+          {
+            queryrep.sequence = query;
+            queryrep.reversecopy = false;
+            if (processqueryheader != NULL)
+            {
+              processqueryheader(processquerymatchinfo,desc,querylen,true);
+            }
+          } else
+          {
+            if (mode == 1 && reversestrand)
+            {
+              if (querylen > queryreverse_length)
+              {
+                queryreverse = gt_realloc(queryreverse,
+                                          sizeof (*queryreverse) * querylen);
+                queryreverse_length = querylen;
+              }
+              gt_copy_reversecomplement(queryreverse,query,querylen);
+              queryrep.sequence = queryreverse;
+              queryrep.reversecopy = true;
+              if (processqueryheader != NULL)
+              {
+                processqueryheader(processquerymatchinfo,desc,querylen,false);
+              }
+            } else
+            {
+              queryrep.sequence = NULL;
+              queryrep.reversecopy = false;
+            }
+          }
+          if (queryrep.sequence != NULL)
+          {
+            int ret;
+            if (findmums)
+            {
+              ret = gt_runqueryuniquematch(false,
+                                           suffixarray,
+                                           queryunitnum,
+                                           &queryrep,
+                                           (unsigned long)
+                                              userdefinedleastlength,
+                                           processquerymatch,
+                                           processquerymatchinfo,
+                                           querymatchspaceptr,
+                                           err);
+            } else
+            {
+              ret = gt_runquerysubstringmatch (false,
+                                               suffixarray,
+                                               queryunitnum,
+                                               &queryrep,
+                                               (unsigned long)
+                                                  userdefinedleastlength,
+                                               processquerymatch,
+                                               processquerymatchinfo,
+                                               querymatchspaceptr,
+                                               err);
+            }
+            if (ret != 0)
+            {
+              haserr = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    gt_seq_iterator_delete(seqit);
+    gt_free(queryreverse);
+    gt_querymatch_delete(querymatchspaceptr);
+  }
+  return haserr ? -1 : 0;
+}
+
 int gt_callenumquerymatches(const char *indexname,
                             const GtStrArray *queryfiles,
                             bool findmums,
                             bool forwardstrand,
                             bool reversestrand,
                             unsigned int userdefinedleastlength,
-                            void (*showqueryheader)(void *,const char *,
-                                                    unsigned long,bool),
-                            Processquerymatch processquerymatch,
+                            GtProcessqueryheader processqueryheader,
+                            GtProcessquerymatch processquerymatch,
                             void *processquerymatchinfo,
                             GtLogger *logger,
                             GtError *err)
 {
   Suffixarray suffixarray;
   bool haserr = false;
-  Querymatch *querymatchspaceptr = gt_querymatch_new();
 
   if (gt_mapsuffixarray(&suffixarray,
                         SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
@@ -588,126 +720,20 @@ int gt_callenumquerymatches(const char *indexname,
     haserr = true;
   } else
   {
-    GtSeqIterator *seqit;
-    const GtUchar *query;
-    unsigned long querylen;
-    int retval;
-    uint64_t queryunitnum;
-
-    seqit = gt_seq_iterator_sequence_buffer_new(queryfiles, err);
-    if (seqit == NULL)
+    if (gt_callenumquerymatches_withindex(&suffixarray,
+                                          queryfiles,
+                                          findmums,
+                                          forwardstrand,
+                                          reversestrand,
+                                          userdefinedleastlength,
+                                          processqueryheader,
+                                          processquerymatch,
+                                          processquerymatchinfo,
+                                          err) != 0)
     {
       haserr = true;
     }
-    if (!haserr)
-    {
-      GtUchar *queryreverse = NULL;
-      unsigned long queryreverse_length = 0;
-      char *desc = NULL;
-      int mode;
-
-      gt_seq_iterator_set_symbolmap(seqit,
-                      gt_alphabet_symbolmap(gt_encseq_alphabet(
-                                                          suffixarray.encseq)));
-      for (queryunitnum = 0; /* Nothing */; queryunitnum++)
-      {
-        retval = gt_seq_iterator_next(seqit,
-                                     &query,
-                                     &querylen,
-                                     &desc,
-                                     err);
-        if (retval < 0)
-        {
-          haserr = true;
-          break;
-        }
-        if (retval == 0)
-        {
-          break;
-        }
-        if (querylen >= (unsigned long) userdefinedleastlength)
-        {
-          GtQueryrep queryrep;
-
-          queryrep.encseq = NULL;
-          queryrep.readmode = GT_READMODE_FORWARD;
-          queryrep.startpos = 0;
-          queryrep.length = querylen;
-          for (mode = 0; mode <= 1; mode++)
-          {
-            if (mode == 0 && forwardstrand)
-            {
-              queryrep.sequence = query;
-              queryrep.reversecopy = false;
-              if (showqueryheader != NULL)
-              {
-                showqueryheader(processquerymatchinfo,desc,querylen,true);
-              }
-            } else
-            {
-              if (mode == 1 && reversestrand)
-              {
-                if (querylen > queryreverse_length)
-                {
-                  queryreverse = gt_realloc(queryreverse,
-                                            sizeof (*queryreverse) * querylen);
-                  queryreverse_length = querylen;
-                }
-                gt_copy_reversecomplement(queryreverse,query,querylen);
-                queryrep.sequence = queryreverse;
-                queryrep.reversecopy = true;
-                if (showqueryheader != NULL)
-                {
-                  showqueryheader(processquerymatchinfo,desc,querylen,false);
-                }
-              } else
-              {
-                queryrep.sequence = NULL;
-                queryrep.reversecopy = false;
-              }
-            }
-            if (queryrep.sequence != NULL)
-            {
-              int ret;
-              if (findmums)
-              {
-                ret = gt_runqueryuniquematch(false,
-                                             &suffixarray,
-                                             queryunitnum,
-                                             &queryrep,
-                                             (unsigned long)
-                                                userdefinedleastlength,
-                                             processquerymatch,
-                                             processquerymatchinfo,
-                                             querymatchspaceptr,
-                                             err);
-              } else
-              {
-                ret = gt_runquerysubstringmatch (false,
-                                                 &suffixarray,
-                                                 queryunitnum,
-                                                 &queryrep,
-                                                 (unsigned long)
-                                                    userdefinedleastlength,
-                                                 processquerymatch,
-                                                 processquerymatchinfo,
-                                                 querymatchspaceptr,
-                                                 err);
-              }
-              if (ret != 0)
-              {
-                haserr = true;
-                break;
-              }
-            }
-          }
-        }
-      }
-      gt_seq_iterator_delete(seqit);
-      gt_free(queryreverse);
-    }
   }
-  gt_querymatch_delete(querymatchspaceptr);
   gt_freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
@@ -715,31 +741,26 @@ int gt_callenumquerymatches(const char *indexname,
 int gt_callenumselfmatches(const char *indexname,
                            GtReadmode queryreadmode,
                            unsigned int userdefinedleastlength,
-                           Processquerymatch processquerymatch,
+                           GtProcessquerymatch processquerymatch,
                            void *processquerymatchinfo,
                            GtLogger *logger,
                            GtError *err)
 {
   Suffixarray suffixarray;
-  unsigned long totallength = 0;
   bool haserr = false;
-  Querymatch *querymatchspaceptr = gt_querymatch_new();
 
   gt_assert(queryreadmode != GT_READMODE_FORWARD);
   if (gt_mapsuffixarray(&suffixarray,
-                     SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
-                     indexname,
-                     logger,
-                     err) != 0)
+                        SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
+                        indexname,
+                        logger,
+                        err) != 0)
   {
     haserr = true;
   } else
   {
-    totallength = gt_encseq_total_length(suffixarray.encseq);
-  }
-  if (!haserr)
-  {
     unsigned long seqnum, numofsequences, seqlength, seqstartpos;
+    Querymatch *querymatchspaceptr = gt_querymatch_new();
     GtQueryrep queryrep;
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
@@ -755,7 +776,6 @@ int gt_callenumselfmatches(const char *indexname,
       {
         queryrep.startpos = seqstartpos;
         queryrep.length = seqlength;
-
         if (gt_runquerysubstringmatch(true,
                                       &suffixarray,
                                       (uint64_t) seqnum,
@@ -771,8 +791,8 @@ int gt_callenumselfmatches(const char *indexname,
         }
       }
     }
+    gt_querymatch_delete(querymatchspaceptr);
   }
-  gt_querymatch_delete(querymatchspaceptr);
   gt_freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }
@@ -786,17 +806,14 @@ static int gt_constructsarrandrunmmsearch(
                  const GtUchar *query,
                  unsigned long querylen,
                  unsigned int minlength,
-                 Processquerymatch processquerymatch,
+                 GtProcessquerymatch processquerymatch,
                  void *processquerymatchinfo,
                  GtTimer *sfxprogress,
                  bool withprogressbar,
                  GtError *err)
 {
-  unsigned long numberofsuffixes;
   bool haserr = false;
   Sfxiterator *sfi;
-  GtQueryrep queryrep;
-  Querymatch *querymatchspaceptr = gt_querymatch_new();
   Sfxstrategy sfxstrategy;
 
   defaultsfxstrategy(&sfxstrategy,
@@ -818,6 +835,10 @@ static int gt_constructsarrandrunmmsearch(
   } else
   {
     const GtSuffixsortspace *suffixsortspace;
+    unsigned long numberofsuffixes;
+    Querymatch *querymatchspaceptr = gt_querymatch_new();
+    GtQueryrep queryrep;
+
     queryrep.sequence = query;
     queryrep.reversecopy = false;
     queryrep.encseq = NULL;
@@ -850,8 +871,8 @@ static int gt_constructsarrandrunmmsearch(
         break;
       }
     }
+    gt_querymatch_delete(querymatchspaceptr);
   }
-  gt_querymatch_delete(querymatchspaceptr);
   if (gt_Sfxiterator_delete(sfi,err) != 0)
   {
     haserr = true;
@@ -865,7 +886,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                unsigned long querylen,
                                unsigned int minlength,
                                GtAlphabet *alpha,
-                               Processquerymatch processquerymatch,
+                               GtProcessquerymatch processquerymatch,
                                void *processquerymatchinfo,
                                GtLogger *logger,
                                GtError *err)
