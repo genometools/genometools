@@ -94,11 +94,13 @@ local function process_file(filename, be_verbose, is_lua)
   if (is_lua and (is_header(filename) or is_lua_file(filename))) or
      (not is_lua and is_api_header(filename)) then
     local ast = doc_parser:parse(filename, be_verbose, is_lua)
-    if be_verbose then
+    if ast and be_verbose then
       print("showing ast:")
       show_rec_array(ast, 0)
     end
-    doc_base:process_ast(ast, be_verbose)
+    if ast then
+      doc_base:process_ast(ast, be_verbose)
+    end
   end
 end
 
