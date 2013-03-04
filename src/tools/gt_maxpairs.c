@@ -604,7 +604,6 @@ static int gt_repfind_runner(GT_UNUSED int argc,
     {
       if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
                                   arguments->queryfiles,
-                                  false,
                                   true,
                                   false,
                                   false,

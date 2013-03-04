@@ -126,14 +126,14 @@ unsigned long gt_suffixarrayfindmums (const void *genericindex,
     gt_assert(itv.left <= itv.right);
     if (qptr >= qend || ISSPECIAL(*qptr) ||
         !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
-                                      suffixarray->readmode,
-                                      totallength,
-                                      suffixarray->suftab,
-                                      &itv,
-                                      *qptr,
-                                      offset,
-                                      itv.left,
-                                      itv.right))
+                                         suffixarray->readmode,
+                                         totallength,
+                                         suffixarray->suftab,
+                                         &itv,
+                                         *qptr,
+                                         offset,
+                                         itv.left,
+                                         itv.right))
     {
       if (itv.left == itv.right)
       {

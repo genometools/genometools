@@ -541,7 +541,6 @@ int gt_callenumquerymatches(const char *indexname,
                             bool findmums,
                             bool forwardstrand,
                             bool reversestrand,
-                            bool echoquery,
                             unsigned int userdefinedleastlength,
                             void (*showqueryheader)(void *,const char *,
                                                     unsigned long,bool),
@@ -551,29 +550,17 @@ int gt_callenumquerymatches(const char *indexname,
                             GtError *err)
 {
   Suffixarray suffixarray;
-  unsigned long totallength = 0;
   bool haserr = false;
   Querymatch *querymatchspaceptr = gt_querymatch_new();
 
   if (gt_mapsuffixarray(&suffixarray,
-                     SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
-                     indexname,
-                     logger,
-                     err) != 0)
+                        SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
+                        indexname,
+                        logger,
+                        err) != 0)
   {
     haserr = true;
   } else
-  {
-    totallength = gt_encseq_total_length(suffixarray.encseq);
-  }
-  if (!haserr && echoquery)
-  {
-    if (gt_echodescriptionandsequence(queryfiles,err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
   {
     GtSeqIterator *seqit;
     const GtUchar *query;
@@ -589,7 +576,8 @@ int gt_callenumquerymatches(const char *indexname,
     if (!haserr)
     {
       GtUchar *queryreverse = NULL;
-      unsigned long queryreverse_length = 0;
+      unsigned long queryreverse_length = 0,
+                    totallength = gt_encseq_total_length(suffixarray.encseq);
       char *desc = NULL;
       int mode;
 
