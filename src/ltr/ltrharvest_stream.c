@@ -283,10 +283,8 @@ static int gt_subsimpleexactselfmatchstore(void *info,
   return 0;
 }
 
-/* XXX: better directly sort the ArrayLTRboundaries */
-static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
-                                                 const GtArrayLTRboundaries
-                                                 *ltr)
+static const LTRboundaries **compactboundaries(unsigned long *numofboundaries,
+                                               const GtArrayLTRboundaries *ltr)
 {
   unsigned long countboundaries = 0, nextfill = 0;
   const LTRboundaries *bd, **bdptrtab;
@@ -1334,9 +1332,8 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
     /* sort elements */
     if (!had_err)
     {
-      ltrh_stream->bdptrtab =
-        sortedltrboundaries(&ltrh_stream->numofboundaries,
-                            &ltrh_stream->arrayLTRboundaries);
+      ltrh_stream->bdptrtab = compactboundaries(&ltrh_stream->numofboundaries,
+                                              &ltrh_stream->arrayLTRboundaries);
     }
     ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_REGIONS;
   }
