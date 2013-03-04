@@ -50,9 +50,10 @@ typedef struct
 static GtUchar gt_mmsearch_accessquery(const GtQueryrep *queryrep,
                                        unsigned long pos)
 {
-  const unsigned long abspos = queryrep->startpos + pos;
+  unsigned long abspos;
 
-  gt_assert(pos < queryrep->length);
+  gt_assert(queryrep != NULL && pos < queryrep->length);
+  abspos = queryrep->startpos + pos;
   if (queryrep->sequence != NULL)
   {
     gt_assert(queryrep->readmode == GT_READMODE_FORWARD);
