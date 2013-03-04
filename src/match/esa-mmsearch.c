@@ -562,10 +562,20 @@ static int gt_querysubstringmatch(bool selfmatch,
                               err);
 }
 
+typedef int (*GtQuerysubstringmatchfunc)(bool,
+                                         const Suffixarray *,
+                                         uint64_t,
+                                         const GtQueryrep *,
+                                         unsigned long,
+                                         GtProcessquerymatch,
+                                         void *,
+                                         GtQuerymatch *,
+                                         GtError *);
+
 static int gt_callenumquerymatches_withindex(
+                            GtQuerysubstringmatchfunc findquerymatches,
                             const Suffixarray *suffixarray,
                             const GtStrArray *queryfiles,
-                            bool findmums,
                             bool forwardstrand,
                             bool reversestrand,
                             unsigned int userdefinedleastlength,
@@ -658,31 +668,15 @@ static int gt_callenumquerymatches_withindex(
           }
           if (queryrep.sequence != NULL)
           {
-            int ret;
-            if (findmums)
-            {
-              ret = gt_queryuniquematch(false,
-                                        suffixarray,
-                                        queryunitnum,
-                                        &queryrep,
-                                        (unsigned long) userdefinedleastlength,
-                                        processquerymatch,
-                                        processquerymatchinfo,
-                                        querymatchspaceptr,
-                                        err);
-            } else
-            {
-              ret = gt_querysubstringmatch(false,
-                                           suffixarray,
-                                           queryunitnum,
-                                           &queryrep,
-                                           (unsigned long)
-                                                  userdefinedleastlength,
-                                           processquerymatch,
-                                           processquerymatchinfo,
-                                           querymatchspaceptr,
-                                           err);
-            }
+            int ret = findquerymatches(false,
+                                       suffixarray,
+                                       queryunitnum,
+                                       &queryrep,
+                                       (unsigned long) userdefinedleastlength,
+                                       processquerymatch,
+                                       processquerymatchinfo,
+                                       querymatchspaceptr,
+                                       err);
             if (ret != 0)
             {
               haserr = true;
@@ -724,9 +718,11 @@ int gt_callenumquerymatches(const char *indexname,
     haserr = true;
   } else
   {
-    if (gt_callenumquerymatches_withindex(&suffixarray,
+    if (gt_callenumquerymatches_withindex(findmums
+                                            ? gt_queryuniquematch
+                                            : gt_querysubstringmatch,
+                                          &suffixarray,
                                           queryfiles,
-                                          findmums,
                                           forwardstrand,
                                           reversestrand,
                                           userdefinedleastlength,
