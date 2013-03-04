@@ -25,19 +25,22 @@
 
 struct GtQuerymatch
 {
-   unsigned long dblen,
-                 dbstart,
-                 querylen,
-                 querystart,
-                 querytotallength,
-                 edist;
-   long score;
-   uint64_t queryseqnum;
+   unsigned long
+      dblen, /* length of match in dbsequence */
+      querylen, /* same as dblen for exact matches */
+      dbstart, /* absolute start position of match in database seq */
+      querystart, /* start of match in query, relative to start of query */
+      querytotallength, /* total length of query */
+      edist; /* 0 for exact match */
+   long score; /* 0 for exact match */
+   uint64_t queryseqnum; /* ordinal number of match in query */
    const GtUchar *querysequence; /* pointer to query or NULL if query is
-                                    represented by encseq */
-   GtReadmode readmode; /* refers to reference sequence */
-   bool selfmatch,
-        query_asreversecopy;
+                                    represented by encseq. Be careful
+                                    query is not copied */
+   GtReadmode readmode; /* readmode by which reference sequence was accessed */
+   bool selfmatch,       /* true if both instances of the match refer to the
+                            same sequence */
+        query_as_reversecopy; /* matched the reverse copy of the query */
 };
 
 GtQuerymatch *gt_querymatch_new(void)
@@ -49,7 +52,7 @@ void gt_querymatch_fill(GtQuerymatch *querymatch,
                         unsigned long dblen,
                         unsigned long dbstart,
                         GtReadmode readmode,
-                        bool query_asreversecopy,
+                        bool query_as_reversecopy,
                         long score,
                         unsigned long edist,
                         bool selfmatch,
@@ -62,7 +65,7 @@ void gt_querymatch_fill(GtQuerymatch *querymatch,
   querymatch->dblen = dblen;
   querymatch->dbstart = dbstart;
   querymatch->readmode = readmode;
-  querymatch->query_asreversecopy = query_asreversecopy;
+  querymatch->query_as_reversecopy = query_as_reversecopy;
   querymatch->score = score;
   querymatch->edist = edist;
   querymatch->selfmatch = selfmatch;
@@ -225,5 +228,5 @@ unsigned long gt_querymatch_querytotallength(const GtQuerymatch *querymatch)
 
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch)
 {
-  return querymatch->query_asreversecopy;
+  return querymatch->query_as_reversecopy;
 }
