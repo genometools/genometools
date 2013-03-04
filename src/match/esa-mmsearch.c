@@ -374,7 +374,8 @@ static unsigned long gt_mmsearch_extendright(const GtEncseq *dbencseq,
   return dbpos - dbend;
 }
 
-static int gt_runqueryuniquematch(const Suffixarray *suffixarray,
+static int gt_runqueryuniquematch(GT_UNUSED bool selfmatch,
+                                  const Suffixarray *suffixarray,
                                   uint64_t queryunitnum,
                                   const GtQueryrep *queryrep,
                                   unsigned long minmatchlength,
@@ -446,7 +447,8 @@ static int gt_runqueryuniquematch(const Suffixarray *suffixarray,
   return haserr ? -1 : 0;
 }
 
-static int gt_runquerysubstringmatch(bool selfmatch,
+static int gt_runquerysubstringmatch_generic(
+                                     bool selfmatch,
                                      const GtEncseq *dbencseq,
                                      const ESASuffixptr *suftabpart,
                                      GtReadmode readmode,
@@ -536,6 +538,30 @@ static int gt_runquerysubstringmatch(bool selfmatch,
   return haserr ? -1 : 0;
 }
 
+static int gt_runquerysubstringmatch(bool selfmatch,
+                                     const Suffixarray *suffixarray,
+                                     uint64_t queryunitnum,
+                                     const GtQueryrep *queryrep,
+                                     unsigned long minmatchlength,
+                                     Processquerymatch processquerymatch,
+                                     void *processquerymatchinfo,
+                                     Querymatch *querymatchspaceptr,
+                                     GtError *err)
+{
+  return gt_runquerysubstringmatch_generic(selfmatch,
+                              suffixarray->encseq,
+                              suffixarray->suftab,
+                              suffixarray->readmode,
+                              gt_encseq_total_length(suffixarray->encseq) + 1,
+                              queryunitnum,
+                              queryrep,
+                              minmatchlength,
+                              processquerymatch,
+                              processquerymatchinfo,
+                              querymatchspaceptr,
+                              err);
+}
+
 int gt_callenumquerymatches(const char *indexname,
                             const GtStrArray *queryfiles,
                             bool findmums,
@@ -576,8 +602,7 @@ int gt_callenumquerymatches(const char *indexname,
     if (!haserr)
     {
       GtUchar *queryreverse = NULL;
-      unsigned long queryreverse_length = 0,
-                    totallength = gt_encseq_total_length(suffixarray.encseq);
+      unsigned long queryreverse_length = 0;
       char *desc = NULL;
       int mode;
 
@@ -646,7 +671,8 @@ int gt_callenumquerymatches(const char *indexname,
               int ret;
               if (findmums)
               {
-                ret = gt_runqueryuniquematch(&suffixarray,
+                ret = gt_runqueryuniquematch(false,
+                                             &suffixarray,
                                              queryunitnum,
                                              &queryrep,
                                              (unsigned long)
@@ -658,10 +684,7 @@ int gt_callenumquerymatches(const char *indexname,
               } else
               {
                 ret = gt_runquerysubstringmatch (false,
-                                                 suffixarray.encseq,
-                                                 suffixarray.suftab,
-                                                 suffixarray.readmode,
-                                                 totallength+1,
+                                                 &suffixarray,
                                                  queryunitnum,
                                                  &queryrep,
                                                  (unsigned long)
@@ -732,11 +755,9 @@ int gt_callenumselfmatches(const char *indexname,
       {
         queryrep.startpos = seqstartpos;
         queryrep.length = seqlength;
+
         if (gt_runquerysubstringmatch(true,
-                                      suffixarray.encseq,
-                                      suffixarray.suftab,
-                                      suffixarray.readmode,
-                                      totallength+1,
+                                      &suffixarray,
                                       (uint64_t) seqnum,
                                       &queryrep,
                                       (unsigned long) userdefinedleastlength,
@@ -771,7 +792,7 @@ static int gt_constructsarrandrunmmsearch(
                  bool withprogressbar,
                  GtError *err)
 {
-  unsigned long numofsuffixes;
+  unsigned long numberofsuffixes;
   bool haserr = false;
   Sfxiterator *sfi;
   GtQueryrep queryrep;
@@ -805,25 +826,25 @@ static int gt_constructsarrandrunmmsearch(
     queryrep.length = (unsigned long) querylen;
     while (true)
     {
-      suffixsortspace = gt_Sfxiterator_next(&numofsuffixes,NULL,sfi);
+      suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,NULL,sfi);
       if (suffixsortspace == NULL)
       {
         break;
       }
-      if (gt_runquerysubstringmatch(false,
-                                    dbencseq,
-                                    (const ESASuffixptr *)
-                                    gt_suffixsortspace_ulong_get(
-                                             suffixsortspace),
-                                    readmode,
-                                    numofsuffixes,
-                                    0,
-                                    &queryrep,
-                                    (unsigned long) minlength,
-                                    processquerymatch,
-                                    processquerymatchinfo,
-                                    querymatchspaceptr,
-                                    err) != 0)
+      if (gt_runquerysubstringmatch_generic(
+                                false,
+                                dbencseq,
+                                (const ESASuffixptr *)
+                                gt_suffixsortspace_ulong_get(suffixsortspace),
+                                readmode,
+                                numberofsuffixes,
+                                0,
+                                &queryrep,
+                                (unsigned long) minlength,
+                                processquerymatch,
+                                processquerymatchinfo,
+                                querymatchspaceptr,
+                                err) != 0)
       {
         haserr = true;
         break;
