@@ -187,6 +187,7 @@ static int bdcompare(const void *a, const void *b)
 
   bda = (const LTRboundaries *) a;
   bdb = (const LTRboundaries *) b;
+  if (bda == bdb) return 0;
   if (bda->contignumber < bdb->contignumber)
   {
     return -1;
@@ -307,8 +308,6 @@ static const LTRboundaries **compactboundaries(unsigned long *numofboundaries,
       bdptrtab[nextfill++] = bd;
     }
   }
-  /* qsort(bdptrtab,(size_t) countboundaries, sizeof (LTRboundaries *),
-        bdptrcompare); */
   *numofboundaries = countboundaries;
   return bdptrtab;
 }
@@ -1300,7 +1299,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
     threadinfo.cur_seed = 0;
     threadinfo.rmutex = gt_mutex_new();
     threadinfo.wmutex = gt_mutex_new();
-    /* apply the filter algorithms */
+    /* apply the seed extension and filter algorithms */
     if (!had_err && gt_multithread(gt_searchforLTRs_threadfunc,
                                    &threadinfo, err) != 0)
     {
@@ -1312,29 +1311,31 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
     /* not needed any longer */
     GT_FREEARRAY(&ltrh_stream->repeatinfo.repeats, Repeat);
 
-    qsort(threadinfo.arrayLTRboundaries->spaceLTRboundaries,
-          (size_t) threadinfo.arrayLTRboundaries->nextfreeLTRboundaries - 1,
-           sizeof (LTRboundaries),  bdcompare);
+    /* sort results after seed extension */
+    if (!had_err && threadinfo.arrayLTRboundaries->spaceLTRboundaries) {
+      qsort(threadinfo.arrayLTRboundaries->spaceLTRboundaries,
+            (size_t) threadinfo.arrayLTRboundaries->nextfreeLTRboundaries,
+             sizeof (LTRboundaries),  bdcompare);
+    }
 
     /* remove exact duplicates */
-    if (!had_err)
-    {
+    if (!had_err) {
       gt_removeduplicates(&ltrh_stream->arrayLTRboundaries);
     }
 
     /* remove overlapping predictions if desired */
-    if (!had_err && (ltrh_stream->nooverlaps || ltrh_stream->bestoverlaps))
-    {
+    if (!had_err && (ltrh_stream->nooverlaps || ltrh_stream->bestoverlaps)) {
       gt_removeoverlapswithlowersimilarity(&ltrh_stream->arrayLTRboundaries,
                                             ltrh_stream->nooverlaps);
     }
 
-    /* sort elements */
-    if (!had_err)
-    {
+    /* build array of non-skipped elements */
+    if (!had_err) {
       ltrh_stream->bdptrtab = compactboundaries(&ltrh_stream->numofboundaries,
                                               &ltrh_stream->arrayLTRboundaries);
     }
+
+    /* advance stream state to output regions */
     ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_REGIONS;
   }
 
