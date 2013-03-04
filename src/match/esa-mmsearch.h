@@ -24,9 +24,13 @@
 typedef int (*GtProcessquerymatch)(void *,
                                    const GtEncseq *,
                                    const GtQuerymatch *,
+                                   const GtUchar *query,
+                                   unsigned long query_totallength,
                                    GtError *);
 
-typedef void (*GtProcessqueryheader)(void *,const char *,unsigned long,bool);
+typedef void (*GtProcessquerybeforematching)(void *,const char *,
+                                             const GtUchar *,unsigned long,
+                                             bool);
 
 typedef struct GtMMsearchiterator GtMMsearchiterator;
 
@@ -57,7 +61,8 @@ int gt_callenumquerymatches(const char *indexname,
                             bool forwardstrand,
                             bool reversestrand,
                             unsigned int userdefinedleastlength,
-                            GtProcessqueryheader processqueryheader,
+                            GtProcessquerybeforematching
+                              processquerybeforematching,
                             GtProcessquerymatch processquerymatch,
                             void *processquerymatchinfo,
                             GtLogger *logger,

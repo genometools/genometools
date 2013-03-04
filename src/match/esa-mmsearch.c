@@ -421,12 +421,12 @@ static int gt_runqueryuniquematch(bool selfmatch,
                          selfmatch,
                          localqueryunitnum,
                          matchlen,
-                         localqueryoffset,
-                         queryrep->sequence,
-                         queryrep->length);
+                         localqueryoffset);
       if (processquerymatch(processquerymatchinfo,
                             suffixarray->encseq,
                             querymatchspaceptr,
+                            queryrep->sequence,
+                            queryrep->length,
                             err) != 0)
       {
         haserr = true;
@@ -508,12 +508,12 @@ static int gt_runquerysubstringmatch_generic(
                            selfmatch,
                            localqueryunitnum,
                            minmatchlength + extend,
-                           localqueryoffset,
-                           queryrep->sequence,
-                           queryrep->length);
+                           localqueryoffset);
         if (processquerymatch(processquerymatchinfo,
                               dbencseq,
                               querymatchspaceptr,
+                              queryrep->sequence,
+                              queryrep->length,
                               err) != 0)
         {
           haserr = true;
@@ -569,7 +569,8 @@ static int gt_callenumquerymatches_withindex(
                             bool forwardstrand,
                             bool reversestrand,
                             unsigned int userdefinedleastlength,
-                            GtProcessqueryheader processqueryheader,
+                            GtProcessquerybeforematching
+                               processquerybeforematching,
                             GtProcessquerymatch processquerymatch,
                             void *processquerymatchinfo,
                             GtError *err)
@@ -626,9 +627,10 @@ static int gt_callenumquerymatches_withindex(
           {
             queryrep.sequence = query;
             queryrep.reversecopy = false;
-            if (processqueryheader != NULL)
+            if (processquerybeforematching != NULL)
             {
-              processqueryheader(processquerymatchinfo,desc,querylen,true);
+              processquerybeforematching(processquerymatchinfo,desc,query,
+                                         querylen,true);
             }
           } else
           {
@@ -643,9 +645,10 @@ static int gt_callenumquerymatches_withindex(
               gt_copy_reversecomplement(queryreverse,query,querylen);
               queryrep.sequence = queryreverse;
               queryrep.reversecopy = true;
-              if (processqueryheader != NULL)
+              if (processquerybeforematching != NULL)
               {
-                processqueryheader(processquerymatchinfo,desc,querylen,false);
+                processquerybeforematching(processquerymatchinfo,desc,
+                                           queryreverse,querylen,false);
               }
             } else
             {
@@ -703,7 +706,8 @@ int gt_callenumquerymatches(const char *indexname,
                             bool forwardstrand,
                             bool reversestrand,
                             unsigned int userdefinedleastlength,
-                            GtProcessqueryheader processqueryheader,
+                            GtProcessquerybeforematching
+                              processquerybeforematching,
                             GtProcessquerymatch processquerymatch,
                             void *processquerymatchinfo,
                             GtLogger *logger,
@@ -727,7 +731,7 @@ int gt_callenumquerymatches(const char *indexname,
                                           forwardstrand,
                                           reversestrand,
                                           userdefinedleastlength,
-                                          processqueryheader,
+                                          processquerybeforematching,
                                           processquerymatch,
                                           processquerymatchinfo,
                                           err) != 0)

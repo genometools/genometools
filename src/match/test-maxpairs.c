@@ -200,6 +200,8 @@ typedef struct
 static int storemaxmatchquery(void *info,
                               GT_UNUSED const GtEncseq *encseq,
                               const GtQuerymatch *querymatch,
+                              GT_UNUSED const GtUchar *query,
+                              GT_UNUSED unsigned long query_totallength,
                               GT_UNUSED GtError *err)
 {
   GtArray *tab = (GtArray *) info;

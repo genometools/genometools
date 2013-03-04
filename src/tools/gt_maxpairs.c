@@ -74,10 +74,8 @@ static int gt_simpleexactselfmatchoutput(void *info,
                      true,
                      (uint64_t) queryseqnum,
                      len,
-                     pos2 - seqstartpos,
-                     NULL,
-                     seqlength);
-  return gt_querymatch_output(info, encseq, querymatch, err);
+                     pos2 - seqstartpos);
+  return gt_querymatch_output(info, encseq, querymatch, NULL, seqlength, err);
 }
 
 typedef struct
@@ -90,6 +88,8 @@ typedef struct
   GtXdropbest best_right;
   GtXdropscore belowscore;
   GtSeqabstract *useq, *vseq;
+  const GtUchar *query_sequence;
+  unsigned long query_totallength;
 } GtXdropmatchinfo;
 
 static int gt_simplexdropselfmatchoutput(void *info,
@@ -204,16 +204,17 @@ static int gt_simplexdropselfmatchoutput(void *info,
                      true,
                      (uint64_t) queryseqnum,
                      querylen,
-                     querystart - queryseqstartpos,
-                     NULL,
-                     gt_encseq_seqlength(encseq, queryseqnum));
+                     querystart - queryseqstartpos);
   return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
+                              NULL, gt_encseq_seqlength(encseq, queryseqnum),
                               err);
 }
 
 static int gt_processxdropquerymatches(void *info,
                                        const GtEncseq *encseq,
                                        const GtQuerymatch *querymatch,
+                                       const GtUchar *query,
+                                       unsigned long query_totallength,
                                        GtError *err)
 {
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
@@ -222,10 +223,8 @@ static int gt_processxdropquerymatches(void *info,
   unsigned long pos1 = gt_querymatch_dbstart(querymatch);
   unsigned long pos2 = gt_querymatch_querystart(querymatch);
   unsigned long len = gt_querymatch_querylen(querymatch);
-  unsigned long querytotallength = gt_querymatch_querytotallength(querymatch);
   const unsigned long dbtotallength = gt_encseq_total_length(encseq);
   uint64_t queryseqnum;
-  const GtUchar *querysequence = gt_querymatch_querysequence(querymatch);
   unsigned long dbseqnum, dbseqstartpos, dbseqlength;
 
   dbseqnum = gt_encseq_seqnum(encseq,pos1);
@@ -236,7 +235,7 @@ static int gt_processxdropquerymatches(void *info,
     gt_assert(dbseqstartpos < pos1);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,
                                  pos1 - dbseqstartpos,0);
-    gt_seqabstract_reinit_ptr(xdropmatchinfo->vseq,querysequence,pos2,0);
+    gt_seqabstract_reinit_ptr(xdropmatchinfo->vseq,query,pos2,0);
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
                                   xdropmatchinfo->res,
@@ -251,13 +250,13 @@ static int gt_processxdropquerymatches(void *info,
     xdropmatchinfo->best_left.jvalue = 0;
     xdropmatchinfo->best_left.score = 0;
   }
-  if (pos1 + len < dbtotallength && pos2 + len < querytotallength)
+  if (pos1 + len < dbtotallength && pos2 + len < query_totallength)
   {
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  encseq,dbseqstartpos + dbseqlength -
                                         (pos1 + len),0);
     gt_seqabstract_reinit_ptr(xdropmatchinfo->vseq,
-                              querysequence,querytotallength - (pos2 + len),0);
+                              query,query_totallength - (pos2 + len),0);
     gt_evalxdroparbitscoresextend(true,
                                   &xdropmatchinfo->best_right,
                                   xdropmatchinfo->res,
@@ -289,7 +288,7 @@ static int gt_processxdropquerymatches(void *info,
                                dblen,
                                dbstart);
   gt_seqabstract_reinit_ptr(xdropmatchinfo->vseq,
-                            querysequence,
+                            query,
                             querylen,
                             querystart);
   gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
@@ -303,10 +302,9 @@ static int gt_processxdropquerymatches(void *info,
                      false,
                      queryseqnum,
                      querylen,
-                     querystart,
-                     NULL,
-                     querytotallength);
+                     querystart);
   return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
+                              query, query_totallength,
                               err);
 }
 

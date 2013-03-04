@@ -37,15 +37,15 @@ void gt_querymatch_fill(GtQuerymatch *querymatch,
                         bool selfmatch,
                         uint64_t queryseqnum,
                         unsigned long querylen,
-                        unsigned long querystart,
-                        const GtUchar *querysequence,
-                        unsigned long querytotallength);
+                        unsigned long querystart);
 
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
 int gt_querymatch_output(void *info,
                          const GtEncseq *encseq,
                          const GtQuerymatch *querymatch,
+                         const GtUchar *query,
+                         unsigned long query_totallength,
                          GtError *err);
 
 unsigned long gt_querymatch_querylen(const GtQuerymatch *querymatch);
