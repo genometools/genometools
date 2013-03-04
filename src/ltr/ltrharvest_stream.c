@@ -1318,29 +1318,11 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
           (size_t) threadinfo.arrayLTRboundaries->nextfreeLTRboundaries - 1,
            sizeof (LTRboundaries),  bdcompare);
 
-    /* unsigned long i;
-    for (i = 0; i < threadinfo.arrayLTRboundaries->nextfreeLTRboundaries; i++) {
-      if (!threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].skipped)
-        printf(">>>> %lu:%lu-%lu\n",
-             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].contignumber,
-             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].leftLTR_5,
-             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].rightLTR_3);
-    } */
-
     /* remove exact duplicates */
     if (!had_err)
     {
       gt_removeduplicates(&ltrh_stream->arrayLTRboundaries);
     }
-
-    /*
-    for (i = 0; i < threadinfo.arrayLTRboundaries->nextfreeLTRboundaries; i++) {
-      if (!threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].skipped)
-        printf(">>>> %lu:%lu-%lu\n",
-             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].contignumber,
-             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].leftLTR_5,
-             threadinfo.arrayLTRboundaries->spaceLTRboundaries[i].rightLTR_3);
-    } */
 
     /* remove overlapping predictions if desired */
     if (!had_err && (ltrh_stream->nooverlaps || ltrh_stream->bestoverlaps))
