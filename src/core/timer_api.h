@@ -43,7 +43,8 @@ void     gt_timer_show(GtTimer *t, FILE *fp);
 /* Output the current state of <t> in a user-defined format given by <fmt>.
    <fmt> must be a format string for four %ld numbers, which are filled with:
    elapsed seconds, elapsed microseconds, used usertime in seconds,
-   system time in seconds. The output is written to <fp>. */
+   system time in seconds. The output is written to <fp>. The timer is then
+   stopped. */
 void     gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp);
 /* Output the current state of <t> on <fp> since the last call of
    <gt_timer_show_progress()> or the last start of <t>, along with the current
