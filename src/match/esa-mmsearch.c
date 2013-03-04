@@ -382,7 +382,7 @@ static int gt_runqueryuniquematch(bool selfmatch,
                                   unsigned long minmatchlength,
                                   GtProcessquerymatch processquerymatch,
                                   void *processquerymatchinfo,
-                                  Querymatch *querymatchspaceptr,
+                                  GtQuerymatch *querymatchspaceptr,
                                   GtError *err)
 {
   unsigned long offset,
@@ -458,7 +458,7 @@ static int gt_runquerysubstringmatch_generic(
                                      unsigned long minmatchlength,
                                      GtProcessquerymatch processquerymatch,
                                      void *processquerymatchinfo,
-                                     Querymatch *querymatchspaceptr,
+                                     GtQuerymatch *querymatchspaceptr,
                                      GtError *err)
 {
   GtMMsearchiterator *mmsi;
@@ -545,7 +545,7 @@ static int gt_runquerysubstringmatch(bool selfmatch,
                                      unsigned long minmatchlength,
                                      GtProcessquerymatch processquerymatch,
                                      void *processquerymatchinfo,
-                                     Querymatch *querymatchspaceptr,
+                                     GtQuerymatch *querymatchspaceptr,
                                      GtError *err)
 {
   return gt_runquerysubstringmatch_generic(selfmatch,
@@ -583,7 +583,7 @@ static int gt_callenumquerymatches_withindex(
     haserr = true;
   } else
   {
-    Querymatch *querymatchspaceptr = gt_querymatch_new();
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     const GtUchar *query;
     unsigned long querylen;
     int retval;
@@ -761,7 +761,7 @@ int gt_callenumselfmatches(const char *indexname,
   } else
   {
     unsigned long seqnum, numofsequences, seqlength, seqstartpos;
-    Querymatch *querymatchspaceptr = gt_querymatch_new();
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     GtQueryrep queryrep;
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
@@ -837,7 +837,7 @@ static int gt_constructsarrandrunmmsearch(
   {
     const GtSuffixsortspace *suffixsortspace;
     unsigned long numberofsuffixes;
-    Querymatch *querymatchspaceptr = gt_querymatch_new();
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     GtQueryrep queryrep;
 
     queryrep.sequence = query;

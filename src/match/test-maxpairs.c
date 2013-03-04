@@ -199,7 +199,7 @@ typedef struct
 
 static int storemaxmatchquery(void *info,
                               GT_UNUSED const GtEncseq *encseq,
-                              const Querymatch *querymatch,
+                              const GtQuerymatch *querymatch,
                               GT_UNUSED GtError *err)
 {
   GtArray *tab = (GtArray *) info;

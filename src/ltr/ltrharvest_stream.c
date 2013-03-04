@@ -216,7 +216,7 @@ static int gt_simpleexactselfmatchstore(void *info,
 
 static int gt_subsimpleexactselfmatchstore(void *info,
                                             GT_UNUSED const GtEncseq *encseq,
-                                            const Querymatch *querymatch,
+                                            const GtQuerymatch *querymatch,
                                             GT_UNUSED GtError *err)
 {
   Repeat *nextfreerepeatptr;

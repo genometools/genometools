@@ -23,11 +23,11 @@
 #include "core/readmode.h"
 #include "core/encseq.h"
 
-typedef struct Querymatch Querymatch;
+typedef struct GtQuerymatch GtQuerymatch;
 
-Querymatch *gt_querymatch_new(void);
+GtQuerymatch *gt_querymatch_new(void);
 
-void gt_querymatch_fill(Querymatch *querymatch,
+void gt_querymatch_fill(GtQuerymatch *querymatch,
                         unsigned long dblen,
                         unsigned long dbstart,
                         GtReadmode readmode,
@@ -41,28 +41,28 @@ void gt_querymatch_fill(Querymatch *querymatch,
                         const GtUchar *querysequence,
                         unsigned long querytotallength);
 
-void gt_querymatch_delete(Querymatch *querymatch);
+void gt_querymatch_delete(GtQuerymatch *querymatch);
 
 int gt_querymatch_output(void *info,
                          const GtEncseq *encseq,
-                         const Querymatch *querymatch,
+                         const GtQuerymatch *querymatch,
                          GtError *err);
 
-unsigned long gt_querymatch_querylen(const Querymatch *querymatch);
+unsigned long gt_querymatch_querylen(const GtQuerymatch *querymatch);
 
-unsigned long gt_querymatch_dbstart(const Querymatch *querymatch);
+unsigned long gt_querymatch_dbstart(const GtQuerymatch *querymatch);
 
-unsigned long gt_querymatch_querystart(const Querymatch *querymatch);
+unsigned long gt_querymatch_querystart(const GtQuerymatch *querymatch);
 
-uint64_t gt_querymatch_queryseqnum(const Querymatch *querymatch);
+uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch);
 
-const GtUchar *gt_querymatch_querysequence(const Querymatch *querymatch);
+const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch);
 
-unsigned long gt_querymatch_querytotallength(const Querymatch *querymatch);
+unsigned long gt_querymatch_querytotallength(const GtQuerymatch *querymatch);
 
 unsigned long gt_querymatch_dbseqnum(const GtEncseq *encseq,
-                                     const Querymatch *querymatch);
+                                     const GtQuerymatch *querymatch);
 
-bool gt_querymatch_queryreverse(const Querymatch *querymatch);
+bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 
 #endif

@@ -23,7 +23,7 @@
 #include "core/minmax.h"
 #include "querymatch.h"
 
-struct Querymatch
+struct GtQuerymatch
 {
    unsigned long dblen,
                  dbstart,
@@ -40,12 +40,12 @@ struct Querymatch
         query_asreversecopy;
 };
 
-Querymatch *gt_querymatch_new(void)
+GtQuerymatch *gt_querymatch_new(void)
 {
-  return gt_malloc(sizeof (Querymatch));
+  return gt_malloc(sizeof (GtQuerymatch));
 }
 
-void gt_querymatch_fill(Querymatch *querymatch,
+void gt_querymatch_fill(GtQuerymatch *querymatch,
                         unsigned long dblen,
                         unsigned long dbstart,
                         GtReadmode readmode,
@@ -73,7 +73,7 @@ void gt_querymatch_fill(Querymatch *querymatch,
   querymatch->querytotallength = querytotallength;
 }
 
-void gt_querymatch_delete(Querymatch *querymatch)
+void gt_querymatch_delete(GtQuerymatch *querymatch)
 {
   if (querymatch != NULL)
   {
@@ -127,14 +127,14 @@ static void verifymatch(const GtEncseq *encseq,
 #endif
 
 unsigned long gt_querymatch_dbseqnum(const GtEncseq *encseq,
-                                     const Querymatch *querymatch)
+                                     const GtQuerymatch *querymatch)
 {
   return gt_encseq_seqnum(encseq,querymatch->dbstart);
 }
 
 int gt_querymatch_output(GT_UNUSED void *info,
                          const GtEncseq *encseq,
-                         const Querymatch *querymatch,
+                         const GtQuerymatch *querymatch,
                          GT_UNUSED GtError *err)
 {
   const char *outflag = "FRCP";
@@ -192,38 +192,38 @@ int gt_querymatch_output(GT_UNUSED void *info,
   return 0;
 }
 
-unsigned long gt_querymatch_querylen(const Querymatch *querymatch)
+unsigned long gt_querymatch_querylen(const GtQuerymatch *querymatch)
 {
   return querymatch->querylen;
 }
 
-unsigned long gt_querymatch_dbstart(const Querymatch *querymatch)
+unsigned long gt_querymatch_dbstart(const GtQuerymatch *querymatch)
 {
   return querymatch->dbstart;
 }
 
-unsigned long gt_querymatch_querystart(const Querymatch *querymatch)
+unsigned long gt_querymatch_querystart(const GtQuerymatch *querymatch)
 {
   return querymatch->querystart;
 }
 
-uint64_t gt_querymatch_queryseqnum(const Querymatch *querymatch)
+uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
 {
   return querymatch->queryseqnum;
 }
 
-const GtUchar *gt_querymatch_querysequence(const Querymatch *querymatch)
+const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch->querysequence != NULL);
   return querymatch->querysequence;
 }
 
-unsigned long gt_querymatch_querytotallength(const Querymatch *querymatch)
+unsigned long gt_querymatch_querytotallength(const GtQuerymatch *querymatch)
 {
   return querymatch->querytotallength;
 }
 
-bool gt_querymatch_queryreverse(const Querymatch *querymatch)
+bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch)
 {
   return querymatch->query_asreversecopy;
 }

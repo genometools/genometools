@@ -52,7 +52,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
                                          GT_UNUSED GtError *err)
 {
   unsigned long queryseqnum, seqstartpos, seqlength;
-  Querymatch *querymatch = (Querymatch *) info;
+  GtQuerymatch *querymatch = (GtQuerymatch *) info;
 
   if (pos1 > pos2)
   {
@@ -82,7 +82,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
 
 typedef struct
 {
-  Querymatch *querymatchspaceptr;
+  GtQuerymatch *querymatchspaceptr;
   GtXdropArbitraryscores arbitscores;
   GtXdropresources *res;
   GtFrontResource *frontresource;
@@ -213,7 +213,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
 
 static int gt_processxdropquerymatches(void *info,
                                        const GtEncseq *encseq,
-                                       const Querymatch *querymatch,
+                                       const GtQuerymatch *querymatch,
                                        GtError *err)
 {
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
@@ -525,7 +525,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   bool haserr = false;
   Maxpairsoptions *arguments = tool_arguments;
   GtLogger *logger = NULL;
-  Querymatch *querymatchspaceptr = gt_querymatch_new();
+  GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
   GtXdropmatchinfo xdropmatchinfo;
 
   gt_error_check(err);

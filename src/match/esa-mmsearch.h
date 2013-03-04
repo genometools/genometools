@@ -23,7 +23,7 @@
 
 typedef int (*GtProcessquerymatch)(void *,
                                    const GtEncseq *,
-                                   const Querymatch *,
+                                   const GtQuerymatch *,
                                    GtError *);
 
 typedef void (*GtProcessqueryheader)(void *,const char *,unsigned long,bool);
