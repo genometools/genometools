@@ -20,7 +20,7 @@
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
-#include "annotationsketch/feature_index_memory_api.h"
+#include "extended/feature_index_memory_api.h"
 #include "annotationsketch/line_breaker_captions.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"

@@ -15,10 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef WITHOUT_CAIRO
-
 #include "lauxlib.h"
-#include "annotationsketch/feature_visitor.h"
+#include "extended/feature_visitor.h"
 #include "extended/luahelper.h"
 #include "gtlua/feature_index_lua.h"
 #include "gtlua/feature_visitor_lua.h"
@@ -56,5 +54,3 @@ int gt_lua_open_feature_visitor(lua_State *L)
   gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
-
-#endif

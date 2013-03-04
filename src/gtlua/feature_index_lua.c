@@ -15,12 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef WITHOUT_CAIRO
-
 #include "lauxlib.h"
-#include "annotationsketch/feature_index_memory_api.h"
 #include "core/unused_api.h"
 #include "core/ma.h"
+#include "extended/feature_index_memory_api.h"
 #include "extended/feature_node.h"
 #include "extended/luahelper.h"
 #include "gtlua/feature_index_lua.h"
@@ -273,5 +271,3 @@ int gt_lua_open_feature_index(lua_State *L)
   gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
-
-#endif

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#warning use of FeatureIndex headers from annotationsketch/ is deprecated  \
-         -- use headers from extended/ instead
-
 #include "extended/feature_index.h"
+#include "extended/feature_stream_api.h"
+#include "extended/feature_visitor.h"
+#include "extended/visitor_stream_api.h"
+
+GtNodeStream* gt_feature_stream_new(GtNodeStream *in_stream, GtFeatureIndex *fi)
+{
+  return gt_visitor_stream_new(in_stream, gt_feature_visitor_new(fi));
+}

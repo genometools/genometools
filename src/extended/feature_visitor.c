@@ -18,10 +18,10 @@
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
+#include "extended/feature_index.h"
+#include "extended/feature_visitor.h"
 #include "extended/node_visitor_api.h"
 #include "extended/region_node.h"
-#include "annotationsketch/feature_index.h"
-#include "annotationsketch/feature_visitor.h"
 
 struct GtFeatureVisitor {
   const GtNodeVisitor parent_instance;

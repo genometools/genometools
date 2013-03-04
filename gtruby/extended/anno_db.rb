@@ -16,7 +16,7 @@
 #
 
 require 'dl/import'
-require 'annotationsketch/feature_index'
+require 'extended/feature_index'
 
 module GT
   extend DL::Importable

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#warning use of FeatureIndex headers from annotationsketch/ is deprecated  \
-         -- use headers from extended/ instead
+#ifndef FEATURE_INDEX_H
+#define FEATURE_INDEX_H
 
-#include "extended/feature_index.h"
+/* The GtFeatureIndex interface. */
+typedef struct GtFeatureIndexClass GtFeatureIndexClass;
+
+#include "extended/feature_index_api.h"
+
+GtFeatureIndex* gt_feature_index_ref(GtFeatureIndex*);
+int             gt_feature_index_unit_test(GtFeatureIndex *fi, GtError *err);
+int             gt_feature_index_mt_unit_test(GtFeatureIndex *fi, GtError *err);
+
+#endif

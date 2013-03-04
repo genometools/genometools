@@ -140,15 +140,15 @@ Test do
   run_test "#{$bin}gt #{$testdata}../gtscripts/gtdoc.lua -html -v #{$cur}"
 end
 
-if not $arguments["nocairo"] then
-  Name "feature_index and feature_stream bindings"
-  Keywords "gt_scripts"
-  Test do
-    run_test "#{$bin}gt #{$testdata}gtscripts/feature_stuff.lua #{$testdata}"
-    run "env LC_ALL=C sort #{last_stdout}"
-    run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{last_stdout} -"
-  end
+Name "feature_index and feature_stream bindings"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}gtscripts/feature_stuff.lua #{$testdata}"
+  run "env LC_ALL=C sort #{last_stdout}"
+  run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{last_stdout} -"
+end
 
+if not $arguments["nocairo"] then
   Name "AnnotationSketch (general bindings)"
   Keywords "gt_scripts"
   Test do

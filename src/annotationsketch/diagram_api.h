@@ -29,7 +29,7 @@
 typedef struct GtDiagram GtDiagram;
 
 #include "annotationsketch/custom_track_api.h"
-#include "annotationsketch/feature_index_api.h"
+#include "extended/feature_index_api.h"
 #include "annotationsketch/style_api.h"
 #include "annotationsketch/block_api.h"
 #include "core/error_api.h"

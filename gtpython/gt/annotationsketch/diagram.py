@@ -22,12 +22,12 @@ from gt.dlload import gtlib
 from gt.annotationsketch.block import Block
 from gt.annotationsketch.canvas import Canvas
 from gt.annotationsketch.custom_track import CustomTrack
-from gt.annotationsketch.feature_index import FeatureIndex
 from gt.annotationsketch.style import Style
 from gt.core.array import Array
 from gt.core.error import Error, gterror
 from gt.core.gtrange import Range
 from gt.core.gtstr import Str
+from gt.extended.feature_index import FeatureIndex
 from gt.extended.feature_node import FeatureNode
 
 TrackSelectorFunc = CFUNCTYPE(c_void_p, c_void_p, c_void_p, c_void_p)

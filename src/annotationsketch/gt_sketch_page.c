@@ -43,7 +43,7 @@
 #include "annotationsketch/canvas_cairo_context.h"
 #include "annotationsketch/custom_track_gc_content_api.h"
 #include "annotationsketch/diagram.h"
-#include "annotationsketch/feature_index_memory.h"
+#include "extended/feature_index_memory.h"
 #include "annotationsketch/gt_sketch_page.h"
 #include "annotationsketch/layout.h"
 #include "annotationsketch/style.h"

@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,4 +15,19 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'extended/feature_index'
+require 'gtdlload'
+require 'extended/genome_stream'
+
+module GT
+  extend DL::Importable
+  gtdlload "libgenometools"
+  extern "GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex*)"
+
+  class FeatureStream < GenomeStream
+    def initialize(genome_stream, feature_index)
+      @genome_stream = GT.gt_feature_stream_new(genome_stream,
+                                                feature_index)
+      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
+    end
+  end
+end

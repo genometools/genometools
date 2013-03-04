@@ -1,29 +1,29 @@
+Name "gtpython: genome_stream bindings (output stream)"
+Keywords "gt_python"
+Test do
+  run_python "#{$testdata}gtpython/gff3.py #{$testdata}gff3_file_1_short.txt"
+  run "env LC_ALL=C sort #{last_stdout}"
+  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+end
+
+Name "gtpython: genome_visitor bindings (output stream)"
+Keywords "gt_python"
+Test do
+  run_python "#{$testdata}gtpython/genome_visitor.py #{$testdata}gff3_file_1_short.txt"
+  run "env LC_ALL=C sort #{last_stdout}"
+  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+end
+
+Name "gtpython: feature_index and feature_stream bindings"
+Keywords "gt_python"
+Test do
+  run_python "#{$testdata}gtpython/feature_stuff.py " +
+             "#{$testdata}gff3_file_1_short.txt"
+  run "env LC_ALL=C sort #{last_stdout}"
+  run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{last_stdout} -"
+end
+
 if not $arguments["nocairo"] then
-  Name "gtpython: genome_stream bindings (output stream)"
-  Keywords "gt_python"
-  Test do
-    run_python "#{$testdata}gtpython/gff3.py #{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{last_stdout}"
-    run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
-  end
-
-  Name "gtpython: genome_visitor bindings (output stream)"
-  Keywords "gt_python"
-  Test do
-    run_python "#{$testdata}gtpython/genome_visitor.py #{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{last_stdout}"
-    run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
-  end
-
-  Name "gtpython: feature_index and feature_stream bindings"
-  Keywords "gt_python"
-  Test do
-    run_python "#{$testdata}gtpython/feature_stuff.py " +
-               "#{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{last_stdout}"
-    run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{last_stdout} -"
-  end
-
   Name "gtpython: AnnotationSketch bindings (valid gff3 file)"
   Keywords "gt_python"
   Test do
@@ -128,12 +128,12 @@ if not $arguments["nocairo"] then
   Test do
     run_python("#{$testdata}gtpython/unicode_strings.py #{$cur}/gtdata/sketch/default.style test.png")
   end
+end
 
-  Name "gtpython: unittests"
-  Keywords "gt_python unittests"
-  Test do
-    run_python "#{$gtpython}/tests/__init__.py "
-    grep last_stderr, "OK"
-  end
 
+Name "gtpython: unittests"
+Keywords "gt_python unittests"
+Test do
+  run_python "#{$gtpython}/tests/__init__.py "
+  grep last_stderr, "OK"
 end

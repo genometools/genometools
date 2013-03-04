@@ -20,7 +20,7 @@
 #include "lauxlib.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/diagram.h"
-#include "annotationsketch/feature_index.h"
+#include "extended/feature_index.h"
 #include "annotationsketch/luastyle.h"
 #include "core/error.h"
 #include "extended/luahelper.h"

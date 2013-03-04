@@ -18,7 +18,7 @@
 #ifndef ANNO_DB_SCHEMA_API_H
 #define ANNO_DB_SCHEMA_API_H
 
-#include "annotationsketch/feature_index_api.h"
+#include "extended/feature_index_api.h"
 #include "core/error_api.h"
 #include "extended/rdb_api.h"
 

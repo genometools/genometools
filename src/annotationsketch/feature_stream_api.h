@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,16 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_STREAM_API_H
-#define FEATURE_STREAM_API_H
+#warning use of FeatureStream headers from annotationsketch/ is deprecated  \
+         -- use headers from extended/ instead
 
-#include "annotationsketch/feature_index_api.h"
-#include "extended/node_stream_api.h"
-
-typedef struct GtFeatureStream GtFeatureStream;
-
-/* Create a new <GtFeatureStream> which writes all passed nodes to
-   <GtFeatureIndex> <fi>. */
-GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex *fi);
-
-#endif
+#include "extended/feature_stream_api.h"

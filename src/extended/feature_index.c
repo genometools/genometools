@@ -23,12 +23,12 @@
 #include "core/ma.h"
 #include "core/thread_api.h"
 #include "core/unused_api.h"
-#include "annotationsketch/feature_index_rep.h"
-#include "annotationsketch/feature_visitor.h"
+#include "extended/feature_index_rep.h"
 #include "extended/feature_node.h"
 #ifdef GT_THREADS_ENABLED
 #include "extended/genome_node.h"
 #endif
+#include "extended/feature_visitor.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 

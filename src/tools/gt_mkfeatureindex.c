@@ -15,10 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef WITHOUT_CAIRO
 #include <string.h>
-#include "annotationsketch/feature_index_api.h"
-#include "annotationsketch/feature_stream_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/str_array_api.h"
@@ -26,6 +23,8 @@
 #include "core/xposix.h"
 #include "extended/anno_db_gfflike_api.h"
 #include "extended/bed_in_stream.h"
+#include "extended/feature_index_api.h"
+#include "extended/feature_stream_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gtf_in_stream.h"
 #include "extended/rdb_api.h"
@@ -281,5 +280,3 @@ GtTool* gt_mkfeatureindex(void)
                      gt_mkfeatureindex_arguments_check,
                      gt_mkfeatureindex_runner);
 }
-
-#endif

@@ -19,10 +19,6 @@
 */
 
 #include <string.h>
-#include "annotationsketch/feature_index_memory.h"
-#include "annotationsketch/feature_index_rep.h"
-#include "annotationsketch/feature_index.h"
-#include "annotationsketch/feature_stream_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_table.h"
 #include "core/cstr_api.h"
@@ -34,6 +30,9 @@
 #include "core/range.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "extended/feature_index_memory.h"
+#include "extended/feature_index_rep.h"
+#include "extended/feature_index.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
 

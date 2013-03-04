@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2006-2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2008-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -431,16 +432,11 @@ ifneq ($(cairo),no)
 else
   EXP_CPPFLAGS += -DWITHOUT_CAIRO
   STEST_FLAGS += -nocairo
-  # TODO: move annodb out of AnnotationSketch dependency
   CAIRO_FILTER_OUT:=src/gtlua/annotationsketch_lua.c \
                     src/gtlua/canvas_lua.c \
                     src/gtlua/diagram_lua.c \
-                    src/gtlua/feature_index_lua.c \
-                    src/gtlua/feature_stream_lua.c \
-                    src/gtlua/feature_visitor_lua.c \
                     src/gtlua/image_info_lua.c \
-                    src/gtlua/layout_lua.c \
-                    src/extended/anno_db_gfflike.c
+                    src/gtlua/layout_lua.c
 endif
 
 ifeq ($(threads),yes)

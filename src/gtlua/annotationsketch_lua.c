@@ -15,14 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef WITHOUT_CAIRO
-
 #include "core/assert_api.h"
 #include "gtlua/canvas_lua.h"
 #include "gtlua/diagram_lua.h"
-#include "gtlua/feature_index_lua.h"
-#include "gtlua/feature_stream_lua.h"
-#include "gtlua/feature_visitor_lua.h"
 #include "gtlua/image_info_lua.h"
 #include "gtlua/layout_lua.h"
 #include "gtlua/annotationsketch_lua.h"
@@ -38,13 +33,8 @@ int gt_lua_open_annotationsketch(lua_State *L)
 #endif
   gt_lua_open_canvas(L);
   gt_lua_open_diagram(L);
-  gt_lua_open_feature_index(L);
-  gt_lua_open_feature_stream(L);
-  gt_lua_open_feature_visitor(L);
   gt_lua_open_imageinfo(L);
   gt_lua_open_layout(L);
   gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
-
-#endif

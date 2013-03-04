@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,16 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_VISITOR_H
-#define FEATURE_VISITOR_H
+#ifndef FEATURE_STREAM_API_H
+#define FEATURE_STREAM_API_H
 
-/* Implements the <GtNodeVisitor> interface. */
-typedef struct GtFeatureVisitor GtFeatureVisitor;
+#include "extended/feature_index_api.h"
+#include "extended/node_stream_api.h"
 
-#include "annotationsketch/feature_index.h"
-#include "extended/node_visitor.h"
+typedef struct GtFeatureStream GtFeatureStream;
 
-const GtNodeVisitorClass* gt_feature_visitor_class(void);
-GtNodeVisitor*            gt_feature_visitor_new(GtFeatureIndex*);
+/* Create a new <GtFeatureStream> which writes all passed nodes to
+   <GtFeatureIndex> <fi>. */
+GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex *fi);
 
 #endif

@@ -15,10 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef WITHOUT_CAIRO
 #include <string.h>
-#include "annotationsketch/feature_index_api.h"
-#include "annotationsketch/feature_stream_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/password_entry.h"
@@ -26,8 +23,10 @@
 #include "core/unused_api.h"
 #include "extended/anno_db_gfflike_api.h"
 #include "extended/anno_db_schema_api.h"
-#include "extended/gff3_visitor.h"
+#include "extended/feature_index_api.h"
 #include "extended/feature_node.h"
+#include "extended/feature_stream_api.h"
+#include "extended/gff3_visitor.h"
 #include "extended/rdb_api.h"
 #ifdef HAVE_MYSQL
 #include "extended/rdb_mysql_api.h"
@@ -334,4 +333,3 @@ GtTool* gt_featureindex(void)
                   gt_featureindex_arguments_check,
                   gt_featureindex_runner);
 }
-#endif

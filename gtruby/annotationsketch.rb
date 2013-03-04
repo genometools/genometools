@@ -21,8 +21,6 @@ begin
   require 'annotationsketch/custom_track'
   require 'annotationsketch/style'
   require 'annotationsketch/diagram'
-  require 'annotationsketch/feature_index'
-  require 'annotationsketch/feature_stream'
   require 'annotationsketch/graphics'
   require 'annotationsketch/image_info'
   require 'annotationsketch/layout'

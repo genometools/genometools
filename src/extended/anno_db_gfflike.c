@@ -15,11 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef WITHOUT_CAIRO
 #include <string.h>
-#include "annotationsketch/feature_index_rep.h"
-#include "annotationsketch/feature_index.h"
-#include "annotationsketch/feature_visitor.h"
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
@@ -42,11 +38,14 @@
 #include "extended/anno_db_gfflike_api.h"
 #include "extended/anno_db_prepared_stmt.h"
 #include "extended/anno_db_schema_rep.h"
-#include "extended/genome_node.h"
-#include "extended/gff3_in_stream.h"
+#include "extended/feature_index_rep.h"
+#include "extended/feature_index.h"
+#include "extended/feature_visitor.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_observer.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/genome_node.h"
+#include "extended/gff3_in_stream.h"
 #include "extended/rdb_api.h"
 #include "extended/rdb_sqlite_api.h"
 #include "extended/rdb_visitor_rep.h"
@@ -2074,5 +2073,3 @@ int gt_anno_db_gfflike_unit_test(GtError *err)
   gt_error_delete(testerr);
   return had_err;
 }
-
-#endif
