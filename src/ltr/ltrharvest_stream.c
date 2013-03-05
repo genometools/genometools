@@ -1172,8 +1172,8 @@ typedef struct {
 static void* gt_searchforLTRs_threadfunc(void *data) {
   GtLTRharvestThreadInfo *info = (GtLTRharvestThreadInfo*) data;
   gt_assert(info);
-  gt_searchforLTRs(info->lo, info->arrayLTRboundaries, info->rmutex,
-                   info->wmutex, &info->cur_seed, info->err);
+  (void) gt_searchforLTRs(info->lo, info->arrayLTRboundaries, info->rmutex,
+                          info->wmutex, &info->cur_seed, info->err);
   return NULL;
 }
 
@@ -1186,19 +1186,22 @@ static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
   LTRboundaries *oldboundaries,
                 *boundaries;
 
-  oldboundaries = &(arrayLTRboundaries->spaceLTRboundaries[0]);
-  for (i = 1; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
+  oldboundaries = arrayLTRboundaries->spaceLTRboundaries;
+  for (i = 1UL; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
   {
-    boundaries = &(arrayLTRboundaries->spaceLTRboundaries[i]);
-    if (!boundaries->skipped) {
-      if (oldboundaries->leftLTR_5 == boundaries->leftLTR_5
-            && oldboundaries->rightLTR_3 == boundaries->rightLTR_3)
-      {
-        boundaries->skipped = true;
-      }
-    }
-    oldboundaries = boundaries;
+    boundaries = arrayLTRboundaries->spaceLTRboundaries + i;
+    gt_assert(!boundaries->skipped);
+    if (oldboundaries->leftLTR_5 == boundaries->leftLTR_5
+          && oldboundaries->rightLTR_3 == boundaries->rightLTR_3)
+      boundaries->skipped = true;
+    else
+      oldboundaries = boundaries;
   }
+}
+
+static inline bool ltrboundaries_overlap(GtRange *a, LTRboundaries *b) {
+  gt_assert(b);
+  return (a->start <= b->rightLTR_3 && a->end >= b->leftLTR_5);
 }
 
 /* The following function removes overlaps and deletes the prediction with
@@ -1208,63 +1211,47 @@ static void gt_removeoverlapswithlowersimilarity(GtArrayLTRboundaries
                                                             *arrayLTRboundaries,
                                                  bool nooverlapallowed)
 {
-  unsigned long i, j;
-  unsigned long startpos_i, endpos_i, startpos_j, endpos_j;
-  LTRboundaries *boundaries_i,
-                *boundaries_j;
+  unsigned long i;
+  LTRboundaries *boundaries,
+                *oldboundaries,
+                *maxsimboundaries = NULL;
+  GtRange refrng;
+  gt_assert(arrayLTRboundaries != NULL);
 
-  for (i = 0; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
-  {
-    boundaries_i = &(arrayLTRboundaries->spaceLTRboundaries[i]);
-    if (boundaries_i->skipped)
-    {
+  if (arrayLTRboundaries->spaceLTRboundaries == NULL)
+    return;
+  gt_assert(arrayLTRboundaries->spaceLTRboundaries != NULL);
+
+  maxsimboundaries = oldboundaries = arrayLTRboundaries->spaceLTRboundaries;
+  refrng.start = oldboundaries->leftLTR_5;
+  refrng.end = oldboundaries->rightLTR_3;
+  for (i = 1UL; i < arrayLTRboundaries->nextfreeLTRboundaries; i++) {
+    boundaries = arrayLTRboundaries->spaceLTRboundaries + i;
+    if (boundaries->skipped)
       continue;
-    }
-    startpos_i = boundaries_i->leftLTR_5;
-    endpos_i   = boundaries_i->rightLTR_3;
-
-    for (j = i + 1; j < arrayLTRboundaries->nextfreeLTRboundaries; j++)
-    {
-      boundaries_j = &(arrayLTRboundaries->spaceLTRboundaries[j]);
-      if (boundaries_j->skipped)
-      {
-        continue;
-      }
-      startpos_j = boundaries_j->leftLTR_5;
-      endpos_j   = boundaries_j->rightLTR_3;
-
-      /* if overlap */
-      if (!((endpos_i < startpos_j) || (endpos_j < startpos_i)))
-      {
-        if (nooverlapallowed)
-        {
-          /* All predictions in a cluster will be deleted. */
-          /* take min(startpos_i, startpos_j) */
-          if (startpos_j < startpos_i)
-          {
-            startpos_i = startpos_j;
-          }
-          /* take max(endpos_i, endpos_j) */
-          if (endpos_i < endpos_j)
-          {
-            endpos_i = endpos_j;
-          }
-          /* delete both predictions */
-          boundaries_i->skipped = true;
-          boundaries_j->skipped = true;
-        } else
-        {
-          /* take prediction with higher similarity */
-          if (boundaries_i->similarity >= boundaries_j->similarity)
-          {
-            boundaries_j->skipped = true;
-          } else
-          {
-            boundaries_i->skipped = true;
-            break;
-          }
+    if (ltrboundaries_overlap(&refrng, boundaries)) {
+      /* due to sortedness of the array, the left border shouldn't change... */
+      gt_assert(refrng.start <= boundaries->leftLTR_5);
+      /* ...so only update the right border */
+      refrng.end = MAX(boundaries->rightLTR_3, refrng.end);
+      if (nooverlapallowed) {
+        oldboundaries->skipped = true;
+        boundaries->skipped = true;
+      } else {
+        if (gt_double_smaller_double(maxsimboundaries->similarity,
+                                     boundaries->similarity)) {
+          maxsimboundaries->skipped = true;
+          maxsimboundaries = boundaries;
+        } else {
+          boundaries->skipped = true;
         }
       }
+    } else {
+      /* no more overlapping with cluster, reset */
+      oldboundaries = boundaries;
+      refrng.start = boundaries->leftLTR_5;
+      refrng.end = boundaries->rightLTR_3;
+      maxsimboundaries = boundaries;
     }
   }
 }
@@ -1273,11 +1260,12 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
                                      GtGenomeNode **gn,
                                      GtError *err)
 {
-  GtLTRharvestStream *ltrh_stream = gt_ltrharvest_stream_cast(ns);
+  GtLTRharvestStream *ltrh_stream;
   GtLTRharvestThreadInfo threadinfo;
   int had_err = 0;
   gt_error_check(err);
 
+  ltrh_stream = gt_ltrharvest_stream_cast(ns);
   if (ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_START) {
     GT_INITARRAY(&ltrh_stream->repeatinfo.repeats, Repeat);
     ltrh_stream->prevseqnum = GT_UNDEF_ULONG;
