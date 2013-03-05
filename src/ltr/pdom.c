@@ -25,7 +25,7 @@
 #include <unistd.h>
 
 #include "core/codon_api.h"
-#include "core/codon_iterator_simple.h"
+#include "core/codon_iterator_simple_api.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
