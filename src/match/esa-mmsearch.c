@@ -609,11 +609,7 @@ static int gt_callenumquerymatches_withindex(
                                                         suffixarray->encseq)));
     for (queryunitnum = 0; /* Nothing */; queryunitnum++)
     {
-      retval = gt_seq_iterator_next(seqit,
-                                   &query,
-                                   &querylen,
-                                   &desc,
-                                   err);
+      retval = gt_seq_iterator_next(seqit, &query, &querylen, &desc, err);
       if (retval < 0)
       {
         haserr = true;

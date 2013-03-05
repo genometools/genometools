@@ -144,3 +144,44 @@ unsigned long gt_suffixarrayfindmums (const void *genericindex,
   }
   return offset;
 }
+
+GtRange gt_suffixarrayfindinterval (const void *genericindex,
+                                    unsigned long offset,
+                                    unsigned long left,
+                                    unsigned long right,
+                                    unsigned long *matchlength,
+                                    const GtUchar *qstart,
+                                    const GtUchar *qend)
+{
+  const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
+  const GtUchar *qptr;
+  unsigned long totallength = gt_encseq_total_length(suffixarray->encseq);
+  GtRange result;
+
+  gt_assert(qstart < qend);
+  for (qptr = qstart; /* Nothing */; qptr++, offset++)
+  {
+    Simplelcpinterval itv;
+
+    if (qptr >= qend || ISSPECIAL(*qptr) ||
+        !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
+                                         suffixarray->readmode,
+                                         totallength,
+                                         suffixarray->suftab,
+                                         &itv,
+                                         *qptr,
+                                         offset,
+                                         left,
+                                         right))
+    {
+      break;
+    }
+    gt_assert(itv.left <= itv.right);
+    left = itv.left;
+    right = itv.right;
+  }
+  *matchlength = (unsigned long) (qptr - qstart - 1);
+  result.start = left;
+  result.end = right;
+  return result;
+}

@@ -20,6 +20,7 @@
 
 #include "core/unused_api.h"
 #include "core/types_api.h"
+#include "core/range_api.h"
 
 unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
                                            unsigned long offset,
@@ -45,4 +46,12 @@ unsigned long gt_suffixarrayfindmums (const void *genericindex,
                                       unsigned long *witnessposition,
                                       const GtUchar *qstart,
                                       const GtUchar *qend);
+
+GtRange gt_suffixarrayfindinterval (const void *genericindex,
+                                    unsigned long offset,
+                                    unsigned long left,
+                                    unsigned long right,
+                                    unsigned long *matchlength,
+                                    const GtUchar *qstart,
+                                    const GtUchar *qend);
 #endif
