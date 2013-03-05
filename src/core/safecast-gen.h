@@ -37,7 +37,7 @@
         {\
           if (sizeof (FROMTYPE) > sizeof (TOTYPE))\
           {\
-            if (from > (FROMTYPE) UINT32_MAX)\
+            if (from > (FROMTYPE) ~0U)\
             {\
               fprintf(stderr,"%s, %d: %llu cannot be stored in 32bit word",\
                         filename,line,PRINTLLUcast(from));\

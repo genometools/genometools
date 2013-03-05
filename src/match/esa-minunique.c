@@ -180,7 +180,7 @@ GtRange gt_suffixarrayfindinterval (const void *genericindex,
     left = itv.left;
     right = itv.right;
   }
-  *matchlength = (unsigned long) (qptr - qstart - 1);
+  *matchlength = (unsigned long) (qptr - qstart);
   result.start = left;
   result.end = right;
   return result;

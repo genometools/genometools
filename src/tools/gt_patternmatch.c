@@ -94,7 +94,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     unsigned long dbstart;
     Enumpatterniterator *epi;
     GT_UNUSED unsigned int firstspecial;
-    GtMMsearchiterator *mmsibck, *mmsiimm;
+    GtMMsearchiterator *mmsibck = NULL, *mmsiimm = NULL;
     GtBucketspecification bucketspec;
     Bucketenumerator *bucketenumerator;
     Lcpinterval itv;
