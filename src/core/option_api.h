@@ -32,19 +32,20 @@ typedef struct GtOptionParser GtOptionParser;
    the descriptions to manually affect the formatting. */
 typedef struct GtOption GtOption;
 
-/* Possible option parser return values. <GT_OPTION_PARSER_OK> denotes that
-   everything went fine, <GT_OPTION_PARSER_ERROR> that an error occured during
-   option parsing, and <GT_OPTION_PARSER_REQUESTS_EXIT> that the option parser
-   requests an exit, because option <-help>, <-help+>, <-helpdev> or <-version>
-   was used. */
-
-typedef enum {
+enum GtOPrval {
   GT_OPTION_PARSER_OK,           /* Everything went fine. */
   GT_OPTION_PARSER_ERROR,        /* An error occured during option parsing. */
   GT_OPTION_PARSER_REQUESTS_EXIT /* The option parser requests an exit, because
                                     option -help, -help+, -helpdev, or -version
                                     was used. */
-} GtOPrval;
+};
+
+/* Possible option parser return values. <GT_OPTION_PARSER_OK> denotes that
+   everything went fine, <GT_OPTION_PARSER_ERROR> that an error occured during
+   option parsing, and <GT_OPTION_PARSER_REQUESTS_EXIT> that the option parser
+   requests an exit, because option <-help>, <-help+>, <-helpdev> or <-version>
+   was used. */
+typedef enum GtOPrval GtOPrval;
 
 typedef void (*GtShowVersionFunc)(const char *progname);
 typedef int  (*GtShowCommentFunc)(const char *progname, void *data, GtError*);

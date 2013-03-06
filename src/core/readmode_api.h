@@ -20,15 +20,16 @@
 
 #include "core/error_api.h"
 
-/* This enum type defines the possible reamodes, namely <GT_READMODE_FORWARD>,
-   <GT_READMODE_REVERSE>, <GT_READMODE_COMPL>, and <GT_READMODE_REVCOMPL>. */
-
-typedef enum {
+enum GtReadmode {
   GT_READMODE_FORWARD = 0,
   GT_READMODE_REVERSE,
   GT_READMODE_COMPL,
   GT_READMODE_REVCOMPL
-} GtReadmode;
+};
+
+/* This enum type defines the possible reamodes, namely <GT_READMODE_FORWARD>,
+   <GT_READMODE_REVERSE>, <GT_READMODE_COMPL>, and <GT_READMODE_REVCOMPL>. */
+typedef enum GtReadmode GtReadmode;
 
 #define gt_readmode_invert(RM) \
         RM = ((GtReadmode) (3 - (int) (RM)))
