@@ -44,21 +44,21 @@ def checktagerator(queryfile,ms)
       "sed -e \'s/^>.*/>/\' > patternfile"
   if File.size("patternfile") > 0
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -esa sfx -q patternfile",
-             :maxtime => 200)
+             :maxtime => 240)
     run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -q patternfile " +
-             "-withwildcards",:maxtime => 200)
+             "-withwildcards",:maxtime => 240)
     run_test("#{$bin}gt tagerator -rw -cmp -e 2 -esa sfx -q patternfile " +
-             "-withwildcards",:maxtime => 200)
+             "-withwildcards",:maxtime => 240)
     run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -q patternfile " +
              " -maxocc 10",
-             :maxtime => 200)
-    run_test "#{$bin}gt prebwt -maxdepth 4 -pck pck", :maxtime => 100
+             :maxtime => 240)
+    run_test "#{$bin}gt prebwt -maxdepth 4 -pck pck", :maxtime => 180
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -q patternfile",
-             :maxtime => 200)
+             :maxtime => 240)
     run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile",
-             :maxtime => 200)
+             :maxtime => 240)
     run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile",
-             :maxtime => 200)
+             :maxtime => 240)
     run_test("#{$bin}gt tagerator -rw -cmp -pck pck -q patternfile " +
              "-maxocc 10",
              :maxtime => 300)
@@ -71,8 +71,8 @@ def createandcheckgreedyfwdmat(reffile,queryfile)
   run "#{$bin}gt suffixerator -indexname sfx -tis -suf -ssp -dna -v " +
            "-db #{reffile}"
   run "#{$bin}gt packedindex mkindex -tis -ssp -indexname pck -db #{reffile} " +
-      "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev", :maxtime => 100
-  run_test "#{$bin}gt prebwt -maxdepth 4 -pck pck", :maxtime => 100
+      "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev", :maxtime => 180
+  run_test "#{$bin}gt prebwt -maxdepth 4 -pck pck", :maxtime => 180
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
 end
@@ -210,21 +210,21 @@ allfiles.each do |reffile|
         run("#{$bin}gt packedindex mkindex -ssp -tis -indexname pck -db " +
             "#{$testdata}#{reffile} -sprank -dna -pl -bsize 10 " +
             "-locfreq 32 -dir rev",
-            :maxtime => 100)
+            :maxtime => 180)
         run_test("#{$bin}gt dev idxlocali -s -th 7 -pck pck " +
                  "-q #{$testdata}#{queryfile}",
-                 :maxtime => 100)
+                 :maxtime => 180)
         run_test("#{$bin}gt dev idxlocali -s -th 7 -pck pck -online " +
                  "-q #{$testdata}#{queryfile}",
-                 :maxtime => 100)
+                 :maxtime => 180)
         run_test "#{$bin}gt suffixerator -indexname sfx -ssp -tis -suf -dna " +
                  "-v -db #{$testdata}#{reffile}"
         run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx " +
                  "-q #{$testdata}#{queryfile}",
-                 :maxtime => 100)
+                 :maxtime => 180)
         run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx -online " +
                  "-q #{$testdata}#{queryfile}",
-                 :maxtime => 100)
+                 :maxtime => 180)
       end
     end
   end
