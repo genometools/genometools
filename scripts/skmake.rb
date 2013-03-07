@@ -102,8 +102,8 @@ end
 
 if File.exists?('LocalMakefile.previous') and
      not FileUtils.compare_file('LocalMakefile','LocalMakefile.previous')
-  STDERR.puts "Current and previous LocalMakefile files differ: first " +
-              "remove them"
+  STDERR.puts "LocalMakefile and LocalMakefile.previous files differ: first " +
+              "remove these"
   exit 1
 end
 
