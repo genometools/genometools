@@ -81,7 +81,7 @@ def makecompilerflags(fp,options)
   if options.threads
     fp.print " threads=yes"
   end
-  fp.print " CC='ccache #{ENV["CC"]}'"
+  fp.print " CC='ccache " + ENV["CC"] + "'"
   if not options.fileargs.nil?
     filenames=options.fileargs.join(" ")
     fp.puts " #{filenames}"
