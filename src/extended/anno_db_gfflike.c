@@ -2037,7 +2037,9 @@ int gt_anno_db_gfflike_unit_test(GtError *err)
   GtError *testerr = NULL;
   GtAnnoDBSchema *adb = NULL;
   FILE *tmpfp;
+#ifdef HAVE_SQLITE
   GtRDB *rdb;
+#endif
   GtStr* tmpfilename;
   gt_error_check(err);
 
@@ -2047,6 +2049,7 @@ int gt_anno_db_gfflike_unit_test(GtError *err)
   tmpfp = gt_xtmpfp(tmpfilename);
   gt_fa_xfclose(tmpfp);
 
+#ifdef HAVE_SQLITE
   rdb = gt_rdb_sqlite_new(gt_str_get(tmpfilename), testerr);
   gt_ensure(had_err, rdb != NULL);
   if (!had_err) {
@@ -2058,6 +2061,7 @@ int gt_anno_db_gfflike_unit_test(GtError *err)
     fi = gt_anno_db_schema_get_feature_index(adb, rdb, testerr);
     gt_ensure(had_err, fi != NULL);
   }
+#endif
 
   if (!had_err) {
     /* run generic feature index tests */
@@ -2069,7 +2073,9 @@ int gt_anno_db_gfflike_unit_test(GtError *err)
   gt_str_delete(tmpfilename);
   gt_feature_index_delete(fi);
   gt_anno_db_schema_delete(adb);
+#ifdef HAVE_SQLITE
   gt_rdb_delete((GtRDB*) rdb);
+#endif
   gt_error_delete(testerr);
   return had_err;
 }

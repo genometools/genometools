@@ -31,7 +31,9 @@
 #ifdef HAVE_MYSQL
 #include "extended/rdb_mysql_api.h"
 #endif
+#ifdef HAVE_SQLITE
 #include "extended/rdb_sqlite_api.h"
+#endif
 #include "tools/gt_featureindex.h"
 
 #define GT_SQLITE_BACKEND_STRING "sqlite"
@@ -212,6 +214,7 @@ static int gt_featureindex_runner(GT_UNUSED int argc,
   gt_error_check(err);
   gt_assert(arguments);
 
+#ifdef HAVE_SQLITE
   if (!had_err) {
     if (strcmp(gt_str_get(arguments->backend),
                GT_SQLITE_BACKEND_STRING) == 0) {
@@ -227,6 +230,7 @@ static int gt_featureindex_runner(GT_UNUSED int argc,
       }
     }
   }
+#endif
 #ifdef HAVE_MYSQL
   if (!had_err) {
     if (strcmp(gt_str_get(arguments->backend),
