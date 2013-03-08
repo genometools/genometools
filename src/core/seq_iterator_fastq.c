@@ -487,7 +487,7 @@ GtSeqIterator* gt_seq_iterator_fastq_new(const GtStrArray *filenametab,
                                    err);
 }
 
-GtSeqIterator* gt_seq_iterator_colorspace_fastq_new(
+GtSeqIterator* gt_seq_iterator_fastq_new_colorspace(
                                                 const GtStrArray *filenametab,
                                                 GtError *err)
 {

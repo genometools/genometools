@@ -26,13 +26,13 @@ typedef struct GtSeqIteratorFastQ GtSeqIteratorFastQ;
 
 /* Create a new <GtSeqIteratorQual> for all sequence files in <filenametab>. */
 GtSeqIterator* gt_seq_iterator_fastq_new(const GtStrArray *filenametab,
-                                        GtError *err);
+                                         GtError *err);
 
 /* Create a new <GtSeqIteratorFastQ> for all sequence files in <filenametab>
    containing color space reads. */
-GtSeqIterator* gt_seq_iterator_colorspace_fastq_new(
-                                                const GtStrArray *filenametab,
-                                                GtError *err);
+GtSeqIterator* gt_seq_iterator_fastq_new_colorspace(const GtStrArray
+                                                    *filenametab,
+                                                    GtError *err);
 
 /* Returns the number of the file in the file name array which <seqit> is
    currently reading.  */

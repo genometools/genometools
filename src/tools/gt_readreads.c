@@ -146,7 +146,7 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
 
   if (opts->colorspace)
   {
-    siq = gt_seq_iterator_colorspace_fastq_new(files, err);
+    siq = gt_seq_iterator_fastq_new_colorspace(files, err);
   }
   else
   {
