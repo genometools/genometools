@@ -106,7 +106,7 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option_width);
 
   /* output file options */
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   /* option implications */
   gt_option_imply_either_2(option_width, option_showfasta, option_showseqnum);

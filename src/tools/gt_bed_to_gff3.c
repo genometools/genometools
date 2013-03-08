@@ -77,7 +77,7 @@ static GtOptionParser* gt_bed_to_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, o);
 
   /* output file options */
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   gt_option_parser_set_max_args(op, 1);
 

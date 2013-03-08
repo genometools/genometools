@@ -110,7 +110,7 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
   width_option = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, width_option);
 
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   /* option exclusions */
   gt_option_exclude(check_option, duplicates_option);

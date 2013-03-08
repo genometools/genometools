@@ -56,7 +56,7 @@ static GtOptionParser* gt_mergefeat_option_parser_new(void *tool_arguments)
                             "given GFF3 file(s).");
 
   /* output file options */
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   return op;
 }

@@ -34,7 +34,7 @@ static GtOPrval parse_options(int *parsed_args, GtFile **outfp, int argc,
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.");
   ofi = gt_output_file_info_new();
-  gt_output_file_register_options(op, outfp, ofi);
+  gt_output_file_info_register_options(ofi, op, outfp);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_output_file_info_delete(ofi);

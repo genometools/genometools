@@ -86,7 +86,7 @@ static GtOptionParser* gt_snpper_option_parser_new(void *tool_arguments)
   gt_seqid2file_register_options(op, arguments->s2fi);
 
   /* output file options */
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_max_args(op, 1, 2);

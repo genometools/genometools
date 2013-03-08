@@ -193,7 +193,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   /* set comment function */
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);

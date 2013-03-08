@@ -354,7 +354,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   /* output file options */
 
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   gt_option_parser_set_min_max_args(op, 2U, 2U);
 

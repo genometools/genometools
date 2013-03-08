@@ -72,7 +72,7 @@ static GtOptionParser* gt_seqtranslate_option_parser_new(void *tool_arguments)
                               &arguments->fasta_width, 60);
   gt_option_parser_add_option(op, option);
 
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
   gt_option_parser_set_min_args(op, 1);
 
   return op;

@@ -80,8 +80,8 @@ static int determine_outfp(void *data, GtError *err)
   return had_err;
 }
 
-void gt_output_file_register_options(GtOptionParser *op, GtFile **outfp,
-                                    GtOutputFileInfo *ofi)
+void gt_output_file_info_register_options(GtOutputFileInfo *ofi,
+                                          GtOptionParser *op, GtFile **outfp)
 {
   GtOption *opto, *optgzip, *optbzip2, *optforce;
   gt_assert(outfp && ofi);

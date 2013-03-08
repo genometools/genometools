@@ -66,7 +66,7 @@ static GtOptionParser* gt_seqtransform_option_parser_new(void *tool_arguments)
   o = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, o);
 
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   return op;
 }

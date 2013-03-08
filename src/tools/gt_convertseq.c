@@ -93,7 +93,7 @@ static GtOPrval parse_options(ConvertseqOptions *opts, int *parsed_args,
                          &opts->reduce_wc_prot, false);
   gt_option_parser_add_option(op, o);
 
-  gt_output_file_register_options(op, &opts->outfp, opts->ofi);
+  gt_output_file_info_register_options(opts->ofi, op, &opts->outfp);
 
   gt_option_parser_set_min_args(op, 1U);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,

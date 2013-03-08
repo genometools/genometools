@@ -410,7 +410,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   gt_option_parser_add_option(op, optmd5ids);
 
   /* output file options */
-  gt_output_file_register_options(op, &call_info->out->outfp, ofi);
+  gt_output_file_info_register_options(ofi, op, &call_info->out->outfp);
 
   /* -skipalignmentout */
   optskipalignmentout = gt_option_new_bool("skipalignmentout", "skip output of "

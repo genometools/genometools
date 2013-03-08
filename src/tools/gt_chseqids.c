@@ -62,7 +62,7 @@ static GtOPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  gt_output_file_register_options(op, &arguments->outfp, ofi);
+  gt_output_file_info_register_options(ofi, op, &arguments->outfp);
 
   /* parse options */
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);

@@ -106,7 +106,7 @@ static GtOptionParser* gt_orffinder_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
-  gt_output_file_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   gt_option_parser_set_min_args(op, 1U);
 

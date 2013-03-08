@@ -28,13 +28,16 @@ typedef struct GtOutputFileInfo GtOutputFileInfo;
 
 /* Create a new <GtOutputFileInfo> object. */
 GtOutputFileInfo* gt_output_file_info_new(void);
-/* Registers the options `-o', `-gzip', `-bzip2' and `-force' in <op>.
-   Options chosen during option parsing will be stored in <ofi> and the
-   output file will be accessible using <*outfp>. */
-void              gt_output_file_register_options(GtOptionParser *op,
-                                                  GtFile **outfp,
-                                                  GtOutputFileInfo *ofi);
-/* Deletes <ofi> and frees all associated memory. */
-void              gt_output_file_info_delete(GtOutputFileInfo *ofi);
+/* Registers the options `-o', `-gzip', `-bzip2' and `-force' in
+   <option_parser>. Options chosen during option parsing will be stored in
+   <output_file_info> and the output file will be accessible using <*outfp>. */
+void              gt_output_file_info_register_options(GtOutputFileInfo
+                                                       *output_file_info,
+                                                       GtOptionParser
+                                                       *option_parser,
+                                                       GtFile **outfp);
+/* Deletes <output_file_info> and frees all associated memory. */
+void              gt_output_file_info_delete(GtOutputFileInfo
+                                             *output_file_info);
 
 #endif
