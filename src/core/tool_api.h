@@ -21,7 +21,8 @@
 #include "core/error_api.h"
 #include "core/option_api.h"
 
-/* The <GtTool> class encapsulates a single __GenomeTools__ tool. */
+/* The <GtTool> class encapsulates a single __GenomeTools__ tool. Can also be
+   used in external applications based on <libgenometools>. */
 typedef struct GtTool GtTool;
 
 /* Callback function. Must return memory to be used as a storage space
