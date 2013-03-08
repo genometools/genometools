@@ -22,7 +22,7 @@
 #include "core/tool_api.h"
 
 /* The <GtToolbox> class groups several tools into one and can be used to
-   structure GenomeTools into sensible sets of subtools. */
+   structure __GenomeTools__ into sensible sets of subtools. */
 typedef struct GtToolbox GtToolbox;
 
 /* Return a new empty <GtToolbox>. */

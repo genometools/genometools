@@ -19,7 +19,7 @@
 #define ANNO_DB_GFFLIKE_API_H
 
 /* The <GtAnnoDBGFFlike> class implements the <GtAnnoDBSchema> interface,
-   using a database schema specifically tailored to store GenomeTools
+   using a database schema specifically tailored to store __GenomeTools__
    annotations. */
 typedef struct GtAnnoDBGFFlike GtAnnoDBGFFlike;
 

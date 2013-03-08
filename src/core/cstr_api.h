@@ -23,7 +23,7 @@
 
 /* Cstr module */
 
-/* Creates a duplicate of string <cstr> using the GenomeTools memory
+/* Creates a duplicate of string <cstr> using the __GenomeTools__ memory
    allocator. */
 char*         gt_cstr_dup(const char *cstr);
 
@@ -33,8 +33,9 @@ char*         gt_cstr_dup(const char *cstr);
    is responsible to free the result. */
 char**        gt_cstr_split(const char *cstr, char sep);
 
-/* Creates a duplicate of string <cstr> using the GenomeTools memory allocator.
-   The string needs not be \0-terminated, instead its <length> must be given. */
+/* Creates a duplicate of string <cstr> using the __GenomeTools__ memory
+   allocator. The string needs not be \0-terminated, instead its <length> must
+   be given. */
 char*         gt_cstr_dup_nt(const char *cstr, unsigned long length);
 
 /* Replace each occurence of <f> in <cstr> to <t>. */
