@@ -88,13 +88,13 @@ enum tmpfp_flags
   TMPFP_OPENBINARY    = 1 << 2, /**< use stdio mode "w+b", "w+" otherwise */
   TMPFP_DEFAULT_FLAGS = 0,
 };
-#define gt_xtmpfp_generic(template, flags) \
-        gt_xtmpfp_generic_func(template, TMPFP_DEFAULT_FLAGS, \
+#define gt_xtmpfp_generic(template_code, flags) \
+        gt_xtmpfp_generic_func(template_code, TMPFP_DEFAULT_FLAGS, \
                                __FILE__, __LINE__)
-FILE*   gt_xtmpfp_generic_func(GtStr *template, enum tmpfp_flags flags,
+FILE*   gt_xtmpfp_generic_func(GtStr *template_code, enum tmpfp_flags flags,
                                const char*, int);
-#define gt_xtmpfp(template)\
-        gt_xtmpfp_generic(template, TMPFP_DEFAULT_FLAGS)
+#define gt_xtmpfp(template_code)\
+        gt_xtmpfp_generic(template_code, TMPFP_DEFAULT_FLAGS)
 
 /* memory map functions */
 #define gt_fa_mmap_read(path, len, err)\
