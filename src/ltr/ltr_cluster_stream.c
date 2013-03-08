@@ -250,7 +250,7 @@ GT_UNUSED static int gt_cluster_matches_gap(GtArray *matches,
                 gap_size = 0,
                 length = 0;
   unsigned long num_of_matches;
-  int had_err;
+  int had_err = 0;
 
   num_of_matches = gt_array_size(matches);
   if (gt_clustered_set_num_of_elements(cs, err) != num_of_matches) {

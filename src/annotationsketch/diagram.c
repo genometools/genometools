@@ -630,7 +630,7 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
 static int visit_child(GtFeatureNode* fn, void *nti, GtError *err)
 {
   NodeTraverseInfo* gt_genome_node_info;
-  int had_err;
+  int had_err = 0;
   gt_genome_node_info = (NodeTraverseInfo*) nti;
   gt_error_check(err);
 

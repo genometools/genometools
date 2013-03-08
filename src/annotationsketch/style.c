@@ -759,7 +759,7 @@ int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
 #ifndef NDEBUG
   int stack_size;
 #endif
-  int had_err;
+  int had_err = 0;
   gt_error_check(err);
   gt_assert(sty && outstr);
   gt_rwlock_wrlock(sty->lock);

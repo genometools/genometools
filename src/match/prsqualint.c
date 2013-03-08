@@ -49,7 +49,7 @@ Qualifiedinteger *gt_parsequalifiedinteger(const char *option,
                                         const char *lparam,
                                         GtError *err)
 {
-  long readint;
+  long readint = 0;
   size_t i;
   char *lparamcopy;
   bool haserr = false;
