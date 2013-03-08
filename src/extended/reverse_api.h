@@ -20,7 +20,9 @@
 
 #include "core/error_api.h"
 
-/* reverse <dna_seq> of length <seqlen> in place */
+/* Reverse module */
+
+/* Reverse <dna_seq> of length <seqlen> in place. */
 int gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError*);
 
 #endif
