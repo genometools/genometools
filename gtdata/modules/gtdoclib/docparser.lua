@@ -97,7 +97,8 @@ local FunctionTypedef = lpeg.Ct(lpeg.Cc("funcdef") *
 local TypedefStruct = lpeg.P("typedef struct") * (Any - Semicolon)^1 * Semicolon
 local OptionalWord = (Character^1 * Space)^-1
 local Function = lpeg.Cc("function") *
-                 lpeg.C(Character^1 * Space * OptionalWord) *
+                 lpeg.C(Character^1 * Space * OptionalWord * OptionalWord *
+                        OptionalWord ) *
                  lpeg.C(lpeg.P(Any - lpeg.P("("))^1) * lpeg.P("(") *
                  lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") *
                  (Any - Semicolon)^0 * Semicolon
