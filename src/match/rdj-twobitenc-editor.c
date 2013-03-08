@@ -57,7 +57,7 @@ GtTwobitencEditor *gt_twobitenc_editor_new(const GtEncseq *encseq,
   had_err = gt_twobitenc_editor_check(encseq, err);
   if (had_err == 0)
   {
-    t_offset = gt_encseq_twobitencoding_mapoffset(encseq);
+    t_offset = gt_encseq_sequence_mapoffset(encseq);
     c_offset = gt_encseq_chardistri_mapoffset(encseq);
     encseqfilename = gt_str_new_cstr(indexname);
     gt_str_append_cstr(encseqfilename, GT_ENCSEQFILESUFFIX);

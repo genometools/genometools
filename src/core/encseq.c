@@ -7127,11 +7127,25 @@ const GtTwobitencoding *gt_encseq_twobitencoding_export(const GtEncseq *encseq)
   return encseq->twobitencoding;
 }
 
-size_t gt_encseq_twobitencoding_mapoffset(const GtEncseq *encseq)
+size_t gt_encseq_sequence_mapoffset(const GtEncseq *encseq)
 {
-  gt_assert(encseq != NULL);
-  return (size_t) ((unsigned char*) encseq->twobitencoding -
-                   (unsigned char*) encseq->mappedptr);
+  gt_assert(encseq != NULL && encseq->sat != GT_ACCESS_TYPE_UNDEFINED);
+  if (gt_encseq_has_twobitencoding(encseq))
+  {
+    return (size_t) ((unsigned char *) encseq->twobitencoding -
+                     (unsigned char *) encseq->mappedptr);
+  } else
+  {
+    if (encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS)
+    {
+      return (size_t) ((unsigned char *) encseq->plainseq -
+                       (unsigned char *) encseq->mappedptr);
+    } else
+    {
+      return (size_t) ((unsigned char *) encseq->bitpackarray -
+                       (unsigned char *) encseq->mappedptr);
+    }
+  }
 }
 
 size_t gt_encseq_chardistri_mapoffset(const GtEncseq *encseq)
