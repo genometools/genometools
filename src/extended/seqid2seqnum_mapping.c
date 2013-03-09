@@ -236,14 +236,15 @@ int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
   SeqidInfo *seqid_info;
   GtRange outrange;
   gt_error_check(err);
-  gt_assert(mapping && seqid && seqnum && offset);
+  gt_assert(mapping && seqid && seqnum);
   /* try to answer request from cache */
   if (mapping->cached_seqid && !strcmp(seqid, mapping->cached_seqid) &&
       (mapping->cached_range.end == GT_UNDEF_ULONG ||
        gt_range_contains(&mapping->cached_range, inrange))) {
     *seqnum = mapping->cached_seqnum;
     *filenum = mapping->cached_filenum;
-    *offset = mapping->cached_range.start;
+    if (offset)
+      *offset = mapping->cached_range.start;
     return 0;
   }
   /* cache miss -> regular mapping */
@@ -258,7 +259,8 @@ int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
     return -1;
   }
   /* report offset */
-  *offset = outrange.start;
+  if (offset)
+    *offset = outrange.start;
   /* store result in cache */
   mapping->cached_seqid = gt_hashmap_get_key(mapping->map, seqid);
   gt_assert(mapping->cached_seqid);

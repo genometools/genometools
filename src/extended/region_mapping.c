@@ -287,7 +287,7 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
                                           unsigned long *length, GtStr *seqid,
                                           GtError *err)
 {
-  unsigned long filenum, seqnum, GT_UNUSED offset;
+  unsigned long filenum, seqnum;
   int had_err;
   gt_error_check(err);
   GT_UNUSED GtRange range;
@@ -305,8 +305,7 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
       gt_assert(rm->seqid2seqnum_mapping);
       had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
                                             gt_str_get(seqid), &range, &seqnum,
-                                            &filenum,
-                                            &offset, err);
+                                            &filenum, NULL, err);
       if (!had_err)
         *length = gt_seq_col_get_sequence_length(rm->seq_col, filenum, seqnum);
     }
@@ -344,8 +343,7 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
       gt_assert(rm->seqid2seqnum_mapping);
       had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
                                             gt_str_get(seqid), NULL, &seqnum,
-                                            &filenum,
-                                            NULL, err);
+                                            &filenum, NULL, err);
       if (!had_err) {
         char *cdesc;
         cdesc = gt_seq_col_get_description(rm->seq_col, filenum, seqnum);
@@ -395,8 +393,7 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
       gt_assert(rm->seqid2seqnum_mapping);
       had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
                                             gt_str_get(seqid), range, &seqnum,
-                                            &filenum,
-                                            offset, err);
+                                            &filenum, offset, err);
       if (!had_err)
         md5 = gt_seq_col_get_md5_fingerprint(rm->seq_col, filenum, seqnum);
     }
