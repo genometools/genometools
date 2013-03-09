@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2011 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007            Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011       Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -44,6 +44,8 @@
 #include "match/stamp.h"
 #include "tools/gt_seqstat.h"
 
+#define GT_SEQSTAT_BINARY_DISTLEN_SUFFIX ".distlen"
+
 typedef struct
 {
   bool verbose,
@@ -56,19 +58,27 @@ typedef struct
   unsigned long genome_length;
 } SeqstatArguments;
 
-#define GT_SEQSTAT_BINARY_DISTLEN_SUFFIX ".distlen"
-
-static GtOPrval parse_options(SeqstatArguments *arguments,
-                              int *parsed_args,int argc,
-                              const char **argv, GtError *err)
+static void* gt_seqstat_arguments_new(void)
 {
+  return gt_calloc(1, sizeof (SeqstatArguments));
+}
+
+static void gt_seqstat_arguments_delete(void *tool_arguments)
+{
+  SeqstatArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  gt_free(arguments);
+}
+
+static GtOptionParser* gt_seqstat_option_parser_new(void *tool_arguments)
+{
+  SeqstatArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *optionverbose, *optiondistlen, *optionbucketsize,
            *optioncontigs, *optionastretch, *optionestimsize,
            *optionbinarydistlen, *optiongenome;
-  GtOPrval oprval;
 
-  gt_error_check(err);
+  gt_assert(arguments);
 
   op = gt_option_parser_new("[options] file [...]",
                             "Calculate statistics for fasta file(s).");
@@ -123,10 +133,7 @@ static GtOPrval parse_options(SeqstatArguments *arguments,
   gt_option_parser_add_option(op, optiongenome);
 
   gt_option_parser_set_min_args(op, 1U);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
-                                  err);
-  gt_option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
 static void showdistseqlen(unsigned long key, unsigned long long value,
@@ -245,14 +252,16 @@ static void processastretches(const GtDiscDistri *distastretch,
   gt_free(astretchinfo.mmercount);
 }
 
-int gt_seqstat(int argc, const char **argv, GtError *err)
+static int gt_seqstat_runner(int argc, const char **argv, int parsed_args,
+                             void *tool_arguments, GtError *err)
 {
+  SeqstatArguments *arguments = tool_arguments;
   GtStrArray *files;
   GtSeqIterator *seqit;
   const GtUchar *sequence;
   char *desc;
   unsigned long len;
-  int i, parsed_args, had_err = 0;
+  int i, had_err = 0;
   off_t totalsize;
   GtDiscDistri *distseqlen = NULL;
   GtAssemblyStatsCalculator *asc = NULL;
@@ -262,18 +271,9 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
   unsigned long minlength = 0, maxlength = 0;
   unsigned long long countA = 0;
   bool minlengthdefined = false;
-  SeqstatArguments arguments;
 
   gt_error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&arguments,&parsed_args, argc, argv, err)) {
-    case GT_OPTION_PARSER_OK: break;
-    case GT_OPTION_PARSER_ERROR:
-        return -1;
-    case GT_OPTION_PARSER_REQUESTS_EXIT:
-        return 0;
-  }
+  gt_assert(arguments);
 
   files = gt_str_array_new();
   for (i = parsed_args; i < argc; i++)
@@ -281,7 +281,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
     gt_str_array_add_cstr(files, argv[i]);
   }
   totalsize = gt_files_estimate_total_size(files);
-  if (arguments.showestimsize)
+  if (arguments->showestimsize)
   {
     printf("# estimated total size is " Formatuint64_t "\n",
               PRINTuint64_tcast(totalsize));
@@ -293,23 +293,23 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
       had_err = -1;
     if (!had_err)
     {
-      if (arguments.dodistlen)
+      if (arguments->dodistlen)
       {
         distseqlen = gt_disc_distri_new();
-        if (arguments.binarydistlen)
-          arguments.bucketsize = 1U;
+        if (arguments->binarydistlen)
+          arguments->bucketsize = 1U;
       }
-      if (arguments.docstats)
+      if (arguments->docstats)
       {
         asc = gt_assembly_stats_calculator_new();
         gt_assembly_stats_calculator_set_genome_length(asc,
-            arguments.genome_length);
+            arguments->genome_length);
       }
-      if (arguments.doastretch)
+      if (arguments->doastretch)
       {
         distastretch = gt_disc_distri_new();
       }
-      if (arguments.verbose)
+      if (arguments->verbose)
       {
         gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
                                                             (unsigned long long)
@@ -321,7 +321,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
         desc = NULL;
         had_err = gt_seq_iterator_next(seqit, &sequence, &len, &desc, err);
         if (had_err != 1) break; /* 0: finished; 1: error */
-        if (arguments.dodistlen || arguments.docstats)
+        if (arguments->dodistlen || arguments->docstats)
         {
           if (!minlengthdefined || minlength > len)
           {
@@ -334,21 +334,21 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
           }
           sumlength += (uint64_t) len;
           numofseq++;
-          if (arguments.dodistlen)
+          if (arguments->dodistlen)
           {
-            gt_disc_distri_add(distseqlen,len/arguments.bucketsize);
+            gt_disc_distri_add(distseqlen,len/arguments->bucketsize);
           }
-          if (arguments.docstats)
+          if (arguments->docstats)
           {
             gt_assembly_stats_calculator_add(asc, len);
           }
         }
-        if (arguments.doastretch)
+        if (arguments->doastretch)
         {
           countA += accumulateastretch(distastretch,sequence,len);
         }
       }
-      if (arguments.verbose)
+      if (arguments->verbose)
       {
         gt_progressbar_stop();
       }
@@ -356,7 +356,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
     }
   }
   gt_str_array_delete(files);
-  if (!had_err && arguments.dodistlen)
+  if (!had_err && arguments->dodistlen)
   {
     printf("# " Formatuint64_t " sequences of average length %.2f\n",
              PRINTuint64_tcast(numofseq),(double) sumlength/numofseq);
@@ -364,7 +364,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
              PRINTuint64_tcast(sumlength));
     printf("# minimum length %lu\n",minlength);
     printf("# maximum length %lu\n",maxlength);
-    if (arguments.binarydistlen)
+    if (arguments->binarydistlen)
     {
       FILE *distlenoutfile;
       GtStr *distlenoutfilename = gt_str_new_cstr(argv[parsed_args]);
@@ -387,13 +387,13 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
     else
     {
       printf("# distribution of sequence length in buckets of size %u\n",
-          arguments.bucketsize);
+          arguments->bucketsize);
       gt_disc_distri_foreach(distseqlen, showdistseqlen,
-          &(arguments.bucketsize));
+          &(arguments->bucketsize));
     }
     gt_disc_distri_delete(distseqlen);
   }
-  if (!had_err && arguments.docstats)
+  if (!had_err && arguments->docstats)
   {
     asc_logger = gt_logger_new(true, GT_LOGGER_DEFLT_PREFIX, stdout);
     gt_assembly_stats_calculator_show(asc, asc_logger);
@@ -401,10 +401,19 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
   }
   if (asc != NULL)
     gt_assembly_stats_calculator_delete(asc);
-  if (!had_err && arguments.doastretch)
+  if (!had_err && arguments->doastretch)
   {
     processastretches(distastretch,countA);
     gt_disc_distri_delete(distastretch);
   }
   return had_err;
+}
+
+GtTool* gt_seqstat(void)
+{
+  return gt_tool_new(gt_seqstat_arguments_new,
+                     gt_seqstat_arguments_delete,
+                     gt_seqstat_option_parser_new,
+                     NULL,
+                     gt_seqstat_runner);
 }

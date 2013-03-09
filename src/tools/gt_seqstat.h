@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,9 @@
 #ifndef GT_SEQSTAT_H
 #define GT_SEQSTAT_H
 
+#include "core/tool_api.h"
+
 /* the sequence statistics tool */
-int gt_seqstat(int argc, const char **argv, GtError*);
+GtTool* gt_seqstat(void);
 
 #endif

@@ -174,7 +174,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "mgth", gt_mgth);
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   gt_toolbox_add_tool(tools, "mmapandread", gt_mmapandread());
-  gt_toolbox_add(tools, "seqstat", gt_seqstat);
+  gt_toolbox_add_tool(tools, "seqstat", gt_seqstat());
   gt_toolbox_add(tools, "suffixerator", gt_suffixerator);
   gt_toolbox_add(tools, "uniquesub", gt_uniquesub);
   gt_toolbox_add_hidden_tool(tools, "dev", gt_dev());
