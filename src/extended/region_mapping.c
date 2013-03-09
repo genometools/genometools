@@ -287,8 +287,8 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
                                           unsigned long *length, GtStr *seqid,
                                           GtError *err)
 {
-  int had_err;
   unsigned long filenum, seqnum, GT_UNUSED offset;
+  int had_err;
   gt_error_check(err);
   GT_UNUSED GtRange range;
   gt_assert(rm && seqid);
@@ -301,10 +301,7 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
       had_err = gt_seq_col_md5_to_sequence_length(rm->seq_col, length, seqid,
                                                   err);
     }
-    return had_err;
-  }
-  if (!had_err) {
-    if (rm->usedesc) {
+    else if (rm->usedesc) {
       gt_assert(rm->seqid2seqnum_mapping);
       had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
                                             gt_str_get(seqid), &range, &seqnum,
@@ -317,10 +314,8 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
       had_err = gt_seq_col_grep_desc_sequence_length(rm->seq_col, length,
                                                      seqid, err);
     }
-    else {
-      if (!had_err)
-        *length = gt_seq_col_get_sequence_length(rm->seq_col, 0, 0);
-    }
+    else
+      *length = gt_seq_col_get_sequence_length(rm->seq_col, 0, 0);
   }
   return had_err;
 }
