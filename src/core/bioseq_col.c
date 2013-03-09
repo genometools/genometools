@@ -180,7 +180,8 @@ static int md5_to_index(GtBioseq **bioseq, unsigned long *seqnum,
   }
   for (i = 0; !had_err && i < bsc->num_of_seqfiles; i++) {
     *bioseq = bsc->bioseqs[i];
-    *seqnum = gt_bioseq_md5_to_index(*bioseq, seqid + GT_MD5_SEQID_PREFIX_LEN);
+    *seqnum = gt_bioseq_md5_to_index(*bioseq, gt_str_get(md5_seqid) +
+                                     GT_MD5_SEQID_PREFIX_LEN);
     if (*seqnum != GT_UNDEF_ULONG)
       break;
   }
