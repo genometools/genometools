@@ -170,7 +170,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "clean", gt_clean());
   gt_toolbox_add(tools, "convertseq", gt_convertseq);
   gt_toolbox_add(tools, "matstat", gt_matstat);
-  gt_toolbox_add(tools, "merge", gt_merge);
+  gt_toolbox_add_tool(tools, "merge", gt_merge());
   gt_toolbox_add(tools, "mgth", gt_mgth);
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   gt_toolbox_add(tools, "mmapandread", gt_mmapandread);
