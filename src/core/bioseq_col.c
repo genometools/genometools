@@ -156,19 +156,15 @@ static int gt_bioseq_col_grep_desc_sequence_length(GtSeqCol *sc,
   return had_err;
 }
 
-static int gt_bioseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
-                                    unsigned long start, unsigned long end,
-                                    GtStr *md5_seqid, GtError *err)
+static int md5_to_index(GtBioseq **bioseq, unsigned long *seqnum,
+                        GtBioseqCol *bsc, GtStr *md5_seqid, GtError *err)
 {
-  unsigned long i, seqnum = GT_UNDEF_ULONG;
+  bool seqid_changed = false;
   char *seqid = NULL;
+  unsigned long i;
   int had_err = 0;
-  GtBioseq *bioseq = NULL;
-  GtBioseqCol *bsc;
-  bsc = gt_bioseq_col_cast(sc);
   gt_error_check(err);
-  gt_assert(bsc && seq && md5_seqid && err);
-  gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
+  gt_assert(seqnum && bsc && md5_seqid);
   /* performance hack to avoid string duplication */
   if (gt_str_length(md5_seqid) >= GT_MD5_SEQID_TOTAL_LEN) {
     seqid = gt_str_get(md5_seqid);
@@ -177,26 +173,41 @@ static int gt_bioseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
                    gt_str_get(md5_seqid), GT_MD5_SEQID_SEPARATOR);
       had_err = -1;
     }
-    if (!had_err)
+    if (!had_err) {
       seqid[GT_MD5_SEQID_TOTAL_LEN-1] = '\0';
+      seqid_changed = true;
+    }
   }
   for (i = 0; !had_err && i < bsc->num_of_seqfiles; i++) {
-    bioseq = bsc->bioseqs[i];
-    seqnum = gt_bioseq_md5_to_index(bioseq, gt_str_get(md5_seqid) +
-                                    GT_MD5_SEQID_PREFIX_LEN);
-    if (seqnum != GT_UNDEF_ULONG)
+    *bioseq = bsc->bioseqs[i];
+    *seqnum = gt_bioseq_md5_to_index(*bioseq, seqid + GT_MD5_SEQID_PREFIX_LEN);
+    if (*seqnum != GT_UNDEF_ULONG)
       break;
   }
-  if (!had_err) {
-    if (gt_str_length(md5_seqid) >= GT_MD5_SEQID_TOTAL_LEN)
-      seqid[GT_MD5_SEQID_TOTAL_LEN-1] = GT_MD5_SEQID_SEPARATOR;
-    if (seqnum != GT_UNDEF_ULONG) {
-      *seq = gt_bioseq_get_sequence_range(bioseq, seqnum, start, end);
-    }
-    else {
-      gt_error_set(err, "sequence %s not found", gt_str_get(md5_seqid));
-      had_err = -1;
-    }
+  if (seqid_changed) /* reset seqid no matter what */
+    seqid[GT_MD5_SEQID_TOTAL_LEN-1] = GT_MD5_SEQID_SEPARATOR;
+  if (!had_err && *seqnum == GT_UNDEF_ULONG) {
+    gt_error_set(err, "sequence %s not found", gt_str_get(md5_seqid));
+    had_err = -1;
+  }
+  return had_err;
+}
+
+static int gt_bioseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
+                                    unsigned long start, unsigned long end,
+                                    GtStr *md5_seqid, GtError *err)
+{
+  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtBioseq *bioseq = NULL;
+  GtBioseqCol *bsc;
+  int had_err = 0;
+  bsc = gt_bioseq_col_cast(sc);
+  gt_error_check(err);
+  gt_assert(bsc && seq && md5_seqid && err);
+  gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
+  if (!(had_err = md5_to_index(&bioseq, &seqnum, bsc, md5_seqid, err))) {
+    gt_assert(seqnum != GT_UNDEF_ULONG);
+    *seq = gt_bioseq_get_sequence_range(bioseq, seqnum, start, end);
   }
   return had_err;
 }
@@ -204,27 +215,17 @@ static int gt_bioseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
 static int gt_bioseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
                                             GtStr *md5_seqid, GtError *err)
 {
-  unsigned long i, seqnum = GT_UNDEF_ULONG;
-  int had_err = 0;
-  GtBioseq *bioseq;
+  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtBioseq *bioseq = NULL;
   GtBioseqCol *bsc;
+  int had_err = 0;
   bsc = gt_bioseq_col_cast(sc);
   gt_error_check(err);
   gt_assert(bsc && desc && md5_seqid && err);
   gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
-  /* XXX: extract method */
-  for (i = 0; i < bsc->num_of_seqfiles; i++) {
-    bioseq = bsc->bioseqs[i];
-    seqnum = gt_bioseq_md5_to_index(bioseq, gt_str_get(md5_seqid) +
-                                    GT_MD5_SEQID_PREFIX_LEN);
-    if (seqnum != GT_UNDEF_ULONG)
-      break;
-  }
-  if (seqnum != GT_UNDEF_ULONG)
+  if (!(had_err = md5_to_index(&bioseq, &seqnum, bsc, md5_seqid, err))) {
+    gt_assert(seqnum != GT_UNDEF_ULONG);
     gt_str_append_cstr(desc, gt_bioseq_get_description(bioseq, seqnum));
-  else  {
-    gt_error_set(err, "sequence %s not found", gt_str_get(md5_seqid));
-    had_err = -1;
   }
   return had_err;
 }
@@ -232,26 +233,17 @@ static int gt_bioseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
 int gt_bioseq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
                                          GtStr *md5_seqid, GtError *err)
 {
-  unsigned long i, seqnum = GT_UNDEF_ULONG;
-  int had_err = 0;
-  GtBioseq *bioseq;
+  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtBioseq *bioseq = NULL;
   GtBioseqCol *bsc;
+  int had_err = 0;
   bsc = gt_bioseq_col_cast(sc);
   gt_error_check(err);
   gt_assert(bsc && len && md5_seqid && err);
   gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
-  for (i = 0; i < bsc->num_of_seqfiles; i++) {
-    bioseq = bsc->bioseqs[i];
-    seqnum = gt_bioseq_md5_to_index(bioseq, gt_str_get(md5_seqid) +
-                                    GT_MD5_SEQID_PREFIX_LEN);
-    if (seqnum != GT_UNDEF_ULONG)
-      break;
-  }
-  if (seqnum != GT_UNDEF_ULONG)
+  if (!(had_err = md5_to_index(&bioseq, &seqnum, bsc, md5_seqid, err))) {
+    gt_assert(seqnum != GT_UNDEF_ULONG);
     *len = gt_bioseq_get_sequence_length(bioseq, seqnum);
-  else  {
-    gt_error_set(err, "sequence %s not found", gt_str_get(md5_seqid));
-    had_err = -1;
   }
   return had_err;
 }
