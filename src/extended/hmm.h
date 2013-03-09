@@ -23,9 +23,9 @@
 /* The Hidden Markov Model (HMM) class */
 typedef struct GtHMM GtHMM;
 
-GtHMM*   gt_hmm_new(unsigned int num_of_states, unsigned int num_of_symbols);
+GtHMM* gt_hmm_new(unsigned int num_of_states, unsigned int num_of_symbols);
 void   gt_hmm_set_initial_state_probability(GtHMM*, unsigned int state_num,
-                                         double probability);
+                                            double probability);
 double gt_hmm_get_initial_state_probability(const GtHMM*,
                                             unsigned int state_num);
 void   gt_hmm_set_transition_probability(GtHMM*, unsigned int from_state_num,
@@ -44,16 +44,17 @@ double gt_hmm_get_emission_probability(const GtHMM*, unsigned int state_num,
 void   gt_hmm_init_random(GtHMM*);
 /* Viterbi algorithm */
 void   gt_hmm_decode(const GtHMM*, unsigned int *state_sequence,
-                  const unsigned int *emissions, unsigned int num_of_emissions);
+                     const unsigned int *emissions,
+                     unsigned int num_of_emissions);
 /* Forward algorithm, returns log(P(emissions)) */
 double gt_hmm_forward(const GtHMM*, const unsigned int *emissions,
-                   unsigned int num_of_emissions);
+                      unsigned int num_of_emissions);
 /* Backward algorithm, returns log(P(emissions)) */
 double gt_hmm_backward(const GtHMM*, const unsigned int *emissions,
-                    unsigned int num_of_emissions);
+                       unsigned int num_of_emissions);
 void   gt_hmm_emit(GtHMM*, unsigned long num_of_emissions,
-                void (*proc_emission)(unsigned int symbol, void *data),
-                void *data);
+                   void (*proc_emission)(unsigned int symbol, void *data),
+                   void *data);
 bool   gt_hmm_is_valid(const GtHMM*);
 /* returns the RMSD of two GtHMMs */
 double gt_hmm_rmsd(const GtHMM*, const GtHMM*);
