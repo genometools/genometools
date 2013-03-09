@@ -73,7 +73,7 @@
           if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
           {\
             (A)->allocated##TYPE += L;\
-            (A)->space##TYPE = gt_realloc_mem((A)->space##TYPE,\
+            (A)->space##TYPE = (TYPE *) gt_realloc_mem((A)->space##TYPE,\
                                               sizeof (TYPE) *\
                                               (A)->allocated##TYPE,\
                                               __FILE__, __LINE__);\
@@ -91,7 +91,7 @@
           if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
           {\
             (A)->allocated##TYPE += L;\
-            (A)->space##TYPE = gt_realloc_mem((A)->space##TYPE,\
+            (A)->space##TYPE = (TYPE *) gt_realloc_mem((A)->space##TYPE,\
                                               sizeof (TYPE) *\
                                               (A)->allocated##TYPE,\
                                               __FILE__, __LINE__);\
