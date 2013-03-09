@@ -21,9 +21,9 @@
 #include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/str.h"
+#include "core/toolbox.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
-#include "extended/toolbox.h"
 #include "match/cgr_spacedseed.h"
 #include "tools/gt_congruence.h"
 

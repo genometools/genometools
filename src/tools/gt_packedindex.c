@@ -19,7 +19,7 @@
 #include "core/error.h"
 #include "core/option_api.h"
 #include "core/str.h"
-#include "extended/toolbox.h"
+#include "core/toolbox.h"
 #include "core/versionfunc.h"
 #include "match/sfx-run.h"
 #include "tools/gt_packedindex.h"

@@ -78,6 +78,7 @@
 #include "core/thread_api.h"
 #include "core/timer_api.h"
 #include "core/tool_api.h"
+#include "core/toolbox_api.h"
 #include "core/translator_api.h"
 #include "core/trans_table_api.h"
 #include "core/types_api.h"

@@ -20,7 +20,7 @@
 
 #include "core/error.h"
 #include "core/tool_api.h"
-#include "extended/toolbox_api.h"
+#include "core/toolbox_api.h"
 
 /* deprecated */
 typedef int (*GtToolfunc)(int argc, const char **argv, GtError*);

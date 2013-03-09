@@ -18,9 +18,9 @@
 #include <string.h>
 #include "core/hashmap.h"
 #include "core/ma.h"
+#include "core/toolbox.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "extended/toolbox.h"
 
 struct GtToolbox {
   GtHashmap *tools;

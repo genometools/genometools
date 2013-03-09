@@ -17,8 +17,8 @@
 
 #include "core/cstr_array.h"
 #include "core/option_api.h"
+#include "core/toolbox.h"
 #include "core/versionfunc.h"
-#include "extended/toolbox.h"
 #include "gth/gt_gthmkbssmfiles.h"
 #include "tools/gt_consensus_sa.h"
 #include "tools/gt_dev.h"

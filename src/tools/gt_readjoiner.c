@@ -17,8 +17,8 @@
 
 #include "core/cstr_array.h"
 #include "core/option_api.h"
+#include "core/toolbox.h"
 #include "core/unused_api.h"
-#include "extended/toolbox.h"
 #include "extended/gtdatahelp.h"
 #include "match/rdj-version.h"
 #include "tools/gt_readjoiner_prefilter.h"

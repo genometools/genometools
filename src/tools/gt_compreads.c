@@ -18,8 +18,8 @@
 
 #include <string.h>
 #include "core/cstr_array.h"
+#include "core/toolbox.h"
 #include "core/unused_api.h"
-#include "extended/toolbox.h"
 #include "tools/gt_compreads.h"
 #include "tools/gt_compreads_refcompress.h"
 #include "tools/gt_compreads_refdecompress.h"
