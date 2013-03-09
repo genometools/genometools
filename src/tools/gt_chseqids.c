@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/chseqids_stream.h"
 #include "extended/genome_node.h"
@@ -31,23 +33,37 @@
 typedef struct {
   bool sort,
        verbose;
+  GtOutputFileInfo *ofi;
   GtFile *outfp;
 } ChseqidsArguments;
 
-static GtOPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
-                              int argc, const char **argv, GtError *err)
+static void* gt_chseqids_arguments_new(void)
 {
+  ChseqidsArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->ofi = gt_output_file_info_new();
+  return arguments;
+}
+
+static void gt_chseqids_arguments_delete(void *tool_arguments)
+{
+  ChseqidsArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_output_file_info_delete(arguments->ofi);
+  gt_free(arguments);
+}
+
+static GtOptionParser* gt_chseqids_option_parser_new(void *tool_arguments)
+{
+  ChseqidsArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOutputFileInfo *ofi;
   GtOption *option;
-  GtOPrval oprval;
-  gt_error_check(err);
+  gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] mapping_file [GFF3_file]",
                          "Change sequence ids by the mapping given in "
                          "mapping_file.");
-  ofi = gt_output_file_info_new();
 
   /* -sort */
   option = gt_option_new_bool("sort",
@@ -62,41 +78,31 @@ static GtOPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  gt_output_file_info_register_options(ofi, op, &arguments->outfp);
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   /* parse options */
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_max_args(op, 1, 2);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
-                                  err);
 
-  /* free */
-  gt_output_file_info_delete(ofi);
-  gt_option_parser_delete(op);
-
-  return oprval;
+  return op;
 }
 
-int gt_chseqids(int argc, const char **argv, GtError *err)
+static int gt_chseqids_runnter(GT_UNUSED int argc, const char **argv,
+                               int parsed_args, void *tool_arguments,
+                               GtError *err)
 {
+  ChseqidsArguments *arguments = tool_arguments;
   GtNodeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
                *gff3_out_stream = NULL;
-  ChseqidsArguments arguments;
   GtStr *chseqids;
-  int parsed_args, had_err = 0;
+  int had_err = 0;
 
   gt_error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case GT_OPTION_PARSER_OK: break;
-    case GT_OPTION_PARSER_ERROR: return -1;
-    case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
-  }
+  gt_assert(arguments);
 
   /* create the streams */
   gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args + 1]);
-  if (arguments.verbose && arguments.outfp)
+  if (arguments->verbose && arguments->outfp)
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
   chseqids = gt_str_new_cstr(argv[parsed_args]);
   chseqids_stream = gt_chseqids_stream_new(gff3_in_stream, chseqids, err);
@@ -104,13 +110,13 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
     had_err = -1;
   gt_str_delete(chseqids);
   if (!had_err) {
-    if (arguments.sort) {
+    if (arguments->sort) {
       sort_stream = gt_sort_stream_new(chseqids_stream);
-      gff3_out_stream = gt_gff3_out_stream_new(sort_stream, arguments.outfp);
+      gff3_out_stream = gt_gff3_out_stream_new(sort_stream, arguments->outfp);
     }
     else {
       gff3_out_stream = gt_gff3_out_stream_new(chseqids_stream,
-                                               arguments.outfp);
+                                               arguments->outfp);
     }
   }
 
@@ -123,7 +129,15 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
   gt_node_stream_delete(chseqids_stream);
   gt_node_stream_delete(sort_stream);
   gt_node_stream_delete(gff3_in_stream);
-  gt_file_delete(arguments.outfp);
 
   return had_err;
+}
+
+GtTool* gt_chseqids(void)
+{
+  return gt_tool_new(gt_chseqids_arguments_new,
+                     gt_chseqids_arguments_delete,
+                     gt_chseqids_option_parser_new,
+                     NULL,
+                     gt_chseqids_runnter);
 }
