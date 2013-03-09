@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,41 +20,31 @@
 #include "core/error.h"
 #include "core/option_api.h"
 #include "core/progressbar.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/xposix.h"
 #include "tools/gt_mmapandread.h"
 
-static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
-                              GtError *err)
+static GtOptionParser* gt_mmapandread_option_parser_new(GT_UNUSED void
+                                                        *tool_arguments)
 {
   GtOptionParser *op;
-  GtOPrval oprval;
-  gt_error_check(err);
   op = gt_option_parser_new("file [...]",
                             "Map the supplied files into memory and "
                             "read them once.");
   gt_option_parser_set_min_args(op, 1);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
-                                  err);
-  gt_option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
-int gt_mmapandread(int argc, const char **argv, GtError *err)
+static int gt_mmapandread_runner(int argc, const char **argv, int parsed_args,
+                                 GT_UNUSED void *tool_arguments, GtError *err)
 {
-  int i, fd, parsed_args;
+  int i, fd;
   void *map;
   struct stat sb;
   unsigned long long j;
   unsigned int byte = 0;
   gt_error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
-    case GT_OPTION_PARSER_OK: break;
-    case GT_OPTION_PARSER_ERROR: return -1;
-    case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
-  }
 
   /* iterate over all files */
   for (i = parsed_args; i < argc; i++) {
@@ -92,4 +82,13 @@ int gt_mmapandread(int argc, const char **argv, GtError *err)
     printf("all read files contained only null characters\n");
 
   return 0;
+}
+
+GtTool* gt_mmapandread(void)
+{
+  return gt_tool_new(NULL,
+                     NULL,
+                     gt_mmapandread_option_parser_new,
+                     NULL,
+                     gt_mmapandread_runner);
 }
