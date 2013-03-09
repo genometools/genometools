@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,24 +19,20 @@
 #include "core/bioseq.h"
 #include "core/md5_tab.h"
 #include "core/option_api.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/xposix.h"
 #include "tools/gt_clean.h"
 
-static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,
-                              GtError *err)
+static GtOptionParser* gt_clean_option_parser_new(GT_UNUSED void
+                                                  *tool_arguments)
 {
   GtOptionParser *op;
-  GtOPrval oprval;
-  gt_error_check(err);
   op = gt_option_parser_new("",
                             "Remove all files in the current directory which "
                             "are automatically created by gt.");
   gt_option_parser_set_max_args(op, 0);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
-                                  err);
-  gt_option_parser_delete(op);
-  return oprval;
+  return op;
 }
 
 static void remove_pattern_in_current_dir(const char *pattern)
@@ -65,18 +61,11 @@ static void remove_pattern_in_current_dir(const char *pattern)
   gt_str_delete(path);
 }
 
-int gt_clean(int argc, const char **argv, GtError *err)
+int gt_clean_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
+                    GT_UNUSED int parsed_args, GT_UNUSED void *tool_arguments,
+                    GtError *err)
 {
-  int parsed_args;
   gt_error_check(err);
-
-  /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
-    case GT_OPTION_PARSER_OK: break;
-    case GT_OPTION_PARSER_ERROR: return -1;
-    case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
-  }
-  gt_assert(parsed_args == 1);
 
   remove_pattern_in_current_dir(GT_ENCSEQFILESUFFIX);
   remove_pattern_in_current_dir(GT_SSPTABFILESUFFIX);
@@ -86,4 +75,13 @@ int gt_clean(int argc, const char **argv, GtError *err)
   remove_pattern_in_current_dir(GT_MD5TABFILESUFFIX);
 
   return 0;
+}
+
+GtTool* gt_clean(void)
+{
+  return gt_tool_new(NULL,
+                     NULL,
+                     gt_clean_option_parser_new,
+                     NULL,
+                     gt_clean_runner);
 }

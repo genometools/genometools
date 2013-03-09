@@ -167,7 +167,7 @@ GtToolbox* gtt_tools(void)
   /* add tools */
   gt_toolbox_add_tool(tools, "orffinder", gt_orffinder());
   gt_toolbox_add_tool(tools, "chseqids", gt_chseqids());
-  gt_toolbox_add(tools, "clean", gt_clean);
+  gt_toolbox_add_tool(tools, "clean", gt_clean());
   gt_toolbox_add(tools, "convertseq", gt_convertseq);
   gt_toolbox_add(tools, "matstat", gt_matstat);
   gt_toolbox_add(tools, "merge", gt_merge);
