@@ -37,7 +37,8 @@ static GtOptionParser* gt_mmapandread_option_parser_new(GT_UNUSED void
 }
 
 static int gt_mmapandread_runner(int argc, const char **argv, int parsed_args,
-                                 GT_UNUSED void *tool_arguments, GtError *err)
+                                 GT_UNUSED void *tool_arguments,
+                                 GT_UNUSED GtError *err)
 {
   int i, fd;
   void *map;

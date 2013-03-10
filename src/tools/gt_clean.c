@@ -63,7 +63,7 @@ static void remove_pattern_in_current_dir(const char *pattern)
 
 int gt_clean_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                     GT_UNUSED int parsed_args, GT_UNUSED void *tool_arguments,
-                    GtError *err)
+                    GT_UNUSED GtError *err)
 {
   gt_error_check(err);
 
