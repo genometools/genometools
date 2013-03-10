@@ -212,7 +212,7 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
   if (!had_err) {
     if (gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
       had_err = gt_seq_col_md5_to_seq(rm->seq_col, seq, start - offset,
-                                        end - offset, seqid, err);
+                                      end - offset, seqid, err);
       return had_err;
     }
   }
