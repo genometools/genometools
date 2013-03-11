@@ -743,7 +743,7 @@ static int readkeysize(const char *indexname,GtError *err)
 {
   FILE *fp;
   bool haserr = false;
-  char cc;
+  char cc = '\0';
 
   gt_error_check(err);
   fp = gt_fa_fopen_with_suffix(indexname,GT_KEYSTABFILESUFFIX,"rb",err);
