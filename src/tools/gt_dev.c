@@ -138,6 +138,6 @@ GtTool* gt_dev(void)
                              gt_dev_option_parser_new,
                              NULL,
                              gt_dev_runner);
-  gt_tool_is_toolbox(tool);
+  gt_tool_set_toolbox(tool);
   return tool;
 }

@@ -14,16 +14,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TOOL_H
-#define TOOL_H
+#ifndef TOOL_ITERATOR_H
+#define TOOL_ITERATOR_H
 
-#include "core/tool_api.h"
 #include "core/toolbox.h"
 
-/* Set that <tool> is a <GtToolbox> (i.e., that <GtToolArgumentsNew> returns a
-   <GtToolbox> object). */
-void        gt_tool_set_toolbox(GtTool *tool);
-bool        gt_tool_is_toolbox(const GtTool *tool);
-GtToolbox*  gt_tool_create_toolbox(const GtTool *tool);
+typedef struct GtToolIterator GtToolIterator;
+
+GtToolIterator* gt_tool_iterator_new(GtToolbox *toolbox);
+bool            gt_tool_iterator_next(GtToolIterator *tool_iterator,
+                                      const char **name, GtTool **tool);
+void            gt_tool_iterator_delete(GtToolIterator *tool_iterator);
 
 #endif

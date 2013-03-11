@@ -135,6 +135,36 @@ int gt_toolbox_show(GT_UNUSED const char *progname, void *toolbox,
   return 0;
 }
 
+typedef struct {
+  GtToolboxIterator func;
+  void *data;
+} IterateInfo;
+
+static int toolbox_iterate(void *key, void *value, void *data,
+                           GT_UNUSED GtError *err)
+{
+  const char *name = key;
+  GtToolinfo *toolinfo = value;
+  IterateInfo *info = data;
+  gt_error_check(err);
+  gt_assert(key && value && data);
+  if (!toolinfo->hidden && toolinfo->tool)
+    info->func(name, toolinfo->tool, info->data);
+  return 0;
+}
+
+void gt_toolbox_iterate(const GtToolbox *tb, GtToolboxIterator func, void *data)
+{
+  IterateInfo info;
+  GT_UNUSED int had_err = 0;
+  gt_assert(tb && func);
+  info.func = func;
+  info.data = data;
+  had_err = gt_hashmap_foreach_in_key_order(tb->tools, toolbox_iterate, &info,
+                                            NULL);
+  gt_assert(!had_err); /* func() is sane */
+}
+
 void gt_toolbox_delete(GtToolbox *tb)
 {
   if (!tb) return;

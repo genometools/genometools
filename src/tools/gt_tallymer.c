@@ -1038,6 +1038,6 @@ GtTool* gt_tallymer(void)
                              gt_tyr_option_parser_new,
                              NULL,
                              gt_tyr_runner);
-  gt_tool_is_toolbox(tool);
+  gt_tool_set_toolbox(tool);
   return tool;
 }

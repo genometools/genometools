@@ -17,7 +17,7 @@
 
 #include "core/ma.h"
 #include "core/versionfunc.h"
-#include "core/tool_api.h"
+#include "core/tool.h"
 
 struct GtTool {
   GtToolArgumentsNew tool_arguments_new;
@@ -99,10 +99,22 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
   return 0;
 }
 
-void gt_tool_is_toolbox(GtTool *tool)
+void gt_tool_set_toolbox(GtTool *tool)
 {
   gt_assert(tool);
   tool->is_toolbox = true;
+}
+
+bool gt_tool_is_toolbox(const GtTool *tool)
+{
+  gt_assert(tool);
+  return tool->is_toolbox;
+}
+
+GtToolbox* gt_tool_create_toolbox(const GtTool *tool)
+{
+  gt_assert(tool && tool->is_toolbox && tool->tool_arguments_new);
+  return tool->tool_arguments_new();
 }
 
 void gt_tool_delete(GtTool *tool)
