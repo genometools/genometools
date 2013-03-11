@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,9 @@
 #ifndef GT_CONVERTSEQ_H
 #define GT_CONVERTSEQ_H
 
-/* the *-to-FASTA conversion tool */
-int gt_convertseq(int argc, const char **argv, GtError*);
+#include "core/tool_api.h"
+
+/* the convertseq tool */
+GtTool* gt_convertseq(void);
 
 #endif
