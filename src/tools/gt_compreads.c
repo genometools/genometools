@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include "core/cstr_array.h"
+#include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"
 #include "tools/gt_compreads.h"
@@ -101,9 +102,11 @@ static int gt_compreads_runner(GT_UNUSED int argc,
 
 GtTool* gt_compreads(void)
 {
-  return gt_tool_new(gt_compreads_arguments_new,
-                  gt_compreads_arguments_delete,
-                  gt_compreads_option_parser_new,
-                  NULL,
-                  gt_compreads_runner);
+  GtTool *tool = gt_tool_new(gt_compreads_arguments_new,
+                             gt_compreads_arguments_delete,
+                             gt_compreads_option_parser_new,
+                             NULL,
+                             gt_compreads_runner);
+  gt_tool_is_toolbox(tool);
+  return tool;
 }

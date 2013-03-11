@@ -25,6 +25,7 @@ struct GtTool {
   GtToolOptionParserNew tool_option_parser_new;
   GtToolArgumentsCheck tool_arguments_check;
   GtToolRunner tool_runner;
+  bool is_toolbox;
 };
 
 GtTool* gt_tool_new(GtToolArgumentsNew tool_arguments_new,
@@ -44,6 +45,7 @@ GtTool* gt_tool_new(GtToolArgumentsNew tool_arguments_new,
   tool->tool_option_parser_new = tool_option_parser_new;
   tool->tool_arguments_check = tool_arguments_check;
   tool->tool_runner = tool_runner;
+  tool->is_toolbox = false;
   return tool;
 }
 
@@ -97,7 +99,13 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
   return 0;
 }
 
-void  gt_tool_delete(GtTool *tool)
+void gt_tool_is_toolbox(GtTool *tool)
+{
+  gt_assert(tool);
+  tool->is_toolbox = true;
+}
+
+void gt_tool_delete(GtTool *tool)
 {
   if (!tool) return;
   gt_free(tool);

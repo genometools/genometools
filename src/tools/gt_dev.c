@@ -17,6 +17,7 @@
 
 #include "core/cstr_array.h"
 #include "core/option_api.h"
+#include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/versionfunc.h"
 #include "gth/gt_gthmkbssmfiles.h"
@@ -132,9 +133,11 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
 
 GtTool* gt_dev(void)
 {
-  return gt_tool_new(gt_dev_arguments_new,
-                     gt_dev_arguments_delete,
-                     gt_dev_option_parser_new,
-                     NULL,
-                     gt_dev_runner);
+  GtTool *tool = gt_tool_new(gt_dev_arguments_new,
+                             gt_dev_arguments_delete,
+                             gt_dev_option_parser_new,
+                             NULL,
+                             gt_dev_runner);
+  gt_tool_is_toolbox(tool);
+  return tool;
 }

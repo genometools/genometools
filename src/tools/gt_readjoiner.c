@@ -17,6 +17,7 @@
 
 #include "core/cstr_array.h"
 #include "core/option_api.h"
+#include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"
 #include "extended/gtdatahelp.h"
@@ -108,9 +109,11 @@ static int gt_readjoiner_runner(int argc, const char **argv, int parsed_args,
 
 GtTool* gt_readjoiner(void)
 {
-  return gt_tool_new(gt_readjoiner_arguments_new,
-                     gt_readjoiner_arguments_delete,
-                     gt_readjoiner_option_parser_new,
-                     NULL,
-                     gt_readjoiner_runner);
+  GtTool *tool = gt_tool_new(gt_readjoiner_arguments_new,
+                             gt_readjoiner_arguments_delete,
+                             gt_readjoiner_option_parser_new,
+                             NULL,
+                             gt_readjoiner_runner);
+  gt_tool_is_toolbox(tool);
+  return tool;
 }

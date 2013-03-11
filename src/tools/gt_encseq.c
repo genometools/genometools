@@ -18,6 +18,7 @@
 #include "core/cstr_array.h"
 #include "core/error.h"
 #include "core/option_api.h"
+#include "core/tool.h"
 #include "core/toolbox_api.h"
 #include "core/versionfunc.h"
 #include "tools/gt_encseq_bitextract.h"
@@ -97,9 +98,11 @@ static int gt_encseq_runner(int argc, const char **argv, int parsed_args,
 
 GtTool* gt_encseq(void)
 {
-  return gt_tool_new(gt_encseq_arguments_new,
-                     gt_encseq_arguments_delete,
-                     gt_encseq_option_parser_new,
-                     NULL,
-                     gt_encseq_runner);
+  GtTool *tool = gt_tool_new(gt_encseq_arguments_new,
+                             gt_encseq_arguments_delete,
+                             gt_encseq_option_parser_new,
+                             NULL,
+                             gt_encseq_runner);
+  gt_tool_is_toolbox(tool);
+  return tool;
 }

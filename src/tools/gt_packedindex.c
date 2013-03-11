@@ -19,6 +19,7 @@
 #include "core/error.h"
 #include "core/option_api.h"
 #include "core/str.h"
+#include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/versionfunc.h"
 #include "match/sfx-run.h"
@@ -108,9 +109,11 @@ static int gt_packedindex_runner(int argc, const char **argv, int parsed_args,
 
 GtTool* gt_packedindex(void)
 {
-  return gt_tool_new(gt_packedindex_arguments_new,
-                  gt_packedindex_arguments_delete,
-                  gt_packedindex_option_parser_new,
-                  NULL,
-                  gt_packedindex_runner);
+  GtTool *tool = gt_tool_new(gt_packedindex_arguments_new,
+                             gt_packedindex_arguments_delete,
+                             gt_packedindex_option_parser_new,
+                             NULL,
+                             gt_packedindex_runner);
+  gt_tool_is_toolbox(tool);
+  return tool;
 }

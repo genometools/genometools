@@ -24,6 +24,7 @@
 #include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/str.h"
+#include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
@@ -1032,9 +1033,11 @@ static int gt_tyr_runner(int argc, const char **argv, int parsed_args,
 
 GtTool* gt_tallymer(void)
 {
-  return gt_tool_new(gt_tyr_arguments_new,
-                     gt_tyr_arguments_delete,
-                     gt_tyr_option_parser_new,
-                     NULL,
-                     gt_tyr_runner);
+  GtTool *tool = gt_tool_new(gt_tyr_arguments_new,
+                             gt_tyr_arguments_delete,
+                             gt_tyr_option_parser_new,
+                             NULL,
+                             gt_tyr_runner);
+  gt_tool_is_toolbox(tool);
+  return tool;
 }
