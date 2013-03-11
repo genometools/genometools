@@ -62,10 +62,14 @@ bool gt_tool_iterator_next(GtToolIterator *tool_iterator, const char **name,
       toolbox = gt_tool_create_toolbox(entry->tool);
       toollist = gt_array_new(sizeof (ToolEntry));
       gt_toolbox_iterate(toolbox, add_tool_to_stack, toollist);
-      gt_array_reverse(toollist); /* alphabetical order */
-      gt_array_add_array(tool_iterator->tool_stack, toollist);
+      if (gt_array_size(toollist)) {
+        gt_array_reverse(toollist); /* alphabetical order */
+        gt_array_add_array(tool_iterator->tool_stack, toollist);
+      }
       gt_array_delete(toollist);
-      gt_toolbox_delete(toolbox);
+
+      /* XXX: add gt_toolbox_delete(toolbox); (needs ref counting of tools to
+         fix memory problems */
     }
     return true;
   }

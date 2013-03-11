@@ -35,6 +35,7 @@
 #include "core/ma.h"
 #include "core/multithread_api.h"
 #include "core/toolbox.h"
+#include "core/tool_iterator.h"
 #include "core/unit_testing.h"
 #include "core/versionfunc.h"
 #include "core/xansi_api.h"
@@ -52,6 +53,7 @@ struct GtR {
   bool test,
        interactive,
        debug,
+       list,
        check64bit;
   unsigned int seed;
   GtStr *debugfp,
@@ -191,6 +193,10 @@ GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
                          "with 1 otherwise", &gtr->check64bit, false);
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
+  o = gt_option_new_bool("list", "list all tools and exit", &gtr->list, false);
+  gt_option_is_development_option(o);
+  gt_option_hide_default(o);
+  gt_option_parser_add_option(op, o);
   o = gt_option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
                              "file", gtr->testspacepeak);
   gt_option_is_development_option(o);
@@ -210,6 +216,19 @@ void gtr_register_components(GtR *gtr)
   /* add unit tests */
   gt_hashmap_delete(gtr->unit_tests);
   gtr->unit_tests = gtt_unit_tests();
+}
+
+static int list_tool(GtToolbox *toolbox)
+{
+  GtToolIterator *ti;
+  const char *name;
+  GtTool *tool;
+  gt_assert(toolbox);
+  ti = gt_tool_iterator_new(toolbox);
+  while (gt_tool_iterator_next(ti, &name, &tool))
+    puts(name);
+  gt_tool_iterator_delete(ti);
+  return EXIT_SUCCESS;
 }
 
 static int check64bit(void)
@@ -295,6 +314,8 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
     enable_logging(gt_str_get(gtr->debugfp), &gtr->logfp);
   gtr->seed = gt_ya_rand_init(gtr->seed);
   gt_log_log("seed=%u", gtr->seed);
+  if (gtr->list)
+    return list_tool(gtr->tools);
   if (gtr->check64bit)
     return check64bit();
   if (gtr->test)
