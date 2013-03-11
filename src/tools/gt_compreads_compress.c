@@ -140,29 +140,37 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
   gt_error_check(err);
   gt_assert(arguments);
 
-  if (gt_str_length(arguments->name) == 0) {
-    if (gt_str_array_size(arguments->files) > 1UL) {
-      gt_error_set(err, "option \"-name\" needs to be specified if more"
-                        " than one file is given");
-      had_err = -1;
-    }
-    else {
-      unsigned long i;
-      char *basename;
-      splitter = gt_splitter_new();
-      basename = gt_basename(gt_str_array_get(arguments->files, 0));
-      buffer = gt_str_new_cstr(basename);
-      gt_splitter_split(splitter, gt_str_get(buffer), gt_str_length(buffer),
-                        '.');
-      for (i = 0; i < gt_splitter_size(splitter) - 1; i++) {
-        gt_str_append_cstr(arguments->name,
-                           gt_splitter_get_token(splitter, i));
-        if (i < gt_splitter_size(splitter) - 2)
-          gt_str_append_char(arguments->name, '.');
+  if (gt_str_array_size(arguments->files) == 0) {
+    gt_error_set(err, "option \"-files\" is mandatory and requires"
+                      " at least one filename as argument!");
+    had_err = -1;
+  }
+
+  if (!had_err) {
+    if (gt_str_length(arguments->name) == 0) {
+      if (gt_str_array_size(arguments->files) > 1UL) {
+        gt_error_set(err, "option \"-name\" needs to be specified"
+                          " if more than one file is given");
+        had_err = -1;
       }
-      gt_free(basename);
-      gt_splitter_delete(splitter);
-      gt_str_delete(buffer);
+      else {
+        unsigned long i;
+        char *basename;
+        splitter = gt_splitter_new();
+        basename = gt_basename(gt_str_array_get(arguments->files, 0));
+        buffer = gt_str_new_cstr(basename);
+        gt_splitter_split(splitter, gt_str_get(buffer), gt_str_length(buffer),
+                          '.');
+        for (i = 0; i < gt_splitter_size(splitter) - 1; i++) {
+          gt_str_append_cstr(arguments->name,
+                             gt_splitter_get_token(splitter, i));
+          if (i < gt_splitter_size(splitter) - 2)
+            gt_str_append_char(arguments->name, '.');
+        }
+        gt_free(basename);
+        gt_splitter_delete(splitter);
+        gt_str_delete(buffer);
+      }
     }
   }
 
@@ -175,8 +183,9 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
       if (arguments->srate == GT_UNDEF_ULONG)
         arguments->srate = GT_SAMPLING_DEFAULT_PAGE_RATE;
       else if (arguments->srate == 0) {
-        gt_error_set(err, "page sampling was chosen, but sampling rate was"
-                          " set to %lu! this seems wrong.", arguments->srate);
+        gt_error_set(err, "page sampling was chosen, but sampling"
+                          " rate was set to %lu! this seems wrong.",
+                     arguments->srate);
         had_err = -1;
       }
     }
