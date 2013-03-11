@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,8 +19,6 @@
 
 #include "core/error_api.h"
 
-extern unsigned int gt_jobs; /* number of parallel threads to be used */
-
 /* The <GtThread> class represents a handle to a single thread of execution. */
 typedef struct GtThread GtThread;
 /* The <GtRWLock> class represents a read/write lock. */
@@ -30,11 +28,6 @@ typedef struct GtMutex GtMutex;
 
 /* A function to be multithreaded. */
 typedef void* (*GtThreadFunc)(void *data);
-
-/* Execute <function> (with <data> passed to it) in <gt_jobs> many parallel
-   threads, if threading is enabled. Otherwise <function> is executed <gt_jobs>
-   many times sequentially. */
-int       gt_multithread(GtThreadFunc function, void *data, GtError *err);
 
 /* Create a new thread which executes the given <function> (with <data> passed
    to it). Returns a <GtThread*> handle to the newly created thread, if

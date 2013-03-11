@@ -21,7 +21,7 @@
 #include "core/array.h"
 #include "core/ensure.h"
 #include "core/ma.h"
-#include "core/thread_api.h"
+#include "core/multithread_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_index_rep.h"
 #include "extended/feature_node.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -58,6 +58,7 @@
 #include "core/md5_encoder_api.h"
 #include "core/md5_fingerprint_api.h"
 #include "core/msort_api.h"
+#include "core/multithread_api.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
 #include "core/parseutils_api.h"
