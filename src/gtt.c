@@ -238,7 +238,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "tallymer", gt_tallymer());
   gt_toolbox_add_tool(tools, "uniq", gt_uniq());
 #ifndef WITHOUT_CAIRO
-  gt_toolbox_add(tools, "sketch", gt_sketch);
+  gt_toolbox_add_tool(tools, "sketch", gt_sketch());
   gt_toolbox_add_tool(tools, "sketch_page", gt_sketch_page());
 #endif
   return tools;

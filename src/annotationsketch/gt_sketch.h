@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Malte Mader <mader@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Malte Mader <mader@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,7 +20,9 @@
 #ifndef GT_SKETCH_H
 #define GT_SKETCH_H
 
-/* the AnnotationSketch tool */
-int gt_sketch(int argc, const char **argv, GtError*);
+#include "core/tool_api.h"
+
+/* the sketch tool */
+GtTool* gt_sketch(void);
 
 #endif
