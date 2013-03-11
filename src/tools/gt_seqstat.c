@@ -60,7 +60,7 @@ typedef struct
 
 static void* gt_seqstat_arguments_new(void)
 {
-  return gt_calloc(1, sizeof (SeqstatArguments));
+  return gt_calloc((size_t) 1, sizeof (SeqstatArguments));
 }
 
 static void gt_seqstat_arguments_delete(void *tool_arguments)
