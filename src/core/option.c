@@ -24,7 +24,7 @@
 #include "core/grep_api.h"
 #include "core/ma.h"
 #include "core/mail_address.h"
-#include "core/option_api.h"
+#include "core/option.h"
 #include "core/parseutils.h"
 #include "core/undef_api.h"
 #include "core/xansi_api.h"
@@ -1674,4 +1674,16 @@ int gt_option_parse_spacespec(unsigned long *maximumspace,
     }
   }
   return had_err;
+}
+
+const char *gt_option_parser_synopsis(const GtOptionParser *option_parser)
+{
+  gt_assert(option_parser);
+  return option_parser->synopsis;
+}
+
+const char *gt_option_parser_one_liner(const GtOptionParser *option_parser)
+{
+  gt_assert(option_parser);
+  return option_parser->one_liner;
 }
