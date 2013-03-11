@@ -169,14 +169,14 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "chseqids", gt_chseqids());
   gt_toolbox_add_tool(tools, "clean", gt_clean());
   gt_toolbox_add_tool(tools, "convertseq", gt_convertseq());
-  gt_toolbox_add(tools, "matstat", gt_matstat);
+  gt_toolbox_add_tool(tools, "matstat", gt_matstat());
   gt_toolbox_add_tool(tools, "merge", gt_merge());
   gt_toolbox_add(tools, "mgth", gt_mgth);
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   gt_toolbox_add_tool(tools, "mmapandread", gt_mmapandread());
   gt_toolbox_add_tool(tools, "seqstat", gt_seqstat());
   gt_toolbox_add(tools, "suffixerator", gt_suffixerator);
-  gt_toolbox_add(tools, "uniquesub", gt_uniquesub);
+  gt_toolbox_add_tool(tools, "uniquesub", gt_uniquesub());
   gt_toolbox_add_hidden_tool(tools, "dev", gt_dev());
   gt_toolbox_add_hidden_tool(tools, "filter", gt_select());
   /* hidden "link from the mutate to the seqmutate tool for backward

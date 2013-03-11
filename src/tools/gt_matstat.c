@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,11 +18,13 @@
 
 #include "core/defined-types.h"
 #include "core/error.h"
+#include "core/ma.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "match/eis-voiditf.h"
 #include "match/esa-map.h"
+#include "match/esa-minunique.h"
 #include "match/fmindex.h"
 #include "match/greedyfwdmat.h"
 #include "match/optionargmode.h"
@@ -29,7 +32,6 @@
 #include "match/stamp.h"
 #include "tools/gt_matstat.h"
 #include "tools/gt_uniquesub.h"
-#include "match/esa-minunique.h"
 
 #include "match/fmi-fwduni.pr"
 #include "match/fmi-map.pr"
@@ -52,22 +54,127 @@ typedef struct
   unsigned int showmode;
   bool verifywitnesspos;
   GtStr *indexname;
-  GtStrArray *queryfilenames;
+  GtStrArray *queryfilenames, *flagsoutputoption;
   Indextype indextype;
+  bool doms;
+  GtOption *optionmin, *optionmax, *optionoutput, *optionfmindex,
+           *optionesaindex, *optionpckindex, *optionquery, *optionverify;
 } Gfmsubcallinfo;
 
-static GtOPrval parsegfmsub(bool doms,
-                            Gfmsubcallinfo *gfmsubcallinfo,
-                            int argc,
-                            const char **argv,
-                            GtError *err)
+static void* gt_matstat_arguments_new_generic(bool doms)
 {
+  Gfmsubcallinfo *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->minlength.defined = false;
+  arguments->maxlength.defined = false;
+  arguments->showmode = 0;
+  arguments->indexname = gt_str_new();
+  arguments->queryfilenames = gt_str_array_new();
+  arguments->flagsoutputoption = gt_str_array_new();
+  arguments->doms = doms;
+  return arguments;
+}
+
+static void* gt_matstat_arguments_new_matstat(void)
+{
+  return gt_matstat_arguments_new_generic(true);
+}
+
+static void* gt_matstat_arguments_new_uniquesub(void)
+{
+  return gt_matstat_arguments_new_generic(false);
+}
+
+static void gt_matstat_arguments_delete(void *tool_arguments)
+{
+  Gfmsubcallinfo *arguments = tool_arguments;
+  if (!arguments) return;
+  gt_str_array_delete(arguments->queryfilenames);
+  gt_str_array_delete(arguments->flagsoutputoption);
+  gt_str_delete(arguments->indexname);
+  gt_free(arguments);
+}
+
+static GtOptionParser* gt_matstat_option_parser_new(void *tool_arguments)
+{
+  Gfmsubcallinfo *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *optionmin, *optionmax, *optionoutput, *optionfmindex,
-         *optionesaindex, *optionpckindex, *optionquery, *optionverify;
-  GtOPrval oprval;
-  GtStrArray *flagsoutputoption;
-  int parsed_args;
+  gt_assert(arguments);
+
+  op = gt_option_parser_new("[options ...] -query queryfile [...]",
+                         arguments->doms
+                         ? "Compute matching statistics."
+                         : "Compute length of minimum unique prefixes.");
+  gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
+
+  arguments->optionfmindex = gt_option_new_string("fmi", "specify fmindex",
+                                                  arguments->indexname,NULL);
+  gt_option_parser_add_option(op, arguments->optionfmindex);
+
+  arguments->optionesaindex = gt_option_new_string("esa",
+                                                   "specify suffix array",
+                                                   arguments->indexname,NULL);
+  gt_option_parser_add_option(op, arguments->optionesaindex);
+
+  arguments->optionpckindex = gt_option_new_string("pck",
+                                                   "specify packed index",
+                                                   arguments->indexname,NULL);
+  gt_option_parser_add_option(op, arguments->optionpckindex);
+
+  gt_option_exclude(arguments->optionfmindex,arguments->optionesaindex);
+  gt_option_exclude(arguments->optionpckindex,arguments->optionesaindex);
+  gt_option_exclude(arguments->optionpckindex,arguments->optionfmindex);
+
+  arguments->optionquery = gt_option_new_filename_array("query",
+                                                     "specify queryfiles",
+                                                     arguments->queryfilenames);
+  gt_option_is_mandatory(arguments->optionquery);
+  gt_option_parser_add_option(op, arguments->optionquery);
+
+  arguments->optionmin = gt_option_new_ulong_min("min",
+                                   "only output length "
+                                   "if >= given minimum length",
+                                   &arguments->minlength.
+                                          valueunsignedlong,
+                                   0,(unsigned long) 1);
+  gt_option_parser_add_option(op, arguments->optionmin);
+
+  arguments->optionmax = gt_option_new_ulong_min("max",
+                                   "only output length "
+                                   "if <= given maximum length",
+                                   &arguments->maxlength.
+                                          valueunsignedlong,
+                                   0,(unsigned long) 1);
+  gt_option_parser_add_option(op, arguments->optionmax);
+
+  arguments->optionoutput = gt_option_new_string_array("output",
+                   arguments->doms
+                     ? "set output flags (sequence, querypos, subjectpos)"
+                     : "set output flags (sequence, querypos)",
+                   arguments->flagsoutputoption);
+  gt_option_parser_add_option(op, arguments->optionoutput);
+
+  if (arguments->doms) {
+    arguments->optionverify = gt_option_new_bool("verify",
+                                                 "verify witness positions",
+                                                 &arguments->verifywitnesspos,
+                                                 false);
+    gt_option_is_development_option(arguments->optionverify);
+    gt_option_parser_add_option(op, arguments->optionverify);
+  } else
+  {
+    arguments->verifywitnesspos = false;
+  }
+
+  gt_option_parser_refer_to_manual(op);
+
+  return op;
+}
+
+static int gt_matstat_arguments_check(GT_UNUSED int rest_argc,
+                                      void *tool_arguments, GtError *err)
+{
+  Gfmsubcallinfo *arguments = tool_arguments;
+  int had_err = 0;
   const Optionargmodedesc msgfmsubmodedesctable[] =
   {
     {"sequence","matching sequence",SHOWSEQUENCE},
@@ -79,200 +186,116 @@ static GtOPrval parsegfmsub(bool doms,
     {"sequence","matching sequence",SHOWSEQUENCE},
     {"querypos","position in query sequence",SHOWQUERYPOS}
   };
-
   gt_error_check(err);
-  gfmsubcallinfo->minlength.defined = false;
-  gfmsubcallinfo->maxlength.defined = false;
-  gfmsubcallinfo->showmode = 0;
-  gfmsubcallinfo->indexname = gt_str_new();
-  gfmsubcallinfo->queryfilenames = gt_str_array_new();
-  flagsoutputoption = gt_str_array_new();
+  gt_assert(arguments);
 
-  op = gt_option_parser_new("[options ...] -query queryfile [...]",
-                         doms
-                         ? "Compute matching statistics."
-                         : "Compute length of minumum unique prefixes."
-                         );
-  gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
-
-  optionfmindex = gt_option_new_string("fmi", "specify fmindex",
-                                    gfmsubcallinfo->indexname,NULL);
-  gt_option_parser_add_option(op, optionfmindex);
-
-  optionesaindex = gt_option_new_string("esa", "specify suffix array",
-                                     gfmsubcallinfo->indexname,NULL);
-  gt_option_parser_add_option(op, optionesaindex);
-
-  optionpckindex = gt_option_new_string("pck", "specify packed index",
-                                     gfmsubcallinfo->indexname,NULL);
-  gt_option_parser_add_option(op, optionpckindex);
-
-  gt_option_exclude(optionfmindex,optionesaindex);
-  gt_option_exclude(optionpckindex,optionesaindex);
-  gt_option_exclude(optionpckindex,optionfmindex);
-
-  optionquery = gt_option_new_filename_array("query", "specify queryfiles",
-                                             gfmsubcallinfo->queryfilenames);
-  gt_option_is_mandatory(optionquery);
-  gt_option_parser_add_option(op, optionquery);
-
-  optionmin = gt_option_new_ulong_min("min",
-                                   "only output length "
-                                   "if >= given minimum length",
-                                   &gfmsubcallinfo->minlength.
-                                          valueunsignedlong,
-                                   0,(unsigned long) 1);
-  gt_option_parser_add_option(op, optionmin);
-
-  optionmax = gt_option_new_ulong_min("max",
-                                   "only output length "
-                                   "if <= given maximum length",
-                                   &gfmsubcallinfo->maxlength.
-                                          valueunsignedlong,
-                                   0,(unsigned long) 1);
-  gt_option_parser_add_option(op, optionmax);
-
-  optionoutput = gt_option_new_string_array("output",
-                   doms
-                     ? "set output flags (sequence, querypos, subjectpos)"
-                     : "set output flags (sequence, querypos)",
-                   flagsoutputoption);
-  gt_option_parser_add_option(op, optionoutput);
-
-  if (doms)
-  {
-    optionverify = gt_option_new_bool("verify","verify witness positions",
-                                   &gfmsubcallinfo->verifywitnesspos,
-                                   false);
-    gt_option_is_development_option(optionverify);
-    gt_option_parser_add_option(op, optionverify);
-  } else
-  {
-    gfmsubcallinfo->verifywitnesspos = false;
-  }
-
-  gt_option_parser_refer_to_manual(op);
-  oprval = gt_option_parser_parse(op, &parsed_args, argc, argv,
-                               gt_versionfunc,err);
-
-  if (oprval == GT_OPTION_PARSER_OK)
-  {
-    if (gt_option_is_set(optionfmindex))
+  if (gt_option_is_set(arguments->optionfmindex))
     {
-      gfmsubcallinfo->indextype = Fmindextype;
+      arguments->indextype = Fmindextype;
     } else
     {
-      if (gt_option_is_set(optionesaindex))
+      if (gt_option_is_set(arguments->optionesaindex))
       {
-        gfmsubcallinfo->indextype = Esaindextype;
+        arguments->indextype = Esaindextype;
       } else
       {
-        if (gt_option_is_set(optionpckindex))
+        if (gt_option_is_set(arguments->optionpckindex))
         {
-          gfmsubcallinfo->indextype = Packedindextype;
+          arguments->indextype = Packedindextype;
         } else
         {
           gt_error_set(err,"one of the options -esa, -pck must be used");
-          oprval = GT_OPTION_PARSER_ERROR;
+          return -1;
         }
       }
     }
-    if (oprval != GT_OPTION_PARSER_ERROR)
+    if (gt_option_is_set(arguments->optionmin))
     {
-      if (gt_option_is_set(optionmin))
+       arguments->minlength.defined = true;
+    }
+    if (gt_option_is_set(arguments->optionmax))
+    {
+       arguments->maxlength.defined = true;
+    }
+    if (!gt_option_is_set(arguments->optionmin) &&
+          !gt_option_is_set(arguments->optionmax))
+    {
+      gt_error_set(err,"one of the options -min or -max must be set");
+      return -1;
+    }
+    if (arguments->minlength.defined &&
+        arguments->maxlength.defined)
+    {
+      if (arguments->maxlength.valueunsignedlong <
+          arguments->minlength.valueunsignedlong)
       {
-         gfmsubcallinfo->minlength.defined = true;
-      }
-      if (gt_option_is_set(optionmax))
-      {
-         gfmsubcallinfo->maxlength.defined = true;
-      }
-      if (!gt_option_is_set(optionmin) && !gt_option_is_set(optionmax))
-      {
-        gt_error_set(err,"one of the options -min or -max must be set");
-        oprval = GT_OPTION_PARSER_ERROR;
+        gt_error_set(err,"minvalue must be smaller or equal than maxvalue");
+        return -1;
       }
     }
-    if (oprval != GT_OPTION_PARSER_ERROR)
+    if (gt_option_is_set(arguments->optionoutput))
     {
-      if (gfmsubcallinfo->minlength.defined &&
-          gfmsubcallinfo->maxlength.defined)
-      {
-        if (gfmsubcallinfo->maxlength.valueunsignedlong <
-            gfmsubcallinfo->minlength.valueunsignedlong)
-        {
-          gt_error_set(err,"minvalue must be smaller or equal than maxvalue");
-          oprval = GT_OPTION_PARSER_ERROR;
-        }
-      }
-    }
-    if (oprval != GT_OPTION_PARSER_ERROR && gt_option_is_set(optionoutput))
-    {
-      if (gt_str_array_size(flagsoutputoption) == 0)
+      if (gt_str_array_size(arguments->flagsoutputoption) == 0)
       {
         gt_error_set(err,"missing arguments to option -output");
-        oprval = GT_OPTION_PARSER_ERROR;
+        return -1;
       } else
       {
         unsigned long i;
-
-        for (i=0; i<gt_str_array_size(flagsoutputoption); i++)
+        for (i=0; i<gt_str_array_size(arguments->flagsoutputoption); i++)
         {
-          if (doms)
+          if (arguments->doms)
           {
             if (gt_optionargaddbitmask(msgfmsubmodedesctable,
                                  sizeof (msgfmsubmodedesctable)/
                                  sizeof (msgfmsubmodedesctable[0]),
-                                 &gfmsubcallinfo->showmode,
+                                 &arguments->showmode,
                                  "-output",
-                                 gt_str_array_get(flagsoutputoption,i),
+                                 gt_str_array_get(arguments->flagsoutputoption,
+                                                  i),
                                  err) != 0)
             {
-              oprval = GT_OPTION_PARSER_ERROR;
+              return -1;
               break;
             }
           } else
           {
             if (gt_optionargaddbitmask(gfmsubmodedesctable,
-                                    sizeof (gfmsubmodedesctable)/
-                                    sizeof (gfmsubmodedesctable[0]),
-                                    &gfmsubcallinfo->showmode,
-                                    "-output",
-                                    gt_str_array_get(flagsoutputoption,i),
-                                    err) != 0)
+                                  sizeof (gfmsubmodedesctable)/
+                                  sizeof (gfmsubmodedesctable[0]),
+                                  &arguments->showmode,
+                                  "-output",
+                                  gt_str_array_get(arguments->flagsoutputoption,
+                                                   i),
+                                  err) != 0)
             {
-              oprval = GT_OPTION_PARSER_ERROR;
+              return -1;
               break;
             }
           }
         }
       }
     }
-  }
-  gt_str_array_delete(flagsoutputoption);
-  gt_option_parser_delete(op);
-  if (oprval == GT_OPTION_PARSER_OK && parsed_args != argc)
-  {
-    gt_error_set(err,"superfluous program parameters");
-    oprval = GT_OPTION_PARSER_ERROR;
-  }
-  return oprval;
+
+  return had_err;
 }
 
-static bool dotestsequence(bool doms,const Gfmsubcallinfo *gfmsubcallinfo)
+static bool dotestsequence(const Gfmsubcallinfo *gfmsubcallinfo)
 {
   if (gfmsubcallinfo->indextype == Packedindextype &&
       gfmsubcallinfo->verifywitnesspos &&
-      doms)
+      gfmsubcallinfo->doms)
   {
     return true;
   }
   return false;
 }
 
-static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
+static int gt_matstat_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
+                             GT_UNUSED int parsed_args,
+                             void *tool_arguments, GtError *err)
 {
-  Gfmsubcallinfo gfmsubcallinfo;
+  Gfmsubcallinfo *arguments = tool_arguments;
   Fmindex fmindex;
   Suffixarray suffixarray;
   void *packedindex = NULL;
@@ -284,23 +307,13 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
 #endif
   unsigned long totallength;
   bool gt_mapfmindexfail = false;
-
   gt_error_check(err);
-  switch (parsegfmsub(doms,&gfmsubcallinfo, argc, argv, err)) {
-    case GT_OPTION_PARSER_OK: break;
-    case GT_OPTION_PARSER_ERROR:
-      gt_str_delete(gfmsubcallinfo.indexname);
-      gt_str_array_delete(gfmsubcallinfo.queryfilenames);
-      return -1;
-    case GT_OPTION_PARSER_REQUESTS_EXIT:
-      gt_str_delete(gfmsubcallinfo.indexname);
-      gt_str_array_delete(gfmsubcallinfo.queryfilenames);
-      return 0;
-  }
+  gt_assert(arguments);
+
   logger = gt_logger_new(false, GT_LOGGER_DEFLT_PREFIX, stdout);
-  if (gfmsubcallinfo.indextype == Fmindextype)
+  if (arguments->indextype == Fmindextype)
   {
-    if (gt_mapfmindex(&fmindex,gt_str_get(gfmsubcallinfo.indexname),
+    if (gt_mapfmindex(&fmindex,gt_str_get(arguments->indexname),
                       logger, err) != 0)
     {
       haserr = true;
@@ -314,7 +327,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   {
     unsigned int mappedbits;
 
-    if (gfmsubcallinfo.indextype == Esaindextype)
+    if (arguments->indextype == Esaindextype)
     {
       mappedbits = SARR_ESQTAB | SARR_SUFTAB
 #undef WITHBCKTAB
@@ -324,7 +337,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
                    ;
     } else
     {
-      if (dotestsequence(doms,&gfmsubcallinfo))
+      if (dotestsequence(arguments))
       {
         mappedbits = SARR_ESQTAB;
       } else
@@ -334,7 +347,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     }
     if (gt_mapsuffixarray(&suffixarray,
                        mappedbits,
-                       gt_str_get(gfmsubcallinfo.indexname),
+                       gt_str_get(arguments->indexname),
                        logger,
                        err) != 0)
     {
@@ -350,10 +363,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     }
     if (!haserr)
     {
-      if (gfmsubcallinfo.indextype == Packedindextype)
+      if (arguments->indextype == Packedindextype)
       {
         packedindex =
-          gt_loadvoidBWTSeqForSA(gt_str_get(gfmsubcallinfo.indexname),
+          gt_loadvoidBWTSeqForSA(gt_str_get(arguments->indexname),
                                  false,
                                  err);
         if (packedindex == NULL)
@@ -368,10 +381,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     const void *theindex;
     Greedygmatchforwardfunction gmatchforwardfunction;
 
-    if (gfmsubcallinfo.indextype == Fmindextype)
+    if (arguments->indextype == Fmindextype)
     {
       theindex = (const void *) &fmindex;
-      if (doms)
+      if (arguments->doms)
       {
         gmatchforwardfunction = gt_skfmmstats;
       } else
@@ -380,10 +393,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       }
     } else
     {
-      if (gfmsubcallinfo.indextype == Esaindextype)
+      if (arguments->indextype == Esaindextype)
       {
         theindex = (const void *) &suffixarray;
-        if (doms)
+        if (arguments->doms)
         {
           gmatchforwardfunction = gt_suffixarraymstats;
         } else
@@ -392,9 +405,9 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
         }
       } else
       {
-        gt_assert(gfmsubcallinfo.indextype == Packedindextype);
+        gt_assert(arguments->indextype == Packedindextype);
         theindex = (const void *) packedindex;
-        if (doms)
+        if (arguments->doms)
         {
           gmatchforwardfunction = gt_voidpackedindexmstatsforward;
         } else
@@ -407,7 +420,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     {
 #ifdef WITHBCKTAB
       if (prefixlength > 0 &&
-          gfmsubcallinfo.indextype == Esaindextype &&
+          arguments->indextype == Esaindextype &&
           runsubstringiteration(gmatchforwardfunction,
                                 theindex,
                                 totallength,
@@ -415,7 +428,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
                                 suffixarray.countspecialcodes,
                                 alphabet,
                                 prefixlength,
-                                gfmsubcallinfo.queryfilenames,
+                                arguments->queryfilenames,
                                 err) != 0)
 
       {
@@ -423,21 +436,21 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       }
 #endif
       if (!haserr &&
-          gt_findsubquerygmatchforward(dotestsequence(doms,&gfmsubcallinfo)
+          gt_findsubquerygmatchforward(dotestsequence(arguments)
                                       ? suffixarray.encseq
                                       : NULL,
                                       theindex,
                                       totallength,
                                       gmatchforwardfunction,
                                       alphabet,
-                                      gfmsubcallinfo.queryfilenames,
-                                      gfmsubcallinfo.minlength,
-                                      gfmsubcallinfo.maxlength,
-                                      (gfmsubcallinfo.showmode & SHOWSEQUENCE)
+                                      arguments->queryfilenames,
+                                      arguments->minlength,
+                                      arguments->maxlength,
+                                      (arguments->showmode & SHOWSEQUENCE)
                                              ? true : false,
-                                      (gfmsubcallinfo.showmode & SHOWQUERYPOS)
+                                      (arguments->showmode & SHOWQUERYPOS)
                                              ? true : false,
-                                      (gfmsubcallinfo.showmode & SHOWSUBJECTPOS)
+                                      (arguments->showmode & SHOWSUBJECTPOS)
                                              ? true : false,
                                       err) != 0)
       {
@@ -445,7 +458,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       }
     }
   }
-  if (gfmsubcallinfo.indextype == Fmindextype)
+  if (arguments->indextype == Fmindextype)
   {
     if (!gt_mapfmindexfail)
     {
@@ -453,24 +466,31 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     }
   } else
   {
-    if (gfmsubcallinfo.indextype == Packedindextype && packedindex != NULL)
+    if (arguments->indextype == Packedindextype && packedindex != NULL)
     {
       gt_deletevoidBWTSeq(packedindex);
     }
     gt_freesuffixarray(&suffixarray);
   }
   gt_logger_delete(logger);
-  gt_str_delete(gfmsubcallinfo.indexname);
-  gt_str_array_delete(gfmsubcallinfo.queryfilenames);
-  return haserr ? -1 : 0;
+
+  return haserr ? -1 : 0;;
 }
 
-int gt_uniquesub(int argc, const char **argv, GtError *err)
+GtTool* gt_matstat(void)
 {
-  return gt_greedyfwdmat(false,argc, argv, err);
+  return gt_tool_new(gt_matstat_arguments_new_matstat,
+                     gt_matstat_arguments_delete,
+                     gt_matstat_option_parser_new,
+                     gt_matstat_arguments_check,
+                     gt_matstat_runner);
 }
 
-int gt_matstat(int argc, const char **argv, GtError *err)
+GtTool* gt_uniquesub(void)
 {
-  return gt_greedyfwdmat(true,argc, argv, err);
+  return gt_tool_new(gt_matstat_arguments_new_uniquesub,
+                     gt_matstat_arguments_delete,
+                     gt_matstat_option_parser_new,
+                     gt_matstat_arguments_check,
+                     gt_matstat_runner);
 }

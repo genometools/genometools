@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,9 @@
 #ifndef GT_MATSTAT_H
 #define GT_MATSTAT_H
 
+#include "core/tool_api.h"
+
 /* the matstat tool */
-int gt_matstat(int argc, const char **argv, GtError*);
+GtTool* gt_matstat(void);
 
 #endif
