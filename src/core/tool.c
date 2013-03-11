@@ -117,6 +117,15 @@ GtToolbox* gt_tool_create_toolbox(const GtTool *tool)
   return tool->tool_arguments_new();
 }
 
+GtOptionParser* gt_tool_create_option_parser(const GtTool *tool)
+{
+  void *tool_arguments = NULL;
+  gt_assert(tool && tool->tool_option_parser_new);
+  if (tool->tool_arguments_new)
+    tool_arguments = tool->tool_arguments_new(); /* XXX: leaks */
+  return tool->tool_option_parser_new(tool_arguments);
+}
+
 void gt_tool_delete(GtTool *tool)
 {
   if (!tool) return;
