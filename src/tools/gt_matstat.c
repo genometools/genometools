@@ -63,7 +63,7 @@ typedef struct
 
 static void* gt_matstat_arguments_new_generic(bool doms)
 {
-  Gfmsubcallinfo *arguments = gt_calloc(1, sizeof *arguments);
+  Gfmsubcallinfo *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->minlength.defined = false;
   arguments->maxlength.defined = false;
   arguments->showmode = 0;
@@ -256,7 +256,6 @@ static int gt_matstat_arguments_check(GT_UNUSED int rest_argc,
                                  err) != 0)
             {
               return -1;
-              break;
             }
           } else
           {
@@ -270,7 +269,6 @@ static int gt_matstat_arguments_check(GT_UNUSED int rest_argc,
                                   err) != 0)
             {
               return -1;
-              break;
             }
           }
         }

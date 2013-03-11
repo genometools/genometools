@@ -52,7 +52,7 @@ typedef struct
 
 static void* gt_convertseq_arguments_new(void)
 {
-  GtConvertseqArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtConvertseqArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->ofi = gt_output_file_info_new();
   arguments->outfp = NULL;
   return arguments;
@@ -117,17 +117,17 @@ static int gt_convertseq_runner(int argc, const char **argv, int parsed_args,
                               void *tool_arguments, GtError *err)
 {
   GtConvertseqArguments *arguments = tool_arguments;
-  int had_err = 0;
+  int had_err = 0, i;
   GtFilelengthvalues *flv;
   GtSeqIterator *seqit;
   GtSequenceBuffer *sb = NULL;
   GtStrArray *files;
   const GtUchar *sequence;
   char *desc;
-  unsigned long len, j, i;
+  unsigned long len, j;
   off_t totalsize;
   gt_error_check(err);
-  gt_assert(arguments);
+  gt_assert(arguments != NULL);
 
   files = gt_str_array_new();
   for (i = parsed_args; i < argc; i++)
