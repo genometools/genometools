@@ -18,8 +18,6 @@
 #include "core/multithread_api.h"
 #include "core/unused_api.h"
 
-unsigned int gt_jobs = 1;
-
 #ifdef GT_THREADS_ENABLED
 
 int gt_multithread(GtThreadFunc function, void *data, GtError *err)

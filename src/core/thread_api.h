@@ -19,6 +19,8 @@
 
 #include "core/error_api.h"
 
+extern unsigned int gt_jobs; /* number of parallel threads to be used */
+
 /* The <GtThread> class represents a handle to a single thread of execution. */
 typedef struct GtThread GtThread;
 /* The <GtRWLock> class represents a read/write lock. */

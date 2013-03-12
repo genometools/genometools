@@ -22,8 +22,6 @@
 
 /* Multithread module */
 
-extern unsigned int gt_jobs; /* number of parallel threads to be used */
-
 /* Execute <function> (with <data> passed to it) in <gt_jobs> many parallel
    threads, if threading is enabled. Otherwise <function> is executed <gt_jobs>
    many times sequentially. <gt_jobs> is a global <unsigned int> variable. */
