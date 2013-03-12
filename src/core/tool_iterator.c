@@ -67,9 +67,6 @@ bool gt_tool_iterator_next(GtToolIterator *tool_iterator, const char **name,
         gt_array_add_array(tool_iterator->tool_stack, toollist);
       }
       gt_array_delete(toollist);
-
-      /* XXX: add gt_toolbox_delete(toolbox); (needs ref counting of tools to
-         fix memory problems */
     }
     return true;
   }

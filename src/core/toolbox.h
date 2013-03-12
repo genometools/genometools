@@ -23,7 +23,8 @@
 #include "core/toolbox_api.h"
 
 typedef void (*GtToolboxIterator)(const char *name, GtTool *tool, void *data);
-void gt_toolbox_iterate(const GtToolbox*, GtToolboxIterator func, void *data);
+void       gt_toolbox_iterate(const GtToolbox*, GtToolboxIterator func,
+                              void *data);
 
 /* deprecated */
 typedef int (*GtToolfunc)(int argc, const char **argv, GtError*);
