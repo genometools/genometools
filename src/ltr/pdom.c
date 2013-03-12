@@ -30,6 +30,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
+#include "core/multithread_api.h"
 #include "core/thread_api.h"
 #include "core/translator.h"
 #include "core/undef_api.h"
