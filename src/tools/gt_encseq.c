@@ -55,7 +55,7 @@ static GtOptionParser* gt_encseq_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   gt_assert(encseq_toolbox);
   op = gt_option_parser_new("[option ...] tool [argument ...]",
-                            "Call encoded sequence manipulation tool <tool> "
+                            "Call an encoded sequence manipulation tool "
                             "and pass argument(s) to it.");
   gt_option_parser_set_comment_func(op, gt_toolbox_show, encseq_toolbox);
   gt_option_parser_set_min_args(op, 1);

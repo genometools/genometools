@@ -55,7 +55,7 @@ static GtOptionParser* gt_compreads_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   gt_assert(compreads_toolbox);
   op = gt_option_parser_new("[option ...] tool [argument ...]",
-                            "Call fastq file compression tool <tool>.");
+                            "Call a fastq file compression tool.");
   gt_option_parser_set_comment_func(op, gt_toolbox_show, compreads_toolbox);
   gt_option_parser_set_min_args(op, 1U);
   return op;
