@@ -96,7 +96,7 @@ local function method_keyword(ast, be_verbose)
     if be_verbose then
       print("Try: " .. keyword)
     end
-    if keyword == "function" then
+    if keyword == "function" or keyword == "functionptr" then
       if be_verbose then
         print("Return: " .. i)
       end
