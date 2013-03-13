@@ -130,7 +130,7 @@ f.each_line do |line|
       timeresult=t[1].to_f
       runtimes[makehashkey(filename,parms)] = timeresult
     else
-      s = line.match(/# space peak in megabytes: ([0-9\.]*)/)
+      s = line.match(/# combined space peak in megabytes: ([0-9\.]*)/)
       if s
         checkvalues(filename,parms)
         space=s[1]
