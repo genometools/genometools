@@ -53,7 +53,11 @@ bool          gt_node_stream_is_sorted(GtNodeStream *node_stream);
    last reference. */
 void          gt_node_stream_delete(GtNodeStream *node_stream);
 
+/* Callback function. Performs the necessary steps to delete
+   implementation-specific memory in the stream implementation. */
 typedef void (*GtNodeStreamFreeFunc)(GtNodeStream*);
+/* Callback function. May receive a <GtGenomeNode> from its predecessor and
+   must write a node reference or NULL to the node pointer. */
 typedef int  (*GtNodeStreamNextFunc)(GtNodeStream*, GtGenomeNode**, GtError*);
 
 typedef struct GtNodeStreamMembers GtNodeStreamMembers;
