@@ -232,7 +232,7 @@ static int list_tools(GtToolbox *toolbox)
   while (gt_tool_iterator_next(ti, &name, &tool)) {
     GtOptionParser *op = gt_tool_create_option_parser(tool);
     puts("-------------------------------------------------------------------");
-    printf("name: gt %s%s\n", gt_str_get(prefix), name);
+    printf("name: gt%c%s%s\n", ' ', gt_str_get(prefix), name);
     printf("synopsis: %s\n", gt_option_parser_synopsis(op));
     printf("one_liner: %s\n", gt_option_parser_one_liner(op));
     gt_option_parser_delete(op);
