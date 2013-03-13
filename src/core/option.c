@@ -16,10 +16,13 @@
 */
 
 #include <ctype.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include "core/cstr_api.h"
+#include "core/error.h"
 #include "core/fa.h"
+#include "core/fileutils_api.h"
 #include "core/hashmap_api.h"
 #include "core/grep_api.h"
 #include "core/ma.h"
@@ -28,6 +31,7 @@
 #include "core/parseutils.h"
 #include "core/undef_api.h"
 #include "core/xansi_api.h"
+#include "core/xposix.h"
 
 typedef enum {
   OPTION_BOOL,
@@ -417,6 +421,201 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
     }
     printf("\nReport bugs to %s.\n",
            op->mail_address ? op->mail_address : GT_MAIL_ADDRESS);
+  }
+  return had_err;
+}
+
+static void print_asciidoc_header(const char *hdr, GtStr *outstr) {
+  unsigned long i;
+  gt_str_append_cstr(outstr, hdr);
+  gt_str_append_char(outstr, '\n');
+  for (i = 0; i < strlen(hdr); i++)
+    gt_str_append_char(outstr, '-');
+  gt_str_append_cstr(outstr, "\n\n");
+}
+
+static void print_toolname(const char *toolname, GtStr *outstr, bool upper) {
+  unsigned long i;
+  for (i = 0; i < strlen(toolname); i++) {
+    char c = toolname[i];
+    if (c == ' ')
+      gt_str_append_char(outstr, '-');
+    else {
+      if (upper)
+        gt_str_append_char(outstr, toupper(c));
+      else
+        gt_str_append_char(outstr, c);
+    }
+  }
+}
+
+int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
+                             GtStr *outstr, GtError *err)
+{
+  unsigned long i;
+  GtOption *option;
+  GtStr *default_string;
+  int had_err = 0;
+  gt_assert(op);
+  gt_error_check(err);
+  gt_assert(strlen(toolname) > 0);
+
+  /* title and section */
+  print_toolname(toolname, outstr, true);
+  gt_str_append_cstr(outstr, "(1)\n");
+  for (i = 0; i < strlen(toolname) + 3; i++)
+    gt_str_append_char(outstr, '=');
+  gt_str_append_char(outstr, '\n');
+  gt_str_append_char(outstr, '\n');
+
+  /* name */
+  print_asciidoc_header("NAME", outstr);
+  print_toolname(toolname, outstr, false);
+  gt_str_append_cstr(outstr, " - ");
+  gt_str_append_cstr(outstr, op->one_liner);
+  gt_str_append_cstr(outstr, "\n\n");
+
+  /* synopsis */
+  print_asciidoc_header("SYNOPSIS", outstr);
+  gt_str_append_cstr(outstr, "*");
+  gt_str_append_cstr(outstr, toolname);
+  gt_str_append_cstr(outstr, "* ");
+  gt_str_append_cstr(outstr, op->synopsis);
+  gt_str_append_cstr(outstr, "\n\n");
+
+  /* description */
+  if (gt_array_size(op->options)) {
+    print_asciidoc_header("DESCRIPTION", outstr);
+    default_string = gt_str_new();
+    for (i = 0; i < gt_array_size(op->options); i++) {
+      option = *(GtOption**) gt_array_get(op->options, i);
+      /* skip dev options */
+      if (option->is_development_option) continue;
+      gt_str_append_cstr(outstr, "*-");
+      gt_str_append_cstr(outstr, gt_str_get(option->option_str));
+      gt_str_append_cstr(outstr, "* ");
+      if (option->option_type == OPTION_BOOL) {
+        gt_str_append_cstr(outstr, "['yes|no']");
+        gt_str_append_cstr(default_string,
+                              option->default_value.b ? "yes" : "no");
+      }
+      else if (option->option_type == OPTION_CHOICE) {
+        gt_str_append_cstr(outstr, "['...']");
+        if (!option->default_value.s || !strlen(option->default_value.s))
+          gt_str_append_cstr(default_string, "undefined");
+        else
+          gt_str_append_cstr(default_string, option->default_value.s);
+      }
+      else if (option->option_type == OPTION_DOUBLE) {
+        gt_str_append_cstr(outstr, "['value']");
+        if (option->default_value.d == GT_UNDEF_DOUBLE)
+          gt_str_append_cstr(default_string, "undefined");
+        else
+          gt_str_append_double(default_string, option->default_value.d, 6);
+      }
+      else if (option->option_type == OPTION_INT) {
+        gt_str_append_cstr(outstr, "['value']");
+        if (option->default_value.i == GT_UNDEF_INT)
+          gt_str_append_cstr(default_string, "undefined");
+        else
+          gt_str_append_int(default_string, option->default_value.i);
+      }
+      else if (option->option_type == OPTION_UINT) {
+        gt_str_append_cstr(outstr, "['value']");
+        if (option->default_value.ui == GT_UNDEF_UINT)
+          gt_str_append_cstr(default_string, "undefined");
+        else
+          gt_str_append_uint(default_string, option->default_value.ui);
+      }
+      else if (option->option_type == OPTION_LONG) {
+        gt_str_append_cstr(outstr, "['value']");
+      }
+      else if (option->option_type == OPTION_ULONG) {
+        gt_str_append_cstr(outstr, "['value']");
+        if (option->default_value.ul == GT_UNDEF_ULONG)
+          gt_str_append_cstr(default_string, "undefined");
+        else
+          gt_str_append_ulong(default_string, option->default_value.ul);
+      }
+      else if (option->option_type == OPTION_RANGE) {
+        gt_str_append_cstr(outstr, "['start' 'end']");
+        if (option->default_value.r.start == GT_UNDEF_ULONG)
+          gt_str_append_cstr(default_string, "undefined");
+        else {
+          gt_str_append_char(default_string, '[');
+          gt_str_append_ulong(default_string, option->default_value.r.start);
+          gt_str_append_cstr(default_string, "..");
+          gt_str_append_ulong(default_string, option->default_value.r.end);
+          gt_str_append_char(default_string, ']');
+        }
+      }
+      else if (option->option_type == OPTION_STRING) {
+        gt_str_append_cstr(outstr, "['string']");
+        if (!option->default_value.s || !strlen(option->default_value.s))
+          gt_str_append_cstr(default_string, "undefined");
+        else
+          gt_str_append_cstr(default_string, option->default_value.s);
+      }
+      gt_str_append_cstr(outstr, "::\n");
+      gt_str_append_cstr(outstr, gt_str_get(option->description));
+      if (gt_str_length(default_string) > 0) {
+        gt_str_append_cstr(outstr, " (default: ");
+        gt_str_append_cstr(outstr, gt_str_get(default_string));
+        gt_str_append_cstr(outstr, ")");
+        }
+      gt_str_append_cstr(outstr, "\n\n");
+      gt_str_reset(default_string);
+    }
+    gt_str_delete(default_string);
+  }
+
+  if (op->comment_func) {
+    int old_stdout, out_pipe[2], rval;
+    long flags;
+    char c;
+
+    /* Lua docu scripts print to stdout by themselves, so temporarily
+       redirect stdout to a pipe. */
+    fflush(stdout);
+    old_stdout = dup(STDOUT_FILENO);
+    if ((rval = pipe(out_pipe)) == -1) {
+      perror("pipe");
+      exit(EXIT_FAILURE);  /* XXX */
+    }
+
+    flags = fcntl(out_pipe[0], F_GETFL);
+    flags |= O_NONBLOCK;
+    (void) fcntl(out_pipe[0], F_SETFL, flags);
+
+    dup2(out_pipe[1], STDOUT_FILENO);
+    close(out_pipe[1]);
+
+    had_err = op->comment_func(gt_error_get_progname(err),
+                               op->comment_func_data, err);
+    fflush(stdout);
+
+    while (read(out_pipe[0], &c, sizeof (char)) > 0)
+      gt_str_append_char(outstr, c);
+
+    dup2(old_stdout, STDOUT_FILENO);
+    close(old_stdout);
+  }
+
+  gt_str_append_cstr(outstr, "\n");
+  if (!had_err) {
+    if (op->refer_to_manual) {
+      print_asciidoc_header("ADDITIONAL INFORMATION", outstr);
+      gt_str_append_cstr(outstr, "For detailed information, please refer to "
+                                 "the manual of ");
+      gt_str_append_cstr(outstr, toolname +
+                                 gt_cstr_length_up_to_char(toolname, ' '));
+      gt_str_append_cstr(outstr, ".\n\n");
+    }
+    print_asciidoc_header("REPORTING BUGS", outstr);
+    gt_str_append_cstr(outstr, "Report bugs to ");
+    gt_str_append_cstr(outstr,
+                       op->mail_address ? op->mail_address : GT_MAIL_ADDRESS);
+    gt_str_append_cstr(outstr, ".\n");
   }
   return had_err;
 }

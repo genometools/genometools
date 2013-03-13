@@ -17,9 +17,13 @@
 #ifndef OPTION_H
 #define OPTION_H
 
+#include "core/error_api.h"
 #include "core/option_api.h"
+#include "core/str_api.h"
 
-const char *gt_option_parser_synopsis(const GtOptionParser *option_parser);
-const char *gt_option_parser_one_liner(const GtOptionParser *option_parser);
+const char* gt_option_parser_synopsis(const GtOptionParser *option_parser);
+const char* gt_option_parser_one_liner(const GtOptionParser *option_parser);
+int         gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
+                                     GtStr *outstr, GtError *err);
 
 #endif
