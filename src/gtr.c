@@ -41,6 +41,7 @@
 #include "core/unit_testing.h"
 #include "core/versionfunc.h"
 #include "core/xansi_api.h"
+#include "core/xposix.h"
 #include "core/yarandom.h"
 #include "extended/gtdatahelp.h"
 #include "extended/luahelper.h"
@@ -62,7 +63,8 @@ struct GtR {
       *testspacepeak;
   GtToolbox *tools;
   GtHashmap *unit_tests;
-  GtStr *test_only;
+  GtStr *manoutdir,
+        *test_only;
   lua_State *L;
 #ifndef WITHOUT_CAIRO
   GtStyle *style;
@@ -81,6 +83,7 @@ GtR* gtr_new(GtError *err)
   gtr->debugfp = gt_str_new();
   gtr->testspacepeak = gt_str_new();
   gtr->test_only = gt_str_new();
+  gtr->manoutdir = gt_str_new();
   gtr->L = luaL_newstate();
   if (!gtr->L) {
     gt_error_set(err, "out of memory (cannot create new lua state)");
@@ -203,6 +206,12 @@ GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
                              "file", gtr->testspacepeak);
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
+
+  o = gt_option_new_string("createman", "create man page sources in directory",
+                           gtr->manoutdir, "");
+  gt_option_is_development_option(o);
+  gt_option_parser_add_option(op, o);
+
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
@@ -224,6 +233,7 @@ static int list_tools(GtToolbox *toolbox)
 {
   GtToolIterator *ti;
   const char *name;
+  char fulltoolname[BUFSIZ];
   GtTool *tool;
   GtStr *prefix = gt_str_new();
   gt_assert(toolbox);
@@ -231,14 +241,58 @@ static int list_tools(GtToolbox *toolbox)
   gt_tool_iterator_set_prefix_target(ti, prefix, ' ');
   while (gt_tool_iterator_next(ti, &name, &tool)) {
     GtOptionParser *op = gt_tool_create_option_parser(tool);
+    (void) snprintf(fulltoolname, BUFSIZ, "gt%c%s%s", ' ',
+                    gt_str_get(prefix), name);
     puts("-------------------------------------------------------------------");
-    printf("name: gt%c%s%s\n", ' ', gt_str_get(prefix), name);
+    printf("name: %s\n", fulltoolname);
     printf("synopsis: %s\n", gt_option_parser_synopsis(op));
     printf("one_liner: %s\n", gt_option_parser_one_liner(op));
     gt_option_parser_delete(op);
   }
   gt_tool_iterator_delete(ti);
   gt_str_delete(prefix);
+  return EXIT_SUCCESS;
+}
+
+static int create_manpages(GtToolbox *toolbox, const char *outdir, GtError *err)
+{
+  GtToolIterator *ti;
+  const char *name;
+  char fulltoolname[BUFSIZ];
+  GtTool *tool;
+  GtStr *prefix = gt_str_new(),
+        *man = gt_str_new(),
+        *pathbuf;
+  GtFile *outfile = NULL;
+  gt_assert(toolbox);
+
+  ti = gt_tool_iterator_new(toolbox);
+  gt_tool_iterator_set_prefix_target(ti, prefix, ' ');
+  pathbuf = gt_str_new();
+  while (gt_tool_iterator_next(ti, &name, &tool)) {
+    GtOptionParser *op = gt_tool_create_option_parser(tool);
+    (void) snprintf(fulltoolname, BUFSIZ, "gt%c%s%s", ' ',
+                    gt_str_get(prefix), name);
+
+    gt_str_reset(pathbuf);
+    gt_str_append_cstr(pathbuf, outdir);
+    if (!gt_file_exists(gt_str_get(pathbuf)))
+      gt_xmkdir(gt_str_get(pathbuf));
+    gt_str_append_char(pathbuf, '/');
+    gt_str_append_cstr(pathbuf, fulltoolname);
+    gt_str_append_cstr(pathbuf, ".mansrc");
+    outfile = gt_file_new(gt_str_get(pathbuf), "w+", err);
+    gt_assert(outfile);
+    gt_str_reset(man);
+    gt_option_parser_manpage(op, fulltoolname, man, err);
+    gt_file_xprintf(outfile, "%s", gt_str_get(man));
+    gt_file_delete(outfile);
+    gt_option_parser_delete(op);
+  }
+  gt_tool_iterator_delete(ti);
+  gt_str_delete(prefix);
+  gt_str_delete(man);
+  gt_str_delete(pathbuf);
   return EXIT_SUCCESS;
 }
 
@@ -327,6 +381,8 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
   gt_log_log("seed=%u", gtr->seed);
   if (gtr->list)
     return list_tools(gtr->tools);
+  if (gt_str_length(gtr->manoutdir) > 0)
+    return create_manpages(gtr->tools, gt_str_get(gtr->manoutdir), err);
   if (gtr->check64bit)
     return check64bit();
   if (gtr->test)
@@ -397,6 +453,7 @@ void gtr_delete(GtR *gtr)
   gt_str_delete(gtr->testspacepeak);
   gt_str_delete(gtr->debugfp);
   gt_str_delete(gtr->test_only);
+  gt_str_delete(gtr->manoutdir);
   gt_toolbox_delete(gtr->tools);
   gt_hashmap_delete(gtr->unit_tests);
   if (gtr->L) lua_close(gtr->L);
