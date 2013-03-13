@@ -84,8 +84,10 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
       had_err = -1;
       break;
     case GT_OPTION_PARSER_REQUESTS_EXIT:
-      if (tool->arguments)
+      if (tool->arguments) {
         tool->tool_arguments_delete(tool->arguments);
+        tool->arguments = NULL;
+      }
       return 0;
   }
 
@@ -140,7 +142,7 @@ void gt_tool_delete(GtTool *tool)
     tool->reference_count--;
     return;
   }
-  if (tool->arguments)
+  if (tool->arguments && tool->tool_arguments_delete)
     tool->tool_arguments_delete(tool->arguments);
   gt_free(tool);
 }
