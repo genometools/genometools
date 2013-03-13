@@ -22,6 +22,9 @@
 typedef struct GtToolIterator GtToolIterator;
 
 GtToolIterator* gt_tool_iterator_new(GtToolbox *toolbox);
+void            gt_tool_iterator_set_prefix_target(GtToolIterator *ti,
+                                                   GtStr *prefix,
+                                                   char sep);
 bool            gt_tool_iterator_next(GtToolIterator *tool_iterator,
                                       const char **name, GtTool **tool);
 void            gt_tool_iterator_delete(GtToolIterator *tool_iterator);

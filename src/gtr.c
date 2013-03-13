@@ -225,17 +225,20 @@ static int list_tools(GtToolbox *toolbox)
   GtToolIterator *ti;
   const char *name;
   GtTool *tool;
+  GtStr *prefix = gt_str_new();
   gt_assert(toolbox);
   ti = gt_tool_iterator_new(toolbox);
+  gt_tool_iterator_set_prefix_target(ti, prefix, ' ');
   while (gt_tool_iterator_next(ti, &name, &tool)) {
     GtOptionParser *op = gt_tool_create_option_parser(tool);
     puts("-------------------------------------------------------------------");
-    printf("name: %s\n", name);
+    printf("name: gt %s%s\n", gt_str_get(prefix), name);
     printf("synopsis: %s\n", gt_option_parser_synopsis(op));
     printf("one_liner: %s\n", gt_option_parser_one_liner(op));
     gt_option_parser_delete(op);
   }
   gt_tool_iterator_delete(ti);
+  gt_str_delete(prefix);
   return EXIT_SUCCESS;
 }
 
