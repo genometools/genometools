@@ -1204,7 +1204,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
                 idx,
                 numoffields,
                 nearestsample,
-                zero_count,
+                zero_count = 0,
                 tmp_symbol = 0;
   size_t startofnearestsample;
   GtBitsequence bitseq;

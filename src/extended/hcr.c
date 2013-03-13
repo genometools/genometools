@@ -869,7 +869,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
   unsigned long i,
                 nearestsample,
                 *symbol;
-  size_t startofnearestsample;
+  size_t startofnearestsample = 0;
   enum state status = END;
   FastqFileInfo cur_read;
   FastqFileInfo *fileinfo = NULL;
