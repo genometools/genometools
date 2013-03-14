@@ -27,6 +27,7 @@ struct GtTool {
   GtToolRunner tool_runner;
   bool is_toolbox;
   void *arguments;
+  GtOptionParser *op;
   unsigned long reference_count;
 };
 
@@ -49,6 +50,7 @@ GtTool* gt_tool_new(GtToolArgumentsNew tool_arguments_new,
   tool->tool_runner = tool_runner;
   tool->is_toolbox = false;
   tool->arguments = NULL;
+  tool->op = NULL;
   tool->reference_count = 0;
   return tool;
 }
@@ -62,7 +64,6 @@ GtTool* gt_tool_ref(GtTool *tool)
 
 int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
 {
-  GtOptionParser *op;
   GtOPrval oprval;
   int parsed_args, had_err = 0;
   gt_error_check(err);
@@ -72,11 +73,14 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
   if (tool->tool_arguments_new && !tool->arguments)
     tool->arguments = tool->tool_arguments_new();
 
+  /* create option parser object */
+  if (tool->tool_option_parser_new && !tool->op)
+    tool->op = tool->tool_option_parser_new(tool->arguments);
+
   /* parse options */
-  op = tool->tool_option_parser_new(tool->arguments);
-  oprval = gt_option_parser_parse(op, &parsed_args, argc, argv, gt_versionfunc,
-                                  err);
-  gt_option_parser_delete(op);
+  oprval = gt_option_parser_parse(tool->op, &parsed_args, argc, argv,
+                                  gt_versionfunc, err);
+
   switch (oprval) {
     case GT_OPTION_PARSER_OK:
       break;
@@ -132,7 +136,9 @@ GtOptionParser* gt_tool_create_option_parser(GtTool *tool)
   gt_assert(tool && tool->tool_option_parser_new);
   if (tool->tool_arguments_new && !tool->arguments)
     tool->arguments = tool->tool_arguments_new();
-  return tool->tool_option_parser_new(tool->arguments);
+  if (tool->tool_option_parser_new && !tool->op)
+    tool->op = tool->tool_option_parser_new(tool->arguments);
+  return tool->op;
 }
 
 void gt_tool_delete(GtTool *tool)
@@ -144,5 +150,7 @@ void gt_tool_delete(GtTool *tool)
   }
   if (tool->arguments && tool->tool_arguments_delete)
     tool->tool_arguments_delete(tool->arguments);
+  if (tool->op)
+    gt_option_parser_delete(tool->op);
   gt_free(tool);
 }
