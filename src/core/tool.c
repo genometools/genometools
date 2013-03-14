@@ -123,7 +123,7 @@ bool gt_tool_is_toolbox(const GtTool *tool)
   return tool->is_toolbox;
 }
 
-GtToolbox* gt_tool_create_toolbox(GtTool *tool)
+GtToolbox* gt_tool_get_toolbox(GtTool *tool)
 {
   gt_assert(tool && tool->is_toolbox && tool->tool_arguments_new);
   if (!tool->arguments)
@@ -131,7 +131,7 @@ GtToolbox* gt_tool_create_toolbox(GtTool *tool)
   return tool->arguments;
 }
 
-GtOptionParser* gt_tool_create_option_parser(GtTool *tool)
+GtOptionParser* gt_tool_get_option_parser(GtTool *tool)
 {
   gt_assert(tool && tool->tool_option_parser_new);
   if (tool->tool_arguments_new && !tool->arguments)

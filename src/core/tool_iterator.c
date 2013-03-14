@@ -97,7 +97,7 @@ bool gt_tool_iterator_next(GtToolIterator *tool_iterator, const char **name,
       myprefix =
                 gt_str_new_cstr(entry->prefix ? gt_str_get(entry->prefix) : "");
       gt_str_append_cstr(myprefix, entry->name);
-      toolbox = gt_tool_create_toolbox(entry->tool);
+      toolbox = gt_tool_get_toolbox(entry->tool);
       toollist = gt_array_new(sizeof (ToolEntry));
       tii.arr = toollist;
       tii.str = myprefix;

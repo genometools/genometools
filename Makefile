@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2006-2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 # Copyright (c) 2008-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2006-2013 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -905,6 +905,14 @@ endif
 	bin/gt gtscripts/gtdoc.lua -lua -tex $(CURDIR) \
 	> doc/manuals/gtscript_reference.tex
 	$(MAKE) -C $(CURDIR)/doc/devguide
+	bin/gt -list > /tmp/list.txt
+	bin/gt -createman /tmp/gtmanpages
+	asciidoc --backend=xhtml11 -a linkcss -a stylesdir=. \
+	  -a stylesheet=style.css -a badges -a icons \
+	  -f www/genometools.org/htdocs/tool_list.conf \
+	  --out-file www/genometools.org/htdocs/tools.html /tmp/list.txt
+	test -d www/genometools.org/htdocs/tools || mkdir -p www/genometools.org/htdocs/tools
+	scripts/create_html /tmp/gtmanpages www/genometools.org/htdocs/
 
 doc/manuals/annotationsketch.pdf: docs
 	$(MAKE) -C $(CURDIR)/doc/manuals annotationsketch
@@ -1110,7 +1118,9 @@ cleangenerated:
           doc/manuals/annotationsketch.pdf
 	rm -f www/genometools.org/htdocs/docs.html \
           www/genometools.org/htdocs/examples.html \
-          www/genometools.org/htdocs/libgenometools.html
+          www/genometools.org/htdocs/libgenometools.html \
+          www/genometools.org/htdocs/tools.html
+	rm -rf www/genometools.org/htdocs/tools
 
 gtkviewer:
 	@echo "[compile $(notdir $@)]"
