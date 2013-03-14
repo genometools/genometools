@@ -225,47 +225,61 @@ void gtr_register_components(GtR *gtr)
   gtr->unit_tests = gtt_unit_tests();
 }
 
+static int create_manpage(const char *outdir, const char *toolname,
+                          GtOptionParser *option_parser, GtError *err)
+{
+  GtFile *outfile = NULL;
+  char *utoolname;
+  GtStr *pathbuf;
+  int had_err = 0;
+  gt_error_check(err);
+  gt_assert(outdir && toolname && option_parser);
+  utoolname = gt_cstr_dup(toolname);
+  gt_cstr_rep(utoolname, ' ', '_');
+  pathbuf = gt_str_new_cstr(outdir);
+  if (!gt_file_exists(gt_str_get(pathbuf)))
+    gt_xmkdir(gt_str_get(pathbuf));
+  gt_str_append_char(pathbuf, '/');
+  gt_str_append_cstr(pathbuf, utoolname);
+  gt_str_append_cstr(pathbuf, ".mansrc");
+  gt_free(utoolname);
+  if (!(outfile = gt_file_new(gt_str_get(pathbuf), "w+", err)))
+    had_err = -1;
+  if (!had_err) {
+    GtStr *man = gt_str_new();
+    gt_option_parser_manpage(option_parser, toolname, man, err);
+    gt_file_xprintf(outfile, "%s", gt_str_get(man));
+    gt_file_delete(outfile);
+    gt_str_delete(pathbuf);
+    gt_str_delete(man);
+  }
+  return had_err;
+}
+
 static int create_manpages(GtToolbox *toolbox, const char *outdir, GtError *err)
 {
   GtToolIterator *ti;
   const char *name;
-  char fulltoolname[BUFSIZ],
-       *utoolname;
+  char fulltoolname[BUFSIZ];
   GtTool *tool;
-  GtStr *prefix = gt_str_new(),
-        *man = gt_str_new(),
-        *pathbuf;
-  GtFile *outfile = NULL;
+  GtStr *prefix = gt_str_new();
+  int had_err = 0;
+
+  gt_error_check(err);
   gt_assert(toolbox);
 
   ti = gt_tool_iterator_new(toolbox);
   gt_tool_iterator_set_prefix_target(ti, prefix, ' ');
-  pathbuf = gt_str_new();
-  while (gt_tool_iterator_next(ti, &name, &tool)) {
+  while (!had_err && gt_tool_iterator_next(ti, &name, &tool)) {
     GtOptionParser *op = gt_tool_get_option_parser(tool);
     (void) snprintf(fulltoolname, BUFSIZ, "gt%c%s%s", ' ',
                     gt_str_get(prefix), name);
-    utoolname = gt_cstr_dup(fulltoolname);
-    gt_cstr_rep(utoolname, ' ', '_');
-    gt_str_reset(pathbuf);
-    gt_str_append_cstr(pathbuf, outdir);
-    if (!gt_file_exists(gt_str_get(pathbuf)))
-      gt_xmkdir(gt_str_get(pathbuf));
-    gt_str_append_char(pathbuf, '/');
-    gt_str_append_cstr(pathbuf, utoolname);
-    gt_str_append_cstr(pathbuf, ".mansrc");
-    gt_free(utoolname);
-    outfile = gt_file_new(gt_str_get(pathbuf), "w+", err);
-    gt_assert(outfile);
-    gt_str_reset(man);
-    gt_option_parser_manpage(op, fulltoolname, man, err);
-    gt_file_xprintf(outfile, "%s", gt_str_get(man));
-    gt_file_delete(outfile);
+    had_err = create_manpage(outdir, fulltoolname, op, err);
   }
   gt_tool_iterator_delete(ti);
   gt_str_delete(prefix);
-  gt_str_delete(man);
-  gt_str_delete(pathbuf);
+  if (had_err)
+    return EXIT_FAILURE;
   return EXIT_SUCCESS;
 }
 
