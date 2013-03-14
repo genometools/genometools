@@ -109,14 +109,19 @@ GtToolfunc gt_toolbox_get(const GtToolbox *tb, const char *toolname)
   return NULL;
 }
 
+bool gt_createman = false;
+
 static int show_tool_name(void *key, void *value, GT_UNUSED void *data,
                           GT_UNUSED GtError *err)
 {
   GtToolinfo *toolinfo = value;
   gt_error_check(err);
   gt_assert(key && value);
-  if (!toolinfo->hidden)
+  if (!toolinfo->hidden) {
+    if (gt_createman)
+      printf("- ");
     gt_xputs(key);
+  }
   return 0;
 }
 

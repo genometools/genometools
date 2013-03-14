@@ -311,6 +311,7 @@ static int create_manpages(GtR *gtr, const char *outdir, GtError *err)
   int had_err = 0;
   gt_error_check(err);
   gt_assert(gtr);
+  gt_createman = true;
   /* create man page for 'gt' itself */
   op = gtr_option_parser_new(gtr);
   had_err = create_manpage(outdir, "gt", op, err);
@@ -328,6 +329,7 @@ static int create_manpages(GtR *gtr, const char *outdir, GtError *err)
     gt_tool_iterator_delete(ti);
   }
   gt_str_delete(prefix);
+  gt_createman = false;
   if (had_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;

@@ -22,6 +22,8 @@
 #include "core/tool_api.h"
 #include "core/toolbox_api.h"
 
+extern bool gt_createman;
+
 typedef void (*GtToolboxIterator)(const char *name, GtTool *tool, void *data);
 void       gt_toolbox_iterate(const GtToolbox*, GtToolboxIterator func,
                               void *data);
