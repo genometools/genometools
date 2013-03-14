@@ -62,8 +62,8 @@ static GtOptionParser* gt_chseqids_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] mapping_file [GFF3_file]",
-                         "Change sequence ids by the mapping given in "
-                         "mapping_file.");
+                         "Change sequence ids by the mapping given in a "
+                         "mapping file.");
 
   /* -sort */
   option = gt_option_new_bool("sort",

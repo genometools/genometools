@@ -58,7 +58,7 @@ static GtOptionParser* gt_interfeat_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Duplicate "
-                            "internal feature nodes in given GFF3_file(s).");
+                            "internal feature nodes in given GFF3 files.");
 
   /* -outside */
   option = gt_option_new_string("dest", "set destination type",

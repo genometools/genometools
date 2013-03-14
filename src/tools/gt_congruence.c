@@ -200,8 +200,7 @@ static GtOptionParser* gt_cge_option_parser_new(void *tool_arguments)
   gt_assert(index_toolbox != NULL);
   op = gt_option_parser_new(
                     "[option ...] congruence_tool [argument ...]",
-                    "Call congruence tool with name congruence_tool and pass "
-                    "argument(s) to it.");
+                    "Call a congruence subtool and pass argument(s) to it.");
   gt_option_parser_set_comment_func(op, gt_toolbox_show, index_toolbox);
   gt_option_parser_set_min_args(op, 1U);
   gt_option_parser_refer_to_manual(op);

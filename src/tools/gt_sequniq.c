@@ -61,8 +61,8 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
-                            "Filter out repeated sequences in given in given "
-                            "sequence_file(s).");
+                            "Filter out repeated sequences in given "
+                            "sequence files.");
 
   /* -seqit */
   seqit_option = gt_option_new_bool("seqit", "use sequence iterator",

@@ -71,7 +71,7 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
   gt_assert(arguments);
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
                             "Compute MD5 fingerprints for each sequence given "
-                            "in sequence_file(s).");
+                            "in a set of sequence files.");
 
   /* -check */
   check_option = gt_option_new_filename("check", "compare all fingerprints "
@@ -102,7 +102,7 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
   extract_option = gt_option_new_string("extract",
                                         "extract the sequence(s) with "
                                         "the given fingerprint from "
-                                        "sequence_file(s) and show them on "
+                                        "sequence file(s) and show them on "
                                         "stdout.", arguments->extract, NULL);
   gt_option_parser_add_option(op, extract_option);
 

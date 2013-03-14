@@ -837,7 +837,7 @@ static GtOptionParser *gt_tyr_search_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[options] -tyr tallymer-index -q queryfile0 "
                             "[queryfile1..] [options]",
                             "Search a set of k-mers in an index constructed "
-                            "by \"gt tallymer mkindex\".");
+                            "by ``gt tallymer mkindex''.");
   gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
   optiontyr = gt_option_new_string("tyr","specify tallymer-index",
@@ -983,8 +983,7 @@ static GtOptionParser* gt_tyr_option_parser_new(void *tool_arguments)
   gt_assert(index_toolbox != NULL);
   op = gt_option_parser_new(
                     "[option ...] tallymer_tool [argument ...]",
-                    "Call tallymer tool with name tallymer_tool and pass "
-                    "argument(s) to it.");
+                    "Call a tallymer subtool and pass argument(s) to it.");
   gt_option_parser_set_comment_func(op, gt_toolbox_show, index_toolbox);
   gt_option_parser_set_min_args(op, 1U);
   gt_option_parser_refer_to_manual(op);
