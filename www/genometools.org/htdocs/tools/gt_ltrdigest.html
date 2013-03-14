@@ -1,0 +1,296 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<title>GenomeTools - manual page for GT-LTRDIGEST(1)</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="..//style.css" type="text/css" />
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="tools.html">Tools</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>gt-ltrdigest - Identifies and annotates sequence features in LTR retrotransposon candidates.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>gt ltrdigest</strong> [option &#8230;] gff3_file indexname</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<strong>-outfileprefix</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+prefix for output files (e.g. <em>foo</em> will create files called <em>foo_*.csv</em> and <em>foo_*.fas</em>)
+Omit this option for GFF3 output only. (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seqnamelen</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+set maximal length of sequence names in FASTA headers (e.g. for clustalw or similar tools) (default: 20)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pptlen</strong> [<em>start</em> <em>end</em>]
+</dt>
+<dd>
+<p>
+required PPT length range (default: [8..30])
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-uboxlen</strong> [<em>start</em> <em>end</em>]
+</dt>
+<dd>
+<p>
+required U-box length range (default: [3..30])
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-uboxdist</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+allowed U-box distance range from PPT (default: 0)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pptradius</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+radius around beginning of 3' LTR to search for PPT (default: 30)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pptrprob</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+purine emission probability inside PPT (default: 0.970000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pptyprob</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+pyrimidine emission probability inside PPT (default: 0.030000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pptgprob</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+background G emission probability outside PPT (default: 0.250000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pptcprob</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+background C emission probability outside PPT (default: 0.250000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pptaprob</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+background A emission probability outside PPT (default: 0.250000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-ppttprob</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+background T emission probability outside PPT (default: 0.250000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pptuprob</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+U/T emission probability inside U-box (default: 0.910000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-trnas</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+tRNA library in multiple FASTA format for PBS detection
+Omit this option to disable PBS search. (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pbsalilen</strong> [<em>start</em> <em>end</em>]
+</dt>
+<dd>
+<p>
+required PBS/tRNA alignment length range (default: [11..30])
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pbsoffset</strong> [<em>start</em> <em>end</em>]
+</dt>
+<dd>
+<p>
+allowed PBS offset from LTR boundary range (default: [0..5])
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pbstrnaoffset</strong> [<em>start</em> <em>end</em>]
+</dt>
+<dd>
+<p>
+allowed PBS/tRNA 3' end alignment offset range (default: [0..5])
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pbsmaxedist</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+maximal allowed PBS/tRNA alignment unit edit distance (default: 1)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pbsradius</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+radius around end of 5' LTR to search for PBS (default: 30)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pbsmatchscore</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+match score for PBS/tRNA alignments (default: 5)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pbsmismatchscore</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+mismatch score for PBS/tRNA alignments (default: -10)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pbsinsertionscore</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+insertion score for PBS/tRNA alignments (default: -20)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pbsdeletionscore</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+deletion score for PBS/tRNA alignments (default: -20)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-v</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+be verbose (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-o</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+redirect output to specified file (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-gzip</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write gzip compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-bzip2</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write bzip2 compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-force</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+force writing to output file (default: no)
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reporting_bugs">REPORTING BUGS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Report bugs to &lt;<a href="mailto:gt-users@genometools.org">gt-users@genometools.org</a>&gt;.</p></div>
+</div>
+</div>
+<div id="footer">
+Copyright &copy; 2007-2013 The <i>GenomeTools</i> authors.
+</div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>

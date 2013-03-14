@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<title>GenomeTools - manual page for GT-SNPPER(1)</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="..//style.css" type="text/css" />
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="tools.html">Tools</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>gt-snpper - Annotates SNPs according to their effect on the genome as given by a genomic annotation.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>gt snpper</strong> [option &#8230;] GFF3_file [GVF_file]</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<strong>-trans_table</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+NCBI translation table number, choose from:
+1: Standard
+2: Vertebrate Mitochondrial
+3: Yeast Mitochondrial
+4: Mold Mitochondrial; Protozoan Mitochondrial; Coelenterate Mitochondrial; Mycoplasma; Spiroplasma
+5: Invertebrate Mitochondrial
+6: Ciliate Nuclear; Dasycladacean Nuclear; Hexamita Nuclear
+9: Echinoderm Mitochondrial
+10: Euplotid Nuclear
+11: Bacterial
+12: Alternative Yeast Nuclear
+13: Ascidian Mitochondrial
+14: Flatworm Mitochondrial
+15: Blepharisma Macronuclear
+16: Chlorophycean Mitochondrial
+21: Trematode Mitochondrial
+22: Scenedesmus Obliquus Mitochondrial
+23: Thraustochytrium Mitochondrial (default: 1)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seqfile</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+set the sequence file from which to take the sequences (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-encseq</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+set the encoded sequence indexname from which to take the sequences (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seqfiles</strong> 
+</dt>
+<dd>
+<p>
+set the sequence files from which to extract the features
+use <em>--</em> to terminate the list of sequence files
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-matchdesc</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+match the sequence descriptions from the input files for the desired sequence IDs (in GFF3) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-usedesc</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+use sequence descriptions to map the sequence IDs (in GFF3) to actual sequence entries.
+If a description contains a sequence range (e.g., III:1000001..2000000), the first  part is used as sequence ID (<em>III</em>) and the first range position as offset (<em>1000001</em>) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-regionmapping</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+set file containing sequence-region to sequence file mapping (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-o</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+redirect output to specified file (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-gzip</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write gzip compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-bzip2</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write bzip2 compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-force</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+force writing to output file (default: no)
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>File format for option <em>-regionmapping</em>:</p></div>
+<div class="paragraph"><p>The file supplied to option -regionmapping defines a &#8220;mapping&#8221;.  A mapping
+maps the <tt>sequence-region</tt> entries given in the <em>GFF3_file</em> to a sequence file
+containing the corresponding sequence. Mappings can be defined in one of the
+following two forms:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>mapping = {
+  chr1  = "hs_ref_chr1.fa.gz",
+  chr2  = "hs_ref_chr2.fa.gz"
+}</tt></pre>
+</div></div>
+<div class="paragraph"><p>or</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>function mapping(sequence_region)
+  return "hs_ref_"..sequence_region..".fa.gz"
+end</tt></pre>
+</div></div>
+<div class="paragraph"><p>The first form defines a Lua (<a href="http://www.lua.org">http://www.lua.org</a>) table named &#8220;mapping&#8221;
+which maps each sequence region to the corresponding sequence file.
+The second one defines a Lua function &#8220;mapping&#8221;, which has to return the
+sequence file name when it is called with the <tt>sequence_region</tt> as argument.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reporting_bugs">REPORTING BUGS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Report bugs to &lt;<a href="mailto:gt-users@genometools.org">gt-users@genometools.org</a>&gt;.</p></div>
+</div>
+</div>
+<div id="footer">
+Copyright &copy; 2007-2013 The <i>GenomeTools</i> authors.
+</div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>

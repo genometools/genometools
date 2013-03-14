@@ -1,0 +1,284 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<title>GenomeTools - manual page for GT-LTRHARVEST(1)</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="..//style.css" type="text/css" />
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="tools.html">Tools</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>gt-ltrharvest - Predict LTR retrotransposons.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>gt ltrharvest</strong> [option &#8230;] -index &lt;indexname&gt;</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<strong>-index</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+specify the name of the enhanced suffix array index (mandatory) (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-range</strong> [<em>start</em> <em>end</em>]
+</dt>
+<dd>
+<p>
+specify range in the input sequence(s) in which LTR pairs are searched (default: [0..0])
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seed</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify minimum seed length for exact repeats (default: 30)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-minlenltr</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify minimum length for each LTR (default: 100)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-maxlenltr</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify maximum length for each LTR (default: 1000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-mindistltr</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify minimum distance of LTR startpositions (default: 1000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-maxdistltr</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify maximum distance of LTR startpositions (default: 15000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-similar</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify similaritythreshold in range [1..100%] (default: 85.000000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-mintsd</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify minimum length for each TSD (default: 4)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-maxtsd</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify maximum length for each TSD (default: 20)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-motif</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+specify 2 nucleotides startmotif + 2 nucleotides endmotif: <strong>*</strong>* (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-motifmis</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify maximum number of mismatches in motif [0,3] (default: 4)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-vic</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify the number of nucleotides (to the left and to the right) that will be searched for TSDs and/or motifs around 5' and 3' boundary of predicted LTR retrotransposons (default: 60)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-overlaps</strong> [<em>&#8230;</em>]
+</dt>
+<dd>
+<p>
+specify no|best|all (default: best)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-xdrop</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify xdropbelowscore for extension-alignment (default: 5)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-mat</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify matchscore for extension-alignment (default: 2)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-mis</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify mismatchscore for extension-alignment (default: -2)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-ins</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify insertionscore for extension-alignment (default: -3)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-del</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify deletionscore for extension-alignment (default: -3)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-v</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+verbose mode (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-longoutput</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+additional motif/TSD output (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-out</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+specify FASTA outputfilename (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-outinner</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+specify FASTA outputfilename for inner regions (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-gff3</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+specify GFF3 outputfilename (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-offset</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+offset added to GFF3 coordinates (default: 0)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-scan</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+scan the index sequentially instead of mapping it into memory entirely (default: yes)
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_additional_information">ADDITIONAL INFORMATION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>For detailed information, please refer to the manual of ltrharvest.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reporting_bugs">REPORTING BUGS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Report bugs to &lt;<a href="mailto:gt-users@genometools.org">gt-users@genometools.org</a>&gt;.</p></div>
+</div>
+</div>
+<div id="footer">
+Copyright &copy; 2007-2013 The <i>GenomeTools</i> authors.
+</div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>

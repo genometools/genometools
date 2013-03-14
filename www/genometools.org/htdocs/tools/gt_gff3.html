@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<title>GenomeTools - manual page for GT-GFF3(1)</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="..//style.css" type="text/css" />
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="tools.html">Tools</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>gt-gff3 - Parse, possibly transform, and output GFF3 files.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>gt gff3</strong> [option &#8230;] [GFF3_file &#8230;]</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<strong>-sort</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+sort the GFF3 features (memory consumption is proportional to the input file size(s)) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-tidy</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+try to tidy the GFF3 files up during parsing (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-retainids</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+when available, use the original IDs provided in the source file
+(memory consumption is proportional to the input file size(s)) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-checkids</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+make sure the ID attributes are unique within the scope of each GFF3_file, as required by GFF3 specification
+(memory consumption is proportional to the input file size(s)) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-addids</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+add missing "##sequence-region" lines automatically (default: yes)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-fixregionboundaries</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+automatically adjust "##sequence-region" lines to contain all their features (memory consumption is proportional to the input file size(s)) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-addintrons</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+add intron features between existing exon features (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-offset</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+transform all features by the given offset
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-offsetfile</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+transform all features by the offsets given in file (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-typecheck</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+check GFF3 types against "id" and "name" tags in given OBO file and validate parent (part-of) relationships.
+If no argument is given, the sofa.obo file from the gtdata/obo_files directory is used.
+If an argument is given, it is used as an OBO filename.
+In the case that such a file does not exist <em>.obo</em> is added to the argument and loading the resulting filename from the gtdata/obo_files directory is attempted. (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-show</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+show GFF3 output (default: yes)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-v</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+be verbose (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-width</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+set output width for FASTA sequence printing
+(0 disables formatting) (default: 0)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-o</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+redirect output to specified file (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-gzip</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write gzip compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-bzip2</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write bzip2 compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-force</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+force writing to output file (default: no)
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>File format for option <em>-offsetfile</em>:</p></div>
+<div class="paragraph"><p>The file supplied to option <em>-offsetfile</em> defines a mapping table named
+&#8220;offsets&#8221;. It maps the <tt>sequence-region</tt> entries given in the GFF3_file to
+offsets.
+It can be defined as follows:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>offsets = {
+  chr1  = 1000,
+  chr2  = 500
+}</tt></pre>
+</div></div>
+<div class="paragraph"><p>When this example is used, all features with seqid &#8220;chr1&#8221; will be offset by
+1000 and all features with seqid &#8220;chr2&#8221; by 500.</p></div>
+<div class="paragraph"><p>If <em>-offsetfile</em> is used, offsets for all <tt>sequence-regions</tt> contained in the
+given GFF3 files must be defined.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reporting_bugs">REPORTING BUGS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Report bugs to &lt;<a href="mailto:gt-users@genometools.org">gt-users@genometools.org</a>&gt;.</p></div>
+</div>
+</div>
+<div id="footer">
+Copyright &copy; 2007-2013 The <i>GenomeTools</i> authors.
+</div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>

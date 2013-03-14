@@ -1,0 +1,269 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<title>GenomeTools - manual page for GT-EXTRACTSEQ(1)</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="..//style.css" type="text/css" />
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="tools.html">Tools</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>gt-extractseq - Extract sequences from given sequence file(s) or fastaindex.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>gt extractseq</strong> [option &#8230;] [sequence_file(s)] | fastaindex</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<strong>-frompos</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+extract sequence from this position
+counting from 1 on (default: 0)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-topos</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+extract sequence up to this position
+counting from 1 on (default: 0)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-match</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+extract all sequences whose description matches the given pattern.
+The given pattern must be a valid extended regular expression. (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-keys</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+extract substrings for keys in specified file (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-width</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+set output width for FASTA sequence printing
+(0 disables formatting) (default: 0)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-o</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+redirect output to specified file (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-gzip</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write gzip compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-bzip2</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write bzip2 compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-force</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+force writing to output file (default: no)
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>The option -keys allows one to extract substrings or sequences from the given
+sequence file or from a fasta index.
+The substrings to be extracted are specified in a key file given
+as argument to this option. The key file must contain lines of the form</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>k</tt></pre>
+</div></div>
+<div class="paragraph"><p>or</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>k i j</tt></pre>
+</div></div>
+<div class="paragraph"><p>where k is a string (the key) and the optional i and j are positive integers
+such that i&#8656;j. k is the key and the optional numbers i and j specify the
+first position of the substring and the last position of the substring to be
+extracted. The positions are counted from 1. If k is identical to the string
+between the first first and second occurrence of the symbol | in a fasta
+header, then the fasta header and the corresponding sequence is output.
+For example in the fasta header</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&gt;tr|A0AQI4|A0AQI4_9ARCH Putative ammonia monooxygenase (Fragment)</tt></pre>
+</div></div>
+<div class="paragraph"><p>the fasta key is A0AQI4. If i and j are both specified, then the corresponding
+substring is shown in fasta format. In the latter case the header of the
+fasta formatted sequence in the output begins with</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&gt;k i j</tt></pre>
+</div></div>
+<div class="paragraph"><p>followed by the original original fasta header.</p></div>
+<div class="paragraph"><p>If the sequence input are fasta files, then the following holds:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+duplicated lines in the input file lead to only one sequence in the output
+</p>
+</li>
+<li>
+<p>
+the sequences are output according to the order in the original sequence
+    files
+</p>
+</li>
+<li>
+<p>
+the formatting of the output can be controlled by the options <em>-width</em>,
+    <em>-o</em>, <em>-gzip</em>, and <em>-bzip2</em>
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>If the sequence input comes from a fasta index (see below), the following holds:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+option <em>-width</em> is required
+</p>
+</li>
+<li>
+<p>
+option <em>-o</em>, <em>-gzip</em> and <em>-bzip2</em> do not work
+</p>
+</li>
+<li>
+<p>
+the sequences are output in the order the corresponding keys appear in
+    the key file
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>If the end of the argument list only contains one filename, say fastaindex, then
+it is checked if there is a file <tt>fastaindex.kys</tt>. This makes up part of the
+fasta index, which is contructed by calling the suffixerator tool as follows:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>gt suffixerator -protein -ssp -tis -des -sds -kys -indexname fastaindex \
+  -db inputfile1 [inputfile2 ..]</tt></pre>
+</div></div>
+<div class="paragraph"><p>This reads the protein sequence files given to the option <em>-db</em> and creates
+several files:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+a file <tt>fastaindex.esq</tt> representing the sequence.
+</p>
+</li>
+<li>
+<p>
+a file <tt>fastaindex.ssp</tt> specifying the sequence separator positions.
+</p>
+</li>
+<li>
+<p>
+a file <tt>fastaindex.des</tt> showing the fasta headers line by line.
+</p>
+</li>
+<li>
+<p>
+a file <tt>fastaindex.sds</tt> giving the sequence header delimiter positions.
+</p>
+</li>
+<li>
+<p>
+a file <tt>fastaindex.kys</tt> containing the keys in the fasta files.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>For the suffixerator command to work, the keys of the form |key| in the fasta
+header must satisfy the following constraints:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+they all have to be of the same length, not longer than 128, and not shorter
+    than 1
+</p>
+</li>
+<li>
+<p>
+they have to appear in lexicographic order
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reporting_bugs">REPORTING BUGS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Report bugs to &lt;<a href="mailto:gt-users@genometools.org">gt-users@genometools.org</a>&gt;.</p></div>
+</div>
+</div>
+<div id="footer">
+Copyright &copy; 2007-2013 The <i>GenomeTools</i> authors.
+</div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>

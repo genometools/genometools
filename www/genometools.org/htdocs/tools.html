@@ -1,0 +1,548 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<title>GenomeTools - Tools</title>
+<title>GenomeTools - Tools</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="./style.css" type="text/css" />
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="tools.html">Tools</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<h1> GenomeTools Tools </h1>
+<p>This list shows all <em>GenomeTools</em> tools and their functions.</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="tools/gt_bed_to_gff3.html">gt bed_to_gff3</a>
+  Parse BED file and convert it to GFF3.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_cds.html">gt cds</a>
+  Add CDS (coding sequence) features to exon features given in GFF3 file.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_chain2dim.html">gt chain2dim</a>
+  Chain pairwise matches.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_chseqids.html">gt chseqids</a>
+  Change sequence ids by the mapping given in a mapping file.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_clean.html">gt clean</a>
+  Remove all files in the current directory which are automatically created by gt.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_compreads.html">gt compreads</a>
+  Call a fastq file compression tool.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_compreads_compress.html">gt compreads compress</a>
+  Generates compact encoding for fastq data.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_compreads_decompress.html">gt compreads decompress</a>
+  Decodes a file of compressed reads.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_compreads_refcompress.html">gt compreads refcompress</a>
+  Generates compact encoding for fastq data using Reference Compressed Reads (RCR).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_compreads_refdecompress.html">gt compreads refdecompress</a>
+  Decodes a given RCR (Reference Compressed Reads).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_congruence.html">gt congruence</a>
+  Call a congruence subtool and pass argument(s) to it.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_congruence_spacedseed.html">gt congruence spacedseed</a>
+  Match spaced seeds.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_convertseq.html">gt convertseq</a>
+  Parse and convert sequence file formats.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_csa.html">gt csa</a>
+  Transform spliced alignments from GFF3 file into consensus spliced alignments.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_dot.html">gt dot</a>
+  Prints feature graphs in dotfile format.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_dupfeat.html">gt dupfeat</a>
+  Duplicate internal feature nodes in given GFF3 files.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_encseq.html">gt encseq</a>
+  Call an encoded sequence manipulation tool and pass argument(s) to it.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_encseq_bench.html">gt encseq bench</a>
+  Perform benchmark on extractions from encseq.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_encseq_bitextract.html">gt encseq bitextract</a>
+  Extracts internal data from encoded sequences.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_encseq_check.html">gt encseq check</a>
+  Check the consistency of an encoded sequence file.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_encseq_decode.html">gt encseq decode</a>
+  Decode/extract encoded sequences.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_encseq_encode.html">gt encseq encode</a>
+  Encode sequence files efficiently.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_encseq_info.html">gt encseq info</a>
+  Display meta-information about an encoded sequence.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_encseq_md5.html">gt encseq md5</a>
+  Display MD5 sums for an encoded sequence.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_encseq2spm.html">gt encseq2spm</a>
+  Compute suffix prefix matches from encoded sequence.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_eval.html">gt eval</a>
+  Compare annotation files and show accuracy measures (prediction vs. reference).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_extractfeat.html">gt extractfeat</a>
+  Extract features given in GFF3 file from sequence file.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_extractseq.html">gt extractseq</a>
+  Extract sequences from given sequence file(s) or fastaindex.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_featureindex.html">gt featureindex</a>
+  Retrieve annotations from a persistent feature index as GFF3 output.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_fingerprint.html">gt fingerprint</a>
+  Compute MD5 fingerprints for each sequence given in a set of sequence files.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_genomediff.html">gt genomediff</a>
+  Calculates Kr: pairwise distances between genomes.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_gff3.html">gt gff3</a>
+  Parse, possibly transform, and output GFF3 files.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_gff3_to_gtf.html">gt gff3_to_gtf</a>
+  Parse GFF3 file(s) and show them as GTF2.2.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_gff3validator.html">gt gff3validator</a>
+  Strictly validate given GFF3 files.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_gtf_to_gff3.html">gt gtf_to_gff3</a>
+  Parse GTF2.2 file and convert it to GFF3.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_hop.html">gt hop</a>
+  Reference-based homopolymer error correction.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_id_to_md5.html">gt id_to_md5</a>
+  Change sequence IDs in given GFF3 files to MD5 fingerprints of the corresponding sequences.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_interfeat.html">gt interfeat</a>
+  Add intermediary features between outside features in given GFF3 file(s).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_ltrclustering.html">gt ltrclustering</a>
+  Cluster features of LTRs.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_ltrdigest.html">gt ltrdigest</a>
+  Identifies and annotates sequence features in LTR retrotransposon candidates.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_ltrharvest.html">gt ltrharvest</a>
+  Predict LTR retrotransposons.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_matchtool.html">gt matchtool</a>
+  Parse match formats and/or invoke matching tools.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_matstat.html">gt matstat</a>
+  Compute matching statistics.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_md5_to_id.html">gt md5_to_id</a>
+  Change MD5 fingerprints used as sequence IDs in given GFF3 files to &#8220;regular&#8221; ones.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_merge.html">gt merge</a>
+  Merge sorted GFF3 files in sorted fashion.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_mergefeat.html">gt mergefeat</a>
+  Merge adjacent features without children of the same type in given GFF3 file(s).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_mkfeatureindex.html">gt mkfeatureindex</a>
+  Creates a new FeatureIndex from annotation data.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_mmapandread.html">gt mmapandread</a>
+  Map the supplied files into memory and read them once.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_orffinder.html">gt orffinder</a>
+  Identifies ORFs (open reading frames) in sequences.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_packedindex.html">gt packedindex</a>
+  Call apacked index subtool and pass argument(s) to it.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_prebwt.html">gt prebwt</a>
+  Precompute bwt-bounds for some prefix length.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_readjoiner.html">gt readjoiner</a>
+  Readjoiner: a string graph-based sequence assembler.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_readjoiner_assembly.html">gt readjoiner assembly</a>
+  Construct string graph and output contigs.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_readjoiner_overlap.html">gt readjoiner overlap</a>
+  Compute suffix prefix matches from encoded sequence.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_readjoiner_prefilter.html">gt readjoiner prefilter</a>
+  Remove contained and low-quality reads and encode read set in GtEncseq format.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_repfind.html">gt repfind</a>
+  Compute maximal repeats.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_scriptfilter.html">gt scriptfilter</a>
+  Get info about and validate Lua script filters.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_select.html">gt select</a>
+  Select certain features (specified by the used options) from given GFF3 file(s).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_seq.html">gt seq</a>
+  Parse the given sequence file(s) and construct the corresponding index files.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_seqfilter.html">gt seqfilter</a>
+  Filter the given sequence file(s) and show the results on stdout.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_seqids.html">gt seqids</a>
+  Show sequence IDs from annotation file.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_seqmutate.html">gt seqmutate</a>
+  Mutate the sequences of the given sequence file(s).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_seqorder.html">gt seqorder</a>
+  Output sequences as MultiFasta in specified order.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_seqstat.html">gt seqstat</a>
+  Calculate statistics for fasta file(s).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_seqtransform.html">gt seqtransform</a>
+  Perform simple transformations on the given sequence file(s).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_seqtranslate.html">gt seqtranslate</a>
+  Translates a nucleotide sequence into a protein sequence.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_sequniq.html">gt sequniq</a>
+  Filter out repeated sequences in given sequence files.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_shredder.html">gt shredder</a>
+  Shredder sequence file(s) into consecutive pieces of random length.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_shulengthdist.html">gt shulengthdist</a>
+  Compute distribution of pairwise shustring lengths.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_simreads.html">gt simreads</a>
+  Simulate sequencing reads from random positions in the input sequence(s).
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_sketch.html">gt sketch</a>
+  Create graphical representation of GFF3 annotation files.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_sketch_page.html">gt sketch_page</a>
+  Draw a multi-page PDF/PS representation of an annotation file.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_snpper.html">gt snpper</a>
+  Annotates SNPs according to their effect on the genome as given by a genomic annotation.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_splicesiteinfo.html">gt splicesiteinfo</a>
+  Show information about splice sites given in GFF3 files.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_splitfasta.html">gt splitfasta</a>
+  Split the supplied fasta file.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_stat.html">gt stat</a>
+  Show statistics about features contained in GFF3 files.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_tagerator.html">gt tagerator</a>
+  Map short sequence tags in given index.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_tallymer.html">gt tallymer</a>
+  Call a tallymer subtool and pass argument(s) to it.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_tallymer_mkindex.html">gt tallymer mkindex</a>
+  Count and index k-mers in the given enhanced suffix array for a fixed value of k.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_tallymer_occratio.html">gt tallymer occratio</a>
+  Compute occurrence ratio for a set of sequences represented by an enhanced suffix array.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_tallymer_search.html">gt tallymer search</a>
+  Search a set of k-mers in an index constructed by &#8220;gt tallymer mkindex&#8221;.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_uniq.html">gt uniq</a>
+  Filter out repeated feature node graphs in a sorted GFF3 file.
+</p>
+</li>
+<li>
+<p>
+<a href="tools/gt_uniquesub.html">gt uniquesub</a>
+  Compute length of minimum unique prefixes.
+</p>
+</li>
+</ul></div>
+<div id="footer">
+Copyright &copy; 2007-2013 The <i>GenomeTools</i> authors.
+</div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>

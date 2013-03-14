@@ -912,6 +912,7 @@ endif
 	  -f www/genometools.org/htdocs/tool_list.conf \
 	  --out-file www/genometools.org/htdocs/tools.html /tmp/list.txt
 	test -d www/genometools.org/htdocs/tools || mkdir -p www/genometools.org/htdocs/tools
+	rm -f www/genometools.org/htdocs/tools/*
 	scripts/create_html /tmp/gtmanpages www/genometools.org/htdocs/
 
 doc/manuals/annotationsketch.pdf: docs
@@ -923,6 +924,7 @@ manuals: $(ANNOTATIONSKETCH_MANUAL)
 manpages: bin/gt
 	bin/gt -createman /tmp/gtmanpages
 	test -d $(CURDIR)/doc/manpages || mkdir -p $(CURDIR)/doc/manpages
+	rm -f $(CURDIR)/doc/manpages/*
 	scripts/create_manpages /tmp/gtmanpages $(CURDIR)/doc/manpages
 
 installwww:
@@ -1127,11 +1129,8 @@ cleangenerated:
           www/genometools.org/htdocs/images/constructed.png \
           doc/manuals/annotationsketch.pdf
 	rm -f www/genometools.org/htdocs/docs.html \
-          www/genometools.org/htdocs/examples.html \
-          www/genometools.org/htdocs/libgenometools.html \
-          www/genometools.org/htdocs/tools.html
-	rm -rf www/genometools.org/htdocs/tools \
-	      doc/manpages
+          www/genometools.org/htdocs/examples.html
+	rm -rf doc/manpages
 
 gtkviewer:
 	@echo "[compile $(notdir $@)]"

@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<title>GenomeTools - manual page for GT-CSA(1)</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="..//style.css" type="text/css" />
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="tools.html">Tools</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>gt-csa - Transform spliced alignments from GFF3 file into consensus spliced alignments.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>gt csa</strong> [option &#8230;] [GFF3_file]</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<strong>-join-length</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+set join length for the spliced alignment clustering (default: 300)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-v</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+be verbose (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-o</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+redirect output to specified file (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-gzip</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write gzip compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-bzip2</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write bzip2 compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-force</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+force writing to output file (default: no)
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_example">Example:</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Let&#8217;s assume we have a GFF3 file <em>csa_example_spliced_alignments.gff3</em>
+containing the following four overlapping spliced alignments (represented as
+genes with exons as children):</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>##gff-version   3
+##sequence-region   seq 1 290
+seq .       gene    1       209     .       +       .       ID=gene1
+seq .       exon    1       90      .       +       .       Parent=gene1
+seq .       exon    110     190     .       +       .       Parent=gene1
+seq .       exon    201     209     .       +       .       Parent=gene1
+###
+seq .       gene    1       290     .       +       .       ID=gene2
+seq .       exon    1       90      .       +       .       Parent=gene2
+seq .       exon    101     190     .       +       .       Parent=gene2
+seq .       exon    201     290     .       +       .       Parent=gene2
+###
+seq .       gene    10      290     .       +       .       ID=gene3
+seq .       exon    10      90      .       +       .       Parent=gene3
+seq .       exon    110     190     .       +       .       Parent=gene3
+seq .       exon    201     290     .       +       .       Parent=gene3
+###
+seq .       gene    181     290     .       +       .       ID=gene4
+seq .       exon    181     190     .       +       .       Parent=gene4
+seq .       exon    201     290     .       +       .       Parent=gene4
+###</tt></pre>
+</div></div>
+<div class="paragraph"><p>To compute the consensus spliced alignments we call:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>$ gt csa csa_example_spliced_alignments.gff3</tt></pre>
+</div></div>
+<div class="paragraph"><p>Which returns:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>##gff-version   3
+##sequence-region   seq 1 290
+seq gt csa  gene    1       290     .       +       .       ID=gene1
+seq gt csa  mRNA    1       290     .       +       .       ID=mRNA1;Parent=gene1
+seq gt csa  exon    1       90      .       +       .       Parent=mRNA1
+seq gt csa  exon    110     190     .       +       .       Parent=mRNA1
+seq gt csa  exon    201     290     .       +       .       Parent=mRNA1
+seq gt csa  mRNA    1       290     .       +       .       ID=mRNA2;Parent=gene1
+seq gt csa  exon    1       90      .       +       .       Parent=mRNA2
+seq gt csa  exon    101     190     .       +       .       Parent=mRNA2
+seq gt csa  exon    201     290     .       +       .       Parent=mRNA2
+###</tt></pre>
+</div></div>
+<div class="paragraph"><p>As one can see, they have been combined into a consensus spliced alignment
+(represented as genes with mRNAs as children which in turn have exons as
+children) with two alternative splice forms. The first and the third spliced
+alignment have been combined into the first alternative splice form (mRNA1) and
+the the second and the fourth spliced alignment into the second alternative
+splice form (mRNA2).</p></div>
+<div class="paragraph"><p>As one can see, the second exon from the first alternative splice form ist
+shorter than the corresponding exon from the second alternative splice form.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reporting_bugs">REPORTING BUGS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Report bugs to &lt;<a href="mailto:gt-users@genometools.org">gt-users@genometools.org</a>&gt;.</p></div>
+</div>
+</div>
+<div id="footer">
+Copyright &copy; 2007-2013 The <i>GenomeTools</i> authors.
+</div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>
