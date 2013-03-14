@@ -236,19 +236,27 @@ void gtr_register_components(GtR *gtr)
   gtr->unit_tests = gtt_unit_tests();
 }
 
-static int list_tools(GtToolbox *toolbox)
+static int list_tools(GtR *gtr)
 {
   GtToolIterator *ti;
+  GtOptionParser *op;
   const char *name;
   char fulltoolname[BUFSIZ],
        *utoolname;
   GtTool *tool;
   GtStr *prefix = gt_str_new();
-  gt_assert(toolbox);
-  ti = gt_tool_iterator_new(toolbox);
+  gt_assert(gtr);
+  /* list 'gt' itself */
+  printf("\n"),
+  printf("- link:tools/gt.html[gt]\n");
+  op = gtr_option_parser_new(gtr);
+  printf("  %s\n", gt_option_parser_one_liner(op));
+  gt_option_parser_delete(op);
+  /* list all tools in 'gt' */
+  ti = gt_tool_iterator_new(gtr->tools);
   gt_tool_iterator_set_prefix_target(ti, prefix, ' ');
   while (gt_tool_iterator_next(ti, &name, &tool)) {
-    GtOptionParser *op = gt_tool_get_option_parser(tool);
+    op = gt_tool_get_option_parser(tool);
     (void) snprintf(fulltoolname, BUFSIZ, "gt%c%s%s", ' ',
                     gt_str_get(prefix), name);
     utoolname = gt_cstr_dup(fulltoolname);
@@ -267,14 +275,15 @@ static int create_manpage(const char *outdir, const char *toolname,
                           GtOptionParser *option_parser, GtError *err)
 {
   GtFile *outfile = NULL;
+  GtStr *man, *pathbuf;
   char *utoolname;
-  GtStr *pathbuf;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(outdir && toolname && option_parser);
+  man = gt_str_new();
+  pathbuf = gt_str_new_cstr(outdir);
   utoolname = gt_cstr_dup(toolname);
   gt_cstr_rep(utoolname, ' ', '_');
-  pathbuf = gt_str_new_cstr(outdir);
   if (!gt_file_exists(gt_str_get(pathbuf)))
     gt_xmkdir(gt_str_get(pathbuf));
   gt_str_append_char(pathbuf, '/');
@@ -283,38 +292,42 @@ static int create_manpage(const char *outdir, const char *toolname,
   gt_free(utoolname);
   if (!(outfile = gt_file_new(gt_str_get(pathbuf), "w+", err)))
     had_err = -1;
-  if (!had_err) {
-    GtStr *man = gt_str_new();
-    gt_option_parser_manpage(option_parser, toolname, man, err);
+  if (!had_err)
+    had_err = gt_option_parser_manpage(option_parser, toolname, man, err);
+  if (!had_err)
     gt_file_xprintf(outfile, "%s", gt_str_get(man));
-    gt_file_delete(outfile);
-    gt_str_delete(pathbuf);
-    gt_str_delete(man);
-  }
+  gt_file_delete(outfile);
+  gt_str_delete(pathbuf);
+  gt_str_delete(man);
   return had_err;
 }
 
-static int create_manpages(GtToolbox *toolbox, const char *outdir, GtError *err)
+static int create_manpages(GtR *gtr, const char *outdir, GtError *err)
 {
-  GtToolIterator *ti;
+  GtOptionParser *op;
   const char *name;
   char fulltoolname[BUFSIZ];
   GtTool *tool;
   GtStr *prefix = gt_str_new();
   int had_err = 0;
-
   gt_error_check(err);
-  gt_assert(toolbox);
-
-  ti = gt_tool_iterator_new(toolbox);
-  gt_tool_iterator_set_prefix_target(ti, prefix, ' ');
-  while (!had_err && gt_tool_iterator_next(ti, &name, &tool)) {
-    GtOptionParser *op = gt_tool_get_option_parser(tool);
-    (void) snprintf(fulltoolname, BUFSIZ, "gt%c%s%s", ' ',
-                    gt_str_get(prefix), name);
-    had_err = create_manpage(outdir, fulltoolname, op, err);
+  gt_assert(gtr);
+  /* create man page for 'gt' itself */
+  op = gtr_option_parser_new(gtr);
+  had_err = create_manpage(outdir, "gt", op, err);
+  gt_option_parser_delete(op);
+  /* create man pages for all tools in 'gt' */
+  if (!had_err) {
+    GtToolIterator *ti = gt_tool_iterator_new(gtr->tools);
+    gt_tool_iterator_set_prefix_target(ti, prefix, ' ');
+    while (!had_err && gt_tool_iterator_next(ti, &name, &tool)) {
+      op = gt_tool_get_option_parser(tool);
+      (void) snprintf(fulltoolname, BUFSIZ, "gt%c%s%s", ' ',
+                      gt_str_get(prefix), name);
+      had_err = create_manpage(outdir, fulltoolname, op, err);
+    }
+    gt_tool_iterator_delete(ti);
   }
-  gt_tool_iterator_delete(ti);
   gt_str_delete(prefix);
   if (had_err)
     return EXIT_FAILURE;
@@ -405,9 +418,9 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
   gtr->seed = gt_ya_rand_init(gtr->seed);
   gt_log_log("seed=%u", gtr->seed);
   if (gtr->list)
-    return list_tools(gtr->tools);
+    return list_tools(gtr);
   if (gt_str_length(gtr->manoutdir) > 0)
-    return create_manpages(gtr->tools, gt_str_get(gtr->manoutdir), err);
+    return create_manpages(gtr, gt_str_get(gtr->manoutdir), err);
   if (gtr->check64bit)
     return check64bit();
   if (gtr->test)

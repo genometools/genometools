@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<title>GenomeTools - manual page for GT(1)</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" href="..//style.css" type="text/css" />
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="tools.html">Tools</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>gt - The GenomeTools (gt) genome analysis system (<a href="http://genometools.org">http://genometools.org</a>).</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>gt</strong> [option &#8230;] [tool | script] [argument &#8230;]</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<strong>-i</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+enter interactive mode after executing <em>tool</em> or <em>script</em> (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-test</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+perform unit tests and exit (default: no)
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Tools:</p></div>
+<div class="paragraph"><p>bed_to_gff3
+cds
+chain2dim
+chseqids
+clean
+compreads
+congruence
+convertseq
+csa
+dot
+dupfeat
+encseq
+encseq2spm
+eval
+extractfeat
+extractseq
+featureindex
+fingerprint
+genomediff
+gff3
+gff3_to_gtf
+gff3validator
+gtf_to_gff3
+hop
+id_to_md5
+interfeat
+ltrclustering
+ltrdigest
+ltrharvest
+matchtool
+matstat
+md5_to_id
+merge
+mergefeat
+mgth
+mkfeatureindex
+mkfmindex
+mmapandread
+orffinder
+packedindex
+prebwt
+readjoiner
+repfind
+scriptfilter
+select
+seq
+seqfilter
+seqids
+seqmutate
+seqorder
+seqstat
+seqtransform
+seqtranslate
+sequniq
+shredder
+shulengthdist
+simreads
+sketch
+sketch_page
+snpper
+splicesiteinfo
+splitfasta
+stat
+suffixerator
+tagerator
+tallymer
+uniq
+uniquesub</p></div>
+<div class="paragraph"><p>Set the environment variable <tt>GT_MEM_BOOKKEEPING=on</tt> to enable memory bookkeeping
+(e.g., like this: <tt>env GT_MEM_BOOKKEEPING=on gt</tt>).</p></div>
+<div class="paragraph"><p>Set the environment variable <tt>GT_ENV_OPTIONS=-spacepeak</tt> to show a spacepeak after
+program run.
+Set the environment variable <tt>GT_ENV_OPTIONS=-showtime</tt> to show processing times
+for some program parts if implemented.</p></div>
+<div class="paragraph"><p>Combinations are possible. Running the <tt>gt' binary with `GT_ENV_OPTIONS=-help</tt>
+shows all possible &#8220;environment options&#8221;)</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reporting_bugs">REPORTING BUGS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Report bugs to &lt;<a href="mailto:gt-users@genometools.org">gt-users@genometools.org</a>&gt;.</p></div>
+</div>
+</div>
+<div id="footer">
+Copyright &copy; 2007-2013 The <i>GenomeTools</i> authors.
+</div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>

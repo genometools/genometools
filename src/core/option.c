@@ -653,9 +653,13 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
     dup2(out_pipe[1], STDOUT_FILENO);
     close(out_pipe[1]);
 
-    (void) snprintf(prognamebuf, BUFSIZ, "%s %s",
-                    gt_error_get_progname(err),
-                    toolname + gt_cstr_length_up_to_char(toolname, ' '));
+    if (!strcmp(toolname, "gt"))
+      (void) snprintf(prognamebuf, BUFSIZ, "gt");
+    else {
+      (void) snprintf(prognamebuf, BUFSIZ, "%s %s",
+                      gt_error_get_progname(err),
+                      toolname + gt_cstr_length_up_to_char(toolname, ' '));
+    }
     had_err = op->comment_func(prognamebuf, op->comment_func_data, err);
     fflush(stdout);
 
