@@ -57,6 +57,7 @@ struct GtR {
   bool test,
        interactive,
        debug,
+       list,
        check64bit;
   unsigned int seed;
   GtStr *debugfp,
@@ -198,6 +199,10 @@ GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
                          "with 1 otherwise", &gtr->check64bit, false);
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
+  o = gt_option_new_bool("list", "list all tools and exit", &gtr->list, false);
+  gt_option_is_development_option(o);
+  gt_option_hide_default(o);
+  gt_option_parser_add_option(op, o);
   o = gt_option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
                              "file", gtr->testspacepeak);
   gt_option_is_development_option(o);
@@ -223,6 +228,33 @@ void gtr_register_components(GtR *gtr)
   /* add unit tests */
   gt_hashmap_delete(gtr->unit_tests);
   gtr->unit_tests = gtt_unit_tests();
+}
+
+static int list_tools(GtToolbox *toolbox)
+{
+  GtToolIterator *ti;
+  const char *name;
+  char fulltoolname[BUFSIZ],
+       *utoolname;
+  GtTool *tool;
+  GtStr *prefix = gt_str_new();
+  gt_assert(toolbox);
+  ti = gt_tool_iterator_new(toolbox);
+  gt_tool_iterator_set_prefix_target(ti, prefix, ' ');
+  while (gt_tool_iterator_next(ti, &name, &tool)) {
+    GtOptionParser *op = gt_tool_get_option_parser(tool);
+    (void) snprintf(fulltoolname, BUFSIZ, "gt%c%s%s", ' ',
+                    gt_str_get(prefix), name);
+    utoolname = gt_cstr_dup(fulltoolname);
+    gt_cstr_rep(utoolname, ' ', '_');
+    printf("\n"),
+    printf("- link:tools/%s.html[%s]\n", utoolname, fulltoolname);
+    printf("  %s\n", gt_option_parser_one_liner(op));
+    gt_free(utoolname);
+  }
+  gt_tool_iterator_delete(ti);
+  gt_str_delete(prefix);
+  return EXIT_SUCCESS;
 }
 
 static int create_manpage(const char *outdir, const char *toolname,
@@ -366,6 +398,8 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
     enable_logging(gt_str_get(gtr->debugfp), &gtr->logfp);
   gtr->seed = gt_ya_rand_init(gtr->seed);
   gt_log_log("seed=%u", gtr->seed);
+  if (gtr->list)
+    return list_tools(gtr->tools);
   if (gt_str_length(gtr->manoutdir) > 0)
     return create_manpages(gtr->tools, gt_str_get(gtr->manoutdir), err);
   if (gtr->check64bit)
