@@ -63,8 +63,8 @@ struct GtOptionParser {
        *synopsis,
        *one_liner;
   GtArray *options,
-        *hooks;
-  bool parser_called,
+          *hooks;
+  bool common_options_added,
        refer_to_manual;
   GtShowCommentFunc comment_func;
   void *comment_func_data;
@@ -119,7 +119,7 @@ struct GtOption {
 };
 
 static GtOption *gt_option_new(const char *option_str, const char *description,
-                          void *value)
+                               void *value)
 {
   GtOption *o = gt_calloc(1, sizeof (GtOption));
   gt_assert(option_str && strlen(option_str));
@@ -162,10 +162,10 @@ static GtOption* gt_option_new_helpdev(void)
   return o;
 }
 
-static GtOption* gt_option_new_version(GtShowVersionFunc versionfunc)
+static GtOption* gt_option_new_version(void )
 {
   GtOption *o = gt_option_new("version", "display version information and exit",
-                              versionfunc);
+                              NULL);
   o->option_type = OPTION_VERSION;
   return o;
 }
@@ -499,6 +499,37 @@ static void print_toolname(const char *toolname, GtStr *outstr, bool upper) {
   }
 }
 
+static bool has_extended_option(GtArray *options)
+{
+  unsigned long i;
+  GtOption *option;
+  gt_assert(options);
+  for (i = 0; i < gt_array_size(options); i++) {
+    option = *(GtOption**) gt_array_get(options, i);
+    if (option->is_extended_option)
+      return true;
+  }
+  return false;
+}
+
+static void add_common_options(GtOptionParser *op)
+{
+  bool has_extended_options;
+  GtOption *option;
+  gt_assert(op);
+  has_extended_options = has_extended_option(op->options);
+  option = gt_option_new_help(has_extended_options);
+  gt_option_parser_add_option(op, option);
+  if (has_extended_options) {
+    option = gt_option_new_helpplus();
+    gt_option_parser_add_option(op, option);
+  }
+  option = gt_option_new_helpdev();
+  gt_option_parser_add_option(op, option);
+  option = gt_option_new_version();
+  gt_option_parser_add_option(op, option);
+}
+
 int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
                              GtStr *outstr, GtError *err)
 {
@@ -509,6 +540,12 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
   gt_assert(op);
   gt_error_check(err);
   gt_assert(strlen(toolname) > 0);
+
+  /* add common options, if necessary */
+  if (!op->common_options_added) {
+    op->common_options_added = true;
+    add_common_options(op);
+  }
 
   /* title and section */
   print_toolname(toolname, outstr, true);
@@ -888,19 +925,6 @@ static int check_mandatory_either_options(GtOptionParser *op, GtError *err)
   return 0;
 }
 
-static bool has_extended_option(GtArray *options)
-{
-  unsigned long i;
-  GtOption *option;
-  gt_assert(options);
-  for (i = 0; i < gt_array_size(options); i++) {
-    option = *(GtOption**) gt_array_get(options, i);
-    if (option->is_extended_option)
-      return true;
-  }
-  return false;
-}
-
 void gt_option_parser_set_min_args(GtOptionParser *op,
                                    unsigned int min_additional_arguments)
 {
@@ -934,7 +958,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
   double double_value;
   HookInfo *hookinfo;
   GtOption *option;
-  bool has_extended_options, option_parsed;
+  bool option_parsed;
   long long_value;
   unsigned long ulong_value;
   int minus_offset, had_err = 0;
@@ -942,24 +966,17 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
 
   gt_error_check(err);
   gt_assert(op);
-  /* to avoid multiple adding of common options */
-  gt_assert(!op->parser_called);
 
-  op->progname = gt_cstr_dup(argv[0]);
-
-  /* add common options */
-  has_extended_options = has_extended_option(op->options);
-  option = gt_option_new_help(has_extended_options);
-  gt_option_parser_add_option(op, option);
-  if (has_extended_options) {
-    option = gt_option_new_helpplus();
-    gt_option_parser_add_option(op, option);
+  /* add common options, if necessary */
+  if (!op->common_options_added) {
+    op->common_options_added = true;
+    add_common_options(op);
   }
-  option = gt_option_new_helpdev();
-  gt_option_parser_add_option(op, option);
-  option = gt_option_new_version(op->version_func ? op->version_func
-                                                  : version_func);
-  gt_option_parser_add_option(op, option);
+
+  /* set progname */
+  if (op->progname)
+    gt_free(op->progname);
+  op->progname = gt_cstr_dup(argv[0]);
 
   for (argnum = 1; argnum < argc; argnum++) {
     if (!(argv[argnum] && argv[argnum][0] == '-' && strlen(argv[argnum]) > 1) ||
@@ -1354,7 +1371,10 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_VERSION:
-              ((GtShowVersionFunc) option->value)(op->progname);
+              if (op->version_func)
+                op->version_func(op->progname);
+              else
+                version_func(op->progname);
               return GT_OPTION_PARSER_REQUESTS_EXIT;
             default: gt_assert(0);
           }
@@ -1413,7 +1433,6 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
     had_err = hookinfo->hook(hookinfo->data, err);
   }
 
-  op->parser_called = true;
   if (parsed_args)
     *parsed_args = argnum;
 
