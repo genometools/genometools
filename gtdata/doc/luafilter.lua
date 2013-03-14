@@ -1,9 +1,8 @@
 if not gtdata_doc_dir then gtdata_doc_dir = "./" end
 print ([[
+File format for option '-rule_files':
 
-File format for option -rule_files:
-
-The files supplied to option -rule_files define a function for
+The files supplied to option '-rule_files' define a function for
 filtering by user given criteria (see example below):
 ]])
 print(io.open(gtdata_doc_dir.."luafilter_function.lua"):read("*a"))

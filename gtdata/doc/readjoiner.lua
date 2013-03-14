@@ -1,6 +1,6 @@
 print ([[
 
-Please consult Readjoiner manual for more information.
+Please consult the Readjoiner manual for more information.
 
 Tools:
 

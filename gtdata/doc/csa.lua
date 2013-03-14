@@ -11,7 +11,7 @@ print(io.open(gtdata_doc_dir.."csa_example_spliced_alignments.gff3"):read("*a"))
 print([[
 To compute the consensus spliced alignments we call:
 
-$ gt csa csa_example_spliced_alignments.gff3
+    $ gt csa csa_example_spliced_alignments.gff3
 
 Which returns:
 ]])
