@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+for FILE in $1/*.mansrc;
+do
+  SHORTNAME=`echo $FILE | cut -f 4 -d '/' | cut -f 1 -d '.'`
+  echo -n '.'
+  asciidoc --backend=xhtml11 -a linkcss -a stylesdir=../ \
+      -a stylesheet=style.css -a badges -a icons \
+      -f $2/tool.conf -o $2/tools/$SHORTNAME.html $FILE
+done
+echo ''
