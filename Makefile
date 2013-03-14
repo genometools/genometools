@@ -920,6 +920,11 @@ doc/manuals/annotationsketch.pdf: docs
 manuals: $(ANNOTATIONSKETCH_MANUAL)
 	$(MAKE) -C $(CURDIR)/doc/manuals
 
+manpages: bin/gt
+	bin/gt -createman /tmp/gtmanpages
+	test -d $(CURDIR)/doc/manpages || mkdir -p $(CURDIR)/doc/manpages
+	scripts/create_manpages /tmp/gtmanpages $(CURDIR)/doc/manpages
+
 installwww:
 # install genometools.org website
 	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)/genometools.org
@@ -965,6 +970,11 @@ endif
 	  -e 's!@SYSTEM@!$(SYSTEM)!' <src/genometools-config.in \
 	  >$(prefix)/bin/genometools-config
 	chmod 755 $(prefix)/bin/genometools-config
+
+installmanpages: manpages
+	test ! -d $(CURDIR)/doc/manpages || \
+	  ((test -d $(prefix)/share/man/man1 || mkdir -p $(prefix)/share/man/man1) \
+	    && cp $(CURDIR)/doc/manpages/* $(prefix)/share/man/man1)
 
 cflags:
 	@echo ${GT_CFLAGS}
@@ -1120,7 +1130,8 @@ cleangenerated:
           www/genometools.org/htdocs/examples.html \
           www/genometools.org/htdocs/libgenometools.html \
           www/genometools.org/htdocs/tools.html
-	rm -rf www/genometools.org/htdocs/tools
+	rm -rf www/genometools.org/htdocs/tools \
+	      doc/manpages
 
 gtkviewer:
 	@echo "[compile $(notdir $@)]"
