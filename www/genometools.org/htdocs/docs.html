@@ -1,0 +1,1106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>gtscript documentation</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a id="current" href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="manuals.html">Manuals</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<h1><tt>gtscript</tt> documentation</h1>
+<p>
+This document describes the <tt>gtscript</tt> API. <tt>gtscript</tt> is
+basically <a href="http://www.lua.org/">Lua</a> (an embeddable scripting
+language) plus parts of the <i>GenomeTools</i> C libraries exported to
+Lua. Because the <i>GenomeTools</i> binary <tt>gt</tt> contains an embedded Lua
+interpreter, <tt>gtscript</tt> files can be executed with the <tt>gt</tt>
+binary.
+The parts of the <i>GenomeTools</i> C libraries exported to Lua (the
+<tt>gtscript</tt> API) are described here, for a documentation of Lua itself and
+its APIs, please refer to the <a href="http://www.lua.org/manual/5.1/">Lua
+reference manual</a>.
+</p>
+<p>
+See the <a href="#Index">index</a> for an alphabetical list of all available
+interfaces.
+</p>
+<h2>Notes</h2>
+<ul>
+<li>
+You have to add <code>require 'gtlua'</code> to your script
+in order to load the parts of the <tt>gtscript</tt> API which are implemented in
+<tt>gtscript</tt> itself.
+<li>
+By default, all functions of the <tt>gtscript</tt> API are contained in the
+<code>gt</code> table.  That is, you have to prepend all functions calls with
+``<code>gt.</code>''. For example, write <code>gt.show()</code> to call the
+<code>show()</code> function documented below.  You can use
+<code>gt.export()</code> or <code>gt.re()</code> to export the <code>gt</code>
+table to the global environment, which makes the prepending unnecessary (but
+clutters your global environment).
+<li>
+If a function is documented as ``returns an array'', this means that the function
+returns a table where only consecutive
+integer keys from 1 on are used and which can be traversed with the
+<a
+href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code></a> function.
+</ul>
+<h2>Classes</h2>
+<ul>
+
+  <li><a href="#Alphabet">Alphabet</a>
+
+  <li><a href="#Bittab">Bittab</a>
+
+  <li><a href="#CDSStream">CDSStream</a>
+
+  <li><a href="#CSAStream">CSAStream</a>
+
+  <li><a href="#Canvas">Canvas</a>
+
+  <li><a href="#Diagram">Diagram</a>
+
+  <li><a href="#FeatureIndex">FeatureIndex</a>
+
+  <li><a href="#FeatureNode">FeatureNode</a>
+
+  <li><a href="#FeatureStream">FeatureStream</a>
+
+  <li><a href="#FeatureVisitor">FeatureVisitor</a>
+
+  <li><a href="#GFF3InStream">GFF3InStream</a>
+
+  <li><a href="#GFF3OutStream">GFF3OutStream</a>
+
+  <li><a href="#GFF3Visitor">GFF3Visitor</a>
+
+  <li><a href="#GenomeNode">GenomeNode</a>
+
+  <li><a href="#GenomeStream">GenomeStream</a>
+
+  <li><a href="#Imageinfo">Imageinfo</a>
+
+  <li><a href="#Layout">Layout</a>
+
+  <li><a href="#Range">Range</a>
+
+  <li><a href="#RegionMapping">RegionMapping</a>
+
+  <li><a href="#RegionNode">RegionNode</a>
+
+  <li><a href="#ScoreMatrix">ScoreMatrix</a>
+
+  <li><a href="#StreamEvaluator">StreamEvaluator</a>
+
+  <li><a href="#translate">translate</a>
+
+</ul>
+<h2>Modules</h2>
+<ul>
+
+</ul>
+<h2>Sole functions</h2>
+<a name="feature_node_iterator_new"></a>
+
+<code> feature_node_iterator_new(genome_node)</code>
+<p>
+Returns a new genome node iterator which performs a depth-first traversel of <code>genome_node</code> (including <code>genome_node</code> itself).
+</p>
+<hr>
+<a name="feature_node_iterator_new_direct"></a>
+
+<code> feature_node_iterator_new_direct(genome_node)</code>
+<p>
+Returns a noew genome node iterator wich iterates over all direct children of <code>genome_node</code> (without <code>genome_node</code> itself).
+</p>
+<hr>
+<a name="feature_node_iterator:next"></a>
+
+<code> feature_node_iterator:next()</code>
+<p>
+Returns the next genome node for <code>feature_node_iterator</code> or nil.
+</p>
+<hr>
+<a name="rand_max"></a>
+
+<code> rand_max(val)</code>
+<p>
+Returns a random number between 0 and <code>val</code>.
+</p>
+<hr>
+<a name="reload"></a>
+
+<code> reload()</code>
+<p>
+Reload <code>gt</code> module.
+</p>
+<hr>
+<a name="export"></a>
+
+<code> export()</code>
+<p>
+Export the content of <code>gt</code> table to the global environment.
+</p>
+<hr>
+<a name="display"></a>
+
+<code> display(filename)</code>
+<p>
+Call external 'display' program for file <code>filename</code>.
+</p>
+<hr>
+<a name="show_table"></a>
+
+<code> show_table(tbl)</code>
+<p>
+Show all keys and values of table <code>tbl</code>.
+</p>
+<hr>
+<a name="show"></a>
+
+<code> show(all)</code>
+<p>
+Show content of the <code>gt</code> table.
+</p>
+<hr>
+<a name="re"></a>
+
+<code> re()</code>
+<p>
+Reload the <code>gt</code> module and export its content to the global environment.
+</p>
+<hr>
+<a name="features_contain_marked"></a>
+
+<code> features_contain_marked(features)</code>
+<p>
+Returns true if the given array of <code>features</code> contains a marked feature, false otherwise.
+</p>
+<hr>
+<a name="features_show"></a>
+
+<code> features_show(features)</code>
+<p>
+Print the given array of <code>features</code> to stdout.
+</p>
+<hr>
+<a name="features_get_marked"></a>
+
+<code> features_get_marked(features)</code>
+<p>
+Return all marked <code>features</code> (an array) as an array or nil if <code>features</code> contains no marked features.
+</p>
+<hr>
+<a name="features_show_marked"></a>
+
+<code> features_show_marked(features)</code>
+<p>
+Print all marked <code>features</code> (an array) to stdout.
+</p>
+<hr>
+<a name="features_mRNAs2genes"></a>
+
+<code> features_mRNAs2genes(in_features)</code>
+<p>
+Return an array of genome features which contains a separate gene feature for each mRNA in <code>in_features</code>.
+</p>
+<hr>
+<a name="features_extract_sequences"></a>
+
+<code> features_extract_sequences(features, type, join, region_mapping)</code>
+<p>
+Return an array with the sequences of the given features.
+</p>
+<hr>
+<a name="Alphabet"></a>
+<h2>Class Alphabet</h2>
+<a name="alphabet_new_protein"></a>
+
+<code> alphabet_new_protein()</code>
+<p>
+Return a new protein alphabet.
+</p>
+<hr>
+<a name="alphabet_new_dna"></a>
+
+<code> alphabet_new_dna()</code>
+<p>
+Return a new DNA alphabet.
+</p>
+<hr>
+<a name="alphabet_new_empty"></a>
+
+<code> alphabet_new_empty()</code>
+<p>
+Return an empty alphabet.
+</p>
+<hr>
+<a name="alphabet:add_mapping"></a>
+
+<code> alphabet:add_mapping(characters)</code>
+<p>
+Add the mapping of all given <code>characters</code> to the given <code>alphabet</code>. The first character is the result of subsequent <code>alphabet:decode()</code> calls.
+</p>
+<hr>
+<a name="alphabet:add_wildcard"></a>
+
+<code> alphabet:add_wildcard(characters)</code>
+<p>
+Add <code>wildcard</code> to <code>alphabet</code>.
+</p>
+<hr>
+<a name="alphabet:decode"></a>
+
+<code> alphabet:decode(code)</code>
+<p>
+Return a string containing the decoded character of the <code>code</code> number.
+</p>
+<hr>
+<a name="alphabet:size"></a>
+
+<code> alphabet:size()</code>
+<p>
+Return the size of <code>alphabet</code> as a number.
+</p>
+<hr>
+<a name="Bittab"></a>
+<h2>Class Bittab</h2>
+<a name="bittab_new"></a>
+
+<code> bittab_new(num_of_bits)</code>
+<p>
+Returns a bittab with <code>num_of_bits</code> many bits.
+</p>
+<hr>
+<a name="bittab:set_bit"></a>
+
+<code> bittab:set_bit(bit)</code>
+<p>
+Set <code>bit</code> in <code>bittab</code>.
+</p>
+<hr>
+<a name="bittab:unset_bit"></a>
+
+<code> bittab:unset_bit(bit)</code>
+<p>
+Unset <code>bit</code> in <code>bittab</code>.
+</p>
+<hr>
+<a name="bittab:complement"></a>
+
+<code> bittab:complement(src)</code>
+<p>
+Store the complement of bittab <code>src</code> in <code>bittab</code>. <code>bittab</code> and <code>src</code> must have the same size.
+</p>
+<hr>
+<a name="bittab:equal"></a>
+
+<code> bittab:equal(src)</code>
+<p>
+Set <code>bittab</code> equal to bittab <code>src</code>. <code>bittab</code> and <code>src</code> must have the same size.
+</p>
+<hr>
+<a name="bittab:and_equal"></a>
+
+<code> bittab:and_equal(src)</code>
+<p>
+Set <code>bittab</code> equal to the bitwise AND of <code>bittab</code> and <code>src</code>. <code>bittab</code> and <code>src</code> must have the same size.
+</p>
+<hr>
+<a name="bittab:bit_is_set"></a>
+
+<code> bittab:bit_is_set(bit)</code>
+<p>
+Returns true if <code>bit</code> is set in <code>bittab</code>, false otherwise.
+</p>
+<hr>
+<a name="CDSStream"></a>
+<h2>Class CDSStream</h2>
+<a name="cds_stream_new"></a>
+
+<code> cds_stream_new(in_stream, region_mapping)</code>
+<p>
+Returns a new CDS (coding sequence) stream object (a genome stream) which uses genome stream <code>in_stream</code> as input. The CDS stream adds CDS features to exon features in <code>in_stream</code>. The given <code>region_mapping</code> is used to map the sequence regions given in <code>in_stream</code> to the actual sequence files necessary for computing the coding sequences.
+</p>
+<hr>
+<a name="CSAStream"></a>
+<h2>Class CSAStream</h2>
+<a name="csa_stream_new"></a>
+
+<code> csa_stream_new(in_stream, join)</code>
+<p>
+Returns a new CSA (consensus spliced alignment) stream object (a genome stream) which uses genome stream <code>in_stream</code> as input. The CSA stream replaces spliced alignments with computed consensus spliced alignments. The optional <code>join</code> parameters sets the length for the spliced alignment clustering (default: 300).
+</p>
+<hr>
+<a name="Canvas"></a>
+<h2>Class Canvas</h2>
+<a name="canvas_cairo_file_new_png"></a>
+
+<code> canvas_cairo_file_new_png(width, imageinfo)</code>
+<p>
+Return a Canvas object which acts as a PNG drawing surface of width <code>width</code> to be passed to rendering functions as a visitor. An <code>imageinfo</code> object is filled with coordinate information if given. If not needed, pass nil as <code>imageinfo</code>.
+</p>
+<hr>
+<a name="canvas_cairo_file_new_pdf"></a>
+
+<code> canvas_cairo_file_new_pdf(width, imageinfo)</code>
+<p>
+Return a Canvas object which acts as a PDF drawing surface of width <code>width</code> to be passed to rendering functions as a visitor. An <code>imageinfo</code> object is filled with coordinate information if given.
+</p>
+<hr>
+<a name="canvas_cairo_file_new_ps"></a>
+
+<code> canvas_cairo_file_new_ps(width, imageinfo)</code>
+<p>
+Return a Canvas object which acts as a PS drawing surface of width <code>width</code> to be passed to rendering functions as a visitor. An <code>imageinfo</code> object is filled with coordinate information if given.
+</p>
+<hr>
+<a name="canvas_cairo_file_new_svg"></a>
+
+<code> canvas_cairo_file_new_svg(width, imageinfo)</code>
+<p>
+Return a Canvas object which acts as a SVG drawing surface of width <code>width</code> to be passed to rendering functions as a visitor. An <code>imageinfo</code> object is filled with coordinate information if given.
+</p>
+<hr>
+<a name="canvas:to_file"></a>
+
+<code> canvas:to_file(filename)</code>
+<p>
+Creates an image file with the given <code>filename</code> which contains the contents of the canvas (only for objects created with <code>canvas_cairo_file_new_*()</code>).
+</p>
+<hr>
+<a name="Diagram"></a>
+<h2>Class Diagram</h2>
+<a name="diagram_new"></a>
+
+<code> diagram_new(feature_index, range, seqid)</code>
+<p>
+Return a diagram object which contains the genome nodes given in <code>feature_index</code> in the given <code>range</code> of the sequence region with sequence ID <code>seqid</code>.
+</p>
+<hr>
+<a name="diagram_new_from_array"></a>
+
+<code> diagram_new_from_array(array, startpos, endpos)</code>
+<p>
+Return a diagram object which contains the genome nodes given in <code>array</code>. The range from <code>startpos</code> to <code>endpos</code> determines the visible region and should include the nodes in <code>array</code>.
+</p>
+<hr>
+<a name="FeatureIndex"></a>
+<h2>Class FeatureIndex</h2>
+<a name="feature_index_memory_new"></a>
+
+<code> feature_index_memory_new()</code>
+<p>
+Returns a new FeatureIndex object storing the index in memory.
+</p>
+<hr>
+<a name="feature_index:add_gff3file"></a>
+
+<code> feature_index:add_gff3file(gff3file)</code>
+<p>
+Add all features from all sequence regions contained in <code>gff3file</code> to <code>feature_index</code>.
+</p>
+<hr>
+<a name="feature_index:add_region_node"></a>
+
+<code> feature_index:add_region_node(region_node)</code>
+<p>
+Add <code>region_node</code> to <code>feature_index</code>.
+</p>
+<hr>
+<a name="feature_index:add_feature_node"></a>
+
+<code> feature_index:add_feature_node(feature_node)</code>
+<p>
+Add <code>feature_node</code> to <code>feature_index</code>, implicitly creating sequence region if not present before.
+</p>
+<hr>
+<a name="feature_index:get_features_for_seqid"></a>
+
+<code> feature_index:get_features_for_seqid(seqid)</code>
+<p>
+Returns the feature nodes for sequence ID <code>seqid</code> in an array.
+</p>
+<hr>
+<a name="feature_index:get_features_for_range"></a>
+
+<code> feature_index:get_features_for_range(seqid, range)</code>
+<p>
+Returns the genome features for sequence ID <code>seqid</code> within <code>range</code> in an array.
+</p>
+<hr>
+<a name="feature_index:get_first_seqid"></a>
+
+<code> feature_index:get_first_seqid()</code>
+<p>
+Returns the first sequence ID stored in <code>feature_index</code>.
+</p>
+<hr>
+<a name="feature_index:get_seqids"></a>
+
+<code> feature_index:get_seqids()</code>
+<p>
+Returns an array containins all sequence IDs stored in <code>feature_index</code>.
+</p>
+<hr>
+<a name="feature_index:get_range_for_seqid"></a>
+
+<code> feature_index:get_range_for_seqid(seqid)</code>
+<p>
+Returns the range covered by features of sequence ID <code>seqid</code> in <code>feature_index</code>.
+</p>
+<hr>
+<a name="feature_index:get_coverage"></a>
+
+<code> feature_index:get_coverage(seqid, maxdist)</code>
+<p>
+Computes the coverage for the sequence ID <code>seqid</code>. The optional <code>maxdist</code> parameter denotes the maximal distance two features can be apart without creating a new Range. Returns an array of Ranges denoting parts the of <code>seqid</code> covered by features.
+</p>
+<hr>
+<a name="feature_index:get_marked_regions"></a>
+
+<code> feature_index:get_marked_regions(seqid, maxdist)</code>
+<p>
+Returns an array of Ranges denoting parts of <code>seqid</code> which are covered by at least one marked feature. Internally, <code>get_coverage()</code> is called and the <code>maxdist</code> is passed along.
+</p>
+<hr>
+<a name="feature_index:render_to_png"></a>
+
+<code> feature_index:render_to_png(seqid, range, png_file, width)</code>
+<p>
+Render to PNG file <code>png_file</code> for <code>seqid</code> in <code>range</code> with optional <code>width</code>. If no <code>png_file</code> is given <code>os.tmpname()</code> is called to create one. Returns name of written PNG file.
+</p>
+<hr>
+<a name="feature_index:show_seqids"></a>
+
+<code> feature_index:show_seqids()</code>
+<p>
+Show all sequence IDs.
+</p>
+<hr>
+<a name="feature_index:get_all_features"></a>
+
+<code> feature_index:get_all_features()</code>
+<p>
+Returns all features from <code>feature_index</code>.
+</p>
+<hr>
+<a name="FeatureNode"></a>
+<h2>Class FeatureNode</h2>
+<a name="feature_node_new"></a>
+
+<code> feature_node_new(seqid, type, startpos, endpos, strand)</code>
+<p>
+Create a new feature node on sequence with ID <code>seqid</code> and type <code>type</code> which lies from <code>startpos</code> to <code>end</code> on strand <code>strand</code>. <code>startpos</code> and <code>endpos</code> always refer to the forward strand, therefore <code>startpos</code> has to bo smaller or equal than <code>endpos</code>.
+</p>
+<hr>
+<a name="feature_node:get_strand"></a>
+
+<code> feature_node:get_strand()</code>
+<p>
+Returns the strand of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:get_source"></a>
+
+<code> feature_node:get_source()</code>
+<p>
+Returns the source of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:get_score"></a>
+
+<code> feature_node:get_score()</code>
+<p>
+Returns the score of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:get_attribute"></a>
+
+<code> feature_node:get_attribute(attrib)</code>
+<p>
+Returns the <code>attrib</code> attribute of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:get_exons"></a>
+
+<code> feature_node:get_exons()</code>
+<p>
+Returns an array containing the exons of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:set_source"></a>
+
+<code> feature_node:set_source(source)</code>
+<p>
+Set the source of <code>feature_node</code> to <code>source</code>.
+</p>
+<hr>
+<a name="feature_node:output_leading"></a>
+
+<code> feature_node:output_leading()</code>
+<p>
+Show leading part of GFF3 output for <code>feature_node</code>
+</p>
+<hr>
+<a name="feature_node:get_type"></a>
+
+<code> feature_node:get_type()</code>
+<p>
+Return type of <code>feature_node</code> as string.
+</p>
+<hr>
+<a name="feature_node:extract_sequence"></a>
+
+<code> feature_node:extract_sequence(type, join, region_mapping)</code>
+<p>
+Extract the sequence of <code>feature_node</code>. If <code>join</code> is false and <code>feature_node</code> has type <code>type</code> the sequence is returned (using <code>region_mapping</code> to get it). If <code>join</code> is true and <code>feature_node</code> has children of type <code>type</code> their joined sequences are returned. If none of the above applies nil is returned.
+</p>
+<hr>
+<a name="FeatureStream"></a>
+<h2>Class FeatureStream</h2>
+<a name="feature_stream_new"></a>
+
+<code> feature_stream_new(in_stream, feature_index)</code>
+<p>
+Returns a new feature stream object (a genome stream) over <code>feature_index</code> which uses the genome stream <code>in_stream</code> as input. That is, all genome nodes which are pulled through the feature stream are added to the <code>feature_index</code>.
+</p>
+<hr>
+<a name="FeatureVisitor"></a>
+<h2>Class FeatureVisitor</h2>
+<a name="feature_visitor_new"></a>
+
+<code> feature_visitor_new(feature_index)</code>
+<p>
+Returns a new feature visitor object over <code>feature_index</code>. That is, all genome nodes which are visited by the feature visitor are added to the <code>feature_index</code>.
+</p>
+<hr>
+<a name="GFF3InStream"></a>
+<h2>Class GFF3InStream</h2>
+<a name="gff3_in_stream_new_sorted"></a>
+
+<code> gff3_in_stream_new_sorted(filename)</code>
+<p>
+Returns a new GFF3 input stream object for <code>filename</code>. The file <code>filename</code> has to be a sorted GFF3 file.
+</p>
+<hr>
+<a name="GFF3OutStream"></a>
+<h2>Class GFF3OutStream</h2>
+<a name="gff3_out_stream_new"></a>
+
+<code> gff3_out_stream_new(genome_stream)</code>
+<p>
+Returns a new GFF3 output stream which pulls its features from <code>genome_stream</code>.
+</p>
+<hr>
+<a name="GFF3Visitor"></a>
+<h2>Class GFF3Visitor</h2>
+<a name="gff3_visitor_new"></a>
+
+<code> gff3_visitor_new()</code>
+<p>
+Returns a new GFF3 visitor.
+</p>
+<hr>
+<a name="GenomeNode"></a>
+<h2>Class GenomeNode</h2>
+<a name="genome_node:get_filename"></a>
+
+<code> genome_node:get_filename()</code>
+<p>
+Returns the filename of <code>genome_node</code>.
+</p>
+<hr>
+<a name="genome_node:get_range"></a>
+
+<code> genome_node:get_range()</code>
+<p>
+Returns the range of <code>genome_node</code>.
+</p>
+<hr>
+<a name="genome_node:get_seqid"></a>
+
+<code> genome_node:get_seqid()</code>
+<p>
+Returns the sequence id of <code>genome_node</code>.
+</p>
+<hr>
+<a name="genome_node:accept"></a>
+
+<code> genome_node:accept(genome_visitor)</code>
+<p>
+Accept <code>genome_visitor</code>.
+</p>
+<hr>
+<a name="genome_node:is_part_of_genome_node"></a>
+
+<code> genome_node:is_part_of_genome_node(child_node)</code>
+<p>
+Make <code>genome_node</code> the parent of <code>child_node</code>.
+</p>
+<hr>
+<a name="genome_node:mark"></a>
+
+<code> genome_node:mark()</code>
+<p>
+Mark <code>genome_node</code>.
+</p>
+<hr>
+<a name="genome_node:is_marked"></a>
+
+<code> genome_node:is_marked()</code>
+<p>
+Returns true if <code>genome_node</code> is marked, false otherwise.
+</p>
+<hr>
+<a name="genome_node:contains_marked"></a>
+
+<code> genome_node:contains_marked()</code>
+<p>
+Returns true if <code>genome_node</code> contains a marked node, false otherwise.
+</p>
+<hr>
+<a name="genome_node:show"></a>
+
+<code> genome_node:show(gff3_visitor)</code>
+<p>
+Show genome node on stdout (using the optional <code>gff3_visitor</code>).
+</p>
+<hr>
+<a name="genome_node:show_marked"></a>
+
+<code> genome_node:show_marked()</code>
+<p>
+Show marked parts of genome node on stdout.
+</p>
+<hr>
+<a name="GenomeStream"></a>
+<h2>Class GenomeStream</h2>
+<a name="genome_stream:next_tree"></a>
+
+<code> genome_stream:next_tree()</code>
+<p>
+Returns the next genome node for <code>genome_stream</code> or nil.
+</p>
+<hr>
+<a name="Imageinfo"></a>
+<h2>Class Imageinfo</h2>
+<a name="imageinfo_new"></a>
+
+<code> imageinfo_new()</code>
+<p>
+returns a new ImageInfo object.
+</p>
+<hr>
+<a name="imageinfo:get_recmaps"></a>
+
+<code> imageinfo:get_recmaps()</code>
+<p>
+returns an array of tables with the fields "nw_x","nw_y","se_x","se_y" and "feature_ref" with the top left and bottom right coordinates in pixels or points and a GenomeNode reference per element drawn.
+</p>
+<hr>
+<a name="Layout"></a>
+<h2>Class Layout</h2>
+<a name="layout_new"></a>
+
+<code> layout_new(diagram, width)</code>
+<p>
+Return a Layout object which represents a layout of the content of <code>diagram</code> with width <code>width</code>.
+</p>
+<hr>
+<a name="layout:get_height"></a>
+
+<code> layout:get_height(layout)</code>
+<p>
+Return the height of the resulting <code>layout</code>.
+</p>
+<hr>
+<a name="layout:sketch"></a>
+
+<code> layout:sketch(layout, canvas)</code>
+<p>
+Draw the content of the <code>layout</code> on a given <code>canvas</code>.
+</p>
+<hr>
+<a name="Range"></a>
+<h2>Class Range</h2>
+<a name="range_new"></a>
+
+<code> range_new(startpos, endpos)</code>
+<p>
+Returns a new range object with start <code>startpos</code> and end <code>endpos</code>. <code>startpos</code> must be smaller or equal than <code>endpos</code>.
+</p>
+<hr>
+<a name="range:get_start"></a>
+
+<code> range:get_start()</code>
+<p>
+Returns start of <code>range</code>.
+</p>
+<hr>
+<a name="range:get_end"></a>
+
+<code> range:get_end()</code>
+<p>
+Returns end of <code>range</code>.
+</p>
+<hr>
+<a name="range:overlap"></a>
+
+<code> range:overlap(other_range)</code>
+<p>
+Returns true if <code>range</code> and <code>other_range</code> overlap, false otherwise.
+</p>
+<hr>
+<a name="ranges_sort"></a>
+
+<code> ranges_sort(range_array)</code>
+<p>
+Returns an array containing the ranges from array <code>range_array</code> in sorted order.
+</p>
+<hr>
+<a name="ranges_are_sorted"></a>
+
+<code> ranges_are_sorted(range_array)</code>
+<p>
+Returns true if the ranges in array <code>range_array</code> are sorted, false otherwise.
+</p>
+<hr>
+<a name="range:show"></a>
+
+<code> range:show()</code>
+<p>
+Show range on stdout.
+</p>
+<hr>
+<a name="RegionMapping"></a>
+<h2>Class RegionMapping</h2>
+<a name="region_mapping_new_seqfile"></a>
+
+<code> region_mapping_new_seqfile(seqfile)</code>
+<p>
+Returns a new region mapping which maps everything onto sequence file <code>seqfile</code>.
+</p>
+<hr>
+<a name="RegionNode"></a>
+<h2>Class RegionNode</h2>
+<a name="region_node_new"></a>
+
+<code> region_node_new(seqid, range)</code>
+<p>
+Returns a new region node for sequence id <code>seqid</code> spanning <code>range</code>.
+</p>
+<hr>
+<a name="ScoreMatrix"></a>
+<h2>Class ScoreMatrix</h2>
+<a name="score_matrix_new_read_protein"></a>
+
+<code> score_matrix_new_read_protein(path)</code>
+<p>
+Returns a new protein score matrix object which has been read from file <code>path</code>.
+</p>
+<hr>
+<a name="score_matrix_new_read"></a>
+
+<code> score_matrix_new_read(path, alphabet)</code>
+<p>
+Read in score matrix from <code>path</code> over given <code>alphabet</code> and return it.
+</p>
+<hr>
+<a name="score_matrix:get_dimension"></a>
+
+<code> score_matrix:get_dimension()</code>
+<p>
+Returns the dimension of the <code>score_matrix</code> as number.
+</p>
+<hr>
+<a name="score_matrix:get_score"></a>
+
+<code> score_matrix:get_score(idx1, idx2)</code>
+<p>
+Returns the score for <code>idx1</code>,<code>idx2</code> as number.
+</p>
+<hr>
+<a name="score_matrix:show"></a>
+
+<code> score_matrix:show()</code>
+<p>
+Show <code>score_matrix</code> on stdout.
+</p>
+<hr>
+<a name="StreamEvaluator"></a>
+<h2>Class StreamEvaluator</h2>
+<a name="stream_evaluator_new"></a>
+
+<code> stream_evaluator_new(reality_stream, prediction_stream)</code>
+<p>
+Returns a new stream evaluator object for the two genome streams <code>reality_stream</code> and <code>prediction_stream</code>.
+</p>
+<hr>
+<a name="stream_evaluator:evaluate"></a>
+
+<code> stream_evaluator:evaluate(genome_visitor)</code>
+<p>
+Run evaluation of <code>stream_evaluator</code>. All evaluated features are visited by the optional <code>genome_visitor</code>.
+</p>
+<hr>
+<a name="stream_evaluator:show"></a>
+
+<code> stream_evaluator:show()</code>
+<p>
+Show result of <code>stream_evaluator</code> on stdout.
+</p>
+<hr>
+<a name="translate"></a>
+<h2>Class translate</h2>
+<a name="translate_dna"></a>
+
+<code> translate_dna(dna)</code>
+<p>
+Returns translated <code>dna</code>.
+</p>
+<hr>
+<a name="Index"></a>
+<h2>Index</h2>
+
+  <a href="#alphabet:add_mapping"><code>alphabet:add_mapping</code></a><br>
+
+  <a href="#alphabet:add_wildcard"><code>alphabet:add_wildcard</code></a><br>
+
+  <a href="#alphabet:decode"><code>alphabet:decode</code></a><br>
+
+  <a href="#alphabet:size"><code>alphabet:size</code></a><br>
+
+  <a href="#alphabet_new_dna"><code>alphabet_new_dna</code></a><br>
+
+  <a href="#alphabet_new_empty"><code>alphabet_new_empty</code></a><br>
+
+  <a href="#alphabet_new_protein"><code>alphabet_new_protein</code></a><br>
+
+  <a href="#bittab:and_equal"><code>bittab:and_equal</code></a><br>
+
+  <a href="#bittab:bit_is_set"><code>bittab:bit_is_set</code></a><br>
+
+  <a href="#bittab:complement"><code>bittab:complement</code></a><br>
+
+  <a href="#bittab:equal"><code>bittab:equal</code></a><br>
+
+  <a href="#bittab:set_bit"><code>bittab:set_bit</code></a><br>
+
+  <a href="#bittab:unset_bit"><code>bittab:unset_bit</code></a><br>
+
+  <a href="#bittab_new"><code>bittab_new</code></a><br>
+
+  <a href="#canvas:to_file"><code>canvas:to_file</code></a><br>
+
+  <a href="#canvas_cairo_file_new_pdf"><code>canvas_cairo_file_new_pdf</code></a><br>
+
+  <a href="#canvas_cairo_file_new_png"><code>canvas_cairo_file_new_png</code></a><br>
+
+  <a href="#canvas_cairo_file_new_ps"><code>canvas_cairo_file_new_ps</code></a><br>
+
+  <a href="#canvas_cairo_file_new_svg"><code>canvas_cairo_file_new_svg</code></a><br>
+
+  <a href="#cds_stream_new"><code>cds_stream_new</code></a><br>
+
+  <a href="#csa_stream_new"><code>csa_stream_new</code></a><br>
+
+  <a href="#diagram_new"><code>diagram_new</code></a><br>
+
+  <a href="#diagram_new_from_array"><code>diagram_new_from_array</code></a><br>
+
+  <a href="#display"><code>display</code></a><br>
+
+  <a href="#export"><code>export</code></a><br>
+
+  <a href="#feature_index:add_feature_node"><code>feature_index:add_feature_node</code></a><br>
+
+  <a href="#feature_index:add_gff3file"><code>feature_index:add_gff3file</code></a><br>
+
+  <a href="#feature_index:add_region_node"><code>feature_index:add_region_node</code></a><br>
+
+  <a href="#feature_index:get_all_features"><code>feature_index:get_all_features</code></a><br>
+
+  <a href="#feature_index:get_coverage"><code>feature_index:get_coverage</code></a><br>
+
+  <a href="#feature_index:get_features_for_range"><code>feature_index:get_features_for_range</code></a><br>
+
+  <a href="#feature_index:get_features_for_seqid"><code>feature_index:get_features_for_seqid</code></a><br>
+
+  <a href="#feature_index:get_first_seqid"><code>feature_index:get_first_seqid</code></a><br>
+
+  <a href="#feature_index:get_marked_regions"><code>feature_index:get_marked_regions</code></a><br>
+
+  <a href="#feature_index:get_range_for_seqid"><code>feature_index:get_range_for_seqid</code></a><br>
+
+  <a href="#feature_index:get_seqids"><code>feature_index:get_seqids</code></a><br>
+
+  <a href="#feature_index:render_to_png"><code>feature_index:render_to_png</code></a><br>
+
+  <a href="#feature_index:show_seqids"><code>feature_index:show_seqids</code></a><br>
+
+  <a href="#feature_index_memory_new"><code>feature_index_memory_new</code></a><br>
+
+  <a href="#feature_node:extract_sequence"><code>feature_node:extract_sequence</code></a><br>
+
+  <a href="#feature_node:get_attribute"><code>feature_node:get_attribute</code></a><br>
+
+  <a href="#feature_node:get_exons"><code>feature_node:get_exons</code></a><br>
+
+  <a href="#feature_node:get_score"><code>feature_node:get_score</code></a><br>
+
+  <a href="#feature_node:get_source"><code>feature_node:get_source</code></a><br>
+
+  <a href="#feature_node:get_strand"><code>feature_node:get_strand</code></a><br>
+
+  <a href="#feature_node:get_type"><code>feature_node:get_type</code></a><br>
+
+  <a href="#feature_node:output_leading"><code>feature_node:output_leading</code></a><br>
+
+  <a href="#feature_node:set_source"><code>feature_node:set_source</code></a><br>
+
+  <a href="#feature_node_iterator:next"><code>feature_node_iterator:next</code></a><br>
+
+  <a href="#feature_node_iterator_new"><code>feature_node_iterator_new</code></a><br>
+
+  <a href="#feature_node_iterator_new_direct"><code>feature_node_iterator_new_direct</code></a><br>
+
+  <a href="#feature_node_new"><code>feature_node_new</code></a><br>
+
+  <a href="#feature_stream_new"><code>feature_stream_new</code></a><br>
+
+  <a href="#feature_visitor_new"><code>feature_visitor_new</code></a><br>
+
+  <a href="#features_contain_marked"><code>features_contain_marked</code></a><br>
+
+  <a href="#features_extract_sequences"><code>features_extract_sequences</code></a><br>
+
+  <a href="#features_get_marked"><code>features_get_marked</code></a><br>
+
+  <a href="#features_mRNAs2genes"><code>features_mRNAs2genes</code></a><br>
+
+  <a href="#features_show"><code>features_show</code></a><br>
+
+  <a href="#features_show_marked"><code>features_show_marked</code></a><br>
+
+  <a href="#genome_node:accept"><code>genome_node:accept</code></a><br>
+
+  <a href="#genome_node:contains_marked"><code>genome_node:contains_marked</code></a><br>
+
+  <a href="#genome_node:get_filename"><code>genome_node:get_filename</code></a><br>
+
+  <a href="#genome_node:get_range"><code>genome_node:get_range</code></a><br>
+
+  <a href="#genome_node:get_seqid"><code>genome_node:get_seqid</code></a><br>
+
+  <a href="#genome_node:is_marked"><code>genome_node:is_marked</code></a><br>
+
+  <a href="#genome_node:is_part_of_genome_node"><code>genome_node:is_part_of_genome_node</code></a><br>
+
+  <a href="#genome_node:mark"><code>genome_node:mark</code></a><br>
+
+  <a href="#genome_node:show"><code>genome_node:show</code></a><br>
+
+  <a href="#genome_node:show_marked"><code>genome_node:show_marked</code></a><br>
+
+  <a href="#genome_stream:next_tree"><code>genome_stream:next_tree</code></a><br>
+
+  <a href="#gff3_in_stream_new_sorted"><code>gff3_in_stream_new_sorted</code></a><br>
+
+  <a href="#gff3_out_stream_new"><code>gff3_out_stream_new</code></a><br>
+
+  <a href="#gff3_visitor_new"><code>gff3_visitor_new</code></a><br>
+
+  <a href="#imageinfo:get_recmaps"><code>imageinfo:get_recmaps</code></a><br>
+
+  <a href="#imageinfo_new"><code>imageinfo_new</code></a><br>
+
+  <a href="#layout:get_height"><code>layout:get_height</code></a><br>
+
+  <a href="#layout:sketch"><code>layout:sketch</code></a><br>
+
+  <a href="#layout_new"><code>layout_new</code></a><br>
+
+  <a href="#rand_max"><code>rand_max</code></a><br>
+
+  <a href="#range:get_end"><code>range:get_end</code></a><br>
+
+  <a href="#range:get_start"><code>range:get_start</code></a><br>
+
+  <a href="#range:overlap"><code>range:overlap</code></a><br>
+
+  <a href="#range:show"><code>range:show</code></a><br>
+
+  <a href="#range_new"><code>range_new</code></a><br>
+
+  <a href="#ranges_are_sorted"><code>ranges_are_sorted</code></a><br>
+
+  <a href="#ranges_sort"><code>ranges_sort</code></a><br>
+
+  <a href="#re"><code>re</code></a><br>
+
+  <a href="#region_mapping_new_seqfile"><code>region_mapping_new_seqfile</code></a><br>
+
+  <a href="#region_node_new"><code>region_node_new</code></a><br>
+
+  <a href="#reload"><code>reload</code></a><br>
+
+  <a href="#score_matrix:get_dimension"><code>score_matrix:get_dimension</code></a><br>
+
+  <a href="#score_matrix:get_score"><code>score_matrix:get_score</code></a><br>
+
+  <a href="#score_matrix:show"><code>score_matrix:show</code></a><br>
+
+  <a href="#score_matrix_new_read"><code>score_matrix_new_read</code></a><br>
+
+  <a href="#score_matrix_new_read_protein"><code>score_matrix_new_read_protein</code></a><br>
+
+  <a href="#show"><code>show</code></a><br>
+
+  <a href="#show_table"><code>show_table</code></a><br>
+
+  <a href="#stream_evaluator:evaluate"><code>stream_evaluator:evaluate</code></a><br>
+
+  <a href="#stream_evaluator:show"><code>stream_evaluator:show</code></a><br>
+
+  <a href="#stream_evaluator_new"><code>stream_evaluator_new</code></a><br>
+
+  <a href="#translate_dna"><code>translate_dna</code></a><br>
+
+<div id="footer">
+Copyright &copy; 2008-2013
+The <i>GenomeTools</i> authors.
+Last update: 2013-03-14
+</div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>
