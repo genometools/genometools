@@ -150,8 +150,7 @@ static GtOptionParser* gtr_option_parser_new(GtR *gtr)
   GtOption *o, *only_option, *debug_option, *debugfp_option;
   gt_assert(gtr);
   op = gt_option_parser_new("[option ...] [tool | script] [argument ...]",
-                            "The GenomeTools (gt) genome analysis system "
-                            "(http://genometools.org).");
+                            "The GenomeTools genome analysis system.");
   gt_option_parser_set_comment_func(op, show_gtr_help, gtr->tools);
   o = gt_option_new_bool("i",
                          "enter interactive mode after executing 'tool' or "
