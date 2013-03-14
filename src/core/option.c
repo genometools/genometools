@@ -39,6 +39,7 @@ typedef enum {
   OPTION_BOOL,
   OPTION_CHOICE,
   OPTION_DOUBLE,
+  OPTION_FILENAME,
   OPTION_HELP,
   OPTION_HELPPLUS,
   OPTION_HELPDEV,
@@ -451,7 +452,8 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
                  option->default_value.r.end);
         }
       }
-      else if (option->option_type == OPTION_STRING) {
+      else if (option->option_type == OPTION_FILENAME ||
+               option->option_type == OPTION_STRING) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (!option->default_value.s || !strlen(option->default_value.s))
           gt_xputs("undefined");
@@ -565,6 +567,13 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
           gt_str_append_cstr(default_string, "undefined");
         else
           gt_str_append_double(default_string, option->default_value.d, 6);
+      }
+      else if (option->option_type == OPTION_FILENAME) {
+        gt_str_append_cstr(outstr, "['filename']");
+        if (!option->default_value.s || !strlen(option->default_value.s))
+          gt_str_append_cstr(default_string, "undefined");
+        else
+          gt_str_append_cstr(default_string, option->default_value.s);
       }
       else if (option->option_type == OPTION_INT) {
         gt_str_append_cstr(outstr, "['value']");
@@ -1300,6 +1309,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               if (!had_err)
                 option_parsed = true;
               break;
+            case OPTION_FILENAME:
             case OPTION_STRING:
               if (optional_arg(option, argnum, argc, argv)) {
                 option_parsed = true;
@@ -1695,7 +1705,11 @@ GtOption* gt_option_new_filename(const char *option_str,
                                  const char *description,
                                  GtStr *filename)
 {
-  return gt_option_new_string(option_str, description, filename, NULL);
+  GtOption *o = gt_option_new(option_str, description, filename);
+  o->option_type = OPTION_FILENAME;
+  o->default_value.s = NULL;
+  gt_str_reset(filename);
+  return o;
 }
 
 /* the following function would allow to handle file arrays differently from

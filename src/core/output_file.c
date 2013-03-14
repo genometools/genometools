@@ -87,8 +87,8 @@ void gt_output_file_info_register_options(GtOutputFileInfo *ofi,
   gt_assert(outfp && ofi);
   ofi->outfp = outfp;
   /* register option -o */
-  opto = gt_option_new_string("o", "redirect output to specified file",
-                              ofi->output_filename, NULL);
+  opto = gt_option_new_filename("o", "redirect output to specified file",
+                                ofi->output_filename);
   gt_option_parser_add_option(op, opto);
   /* register option -gzip */
   optgzip = gt_option_new_bool("gzip", "write gzip compressed output file",
