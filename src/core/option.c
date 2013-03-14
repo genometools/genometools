@@ -146,7 +146,7 @@ static GtOption* gt_option_new_help(bool has_extended_options)
 static GtOption* gt_option_new_helpplus(void)
 {
   GtOption *o = gt_option_new("help+", "display help for all options and exit",
-                         NULL);
+                              NULL);
   o->option_type = OPTION_HELPPLUS;
   o->default_value.b = false;
   return o;
@@ -165,7 +165,7 @@ static GtOption* gt_option_new_helpdev(void)
 static GtOption* gt_option_new_version(GtShowVersionFunc versionfunc)
 {
   GtOption *o = gt_option_new("version", "display version information and exit",
-                         versionfunc);
+                              versionfunc);
   o->option_type = OPTION_VERSION;
   return o;
 }
@@ -363,7 +363,7 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
   int had_err = 0;
   gt_error_check(err);
   gt_assert(optiontype == OPTION_HELP || optiontype == OPTION_HELPPLUS ||
-         optiontype == OPTION_HELPDEV);
+            optiontype == OPTION_HELPDEV);
 
   /* determine maximum option length */
   for (i = 0; i < gt_array_size(op->options); i++) {
