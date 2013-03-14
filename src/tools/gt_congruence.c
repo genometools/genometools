@@ -256,6 +256,6 @@ GtTool* gt_congruence(void)
                              gt_cge_option_parser_new,
                              NULL,
                              gt_cge_runner);
-  gt_tool_set_toolbox(tool);
+  gt_tool_set_toolbox_new(tool, (GtToolToolboxNew) gt_cge_arguments_new);
   return tool;
 }

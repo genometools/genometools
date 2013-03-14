@@ -114,6 +114,7 @@ GtTool* gt_packedindex(void)
                              gt_packedindex_option_parser_new,
                              NULL,
                              gt_packedindex_runner);
-  gt_tool_set_toolbox(tool);
+  gt_tool_set_toolbox_new(tool,
+                          (GtToolToolboxNew) gt_packedindex_arguments_new);
   return tool;
 }

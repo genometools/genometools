@@ -114,6 +114,6 @@ GtTool* gt_readjoiner(void)
                              gt_readjoiner_option_parser_new,
                              NULL,
                              gt_readjoiner_runner);
-  gt_tool_set_toolbox(tool);
+  gt_tool_set_toolbox_new(tool, (GtToolToolboxNew) gt_readjoiner_arguments_new);
   return tool;
 }

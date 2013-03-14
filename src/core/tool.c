@@ -25,9 +25,10 @@ struct GtTool {
   GtToolOptionParserNew tool_option_parser_new;
   GtToolArgumentsCheck tool_arguments_check;
   GtToolRunner tool_runner;
-  bool is_toolbox;
+  GtToolToolboxNew tool_toolbox_new;
   void *arguments;
   GtOptionParser *op;
+  GtToolbox *toolbox;
   unsigned long reference_count;
 };
 
@@ -42,16 +43,12 @@ GtTool* gt_tool_new(GtToolArgumentsNew tool_arguments_new,
   /* <tool_arguments_new> and <tool_arguments_delete> imply each other */
   gt_assert(( tool_arguments_new &&  tool_arguments_delete) ||
          (!tool_arguments_new && !tool_arguments_delete));
-  tool = gt_malloc(sizeof *tool);
+  tool = gt_calloc(1, sizeof *tool);
   tool->tool_arguments_new = tool_arguments_new;
   tool->tool_arguments_delete = tool_arguments_delete;
   tool->tool_option_parser_new = tool_option_parser_new;
   tool->tool_arguments_check = tool_arguments_check;
   tool->tool_runner = tool_runner;
-  tool->is_toolbox = false;
-  tool->arguments = NULL;
-  tool->op = NULL;
-  tool->reference_count = 0;
   return tool;
 }
 
@@ -111,24 +108,24 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
   return 0;
 }
 
-void gt_tool_set_toolbox(GtTool *tool)
+void gt_tool_set_toolbox_new(GtTool *tool, GtToolToolboxNew tool_toolbox_new)
 {
   gt_assert(tool);
-  tool->is_toolbox = true;
+  tool->tool_toolbox_new = tool_toolbox_new;
 }
 
 bool gt_tool_is_toolbox(const GtTool *tool)
 {
   gt_assert(tool);
-  return tool->is_toolbox;
+  return tool->tool_toolbox_new ? true : false;
 }
 
 GtToolbox* gt_tool_get_toolbox(GtTool *tool)
 {
-  gt_assert(tool && tool->is_toolbox && tool->tool_arguments_new);
-  if (!tool->arguments)
-    tool->arguments = tool->tool_arguments_new();
-  return tool->arguments;
+  gt_assert(tool && tool->tool_toolbox_new);
+  if (!tool->toolbox)
+    tool->toolbox = tool->tool_toolbox_new();
+  return tool->toolbox;
 }
 
 GtOptionParser* gt_tool_get_option_parser(GtTool *tool)
@@ -150,7 +147,7 @@ void gt_tool_delete(GtTool *tool)
   }
   if (tool->arguments && tool->tool_arguments_delete)
     tool->tool_arguments_delete(tool->arguments);
-  if (tool->op)
-    gt_option_parser_delete(tool->op);
+  gt_toolbox_delete(tool->toolbox);
+  gt_option_parser_delete(tool->op);
   gt_free(tool);
 }

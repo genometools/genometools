@@ -103,6 +103,6 @@ GtTool* gt_encseq(void)
                              gt_encseq_option_parser_new,
                              NULL,
                              gt_encseq_runner);
-  gt_tool_set_toolbox(tool);
+  gt_tool_set_toolbox_new(tool, (GtToolToolboxNew) gt_encseq_arguments_new);
   return tool;
 }

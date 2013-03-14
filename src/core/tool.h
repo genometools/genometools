@@ -20,10 +20,13 @@
 #include "core/tool_api.h"
 #include "core/toolbox.h"
 
+typedef GtToolbox* (*GtToolToolboxNew)(void);
+
 GtTool*         gt_tool_ref(GtTool *tool);
-/* Set that <tool> is a <GtToolbox> (i.e., that <GtToolArgumentsNew> returns a
-   <GtToolbox> object). */
-void            gt_tool_set_toolbox(GtTool *tool);
+/* Set that <tool> is a <GtToolbox> and with given toolbox
+   constructor <tool_toolbox_new>. */
+void            gt_tool_set_toolbox_new(GtTool *tool,
+                                        GtToolToolboxNew tool_toolbox_new);
 bool            gt_tool_is_toolbox(const GtTool *tool);
 GtToolbox*      gt_tool_get_toolbox(GtTool *tool);
 GtOptionParser* gt_tool_get_option_parser(GtTool *tool);
