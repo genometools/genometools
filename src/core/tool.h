@@ -26,7 +26,6 @@ GtTool*         gt_tool_ref(GtTool *tool);
 void            gt_tool_set_toolbox(GtTool *tool);
 bool            gt_tool_is_toolbox(const GtTool *tool);
 GtToolbox*      gt_tool_get_toolbox(GtTool *tool);
-/* XXX: leaks memory */
 GtOptionParser* gt_tool_get_option_parser(GtTool *tool);
 
 #endif
