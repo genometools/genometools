@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include "gt_config.h"
 #include "core/cstr_api.h"
 #include "core/error.h"
 #include "core/fa.h"
@@ -466,6 +467,11 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
   for (i = 0; i < strlen(toolname) + 3; i++)
     gt_str_append_char(outstr, '=');
   gt_str_append_char(outstr, '\n');
+  gt_str_append_cstr(outstr, ":man source:   GenomeTools\n");
+  gt_str_append_cstr(outstr, ":man version:  ");
+  gt_str_append_cstr(outstr, GT_VERSION);
+  gt_str_append_char(outstr, '\n');
+  gt_str_append_cstr(outstr, ":man manual:   GenomeTools Manual\n");
   gt_str_append_char(outstr, '\n');
 
   /* name */
