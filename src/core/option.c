@@ -572,7 +572,8 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
   if (op->comment_func) {
     int old_stdout, out_pipe[2], rval;
     long flags;
-    char c;
+    char c,
+         prognamebuf[BUFSIZ];
 
     /* Lua docu scripts print to stdout by themselves, so temporarily
        redirect stdout to a pipe. */
@@ -590,8 +591,10 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
     dup2(out_pipe[1], STDOUT_FILENO);
     close(out_pipe[1]);
 
-    had_err = op->comment_func(gt_error_get_progname(err),
-                               op->comment_func_data, err);
+    (void) snprintf(prognamebuf, BUFSIZ, "%s %s",
+                    gt_error_get_progname(err),
+                    toolname + gt_cstr_length_up_to_char(toolname, ' '));
+    had_err = op->comment_func(prognamebuf, op->comment_func_data, err);
     fflush(stdout);
 
     while (read(out_pipe[0], &c, sizeof (char)) > 0)
@@ -606,7 +609,7 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
     if (op->refer_to_manual) {
       print_asciidoc_header("ADDITIONAL INFORMATION", outstr);
       gt_str_append_cstr(outstr, "For detailed information, please refer to "
-                                 "the manual of ");
+                                 "the manual of");
       gt_str_append_cstr(outstr, toolname +
                                  gt_cstr_length_up_to_char(toolname, ' '));
       gt_str_append_cstr(outstr, ".\n\n");
