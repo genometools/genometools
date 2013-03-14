@@ -119,6 +119,9 @@ GtOPrval        gt_option_parser_parse(GtOptionParser *option_parser,
                                        int argc, const char **argv,
                                        GtShowVersionFunc version_func,
                                        GtError *err);
+/* Reset all options set in <op> to the default values specified at
+   option parser creation time. */
+void            gt_option_parser_reset(GtOptionParser *op);
 /* Delete <option_parser>. */
 void            gt_option_parser_delete(GtOptionParser *option_parser);
 

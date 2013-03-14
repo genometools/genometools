@@ -31,6 +31,7 @@
 #include "core/option.h"
 #include "core/parseutils.h"
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/xposix.h"
 
@@ -175,6 +176,36 @@ GtOption* gt_option_ref(GtOption *o)
   return o;
 }
 
+static void gt_option_reset(GtOption *option)
+{
+  gt_assert(option);
+  if (option->option_type == OPTION_BOOL) {
+    *(bool*) option->value = option->default_value.b;
+  }
+  else if (option->option_type == OPTION_CHOICE
+             || option->option_type == OPTION_STRING) {
+    gt_str_set((GtStr*) option->value, option->default_value.s);
+  }
+  else if (option->option_type == OPTION_DOUBLE) {
+    *(double*) option->value = option->default_value.d;
+  }
+  else if (option->option_type == OPTION_INT) {
+    *(int*) option->value = option->default_value.i;
+  }
+  else if (option->option_type == OPTION_UINT) {
+    *(unsigned int*) option->value = option->default_value.ui;
+  }
+  else if (option->option_type == OPTION_LONG) {
+    *(long*) option->value = option->default_value.l;
+  }
+  else if (option->option_type == OPTION_ULONG) {
+    *(unsigned long*) option->value = option->default_value.ul;
+  }
+  else if (option->option_type == OPTION_RANGE) {
+   *(GtRange*) option->value = option->default_value.r;
+  }
+}
+
 GtOptionParser* gt_option_parser_new(const char *synopsis,
                                      const char *one_liner)
 {
@@ -240,6 +271,22 @@ void gt_option_parser_register_hook(GtOptionParser *op,
   hookinfo.hook = hook;
   hookinfo.data = data;
   gt_array_add(op->hooks, hookinfo);
+}
+
+static int reset_option(GT_UNUSED void *key, void *value, GT_UNUSED void *data,
+                        GT_UNUSED GtError *err)
+{
+  GtOption *o = (GtOption*) value;
+  gt_option_reset(o);
+  return 0;
+}
+
+void gt_option_parser_reset(GtOptionParser *op)
+{
+  int rval;
+  gt_assert(op);
+  rval = gt_hashmap_foreach(op->optionindex, reset_option, NULL, NULL);
+  gt_assert(!rval); /* reset_option() is sane */
 }
 
 void gt_option_parser_set_mail_address(GtOptionParser *op, const char *address)

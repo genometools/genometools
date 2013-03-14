@@ -74,6 +74,9 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
   if (tool->tool_option_parser_new && !tool->op)
     tool->op = tool->tool_option_parser_new(tool->arguments);
 
+  /* make sure defaults are restored when reusing option parsers */
+  gt_option_parser_reset(tool->op);
+
   /* parse options */
   oprval = gt_option_parser_parse(tool->op, &parsed_args, argc, argv,
                                   gt_versionfunc, err);
