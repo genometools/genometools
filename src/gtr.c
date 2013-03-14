@@ -144,14 +144,10 @@ static int show_gtr_help(const char *progname, void *data, GtError *err)
   return had_err;
 }
 
-GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
-                   GtError *err)
+static GtOptionParser* gtr_option_parser_new(GtR *gtr)
 {
   GtOptionParser *op;
   GtOption *o, *only_option, *debug_option, *debugfp_option;
-  GtOPrval oprval;
-
-  gt_error_check(err);
   gt_assert(gtr);
   op = gt_option_parser_new("[option ...] [tool | script] [argument ...]",
                             "The GenomeTools (gt) genome analysis system "
@@ -212,7 +208,17 @@ GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
                            gtr->manoutdir, "");
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
+  return op;
+}
 
+GtOPrval gtr_parse(GtR *gtr, int *parsed_args, int argc, const char **argv,
+                   GtError *err)
+{
+  GtOptionParser *op;
+  GtOPrval oprval;
+  gt_error_check(err);
+  gt_assert(gtr);
+  op = gtr_option_parser_new(gtr);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
