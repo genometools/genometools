@@ -6319,6 +6319,14 @@ Use <code>option_parser</code> to parse options given in argument vector <code>a
    accordingly.
 </p>
 <hr>
+<a name="gt_option_parser_reset"></a>
+
+<code>void             gt_option_parser_reset(GtOptionParser *op)</code>
+<p>
+Reset all options set in <code>op</code> to the default values specified at
+   option parser creation time.
+</p>
+<hr>
 <a name="gt_option_parser_delete"></a>
 
 <code>void             gt_option_parser_delete(GtOptionParser *option_parser)</code>
@@ -10641,6 +10649,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_option_parser_refer_to_manual"><code>gt_option_parser_refer_to_manual</code></a><br>
 
   <a href="#gt_option_parser_register_hook"><code>gt_option_parser_register_hook</code></a><br>
+
+  <a href="#gt_option_parser_reset"><code>gt_option_parser_reset</code></a><br>
 
   <a href="#gt_option_parser_set_comment_func"><code>gt_option_parser_set_comment_func</code></a><br>
 
