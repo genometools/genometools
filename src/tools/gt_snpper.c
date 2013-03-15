@@ -47,6 +47,7 @@ static void* gt_snpper_arguments_new(void)
                                     "choose from:\n");
   descs = gt_trans_table_get_scheme_descriptions();
   for (i = 0; i < gt_str_array_size(descs); i++) {
+    gt_str_append_cstr(arguments->desc, "* ");
     gt_str_append_cstr(arguments->desc, gt_str_array_get(descs, i));
     if (i != gt_str_array_size(descs)-1)
       gt_str_append_cstr(arguments->desc, "\n");
