@@ -3,8 +3,8 @@ print ([[
 If neither option '-check' nor option '-duplicates' is used, the fingerprints
 for all sequences are shown on stdout.
 
-Examples:
----------
+Examples
+--------
 
 Compute (unified) list of fingerprints:
 
@@ -28,8 +28,8 @@ Extract sequence with given fingerprint:
     TTTTTTTTTTTTTTTTTCCTGACAAAACCCCAAGACTCAATTTAATCAATCCTCAAATTTACATGATAC
     CAACGTAATGGGAGCTTAAAAATA
 
-Return values:
---------------
+Return values
+-------------
 
 - 0  everything went fine ('-check': the comparison was successful;
                            '-duplicates': no duplicates found)
