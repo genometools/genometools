@@ -41,6 +41,8 @@
 
 typedef struct GtSuffixsortspace GtSuffixsortspace;
 
+typedef struct GtBitbuffer GtBitbuffer;
+
 typedef struct
 {
   uint32_t *uinttabsectionptr;
@@ -127,8 +129,17 @@ uint64_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
                                           unsigned long maxvalue,
                                           bool useuint);
 
-int gt_suffixsortspace_to_file (FILE *outfpsuftab,
-                                const GtSuffixsortspace *sssp,
-                                unsigned long numberofsuffixes,
-                                GtError *err);
+void gt_suffixsortspace_to_file (FILE *outfpsuftab,
+                                 const GtSuffixsortspace *sssp,
+                                 unsigned long numberofsuffixes);
+
+GtBitbuffer *gt_bitbuffer_new(void);
+
+void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
+                                            const GtSuffixsortspace *sssp,
+                                            GtBitbuffer *bb,
+                                            unsigned long numberofsuffixes);
+
+void gt_bitbuffer_delete(FILE *outfpsuftab,GtBitbuffer *bitbuffer);
+
 #endif

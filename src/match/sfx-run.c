@@ -241,9 +241,14 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
   } else
   {
     const GtSuffixsortspace *suffixsortspace;
+    GtBitbuffer *bitbuffer = NULL;
     unsigned long numberofsuffixes;
     bool specialsuffixes = false;
 
+    if (sfxstrategy->compressedoutput)
+    {
+      bitbuffer = gt_bitbuffer_new();
+    }
     while (true)
     {
       suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,&specialsuffixes,
@@ -255,13 +260,17 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
       if (outfileinfo->outfpsuftab != NULL &&
           (!specialsuffixes || !swallow_tail))
       {
-        if (gt_suffixsortspace_to_file (outfileinfo->outfpsuftab,
-                                        suffixsortspace,
-                                        numberofsuffixes,
-                                        err) != 0)
+        if (sfxstrategy->compressedoutput)
         {
-          haserr = true;
-          break;
+          gt_suffixsortspace_compressed_to_file (outfileinfo->outfpsuftab,
+                                                 suffixsortspace,
+                                                 bitbuffer,
+                                                 numberofsuffixes);
+        } else
+        {
+          gt_suffixsortspace_to_file (outfileinfo->outfpsuftab,
+                                      suffixsortspace,
+                                      numberofsuffixes);
         }
       }
       if (bwttab2file(outfileinfo,suffixsortspace,readmode,numberofsuffixes,
@@ -271,6 +280,10 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
         break;
       }
       outfileinfo->numberofallsortedsuffixes += numberofsuffixes;
+    }
+    if (sfxstrategy->compressedoutput)
+    {
+      gt_bitbuffer_delete(outfileinfo->outfpsuftab,bitbuffer);
     }
   }
   if (haserr)

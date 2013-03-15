@@ -20,6 +20,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
+#include "core/mathsupport.h"
 #include "xdrop.h"
 
 typedef struct
@@ -122,26 +123,6 @@ void gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
            (double) filled * 100.00 / ((ulen + 1) * (vlen + 1)));
 }
 
-static unsigned int gt_xdrop_gcd(unsigned int m, unsigned int n)
-{
-  unsigned int r;
-
-  if (m < n)
-  {
-    r = m;
-    m = n;
-    n = r;
-  }
-  do
-  {
-    gt_assert(m >= n);
-    r = m % n;
-    m = n;
-    n = r;
-  } while (r != 0);
-  return m;
-}
-
 /*
  The following function calculates the distance from the given scores.
  */
@@ -168,8 +149,8 @@ static void gt_calculatedistancesfromscores(
   }
   gt_assert(mat >= mis && mat/2 >= ins && mat/2 >= del);
   dist->gcd
-    = (int) gt_xdrop_gcd(gt_xdrop_gcd((unsigned int) (mat-mis),
-                                      (unsigned int) (mat/2-ins)),
+    = (int) gt_gcd_uint(gt_gcd_uint((unsigned int) (mat-mis),
+                                    (unsigned int) (mat/2-ins)),
                          (unsigned int) (mat/2-del));
   dist->mis = (mat - mis) / dist->gcd;
   dist->ins = (mat/2 - ins) / dist->gcd;

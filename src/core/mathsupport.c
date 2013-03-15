@@ -217,6 +217,31 @@ long int gt_round_to_long(double x)
   return (long int) intgr;
 }
 
+unsigned int gt_gcd_uint(unsigned int m, unsigned int n)
+{
+  unsigned int r;
+
+  if (m < n)
+  {
+    r = m;
+    m = n;
+    n = r;
+  }
+  do
+  {
+    gt_assert(m >= n);
+    r = m % n;
+    m = n;
+    n = r;
+  } while (r != 0);
+  return m;
+}
+
+unsigned int gt_lcm_uint(unsigned int m, unsigned int n)
+{
+  return (m * n)/gt_gcd_uint(m,n);
+}
+
 /* Make some unit tests for this? */
 void gt_out_power_for_small_exponents(void)
 {

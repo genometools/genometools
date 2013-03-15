@@ -46,6 +46,7 @@ typedef struct
        samplewithprefixlengthnull,
        noshortreadsort,
        outsuftabonfile,
+       compressedoutput,
        withradixsort;
 } Sfxstrategy;
 
@@ -68,6 +69,7 @@ typedef struct
   sfxstrategy->samplewithprefixlengthnull = false;
   sfxstrategy->outsuftabonfile = true;
   sfxstrategy->noshortreadsort = false;
+  sfxstrategy->compressedoutput = false;
   sfxstrategy->withradixsort = false;
   sfxstrategy->userdefinedsortmaxdepth = 0;
 }

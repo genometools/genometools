@@ -113,8 +113,7 @@ void gt_compact_ulong_store_update(GtCompactUlongStore *cus,
   unsigned int unitoffset;
   unsigned long unitindex;
 
-  gt_assert(idx < cus->numofentries);
-  gt_assert(value <= cus->maskright);
+  gt_assert(idx < cus->numofentries && value <= cus->maskright);
   idx *= cus->bitsperentry;
   unitoffset = (unsigned int) GT_MODWORDSIZE(idx);
   unitindex = GT_DIVWORDSIZE(idx);
