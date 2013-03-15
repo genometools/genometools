@@ -1128,8 +1128,7 @@ cleangenerated:
           www/genometools.org/htdocs/images/parsed.png    \
           www/genometools.org/htdocs/images/constructed.png \
           doc/manuals/annotationsketch.pdf
-	rm -f www/genometools.org/htdocs/docs.html \
-          www/genometools.org/htdocs/examples.html
+	rm -f www/genometools.org/htdocs/examples.html
 	rm -rf doc/manpages
 
 gtkviewer:
