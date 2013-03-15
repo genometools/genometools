@@ -119,8 +119,9 @@ static int show_tool_name(void *key, void *value, GT_UNUSED void *data,
   gt_assert(key && value);
   if (!toolinfo->hidden) {
     if (gt_createman)
-      printf("- ");
-    gt_xputs(key);
+      printf("- *%s*\n", (const char*) key);
+    else
+      gt_xputs(key);
   }
   return 0;
 }
