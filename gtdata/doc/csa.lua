@@ -24,5 +24,5 @@ alignment have been combined into the first alternative splice form (mRNA1) and
 the the second and the fourth spliced alignment into the second alternative
 splice form (mRNA2).
 
-As one can see, the second exon from the first alternative splice form ist
+As one can see, the second exon from the first alternative splice form is
 shorter than the corresponding exon from the second alternative splice form.]])
