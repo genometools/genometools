@@ -284,7 +284,7 @@ static int reset_option(GT_UNUSED void *key, void *value, GT_UNUSED void *data,
 
 void gt_option_parser_reset(GtOptionParser *op)
 {
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(op);
   rval = gt_hashmap_foreach(op->optionindex, reset_option, NULL, NULL);
   gt_assert(!rval); /* reset_option() is sane */
