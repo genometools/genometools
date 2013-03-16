@@ -37,7 +37,8 @@ struct GtBitbuffer
   unsigned int remainingbitsinbuffer,
                bits2store;
   unsigned long currentbitbuffer,
-                currentsuftabvalue;
+                currentsuftabvalue,
+                wordswritten;
 };
 
 struct GtSuffixsortspace
@@ -452,6 +453,7 @@ GtBitbuffer *gt_bitbuffer_new(void)
   bitbuffer->currentsuftabvalue = 0;
   bitbuffer->remainingbitsinbuffer = (unsigned int) GT_INTWORDSIZE;
   bitbuffer->bits2store = 0;
+  bitbuffer->wordswritten = 0;
   return bitbuffer;
 }
 
@@ -469,6 +471,7 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
     {
       (void) fwrite(&bb->currentbitbuffer,sizeof bb->currentbitbuffer,
                     (size_t) 1,outfpsuftab);
+      bb->wordswritten++;
       bb->currentbitbuffer = 0;
       bb->remainingbitsinbuffer = (unsigned int) GT_INTWORDSIZE;
     } else
@@ -518,7 +521,12 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
 
 void gt_bitbuffer_delete(FILE *outfpsuftab,GtBitbuffer *bitbuffer)
 {
-  (void) fwrite(&bitbuffer->currentbitbuffer,sizeof bitbuffer->currentbitbuffer,
-                (size_t) 1,outfpsuftab);
+  if (bitbuffer->remainingbitsinbuffer < (unsigned int) GT_INTWORDSIZE)
+  {
+    (void) fwrite(&bitbuffer->currentbitbuffer,
+                  sizeof bitbuffer->currentbitbuffer,
+                  (size_t) 1,outfpsuftab);
+    bitbuffer->wordswritten++;
+  }
   gt_free(bitbuffer);
 }

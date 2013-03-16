@@ -311,7 +311,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
     {
       if (copytheindexfile(outfmindex,
                             indexname,
-                            BWTTABSUFFIX,
+                            GT_BWTTABSUFFIX,
                             (uint64_t) firstignorespecial,
                             err) != 0)
       {
@@ -362,7 +362,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
     {
       longest.defined = false;
       longest.valueunsignedlong = 0;
-      outbwt = gt_fa_fopen_with_suffix(outfmindex,BWTTABSUFFIX,"wb",err);
+      outbwt = gt_fa_fopen_with_suffix(outfmindex,GT_BWTTABSUFFIX,"wb",err);
       if (outbwt == NULL)
       {
         haserr = true;

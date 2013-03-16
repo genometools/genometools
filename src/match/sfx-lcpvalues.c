@@ -267,7 +267,7 @@ GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
     GT_INITARRAY(&outlcpinfo->lcpsubtab.lcp2file->largelcpvalues,
                  Largelcpvalue);
     outlcpinfo->lcpsubtab.lcp2file->outfplcptab
-      = gt_fa_fopen_with_suffix(indexname,LCPTABSUFFIX,"wb",err);
+      = gt_fa_fopen_with_suffix(indexname,GT_LCPTABSUFFIX,"wb",err);
     if (outlcpinfo->lcpsubtab.lcp2file->outfplcptab == NULL)
     {
       haserr = true;
@@ -275,7 +275,7 @@ GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
     if (!haserr)
     {
       outlcpinfo->lcpsubtab.lcp2file->outfpllvtab
-        = gt_fa_fopen_with_suffix(indexname,LARGELCPTABSUFFIX,"wb",err);
+        = gt_fa_fopen_with_suffix(indexname,GT_LARGELCPTABSUFFIX,"wb",err);
       if (outlcpinfo->lcpsubtab.lcp2file->outfpllvtab == NULL)
       {
         haserr = true;

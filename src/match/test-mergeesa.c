@@ -131,21 +131,22 @@ static int mergeandstoreindex(const GtStr *storeindex,
   bool haserr = false;
 
   gt_error_check(err);
-  if (initNameandFILE(&mergeoutinfo.outsuf,storeindex,SUFTABSUFFIX,err) != 0)
+  if (initNameandFILE(&mergeoutinfo.outsuf,storeindex,GT_SUFTABSUFFIX,err) != 0)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    if (initNameandFILE(&mergeoutinfo.outlcp,storeindex,LCPTABSUFFIX,err) != 0)
+    if (initNameandFILE(&mergeoutinfo.outlcp,storeindex,
+                        GT_LCPTABSUFFIX,err) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr)
   {
-    if (initNameandFILE(&mergeoutinfo.outllv,storeindex,LARGELCPTABSUFFIX,
-                       err) != 0)
+    if (initNameandFILE(&mergeoutinfo.outllv,storeindex,GT_LARGELCPTABSUFFIX,
+                        err) != 0)
     {
       haserr = true;
     }

@@ -19,52 +19,52 @@
 #define ESA_FILEEND_H
 
 /*
-  The following defines the suffix of an indexname to be used for an
-  reverse complemented index. The length is also defined.
-*/
-
-#define RCMSUFFIX         ".rcm"
-
-/*
-  The following defines the suffix of an indexname to be used as
-  a six frame index. The length is also defined.
-*/
-
-#define SIXFRAMESUFFIX    ".6fr"
-
-/*
   The following defines the suffix of a file to store the
   table suftab.
 */
 
-#define SUFTABSUFFIX  ".suf"
+#define GT_SUFTABSUFFIX  ".suf"
+
+/*
+  The following defines the suffix of a file to store the byte compressed
+  suftab.
+*/
+
+#define GT_SUFTABSUFFIX_BYTECOMPRESSED  ".sufc"
 
 /*
   The following defines the suffix of a file to store the
   table lcptab.
 */
 
-#define LCPTABSUFFIX  ".lcp"
+#define GT_LCPTABSUFFIX  ".lcp"
 
 /*
   The following defines the suffix of a file to store the
   large lcp table values.
 */
 
-#define LARGELCPTABSUFFIX  ".llv"
+#define GT_LARGELCPTABSUFFIX  ".llv"
+
+/*
+  The following defines the suffix of a file to store the byte compressed
+  lcptab.
+*/
+
+#define GT_LCPTABSUFFIX_BYTECOMPRESSED  ".lcpc"
 
 /*
   The following defines the suffix of a file to store Burrows and
   Wheeler transform.
 */
 
-#define BWTTABSUFFIX  ".bwt"
+#define GT_BWTTABSUFFIX  ".bwt"
 
 /*
   The following defines the suffix of a file to store bucket table.
 */
 
-#define BCKTABSUFFIX  ".bck"
+#define GT_BCKTABSUFFIX  ".bck"
 
 /*
   The following defines the suffix of the project file.
@@ -74,6 +74,6 @@
   The following defines the suffix of the project file.
 */
 
-#define PROJECTFILESUFFIX ".prj"
+#define GT_PROJECTFILESUFFIX ".prj"
 
 #endif

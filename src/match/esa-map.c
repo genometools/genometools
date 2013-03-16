@@ -131,7 +131,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
     } else
     {
       if (gt_scannedprjkey_analyze(indexname,
-                                   PROJECTFILESUFFIX,
+                                   GT_PROJECTFILESUFFIX,
                                    linenum,
                                    gt_str_get(currentline),
                                    currentlinelength,
@@ -145,7 +145,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
     gt_str_reset(currentline);
   }
   gt_str_delete(currentline);
-  if (!haserr && gt_scannedprjkey_allkeysdefined(indexname,PROJECTFILESUFFIX,
+  if (!haserr && gt_scannedprjkey_allkeysdefined(indexname,GT_PROJECTFILESUFFIX,
                                                  scannedprjkeytable,
                                                  logger,err) != 0)
   {
@@ -154,7 +154,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   if (!haserr && integersize != (uint32_t) 32 && integersize != (uint32_t) 64)
   {
     gt_error_set(err,"%s%s contains illegal line defining the integer size",
-                 indexname,PROJECTFILESUFFIX);
+                 indexname,GT_PROJECTFILESUFFIX);
     haserr = true;
   }
   if (!haserr && integersize != (uint32_t) (sizeof (unsigned long) * CHAR_BIT))
@@ -242,7 +242,7 @@ static bool scanprjfileuintkeys(Suffixarray *suffixarray,
   FILE *fp;
 
   gt_error_check(err);
-  fp = gt_fa_fopen_with_suffix(indexname,PROJECTFILESUFFIX,"rb",err);
+  fp = gt_fa_fopen_with_suffix(indexname,GT_PROJECTFILESUFFIX,"rb",err);
   if (fp == NULL)
   {
     haserr = true;
@@ -349,7 +349,7 @@ static int inputsuffixarray(bool map,
       {
         suffixarray->suftab
           = gt_fa_mmap_check_size_with_suffix(indexname,
-                                       SUFTABSUFFIX,
+                                       GT_SUFTABSUFFIX,
                                        suffixarray->numberofallsortedsuffixes,
                                        sizeof (*suffixarray->suftab),
                                        err);
@@ -361,24 +361,24 @@ static int inputsuffixarray(bool map,
     } else
     {
 #ifdef _LP64
-      off_t filesize = gt_file_size_with_suffix(indexname,SUFTABSUFFIX);
+      off_t filesize = gt_file_size_with_suffix(indexname,GT_SUFTABSUFFIX);
 
       if (filesize == (off_t) sizeof (uint32_t) *
                               suffixarray->numberofallsortedsuffixes)
       {
         gt_logger_log(logger,"read suftab in units of 4 bytes");
         INITBufferedfile(indexname,&suffixarray->suftabstream_uint32_t,uint32_t,
-                         SUFTABSUFFIX);
+                         GT_SUFTABSUFFIX);
       } else
       {
         gt_logger_log(logger,"read suftab in units of 8 bytes");
         INITBufferedfile(indexname,&suffixarray->suftabstream_GtUlong,GtUlong,
-                         SUFTABSUFFIX);
+                         GT_SUFTABSUFFIX);
       }
 #else
       gt_logger_log(logger,"read suftab in units of 4 bytes");
       INITBufferedfile(indexname,&suffixarray->suftabstream_GtUlong,GtUlong,
-                       SUFTABSUFFIX);
+                       GT_SUFTABSUFFIX);
 #endif
     }
     if (!haserr && !suffixarray->longest.defined)
@@ -395,7 +395,7 @@ static int inputsuffixarray(bool map,
       {
         suffixarray->lcptab
           = gt_fa_mmap_check_size_with_suffix(indexname,
-                                         LCPTABSUFFIX,
+                                         GT_LCPTABSUFFIX,
                                          suffixarray->numberofallsortedsuffixes,
                                          sizeof (*suffixarray->lcptab),
                                          err);
@@ -407,7 +407,7 @@ static int inputsuffixarray(bool map,
     } else
     {
       INITBufferedfile(indexname,&suffixarray->lcptabstream,GtUchar,
-                       LCPTABSUFFIX);
+                       GT_LCPTABSUFFIX);
       if (!haserr &&
           fseek(suffixarray->lcptabstream.fp,(long) sizeof (GtUchar),SEEK_SET))
       {
@@ -426,7 +426,7 @@ static int inputsuffixarray(bool map,
       {
         suffixarray->llvtab
           = gt_fa_mmap_check_size_with_suffix(indexname,
-                                           LARGELCPTABSUFFIX,
+                                           GT_LARGELCPTABSUFFIX,
                                            (unsigned long)
                                            suffixarray->numoflargelcpvalues.
                                            valueunsignedlong,
@@ -439,7 +439,7 @@ static int inputsuffixarray(bool map,
       } else
       {
         INITBufferedfile(indexname,&suffixarray->llvtabstream,Largelcpvalue,
-                         LARGELCPTABSUFFIX);
+                         GT_LARGELCPTABSUFFIX);
       }
     }
   }
@@ -449,7 +449,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->bwttab
         = gt_fa_mmap_check_size_with_suffix(indexname,
-                                         BWTTABSUFFIX,
+                                         GT_BWTTABSUFFIX,
                                          totallength+1,
                                          sizeof (*suffixarray->bwttab),
                                          err);
@@ -460,7 +460,7 @@ static int inputsuffixarray(bool map,
     } else
     {
       INITBufferedfile(indexname,&suffixarray->bwttabstream,GtUchar,
-                       BWTTABSUFFIX);
+                       GT_BWTTABSUFFIX);
     }
   }
   if (!haserr && (demand & SARR_BCKTAB))

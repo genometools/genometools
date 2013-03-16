@@ -114,6 +114,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                            unsigned int prefixlength,
                            const GtEncseq *encseq,
                            const Suffixeratoroptions *so,
+                           bool compressedoutput,
                            GenomediffInfo *gd_info,
                            GtError *err)
 {
@@ -148,13 +149,14 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   }
   INITOUTFILEPTR(outfileinfo->outfpsuftab,
                  gt_index_options_outsuftab_value(so->idxopts),
-                 SUFTABSUFFIX);
+                 compressedoutput ? GT_SUFTABSUFFIX_BYTECOMPRESSED
+                                  : GT_SUFTABSUFFIX);
   INITOUTFILEPTR(outfileinfo->outfpbwttab,
                  gt_index_options_outbwttab_value(so->idxopts),
-                 BWTTABSUFFIX);
+                 GT_BWTTABSUFFIX);
   INITOUTFILEPTR(outfileinfo->outfpbcktab,
                  gt_index_options_outbcktab_value(so->idxopts),
-                 BCKTABSUFFIX);
+                 GT_BCKTABSUFFIX);
   if (gt_index_options_outsuftab_value(so->idxopts)
         || gt_index_options_outbwttab_value(so->idxopts)
         || so->outlcptab
@@ -602,7 +604,8 @@ int runsuffixerator(bool doesa,
   outfileinfo.encseq = NULL;
   if (!haserr)
   {
-    if (initoutfileinfo(&outfileinfo,prefixlength,encseq,so,gd_info,err) != 0)
+    if (initoutfileinfo(&outfileinfo,prefixlength,encseq,so,
+                        sfxstrategy.compressedoutput,gd_info,err) != 0)
     {
       haserr = true;
     }

@@ -586,7 +586,7 @@ static int fillbcktabmapspecstartptr(GtBcktab *bcktab,
 
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(indexname);
-  gt_str_append_cstr(tmpfilename,BCKTABSUFFIX);
+  gt_str_append_cstr(tmpfilename,GT_BCKTABSUFFIX);
   if (gt_mapspec_read(assignbcktabmapspecification,
                       bcktab,
                       tmpfilename,

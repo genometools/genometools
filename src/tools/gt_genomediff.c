@@ -297,7 +297,7 @@ static int gt_genomediff_runner(int argc, const char **argv,
       char **elements = NULL;
 
       prj_fp = gt_fa_fopen_with_suffix(gt_str_get(arguments->indexname),
-                                       PROJECTFILESUFFIX,"rb",err);
+                                       GT_PROJECTFILESUFFIX,"rb",err);
       if (prj_fp == NULL)
         had_err = -1;
       while (!had_err && gt_str_read_next_line(current_line, prj_fp) != EOF) {

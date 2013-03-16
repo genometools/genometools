@@ -96,7 +96,7 @@ int gt_outprjfile(const char *indexname,
   bool haserr = false;
 
   gt_error_check(err);
-  prjfp = gt_fa_fopen_with_suffix(indexname,PROJECTFILESUFFIX,"wb",err);
+  prjfp = gt_fa_fopen_with_suffix(indexname,GT_PROJECTFILESUFFIX,"wb",err);
   if (prjfp == NULL)
   {
     haserr = true;
