@@ -21,6 +21,7 @@
 #include "core/option_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
+#include "core/fa.h"
 #include "match/echoseq.h"
 #include "match/eis-voiditf.h"
 #include "match/esa-lcpintervals.h"
@@ -39,6 +40,7 @@
 #include "match/test-mappedstr.pr"
 #include "match/twobits2kmers.h"
 #include "match/sfx-linlcp.h"
+#include "match/esa-fileend.h"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
@@ -61,6 +63,7 @@ typedef struct
        enumlcpitvtreeBU,
        diffcovercheck,
        wholeleafcheck,
+       compressedesa,
        spmitv,
        ownencseq2file;
   unsigned long delspranges;
@@ -157,7 +160,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optionwholeleafcheck,
          *optionenumlcpitvs, *optionenumlcpitvtree, *optionenumlcpitvtreeBU,
          *optionscanesa, *optionspmitv, *optionownencseq2file,
-         *optionbfcheck;
+         *optionbfcheck, *optioncompressedesa;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -308,6 +311,14 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                             &arguments->ownencseq2file,false);
   gt_option_parser_add_option(op, optionownencseq2file);
   gt_option_imply(optionownencseq2file, optionesaindex);
+
+  optioncompressedesa = gt_option_new_bool("compressedesa",
+                                           "input the compressed tables of the "
+                                           "enhanced suffix array",
+                                           &arguments->compressedesa,
+                                           false);
+  gt_option_parser_add_option(op, optioncompressedesa);
+  gt_option_imply(optioncompressedesa, optionesaindex);
 
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);
@@ -808,6 +819,38 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
   return haserr ? -1 : 0;
 }
 
+static int sfxmap_compressed_esa(const char *indexname,GtError *err)
+{
+  bool haserr = false;
+  GtEncseq *encseq;
+  GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
+
+  encseq = gt_encseq_loader_load(encseq_loader,indexname, err);
+  gt_encseq_loader_delete(encseq_loader);
+  if (encseq == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    GtStr *compressed_suftabfile = gt_str_new_cstr(indexname);
+    unsigned long len;
+    void *mappedcompressedsuftab;
+
+    gt_str_append_cstr(compressed_suftabfile,GT_SUFTABSUFFIX_BYTECOMPRESSED);
+    mappedcompressedsuftab
+      = gt_fa_mmap_read(gt_str_get(compressed_suftabfile),&len,err);
+    if (mappedcompressedsuftab == NULL)
+    {
+      haserr = true;
+    }
+    gt_fa_xmunmap(mappedcompressedsuftab);
+    gt_str_delete(compressed_suftabfile);
+  }
+  gt_encseq_delete(encseq);
+  return haserr ? -1 : 0;
+}
+
 static int comparelcpvalue(void *info,unsigned long lcp,GtError *err)
 {
   unsigned long currentlcpvalue;
@@ -1187,9 +1230,18 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (gt_str_length(arguments->esaindexname) > 0)
   {
-    if (sfxmap_esa(arguments,logger,err) != 0)
+    if (arguments->compressedesa)
     {
-      haserr = true;
+      if (sfxmap_compressed_esa(gt_str_get(arguments->esaindexname),err) != 0)
+      {
+        haserr = true;
+      }
+    } else
+    {
+      if (sfxmap_esa(arguments,logger,err) != 0)
+      {
+        haserr = true;
+      }
     }
   }
   if (!haserr && gt_str_length(arguments->pckindexname) > 0)
