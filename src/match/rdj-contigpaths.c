@@ -59,13 +59,13 @@ int gt_contigpaths_to_fasta(const char *indexname,
   if (buffersize == 0)
   {
     buffersize = GT_CONTIGPATHS_BUFFERSIZE * sizeof (GtContigpathElem);
-    gt_log_log("buffersize = default (%lu bytes)", buffersize);
+    gt_log_log("buffersize = default (%zu bytes)", buffersize);
   }
   else
   {
     size_t bsmod = buffersize % sizeof (GtContigpathElem);
     buffersize -= bsmod;
-    gt_log_log("buffersize = %lu bytes", buffersize);
+    gt_log_log("buffersize = %zu bytes", buffersize);
   }
   gt_assert(buffersize > 0);
   gt_assert(buffersize % sizeof (GtContigpathElem) == 0);
