@@ -51,7 +51,6 @@ struct GtSuffixsortspace
   uint32_t *uinttab;
   size_t basesize;
   GtSuffixsortspace_exportptr exportptr;
-  unsigned int bitsformaxvalue;
   unsigned long maxindex,
                 maxvalue,
                 partoffset,
@@ -117,8 +116,6 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   suffixsortspace->exportptr.ulongtabsectionptr = NULL;
   suffixsortspace->exportptr.uinttabsectionptr = NULL;
   suffixsortspace->currentexport = false;
-  suffixsortspace->bitsformaxvalue = gt_determinebitspervalue(maxvalue);
-  gt_assert(suffixsortspace->bitsformaxvalue < GT_BITSINBYTEBUFFER);
 #ifdef _LP64
   gt_logger_log(logger,"suftab uses %dbit values: "
                          "maxvalue=%lu,numofentries=%lu",
@@ -448,11 +445,12 @@ static unsigned long gt_extract_compressed_value(unsigned long *tab,
 }
 */
 
-GtBitbuffer *gt_bitbuffer_new(void)
+GtBitbuffer *gt_bitbuffer_new(unsigned int bitsperentry)
 {
   GtBitbuffer *bitbuffer = gt_malloc(sizeof *bitbuffer);
 
-  bitbuffer->bitsperentry = 0;
+  gt_assert(bitsperentry < GT_BITSINBYTEBUFFER);
+  bitbuffer->bitsperentry = bitsperentry;
   bitbuffer->currentbitbuffer = 0;
   bitbuffer->currentsuftabvalue = 0;
   bitbuffer->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
@@ -469,13 +467,6 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
   const unsigned long *ulongptr = sssp->ulongtab;
   const uint32_t *uintptr = sssp->uinttab;
 
-  if (bb->bitsperentry == 0)
-  {
-    bb->bitsperentry = sssp->bitsformaxvalue;
-  } else
-  {
-    gt_assert(bb->bitsperentry == sssp->bitsformaxvalue);
-  }
   while (true)
   {
     if (bb->remainingbitsinbuffer == 0)

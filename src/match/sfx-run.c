@@ -32,6 +32,7 @@
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "core/mathsupport.h"
 #include "esa-fileend.h"
 #include "esa-shulen.h"
 #include "giextract.h"
@@ -249,7 +250,15 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
 
     if (sfxstrategy->compressedoutput)
     {
-      bitbuffer = gt_bitbuffer_new();
+      unsigned long totallength = gt_encseq_total_length(encseq);
+      uint64_t numberofallsuffixes = 1 + (uint64_t) totallength;
+      uint8_t bitsperentry = (uint8_t) gt_determinebitspervalue(totallength);
+
+      (void) fwrite(&numberofallsuffixes,sizeof numberofallsuffixes,
+                    (size_t) 1,outfileinfo->outfpsuftab);
+      (void) fwrite(&bitsperentry,sizeof bitsperentry,
+                    (size_t) 1,outfileinfo->outfpsuftab);
+      bitbuffer = gt_bitbuffer_new((unsigned int) bitsperentry);
     }
     while (true)
     {

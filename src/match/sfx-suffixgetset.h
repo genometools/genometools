@@ -133,7 +133,7 @@ void gt_suffixsortspace_to_file (FILE *outfpsuftab,
                                  const GtSuffixsortspace *sssp,
                                  unsigned long numberofsuffixes);
 
-GtBitbuffer *gt_bitbuffer_new(void);
+GtBitbuffer *gt_bitbuffer_new(unsigned int bitsperentry);
 
 void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
                                             const GtSuffixsortspace *sssp,
