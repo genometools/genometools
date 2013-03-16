@@ -21,6 +21,7 @@
 #include "core/option_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
+#include "core/format64.h"
 #include "core/fa.h"
 #include "match/echoseq.h"
 #include "match/eis-voiditf.h"
@@ -835,6 +836,7 @@ static int sfxmap_compressed_esa(const char *indexname,GtError *err)
   {
     uint64_t numberofentries;
     uint8_t bitsperentry;
+    unsigned long totallength = gt_encseq_total_length(encseq);
     FILE *fp;
 
     fp = gt_fa_fopen_with_suffix(indexname,GT_SUFTABSUFFIX_BYTECOMPRESSED,
@@ -853,6 +855,7 @@ static int sfxmap_compressed_esa(const char *indexname,GtError *err)
                         indexname,GT_SUFTABSUFFIX_BYTECOMPRESSED);
         haserr = true;
       }
+      gt_assert(numberofentries == (uint64_t) totallength + 1);
     }
     if (!haserr)
     {
@@ -865,6 +868,55 @@ static int sfxmap_compressed_esa(const char *indexname,GtError *err)
                         (int) sizeof numberofentries);
         haserr = true;
       }
+    }
+    if (!haserr)
+    {
+      uint64_t readvalue = 0, countentries = 0;
+      const unsigned int bitspervalue = 64U;
+      unsigned int bits2add = (unsigned int) bitsperentry,
+                   remainingbits = 0;
+      unsigned long bitbuffer = 0,
+                    *suftabptr,
+                    *suftab = gt_malloc(numberofentries * sizeof *suftab);
+
+      suftabptr = suftab;
+      while (true)
+      {
+        if (remainingbits == 0)
+        {
+          if (fread(&readvalue,sizeof readvalue,(size_t) 1,fp) != (size_t) 1)
+          {
+            break;
+          }
+          remainingbits = bitspervalue;
+        } else
+        {
+          if (remainingbits >= (unsigned int) bits2add)
+          {
+            if (suftabptr >= suftab + numberofentries)
+            {
+              break;
+            }
+            remainingbits -= bits2add;
+            bitbuffer |= (unsigned long) (readvalue >> remainingbits) &
+                         ((1UL << bits2add) - 1);
+            gt_assert(bitbuffer < (1UL << bitsperentry));
+            *suftabptr++ = bitbuffer;
+            bitbuffer = 0;
+            bits2add = (unsigned int) bitsperentry;
+            countentries++;
+          } else
+          {
+            bits2add -= remainingbits;
+            bitbuffer |= (readvalue & ((1UL << remainingbits) - 1)) << bits2add;
+            remainingbits = 0;
+          }
+        }
+      }
+      gt_assert(countentries == numberofentries);
+      gt_suftab_lightweightcheck(encseq, GT_READMODE_FORWARD,
+                                 totallength,suftab,NULL);
+      gt_free(suftab);
     }
     gt_fa_fclose(fp);
   }
