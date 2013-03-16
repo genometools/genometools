@@ -20,6 +20,7 @@
 #include "core/ma.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "core/xansi_api.h"
 
 struct GtToolbox {
@@ -154,8 +155,12 @@ static int toolbox_iterate(void *key, void *value, void *data,
   IterateInfo *info = data;
   gt_error_check(err);
   gt_assert(key && value && data);
-  if (!toolinfo->hidden && toolinfo->tool)
-    info->func(name, toolinfo->tool, info->data);
+  if (!toolinfo->hidden) {
+    if (toolinfo->tool)
+      info->func(name, toolinfo->tool, info->data);
+    else
+      gt_warning("skipping tool '%s' in iterator (not a GtTool object)", name);
+  }
   return 0;
 }
 
