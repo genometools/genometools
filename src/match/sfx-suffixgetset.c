@@ -32,13 +32,16 @@
 #include "core/arraydef.h"
 #include "sfx-suffixgetset.h"
 
+#define GT_BITSINBYTEBUFFER 64U
+
 struct GtBitbuffer
 {
   unsigned int remainingbitsinbuffer,
+               bitsperentry,
                bits2store;
-  unsigned long currentbitbuffer,
-                currentsuftabvalue,
+  unsigned long currentsuftabvalue,
                 wordswritten;
+  uint64_t currentbitbuffer;
 };
 
 struct GtSuffixsortspace
@@ -115,7 +118,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   suffixsortspace->exportptr.uinttabsectionptr = NULL;
   suffixsortspace->currentexport = false;
   suffixsortspace->bitsformaxvalue = gt_determinebitspervalue(maxvalue);
-  gt_assert(suffixsortspace->bitsformaxvalue < (unsigned int) GT_INTWORDSIZE);
+  gt_assert(suffixsortspace->bitsformaxvalue < GT_BITSINBYTEBUFFER);
 #ifdef _LP64
   gt_logger_log(logger,"suftab uses %dbit values: "
                          "maxvalue=%lu,numofentries=%lu",
@@ -423,7 +426,7 @@ static unsigned long gt_extract_compressed_value(unsigned long *tab,
                                                  unsigned long idx)
 {
   unsigned int unitoffset,
-               bitsleft = (unsigned int) GT_INTWORDSIZE - bitsperentry;
+               bitsleft = GT_BITSINBYTEBUFFER - bitsperentry;
   unsigned long unitindex, maskright = ~0UL >> bitsleft;
 
   idx *= bitsperentry;
@@ -437,9 +440,9 @@ static unsigned long gt_extract_compressed_value(unsigned long *tab,
   {
     return (unsigned long)
            ((tab[unitindex] <<
-                (unitoffset + bitsperentry - GT_INTWORDSIZE)) |
+                (unitoffset + bitsperentry - GT_BITSINBYTEBUFFER)) |
               (tab[unitindex+1] >>
-                (GT_INTWORDSIZE + bitsleft - unitoffset))) &
+                (GT_BITSINBYTEBUFFER + bitsleft - unitoffset))) &
            maskright;
   }
 }
@@ -449,9 +452,10 @@ GtBitbuffer *gt_bitbuffer_new(void)
 {
   GtBitbuffer *bitbuffer = gt_malloc(sizeof *bitbuffer);
 
+  bitbuffer->bitsperentry = 0;
   bitbuffer->currentbitbuffer = 0;
   bitbuffer->currentsuftabvalue = 0;
-  bitbuffer->remainingbitsinbuffer = (unsigned int) GT_INTWORDSIZE;
+  bitbuffer->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
   bitbuffer->bits2store = 0;
   bitbuffer->wordswritten = 0;
   return bitbuffer;
@@ -465,6 +469,13 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
   const unsigned long *ulongptr = sssp->ulongtab;
   const uint32_t *uintptr = sssp->uinttab;
 
+  if (bb->bitsperentry == 0)
+  {
+    bb->bitsperentry = sssp->bitsformaxvalue;
+  } else
+  {
+    gt_assert(bb->bitsperentry == sssp->bitsformaxvalue);
+  }
   while (true)
   {
     if (bb->remainingbitsinbuffer == 0)
@@ -473,7 +484,7 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
                     (size_t) 1,outfpsuftab);
       bb->wordswritten++;
       bb->currentbitbuffer = 0;
-      bb->remainingbitsinbuffer = (unsigned int) GT_INTWORDSIZE;
+      bb->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
     } else
     {
       if (bb->bits2store == 0)
@@ -494,14 +505,16 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
           }
           bb->currentsuftabvalue = (unsigned long) *uintptr++;
         }
-        bb->bits2store = sssp->bitsformaxvalue;
+        bb->bits2store = bb->bitsperentry;
       } else
       {
         if (bb->remainingbitsinbuffer >= bb->bits2store)
         {
           unsigned int shiftleft = bb->remainingbitsinbuffer -
                                    bb->bits2store;
-          bb->currentbitbuffer |= (bb->currentsuftabvalue << shiftleft);
+          /* use bb->remainingbitsinbuffer after subtraction for shiftleft */
+          bb->currentbitbuffer
+            |= (uint64_t) (bb->currentsuftabvalue << shiftleft);
           bb->remainingbitsinbuffer -= bb->bits2store;
           bb->bits2store = 0;
         } else
@@ -509,8 +522,10 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
           unsigned long maskright = (1UL << bb->bits2store) - 1;
           unsigned int shiftright = bb->bits2store -
                                     bb->remainingbitsinbuffer;
-          bb->currentbitbuffer |= ((bb->currentsuftabvalue & maskright)
-                                     >> shiftright);
+          /* use bb->bits2store after subtraction for shiftright */
+          /* maskright is not necessary */
+          bb->currentbitbuffer
+            |= ((uint64_t) (bb->currentsuftabvalue & maskright) >> shiftright);
           bb->bits2store -= bb->remainingbitsinbuffer;
           bb->remainingbitsinbuffer = 0;
         }
@@ -519,14 +534,26 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
   }
 }
 
-void gt_bitbuffer_delete(FILE *outfpsuftab,GtBitbuffer *bitbuffer)
+void gt_bitbuffer_delete(FILE *outfpsuftab,
+                         unsigned long numberofallsortedsuffixes,
+                         GtBitbuffer *bitbuffer)
 {
-  if (bitbuffer->remainingbitsinbuffer < (unsigned int) GT_INTWORDSIZE)
+  unsigned long expectedwords,
+                totalbits = numberofallsortedsuffixes * bitbuffer->bitsperentry;
+  const int log2of64 = 6;
+
+  expectedwords = totalbits >> log2of64; /* div by bitsize of uint64_t */
+  if ((totalbits & 63UL) > 0)  /* mod by bitsize of uint64_t */
+  {
+    expectedwords++;
+  }
+  if (bitbuffer->remainingbitsinbuffer < GT_BITSINBYTEBUFFER)
   {
     (void) fwrite(&bitbuffer->currentbitbuffer,
                   sizeof bitbuffer->currentbitbuffer,
                   (size_t) 1,outfpsuftab);
     bitbuffer->wordswritten++;
   }
+  gt_assert(bitbuffer->wordswritten == expectedwords);
   gt_free(bitbuffer);
 }

@@ -285,7 +285,8 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
     }
     if (sfxstrategy->compressedoutput)
     {
-      gt_bitbuffer_delete(outfileinfo->outfpsuftab,bitbuffer);
+      gt_bitbuffer_delete(outfileinfo->outfpsuftab,
+                          outfileinfo->numberofallsortedsuffixes,bitbuffer);
     }
   }
   if (haserr)

@@ -140,6 +140,8 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
                                             GtBitbuffer *bb,
                                             unsigned long numberofsuffixes);
 
-void gt_bitbuffer_delete(FILE *outfpsuftab,GtBitbuffer *bitbuffer);
+void gt_bitbuffer_delete(FILE *outfpsuftab,
+                         unsigned long numberofallsortedsuffixes,
+                         GtBitbuffer *bitbuffer);
 
 #endif
