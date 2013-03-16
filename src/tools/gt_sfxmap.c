@@ -833,19 +833,40 @@ static int sfxmap_compressed_esa(const char *indexname,GtError *err)
   }
   if (!haserr)
   {
-    GtStr *compressed_suftabfile = gt_str_new_cstr(indexname);
-    unsigned long len;
-    void *mappedcompressedsuftab;
+    uint64_t numberofentries;
+    uint8_t bitsperentry;
+    FILE *fp;
 
-    gt_str_append_cstr(compressed_suftabfile,GT_SUFTABSUFFIX_BYTECOMPRESSED);
-    mappedcompressedsuftab
-      = gt_fa_mmap_read(gt_str_get(compressed_suftabfile),&len,err);
-    if (mappedcompressedsuftab == NULL)
+    fp = gt_fa_fopen_with_suffix(indexname,GT_SUFTABSUFFIX_BYTECOMPRESSED,
+                                 "rb",err);
+    if (fp == NULL)
     {
       haserr = true;
     }
-    gt_fa_xmunmap(mappedcompressedsuftab);
-    gt_str_delete(compressed_suftabfile);
+    if (!haserr)
+    {
+      if (fread(&numberofentries,sizeof numberofentries,(size_t) 1,fp)
+          != (size_t) 1)
+      {
+        gt_error_set(err,"cannot read %d bytes from %s%s at offset 0",
+                        (int) sizeof numberofentries,
+                        indexname,GT_SUFTABSUFFIX_BYTECOMPRESSED);
+        haserr = true;
+      }
+    }
+    if (!haserr)
+    {
+      if (fread(&bitsperentry,sizeof bitsperentry,(size_t) 1,fp)
+          != (size_t) 1)
+      {
+        gt_error_set(err,"cannot read %d bytes from %s%s at offset %d",
+                        (int) sizeof bitsperentry,
+                        indexname,GT_SUFTABSUFFIX_BYTECOMPRESSED,
+                        (int) sizeof numberofentries);
+        haserr = true;
+      }
+    }
+    gt_fa_fclose(fp);
   }
   gt_encseq_delete(encseq);
   return haserr ? -1 : 0;
