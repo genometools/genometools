@@ -40,21 +40,17 @@ double        gt_rand_0_to_1(void);
 /* Returns a random character from 'a' to 'z'. */
 char          gt_rand_char(void);
 /* Retuns the log base 2 of an integer <maxvalue> in O(wordsize) operations */
-unsigned int gt_determinebitspervalue(unsigned long maxvalue);
+unsigned int  gt_determinebitspervalue(unsigned long maxvalue);
 /* Determine pow(base,exponent) for small values of exponent */
 unsigned long gt_power_for_small_exponents(unsigned int base,
                                            unsigned int exponent);
 /* Return <x> rounded to the nearest long integer, similar to
    <lrint()> which may not be available on older glibc versions. */
 long          gt_round_to_long(double x);
-
 /* Compute the greatest common divisor of two unsigned integers */
-
-unsigned int gt_gcd_uint(unsigned int m, unsigned int n);
-
+unsigned int  gt_gcd_uint(unsigned int m, unsigned int n);
 /* Compute the least common multiplier of two unsigned integers */
-
-unsigned int gt_lcm_uint(unsigned int m, unsigned int n);
+unsigned int  gt_lcm_uint(unsigned int m, unsigned int n);
 
 int           gt_mathsupport_unit_test(GtError *err);
 
