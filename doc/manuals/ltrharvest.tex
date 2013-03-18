@@ -21,9 +21,10 @@
 a manual}
 \author{\begin{tabular}{c}
          \textit{David Ellinghaus}\\
+         \textit{Sascha Steinbiss}\\
          \textit{Stefan Kurtz}\\
          \textit{Ute Willhoeft}\\[1cm]
-         Research Group for Genomeinformatics\\
+         Research Group for Genome Informatics\\
          Center for Bioinformatics\\
          University of Hamburg\\
          Bundesstrasse 43\\
@@ -90,15 +91,18 @@ Some text is highlighted by different fonts according to the following rules.
 
 \subsection{The options of \LTRharvest} \label{Overview}
 
-Since \LTRharvest is part of \Gt, \LTRharvest is called as follows.
+Since \LTRharvest is part of \Gt, \LTRharvest is called as follows:
 
-\Gtltrharvest \Showoption{index} \Showoptionarg{indexname} $[$\emph{options}$]$
+\texttt{gt} $[$\Showoption{j} \Showoptionarg{n} $]$ \texttt{ltrharvest} \Showoption{index} \Showoptionarg{indexname} $[$\emph{options}$]$
 
-where \Showoptionarg{indexname} denotes the enhanced suffix array index of
-the target sequence(s) constructed by the program \Suffixerator.
-An overview of all possible options with a short one-line description of
-each option is given in Table \ref{overviewOpt}.
-All options can be specified only once.
+where \Showoptionarg{indexname} denotes the enhanced suffix array index of the
+target sequence(s) constructed by the program \Suffixerator. If the option
+\Showoption{j} is given and \GenomeTools has been compiled with multithreading
+support (\texttt{threads=yes}), some calculations will run in parallel, using
+\Showoptionarg{n} threads.
+An overview of all possible options with a short one-line description of each
+option is given in Table \ref{overviewOpt}. All options can be specified only
+once.
 
 \begin{table}[htbp]
 \caption{Overview of the \LTRharvest options sorted by categories.}
@@ -120,6 +124,12 @@ format
 \\
 \Showoption{outinner}& specify outputfilename for multiple FASTA file
 of the inner regions of predictions
+\\
+\Showoption{tabout}& output tabular format on stdout (instead of GFF3)
+\\
+\Showoption{seqids}& output sequence descriptions (instead of numbers)
+\\
+\Showoption{md5}& output GFF3 with MD5 headers
 \\
 \Showoptiongroup{Filter options}
 \Showoption{seed}& specify minimum seed length for exact maximal repeats
@@ -216,7 +226,8 @@ be written to a file using the notation \texttt{\symbol{62}}
 \Gtltrharvest \Showoption{index} \Showoptionarg{indexname}
 $[$\emph{options}$]$ \texttt{\symbol{62}} \Showoptionarg{resultfile}
 
-In addition, the following options write extra information to files
+In addition, the following options influence how and which information is
+output:
 \begin{Justshowoptions}
 
 \Option{out}{\Showoptionarg{outputfile}}{
@@ -234,6 +245,35 @@ Each prediction will be represented by an individual FASTA entry.
 Specify the name of a file where the predictions will be written to.
 Each prediction will be represented by an individual GFF3~\cite{gff3} entry.
 }
+
+\Option{tabout}
+{$\Showoptionarg{yes}|\Showoptionarg{no}$}{
+If set to $\Showoptionarg{yes}$, the usual tabular format will be printed to
+stdout. If set to $\Showoptionarg{no}$, then GFF3 output will be printed to
+stdout. Default is $\Showoptionarg{yes}$. This option does not influence the
+GFF3 output specified by \Showoption{gff3}.
+}
+
+\Option{seqids}
+{$\Showoptionarg{yes}|\Showoptionarg{no}$}{
+If set to $\Showoptionarg{yes}$, then the original sequence descriptions (FASTA
+headers) are output as GFF3 sequence identifiers.
+If set to $\Showoptionarg{no}$, then the sequence identifiers will have the
+format  \texttt{seq}$n$, where $n$ is the sequence number of the corresponding
+sequence in the input index, e.g.\ \texttt{seq0} for the first sequence in the
+index. Default is $\Showoptionarg{no}$.
+}
+
+\Option{md5}
+{$\Showoptionarg{yes}|\Showoptionarg{no}$}{
+If set to $\Showoptionarg{yes}$, the sequence regions output in the GFF3 output will
+be augmented with additional MD5 fingerprints for each sequence.
+That is, the sequence region identifiers are constructed as follows:
+``\texttt{md5:}$md5hash$\texttt{:}$seqid$'' where $seqid$ is the original
+sequence region identifies according to option \Showoption{seqids}.
+Default is $\Showoptionarg{no}$.
+}
+
 
 \end{Justshowoptions}
 
@@ -463,27 +503,31 @@ the \LTRharvest output is shown. Please note that this step is not part of
 \subsection{Using different options of \LTRharvest}
 \label{different-options}
 
-As target
-sequence file we use some FASTA file \texttt{\small{chr02.19970727.fsa.gz}}
-containing the \textit{S. cerevisiae} genome sequence, chromosome 2. Note
-that the file is a compressed file in gzip format (because of the ending
-\texttt{.gz}). This format can be handled by the program \Suffixerator.
+As the input sequence file, we use some FASTA file
+\texttt{\small{chr02.19970727.fsa.gz}} containing the \textit{S. cerevisiae}
+genome sequence, chromosome 2. Note that the file is a compressed file in gzip
+format (because of the ending \texttt{.gz}). This format can be handled by the
+program \Suffixerator.
 
-First, we create the enhanced suffix array.
-We invoke \Gtsuffixerator with options \Showoption{tis}, \Showoption{suf},
-\Showoption{lcp}, \Showoption{des}, \Showoption{ssp} and \Showoption{sds} since \LTRharvest needs the corresponding
-tables. Furthermore, we specify \Showoption{dna}, as we process DNA-sequences.
+First, we create the enhanced suffix array. We invoke \Gtsuffixerator with
+options \Showoption{tis}, \Showoption{suf}, \Showoption{lcp}, \Showoption{des},
+\Showoption{ssp} and \Showoption{sds} since \LTRharvest needs the corresponding
+tables. Furthermore, we specify \Showoption{dna}, as we process DNA sequences.
+Additional creation of the $\tt{ois}$ table using the \Showoption{lossless}
+option makes it easier to re-use the created index in later tools (e.g.\
+\emph{LTRdigest}) which require this table.
 
 \begin{footnotesize}
 \begin{verbatim}
 $ gt suffixerator -db chr02.19970727.fsa.gz -indexname chr02.19970727.fsa -tis
--suf -lcp -des -ssp -sds -dna
+-suf -lcp -des -ssp -sds -dna -lossless -v
 # dna=yes
 # indexname="chr02.19970727.fsa"
 .
 .
 .
-# TIME overall 1.37
+# countradixsort=0
+# counttqsort=0
 \end{verbatim}
 \end{footnotesize}
 
@@ -496,8 +540,7 @@ without searching for TSD or an LTR start-end motif.
 $ gt ltrharvest -index chr02.19970727.fsa
 # args=-index chr02.19970727.fsa
 # predictions are reported in the following way
-# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) s(rLTR) e(rLTR) l(rLTR)
-sim(LTRs) seq-nr
+# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) s(rLTR) e(rLTR) l(rLTR) sim(LTRs) seq-nr
 # where:
 # s = starting position
 # e = ending position
@@ -507,10 +550,10 @@ sim(LTRs) seq-nr
 # rLTR = right LTR
 # sim = similarity
 # seq-nr = sequence number
-259532  265448  5917  259532  259863  332  265117  265448  332  99.40  0
-427672  430021  2350  427672  428170  499  429522  430021  500  91.60  0
-29632  35597  5966  29632  29969  338  35259  35597  339  98.82  0
+29632  35598  5967  29632  29969  338  35259  35598  340  98.53  0
 220989  226919  5931  220989  221339  351  226574  226919  346  97.15  0
+259532  265448  5917  259532  259863  332  265117  265448  332  99.40  0
+427671  430013  2343  427671  428170  500  429522  430013  492  90.20  0
 \end{verbatim}
 \end{footnotesize}
 
@@ -533,8 +576,7 @@ and \Showoption{outinner} the run results in two multiple FASTA files.
 \begin{verbatim}
 $ gt ltrharvest -index chr02.19970727.fsa -v -out pred-chr02.fsa
 -outinner pred-inner-chr02.fsa
-# args=-index chr02.19970727.fsa -v -out pred-chr02.fsa -outinner
-pred-inner-chr02.fsa
+# args=-index chr02.19970727.fsa -v -out pred-chr02.fsa -outinner pred-inner-chr02.fsa
 # user defined options and values:
 #   verbosemode: On
 #   indexname: chr02.19970727.fsa
@@ -552,14 +594,13 @@ pred-inner-chr02.fsa
 #   minLTRdistance: 1000
 #   maxLTRdistance: 15000
 #   overlaps: best
-#   minTSDlength: 0
+#   minTSDlength: 4
 #   maxTSDlength: 20
 #   palindromic motif:
 #   motifmismatchesallowed: 4
 #   vicinity: 60 nt
 # predictions are reported in the following way
-# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) s(rLTR) e(rLTR) l(rLTR) sim(LTRs)
-seq-nr
+# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) s(rLTR) e(rLTR) l(rLTR) sim(LTRs) seq-nr
 # where:
 # s = starting position
 # e = ending position
@@ -569,10 +610,11 @@ seq-nr
 # rLTR = right LTR
 # sim = similarity
 # seq-nr = sequence number
-259532  265448  5917  259532  259863  332  265117  265448  332  99.40  0
-427672  430021  2350  427672  428170  499  429522  430021  500  91.60  0
-29632  35597  5966  29632  29969  338  35259  35597  339  98.82  0
+29632  35598  5967  29632  29969  338  35259  35598  340  98.53  0
 220989  226919  5931  220989  221339  351  226574  226919  346  97.15  0
+259532  265448  5917  259532  259863  332  265117  265448  332  99.40  0
+427671  430013  2343  427671  428170  500  429522  430013  492  90.20  0
+
 \end{verbatim}
 \end{footnotesize}
 
@@ -586,8 +628,7 @@ $ gt ltrharvest -index chr02.19970727.fsa -mintsd 5 -maxtsd 20 -motif tgca
 -motifmis 0
 # args=-index chr02.19970727.fsa -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0
 # predictions are reported in the following way
-# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) s(rLTR) e(rLTR) l(rLTR) sim(LTRs)
-seq-nr
+# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) s(rLTR) e(rLTR) l(rLTR) sim(LTRs) seq-nr
 # where:
 # s = starting position
 # e = ending position
@@ -597,9 +638,9 @@ seq-nr
 # rLTR = right LTR
 # sim = similarity
 # seq-nr = sequence number
-259532  265448  5917  259532  259863  332  265117  265448  332  99.40  0
 29632  35590  5959  29632  29963  332  35259  35590  332  99.70  0
 220996  226911  5916  220996  221329  334  226575  226911  337  97.33  0
+259532  265448  5917  259532  259863  332  265117  265448  332  99.40  0
 \end{verbatim}
 \end{footnotesize}
 
@@ -615,12 +656,12 @@ $ gt ltrharvest -index chr02.19970727.fsa -seed 30 -xdrop 5 -mat 2 -mis -2 -ins 
 -del -3 -minlenltr 100 -maxlenltr 1000 -mindistltr 1000 -maxdistltr 15000
 -similar 90.0 -overlaps all -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60
 -longoutput
-# args=-index chr02.19970727.fsa -seed 30 -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3
--minlenltr 100 -maxlenltr 1000 -mindistltr 1000 -maxdistltr 15000 -similar 90.0
--overlaps all -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60 -longoutput
+# args=-index chr02.19970727.fsa -seed 30 -xdrop 5 -mat 2 -mis -2 -ins -3
+-del -3 -minlenltr 100 -maxlenltr 1000 -mindistltr 1000 -maxdistltr 15000
+-similar 90.0 -overlaps all -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0
+-vic 60 -longoutput
 # predictions are reported in the following way
-# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) TSD l(TSD) m(lLTR) s(rLTR)
-e(rLTR) l(rLTR) TSD l(TSD) m(rLTR) sim(LTRs) seq-nr
+# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) TSD l(TSD) m(lLTR) s(rLTR) e(rLTR) l(rLTR) TSD l(TSD) m(rLTR) sim(LTRs) seq-nr
 # where:
 # s = starting position
 # e = ending position
@@ -632,12 +673,12 @@ e(rLTR) l(rLTR) TSD l(TSD) m(rLTR) sim(LTRs) seq-nr
 # TSD = target site duplication
 # sim = similarity
 # seq-nr = sequence number
-259532  265448  5917  259532  259863  332  gtaat  5  tg..ca  265117  265448  332
-gtaat  5  tg..ca  99.40  0
-29632  35590  5959  29632  29963  332  ataat  5  tg..ca  35259  35590  332
-ataat  5  tg..ca  99.70  0
-220996  226911  5916  220996  221329  334  ggaat  5  tg..ca  226575  226911 337
-ggaat  5  tg..ca  97.33  0
+29632  35590  5959  29632  29963  332  ATAAT  5  TG..CA  35259  35590
+  332  ATAAT  5  TG..CA  99.70  0
+220996  226911  5916  220996  221329  334  GGAAT  5  TG..CA  226575  226911
+  337  GGAAT  5  TG..CA  97.33  0
+259532  265448  5917  259532  259863  332  GTAAT  5  TG..CA  265117  265448
+  332  GTAAT  5  TG..CA  99.40  0
 \end{verbatim}
 \end{footnotesize}
 
@@ -650,22 +691,24 @@ chromosomal sequences of the release before Oct. 1st, 1997, probably
 used by Kim et al.
 in their comprehensive survey of retrotransposons~\cite{kim:1998}.
 
-First, we create the enhanced suffix array.
-We invoke \Gtsuffixerator with options \Showoption{tis},
-\Showoption{suf}, \Showoption{lcp}, \Showoption{des}, since
-\LTRharvest needs the corresponding tables. Furthermore, we specify option
-\Showoption{dna}, as we are processing DNA sequences.
+First, we create the enhanced suffix array. We invoke \Gtsuffixerator with
+options \Showoption{tis}, \Showoption{suf}, \Showoption{lcp}, \Showoption{des},
+since \LTRharvest needs the corresponding tables. Furthermore, we specify option
+\Showoption{dna}, as we are processing DNA sequences. We also use
+\Showoption{lossless} to create the table necessary to enable lossless access to
+the sequence.
 
 \begin{footnotesize}
 \begin{verbatim}
 $ gt suffixerator -db chrAll.19971001.fsa.gz -indexname chrAll.19971001.fsa -tis
--suf -lcp -des -sds -dna
+-suf -lcp -des -sds -dna -lossless -v
 # dna=yes
 # indexname="chrAll.19971001.fsa"
 .
 .
 .
-# TIME overall 108.35
+# countradixsort=0
+# counttqsort=4
 \end{verbatim}
 \end{footnotesize}
 
@@ -678,27 +721,40 @@ LTR retrotransposon sequences to a file.
 $ gt ltrharvest -index chrAll.19971001.fsa -seed 100 -minlenltr 100 -maxlenltr 1000
 -mindistltr 1000 -maxdistltr 15000 -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3
 -similar 90.0 -overlaps best -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0
--vic 60 -longoutput
--out pred-chrAll.fsa
+-vic 60 -longoutput -out pred-chrAll.fsa
 # args=-index chrAll.19971001.fsa -seed 100 -minlenltr 100 -maxlenltr 1000
 -mindistltr 1000 -maxdistltr 15000 -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3
 -similar 90.0 -overlaps best -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0
 -vic 60 -longoutput -out pred-chrAll.fsa
 # predictions are reported in the following way
-# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) TSD l(TSD) m(lLTR) s(rLTR) e(rLTR)
-l(rLTR) TSD l(TSD) m(rLTR) sim(LTRs) seq-nr
-# where:                                                                                                                                                    # s = starting position                                                                                                                                     # e = ending position                                                                                                                                       # l = length                                                                                                                                                # m = motif                                                                                                                                                 # ret = LTR-retrotransposon                                                                                                                                 # lLTR = left LTR                                                                                                                                           # rLTR = right LTR                                                                                                                                          # TSD = target site duplication                                                                                                                             # sim = similarity                                                                                                                                          # seq-nr = sequence number
-160239  166163  5925  160239  160575  337  ggttc  5  tg..ca  165827  166163  337
-ggttc  5  tg..ca  100.00  0
-29632  35590  5959  29632  29963  332  ataat  5  tg..ca  35259  35590  332
-ataat  5  tg..ca  99.70  1
+# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR) TSD l(TSD) m(lLTR) s(rLTR)
+  e(rLTR) l(rLTR) TSD l(TSD) m(rLTR) sim(LTRs) seq-nr
+# where:
+# s = starting position
+# e = ending position
+# l = length
+# m = motif
+# ret = LTR-retrotransposon
+# lLTR = left LTR
+# rLTR = right LTR
+# TSD = target site duplication
+# sim = similarity
+# seq-nr = sequence number
+160239  166163  5925  160239  160575  337  GGTTC  5  TG..CA  165827  166163
+  337  GGTTC  5  TG..CA  100.00  0
+29632  35590  5959  29632  29963  332  ATAAT  5  TG..CA  35259  35590
+  332  ATAAT  5  TG..CA  99.70  1
+220996  226911  5916  220996  221329  334  GGAAT  5  TG..CA  226575  226911
+  337  GGAAT  5  TG..CA  97.33  1
 .
 .
 .
-844407  850335  5929  844407  844744  338  gaaat  5  tg..ca  849998  850335  338
-gaaat  5  tg..ca  100.00  15
-56452  62375  5924  56452  56788  337  gttat  5  tg..ca  62039  62375  337
-gttat  5  tg..ca  100.00  15
+804640  810557  5918  804640  804973  334  AATTA  5  TG..CA  810224  810557
+  334  AATTA  5  TG..CA  100.00  15
+844407  850335  5929  844407  844744  338  GAAAT  5  TG..CA  849998  850335
+  338  GAAAT  5  TG..CA  100.00  15
+850624  856549  5926  850624  850961  338  CAAAA  5  TG..CA  856212  856549
+  338  CAAAA  5  TG..CA  99.11  15
 \end{verbatim}
 \end{footnotesize}
 
@@ -719,7 +775,6 @@ An index needs to be constructed from the predicted sequences by the program
 \begin{verbatim}
 $ mkvtree -db pred-chrAll.fsa -dna -pl -allout -v
 reading file "pred-chrAll.fsa"
-...
 .
 .
 .
