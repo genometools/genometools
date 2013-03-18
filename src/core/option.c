@@ -691,7 +691,7 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
     close(out_pipe[1]);
 
     if (!strcmp(toolname, "gt"))
-      (void) snprintf(prognamebuf, BUFSIZ, "gt");
+      (void) snprintf(prognamebuf, BUFSIZ, "%s", gt_error_get_progname(err));
     else {
       (void) snprintf(prognamebuf, BUFSIZ, "%s %s",
                       gt_error_get_progname(err),
