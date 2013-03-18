@@ -249,6 +249,7 @@ typedef struct {
   unsigned long seppos_nextfree;
   unsigned long seqlen_max;
   unsigned long seqlen_min;
+  unsigned long seqlen_first;
 } GtReads2TwobitEncodeInfo;
 
 #define GT_READS2TWOBIT_INIT_ENCODE_INFO(EI, TBE)\
@@ -261,7 +262,7 @@ typedef struct {
 typedef struct {
   GtTwobitencoding char2code[UCHAR_MAX + 1];
   unsigned long inputfiles_totallength;
-  unsigned long seqlen, seqlen_first, seqlen_mate;
+  unsigned long seqlen, seqlen_mate;
   GtReads2TwobitEncodeInfo current, backup;
   bool varlen_mode, invalid_mode;
   unsigned long invalid_sequences, invalid_total_length;
@@ -306,7 +307,6 @@ static void gt_reads2twobit_init_encode(GtReads2Twobit *r2t,
   state->char2code[(unsigned char)'t'] = (GtTwobitencoding)3;
   state->seqlen = 0;
   state->seqlen_mate = 0;
-  state->seqlen_first = 0;
   state->varlen_mode = false;
   state->invalid_mode = false;
   state->invalid_sequences = 0;
@@ -374,27 +374,27 @@ static void gt_reads2twobit_switch_to_varlen_mode(
   gt_assert(state->varlen_mode == false);
   state->varlen_mode = true;
   gt_assert(state->current.nofseqs > 1UL);
-  gt_assert(state->seqlen_first != state->seqlen);
+  gt_assert(state->current.seqlen_first != state->seqlen);
   gt_assert(state->seqlen > 1UL);
   gt_log_log("readset is varlen: sequences 0..%lu are "
       "%lu bp long, sequence %lu is %lu bp long",
-      state->current.nofseqs - 2UL, state->seqlen_first - 1UL,
+      state->current.nofseqs - 2UL, state->current.seqlen_first - 1UL,
       state->current.nofseqs - 1UL, state->seqlen - 1UL);
   gt_assert(state->current.globalpos == 0);
   gt_reads2twobit_init_seppos(state,
-      state->seqlen_first * (state->current.nofseqs - 2UL) +
+      state->current.seqlen_first * (state->current.nofseqs - 2UL) +
       state->seqlen);
   for (seqnum = 0; seqnum < state->current.nofseqs - 1UL; seqnum++)
   {
-    state->current.globalpos += state->seqlen_first;
+    state->current.globalpos += state->current.seqlen_first;
     gt_reads2twobit_append_seppos(state);
   }
   state->current.globalpos += state->seqlen;
   gt_reads2twobit_append_seppos(state);
   gt_assert(state->current.seppos_nextfree == state->current.nofseqs);
-  state->current.seqlen_max = MAX(state->seqlen_first, state->seqlen);
-  state->current.seqlen_min = MIN(state->seqlen_first, state->seqlen);
-  state->seqlen_first = 0;
+  state->current.seqlen_max = MAX(state->current.seqlen_first, state->seqlen);
+  state->current.seqlen_min = MIN(state->current.seqlen_first, state->seqlen);
+  state->current.seqlen_first = 0;
 }
 
 #define GT_READS2TWOBIT_DEFAULT_SEPARATOR (GtTwobitencoding)3
@@ -418,11 +418,13 @@ static inline void gt_reads2twobit_process_sequence_end(
   {
     if (state->current.nofseqs > 1UL)
     {
-      if (state->seqlen != state->seqlen_first)
+      if (state->seqlen != state->current.seqlen_first)
         gt_reads2twobit_switch_to_varlen_mode(state);
     }
     else
-      state->seqlen_first = state->seqlen;
+    {
+      state->current.seqlen_first = state->seqlen;
+    }
   }
 }
 
@@ -453,6 +455,15 @@ static void gt_reads2twobit_switch_to_invalid_mode(
   state->invalid_sequences++;
   state->invalid_total_length += state->seqlen;
   state->invalid_total_length += state->seqlen_mate;
+  if (state->varlen_mode && state->backup.seppos_nextfree == 0)
+  {
+    gt_log_log("switch back to eqlen mode, seqlen = %lu",
+        state->backup.seqlen_first);
+    gt_free(state->seppos);
+    state->seppos = NULL;
+    state->seppos_alloc = 0;
+    state->varlen_mode = false;
+  }
   GT_READS2TWOBIT_COPY_ENCODE_INFO(state->backup, state->current);
 }
 
@@ -652,7 +663,7 @@ static int gt_reads2twobit_encode_unpaired_library(
     rli->total_seqlength = state->varlen_mode
       ?  state->seppos[state->current.nofseqs - 1UL] + 1UL -
          ((rli->first_seqnum == 0) ? 0 : state->seppos[rli->first_seqnum - 1UL])
-      : state->seqlen_first * rli->nofseqs;
+      : state->current.seqlen_first * rli->nofseqs;
     /* the following is not necessary, but is useful for the tests */
     rli->total_filelength -= (state->invalid_total_length - invalid_tl_before +
         3UL * (state->invalid_sequences - invalid_s_before));
@@ -1054,7 +1065,7 @@ static int gt_reads2twobit_encode_paired_library(
     rli->total_seqlength = state->varlen_mode
       ?  state->seppos[state->current.nofseqs - 1UL] + 1UL -
          ((rli->first_seqnum == 0) ? 0 : state->seppos[rli->first_seqnum - 1UL])
-      : state->seqlen_first * rli->nofseqs;
+      : state->current.seqlen_first * rli->nofseqs;
     /* the following is not necessary, but is useful for the tests */
     rli->total_filelength -= (state->invalid_total_length - invalid_tl_before +
         3UL * (state->invalid_sequences - invalid_s_before));
@@ -1081,7 +1092,9 @@ static void gt_reads2twobit_tbe_flush_and_realloc(GtReads2Twobit *r2t,
   }
   if (state->current.nofseqs > 0)
   {
-    gt_log_log("realloc tbe, total_seqlength=%lu", r2t->total_seqlength);
+    gt_log_log("realloc tbe, total_seqlength = %lu, nofseqs = %lu",
+        r2t->total_seqlength, state->current.nofseqs);
+    gt_assert(r2t->total_seqlength > 0);
     r2t->twobitencoding = gt_realloc(r2t->twobitencoding,
         sizeof (*r2t->twobitencoding) *
         (GT_DIVBYUNITSIN2BITENC(r2t->total_seqlength) + 2UL));
@@ -1115,11 +1128,12 @@ static void gt_reads2twobit_finalize_encode(GtReads2Twobit *r2t,
   }
   else
   {
-    r2t->seqlen_eqlen = state->seqlen_first;
-    r2t->seqlen_max = state->seqlen_first;
-    r2t->seqlen_min = state->seqlen_first;
-    if (state->seqlen_first > 0)
-      r2t->total_seqlength = state->seqlen_first * state->current.nofseqs - 1UL;
+    r2t->seqlen_eqlen = state->current.seqlen_first;
+    r2t->seqlen_max = state->current.seqlen_first;
+    r2t->seqlen_min = state->current.seqlen_first;
+    if (state->current.seqlen_first > 0)
+      r2t->total_seqlength = state->current.seqlen_first *
+        state->current.nofseqs - 1UL;
     else
       r2t->total_seqlength = 0;
     gt_assert(state->seppos == NULL);
