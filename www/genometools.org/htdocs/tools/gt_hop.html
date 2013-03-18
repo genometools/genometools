@@ -14,13 +14,15 @@
 <li><a href="../cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
 <li><a href="../mailman/listinfo/gt-users">Mailing list</a></li>
 <li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
-<li><a href="../design.html">Design</a></li>
-<li><a id="current" href="../tools.html">Tools</a></li>
-<li><a href="../libgenometools.html">C API</a></li>
-<li><a href="../docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="../documentation.html">Documentation</a></li>
+  <ul class="submenu">
+    <li><a id="current" href="../tools.html">Tools</a></li>
+    <li><a href="../manuals.html">Manuals</a></li>
+    <li><a href="../libgenometools.html">C API</a></li>
+    <li><a href="../docs.html"><tt>gtscript</tt> docs</a></li>
+  </ul>
 <li><a href="../annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
 <li><a href="../cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
-<li><a href="../manuals.html">Manuals</a></li>
 <li><a href="../license.html">License</a></li>
 </ul>
 </div>
@@ -28,13 +30,13 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-hop - Reference-based homopolymer error correction.</p></div>
+<div class="paragraph"><p>gt-hop - Cognate sequence-based homopolymer error correction.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt hop</strong> -&lt;mode&gt; -ref &lt;encseq&gt; -map &lt;sam/bam&gt; -reads &lt;fastq&gt; [options&#8230;]</p></div>
+<div class="paragraph"><p><strong>gt hop</strong> -&lt;mode&gt; -c &lt;encseq&gt; -map &lt;sam/bam&gt; -reads &lt;fastq&gt; [options&#8230;]</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -42,12 +44,12 @@
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<strong>-ref</strong> [<em>string</em>]
+<strong>-c</strong> [<em>string</em>]
 </dt>
 <dd>
 <p>
-reference sequence in GtEncseq format
-(can be prepared using gt encseq encode) (default: undefined)
+cognate sequence
+(encoded using gt encseq encode) (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -55,7 +57,7 @@ reference sequence in GtEncseq format
 </dt>
 <dd>
 <p>
-mapping of reads to reference
+mapping of reads to the cognate sequence
 it must be in SAM/BAM format, and sorted by coordinate
 (can be prepared e.g. using: samtools sort) (default: undefined)
 </p>
@@ -136,8 +138,7 @@ this will only work if the reads were aligned with a software which only include
 </dt>
 <dd>
 <p>
-minimal homopolymer length in reference
-minimal number of consecutive identical symbols on the reference (default: 3)
+minimal homopolymer length in cognate sequence (default: 3)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -149,23 +150,31 @@ minimal homopolymer length in reads (default: 2)
 </p>
 </dd>
 <dt class="hdlist1">
+<strong>-qmax</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+maximal average quality of homopolymer in a read (default: 120)
+</p>
+</dd>
+<dt class="hdlist1">
 <strong>-altmax</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
 max support of alternate homopol. length;
-e.g. 0.8 means: do not correct any read if homop. length in more than 80% of the reads has the same value, different from the reference
+e.g. 0.8 means: do not correct any read if homop. length in more than 80% of the reads has the same value, different from the cognate
 if altmax is set to 1.0 reads are always corrected (default: 0.800000)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-refmin</strong> [<em>value</em>]
+<strong>-cogmin</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-min support of reference homopol. length;
-e.g. 0.1 means: do not correct any read if ref. homop. length is not present in at least 10% of the reads
-if refmin is set to 0.0 reads are always corrected (default: 0.100000)
+min support of cognate sequence homopol. length;
+e.g. 0.1 means: do not correct any read if cognate homop. length is not present in at least 10% of the reads
+if cogmin is set to 0.0 reads are always corrected (default: 0.100000)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -208,8 +217,8 @@ default: unlimited (default: undefined)
 </dt>
 <dd>
 <p>
-annotation of reference sequence
-it must be sorted by coordinates on the reference sequence
+annotation of cognate sequence
+it must be sorted by coordinates on the cognate sequence
 (this can be e.g. done using: gt gff3 -sort)
 if -ann is used, corrections will be limited to homopolymers startingor ending inside the feature type indicated by -ft optionformat: sorted GFF3 (default: undefined)
 </p>
@@ -260,7 +269,7 @@ display version information and exit
 must be selected.</p></div>
 <div class="paragraph"><p>The <em>-aggressive</em>, <em>-moderate</em> and <em>-conservative</em> modes are presets of
 the criteria by which it is decided if an observed discrepancy in
-homopolymer length between reference and a read shall be corrected
+homopolymer length between cognate sequence and a read shall be corrected
 or not. A description of the single criteria is provided by using
 the <em>-help+</em>' option. The presets are equivalent to the following settings:</p></div>
 <div class="literalblock">
@@ -281,8 +290,8 @@ of corrections can be achieved using the <em>-ann</em> option (see <em>-help+</e
 <div class="paragraph"><p>The <em>-expert</em> mode allows to manually set each parameter; the default
 values are the same as in the <em>-conservative</em> mode.</p></div>
 <div class="paragraph"><p>(Finally, for evaluation purposes only, the <em>-state-of-truth</em> mode can be used:
-this mode assumes that the target sequence of the sequencing has been specified
-as reference sequence and outputs an ideal list of corrections.)</p></div>
+this mode assumes that the sequenced genome has been specified
+as cognate sequence and outputs an ideal list of corrections.)</p></div>
 </div>
 </div>
 <div class="sect1">
