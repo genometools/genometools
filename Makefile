@@ -914,7 +914,7 @@ endif
 	test -d www/genometools.org/htdocs/tools || mkdir -p www/genometools.org/htdocs/tools
 	rm -f www/genometools.org/htdocs/tools/*
 	scripts/create_html /tmp/gtmanpages www/genometools.org/htdocs/
-	rm -rf /tmp/gtmanpages
+	rm -rf /tmp/list.txt /tmp/gtmanpages
 
 doc/manuals/annotationsketch.pdf: docs
 	$(MAKE) -C $(CURDIR)/doc/manuals annotationsketch
