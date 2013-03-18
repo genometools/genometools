@@ -259,7 +259,7 @@ GtRange gt_pdom_single_hit_get_range(const GtPdomSingleHit *singlehit)
                         + (singlehit->range.start) * GT_CODON_LENGTH
                         + (unsigned long) singlehit->phase;
       retrng.end   =  retrng.start
-                        + (gt_range_length(&singlehit->range) - 1)
+                        + (gt_range_length(&singlehit->range))
                            * GT_CODON_LENGTH;
       break;
     case GT_STRAND_REVERSE:
@@ -267,7 +267,7 @@ GtRange gt_pdom_single_hit_get_range(const GtPdomSingleHit *singlehit)
                         - (singlehit->range.end+1) * GT_CODON_LENGTH
                         - (unsigned long) singlehit->phase;
       retrng.end   =  retrng.start
-                        + (gt_range_length(&singlehit->range) - 1)
+                        + (gt_range_length(&singlehit->range))
                            * GT_CODON_LENGTH;
       break;
   }
