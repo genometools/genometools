@@ -65,6 +65,7 @@ struct GtReads2Twobit
   unsigned long invalid_sequences, invalid_total_length;
   char phredbase, lowqual;
   unsigned long maxlow;
+  bool has_paired;
 };
 
 GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname)
@@ -86,6 +87,7 @@ GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname)
   r2t->phredbase = (char)33;
   r2t->maxlow = GT_UNDEF_ULONG;
   r2t->lowqual = 0;
+  r2t->has_paired = false;
   return r2t;
 }
 
@@ -108,6 +110,12 @@ void gt_reads2twobit_delete(GtReads2Twobit *r2t)
     gt_free(r2t->seppos);
     gt_free(r2t);
   }
+}
+
+bool gt_reads2twobit_has_paired(GtReads2Twobit *r2t)
+{
+  gt_assert(r2t != NULL);
+  return r2t->has_paired;
 }
 
 void gt_reads2twobit_add(GtReads2Twobit *r2t, bool paired,
@@ -160,6 +168,7 @@ int gt_reads2twobit_add_library(GtReads2Twobit *r2t, const GtStr *libspec,
     GtStr *filename1, *filename2;
     unsigned long insertlength = 0, stdev = 0;
     char *insertspec, *insertspec_copy;
+    r2t->has_paired = true;
     filename1 = gt_str_new_cstr(gt_splitter_get_token(s1, 0));
     if (gt_splitter_size(s1) == 3UL)
     {
@@ -1529,23 +1538,35 @@ GtTwobitencoding* gt_reads2twobit_write_encoded(GtReads2Twobit *r2t,
   return outputbuffer + GT_DIVBYUNITSIN2BITENC(outputoffset + seqlen);
 }
 
-static inline void gt_reads2twobit_handle_deleted_mates(
-    GT_UNUSED GtReads2Twobit *r2t, GtReadsLibraryInfo *rli, GtBitsequence *list)
+unsigned long gt_reads2twobit_mark_mates_of_contained(GtReads2Twobit *r2t,
+    GtBitsequence *list)
 {
-  unsigned long seqnum, last_seqnum = rli->first_seqnum + rli->nofseqs - 1UL;
-  gt_assert(rli->nofseqs % 2 == 0);
-  gt_assert(rli->nofseqs > 0);
-  for (seqnum = rli->first_seqnum; seqnum < last_seqnum; seqnum += 2UL)
+  unsigned long libnum, noflibs = gt_array_size(r2t->collection), nofmarked = 0;
+  for (libnum = 0; libnum < noflibs; libnum++)
   {
-    if (GT_ISIBITSET(list, seqnum))
+    GtReadsLibraryInfo *rli = gt_array_get(r2t->collection, libnum);
+    if (rli->paired && rli->nofseqs > 0)
     {
-      GT_SETIBIT(list, seqnum + 1UL);
-    }
-    else if (GT_ISIBITSET(list, seqnum + 1UL))
-    {
-      GT_SETIBIT(list, seqnum);
+      unsigned long seqnum,
+                    last_seqnum = rli->first_seqnum + rli->nofseqs - 1UL;
+      gt_assert(rli->nofseqs % 2 == 0);
+      for (seqnum = rli->first_seqnum; seqnum < last_seqnum; seqnum += 2UL)
+      {
+        if (GT_ISIBITSET(list, seqnum) && !GT_ISIBITSET(list, seqnum + 1))
+        {
+          GT_SETIBIT(list, seqnum + 1UL);
+          nofmarked++;
+        }
+        else if (GT_ISIBITSET(list, seqnum + 1UL) &&
+            !GT_ISIBITSET(list, seqnum))
+        {
+          GT_SETIBIT(list, seqnum);
+          nofmarked++;
+        }
+      }
     }
   }
+  return nofmarked;
 }
 
 void gt_reads2twobit_delete_sequences(GtReads2Twobit *r2t, GtBitsequence *list)
@@ -1561,8 +1582,6 @@ void gt_reads2twobit_delete_sequences(GtReads2Twobit *r2t, GtBitsequence *list)
     {
       unsigned long deleted_sequences_in_lib = 0, deleted_chars_in_lib = 0,
                     last_seqnum = rli->first_seqnum + rli->nofseqs - 1UL;
-      if (rli->filename2 != NULL)
-        gt_reads2twobit_handle_deleted_mates(r2t, rli, list);
       for (seqnum = rli->first_seqnum; seqnum <= last_seqnum; seqnum++)
       {
         if (!GT_ISIBITSET(list, seqnum))
@@ -1602,7 +1621,7 @@ void gt_reads2twobit_delete_sequences(GtReads2Twobit *r2t, GtBitsequence *list)
       }
       deleted_chars += deleted_chars_in_lib;
       gt_assert(deleted_sequences_in_lib <= rli->nofseqs);
-      if (rli->filename2 != NULL)
+      if (rli->paired == true)
         gt_assert(deleted_sequences_in_lib % 2 == 0);
       rli->nofseqs -= deleted_sequences_in_lib;
       gt_assert(deleted_chars_in_lib <= rli->total_seqlength);
@@ -1611,8 +1630,15 @@ void gt_reads2twobit_delete_sequences(GtReads2Twobit *r2t, GtBitsequence *list)
   }
   gt_assert(deleted_sequences <= r2t->nofseqs);
   r2t->nofseqs -= deleted_sequences;
-  gt_assert(deleted_chars <= r2t->total_seqlength);
-  r2t->total_seqlength -= deleted_chars;
+  if (r2t->nofseqs == 0)
+  {
+    r2t->total_seqlength = 0;
+  }
+  else
+  {
+    gt_assert(deleted_chars <= r2t->total_seqlength);
+    r2t->total_seqlength -= deleted_chars;
+  }
   if (deleted_sequences > 0)
   {
     r2t->twobitencoding = gt_realloc(r2t->twobitencoding,

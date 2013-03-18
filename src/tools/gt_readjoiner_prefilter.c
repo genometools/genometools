@@ -349,7 +349,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     else
     {
       GtContfinder *contfinder;
-      unsigned long nofreads_contained;
+      unsigned long nofreads_contained, nofreads_matesofc;
       contfinder = gt_contfinder_new(r2t);
       gt_contfinder_run(contfinder, !arguments->singlestrand,
           arguments->copynum);
@@ -363,6 +363,21 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
       if (!arguments->verbose)
         gt_logger_log(default_logger, "contained reads = %lu",
             nofreads_contained);
+
+      if (gt_reads2twobit_has_paired(r2t))
+      {
+        nofreads_matesofc = gt_reads2twobit_mark_mates_of_contained(r2t,
+            gt_contfinder_contained(contfinder));
+        nofreads_output -= nofreads_matesofc;
+
+        gt_logger_log(verbose_logger,
+            "mates of contained reads = %lu [%.2f %% of input]",
+            nofreads_matesofc, (float)nofreads_matesofc * 100 /
+            (float)nofreads_input);
+        if (!arguments->verbose)
+          gt_logger_log(default_logger, "mates of contained reads = %lu",
+              nofreads_matesofc);
+      }
 
       gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
           nofreads_output);
@@ -398,10 +413,19 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
       {
         gt_reads2twobit_delete_sequences(r2t,
             gt_contfinder_contained(contfinder));
-        had_err = gt_reads2twobit_write_encseq(r2t, err);
-        gt_logger_log(verbose_logger, "suffix-prefix-free readset saved: %s.%s",
-            gt_str_get(arguments->readset),
-            varlen ? "(esq|ssp)" : "esq");
+        if (nofreads_output > 0)
+        {
+          had_err = gt_reads2twobit_write_encseq(r2t, err);
+          gt_logger_log(verbose_logger,
+              "suffix-prefix-free readset saved: %s.%s",
+              gt_str_get(arguments->readset),
+              varlen ? "(esq|ssp)" : "esq");
+        }
+        else
+        {
+          gt_logger_log(default_logger,
+              "no readset saved as no sequence passed the filters");
+        }
       }
       if (arguments->testrs)
       {
@@ -412,7 +436,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
       }
       gt_contfinder_delete(contfinder);
     }
-    if (!had_err && arguments->libtable)
+    if (!had_err && arguments->libtable && nofreads_output > 0)
     {
       GtStr *fn;
       FILE *rlt_fp;

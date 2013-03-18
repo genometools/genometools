@@ -58,6 +58,9 @@ int               gt_reads2twobit_add_library(GtReads2Twobit *r2t,
                                               const GtStr *libspec,
                                               GtError *err);
 
+/* has any paired reads library (until now) been added to the collection? */
+bool              gt_reads2twobit_has_paired(GtReads2Twobit *r2t);
+
 /* Use phred64 scores instead of phred33;
    it must be called before <gt_reads2twobit_encode>. */
 void              gt_reads2twobit_use_phred64(GtReads2Twobit *r2t);
@@ -133,8 +136,15 @@ int               gt_reads2twobit_write_seppos(GtReads2Twobit *r2t,
                                                GtBitsequence *skip,
                                                GtError *err);
 
+/* set bit for second member of a pair for which one bit is set;
+   return the number of new bit set */
+unsigned long     gt_reads2twobit_mark_mates_of_contained(GtReads2Twobit *r2t,
+                                                          GtBitsequence *list);
+
 /* delete the sequences for which a bit is set in the list;
-   for paired reads: both members of a pair are deleted */
+   if the collection has paired reads, it is the responsibility of the
+   caller to make sure that both bits for paired reads are set
+   (e.g. by calling <gt_reads2twobit_mark_mates_of_contained>) */
 void              gt_reads2twobit_delete_sequences(GtReads2Twobit *r2t,
                                                    GtBitsequence *list);
 

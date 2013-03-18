@@ -651,6 +651,14 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
+Name "gt readjoiner prefilter: read contained in its mate"
+Keywords "gt_readjoiner gt_readjoiner prefilter"
+Test do
+  run "cp #{$testdata}/readjoiner/paired_reads_1.fastq U"
+  run "#{$bin}gt readjoiner prefilter "+
+    "-db U:U:100 -readset reads_prefilter"
+end
+
 Name "gt readjoiner: no crash when no spm found"
 Keywords "gt_readjoiner"
 Test do
