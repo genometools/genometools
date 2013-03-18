@@ -606,6 +606,15 @@ Test do
   compare_encseqs("reads", "reads_prefilter")
 end
 
+Name "gt readjoiner encoder: invalid read with qual @ at pos 256"
+Keywords "gt_readjoiner gt_readjoiner_prefilter reads2twobit"
+Test do
+  run "cp #{$testdata}/readjoiner/invalid_with_pos256_q31.fastq U"
+  run "#{$bin}gt readjoiner prefilter -encodeonly "+
+    "-db U -readset reads_prefilter"
+  grep(last_stdout,"number of reads in output readset = 0")
+end
+
 Name "gt readjoiner prefilter: correct encseq output (eqlen)"
 Keywords "gt_readjoiner gt_readjoiner_prefilter"
 Test do

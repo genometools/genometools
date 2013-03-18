@@ -551,7 +551,7 @@ static int gt_reads2twobit_encode_unpaired_fastq_library(
         }
         qmode = true;
       }
-      else if (!state->invalid_mode)
+      else
       {
         gt_reads2twobit_process_sequence_line(state, line);
       }
@@ -836,7 +836,7 @@ static int gt_reads2twobit_encode_twofile_paired_fastq_library(
         }
         qmode = true;
       }
-      else if (!state->invalid_mode)
+      else
       {
         gt_reads2twobit_process_sequence_line(state, line1);
       }
