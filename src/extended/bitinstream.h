@@ -25,7 +25,7 @@
 #include "core/error.h"
 #include "core/intbits.h"
 
-/* Class <GtBitInStream> reads variable length encoded data from a mmap()ed
+/* The <GtBitInStream> class reads variable length encoded data from a mmap()ed
    file. */
 typedef struct GtBitInStream GtBitInStream;
 

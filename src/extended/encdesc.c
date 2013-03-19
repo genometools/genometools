@@ -815,9 +815,9 @@ static inline void prepare_generic(EncdescWriteInfo *info,
   info->total_bits_prepared += this_code->length;
 }
 
-static inline void append_data_to_bitstream_and_reset_info(
-                                                      EncdescWriteInfo *info,
-                                                      GtBitOutStream *bitstream)
+static inline void
+append_data_to_bitstream_and_reset_info(EncdescWriteInfo *info,
+                                        GtBitOutStream *bitstream)
 {
   unsigned long number_of_codes, idx;
   EncdescCode *codes = info->codes->spaceEncdescCode;

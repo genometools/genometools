@@ -19,8 +19,8 @@
 
 /* Abstract class GtWtree,
    Used to store sequences or Permutations.
-   Each implementation should implement a function for mapping <GtWtreeSymbol>
-   to the apropriate symbol. */
+   Each implementation must implement a function for mapping <GtWtreeSymbol> to
+   the implementation-specific alphabet symbol. */
 typedef struct GtWtree GtWtree;
 
 /* Type used by GtWtree to represent symbols */
@@ -50,14 +50,14 @@ unsigned long gt_wtree_select(GtWtree *wtree,
                               unsigned long i,
                               GtWtreeSymbol symbol);
 
-/* Returns the length of the sequence/permutation encoded by <wtree> */
+/* Returns the length of the sequence/permutation encoded by <wtree>. */
 unsigned long gt_wtree_length(GtWtree *wtree);
 
 /* Returns the number of distinct symbols recognized by <wtree>. Corresponding
-   to alphabet or set-size */
+   to alphabet or set-size. */
 unsigned long gt_wtree_num_of_symbols(GtWtree *wtree);
 
-/* Frees all memory associated with <wtree> */
+/* Frees all memory associated with <wtree>. */
 void          gt_wtree_delete(GtWtree *wtree);
 
 #endif

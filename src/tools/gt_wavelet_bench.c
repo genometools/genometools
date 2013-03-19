@@ -128,7 +128,7 @@ static int gt_wavelet_bench_bench_wtree(GtWtree *wt,
   printf("\n");
   for (idx = 0; !had_err && idx < WAVELET_BENCH_SIZE; idx++) {
     symbol = gt_wtree_access(wt, gt_rand_max(length-1));
-    c = gt_wtree_encseq_unmap(wt, symbol);
+    c = gt_wtree_encseq_unmap_decoded(wt, symbol);
     switch (c) {
       case (char) SEPARATOR:
         printf("$");
@@ -147,7 +147,7 @@ static int gt_wavelet_bench_bench_wtree(GtWtree *wt,
     symbol = gt_rand_max(syms-1);
     pos = gt_rand_max(length-1);
     tmp = gt_wtree_rank(wt, pos, symbol);
-    c = gt_wtree_encseq_unmap(wt, symbol);
+    c = gt_wtree_encseq_unmap_decoded(wt, symbol);
     if (isprint(c))
       printf("rank of %c at %lu: %lu\n", c, pos, tmp);
     else
@@ -168,7 +168,7 @@ static int gt_wavelet_bench_bench_wtree(GtWtree *wt,
     pos = gt_rand_max(max_ranks[symbol]);
     } while (pos == 0);
     tmp = gt_wtree_select(wt, pos, symbol);
-    c = gt_wtree_encseq_unmap(wt, symbol);
+    c = gt_wtree_encseq_unmap_decoded(wt, symbol);
     if (isprint(c))
       printf("select %luth %c: at %lu\n", pos, c, tmp);
     else

@@ -17,20 +17,19 @@
 #ifndef WTREE_ENCSEQ_H
 #define WTREE_ENCSEQ_H
 
+#include "core/encseq_api.h"
 #include "extended/wtree.h"
 
-#include "core/encseq_api.h"
-
-/* Class <GtWtreeEncseq>, Implements the <GtWtree> interface.
+/* The <GtWtreeEncseq> class implements the <GtWtree> interface.
    This implementation represents the sequence part of an encoded sequence */
 typedef struct GtWtreeEncseq GtWtreeEncseq;
 
-/* Return a new <GtWtree> object, the implementation beeing of type
-   <GtWtreeEncseq>.
+/* Return a new <GtWtree> object, representing an <encseq>.
    TODO: add documentation */
 GtWtree* gt_wtree_encseq_new(GtEncseq *encseq);
 
-/* Mapps a <GtWtreeSymbol> to a <char> according to the encseq it was build with
-   */
-char gt_wtree_encseq_unmap(GtWtree *wtree, GtWtreeSymbol symbol);
+/* Maps <symbol> to a decoded character symbol as defined by the original
+   alphabet <wtree> was built with. */
+char     gt_wtree_encseq_unmap_decoded(GtWtree *wtree, GtWtreeSymbol symbol);
+
 #endif

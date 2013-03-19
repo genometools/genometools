@@ -22,8 +22,8 @@
 #include "core/intbits.h"
 #include "core/bittab_api.h"
 
-/* Class <GtBitOutStream> helps writing variable length encoded data to files,
-   handling the filling of words of type <GtBitsequence>. */
+/* The <GtBitOutStream> class helps writing variable length encoded data to
+   files, handling the filling of words of type <GtBitsequence>. */
 typedef struct GtBitOutStream GtBitOutStream;
 
 /* Returns a new <GtBitOutStream>, <fp> needs to be valid and opened for

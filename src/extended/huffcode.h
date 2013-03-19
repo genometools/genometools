@@ -23,15 +23,16 @@
 #include "core/intbits.h"
 #include "core/error_api.h"
 
-/* Class <GtHuffman> holds information to encode arbitrary symbols with an
+/* The <GtHuffman> class holds information to encode arbitrary symbols with an
    efficient variable bit length. */
 typedef struct GtHuffman GtHuffman;
 
-/* Class <GtHuffmanDecoder> is used to decode consecutive symbols from Huffman
-   encoded data */
+/* The <GtHuffmanDecoder> class is used to decode consecutive symbols from
+   Huffman encoded data */
 typedef struct GtHuffmanDecoder GtHuffmanDecoder;
 
-/* Class <GtHuffmanBitwiseDecoder> is used to decode bitstreams bit by bit */
+/* The <GtHuffmanBitwiseDecoder> class is used to decode bitstreams bit by bit
+   */
 typedef struct GtHuffmanBitwiseDecoder GtHuffmanBitwiseDecoder;
 
 /* Function type, used to get the count of a specific symbol represented by

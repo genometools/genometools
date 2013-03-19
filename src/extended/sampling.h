@@ -27,10 +27,10 @@
 #define GT_SAMPLING_DEFAULT_REGULAR_RATE 10000UL
 #define GT_SAMPLING_DEFAULT_PAGE_RATE 100UL
 
-/* Class <GtSampling> can be used to collect sampling information for variable
-   length data that is written to a file. For each sampled element, it stores
-   the number of that element and its page offset in the file. When read from
-   a file, it helps to find the page offset of a sample. */
+/* The <GtSampling> class can be used to collect sampling information for
+   variable length data that is written to a file. For each sampled element, it
+   stores the number of that element and its page offset in the file. When read
+   from a file, it helps to find the page offset of a sample. */
 typedef struct GtSampling GtSampling;
 
 /* Returns a new <GtSampling> object which uses regular sampling, <rate> sets

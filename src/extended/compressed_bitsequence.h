@@ -21,8 +21,8 @@
 #include "core/error_api.h"
 #include "core/intbits.h"
 
-/* Class <GtCompressedBitsequence> stores a bitvector in a compressed way
-   known as an RRR-bitvector after Raman, Raman and Rao described it in 2002. It
+/* The <GtCompressedBitsequence> class stores a bitvector in a compressed way
+   known as an RRR-bitvector like Raman, Raman and Rao described it in 2002. It
    gives constant time access and rank on the bitvector represented. */
 typedef struct GtCompressedBitsequence GtCompressedBitsequence;
 
@@ -30,45 +30,44 @@ typedef struct GtCompressedBitsequence GtCompressedBitsequence;
    sequence to be compressed, <samplerate> defines the rate of sampling, which
    is the constant factor for access and rank queries, <num_of_bits> is the
    number of bits to be read from <bitseq>. Words in <bitseq> are assumed to be
-   filled continuous. That is, the last <GtBitsequence> in <bitseq> has its most
-   significant bits filled first. */
+   filled continuously. That is, the last <GtBitsequence> in <bitseq> has its
+   most significant bits filled first. */
 GtCompressedBitsequence* gt_compressed_bitsequence_new(
                                                      GtBitsequence *bitseq,
                                                      unsigned int samplerate,
                                                      unsigned long num_of_bits);
 
 /* Returns 0 or 1 according to the bit at <position> in <cbs>. Note that
-   <position> has to be less than <num_of_bits> of <cbs> */
+   <position> has to be smaller than the length  of <cbs>. */
 int                      gt_compressed_bitsequence_access(
                                                   GtCompressedBitsequence *cbs,
                                                   unsigned long position);
 
 /* Returns the number of 1 bits in <cbs> upto and including <position>. Note
-   that <position> has to be less than <num_of_bits> of <cbs> */
+   that <position> has to be smaller than the length of <cbs>. */
 unsigned long            gt_compressed_bitsequence_rank_1(
                                                    GtCompressedBitsequence *cbs,
                                                    unsigned long position);
 
 /* Returns the number of 0 bits in <cbs> upto and including <position>. Note
-   that <position> has to be less than <num_of_bits> of <cbs> */
+   that <position> has to be smaller than the length of <cbs>. */
 unsigned long            gt_compressed_bitsequence_rank_0(
                                                    GtCompressedBitsequence *cbs,
                                                    unsigned long position);
 
-/* Returns the position of the <num>th bit set to 1 in <cbs>. Returns
-   <num_of_bits> from <cbs> if there are less than <num> bits set to 1. */
+/* Returns the position of the <num>th bit set to 1 in <cbs>. Returns length of
+   <cbs> if there are less than <num> bits set to 1. */
 unsigned long            gt_compressed_bitsequence_select_1(
                                                    GtCompressedBitsequence *cbs,
                                                    unsigned long num);
 
-/* WARNING: not implemented jet! */
-/* Returns the position of the <num>th bit set to 0 in <cbs>. Returns
-   <num_of_bits> from <cbs> if there are less than <num> bits set to 0. */
+/* Returns the position of the <num>th bit set to 0 in <cbs>. Returns length of
+   <cbs> if there are less than <num> bits set to 0. */
 unsigned long            gt_compressed_bitsequence_select_0(
                                                    GtCompressedBitsequence *cbs,
                                                    unsigned long num);
 
-/* Frees the memory of <cbs> */
+/* Frees the memory of <cbs>. */
 void                     gt_compressed_bitsequence_delete(
                                                   GtCompressedBitsequence *cbs);
 

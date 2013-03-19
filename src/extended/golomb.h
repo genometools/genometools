@@ -22,11 +22,11 @@
 #include "core/bittab_api.h"
 #include "core/error_api.h"
 
-/* Class <GtGolomb> stores information to encode integers with Golomb encoding.
-   See Golomb, S.W. (1966), Run-length encodings. */
+/* The <GtGolomb> class stores information to encode integers with Golomb
+   encoding. See Golomb, S.W. (1966), Run-length encodings. */
 typedef struct GtGolomb GtGolomb;
 
-/* Class <GtGolombBitwiseDecoder> decode Golomb encoded integers given in a
+/* The <GtGolombBitwiseDecoder> class decode Golomb encoded integers given in a
    <GtGolomb> object. */
 typedef struct GtGolombBitwiseDecoder GtGolombBitwiseDecoder;
 

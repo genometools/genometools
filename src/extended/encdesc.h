@@ -24,12 +24,12 @@
 #include "core/timer_api.h"
 #include "extended/cstr_iterator.h"
 
-/* Class <GtEncdesc> stores a sequence description, e.g. a FASTA header,
+/* The <GtEncdesc> class stores a sequence description, e.g. a FASTA header,
    in a compressed form. This can save a lot of disk space or memory for
    repetitive headers, for example in multiple FASTA files with short reads. */
 typedef struct GtEncdesc GtEncdesc;
 
-/* Class <GtEncdescEncoder> can be used to encode FASTA header, delivering a
+/* The <GtEncdescEncoder> class can be used to encode FASTA header, delivering a
    <GtEncdesc>. */
 typedef struct GtEncdescEncoder GtEncdescEncoder;
 

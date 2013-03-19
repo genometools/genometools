@@ -114,8 +114,8 @@ typedef void (*SamplingIOFunc)(void *ptr,
   } while (false)
 
 static inline void sampling_io_page_sampling(GtSampling *sampling,
-                                      FILE *fp,
-                                      SamplingIOFunc io_func)
+                                             FILE *fp,
+                                             SamplingIOFunc io_func)
 {
   if (sampling->page_sampling == NULL) {
     sampling->page_sampling = gt_malloc((size_t) sampling->arraysize *
@@ -128,8 +128,8 @@ static inline void sampling_io_page_sampling(GtSampling *sampling,
 }
 
 static inline void sampling_io_samplingtab(GtSampling *sampling,
-                                    FILE *fp,
-                                    SamplingIOFunc io_func)
+                                           FILE *fp,
+                                           SamplingIOFunc io_func)
 {
   io_func(sampling->samplingtab,
           sizeof (*sampling->samplingtab),
@@ -138,8 +138,8 @@ static inline void sampling_io_samplingtab(GtSampling *sampling,
 }
 
 static inline void sampling_io_header(GtSampling *sampling,
-                               FILE *fp,
-                               SamplingIOFunc io_func)
+                                      FILE *fp,
+                                      SamplingIOFunc io_func)
 {
   SAMPLING_IO_ONE(sampling->numofsamples, fp);
   gt_assert(sampling->numofsamples != 0);
@@ -367,12 +367,11 @@ void gt_sampling_add_sample(GtSampling *sampling,
   sampling->samplingtab[sampling->numofsamples -1] = position;
 }
 
-bool          gt_sampling_is_next_element_sample(
-                                          GtSampling *sampling,
-                                          unsigned long pages_written,
-                                          unsigned long elements_written,
-                                          unsigned long elem_bit_size,
-                                          unsigned long free_pagespace_bitsize)
+bool gt_sampling_is_next_element_sample(GtSampling *sampling,
+                                        unsigned long pages_written,
+                                        unsigned long elements_written,
+                                        unsigned long elem_bit_size,
+                                        unsigned long free_pagespace_bitsize)
 {
   if (sampling->method == GT_SAMPLING_REGULAR)
     return elements_written >= sampling->sampling_rate;

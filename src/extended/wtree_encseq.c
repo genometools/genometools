@@ -323,8 +323,8 @@ static inline GtWtreeSymbol gt_wtree_encseq_map(GtWtreeEncseq *wtree_encseq,
   return (GtWtreeSymbol) wtree_encseq->alpha_size - 3;
 }
 
-char gt_wtree_encseq_unmap(GtWtree *wtree,
-                           GtWtreeSymbol symbol)
+char gt_wtree_encseq_unmap_decoded(GtWtree *wtree,
+                                   GtWtreeSymbol symbol)
 {
   GtWtreeEncseq *wtree_encseq;
   GtUchar encseq_sym = (GtUchar) symbol;

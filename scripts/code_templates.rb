@@ -96,7 +96,7 @@ END_GT_CLASS_H
 
 $interface_header = <<-INTERFACE_HEADER
 
-/* Abstract class <%=classN%>,
+/* The <%=classN%> interface
    TODO: add documentation */
 typedef struct <%=classN%> <%=classN%>;
 <% if options.refcount %>\
@@ -292,7 +292,7 @@ $implement_header = <<-IMPLEMENT_HEADER
 
 #include "<%=classbase%>.h"
 
-/* Class <<%=iclassN%>>, Implements the <<%=classN%>> interface.
+/* The <<%=iclassN%>> class implements the <<%=classN%>> interface.
    TODO: add documentation */
 typedef struct <%=iclassN%> <%=iclassN%>;
 
