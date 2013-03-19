@@ -199,7 +199,7 @@ static int gt_readjoiner_cgraph_runner(GT_UNUSED int argc,
     gt_contigs_graph_enable_dot_show_deleted(cg);
   if (!had_err && arguments->dot)
   {
-    FILE *dot_fp;
+    FILE *dot_fp = NULL;
     GT_READJOINER_CGRAPH_GET_FP(dot_fp, readset,
         GT_READJOINER_SUFFIX_CG_DOT, "w");
     if (!had_err)
@@ -217,7 +217,7 @@ static int gt_readjoiner_cgraph_runner(GT_UNUSED int argc,
     unsigned long nofcnums = gt_str_array_size(arguments->subgraph);
     if (nofcnums > 0)
     {
-      FILE *dot_fp;
+      FILE *dot_fp = NULL;
       unsigned long i, *cnums;
       const char *cnum_str;
       cnums = gt_malloc(sizeof (*cnums) * nofcnums);
@@ -247,7 +247,7 @@ static int gt_readjoiner_cgraph_runner(GT_UNUSED int argc,
   }
   if (!had_err)
   {
-    FILE *paths_fp;
+    FILE *paths_fp = NULL;
     GT_READJOINER_CGRAPH_GET_FP(paths_fp, readset,
         GT_READJOINER_SUFFIX_CG_PATHS, "w");
     if (!had_err)
