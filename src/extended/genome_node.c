@@ -18,6 +18,7 @@
 #include <stdarg.h>
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
+#include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
@@ -367,18 +368,23 @@ bool gt_genome_nodes_are_sorted(const GtArray *nodes)
 void gt_genome_node_add_user_data(GtGenomeNode *gn, const char *key, void *data,
                                   GtFree free_func)
 {
-  GtGenomeNodeUserData *ud;
+  GtGenomeNodeUserData *ud, *myud;
   gt_assert(gn && key);
   ud = gt_malloc(sizeof (GtGenomeNodeUserData));
   ud->ptr = data;
   ud->free_func = free_func;
   if (!gn->userdata) {
-    gn->userdata = gt_hashmap_new(GT_HASH_STRING, NULL, userdata_delete);
+    gn->userdata = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
+                                  userdata_delete);
   }
-  else /* free old data if overwriting */
-    gt_genome_node_release_user_data(gn, key);
-  gt_hashmap_add(gn->userdata, (char*) key, ud);
-  gn->userdata_nof_items++;
+  gt_assert(gn->userdata != NULL);
+  /* remove old data entry first if there is one */
+  if ((myud = gt_hashmap_get(gn->userdata, key)) != NULL) {
+    gt_hashmap_remove(gn->userdata, key);
+  } else {
+    gn->userdata_nof_items++;
+  }
+  gt_hashmap_add(gn->userdata, gt_cstr_dup((char*) key), ud);
 }
 
 void* gt_genome_node_get_user_data(const GtGenomeNode *gn, const char *key)
@@ -398,8 +404,7 @@ void gt_genome_node_release_user_data(GtGenomeNode *gn, const char *key)
   if (!gn->userdata)
     return;
   if ((ud = (GtGenomeNodeUserData*) gt_hashmap_get(gn->userdata, key))) {
-    gt_hashmap_add(gn->userdata, (char*) key, NULL);
-    userdata_delete(ud);
+    gt_hashmap_remove(gn->userdata, (char*) key);
     if (--gn->userdata_nof_items == 0) {
       gt_hashmap_delete(gn->userdata);
       gn->userdata = NULL;
