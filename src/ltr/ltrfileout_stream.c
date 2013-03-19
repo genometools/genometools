@@ -472,7 +472,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
       gt_str_reset(seq);
     }
     gt_file_xprintf(ls->tabout_file, "\n");
-    gt_free(seq);
+    gt_str_delete(seq);
   }
   gt_hashmap_delete(ls->element.pdoms);
   gt_array_delete(ls->element.pdomorder);

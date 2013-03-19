@@ -98,9 +98,11 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
                                rng.end,
                                strand);
       gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_alignment",
-                                   alignmentstring, (GtFree) gt_str_delete);
+                                   gt_str_ref(alignmentstring),
+                                   (GtFree) gt_str_delete);
       gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_aaseq",
-                                   aastring, (GtFree) gt_str_delete);
+                                   gt_str_ref(aastring),
+                                   (GtFree) gt_str_delete);
       gt_feature_node_set_source((GtFeatureNode*) gf, ls->ltrdigest_tag);
       gt_feature_node_set_score((GtFeatureNode*) gf,
                                 gt_pdom_single_hit_get_evalue(singlehit));
@@ -135,6 +137,8 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
       }
       gt_feature_node_add_child(ls->element.mainnode, (GtFeatureNode*) gf);
     }
+    gt_str_delete(alignmentstring);
+    gt_str_delete(aastring);
   }
   return 0;
 }
