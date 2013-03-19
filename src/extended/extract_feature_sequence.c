@@ -115,8 +115,8 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
       range = gt_genome_node_get_range(gn);
       gt_assert(range.start); /* 1-based coordinates */
       had_err = gt_region_mapping_get_sequence(region_mapping, &outsequence,
-                                             gt_genome_node_get_seqid(gn),
-                                             range.start, range.end, err);
+                                               gt_genome_node_get_seqid(gn),
+                                               range.start, range.end, err);
       if (!had_err) {
         gt_str_append_cstr_nt(sequence, outsequence, gt_range_length(&range));
         gt_free(outsequence);
