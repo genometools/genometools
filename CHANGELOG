@@ -1,3 +1,11 @@
+changes in version 1.5.2 (2013-XX-XX)
+
+- bugfixes and cleanups
+- options `-j' and GT_MEM_BOOKKEEPING now usable together in a multithreaded
+  environment
+- automatic man page building (`gt -createman') implemented
+
+
 changes in version 1.5.1 (2013-03-07)
 
 - bugfixes and cleanups
