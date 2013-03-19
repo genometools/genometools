@@ -30,6 +30,7 @@ def parseargs(argv)
   options.m64 = false
   options.speed = false
   options.prof = false
+  options.gprof = false
   options.ddd = false
   options.threads = false
   opts = OptionParser.new
@@ -44,6 +45,15 @@ def parseargs(argv)
   end
   opts.on("-p","--prof","compile for profiling") do |x|
     options.prof = true
+    if options.gprof
+      usage(opts,"-d and -g are exclusive")
+    end
+  end
+  opts.on("-g","--gprof","compile for google-proftool") do |x|
+    options.gprof = true
+    if options.prof
+      usage(opts,"-d and -g are exclusive")
+    end
   end
   opts.on("-d","--ddd","compile for debugging (no opt)") do |x|
     if options.speed
@@ -80,6 +90,9 @@ def makecompilerflags(fp,options)
     fp.print " CC=gcc"
   else
     fp.print " CC='ccache clang'"
+  end
+  if options.gprof
+    fp.print " LIBS='-Wl,--no-as-needed -lprofiler -Wl,--as-needed'"
   end
   if options.threads
     fp.print " -j#{options.j}"
