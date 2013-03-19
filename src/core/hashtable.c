@@ -71,6 +71,7 @@ struct GtHashtable
   unsigned short table_size_log, high_fill_mul, low_fill_mul;
   GtRWLock *lock;
   unsigned long reference_count;
+  bool no_ma;
 };
 
 static inline void *
@@ -88,11 +89,6 @@ gt_ht_cp_elem(GtHashtable *ht, htsize_t dest_idx, const void *src)
 static void
 gt_ht_resize(GtHashtable *ht, unsigned short new_size_log);
 
-GtHashtable* gt_hashtable_new(HashElemInfo table_info)
-{
-  return gt_hashtable_new_with_start_size(table_info, MIN_SIZE_LOG);
-}
-
 static void
 gt_ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
              unsigned short high_mul, unsigned short low_mul)
@@ -103,7 +99,10 @@ gt_ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
   ht->table_info = table_info;
   ht->table_size_log = size_log;
   ht->table_mask = (table_size = 1 << size_log) - 1;
-  ht->table = gt_realloc(ht->table, table_info.elem_size * table_size);
+  if (ht->no_ma)
+    ht->table = realloc(ht->table, table_info.elem_size * table_size);
+  else
+    ht->table = gt_realloc(ht->table, table_info.elem_size * table_size);
   ht->high_fill_mul = high_mul;
   ht->high_fill
     = (unsigned long long)ht->high_fill_mul * table_size / FILL_DIVISOR;
@@ -112,8 +111,12 @@ gt_ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
     = (unsigned long long)ht->low_fill_mul * table_size / FILL_DIVISOR;
   {
     uint32_t i;
-    ht->links.table = gt_realloc(ht->links.table,
-                                 sizeof (*(ht->links.table)) * table_size);
+    if (ht->no_ma)
+      ht->links.table = realloc(ht->links.table,
+                                sizeof (*(ht->links.table)) * table_size);
+    else
+      ht->links.table = gt_realloc(ht->links.table,
+                                   sizeof (*(ht->links.table)) * table_size);
     for (i = 0; i < table_size; ++i)
       ht->links.table[i] = free_mark;
     ht->get_link = gt_ht_get_table_link;
@@ -135,17 +138,56 @@ gt_ht_init(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
 static void
 gt_ht_destruct(GtHashtable *ht)
 {
-  gt_free(ht->table);
-  gt_free(ht->links.table);
+  if (ht->no_ma) {
+    free(ht->table);
+    free(ht->links.table);
+  } else {
+    gt_free(ht->table);
+    gt_free(ht->links.table);
+  }
+}
+
+static void* gt_hashtable_malloc(size_t memsize)
+{
+  return gt_malloc(memsize);
+}
+
+GtHashtable* gt_hashtable_new_with_start_size_g(HashElemInfo table_info,
+                                                unsigned short size_log,
+                                                void* (*alloc)(size_t))
+{
+  GtHashtable *ht;
+  ht = alloc(sizeof (*ht));
+  ht->lock = gt_rwlock_new();
+  if (alloc == gt_hashtable_malloc)
+    ht->no_ma = false;
+  else
+    ht->no_ma = true;
+  gt_ht_init(ht, table_info, size_log, DEFAULT_HIGH_MUL, DEFAULT_LOW_MUL);
+  return ht;
+}
+
+GtHashtable* gt_hashtable_new(HashElemInfo table_info)
+{
+  GtHashtable *ht = gt_hashtable_new_with_start_size_g(table_info,
+                                                       MIN_SIZE_LOG,
+                                                       gt_hashtable_malloc);
+  return ht;
+}
+
+GtHashtable* gt_hashtable_new_no_ma(HashElemInfo table_info)
+{
+  GtHashtable *ht = gt_hashtable_new_with_start_size_g(table_info,
+                                                       MIN_SIZE_LOG,
+                                                       malloc);
+  return ht;
 }
 
 GtHashtable* gt_hashtable_new_with_start_size(HashElemInfo table_info,
                                               unsigned short size_log)
 {
-  GtHashtable *ht;
-  ht = gt_malloc(sizeof (*ht));
-  ht->lock = gt_rwlock_new();
-  gt_ht_init(ht, table_info, size_log, DEFAULT_HIGH_MUL, DEFAULT_LOW_MUL);
+  GtHashtable *ht = gt_hashtable_new_with_start_size_g(table_info, size_log,
+                                                       gt_hashtable_malloc);
   return ht;
 }
 
@@ -184,6 +226,7 @@ gt_ht_resize(GtHashtable *ht, unsigned short new_size_log)
   {
     /* save lock from old table */
     GtRWLock *l = ht->lock;
+    new_ht.no_ma = ht->no_ma;
     gt_ht_init(&new_ht, ht->table_info, new_size_log, ht->high_fill_mul,
                ht->low_fill_mul);
     gt_assert(ht->current_fill < new_size);
@@ -623,7 +666,10 @@ void gt_hashtable_delete(GtHashtable *ht)
     ht->table_info.table_data_free(ht->table_info.table_data);
   gt_rwlock_unlock(ht->lock);
   gt_rwlock_delete(ht->lock);
-  gt_free(ht);
+  if (ht->no_ma)
+    free(ht);
+  else
+    gt_free(ht);
 }
 
 uint32_t gt_ht_ptr_elem_hash(const void *elem)

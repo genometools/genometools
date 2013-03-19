@@ -64,6 +64,7 @@ struct HashElemInfo
 typedef struct HashElemInfo HashElemInfo;
 
 GtHashtable* gt_hashtable_new(HashElemInfo);
+GtHashtable* gt_hashtable_new_no_ma(HashElemInfo table_info);
 GtHashtable* gt_hashtable_ref(GtHashtable*);
 GtHashtable* gt_hashtable_new_with_start_size(HashElemInfo htype,
                                               unsigned short size_log);

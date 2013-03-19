@@ -45,10 +45,15 @@ hm_elem_free(void *elem, void *table_data)
     ff->valuefree(((struct map_entry *)elem)->value);
 }
 
-GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
-                          GtFree valuefree)
+static void* gt_hashmap_malloc(size_t memsize)
 {
-  struct hm_freefuncs *ff = gt_malloc(sizeof (*ff));
+  return gt_malloc(memsize);
+}
+
+static GtHashmap* gt_hashmap_new_g(GtHashType keyhashtype, GtFree keyfree,
+                                   GtFree valuefree, void* (*alloc)(size_t))
+{
+  struct hm_freefuncs *ff = alloc(sizeof (*ff));
   ff->keyfree = keyfree;
   ff->valuefree = valuefree;
   switch (keyhashtype) {
@@ -58,7 +63,10 @@ GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
           gt_ht_ptr_elem_hash, { .free_elem_with_data = hm_elem_free },
           sizeof (struct map_entry), gt_ht_ptr_elem_cmp, ff, gt_free_func
         };
-        return (GtHashmap*) gt_hashtable_new(hm_directkey_eleminfo);
+        if (alloc != gt_hashmap_malloc)
+          return (GtHashmap*) gt_hashtable_new_no_ma(hm_directkey_eleminfo);
+        else
+          return (GtHashmap*) gt_hashtable_new(hm_directkey_eleminfo);
       }
     case GT_HASH_STRING:
       {
@@ -66,11 +74,26 @@ GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
           gt_ht_cstr_elem_hash, { .free_elem_with_data = hm_elem_free },
           sizeof (struct map_entry), gt_ht_cstr_elem_cmp, ff, gt_free_func
         };
-        return (GtHashmap*) gt_hashtable_new(hm_strkey_eleminfo);
+        if (alloc != gt_hashmap_malloc)
+          return (GtHashmap*) gt_hashtable_new_no_ma(hm_strkey_eleminfo);
+        else
+          return (GtHashmap*) gt_hashtable_new(hm_strkey_eleminfo);
       }
     default: gt_assert(0);
   }
   return NULL; /* for stupid compilers nagging too much */
+}
+
+GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
+                          GtFree valuefree)
+{
+  return gt_hashmap_new_g(keyhashtype, keyfree, valuefree, gt_hashmap_malloc);
+}
+
+GtHashmap* gt_hashmap_new_no_ma(GtHashType keyhashtype, GtFree keyfree,
+                                GtFree valuefree)
+{
+  return gt_hashmap_new_g(keyhashtype, keyfree, valuefree, malloc);
 }
 
 GtHashmap* gt_hashmap_ref(GtHashmap *hm)
