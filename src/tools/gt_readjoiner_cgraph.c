@@ -144,7 +144,8 @@ static int gt_readjoiner_cgraph_runner(GT_UNUSED int argc,
   const char *readset = gt_str_get(arguments->readset);
   int had_err = 0;
   GtContigsGraph *cg = NULL;
-  FILE *cjl_i_fp, *cjl_o_fp, *j_fp, *rlt_fp, *di_fp;
+  FILE *cjl_i_fp = NULL, *cjl_o_fp = NULL, *j_fp = NULL, *rlt_fp = NULL,
+       *di_fp = NULL;
 
   gt_assert(arguments);
   gt_error_check(err);
