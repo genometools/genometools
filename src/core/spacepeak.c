@@ -33,7 +33,7 @@ static GtSpacepeakLogger *peaklogger = NULL;
 void gt_spacepeak_init(void)
 {
   gt_assert(!peaklogger);
-  peaklogger = gt_malloc(sizeof (GtSpacepeakLogger));
+  peaklogger = malloc(sizeof (GtSpacepeakLogger));
   peaklogger->current = gt_ma_get_space_current();
   peaklogger->max = 0;
   peaklogger->mutex = gt_mutex_new();
@@ -73,5 +73,5 @@ void gt_spacepeak_clean()
 {
   if (!peaklogger) return;
   gt_mutex_delete(peaklogger->mutex);
-  gt_free(peaklogger);
+  free(peaklogger);
 }
