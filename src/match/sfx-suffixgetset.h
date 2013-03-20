@@ -135,13 +135,15 @@ void gt_suffixsortspace_to_file (FILE *outfpsuftab,
 
 GtBitbuffer *gt_bitbuffer_new(unsigned int bitsperentry);
 
-void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
-                                            const GtSuffixsortspace *sssp,
-                                            GtBitbuffer *bb,
-                                            unsigned long numberofsuffixes);
+void gt_bitbuffer_next (FILE *outfpsuftab, GtBitbuffer *bb,unsigned long value);
 
 void gt_bitbuffer_delete(FILE *outfpsuftab,
                          unsigned long numberofallsortedsuffixes,
                          GtBitbuffer *bitbuffer);
+
+void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
+                                            const GtSuffixsortspace *sssp,
+                                            GtBitbuffer *bb,
+                                            unsigned long numberofsuffixes);
 
 #endif

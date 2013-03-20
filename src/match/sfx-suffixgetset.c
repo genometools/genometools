@@ -459,14 +459,8 @@ GtBitbuffer *gt_bitbuffer_new(unsigned int bitsperentry)
   return bitbuffer;
 }
 
-void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
-                                            const GtSuffixsortspace *sssp,
-                                            GtBitbuffer *bb,
-                                            unsigned long numberofsuffixes)
+void gt_bitbuffer_next (FILE *outfpsuftab, GtBitbuffer *bb, unsigned long value)
 {
-  const unsigned long *ulongptr = sssp->ulongtab;
-  const uint32_t *uintptr = sssp->uinttab;
-
   while (true)
   {
     if (bb->remainingbitsinbuffer == 0)
@@ -480,22 +474,7 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
     {
       if (bb->bits2store == 0)
       {
-        if (ulongptr != NULL)
-        {
-          if (ulongptr >= sssp->ulongtab + numberofsuffixes)
-          {
-            break;
-          }
-          bb->currentsuftabvalue = *ulongptr++;
-        } else
-        {
-          gt_assert (uintptr != NULL);
-          if (uintptr >= sssp->uinttab + numberofsuffixes)
-          {
-            break;
-          }
-          bb->currentsuftabvalue = (unsigned long) *uintptr++;
-        }
+        bb->currentsuftabvalue = value;
         bb->bits2store = bb->bitsperentry;
       } else
       {
@@ -508,6 +487,7 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
             |= (uint64_t) (bb->currentsuftabvalue << shiftleft);
           bb->remainingbitsinbuffer -= bb->bits2store;
           bb->bits2store = 0;
+          break;
         } else
         {
           unsigned long maskright = (1UL << bb->bits2store) - 1;
@@ -518,9 +498,37 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
           bb->currentbitbuffer
             |= ((uint64_t) (bb->currentsuftabvalue & maskright) >> shiftright);
           bb->bits2store -= bb->remainingbitsinbuffer;
+          gt_assert(bb->bits2store > 0);
           bb->remainingbitsinbuffer = 0;
         }
       }
+    }
+  }
+}
+
+void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
+                                            const GtSuffixsortspace *sssp,
+                                            GtBitbuffer *bb,
+                                            unsigned long numberofsuffixes)
+{
+  if (sssp->ulongtab != NULL)
+  {
+    const unsigned long *ulongptr;
+
+    for (ulongptr = sssp->ulongtab;
+         ulongptr < sssp->ulongtab + numberofsuffixes; ulongptr++)
+    {
+      gt_bitbuffer_next (outfpsuftab, bb, *ulongptr);
+    }
+  } else
+  {
+    const uint32_t *uintptr;
+
+    gt_assert (sssp->uinttab != NULL);
+    for (uintptr = sssp->uinttab;
+         uintptr < sssp->uinttab + numberofsuffixes; uintptr++)
+    {
+      gt_bitbuffer_next (outfpsuftab, bb, (unsigned long) *uintptr);
     }
   }
 }
