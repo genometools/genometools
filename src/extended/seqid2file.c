@@ -173,7 +173,8 @@ void gt_seqid2file_register_options(GtOptionParser *op, GtSeqid2FileInfo *s2fi)
 
 bool gt_seqid2file_option_used(GtSeqid2FileInfo *s2fi)
 {
-  if (gt_str_array_size(s2fi->seqfiles) || gt_str_length(s2fi->region_mapping))
+  if (gt_str_array_size(s2fi->seqfiles) || gt_str_length(s2fi->region_mapping)
+       || gt_str_length(s2fi->seqfile) || gt_str_length(s2fi->encseq))
     return true;
   return false;
 }
