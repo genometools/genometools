@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,7 @@
 #include "core/warning_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
+#include "extended/region_mapping.h"
 #include "extended/seqid2file.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/ltrdigest_def.h"
@@ -362,7 +363,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
 
   /* region mapping and sequence source options */
 
-  gt_seqid2file_register_options(op, arguments->s2fi);
+  gt_seqid2file_register_options_ext(op, arguments->s2fi, false, false);
 
   return op;
 }
@@ -424,14 +425,43 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
       arg = parsed_args;
   GtLogger *logger = gt_logger_new(arguments->verbose,
                                    GT_LOGGER_DEFLT_PREFIX, stdout);
-  GtRegionMapping *rmap;
+  GtRegionMapping *rmap = NULL;
   gt_error_check(err);
   gt_assert(arguments);
 
-  /* create region mapping */
-  rmap = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
-  if (!rmap)
-    had_err = -1;
+  if (gt_seqid2file_option_used(arguments->s2fi)) {
+    /* create region mapping */
+    rmap = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
+    if (!rmap)
+      had_err = -1;
+  } else {
+    GtEncseqLoader *el;
+    GtEncseq *encseq;
+    /* no new-style sequence source option given, fall back to legacy syntax */
+    if (argc < 3) {
+      gt_error_set(err, "missing mandatory argument(s)");
+      had_err = -1;
+    }
+    if (!had_err) {
+      el = gt_encseq_loader_new();
+      gt_encseq_loader_disable_autosupport(el);
+      gt_encseq_loader_require_md5_support(el);
+      gt_encseq_loader_require_description_support(el);
+      encseq = gt_encseq_loader_load(el, argv[argc-1], err);
+      /* XXX: clip off terminal argument */
+      gt_free((char*) argv[argc-1]);
+      argv[argc-1] = NULL;
+      argc--;
+      gt_encseq_loader_delete(el);
+      if (!encseq)
+        had_err = -1;
+      else {
+        rmap = gt_region_mapping_new_encseq_seqno(encseq);
+        gt_encseq_delete(encseq);
+      }
+    }
+  }
+  gt_assert(had_err || rmap);
 
   /* Always search for PPT. */
   tests_to_run |= GT_LTRDIGEST_RUN_PPT;
@@ -442,7 +472,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   {
     tests_to_run |= GT_LTRDIGEST_RUN_PBS;
    arguments->pbs_opts.trna_lib = gt_bioseq_new(gt_str_get(arguments->trna_lib),
-                                                 err);
+                                                err);
     if (gt_error_is_set(err))
       had_err = -1;
   }

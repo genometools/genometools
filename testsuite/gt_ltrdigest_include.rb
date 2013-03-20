@@ -215,7 +215,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted", :retval => 1
-    grep(last_stderr, /is mandatory/)
+    grep(last_stderr, /mandatory/)
   end
 
   Name "gt ltrdigest missing tRNA library but -trna given"
@@ -335,7 +335,7 @@ if $gttestdata then
   chromosomes_dmel = ["2L","2R","3L","3R","4","X"]
   chromosomes_dmel.each do |chr|
     if $arguments["hmmer"] then
-      Name "gt ltrdigest D. melanogaster chromosome #{chr} basic test w/ RT"
+      Name "gt ltrdigest D. mel. #{chr} basic test w/ RT"
       Keywords "gt_ltrdigest"
       Test do
         run_test "#{$bin}gt suffixerator -lossless  -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :maxtime => 600
@@ -358,7 +358,7 @@ if $gttestdata then
 
   chromosomes_dmel.each do |chr|
     if $arguments["hmmer"] then
-      Name "gt ltrdigest D. melanogaster chromosome #{chr} AAseq out"
+      Name "gt ltrdigest D. mel. #{chr} AAseq out"
       Keywords "gt_ltrdigest aminoacidout"
       Test do
         run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v " + \
@@ -420,6 +420,247 @@ if $gttestdata then
                "-encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz " + \
                "-aaout yes " + \
                "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted ",
+               :retval => 0, :maxtime => 12000
+      if !File.exists?("result4_pdom_RVT_1_aa.fas") then
+        raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" does not exist"
+      end
+    end
+  end
+
+  # LEGACY INTERFACE TESTS
+
+  Name "gt ltrdigest missing input GFF (legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/2L_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+  end
+
+  Name "gt ltrdigest unsorted input GFF (legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    grep(last_stderr, /is not sorted/)
+  end
+
+  Name "gt ltrdigest wrong sequence regions in input GFF (legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_4_wrong_seqid.gff3 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    grep(last_stderr, /does not have the form/)
+  end
+
+  Name "gt ltrdigest missing input sequence (legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted", :retval => 1
+    grep(last_stderr, /missing mandatory/)
+  end
+
+  Name "gt ltrdigest missing tRNA library but -trna given (legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest -trnas -outfileprefix foo #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    grep(last_stderr, /missing argument to option/)
+  end
+
+  Name "gt ltrdigest corrupt tRNA library (legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}ltrdigest/corrupt_trna.fas #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    grep(last_stderr, /cannot guess file type of file/)
+  end
+
+  Name "gt ltrdigest tRNA implied options (legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest -pbsalilen 10 20 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    grep(last_stderr, /option "-pbsalilen" requires option "-trnas"/)
+    run_test "#{$bin}gt ltrdigest -pbsoffset 10 20 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    grep(last_stderr, /option "-pbsoffset" requires option "-trnas"/)
+    run_test "#{$bin}gt ltrdigest -pbstrnaoffset 10 20 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    grep(last_stderr, /option "-pbstrnaoffset" requires option "-trnas"/)
+    run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+  end
+
+  if $arguments["hmmer"] then
+    Name "gt ltrdigest corrupt pHMM (legacy syntax)"
+    Keywords "gt_ltrdigest"
+    Test do
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+      run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}ltrdigest/corrupt.hmm -- #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+      grep(last_stderr, /Failed to open HMM file/)
+    end
+
+    Name "gt ltrdigest HMM list not properly closed (legacy syntax)"
+    Keywords "gt_ltrdigest"
+    Test do
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+      run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+      grep(last_stderr, /Failed to open HMM/)
+    end
+
+    Name "gt ltrdigest pHMM implied options (legacy syntax)"
+    Keywords "gt_ltrdigest"
+    Test do
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+      run_test "#{$bin}gt ltrdigest -pdomevalcutoff 0.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+      grep(last_stderr, /option "-pdomevalcutoff" requires option "-hmms"/)
+      run_test "#{$bin}gt ltrdigest -pdomevalcutoff 2.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+      grep(last_stderr, /argument to option "-pdomevalcutoff" must be a floating point value <= 1.000000/)
+    end
+
+    Name "gt ltrdigest use of deprecated '-threads' switch (legacy syntax)"
+    Keywords "gt_ltrdigest"
+    Test do
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+      run_test "#{$bin}gt ltrdigest -threads 2 -outfileprefix result4 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
+      grep(last_stderr, /option is deprecated. Please use/)
+    end
+  end
+
+  Name "gt ltrdigest PPT HMM parameters (background distribution, legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    # probabilities do not add up to 1, sum > 0
+    run_test "#{$bin}gt ltrdigest -ppttprob 0.3 -pptaprob 0.3 -pptgprob 0.9 -pptcprob 0.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    # probability > 1
+    run_test "#{$bin}gt ltrdigest -ppttprob 1.3 -pptaprob 0.3 -pptgprob 0.9 -pptcprob 0.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    # negative probability
+    run_test "#{$bin}gt ltrdigest -ppttprob -0.3 -pptaprob 0.3 -pptgprob 0.9 -pptcprob 0.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    # probabilities do not add up to 1, sum < 0
+    run_test "#{$bin}gt ltrdigest -ppttprob 0.1 -pptaprob 0.1 -pptgprob 0.2 -pptcprob 0.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    # positive test
+    run_test "#{$bin}gt ltrdigest -ppttprob 0.25 -pptaprob 0.25 -pptgprob 0.25 -pptcprob 0.25 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+  end
+
+  Name "gt ltrdigest PPT HMM parameters (U-box U frequency, legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest -pptuprob 1.3 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    run_test "#{$bin}gt ltrdigest -pptuprob 0.0 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
+    run_test "#{$bin}gt ltrdigest -pptuprob 0.91 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+  end
+
+  Name "gt ltrdigest PPT HMM parameters (PPT R/Y frequencies, legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest -pptrprob 1.3 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    run_test "#{$bin}gt ltrdigest -pptyprob 1.3 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    run_test "#{$bin}gt ltrdigest -pptrprob 0.97 -pptyprob 0.03 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    run_test "#{$bin}gt ltrdigest -pptrprob 0.6 -pptyprob 0.4 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3", :retval => 1
+  end
+
+  Name "gt ltrdigest GFF and sequence do not match (legacy syntax)"
+  Keywords "gt_ltrdigest"
+  Test do
+    run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_2L.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
+    grep(last_stderr, "which is not covered by that sequence")
+  end
+
+  # positive test for all D.mel chromosomes -> must match reference
+  chromosomes_dmel = ["2L","2R","3L","3R","4","X"]
+  chromosomes_dmel.each do |chr|
+    if $arguments["hmmer"] then
+      Name "gt ltrdigest D. mel. #{chr} basic test w/ RT (legacy syntax)"
+      Keywords "gt_ltrdigest"
+      Test do
+        run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :maxtime => 600
+        run_test "#{$bin}gt ltrdigest -outfileprefix result#{chr} -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
+        check_ppt_pbs(last_stdout, chr)
+        #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref.gff3"
+      end
+    else
+      Name "gt ltrdigest D. mel. #{chr} basic test, no HMM (legacy syntax)"
+      Keywords "gt_ltrdigest"
+      Test do
+        run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :maxtime => 600
+        run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result#{chr} -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
+       :retval => 0, :maxtime => 700
+        check_ppt_pbs(last_stdout, chr)
+        #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref_noHMM.gff3"
+      end
+    end
+  end
+
+  chromosomes_dmel.each do |chr|
+    if $arguments["hmmer"] then
+      Name "gt ltrdigest D. mel. #{chr} AAseq out (legacy syntax)"
+      Keywords "gt_ltrdigest aminoacidout"
+      Test do
+        run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v " + \
+                 "-db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
+                 :maxtime => 600
+        run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result#{chr} " + \
+                 "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm " + \
+                 "-aaout yes " + \
+                 " #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted " + \
+                 " #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
+                 :retval => 0, :maxtime => 12000
+        check_amino_acid_output(last_stdout, chr, ["RVT_1"])
+      end
+    end
+  end
+
+  if $arguments["hmmer"] then
+    Name "gt ltrdigest -aliout (legacy syntax)"
+    Keywords "gt_ltrdigest aminoacidout aliout"
+    Test do
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v " + \
+               "-db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :maxtime => 600
+      run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
+               "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm -- " + \
+               "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
+               "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :retval => 0, :maxtime => 12000
+      if File.exists?("result4_pdom_RVT_1.ali") then
+        raise TestFailed, "file \"result4_pdom_RVT_1.ali\" should not exist"
+      end
+      run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
+               "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm " + \
+               "-aliout yes " + \
+               "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
+               "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :retval => 0, :maxtime => 12000
+      if !File.exists?("result4_pdom_RVT_1.ali") then
+        raise TestFailed, "file \"result4_pdom_RVT_1.ali\" does not exist"
+      end
+    end
+
+    Name "gt ltrdigest -aaout (legacy syntax)"
+    Keywords "gt_ltrdigest aminoacidout aaout"
+    Test do
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v " + \
+               "-db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :maxtime => 600
+      run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
+               "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm -- " + \
+               "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
+               "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+               :retval => 0, :maxtime => 12000
+      if File.exists?("result4_pdom_RVT_1_aa.fas") then
+        raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" should not exist"
+      end
+      run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
+               "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm " + \
+               "-aaout yes " + \
+               "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
+               "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
                :retval => 0, :maxtime => 12000
       if !File.exists?("result4_pdom_RVT_1_aa.fas") then
         raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" does not exist"
