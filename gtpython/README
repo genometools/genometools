@@ -1,4 +1,4 @@
-This directory contains the GenomeTools Python bindings.
+This directory contains the GenomeTools Python bindings (requires Python >=2.6)
 
 To use them, you have to add the following line to your Python script:
 

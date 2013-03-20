@@ -21,7 +21,8 @@ from gt.dlload import gtlib
 from gt.core.error import Error, gterror
 from gt.core.gtstr import Str
 from gt.core.str_array import StrArray
-from ctypes import c_ulong, c_uint, c_int, c_char_p, c_void_p, c_char, c_ubyte
+from ctypes import c_ulong, c_uint, c_int, c_char_p, c_void_p, c_char, \
+                   c_ubyte, c_bool
 import os.path
 
 
@@ -114,22 +115,13 @@ class Alphabet:
         return str(s)
 
     def valid_input(self, plainchar):
-        if gtlib.gt_alphabet_valid_input(self.alpha, plainchar) == 1:
-            return True
-        else:
-            return False
+        return gtlib.gt_alphabet_valid_input(self.alpha, plainchar)
 
     def is_dna(self):
-        if gtlib.gt_alphabet_is_dna(self.alpha) == 1:
-            return True
-        else:
-            return False
+        return gtlib.gt_alphabet_is_dna(self.alpha)
 
     def is_protein(self):
-        if gtlib.gt_alphabet_is_protein(self.alpha) == 1:
-            return True
-        else:
-            return False
+        return gtlib.gt_alphabet_is_protein(self.alpha)
 
     def register(cls, gtlib):
         gtlib.gt_alphabet_new_from_sequence.restype = c_void_p
@@ -152,11 +144,11 @@ class Alphabet:
         gtlib.gt_alphabet_encode.argtypes = [c_void_p, c_char]
         gtlib.gt_alphabet_decode.restype = c_char
         gtlib.gt_alphabet_decode.argtypes = [c_void_p, c_ubyte]
-        gtlib.gt_alphabet_valid_input.restype = c_int
+        gtlib.gt_alphabet_valid_input.restype = c_bool
         gtlib.gt_alphabet_valid_input.argtypes = [c_void_p, c_char]
-        gtlib.gt_alphabet_is_dna.restype = c_int
+        gtlib.gt_alphabet_is_dna.restype = c_bool
         gtlib.gt_alphabet_is_dna.argtypes = [c_void_p]
-        gtlib.gt_alphabet_is_protein.restype = c_int
+        gtlib.gt_alphabet_is_protein.restype = c_bool
         gtlib.gt_alphabet_is_protein.argtypes = [c_void_p]
 
     register = classmethod(register)
