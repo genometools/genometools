@@ -16,28 +16,29 @@
 */
 
 #include <ctype.h>
+
 #include "core/chardef.h"
 #include "core/encseq_api.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "extended/wtree_encseq.h"
-#include "tools/gt_wavelet_bench.h"
-#include "core/mathsupport.h"
+#include "tools/gt_wtree_bench.h"
 
 #define WAVELET_BENCH_SIZE 1000000UL
 typedef struct {
   GtStr  *safe;
 } GtWaveletBenchArguments;
 
-static void* gt_wavelet_bench_arguments_new(void)
+static void* gt_wtree_bench_arguments_new(void)
 {
   GtWaveletBenchArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->safe = gt_str_new();
   return arguments;
 }
 
-static void gt_wavelet_bench_arguments_delete(void *tool_arguments)
+static void gt_wtree_bench_arguments_delete(void *tool_arguments)
 {
   GtWaveletBenchArguments *arguments = tool_arguments;
   if (arguments != NULL) {
@@ -46,7 +47,7 @@ static void gt_wavelet_bench_arguments_delete(void *tool_arguments)
   }
 }
 
-static GtOptionParser* gt_wavelet_bench_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_wtree_bench_option_parser_new(void *tool_arguments)
 {
   GtWaveletBenchArguments *arguments = tool_arguments;
   GtOptionParser *op;
@@ -55,7 +56,7 @@ static GtOptionParser* gt_wavelet_bench_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] encoded_sequence",
-                            "Testing and benchmarking for wavelet tree.");
+                            "Testing and benchmarking for wtree.");
 
   /* -safe */
   option = gt_option_new_string("safe", "safe files to disk, currently not "
@@ -66,9 +67,9 @@ static GtOptionParser* gt_wavelet_bench_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_wavelet_bench_arguments_check(int rest_argc,
-                                            void *tool_arguments,
-                                            GtError *err)
+static int gt_wtree_bench_arguments_check(int rest_argc,
+                                          void *tool_arguments,
+                                          GtError *err)
 {
   GtWaveletBenchArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -89,8 +90,8 @@ static int gt_wavelet_bench_arguments_check(int rest_argc,
   return had_err;
 }
 
-static int gt_wavelet_bench_bench_encseq(GtEncseq *es, GtTimer *t,
-                                         GT_UNUSED GtError *err)
+static int gt_wtree_bench_bench_encseq(GtEncseq *es, GtTimer *t,
+                                       GT_UNUSED GtError *err)
 {
   int had_err = 0;
   unsigned long idx, length, pos;
@@ -112,9 +113,9 @@ static int gt_wavelet_bench_bench_encseq(GtEncseq *es, GtTimer *t,
   return had_err;
 }
 
-static int gt_wavelet_bench_bench_wtree(GtWtree *wt,
-                                        GtError *err,
-                                        GtTimer *timer)
+static int gt_wtree_bench_bench_wtree(GtWtree *wt,
+                                      GtError *err,
+                                      GtTimer *timer)
 {
   int had_err = 0;
   unsigned long idx,
@@ -179,10 +180,10 @@ static int gt_wavelet_bench_bench_wtree(GtWtree *wt,
   return had_err;
 }
 
-static int gt_wavelet_bench_runner(GT_UNUSED int argc, const char **argv,
-                                   int parsed_args,
-                                   GT_UNUSED void *tool_arguments,
-                                   GT_UNUSED GtError *err)
+static int gt_wtree_bench_runner(GT_UNUSED int argc, const char **argv,
+                                 int parsed_args,
+                                 GT_UNUSED void *tool_arguments,
+                                 GT_UNUSED GtError *err)
 {
   GT_UNUSED GtWaveletBenchArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -197,13 +198,13 @@ static int gt_wavelet_bench_runner(GT_UNUSED int argc, const char **argv,
   gt_assert(arguments);
 
   encseq = gt_encseq_loader_load(el, es_basename, err);
-  had_err = gt_wavelet_bench_bench_encseq(encseq, timer, err);
+  had_err = gt_wtree_bench_bench_encseq(encseq, timer, err);
   gt_timer_delete(timer);
 
   timer = gt_timer_new_with_progress_description("creating wt");
   gt_timer_start(timer);
   wt = gt_wtree_encseq_new(encseq);
-  had_err = gt_wavelet_bench_bench_wtree(wt, err, timer);
+  had_err = gt_wtree_bench_bench_wtree(wt, err, timer);
   gt_timer_show_progress_final(timer, stderr);
   gt_timer_delete(timer);
   gt_encseq_delete(encseq);
@@ -214,11 +215,11 @@ static int gt_wavelet_bench_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-GtTool* gt_wavelet_bench(void)
+GtTool* gt_wtree_bench(void)
 {
-  return gt_tool_new(gt_wavelet_bench_arguments_new,
-                     gt_wavelet_bench_arguments_delete,
-                     gt_wavelet_bench_option_parser_new,
-                     gt_wavelet_bench_arguments_check,
-                     gt_wavelet_bench_runner);
+  return gt_tool_new(gt_wtree_bench_arguments_new,
+                     gt_wtree_bench_arguments_delete,
+                     gt_wtree_bench_option_parser_new,
+                     gt_wtree_bench_arguments_check,
+                     gt_wtree_bench_runner);
 }

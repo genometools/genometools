@@ -150,7 +150,7 @@
 #include "tools/gt_template.h"
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
-#include "tools/gt_wavelet_bench.h"
+#include "tools/gt_wtree.h"
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
@@ -239,7 +239,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "tagerator", gt_tagerator());
   gt_toolbox_add_tool(tools, "tallymer", gt_tallymer());
   gt_toolbox_add_tool(tools, "uniq", gt_uniq());
-  gt_toolbox_add_tool(tools, "wt_bench", gt_wavelet_bench());
+  gt_toolbox_add_tool(tools, "wtree", gt_wtree());
 #ifndef WITHOUT_CAIRO
   gt_toolbox_add_tool(tools, "sketch", gt_sketch());
   gt_toolbox_add_tool(tools, "sketch_page", gt_sketch_page());

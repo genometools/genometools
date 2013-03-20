@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_WAVELET_BENCH_H
-#define GT_WAVELET_BENCH_H
+#ifndef GT_WTREE_H
+#define GT_WTREE_H
 
 #include "core/tool_api.h"
 
-/* the wavelet_bench tool */
-GtTool* gt_wavelet_bench(void);
+/* the wtree tool */
+GtTool* gt_wtree(void);
 
 #endif
