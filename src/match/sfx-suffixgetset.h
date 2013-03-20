@@ -23,6 +23,7 @@
 #include "core/unused_api.h"
 #include "core/logger_api.h"
 #include "core/error_api.h"
+#include "core/bitbuffer.h"
 
 #define GT_SUFFIXSORTSPACE_EXPORT_SET(SSSP,EXPORTPTR,INDEX,POS)\
         if ((EXPORTPTR)->ulongtabsectionptr != NULL)\
@@ -40,8 +41,6 @@
         }
 
 typedef struct GtSuffixsortspace GtSuffixsortspace;
-
-typedef struct GtBitbuffer GtBitbuffer;
 
 typedef struct
 {
@@ -132,14 +131,6 @@ uint64_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
 void gt_suffixsortspace_to_file (FILE *outfpsuftab,
                                  const GtSuffixsortspace *sssp,
                                  unsigned long numberofsuffixes);
-
-GtBitbuffer *gt_bitbuffer_new(unsigned int bitsperentry);
-
-void gt_bitbuffer_next (FILE *outfpsuftab, GtBitbuffer *bb,unsigned long value);
-
-void gt_bitbuffer_delete(FILE *outfpsuftab,
-                         unsigned long numberofallsortedsuffixes,
-                         GtBitbuffer *bitbuffer);
 
 void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
                                             const GtSuffixsortspace *sssp,

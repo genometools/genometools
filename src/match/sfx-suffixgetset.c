@@ -32,18 +32,6 @@
 #include "core/arraydef.h"
 #include "sfx-suffixgetset.h"
 
-#define GT_BITSINBYTEBUFFER 64U
-
-struct GtBitbuffer
-{
-  unsigned int remainingbitsinbuffer,
-               bitsperentry,
-               bits2store;
-  unsigned long currentsuftabvalue,
-                wordswritten;
-  uint64_t currentbitbuffer;
-};
-
 struct GtSuffixsortspace
 {
   bool unmapsortspace, currentexport;
@@ -445,67 +433,6 @@ static unsigned long gt_extract_compressed_value(unsigned long *tab,
 }
 */
 
-GtBitbuffer *gt_bitbuffer_new(unsigned int bitsperentry)
-{
-  GtBitbuffer *bitbuffer = gt_malloc(sizeof *bitbuffer);
-
-  gt_assert(bitsperentry < GT_BITSINBYTEBUFFER);
-  bitbuffer->bitsperentry = bitsperentry;
-  bitbuffer->currentbitbuffer = 0;
-  bitbuffer->currentsuftabvalue = 0;
-  bitbuffer->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
-  bitbuffer->bits2store = 0;
-  bitbuffer->wordswritten = 0;
-  return bitbuffer;
-}
-
-void gt_bitbuffer_next (FILE *outfpsuftab, GtBitbuffer *bb, unsigned long value)
-{
-  while (true)
-  {
-    if (bb->remainingbitsinbuffer == 0)
-    {
-      (void) fwrite(&bb->currentbitbuffer,sizeof bb->currentbitbuffer,
-                    (size_t) 1,outfpsuftab);
-      bb->wordswritten++;
-      bb->currentbitbuffer = 0;
-      bb->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
-    } else
-    {
-      if (bb->bits2store == 0)
-      {
-        bb->currentsuftabvalue = value;
-        bb->bits2store = bb->bitsperentry;
-      } else
-      {
-        if (bb->remainingbitsinbuffer >= bb->bits2store)
-        {
-          unsigned int shiftleft = bb->remainingbitsinbuffer -
-                                   bb->bits2store;
-          /* use bb->remainingbitsinbuffer after subtraction for shiftleft */
-          bb->currentbitbuffer
-            |= (uint64_t) (bb->currentsuftabvalue << shiftleft);
-          bb->remainingbitsinbuffer -= bb->bits2store;
-          bb->bits2store = 0;
-          break;
-        } else
-        {
-          unsigned long maskright = (1UL << bb->bits2store) - 1;
-          unsigned int shiftright = bb->bits2store -
-                                    bb->remainingbitsinbuffer;
-          /* use bb->bits2store after subtraction for shiftright */
-          /* maskright is not necessary */
-          bb->currentbitbuffer
-            |= ((uint64_t) (bb->currentsuftabvalue & maskright) >> shiftright);
-          bb->bits2store -= bb->remainingbitsinbuffer;
-          gt_assert(bb->bits2store > 0);
-          bb->remainingbitsinbuffer = 0;
-        }
-      }
-    }
-  }
-}
-
 void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
                                             const GtSuffixsortspace *sssp,
                                             GtBitbuffer *bb,
@@ -513,46 +440,10 @@ void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
 {
   if (sssp->ulongtab != NULL)
   {
-    const unsigned long *ulongptr;
-
-    for (ulongptr = sssp->ulongtab;
-         ulongptr < sssp->ulongtab + numberofsuffixes; ulongptr++)
-    {
-      gt_bitbuffer_next (outfpsuftab, bb, *ulongptr);
-    }
+    gt_bitbuffer_next_ulongtab(outfpsuftab,bb,sssp->ulongtab,numberofsuffixes);
   } else
   {
-    const uint32_t *uintptr;
-
     gt_assert (sssp->uinttab != NULL);
-    for (uintptr = sssp->uinttab;
-         uintptr < sssp->uinttab + numberofsuffixes; uintptr++)
-    {
-      gt_bitbuffer_next (outfpsuftab, bb, (unsigned long) *uintptr);
-    }
+    gt_bitbuffer_next_uint32tab(outfpsuftab,bb,sssp->uinttab,numberofsuffixes);
   }
-}
-
-void gt_bitbuffer_delete(FILE *outfpsuftab,
-                         unsigned long numberofallsortedsuffixes,
-                         GtBitbuffer *bitbuffer)
-{
-  unsigned long expectedwords,
-                totalbits = numberofallsortedsuffixes * bitbuffer->bitsperentry;
-  const int log2of64 = 6;
-
-  expectedwords = totalbits >> log2of64; /* div by bitsize of uint64_t */
-  if ((totalbits & 63UL) > 0)  /* mod by bitsize of uint64_t */
-  {
-    expectedwords++;
-  }
-  if (bitbuffer->remainingbitsinbuffer < GT_BITSINBYTEBUFFER)
-  {
-    (void) fwrite(&bitbuffer->currentbitbuffer,
-                  sizeof bitbuffer->currentbitbuffer,
-                  (size_t) 1,outfpsuftab);
-    bitbuffer->wordswritten++;
-  }
-  gt_assert(bitbuffer->wordswritten == expectedwords);
-  gt_free(bitbuffer);
 }
