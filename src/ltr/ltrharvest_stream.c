@@ -1374,7 +1374,8 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
         }
 
         if (!had_err) {
-          if (gt_encseq_has_description_support(ltrh_stream->encseq)) {
+          if (gt_encseq_has_description_support(ltrh_stream->encseq)
+                && ltrh_stream->output_seqids) {
             unsigned long desclength = 0UL,
                           i = 0UL;
             const char *desc;
