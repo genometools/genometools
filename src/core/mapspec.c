@@ -43,7 +43,8 @@ typedef enum
   GtPairBwtidxType,
   GtTwobitencodingType,
   GtSpecialcharinfoType,
-  GtBitElemType
+  GtBitElemType,
+  GtUintType
 } GtTypespec;
 
 typedef struct
@@ -152,6 +153,9 @@ static int assigncorrecttype(GtMapspecification *mapspec,
       break;
     case GtBitElemType:
       ASSIGNPTR2STARTPTR(BitElem);
+      break;
+    case GtUintType:
+      ASSIGNPTR2STARTPTR(unsigned int);
       break;
     default:
       gt_error_set(err,"no assignment specification for size %lu",
@@ -345,6 +349,9 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
         case GtBitElemType:
           WRITEACTIONWITHTYPE(BitElem);
           break;
+        case GtUintType:
+          WRITEACTIONWITHTYPE(unsigned int);
+          break;
         default:
            gt_error_set(err,"no map specification for size %lu",
                          (unsigned long) mapspecptr->sizeofunit);
@@ -495,4 +502,12 @@ void gt_mapspec_add_pairbwtindex_ptr(GtMapspec *mapspec, GtPairBwtidx **ptr,
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
   NEWMAPSPEC(mapspec, ptr, GtPairBwtidxType, sizeof (GtPairBwtidx), n);
+}
+
+void gt_mapspec_add_uint_ptr(GtMapspec *mapspec, unsigned int **ptr,
+                             unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtUintType, sizeof (unsigned int), n);
 }

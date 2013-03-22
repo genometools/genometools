@@ -39,10 +39,10 @@ typedef struct GtMapspec GtMapspec;
    data by iteratively adding pointers to the sources (for writing) or
    destinations (for reading) of the data of a given type and length to the
    <mapspec>. The <data> pointer can be used to pass arbitrary data into this
-   function. If this function is called from a writing context, <readwrite> is
+   function. If this function is called from a writing context, <write> is
    <TRUE>, otherwise it is <FALSE>. */
 typedef void (*GtMapspecSetupFunc)(GtMapspec *mapspec, void *data,
-                                   bool readwrite);
+                                   bool write);
 
 /* Adds a C string of length <n>, to be read from or written to <ptr> to the
    <mapspec>. */
@@ -150,6 +150,14 @@ void gt_mapspec_add_filelengthvalues_ptr(GtMapspec *mapspec,
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_pairbwtindex_ptr(GtMapspec *mapspec, GtPairBwtidx **ptr,
                                      unsigned long n);
+/* Adds a unsigned int array of length <n>, to be read from or written
+   to <ptr> to the <mapspec>. */
+#define gt_mapspec_add_uint(MAPSPEC, PTR, N)\
+        gt_mapspec_add_uint_ptr(MAPSPEC, &(PTR), N);
+/* Adds a unsigned int array of length <n>, to be read from or written
+   to <ptr> to the <mapspec>. */
+void gt_mapspec_add_uint_ptr(GtMapspec *mapspec, unsigned int **ptr,
+                             unsigned long n);
 
 /* Runs <setup> to build the map specification using <data> if given,
    then maps the file specified by <filename> with the expected size
