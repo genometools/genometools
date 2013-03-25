@@ -265,12 +265,13 @@ gt_bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
                          size_t numValues, int8_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * getpagesize() / sizeof (val[0]);
+  int blockSize = 16 * sysconf(_SC_PAGESIZE) / sizeof (val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int8_t *blockPtr = val;
   size_t revIndex = numValues;
   BitOffset offsetTemp = offset;
-  while (revIndex > blockSize)
+  gt_assert(blockSize >= 0);
+  while (revIndex > (size_t) blockSize)
   {
     gt_bsGetUniformUInt8Array(str, offsetTemp, numBits,
                               blockSize, (uint8_t *)blockPtr);
@@ -289,12 +290,13 @@ gt_bsGetUniformInt16Array(constBitString str, BitOffset offset,
                           unsigned numBits, size_t numValues, int16_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * getpagesize() / sizeof (val[0]);
+  int blockSize = 16 * sysconf(_SC_PAGESIZE) / sizeof (val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int16_t *blockPtr = val;
   size_t revIndex = numValues;
   BitOffset offsetTemp = offset;
-  while (revIndex > blockSize)
+  gt_assert(blockSize >= 0);
+  while (revIndex > (size_t)blockSize)
   {
     gt_bsGetUniformUInt16Array(str, offsetTemp, numBits,
                                blockSize, (uint16_t *)blockPtr);
@@ -313,12 +315,13 @@ gt_bsGetUniformInt32Array(constBitString str, BitOffset offset,
                           unsigned numBits, size_t numValues, int32_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * getpagesize() / sizeof (val[0]);
+  int blockSize = 16 * sysconf(_SC_PAGESIZE) / sizeof (val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int32_t *blockPtr = val;
   size_t revIndex = numValues;
   BitOffset offsetTemp = offset;
-  while (revIndex > blockSize)
+  gt_assert(blockSize >= 0);
+  while (revIndex > (size_t) blockSize)
   {
     gt_bsGetUniformUInt32Array(str, offsetTemp, numBits,
                                blockSize, (uint32_t *)blockPtr);
@@ -337,12 +340,13 @@ gt_bsGetUniformInt64Array(constBitString str, BitOffset offset,
                           unsigned numBits, size_t numValues, int64_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * getpagesize() / sizeof (val[0]);
+  int blockSize = 16 * sysconf(_SC_PAGESIZE) / sizeof (val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int64_t *blockPtr = val;
   size_t revIndex = numValues;
   BitOffset offsetTemp = offset;
-  while (revIndex > blockSize)
+  gt_assert(blockSize >= 0);
+  while (revIndex > (size_t) blockSize)
   {
     gt_bsGetUniformUInt64Array(str, offsetTemp, numBits,
                                blockSize, (uint64_t *)blockPtr);
