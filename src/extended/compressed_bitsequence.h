@@ -20,6 +20,9 @@
 
 #include "core/error_api.h"
 #include "core/intbits.h"
+#include "core/mapspec.h"
+
+#define GT_COMP_BITSEQ_FILESUFFIX ".cbs"
 
 /* The <GtCompressedBitsequence> class stores a bitvector in a compressed way
    known as an RRR-bitvector like Raman, Raman and Rao described it in 2002. It
@@ -66,6 +69,19 @@ unsigned long            gt_compressed_bitsequence_select_1(
 unsigned long            gt_compressed_bitsequence_select_0(
                                                    GtCompressedBitsequence *cbs,
                                                    unsigned long num);
+
+size_t                   gt_compressed_bitsequence_file_size(
+                                                  GtCompressedBitsequence *cbs);
+/* Write <cbs> to file with name <filename>. */
+int                      gt_compressed_bitsequence_write(
+                                                   GtCompressedBitsequence *cbs,
+                                                   char *filename,
+                                                   GtError *err);
+
+/* Returns a new <GtCompressedBitsequence> object by reading file <filename> */
+GtCompressedBitsequence* gt_compressed_bitsequence_new_from_file(
+                                                           const char *filename,
+                                                           GtError *err);
 
 /* Frees the memory of <cbs>. */
 void                     gt_compressed_bitsequence_delete(
