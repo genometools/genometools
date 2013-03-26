@@ -255,24 +255,27 @@ void              gt_encseq_encoder_disable_description_support(
    sequence encoded by <ee>. That is, the .ssp table is created.
    This is a prerequisite for being able to activate description support in
    <gt_encseq_loader_require_multiseq_support()>. Activated by default. */
-void             gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee);
+void              gt_encseq_encoder_enable_multiseq_support(
+                                                           GtEncseqEncoder *ee);
 /* Disables support for random access to multiple sequences in the encoded
    sequence encoded by <ee>. That is, the .ssp table is not created.
    Encoded sequences created without this support will not be able to be
    loaded via a <GtEncseqLoader> with
    <gt_encseq_loader_require_multiseq_support()> enabled. */
-void            gt_encseq_encoder_disable_multiseq_support(GtEncseqEncoder *ee);
+void              gt_encseq_encoder_disable_multiseq_support(
+                                                           GtEncseqEncoder *ee);
 /* Enables support for lossless reproduction of the original sequence,
    regardless of alphabet transformations that may apply. Deactivated by
    default. */
-void             gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee);
+void              gt_encseq_encoder_enable_lossless_support(
+                                                           GtEncseqEncoder *ee);
 /* Enables support for lossless reproduction of the original sequence,
    regardless of alphabet transformations that may apply. Encoded sequences
    created without this support will not be able to be loaded via a
    <GtEncseqLoader> with <gt_encseq_loader_require_lossless_support()>
    enabled. */
-void              gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder
-                                                                           *ee);
+void              gt_encseq_encoder_disable_lossless_support(
+                                                           GtEncseqEncoder *ee);
 /* Enables support for quick MD5 indexing of the sequences in <ee>. Activated by
    default. */
 void              gt_encseq_encoder_enable_md5_support(GtEncseqEncoder *ee);
@@ -287,7 +290,8 @@ void              gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee);
 void              gt_encseq_encoder_do_not_create_des_tab(GtEncseqEncoder *ee);
 /* Returns <true> if the creation of the .des table has been requested,
    <false> otherwise. */
-bool             gt_encseq_encoder_des_tab_requested(const GtEncseqEncoder *ee);
+bool              gt_encseq_encoder_des_tab_requested(
+                                                     const GtEncseqEncoder *ee);
 /* Enables creation of the .ssp table containing indexes for multiple sequences.
    Enabled by default. */
 void              gt_encseq_encoder_create_ssp_tab(GtEncseqEncoder *ee);
@@ -295,7 +299,8 @@ void              gt_encseq_encoder_create_ssp_tab(GtEncseqEncoder *ee);
 void              gt_encseq_encoder_do_not_create_ssp_tab(GtEncseqEncoder *ee);
 /* Returns <true> if the creation of the .ssp table has been requested,
    <false> otherwise. */
-bool             gt_encseq_encoder_ssp_tab_requested(const GtEncseqEncoder *ee);
+bool              gt_encseq_encoder_ssp_tab_requested(
+                                                     const GtEncseqEncoder *ee);
 /* Enables creation of the .sds table containing indexes for sequence
    descriptions. Enabled by default. */
 void              gt_encseq_encoder_create_sds_tab(GtEncseqEncoder *ee);
@@ -303,7 +308,8 @@ void              gt_encseq_encoder_create_sds_tab(GtEncseqEncoder *ee);
 void              gt_encseq_encoder_do_not_create_sds_tab(GtEncseqEncoder *ee);
 /* Returns <true> if the creation of the .sds table has been requested,
    <false> otherwise. */
-bool             gt_encseq_encoder_sds_tab_requested(const GtEncseqEncoder *ee);
+bool              gt_encseq_encoder_sds_tab_requested(
+                                                     const GtEncseqEncoder *ee);
 /* Enables creation of the .md5 table containing MD5 sums. Enabled by
    default. */
 void              gt_encseq_encoder_create_md5_tab(GtEncseqEncoder *ee);
@@ -311,7 +317,8 @@ void              gt_encseq_encoder_create_md5_tab(GtEncseqEncoder *ee);
 void              gt_encseq_encoder_do_not_create_md5_tab(GtEncseqEncoder *ee);
 /* Returns <true> if the creation of the .md5 table has been requested,
    <false> otherwise. */
-bool             gt_encseq_encoder_md5_tab_requested(const GtEncseqEncoder *ee);
+bool              gt_encseq_encoder_md5_tab_requested(
+                                                     const GtEncseqEncoder *ee);
 /* Sets the sequence input type for <ee> to DNA. */
 void              gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee);
 /* Returns <true> if the input sequence has been defined as being DNA. */
