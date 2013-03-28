@@ -1,0 +1,25 @@
+LOCUS       sequence0
+DEFINITION  test1 foo bar
+ORIGIN      
+        1 AAAAAAAAAA AAAAAAAAAA AAAAA
+//
+LOCUS       sequence1
+DEFINITION  test2 bar baz
+ORIGIN      
+        1 CCCCCCCCCC CCCC
+//
+LOCUS       sequence2
+DEFINITION  test3 baz quux
+ORIGIN      
+        1 GGGGGGGGGG GGGGGGGGGG GGG
+//
+LOCUS       sequence3
+DEFINITION  test4
+ORIGIN      
+        1 CGCGCG
+//
+LOCUS       sequence4
+DEFINITION  
+ORIGIN      
+        1 ATATTTTTTT 
+//

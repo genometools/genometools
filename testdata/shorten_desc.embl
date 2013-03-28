@@ -1,0 +1,40 @@
+ID   sequence0
+XX
+DE   test1 foo bar
+XX
+SQ
+     AAAAAAAAAA AAAAAAAAAA AAAAA                                              25
+//
+
+ID   sequence1
+XX
+DE   test2 bar baz
+XX
+SQ
+     CCCCCCCCCC CCCC                                                          14
+//
+
+ID   sequence2
+XX
+DE   test3 baz quux
+XX
+SQ
+     GGGGGGGGGG GGGGGGGGGG GGG                                                23
+//
+
+ID   sequence3
+XX
+DE   test4
+XX
+SQ
+     CGCGCG                                                                    6
+//
+
+ID   sequence4
+XX
+DE   
+XX
+SQ
+     ATATTTTTTT                                                               10
+//
+

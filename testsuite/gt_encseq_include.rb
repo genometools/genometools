@@ -24,6 +24,17 @@ Test do
   run "head -n -1 #{last_stdout} | diff - #{$testdata}gt_encseq_eqlen_last_empty.fas"
 end
 
+Name "gt encseq encode|decode w/ clipped desc"
+Keywords "gt_encseq_encode encseq gt_encseq_decode clip shorten"
+Test do
+  ['fas','embl','gbk'].each do |sfx|
+    run_test "#{$bin}gt encseq encode -clipdesc -indexname foo " + \
+             "#{$testdata}/shorten_desc.#{sfx}"
+    run "#{$bin}gt encseq decode foo"
+    run "diff #{last_stdout} #{$testdata}shorten_desc.clipped.fas"
+  end
+end
+
 Name "gt encseq encode multiple files without indexname"
 Keywords "encseq gt_encseq_encode"
 Test do

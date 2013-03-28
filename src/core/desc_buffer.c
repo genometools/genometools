@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <math.h>
+#include <ctype.h>
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/desc_buffer.h"
@@ -34,7 +34,9 @@ struct GtDescBuffer {
   unsigned long length;
   size_t allocated;
   bool finished,
-       dirty;
+       dirty,
+       shorten,
+       seen_whitespace;
   GtQueue *startqueue;
   unsigned int reference_count;
 };
@@ -47,15 +49,31 @@ GtDescBuffer* gt_desc_buffer_new(void)
   db->allocated = GT_DESC_BUFFER_INIT_SIZE;
   db->finished = false;
   db->dirty = true;
+  db->shorten = false;
+  db->seen_whitespace = false;
   db->reference_count = 0;
   db->startqueue = gt_queue_new();
   gt_queue_add(db->startqueue, (void*) 0);
   return db;
 }
 
+void gt_desc_buffer_set_clip_at_whitespace(GtDescBuffer *db)
+{
+  gt_assert(db);
+  db->shorten = true;
+}
+
 void gt_desc_buffer_append_char(GtDescBuffer *db, char c)
 {
   gt_assert(db);
+  if (db->shorten) {
+    if (db->seen_whitespace)
+      return;
+    if (isspace(c)) {
+      db->seen_whitespace = true;
+      return;
+    }
+  }
   if (db->finished) {
     gt_queue_add(db->startqueue, (void*) (db->length));
     db->finished = false;
@@ -78,6 +96,7 @@ const char* gt_desc_buffer_get_next(GtDescBuffer *db)
 void gt_desc_buffer_finish(GtDescBuffer *db)
 {
   gt_assert(db);
+  db->seen_whitespace = false;
   /* XXX: maybe do a gt_cstr_rtrim(..., ' ') equivalent? */
   gt_desc_buffer_append_char(db, '\0');
   db->finished = true;

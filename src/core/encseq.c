@@ -5770,6 +5770,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            unsigned long *numofseparators,
                                            unsigned long *minseqlen,
                                            unsigned long *maxseqlen,
+                                           bool clip_desc,
                                            GtLogger *logger,
                                            GtError *err)
 {
@@ -5819,6 +5820,8 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   if (!haserr && outdestab)
   {
     descqueue = gt_desc_buffer_new();
+    if (clip_desc)
+      gt_desc_buffer_set_clip_at_whitespace(descqueue);
     desfp = gt_fa_fopen_with_suffix(indexname,GT_DESTABFILESUFFIX,"wb",err);
     if (desfp == NULL)
     {
@@ -8028,6 +8031,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                           bool outoistab,
                                           bool outmd5tab,
                                           bool esq_no_header,
+                                          bool clip_desc,
                                           GtLogger *logger,
                                           GtError *err)
 {
@@ -8123,6 +8127,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                         &numofseparators,
                                         &minseqlen,
                                         &maxseqlen,
+                                        clip_desc,
                                         logger,
                                         err) != 0)
     {
@@ -8743,7 +8748,8 @@ struct GtEncseqEncoder {
        isdna,
        isprotein,
        isplain,
-       esq_no_header;
+       esq_no_header,
+       clip_desc;
   GtStr *sat,
         *smapfile;
   GtLogger *logger;
@@ -8795,6 +8801,8 @@ GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
     gt_encseq_encoder_enable_lossless_support(ee);
   if (gt_encseq_options_md5_value(opts))
     gt_encseq_encoder_enable_md5_support(ee);
+  if (gt_encseq_options_clip_desc_value(opts))
+    gt_encseq_encoder_clip_desc(ee);
   if (gt_str_length(gt_encseq_options_smap_value(opts)) > 0)
     had_err = gt_encseq_encoder_use_symbolmap_file(ee,
                                  gt_str_get(gt_encseq_options_smap_value(opts)),
@@ -9008,6 +9016,18 @@ void gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee)
   ee->isplain = true;
 }
 
+void gt_encseq_encoder_clip_desc(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->clip_desc = true;
+}
+
+bool gt_encseq_encoder_are_descs_clipped(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->clip_desc;
+}
+
 bool gt_encseq_encoder_is_input_preencoded(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
@@ -9076,6 +9096,7 @@ int gt_encseq_encoder_encode(GtEncseqEncoder *ee, GtStrArray *seqfiles,
                                     ee->oistab,
                                     ee->md5tab,
                                     ee->esq_no_header,
+                                    ee->clip_desc,
                                     ee->logger,
                                     err);
   if (!encseq)

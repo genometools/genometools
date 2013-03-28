@@ -320,6 +320,11 @@ bool              gt_encseq_encoder_is_input_dna(GtEncseqEncoder *ee);
 void              gt_encseq_encoder_set_input_protein(GtEncseqEncoder *ee);
 /* Returns <true> if the input sequence has been defined as being protein. */
 bool              gt_encseq_encoder_is_input_protein(GtEncseqEncoder *ee);
+/* Makes <ee> ignore all description suffixes after the first whitespace
+   character per description (as defined via isspace(3)). */
+void              gt_encseq_encoder_clip_desc(GtEncseqEncoder *ee);
+/* Returns <true> if <ee> clips all descriptions after the first whitespace. */
+bool              gt_encseq_encoder_are_descs_clipped(GtEncseqEncoder *ee);
 /* Encodes the sequence files given in <seqfiles> using the settings in <ee>
    and <indexname> as the prefix for the index tables. Returns 0 on success, or
    a negative value on error (<err> is set accordingly). */

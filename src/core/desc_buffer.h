@@ -25,6 +25,9 @@ typedef struct GtDescBuffer GtDescBuffer;
 
 /* Return an empty <GtDescBuffer*> object. */
 GtDescBuffer* gt_desc_buffer_new(void);
+/* Makes <db> ignore all description suffixes after the first whitespace
+   character per description (as defined via isspace(3)). */
+void          gt_desc_buffer_set_clip_at_whitespace(GtDescBuffer *db);
 /* Increase the reference count for <db> and return it. */
 GtDescBuffer* gt_desc_buffer_ref(GtDescBuffer *db);
 unsigned long gt_desc_buffer_length(const GtDescBuffer *s);

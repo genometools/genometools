@@ -49,7 +49,8 @@ struct GtEncseqOptions {
            *optionplain,
            *optionprotein,
            *optionsmap,
-           *optionmirrored;
+           *optionmirrored,
+           *optionclip_desc;
   GtStrArray *db;
   bool des,
        ssp,
@@ -62,7 +63,8 @@ struct GtEncseqOptions {
        plain,
        mirrored,
        withdb,
-       withindexname;
+       withindexname,
+       clip_desc;
 };
 
 static GtEncseqOptions* gt_encseq_options_new(void)
@@ -212,6 +214,13 @@ gt_encseq_options_register_generic(GtOptionParser *op,
                                        true);
     gt_option_parser_add_option(op, oi->optionmd5);
 
+    oi->optionclip_desc = gt_option_new_bool("clipdesc",
+                                             "clip descriptions after first "
+                                             "whitespace",
+                                             &oi->clip_desc,
+                                             false);
+    gt_option_parser_add_option(op, oi->optionclip_desc);
+
     oi->optionsat = gt_option_new_string("sat",
                                          "specify kind of sequence "
                                          "representation\n"
@@ -357,6 +366,7 @@ GT_ENCSEQ_OPTS_GETTER_DEF(sds, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF(smap, GtStr*);
 GT_ENCSEQ_OPTS_GETTER_DEF(ssp, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF(tis, bool);
+GT_ENCSEQ_OPTS_GETTER_DEF(clip_desc, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF_OPT(dir);
 
 void gt_encseq_options_delete(GtEncseqOptions *oi)
