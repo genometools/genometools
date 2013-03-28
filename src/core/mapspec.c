@@ -169,6 +169,88 @@ struct GtMapspec {
   GtArrayGtMapspecification mapspectable;
 };
 
+int  gt_mapspec_read_header(GtMapspecSetupFunc setup, void *data,
+                            const char *filename, unsigned long expectedsize,
+                            void **mapped, GtError *err)
+{
+  void *mapptr;
+  unsigned long byteoffset = 0;
+  size_t numofbytes;
+  GtMapspec *ms = gt_malloc(sizeof (GtMapspec));
+  GtMapspecification *mapspecptr;
+  int had_err = 0;
+  unsigned long totalpadunits = 0;
+
+  gt_error_check(err);
+  GT_INITARRAY(&ms->mapspectable, GtMapspecification);
+  setup(ms, data, false);
+
+  mapptr = gt_fa_mmap_read(filename, &numofbytes, err);
+  if (mapptr == NULL)
+  {
+    had_err = -1;
+  }
+  if (!had_err)
+    *mapped = mapptr;
+  if (!had_err)
+  {
+    if (assigncorrecttype(ms->mapspectable.spaceGtMapspecification,
+                          mapptr,0,err) != 0)
+    {
+      had_err = -1;
+    }
+  }
+  if (!had_err)
+  {
+    mapspecptr = ms->mapspectable.spaceGtMapspecification;
+    gt_assert(mapspecptr != NULL);
+    byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
+                              (uint64_t) (mapspecptr->sizeofunit *
+                                          mapspecptr->numofunits));
+    if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
+    {
+      size_t padunits
+        = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
+      byteoffset += (unsigned long) padunits;
+      totalpadunits += (unsigned long) padunits;
+    }
+    for (mapspecptr++;
+         mapspecptr < ms->mapspectable.spaceGtMapspecification +
+                      ms->mapspectable.nextfreeGtMapspecification; mapspecptr++)
+    {
+      if (assigncorrecttype(mapspecptr,mapptr,byteoffset,err) != 0)
+      {
+        had_err = -1;
+        break;
+      }
+      byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
+                                (uint64_t) (byteoffset +
+                                            mapspecptr->sizeofunit *
+                                            mapspecptr->numofunits));
+      if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
+      {
+        size_t padunits
+          = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
+        byteoffset += (unsigned long) padunits;
+        totalpadunits += (unsigned long) padunits;
+      }
+    }
+  }
+  if (!had_err)
+  {
+    if (expectedsize + totalpadunits != byteoffset)
+    {
+      gt_error_set(err,"mapping: expected header size is %lu bytes, "
+                       "but file has %lu bytes",
+                       expectedsize,byteoffset);
+      had_err = -1;
+    }
+  }
+  GT_FREEARRAY(&ms->mapspectable,GtMapspecification);
+  gt_free(ms);
+  return had_err;
+}
+
 int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
                      const char *filename, unsigned long expectedsize,
                      void **mapped, GtError *err)

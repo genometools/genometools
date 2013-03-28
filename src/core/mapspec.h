@@ -167,6 +167,20 @@ void gt_mapspec_add_uint_ptr(GtMapspec *mapspec, unsigned int **ptr,
 int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
                      const char *filename, unsigned long expectedsize,
                      void **mapped, GtError *err);
+
+/* Runs <setup> to build the map specification using <data> if given, then maps
+   the file specified by <filename> with the expected size <expectedsize> and
+   fills the pointers in the map specification with their corresponding values.
+   The beginning of the mapped area is written to <mapped>. Returns 0 on
+   success, -1 otherwise. <err> is set accordingly.
+   The file is expected to be larger than <expectedsize>, use this function if a
+   file includes information that is needed to know the size of structures
+   within it. Then unmapp und reread with <gt_mapspec_read> to get all data. */
+/* TODO: make this more intuitive */
+int  gt_mapspec_read_header(GtMapspecSetupFunc setup, void *data,
+                            const char *filename, unsigned long expectedsize,
+                            void **mapped, GtError *err);
+
 /* Runs <setup> to build the map specification using <data> if given,
    then writes the data at the pointers given in the map specification to the
    file specified by <fp> with the expected file size <expectedsize>.
