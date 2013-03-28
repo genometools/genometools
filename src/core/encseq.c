@@ -996,7 +996,7 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
   ssptransferinfo.satsep = encseq->satsep;
   ssptransferinfo.ssptabptr = &encseq->ssptab;
   if (gt_mapspec_read(assignssptabmapspecification, &ssptransferinfo,
-                      tmpfilename,
+                      gt_str_get(tmpfilename),
                       sizessptab, &encseq->ssptabmappedptr, err) != 0)
   {
     haserr = true;
@@ -1174,7 +1174,8 @@ static int filloistabmapspecstartptr(GtEncseq *encseq,
 
   sizeoistab = (unsigned long) gt_encseq_size_of_exceptiontablemap(encseq);
 
-  if (gt_mapspec_read(assignoistabmapspecification, encseq, tmpfilename,
+  if (gt_mapspec_read(assignoistabmapspecification, encseq,
+                      gt_str_get(tmpfilename),
                       sizeoistab, &encseq->oistabmappedptr, err) != 0)
   {
     haserr = true;
@@ -1672,7 +1673,7 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   gt_str_append_cstr(tmpfilename,GT_ENCSEQFILESUFFIX);
   if (gt_mapspec_read(gt_encseq_assign_mapspec,
                       encseq,
-                      tmpfilename,
+                      gt_str_get(tmpfilename),
                       encseq->sizeofrep,
                       &encseq->mappedptr,
                       err) != 0)

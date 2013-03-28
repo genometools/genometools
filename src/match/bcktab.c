@@ -589,7 +589,7 @@ static int fillbcktabmapspecstartptr(GtBcktab *bcktab,
   gt_str_append_cstr(tmpfilename,GT_BCKTABSUFFIX);
   if (gt_mapspec_read(assignbcktabmapspecification,
                       bcktab,
-                      tmpfilename,
+                      gt_str_get(tmpfilename),
                       bcktab->sizeofrep,
                       &bcktab->mappedptr,
                       err) != 0)

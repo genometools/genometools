@@ -73,7 +73,7 @@ int gt_fillfmmapspecstartptr(Fmindex *fmindex,
   fmwithoptions.storeindexpos = storeindexpos;
   return gt_mapspec_read(assignfmmapspecification,
                          (void *) &fmwithoptions,
-                         tmpfilename,
+                         gt_str_get(tmpfilename),
                          fmindex->sizeofindex,
                          &fmindex->mappedptr,
                          err);

@@ -170,7 +170,7 @@ struct GtMapspec {
 };
 
 int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
-                     const GtStr *filename, unsigned long expectedsize,
+                     const char *filename, unsigned long expectedsize,
                      void **mapped, GtError *err)
 {
   void *mapptr;
@@ -186,7 +186,7 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
   GT_INITARRAY(&ms->mapspectable, GtMapspecification);
   setup(ms, data, false);
 
-  mapptr = gt_fa_mmap_read(gt_str_get(filename), &numofbytes, err);
+  mapptr = gt_fa_mmap_read(filename, &numofbytes, err);
   if (mapptr == NULL)
   {
     had_err = -1;
@@ -209,7 +209,7 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
       gt_error_set(err,"%lu bytes read from %s, but " Formatuint64_t
                          " expected",
                          (unsigned long) numofbytes,
-                         gt_str_get(filename),
+                         filename,
                          PRINTuint64_tcast(expectedaccordingtomapspec));
       had_err = -1;
     }

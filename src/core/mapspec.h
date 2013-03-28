@@ -165,7 +165,7 @@ void gt_mapspec_add_uint_ptr(GtMapspec *mapspec, unsigned int **ptr,
    corresponding values. The beginning of the mapped area is written to
    <mapped>. Returns 0 on success, -1 otherwise. <err> is set accordingly. */
 int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
-                     const GtStr *filename, unsigned long expectedsize,
+                     const char *filename, unsigned long expectedsize,
                      void **mapped, GtError *err);
 /* Runs <setup> to build the map specification using <data> if given,
    then writes the data at the pointers given in the map specification to the
