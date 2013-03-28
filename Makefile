@@ -25,7 +25,7 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.6 \
             -I$(CURDIR)/src/external/libtecla-1.6.1 \
-            -I$(CURDIR)/src/external/samtools-0.1.19 \
+            -I$(CURDIR)/src/external/samtools-0.1.18 \
             -I$(CURDIR)/src/external/sqlite-3.7.10
 
 ifeq ($(shell pkg-config --version > /dev/null 2> /dev/null; echo $$?),0)
@@ -61,10 +61,9 @@ GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # lua needs -DLUA_USE_POSIX
 # tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
 # zlib needs -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
-# samtools needs -D_USE_KNETFILE
 EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DLUA_DL_DLOPEN \
             -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO \
-            -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -D_USE_KNETFILE
+            -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
 GT_CPPFLAGS:=$(INCLUDEOPT)
 GT_CXXFLAGS:=-g -pipe
@@ -226,7 +225,7 @@ ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
 ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
 ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
 
-SAMTOOLS_DIR:=src/external/samtools-0.1.19
+SAMTOOLS_DIR:=src/external/samtools-0.1.18
 SAMTOOLS_SRC:=$(SAMTOOLS_DIR)/bgzf.c \
               $(SAMTOOLS_DIR)/kstring.c \
               $(SAMTOOLS_DIR)/bam_aux.c \
