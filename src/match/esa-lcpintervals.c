@@ -128,13 +128,13 @@ static void assignrightmostleaf_elcp(Dfsinfo *adfsinfo,
   ((Lcpinterval *) adfsinfo)->right = currentindex;
 }
 
-static int gt_enumlcpvalues(bool outedges,
-                            Sequentialsuffixarrayreader *ssar,
-                            int (*processlcpinterval)(void *,
-                                                      const Lcpinterval *),
-                            void *processinfo,
-                            GtLogger *logger,
-                            GtError *err)
+static int gt_processlcpintervals(bool outedges,
+                                  Sequentialsuffixarrayreader *ssar,
+                                  int (*processfunction)(void *,
+                                                         const Lcpinterval *),
+                                  void *processinfo,
+                                  GtLogger *logger,
+                                  GtError *err)
 {
   Elcpstate *state;
   bool haserr = false;
@@ -146,7 +146,7 @@ static int gt_enumlcpvalues(bool outedges,
     state->processinfo = NULL;
   } else
   {
-    state->processlcpinterval = processlcpinterval;
+    state->processlcpinterval = processfunction;
     state->processinfo = processinfo;
   }
   if (gt_depthfirstesa(ssar,
@@ -220,8 +220,8 @@ int gt_runenumlcpvalues(const char *inputindex,
       gt_esa_visitor_delete(elv);
     } else
     {
-      if (gt_enumlcpvalues(outedges, ssar, showlcpinterval, NULL,
-                           logger, err) != 0)
+      if (gt_processlcpintervals(outedges, ssar, showlcpinterval, NULL,
+                                 logger, err) != 0)
       {
         haserr = true;
       }

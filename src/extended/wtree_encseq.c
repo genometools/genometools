@@ -16,7 +16,9 @@
 */
 
 #include <stdbool.h>
+#ifndef S_SPLINT_S
 #include <ctype.h>
+#endif
 
 #include "core/alphabet_api.h"
 #include "core/chardef.h"
