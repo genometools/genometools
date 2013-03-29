@@ -76,8 +76,8 @@ typedef struct
              *streamesq;
 } Sfxmapoptions;
 
-static void deletethespranges(const GtEncseq *encseq,
-                              unsigned long delspranges)
+static void gt_sfxmap_deletethespranges(const GtEncseq *encseq,
+                                        unsigned long delspranges)
 {
   GtSpecialrangeiterator *sri;
   GtRange range;
@@ -341,7 +341,7 @@ static int gt_sfxmap_arguments_check(GT_UNUSED int rest_argc,
   return 0;
 }
 
-static void showcomparisonfailureESA(const char *filename,
+static void gt_sfxmap_showcomparisonfailureESA(const char *filename,
                                      int line,
                                      const char *where,
                                      const GtEncseq *encseq,
@@ -370,7 +370,8 @@ static void showcomparisonfailureESA(const char *filename,
                                                 maxlcp);
 }
 
-static unsigned long determinenumberofwholeleaves(const GtEncseq *encseq,
+static unsigned long gt_sfxmap_determinenumberofwholeleaves(
+                                                  const GtEncseq *encseq,
                                                   GtReadmode readmode)
 {
   unsigned long idx, wholeleafcount = 0, totallength;
@@ -402,13 +403,13 @@ static unsigned long determinenumberofwholeleaves(const GtEncseq *encseq,
   return wholeleafcount;
 }
 
-static int gt_encseq_check_comparefullsuffixes(const GtEncseq *encseq,
-                                               GtReadmode readmode,
-                                               unsigned long *maxlcp,
-                                               unsigned long start1,
-                                               unsigned long start2,
-                                               GtEncseqReader *esr1,
-                                               GtEncseqReader *esr2)
+static int gt_sfxmap_comparefullsuffixes(const GtEncseq *encseq,
+                                         GtReadmode readmode,
+                                         unsigned long *maxlcp,
+                                         unsigned long start1,
+                                         unsigned long start2,
+                                         GtEncseqReader *esr1,
+                                         GtEncseqReader *esr2)
 {
   GtUchar cc1, cc2;
   unsigned long pos1, pos2, totallength;
@@ -489,7 +490,7 @@ static int gt_encseq_check_comparefullsuffixes(const GtEncseq *encseq,
   return retval;
 }
 
-static int gt_checkentiresuftab(const char *filename,
+static int gt_sfxmap_checkentiresuftab(const char *filename,
                                 int line,
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
@@ -552,7 +553,7 @@ static int gt_checkentiresuftab(const char *filename,
   if (wholeleafcheck)
   {
     unsigned long expectednumofwholeleaves
-      = determinenumberofwholeleaves(encseq,readmode);
+      = gt_sfxmap_determinenumberofwholeleaves(encseq,readmode);
     if (wholeleafcount != expectednumofwholeleaves)
     {
       fprintf(stderr,"wholeleafcount=%lu != %lu=expectednumofwholeleaves\n",
@@ -574,18 +575,18 @@ static int gt_checkentiresuftab(const char *filename,
     if (idx < totallength)
     {
       gt_assert(ESASUFFIXPTRGET(suftab,idx) < totallength);
-      cmp = gt_encseq_check_comparefullsuffixes(encseq,
-                                                readmode,
-                                                &maxlcp,
-                                                ESASUFFIXPTRGET(suftab,idx-1),
-                                                ESASUFFIXPTRGET(suftab,idx),
-                                                esr1,
-                                                esr2);
+      cmp = gt_sfxmap_comparefullsuffixes(encseq,
+                                          readmode,
+                                          &maxlcp,
+                                          ESASUFFIXPTRGET(suftab,idx-1),
+                                          ESASUFFIXPTRGET(suftab,idx),
+                                          esr1,
+                                          esr2);
       if (cmp >= 0)
       {
-        showcomparisonfailureESA(filename,
+        gt_sfxmap_showcomparisonfailureESA(filename,
                                  line,
-                                 "checkentiresuftab",
+                                 __func__,
                                  encseq,
                                  readmode,
                                  suftab,
@@ -634,14 +635,10 @@ static int gt_checkentiresuftab(const char *filename,
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
   return haserr ? -1 : 0;
-  /*
-  printf("# gt_checkentiresuftab with mode 'specials are %s'\n",
-               specialsareequal ? "equal" : "different");
-  */
 }
 
-static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
-                      GtError *err)
+static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
+                         GtError *err)
 {
   bool haserr = false;
   Suffixarray suffixarray;
@@ -693,7 +690,7 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
   {
     if (arguments->delspranges > 0)
     {
-      deletethespranges(suffixarray.encseq,arguments->delspranges);
+      gt_sfxmap_deletethespranges(suffixarray.encseq,arguments->delspranges);
     } else
     {
       unsigned long totallength = gt_encseq_total_length(suffixarray.encseq);
@@ -716,8 +713,8 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
           {
             ssar = NULL;
           }
-          gt_logger_log(logger, "checkentiresuftab");
-          if (gt_checkentiresuftab(__FILE__,
+          gt_logger_log(logger, __func__);
+          if (gt_sfxmap_checkentiresuftab(__FILE__,
                                    __LINE__,
                                    suffixarray.encseq,
                                    suffixarray.readmode,
@@ -730,7 +727,7 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
                                    0,
                                    err) != 0)
           {
-            fprintf(stderr,"gt_checkentiresuftab failed\n");
+            fprintf(stderr,"%s\n",__func__);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           }
           if (ssar != NULL)
@@ -820,7 +817,7 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
   return haserr ? -1 : 0;
 }
 
-static int sfxmap_compressed_esa(const char *indexname,GtError *err)
+static int gt_sfxmap_compressed_esa(const char *indexname,GtError *err)
 {
   bool haserr = false;
   GtEncseq *encseq;
@@ -924,7 +921,7 @@ static int sfxmap_compressed_esa(const char *indexname,GtError *err)
   return haserr ? -1 : 0;
 }
 
-static int comparelcpvalue(void *info,unsigned long lcp,GtError *err)
+static int gt_sfxmap_comparelcpvalue(void *info,unsigned long lcp,GtError *err)
 {
   unsigned long currentlcpvalue;
   Sequentialsuffixarrayreader *ssar = (Sequentialsuffixarrayreader *) info;
@@ -944,8 +941,8 @@ static int comparelcpvalue(void *info,unsigned long lcp,GtError *err)
   return haserr ? -1 : 0;
 }
 
-static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
-                      GtError *err)
+static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
+                         GtError *err)
 {
   bool haserr = false;
   FMindex *fmindex;
@@ -1042,7 +1039,7 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
       if (gt_fmindex_dfstraverse(fmindex,
                                  numofchars,
                                  totallength,
-                                 comparelcpvalue,
+                                 gt_sfxmap_comparelcpvalue,
                                  (void *) ssar,
                                  err) != 0)
       {
@@ -1079,7 +1076,7 @@ static const Optionargmodedesc stream_esq_operation[] =
                    (unsigned int) BSRS_hashfirstcodes}
 };
 
-static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
+static int gt_sfxmap_stream_esq(const Sfxmapoptions *arguments,GtError *err)
 {
   GtEncseqLoader *el = NULL;
   GtEncseq *encseq = NULL;
@@ -1095,7 +1092,7 @@ static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
     mode = gt_optionargsetsingle(stream_esq_operation,
                                  sizeof stream_esq_operation/
                                  sizeof stream_esq_operation[0],
-                                 "stream-esq",
+                                 __func__,
                                  gt_str_array_get(arguments->streamesq,1UL),
                                  err);
     if (mode < 0)
@@ -1181,7 +1178,7 @@ typedef struct
   GtSuffixsortspace *sssp;
 } Checkunsortedrangeinfo;
 
-static void sortmaxdepth_processunsortedrange(void *voiddcov,
+static void gt_sfxmap_sortmaxdepth_processunsortedrange(void *voiddcov,
                                               unsigned long subbucketleft,
                                               unsigned long width,
                                               GT_UNUSED unsigned long depth)
@@ -1198,8 +1195,8 @@ static void sortmaxdepth_processunsortedrange(void *voiddcov,
                                  (unsigned long) curi->sortmaxdepth);
 }
 
-static int performsortmaxdepth(const Sfxmapoptions *arguments,
-                               GtLogger *logger,GtError *err)
+static int gt_sfxmap_performsortmaxdepth(const Sfxmapoptions *arguments,
+                                         GtLogger *logger,GtError *err)
 {
   bool haserr = false;
   GtEncseqLoader *el = NULL;
@@ -1216,7 +1213,7 @@ static int performsortmaxdepth(const Sfxmapoptions *arguments,
   }
   if (!haserr)
   {
-    gt_logger_log(logger,"performsortmaxdepth(%s,%u)",
+    gt_logger_log(logger,"%s(%s,%u)",__func__,
                   indexname,arguments->sortmaxdepth);
     defaultsfxstrategy(&sfxstrategy,
                        gt_encseq_bitwise_cmp_ok(curi.encseq) ? false : true);
@@ -1245,7 +1242,7 @@ static int performsortmaxdepth(const Sfxmapoptions *arguments,
                                 NULL,
                                 arguments->sortmaxdepth,
                                 &sfxstrategy,
-                                sortmaxdepth_processunsortedrange,
+                                gt_sfxmap_sortmaxdepth_processunsortedrange,
                                 &curi, /* voiddcov */
                                 logger);
     gt_checksortedsuffixes(__FILE__,
@@ -1265,7 +1262,8 @@ static int performsortmaxdepth(const Sfxmapoptions *arguments,
   return haserr ? -1 : 0;
 }
 
-static int run_diffcover_check(const Sfxmapoptions *arguments, GtError *err)
+static int gt_sfxmap_run_diffcover_check(const Sfxmapoptions *arguments,
+                                         GtError *err)
 {
   int had_err = 0;
   GtEncseqLoader *el = NULL;
@@ -1305,13 +1303,14 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   {
     if (arguments->compressedesa)
     {
-      if (sfxmap_compressed_esa(gt_str_get(arguments->esaindexname),err) != 0)
+      if (gt_sfxmap_compressed_esa(gt_str_get(arguments->esaindexname),
+                                   err) != 0)
       {
         haserr = true;
       }
     } else
     {
-      if (sfxmap_esa(arguments,logger,err) != 0)
+      if (gt_sfxmap_esa(arguments,logger,err) != 0)
       {
         haserr = true;
       }
@@ -1319,28 +1318,28 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   }
   if (!haserr && gt_str_length(arguments->pckindexname) > 0)
   {
-    if (sfxmap_pck(arguments,logger,err) != 0)
+    if (gt_sfxmap_pck(arguments,logger,err) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr && gt_str_array_size(arguments->streamesq) > 0)
   {
-    if (stream_esq(arguments,err) != 0)
+    if (gt_sfxmap_stream_esq(arguments,err) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr && arguments->sortmaxdepth > 0)
   {
-    if (performsortmaxdepth(arguments,logger,err) != 0)
+    if (gt_sfxmap_performsortmaxdepth(arguments,logger,err) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr && arguments->diffcovercheck)
   {
-    if (run_diffcover_check(arguments, err) != 0)
+    if (gt_sfxmap_run_diffcover_check(arguments, err) != 0)
     {
       haserr = true;
     }
