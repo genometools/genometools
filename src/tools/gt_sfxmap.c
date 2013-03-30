@@ -655,6 +655,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
   Suffixarray suffixarray;
   unsigned int demand = 0;
 
+  gt_error_check(err);
   if (arguments->inputtis || arguments->delspranges > 0 || arguments->inputsuf)
   {
     demand |= SARR_ESQTAB;
@@ -834,6 +835,7 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
   GtEncseq *encseq;
   GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
 
+  gt_error_check(err);
   encseq = gt_encseq_loader_load(encseq_loader,indexname, err);
   gt_encseq_loader_delete(encseq_loader);
   if (encseq == NULL)
@@ -938,13 +940,18 @@ static int gt_sfxmap_compresslcp(const char *indexname,
   Sequentialsuffixarrayreader *ssar = NULL;
   bool haserr = false;
 
+  gt_error_check(err);
   ssar = gt_newSequentialsuffixarrayreaderfromfile(
                                           indexname,
                                           SARR_LCPTAB | SARR_ESQTAB,
                                           SEQ_scan,
                                           logger,
                                           err);
-  if (ssar != NULL)
+  if (ssar == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
   {
     unsigned long elems = 0;
     unsigned long totallength
@@ -956,6 +963,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
     uint8_t bitsperentry = (uint8_t) gt_determinebitspervalue(maxbranchdepth);
     GtBitbuffer *bitbuffer;
 
+    gt_assert(ssar != NULL);
     if (fpcompressedlcp == NULL)
     {
        haserr = true;
@@ -966,13 +974,16 @@ static int gt_sfxmap_compresslcp(const char *indexname,
     }
     if (bitsperentry > 0)
     {
-      while (true)
+      if (!haserr)
       {
-        unsigned long currentlcp;
+        while (true)
+        {
+          unsigned long currentlcp;
 
-        NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
-        gt_bitbuffer_next_value (bitbuffer,currentlcp);
-        elems++;
+          NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+          gt_bitbuffer_next_value (bitbuffer,currentlcp);
+          elems++;
+        }
       }
       if (!haserr)
       {
@@ -995,6 +1006,7 @@ static int gt_sfxmap_comparelcpvalue(void *info,unsigned long lcp,GtError *err)
   Sequentialsuffixarrayreader *ssar = (Sequentialsuffixarrayreader *) info;
   bool haserr = false;
 
+  gt_error_check(err);
   do /* fake loop to allow for the use of a break statement */
   {
     NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
@@ -1019,6 +1031,7 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
   GtEncseqMetadata *encseqmetadata = NULL;
   Sequentialsuffixarrayreader *ssar;
 
+  gt_error_check(err);
   gt_assert(gt_str_length(arguments->pckindexname) > 0);
   fmindex = gt_loadvoidBWTSeqForSA(gt_str_get(arguments->pckindexname),false,
                                    err);
@@ -1153,6 +1166,7 @@ static int gt_sfxmap_stream_esq(const Sfxmapoptions *arguments,GtError *err)
   int multiarg = 0;
   unsigned long streamesq_size = gt_str_array_size(arguments->streamesq);
 
+  gt_error_check(err);
   if (streamesq_size == 2UL || streamesq_size == 3UL)
   {
     int mode;
@@ -1272,6 +1286,7 @@ static int gt_sfxmap_performsortmaxdepth(const Sfxmapoptions *arguments,
   Sfxstrategy sfxstrategy;
   const char *indexname;
 
+  gt_error_check(err);
   indexname = gt_str_get(arguments->esaindexname);
   el = gt_encseq_loader_new();
   curi.encseq = gt_encseq_loader_load(el, indexname, err);
@@ -1338,6 +1353,7 @@ static int gt_sfxmap_run_diffcover_check(const Sfxmapoptions *arguments,
   GtEncseq *encseq = NULL;
   const char *indexname;
 
+  gt_error_check(err);
   indexname = gt_str_get(arguments->esaindexname);
   el = gt_encseq_loader_new();
   encseq = gt_encseq_loader_load(el, indexname, err);
@@ -1384,12 +1400,12 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
                                   logger,err) != 0)
         {
           haserr = true;
-        } else
+        }
+      } else
+      {
+        if (gt_sfxmap_esa(arguments,logger,err) != 0)
         {
-          if (gt_sfxmap_esa(arguments,logger,err) != 0)
-          {
-            haserr = true;
-          }
+          haserr = true;
         }
       }
     }
