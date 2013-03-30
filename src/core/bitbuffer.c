@@ -27,34 +27,42 @@ struct GtBitbuffer
   unsigned int remainingbitsinbuffer,
                bitsperentry,
                bits2store;
-  unsigned long currentvalue,
-                wordswritten;
-  uint64_t currentbitbuffer;
+  unsigned long currentvalue;
+  uint64_t currentbitbuffer,
+           numberofallelements,
+           wordswritten;
+  FILE *outfp;
 };
 
-GtBitbuffer *gt_bitbuffer_new(unsigned int bitsperentry)
+GtBitbuffer *gt_bitbuffer_new(FILE *outfp,uint8_t bitsperentry,
+                              uint64_t numberofallelements)
 {
   GtBitbuffer *bitbuffer = gt_malloc(sizeof *bitbuffer);
 
-  gt_assert(bitsperentry < GT_BITSINBYTEBUFFER);
-  bitbuffer->bitsperentry = bitsperentry;
+  gt_assert(outfp != NULL);
+  (void) fwrite(&numberofallelements,sizeof numberofallelements,(size_t) 1,
+                outfp);
+  (void) fwrite(&bitsperentry,sizeof bitsperentry,(size_t) 1,outfp);
+  gt_assert((unsigned int) bitsperentry < GT_BITSINBYTEBUFFER);
+  bitbuffer->numberofallelements = numberofallelements;
+  bitbuffer->bitsperentry = (unsigned int) bitsperentry;
   bitbuffer->currentbitbuffer = 0;
   bitbuffer->currentvalue = 0;
+  bitbuffer->outfp = outfp;
   bitbuffer->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
   bitbuffer->bits2store = 0;
   bitbuffer->wordswritten = 0;
   return bitbuffer;
 }
 
-void gt_bitbuffer_next_value (FILE *fp, GtBitbuffer *bb,
-                              unsigned long value)
+void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value)
 {
   while (true)
   {
     if (bb->remainingbitsinbuffer == 0)
     {
       (void) fwrite(&bb->currentbitbuffer,sizeof bb->currentbitbuffer,
-                    (size_t) 1,fp);
+                    (size_t) 1,bb->outfp);
       bb->wordswritten++;
       bb->currentbitbuffer = 0;
       bb->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
@@ -94,7 +102,7 @@ void gt_bitbuffer_next_value (FILE *fp, GtBitbuffer *bb,
   }
 }
 
-void gt_bitbuffer_next_uint32tab(FILE *fp,GtBitbuffer *bb,const uint32_t *tab,
+void gt_bitbuffer_next_uint32tab(GtBitbuffer *bb,const uint32_t *tab,
                                  unsigned long len)
 {
   const uint32_t *uintptr;
@@ -102,11 +110,11 @@ void gt_bitbuffer_next_uint32tab(FILE *fp,GtBitbuffer *bb,const uint32_t *tab,
   gt_assert (tab != NULL);
   for (uintptr = tab; uintptr < tab + len; uintptr++)
   {
-    gt_bitbuffer_next_value (fp, bb, (unsigned long) *uintptr);
+    gt_bitbuffer_next_value (bb, (unsigned long) *uintptr);
   }
 }
 
-void gt_bitbuffer_next_ulongtab(FILE *fp,GtBitbuffer *bb,
+void gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
                                 const unsigned long *tab,
                                 unsigned long len)
 {
@@ -115,30 +123,38 @@ void gt_bitbuffer_next_ulongtab(FILE *fp,GtBitbuffer *bb,
   gt_assert (tab != NULL);
   for (ulongptr = tab; ulongptr < tab + len; ulongptr++)
   {
-    gt_bitbuffer_next_value (fp, bb, *ulongptr);
+    gt_bitbuffer_next_value (bb, *ulongptr);
   }
 }
 
-void gt_bitbuffer_delete(FILE *fp,
-                         unsigned long numberofallelements,
-                         GtBitbuffer *bitbuffer)
+void gt_bitbuffer_delete(GtBitbuffer *bitbuffer)
 {
-  unsigned long expectedwords,
-                totalbits = numberofallelements * bitbuffer->bitsperentry;
+  uint64_t expectedwords,
+           totalbits = bitbuffer->numberofallelements *
+                       bitbuffer->bitsperentry;
   const int log2of64 = 6;
 
   expectedwords = totalbits >> log2of64; /* div by bitsize of uint64_t */
-  if ((totalbits & 63UL) > 0)  /* mod by bitsize of uint64_t */
+  if ((totalbits & (uint64_t) 63) > 0)  /* mod by bitsize of uint64_t */
   {
     expectedwords++;
   }
-  if (bitbuffer->remainingbitsinbuffer < GT_BITSINBYTEBUFFER)
+  if (bitbuffer->outfp != NULL)
   {
-    (void) fwrite(&bitbuffer->currentbitbuffer,
-                  sizeof bitbuffer->currentbitbuffer,
-                  (size_t) 1,fp);
-    bitbuffer->wordswritten++;
+    if (bitbuffer->remainingbitsinbuffer < GT_BITSINBYTEBUFFER)
+    {
+      (void) fwrite(&bitbuffer->currentbitbuffer,
+                    sizeof bitbuffer->currentbitbuffer,
+                    (size_t) 1,bitbuffer->outfp);
+      bitbuffer->wordswritten++;
+    }
+    if (bitbuffer->wordswritten != expectedwords)
+    {
+      fprintf(stderr,"wordswritten = %lu != %lu = expextedwords\n",
+               (unsigned long) bitbuffer->wordswritten,
+               (unsigned long) expectedwords);
+    }
+    gt_assert(bitbuffer->wordswritten == expectedwords);
   }
-  gt_assert(bitbuffer->wordswritten == expectedwords);
   gt_free(bitbuffer);
 }

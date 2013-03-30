@@ -101,7 +101,8 @@ typedef unsigned long ESASuffixptr;
 typedef struct
 {
   GtEncseq *encseq;
-  Definedunsignedlong numoflargelcpvalues; /* only in esa-map.c */
+  Definedunsignedlong numoflargelcpvalues, /* only in esa-map.c */
+                      maxbranchdepth;
   Defineddouble averagelcp;
   Definedunsignedlong longest; /* for BWT */
   GtReadmode readmode; /* relevant when reading the encoded sequence */

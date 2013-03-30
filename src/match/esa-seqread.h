@@ -299,6 +299,9 @@ const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
 unsigned long gt_Sequentialsuffixarrayreader_totallength(
               const Sequentialsuffixarrayreader *ssar);
 
+unsigned long gt_Sequentialsuffixarrayreader_maxbranchdepth(
+              const Sequentialsuffixarrayreader *ssar);
+
 unsigned int gt_Sequentialsuffixarrayreader_prefixlength(
               const Sequentialsuffixarrayreader *ssar);
 

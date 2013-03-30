@@ -21,19 +21,18 @@
 
 typedef struct GtBitbuffer GtBitbuffer;
 
-GtBitbuffer *gt_bitbuffer_new(unsigned int bitsperentry);
+GtBitbuffer *gt_bitbuffer_new(FILE *outfp,uint8_t bitsperentry,
+                              uint64_t numberofallelements);
 
-void gt_bitbuffer_next_value (FILE *fp, GtBitbuffer *bb, unsigned long value);
+void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value);
 
-void gt_bitbuffer_next_uint32tab(FILE *fp,GtBitbuffer *bb,const uint32_t *tab,
+void gt_bitbuffer_next_uint32tab(GtBitbuffer *bb,const uint32_t *tab,
                                  unsigned long len);
 
-void gt_bitbuffer_next_ulongtab(FILE *fp,GtBitbuffer *bb,
+void gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
                                 const unsigned long *tab,
                                 unsigned long len);
 
-void gt_bitbuffer_delete(FILE *fp,
-                         unsigned long numberofallelements,
-                         GtBitbuffer *bitbuffer);
+void gt_bitbuffer_delete(GtBitbuffer *bitbuffer);
 
 #endif

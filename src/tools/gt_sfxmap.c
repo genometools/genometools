@@ -23,6 +23,7 @@
 #include "core/unused_api.h"
 #include "core/format64.h"
 #include "core/fa.h"
+#include "core/mathsupport.h"
 #include "match/echoseq.h"
 #include "match/eis-voiditf.h"
 #include "match/esa-lcpintervals.h"
@@ -37,7 +38,6 @@
 #include "match/sfx-strategy.h"
 #include "match/sfx-suffixgetset.h"
 #include "match/sfx-suftaborder.h"
-#include "match/stamp.h"
 #include "match/test-mappedstr.pr"
 #include "match/twobits2kmers.h"
 #include "match/sfx-linlcp.h"
@@ -65,6 +65,7 @@ typedef struct
        diffcovercheck,
        wholeleafcheck,
        compressedesa,
+       compresslcp,
        spmitv,
        ownencseq2file;
   unsigned long delspranges;
@@ -161,7 +162,8 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optionwholeleafcheck,
          *optionenumlcpitvs, *optionenumlcpitvtree, *optionenumlcpitvtreeBU,
          *optionscanesa, *optionspmitv, *optionownencseq2file,
-         *optionbfcheck, *optioncompressedesa;
+         *optionbfcheck, *optioncompressedesa,
+         *optioncompresslcp;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -321,10 +323,19 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optioncompressedesa);
   gt_option_imply(optioncompressedesa, optionesaindex);
 
+  optioncompresslcp = gt_option_new_bool("compresslcp",
+                                          "compress the lcp value into byte "
+                                          "compressed form",
+                                          &arguments->compresslcp,
+                                          false);
+  gt_option_parser_add_option(op, optioncompresslcp);
+  gt_option_imply(optioncompresslcp, optionesaindex);
+
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);
 
   gt_option_exclude(optionenumlcpitvs,optionenumlcpitvtree);
+  gt_option_exclude(optioncompresslcp,optioncompressedesa);
   gt_option_exclude(optionenumlcpitvs,optionenumlcpitvtreeBU);
   gt_option_exclude(optionenumlcpitvtree,optionenumlcpitvtreeBU);
   gt_option_imply(optionlcp,optionsuf);
@@ -817,7 +828,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
   return haserr ? -1 : 0;
 }
 
-static int gt_sfxmap_compressed_esa(const char *indexname,GtError *err)
+static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
 {
   bool haserr = false;
   GtEncseq *encseq;
@@ -918,6 +929,63 @@ static int gt_sfxmap_compressed_esa(const char *indexname,GtError *err)
     gt_fa_fclose(fp);
   }
   gt_encseq_delete(encseq);
+  return haserr ? -1 : 0;
+}
+
+static int gt_sfxmap_compresslcp(const char *indexname,
+                                 GtLogger *logger,GtError *err)
+{
+  Sequentialsuffixarrayreader *ssar = NULL;
+  bool haserr = false;
+
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(
+                                          indexname,
+                                          SARR_LCPTAB | SARR_ESQTAB,
+                                          SEQ_scan,
+                                          logger,
+                                          err);
+  if (ssar != NULL)
+  {
+    unsigned long elems = 0;
+    unsigned long totallength
+      = gt_Sequentialsuffixarrayreader_totallength(ssar);
+    unsigned long maxbranchdepth
+      = gt_Sequentialsuffixarrayreader_maxbranchdepth(ssar);
+    FILE *fpcompressedlcp = gt_fa_fopen_with_suffix(indexname,
+                                     GT_LCPTABSUFFIX_BYTECOMPRESSED,"wb",err);
+    uint8_t bitsperentry = (uint8_t) gt_determinebitspervalue(maxbranchdepth);
+    GtBitbuffer *bitbuffer;
+
+    if (fpcompressedlcp == NULL)
+    {
+       haserr = true;
+    } else
+    {
+      bitbuffer = gt_bitbuffer_new(fpcompressedlcp,bitsperentry,
+                                   (uint64_t) totallength);
+    }
+    if (bitsperentry > 0)
+    {
+      while (true)
+      {
+        unsigned long currentlcp;
+
+        NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+        gt_bitbuffer_next_value (bitbuffer,currentlcp);
+        elems++;
+      }
+      if (!haserr)
+      {
+        gt_assert(elems == totallength);
+      }
+    }
+    gt_freeSequentialsuffixarrayreader(&ssar);
+    gt_bitbuffer_delete(bitbuffer);
+    if (fpcompressedlcp != NULL)
+    {
+      gt_fa_fclose(fpcompressedlcp);
+    }
+  }
   return haserr ? -1 : 0;
 }
 
@@ -1303,16 +1371,26 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   {
     if (arguments->compressedesa)
     {
-      if (gt_sfxmap_compressed_esa(gt_str_get(arguments->esaindexname),
+      if (gt_sfxmap_compressedesa(gt_str_get(arguments->esaindexname),
                                    err) != 0)
       {
         haserr = true;
       }
     } else
     {
-      if (gt_sfxmap_esa(arguments,logger,err) != 0)
+      if (arguments->compresslcp)
       {
-        haserr = true;
+        if (gt_sfxmap_compresslcp(gt_str_get(arguments->esaindexname),
+                                  logger,err) != 0)
+        {
+          haserr = true;
+        } else
+        {
+          if (gt_sfxmap_esa(arguments,logger,err) != 0)
+          {
+            haserr = true;
+          }
+        }
       }
     }
   }

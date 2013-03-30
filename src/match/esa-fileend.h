@@ -26,13 +26,6 @@
 #define GT_SUFTABSUFFIX  ".suf"
 
 /*
-  The following defines the suffix of a file to store the byte compressed
-  suftab.
-*/
-
-#define GT_SUFTABSUFFIX_BYTECOMPRESSED  ".sufc"
-
-/*
   The following defines the suffix of a file to store the
   table lcptab.
 */
@@ -45,6 +38,13 @@
 */
 
 #define GT_LARGELCPTABSUFFIX  ".llv"
+
+/*
+  The following defines the suffix of a file to store the byte compressed
+  suftab.
+*/
+
+#define GT_SUFTABSUFFIX_BYTECOMPRESSED  ".sufc"
 
 /*
   The following defines the suffix of a file to store the byte compressed

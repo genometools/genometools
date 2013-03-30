@@ -433,17 +433,16 @@ static unsigned long gt_extract_compressed_value(unsigned long *tab,
 }
 */
 
-void gt_suffixsortspace_compressed_to_file (FILE *outfpsuftab,
-                                            const GtSuffixsortspace *sssp,
+void gt_suffixsortspace_compressed_to_file (const GtSuffixsortspace *sssp,
                                             GtBitbuffer *bb,
                                             unsigned long numberofsuffixes)
 {
   if (sssp->ulongtab != NULL)
   {
-    gt_bitbuffer_next_ulongtab(outfpsuftab,bb,sssp->ulongtab,numberofsuffixes);
+    gt_bitbuffer_next_ulongtab(bb,sssp->ulongtab,numberofsuffixes);
   } else
   {
     gt_assert (sssp->uinttab != NULL);
-    gt_bitbuffer_next_uint32tab(outfpsuftab,bb,sssp->uinttab,numberofsuffixes);
+    gt_bitbuffer_next_uint32tab(bb,sssp->uinttab,numberofsuffixes);
   }
 }

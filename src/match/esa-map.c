@@ -61,7 +61,6 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   uint32_t integersize, littleendian, readmodeint, mirrored;
   unsigned int linenum;
   unsigned long currentlinelength;
-  Definedunsignedlong maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
   GtScannedprjkeytable *scannedprjkeytable;
@@ -114,8 +113,9 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                        sizeof (suffixarray->averagelcp.valuedouble),
                        true,
                        &suffixarray->averagelcp.defined);
-  GT_SCANNEDPRJKEY_ADD("maxbranchdepth",&maxbranchdepth.valueunsignedlong,
-                       &maxbranchdepth.defined);
+  GT_SCANNEDPRJKEY_ADD("maxbranchdepth",
+                       &suffixarray->maxbranchdepth.valueunsignedlong,
+                       &suffixarray->maxbranchdepth.defined);
   GT_SCANNEDPRJKEY_ADD("integersize",&integersize,NULL);
   GT_SCANNEDPRJKEY_ADD("littleendian",&littleendian,NULL);
   GT_SCANNEDPRJKEY_ADD("readmode",&readmodeint,NULL);

@@ -258,6 +258,13 @@ unsigned long gt_Sequentialsuffixarrayreader_totallength(
   return ssar->numberofsuffixes - 1;
 }
 
+unsigned long gt_Sequentialsuffixarrayreader_maxbranchdepth(
+              const Sequentialsuffixarrayreader *ssar)
+{
+  gt_assert(ssar->suffixarray->maxbranchdepth.defined);
+  return ssar->suffixarray->maxbranchdepth.valueunsignedlong;
+}
+
 unsigned int gt_Sequentialsuffixarrayreader_prefixlength(
               const Sequentialsuffixarrayreader *ssar)
 {

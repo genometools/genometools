@@ -254,11 +254,9 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
       uint64_t numberofallsuffixes = 1 + (uint64_t) totallength;
       uint8_t bitsperentry = (uint8_t) gt_determinebitspervalue(totallength);
 
-      (void) fwrite(&numberofallsuffixes,sizeof numberofallsuffixes,
-                    (size_t) 1,outfileinfo->outfpsuftab);
-      (void) fwrite(&bitsperentry,sizeof bitsperentry,
-                    (size_t) 1,outfileinfo->outfpsuftab);
-      bitbuffer = gt_bitbuffer_new((unsigned int) bitsperentry);
+      bitbuffer = gt_bitbuffer_new(outfileinfo->outfpsuftab,
+                                   bitsperentry,
+                                   numberofallsuffixes);
     }
     while (true)
     {
@@ -273,8 +271,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
       {
         if (sfxstrategy->compressedoutput)
         {
-          gt_suffixsortspace_compressed_to_file (outfileinfo->outfpsuftab,
-                                                 suffixsortspace,
+          gt_suffixsortspace_compressed_to_file (suffixsortspace,
                                                  bitbuffer,
                                                  numberofsuffixes);
         } else
@@ -294,8 +291,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
     }
     if (sfxstrategy->compressedoutput)
     {
-      gt_bitbuffer_delete(outfileinfo->outfpsuftab,
-                          outfileinfo->numberofallsortedsuffixes,bitbuffer);
+      gt_bitbuffer_delete(bitbuffer);
     }
   }
   if (haserr)
