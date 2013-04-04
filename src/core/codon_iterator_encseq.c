@@ -183,25 +183,36 @@ int gt_codon_iterator_encseq_unit_test(GtError *err)
   gt_error_check(err);
 
   alpha = gt_alphabet_new_dna();
+  gt_ensure(had_err, alpha != NULL);
   eb = gt_encseq_builder_new(alpha);
+  gt_ensure(had_err, eb != NULL);
   gt_encseq_builder_add_cstr(eb, testseq, strlen(testseq), "foo");
   encseq = gt_encseq_builder_build(eb, NULL);
+  gt_ensure(had_err, encseq != NULL);
 
-  /* forward tests */
-  had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq,
-                                                 GT_READMODE_FORWARD, err);
+  if (!had_err) {
+    /* forward tests */
+    had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq,
+                                                   GT_READMODE_FORWARD, err);
+  }
 
-  /* complement tests */
-  had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq_cm,
-                                                 GT_READMODE_COMPL, err);
+  if (!had_err) {
+    /* complement tests */
+    had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq_cm,
+                                                   GT_READMODE_COMPL, err);
+  }
 
-  /* revcompl tests */
-  had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq_rc,
-                                                 GT_READMODE_REVCOMPL, err);
+  if (!had_err) {
+    /* revcompl tests */
+    had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq_rc,
+                                                   GT_READMODE_REVCOMPL, err);
+  }
 
-  /* reverse tests */
-  had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq_rv,
-                                                 GT_READMODE_REVERSE, err);
+  if (!had_err) {
+    /* reverse tests */
+    had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq_rv,
+                                                   GT_READMODE_REVERSE, err);
+  }
 
   /* lengths < 3 */
   for (j = 0; !had_err && j < 3; j++) {
