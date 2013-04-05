@@ -31,30 +31,42 @@ struct GtBitbuffer
   FILE *outfp;
 };
 
-GtBitbuffer *gt_bitbuffer_new(FILE *outfp,uint8_t bitsperentry)
+GtBitbuffer *gt_bitbuffer_new(FILE *outfp,unsigned int bitsperentry)
 {
   GtBitbuffer *bitbuffer = gt_malloc(sizeof *bitbuffer);
 
   bitbuffer->numberofallvalues = 0;
-  gt_assert(outfp != NULL);
-  (void) fwrite(&bitbuffer->numberofallvalues,
-                sizeof bitbuffer->numberofallvalues,(size_t) 1,outfp);
-  (void) fwrite(&bitsperentry,sizeof bitsperentry,(size_t) 1,outfp);
-  gt_assert((unsigned int) bitsperentry < GT_BITSINBYTEBUFFER);
-  bitbuffer->bitsperentry = (unsigned int) bitsperentry;
+  if (bitsperentry > 0)
+  {
+    uint8_t bitsperentry8 = (uint8_t) bitsperentry;
+
+    gt_assert(bitsperentry < GT_BITSINBYTEBUFFER && outfp != NULL);
+    (void) fwrite(&bitbuffer->numberofallvalues,
+                  sizeof bitbuffer->numberofallvalues,(size_t) 1,outfp);
+    (void) fwrite(&bitsperentry8,sizeof bitsperentry8,(size_t) 1,outfp);
+  }
+  bitbuffer->bitsperentry = bitsperentry;
   bitbuffer->currentbitbuffer = 0;
   bitbuffer->outfp = outfp;
   bitbuffer->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
   return bitbuffer;
 }
 
-void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value)
+void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value,
+                              unsigned int bitsforvalue)
 {
-  unsigned int bits2store = bb->bitsperentry;
+  unsigned int bits2store = bitsforvalue;
 
   bb->numberofallvalues++;
   while (true)
   {
+    gt_assert(bits2store > 0);
+    if (bb->remainingbitsinbuffer >= bits2store)
+    {
+      bb->remainingbitsinbuffer -= bits2store;
+      bb->currentbitbuffer |= (uint64_t) (value << bb->remainingbitsinbuffer);
+      break;
+    }
     if (bb->remainingbitsinbuffer == 0)
     {
       (void) fwrite(&bb->currentbitbuffer,sizeof bb->currentbitbuffer,
@@ -63,20 +75,18 @@ void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value)
       bb->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
     } else
     {
-      if (bb->remainingbitsinbuffer >= bits2store)
-      {
-        bb->remainingbitsinbuffer -= bits2store;
-        bb->currentbitbuffer |= (uint64_t) (value << bb->remainingbitsinbuffer);
-        break;
-      } else
-      {
-        gt_assert(value < (1UL << bits2store));
-        bits2store -= bb->remainingbitsinbuffer;
-        bb->currentbitbuffer |= ((uint64_t) value >> bits2store);
-        bb->remainingbitsinbuffer = 0;
-      }
+      gt_assert(value < (1UL << bits2store));
+      bits2store -= bb->remainingbitsinbuffer;
+      bb->currentbitbuffer |= ((uint64_t) value >> bits2store);
+      bb->remainingbitsinbuffer = 0;
     }
   }
+}
+
+void gt_bitbuffer_next_fixed_bits_value (GtBitbuffer *bb, unsigned long value)
+{
+  gt_assert(bb->bitsperentry > 0);
+  gt_bitbuffer_next_value (bb, value, bb->bitsperentry);
 }
 
 void gt_bitbuffer_next_uint32tab(GtBitbuffer *bb,const uint32_t *tab,
@@ -87,7 +97,7 @@ void gt_bitbuffer_next_uint32tab(GtBitbuffer *bb,const uint32_t *tab,
   gt_assert (tab != NULL);
   for (uintptr = tab; uintptr < tab + len; uintptr++)
   {
-    gt_bitbuffer_next_value (bb, (unsigned long) *uintptr);
+    gt_bitbuffer_next_fixed_bits_value (bb, (unsigned long) *uintptr);
   }
 }
 
@@ -100,7 +110,7 @@ void gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
   gt_assert (tab != NULL);
   for (ulongptr = tab; ulongptr < tab + len; ulongptr++)
   {
-    gt_bitbuffer_next_value (bb, *ulongptr);
+    gt_bitbuffer_next_fixed_bits_value (bb, *ulongptr);
   }
 }
 
@@ -114,9 +124,12 @@ void gt_bitbuffer_delete(GtBitbuffer *bb)
                     sizeof bb->currentbitbuffer,
                     (size_t) 1,bb->outfp);
     }
-    (void) fseek(bb->outfp,0,SEEK_SET);
-    (void) fwrite(&bb->numberofallvalues,sizeof bb->numberofallvalues,
-                  (size_t) 1,bb->outfp);
+    if (bb->bitsperentry > 0)
+    {
+      (void) fseek(bb->outfp,0,SEEK_SET);
+      (void) fwrite(&bb->numberofallvalues,sizeof bb->numberofallvalues,
+                    (size_t) 1,bb->outfp);
+    }
   }
   gt_free(bb);
 }

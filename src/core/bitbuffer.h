@@ -25,11 +25,21 @@
 typedef struct GtBitbuffer GtBitbuffer;
 
 /* Creates a new <GtBitbuffer> for output to <outfp>.
-   <bitsperentry> specifies the number of bits per entry. */
-GtBitbuffer* gt_bitbuffer_new(FILE *outfp, uint8_t bitsperentry);
+   <bitsperentry> specifies the number of bits per entry if
+   greater than 0. In this case a header is written in the input file
+   consisting of a <uint64_t>-value specifying the number of elements
+   written and a <uint8_t> value specifying the number of bits per
+   entry. If <bitsperentry> is 0, then no header is written and
+   the number of bits for the value to be written has to be specified
+   for each call of <gt_bitbuffer_next_value>. */
+GtBitbuffer *gt_bitbuffer_new(FILE *outfp,unsigned int bitsperentry);
 
-/* Appends unsigned long <value> to <bb>. */
-void         gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value);
+/* Appends unsigned long <value> of <bitsforvalue> bits to <bb>. */
+void         gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value,
+                                      unsigned int bitsforvalue);
+
+/* Appends unsigned long <value> of <bb->bitsperentry> bits to <bb>. */
+void gt_bitbuffer_next_fixed_bits_value (GtBitbuffer *bb, unsigned long value);
 
 /* Appends unsigned 32-bit integer array <tab> of length <len> to <bb>. */
 void         gt_bitbuffer_next_uint32tab(GtBitbuffer *bb, const uint32_t *tab,

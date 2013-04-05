@@ -405,34 +405,6 @@ void gt_suffixsortspace_to_file (FILE *outfpsuftab,
              outfpsuftab);
 }
 
-/*
-static unsigned long gt_extract_compressed_value(unsigned long *tab,
-                                                 unsigned int bitsperentry,
-                                                 unsigned long idx)
-{
-  unsigned int unitoffset,
-               bitsleft = GT_BITSINBYTEBUFFER - bitsperentry;
-  unsigned long unitindex, maskright = ~0UL >> bitsleft;
-
-  idx *= bitsperentry;
-  unitoffset = (unsigned int) GT_MODWORDSIZE(idx);
-  unitindex = GT_DIVWORDSIZE(idx);
-  if (unitoffset <= (unsigned int) bitsleft)
-  {
-    return (unsigned long) (tab[unitindex] >> (bitsleft - unitoffset))
-           & maskright;
-  } else
-  {
-    return (unsigned long)
-           ((tab[unitindex] <<
-                (unitoffset + bitsperentry - GT_BITSINBYTEBUFFER)) |
-              (tab[unitindex+1] >>
-                (GT_BITSINBYTEBUFFER + bitsleft - unitoffset))) &
-           maskright;
-  }
-}
-*/
-
 void gt_suffixsortspace_compressed_to_file (const GtSuffixsortspace *sssp,
                                             GtBitbuffer *bb,
                                             unsigned long numberofsuffixes)

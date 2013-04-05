@@ -960,7 +960,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
       = gt_Sequentialsuffixarrayreader_maxbranchdepth(ssar);
     FILE *fpcompressedlcp = gt_fa_fopen_with_suffix(indexname,
                                      GT_LCPTABSUFFIX_BYTECOMPRESSED,"wb",err);
-    uint8_t bitsperentry = (uint8_t) gt_determinebitspervalue(maxbranchdepth);
+    unsigned int bitsperentry = gt_determinebitspervalue(maxbranchdepth);
     GtBitbuffer *bitbuffer = NULL;
 
     gt_assert(ssar != NULL);
@@ -980,7 +980,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
           unsigned long currentlcp;
 
           NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
-          gt_bitbuffer_next_value (bitbuffer,currentlcp);
+          gt_bitbuffer_next_fixed_bits_value (bitbuffer,currentlcp);
           elems++;
         }
       }
