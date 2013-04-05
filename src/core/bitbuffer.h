@@ -24,10 +24,9 @@
    integer arrays into a file. */
 typedef struct GtBitbuffer GtBitbuffer;
 
-/* Creates a new <GtBitbuffer> for output to <outfp>. The expected output length
-   is set to be <numberofallelements> entries of <bitsperentry> bits each. */
-GtBitbuffer* gt_bitbuffer_new(FILE *outfp, uint8_t bitsperentry,
-                              uint64_t numberofallelements);
+/* Creates a new <GtBitbuffer> for output to <outfp>.
+   <bitsperentry> specifies the number of bits per entry. */
+GtBitbuffer* gt_bitbuffer_new(FILE *outfp, uint8_t bitsperentry);
 
 /* Appends unsigned long <value> to <bb>. */
 void         gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value);

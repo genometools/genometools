@@ -34,17 +34,18 @@ struct GtBitbuffer
   FILE *outfp;
 };
 
-GtBitbuffer *gt_bitbuffer_new(FILE *outfp,uint8_t bitsperentry,
-                              uint64_t numberofallelements)
+GtBitbuffer *gt_bitbuffer_new(FILE *outfp,uint8_t bitsperentry)
 {
   GtBitbuffer *bitbuffer = gt_malloc(sizeof *bitbuffer);
+  uint64_t numberofallelements = 0; /* first write 0 as the value is not
+                                       known in advance */
 
   gt_assert(outfp != NULL);
   (void) fwrite(&numberofallelements,sizeof numberofallelements,(size_t) 1,
                 outfp);
   (void) fwrite(&bitsperentry,sizeof bitsperentry,(size_t) 1,outfp);
   gt_assert((unsigned int) bitsperentry < GT_BITSINBYTEBUFFER);
-  bitbuffer->numberofallelements = numberofallelements;
+  bitbuffer->numberofallelements = 0;
   bitbuffer->bitsperentry = (unsigned int) bitsperentry;
   bitbuffer->currentbitbuffer = 0;
   bitbuffer->currentvalue = 0;
@@ -57,6 +58,7 @@ GtBitbuffer *gt_bitbuffer_new(FILE *outfp,uint8_t bitsperentry,
 
 void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value)
 {
+  bb->numberofallelements++;
   while (true)
   {
     if (bb->remainingbitsinbuffer == 0)
@@ -130,8 +132,7 @@ void gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
 void gt_bitbuffer_delete(GtBitbuffer *bb)
 {
   uint64_t expectedwords,
-           totalbits = bb->numberofallelements *
-                       bb->bitsperentry;
+           totalbits = bb->numberofallelements * bb->bitsperentry;
   const int log2of64 = 6;
 
   expectedwords = totalbits >> log2of64; /* div by bitsize of uint64_t */
@@ -155,6 +156,9 @@ void gt_bitbuffer_delete(GtBitbuffer *bb)
                (unsigned long) expectedwords);
     }
     gt_assert(bb->wordswritten == expectedwords);
+    (void) fseek(bb->outfp,0,SEEK_SET);
+    (void) fwrite(&bb->numberofallelements,sizeof bb->numberofallelements,
+                  (size_t) 1,bb->outfp);
   }
   gt_free(bb);
 }

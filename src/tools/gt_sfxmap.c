@@ -969,8 +969,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
        haserr = true;
     } else
     {
-      bitbuffer = gt_bitbuffer_new(fpcompressedlcp,bitsperentry,
-                                   (uint64_t) totallength);
+      bitbuffer = gt_bitbuffer_new(fpcompressedlcp,bitsperentry);
     }
     if (bitsperentry > 0)
     {
