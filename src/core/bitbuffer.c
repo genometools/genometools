@@ -50,7 +50,7 @@ GtBitbuffer *gt_bitbuffer_new(FILE *outfp,uint8_t bitsperentry)
 
 void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value)
 {
-  unsigned int bits2store = 0;
+  unsigned int bits2store = bb->bitsperentry;
 
   bb->numberofallvalues++;
   while (true)
@@ -63,30 +63,17 @@ void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value)
       bb->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
     } else
     {
-      if (bits2store == 0)
+      if (bb->remainingbitsinbuffer >= bits2store)
       {
-        bits2store = bb->bitsperentry;
+        bb->remainingbitsinbuffer -= bits2store;
+        bb->currentbitbuffer |= (uint64_t) (value << bb->remainingbitsinbuffer);
+        break;
       } else
       {
-        if (bb->remainingbitsinbuffer >= bits2store)
-        {
-          unsigned int shiftleft = bb->remainingbitsinbuffer - bits2store;
-          /* use bb->remainingbitsinbuffer after subtraction for shiftleft */
-          bb->currentbitbuffer |= (uint64_t) (value << shiftleft);
-          bb->remainingbitsinbuffer -= bits2store;
-          break;
-        } else
-        {
-          unsigned long maskright = (1UL << bits2store) - 1;
-          unsigned int shiftright = bits2store - bb->remainingbitsinbuffer;
-          /* use bits2store after subtraction for shiftright */
-          /* maskright is not necessary */
-          bb->currentbitbuffer
-            |= ((uint64_t) (value & maskright) >> shiftright);
-          bits2store -= bb->remainingbitsinbuffer;
-          gt_assert(bits2store > 0);
-          bb->remainingbitsinbuffer = 0;
-        }
+        gt_assert(value < (1UL << bits2store));
+        bits2store -= bb->remainingbitsinbuffer;
+        bb->currentbitbuffer |= ((uint64_t) value >> bits2store);
+        bb->remainingbitsinbuffer = 0;
       }
     }
   }
