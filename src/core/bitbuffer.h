@@ -31,12 +31,12 @@ typedef struct GtBitbuffer GtBitbuffer;
    written and a <uint8_t> value specifying the number of bits per
    entry. If <bitsperentry> is 0, then no header is written and
    the number of bits for the value to be written has to be specified
-   for each call of <gt_bitbuffer_next_value>. */
-GtBitbuffer *gt_bitbuffer_new(FILE *outfp,unsigned int bitsperentry);
+   for each call of <gt_bitbuffer_next_value()>. */
+GtBitbuffer* gt_bitbuffer_new(FILE *outfp, unsigned int bitsperentry);
 
 /* Appends unsigned long <value> of <bitsforvalue> bits to <bb>. */
-void         gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value,
-                                      unsigned int bitsforvalue);
+void         gt_bitbuffer_next_value(GtBitbuffer *bb, unsigned long value,
+                                     unsigned int bitsforvalue);
 
 /* Appends unsigned long <value> to <bb>. Requires that <bb> has been created
    with a <bitsperentry> value > 0. */
