@@ -220,7 +220,7 @@ static void get_pagewise_page(GtSampling *sampling,
 
   gt_assert(sampling->numofsamples != 0);
   end = sampling->numofsamples - 1;
-  middle = (end - start) >> 1;
+  middle = end >> 1;
   while (start < end) {
     if (sampling->page_sampling[middle] == element_num)
       break;

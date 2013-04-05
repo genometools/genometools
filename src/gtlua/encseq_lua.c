@@ -827,7 +827,7 @@ static inline int gt_lua_get_table_as_uchararray(lua_State *L, int index,
     lua_pop(L, 1);
   }
   *outarray = arr;
-  return 0;
+  return had_err;
 }
 
 static int encseq_builder_lua_add_encoded(lua_State *L)

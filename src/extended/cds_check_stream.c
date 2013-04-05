@@ -32,10 +32,11 @@ struct GtCDSCheckStream {
 static int cds_check_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                  GtError *err)
 {
-  GtCDSCheckStream *cs = cds_check_stream_cast(ns);
+  GtCDSCheckStream *cs;
   int had_err;
   gt_error_check(err);
   cs = cds_check_stream_cast(ns);
+  gt_assert(cs);
   had_err = gt_node_stream_next(cs->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, cs->cds_check_visitor, err);

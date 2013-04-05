@@ -237,7 +237,7 @@ static int snp_annotator_visitor_feature_node(GtNodeVisitor *nv,
                 if (*variantchars != ',' && *variantchars != origchar) {
                   char variantchar = *variantchars;
 #ifndef NDEBUG
-                  char refchar = refstr[0];
+                  char refchar = refstr ? refstr[0] : '-';  /* XXX */
                   if (!had_err && mrna_strand == GT_STRAND_REVERSE)
                     had_err = gt_complement(&refchar, refchar, err);
 #endif

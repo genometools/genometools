@@ -404,23 +404,27 @@ static int last_prepare_indices(GtMatchIteratorLast *mil,
       had_err = last_prepare_fasta_seqs(gt_str_get(mil->pvt->idxfilename),
                                         mil->pvt->es1, mil->pvt->desc_to_seqno,
                                         err);
-      cmdline = gt_str_new();
-      env = getenv("GT_LAST_PATH");
-      if (env) {
-        gt_str_append_cstr(cmdline, env);
-        gt_str_append_cstr(cmdline, "/lastdb ");
-        if (!gt_file_exists(gt_str_get(cmdline))) {
-          gt_error_set(err, "cannot find LASTDB executable at %s",
-                       gt_str_get(cmdline));
-          had_err = -1;
+      if (!had_err) {
+        cmdline = gt_str_new();
+        env = getenv("GT_LAST_PATH");
+        if (env) {
+          gt_str_append_cstr(cmdline, env);
+          gt_str_append_cstr(cmdline, "/lastdb ");
+          if (!gt_file_exists(gt_str_get(cmdline))) {
+            gt_error_set(err, "cannot find LASTDB executable at %s",
+                         gt_str_get(cmdline));
+            had_err = -1;
+          }
+        } else {
+          gt_str_append_cstr(cmdline, "lastdb ");
         }
-      } else {
-        gt_str_append_cstr(cmdline, "lastdb ");
       }
-      gt_str_append_str(cmdline, idxfilename);
-      gt_str_append_cstr(cmdline, " ");
-      gt_str_append_str(cmdline, idxfilename);
-      had_err = system(gt_str_get(cmdline));
+      if (!had_err) {
+        gt_str_append_str(cmdline, idxfilename);
+        gt_str_append_cstr(cmdline, " ");
+        gt_str_append_str(cmdline, idxfilename);
+        had_err = system(gt_str_get(cmdline));
+      }
       if (had_err)
         gt_error_set(err, "error forking the LAST process");
       gt_str_delete(cmdline);

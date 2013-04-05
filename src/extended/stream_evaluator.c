@@ -1420,8 +1420,9 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
 
   /* process the prediction stream */
   if (!had_err) {
-    while (!(had_err = gt_node_stream_next(se->prediction, &gn, err)) &&
-           gn) {
+    while (!had_err &&
+             !(had_err = gt_node_stream_next(se->prediction, &gn, err)) &&
+                gn) {
       /* we consider only genome features */
       if ((fn = gt_feature_node_try_cast(gn))) {
         /* get (real) slot */

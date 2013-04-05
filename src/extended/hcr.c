@@ -687,7 +687,7 @@ static GtRBTree *seq_decoder_init_file_info(FastqFileInfo *fileinfos,
                                             unsigned long num_off_files)
 {
   GtRBTree *tree;
-  bool nodecreated;
+  bool nodecreated = false;
   unsigned long i;
 
   tree = gt_rbtree_new(hcr_cmp_FastqFileInfo, NULL, NULL);

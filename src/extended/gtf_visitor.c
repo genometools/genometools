@@ -103,7 +103,8 @@ static int gtf_show_transcript(GtFeatureNode *feature_node,
           gt_array_size(gtf_visitor->CDS_features), sizeof (GtGenomeNode*),
           (GtCompare) gt_genome_node_compare);
     /* show start_codon feature */
-    fn = *(GtFeatureNode**) gt_array_get(gtf_visitor->CDS_features, 0);
+    /* fn = *(GtFeatureNode**) */ (void) gt_array_get(gtf_visitor->CDS_features,
+                                                      0);
     /* XXX: to be done */
 
     /* show CDS features */

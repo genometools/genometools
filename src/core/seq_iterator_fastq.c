@@ -356,8 +356,6 @@ int gt_seq_iterator_fastq_next(GtSeqIterator *seqit,
 {
   int errstatus = 0;
   GtSeqIteratorFastQ *seqitf;
-  gt_assert(seqit);
-  seqitf = gt_seq_iterator_fastq_cast((GtSeqIterator*) seqit);
   gt_assert(seqit && len && desc);
 
   seqitf = gt_seq_iterator_fastq_cast(seqit);

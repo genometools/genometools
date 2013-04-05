@@ -120,7 +120,7 @@ int gt_lua_get_table_as_strarray(lua_State *L, int index, GtStrArray *outarray,
     gt_str_array_add_cstr(outarray, lua_tostring(L, -1));
     lua_pop(L, 1);
   }
-  return 0;
+  return had_err;
 }
 
 int gt_lua_error(lua_State *L, GtError *err)

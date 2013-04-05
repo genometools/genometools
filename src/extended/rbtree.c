@@ -352,7 +352,7 @@ int gt_rbtree_erase(GtRBTree *tree, void *key)
 
     /* Set up our helpers */
     q = &head;
-    g = p = NULL;
+    p = NULL;
     q->link[1] = tree->root;
 
     /* Search and push a red node down to fix red violations as we go */

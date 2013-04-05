@@ -1222,7 +1222,7 @@ static int gt_feature_index_gfflike_save_chg(void *key, GT_UNUSED void *val,
     gt_rdb_stmt_reset(oci->fis->stmts[GT_PSTMT_NODE_DELETE_AS_PARENT], err);
     gt_rdb_stmt_bind_int(oci->fis->stmts[GT_PSTMT_NODE_DELETE_AS_PARENT],
                          0, *id, err);
-    rval = gt_rdb_stmt_exec(oci->fis->stmts[GT_PSTMT_NODE_DELETE_AS_PARENT],
+    (void) gt_rdb_stmt_exec(oci->fis->stmts[GT_PSTMT_NODE_DELETE_AS_PARENT],
                             err);
     fni = gt_feature_node_iterator_new_direct(fn);
     while ((child = gt_feature_node_iterator_next(fni))) {
@@ -1233,7 +1233,7 @@ static int gt_feature_index_gfflike_save_chg(void *key, GT_UNUSED void *val,
                              0, *child_id, err);
         gt_rdb_stmt_bind_int(oci->fis->stmts[GT_PSTMT_PARENT_INSERT],
                              1, *id, err);
-        rval = gt_rdb_stmt_exec(oci->fis->stmts[GT_PSTMT_PARENT_INSERT],
+        (void) gt_rdb_stmt_exec(oci->fis->stmts[GT_PSTMT_PARENT_INSERT],
                                 err);
       }
     }

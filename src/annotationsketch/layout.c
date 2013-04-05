@@ -407,9 +407,7 @@ int gt_layout_get_height(GtLayout *layout, unsigned long *result,
   GtTracklineInfo lines;
   double tmp, head_track_space = HEAD_TRACK_SPACE_DEFAULT;
   bool show_track_captions = true;
-  unsigned long height,
-                line_height,
-                i;
+  unsigned long height, i;
   gt_assert(layout);
 
   had_err = layout_all_tracks(layout, err);
@@ -421,23 +419,6 @@ int gt_layout_get_height(GtLayout *layout, unsigned long *result,
       return -1;
     }
     height = lines.height;
-
-    /* obtain line height and spacer from style */
-    tmp = BAR_HEIGHT_DEFAULT;
-    if (gt_style_get_num(layout->style,
-                         "format", "bar_height",
-                         &tmp, NULL, err) == GT_STYLE_QUERY_ERROR) {
-      return -1;
-    }
-    line_height = tmp;
-
-    tmp = BAR_VSPACE_DEFAULT;
-    if (gt_style_get_num(layout->style,
-                         "format", "bar_vspace",
-                         &tmp, NULL, err) == GT_STYLE_QUERY_ERROR) {
-      return -1;
-    }
-    line_height += tmp;
 
     if (gt_style_get_bool(layout->style,
                           "format","show_track_captions",

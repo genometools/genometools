@@ -1761,7 +1761,6 @@ static GtEncseqAccessType determineoptimalsssptablerep(
                                     totallength,numofseparators);
   if (sepsize < sepsizemin)
   {
-    sepsizemin = sepsize;
     satmin = GT_ACCESS_TYPE_UINT32TABLES;
   }
   return satmin;
@@ -3007,7 +3006,6 @@ static int fillViabitaccess(GtEncseq *encseq,
       {
         exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
         pagenumber++;
-        nextcheckpos += 1UL + exceptiontable->maxrangevalue;
       }
       break;
     }
@@ -5203,7 +5201,7 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
   totaldesclength = encseq->numofdbsequences; /* for each new line */
   for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
   {
-    desptr = gt_encseq_description(encseq,&desclen,seqnum);
+    (void) gt_encseq_description(encseq,&desclen,seqnum);
     totaldesclength += desclen;
   }
   copydestab = gt_malloc(sizeof (*copydestab) * totaldesclength);
@@ -5729,7 +5727,6 @@ static int countnumberofexceptionranges(const GtAlphabet *alpha,
         {
           if (in_range) {
             specialcharinfo->realexceptionranges++;
-            in_range = false;
           }
         } else /* retval < 0 */
         {
@@ -5908,7 +5905,6 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
               specialcharinfo->lengthoflongestnonspecial =
                                                       lastnonspecialrangelength;
             }
-            lastnonspecialrangelength = 0;
           }
           if (lastwildcardrangelength > 0)
           {

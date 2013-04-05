@@ -55,7 +55,6 @@ static int msv_fixup_representatives(GtFeatureNode *fn, void *data,
       gt_hashmap_add(msv->first_elems,
                      gt_feature_node_get_multi_representative(fn),
                      fn);
-      rep = fn;
       gt_feature_node_unset_multi(fn);
       gt_feature_node_make_multi_representative(fn);
     } else {

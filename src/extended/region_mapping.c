@@ -493,7 +493,7 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
         }
       }
       if (!had_err)
-        had_err = gt_seq_col_grep_desc_md5(rm->seq_col, &md5, seqid, err);
+        (void) gt_seq_col_grep_desc_md5(rm->seq_col, &md5, seqid, err);
       *offset = 1;
     }
     else if (rm->useseqno) {

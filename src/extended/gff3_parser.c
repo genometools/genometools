@@ -1287,7 +1287,6 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
           GtStrArray *target_ids;
           GtArray *target_ranges, *target_strands;
           /* try to tidy up the ``Target'' attributes */
-          had_err = 0;
           gt_error_unset(err);
           target_ids = gt_str_array_new();
           target_ranges = gt_array_new(sizeof (GtRange));

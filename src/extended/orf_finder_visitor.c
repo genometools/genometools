@@ -305,7 +305,7 @@ static int gt_orf_finder_visitor_feature_node(GtNodeVisitor *gv,
         else if (gt_feature_node_has_children(curnode)) {
           GtFeatureNode *tmpnode = NULL;
           GtFeatureNodeIterator *tmpgfi = gt_feature_node_iterator_new(curnode);
-          tmpnode = gt_feature_node_iterator_next(tmpgfi);
+          (void) gt_feature_node_iterator_next(tmpgfi);
           while ((tmpnode = gt_feature_node_iterator_next(tmpgfi))) {
             gft = gt_feature_node_get_type(tmpnode);
             if (strcmp(gft, (const char*) GT_ORF_TYPE) == 0) {

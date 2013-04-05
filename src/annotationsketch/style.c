@@ -821,7 +821,10 @@ GtStyle* gt_style_clone(const GtStyle *sty, GtError *err)
     had_err = gt_style_load_str(new_sty, sty_buffer, err);
   gt_rwlock_unlock(sty->clone_lock);
   gt_str_delete(sty_buffer);
-  return new_sty;
+  if (had_err) {
+    gt_style_delete(new_sty);
+    return NULL;
+  } else return new_sty;
 }
 
 int gt_style_unit_test(GtError *err)
