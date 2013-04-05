@@ -127,11 +127,11 @@ void gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
   }
 }
 
-void gt_bitbuffer_delete(GtBitbuffer *bitbuffer)
+void gt_bitbuffer_delete(GtBitbuffer *bb)
 {
   uint64_t expectedwords,
-           totalbits = bitbuffer->numberofallelements *
-                       bitbuffer->bitsperentry;
+           totalbits = bb->numberofallelements *
+                       bb->bitsperentry;
   const int log2of64 = 6;
 
   expectedwords = totalbits >> log2of64; /* div by bitsize of uint64_t */
@@ -139,22 +139,22 @@ void gt_bitbuffer_delete(GtBitbuffer *bitbuffer)
   {
     expectedwords++;
   }
-  if (bitbuffer->outfp != NULL)
+  if (bb->outfp != NULL)
   {
-    if (bitbuffer->remainingbitsinbuffer < GT_BITSINBYTEBUFFER)
+    if (bb->remainingbitsinbuffer < GT_BITSINBYTEBUFFER)
     {
-      (void) fwrite(&bitbuffer->currentbitbuffer,
-                    sizeof bitbuffer->currentbitbuffer,
-                    (size_t) 1,bitbuffer->outfp);
-      bitbuffer->wordswritten++;
+      (void) fwrite(&bb->currentbitbuffer,
+                    sizeof bb->currentbitbuffer,
+                    (size_t) 1,bb->outfp);
+      bb->wordswritten++;
     }
-    if (bitbuffer->wordswritten != expectedwords)
+    if (bb->wordswritten != expectedwords)
     {
       fprintf(stderr,"wordswritten = %lu != %lu = expextedwords\n",
-               (unsigned long) bitbuffer->wordswritten,
+               (unsigned long) bb->wordswritten,
                (unsigned long) expectedwords);
     }
-    gt_assert(bitbuffer->wordswritten == expectedwords);
+    gt_assert(bb->wordswritten == expectedwords);
   }
-  gt_free(bitbuffer);
+  gt_free(bb);
 }

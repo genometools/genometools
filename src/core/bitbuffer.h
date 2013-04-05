@@ -17,22 +17,31 @@
 
 #ifndef BITBUFFER_H
 #define BITBUFFER_H
+
 #include <stdio.h>
 
+/* The <GtBitbuffer> class provides means to sequentially write bit-compressed
+   integer arrays into a file. */
 typedef struct GtBitbuffer GtBitbuffer;
 
-GtBitbuffer *gt_bitbuffer_new(FILE *outfp,uint8_t bitsperentry,
+/* Creates a new <GtBitbuffer> for output to <outfp>. The expected output length
+   is set to be <numberofallelements> entries of <bitsperentry> bits each. */
+GtBitbuffer* gt_bitbuffer_new(FILE *outfp, uint8_t bitsperentry,
                               uint64_t numberofallelements);
 
-void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value);
+/* Appends unsigned long <value> to <bb>. */
+void         gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value);
 
-void gt_bitbuffer_next_uint32tab(GtBitbuffer *bb,const uint32_t *tab,
-                                 unsigned long len);
+/* Appends unsigned 32-bit integer array <tab> of length <len> to <bb>. */
+void         gt_bitbuffer_next_uint32tab(GtBitbuffer *bb,const uint32_t *tab,
+                                         unsigned long len);
 
-void gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
-                                const unsigned long *tab,
-                                unsigned long len);
+/* Appends unsigned long integer array <tab> of length <len> to <bb>. */
+void         gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
+                                        const unsigned long *tab,
+                                        unsigned long len);
 
-void gt_bitbuffer_delete(GtBitbuffer *bitbuffer);
+/* Deleted <bb> and frees all associated memory. */
+void         gt_bitbuffer_delete(GtBitbuffer *bb);
 
 #endif
