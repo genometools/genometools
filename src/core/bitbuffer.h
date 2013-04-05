@@ -38,8 +38,10 @@ GtBitbuffer *gt_bitbuffer_new(FILE *outfp,unsigned int bitsperentry);
 void         gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value,
                                       unsigned int bitsforvalue);
 
-/* Appends unsigned long <value> of <bb->bitsperentry> bits to <bb>. */
-void gt_bitbuffer_next_fixed_bits_value (GtBitbuffer *bb, unsigned long value);
+/* Appends unsigned long <value> to <bb>. Requires that <bb> has been created
+   with a <bitsperentry> value > 0. */
+void         gt_bitbuffer_next_fixed_bits_value(GtBitbuffer *bb,
+                                                unsigned long value);
 
 /* Appends unsigned 32-bit integer array <tab> of length <len> to <bb>. */
 void         gt_bitbuffer_next_uint32tab(GtBitbuffer *bb, const uint32_t *tab,
