@@ -33,7 +33,7 @@ GtBitbuffer* gt_bitbuffer_new(FILE *outfp, uint8_t bitsperentry,
 void         gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value);
 
 /* Appends unsigned 32-bit integer array <tab> of length <len> to <bb>. */
-void         gt_bitbuffer_next_uint32tab(GtBitbuffer *bb,const uint32_t *tab,
+void         gt_bitbuffer_next_uint32tab(GtBitbuffer *bb, const uint32_t *tab,
                                          unsigned long len);
 
 /* Appends unsigned long integer array <tab> of length <len> to <bb>. */
@@ -41,7 +41,7 @@ void         gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
                                         const unsigned long *tab,
                                         unsigned long len);
 
-/* Deleted <bb> and frees all associated memory. */
+/* Deletes <bb> and frees all associated memory. */
 void         gt_bitbuffer_delete(GtBitbuffer *bb);
 
 #endif
