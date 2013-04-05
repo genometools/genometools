@@ -25,78 +25,66 @@
 struct GtBitbuffer
 {
   unsigned int remainingbitsinbuffer,
-               bitsperentry,
-               bits2store;
-  unsigned long currentvalue;
+               bitsperentry;
   uint64_t currentbitbuffer,
-           numberofallelements,
-           wordswritten;
+           numberofallvalues;
   FILE *outfp;
 };
 
 GtBitbuffer *gt_bitbuffer_new(FILE *outfp,uint8_t bitsperentry)
 {
   GtBitbuffer *bitbuffer = gt_malloc(sizeof *bitbuffer);
-  uint64_t numberofallelements = 0; /* first write 0 as the value is not
-                                       known in advance */
 
+  bitbuffer->numberofallvalues = 0;
   gt_assert(outfp != NULL);
-  (void) fwrite(&numberofallelements,sizeof numberofallelements,(size_t) 1,
-                outfp);
+  (void) fwrite(&bitbuffer->numberofallvalues,
+                sizeof bitbuffer->numberofallvalues,(size_t) 1,outfp);
   (void) fwrite(&bitsperentry,sizeof bitsperentry,(size_t) 1,outfp);
   gt_assert((unsigned int) bitsperentry < GT_BITSINBYTEBUFFER);
-  bitbuffer->numberofallelements = 0;
   bitbuffer->bitsperentry = (unsigned int) bitsperentry;
   bitbuffer->currentbitbuffer = 0;
-  bitbuffer->currentvalue = 0;
   bitbuffer->outfp = outfp;
   bitbuffer->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
-  bitbuffer->bits2store = 0;
-  bitbuffer->wordswritten = 0;
   return bitbuffer;
 }
 
 void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value)
 {
-  bb->numberofallelements++;
+  unsigned int bits2store = 0;
+
+  bb->numberofallvalues++;
   while (true)
   {
     if (bb->remainingbitsinbuffer == 0)
     {
       (void) fwrite(&bb->currentbitbuffer,sizeof bb->currentbitbuffer,
                     (size_t) 1,bb->outfp);
-      bb->wordswritten++;
       bb->currentbitbuffer = 0;
       bb->remainingbitsinbuffer = GT_BITSINBYTEBUFFER;
     } else
     {
-      if (bb->bits2store == 0)
+      if (bits2store == 0)
       {
-        bb->currentvalue = value;
-        bb->bits2store = bb->bitsperentry;
+        bits2store = bb->bitsperentry;
       } else
       {
-        if (bb->remainingbitsinbuffer >= bb->bits2store)
+        if (bb->remainingbitsinbuffer >= bits2store)
         {
-          unsigned int shiftleft = bb->remainingbitsinbuffer -
-                                   bb->bits2store;
+          unsigned int shiftleft = bb->remainingbitsinbuffer - bits2store;
           /* use bb->remainingbitsinbuffer after subtraction for shiftleft */
-          bb->currentbitbuffer
-            |= (uint64_t) (bb->currentvalue << shiftleft);
-          bb->remainingbitsinbuffer -= bb->bits2store;
-          bb->bits2store = 0;
+          bb->currentbitbuffer |= (uint64_t) (value << shiftleft);
+          bb->remainingbitsinbuffer -= bits2store;
           break;
         } else
         {
-          unsigned long maskright = (1UL << bb->bits2store) - 1;
-          unsigned int shiftright = bb->bits2store -
-                                    bb->remainingbitsinbuffer;
-          /* use bb->bits2store after subtraction for shiftright */
+          unsigned long maskright = (1UL << bits2store) - 1;
+          unsigned int shiftright = bits2store - bb->remainingbitsinbuffer;
+          /* use bits2store after subtraction for shiftright */
           /* maskright is not necessary */
           bb->currentbitbuffer
-            |= ((uint64_t) (bb->currentvalue & maskright) >> shiftright);
-          bb->bits2store -= bb->remainingbitsinbuffer;
-          gt_assert(bb->bits2store > 0);
+            |= ((uint64_t) (value & maskright) >> shiftright);
+          bits2store -= bb->remainingbitsinbuffer;
+          gt_assert(bits2store > 0);
           bb->remainingbitsinbuffer = 0;
         }
       }
@@ -131,15 +119,6 @@ void gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
 
 void gt_bitbuffer_delete(GtBitbuffer *bb)
 {
-  uint64_t expectedwords,
-           totalbits = bb->numberofallelements * bb->bitsperentry;
-  const int log2of64 = 6;
-
-  expectedwords = totalbits >> log2of64; /* div by bitsize of uint64_t */
-  if ((totalbits & (uint64_t) 63) > 0)  /* mod by bitsize of uint64_t */
-  {
-    expectedwords++;
-  }
   if (bb->outfp != NULL)
   {
     if (bb->remainingbitsinbuffer < GT_BITSINBYTEBUFFER)
@@ -147,17 +126,9 @@ void gt_bitbuffer_delete(GtBitbuffer *bb)
       (void) fwrite(&bb->currentbitbuffer,
                     sizeof bb->currentbitbuffer,
                     (size_t) 1,bb->outfp);
-      bb->wordswritten++;
     }
-    if (bb->wordswritten != expectedwords)
-    {
-      fprintf(stderr,"wordswritten = %lu != %lu = expextedwords\n",
-               (unsigned long) bb->wordswritten,
-               (unsigned long) expectedwords);
-    }
-    gt_assert(bb->wordswritten == expectedwords);
     (void) fseek(bb->outfp,0,SEEK_SET);
-    (void) fwrite(&bb->numberofallelements,sizeof bb->numberofallelements,
+    (void) fwrite(&bb->numberofallvalues,sizeof bb->numberofallvalues,
                   (size_t) 1,bb->outfp);
   }
   gt_free(bb);
