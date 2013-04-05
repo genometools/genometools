@@ -174,8 +174,7 @@ int gt_colorspace_decode_string(GtStr *color_string, GtStr *result,
 
 int gt_colorspace_unit_test(GtError *err)
 {
-  int had_err = 0,
-      test_err = 0;
+  int had_err = 0;
   GtStr *in_gt = gt_str_new_cstr("A0112233122331211332311223"),
         *con_gt = gt_str_new_cstr("AACAGATACTCGCAGTGCGATGTCGA"),
         *output = gt_str_new();
@@ -187,6 +186,7 @@ int gt_colorspace_unit_test(GtError *err)
 
   if (!had_err)
   {
+    int test_err;
     GtError *my_err = gt_error_new();
 
     gt_str_delete(in_gt);
@@ -201,10 +201,10 @@ int gt_colorspace_unit_test(GtError *err)
     gt_ensure(had_err, gt_error_is_set(my_err));
 
     gt_error_delete(my_err);
-    test_err = 0;
   }
   if (!had_err)
   {
+    int test_err;
     GtError *my_err = gt_error_new();
 
     gt_str_delete(in_gt);
@@ -219,7 +219,6 @@ int gt_colorspace_unit_test(GtError *err)
     gt_ensure(had_err, gt_error_is_set(my_err));
 
     gt_error_delete(my_err);
-    test_err = 0;
   }
   gt_str_delete(in_gt);
   gt_str_delete(con_gt);

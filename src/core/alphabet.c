@@ -835,8 +835,8 @@ static int comparechar(const void *a,const void *b)
 bool gt_alphabet_is_protein(const GtAlphabet *alphabet)
 {
   GtAlphabet proteinalphabet;
-  unsigned int i, reduceddomainsize1, reduceddomainsize2;
-  bool isprot = false;
+  unsigned int reduceddomainsize1, reduceddomainsize2;
+  bool isprot;
   GtUchar domainbuf1[GT_MAXALPHABETCHARACTER+1],
         domainbuf2[GT_MAXALPHABETCHARACTER+1];
 
@@ -848,15 +848,14 @@ bool gt_alphabet_is_protein(const GtAlphabet *alphabet)
   {
     qsort(&domainbuf1[0],(size_t) reduceddomainsize1,sizeof (char),comparechar);
     qsort(&domainbuf2[0],(size_t) reduceddomainsize2,sizeof (char),comparechar);
-    for (i=0; i < reduceddomainsize2; i++)
+    if (memcmp((const void *) domainbuf1,(const void *) domainbuf2,
+               reduceddomainsize2 * sizeof (GtUchar)) == 0)
     {
-      if (domainbuf1[i] != domainbuf2[i])
-      {
-        isprot = false;
-        break;
-      }
+      isprot = true;
+    } else
+    {
+      isprot = false;
     }
-    isprot = true;
   } else
   {
     isprot = false;

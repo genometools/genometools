@@ -961,7 +961,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
     FILE *fpcompressedlcp = gt_fa_fopen_with_suffix(indexname,
                                      GT_LCPTABSUFFIX_BYTECOMPRESSED,"wb",err);
     uint8_t bitsperentry = (uint8_t) gt_determinebitspervalue(maxbranchdepth);
-    GtBitbuffer *bitbuffer;
+    GtBitbuffer *bitbuffer = NULL;
 
     gt_assert(ssar != NULL);
     if (fpcompressedlcp == NULL)

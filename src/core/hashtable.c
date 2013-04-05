@@ -417,7 +417,7 @@ gt_ht_shrink(GtHashtable *ht)
       && ht->table_size_log > MIN_SIZE_LOG)
   {
     unsigned short new_size_log = ht->table_size_log;
-    htsize_t low_fill = ht->low_fill, old_low_fill = low_fill;
+    htsize_t low_fill = ht->low_fill, old_low_fill;
     do {
       old_low_fill = low_fill;
       --new_size_log;

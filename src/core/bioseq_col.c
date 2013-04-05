@@ -55,7 +55,7 @@ static int grep_desc(GtBioseqCol *bsc, unsigned long *filenum,
   unsigned long i, j;
   const GtSeqInfo *seq_info_ptr;
   GtSeqInfo seq_info;
-  bool match;
+  bool match = false;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(bsc && filenum && seqnum && seqid);

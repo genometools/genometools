@@ -54,7 +54,7 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, unsigned long *filenum,
   unsigned long j;
   const GtSeqInfo *seq_info_ptr;
   GtSeqInfo seq_info;
-  bool match;
+  bool match = false;
   int had_err = 0;
   gt_error_check(err);
 

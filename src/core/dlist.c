@@ -336,6 +336,7 @@ int gt_dlist_unit_test(GtError *err)
     for (dlistelem = gt_dlist_first(dlist); dlistelem != NULL;
          dlistelem = gt_dlistelem_next(dlistelem)) {
       data = gt_dlistelem_get_data(dlistelem);
+      gt_assert(j < MAX_SIZE);
       gt_ensure(had_err, *data == elems[j]);
       j++;
     }
