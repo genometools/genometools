@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +31,9 @@
 
 struct GtDescBuffer {
   char *buf;
-  unsigned long length;
+  unsigned long length,
+                maxlength,
+                curlength;
   size_t allocated;
   bool finished,
        dirty,
@@ -46,6 +48,7 @@ GtDescBuffer* gt_desc_buffer_new(void)
   GtDescBuffer *db = gt_malloc(sizeof *db);
   db->buf = gt_calloc(GT_DESC_BUFFER_INIT_SIZE, sizeof (char));
   db->length = 0;
+  db->maxlength = db->curlength = 0;
   db->allocated = GT_DESC_BUFFER_INIT_SIZE;
   db->finished = false;
   db->dirty = true;
@@ -82,6 +85,7 @@ void gt_desc_buffer_append_char(GtDescBuffer *db, char c)
     db->buf = gt_dynalloc(db->buf, &db->allocated,
                           (db->length + 2) * sizeof (char));
   }
+  db->curlength++;
   db->buf[db->length++] = c;
 }
 
@@ -99,6 +103,9 @@ void gt_desc_buffer_finish(GtDescBuffer *db)
   db->seen_whitespace = false;
   /* XXX: maybe do a gt_cstr_rtrim(..., ' ') equivalent? */
   gt_desc_buffer_append_char(db, '\0');
+  if (db->curlength > db->maxlength)
+    db->maxlength = db->curlength;
+  db->curlength = 0;
   db->finished = true;
 }
 
@@ -132,6 +139,12 @@ void gt_desc_buffer_reset(GtDescBuffer *db)
     gt_queue_add(db->startqueue, (void*) 0);
   }
   db->dirty = false;
+}
+
+unsigned long gt_desc_buffer_max_length(GtDescBuffer *db)
+{
+  gt_assert(db);
+  return db->maxlength;
 }
 
 GtDescBuffer* gt_desc_buffer_ref(GtDescBuffer *db)

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +37,8 @@ void          gt_desc_buffer_append_char(GtDescBuffer *db, char c);
 void          gt_desc_buffer_finish(GtDescBuffer *db);
 /* Reset <db> to length 0. */
 void          gt_desc_buffer_reset(GtDescBuffer *db);
+/* Returns the maximum length of any description passed through <db>. */
+unsigned long gt_desc_buffer_max_length(GtDescBuffer *db);
 /* Decrease the reference count for <db> or delete it, if this was the last
    reference. */
 void          gt_desc_buffer_delete(GtDescBuffer *db);
