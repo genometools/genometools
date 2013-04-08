@@ -251,7 +251,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
     if (sfxstrategy->compressedoutput)
     {
       unsigned long totallength = gt_encseq_total_length(encseq);
-      uint8_t bitsperentry = (uint8_t) gt_determinebitspervalue(totallength);
+      unsigned int bitsperentry = gt_determinebitspervalue(totallength);
 
       bitbuffer = gt_bitbuffer_new(outfileinfo->outfpsuftab,bitsperentry);
     }
