@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,22 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LTR_VISITOR_H
-#define LTR_VISITOR_H
+#ifndef LTRDIGEST_STRAND_ASSIGN_VISITOR_H
+#define LTRDIGEST_STRAND_ASSIGN_VISITOR_H
+
+#include "extended/node_visitor_api.h"
 
 /* Implements the <GtNodeVisitor> interface. */
-typedef struct GtLTRVisitor GtLTRVisitor;
+typedef struct GtLTRdigestStrandAssignVisitor GtLTRdigestStrandAssignVisitor;
 
-#include "extended/node_visitor.h"
-#include "ltr/ltrelement.h"
-
-const GtNodeVisitorClass* gt_ltr_visitor_class(void);
-GtNodeVisitor*            gt_ltr_visitor_new(GtLTRElement *element);
-
-#define gt_ltr_visitor_cast(GV)\
-        gt_node_visitor_cast(gt_ltr_visitor_class(), GV)
-
-#define gt_ltr_visitor_try_cast(GV)\
-        gt_node_visitor_try_cast(gt_ltr_visitor_class(), GV)
+GtNodeVisitor* gt_ltrdigest_strand_assign_visitor_new(void);
 
 #endif

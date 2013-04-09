@@ -79,9 +79,7 @@
 #include "ltr/gt_ltrclustering.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/gt_ltrharvest.h"
-#include "ltr/ltrelement.h"
-#include "ltr/pbs.h"
-#include "ltr/ppt.h"
+#include "ltr/ltrdigest_pbs_visitor.h"
 #include "match/rdj-spmlist.h"
 #include "match/rdj-strgraph.h"
 #include "match/shu-encseq-gc.h"
@@ -308,14 +306,13 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
   gt_hashmap_add(unit_tests, "Lua serializer module",
                                                    gt_lua_serializer_unit_test);
-  gt_hashmap_add(unit_tests, "ltrelement module", gt_ltrelement_unit_test);
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
   gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
   gt_hashmap_add(unit_tests, "MD5 seqid module", gt_md5_seqid_unit_test);
   gt_hashmap_add(unit_tests, "rdj: suffix-prefix matches list module",
                                                           gt_spmlist_unit_test);
-  gt_hashmap_add(unit_tests, "PBS finder module", gt_pbs_unit_test);
-  gt_hashmap_add(unit_tests, "PPT finder module", gt_ppt_unit_test);
+  gt_hashmap_add(unit_tests, "PBS finder module",
+                                            gt_ltrdigest_pbs_visitor_unit_test);
   gt_hashmap_add(unit_tests, "popcount sorted tab", gt_popcount_tab_unit_test);
   gt_hashmap_add(unit_tests, "quality module", gt_quality_unit_test);
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);

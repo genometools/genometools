@@ -159,63 +159,6 @@ SQLITE3_SRC:=$(SQLITE3_DIR)/sqlite3.c
 SQLITE3_OBJ:=$(SQLITE3_SRC:%.c=obj/%.o)
 SQLITE3_DEP:=$(SQLITE3_SRC:%.c=obj/%.d)
 
-HMMER_BASE:=src/external/hmmer-3.0
-HMMER_DIR:=$(HMMER_BASE)/src
-HMMER_SRC:=$(HMMER_DIR)/emit.c $(HMMER_DIR)/build.c \
-           $(HMMER_DIR)/errors.c $(HMMER_DIR)/evalues.c \
-           $(HMMER_DIR)/eweight.c \
-           $(HMMER_DIR)/generic_decoding.c $(HMMER_DIR)/modelconfig.c \
-           $(HMMER_DIR)/generic_fwdback.c $(HMMER_DIR)/modelstats.c \
-           $(HMMER_DIR)/generic_msv.c $(HMMER_DIR)/mpisupport.c \
-           $(HMMER_DIR)/generic_null2.c $(HMMER_DIR)/p7_alidisplay.c \
-           $(HMMER_DIR)/generic_optacc.c $(HMMER_DIR)/p7_bg.c \
-           $(HMMER_DIR)/generic_stotrace.c $(HMMER_DIR)/p7_builder.c \
-           $(HMMER_DIR)/generic_viterbi.c $(HMMER_DIR)/p7_domaindef.c \
-           $(HMMER_DIR)/generic_vtrace.c $(HMMER_DIR)/p7_gmx.c \
-           $(HMMER_DIR)/h2_io.c $(HMMER_DIR)/p7_hmm.c \
-           $(HMMER_DIR)/heatmap.c $(HMMER_DIR)/p7_hmmfile.c \
-           $(HMMER_DIR)/p7_pipeline.c $(HMMER_DIR)/p7_prior.c \
-           $(HMMER_DIR)/p7_profile.c $(HMMER_DIR)/p7_spensemble.c \
-           $(HMMER_DIR)/hmmer.c $(HMMER_DIR)/p7_tophits.c \
-           $(HMMER_DIR)/p7_trace.c $(HMMER_DIR)/phmmer.c \
-           $(HMMER_DIR)/seqmodel.c $(HMMER_DIR)/tracealign.c \
-           $(HMMER_DIR)/logsum.c $(HMMER_DIR)/impl/decoding.c \
-           $(HMMER_DIR)/impl/optacc.c \
-           $(HMMER_DIR)/impl/fwdback.c $(HMMER_DIR)/impl/p7_omx.c \
-           $(HMMER_DIR)/impl/io.c $(HMMER_DIR)/impl/p7_oprofile.c \
-           $(HMMER_DIR)/impl/mpi.c $(HMMER_DIR)/impl/stotrace.c \
-           $(HMMER_DIR)/impl/msvfilter.c $(HMMER_DIR)/impl/vitfilter.c \
-           $(HMMER_DIR)/impl/null2.c
-HMMER_OBJ:=$(HMMER_SRC:%.c=%.o)
-
-EASEL_DIR:=$(HMMER_BASE)/easel
-EASEL_SRC:=$(EASEL_DIR)/easel.c $(EASEL_DIR)/esl_randomseq.c \
-           $(EASEL_DIR)/esl_alphabet.c $(EASEL_DIR)/esl_ratematrix.c \
-           $(EASEL_DIR)/esl_cluster.c $(EASEL_DIR)/esl_regexp.c \
-           $(EASEL_DIR)/esl_dirichlet.c $(EASEL_DIR)/esl_rootfinder.c \
-           $(EASEL_DIR)/esl_distance.c $(EASEL_DIR)/esl_scorematrix.c \
-           $(EASEL_DIR)/esl_dmatrix.c $(EASEL_DIR)/esl_sq.c \
-           $(EASEL_DIR)/esl_exponential.c $(EASEL_DIR)/esl_sqio_ascii.c \
-           $(EASEL_DIR)/esl_fileparser.c $(EASEL_DIR)/esl_sqio.c \
-           $(EASEL_DIR)/esl_gamma.c $(EASEL_DIR)/esl_sqio_ncbi.c \
-           $(EASEL_DIR)/esl_getopts.c $(EASEL_DIR)/esl_sse.c \
-           $(EASEL_DIR)/esl_gev.c $(EASEL_DIR)/esl_ssi.c \
-           $(EASEL_DIR)/esl_gumbel.c $(EASEL_DIR)/esl_stack.c \
-           $(EASEL_DIR)/esl_histogram.c $(EASEL_DIR)/esl_stats.c \
-           $(EASEL_DIR)/esl_hmm.c $(EASEL_DIR)/esl_stopwatch.c \
-           $(EASEL_DIR)/esl_hyperexp.c $(EASEL_DIR)/esl_stretchexp.c \
-           $(EASEL_DIR)/esl_keyhash.c \
-           $(EASEL_DIR)/esl_minimizer.c $(EASEL_DIR)/esl_threads.c \
-           $(EASEL_DIR)/esl_mixgev.c $(EASEL_DIR)/esl_tree.c \
-           $(EASEL_DIR)/esl_mpi.c $(EASEL_DIR)/esl_vectorops.c \
-           $(EASEL_DIR)/esl_msa.c $(EASEL_DIR)/esl_vmx.c \
-           $(EASEL_DIR)/esl_msacluster.c $(EASEL_DIR)/esl_weibull.c \
-           $(EASEL_DIR)/esl_msashuffle.c $(EASEL_DIR)/esl_workqueue.c \
-           $(EASEL_DIR)/esl_msaweight.c $(EASEL_DIR)/esl_wuss.c \
-           $(EASEL_DIR)/esl_normal.c $(EASEL_DIR)/esl_paml.c \
-           $(EASEL_DIR)/esl_random.c
-EASEL_OBJ:=$(EASEL_SRC:%.c=%.o)
-
 ZLIB_DIR:=src/external/zlib-1.2.7
 ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
           $(ZLIB_DIR)/gzclose.c $(ZLIB_DIR)/gzlib.c $(ZLIB_DIR)/gzread.c \
@@ -264,6 +207,10 @@ WWWBASEDIR=/var/www/servers
 # process arguments
 ifeq ($(assert),no)
   EXP_CPPFLAGS += -DNDEBUG
+endif
+
+ifeq ($(shell hmmscan -h > /dev/null 2> /dev/null; echo $$?),0)
+  STEST_FLAGS += -hmmer
 endif
 
 ifeq ($(cov),yes)
@@ -365,7 +312,6 @@ endif
 
 ifeq ($(m32),yes)
   GT_CFLAGS += -m32
-  HMMER_CFLAGS += -m32
   GT_LDFLAGS += -m32
   SQLITE_CFLAGS += -m32
 endif
@@ -374,7 +320,6 @@ ifeq ($(m64),yes)
   ifneq ($(MACHINE),ia64)
     ifneq ($(MACHINE),alpha)
       GT_CFLAGS += -m64
-      HMMER_CFLAGS += -m64
       GT_LDFLAGS += -m64
       SQLITE_CFLAGS += -m64
     endif
@@ -398,14 +343,6 @@ LIBGENOMETOOLS_DIRS:= src/core \
                       src/gth \
                       src/mgth \
                       src/ltr
-
-ifeq ($(with-hmmer),yes)
-  LIBGENOMETOOLS_DIRS := src/external/hmmer-3.0  $(LIBGENOMETOOLS_DIRS)
-  EXP_CPPFLAGS += -DHAVE_HMMER
-  GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) -I$(CURDIR)/$(EASEL_DIR)
-  STEST_FLAGS += -hmmer
-  HMMERADDTARGET = hmmerlibs
-endif
 
 ifneq ($(cairo),no)
   ifeq ($(SYSTEM),Darwin)
@@ -473,8 +410,7 @@ else
 endif
 
 # the GenomeTools library
-LIBGENOMETOOLS_PRESRC:=$(filter-out src/ltr/pdom.c,\
-                   $(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c)))
+LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
 # remove AnnotationSketch-only bindings
 LIBGENOMETOOLS_PRESRC:=$(filter-out $(CAIRO_FILTER_OUT),\
                          $(LIBGENOMETOOLS_PRESRC))
@@ -510,11 +446,6 @@ ifneq ($(with-sqlite),no)
   ifneq ($(useshared),yes)
     LIBGENOMETOOLS_OBJ := $(LIBGENOMETOOLS_OBJ) lib/libsqlite.a
   endif
-endif
-
-ifeq ($(with-hmmer),yes)
-  LIBGENOMETOOLS_SRC += src/ltr/pdom.c
-  LIBGENOMETOOLS_OBJ += $(HMMER_OBJ) $(EASEL_OBJ) obj/src/ltr/pdom.o
 endif
 
 GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
@@ -568,15 +499,6 @@ lib/libbz2.a: $(LIBBZ2_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
-
-$(HMMER_OBJ) $(EASEL_OBJ): hmmerlibs
-
-# HMMER libs must be built with -fPIC to support shared libs on AMD64
-hmmerlibs: hmmer_get
-	@echo "[build HMMER3]"
-	@(cd $(HMMER_BASE) && CFLAGS=-O3\ -fPIC\ $(HMMER_CFLAGS) \
-	   ./configure -q --enable-threads > /dev/null)
-	@$(MAKE) -s -C $(HMMER_BASE) > /dev/null
 
 lib/libz.a: $(ZLIB_OBJ)
 	@echo "[link $(@F)]"
@@ -751,23 +673,6 @@ src/core/checkbitpackstring-int.c: \
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl '-int' $<
 
-# If HMMER3 SIMD support is enabled, pdom.o must be compiled with additional
-# compiler flags. Get these from the HMMER3 Makefile so we don't
-# have to repeat what autoconf did.
-obj/src/ltr/pdom.o: src/ltr/pdom.c $(HMMERADDTARGET)
-	@echo "[compile $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
-	  $(filter-out -fomit-frame-pointer, \
-	    ${shell grep -s "CFLAGS   " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" }) \
-	  ${shell grep -s "SIMDFLAGS " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
-	  $(GT_CFLAGS) $(3)
-	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
-	  $(filter-out -fomit-frame-pointer, \
-	    ${shell grep -s "CFLAGS   " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" }) \
-	  ${shell grep -s "SIMDFLAGS " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
-    $(3) -MM -MP -MT $@
-
 # SQLite needs special attention
 obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
 	@echo "[compile $(@F)]"
@@ -823,7 +728,6 @@ obj/src/core/versionfunc.o: obj/gt_config.h
          $(LUAMAIN_DEP) \
          $(LIBTECLA_DEP) \
          $(LIBBZ2_DEP) \
-         $(HMMER_DEP) \
          $(ZLIB_DEP) \
          $(SAMTOOLS_DEP) \
          $(LIBGENOMETOOLS_DEP) \
@@ -834,10 +738,10 @@ obj/src/core/versionfunc.o: obj/gt_config.h
          obj/src/examples/sketch_constructed.d \
          obj/src/examples/sketch_parsed.d
 
-.PRECIOUS: $(HMMER_DIR)/%.c
+.PRECIOUS:
 .SUFFIXES:
 .PHONY: dist srcdist release gt install docs manuals installwww push \
-        splint test clean cleanup hmmer_get
+        splint test clean cleanup
 
 VERSION:="`cat $(CURDIR)/VERSION`"
 SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"
@@ -1119,7 +1023,6 @@ clean:
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 	$(MAKE) -s -C $(CURDIR)/doc/devguide clean
 	$(MAKE) -s -C $(CURDIR)/doc/manuals cleanup
-	test -d "$(HMMER_BASE)" && $(MAKE) -s -C $(HMMER_BASE) clean || true
 
 cleangenerated:
 	rm -f doc/manuals/api_reference.tex \
@@ -1141,14 +1044,3 @@ gtkviewer:
 cleanup: clean cleangenerated
 	rm -rf lib bin
 	rm -rf gtpython/build
-
-hmmer_get:
-	@echo "[check for HMMER3]"
-	@test ! -f "src/external/hmmer-3.0.tar.gz" && \
-	  cd src/external && \
-	  echo "[retrieve HMMER3]" && \
-	  wget -q ftp://selab.janelia.org/pub/software/hmmer3/3.0/hmmer-3.0.tar.gz || true
-	@test ! -d "$(HMMER_BASE)" && \
-	  cd src/external && \
-	  echo "[decompress HMMER3]" && \
-	  tar -xzf hmmer-3.0.tar.gz || true

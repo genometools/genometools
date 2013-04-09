@@ -1171,9 +1171,11 @@ typedef struct {
 
 static void* gt_searchforLTRs_threadfunc(void *data) {
   GtLTRharvestThreadInfo *info = (GtLTRharvestThreadInfo*) data;
+  GT_UNUSED int rval;
   gt_assert(info);
-  (void) gt_searchforLTRs(info->lo, info->arrayLTRboundaries, info->rmutex,
+  rval = gt_searchforLTRs(info->lo, info->arrayLTRboundaries, info->rmutex,
                           info->wmutex, &info->cur_seed, info->err);
+  gt_assert(rval == 0);
   return NULL;
 }
 

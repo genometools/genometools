@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,15 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LTRDIGEST_DEF_H
-#define LTRDIGEST_DEF_H
+#ifndef PDOM_MODEL_SET_H
+#define PDOM_MODEL_SET_H
 
-enum GtLTRdigestRunScans {
-  GT_LTRDIGEST_RUN_PPT  = 0x1,
-  GT_LTRDIGEST_RUN_PBS  = 0x2,
-  GT_LTRDIGEST_RUN_PDOM = 0x4
-};
+typedef struct GtPdomModelSet GtPdomModelSet;
 
-#define GT_LTRDIGEST_TAG "LTRdigest"
+GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err);
+const char*     gt_pdom_model_set_get_filename(GtPdomModelSet *set);
+void            gt_pdom_model_set_delete(GtPdomModelSet *set);
 
 #endif

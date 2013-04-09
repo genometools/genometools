@@ -73,7 +73,7 @@ def get_protdom_dna_seqs(gff3filename, chr)
   seqs
 end
 
-# checks whether the sequences output by the LTRFileOutStream match those
+# checks whether the sequences output by the LTRdigestFileOutStream match those
 # referenced in the GFF3 file
 def check_ppt_pbs(gff3filename, chr)
   coords = {:ppt => {}, :pbs => {}}
@@ -254,7 +254,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -hmms #{$gttestdata}ltrdigest/corrupt.hmm -- #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted", :retval => 1
-      grep(last_stderr, /Failed to open HMM file/)
+      grep(last_stderr, /error occurred during HMM preprocessing/)
     end
 
     Name "gt ltrdigest HMM list not properly closed (--)"
@@ -262,7 +262,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted", :retval => 1
-      grep(last_stderr, /Failed to open HMM file/)
+      grep(last_stderr, /an error occurred during/)
     end
 
     Name "gt ltrdigest pHMM implied options"
@@ -495,7 +495,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}ltrdigest/corrupt.hmm -- #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-      grep(last_stderr, /Failed to open HMM file/)
+      grep(last_stderr, /error occurred during HMM preprocessing/)
     end
 
     Name "gt ltrdigest HMM list not properly closed (legacy syntax)"
@@ -503,7 +503,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-      grep(last_stderr, /Failed to open HMM/)
+      grep(last_stderr, /invalid HMM file/)
     end
 
     Name "gt ltrdigest pHMM implied options (legacy syntax)"

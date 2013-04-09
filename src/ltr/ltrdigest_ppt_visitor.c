@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,17 +16,50 @@
 */
 
 #include <math.h>
-#include "core/ensure.h"
+#include <signal.h>
+#include <string.h>
+#include "core/array_api.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
-#include "core/xansi_api.h"
-#include "core/array.h"
+#include "core/range_api.h"
+#include "core/str_api.h"
+#include "core/strand_api.h"
+#include "core/symbol_api.h"
+#include "core/undef_api.h"
+#include "core/unused_api.h"
+#include "extended/node_visitor_api.h"
+#include "extended/extract_feature_sequence.h"
+#include "extended/feature_node.h"
+#include "extended/feature_node_iterator_api.h"
+#include "extended/feature_type.h"
+#include "extended/hmm.h"
 #include "extended/reverse_api.h"
-#include "ltr/ppt.h"
+#include "ltr/ltrdigest_def.h"
+#include "ltr/ltrdigest_ppt_visitor.h"
 
-/* This enumeration defines the states in the PPT detection HMM. */
+struct GtLTRdigestPPTVisitor {
+  const GtNodeVisitor parent_instance;
+  GtRegionMapping *rmap;
+  GtStr *tag;
+  GtHMM *hmm;
+  GtAlphabet *alpha;
+  GtRange ppt_len, ubox_len;
+  double ppt_pyrimidine_prob,
+         ppt_purine_prob,
+         bkg_a_prob,
+         bkg_g_prob,
+         bkg_t_prob,
+         bkg_c_prob,
+         ubox_u_prob;
+  unsigned int radius,
+               max_ubox_dist;
+};
+
+typedef struct GtPPTHit GtPPTHit;
+typedef struct GtPPTResults GtPPTResults;
+
 typedef enum {
   PPT_IN,
   PPT_OUT,
@@ -46,16 +79,22 @@ struct GtPPTHit {
 
 struct GtPPTResults {
   GtArray *hits;
-  GtLTRElement *elem;
-  GtPPTOptions *opts;
+  GtFeatureNode *elem;
+  GtRange leftltrrng,
+          rightltrrng;
 };
 
-static GtPPTResults* gt_ppt_results_new(GtLTRElement *elem,
-                                        GtPPTOptions *opts)
+const GtNodeVisitorClass* gt_ltrdigest_ppt_visitor_class(void);
+
+#define gt_ltrdigest_ppt_visitor_cast(GV)\
+        gt_node_visitor_cast(gt_ltrdigest_ppt_visitor_class(), GV)
+
+static GtPPTResults* gt_ppt_results_new(GtRange leftltrrng,
+                                        GtRange rightltrrng)
 {
   GtPPTResults *res = gt_calloc((size_t) 1, sizeof (GtPPTResults));
-  res->elem = elem;
-  res->opts = opts;
+  res->leftltrrng = leftltrrng;
+  res->rightltrrng = rightltrrng;
   res->hits = gt_array_new(sizeof (GtPPTHit*));
   return res;
 }
@@ -70,7 +109,8 @@ static GtPPTHit* gt_ppt_hit_new(GtStrand strand, GtPPTResults *r)
   return h;
 }
 
-GtRange gt_ppt_hit_get_coords(const GtPPTHit *h)
+  GtRange gt_ppt_hit_get_coords(const GtPPTHit *h,
+                                     GtLTRdigestPPTVisitor *lv)
 {
   GtRange rng;
   gt_assert(h);
@@ -80,12 +120,12 @@ GtRange gt_ppt_hit_get_coords(const GtPPTHit *h)
   {
     case GT_STRAND_FORWARD:
     default:
-      rng.start = h->res->elem->rightLTR_5 - 1 - h->res->opts->radius
+      rng.start = h->res->rightltrrng.start - 2 - lv->radius
                     + rng.start;
       rng.end = rng.start + (gt_range_length(&h->rng) - 1);
       break;
     case GT_STRAND_REVERSE:
-      rng.end = h->res->elem->leftLTR_3 + 1 + h->res->opts->radius - rng.start;
+      rng.end = h->res->leftltrrng.end + lv->radius - rng.start;
       rng.start = rng.end - (gt_range_length(&h->rng) - 1);
       break;
   }
@@ -93,31 +133,31 @@ GtRange gt_ppt_hit_get_coords(const GtPPTHit *h)
   return rng;
 }
 
-GtPPTHit* gt_ppt_hit_get_ubox(const GtPPTHit *h)
+static GtPPTHit* gt_ppt_hit_get_ubox(const GtPPTHit *h)
 {
   gt_assert(h);
   return h->ubox;
 }
 
-GtStrand gt_ppt_hit_get_strand(const GtPPTHit *h)
+static GtStrand gt_ppt_hit_get_strand(const GtPPTHit *h)
 {
   gt_assert(h);
   return h->strand;
 }
 
-unsigned long gt_ppt_results_get_number_of_hits(GtPPTResults *r)
+static unsigned long gt_ppt_results_get_number_of_hits(GtPPTResults *r)
 {
   gt_assert(r);
   return gt_array_size(r->hits);
 }
 
-GtPPTHit* gt_ppt_results_get_ranked_hit(GtPPTResults *r, unsigned long i)
+static GtPPTHit* gt_ppt_results_get_ranked_hit(GtPPTResults *r, unsigned long i)
 {
   gt_assert(r);
   return *(GtPPTHit**) gt_array_get(r->hits, i);
 }
 
-GtHMM* gt_ppt_hmm_new(const GtAlphabet *alpha, GtPPTOptions *opts)
+static GtHMM* gt_ppt_hmm_new(const GtAlphabet *alpha, GtLTRdigestPPTVisitor *lv)
 {
   GtHMM *hmm;
   double non_u_prob = 0.0;
@@ -129,33 +169,33 @@ GtHMM* gt_ppt_hmm_new(const GtAlphabet *alpha, GtPPTOptions *opts)
   /* set emission probabilities */
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_OUT,
                                   (unsigned int) gt_alphabet_encode(alpha, 'G'),
-                                  opts->bkg_g_prob);
+                                  lv->bkg_g_prob);
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_OUT,
                                   (unsigned int) gt_alphabet_encode(alpha, 'A'),
-                                  opts->bkg_a_prob);
+                                  lv->bkg_a_prob);
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_OUT,
                                   (unsigned int) gt_alphabet_encode(alpha, 'C'),
-                                  opts->bkg_c_prob);
+                                  lv->bkg_c_prob);
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_OUT,
                                   (unsigned int) gt_alphabet_encode(alpha, 'T'),
-                                  opts->bkg_t_prob);
+                                  lv->bkg_t_prob);
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_IN,
                                   (unsigned int) gt_alphabet_encode(alpha, 'G'),
-                                  opts->ppt_purine_prob/2);
+                                  lv->ppt_purine_prob/2);
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_IN,
                                   (unsigned int) gt_alphabet_encode(alpha, 'A'),
-                                  opts->ppt_purine_prob/2);
+                                  lv->ppt_purine_prob/2);
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_IN,
                                   (unsigned int) gt_alphabet_encode(alpha, 'C'),
-                                  opts->ppt_pyrimidine_prob/2);
+                                  lv->ppt_pyrimidine_prob/2);
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_IN,
                                   (unsigned int) gt_alphabet_encode(alpha, 'T'),
-                                  opts->ppt_pyrimidine_prob/2);
+                                  lv->ppt_pyrimidine_prob/2);
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_UBOX,
                                   (unsigned int) gt_alphabet_encode(alpha, 'T'),
-                                  opts->ubox_u_prob);
+                                  lv->ubox_u_prob);
   /* calculate non-U probabilities (still uniform, may be optimised) */
-  non_u_prob = (1.0 - (opts->ubox_u_prob)) / ((double) 3);
+  non_u_prob = (1.0 - (lv->ubox_u_prob)) / ((double) 3);
   gt_hmm_set_emission_probability(hmm, (unsigned int) PPT_UBOX,
                                   (unsigned int) gt_alphabet_encode(alpha, 'G'),
                                   non_u_prob);
@@ -250,7 +290,8 @@ static bool gt_ppt_ok(GtPPTHit *hit, GtRange pptlen)
            && hit->rng.end-hit->rng.start+1 <= pptlen.end);
 }
 
-static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
+static void gt_group_hits(GtLTRdigestPPTVisitor *lv,
+                          unsigned int *decoded, GtPPTResults *results,
                           unsigned long radius, GT_UNUSED const char *seq,
                           GtStrand strand)
 {
@@ -271,7 +312,7 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
       switch (cur_hit->state)
       {
         case PPT_UBOX:
-          if (gt_ubox_ok(cur_hit, results->opts->ubox_len)) {
+          if (gt_ubox_ok(cur_hit, lv->ubox_len)) {
             if (potential_ubox != NULL) {
               gt_free(potential_ubox);
               potential_ubox = NULL;
@@ -286,14 +327,14 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
           }
           break;
         case PPT_IN:
-          if (gt_ppt_ok(cur_hit, results->opts->ppt_len))
+          if (gt_ppt_ok(cur_hit, lv->ppt_len))
           {
             cur_hit->score = gt_ppt_score(radius, cur_hit->rng.end);
             gt_array_add(results->hits, cur_hit);
             if (potential_ubox != NULL)
             {
               if (cur_hit->rng.start - potential_ubox->rng.end
-                    <= (unsigned long) results->opts->max_ubox_dist)
+                    <= (unsigned long) lv->max_ubox_dist)
               {
                 /* this PPT has a U-box, handle accordingly */
                 cur_hit->ubox = potential_ubox;
@@ -337,67 +378,60 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
   gt_free(potential_ubox);
 }
 
-GtPPTResults* gt_ppt_find(const char *seq,
-                          const char *rev_seq,
-                          GtLTRElement *element,
-                          GtPPTOptions *o)
+static GtPPTResults* gt_ppt_find(GtLTRdigestPPTVisitor *v,
+                                 const char *seq, const char *rev_seq,
+                                 unsigned long seqlen,
+                                 GtRange rightltrrng,
+                                 GtRange leftltrrng)
 {
-  unsigned int *encoded_seq=NULL,
-               *decoded=NULL;
-  GtAlphabet *alpha;
-  GtHMM *hmm;
+  unsigned int *encoded_seq = NULL,
+               *decoded = NULL;
   GtPPTResults *results = NULL;
   unsigned long i = 0,
                 radius = 0,
-                seqlen = gt_ltrelement_length(element),
                 ltrlen = 0;
 
-  gt_assert(seq && rev_seq && element && o);
+  gt_assert(seq && rev_seq && v);
 
-  results = gt_ppt_results_new(element, o);
+  results = gt_ppt_results_new(leftltrrng, rightltrrng);
 
-  alpha = gt_alphabet_new_dna();
-  hmm = gt_ppt_hmm_new(alpha, o);
-
-  /* do PPT finding on forward strand
+    /* do PPT finding on forward strand
      -------------------------------- */
-  ltrlen = gt_ltrelement_rightltrlen(element);
+  ltrlen = gt_range_length(&rightltrrng);
   /* make sure that we do not cross the LTR boundary */
-  radius = MIN((unsigned long) o->radius, ltrlen-1);
+  radius = MIN((unsigned long) v->radius, ltrlen-1);
   /* encode sequence */
   encoded_seq = gt_malloc(sizeof (unsigned int) * seqlen);
-  for (i=0;i<seqlen;i++)
-  {
-    encoded_seq[i] = (unsigned int) gt_alphabet_encode(alpha, seq[i]);
+  for (i = 0; i < seqlen; i++) {
+    encoded_seq[i] = (unsigned int) gt_alphabet_encode(v->alpha, seq[i]);
   }
   /* use Viterbi algorithm to decode emissions within radius */
-  decoded = gt_malloc(sizeof (unsigned int) * (2*radius+1));
-  gt_hmm_decode(hmm, decoded,
+  decoded = gt_malloc(sizeof (unsigned int) * (2 * radius + 1));
+  gt_hmm_decode(v->hmm, decoded,
                 encoded_seq + (seqlen-1) - (ltrlen-1) - radius - 1,
-                (unsigned int) (2*radius+1));
-  gt_group_hits(decoded, results, radius,
-                seq + (seqlen-1) - (ltrlen-1) - radius - 1,
+                (unsigned int) (2 * radius + 1));
+  gt_group_hits(v, decoded, results, radius,
+                seq + (seqlen - 1) - (ltrlen - 1) - radius - 1,
                 GT_STRAND_FORWARD);
   /* radius length may change in the next strand, so reallocate */
   gt_free(decoded);
 
   /* do PPT finding on reverse strand
      -------------------------------- */
-  ltrlen = gt_ltrelement_leftltrlen(element);
+  ltrlen = gt_range_length(&leftltrrng);
   /* make sure that we do not cross the LTR boundary */
-  radius = MIN((unsigned long) o->radius, ltrlen-1);
+  radius = MIN((unsigned long) v->radius, ltrlen - 1);
   /* encode sequence */
-  for (i=0;i<seqlen;i++)
-  {
-    encoded_seq[i] = (unsigned int) gt_alphabet_encode(alpha, rev_seq[i]);
+  for (i = 0; i < seqlen; i++) {
+    encoded_seq[i] = (unsigned int) gt_alphabet_encode(v->alpha, rev_seq[i]);
   }
   /* use Viterbi algorithm to decode emissions within radius */
-  decoded = gt_malloc(sizeof (unsigned int) * (2*radius+1));
-  gt_hmm_decode(hmm, decoded,
-                encoded_seq + (seqlen-1) - (ltrlen-1) - radius - 1,
-                (unsigned int) (2*radius+1));
-  gt_group_hits(decoded, results, radius,
-                rev_seq + (seqlen-1) - (ltrlen-1) - radius - 1,
+  decoded = gt_malloc(sizeof (unsigned int) * (2 * radius + 1));
+  gt_hmm_decode(v->hmm, decoded,
+                encoded_seq + (seqlen - 1) - (ltrlen - 1) - radius - 1,
+                (unsigned int) (2 * radius + 1));
+  gt_group_hits(v, decoded, results, radius,
+                rev_seq + (seqlen - 1) - (ltrlen - 1) - radius - 1,
                 GT_STRAND_REVERSE);
 
   /* rank hits by descending score */
@@ -405,8 +439,6 @@ GtPPTResults* gt_ppt_find(const char *seq,
 
   gt_free(encoded_seq);
   gt_free(decoded);
-  gt_alphabet_delete(alpha);
-  gt_hmm_delete(hmm);
 
   return results;
 }
@@ -430,86 +462,186 @@ void gt_ppt_results_delete(GtPPTResults *results)
   gt_free(results);
 }
 
-int gt_ppt_unit_test(GtError *err)
+static void ppt_attach_results_to_gff3(GtLTRdigestPPTVisitor *lv,
+                                       GtPPTResults *results,
+                                       GtFeatureNode *mainnode,
+                                       GtStrand *canonical_strand)
 {
+  GtRange ppt_range;
+  unsigned long i = 0;
+  GtGenomeNode *gf;
+  GtPPTHit *hit = gt_ppt_results_get_ranked_hit(results, i++),
+           *ubox;
+  if (*canonical_strand == GT_STRAND_UNKNOWN)
+    *canonical_strand = hit->strand;
+  else {
+    /* find best-scoring PPT on the given canonical strand */
+    while (hit->strand != *canonical_strand
+             && i < gt_ppt_results_get_number_of_hits(results)) {
+      gt_log_log("dropping PPT because of nonconsistent strand: %s\n",
+                 gt_feature_node_get_attribute(mainnode, "ID"));
+      hit = gt_ppt_results_get_ranked_hit(results, i++);
+    }
+    /* if there is none, do not report a PPT */
+    if (hit->strand != *canonical_strand)
+      return;
+  }
+  ppt_range = gt_ppt_hit_get_coords(hit, lv);
+  ppt_range.start++; ppt_range.end++;  /* GFF3 is 1-based */
+  gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*) mainnode),
+                           gt_ft_RR_tract,
+                           ppt_range.start,
+                           ppt_range.end,
+                           hit->strand);
+  gt_feature_node_set_source((GtFeatureNode*) gf, lv->tag);
+  gt_feature_node_set_strand(mainnode, hit->strand);
+  gt_feature_node_add_child(mainnode, (GtFeatureNode*) gf);
+  if ((ubox = gt_ppt_hit_get_ubox(hit)) != NULL) {
+    GtRange ubox_range = gt_ppt_hit_get_coords(ubox, lv);
+    ubox_range.start++; ubox_range.end++;
+    gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*) mainnode),
+                             gt_ft_U_box,
+                             ubox_range.start,
+                             ubox_range.end,
+                             gt_ppt_hit_get_strand(ubox));
+    gt_feature_node_set_source((GtFeatureNode*) gf, lv->tag);
+    gt_feature_node_set_strand(mainnode, gt_ppt_hit_get_strand(ubox));
+    gt_feature_node_add_child(mainnode, (GtFeatureNode*) gf);
+  }
+}
+
+static int gt_ltrdigest_ppt_visitor_feature_node(GtNodeVisitor *nv,
+                                                 GtFeatureNode *fn,
+                                                 GtError *err)
+{
+  GT_UNUSED GtLTRdigestPPTVisitor *lv;
+  GtFeatureNodeIterator *fni;
+  GtRange leftltrrng, rightltrrng;
+  bool seen_left = false;
+  GtFeatureNode *curnode = NULL,
+                *ltr_retrotrans = NULL;
   int had_err = 0;
-  GtPPTOptions o;
-  GtPPTResults *rs;
-  GtPPTHit *h;
-  GtLTRElement element;
-  GtRange rng;
-  char *rev_seq,
-       *seq,
-       tmp[BUFSIZ];
-  const char *fullseq =                           "aaaaaaaaaaaaaaaaaaaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "aaag"
-                        "tcttctttct" /* <- PPT reverse */
-                                  "aaaaatatagtttcgaatatagcactgcatttcgaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatttt"
-                                   /* PPT forward -> */  "gggatagggggag"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
-                    "aaaaaaaaaaaaaaaaaaaa";
+  lv = gt_ltrdigest_ppt_visitor_cast(nv);
+  gt_assert(lv);
+  gt_error_check(err);
 
-  seq     = gt_malloc(600 * sizeof (char));
-  rev_seq = gt_malloc(600 * sizeof (char));
-  memcpy(seq,     fullseq + 20, (size_t) 600);
-  memcpy(rev_seq, fullseq + 20, (size_t) 600);
-  gt_ensure(had_err, !gt_reverse_complement(rev_seq, 600UL, err));
+  /* traverse annotation subgraph and find LTR element */
+  fni = gt_feature_node_iterator_new(fn);
+  while (!had_err && (curnode = gt_feature_node_iterator_next(fni))) {
+    if (strcmp(gt_feature_node_get_type(curnode),
+               gt_ft_LTR_retrotransposon) == 0) {
+      ltr_retrotrans = curnode;
+    }
+    if (strcmp(gt_feature_node_get_type(curnode),
+               gt_ft_long_terminal_repeat) == 0) {
+      if (seen_left)   /* XXX */
+        rightltrrng = gt_genome_node_get_range((GtGenomeNode*) curnode);
+      else {
+        leftltrrng = gt_genome_node_get_range((GtGenomeNode*) curnode);
+        seen_left = true;
+      }
+    }
+  }
+  gt_feature_node_iterator_delete(fni);
 
-  element.leftLTR_5 = 20UL;
-  element.leftLTR_3 = 119UL;
-  element.rightLTR_5 = 520UL;
-  element.rightLTR_3 = 619UL;
+  if (!had_err && ltr_retrotrans != NULL) {
+    char *rev_seq;
+    GtRange rng;
+    GtStrand canonical_strand = gt_feature_node_get_strand(ltr_retrotrans);
+    GtPPTResults *res;
+    unsigned long seqlen;
+    GtStr *seq = gt_str_new();
+    rng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
+    seqlen = gt_range_length(&rng);
 
-  /* run PPT finding */
-  memset(&o, 0, sizeof (GtPPTOptions));
-  o.ppt_len.start = 5UL;
-  o.ppt_len.end = 15UL;
-  o.ubox_len.start = 2UL;
-  o.ubox_len.end = 15UL;
-  o.radius = 30U;
-  o.ppt_pyrimidine_prob = PPT_PYRIMIDINE_PROB;
-  o.ppt_purine_prob = PPT_PURINE_PROB;
-  o.bkg_a_prob = BKG_A_PROB;
-  o.bkg_g_prob = BKG_G_PROB;
-  o.bkg_t_prob = BKG_T_PROB;
-  o.bkg_c_prob = BKG_C_PROB;
-  o.ubox_u_prob = UBOX_U_PROB;
-  rs = gt_ppt_find(seq, rev_seq, &element, &o);
+    had_err = gt_extract_feature_sequence(seq, (GtGenomeNode*) ltr_retrotrans,
+                                          gt_symbol(gt_ft_LTR_retrotransposon),
+                                          false, NULL, NULL, lv->rmap, err);
 
-  gt_ensure(had_err, gt_ppt_results_get_number_of_hits(rs) == 2UL);
-  h = gt_ppt_results_get_ranked_hit(rs, 0);
-  gt_ensure(had_err, h);
-  rng = gt_ppt_hit_get_coords(h);
-  gt_ensure(had_err, rng.start == 507UL);
-  gt_ensure(had_err, rng.end == 519UL);
-  memset(tmp, 0, BUFSIZ);
-  memcpy(tmp, fullseq + (rng.start * sizeof (char)),
-         (size_t) ((rng.end - rng.start + 1) * sizeof (char)));
-  gt_ensure(had_err, strcmp(tmp, "gggatagggggag" ) == 0);
+    if (!had_err) {
+      rev_seq = gt_malloc((size_t) seqlen * sizeof (char));
+      strncpy(rev_seq, gt_str_get(seq), (size_t) seqlen * sizeof (char));
+      (void) gt_reverse_complement(rev_seq, seqlen, NULL);
 
-  h = gt_ppt_results_get_ranked_hit(rs, 1UL);
-  gt_ensure(had_err, h);
-  rng = gt_ppt_hit_get_coords(h);
-  gt_ensure(had_err, rng.start == 124UL);
-  gt_ensure(had_err, rng.end == 133UL);
-  memset(tmp, 0, BUFSIZ);
-  memcpy(tmp, fullseq + (rng.start * sizeof (char)),
-         (size_t) ((rng.end - rng.start + 1) * sizeof (char)));
-  gt_ensure(had_err, strcmp(tmp, "tcttctttct" ) == 0);
+      res = gt_ppt_find(lv, gt_str_get(seq), rev_seq, seqlen, rightltrrng,
+                        leftltrrng);
+      if (gt_ppt_results_get_number_of_hits(res) > 0) {
+        ppt_attach_results_to_gff3(lv, res, ltr_retrotrans, &canonical_strand);
+      }
+      gt_ppt_results_delete(res);
+      gt_free(rev_seq);
+    }
+    gt_str_delete(seq);
+  }
 
-  gt_free(rev_seq);
-  gt_free(seq);
-
-  gt_ppt_results_delete(rs);
   return had_err;
+}
+
+void gt_ltrdigest_ppt_visitor_free(GtNodeVisitor *nv)
+{
+  GT_UNUSED GtLTRdigestPPTVisitor *lv;
+  if (!nv) return;
+  lv = gt_ltrdigest_ppt_visitor_cast(nv);
+  gt_str_delete(lv->tag);
+  gt_alphabet_delete(lv->alpha);
+  gt_hmm_delete(lv->hmm);
+}
+
+const GtNodeVisitorClass* gt_ltrdigest_ppt_visitor_class(void)
+{
+  static const GtNodeVisitorClass *nvc = NULL;
+  if (!nvc) {
+    nvc = gt_node_visitor_class_new(sizeof (GtLTRdigestPPTVisitor),
+                                   gt_ltrdigest_ppt_visitor_free,
+                                   NULL,
+                                   gt_ltrdigest_ppt_visitor_feature_node,
+                                   NULL,
+                                   NULL,
+                                   NULL);
+  }
+  return nvc;
+}
+
+GtNodeVisitor* gt_ltrdigest_ppt_visitor_new(GtRegionMapping *rmap,
+                                            GtRange ppt_len,
+                                            GtRange ubox_len,
+                                            double ppt_pyrimidine_prob,
+                                            double ppt_purine_prob,
+                                            double bkg_a_prob,
+                                            double bkg_g_prob,
+                                            double bkg_t_prob,
+                                            double bkg_c_prob,
+                                            double ubox_u_prob,
+                                            unsigned int radius,
+                                            unsigned int max_ubox_dist,
+                                            GT_UNUSED GtError *err)
+{
+  GtNodeVisitor *nv = NULL;
+  GtLTRdigestPPTVisitor *lv;
+  GT_UNUSED int had_err = 0, i;
+  gt_assert(rmap);
+  nv = gt_node_visitor_create(gt_ltrdigest_ppt_visitor_class());
+  lv = gt_ltrdigest_ppt_visitor_cast(nv);
+  lv->ppt_len = ppt_len;
+  lv->ubox_len = ubox_len;
+  lv->ppt_pyrimidine_prob = ppt_pyrimidine_prob;
+  lv->ppt_purine_prob = ppt_purine_prob;
+  lv->bkg_a_prob = bkg_a_prob;
+  lv->bkg_g_prob = bkg_g_prob;
+  lv->bkg_t_prob = bkg_t_prob;
+  lv->bkg_c_prob = bkg_c_prob;
+  lv->ubox_u_prob = ubox_u_prob;
+  lv->radius = radius;
+  lv->rmap = rmap;
+  lv->max_ubox_dist = max_ubox_dist;
+  lv->tag = gt_str_new_cstr(GT_LTRDIGEST_TAG);
+  lv->alpha = gt_alphabet_new_dna();
+  lv->hmm = gt_ppt_hmm_new(lv->alpha, lv);
+  if (!lv->hmm) {
+    gt_node_visitor_delete(nv);
+    gt_error_set(err, "PPT HMM parameters are not valid!");
+    had_err = -1;
+    nv = NULL;
+  }
+  return nv;
 }

@@ -7,11 +7,19 @@ changes in version 1.5.2 (2013-XX-XX)
 - LTRharvest seed extension now multithreaded , use `gt -j'
 - LTRharvest internal pipeline restructured to be deterministic during
   multithreaded runs
+- LTRharvest now considers transitively overlapping candidates in `-overlaps'
+  option
 - LTRharvest optionally outputs GFF3 on stdout for piping (option `-tabout')
 - LTRharvest now outputs sequence IDs (optionally MD5 tagged, options `-seqids'
   and `-md5')
 - LTRdigest now accepts `-seqfile(s)', `-regionmapping', `-encseq',
   `-matchdesc', `-usedesc' options
+- LTRdigest now uses external hmmscan/hmmpress binaries, no HMMER code will be
+  built into gt (licensing and redistributability reasons)
+- LTRdigest output does not contain Pfam IDs anymore
+- LTRdigest now assigns a strand to _every_ feature in element CC if possible
+- LTRdigest code refactored for reusability
+
 
 changes in version 1.5.1 (2013-03-07)
 
