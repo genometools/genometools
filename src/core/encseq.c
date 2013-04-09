@@ -5153,10 +5153,18 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
   return encseq;
 }
 
-const char *gt_encseq_description(const GtEncseq *encseq,
+const char* gt_encseq_description(const GtEncseq *encseq,
                                   unsigned long *desclen,
                                   unsigned long seqnum)
 {
+  unsigned long destablen;
+  if (encseq->destab[encseq->destablength - 1] == '\n') {
+    destablen = encseq->destablength;
+  } else {
+    /* XXX: hard-coded! final two ulongs are max desc length and
+       terminator constant */
+    destablen = encseq->destablength - (2 * sizeof (unsigned long));
+  }
   if (seqnum >= encseq->numofdbsequences) {
       seqnum = encseq->logicalnumofdbsequences - 1 - seqnum;
   }
@@ -5169,21 +5177,43 @@ const char *gt_encseq_description(const GtEncseq *encseq,
       nextend = encseq->sdstab[seqnum];
     } else
     {
-      nextend = encseq->destablength - 1;
+      nextend = destablen - 1;
     }
     gt_assert(encseq->sdstab[seqnum-1] < nextend);
     *desclen = nextend - encseq->sdstab[seqnum-1] - 1;
     return encseq->destab + encseq->sdstab[seqnum-1] + 1;
   }
+  gt_assert(seqnum == 0);
   if (encseq->numofdbsequences > 1UL)
   {
     gt_assert(encseq->sdstab != NULL);
     *desclen = encseq->sdstab[0];
   } else
   {
-    *desclen = encseq->destablength - 1;
+    *desclen = destablen - 1;
   }
   return encseq->destab;
+}
+
+unsigned long gt_encseq_max_desc_length(const GtEncseq *encseq)
+{
+  gt_assert(encseq && encseq->destab);
+  /* decides whether destab contains max desc length as a separate field */
+  if (encseq->destab[encseq->destablength - 1] == '\n') {
+    unsigned long i,
+                  maxlen = 0;
+    for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
+      unsigned long len;
+      (void) gt_encseq_description(encseq, &len, i);
+      if (len > maxlen)
+        maxlen = len;
+    }
+    return maxlen;
+  } else {
+    void *ptr;
+    ptr = encseq->destab + encseq->destablength - 2 * (sizeof (unsigned long));
+    return *(unsigned long*) ptr;
+  }
 }
 
 const GtStrArray *gt_encseq_filenames(const GtEncseq *encseq)
@@ -5960,9 +5990,15 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   if (!haserr) {
     if (desfp != NULL)
     {
+      unsigned long longestdesc,
+                    fin = ~0UL;
       desc = (char*) gt_desc_buffer_get_next(descqueue);
+      longestdesc = gt_desc_buffer_max_length(descqueue) - 1;
       gt_xfputs(desc,desfp);
       gt_xfputc((int) '\n',desfp);
+      gt_xfwrite_one(&longestdesc, desfp);
+      gt_xfwrite_one(&fin, desfp); /* to ensure that there is no \n in new-style
+                                      .des files */
     }
     *totallength = currentpos;
     specialcharinfo->lengthofspecialsuffix = lastspecialrangelength;

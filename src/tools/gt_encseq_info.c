@@ -289,6 +289,12 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
                                           ? "yes"
                                           : "no");
 
+      if (gt_encseq_has_description_support(encseq)) {
+        gt_file_xprintf(arguments->outfp, "length of longest description: ");
+        gt_file_xprintf(arguments->outfp, "%lu\n",
+                                          gt_encseq_max_desc_length(encseq));
+      }
+
       gt_file_xprintf(arguments->outfp, "has multiple sequence support: ");
       gt_file_xprintf(arguments->outfp, "%s\n",
                                         gt_encseq_has_multiseq_support(encseq)

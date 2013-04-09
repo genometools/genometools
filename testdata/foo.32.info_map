@@ -21,4 +21,5 @@ accesstype: eqlen
 bits used per character: 78.117647
 has special ranges: yes
 has description support: yes
+length of longest description: 3
 has multiple sequence support: yes

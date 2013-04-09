@@ -262,7 +262,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         switch (lc) {
           case DESCRIPTION:
             sbe->state = EMBL_IN_DESCRIPTION;
-            if (pvt->descptr) {
+            if (pvt->descptr && gt_desc_buffer_length(pvt->descptr) > 0) {
               gt_desc_buffer_append_char(pvt->descptr, ' ');
             }
             break;

@@ -597,4 +597,8 @@ void gt_encseq_relpos_seqnum_check(const char *filename,int line,
 /* Reverse the range with respect to the given total length */
 void gt_range_reverse(unsigned long totallength,GtRange *range);
 
+/* Return the length of the longest description in <encseq>.
+   Requires that the description support is enabled in <encseq>.  */
+unsigned long gt_encseq_max_desc_length(const GtEncseq *encseq);
+
 #endif
