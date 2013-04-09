@@ -102,28 +102,34 @@ struct GtPopcountTab
   unsigned int blocksize,
                *bit_sizes;
   unsigned long num_of_blocks;
-  GtCompactUlongStore *blocks;
-  unsigned long *offsets;
+  /* the actual blocks in popcount order */
+  GtCompactUlongStore *blocks,
+                      *offsets,
   /* this contains a mapping from a block to its offset within its class */
-  GtCompactUlongStore *rev_blocks;
+                      *rev_blocks;
 };
 
 static void gt_popcount_tab_init_offset_tab(GtPopcountTab *popcount_tab)
 {
   unsigned long idx, class_size,
-                *offsets = popcount_tab->offsets,
                 blocksize = (unsigned long) popcount_tab->blocksize,
                 num_of_blocks = popcount_tab->num_of_blocks;
+  GtCompactUlongStore *offsets = popcount_tab->offsets;
 
-  offsets[0] = 0;
-  offsets[1] = 1UL;
-  offsets[2] = blocksize + 1UL;
+  gt_compact_ulong_store_update(offsets, 0, 0);
+  gt_compact_ulong_store_update(offsets, 1UL, 1UL);
+  gt_compact_ulong_store_update(offsets, 2UL, blocksize + 1UL);
   for (idx = 3UL; idx < blocksize - 1; idx++) {
     class_size = gt_combinatorics_binomial_ln(blocksize, idx - 1);
-    offsets[idx] = offsets[idx - 1] + class_size;
+    gt_compact_ulong_store_update(offsets, idx,
+                                  class_size + gt_compact_ulong_store_get(
+                                                                      offsets,
+                                                                      idx - 1));
+
   }
-  offsets[blocksize - 1] = num_of_blocks - blocksize - 1;
-  offsets[blocksize] = num_of_blocks - 1;
+  gt_compact_ulong_store_update(offsets, blocksize - 1,
+                                num_of_blocks - blocksize - 1);
+  gt_compact_ulong_store_update(offsets, blocksize, num_of_blocks - 1);
 }
 
 static unsigned long gt_popcount_tab_next_perm(unsigned long v)
@@ -190,25 +196,26 @@ GtPopcountTab *gt_popcount_tab_new(unsigned int blocksize)
   gt_assert(blocksize <= (unsigned) GT_INTWORDSIZE);
 
   popcount_tab = gt_malloc(sizeof (GtPopcountTab));
+  popcount_tab->rev_blocks = NULL;
+  popcount_tab->bit_sizes = NULL;
   popcount_tab->num_of_blocks = 1UL << blocksize;
   popcount_tab->blocksize = blocksize;
+
   popcount_tab->blocks = gt_compact_ulong_store_new(popcount_tab->num_of_blocks,
                                                     blocksize);
-  popcount_tab->offsets = gt_malloc(sizeof (popcount_tab->offsets) *
-                                      (blocksize + 1));
+  popcount_tab->offsets =
+    gt_compact_ulong_store_new((unsigned long) blocksize + 1, blocksize);
   gt_popcount_tab_init_offset_tab(popcount_tab);
   idx_check = gt_popcount_tab_init_blocks_tab(popcount_tab->blocks, blocksize);
   gt_assert(idx_check == popcount_tab->num_of_blocks);
-  popcount_tab->rev_blocks = NULL;
-  popcount_tab->bit_sizes = NULL;
   return popcount_tab;
 }
 
 void gt_popcount_tab_delete(GtPopcountTab *popcount_tab)
 {
   if (popcount_tab != NULL) {
-    gt_free(popcount_tab->offsets);
     gt_compact_ulong_store_delete(popcount_tab->blocks);
+    gt_compact_ulong_store_delete(popcount_tab->offsets);
     gt_compact_ulong_store_delete(popcount_tab->rev_blocks);
     gt_free(popcount_tab->bit_sizes);
     gt_free(popcount_tab);
@@ -225,12 +232,17 @@ unsigned long gt_popcount_tab_get(GtPopcountTab *popcount_tab,
     return 0;
   }
   if (popcount_c < popcount_tab->blocksize)
-    gt_assert(i < popcount_tab->offsets[popcount_c + 1] -
-                    popcount_tab->offsets[popcount_c]);
+    gt_assert(i <
+              gt_compact_ulong_store_get(popcount_tab->offsets,
+                                         (unsigned long) popcount_c + 1) -
+              gt_compact_ulong_store_get(popcount_tab->offsets,
+                                         (unsigned long) popcount_c));
   else
     gt_assert(i == 0);
-  return gt_compact_ulong_store_get(popcount_tab->blocks,
-                                    popcount_tab->offsets[popcount_c] + i);
+  return gt_compact_ulong_store_get(
+                    popcount_tab->blocks,
+                    gt_compact_ulong_store_get(popcount_tab->offsets,
+                                               (unsigned long) popcount_c) + i);
 }
 
 size_t gt_popcount_tab_calculate_size(unsigned int blocksize)
@@ -269,53 +281,43 @@ static inline unsigned int gt_popcount_tab_popcount(unsigned long val)
 #endif
 }
 
-static inline unsigned int
-_gt_popcount_tab_class(unsigned long block, GT_UNUSED unsigned int blocksize)
-{
-  gt_assert(block >> blocksize == 0);
-  return gt_popcount_tab_popcount(block);
-}
-
 unsigned int gt_popcount_tab_class(GT_UNUSED GtPopcountTab *popcount_tab,
                                    unsigned long block)
 {
   gt_assert(popcount_tab != NULL);
-  return _gt_popcount_tab_class(block, popcount_tab->blocksize);
-}
-
-static inline unsigned int _gt_popcount_tab_offset_bits(unsigned int blocksize,
-                                                        unsigned int class)
-{
-  gt_assert(class <= blocksize);
-#ifdef __SSE4__
-  return (unsigned int) (sizeof (unsigned long) * CHAR_BIT -
-      __builtin_clzl(gt_combinatorics_binomial_dp((unsigned long) blocksize,
-                                                  (unsigned long) class)));
-#else
-  return gt_determinebitspervalue(
-      gt_combinatorics_binomial_dp((unsigned long) blocksize,
-                                   (unsigned long) class));
-#endif
+  gt_assert(block >> popcount_tab->blocksize == 0);
+  return gt_popcount_tab_popcount(block);
 }
 
 unsigned int gt_popcount_tab_offset_bits(GtPopcountTab *popcount_tab,
                                          unsigned int class)
 {
   gt_assert(popcount_tab != NULL);
+  gt_assert(class <= popcount_tab->blocksize);
   if (popcount_tab->bit_sizes == NULL)
     popcount_tab->bit_sizes = gt_calloc((size_t) popcount_tab->blocksize + 1,
                                         sizeof (*(popcount_tab->bit_sizes)));
   if (popcount_tab->bit_sizes[class] == 0) {
+#ifdef __SSE4__
+    popcount_tab->bit_sizes[class] = (unsigned int)
+      (sizeof (unsigned long) * CHAR_BIT -
+       __builtin_clzl(gt_combinatorics_binomial_dp((unsigned long)
+                                                     popcount_tab->blocksize,
+                                                   (unsigned long) class)));
+#else
     popcount_tab->bit_sizes[class] =
-      _gt_popcount_tab_offset_bits(popcount_tab->blocksize, class);
+      gt_determinebitspervalue(
+        gt_combinatorics_binomial_dp((unsigned long) popcount_tab->blocksize,
+                                     (unsigned long) class));
+#endif
   }
   return popcount_tab->bit_sizes[class];
 }
 
-static inline unsigned int _gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
-                                                   unsigned int popcount_c,
-                                                   unsigned long i,
-                                                   unsigned int pos)
+unsigned int gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
+                                    unsigned int popcount_c,
+                                    unsigned long i,
+                                    unsigned int pos)
 {
   unsigned long block;
   gt_assert(pos < popcount_tab->blocksize);
@@ -324,24 +326,22 @@ static inline unsigned int _gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
   if (popcount_c == 0)
     return 0;
   if (popcount_c < popcount_tab->blocksize)
-    gt_assert(i < popcount_tab->offsets[popcount_c + 1] -
-                       popcount_tab->offsets[popcount_c]);
+    gt_assert(i <
+              gt_compact_ulong_store_get(popcount_tab->offsets,
+                                         (unsigned long) popcount_c + 1) -
+              gt_compact_ulong_store_get(popcount_tab->offsets,
+                                         (unsigned long) popcount_c));
   else {
     gt_assert(i == 0);
     return pos+1;
   }
-  block = gt_compact_ulong_store_get(popcount_tab->blocks,
-                                     popcount_tab->offsets[popcount_c] + i);
+  block =
+    gt_compact_ulong_store_get(
+                    popcount_tab->blocks,
+                    gt_compact_ulong_store_get(popcount_tab->offsets,
+                                               (unsigned long) popcount_c) + i);
   block >>= popcount_tab->blocksize - pos - 1;
   return gt_popcount_tab_popcount(block);
-}
-
-unsigned int gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
-                                    unsigned int popcount_c,
-                                    unsigned long i,
-                                    unsigned int pos)
-{
-  return _gt_popcount_tab_rank_1(popcount_tab, popcount_c, i, pos);
 }
 
 unsigned int gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
@@ -351,27 +351,28 @@ unsigned int gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
 {
   if (popcount_c == 0)
     return pos + 1;
-  return pos + 1 - _gt_popcount_tab_rank_1(popcount_tab, popcount_c, i, pos);
+  return pos + 1 - gt_popcount_tab_rank_1(popcount_tab, popcount_c, i, pos);
 }
 
 static inline void gt_popcount_tab_init_rev_offset(GtPopcountTab *popcount_tab)
 {
   unsigned long idx, current_offset = 0, current_block;
-  unsigned int max_bits = _gt_popcount_tab_offset_bits(
-                                              popcount_tab->blocksize,
-                                              GT_DIV2(popcount_tab->blocksize)),
+  unsigned int max_bits =
+    gt_popcount_tab_offset_bits(popcount_tab, GT_DIV2(popcount_tab->blocksize)),
                current_class = 0;
-  max_bits++;
-  popcount_tab->rev_blocks = gt_compact_ulong_store_new(
-                                                    popcount_tab->num_of_blocks,
-                                                    max_bits);
+  popcount_tab->rev_blocks =
+    gt_compact_ulong_store_new(popcount_tab->num_of_blocks, max_bits);
   for (idx = 0; idx < popcount_tab->num_of_blocks; idx++) {
     current_block = gt_compact_ulong_store_get(popcount_tab->blocks, idx);
     if (current_class < popcount_tab->blocksize &&
-        idx == popcount_tab->offsets[current_class+1])
+        idx ==
+          gt_compact_ulong_store_get(popcount_tab->offsets,
+                                     (unsigned long) current_class + 1))
       current_class++;
     if (current_class != 0)
-      current_offset = idx - popcount_tab->offsets[current_class];
+      current_offset =
+        idx - gt_compact_ulong_store_get(popcount_tab->offsets,
+                                         (unsigned long) current_class);
     gt_compact_ulong_store_update(popcount_tab->rev_blocks,
                                   current_block,
                                   current_offset);
@@ -422,8 +423,13 @@ int gt_popcount_tab_unit_test(GtError *err)
     for (jdx = 0;
          !had_err && jdx < (unsigned long) class_size;
          jdx++) {
-      gt_ensure(had_err, blocksize_four[idx + jdx] ==
-                         gt_popcount_tab_get(popcount_t, popcount_c, jdx));
+      gt_ensure(had_err, idx ==
+                gt_compact_ulong_store_get(popcount_t->offsets,
+                                           (unsigned long) popcount_c));
+      gt_ensure(had_err,
+                blocksize_four[idx + jdx] ==
+                          (unsigned long) gt_popcount_tab_get(popcount_t,
+                                                              popcount_c, jdx));
     }
   }
   gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 0UL, 1U) == 0U);
@@ -437,7 +443,7 @@ int gt_popcount_tab_unit_test(GtError *err)
   gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 4U, 0UL, 1U) == 2U);
 
   for (idx = 0; !had_err && idx < (1UL << blocksize); idx++) {
-    popcount_c = _gt_popcount_tab_class(idx, blocksize);
+    popcount_c = gt_popcount_tab_class(popcount_t, idx);
     offset = gt_popcount_tab_get_offset_for_block(popcount_t, idx);
 
     for (jdx = 0; !had_err && jdx < (unsigned long) blocksize; jdx++) {
@@ -450,24 +456,28 @@ int gt_popcount_tab_unit_test(GtError *err)
     }
   }
 
-  offset = gt_popcount_tab_get_offset_for_block(popcount_t, 4UL);
-  gt_ensure(had_err, offset == 2UL);
-  offset = gt_popcount_tab_get_offset_for_block(popcount_t, 15UL);
-  gt_ensure(had_err, offset == 0);
-  gt_popcount_tab_delete(popcount_t);
-
-  popcount_t = gt_popcount_tab_new(10U);
-  for (idx = 0; !had_err && idx < 1UL<<10UL; idx++) {
-    offset = gt_popcount_tab_get_offset_for_block(popcount_t, idx);
-    popcount_c = gt_popcount_tab_popcount(idx);
-    jdx = gt_popcount_tab_get(popcount_t, popcount_c, offset);
-    gt_ensure(had_err, idx == jdx);
+  if (!had_err) {
+    offset = gt_popcount_tab_get_offset_for_block(popcount_t, 4UL);
+    gt_ensure(had_err, offset == 2UL);
+    offset = gt_popcount_tab_get_offset_for_block(popcount_t, 15UL);
+    gt_ensure(had_err, offset == 0);
   }
   gt_popcount_tab_delete(popcount_t);
-  popc_perm = init = gt_popcount_tab_perm_start(5U);
-  while (!had_err && popc_perm >= init) {
-    gt_ensure(had_err, gt_popcount_tab_popcount(popc_perm) == 5U);
-    popc_perm = gt_popcount_tab_next_perm(popc_perm) & blockmask;
+
+  if (!had_err) {
+    popcount_t = gt_popcount_tab_new(10U);
+    for (idx = 0; !had_err && idx < 1UL<<10UL; idx++) {
+      offset = gt_popcount_tab_get_offset_for_block(popcount_t, idx);
+      popcount_c = gt_popcount_tab_popcount(idx);
+      jdx = gt_popcount_tab_get(popcount_t, popcount_c, offset);
+      gt_ensure(had_err, idx == jdx);
+    }
+    gt_popcount_tab_delete(popcount_t);
+    popc_perm = init = gt_popcount_tab_perm_start(5U);
+    while (!had_err && popc_perm >= init) {
+      gt_ensure(had_err, gt_popcount_tab_popcount(popc_perm) == 5U);
+      popc_perm = gt_popcount_tab_next_perm(popc_perm) & blockmask;
+    }
   }
   return had_err;
 }
