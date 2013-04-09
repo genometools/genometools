@@ -962,27 +962,27 @@ obj/%.sb: src/extended/%.c
 
 obj/%.splint: ${CURDIR}/src/match/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/ltr/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/core/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/extended/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 
