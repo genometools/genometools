@@ -89,6 +89,7 @@
 #include "tools/gt_chseqids.h"
 #include "tools/gt_clean.h"
 #include "tools/gt_compreads.h"
+#include "tools/gt_compressedbits.h"
 #include "tools/gt_congruence.h"
 #include "tools/gt_convertseq.h"
 #include "tools/gt_csa.h"

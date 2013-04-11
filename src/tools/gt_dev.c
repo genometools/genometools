@@ -21,6 +21,7 @@
 #include "core/toolbox.h"
 #include "core/versionfunc.h"
 #include "gth/gt_gthmkbssmfiles.h"
+#include "tools/gt_compressedbits.h"
 #include "tools/gt_consensus_sa.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_extracttarget.h"
@@ -54,6 +55,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
   gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
   gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
+  gt_toolbox_add_tool(dev_toolbox, "compbits", gt_compressedbits());
   gt_toolbox_add_tool(dev_toolbox, "consensus_sa", gt_consensus_sa_tool());
   gt_toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
   gt_toolbox_add_tool(dev_toolbox, "gdiffcalc", gt_gdiffcalc());
