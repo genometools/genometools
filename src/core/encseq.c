@@ -5890,7 +5890,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                      sizeof (unsigned long));
     if (md5fp != NULL)
       md5enc = gt_md5_encoder_new();
-    for (currentpos = 0; /* Nothing */; currentpos++)
+    for (currentpos = 0; !haserr; currentpos++)
     {
 #ifndef _LP64
 #define MAXSFXLENFOR32BIT 4294000000UL

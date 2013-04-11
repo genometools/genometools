@@ -109,7 +109,13 @@
                   equallength->valueunsignedlong = lengthofcurrentsequence;
                 }
               }
-              if (desfp != NULL)
+              if (!haserr && !plainformat && lengthofcurrentsequence == 0) {
+                gt_error_set(err, "file '%s' contains an empty sequence",
+                             gt_str_array_get(filenametab,
+                               gt_sequence_buffer_get_file_index(fb)));
+                haserr = true;
+              }
+              if (desfp != NULL && !haserr)
               {
                 desc = (char*) gt_desc_buffer_get_next(descqueue);
                 gt_xfputs(desc,desfp);
