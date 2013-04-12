@@ -19,6 +19,8 @@ changes in version 1.5.2 (2013-XX-XX)
 - LTRdigest output does not contain Pfam IDs anymore
 - LTRdigest now assigns a strand to _every_ feature in element CC if possible
 - LTRdigest code refactored for reusability
+- added GtCompressedBitsequence, abstract GtWTree and implementation thereof
+  GtWtreeEncseq
 
 
 changes in version 1.5.1 (2013-03-07)
