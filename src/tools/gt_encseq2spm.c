@@ -292,15 +292,6 @@ static int gt_encseq2spm_arguments_check(int rest_argc,
       haserr = true;
     }
   }
-#ifdef GT_THREADS_ENABLED
-  if (!haserr) {
-    if (gt_jobs > 1 && gt_ma_bookkeeping_enabled()) {
-      gt_error_set(err, "gt option '-j' and GT_MEM_BOOKKEEPING=on "
-                        "are incompatible");
-      haserr = true;
-    }
-  }
-#endif
   return haserr ? -1 : 0;
 }
 

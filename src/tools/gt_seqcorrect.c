@@ -321,15 +321,6 @@ static int gt_seqcorrect_arguments_check(GT_UNUSED int rest_argc,
       haserr = true;
     }
   }
-#ifdef GT_THREADS_ENABLED
-  if (!haserr) {
-    if (gt_jobs > 1 && gt_ma_bookkeeping_enabled()) {
-      gt_error_set(err, "gt option '-j' and GT_MEM_BOOKKEEPING=on "
-                        "are incompatible");
-      haserr = true;
-    }
-  }
-#endif
   if (!haserr) {
     if (arguments->find_seldom && arguments->iterations != 1U)
     {
