@@ -16,8 +16,10 @@
 */
 
 #include <stdlib.h>
+#ifndef S_SPLINT_S
 #include <sys/types.h>
 #include <sys/wait.h>
+#endif
 #include "core/error_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"

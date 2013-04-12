@@ -18,11 +18,11 @@
 #include <ctype.h>
 #include <signal.h>
 #include <string.h>
-#include <sys/types.h>
 #ifndef S_SPLINT_S
+#include <sys/types.h>
 #include <unistd.h>
-#endif
 #include <sys/wait.h>
+#endif
 #include "core/array_api.h"
 #include "core/codon_api.h"
 #include "core/codon_iterator_api.h"
