@@ -192,7 +192,7 @@ static int gt_wtree_bench_runner(GT_UNUSED int argc, const char **argv,
   GtEncseq *encseq;
   GtEncseqLoader *el = gt_encseq_loader_new();
   const char *es_basename = argv[parsed_args];
-  GtWtree *wt;
+  GtWtree *wt = NULL;
   GtTimer *timer =
     gt_timer_new_with_progress_description("random access encseq 1M");
 
@@ -203,11 +203,13 @@ static int gt_wtree_bench_runner(GT_UNUSED int argc, const char **argv,
   had_err = gt_wtree_bench_bench_encseq(encseq, timer, err);
   gt_timer_delete(timer);
 
-  timer = gt_timer_new_with_progress_description("creating wt");
-  gt_timer_start(timer);
-  wt = gt_wtree_encseq_new(encseq);
-  had_err = gt_wtree_bench_bench_wtree(wt, err, timer);
-  gt_timer_show_progress_final(timer, stderr);
+  if (!had_err) {
+    timer = gt_timer_new_with_progress_description("creating wt");
+    gt_timer_start(timer);
+    wt = gt_wtree_encseq_new(encseq);
+    had_err = gt_wtree_bench_bench_wtree(wt, err, timer);
+    gt_timer_show_progress_final(timer, stderr);
+  }
   gt_timer_delete(timer);
   gt_encseq_delete(encseq);
 
