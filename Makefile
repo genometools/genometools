@@ -930,31 +930,31 @@ splintclean:
 sbclean:
 	find obj -name '*.sb' | xargs rm -f
 
-obj/%.sb: ${CURDIR}/src/match/%.c
+obj/%.sb: src/match/%.c
 	@echo "scan-build $<"
 	@scan-build --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
 	@touch $@
 
-obj/%.sb: ${CURDIR}/src/ltr/%.c
+obj/%.sb: src/ltr/%.c
 	@echo "scan-build $<"
 	@scan-build --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
 	@touch $@
 
-obj/%.sb: ${CURDIR}/src/tools/%.c
+obj/%.sb: src/tools/%.c
 	@echo "scan-build $<"
 	@scan-build --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
 	@touch $@
 
-obj/%.sb: ${CURDIR}/src/core/%.c
+obj/%.sb: src/core/%.c
 	@echo "scan-build $<"
 	@scan-build --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
 	@touch $@
 
-obj/%.sb: ${CURDIR}/src/extended/%.c
+obj/%.sb: src/extended/%.c
 	@echo "scan-build $<"
 	@scan-build --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
