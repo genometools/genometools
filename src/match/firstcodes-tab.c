@@ -399,7 +399,6 @@ unsigned long gt_firstcodes_accumulatecounts_merge(
   {
     gt_firstcodes_countocc_increment(tab,differences,subjectindex,lastocc);
     found += lastocc;
-    lastocc = 0;
   }
   return found;
 }

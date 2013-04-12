@@ -1495,6 +1495,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     if (!onlyaccumulation)
     {
+      gt_assert(fci.flushcount > 0);
       gt_logger_log(logger,"firstcodeposhits=%lu (%.3f%% of all suffixes), "
                            "%u rounds (avg length %lu)",
                            fci.firstcodeposhits,

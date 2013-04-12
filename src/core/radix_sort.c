@@ -181,7 +181,7 @@ static unsigned long gt_radixsort_findfirstlarger(const unsigned long
     gt_assert(mid >= leftborder + start && mid <= leftborder + end);
     if (offset == *mid)
     {
-      return mid - leftborder;
+      return (unsigned long) (mid - leftborder);
     }
     if (offset < *mid)
     {
@@ -538,7 +538,8 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
     gt_assert(radixsortinfo->stack.nextfree <= UINT8_MAX+1);
     for (j=0; j<radixsortinfo->stack.nextfree; j++)
     {
-      radixsortinfo->lentab[j] = radixsortinfo->stack.space[j].len;
+      radixsortinfo->lentab[j] = (unsigned long)
+                                              radixsortinfo->stack.space[j].len;
     }
     gt_evenly_divide_lentab(radixsortinfo->endindexes,
                             radixsortinfo->lentab,
