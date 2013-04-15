@@ -47,7 +47,12 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
   gt_assert(hmmfiles);
   gt_error_check(err);
 
-  if (0 != WEXITSTATUS(system("hmmpress -h > /dev/null"))) {
+  rval = system("hmmpress -h > /dev/null");
+  if (rval == -1) {
+    gt_error_set(err, "error executing system(hmmpress)");
+    return NULL;
+  }
+  if (WEXITSTATUS(rval) != 0) {
     gt_error_set(err, "cannot find the hmmpress executable in PATH");
     return NULL;
   }
@@ -109,9 +114,13 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
     gt_str_append_str(cmdline, pdom_model_set->filename);
     gt_str_append_cstr(cmdline, "> /dev/null");   /* XXX: portability? */
 
-    rval =  WEXITSTATUS(system(gt_str_get(cmdline)));
+    rval = system(gt_str_get(cmdline));
     gt_str_delete(cmdline);
-    if (rval != 0) {
+    if (rval == -1) {
+      gt_error_set(err, "error executing system(hmmpress)");
+      return NULL;
+    }
+    if (WEXITSTATUS(rval) != 0) {
       gt_error_set(err, "an error occurred during HMM preprocessing");
       had_err = -1;
     }
