@@ -28,6 +28,7 @@ typedef struct {
                 multicharcmptrials,
                 prefixlength;
   bool verbose,
+       mirror,
        nocheckunit;
 } GtEncseqCheckArguments;
 
@@ -75,6 +76,10 @@ static GtOptionParser* gt_encseq_check_option_parser_new(void *tool_arguments)
                               &arguments->nocheckunit, false);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_bool("mirrored","use mirrored encseq",
+                              &arguments->mirror, false);
+  gt_option_parser_add_option(op, option);
+
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
@@ -98,18 +103,19 @@ static int gt_encseq_check_runner(GT_UNUSED int argc, const char **argv,
 
   logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   encseq_loader = gt_encseq_loader_new();
+  if (arguments->mirror)
+    gt_encseq_loader_mirror(encseq_loader);
+
   if (!(encseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args], err)))
     had_err = -1;
   if (!had_err) {
     int readmode;
 
     gt_encseq_check_startpositions(encseq,logger);
-    for (readmode = 0; readmode < 4; readmode++)
-    {
+    for (readmode = 0; readmode < 4; readmode++) {
       if (gt_alphabet_is_dna(gt_encseq_alphabet(encseq)) ||
            ((GtReadmode) readmode) == GT_READMODE_FORWARD ||
-           ((GtReadmode) readmode) == GT_READMODE_REVERSE)
-      {
+           ((GtReadmode) readmode) == GT_READMODE_REVERSE) {
         gt_logger_log(logger,"check consistency for readmode %s",
                       gt_readmode_show((GtReadmode) readmode));
         if (gt_encseq_check_consistency(encseq,
@@ -120,32 +126,22 @@ static int gt_encseq_check_runner(GT_UNUSED int argc, const char **argv,
                            gt_encseq_has_multiseq_support(encseq),
                            !arguments->nocheckunit,
                            logger,
-                           err) != 0)
-        {
+                           err) != 0) {
           had_err = -1;
           break;
         }
       }
     }
     if (!had_err)
-    {
       gt_encseq_check_specialranges(encseq);
-    }
-    if (!had_err)
-    {
+    if (!had_err && !arguments->mirror)
       gt_encseq_check_markpos(encseq);
-    }
     if (!had_err)
-    {
       had_err = gt_encseq_check_minmax(encseq, err);
-    }
-    if (!had_err &&
-           arguments->prefixlength > 0)
-    {
+    if (!had_err && arguments->prefixlength > 0) {
       if (gt_verifymappedstr(encseq,
                              arguments->prefixlength,
-                             err) != 0)
-      {
+                             err) != 0) {
         had_err = -1;
       }
     }
