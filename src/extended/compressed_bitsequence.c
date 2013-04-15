@@ -546,7 +546,8 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
                 block_idx, blocks_offset_pos, block,
                 rank_sum = 0,
                 select_mask,
-                position;
+                position,
+                start_0, start_1, start_2;
 
   gt_assert(num != 0);
   gt_assert(cbs != NULL);
@@ -570,15 +571,16 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
     end_s_block = cbs->num_of_superblocks;
     middle_s_block = GT_DIV2(start_s_block + end_s_block);
     while (start_s_block < end_s_block) {
+      start_0 = (middle_s_block - 1) * cbs->superblockranks_bits;
+      start_1 = start_0 + cbs->superblockranks_bits;
+      start_2 = start_1 + cbs->superblockranks_bits;
       if ((unsigned long) gt_compressed_bitsequence_get_variable_field(
-                                     cbs->superblockranks,
-                                     middle_s_block * cbs->superblockranks_bits,
-                                     cbs->superblockranks_bits)
+                                                  cbs->superblockranks, start_1,
+                                                  cbs->superblockranks_bits)
           < num) {
         if ((unsigned long) gt_compressed_bitsequence_get_variable_field(
-                               cbs->superblockranks,
-                               (middle_s_block + 1) * cbs->superblockranks_bits,
-                               cbs->superblockranks_bits)
+                                                  cbs->superblockranks, start_2,
+                                                  cbs->superblockranks_bits)
             < num)
           start_s_block = middle_s_block;
         else
@@ -586,9 +588,8 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
       }
       else {
         if ((unsigned long) gt_compressed_bitsequence_get_variable_field(
-                               cbs->superblockranks,
-                               (middle_s_block - 1) * cbs->superblockranks_bits,
-                               cbs->superblockranks_bits)
+                                                  cbs->superblockranks, start_0,
+                                                  cbs->superblockranks_bits)
             >= num)
           end_s_block = middle_s_block;
         else {
@@ -658,7 +659,8 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
                 position,
                 max_0_rank,
                 first_0_superblock_rank,
-                s_block_bits;
+                s_block_bits,
+                start_0, start_1, start_2;
 
   gt_assert(num != 0);
   gt_assert(cbs != NULL);
@@ -693,17 +695,18 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
       middle_s_block_max = s_block_bits * (middle_s_block+1);
       middle_s_block_next_max = middle_s_block_max + s_block_bits;
       middle_s_block_prev_max = middle_s_block_max - s_block_bits;
+      start_0 = (middle_s_block - 1) * cbs->superblockranks_bits;
+      start_1 = start_0 + cbs->superblockranks_bits;
+      start_2 = start_1 + cbs->superblockranks_bits;
       if ((middle_s_block_max -
             gt_compressed_bitsequence_get_variable_field(
-                                     cbs->superblockranks,
-                                     middle_s_block * cbs->superblockranks_bits,
-                                     cbs->superblockranks_bits))
+                                                  cbs->superblockranks, start_1,
+                                                  cbs->superblockranks_bits))
           < num) {
         if ((middle_s_block_next_max -
               gt_compressed_bitsequence_get_variable_field(
-                               cbs->superblockranks,
-                               (middle_s_block + 1) * cbs->superblockranks_bits,
-                               cbs->superblockranks_bits))
+                                                  cbs->superblockranks, start_2,
+                                                  cbs->superblockranks_bits))
             < num)
           start_s_block = middle_s_block;
         else
@@ -712,9 +715,8 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
       else {
         if ((middle_s_block_prev_max -
                gt_compressed_bitsequence_get_variable_field(
-                               cbs->superblockranks,
-                               (middle_s_block - 1) * cbs->superblockranks_bits,
-                               cbs->superblockranks_bits))
+                                                  cbs->superblockranks, start_0,
+                                                  cbs->superblockranks_bits))
             >= num)
           end_s_block = middle_s_block;
         else {
@@ -725,16 +727,15 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
       middle_s_block = GT_DIV2(start_s_block + end_s_block);
     }
     middle_s_block_max = s_block_bits * (middle_s_block + 1);
+    start_0 = middle_s_block * cbs->superblockoffsets_bits;
     blocks_offset_pos = (unsigned long)
-      gt_compressed_bitsequence_get_variable_field(
-                                   cbs->superblockoffsets,
-                                   middle_s_block * cbs->superblockoffsets_bits,
-                                   cbs->superblockoffsets_bits);
+      gt_compressed_bitsequence_get_variable_field(cbs->superblockoffsets,
+                                                   start_0,
+                                                   cbs->superblockoffsets_bits);
     rank_sum = (unsigned long)
       middle_s_block_max - gt_compressed_bitsequence_get_variable_field(
-                                     cbs->superblockranks,
-                                     middle_s_block * cbs->superblockranks_bits,
-                                     cbs->superblockranks_bits);
+                                                  cbs->superblockranks, start_0,
+                                                  cbs->superblockranks_bits);
     containing_s_block = middle_s_block+1;
   }
 
