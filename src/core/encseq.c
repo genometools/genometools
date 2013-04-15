@@ -431,12 +431,10 @@ bool gt_encseq_position_is_separator(const GtEncseq *encseq,
       /* invert coordinates and readmode */
       gt_readmode_invert(readmode);
       pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
-    } else
-    {
+    }
+    else {
       if (pos == encseq->totallength)
-      {
         return true;
-      }
     }
   }
   if (encseq->numofdbsequences == 1UL)
@@ -1871,19 +1869,15 @@ static void gt_ssptab_delete(GtEncseqAccessType satsep, GtSWtable *ssptab)
 void gt_encseq_delete(GtEncseq *encseq)
 {
   if (encseq == NULL)
-  {
     return;
-  }
   gt_mutex_lock(encseq->refcount_lock);
   if (encseq->reference_count) {
     encseq->reference_count--;
     gt_mutex_unlock(encseq->refcount_lock);
     return;
   }
-  if (encseq->mappedptr != NULL)
-  {
-    if (encseq->bitpackarray != NULL)
-    {
+  if (encseq->mappedptr != NULL) {
+    if (encseq->bitpackarray != NULL) {
       /* store points to some subarea of the region mapped by mappedptr:
          therefor we have to set it to NULL to prevent that it is freed */
       BITPACKARRAYSTOREVAR(encseq->bitpackarray) = NULL;
@@ -1891,16 +1885,13 @@ void gt_encseq_delete(GtEncseq *encseq)
       encseq->bitpackarray = NULL;
     }
     gt_fa_xmunmap(encseq->mappedptr);
-  } else
-  {
+  }
+  else {
     gt_free(encseq->headerptr.characterdistribution);
-    switch (encseq->sat)
-    {
+    switch (encseq->sat) {
       case  GT_ACCESS_TYPE_DIRECTACCESS:
         if (!encseq->hasplainseqptr)
-        {
           gt_free(encseq->plainseq);
-        }
         break;
       case GT_ACCESS_TYPE_BYTECOMPRESS:
         bitpackarray_delete(encseq->bitpackarray);
@@ -1943,13 +1934,9 @@ void gt_encseq_delete(GtEncseq *encseq)
     gt_ssptab_delete(encseq->satsep, &encseq->ssptab);
   }
   if (encseq->ssptabmappedptr != NULL)
-  {
     gt_fa_xmunmap(encseq->ssptabmappedptr);
-  }
   if (encseq->oistabmappedptr != NULL)
-  {
     gt_fa_xmunmap(encseq->oistabmappedptr);
-  }
   encseq->headerptr.characterdistribution = NULL;
   encseq->plainseq = NULL;
   encseq->specialbits = NULL;
@@ -1957,32 +1944,24 @@ void gt_encseq_delete(GtEncseq *encseq)
   setencsequtablesNULL(encseq->sat, &encseq->wildcardrangetable);
   setencsequtablesNULL(encseq->satsep, &encseq->ssptab);
   if (encseq->destab != NULL) {
-    if (encseq->hasallocateddestab) {
+    if (encseq->hasallocateddestab)
       gt_free(encseq->destab);
-    } else
-    {
+    else
       gt_fa_xmunmap((void *) encseq->destab);
-    }
     encseq->destab = NULL;
   }
-  if (encseq->sdstab != NULL)
-  {
+  if (encseq->sdstab != NULL) {
     if (encseq->hasallocatedsdstab)
-    {
       gt_free(encseq->sdstab);
-    } else
-    {
+    else
       gt_fa_xmunmap((void *) encseq->sdstab);
-    }
     encseq->sdstab = NULL;
   }
-  if (encseq->fsptab != NULL)
-  {
+  if (encseq->fsptab != NULL) {
     gt_free(encseq->fsptab);
     encseq->fsptab = NULL;
   }
-  if (encseq->exceptions != NULL)
-  {
+  if (encseq->exceptions != NULL) {
     if (encseq->oistabmappedptr != NULL)
       BITPACKARRAYSTOREVAR(encseq->exceptions) = NULL;
     bitpackarray_delete(encseq->exceptions);
@@ -1994,9 +1973,7 @@ void gt_encseq_delete(GtEncseq *encseq)
   if (encseq->alphadef != NULL)
     gt_free(encseq->alphadef);
   if (encseq->mappedptr == NULL)
-  {
     gt_free(encseq->headerptr.filelengthtab);
-  }
   encseq->headerptr.filelengthtab = NULL;
   if (encseq->md5_tab != NULL)
     gt_md5_tab_delete(encseq->md5_tab);
@@ -3070,39 +3047,35 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
 #endif
       advancerangeGtEncseqReader(esr, SWtable_ssptab);
     }
-  } else
-  {
-    if (esr->wildcardrangestate != NULL)
-    {
+  }
+  else {
+    if (esr->wildcardrangestate != NULL) {
       gt_free(esr->wildcardrangestate);
       esr->wildcardrangestate = NULL;
     }
-    if (esr->ssptabstate != NULL)
-    {
+    if (esr->ssptabstate != NULL) {
       gt_free(esr->ssptabstate);
       esr->ssptabstate = NULL;
     }
     if (encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) {
       if (issinglepositioninspecialrangeViaequallength(esr->encseq, startpos)) {
         esr->nextseparatorpos = startpos;
-      } else
-      {
+      }
+      else {
         unsigned long seqnum = (startpos + 1)/
                                (encseq->equallength.valueunsignedlong + 1);
-        if (!GT_ISDIRREVERSE(esr->readmode))
-        {
+        if (!GT_ISDIRREVERSE(esr->readmode)) {
           esr->nextseparatorpos = encseq->equallength.valueunsignedlong +
                                   seqnum *
                                   (encseq->equallength.valueunsignedlong + 1);
-        } else
-        {
-          if (seqnum > 0)
-          {
+        }
+        else {
+          if (seqnum > 0) {
             esr->nextseparatorpos = encseq->equallength.valueunsignedlong +
                                     (seqnum-1) *
                                     (encseq->equallength.valueunsignedlong + 1);
-          } else
-          {
+          }
+          else {
             esr->nextseparatorpos = 0;
           }
         }
@@ -3910,36 +3883,29 @@ unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
 
 unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
 {
-  if (seqnum >= encseq->numofdbsequences) {
-    seqnum = encseq->logicalnumofdbsequences - 1 - seqnum;
+  gt_assert(encseq != NULL && seqnum < encseq->logicalnumofdbsequences);
+  if (encseq->hasmirror && seqnum >= encseq->numofdbsequences) {
+    seqnum = GT_REVERSEPOS(encseq->logicalnumofdbsequences, seqnum);
   }
-  if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
-  {
-    if (seqnum == 0)
-    {
+  if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH) {
+    if (seqnum == 0) {
       if (encseq->numofdbsequences == 1UL)
-      {
         return encseq->totallength;
-      } else
-      {
+      else
         return gt_encseq_seqstartpos_viautables(encseq, 1UL) - 1;
-      }
-    } else
-    {
+    }
+    else {
       unsigned long startpos = gt_encseq_seqstartpos(encseq, seqnum);
       if (seqnum == encseq->numofdbsequences - 1)
-      {
         return encseq->totallength - startpos;
-      } else
-      {
+      else {
         return gt_encseq_seqstartpos_viautables(encseq, seqnum + 1UL)
                  - 1 - startpos;
       }
     }
-  } else
-  {
-    return encseq->equallength.valueunsignedlong;
   }
+  else
+    return encseq->equallength.valueunsignedlong;
 }
 
 void gt_encseq_check_markpos(const GtEncseq *encseq)
@@ -4840,6 +4806,8 @@ void gt_encseq_check_startpositions(const GtEncseq *encseq, GtLogger *logger)
                  gt_encseq_total_length(encseq));
   for (i = 0; i < gt_encseq_total_length(encseq); i++) {
     if (gt_encseq_reader_next_encoded_char(esr) == (GtUchar) SEPARATOR) {
+      gt_assert(gt_encseq_position_is_separator(encseq, i,
+                                                GT_READMODE_FORWARD));
       startpostable[pos++] = i+1;
     }
   }
@@ -6074,12 +6042,12 @@ unsigned long gt_getnexttwobitencodingstoppos(GT_UNUSED bool fwd,
   return rawstoppos;
 }
 
-static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
-                                              const GtEncseq *encseq,
-                                              bool fwd,
-                                              unsigned long currentpos,
-                                              unsigned long
-                                                          twobitencodingstoppos)
+static unsigned long gt_encseq_extract2bitenc(
+                                            GtEndofTwobitencoding *ptbe,
+                                            const GtEncseq *encseq,
+                                            bool fwd,
+                                            unsigned long currentpos,
+                                            unsigned long twobitencodingstoppos)
 {
   bool mirrored = false;
   unsigned long pos;
@@ -6722,12 +6690,32 @@ static void extract2bitenc_bruteforce(bool fwd,
                                       const GtEncseq *encseq,
                                       unsigned long startpos)
 {
-  if (fwd) {
-    fwdextract2bitenc_bruteforce(ptbe, encseq, startpos);
+  bool mirrored = false;
+  if (encseq->hasmirror && startpos >= encseq->totallength) {
+    if (startpos == encseq->totallength) {
+      /* handle special case where we start on the virtual separator */
+      ptbe->tbe = 0;
+      ptbe->unitsnotspecial = 0;
+      return;
+    }
+    mirrored = true;
+    /* invert coordinates */
+    fwd = !fwd;
+    startpos = GT_REVERSEPOS(encseq->totallength,
+                             startpos - encseq->totallength - 1);
   }
+  if (fwd)
+    fwdextract2bitenc_bruteforce(ptbe, encseq, startpos);
   else {
     revextract2bitenc_bruteforce(ptbe, encseq,
                                  GT_REVERSEPOS(encseq->totallength, startpos));
+  }
+  if (mirrored) {
+    /* reverse */
+    ptbe->tbe = gt_intbits_reverse_unitwise(ptbe->tbe);
+    /* complement */
+    if (ptbe->unitsnotspecial > 0)
+      ptbe->tbe ^= ~0;
   }
 }
 
@@ -7676,21 +7664,13 @@ static void testseqnumextraction(const GtEncseq *encseq)
       startofsequence = true;
     }
     else {
-      unsigned long seqnum1, seqnum2;
+      unsigned long seqnum1;
 
       seqnum1 = gt_encseq_seqnum(encseq, pos);
       if (currentseqnum != seqnum1) {
         fprintf(stderr, "testseqnumextraction: pos=%lu: currentseqnum = %lu "
                        "!= %lu = seqnum\n", pos, currentseqnum, seqnum1);
         exit(GT_EXIT_PROGRAMMING_ERROR);
-      }
-      if (encseq->satsep != GT_ACCESS_TYPE_UNDEFINED) {
-        seqnum2 = gt_encseq_seqnum_ssptab(encseq, pos);
-        if (seqnum1 != seqnum2) {
-          fprintf(stderr, "pos=%lu: seqnum1=%lu!=%lu=seqnum2\n",
-                         pos, seqnum1, seqnum2);
-          exit(GT_EXIT_PROGRAMMING_ERROR);
-        }
       }
       if (startofsequence) {
         gt_assert(gt_encseq_seqstartpos(encseq, seqnum1) == pos);
@@ -7753,7 +7733,7 @@ static int testfullscan(const GtStrArray *filenametab,
   unsigned long long fullscanpbar = 0;
 
   gt_error_check(err);
-  totallength = encseq->logicaltotallength;
+  totallength = encseq->totallength;
   /* gt_progressbar_start(&fullscanpbar, (unsigned long long) totallength); */
   if (filenametab != NULL) {
     fb = gt_sequence_buffer_new_guess_type(filenametab, err);
@@ -7859,7 +7839,8 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
   if (encseq->sat != GT_ACCESS_TYPE_DIRECTACCESS &&
-      encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS) {
+      encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS &&
+      !encseq->hasmirror) {
     if (withcheckunit) {
       gt_logger_log(logger, "run checkextractunitatpos");
       checkextractunitatpos(encseq, readmode);
