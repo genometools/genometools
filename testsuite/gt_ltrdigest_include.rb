@@ -257,14 +257,6 @@ if $gttestdata then
       grep(last_stderr, /error occurred during HMM preprocessing/)
     end
 
-    Name "gt ltrdigest HMM list not properly closed (--)"
-    Keywords "gt_ltrdigest"
-    Test do
-      run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
-      run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted", :retval => 1
-      grep(last_stderr, /an error occurred during/)
-    end
-
     Name "gt ltrdigest pHMM implied options"
     Keywords "gt_ltrdigest"
     Test do
