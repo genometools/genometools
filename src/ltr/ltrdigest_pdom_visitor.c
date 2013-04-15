@@ -883,10 +883,15 @@ GtNodeVisitor* gt_ltrdigest_pdom_visitor_new(GtPdomModelSet *model,
   GtNodeVisitor *nv;
   GtLTRdigestPdomVisitor *lv;
   GtStr *cmd;
-  int had_err = 0, i;
+  int had_err = 0, i, rval;
   gt_assert(model && rmap);
 
-  if (0 != WEXITSTATUS(system("hmmscan -h > /dev/null"))) {
+  rval = system("hmmscan -h > /dev/null");
+  if (rval == -1) {
+    gt_error_set(err, "error executing system(hmmscan)");
+    return NULL;
+  }
+  if (WEXITSTATUS(rval) != 0) {
     gt_error_set(err, "cannot find the hmmscan executable in PATH");
     return NULL;
   }
