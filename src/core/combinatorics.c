@@ -58,9 +58,20 @@ static inline void init_binomial_dp_tab(void)
                   rows = GT_BINOMIAL_MAX_N_DP + 1UL,
                   cols = GT_DIV2(GT_BINOMIAL_MAX_N_DP) + 1;
     gt_array2dim_malloc(binomial_dp_tab, rows, cols);
-    for (idx=0; idx < rows; idx++)
-      for (jdx=0; jdx < cols; jdx++)
-        binomial_dp_tab[idx][jdx] = UNDEFTABVALUE;
+    for (jdx = 1UL; jdx < cols; ++jdx)
+      binomial_dp_tab[0][jdx] = 0;
+    for (idx = 0; idx < rows; ++idx)
+      binomial_dp_tab[idx][0] = 1UL;
+    for (idx=1UL; idx < rows; idx++) {
+      for (jdx=1UL; jdx < cols; jdx++) {
+        if (idx <= jdx)
+         binomial_dp_tab[idx][jdx] = 1UL;
+        else
+         gt_safe_add(binomial_dp_tab[idx][jdx],
+                     binomial_dp_tab[idx - 1][jdx - 1],
+                     binomial_dp_tab[idx - 1][jdx]);
+      }
+    }
   }
 }
 
@@ -78,36 +89,9 @@ void gt_combinatorics_clean(void)
   binomial_dp_tab = NULL;
 }
 
-static inline unsigned long gt_combinatorics_binomial_dp_rec(unsigned long n,
-                                                             unsigned long k)
-{
-  if (k == 0 || n <= k)
-    return 1UL;
-  if (n == 0)
-    return 0;
-  if (binomial_dp_tab[n][k] == UNDEFTABVALUE) {
-    if (binomial_dp_tab[n - 1][k - 1] == UNDEFTABVALUE)
-      binomial_dp_tab[n - 1][k - 1] =
-        gt_combinatorics_binomial_dp_rec(n - 1, k - 1);
-    if (binomial_dp_tab[n - 1][k] == UNDEFTABVALUE)
-      binomial_dp_tab[n - 1][k] = gt_combinatorics_binomial_dp_rec(n - 1, k);
-    gt_safe_add(binomial_dp_tab[n][k],
-                binomial_dp_tab[n - 1][k - 1],
-                binomial_dp_tab[n - 1][k]);
-  }
-  return binomial_dp_tab[n][k];
-}
-
 unsigned long gt_combinatorics_binomial_dp(unsigned long n, unsigned long k)
 {
-  if (k == 0 || n <= k)
-    return 1UL;
-  if (n == 0)
-    return 0;
-  gt_assert(n <= GT_BINOMIAL_MAX_N_DP);
-  if (GT_DIV2(n) < k)
-    k = n - k;
-  return gt_combinatorics_binomial_dp_rec(n, k);
+  return binomial_dp_tab[n][k];
 }
 
 unsigned long gt_combinatorics_binomial_ln(unsigned long n, unsigned long k)

@@ -18,6 +18,12 @@
 #ifndef COMBINATORICS_IMPL_H
 #define COMBINATORICS_IMPL_H
 
+#include "core/assert_api.h"
+#include "core/error_api.h"
+#include "core/minmax.h"
+#include "core/unused_api.h"
+#include "core/safearith.h"
+
 #ifdef _LP64
 #define GT_BINOMIAL_MAX_N_LN 66UL
 #define GT_BINOMIAL_MAX_N 62UL
