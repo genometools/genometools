@@ -114,11 +114,10 @@ char gt_rand_char(void)
   return c;
 }
 
-/*
-  Find the log base 2 of an integer in O(wordsize) operations.
-  where N is the number of bits. There are faster methods, see
-  \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
-*/
+/* Find the log base 2 of an integer in O(wordsize) operations. where N is the
+   number of bits. There are faster methods, see
+   \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
+   */
 unsigned int gt_determinebitspervalue(unsigned long maxvalue)
 {
   unsigned int bits = 0;
@@ -132,13 +131,16 @@ unsigned int gt_determinebitspervalue(unsigned long maxvalue)
   gt_assert(bits <= GT_MAXLOG2VALUE);
 #ifdef USEbuiltin_clzl
   {
-    unsigned int fastbits = (unsigned int) (sizeof(unsigned long) * CHAR_BIT) -
-                            __builtin_clzl(maxvalue);
-    if (bits != fastbits)
-    {
-      fprintf(stderr,"maxvalue=%lu: bits = %u != %d = clzl\n",
-                        maxvalue,bits,fastbits);
-      exit(EXIT_FAILURE);
+    if (maxvalue != 0) { /*__builtin_clz only defined != 0 */
+      unsigned int fastbits =
+        (unsigned int) (sizeof(unsigned long) * CHAR_BIT) -
+        __builtin_clzl(maxvalue);
+      if (bits != fastbits)
+      {
+        fprintf(stderr,"maxvalue=%lu: bits = %u != %d = clzl\n",
+                          maxvalue,bits,fastbits);
+        exit(EXIT_FAILURE);
+      }
     }
   }
 #endif
@@ -183,7 +185,8 @@ unsigned long gt_power_for_small_exponents(unsigned int base,
   if (logvalue > 0) {
     gt_assert(logvalue * exponent < sizeof (void *) * 8);
     return 1UL << (logvalue * exponent);
-  } else {
+  }
+  else {
     unsigned long powervalue = (unsigned long) base;
 
     while (exponent > 1U) {
@@ -221,14 +224,12 @@ unsigned int gt_gcd_uint(unsigned int m, unsigned int n)
 {
   unsigned int r;
 
-  if (m < n)
-  {
+  if (m < n) {
     r = m;
     m = n;
     n = r;
   }
-  do
-  {
+  do {
     gt_assert(m >= n);
     r = m % n;
     m = n;
