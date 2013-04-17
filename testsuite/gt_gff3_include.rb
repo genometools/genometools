@@ -331,11 +331,20 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_gff3_offset_test.out-999"
 end
 
-Name "gt gff3 test option -offset -1001 (overflow)"
+Name "gt gff3 test option -offset -1000 (start 0)"
+Keywords "gt_gff3 offset"
+Test do
+  run_test("#{$bin}gt gff3 -offset -1000 #{$testdata}gt_gff3_offset_test.gff3",
+           :retval => 1)
+  grep last_stderr, "leads to start 0"
+end
+
+Name "gt gff3 test option -offset -1001 (underflow)"
 Keywords "gt_gff3 offset"
 Test do
   run_test("#{$bin}gt gff3 -offset -1001 #{$testdata}gt_gff3_offset_test.gff3",
            :retval => 1)
+  grep last_stderr, "leads to underflow"
 end
 
 Name "gt gff3 test option -offsetfile"

@@ -164,17 +164,49 @@ void gt_gff3_parser_enable_tidy_mode(GtGFF3Parser *parser)
   parser->tidy = true;
 }
 
-static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
-                                   const char *seqid, GtError *err)
+static int offset_possible(const GtRange *range, long offset,
+                           const char *filename, unsigned int line_number,
+                           GtError *err)
 {
-  long offset;
   int had_err = 0;
   gt_error_check(err);
-  if (parser->offset != GT_UNDEF_LONG)
-    *range = gt_range_offset(range, parser->offset);
+  if (offset < 0) {
+    /* check for underflow */
+    unsigned long result = range->start + offset;
+    if (result == 0) {
+      gt_error_set(err, "==0");
+      gt_error_set(err, "adding offset %ld to node on line %u in file \"%s\" "
+                   "leads to start 0 (GFF3 files are 1-based)",
+                   offset, line_number, filename);
+      had_err = -1;
+    }
+    else if (result > range->start) {
+      gt_error_set(err, "adding offset %ld to node on line %u in file \"%s\" "
+                   "leads to underflow", offset, line_number, filename);
+      had_err = -1;
+    }
+  }
+  return had_err;
+}
+
+static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
+                                   const char *seqid, const char *filename,
+                                   unsigned long line_number, GtError *err)
+{
+  int had_err = 0;
+  gt_error_check(err);
+  if (parser->offset != GT_UNDEF_LONG) {
+    had_err = offset_possible(range, parser->offset, filename, line_number,
+                              err);
+    if (!had_err)
+      *range = gt_range_offset(range, parser->offset);
+  }
   else if (parser->offset_mapping) {
+    long offset;
     had_err = gt_mapping_map_integer(parser->offset_mapping, &offset, seqid,
                                      err);
+    if (!had_err)
+      had_err = offset_possible(range, offset, filename, line_number, err);
     if (!had_err)
       *range = gt_range_offset(range, offset);
   }
@@ -1447,8 +1479,10 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
                    "(GFF3 files are 1-based)", line_number, filename);
       had_err = -1;
   }
-  if (!had_err)
-    had_err = add_offset_if_necessary(&range, parser, seqid, err);
+  if (!had_err) {
+    had_err = add_offset_if_necessary(&range, parser, seqid, filename,
+                                      line_number, err);
+  }
 
   /* parse the score */
   if (!had_err) {
@@ -1827,8 +1861,10 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
                    "(GFF3 files are 1-based)", line_number, filename);
       had_err = -1;
     }
-    if (!had_err)
-      had_err = add_offset_if_necessary(&range, parser, seqid, err);
+    if (!had_err) {
+      had_err = add_offset_if_necessary(&range, parser, seqid, filename,
+                                        line_number, err);
+    }
     if (!had_err) {
       /* now we can create a sequence region node */
       gt_assert(seqid);
