@@ -30,7 +30,7 @@
 
 #ifdef POPCOUNT_TL
 static const uint8_t B1CntBytes[] = {
-  0, (uint8_t) 1, (uint8_t) 1, (uint8_t) 2,
+  (uint8_t) 0, (uint8_t) 1, (uint8_t) 1, (uint8_t) 2,
   (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
   (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
   (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
@@ -139,7 +139,7 @@ static unsigned long gt_popcount_tab_next_perm(unsigned long v)
   head = (v | (v - 1)) + 1;
   tail = v & (((head & -head) >> 1) -1);
   if (tail != 0) {
-#ifdef __SSE4_2__
+#ifdef __SSE__
     int zero_trail = __builtin_ctzl(tail);
     tail >>= zero_trail;
 #else
@@ -289,27 +289,33 @@ unsigned int gt_popcount_tab_class(GT_UNUSED GtPopcountTab *popcount_tab,
   return gt_popcount_tab_popcount(block);
 }
 
+static void gt_popcount_tab_init_bit_sizes(unsigned int *bit_sizes,
+                                           unsigned int blocksize)
+{
+  unsigned int class;
+  for (class = 0; class <= blocksize; ++class) {
+#ifdef __SSE4__
+    bit_sizes[class] = (unsigned int) (sizeof (unsigned long) * CHAR_BIT -
+       __builtin_clzl(gt_combinatorics_binomial_dp((unsigned long) blocksize,
+                                                   (unsigned long) class)));
+#else
+    bit_sizes[class] = gt_determinebitspervalue(
+        gt_combinatorics_binomial_dp((unsigned long) blocksize,
+                                     (unsigned long) class));
+#endif
+  }
+}
+
 unsigned int gt_popcount_tab_offset_bits(GtPopcountTab *popcount_tab,
                                          unsigned int class)
 {
   gt_assert(popcount_tab != NULL);
   gt_assert(class <= popcount_tab->blocksize);
-  if (popcount_tab->bit_sizes == NULL)
+  if (popcount_tab->bit_sizes == NULL) {
     popcount_tab->bit_sizes = gt_calloc((size_t) popcount_tab->blocksize + 1,
                                         sizeof (*(popcount_tab->bit_sizes)));
-  if (popcount_tab->bit_sizes[class] == 0) {
-#ifdef __SSE4__
-    popcount_tab->bit_sizes[class] = (unsigned int)
-      (sizeof (unsigned long) * CHAR_BIT -
-       __builtin_clzl(gt_combinatorics_binomial_dp((unsigned long)
-                                                     popcount_tab->blocksize,
-                                                   (unsigned long) class)));
-#else
-    popcount_tab->bit_sizes[class] =
-      gt_determinebitspervalue(
-        gt_combinatorics_binomial_dp((unsigned long) popcount_tab->blocksize,
-                                     (unsigned long) class));
-#endif
+    gt_popcount_tab_init_bit_sizes(popcount_tab->bit_sizes,
+                                   popcount_tab->blocksize);
   }
   return popcount_tab->bit_sizes[class];
 }
