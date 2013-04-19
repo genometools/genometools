@@ -18,6 +18,7 @@
 #ifndef POPCOUNT_TAB_H
 #define POPCOUNT_TAB_H
 
+#include <stdint.h>
 #include "core/error_api.h"
 
 /* The <GtPopcountTab> class represents a table of values of a fixed bit
@@ -25,6 +26,9 @@
    by increasing value within one popcount class (set of values with the
    same popcount). */
 typedef struct GtPopcountTab GtPopcountTab;
+
+/* Lookuptable for byte popcounts */
+extern const uint8_t gt_popcount_tab_B_1_count[256];
 
 /* Returns <GtPopcountTab> object with tables for unsigned values of
    <blocksize> bit width. */
