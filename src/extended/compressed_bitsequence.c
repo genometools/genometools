@@ -30,6 +30,433 @@
 /* this seems to be a good default value. maybe change this in the future */
 #define GT_COMP_BITSEQ_BLOCKSIZE 15U
 
+/* contains 256 * 8 select values, Entry at idx = 256*j + i equals the position
+   of the (j+1)-th set bit in byte i. Positions lie in the range [0..7] returns
+   8 if less set bits then j. */
+const uint8_t gt_compressed_bitsequece_B_1_select[] = {
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+  (uint8_t) 0, (uint8_t) 0, (uint8_t) 0, (uint8_t) 0,
+
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+  (uint8_t) 1, (uint8_t) 1, (uint8_t) 1, (uint8_t) 1,
+
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+  (uint8_t) 2, (uint8_t) 2, (uint8_t) 2, (uint8_t) 2,
+
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+  (uint8_t) 3, (uint8_t) 3, (uint8_t) 3, (uint8_t) 3,
+
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+  (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,
+
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 6, (uint8_t) 6, (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+  (uint8_t) 5, (uint8_t) 5, (uint8_t) 5, (uint8_t) 5,
+
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7,
+  (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6,
+
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 8,
+  (uint8_t) 8, (uint8_t) 8, (uint8_t) 8, (uint8_t) 7
+};
+
+/* ps_overflow contains a bit mask x consisting of 8 bytes
+   x[7],...,x[0] and each is set to 128-i */
+const uint64_t gt_compressed_bitsequence_ps_overflow[] = {
+  (uint64_t) 0x8080808080808080ULL,
+  (uint64_t) 0x7f7f7f7f7f7f7f7fULL,
+  (uint64_t) 0x7e7e7e7e7e7e7e7eULL,
+  (uint64_t) 0x7d7d7d7d7d7d7d7dULL,
+  (uint64_t) 0x7c7c7c7c7c7c7c7cULL,
+  (uint64_t) 0x7b7b7b7b7b7b7b7bULL,
+  (uint64_t) 0x7a7a7a7a7a7a7a7aULL,
+  (uint64_t) 0x7979797979797979ULL,
+  (uint64_t) 0x7878787878787878ULL,
+  (uint64_t) 0x7777777777777777ULL,
+  (uint64_t) 0x7676767676767676ULL,
+  (uint64_t) 0x7575757575757575ULL,
+  (uint64_t) 0x7474747474747474ULL,
+  (uint64_t) 0x7373737373737373ULL,
+  (uint64_t) 0x7272727272727272ULL,
+  (uint64_t) 0x7171717171717171ULL,
+  (uint64_t) 0x7070707070707070ULL,
+  (uint64_t) 0x6f6f6f6f6f6f6f6fULL,
+  (uint64_t) 0x6e6e6e6e6e6e6e6eULL,
+  (uint64_t) 0x6d6d6d6d6d6d6d6dULL,
+  (uint64_t) 0x6c6c6c6c6c6c6c6cULL,
+  (uint64_t) 0x6b6b6b6b6b6b6b6bULL,
+  (uint64_t) 0x6a6a6a6a6a6a6a6aULL,
+  (uint64_t) 0x6969696969696969ULL,
+  (uint64_t) 0x6868686868686868ULL,
+  (uint64_t) 0x6767676767676767ULL,
+  (uint64_t) 0x6666666666666666ULL,
+  (uint64_t) 0x6565656565656565ULL,
+  (uint64_t) 0x6464646464646464ULL,
+  (uint64_t) 0x6363636363636363ULL,
+  (uint64_t) 0x6262626262626262ULL,
+  (uint64_t) 0x6161616161616161ULL,
+  (uint64_t) 0x6060606060606060ULL,
+  (uint64_t) 0x5f5f5f5f5f5f5f5fULL,
+  (uint64_t) 0x5e5e5e5e5e5e5e5eULL,
+  (uint64_t) 0x5d5d5d5d5d5d5d5dULL,
+  (uint64_t) 0x5c5c5c5c5c5c5c5cULL,
+  (uint64_t) 0x5b5b5b5b5b5b5b5bULL,
+  (uint64_t) 0x5a5a5a5a5a5a5a5aULL,
+  (uint64_t) 0x5959595959595959ULL,
+  (uint64_t) 0x5858585858585858ULL,
+  (uint64_t) 0x5757575757575757ULL,
+  (uint64_t) 0x5656565656565656ULL,
+  (uint64_t) 0x5555555555555555ULL,
+  (uint64_t) 0x5454545454545454ULL,
+  (uint64_t) 0x5353535353535353ULL,
+  (uint64_t) 0x5252525252525252ULL,
+  (uint64_t) 0x5151515151515151ULL,
+  (uint64_t) 0x5050505050505050ULL,
+  (uint64_t) 0x4f4f4f4f4f4f4f4fULL,
+  (uint64_t) 0x4e4e4e4e4e4e4e4eULL,
+  (uint64_t) 0x4d4d4d4d4d4d4d4dULL,
+  (uint64_t) 0x4c4c4c4c4c4c4c4cULL,
+  (uint64_t) 0x4b4b4b4b4b4b4b4bULL,
+  (uint64_t) 0x4a4a4a4a4a4a4a4aULL,
+  (uint64_t) 0x4949494949494949ULL,
+  (uint64_t) 0x4848484848484848ULL,
+  (uint64_t) 0x4747474747474747ULL,
+  (uint64_t) 0x4646464646464646ULL,
+  (uint64_t) 0x4545454545454545ULL,
+  (uint64_t) 0x4444444444444444ULL,
+  (uint64_t) 0x4343434343434343ULL,
+  (uint64_t) 0x4242424242424242ULL,
+  (uint64_t) 0x4141414141414141ULL,
+  (uint64_t) 0x4040404040404040ULL
+};
+
 typedef struct
 {
   unsigned int class;
@@ -309,7 +736,7 @@ static void gt_compressed_bitsequence_init_c_tab(GtCompressedBitsequence *cbs)
   cbs->num_of_blocks = cbs->num_of_bits / cbs->blocksize;
   if (cbs->num_of_bits % cbs->blocksize != 0 || cbs->num_of_blocks == 0)
     cbs->num_of_blocks++;
-#ifdef __SSE4__
+#ifdef __SSE4_2__
   cbs->class_bits = (unsigned int)
     (sizeof (unsigned int) * CHAR_BIT - __builtin_clz(cbs->blocksize));
 #else
@@ -344,7 +771,7 @@ gt_compressed_bitsequence_fill_c_tab_init_o_tab(GtCompressedBitsequence *cbs,
     ones += current_blk;
   }
   cbs->c_offsets_size = (unsigned long) GT_NUMOFINTSFORBITS(o_size);
-#ifdef __SSE4__
+#ifdef __SSE4_2__
   cbs->superblockoffsets_bits = __builtin_clzl(o_size);
   cbs->superblockranks_bits = __builtin_clzl(ones);
 #else
@@ -409,9 +836,9 @@ gt_compressed_bitsequence_new(GtBitsequence *bitseq,
   return cbs;
 }
 
-static inline void gt_compressed_bitsequence_calc_block_info(
-                                                   GtCompressedBitsequence *cbs,
-                                                   unsigned long position)
+static inline void
+gt_compressed_bitsequence_calc_block_info(GtCompressedBitsequence *cbs,
+                                          unsigned long position)
 {
   unsigned long idx;
   GtCompressedBitsequenceBlockInfo *bi = cbs->cbs_bi;
@@ -480,6 +907,8 @@ int gt_compressed_bitsequence_access(GtCompressedBitsequence *cbs,
 
   gt_compressed_bitsequence_calc_block_info(cbs, position);
   cbs_bi = cbs->cbs_bi;
+  if (cbs_bi->class == 0 || cbs_bi->class == cbs->blocksize)
+    return cbs_bi->class == 0 ? 0 : 1;
 
   block = gt_popcount_tab_get(cbs->popcount_tab,
                               cbs_bi->class,
@@ -507,6 +936,11 @@ unsigned long gt_compressed_bitsequence_rank_1(GtCompressedBitsequence *cbs,
   cbs_bi = cbs->cbs_bi;
 
   pos_in_block += cbs->blocksize - cbs_bi->block_len;
+  if (cbs_bi->class == 0)
+    return cbs_bi->rank_sum;
+  if (cbs_bi->class == cbs->blocksize)
+    return cbs_bi->rank_sum + pos_in_block + 1;
+
   return cbs_bi->rank_sum + gt_popcount_tab_rank_1(cbs->popcount_tab,
                                                    cbs_bi->class,
                                                    cbs_bi->block_offset,
@@ -531,28 +965,90 @@ unsigned long gt_compressed_bitsequence_rank_0(GtCompressedBitsequence *cbs,
   pos_in_block += cbs->blocksize - cbs_bi->block_len;
   rank_sum0 = ((cbs_bi->idx) * cbs->blocksize) - cbs_bi->rank_sum;
   rank_sum0 -= cbs->blocksize - cbs_bi->block_len;
+  if (cbs_bi->class == 0)
+    return rank_sum0 + pos_in_block + 1;
+  if (cbs_bi->class == cbs->blocksize)
+    return rank_sum0;
   return rank_sum0 + gt_popcount_tab_rank_0(cbs->popcount_tab,
                                             cbs_bi->class,
                                             cbs_bi->block_offset,
                                             pos_in_block);
 }
 
+static inline unsigned int
+gt_compressed_bitsequence_select_1_word(uint64_t word, unsigned int i)
+{
+#ifdef __SSE4_2__
+  uint64_t s = word, b;
+  unsigned int byte_nr;
+  s = s - ((s >> 1) & (uint64_t) 0x5555555555555555ULL);
+  s = (s & (uint64_t) 0x3333333333333333ULL) +
+      ((s >> 2) & (uint64_t) 0x3333333333333333ULL);
+  s = (s + (s >> 4)) & (uint64_t) 0x0F0F0F0F0F0F0F0FULL;
+  /* s *= (uint64_t) 0x0101010101010101ULL; [>this will add the running sums to
+                                            the most significant byte<] */
+  /* analog to multiplication which would use << */
+  s = s         + (s >> 8)  + (s >> 16) + (s >> 24) +
+      (s >> 32) + (s >> 40) + (s >> 48) + (s >> 52);
+  /* now s contains 8 bytes s[0],...,s[7], s[i] contains the cumulative sum
+     of (i+1)*8 least significant bits of s */
+  b = (s + gt_compressed_bitsequence_ps_overflow[i]) &
+      (uint64_t) 0x8080808080808080ULL;
+  /* ps_overflow contains a bit mask mask consisting of 8 bytes
+     mask[7],...,mask[0] and each set to 128-i
+     => a byte b[i] in b is >= 128 if cum sum >= i */
+  b >>= 7;
+
+  /* __builtin_clzll returns the number of leading zeros, if b!=0 */
+  byte_nr = __builtin_clzll(b) >> 3;   /* byte nr in [0..7] */
+  /* subtract the cumulative sum of bits of all bytes before byte_nr */
+  s >>= 8; /* remove total sum */
+  i -= (s >> ((7 - byte_nr) << 3)) & 0xFFULL;
+  return (byte_nr << 3) + (unsigned int)
+    gt_compressed_bitsequece_B_1_select[((i-1) << 8) +
+                                        ((word >> ((7 - byte_nr) << 3)) &
+                                           0xFFULL)];
+#else
+  unsigned int bytecount,
+               idx,
+               ranksum = 0,
+               shift = (unsigned int) ((CHAR_BIT - 1) * sizeof (word));
+  for (idx = 0; idx < (unsigned int) sizeof (word); ++idx, shift -= 8) {
+    bytecount =
+      (unsigned int) gt_popcount_tab_B_1_count[(word >> shift) & 0xFFULL];
+    if (ranksum + bytecount >= i) {
+      i -= ranksum;
+      return (unsigned int) (idx * CHAR_BIT +
+             gt_compressed_bitsequece_B_1_select[((i - 1) << 8) +
+                                                 ((word >> shift) & 0xFFULL)]);
+    }
+    else
+      ranksum += bytecount;
+  }
+  /* 64 (or 32) if bit is not present */
+  return (unsigned int) (CHAR_BIT * sizeof (word));
+#endif
+}
+
 unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
                                                  unsigned long num)
 {
-  unsigned int class = cbs->blocksize + 1;
-  unsigned long start_s_block, middle_s_block, end_s_block,
+  unsigned int  block_offset_bits,
+                class = cbs->blocksize + 1;
+  unsigned long block_idx,
+                blocks_offset_pos,
                 containing_s_block,
-                block_idx, blocks_offset_pos, block,
-                rank_sum = 0,
-                select_mask,
+                end_s_block, middle_s_block, start_s_block,
                 position,
-                start_0, start_1, start_2;
+                rank_sum = 0,
+                start, start_l, start_r;
+  uint64_t block;
 
   gt_assert(num != 0);
   gt_assert(cbs != NULL);
   gt_assert(num < cbs->num_of_bits);
 
+  /* if larger then max rank1 */
   if (num > (unsigned long) gt_compressed_bitsequence_get_variable_field(
                       cbs->superblockranks,
                       (cbs->num_of_superblocks - 1) * cbs->superblockranks_bits,
@@ -566,20 +1062,19 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
     blocks_offset_pos = 0;
   }
   else {
-    /* search for superblock */
+    /* binary search for superblock */
     start_s_block = num / (cbs->blocksize * cbs->superblocksize);
     end_s_block = cbs->num_of_superblocks;
     middle_s_block = GT_DIV2(start_s_block + end_s_block);
     while (start_s_block < end_s_block) {
-      start_0 = (middle_s_block - 1) * cbs->superblockranks_bits;
-      start_1 = start_0 + cbs->superblockranks_bits;
-      start_2 = start_1 + cbs->superblockranks_bits;
+      start = middle_s_block * cbs->superblockranks_bits;
       if ((unsigned long) gt_compressed_bitsequence_get_variable_field(
-                                                  cbs->superblockranks, start_1,
+                                                  cbs->superblockranks, start,
                                                   cbs->superblockranks_bits)
           < num) {
+        start_r = start + cbs->superblockranks_bits;
         if ((unsigned long) gt_compressed_bitsequence_get_variable_field(
-                                                  cbs->superblockranks, start_2,
+                                                  cbs->superblockranks, start_r,
                                                   cbs->superblockranks_bits)
             < num)
           start_s_block = middle_s_block;
@@ -587,8 +1082,9 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
           break;
       }
       else {
+        start_l = start - cbs->superblockranks_bits;
         if ((unsigned long) gt_compressed_bitsequence_get_variable_field(
-                                                  cbs->superblockranks, start_0,
+                                                  cbs->superblockranks, start_l,
                                                   cbs->superblockranks_bits)
             >= num)
           end_s_block = middle_s_block;
@@ -621,46 +1117,49 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
     blocks_offset_pos += gt_popcount_tab_offset_bits(cbs->popcount_tab, class);
     rank_sum += class;
   }
-  position = block_idx * cbs->blocksize;
   gt_assert(class != cbs->blocksize + 1);
-
-  /* search within block */
-  if (block_idx != cbs->num_of_blocks - 1)
-    select_mask = 1UL << (cbs->blocksize - 1UL);
-  else
-    select_mask = 1UL << (cbs->last_block_len - 1UL);
-
-  block =
-    gt_popcount_tab_get(cbs->popcount_tab, class,
-                        (unsigned long)
-                          gt_compressed_bitsequence_get_variable_field(
-                                  cbs->c_offsets, blocks_offset_pos,
-                                  gt_popcount_tab_offset_bits(cbs->popcount_tab,
-                                                              class)));
-  while (rank_sum < num && select_mask != 0) {
-    rank_sum += (block & select_mask) != 0 ? 1 : 0;
-    select_mask >>= 1;
-    position++;
+  position = block_idx * cbs->blocksize;
+  if (class == cbs->blocksize) {
+    position += num - rank_sum - 1;
   }
-  gt_assert(rank_sum == num);
+  else {
+    block_offset_bits = gt_popcount_tab_offset_bits(cbs->popcount_tab, class);
 
-  return position - 1;
+    /* search within block */
+    block = (uint64_t)
+      gt_popcount_tab_get(cbs->popcount_tab, class, (unsigned long)
+                          gt_compressed_bitsequence_get_variable_field(
+                                             cbs->c_offsets, blocks_offset_pos,
+                                             block_offset_bits));
+    if (block_idx != cbs->num_of_blocks - 1)
+      block <<= ((sizeof (block) * CHAR_BIT) - cbs->blocksize);
+    else
+      block <<= ((sizeof (block) * CHAR_BIT) - cbs->last_block_len);
+
+    position +=
+      gt_compressed_bitsequence_select_1_word(block,
+                                              (unsigned int) (num - rank_sum));
+  }
+
+  return position;
 }
 
 unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
                                                  unsigned long num)
 {
-  unsigned int class = cbs->blocksize + 1;
-  unsigned long start_s_block, middle_s_block, end_s_block,
+  unsigned int block_offset_bits,
+               class = cbs->blocksize + 1;
+  unsigned long block_idx,
+                blocks_offset_pos,
                 containing_s_block,
-                block_idx, blocks_offset_pos, block,
-                rank_sum = 0,
-                select_mask,
-                position,
-                max_0_rank,
+                end_s_block, middle_s_block, start_s_block,
                 first_0_superblock_rank,
+                max_0_rank,
+                position,
+                rank_sum = 0,
                 s_block_bits,
-                start_0, start_1, start_2;
+                start, start_l, start_r;
+  uint64_t block;
 
   gt_assert(num != 0);
   gt_assert(cbs != NULL);
@@ -685,27 +1184,25 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
   }
   else {
     unsigned long middle_s_block_max,
-                  middle_s_block_next_max,
-                  middle_s_block_prev_max;
+                  middle_s_block_r_max,
+                  middle_s_block_l_max;
     /* search for superblock */
     start_s_block = num / s_block_bits; /* cannot be smaller than this */
     end_s_block = cbs->num_of_superblocks;
     middle_s_block = GT_DIV2(start_s_block + end_s_block);
     while (start_s_block < end_s_block) {
       middle_s_block_max = s_block_bits * (middle_s_block+1);
-      middle_s_block_next_max = middle_s_block_max + s_block_bits;
-      middle_s_block_prev_max = middle_s_block_max - s_block_bits;
-      start_0 = (middle_s_block - 1) * cbs->superblockranks_bits;
-      start_1 = start_0 + cbs->superblockranks_bits;
-      start_2 = start_1 + cbs->superblockranks_bits;
+      start = middle_s_block * cbs->superblockranks_bits;
       if ((middle_s_block_max -
             gt_compressed_bitsequence_get_variable_field(
-                                                  cbs->superblockranks, start_1,
+                                                  cbs->superblockranks, start,
                                                   cbs->superblockranks_bits))
           < num) {
-        if ((middle_s_block_next_max -
+        middle_s_block_r_max = middle_s_block_max + s_block_bits;
+        start_r = start + cbs->superblockranks_bits;
+        if ((middle_s_block_r_max -
               gt_compressed_bitsequence_get_variable_field(
-                                                  cbs->superblockranks, start_2,
+                                                  cbs->superblockranks, start_r,
                                                   cbs->superblockranks_bits))
             < num)
           start_s_block = middle_s_block;
@@ -713,9 +1210,11 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
           break;
       }
       else {
-        if ((middle_s_block_prev_max -
+        middle_s_block_l_max = middle_s_block_max - s_block_bits;
+        start_l = start - cbs->superblockranks_bits;
+        if ((middle_s_block_l_max -
                gt_compressed_bitsequence_get_variable_field(
-                                                  cbs->superblockranks, start_0,
+                                                  cbs->superblockranks, start_l,
                                                   cbs->superblockranks_bits))
             >= num)
           end_s_block = middle_s_block;
@@ -727,15 +1226,16 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
       middle_s_block = GT_DIV2(start_s_block + end_s_block);
     }
     middle_s_block_max = s_block_bits * (middle_s_block + 1);
-    start_0 = middle_s_block * cbs->superblockoffsets_bits;
     blocks_offset_pos = (unsigned long)
-      gt_compressed_bitsequence_get_variable_field(cbs->superblockoffsets,
-                                                   start_0,
-                                                   cbs->superblockoffsets_bits);
+      gt_compressed_bitsequence_get_variable_field(
+                                   cbs->superblockoffsets,
+                                   middle_s_block * cbs->superblockoffsets_bits,
+                                   cbs->superblockoffsets_bits);
     rank_sum = (unsigned long)
       middle_s_block_max - gt_compressed_bitsequence_get_variable_field(
-                                                  cbs->superblockranks, start_0,
-                                                  cbs->superblockranks_bits);
+                                     cbs->superblockranks,
+                                     middle_s_block * cbs->superblockranks_bits,
+                                     cbs->superblockranks_bits);
     containing_s_block = middle_s_block+1;
   }
 
@@ -751,29 +1251,29 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
   }
   position = block_idx * cbs->blocksize;
   gt_assert(class != cbs->blocksize + 1);
+  if (class == 0)
+    position += num - rank_sum - 1;
+  else {
+    block_offset_bits = gt_popcount_tab_offset_bits(cbs->popcount_tab, class);
 
-  /* search within block */
-  if (block_idx != cbs->num_of_blocks - 1)
-    select_mask = 1UL << (cbs->blocksize - 1UL);
-  else
-    select_mask = 1UL << (cbs->last_block_len - 1UL);
-
-  block =
-    gt_popcount_tab_get(cbs->popcount_tab, class,
-                        (unsigned long)
+    /* search within block */
+    block = (uint64_t)
+      gt_popcount_tab_get(cbs->popcount_tab, class, (unsigned long)
                           gt_compressed_bitsequence_get_variable_field(
-                                  cbs->c_offsets, blocks_offset_pos,
-                                  gt_popcount_tab_offset_bits(cbs->popcount_tab,
-                                                              class)));
-  block = ~block; /* invert, we are searching for 0 not for 1 */
-  while (rank_sum < num && select_mask != 0) {
-    rank_sum += (block & select_mask) != 0 ? 1 : 0;
-    select_mask >>= 1;
-    position++;
-  }
-  gt_assert(rank_sum == num);
+                                             cbs->c_offsets, blocks_offset_pos,
+                                             block_offset_bits));
+    if (block_idx != cbs->num_of_blocks - 1)
+      block <<= ((sizeof (block) * CHAR_BIT) - cbs->blocksize);
+    else
+      block <<= ((sizeof (block) * CHAR_BIT) - cbs->last_block_len);
 
-  return position - 1;
+    /* invert because we search for 0 */
+    position +=
+      gt_compressed_bitsequence_select_1_word(~block,
+                                              (unsigned int) (num - rank_sum));
+  }
+
+  return position;
 }
 
 static size_t

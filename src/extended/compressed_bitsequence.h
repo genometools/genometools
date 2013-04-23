@@ -29,6 +29,11 @@
    gives constant time access and rank on the bitvector represented. */
 typedef struct GtCompressedBitsequence GtCompressedBitsequence;
 
+/* contains 256 * 8 select values, Entry at idx = 256*j + i equals the position
+   of the (j+1)-th set bit in byte i. Positions lie in the range [0..7] returns
+   8 if less set bits then j. */
+extern const uint8_t gt_compressed_bitsequece_B_1_select[2048];
+
 /* Returns a new <GtCompressedBitsequence> object. <bitseq> points to the bit
    sequence to be compressed, <samplerate> defines the rate of sampling, which
    is the constant factor for access and rank queries, <num_of_bits> is the
