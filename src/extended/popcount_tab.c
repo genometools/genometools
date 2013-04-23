@@ -292,7 +292,7 @@ static void gt_popcount_tab_init_bit_sizes(unsigned int *bit_sizes,
 {
   unsigned int class;
   for (class = 0; class <= blocksize; ++class) {
-#ifdef __SSE4__
+#ifdef __SSE4_2__
     bit_sizes[class] = (unsigned int) (sizeof (unsigned long) * CHAR_BIT -
        __builtin_clzl(gt_combinatorics_binomial_dp((unsigned long) blocksize,
                                                    (unsigned long) class)));
@@ -356,6 +356,18 @@ unsigned int gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
   if (popcount_c == 0)
     return pos + 1;
   return pos + 1 - gt_popcount_tab_rank_1(popcount_tab, popcount_c, i, pos);
+}
+
+void gt_popcount_tab_block_to_str(GtPopcountTab *popcount_tab,
+                                  unsigned long block,
+                                  char *buffer)
+{
+  unsigned int idx;
+  buffer[popcount_tab->blocksize] = 0;
+  for (idx = 0; idx < popcount_tab->blocksize; ++idx) {
+    buffer[idx] = ((block >> (popcount_tab->blocksize - idx - 1)) & 1) == 1UL ?
+      '1' : '0';
+  }
 }
 
 static inline void gt_popcount_tab_init_rev_offset(GtPopcountTab *popcount_tab)

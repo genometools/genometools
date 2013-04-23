@@ -76,6 +76,12 @@ unsigned long  gt_popcount_tab_get_offset_for_block(GtPopcountTab *popcount_tab,
 /* Return size of a <GtPopcountTab> with <blocksize> in bytes. */
 size_t         gt_popcount_tab_calculate_size(unsigned int blocksize);
 
+/* writes a bitstring to buffer, has to be of length blocksize + 1, will be
+   \0-terminated */
+void           gt_popcount_tab_block_to_str(GtPopcountTab *popcount_tab,
+                                            unsigned long block,
+                                            char *buffer);
+
 /* Deletes <popcount_tab> and frees all associated memory. */
 void           gt_popcount_tab_delete(GtPopcountTab *popcount_tab);
 
