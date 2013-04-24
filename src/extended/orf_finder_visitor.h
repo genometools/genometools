@@ -1,7 +1,7 @@
 /*
+  Copyright (c) 2011-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2010      Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
-  Copyright (c) 2011-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,9 +25,10 @@ typedef struct GtORFFinderVisitor GtORFFinderVisitor;
 #include "core/encseq_api.h"
 #include "core/hashmap_api.h"
 #include "extended/node_visitor_api.h"
+#include "extended/region_mapping_api.h"
 
 const GtNodeVisitorClass* gt_orf_finder_visitor_class(void);
-GtNodeVisitor*            gt_orf_finder_visitor_new(GtEncseq *encseq,
+GtNodeVisitor*            gt_orf_finder_visitor_new(GtRegionMapping *rmap,
                                                     GtHashmap *types,
                                                     unsigned int min,
                                                     unsigned int max,

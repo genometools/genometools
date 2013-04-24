@@ -19,6 +19,7 @@
 #include "core/hashmap_api.h"
 #include "extended/feature_type.h"
 #include "extended/orf_finder_stream.h"
+#include "extended/region_mapping.h"
 #include "ltr/ltr_orf_annotator_stream_api.h"
 
 struct GtLTRORFAnnotatorStream {
@@ -73,13 +74,16 @@ GtNodeStream* gt_ltr_orf_annotator_stream_new(GtNodeStream *in_stream,
 {
   GtLTRORFAnnotatorStream *bs;
   GtNodeStream *ns;
+  GtRegionMapping *rmap;
   gt_assert(in_stream);
   ns = gt_node_stream_create(gt_ltr_orf_annotator_stream_class(), false);
   bs = ltr_orf_annotator_stream_cast(ns);
   bs->types = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
   bs->progress_loc = NULL;
   gt_hashmap_add(bs->types, gt_ft_LTR_retrotransposon, (void*) 1);
-  bs->orf_stream = gt_orf_finder_stream_new(in_stream, encseq, bs->types, min,
+  rmap = gt_region_mapping_new_encseq_seqno(encseq);
+  gt_assert(rmap);
+  bs->orf_stream = gt_orf_finder_stream_new(in_stream, rmap, bs->types, min,
                                             max, all, err);
   return ns;
 }

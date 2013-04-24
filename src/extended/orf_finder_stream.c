@@ -81,7 +81,7 @@ const GtNodeStreamClass* gt_orf_finder_stream_class(void)
 }
 
 GtNodeStream* gt_orf_finder_stream_new(GtNodeStream *in_stream,
-                                       GtEncseq *encseq,
+                                       GtRegionMapping *rmap,
                                        GtHashmap *types,
                                        unsigned int min,
                                        unsigned int max,
@@ -93,7 +93,7 @@ GtNodeStream* gt_orf_finder_stream_new(GtNodeStream *in_stream,
   gs = gt_node_stream_create(gt_orf_finder_stream_class(), false);
   ls = gt_orf_finder_stream_cast(gs);
   ls->in_stream = gt_node_stream_ref(in_stream);
-  ls->lv = (GtORFFinderVisitor*) gt_orf_finder_visitor_new(encseq,types,
+  ls->lv = (GtORFFinderVisitor*) gt_orf_finder_visitor_new(rmap,types,
                                                            min, max, all, err);
   return gs;
 }

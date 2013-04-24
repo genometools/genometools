@@ -1,7 +1,7 @@
 /*
+  Copyright (c) 2011-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2010      Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
-  Copyright (c) 2011-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,13 +30,14 @@
 #include "core/undef_api.h"
 #include "core/translator.h"
 #include "core/codon_iterator_api.h"
-#include "core/codon_iterator_encseq_api.h"
 #include "core/codon_iterator_simple_api.h"
 #include "core/strand_api.h"
 #include "core/trans_table.h"
 #include "core/encseq_api.h"
+#include "extended/extract_feature_sequence.h"
 #include "extended/node_visitor_api.h"
 #include "extended/region_node.h"
+#include "extended/region_mapping.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/reverse_api.h"
@@ -45,7 +46,7 @@
 
 struct GtORFFinderVisitor {
   const GtNodeVisitor parent_instance;
-  GtEncseq *encseq;
+  GtRegionMapping *rmap;
   GtHashmap *types;
   unsigned int min;
   unsigned int max;
@@ -131,33 +132,33 @@ static void process_orf(GtRange orf_rng, unsigned int orf_frame,
   }
 }
 
-static int run_orffinder(GtEncseq *encseq,
+static int run_orffinder(GtRegionMapping *rmap,
                          GtFeatureNode *gf,
                          unsigned long start,
-                         unsigned long end,
-                         unsigned long seqid,
+                         GT_UNUSED unsigned long end,
                          unsigned int min,
                          unsigned int max,
                          bool all,
                          GtError *err)
 {
   int had_err = 0, i;
-  unsigned long seqstartpos, startpos, endpos, length, sum, seqlength,
-                rcstartpos;
+  unsigned long sum;
   GtCodonIterator* ci = NULL;
   GtTranslator* translator = NULL;
   GtORFIterator* orfi = NULL;
   GtORFIteratorStatus state;
   GtRange orf_rng, tmp_orf_rng[3];
+  GtStr *seq;
   unsigned int orf_frame;
 
   /* forward strand */
-  seqstartpos = gt_encseq_seqstartpos(encseq, seqid);
-  startpos = seqstartpos + start;
-  endpos = seqstartpos + end;
-  length = endpos - startpos + 1;
-  ci = gt_codon_iterator_encseq_new_with_readmode(encseq, startpos, length,
-                                                  GT_READMODE_FORWARD, err);
+  seq = gt_str_new();
+  had_err = gt_extract_feature_sequence(seq,
+                                        (GtGenomeNode*) gf,
+                                        gt_feature_node_get_type(gf),
+                                        false, NULL, NULL, rmap, err);
+
+  ci = gt_codon_iterator_simple_new(gt_str_get(seq), gt_str_length(seq), err);
   gt_assert(ci);
   translator = gt_translator_new(ci);
   gt_assert(translator);
@@ -209,16 +210,13 @@ static int run_orffinder(GtEncseq *encseq,
 
     /* reverse strand */
     if (!had_err) {
-      seqlength = gt_encseq_seqlength(encseq, seqid);
-      seqstartpos = (seqid == gt_encseq_num_of_sequences(encseq) -1 )
-                      ? gt_encseq_total_length(encseq) - 1
-                      : gt_encseq_seqstartpos(encseq, seqid+1);
-      rcstartpos = gt_encseq_total_length(encseq) - 2 -
-                      seqstartpos + (seqlength - end);
-      ci = gt_codon_iterator_encseq_new_with_readmode(encseq, rcstartpos,
-                                                      length,
-                                                      GT_READMODE_REVCOMPL,
-                                                      err);
+      int rval = 0;
+      unsigned long length = gt_str_length(seq);
+      char *strp = (char*) gt_str_get_mem(seq);
+      rval = gt_reverse_complement(strp, gt_str_length(seq), err);
+      gt_assert(!rval); /* XXX */
+      ci = gt_codon_iterator_simple_new(gt_str_get(seq), gt_str_length(seq),
+                                        err);
       gt_assert(ci);
       translator = gt_translator_new(ci);
       gt_assert(translator);
@@ -253,6 +251,7 @@ static int run_orffinder(GtEncseq *encseq,
         }
       }
     }
+    gt_str_delete(seq);
     gt_codon_iterator_delete(ci);
     gt_translator_delete(translator);
     gt_orf_iterator_delete(orfi);
@@ -261,15 +260,14 @@ static int run_orffinder(GtEncseq *encseq,
 }
 
 static int gt_orf_finder_visitor_feature_node(GtNodeVisitor *gv,
-                                             GtFeatureNode *gf,
-                                             GtError *err)
+                                              GtFeatureNode *gf,
+                                              GtError *err)
 {
   GtORFFinderVisitor *lv;
   const char *gft = NULL;
   GtFeatureNodeIterator *gfi;
   GtFeatureNode *curnode = NULL;
   int had_err = 0;
-  unsigned long seqnum = GT_UNDEF_ULONG;
   GtRange rng;
 
   lv = gt_orf_finder_visitor_cast(gv);
@@ -284,20 +282,10 @@ static int gt_orf_finder_visitor_feature_node(GtNodeVisitor *gv,
     if (gt_hashmap_get(lv->types, (void*) gft) != NULL ||
                        gt_hashmap_get(lv->types,
                                       (void*) "all") == (void*) 1) {
-      GtStr *val;
-      val = gt_genome_node_get_seqid((GtGenomeNode*) curnode);
-      if (val == NULL) {
-        gt_error_set(err, "missing attribute \"seq_number\"");
-        had_err = -1;
-      }
-      if (sscanf(gt_str_get(val), "seq%lu", &seqnum) != 1) {
-        had_err = -1;
-      }
-      gt_assert(seqnum != GT_UNDEF_ULONG);
       if (!had_err) {
         rng = gt_genome_node_get_range((GtGenomeNode*) curnode);
-        had_err = run_orffinder(lv->encseq, curnode, rng.start - 1, rng.end - 1,
-                                seqnum, lv->min, lv->max, lv->all, err);
+        had_err = run_orffinder(lv->rmap, curnode, rng.start - 1, rng.end - 1,
+                                lv->min, lv->max, lv->all, err);
         if (gt_hashmap_get(lv->types,
                            (void*) "all") == (void*) 1) {
           break;
@@ -311,7 +299,7 @@ static int gt_orf_finder_visitor_feature_node(GtNodeVisitor *gv,
             if (strcmp(gft, (const char*) GT_ORF_TYPE) == 0) {
               continue;
             }
-            curnode = gt_feature_node_iterator_next(gfi);
+            /* curnode = gt_feature_node_iterator_next(gfi); */
           }
           gt_feature_node_iterator_delete(tmpgfi);
         }
@@ -341,19 +329,19 @@ const GtNodeVisitorClass* gt_orf_finder_visitor_class(void)
   return gvc;
 }
 
-GtNodeVisitor* gt_orf_finder_visitor_new(GtEncseq *encseq,
-                                        GtHashmap *types,
-                                        unsigned int min,
-                                        unsigned int max,
-                                        bool all,
-                                        GT_UNUSED GtError *err)
+GtNodeVisitor* gt_orf_finder_visitor_new(GtRegionMapping *rmap,
+                                         GtHashmap *types,
+                                         unsigned int min,
+                                         unsigned int max,
+                                         bool all,
+                                         GT_UNUSED GtError *err)
 {
   GtNodeVisitor *gv;
   GtORFFinderVisitor *lv;
   gv = gt_node_visitor_create(gt_orf_finder_visitor_class());
   lv = gt_orf_finder_visitor_cast(gv);
   gt_assert(lv);
-  lv->encseq = encseq;
+  lv->rmap = rmap;
   lv->types=types;
   lv->min = min;
   lv->max = max;

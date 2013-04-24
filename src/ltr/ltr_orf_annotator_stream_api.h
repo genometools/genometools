@@ -25,6 +25,7 @@
 /* implements the ``node stream'' interface */
 typedef struct GtLTRORFAnnotatorStream GtLTRORFAnnotatorStream;
 
+/* TODO: Should take a region mapping for easier ID->sequence mapping */
 GtNodeStream* gt_ltr_orf_annotator_stream_new(GtNodeStream *in_stream,
                                               GtEncseq *encseq,
                                               unsigned int min,

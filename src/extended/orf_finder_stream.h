@@ -24,6 +24,7 @@
 #include "core/hashmap_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/orf_iterator_api.h"
+#include "extended/region_mapping_api.h"
 
 /* implements the ``node stream'' interface */
 typedef struct GtORFFinderStream GtORFFinderStream;
@@ -31,7 +32,7 @@ typedef struct GtORFFinderStream GtORFFinderStream;
 const GtNodeStreamClass* gt_orf_finder_stream_class(void);
 
 GtNodeStream* gt_orf_finder_stream_new(GtNodeStream *in_stream,
-                                       GtEncseq *encseq,
+                                       GtRegionMapping *rmap,
                                        GtHashmap *types,
                                        unsigned int min,
                                        unsigned int max,
