@@ -146,41 +146,6 @@ struct GtLTRharvestStream
 #define gt_ltrharvest_stream_cast(GS)\
         gt_node_stream_cast(gt_ltrharvest_stream_class(), GS);
 
-GT_UNUSED static int bdptrcompare(const void *a, const void *b)
-{
-  const LTRboundaries **bda, **bdb;
-
-  bda = (const LTRboundaries **) a;
-  bdb = (const LTRboundaries **) b;
-  if ((*bda)->contignumber < (*bdb)->contignumber)
-  {
-    return -1;
-  }
-  if ((*bda)->contignumber > (*bdb)->contignumber)
-  {
-    return 1;
-  }
-  gt_assert((*bda)->contignumber == (*bdb)->contignumber);
-  if ((*bda)->leftLTR_5 < (*bdb)->leftLTR_5)
-  {
-    return -1;
-  }
-  if ((*bda)->leftLTR_5 > (*bdb)->leftLTR_5)
-  {
-    return 1;
-  }
-  gt_assert((*bda)->leftLTR_5 == (*bdb)->leftLTR_5);
-  if ((*bda)->rightLTR_3 < (*bdb)->rightLTR_3)
-  {
-    return -1;
-  }
-  if ((*bda)->rightLTR_3 > (*bdb)->rightLTR_3)
-  {
-    return 1;
-  }
-  return 0;
-}
-
 static int bdcompare(const void *a, const void *b)
 {
   const LTRboundaries *bda, *bdb;
