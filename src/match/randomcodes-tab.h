@@ -100,10 +100,10 @@ static inline void gt_randomcodes_countocc_increment(GtRandomcodestab *rct,
 
 #ifdef _LP64
 #define GT_CHANGEPOINT_GET_RCT(CP)\
-        unsigned long CP;\
-        for (CP = 0; CP < rct->bitchangepoints.nextfreeGtUlong &&\
-                     idx > rct->bitchangepoints.spaceGtUlong[CP]; CP++)\
-            /* Nothing */ ;
+        unsigned long CP = 0;\
+        while (CP < rct->bitchangepoints.nextfreeGtUlong &&\
+                 idx > rct->bitchangepoints.spaceGtUlong[CP])\
+          CP++;
 #endif
 
 GT_UNUSED

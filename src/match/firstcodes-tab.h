@@ -59,10 +59,10 @@ DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
 
 #ifdef _LP64
 #define GT_CHANGEPOINT_GET(CP)\
-        unsigned long CP;\
-        for (CP = 0; CP < fct->bitchangepoints.nextfreeGtUlong &&\
-                     idx > fct->bitchangepoints.spaceGtUlong[CP]; CP++)\
-            /* Nothing */ ;
+        unsigned long CP = 0;\
+        while (CP < fct->bitchangepoints.nextfreeGtUlong &&\
+                 idx > fct->bitchangepoints.spaceGtUlong[CP])\
+          CP++;
 #endif
 
 #define GT_MODVALUEBITS 32U
