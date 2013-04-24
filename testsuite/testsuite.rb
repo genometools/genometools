@@ -155,6 +155,7 @@ require 'gt_simreads_include'
 require 'gt_splicesiteinfo_include'
 require 'gt_splitfasta_include'
 require 'gt_stat_include'
+require 'gt_tirvish_include'
 require 'gt_uniq_include'
 if not $arguments["nocairo"] then
   require 'gt_sketch_include'

@@ -147,6 +147,7 @@
 #include "tools/gt_tagerator.h"
 #include "tools/gt_tallymer.h"
 #include "tools/gt_template.h"
+#include "tools/gt_tir.h"
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 #include "tools/gt_wtree.h"
@@ -237,6 +238,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "stat", gt_stat());
   gt_toolbox_add_tool(tools, "tagerator", gt_tagerator());
   gt_toolbox_add_tool(tools, "tallymer", gt_tallymer());
+  gt_toolbox_add_tool(tools, "tirvish", gt_tir());
   gt_toolbox_add_tool(tools, "uniq", gt_uniq());
   gt_toolbox_add_tool(tools, "wtree", gt_wtree());
 #ifndef WITHOUT_CAIRO

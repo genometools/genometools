@@ -40,6 +40,9 @@
 #define gt_ft_protein_match                "protein_match"
 #define gt_ft_repeat_region                "repeat_region"
 #define gt_ft_target_site_duplication      "target_site_duplication"
+#define gt_ft_terminal_inverted_repeat     "terminal_inverted_repeat"
+#define gt_ft_terminal_inverted_repeat_element \
+                                           "terminal_inverted_repeat_element"
 #define gt_ft_three_prime_UTR              "three_prime_UTR"
 #define gt_ft_three_prime_cis_splice_site  "three_prime_cis_splice_site"
 #define gt_ft_transcript                   "transcript"
