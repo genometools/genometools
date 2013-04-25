@@ -967,7 +967,7 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
         dest = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dest;
         dir = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dir;
       }
-      else if (i >= info[1].depth)
+      else
       {
         dest = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dest;
         dir = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dir;
@@ -1002,7 +1002,7 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
       extended = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].
         extended;
     }
-    else if (i >= info[1].depth)
+    else
     {
       dest = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dest;
       dir = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dir;
