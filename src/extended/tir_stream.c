@@ -133,7 +133,7 @@ struct GtTIRStream
 /* optimized to discard irrelevant seeds as soon as possible */
 static int gt_tir_store_seeds(void *info, const GtEncseq *encseq,
                               unsigned long len, unsigned long pos1,
-                              unsigned long pos2, GtError *err)
+                              unsigned long pos2, GT_UNUSED GtError *err)
 {
   unsigned long seqnum1,
                 seqnum2;

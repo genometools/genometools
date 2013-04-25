@@ -210,7 +210,7 @@ static int run_orffinder(GtRegionMapping *rmap,
 
     /* reverse strand */
     if (!had_err) {
-      int rval = 0;
+      GT_UNUSED int rval = 0;
       unsigned long length = gt_str_length(seq);
       char *strp = (char*) gt_str_get_mem(seq);
       rval = gt_reverse_complement(strp, gt_str_length(seq), err);
