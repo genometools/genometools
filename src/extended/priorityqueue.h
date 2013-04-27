@@ -24,16 +24,16 @@ typedef struct {
                 value;
 } GtPriorityQueueElementType;
 
-GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements);
-void             gt_priorityqueue_add(GtPriorityQueue *pq,
-                                      unsigned long sortkey,
-                                      unsigned long value);
+GtPriorityQueue *gt_priority_queue_new(unsigned long maxnumofelements);
+void             gt_priority_queue_add(GtPriorityQueue *pq,
+                                       unsigned long sortkey,
+                                       unsigned long value);
 GtPriorityQueueElementType*
-                 gt_priorityqueue_delete_min(GtPriorityQueue *pq);
+                 gt_priority_queue_delete_min(GtPriorityQueue *pq);
 const GtPriorityQueueElementType*
-                 gt_priorityqueue_find_min(const GtPriorityQueue *pq);
-bool             gt_priorityqueue_is_empty(const GtPriorityQueue *pq);
-bool             gt_priorityqueue_is_full(const GtPriorityQueue *pq);
-void             gt_priorityqueue_delete(GtPriorityQueue *pq);
+                 gt_priority_queue_find_min(const GtPriorityQueue *pq);
+bool             gt_priority_queue_is_empty(const GtPriorityQueue *pq);
+bool             gt_priority_queue_is_full(const GtPriorityQueue *pq);
+void             gt_priority_queue_delete(GtPriorityQueue *pq);
 
 #endif

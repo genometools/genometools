@@ -29,11 +29,9 @@ struct GtPriorityQueue
   GtPriorityQueueElementType minelement, *elements;
 };
 
-GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements)
+GtPriorityQueue *gt_priority_queue_new(unsigned long maxnumofelements)
 {
-  GtPriorityQueue *pq;
-
-  pq = gt_malloc(sizeof (*pq));
+  GtPriorityQueue *pq = gt_malloc(sizeof *pq);
   pq->elements = gt_malloc(sizeof (*pq->elements) * (maxnumofelements + 1));
   pq->capacity = maxnumofelements;
   pq->numofelements = 0;
@@ -42,7 +40,7 @@ GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements)
   return pq;
 }
 
-static void gt_priorityqueue_checkorder(const GtPriorityQueue *pq)
+static void gt_priority_queue_checkorder(const GtPriorityQueue *pq)
 {
   GtPriorityQueueElementType *ptr;
 
@@ -53,22 +51,22 @@ static void gt_priorityqueue_checkorder(const GtPriorityQueue *pq)
   }
 }
 
-bool gt_priorityqueue_is_empty(const GtPriorityQueue *pq)
+bool gt_priority_queue_is_empty(const GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL);
   return pq->numofelements == 0 ? true : false;
 }
 
-bool gt_priorityqueue_is_full(const GtPriorityQueue *pq)
+bool gt_priority_queue_is_full(const GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL);
   return pq->numofelements == pq->capacity ? true : false;
 }
 
-void gt_priorityqueue_add(GtPriorityQueue *pq, unsigned long sortkey,
+void gt_priority_queue_add(GtPriorityQueue *pq, unsigned long sortkey,
                           unsigned long value)
 {
-  gt_assert(pq != NULL && !gt_priorityqueue_is_full(pq));
+  gt_assert(pq != NULL && !gt_priority_queue_is_full(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
   {
     GtPriorityQueueElementType *ptr;
@@ -107,13 +105,13 @@ void gt_priorityqueue_add(GtPriorityQueue *pq, unsigned long sortkey,
   }
 }
 
-GtPriorityQueueElementType *gt_priorityqueue_delete_min(GtPriorityQueue *pq)
+GtPriorityQueueElementType *gt_priority_queue_delete_min(GtPriorityQueue *pq)
 {
-  gt_assert(pq != NULL && !gt_priorityqueue_is_empty(pq));
+  gt_assert(pq != NULL && !gt_priority_queue_is_empty(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
   {
     pq->minelement = pq->elements[--pq->numofelements];
-    gt_priorityqueue_checkorder(pq);
+    gt_priority_queue_checkorder(pq);
   } else
   {
     unsigned long idx, child;
@@ -144,16 +142,16 @@ GtPriorityQueueElementType *gt_priorityqueue_delete_min(GtPriorityQueue *pq)
   return &pq->minelement;
 }
 
-const GtPriorityQueueElementType *gt_priorityqueue_find_min(const
+const GtPriorityQueueElementType *gt_priority_queue_find_min(const
                                                             GtPriorityQueue *pq)
 {
-  gt_assert(pq != NULL && !gt_priorityqueue_is_empty(pq));
+  gt_assert(pq != NULL && !gt_priority_queue_is_empty(pq));
   return pq->elements +
          (pq->capacity < (unsigned long) GT_MINPQSIZE ? pq->numofelements-1
                                                       : 1UL);
 }
 
-void gt_priorityqueue_delete(GtPriorityQueue *pq)
+void gt_priority_queue_delete(GtPriorityQueue *pq)
 {
   if (pq != NULL)
   {
