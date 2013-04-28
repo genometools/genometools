@@ -73,7 +73,7 @@ void gt_priority_queue_add(GtPriorityQueue *pq, void *value)
        the key is found. */
     for (ptr = pq->elements + pq->numofelements; ptr > pq->elements; ptr--)
     {
-      if (pq->cmpfun(*(ptr-1),value) < 0)
+      if (*(ptr-1) == NULL || pq->cmpfun(*(ptr-1),value) < 0)
       {
         *ptr = *(ptr-1);
       } else
@@ -160,22 +160,12 @@ void gt_priority_queue_delete(GtPriorityQueue *pq)
 
 static int cmpUlong(const void *aptr,const void *bptr)
 {
-  if (aptr == NULL)
-  {
-    gt_assert(bptr != NULL);
-    return -1;
-  }
-  if (bptr == NULL)
-  {
-    gt_assert(aptr != NULL);
-    return 1;
-  } else
-  {
-    unsigned long a = *((const unsigned long *) aptr);
-    unsigned long b = *((const unsigned long *) bptr);
+  unsigned long a, b;
 
-    return a < b ? -1 : (a > b ? 1 : 0);
-  }
+  gt_assert(aptr != NULL && bptr != NULL);
+  a = *((const unsigned long *) aptr);
+  b = *((const unsigned long *) bptr);
+  return a < b ? -1 : (a > b ? 1 : 0);
 }
 
 static void gt_priority_sort(unsigned long *numbers,unsigned long len)
