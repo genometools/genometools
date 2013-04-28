@@ -19,9 +19,13 @@
 #include <stdlib.h>
 #include "core/ma_api.h"
 #include "core/assert_api.h"
+#include "core/divmodmul.h"
+#include "core/error_api.h"
+#include "core/mathsupport.h"
+#include "core/ensure.h"
 #include "priorityqueue.h"
 
-#define GT_MINPQSIZE 10
+#define GT_MINPQSIZE 16
 
 struct GtPriorityQueue
 {
@@ -90,14 +94,19 @@ void gt_priority_queue_add(GtPriorityQueue *pq, unsigned long sortkey,
     pq->numofelements++;
   } else
   {
-    unsigned long idx;
+    unsigned long idx = ++pq->numofelements;
 
-    for (idx = ++pq->numofelements;
-         idx/2 > 0 && pq->elements[idx/2].sortkey > sortkey;
-         idx /= 2)
+    while (true)
     {
+      const unsigned long newidx = GT_DIV2(idx);
+
+      if (newidx == 0 || pq->elements[newidx].sortkey <= sortkey)
+      {
+        break;
+      }
       gt_assert(idx > 0);
-      pq->elements[idx] = pq->elements[idx/2];
+      pq->elements[idx] = pq->elements[newidx];
+      idx = newidx;
     }
     gt_assert(idx > 0);
     pq->elements[idx].sortkey = sortkey;
@@ -110,6 +119,7 @@ GtPriorityQueueElementType *gt_priority_queue_delete_min(GtPriorityQueue *pq)
   gt_assert(pq != NULL && !gt_priority_queue_is_empty(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
   {
+    gt_assert(pq->numofelements > 0);
     pq->minelement = pq->elements[--pq->numofelements];
     gt_priority_queue_checkorder(pq);
   } else
@@ -119,9 +129,9 @@ GtPriorityQueueElementType *gt_priority_queue_delete_min(GtPriorityQueue *pq)
 
     pq->minelement = pq->elements[1];
     lastelement = pq->elements[pq->numofelements--];
-    for (idx = 1UL; idx * 2 <= pq->numofelements; idx = child)
+    for (idx = 1UL; GT_MULT2(idx) <= pq->numofelements; idx = child)
     {
-      child = idx * 2;
+      child = GT_MULT2(idx);
       gt_assert(child > 0);
       if (child != pq->numofelements &&
           pq->elements[child + 1].sortkey < pq->elements[child].sortkey)
@@ -158,4 +168,47 @@ void gt_priority_queue_delete(GtPriorityQueue *pq)
     gt_free(pq->elements);
     gt_free(pq);
   }
+}
+
+static int cmpUlong(const void *aptr,const void *bptr)
+{
+  unsigned long a = *((const unsigned long *) aptr);
+  unsigned long b = *((const unsigned long *) bptr);
+
+  return a < b ? -1 : (a > b ? 1 : 0);
+}
+
+int gt_priority_queue_unit_test(GtError *err)
+{
+  int had_err = 0;
+  unsigned long idx, maxsize = 1000UL,
+                trials = 100UL,
+                *numbers = gt_malloc(sizeof *numbers * maxsize);
+
+  gt_error_check (err);
+  for (idx = 0; idx < trials; idx++)
+  {
+    unsigned long j,
+                  size = gt_rand_max(maxsize),
+                  maximal_value = 1 + gt_rand_max(1000UL);
+    GtPriorityQueue *pq = gt_priority_queue_new(size);
+    GtPriorityQueueElementType *elem;
+
+    for (j = 0; j< size; j++)
+    {
+      numbers[j] = gt_rand_max(maximal_value);
+      gt_priority_queue_add(pq, numbers[j], 0);
+    }
+    gt_ensure(had_err,gt_priority_queue_is_full(pq));
+    qsort(numbers,(size_t) size,sizeof *numbers,cmpUlong);
+    for (j = 0; j < size; j++)
+    {
+      elem = gt_priority_queue_delete_min(pq);
+      gt_ensure(had_err,elem->sortkey == numbers[j]);
+    }
+    gt_ensure(had_err,gt_priority_queue_is_empty(pq));
+    gt_priority_queue_delete(pq);
+  }
+  gt_free(numbers);
+  return had_err;
 }

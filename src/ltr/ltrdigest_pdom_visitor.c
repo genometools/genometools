@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <ctype.h>
 #include <signal.h>
 #include <string.h>
 #ifndef S_SPLINT_S
+#include <ctype.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/wait.h>

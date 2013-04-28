@@ -35,5 +35,6 @@ const GtPriorityQueueElementType*
 bool             gt_priority_queue_is_empty(const GtPriorityQueue *pq);
 bool             gt_priority_queue_is_full(const GtPriorityQueue *pq);
 void             gt_priority_queue_delete(GtPriorityQueue *pq);
+int              gt_priority_queue_unit_test(GtError *err);
 
 #endif
