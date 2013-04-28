@@ -18,20 +18,17 @@
 #ifndef PRIORITYQUEUE_H
 #define PRIORITYQUEUE_H
 
-typedef struct GtPriorityQueue GtPriorityQueue;
-typedef struct {
-  unsigned long sortkey,
-                value;
-} GtPriorityQueueElementType;
+#include "core/fptr_api.h"
 
-GtPriorityQueue *gt_priority_queue_new(unsigned long maxnumofelements);
+typedef struct GtPriorityQueue GtPriorityQueue;
+
+GtPriorityQueue *gt_priority_queue_new(GtCompare cmpfun,
+                                       unsigned long maxnumofelements);
 void             gt_priority_queue_add(GtPriorityQueue *pq,
-                                       unsigned long sortkey,
-                                       unsigned long value);
-GtPriorityQueueElementType*
-                 gt_priority_queue_delete_min(GtPriorityQueue *pq);
-const GtPriorityQueueElementType*
-                 gt_priority_queue_find_min(const GtPriorityQueue *pq);
+                                       void *value);
+
+void *gt_priority_queue_delete_min(GtPriorityQueue *pq);
+const void *gt_priority_queue_find_min(const GtPriorityQueue *pq);
 bool             gt_priority_queue_is_empty(const GtPriorityQueue *pq);
 bool             gt_priority_queue_is_full(const GtPriorityQueue *pq);
 void             gt_priority_queue_delete(GtPriorityQueue *pq);
