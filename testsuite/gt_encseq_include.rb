@@ -21,7 +21,8 @@ Test do
   run "#{$bin}gt encseq encode -indexname foo " + \
       "#{$testdata}gt_encseq_eqlen_last_empty.fas"
   run "#{$bin}gt encseq decode foo"
-  run "head -n -1 #{last_stdout} | diff - #{$testdata}gt_encseq_eqlen_last_empty.fas"
+  run "awk -v n=1 '{if(NR>n) print a[NR%n]; a[NR%n]=$0}' #{last_stdout} " + \
+      "| diff - #{$testdata}gt_encseq_eqlen_last_empty.fas"
 end
 
 Name "gt encseq encode|decode w/ clipped desc"
