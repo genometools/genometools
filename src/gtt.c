@@ -198,7 +198,6 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "eval", gt_eval());
   gt_toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
   gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
-  gt_toolbox_add_tool(tools, "featureindex", gt_featureindex());
   gt_toolbox_add_tool(tools, "fingerprint", gt_fingerprint());
   gt_toolbox_add_tool(tools, "genomediff", gt_genomediff());
   gt_toolbox_add_tool(tools, "gff3", gt_gff3());
@@ -214,7 +213,6 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "matchtool", gt_matchtool());
   gt_toolbox_add_tool(tools, "md5_to_id", gt_md5_to_id());
   gt_toolbox_add_tool(tools, "mergefeat", gt_mergefeat());
-  gt_toolbox_add_tool(tools, "mkfeatureindex", gt_mkfeatureindex());
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
   gt_toolbox_add_tool(tools, "readjoiner", gt_readjoiner());
@@ -245,6 +243,11 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "sketch", gt_sketch());
   gt_toolbox_add_tool(tools, "sketch_page", gt_sketch_page());
 #endif
+#if defined (HAVE_MYSQL) || defined (HAVE_SQLITE)
+  gt_toolbox_add_tool(tools, "featureindex", gt_featureindex());
+  gt_toolbox_add_tool(tools, "mkfeatureindex", gt_mkfeatureindex());
+#endif
+
   return tools;
 }
 
@@ -347,11 +350,13 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "element class", gt_element_unit_test);
   gt_hashmap_add(unit_tests, "memory feature index class",
                                              gt_feature_index_memory_unit_test);
-  gt_hashmap_add(unit_tests, "database feature index class (GFF-like)",
-                                                  gt_anno_db_gfflike_unit_test);
   gt_hashmap_add(unit_tests, "imageinfo class", gt_image_info_unit_test);
   gt_hashmap_add(unit_tests, "line class", gt_line_unit_test);
   gt_hashmap_add(unit_tests, "track class", gt_track_unit_test);
+#endif
+#if defined (HAVE_MYSQL) || defined (HAVE_SQLITE)
+  gt_hashmap_add(unit_tests, "database feature index class (GFF-like)",
+                                                  gt_anno_db_gfflike_unit_test);
 #endif
 
   return unit_tests;

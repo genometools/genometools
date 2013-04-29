@@ -51,5 +51,9 @@ AddIntronsStream.register(gtlib)
 InterFeatureStream.register(gtlib)
 DuplicateFeatureStream.register(gtlib)
 MergeFeatureStream.register(gtlib)
-RDBSqlite.register(gtlib)
-AnnoDBSchema.register(gtlib)
+try:
+    RDBSqlite.register(gtlib)
+    AnnoDBSchema.register(gtlib)
+except AttributeError:
+    # fail gracefully when RDB symbols are not present
+    pass

@@ -396,7 +396,6 @@ ifneq ($(with-sqlite),no)
   ifneq ($(SYSTEM),FreeBSD)
     EXP_LDLIBS += -ldl
   endif
-  STEST_FLAGS += -sqlite
 else
   SQLITE_FILTER_OUT:=src/extended/rdb_sqlite.c
 endif
@@ -407,6 +406,9 @@ ifeq ($(with-mysql),yes)
   EXP_LDLIBS += -lmysqlclient
 else
   MYSQL_FILTER_OUT:=src/extended/rdb_mysql.c
+  ifeq ($(with-sqlite),no)
+    STEST_FLAGS += -nordb
+  endif
 endif
 
 # the GenomeTools library
