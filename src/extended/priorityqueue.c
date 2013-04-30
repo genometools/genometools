@@ -26,7 +26,9 @@
 #include "core/ensure.h"
 #include "priorityqueue.h"
 
-#define GT_MINPQSIZE 16
+#define GT_HEAP_PARENT(X)  GT_DIV2(X)
+#define GT_HEAP_LEFT(X)    GT_MULT2(X)
+#define GT_MINPQSIZE       16
 
 struct GtPriorityQueue
 {
@@ -89,7 +91,7 @@ void gt_priority_queue_add(GtPriorityQueue *pq, void *value)
 
     while (true)
     {
-      const unsigned long newidx = GT_DIV2(idx);
+      const unsigned long newidx = GT_HEAP_PARENT(idx);
 
       if (newidx == 0 || pq->cmpfun(pq->elements[newidx],value) <= 0)
       {
@@ -104,7 +106,7 @@ void gt_priority_queue_add(GtPriorityQueue *pq, void *value)
   }
 }
 
-void *gt_priority_queue_delete_min(GtPriorityQueue *pq)
+void *gt_priority_queue_extract_min(GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL && !gt_priority_queue_is_empty(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
@@ -118,9 +120,9 @@ void *gt_priority_queue_delete_min(GtPriorityQueue *pq)
 
     pq->minelement = pq->elements[1];
     lastelement = pq->elements[pq->numofelements--];
-    for (idx = 1UL; GT_MULT2(idx) <= pq->numofelements; idx = child)
+    for (idx = 1UL; GT_HEAP_LEFT(idx) <= pq->numofelements; idx = child)
     {
-      child = GT_MULT2(idx);
+      child = GT_HEAP_LEFT(idx);
       gt_assert(child > 0);
       if (child != pq->numofelements &&
           pq->cmpfun(pq->elements[child + 1],pq->elements[child]) < 0)
@@ -180,7 +182,7 @@ static void gt_priority_sort(unsigned long *numbers,unsigned long len)
   gt_assert(gt_priority_queue_is_full(pq));
   for (j = 0; j < len; j++)
   {
-    void *elem = gt_priority_queue_delete_min(pq);
+    void *elem = gt_priority_queue_extract_min(pq);
 
     if (previousvalue != ULONG_MAX)
     {
@@ -222,7 +224,7 @@ int gt_priority_queue_unit_test(GtError *err)
     qsort(numbers,(size_t) size,sizeof *numbers,cmpUlong);
     for (j = 0; j < size; j++)
     {
-      elem = gt_priority_queue_delete_min(pq);
+      elem = gt_priority_queue_extract_min(pq);
       if (*((unsigned long *) elem) != numbers[j])
       {
         fprintf(stderr,"elem=%lu != %lu = numbers[%lu]\n",

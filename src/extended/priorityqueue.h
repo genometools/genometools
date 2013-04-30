@@ -27,7 +27,7 @@ GtPriorityQueue *gt_priority_queue_new(GtCompare cmpfun,
 void             gt_priority_queue_add(GtPriorityQueue *pq,
                                        void *value);
 
-void *gt_priority_queue_delete_min(GtPriorityQueue *pq);
+void *gt_priority_queue_extract_min(GtPriorityQueue *pq);
 const void *gt_priority_queue_find_min(const GtPriorityQueue *pq);
 bool             gt_priority_queue_is_empty(const GtPriorityQueue *pq);
 bool             gt_priority_queue_is_full(const GtPriorityQueue *pq);
