@@ -15,20 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef PRIORITYQUEUE_H
-#define PRIORITYQUEUE_H
+#ifndef PRIORITY_QUEUE_H
+#define PRIORITY_QUEUE_H
 
 #include "core/fptr_api.h"
 
 typedef struct GtPriorityQueue GtPriorityQueue;
 
-GtPriorityQueue *gt_priority_queue_new(GtCompare cmpfun,
+GtPriorityQueue* gt_priority_queue_new(GtCompare cmpfun,
                                        unsigned long maxnumofelements);
 void             gt_priority_queue_add(GtPriorityQueue *pq,
                                        void *value);
-
-void *gt_priority_queue_extract_min(GtPriorityQueue *pq);
-const void *gt_priority_queue_find_min(const GtPriorityQueue *pq);
+void*            gt_priority_queue_extract_min(GtPriorityQueue *pq);
+const void*      gt_priority_queue_find_min(const GtPriorityQueue *pq);
 bool             gt_priority_queue_is_empty(const GtPriorityQueue *pq);
 bool             gt_priority_queue_is_full(const GtPriorityQueue *pq);
 void             gt_priority_queue_delete(GtPriorityQueue *pq);

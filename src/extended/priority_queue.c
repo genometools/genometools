@@ -15,16 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <limits.h>
-#include "core/ma_api.h"
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "core/error_api.h"
-#include "core/mathsupport.h"
 #include "core/ensure.h"
-#include "priorityqueue.h"
+#include "core/ma_api.h"
+#include "core/mathsupport.h"
+#include "extended/priority_queue.h"
 
 #define GT_HEAP_PARENT(X)  GT_DIV2(X)
 #define GT_HEAP_LEFT(X)    GT_MULT2(X)

@@ -69,7 +69,7 @@
 #include "extended/huffcode.h"
 #include "extended/luaserialize.h"
 #include "extended/popcount_tab.h"
-#include "extended/priorityqueue.h"
+#include "extended/priority_queue.h"
 #include "extended/ranked_list.h"
 #include "extended/rbtree.h"
 #include "extended/rmq.h"
@@ -328,7 +328,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "red-black tree class", gt_rbtree_unit_test);
   gt_hashmap_add(unit_tests, "range minimum query class", gt_rmq_unit_test);
   gt_hashmap_add(unit_tests, "rdj: string graph class", gt_strgraph_unit_test);
-  gt_hashmap_add(unit_tests, "priority queue class", 
+  gt_hashmap_add(unit_tests, "priority queue class",
                              gt_priority_queue_unit_test);
   gt_hashmap_add(unit_tests, "safearith example", gt_safearith_example);
   gt_hashmap_add(unit_tests, "safearith module", gt_safearith_unit_test);
