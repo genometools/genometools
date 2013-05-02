@@ -962,13 +962,11 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
     {
       GtContigsGraphSpmEdge *edge;
       unsigned long dest;
-      if (i < info[1].depth)
-      {
+      if (i < info[1].depth) {
         dest = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dest;
         dir = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dir;
       }
-      else
-      {
+      else { /* if (i >= info[1].depth) */
         dest = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dest;
         dir = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dir;
       }
@@ -994,15 +992,13 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
     unsigned long src = cnum;
     unsigned long dest;
     GT_UNUSED bool extended;
-    if (i < info[1].depth)
-    {
+    if (i < info[1].depth) {
       dest = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dest;
       dir = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].dir;
       extended = path[1].spaceGtContigsGraphPathElem[info[1].depth - 1 - i].
         extended;
     }
-    else
-    {
+    else { /* if (i >= info[1].depth) */
       dest = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dest;
       dir = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].dir;
       extended = path[0].spaceGtContigsGraphPathElem[i - info[1].depth].
