@@ -290,13 +290,13 @@ int gt_ovlfind_bf_unit_test(GtError *err)
   if (!had_err)
   {
     gt_array_reset(a);
-    retval = gt_ovlfind_bf("aggaccagtagt", 12UL, "agtagttactac", 12UL,
+    (void)gt_ovlfind_bf("aggaccagtagt", 12UL, "agtagttactac", 12UL,
                            GT_OVLFIND_SPM, 1UL, true,
                            ovlfind_bf_test_save, a);
     gt_ensure(had_err, gt_array_size(a) == 2UL);
 
     gt_array_reset(a);
-    retval = gt_ovlfind_bf("aggaccagtagt", 12UL, "agtagttactac", 12UL,
+    (void)gt_ovlfind_bf("aggaccagtagt", 12UL, "agtagttactac", 12UL,
                            GT_OVLFIND_SPM, 4UL, true,
                            ovlfind_bf_test_save, a);
     gt_ensure(had_err, gt_array_size(a) == 1UL);

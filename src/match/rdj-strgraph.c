@@ -1259,8 +1259,6 @@ unsigned long gt_strgraph_redpbubbles(GtStrgraph *strgraph,
       {
         if (!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph, i, j))
         {
-          from = i;
-          from_to = j;
           to = GT_STRGRAPH_EDGE_DEST(strgraph, i, j);
           depth = 1UL;
           len = GT_STRGRAPH_EDGE_LEN(strgraph, i, j);

@@ -194,6 +194,7 @@ static inline GtContfinderKmercodeWithOverflow gt_contfinder_get_code(
     }
     else
     {
+      gt_assert(seppos != NULL);
       seqstart = (seqnum > 0) ? seppos[seqnum - 1] + 1 : 0;
       len = seppos[seqnum] - seqstart + 1;
     }
@@ -226,6 +227,7 @@ static inline GtContfinderKmercodeWithOverflow gt_contfinder_get_code(
     else
     {
       seqnum = (firstrevcompl << 1) - seqnum - 1;
+      gt_assert(seppos != NULL);
       pos = seppos[seqnum] - depth;
       seqstart = (seqnum > 0) ? seppos[seqnum - 1] + 1 : 0;
       len = seppos[seqnum] - seqstart + 1;

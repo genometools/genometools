@@ -60,15 +60,16 @@ DEFINE_HASHMAP(GtStrgraphVnum, v, GtStrgraphCount__Large, c_,
 #define GT_STRGRAPH_FREE_COUNTS(STRGRAPH)\
   gt_free((STRGRAPH)->__small_counts);\
   (STRGRAPH)->__small_counts = NULL;\
-  if ((STRGRAPH)->__large_counts != NULL)\
+  if ((STRGRAPH)->__large_counts != NULL) \
     v_c__gt_hashmap_delete((STRGRAPH)->__large_counts);\
   (STRGRAPH)->__large_counts = NULL
 
 #define GT_STRGRAPH_GET_COUNT(STRGRAPH, POSITION) \
   (((STRGRAPH)->__small_counts[(POSITION)] < GT_STRGRAPH__COUNT_IS_LARGE)\
     ? (GtStrgraphCount)((STRGRAPH)->__small_counts[(POSITION)]) \
-    : (GtStrgraphCount)*v_c__gt_hashmap_get((STRGRAPH)->__large_counts,\
-      (POSITION)))
+    : (v_c__gt_hashmap_get((STRGRAPH)->__large_counts, (POSITION)) != NULL ? \
+   (GtStrgraphCount)*v_c__gt_hashmap_get((STRGRAPH)->__large_counts,\
+      (POSITION)) : 0))
 
 #define GT_STRGRAPH__SET_COUNT(STRGRAPH, POSITION, VALUE) \
   if ((VALUE) < (GtStrgraphCount)GT_STRGRAPH__COUNT_IS_LARGE)\
@@ -98,9 +99,9 @@ DEFINE_HASHMAP(GtStrgraphVnum, v, GtStrgraphCount__Large, c_,
   {\
     gt_assert((STRGRAPH)->__small_counts[(POSITION)] == \
         GT_STRGRAPH__COUNT_IS_LARGE);\
-    gt_assert(v_c__gt_hashmap_get((STRGRAPH)->__large_counts,\
-          (POSITION)) != NULL);\
-    (*v_c__gt_hashmap_get((STRGRAPH)->__large_counts, (POSITION)))++;\
+    if (v_c__gt_hashmap_get((STRGRAPH)->__large_counts,\
+          (POSITION)) != NULL) \
+      (*v_c__gt_hashmap_get((STRGRAPH)->__large_counts, (POSITION)))++;\
   }
 
 enum iterator_op gt_strgraph__save_large_count(GtStrgraphVnum vnum,

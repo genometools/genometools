@@ -1426,9 +1426,6 @@ static int gt_randomcodes_process_part(GtRandomcodesinfo *fci,
                                  gt_firstcodes_spacelog_total(fci->fcsl);
       gt_log_log("space left for sortremaining: %.2f",
                  GT_MEGABYTES(spaceforbucketprocessing));
-    } else
-    {
-      spaceforbucketprocessing = 0;
     }
   }
 #ifdef GT_THREADS_ENABLED
@@ -1755,6 +1752,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     if (!onlyaccumulation)
     {
+      gt_assert(fci.flushcount > 0);
       gt_logger_log(logger,"total inserted=%lu (%.3f%% of all suffixes), "
                            "%u rounds (avg length %lu)",
                            fci.total_inserted,

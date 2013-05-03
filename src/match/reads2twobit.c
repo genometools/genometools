@@ -1340,7 +1340,7 @@ void gt_reads2twobit_decode_range(const GtReads2Twobit *r2t,
   unsigned short charsincode;
   const char code2char[] = "acgt";
   unsigned long seqnum, pos, nextsep, nextdecoded, seqnum_to;
-  const GtTwobitencoding *nextencoded = r2t->twobitencoding;
+  const GtTwobitencoding *nextencoded;
   char *decoded;
 
   gt_assert(r2t->seqlen_max > 0);

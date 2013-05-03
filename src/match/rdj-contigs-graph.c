@@ -982,7 +982,6 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
   gt_assert(cnum == info[0].cnum);
   cnum = info[1].cnum;
   gt_log_log("--- start traversal from %lu", cnum);
-  dir = info[1].dir;
   gt_assert(nof_units >= 1UL);
   if (info[1].t == GT_CONTIGS_GRAPH_CIRCULAR)
   {

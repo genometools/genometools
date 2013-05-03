@@ -68,6 +68,7 @@ void rdj_gusfield_processleafedge(unsigned long leafnumber,
   bool suffixseq_direct = true, prefixseq_direct = true;
   unsigned long *matchlen;
   unsigned long stack_pos;
+  gt_assert(encseq != NULL);
 
   if (leafnumber == 0 || (bool)GT_ISIBITSET(sspbittab, leafnumber-1))
   {
@@ -94,6 +95,7 @@ void rdj_gusfield_processleafedge(unsigned long leafnumber,
         {
           matchlen = matchlen_stacks[suffix_seqnum].spaceGtUlong +
                      matchlen_stacks[suffix_seqnum].nextfreeGtUlong - 1;
+          gt_assert(matchlen != NULL);
           if (suffix_seqnum == prefix_seqnum)
           {
             if (*matchlen == gt_encseq_seqlength(encseq, suffix_seqnum))
@@ -122,6 +124,7 @@ void rdj_gusfield_processleafedge(unsigned long leafnumber,
                stack_pos++)
           {
             matchlen = matchlen_stacks[suffix_seqnum].spaceGtUlong + stack_pos;
+            gt_assert(matchlen != NULL);
             if (suffix_seqnum == prefix_seqnum)
             {
               if (*matchlen == gt_encseq_seqlength(encseq, suffix_seqnum))

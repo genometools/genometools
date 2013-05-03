@@ -274,13 +274,15 @@ int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
     if (state->editor == NULL)
       had_err = -1;
   }
-  state->k = k;
-  state->c = c;
-  state->debug_value = debug_value;
-  state->quiet = (state->debug_value == GT_UNDEF_ULONG ? false : true);
-  gt_errfind_reset(state);
-
-  had_err = gt_esa_bottomup_errfind(ssar, state, err);
+  if (had_err == 0)
+  {
+    state->k = k;
+    state->c = c;
+    state->debug_value = debug_value;
+    state->quiet = (state->debug_value == GT_UNDEF_ULONG ? false : true);
+    gt_errfind_reset(state);
+    had_err = gt_esa_bottomup_errfind(ssar, state, err);
+  }
 
   if (state->editor != NULL)
   {
