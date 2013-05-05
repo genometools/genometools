@@ -1689,6 +1689,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                 specials,fullspecials);
   if (withcheck)
   {
+    gt_assert(codelist.spaceCodeatposition != NULL);
     qsort(codelist.spaceCodeatposition,
           (size_t) codelist.nextfreeCodeatposition,
           sizeof (*codelist.spaceCodeatposition),dc_compareCodeatpositon);
@@ -1898,6 +1899,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
   Sfxstrategy sfxstrategy;
   GtUchar cc;
 
+  sfxstrategy.suftabuint = false;
   dcov->samplesize = 0;
   dcov->bcktab = NULL;
   dcov->multimappower = NULL;

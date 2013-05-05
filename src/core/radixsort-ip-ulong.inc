@@ -217,6 +217,7 @@ static void gt_radixsort_ulong_shuffle(GtRadixbuffer *rbuf,
                                        GtCountbasetype len,
                                        size_t rightshift)
 {
+  gt_assert(rbuf != NULL);
   ((unsigned long) len > rbuf->cachesize
      ? gt_radixsort_ulong_cached_shuffle
      : gt_radixsort_ulong_uncached_shuffle) (rbuf,source,len,rightshift);

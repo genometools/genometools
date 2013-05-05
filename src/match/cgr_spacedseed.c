@@ -82,8 +82,11 @@ static Spacedseed *spacedseed_new(const char *seedstring, GtError *err)
 
 static void spacedseed_delete(Spacedseed *spse)
 {
-  gt_free(spse->onepositions);
-  gt_free(spse);
+  if (spse != NULL)
+  {
+    gt_free(spse->onepositions);
+    gt_free(spse);
+  }
 }
 
 static void singlewindowmatchspacedseed(Limdfsresources *limdfsresources,

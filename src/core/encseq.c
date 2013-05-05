@@ -3162,6 +3162,7 @@ static bool containsSWViatables(const GtEncseq *encseq,
 {
   GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr, kindsw);
 
+  gt_assert(swstate != NULL);
   if (swstate->hasprevious) {
     if (!GT_ISDIRREVERSE(esr->readmode)) {
       gt_assert(startpos + len > 0);

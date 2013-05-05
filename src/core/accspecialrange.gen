@@ -358,7 +358,7 @@ static bool GT_APPENDINT(checkspecialrange)(
   unsigned long pagenumber = GT_POS2PAGENUM(pos);
   const GT_SPECIALTABLETYPE *found;
 
-  gt_assert (swtable->endidxinpage != NULL);
+  gt_assert (swtable != NULL && swtable->endidxinpage != NULL);
   if (pagenumber == 0)
   {
     if (swtable->endidxinpage[0] >= 1UL)
@@ -375,6 +375,7 @@ static bool GT_APPENDINT(checkspecialrange)(
                            [(unsigned long) (found - swtable->positions)];
         if (swtable->mappositions != NULL) {
           unsigned long rstart = GT_PAGENUM2OFFSET(pagenumber) + *found;
+          gt_assert(mappos != NULL);
           *mappos = swtable->mappositions
                     [(unsigned long) (found - swtable->positions)]
                     + pos - rstart;
@@ -404,6 +405,7 @@ static bool GT_APPENDINT(checkspecialrange)(
 
         rstart = GT_PAGENUM2OFFSET(pagenumber) + *found;
         if (swtable->mappositions != NULL) {
+          gt_assert(mappos != NULL);
           *mappos = swtable->mappositions
                     [(unsigned long) (found - swtable->positions)]
                     + pos - rstart;

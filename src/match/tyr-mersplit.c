@@ -88,13 +88,14 @@ static const GtUchar *remainingleftmost(unsigned long merbytes,
                                       const GtUchar *leftptr,
                                       const GtUchar *rightptr)
 {
-  unsigned long len;
+  unsigned long len, halvemerbytes = GT_MULT2(merbytes);
   GtUchar midcode;
   const GtUchar *midptr;
 
+  gt_assert(halvemerbytes > 0);
   while (leftptr + merbytes < rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/GT_MULT2(merbytes);
+    len = (unsigned long) (rightptr-leftptr)/halvemerbytes;
     midptr = leftptr + merbytes * len;
     midcode = extractremainingbytes(remainmask,byteoffset,midptr);
     if (code <= midcode)
@@ -115,13 +116,14 @@ static const GtUchar *remainingrightmost(unsigned long merbytes,
                                        const GtUchar *leftptr,
                                        const GtUchar *rightptr)
 {
-  unsigned long len;
+  unsigned long len, halvemerbytes = GT_MULT2(merbytes);
   GtUchar midcode;
   const GtUchar *midptr;
 
+  gt_assert(halvemerbytes > 0);
   while (leftptr + merbytes < rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/GT_MULT2(merbytes);
+    len = (unsigned long) (rightptr-leftptr)/halvemerbytes;
     midptr = leftptr + merbytes * len;
     midcode = extractremainingbytes(remainmask,byteoffset,midptr);
     if (code >= midcode)
@@ -330,6 +332,7 @@ int gt_constructmerbuckets(const char *inputindex,
   gt_error_check(err);
   tyrbckinfo.bounds = NULL;
   tyrbckinfo.boundisdefined = NULL;
+  tyrbckinfo.prefixlength = 0;
   tyrindex = gt_tyrindex_new(inputindex,err);
   if (tyrindex == NULL)
   {
@@ -347,6 +350,7 @@ int gt_constructmerbuckets(const char *inputindex,
   }
   if (!haserr && tyrindex != NULL && !gt_tyrindex_isempty(tyrindex))
   {
+    gt_assert(tyrbckinfo.prefixlength > 0);
     printf("# construct mer buckets for prefixlength %u\n",
             tyrbckinfo.prefixlength);
     tyrbckinfo.numofcodes

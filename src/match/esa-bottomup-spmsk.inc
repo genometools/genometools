@@ -181,12 +181,8 @@ static int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
       }
       if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
       {
-        if (TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot)
+        if (!(TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot))
         {
-          firstedge = false;
-        } else
-        {
-          firstedge = true;
           firstedgefromroot = false;
         }
         /* no call to processbranchingedge_spmsk */

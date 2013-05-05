@@ -196,13 +196,13 @@ static int gt_esa_bottomup_RAM_spmvar(const unsigned long *bucketofsuffixes,
           firstedgefromroot = false;
         }
         if (processbranchingedge_spmvar(firstedge,
-                   TOP_ESA_BOTTOMUP_spmvar.lcp,
-                   &TOP_ESA_BOTTOMUP_spmvar.info,
-                   lastinterval->lcp,
-                   lastinterval->rb - lastinterval->lb + 1,
-                   &lastinterval->info,
-                   bustate,
-                   err) != 0)
+               TOP_ESA_BOTTOMUP_spmvar.lcp,
+               &TOP_ESA_BOTTOMUP_spmvar.info,
+               lastinterval->lcp,
+               lastinterval->rb - lastinterval->lb + 1,
+               &lastinterval->info,
+               bustate,
+               err) != 0)
         {
           haserr = true;
         }

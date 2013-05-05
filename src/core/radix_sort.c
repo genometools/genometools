@@ -485,8 +485,6 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                                  GtRadixvalues *radixvalues,
                                  unsigned long len)
 {
-  unsigned long countcached = 0, countuncached = 0,
-                countinsertionsort = 0;
   const size_t shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
 #ifdef GT_THREADS_ENABLED
   const unsigned int threads = GT_THREADS_JOBS;
@@ -501,6 +499,7 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                    "#define GT_RADIX_LARGEARRAYS\n",__FILE__,__LINE__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+  gt_assert(radixsortinfo != NULL);
   if (radixsortinfo->pairs)
   {
     gt_radixsort_ulongpair_shuffle(radixsortinfo->rbuf,
@@ -526,9 +525,14 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
   }
   if (threads == 1U || radixsortinfo->stack.nextfree < (unsigned long) threads)
   {
-    (radixsortinfo->pairs ? gt_radixsort_ulongpair_sub_inplace
-                          : gt_radixsort_ulong_sub_inplace)
-                            (radixsortinfo->rbuf, &radixsortinfo->stack);
+    if (radixsortinfo->pairs)
+    {
+      gt_radixsort_ulongpair_sub_inplace(radixsortinfo->rbuf,
+                                         &radixsortinfo->stack);
+    } else
+    {
+      gt_radixsort_ulong_sub_inplace(radixsortinfo->rbuf,&radixsortinfo->stack);
+    }
   } else
   {
 #ifdef GT_THREADS_ENABLED
@@ -563,23 +567,8 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
       gt_thread_join(radixsortinfo->threadinfo[t].thread);
       gt_thread_delete(radixsortinfo->threadinfo[t].thread);
     }
-    for (t = 0; t < threads; t++)
-    {
-      countcached += radixsortinfo->threadinfo[t].rbuf->countcached;
-      countuncached += radixsortinfo->threadinfo[t].rbuf->countuncached;
-      countinsertionsort
-        += radixsortinfo->threadinfo[t].rbuf->countinsertionsort;
-    }
 #endif
   }
-  countcached += radixsortinfo->rbuf->countcached;
-  countuncached += radixsortinfo->rbuf->countuncached;
-  countinsertionsort += radixsortinfo->rbuf->countinsertionsort;
-  /*
-  printf("countcached=%lu\n",countcached);
-  printf("countuncached=%lu\n",countuncached);
-  printf("countinsertionsort=%lu\n",countinsertionsort);
-  */
 }
 
 void gt_radixsort_inplace_ulong(unsigned long *source, unsigned long len)

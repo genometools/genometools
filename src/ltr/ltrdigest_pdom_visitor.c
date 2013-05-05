@@ -298,6 +298,7 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
   gt_assert(lv && instream && status);
   gt_error_check(err);
   had_err = pdom_parser_get_next_line(buf, instream, err);
+  gt_assert(buf != NULL);
   while (!had_err && strncmp("Internal pipeline statistics",
                              buf, (size_t) 28) &&
                      strncmp(">>", buf, (size_t) 2)) {
@@ -351,6 +352,7 @@ static int gt_ltrdigest_pdom_visitor_parse_domainhits(GtLTRdigestPdomVisitor
   gt_error_check(err);
 
   had_err = pdom_parser_get_next_line(buf, instream, err);
+  gt_assert(buf != NULL);
   while (!had_err && strncmp("Internal", buf, (size_t) 8)) {
     unsigned long no, hmmfrom, hmmto, alifrom, alito;
     double score, evalue;

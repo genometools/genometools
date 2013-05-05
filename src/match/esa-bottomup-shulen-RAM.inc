@@ -86,13 +86,13 @@ static int gt_esa_bottomup_RAM_previousfromlast_shulen(
           firstedgefromroot = false;
         }
         if (processbranchingedge_shulen(firstedge,
-                   TOP_ESA_BOTTOMUP_shulen.lcp,
-                   &TOP_ESA_BOTTOMUP_shulen.info,
-                   lastinterval->lcp,
-                   lastinterval->rb - lastinterval->lb + 1,
-                   &lastinterval->info,
-                   bustate,
-                   err) != 0)
+               TOP_ESA_BOTTOMUP_shulen.lcp,
+               &TOP_ESA_BOTTOMUP_shulen.info,
+               lastinterval->lcp,
+               lastinterval->rb - lastinterval->lb + 1,
+               &lastinterval->info,
+               bustate,
+               err) != 0)
         {
           haserr = true;
         }
@@ -209,13 +209,13 @@ static int gt_esa_bottomup_RAM_shulen(const unsigned long *bucketofsuffixes,
           firstedgefromroot = false;
         }
         if (processbranchingedge_shulen(firstedge,
-                   TOP_ESA_BOTTOMUP_shulen.lcp,
-                   &TOP_ESA_BOTTOMUP_shulen.info,
-                   lastinterval->lcp,
-                   lastinterval->rb - lastinterval->lb + 1,
-                   &lastinterval->info,
-                   bustate,
-                   err) != 0)
+               TOP_ESA_BOTTOMUP_shulen.lcp,
+               &TOP_ESA_BOTTOMUP_shulen.info,
+               lastinterval->lcp,
+               lastinterval->rb - lastinterval->lb + 1,
+               &lastinterval->info,
+               bustate,
+               err) != 0)
         {
           haserr = true;
         }

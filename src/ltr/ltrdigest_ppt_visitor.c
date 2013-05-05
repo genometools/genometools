@@ -305,6 +305,7 @@ static void gt_group_hits(GtLTRdigestPPTVisitor *lv,
   cur_hit = gt_ppt_hit_new(strand, results);
   for (i = 0; i < 2 * radius - 1; i++)
   {
+    gt_assert(cur_hit != NULL);
     cur_hit->state = (GtPPTStates) decoded[i];
     cur_hit->rng.end = i;
     if (decoded[i+1] != decoded[i] || i + 2 == 2 * radius)

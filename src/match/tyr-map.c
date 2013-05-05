@@ -373,6 +373,7 @@ void gt_tyrindex_check(GT_UNUSED const Tyrindex *tyrindex)
   unsigned long position;
   GT_UNUSED unsigned long previousposition = 0;
 
+  gt_assert(tyrindex->merbytes > 0);
   for (mercodeptr = tyrindex->mertable;
        mercodeptr <= tyrindex->lastmer;
        mercodeptr += tyrindex->merbytes)

@@ -294,9 +294,10 @@ static void tracethestackelems(GtIdxMatch *match,
 {
   unsigned long previous = 0;
 
+  gt_assert(runptr != NULL);
   gt_reinitLocaliTracebackstate(limdfsresources->dfsconstinfo,
-                             runptr->lcpitv.offset,
-                             pprefixlen);
+                                runptr->lcpitv.offset,
+                                pprefixlen);
   do
   {
     if (previous > 0)
@@ -496,10 +497,12 @@ GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
   Indexbounds itv;
   GtIdxMatch match;
 
+  gt_assert(limdfsresources != NULL &&
+            limdfsresources->genericindex != NULL);
   limdfsresources->mstatspos.nextfreeGtUlong = 0;
   itv.leftbound = leftbound;
   itv.rightbound = rightbound;
-  itv.offset = (unsigned long) offset;
+  itv.offset = offset;
   match.dbabsolute = true;
   match.dblen = itv.offset;
   match.dbsubstring = limdfsresources->currentpathspace;

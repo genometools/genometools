@@ -257,7 +257,6 @@ int gt_emissionmergedesa_init(Emissionmergedesa *emmesa,
                         err) != 0)
   {
     haserr = true;
-    return -1;
   }
   if (!haserr && numofindexes > 1U)
   {

@@ -131,6 +131,12 @@ static int mergeandstoreindex(const GtStr *storeindex,
   bool haserr = false;
 
   gt_error_check(err);
+  mergeoutinfo.outsuf.fp = NULL;
+  mergeoutinfo.outlcp.fp = NULL;
+  mergeoutinfo.outllv.fp = NULL;
+  mergeoutinfo.outsuf.outfilename = NULL;
+  mergeoutinfo.outlcp.outfilename = NULL;
+  mergeoutinfo.outllv.outfilename = NULL;
   if (initNameandFILE(&mergeoutinfo.outsuf,storeindex,GT_SUFTABSUFFIX,err) != 0)
   {
     haserr = true;

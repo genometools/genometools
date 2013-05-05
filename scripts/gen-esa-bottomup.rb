@@ -93,19 +93,31 @@ end
 
 def processbranching_call1(key,options)
   if options.with_process_branching
-    return "if (processbranchingedge_#{key}(firstedge,
-                   TOP_ESA_BOTTOMUP_#{key}.lcp,
-                   &TOP_ESA_BOTTOMUP_#{key}.info,
-                   lastinterval->lcp,
-                   lastinterval->rb - lastinterval->lb + 1,
-                   &lastinterval->info,
-                   bustate,
-                   err) != 0)
+    return "if (TOP_ESA_BOTTOMUP_#{key}.lcp > 0 || !firstedgefromroot)
+        {
+          firstedge = false;
+        } else
+        {
+          firstedge = true;
+          firstedgefromroot = false;
+        }
+        if (processbranchingedge_#{key}(firstedge,
+               TOP_ESA_BOTTOMUP_#{key}.lcp,
+               &TOP_ESA_BOTTOMUP_#{key}.info,
+               lastinterval->lcp,
+               lastinterval->rb - lastinterval->lb + 1,
+               &lastinterval->info,
+               bustate,
+               err) != 0)
         {
           haserr = true;
         }"
   else
-    return "/* no call to processbranchingedge_#{key} */"
+    return "if (!(TOP_ESA_BOTTOMUP_#{key}.lcp > 0 || !firstedgefromroot))
+        {
+          firstedgefromroot = false;
+        }
+        /* no call to processbranchingedge_#{key} */"
   end
 end
 
@@ -208,14 +220,6 @@ print <<END_OF_FILE
       #{processlcpinterval_call1(key,options)}
       if (lcpvalue <= TOP_ESA_BOTTOMUP_#{key}.lcp)
       {
-        if (TOP_ESA_BOTTOMUP_#{key}.lcp > 0 || !firstedgefromroot)
-        {
-          firstedge = false;
-        } else
-        {
-          firstedge = true;
-          firstedgefromroot = false;
-        }
         #{processbranching_call1(key,options)}
         lastinterval = NULL;
       }

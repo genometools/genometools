@@ -875,17 +875,14 @@ static unsigned long blindtrie_enumeratetrieleaves (
       }
     }
   }
-  if (nextfree > 0 && equalsrangewidth > 0)
+  if (nextfree > 0 && equalsrangewidth > 0 &&
+      processunsortedsuffixrange != NULL)
   {
-    if (processunsortedsuffixrange != NULL)
-    {
-      processunsortedsuffixrange(voiddcov,
-                                 bucketleftidxplussubbucketleft
-                                   + nextfree - 1 - equalsrangewidth,
-                                 equalsrangewidth + 1,
-                                 sortmaxdepth);
-    }
-    equalsrangewidth = 0;
+    processunsortedsuffixrange(voiddcov,
+                               bucketleftidxplussubbucketleft
+                                 + nextfree - 1 - equalsrangewidth,
+                               equalsrangewidth + 1,
+                               sortmaxdepth);
   }
   return nextfree;
 }

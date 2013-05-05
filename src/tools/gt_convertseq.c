@@ -158,7 +158,7 @@ static int gt_convertseq_runner(int argc, const char **argv, int parsed_args,
     {
       GtUchar *seq = NULL;
       desc = NULL;
-      i = 0; j = 0UL;
+      j = 0UL;
       had_err = gt_seq_iterator_next(seqit, &sequence, &len, &desc, err);
       if (had_err != 1)
         break;

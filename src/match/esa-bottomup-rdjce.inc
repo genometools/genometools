@@ -188,13 +188,13 @@ static int gt_esa_bottomup_rdjce(Sequentialsuffixarrayreader *ssar,
           firstedgefromroot = false;
         }
         if (processbranchingedge_rdjce(firstedge,
-                   TOP_ESA_BOTTOMUP_rdjce.lcp,
-                   &TOP_ESA_BOTTOMUP_rdjce.info,
-                   lastinterval->lcp,
-                   lastinterval->rb - lastinterval->lb + 1,
-                   &lastinterval->info,
-                   bustate,
-                   err) != 0)
+               TOP_ESA_BOTTOMUP_rdjce.lcp,
+               &TOP_ESA_BOTTOMUP_rdjce.info,
+               lastinterval->lcp,
+               lastinterval->rb - lastinterval->lb + 1,
+               &lastinterval->info,
+               bustate,
+               err) != 0)
         {
           haserr = true;
         }

@@ -580,7 +580,7 @@ void gt_spmproc_strgraph_count(unsigned long suffix_readnum,
   gt_assert(strgraph != NULL);
   g = (GtStrgraph*)strgraph;
 
-  gt_assert(g->state == GT_STRGRAPH_PREPARATION);
+  gt_assert(g != NULL && g->state == GT_STRGRAPH_PREPARATION);
   position = suffixseq_direct ? GT_STRGRAPH_V_E(suffix_readnum)
     : GT_STRGRAPH_V_B(suffix_readnum);
   GT_STRGRAPH_INC_COUNT(g, position);

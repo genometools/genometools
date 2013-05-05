@@ -188,13 +188,13 @@ static int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
           firstedgefromroot = false;
         }
         if (processbranchingedge_maxpairs(firstedge,
-                   TOP_ESA_BOTTOMUP_maxpairs.lcp,
-                   &TOP_ESA_BOTTOMUP_maxpairs.info,
-                   lastinterval->lcp,
-                   lastinterval->rb - lastinterval->lb + 1,
-                   &lastinterval->info,
-                   bustate,
-                   err) != 0)
+               TOP_ESA_BOTTOMUP_maxpairs.lcp,
+               &TOP_ESA_BOTTOMUP_maxpairs.info,
+               lastinterval->lcp,
+               lastinterval->rb - lastinterval->lb + 1,
+               &lastinterval->info,
+               bustate,
+               err) != 0)
         {
           haserr = true;
         }

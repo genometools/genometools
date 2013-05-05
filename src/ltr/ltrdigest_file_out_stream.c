@@ -385,7 +385,6 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
   GtFeatureNode *fn;
   GtRange lltr_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
           rltr_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
-          rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
           ppt_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
           pbs_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG};
   int had_err;
@@ -432,6 +431,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
     had_err = gt_region_mapping_get_description(ls->rmap, sdesc, sreg, err);
 
     if (!had_err) {
+      GtRange rng;
       ls->element.seqid = gt_calloc((size_t) ls->seqnamelen+1, sizeof (char));
       (void) snprintf(ls->element.seqid,
                       MIN((size_t) gt_str_length(sdesc),

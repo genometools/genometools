@@ -46,6 +46,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 #ifndef BAM_LITE
 #define BAM_VIRTUAL_OFFSET16
@@ -730,6 +731,7 @@ static inline bam1_t *bam_copy1(bam1_t *bdst, const bam1_t *bsrc)
 		m_data = bsrc->data_len; kroundup32(m_data);
 		data = (uint8_t*)realloc(data, m_data);
 	}
+        assert(data != NULL);
 	memcpy(data, bsrc->data, bsrc->data_len); // copy var-len data
 	*bdst = *bsrc; // copy the rest
 	// restore the backup

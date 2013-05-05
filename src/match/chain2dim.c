@@ -1497,6 +1497,7 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
     GtChain2DimMatchstore matchstore;
 
     gt_logger_log(logger,"compute chain scores");
+    matchstore.dictroot = NULL;
     if (chainmode->chainkind == GLOBALCHAININGWITHOVERLAPS)
     {
       gt_chain2dim_bruteforcechainingscores(chainmode,matchtable,

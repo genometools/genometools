@@ -196,13 +196,13 @@ static int gt_esa_bottomup_errfind(Sequentialsuffixarrayreader *ssar,
           firstedgefromroot = false;
         }
         if (processbranchingedge_errfind(firstedge,
-                   TOP_ESA_BOTTOMUP_errfind.lcp,
-                   &TOP_ESA_BOTTOMUP_errfind.info,
-                   lastinterval->lcp,
-                   lastinterval->rb - lastinterval->lb + 1,
-                   &lastinterval->info,
-                   bustate,
-                   err) != 0)
+               TOP_ESA_BOTTOMUP_errfind.lcp,
+               &TOP_ESA_BOTTOMUP_errfind.info,
+               lastinterval->lcp,
+               lastinterval->rb - lastinterval->lb + 1,
+               &lastinterval->info,
+               bustate,
+               err) != 0)
         {
           haserr = true;
         }

@@ -188,13 +188,13 @@ static int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
           firstedgefromroot = false;
         }
         if (processbranchingedge_spmeq(firstedge,
-                   TOP_ESA_BOTTOMUP_spmeq.lcp,
-                   &TOP_ESA_BOTTOMUP_spmeq.info,
-                   lastinterval->lcp,
-                   lastinterval->rb - lastinterval->lb + 1,
-                   &lastinterval->info,
-                   bustate,
-                   err) != 0)
+               TOP_ESA_BOTTOMUP_spmeq.lcp,
+               &TOP_ESA_BOTTOMUP_spmeq.info,
+               lastinterval->lcp,
+               lastinterval->rb - lastinterval->lb + 1,
+               &lastinterval->info,
+               bustate,
+               err) != 0)
         {
           haserr = true;
         }

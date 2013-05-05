@@ -2129,6 +2129,7 @@ GtRcrDecoder *gt_rcr_decoder_new(const char *name, const GtEncseq *ref,
 
   rcr_read_header(rcr_dec);
 
+  gt_assert(rcr_dec != NULL && rcr_dec->fp != NULL);
   filepos = ftell(rcr_dec->fp);
   is_not_at_pageborder = (filepos % pagesize) != 0;
   if (is_not_at_pageborder)

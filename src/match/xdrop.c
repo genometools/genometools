@@ -67,7 +67,7 @@ void gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
                        long vlen)
 {
   unsigned long l;
-  long i, j, k, d = distance + 1, filled = 0, integermax = MAX(ulen,vlen),
+  long i, j, k, d, filled = 0, integermax = MAX(ulen,vlen),
        integermin = -integermax;
 
   printf("frontvalues:\n");
@@ -389,7 +389,6 @@ void gt_evalxdroparbitscoresextend(bool forward,
       currentMININFINITYINTgeneration++;
       if (currentMININFINITYINTgeneration > allowedMININFINITYINTgenerations)
       {
-        currd -= currentMININFINITYINTgeneration;
         break;
       }
     } else
