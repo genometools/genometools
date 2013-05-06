@@ -357,6 +357,10 @@ GtStrgraphCount gt_strgraph_largest_count(GtStrgraph *strgraph)
   GtStrgraphCount count, maxcount;
   GtStrgraphVnum i;
   maxcount = 0;
+
+  gt_assert(strgraph != NULL &&\
+            strgraph->__small_counts != NULL &&
+            strgraph->__large_counts != NULL);
   for (i = 0; i < (GT_STRGRAPH_NOFVERTICES(strgraph)); i++)
   {
     count = GT_STRGRAPH_GET_COUNT(strgraph, i);
@@ -582,11 +586,11 @@ void gt_spmproc_strgraph_count(unsigned long suffix_readnum,
 
   gt_assert(g != NULL && g->state == GT_STRGRAPH_PREPARATION);
   position = suffixseq_direct ? GT_STRGRAPH_V_E(suffix_readnum)
-    : GT_STRGRAPH_V_B(suffix_readnum);
+                              : GT_STRGRAPH_V_B(suffix_readnum);
   GT_STRGRAPH_INC_COUNT(g, position);
 
   position = prefixseq_direct ? GT_STRGRAPH_V_B(prefix_readnum)
-    : GT_STRGRAPH_V_E(prefix_readnum);
+                              : GT_STRGRAPH_V_E(prefix_readnum);
   GT_STRGRAPH_INC_COUNT(g, position);
 
   if (g->minmatchlen > (GtStrgraphLength)length)
@@ -1787,14 +1791,14 @@ static int gt_strgraph_show_disc_distri_datapoint(unsigned long key,
 void gt_strgraph_show_edge_lengths_distribution(const GtStrgraph *strgraph,
     const char *indexname, const char *suffix)
 {
-  GtDiscDistri *d = gt_disc_distri_new();
+  GtDiscDistri *d;
   GtStrgraphVnum i;
   GtStrgraphVEdgenum j;
-
-  GtFile *outfp = gt_strgraph_get_file(indexname, suffix, true, false);
+  GtFile *outfp;
 
   gt_assert(strgraph != NULL);
   gt_assert(sizeof (unsigned long) >= sizeof (GtStrgraphLength));
+  d = gt_disc_distri_new();
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
   {
     for (j = 0; j < GT_STRGRAPH_V_NOFEDGES(strgraph, i); j++)
@@ -1803,6 +1807,7 @@ void gt_strgraph_show_edge_lengths_distribution(const GtStrgraph *strgraph,
           (unsigned long)GT_STRGRAPH_EDGE_LEN(strgraph, i, j));
     }
   }
+  outfp = gt_strgraph_get_file(indexname, suffix, true, false);
   gt_file_xprintf(outfp, "# length nofedges\n");
   gt_disc_distri_foreach(d,
      (GtDiscDistriIterFunc) gt_strgraph_show_disc_distri_datapoint, outfp);
@@ -1813,14 +1818,18 @@ void gt_strgraph_show_edge_lengths_distribution(const GtStrgraph *strgraph,
 void gt_strgraph_show_counts_distribution(const GtStrgraph *strgraph,
     const char *indexname, const char *suffix)
 {
-  GtDiscDistri *d = gt_disc_distri_new();
-  GtFile *outfp = gt_strgraph_get_file(indexname, suffix, true, false);
+  GtDiscDistri *d;
+  GtFile *outfp;
   GtStrgraphVnum i;
 
-  gt_assert(strgraph != NULL);
   gt_assert(sizeof (unsigned long) >= sizeof (GtStrgraphCount));
+  d = gt_disc_distri_new();
+  gt_assert(strgraph != NULL &&\
+            strgraph->__small_counts != NULL &&
+            strgraph->__large_counts != NULL);
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
     gt_disc_distri_add(d, (unsigned long)GT_STRGRAPH_GET_COUNT(strgraph, i));
+  outfp = gt_strgraph_get_file(indexname, suffix, true, false);
   gt_file_xprintf(outfp, "# count nofvertices\n");
   gt_disc_distri_foreach(d,
      (GtDiscDistriIterFunc) gt_strgraph_show_disc_distri_datapoint, outfp);

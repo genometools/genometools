@@ -1687,7 +1687,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
               dcov->prefixlength);
   gt_logger_log(dcov->logger,"specials=%lu, fullspecials=%lu",
                 specials,fullspecials);
-  if (withcheck)
+  if (withcheck && codelist.nextfreeCodeatposition > 1UL)
   {
     gt_assert(codelist.spaceCodeatposition != NULL);
     qsort(codelist.spaceCodeatposition,
@@ -2080,11 +2080,15 @@ GtDifferencecover *gt_differencecover_prepare_sample(
       gt_assert(sfxstrategy != NULL);
       gt_logger_log(logger,"presorting sample suffixes according to "
                            "difference cover modulo %u",vparam);
-      (prefixlength > 0 ? dc_differencecover_sortsample
-                        : dc_differencecover_sortsample0)
-                          (dcov,outlcpinfosample,sfxstrategy,
-                           sfxprogress,
-                           sfxstrategy->dccheck);
+      if (prefixlength > 0)
+      {
+        dc_differencecover_sortsample(dcov,outlcpinfosample,sfxstrategy,
+                                      sfxprogress,sfxstrategy->dccheck);
+      } else
+      {
+        dc_differencecover_sortsample0(dcov,outlcpinfosample,sfxstrategy,
+                                       sfxprogress,sfxstrategy->dccheck);
+      }
     }
   }
   return dcov;

@@ -83,7 +83,8 @@ DEFINE_HASHMAP(GtStrgraphVnum, v, GtStrgraphCount__Large, c_,
   }\
 
 #define GT_STRGRAPH_INC_COUNT(STRGRAPH, POSITION) \
-  gt_assert((STRGRAPH)->__small_counts != NULL &&\
+  gt_assert((STRGRAPH) != NULL &&\
+            (STRGRAPH)->__small_counts != NULL &&\
             (STRGRAPH)->__large_counts != NULL);\
   if ((STRGRAPH)->__small_counts[(POSITION)] < GT_STRGRAPH__COUNT_IS_LARGE -\
       (GtStrgraphCount__Small)1)\
