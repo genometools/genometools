@@ -77,6 +77,9 @@ unsigned long            gt_compressed_bitsequence_select_0(
 
 size_t                   gt_compressed_bitsequence_file_size(
                                                   GtCompressedBitsequence *cbs);
+
+size_t                   gt_compressed_bitsequence_size(
+                                                  GtCompressedBitsequence *cbs);
 /* Write <cbs> to file with name <filename>. */
 int                      gt_compressed_bitsequence_write(
                                                    GtCompressedBitsequence *cbs,

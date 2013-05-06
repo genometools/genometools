@@ -1311,6 +1311,19 @@ size_t gt_compressed_bitsequence_file_size(GtCompressedBitsequence *cbs)
   return size;
 }
 
+size_t gt_compressed_bitsequence_size(GtCompressedBitsequence *cbs)
+{
+  size_t size =  sizeof (cbs) +
+    gt_popcount_tab_calculate_size(cbs->blocksize) +
+    sizeof (cbs->cbs_bi) +
+    sizeof (cbs->c_offsets[0]) * cbs->c_offsets_size +
+    sizeof (cbs->classes[0]) * cbs->classes_size +
+    sizeof (cbs->superblockoffsets[0]) * cbs->superblockoffsets_size +
+    sizeof (cbs->superblockranks[0]) * cbs->superblockranks_size;
+
+  return size;
+}
+
 int gt_compressed_bitsequence_write(GtCompressedBitsequence *cbs,
                                     char *filename,
                                     GtError *err)
