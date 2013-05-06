@@ -98,6 +98,7 @@ typedef uint64_t GtStrgraphLength;
     GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__n_edges));\
     GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__len_max));\
     GT_STRGRAPH__ALLOC_E_INFO(STRGRAPH);\
+    gt_assert((STRGRAPH)->__e_info != NULL);\
     GT_STRGRAPH_DESERIALIZE_DATA((FP),\
         bitElemsAllocSize(GT_STRGRAPH__EDGE_BITS(STRGRAPH) * \
           GT_STRGRAPH_NOFEDGES(STRGRAPH)), (STRGRAPH)->__e_info->store);\

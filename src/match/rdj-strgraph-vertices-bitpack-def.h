@@ -128,20 +128,25 @@ typedef uint64_t GtStrgraphEdgenum;
       (STRGRAPH)->__v_offset->store)
 
 #define GT_STRGRAPH_DESERIALIZE_VERTICES(STRGRAPH, FP)\
+  gt_assert((STRGRAPH) != NULL);\
+  gt_assert((FP) != NULL);\
   GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__n_vertices));\
   GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__offset_max));\
   GT_STRGRAPH_DESERIALIZE_DATA((FP), 1, &((STRGRAPH)->__outdeg_max));\
   GT_STRGRAPH__ALLOC_VMARKS(STRGRAPH);\
   GT_STRGRAPH__ALLOC_OFFSETS(STRGRAPH);\
   GT_STRGRAPH__ALLOC_OUTDEGS(STRGRAPH);\
+  gt_assert((STRGRAPH)->__v_mark != NULL);\
   GT_STRGRAPH_DESERIALIZE_DATA((FP),\
       bitElemsAllocSize(GT_STRGRAPH_VMARK_BITS * \
         (GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1)), \
       (STRGRAPH)->__v_mark->store);\
+  gt_assert((STRGRAPH)->__v_outdeg != NULL);\
   GT_STRGRAPH_DESERIALIZE_DATA((FP), \
       bitElemsAllocSize(GT_STRGRAPH__OUTDEG_BITS(STRGRAPH) * \
         (GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1)), \
       (STRGRAPH)->__v_outdeg->store);\
+  gt_assert((STRGRAPH)->__v_offset != NULL);\
   GT_STRGRAPH_DESERIALIZE_DATA((FP), \
       bitElemsAllocSize(GT_STRGRAPH__OFFSET_BITS(STRGRAPH) * \
         (GT_STRGRAPH_NOFVERTICES(STRGRAPH) + 1)), \

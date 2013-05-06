@@ -363,7 +363,7 @@ GtStrgraphCount gt_strgraph_largest_count(GtStrgraph *strgraph)
             strgraph->__large_counts != NULL);
   for (i = 0; i < (GT_STRGRAPH_NOFVERTICES(strgraph)); i++)
   {
-    count = GT_STRGRAPH_GET_COUNT(strgraph, i);
+    GT_STRGRAPH_GET_COUNT(strgraph, count, i);
     if (count > maxcount)
       maxcount = count;
   }
@@ -372,13 +372,15 @@ GtStrgraphCount gt_strgraph_largest_count(GtStrgraph *strgraph)
 
 GtStrgraphEdgenum gt_strgraph_counts_sum(GtStrgraph *strgraph)
 {
+  GtStrgraphCount count;
   GtStrgraphEdgenum sum;
   GtStrgraphVnum i;
   sum = 0;
   for (i = 0; i < (GT_STRGRAPH_NOFVERTICES(strgraph)); i++)
   {
     gt_assert(sizeof (GtStrgraphEdgenum) >= sizeof (GtStrgraphVEdgenum));
-    sum += GT_STRGRAPH_GET_COUNT(strgraph, i);
+    GT_STRGRAPH_GET_COUNT(strgraph, count, i);
+    sum += count;
   }
   return sum;
 }
@@ -414,7 +416,7 @@ static void gt_strgraph_create_vertices(GtStrgraph *strgraph)
   offset = 0;
   for (i = (GtStrgraphVnum)1; i <= GT_STRGRAPH_NOFVERTICES(strgraph); i++)
   {
-    c = GT_STRGRAPH_GET_COUNT(strgraph, i - 1);
+    GT_STRGRAPH_GET_COUNT(strgraph, c, i - 1);
     gt_assert(sizeof (GtStrgraphVEdgenum) >= sizeof (GtStrgraphCount));
     GT_STRGRAPH_CHECK_OUTDEG(i - 1, (GtStrgraphVEdgenum)c);
     gt_assert(sizeof (GtStrgraphEdgenum) >= sizeof (GtStrgraphCount));
@@ -1828,7 +1830,11 @@ void gt_strgraph_show_counts_distribution(const GtStrgraph *strgraph,
             strgraph->__small_counts != NULL &&
             strgraph->__large_counts != NULL);
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
-    gt_disc_distri_add(d, (unsigned long)GT_STRGRAPH_GET_COUNT(strgraph, i));
+  {
+    GtStrgraphCount c;
+    GT_STRGRAPH_GET_COUNT(strgraph, c, i);
+    gt_disc_distri_add(d, (unsigned long)c);
+  }
   outfp = gt_strgraph_get_file(indexname, suffix, true, false);
   gt_file_xprintf(outfp, "# count nofvertices\n");
   gt_disc_distri_foreach(d,
@@ -2480,17 +2486,20 @@ static int gt_strgraph_creation_unit_test(GtError *err)
 {
   int had_err = 0;
   GtStrgraph *strgraph;
+  GtStrgraphCount c;
   unsigned long nofreads = 2UL;
 
   gt_error_check(err);
   strgraph = gt_strgraph_new(nofreads);
   gt_spmproc_strgraph_count(0, 1UL, 10UL, true, true, strgraph);
-  gt_ensure(had_err, GT_STRGRAPH_GET_COUNT(strgraph, GT_STRGRAPH_V_B(0)) == 0);
-  gt_ensure(had_err, GT_STRGRAPH_GET_COUNT(strgraph, GT_STRGRAPH_V_E(0)) ==
-      (GtStrgraphCount)1);
-  gt_ensure(had_err, GT_STRGRAPH_GET_COUNT(strgraph, GT_STRGRAPH_V_B(1)) ==
-      (GtStrgraphCount)1);
-  gt_ensure(had_err, GT_STRGRAPH_GET_COUNT(strgraph, GT_STRGRAPH_V_E(1)) == 0);
+  GT_STRGRAPH_GET_COUNT(strgraph, c, GT_STRGRAPH_V_B(0));
+  gt_ensure(had_err, c == 0);
+  GT_STRGRAPH_GET_COUNT(strgraph, c, GT_STRGRAPH_V_E(0));
+  gt_ensure(had_err, c == (GtStrgraphCount)1);
+  GT_STRGRAPH_GET_COUNT(strgraph, c, GT_STRGRAPH_V_B(1));
+  gt_ensure(had_err, c == (GtStrgraphCount)1);
+  GT_STRGRAPH_GET_COUNT(strgraph, c, GT_STRGRAPH_V_E(1));
+  gt_ensure(had_err, c == 0);
   gt_strgraph_allocate_graph(strgraph, 100UL, NULL);
   gt_ensure(had_err, GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_B(0)) == 0);
   gt_ensure(had_err, GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_E(0)) ==
