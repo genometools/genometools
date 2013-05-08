@@ -2,4 +2,4 @@ language: c
 compiler:
   - gcc
   - clang
-script: make 64bit=yes
+script: make 64bit=yes test
