@@ -2,4 +2,4 @@ language: c
 compiler:
   - gcc
   - clang
-script: make 64bit=yes test
+script: make 64bit=yes assert=no && make cleanup && make 64bit=yes test && make cleanup && make 64bit=yes amalgamation=yes
