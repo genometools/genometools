@@ -129,7 +129,7 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
   unsigned long idx;
   unsigned long long num_of_bits = 0ULL;
   GtBitsequence *bits = NULL;
-  GtCompressedBitsequence *cbs, *read_cbs = NULL;
+  GtCompressedBitsequence *cbs = NULL, *read_cbs = NULL;
   GtStr *filename = gt_str_new();
   FILE *fp = NULL;
 
