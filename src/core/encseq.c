@@ -4709,6 +4709,8 @@ const char* gt_encseq_description(const GtEncseq *encseq,
                                   unsigned long seqnum)
 {
   unsigned long destablen;
+
+  gt_assert(encseq != NULL && encseq->destab != NULL);
   if (encseq->destab[encseq->destablength - 1] == '\n') {
     destablen = encseq->destablength;
   } else {
@@ -4774,6 +4776,7 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
   const char *desptr;
   char *copydestab;
 
+  gt_assert(encseq != NULL);
   totaldesclength = encseq->numofdbsequences; /* for each new line */
   for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++) {
     (void) gt_encseq_description(encseq, &desclen, seqnum);
@@ -4786,6 +4789,7 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
     copydestab[offset+desclen] = '\n';
     offset += (desclen+1);
   }
+  gt_assert(encseq->destab != NULL);
   if (strncmp(copydestab, encseq->destab, (size_t) totaldesclength) != 0) {
     fprintf(stderr, "different descriptions\n");
     exit(GT_EXIT_PROGRAMMING_ERROR);

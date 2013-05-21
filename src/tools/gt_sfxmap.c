@@ -844,8 +844,9 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
   }
   if (!haserr)
   {
-    uint64_t numberofentries;
+    uint64_t writtenbits;
     uint8_t bitsperentry;
+    unsigned long numberofentries = 0;
     unsigned long totallength = gt_encseq_total_length(encseq);
     FILE *fp;
 
@@ -857,15 +858,14 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
     }
     if (!haserr)
     {
-      if (fread(&numberofentries,sizeof numberofentries,(size_t) 1,fp)
+      if (fread(&writtenbits,sizeof writtenbits,(size_t) 1,fp)
           != (size_t) 1)
       {
         gt_error_set(err,"cannot read %d bytes from %s%s at offset 0",
-                        (int) sizeof numberofentries,
+                        (int) sizeof writtenbits,
                         indexname,GT_SUFTABSUFFIX_BYTECOMPRESSED);
         haserr = true;
       }
-      gt_assert(numberofentries == (uint64_t) totallength + 1);
     }
     if (!haserr)
     {
@@ -875,19 +875,24 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
         gt_error_set(err,"cannot read %d bytes from %s%s at offset %d",
                         (int) sizeof bitsperentry,
                         indexname,GT_SUFTABSUFFIX_BYTECOMPRESSED,
-                        (int) sizeof numberofentries);
+                        (int) sizeof writtenbits);
         haserr = true;
       }
+      gt_assert(writtenbits % bitsperentry == 0);
+      numberofentries = (unsigned long) (writtenbits/bitsperentry);
+      gt_assert(numberofentries == totallength + 1);
     }
     if (!haserr)
     {
-      uint64_t readvalue = 0, countentries = 0;
+      uint64_t readvalue = 0;
       const unsigned int bitspervalue = 64U;
       unsigned int bits2add = (unsigned int) bitsperentry,
                    remainingbits = 0;
       unsigned long bitbuffer = 0,
+                    countentries = 0,
                     *suftabptr,
-                    *suftab = gt_malloc(numberofentries * sizeof *suftab);
+                    *suftab = gt_malloc(sizeof *suftab *
+                                        (size_t) numberofentries);
 
       suftabptr = suftab;
       while (true)

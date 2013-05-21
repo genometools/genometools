@@ -35,16 +35,16 @@ GtBitbuffer *gt_bitbuffer_new(FILE *outfp,unsigned int bitsperentry)
 {
   GtBitbuffer *bitbuffer = gt_malloc(sizeof *bitbuffer);
 
-  bitbuffer->numberofallvalues = 0;
   if (bitsperentry > 0)
   {
     uint8_t bitsperentry8 = (uint8_t) bitsperentry;
+    uint64_t writtenbits = 0;
 
     gt_assert(bitsperentry < GT_BITSINBYTEBUFFER && outfp != NULL);
-    (void) fwrite(&bitbuffer->numberofallvalues,
-                  sizeof bitbuffer->numberofallvalues,(size_t) 1,outfp);
+    (void) fwrite(&writtenbits,sizeof writtenbits,(size_t) 1,outfp);
     (void) fwrite(&bitsperentry8,sizeof bitsperentry8,(size_t) 1,outfp);
   }
+  bitbuffer->numberofallvalues = 0;
   bitbuffer->bitsperentry = bitsperentry;
   bitbuffer->currentbitbuffer = 0;
   bitbuffer->outfp = outfp;
@@ -126,9 +126,9 @@ void gt_bitbuffer_delete(GtBitbuffer *bb)
     }
     if (bb->bitsperentry > 0)
     {
+      uint64_t writtenbits = bb->numberofallvalues * bb->bitsperentry;
       (void) fseek(bb->outfp,0,SEEK_SET);
-      (void) fwrite(&bb->numberofallvalues,sizeof bb->numberofallvalues,
-                    (size_t) 1,bb->outfp);
+      (void) fwrite(&writtenbits,sizeof writtenbits,(size_t) 1,bb->outfp);
     }
   }
   gt_free(bb);

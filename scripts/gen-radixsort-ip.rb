@@ -277,9 +277,13 @@ static void gt_radixsort_#{makekey(options)}_shuffle(GtRadixbuffer *rbuf,
                                        size_t rightshift)
 {
   gt_assert(rbuf != NULL);
-  ((unsigned long) len > rbuf->cachesize
-     ? gt_radixsort_#{makekey(options)}_cached_shuffle
-     : gt_radixsort_#{makekey(options)}_uncached_shuffle) (rbuf,source,len,rightshift);
+  if ((unsigned long) len > rbuf->cachesize)
+  {
+    gt_radixsort_#{makekey(options)}_cached_shuffle(rbuf,source,len,rightshift);
+  } else
+  {
+    gt_radixsort_#{makekey(options)}_uncached_shuffle(rbuf,source,len,rightshift);
+  }
 }
 
 static void
