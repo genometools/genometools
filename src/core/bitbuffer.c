@@ -63,8 +63,9 @@ void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value,
     gt_assert(bits2store > 0);
     if (bb->remainingbitsinbuffer >= bits2store)
     {
+      bb->currentbitbuffer |= (uint64_t) ((value >> (bitsforvalue-bits2store) )
+                           << (GT_BITSINBYTEBUFFER-bb->remainingbitsinbuffer));
       bb->remainingbitsinbuffer -= bits2store;
-      bb->currentbitbuffer |= (uint64_t) (value << bb->remainingbitsinbuffer);
       break;
     }
     if (bb->remainingbitsinbuffer == 0)
@@ -76,8 +77,9 @@ void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value,
     } else
     {
       gt_assert(value < (1UL << bits2store));
+      bb->currentbitbuffer |= ((uint64_t) value >> (bitsforvalue-bits2store) )
+                           << (GT_BITSINBYTEBUFFER-bb->remainingbitsinbuffer);
       bits2store -= bb->remainingbitsinbuffer;
-      bb->currentbitbuffer |= ((uint64_t) value >> bits2store);
       bb->remainingbitsinbuffer = 0;
     }
   }

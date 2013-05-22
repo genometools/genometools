@@ -912,9 +912,10 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
             {
               break;
             }
+            bitbuffer |= ((unsigned long) (readvalue) &
+                         ((1UL << bits2add) - 1)) << (bitsperentry-bits2add);
+            readvalue >>= bits2add;
             remainingbits -= bits2add;
-            bitbuffer |= (unsigned long) (readvalue >> remainingbits) &
-                         ((1UL << bits2add) - 1);
             gt_assert(bitbuffer < (1UL << bitsperentry));
             *suftabptr++ = bitbuffer;
             bitbuffer = 0;
@@ -922,9 +923,10 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
             countentries++;
           } else
           {
-            bits2add -= remainingbits;
             bitbuffer |= (readvalue & ((((uint64_t) 1) << remainingbits) - 1))
-                         << bits2add;
+                         << (bitsperentry-bits2add);
+            readvalue >>= remainingbits;
+            bits2add -= remainingbits;
             remainingbits = 0;
           }
         }
