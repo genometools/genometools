@@ -964,7 +964,6 @@ static int gt_sfxmap_compresslcp(const char *indexname,
     unsigned long elems = 0;
     GT_UNUSED unsigned long totallength
       = gt_Sequentialsuffixarrayreader_totallength(ssar);
-fprintf(stderr,"gt_sfxmap_compresslcp totallength=%lu\n",totallength);    
     unsigned long maxbranchdepth
       = gt_Sequentialsuffixarrayreader_maxbranchdepth(ssar);
     FILE *fpcompressedlcp = gt_fa_fopen_with_suffix(indexname,
