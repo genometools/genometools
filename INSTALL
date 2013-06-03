@@ -22,7 +22,6 @@ Possible arguments:
 - cairo=no         to disable AnnotationSketch, dropping Cairo/Pango deps
 - errorcheck=no    to disable the handling of compiler warnings as errors
 - universal=yes    to build a universal binary
-- with-hmmer=yes   to add HMMER support to the LTRdigest tool
 
 Example call to build GenomeTools without assertions on a system where GNU make
 is called ``gmake'':
