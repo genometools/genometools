@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2009 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2004      Michael E Sparks <mespar1@iastate.edu>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
@@ -41,7 +41,7 @@ static GtOPrval gthbssmprint_parse_options(int *parsed_args, int argc,
   op = gt_option_parser_new("bssm_file",
                             "Print BSSM file bssm_file to stdout.");
   gt_option_parser_set_min_max_args(op, 1, 1);
-  gt_option_parser_set_mail_address(op, "<gremme@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<gordon@gremme.org>");
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gth_version_func,
                                err);
   gt_option_parser_delete(op);

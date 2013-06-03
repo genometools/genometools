@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 --[[
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -76,7 +76,7 @@ for i,v in ipairs(arg) do
     io.stderr:write("Convert all given report files to fasta files\n\n")
     io.stderr:write("-organism set organism to show\n")
     io.stderr:write("-help     display help and exit\n\n")
-    io.stderr:write("Report bugs to <gremme@zbh.uni-hamburg.de>.\n")
+    io.stderr:write("Report bugs to <gordon@gremme.org>.\n")
     os.exit()
   elseif v == "-organism" then
     if not arg[i+1] then

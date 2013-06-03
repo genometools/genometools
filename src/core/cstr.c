@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Gordon Gremme <gordon@gremme.org>
   Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2006-2012 Center for Bioinformatics, University of Hamburg
 

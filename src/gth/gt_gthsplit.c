@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2011 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -285,7 +285,7 @@ static GtOPrval gthsplit_parse_options(int *parsed_args,
   gt_option_exclude(optgzip, optbzip2);
   gt_option_is_mandatory_either(optalignmentscore, optcoverage);
 
-  gt_option_parser_set_mail_address(op, "<gremme@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<gordon@gremme.org>");
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
                                   plugins->gth_version_func, err);
 

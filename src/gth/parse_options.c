@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2012 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -1348,7 +1348,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   }
 
   /* set mail addresse */
-  gt_option_parser_set_mail_address(op, "<gremme@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<gordon@gremme.org>");
 
   /* set comment function */
   gt_option_parser_set_comment_func(op, show_gth_help_trailer, NULL);

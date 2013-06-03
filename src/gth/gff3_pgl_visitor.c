@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2011, 2013 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2011, 2013 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2004-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any

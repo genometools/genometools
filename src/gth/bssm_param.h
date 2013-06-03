@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2003-2005 Michael E Sparks <mespar1@iastate.edu>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 

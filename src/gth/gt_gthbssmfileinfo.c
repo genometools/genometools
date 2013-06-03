@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2009 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -30,7 +30,7 @@ static GtOPrval gthbssmfileinfo_parse_options(int *parsed_args, int argc,
   op = gt_option_parser_new("bssm_file", "Show information about the specified "
                          "BSSM file.");
   gt_option_parser_set_min_args(op, 1);
-  gt_option_parser_set_mail_address(op, "<gremme@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<gordon@gremme.org>");
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gth_version_func,
                                   err);
   gt_option_parser_delete(op);

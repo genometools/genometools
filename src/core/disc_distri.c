@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gordon@gremme.org>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c)      2008 Thomas Jahns <Thomas.Jahns@gmx.net>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
