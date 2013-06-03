@@ -390,70 +390,38 @@ const uint8_t gt_compressed_bitsequece_B_1_select[] = {
 /* ps_overflow contains a bit mask x consisting of 8 bytes
    x[7],...,x[0] and each is set to 128-i */
 const uint64_t gt_compressed_bitsequence_ps_overflow[] = {
-  (uint64_t) 0x8080808080808080ULL,
-  (uint64_t) 0x7f7f7f7f7f7f7f7fULL,
-  (uint64_t) 0x7e7e7e7e7e7e7e7eULL,
-  (uint64_t) 0x7d7d7d7d7d7d7d7dULL,
-  (uint64_t) 0x7c7c7c7c7c7c7c7cULL,
-  (uint64_t) 0x7b7b7b7b7b7b7b7bULL,
-  (uint64_t) 0x7a7a7a7a7a7a7a7aULL,
-  (uint64_t) 0x7979797979797979ULL,
-  (uint64_t) 0x7878787878787878ULL,
-  (uint64_t) 0x7777777777777777ULL,
-  (uint64_t) 0x7676767676767676ULL,
-  (uint64_t) 0x7575757575757575ULL,
-  (uint64_t) 0x7474747474747474ULL,
-  (uint64_t) 0x7373737373737373ULL,
-  (uint64_t) 0x7272727272727272ULL,
-  (uint64_t) 0x7171717171717171ULL,
-  (uint64_t) 0x7070707070707070ULL,
-  (uint64_t) 0x6f6f6f6f6f6f6f6fULL,
-  (uint64_t) 0x6e6e6e6e6e6e6e6eULL,
-  (uint64_t) 0x6d6d6d6d6d6d6d6dULL,
-  (uint64_t) 0x6c6c6c6c6c6c6c6cULL,
-  (uint64_t) 0x6b6b6b6b6b6b6b6bULL,
-  (uint64_t) 0x6a6a6a6a6a6a6a6aULL,
-  (uint64_t) 0x6969696969696969ULL,
-  (uint64_t) 0x6868686868686868ULL,
-  (uint64_t) 0x6767676767676767ULL,
-  (uint64_t) 0x6666666666666666ULL,
-  (uint64_t) 0x6565656565656565ULL,
-  (uint64_t) 0x6464646464646464ULL,
-  (uint64_t) 0x6363636363636363ULL,
-  (uint64_t) 0x6262626262626262ULL,
-  (uint64_t) 0x6161616161616161ULL,
-  (uint64_t) 0x6060606060606060ULL,
-  (uint64_t) 0x5f5f5f5f5f5f5f5fULL,
-  (uint64_t) 0x5e5e5e5e5e5e5e5eULL,
-  (uint64_t) 0x5d5d5d5d5d5d5d5dULL,
-  (uint64_t) 0x5c5c5c5c5c5c5c5cULL,
-  (uint64_t) 0x5b5b5b5b5b5b5b5bULL,
-  (uint64_t) 0x5a5a5a5a5a5a5a5aULL,
-  (uint64_t) 0x5959595959595959ULL,
-  (uint64_t) 0x5858585858585858ULL,
-  (uint64_t) 0x5757575757575757ULL,
-  (uint64_t) 0x5656565656565656ULL,
-  (uint64_t) 0x5555555555555555ULL,
-  (uint64_t) 0x5454545454545454ULL,
-  (uint64_t) 0x5353535353535353ULL,
-  (uint64_t) 0x5252525252525252ULL,
-  (uint64_t) 0x5151515151515151ULL,
-  (uint64_t) 0x5050505050505050ULL,
-  (uint64_t) 0x4f4f4f4f4f4f4f4fULL,
-  (uint64_t) 0x4e4e4e4e4e4e4e4eULL,
-  (uint64_t) 0x4d4d4d4d4d4d4d4dULL,
-  (uint64_t) 0x4c4c4c4c4c4c4c4cULL,
-  (uint64_t) 0x4b4b4b4b4b4b4b4bULL,
-  (uint64_t) 0x4a4a4a4a4a4a4a4aULL,
-  (uint64_t) 0x4949494949494949ULL,
-  (uint64_t) 0x4848484848484848ULL,
-  (uint64_t) 0x4747474747474747ULL,
-  (uint64_t) 0x4646464646464646ULL,
-  (uint64_t) 0x4545454545454545ULL,
-  (uint64_t) 0x4444444444444444ULL,
-  (uint64_t) 0x4343434343434343ULL,
-  (uint64_t) 0x4242424242424242ULL,
-  (uint64_t) 0x4141414141414141ULL,
+  (uint64_t) 0x8080808080808080ULL, (uint64_t) 0x7f7f7f7f7f7f7f7fULL,
+  (uint64_t) 0x7e7e7e7e7e7e7e7eULL, (uint64_t) 0x7d7d7d7d7d7d7d7dULL,
+  (uint64_t) 0x7c7c7c7c7c7c7c7cULL, (uint64_t) 0x7b7b7b7b7b7b7b7bULL,
+  (uint64_t) 0x7a7a7a7a7a7a7a7aULL, (uint64_t) 0x7979797979797979ULL,
+  (uint64_t) 0x7878787878787878ULL, (uint64_t) 0x7777777777777777ULL,
+  (uint64_t) 0x7676767676767676ULL, (uint64_t) 0x7575757575757575ULL,
+  (uint64_t) 0x7474747474747474ULL, (uint64_t) 0x7373737373737373ULL,
+  (uint64_t) 0x7272727272727272ULL, (uint64_t) 0x7171717171717171ULL,
+  (uint64_t) 0x7070707070707070ULL, (uint64_t) 0x6f6f6f6f6f6f6f6fULL,
+  (uint64_t) 0x6e6e6e6e6e6e6e6eULL, (uint64_t) 0x6d6d6d6d6d6d6d6dULL,
+  (uint64_t) 0x6c6c6c6c6c6c6c6cULL, (uint64_t) 0x6b6b6b6b6b6b6b6bULL,
+  (uint64_t) 0x6a6a6a6a6a6a6a6aULL, (uint64_t) 0x6969696969696969ULL,
+  (uint64_t) 0x6868686868686868ULL, (uint64_t) 0x6767676767676767ULL,
+  (uint64_t) 0x6666666666666666ULL, (uint64_t) 0x6565656565656565ULL,
+  (uint64_t) 0x6464646464646464ULL, (uint64_t) 0x6363636363636363ULL,
+  (uint64_t) 0x6262626262626262ULL, (uint64_t) 0x6161616161616161ULL,
+  (uint64_t) 0x6060606060606060ULL, (uint64_t) 0x5f5f5f5f5f5f5f5fULL,
+  (uint64_t) 0x5e5e5e5e5e5e5e5eULL, (uint64_t) 0x5d5d5d5d5d5d5d5dULL,
+  (uint64_t) 0x5c5c5c5c5c5c5c5cULL, (uint64_t) 0x5b5b5b5b5b5b5b5bULL,
+  (uint64_t) 0x5a5a5a5a5a5a5a5aULL, (uint64_t) 0x5959595959595959ULL,
+  (uint64_t) 0x5858585858585858ULL, (uint64_t) 0x5757575757575757ULL,
+  (uint64_t) 0x5656565656565656ULL, (uint64_t) 0x5555555555555555ULL,
+  (uint64_t) 0x5454545454545454ULL, (uint64_t) 0x5353535353535353ULL,
+  (uint64_t) 0x5252525252525252ULL, (uint64_t) 0x5151515151515151ULL,
+  (uint64_t) 0x5050505050505050ULL, (uint64_t) 0x4f4f4f4f4f4f4f4fULL,
+  (uint64_t) 0x4e4e4e4e4e4e4e4eULL, (uint64_t) 0x4d4d4d4d4d4d4d4dULL,
+  (uint64_t) 0x4c4c4c4c4c4c4c4cULL, (uint64_t) 0x4b4b4b4b4b4b4b4bULL,
+  (uint64_t) 0x4a4a4a4a4a4a4a4aULL, (uint64_t) 0x4949494949494949ULL,
+  (uint64_t) 0x4848484848484848ULL, (uint64_t) 0x4747474747474747ULL,
+  (uint64_t) 0x4646464646464646ULL, (uint64_t) 0x4545454545454545ULL,
+  (uint64_t) 0x4444444444444444ULL, (uint64_t) 0x4343434343434343ULL,
+  (uint64_t) 0x4242424242424242ULL, (uint64_t) 0x4141414141414141ULL,
   (uint64_t) 0x4040404040404040ULL
 };
 
@@ -1492,26 +1460,47 @@ static int gt_compressed_bitsequence_unit_test_variable_field(
 {
   int had_err = 0;
   GtBitsequence result,
-                value = ((GtBitsequence) 0xFF) << 28;
+                value = ((GtBitsequence) 0xff) << 12;
 
   gt_error_check(err);
 
   result = gt_compressed_bitsequence_get_variable_field(bitseq, 0, 16U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xAAAA);
+  gt_ensure(had_err, result == (GtBitsequence) 0xaaaa);
   result = gt_compressed_bitsequence_get_variable_field(bitseq, 16UL, 16U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xCCCC);
-  result = gt_compressed_bitsequence_get_variable_field(bitseq, 32UL, 64U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xAAAACCCCAAAACCCC);
+  gt_ensure(had_err, result == (GtBitsequence) 0xcccc);
+  result = gt_compressed_bitsequence_get_variable_field(bitseq, 32UL, 32U);
+  gt_ensure(had_err, result == (GtBitsequence) 0xaaaaccccUL);
+  if (GT_LOGWORDSIZE == 6) {
+    result = gt_compressed_bitsequence_get_variable_field(bitseq, 32UL, 64U);
+    gt_ensure(had_err, result == (GtBitsequence) 0xaaaaccccaaaaccccULL);
+  }
 
-  gt_compressed_bitsequence_set_variable_field(bitseq, size, 32UL, 64U, value);
-  result = gt_compressed_bitsequence_get_variable_field(bitseq, 0, 64U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xAAAACCCC0000000F);
-  result = gt_compressed_bitsequence_get_variable_field(bitseq, 64UL, 64U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xF0000000AAAACCCC);
+  gt_compressed_bitsequence_set_variable_field(bitseq, size, 16UL, 32U, value);
+  result = gt_compressed_bitsequence_get_variable_field(bitseq, 0, 32U);
+  gt_ensure(had_err, result == (GtBitsequence) 0xaaaa000fUL);
+  result = gt_compressed_bitsequence_get_variable_field(bitseq, 32UL, 32U);
+  gt_ensure(had_err, result == (GtBitsequence) 0xf000ccccUL);
+  gt_compressed_bitsequence_set_variable_field(bitseq, size,
+                                               16UL, 32U,
+                                               (GtBitsequence) 0xccccaaaaUL);
   gt_compressed_bitsequence_set_variable_field(bitseq, size, 128UL, 8U,
-                                               value>>28);
-  result = gt_compressed_bitsequence_get_variable_field(bitseq, 128UL, 64U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xFFAACCCCAAAACCCC);
+                                               (GtBitsequence) 0xFF);
+  result = gt_compressed_bitsequence_get_variable_field(bitseq, 128UL, 32U);
+  gt_ensure(had_err, result == (GtBitsequence) 0xffaaccccUL);
+
+  if (GT_LOGWORDSIZE == 6) {
+    value <<= 16; /* total of << 28 = 0x0000000FF0000000 */
+    gt_compressed_bitsequence_set_variable_field(bitseq, size,
+                                                 32UL, 64U, value);
+    result = gt_compressed_bitsequence_get_variable_field(bitseq, 0, 64U);
+    gt_ensure(had_err, result == (GtBitsequence) 0xaaaacccc0000000fULL);
+    result = gt_compressed_bitsequence_get_variable_field(bitseq, 64UL, 64U);
+    gt_ensure(had_err, result == (GtBitsequence) 0xf0000000aaaaccccULL);
+    gt_compressed_bitsequence_set_variable_field(
+                bitseq, size, 32UL, 64U, (GtBitsequence) 0xaaaaccccaaaaccccULL);
+    result = gt_compressed_bitsequence_get_variable_field(bitseq, 120UL, 64U);
+    gt_ensure(had_err, result == (GtBitsequence) 0xccffaaccccaaaaccULL);
+  }
 
   return had_err;
 }
@@ -1579,7 +1568,9 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
   const unsigned int sample_testratio = 32U;
   int had_err = 0;
   const unsigned long bitseq_testsize = 256UL,
-                      cbs_testsize = 16380UL;
+                      cbs_testsize = (GT_LOGWORDSIZE == 6) ?
+                                     16380UL :
+                                     8192UL;
   unsigned long idx;
   GtBitsequence *bitseq;
   GtCompressedBitsequence *cbs;
@@ -1589,7 +1580,9 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
   bitseq = gt_malloc((size_t) bitseq_testsize * sizeof (*bitseq));
 
   for (idx = 0; idx < bitseq_testsize; idx++) {
-    bitseq[idx] = (GtBitsequence) 0xAAAACCCCAAAACCCC;
+    bitseq[idx] = (GtBitsequence) ((GT_LOGWORDSIZE == 6) ?
+                                   (GtBitsequence) 0xaaaaccccaaaaccccULL :
+                                   (GtBitsequence) 0xaaaaccccULL);
   }
 
   had_err =
@@ -1598,7 +1591,9 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
 
   if (!had_err) {
     for (idx = 0; idx < bitseq_testsize; idx++) {
-      bitseq[idx] = (GtBitsequence) 0xAAAACCCCAAAACCCCULL;
+      bitseq[idx] = (GtBitsequence) ((GT_LOGWORDSIZE == 6) ?
+                                     (GtBitsequence) 0xaaaaccccaaaaccccULL :
+                                     (GtBitsequence) 0xaaaaccccUL);
     }
     had_err =
       gt_compressed_bitsequence_unit_test_block_identical(err, bitseq,
@@ -1610,11 +1605,9 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
     cbs = gt_compressed_bitsequence_new(bitseq, sample_testratio, cbs_testsize);
     gt_ensure(had_err, cbs != NULL);
 
-    if (cbs != NULL)
-    {
+    if (cbs != NULL) {
 
-      for (idx = 1UL; idx < cbs_testsize; idx += GT_DIV2(GT_INTWORDSIZE))
-      {
+      for (idx = 1UL; !had_err && idx < cbs_testsize; idx += 32UL) {
         gt_ensure(had_err, 1 == gt_compressed_bitsequence_access(cbs, idx - 1));
         gt_ensure(had_err, 0 == gt_compressed_bitsequence_access(cbs, idx));
       }
@@ -1629,8 +1622,7 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
     cbs = gt_compressed_bitsequence_new(bitseq, sample_testratio, cbs_testsize);
     gt_ensure(had_err, cbs != NULL);
 
-    if (cbs != NULL)
-    {
+    if (cbs != NULL) {
       unsigned long rank1, rank0;
 
       rank1 = gt_compressed_bitsequence_rank_1(cbs,
@@ -1638,8 +1630,7 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
       gt_ensure(had_err, rank1 == (unsigned long) GT_DIV2(GT_INTWORDSIZE));
       for (idx = (unsigned long) GT_INTWORDSIZE - 1UL;
            !had_err && idx < cbs_testsize;
-           idx += idx + 1)
-      {
+           idx += idx + 1) {
         rank1 = gt_compressed_bitsequence_rank_1(cbs, idx);
         rank0 = gt_compressed_bitsequence_rank_0(cbs, idx);
         gt_ensure(had_err, rank1 + rank0 == idx+1);
