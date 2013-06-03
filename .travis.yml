@@ -3,8 +3,8 @@ compiler:
   - gcc
   - clang
 env:
-  - 64bit=yes
-  - 64bit=yes assert=no
-  - 64bit=yes amalgamation=yes
-  - 64bit=yes opt=no curses=no cairo=no
-script: make test
+  - default=yes
+  - assert=no
+  - amalgamation=yes
+  - opt=no curses=no cairo=no
+script: make 64bit=yes test
