@@ -165,12 +165,12 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
     if (arguments->fill_random) {
       for (idx = 0; idx < arguments->size; idx++) {
         bits[idx] =
-          (GtBitsequence) (0xAAAAAAAAAAAAAAAAUL ^ gt_rand_max(ULONG_MAX));
+          (GtBitsequence) (0xAAAAAAAAAAAAAAAAULL ^ gt_rand_max(ULONG_MAX));
       }
     }
     else {
       for (idx = 0; idx < arguments->size; idx++)
-        bits[idx] = (GtBitsequence) (0xAAAAAAAAAAAAAAAAUL ^ idx);
+        bits[idx] = (GtBitsequence) (0xAAAAAAAAAAAAAAAAULL ^ idx);
     }
   }
 
