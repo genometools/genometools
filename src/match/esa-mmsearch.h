@@ -34,7 +34,7 @@ typedef void (*GtProcessquerybeforematching)(void *,const char *,
 
 typedef struct GtMMsearchiterator GtMMsearchiterator;
 
-GtMMsearchiterator *gt_mmsearchiterator_new_complete_olain(
+GtMMsearchiterator *gt_mmsearchiterator_new_complete_plain(
                                     const GtEncseq *dbencseq,
                                     const void *voidsuftab, /* XXX */
                                     unsigned long leftbound,

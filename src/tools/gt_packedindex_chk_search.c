@@ -177,7 +177,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       {
         const GtUchar *pptr = gt_nextEnumpatterniterator(&patternLen, epi);
         GtMMsearchiterator *mmsi =
-          gt_mmsearchiterator_new_complete_olain(suffixarray.encseq,
+          gt_mmsearchiterator_new_complete_plain(suffixarray.encseq,
                                             suffixarray.suftab,
                                             0,  /* leftbound */
                                             totalLen, /* rightbound */

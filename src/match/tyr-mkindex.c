@@ -131,7 +131,7 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
               gt_encseq_get_encoded_char(dfsstate->encseq,position+idx,
                                                 dfsstate->readmode);
   }
-  mmsi = gt_mmsearchiterator_new_complete_olain(dfsstate->encseq,
+  mmsi = gt_mmsearchiterator_new_complete_plain(dfsstate->encseq,
                                               dfsstate->suftab,
                                               0,
                                               dfsstate->totallength,

@@ -1317,7 +1317,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
   bool nomatches;
   GtIdxMatch match;
 
-  mmsi = gt_mmsearchiterator_new_complete_olain(suffixarray->encseq,
+  mmsi = gt_mmsearchiterator_new_complete_plain(suffixarray->encseq,
                                            suffixarray->suftab,
                                            0,  /* leftbound */
                                            totallength, /* rightbound */
@@ -1429,7 +1429,7 @@ unsigned long esa_exact_pattern_count(const Suffixarray *suffixarray,
   unsigned long count,
                 totallength = gt_encseq_total_length(suffixarray->encseq);
 
-  mmsi = gt_mmsearchiterator_new_complete_olain(suffixarray->encseq,
+  mmsi = gt_mmsearchiterator_new_complete_plain(suffixarray->encseq,
                                            suffixarray->suftab,
                                            0,  /* leftbound */
                                            totallength, /* rightbound */

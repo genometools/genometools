@@ -182,7 +182,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
           } else
           {
             mmsibck
-              = gt_mmsearchiterator_new_complete_olain(
+              = gt_mmsearchiterator_new_complete_plain(
                                        suffixarray.encseq,
                                        suffixarray.suftab,
                                        bucketspec.left,
@@ -197,7 +197,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
       }
       if (pmopt->immediate)
       {
-        mmsiimm = gt_mmsearchiterator_new_complete_olain(
+        mmsiimm = gt_mmsearchiterator_new_complete_plain(
                                             suffixarray.encseq,
                                             suffixarray.suftab,
                                             0,  /* leftbound */
