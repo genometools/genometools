@@ -391,7 +391,12 @@ ifneq ($(with-sqlite),no)
     GT_CPPFLAGS +=  -I$(CURDIR)/$(SQLITE3_DIR)
     OVERRIDELIBS += lib/libsqlite.a
   endif
-  EXP_CPPFLAGS += -DHAVE_SQLITE -DSQLITE_THREADSAFE=1
+  EXP_CPPFLAGS += -DHAVE_SQLITE
+  ifeq ($(threads),yes)
+    EXP_CPPFLAGS += -DSQLITE_THREADSAFE=1
+  else
+    EXP_CPPFLAGS += -DSQLITE_THREADSAFE=0
+  endif
   EXP_LDLIBS += -lpthread
   ifneq ($(SYSTEM),FreeBSD)
     EXP_LDLIBS += -ldl
