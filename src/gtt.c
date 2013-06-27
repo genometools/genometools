@@ -84,6 +84,7 @@
 #include "match/rdj-spmlist.h"
 #include "match/rdj-strgraph.h"
 #include "match/shu-encseq-gc.h"
+#include "match/xdrop.h"
 #include "tools/gt_bed_to_gff3.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chain2dim.h"
@@ -258,8 +259,6 @@ GtHashmap* gtt_unit_tests(void)
 
   /* add unit tests */
 
-  gt_hashmap_add(unit_tests, "compactulongstore class",
-                                              gt_compact_ulong_store_unit_test);
   gt_hashmap_add(unit_tests, "alphabet class", gt_alphabet_unit_test);
   gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
   gt_hashmap_add(unit_tests, "array class", gt_array_unit_test);
@@ -281,6 +280,8 @@ GtHashmap* gtt_unit_tests(void)
                                             gt_codon_iterator_encseq_unit_test);
   gt_hashmap_add(unit_tests, "color space module", gt_colorspace_unit_test);
   gt_hashmap_add(unit_tests, "combinatorics", gt_combinatorics_unit_test);
+  gt_hashmap_add(unit_tests, "compactulongstore class",
+                                              gt_compact_ulong_store_unit_test);
   gt_hashmap_add(unit_tests, "compressed bitsequence",
                                            gt_compressed_bitsequence_unit_test);
   gt_hashmap_add(unit_tests, "countingsort module", gt_countingsort_unit_test);
@@ -345,6 +346,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
   gt_hashmap_add(unit_tests, "translator class", gt_translator_unit_test);
   gt_hashmap_add(unit_tests, "uint64hashtable", gt_uint64hashtable_unit_test);
+  gt_hashmap_add(unit_tests, "xdrop", gt_xdrop_unit_test);
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
   gt_hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test);

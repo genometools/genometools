@@ -19,6 +19,8 @@
 #define XDROP_H
 
 #include "core/arraydef.h"
+#include "core/error_api.h"
+#include "extended/multieoplist.h"
 #include "match/seqabstract.h"
 
 typedef struct GtXdropresources GtXdropresources;
@@ -38,9 +40,17 @@ typedef struct
 {
   unsigned long ivalue, jvalue;
   GtXdropscore score;
+  long best_d;
+  long best_k;
 } GtXdropbest;
 
 GT_DECLAREARRAYSTRUCT(GtXdropscore);
+
+/* scores have restrictions as follows:
+   mat >= mis
+   mat >= 2*ins
+   mat >= 2*del */
+GtXdropresources* gt_xdrop_resources_new(const GtXdropArbitraryscores *scores);
 
 /*
    The following functions extend seeds to the right (forward = true)
@@ -52,18 +62,20 @@ GT_DECLAREARRAYSTRUCT(GtXdropscore);
    xdropbelowscore, then this alignment is not extended
    any more.
 */
+void              gt_evalxdroparbitscoresextend(bool forward,
+                                                GtXdropbest *xdropbest,
+                                                GtXdropresources *res,
+                                                const GtSeqabstract *useq,
+                                                const GtSeqabstract *vseq,
+                                                unsigned long uoffset,
+                                                unsigned long voffset,
+                                                GtXdropscore xdropbelowscore);
 
-GtXdropresources *gt_xdrop_resources_new(const GtXdropArbitraryscores *scores);
+void              gt_xdrop_resources_delete(GtXdropresources *);
 
-void gt_evalxdroparbitscoresextend(bool forward,
-                                   GtXdropbest *xdropbest,
-                                   GtXdropresources *res,
-                                   const GtSeqabstract *useq,
-                                   const GtSeqabstract *vseq,
-                                   unsigned long uoffset,
-                                   unsigned long voffset,
-                                   GtXdropscore xdropbelowscore);
+/* Creates a <GtMultieoplist> by backtrack algorythm. */
+GtMultieoplist*   gt_xdrop_backtrack(GtXdropresources *res, GtXdropbest *best);
 
-void gt_xdrop_resources_delete(GtXdropresources *);
+int               gt_xdrop_unit_test(GtError *err);
 
 #endif
