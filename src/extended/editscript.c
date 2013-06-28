@@ -41,7 +41,7 @@ GtEditscript *gt_editscript_new(void)
   editscript->eops = gt_multieoplist_new();
   editscript->seqlen = 0;
   editscript->charidx = 0;
-  editscript->maxchar = 100;
+  editscript->maxchar = 100UL;
   return editscript;
 }
 
@@ -56,7 +56,7 @@ static void gt_editscript_add_char_to_charlist(GtEditscript *editscript, char c)
 {
   if (editscript->charidx == editscript->maxchar) {
     char *charlist = gt_realloc(editscript->charlist,
-        (editscript->maxchar + 100) * sizeof (char) );
+                                sizeof (char) * (editscript->maxchar + 100));
     editscript->charlist = charlist;
     editscript->maxchar += 100;
   }
@@ -106,25 +106,27 @@ void gt_editscript_remove_last(GtEditscript *editscript)
   editscript->seqlen--;
 }
 
-void gt_editscript_show(const GtEncseq *encseq,
-    const GtEditscript *editscript, FILE* fp)
+void gt_editscript_show(const GtEncseq *encseq, const GtEditscript *editscript,
+                        FILE* fp)
 {
-  gt_assert(encseq && editscript);
   unsigned long i, j, charidx = editscript->seqlen - 1, meoplen;
   GtEncseqReader *esr;
   GtMultieop *meop;
-  meoplen = gt_multieoplist_get_length(editscript->eops);
   char c;
-  esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD,
-      editscript->encseq_compressed_start);
+
+  gt_assert(encseq != NULL && editscript != NULL);
+
+  meoplen = gt_multieoplist_get_length(editscript->eops);
+  esr =
+    gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD,
+                                          editscript->encseq_compressed_start);
 
   for (i = meoplen; i > 0; i--) {
     meop = gt_multieoplist_get_entry(editscript->eops, i - 1);
     if (meop->type == Deletion) {
       for (j = 0; j < meop->steps; j++) {
-        c = gt_encseq_reader_next_decoded_char(esr);
+        (void) gt_encseq_reader_next_decoded_char(esr);
       }
-      continue;
     }
     else if (meop->type == Insertion) {
       for (j = 0; j < meop->steps; j++) {
@@ -140,7 +142,7 @@ void gt_editscript_show(const GtEncseq *encseq,
     }
     else if (meop->type == Mismatch) {
       for (j = 0; j < meop->steps; j++) {
-        c = gt_encseq_reader_next_decoded_char(esr);
+        (void) gt_encseq_reader_next_decoded_char(esr);
         gt_xfputc(editscript->charlist[charidx], fp);
         charidx--;
       }
