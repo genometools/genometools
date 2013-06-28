@@ -40,7 +40,7 @@ typedef struct {
         variable (use bit shifting operations) */
 
 GtMultieoplist *gt_multieoplist_new(void);
-void gt_multieoplist_delete(GtMultieoplist *multieop);
+void gt_multieoplist_delete(GtMultieoplist *multieops);
 
 void gt_multieoplist_add_replacement(GtMultieoplist *eops);
 void gt_multieoplist_add_insertion(GtMultieoplist *eops);

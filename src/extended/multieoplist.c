@@ -33,30 +33,25 @@ GtMultieoplist *gt_multieoplist_new(void)
   return eops;
 }
 
-void gt_multieoplist_delete(GtMultieoplist *eops)
+void gt_multieoplist_delete(GtMultieoplist *multieops)
 {
-  gt_array_delete(eops->meoplist);
-  gt_free(eops);
+  gt_array_delete(multieops->meoplist);
+  gt_free(multieops);
 }
 
 static void gt_multieoplist_add_eop(GtMultieoplist *eops, AlignmentEoptype type)
 {
   GtMultieop meop, *meop_ptr;
-  if (!gt_array_size(eops->meoplist)) {
-    meop.type = type;
-    meop.steps = 1;
-    gt_array_add(eops->meoplist, meop);
-  }
-  else {
+  if (gt_array_size(eops->meoplist) != 0) {
     meop_ptr = gt_array_get_last(eops->meoplist);
-    if (meop_ptr->type == type)
+    if (meop_ptr->type == type) {
       meop_ptr->steps++; /* XXX: check for overflow */
-    else {
-      meop.type = type;
-      meop.steps = 1;
-      gt_array_add(eops->meoplist, meop);
+      return;
     }
   }
+  meop.type = type;
+  meop.steps = 1UL;
+  gt_array_add(eops->meoplist, meop);
 }
 
 void gt_multieoplist_add_replacement(GtMultieoplist *eops)
@@ -95,7 +90,7 @@ void gt_multieoplist_remove_last(GtMultieoplist *eops)
   gt_assert(eops && gt_array_size(eops->meoplist));
   meop_ptr = gt_array_get_last(eops->meoplist);
   gt_assert(meop_ptr->steps);
-  if (meop_ptr->steps == 1)
+  if (meop_ptr->steps == 1UL)
     (void) gt_array_pop(eops->meoplist);
   else
     meop_ptr->steps--;
@@ -162,9 +157,8 @@ void gt_multieoplist_show(GtMultieoplist *eops, FILE *fp)
         break;
     }
     fprintf(fp, " %lu", meop.steps);
-    if (i != 1UL) {
+    if (i == 1UL)
       gt_xfputc(',', fp);
-    }
   }
   gt_xfputs("]\n", fp);
 }
