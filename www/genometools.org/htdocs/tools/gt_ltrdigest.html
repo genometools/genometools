@@ -20,6 +20,8 @@
     <li><a href="../manuals.html">Manuals</a></li>
     <li><a href="../libgenometools.html">C API</a></li>
     <li><a href="../docs.html"><tt>gtscript</tt> docs</a></li>
+    <li><a href="../contract.html">Development Process</a></li>
+    <li><a href="../contribute.html">Contribute</a></li>
   </ul>
 <li><a href="../annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
 <li><a href="../cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
@@ -36,7 +38,7 @@
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt ltrdigest</strong> [option &#8230;] gff3_file indexname</p></div>
+<div class="paragraph"><p><strong>gt ltrdigest</strong> [option &#8230;] gff3_file</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -50,6 +52,14 @@
 <p>
 prefix for output files (e.g. <em>foo</em> will create files called <em>foo_*.csv</em> and <em>foo_*.fas</em>)
 Omit this option for GFF3 output only. (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-metadata</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+output metadata (run conditions) to separate file (default: yes)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -198,6 +208,73 @@ radius around end of 5' LTR to search for PBS (default: 30)
 </p>
 </dd>
 <dt class="hdlist1">
+<strong>-hmms</strong> 
+</dt>
+<dd>
+<p>
+profile HMM models for domain detection (separate by spaces, finish with --) in HMMER3 format
+Omit this option to disable pHMM search.
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pdomevalcutoff</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+global E-value cutoff for pHMM search
+default 1E-6 (default: 0.000001)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pdomcutoff</strong> [<em>&#8230;</em>]
+</dt>
+<dd>
+<p>
+model-specific score cutoff
+choose from TC (trusted cutoff) | GA (gathering cutoff) | NONE (no cutoffs) (default: NONE)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-aliout</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+output pHMM to amino acid sequence alignments (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-aaout</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+output amino acid sequences for protein domain hits (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-allchains</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+output features from all chains and unchained features, labeled with chain numbers (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-maxgaplen</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+maximal allowed gap size between fragments (in amino acids) when chaining pHMM hits for a protein domain (default: 50)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-threads</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+DEPRECATED, only included for compatibility reasons! Use the -j parameter of the <em>gt</em> call instead. (default: 0)
+</p>
+</dd>
+<dt class="hdlist1">
 <strong>-pbsmatchscore</strong> [<em>value</em>]
 </dt>
 <dd>
@@ -267,6 +344,56 @@ write bzip2 compressed output file (default: no)
 <dd>
 <p>
 force writing to output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seqfile</strong> [<em>filename</em>]
+</dt>
+<dd>
+<p>
+set the sequence file from which to take the sequences (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-encseq</strong> [<em>filename</em>]
+</dt>
+<dd>
+<p>
+set the encoded sequence indexname from which to take the sequences (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seqfiles</strong> 
+</dt>
+<dd>
+<p>
+set the sequence files from which to extract the features
+use <em>--</em> to terminate the list of sequence files
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-matchdesc</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+match the sequence descriptions from the input files for the desired sequence IDs (in GFF3) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-usedesc</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+use sequence descriptions to map the sequence IDs (in GFF3) to actual sequence entries.
+If a description contains a sequence range (e.g., III:1000001..2000000), the first  part is used as sequence ID (<em>III</em>) and the first range position as offset (<em>1000001</em>) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-regionmapping</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+set file containing sequence-region to sequence file mapping (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">

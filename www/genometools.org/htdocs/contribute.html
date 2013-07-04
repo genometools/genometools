@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>The GenomeTools Contribution Policy</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="documentation.html">Documentation</a></li>
+  <ul class="submenu">
+    <li><a href="tools.html">Tools</a></li>
+    <li><a href="manuals.html">Manuals</a></li>
+    <li><a href="libgenometools.html">C API</a></li>
+    <li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+    <li><a href="contract.html">Development Process</a></li>
+    <li><a id="current" href="contribute.html">Contribute</a></li>
+  </ul>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<h1>The <i>GenomeTools</i> Contribution Policy</h1>
+<p><em>GenomeTools</em> development is centered around the <a href="contract.html"><em>GenomeTools</em> development process</a>. If you contribute a nice patch which will be integrated into the master, we'll invite you to join the Maintainer's team and you can add &quot;<em>GenomeTools</em> maintainer&quot; to your resume or C.V.</p>
+<p>This introductory text has been <a href="http://www.zeromq.org/docs:contributing">borrowed</a> (with adjustments) from the <a href="http://www.zeromq.org">ZeroMQ project</a>.</p>
+<p>Our process is this:</p>
+<ol>
+<li><a href="https://github.com/genometools/genometools/issues">Log an issue</a> that explains the problem you are solving or the feature you are adding.</li>
+<li>Provide a test case if possible. </li>
+<li>Make your change as a pull request (see below).</li>
+<li>Discuss on the issue page or the <a href="http://genometools.org/mailman/listinfo/gt-dev">gt-dev mailing list</a> as needed.</li>
+<li>Close the issue when your pull request is merged and the test case passes.</li>
+</ol>
+
+<h3 id="toc1"><span>Getting Started</span></h3>
+
+<p><a href="http://www.git-scm.com/download">Download</a> and install git. On Ubuntu or Debian, you can use the following command:<pre class="code">apt-get install git</pre> If you are new to git, read the <a href="http://www.git-scm.com/documentation">git docs</a>, and <a href="http://progit.org/book/">Pro git</a> by Scott Chacon.</p>
+<p>Ensure that your copy of git is configured with your real name and the e-mail address you wish to be associated with your contributions. This is required to correctly track authorship:</p>
+<div class="code">
+<pre class="code">
+<code>$ git config --global user.name &quot;Your Name&quot;
+$ git config --global user.email your.name@example.com</code>
+</pre></div>
+<p>Create a user profile at <a href="https://github.com">GitHub</a> with your real name and the same email you used to configure your git.</p>
+
+
+<h3 id="toc2"><span>Basic Techniques</span></h3>
+<p>If you're new to git, especially if you come from SVN, you work by getting full copies of the repository on your local hard disk, and then exchanging sets of changes to and from other gits. It sounds complex, and sometimes is, but it works very well for large loose groups like ours.</p>
+<p>In git, you work with a set of 'branches', starting with the 'master' branch. Use 'git branch' to see what branches you have. To get a git repository onto your hard disk use the 'git clone' command, e.g.:</p>
+<div class="code">
+<pre class="code">
+<code>$ git clone git://github.com/MyName/genometools.git</code>
+</pre></div>
+<p>Behind a firewall you may need to use 'http:' instead of 'git:'.</p>
+<p><strong>Your clone has an origin</strong>, which is a 'remote' by that name. Use 'git remote -v' to see what remotes you have.</p>
+<p><strong>To make your changes</strong>: use your favorite tools to edit, compile, build, test. Do not allow your editor to reformat code you're not changing, or remove whitespaces elsewhere, this will make your patches useless.</p>
+<p><strong>To commit your work</strong>: use 'git add (files)' and 'git commit'. Use 'git commit &#8212;amend' to add to or fix up the previous commit.</p>
+<p>The 'git commit' command opens an editor for you to enter a commit message. Provide a short one-line summary, followed by a blank line, followed by a description of what you changed. The commit message becomes part of the permanent history of the project if your changes are accepted, so be clear and concise.</p>
+<p><strong>To abandon your changes</strong>: either wipe your directory and re-clone the project git, or use the 'git reset' command. All git commands have help ('git reset &#8212;help'), and extensive explanation online.</p>
+<p><strong>To push a branch to a remote</strong>: 'git push &lt;remotename&gt; &lt;branchname&gt;', usually 'git push origin master'.</p>
+<p><strong>To pull a branch from a remote</strong>: 'git pull origin master', which fetches the master branch from the origin remote, and merges it into your local master branch.</p>
+<h3 id="toc3"><span>The Pull Request Model</span></h3>
+<p>The <a href="http://github.com/genometools/genometools">home page for the <em>GenomeTools</em> git repository</a> has a button &quot;Fork&quot;, which will fork the project into your own profile. Click it, and you get a fork of the project git. Clone your <em>forked git</em> to your hard disk. You can now work in your forked git.</p>
+<p>The best strategy is to make each change (a set of commits) in its own branch. Your master branch can then track precisely the original repository master.</p>
+<p>Work and commit your work as explained in Basic Techniques, and push your changed branches back to your forked repository. When you're ready to send your work to the project owner, go to github.com and click the &quot;pull request&quot; button. Do make one pull request for each set of changes that go together.</p>
+<p>To resync your fork with the original repository, add a remote that points to that repo, and use 'git pull &#8212;rebase remotename master'. For example:</p>
+<div class="code">
+<pre class="code">
+<code>#  One time when you start working
+git remote add gt-master git://github.com/genometools/genometools.git
+#  Each time you need to resync
+git pull --rebase gt-master master</code>
+</pre></div>
+
+<h3 id="toc4"><span>Separate Your Changes</span></h3>
+<p>Separate different independent <em>logical</em> changes into separate commits (and thus separate patch submissions) when at all possible. This allows each change to be considered on it's own merits. Also, it is easier to review a batch of independent changes rather than one large patch.</p>
+
+<h3 id="toc5"><span>Write Good Commit Messages</span></h3>
+<p>Commit messages become the public record of your changes, as such it's important that they be well-written. The basic format of git commit messages is:</p>
+<ul>
+<li>A single summary line. This should be short &#8212; no more than 70 characters or so, since it can be used as the e-mail subject when submitting your patch and also for generating patch file names by 'git format-patch'. If your change only touches a single file or subsystem you may wish to prefix the summary with the file or subsystem name.</li>
+<li>A blank line.</li>
+<li>A detailed description of your change. Where possible, write in the present tense, e.g. &quot;Add assertions to zmq_foo()&quot;. If your changes have not resulted from previous discussion on the mailing list you may also wish to include brief rationale on your change. Your description should be formatted as plain text with each line not exceeding 80 characters.</li>
+</ul>
+
+<h3 id="toc6"><span>Give Yourself Credit</span></h3>
+<p>Add yourself to the CONTRIBUTORS file with your commit. The maintainers won't do this, it's your choice whether you consider your patch worth a mention, or not. Note that you must make contributions under your real name, associated with your github account.</p>
+
+<h3 id="toc7"><span>Copyrights and Licenses</span></h3>
+<p>Make sure your contributions do not include code from projects with incompatible licenses. <em>GenomeTools</em> uses the <a href="license.html">ISC license</a>. If your code isn't compatible with this, it will sooner or later be spotted and removed. The best way to avoid any license issues is to write your own code.</p>
+
+</div>
+
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
+</body>
+</html>
