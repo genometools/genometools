@@ -37,6 +37,7 @@
 */
 
 #include "core/option_api.h"
+#include "core/versionfunc.h"
 #include "gth/bssm_param.h"
 #include "gth/gt_gthbssmbuild.h"
 
@@ -139,8 +140,9 @@ static void freecommandlineopts(Commandlineopts *commandlineopts)
   gt_str_delete(commandlineopts->datapath);
 }
 
-int gt_gthbssmbuild(int argc, const char **argv,
-                    GtShowVersionFunc gth_version_func, GtError *err)
+int gt_gthbssmbuild_with_version_func(int argc, const char **argv,
+                                      GtShowVersionFunc version_func,
+                                      GtError *err)
 {
   GthBSSMParam *bssm_param; /* stores model parameterization  */
   Commandlineopts commandlineopts;
@@ -149,7 +151,7 @@ int gt_gthbssmbuild(int argc, const char **argv,
   /* process command line args */
   initcommandlineopts(&commandlineopts);
   switch (gthbssmbuild_parse_options(&parsed_args, &commandlineopts, argc, argv,
-                                     gth_version_func, err)) {
+                                     version_func, err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR: return -1;
     case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
@@ -190,4 +192,9 @@ int gt_gthbssmbuild(int argc, const char **argv,
   gth_bssm_param_delete(bssm_param);
 
   return had_err;
+}
+
+int gt_gthbssmbuild(int argc, const char **argv, GtError *err)
+{
+  return gt_gthbssmbuild_with_version_func(argc, argv, gt_versionfunc, err);
 }
