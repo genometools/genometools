@@ -19,6 +19,8 @@
     <li><a href="manuals.html">Manuals</a></li>
     <li><a id="current" href="libgenometools.html">C API</a></li>
     <li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+    <li><a href="contract.html">Development Process</a></li>
+    <li><a href="contribute.html">Contribute</a></li>
   </ul>
 <li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
 <li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
@@ -2601,7 +2603,8 @@ Disables support for retrieving descriptions from the encoded sequence
 <hr>
 <a name="gt_encseq_encoder_enable_multiseq_support"></a>
 
-<code>void              gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee)</code>
+<code>void               gt_encseq_encoder_enable_multiseq_support(
+                                                           GtEncseqEncoder *ee)</code>
 <p>
 Enables support for random access to multiple sequences in the encoded
    sequence encoded by <code>ee</code>. That is, the .ssp table is created.
@@ -2611,7 +2614,8 @@ Enables support for random access to multiple sequences in the encoded
 <hr>
 <a name="gt_encseq_encoder_disable_multiseq_support"></a>
 
-<code>void             gt_encseq_encoder_disable_multiseq_support(GtEncseqEncoder *ee)</code>
+<code>void               gt_encseq_encoder_disable_multiseq_support(
+                                                           GtEncseqEncoder *ee)</code>
 <p>
 Disables support for random access to multiple sequences in the encoded
    sequence encoded by <code>ee</code>. That is, the .ssp table is not created.
@@ -2622,7 +2626,8 @@ Disables support for random access to multiple sequences in the encoded
 <hr>
 <a name="gt_encseq_encoder_enable_lossless_support"></a>
 
-<code>void              gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee)</code>
+<code>void               gt_encseq_encoder_enable_lossless_support(
+                                                           GtEncseqEncoder *ee)</code>
 <p>
 Enables support for lossless reproduction of the original sequence,
    regardless of alphabet transformations that may apply. Deactivated by
@@ -2631,8 +2636,8 @@ Enables support for lossless reproduction of the original sequence,
 <hr>
 <a name="gt_encseq_encoder_disable_lossless_support"></a>
 
-<code>void               gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder
-                                                                           *ee)</code>
+<code>void               gt_encseq_encoder_disable_lossless_support(
+                                                           GtEncseqEncoder *ee)</code>
 <p>
 Enables support for lossless reproduction of the original sequence,
    regardless of alphabet transformations that may apply. Encoded sequences
@@ -2675,7 +2680,8 @@ Disables creation of the .des table.
 <hr>
 <a name="gt_encseq_encoder_des_tab_requested"></a>
 
-<code>bool              gt_encseq_encoder_des_tab_requested(const GtEncseqEncoder *ee)</code>
+<code>bool               gt_encseq_encoder_des_tab_requested(
+                                                     const GtEncseqEncoder *ee)</code>
 <p>
 Returns <code>true</code> if the creation of the .des table has been requested,
    <code>false</code> otherwise.
@@ -2698,7 +2704,8 @@ Disables creation of the .ssp table.
 <hr>
 <a name="gt_encseq_encoder_ssp_tab_requested"></a>
 
-<code>bool              gt_encseq_encoder_ssp_tab_requested(const GtEncseqEncoder *ee)</code>
+<code>bool               gt_encseq_encoder_ssp_tab_requested(
+                                                     const GtEncseqEncoder *ee)</code>
 <p>
 Returns <code>true</code> if the creation of the .ssp table has been requested,
    <code>false</code> otherwise.
@@ -2721,7 +2728,8 @@ Disables creation of the .sds table.
 <hr>
 <a name="gt_encseq_encoder_sds_tab_requested"></a>
 
-<code>bool              gt_encseq_encoder_sds_tab_requested(const GtEncseqEncoder *ee)</code>
+<code>bool               gt_encseq_encoder_sds_tab_requested(
+                                                     const GtEncseqEncoder *ee)</code>
 <p>
 Returns <code>true</code> if the creation of the .sds table has been requested,
    <code>false</code> otherwise.
@@ -2744,7 +2752,8 @@ Disables creation of the .md5 table.
 <hr>
 <a name="gt_encseq_encoder_md5_tab_requested"></a>
 
-<code>bool              gt_encseq_encoder_md5_tab_requested(const GtEncseqEncoder *ee)</code>
+<code>bool               gt_encseq_encoder_md5_tab_requested(
+                                                     const GtEncseqEncoder *ee)</code>
 <p>
 Returns <code>true</code> if the creation of the .md5 table has been requested,
    <code>false</code> otherwise.
@@ -2776,6 +2785,21 @@ Sets the sequence input type for <code>ee</code> to protein/amino acids.
 <code>bool               gt_encseq_encoder_is_input_protein(GtEncseqEncoder *ee)</code>
 <p>
 Returns <code>true</code> if the input sequence has been defined as being protein.
+</p>
+<hr>
+<a name="gt_encseq_encoder_clip_desc"></a>
+
+<code>void               gt_encseq_encoder_clip_desc(GtEncseqEncoder *ee)</code>
+<p>
+Makes <code>ee</code> ignore all description suffixes after the first whitespace
+   character per description (as defined via isspace(3)).
+</p>
+<hr>
+<a name="gt_encseq_encoder_are_descs_clipped"></a>
+
+<code>bool               gt_encseq_encoder_are_descs_clipped(GtEncseqEncoder *ee)</code>
+<p>
+Returns <code>true</code> if <code>ee</code> clips all descriptions after the first whitespace.
 </p>
 <hr>
 <a name="gt_encseq_encoder_encode"></a>
@@ -9791,6 +9815,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_effective_filelength"><code>gt_encseq_effective_filelength</code></a><br>
 
+  <a href="#gt_encseq_encoder_are_descs_clipped"><code>gt_encseq_encoder_are_descs_clipped</code></a><br>
+
+  <a href="#gt_encseq_encoder_clip_desc"><code>gt_encseq_encoder_clip_desc</code></a><br>
+
   <a href="#gt_encseq_encoder_create_des_tab"><code>gt_encseq_encoder_create_des_tab</code></a><br>
 
   <a href="#gt_encseq_encoder_create_md5_tab"><code>gt_encseq_encoder_create_md5_tab</code></a><br>
@@ -11130,7 +11158,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-03-18
+Last update: 2013-07-04
 </div>
 </div>
 <!-- Piwik -->
