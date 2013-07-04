@@ -20,6 +20,8 @@
     <li><a href="../manuals.html">Manuals</a></li>
     <li><a href="../libgenometools.html">C API</a></li>
     <li><a href="../docs.html"><tt>gtscript</tt> docs</a></li>
+    <li><a href="../contract.html">Development Process</a></li>
+    <li><a href="../contribute.html">Contribute</a></li>
   </ul>
 <li><a href="../annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
 <li><a href="../cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
@@ -36,7 +38,7 @@
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt orffinder</strong> [option &#8230;] indexname [GFF3_file &#8230;]</p></div>
+<div class="paragraph"><p><strong>gt orffinder</strong> [option &#8230;] [indexname] [GFF3_file &#8230;]</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -114,6 +116,56 @@ write bzip2 compressed output file (default: no)
 <dd>
 <p>
 force writing to output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seqfile</strong> [<em>filename</em>]
+</dt>
+<dd>
+<p>
+set the sequence file from which to take the sequences (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-encseq</strong> [<em>filename</em>]
+</dt>
+<dd>
+<p>
+set the encoded sequence indexname from which to take the sequences (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seqfiles</strong> 
+</dt>
+<dd>
+<p>
+set the sequence files from which to extract the features
+use <em>--</em> to terminate the list of sequence files
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-matchdesc</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+match the sequence descriptions from the input files for the desired sequence IDs (in GFF3) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-usedesc</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+use sequence descriptions to map the sequence IDs (in GFF3) to actual sequence entries.
+If a description contains a sequence range (e.g., III:1000001..2000000), the first  part is used as sequence ID (<em>III</em>) and the first range position as offset (<em>1000001</em>) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-regionmapping</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+set file containing sequence-region to sequence file mapping (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
