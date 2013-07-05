@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<title>GenomeTools - manual page for GT-READJOINER-PREFILTER(1)</title>
+<title>GenomeTools - manual page for GT-TIRVISH(1)</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="..//style.css" type="text/css" />
 </head>
@@ -32,13 +32,13 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-readjoiner-prefilter - Remove contained and low-quality reads and encode read set in GtEncseq format.</p></div>
+<div class="paragraph"><p>gt-tirvish - Identify Terminal Inverted Repeat (TIR) elements,such as DNA transposons.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt readjoiner prefilter</strong> [option &#8230;]</p></div>
+<div class="paragraph"><p><strong>gt tirvish</strong> [option &#8230;] -index INDEXNAME</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -46,61 +46,131 @@
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<strong>-readset</strong> [<em>string</em>]
+<strong>-index</strong> [<em>string</em>]
 </dt>
 <dd>
 <p>
-specify the readset name
-default: filename of first input sequence_file (default: undefined)
+specify the name of the enhanced suffix array index (mandatory) (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-db</strong> 
+<strong>-seed</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-specify a list of input libraries (Fasta/FastQ); for single-end libraries use the filename (which is not allowed to contain <em>:</em> symbols); for paired-end libraries with reads interleaved (f,r,f,r,&#8230;) in a single file use the notation &lt;filename&gt;:&lt;insertlength&gt;[,&lt;stdev&gt;] (stdev may be omitted); for paired-end with reads in two files (f, r) use the notation &lt;file_f&gt;:&lt;file_r&gt;:&lt;insertlength&gt;[,&lt;stdev&gt;]
+specify minimum seed length for exact repeats (default: 20)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-v</strong> [<em>yes|no</em>]
+<strong>-mintirlen</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-be verbose (default: no)
+specify minimum length for each TIR (default: 27)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-q</strong> [<em>yes|no</em>]
+<strong>-maxtirlen</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-suppress standard output messages (default: no)
+specify maximum length for each TIR (default: 1000)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-maxlow</strong> [<em>value</em>]
+<strong>-mintirdist</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-maximal number of low-quality positions in a read
-default: infinite (default: undefined)
+specify minimum distance of TIRs (default: 100)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-lowqual</strong> [<em>value</em>]
+<strong>-maxtirdist</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-maximal quality for a position to be considered low-quality (default: 3)
+specify maximum distance of TIRs (default: 10000)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-phred64</strong> [<em>yes|no</em>]
+<strong>-mat</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-use phred64 scores for FastQ format (default: no)
+specify matchscore for extension-alignment (default: 2)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-mis</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify mismatchscore for extension-alignment (default: -2)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-ins</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify insertionscore for extension-alignment (default: -3)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-del</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify deletionscore for extension-alignment (default: -3)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-xdrop</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify xdropbelowscore for extension-alignment (default: 5)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-similar</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify similaritythreshold in range [1..100%] (default: 85.000000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-overlaps</strong> [<em>&#8230;</em>]
+</dt>
+<dd>
+<p>
+specify no|best|all (default: best)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-mintsd</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify minimum length for each TSD (default: 2)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-maxtsd</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify maximum length for each TSD (default: 11)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-vic</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify the number of nucleotides (to the left and to the right) that will be searched for TSDs around 5' and 3' boundary of predicted TIRs (default: 60)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -108,15 +178,7 @@ use phred64 scores for FastQ format (default: no)
 </dt>
 <dd>
 <p>
-display help for basic options and exit
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-help+</strong> 
-</dt>
-<dd>
-<p>
-display help for all options and exit
+display help and exit
 </p>
 </dd>
 <dt class="hdlist1">
