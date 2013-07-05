@@ -1859,19 +1859,20 @@ strategy is most effective when working in \Gt development.
 \subsection{Getting started}
 To get started with \Gt development, we recommend the following:
 \begin{enumerate}
+  \item Familiarize yourself with the \Gt development process at \url{http://genometools.org/contract.html}.
   \item Install the Git version control system.
   \item Read the Git documentation.
-  \item Clone the \Gt Git repository with:
+  \item Fork the \Gt Git repository on GitHub at \url{https://github.com/genometools/genometools}.
+  \item Clone a local version of your forked repo:
     \begin{lstlisting}[language=sh]
-$ git clone git://genometools.org/genometools.git
+$ git clone git://github.com/<YourName>/genometools.git
     \end{lstlisting}%$
-
   \item Start hacking on your own feature branch:
     \begin{lstlisting}[language=sh]
 $ cd genometools
 $ git checkout -b my_feature_branch_name
     \end{lstlisting}
-   \item Have fun!
+ \item Have fun!
 \end{enumerate}
 
 \subsection{Basic Git configuration}
@@ -1925,33 +1926,12 @@ an explanation.}.
 Needless to say, every commit should compile cleanly. Again, bisecting can become
 very tedious if the code has to be fixed at each stop to get it to even compile.
 \item
-Try to avoid merges with upstream as much as possible to keep the history linear.
-Instead of merging, rebase your feature branches regularly against an updated
-\emph{master}:
-    \begin{lstlisting}[language=sh]
-$ git branch
-* mybranch
-  master
-$ git checkout master
-$ git pull origin
-<...>
-$ git checkout mybranch
-$ git rebase master
-<...>
-    \end{lstlisting}%$
-\item
 In the first line of the commit message, give a short description of the
 change contained in the commit.  Please use active, present tense,
 e.g.\ ``add feature X'' or ``allow X to do Y''.
 Commit messages for commits that touch scripting
 language bindings should be prefixed with the language in question,
 e.g.\ ``gtpython: add bindings for GtFoo class''.
-\item
-For bugfixes for bugs also listed in the \Gt Lighthouse bug tracking web
-app\footnote{\url{http://genometools.lighthouseapp.com}}, commit messages can
-be used to update the ticket status. See the Lighthouse
-documentation\footnote{\url{http://help.lighthouseapp.com/faqs/ticket-workflow/ticket-keyword-updates}}
-for details.
 \end{itemize}
 
 \subsection{Submission of contributions}
@@ -1961,33 +1941,17 @@ integrated into the main \Gt codebase.
 
 \subsubsection{Source code submission}
 
-To get your source code to be considered for inclusion into the \Gt official
-source tree, first you need a Git repository in a publicly accessible location.
-That may be a free public account on github (\url{http://www.github.com},
-Gitorious (\url{http://gitorious.org}), etc., or a directory on a filesystem
-accessible by one of the core developers.
+To get your source code (which we assume to reside in your personal forked
+GitHub repository) to be considered for inclusion into the \Gt official source
+tree, file an issue in the \Gt issue
+tracker\footnote{\url{https://github.com/genometools/genometools/issues}}
+describing your proposed changes. Then issue a pull request from your repository against the official \Gt repository. A maintainer will review your contribution and merge it. After providing a working patch or feature, you will eventually obtain maintainer status yourself and will be able (but not required to) to review and merge pull requests from other contributors.
 
-Typically the \Gt maintainers pull from a branch provided in this location and
-specified by you. This is called a \emph{pull request}. Please specify the exact
-location to the repository as well as the branch name. A pull request can be
-sent to
-
-\centerline{\texttt{steinbiss@zbh.uni-hamburg.de}}
-
-or
-
-\centerline{\texttt{gremme@gmail.com}.}
-
-\textbf{Important:} Always rebase your feature branch against the current
+\textbf{Important:} Always rebase your code against the current
 official \Gt master before requesting a pull (see above). Also, please check
 whether your code compiles cleanly, even with the \keyword{amalgamation=yes}
 and \keyword{assert=no} parameters enabled which may influence compilation
 success.
-
-Small changes can also be submitted as patches which must be applicable using
-\keyword{git apply}. You will then be credited in the commit message. Such
-patches can be created conveniently -- ready to be sent via mail -- via git
-only using \keyword{git format-patch} or \keyword{git diff}.
 
 \subsubsection{Test data submission}
 

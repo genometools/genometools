@@ -78,9 +78,9 @@ HTML_HEADER = <<END
 <ul>
 <li><a href="../index.html">Overview</a></li>
 <li><a href="../pub/">Download</a></li>
-<li><a href="gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="https://github.com/genometools/genometools">Browse source</a></li>
 <li><a href="../mailman/listinfo/gt-users">Mailing list</a></li>
-<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="http://github.com/genometools/genometools/issues/">Issue tracker</a></li>
 <li><a href="../documentation.html">Documentation</a></li>
 <li><a href="../annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
   <ul class="submenu">

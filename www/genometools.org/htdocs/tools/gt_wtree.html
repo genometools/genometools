@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<title>GenomeTools - manual page for GT-READJOINER-PREFILTER(1)</title>
+<title>GenomeTools - manual page for GT-WTREE(1)</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="..//style.css" type="text/css" />
 </head>
@@ -32,13 +32,13 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-readjoiner-prefilter - Remove contained and low-quality reads and encode read set in GtEncseq format.</p></div>
+<div class="paragraph"><p>gt-wtree - Call an wtree manipulation tool and pass argument(s) to it.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt readjoiner prefilter</strong> [option &#8230;]</p></div>
+<div class="paragraph"><p><strong>gt wtree</strong> [option &#8230;] tool [argument &#8230;]</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -46,77 +46,11 @@
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<strong>-readset</strong> [<em>string</em>]
-</dt>
-<dd>
-<p>
-specify the readset name
-default: filename of first input sequence_file (default: undefined)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-db</strong> 
-</dt>
-<dd>
-<p>
-specify a list of input libraries (Fasta/FastQ); for single-end libraries use the filename (which is not allowed to contain <em>:</em> symbols); for paired-end libraries with reads interleaved (f,r,f,r,&#8230;) in a single file use the notation &lt;filename&gt;:&lt;insertlength&gt;[,&lt;stdev&gt;] (stdev may be omitted); for paired-end with reads in two files (f, r) use the notation &lt;file_f&gt;:&lt;file_r&gt;:&lt;insertlength&gt;[,&lt;stdev&gt;]
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-v</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-be verbose (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-q</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-suppress standard output messages (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-maxlow</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-maximal number of low-quality positions in a read
-default: infinite (default: undefined)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-lowqual</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-maximal quality for a position to be considered low-quality (default: 3)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-phred64</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-use phred64 scores for FastQ format (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
 <strong>-help</strong> 
 </dt>
 <dd>
 <p>
-display help for basic options and exit
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-help+</strong> 
-</dt>
-<dd>
-<p>
-display help for all options and exit
+display help and exit
 </p>
 </dd>
 <dt class="hdlist1">
@@ -128,6 +62,14 @@ display version information and exit
 </p>
 </dd>
 </dl></div>
+<div class="paragraph"><p>Tools:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>benchmark</strong>
+</p>
+</li>
+</ul></div>
 </div>
 </div>
 <div class="sect1">
