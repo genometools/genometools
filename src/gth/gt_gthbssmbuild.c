@@ -63,7 +63,7 @@ static void initcommandlineopts(Commandlineopts *commandlineopts)
 static GtOPrval gthbssmbuild_parse_options(int *parsed_args,
                                            Commandlineopts *commandlineopts,
                                            int argc, const char **argv,
-                                           GtShowVersionFunc gth_version_func,
+                                           GtShowVersionFunc version_func,
                                            GtError *err)
 {
   GtOptionParser *op;
@@ -115,7 +115,7 @@ static GtOPrval gthbssmbuild_parse_options(int *parsed_args,
 
   gt_option_parser_set_max_args(op, 0);
   gt_option_parser_set_mail_address(op, "<gordon@gremme.org>");
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gth_version_func,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, version_func,
                                   err);
 
   /* some checks */
