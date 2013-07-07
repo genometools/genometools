@@ -14,7 +14,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/tool.h"
 #include "core/unused_api.h"
 #include "gth/bssm_param_rmsd.h"
 #include "gth/gt_gthbssmrmsd.h"
@@ -37,15 +36,11 @@ static int gt_gthbssmrmsd_runner(GT_UNUSED int argc, const char **argv,
   return gth_bssm_param_rmsd_show(argv[parsed_args], argv[parsed_args+1], err);
 }
 
-GtTool* gt_gthbssmrmsd(GtShowVersionFunc version_func)
+GtTool* gt_gthbssmrmsd(void)
 {
-  GtOptionParser *op;
-  GtTool *tool = gt_tool_new(NULL,
-                             NULL,
-                             gt_gthbssmrmsd_option_parser_new,
-                             NULL,
-                             gt_gthbssmrmsd_runner);
-  op = gt_tool_get_option_parser(tool);
-  gt_option_parser_set_version_func(op, version_func);
-  return tool;
+  return gt_tool_new(NULL,
+                     NULL,
+                     gt_gthbssmrmsd_option_parser_new,
+                     NULL,
+                     gt_gthbssmrmsd_runner);
 }

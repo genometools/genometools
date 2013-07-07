@@ -20,6 +20,6 @@
 #include "core/tool_api.h"
 
 /* the gthbssmrmsd tool */
-GtTool* gt_gthbssmrmsd(GtShowVersionFunc version_func);
+GtTool* gt_gthbssmrmsd(void);
 
 #endif

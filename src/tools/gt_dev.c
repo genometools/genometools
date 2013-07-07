@@ -55,8 +55,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "gthbssmbuild", gt_gthbssmbuild);
   gt_toolbox_add(dev_toolbox, "gthbssmfileinfo", gt_gthbssmfileinfo);
   gt_toolbox_add(dev_toolbox, "gthbssmprint", gt_gthbssmprint);
-  gt_toolbox_add_tool(dev_toolbox, "gthbssmrmsd",
-                      gt_gthbssmrmsd(gt_versionfunc));
+  gt_toolbox_add_tool(dev_toolbox, "gthbssmrmsd", gt_gthbssmrmsd());
   gt_toolbox_add(dev_toolbox, "gthmkbssmfiles", gt_gthmkbssmfiles);
   gt_toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
