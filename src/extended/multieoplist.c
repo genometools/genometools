@@ -23,27 +23,43 @@
 
 struct GtMultieoplist {
   GtArray *meoplist;
+  unsigned long refcount;
 };
 
 GtMultieoplist *gt_multieoplist_new(void)
 {
-  GtMultieoplist *eops;
-  eops = gt_malloc(sizeof (GtMultieoplist));
-  eops->meoplist = gt_array_new(sizeof (GtMultieop));
-  return eops;
+  GtMultieoplist *multieops;
+  multieops = gt_malloc(sizeof (GtMultieoplist));
+  multieops->meoplist = gt_array_new(sizeof (GtMultieop));
+  multieops->refcount = 0;
+  return multieops;
+}
+
+GtMultieoplist *gt_multieoplist_ref(GtMultieoplist *multieops)
+{
+  multieops->refcount++;
+  return multieops;
 }
 
 void gt_multieoplist_delete(GtMultieoplist *multieops)
 {
-  gt_array_delete(multieops->meoplist);
-  gt_free(multieops);
+  if (multieops != NULL) {
+    if (multieops->refcount != 0) {
+      multieops->refcount--;
+    }
+    else {
+      gt_array_delete(multieops->meoplist);
+      gt_free(multieops);
+    }
+  }
 }
 
-static void gt_multieoplist_add_eop(GtMultieoplist *eops, AlignmentEoptype type)
+static void gt_multieoplist_add_eop(GtMultieoplist *multieops,
+                                    AlignmentEoptype type)
 {
   GtMultieop meop, *meop_ptr;
-  if (gt_array_size(eops->meoplist) != 0) {
-    meop_ptr = gt_array_get_last(eops->meoplist);
+  if (gt_array_size(multieops->meoplist) != 0) {
+    meop_ptr = gt_array_get_last(multieops->meoplist);
     if (meop_ptr->type == type) {
       meop_ptr->steps++; /* XXX: check for overflow */
       return;
@@ -51,101 +67,120 @@ static void gt_multieoplist_add_eop(GtMultieoplist *eops, AlignmentEoptype type)
   }
   meop.type = type;
   meop.steps = 1UL;
-  gt_array_add(eops->meoplist, meop);
+  gt_array_add(multieops->meoplist, meop);
 }
 
-void gt_multieoplist_add_replacement(GtMultieoplist *eops)
+void gt_multieoplist_add_replacement(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(eops, Replacement);
+  gt_multieoplist_add_eop(multieops, Replacement);
 }
 
-void gt_multieoplist_add_insertion(GtMultieoplist *eops)
+void gt_multieoplist_add_insertion(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(eops, Insertion);
+  gt_multieoplist_add_eop(multieops, Insertion);
 }
 
-void gt_multieoplist_add_deletion(GtMultieoplist *eops)
+void gt_multieoplist_add_deletion(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(eops, Deletion);
+  gt_multieoplist_add_eop(multieops, Deletion);
 }
 
-void gt_multieoplist_add_mismatch(GtMultieoplist *eops)
+void gt_multieoplist_add_mismatch(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(eops, Mismatch);
+  gt_multieoplist_add_eop(multieops, Mismatch);
 }
 
-void gt_multieoplist_add_match(GtMultieoplist *eops)
+void gt_multieoplist_add_match(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(eops, Match);
+  gt_multieoplist_add_eop(multieops, Match);
 }
 
-void gt_multieoplist_reset(GtMultieoplist *eops)
+void gt_multieoplist_reset(GtMultieoplist *multieops)
 {
-  gt_array_reset(eops->meoplist);
+  gt_array_reset(multieops->meoplist);
 }
 
-void gt_multieoplist_remove_last(GtMultieoplist *eops)
+void gt_multieoplist_remove_last(GtMultieoplist *multieops)
 {
   GtMultieop *meop_ptr;
-  gt_assert(eops && gt_array_size(eops->meoplist));
-  meop_ptr = gt_array_get_last(eops->meoplist);
+  gt_assert(multieops && gt_array_size(multieops->meoplist));
+  meop_ptr = gt_array_get_last(multieops->meoplist);
   gt_assert(meop_ptr->steps);
   if (meop_ptr->steps == 1UL)
-    (void) gt_array_pop(eops->meoplist);
+    (void) gt_array_pop(multieops->meoplist);
   else
     meop_ptr->steps--;
 }
 
-unsigned long gt_multieoplist_get_repdel_length(GtMultieoplist *eops)
+unsigned long gt_multieoplist_get_repdel_length(GtMultieoplist *multieops)
 {
   unsigned long len = 0, i;
   GtMultieop meop;
-  for (i = gt_array_size(eops->meoplist); i > 0; i--) {
-    meop = *(GtMultieop*) gt_array_get(eops->meoplist, i-1);
-    if (meop.type == Replacement || meop.type == Deletion)
-      len += meop.steps;
+  for (i = gt_array_size(multieops->meoplist); i > 0; i--) {
+    meop = *(GtMultieop*) gt_array_get(multieops->meoplist, i-1);
+    switch (meop.type) {
+      case Match:
+      case Mismatch:
+      case Replacement:
+      case Deletion:
+        len += meop.steps;
+        break;
+      default:
+        /* nothing */;
+    }
   }
   return len;
 }
 
-unsigned long gt_multieoplist_get_repins_length(GtMultieoplist *eops)
+unsigned long gt_multieoplist_get_repins_length(GtMultieoplist *multieops)
 {
   unsigned long len = 0, i;
   GtMultieop meop;
-  for (i = gt_array_size(eops->meoplist); i > 0; i--) {
-    meop = *(GtMultieop*) gt_array_get(eops->meoplist, i-1);
-    if (meop.type == Replacement || meop.type == Insertion)
-      len += meop.steps;
+  for (i = gt_array_size(multieops->meoplist); i > 0; i--) {
+    meop = *(GtMultieop*) gt_array_get(multieops->meoplist, i-1);
+    switch (meop.type) {
+      case Match:
+      case Mismatch:
+      case Replacement:
+      case Insertion:
+        len += meop.steps;
+        break;
+      default:
+        /* nothing */;
+    }
   }
   return len;
 }
 
-unsigned long gt_multieoplist_get_length(GtMultieoplist *eops)
+unsigned long gt_multieoplist_get_length(GtMultieoplist *multieops)
 {
-  return(gt_array_size(eops->meoplist));
+  return(gt_array_size(multieops->meoplist));
 }
 
-GtMultieop *gt_multieoplist_get_entry(GtMultieoplist *eops, unsigned long index)
+GtMultieop *gt_multieoplist_get_entry(GtMultieoplist *multieops,
+                                      unsigned long index)
 {
-  gt_assert(index < gt_array_size(eops->meoplist));
-  return((GtMultieop *) gt_array_get(eops->meoplist, index));
+  gt_assert(index < gt_array_size(multieops->meoplist));
+  return((GtMultieop *) gt_array_get(multieops->meoplist, index));
 }
 
-void gt_multieoplist_show(GtMultieoplist *eops, FILE *fp)
+void gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp)
 {
   unsigned long i, size;
   GtMultieop meop;
 
-  gt_assert(eops != NULL);
+  gt_assert(multieops != NULL);
 
-  size = gt_array_size(eops->meoplist);
+  size = gt_array_size(multieops->meoplist);
 
   gt_xfputc('[', fp);
   for (i = size; i > 0; i--) {
-    meop = *(GtMultieop*) gt_array_get(eops->meoplist, i-1);
+    meop = *(GtMultieop*) gt_array_get(multieops->meoplist, i-1);
     switch (meop.type) {
-      case Mismatch:
       case Match:
+        gt_xfputc('M', fp);
+        break;
+      case Mismatch:
       case Replacement:
         gt_xfputc('R', fp);
         break;
