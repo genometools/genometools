@@ -27,12 +27,13 @@
 */
 
 #include "core/option_api.h"
+#include "core/versionfunc.h"
 #include "gth/bssm_param.h"
 #include "gth/gt_gthbssmprint.h"
 
 static GtOPrval gthbssmprint_parse_options(int *parsed_args, int argc,
                                            const char **argv,
-                                           GtShowVersionFunc gth_version_func,
+                                           GtShowVersionFunc version_func,
                                            GtError *err)
 {
   GtOptionParser *op;
@@ -42,20 +43,26 @@ static GtOPrval gthbssmprint_parse_options(int *parsed_args, int argc,
                             "Print BSSM file bssm_file to stdout.");
   gt_option_parser_set_min_max_args(op, 1, 1);
   gt_option_parser_set_mail_address(op, "<gordon@gremme.org>");
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gth_version_func,
-                               err);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, version_func,
+                                  err);
   gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_gthbssmprint(int argc, const char **argv,
-                    GtShowVersionFunc gth_version_func, GtError *err)
+int gt_gthbssmprint(int argc, const char **argv, GtError *err)
+{
+  return gt_gthbssmprint_with_version_func(argc, argv, gt_versionfunc, err);
+}
+
+int gt_gthbssmprint_with_version_func(int argc, const char **argv,
+                                      GtShowVersionFunc version_func,
+                                      GtError *err)
 {
   GthBSSMParam *bssm_param; /* stores model parameterization */
   int parsed_args, had_err = 0;
 
   /* verify command line specification of a parameter file to inspect */
-  switch (gthbssmprint_parse_options(&parsed_args, argc, argv, gth_version_func,
+  switch (gthbssmprint_parse_options(&parsed_args, argc, argv, version_func,
                                      err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR: return -1;

@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include "core/init_api.h"
+#include "core/tool.h"
 #include "core/tooldriver.h"
 
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[])
@@ -61,14 +62,16 @@ int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
   return EXIT_SUCCESS;
 }
 
-int gt_toolobjdriver(GtToolConstructor tool_constructor, int argc, char *argv[])
+int gt_toolobjdriver(GtToolConstructor tool_constructor,
+                     GtShowVersionFunc version_func, int argc, char *argv[])
 {
   gt_assert(tool_constructor && argv);
-  return gt_toolobjdriver_with_license(tool_constructor, argc, argv, NULL, 0, 0,
-                                       NULL, NULL);
+  return gt_toolobjdriver_with_license(tool_constructor, version_func, argc,
+                                       argv, NULL, 0, 0, NULL, NULL);
 }
 
-int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor, int argc,
+int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor,
+                                  GtShowVersionFunc version_func, int argc,
                                   char *argv[], GtLicense **license_out,
                                   unsigned int major_version,
                                   unsigned int minor_version,
@@ -90,6 +93,10 @@ int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor, int argc,
   err = gt_error_new();
   gt_error_set_progname(err, argv[0]);
   tool = tool_constructor();
+  if (version_func) {
+    GtOptionParser *op = gt_tool_get_option_parser(tool);
+    gt_option_parser_set_version_func(op, version_func);
+  }
   had_err = gt_tool_run(tool, argc, (const char**) argv, err);
   gt_tool_delete(tool);
   if (gt_error_is_set(err)) {

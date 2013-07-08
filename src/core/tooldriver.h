@@ -43,9 +43,13 @@ int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
                                unsigned int minor_version,
                                GtLicenseConstructor, GtLicenseDestructor);
 
-int gt_toolobjdriver(GtToolConstructor, int argc, char *argv[]);
+/* Optional <version_func> to override the default one. */
+int gt_toolobjdriver(GtToolConstructor, GtShowVersionFunc version_func,
+                     int argc, char *argv[]);
 
-int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor, int argc,
+/* Optional <version_func> to override the default one. */
+int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor,
+                                  GtShowVersionFunc version_func, int argc,
                                   char *argv[], GtLicense **license_out,
                                   unsigned int major_version,
                                   unsigned int minor_version,

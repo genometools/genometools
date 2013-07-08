@@ -22,6 +22,7 @@
 
 /* the gthbssmbuild tool */
 int gt_gthbssmbuild(int argc, const char **argv, GtError*);
+
 int gt_gthbssmbuild_with_version_func(int argc, const char **argv,
                                       GtShowVersionFunc version_func, GtError*);
 

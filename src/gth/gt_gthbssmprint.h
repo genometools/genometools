@@ -21,7 +21,10 @@
 #include "core/error.h"
 
 /* the gthbssmprint tool */
-int gt_gthbssmprint(int argc, const char **argv,
-                    GtShowVersionFunc gth_version_func, GtError*);
+int gt_gthbssmprint(int argc, const char **argv, GtError *err);
+
+int gt_gthbssmprint_with_version_func(int argc, const char **argv,
+                                      GtShowVersionFunc version_func,
+                                      GtError *err);
 
 #endif

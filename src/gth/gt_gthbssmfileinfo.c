@@ -16,13 +16,14 @@
 */
 
 #include "core/option_api.h"
+#include "core/versionfunc.h"
 #include "gth/bssm_param.h"
 #include "gth/gt_gthbssmfileinfo.h"
 
 static GtOPrval gthbssmfileinfo_parse_options(int *parsed_args, int argc,
                                               const char **argv,
                                               GtShowVersionFunc
-                                              gth_version_func, GtError *err)
+                                              version_func, GtError *err)
 {
   GtOptionParser *op;
   GtOPrval oprval;
@@ -31,14 +32,20 @@ static GtOPrval gthbssmfileinfo_parse_options(int *parsed_args, int argc,
                          "BSSM file.");
   gt_option_parser_set_min_args(op, 1);
   gt_option_parser_set_mail_address(op, "<gordon@gremme.org>");
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gth_version_func,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, version_func,
                                   err);
   gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_gthbssmfileinfo(int argc, const char **argv,
-                       GtShowVersionFunc gth_version_func, GtError *err)
+int gt_gthbssmfileinfo(int argc, const char **argv, GtError *err)
+{
+  return gt_gthbssmfileinfo_with_version_func(argc, argv, gt_versionfunc, err);
+}
+
+int gt_gthbssmfileinfo_with_version_func(int argc, const char **argv,
+                                         GtShowVersionFunc version_func,
+                                         GtError *err)
 {
   GthBSSMParam *bssm_param;
   GtStr *bssm_param_filename;
@@ -48,7 +55,7 @@ int gt_gthbssmfileinfo(int argc, const char **argv,
 
   /* option parsing */
   switch (gthbssmfileinfo_parse_options(&parsed_args, argc, argv,
-                                        gth_version_func, err)) {
+                                        version_func, err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR: return -1;
     case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
