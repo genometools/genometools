@@ -165,8 +165,8 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
 {
   unsigned long edist1, edist2;
   GtFrontResource *frontresource = gt_frontresource_new(10UL);
-  GtSeqabstract *greedyedistuseq = gt_seqabstract_new_ptr(useq,ulen,0),
-                *greedyedistvseq = gt_seqabstract_new_ptr(vseq,vlen,0);
+  GtSeqabstract *greedyedistuseq = gt_seqabstract_new_gtuchar(useq,ulen,0),
+                *greedyedistvseq = gt_seqabstract_new_gtuchar(vseq,vlen,0);
 
   edist1 = greedyunitedist(frontresource,greedyedistuseq,greedyedistvseq);
   edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);
