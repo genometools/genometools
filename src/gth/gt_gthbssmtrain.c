@@ -158,7 +158,8 @@ static GtOptionParser* gt_gthbssmtrain_option_parser_new(void *tool_arguments)
 }
 
 static int gt_gthbssmtrain_arguments_check(GT_UNUSED int rest_argc,
-                                           void *tool_arguments, GtError *err)
+                                           void *tool_arguments,
+                                           GT_UNUSED GtError *err)
 {
   GthBSSMTrainArguments *arguments = tool_arguments;
   gt_error_check(err);

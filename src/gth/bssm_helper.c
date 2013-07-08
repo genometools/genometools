@@ -21,8 +21,10 @@
 bool gth_seq_contains_wildcard(GtStr *seq)
 {
   bool match;
-  int had_err;
-  had_err = gt_grep(&match, "[^"GT_DNABASES"]", gt_str_get(seq), NULL);
+#ifndef NDEBUG
+  int had_err =
+#endif
+    gt_grep(&match, "[^"GT_DNABASES"]", gt_str_get(seq), NULL);
   gt_assert(!had_err);
   return match;
 }

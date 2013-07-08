@@ -715,7 +715,8 @@ void gth_bssm_seq_processor_squash(GthBSSMSeqProcessor *bsp)
 }
 
 static int get_true_seq(GtArray *true_sites, BSSMSeq *intron,
-                        const char *sequence, unsigned long sequence_length,
+                        const char *sequence,
+                        GT_UNUSED unsigned long sequence_length,
                         GtStr *seq, const GtRange *site_range, GtError *err)
 {
   int had_err = 0;
@@ -897,9 +898,10 @@ static int get_false_don_seq(GtArray *false_don_0_gt, GtArray *false_don_0_gc,
                              GtArray *false_don_1_gt, GtArray *false_don_1_gc,
                              GtArray *false_don_2_gt, GtArray *false_don_2_gc,
                              BSSMSeq *intron, const char *sequence,
-                             unsigned long sequence_length, GtStr *seq,
-                             const GtRange *don_range, bool proc_exons,
-                             bool gcdonor, unsigned long j, GtError *err)
+                             GT_UNUSED unsigned long sequence_length,
+                             GtStr *seq, const GtRange *don_range,
+                             bool proc_exons, GT_UNUSED bool gcdonor,
+                             unsigned long j, GtError *err)
 {
   unsigned int phase = 0;
   BSSMSeq *false_seq;
@@ -947,9 +949,9 @@ static int get_false_don_seq(GtArray *false_don_0_gt, GtArray *false_don_0_gc,
 static int get_false_acc_seq(GtArray *false_acc_0, GtArray *false_acc_1,
                              GtArray *false_acc_2, BSSMSeq *intron,
                              const char *sequence,
-                             unsigned long sequence_length, GtStr *seq,
-                             const GtRange *acc_range, bool proc_exons,
-                             unsigned long j, GtError *err)
+                             GT_UNUSED unsigned long sequence_length,
+                             GtStr *seq, const GtRange *acc_range,
+                             bool proc_exons, unsigned long j, GtError *err)
 {
   unsigned int phase = 0;
   BSSMSeq *false_seq;
@@ -964,7 +966,9 @@ static int get_false_acc_seq(GtArray *false_acc_0, GtArray *false_acc_1,
   if (intron->reverse)
     had_err = gt_reverse_complement(gt_str_get(seq), gt_str_length(seq), err);
   if (!had_err && !gth_seq_contains_wildcard(seq)) {
+#ifndef NDEBUG
     const char *iseq = gt_str_get(seq);
+#endif
     gt_assert(gt_str_length(seq) == 102);
     gt_assert(iseq[50] == 'A' || iseq[50] == 'a');
     gt_assert(iseq[51] == 'G' || iseq[51] == 'g');
