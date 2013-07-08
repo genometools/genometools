@@ -322,8 +322,8 @@ typedef struct {
   unsigned int phase;
 } BSSMSeq;
 
-static GtStr* construct_description(const GtRange *range, bool reverse,
-                                    unsigned int phase, GtStr *seqid)
+static GtStr* construct_seq_description(const GtRange *range, bool reverse,
+                                        unsigned int phase, GtStr *seqid)
 {
   GtStr *desc;
   gt_assert(range && phase <= 2);
@@ -350,7 +350,7 @@ static BSSMSeq* bssm_seq_new(GtStr *seqid, const GtRange *range, bool reverse,
   s->reverse = reverse;
   s->phase = phase;
   s->seq = gt_str_clone(seq);
-  s->desc = construct_description(range, reverse, phase, seqid);
+  s->desc = construct_seq_description(range, reverse, phase, seqid);
   return s;
 }
 
