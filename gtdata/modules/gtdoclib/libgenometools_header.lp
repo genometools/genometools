@@ -19,7 +19,7 @@
     <li><a href="manuals.html">Manuals</a></li>
     <li><a id="current" href="libgenometools.html">C API</a></li>
     <li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
-    <li><a href="contract.html">Development Process</a></li>
+    <li><a href="contract.html">Development Contract</a></li>
     <li><a href="contribute.html">Contribute</a></li>
   </ul>
 <li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
