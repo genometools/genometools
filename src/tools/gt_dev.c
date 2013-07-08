@@ -21,6 +21,10 @@
 #include "core/toolbox.h"
 #include "core/versionfunc.h"
 #include "gth/gt_gthbssmbuild.h"
+#include "gth/gt_gthbssmfileinfo.h"
+#include "gth/gt_gthbssmprint.h"
+#include "gth/gt_gthbssmrmsd.h"
+#include "gth/gt_gthbssmtrain.h"
 #include "gth/gt_gthmkbssmfiles.h"
 #include "tools/gt_compressedbits.h"
 #include "tools/gt_consensus_sa.h"
@@ -50,6 +54,10 @@ static void* gt_dev_arguments_new(void)
   /* add development tools here with a function call like this:
      gt_toolbox_add(dev_toolbox, "devtool", gt_devtool); */
   gt_toolbox_add(dev_toolbox, "gthbssmbuild", gt_gthbssmbuild);
+  gt_toolbox_add(dev_toolbox, "gthbssmfileinfo", gt_gthbssmfileinfo);
+  gt_toolbox_add(dev_toolbox, "gthbssmprint", gt_gthbssmprint);
+  gt_toolbox_add_tool(dev_toolbox, "gthbssmrmsd", gt_gthbssmrmsd());
+  gt_toolbox_add_tool(dev_toolbox, "gthbssmtrain", gt_gthbssmtrain());
   gt_toolbox_add(dev_toolbox, "gthmkbssmfiles", gt_gthmkbssmfiles);
   gt_toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);

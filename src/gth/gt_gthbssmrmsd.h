@@ -1,7 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2001      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,10 +14,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/tooldriver.h"
-#include "tools/gt_skproto.h"
+#ifndef GT_GTHBSSMRMSD_H
+#define GT_GTHBSSMRMSD_H
 
-int main(int argc, char *argv[])
-{
-  return gt_toolobjdriver(gt_skproto, NULL, argc, argv);
-}
+#include "core/tool_api.h"
+
+/* the gthbssmrmsd tool */
+GtTool* gt_gthbssmrmsd(void);
+
+#endif
