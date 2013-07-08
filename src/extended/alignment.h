@@ -22,6 +22,7 @@
 #include "core/range.h"
 #include "core/types_api.h"
 #include "core/error_api.h"
+#include "extended/multieoplist.h"
 
 /* the GtAlignment class (an object has to be constructed backwards) */
 typedef struct GtAlignment GtAlignment;
