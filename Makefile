@@ -909,6 +909,7 @@ DWTOOLS=${shell grep -l Willrodt src/tools/*.c}
 GGTOOLS=${shell grep -l Gonnella src/tools/*.c}
 SKEXT=${shell grep -l 'Stefan Kurtz' src/extended/*.c}
 DWEXT=${shell grep -l Willrodt src/extended/*.c}
+OEEXT=${shell grep -l Eigenbrod src/extended/*.c}
 GGEXT=${shell grep -l Gonnella src/extended/*.c}
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
@@ -916,7 +917,7 @@ ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
              ${wildcard ${CURDIR}/src/ltr/*.c}\
              ${SKTOOLS} ${SKCORE} ${SKEXT} \
 						 ${DWTOOLS} ${DWCORE} ${DWEXT} \
-             ${GGTOOLS} ${GGEXT} }}}
+             ${GGTOOLS} ${GGEXT} ${OEEXT} }}}
 
 ALLSCANBUILD=${subst .splint,.sb, ${ALLSPLINT}}
 
