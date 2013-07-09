@@ -3,8 +3,16 @@ compiler:
   - gcc
   - clang
 env:
-  - default=yes
-  - assert=no
-  - amalgamation=yes
-  - opt=no curses=no cairo=no
+  - default=yes               testrange=1..1000
+  - assert=no                 testrange=1..1000
+  - amalgamation=yes          testrange=1..1000
+  - opt=no curses=no cairo=no testrange=1..1000
+  - default=yes               testrange=1001..2000
+  - assert=no                 testrange=1001..2000
+  - amalgamation=yes          testrange=1001..2000
+  - opt=no curses=no cairo=no testrange=1001..2000
+  - default=yes               testrange=2001..3000
+  - assert=no                 testrange=2001..3000
+  - amalgamation=yes          testrange=2001..3000
+  - opt=no curses=no cairo=no testrange=2001..3000
 script: make 64bit=yes test

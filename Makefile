@@ -1055,13 +1055,18 @@ obj/%.prepro: ${CURDIR}/src/extended/%.c
 
 RUBY:=ruby
 
+ifndef testrange
+  testrange:=0..5000
+endif
+
 test: all
 	GT_MEM_BOOKKEEPING=on bin/gt -test
 	cd testsuite && env -i GT_MEM_BOOKKEEPING=on MAKE=$(MAKE) PATH=$(PATH) \
           CCACHE_DISABLE=yes HOME=$(HOME) \
           $(RUBY) -I. testsuite.rb \
           -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR) \
-          -gtruby $(CURDIR)/gtruby $(STEST_FLAGS)
+          -gtruby $(CURDIR)/gtruby $(STEST_FLAGS) \
+          -select $(testrange)
 
 clean:
 	rm -rf obj
