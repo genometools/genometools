@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     if (gt_error_is_set(err))
       handle_error(err);
   }
-  if (gt_feature_index_get_range_for_seqid(feature_index, &range, seqid, err))
+  if (gt_feature_index_get_range_for_seqid(feature_index, &range, seqid, true, err))
     handle_error(err);
   diagram = gt_diagram_new(feature_index, seqid, &range, style, err);
   gt_free(seqid);
