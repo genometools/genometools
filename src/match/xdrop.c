@@ -17,10 +17,12 @@
 */
 
 #include <string.h>
+
 #include "core/chardef.h"
 #include "core/divmodmul.h"
-#include "core/minmax.h"
 #include "core/mathsupport.h"
+#include "core/minmax.h"
+
 #include "xdrop.h"
 
 typedef struct
@@ -225,8 +227,8 @@ void gt_evalxdroparbitscoresextend(bool forward,
                                    unsigned long voffset,
                                    GtXdropscore xdropbelowscore)
 {
-  const long ulen = (long) gt_seqabstract_length_get(useq),
-             vlen = (long) gt_seqabstract_length_get(vseq),
+  const long ulen = (long) gt_seqabstract_length(useq),
+             vlen = (long) gt_seqabstract_length(vseq),
              end_k = ulen - vlen, /* diagonal of endpoint (ulen, vlen) */
              integermax = MAX(ulen, vlen),
              integermin = -integermax,

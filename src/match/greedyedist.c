@@ -293,10 +293,10 @@ unsigned long greedyunitedist(GtFrontResource *ftres,
 #ifdef SKDEBUG
   printf("unitedistcheckSEPgeneric(ulen=%lu,vlen=%lu)\n",ulenvalue,vlenvalue);
 #endif
-  gt_assert(gt_seqabstract_length_get(useq) < (unsigned long) LONG_MAX);
-  gt_assert(gt_seqabstract_length_get(vseq) < (unsigned long) LONG_MAX);
-  ftres->ulen = (long) gt_seqabstract_length_get(useq);
-  ftres->vlen = (long) gt_seqabstract_length_get(vseq);
+  gt_assert(gt_seqabstract_length(useq) < (unsigned long) LONG_MAX);
+  gt_assert(gt_seqabstract_length(vseq) < (unsigned long) LONG_MAX);
+  ftres->ulen = (long) gt_seqabstract_length(useq);
+  ftres->vlen = (long) gt_seqabstract_length(vseq);
   ftres->integermin = -MAX(ftres->ulen,ftres->vlen);
   prevfspec = &frontspecspace[0];
   firstfrontforward(useq,vseq,ftres,prevfspec);
