@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"
@@ -345,7 +346,7 @@ void gt_hmm_decode(const GtHMM *hmm,
         tmp_prob = max_probabilities[previous_row][precolidx] +
                    hmm->transition_prob[previous_row][row] +
                    hmm->emission_prob[row][emission];
-        if (tmp_prob > max_probabilities[row][colidx]) {
+        if (tmp_prob - max_probabilities[row][colidx] < DBL_EPSILON) {
           max_probabilities[row][colidx] = tmp_prob;
           backtrace[row][column] = previous_row;
         }
@@ -358,7 +359,7 @@ void gt_hmm_decode(const GtHMM *hmm,
   tmp_prob = max_probabilities[0][colidx];
   state_sequence[num_of_columns - 1] = 0;
   for (row = 1; row < num_of_rows; row++) {
-    if (max_probabilities[row][colidx] > tmp_prob)
+    if (max_probabilities[row][colidx] - tmp_prob > DBL_EPSILON)
       state_sequence[num_of_columns - 1] = row;
   }
 
@@ -500,7 +501,7 @@ void gt_hmm_emit(GtHMM *hmm, unsigned long num_of_emissions,
   cumulative_prob = 0.0;
   for (state = 0; state < hmm->num_of_states - 1; state++) {
     cumulative_prob += gt_hmm_get_initial_state_probability(hmm, state);
-    if (cumulative_prob > random_value)
+    if (cumulative_prob - random_value > DBL_EPSILON)
       break;
   }
 
@@ -511,10 +512,10 @@ void gt_hmm_emit(GtHMM *hmm, unsigned long num_of_emissions,
     cumulative_prob = 0.0;
     for (symbol = 0; symbol < hmm->num_of_symbols - 1; symbol++) {
       cumulative_prob += gt_hmm_get_emission_probability(hmm, state, symbol);
-      if (cumulative_prob > random_value)
+      if (cumulative_prob - random_value > DBL_EPSILON)
         break;
     }
-    if (proc_emission)
+    if (proc_emission != NULL)
       proc_emission(symbol, data);
     /* go to next state */
     random_value = gt_rand_0_to_1();
@@ -522,7 +523,7 @@ void gt_hmm_emit(GtHMM *hmm, unsigned long num_of_emissions,
     for (next_state = 0; next_state < hmm->num_of_states - 1; next_state++) {
       cumulative_prob += gt_hmm_get_transition_probability(hmm,
                                                            state, next_state);
-      if (cumulative_prob > random_value)
+      if (cumulative_prob - random_value > DBL_EPSILON)
         break;
     }
     state = next_state;
@@ -532,7 +533,7 @@ void gt_hmm_emit(GtHMM *hmm, unsigned long num_of_emissions,
 double gt_hmm_rmsd(const GtHMM *hmm_a, const GtHMM* hmm_b)
 {
   unsigned int i, j;
-  double difference = 0.0, rmsd = 0.0;
+  double difference = 0.0, rmsd = 0.0, a_prob, b_prob;
   gt_assert(hmm_a && hmm_b);
   gt_assert(hmm_a->num_of_states == hmm_b->num_of_states);
   gt_assert(hmm_a->num_of_symbols == hmm_b->num_of_symbols);
@@ -541,16 +542,26 @@ double gt_hmm_rmsd(const GtHMM *hmm_a, const GtHMM* hmm_b)
   /* add transitions probabilities */
   for (i = 0; i < hmm_a->num_of_states; i++) {
     for (j = 0; j < hmm_a->num_of_states; j++) {
-      difference = gt_hmm_get_transition_probability(hmm_a, i, j) -
-                   gt_hmm_get_transition_probability(hmm_b, i, j);
+      a_prob = gt_hmm_get_transition_probability(hmm_a,i,j);
+      b_prob = gt_hmm_get_transition_probability(hmm_b,i,j);
+
+      if (gt_double_equals_double(a_prob, b_prob))
+        difference = 0.0;
+      else
+        difference = a_prob - b_prob;
       rmsd += difference * difference;
     }
   }
   /* add emission probabilities */
   for (i = 0; i < hmm_a->num_of_states; i++) {
     for (j = 0; j < hmm_a->num_of_symbols; j++) {
-      difference = gt_hmm_get_emission_probability(hmm_a, i, j) -
-                   gt_hmm_get_emission_probability(hmm_b, i, j);
+      a_prob = gt_hmm_get_emission_probability(hmm_a,i,j);
+      b_prob = gt_hmm_get_emission_probability(hmm_b,i,j);
+
+      if (gt_double_equals_double(a_prob, b_prob))
+        difference = 0.0;
+      else
+        difference = a_prob - b_prob;
       rmsd += difference * difference;
     }
   }
