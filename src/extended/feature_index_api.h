@@ -77,6 +77,7 @@ GtStrArray* gt_feature_index_get_seqids(const GtFeatureIndex *feature_index,
 int         gt_feature_index_get_range_for_seqid(GtFeatureIndex *feature_index,
                                                  GtRange *range,
                                                  const char *seqid,
+                                                 bool dynamic,
                                                  GtError *err);
 /* Returns <has_seqid>  to true if the sequence region identified by <seqid>
    has been registered in the <feature_index>. */

@@ -302,6 +302,7 @@ GtStrArray* gt_feature_index_memory_get_seqids(const GtFeatureIndex *gfi,
 int gt_feature_index_memory_get_range_for_seqid(GtFeatureIndex *gfi,
                                                 GtRange *range,
                                                 const char *seqid,
+                                                bool dynamic,
                                                 GT_UNUSED GtError *err)
 {
   RegionInfo *info;
@@ -311,7 +312,7 @@ int gt_feature_index_memory_get_range_for_seqid(GtFeatureIndex *gfi,
   info = (RegionInfo*) gt_hashmap_get(fi->regions, seqid);
   gt_assert(info);
 
-  if (info->dyn_range.start != ~0UL && info->dyn_range.end != 0) {
+  if (dynamic && info->dyn_range.start != ~0UL && info->dyn_range.end != 0) {
     range->start = info->dyn_range.start;
     range->end = info->dyn_range.end;
   }
