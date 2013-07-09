@@ -307,7 +307,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     /* set display range */
     had_err = gt_feature_index_get_range_for_seqid(features,
                                                    &sequence_region_range,
-                                                   seqid, err);
+                                                   seqid, true, err);
   }
   if (!had_err)
   {

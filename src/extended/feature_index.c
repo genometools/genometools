@@ -262,13 +262,14 @@ GtStrArray* gt_feature_index_get_seqids(const GtFeatureIndex *feature_index,
 int  gt_feature_index_get_range_for_seqid(GtFeatureIndex *feature_index,
                                           GtRange *range,
                                           const char *seqid,
+                                          bool dynamic,
                                           GtError *err)
 {
   int ret;
   gt_assert(feature_index && feature_index->c_class && range && seqid);
   gt_rwlock_rdlock(feature_index->pvt->lock);
   ret = feature_index->c_class->get_range_for_seqid(feature_index, range,
-                                                    seqid, err);
+                                                    seqid, dynamic, err);
   gt_rwlock_unlock(feature_index->pvt->lock);
   return ret;
 }
@@ -442,7 +443,7 @@ int gt_feature_index_unit_test(GtFeatureIndex *fi, GtError *err)
   gt_ensure(had_err, has_seqid);
 
   gt_feature_index_get_range_for_seqid(sh.fi, &check_range, GT_FI_TEST_SEQID,
-                                       err);
+                                       true, err);
   gt_ensure(had_err, check_range.start == GT_FI_TEST_START
                     && check_range.end == GT_FI_TEST_END);
 

@@ -1565,6 +1565,7 @@ GtStrArray* gt_feature_index_gfflike_get_seqids(const GtFeatureIndex *gfi,
 int gt_feature_index_gfflike_get_range_for_seqid(GtFeatureIndex *gfi,
                                                  GtRange *range,
                                                  const char *seqid,
+                                                 bool dynamic,
                                                  GtError *err)
 {
   GtFeatureIndexGFFlike *fi;
@@ -1572,6 +1573,7 @@ int gt_feature_index_gfflike_get_range_for_seqid(GtFeatureIndex *gfi,
   GtRDBStmt *stmt;
   gt_assert(gfi && range && seqid);
   gt_error_check(err);
+  if(dynamic){} // Not sure how to handle this
   fi = feature_index_gfflike_cast(gfi);
   gt_mutex_lock(fi->dblock);
   stmt = fi->stmts[GT_PSTMT_GET_SEQREG_RANGE_SELECT];

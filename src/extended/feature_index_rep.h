@@ -46,6 +46,7 @@ typedef GtStrArray* (*GtFeatureIndexGetSeqidsFunc)(const GtFeatureIndex*,
 typedef int         (*GtFeatureIndexGetRangeForSeqidFunc)(GtFeatureIndex*,
                                                           GtRange*,
                                                           const char*,
+                                                          bool dynamic,
                                                           GtError*);
 typedef int         (*GtFeatureIndexHasSeqidFunc)(const GtFeatureIndex*,
                                                   bool*,
