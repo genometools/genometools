@@ -1721,9 +1721,9 @@ The tool tests can also be run using the \keyword{testsuite/testsuite.rb}
 script. Use the \keyword{-keywords <keywords>} parameter to only run these
 tests tagged with the given keywords. OR and AND operators can be used to
 specify the tests in a more detailed way. The \keyword{-select <n>} parameter
-can be used to run only the one test with number \keyword{n}, and the
-\keyword{-threads <n>} will run the testsuite with \keyword{n} threads in
-parallel.
+can be used to run only the one test with number \keyword{n} (use
+\keyword{-select <m..n>} for ranges), and the \keyword{-threads <n>} will run
+the testsuite with \keyword{n} threads in parallel.
 
 \subsection{Header inclusion dependencies}
 Often function prototypes in the \Gt header files use types declared in
