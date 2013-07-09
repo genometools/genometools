@@ -370,7 +370,6 @@ static int gt_sketch_runner(int argc, const char **argv, int parsed_args,
     had_err = gt_feature_index_get_range_for_seqid(features,
                                                    &sequence_region_range,
                                                    seqid,
-                                                   true,
                                                    err);
   }
   if (!had_err) {

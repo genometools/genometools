@@ -46,8 +46,11 @@ typedef GtStrArray* (*GtFeatureIndexGetSeqidsFunc)(const GtFeatureIndex*,
 typedef int         (*GtFeatureIndexGetRangeForSeqidFunc)(GtFeatureIndex*,
                                                           GtRange*,
                                                           const char*,
-                                                          bool dynamic,
                                                           GtError*);
+typedef int         (*GtFeatureIndexGetOrigRangeForSeqidFunc)(GtFeatureIndex*,
+                                                              GtRange*,
+                                                              const char*,
+                                                              GtError*);
 typedef int         (*GtFeatureIndexHasSeqidFunc)(const GtFeatureIndex*,
                                                   bool*,
                                                   const char*,
@@ -80,6 +83,8 @@ const GtFeatureIndexClass* gt_feature_index_class_new(size_t size,
                                                  get_seqids,
                                          GtFeatureIndexGetRangeForSeqidFunc
                                                  get_range_for_seqid,
+                                         GtFeatureIndexGetOrigRangeForSeqidFunc
+                                                 get_orig_range_for_seqid,
                                          GtFeatureIndexHasSeqidFunc
                                                  has_seqid,
                                          GtFeatureIndexFreeFunc

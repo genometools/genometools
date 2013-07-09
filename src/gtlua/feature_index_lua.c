@@ -216,7 +216,7 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
   luaL_argcheck(L, has_seqid, 2,
                 "feature_index does not contain seqid");
   err = gt_error_new();
-  if (gt_feature_index_get_range_for_seqid(*feature_index, &range, seqid, true, err))
+  if (gt_feature_index_get_range_for_seqid(*feature_index, &range, seqid, err))
     return gt_lua_error(L, err);
   gt_error_delete(err);
   return gt_lua_range_push(L, range);

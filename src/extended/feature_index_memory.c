@@ -302,7 +302,6 @@ GtStrArray* gt_feature_index_memory_get_seqids(const GtFeatureIndex *gfi,
 int gt_feature_index_memory_get_range_for_seqid(GtFeatureIndex *gfi,
                                                 GtRange *range,
                                                 const char *seqid,
-                                                bool dynamic,
                                                 GT_UNUSED GtError *err)
 {
   RegionInfo *info;
@@ -312,12 +311,30 @@ int gt_feature_index_memory_get_range_for_seqid(GtFeatureIndex *gfi,
   info = (RegionInfo*) gt_hashmap_get(fi->regions, seqid);
   gt_assert(info);
 
-  if (dynamic && info->dyn_range.start != ~0UL && info->dyn_range.end != 0) {
+  if (info->dyn_range.start != ~0UL && info->dyn_range.end != 0) {
     range->start = info->dyn_range.start;
     range->end = info->dyn_range.end;
   }
   else if (info->region)
     *range = gt_genome_node_get_range((GtGenomeNode*) info->region);
+  return 0;
+}
+
+int gt_feature_index_memory_get_orig_range_for_seqid(GtFeatureIndex *gfi,
+                                                     GtRange *range,
+                                                     const char *seqid,
+                                                     GT_UNUSED GtError *err)
+{
+  RegionInfo *info;
+  GtFeatureIndexMemory *fi;
+  gt_assert(gfi && range && seqid);
+  fi = gt_feature_index_memory_cast(gfi);
+  info = (RegionInfo*) gt_hashmap_get(fi->regions, seqid);
+  gt_assert(info);
+
+  if (info->region)
+    *range = gt_genome_node_get_range((GtGenomeNode*) info->region);
+
   return 0;
 }
 
@@ -358,6 +375,7 @@ const GtFeatureIndexClass* gt_feature_index_memory_class(void)
                      NULL,
                      gt_feature_index_memory_get_seqids,
                      gt_feature_index_memory_get_range_for_seqid,
+                     gt_feature_index_memory_get_orig_range_for_seqid,
                      gt_feature_index_memory_has_seqid,
                      gt_feature_index_memory_delete);
   }

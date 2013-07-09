@@ -271,7 +271,6 @@ static int gt_featureindex_runner(GT_UNUSED int argc,
   if (!had_err && !gt_option_is_set(arguments->rngopt)) {
     had_err = gt_feature_index_get_range_for_seqid(fi, &arguments->qry_rng,
                                                    gt_str_get(arguments->seqid),
-                                                   true,
                                                    err);
   }
 
@@ -288,7 +287,6 @@ static int gt_featureindex_runner(GT_UNUSED int argc,
 
     had_err = gt_feature_index_get_range_for_seqid(fi, &rng,
                                                    gt_str_get(arguments->seqid),
-                                                   true,
                                                    err);
   }
   if (!had_err) {
