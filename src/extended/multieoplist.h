@@ -40,21 +40,22 @@ typedef struct {
         variable (use bit shifting operations) */
 
 GtMultieoplist* gt_multieoplist_new(void);
+GtMultieoplist* gt_multieoplist_ref(GtMultieoplist *multieops);
 void            gt_multieoplist_delete(GtMultieoplist *multieops);
 
-void            gt_multieoplist_add_replacement(GtMultieoplist *eops);
-void            gt_multieoplist_add_insertion(GtMultieoplist *eops);
-void            gt_multieoplist_add_deletion(GtMultieoplist *eops);
-void            gt_multieoplist_add_mismatch(GtMultieoplist *eops);
-void            gt_multieoplist_add_match(GtMultieoplist *eops);
-void            gt_multieoplist_reset(GtMultieoplist *eops);
-void            gt_multieoplist_remove_last(GtMultieoplist *eops);
-unsigned long   gt_multieoplist_get_length(GtMultieoplist *eops);
-GtMultieop*     gt_multieoplist_get_entry(GtMultieoplist *eops,
+void            gt_multieoplist_add_replacement(GtMultieoplist *multieops);
+void            gt_multieoplist_add_insertion(GtMultieoplist *multieops);
+void            gt_multieoplist_add_deletion(GtMultieoplist *multieops);
+void            gt_multieoplist_add_mismatch(GtMultieoplist *multieops);
+void            gt_multieoplist_add_match(GtMultieoplist *multieops);
+void            gt_multieoplist_reset(GtMultieoplist *multieops);
+void            gt_multieoplist_remove_last(GtMultieoplist *multieops);
+unsigned long   gt_multieoplist_get_length(GtMultieoplist *multieops);
+GtMultieop*     gt_multieoplist_get_entry(GtMultieoplist *multieops,
                                           unsigned long index);
-unsigned long   gt_multieoplist_get_repdel_length(GtMultieoplist *eops);
-unsigned long   gt_multieoplist_get_repins_length(GtMultieoplist *eops);
+unsigned long   gt_multieoplist_get_repdel_length(GtMultieoplist *multieops);
+unsigned long   gt_multieoplist_get_repins_length(GtMultieoplist *multieops);
 
-void            gt_multieoplist_show(GtMultieoplist *eops, FILE *fp);
+void            gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp);
 
 #endif
