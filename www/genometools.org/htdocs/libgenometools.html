@@ -325,15 +325,14 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="gt_feature_index_gfflike_get_all_features"></a>
+<a name="gt_fasta_show_entry"></a>
 
-<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
-                                                          GtArray *results,
-                                                          GtError *err)</code>
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
 <p>
-Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
-   success, a negative value otherwise. The message in <code>err</code> is set
-   accordingly.
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
 </p>
 <hr>
 <a name="GtTrackSelectorFunc"></a>
@@ -3317,6 +3316,17 @@ TODO: document me
 <code>void         gt_feature_index_delete(GtFeatureIndex*)</code>
 <p>
 Deletes the <code>feature_index</code> and all its referenced features.
+</p>
+<hr>
+<a name="gt_feature_index_gfflike_get_all_features"></a>
+
+<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
+                                                          GtArray *results,
+                                                          GtError *err)</code>
+<p>
+Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
+   success, a negative value otherwise. The message in <code>err</code> is set
+   accordingly.
 </p>
 <hr>
 <a name="GtFeatureIndexMemory"></a>
@@ -8413,16 +8423,6 @@ Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
 </p>
 <hr>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
-</p>
-<hr>
 <a name="Assert"></a>
 <h2>Module Assert</h2>
 <a name="gt_assert"></a>
@@ -11158,7 +11158,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-07-08
+Last update: 2013-07-09
 </div>
 </div>
 <!-- Piwik -->
