@@ -67,9 +67,6 @@ int            gt_feature_node_traverse_children_top(GtFeatureNode
 int            gt_feature_node_traverse_direct_children(GtFeatureNode*, void*,
                                                       GtFeatureNodeTraverseFunc,
                                                         GtError*);
-/* Does not free the leaf, do not use during traversal! */
-void           gt_feature_node_remove_leaf(GtFeatureNode *tree,
-                                           GtFeatureNode *leafn);
 
 /* Returns <true> if the given <feature_node> graph contains a marked node. */
 bool           gt_feature_node_contains_marked(GtFeatureNode *feature_node);

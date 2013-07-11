@@ -1089,17 +1089,26 @@ void gt_feature_node_add_child(GtFeatureNode *parent, GtFeatureNode *child)
     parent->observer->child_added(parent, child, parent->observer->data);
 }
 
+typedef struct {
+  GtFeatureNode *leaf,
+                *parent;
+  bool deleted;
+} GtFeatureNodeLeafDeleteInfo;
+
 static int remove_leaf(GtFeatureNode *node, void *data, GT_UNUSED GtError *err)
 {
-  GtFeatureNode *child, *leaf = (GtFeatureNode*) data;
+  GtFeatureNode *child;
+  GtFeatureNodeLeafDeleteInfo* info = (GtFeatureNodeLeafDeleteInfo*) data;
   GtDlistelem *dlistelem;
   gt_error_check(err);
-  if (node != leaf && node->children) {
+  if (node != info->leaf && node->children) {
     for (dlistelem = gt_dlist_first(node->children); dlistelem != NULL;
          dlistelem = gt_dlistelem_next(dlistelem)) {
       child = (GtFeatureNode*) gt_dlistelem_get_data(dlistelem);
-      if (child == leaf) {
+      if (child == info->leaf) {
         gt_dlist_remove(node->children, dlistelem);
+        gt_genome_node_delete((GtGenomeNode*) child);
+        info->deleted = true;
         break;
       }
     }
@@ -1110,10 +1119,24 @@ static int remove_leaf(GtFeatureNode *node, void *data, GT_UNUSED GtError *err)
 void gt_feature_node_remove_leaf(GtFeatureNode *tree, GtFeatureNode *leafn)
 {
   GT_UNUSED int had_err;
+  GtFeatureNodeLeafDeleteInfo info;
   gt_assert(tree && leafn);
-  gt_assert(!gt_feature_node_number_of_children(leafn));
-  had_err = gt_feature_node_traverse_children(tree, leafn, remove_leaf, true,
+
+  info.leaf = leafn;
+  info.parent = tree;
+  info.deleted = false;
+
+  /* ref child node to enable traversal */
+  gt_genome_node_ref((GtGenomeNode*) leafn);
+  gt_assert(gt_feature_node_number_of_children(leafn) == 0);
+  had_err = gt_feature_node_traverse_children(tree, &info, remove_leaf, true,
                                               NULL);
+  /* unref child node, traversal done */
+  gt_genome_node_delete((GtGenomeNode*) leafn);
+
+  if (info.deleted)
+    set_tree_status(&tree->bit_field, TREE_STATUS_UNDETERMINED);
+
   gt_assert(!had_err); /* cannot happen, remove_leaf() is sane */
 }
 
