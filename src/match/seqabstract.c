@@ -217,10 +217,10 @@ static unsigned long gt_seqabstract_lcp_encseq_encseq(bool forward,
 {
   unsigned long lcp;
   GtUchar a, b;
-  bool is_same_sequence = useq->seq.encseq == vseq->seq.encseq &&
-    useq->offset + leftstart == vseq->offset + rightstart;
+  bool is_same_sequence = (useq->seq.encseq == vseq->seq.encseq) &&
+    ((useq->offset + leftstart) == (vseq->offset + rightstart));
 
-  if ((useq->cmpcharbychar || vseq->cmpcharbychar) && !is_same_sequence)
+  if ((useq->cmpcharbychar || vseq->cmpcharbychar) || !is_same_sequence)
   {
     for (lcp = 0; lcp < minlen; lcp++)
     {
