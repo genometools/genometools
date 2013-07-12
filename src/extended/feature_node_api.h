@@ -238,4 +238,12 @@ bool           gt_feature_node_contains_marked(GtFeatureNode *feature_node);
 /* Returns <true> if the (top-level) <feature_node> is marked. */
 bool           gt_feature_node_is_marked(const GtFeatureNode *feature_node);
 
+/* Removes the parent-child relationship between the leaf node <leafn> and a
+   parent node <tree>. <tree> needs not be the direct parent of the <leafn>.
+   Note that <leafn> is freed, use <gt_genome_node_ref()> to increase the
+   reference count if deletion is not wanted. As a side effect, the tree
+   property of <tree> is set back to an undefined state. */
+void           gt_feature_node_remove_leaf(GtFeatureNode *tree,
+                                           GtFeatureNode *leafn);
+
 #endif

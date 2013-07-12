@@ -321,7 +321,6 @@ static int feature_node_lua_remove_leaf(lua_State *L)
   lf = gt_feature_node_try_cast(*leaf);
   luaL_argcheck(L, lf, 2, "not a feature node");
   gt_feature_node_remove_leaf(pf, lf);
-  gt_genome_node_delete((GtGenomeNode*) lf);
   return 0;
 }
 

@@ -107,7 +107,6 @@ static int merge_feature_visitor_feature_node(GtNodeVisitor *nv,
     for (i = 0; i < gt_array_size(v->nodes_to_remove); i++) {
       leaf = *(GtFeatureNode**) gt_array_get(v->nodes_to_remove, i);
       gt_feature_node_remove_leaf(fn, leaf);
-      gt_genome_node_delete((GtGenomeNode*) leaf);
     }
   }
   return had_err;

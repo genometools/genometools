@@ -211,6 +211,7 @@ static void split_cds_feature(GtFeatureNode *cds_feature, GtFeatureNode *fn)
   parents = find_cds_parents(cds_feature, fn);
 
   /* remove CDS feature */
+  gt_genome_node_ref((GtGenomeNode*) cds_feature);
   gt_feature_node_remove_leaf(fn, cds_feature);
 
   /* add CDS feature to all parents */
@@ -225,7 +226,6 @@ static void split_cds_feature(GtFeatureNode *cds_feature, GtFeatureNode *fn)
       GtFeatureNode *new_cds = gt_feature_node_clone(cds_feature);
       gt_feature_node_set_attribute(new_cds, GT_GFF_PARENT, id);
       gt_feature_node_add_child(parent, new_cds);
-      gt_genome_node_delete((GtGenomeNode*) cds_feature);
     }
   }
 
