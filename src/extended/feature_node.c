@@ -155,7 +155,9 @@ static void feature_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
 
 void gt_feature_node_set_source(GtFeatureNode *fn, GtStr *source)
 {
-  gt_assert(fn && source && !fn->source);
+  gt_assert(fn && source);
+  if (fn->source)
+    gt_str_delete(fn->source);
   fn->source = gt_str_ref(source);
   if (fn->observer && fn->observer->source_changed)
     fn->observer->source_changed(fn, source, fn->observer->data);
