@@ -143,10 +143,10 @@ gt_calculatedistancesfromscores(const GtXdropArbitraryscores *arbitscores,
     del = arbitscores->del;
   }
   gt_assert(mat >= mis && mat/2 >= ins && mat/2 >= del);
-  dist->gcd
-    = (int) gt_gcd_uint(gt_gcd_uint((unsigned int) (mat-mis),
-                                    (unsigned int) (mat/2-ins)),
-                         (unsigned int) (mat/2-del));
+  dist->gcd =
+    (int) gt_gcd_uint(gt_gcd_uint((unsigned int) (mat-mis),
+                                  (unsigned int) (mat/2-ins)),
+                      (unsigned int) (mat/2-del));
   dist->mis = (mat - mis) / dist->gcd;
   dist->ins = (mat/2 - ins) / dist->gcd;
   dist->del = (mat/2 - del) / dist->gcd;
@@ -394,7 +394,6 @@ void gt_evalxdroparbitscoresextend(bool forward,
 
     /* pruning lower bound
        lbound may decrease by one or increase/stays the same
-       XXX should it realy be possible to decrease?
        l <- min{k:R(d,k) > -inf} */
     for (k = lbound - 1; k <= ubound + 1; k++) {
       if (gt_xdrop_frontvalue_get(res,currd,k) > integermin) {
@@ -486,50 +485,138 @@ GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,
   return meops;
 }
 
-#define GT_XDROP_NUM_OF_TESTS 5
+#define GT_XDROP_NUM_OF_TESTS 8
 int gt_xdrop_unit_test(GT_UNUSED GtError *err)
 {
-  int had_err = 0, i;
-  const GtUchar *ustring = (const GtUchar*) "AAAGGGTTTCCCAAAGGGTTTCCC",
-                *vstrings[GT_XDROP_NUM_OF_TESTS] =
-                                  {(const GtUchar*) "AAAGGGTTTCCCAAAGGGTTTCCC",
-                                   (const GtUchar*) "AAAGGGTTTCGCAAAGGGTTTCCC",
-                                   (const GtUchar*) "AAAGGGTTTCCAAAGGGTTTCCC",
-                                   (const GtUchar*) "AAAGGGTTTCCTCAAAGGGTTTCCC",
-                                   (const GtUchar*) "AAACGGGTTTCTCAAAGGGTTCCC"};
-  unsigned long vlengths[GT_XDROP_NUM_OF_TESTS] =
-                  {24UL, 24UL, 23UL, 25UL, 24UL},
-                eval_scores[GT_XDROP_NUM_OF_TESTS] = {0, 1UL, 1UL, 1UL, 4UL};
-  GtSeqabstract *useq = gt_seqabstract_new_gtuchar(ustring, 24UL, 0), *vseq;
+  int had_err = 0, i, j, s;
+  const GtUchar *strings[GT_XDROP_NUM_OF_TESTS] =
+    {(const GtUchar*) "TTTTTTTTTTTTTTTAAAGGGTTTCCCAAAGGGTTTCCCTTTTTTTTTTTTTTT",
+     (const GtUchar*) "TTTTTTTTTTTTTTTTTTTGGGGCCCCAAAATTTTTTTTTTTTTTT",
+     (const GtUchar*) "TTTTTTTTTTTTTTTNNNNTTTTGGGGCCCCAAAATTTTTTTTTTTTTTT",
+     (const GtUchar*) "TTTTTTTTTTTTTTTAAAGGGTTTCGCAAAGGGTTTCCCTTTTTTTTTTTTTTT",
+     (const GtUchar*) "TTTTTTTTTTTTTTTAAAGGGTTTCCAAAGGGTTTCCCCTTTTTTTTTTTTTTT",
+     (const GtUchar*) "TTTTTTTTTTTTTTTAAAGGGTTTCCTCAAAGGGTTTCCTTTTTTTTTTTTTTT",
+     (const GtUchar*) "TTTTTTTTTTTTTTTAAACAGATCACCCGCTTTTTTTTTTTTTTTT",
+     (const GtUchar*) "TTTTTTTTTTTTTTTAAACGGGTTTCTCAAAGGGTTCCCTTTTTTTTTTTTTTT"};
+  unsigned long lengths[GT_XDROP_NUM_OF_TESTS] =
+                  {54UL, 46UL, 50UL, 54UL, 54UL, 54UL, 46UL, 54UL},
+                eval_scores[GT_XDROP_NUM_OF_TESTS *
+                            GT_XDROP_NUM_OF_TESTS *
+                            GT_XDROP_NUM_OF_TESTS] =
+                                   {0, 13UL, 0, 1UL, 4UL, 1UL, 0, 7UL,
+                                    13UL, 0, 0, 14UL, 15UL, 14UL, 0, 15UL,
+                                    0, 0, 0, 0, 0, 0, 0, 0,
+                                    1UL, 14UL, 0, 0, 1UL, 2UL, 0, 1UL,
+                                    4UL, 15UL, 0, 1UL, 0, 8UL, 0, 1UL,
+                                    1UL, 14UL, 0, 2UL, 8UL, 0, 0, 4UL,
+                                    0, 0, 0, 0, 0, 0, 0, 0,
+                                    7UL, 15UL, 0, 1UL, 1UL, 4UL, 0, 0,
 
-  GtXdropArbitraryscores score = {3, -1, -1, -1};
+                                    0, 13UL, 0, 1UL, 4UL, 5UL, 14UL, 7UL,
+                                    13UL, 0, 0, 14UL, 15UL, 14UL, 12UL, 15UL,
+                                    0, 0, 0, 20UL, 0, 19UL, 17UL, 0,
+                                    1UL, 14UL, 20UL, 0, 5UL, 6UL, 15UL, 8UL,
+                                    4UL, 15UL, 0, 5UL, 0, 8UL, 15UL, 10UL,
+                                    5UL, 14UL, 19UL, 6UL, 8UL, 0, 14UL, 4UL,
+                                    14UL, 12UL, 17UL, 15UL, 15UL, 14UL, 0, 14UL,
+                                    7UL, 15UL, 0, 8UL, 10UL, 4UL, 14UL, 0,
+
+                                    0, 13UL, 19UL, 1UL, 2UL, 2UL, 13UL, 3UL,
+                                    13UL, 0, 9UL, 14UL, 14UL, 13UL, 12UL, 14UL,
+                                    17UL, 4UL, 0, 18UL, 19UL, 16UL, 16UL, 18UL,
+                                    1UL, 14UL, 18UL, 0, 2UL, 3UL, 13UL, 3UL,
+                                    2UL, 14UL, 18UL, 2UL, 0, 4UL, 13UL, 4UL,
+                                    2UL, 13UL, 19UL, 3UL, 4UL, 0, 13UL, 3UL,
+                                    14UL, 12UL, 17UL, 13UL, 13UL, 14UL, 0, 14UL,
+                                    3UL, 14UL, 18UL, 3UL, 4UL, 3UL, 13UL, 0,
+
+                                    0, 13UL, 17UL, 1UL, 2UL, 2UL, 14UL, 3UL,
+                                    13UL, 0, 4UL, 14UL, 15UL, 13UL, 12UL, 14UL,
+                                    19UL, 9UL, 0, 18UL, 18UL, 19UL, 17UL, 18UL,
+                                    1UL, 14UL, 18UL, 0, 2UL, 3UL, 13UL, 3UL,
+                                    2UL, 14UL, 19UL, 2UL, 0, 4UL, 13UL, 4UL,
+                                    2UL, 13UL, 16UL, 3UL, 4UL, 0, 14UL, 3UL,
+                                    13UL, 12UL, 16UL, 13UL, 13UL, 13UL, 0, 13UL,
+                                    3UL, 14UL, 18UL, 3UL, 4UL, 3UL, 14UL, 0,
+
+                                    0, 0, 0, 1UL, 1UL, 1UL, 0, 1UL,
+                                    0, 0, 0, 0, 0, 0, 0, 0,
+                                    0, 0, 0, 0, 0, 0, 0, 0,
+                                    1UL, 0, 0, 0, 1UL, 0, 0, 1UL,
+                                    1UL, 0, 0, 1UL, 0, 0, 0, 1UL,
+                                    1UL, 0, 0, 0, 0, 0, 0, 1UL,
+                                    0, 0, 0, 0, 0, 0, 0, 0,
+                                    1UL, 0, 0, 1UL, 1UL, 1UL, 0, 0,
+
+                                    0, 0, 0, 1UL, 1UL, 1UL, 0, 1UL,
+                                    0, 0, 0, 0, 0, 0, 0, 0,
+                                    0, 0, 0, 0, 0, 0, 0, 0,
+                                    1UL, 0, 0, 0, 1UL, 2UL, 0, 1UL,
+                                    1UL, 0, 0, 1UL, 0, 0, 0, 1UL,
+                                    1UL, 0, 0, 2UL, 0, 0, 0, 1UL,
+                                    0, 0, 0, 0, 0, 0, 0, 0,
+                                    1UL, 0, 0, 1UL, 1UL, 1UL, 0, 0,
+
+                                    0, 13UL, 17UL, 1UL, 2UL, 2UL, 13UL, 3UL,
+                                    13UL, 0, 4UL, 14UL, 14UL, 13UL, 12UL, 14UL,
+                                    17UL, 4UL, 0, 18UL, 19UL, 16UL, 16UL, 19UL,
+                                    1UL, 14UL, 18UL, 0, 2UL, 3UL, 13UL, 3UL,
+                                    2UL, 14UL, 19UL, 2UL, 0, 4UL, 13UL, 4UL,
+                                    2UL, 13UL, 16UL, 3UL, 4UL, 0, 13UL, 3UL,
+                                    13UL, 12UL, 16UL, 13UL, 13UL, 13UL, 0, 13UL,
+                                    3UL, 14UL, 19UL, 3UL, 4UL, 3UL, 13UL, 0,
+
+                                    0, 13UL, 0, 1UL, 2UL, 2UL, 5UL, 3UL,
+                                    13UL, 0, 0, 14UL, 15UL, 13UL, 0, 14UL,
+                                    0, 0, 0, 0, 0, 0, 0, 0,
+                                    1UL, 14UL, 0, 0, 2UL, 3UL, 5UL, 3UL,
+                                    2UL, 15UL, 0, 2UL, 0, 4UL, 5UL, 4UL,
+                                    2UL, 13UL, 0, 3UL, 4UL, 0, 6UL, 3UL,
+                                    5UL, 0, 0, 5UL, 5UL, 6UL, 0, 5UL,
+                                    3UL, 14UL, 0, 3UL, 4UL, 3UL, 5UL, 0};
+  GtSeqabstract *useq, *vseq;
+
+  GtXdropArbitraryscores score[GT_XDROP_NUM_OF_TESTS] = {{2, -2, -2, -2},
+                                                         {2, -1, -1, -1},
+                                                         {2, -1, -5, -2},
+                                                         {2, -1, -2, -5},
+                                                         {3, -2, -3, -3},
+                                                         {3, -1, -1, -1},
+                                                         {4, -1, -3, -3},
+                                                         {10, -3, -8, -8}};
   GtXdropresources *resources;
   GtXdropbest best;
-  GtXdropscore dropscore = (GtXdropscore) 25;
+  GtXdropscore dropscore = (GtXdropscore) 12;
   GtMultieoplist *edit_ops = NULL;
   GtAlignment *alignment;
 
   gt_error_check(err);
 
-  resources = gt_xdrop_resources_new(&score);
-  for (i = 0; i < GT_XDROP_NUM_OF_TESTS && !had_err; ++i) {
-    vseq = gt_seqabstract_new_gtuchar(vstrings[i], vlengths[i], 0);
-    gt_evalxdroparbitscoresextend(true, &best, resources, useq, vseq, 0, 0,
-                                  dropscore);
+  for (s = 0; s < GT_XDROP_NUM_OF_TESTS; ++s) {
+    resources = gt_xdrop_resources_new(&score[s]);
+    for (i = 0; i < GT_XDROP_NUM_OF_TESTS && !had_err; ++i) {
+      for (j = 0; j < GT_XDROP_NUM_OF_TESTS; ++j) {
+        useq = gt_seqabstract_new_gtuchar(strings[i], lengths[i], 0);
+        vseq = gt_seqabstract_new_gtuchar(strings[j], lengths[j], 0);
+        gt_evalxdroparbitscoresextend(true, &best, resources, useq, vseq, 0, 0,
+                                      dropscore);
 
-    edit_ops = gt_xdrop_backtrack(resources, &best);
-    gt_ensure(had_err, edit_ops != NULL);
-    alignment = gt_alignment_new_with_seqs(ustring, best.ivalue,
-                                           vstrings[i], best.jvalue);
-    gt_alignment_set_multieop_list(alignment, edit_ops);
-    gt_ensure(had_err, eval_scores[i] == gt_alignment_eval(alignment));
+        edit_ops = gt_xdrop_backtrack(resources, &best);
+        gt_ensure(had_err, edit_ops != NULL);
+        alignment = gt_alignment_new_with_seqs(strings[i], best.ivalue,
+                                               strings[j], best.jvalue);
+        gt_alignment_set_multieop_list(alignment, edit_ops);
+        gt_ensure(had_err,
+                  eval_scores[s*64+i*8+j] == gt_alignment_eval(alignment));
 
-    gt_multieoplist_delete(edit_ops);
-    gt_seqabstract_delete(vseq);
-    gt_alignment_delete(alignment);
+        gt_multieoplist_delete(edit_ops);
+        gt_seqabstract_delete(useq);
+        gt_seqabstract_delete(vseq);
+        gt_alignment_delete(alignment);
+      }
+    }
+    gt_xdrop_resources_delete(resources);
   }
-  gt_xdrop_resources_delete(resources);
 
-  gt_seqabstract_delete(useq);
   return had_err;
 }
