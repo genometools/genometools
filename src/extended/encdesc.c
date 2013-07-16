@@ -1054,7 +1054,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
     }
     gt_error_check(err);
     pos = ftell(fp);
-    gt_xfwrite(&dummy, sizeof (dummy), (size_t) 1, fp);
+    gt_xfwrite_one(&dummy, fp);
 
     pagesize = ee->encdesc->pagesize;
     is_not_at_pageborder = (ftell(fp) % pagesize) != 0;
@@ -1080,7 +1080,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
                  sizeof (ee->encdesc->start_of_samplingtab), (size_t) 1, fp);
     else {
       const long null = 0;
-      gt_xfwrite(&null, sizeof (null), (size_t) 1, fp);
+      gt_xfwrite_one(&null, fp);
     }
   }
 
