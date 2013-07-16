@@ -18,6 +18,8 @@
 #include <unistd.h>
 #endif
 
+#include <stdio.h>
+
 #include "core/assert_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
@@ -45,7 +47,7 @@ struct GtSampling
   long pagesize;
 };
 
-static void sampling_init_sampling(GtSampling *sampling,
+static void gt_sampling_init_sampling(GtSampling *sampling,
                                    unsigned long rate)
 {
   sampling->numofsamples = 1UL;
@@ -62,7 +64,7 @@ GtSampling *gt_sampling_new_regular(unsigned long rate, off_t first_offset)
   sampling->method = GT_SAMPLING_REGULAR;
   gt_assert(rate != 0);
 
-  sampling_init_sampling(sampling, rate);
+  gt_sampling_init_sampling(sampling, rate);
 
   gt_assert(first_offset % sampling->pagesize == 0);
 
@@ -85,22 +87,28 @@ GtSampling *gt_sampling_new_page(unsigned long rate, off_t first_offset)
   return sampling;
 }
 
-static inline void sampling_gt_xfwrite(void *ptr,
+static inline void gt_sampling_xfwrite(void *ptr,
                                        size_t size,
                                        size_t nmemb,
                                        FILE *stream)
 {
-  gt_xfwrite((const void*) ptr, size, nmemb, stream);
+  if (nmemb != fwrite((const void*) ptr, size, nmemb, stream)) {
+    perror("gt_sampling_xfwrite could not write to file");
+    exit(EXIT_FAILURE);
+  }
 }
 
-static inline void sampling_gt_xfread(void *ptr,
+static inline void gt_sampling_xfread(void *ptr,
                                       size_t size,
                                       size_t nmemb,
                                       FILE *stream)
 {
-  GT_UNUSED size_t read;
-  read = gt_xfread(ptr, size, nmemb, stream);
-  gt_assert(read == nmemb);
+  if (nmemb != fread(ptr, size, nmemb, stream)) {
+    gt_assert(feof(stream) == 0);
+    if (ferror(stream) != 0)
+      perror("gt_sampling_xfread could not read from file");
+    exit(EXIT_FAILURE);
+  };
 }
 
 typedef void (*SamplingIOFunc)(void *ptr,
@@ -108,12 +116,10 @@ typedef void (*SamplingIOFunc)(void *ptr,
                                size_t nmemb,
                                FILE *stream);
 
-#define SAMPLING_IO_ONE(element, fp)                    \
-  do {                                                  \
-    io_func(&element, sizeof (element), (size_t) 1, fp);\
-  } while (false)
+#define SAMPLING_IO_ONE(element, fp)                   \
+    io_func(&element, sizeof (element), (size_t) 1, fp)\
 
-static inline void sampling_io_page_sampling(GtSampling *sampling,
+static inline void gt_sampling_io_page_sampling(GtSampling *sampling,
                                              FILE *fp,
                                              SamplingIOFunc io_func)
 {
@@ -127,7 +133,7 @@ static inline void sampling_io_page_sampling(GtSampling *sampling,
           fp);
 }
 
-static inline void sampling_io_samplingtab(GtSampling *sampling,
+static inline void gt_sampling_io_samplingtab(GtSampling *sampling,
                                            FILE *fp,
                                            SamplingIOFunc io_func)
 {
@@ -137,7 +143,7 @@ static inline void sampling_io_samplingtab(GtSampling *sampling,
           fp);
 }
 
-static inline void sampling_io_header(GtSampling *sampling,
+static inline void gt_sampling_io_header(GtSampling *sampling,
                                       FILE *fp,
                                       SamplingIOFunc io_func)
 {
@@ -149,11 +155,11 @@ static inline void sampling_io_header(GtSampling *sampling,
 }
 
 /* TODO: add checksums for data */
-static void sampling_io_header_samplingtab(GtSampling *sampling,
+static void gt_sampling_io_header_samplingtab(GtSampling *sampling,
                                            FILE *fp,
                                            SamplingIOFunc io_func)
 {
-  sampling_io_header(sampling, fp, io_func);
+  gt_sampling_io_header(sampling, fp, io_func);
   gt_assert(sampling->method == GT_SAMPLING_REGULAR ||
             sampling->method == GT_SAMPLING_PAGES);
 
@@ -162,7 +168,7 @@ static void sampling_io_header_samplingtab(GtSampling *sampling,
     sampling->samplingtab = gt_malloc((size_t) sampling->arraysize *
                                         sizeof (*sampling->samplingtab));
   }
-  sampling_io_samplingtab(sampling, fp, io_func);
+  gt_sampling_io_samplingtab(sampling, fp, io_func);
 }
 
 void gt_sampling_write(GtSampling *sampling, FILE *fp)
@@ -170,9 +176,9 @@ void gt_sampling_write(GtSampling *sampling, FILE *fp)
   gt_assert(sampling);
   gt_assert(fp);
 
-  sampling_io_header_samplingtab(sampling, fp, sampling_gt_xfwrite);
+  gt_sampling_io_header_samplingtab(sampling, fp, gt_sampling_xfwrite);
   if (sampling->method == GT_SAMPLING_PAGES)
-    sampling_io_page_sampling(sampling, fp, sampling_gt_xfwrite);
+    gt_sampling_io_page_sampling(sampling, fp, gt_sampling_xfwrite);
 }
 
 GtSampling *gt_sampling_read(FILE *fp)
@@ -188,9 +194,9 @@ GtSampling *gt_sampling_read(FILE *fp)
     sampling->current_sample_elementnum = 0;
   sampling->pagesize = sysconf((int) _SC_PAGESIZE);
 
-  sampling_io_header_samplingtab(sampling, fp, sampling_gt_xfread);
+  gt_sampling_io_header_samplingtab(sampling, fp, gt_sampling_xfread);
   if (sampling->method == GT_SAMPLING_PAGES)
-    sampling_io_page_sampling(sampling, fp, sampling_gt_xfread);
+    gt_sampling_io_page_sampling(sampling, fp, gt_sampling_xfread);
   gt_assert(sampling->arraysize == sampling->numofsamples);
 
   return sampling;
