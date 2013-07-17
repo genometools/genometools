@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011      Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
+  Copyright (c) 2011      Sascha Kastens <mail@skastens.de>
   Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 

@@ -1,7 +1,7 @@
 name        = "ORF filter w/o frame"
 author      = "Sascha Kastens"
 version     = "1.0"
-email       = "sascha.kastens@studium.uni-hamburg.de"
+email       = "mail@skastens.de"
 short_descr = "Selects nodes with ORF frame information."
 description = "Selects a node if it contains a node of type " ..
               "reading_frame with frame information."
