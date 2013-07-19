@@ -66,6 +66,7 @@ struct GtLTRdigestPdomVisitor {
   GtStr *cmdline, *tag;
   bool output_all_chains;
   char **args;
+  const char *root_type;
 };
 
 typedef struct {
@@ -269,7 +270,8 @@ static int gt_ltrdigest_pdom_visitor_parse_scores(GT_UNUSED
         ((c) == ' ' || (c) == '.' || (c) == '_' \
                     || (c) == '-' || (c) == '~')
 
-static void gt_ltrdigest_pdom_visitor_add_aaseq(const char *str, GtStr *dest)
+GT_UNUSED static void gt_ltrdigest_pdom_visitor_add_aaseq(const char *str,
+                                                          GtStr *dest)
 {
   unsigned long i;
   gt_assert(str && dest);
@@ -293,7 +295,9 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
                                                      FILE *instream,
                                                      GtError *err)
 {
-  int had_err = 0, cur_domain = GT_UNDEF_INT, line = -1;
+  int had_err = 0, cur_domain = GT_UNDEF_INT, line = GT_UNDEF_INT;
+  bool first_align_line = false;
+  int mod_val = 4;
   GtHMMERSingleHit *hit = NULL;
   gt_assert(lv && instream && status);
   gt_error_check(err);
@@ -311,26 +315,45 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
       gt_assert(hit && !hit->alignment);
       hit->alignment = gt_str_new();
       hit->aastring = gt_str_new();
-      line = -2;
+      first_align_line = true;
+      mod_val = 4;
     } else {
-      gt_assert(hit && hit->alignment);
-      gt_str_append_cstr(hit->alignment, buf);
-      gt_str_append_char(hit->alignment, '\n');
-      switch (line % 4) {
-        case 1:
-          gt_str_append_char(hit->alignment, '\n');
-          break;
-        case 0:
-          {
-            char *b = buf;
-            b = strtok(buf, " ");
-            gt_assert(strspn(b, "012+-") == (size_t) 2);
-            b = strtok(NULL, " ");
-            gt_assert(strlen(b) > 0);
-            b = strtok(NULL, " ");
-            gt_ltrdigest_pdom_visitor_add_aaseq(b, hit->aastring);
+      bool run = true;
+      char junkbuf[BUFSIZ];
+      if (first_align_line) {
+        /* some models contain consensus structure annotation -- in this case
+           there is an additional line in the output which must be taken
+           into account */
+        line = 0;
+        if (1 == sscanf(buf, "%*s %s", junkbuf)) {
+          if (0 == strcmp(junkbuf, "CS")) {
+            mod_val = 5;
+            line = -1;
+            run = false;
           }
-          break;
+        }
+        first_align_line = false;
+      }
+      if (run) {
+        gt_assert(hit && hit->alignment);
+        gt_str_append_cstr(hit->alignment, buf);
+        gt_str_append_char(hit->alignment, '\n');
+        switch (line % mod_val) {
+          case 1:
+            gt_str_append_char(hit->alignment, '\n');
+            break;
+          case 2:
+            {
+              GT_UNUSED char *b = buf;
+              b = strtok(buf, " ");
+              gt_assert(strspn(b, "012+-") == (size_t) 2);
+              b = strtok(NULL, " ");
+              gt_assert(strlen(b) > 0);
+              b = strtok(NULL, " ");
+              gt_ltrdigest_pdom_visitor_add_aaseq(b, hit->aastring);
+            }
+            break;
+        }
       }
       line++;
     }
@@ -715,8 +738,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
   /* traverse annotation subgraph and find LTR element */
   fni = gt_feature_node_iterator_new(fn);
   while (!had_err && (curnode = gt_feature_node_iterator_next(fni))) {
-    if (strcmp(gt_feature_node_get_type(curnode),
-               gt_ft_LTR_retrotransposon) == 0) {
+    if (strcmp(gt_feature_node_get_type(curnode), lv->root_type) == 0) {
       lv->ltr_retrotrans = curnode;
     }
   }
@@ -741,7 +763,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
 
     had_err = gt_extract_feature_sequence(seq,
                                           (GtGenomeNode*) lv->ltr_retrotrans,
-                                          gt_symbol(gt_ft_LTR_retrotransposon),
+                                          lv->root_type,
                                           false, NULL, NULL, lv->rmap, err);
 
     if (!had_err) {
@@ -875,6 +897,21 @@ void gt_ltrdigest_pdom_visitor_output_all_chains(GtLTRdigestPdomVisitor *lv)
   lv->output_all_chains = true;
 }
 
+void gt_ltrdigest_pdom_visitor_set_root_type(GtLTRdigestPdomVisitor *lv,
+                                             const char *type)
+{
+  gt_assert(lv && type);
+  lv->root_type = gt_symbol(type);
+}
+
+void gt_ltrdigest_pdom_visitor_set_source_tag(GtLTRdigestPdomVisitor *lv,
+                                              const char *tag)
+{
+  gt_assert(lv && tag && lv->tag);
+  gt_str_reset(lv->tag);
+  gt_str_append_cstr(lv->tag, tag);
+}
+
 GtNodeVisitor* gt_ltrdigest_pdom_visitor_new(GtPdomModelSet *model,
                                              double eval_cutoff,
                                              unsigned int chain_max_gap_length,
@@ -905,7 +942,8 @@ GtNodeVisitor* gt_ltrdigest_pdom_visitor_new(GtPdomModelSet *model,
   lv->chain_max_gap_length = chain_max_gap_length;
   lv->rmap = rmap;
   lv->output_all_chains = false;
-  lv->tag = gt_str_new_cstr(GT_LTRDIGEST_TAG);
+  lv->tag = gt_str_new_cstr("GenomeTools");
+  lv->root_type = gt_symbol(gt_ft_LTR_retrotransposon);
 
   for (i = 0; i < 3; i++) {
     lv->fwd[i] = gt_str_new();

@@ -522,6 +522,9 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
       if (pdom_v == NULL)
         had_err = -1;
       if (!had_err) {
+        gt_ltrdigest_pdom_visitor_set_source_tag((GtLTRdigestPdomVisitor*)
+                                                                        pdom_v,
+                                                 GT_LTRDIGEST_TAG);
         if (arguments->output_all_chains)
           gt_ltrdigest_pdom_visitor_output_all_chains((GtLTRdigestPdomVisitor*)
                                                                         pdom_v);
