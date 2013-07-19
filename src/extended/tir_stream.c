@@ -993,3 +993,9 @@ GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
 
   return NULL;
 }
+
+const GtEncseq* gt_tir_stream_get_encseq(GtTIRStream *ts)
+{
+  gt_assert(ts);
+  return ts->encseq;
+}
