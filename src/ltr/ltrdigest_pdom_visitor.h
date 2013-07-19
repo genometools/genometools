@@ -40,4 +40,10 @@ GtNodeVisitor* gt_ltrdigest_pdom_visitor_new(GtPdomModelSet *model,
 
 void           gt_ltrdigest_pdom_visitor_output_all_chains(
                                                     GtLTRdigestPdomVisitor *lv);
+void           gt_ltrdigest_pdom_visitor_set_root_type(
+                                                     GtLTRdigestPdomVisitor *lv,
+                                                     const char *type);
+void           gt_ltrdigest_pdom_visitor_set_source_tag(
+                                                     GtLTRdigestPdomVisitor *lv,
+                                                     const char *tag);
 #endif

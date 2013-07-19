@@ -66,6 +66,7 @@ struct GtLTRdigestPdomVisitor {
   GtStr *cmdline, *tag;
   bool output_all_chains;
   char **args;
+  const char *root_type;
 };
 
 typedef struct {
@@ -715,8 +716,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
   /* traverse annotation subgraph and find LTR element */
   fni = gt_feature_node_iterator_new(fn);
   while (!had_err && (curnode = gt_feature_node_iterator_next(fni))) {
-    if (strcmp(gt_feature_node_get_type(curnode),
-               gt_ft_LTR_retrotransposon) == 0) {
+    if (strcmp(gt_feature_node_get_type(curnode), lv->root_type) == 0) {
       lv->ltr_retrotrans = curnode;
     }
   }
@@ -741,7 +741,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
 
     had_err = gt_extract_feature_sequence(seq,
                                           (GtGenomeNode*) lv->ltr_retrotrans,
-                                          gt_symbol(gt_ft_LTR_retrotransposon),
+                                          lv->root_type,
                                           false, NULL, NULL, lv->rmap, err);
 
     if (!had_err) {
@@ -875,6 +875,21 @@ void gt_ltrdigest_pdom_visitor_output_all_chains(GtLTRdigestPdomVisitor *lv)
   lv->output_all_chains = true;
 }
 
+void gt_ltrdigest_pdom_visitor_set_root_type(GtLTRdigestPdomVisitor *lv,
+                                             const char *type)
+{
+  gt_assert(lv && type);
+  lv->root_type = gt_symbol(type);
+}
+
+void gt_ltrdigest_pdom_visitor_set_source_tag(GtLTRdigestPdomVisitor *lv,
+                                              const char *tag)
+{
+  gt_assert(lv && tag && lv->tag);
+  gt_str_reset(lv->tag);
+  gt_str_append_cstr(lv->tag, tag);
+}
+
 GtNodeVisitor* gt_ltrdigest_pdom_visitor_new(GtPdomModelSet *model,
                                              double eval_cutoff,
                                              unsigned int chain_max_gap_length,
@@ -905,7 +920,8 @@ GtNodeVisitor* gt_ltrdigest_pdom_visitor_new(GtPdomModelSet *model,
   lv->chain_max_gap_length = chain_max_gap_length;
   lv->rmap = rmap;
   lv->output_all_chains = false;
-  lv->tag = gt_str_new_cstr(GT_LTRDIGEST_TAG);
+  lv->tag = gt_str_new_cstr("GenomeTools");
+  lv->root_type = gt_symbol(gt_ft_LTR_retrotransposon);
 
   for (i = 0; i < 3; i++) {
     lv->fwd[i] = gt_str_new();
