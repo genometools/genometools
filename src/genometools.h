@@ -24,6 +24,10 @@
 /* the generated config header (includes version information) */
 #include "gt_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* the core module */
 #include "core/alphabet_api.h"
 #include "core/array2dim_api.h"
@@ -171,6 +175,10 @@
 #include "annotationsketch/style_api.h"
 #include "annotationsketch/text_width_calculator_api.h"
 #include "annotationsketch/text_width_calculator_cairo_api.h"
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
