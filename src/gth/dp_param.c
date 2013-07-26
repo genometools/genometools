@@ -22,6 +22,7 @@
 #include "core/safearith.h"
 #include "core/unused_api.h"
 #include "gth/bssm_param_rep.h"
+#include "gth/default.h"
 #include "gth/dp_param.h"
 #include "gth/splice_site_model_rep.h"
 
@@ -490,6 +491,8 @@ static void filllogvaluesforonestrand(GtArray *ranges,
       for (genomicindex = startpos; genomicindex <= endpos; genomicindex++) {
         evaldonorprob(&donorprob, gen_seq_tran, gen_seq_bounds, genomicindex,
                        gen_alphabet_symbolmap, splice_site_model->bssm_param);
+        if (donorprob > GTH_DEFAULT_MAXIMAL_SPLICESITEPROB)
+          donorprob = GTH_DEFAULT_MAXIMAL_SPLICESITEPROB;
         if (donorprob > 0.0) {
           log_donorprob = log((double) donorprob);
           if (log_donorprob > (double) log_Pdonor[probindex]) {
@@ -501,6 +504,8 @@ static void filllogvaluesforonestrand(GtArray *ranges,
         evalacceptorprob(&acceptorprob, gen_seq_tran, gen_seq_bounds,
                          genomicindex, gen_alphabet_symbolmap,
                          splice_site_model->bssm_param);
+        if (acceptorprob > GTH_DEFAULT_MAXIMAL_SPLICESITEPROB)
+          acceptorprob = GTH_DEFAULT_MAXIMAL_SPLICESITEPROB;
         if (acceptorprob > 0.0) {
           log_acceptorprob = log((double) acceptorprob);
           if (log_acceptorprob > (double) log_Pacceptor[probindex]) {
