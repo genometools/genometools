@@ -15,18 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/byte_popcount_api.h"
+#include "core/byte_select_api.h"
 #include "core/combinatorics.h"
 #include "core/ensure.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
+#include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"
 #include "extended/compressed_bitsequence.h"
 #include "extended/popcount_tab.h"
-#include "core/log_api.h"
-#include "core/byte_select_api.h"
 
 /* this seems to be a good default value. maybe change this in the future */
 #define GT_COMP_BITSEQ_BLOCKSIZE 15U
@@ -627,7 +628,7 @@ gt_compressed_bitsequence_select_1_word(uint64_t word, unsigned int i)
                shift = (unsigned int) ((CHAR_BIT - 1) * sizeof (word));
   for (idx = 0; idx < (unsigned int) sizeof (word); ++idx, shift -= 8) {
     bytecount =
-      (unsigned int) gt_popcount_tab_B_1_count[(word >> shift) & 0xFFULL];
+      (unsigned int) gt_byte_popcount[(word >> shift) & 0xFFULL];
     if (ranksum + bytecount >= i) {
       i -= ranksum;
       return (unsigned int) (idx * CHAR_BIT +
