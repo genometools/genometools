@@ -28,6 +28,7 @@ function DocBase:new()
   o.classcomments = {}
   o.modules = {}
   o.moduledefs = {}
+  o.variables = {}
   o.solefuncs = {}
   setmetatable(o, self)
   self.__index = self
@@ -49,6 +50,7 @@ function DocBase:add_module(modulename, be_verbose)
     print("module added: " .. modulename)
   end
   self.modules[modulename] = self.modules[modulename] or {}
+  self.variables[modulename] = self.variables[modulename] or {}
 end
 
 function DocBase:add_method(funcret, funcname, funcargs, comment, be_verbose)
@@ -91,12 +93,52 @@ function DocBase:add_method(funcret, funcname, funcargs, comment, be_verbose)
   end
 end
 
+function DocBase:add_variable(vartype, varname, comment, be_verbose)
+  assert(varname and comment)
+  local desc = {}
+  desc.type = vartype
+  desc.name = varname
+  desc.comment = comment
+  if be_verbose then
+    print("variable added: " .. desc.name)
+  end
+  if self.last_module then
+    assert(self.variables)
+    self.variables[self.last_module]
+                  [#self.variables[self.last_module] + 1] = desc
+    return
+  end
+  local classname, match
+  varname = string.lower(string.gsub(desc.name, "_", ""))
+  for class_to_search in pairs(self.classes) do
+    local class_to_match = "^" .. string.lower(string.gsub(class_to_search, "_", ""))
+    if be_verbose then
+      print("match class: " .. class_to_match .. funcname)
+    end
+    match = string.match(funcname, class_to_match)
+    if match then
+      if not classname or string.len(match) > string.len(classname) then
+        classname = class_to_search
+      end
+    end
+  end
+  if be_verbose and classname then
+    print("classname found: " .. classname)
+  end
+  -- if this is a valid classname, try to store method in class
+  if classname and self.classes[classname] then
+    self.classes[classname][#self.classes[classname] + 1] = desc
+  else
+    self.solefuncs[#self.solefuncs + 1] = desc
+  end
+end
+
 local function method_keyword(ast, be_verbose)
   for i, keyword in ipairs(ast) do
     if be_verbose then
       print("Try: " .. keyword)
     end
-    if keyword == "function" or keyword == "functionptr" then
+    if keyword == "function" or keyword == "functionptr" or keyword == "variable" then
       if be_verbose then
         print("Return: " .. i)
       end
@@ -141,7 +183,8 @@ function DocBase:process_ast(ast, be_verbose)
           desc = {}
           desc.name = ast[3]
           desc.comment = ast[2]
-          self.moduledefs[self.last_module] = self.moduledefs[self.last_module]                                               or {}
+          self.moduledefs[self.last_module] = self.moduledefs[self.last_module]
+                                              or {}
           self.moduledefs[self.last_module][#self.moduledefs[self.last_module]
                                             + 1] = desc
         end
@@ -153,7 +196,7 @@ function DocBase:process_ast(ast, be_verbose)
           assert(funcpos > 2)
           assert(#ast == funcpos + 2 or #ast == funcpos + 3)
           if be_verbose then
-            print("function found!")
+            print("found: " .. ast[3] .. "!")
           end
           if ast[2] == "undefined" then
             w.warning("undefined comment")
@@ -161,8 +204,13 @@ function DocBase:process_ast(ast, be_verbose)
             complete_comment = table.concat(ast, "", 2, funcpos-1)
             complete_comment = string.strip(complete_comment)
           end
+          if ast[3] == "variable" then
+            self:add_variable(ast[funcpos+1], ast[funcpos+2], complete_comment,
+                              be_verbose)
+          else
             self:add_method(ast[funcpos+1], ast[funcpos+2], ast[funcpos+3],
                             complete_comment, be_verbose)
+          end
           break
         elseif be_verbose then
           print("no function found!")
@@ -189,7 +237,9 @@ function DocBase:accept(visitor)
   -- visit all modules
   local sorted_modules = {}
   for modulename in pairs(self.modules) do
-    if #self.modules[modulename] > 0 or #self.moduledefs[modulename] > 0 then
+    if #self.modules[modulename] > 0 or
+      #self.variables[modulename] > 0 or
+      #self.moduledefs[modulename] > 0 then
       sorted_modules[#sorted_modules + 1] = modulename
     end
   end
@@ -219,6 +269,11 @@ function DocBase:accept(visitor)
   if visitor.visit_module then
     for _, modulename in ipairs(sorted_modules) do
       visitor:visit_module(modulename)
+      -- visit variables for module
+      for _, variable in ipairs(self.variables[modulename]) do
+        visitor:visit_variable(variable)
+        method_names[#method_names + 1] = variable.name
+      end
       -- visit funcdefs for module
       if self.moduledefs[modulename] then
         for _, funcdef in ipairs(self.moduledefs[modulename]) do
@@ -232,7 +287,7 @@ function DocBase:accept(visitor)
       end
     end
   end
-  -- visit all method names (for index construction)
+  -- visit all method and variable names (for index construction)
   if visitor.visit_index then
     table.sort(method_names)
     visitor:visit_index(method_names)
