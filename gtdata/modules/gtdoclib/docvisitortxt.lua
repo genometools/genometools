@@ -56,6 +56,12 @@ function DocVisitorTxt:visit_method(desc)
            end
 end
 
+function DocVisitorTxt:visit_variable(desc)
+  assert(desc)
+  io.write(string.format("variable:\n%s\n%s %s\n", desc.comment, desc.type,
+                         desc.name))
+end
+
 function DocVisitorTxt:visit_funcdef(desc)
   assert(desc)
   io.write(string.format("fundef:\n%s\n%s\n", desc.comment, desc.name))

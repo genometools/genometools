@@ -19,7 +19,10 @@
 
 #include "core/error_api.h"
 
-extern unsigned int gt_jobs; /* number of parallel threads to be used */
+/* Threads module */
+
+/* Number of parallel threads to be used. */
+extern unsigned int gt_jobs;
 
 /* The <GtThread> class represents a handle to a single thread of execution. */
 typedef struct GtThread GtThread;

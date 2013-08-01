@@ -277,6 +277,10 @@ interfaces.
 
   <li><a href="#Bsearch">Bsearch</a>
 
+  <li><a href="#BytePopcount">BytePopcount</a>
+
+  <li><a href="#ByteSelect">ByteSelect</a>
+
   <li><a href="#Countingsort">Countingsort</a>
 
   <li><a href="#Cstr">Cstr</a>
@@ -313,6 +317,8 @@ interfaces.
 
   <li><a href="#Symbol">Symbol</a>
 
+  <li><a href="#Threads">Threads</a>
+
   <li><a href="#Undef">Undef</a>
 
   <li><a href="#Unused">Unused</a>
@@ -325,15 +331,14 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="gt_feature_index_gfflike_get_all_features"></a>
+<a name="gt_fasta_show_entry"></a>
 
-<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
-                                                          GtArray *results,
-                                                          GtError *err)</code>
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
 <p>
-Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
-   success, a negative value otherwise. The message in <code>err</code> is set
-   accordingly.
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
 </p>
 <hr>
 <a name="GtTrackSelectorFunc"></a>
@@ -3332,6 +3337,17 @@ TODO: document me
 Deletes the <code>feature_index</code> and all its referenced features.
 </p>
 <hr>
+<a name="gt_feature_index_gfflike_get_all_features"></a>
+
+<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
+                                                          GtArray *results,
+                                                          GtError *err)</code>
+<p>
+Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
+   success, a negative value otherwise. The message in <code>err</code> is set
+   accordingly.
+</p>
+<hr>
 <a name="GtFeatureIndexMemory"></a>
 <h2>Class GtFeatureIndexMemory</h2>
 
@@ -3706,6 +3722,18 @@ Returns <code>true</code> if the given <code>feature_node</code> graph contains 
 <code>bool            gt_feature_node_is_marked(const GtFeatureNode *feature_node)</code>
 <p>
 Returns <code>true</code> if the (top-level) <code>feature_node</code> is marked.
+</p>
+<hr>
+<a name="gt_feature_node_remove_leaf"></a>
+
+<code>void            gt_feature_node_remove_leaf(GtFeatureNode *tree,
+                                           GtFeatureNode *leafn)</code>
+<p>
+Removes the parent-child relationship between the leaf node <code>leafn</code> and a
+   parent node <code>tree</code>. <code>tree</code> needs not be the direct parent of the <code>leafn</code>.
+   Note that <code>leafn</code> is freed, use <code>gt_genome_node_ref()</code> to increase the
+   reference count if deletion is not wanted. As a side effect, the tree
+   property of <code>tree</code> is set back to an undefined state.
 </p>
 <hr>
 <a name="GtFeatureNodeIterator"></a>
@@ -8426,16 +8454,6 @@ Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
 </p>
 <hr>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
-</p>
-<hr>
 <a name="Assert"></a>
 <h2>Module Assert</h2>
 <a name="gt_assert"></a>
@@ -8479,6 +8497,25 @@ Similar interface to <code>gt_bsearch_data()</code>, except that all members whi
 Similar interface to <code>gt_bsearch_all()</code>. Additionally, if a bittab is given
    (which must be of size <code>nmemb</code>), the bits corresponding to the found
    elements are marked (i.e., set).
+</p>
+<hr>
+<a name="BytePopcount"></a>
+<h2>Module BytePopcount</h2>
+<a name="gt_byte_popcount[256]"></a>
+<code>extern const uint8_t  gt_byte_popcount[256]</code>
+<p>
+Lookup table containing the popcount (number of set bits). Entry at <code>i</code>
+   equals popcount(<code>i</code>).
+</p>
+<hr>
+<a name="ByteSelect"></a>
+<h2>Module ByteSelect</h2>
+<a name="gt_byte_select[2048]"></a>
+<code>extern const uint8_t  gt_byte_select[2048]</code>
+<p>
+Contains 256 * 8 select values, Entry at index 256 * <code>j</code> + <code>i</code> equals the
+   position of the (<code>j</code> + 1)-th set bit in byte <code>i</code>. Positions lie in the range
+   [0..7]. Returns 8 if byte <code>i</code> contains less than <code>j</code> set bits.
 </p>
 <hr>
 <a name="Countingsort"></a>
@@ -9033,6 +9070,14 @@ Return a symbol (a canonical representation) for <code>cstr</code>. An advantage
    keep in mind that this memory can never be freed safely during the lifetime
    of the calling program. Therefore, it should only be used for a small set of
    <code>cstr</code>s.
+</p>
+<hr>
+<a name="Threads"></a>
+<h2>Module Threads</h2>
+<a name="gt_jobs"></a>
+<code>extern unsigned int  gt_jobs</code>
+<p>
+Number of parallel threads to be used.
 </p>
 <hr>
 <a name="Undef"></a>
@@ -9636,6 +9681,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_bsearch_data"><code>gt_bsearch_data</code></a><br>
 
+  <a href="#gt_byte_popcount[256]"><code>gt_byte_popcount[256]</code></a><br>
+
+  <a href="#gt_byte_select[2048]"><code>gt_byte_select[2048]</code></a><br>
+
   <a href="#gt_calloc"><code>gt_calloc</code></a><br>
 
   <a href="#gt_canvas_cairo_context_new"><code>gt_canvas_cairo_context_new</code></a><br>
@@ -10128,6 +10177,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_remove_attribute"><code>gt_feature_node_remove_attribute</code></a><br>
 
+  <a href="#gt_feature_node_remove_leaf"><code>gt_feature_node_remove_leaf</code></a><br>
+
   <a href="#gt_feature_node_score_is_defined"><code>gt_feature_node_score_is_defined</code></a><br>
 
   <a href="#gt_feature_node_set_attribute"><code>gt_feature_node_set_attribute</code></a><br>
@@ -10399,6 +10450,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_interval_tree_traverse"><code>gt_interval_tree_traverse</code></a><br>
 
   <a href="#gt_is_little_endian"><code>gt_is_little_endian</code></a><br>
+
+  <a href="#gt_jobs"><code>gt_jobs</code></a><br>
 
   <a href="#gt_layout_delete"><code>gt_layout_delete</code></a><br>
 
@@ -11173,7 +11226,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-07-11
+Last update: 2013-08-01
 </div>
 </div>
 <!-- Piwik -->
