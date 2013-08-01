@@ -24,12 +24,12 @@ DocParser = {}
 
 -- Common Lexical Elements
 local Any             = lpeg.P(1)
-local Newline         = lpeg.S("\n")
+local Newline         = lpeg.P("\n")
 local Whitespace      = lpeg.S(" \t\n")
 local OptionalSpace   = Whitespace^0
 local Space           = Whitespace^1
-local Semicolon       = lpeg.S(";")
-local DefineSeparator = lpeg.S("\\")
+local Semicolon       = lpeg.P(";")
+local DefineSeparator = lpeg.P("\\")
 
 -- Lexical Elements of Lua
 local LuaLongCommentStart  = lpeg.P("--[[")
@@ -99,8 +99,8 @@ local OptionalWord = (Character^1 * Space)^-1
 local Function = lpeg.Cc("function") *
                  lpeg.C(Character^1 * Space * OptionalWord * OptionalWord *
                         OptionalWord ) *
-                 lpeg.C(lpeg.P(Any - lpeg.P("("))^1) * lpeg.P("(") *
-                 lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") *
+                 lpeg.C(lpeg.P(Any - lpeg.S("(;"))^1) * lpeg.P("(") *
+                 lpeg.C((Any - lpeg.S(");"))^1) * lpeg.P(")") *
                  (Any - Semicolon)^0 * Semicolon
 local FunctionPtr = lpeg.Cc("functionptr") *
                  lpeg.P("typedef") * Space *
@@ -109,6 +109,10 @@ local FunctionPtr = lpeg.Cc("functionptr") *
                  lpeg.C(lpeg.P(Any - lpeg.S("()"))^1) * lpeg.P(")") * lpeg.P("(") *
                  lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") *
                  (Any - Semicolon)^0 * Semicolon
+local Variable = lpeg.Cc("variable") *
+                 lpeg.C(lpeg.P("extern") * Space * Character^1 *Space*
+                        OptionalWord * OptionalWord * OptionalWord) *
+                 lpeg.C((Any - lpeg.S("();"))^0) * Semicolon
 local ExportedComment = lpeg.Cc("comment") * CCommentStart *
                         lpeg.C((Any - CCommentEnd)^0) * CCommentEnd
 local ExportedDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
@@ -118,7 +122,7 @@ local ExportedDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
 local ExportedPlainDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
                             lpeg.C(lpeg.P(Any - (DefineSeparator + Space))^1) *
                             OptionalSpace * DefineSeparator
-local ExportCMethod = lpeg.Ct(ExportedComment * Newline^0 * (Function + FunctionPtr))
+local ExportCMethod = lpeg.Ct(ExportedComment * Newline^0 * (Function + FunctionPtr + Variable))
 local ExportCDefine = lpeg.Ct(ExportedComment * Newline^0 *
                               (ExportedDefine+ ExportedPlainDefine))
 local ModuleDef = lpeg.Ct(lpeg.Cc("module") * CCommentStart * Space *

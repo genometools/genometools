@@ -105,9 +105,23 @@ function DocVisitorHTML:visit_method(desc)
   if desc.rval then
     name = desc.rval .. " " .. desc.name
   else
-    name = desc.rval
+    name = desc.name
   end
   include("method.lp", { name = name, args = desc.args,
+                         comment = codify(desc.comment),
+                         prototype = prototype })
+end
+
+function DocVisitorHTML:visit_variable(desc)
+  assert(desc)
+  local name
+  local prototype = desc.name
+  if desc.type then
+    name = desc.type .. " " .. desc.name
+  else
+    name = desc.name
+  end
+  include("variable.lp", { name = name,
                          comment = codify(desc.comment),
                          prototype = prototype })
 end
