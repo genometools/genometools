@@ -34,9 +34,13 @@ def parseargs(argv)
   options.ddd = false
   options.threads = false
   options.clang = true
+  options.ccache = true
   opts = OptionParser.new
   opts.on("-c", "--[no-]clang") do |x|
     options.clang = x
+  end
+  opts.on("--[no-]ccache") do |x|
+    options.ccache = x
   end
   opts.on("-m","--m64","compile 64 bit binary") do |x|
     options.m64 = true
@@ -94,10 +98,18 @@ def makecompilerflags(fp,options)
     fp.print " prof=yes"
     options.clang = false
   end
-  if options.clang
-    fp.print " CC='ccache clang'"
+  if options.ccache
+    if options.clang
+      fp.print " CC='ccache clang'"
+    else
+      fp.print " CC='ccache gcc'"
+    end
   else
-    fp.print " CC=gcc"
+    if options.clang
+      fp.print " CC='clang'"
+    else
+      fp.print " CC='gcc'"
+    end
   end
   if options.gprof
     fp.print " LIBS='-Wl,--no-as-needed -lprofiler -Wl,--as-needed'"

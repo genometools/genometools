@@ -129,6 +129,20 @@ function DocVisitorLaTeX:visit_method(desc)
                          prototype = codify(prototype) })
 end
 
+function DocVisitorLaTeX:visit_variable(desc)
+  assert(desc)
+  local name
+  local prototype = desc.name
+  if desc.type then
+    name = desc.type .. " " .. desc.name
+  else
+    name = desc.name
+  end
+  include("variable_latex.lp", { name = codify(name),
+                         comment = paragraphify(codify(desc.comment)),
+                         prototype = codify(prototype) })
+end
+
 function DocVisitorLaTeX:visit_funcdef(desc)
   assert(desc)
   include("funcdef_latex.lp", { name = codify(desc.name),
