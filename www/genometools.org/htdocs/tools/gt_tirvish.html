@@ -174,11 +174,54 @@ specify the number of nucleotides (to the left and to the right) that will be se
 </p>
 </dd>
 <dt class="hdlist1">
+<strong>-hmms</strong> 
+</dt>
+<dd>
+<p>
+profile HMM models for domain detection (separate by spaces, finish with --) in HMMER3 format
+Omit this option to disable pHMM search.
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pdomevalcutoff</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+global E-value cutoff for pHMM search
+default 1E-6 (default: 0.000001)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-pdomcutoff</strong> [<em>&#8230;</em>]
+</dt>
+<dd>
+<p>
+model-specific score cutoff
+choose from TC (trusted cutoff) | GA (gathering cutoff) | NONE (no cutoffs) (default: GA)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-maxgaplen</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+maximal allowed gap size between fragments (in amino acids) when chaining pHMM hits for a protein domain (default: 50)
+</p>
+</dd>
+<dt class="hdlist1">
 <strong>-help</strong> 
 </dt>
 <dd>
 <p>
-display help and exit
+display help for basic options and exit
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-help+</strong> 
+</dt>
+<dd>
+<p>
+display help for all options and exit
 </p>
 </dd>
 <dt class="hdlist1">
