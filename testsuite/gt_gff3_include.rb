@@ -310,10 +310,10 @@ Test do
   run "diff #{last_stdout} #{$testdata}addintrons.out"
 end
 
-Name "gt gff3 test option -resetsource"
+Name "gt gff3 test option -setsource"
 Keywords "gt_gff3"
 Test do
-  run_test "#{$bin}gt gff3 -resetsource GFF3spec #{$testdata}resetsource.gff3"
+  run_test "#{$bin}gt gff3 -setsource GFF3spec #{$testdata}resetsource.gff3"
   run "diff #{last_stdout} #{$testdata}resetsource.out"
 end
 

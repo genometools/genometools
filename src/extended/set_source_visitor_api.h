@@ -14,21 +14,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RESET_SOURCE_STREAM_API_H
-#define RESET_SOURCE_STREAM_API_H
+#ifndef SET_SOURCE_VISITOR_API_H
+#define SET_SOURCE_VISITOR_API_H
 
-#include "extended/node_stream_api.h"
-
-/**
- * Implements the <GtNodeStream> interface. A <GtResetSourceStream> resets the
- * 'source' value for GtFeatureNode objects.
- */
-typedef struct GtResetSourceStream GtResetSourceStream;
+#include "core/str_api.h"
+#include "extended/node_visitor_api.h"
 
 /**
- * Create a <GtResetSourceStream> object.
+ * Implements the <GtNodeVisitor> interface. Used with the <GtVisitorStream>
+ * class, a <GtSetSourceVisitor> resets the 'source' value for <GtFeatureNode>
+ * objects.
  */
-GtNodeStream* gt_reset_source_stream_new(GtNodeStream *in_stream,
-                                         GtStr *newsource);
+typedef struct GtSetSourceVisitor GtSetSourceVisitor;
+
+/* constructor */
+GtNodeVisitor* gt_set_source_visitor_new(GtStr *newsource);
 
 #endif
