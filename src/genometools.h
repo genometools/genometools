@@ -139,6 +139,7 @@ extern "C" {
 #include "extended/rdb_visitor_api.h"
 #include "extended/region_mapping_api.h"
 #include "extended/region_node_api.h"
+#include "extended/reset_source_stream_api.h"
 #include "extended/reverse_api.h"
 #include "extended/script_filter_api.h"
 #include "extended/select_stream_api.h"
