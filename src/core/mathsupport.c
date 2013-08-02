@@ -23,6 +23,7 @@
 #include "core/ensure.h"
 #include "core/mathsupport.h"
 #include "core/yarandom.h" /* necessary to define random() correctly */
+#include "core/byte_select_api.h"
 
 #define GT_DBL_MAX_ABS_ERROR 1.0E-100
 #define GT_DBL_MAX_REL_ERROR 1.0E-8
@@ -114,36 +115,30 @@ char gt_rand_char(void)
   return c;
 }
 
-/* Find the log base 2 of an integer in O(wordsize) operations. where N is the
-   number of bits. There are faster methods, see
+#define GT_MAXLOG2VALUE 63
+/* Find the log base 2 of an integer in O(wordsize/CHAR_BIT) operations. where N
+   is the number of bits. There are faster methods, see
    \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
    */
 unsigned int gt_determinebitspervalue(unsigned long maxvalue)
 {
   unsigned int bits = 0;
-  unsigned long value;
+#ifndef USEbuiltin_clzl
+  unsigned long value, mask = (~0) << CHAR_BIT;
 
-  for (value = maxvalue; value > 0; value >>= 1)
-  {
-    bits++;
+  for (value = maxvalue; (value & mask) != 0; value >>= CHAR_BIT) {
+    bits += CHAR_BIT;
   }
-#define GT_MAXLOG2VALUE 63
-  gt_assert(bits <= GT_MAXLOG2VALUE);
-#ifdef USEbuiltin_clzl
+  bits += CHAR_BIT - gt_byte_select[value];
+#else
   {
     if (maxvalue != 0) { /*__builtin_clz only defined != 0 */
-      unsigned int fastbits =
-        (unsigned int) (sizeof(unsigned long) * CHAR_BIT) -
-        __builtin_clzl(maxvalue);
-      if (bits != fastbits)
-      {
-        fprintf(stderr,"maxvalue=%lu: bits = %u != %d = clzl\n",
-                          maxvalue,bits,fastbits);
-        exit(EXIT_FAILURE);
-      }
+      bits = (unsigned int) (sizeof(unsigned long) * CHAR_BIT) -
+             __builtin_clzl(maxvalue);
     }
   }
 #endif
+  gt_assert(bits <= GT_MAXLOG2VALUE);
   return bits;
 }
 
@@ -269,6 +264,7 @@ void gt_out_power_for_small_exponents(void)
 int gt_mathsupport_unit_test(GtError *err)
 {
   int had_err = 0;
+  unsigned long i;
   double less_than_epsilon = 0.0000000000000001;
   gt_error_check(err);
 
@@ -315,6 +311,9 @@ int gt_mathsupport_unit_test(GtError *err)
   gt_ensure(had_err, -2L == gt_round_to_long(-2.5));
   gt_ensure(had_err, -3L == gt_round_to_long(-2.51));
 
+  for (i = 0; !had_err && i < GT_MAXLOG2VALUE; ++i) {
+    gt_ensure(had_err, i+1 == gt_determinebitspervalue(1UL << i));
+  }
   return had_err;
 }
 #endif /* S_SPLINT_S */

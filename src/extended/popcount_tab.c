@@ -16,7 +16,9 @@
 */
 
 #include <limits.h>
+
 #include "core/assert_api.h"
+#include "core/byte_popcount_api.h"
 #include "core/combinatorics.h"
 #include "core/compact_ulong_store.h"
 #include "core/ensure.h"
@@ -27,73 +29,6 @@
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "extended/popcount_tab.h"
-
-const uint8_t gt_popcount_tab_B_1_count[] = {
-  (uint8_t) 0, (uint8_t) 1, (uint8_t) 1, (uint8_t) 2,
-  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
-  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
-  (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
-  (uint8_t) 2, (uint8_t) 3, (uint8_t) 3, (uint8_t) 4,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
-  (uint8_t) 3, (uint8_t) 4, (uint8_t) 4, (uint8_t) 5,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
-  (uint8_t) 4, (uint8_t) 5, (uint8_t) 5, (uint8_t) 6,
-  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
-  (uint8_t) 5, (uint8_t) 6, (uint8_t) 6, (uint8_t) 7,
-  (uint8_t) 6, (uint8_t) 7, (uint8_t) 7, (uint8_t) 8
-};
 
 struct GtPopcountTab
 {
@@ -260,14 +195,14 @@ static inline unsigned int gt_popcount_tab_popcount(unsigned long val)
   uint64_t x = (uint64_t) val;
 #ifdef POPCOUNT_TL
   return (unsigned long)
-         gt_popcount_tab_B_1_count[x         & 0xFFULL] +
-         gt_popcount_tab_B_1_count[(x >>  8) & 0xFFULL] +
-         gt_popcount_tab_B_1_count[(x >> 16) & 0xFFULL] +
-         gt_popcount_tab_B_1_count[(x >> 24) & 0xFFULL] +
-         gt_popcount_tab_B_1_count[(x >> 32) & 0xFFULL] +
-         gt_popcount_tab_B_1_count[(x >> 40) & 0xFFULL] +
-         gt_popcount_tab_B_1_count[(x >> 48) & 0xFFULL] +
-         gt_popcount_tab_B_1_count[(x >> 56) & 0xFFULL];
+         gt_byte_popcount[x         & 0xFFULL] +
+         gt_byte_popcount[(x >>  8) & 0xFFULL] +
+         gt_byte_popcount[(x >> 16) & 0xFFULL] +
+         gt_byte_popcount[(x >> 24) & 0xFFULL] +
+         gt_byte_popcount[(x >> 32) & 0xFFULL] +
+         gt_byte_popcount[(x >> 40) & 0xFFULL] +
+         gt_byte_popcount[(x >> 48) & 0xFFULL] +
+         gt_byte_popcount[(x >> 56) & 0xFFULL];
 #else
   /* see page 11, Knuth TAOCP Vol 4 F1A */
   x = x - ((x >> 1) & (uint64_t) 0x5555555555555555ULL);
