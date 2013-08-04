@@ -15,6 +15,7 @@
 
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
+#include "core/class_alloc_lock.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/feature_node_api.h"
@@ -25,6 +26,7 @@
         gt_node_visitor_cast(gt_set_source_visitor_class(), GV)
 
 struct GtSetSourceVisitor {
+  const GtNodeVisitor parent_instance;
   GtStr *newsource;
 };
 
@@ -33,7 +35,7 @@ GtNodeVisitor *gt_set_source_visitor_new(GtStr *newsource)
   GtNodeVisitor *nv;
   nv = gt_node_visitor_create(gt_set_source_visitor_class());
   GtSetSourceVisitor *ssv = set_source_visitor_cast(nv);
-  ssv->newsource = newsource;
+  ssv->newsource = gt_str_ref(newsource);
   return nv;
 }
 
@@ -53,9 +55,9 @@ static int set_source_visitor_visit_feature_node(GtNodeVisitor *nv,
 
   GtFeatureNode *current;
   GtFeatureNodeIterator *iter = gt_feature_node_iterator_new(fn);
-  for(current  = gt_feature_node_iterator_next(iter);
-      current != NULL;
-      current  = gt_feature_node_iterator_next(iter))
+  for (current  = gt_feature_node_iterator_next(iter);
+       current != NULL;
+       current  = gt_feature_node_iterator_next(iter))
   {
     gt_feature_node_set_source(current, ssv->newsource);
   }
@@ -67,7 +69,8 @@ static int set_source_visitor_visit_feature_node(GtNodeVisitor *nv,
 const GtNodeVisitorClass *gt_set_source_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
-  if(!nvc)
+  gt_class_alloc_lock_enter();
+  if (!nvc)
   {
     nvc = gt_node_visitor_class_new(sizeof (GtSetSourceVisitor),
                                     set_source_visitor_free,
@@ -77,5 +80,6 @@ const GtNodeVisitorClass *gt_set_source_visitor_class()
                                     NULL,
                                     NULL);
   }
+  gt_class_alloc_lock_leave();
   return nvc;
 }
