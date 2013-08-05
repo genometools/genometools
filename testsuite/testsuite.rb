@@ -101,7 +101,6 @@ def run_python(str, opts = {})
 end
 
 # include the actual test modules
-require 'gt_gff3_include'
 require 'gt_bed_to_gff3_include'
 require 'gt_cds_include'
 require 'gt_chseqids_include'
@@ -114,6 +113,7 @@ require 'gt_extractfeat_include'
 require 'gt_featureindex_include'
 require 'gt_fingerprint_include'
 require 'gt_genomediff_include'
+require 'gt_gff3_include'
 require 'gt_gff3validator_include'
 require 'gt_gtf_to_gff3_include'
 require 'gt_hop_include'
