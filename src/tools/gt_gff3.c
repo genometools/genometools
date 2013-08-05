@@ -30,9 +30,10 @@
 #include "extended/gtdatahelp.h"
 #include "extended/load_stream.h"
 #include "extended/merge_feature_stream_api.h"
-#include "extended/reset_source_stream_api.h"
+#include "extended/set_source_visitor_api.h"
 #include "extended/sort_stream_api.h"
 #include "extended/typecheck_info.h"
+#include "extended/visitor_stream_api.h"
 #include "tools/gt_gff3.h"
 
 typedef struct {
@@ -84,7 +85,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *sort_option, *load_option, *strict_option, *tidy_option,
            *mergefeat_option, *addintrons_option, *offset_option,
-           *offsetfile_option, *resetsource_option, *option;
+           *offsetfile_option, *setsource_option, *option;
   gt_assert(arguments);
 
   /* init */
@@ -179,11 +180,11 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, offsetfile_option);
   gt_option_exclude(offset_option, offsetfile_option);
 
-  /* -resetsource */
-  resetsource_option = gt_option_new_string("resetsource", "reset the 'source' "
-                                            "value (2nd column) of each feature",
-                                            arguments->newsource, NULL);
-  gt_option_parser_add_option(op, resetsource_option);
+  /* -setsource */
+  setsource_option = gt_option_new_string("setsource", "set the 'source' "
+                                          "value (2nd column) of each feature",
+                                          arguments->newsource, NULL);
+  gt_option_parser_add_option(op, setsource_option);
 
   /* typecheck options */
   gt_typecheck_info_register_options(arguments->tci, op);
@@ -220,7 +221,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                *load_stream = NULL,
                *merge_feature_stream = NULL,
                *add_introns_stream = NULL,
-               *reset_source_stream = NULL,
+               *set_source_stream = NULL,
                *gff3_out_stream = NULL,
                *last_stream;
   int had_err = 0;
@@ -295,12 +296,12 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
     last_stream = add_introns_stream;
   }
 
-  /* create resetsource stream (if necessary) */
+  /* create setsource stream (if necessary) */
   if (!had_err && gt_str_length(arguments->newsource) > 0) {
     gt_assert(last_stream);
-    reset_source_stream = gt_reset_source_stream_new(last_stream,
-                                                     arguments->newsource);
-    last_stream = reset_source_stream;
+    GtNodeVisitor *ssv = gt_set_source_visitor_new(arguments->newsource);
+    set_source_stream = gt_visitor_stream_new(last_stream, ssv);
+    last_stream = set_source_stream;
   }
 
   /* create gff3 output stream */
@@ -323,7 +324,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   gt_node_stream_delete(load_stream);
   gt_node_stream_delete(merge_feature_stream);
   gt_node_stream_delete(add_introns_stream);
-  gt_node_stream_delete(reset_source_stream);
+  gt_node_stream_delete(set_source_stream);
   gt_node_stream_delete(gff3_in_stream);
   gt_type_checker_delete(type_checker);
 
