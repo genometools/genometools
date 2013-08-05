@@ -216,7 +216,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
     gt_log_log("passed\n");
   }
   gt_log_log("gt_bsStoreUniformUInt16Array/gt_bsGetUInt16: ");
-  {
+  if (numRnd > 0) {
     unsigned numBits = random()%16 + 1;
     uint16_t mask = ~(uint16_t)0;
     if (numBits < 16)
@@ -298,7 +298,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
   }
   gt_log_log("passed\n");
   gt_log_log("gt_bsStoreUniformInt16Array/gt_bsGetInt16: ");
-  {
+  if (numRnd > 0) {
     unsigned numBits = random()%16 + 1;
     int16_t mask = ~(int16_t)0;
     if (numBits < 16)
@@ -359,7 +359,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
   }
 
   gt_log_log("gt_bsStoreNonUniformUInt16Array/gt_bsGetUInt16: ");
-  {
+  if (numRnd != 0) {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
@@ -427,7 +427,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
     numBitsList = NULL;
   }
   gt_log_log("bsNonStoreUniformInt16Array/gt_bsGetInt16: ");
-  {
+  if (numRnd != 0) {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)

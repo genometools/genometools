@@ -192,5 +192,3 @@ static unsigned long GT_APPENDINT(gt_encseq_seqnum)(
     }
   }
 }
-/* vim: ft=c
- */
