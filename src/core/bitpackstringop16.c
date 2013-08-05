@@ -350,9 +350,6 @@ gt_bsGetNonUniformInt16Array(
     }
   }
 }
-/*
-vim: ft=c
- */
 
 /*
   Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
@@ -507,6 +504,9 @@ gt_bsStoreNonUniformUInt16Array(
   BitElem *p = str + offset/bitElemBits;
   unsigned bitsInAccum;
   unsigned long accum, valMask = ~(unsigned long)0, currentVal;
+  gt_assert(numBitsList != NULL);
+  gt_assert(val != NULL);
+  gt_assert(numValues != 0);
   if (numBitsList[0] < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBitsList[0]);
   gt_assert(str && val);
@@ -630,9 +630,6 @@ gt_bsStoreNonUniformUInt16Array(
     *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);
   }
 }
-/*
-vim: ft=c
- */
 
 /*
   Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
@@ -845,6 +842,7 @@ gt_bsGetNonUniformInt16ArrayAdd(
     }
   }
 }
+
 /*
 vim: ft=c
- */
+*/

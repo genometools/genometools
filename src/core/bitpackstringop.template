@@ -141,3 +141,7 @@ gt_bsStore@uTypeTag@(BitString str, BitOffset offset,
 @include "bitpackstringvectorwriteop.gen"@
 
 @include "bitpackstringvectorreadop.gen" VecOpName="Add" AssignOp="+="@
+
+/*
+vim: ft=c
+*/

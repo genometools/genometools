@@ -151,6 +151,9 @@ gt_bsStoreNonUniform@uTypeTag@Array(
   BitElem *p = str + offset/bitElemBits;
   unsigned bitsInAccum;
   @AccumType@ accum, valMask = ~(@AccumType@)0, currentVal;
+  gt_assert(numBitsList != NULL);
+  gt_assert(val != NULL);
+  gt_assert(numValues != 0);
   if (numBitsList[0] < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBitsList[0]);
   gt_assert(str && val);
@@ -274,6 +277,3 @@ gt_bsStoreNonUniform@uTypeTag@Array(
     *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);
   }
 }
-/*
-vim: ft=c
- */

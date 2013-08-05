@@ -216,7 +216,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     gt_log_log("passed\n");
   }
   gt_log_log("gt_bsStoreUniformUIntArray/gt_bsGetUInt: ");
-  {
+  if (numRnd > 0) {
     unsigned numBits = random()%32 + 1;
     unsigned mask = ~(unsigned)0;
     if (numBits < 32)
@@ -298,7 +298,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
   }
   gt_log_log("passed\n");
   gt_log_log("gt_bsStoreUniformIntArray/gt_bsGetInt: ");
-  {
+  if (numRnd > 0) {
     unsigned numBits = random()%32 + 1;
     int mask = ~(int)0;
     if (numBits < 32)
@@ -359,7 +359,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
   }
 
   gt_log_log("gt_bsStoreNonUniformUIntArray/gt_bsGetUInt: ");
-  {
+  if (numRnd != 0) {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
@@ -427,7 +427,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     numBitsList = NULL;
   }
   gt_log_log("bsNonStoreUniformIntArray/gt_bsGetInt: ");
-  {
+  if (numRnd != 0) {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)

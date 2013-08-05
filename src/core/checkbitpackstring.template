@@ -213,7 +213,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     gt_log_log("passed\n");
   }
   gt_log_log("gt_bsStoreUniform@uTypeTag@Array/gt_bsGet@uTypeTag@: ");
-  {
+  if (numRnd > 0) {
     unsigned numBits = random()%@bitSize@ + 1;
     @uOpType@ mask = ~(@uOpType@)0;
     if (numBits < @bitSize@)
@@ -295,7 +295,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
   }
   gt_log_log("passed\n");
   gt_log_log("gt_bsStoreUniform@iTypeTag@Array/gt_bsGet@iTypeTag@: ");
-  {
+  if (numRnd > 0) {
     unsigned numBits = random()%@bitSize@ + 1;
     @iOpType@ mask = ~(@iOpType@)0;
     if (numBits < @bitSize@)
@@ -356,7 +356,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
   }
 
   gt_log_log("gt_bsStoreNonUniform@uTypeTag@Array/gt_bsGet@uTypeTag@: ");
-  {
+  if (numRnd != 0) {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
@@ -424,7 +424,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     numBitsList = NULL;
   }
   gt_log_log("bsNonStoreUniform@iTypeTag@Array/gt_bsGet@iTypeTag@: ");
-  {
+  if (numRnd != 0) {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
