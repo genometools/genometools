@@ -955,5 +955,3 @@ static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposSW)(
   }
   return 0; /* virtual stop at -1 */
 }
-/* vim: ft=c
- */
