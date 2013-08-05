@@ -14,11 +14,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RESET_SOURCE_STREAM_H
-#define RESET_SOURCE_STREAM_H
+#ifndef SET_SOURCE_VISITOR_H
+#define SET_SOURCE_VISITOR_H
 
-#include "extended/reset_source_stream_api.h"
+#include "extended/set_source_visitor_api.h"
 
-const GtNodeStreamClass* gt_reset_source_stream_class(void);
+typedef struct GtSetSourceVisitorClass GtSetSourceVisitorClass;
+
+const GtNodeVisitorClass* gt_set_source_visitor_class();
 
 #endif
