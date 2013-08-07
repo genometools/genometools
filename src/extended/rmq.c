@@ -652,7 +652,7 @@ int gt_rmq_unit_test(GtError *err)
     end = start + gt_rand_max(GT_RMQ_MAXRANGELENGTH) + 1UL;
     res_naive = gt_rmq_naive(data, GT_RMQ_TESTARRSIZE, start, end);
     res_efficient = gt_rmq_find_min_index(rmq, start, end);
-    gt_ensure(had_err, data[res_efficient] == data[res_naive]);
+    gt_ensure(data[res_efficient] == data[res_naive]);
   }
 
   gt_rmq_delete(rmq);

@@ -106,14 +106,14 @@ static void outproc_a(GT_UNUSED unsigned long suffix_seqnum,
         d.out.e.proc = outproc;\
         d.out.e.data = &skipped;\
         gt_spmproc_skip((SN), (PN), 100UL, false, true, &d);\
-        if (EXP) gt_ensure(had_err, skipped);\
-        else gt_ensure(had_err, !skipped);\
+        if (EXP) gt_ensure(skipped);\
+        else gt_ensure(!skipped);\
         skipped = true;\
         d.out.a.proc = outproc_a;\
         d.out.a.data = &skipped;\
         gt_spmproc_a_skip((SN), (PN), 100UL, 101UL, 1UL, true, false, &d);\
-        if (EXP) gt_ensure(had_err, skipped);\
-        else gt_ensure(had_err, !skipped)
+        if (EXP) gt_ensure(skipped);\
+        else gt_ensure(!skipped)
 
 int gt_spmproc_skip_unit_test(GtError *err)
 {

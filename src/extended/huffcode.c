@@ -676,11 +676,11 @@ static int test_bitwise(GtError *err)
   huffman = gt_huffman_new(&distr,unit_test_distr_func, 6UL);
 
   hbwd = gt_huffman_bitwise_decoder_new(huffman, err);
-  gt_ensure(had_err, hbwd);
+  gt_ensure(hbwd);
   for (i = 0; !had_err && i < 6UL; i++) {
     gt_huffman_encode(huffman, i, &bitseq, &length2);
     if (i > 0) {
-      gt_ensure(had_err, length1 <= length2);
+      gt_ensure(length1 <= length2);
     }
     j = 1UL;
     while (1 == (stat = gt_huffman_bitwise_decoder_next(hbwd,
@@ -688,60 +688,60 @@ static int test_bitwise(GtError *err)
                                            &symbol, err))) {
       j++;
     }
-    gt_ensure(had_err, stat == 0);
-    gt_ensure(had_err, j == (unsigned long) length2);
-    gt_ensure(had_err, symbol == i);
+    gt_ensure(stat == 0);
+    gt_ensure(j == (unsigned long) length2);
+    gt_ensure(symbol == i);
     length1 = length2;
   }
 
   stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
 
-  gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 0);
+  gt_ensure(stat == 0);
+  gt_ensure(symbol == 0);
 
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 1UL);
+  gt_ensure(stat == 0);
+  gt_ensure(symbol == 1UL);
 
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 2UL);
+  gt_ensure(stat == 0);
+  gt_ensure(symbol == 2UL);
 
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
-  gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 3UL);
+  gt_ensure(stat == 0);
+  gt_ensure(symbol == 3UL);
 
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 4UL);
+  gt_ensure(stat == 0);
+  gt_ensure(symbol == 4UL);
 
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, false, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
-  gt_ensure(had_err, stat == 1);
+  gt_ensure(stat == 1);
   stat = gt_huffman_bitwise_decoder_next(hbwd, true, &symbol, err);
-  gt_ensure(had_err, stat == 0);
-  gt_ensure(had_err, symbol == 5UL);
+  gt_ensure(stat == 0);
+  gt_ensure(symbol == 5UL);
 
   gt_huffman_delete(huffman);
   gt_huffman_bitwise_decoder_delete(hbwd);
@@ -819,7 +819,7 @@ int test_mem(GtError *err)
     gt_array_add(numbers, x);
   }
 
-  gt_ensure(had_err, gt_array_size(numbers) == max_num);
+  gt_ensure(gt_array_size(numbers) == max_num);
 
   /*calculate distribution*/
   for (idx = 0; !had_err && idx < max_num; idx++) {
@@ -830,9 +830,9 @@ int test_mem(GtError *err)
   if (!had_err) {
     uint64_t chars;
     huff = gt_huffman_new(distribution, unit_test_distr_func, dist_size);
-    gt_ensure(had_err, huff);
+    gt_ensure(huff);
     gt_huffman_size(huff, &total_bits, &chars);
-    gt_ensure(had_err, chars == (uint64_t) max_num);
+    gt_ensure(chars == (uint64_t) max_num);
   }
 
   for (idx = 0; !had_err && idx < max_num; idx++) {
@@ -854,7 +854,7 @@ int test_mem(GtError *err)
   if (!had_err)
     gt_array_add(codes, buffer);
 
-  gt_ensure(had_err,
+  gt_ensure(
             total_bits == (uint64_t) gt_array_size(codes) *
                           gt_array_elem_size(codes) * 8 - bits_remain);
 
@@ -877,39 +877,39 @@ int test_mem(GtError *err)
                                      gt_array_size(codes),
                                      0,/*offset*/
                                      bits_remain);
-    gt_ensure(had_err, huffdec);
+    gt_ensure(huffdec);
   }
 
   for (idx = 0; !had_err && idx < max_num; idx += step_size) {
     gt_array_reset(encoded);
-    gt_ensure(had_err, decoder_stat == 1);
+    gt_ensure(decoder_stat == 1);
     decoder_stat = gt_huffman_decoder_next(huffdec,
                                            encoded,
                                            (unsigned long) step_size,
                                            err);
     if (decoder_stat == 1)
-      gt_ensure(had_err, gt_array_size(encoded) == (unsigned long) step_size);
+      gt_ensure(gt_array_size(encoded) == (unsigned long) step_size);
     else
-      gt_ensure(had_err, decoder_stat == 0);
+      gt_ensure(decoder_stat == 0);
 
-    gt_ensure(had_err, decoder_stat != -1);
+    gt_ensure(decoder_stat != -1);
     if (!had_err) {
       for (idx_j = 0; !had_err && idx_j < gt_array_size(encoded); idx_j++) {
         unsigned long ist = *(unsigned long*) gt_array_get(encoded, idx_j);
         unsigned char soll =
           *(unsigned char*)gt_array_get(numbers, idx + idx_j);
-        gt_ensure(had_err, (ist == soll));
+        gt_ensure((ist == soll));
       }
     }
   }
 
-  gt_ensure(had_err, idx >= max_num);
+  gt_ensure(idx >= max_num);
   if (!had_err)
     decoder_stat = gt_huffman_decoder_next(huffdec,
                                            encoded,
                                            1UL,
                                            err);
-  gt_ensure(had_err, decoder_stat == 0);
+  gt_ensure(decoder_stat == 0);
 
   if (!had_err) {
     gt_huffman_decoder_delete(huffdec);
@@ -918,40 +918,40 @@ int test_mem(GtError *err)
                                                  huffman_unit_get_next_block,
                                                  meminfo,
                                                  err);
-    gt_ensure(had_err, huffdec);
+    gt_ensure(huffdec);
   }
 
   decoder_stat = 1;
   for (idx = 0; !had_err && idx < max_num; idx += step_size) {
     gt_array_reset(encoded);
-    gt_ensure(had_err, decoder_stat == 1);
+    gt_ensure(decoder_stat == 1);
     decoder_stat = gt_huffman_decoder_next(huffdec,
                                            encoded,
                                            step_size,
                                            err);
     if (decoder_stat == 1)
-      gt_ensure(had_err, gt_array_size(encoded) == step_size);
+      gt_ensure(gt_array_size(encoded) == step_size);
     else
-      gt_ensure(had_err, decoder_stat == 0);
+      gt_ensure(decoder_stat == 0);
 
-    gt_ensure(had_err, decoder_stat != -1);
+    gt_ensure(decoder_stat != -1);
     if (!had_err) {
       for (idx_j = 0; !had_err && idx_j < gt_array_size(encoded); idx_j++) {
         unsigned long ist = *(unsigned long*)gt_array_get(encoded, idx_j);
         unsigned char soll =
           *(unsigned char*)gt_array_get(numbers, idx + idx_j);
-        gt_ensure(had_err, (ist == soll));
+        gt_ensure((ist == soll));
       }
     }
   }
 
-  gt_ensure(had_err, idx >= max_num);
+  gt_ensure(idx >= max_num);
   if (!had_err)
     decoder_stat = gt_huffman_decoder_next(huffdec,
                                            encoded,
                                            1UL,
                                            err);
-  gt_ensure(had_err, decoder_stat == 0);
+  gt_ensure(decoder_stat == 0);
 
   gt_huffman_decoder_delete(huffdec);
   gt_free(meminfo);

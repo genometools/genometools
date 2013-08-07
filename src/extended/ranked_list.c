@@ -243,32 +243,32 @@ int gt_ranked_list_unit_test(GtError *err)
   gt_error_check(err);
 
   rl = gt_ranked_list_new(5UL, gt_ranked_list_cmp_numbers, NULL, NULL);
-  gt_ensure(had_err, rl != NULL);
-  gt_ensure(had_err, gt_ranked_list_size(rl) == 0);
+  gt_ensure(rl != NULL);
+  gt_ensure(gt_ranked_list_size(rl) == 0);
 
   iter = gt_ranked_list_iter_new_from_first(rl);
   mystr = gt_ranked_list_iter_next(iter);
-  gt_ensure(had_err, mystr == NULL);
+  gt_ensure(mystr == NULL);
   mystr = gt_ranked_list_iter_next(iter);
-  gt_ensure(had_err, mystr == NULL);
+  gt_ensure(mystr == NULL);
   gt_ranked_list_iter_delete(iter);
 
   iter = gt_ranked_list_iter_new_from_last(rl);
   mystr = gt_ranked_list_iter_prev(iter);
-  gt_ensure(had_err, mystr == NULL);
+  gt_ensure(mystr == NULL);
   mystr = gt_ranked_list_iter_prev(iter);
-  gt_ensure(had_err, mystr == NULL);
+  gt_ensure(mystr == NULL);
   gt_ranked_list_iter_delete(iter);
 
   for (i = 0; i < 8; i++) {
     gt_ranked_list_insert(rl, values+i);
     if (i < 5)
-      gt_ensure(had_err, gt_ranked_list_size(rl) == (unsigned long) i + 1UL);
+      gt_ensure(gt_ranked_list_size(rl) == (unsigned long) i + 1UL);
     else
-      gt_ensure(had_err, gt_ranked_list_size(rl) == 5UL);
+      gt_ensure(gt_ranked_list_size(rl) == 5UL);
   }
-  gt_ensure(had_err, (*(int*) gt_ranked_list_first(rl)) == 545);
-  gt_ensure(had_err, (*(int*) gt_ranked_list_last(rl)) == 22);
+  gt_ensure((*(int*) gt_ranked_list_first(rl)) == 545);
+  gt_ensure((*(int*) gt_ranked_list_last(rl)) == 22);
   gt_ranked_list_delete(rl);
 
   for (j = 0; (unsigned long) j < nof_tests; j++) {
@@ -286,14 +286,14 @@ int gt_ranked_list_unit_test(GtError *err)
       ptr->score = newstr.score;
       gt_ranked_list_insert(rl, ptr);
         if ((unsigned long) i < nof_best)
-        gt_ensure(had_err, gt_ranked_list_size(rl) == (unsigned long) i + 1UL);
+        gt_ensure(gt_ranked_list_size(rl) == (unsigned long) i + 1UL);
       else
-        gt_ensure(had_err, gt_ranked_list_size(rl) == nof_best);
+        gt_ensure(gt_ranked_list_size(rl) == nof_best);
     }
     gt_array_sort_stable_with_data(arr, gt_ranked_list_cmp_teststructs, NULL);
     gt_array_reverse(arr);
 
-    gt_ensure(had_err, gt_ranked_list_size(rl) == nof_best);
+    gt_ensure(gt_ranked_list_size(rl) == nof_best);
     iter = gt_ranked_list_iter_new_from_first(rl);
 
     i = 0;
@@ -302,9 +302,9 @@ int gt_ranked_list_unit_test(GtError *err)
          mystr = gt_ranked_list_iter_next(iter)) {
       GtRankedListTestStruct *str = (GtRankedListTestStruct*)
                                          gt_array_get(arr, (unsigned long) i++);
-      gt_ensure(had_err, mystr != NULL);
-      gt_ensure(had_err, mystr->id == str->id);
-      gt_ensure(had_err, mystr->score == str->score);
+      gt_ensure(mystr != NULL);
+      gt_ensure(mystr->id == str->id);
+      gt_ensure(mystr->score == str->score);
       /* printf("id: %lu/%lu, score %lu/%lu\n", mystr->id, str->id,
                                                 mystr->score, str->score); */
     }

@@ -104,57 +104,57 @@ int gt_splitter_unit_test(GtError *err)
   s = gt_splitter_new();
 
   /* string_1 */
-  gt_ensure(had_err, !gt_splitter_size(s));
+  gt_ensure(!gt_splitter_size(s));
   gt_splitter_split(s, string_1, strlen(string_1), ' ');
-  gt_ensure(had_err, gt_splitter_size(s) == 5);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "a") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 1), "bb") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 2), "ccc") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 3), "dddd") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 4), "eeeee") == 0);
+  gt_ensure(gt_splitter_size(s) == 5);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 0), "a") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 1), "bb") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 2), "ccc") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 3), "dddd") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 4), "eeeee") == 0);
   gt_splitter_reset(s);
 
   /* string_2 */
-  gt_ensure(had_err, !gt_splitter_size(s));
+  gt_ensure(!gt_splitter_size(s));
   gt_splitter_split(s, string_2, strlen(string_2), '\t');
-  gt_ensure(had_err, gt_splitter_size(s) == 5);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "a") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 1), "bb") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 2), "ccc") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 3), "dddd") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 4), "eeeee") == 0);
+  gt_ensure(gt_splitter_size(s) == 5);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 0), "a") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 1), "bb") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 2), "ccc") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 3), "dddd") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 4), "eeeee") == 0);
   gt_splitter_reset(s);
 
   /* string_3 */
-  gt_ensure(had_err, !gt_splitter_size(s));
+  gt_ensure(!gt_splitter_size(s));
   gt_splitter_split(s, string_3, strlen(string_3), '\t');
-  gt_ensure(had_err, gt_splitter_size(s) == 1);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "") == 0);
+  gt_ensure(gt_splitter_size(s) == 1);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 0), "") == 0);
   gt_splitter_reset(s);
 
   /* string_4 */
-  gt_ensure(had_err, !gt_splitter_size(s));
+  gt_ensure(!gt_splitter_size(s));
   gt_splitter_split(s, string_4, strlen(string_4), ' ');
-  gt_ensure(had_err, gt_splitter_size(s) == 3);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "a") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 1), "") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 2), "b") == 0);
+  gt_ensure(gt_splitter_size(s) == 3);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 0), "a") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 1), "") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 2), "b") == 0);
   gt_splitter_reset(s);
 
   /* string_5 */
-  gt_ensure(had_err, !gt_splitter_size(s));
+  gt_ensure(!gt_splitter_size(s));
   gt_splitter_split(s, string_5, strlen(string_5), ' ');
-  gt_ensure(had_err, gt_splitter_size(s) == 3);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "ac") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 1), "bc") == 0);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 2), "") == 0);
+  gt_ensure(gt_splitter_size(s) == 3);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 0), "ac") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 1), "bc") == 0);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 2), "") == 0);
   gt_splitter_reset(s);
 
   /* string_6 */
-  gt_ensure(had_err, !gt_splitter_size(s));
+  gt_ensure(!gt_splitter_size(s));
   gt_splitter_split(s, string_6, strlen(string_6), ';');
-  gt_ensure(had_err, gt_splitter_size(s) == 1);
-  gt_ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "test") == 0);
+  gt_ensure(gt_splitter_size(s) == 1);
+  gt_ensure(strcmp(gt_splitter_get_token(s, 0), "test") == 0);
 
   /* free */
   gt_splitter_delete(s);

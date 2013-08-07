@@ -146,10 +146,10 @@ int gt_combinatorics_unit_test(GtError *err)
       unsigned long a = gt_combinatorics_binomial_dp(n, k),
                     b = gt_combinatorics_binomial_simple(n, k),
                     c;
-      gt_ensure(had_err, a == b);
+      gt_ensure(a == b);
       if (n < max_fac_stable) {
         c = gt_combinatorics_binomial_ln(n,k);
-        gt_ensure(had_err, c == a);
+        gt_ensure(c == a);
       }
     }
   }

@@ -447,21 +447,21 @@ int gt_feature_index_unit_test(GtFeatureIndex *fi, GtError *err)
                                           GT_FI_TEST_END);
 
   /* test seqid is not supposed to exist */
-  gt_ensure(had_err, gt_feature_index_has_seqid(sh.fi, &has_seqid,
+  gt_ensure(gt_feature_index_has_seqid(sh.fi, &has_seqid,
                                                  GT_FI_TEST_SEQID, err) == 0);
-  gt_ensure(had_err, !has_seqid);
+  gt_ensure(!has_seqid);
 
   /* add a sequence region directly and check if it has been added */
   rval = gt_feature_index_add_region_node(sh.fi, rn, err);
-  gt_ensure(had_err, rval == 0);
+  gt_ensure(rval == 0);
   gt_genome_node_delete((GtGenomeNode*) rn);
-  gt_ensure(had_err, gt_feature_index_has_seqid(sh.fi, &has_seqid,
+  gt_ensure(gt_feature_index_has_seqid(sh.fi, &has_seqid,
                                                 GT_FI_TEST_SEQID, err) == 0);
-  gt_ensure(had_err, has_seqid);
+  gt_ensure(has_seqid);
 
   gt_feature_index_get_range_for_seqid(sh.fi, &check_range, GT_FI_TEST_SEQID,
                                        err);
-  gt_ensure(had_err, check_range.start == GT_FI_TEST_START
+  gt_ensure(check_range.start == GT_FI_TEST_START
                     && check_range.end == GT_FI_TEST_END);
 
   /* set up nodes to store */
@@ -477,16 +477,16 @@ int gt_feature_index_unit_test(GtFeatureIndex *fi, GtError *err)
   /* test parallel addition */
   gt_multithread(gt_feature_index_unit_test_add, &sh, err);
   seqids = gt_feature_index_get_seqids(fi, err);
-  gt_ensure(had_err, seqids);
-  gt_ensure(had_err, gt_feature_index_has_seqid(fi, &has_seqid,GT_FI_TEST_SEQID,
+  gt_ensure(seqids);
+  gt_ensure(gt_feature_index_has_seqid(fi, &has_seqid,GT_FI_TEST_SEQID,
                                                 err) == 0);
-  gt_ensure(had_err, has_seqid);
-  gt_ensure(had_err, gt_str_array_size(seqids) == 1);
+  gt_ensure(has_seqid);
+  gt_ensure(gt_str_array_size(seqids) == 1);
 
   /* test parallel query */
   if (!had_err)
     gt_multithread(gt_feature_index_unit_test_query, &sh, err);
-  gt_ensure(had_err, sh.error_count == 0);
+  gt_ensure(sh.error_count == 0);
 
   gt_mutex_delete(sh.mutex);
   gt_error_delete(sh.err);

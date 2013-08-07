@@ -182,7 +182,7 @@ int gt_colorspace_unit_test(GtError *err)
   had_err = gt_colorspace_decode_string(in_gt,
                                         output,
                                         err);
-  gt_ensure(had_err, gt_str_cmp(con_gt, output));
+  gt_ensure(gt_str_cmp(con_gt, output));
 
   if (!had_err)
   {
@@ -197,8 +197,8 @@ int gt_colorspace_unit_test(GtError *err)
                                            output,
                                            my_err);
 
-    gt_ensure(had_err, test_err);
-    gt_ensure(had_err, gt_error_is_set(my_err));
+    gt_ensure(test_err);
+    gt_ensure(gt_error_is_set(my_err));
 
     gt_error_delete(my_err);
   }
@@ -215,8 +215,8 @@ int gt_colorspace_unit_test(GtError *err)
                                            output,
                                            my_err);
 
-    gt_ensure(had_err, test_err);
-    gt_ensure(had_err, gt_error_is_set(my_err));
+    gt_ensure(test_err);
+    gt_ensure(gt_error_is_set(my_err));
 
     gt_error_delete(my_err);
   }

@@ -1034,10 +1034,10 @@ static bool nrbt_mangle_tree(GtRBTreeSearchOrder how, GtRBTreeDoAction what,
 }
 
 #define NRBT_MANGLECHECK(ORDER,MODE,LAG)\
-        gt_ensure(had_err,!nrbt_mangle_tree(ORDER, MODE, tree, LAG,err))
+        gt_ensure(!nrbt_mangle_tree(ORDER, MODE, tree, LAG,err))
 
 #define NRBT_WALKCHECK\
-        gt_ensure(had_err,!nrbt_walk_tree(tree, (unsigned long) GT_RBTREE_SIZE))
+        gt_ensure(!nrbt_walk_tree(tree, (unsigned long) GT_RBTREE_SIZE))
 
 int gt_rbtree_unit_test(GtError *err)
 {
@@ -1052,7 +1052,7 @@ int gt_rbtree_unit_test(GtError *err)
   gt_rbtree_depths = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_depths));
 
   tree = gt_rbtree_new(nrbt_cmp_fn, NULL, NULL);
-  gt_ensure(had_err, tree != NULL);
+  gt_ensure(tree != NULL);
   for (i = 0; i < (unsigned long) GT_RBTREE_SIZE; ++i) {
     gt_rbtree_xtab[i] = i;
   }
@@ -1119,16 +1119,16 @@ int gt_rbtree_unit_test(GtError *err)
   i = 0; j = 1UL, k = 2UL;
   tree = gt_rbtree_new(nrbt_cmp_fn, NULL, NULL);
   v = gt_rbtree_root_key(tree);
-  gt_ensure(had_err, !v);
+  gt_ensure(!v);
   (void) gt_rbtree_insert(tree, &i);
   v = gt_rbtree_root_key(tree);
-  gt_ensure(had_err, v == &i);
-  gt_ensure(had_err, *v == i);
+  gt_ensure(v == &i);
+  gt_ensure(*v == i);
   (void) gt_rbtree_insert(tree, &j);
   (void) gt_rbtree_insert(tree, &k);
   v = gt_rbtree_root_key(tree);
-  gt_ensure(had_err, v == &j);
-  gt_ensure(had_err, *v == j);
+  gt_ensure(v == &j);
+  gt_ensure(*v == j);
   gt_rbtree_delete(tree);
 
   return had_err;

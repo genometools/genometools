@@ -579,7 +579,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     new_node = gt_interval_tree_node_new(rng, rng->start, rng->end);
     gt_interval_tree_insert(it, new_node);
   }
-  gt_ensure(had_err, gt_interval_tree_size(it) == num_testranges);
+  gt_ensure(gt_interval_tree_size(it) == num_testranges);
 
   /* perform test queries */
   for (i = 0; i < num_samples && !had_err; i++)
@@ -592,7 +592,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     {
       /* we have a hit, check if really overlapping */
       res_rng = (GtRange*) gt_interval_tree_node_get_data(res);
-      gt_ensure(had_err, gt_range_overlap(&qrange, res_rng));
+      gt_ensure(gt_range_overlap(&qrange, res_rng));
     } else {
       /* no hit, check whether there really is no overlapping
          interval in tree */
@@ -608,7 +608,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
           break;
         }
       }
-      gt_ensure(had_err, !found);
+      gt_ensure(!found);
     }
   }
 
@@ -639,7 +639,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
       gt_array_sort_stable(ref, range_ptr_compare);
       gt_array_sort_stable(res, range_ptr_compare);
       /* must be equal */
-      gt_ensure(had_err, gt_array_cmp(ref, res)==0);
+      gt_ensure(gt_array_cmp(ref, res)==0);
       gt_array_delete(ref);
     }
     gt_array_delete(res);
@@ -659,7 +659,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
                                           start + gt_rand_max(width));
     gt_interval_tree_insert(it, new_node);
   }
-  gt_ensure(had_err, gt_interval_tree_size(it) == num_testranges);
+  gt_ensure(gt_interval_tree_size(it) == num_testranges);
 
   narr = gt_array_new(sizeof (GtIntervalTreeNode*));
   for (i = 0; i < num_testranges && !had_err; i++) {
@@ -673,19 +673,19 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     /* remove a random node */
     idx = gt_rand_max(gt_array_size(narr)-1);
     node = *(GtIntervalTreeNode**) gt_array_get(narr, idx);
-    gt_ensure(had_err, node != NULL);
+    gt_ensure(node != NULL);
     val = (unsigned long) gt_interval_tree_node_get_data(node);
     gt_interval_tree_remove(it, node);
     gt_array_reset(narr);
 
     /* make sure that the node has disappeared */
-    gt_ensure(had_err, gt_interval_tree_size(it) == num_testranges - (i+1));
+    gt_ensure(gt_interval_tree_size(it) == num_testranges - (i+1));
     interval_tree_find_all_internal(it, it->root, itree_test_get_node, 0,
                                     gt_range_max_basepos+width, narr);
-    gt_ensure(had_err, gt_array_size(narr) == num_testranges - (i+1));
+    gt_ensure(gt_array_size(narr) == num_testranges - (i+1));
     for (n = 0; !had_err && n < gt_array_size(narr); n++) {
       GtIntervalTreeNode *onode = *(GtIntervalTreeNode**) gt_array_get(narr, n);
-      gt_ensure(had_err, (unsigned long) gt_interval_tree_node_get_data(onode)
+      gt_ensure((unsigned long) gt_interval_tree_node_get_data(onode)
                            != val);
     }
   }

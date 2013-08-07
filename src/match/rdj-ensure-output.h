@@ -42,8 +42,8 @@
         (void)fflush(handle);                                              \
         gt_file_xrewind(GTFILE);                                           \
         outsize = (size_t)gt_file_xread((GTFILE), buffer, strlen(EXPOUT)); \
-        gt_ensure(had_err, outsize == strlen(EXPOUT));                     \
-        gt_ensure(had_err, memcmp((EXPOUT), buffer, outsize) == 0);        \
+        gt_ensure(outsize == strlen(EXPOUT));                     \
+        gt_ensure(memcmp((EXPOUT), buffer, outsize) == 0);        \
         if (had_err != 0)                                                  \
         {                                                                  \
           fprintf(stderr, "\nExpected file content: \n%s\n",               \
