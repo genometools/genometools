@@ -100,59 +100,59 @@ int gt_evaluator_unit_test(GtError *err)
   int had_err = 0;
   gt_error_check(err);
 
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 1.0);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 1.0);
 
   gt_evaluator_add_actual(evaluator, 1);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 0.0);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 0.0);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 1.0);
 
   gt_evaluator_add_predicted(evaluator, 1);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 0.0);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 0.0);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 0.0);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 0.0);
 
   gt_evaluator_add_true(evaluator);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 1.0);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 1.0);
 
   gt_evaluator_reset(evaluator);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 1.0);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 1.0);
 
   gt_evaluator_add_predicted(evaluator, 1);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 1.0);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 0.0);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 0.0);
 
   gt_evaluator_reset(evaluator);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 1.0);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 1.0);
 
   gt_evaluator_add_actual(evaluator, 2);
   gt_evaluator_add_predicted(evaluator, 2);
   gt_evaluator_add_true(evaluator);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 0.5);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 0.5);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 0.5);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 0.5);
 
   gt_evaluator_reset(evaluator);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 1.0);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 1.0);
 
   gt_evaluator_add_actual(evaluator, 4);
   gt_evaluator_add_predicted(evaluator, 4);
   gt_evaluator_add_true(evaluator);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 0.25);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 0.25);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 0.25);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 0.25);
   gt_evaluator_add_true(evaluator);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 0.5);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 0.5);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 0.5);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 0.5);
 
   gt_evaluator_add_true(evaluator);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 0.75);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 0.75);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 0.75);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 0.75);
 
   gt_evaluator_add_true(evaluator);
-  gt_ensure(had_err, gt_evaluator_get_sensitivity(evaluator) == 1.0);
-  gt_ensure(had_err, gt_evaluator_get_specificity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_sensitivity(evaluator) == 1.0);
+  gt_ensure(gt_evaluator_get_specificity(evaluator) == 1.0);
 
   gt_evaluator_delete(evaluator);
 

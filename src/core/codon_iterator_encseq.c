@@ -155,9 +155,9 @@ static int gt_codon_iterator_encseq_single_test(GtEncseq *encseq,
       i = j;
       while (!had_err && !(s = gt_codon_iterator_next(ci, &n1, &n2, &n3,
                                                       &frame, NULL))) {
-        gt_ensure(had_err, n1 == testseq_cmp[i]);
-        gt_ensure(had_err, n2 == testseq_cmp[i+1]);
-        gt_ensure(had_err, n3 == testseq_cmp[i+2]);
+        gt_ensure(n1 == testseq_cmp[i]);
+        gt_ensure(n2 == testseq_cmp[i+1]);
+        gt_ensure(n3 == testseq_cmp[i+2]);
         i++;
       }
       gt_codon_iterator_delete(ci);
@@ -183,12 +183,12 @@ int gt_codon_iterator_encseq_unit_test(GtError *err)
   gt_error_check(err);
 
   alpha = gt_alphabet_new_dna();
-  gt_ensure(had_err, alpha != NULL);
+  gt_ensure(alpha != NULL);
   eb = gt_encseq_builder_new(alpha);
-  gt_ensure(had_err, eb != NULL);
+  gt_ensure(eb != NULL);
   gt_encseq_builder_add_cstr(eb, testseq, strlen(testseq), "foo");
   encseq = gt_encseq_builder_build(eb, NULL);
-  gt_ensure(had_err, encseq != NULL);
+  gt_ensure(encseq != NULL);
 
   if (!had_err) {
     /* forward tests */
@@ -220,9 +220,9 @@ int gt_codon_iterator_encseq_unit_test(GtError *err)
                                                     GT_READMODE_REVCOMPL, NULL);
     i = 10;
     while (!(gt_codon_iterator_next(ci, &n1, &n2, &n3, &frame, NULL))) {
-      gt_ensure(had_err, false);
+      gt_ensure(false);
     }
-    gt_ensure(had_err, i == 10);
+    gt_ensure(i == 10);
     gt_codon_iterator_delete(ci);
   }
 

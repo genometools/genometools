@@ -123,7 +123,7 @@ int gt_dyn_bittab_unit_test(GtError *err)
 
   b = gt_dyn_bittab_new();
   for (i = 0; !had_err && i < 256; i++) {
-    gt_ensure(had_err, !gt_dyn_bittab_bit_is_set(b, i));
+    gt_ensure(!gt_dyn_bittab_bit_is_set(b, i));
   }
   if (!had_err) {
     gt_dyn_bittab_set_bit(b, 0);
@@ -133,20 +133,20 @@ int gt_dyn_bittab_unit_test(GtError *err)
     gt_dyn_bittab_set_bit(b, 96);
     gt_dyn_bittab_set_bit(b, 123);
   }
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 0));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 32));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 64));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 77));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 96));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 123));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 0));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 32));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 64));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 77));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 96));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 123));
   for (i = 124; !had_err && i < 256; i++) {
-    gt_ensure(had_err, !gt_dyn_bittab_bit_is_set(b, i));
+    gt_ensure(!gt_dyn_bittab_bit_is_set(b, i));
   }
   gt_dyn_bittab_delete(b);
 
   b = gt_dyn_bittab_new();
   for (i = 0; !had_err && i < 256; i++) {
-    gt_ensure(had_err, !gt_dyn_bittab_bit_is_set(b, i));
+    gt_ensure(!gt_dyn_bittab_bit_is_set(b, i));
   }
   if (!had_err) {
     gt_dyn_bittab_set_bit(b, 1);
@@ -156,14 +156,14 @@ int gt_dyn_bittab_unit_test(GtError *err)
     gt_dyn_bittab_set_bit(b, 97);
     gt_dyn_bittab_set_bit(b, 124);
   }
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 1));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 33));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 65));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 77));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 97));
-  gt_ensure(had_err, gt_dyn_bittab_bit_is_set(b, 124));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 1));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 33));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 65));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 77));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 97));
+  gt_ensure(gt_dyn_bittab_bit_is_set(b, 124));
   for (i = 125; !had_err && i < 256; i++) {
-    gt_ensure(had_err, !gt_dyn_bittab_bit_is_set(b, i));
+    gt_ensure(!gt_dyn_bittab_bit_is_set(b, i));
   }
   gt_dyn_bittab_delete(b);
 

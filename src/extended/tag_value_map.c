@@ -248,10 +248,10 @@ int gt_tag_value_map_unit_test(GtError *err)
   gt_tag_value_map_set(&map, "tag 1", "val X");
   gt_tag_value_map_set(&map, "tag 2", "val Y");
   gt_tag_value_map_set(&map, "tag 3", "val Z");
-  gt_ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
-  gt_ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 1"), "val X"));
-  gt_ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 2"), "val Y"));
-  gt_ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 3"), "val Z"));
+  gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
+  gt_ensure(!strcmp(gt_tag_value_map_get(map, "tag 1"), "val X"));
+  gt_ensure(!strcmp(gt_tag_value_map_get(map, "tag 2"), "val Y"));
+  gt_ensure(!strcmp(gt_tag_value_map_get(map, "tag 3"), "val Z"));
   gt_tag_value_map_delete(map);
 
   /* test gt_tag_value_map_set() (new tags have same length) */
@@ -260,10 +260,10 @@ int gt_tag_value_map_unit_test(GtError *err)
     gt_tag_value_map_set(&map, "tag 1", "value X");
     gt_tag_value_map_set(&map, "tag 2", "value Y");
     gt_tag_value_map_set(&map, "tag 3", "value Z");
-    gt_ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
-    gt_ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 1"), "value X"));
-    gt_ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 2"), "value Y"));
-    gt_ensure(had_err, !strcmp(gt_tag_value_map_get(map, "tag 3"), "value Z"));
+    gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
+    gt_ensure(!strcmp(gt_tag_value_map_get(map, "tag 1"), "value X"));
+    gt_ensure(!strcmp(gt_tag_value_map_get(map, "tag 2"), "value Y"));
+    gt_ensure(!strcmp(gt_tag_value_map_get(map, "tag 3"), "value Z"));
     gt_tag_value_map_delete(map);
   }
 
@@ -273,12 +273,12 @@ int gt_tag_value_map_unit_test(GtError *err)
     gt_tag_value_map_set(&map, "tag 1", "value XXX");
     gt_tag_value_map_set(&map, "tag 2", "value YYY");
     gt_tag_value_map_set(&map, "tag 3", "value ZZZ");
-    gt_ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
-    gt_ensure(had_err,
+    gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
+    gt_ensure(
               !strcmp(gt_tag_value_map_get(map, "tag 1"), "value XXX"));
-    gt_ensure(had_err,
+    gt_ensure(
               !strcmp(gt_tag_value_map_get(map, "tag 2"), "value YYY"));
-    gt_ensure(had_err,
+    gt_ensure(
               !strcmp(gt_tag_value_map_get(map, "tag 3"), "value ZZZ"));
     gt_tag_value_map_delete(map);
   }
@@ -293,8 +293,8 @@ int gt_tag_value_map_unit_test(GtError *err)
     old_map_len = get_map_len(map);
     gt_tag_value_map_remove(&map, "tag 1");
     new_map_len = get_map_len(map);
-    gt_ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
-    gt_ensure(had_err, !(old_map_len - new_map_len - strlen("tag 1") - 1
+    gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
+    gt_ensure(!(old_map_len - new_map_len - strlen("tag 1") - 1
                      - strlen("value XXX") -1));
     gt_tag_value_map_delete(map);
   }
@@ -309,8 +309,8 @@ int gt_tag_value_map_unit_test(GtError *err)
     old_map_len = get_map_len(map);
     gt_tag_value_map_remove(&map, "tag 2");
     new_map_len = get_map_len(map);
-    gt_ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
-    gt_ensure(had_err, !(old_map_len - new_map_len - strlen("tag 2") - 1
+    gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
+    gt_ensure(!(old_map_len - new_map_len - strlen("tag 2") - 1
                      - strlen("value YYY") -1));
     gt_tag_value_map_delete(map);
   }
@@ -325,8 +325,8 @@ int gt_tag_value_map_unit_test(GtError *err)
     old_map_len = get_map_len(map);
     gt_tag_value_map_remove(&map, "tag 3");
     new_map_len = get_map_len(map);
-    gt_ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
-    gt_ensure(had_err, !(old_map_len - new_map_len - strlen("tag 3") - 1
+    gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
+    gt_ensure(!(old_map_len - new_map_len - strlen("tag 3") - 1
                      - strlen("value ZZZ") -1));
     gt_tag_value_map_delete(map);
   }

@@ -602,11 +602,11 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
                                       dropscore);
 
         edit_ops = gt_xdrop_backtrack(resources, &best);
-        gt_ensure(had_err, edit_ops != NULL);
+        gt_ensure(edit_ops != NULL);
         alignment = gt_alignment_new_with_seqs(strings[i], best.ivalue,
                                                strings[j], best.jvalue);
         gt_alignment_set_multieop_list(alignment, edit_ops);
-        gt_ensure(had_err,
+        gt_ensure(
                   eval_scores[s*64+i*8+j] == gt_alignment_eval(alignment));
 
         gt_multieoplist_delete(edit_ops);

@@ -492,7 +492,7 @@ int gt_alignment_unit_test(GtError *err)
   gt_alignment_add_replacement(alignment);
   gt_alignment_add_replacement(alignment);
 
-  gt_ensure(had_err, gt_alignment_eval(alignment) == 10UL);
+  gt_ensure(gt_alignment_eval(alignment) == 10UL);
 
   gt_alignment_delete(alignment);
 

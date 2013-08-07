@@ -88,15 +88,15 @@ int gt_union_find_unit_test(GtError *err)
 
   /* one element */
   uf = gt_union_find_new(1);
-  gt_ensure(had_err, gt_union_find_find(uf, 0) == 0);
+  gt_ensure(gt_union_find_find(uf, 0) == 0);
   gt_union_find_delete(uf);
 
   /* two elements */
   if (!had_err) {
     uf = gt_union_find_new(2);
-    gt_ensure(had_err, gt_union_find_find(uf, 0) != gt_union_find_find(uf, 1));
+    gt_ensure(gt_union_find_find(uf, 0) != gt_union_find_find(uf, 1));
     gt_union_find_union(uf, 0, 1);
-    gt_ensure(had_err, gt_union_find_find(uf, 0) == gt_union_find_find(uf, 1));
+    gt_ensure(gt_union_find_find(uf, 0) == gt_union_find_find(uf, 1));
     gt_union_find_delete(uf);
   }
 
@@ -104,12 +104,12 @@ int gt_union_find_unit_test(GtError *err)
   if (!had_err) {
     uf = gt_union_find_new(UNION_FIND_TEST_SIZE);
     for (i = 1; !had_err && i < UNION_FIND_TEST_SIZE; i++)
-      gt_ensure(had_err, gt_union_find_find(uf, 0) != gt_union_find_find(uf,
+      gt_ensure(gt_union_find_find(uf, 0) != gt_union_find_find(uf,
                                                                          i));
     for (i = 1; !had_err && i < UNION_FIND_TEST_SIZE; i++)
       gt_union_find_union(uf, 0, i);
     for (i = 1; !had_err && i < UNION_FIND_TEST_SIZE; i++)
-      gt_ensure(had_err, gt_union_find_find(uf, 0) == gt_union_find_find(uf,
+      gt_ensure(gt_union_find_find(uf, 0) == gt_union_find_find(uf,
                                                                          i));
     gt_union_find_delete(uf);
   }

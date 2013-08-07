@@ -295,13 +295,13 @@ static inline int parse_plusminus_unit_test(GtError *err)
 {
   int had_err = 0;
   bool destination;
-  gt_ensure(had_err, parse_plusminus(&destination, "+") == 0);
-  gt_ensure(had_err, destination);
-  gt_ensure(had_err, parse_plusminus(&destination, "-") == 0);
-  gt_ensure(had_err, !destination);
-  gt_ensure(had_err, parse_plusminus(&destination, "xy") != 0);
-  gt_ensure(had_err, parse_plusminus(&destination, "x") != 0);
-  gt_ensure(had_err, parse_plusminus(&destination, "") != 0);
+  gt_ensure(parse_plusminus(&destination, "+") == 0);
+  gt_ensure(destination);
+  gt_ensure(parse_plusminus(&destination, "-") == 0);
+  gt_ensure(!destination);
+  gt_ensure(parse_plusminus(&destination, "xy") != 0);
+  gt_ensure(parse_plusminus(&destination, "x") != 0);
+  gt_ensure(parse_plusminus(&destination, "") != 0);
   return had_err;
 }
 
@@ -348,9 +348,9 @@ static void gt_spmlist_test_save_a(unsigned long suffix_seqnum,
 #define GT_SPMPARSE_TEST_LINE_ERR(LINE)\
   do {\
     line = gt_str_new_cstr(LINE);\
-    gt_ensure(had_err, parse_line(line, 0, gt_spmlist_test_save, NULL, &r,\
+    gt_ensure(parse_line(line, 0, gt_spmlist_test_save, NULL, &r,\
           parse_err) != 0);\
-    gt_ensure(had_err, gt_error_is_set(parse_err));\
+    gt_ensure(gt_error_is_set(parse_err));\
     gt_error_unset(parse_err);\
     gt_str_delete(line);\
   } while (false)
@@ -358,23 +358,23 @@ static void gt_spmlist_test_save_a(unsigned long suffix_seqnum,
 #define GT_SPMPARSE_TEST_LINE_OK(LINE,SN,PN,L,SD,PD)\
   do {\
     line = gt_str_new_cstr(LINE);\
-    gt_ensure(had_err, parse_line(line, 0, gt_spmlist_test_save, NULL, &r,\
+    gt_ensure(parse_line(line, 0, gt_spmlist_test_save, NULL, &r,\
           parse_err) == 0);\
-    gt_ensure(had_err, !gt_error_is_set(parse_err));\
-    gt_ensure(had_err, r.suffix_seqnum == (SN));\
-    gt_ensure(had_err, r.prefix_seqnum == (PN));\
-    gt_ensure(had_err, r.length == (L));\
-    gt_ensure(had_err, r.suffixseq_direct == (SD));\
-    gt_ensure(had_err, r.prefixseq_direct == (PD));\
+    gt_ensure(!gt_error_is_set(parse_err));\
+    gt_ensure(r.suffix_seqnum == (SN));\
+    gt_ensure(r.prefix_seqnum == (PN));\
+    gt_ensure(r.length == (L));\
+    gt_ensure(r.suffixseq_direct == (SD));\
+    gt_ensure(r.prefixseq_direct == (PD));\
     gt_str_delete(line);\
   } while (false)
 
 #define GT_SPMPARSE_TEST_LINE_A_ERR(LINE)\
   do {\
     line = gt_str_new_cstr(LINE);\
-    gt_ensure(had_err, parse_line(line, 0, NULL, gt_spmlist_test_save_a, &r_a,\
+    gt_ensure(parse_line(line, 0, NULL, gt_spmlist_test_save_a, &r_a,\
           parse_err) != 0);\
-    gt_ensure(had_err, gt_error_is_set(parse_err));\
+    gt_ensure(gt_error_is_set(parse_err));\
     gt_error_unset(parse_err);\
     gt_str_delete(line);\
   } while (false)
@@ -382,16 +382,16 @@ static void gt_spmlist_test_save_a(unsigned long suffix_seqnum,
 #define GT_SPMPARSE_TEST_LINE_A_OK(LINE,SN,PN,SL,PL,UE,SD,PD)\
   do {\
     line = gt_str_new_cstr(LINE);\
-    gt_ensure(had_err, parse_line(line, 0, NULL, gt_spmlist_test_save_a, &r_a,\
+    gt_ensure(parse_line(line, 0, NULL, gt_spmlist_test_save_a, &r_a,\
           parse_err) == 0);\
-    gt_ensure(had_err, !gt_error_is_set(parse_err));\
-    gt_ensure(had_err, r_a.suffix_seqnum == (SN));\
-    gt_ensure(had_err, r_a.prefix_seqnum == (PN));\
-    gt_ensure(had_err, r_a.suffix_length == (SL));\
-    gt_ensure(had_err, r_a.prefix_length == (PL));\
-    gt_ensure(had_err, r_a.unit_edist == (UE));\
-    gt_ensure(had_err, r_a.suffixseq_direct == (SD));\
-    gt_ensure(had_err, r_a.prefixseq_direct == (PD));\
+    gt_ensure(!gt_error_is_set(parse_err));\
+    gt_ensure(r_a.suffix_seqnum == (SN));\
+    gt_ensure(r_a.prefix_seqnum == (PN));\
+    gt_ensure(r_a.suffix_length == (SL));\
+    gt_ensure(r_a.prefix_length == (PL));\
+    gt_ensure(r_a.unit_edist == (UE));\
+    gt_ensure(r_a.suffixseq_direct == (SD));\
+    gt_ensure(r_a.prefixseq_direct == (PD));\
     gt_str_delete(line);\
   } while (false)
 

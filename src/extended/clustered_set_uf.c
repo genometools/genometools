@@ -323,10 +323,10 @@ int gt_clustered_set_union_find_unit_test(GtError *err)
   int had_err = 0, i = 0, j = 0;
   GtClusteredSet *cs = NULL;
   cs = gt_clustered_set_union_find_new(1, err);
-  gt_ensure(had_err,
+  gt_ensure(
             gt_clustered_set_union_find_num_of_elements(cs, err) ==
             gt_clustered_set_union_find_cluster_num(cs, 0, err));
-  gt_ensure(had_err,
+  gt_ensure(
             gt_clustered_set_union_find_num_of_clusters(cs, err) == 0);
   gt_clustered_set_union_find_delete(cs, err);
 
@@ -334,12 +334,12 @@ int gt_clustered_set_union_find_unit_test(GtError *err)
     cs = gt_clustered_set_union_find_new(2, err);
     gt_clustered_set_union_find_merge_clusters(cs, 0, 1, err);
 
-    gt_ensure(had_err,
+    gt_ensure(
               gt_clustered_set_union_find_num_of_clusters(cs, err) == 1);
-    gt_ensure(had_err,
+    gt_ensure(
               gt_clustered_set_union_find_cluster_num(cs, 0, err) ==
               gt_clustered_set_union_find_cluster_num(cs, 1, err));
-    gt_ensure(had_err,
+    gt_ensure(
               gt_clustered_set_union_find_num_of_clusters(cs, err) == 1);
 
     gt_clustered_set_union_find_delete(cs, err);
@@ -350,17 +350,17 @@ int gt_clustered_set_union_find_unit_test(GtError *err)
     gt_clustered_set_union_find_merge_clusters(cs, 0, 1, err);
     gt_clustered_set_union_find_merge_clusters(cs, 1, 2, err);
 
-    gt_ensure(had_err,
+    gt_ensure(
                gt_clustered_set_union_find_num_of_clusters(cs, err) == 1);
-    gt_ensure(had_err,
+    gt_ensure(
                gt_clustered_set_union_find_cluster_num(cs, 0, err) ==
                gt_clustered_set_union_find_cluster_num(cs, 1, err));
 
-    gt_ensure(had_err,
+    gt_ensure(
                gt_clustered_set_union_find_cluster_num(cs, 0, err) ==
                gt_clustered_set_union_find_cluster_num(cs, 2, err));
 
-    gt_ensure(had_err,
+    gt_ensure(
               gt_clustered_set_union_find_cluster_num(cs, 1, err) ==
               gt_clustered_set_union_find_cluster_num(cs, 2, err));
 
@@ -372,14 +372,14 @@ int gt_clustered_set_union_find_unit_test(GtError *err)
     gt_clustered_set_union_find_merge_clusters(cs, 0, 1, err);
     gt_clustered_set_union_find_merge_clusters(cs, 2, 3, err);
 
-    gt_ensure(had_err,
+    gt_ensure(
               gt_clustered_set_union_find_num_of_clusters(cs, err) == 2);
 
     gt_clustered_set_union_find_merge_clusters(cs, 0, 2, err);
 
     for (i = 0; i < 4 - 1; i++) {
       for (j = i + 1; j < 4; j++) {
-        gt_ensure(had_err,
+        gt_ensure(
                   gt_clustered_set_union_find_cluster_num(cs, i, err) ==
                   gt_clustered_set_union_find_cluster_num(cs, j, err));
       }
@@ -392,7 +392,7 @@ int gt_clustered_set_union_find_unit_test(GtError *err)
                                          err);
 
     for (i = 0; !had_err && i < CLUSTERED_SET_UNION_FIND_TEST_SIZE; i++) {
-      gt_ensure(had_err,
+      gt_ensure(
                 gt_clustered_set_union_find_num_of_elements(cs, err) ==
                 gt_clustered_set_union_find_cluster_num(cs, i, err));
     }
@@ -401,7 +401,7 @@ int gt_clustered_set_union_find_unit_test(GtError *err)
     }
 
     for (i = 0; !had_err && i < CLUSTERED_SET_UNION_FIND_TEST_SIZE; i++) {
-      gt_ensure(had_err,
+      gt_ensure(
                 gt_clustered_set_union_find_cluster_num(cs, i, err) == 0);
     }
     gt_clustered_set_union_find_delete(cs, err);

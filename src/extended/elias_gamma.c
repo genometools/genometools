@@ -125,15 +125,15 @@ int gt_elias_gamma_unit_test(GtError *err)
         stat = gt_elias_gamma_bitwise_decoder_next(egbd, true, &number);
       else
         stat = gt_elias_gamma_bitwise_decoder_next(egbd, false, &number);
-      gt_ensure(had_err, stat == 1);
+      gt_ensure(stat == 1);
     }
 
     if (gt_bittab_bit_is_set(code, idx_j))
       stat = gt_elias_gamma_bitwise_decoder_next(egbd, true, &number);
     else
       stat = gt_elias_gamma_bitwise_decoder_next(egbd, false, &number);
-    gt_ensure(had_err, stat == 0);
-    gt_ensure(had_err, number == idx);
+    gt_ensure(stat == 0);
+    gt_ensure(number == idx);
     gt_bittab_delete(code);
   }
   gt_elias_gamma_bitwise_decoder_delete(egbd);

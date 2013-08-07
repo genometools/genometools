@@ -280,10 +280,10 @@ void ovlfind_dp_test_save(unsigned long ulen, unsigned long vlen,
 
 #define GT_OVLFIND_DP_EXPECT_RESULT(N,ULEN,VLEN,EDST,DIR)        \
         if (!had_err) r = gt_array_get(a, (N));                  \
-        gt_ensure(had_err, r->ulen == (ULEN));                      \
-        gt_ensure(had_err, r->vlen == (VLEN));                      \
-        gt_ensure(had_err, r->edist == (EDST));                     \
-        gt_ensure(had_err, r->dir == (DIR))
+        gt_ensure(r->ulen == (ULEN));                      \
+        gt_ensure(r->vlen == (VLEN));                      \
+        gt_ensure(r->edist == (EDST));                     \
+        gt_ensure(r->dir == (DIR))
 
 int gt_ovlfind_dp_unit_test(GtError *err)
 {
@@ -302,8 +302,8 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("aacgcacctg", 10UL, "acctgatttc", 10UL, 0.0,
                            GT_OVLFIND_PROPER_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_NO);
-    gt_ensure(had_err, gt_array_size(a) == 1UL);
+    gt_ensure(retval == GT_CONTFIND_NO);
+    gt_ensure(gt_array_size(a) == 1UL);
     GT_OVLFIND_DP_EXPECT_RESULT(0UL, 5UL, 5UL, 0UL, true);
   }
   /* v suffix == u prefix */
@@ -314,8 +314,8 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("atccgtgacgtg", 12UL, "aagaagaatccg", 12UL, 0.0,
                            GT_OVLFIND_ALL, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_NO);
-    gt_ensure(had_err, gt_array_size(a) == 1UL);
+    gt_ensure(retval == GT_CONTFIND_NO);
+    gt_ensure(gt_array_size(a) == 1UL);
     GT_OVLFIND_DP_EXPECT_RESULT(0UL, 5UL, 5UL, 0UL, false);
   }
   /* no overlap */
@@ -325,8 +325,8 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("aac", 3UL, "tgc", 3UL, 0.0,
                            GT_OVLFIND_PROPER_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_NO);
-    gt_ensure(had_err, gt_array_size(a) == 0UL);
+    gt_ensure(retval == GT_CONTFIND_NO);
+    gt_ensure(gt_array_size(a) == 0UL);
   }
   /* u suffix of v */
   if (!had_err)
@@ -335,30 +335,30 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("acagc", 5UL, "gtacagc", 7UL, 0.0,
                            GT_OVLFIND_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
-    gt_ensure(had_err, gt_array_size(a) == 1UL);
+    gt_ensure(retval == GT_CONTFIND_OFF);
+    gt_ensure(gt_array_size(a) == 1UL);
     GT_OVLFIND_DP_EXPECT_RESULT(0UL, 5UL, 5UL, 0UL, false);
 
     gt_array_reset(a);
     retval = gt_ovlfind_dp("acagc", 5UL, "gtacagc", 7UL, 0.0,
                            GT_OVLFIND_PROPER_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_U);
-    gt_ensure(had_err, gt_array_size(a) == 0UL);
+    gt_ensure(retval == GT_CONTFIND_U);
+    gt_ensure(gt_array_size(a) == 0UL);
 
     gt_array_reset(a);
     retval = gt_ovlfind_dp("acagc", 5UL, "gtacagc", 7UL, 0.0,
                            GT_OVLFIND_CNT, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 0UL);
-    gt_ensure(had_err, retval == GT_CONTFIND_U);
+    gt_ensure(gt_array_size(a) == 0UL);
+    gt_ensure(retval == GT_CONTFIND_U);
 
     gt_array_reset(a);
     retval = gt_ovlfind_dp("acagc", 5UL, "gtacagc", 7UL, 0.0,
                            GT_OVLFIND_ALL, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 1UL);
-    gt_ensure(had_err, retval == GT_CONTFIND_U);
+    gt_ensure(gt_array_size(a) == 1UL);
+    gt_ensure(retval == GT_CONTFIND_U);
     GT_OVLFIND_DP_EXPECT_RESULT(0UL, 5UL, 5UL, 0UL, false);
   }
   /* v suffix of u */
@@ -368,16 +368,16 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("gtacagc", 7UL, "acagc", 5UL, 0.0,
                            GT_OVLFIND_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
-    gt_ensure(had_err, gt_array_size(a) == 1UL);
+    gt_ensure(retval == GT_CONTFIND_OFF);
+    gt_ensure(gt_array_size(a) == 1UL);
     GT_OVLFIND_DP_EXPECT_RESULT(0UL, 5UL, 5UL, 0UL, true);
 
     gt_array_reset(a);
     retval = gt_ovlfind_dp("gtacagc", 7UL, "acagc", 5UL, 0.0,
                            GT_OVLFIND_PROPER_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_V);
-    gt_ensure(had_err, gt_array_size(a) == 0UL);
+    gt_ensure(retval == GT_CONTFIND_V);
+    gt_ensure(gt_array_size(a) == 0UL);
   }
   /* u prefix of v */
   if (!had_err)
@@ -386,16 +386,16 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("ctat", 4UL, "ctatacagg", 9UL, 0.0,
                            GT_OVLFIND_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
-    gt_ensure(had_err, gt_array_size(a) == 1UL);
+    gt_ensure(retval == GT_CONTFIND_OFF);
+    gt_ensure(gt_array_size(a) == 1UL);
     GT_OVLFIND_DP_EXPECT_RESULT(0UL, 4UL, 4UL, 0UL, true);
 
     gt_array_reset(a);
     retval = gt_ovlfind_dp("ctat", 4UL, "ctatacagg", 9UL, 0.0,
                            GT_OVLFIND_PROPER_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_U);
-    gt_ensure(had_err, gt_array_size(a) == 0UL);
+    gt_ensure(retval == GT_CONTFIND_U);
+    gt_ensure(gt_array_size(a) == 0UL);
   }
   /* v prefix of u */
   if (!had_err)
@@ -404,16 +404,16 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("ctatacagg", 9UL, "ctat", 4UL, 0.0,
                            GT_OVLFIND_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 1UL);
+    gt_ensure(gt_array_size(a) == 1UL);
     GT_OVLFIND_DP_EXPECT_RESULT(0UL, 4UL, 4UL, 0UL, false);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
+    gt_ensure(retval == GT_CONTFIND_OFF);
 
     gt_array_reset(a);
     retval = gt_ovlfind_dp("ctatacagg", 9UL, "ctat", 4UL, 0.0,
                            GT_OVLFIND_PROPER_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_V);
-    gt_ensure(had_err, gt_array_size(a) == 0UL);
+    gt_ensure(retval == GT_CONTFIND_V);
+    gt_ensure(gt_array_size(a) == 0UL);
   }
   /* identical sequences */
   if (!had_err)
@@ -422,17 +422,17 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("acagc", 5UL, "acagc", 5UL, 0.0,
                            GT_OVLFIND_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 2UL);
+    gt_ensure(gt_array_size(a) == 2UL);
     GT_OVLFIND_DP_EXPECT_RESULT(0UL, 5UL, 5UL, 0UL, true);
     GT_OVLFIND_DP_EXPECT_RESULT(1UL, 5UL, 5UL, 0UL, false);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
+    gt_ensure(retval == GT_CONTFIND_OFF);
 
     gt_array_reset(a);
     retval = gt_ovlfind_dp("acagc", 5UL, "acagc", 5UL, 0.0,
                            GT_OVLFIND_PROPER_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 0UL);
-    gt_ensure(had_err, retval == GT_CONTFIND_EQ);
+    gt_ensure(gt_array_size(a) == 0UL);
+    gt_ensure(retval == GT_CONTFIND_EQ);
   }
   /* find_nonmaximal */
   if (!had_err)
@@ -442,8 +442,8 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("aacagtagtagt", 12UL, "agtagtagttaa", 12UL, 0.0,
                            GT_OVLFIND_SPM, 1UL, false,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
-    gt_ensure(had_err, gt_array_size(a) == 2UL);
+    gt_ensure(retval == GT_CONTFIND_OFF);
+    gt_ensure(gt_array_size(a) == 2UL);
     GT_OVLFIND_DP_EXPECT_RESULT(0UL, 9UL, 9UL, 0UL, true);
     GT_OVLFIND_DP_EXPECT_RESULT(1UL, 2UL, 2UL, 0UL, false);
 
@@ -451,8 +451,8 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("aacagtagtagt", 12UL, "agtagtagttaa", 12UL, 0.0,
                            GT_OVLFIND_SPM, 1UL, true,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 5UL);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
+    gt_ensure(gt_array_size(a) == 5UL);
+    gt_ensure(retval == GT_CONTFIND_OFF);
   }
   /* min_length */
   if (!had_err)
@@ -461,15 +461,15 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("aggaccagtagt", 12UL, "agtagttactac", 12UL, 0.0,
                            GT_OVLFIND_SPM, 1UL, true,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 2UL);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
+    gt_ensure(gt_array_size(a) == 2UL);
+    gt_ensure(retval == GT_CONTFIND_OFF);
 
     gt_array_reset(a);
     retval = gt_ovlfind_dp("aggaccagtagt", 12UL, "agtagttactac", 12UL, 0.0,
                            GT_OVLFIND_SPM, 4UL, true,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 1UL);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
+    gt_ensure(gt_array_size(a) == 1UL);
+    gt_ensure(retval == GT_CONTFIND_OFF);
   }
   /* max_error */
   if (!had_err)
@@ -478,15 +478,15 @@ int gt_ovlfind_dp_unit_test(GtError *err)
     retval = gt_ovlfind_dp("gaccactagt", 10UL, "agtagttact", 10UL, 0.0,
                            GT_OVLFIND_SPM, 6UL, true,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 0UL);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
+    gt_ensure(gt_array_size(a) == 0UL);
+    gt_ensure(retval == GT_CONTFIND_OFF);
 
     gt_array_reset(a);
     retval = gt_ovlfind_dp("gaccactagt", 10UL, "agtagttact", 10UL, 0.1,
                            GT_OVLFIND_SPM, 6UL, true,
                            ovlfind_dp_test_save, a);
-    gt_ensure(had_err, gt_array_size(a) == 1UL);
-    gt_ensure(had_err, retval == GT_CONTFIND_OFF);
+    gt_ensure(gt_array_size(a) == 1UL);
+    gt_ensure(retval == GT_CONTFIND_OFF);
   }
   gt_array_delete(a);
   return had_err;
