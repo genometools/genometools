@@ -1538,7 +1538,7 @@ The \keyword{gt_ensure} helper macro makes writing unit tests easier. To use it,
 \begin{lstlisting}
 int gt_class_unit_test(GtError *err) /* must be called 'err'! */
 {
-  int had_err = 0;
+  int had_err = 0;                   /* must be called 'had_err'! */
   gt_error_check(err);               /* will abort if error was already set */
 
   gt_ensure(1 + 1 == 2);    /* will succeed */
@@ -1549,11 +1549,12 @@ int gt_class_unit_test(GtError *err) /* must be called 'err'! */
 \end{lstlisting}
 
 Similarly to \keyword{gt_assert()}, if the expression given to
-\keyword{gt_ensure()} as a second parameter evaluates to false, the test will
-fail with an error message, giving the location at which the first condition
-failed. Because \keyword{gt_ensure()} is implemented as a macro relying on
-certain naming conventions, it is mandatory that the \keyword{GtError} object
-passed to the test function is called \keyword{err}.
+\keyword{gt_ensure()} as a parameter evaluates to false, the test will fail with
+an error message, giving the location at which the first condition failed.
+Because \keyword{gt_ensure()} is implemented as a macro relying on certain
+naming conventions, it is mandatory that the \keyword{int} error indicator
+variabel and the \keyword{GtError} object within the test function are called
+\keyword{had_err} and \keyword{err}.
 
 The unit tests are added to the test suite in the function
 \keyword{gtt_unit_tests()} in \keyword{gtt.c} and loaded into the \Gt runtime
