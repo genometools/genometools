@@ -69,28 +69,28 @@ int gt_grep_unit_test(GtError *err)
   gt_error_check(err);
 
   grep_err = gt_grep(&match, "a", "a", NULL);
-  gt_ensure(had_err, !grep_err);
-  gt_ensure(had_err, match);
+  gt_ensure(!grep_err);
+  gt_ensure(match);
 
   grep_err = gt_grep(&match, "b", "a", NULL);
-  gt_ensure(had_err, !grep_err);
-  gt_ensure(had_err, !match);
+  gt_ensure(!grep_err);
+  gt_ensure(!match);
 
   grep_err =  gt_grep(&match, "aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
-  gt_ensure(had_err, !grep_err);
-  gt_ensure(had_err, match);
+  gt_ensure(!grep_err);
+  gt_ensure(match);
 
   grep_err = gt_grep(&match, "aba", "wenbapzbpqSayhzzaBaZZqyghaAAahhaA", NULL);
-  gt_ensure(had_err, !grep_err);
-  gt_ensure(had_err, !match);
+  gt_ensure(!grep_err);
+  gt_ensure(!match);
 
   grep_err = gt_grep(&match, "^aba", "abawenbapzbpqSayhzzZZqyghaAAahhaA", NULL);
-  gt_ensure(had_err, !grep_err);
-  gt_ensure(had_err, match);
+  gt_ensure(!grep_err);
+  gt_ensure(match);
 
   grep_err = gt_grep(&match, "^aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
-  gt_ensure(had_err, !grep_err);
-  gt_ensure(had_err, !match);
+  gt_ensure(!grep_err);
+  gt_ensure(!match);
 
   return had_err;
 }

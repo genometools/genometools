@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2007-2009 Gordon Gremme <gordon@gremme.org>
+  Copyright (c)      2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,16 +23,15 @@
 #include "core/error.h"
 
 /* the ensure macro used for unit tests */
-#define gt_ensure(had_err, expr)                                               \
-        do {                                                                   \
-          if (!had_err) {                                                      \
-            if (!(expr)) {                                                     \
-              gt_error_set(err, "gt_ensure(%s) failed: function %s, file %s, " \
-                           "line %d.\nThis is probably a bug, please report.", \
-                           #expr, __func__, __FILE__, __LINE__);               \
-              had_err = -1;                                                    \
-            }                                                                  \
-          }                                                                    \
-        } while (false)
-
+#define gt_ensure(expr)                                                  \
+  do {                                                                   \
+    if (!had_err) {                                                      \
+      if (!(expr)) {                                                     \
+        gt_error_set(err, "gt_ensure(%s) failed: function %s, file %s, " \
+                     "line %d.\nThis is probably a bug, please report.", \
+                     #expr, __func__, __FILE__, __LINE__);               \
+        had_err = -1;                                                    \
+      }                                                                  \
+    }                                                                    \
+  } while (false)
 #endif

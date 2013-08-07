@@ -303,8 +303,8 @@ static int iterate_test_func(void *value, void *info, GT_UNUSED GtError *err)
   gt_error_check(err);
   i = (unsigned long*) info;
   range = *(GtRange*) value;
-  gt_ensure(had_err, range.start == *i + 1);
-  gt_ensure(had_err, range.end == *i + 101);
+  gt_ensure(range.start == *i + 1);
+  gt_ensure(range.end == *i + 101);
   (*i)++;
   return had_err;
 }
@@ -364,8 +364,8 @@ int gt_array_unit_test(GtError *err)
     gt_array_reset(char_array);
     gt_array_set_size(int_array, 0);
 
-    gt_ensure(had_err, gt_array_size(char_array) == 0);
-    gt_ensure(had_err, gt_array_size(int_array) == 0);
+    gt_ensure(gt_array_size(char_array) == 0);
+    gt_ensure(gt_array_size(int_array) == 0);
 
     for (i = 0; !had_err && i < size; i++) {
       cc = gt_rand_max(CHAR_MAX);
@@ -374,35 +374,35 @@ int gt_array_unit_test(GtError *err)
       gt_array_add(char_array, cc);
       gt_array_add(int_array, ci);
 
-      gt_ensure(had_err, gt_array_size(char_array) == i+1);
-      gt_ensure(had_err, gt_array_size(int_array) == i+1);
-      gt_ensure(had_err, *((char*) gt_array_get(char_array, i)) == cc);
-      gt_ensure(had_err, *((int*) gt_array_get(int_array, i)) == ci);
+      gt_ensure(gt_array_size(char_array) == i+1);
+      gt_ensure(gt_array_size(int_array) == i+1);
+      gt_ensure(*((char*) gt_array_get(char_array, i)) == cc);
+      gt_ensure(*((int*) gt_array_get(int_array, i)) == ci);
 
       gt_array_add_elem(char_array, &cc, sizeof (char));
       gt_array_add_elem(int_array, &ci, sizeof (int));
 
-      gt_ensure(had_err, gt_array_size(char_array) == i+2);
-      gt_ensure(had_err, gt_array_size(int_array) == i+2);
-      gt_ensure(had_err, *((char*) gt_array_get(char_array, i+1)) == cc);
-      gt_ensure(had_err, *((int*) gt_array_get(int_array, i+1)) == ci);
-      gt_ensure(had_err, *((char*) gt_array_pop(char_array)) == cc);
-      gt_ensure(had_err, *((int*) gt_array_pop(int_array)) == ci);
-      gt_ensure(had_err, gt_array_size(char_array) == i+1);
-      gt_ensure(had_err, gt_array_size(int_array) == i+1);
-      gt_ensure(had_err, *((char*) gt_array_get(char_array, i)) == cc);
-      gt_ensure(had_err, *((int*) gt_array_get(int_array, i)) == ci);
+      gt_ensure(gt_array_size(char_array) == i+2);
+      gt_ensure(gt_array_size(int_array) == i+2);
+      gt_ensure(*((char*) gt_array_get(char_array, i+1)) == cc);
+      gt_ensure(*((int*) gt_array_get(int_array, i+1)) == ci);
+      gt_ensure(*((char*) gt_array_pop(char_array)) == cc);
+      gt_ensure(*((int*) gt_array_pop(int_array)) == ci);
+      gt_ensure(gt_array_size(char_array) == i+1);
+      gt_ensure(gt_array_size(int_array) == i+1);
+      gt_ensure(*((char*) gt_array_get(char_array, i)) == cc);
+      gt_ensure(*((int*) gt_array_get(int_array, i)) == ci);
 
       char_array_test[i] = cc;
       char_array_test[i+1]= '\0';
       int_array_test[i] = ci;
 
-      gt_ensure(had_err, strncmp(gt_array_get_space(char_array),
+      gt_ensure(strncmp(gt_array_get_space(char_array),
                                  char_array_test,
                                  strlen(char_array_test)) == 0);
 
       for (j = 0; j <= i && !had_err; j++)
-        gt_ensure(had_err,
+        gt_ensure(
                *(int*) gt_array_get(int_array, j) == int_array_test[j]);
     }
   }
@@ -420,7 +420,7 @@ int gt_array_unit_test(GtError *err)
     for (i = 0; !had_err && i < 24; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      gt_ensure(had_err, !gt_range_compare(&range, gt_array_get(a, 23 - i)));
+      gt_ensure(!gt_range_compare(&range, gt_array_get(a, 23 - i)));
     }
     aref = gt_array_ref(a);
     gt_array_delete(aref);
@@ -428,19 +428,19 @@ int gt_array_unit_test(GtError *err)
   if (!had_err) {
     i = 0;
     had_err = gt_array_iterate_reverse(a, iterate_test_func, &i, err);
-    gt_ensure(had_err,
+    gt_ensure(
               gt_array_iterate_reverse(a, iterate_fail_func, NULL, err));
   }
   if (!had_err) {
     gt_array_reverse(a);
     i = 0;
     had_err = gt_array_iterate(a, iterate_test_func, &i, err);
-    gt_ensure(had_err, gt_array_iterate(a, iterate_fail_func, NULL, err));
+    gt_ensure(gt_array_iterate(a, iterate_fail_func, NULL, err));
   }
   if (!had_err) {
     aclone = gt_array_clone(a);
     for (i = 0;!had_err && i < gt_array_size(a); i++) {
-      gt_ensure(had_err, !gt_range_compare(gt_array_get(a, i),
+      gt_ensure(!gt_range_compare(gt_array_get(a, i),
                                         gt_array_get(aclone, i)));
     }
   }
@@ -449,50 +449,50 @@ int gt_array_unit_test(GtError *err)
     gt_array_rem(a, 12);
     gt_array_rem(a, 11);
     gt_array_rem(a, 10);
-    gt_ensure(had_err, gt_array_size(a) == 20);
+    gt_ensure(gt_array_size(a) == 20);
     for (i = 0; !had_err && i < 10; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      gt_ensure(had_err, !gt_range_compare(&range, gt_array_get(a, i)));
+      gt_ensure(!gt_range_compare(&range, gt_array_get(a, i)));
     }
     for (i = 10; !had_err && i < 20; i++) {
       range.start = 4 + i + 1;
       range.end   = 4 + i + 101;
-      gt_ensure(had_err, !gt_range_compare(&range, gt_array_get(a, i)));
+      gt_ensure(!gt_range_compare(&range, gt_array_get(a, i)));
     }
   }
   if (!had_err) {
     gt_array_rem_span(aclone, 10, 13);
-    gt_ensure(had_err, gt_array_size(aclone) == 20);
+    gt_ensure(gt_array_size(aclone) == 20);
     for (i = 0; !had_err && i < 10; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      gt_ensure(had_err, !gt_range_compare(&range, gt_array_get(aclone, i)));
+      gt_ensure(!gt_range_compare(&range, gt_array_get(aclone, i)));
     }
     for (i = 10; !had_err && i < 20; i++) {
       range.start = 4 + i + 1;
       range.end   = 4 + i + 101;
-      gt_ensure(had_err, !gt_range_compare(&range, gt_array_get(aclone, i)));
+      gt_ensure(!gt_range_compare(&range, gt_array_get(aclone, i)));
     }
   }
   if (!had_err) {
     gt_array_rem_span(aclone, 10, 19);
     gt_array_prepend_array(a, aclone);
-    gt_ensure(had_err, gt_array_size(a) == 30);
+    gt_ensure(gt_array_size(a) == 30);
     for (i = 0; !had_err && i < 10; i++) {
       range.start = i + 1;
       range.end   = i + 101;
-      gt_ensure(had_err, !gt_range_compare(&range, gt_array_get(a, i)));
+      gt_ensure(!gt_range_compare(&range, gt_array_get(a, i)));
     }
     for (i = 10; !had_err && i < 20; i++) {
       range.start = i + 1 - 10;
       range.end   = i + 101 - 10;
-      gt_ensure(had_err, !gt_range_compare(&range, gt_array_get(a, i)));
+      gt_ensure(!gt_range_compare(&range, gt_array_get(a, i)));
     }
     for (i = 20; !had_err && i < 30; i++) {
       range.start = 4 + i + 1 - 10;
       range.end   = 4 + i + 101 - 10;
-      gt_ensure(had_err, !gt_range_compare(&range, gt_array_get(a, i)));
+      gt_ensure(!gt_range_compare(&range, gt_array_get(a, i)));
     }
   }
   gt_array_delete(aclone);

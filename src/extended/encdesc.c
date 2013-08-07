@@ -1585,16 +1585,16 @@ int gt_encdesc_unit_test(GtError *err)
   /* test count_leading_zeros */
   if (!had_err) {
     char *test = "000156";
-    gt_ensure(had_err, count_leading_zeros(test) == 3U);
+    gt_ensure(count_leading_zeros(test) == 3U);
 
     test = "x";
-    gt_ensure(had_err, count_leading_zeros(test) == 0);
+    gt_ensure(count_leading_zeros(test) == 0);
 
     test = "0000";
-    gt_ensure(had_err, count_leading_zeros(test) == 3U);
+    gt_ensure(count_leading_zeros(test) == 3U);
 
     test = "";
-    gt_ensure(had_err, count_leading_zeros(test) == 0U);
+    gt_ensure(count_leading_zeros(test) == 0U);
   }
 
   /* test parse_number_out_of_current_field */
@@ -1603,17 +1603,17 @@ int gt_encdesc_unit_test(GtError *err)
     info->descbuffer = "abc00666";
     info->cur_field_start_pos = 3UL;
     parse_number_out_of_current_field(info, &retval);
-    gt_ensure(had_err, retval == 666L);
+    gt_ensure(retval == 666L);
 
     info->descbuffer = "abc\000666\000abc";
     info->cur_field_start_pos = 4UL;
     parse_number_out_of_current_field(info, &retval);
-    gt_ensure(had_err, retval == 666L);
+    gt_ensure(retval == 666L);
 
     info->descbuffer = "aaa-123\000aaa";
     info->cur_field_start_pos = 3UL;
     parse_number_out_of_current_field(info, &retval);
-    gt_ensure(had_err, retval == -123L);
+    gt_ensure(retval == -123L);
   }
 
   GT_FREEARRAY(info->codes, EncdescCode);

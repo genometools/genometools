@@ -151,11 +151,11 @@ int gt_compact_ulong_store_unit_test(GtError *err)
       checknumbers[idx] = nums == constnums ? gt_rand_max(numforbits-1) : idx;
       gt_compact_ulong_store_update(cus,idx,checknumbers[idx]);
       value = gt_compact_ulong_store_get(cus,idx);
-      gt_ensure(had_err,checknumbers[idx] == value);
+      gt_ensure(checknumbers[idx] == value);
     }
     for (idx = 0; had_err == 0 && idx < nums; idx++) {
       value = gt_compact_ulong_store_get(cus,idx);
-      gt_ensure(had_err,checknumbers[idx] == value);
+      gt_ensure(checknumbers[idx] == value);
     }
     gt_compact_ulong_store_delete(cus);
   }

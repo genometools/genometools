@@ -2460,7 +2460,7 @@ static int gt_strgraph_new_unit_test(GtError *err)
 
   /* ordinary number of reads */
   strgraph = gt_strgraph_new(100UL);
-  gt_ensure(had_err, strgraph != NULL);
+  gt_ensure(strgraph != NULL);
   gt_strgraph_delete(strgraph);
 
   return had_err;
@@ -2493,20 +2493,20 @@ static int gt_strgraph_creation_unit_test(GtError *err)
   strgraph = gt_strgraph_new(nofreads);
   gt_spmproc_strgraph_count(0, 1UL, 10UL, true, true, strgraph);
   GT_STRGRAPH_GET_COUNT(strgraph, c, GT_STRGRAPH_V_B(0));
-  gt_ensure(had_err, c == 0);
+  gt_ensure(c == 0);
   GT_STRGRAPH_GET_COUNT(strgraph, c, GT_STRGRAPH_V_E(0));
-  gt_ensure(had_err, c == (GtStrgraphCount)1);
+  gt_ensure(c == (GtStrgraphCount)1);
   GT_STRGRAPH_GET_COUNT(strgraph, c, GT_STRGRAPH_V_B(1));
-  gt_ensure(had_err, c == (GtStrgraphCount)1);
+  gt_ensure(c == (GtStrgraphCount)1);
   GT_STRGRAPH_GET_COUNT(strgraph, c, GT_STRGRAPH_V_E(1));
-  gt_ensure(had_err, c == 0);
+  gt_ensure(c == 0);
   gt_strgraph_allocate_graph(strgraph, 100UL, NULL);
-  gt_ensure(had_err, GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_B(0)) == 0);
-  gt_ensure(had_err, GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_E(0)) ==
+  gt_ensure(GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_B(0)) == 0);
+  gt_ensure(GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_E(0)) ==
       (GtStrgraphVEdgenum)1);
-  gt_ensure(had_err, GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_B(1)) ==
+  gt_ensure(GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_B(1)) ==
       (GtStrgraphVEdgenum)1);
-  gt_ensure(had_err, GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_E(1)) == 0);
+  gt_ensure(GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_E(1)) == 0);
   gt_strgraph_delete(strgraph);
   return had_err;
 }
@@ -2522,24 +2522,24 @@ static int gt_strgraph_add_spm_unit_test(GtError *err)
   gt_spmproc_strgraph_count(0, 1UL, 10UL, true, true, strgraph);
   gt_strgraph_allocate_graph(strgraph, 22UL, NULL);
   gt_spmproc_strgraph_add(0, 1UL, 10UL, true, true, strgraph);
-  gt_ensure(had_err, GT_STRGRAPH_NOFVERTICES(strgraph) == (GtStrgraphVnum)4);
-  gt_ensure(had_err, GT_STRGRAPH_V_OUTDEG(strgraph, GT_STRGRAPH_V_B(0)) == 0);
-  gt_ensure(had_err, GT_STRGRAPH_V_OUTDEG(strgraph, GT_STRGRAPH_V_E(0)) ==
+  gt_ensure(GT_STRGRAPH_NOFVERTICES(strgraph) == (GtStrgraphVnum)4);
+  gt_ensure(GT_STRGRAPH_V_OUTDEG(strgraph, GT_STRGRAPH_V_B(0)) == 0);
+  gt_ensure(GT_STRGRAPH_V_OUTDEG(strgraph, GT_STRGRAPH_V_E(0)) ==
       (GtStrgraphVEdgenum)1);
-  gt_ensure(had_err, GT_STRGRAPH_EDGE_DEST(strgraph, GT_STRGRAPH_V_E(0), 0) ==
+  gt_ensure(GT_STRGRAPH_EDGE_DEST(strgraph, GT_STRGRAPH_V_E(0), 0) ==
       GT_STRGRAPH_V_E(1));
-  gt_ensure(had_err, GT_STRGRAPH_EDGE_LEN(strgraph, GT_STRGRAPH_V_E(0), 0) ==
+  gt_ensure(GT_STRGRAPH_EDGE_LEN(strgraph, GT_STRGRAPH_V_E(0), 0) ==
       (GtStrgraphLength)12);
-  gt_ensure(had_err, !GT_STRGRAPH_EDGE_IS_REDUCED(strgraph,
+  gt_ensure(!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph,
       GT_STRGRAPH_V_E(0), 0));
-  gt_ensure(had_err, GT_STRGRAPH_V_OUTDEG(strgraph, GT_STRGRAPH_V_B(1)) ==
+  gt_ensure(GT_STRGRAPH_V_OUTDEG(strgraph, GT_STRGRAPH_V_B(1)) ==
       (GtStrgraphVEdgenum)1);
-  gt_ensure(had_err, GT_STRGRAPH_V_OUTDEG(strgraph, GT_STRGRAPH_V_E(1)) == 0);
-  gt_ensure(had_err, GT_STRGRAPH_EDGE_DEST(strgraph, GT_STRGRAPH_V_B(1), 0) ==
+  gt_ensure(GT_STRGRAPH_V_OUTDEG(strgraph, GT_STRGRAPH_V_E(1)) == 0);
+  gt_ensure(GT_STRGRAPH_EDGE_DEST(strgraph, GT_STRGRAPH_V_B(1), 0) ==
       (GtStrgraphVnum)GT_STRGRAPH_V_B(0));
-  gt_ensure(had_err, GT_STRGRAPH_EDGE_LEN(strgraph, GT_STRGRAPH_V_B(1), 0) ==
+  gt_ensure(GT_STRGRAPH_EDGE_LEN(strgraph, GT_STRGRAPH_V_B(1), 0) ==
       (GtStrgraphLength)12);
-  gt_ensure(had_err, !GT_STRGRAPH_EDGE_IS_REDUCED(strgraph,
+  gt_ensure(!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph,
       GT_STRGRAPH_V_B(1), 0));
   gt_strgraph_delete(strgraph);
   return had_err;

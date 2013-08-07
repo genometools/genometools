@@ -637,12 +637,12 @@ int gt_hmm_unit_test(GtError *err)
     for (j = 0; j < len; j++)
       encoded_seq[j] = gt_alphabet_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
-    gt_ensure(had_err,
+    gt_ensure(
            gt_double_equals_double(exp(gt_hmm_forward(fair_hmm, encoded_seq,
                                                       len)),
                                    exp(gt_hmm_backward(fair_hmm, encoded_seq,
                                                     len))));
-    gt_ensure(had_err,
+    gt_ensure(
            gt_double_equals_double(exp(gt_hmm_forward(loaded_hmm, encoded_seq,
                                                    len)),
                                    exp(gt_hmm_backward(loaded_hmm, encoded_seq,
@@ -651,9 +651,9 @@ int gt_hmm_unit_test(GtError *err)
 
   gt_free(encoded_seq);
   gt_alphabet_delete(alpha);
-  gt_ensure(had_err,
+  gt_ensure(
             gt_double_equals_double(gt_hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  gt_ensure(had_err,
+  gt_ensure(
             gt_double_equals_double(gt_hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   gt_hmm_delete(loaded_hmm);
   gt_hmm_delete(fair_hmm);
@@ -671,12 +671,12 @@ int gt_hmm_unit_test(GtError *err)
       encoded_seq[j] = gt_alphabet_encode(alpha, dice_rolls[i][j]);
     }
     /* XXX: remove exp() calls */
-    gt_ensure(had_err,
+    gt_ensure(
            gt_double_equals_double(exp(gt_hmm_forward(fair_hmm, encoded_seq,
                                                       len)),
                                    exp(gt_hmm_backward(fair_hmm, encoded_seq,
                                                        len))));
-    gt_ensure(had_err,
+    gt_ensure(
            gt_double_equals_double(exp(gt_hmm_forward(loaded_hmm, encoded_seq,
                                                       len)),
                                    exp(gt_hmm_backward(loaded_hmm, encoded_seq,
@@ -685,9 +685,9 @@ int gt_hmm_unit_test(GtError *err)
 
   gt_free(encoded_seq);
   gt_alphabet_delete(alpha);
-  gt_ensure(had_err,
+  gt_ensure(
             gt_double_equals_double(gt_hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  gt_ensure(had_err,
+  gt_ensure(
             gt_double_equals_double(gt_hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   gt_hmm_delete(loaded_hmm);
   gt_hmm_delete(fair_hmm);

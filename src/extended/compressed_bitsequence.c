@@ -1109,41 +1109,41 @@ static int gt_compressed_bitsequence_unit_test_variable_field(
   gt_error_check(err);
 
   result = gt_compressed_bitsequence_get_variable_field(bitseq, 0, 16U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xaaaa);
+  gt_ensure(result == (GtBitsequence) 0xaaaa);
   result = gt_compressed_bitsequence_get_variable_field(bitseq, 16UL, 16U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xcccc);
+  gt_ensure(result == (GtBitsequence) 0xcccc);
   result = gt_compressed_bitsequence_get_variable_field(bitseq, 32UL, 32U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xaaaaccccUL);
+  gt_ensure(result == (GtBitsequence) 0xaaaaccccUL);
   if (GT_LOGWORDSIZE == 6) {
     result = gt_compressed_bitsequence_get_variable_field(bitseq, 32UL, 64U);
-    gt_ensure(had_err, result == (GtBitsequence) 0xaaaaccccaaaaccccULL);
+    gt_ensure(result == (GtBitsequence) 0xaaaaccccaaaaccccULL);
   }
 
   gt_compressed_bitsequence_set_variable_field(bitseq, size, 16UL, 32U, value);
   result = gt_compressed_bitsequence_get_variable_field(bitseq, 0, 32U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xaaaa000fUL);
+  gt_ensure(result == (GtBitsequence) 0xaaaa000fUL);
   result = gt_compressed_bitsequence_get_variable_field(bitseq, 32UL, 32U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xf000ccccUL);
+  gt_ensure(result == (GtBitsequence) 0xf000ccccUL);
   gt_compressed_bitsequence_set_variable_field(bitseq, size,
                                                16UL, 32U,
                                                (GtBitsequence) 0xccccaaaaUL);
   gt_compressed_bitsequence_set_variable_field(bitseq, size, 128UL, 8U,
                                                (GtBitsequence) 0xFF);
   result = gt_compressed_bitsequence_get_variable_field(bitseq, 128UL, 32U);
-  gt_ensure(had_err, result == (GtBitsequence) 0xffaaccccUL);
+  gt_ensure(result == (GtBitsequence) 0xffaaccccUL);
 
   if (GT_LOGWORDSIZE == 6) {
     value <<= 16; /* total of << 28 = 0x0000000FF0000000 */
     gt_compressed_bitsequence_set_variable_field(bitseq, size,
                                                  32UL, 64U, value);
     result = gt_compressed_bitsequence_get_variable_field(bitseq, 0, 64U);
-    gt_ensure(had_err, result == (GtBitsequence) 0xaaaacccc0000000fULL);
+    gt_ensure(result == (GtBitsequence) 0xaaaacccc0000000fULL);
     result = gt_compressed_bitsequence_get_variable_field(bitseq, 64UL, 64U);
-    gt_ensure(had_err, result == (GtBitsequence) 0xf0000000aaaaccccULL);
+    gt_ensure(result == (GtBitsequence) 0xf0000000aaaaccccULL);
     gt_compressed_bitsequence_set_variable_field(
                 bitseq, size, 32UL, 64U, (GtBitsequence) 0xaaaaccccaaaaccccULL);
     result = gt_compressed_bitsequence_get_variable_field(bitseq, 120UL, 64U);
-    gt_ensure(had_err, result == (GtBitsequence) 0xccffaaccccaaaaccULL);
+    gt_ensure(result == (GtBitsequence) 0xccffaaccccaaaaccULL);
   }
 
   return had_err;
@@ -1166,7 +1166,7 @@ static int gt_compressed_bitsequence_unit_test_block_identical(
   gt_error_check(err);
 
   cbs = gt_compressed_bitsequence_new(bitseq, sample_testratio, cbs_testsize);
-  gt_ensure(had_err, cbs != NULL);
+  gt_ensure(cbs != NULL);
   if (cbs != NULL) {
     block_len = cbs->blocksize;
   }
@@ -1201,7 +1201,7 @@ static int gt_compressed_bitsequence_unit_test_block_identical(
                                                          bitseq,
                                                          idx * cbs->blocksize,
                                                          block_len);
-    gt_ensure(had_err, block == (unsigned long) orig_block);
+    gt_ensure(block == (unsigned long) orig_block);
   }
   gt_compressed_bitsequence_delete(cbs);
   return had_err;
@@ -1247,13 +1247,13 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
 
   if (!had_err) {
     cbs = gt_compressed_bitsequence_new(bitseq, sample_testratio, cbs_testsize);
-    gt_ensure(had_err, cbs != NULL);
+    gt_ensure(cbs != NULL);
 
     if (cbs != NULL) {
 
       for (idx = 1UL; !had_err && idx < cbs_testsize; idx += 32UL) {
-        gt_ensure(had_err, 1 == gt_compressed_bitsequence_access(cbs, idx - 1));
-        gt_ensure(had_err, 0 == gt_compressed_bitsequence_access(cbs, idx));
+        gt_ensure(1 == gt_compressed_bitsequence_access(cbs, idx - 1));
+        gt_ensure(0 == gt_compressed_bitsequence_access(cbs, idx));
       }
       gt_compressed_bitsequence_delete(cbs);
     }
@@ -1264,24 +1264,24 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
   bitseq[GT_DIV2(bitseq_testsize)+1] = (GtBitsequence) ~0ULL;
   if (!had_err) {
     cbs = gt_compressed_bitsequence_new(bitseq, sample_testratio, cbs_testsize);
-    gt_ensure(had_err, cbs != NULL);
+    gt_ensure(cbs != NULL);
 
     if (cbs != NULL) {
       unsigned long rank1, rank0;
 
       rank1 = gt_compressed_bitsequence_rank_1(cbs,
                                (unsigned long) GT_INTWORDSIZE - 1UL);
-      gt_ensure(had_err, rank1 == (unsigned long) GT_DIV2(GT_INTWORDSIZE));
+      gt_ensure(rank1 == (unsigned long) GT_DIV2(GT_INTWORDSIZE));
       for (idx = (unsigned long) GT_INTWORDSIZE - 1UL;
            !had_err && idx < cbs_testsize;
            idx += idx + 1) {
         rank1 = gt_compressed_bitsequence_rank_1(cbs, idx);
         rank0 = gt_compressed_bitsequence_rank_0(cbs, idx);
-        gt_ensure(had_err, rank1 + rank0 == idx+1);
+        gt_ensure(rank1 + rank0 == idx+1);
       }
       rank1 = gt_compressed_bitsequence_rank_1(cbs, cbs_testsize-1);
       rank0 = gt_compressed_bitsequence_rank_0(cbs, cbs_testsize-1);
-      gt_ensure(had_err, rank1 + rank0 == cbs_testsize);
+      gt_ensure(rank1 + rank0 == cbs_testsize);
       gt_compressed_bitsequence_delete(cbs);
     }
   }
@@ -1293,15 +1293,15 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
       ranktotal1 = gt_compressed_bitsequence_rank_1(cbs, cbs_testsize - 1);
       for (idx = 1UL; !had_err && idx <= ranktotal1; idx++) {
         select1 = gt_compressed_bitsequence_select_1(cbs, idx);
-        gt_ensure(had_err, gt_compressed_bitsequence_access(cbs, select1) == 1);
+        gt_ensure(gt_compressed_bitsequence_access(cbs, select1) == 1);
         rank1 = gt_compressed_bitsequence_rank_1(cbs, select1);
-        gt_ensure(had_err, idx == rank1);
+        gt_ensure(idx == rank1);
       }
       for (idx = 1UL; !had_err && idx <= cbs_testsize - ranktotal1; idx++) {
         select0 = gt_compressed_bitsequence_select_0(cbs, idx);
-        gt_ensure(had_err, gt_compressed_bitsequence_access(cbs, select0) == 0);
+        gt_ensure(gt_compressed_bitsequence_access(cbs, select0) == 0);
         rank0 = gt_compressed_bitsequence_rank_0(cbs, select0);
-        gt_ensure(had_err, idx == rank0);
+        gt_ensure(idx == rank0);
       }
     }
     gt_compressed_bitsequence_delete(cbs);

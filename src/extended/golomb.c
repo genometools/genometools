@@ -209,11 +209,11 @@ int gt_golomb_unit_test(GtError *err)
           stat = gt_golomb_bitwise_decoder_next(gbwd, true, &number);
         else
           stat = gt_golomb_bitwise_decoder_next(gbwd, false, &number);
-        gt_ensure(had_err, stat != -1);
+        gt_ensure(stat != -1);
       }
 
-      gt_ensure(had_err, stat == 0);
-      gt_ensure(had_err, number == idx_k);
+      gt_ensure(stat == 0);
+      gt_ensure(number == idx_k);
       gt_bittab_delete(code);
     }
     gt_golomb_bitwise_decoder_delete(gbwd);

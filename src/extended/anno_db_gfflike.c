@@ -2052,22 +2052,22 @@ int gt_anno_db_gfflike_unit_test(GtError *err)
 
 #ifdef HAVE_SQLITE
   rdb = gt_rdb_sqlite_new(gt_str_get(tmpfilename), testerr);
-  gt_ensure(had_err, rdb != NULL);
+  gt_ensure(rdb != NULL);
   if (!had_err) {
     adb = gt_anno_db_gfflike_new();
-    gt_ensure(had_err, adb != NULL);
+    gt_ensure(adb != NULL);
   }
 
   if (!had_err) {
     fi = gt_anno_db_schema_get_feature_index(adb, rdb, testerr);
-    gt_ensure(had_err, fi != NULL);
+    gt_ensure(fi != NULL);
   }
 #endif
 
   if (!had_err) {
     /* run generic feature index tests */
     status = gt_feature_index_unit_test(fi, testerr);
-    gt_ensure(had_err, status == 0);
+    gt_ensure(status == 0);
   }
 
   gt_xremove(gt_str_get(tmpfilename));

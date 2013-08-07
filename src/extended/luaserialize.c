@@ -150,7 +150,7 @@ int gt_lua_serializer_unit_test(GtError *err)
   gt_error_check(err);
 
   L = luaL_newstate();
-  gt_ensure(had_err, L);
+  gt_ensure(L);
   luaL_openlibs(L);
   had_err = luaL_loadbuffer(L, testtable, sizeof (testtable)-1, "t") ||
               lua_pcall(L, 0, 0, 0);
@@ -165,31 +165,31 @@ int gt_lua_serializer_unit_test(GtError *err)
               lua_pcall(L, 0, 0, 0);
     if (!had_err)
     {
-      gt_ensure(had_err, gt_str_length(outstr) > 0);
+      gt_ensure(gt_str_length(outstr) > 0);
       lua_getglobal(L, "config");
-      gt_ensure(had_err, lua_istable(L, -1));
+      gt_ensure(lua_istable(L, -1));
       lua_getfield(L, -1, "gene");
-      gt_ensure(had_err, lua_istable(L, -1));
+      gt_ensure(lua_istable(L, -1));
       lua_getfield(L, -1, "stroke_marked");
-      gt_ensure(had_err, lua_istable(L, -1));
+      gt_ensure(lua_istable(L, -1));
       lua_getfield(L, -1, "red");
-      gt_ensure(had_err, lua_isnumber(L, -1));
-      gt_ensure(had_err, 1.0 == lua_tonumber(L, -1));
+      gt_ensure(lua_isnumber(L, -1));
+      gt_ensure(1.0 == lua_tonumber(L, -1));
       lua_pop(L, 1);
       lua_getfield(L, -1, "blue");
-      gt_ensure(had_err, lua_isnumber(L, -1));
-      gt_ensure(had_err, 0.0 == lua_tonumber(L, -1));
+      gt_ensure(lua_isnumber(L, -1));
+      gt_ensure(0.0 == lua_tonumber(L, -1));
       lua_pop(L, 2);
       lua_getfield(L, -1, "style");
-      gt_ensure(had_err, lua_isstring(L, -1));
-      gt_ensure(had_err, strcmp("box",lua_tostring(L, -1)) == 0);
+      gt_ensure(lua_isstring(L, -1));
+      gt_ensure(strcmp("box",lua_tostring(L, -1)) == 0);
       lua_pop(L, 1);
       lua_getfield(L, -1, "collapse_to_parent");
-      gt_ensure(had_err, lua_isboolean(L, -1));
-      gt_ensure(had_err, lua_toboolean(L, -1) == false);
+      gt_ensure(lua_isboolean(L, -1));
+      gt_ensure(lua_toboolean(L, -1) == false);
       lua_pop(L, 1);
       lua_getfield(L, -1, "max_show_width");
-      gt_ensure(had_err, lua_isnil(L, -1));
+      gt_ensure(lua_isnil(L, -1));
       lua_pop(L, 3);
     }
   }

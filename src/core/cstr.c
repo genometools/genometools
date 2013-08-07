@@ -121,15 +121,15 @@ int gt_cstr_unit_test(GtError *err)
   gt_error_check(err);
 
   res = gt_cstr_split(foo, ' ');
-  gt_ensure(had_err, strcmp(res[0], "foo") == 0);
-  gt_ensure(had_err, strcmp(res[1], "") == 0);
-  gt_ensure(had_err, strcmp(res[2], "bar") == 0);
-  gt_ensure(had_err, strcmp(res[3], "baz") == 0);
-  gt_ensure(had_err, res[4] == NULL);
+  gt_ensure(strcmp(res[0], "foo") == 0);
+  gt_ensure(strcmp(res[1], "") == 0);
+  gt_ensure(strcmp(res[2], "bar") == 0);
+  gt_ensure(strcmp(res[3], "baz") == 0);
+  gt_ensure(res[4] == NULL);
   gt_cstr_array_delete(res);
 
   res = gt_cstr_split("", ' ');
-  gt_ensure(had_err, res[0] == NULL);
+  gt_ensure(res[0] == NULL);
   gt_cstr_array_delete(res);
 
   return had_err;

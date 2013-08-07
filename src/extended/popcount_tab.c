@@ -355,13 +355,13 @@ int gt_popcount_tab_unit_test(GtError *err)
   gt_error_check(err);
 
   for (idx = 0; !had_err && idx <= (unsigned long) blocksize; idx++) {
-    gt_ensure(had_err,
+    gt_ensure(
               gt_popcount_tab_offset_bits(popcount_t, (unsigned int) idx) ==
                 offsets_bits[idx]);
   }
 
   for (idx = 0; !had_err && idx < (1UL << blocksize); idx++) {
-    gt_ensure(had_err, blocksize_four[idx] ==
+    gt_ensure(blocksize_four[idx] ==
               gt_compact_ulong_store_get(popcount_t->blocks, idx));
   }
   for (popcount_c = 0, idx = 0;
@@ -374,31 +374,31 @@ int gt_popcount_tab_unit_test(GtError *err)
     for (jdx = 0;
          !had_err && jdx < (unsigned long) class_size;
          jdx++) {
-      gt_ensure(had_err, idx ==
+      gt_ensure(idx ==
                 gt_compact_ulong_store_get(popcount_t->offsets,
                                            (unsigned long) popcount_c));
-      gt_ensure(had_err,
+      gt_ensure(
                 blocksize_four[idx + jdx] ==
                           (unsigned long) gt_popcount_tab_get(popcount_t,
                                                               popcount_c, jdx));
     }
   }
-  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 0UL, 1U) == 0U);
-  gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 0UL, 1U) == 2U);
-  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 0U) == 0U);
-  gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 0U) == 1U);
-  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 1U) == 1U);
-  gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 1U) == 1U);
-  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 2U) == 1U);
-  gt_ensure(had_err, gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 2U) == 2U);
-  gt_ensure(had_err, gt_popcount_tab_rank_1(popcount_t, 4U, 0UL, 1U) == 2U);
+  gt_ensure(gt_popcount_tab_rank_1(popcount_t, 2U, 0UL, 1U) == 0U);
+  gt_ensure(gt_popcount_tab_rank_0(popcount_t, 2U, 0UL, 1U) == 2U);
+  gt_ensure(gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 0U) == 0U);
+  gt_ensure(gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 0U) == 1U);
+  gt_ensure(gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 1U) == 1U);
+  gt_ensure(gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 1U) == 1U);
+  gt_ensure(gt_popcount_tab_rank_1(popcount_t, 2U, 1UL, 2U) == 1U);
+  gt_ensure(gt_popcount_tab_rank_0(popcount_t, 2U, 1UL, 2U) == 2U);
+  gt_ensure(gt_popcount_tab_rank_1(popcount_t, 4U, 0UL, 1U) == 2U);
 
   for (idx = 0; !had_err && idx < (1UL << blocksize); idx++) {
     popcount_c = gt_popcount_tab_class(popcount_t, idx);
     offset = gt_popcount_tab_get_offset_for_block(popcount_t, idx);
 
     for (jdx = 0; !had_err && jdx < (unsigned long) blocksize; jdx++) {
-      gt_ensure(had_err,
+      gt_ensure(
                 gt_popcount_tab_rank_1(popcount_t, popcount_c,
                                        offset, (unsigned int) jdx) +
                   gt_popcount_tab_rank_0(popcount_t, popcount_c,
@@ -409,9 +409,9 @@ int gt_popcount_tab_unit_test(GtError *err)
 
   if (!had_err) {
     offset = gt_popcount_tab_get_offset_for_block(popcount_t, 4UL);
-    gt_ensure(had_err, offset == 2UL);
+    gt_ensure(offset == 2UL);
     offset = gt_popcount_tab_get_offset_for_block(popcount_t, 15UL);
-    gt_ensure(had_err, offset == 0);
+    gt_ensure(offset == 0);
   }
   gt_popcount_tab_delete(popcount_t);
 
@@ -421,12 +421,12 @@ int gt_popcount_tab_unit_test(GtError *err)
       offset = gt_popcount_tab_get_offset_for_block(popcount_t, idx);
       popcount_c = gt_popcount_tab_popcount(idx);
       jdx = gt_popcount_tab_get(popcount_t, popcount_c, offset);
-      gt_ensure(had_err, idx == jdx);
+      gt_ensure(idx == jdx);
     }
     gt_popcount_tab_delete(popcount_t);
     popc_perm = init = gt_popcount_tab_perm_start(5U);
     while (!had_err && popc_perm >= init) {
-      gt_ensure(had_err, gt_popcount_tab_popcount(popc_perm) == 5U);
+      gt_ensure(gt_popcount_tab_popcount(popc_perm) == 5U);
       popc_perm = gt_popcount_tab_next_perm(popc_perm) & blockmask;
     }
   }

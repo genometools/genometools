@@ -1084,12 +1084,12 @@ int gt_alphabet_unit_test(GtError *err)
   b = gt_alphabet_new_protein();
   c = gt_alphabet_clone(a);
 
-  gt_ensure(had_err, gt_alphabet_equals(a, a));
-  gt_ensure(had_err, gt_alphabet_equals(b, b));
-  gt_ensure(had_err, gt_alphabet_equals(c, c));
+  gt_ensure(gt_alphabet_equals(a, a));
+  gt_ensure(gt_alphabet_equals(b, b));
+  gt_ensure(gt_alphabet_equals(c, c));
 
-  gt_ensure(had_err, !gt_alphabet_equals(a, b));
-  gt_ensure(had_err, gt_alphabet_equals(a, c));
+  gt_ensure(!gt_alphabet_equals(a, b));
+  gt_ensure(gt_alphabet_equals(a, c));
 
   gt_alphabet_delete(a);
   gt_alphabet_delete(b);

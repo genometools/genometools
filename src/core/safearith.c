@@ -183,31 +183,31 @@ int gt_safearith_unit_test(GtError *err)
   gt_error_check(err);
 
   {
-    gt_ensure(had_err, __MIN(char) == -128);
-    gt_ensure(had_err, __MAX(char) == 127);
-    gt_ensure(had_err, __MIN(unsigned char) == 0);
-    gt_ensure(had_err, __MAX(unsigned char) == 255);
+    gt_ensure(__MIN(char) == -128);
+    gt_ensure(__MAX(char) == 127);
+    gt_ensure(__MIN(unsigned char) == 0);
+    gt_ensure(__MAX(unsigned char) == 255);
 
-    gt_ensure(had_err, __MIN(short) == SHRT_MIN);
-    gt_ensure(had_err, __MAX(short) == SHRT_MAX);
-    gt_ensure(had_err, __MIN(unsigned short) == 0);
-    gt_ensure(had_err, __MAX(unsigned short) == USHRT_MAX);
+    gt_ensure(__MIN(short) == SHRT_MIN);
+    gt_ensure(__MAX(short) == SHRT_MAX);
+    gt_ensure(__MIN(unsigned short) == 0);
+    gt_ensure(__MAX(unsigned short) == USHRT_MAX);
 
-    gt_ensure(had_err, __MIN(int) == INT_MIN);
-    gt_ensure(had_err, __MAX(int) == INT_MAX);
-    gt_ensure(had_err, __MIN(unsigned int) == 0);
-    gt_ensure(had_err, __MAX(unsigned int) == UINT_MAX);
+    gt_ensure(__MIN(int) == INT_MIN);
+    gt_ensure(__MAX(int) == INT_MAX);
+    gt_ensure(__MIN(unsigned int) == 0);
+    gt_ensure(__MAX(unsigned int) == UINT_MAX);
 
-    gt_ensure(had_err, __MIN(long) == LONG_MIN);
-    gt_ensure(had_err, __MAX(long) == LONG_MAX);
-    gt_ensure(had_err, __MIN(unsigned long) == 0);
-    gt_ensure(had_err, __MAX(unsigned long) == ULONG_MAX);
+    gt_ensure(__MIN(long) == LONG_MIN);
+    gt_ensure(__MAX(long) == LONG_MAX);
+    gt_ensure(__MIN(unsigned long) == 0);
+    gt_ensure(__MAX(unsigned long) == ULONG_MAX);
 
 #ifdef LLONG_MIN
-    gt_ensure(had_err, __MIN(long long) == LLONG_MIN);
-    gt_ensure(had_err, __MAX(long long) == LLONG_MAX);
-    gt_ensure(had_err, __MIN(unsigned long long) == 0);
-    gt_ensure(had_err, __MAX(unsigned long long) == ULLONG_MAX);
+    gt_ensure(__MIN(long long) == LLONG_MIN);
+    gt_ensure(__MAX(long long) == LLONG_MAX);
+    gt_ensure(__MIN(unsigned long long) == 0);
+    gt_ensure(__MAX(unsigned long long) == ULLONG_MAX);
 #endif
   }
 
@@ -216,64 +216,64 @@ int gt_safearith_unit_test(GtError *err)
     long slong;
 
     slong = -1;
-    gt_ensure(had_err, assign(ulong, slong));
+    gt_ensure(assign(ulong, slong));
 
     ulong = 0;
     slong = LONG_MAX;
-    gt_ensure(had_err, !assign(ulong, slong) && ulong == LONG_MAX);
+    gt_ensure(!assign(ulong, slong) && ulong == LONG_MAX);
 
     ulong = ULONG_MAX;
-    gt_ensure(had_err, assign(slong, ulong));
+    gt_ensure(assign(slong, ulong));
 
     slong = 0;
     ulong = LONG_MAX;
-    gt_ensure(had_err, !assign(slong, ulong) && slong == LONG_MAX);
+    gt_ensure(!assign(slong, ulong) && slong == LONG_MAX);
   }
 
   {
     int x;
-    gt_ensure(had_err, add_of(x, INT_MAX, 1));
-    gt_ensure(had_err, add_of(x, INT_MAX, 256));
-    gt_ensure(had_err, add_of(x, INT_MAX, INT_MAX));
+    gt_ensure(add_of(x, INT_MAX, 1));
+    gt_ensure(add_of(x, INT_MAX, 256));
+    gt_ensure(add_of(x, INT_MAX, INT_MAX));
 
-    x = 0; gt_ensure(had_err, !add_of(x, INT_MAX - 1, 1) && x == INT_MAX);
-    x = 0; gt_ensure(had_err, !add_of(x, INT_MAX - 256, 256) && x == INT_MAX);
-    x = 0; gt_ensure(had_err, !add_of(x, INT_MAX, 0) && x == INT_MAX);
+    x = 0; gt_ensure(!add_of(x, INT_MAX - 1, 1) && x == INT_MAX);
+    x = 0; gt_ensure(!add_of(x, INT_MAX - 256, 256) && x == INT_MAX);
+    x = 0; gt_ensure(!add_of(x, INT_MAX, 0) && x == INT_MAX);
 
-    gt_ensure(had_err, add_of(x, 0x100000000ll, 0x100000000ll));
+    gt_ensure(add_of(x, 0x100000000ll, 0x100000000ll));
     x = INT_MAX;
-    gt_ensure(had_err, !add_of(x, 0x100000000ll, -0x100000000ll) && x == 0);
+    gt_ensure(!add_of(x, 0x100000000ll, -0x100000000ll) && x == 0);
 
-    gt_ensure(had_err, sub_of(x, INT_MIN, 1));
-    gt_ensure(had_err, sub_of(x, INT_MIN, 256));
-    gt_ensure(had_err, sub_of(x, INT_MIN, INT_MAX));
+    gt_ensure(sub_of(x, INT_MIN, 1));
+    gt_ensure(sub_of(x, INT_MIN, 256));
+    gt_ensure(sub_of(x, INT_MIN, INT_MAX));
 
-    x = 0; gt_ensure(had_err, !sub_of(x, INT_MIN + 1, 1) && x == INT_MIN);
-    x = 0; gt_ensure(had_err, !sub_of(x, INT_MIN + 256, 256) && x == INT_MIN);
-    x = 0; gt_ensure(had_err, !sub_of(x, INT_MIN, 0) && x == INT_MIN);
+    x = 0; gt_ensure(!sub_of(x, INT_MIN + 1, 1) && x == INT_MIN);
+    x = 0; gt_ensure(!sub_of(x, INT_MIN + 256, 256) && x == INT_MIN);
+    x = 0; gt_ensure(!sub_of(x, INT_MIN, 0) && x == INT_MIN);
   }
 
   {
     unsigned int x;
-    gt_ensure(had_err, add_of(x, UINT_MAX, 1));
-    gt_ensure(had_err, add_of(x, UINT_MAX, 256));
-    gt_ensure(had_err, add_of(x, UINT_MAX, UINT_MAX));
+    gt_ensure(add_of(x, UINT_MAX, 1));
+    gt_ensure(add_of(x, UINT_MAX, 256));
+    gt_ensure(add_of(x, UINT_MAX, UINT_MAX));
 
-    x = 0; gt_ensure(had_err, !add_of(x, UINT_MAX - 1, 1) && x == UINT_MAX);
-    x = 0; gt_ensure(had_err, !add_of(x, UINT_MAX - 256, 256) && x == UINT_MAX);
-    x = 0; gt_ensure(had_err, !add_of(x, UINT_MAX, 0) && x == UINT_MAX);
+    x = 0; gt_ensure(!add_of(x, UINT_MAX - 1, 1) && x == UINT_MAX);
+    x = 0; gt_ensure(!add_of(x, UINT_MAX - 256, 256) && x == UINT_MAX);
+    x = 0; gt_ensure(!add_of(x, UINT_MAX, 0) && x == UINT_MAX);
 
-    gt_ensure(had_err, add_of(x, 0x100000000ll, 0x100000000ll));
+    gt_ensure(add_of(x, 0x100000000ll, 0x100000000ll));
     x = UINT_MAX;
-    gt_ensure(had_err, !add_of(x, 0x100000000ll, -0x100000000ll) && x == 0);
+    gt_ensure(!add_of(x, 0x100000000ll, -0x100000000ll) && x == 0);
 
-    gt_ensure(had_err, sub_of(x, 0, 1));
-    gt_ensure(had_err, sub_of(x, 0, 256));
-    gt_ensure(had_err, sub_of(x, 0, UINT_MAX));
+    gt_ensure(sub_of(x, 0, 1));
+    gt_ensure(sub_of(x, 0, 256));
+    gt_ensure(sub_of(x, 0, UINT_MAX));
 
-    x = 0; gt_ensure(had_err, !sub_of(x, 1, 1) && x == 0);
-    x = 0; gt_ensure(had_err, !sub_of(x, 256, 256) && x == 0);
-    x = 0; gt_ensure(had_err, !sub_of(x, 0, 0) && x == 0);
+    x = 0; gt_ensure(!sub_of(x, 1, 1) && x == 0);
+    x = 0; gt_ensure(!sub_of(x, 256, 256) && x == 0);
+    x = 0; gt_ensure(!sub_of(x, 0, 0) && x == 0);
   }
 
   {
@@ -282,32 +282,32 @@ int gt_safearith_unit_test(GtError *err)
     long long ll;
 
     i = gt_safe_abs(0);
-    gt_ensure(had_err, i == 0);
+    gt_ensure(i == 0);
 
     i = gt_safe_abs(-1);
-    gt_ensure(had_err, i == 1);
+    gt_ensure(i == 1);
 
     i = gt_safe_abs(INT_MIN + 1);
-    gt_ensure(had_err, i == INT_MAX);
+    gt_ensure(i == INT_MAX);
 
     l = gt_safe_labs(0);
-    gt_ensure(had_err, l == 0);
+    gt_ensure(l == 0);
 
     l = gt_safe_labs(-1);
-    gt_ensure(had_err, l == 1);
+    gt_ensure(l == 1);
 
     l = gt_safe_labs(LONG_MIN + 1);
-    gt_ensure(had_err, l == LONG_MAX);
+    gt_ensure(l == LONG_MAX);
 
     ll = gt_safe_llabs(0);
-    gt_ensure(had_err, ll == 0);
+    gt_ensure(ll == 0);
 
     ll = gt_safe_llabs(-1);
-    gt_ensure(had_err, ll == 1);
+    gt_ensure(ll == 1);
 
 #ifdef LLONG_MIN
     ll = gt_safe_llabs(LLONG_MIN + 1);
-    gt_ensure(had_err, ll == LLONG_MAX);
+    gt_ensure(ll == LLONG_MAX);
 #endif
   }
 

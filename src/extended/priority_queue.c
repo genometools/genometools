@@ -220,7 +220,7 @@ int gt_priority_queue_unit_test(GtError *err)
       numbers_copy[j] = numbers[j] = gt_rand_max(maximal_value);
       gt_priority_queue_add(pq, numbers_copy + j);
     }
-    gt_ensure(had_err,gt_priority_queue_is_full(pq));
+    gt_ensure(gt_priority_queue_is_full(pq));
     qsort(numbers,(size_t) size,sizeof *numbers,cmpUlong);
     for (j = 0; j < size; j++)
     {
@@ -231,9 +231,9 @@ int gt_priority_queue_unit_test(GtError *err)
                       *((unsigned long *) elem),numbers[j],j);
         exit(EXIT_FAILURE);
       }
-      gt_ensure(had_err,*((unsigned long *) elem) == numbers[j]);
+      gt_ensure(*((unsigned long *) elem) == numbers[j]);
     }
-    gt_ensure(had_err,gt_priority_queue_is_empty(pq));
+    gt_ensure(gt_priority_queue_is_empty(pq));
     gt_priority_queue_delete(pq);
   }
   gt_free(numbers);
