@@ -21,15 +21,14 @@
 #include "core/file.h"
 
 /* Return copy of <gt_cstr_array>. */
-char**        gt_cstr_array_dup(const char **gt_cstr_array);
-/* Use p and a blank as prefix for gt_cstr_array[0] and return the result. */
-char**        gt_cstr_array_prefix_first(const char **gt_cstr_array,
+char**        gt_cstr_array_dup(const char **cstr_array);
+/* Use p and a blank as prefix for cstr_array[0] and return the result. */
+char**        gt_cstr_array_prefix_first(const char **cstr_array,
                                          const char *p);
-char**        gt_cstr_array_preprend(const char **gt_cstr_array, const char *p);
-void          gt_cstr_array_show(char **gt_cstr_array, FILE*);
-void          gt_cstr_array_show_genfile(const char **gt_cstr_array,
-                                         GtFile*);
-unsigned long gt_cstr_array_size(const char **gt_cstr_array); /* O(n) */
-void          gt_cstr_array_delete(char **gt_cstr_array);
+char**        gt_cstr_array_preprend(const char **cstr_array, const char *p);
+void          gt_cstr_array_show(char **cstr_array, FILE*);
+void          gt_cstr_array_show_genfile(const char **cstr_array, GtFile*);
+unsigned long gt_cstr_array_size(const char **cstr_array); /* O(n) */
+void          gt_cstr_array_delete(char **cstr_array);
 
 #endif
