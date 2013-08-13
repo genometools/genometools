@@ -55,6 +55,7 @@
 #include "extended/alignment.h"
 #include "extended/anno_db_gfflike_api.h"
 #include "extended/compressed_bitsequence.h"
+#include "extended/editscript.h"
 #include "extended/elias_gamma.h"
 #include "extended/encdesc.h"
 #include "extended/evaluator.h"
@@ -293,6 +294,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
   gt_hashmap_add(unit_tests, "dlist example", gt_dlist_example);
   gt_hashmap_add(unit_tests, "dynamic bittab class", gt_dyn_bittab_unit_test);
+  gt_hashmap_add(unit_tests, "editscript class", gt_editscript_unit_test);
   gt_hashmap_add(unit_tests, "elias gamma class", gt_elias_gamma_unit_test);
   gt_hashmap_add(unit_tests, "encdesc class", gt_encdesc_unit_test);
   gt_hashmap_add(unit_tests, "encseq builder class",
