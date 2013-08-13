@@ -78,6 +78,7 @@
 #include "extended/string_matching.h"
 #include "extended/tag_value_map.h"
 #include "extended/uint64hashtable.h"
+#include "extended/unique_encseq.h"
 #include "ltr/gt_ltrclustering.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/gt_ltrharvest.h"
@@ -154,6 +155,8 @@
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 #include "tools/gt_wtree.h"
+#include "tools/gt_unique_encseq.h"
+#include "tools/gt_unique_encseq_extract.h"
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
@@ -242,6 +245,9 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "tirvish", gt_tir());
   gt_toolbox_add_tool(tools, "uniq", gt_uniq());
   gt_toolbox_add_tool(tools, "wtree", gt_wtree());
+  gt_toolbox_add_tool(tools, "unique_encseq", gt_unique_encseq());
+  gt_toolbox_add_tool(tools, "unique_encseq_extract",
+      gt_unique_encseq_extract());
 #ifndef WITHOUT_CAIRO
   gt_toolbox_add_tool(tools, "sketch", gt_sketch());
   gt_toolbox_add_tool(tools, "sketch_page", gt_sketch_page());
