@@ -54,7 +54,7 @@ void           gt_seqabstract_reinit_encseq(GtSeqabstract *sa,
 unsigned long  gt_seqabstract_length(const GtSeqabstract *sa);
 
 GtUchar        gt_seqabstract_encoded_char(const GtSeqabstract *sa,
-                                          unsigned long idx);
+                                           unsigned long idx);
 
 void           gt_seqabstract_delete(GtSeqabstract *sa);
 

@@ -23,6 +23,7 @@
 #include "core/encseq.h"
 #include "stamp.h"
 #include "greedyedist.h"
+#include "core/xansi_api.h"
 
 typedef enum GtSeqabstractType {
   GT_SEQABSTRACT_UNDEF,
