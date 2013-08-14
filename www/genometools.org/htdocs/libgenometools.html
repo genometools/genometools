@@ -227,6 +227,8 @@ interfaces.
 
   <li><a href="#GtSequenceNode">GtSequenceNode</a>
 
+  <li><a href="#GtSetSourceVisitor">GtSetSourceVisitor</a>
+
   <li><a href="#GtSortStream">GtSortStream</a>
 
   <li><a href="#GtSplitter">GtSplitter</a>
@@ -331,14 +333,15 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="gt_fasta_show_entry"></a>
+<a name="gt_feature_index_gfflike_get_all_features"></a>
 
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
+<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
+                                                          GtArray *results,
+                                                          GtError *err)</code>
 <p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
+   success, a negative value otherwise. The message in <code>err</code> is set
+   accordingly.
 </p>
 <hr>
 <a name="GtTrackSelectorFunc"></a>
@@ -3335,17 +3338,6 @@ TODO: document me
 <code>void         gt_feature_index_delete(GtFeatureIndex*)</code>
 <p>
 Deletes the <code>feature_index</code> and all its referenced features.
-</p>
-<hr>
-<a name="gt_feature_index_gfflike_get_all_features"></a>
-
-<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
-                                                          GtArray *results,
-                                                          GtError *err)</code>
-<p>
-Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
-   success, a negative value otherwise. The message in <code>err</code> is set
-   accordingly.
 </p>
 <hr>
 <a name="GtFeatureIndexMemory"></a>
@@ -7158,6 +7150,23 @@ Return the sequence of <code>sequence_node</code>.
 Return the sequence length of <code>sequence_node</code>.
 </p>
 <hr>
+<a name="GtSetSourceVisitor"></a>
+<h2>Class GtSetSourceVisitor</h2>
+
+<p>*
+ * Implements the <code>GtNodeVisitor</code> interface. Used with the <code>GtVisitorStream</code>
+ * class, a <code>GtSetSourceVisitor</code> resets the 'source' value for <code>GtFeatureNode</code>
+ * objects.
+ </p>
+
+<hr>
+<a name="gt_set_source_visitor_new"></a>
+
+<code>GtNodeVisitor*  gt_set_source_visitor_new(GtStr *newsource)</code>
+<p>
+constructor
+</p>
+<hr>
 <a name="GtSortStream"></a>
 <h2>Class GtSortStream</h2>
 
@@ -8452,6 +8461,16 @@ An example for usage of the <code>Array2dim</code> module.
 <p>
 Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
+</p>
+<hr>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
 </p>
 <hr>
 <a name="Assert"></a>
@@ -10925,6 +10944,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_sequence_node_new"><code>gt_sequence_node_new</code></a><br>
 
+  <a href="#gt_set_source_visitor_new"><code>gt_set_source_visitor_new</code></a><br>
+
   <a href="#gt_sort_stream_new"><code>gt_sort_stream_new</code></a><br>
 
   <a href="#gt_splitter_delete"><code>gt_splitter_delete</code></a><br>
@@ -11226,12 +11247,12 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-08-01
+Last update: 2013-08-14
 </div>
 </div>
 <!-- Piwik -->
 <script type="text/javascript">
-var pkBaseURL = (("https:" == document.location.protocol) ?  "https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+var pkBaseURL = "https://zenlicensemanager.com/piwik/";
 document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
 </script><script type="text/javascript">
 try {
@@ -11239,7 +11260,7 @@ var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
 piwikTracker.trackPageView();
 piwikTracker.enableLinkTracking();
 } catch( err ) {}
-</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
+</script><noscript><p><img src="https://zenlicensemanager.com/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
 <!-- End Piwik Tracking Tag -->
 </body>
 </html>
