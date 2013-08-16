@@ -246,4 +246,8 @@ bool           gt_feature_node_is_marked(const GtFeatureNode *feature_node);
 void           gt_feature_node_remove_leaf(GtFeatureNode *tree,
                                            GtFeatureNode *leafn);
 
+/* Returns a pointer to the feature if it is indeed a feature node, or NULL
+   otherwise. */
+void *         gt_feature_node_try_cast(GtGenomeNode *gn);
+
 #endif

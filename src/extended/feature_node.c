@@ -1298,3 +1298,8 @@ bool gt_feature_node_overlaps_nodes_mark(GtFeatureNode *fn, GtArray *nodes,
   }
   return rval;
 }
+
+void* gt_feature_node_try_cast(GtGenomeNode *gn)
+{
+  return gt_genome_node_try_cast(gt_feature_node_class(), gn);
+}
