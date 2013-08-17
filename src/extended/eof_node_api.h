@@ -30,4 +30,10 @@ const GtGenomeNodeClass* gt_eof_node_class(void);
 /* Create a new <GtEOFNode*> representing an EOF marker. */
 GtGenomeNode*            gt_eof_node_new(void);
 
+/* Test whether the given genome node is an EOF node. If so, a pointer to the
+   EOF node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types. */
+GtEOFNode*               gt_eof_node_try_cast(GtGenomeNode *gn);
+
 #endif

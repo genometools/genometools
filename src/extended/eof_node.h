@@ -19,7 +19,4 @@
 
 #include "extended/eof_node_api.h"
 
-#define gt_eof_node_try_cast(genome_node) \
-        gt_genome_node_try_cast(gt_eof_node_class(), genome_node)
-
 #endif

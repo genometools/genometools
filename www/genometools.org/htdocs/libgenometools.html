@@ -2002,6 +2002,16 @@ Return the data pointer attached to <code>dlistelem</code>.
 Create a new <code>GtEOFNode*</code> representing an EOF marker.
 </p>
 <hr>
+<a name="gt_eof_node_try_cast"></a>
+
+<code>GtEOFNode*                gt_eof_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is an EOF node. If so, a pointer to the
+   EOF node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
+</p>
+<hr>
 <a name="GtEncseq"></a>
 <h2>Class GtEncseq</h2>
 
@@ -10111,6 +10121,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_version"><code>gt_encseq_version</code></a><br>
 
   <a href="#gt_eof_node_new"><code>gt_eof_node_new</code></a><br>
+
+  <a href="#gt_eof_node_try_cast"><code>gt_eof_node_try_cast</code></a><br>
 
   <a href="#gt_error_check"><code>gt_error_check</code></a><br>
 
