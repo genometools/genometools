@@ -3740,10 +3740,12 @@ Removes the parent-child relationship between the leaf node <code>leafn</code> a
 <hr>
 <a name="gt_feature_node_try_cast"></a>
 
-<code>void *          gt_feature_node_try_cast(GtGenomeNode *gn)</code>
+<code>GtFeatureNode*  gt_feature_node_try_cast(GtGenomeNode *gn)</code>
 <p>
-Returns a pointer to the feature if it is indeed a feature node, or NULL
-   otherwise.
+Test whether the given genome node is a feature node. If so, a pointer to the
+   feature node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
 </p>
 <hr>
 <a name="GtFeatureNodeIterator"></a>
@@ -6934,6 +6936,16 @@ Create a new <code>GtRegionNode*</code> representing sequence with ID <code>seqi
    not modify the original <code>seqid</code> afterwards!
 </p>
 <hr>
+<a name="gt_region_node_try_cast"></a>
+
+<code>GtRegionNode*  gt_region_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a region node. If so, a pointer to the
+   region node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
+</p>
+<hr>
 <a name="GtSelectStream"></a>
 <h2>Class GtSelectStream</h2>
 
@@ -7166,6 +7178,16 @@ Return the sequence of <code>sequence_node</code>.
                                                               *sequence_node)</code>
 <p>
 Return the sequence length of <code>sequence_node</code>.
+</p>
+<hr>
+<a name="gt_sequence_node_try_cast"></a>
+
+<code>GtSequenceNode*           gt_sequence_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a sequence node. If so, a pointer to
+   the sequence node is returned. If not, NULL is returned. Note that in most
+   cases, one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
 </p>
 <hr>
 <a name="GtSetSourceVisitor"></a>
@@ -10906,6 +10928,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_region_node_new"><code>gt_region_node_new</code></a><br>
 
+  <a href="#gt_region_node_try_cast"><code>gt_region_node_try_cast</code></a><br>
+
   <a href="#gt_reverse_complement"><code>gt_reverse_complement</code></a><br>
 
   <a href="#gt_rwlock_delete"><code>gt_rwlock_delete</code></a><br>
@@ -10953,6 +10977,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_sequence_node_get_sequence_length"><code>gt_sequence_node_get_sequence_length</code></a><br>
 
   <a href="#gt_sequence_node_new"><code>gt_sequence_node_new</code></a><br>
+
+  <a href="#gt_sequence_node_try_cast"><code>gt_sequence_node_try_cast</code></a><br>
 
   <a href="#gt_set_source_visitor_new"><code>gt_set_source_visitor_new</code></a><br>
 
