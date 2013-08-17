@@ -246,8 +246,10 @@ bool           gt_feature_node_is_marked(const GtFeatureNode *feature_node);
 void           gt_feature_node_remove_leaf(GtFeatureNode *tree,
                                            GtFeatureNode *leafn);
 
-/* Returns a pointer to the feature if it is indeed a feature node, or NULL
-   otherwise. */
-void *         gt_feature_node_try_cast(GtGenomeNode *gn);
+/* Test whether the given genome node is a feature node. If so, a pointer to the
+   feature node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types. */
+GtFeatureNode* gt_feature_node_try_cast(GtGenomeNode *gn);
 
 #endif

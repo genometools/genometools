@@ -333,6 +333,16 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
 <a name="gt_feature_index_gfflike_get_all_features"></a>
 
 <code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
@@ -3726,6 +3736,14 @@ Removes the parent-child relationship between the leaf node <code>leafn</code> a
    Note that <code>leafn</code> is freed, use <code>gt_genome_node_ref()</code> to increase the
    reference count if deletion is not wanted. As a side effect, the tree
    property of <code>tree</code> is set back to an undefined state.
+</p>
+<hr>
+<a name="gt_feature_node_try_cast"></a>
+
+<code>void *          gt_feature_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Returns a pointer to the feature if it is indeed a feature node, or NULL
+   otherwise.
 </p>
 <hr>
 <a name="GtFeatureNodeIterator"></a>
@@ -8463,16 +8481,6 @@ Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
 </p>
 <hr>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
-</p>
-<hr>
 <a name="Assert"></a>
 <h2>Module Assert</h2>
 <a name="gt_assert"></a>
@@ -10214,6 +10222,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_set_type"><code>gt_feature_node_set_type</code></a><br>
 
+  <a href="#gt_feature_node_try_cast"><code>gt_feature_node_try_cast</code></a><br>
+
   <a href="#gt_feature_node_unmark"><code>gt_feature_node_unmark</code></a><br>
 
   <a href="#gt_feature_node_unset_multi"><code>gt_feature_node_unset_multi</code></a><br>
@@ -11247,7 +11257,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-08-14
+Last update: 2013-08-17
 </div>
 </div>
 <!-- Piwik -->
