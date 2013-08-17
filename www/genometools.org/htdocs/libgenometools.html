@@ -333,6 +333,16 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
 <a name="gt_feature_index_gfflike_get_all_features"></a>
 
 <code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
@@ -1990,6 +2000,16 @@ Return the data pointer attached to <code>dlistelem</code>.
 <code>GtGenomeNode*             gt_eof_node_new(void)</code>
 <p>
 Create a new <code>GtEOFNode*</code> representing an EOF marker.
+</p>
+<hr>
+<a name="gt_eof_node_try_cast"></a>
+
+<code>GtEOFNode*                gt_eof_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is an EOF node. If so, a pointer to the
+   EOF node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
 </p>
 <hr>
 <a name="GtEncseq"></a>
@@ -3726,6 +3746,16 @@ Removes the parent-child relationship between the leaf node <code>leafn</code> a
    Note that <code>leafn</code> is freed, use <code>gt_genome_node_ref()</code> to increase the
    reference count if deletion is not wanted. As a side effect, the tree
    property of <code>tree</code> is set back to an undefined state.
+</p>
+<hr>
+<a name="gt_feature_node_try_cast"></a>
+
+<code>GtFeatureNode*  gt_feature_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a feature node. If so, a pointer to the
+   feature node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
 </p>
 <hr>
 <a name="GtFeatureNodeIterator"></a>
@@ -6916,6 +6946,16 @@ Create a new <code>GtRegionNode*</code> representing sequence with ID <code>seqi
    not modify the original <code>seqid</code> afterwards!
 </p>
 <hr>
+<a name="gt_region_node_try_cast"></a>
+
+<code>GtRegionNode*  gt_region_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a region node. If so, a pointer to the
+   region node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
+</p>
+<hr>
 <a name="GtSelectStream"></a>
 <h2>Class GtSelectStream</h2>
 
@@ -7148,6 +7188,16 @@ Return the sequence of <code>sequence_node</code>.
                                                               *sequence_node)</code>
 <p>
 Return the sequence length of <code>sequence_node</code>.
+</p>
+<hr>
+<a name="gt_sequence_node_try_cast"></a>
+
+<code>GtSequenceNode*           gt_sequence_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a sequence node. If so, a pointer to
+   the sequence node is returned. If not, NULL is returned. Note that in most
+   cases, one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
 </p>
 <hr>
 <a name="GtSetSourceVisitor"></a>
@@ -8461,16 +8511,6 @@ An example for usage of the <code>Array2dim</code> module.
 <p>
 Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
-</p>
-<hr>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
 </p>
 <hr>
 <a name="Assert"></a>
@@ -10082,6 +10122,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_eof_node_new"><code>gt_eof_node_new</code></a><br>
 
+  <a href="#gt_eof_node_try_cast"><code>gt_eof_node_try_cast</code></a><br>
+
   <a href="#gt_error_check"><code>gt_error_check</code></a><br>
 
   <a href="#gt_error_delete"><code>gt_error_delete</code></a><br>
@@ -10213,6 +10255,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_feature_node_set_strand"><code>gt_feature_node_set_strand</code></a><br>
 
   <a href="#gt_feature_node_set_type"><code>gt_feature_node_set_type</code></a><br>
+
+  <a href="#gt_feature_node_try_cast"><code>gt_feature_node_try_cast</code></a><br>
 
   <a href="#gt_feature_node_unmark"><code>gt_feature_node_unmark</code></a><br>
 
@@ -10896,6 +10940,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_region_node_new"><code>gt_region_node_new</code></a><br>
 
+  <a href="#gt_region_node_try_cast"><code>gt_region_node_try_cast</code></a><br>
+
   <a href="#gt_reverse_complement"><code>gt_reverse_complement</code></a><br>
 
   <a href="#gt_rwlock_delete"><code>gt_rwlock_delete</code></a><br>
@@ -10943,6 +10989,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_sequence_node_get_sequence_length"><code>gt_sequence_node_get_sequence_length</code></a><br>
 
   <a href="#gt_sequence_node_new"><code>gt_sequence_node_new</code></a><br>
+
+  <a href="#gt_sequence_node_try_cast"><code>gt_sequence_node_try_cast</code></a><br>
 
   <a href="#gt_set_source_visitor_new"><code>gt_set_source_visitor_new</code></a><br>
 
@@ -11247,7 +11295,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-08-14
+Last update: 2013-08-17
 </div>
 </div>
 <!-- Piwik -->

@@ -56,3 +56,9 @@ GtGenomeNode* gt_eof_node_new(void)
 {
   return gt_genome_node_create(gt_eof_node_class());
 }
+
+GtEOFNode* gt_eof_node_try_cast(GtGenomeNode *gn)
+{
+  GtEOFNode *en = gt_genome_node_try_cast(gt_eof_node_class(), gn);
+  return en;
+}

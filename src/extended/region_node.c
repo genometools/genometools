@@ -112,3 +112,9 @@ void gt_region_node_consolidate(GtRegionNode *rn_a, GtRegionNode *rn_b)
   range_a = gt_range_join(&range_a, &range_b);
   gt_genome_node_set_range((GtGenomeNode*) rn_a, &range_a);
 }
+
+GtRegionNode* gt_region_node_try_cast(GtGenomeNode *gn)
+{
+  GtRegionNode *rn = gt_genome_node_try_cast(gt_region_node_class(), gn);
+  return rn;
+}

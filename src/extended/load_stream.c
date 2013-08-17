@@ -40,7 +40,8 @@ static int gt_load_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                GtError *err)
 {
   GtLoadStream *load_stream;
-  GtGenomeNode *node, *eofn;
+  GtEOFNode *eofn;
+  GtGenomeNode *node;
   int had_err = 0;
   gt_error_check(err);
   load_stream = gt_load_stream_cast(ns);
@@ -49,7 +50,7 @@ static int gt_load_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
     while (!(had_err = gt_node_stream_next(load_stream->in_stream, &node,
                                            err)) && node) {
       if ((eofn = gt_eof_node_try_cast(node)))
-        gt_genome_node_delete(eofn); /* get rid of EOF nodes */
+        gt_genome_node_delete(node); /* get rid of EOF nodes */
       else
         gt_array_add(load_stream->nodes, node);
     }

@@ -109,3 +109,9 @@ unsigned long gt_sequence_node_get_sequence_length(const GtSequenceNode *sn)
   gt_assert(sn);
   return gt_str_length(sn->sequence);
 }
+
+GtSequenceNode* gt_sequence_node_try_cast(GtGenomeNode *gn)
+{
+  GtSequenceNode *sn = gt_genome_node_try_cast(gt_sequence_node_class(), gn);
+  return sn;
+}
