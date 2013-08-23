@@ -15,21 +15,22 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "extended/unique_encseq.h"
-#include "extended/unique_encseq_rep.h"
-#include "core/ma_api.h"
+#include "core/array_api.h"
+#include "core/ensure.h"
+#include "core/error_api.h"
 #include "core/log_api.h"
 #include "core/logger_api.h"
-#include "core/error_api.h"
-#include "match/kmer2string.h"
-#include "core/array_api.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
-#include "extended/editscript.h"
-#include "core/xansi_api.h"
-#include "match/echoseq.h"
+#include "core/types_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "core/ensure.h"
+#include "core/xansi_api.h"
+#include "extended/editscript.h"
+#include "extended/unique_encseq.h"
+#include "extended/unique_encseq_rep.h"
+#include "match/echoseq.h"
+#include "match/kmer2string.h"
 
 struct GtUniqueEncseq {
 };
@@ -195,11 +196,9 @@ void gt_unique_encseq_database_stats_coarse(GtUniqueEncseqDB *uedb,
 void gt_unique_encseq_database_stats_fine(GtUniqueEncseqDB *uedb,
                                           FILE *fp)
 {
-  GtUword idx, idx2, tmplen, seqnum = 0, *len, *nlinksperunique,
+  GtUword idx, tmplen, seqnum = 0, *len, *nlinksperunique,
       *nmatchperlink, *nmmperlink, *ninsperlink, *ndelperlink, *linkedidx,
       *linkoffset;
-  GtMultieoplist *meoplist;
-  GtMultieop meop;
   GtUniqueEncseqDBentry entry;
   len = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
   nlinksperunique = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
@@ -214,22 +213,14 @@ void gt_unique_encseq_database_stats_fine(GtUniqueEncseqDB *uedb,
     entry = uedb->fragmentdb[idx];
     tmplen = entry.orig_endpos - entry.orig_startpos + 1;
     if (entry.type == Link) {
-      meoplist = gt_editscript_get_multieops(entry.entry.link->editscript);
-      for (idx2 = 0; idx2 < gt_multieoplist_get_length(meoplist); idx2++) {
-        meop = gt_multieoplist_get_entry(meoplist, idx2);
-        if (meop.type == Match) {
-          nmatchperlink[idx] += meop.steps;
-        }
-        else if (meop.type == Mismatch) {
-          nmmperlink[idx] += meop.steps;
-        }
-        else if (meop.type == Insertion) {
-          ninsperlink[idx] += meop.steps;
-        }
-        else if (meop.type == Deletion) {
-          ndelperlink[idx] += meop.steps;
-        }
-      }
+      GtUword match, mismatch, insertion, deletion;
+      gt_editscript_get_stats(entry.entry.link->editscript,
+                              &match, &mismatch, &insertion, &deletion);
+      nmatchperlink[idx] += match;
+      nmmperlink[idx] += mismatch;
+      ninsperlink[idx] += insertion;
+      ndelperlink[idx] += deletion;
+
       nlinksperunique[entry.entry.link->aligned_seq_idx]++;
       linkedidx[idx] = entry.entry.link->aligned_seq_idx;
       linkoffset[idx] = entry.entry.link->offset;
@@ -242,10 +233,10 @@ void gt_unique_encseq_database_stats_fine(GtUniqueEncseqDB *uedb,
   for (idx = 0; idx < uedb->nelems; idx++) {
     entry = uedb->fragmentdb[idx];
     if (entry.type == Link) {
-      printf(GT_WU "\tlink\t", idx);
+      printf("" GT_WU "\tlink\t", idx);
     }
     else if (entry.type == Unique) {
-      printf(GT_WU "\tunique\t", idx);
+      printf("" GT_WU "\tunique\t", idx);
     }
     if ((seqnum < (uedb->nseq - 1))
         && entry.orig_startpos >= uedb->ssp[seqnum + 1]) {
@@ -342,12 +333,10 @@ int gt_unique_encseq_get_sequence_from_range(GtRange *range,
       offset = link_entry->offset;
       comp_start =
           uedb->fragmentdb[aligned_seq_idx].entry.unique->compressed_start;
-      gt_encseq_reader_reinit_with_readmode(esr,
-                                            unique_encseq,
-                                            GT_READMODE_FORWARD,
-                                            comp_start + offset);
       editscript_seqlen = gt_editscript_get_sequence(link_entry->editscript,
-                                                     esr,
+                                                     unique_encseq,
+                                                     comp_start + offset,
+                                                     GT_READMODE_FORWARD,
                                                      buffer);
       decode_end2 = MIN(decode_end, editscript_seqlen - 1);
       for (j = decode_start; j <= decode_end2; j++) {
@@ -476,7 +465,7 @@ static void gt_unique_encseq_udb2fasta(GtUniqueEncseqDB *uedb,
   char desc[4];
   for (i = 0; i < uedb->nelems; i++) {
     if (uedb->fragmentdb[i].type == Unique) {
-      sprintf(desc,GT_WU, unique_count);
+      sprintf(desc, GT_WU, unique_count);
       len = uedb->fragmentdb[i].orig_endpos - uedb->fragmentdb[i].orig_startpos
             + 1;
       seqnum = gt_unique_encseq_get_seqnum_binsearch(
@@ -707,12 +696,10 @@ void gt_unique_encseq_print_editscripts(GtUniqueEncseqDB *uedb,
                                         FILE *fp)
 {
   GtUword i, align_seq_idx, fragment_len, buffer_len = 0, unique_start;
+  GT_UNUSED GtUword testlen;
   GtUchar *buffer = NULL;
-  GtEncseqReader *esr =
-      gt_encseq_create_reader_with_readmode(unique_encseq,
-                                            GT_READMODE_FORWARD,
-                                            0);
   GtUniqueEncseqDBentry entry;
+
   for (i = 0; i < uedb->nelems; i++) {
     entry = uedb->fragmentdb[i];
     if (entry.type == Link) {
@@ -724,14 +711,13 @@ void gt_unique_encseq_print_editscripts(GtUniqueEncseqDB *uedb,
       align_seq_idx = entry.entry.link->aligned_seq_idx;
       unique_start =
           uedb->fragmentdb[align_seq_idx].entry.unique->compressed_start;
-      gt_encseq_reader_reinit_with_readmode(esr,
-                                            unique_encseq,
-                                            GT_READMODE_FORWARD,
-                                            unique_start
-                                            + entry.entry.link->offset);
-      (void) gt_editscript_get_sequence(entry.entry.link->editscript,
-                                        esr,
-                                        buffer);
+      testlen = gt_editscript_get_sequence(entry.entry.link->editscript,
+                                           unique_encseq,
+                                           unique_start +
+                                             entry.entry.link->offset,
+                                           GT_READMODE_FORWARD,
+                                           buffer);
+      gt_assert(testlen == fragment_len);
       gt_alphabet_decode_seq_to_fp(gt_encseq_alphabet(unique_encseq),
                                    fp,
                                    buffer,
@@ -739,7 +725,6 @@ void gt_unique_encseq_print_editscripts(GtUniqueEncseqDB *uedb,
       gt_xfputc('\n', fp);
     }
   }
-  gt_encseq_reader_delete(esr);
   gt_free(buffer);
 }
 
@@ -990,8 +975,8 @@ static void gt_unique_encseq_xdrop_extension(GtUniqueEncseqInfo *ueinfo,
                                 ueinfo->xdropbelowscore);
 
   gt_logger_log(ueinfo->debug_logger,
-                "xdrop alignment score: " GT_WD ", ival: " GT_WU ", jval "
-                GT_WU,
+                "xdrop alignment score: " GT_WD ", ival: "
+                GT_WU ", jval " GT_WU,
                 (GtWord) kmerhitinfo->xdropbest->score,
                 kmerhitinfo->xdropbest->ivalue,
                 kmerhitinfo->xdropbest->jvalue);
@@ -1168,7 +1153,7 @@ static void gt_unique_encseq_process_kmer_seed(GtUniqueEncseqInfo *ueinfo,
       offset = position - position2;
       gt_logger_log(debug_logger,
                     "offset: " GT_WU ", maxlen1: " GT_WU ", maxlen2: " GT_WU
-                    ", pos1: " GT_WU ", " "pos2: " GT_WU,
+                    ", pos1: " GT_WU ", pos2: " GT_WU,
                     offset,
                     maxlen1,
                     maxlen2,
@@ -1248,6 +1233,8 @@ static void gt_unique_encseq_process_kmer_seed(GtUniqueEncseqInfo *ueinfo,
                                           multieops,
                                           kmerhitinfo->bestAlignment->position1,
                                           GT_READMODE_FORWARD);
+      gt_multieoplist_delete(multieops);
+      multieops = NULL;
       gt_unique_encseq_alignment_insert(ueinfo, kmerhitinfo, editscript);
       ueinfo->alignmentcount++;
     }

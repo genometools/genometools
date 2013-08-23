@@ -19,13 +19,16 @@
 #ifndef EDITSCRIPT_H
 #define EDITSCRIPT_H
 
+#include "core/alphabet_api.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "extended/multieoplist.h"
 
 /* Class <GtEditscript> stores everything from an alignment of two sequences
    that is needed to reproduce sequence 2 (usualy called v) from sequence one
-   (u). The purpose is reduction in space for sequence v. */
+   (u). The purpose is reduction in space for sequence v.
+   As with <GtMultieoplist> the order of edit operations is expected to be
+   reversed. */
 typedef struct GtEditscript GtEditscript;
 
 /* Function Pointer to read or write to/from file. Only wrappers around fread
@@ -36,51 +39,61 @@ typedef void (*EditscriptIOFunc)(void *ptr,
                                  FILE *stream);
 
 /* Returns new empty <GtEditscript> object. */
-GtEditscript*   gt_editscript_new(void);
+GtEditscript*   gt_editscript_new(GtAlphabet *alphabet);
 
 /* Add one deletion to <editscript>. */
 void            gt_editscript_add_deletion(GtEditscript *editscript);
+
 /* Add one insertion to <editscript>. <c> is the encoded character in v that
    was inserted. */
 void            gt_editscript_add_insertion(GtEditscript *editscript,
                                             GtUchar c);
+
 /* Add one match to <editscript>. */
 void            gt_editscript_add_match(GtEditscript *editscript);
+
 /* Add one mismatch to <editscript>. <c> is the encoded character in v that
    replaces one character in u. */
 void            gt_editscript_add_mismatch(GtEditscript *editscript, GtUchar c);
+
 /* Delete content of <editscript> */
 void            gt_editscript_reset(GtEditscript *editscript);
-/* Remove one edit operation from <editscript>, this will be the last one added
-   with one of the gt_editscript_add_*() functions. */
-void            gt_editscript_remove_last(GtEditscript *editscript);
+
 /* Returns new <GtEditscript> object and fills it with <encseq> as "second" or v
    sequence and <multieops> representing the edit operations when aligned to a
    sequence u. <start> and <dir> define where sequence v starts within
-   <encseq> */
+   <encseq>. Expects <multieops> to be in reverse order. */
 GtEditscript*   gt_editscript_new_with_sequences(const GtEncseq *encseq,
                                                  GtMultieoplist *multieops,
                                                  GtUword start,
                                                  GtReadmode dir);
-/* Returns the multi edit operation list from <editscript> */
-GtMultieoplist* gt_editscript_get_multieops(GtEditscript *editscript);
-/* Returns 0 if ulen = Match + Mismatch + Deletion and vlen = Match + Mismatch
-   + Insertion, 1 otherwise. */
-int             gt_editscript_is_valid(const GtEditscript *editscript,
-                                       GtUword ulen,
-                                       GtUword vlen);
+
+void            gt_editscript_get_stats(const GtEditscript *editscript,
+                                        GtUword *match,
+                                        GtUword *mismatch,
+                                        GtUword *insertion,
+                                        GtUword *deletion);
+
+/* Returns the length of the reference sequence (u). */
+GtUword         gt_editscript_get_ref_len(const GtEditscript *editscript);
+
+/* Returns the length of the target sequence v. */
+GtUword         gt_editscript_get_target_len(const GtEditscript *editscript);
 
 /* Transform sequence u represeted by <esr> using the edit operations in
    <editscript> and stores the result in <buffer> which has to be large enough
    to hold v. Returns the number of <GtUchar>s written to buffer. */
 GtUword         gt_editscript_get_sequence(const GtEditscript *editscript,
-                                           GtEncseqReader *esr,
+                                           const GtEncseq *encseq,
+                                           GtUword start,
+                                           GtReadmode dir,
                                            GtUchar *buffer);
 
 /* Write or read to <fp> depending on what <io_func> is given. */
-GtEditscript*   gt_editscript_io(GtEditscript *es, FILE *fp,
+GtEditscript*   gt_editscript_io(GtEditscript *editscript, FILE *fp,
                                  EditscriptIOFunc io_func);
 
+size_t          gt_editscript_size(GtEditscript *editscript);
 void            gt_editscript_delete(GtEditscript *editscript);
 
 int             gt_editscript_unit_test(GtError *err);

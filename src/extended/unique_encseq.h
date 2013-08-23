@@ -18,16 +18,16 @@
 #ifndef UNIQUE_ENCSEQ_H
 #define UNIQUE_ENCSEQ_H
 
+#include "core/array_api.h"
+#include "core/encseq.h"
 #include "core/encseq_api.h"
 #include "core/hashmap_api.h"
-#include "unique_encseq_rep.h"
-#include "core/array_api.h"
-#include "match/xdrop.h"
-#include "match/greedyedist.h"
-#include "extended/alignment.h"
 #include "core/seq.h"
-#include "core/encseq.h"
+#include "extended/alignment.h"
 #include "extended/swalign.h"
+#include "match/greedyedist.h"
+#include "match/xdrop.h"
+#include "unique_encseq_rep.h"
 
 typedef struct GtUniqueEncseq GtUniqueEncseq;
 

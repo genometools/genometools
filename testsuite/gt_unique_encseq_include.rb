@@ -21,6 +21,8 @@ Test do
              "encseq_encode_test > encseq_test_decode.fas"
     run_test "#{$bin}gt unique_encseq_extract -all " +
              "unique_encseq_test > unique_encseq_test_decode.fas"
+    run_test "#{$bin}gt unique_encseq_extract -dbstats -dbstats_fine " +
+             "unique_encseq_test > unique_encseq_test.stats"
     run "diff encseq_test_decode.fas unique_encseq_test_decode.fas"
   end
 end
