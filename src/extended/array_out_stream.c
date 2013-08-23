@@ -36,7 +36,8 @@ static int gt_array_out_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                     GtError *err)
 {
   GtArrayOutStream *aos;
-  GtGenomeNode *node, *gn_ref;
+  GtFeatureNode *node;
+  GtGenomeNode  *gn_ref;
   int had_err = 0;
 
   gt_error_check(err);

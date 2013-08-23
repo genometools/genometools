@@ -43,10 +43,13 @@ unsigned long            gt_sequence_node_get_sequence_length(const
                                                               GtSequenceNode
                                                               *sequence_node);
 
-#define gt_sequence_node_cast(genome_node) \
-        gt_genome_node_cast(gt_sequence_node_class(), genome_node)
+/* Test whether the given genome node is a sequence node. If so, a pointer to
+   the sequence node is returned. If not, NULL is returned. Note that in most
+   cases, one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types. */
+GtSequenceNode*          gt_sequence_node_try_cast(GtGenomeNode *gn);
 
-#define gt_sequence_node_try_cast(genome_node) \
-        gt_genome_node_try_cast(gt_sequence_node_class(), genome_node)
+#define gt_sequence_node_cast(GN) \
+        gt_sequence_node_try_cast(GN)
 
 #endif

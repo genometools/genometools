@@ -35,10 +35,10 @@ const GtGenomeNodeClass* gt_region_node_class(void);
 GtGenomeNode* gt_region_node_new(GtStr *seqid, unsigned long start,
                                                unsigned long end);
 
-#define       gt_region_node_cast(genome_node) \
-              gt_genome_node_cast(gt_region_node_class(), genome_node)
-
-#define       gt_region_node_try_cast(genome_node) \
-              gt_genome_node_try_cast(gt_region_node_class(), genome_node)
+/* Test whether the given genome node is a region node. If so, a pointer to the
+   region node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types. */
+GtRegionNode* gt_region_node_try_cast(GtGenomeNode *gn);
 
 #endif

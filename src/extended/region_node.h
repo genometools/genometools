@@ -22,4 +22,7 @@
 
 void gt_region_node_consolidate(GtRegionNode*, GtRegionNode*);
 
+#define       gt_region_node_cast(GN) \
+              gt_region_node_try_cast(GN)
+
 #endif
