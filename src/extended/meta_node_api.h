@@ -48,7 +48,8 @@ const char*              gt_meta_node_get_data(const GtMetaNode *meta_node);
    GtGenomeNode types. */
 GtMetaNode*              gt_meta_node_try_cast(GtGenomeNode *gn);
 
-#define                  gt_meta_node_cast(GN) \
-                         gt_meta_node_try_cast(GN)
+/* Test whether the given genome node is a meta node. If so, a pointer to the
+   meta node is returned. If not, an assertion fails. */
+GtMetaNode*              gt_meta_node_cast(GtGenomeNode *gn);
 
 #endif
