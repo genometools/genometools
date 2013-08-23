@@ -1301,6 +1301,10 @@ bool gt_feature_node_overlaps_nodes_mark(GtFeatureNode *fn, GtArray *nodes,
 
 GtFeatureNode* gt_feature_node_try_cast(GtGenomeNode *gn)
 {
-  GtFeatureNode *fn = gt_genome_node_try_cast(gt_feature_node_class(), gn);
-  return fn;
+  return gt_genome_node_try_cast(gt_feature_node_class(), gn);
+}
+
+GtFeatureNode* gt_feature_node_cast(GtGenomeNode *gn)
+{
+  return gt_genome_node_cast(gt_feature_node_class(), gn);
 }

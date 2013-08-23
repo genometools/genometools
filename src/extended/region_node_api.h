@@ -41,4 +41,8 @@ GtGenomeNode* gt_region_node_new(GtStr *seqid, unsigned long start,
    GtGenomeNode types. */
 GtRegionNode* gt_region_node_try_cast(GtGenomeNode *gn);
 
+/* Test whether the given genome node is a region node. If so, a pointer to the
+   region node is returned. If not, an assertion fails. */
+GtRegionNode* gt_region_node_cast(GtGenomeNode *gn);
+
 #endif

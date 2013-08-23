@@ -108,6 +108,10 @@ const char* gt_meta_node_get_data(const GtMetaNode *m)
 
 GtMetaNode* gt_meta_node_try_cast(GtGenomeNode *gn)
 {
-  GtMetaNode *mn = gt_genome_node_try_cast(gt_meta_node_class(), gn);
-  return mn;
+  return gt_genome_node_try_cast(gt_meta_node_class(), gn);
+}
+
+GtMetaNode* gt_meta_node_cast(GtGenomeNode *gn)
+{
+  return gt_genome_node_cast(gt_meta_node_class(), gn);
 }

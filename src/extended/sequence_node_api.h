@@ -49,7 +49,8 @@ unsigned long            gt_sequence_node_get_sequence_length(const
    GtGenomeNode types. */
 GtSequenceNode*          gt_sequence_node_try_cast(GtGenomeNode *gn);
 
-#define gt_sequence_node_cast(GN) \
-        gt_sequence_node_try_cast(GN)
+/* Test whether the given genome node is a sequence node. If so, a pointer to
+   the sequence node is returned. If not, an assertion fails. */
+GtSequenceNode*          gt_sequence_node_cast(GtGenomeNode *gn);
 
 #endif
