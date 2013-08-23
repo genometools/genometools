@@ -119,6 +119,8 @@ interfaces.
 
   <li><a href="#GtFeatureNodeIterator">GtFeatureNodeIterator</a>
 
+  <li><a href="#GtFeatureOutStream">GtFeatureOutStream</a>
+
   <li><a href="#GtFeatureStream">GtFeatureStream</a>
 
   <li><a href="#GtFile">GtFile</a>
@@ -333,16 +335,6 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
-</p>
-<hr>
 <a name="gt_feature_index_gfflike_get_all_features"></a>
 
 <code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
@@ -3350,7 +3342,9 @@ Returns <code>has_seqid</code>  to true if the sequence region identified by <co
 
 <code>int          gt_feature_index_save(GtFeatureIndex *feature_index, GtError *err)</code>
 <p>
-TODO: document me
+Calls the save function for the given <code>feature_index</code>. The save functions
+   must be defined, otherwise the method fails with an assertion (for example,
+   the memory based feature index does not have a save function) .
 </p>
 <hr>
 <a name="gt_feature_index_delete"></a>
@@ -3794,6 +3788,16 @@ Return the next <code>GtFeatureNode*</code> in <code>feature_node_iterator</code
                                                        *feature_node_iterator)</code>
 <p>
 Delete <code>feature_node_iterator</code>.
+</p>
+<hr>
+<a name="GtFeatureOutStream"></a>
+<h2>Class GtFeatureOutStream</h2>
+<a name="gt_feature_out_stream_new"></a>
+
+<code>GtNodeStream*  gt_feature_out_stream_new(GtFeatureIndex *fi)</code>
+<p>
+Create a new <code>GtFeatureOutStream</code> using the given <code>GtFeatureIndex</code> as the
+   source of an output stream.
 </p>
 <hr>
 <a name="GtFeatureStream"></a>
@@ -5566,6 +5570,16 @@ Return the meta directive stored in <code>meta_node</code>.
 <code>const char*               gt_meta_node_get_data(const GtMetaNode *meta_node)</code>
 <p>
 Return the meta data stored in <code>meta_node</code>.
+</p>
+<hr>
+<a name="gt_meta_node_try_cast"></a>
+
+<code>GtMetaNode*               gt_meta_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a meta node. If so, a pointer to the
+   meta node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
 </p>
 <hr>
 <a name="GtMutex"></a>
@@ -8513,6 +8527,16 @@ Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
 </p>
 <hr>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
 <a name="Assert"></a>
 <h2>Module Assert</h2>
 <a name="gt_assert"></a>
@@ -10264,6 +10288,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_unset_score"><code>gt_feature_node_unset_score</code></a><br>
 
+  <a href="#gt_feature_out_stream_new"><code>gt_feature_out_stream_new</code></a><br>
+
   <a href="#gt_feature_stream_new"><code>gt_feature_stream_new</code></a><br>
 
   <a href="#gt_file_delete"><code>gt_file_delete</code></a><br>
@@ -10669,6 +10695,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_meta_node_get_directive"><code>gt_meta_node_get_directive</code></a><br>
 
   <a href="#gt_meta_node_new"><code>gt_meta_node_new</code></a><br>
+
+  <a href="#gt_meta_node_try_cast"><code>gt_meta_node_try_cast</code></a><br>
 
   <a href="#gt_msort"><code>gt_msort</code></a><br>
 
@@ -11295,7 +11323,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-08-17
+Last update: 2013-08-23
 </div>
 </div>
 <!-- Piwik -->

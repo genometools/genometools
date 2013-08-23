@@ -92,7 +92,9 @@ int         gt_feature_index_has_seqid(const GtFeatureIndex *feature_index,
                                        bool *has_seqid,
                                        const char *seqid,
                                        GtError *err);
-/* TODO: document me */
+/* Calls the save function for the given <feature_index>. The save functions
+   must be defined, otherwise the method fails with an assertion (for example,
+   the memory based feature index does not have a save function) . */
 int         gt_feature_index_save(GtFeatureIndex *feature_index, GtError *err);
 /* Deletes the <feature_index> and all its referenced features. */
 void        gt_feature_index_delete(GtFeatureIndex*);

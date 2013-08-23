@@ -246,6 +246,7 @@ int gt_feature_index_save(GtFeatureIndex *feature_index, GtError *err)
 {
   int ret;
   gt_assert(feature_index && feature_index->c_class);
+  gt_assert(feature_index->c_class->save_func);
   gt_rwlock_wrlock(feature_index->pvt->lock);
   ret = feature_index->c_class->save_func(feature_index, err);
   gt_rwlock_unlock(feature_index->pvt->lock);
