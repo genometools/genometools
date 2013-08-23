@@ -90,7 +90,4 @@ bool           gt_feature_node_overlaps_nodes_mark(GtFeatureNode *feature_node,
                                                    GtArray *array,
                                                    GtBittab *bttab);
 
-#define gt_feature_node_cast(GN) \
-        gt_feature_node_try_cast(GN)
-
 #endif
