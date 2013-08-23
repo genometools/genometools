@@ -3752,6 +3752,14 @@ Test whether the given genome node is a feature node. If so, a pointer to the
    GtGenomeNode types.
 </p>
 <hr>
+<a name="gt_feature_node_cast"></a>
+
+<code>GtFeatureNode*  gt_feature_node_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a feature node. If so, a pointer to the
+   feature node is returned. If not, an assertion fails.
+</p>
+<hr>
 <a name="GtFeatureNodeIterator"></a>
 <h2>Class GtFeatureNodeIterator</h2>
 <a name="gt_feature_node_iterator_new"></a>
@@ -5582,6 +5590,14 @@ Test whether the given genome node is a meta node. If so, a pointer to the
    GtGenomeNode types.
 </p>
 <hr>
+<a name="gt_meta_node_cast"></a>
+
+<code>GtMetaNode*               gt_meta_node_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a meta node. If so, a pointer to the
+   meta node is returned. If not, an assertion fails.
+</p>
+<hr>
 <a name="GtMutex"></a>
 <h2>Class GtMutex</h2>
 
@@ -6970,6 +6986,14 @@ Test whether the given genome node is a region node. If so, a pointer to the
    GtGenomeNode types.
 </p>
 <hr>
+<a name="gt_region_node_cast"></a>
+
+<code>GtRegionNode*  gt_region_node_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a region node. If so, a pointer to the
+   region node is returned. If not, an assertion fails.
+</p>
+<hr>
 <a name="GtSelectStream"></a>
 <h2>Class GtSelectStream</h2>
 
@@ -7212,6 +7236,14 @@ Test whether the given genome node is a sequence node. If so, a pointer to
    the sequence node is returned. If not, NULL is returned. Note that in most
    cases, one should implement a GtNodeVisitor to handle processing of different
    GtGenomeNode types.
+</p>
+<hr>
+<a name="gt_sequence_node_cast"></a>
+
+<code>GtSequenceNode*           gt_sequence_node_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a sequence node. If so, a pointer to
+   the sequence node is returned. If not, an assertion fails.
 </p>
 <hr>
 <a name="GtSetSourceVisitor"></a>
@@ -10206,6 +10238,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_add_child"><code>gt_feature_node_add_child</code></a><br>
 
+  <a href="#gt_feature_node_cast"><code>gt_feature_node_cast</code></a><br>
+
   <a href="#gt_feature_node_contains_marked"><code>gt_feature_node_contains_marked</code></a><br>
 
   <a href="#gt_feature_node_get_attribute"><code>gt_feature_node_get_attribute</code></a><br>
@@ -10690,6 +10724,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_merge_stream_new"><code>gt_merge_stream_new</code></a><br>
 
+  <a href="#gt_meta_node_cast"><code>gt_meta_node_cast</code></a><br>
+
   <a href="#gt_meta_node_get_data"><code>gt_meta_node_get_data</code></a><br>
 
   <a href="#gt_meta_node_get_directive"><code>gt_meta_node_get_directive</code></a><br>
@@ -10966,6 +11002,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_region_mapping_ref"><code>gt_region_mapping_ref</code></a><br>
 
+  <a href="#gt_region_node_cast"><code>gt_region_node_cast</code></a><br>
+
   <a href="#gt_region_node_new"><code>gt_region_node_new</code></a><br>
 
   <a href="#gt_region_node_try_cast"><code>gt_region_node_try_cast</code></a><br>
@@ -11009,6 +11047,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_seq_iterator_set_sequence_output"><code>gt_seq_iterator_set_sequence_output</code></a><br>
 
   <a href="#gt_seq_iterator_set_symbolmap"><code>gt_seq_iterator_set_symbolmap</code></a><br>
+
+  <a href="#gt_sequence_node_cast"><code>gt_sequence_node_cast</code></a><br>
 
   <a href="#gt_sequence_node_get_description"><code>gt_sequence_node_get_description</code></a><br>
 
