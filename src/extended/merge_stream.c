@@ -19,7 +19,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
-#include "extended/eof_node.h"
+#include "extended/eof_node_api.h"
 #include "extended/genome_node.h"
 #include "extended/merge_stream.h"
 #include "extended/node_stream_api.h"

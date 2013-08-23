@@ -26,7 +26,7 @@
 #include "core/msort.h"
 #include "core/queue_api.h"
 #include "core/unused_api.h"
-#include "extended/eof_node.h"
+#include "extended/eof_node_api.h"
 #include "extended/genome_node_rep.h"
 #include "extended/gff3_defines.h"
 #include "extended/gff3_visitor_api.h"

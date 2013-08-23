@@ -15,7 +15,7 @@
 */
 
 #include "core/class_alloc_lock.h"
-#include "extended/eof_node.h"
+#include "extended/eof_node_api.h"
 #include "extended/genome_node_rep.h"
 #include "extended/node_visitor.h"
 
