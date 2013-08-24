@@ -56,7 +56,7 @@ EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
-GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
+GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
@@ -224,7 +224,7 @@ ifeq ($(cov),yes)
     GT_LDFLAGS += -fprofile-arcs -ftest-coverage
   endif
   ifeq ($(MACHINE),amd64)
-    GT_LDFLAGS += -fPIC
+    GT_LDFLAGS += $(FPIC)
   endif
 endif
 
@@ -461,6 +461,10 @@ ifneq ($(errorcheck),no)
   GT_CFLAGS += -Werror
 endif
 
+ifneq ($(fpic),no)
+  FPIC:=-fPIC
+endif
+
 # set prefix for install target
 prefix ?= /usr/local
 
@@ -685,9 +689,9 @@ obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) -c $< -o $@ -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
-	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY  $(3) -fPIC
+	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY  $(3) $(FPIC)
 	@$(CC) -c $< -o $(@:.o=.d) -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
-	  $(GT_CPPFLAGS) $(3) -MM -MP -MT $@ -fPIC
+	  $(GT_CPPFLAGS) $(3) -MM -MP -MT $@ $(FPIC)
 
 define COMPILE_template
 $(1): $(2)
