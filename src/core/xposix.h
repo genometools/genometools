@@ -19,11 +19,15 @@
 #define XPOSIX_H
 
 #ifndef S_SPLINT_S
+#ifndef _WIN32
 #include <glob.h>
+#endif
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/resource.h>
+#endif
 #include <sys/stat.h>
 
 /*
@@ -35,9 +39,11 @@
 void   gt_xclose(int d);
 FILE*  gt_xfdopen(int filedes, const char *mode);
 void   gt_xfstat(int fd, struct stat *sb);
+#ifndef _WIN32
 void   gt_xgetrusage(int who, struct rusage *rusage);
 void   gt_xglob(const char *pattern, int flags,
                 int (*errfunc)(const char*, int), glob_t *pglob);
+#endif
 int    gt_xopen(const char *path, int flags, mode_t mode);
 void   gt_xmkdir(const char *path);
 int    gt_xmkstemp(char *temp);
