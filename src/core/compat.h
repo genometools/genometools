@@ -14,8 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FORMAT_H
-#define FORMAT_H
+#ifndef COMPAT_H
+#define COMPAT_H
 
 /* Define the conversion string for '%llu' in platform independent fashion. */
 #ifndef _WIN32
@@ -23,5 +23,7 @@
 #else
 #define GT_LLU "%I64u"
 #endif
+
+unsigned long gt_pagesize(void);
 
 #endif

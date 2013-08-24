@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include "core/assert_api.h"
-#include "core/format.h"
+#include "core/compat.h"
 #include "core/unused_api.h"
 
 #ifdef S_SPLINT_S
