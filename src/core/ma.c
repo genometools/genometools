@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <string.h>
 #include "core/array_api.h"
+#include "core/compat.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/multithread_api.h"
@@ -277,7 +278,7 @@ unsigned long gt_ma_get_space_current(void)
 void gt_ma_show_space_peak(FILE *fp)
 {
   gt_assert(ma);
-  fprintf(fp, "# space peak in megabytes: %.2f (in %llu events)\n",
+  fprintf(fp, "# space peak in megabytes: %.2f (in "GT_LLU" events)\n",
           GT_MEGABYTES(ma->max_size),
           ma->mallocevents);
 }

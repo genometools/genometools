@@ -1301,7 +1301,7 @@ int gt_hcr_encoder_encode(GtHcrEncoder *hcr_enc, const char *name,
 
     gt_log_log("total number of encoded nucleotide sequences with qualities: "
                "%lu", hcr_enc->num_of_reads);
-    gt_log_log("total number of encoded nucleotides: %llu",
+    gt_log_log("total number of encoded nucleotides: "GT_LLU"",
                hcr_enc->seq_encoder->total_num_of_symbols);
     gt_log_log("bits per nucleotide encoding: %f",
                (gt_file_estimate_size(gt_str_get(name1)) * 8.0) /

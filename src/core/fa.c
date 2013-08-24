@@ -18,6 +18,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "core/compat.h"
 #include "core/dynalloc.h"
 #include "core/eansi.h"
 #include "core/ebzlib.h"
@@ -423,7 +424,7 @@ static size_t fd_to_file_size(int fd,const char *path,bool hard_fail,
     return -1;
   }
   if (sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX) {
-    gt_error_set(err,"file \"%s\" of size %llu is too large to map",
+    gt_error_set(err,"file \"%s\" of size "GT_LLU" is too large to map",
                  path, (unsigned long long) sb.st_size);
     return -1;
   }

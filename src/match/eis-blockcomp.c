@@ -2609,15 +2609,15 @@ printBucket(const struct blockCompositionSeq *seqIdx, unsigned long bucketNum,
       fprintf(fp, "# bit size of sBlockVarIdxOffset: %u\n",
               seqIdx->bitsPerVarDiskOffset);
     }
-    fprintf(fp, "# sBlockVarIdxOffset=%llu\n",
+    fprintf(fp, "# sBlockVarIdxOffset="GT_LLU"\n",
             (varIdxOffset = sBlockGetVarIdxOffset(sBlock, seqIdx)));
     if (seqIdx->callBackDataOffsetBits)
-      fprintf(fp, "# sBlockGetcbOffset=%llu\n",
+      fprintf(fp, "# sBlockGetcbOffset="GT_LLU"\n",
               sBlockGetcbOffset(sBlock, seqIdx));
     i = 0;
     if (flags & BUCKET_PRINT_BITSIZES)
     {
-      fprintf(fp, "# bits of constant width extension data: %llu\n",
+      fprintf(fp, "# bits of constant width extension data: "GT_LLU"\n",
               (unsigned long long)seqIdx->cwExtBitsPerBucket);
     }
     walkCompIndicesPrefix(
@@ -2686,7 +2686,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, unsigned long bucketNum,
         nextVarIdxOffset = sBlockGetVarIdxOffset(nextSBlock, seqIdx);
         gt_bsPrint(fp, sBlock->varData, varDataMemOffset,
                 nextVarIdxOffset - varIdxOffset);
-        fprintf(fp, "\n# varIdxOffset for next block: %llu",
+        fprintf(fp, "\n# varIdxOffset for next block: "GT_LLU"",
                 (unsigned long long)nextVarIdxOffset);
 #ifndef USE_SBLOCK_CACHE
         deleteSuperBlock(sBlock);

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/compat.h"
 #include "core/disc_distri_api.h"
 #include "core/format64.h"
 #include "core/ma.h"
@@ -175,22 +176,22 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   }
   gt_logger_log(logger, "mean contig size:      %.2f",
       (double) asc->sumlength / asc->numofseq);
-  gt_logger_log(logger, "median contig size:    %llu", nstats.median);
+  gt_logger_log(logger, "median contig size:    "GT_LLU"", nstats.median);
   gt_logger_log(logger, "longest contig:        %lu", asc->maxlength);
   gt_logger_log(logger, "shortest contig:       %lu", asc->minlength);
-  gt_logger_log(logger, "contigs > 500 nt:      %llu (%.2f %%)",
+  gt_logger_log(logger, "contigs > 500 nt:      "GT_LLU" (%.2f %%)",
       nstats.larger_than_limit[0], (double) nstats.larger_than_limit[0] * 100
       / asc->numofseq);
-  gt_logger_log(logger, "contigs > 1K nt:       %llu (%.2f %%)",
+  gt_logger_log(logger, "contigs > 1K nt:       "GT_LLU" (%.2f %%)",
       nstats.larger_than_limit[1], (double) nstats.larger_than_limit[1] * 100
       / asc->numofseq);
-  gt_logger_log(logger, "contigs > 10K nt:      %llu (%.2f %%)",
+  gt_logger_log(logger, "contigs > 10K nt:      "GT_LLU" (%.2f %%)",
       nstats.larger_than_limit[2], (double) nstats.larger_than_limit[2] * 100
       / asc->numofseq);
-  gt_logger_log(logger, "contigs > 100K nt:     %llu (%.2f %%)",
+  gt_logger_log(logger, "contigs > 100K nt:     "GT_LLU" (%.2f %%)",
       nstats.larger_than_limit[3], (double) nstats.larger_than_limit[3] * 100
       / asc->numofseq);
-  gt_logger_log(logger, "contigs > 1M nt:       %llu (%.2f %%)",
+  gt_logger_log(logger, "contigs > 1M nt:       "GT_LLU" (%.2f %%)",
       nstats.larger_than_limit[4], (double) nstats.larger_than_limit[4] * 100
       / asc->numofseq);
   for (i = 0; i < nstats.nofstats ; i++)

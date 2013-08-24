@@ -1115,7 +1115,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
 
       gt_log_log("total number of encoded descriptions: %lu",
                  ee->encdesc->num_of_descs);
-      gt_log_log("total number of encoded characters: %llu",
+      gt_log_log("total number of encoded characters: "GT_LLU"",
                  ee->encdesc->total_num_of_chars);
       gt_log_log("bits per character encoding: %f",
                  (gt_file_estimate_size(gt_str_get(name1)) * 8.0) /

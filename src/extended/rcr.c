@@ -1293,8 +1293,9 @@ static int rcr_write_encoding_to_file(GtRcrEncoder *rcr_enc, GtError *err)
   if (rcr_enc->is_verbose) {
     printf("encoded %lu BAM records, %lu reads(s) unmapped\n",
            rcr_enc->numofreads, rcr_enc->numofunmappedreads);
-    printf("encoded %llu bases\n",rcr_enc->encodedbases);
-    printf("total number of bits used for encoding: %llu\n", rcr_enc->all_bits);
+    printf("encoded "GT_LLU" bases\n",rcr_enc->encodedbases);
+    printf("total number of bits used for encoding: "GT_LLU"\n",
+           rcr_enc->all_bits);
     printf("%% bits used for quality values: %.3f\n",
            rcr_enc->qual_bits * 100.0 / rcr_enc->all_bits);
     printf("%% bits used for mapping quality values: %.3f\n",
