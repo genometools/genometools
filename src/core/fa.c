@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef _WIN32
 #include <sys/mman.h>
+#endif
 #include <fcntl.h>
 #include <unistd.h>
 #include "core/compat.h"
@@ -347,7 +349,7 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
     gt_str_append_cstr(template, genometools_tmptemplate);
   }
   {
-    int fd = mkstemp(gt_str_get(template));
+    int fd = gt_mkstemp(gt_str_get(template));
     char mode[] = { 'w', '+', flags & TMPFP_OPENBINARY?'b':'\0', '\0' };
     fp = gt_xfdopen(fd, mode);
   }

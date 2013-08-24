@@ -24,6 +24,7 @@
 #define GT_LLU "%I64u"
 #endif
 
+int           gt_mkstemp(char *template);
 unsigned long gt_pagesize(void);
 
 #endif
