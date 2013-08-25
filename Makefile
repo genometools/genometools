@@ -62,11 +62,9 @@ EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
-# lua needs -DLUA_USE_POSIX
 # tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
 # zlib needs -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
-EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DLUA_DL_DLOPEN \
-            -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO \
+EXT_FLAGS:= -DHAVE_MEMMOVE -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO \
             -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
 GT_CPPFLAGS:=$(INCLUDEOPT)
@@ -444,17 +442,17 @@ LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o)
 LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d)
 
 ifneq ($(useshared),yes)
-  LIBGENOMETOOLS_OBJ += $(LIBBZ2_OBJ) \
+  LIBGENOMETOOLS_OBJ += $(LIBLUA_OBJ) \
+                        $(LIBEXPAT_OBJ) \
+                        $(LIBBZ2_OBJ) \
                         $(ZLIB_OBJ)
-  LIBGENOMETOOLS_DEP += $(LIBBZ2_DEP) \
+  LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
+                        $(LIBEXPAT_DEP) \
+                        $(LIBBZ2_DEP) \
                         $(ZLIB_DEP)
   ifneq ($(mini),yes)
-    LIBGENOMETOOLS_OBJ += $(LIBLUA_OBJ) \
-                          $(LIBEXPAT_OBJ) \
-                          $(SAMTOOLS_OBJ)
-    LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
-                          $(LIBEXPAT_DEP) \
-                          $(SAMTOOLS_DEP)
+    LIBGENOMETOOLS_OBJ += $(SAMTOOLS_OBJ)
+    LIBGENOMETOOLS_DEP += $(SAMTOOLS_DEP)
   endif
 endif
 
