@@ -24,7 +24,7 @@
 #include "core/mathsupport.h"
 #include "core/qsort_r.h"
 #include "core/str.h"
-#include "core/timer.h"
+#include "core/timer_api.h"
 #include "core/radix_sort.h"
 #include "core/unused_api.h"
 #include "core/qsort-ulong.h"

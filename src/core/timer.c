@@ -19,7 +19,7 @@
 #include <sys/time.h>
 #include "core/cstr_api.h"
 #include "core/ma.h"
-#include "core/timer.h"
+#include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/xposix.h"
 
