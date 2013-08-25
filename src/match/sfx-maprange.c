@@ -19,6 +19,7 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif
+#include "core/compat.h"
 #include "core/xposix.h"
 #include "core/xansi_api.h"
 #include "core/fa.h"
@@ -119,7 +120,7 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
 
   sfxmappedrange = gt_malloc(sizeof (*sfxmappedrange));
   sfxmappedrange->ptr = NULL;
-  sfxmappedrange->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
+  sfxmappedrange->pagesize = gt_pagesize();
   sfxmappedrange->usedptrptr = NULL;
   sfxmappedrange->filename = NULL;
   sfxmappedrange->writable = false;
