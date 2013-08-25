@@ -1546,8 +1546,8 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
       call_info->dp_options_postpro->termcutoffsmode = mode;
     }
     if (oprval == GT_OPTION_PARSER_OK && mincutoffs) {
-      call_info->dp_options_postpro->leadcutoffsmode = MINIMAL;
-      call_info->dp_options_postpro->termcutoffsmode = MINIMAL;
+      call_info->dp_options_postpro->leadcutoffsmode = GTH_MINIMAL;
+      call_info->dp_options_postpro->termcutoffsmode = GTH_MINIMAL;
     }
   }
 
