@@ -21,9 +21,6 @@
 #ifndef S_SPLINT_S
 #include <ctype.h>
 #include <fcntl.h>
-#ifndef _WIN32
-#include <sys/mman.h>
-#endif
 #include <sys/stat.h>
 #include <unistd.h>
 #endif

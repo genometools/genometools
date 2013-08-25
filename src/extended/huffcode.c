@@ -18,9 +18,6 @@
 #include <inttypes.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
-#ifndef _WIN32
-#include <sys/mman.h>
-#endif
 #include <sys/stat.h>
 #include <fcntl.h>
 #endif

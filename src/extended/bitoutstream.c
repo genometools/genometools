@@ -16,9 +16,6 @@
 */
 
 #ifndef S_SPLINT_S
-#ifndef _WIN32
-#include <sys/mman.h>
-#endif
 #include <sys/stat.h>
 #include <unistd.h>
 #endif

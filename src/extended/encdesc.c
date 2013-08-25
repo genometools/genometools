@@ -19,9 +19,6 @@
 #include <errno.h>
 #ifndef S_SPLINT_S
 #include <fcntl.h>
-#ifndef _WIN32
-#include <sys/mman.h>
-#endif
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
