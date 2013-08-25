@@ -23,6 +23,7 @@
 #include "core/unused_api.h"
 #include "core/xposix.h"
 
+#ifndef _WIN32
 typedef enum {
   TIMER_RUNNING,
   TIMER_STOPPED
@@ -233,3 +234,4 @@ void gt_timer_delete(GtTimer *t)
     gt_free(t->statedesc);
   gt_free(t);
 }
+#endif
