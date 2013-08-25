@@ -23,19 +23,20 @@
 #include "core/unused_api.h"
 #include "core/xposix.h"
 
-#ifndef _WIN32
 typedef enum {
   TIMER_RUNNING,
   TIMER_STOPPED
 } Timerstate;
 
 struct GtTimer {
+#ifndef _WIN32
   struct timeval gstart_tv,
                  start_tv,
                  stop_tv;
   struct rusage  gstart_ru,
                  start_ru,
                  stop_ru;
+#endif
   Timerstate state;
   char *statedesc;
   bool has_desc;
@@ -62,26 +63,39 @@ GtTimer* gt_timer_new_with_progress_description(const char* desc)
   return t;
 }
 
-void gt_timer_start(GtTimer *t)
+void gt_timer_start(GT_UNUSED GtTimer *t)
 {
+#ifndef _WIN32
   gt_assert(t);
   gettimeofday(&t->gstart_tv, NULL);
   gettimeofday(&t->start_tv, NULL);
   gt_xgetrusage(RUSAGE_SELF, &t->start_ru);
   gt_xgetrusage(RUSAGE_SELF, &t->gstart_ru);
   t->state = TIMER_RUNNING;
+#else
+  /* XXX */
+  fprintf(stderr, "gt_timer_start() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }
 
 void gt_timer_stop(GtTimer *t)
 {
   gt_assert(t);
+#ifndef _WIN32
   if (t->state == TIMER_RUNNING) {
     gettimeofday(&t->stop_tv, NULL);
     gt_xgetrusage(RUSAGE_SELF, &t->stop_ru);
     t->state = TIMER_STOPPED;
   }
+#else
+  /* XXX */
+  fprintf(stderr, "gt_timer_stop() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }
 
+#ifndef _WIN32
 static int timeval_subtract(struct timeval *result,
                             struct timeval *x,
                             struct timeval *y)
@@ -114,9 +128,12 @@ static int timeval_add(struct timeval *result,
   }
   return 0;
 }
+#endif
 
-void gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp)
+void gt_timer_show_formatted(GT_UNUSED GtTimer *t, GT_UNUSED const char *fmt,
+                             GT_UNUSED FILE *fp)
 {
+#ifndef _WIN32
   struct timeval elapsed_tv;
   if (t->state == TIMER_RUNNING)
     gt_timer_stop(t);
@@ -127,6 +144,11 @@ void gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp)
           (long)(elapsed_tv.tv_usec),
           (long)(t->stop_ru.ru_utime.tv_sec - t->start_ru.ru_utime.tv_sec),
           (long)(t->stop_ru.ru_stime.tv_sec - t->start_ru.ru_stime.tv_sec));
+#else
+  /* XXX */
+  fprintf(stderr, "gt_timer_show_formatted() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }
 
 void gt_timer_show(GtTimer *t, FILE *fp)
@@ -134,6 +156,7 @@ void gt_timer_show(GtTimer *t, FILE *fp)
   gt_timer_show_formatted(t, "%ld.%06lds real %lds user %lds system\n", fp);
 }
 
+#ifndef _WIN32
 static void gt_timer_print_progress_report(GtTimer *t,
     struct timeval *elapsed_tv, struct timeval *elapsed_user_tv,
     struct timeval *elapsed_sys_tv, const char *desc, FILE *fp)
@@ -201,9 +224,11 @@ void gt_timer_show_progress_va(GtTimer *t, FILE *fp, const char *desc,
   gettimeofday(&t->start_tv, NULL);
   gt_xgetrusage(RUSAGE_SELF, &t->start_ru);
 }
+#endif
 
-void gt_timer_show_progress_final(GtTimer *t, FILE *fp)
+void gt_timer_show_progress_final(GT_UNUSED GtTimer *t, GT_UNUSED FILE *fp)
 {
+#ifndef _WIN32
   struct timeval elapsed_tv, elapsed_user_tv, elapsed_sys_tv;
   const char overall_desc[] = "overall";
 
@@ -224,6 +249,11 @@ void gt_timer_show_progress_final(GtTimer *t, FILE *fp)
     &t->gstart_ru.ru_stime);
   gt_timer_print_progress_report(t, &elapsed_tv, &elapsed_user_tv,
     &elapsed_sys_tv, overall_desc, fp);
+#else
+  /* XXX */
+  fprintf(stderr, "gt_timer_show_progress_final() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }
 
 void gt_timer_show_cpu_time_by_progress(GtTimer *t)
@@ -243,4 +273,3 @@ void gt_timer_delete(GtTimer *t)
     gt_free(t->statedesc);
   gt_free(t);
 }
-#endif

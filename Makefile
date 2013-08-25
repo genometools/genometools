@@ -294,8 +294,10 @@ ifeq ($(SYSTEM),Darwin)
 else
   EXT_FLAGS += -DLUA_DL_DLOPEN
   ifneq ($(SYSTEM),FreeBSD)
+  ifneq ($(SYSTEM),Windows)
     LUA_LDLIB:=-ldl
     EXP_LDLIBS += -ldl
+  endif
   endif
 endif
 
