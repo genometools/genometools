@@ -16,6 +16,7 @@
 
 #include <fcntl.h>
 #include <string.h>
+#include "core/unused_api.h"
 #include "core/xbsd.h"
 
 #ifndef _WIN32
@@ -29,19 +30,31 @@ static void gt_xflock_with_op(int fd, short l_type)
     exit(EXIT_FAILURE);
   }
 }
-
-void gt_xflock_shared(int fd)
-{
-  gt_xflock_with_op(fd, F_RDLCK);
-}
-
-void gt_xflock_exclusive(int fd)
-{
-  gt_xflock_with_op(fd, F_WRLCK);
-}
-
-void gt_xflock_unlock(int fd)
-{
-  gt_xflock_with_op(fd, F_UNLCK);
-}
 #endif
+
+void gt_xflock_shared(GT_UNUSED int fd)
+{
+#ifndef _WIN32
+  gt_xflock_with_op(fd, F_RDLCK);
+#else
+  /* XXX */
+#endif
+}
+
+void gt_xflock_exclusive(GT_UNUSED int fd)
+{
+#ifndef _WIN32
+  gt_xflock_with_op(fd, F_WRLCK);
+#else
+  /* XXX */
+#endif
+}
+
+void gt_xflock_unlock(GT_UNUSED int fd)
+{
+#ifndef _WIN32
+  gt_xflock_with_op(fd, F_UNLCK);
+#else
+  /* XXX */
+#endif
+}

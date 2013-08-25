@@ -153,12 +153,21 @@ static void gt_timer_print_progress_report(GtTimer *t,
     fprintf(fp, "\n");
   }
 }
+#endif
 
-void gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)
+void gt_timer_show_progress(GT_UNUSED GtTimer *t, GT_UNUSED const char *desc,
+                            GT_UNUSED FILE *fp)
 {
+#ifndef _WIN32
   gt_timer_show_progress_formatted(t, fp, "%s", desc);
+#else
+  /* XXX */
+  fprintf(stderr, "gt_timer_show_progress() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }
 
+#ifndef _WIN32
 void gt_timer_show_progress_formatted(GtTimer *t, FILE *fp,
                                       const char *desc, ...)
 {
