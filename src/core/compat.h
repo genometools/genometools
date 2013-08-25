@@ -24,6 +24,13 @@
 #define GT_LLU "%I64u"
 #endif
 
+/* Define the conversion string for '%zu' in platform independent fashion. */
+#ifndef _WIN32
+#define GT_ZU "%zu"
+#else
+#define GT_ZU "%u"
+#endif
+
 int           gt_mkstemp(char *template);
 unsigned long gt_pagesize(void);
 
