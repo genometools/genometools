@@ -31,7 +31,6 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif
-#include <sys/mman.h>
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "match/dataalign.h"
