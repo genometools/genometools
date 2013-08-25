@@ -342,11 +342,11 @@ endif
 
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
-                      src/gtlua \
-                      src/match \
                       src/gth \
-                      src/mgth \
-                      src/ltr
+                      src/gtlua \
+                      src/ltr \
+                      src/match \
+                      src/mgth
 
 ifneq ($(cairo),no)
   ifeq ($(SYSTEM),Darwin)
