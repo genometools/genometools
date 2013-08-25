@@ -43,6 +43,10 @@ ifneq ($(cairo),no)
   endif
 endif
 
+ifneq ($(fpic),no)
+  FPIC:=-fPIC
+endif
+
 # these variables are exported by the configuration script
 ifndef CC
   CC:=gcc
@@ -459,10 +463,6 @@ GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
 
 ifneq ($(errorcheck),no)
   GT_CFLAGS += -Werror
-endif
-
-ifneq ($(fpic),no)
-  FPIC:=-fPIC
 endif
 
 # set prefix for install target
