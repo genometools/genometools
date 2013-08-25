@@ -43,6 +43,10 @@ ifneq ($(cairo),no)
   endif
 endif
 
+ifneq ($(fpic),no)
+  FPIC:=-fPIC
+endif
+
 # these variables are exported by the configuration script
 ifndef CC
   CC:=gcc
@@ -56,7 +60,7 @@ EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
-GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
+GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
@@ -224,7 +228,7 @@ ifeq ($(cov),yes)
     GT_LDFLAGS += -fprofile-arcs -ftest-coverage
   endif
   ifeq ($(MACHINE),amd64)
-    GT_LDFLAGS += -fPIC
+    GT_LDFLAGS += $(FPIC)
   endif
 endif
 
@@ -486,7 +490,7 @@ all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBEXPAT_OBJ)
+	@$(AR) ru $@ $(LIBEXPAT_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -494,7 +498,7 @@ endif
 lib/libsqlite.a: $(SQLITE3_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(SQLITE3_OBJ)
+	@$(AR) ru $@ $(SQLITE3_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -502,7 +506,7 @@ endif
 lib/libbz2.a: $(LIBBZ2_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBBZ2_OBJ)
+	@$(AR) ru $@ $(LIBBZ2_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -510,7 +514,7 @@ endif
 lib/libz.a: $(ZLIB_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(ZLIB_OBJ)
+	@$(AR) ru $@ $(ZLIB_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -518,7 +522,7 @@ endif
 lib/libgenometools.a: obj/gt_config.h  $(LIBGENOMETOOLS_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar r $@ $(LIBGENOMETOOLS_OBJ)
+	@$(AR) r $@ $(LIBGENOMETOOLS_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -541,7 +545,7 @@ lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
 lib/libtecla.a: $(LIBTECLA_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBTECLA_OBJ)
+	@$(AR) ru $@ $(LIBTECLA_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -685,9 +689,9 @@ obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) -c $< -o $@ -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
-	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY  $(3) -fPIC
+	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY  $(3) $(FPIC)
 	@$(CC) -c $< -o $(@:.o=.d) -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
-	  $(GT_CPPFLAGS) $(3) -MM -MP -MT $@ -fPIC
+	  $(GT_CPPFLAGS) $(3) -MM -MP -MT $@ $(FPIC)
 
 define COMPILE_template
 $(1): $(2)
