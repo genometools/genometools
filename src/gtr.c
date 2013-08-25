@@ -369,8 +369,7 @@ static int run_tests(GtR *gtr, GtError *err)
   gt_ensure(sizeof (int) == 4);
   gt_ensure(sizeof (unsigned int) == 4);
   gt_ensure(sizeof (long) == 4 || sizeof (long) == 8);
-  gt_ensure(sizeof (unsigned long) == 4 ||
-                     sizeof (unsigned long) == 8);
+  gt_ensure(sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
   gt_ensure(sizeof (unsigned long) >= sizeof (size_t));
   gt_ensure(sizeof (long long) == 8);
   gt_ensure(sizeof (unsigned long long) == 8);
