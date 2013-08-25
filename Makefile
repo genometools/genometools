@@ -342,14 +342,11 @@ endif
 
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
-                      src/gth
-
-ifneq ($(mini),yes)
-LIBGENOMETOOLS_DIRS+= src/gtlua \
+                      src/gth \
+                      src/gtlua \
                       src/ltr \
                       src/match \
                       src/mgth
-endif
 
 ifneq ($(cairo),no)
   ifeq ($(SYSTEM),Darwin)
@@ -445,17 +442,15 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d)
 
 ifneq ($(useshared),yes)
   LIBGENOMETOOLS_OBJ += $(LIBLUA_OBJ) \
+                        $(SAMTOOLS_OBJ) \
                         $(LIBEXPAT_OBJ) \
                         $(LIBBZ2_OBJ) \
                         $(ZLIB_OBJ)
   LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
+                        $(SAMTOOLS_DEP) \
                         $(LIBEXPAT_DEP) \
                         $(LIBBZ2_DEP) \
                         $(ZLIB_DEP)
-  ifneq ($(mini),yes)
-    LIBGENOMETOOLS_OBJ += $(SAMTOOLS_OBJ)
-    LIBGENOMETOOLS_DEP += $(SAMTOOLS_DEP)
-  endif
 endif
 
 ifneq ($(with-sqlite),no)
