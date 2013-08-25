@@ -55,7 +55,7 @@ static void* xcalloc(size_t nmemb, size_t size, unsigned long current_size,
 {
   void *p;
   if ((p = calloc(nmemb, size)) == NULL) {
-    fprintf(stderr, "cannot calloc(%zu, %zu) memory\n", nmemb, size);
+    fprintf(stderr, "cannot calloc("GT_ZU", "GT_ZU") memory\n", nmemb, size);
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
            src_file);
     if (current_size)
@@ -70,7 +70,7 @@ static void* xmalloc(size_t size, unsigned long current_size,
 {
   void *p;
   if ((p = malloc(size)) == NULL) {
-    fprintf(stderr, "cannot malloc(%zu) memory\n", size);
+    fprintf(stderr, "cannot malloc("GT_ZU") memory\n", size);
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
             src_file);
     if (current_size)
@@ -85,7 +85,7 @@ static void* xrealloc(void *ptr, size_t size, unsigned long current_size,
 {
   void *p;
   if ((p = realloc(ptr, size)) == NULL) {
-    fprintf(stderr, "cannot realloc(%zu) memory\n", size);
+    fprintf(stderr, "cannot realloc("GT_ZU") memory\n", size);
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
             src_file);
     if (current_size)
@@ -244,7 +244,7 @@ static int check_space_leak(GT_UNUSED void *key, void *value, void *data,
   gt_assert(key && value && data);
   /* report only the first leak */
   if (!info->has_leak) {
-    fprintf(stderr, "bug: %zu bytes memory leaked (allocated on line %d in "
+    fprintf(stderr, "bug: "GT_ZU" bytes memory leaked (allocated on line %d in "
             "file \"%s\")\n", mainfo->size, mainfo->src_line, mainfo->src_file);
     info->has_leak = true;
   }
@@ -312,7 +312,7 @@ static int print_allocation(GT_UNUSED void *key, void *value,
   FILE *outfp = (FILE*) data;
   gt_error_check(err);
   gt_assert(outfp && key && value);
-  fprintf(outfp, "%zu bytes memory allocated on line %d in file \"%s\")\n",
+  fprintf(outfp, ""GT_ZU" bytes memory allocated on line %d in file \"%s\")\n",
           mainfo->size, mainfo->src_line, mainfo->src_file);
   return 0;
 }
