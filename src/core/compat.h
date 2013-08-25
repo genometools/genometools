@@ -17,6 +17,13 @@
 #ifndef COMPAT_H
 #define COMPAT_H
 
+/* Define the conversion string for '%lld' in platform independent fashion. */
+#ifndef _WIN32
+#define GT_LLD "%lld"
+#else
+#define GT_LLD "%I64d"
+#endif
+
 /* Define the conversion string for '%llu' in platform independent fashion. */
 #ifndef _WIN32
 #define GT_LLU "%llu"
