@@ -20,5 +20,10 @@
 
 bool gt_process_is_foreground(void)
 {
+#ifndef _WIN32
   return getpgrp() == tcgetpgrp(STDOUT_FILENO);
+#else
+  /* XXX */
+  return true;
+#endif
 }
