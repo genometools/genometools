@@ -17,6 +17,14 @@
 #ifndef COMPAT_H
 #define COMPAT_H
 
+#ifndef _WIN32
+#define GT_PATH_SEPARATOR     '/'
+#define GT_PATH_VAR_SEPARATOR ':'
+#else
+#define GT_PATH_SEPARATOR     '\\'
+#define GT_PATH_VAR_SEPARATOR ';'
+#endif
+
 /* Define the conversion string for '%lld' in platform independent fashion. */
 #ifndef _WIN32
 #define GT_LLD "%lld"
