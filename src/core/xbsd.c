@@ -18,6 +18,7 @@
 #include <string.h>
 #include "core/xbsd.h"
 
+#ifndef _WIN32
 static void gt_xflock_with_op(int fd, short l_type)
 {
   struct flock f;
@@ -43,3 +44,4 @@ void gt_xflock_unlock(int fd)
 {
   gt_xflock_with_op(fd, F_UNLCK);
 }
+#endif

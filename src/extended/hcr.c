@@ -21,7 +21,9 @@
 #ifndef S_SPLINT_S
 #include <ctype.h>
 #include <fcntl.h>
+#ifndef _WIN32
 #include <sys/mman.h>
+#endif
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
@@ -31,6 +33,7 @@
 #include "core/arraydef.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"
+#include "core/compat.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
 #include "core/intbits.h"
@@ -606,7 +609,7 @@ static HcrHuffDataIterator *decoder_init_data_iterator(
   data_iter->pos = data_iter->start = (size_t) start_of_encoding;
   data_iter->end = (size_t) end_of_encoding;
   data_iter->pages_per_chunk = HCR_PAGES_PER_CHUNK;
-  data_iter->pagesize = sysconf((int) _SC_PAGESIZE);
+  data_iter->pagesize = gt_pagesize();
   gt_assert(data_iter->start % data_iter->pagesize == 0);
   data_iter->blocksize = data_iter->pagesize * data_iter->pages_per_chunk;
   gt_safe_assign(data_iter->bitseq_per_chunk,
@@ -701,7 +704,7 @@ static GtRBTree *seq_decoder_init_file_info(FastqFileInfo *fileinfos,
 static inline long decoder_calc_start_of_encoded_data(FILE *fp)
 {
   bool is_not_at_pageborder;
-  long pagesize = sysconf((int) _SC_PAGESIZE);
+  long pagesize = gt_pagesize();
 
   is_not_at_pageborder = (ftell(fp) % pagesize) != 0;
 
@@ -861,7 +864,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
                              GtError *err)
 {
   enum state {
-    ERROR = -1,
+    HCR_ERROR = -1,
     END,
     SUCCESS
   };
@@ -899,14 +902,14 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
       reset_data_iterator_to_pos(seq_dec->data_iter, startofnearestsample);
       (void) gt_huffman_decoder_get_new_mem_chunk(seq_dec->huff_dec, err);
       if (gt_error_is_set(err))
-        status = ERROR;
+        status = HCR_ERROR;
     }
-    if (status != ERROR) {
+    if (status != HCR_ERROR) {
       int ret;
       ret =  gt_huffman_decoder_next(seq_dec->huff_dec, seq_dec->symbols,
                                      fileinfo->readlength, err);
       if (ret != 1)
-        status = ERROR;
+        status = HCR_ERROR;
       if (ret == 0)
         gt_error_set(err, "reached end of file");
     }
@@ -1128,7 +1131,7 @@ GtHcrEncoder *gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
   hcr_enc->page_sampling = false;
   hcr_enc->regular_sampling = false;
   hcr_enc->sampling_rate = 0;
-  hcr_enc->pagesize = sysconf((int) _SC_PAGESIZE);
+  hcr_enc->pagesize = gt_pagesize();
   if (descs) {
     hcr_enc->encdesc_encoder = gt_encdesc_encoder_new();
     if (timer != NULL)

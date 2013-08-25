@@ -19,7 +19,9 @@
 #include <errno.h>
 #ifndef S_SPLINT_S
 #include <fcntl.h>
+#ifndef _WIN32
 #include <sys/mman.h>
+#endif
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
@@ -27,6 +29,7 @@
 #include "core/arraydef.h"
 #include "core/assert_api.h"
 #include "core/bittab_api.h"
+#include "core/compat.h"
 #include "core/cstr_api.h"
 #include "core/disc_distri_api.h"
 #include "core/ensure.h"
@@ -845,7 +848,7 @@ static GtEncdesc *encdesc_new(void)
   encdesc->num_of_descs = 0;
   encdesc->total_num_of_chars = 0;
   encdesc->sampling = NULL;
-  encdesc->pagesize = sysconf((int) _SC_PAGESIZE);
+  encdesc->pagesize = gt_pagesize();
   return encdesc;
 }
 

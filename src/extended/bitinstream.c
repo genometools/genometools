@@ -16,12 +16,15 @@
 */
 
 #ifndef S_SPLINT_S
+#ifndef _WIN32
 #include <sys/mman.h>
+#endif
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
 
 #include "core/assert_api.h"
+#include "core/compat.h"
 #include "core/cstr_api.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
@@ -50,7 +53,7 @@ GtBitInStream *gt_bitinstream_new(const char* path,
 {
   GtBitInStream *bitstream = gt_malloc(sizeof (*bitstream));
 
-  bitstream->pagesize =sysconf((int) _SC_PAGESIZE);
+  bitstream->pagesize = gt_pagesize();
   bitstream->last_chunk = false;
   gt_safe_assign(bitstream->filesize, gt_file_estimate_size(path));
   bitstream->path = gt_cstr_dup(path);
