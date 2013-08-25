@@ -16,11 +16,14 @@
 */
 
 #include <signal.h>
+#include <stdlib.h>
 #include "core/sig.h"
+#include "core/unused_api.h"
 #include "core/xposix.h"
 
-void gt_sig_register_all(void (*func)(int sigraised))
+void gt_sig_register_all(GT_UNUSED void (*func)(int sigraised))
 {
+#ifndef _WIN32
   /* POSIX */
   (void) gt_xsignal(SIGABRT, func);
   (void) gt_xsignal(SIGBUS, func);
@@ -45,10 +48,16 @@ void gt_sig_register_all(void (*func)(int sigraised))
 #ifdef SIGEMT
   (void) gt_xsignal(SIGEMT, func);
 #endif
+#else
+  /* XXX */
+  fprintf(stderr, "gt_sig_register_all() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }
 
 void gt_sig_unregister_all(void)
 {
+#ifndef _WIN32
   /* POSIX */
   (void) gt_xsignal(SIGABRT, SIG_DFL);
   (void) gt_xsignal(SIGBUS, SIG_DFL);
@@ -72,5 +81,10 @@ void gt_sig_unregister_all(void)
   /* OpenBSD */
 #ifdef SIGEMT
   (void) gt_xsignal(SIGEMT, SIG_DFL);
+#endif
+#else
+  /* XXX */
+  fprintf(stderr, "gt_sig_unregister_all() not implemented\n");
+  exit(EXIT_FAILURE);
 #endif
 }
