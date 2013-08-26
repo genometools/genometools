@@ -158,7 +158,7 @@ static bool determinefirstspecialposition(unsigned int *firstspecialpos,
 
 typedef struct
 {
-  unsigned int distvalue;
+  unsigned int specialposition;
   GtCodetype codeforleftcontext;
 } Specialitem;
 
@@ -217,12 +217,12 @@ static void specialdeleteheadofqueue(Specialpositions *spos)
   }
 }
 
-static void specialenqueue(Specialpositions *spos,Specialitem elem)
+static void specialenqueue(Specialpositions *spos,unsigned int specialposition,
+                                                  GtCodetype codeforleftcontext)
 {
   spos->noofelements++;
-  spos->queuespace[spos->enqueueindex].codeforleftcontext =
-    elem.codeforleftcontext;
-  spos->queuespace[spos->enqueueindex].distvalue = elem.distvalue;
+  spos->queuespace[spos->enqueueindex].codeforleftcontext = codeforleftcontext;
+  spos->queuespace[spos->enqueueindex].specialposition = specialposition;
   if (spos->enqueueindex > 0)
     spos->enqueueindex--;
   else
@@ -255,58 +255,54 @@ static Kmerstream *kmerstream_new(unsigned int numofchars,unsigned int kmersize)
 static void updatespecialpositions(Kmerstream *spwp,
                                    GtUchar charcode,
                                    bool doshift,
-                                   GtUchar lchar)
+                                   GtUchar leftchar)
 {
-  if (doshift) {
-    if (!specialqueueisempty(&spwp->spos)) {
-      Specialitem *head;
+  if (doshift && !specialqueueisempty(&spwp->spos)) {
+    Specialitem *head = specialheadofqueue(&spwp->spos);
+    /* only here we add some element to the queue */
 
-      /* only here we add some element to the queue */
-      head = specialheadofqueue(&spwp->spos);
-      if (head->distvalue > 0) {
-        SUBTRACTLCHARANDSHIFT(head->codeforleftcontext,lchar,spwp->numofchars,
-                              spwp->multimappower[0]);
-        head->distvalue--;
-      }
-      else {
-        specialdeleteheadofqueue(&spwp->spos);
-        if (!specialqueueisempty(&spwp->spos)) {
-          head = specialheadofqueue(&spwp->spos);
-          head->distvalue--;
-        }
+    if (head->specialposition > 0)
+    {
+      SUBTRACTLCHARANDSHIFT(head->codeforleftcontext,leftchar,spwp->numofchars,
+                            spwp->multimappower[0]);
+      head->specialposition--;
+    } else
+    {
+      specialdeleteheadofqueue(&spwp->spos);
+      if (!specialqueueisempty(&spwp->spos)) {
+        head = specialheadofqueue(&spwp->spos);
+        head->specialposition--;
       }
     }
   }
-  if (ISNOTSPECIAL(charcode)) {
-    if (spwp->lengthwithoutspecial == spwp->kmersize) {
+  if (ISNOTSPECIAL(charcode))
+  {
+    if (spwp->lengthwithoutspecial == spwp->kmersize)
+    {
       SUBTRACTLCHARSHIFTADDNEXT(spwp->codewithoutspecial,
-                                lchar,
+                                leftchar,
                                 spwp->numofchars,
                                 spwp->multimappower[0],
                                 charcode);
-    }
-    else {
+    } else
+    {
       spwp->codewithoutspecial +=
         spwp->multimappower[spwp->lengthwithoutspecial][charcode];
       spwp->lengthwithoutspecial++;
     }
-  }
-  else {
+  } else
+  {
     /* only here we add some element to the queue */
-    Specialitem newelem;
-    /* memset(&newelem, 0, sizeof (newelem)); */
-
-    if (specialqueueisempty(&spwp->spos))
-      newelem.distvalue = spwp->windowwidth-1U;
-    else
-      newelem.distvalue = spwp->lengthwithoutspecial+1U;
-
-    if (spwp->lengthwithoutspecial == spwp->kmersize) {
-      SUBTRACTLCHARANDSHIFT(spwp->codewithoutspecial,lchar,
+    unsigned int newelem_specialposition
+      = specialqueueisempty(&spwp->spos) ? spwp->windowwidth-1U
+                                         : spwp->lengthwithoutspecial+1U;
+    if (spwp->lengthwithoutspecial == spwp->kmersize)
+    {
+      SUBTRACTLCHARANDSHIFT(spwp->codewithoutspecial,leftchar,
                             spwp->numofchars,spwp->multimappower[0]);
     }
-    newelem.codeforleftcontext = spwp->codewithoutspecial;
-    specialenqueue(&spwp->spos, newelem);
+    specialenqueue(&spwp->spos, newelem_specialposition,
+                   spwp->codewithoutspecial);
     spwp->lengthwithoutspecial = 0;
     spwp->codewithoutspecial = 0;
   }
@@ -321,7 +317,7 @@ static void kmerstream_newcode(GtKmercode *kmercode, Kmerstream *spwp)
   if (!specialqueueisempty(&spwp->spos))
   {
     Specialitem *head = specialheadofqueue(&spwp->spos);
-    GtCodetype tmpprefixcode = prefixwindowkmer2code(head->distvalue,
+    GtCodetype tmpprefixcode = prefixwindowkmer2code(head->specialposition,
                                                      spwp->kmersize,
                                                      (const GtCodetype **)
                                                        spwp->multimappower,
@@ -342,7 +338,7 @@ static void kmerstream_newcode(GtKmercode *kmercode, Kmerstream *spwp)
   {
     Specialitem *head = specialheadofqueue(&spwp->spos);
     gt_assert(firstspecialbrutedefined ? 1 : 0);
-    gt_assert(head->distvalue == firstspecialbrute);
+    gt_assert(head->specialposition == firstspecialbrute);
   }
 #endif
   {
@@ -362,9 +358,9 @@ static void kmerstream_newcode(GtKmercode *kmercode, Kmerstream *spwp)
     else {
       Specialitem *head = specialheadofqueue(&spwp->spos);
       kmercode->code = head->codeforleftcontext +
-                       spwp->filltable[head->distvalue];
+                       spwp->filltable[head->specialposition];
       kmercode->definedspecialposition = true;
-      kmercode->specialposition = head->distvalue;
+      kmercode->specialposition = head->specialposition;
     }
 #ifdef SKDEBUG
     gt_assert(wcode == kmercode->code);
