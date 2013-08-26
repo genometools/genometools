@@ -31,9 +31,14 @@ int gt_mkstemp(char *template)
   return mkstemp(template);
 #else
   /* XXX: is this replacement good enough? */
+#ifdef _mktemp_s
   errno_t err = _mktemp_s(template, strlen(template) + 1);
   if (err == EINVAL)
     return -1;
+#else
+  if (!_mktemp(template))
+    return -1;
+#endif
   return open(template, O_RDWR, O_EXCL);
 #endif
 }
