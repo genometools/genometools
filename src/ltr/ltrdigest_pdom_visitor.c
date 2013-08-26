@@ -256,6 +256,7 @@ static int gt_ltrdigest_pdom_visitor_parse_scores(GT_UNUSED
   gt_assert(lv && instream);
   gt_error_check(err);
   had_err = pdom_parser_get_next_line(buf, instream, err);
+  gt_assert(had_err || buf != NULL);
   if (!had_err && strncmp("Scores", buf, (size_t) 6) != 0) {
     gt_error_set(err, "expected 'Scores:' at beginning of new scores "
                       "section, '%s' read instead", buf);
