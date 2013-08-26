@@ -26,10 +26,10 @@ struct GtFeatureOutStream
   const GtNodeStream parent_instance;
   GtFeatureIndex *fi;
   GtStrArray *seqids;
-  GtArray *regioncache;
-  GtArray *featurecache;
-  unsigned long regindex;
-  unsigned long seqindex;
+  GtArray *regioncache,
+          *featurecache;
+  unsigned long regindex,
+                seqindex;
 };
 
 #define feature_out_stream_cast(GS)\
@@ -41,7 +41,7 @@ static int feature_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   GtFeatureOutStream *stream = feature_out_stream_cast(ns);
   gt_error_check(error);
 
-  if(stream->regindex < gt_array_size(stream->regioncache))
+  if (stream->regindex < gt_array_size(stream->regioncache))
   {
     GtGenomeNode **region = gt_array_get(stream->regioncache, stream->regindex);
     stream->regindex++;
@@ -49,15 +49,15 @@ static int feature_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
     return 0;
   }
 
-  if(stream->featurecache == NULL || gt_array_size(stream->featurecache) == 0)
+  if (stream->featurecache == NULL || gt_array_size(stream->featurecache) == 0)
   {
-    if(stream->featurecache != NULL)
+    if (stream->featurecache != NULL)
     {
       gt_array_delete(stream->featurecache);
       stream->featurecache = NULL;
     }
 
-    if(stream->seqindex == gt_str_array_size(stream->seqids))
+    if (stream->seqindex == gt_str_array_size(stream->seqids))
     {
       *gn = NULL;
       return 0;
@@ -79,7 +79,7 @@ static int feature_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 static void feature_out_stream_free(GtNodeStream *ns)
 {
   GtFeatureOutStream *stream = feature_out_stream_cast(ns);
-  while(gt_array_size(stream->regioncache) > 0)
+  while (gt_array_size(stream->regioncache) > 0)
   {
     GtGenomeNode **gn = gt_array_pop(stream->regioncache);
     gt_genome_node_delete(*gn);
@@ -92,7 +92,7 @@ const GtNodeStreamClass *gt_feature_out_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   gt_class_alloc_lock_enter();
-  if(!nsc)
+  if (!nsc)
   {
     nsc = gt_node_stream_class_new(sizeof (GtFeatureOutStream),
                                    feature_out_stream_free,
@@ -108,11 +108,11 @@ void feature_out_stream_init(GtFeatureOutStream *stream)
   GtError *error = gt_error_new();
 
   stream->featurecache = NULL;
-  stream->regioncache = gt_array_new( sizeof(GtRegionNode *) );
+  stream->regioncache = gt_array_new(sizeof (GtRegionNode *));
   stream->seqids = gt_feature_index_get_seqids(stream->fi, error);
   stream->regindex = 0;
   stream->seqindex = 0;
-  for(i = 0; i < gt_str_array_size(stream->seqids); i++)
+  for (i = 0; i < gt_str_array_size(stream->seqids); i++)
   {
     const char *seqid = gt_str_array_get(stream->seqids, i);
     GtRange seqrange;
