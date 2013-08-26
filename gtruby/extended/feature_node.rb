@@ -19,6 +19,7 @@ require 'dl/import'
 require 'gthelper'
 require 'core/str'
 require 'extended/genome_node'
+require 'extended/strand'
 
 module GT
   extend DL::Importable
