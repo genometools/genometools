@@ -73,6 +73,8 @@ end
 $systemname=`uname -s`
 $systemname.chomp!
 
+$SEED = rand(2**31)
+
 $MEMCHECK_SUPPORTEDPLATFORMS = ["Linux", "Darwin"]
 
 # define helper function
@@ -88,7 +90,7 @@ def run_test(str, opts = {})
   else
     $memcheck = ""
   end
-  run("#{$memcheck} #{$path}#{str}", opts)
+  run("env GT_SEED=#{$SEED} #{$memcheck} #{$path}#{str}", opts)
 end
 
 def run_ruby(str, opts = {})
@@ -186,4 +188,9 @@ end
 if $arguments["threads"] then
   $testsuite.nof_threads = $arguments["threads"].to_i
 end
+
+#output seed
+puts "seed=#{$SEED}"
+
+#start tests
 $testsuite.run
