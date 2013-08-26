@@ -19,7 +19,6 @@
 #include <errno.h>
 #ifndef S_SPLINT_S
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
@@ -27,6 +26,7 @@
 #include "core/arraydef.h"
 #include "core/assert_api.h"
 #include "core/bittab_api.h"
+#include "core/compat.h"
 #include "core/cstr_api.h"
 #include "core/disc_distri_api.h"
 #include "core/ensure.h"
@@ -845,7 +845,7 @@ static GtEncdesc *encdesc_new(void)
   encdesc->num_of_descs = 0;
   encdesc->total_num_of_chars = 0;
   encdesc->sampling = NULL;
-  encdesc->pagesize = sysconf((int) _SC_PAGESIZE);
+  encdesc->pagesize = gt_pagesize();
   return encdesc;
 }
 
@@ -1115,7 +1115,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
 
       gt_log_log("total number of encoded descriptions: %lu",
                  ee->encdesc->num_of_descs);
-      gt_log_log("total number of encoded characters: %llu",
+      gt_log_log("total number of encoded characters: "GT_LLU"",
                  ee->encdesc->total_num_of_chars);
       gt_log_log("bits per character encoding: %f",
                  (gt_file_estimate_size(gt_str_get(name1)) * 8.0) /

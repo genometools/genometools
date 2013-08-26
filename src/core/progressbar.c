@@ -20,13 +20,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#ifndef _WIN32
 #include <sys/ioctl.h>
 #include <termios.h>
+#endif
 #include "core/assert_api.h"
 #include "core/process.h"
 #include "core/unused_api.h"
 #include "core/xposix.h"
 
+#ifndef _WIN32
 #define DEFAULT_WINDOW_SIZE  80
 #define UPDATE_INTERVAL      1U  /* update the progress bar every second */
 #define MAXIMUM_WINDOW_SIZE  512 /* the maximum window size
@@ -191,10 +194,13 @@ static void gt_sig_winch(GT_UNUSED int sigraised)
   gt_assert(sigraised == SIGWINCH);
   window_resized = 1;
 }
+#endif
 
-void gt_progressbar_start(const unsigned long long *current_computation,
-                          unsigned long long number_of_computations)
+void gt_progressbar_start(GT_UNUSED const unsigned long long
+                                    *current_computation,
+                          GT_UNUSED unsigned long long number_of_computations)
 {
+#ifndef _WIN32
   computation_counter = current_computation;
   last_computation = number_of_computations;
   computed_eta = 0;
@@ -207,10 +213,16 @@ void gt_progressbar_start(const unsigned long long *current_computation,
   (void) gt_xsignal(SIGALRM, update_progressbar); /* the timer */
   (void) gt_xsignal(SIGWINCH, gt_sig_winch);         /* window resizing */
   (void) alarm(UPDATE_INTERVAL);                  /* set alarm */
+#else
+  /* XXX */
+  fprintf(stderr, "gt_progressbar_start() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }
 
 void gt_progressbar_stop(void)
 {
+#ifndef _WIN32
   (void) alarm(0); /* reset alarm */
   if (!gt_process_is_foreground())
     return;
@@ -223,4 +235,9 @@ void gt_progressbar_stop(void)
   /* unregister signal handlers */
   (void) gt_xsignal(SIGALRM, SIG_DFL);  /* the timer */
   (void) gt_xsignal(SIGWINCH, SIG_DFL); /* window resizing */
+#else
+  /* XXX */
+  fprintf(stderr, "gt_progressbar_stop() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }

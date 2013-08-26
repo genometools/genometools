@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include "core/assert_api.h"
 #include "core/disc_distri_api.h"
+#include "core/compat.h"
 #include "core/ensure.h"
 #include "core/hashmap-generic.h"
 #include "core/ma.h"
@@ -92,7 +93,7 @@ showvalue(unsigned long key, unsigned long long occurrences,
 
   probability = (double) ((double) occurrences / info->num_of_occurrences);
   info->cumulative_probability += probability;
-  gt_file_xprintf(info->outfp, "%lu: %llu (prob=%.4f,cumulative=%.4f)\n",
+  gt_file_xprintf(info->outfp, "%lu: "GT_LLU" (prob=%.4f,cumulative=%.4f)\n",
                   key, occurrences, probability, info->cumulative_probability);
   return CONTINUE_ITERATION;
 }

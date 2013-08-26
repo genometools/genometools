@@ -224,7 +224,7 @@ static int gt_simreads_plot_disc_distri(unsigned long key,
                                         unsigned long long value,
                                         GtFile *outfile)
 {
-  gt_file_xprintf(outfile, "%lu %llu\n", key, value);
+  gt_file_xprintf(outfile, "%lu "GT_LLU"\n", key, value);
   return 0;
 }
 

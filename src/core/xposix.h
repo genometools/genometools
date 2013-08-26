@@ -19,11 +19,15 @@
 #define XPOSIX_H
 
 #ifndef S_SPLINT_S
+#ifndef _WIN32
 #include <glob.h>
+#endif
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/resource.h>
+#endif
 #include <sys/stat.h>
 
 /*
@@ -35,17 +39,21 @@
 void   gt_xclose(int d);
 FILE*  gt_xfdopen(int filedes, const char *mode);
 void   gt_xfstat(int fd, struct stat *sb);
+#ifndef _WIN32
 void   gt_xgetrusage(int who, struct rusage *rusage);
 void   gt_xglob(const char *pattern, int flags,
                 int (*errfunc)(const char*, int), glob_t *pglob);
+#endif
 int    gt_xopen(const char *path, int flags, mode_t mode);
 void   gt_xmkdir(const char *path);
 int    gt_xmkstemp(char *temp);
+#ifndef _WIN32
 /* low-level wrapper for the mmap() routine */
 void*  gt_xmmap(void *addr, size_t len, int prot, int flags, int fd,
                 off_t offset);
 /* generic unmapping routine */
 void   gt_xmunmap(void *addr, size_t len);
+#endif
 void   gt_xraise(int sig);
 void (*gt_xsignal(int sigcatch, void (*func)(int sigraised)))(int);
 void   gt_xstat(const char *path, struct stat *sb);

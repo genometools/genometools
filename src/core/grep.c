@@ -18,11 +18,15 @@
 #ifndef S_SPLINT_S
 #include <sys/types.h>
 #endif
+#ifndef _WIN32
 #include <regex.h>
+#endif
 #include <stdlib.h>
 #include "core/ensure.h"
 #include "core/grep_api.h"
+#include "core/unused_api.h"
 
+#ifndef _WIN32
 static void grep_error(int errcode, regex_t *matcher, GtError *err)
 {
   char sbuf[BUFSIZ], *buf;
@@ -34,9 +38,12 @@ static void grep_error(int errcode, regex_t *matcher, GtError *err)
   gt_error_set(err, "grep(): %s", buf ? buf : sbuf);
   free(buf);
 }
+#endif
 
-int gt_grep(bool *match, const char *pattern, const char *line, GtError *err)
+int gt_grep(GT_UNUSED bool *match, GT_UNUSED const char *pattern,
+            GT_UNUSED const char *line, GtError *err)
 {
+#ifndef _WIN32
   regex_t matcher;
   int rval, had_err = 0;
   gt_error_check(err);
@@ -60,6 +67,11 @@ int gt_grep(bool *match, const char *pattern, const char *line, GtError *err)
       *match = true;
   }
   return had_err;
+#else
+  /* XXX */
+  gt_error_set(err, "gt_grep() not implemented");
+  return -1;
+#endif
 }
 
 int gt_grep_unit_test(GtError *err)

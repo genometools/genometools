@@ -669,13 +669,17 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
   }
 
   if (op->comment_func) {
-    int old_stdout, out_pipe[2], rval;
+    int old_stdout, out_pipe[2];
+#ifndef _WIN32
+    int rval;
     long flags;
+#endif
     char c,
          prognamebuf[BUFSIZ];
 
     /* Lua docu scripts print to stdout by themselves, so temporarily
        redirect stdout to a pipe. */
+#ifndef _WIN32
     fflush(stdout);
     old_stdout = dup(STDOUT_FILENO);
     if ((rval = pipe(out_pipe)) == -1) {
@@ -689,6 +693,11 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
 
     dup2(out_pipe[1], STDOUT_FILENO);
     close(out_pipe[1]);
+#else
+    /* XXX */
+    fprintf(stderr, "pipe() stuff not implemented\n");
+    exit(EXIT_FAILURE);
+#endif
 
     if (!strcmp(toolname, "gt"))
       (void) snprintf(prognamebuf, BUFSIZ, "%s", gt_error_get_progname(err));
