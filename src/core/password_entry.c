@@ -18,12 +18,15 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#ifndef _WIN32
 #include <termios.h>
-#include <core/password_entry.h>
-#include <core/unused_api.h>
+#endif
+#include "core/password_entry.h"
+#include "core/unused_api.h"
 
-GtStr* gt_get_password(const char *prompt, GtError *err)
+GtStr* gt_get_password(GT_UNUSED const char *prompt, GT_UNUSED GtError *err)
 {
+#ifndef _WIN32
   int flags,
       GT_UNUSED retval;
   char buf[255];
@@ -51,4 +54,9 @@ GtStr* gt_get_password(const char *prompt, GtError *err)
   }
   fprintf(stderr, "\n");
   return gt_str_new_cstr(buf);
+#else
+  /* XXX */
+  fprintf(stderr, "gt_get_password() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }

@@ -17,10 +17,12 @@
 
 #ifndef SAFECAST_GEN_H
 #define SAFECAST_GEN_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
 #include "core/assert_api.h"
+#include "core/compat.h"
 #include "core/unused_api.h"
 
 #ifdef S_SPLINT_S
@@ -39,7 +41,7 @@
           {\
             if (from > (FROMTYPE) ~0U)\
             {\
-              fprintf(stderr,"%s, %d: %llu cannot be stored in 32bit word",\
+              fprintf(stderr,"%s, %d: "GT_LLU" cannot be stored in 32bit word",\
                         filename,line,PRINTLLUcast(from));\
               exit(GT_EXIT_PROGRAMMING_ERROR);\
             }\

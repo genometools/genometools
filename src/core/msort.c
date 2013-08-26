@@ -56,7 +56,7 @@
 #include "core/msort.h"
 
 #define ISIZE sizeof (int)
-#define PSIZE sizeof (u_char *)
+#define PSIZE sizeof (unsigned char *)
 #define ICOPY_LIST(src, dst, last) \
   do \
   *(int*)dst = *(int*)src, src += ISIZE, dst += ISIZE; \
@@ -98,19 +98,19 @@
  * boundaries.
  */
 /* Assumption: PSIZE is a power of 2. */
-#define EVAL(p) (u_char **)\
-  ((u_char *)0 +\
-      (((u_char *)p + PSIZE - 1 - (u_char *) 0) & ~(PSIZE - 1)))
+#define EVAL(p) (unsigned char **)\
+  ((unsigned char *)0 +\
+      (((unsigned char *)p + PSIZE - 1 - (unsigned char *) 0) & ~(PSIZE - 1)))
 
 /*
  * This is to avoid out-of-bounds addresses in sorting the
  * last 4 elements.
  */
 static void
-insertionsort(u_char *a, size_t n, size_t size, void *cmpinfo,
+insertionsort(unsigned char *a, size_t n, size_t size, void *cmpinfo,
               GtCompareWithData cmp)
 {
-  u_char *ai, *s, *t, *u, tmp;
+  unsigned char *ai, *s, *t, *u, tmp;
   int i;
 
   for (ai = a+size; --n >= 1; ai += size)
@@ -129,16 +129,16 @@ insertionsort(u_char *a, size_t n, size_t size, void *cmpinfo,
  * is defined.  Otherwise simple pairwise merging is used.)
  */
 static void
-setup(u_char *list1, u_char *list2, size_t n, size_t size,  void *cmpinfo,
-      GtCompareWithData cmp)
+setup(unsigned char *list1, unsigned char *list2, size_t n, size_t size,
+      void *cmpinfo, GtCompareWithData cmp)
 {
   int i, length, size2, tmp, sense;
-  u_char *f1, *f2, *s, *l2, *last, *p2;
+  unsigned char *f1, *f2, *s, *l2, *last, *p2;
 
   size2 = size*2;
   if (n <= 5) {
     insertionsort(list1, n, size, cmpinfo, cmp);
-    *EVAL(list2) = (u_char*) list2 + n*size;
+    *EVAL(list2) = (unsigned char*) list2 + n*size;
     return;
   }
   /*
@@ -202,8 +202,8 @@ msort_r(void *base, size_t nmemb, size_t size, void *cmpinfo,
 {
   int i, sense;
   int big, iflag;
-  u_char *f1, *f2, *t, *b, *tp2, *q, *l1 = NULL, *l2;
-  u_char *list2, *list1, *p2, *p, *last, **p1;
+  unsigned char *f1, *f2, *t, *b, *tp2, *q, *l1 = NULL, *l2;
+  unsigned char *list2, *list1, *p2, *p, *last, **p1;
 
   if (size < PSIZE / 2) {   /* Pointers must fit into 2 * size. */
     errno = EINVAL;

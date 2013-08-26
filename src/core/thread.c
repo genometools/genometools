@@ -55,7 +55,8 @@ static void* thread_xmalloc(size_t size, const char *filename, int line)
 {
   void *p;
   if ((p = malloc(size)) == NULL) {
-    fprintf(stderr, "cannot malloc(%zu) memory: %s\n", size, strerror(errno));
+    fprintf(stderr, "cannot malloc("GT_ZU") memory: %s\n", size,
+            strerror(errno));
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", line, filename);
     exit(EXIT_FAILURE);
   }

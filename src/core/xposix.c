@@ -21,7 +21,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#ifndef _WIN32
 #include <sys/mman.h>
+#else
+#include <direct.h>
+#endif
+#include "core/compat.h"
 #include "core/xposix.h"
 
 void gt_xclose(int d)
@@ -50,6 +55,7 @@ void gt_xfstat(int fd, struct stat *sb)
   }
 }
 
+#ifndef _WIN32
 void gt_xgetrusage(int who, struct rusage *rusage)
 {
   if (getrusage(who, rusage)) {
@@ -57,7 +63,9 @@ void gt_xgetrusage(int who, struct rusage *rusage)
     exit(EXIT_FAILURE);
   }
 }
+#endif
 
+#ifndef _WIN32
 void gt_xglob(const char *pattern, int flags,
               int (*errfunc)(const char*, int), glob_t *pglob)
 {
@@ -84,6 +92,7 @@ void gt_xglob(const char *pattern, int flags,
     exit(EXIT_FAILURE);
   }
 }
+#endif
 
 int gt_xopen(const char *path, int flags, mode_t mode)
 {
@@ -100,7 +109,11 @@ int gt_xopen(const char *path, int flags, mode_t mode)
 
 void gt_xmkdir(const char *path)
 {
+#ifndef _WIN32
   if (mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO)) {
+#else
+  if (_mkdir(path)) {
+#endif
     fprintf(stderr, "mkdir(): cannot make directory '%s': %s\n", path,
             strerror(errno));
     exit(EXIT_FAILURE);
@@ -110,13 +123,14 @@ void gt_xmkdir(const char *path)
 int gt_xmkstemp(char *temp)
 {
   int fd;
-  if ((fd = mkstemp(temp)) == -1) {
+  if ((fd = gt_mkstemp(temp)) == -1) {
     perror("cannot mkstemp");
     exit(EXIT_FAILURE);
   }
   return fd;
 }
 
+#ifndef _WIN32
 void* gt_xmmap(void *addr, size_t len, int prot, int flags, int fd,
                off_t offset)
 {
@@ -135,6 +149,7 @@ void gt_xmunmap(void *addr, size_t len)
     exit(EXIT_FAILURE);
   }
 }
+#endif
 
 void gt_xraise(int sig)
 {

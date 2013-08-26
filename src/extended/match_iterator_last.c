@@ -17,7 +17,9 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 #include <fcntl.h>
 #include "core/class_alloc_lock.h"
 #include "core/cstr.h"
@@ -85,6 +87,7 @@ static int get_index_parameterization(GtMatchIteratorLast *mil, GtStr *out,
   return had_err;
 }
 
+#ifndef _WIN32
 static int get_run_parameterization(GtMatchIteratorLast *mil, GtStr *out,
                                     GtStr *lastbinary,
                                     const char *indexname, const char *qryname,
@@ -158,6 +161,7 @@ static int get_run_parameterization(GtMatchIteratorLast *mil, GtStr *out,
   gt_str_append_cstr(out, qryname);
   return had_err;
 }
+#endif
 
 static int last_prepare_fasta_seqs(const char *filename, GtEncseq *encseq,
                                    GtHashmap *desc_to_seqno,
@@ -200,6 +204,7 @@ static int last_prepare_fasta_seqs(const char *filename, GtEncseq *encseq,
   return had_err;
 }
 
+#ifndef _WIN32
 static bool last_parse_comment_line(GtMatchIteratorLast *mil)
 {
   char c;
@@ -213,7 +218,9 @@ static bool last_parse_comment_line(GtMatchIteratorLast *mil)
   }
   return true;
 }
+#endif
 
+#ifndef _WIN32
 static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
                             GtError *err)
 {
@@ -266,11 +273,15 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
   }
   return had_err;
 }
+#endif
 
-static GtMatchIteratorStatus gt_match_iterator_last_next(GtMatchIterator *gmpi,
+static GtMatchIteratorStatus gt_match_iterator_last_next(GT_UNUSED
+                                                         GtMatchIterator *gmpi,
+                                                         GT_UNUSED
                                                          GtMatch **match,
                                                          GtError *err)
 {
+#ifndef _WIN32
   int had_err = 0, rval;
   GtMatchIteratorLast *mil;
   GtStr *tmp = NULL,
@@ -367,6 +378,11 @@ static GtMatchIteratorStatus gt_match_iterator_last_next(GtMatchIterator *gmpi,
     return GT_MATCHER_STATUS_ERROR;
   }
   return GT_MATCHER_STATUS_OK;
+#else
+  /* XXX */
+  gt_error_set(err, "gt_match_iterator_last_next() not implemented");
+  return GT_MATCHER_STATUS_ERROR;
+#endif
 }
 
 static int last_prepare_indices(GtMatchIteratorLast *mil,

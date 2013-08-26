@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "core/assert_api.h"
+#include "core/compat.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/safearith.h"
@@ -55,7 +56,7 @@ static void gt_sampling_init_sampling(GtSampling *sampling,
   sampling->sampling_rate = rate;
   sampling->current_sample_elementnum = 0;
   sampling->current_sample_num = 0;
-  sampling->pagesize = sysconf((int) _SC_PAGESIZE);
+  sampling->pagesize = gt_pagesize();
 }
 
 GtSampling *gt_sampling_new_regular(unsigned long rate, off_t first_offset)
@@ -192,7 +193,7 @@ GtSampling *gt_sampling_read(FILE *fp)
   sampling->page_sampling = NULL;
   sampling->current_sample_num =
     sampling->current_sample_elementnum = 0;
-  sampling->pagesize = sysconf((int) _SC_PAGESIZE);
+  sampling->pagesize = gt_pagesize();
 
   gt_sampling_io_header_samplingtab(sampling, fp, gt_sampling_xfread);
   if (sampling->method == GT_SAMPLING_PAGES)

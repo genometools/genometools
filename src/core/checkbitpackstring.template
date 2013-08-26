@@ -137,7 +137,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       gt_ensure(lowBit == (r = gt_bsGetBit(bitStore, --i)));
       if (had_err)
       {
-        gt_log_log("Expected %d, got %d, i = %llu\n",
+        gt_log_log("Expected %d, got %d, i = "GT_LLU"\n",
                 lowBit, (int)r, (unsigned long long)i);
         freeResourcesAndReturn(had_err);
       }
@@ -534,8 +534,8 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected equality on bitstrings\n"
-                    "offset = %llu, destOffset = %llu,"
-                    " numCopyBits=%llu\n",
+                    "offset = "GT_LLU", destOffset = "GT_LLU","
+                    " numCopyBits="GT_LLU"\n",
                     (unsigned long long)offset,
                     (unsigned long long)destOffset,
                     (unsigned long long)numCopyBits);
@@ -659,7 +659,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       gt_ensure(bitCountRef == bitCountCmp);
       if (had_err)
       {
-        gt_log_log("Expected %llu, got %llu,\n"
+        gt_log_log("Expected "GT_LLU", got "GT_LLU",\n"
                 "numBits=%u\n", (unsigned long long)bitCountRef,
                 (unsigned long long)bitCountCmp, numBits);
         freeResourcesAndReturn(had_err);

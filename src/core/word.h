@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,15 +14,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <unistd.h>
-#include "core/process.h"
+#ifndef WORD_H
+#define WORD_H
 
-bool gt_process_is_foreground(void)
-{
-#ifndef _WIN32
-  return getpgrp() == tcgetpgrp(STDOUT_FILENO);
+/* Define GtUword as an unsigned integer with the machine word size (4 byte on
+   32-bit systems and 8 byte on 64-bit systems). */
+#if defined (_LP64) || defined (_WIN64)
+typedef unsigned long long GtUword;
 #else
-  /* XXX */
-  return true;
+typedef unsigned int GtUword;
 #endif
-}
+
+/* Define GtWord as a signed integer with the machine word size (4 byte on
+   32-bit systems and 8 byte on 64-bit systems). */
+#if defined (_LP64) || defined (_WIN64)
+typedef long long GtWord;
+#else
+typedef int GtWord;
+#endif
+
+#endif

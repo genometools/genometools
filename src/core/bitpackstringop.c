@@ -92,7 +92,7 @@ computeDeBruijn()
   for (v = 1, i = 1; i <= 64; ++i, v <<= 1)
   {
     prod = ((unsigned long long)v * 0x26752B916FC7B0DULL) >> 58;
-    printf("v = %llu, i = %u, prod = %u\n", v, i, prod);
+    printf("v = "GT_LLU", i = %u, prod = %u\n", v, i, prod);
     gt_assert(prod < 64);
     MultiplyDeBruijnBitPosition[prod] = i;
   }

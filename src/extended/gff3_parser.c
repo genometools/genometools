@@ -21,6 +21,7 @@
 #include <string.h>
 #include "core/array.h"
 #include "core/assert_api.h"
+#include "core/compat.h"
 #include "core/cstr_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
@@ -2038,7 +2039,7 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
       gt_assert(had_err == 0); /* line not processed */
     }
     if (line_length == 0) {
-      gt_warning("skipping blank line %llu in file \"%s\"", *line_number,
+      gt_warning("skipping blank line "GT_LLU" in file \"%s\"", *line_number,
                  filename);
     }
     else if (parser->fasta_parsing || line[0] == '>') {
