@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2013 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,47 +14,39 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <fcntl.h>
-#include <string.h>
-#include "core/unused_api.h"
-#include "core/xbsd.h"
+#ifndef COMPAT_H
+#define COMPAT_H
 
 #ifndef _WIN32
-static void gt_xflock_with_op(int fd, short l_type)
-{
-  struct flock f;
-  memset(&f, 0, sizeof (f));
-  f.l_type = l_type;
-  if (fcntl(fd, F_SETLKW, &f)) {
-    perror("cannot flock");
-    exit(EXIT_FAILURE);
-  }
-}
-#endif
-
-void gt_xflock_shared(GT_UNUSED int fd)
-{
-#ifndef _WIN32
-  gt_xflock_with_op(fd, F_RDLCK);
+#define GT_PATH_SEPARATOR     '/'
+#define GT_PATH_VAR_SEPARATOR ':'
 #else
-  /* XXX */
+#define GT_PATH_SEPARATOR     '\\'
+#define GT_PATH_VAR_SEPARATOR ';'
 #endif
-}
 
-void gt_xflock_exclusive(GT_UNUSED int fd)
-{
+/* Define the conversion string for '%lld' in platform independent fashion. */
 #ifndef _WIN32
-  gt_xflock_with_op(fd, F_WRLCK);
+#define GT_LLD "%lld"
 #else
-  /* XXX */
+#define GT_LLD "%I64d"
 #endif
-}
 
-void gt_xflock_unlock(GT_UNUSED int fd)
-{
+/* Define the conversion string for '%llu' in platform independent fashion. */
 #ifndef _WIN32
-  gt_xflock_with_op(fd, F_UNLCK);
+#define GT_LLU "%llu"
 #else
-  /* XXX */
+#define GT_LLU "%I64u"
 #endif
-}
+
+/* Define the conversion string for '%zu' in platform independent fashion. */
+#ifndef _WIN32
+#define GT_ZU "%zu"
+#else
+#define GT_ZU "%u"
+#endif
+
+int           gt_mkstemp(char *template);
+unsigned long gt_pagesize(void);
+
+#endif

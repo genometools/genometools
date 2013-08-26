@@ -27,9 +27,9 @@
 */
 
 typedef enum {
-  RELAXED = 0,
-  STRICT,
-  MINIMAL,
+  GTH_RELAXED = 0,
+  GTH_STRICT,
+  GTH_MINIMAL,
   NUMOFCUTOFFMODES
 } GthCutoffmode;
 

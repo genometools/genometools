@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "core/compat.h"
 #include "core/log_api.h"
 #include "core/yarandom.h"
 #include "match/eis-encidxseq.h"
@@ -122,7 +123,7 @@ gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
       unsigned sym;
       if (skip >= length)
       {
-        gt_logger_log(verbosity, "Invalid skip request: %lld,"
+        gt_logger_log(verbosity, "Invalid skip request: "GT_LLD","
                     " too large for sequence length: %lu",
                     (long long)skip, length);
         return -1;

@@ -16,8 +16,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifdef _WIN32
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <string.h>
-#include "core/encseq.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

@@ -26,7 +26,12 @@
 #include <string.h>
 #include "interactive.h"
 #include "lauxlib.h"
+#ifndef _WIN32
 #include "libtecla.h"
+#else
+/* XXX */
+typedef void* GetLine;
+#endif
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
 #include "core/ma.h"

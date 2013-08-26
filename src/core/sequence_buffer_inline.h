@@ -19,6 +19,7 @@
 #ifndef SEQUENCE_BUFFER_INLINE_H
 #define SEQUENCE_BUFFER_INLINE_H
 
+#include "core/compat.h"
 #include "core/file.h"
 #include "core/sequence_buffer_rep.h"
 
@@ -33,7 +34,7 @@
   if (pvt->symbolmap != NULL) {
     charcode = pvt->symbolmap[(unsigned int) cc];
     if (charcode == UNDEFCHAR) {
-      gt_error_set(err, "illegal character '%c': file \"%s\", line %llu",
+      gt_error_set(err, "illegal character '%c': file \"%s\", line "GT_LLU"",
                         cc,
                         gt_str_array_get(pvt->filenametab,
                                          (unsigned long) pvt->filenum),

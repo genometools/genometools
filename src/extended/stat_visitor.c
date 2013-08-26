@@ -17,6 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
+#include "core/compat.h"
 #include "core/cstr_table_api.h"
 #include "core/disc_distri_api.h"
 #include "core/unused_api.h"
@@ -236,7 +237,7 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
 {
   GtStatVisitor *sv = stat_visitor_cast(nv);
   if (sv->number_of_sequence_regions) {
-    gt_file_xprintf(outfp, "sequence regions: %lu (total length: %llu)\n",
+    gt_file_xprintf(outfp, "sequence regions: %lu (total length: "GT_LLU")\n",
                     sv->number_of_sequence_regions,
                     sv->total_length_of_sequence_regions);
   }

@@ -24,7 +24,7 @@
 #include "core/mathsupport.h"
 #include "core/qsort_r.h"
 #include "core/str.h"
-#include "core/timer.h"
+#include "core/timer_api.h"
 #include "core/radix_sort.h"
 #include "core/unused_api.h"
 #include "core/qsort-ulong.h"
@@ -374,10 +374,16 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     if (arguments->verbose)
       printf("# using simple array of random numbers\n");
     /* use seed initialization to make array deterministic */
+#ifndef _WIN32
     srand48(366292341);
     for (idx = 0; idx < arguments->num_values; idx++) {
       array[idx] = drand48() * arguments->maxvalue;
     }
+#else
+    /* XXX: use random instead of drand48() above */
+    fprintf(stderr, "drand48() not implemented\n");
+    exit(EXIT_FAILURE);
+#endif
   }
 
   timer = gt_timer_new();

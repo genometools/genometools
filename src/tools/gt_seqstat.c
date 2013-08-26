@@ -22,6 +22,7 @@
 #ifndef S_SPLINT_S
 #include <sys/types.h>
 #endif
+#include "core/compat.h"
 #include "core/fileutils_api.h"
 #include "core/xposix.h"
 #include "core/fa.h"
@@ -181,7 +182,7 @@ static void showastretches(unsigned long key, unsigned long long value,
     astretchinfo->maxvalue = key;
   }
   /*@ignore@*/
-  printf("%lu %llu\n", key,value);
+  printf("%lu "GT_LLU"\n", key,value);
   /*@end@*/
 }
 
@@ -245,7 +246,7 @@ static void processastretches(const GtDiscDistri *distastretch,
   for (len=astretchinfo.minkey; len<=astretchinfo.maxvalue; len++)
   {
     /*@ignore@*/
-    printf("a^{%lu} occurs %llu times\n", len,astretchinfo.mmercount[len]);
+    printf("a^{%lu} occurs "GT_LLU" times\n", len,astretchinfo.mmercount[len]);
     /*@end@*/
   }
   gt_assert(astretchinfo.sumA == countA);

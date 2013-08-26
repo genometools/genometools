@@ -271,20 +271,20 @@ static void determine_cutoffs(GthBacktracePath *bp,
 
   /* cutting of leading indels in the sequences */
   switch (leadcutoffsmode) {
-    case RELAXED:
+    case GTH_RELAXED:
       gt_initRelaxedcutoffsTravfunctions(&travfunctions);
       gt_initRelaxedcutoffsdata(&relaxedcutoffsdata, &bp->cutoffs.start);
       gthtraversealignment(true, &travstate, proteineop, &relaxedcutoffsdata,
                            &travfunctions);
       break;
-    case STRICT:
+    case GTH_STRICT:
       gt_initStrictcutoffsTravfunctions(&travfunctions);
       gt_initStrictcutoffsdata(&strictcutoffsdata, &bp->cutoffs.start,
                             cutoffsminexonlen);
       gthtraversealignment(true , &travstate , proteineop, &strictcutoffsdata,
                            &travfunctions);
       break;
-    case MINIMAL:
+    case GTH_MINIMAL:
       gt_initMinimalcutoffsTravfunctions(&travfunctions);
       gt_initMinimalcutoffsdata(&minimalcutoffsdata, &bp->cutoffs.start);
       gthtraversealignment(true, &travstate, proteineop, &minimalcutoffsdata,
@@ -302,20 +302,20 @@ static void determine_cutoffs(GthBacktracePath *bp,
 
   /* cutting of terminal indels in the sequences */
   switch (termcutoffsmode) {
-    case RELAXED:
+    case GTH_RELAXED:
       gt_initRelaxedcutoffsTravfunctions(&travfunctions);
       gt_initRelaxedcutoffsdata(&relaxedcutoffsdata, &bp->cutoffs.end);
       gthtraversealignment(false, &travstate, proteineop, &relaxedcutoffsdata,
                            &travfunctions);
       break;
-    case STRICT:
+    case GTH_STRICT:
       gt_initStrictcutoffsTravfunctions(&travfunctions);
       gt_initStrictcutoffsdata(&strictcutoffsdata, &bp->cutoffs.end,
                             cutoffsminexonlen);
       gthtraversealignment(false, &travstate, proteineop, &strictcutoffsdata,
                            &travfunctions);
       break;
-    case MINIMAL:
+    case GTH_MINIMAL:
       gt_initMinimalcutoffsTravfunctions(&travfunctions);
       gt_initMinimalcutoffsdata(&minimalcutoffsdata, &bp->cutoffs.end);
       gthtraversealignment(false, &travstate, proteineop, &minimalcutoffsdata,

@@ -22,9 +22,10 @@
 #include <errno.h>
 #include <string.h>
 #endif
-#include "core/fa.h"
 #include "core/chardef.h"
+#include "core/compat.h"
 #include "core/error.h"
+#include "core/fa.h"
 #include "core/format64.h"
 #include "core/mapspec.h"
 #include "core/mathsupport.h"
@@ -424,7 +425,7 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
   bcktab->multimappower = gt_initmultimappower(numofchars,prefixlength);
-  bcktab->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
+  bcktab->pagesize = gt_pagesize();
   bcktab->useulong = gt_bcktab_useulong(maxvalue);
   gt_assert(bcktab->pagesize % sizeof (unsigned long) == 0);
   bcktab->allocated = false;

@@ -130,8 +130,8 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   /* show statistics */
   if (!had_err) {
     gt_assert(passed + filtered == num_of_sequences);
-    fprintf(stderr, "# %llu out of %llu sequences have been removed (%.3f%%)\n",
-            filtered, num_of_sequences,
+    fprintf(stderr, "# "GT_LLU" out of "GT_LLU" sequences have been removed "
+            "(%.3f%%)\n", filtered, num_of_sequences,
             ((double) filtered / num_of_sequences) * 100.0);
   }
 

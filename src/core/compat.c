@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,9 +14,37 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TIMER_H
-#define TIMER_H
-
-#include "core/timer_api.h"
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#ifdef _WIN32
+#include <windows.h>
 #endif
+#include "core/compat.h"
+
+int gt_mkstemp(char *template)
+{
+#ifndef _WIN32
+  return mkstemp(template);
+#else
+  /* XXX: is this replacement good enough? */
+  errno_t err = _mktemp_s(template, strlen(template) + 1);
+  if (err == EINVAL)
+    return -1;
+  return open(template, O_RDWR, O_EXCL);
+#endif
+}
+
+unsigned long gt_pagesize(void)
+{
+#ifndef _WIN32
+  return sysconf(_SC_PAGESIZE);
+#else
+  SYSTEM_INFO si;
+  GetSystemInfo(&si);
+  return si.dwPageSize;
+#endif
+}

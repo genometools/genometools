@@ -21,7 +21,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
@@ -31,6 +30,7 @@
 #include "core/fa.h"
 #include "core/bittab_api.h"
 #include "core/chardef.h"
+#include "core/compat.h"
 #include "core/disc_distri_api.h"
 #include "core/hashmap-generic.h"
 #include "core/log_api.h"
@@ -63,7 +63,7 @@
 #define PHREDOFFSET 33
 
 #ifndef PAGESIZE
-#define PAGESIZE sysconf((int) _SC_PAGESIZE)
+#define PAGESIZE gt_pagesize()
 #endif
 #define NUMOFPAGES2MAP 100
 
@@ -1293,8 +1293,9 @@ static int rcr_write_encoding_to_file(GtRcrEncoder *rcr_enc, GtError *err)
   if (rcr_enc->is_verbose) {
     printf("encoded %lu BAM records, %lu reads(s) unmapped\n",
            rcr_enc->numofreads, rcr_enc->numofunmappedreads);
-    printf("encoded %llu bases\n",rcr_enc->encodedbases);
-    printf("total number of bits used for encoding: %llu\n", rcr_enc->all_bits);
+    printf("encoded "GT_LLU" bases\n",rcr_enc->encodedbases);
+    printf("total number of bits used for encoding: "GT_LLU"\n",
+           rcr_enc->all_bits);
     printf("%% bits used for quality values: %.3f\n",
            rcr_enc->qual_bits * 100.0 / rcr_enc->all_bits);
     printf("%% bits used for mapping quality values: %.3f\n",
@@ -1332,7 +1333,7 @@ static int rcr_write_data(const char *name, GtRcrEncoder *rcr_enc, GtError *err)
   bool is_not_at_pageborder;
   int had_err = 0;
   long fpos,
-       pagesize = sysconf((int) _SC_PAGESIZE);
+       pagesize = gt_pagesize();
   GtStr *unmapped_reads_filename;
   gt_error_check(err);
 
@@ -2112,7 +2113,7 @@ GtRcrDecoder *gt_rcr_decoder_new(const char *name, const GtEncseq *ref,
                                  GtTimer *timer, GtError *err)
 {
   bool is_not_at_pageborder;
-  long pagesize = sysconf((int) _SC_PAGESIZE),
+  long pagesize = gt_pagesize(),
        filepos;
   GtRcrDecoder *rcr_dec;
 

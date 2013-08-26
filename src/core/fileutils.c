@@ -50,7 +50,12 @@ static bool file_exists_and_is_regular_executable(const char *path)
     return false;
   gt_xfstat(fileno(file), &sb);
   if (S_ISREG(sb.st_mode) &&
-      (sb.st_mode & S_IXUSR || sb.st_mode & S_IXGRP || sb.st_mode & S_IXOTH)) {
+      (sb.st_mode & S_IXUSR
+#ifndef _WIN32
+       || sb.st_mode & S_IXGRP || sb.st_mode & S_IXOTH
+#endif
+      )
+     ) {
     is_exec = true;
   }
   gt_xfclose(file);
