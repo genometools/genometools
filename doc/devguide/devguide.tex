@@ -1726,6 +1726,13 @@ can be used to run only the one test with number \keyword{n} (use
 \keyword{-select <m..n>} for ranges), and the \keyword{-threads <n>} will run
 the testsuite with \keyword{n} threads in parallel.
 
+To make tests depending on randomized values reproducible, the test suite will
+pick a RNG seed before starting any tests and will run all \keyword{gt}
+invocations with the environment variable \keyword{GT\_SEED} set to this seed
+value. This seed value is also output by \keyword{testsuite/testsuite.rb}. This
+makes sure that all tests are run with a common random seed, instead of picking
+a new one each time \keyword{gt} is run in a test.
+
 \subsection{Header inclusion dependencies}
 Often function prototypes in the \Gt header files use types declared in
 another header files. By mistake, it is possible to forget
