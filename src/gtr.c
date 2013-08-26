@@ -36,6 +36,7 @@
 #include "core/ma.h"
 #include "core/multithread_api.h"
 #include "core/option.h"
+#include "core/parseutils.h"
 #include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/tool_iterator.h"
@@ -76,19 +77,29 @@ struct GtR {
 GtR* gtr_new(GtError *err)
 {
   GtR *gtr;
+  char *seedstr = NULL;
   int had_err = 0;
 #ifndef WITHOUT_CAIRO
   GtStr *style_file = NULL;
 #endif
   gtr = gt_calloc(1, sizeof (GtR));
-  gtr->debugfp = gt_str_new();
-  gtr->testspacepeak = gt_str_new();
-  gtr->test_only = gt_str_new();
-  gtr->manoutdir = gt_str_new();
-  gtr->L = luaL_newstate();
-  if (!gtr->L) {
-    gt_error_set(err, "out of memory (cannot create new lua state)");
-    had_err = -1;
+  if ((seedstr = getenv("GT_SEED"))) {
+    if (gt_parse_uint(&gtr->seed, seedstr) != 0) {
+      gt_error_set(err, "invalid seed in GT_SEED environment variable: %s",
+                   seedstr);
+      had_err = -1;
+    }
+  } else gtr->seed = 0;
+  if (!had_err) {
+    gtr->debugfp = gt_str_new();
+    gtr->testspacepeak = gt_str_new();
+    gtr->test_only = gt_str_new();
+    gtr->manoutdir = gt_str_new();
+    gtr->L = luaL_newstate();
+    if (!gtr->L) {
+      gt_error_set(err, "out of memory (cannot create new lua state)");
+      had_err = -1;
+    }
   }
   if (!had_err) {
     luaL_openlibs(gtr->L);    /* open the standard libraries */
@@ -187,7 +198,7 @@ static GtOptionParser* gtr_option_parser_new(GtR *gtr)
   o = gt_option_new_uint("seed",
                          "set seed for random number generator manually\n"
                          "0 generates a seed from current time and process id",
-                         &gtr->seed, 0);
+                         &gtr->seed, gtr->seed);
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
   o = gt_option_new_bool("64bit", "exit with code 0 if this is a 64bit binary, "

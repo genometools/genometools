@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2007-2008 Gordon Gremme <gordon@gremme.org>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,21 +15,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'extended/add_introns_stream'
-require 'extended/anno_db'
-require 'extended/comment_node'
-require 'extended/custom_stream'
-require 'extended/custom_visitor'
-require 'extended/eof_node'
-require 'extended/feature_index'
-require 'extended/feature_node'
-require 'extended/feature_stream'
-require 'extended/gff3_in_stream'
-require 'extended/gff3_out_stream'
-require 'extended/gff3_visitor'
-require 'extended/meta_node'
-require 'extended/rdb'
-require 'extended/region_node'
-require 'extended/sequence_node'
-require 'extended/strand'
-require 'extended/type_checker'
+module GT
+  STRANDCHARS = ['+', '-', '.']
+end

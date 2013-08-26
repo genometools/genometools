@@ -17,6 +17,7 @@
 
 require 'dl/import'
 require 'gthelper'
+require 'extended/strand'
 
 module GT
   extend DL::Importable
@@ -32,8 +33,6 @@ module GT
   extern "int            gt_block_get_strand(const GtBlock*)"
   extern "unsigned long  gt_block_get_size(const GtBlock*)"
   extern "void           gt_block_delete(GtBlock*)"
-
-  STRANDCHARS = ['+', '-', '.']
 
   class Block
     def initialize(ptr)

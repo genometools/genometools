@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
   if (!(gtr = gtr_new(err))) {
     fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
             gt_error_get(err));
+    gt_error_delete(err);
     return EXIT_FAILURE;
   }
   gtr_register_components(gtr);
