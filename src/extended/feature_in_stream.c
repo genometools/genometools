@@ -15,17 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_STREAM_API_H
-#define FEATURE_STREAM_API_H
+#include "extended/feature_in_stream_api.h"
 
-#include "extended/feature_index_api.h"
-#include "extended/node_stream_api.h"
-
-typedef struct GtFeatureStream GtFeatureStream;
-
-/* Create a new <GtFeatureStream> which writes all passed nodes to
-   <GtFeatureIndex> <fi>. Note: The <GtFeatureStream> class is now deprecated.
-   Please use the <GtFeatureInStream> class instead. */
-GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex *fi);
-
-#endif
+GtNodeStream* gt_feature_in_stream_new(GtNodeStream *ns, GtFeatureIndex *fi)
+{
+  return gt_feature_stream_new(ns, fi);
+}
