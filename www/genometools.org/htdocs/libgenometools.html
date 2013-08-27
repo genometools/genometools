@@ -111,6 +111,8 @@ interfaces.
 
   <li><a href="#GtExtractFeatureStream">GtExtractFeatureStream</a>
 
+  <li><a href="#GtFeatureInStream">GtFeatureInStream</a>
+
   <li><a href="#GtFeatureIndex">GtFeatureIndex</a>
 
   <li><a href="#GtFeatureIndexMemory">GtFeatureIndexMemory</a>
@@ -335,6 +337,16 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
 <a name="gt_feature_index_gfflike_get_all_features"></a>
 
 <code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
@@ -3216,6 +3228,16 @@ Create a <code>GtExtractFeatureStream*</code> which extracts the corresponding s
    the FASTA header. Takes ownership of <code>region_mapping</code>!
 </p>
 <hr>
+<a name="GtFeatureInStream"></a>
+<h2>Class GtFeatureInStream</h2>
+<a name="gt_feature_in_stream_new"></a>
+
+<code>GtNodeStream*  gt_feature_in_stream_new(GtNodeStream*, GtFeatureIndex *fi)</code>
+<p>
+Create a new <code>GtFeatureInStream</code> which writes all passed nodes to
+   <code>GtFeatureIndex</code> <code>fi</code>.
+</p>
+<hr>
 <a name="GtFeatureIndex"></a>
 <h2>Class GtFeatureIndex</h2>
 
@@ -3815,7 +3837,8 @@ Create a new <code>GtFeatureOutStream</code> using the given <code>GtFeatureInde
 <code>GtNodeStream*  gt_feature_stream_new(GtNodeStream*, GtFeatureIndex *fi)</code>
 <p>
 Create a new <code>GtFeatureStream</code> which writes all passed nodes to
-   <code>GtFeatureIndex</code> <code>fi</code>.
+   <code>GtFeatureIndex</code> <code>fi</code>. Note: The <code>GtFeatureStream</code> class is now deprecated.
+   Please use the <code>GtFeatureInStream</code> class instead.
 </p>
 <hr>
 <a name="GtFile"></a>
@@ -8559,16 +8582,6 @@ Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
 </p>
 <hr>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
-</p>
-<hr>
 <a name="Assert"></a>
 <h2>Module Assert</h2>
 <a name="gt_assert"></a>
@@ -10202,6 +10215,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_fasta_show_entry"><code>gt_fasta_show_entry</code></a><br>
 
+  <a href="#gt_feature_in_stream_new"><code>gt_feature_in_stream_new</code></a><br>
+
   <a href="#gt_feature_index_add_feature_node"><code>gt_feature_index_add_feature_node</code></a><br>
 
   <a href="#gt_feature_index_add_gff3file"><code>gt_feature_index_add_gff3file</code></a><br>
@@ -11363,7 +11378,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-08-23
+Last update: 2013-08-26
 </div>
 </div>
 <!-- Piwik -->
