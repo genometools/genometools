@@ -27,9 +27,9 @@ typedef enum {
 
 struct GtEliasGammaBitwiseDecoder {
   EliasGammaStatus status;
-  unsigned long cur_bit,
-                length_in_bits,
-                x;
+  unsigned long    cur_bit,
+                   length_in_bits,
+                   x;
 };
 
 GtBittab* gt_elias_gamma_encode(unsigned long x)

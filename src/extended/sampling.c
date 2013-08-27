@@ -37,15 +37,15 @@ typedef enum {
 
 struct GtSampling
 {
+  size_t          *samplingtab;
+  unsigned long    arraysize,
+                   current_sample_elementnum,
+                   current_sample_num,
+                   numofsamples,
+                   pagesize,
+                   sampling_rate,
+                  *page_sampling;
   GtSamplingMethod method;
-  unsigned long numofsamples,
-                sampling_rate,
-                arraysize,
-                *page_sampling,
-                current_sample_num,
-                current_sample_elementnum;
-  size_t *samplingtab;
-  long pagesize;
 };
 
 static void gt_sampling_init_sampling(GtSampling *sampling,

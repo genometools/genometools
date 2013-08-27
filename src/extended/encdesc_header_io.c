@@ -114,9 +114,9 @@ static bool io_zero_padding_needs_dist(DescField *field,
 }
 
 typedef struct data {
-  FILE *fp;
+  FILE         *fp;
   unsigned long written_elems;
-  long minimum_element;
+  long          minimum_element;
 } EncsecDistriData;
 
 static void encdesc_distri_iter_count(GT_UNUSED unsigned long symbol,

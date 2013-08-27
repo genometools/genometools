@@ -27,11 +27,13 @@
 #include "core/alphabet_api.h"
 
 struct GtSamAlignment{
-  bam1_t *s_alignment;
-  GtAlphabet *alphabet;
-  GtUchar *seq_buffer, *qual_buffer;
-  unsigned long s_bufsize, q_bufsize;
-  unsigned long rightmost;
+  bam1_t       *s_alignment;
+  GtAlphabet   *alphabet;
+  GtUchar      *seq_buffer,
+               *qual_buffer;
+  unsigned long s_bufsize,
+                q_bufsize,
+                rightmost;
 };
 
 #endif

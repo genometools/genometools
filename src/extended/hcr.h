@@ -39,8 +39,8 @@ typedef struct GtHcrDecoder GtHcrDecoder;
 typedef struct GtQualRange GtQualRange;
 
 struct GtQualRange {
-  unsigned start,
-           end;
+  unsigned int start,
+               end;
 };
 
 /* Returns a new GtHcrEncoder object. If <descs> is true, description lines

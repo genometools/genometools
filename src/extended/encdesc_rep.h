@@ -39,87 +39,87 @@ DEFINE_HASHMAP(long int, li, unsigned long long, ull, gt_ht_ul_elem_hash,
 
 typedef struct {
   GtHashtable *li_ull_hashmap;
-  long correction_base;
+  long         correction_base;
 } EncdescHuffDist;
 
 typedef struct {
-  char *data,
-       sep;
-  bool is_numeric,
-       is_cons,
-       fieldlen_is_const,
-       use_delta_coding,
-       is_delta_cons,
-       is_value_cons,
-       use_hc,
-       has_zero_padding;
-  unsigned bits_per_num,
-           bits_per_value,
-           bits_per_len,
-           max_zero;
-  long max_delta,
-       min_delta,
-       global_delta,
-       min_value,
-       max_value,
-       global_value,
-       prev_value;
-  unsigned long max_len,
-                min_len,
-                num_values_size,
-                len,
-                delta_values_size;
-  GtBittab *bittab;
-  GtHashtable *num_values,
-              *delta_values,
+  GtHuffman   **huffman_chars,
+               *huffman_num,
+               *huffman_zero_count;
+  GtBittab     *bittab;
+  GtHashtable  *num_values,
+               *delta_values,
               **chars;
   /* TODO: test if this can be a GtHashtable, too */
   GtDiscDistri *zero_count;
-  GtHuffman **huffman_chars,
-            *huffman_num,
-            *huffman_zero_count;
+  char         *data;
+  unsigned long delta_values_size,
+                len,
+                min_len,
+                num_values_size,
+                max_len;
+  long          global_delta,
+                global_value,
+                max_delta,
+                max_value,
+                min_delta,
+                min_value,
+                prev_value;
+  unsigned int  bits_per_len,
+                bits_per_num,
+                bits_per_value,
+                max_zero;
+  char          sep;
+  bool          fieldlen_is_const,
+                has_zero_padding,
+                is_cons,
+                is_delta_cons,
+                is_numeric,
+                is_value_cons,
+                use_delta_coding,
+                use_hc;
 } DescField;
 
 struct GtEncdesc {
-  bool num_of_fields_is_cons;
-  unsigned bits_per_field;
-  long start_of_encoding,
-       start_of_samplingtab;
-  unsigned long num_of_descs,
-                num_of_fields,
-                cur_desc;
+  GtArrayGtUlong     num_of_fields_tab;
+  DescField         *fields;
+  GtBitInStream     *bitinstream;
+  GtSampling        *sampling;
   unsigned long long total_num_of_chars;
-  DescField *fields;
-  GtBitInStream *bitinstream;
-  GtArrayGtUlong num_of_fields_tab;
-  GtSampling *sampling;
-  long pagesize;
+  unsigned long      num_of_descs,
+                     num_of_fields,
+                     cur_desc,
+                     pagesize;
+  long               start_of_samplingtab,
+                     start_of_encoding;
+  unsigned int       bits_per_field;
+  bool               num_of_fields_is_cons;
 };
 
 struct GtEncdescEncoder {
-  GtTimer *timer;
-  GtEncdesc *encdesc;
-  bool regular_sampling,
-       page_sampling;
+  GtTimer      *timer;
+  GtEncdesc    *encdesc;
   unsigned long sampling_rate;
+  bool          regular_sampling,
+                page_sampling;
 };
 
 typedef struct {
   GtBitsequence code;
-  unsigned length;
+  unsigned      length;
 } EncdescCode;
 
 GT_DECLAREARRAYSTRUCT(EncdescCode);
 
 typedef struct {
   GtArrayEncdescCode *codes;
-  unsigned long total_bits_prepared,
-                bits_to_write,
-                cur_field_start_pos,
-                cur_field_num,
-                cur_desc;
-  char *descbuffer;
-  bool sample;
+  char               *descbuffer;
+  unsigned long       total_bits_prepared,
+                      bits_to_write,
+                      cur_field_start_pos,
+                      cur_field_num,
+                      cur_desc;
+  bool                sample;
 } EncdescWriteInfo;
 
 #endif
