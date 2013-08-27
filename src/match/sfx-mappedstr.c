@@ -175,12 +175,12 @@ typedef struct
 
 typedef struct
 {
-  GtSpecialcontext *queuespace;  /* the space to store the queue elements */
-  unsigned int enqueueindex,  /* entry into which element is to be enqued */
-               dequeueindex,  /* last element of queue */
-               queuesize,     /* size of the queue */
-               noofelements;  /* no ofelements between enqueueindex+1 and
-                                 dequeindex */
+  GtSpecialcontext *queuespace,  /* the space to store the queue elements */
+                   *enqueueptr,  /* entry into which element is to be enqued */
+                   *dequeueptr;  /* last element of queue */
+  unsigned int queuesize,     /* size of the queue */
+               noofelements;  /* no ofelements between enqueueptr+1 and
+                                 dequeptr */
 } GtSpecialqueue;
 
 typedef struct
@@ -205,7 +205,8 @@ static void special_queue_init(GtSpecialqueue *specialqueue,
     = gt_malloc(queuesize * sizeof (*specialqueue->queuespace));
   specialqueue->noofelements = 0;
   specialqueue->queuesize = queuesize;
-  specialqueue->dequeueindex = specialqueue->enqueueindex = queuesize - 1;
+  specialqueue->dequeueptr = specialqueue->enqueueptr
+                           = specialqueue->queuespace + queuesize - 1;
 }
 
 static bool special_queue_is_empty(const GtSpecialqueue *specialqueue)
@@ -216,18 +217,19 @@ static bool special_queue_is_empty(const GtSpecialqueue *specialqueue)
 static GtSpecialcontext *special_queue_head_get(const GtSpecialqueue
                                                  *specialqueue)
 {
-  return specialqueue->queuespace + specialqueue->dequeueindex;
+  return specialqueue->dequeueptr;
 }
 
 static void special_queueu_head_delete(GtSpecialqueue *specialqueue)
 {
   specialqueue->noofelements--;
-  if (specialqueue->dequeueindex > 0)
+  if (specialqueue->dequeueptr > specialqueue->queuespace)
   {
-    specialqueue->dequeueindex--;
+    specialqueue->dequeueptr--;
   } else
   {
-    specialqueue->dequeueindex = specialqueue->queuesize - 1;
+    specialqueue->dequeueptr
+      = specialqueue->queuespace + specialqueue->queuesize - 1;
   }
 }
 
@@ -236,14 +238,16 @@ static void special_queue_enqueue(GtSpecialqueue *specialqueue,
                                   GtCodetype codeofleftcontext)
 {
   specialqueue->noofelements++;
-  specialqueue->queuespace[specialqueue->enqueueindex].codeofleftcontext
-    = codeofleftcontext;
-  specialqueue->queuespace[specialqueue->enqueueindex].lengthofleftcontext
-    = lengthofleftcontext;
-  if (specialqueue->enqueueindex > 0)
-    specialqueue->enqueueindex--;
-  else
-    specialqueue->enqueueindex = specialqueue->queuesize - 1;
+  specialqueue->enqueueptr->codeofleftcontext = codeofleftcontext;
+  specialqueue->enqueueptr->lengthofleftcontext = lengthofleftcontext;
+  if (specialqueue->enqueueptr > specialqueue->queuespace)
+  {
+    specialqueue->enqueueptr--;
+  } else
+  {
+    specialqueue->enqueueptr
+      = specialqueue->queuespace + specialqueue->queuesize - 1;
+  }
 }
 
 static void special_queue_delete(GtSpecialqueue *specialqueue)
@@ -278,7 +282,6 @@ static void updatespecialpositions(Kmerstream *spwp,
   {
     GtSpecialcontext *head = special_queue_head_get(&spwp->specialqueue);
 
-    /* only here we add some element to the queue */
     if (head->lengthofleftcontext > 0)
     {
       SUBTRACTLCHARANDSHIFT(head->codeofleftcontext,leftchar,spwp->numofchars,
@@ -323,6 +326,7 @@ static void updatespecialpositions(Kmerstream *spwp,
                             spwp->numofchars,
                             spwp->multimappower[0]);
     }
+    /* only here we add some element to the queue */
     special_queue_enqueue(&spwp->specialqueue,
                           newelem_lengthofleftcontext,
                           spwp->codewithoutspecial);
