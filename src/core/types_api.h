@@ -1,4 +1,5 @@
 /*
+  Copyright (c) 2013 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
@@ -19,6 +20,22 @@
 #define TYPES_API_H
 
 #include <inttypes.h>
+
+/* Define GtUword as an unsigned integer with the machine word size (4 byte on
+   32-bit systems and 8 byte on 64-bit systems). */
+#if defined (_LP64) || defined (_WIN64)
+typedef unsigned long long GtUword;
+#else
+typedef unsigned int GtUword;
+#endif
+
+/* Define GtWord as a signed integer with the machine word size (4 byte on
+   32-bit systems and 8 byte on 64-bit systems). */
+#if defined (_LP64) || defined (_WIN64)
+typedef long long GtWord;
+#else
+typedef int GtWord;
+#endif
 
 typedef uint8_t       GtUchar;
 typedef unsigned long GtUlong;
