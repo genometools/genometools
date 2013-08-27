@@ -47,7 +47,7 @@ typedef struct
   unsigned long differencemask, /* for extracting the difference */
                 countmax;
   unsigned int shiftforcounts;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   GtArrayGtUlong bitchangepoints;
 #endif
 } GtFirstcodestab;
@@ -57,7 +57,7 @@ DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
 #define GT_CHANGEPOINT_GET(CP)\
         unsigned long CP = 0;\
         while (CP < fct->bitchangepoints.nextfreeGtUlong &&\
@@ -72,7 +72,7 @@ GT_UNUSED
 static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
                                                          unsigned long idx)
 {
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   GT_CHANGEPOINT_GET(changepoint);
   gt_assert(idx < fct->differentcodes);
   if (fct->leftborder[idx] > 0)

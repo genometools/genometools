@@ -137,7 +137,7 @@ static unsigned long zerosontheright(unsigned long v)
   } else
   {
     c = 1UL;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
     if ((v & 0xffffffff) == 0)
     {
       v >>= 32;

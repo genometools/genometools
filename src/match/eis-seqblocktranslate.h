@@ -205,7 +205,7 @@ addSymCountsFromComposition(struct compList *compositionTable,
   gt_bsGetUniformUlongArrayAdd(compositionTable->catCompsPerms,
                              compIndex * bitsPerComp, bitsPerCount,
                              alphabetSize,
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
                              (uint64_t*) counts);
 #else
                              (uint32_t*) counts);

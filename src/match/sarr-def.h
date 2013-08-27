@@ -83,7 +83,7 @@
 DECLAREBufferedfiletype(GtUlong);
 DECLAREREADFUNCTION(GtUlong);
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
 DECLAREBufferedfiletype(uint32_t);
 DECLAREREADFUNCTION(uint32_t);
 #endif
@@ -116,7 +116,7 @@ typedef struct
   unsigned int prefixlength;
   GtBcktab *bcktab;
   /* or with streams */
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   GtBufferedfile_uint32_t suftabstream_uint32_t;
 #endif
   GtBufferedfile_GtUlong suftabstream_GtUlong;

@@ -342,7 +342,7 @@ static void updatekmercount(void *processinfo,
 #define GT_SCANCODE_TO_PREFIXCODE(SFI,CODE)\
         (GtCodetype) ((CODE) >> (SFI)->spmopt_kmerscancodeshift2prefixcode)
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
 #define GT_SCANCODE_TO_SUFFIXCODE(SFI,CODE)\
         (GtCodetype) ((CODE) & (SFI)->spmopt_kmerscancodesuffixmask)
 
@@ -1139,7 +1139,7 @@ static void gt_sfimarkprefixsuffixbuckets(void *processinfo,
   {
     GT_SETIBIT(sfi->markprefixbuckets,checkcode);
   }
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   checkcode = GT_SCANCODE_TO_SUFFIXCODE(sfi,scancode);
   if (!GT_ISIBITSET(sfi->marksuffixbuckets,checkcode))
   {
@@ -1180,7 +1180,7 @@ static void gt_determineaddionalsuffixprefixchars(
     }
   }
   *additionalprefixchars = prefixchars;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   {
     unsigned int suffixchars;
     size_t sizeofsuffixmarks;
@@ -1251,7 +1251,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   unsigned long realspecialranges, specialcharacters, numofsuffixestosort = 0;
   bool haserr = false;
   GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   size_t estimatedspace = (size_t) 13131;
 #else
   size_t estimatedspace = (size_t) 7968;
@@ -1447,7 +1447,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       unsigned int suffixchars = 0, additionalsuffixchars = 2U;
       size_t sizeofprefixmarks, intsforbits;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
       size_t sizeofsuffixmarks;
 #endif
       if (maximumspace > 0)
@@ -1460,7 +1460,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                estimatedspace,
                                maximumspace);
       }
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
       if (sfi->prefixlength + sfi->spmopt_additionalprefixchars +
           sfi->prefixlength + additionalsuffixchars >
           (unsigned int) GT_UNITSIN2BITENC)
@@ -1506,7 +1506,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       gt_Sfxmappedrangelist_add(sfxmrlist,sfi->mappedmarkprefixbuckets);
       sfi->spmopt_numofallsuffixcodes
         = gt_power_for_small_exponents(sfi->numofchars,suffixchars);
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
       GT_INITBITTAB(sfi->marksuffixbuckets,
                     sfi->spmopt_numofallsuffixcodes);
       sizeofsuffixmarks
