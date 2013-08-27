@@ -37,11 +37,12 @@
   some given TYPE.
 */
 
-#define GT_DECLAREARRAYSTRUCT(TYPE)\
-        typedef struct\
-        {\
-          TYPE *space##TYPE;\
-          unsigned long allocated##TYPE, nextfree##TYPE;\
+#define GT_DECLAREARRAYSTRUCT(TYPE)     \
+        typedef struct                  \
+        {                               \
+          TYPE *space##TYPE;            \
+          unsigned long allocated##TYPE,\
+          nextfree##TYPE;               \
         } GtArray##TYPE
 
 /*

@@ -33,28 +33,26 @@
 #include "extended/wtree_encseq.h"
 #include "extended/wtree_rep.h"
 
-typedef struct GtWtreeEncseqFillOffset GtWtreeEncseqFillOffset;
-
-struct GtWtreeEncseqFillOffset {
-  GtWtreeEncseqFillOffset *left,
-                           *right;
-  unsigned long offset,
-                left_size;
-};
+typedef struct GtWtreeEncseqFillOffset {
+  struct GtWtreeEncseqFillOffset *left,
+                                 *right;
+  unsigned long                   offset,
+                                  left_size;
+}GtWtreeEncseqFillOffset;
 
 struct GtWtreeEncseq {
-  GtWtree parent_instance;
-  GtEncseq *encseq;
-  GtAlphabet *alpha;
-  GtBitsequence *bits;
+  GtWtree                  parent_instance;
+  GtEncseq                *encseq;
+  GtAlphabet              *alpha;
+  GtBitsequence           *bits;
   GtWtreeEncseqFillOffset *root_fo,
-                           *current_fo;
+                          *current_fo;
   GtCompressedBitsequence *c_bits;
-  unsigned long bits_size,
-                node_start,
-                num_of_bits;
-  unsigned int alpha_size,
-               levels;
+  unsigned long            bits_size,
+                           node_start,
+                           num_of_bits;
+  unsigned int             alpha_size,
+                           levels;
 };
 
 const GtWtreeClass* gt_wtree_encseq_class(void);

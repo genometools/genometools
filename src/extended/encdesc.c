@@ -1020,9 +1020,9 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
   FILE *fp = NULL;
   GtStr *name1;
   long pos = 0,
-       start_of_encoding,
-       pagesize;
-  unsigned long dummy = 0;
+       start_of_encoding;
+  unsigned long dummy = 0,
+                pagesize;
 
   gt_assert(ee != NULL);
   gt_assert(cstr_iterator != NULL);

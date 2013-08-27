@@ -31,17 +31,17 @@
 #include "extended/bitinstream.h"
 
 struct GtBitInStream {
-  bool last_chunk;
-  char *path;
+  size_t         cur_filepos,
+                 filesize;
+  unsigned long  bufferlength,
+                 cur_bitseq,
+                 pages_to_map,
+                 pagesize,
+                 read_bits;
+  char          *path;
   GtBitsequence *bitseqbuffer;
-  int cur_bit;
-  unsigned long cur_bitseq,
-                bufferlength,
-                pages_to_map,
-                read_bits;
-  size_t cur_filepos,
-         filesize;
-  long pagesize;
+  int            cur_bit;
+  bool           last_chunk;
 };
 
 GtBitInStream *gt_bitinstream_new(const char* path,

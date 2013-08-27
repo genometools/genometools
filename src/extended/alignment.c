@@ -29,14 +29,14 @@
 #include "extended/alignment.h"
 
 struct GtAlignment {
-  const GtUchar *u,
-              *v;
-  unsigned long ulen,
-                vlen,
-                alilen;
-  GtRange aligned_range_u,
-          aligned_range_v;
+  GtRange         aligned_range_u,
+                  aligned_range_v;
+  const GtUchar  *u,
+                 *v;
   GtMultieoplist *eops;
+  unsigned long   ulen,
+                  vlen,
+                  alilen;
 };
 
 #define GAPSYMBOL      '-'
