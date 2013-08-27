@@ -29,11 +29,12 @@
 typedef struct GtEliasGammaBitwiseDecoder GtEliasGammaBitwiseDecoder;
 
 /* Encodes the given positive integer <x>, writes it to a new <GtBittab> object
-   and returns it. */
+   and returns it. Expects x > 0. To encode 0 just add 1 to all numbers to
+   encode. */
 GtBittab*                   gt_elias_gamma_encode(unsigned long x);
 
 /* Returns a new <GtEliasGammaBitwiseDecoder> object. This decoder is
-   meant to decode a code word bit by bit.*/
+   meant to decode a code word bit by bit. */
 GtEliasGammaBitwiseDecoder* gt_elias_gamma_bitwise_decoder_new(void);
 
 /* Appends <bit> to the code word currently being decoded by <egbd>.

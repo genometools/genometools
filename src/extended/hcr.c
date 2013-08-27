@@ -57,16 +57,16 @@
 #define HCR_PAGES_PER_CHUNK 10UL
 
 typedef struct GtBaseQualDistr {
-  unsigned ncols,
-           nrows,
-           max_qual,
-           min_qual,
-           wildcard_indx,
-           qrange_start,
-           qual_offset,
-           qrange_end;
   unsigned long long **distr;
-  GtAlphabet *alpha;
+  GtAlphabet          *alpha;
+  unsigned int         ncols,
+                       nrows,
+                       max_qual,
+                       min_qual,
+                       wildcard_indx,
+                       qrange_start,
+                       qual_offset,
+                       qrange_end;
 } GtBaseQualDistr;
 
 typedef struct FastqFileInfo {
@@ -75,72 +75,72 @@ typedef struct FastqFileInfo {
 } FastqFileInfo;
 
 typedef struct GtHcrSeqEncoder {
-  GtHuffman *huffman;
-  unsigned qual_offset;
-  unsigned long num_of_files;
-  long startofsamplingtab,
-       start_of_encoding;
+  GtQualRange        qrange;
+  FastqFileInfo     *fileinfos;
+  GtAlphabet        *alpha;
+  GtHuffman         *huffman;
+  GtSampling        *sampling;
   unsigned long long total_num_of_symbols;
-  GtAlphabet *alpha;
-  FastqFileInfo *fileinfos;
-  GtQualRange qrange;
-  GtSampling *sampling;
+  unsigned long      num_of_files;
+  long               startofsamplingtab,
+                     start_of_encoding;
+  unsigned int       qual_offset;
 } GtHcrSeqEncoder;
 
 struct GtHcrEncoder {
-  GtHcrSeqEncoder *seq_encoder;
   GtEncdescEncoder *encdesc_encoder;
-  unsigned long num_of_reads,
-                num_of_files,
-                sampling_rate;
-  GtStrArray *files;
-  bool page_sampling,
-       regular_sampling;
-  long pagesize;
+  GtHcrSeqEncoder  *seq_encoder;
+  GtStrArray       *files;
+  unsigned long     num_of_reads,
+                    num_of_files,
+                    sampling_rate,
+                    pagesize;
+  bool              page_sampling,
+                    regular_sampling;
 };
 
 typedef struct hcr_huff_mem_info {
-  char *path;
-  size_t start,
-         end,
-         pos;
+  char         *path;
+  void         *data;
+  size_t        start,
+                end,
+                pos;
   unsigned long pages_per_chunk,
-                bitseq_per_chunk;
-  long pagesize,
-       blocksize;
-  bool first;
-  void *data;
+                bitseq_per_chunk,
+                pagesize,
+                blocksize;
+  bool          first;
 } HcrHuffDataIterator;
 
 typedef struct GtHcrSeqDecoder {
-  unsigned alphabet_size,
-           qual_offset;
-  long start_of_encoding;
-  unsigned long readlength,
-                cur_read,
-                num_of_reads,
-                num_of_files;
-  FastqFileInfo *fileinfos;
-  GtAlphabet *alpha;
-  GtArray *symbols;
-  GtBitsequence *bitseq_buffer;
-  GtHuffman *huffman;
-  GtHuffmanDecoder *huff_dec;
-  GtRBTree *file_info_rbt;
-  GtSampling *sampling;
-  GtStr *filename;
+  FastqFileInfo       *fileinfos;
+  GtAlphabet          *alpha;
+  GtArray             *symbols;
+  GtBitsequence       *bitseq_buffer;
+  GtHuffman           *huffman;
+  GtHuffmanDecoder    *huff_dec;
+  GtRBTree            *file_info_rbt;
+  GtSampling          *sampling;
+  GtStr               *filename;
   HcrHuffDataIterator *data_iter;
+  unsigned long        readlength,
+                       cur_read,
+                       num_of_reads,
+                       num_of_files;
+  long                 start_of_encoding;
+  unsigned int         alphabet_size,
+                       qual_offset;
 } GtHcrSeqDecoder;
 
 struct GtHcrDecoder {
-  GtEncdesc *encdesc;
+  GtEncdesc       *encdesc;
   GtHcrSeqDecoder *seq_dec;
 };
 
 typedef struct WriteNodeInfo {
+  FILE       *output;
   GtAlphabet *alpha;
-  unsigned qual_offset;
-  FILE *output;
+  unsigned    qual_offset;
 } WriteNodeInfo;
 
 static unsigned long long hcr_base_qual_distr_func(const void *distr,
@@ -701,7 +701,7 @@ static GtRBTree *seq_decoder_init_file_info(FastqFileInfo *fileinfos,
 static inline long decoder_calc_start_of_encoded_data(FILE *fp)
 {
   bool is_not_at_pageborder;
-  long pagesize = gt_pagesize();
+  unsigned long pagesize = gt_pagesize();
 
   is_not_at_pageborder = (ftell(fp) % pagesize) != 0;
 

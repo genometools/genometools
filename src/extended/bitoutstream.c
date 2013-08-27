@@ -26,11 +26,11 @@
 #include "extended/bitoutstream.h"
 
 struct GtBitOutStream {
-  int bits_left;
-  long pagesize;
-  unsigned long written_bits;
+  FILE         *fp;
+  unsigned long written_bits,
+                pagesize;
   GtBitsequence bitseqbuffer;
-  FILE *fp;
+  int           bits_left;
 };
 
 GtBitOutStream* gt_bitoutstream_new(FILE *fp)

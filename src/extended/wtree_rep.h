@@ -33,21 +33,21 @@ typedef void (*GtWtreeDeleteFunc)(GtWtree*);
 
 struct GtWtree {
   const GtWtreeClass *c_class;
-  GtWtreeMembers *members;
+  GtWtreeMembers     *members;
 };
 
 struct GtWtreeClass {
-  size_t size;
   GtWtreeAccessFunc access_func;
-  GtWtreeRankFunc rank_func;
-  GtWtreeSelectFunc select_func;
   GtWtreeDeleteFunc delete_func;
+  GtWtreeRankFunc   rank_func;
+  GtWtreeSelectFunc select_func;
+  size_t            size;
 };
 
 struct GtWtreeMembers {
-  unsigned long refcount,
+  unsigned long length,
                 num_of_symbols,
-                length;
+                refcount;
 };
 
 const GtWtreeClass* gt_wtree_class_new(size_t size,

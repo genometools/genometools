@@ -32,8 +32,8 @@
 /* this seems to be a good default value. maybe change this in the future */
 #define GT_COMP_BITSEQ_BLOCKSIZE 15U
 
-/* ps_overflow contains a bit mask x consisting of 8 bytes
-   x[7],...,x[0] and each is set to 128-i */
+/* gt_compressed_bitsequence_ps_overflow contains a bit mask x consisting of 8
+   bytes x[7],...,x[0] and each is set to 128-i */
 const uint64_t gt_compressed_bitsequence_ps_overflow[] = {
   (uint64_t) 0x8080808080808080ULL, (uint64_t) 0x7f7f7f7f7f7f7f7fULL,
   (uint64_t) 0x7e7e7e7e7e7e7e7eULL, (uint64_t) 0x7d7d7d7d7d7d7d7dULL,
@@ -72,11 +72,11 @@ const uint64_t gt_compressed_bitsequence_ps_overflow[] = {
 
 typedef struct
 {
-  unsigned int class;
-  unsigned int block_len;
-  unsigned long rank_sum;
-  unsigned long idx;
-  unsigned long block_offset;
+  unsigned long block_offset,
+                idx,
+                rank_sum;
+  unsigned int class,
+               block_len;
 } GtCompressedBitsequenceBlockInfo;
 
 typedef struct
@@ -88,38 +88,38 @@ typedef struct
                 *num_of_superblocks,
                 *superblockoffsets_size,
                 *superblockranks_size;
-  unsigned int *blocksize,
-               *class_bits,
-               *last_block_len,
-               *superblockoffsets_bits,
-               *superblockranks_bits,
-               *superblocksize;
+  unsigned int  *blocksize,
+                *class_bits,
+                *last_block_len,
+                *superblockoffsets_bits,
+                *superblockranks_bits,
+                *superblocksize;
 }GtCompressedBitsequenceHeaderPtr;
 
 struct GtCompressedBitsequence
 {
-  GtPopcountTab *popcount_tab;
-  GtBitsequence *c_offsets,
-                *classes,
-                *superblockoffsets,
-                *superblockranks;
+  GtCompressedBitsequenceHeaderPtr  header;
+  GtPopcountTab                    *popcount_tab;
+  GtBitsequence                    *c_offsets,
+                                   *classes,
+                                   *superblockoffsets,
+                                   *superblockranks;
   GtCompressedBitsequenceBlockInfo *cbs_bi;
-  void *mmapped;
-  unsigned long c_offsets_size,
-                classes_size,
-                num_of_bits,
-                num_of_blocks,
-                num_of_superblocks,
-                superblockoffsets_size,
-                superblockranks_size;
-  unsigned int blocksize,
-               class_bits,
-               last_block_len,
-               superblockoffsets_bits,
-               superblockranks_bits,
-               superblocksize;
-  GtCompressedBitsequenceHeaderPtr header;
-  bool from_file;
+  void                             *mmapped;
+  unsigned long                     c_offsets_size,
+                                    classes_size,
+                                    num_of_bits,
+                                    num_of_blocks,
+                                    num_of_superblocks,
+                                    superblockoffsets_size,
+                                    superblockranks_size;
+  unsigned int                      blocksize,
+                                    class_bits,
+                                    last_block_len,
+                                    superblockoffsets_bits,
+                                    superblockranks_bits,
+                                    superblocksize;
+  bool                              from_file;
 };
 
 static void gt_compressed_bitsequence_header_setup_mapspec(GtMapspec *mapspec,
@@ -619,8 +619,7 @@ gt_compressed_bitsequence_select_1_word(uint64_t word, unsigned int i)
   i -= (s >> ((7 - byte_nr) << 3)) & 0xFFULL;
   return (byte_nr << 3) + (unsigned int)
     gt_byte_select[((i-1) << 8) +
-                                        ((word >> ((7 - byte_nr) << 3)) &
-                                           0xFFULL)];
+                   ((word >> ((7 - byte_nr) << 3)) & 0xFFULL)];
 #else
   unsigned int bytecount,
                idx,
@@ -637,7 +636,7 @@ gt_compressed_bitsequence_select_1_word(uint64_t word, unsigned int i)
     else
       ranksum += bytecount;
   }
-  /* 64 (or 32) if bit is not present */
+  /* 64 if bit is not present */
   return (unsigned int) (CHAR_BIT * sizeof (word));
 #endif
 }

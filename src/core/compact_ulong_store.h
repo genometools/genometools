@@ -22,7 +22,7 @@
 #include "core/error_api.h"
 
 /* The <GtCompactUlongStore> class stores fixed bit witdh unsigned integers.
-   Maximum bitwidth is sizeof (unsigned long) */
+   Maximum bitwidth is sizeof (unsigned long) * CHAR_BIT. */
 typedef struct GtCompactUlongStore GtCompactUlongStore;
 
 /* Return a new <GtCompactUlongStore> object with <numofentries> elements of

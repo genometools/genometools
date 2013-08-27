@@ -269,6 +269,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
   xdropbest->best_d = currd;
   xdropbest->best_k = 0;
   GT_STOREINARRAY (&res->big_t, GtXdropscore, 10, bigt_tmp);
+
   /* phase d > 0 */
   while (lbound <= ubound) {
     currd++;
