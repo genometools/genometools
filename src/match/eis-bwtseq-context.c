@@ -230,7 +230,7 @@ readBlock2Buf(FILE *fp,
   if (fread(buf, sizeof (buf[0]), len, fp) != len)
     die("short read when reading backing store");
   gt_bsStoreUniformUlongArray(bitstring, offset, bitsPerUlong, len,
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
                              (uint64_t*) buf);
 #else
                              (uint32_t*) buf);

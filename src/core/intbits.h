@@ -30,7 +30,7 @@
   and \texttt{\symbol{94}} for exponentiation of the previous character.
 */
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
 
 #define GT_LOGWORDSIZE    6         /* base 2 logarithm of wordsize */
 typedef uint64_t GtBitsequence;
@@ -223,7 +223,7 @@ static const unsigned char ReversedByte[256] =
   GtBitsequence out;
   unsigned char *q = (unsigned char*) &out;
   unsigned char *p = (unsigned char*) &bs;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   q[7] = ReversedByte[p[0]];
   q[6] = ReversedByte[p[1]];
   q[5] = ReversedByte[p[2]];
@@ -244,7 +244,7 @@ static const unsigned char ReversedByte[256] =
 /*@unused@*/
 static inline GtBitsequence gt_intbits_reverse_unitwise(GtBitsequence bs)
 {
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   /* 10 shifts, 10 &, 5 |, 4 assignments = 29 ops */
   bs = (bs & 0xFFFFFFFF00000000) >> 32 | (bs & 0x00000000FFFFFFFF) << 32;
   bs = (bs & 0xFFFF0000FFFF0000) >> 16 | (bs & 0x0000FFFF0000FFFF) << 16;

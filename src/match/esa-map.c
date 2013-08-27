@@ -222,7 +222,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->bwttabstream.bufferedfilespace = NULL;
   suffixarray->suftabstream_GtUlong.fp = NULL;
   suffixarray->suftabstream_GtUlong.bufferedfilespace = NULL;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   suffixarray->suftabstream_uint32_t.fp = NULL;
   suffixarray->suftabstream_uint32_t.bufferedfilespace = NULL;
 #endif
@@ -270,7 +270,7 @@ void gt_freesuffixarray(Suffixarray *suffixarray)
   gt_fa_xfclose(suffixarray->suftabstream_GtUlong.fp);
   suffixarray->suftabstream_GtUlong.fp = NULL;
   gt_free(suffixarray->suftabstream_GtUlong.bufferedfilespace);
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   gt_fa_xfclose(suffixarray->suftabstream_uint32_t.fp);
   suffixarray->suftabstream_uint32_t.fp = NULL;
   gt_free(suffixarray->suftabstream_uint32_t.bufferedfilespace);
@@ -360,7 +360,7 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
       off_t filesize = gt_file_size_with_suffix(indexname,GT_SUFTABSUFFIX);
 
       if (filesize == (off_t) sizeof (uint32_t) *

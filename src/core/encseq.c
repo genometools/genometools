@@ -2019,7 +2019,7 @@ static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
 
 #define GT_APPENDINT(V)          V##_uint32
 #define GT_SPECIALTABLETYPE      uint32_t
-#ifdef  _LP64
+#if defined (_LP64) || defined (_WIN64)
 #define GT_PAGENUM2OFFSET(P)     ((P) << 32)
 #define GT_POS2PAGENUM(V)        ((V) >> 32)
 #else
@@ -5412,7 +5412,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     if (md5fp != NULL)
       md5enc = gt_md5_encoder_new();
     for (currentpos = 0; !haserr; currentpos++) {
-#ifndef _LP64
+#if !(defined (_LP64) || defined (_WIN64))
 #define MAXSFXLENFOR32BIT 4294000000UL
       if (currentpos > MAXSFXLENFOR32BIT) {
         gt_error_set(err, "input sequence must not be longer than %lu",
@@ -5738,7 +5738,7 @@ static inline unsigned int numberoftrailingzeros32 (uint32_t x)
                  ((x & -(int) x) * (uint32_t) 0x077CB531U) >> 27];
 }
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
 
 static inline unsigned int numberoftrailingzeros (GtBitsequence x)
 {

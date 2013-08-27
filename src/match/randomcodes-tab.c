@@ -44,7 +44,7 @@ void gt_randomcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   gt_assert(rct->countocc_exceptions != NULL);
   rct->outfilenameleftborder = NULL;
   rct->leftborder_samples = NULL;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   rct->modvaluebits = 32U; /* XXX remove the following later */
   if (rct->modvaluebits == 32U)
   {
@@ -198,7 +198,7 @@ static uint32_t gt_randomcodes_countocc_get(const GtRandomcodestab *rct,
   }
 }
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
 #define GT_RCT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
         if ((BUF)->nextfree == (BUF)->allocated)\
         {\
@@ -228,7 +228,7 @@ unsigned long gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
                 spacewithhashmap = 0, spacewithouthashmap = 0;
   uint32_t currentcount;
   GtLeftborderOutbuffer *leftborderbuffer_all = NULL;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   const unsigned int btp = gt_determinebitspervalue(expectedlastpartsum);
   unsigned long exceedvalue = 1UL << rct->modvaluebits;
 #endif
@@ -249,7 +249,7 @@ unsigned long gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
                   100.0 * (double) rct->hashmap_getcount/
                                    rct->all_incrementcount);
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   if (btp <= rct->modvaluebits)
   {
     rct->bitchangepoints.allocatedGtUlong = 0;
@@ -293,7 +293,7 @@ unsigned long gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
   for (idx = 1UL; idx < rct->differentcodes; idx++)
   {
     currentcount = gt_randomcodes_countocc_get(rct,idx);
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
     gt_assert(currentcount <= rct->modvaluemask);
 #endif
 #ifdef SKDEBUG
@@ -304,7 +304,7 @@ unsigned long gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
       maxbucketsize = (unsigned long) currentcount;
     }
     partsum += currentcount;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
     if (rct->bitchangepoints.allocatedGtUlong > 0 && partsum >= exceedvalue)
     {
       gt_assert(idx > 0 && rct->bitchangepoints.nextfreeGtUlong <
@@ -372,7 +372,7 @@ unsigned long gt_randomcodes_get_sample(const GtRandomcodestab *rct,
 unsigned long gt_randomcodes_get_leftborder(const GtRandomcodestab *rct,
                                            unsigned long idx)
 {
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   GT_CHANGEPOINT_GET_RCT(changepoint);
 
   return (unsigned long) rct->leftborder[idx]
@@ -459,7 +459,7 @@ void gt_randomcodes_tab_delete(GtFirstcodesspacelog *fcsl,GtRandomcodestab *rct)
   gt_randomcodes_samples_delete(fcsl,rct);
   gt_str_delete(rct->outfilenameleftborder);
   rct->outfilenameleftborder = NULL;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   GT_FREEARRAY(&rct->bitchangepoints,GtUlong);
 #endif
 }
@@ -478,7 +478,7 @@ void gt_randomcodes_countocc_setnull(GtRandomcodestab *rct)
   rct->all_incrementcount = 0;
   rct->hashmap_getcount = 0;
   rct->outfilenameleftborder = NULL;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   GT_INITARRAY(&rct->bitchangepoints,GtUlong);
 #endif
 }
