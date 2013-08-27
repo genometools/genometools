@@ -197,7 +197,7 @@ static int show_duplicates(GtStringDistri *sd, GtError *err)
   info.num_of_sequences = 0;
   gt_string_distri_foreach(sd, show_duplicate, &info);
   if (info.duplicates) {
-    gt_error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
+    gt_error_set(err, "duplicates found: "GT_LLU" out of "GT_LLU" (%.3f%%)",
                  info.duplicates, info.num_of_sequences,
                  (((double) info.duplicates / info.num_of_sequences) * 100.0));
     return -1;

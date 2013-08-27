@@ -18,7 +18,6 @@
 #include <inttypes.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #endif
@@ -261,7 +260,7 @@ static int print_codes(unsigned long symbol,
                        GT_UNUSED void *unused)
 {
 #ifndef S_SPLINT_S
-  printf("control symbol %lu, freq %llu, codelength %u: ",
+  printf("control symbol %lu, freq "GT_LLU", codelength %u: ",
          symbol,
          freq,
          code_len);

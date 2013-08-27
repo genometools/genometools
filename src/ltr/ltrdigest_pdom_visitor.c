@@ -21,7 +21,9 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <unistd.h>
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 #endif
 #include "core/array_api.h"
 #include "core/codon_api.h"
@@ -95,8 +97,11 @@ typedef struct {
   GtStr *alignment, *aastring;
 } GtHMMERSingleHit;
 
+#ifndef _WIN32
 static void gt_hmmer_model_hit_delete(GtHMMERModelHit *mh);
+#endif
 
+#ifndef _WIN32
 static GtHMMERParseStatus* gt_hmmer_parse_status_new(void)
 {
   GtHMMERParseStatus *s;
@@ -106,7 +111,9 @@ static GtHMMERParseStatus* gt_hmmer_parse_status_new(void)
                              (GtFree) gt_hmmer_model_hit_delete);
   return s;
 }
+#endif
 
+#ifndef _WIN32
 static void gt_hmmer_parse_status_add_hit(GtHMMERParseStatus *s,
                                           GtHMMERSingleHit *hit)
 {
@@ -131,7 +138,9 @@ static void gt_hmmer_parse_status_add_hit(GtHMMERParseStatus *s,
     gt_array_add(mh->rev_hits, hit);
   }
 }
+#endif
 
+#ifndef _WIN32
 static void gt_hmmer_parse_status_mark_frame_finished(GtHMMERParseStatus *s)
 {
   GtHMMERModelHit *mh;
@@ -142,7 +151,9 @@ static void gt_hmmer_parse_status_mark_frame_finished(GtHMMERParseStatus *s)
     mh->last_array_size_rev = gt_array_size(mh->rev_hits);
   }
 }
+#endif
 
+#ifndef _WIN32
 static GtHMMERSingleHit* gt_hmmer_parse_status_get_hit(GtHMMERParseStatus *s,
                                                        unsigned long i)
 {
@@ -161,6 +172,7 @@ static GtHMMERSingleHit* gt_hmmer_parse_status_get_hit(GtHMMERParseStatus *s,
     }
   } else return NULL;
 }
+#endif
 
 GT_UNUSED static int pdom_printvals(void *key, void *val, GT_UNUSED void *data,
                                     GT_UNUSED GtError *err) {
@@ -187,6 +199,7 @@ GT_UNUSED static void gt_hmmer_parse_status_show(GtHMMERParseStatus *s)
   (void) gt_hashmap_foreach(s->models, pdom_printvals, NULL, NULL);
 }
 
+#ifndef _WIN32
 static void gt_hmmer_model_hit_delete(GtHMMERModelHit *mh)
 {
   unsigned long i;
@@ -199,7 +212,9 @@ static void gt_hmmer_model_hit_delete(GtHMMERModelHit *mh)
    gt_array_delete(mh->rev_hits);
   gt_free(mh);
 }
+#endif
 
+#ifndef _WIN32
 static void gt_hmmer_parse_status_delete(GtHMMERParseStatus *s)
 {
   if (!s) return;
@@ -207,6 +222,7 @@ static void gt_hmmer_parse_status_delete(GtHMMERParseStatus *s)
   gt_hashmap_delete(s->models);
   gt_free(s);
 }
+#endif
 
 const GtNodeVisitorClass* gt_ltrdigest_pdom_visitor_class(void);
 
@@ -233,6 +249,7 @@ static inline int pdom_parser_get_next_line(char *buf, FILE *instream,
   return 0;
 }
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_parse_statistics(GT_UNUSED
                                                       GtLTRdigestPdomVisitor
                                                                             *lv,
@@ -246,7 +263,9 @@ static int gt_ltrdigest_pdom_visitor_parse_statistics(GT_UNUSED
     had_err = pdom_parser_get_next_line(buf, instream, err);
   return had_err;
 }
+#endif
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_parse_scores(GT_UNUSED
                                                   GtLTRdigestPdomVisitor *lv,
                                                   char *buf, FILE *instream,
@@ -266,6 +285,7 @@ static int gt_ltrdigest_pdom_visitor_parse_scores(GT_UNUSED
     had_err = pdom_parser_get_next_line(buf, instream, err);
   return had_err;
 }
+#endif
 
 #define gt_ltrdigest_pdom_visitor_isgap(c) \
         ((c) == ' ' || (c) == '.' || (c) == '_' \
@@ -288,6 +308,7 @@ GT_UNUSED static void gt_ltrdigest_pdom_visitor_add_aaseq(const char *str,
   }
 }
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
                                                       GtLTRdigestPdomVisitor
                                                                             *lv,
@@ -362,7 +383,9 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
   }
   return had_err;
 }
+#endif
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_parse_domainhits(GtLTRdigestPdomVisitor
                                                                             *lv,
                                                      GtHMMERParseStatus *status,
@@ -424,7 +447,9 @@ static int gt_ltrdigest_pdom_visitor_parse_domainhits(GtLTRdigestPdomVisitor
   }
   return had_err;
 }
+#endif
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_parse_query(GtLTRdigestPdomVisitor *lv,
                                                  GtHMMERParseStatus *status,
                                                  bool *end,
@@ -457,7 +482,9 @@ static int gt_ltrdigest_pdom_visitor_parse_query(GtLTRdigestPdomVisitor *lv,
   }
   return had_err;
 }
+#endif
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_parse_output(GtLTRdigestPdomVisitor *lv,
                                                   GtHMMERParseStatus *status,
                                                   FILE *instream, GtError *err)
@@ -473,7 +500,9 @@ static int gt_ltrdigest_pdom_visitor_parse_output(GtLTRdigestPdomVisitor *lv,
   /* gt_hmmer_parse_status_show(status); */
   return had_err;
 }
+#endif
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_fragcmp(const void *frag1,
                                              const void *frag2)
 {
@@ -483,7 +512,9 @@ static int gt_ltrdigest_pdom_visitor_fragcmp(const void *frag1,
     return 0;
   else return (f1->startpos2 < f2->startpos2 ? -1 : 1);
 }
+#endif
 
+#ifndef _WIN32
 static void gt_ltrdigest_pdom_visitor_chainproc(GtChain *c, GtFragment *f,
                                              GT_UNUSED unsigned long nof_frags,
                                              GT_UNUSED unsigned long gap_length,
@@ -504,7 +535,9 @@ static void gt_ltrdigest_pdom_visitor_chainproc(GtChain *c, GtFragment *f,
   (*chainno)++;
   gt_log_log("\n");
 }
+#endif
 
+#ifndef _WIN32
 static GtRange gt_ltrdigest_pdom_visitor_coords(GtLTRdigestPdomVisitor *lv,
                                               const GtHMMERSingleHit *singlehit)
 {
@@ -529,7 +562,9 @@ static GtRange gt_ltrdigest_pdom_visitor_coords(GtLTRdigestPdomVisitor *lv,
   retrng.start++; retrng.end++;  /* GFF3 is 1-based */
   return retrng;
 }
+#endif
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_attach_hit(GtLTRdigestPdomVisitor *lv,
                                                 GtHMMERModelHit *modelhit,
                                                 GtHMMERSingleHit *singlehit)
@@ -586,7 +621,9 @@ static int gt_ltrdigest_pdom_visitor_attach_hit(GtLTRdigestPdomVisitor *lv,
   }
   return had_err;
 }
+#endif
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_process_hit(GT_UNUSED void *key, void *val,
                                                  void *data,
                                                  GT_UNUSED GtError *err)
@@ -639,7 +676,9 @@ static int gt_ltrdigest_pdom_visitor_process_hit(GT_UNUSED void *key, void *val,
 
   return 0;
 }
+#endif
 
+#ifndef _WIN32
 static int gt_ltrdigest_pdom_visitor_process_hits(GtLTRdigestPdomVisitor *lv,
                                                   GtHMMERParseStatus *status,
                                                   GtError *err)
@@ -654,6 +693,7 @@ static int gt_ltrdigest_pdom_visitor_process_hits(GtLTRdigestPdomVisitor *lv,
 
   return had_err;
 }
+#endif
 
 static int gt_ltrdigest_pdom_visitor_choose_strand(GtLTRdigestPdomVisitor *lv)
 {
@@ -751,8 +791,10 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
     GtTranslatorStatus status;
     unsigned long seqlen;
     char translated, *rev_seq;
+#ifndef _WIN32
     FILE *instream;
     GtHMMERParseStatus *pstatus;
+#endif
     unsigned int frame;
     GtStr *seq;
 
@@ -804,6 +846,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
 
     /* run HMMER and handle results */
     if (!had_err) {
+#ifndef _WIN32
       int pid, pc[2], cp[2];
       GT_UNUSED int rval;
 
@@ -854,6 +897,11 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
             had_err = gt_ltrdigest_pdom_visitor_process_hits(lv, pstatus, err);
           gt_hmmer_parse_status_delete(pstatus);
       }
+#else
+      /* XXX */
+      gt_error_set(err, "HMMER call not implemented on Windows\n");
+      had_err = -1;
+#endif
     }
     gt_str_delete(seq);
   }
@@ -931,10 +979,16 @@ GtNodeVisitor* gt_ltrdigest_pdom_visitor_new(GtPdomModelSet *model,
     gt_error_set(err, "error executing system(hmmscan)");
     return NULL;
   }
+#ifndef _WIN32
   if (WEXITSTATUS(rval) != 0) {
     gt_error_set(err, "cannot find the hmmscan executable in PATH");
     return NULL;
   }
+#else
+  /* XXX */
+  gt_error_set(err, "hmmscan for Windows not implemented");
+  return NULL;
+#endif
 
   nv = gt_node_visitor_create(gt_ltrdigest_pdom_visitor_class());
   lv = gt_ltrdigest_pdom_visitor_cast(nv);

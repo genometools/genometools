@@ -25,6 +25,7 @@
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/dynalloc.h"
+#include "core/compat.h"
 #include "core/safearith.h"
 
 /**
@@ -265,7 +266,7 @@ gt_bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
                          size_t numValues, int8_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * sysconf(_SC_PAGESIZE) / sizeof (val[0]);
+  int blockSize = 16 * gt_pagesize() / sizeof (val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int8_t *blockPtr = val;
   size_t revIndex = numValues;
@@ -290,7 +291,7 @@ gt_bsGetUniformInt16Array(constBitString str, BitOffset offset,
                           unsigned numBits, size_t numValues, int16_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * sysconf(_SC_PAGESIZE) / sizeof (val[0]);
+  int blockSize = 16 * gt_pagesize() / sizeof (val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int16_t *blockPtr = val;
   size_t revIndex = numValues;
@@ -315,7 +316,7 @@ gt_bsGetUniformInt32Array(constBitString str, BitOffset offset,
                           unsigned numBits, size_t numValues, int32_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * sysconf(_SC_PAGESIZE) / sizeof (val[0]);
+  int blockSize = 16 * gt_pagesize() / sizeof (val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int32_t *blockPtr = val;
   size_t revIndex = numValues;
@@ -340,7 +341,7 @@ gt_bsGetUniformInt64Array(constBitString str, BitOffset offset,
                           unsigned numBits, size_t numValues, int64_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * sysconf(_SC_PAGESIZE) / sizeof (val[0]);
+  int blockSize = 16 * gt_pagesize() / sizeof (val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int64_t *blockPtr = val;
   size_t revIndex = numValues;

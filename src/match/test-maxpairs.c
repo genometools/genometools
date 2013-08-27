@@ -26,6 +26,7 @@
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/ma_api.h"
+#include "core/yarandom.h"
 #include "esa-mmsearch.h"
 #include "echoseq.h"
 #include "sfx-suffixer.h"

@@ -23,8 +23,8 @@ GthDPOptionsPostpro* gth_dp_options_postpro_new(void)
 {
   GthDPOptionsPostpro *dp_options_postpro =
     gt_malloc(sizeof *dp_options_postpro);
-  dp_options_postpro->leadcutoffsmode = RELAXED;
-  dp_options_postpro->termcutoffsmode = STRICT;
+  dp_options_postpro->leadcutoffsmode = GTH_RELAXED;
+  dp_options_postpro->termcutoffsmode = GTH_STRICT;
   dp_options_postpro->cutoffsminexonlen = GTH_DEFAULT_CUTOFFSMINEXONLEN;
   dp_options_postpro->scoreminexonlen = GTH_DEFAULT_SCOREMINEXONLEN;
   return dp_options_postpro;

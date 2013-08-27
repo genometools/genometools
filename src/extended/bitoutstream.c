@@ -16,7 +16,6 @@
 */
 
 #ifndef S_SPLINT_S
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
@@ -44,7 +43,7 @@ GtBitOutStream* gt_bitoutstream_new(FILE *fp)
   bitstream->fp = fp;
   bitstream->bitseqbuffer = 0;
   bitstream->written_bits = 0;
-  bitstream->pagesize = sysconf((int) _SC_PAGESIZE);
+  bitstream->pagesize = gt_pagesize();
   return bitstream;
 }
 

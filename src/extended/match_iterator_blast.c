@@ -17,6 +17,9 @@
 */
 
 #include <errno.h>
+#ifdef _WIN32
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include "core/class_alloc_lock.h"
 #include "core/ma.h"

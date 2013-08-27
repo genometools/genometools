@@ -62,11 +62,9 @@ EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
-# lua needs -DLUA_USE_POSIX
 # tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
 # zlib needs -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
-EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DLUA_DL_DLOPEN \
-            -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO \
+EXT_FLAGS:= -DHAVE_MEMMOVE -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO \
             -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
 GT_CPPFLAGS:=$(INCLUDEOPT)
@@ -296,8 +294,10 @@ ifeq ($(SYSTEM),Darwin)
 else
   EXT_FLAGS += -DLUA_DL_DLOPEN
   ifneq ($(SYSTEM),FreeBSD)
+  ifneq ($(SYSTEM),Windows)
     LUA_LDLIB:=-ldl
     EXP_LDLIBS += -ldl
+  endif
   endif
 endif
 
@@ -345,8 +345,8 @@ LIBGENOMETOOLS_DIRS:= src/core \
                       src/gtlua \
                       src/match \
                       src/gth \
-                      src/mgth \
-                      src/ltr
+                      src/ltr \
+                      src/mgth
 
 ifneq ($(cairo),no)
   ifeq ($(SYSTEM),Darwin)
@@ -442,13 +442,13 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d)
 
 ifneq ($(useshared),yes)
   LIBGENOMETOOLS_OBJ += $(LIBLUA_OBJ) \
-                        $(LIBEXPAT_OBJ) \
                         $(SAMTOOLS_OBJ) \
+                        $(LIBEXPAT_OBJ) \
                         $(LIBBZ2_OBJ) \
                         $(ZLIB_OBJ)
   LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
-                        $(LIBEXPAT_DEP) \
                         $(SAMTOOLS_DEP) \
+                        $(LIBEXPAT_DEP) \
                         $(LIBBZ2_DEP) \
                         $(ZLIB_DEP)
 endif

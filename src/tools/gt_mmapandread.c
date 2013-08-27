@@ -16,7 +16,9 @@
 */
 
 #include <fcntl.h>
+#ifndef _WIN32
 #include <sys/mman.h>
+#endif
 #include "core/error.h"
 #include "core/option_api.h"
 #include "core/progressbar.h"
@@ -61,7 +63,13 @@ static int gt_mmapandread_runner(int argc, const char **argv, int parsed_args,
       printf("\"%s\" is not a regular file\n", argv[i]);
     else {
       /* map file */
+#ifndef _WIN32
       map = gt_xmmap(0, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+#else
+      /* XXX */
+      fprintf(stderr, "mmapandread not implemented\n");
+      exit(EXIT_FAILURE);
+#endif
 
       /* read file */
       printf("reading file \"%s\"\n", argv[i]);
@@ -72,7 +80,11 @@ static int gt_mmapandread_runner(int argc, const char **argv, int parsed_args,
       gt_progressbar_stop();
 
       /* unmap file */
+#ifndef _WIN32
       gt_xmunmap(map, sb.st_size);
+#else
+      /* XXX */
+#endif
     }
 
     /* close file */

@@ -20,6 +20,7 @@
 #include <ctype.h>
 #endif
 #include "md5.h"
+#include "core/compat.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/safearith.h"
@@ -38,7 +39,7 @@ typedef struct {
   ((A).l == 0 && (A).h == 0)
 
 #define GT_MD5SET_TOO_LARGE \
-  "fatal: no prime number larger than %llu in lookup table\n" \
+  "fatal: no prime number larger than "GT_LLU" in lookup table\n" \
   "developers: modify scripts/makeprimestable.sh to create a larger table\n"
 
 #ifndef S_SPLINT_S

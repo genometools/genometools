@@ -18,7 +18,9 @@
 #include <stdlib.h>
 #ifndef S_SPLINT_S
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 #endif
 #include "core/error_api.h"
 #include "core/fileutils_api.h"
@@ -52,10 +54,16 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
     gt_error_set(err, "error executing system(hmmpress)");
     return NULL;
   }
+#ifndef _WIN32
   if (WEXITSTATUS(rval) != 0) {
     gt_error_set(err, "cannot find the hmmpress executable in PATH");
     return NULL;
   }
+#else
+  /* XXX */
+  gt_error_set(err, "hmmpress for Windows not implemented");
+  return NULL;
+#endif
 
   pdom_model_set = gt_calloc((size_t) 1, sizeof (GtPdomModelSet));
   concat_dbnames = gt_str_new();
@@ -120,10 +128,15 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
       gt_error_set(err, "error executing system(hmmpress)");
       return NULL;
     }
+#ifndef _WIN32
     if (WEXITSTATUS(rval) != 0) {
       gt_error_set(err, "an error occurred during HMM preprocessing");
       had_err = -1;
     }
+#else
+    gt_error_set(err, "WEXITSTATUS not implemented on Windows");
+    had_err = -1;
+#endif
   }
 
   if (had_err) {

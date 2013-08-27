@@ -35,6 +35,7 @@ static GtOptionParser* gt_clean_option_parser_new(GT_UNUSED void
   return op;
 }
 
+#ifndef _WIN32
 static void remove_pattern_in_current_dir(const char *pattern)
 {
   char **files_to_remove;
@@ -60,6 +61,7 @@ static void remove_pattern_in_current_dir(const char *pattern)
   globfree(&g);
   gt_str_delete(path);
 }
+#endif
 
 int gt_clean_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                     GT_UNUSED int parsed_args, GT_UNUSED void *tool_arguments,
@@ -67,12 +69,18 @@ int gt_clean_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 {
   gt_error_check(err);
 
+#ifndef _WIN32
   remove_pattern_in_current_dir(GT_ENCSEQFILESUFFIX);
   remove_pattern_in_current_dir(GT_SSPTABFILESUFFIX);
   remove_pattern_in_current_dir(GT_DESTABFILESUFFIX);
   remove_pattern_in_current_dir(GT_SDSTABFILESUFFIX);
   remove_pattern_in_current_dir(GT_OISTABFILESUFFIX);
   remove_pattern_in_current_dir(GT_MD5TABFILESUFFIX);
+#else
+  /* XXX */
+  gt_error_set(err, "gt_clean_runner() not implemented");
+  return -1;
+#endif
 
   return 0;
 }

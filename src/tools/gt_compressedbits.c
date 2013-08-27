@@ -147,7 +147,7 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
       had_err = -1;
     }
     if (!had_err) {
-      gt_log_log("bits to read: %llu", num_of_bits);
+      gt_log_log("bits to read: "GT_LLU"", num_of_bits);
       arguments->size = (unsigned long) GT_NUMOFINTSFORBITS(num_of_bits);
       bits = gt_malloc(sizeof (*bits) * arguments->size);
       if ((size_t) arguments->size !=

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2010, 2013 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2007-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,9 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef _WIN32
 #include <sys/mman.h>
+#else
+#include <windows.h>
+#endif
 #include <fcntl.h>
 #include <unistd.h>
+#include "core/compat.h"
 #include "core/dynalloc.h"
 #include "core/eansi.h"
 #include "core/ebzlib.h"
@@ -56,6 +61,11 @@ typedef struct {
   size_t len;
   const char *src_file;
   int src_line;
+#ifdef _WIN32
+  /* additional handles necessary for memory maps on Windows */
+  HANDLE filehandle,
+         filemapping;
+#endif
 } FAMapInfo;
 
 typedef struct {
@@ -346,7 +356,7 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
     gt_str_append_cstr(template, genometools_tmptemplate);
   }
   {
-    int fd = mkstemp(gt_str_get(template));
+    int fd = gt_mkstemp(gt_str_get(template));
     char mode[] = { 'w', '+', flags & TMPFP_OPENBINARY?'b':'\0', '\0' };
     fp = gt_xfdopen(fd, mode);
   }
@@ -369,32 +379,72 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
   return fp;
 }
 
-void* gt_fa_mmap_generic_fd_func(int fd, const char *filename, size_t len,
-                                 size_t offset, bool mapwritable,
-                                 bool hard_fail, const char *src_file,
-                                 int src_line, GtError *err)
+void* gt_fa_mmap_generic_fd_func(GT_UNUSED int fd, const char *filename,
+                                 size_t len, GT_UNUSED size_t offset,
+                                 bool mapwritable, bool hard_fail,
+                                 const char *src_file, int src_line,
+                                 GtError *err)
 {
   FAMapInfo *mapinfo;
-  void *map;
+  void *map = NULL;
   gt_error_check(err);
   gt_assert(fa);
-  mapinfo = gt_malloc(sizeof (FAMapInfo));
+  mapinfo = gt_calloc(1, sizeof *mapinfo);
   mapinfo->src_file = src_file;
   mapinfo->src_line = src_line;
   mapinfo->len = len;
-  if (hard_fail)
-  {
+
+#ifndef _WIN32
+  if (hard_fail) {
     map = gt_xmmap(0, len, PROT_READ | (mapwritable ? PROT_WRITE : 0),
-                MAP_SHARED, fd, offset);
+                   MAP_SHARED, fd, offset);
   }
-  else
-  {
+  else {
     if ((map = mmap(0, len, PROT_READ | (mapwritable ? PROT_WRITE : 0),
                     MAP_SHARED, fd, offset)) == MAP_FAILED) {
       gt_error_set(err,"cannot map file \"%s\": %s", filename, strerror(errno));
       map = NULL;
     }
   }
+#else
+  mapinfo->filehandle = CreateFile(filename,
+                                   mapwritable ? GENERIC_READ | GENERIC_WRITE
+                                               : GENERIC_READ,
+                                   FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                                   FILE_FLAG_RANDOM_ACCESS, NULL);
+  if (!mapinfo->filehandle) {
+    if (hard_fail) {
+      gt_error_set(err,"cannot CreateFile for file \"%s\": 0x%08x", filename,
+                   (unsigned int) GetLastError());
+    }
+  }
+  else {
+    mapinfo->filemapping = CreateFileMapping(mapinfo->filehandle, NULL,
+                                             mapwritable ? PAGE_READWRITE
+                                                         : PAGE_READONLY,
+                                             0, 0, 0);
+    if (!mapinfo->filemapping) {
+      CloseHandle(mapinfo->filehandle);
+      if (hard_fail) {
+        gt_error_set(err,"cannot CreateFileMapping for file \"%s\": 0x%08x",
+                     filename, (unsigned int) GetLastError());
+      }
+    }
+    else {
+      map = MapViewOfFile(mapinfo->filemapping,
+                          mapwritable ? FILE_MAP_WRITE : FILE_MAP_READ,
+                          0, 0, 0);
+      if (!map) {
+        CloseHandle(mapinfo->filemapping);
+        CloseHandle(mapinfo->filehandle);
+        if (hard_fail) {
+          gt_error_set(err,"cannot MapViewOfFile for file \"%s\": 0x%08x",
+                       filename, (unsigned int) GetLastError());
+        }
+      }
+    }
+  }
+#endif
 
   if (map) {
     gt_mutex_lock(fa->mmap_mutex);
@@ -423,7 +473,7 @@ static size_t fd_to_file_size(int fd,const char *path,bool hard_fail,
     return -1;
   }
   if (sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX) {
-    gt_error_set(err,"file \"%s\" of size %llu is too large to map",
+    gt_error_set(err,"file \"%s\" of size "GT_LLU" is too large to map",
                  path, (unsigned long long) sb.st_size);
     return -1;
   }
@@ -565,7 +615,25 @@ void gt_fa_xmunmap(void *addr)
   gt_mutex_lock(fa->mmap_mutex);
   mapinfo = gt_hashmap_get(fa->memory_maps, addr);
   gt_assert(mapinfo);
+#ifndef _WIN32
   gt_xmunmap(addr, mapinfo->len);
+#else
+  if (!UnmapViewOfFile(addr)) {
+    fprintf(stderr, "cannot UnmapViewOfFile: 0x%08x\n",
+            (unsigned int) GetLastError());
+    exit(EXIT_FAILURE);
+  }
+  if (!CloseHandle(mapinfo->filemapping)) {
+    fprintf(stderr, "cannot CloseHandle(fm): 0x%08x\n",
+            (unsigned int) GetLastError());
+    exit(EXIT_FAILURE);
+  }
+  if (!CloseHandle(mapinfo->filehandle)) {
+    fprintf(stderr, "cannot CloseHandle(fh): 0x%08x\n",
+            (unsigned int) GetLastError());
+    exit(EXIT_FAILURE);
+  }
+#endif
   gt_assert(fa->current_size >= mapinfo->len);
   fa->current_size -= mapinfo->len;
   if (fa->global_space_peak)
@@ -650,8 +718,8 @@ static int check_mmap_leak(GT_UNUSED void *key, void *value, void *data,
   gt_assert(key && value && data);
   /* report only the first leak */
   if (!info->has_leak) {
-    fprintf(stderr, "bug: memory map of length %zu leaked (opened on line %d "
-            "in file \"%s\")\n", mapinfo->len, mapinfo->src_line,
+    fprintf(stderr, "bug: memory map of length "GT_ZU" leaked (opened on line "
+            "%d in file \"%s\")\n", mapinfo->len, mapinfo->src_line,
             mapinfo->src_file);
     info->has_leak = true;
   }
