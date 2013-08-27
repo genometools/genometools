@@ -47,7 +47,7 @@ typedef struct
   GtStr *outfilenameleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   uint32_t modvaluemask;
   unsigned int modvaluebits;
   GtArrayGtUlong bitchangepoints;
@@ -98,7 +98,7 @@ static inline void gt_randomcodes_countocc_increment(GtRandomcodestab *rct,
   }
 }
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
 #define GT_CHANGEPOINT_GET_RCT(CP)\
         unsigned long CP = 0;\
         while (CP < rct->bitchangepoints.nextfreeGtUlong &&\
@@ -110,7 +110,7 @@ GT_UNUSED
 static inline unsigned long gt_randomcodes_insertionindex(GtRandomcodestab *rct,
                                                          unsigned long idx)
 {
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   GT_CHANGEPOINT_GET_RCT(changepoint);
   gt_assert(idx < rct->differentcodes);
   if (rct->leftborder[idx] > 0)

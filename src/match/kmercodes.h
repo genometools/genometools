@@ -144,7 +144,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              kmer = (kmer & 0xFF00FF00) >> 8 |  (kmer & 0x00FF00FF) << 8;
              kmer = (kmer & 0XF0F0F0F0) >> 4 |  (kmer & 0x0F0F0F0F) << 4;
              return (kmer & 0xCCCCCCCC) >> 2 |  (kmer & 0x33333333) << 2;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
     case 17:
       return GT_SWAPBITPAIRS(kmer,32,0,32) |
              GT_SWAPBITPAIRS(kmer,30,2,28) |
