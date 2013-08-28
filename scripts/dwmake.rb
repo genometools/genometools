@@ -35,11 +35,12 @@ def parseargs(argv)
   options.threads = false
   options.clang = true
   options.ccache = true
+  options.check = true
   opts = OptionParser.new
-  opts.on("-c", "--[no-]clang") do |x|
+  opts.on("-c", "--[no-]clang", "use [no] clang, defaults to using it") do |x|
     options.clang = x
   end
-  opts.on("--[no-]ccache") do |x|
+  opts.on("--[no-]ccache", "use [no] ccache, defaults to using it") do |x|
     options.ccache = x
   end
   opts.on("-m","--m64","compile 64 bit binary") do |x|
@@ -72,6 +73,9 @@ def parseargs(argv)
   opts.on("-j [n]", Integer, "number of processes for make") do |x|
     options.threads = true
     options.j = x || ""
+  end
+  opts.on("-f", "--force", "do not check if make is the same as last") do |x|
+    options.check = false
   end
   rest = opts.parse(argv)
   if not rest.empty?
@@ -131,7 +135,8 @@ File.open('LocalMakefile',"w") do |fp|
 end
 
 if File.exists?('LocalMakefile.previous') and
-     not FileUtils.compare_file('LocalMakefile','LocalMakefile.previous')
+    not FileUtils.compare_file('LocalMakefile','LocalMakefile.previous') and
+    options.check
   STDERR.puts "Current and previous LocalMakefile files differ: first " +
               "remove them"
   exit 1
