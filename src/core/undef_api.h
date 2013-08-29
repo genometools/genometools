@@ -41,7 +41,7 @@
 
 /* The undefined <int> value. */
 #define GT_UNDEF_INT \
-        ~0
+        INT_MIN
 
 /* The undefined <long> value. */
 #define GT_UNDEF_LONG \
