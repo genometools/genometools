@@ -18,6 +18,7 @@
 #ifndef BITBUFFER_H
 #define BITBUFFER_H
 
+#include <inttypes.h>
 #include <stdio.h>
 
 /* The <GtBitbuffer> class provides means to sequentially write bit-compressed

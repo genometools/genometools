@@ -804,7 +804,7 @@ sBlockGetPartialSymSums(struct superBlock *sBlock,
   gt_bsGetNonUniformUlongArray(
     sBlock->cwData, sBlock->cwIdxMemBase, seqIdx->blockMapAlphabetSize,
     seqIdx->symSumBits, seqIdx->partialSymSumBits,
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
                              (uint64_t*) sums);
 #else
                              (uint32_t*) sums);

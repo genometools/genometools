@@ -104,7 +104,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   suffixsortspace->exportptr.ulongtabsectionptr = NULL;
   suffixsortspace->exportptr.uinttabsectionptr = NULL;
   suffixsortspace->currentexport = false;
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
   gt_logger_log(logger,"suftab uses %dbit values: "
                          "maxvalue=%lu,numofentries=%lu",
                          gt_decide_to_use_uint(useuint,maxvalue) ? 32 : 64,

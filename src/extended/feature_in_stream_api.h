@@ -1,8 +1,6 @@
 /*
-  Copyright (c) 2011      Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c)      2012 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
-  Copyright (c) 2011      Center for Bioinformatics, University of Hamburg
-  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2010 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,23 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SAM_ALIGNMENT_REP_H
-#define SAM_ALIGNMENT_REP_H
+#ifndef FEATURE_IN_STREAM_API_H
+#define FEATURE_IN_STREAM_API_H
 
-/* The contents of this file is to be considered private implementation detail.
-*/
+#include "extended/feature_stream_api.h"
 
-#include <sam.h>
-#include "core/alphabet_api.h"
+typedef struct GtFeatureStream GtFeatureInStream;
 
-struct GtSamAlignment{
-  bam1_t       *s_alignment;
-  GtAlphabet   *alphabet;
-  GtUchar      *seq_buffer,
-               *qual_buffer;
-  unsigned long s_bufsize,
-                q_bufsize,
-                rightmost;
-};
+/* Create a new <GtFeatureInStream> which writes all passed nodes to
+   <GtFeatureIndex> <fi>. */
+GtNodeStream* gt_feature_in_stream_new(GtNodeStream*, GtFeatureIndex *fi);
 
 #endif

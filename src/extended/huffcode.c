@@ -33,50 +33,50 @@
 #include "extended/rbtree.h"
 
 typedef struct GtHuffmanSymbol {
-  unsigned long symbol;
   unsigned long long freq;
+  unsigned long      symbol;
 } GtHuffmanSymbol;
 
 typedef struct GtHuffmanCode {
-  unsigned int numofbits;
   GtBitsequence code;
+  unsigned int  numofbits;
 } GtHuffmanCode;
 
 typedef struct GtHuffmanTree {
-  GtHuffmanSymbol symbol;
-  GtHuffmanCode code;
+  GtHuffmanCode         code;
+  GtHuffmanSymbol       symbol;
   struct GtHuffmanTree *leftchild,
                        *rightchild;
-  unsigned int reference_count;
+  unsigned int          reference_count;
 } GtHuffmanTree;
 
 struct GtHuffman {
-  GtHuffmanTree *root_huffman_tree;  /* stores the final huffmantree */
-  unsigned long num_of_coded_symbols,/* number of nodes in red black tree, */
-                                     /* e.g. symbols with frequency > 0*/
-                num_of_symbols;      /* symbols with frequency >= 0 */
-  uint64_t num_of_text_bits,         /* total bits needed to represent the text
-                                      */
-           num_of_text_symbols;      /* total number of characters in text */
-  GtRBTree *rbt_root;                /* red black tree*/
-  GtHuffmanCode *code_tab;           /* table for encoding */
+  uint64_t       num_of_text_bits,    /* total bits needed to represent the text
+                                       */
+                 num_of_text_symbols; /* total number of characters in text */
+  GtHuffmanTree *root_huffman_tree;   /* stores the final huffmantree */
+  GtRBTree      *rbt_root;            /* red black tree */
+  GtHuffmanCode *code_tab;            /* table for encoding */
+  unsigned long  num_of_coded_symbols,/* number of nodes in red black tree, */
+                                      /* e.g. symbols with frequency > 0*/
+                 num_of_symbols;      /* symbols with frequency >= 0 */
 };
 
 struct GtHuffmanDecoder {
-  int mem_func_stat;
-  unsigned long cur_bitseq,
-                cur_bit,
-                pad_length,
-                length;
-  GtBitsequence *bitsequence;
-  GtHuffman *huffman;
-  GtHuffmanTree *cur_node;
+  GtBitsequence             *bitsequence;
+  GtHuffman                 *huffman;
   GtHuffmanDecoderGetMemFunc mem_func;
-  void *info;
+  GtHuffmanTree             *cur_node;
+  void                      *info;
+  unsigned long              cur_bitseq,
+                             cur_bit,
+                             pad_length,
+                             length;
+  int                        mem_func_stat;
 };
 
 struct GtHuffmanBitwiseDecoder {
-  GtHuffman *huffman;
+  GtHuffman     *huffman;
   GtHuffmanTree *cur_node;
 };
 
@@ -748,8 +748,12 @@ static int test_bitwise(GtError *err)
 }
 
 typedef struct huffman_unit_test_meminfo {
-  unsigned long chunk, chunks, size, lastchunk_size, padding;
   GtBitsequence *data;
+  unsigned long  chunk,
+                 chunks,
+                 size,
+                 lastchunk_size,
+                 padding;
 } HuffmanUnitTestMeminfo;
 
 static int huffman_unit_get_next_block(GtBitsequence **bits,

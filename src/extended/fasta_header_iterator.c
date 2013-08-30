@@ -27,8 +27,8 @@
 
 struct GtFastaHeaderIterator {
   const GtCstrIterator parent_instance;
-  GtSeqIterator *seq_iter;
-  GtStrArray *filenametab;
+  GtSeqIterator       *seq_iter;
+  GtStrArray          *filenametab;
 };
 
 static int gt_fasta_header_iterator_next(GtCstrIterator *cstr_iterator,

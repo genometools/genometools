@@ -122,7 +122,7 @@ unsigned long gt_combinatorics_binomial_simple(unsigned long n, unsigned long k)
     k = n - k;
   result = n - k + 1;
   for (idx = 2UL; idx <= k; idx++) {
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
     result = (unsigned long) gt_safe_mult_u64((uint64_t) result,
                                               (uint64_t) (n - k + idx));
 #else

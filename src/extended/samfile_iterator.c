@@ -27,13 +27,13 @@
 #include "extended/samfile_iterator.h"
 
 struct GtSamfileIterator {
-  samfile_t *samfile;
+  GtAlphabet     *alphabet;
   GtSamAlignment *current_alignment;
-  GtAlphabet *alphabet;
-  char *filename,
-       *mode;
-  unsigned long ref_count;
-  void *aux;
+  char           *filename,
+                 *mode;
+  samfile_t      *samfile;
+  void           *aux;
+  unsigned long   ref_count;
 };
 
 GtSamfileIterator* gt_samfile_iterator_new(const char *filename,

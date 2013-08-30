@@ -502,7 +502,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       {
         gt_bsStoreUniformUlongArray(varDest, varOffset + bitsWritten,
                                   bitsPerOrigRank, origRanksQueueLen,
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
                              (uint64_t*) state->origRanksQueue);
 #else
                              (uint32_t*) state->origRanksQueue);

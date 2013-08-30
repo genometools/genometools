@@ -32,14 +32,14 @@
 
 struct GtPopcountTab
 {
-  unsigned int blocksize,
-               *bit_sizes;
-  unsigned long num_of_blocks;
+  unsigned int        *bit_sizes;
   /* the actual blocks in popcount order */
   GtCompactUlongStore *blocks,
                       *offsets,
   /* this contains a mapping from a block to its offset within its class */
                       *rev_blocks;
+  unsigned long        num_of_blocks;
+  unsigned int         blocksize;
 };
 
 static void gt_popcount_tab_init_offset_tab(GtPopcountTab *popcount_tab)

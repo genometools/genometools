@@ -187,7 +187,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
 {
   if (ssar->seqactype == SEQ_scan)
   {
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
     if (ssar->suffixarray->suftabstream_GtUlong.fp != NULL)
     {
       return gt_readnextfromstream_GtUlong(currentsuffix,

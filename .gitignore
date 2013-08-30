@@ -77,3 +77,8 @@ src/external/hmmer-2.3.2/squid/squidconf.h
 src/external/hmmer-2.3.2/src/config.h
 tags
 testdata/genomediff
+.project
+.cproject
+gmon.out
+gprof_analysis.txt
+*.uedb

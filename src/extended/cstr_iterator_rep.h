@@ -32,14 +32,14 @@ typedef void   (*GtCstrIteratorDeleteFunc)(GtCstrIterator*);
 
 struct GtCstrIterator {
   const GtCstrIteratorClass *c_class;
-  GtCstrIteratorMembers *members;
+  GtCstrIteratorMembers     *members;
 };
 
 struct GtCstrIteratorClass {
-  size_t size;
-  GtCstrIteratorNextFunc next_func;
-  GtCstrIteratorResetFunc reset_func;
+  GtCstrIteratorNextFunc   next_func;
+  GtCstrIteratorResetFunc  reset_func;
   GtCstrIteratorDeleteFunc delete_func;
+  size_t                   size;
 };
 
 GtCstrIteratorClass* gt_cstr_iterator_class_new(size_t size,

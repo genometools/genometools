@@ -24,7 +24,7 @@
 #include "core/unused_api.h"
 #include "core/safearith.h"
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
 #define GT_BINOMIAL_MAX_N_LN 66UL
 #define GT_BINOMIAL_MAX_N 62UL
 #define GT_BINOMIAL_MAX_N_DP 67UL

@@ -24,7 +24,8 @@
 typedef struct GtFeatureStream GtFeatureStream;
 
 /* Create a new <GtFeatureStream> which writes all passed nodes to
-   <GtFeatureIndex> <fi>. */
+   <GtFeatureIndex> <fi>. Note: The <GtFeatureStream> class is now deprecated.
+   Please use the <GtFeatureInStream> class instead. */
 GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex *fi);
 
 #endif

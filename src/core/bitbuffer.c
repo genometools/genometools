@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <inttypes.h>
 #include "core/ma_api.h"
 #include "core/assert_api.h"
 #include "bitbuffer.h"
@@ -52,8 +51,8 @@ GtBitbuffer *gt_bitbuffer_new(FILE *outfp,unsigned int bitsperentry)
   return bitbuffer;
 }
 
-void gt_bitbuffer_next_value (GtBitbuffer *bb, unsigned long value,
-                              unsigned int bitsforvalue)
+void gt_bitbuffer_next_value(GtBitbuffer *bb, unsigned long value,
+                             unsigned int bitsforvalue)
 {
   unsigned int bits2store = bitsforvalue;
 

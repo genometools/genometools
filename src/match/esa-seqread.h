@@ -96,7 +96,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
           SUFTABVALUE = (unsigned long)buf->bufferedfilespace[buf->nextread++];\
         }
 
-#ifdef _LP64
+#if defined (_LP64) || defined (_WIN64)
 #define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
         if ((SSAR)->suffixarray->suftabstream_GtUlong.fp != NULL)\
         {\
