@@ -25,7 +25,7 @@
 int gt_randomcodes_correct_process_bucket(void *data,
     const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
     const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
-    unsigned int correction_kmersize, GtError *err);
+    unsigned int sortingdepth, GtError *err);
 
 typedef struct GtRandomcodesCorrectData GtRandomcodesCorrectData;
 

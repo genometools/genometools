@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011-2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2012-2013 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -34,17 +35,17 @@ typedef int (*GtRandomcodesintervalprocess)(void *,
 
 typedef void (*GtRandomcodesintervalprocess_end)(void *);
 
-void gt_rungetencseqkmers_rc(const GtEncseq *encseq,unsigned int kmersize);
+void gt_rungetencseqkmers_rc(const GtEncseq *encseq,unsigned int bucketkeysize);
 
 int storerandomcodes_getencseqkmers_twobitencoding(
                     const GtEncseq *encseq,
-                    unsigned int kmersize,
+                    unsigned int bucketkeysize,
                     unsigned int numofparts,
                     unsigned long maximumspace,
-                    unsigned int correction_kmersize,
+                    unsigned int sortingdepth,
+                    unsigned int skipshorter,
                     bool usefirstcodes,
                     unsigned int sampling_factor,
-                    bool usemaxdepth,
                     bool withsuftabcheck, /* set to false, only for tests */
                     bool onlyaccumulation, /* set to false, only for tests */
                     bool onlyallrandomcodes, /* set to false, only for tests */
