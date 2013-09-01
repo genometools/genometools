@@ -25,7 +25,7 @@
 int gt_randomcodes_find_seldom_process_bucket(void *data,
     const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
     const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
-    unsigned int operative_kmersize, GtError *err);
+    unsigned int sortingdepth, GtError *err);
 
 typedef struct GtRandomcodesFindSeldomData GtRandomcodesFindSeldomData;
 

@@ -36,6 +36,10 @@ typedef struct GtUnionFind GtUnionFind;
    sets. */
 GtUnionFind*  gt_union_find_new(unsigned long num_of_elems);
 
+/* Reset the union-find structure, by placing each element in a disjoined set;
+   thereby resize the representation to <num_of_elems> elements. */
+void          gt_union_find_reset(GtUnionFind*, unsigned long num_of_elems);
+
 /* Delete the given union-find data structure. */
 void          gt_union_find_delete(GtUnionFind*);
 

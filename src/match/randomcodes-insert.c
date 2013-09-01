@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012-2013 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -45,7 +46,7 @@
 static void gt_randomcodes_insert_kmerscan_range(
                                          const GtBitsequence *twobitencoding,
                                          unsigned int kmersize,
-                                         unsigned int minmatchlength,
+                                         unsigned int skipshorter,
                                          unsigned long startpos,
                                          unsigned long length,
                                          unsigned long fseqnum,
@@ -54,7 +55,7 @@ static void gt_randomcodes_insert_kmerscan_range(
                                          GtCodeposbuffer *buf)
 {
   const unsigned long maskright = GT_MASKRIGHT(kmersize);
-  const unsigned long lastpossiblepos = length - minmatchlength;
+  const unsigned long lastpossiblepos = length - skipshorter;
   const unsigned long lastfrelpos = length - kmersize;
   const unsigned int shiftleft = GT_MULT2(kmersize-1);
   unsigned int shiftright;
@@ -67,7 +68,7 @@ static void gt_randomcodes_insert_kmerscan_range(
   rccode = gt_kmercode_complement(gt_kmercode_reverse(fcode,kmersize),
                                   maskright);
   GT_RANDOMCODES_INSERTSUFFIXES(buf,fcode,fseqnum,0UL);
-  if (kmersize == minmatchlength)
+  if (kmersize == skipshorter)
   {
     GT_RANDOMCODES_INSERTSUFFIXES(buf,rccode,rseqnum,lastfrelpos);
   }
@@ -111,7 +112,7 @@ static void gt_randomcodes_insert_kmerscan_eqlen(
                                      unsigned long numofsequences,
                                      unsigned long maxunitindex,
                                      unsigned int kmersize,
-                                     unsigned int minmatchlength,
+                                     unsigned int skipshorter,
                                      GtCodeposbuffer *buf)
 {
   unsigned long startpos, fseqnum;
@@ -123,7 +124,7 @@ static void gt_randomcodes_insert_kmerscan_eqlen(
     {
       gt_randomcodes_insert_kmerscan_range(twobitencoding,
                                           kmersize,
-                                          minmatchlength,
+                                          skipshorter,
                                           startpos,
                                           equallength,
                                           fseqnum,
@@ -140,7 +141,7 @@ static void gt_randomcodes_insert_kmerscan(const GtEncseq *encseq,
                                           unsigned long numofsequences,
                                           unsigned long maxunitindex,
                                           unsigned int kmersize,
-                                          unsigned int minmatchlength,
+                                          unsigned int skipshorter,
                                           GtCodeposbuffer *buf)
 {
   unsigned long laststart = 0, fseqnum = 0;
@@ -155,11 +156,11 @@ static void gt_randomcodes_insert_kmerscan(const GtEncseq *encseq,
            && range.start < totallength)
     {
       gt_assert(range.start >= laststart);
-      if (range.start - laststart >= (unsigned long) minmatchlength)
+      if (range.start - laststart >= (unsigned long) skipshorter)
       {
         gt_randomcodes_insert_kmerscan_range(twobitencoding,
                                             kmersize,
-                                            minmatchlength,
+                                            skipshorter,
                                             laststart,
                                             range.start - laststart,
                                             fseqnum,
@@ -172,11 +173,11 @@ static void gt_randomcodes_insert_kmerscan(const GtEncseq *encseq,
     }
     gt_specialrangeiterator_delete(sri);
   }
-  if (totallength - laststart >= (unsigned long) minmatchlength)
+  if (totallength - laststart >= (unsigned long) skipshorter)
   {
     gt_randomcodes_insert_kmerscan_range(twobitencoding,
                                         kmersize,
-                                        minmatchlength,
+                                        skipshorter,
                                         laststart,
                                         totallength - laststart,
                                         fseqnum,
@@ -188,14 +189,14 @@ static void gt_randomcodes_insert_kmerscan(const GtEncseq *encseq,
 
 void gt_randomcodes_insert_runkmerscan(const GtEncseq *encseq,
                                       unsigned int kmersize,
-                                      unsigned int minmatchlength,
+                                      unsigned int skipshorter,
                                       GtCodeposbuffer *buf)
 {
   const GtTwobitencoding *twobitencoding
     = gt_encseq_twobitencoding_export(encseq);
   unsigned long totallength, maxunitindex, numofsequences;
 
-  gt_assert(minmatchlength>=kmersize);
+  gt_assert(skipshorter>=kmersize);
   if (gt_encseq_is_mirrored(encseq))
   {
     totallength = (gt_encseq_total_length(encseq)-1)/2;
@@ -216,7 +217,7 @@ void gt_randomcodes_insert_runkmerscan(const GtEncseq *encseq,
                                         numofsequences,
                                         maxunitindex,
                                         kmersize,
-                                        minmatchlength,
+                                        skipshorter,
                                         buf);
   } else
   {
@@ -226,7 +227,7 @@ void gt_randomcodes_insert_runkmerscan(const GtEncseq *encseq,
                                   numofsequences,
                                   maxunitindex,
                                   kmersize,
-                                  minmatchlength,
+                                  skipshorter,
                                   buf);
   }
 }

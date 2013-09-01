@@ -66,10 +66,17 @@ bool              gt_reads2twobit_has_paired(GtReads2Twobit *r2t);
 void              gt_reads2twobit_use_phred64(GtReads2Twobit *r2t);
 
 /* filter those reads which contain more than <maxlow> positions
-   whose quality is no more than <lowqual>. */
+   whose quality is no more than <lowqual>;
+   it must be called before <gt_reads2twobit_encode> */
 void              gt_reads2twobit_set_quality_filter(GtReads2Twobit *r2t,
                                                      unsigned long maxlow,
                                                      char lowqual);
+
+/* use a run-length encoding, in which the two-bit representation
+   stores only the first letter of each homopolymer; the homopolymer length
+   is stored in a separate data structure;
+   it must be called before <gt_reads2twobit_encode> */
+void              gt_reads2twobit_use_rle(GtReads2Twobit *r2t);
 
 /* Encodes the sequences in the twobit-encoding format in memory;
    can be called only once; returns 0 on success, a negative number on
@@ -162,10 +169,18 @@ void              gt_reads2twobit_sort(GtReads2Twobit *r2t,
                                        GtCompareWithData cmp,
                                        void *cmp_data);
 
-/* write the libraries information to disk */
+/* write the libraries information to file */
 void              gt_reads2twobit_write_libraries_table(
                                             const GtReads2Twobit *r2t,
                                             FILE *rlt_fp);
+
+/* write the homopolymer length table to file */
+void              gt_reads2twobit_write_hplengths(const GtReads2Twobit *r2t,
+                                                  FILE *out_fp);
+
+/* approximate average length of homopolymers */
+double            gt_reads2twobit_approx_average_hplength(
+                                            const GtReads2Twobit *r2t);
 
 #define GT_READS2TWOBIT_LIBSPEC_HELPMSG \
   "specify a list of input libraries (Fasta/FastQ); for single-end " \

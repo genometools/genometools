@@ -40,6 +40,11 @@ unsigned long gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                          const char *charlist,
                                          unsigned long len);
 
+unsigned long gt_computegreedyunitedist(const GtUchar *useq,
+                                        unsigned long ulen,
+                                        const GtUchar *vseq,
+                                        unsigned long vlen);
+
 void gt_checkgreedyunitedist(bool forward,
                           const GtUchar *useq,
                           unsigned long ulen,
