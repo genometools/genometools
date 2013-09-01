@@ -157,6 +157,22 @@ unsigned long gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                   gt_applycheckfunctiontotext);
 }
 
+unsigned long gt_computegreedyunitedist(const GtUchar *useq,
+                                        unsigned long ulen,
+                                        const GtUchar *vseq,
+                                        unsigned long vlen)
+{
+  unsigned long edist;
+  GtFrontResource *frontresource = gt_frontresource_new(10UL);
+  GtSeqabstract *greedyedistuseq = gt_seqabstract_new_gtuchar(useq,ulen,0),
+                *greedyedistvseq = gt_seqabstract_new_gtuchar(vseq,vlen,0);
+  edist = greedyunitedist(frontresource,greedyedistuseq,greedyedistvseq);
+  gt_seqabstract_delete(greedyedistuseq);
+  gt_seqabstract_delete(greedyedistvseq);
+  gt_frontresource_delete(frontresource);
+  return edist;
+}
+
 void gt_checkgreedyunitedist(GT_UNUSED bool forward,
                              const GtUchar *useq,
                              unsigned long ulen,
