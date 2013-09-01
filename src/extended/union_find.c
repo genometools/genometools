@@ -23,13 +23,13 @@
 #define UNION_FIND_TEST_SIZE  1024
 
 typedef struct {
-  unsigned long parent,
-                rank;
+  unsigned long parent/*, rank*/;
 } GtUnionFindElement;
 
 struct GtUnionFind {
   GtUnionFindElement *elems;
   unsigned long num_of_elems;
+  unsigned long allocated;
 };
 
 GtUnionFind* gt_union_find_new(unsigned long num_of_elems)
@@ -39,10 +39,26 @@ GtUnionFind* gt_union_find_new(unsigned long num_of_elems)
   gt_assert(num_of_elems);
   uf = gt_malloc(sizeof *uf);
   uf->elems = gt_calloc(sizeof (GtUnionFindElement), num_of_elems);
+  uf->allocated = num_of_elems;
   for (i = 0; i < num_of_elems; i++)
     uf->elems[i].parent = i;
   uf->num_of_elems = num_of_elems;
   return uf;
+}
+
+void gt_union_find_reset(GtUnionFind *uf, unsigned long num_of_elems)
+{
+  unsigned long i;
+  gt_assert(num_of_elems);
+  if (num_of_elems > uf->allocated)
+  {
+    uf->elems = gt_realloc(uf->elems, sizeof (GtUnionFindElement) *
+        num_of_elems);
+    uf->allocated = num_of_elems;
+  }
+  for (i = 0; i < num_of_elems; i++)
+    uf->elems[i].parent = i;
+  uf->num_of_elems = num_of_elems;
 }
 
 void gt_union_find_delete(GtUnionFind *uf)
