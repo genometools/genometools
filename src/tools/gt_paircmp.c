@@ -39,13 +39,15 @@ typedef struct
            *files;
   Charlistlen *charlistlen;
   GtStr *text;
+  bool showedist;
 } Cmppairwiseopt;
 
 static void showsimpleoptions(const Cmppairwiseopt *opt)
 {
   if (gt_str_array_size(opt->strings) > 0)
   {
-    printf("# two strings \"%s\" \"%s\"\n",gt_str_array_get(opt->strings,0),
+    if (!opt->showedist)
+      printf("# two strings \"%s\" \"%s\"\n",gt_str_array_get(opt->strings,0),
                                            gt_str_array_get(opt->strings,1UL));
     return;
   }
@@ -77,7 +79,8 @@ static GtOPrval parse_options(int *parsed_args,
   GtOption *optionstrings,
          *optionfiles,
          *optioncharlistlen,
-         *optiontext;
+         *optiontext,
+         *optionshowedist;
   GtStrArray *charlistlen;
   GtOPrval oprval;
 
@@ -87,6 +90,7 @@ static GtOPrval parse_options(int *parsed_args,
   pw->files = gt_str_array_new();
   pw->text = gt_str_new();
   pw->charlistlen = NULL;
+  pw->showedist = false;
   op = gt_option_parser_new("options","Apply function to pairs of strings.");
   gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
@@ -106,12 +110,17 @@ static GtOPrval parse_options(int *parsed_args,
   optiontext = gt_option_new_string("t","use text",pw->text, NULL);
   gt_option_parser_add_option(op, optiontext);
 
+  optionshowedist = gt_option_new_bool("e", "output unit edit distance",
+                      &pw->showedist, false);
+  gt_option_parser_add_option(op, optionshowedist);
+
   gt_option_exclude(optionstrings, optionfiles);
   gt_option_exclude(optionstrings, optioncharlistlen);
   gt_option_exclude(optionstrings, optiontext);
   gt_option_exclude(optionfiles, optioncharlistlen);
   gt_option_exclude(optionfiles, optiontext);
   gt_option_exclude(optioncharlistlen, optiontext);
+  gt_option_imply(optionshowedist, optionstrings);
 
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
@@ -245,13 +254,25 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
   oprval = parse_options(&parsed_args,&cmppairwise,argc, argv, err);
   if (oprval == GT_OPTION_PARSER_OK)
   {
-    unsigned long testcases;
-
     gt_assert(parsed_args == argc);
     showsimpleoptions(&cmppairwise);
-    testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
-                                                  &cmppairwise);
-    printf("# number of testcases: %lu\n",testcases);
+    if (cmppairwise.showedist)
+    {
+      unsigned long edist;
+      edist = gt_computegreedyunitedist(
+        (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),
+        (unsigned long) strlen(gt_str_array_get(cmppairwise.strings,0)),
+        (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
+        (unsigned long) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
+      printf("%lu\n",edist);
+    }
+    else
+    {
+      unsigned long testcases;
+      testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
+                                                    &cmppairwise);
+      printf("# number of testcases: %lu\n",testcases);
+    }
   }
   freesimpleoption(&cmppairwise);
   if (oprval == GT_OPTION_PARSER_REQUESTS_EXIT)

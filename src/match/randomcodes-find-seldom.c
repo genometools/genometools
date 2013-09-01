@@ -56,16 +56,17 @@ static inline void gt_randomcodes_find_seldom_process_kmer_itv(
 int gt_randomcodes_find_seldom_process_bucket(void *data,
     const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
     const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
-    unsigned int operative_kmersize, GT_UNUSED GtError *err)
+    GT_UNUSED unsigned int sortingdepth, GT_UNUSED GtError *err)
 {
   unsigned long itvstart, next_itvstart;
   unsigned int lcpvalue;
+  GtRandomcodesFindSeldomData *sdata = data;
 
   for (itvstart = 0, next_itvstart = 1UL; next_itvstart < numberofsuffixes;
       next_itvstart++)
   {
     lcpvalue = (unsigned int) lcptab_bucket[next_itvstart];
-    if (lcpvalue < operative_kmersize)
+    if (lcpvalue < (unsigned int)sdata->k)
     {
       gt_randomcodes_find_seldom_process_kmer_itv(snrp,
           bucketofsuffixes + itvstart, next_itvstart - itvstart, data);

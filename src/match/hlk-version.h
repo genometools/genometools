@@ -1,7 +1,6 @@
 /*
-  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2012-2013 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
-  Copyright (c) 2011-2013 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,15 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RANDOMCODES_INSERT_H
-#define RANDOMCODES_INSERT_H
+#ifndef HLK_VERSION_H
+#define HLK_VERSION_H
 
-#include "core/encseq_api.h"
-#include "match/firstcodes-buf.h"
+#define GT_HARLEKIN_VERSION "0.9"
+#define GT_HARLEKIN_CMD     "harlekin"
 
-void gt_randomcodes_insert_runkmerscan(const GtEncseq *encseq,
-                                      unsigned int kmersize,
-                                      unsigned int skipshorter,
-                                      GtCodeposbuffer *buf);
+void gt_harlekin_show_version(const char *progname);
 
 #endif

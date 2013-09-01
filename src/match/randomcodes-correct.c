@@ -135,22 +135,23 @@ static inline void gt_randomcodes_correct_process_kmergroup_end(
 int gt_randomcodes_correct_process_bucket(void *data,
     const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
     const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
-    unsigned int correction_kmersize, GT_UNUSED GtError *err)
+    GT_UNUSED unsigned int sortingdepth, GT_UNUSED GtError *err)
 {
   unsigned long itvstart, next_itvstart;
   unsigned int lcpvalue;
   bool haserr = false;
+  GtRandomcodesCorrectData *cdata = data;
 
   for (itvstart = 0, next_itvstart = 1UL; next_itvstart < numberofsuffixes;
       next_itvstart++)
   {
     lcpvalue = (unsigned int) lcptab_bucket[next_itvstart];
-    if (lcpvalue < correction_kmersize)
+    if (lcpvalue < cdata->k)
     {
       gt_randomcodes_correct_process_kmer_itv(bucketofsuffixes + itvstart,
           next_itvstart - itvstart, data);
       itvstart = next_itvstart;
-      if (lcpvalue < correction_kmersize - 1)
+      if (lcpvalue < cdata->k - 1)
       {
         gt_randomcodes_correct_process_kmergroup_end(snrp, data);
       }
