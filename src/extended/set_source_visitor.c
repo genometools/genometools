@@ -33,6 +33,7 @@ struct GtSetSourceVisitor {
 GtNodeVisitor *gt_set_source_visitor_new(GtStr *newsource)
 {
   GtNodeVisitor *nv;
+  gt_assert(newsource);
   nv = gt_node_visitor_create(gt_set_source_visitor_class());
   GtSetSourceVisitor *ssv = set_source_visitor_cast(nv);
   ssv->newsource = gt_str_ref(newsource);
