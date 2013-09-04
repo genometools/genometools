@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include "core/ensure.h"
 #include "core/grep_api.h"
+#include "core/ma.h"
 #include "core/unused_api.h"
 
 #ifndef _WIN32
@@ -33,10 +34,10 @@ static void grep_error(int errcode, regex_t *matcher, GtError *err)
   size_t bufsize;
   gt_error_check(err);
   bufsize = regerror(errcode, matcher, NULL, 0);
-  buf = malloc(bufsize);
+  buf = gt_malloc(bufsize);
   (void) regerror(errcode, matcher, buf ? buf : sbuf, buf ? bufsize : BUFSIZ);
   gt_error_set(err, "grep(): %s", buf ? buf : sbuf);
-  free(buf);
+  gt_free(buf);
 }
 #endif
 
