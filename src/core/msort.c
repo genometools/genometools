@@ -53,6 +53,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include "core/ma.h"
 #include "core/msort.h"
 
 #define ISIZE sizeof (int)
@@ -218,7 +219,7 @@ msort_r(void *base, size_t nmemb, size_t size, void *cmpinfo,
   if (!(size % ISIZE) && !(((char *)base - (char *)0) % ISIZE))
     iflag = 1;
 
-  if ((list2 = malloc(nmemb * size + PSIZE)) == NULL)
+  if ((list2 = gt_malloc(nmemb * size + PSIZE)) == NULL)
     return (-1);
 
   list1 = base;
@@ -325,7 +326,7 @@ COPY:           b = t;
     memmove(list2, list1, nmemb*size);
     list2 = list1;
   }
-  free(list2);
+  gt_free(list2);
   return (0);
 }
 

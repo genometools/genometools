@@ -26,8 +26,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "core/md5_encoder_api.h"
 #include "core/assert_api.h"
+#include "core/ma.h"
+#include "core/md5_encoder_api.h"
 
 #define GT_MD5_WORD 32
 #define GT_MD5_MASK 0xFFFFFFFF
@@ -192,7 +193,7 @@ struct GtMD5Encoder {
 
 GtMD5Encoder* gt_md5_encoder_new()
 {
-  GtMD5Encoder *enc = malloc(sizeof (GtMD5Encoder));
+  GtMD5Encoder *enc = gt_malloc(sizeof (GtMD5Encoder));
   enc->len = 0;
   enc->status = 0;
   memset(enc->d_old, 0, sizeof (WORD32)*4);
@@ -258,5 +259,5 @@ void gt_md5_encoder_finish(GtMD5Encoder *enc, unsigned char *output,
 void gt_md5_encoder_delete(GtMD5Encoder *enc)
 {
   if (!enc) return;
-  free(enc);
+  gt_free(enc);
 }
