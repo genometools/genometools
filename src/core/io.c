@@ -87,7 +87,7 @@ bool gt_io_has_char(GtIO *io)
   return rval ? false : true;
 }
 
-char gt_io_peek(GtIO *io)
+signed char gt_io_peek(GtIO *io)
 {
   char c;
   gt_assert(io);
@@ -96,7 +96,7 @@ char gt_io_peek(GtIO *io)
   return c;
 }
 
-char gt_io_next(GtIO *io)
+signed char gt_io_next(GtIO *io)
 {
   char c;
   gt_assert(io);
