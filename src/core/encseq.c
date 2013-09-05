@@ -9331,7 +9331,7 @@ unsigned long gt_encseq_num_of_files(const GtEncseq *encseq)
   return encseq->numofdbfiles;
 }
 
-uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
+GtUint64 gt_encseq_effective_filelength(const GtEncseq *encseq,
                                         unsigned long filenum)
 {
   if (encseq->numofdbfiles == 1UL)

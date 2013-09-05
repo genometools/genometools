@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #endif
 
+#include <stdint.h>
 #include "core/alphabet_api.h"
 #include "core/str_api.h"
 #include "core/types_api.h"

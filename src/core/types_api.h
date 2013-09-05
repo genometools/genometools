@@ -19,22 +19,20 @@
 #ifndef TYPES_API_H
 #define TYPES_API_H
 
-#include <inttypes.h>
-
 /* Define GtUword as an unsigned integer with the machine word size (4 byte on
    32-bit systems and 8 byte on 64-bit systems). */
-#if defined (_LP64) || defined (_WIN64)
+#ifdef _WIN64
 typedef unsigned long long GtUword;
 #else
-typedef unsigned int GtUword;
+typedef unsigned long GtUword;
 #endif
 
 /* Define GtWord as a signed integer with the machine word size (4 byte on
    32-bit systems and 8 byte on 64-bit systems). */
-#if defined (_LP64) || defined (_WIN64)
+#ifdef _WIN64
 typedef long long GtWord;
 #else
-typedef int GtWord;
+typedef long GtWord;
 #endif
 
 typedef long long          GtInt64;

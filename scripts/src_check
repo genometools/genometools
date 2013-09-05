@@ -120,6 +120,18 @@ for _, fn in ipairs(arg) do -- iterate over all files
       end
     end
 
+    if string.match(fn, "_api.h$") then
+      -- check for stdint.h
+      if string.find(l, "^#include <stdint.h>") then
+        err(fn, ln, "do not use stdint.h in API header")
+      end
+
+      -- check for inttypes.h
+      if string.find(l, "^#include <inttypes.h>") then
+        err(fn, ln, "do not use inttypes.h in API header")
+      end
+    end
+
     -- check for superfluous blanks
     if string.find(l, "return  ") then err(fn, ln, "superfluous blank") end
 
