@@ -21,6 +21,8 @@ changes in version 1.5.2 (2013-XX-XX)
 - LTRdigest code refactored for reusability
 - added GtCompressedBitsequence, abstract GtWTree and implementation thereof
   GtWtreeEncseq
+- C API: replace 'unsigned long long' by 'GtUint64'
+- C API: replace 'uint64_t ' by 'GtUint64'
 
 
 changes in version 1.5.1 (2013-03-07)
