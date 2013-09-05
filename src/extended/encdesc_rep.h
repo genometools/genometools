@@ -32,8 +32,8 @@
 
 #define GT_ENCDESC_MAX_NUM_VAL_HUF 512UL
 
-DECLARE_HASHMAP(long int, li, unsigned long long, ull, static, inline)
-DEFINE_HASHMAP(long int, li, unsigned long long, ull, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(long int, li, GtUint64, ull, static, inline)
+DEFINE_HASHMAP(long int, li, GtUint64, ull, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
@@ -85,7 +85,7 @@ struct GtEncdesc {
   DescField         *fields;
   GtBitInStream     *bitinstream;
   GtSampling        *sampling;
-  unsigned long long total_num_of_chars;
+  GtUint64 total_num_of_chars;
   unsigned long      num_of_descs,
                      num_of_fields,
                      cur_desc,

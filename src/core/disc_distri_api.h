@@ -21,6 +21,7 @@
 
 #include "core/error_api.h"
 #include "core/file_api.h"
+#include "core/types_api.h"
 
 /* The <GtDiscDistri> class represents a discrete distribution of integer
    values. */
@@ -29,7 +30,7 @@ typedef struct GtDiscDistri GtDiscDistri;
 /* Callback function called during iteration over each item of the
    distribution, where <key> is the counted value and <value> is the count. */
 typedef void (*GtDiscDistriIterFunc)(unsigned long key,
-                                     unsigned long long value,
+                                     GtUint64 value,
                                      void *data);
 
 /* Creates a new, empty <GtDiscDistri>. */
@@ -38,9 +39,9 @@ GtDiscDistri*      gt_disc_distri_new(void);
 void               gt_disc_distri_add(GtDiscDistri *d, unsigned long key);
 /* Adds <occurrences> counts of <key> to <d>. */
 void               gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
-                                            unsigned long long occurrences);
+                                            GtUint64 occurrences);
 /* Return the current count of <key> as stored in <d>. */
-unsigned long long gt_disc_distri_get(const GtDiscDistri *d, unsigned long key);
+GtUint64 gt_disc_distri_get(const GtDiscDistri *d, unsigned long key);
 /* Prints the current state of <d> to <outfile>. If <outfp> is NULL,
    stdout will be used for output. */
 void               gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp);

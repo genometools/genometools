@@ -23,12 +23,13 @@
 #include <inttypes.h>
 #include "core/assert_api.h"
 #include "core/compat.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 
 #ifdef S_SPLINT_S
 #define PRINTLLUcast(X)  ((unsigned int) (X))
 #else
-#define PRINTLLUcast(X)  ((unsigned long long) (X))
+#define PRINTLLUcast(X)  ((GtUint64) (X))
 #endif
 
 #define DECLARESAFECASTFUNCTION(FROMTYPE,FROMTYPEALIAS,TOTYPE,TOTYPEALIAS)\

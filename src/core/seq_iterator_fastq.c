@@ -49,7 +49,7 @@ struct GtSeqIteratorFastQ
                 curline,
                 reference_count;
   uint64_t lastspeciallength;
-  unsigned long long maxread,
+  GtUint64 maxread,
                      currentread;
   const GtStrArray *filenametab;
   unsigned char ungetchar,
@@ -407,9 +407,9 @@ int gt_seq_iterator_fastq_next(GtSeqIterator *seqit,
   return errstatus;
 }
 
-const unsigned long long*
+const GtUint64*
 gt_seq_iterator_fastq_getcurrentcounter(GtSeqIterator *si,
-                                       unsigned long long maxread)
+                                       GtUint64 maxread)
 {
   GtSeqIteratorFastQ *seqit;
   gt_assert(si);

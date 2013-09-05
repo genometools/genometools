@@ -1774,7 +1774,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
     dc_bcktab2firstlevelintervals(dcov);
   } else
   {
-    unsigned long long bucketiterstep = 0;
+    GtUint64 bucketiterstep = 0;
     Sfxstrategy sfxstrategy;
 
     gt_assert (dcov->vparam > dcov->prefixlength);

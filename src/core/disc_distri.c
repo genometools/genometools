@@ -28,7 +28,7 @@
 
 struct GtDiscDistri {
   GtHashtable *hashdist;
-  unsigned long long num_of_occurrences;
+  GtUint64 num_of_occurrences;
 };
 
 GtDiscDistri* gt_disc_distri_new(void)
@@ -38,18 +38,18 @@ GtDiscDistri* gt_disc_distri_new(void)
 
 void gt_disc_distri_add(GtDiscDistri *d, unsigned long key)
 {
-  gt_disc_distri_add_multi(d, key, (unsigned long long) 1);
+  gt_disc_distri_add_multi(d, key, (GtUint64) 1);
 }
 
-DECLARE_HASHMAP(unsigned long, ul, unsigned long long, ull, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, unsigned long long, ull, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(unsigned long, ul, GtUint64, ull, static, inline)
+DEFINE_HASHMAP(unsigned long, ul, GtUint64, ull, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
 void gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
-                              unsigned long long occurrences)
+                              GtUint64 occurrences)
 {
-  unsigned long long *valueptr;
+  GtUint64 *valueptr;
   gt_assert(d);
 
   if (!d->hashdist)
@@ -65,9 +65,9 @@ void gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
   d->num_of_occurrences += occurrences;
 }
 
-unsigned long long gt_disc_distri_get(const GtDiscDistri *d, unsigned long key)
+GtUint64 gt_disc_distri_get(const GtDiscDistri *d, unsigned long key)
 {
-  unsigned long long *valueptr;
+  GtUint64 *valueptr;
   gt_assert(d);
   if (!d->hashdist || !(valueptr = ul_ull_gt_hashmap_get(d->hashdist, key)))
     return 0;
@@ -76,12 +76,12 @@ unsigned long long gt_disc_distri_get(const GtDiscDistri *d, unsigned long key)
 
 typedef struct {
   double cumulative_probability;
-  unsigned long long num_of_occurrences;
+  GtUint64 num_of_occurrences;
   GtFile *outfp;
 } GtShowValueInfo;
 
 static enum iterator_op
-showvalue(unsigned long key, unsigned long long occurrences,
+showvalue(unsigned long key, GtUint64 occurrences,
           void *data, GT_UNUSED GtError *err)
 {
   double probability;
@@ -121,7 +121,7 @@ typedef struct {
 } DiscDistriForeachInfo;
 
 static enum iterator_op
-disc_distri_foreach_iterfunc(unsigned long key, unsigned long long occurrences,
+disc_distri_foreach_iterfunc(unsigned long key, GtUint64 occurrences,
                              void *data, GT_UNUSED GtError *err)
 {
   DiscDistriForeachInfo *info;
@@ -189,7 +189,7 @@ struct ForeachTesterData
 
 /* helper function for unit test of foreach */
 static void foreachtester(unsigned long key,
-                          unsigned long long value, void *data)
+                          GtUint64 value, void *data)
 {
   struct ForeachTesterData *tdata = data;
   int had_err = *(tdata->had_err);
@@ -197,7 +197,7 @@ static void foreachtester(unsigned long key,
   tdata->counter++;
   gt_ensure(tdata->counter < DISC_DISTRI_FOREACHTESTSIZE);
   gt_ensure((unsigned long) tdata->expkeys[tdata->counter] == key);
-  gt_ensure((unsigned long long) tdata->expvalues[tdata->counter] == value);
+  gt_ensure((GtUint64) tdata->expvalues[tdata->counter] == value);
   *(tdata->had_err) = had_err;
 }
 

@@ -24,6 +24,7 @@
 #include "core/multithread_api.h"
 #include "core/spacecalc.h"
 #include "core/spacepeak.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 
@@ -32,7 +33,7 @@ typedef struct {
   GtHashmap *allocated_pointer;
   bool bookkeeping,
        global_space_peak;
-  unsigned long long mallocevents;
+  GtUint64 mallocevents;
   unsigned long current_size,
                 max_size;
 } MA;

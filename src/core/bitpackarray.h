@@ -200,7 +200,7 @@ typedef struct
   /* and others */
 } BitPackArray;
 
-typedef unsigned long long BitOffset;
+typedef GtUint64 BitOffset;
 size_t sizeofbitarray(unsigned bits, BitOffset numValues);
 void bitpackarray_delete(BitPackArray *bpa);
 BitPackArray *bitpackarray_new(unsigned bits, BitOffset numValues,

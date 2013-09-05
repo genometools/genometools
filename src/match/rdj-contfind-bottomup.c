@@ -38,7 +38,7 @@ typedef struct
 
   /* progressbar */
   bool show_progressbar;
-  unsigned long long progress;
+  GtUint64 progress;
 
   /* revcompl mode */
   unsigned long firstrevcompl;
@@ -235,7 +235,7 @@ unsigned long gt_contfind_bottomup(Sequentialsuffixarrayreader *ssar,
   {
     state.progress = 0;
     gt_progressbar_start(&(state.progress),
-        (unsigned long long)totallength);
+        (GtUint64)totallength);
   }
 
   retval = (read_length == 0)

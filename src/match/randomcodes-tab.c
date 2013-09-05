@@ -80,7 +80,7 @@ typedef struct
 } GtCountdistri_info;
 
 static void gt_randomcodes_evaluate_distvalue(unsigned long key,
-                                             unsigned long long value,
+                                             GtUint64 value,
                                              void *data)
 {
   GtCountdistri_info *cdi = (GtCountdistri_info *) data;

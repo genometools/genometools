@@ -51,7 +51,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        const Sfxstrategy *sfxstrategy,
                        GtProcessunsortedsuffixrange processunsortedsuffixrange,
                        void *processunsortedsuffixrangeinfo,
-                       unsigned long long *bucketiterstep,
+                       GtUint64 *bucketiterstep,
                        GtLogger *logger);
 
 void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,

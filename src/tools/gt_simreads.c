@@ -221,7 +221,7 @@ static int gt_simreads_arguments_check(GT_UNUSED int rest_argc,
 }
 
 static int gt_simreads_plot_disc_distri(unsigned long key,
-                                        unsigned long long value,
+                                        GtUint64 value,
                                         GtFile *outfile)
 {
   gt_file_xprintf(outfile, "%lu "GT_LLU"\n", key, value);
@@ -297,7 +297,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
                 required_output_bases = 0,
                 target_total_length,
                 startpos, readlen, i;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
   bool fixed_readlen;
   int had_err = 0;
   GtUchar ch;
@@ -343,7 +343,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
       required_output_bases = arguments->coverage * target_total_length;
       if (arguments->show_progressbar)
         gt_progressbar_start(&progress,
-            (unsigned long long)required_output_bases);
+            (GtUint64)required_output_bases);
     }
     else
     {
@@ -351,7 +351,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
       gt_logger_log(logger, "required number of reads: %lu",
                             arguments->num);
       if (arguments->show_progressbar)
-        gt_progressbar_start(&progress, (unsigned long long)arguments->num);
+        gt_progressbar_start(&progress, (GtUint64)arguments->num);
     }
     read = gt_str_new();
     description = gt_str_new();
@@ -454,7 +454,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     if (arguments->coverage != GT_UNDEF_ULONG)
     {
       if (arguments->show_progressbar)
-        progress = (unsigned long long)output_bases;
+        progress = (GtUint64)output_bases;
       if (output_bases >= required_output_bases)
         break;
     }
@@ -462,7 +462,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     {
       gt_assert(arguments->num != GT_UNDEF_ULONG);
       if (arguments->show_progressbar)
-        progress = (unsigned long long)output_reads;
+        progress = (GtUint64)output_reads;
       if (output_reads == arguments->num)
         break;
     }

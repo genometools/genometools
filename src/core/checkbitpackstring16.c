@@ -141,7 +141,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %d, got %d, i = "GT_LLU"\n",
-                lowBit, (int)r, (unsigned long long)i);
+                lowBit, (int)r, (GtUint64)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -539,9 +539,9 @@ gt_bitPackStringInt16_unit_test(GtError *err)
         gt_log_log("Expected equality on bitstrings\n"
                     "offset = "GT_LLU", destOffset = "GT_LLU","
                     " numCopyBits="GT_LLU"\n",
-                    (unsigned long long)offset,
-                    (unsigned long long)destOffset,
-                    (unsigned long long)numCopyBits);
+                    (GtUint64)offset,
+                    (GtUint64)destOffset,
+                    (GtUint64)numCopyBits);
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
       }
@@ -663,8 +663,8 @@ gt_bitPackStringInt16_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected "GT_LLU", got "GT_LLU",\n"
-                "numBits=%u\n", (unsigned long long)bitCountRef,
-                (unsigned long long)bitCountCmp, numBits);
+                "numBits=%u\n", (GtUint64)bitCountRef,
+                (GtUint64)bitCountCmp, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;

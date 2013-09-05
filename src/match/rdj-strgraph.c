@@ -485,13 +485,13 @@ void gt_strgraph_compact(GtStrgraph *strgraph, bool show_progressbar)
   GtStrgraphVnum i;
   GtStrgraphEdgenum old_offset, next_free_edge, new_offset;
   GtStrgraphVEdgenum old_nofedges, j;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
 
   gt_assert(strgraph != NULL);
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
 
   next_free_edge = 0;
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
@@ -818,13 +818,13 @@ void gt_spmproc_strgraph_add(unsigned long suffix_readnum,
 void gt_strgraph_sort_edges_by_len(GtStrgraph *strgraph, bool show_progressbar)
 {
   GtStrgraphVnum i;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
 
   gt_assert(strgraph != NULL);
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
 
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
   {
@@ -886,14 +886,14 @@ unsigned long gt_strgraph_redself(GtStrgraph *strgraph, bool show_progressbar)
   GtStrgraphVnum vnum;
   GtStrgraphVEdgenum edgenum;
   unsigned long counter = 0;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
 
   gt_assert(strgraph != NULL);
 
   counter = 0;
   if (show_progressbar)
     gt_progressbar_start(&(progress),
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
   for (vnum = 0; vnum < GT_STRGRAPH_NOFVERTICES(strgraph); vnum++)
   {
     if (GT_STRGRAPH_V_OUTDEG(strgraph, vnum) > 0)
@@ -931,18 +931,18 @@ unsigned long gt_strgraph_redwithrc(GtStrgraph *strgraph, bool show_progressbar)
   GtStrgraphVnum vnum;
   GtStrgraphVEdgenum edgenum;
   unsigned long counter = 0;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
 
   gt_assert(strgraph != NULL);
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
 
   counter = 0;
   if (show_progressbar)
     gt_progressbar_start(&(progress),
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
   for (vnum = 0; vnum < GT_STRGRAPH_NOFVERTICES(strgraph); vnum++)
   {
     if (GT_STRGRAPH_V_OUTDEG(strgraph, vnum) > 0)
@@ -982,7 +982,7 @@ unsigned long gt_strgraph_redtrans(GtStrgraph *strgraph, bool show_progressbar)
   GtStrgraphVEdgenum j, k, l;
   GtStrgraphVnum i, jdest, kdest;
   unsigned long counter;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
 
   gt_assert(strgraph != NULL);
   gt_assert(strgraph->state == GT_STRGRAPH_SORTED_BY_L);
@@ -992,7 +992,7 @@ unsigned long gt_strgraph_redtrans(GtStrgraph *strgraph, bool show_progressbar)
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
   {
     if (GT_STRGRAPH_V_OUTDEG(strgraph, i) > 0)
@@ -1052,14 +1052,14 @@ unsigned long gt_strgraph_redsubmax(GtStrgraph *strgraph, bool show_progressbar)
   GtStrgraphVnum i;
   GtStrgraphVEdgenum j;
   unsigned long counter = 0;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
 
   gt_assert(strgraph != NULL);
   gt_assert(strgraph->state == GT_STRGRAPH_SORTED_BY_L);
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
 
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
     GT_STRGRAPH_V_SET_MARK(strgraph, i, GT_STRGRAPH_V_VACANT);
@@ -1127,7 +1127,7 @@ unsigned long gt_strgraph_reddepaths(GtStrgraph *strgraph,
   GtStrgraphVEdgenum j, from_to;
   unsigned long depth, d;
   unsigned long counter = 0, nofdepaths = 0;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
   bool i_branching;
   GtStrgraphEdgeID *edges;
 
@@ -1137,7 +1137,7 @@ unsigned long gt_strgraph_reddepaths(GtStrgraph *strgraph,
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
 
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
   {
@@ -1227,7 +1227,7 @@ unsigned long gt_strgraph_redpbubbles(GtStrgraph *strgraph,
   GtStrgraphVEdgenum j, from_to, p, nofpaths;
   GtStrgraphLength len;
   unsigned long depth, width, counter = 0, nofpbubbles = 0;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
   GtStrgraphPathInfo *info, *prev;
 
   gt_assert(strgraph != NULL);
@@ -1252,7 +1252,7 @@ unsigned long gt_strgraph_redpbubbles(GtStrgraph *strgraph,
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
 
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
   {
@@ -1427,13 +1427,13 @@ static void gt_strgraph_dot_show(const GtStrgraph *strgraph, GtFile *outfp,
 {
   GtStrgraphVnum i;
   GtStrgraphVEdgenum j;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
 
   gt_assert(strgraph != NULL);
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
 
   gt_file_xprintf(outfp, GT_STRGRAPH_DOT_HEADER);
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++) {
@@ -1462,13 +1462,13 @@ static void gt_strgraph_dot_bi_show(const GtStrgraph *strgraph, GtFile *outfp,
   GtStrgraphVnum i;
   GtStrgraphVEdgenum j;
   bool is_e1, is_e2;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
 
   gt_assert(strgraph != NULL);
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
 
   gt_file_xprintf(outfp, GT_STRGRAPH_DOT_BI_HEADER);
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++) {
@@ -1783,7 +1783,7 @@ void gt_strgraph_show(const GtStrgraph *strgraph, GtStrgraphFormat format,
 }
 
 static int gt_strgraph_show_disc_distri_datapoint(unsigned long key,
-    unsigned long long value, GtFile *outfile)
+    GtUint64 value, GtFile *outfile)
 {
   gt_file_xprintf(outfile, "%lu "Formatuint64_t"\n", key,
      PRINTuint64_tcast((uint64_t)value));
@@ -2095,7 +2095,7 @@ static void gt_strgraph_traverse(GtStrgraph *strgraph,
     void *data, bool show_progressbar)
 {
   GtStrgraphVnum i;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
 
   gt_assert(strgraph != NULL);
 
@@ -2108,7 +2108,7 @@ static void gt_strgraph_traverse(GtStrgraph *strgraph,
 
   if (show_progressbar)
     gt_progressbar_start(&progress,
-        (unsigned long long)GT_STRGRAPH_NOFVERTICES(strgraph));
+        (GtUint64)GT_STRGRAPH_NOFVERTICES(strgraph));
 
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
   {

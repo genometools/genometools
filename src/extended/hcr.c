@@ -57,7 +57,7 @@
 #define HCR_PAGES_PER_CHUNK 10UL
 
 typedef struct GtBaseQualDistr {
-  unsigned long long **distr;
+  GtUint64 **distr;
   GtAlphabet          *alpha;
   unsigned int         ncols,
                        nrows,
@@ -80,7 +80,7 @@ typedef struct GtHcrSeqEncoder {
   GtAlphabet        *alpha;
   GtHuffman         *huffman;
   GtSampling        *sampling;
-  unsigned long long total_num_of_symbols;
+  GtUint64 total_num_of_symbols;
   unsigned long      num_of_files;
   long               startofsamplingtab,
                      start_of_encoding;
@@ -143,10 +143,10 @@ typedef struct WriteNodeInfo {
   unsigned    qual_offset;
 } WriteNodeInfo;
 
-static unsigned long long hcr_base_qual_distr_func(const void *distr,
+static GtUint64 hcr_base_qual_distr_func(const void *distr,
                                                    unsigned long symbol)
 {
-  unsigned long long value;
+  GtUint64 value;
   GtBaseQualDistr *bqd = (GtBaseQualDistr*)distr;
   value = bqd->distr[symbol / bqd->ncols][symbol % bqd->ncols];
   return value;
@@ -155,7 +155,7 @@ static unsigned long long hcr_base_qual_distr_func(const void *distr,
 static void hcr_base_qual_distr_trim(GtBaseQualDistr *bqd)
 {
   if (bqd->min_qual != 0) {
-    unsigned long long **distr_trimmed;
+    GtUint64 **distr_trimmed;
     unsigned nrows_new,
              i,
              j;
@@ -185,7 +185,7 @@ static GtBaseQualDistr* hcr_base_qual_distr_new_from_file(FILE *fp,
            max_qual = HCR_LOWESTQUALVALUE;
   unsigned long numofleaves,
                 i;
-  unsigned long long cur_freq;
+  GtUint64 cur_freq;
   GT_UNUSED size_t read,
             one = (size_t) 1;
 
@@ -462,7 +462,7 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
 }
 
 static int hcr_huffman_write_base_qual_freq(unsigned long symbol,
-                                            unsigned long long freq,
+                                            GtUint64 freq,
                                             GT_UNUSED GtBitsequence code,
                                             GT_UNUSED unsigned code_length,
                                             void *pt)

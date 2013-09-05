@@ -87,11 +87,11 @@ static void
 computeDeBruijn()
 {
   unsigned prod, i;
-  unsigned long long v;
+  GtUint64 v;
   int MultiplyDeBruijnBitPosition[64];
   for (v = 1, i = 1; i <= 64; ++i, v <<= 1)
   {
-    prod = ((unsigned long long)v * 0x26752B916FC7B0DULL) >> 58;
+    prod = ((GtUint64)v * 0x26752B916FC7B0DULL) >> 58;
     printf("v = "GT_LLU", i = %u, prod = %u\n", v, i, prod);
     gt_assert(prod < 64);
     MultiplyDeBruijnBitPosition[prod] = i;

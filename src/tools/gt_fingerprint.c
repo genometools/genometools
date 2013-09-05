@@ -173,7 +173,7 @@ static int compare_fingerprints(GtStringDistri *sd, const char *checklist,
 }
 
 typedef struct {
-  unsigned long long duplicates,
+  GtUint64 duplicates,
                      num_of_sequences;
 } FingerprintInfo;
 

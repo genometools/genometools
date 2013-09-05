@@ -39,7 +39,7 @@ struct GtGFF3InStreamPlain {
        file_is_open,
        progress_bar;
   GtFile *fpin;
-  unsigned long long line_number;
+  GtUint64 line_number;
   GtQueue *genome_node_buffer;
   GtGFF3Parser *gff3_parser;
   GtCstrTable *used_types;

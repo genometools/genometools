@@ -1551,7 +1551,7 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
 
 static int parse_first_gff3_line(const char *line, const char *filename,
                                  GtQueue *genome_nodes, GtStr *filenamestr,
-                                 unsigned long long *line_number,
+                                 GtUint64 *line_number,
                                  bool *gvf_mode,
                                  bool tidy, GtError *err)
 {
@@ -2003,7 +2003,7 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
                                       GtQueue *genome_nodes,
                                       GtCstrTable *used_types,
                                       GtStr *filenamestr,
-                                      unsigned long long *line_number,
+                                      GtUint64 *line_number,
                                       GtFile *fpin, GtError *err)
 {
   size_t line_length;

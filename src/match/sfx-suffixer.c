@@ -92,7 +92,7 @@ struct Sfxiterator
   GtSuffixposbuffer fusp;
   GtRange overhang;
   bool exhausted;
-  unsigned long long bucketiterstep; /* for progressbar */
+  GtUint64 bucketiterstep; /* for progressbar */
   GtLogger *logger;
   GtTimer *sfxprogress;
   GtSpecialrangeiterator *sri; /* refers to space used in each part */
@@ -1788,7 +1788,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   {
     gt_assert(sfi->bcktab != NULL);
     gt_progressbar_start(&sfi->bucketiterstep,
-                         (unsigned long long)
+                         (GtUint64)
                          gt_bcktab_numofallcodes(sfi->bcktab));
   }
   sfi->currentmincode = gt_suftabparts_minindex(sfi->part,sfi->suftabparts);

@@ -82,19 +82,19 @@ typedef struct
 {
   unsigned long       nvalue[MAX_NOF_NSTATS];
   unsigned long       lvalue[MAX_NOF_NSTATS];
-  unsigned long long  min[MAX_NOF_NSTATS];
+  GtUint64  min[MAX_NOF_NSTATS];
   bool                done[MAX_NOF_NSTATS];
   char                *name[MAX_NOF_NSTATS];
-  unsigned long long  limit[NOF_LIMITS];
-  unsigned long long  larger_than_limit[NOF_LIMITS];
-  unsigned long long  current_len;
-  unsigned long long  current_num;
+  GtUint64  limit[NOF_LIMITS];
+  GtUint64  larger_than_limit[NOF_LIMITS];
+  GtUint64  current_len;
+  GtUint64  current_num;
   unsigned int        nofstats;
-  unsigned long long  median;
-  unsigned long long  half_num;
+  GtUint64  median;
+  GtUint64  half_num;
 } Nstats;
 
-static void calcNstats(unsigned long key, unsigned long long value,
+static void calcNstats(unsigned long key, GtUint64 value,
                         void *data)
 {
   Nstats *nstats = data;
@@ -103,12 +103,12 @@ static void calcNstats(unsigned long key, unsigned long long value,
   nstats->current_num += value;
   for (i = 0; i < (unsigned int) NOF_LIMITS; i++)
   {
-    if ((unsigned long long) key > nstats->limit[i])
+    if ((GtUint64) key > nstats->limit[i])
       nstats->larger_than_limit[i] = nstats->current_num;
   }
   if (nstats->median == 0 && nstats->current_num >= nstats->half_num)
   {
-    nstats->median = (unsigned long long) key;
+    nstats->median = (GtUint64) key;
   }
   for (i = 0; i < nstats->nofstats; i++)
   {
@@ -123,14 +123,14 @@ static void calcNstats(unsigned long key, unsigned long long value,
 
 #define initNstat(INDEX, NAME, LENGTH)\
   nstats.name[INDEX] = (NAME);\
-  nstats.min[INDEX] = (unsigned long long) (LENGTH);\
+  nstats.min[INDEX] = (GtUint64) (LENGTH);\
   nstats.nvalue[INDEX] = 0;\
   nstats.lvalue[INDEX] = 0;\
   nstats.done[INDEX] = false;\
   nstats.nofstats++
 
 #define initLimit(INDEX, LENGTH)\
-  nstats.limit[INDEX] = (unsigned long long) (LENGTH);\
+  nstats.limit[INDEX] = (GtUint64) (LENGTH);\
   nstats.larger_than_limit[INDEX] = 0
 
 void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
@@ -156,7 +156,7 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   initLimit(4, 1000000ULL);
   nstats.current_len = 0;
   nstats.current_num = 0;
-  nstats.half_num = (unsigned long long) (asc->numofseq >> 1);
+  nstats.half_num = (GtUint64) (asc->numofseq >> 1);
   nstats.median = 0;
   gt_disc_distri_foreach_in_reverse_order(asc->lengths, calcNstats, &nstats);
 

@@ -38,7 +38,7 @@ struct GtStatVisitor {
                 number_of_LTR_retrotransposons,
                 exon_number_for_distri,
                 cds_length_for_distri;
-  unsigned long long total_length_of_sequence_regions;
+  GtUint64 total_length_of_sequence_regions;
   GtDiscDistri *gene_length_distribution,
                *gene_score_distribution,
                *exon_length_distribution,

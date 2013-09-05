@@ -95,7 +95,7 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   GtBioseqIterator *bsi;
   GtBioseq *bioseq;
   unsigned long i;
-  unsigned long long passed = 0, filtered = 0, num_of_sequences = 0;
+  GtUint64 passed = 0, filtered = 0, num_of_sequences = 0;
   int had_err = 0;
 
   gt_error_check(err);

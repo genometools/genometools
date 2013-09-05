@@ -93,7 +93,7 @@ uint64_t      gt_sequence_buffer_get_lastspeciallength(const GtSequenceBuffer*);
 
 /* Returns a pointer to a memory location holding the number of characters
    read altogether in this sequence of files. */
-const unsigned long long*
+const GtUint64*
               gt_sequence_buffer_get_counter(const GtSequenceBuffer *si);
 
 void          gt_sequence_buffer_delete(GtSequenceBuffer*);

@@ -58,7 +58,7 @@ struct GtSequenceBufferMembers {
                 nextread,
                 nextfree;
   uint64_t lastspeciallength;
-  unsigned long long counter;
+  GtUint64 counter;
   const GtStrArray *filenametab;
   unsigned char ungetchar,
                 inbuf[INBUFSIZE],

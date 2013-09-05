@@ -214,7 +214,7 @@ void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
   GtBitsequence *has_match;
 
   /* progressbar */
-  unsigned long long progress;
+  GtUint64 progress;
 
   gt_assert(min_length>0);
   gt_assert(ssar != NULL);
@@ -246,7 +246,7 @@ void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
   if (show_progressbar)
   {
     progress = 0ULL;
-    gt_progressbar_start(&progress, (unsigned long long)totallength);
+    gt_progressbar_start(&progress, (GtUint64)totallength);
   }
 
   GT_INITARRAY(&stack, RdjGusfieldIndexBounds);

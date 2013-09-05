@@ -189,7 +189,7 @@ static inline void rdj_pairwise_generic(bool use_dp, GtOvlfindMode m,
 {
   GtContfind containment_status;
   GtBitsequence *cntreads = NULL;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
   unsigned long i, j, startpos, v_seqnum, nofsequences, n;
   struct Read u, v;
   struct Data d;
@@ -213,8 +213,8 @@ static inline void rdj_pairwise_generic(bool use_dp, GtOvlfindMode m,
     cntreads = cntreads_in;
   else if (m != GT_OVLFIND_SPM)
     GT_INITBITTAB(cntreads, n);
-  if (show_progressbar) gt_progressbar_start(&progress, (unsigned long long)n *
-      ((unsigned long long)n - 1ULL) / 2ULL);
+  if (show_progressbar) gt_progressbar_start(&progress, (GtUint64)n *
+      ((GtUint64)n - 1ULL) / 2ULL);
 
   for (i = 0; i < n; i++)
   {

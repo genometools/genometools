@@ -112,10 +112,8 @@ int gt_seq_iterator_next(GtSeqIterator *seqit,
     return 0;
 }
 
-const unsigned long long *gt_seq_iterator_getcurrentcounter(GtSeqIterator
-                                                                         *seqit,
-                                                           unsigned long long
-                                                                        maxread)
+const GtUint64 *gt_seq_iterator_getcurrentcounter(GtSeqIterator *seqit,
+                                                  GtUint64 maxread)
 {
   gt_assert(seqit);
   if (seqit->c_class && seqit->c_class->get_curr_counter_func)

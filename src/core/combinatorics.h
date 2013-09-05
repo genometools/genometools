@@ -22,6 +22,7 @@
 #include "core/minmax.h"
 #include "core/unused_api.h"
 #include "core/safearith.h"
+#include "core/types_api.h"
 
 /* The combinatorics module implements some standard approaches for
    combinatorics problems, some with efficient implementations. */
@@ -63,8 +64,7 @@ static inline unsigned long      gt_combinatorics_multinomial(
                                                      const unsigned binSizes[]);
 
 /* Returns <x>^<i> */
-static inline unsigned long long gt_combinatorics_i_pow(unsigned long long x,
-                                                        unsigned i);
+static inline GtUint64 gt_combinatorics_i_pow(GtUint64 x, unsigned i);
 
 int                              gt_combinatorics_unit_test(
                                                         GT_UNUSED GtError *err);

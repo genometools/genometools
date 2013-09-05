@@ -19,6 +19,7 @@
 #include <limits.h>
 #include "core/ensure.h"
 #include "core/safearith.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 
 void gt_safe_default_overflow_handler(const char *src_file, int src_line,
@@ -65,7 +66,7 @@ uint32_t gt_safe_mult_u32_check_func(uint32_t a, uint32_t b,
                                      GtOverflowHandlerFunc handler_func,
                                      void *data)
 {
-  unsigned long long x = (unsigned long long) a * b;
+  GtUint64 x = (GtUint64) a * b;
   if (x > 0xffffffff) { /* overflow */
     handler_func(src_file, src_line, data);
   }
@@ -206,8 +207,8 @@ int gt_safearith_unit_test(GtError *err)
 #ifdef LLONG_MIN
     gt_ensure(__MIN(long long) == LLONG_MIN);
     gt_ensure(__MAX(long long) == LLONG_MAX);
-    gt_ensure(__MIN(unsigned long long) == 0);
-    gt_ensure(__MAX(unsigned long long) == ULLONG_MAX);
+    gt_ensure(__MIN(GtUint64) == 0);
+    gt_ensure(__MAX(GtUint64) == ULLONG_MAX);
 #endif
   }
 

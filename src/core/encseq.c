@@ -4973,13 +4973,13 @@ typedef struct
   const char *kind;
 } Updatesumrangeinfo;
 
-static void updatesumranges(unsigned long key, unsigned long long value,
+static void updatesumranges(unsigned long key, GtUint64 value,
                             void *data)
 {
   unsigned long distvalue;
   Updatesumrangeinfo *updatesumrangeinfo = (Updatesumrangeinfo *) data;
 
-  gt_assert(value <= (unsigned long long) ULONG_MAX);
+  gt_assert(value <= (GtUint64) ULONG_MAX);
   distvalue = (unsigned long) value;
   updatesumrangeinfo->ranges_uint8_t
      += currentspecialrangevalue(key, distvalue, (unsigned long) UCHAR_MAX);
@@ -7734,11 +7734,11 @@ static int testfullscan(const GtStrArray *filenametab,
   int retval;
   bool haserr = false;
   GtEncseqReader *esr = NULL;
-  unsigned long long fullscanpbar = 0;
+  GtUint64 fullscanpbar = 0;
 
   gt_error_check(err);
   totallength = encseq->totallength;
-  /* gt_progressbar_start(&fullscanpbar, (unsigned long long) totallength); */
+  /* gt_progressbar_start(&fullscanpbar, (GtUint64) totallength); */
   if (filenametab != NULL) {
     fb = gt_sequence_buffer_new_guess_type(filenametab, err);
     if (!fb)

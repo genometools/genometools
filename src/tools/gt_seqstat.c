@@ -137,13 +137,13 @@ static GtOptionParser* gt_seqstat_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static void showdistseqlen(unsigned long key, unsigned long long value,
+static void showdistseqlen(unsigned long key, GtUint64 value,
                             void *data)
 {
   unsigned long distvalue;
   unsigned int *bucketsize = data;
 
-  gt_assert(value <= (unsigned long long) ULONG_MAX);
+  gt_assert(value <= (GtUint64) ULONG_MAX);
   distvalue = (unsigned long) value;
   printf("%lu--%lu %lu\n",
          (*bucketsize) * key,
@@ -151,7 +151,7 @@ static void showdistseqlen(unsigned long key, unsigned long long value,
          distvalue);
 }
 
-static void showdistseqlenbinary(unsigned long key, unsigned long long value,
+static void showdistseqlenbinary(unsigned long key, GtUint64 value,
                             void *data)
 {
   unsigned long value_ul;
@@ -159,7 +159,7 @@ static void showdistseqlenbinary(unsigned long key, unsigned long long value,
   FILE *file = data;
   /*@end@*/
 
-  gt_assert(value <= (unsigned long long) ULONG_MAX);
+  gt_assert(value <= (GtUint64) ULONG_MAX);
   value_ul = (unsigned long) value;
   gt_xfwrite(&key, sizeof (key), (size_t)1, file);
   gt_xfwrite(&value_ul, sizeof (value_ul), (size_t)1, file);
@@ -167,16 +167,16 @@ static void showdistseqlenbinary(unsigned long key, unsigned long long value,
 
 typedef struct
 {
-  unsigned long long sumA, *mmercount;
+  GtUint64 sumA, *mmercount;
   unsigned long maxvalue, minkey;
 } Astretchinfo;
 
-static void showastretches(unsigned long key, unsigned long long value,
+static void showastretches(unsigned long key, GtUint64 value,
                            void *data)
 {
   Astretchinfo *astretchinfo = (Astretchinfo *) data;
 
-  astretchinfo->sumA += value * (unsigned long long) key;
+  astretchinfo->sumA += value * (GtUint64) key;
   if (key > astretchinfo->maxvalue)
   {
     astretchinfo->maxvalue = key;
@@ -186,7 +186,7 @@ static void showastretches(unsigned long key, unsigned long long value,
   /*@end@*/
 }
 
-static void showmeroccurrence(unsigned long key, unsigned long long value,
+static void showmeroccurrence(unsigned long key, GtUint64 value,
                               void *data)
 {
   unsigned long len;
@@ -195,16 +195,16 @@ static void showmeroccurrence(unsigned long key, unsigned long long value,
   for (len=astretchinfo->minkey; len<= key; len++)
   {
     gt_assert(len <= astretchinfo->maxvalue);
-    astretchinfo->mmercount[len] += value * (unsigned long long) (key-len+1);
+    astretchinfo->mmercount[len] += value * (GtUint64) (key-len+1);
   }
 }
 
-static unsigned long long accumulateastretch(GtDiscDistri *distastretch,
+static GtUint64 accumulateastretch(GtDiscDistri *distastretch,
                                              const GtUchar *sequence,
                                              unsigned long len)
 {
   unsigned long i, lenofastretch = 0;
-  unsigned long long countA = 0;
+  GtUint64 countA = 0;
 
   for (i=0; i<len; i++)
   {
@@ -229,7 +229,7 @@ static unsigned long long accumulateastretch(GtDiscDistri *distastretch,
 }
 
 static void processastretches(const GtDiscDistri *distastretch,
-                              GT_UNUSED unsigned long long countA)
+                              GT_UNUSED GtUint64 countA)
 {
   Astretchinfo astretchinfo;
   unsigned long len;
@@ -270,7 +270,7 @@ static int gt_seqstat_runner(int argc, const char **argv, int parsed_args,
   GtDiscDistri *distastretch = NULL;
   uint64_t numofseq = 0, sumlength = 0;
   unsigned long minlength = 0, maxlength = 0;
-  unsigned long long countA = 0;
+  GtUint64 countA = 0;
   bool minlengthdefined = false;
 
   gt_error_check(err);
@@ -313,9 +313,9 @@ static int gt_seqstat_runner(int argc, const char **argv, int parsed_args,
       if (arguments->verbose)
       {
         gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
-                                                            (unsigned long long)
+                                                            (GtUint64)
                                                             totalsize),
-                             (unsigned long long) totalsize);
+                             (GtUint64) totalsize);
       }
       while (true)
       {

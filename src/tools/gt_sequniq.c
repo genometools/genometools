@@ -105,7 +105,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              void *tool_arguments, GtError *err)
 {
   GtSequniqArguments *arguments = tool_arguments;
-  unsigned long long duplicates = 0, num_of_sequences = 0;
+  GtUint64 duplicates = 0, num_of_sequences = 0;
   int i, had_err = 0;
   GtMD5Set *md5set;
 
@@ -159,9 +159,9 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err) {
       if (arguments->verbose) {
         gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
-                                                            (unsigned long long)
+                                                            (GtUint64)
                                                             totalsize),
-                             (unsigned long long) totalsize);
+                             (GtUint64) totalsize);
       }
       while (!had_err) {
         GtMD5SetStatus retval;

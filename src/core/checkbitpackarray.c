@@ -119,8 +119,8 @@ int gt_bitpackarray_unit_test(GtError *err)
       {
         gt_log_log("gt_bsStoreUInt64/bitpackarray_get_uint64: "
                 "Expected "GT_LLU", got "GT_LLU", i = %lu, bits=%u\n",
-                (unsigned long long)(v & mask),
-                (unsigned long long)r, (unsigned long)i, bits);
+                (GtUint64)(v & mask),
+                (GtUint64)r, (unsigned long)i, bits);
         gt_free(randSrc);
         gt_free(randCmp);
         bitpackarray_delete(bitStore);

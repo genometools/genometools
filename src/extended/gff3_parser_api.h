@@ -23,6 +23,7 @@
 #include "core/queue_api.h"
 #include "core/range_api.h"
 #include "core/strand_api.h"
+#include "core/types_api.h"
 #include "extended/type_checker_api.h"
 
 /* A <GtGFF3Parser> can be used to parse GFF3 files and convert them into
@@ -72,7 +73,7 @@ int           gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *gff3_parser,
                                                 GtQueue *genome_nodes,
                                                 GtCstrTable *used_types,
                                                 GtStr *filenamestr,
-                                                unsigned long long *line_number,
+                                                GtUint64 *line_number,
                                                 GtFile *fpin,
                                                 GtError *err);
 /* Reset the <gff3_parser> (necessary if the input file is switched). */

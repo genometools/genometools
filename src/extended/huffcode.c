@@ -33,7 +33,7 @@
 #include "extended/rbtree.h"
 
 typedef struct GtHuffmanSymbol {
-  unsigned long long freq;
+  GtUint64 freq;
   unsigned long      symbol;
 } GtHuffmanSymbol;
 
@@ -118,7 +118,7 @@ static void huffman_tree_delete(void *tree)
 }
 
 static GtHuffmanTree *huffman_tree_new(unsigned long symbol,
-                                       unsigned long long freq)
+                                       GtUint64 freq)
 {
   GtHuffmanTree *huffptr;
   huffptr = gt_malloc(sizeof (GtHuffmanTree));
@@ -146,7 +146,7 @@ static void initialise_rbt(GtHuffman *huffman,
   GtHuffmanTree *huffptr;
   GT_UNUSED GtHuffmanTree *huffptr2;
   unsigned long i;
-  unsigned long long ret;
+  GtUint64 ret;
   bool nodecreated;
 
   huffman->num_of_coded_symbols = 0;
@@ -180,7 +180,7 @@ static void make_huffman_tree(GtHuffman *huffman)
   GT_UNUSED GtHuffmanTree *n3 = NULL;
   unsigned long i,
                 symbol;
-  unsigned long long freq;
+  GtUint64 freq;
   int GT_UNUSED deleted;
   bool nodecreated = false;
   gt_assert(huffman->num_of_coded_symbols <= huffman->num_of_symbols);
@@ -242,7 +242,7 @@ static void print_huff_code(unsigned length, GtBitsequence code)
 }
 
 static int store_codes(unsigned long symbol,
-                       GT_UNUSED unsigned long long freq,
+                       GT_UNUSED GtUint64 freq,
                        const GtBitsequence code,
                        unsigned int code_len,
                        void *huffman)
@@ -254,7 +254,7 @@ static int store_codes(unsigned long symbol,
 }
 
 static int print_codes(unsigned long symbol,
-                       unsigned long long freq,
+                       GtUint64 freq,
                        const GtBitsequence code,
                        unsigned int code_len,
                        GT_UNUSED void *unused)
@@ -277,7 +277,7 @@ static int print_codes(unsigned long symbol,
 }
 
 static int calc_size(GT_UNUSED unsigned long symbol,
-                     unsigned long long freq,
+                     GtUint64 freq,
                      GT_UNUSED const GtBitsequence code,
                      unsigned int code_len,
                      void *huffman)
@@ -653,9 +653,9 @@ void gt_huffman_bitwise_decoder_delete(GtHuffmanBitwiseDecoder *hbwd)
   gt_free(hbwd);
 }
 
-unsigned long long unit_test_distr_func(const void *distr, unsigned long symbol)
+GtUint64 unit_test_distr_func(const void *distr, unsigned long symbol)
 {
-  unsigned long long *distrull = (unsigned long long*) distr;
+  GtUint64 *distrull = (GtUint64*) distr;
   return distrull[symbol];
 }
 
@@ -670,7 +670,7 @@ static int test_bitwise(GtError *err)
   GtHuffman *huffman;
   GtHuffmanBitwiseDecoder *hbwd;
   GtBitsequence bitseq;
-  unsigned long long distr[6] = {45ULL, 16ULL, 13ULL, 12ULL, 9ULL, 5ULL};
+  GtUint64 distr[6] = {45ULL, 16ULL, 13ULL, 12ULL, 9ULL, 5ULL};
 
   huffman = gt_huffman_new(&distr,unit_test_distr_func, 6UL);
 
@@ -793,7 +793,7 @@ int test_mem(GtError *err)
   unsigned long range = 0,
                 idx, idx_j;
   uint64_t total_bits;
-  unsigned long long *distribution = gt_malloc(sizeof (*distribution) *
+  GtUint64 *distribution = gt_malloc(sizeof (*distribution) *
                                      dist_size);
   GtBitsequence buffer = 0,
                 code;

@@ -140,6 +140,6 @@ void gt_spmproc_show_count(GT_UNUSED unsigned long suffix_seqnum,
   GT_UNUSED bool suffixseq_direct, GT_UNUSED bool prefixseq_direct,
   void *data)
 {
-  unsigned long long *counter = data;
+  GtUint64 *counter = data;
   (*counter)++;
 }

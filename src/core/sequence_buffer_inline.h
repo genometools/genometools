@@ -38,7 +38,7 @@
                         cc,
                         gt_str_array_get(pvt->filenametab,
                                          (unsigned long) pvt->filenum),
-                        (unsigned long long) pvt->linenum);
+                        (GtUint64) pvt->linenum);
       return -1;
     }
     if (ISSPECIAL((GtUchar) charcode)) {

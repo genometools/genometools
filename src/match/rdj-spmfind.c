@@ -510,7 +510,7 @@ static int processlcpinterval_spmvar(unsigned long lcp,
 #ifdef GT_READJOINER_STATISTICS
 
 static int show_disc_distri_datapoint_spm(unsigned long key,
-    unsigned long long value, GtFile *outfile)
+    GtUint64 value, GtFile *outfile)
 {
   gt_file_xprintf(outfile, "%lu "GT_LLU"\n", key, value);
   return 0;

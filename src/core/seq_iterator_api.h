@@ -31,39 +31,38 @@ typedef struct GtSeqIteratorClass GtSeqIteratorClass;
 /* Sets a symbol map for the <GtSeqIterator>.
    If a <symbolmap> is given, all read in sequences are transformed with it.
    Set to NULL to disable alphabet transformation. */
-void           gt_seq_iterator_set_symbolmap(GtSeqIterator*,
-                                            const GtUchar *symbolmap);
+void            gt_seq_iterator_set_symbolmap(GtSeqIterator*,
+                                             const GtUchar *symbolmap);
 
 /* If set to <true>, sequences and descriptions are processed (otherwise
    only the descriptions). By default, sequences are processed. */
-void           gt_seq_iterator_set_sequence_output(GtSeqIterator*, bool);
+void            gt_seq_iterator_set_sequence_output(GtSeqIterator*, bool);
 
 /* Get next <sequence> (of length <len>) and <description> from <seqit>.
    Note that <seqit> retains ownership of the <sequence> and <description>.
    Returns 1 if another sequence could be parsed, 0 if all given sequence
    files are exhausted, And -1 if an error occured (<err> is set
    accordingly). */
-int            gt_seq_iterator_next(GtSeqIterator *seqit,
-                                   const GtUchar **sequence,
-                                   unsigned long *len,
-                                   char **description,
-                                   GtError *err);
+int             gt_seq_iterator_next(GtSeqIterator *seqit,
+                                    const GtUchar **sequence,
+                                    unsigned long *len,
+                                    char **description,
+                                    GtError *err);
 
 /* Returns a pointer to the current total number of read characters. */
-const unsigned
-long long*     gt_seq_iterator_getcurrentcounter(GtSeqIterator*,
-                                                unsigned long long);
+const GtUint64* gt_seq_iterator_getcurrentcounter(GtSeqIterator*,
+                                                  GtUint64);
 
 /* Returns TRUE if <seqit> supports setting of a quality buffer. */
-bool           gt_seq_iterator_has_qualities(GtSeqIterator *seqit);
+bool            gt_seq_iterator_has_qualities(GtSeqIterator *seqit);
 
 /* Turns on reporting of sequence qualities to the location
    pointed to by <qualities>. That pointer will be set to a string containing
    the quality data (which must then be processed into scores). */
-void           gt_seq_iterator_set_quality_buffer(GtSeqIterator *seqit,
-                                                 const GtUchar **qualities);
+void            gt_seq_iterator_set_quality_buffer(GtSeqIterator *seqit,
+                                                  const GtUchar **qualities);
 
 /* Deletes <seqit> and frees associated memory. */
-void           gt_seq_iterator_delete(GtSeqIterator *seqit);
+void            gt_seq_iterator_delete(GtSeqIterator *seqit);
 
 #endif

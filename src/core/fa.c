@@ -32,6 +32,7 @@
 #include "core/ma.h"
 #include "core/spacepeak.h"
 #include "core/thread_api.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/xbsd.h"
@@ -474,7 +475,7 @@ static size_t fd_to_file_size(int fd,const char *path,bool hard_fail,
   }
   if (sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX) {
     gt_error_set(err,"file \"%s\" of size "GT_LLU" is too large to map",
-                 path, (unsigned long long) sb.st_size);
+                 path, (GtUint64) sb.st_size);
     return -1;
   }
   return sb.st_size;

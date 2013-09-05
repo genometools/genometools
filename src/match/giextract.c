@@ -868,9 +868,9 @@ int gt_extractkeysfromfastafile(bool verbose,
   if (!had_err && verbose)
   {
     gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
-                                                          (unsigned long long)
+                                                          (GtUint64)
                                                           totalsize),
-                                                          (unsigned long long)
+                                                          (GtUint64)
                                                           totalsize);
   }
   while (had_err != -1 && countmarkhit < numofqueries)

@@ -37,7 +37,7 @@ typedef struct GtHuffmanBitwiseDecoder GtHuffmanBitwiseDecoder;
 
 /* Function type, used to get the count of a specific symbol represented by
    <symbol_number> in <distribution>. Needed by <GtHuffman>. */
-typedef unsigned long long (*GtDistrFunc) (const void *distribution,
+typedef GtUint64 (*GtDistrFunc) (const void *distribution,
                                            unsigned long symbol_number);
 
 /* Function type, used when iterating over all encoded symbols in a <GtHuffman>
@@ -48,7 +48,7 @@ typedef unsigned long long (*GtDistrFunc) (const void *distribution,
    <GtHuffmanActFunc> for example when calculating the average code length.
    Should return 0 on success and -1 on error. */
 typedef int (*GtHuffmanActFunc) (unsigned long symbol,
-                                 unsigned long long freq,
+                                 GtUint64 freq,
                                  GtBitsequence code,
                                  unsigned int code_length,
                                  void *action_info);

@@ -27,6 +27,7 @@
 #include "core/ma.h"
 #include "core/qsort_r.h"
 #include "core/thread_api.h"
+#include "core/types_api.h"
 
 union link_data
 {
@@ -105,10 +106,10 @@ gt_ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
     ht->table = gt_realloc(ht->table, table_info.elem_size * table_size);
   ht->high_fill_mul = high_mul;
   ht->high_fill
-    = (unsigned long long)ht->high_fill_mul * table_size / FILL_DIVISOR;
+    = (GtUint64)ht->high_fill_mul * table_size / FILL_DIVISOR;
   ht->low_fill_mul = low_mul;
   ht->low_fill
-    = (unsigned long long)ht->low_fill_mul * table_size / FILL_DIVISOR;
+    = (GtUint64)ht->low_fill_mul * table_size / FILL_DIVISOR;
   {
     uint32_t i;
     if (ht->no_ma)

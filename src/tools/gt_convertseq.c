@@ -150,9 +150,9 @@ static int gt_convertseq_runner(int argc, const char **argv, int parsed_args,
     if (arguments->verbose)
     {
       gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
-                                                           (unsigned long long)
+                                                           (GtUint64)
                                                            totalsize),
-                           (unsigned long long) totalsize);
+                           (GtUint64) totalsize);
     }
     while (true)
     {

@@ -45,7 +45,7 @@ static int gt_mmapandread_runner(int argc, const char **argv, int parsed_args,
   int i, fd;
   void *map;
   struct stat sb;
-  unsigned long long j;
+  GtUint64 j;
   unsigned int byte = 0;
   gt_error_check(err);
 
@@ -74,8 +74,8 @@ static int gt_mmapandread_runner(int argc, const char **argv, int parsed_args,
       /* read file */
       printf("reading file \"%s\"\n", argv[i]);
       j = 0;
-      gt_progressbar_start(&j, (unsigned long long) sb.st_size);
-      for (; j < (unsigned long long) sb.st_size; j++)
+      gt_progressbar_start(&j, (GtUint64) sb.st_size);
+      for (; j < (GtUint64) sb.st_size; j++)
         byte |= (unsigned int) ((char*) map)[j];
       gt_progressbar_stop();
 

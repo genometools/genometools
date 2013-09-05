@@ -40,6 +40,7 @@
 #include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/tool_iterator.h"
+#include "core/types_api.h"
 #include "core/unit_testing.h"
 #include "core/versionfunc.h"
 #include "core/xansi_api.h"
@@ -372,7 +373,7 @@ static int run_tests(GtR *gtr, GtError *err)
   gt_ensure(sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
   gt_ensure(sizeof (unsigned long) >= sizeof (size_t));
   gt_ensure(sizeof (long long) == 8);
-  gt_ensure(sizeof (unsigned long long) == 8);
+  gt_ensure(sizeof (GtUint64) == 8);
 
   /* show seed */
   printf("seed=%u\n", gtr->seed);

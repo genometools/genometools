@@ -116,11 +116,11 @@ static unsigned encdesc_digits_per_value(unsigned long value,
 
 static int encdesc_hashmap_distr_add(GtHashtable *hm_distri, long key)
 {
-  unsigned long long *valueptr;
+  GtUint64 *valueptr;
   gt_assert(hm_distri != NULL);
   valueptr = li_ull_gt_hashmap_get(hm_distri, key);
   if (!valueptr) {
-    li_ull_gt_hashmap_add(hm_distri, key, (unsigned long long) 1);
+    li_ull_gt_hashmap_add(hm_distri, key, (GtUint64) 1);
     return 1;
   }
   else {
@@ -920,11 +920,11 @@ unsigned long gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee)
   return ee->sampling_rate;
 }
 
-unsigned long long encdesc_hashmap_distr_get_corrected(const void *data,
+GtUint64 encdesc_hashmap_distr_get_corrected(const void *data,
                                                        unsigned long key)
 {
   EncdescHuffDist *dist = (EncdescHuffDist*) data;
-  unsigned long long *valueptr;
+  GtUint64 *valueptr;
   long corrected_key = (long) key + dist->correction_base;
   gt_assert(dist->li_ull_hashmap);
   if (!(valueptr = li_ull_gt_hashmap_get(dist->li_ull_hashmap,
@@ -933,18 +933,18 @@ unsigned long long encdesc_hashmap_distr_get_corrected(const void *data,
   return *valueptr;
 }
 
-static unsigned long long encdesc_distri_get_symbol_freq(const void *distri,
+static GtUint64 encdesc_distri_get_symbol_freq(const void *distri,
                                                          unsigned long symbol)
 {
   GtDiscDistri *distr = (GtDiscDistri*) distri;
   return gt_disc_distri_get(distr, symbol);
 }
 
-unsigned long long encdesc_hashmap_distr_get(const void *hm_distri,
+GtUint64 encdesc_hashmap_distr_get(const void *hm_distri,
                                              unsigned long key)
 {
   GtHashtable *hashmap = (GtHashtable*) hm_distri;
-  unsigned long long *valueptr;
+  GtUint64 *valueptr;
   gt_assert(hashmap != NULL);
   if (!(valueptr = li_ull_gt_hashmap_get(hashmap, (long) key)))
     return 0;

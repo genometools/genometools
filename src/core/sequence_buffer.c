@@ -141,7 +141,7 @@ void gt_sequence_buffer_set_chardisttab(GtSequenceBuffer *si,
   si->pvt->chardisttab = chardisttab;
 }
 
-const unsigned long long*
+const GtUint64*
 gt_sequence_buffer_get_counter(const GtSequenceBuffer *si)
 {
   gt_assert(si && si->pvt);

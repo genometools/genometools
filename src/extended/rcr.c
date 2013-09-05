@@ -79,8 +79,8 @@
 #define DEFAULTMQUAL 0
 #define DEFAULTQUAL '-'
 
-DECLARE_HASHMAP(long int, rcr_li, unsigned long long, ull, static, inline)
-DEFINE_HASHMAP(long int, rcr_li, unsigned long long, ull, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(long int, rcr_li, GtUint64, ull, static, inline)
+DEFINE_HASHMAP(long int, rcr_li, GtUint64, ull, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
@@ -107,9 +107,9 @@ struct GtRcrEncoder {
   bam1_t             *sam_align;
   const GtEncseq     *encseq;
   const char         *samfilename;
-  unsigned long long *ins_bases;
+  GtUint64 *ins_bases;
   GtQueue            *not_exact_matches;
-  unsigned long long  all_bits,
+  GtUint64  all_bits,
                       dellen_bits,
                       encodedbases,
                       exact_match_flag_bits,
@@ -154,8 +154,8 @@ struct GtRcrDecoder {
   GtStr              *inputname;
   const GtEncseq     *encseq;
   const char         *basename;
-  unsigned long long *ins_bases;
-  unsigned long long  present_cigar_ops[ENDOFRECORD + 1];
+  GtUint64 *ins_bases;
+  GtUint64  present_cigar_ops[ENDOFRECORD + 1];
   unsigned long       numofreads,
                       cur_bit,
                       cur_bitseq,
@@ -169,7 +169,7 @@ struct GtRcrDecoder {
 };
 
 typedef struct MedianData {
-  unsigned long long n,
+  GtUint64 n,
                      x;
   unsigned long      median;
 } MedianData;
@@ -666,7 +666,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
   return 0;
 }
 
-static void rcr_get_m(unsigned long key, unsigned long long value,
+static void rcr_get_m(unsigned long key, GtUint64 value,
                       void *data)
 {
   MedianData *md = (MedianData*) data;
@@ -675,7 +675,7 @@ static void rcr_get_m(unsigned long key, unsigned long long value,
     md->median = key;
 }
 
-static void rcr_get_n(GT_UNUSED unsigned long key, unsigned long long value,
+static void rcr_get_n(GT_UNUSED unsigned long key, GtUint64 value,
                       void *data)
 {
   MedianData *md = (MedianData*) data;
@@ -698,17 +698,17 @@ static unsigned long rcr_get_median(GtDiscDistri *distr)
   return median;
 }
 
-static unsigned long long rcr_disc_distri_func(const void *data,
+static GtUint64 rcr_disc_distri_func(const void *data,
                                                unsigned long symbol)
 {
   GtDiscDistri *distr = (GtDiscDistri*)data;
   return gt_disc_distri_get(distr, symbol);
 }
 
-static unsigned long long rcr_array_func(const void *data, unsigned long symbol)
+static GtUint64 rcr_array_func(const void *data, unsigned long symbol)
 {
   unsigned long *distr = (unsigned long*)data;
-  return (unsigned long long) distr[symbol];
+  return (GtUint64) distr[symbol];
 }
 
 static int rcr_initialize_encoders(GtRcrEncoder *rcr_enc,
@@ -1008,7 +1008,7 @@ static inline GtRcrEncoder *gt_rcr_encoder_init(const char *filename,
   rcr_enc->readlength = 0;
 
   rcr_enc->ins_bases = gt_calloc((size_t) (alpha_size + 1),
-                              sizeof (unsigned long long));
+                              sizeof (GtUint64));
   for (i = 0; i < (unsigned long) (alpha_size + 1); i ++)
     rcr_enc->ins_bases[i] = 0;
 
@@ -1062,7 +1062,7 @@ static inline int gt_rcr_analyse_alignment_data(GtRcrEncoder *rcr_enc,
   }
 
   /* end symbol */
-  rcr_enc->present_cigar_ops[ENDOFRECORD] = (unsigned long long)
+  rcr_enc->present_cigar_ops[ENDOFRECORD] = (GtUint64)
                                               rcr_enc->numofreads;
   samclose(samfile);
 
@@ -1156,7 +1156,7 @@ typedef struct{
 } RcrData;
 
 static int rcr_write_node(unsigned long symbol,
-                          unsigned long long freq,
+                          GtUint64 freq,
                           GT_UNUSED GtBitsequence code,
                           GT_UNUSED unsigned length,
                           void *pt)
@@ -1227,7 +1227,7 @@ static int rcr_write_header_to_file(GtRcrEncoder *rcr_enc)
   gt_xfwrite(rcr_enc->present_cigar_ops, sizeof (*rcr_enc->present_cigar_ops),
              (size_t) (ENDOFRECORD + 1), fp);
 
-  gt_xfwrite(rcr_enc->ins_bases, sizeof (unsigned long long),
+  gt_xfwrite(rcr_enc->ins_bases, sizeof (GtUint64),
              (size_t) gt_alphabet_size(gt_encseq_alphabet(rcr_enc->encseq)) + 1,
              fp);
 
@@ -1418,7 +1418,7 @@ static void rcr_read_header(GtRcrDecoder *rcr_dec)
                 i,
                 symbol,
                 max_read_length;
-  unsigned long long freq;
+  GtUint64 freq;
   GT_UNUSED size_t read,
             one = (size_t) 1;
 
@@ -2098,7 +2098,7 @@ static GtRcrDecoder *gt_rcr_decoder_init(const char *name,
   rcr_dec->readpos_golomb = NULL;
   rcr_dec->varpos_golomb = NULL;
 
-  rcr_dec->ins_bases = gt_calloc(alpha_size + 1, sizeof (unsigned long long));
+  rcr_dec->ins_bases = gt_calloc(alpha_size + 1, sizeof (GtUint64));
 
   rcr_dec->fp = gt_fa_fopen(gt_str_get(rcr_dec->inputname),
                             "rb", err);

@@ -24,6 +24,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/safearith.h"
+#include "core/types_api.h"
 #include "extended/md5set.h"
 #include "extended/md5set_primes_table.h"
 #include "extended/reverse_api.h"
@@ -47,9 +48,9 @@ typedef struct {
  * otherwise return first element in lookup table larger than n */
 static unsigned long gt_md5set_get_size(unsigned long n)
 {
-  unsigned long long u, l, i, k, k_i;
+  GtUint64 u, l, i, k, k_i;
 
-  k = (unsigned long long)n;
+  k = (GtUint64)n;
   if (k > GT_MD5SET_LARGEST_PRIME)
   {
     fprintf(stderr, GT_MD5SET_TOO_LARGE, k);

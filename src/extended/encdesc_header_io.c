@@ -120,7 +120,7 @@ typedef struct data {
 } EncsecDistriData;
 
 static void encdesc_distri_iter_count(GT_UNUSED unsigned long symbol,
-                                      GT_UNUSED unsigned long long freq,
+                                      GT_UNUSED GtUint64 freq,
                                       void *data)
 {
   EncsecDistriData *this_data = (EncsecDistriData*) data;
@@ -128,7 +128,7 @@ static void encdesc_distri_iter_count(GT_UNUSED unsigned long symbol,
 }
 
 static void encdesc_distri_iter_write(unsigned long symbol,
-                                      unsigned long long freq,
+                                      GtUint64 freq,
                                       void *data)
 {
   EncsecDistriData *this_data = (EncsecDistriData*) data;
@@ -196,7 +196,7 @@ static void numeric_field_check_distri_dependence(DescField *field,
 
 static enum iterator_op encdesc_li_ull_hashmap_iter_count(
                                              GT_UNUSED long key,
-                                             GT_UNUSED unsigned long long value,
+                                             GT_UNUSED GtUint64 value,
                                              void *data,
                                              GT_UNUSED GtError *err)
 {
@@ -219,7 +219,7 @@ static unsigned long get_hashmap_distri_size(GtHashtable *h_table)
 
 static enum iterator_op encdesc_li_ull_hashmap_iter_write(
                                                        long key,
-                                                       unsigned long long value,
+                                                       GtUint64 value,
                                                        void *data,
                                                        GT_UNUSED GtError *err)
 {
@@ -252,7 +252,7 @@ static void read_hashmap_distri(unsigned long size,
 {
   unsigned long idx;
   long symbol;
-  unsigned long long freq;
+  GtUint64 freq;
 
   gt_assert(h_table != NULL);
   for (idx = 0; idx < size; idx++) {
@@ -312,7 +312,7 @@ static void read_numeric_field_header(DescField *field,
   if (needs_zero_dist) {
     unsigned long idx,
                   symbol;
-    unsigned long long freq;
+    GtUint64 freq;
     field->zero_count = gt_disc_distri_new();
     GT_ENCDESC_READ_ONE(num_of_zero_leaves, fp);
     for (idx = 0; idx < num_of_zero_leaves; idx++) {

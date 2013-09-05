@@ -127,7 +127,7 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
   GtCompressdbitsArguments *arguments = tool_arguments;
   int had_err = 0;
   unsigned long idx;
-  unsigned long long num_of_bits = 0ULL;
+  GtUint64 num_of_bits = 0ULL;
   GtBitsequence *bits = NULL;
   GtCompressedBitsequence *cbs = NULL, *read_cbs = NULL;
   GtStr *filename = gt_str_new();
@@ -160,7 +160,7 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
   }
   else {
     bits = gt_calloc(sizeof (*bits), (size_t) arguments->size);
-    num_of_bits = (unsigned long long) (GT_INTWORDSIZE * arguments->size);
+    num_of_bits = (GtUint64) (GT_INTWORDSIZE * arguments->size);
 
     if (arguments->fill_random) {
       for (idx = 0; idx < arguments->size; idx++) {
@@ -200,7 +200,7 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
       had_err = -1;
   }
   if (!had_err && bits != NULL && arguments->check_consistency) {
-    for (idx = 0; (unsigned long long) idx < num_of_bits; ++idx) {
+    for (idx = 0; (GtUint64) idx < num_of_bits; ++idx) {
       int GT_UNUSED bit = gt_compressed_bitsequence_access(read_cbs, idx);
       int GT_UNUSED original = GT_ISIBITSET(bits, idx) ? 1 : 0;
       gt_assert(gt_compressed_bitsequence_access(cbs, idx) == bit);

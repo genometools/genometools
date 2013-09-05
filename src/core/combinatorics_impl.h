@@ -43,12 +43,12 @@ static inline unsigned long gt_combinatorics_factorial(unsigned n)
 }
 
 /*@unused@*/
-static inline unsigned long long gt_combinatorics_i_pow(unsigned long long x,
+static inline GtUint64 gt_combinatorics_i_pow(GtUint64 x,
                                                         unsigned int i)
 {
-   unsigned long long result = 1ULL;
+   GtUint64 result = 1ULL;
    if (x == 2ULL)
-     return 1ULL << (unsigned long long) i;
+     return 1ULL << (GtUint64) i;
    while (i != 0) {
      if (i & 1)
        result *= x;

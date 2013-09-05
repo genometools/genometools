@@ -12,13 +12,13 @@ sub transformInputFile($$$\%);
 sub transformInputLine($$$\%);
 
 my %initialReplacements;
-my %stdTypeReplacements = 
+my %stdTypeReplacements =
     (
      'LEN' => [ '8', '16', '32', '64', '-int' ],
      'bitSize' =>  [ '8', '16', '32', '64', '32' ],
      'ValueType' =>  [ qw(uint8_t uint16_t uint32_t uint64_t) ],
      'AccumType' => [ 'unsigned long', 'unsigned long',
-                     'unsigned long', 'unsigned long long' ],
+                     'unsigned long', 'GtUint64' ],
      'uOpType' => [ qw(uint8_t uint16_t uint32_t uint64_t unsigned) ],
      'iOpType' => [ qw(int8_t int16_t int32_t int64_t int) ],
      'uTypeTag' => [ 'UInt8', 'UInt16', 'UInt32', 'UInt64', 'UInt' ],
@@ -45,7 +45,7 @@ my @autogenheader = <DATA>;
 
 foreach my $input (@inputs)
 {
-  my ($output, $outputfh) = $input;  
+  my ($output, $outputfh) = $input;
   $output =~ s/\.template$/$lengthTag\.c/;
   die('Failed output name generation: ', $input, ' => ', $output, "\n")
       if ($output eq $input);
