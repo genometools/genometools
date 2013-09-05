@@ -31,7 +31,7 @@ struct GtSamAlignment{
   GtAlphabet   *alphabet;
   GtUchar      *seq_buffer,
                *qual_buffer;
-  unsigned long s_bufsize,
+  GtUword s_bufsize,
                 q_bufsize,
                 rightmost;
 };

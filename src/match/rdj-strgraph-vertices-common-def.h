@@ -59,7 +59,7 @@
   (GT_STRGRAPH_V_B(READNUM) + (GtStrgraphVnum)1)
 
 #define GT_STRGRAPH_V_READNUM(V) \
-  (unsigned long)((V) >> 1)
+  (GtUword)((V) >> 1)
 
 #define GT_STRGRAPH_V_IS_E(V) \
   (((V) & (GtStrgraphVnum)1) == (GtStrgraphVnum)1)

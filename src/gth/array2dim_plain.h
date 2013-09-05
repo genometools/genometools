@@ -24,7 +24,7 @@
 
 #define gth_array2dim_plain_malloc(ARRAY2DIM, ROWS, COLUMNS)                   \
         {                                                                      \
-          unsigned long gth_a2d_i;                                             \
+          GtUword gth_a2d_i;                                             \
           ARRAY2DIM = malloc(sizeof *ARRAY2DIM * (ROWS));                      \
           if (ARRAY2DIM) {                                                     \
             (ARRAY2DIM)[0] = malloc(sizeof **ARRAY2DIM * (ROWS) * (COLUMNS));  \
@@ -45,7 +45,7 @@
 
 #define gth_array2dim_plain_calloc(ARRAY2DIM, ROWS, COLUMNS)                   \
         {                                                                      \
-          unsigned long gth_a2d_i;                                             \
+          GtUword gth_a2d_i;                                             \
           ARRAY2DIM = calloc((ROWS), sizeof *ARRAY2DIM);                       \
           if (ARRAY2DIM) {                                                     \
             (ARRAY2DIM)[0] = calloc((ROWS) * (COLUMNS), sizeof **ARRAY2DIM);   \

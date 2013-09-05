@@ -25,7 +25,7 @@
 
 struct GtQuerymatch
 {
-   unsigned long
+   GtUword
       dblen, /* length of match in dbsequence */
       querylen, /* same as dblen for exact matches */
       dbstart, /* absolute start position of match in database seq */
@@ -45,16 +45,16 @@ GtQuerymatch *gt_querymatch_new(void)
 }
 
 void gt_querymatch_fill(GtQuerymatch *querymatch,
-                        unsigned long dblen,
-                        unsigned long dbstart,
+                        GtUword dblen,
+                        GtUword dbstart,
                         GtReadmode readmode,
                         bool query_as_reversecopy,
                         long score,
-                        unsigned long edist,
+                        GtUword edist,
                         bool selfmatch,
                         uint64_t queryseqnum,
-                        unsigned long querylen,
-                        unsigned long querystart)
+                        GtUword querylen,
+                        GtUword querystart)
 {
   querymatch->dblen = dblen;
   querymatch->dbstart = dbstart;
@@ -78,15 +78,15 @@ void gt_querymatch_delete(GtQuerymatch *querymatch)
 
 #ifdef VERIFY
 static void verifymatch(const GtEncseq *encseq,
-                        unsigned long len,
-                        unsigned long pos1,
+                        GtUword len,
+                        GtUword pos1,
                         uint64_t seqnum2,
-                        unsigned long pos2,
+                        GtUword pos2,
                         GtReadmode readmode)
 {
   if (readmode == GT_READMODE_REVERSE)
   {
-    unsigned long offset,
+    GtUword offset,
                   seqstartpos,
                   totallength = gt_encseq_total_length(encseq);
     GtUchar cc1, cc2;
@@ -121,7 +121,7 @@ static void verifymatch(const GtEncseq *encseq,
 }
 #endif
 
-unsigned long gt_querymatch_dbseqnum(const GtEncseq *encseq,
+GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
                                      const GtQuerymatch *querymatch)
 {
   return gt_encseq_seqnum(encseq,querymatch->dbstart);
@@ -131,11 +131,11 @@ int gt_querymatch_output(GT_UNUSED void *info,
                          const GtEncseq *encseq,
                          const GtQuerymatch *querymatch,
                          GT_UNUSED const GtUchar *query,
-                         unsigned long query_totallength,
+                         GtUword query_totallength,
                          GT_UNUSED GtError *err)
 {
   const char *outflag = "FRCP";
-  unsigned long dbseqnum, querystart, dbstart_relative, seqstartpos;
+  GtUword dbseqnum, querystart, dbstart_relative, seqstartpos;
 
   gt_assert(encseq != NULL);
   dbseqnum = gt_querymatch_dbseqnum(encseq,querymatch);
@@ -189,17 +189,17 @@ int gt_querymatch_output(GT_UNUSED void *info,
   return 0;
 }
 
-unsigned long gt_querymatch_querylen(const GtQuerymatch *querymatch)
+GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch)
 {
   return querymatch->querylen;
 }
 
-unsigned long gt_querymatch_dbstart(const GtQuerymatch *querymatch)
+GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch)
 {
   return querymatch->dbstart;
 }
 
-unsigned long gt_querymatch_querystart(const GtQuerymatch *querymatch)
+GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch)
 {
   return querymatch->querystart;
 }

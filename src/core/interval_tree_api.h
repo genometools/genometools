@@ -33,8 +33,8 @@ typedef int (*GtIntervalTreeIteratorFunc)(GtIntervalTreeNode*, void*);
    tree if inserted into a <GtIntervalTree> in which a
    <GtIntervalTreeDataFreeFunc> is set. */
 GtIntervalTreeNode* gt_interval_tree_node_new(void *data,
-                                              unsigned long low,
-                                              unsigned long high);
+                                              GtUword low,
+                                              GtUword high);
 
 /* Returns a pointer to the data associated with node <node>. */
 void*               gt_interval_tree_node_get_data(GtIntervalTreeNode* node);
@@ -45,13 +45,13 @@ void*               gt_interval_tree_node_get_data(GtIntervalTreeNode* node);
 GtIntervalTree*     gt_interval_tree_new(GtFree);
 
 /* Returns the number of elements in the <GtIntervalTree>. */
-unsigned long       gt_interval_tree_size(GtIntervalTree*);
+GtUword       gt_interval_tree_size(GtIntervalTree*);
 
 /* Returns the first node in the <GtIntervalTree> which overlaps the given
    range (from <start> to <end>). */
 GtIntervalTreeNode* gt_interval_tree_find_first_overlapping(GtIntervalTree*,
-                                                            unsigned long start,
-                                                            unsigned long end);
+                                                            GtUword start,
+                                                            GtUword end);
 
 /* Inserts node <node> into <tree>. */
 void                gt_interval_tree_insert(GtIntervalTree *tree,
@@ -60,8 +60,8 @@ void                gt_interval_tree_insert(GtIntervalTree *tree,
 /* Collects data pointers of all <GtIntervalTreeNode>s in the tree which
    overlap with the query range (from <start> to <end>) in a <GtArray>. */
 void                gt_interval_tree_find_all_overlapping(GtIntervalTree*,
-                                                          unsigned long start,
-                                                          unsigned long end,
+                                                          GtUword start,
+                                                          GtUword end,
                                                           GtArray*);
 
 /* Call <func> for all <GtIntervalTreeNode>s in the tree which overlap with
@@ -69,8 +69,8 @@ void                gt_interval_tree_find_all_overlapping(GtIntervalTree*,
    user data. */
 void                gt_interval_tree_iterate_overlapping(GtIntervalTree *it,
                                                 GtIntervalTreeIteratorFunc func,
-                                                unsigned long start,
-                                                unsigned long end,
+                                                GtUword start,
+                                                GtUword end,
                                                 void *data);
 
 /* Traverses the <GtIntervalTree> in a depth-first fashion, applying <func> to

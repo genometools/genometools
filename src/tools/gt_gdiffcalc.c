@@ -184,7 +184,7 @@ static int gt_gdiffcalc_runner(int argc, const char **argv, int parsed_args,
 {
   GtGenomediffArguments *arguments = tool_arguments;
   int had_err = 0, i;
-  unsigned long lcounter = 0, zcounter = 0;
+  GtUword lcounter = 0, zcounter = 0;
   double **shusums = NULL;
   GtEncseq              *encseq = NULL;
   GtLogger              *logger;
@@ -277,8 +277,8 @@ static int gt_gdiffcalc_runner(int argc, const char **argv, int parsed_args,
     }
   }
   if (!had_err) {
-    unsigned long num_of_seq, file_idx, seq_idx, startpos;
-    GT_UNUSED unsigned long oldpos = 0;
+    GtUword num_of_seq, file_idx, seq_idx, startpos;
+    GT_UNUSED GtUword oldpos = 0;
 
     gt_assert(unit_info != NULL);
     gt_assert(lcounter == zcounter);

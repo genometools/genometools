@@ -106,7 +106,7 @@ static void print_codingheader(const ParseStruct *, const char *, GtStr *);
               Ausgabeformat, Sequenzposition
    Returnwert: void */
 static void print_hitinformation(const ParseStruct *,
-                                 const HitInformation *, unsigned long);
+                                 const HitInformation *, GtUword);
 
 /* Funktion zum Schreiben der Metagenomethreader-Statistik der Text-Datei
    Parameter: Zeiger auf die ParseStruct-Struktur
@@ -140,11 +140,11 @@ static void output_footer_xml(const ParseStruct *);
 static int as_coding(const ParseStruct *,
                      char *,
                      GtStr *,
-                     unsigned long,
-                     unsigned long, unsigned short, GtError *);
+                     GtUword,
+                     GtUword, unsigned short, GtError *);
 
 static enum iterator_op
-newmemory_hash(char *key, unsigned long *value, void *data, GtError * err);
+newmemory_hash(char *key, GtUword *value, void *data, GtError * err);
 
 /* Funktion zum Schreiben des Statistic-Headers
    Parameter: Zeiger auf die ParseStruct-Struktur
@@ -684,7 +684,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
 {
   GT_UNUSED int had_err = 0;
 
-  unsigned long arraysize,
+  GtUword arraysize,
     from = 0,
     to = 0,
     contig_seq_diff,
@@ -730,10 +730,10 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
         /* Bereichsgrenzen des kodierenden Abschnittes - Werte bereits in
            0- bis X-Kodierung */
         from =
-          *(unsigned long *) gt_array_get(regionmatrix[row_index][0].from,
+          *(GtUword *) gt_array_get(regionmatrix[row_index][0].from,
                                        gt_array_index);
         to =
-          *(unsigned long *) gt_array_get(regionmatrix[row_index][0].to,
+          *(GtUword *) gt_array_get(regionmatrix[row_index][0].to,
                                        gt_array_index);
 
         /* nur wenn die Mindestlaenge in Anzahl AS erfuellt ist, erfolgt
@@ -779,14 +779,14 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
 
             if (hit_ptr == NULL)
             {
-              hit_ptr = gt_calloc(hitcounter, sizeof (unsigned long));
+              hit_ptr = gt_calloc(hitcounter, sizeof (GtUword));
             }
             /* Abfragen aller Hit-Nummern fuer jede Position */
             for (hit_index = 0; hit_index < hit_numbers; hit_index++)
             {
               /* current entspricht der Hit-Nummer */
               current =
-                *(unsigned long *)
+                *(GtUword *)
                 gt_array_get(combinedscore_matrix[row_index][seq_index].
                           hit_number, hit_index);
               /* hit_ptr wird an der Stelle current auf 1 gesetzt - so
@@ -850,11 +850,11 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                   HITSTRUCT(hitsnum) =
                     gt_realloc(hitsnum_tmp,
                                parsestruct_ptr->hits_memory *
-                               sizeof (unsigned long));
+                               sizeof (GtUword));
                   HITSTRUCT(memory) =
                     gt_realloc(memory_tmp,
                                parsestruct_ptr->hits_memory *
-                               sizeof (unsigned long));
+                               sizeof (GtUword));
 
                   gt_hashtable_reset(parsestruct_ptr->resulthits);
 
@@ -866,12 +866,12 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                                    parsestruct_ptr->resulthits,
                                   (char *)
                                   gt_str_array_get(HITSTRUCT(hits_statistic),
-                                               *(unsigned long *)
+                                               *(GtUword *)
                                                gt_array_get(parsestruct_ptr->
                                                          value_tmp,
                                                          hash_index)),
                                   HITSTRUCT(memory +
-                                            *(unsigned long *)
+                                            *(GtUword *)
                                             gt_array_get(parsestruct_ptr->
                                                       value_tmp,
                                                       hash_index)));
@@ -1009,7 +1009,7 @@ static void print_codingheader(const ParseStruct *parsestruct_ptr,
 
 static void print_hitinformation(const ParseStruct *parsestruct_ptr,
                                  const HitInformation *hit_information,
-                                 unsigned long seq_index)
+                                 GtUword seq_index)
 {
   /* je nach Ausgabeformat schreiben der Hit-Informationen */
   switch (ARGUMENTSSTRUCT(outputfile_format))
@@ -1138,13 +1138,13 @@ static void output_footer_xml(const ParseStruct *parsestruct_ptr)
 static int as_coding(const ParseStruct *parsestruct_ptr,
                      char *contig_seq,
                       GtStr *as_seq,
-                      unsigned long from,
-                      unsigned long to,
+                      GtUword from,
+                      GtUword to,
                       unsigned short current_row, GtError * err)
 {
   int had_err = 0;
 
-  unsigned long startpoint = from,
+  GtUword startpoint = from,
     endpoint = to,
     startpoint_start,
     startpoint_atg,
@@ -1352,7 +1352,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
 }
 
 static enum iterator_op
-newmemory_hash(GT_UNUSED char *key, unsigned long *value, void *data,
+newmemory_hash(GT_UNUSED char *key, GtUword *value, void *data,
                GT_UNUSED GtError * err)
 {
   /* Parsestruct-Struktur */

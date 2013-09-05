@@ -19,11 +19,11 @@
 #include "core/minmax.h"
 #include "extended/linearedist.h"
 
-static void fillDPtable(unsigned long *dptable,
-                        const char *u, unsigned long n,
-                        const char *v, unsigned long m)
+static void fillDPtable(GtUword *dptable,
+                        const char *u, GtUword n,
+                        const char *v, GtUword m)
 {
-  unsigned long i, j , nw, we;
+  GtUword i, j , nw, we;
   for (i = 0; i <= n; i++)
     dptable[i] = i;
   for (j = 1; j <= m; j++) {
@@ -41,11 +41,11 @@ static void fillDPtable(unsigned long *dptable,
   }
 }
 
-unsigned long gt_calc_linearedist(const char *u, unsigned long n,
-                                  const char *v, unsigned long m)
+GtUword gt_calc_linearedist(const char *u, GtUword n,
+                                  const char *v, GtUword m)
 {
-  unsigned long *dptable, edist;
-  dptable = gt_malloc(sizeof (unsigned long) * (MIN(n,m) + 1));
+  GtUword *dptable, edist;
+  dptable = gt_malloc(sizeof (GtUword) * (MIN(n,m) + 1));
   fillDPtable(dptable, n <= m ? u : v, MIN(n,m), n <= m ? v : u, MAX(n,m));
   edist = dptable[MIN(n,m)];
   gt_free(dptable);

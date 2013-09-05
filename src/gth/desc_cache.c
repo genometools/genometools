@@ -22,7 +22,7 @@ struct GthDescCache {
   GtStrCache *str_cache;
 };
 
-static GtStr* get_desc_str(void *str_source, unsigned long index)
+static GtStr* get_desc_str(void *str_source, GtUword index)
 {
   GtStr *str;
   GthSeqCon *seq_con = str_source;
@@ -49,7 +49,7 @@ void gth_desc_cache_delete(GthDescCache *desc_cache)
   gt_free(desc_cache);
 }
 
-GtStr* gth_desc_cache_get(GthDescCache *desc_cache, unsigned long seq_num)
+GtStr* gth_desc_cache_get(GthDescCache *desc_cache, GtUword seq_num)
 {
   gt_assert(desc_cache);
   return gt_str_cache_get(desc_cache->str_cache, seq_num);

@@ -34,7 +34,7 @@ GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp);
    by <gff3_visitor> are shown to <fasta_width>.
    Per default, each FASTA entry is shown on a single line. */
 void           gt_gff3_visitor_set_fasta_width(GtGFF3Visitor *gff3_visitor,
-                                               unsigned long fasta_width);
+                                               GtUword fasta_width);
 /* Retain the original ID attributes (instead of creating new ones), if
    possible.  Memory consumption for <gff3_visitor> is raised from O(1) to
    O(<input_size>), because bookkeeping of used IDs becomes necessary to avoid

@@ -190,9 +190,9 @@ void gt_hashmap_reset(GtHashmap *hm)
     break;                                      \
   }
 
-DECLARE_HASHMAP(unsigned long, testul, GtUint64, testull,
+DECLARE_HASHMAP(GtUword, testul, GtUint64, testull,
                 static, inline)
-DEFINE_HASHMAP(unsigned long, testul, GtUint64, testull,
+DEFINE_HASHMAP(GtUword, testul, GtUint64, testull,
                gt_ht_ul_elem_hash, gt_ht_ul_elem_cmp,
                NULL_DESTRUCTOR, NULL_DESTRUCTOR, static, inline)
 
@@ -200,7 +200,7 @@ static int
 gt_hashmap_test(GtHashType hash_type)
 {
   char *s1 = "foo", *s2 = "bar";
-  GT_UNUSED unsigned long ul1 = 1UL, ul2 = 2UL;
+  GT_UNUSED GtUword ul1 = 1UL, ul2 = 2UL;
   GT_UNUSED GtUint64 ull1 = 3ULL, ull2 = 4ULL, *sptr = NULL,
                                *tptr = NULL;
   GtHashmap *hm;

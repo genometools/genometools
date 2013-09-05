@@ -32,7 +32,7 @@
 typedef struct {
   GtOutputFileInfo *ofi;
   GtFile *outfp;
-  unsigned long fasta_width;
+  GtUword fasta_width;
   bool reverse;
 } GtTranslateArguments;
 
@@ -92,7 +92,7 @@ static int gt_seqtranslate_arguments_check(GT_UNUSED int rest_argc,
 
 static int gt_seqtranslate_do_translation(GtTranslateArguments *arguments,
                                        const char *sequence,
-                                       unsigned long length,
+                                       GtUword length,
                                        const char *desc,
                                        GtStr **translations,
                                        bool rev,
@@ -170,7 +170,7 @@ static int gt_seqtranslate_runner(int argc, const char **argv, int parsed_args,
   if (!had_err) {
     char *desc;
     const GtUchar *sequence;
-    unsigned long len;
+    GtUword len;
     while (!had_err && (rval = gt_seq_iterator_next(si,
                                                    &sequence,
                                                    &len, &desc, err))) {

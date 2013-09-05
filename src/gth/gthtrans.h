@@ -21,9 +21,9 @@
 #include "gth/gthoutput.h"
 #include "gth/ags.h"
 
-void gt_outputtranslationandorf(unsigned long pglnum, const GthAGS*,
-                             unsigned long agsnum,
-                             unsigned long translationtable,
+void gt_outputtranslationandorf(GtUword pglnum, const GthAGS*,
+                             GtUword agsnum,
+                             GtUword translationtable,
                              GthInput *input,
                              unsigned int indentlevel, GthOutput*);
 

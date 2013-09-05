@@ -22,7 +22,7 @@
 
 static int range_lua_new(lua_State *L)
 {
-  unsigned long startpos, endpos;
+  GtUword startpos, endpos;
   GtRange *range;
   startpos = luaL_checklong(L, 1);
   endpos   = luaL_checklong(L, 2);
@@ -104,7 +104,7 @@ static GtArray* range_table_to_array(lua_State *L)
 
 static void push_range_array_as_table(lua_State *L, GtArray *ranges)
 {
-  unsigned long i;
+  GtUword i;
   if (ranges && gt_array_size(ranges)) {
     lua_newtable(L);
     for (i = 0; i < gt_array_size(ranges); i++) {

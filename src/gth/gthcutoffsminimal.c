@@ -23,7 +23,7 @@ static void minimalcutoffsprocmatchmismatchordeletion(Traversealignmentstate
                                                       *state,
                                                       void *data,
                                                       GT_UNUSED
-                                                      unsigned long lengthofeop)
+                                                      GtUword lengthofeop)
 {
   Minimalcutoffsdata *d = (Minimalcutoffsdata*) data;
 
@@ -48,7 +48,7 @@ static void minimalcutoffsprocinsertionorintron(GT_UNUSED
                                                 Traversealignmentstate *state,
                                                 void *data,
                                                 GT_UNUSED
-                                                unsigned long lengthofeop)
+                                                GtUword lengthofeop)
 {
   Minimalcutoffsdata *d = (Minimalcutoffsdata*) data;
   d->cutoffs->eopcutoff++;

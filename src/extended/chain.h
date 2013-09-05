@@ -27,11 +27,11 @@ GtChain*      gt_chain_new(void);
 void          gt_chain_reset(GtChain*);
 long          gt_chain_get_score(const GtChain*);
 void          gt_chain_set_score(GtChain*, long);
-void          gt_chain_add_fragnum(GtChain*, unsigned long fragnum);
-void          gt_chain_set_fragnum(GtChain*, unsigned long idx,
-                                             unsigned long fragnum);
-unsigned long gt_chain_get_fragnum(const GtChain*, unsigned long idx);
-unsigned long gt_chain_size(const GtChain*);
+void          gt_chain_add_fragnum(GtChain*, GtUword fragnum);
+void          gt_chain_set_fragnum(GtChain*, GtUword idx,
+                                             GtUword fragnum);
+GtUword gt_chain_get_fragnum(const GtChain*, GtUword idx);
+GtUword gt_chain_size(const GtChain*);
 void          gt_chain_delete(GtChain*);
 
 #endif

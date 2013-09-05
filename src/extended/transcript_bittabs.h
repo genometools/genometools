@@ -24,11 +24,11 @@
 typedef struct GtTranscriptBittabs GtTranscriptBittabs;
 
 /* create an empy container */
-GtTranscriptBittabs* gt_transcript_bittabs_new(unsigned long size_all,
-                                               unsigned long size_single,
-                                               unsigned long size_initial,
-                                               unsigned long size_internal,
-                                               unsigned long size_terminal);
+GtTranscriptBittabs* gt_transcript_bittabs_new(GtUword size_all,
+                                               GtUword size_single,
+                                               GtUword size_initial,
+                                               GtUword size_internal,
+                                               GtUword size_terminal);
 
 /* return the bittab for all exons */
 GtBittab*            gt_transcript_bittabs_get_all(const GtTranscriptBittabs*);

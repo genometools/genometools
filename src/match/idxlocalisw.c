@@ -29,7 +29,7 @@
 
 typedef struct
 {
-  unsigned long umax,
+  GtUword umax,
                 vmax;
 } Maxscorecoord;
 
@@ -39,15 +39,15 @@ static Scoretype swlocalsimilarityscore(Scoretype *scol,
                                         Maxscorecoord *maxpair,
                                         const Scorevalues *scorevalues,
                                         const GtUchar *useq,
-                                        unsigned long ulen,
+                                        GtUword ulen,
                                         const GtEncseq *vencseq,
-                                        unsigned long startpos,
-                                        unsigned long endpos)
+                                        GtUword startpos,
+                                        GtUword endpos)
 {
   Scoretype val, we, nw, *scolptr, maximalscore = 0;
   const GtUchar *uptr;
   GtUchar vcurrent;
-  unsigned long j;
+  GtUword j;
 
   maxpair->umax = maxpair->vmax = 0;
   for (scolptr = scol; scolptr <= scol + ulen; scolptr++)
@@ -81,8 +81,8 @@ static Scoretype swlocalsimilarityscore(Scoretype *scol,
         if (*scolptr > maximalscore)
         {
           maximalscore = *scolptr;
-          maxpair->umax = (unsigned long) (uptr - useq + 1);
-          maxpair->vmax = (unsigned long) (j - startpos + 1);
+          maxpair->umax = (GtUword) (uptr - useq + 1);
+          maxpair->vmax = (GtUword) (j - startpos + 1);
         }
       }
       nw = we;
@@ -94,15 +94,15 @@ static Scoretype swlocalsimilarityscore(Scoretype *scol,
 typedef struct
 {
   Scoretype similarity;
-  unsigned long lu;
-  unsigned long lv;
+  GtUword lu;
+  GtUword lv;
 } DPpoint;
 
 typedef struct
 {
-  unsigned long len1,
+  GtUword len1,
                 start1;
-  unsigned long start2, len2;
+  GtUword start2, len2;
   Scoretype similarity;
 } DPregion;
 
@@ -110,16 +110,16 @@ static void swlocalsimilarityregion(DPpoint *scol,
                                     DPregion *maxentry,
                                     const Scorevalues *scorevalues,
                                     const GtUchar *useq,
-                                    unsigned long ulen,
+                                    GtUword ulen,
                                     const GtEncseq *vencseq,
-                                    unsigned long startpos,
-                                    unsigned long endpos)
+                                    GtUword startpos,
+                                    GtUword endpos)
 {
   Scoretype val;
   DPpoint *scolptr, we, nw;
   const GtUchar *uptr;
   GtUchar vcurrent;
-  unsigned long j;
+  GtUword j;
 
   maxentry->similarity = 0;
   maxentry->len1 = 0;
@@ -171,7 +171,7 @@ static void swlocalsimilarityregion(DPpoint *scol,
           maxentry->similarity = scolptr->similarity;
           maxentry->len1 = scolptr->lu;
           maxentry->len2 = scolptr->lv;
-          maxentry->start1 = (unsigned long) (uptr - useq) - scolptr->lu + 1;
+          maxentry->start1 = (GtUword) (uptr - useq) - scolptr->lu + 1;
           maxentry->start2 = (j - startpos) - scolptr->lv + 1;
         }
       }
@@ -184,15 +184,15 @@ static void swmaximalDPedges(Retracebits *edges,
                              Scoretype *scol,
                              const Scorevalues *scorevalues,
                              const GtUchar *useq,
-                             unsigned long ulen,
+                             GtUword ulen,
                              const GtEncseq *vencseq,
-                             unsigned long startpos,
-                             unsigned long endpos)
+                             GtUword startpos,
+                             GtUword endpos)
 {
   Scoretype val, we, nw, *scolptr;
   const GtUchar *uptr;
   GtUchar vcurrent;
-  unsigned long j;
+  GtUword j;
   Retracebits *eptr;
 
   eptr = edges;
@@ -247,11 +247,11 @@ static void swmaximalDPedges(Retracebits *edges,
 }
 
 static void swtracebackDPedges(GtAlignment *alignment,
-                               unsigned long ulen,
+                               GtUword ulen,
                                const GtEncseq *encseq,
-                               unsigned long vlen,
+                               GtUword vlen,
                                GtUchar *dbsubstring,
-                               unsigned long startpos,
+                               GtUword startpos,
                                const Retracebits *edges)
 {
   const Retracebits *eptr = edges + (ulen+1) * (vlen+1) - 1;
@@ -293,18 +293,18 @@ static void swproducealignment(GtAlignment *alignment,
                                Retracebits *edges,
                                Scoretype *scol,
                                const Scorevalues *scorevalues,
-                               GT_UNUSED unsigned long scorethreshold,
+                               GT_UNUSED GtUword scorethreshold,
                                const GtUchar *useq,
-                               unsigned long ulen,
+                               GtUword ulen,
                                const GtEncseq *vencseq,
-                               unsigned long startpos,
-                               unsigned long endpos)
+                               GtUword startpos,
+                               GtUword endpos)
 {
-  unsigned long vlen = endpos - startpos;
+  GtUword vlen = endpos - startpos;
 
   swmaximalDPedges(edges,scol,scorevalues,useq,ulen,vencseq,startpos,endpos);
   swtracebackDPedges(alignment,ulen,vencseq,vlen,dbsubstring,startpos,edges);
-  gt_alignment_set_seqs(alignment,useq,ulen,dbsubstring,(unsigned long) vlen);
+  gt_alignment_set_seqs(alignment,useq,ulen,dbsubstring,(GtUword) vlen);
 #ifndef NDEBUG
   {
     Scoretype evalscore;
@@ -313,7 +313,7 @@ static void swproducealignment(GtAlignment *alignment,
                                              scorevalues->matchscore,
                                              scorevalues->mismatchscore,
                                              scorevalues->gapextend);
-    if (evalscore < 0 || (unsigned long) evalscore < scorethreshold)
+    if (evalscore < 0 || (GtUword) evalscore < scorethreshold)
     {
       fprintf(stderr,"unexpected eval score %ld\n",evalscore);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -328,10 +328,10 @@ struct SWdpresource
   GtAlignment *alignment;
   Scorevalues scorevalues;
   Scoretype *swcol;
-  unsigned long scorethreshold;
+  GtUword scorethreshold;
   DPpoint *swentrycol;
   GtUchar *dbsubstring;
-  unsigned long allocatedswcol, allocatedmaxedges, allocateddbsubstring;
+  GtUword allocatedswcol, allocatedmaxedges, allocateddbsubstring;
   Retracebits *maxedges;
   ProcessIdxMatch processmatch;
   void *processmatchinfo;
@@ -339,11 +339,11 @@ struct SWdpresource
 
 static void applysmithwaterman(SWdpresource *dpresource,
                                const GtEncseq *encseq,
-                               unsigned long encsequnit,
-                               unsigned long startpos,
-                               unsigned long endpos,
+                               GtUword encsequnit,
+                               GtUword startpos,
+                               GtUword endpos,
                                const GtUchar *query,
-                               unsigned long querylen)
+                               GtUword querylen)
 {
   Scoretype score;
   Maxscorecoord maxpair;
@@ -379,7 +379,7 @@ static void applysmithwaterman(SWdpresource *dpresource,
     match.querystartpos = maxentry.start1;
     match.querylen = maxentry.len1;
     gt_assert(maxentry.similarity >= 0);
-    match.distance = (unsigned long) maxentry.similarity;
+    match.distance = (GtUword) maxentry.similarity;
     if (dpresource->showalignment)
     {
       if (dpresource->allocatedmaxedges <
@@ -393,9 +393,9 @@ static void applysmithwaterman(SWdpresource *dpresource,
                        * dpresource->allocatedmaxedges);
       }
       gt_alignment_reset(dpresource->alignment);
-      if (dpresource->allocateddbsubstring < (unsigned long) maxentry.len2)
+      if (dpresource->allocateddbsubstring < (GtUword) maxentry.len2)
       {
-        dpresource->allocateddbsubstring = (unsigned long) maxentry.len2;
+        dpresource->allocateddbsubstring = (GtUword) maxentry.len2;
         dpresource->dbsubstring
           = gt_realloc(dpresource->dbsubstring,
                        sizeof *dpresource->dbsubstring
@@ -426,9 +426,9 @@ static void applysmithwaterman(SWdpresource *dpresource,
 void gt_multiapplysmithwaterman(SWdpresource *dpresource,
                              const GtEncseq *encseq,
                              const GtUchar *query,
-                             unsigned long querylen)
+                             GtUword querylen)
 {
-  unsigned long seqnum,
+  GtUword seqnum,
                 seqstartpos,
                 seqlength,
                 numofdbsequences = gt_encseq_num_of_sequences(encseq);
@@ -450,7 +450,7 @@ void gt_multiapplysmithwaterman(SWdpresource *dpresource,
 SWdpresource *gt_newSWdpresource(Scoretype matchscore,
                               Scoretype mismatchscore,
                               Scoretype gapextend,
-                              unsigned long scorethreshold,
+                              GtUword scorethreshold,
                               bool showalignment,
                               ProcessIdxMatch processmatch,
                               void *processmatchinfo)

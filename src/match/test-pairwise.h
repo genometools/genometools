@@ -22,33 +22,33 @@
 #include "core/types_api.h"
 
 typedef void (*Checkcmppairfuntype)(bool,
-                                    const GtUchar *,unsigned long,
-                                    const GtUchar *,unsigned long);
+                                    const GtUchar *,GtUword,
+                                    const GtUchar *,GtUword);
 
 void gt_runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
                                const char *file1,
                                const char *file2);
 
-unsigned long gt_runcheckfunctionontext(Checkcmppairfuntype checkfunction,
+GtUword gt_runcheckfunctionontext(Checkcmppairfuntype checkfunction,
                                      const char *text);
 
-unsigned long gt_applycheckfunctiontotext(const GtUchar *text,
-                                       unsigned long textlen,
+GtUword gt_applycheckfunctiontotext(const GtUchar *text,
+                                       GtUword textlen,
                                        void *info);
 
-unsigned long gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
+GtUword gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                          const char *charlist,
-                                         unsigned long len);
+                                         GtUword len);
 
-unsigned long gt_computegreedyunitedist(const GtUchar *useq,
-                                        unsigned long ulen,
+GtUword gt_computegreedyunitedist(const GtUchar *useq,
+                                        GtUword ulen,
                                         const GtUchar *vseq,
-                                        unsigned long vlen);
+                                        GtUword vlen);
 
 void gt_checkgreedyunitedist(bool forward,
                           const GtUchar *useq,
-                          unsigned long ulen,
+                          GtUword ulen,
                           const GtUchar *vseq,
-                          unsigned long vlen);
+                          GtUword vlen);
 
 #endif

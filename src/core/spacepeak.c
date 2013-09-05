@@ -23,7 +23,7 @@
 
 typedef struct
 {
-  unsigned long current,
+  GtUword current,
                 max;
   GtMutex *mutex;
 } GtSpacepeakLogger;
@@ -39,7 +39,7 @@ void gt_spacepeak_init(void)
   peaklogger->mutex = gt_mutex_new();
 }
 
-void gt_spacepeak_add(unsigned long size)
+void gt_spacepeak_add(GtUword size)
 {
   gt_assert(peaklogger);
   gt_mutex_lock(peaklogger->mutex);
@@ -49,14 +49,14 @@ void gt_spacepeak_add(unsigned long size)
   gt_mutex_unlock(peaklogger->mutex);
 }
 
-void gt_spacepeak_free(unsigned long size)
+void gt_spacepeak_free(GtUword size)
 {
   gt_assert(peaklogger && size <= peaklogger->current);
   gt_mutex_lock(peaklogger->mutex);
   peaklogger->current -= size;
   gt_mutex_unlock(peaklogger->mutex);
 }
-unsigned long gt_spacepeak_get_space_peak(void)
+GtUword gt_spacepeak_get_space_peak(void)
 {
   gt_assert(peaklogger);
   return peaklogger->max;

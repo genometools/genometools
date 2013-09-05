@@ -43,7 +43,7 @@ struct GtSeqIteratorFastQ
         *qualsbuffer;
   GtStr *qdescbuffer;
   GtFile *curfile;
-  unsigned long *chardisttab,
+  GtUword *chardisttab,
                 currentfillpos,
                 currentinpos,
                 curline,
@@ -172,7 +172,7 @@ static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
     {
       int charcode;
       char *input_str = gt_str_get(tmp_str);
-      unsigned long str_len = gt_str_length(tmp_str),
+      GtUword str_len = gt_str_length(tmp_str),
                     idx;
       for (idx = 0; !had_err && idx < str_len; idx++)
       {
@@ -182,7 +182,7 @@ static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
                             input_str[idx],
                             gt_str_array_get(seqit->filenametab,
                                              seqit->filenum),
-                            (unsigned long) seqit->curline);
+                            (GtUword) seqit->curline);
           had_err = -2;
         }
         if (ISSPECIAL(charcode)) {
@@ -208,7 +208,7 @@ static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
                                         GT_UNUSED GtError *err)
 {
   char currentchar;
-  unsigned long i = 0;
+  GtUword i = 0;
   gt_assert(gt_str_length(seqit->sequencebuffer) > 0);
   if ((currentchar = fastq_buf_getchar(seqit)) == EOF)
     return EOF;
@@ -251,7 +251,7 @@ static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
                       "file ended before end of block", \
                       gt_str_array_get((seqit)->filenametab, \
                                        (seqit)->filenum), \
-                      (unsigned long) (seqit)->curline-1); \
+                      (GtUword) (seqit)->curline-1); \
     return -2; \
   }
 
@@ -307,7 +307,7 @@ static inline int parse_fastq_block(GtSeqIteratorFastQ *seqit, GtError *err)
   return had_err;
 }
 
-unsigned long gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit)
+GtUword gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit)
 {
   gt_assert(seqit);
   return seqit->filenum;
@@ -332,7 +332,7 @@ void gt_seq_iterator_fastq_set_symbolmap(GtSeqIterator *si,
 }
 
 void gt_seq_iterator_fastq_set_chardisttab(GtSeqIterator *si,
-                                          unsigned long *chardist)
+                                          GtUword *chardist)
 {
   GtSeqIteratorFastQ *seqit;
   gt_assert(si && chardist);
@@ -350,7 +350,7 @@ uint64_t gt_seq_iterator_fastq_get_lastspeciallength(const GtSeqIterator *si)
 
 int gt_seq_iterator_fastq_next(GtSeqIterator *seqit,
                               const GtUchar **sequence,
-                              unsigned long *len,
+                              GtUword *len,
                               char **desc,
                               GtError *err)
 {

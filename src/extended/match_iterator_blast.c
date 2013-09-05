@@ -50,7 +50,7 @@
         gt_match_iterator_cast(gt_match_iterator_blast_class(), M)
 
 typedef struct {
-  unsigned long curpos;
+  GtUword curpos;
   FILE *matchfilep;
   GtFile *gtmatchfilep;
   const char *matchfile;
@@ -69,7 +69,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
                                                           GtError *err)
 {
   gt_assert(gm);
-  unsigned long columncount = 0;
+  GtUword columncount = 0;
   long storeinteger[READNUMS], tmp;
   long double e_value;
   float bitscore, identity;
@@ -126,7 +126,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
     }
   }
 
-  for (columncount = 0; columncount < (unsigned long) (READNUMS);
+  for (columncount = 0; columncount < (GtUword) (READNUMS);
        columncount++) {
     if (storeinteger[columncount] < 0) {
          GT_MATCHER_BLAST_CANNOTPARSECOLUMN("non-negative integer expected");

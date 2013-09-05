@@ -38,7 +38,7 @@ struct chkSearchOptions
 {
   struct bwtOptions idx;
   long minPatLen, maxPatLen;
-  unsigned long numOfSamples, progressInterval;
+  GtUword numOfSamples, progressInterval;
   int flags;
   bool verboseOutput;
 };
@@ -115,8 +115,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       EMIterInitialized = true;
     }
     {
-      unsigned long totalLen, dbstart;
-      unsigned long trial, patternLen;
+      GtUword totalLen, dbstart;
+      GtUword trial, patternLen;
 
       if ((had_err =
            gt_mapsuffixarray(&suffixarray, SARR_SUFTAB | SARR_ESQTAB,
@@ -201,7 +201,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                       == gt_mmsearchiterator_count(mmsi));
           while (gt_mmsearchiterator_next(&dbstart,mmsi))
           {
-            unsigned long matchPos = 0;
+            GtUword matchPos = 0;
             bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = !match))
             {
@@ -218,7 +218,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
           }
           if (!had_err)
           {
-            unsigned long matchPos;
+            GtUword matchPos;
             bool trailingMatch = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = trailingMatch))
             {
@@ -229,7 +229,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
         }
         else
         {
-          unsigned long numFMIMatches = gt_BWTSeqMatchCount(bwtSeq, pptr,
+          GtUword numFMIMatches = gt_BWTSeqMatchCount(bwtSeq, pptr,
                                                          patternLen,
                                                          false),
             numMMSearchMatches = gt_mmsearchiterator_count(mmsi);

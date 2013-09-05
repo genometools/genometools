@@ -35,7 +35,7 @@ static void determineAGSscore(GthAGS *ags, double sortagswf)
 {
   GthDbl average_exon_score              = 0.0,
          average_splice_site_probability = 0.0;
-  unsigned long i, numofexons = gt_array_size(ags->exons);
+  GtUword i, numofexons = gt_array_size(ags->exons);
   GthSpliceSiteProb *splicesiteprob;
   gt_assert(numofexons > 0);
 
@@ -70,7 +70,7 @@ static void determineAGSscore(GthAGS *ags, double sortagswf)
 
 static void sortAGSsinsinglePGL(GthPGL *pgl, double sortagswf)
 {
-  unsigned long i;
+  GtUword i;
 
   /* determine AGS scores */
   for (i = 0; i < gt_array_size(pgl->assemblies); i++)
@@ -83,7 +83,7 @@ static void sortAGSsinsinglePGL(GthPGL *pgl, double sortagswf)
 
 void gth_sortAGSs(GtArray *pgls, double sortagswf)
 {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < gt_array_size(pgls); i++)
     sortAGSsinsinglePGL(*(GthPGL**) gt_array_get(pgls, i), sortagswf);
 }

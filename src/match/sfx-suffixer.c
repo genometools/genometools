@@ -59,7 +59,7 @@
 
 typedef struct
 {
-  unsigned long allocatedSuffixptr, nextfreeSuffixptr;
+  GtUword allocatedSuffixptr, nextfreeSuffixptr;
   GtSuffixsortspace *sssp;
 } GtSuffixposbuffer;
 
@@ -68,7 +68,7 @@ struct Sfxiterator
   /* globally constant */
   const GtEncseq *encseq;
   GtReadmode readmode;
-  unsigned long specialcharacters,
+  GtUword specialcharacters,
                 totallength;
   unsigned int numofchars,
                prefixlength;
@@ -86,7 +86,7 @@ struct Sfxiterator
   GtSuffixsortspace *suffixsortspace;
   GtCodetype currentmincode,
              currentmaxcode;
-  unsigned long widthofpart;
+  GtUword widthofpart;
   unsigned int part;
   GtOutlcpinfo *outlcpinfo;
   GtSuffixposbuffer fusp;
@@ -100,7 +100,7 @@ struct Sfxiterator
   /* use for generating k-mer codes */
   FILE *outfpbcktab;
   bool storespecials;
-  unsigned long nextfreeCodeatposition;
+  GtUword nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
   unsigned int kmerfastmaskright;
   GtSuffixsortspace_exportptr *exportptr;
@@ -111,13 +111,13 @@ struct Sfxiterator
   GtBitsequence *markprefixbuckets,
                 *marksuffixbuckets;
   GtCodetype spmopt_kmerscancodesuffixmask;
-  unsigned long spmopt_numofallprefixcodes,
+  GtUword spmopt_numofallprefixcodes,
                 spmopt_numofallsuffixcodes;
   GtSfxmappedrange *mappedmarkprefixbuckets;
 };
 
 #ifdef SKDEBUG
-static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
+static GtUword iterproduceCodeatposition(Codeatposition *codelist,
                                                const  GtEncseq *encseq,
                                                GtReadmode readmode,
                                                unsigned int prefixlength,
@@ -126,7 +126,7 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
   if (prefixlength > 1U)
   {
     Enumcodeatposition *ecp;
-    unsigned long insertindex;
+    GtUword insertindex;
     Specialcontext specialcontext;
 
     ecp = gt_Enumcodeatposition_new(encseq,
@@ -152,11 +152,11 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
 }
 
 static void compareCodeatpositionlists(const Codeatposition *codelist1,
-                                       unsigned long len1,
+                                       GtUword len1,
                                        const Codeatposition *codelist2,
-                                       unsigned long len2)
+                                       GtUword len2)
 {
-  unsigned long idx;
+  GtUword idx;
 
   if (len1 != len2)
   {
@@ -204,13 +204,13 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
 static void verifycodelistcomputation(
                        const GtEncseq *encseq,
                        GtReadmode readmode,
-                       unsigned long realspecialranges,
+                       GtUword realspecialranges,
                        unsigned int prefixlength,
                        unsigned int numofchars,
-                       unsigned long nextfreeCodeatposition1,
+                       GtUword nextfreeCodeatposition1,
                        const Codeatposition *spaceCodeatposition1)
 {
-  unsigned long nextfreeCodeatposition2;
+  GtUword nextfreeCodeatposition2;
   Codeatposition *spaceCodeatposition2;
 
   spaceCodeatposition2 = gt_malloc(sizeof (*spaceCodeatposition2) *
@@ -230,10 +230,10 @@ static void verifycodelistcomputation(
 
 static GtCodetype getencseqcode(const GtEncseq *encseq,
                                 GtReadmode readmode,
-                                unsigned long totallength,
+                                GtUword totallength,
                                 const GtCodetype **multimappower,
                                 unsigned int prefixlength,
-                                unsigned long pos)
+                                GtUword pos)
 {
   GtCodetype code = 0;
   unsigned int idx;
@@ -241,7 +241,7 @@ static GtCodetype getencseqcode(const GtEncseq *encseq,
 
   for (idx=0; idx<prefixlength; idx++)
   {
-    gt_assert((unsigned long) (pos + idx) < totallength);
+    gt_assert((GtUword) (pos + idx) < totallength);
     cc = gt_encseq_get_encoded_char_nospecial(encseq,pos + idx,readmode);
     gt_assert(ISNOTSPECIAL(cc));
     code += multimappower[idx][cc];
@@ -256,7 +256,7 @@ unsigned int previousspecialpos = 0;
 #endif
 
 static void updatekmercount(void *processinfo,
-                            unsigned long position,
+                            GtUword position,
                             const GtKmercode *kmercode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
@@ -375,7 +375,7 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
           if ((SCANCODE) >= (SFI)->currentmincode &&\
               (SCANCODE) <= (SFI)->currentmaxcode)\
           {\
-            unsigned long stidx;\
+            GtUword stidx;\
             stidx = gt_bcktab_leftborder_insertionindex((SFI)->leftborder,\
                                                         SCANCODE);\
             /* from right to left */\
@@ -389,7 +389,7 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
               bcktabcode <= (SFI)->currentmaxcode &&\
               (FIRSTINRANGE || gt_checksuffixprefixbuckets(SFI,SCANCODE)))\
           {\
-            unsigned long stidx;\
+            GtUword stidx;\
             stidx = gt_bcktab_leftborder_insertionindex((SFI)->leftborder,\
                                                         bcktabcode);\
             /* from right to left */\
@@ -399,7 +399,7 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
         }
 
 static void gt_insertkmerwithoutspecial(void *processinfo,
-                                        unsigned long position,
+                                        GtUword position,
                                         const GtKmercode *kmercode)
 {
   if (!kmercode->definedspecialposition)
@@ -410,7 +410,7 @@ static void gt_insertkmerwithoutspecial(void *processinfo,
 }
 
 static void gt_reversespecialcodes(Codeatposition *spaceCodeatposition,
-                                   unsigned long nextfreeCodeatposition)
+                                   GtUword nextfreeCodeatposition)
 {
   Codeatposition *front, *back, tmp;
 
@@ -428,7 +428,7 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
 {
   GtCodetype code;
   unsigned int prefixindex;
-  unsigned long insertindex, j, stidx;
+  GtUword insertindex, j, stidx;
 
   for (prefixindex=1U; prefixindex < sfi->prefixlength; prefixindex++)
   {
@@ -477,7 +477,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
 {
   GtCodetype code;
   unsigned int prefixindex;
-  unsigned long stidx;
+  GtUword stidx;
   Enumcodeatposition *ecp;
   Specialcontext specialcontext;
 
@@ -581,7 +581,7 @@ static void getencseqkmersupdatekmercount(const GtEncseq *encseq,
   kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize,0);
   if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
   {
-    unsigned long position = 0;
+    GtUword position = 0;
 
     while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
                           != NULL)
@@ -603,7 +603,7 @@ void getencseqkmersinsertkmerwithoutspecial(const GtEncseq *encseq,
   kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize,0);
   if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
   {
-    unsigned long position = 0;
+    GtUword position = 0;
 
     while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
                           != NULL)
@@ -618,13 +618,13 @@ void getencseqkmersinsertkmerwithoutspecial(const GtEncseq *encseq,
 #ifdef DEBUGSIZEESTIMATION
 static void verifyestimatedspace(size_t estimatedspace)
 {
-  unsigned long usedspace_ma_fa = gt_ma_get_space_current() +
+  GtUword usedspace_ma_fa = gt_ma_get_space_current() +
                                   gt_fa_get_space_current();
   if (usedspace_ma_fa > 0)
   {
     double relativedifference;
 
-    if (usedspace_ma_fa >= (unsigned long) estimatedspace)
+    if (usedspace_ma_fa >= (GtUword) estimatedspace)
     {
       relativedifference
         = (double) (usedspace_ma_fa - estimatedspace)/usedspace_ma_fa;
@@ -684,21 +684,21 @@ static void checkallreversebitpairs(void)
 
 static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                     const GtTwobitencoding *twobitencoding,
-                                    unsigned long totallength,
+                                    GtUword totallength,
                                     GtCodetype maskright,
                                     GtReadmode readmode,
                                     unsigned int kmersize,
                                     unsigned int upperkmersize,
                                     void(*processkmercode)(void *,
                                                            bool,
-                                                           unsigned long,
+                                                           GtUword,
                                                            GtCodetype),
                                     void *processkmercodeinfo,
                                     bool onlyfirst,
-                                    unsigned long startpos,
-                                    unsigned long endpos)
+                                    GtUword startpos,
+                                    GtUword endpos)
 {
-  unsigned long pos, unitindex, rightbound = totallength - kmersize;
+  GtUword pos, unitindex, rightbound = totallength - kmersize;
   unsigned int shiftright;
   GtCodetype code;
   GtUchar cc;
@@ -707,10 +707,10 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
   gt_assert(kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))
   {
-    unsigned long startpos2;
+    GtUword startpos2;
 
-    gt_assert(endpos >= (unsigned long) upperkmersize);
-    pos = endpos - (unsigned long) kmersize;
+    gt_assert(endpos >= (GtUword) upperkmersize);
+    pos = endpos - (GtUword) kmersize;
     unitindex = (pos > 0) ? GT_DIVBYUNITSIN2BITENC(pos-1) : 0;
     code = gt_kmercode_reverse(gt_kmercode_at_position(twobitencoding,pos,
                                                        kmersize),
@@ -761,7 +761,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     }
   } else
   {
-    unsigned long maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
+    GtUword maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
 
     pos = startpos;
     unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
@@ -781,7 +781,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     shiftright = (unsigned int)
                  GT_MULT2(GT_UNITSIN2BITENC - 1 -
                           GT_MODBYUNITSIN2BITENC(startpos+kmersize));
-    while (pos < endpos - (unsigned long) upperkmersize)
+    while (pos < endpos - (GtUword) upperkmersize)
     {
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
@@ -799,7 +799,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       } else
       {
         gt_assert(unitindex < maxunitindex-1 ||
-                  pos == endpos - (unsigned long) upperkmersize);
+                  pos == endpos - (GtUword) upperkmersize);
         if (unitindex < maxunitindex-1)
         {
           currentencoding = twobitencoding[++unitindex];
@@ -813,8 +813,8 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
 
 static void getencseqkmers_rangetwobitencoding(
                                       const GtTwobitencoding *twobitencoding,
-                                      unsigned long totallength,
-                                      unsigned long realtotallength,
+                                      GtUword totallength,
+                                      GtUword realtotallength,
                                       bool mirrored,
                                       GtCodetype maskright,
                                       GtReadmode readmode,
@@ -823,16 +823,16 @@ static void getencseqkmers_rangetwobitencoding(
                                       bool onlyfirst,
                                       void(*processkmercode)(void *,
                                                              bool,
-                                                             unsigned long,
+                                                             GtUword,
                                                              GtCodetype),
                                       void *processkmercodeinfo,
                                       void(*processkmerspecial)(void *,
                                                                 unsigned int,
                                                                 unsigned int,
-                                                                unsigned long),
+                                                                GtUword),
                                       void *processkmerspecialinfo,
-                                      unsigned long startpos,
-                                      unsigned long endpos)
+                                      GtUword startpos,
+                                      GtUword endpos)
 {
   GtCodetype lastcode, newcode;
 
@@ -844,14 +844,14 @@ static void getencseqkmers_rangetwobitencoding(
     else
       endpos = GT_REVERSEPOS(realtotallength, endpos - realtotallength - 2);
     if (startpos > endpos) {
-      unsigned long tmp = startpos;
+      GtUword tmp = startpos;
       startpos = endpos;
       endpos = tmp;
     }
     gt_assert(startpos <= endpos);
     gt_assert(endpos <= realtotallength);
   }
-  if (endpos - startpos >= (unsigned long) upperkmersize)
+  if (endpos - startpos >= (GtUword) upperkmersize)
   {
     gt_assert(endpos > 0);
     lastcode = getencseqkmers_nospecialtwobitencoding(twobitencoding,
@@ -884,7 +884,7 @@ static void getencseqkmers_rangetwobitencoding(
     {
       unsigned int fillpos;
 
-      gt_assert((unsigned long) kmersize > endpos - startpos);
+      gt_assert((GtUword) kmersize > endpos - startpos);
       fillpos = (unsigned int) (kmersize - (endpos - startpos));
       lastcode = gt_kmercode_at_position(twobitencoding,startpos,
                                          (unsigned int) (endpos - startpos));
@@ -916,16 +916,16 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    bool onlyfirst,
                                    void(*processkmercode)(void *,
                                                           bool,
-                                                          unsigned long,
+                                                          GtUword,
                                                           GtCodetype),
                                    void *processkmercodeinfo,
                                    void(*processkmerspecial)(void *,
                                                              unsigned int,
                                                              unsigned int,
-                                                             unsigned long),
+                                                             GtUword),
                                    void *processkmerspecialinfo)
 {
-  unsigned long laststart = 0, lastend,
+  GtUword laststart = 0, lastend,
                 totallength,
                 realtotallength;
   const GtTwobitencoding *twobitencoding
@@ -1014,9 +1014,9 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
 
 static void gt_updateleftborderforkmer(Sfxiterator *sfi,
                                        GT_UNUSED bool firstinrange,
-                                       GT_UNUSED unsigned long position,
-                                       GT_UNUSED unsigned long seqnum,
-                                       GT_UNUSED unsigned long relpos,
+                                       GT_UNUSED GtUword position,
+                                       GT_UNUSED GtUword seqnum,
+                                       GT_UNUSED GtUword relpos,
                                        GtCodetype code)
 {
   gt_assert(sfi->sfxstrategy.spmopt_minlength == 0);
@@ -1025,7 +1025,7 @@ static void gt_updateleftborderforkmer(Sfxiterator *sfi,
 
 static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
                                               unsigned int maxprefixindex,
-                                              unsigned long position,
+                                              GtUword position,
                                               unsigned int code)
 {
   unsigned int idx;
@@ -1058,7 +1058,7 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 typedef struct
 {
   const GtTwobitencoding *twobitencoding;
-  unsigned long totallength, maxunitindex, realtotallength, rightbound,
+  GtUword totallength, maxunitindex, realtotallength, rightbound,
                 numofsequences;
   GtCodetype maskright;
   unsigned int kmersize, upperkmersize;
@@ -1128,7 +1128,7 @@ typedef struct
 
 static void gt_sfimarkprefixsuffixbuckets(void *processinfo,
                                           GT_UNUSED bool firstinrange,
-                                          GT_UNUSED unsigned long pos,
+                                          GT_UNUSED GtUword pos,
                                           GtCodetype scancode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
@@ -1151,7 +1151,7 @@ static void gt_sfimarkprefixsuffixbuckets(void *processinfo,
 static size_t gt_sizeforbittable(unsigned int numofchars,
                                  unsigned int prefixlength)
 {
-  unsigned long numofcodes;
+  GtUword numofcodes;
 
   numofcodes = gt_power_for_small_exponents(numofchars,prefixlength);
   return sizeof (GtBitsequence) * GT_NUMOFINTSFORBITS(numofcodes);
@@ -1163,7 +1163,7 @@ static void gt_determineaddionalsuffixprefixchars(
                                    unsigned int numofchars,
                                    unsigned int prefixlength,
                                    size_t estimatedspace,
-                                   unsigned long maximumspace)
+                                   GtUword maximumspace)
 {
   unsigned int prefixchars;
   size_t sizeofprefixmarks;
@@ -1210,7 +1210,7 @@ static void gt_determineaddionalsuffixprefixchars(
 #endif
 }
 
-static unsigned long gt_bcktab_code_to_prefix_index(unsigned long code,
+static GtUword gt_bcktab_code_to_prefix_index(GtUword code,
                                                     const void *data)
 {
   unsigned int additionalprefixchars, *ptr = (unsigned int *) data;
@@ -1218,15 +1218,15 @@ static unsigned long gt_bcktab_code_to_prefix_index(unsigned long code,
   additionalprefixchars = *ptr;
   if (GT_MULT2(additionalprefixchars) > (unsigned int) GT_LOGWORDSIZE)
   {
-    return (unsigned long) (code << (GT_MULT2(additionalprefixchars) -
+    return (GtUword) (code << (GT_MULT2(additionalprefixchars) -
                                  GT_LOGWORDSIZE));
   }
-  return (unsigned long) (code >> (GT_LOGWORDSIZE -
+  return (GtUword) (code >> (GT_LOGWORDSIZE -
                                 GT_MULT2(additionalprefixchars)));
 }
 
-static void gt_bcktab_code_to_minmax_prefix_index(unsigned long *mincode,
-                                                  unsigned long *maxcode,
+static void gt_bcktab_code_to_minmax_prefix_index(GtUword *mincode,
+                                                  GtUword *maxcode,
                                                   const void *data)
 {
   *mincode = gt_bcktab_code_to_prefix_index(*mincode,data);
@@ -1238,7 +1238,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 GtReadmode readmode,
                                 unsigned int prefixlength,
                                 unsigned int numofparts,
-                                unsigned long maximumspace,
+                                GtUword maximumspace,
                                 void *voidoutlcpinfo,
                                 FILE *outfpbcktab,
                                 const Sfxstrategy *sfxstrategy,
@@ -1248,7 +1248,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 GtError *err)
 {
   Sfxiterator *sfi = NULL;
-  unsigned long realspecialranges, specialcharacters, numofsuffixestosort = 0;
+  GtUword realspecialranges, specialcharacters, numofsuffixestosort = 0;
   bool haserr = false;
   GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
 #if defined (_LP64) || defined (_WIN64)
@@ -1294,7 +1294,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       sfi->spaceCodeatposition
         = gt_malloc(sizeof (*sfi->spaceCodeatposition) * (realspecialranges+1));
       gt_logger_log(logger,"sizeof (spaceCodeatposition)=%lu bytes",
-                 (unsigned long) (sizeof (*sfi->spaceCodeatposition) *
+                 (GtUword) (sizeof (*sfi->spaceCodeatposition) *
                                           (realspecialranges+1)));
       estimatedspace += sizeof (*sfi->spaceCodeatposition) *
                         (realspecialranges+1);
@@ -1496,7 +1496,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 "table of %lu bytes",
                                 sfi->prefixlength +
                                 sfi->spmopt_additionalprefixchars,
-                                (unsigned long) sizeofprefixmarks);
+                                (GtUword) sizeofprefixmarks);
       sfi->mappedmarkprefixbuckets
         = gt_Sfxmappedrange_new("markprefixbuckets",
                                 sfi->spmopt_numofallprefixcodes,
@@ -1519,7 +1519,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 suffixchars,
                                 sfi->prefixlength +
                                 sfi->spmopt_additionalprefixchars,
-                                (unsigned long) sizeofsuffixmarks);
+                                (GtUword) sizeofsuffixmarks);
 #endif
       getencseqkmers_twobitencoding(encseq,
                                     sfi->readmode,
@@ -1540,7 +1540,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   SHOWCURRENTSPACE;
   if (!haserr)
   {
-    unsigned long largestbucketsize,
+    GtUword largestbucketsize,
                   saved_bucketswithoutwholeleaf;
     gt_assert(sfi != NULL);
     sfi->storespecials = true;
@@ -1757,7 +1757,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned int prefixlength,
                                 unsigned int numofparts,
-                                unsigned long maximumspace,
+                                GtUword maximumspace,
                                 const Sfxstrategy *sfxstrategy,
                                 GtTimer *sfxprogress,
                                 bool withprogressbar,
@@ -1781,7 +1781,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 {
-  unsigned long sumofwidthforpart;
+  GtUword sumofwidthforpart;
   GtBucketspec2 *bucketspec2 = NULL;
 
   if (sfi->part == 0 && sfi->withprogressbar)
@@ -1947,10 +1947,10 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 }
 
 static void insertfullspecialrange(Sfxiterator *sfi,
-                                   unsigned long leftpos,
-                                   unsigned long rightpos)
+                                   GtUword leftpos,
+                                   GtUword rightpos)
 {
-  unsigned long pos;
+  GtUword pos;
 
   gt_assert(leftpos < rightpos);
   if (GT_ISDIRREVERSE(sfi->readmode))
@@ -1992,7 +1992,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
 static void fillspecialnextpage(Sfxiterator *sfi)
 {
   GtRange range;
-  unsigned long width;
+  GtUword width;
 
   while (true)
   {
@@ -2002,7 +2002,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
       if (sfi->fusp.nextfreeSuffixptr + width > sfi->fusp.allocatedSuffixptr)
       {
         /* does not fit into the buffer, so only output a part */
-        unsigned long rest = sfi->fusp.nextfreeSuffixptr +
+        GtUword rest = sfi->fusp.nextfreeSuffixptr +
                              width - sfi->fusp.allocatedSuffixptr;
         gt_assert(rest > 0);
         if (GT_ISDIRREVERSE(sfi->readmode))
@@ -2035,7 +2035,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         gt_assert(width > 0);
         if (sfi->fusp.nextfreeSuffixptr + width > sfi->fusp.allocatedSuffixptr)
         { /* does not fit into the buffer, so only output a part */
-          unsigned long rest = sfi->fusp.nextfreeSuffixptr +
+          GtUword rest = sfi->fusp.nextfreeSuffixptr +
                                width - sfi->fusp.allocatedSuffixptr;
           if (GT_ISDIRREVERSE(sfi->readmode))
           {
@@ -2074,7 +2074,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
+const GtSuffixsortspace *gt_Sfxiterator_next(GtUword *numberofsuffixes,
                                              bool *specialsuffixes,
                                              Sfxiterator *sfi)
 {
@@ -2128,7 +2128,7 @@ int gt_Sfxiterator_bcktab2file(FILE *fp, Sfxiterator *sfi, GtError *err)
   return 0;
 }
 
-unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi)
+GtUword gt_Sfxiterator_longest(const Sfxiterator *sfi)
 {
   gt_assert(sfi != NULL);
   if (sfi->sfxstrategy.spmopt_minlength == 0)

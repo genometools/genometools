@@ -38,8 +38,8 @@ GtNodeStream* gt_ltr_cluster_stream_new(GtNodeStream *in_stream,
                                         int k,
                                         int mscoregapped,
                                         int mscoregapless,
-                                        unsigned long plarge,
-                                        unsigned long psmall,
+                                        GtUword plarge,
+                                        GtUword psmall,
                                         char **current_state,
                                         GtError *err);
 

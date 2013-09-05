@@ -57,7 +57,7 @@ static void show_xml_run_header(GthCallInfo *call_info, GthInput *input,
                                 unsigned int indentlevel, const char **args)
 {
   GtFile *outfp = call_info->out->outfp;
-  unsigned long i;
+  GtUword i;
 
   gth_indent(outfp, indentlevel);
   if (call_info->intermediate) {

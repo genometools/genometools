@@ -28,7 +28,7 @@
 struct GtORFIterator {
   GtCodonIterator *ci;
   GtTranslator *translator;
-  unsigned long orf_start[3];
+  GtUword orf_start[3];
   bool found_start[3];
 };
 

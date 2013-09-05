@@ -35,7 +35,7 @@
 #include "core/types_api.h"
 
 /** basic unit of addressing BitStrings */
-/* Caution: sizeof (BitElem) <= sizeof (unsigned long) must be met */
+/* Caution: sizeof (BitElem) <= sizeof (GtUword) must be met */
 typedef unsigned char BitElem;
 /** Stores arbitrary bit sequences */
 typedef BitElem *BitString;

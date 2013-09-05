@@ -30,7 +30,7 @@
 static int feature_node_lua_new(lua_State *L)
 {
   GtGenomeNode **gf;
-  unsigned long startpos, endpos;
+  GtUword startpos, endpos;
   GtStrand strand;
   const char *seqid, *type, *strand_str;
   size_t length;
@@ -62,7 +62,7 @@ static int feature_node_lua_new(lua_State *L)
 static int sequence_region_lua_new(lua_State *L)
 {
   GtGenomeNode **rn;
-  unsigned long startpos, endpos;
+  GtUword startpos, endpos;
   const char *seqid;
   GtStr *seqid_str;
   gt_assert(L);
@@ -168,7 +168,7 @@ static int feature_node_lua_get_exons(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
   GtArray *exons = gt_array_new(sizeof (GtGenomeNode*));
-  unsigned long i = 0;
+  GtUword i = 0;
   GtFeatureNode *fn;
   /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);

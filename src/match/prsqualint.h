@@ -19,6 +19,7 @@
 #define PRSQUALINT_H
 
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 #define BESTCHARACTER        'b'
 #define PERCENTAWAYCHARACTER 'p'
@@ -33,7 +34,7 @@ typedef enum
 typedef struct
 {
   Qualificationtag qualtag;
-  unsigned long integervalue;
+  GtUword integervalue;
 } Qualifiedinteger;
 
 Qualifiedinteger *gt_parsequalifiedinteger(const char *option,

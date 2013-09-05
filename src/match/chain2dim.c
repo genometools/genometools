@@ -42,7 +42,7 @@ typedef struct
   GtChain2Dimpostype startpos[2], /* start of matches in the 2 dimensions,
                                  userdef */
                  endpos[2];  /* end of matches in the 2 dimensions, userdef */
-  unsigned long firstinchain,   /* first element in chain, computed for all
+  GtUword firstinchain,   /* first element in chain, computed for all
                                    chainkinds but only used for local chaining
                                 */
                 previousinchain;  /* previous index in chain, compute */
@@ -58,7 +58,7 @@ struct GtChain2Dimmatchtable
    Matchchaininfo *matches;
    GtChain2Dimscoretype largestdim0,
                         largestdim1;
-   unsigned long nextfree,
+   GtUword nextfree,
                  allocated,
                  /* not NULL only for GLOBALCHAININGALLCHAINS */
                  allprevious,
@@ -109,13 +109,13 @@ struct GtChain2Dimmode
                                   otherwise maximal width of gap */
   GtChain2Dimscoretype minimumscore; /* only defined if
                                   chainkind = LOCALCHAININGTHRESHOLD */
-  unsigned long howmanybest,   /* only defined if
+  GtUword howmanybest,   /* only defined if
                                   chainkind = LOCALCHAININGBEST */
                 percentawayfrombest;  /* only defined if
                                          chainkind = LOCALCHAININGPERCENTAWAY */
 };
 
-typedef unsigned long GtChain2Dimref;
+typedef GtUword GtChain2Dimref;
 
 GT_DECLAREARRAYSTRUCT(GtChain2Dimref);
 
@@ -131,7 +131,7 @@ struct GtChain2Dim
   bool storedinreverseorder;
 };
 
-GtChain2Dimmatchtable *gt_chain_matchtable_new(unsigned long numberofmatches)
+GtChain2Dimmatchtable *gt_chain_matchtable_new(GtUword numberofmatches)
 {
   GtChain2Dimmatchtable *matchtable = gt_malloc(sizeof (*matchtable));
   matchtable->matches = gt_malloc(sizeof (*matchtable->matches) *
@@ -237,25 +237,25 @@ void gt_chain_applyweight(double weightfactor,
 
 typedef GtChain2Dimscoretype (*GtChain2Dimgapcostfunction)(
                                                   const GtChain2Dimmatchtable *,
-                                                  unsigned long,
-                                                  unsigned long);
+                                                  GtUword,
+                                                  GtUword);
 
 typedef struct
 {
-  unsigned long fpident;
+  GtUword fpident;
   GtChain2Dimpostype fpposition;
 } GtChain2DimMatchpoint;
 
 typedef struct
 {
   GtRBTree *dictroot;
-  unsigned long *endpointperm;
+  GtUword *endpointperm;
 } GtChain2DimMatchstore;
 
 typedef struct
 {
   GtChain2Dimscoretype maxscore;
-  unsigned long maxmatchnum;
+  GtUword maxmatchnum;
   bool defined;
 } GtChain2DimMaxmatchvalue;
 
@@ -273,8 +273,8 @@ typedef struct
 } GtChain2DimBestofclass;
 
 static bool gt_chain2dim_overlapping(const GtChain2Dimmatchtable *matchtable,
-                                     unsigned long i,
-                                     unsigned long j)
+                                     GtUword i,
+                                     GtUword j)
 {
   return (GT_CHAIN2DIM_GETSTOREDENDPOINT(0,i)
             >= GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,j) ||
@@ -284,16 +284,16 @@ static bool gt_chain2dim_overlapping(const GtChain2Dimmatchtable *matchtable,
 
 static bool gt_chain2dim_colinear(const GtChain2Dimmatchtable *matchtable,
                                   int dim,
-                                  unsigned long i,
-                                  unsigned long j)
+                                  GtUword i,
+                                  GtUword j)
 {
   return (GT_CHAIN2DIM_GETSTOREDENDPOINT(dim,i)
             < GT_CHAIN2DIM_GETSTOREDSTARTPOINT(dim,j)) ? true : false;
 }
 
 static bool gt_chain2dim_ovl_colinear(const GtChain2Dimmatchtable *matchtable,
-                                      unsigned long i,
-                                      unsigned long j)
+                                      GtUword i,
+                                      GtUword j)
 {
   return (GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, i)
             < GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, j) &&
@@ -306,8 +306,8 @@ static bool gt_chain2dim_ovl_colinear(const GtChain2Dimmatchtable *matchtable,
 }
 
 static GtChain2Dimscoretype gapcostL1(const GtChain2Dimmatchtable *matchtable,
-                                  unsigned long i,
-                                  unsigned long j)
+                                  GtUword i,
+                                  GtUword j)
 {
   return (GtChain2Dimscoretype)
          ((GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,j)
@@ -318,8 +318,8 @@ static GtChain2Dimscoretype gapcostL1(const GtChain2Dimmatchtable *matchtable,
 
 static GtChain2Dimscoretype gt_chain2dim_overlapcost(
                                     const GtChain2Dimmatchtable *matchtable,
-                                    unsigned long i,
-                                    unsigned long j)
+                                    GtUword i,
+                                    GtUword j)
 {
   GtChain2Dimpostype overlaplength = 0;
 
@@ -354,7 +354,7 @@ static GtChain2Dimscoretype gt_chain2dim_overlapcost(
 */
 
 static GtChain2Dimscoretype gapcostCc(const GtChain2Dimmatchtable *matchtable,
-                                  unsigned long i,unsigned long j)
+                                  GtUword i,GtUword j)
 {
   GtChain2Dimpostype value1, value2;
 
@@ -409,9 +409,9 @@ static void gt_chain2dim_chainingboundarycases(const GtChain2Dimmode *chainmode,
 
 static void gt_chain2dim_retrace_previousinchain(GtChain2Dim *chain,
                                    const GtChain2Dimmatchtable *matchtable,
-                                   unsigned long retracestart)
+                                   GtUword retracestart)
 {
-  unsigned long matchnum, lengthofchain;
+  GtUword matchnum, lengthofchain;
 
   chain->storedinreverseorder = false;
   for (lengthofchain = 0, matchnum = retracestart;
@@ -436,7 +436,7 @@ static void gt_chain2dim_retrace_previousinchain(GtChain2Dim *chain,
 
 typedef struct
 {
-  unsigned long level, son;
+  GtUword level, son;
 } GtChain2DimEdgelevel;
 
 GT_DECLAREARRAYSTRUCT(GtChain2DimEdgelevel);
@@ -445,11 +445,11 @@ static void gt_chain2dim_nd_retrace_allprevious(
                                    GtArrayGtChain2DimEdgelevel *stack,
                                    GtChain2Dim *chain,
                                    const GtChain2Dimmatchtable *matchtable,
-                                   unsigned long retracestart,
+                                   GtUword retracestart,
                                    GtChain2Dimprocessor chainprocessor,
                                    void *cpinfo)
 {
-  unsigned long idx;
+  GtUword idx;
   GtChain2DimEdgelevel *el;
 
   if (matchtable->previouscount[retracestart] == 0)
@@ -502,8 +502,8 @@ static void gt_chain2dim_nd_retrace_allprevious(
 static bool gt_chain2dim_checkmaxgapwidth(const GtChain2Dimmatchtable
                                                                     *matchtable,
                                           GtChain2Dimpostype maxgapwidth,
-                                          unsigned long leftmatch,
-                                          unsigned long rightmatch)
+                                          GtUword leftmatch,
+                                          GtUword rightmatch)
 {
   GtChain2Dimpostype gapwidth, startpoint, endpoint;
 
@@ -543,7 +543,7 @@ static void gt_chain2dim_bruteforcechainingscores(
 {
   if (matchtable->nextfree > 1UL)
   {
-    unsigned long rightmatch;
+    GtUword rightmatch;
 
     matchtable->matches[0].firstinchain = 0;
     matchtable->matches[0].previousinchain = GT_CHAIN2DIM_UNDEFPREVIOUS;
@@ -557,7 +557,7 @@ static void gt_chain2dim_bruteforcechainingscores(
     {
       const GtChain2Dimscoretype weightright
         = matchtable->matches[rightmatch].weight;
-      unsigned long leftmatch;
+      GtUword leftmatch;
       GtChain2DimMaxmatchvalue localmaxmatch;
 
       localmaxmatch.defined = false;
@@ -592,7 +592,7 @@ static void gt_chain2dim_bruteforcechainingscores(
         if (combinable)
         {
           GtChain2Dimscoretype score = matchtable->matches[leftmatch].score;
-          unsigned long previous;
+          GtUword previous;
 
           if (chainmode->chainkind == GLOBALCHAINING)
           {
@@ -662,7 +662,7 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
 {
   if (matchtable->nextfree > 1UL)
   {
-    unsigned long rightmatch;
+    GtUword rightmatch;
 
     matchtable->matches[0].firstinchain = 0;
     matchtable->matches[0].previousinchain = GT_CHAIN2DIM_UNDEFPREVIOUS;
@@ -676,9 +676,9 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
     {
       const GtChain2Dimscoretype weightright
         = matchtable->matches[rightmatch].weight;
-      unsigned long leftmatch;
+      GtUword leftmatch;
       GtChain2DimMaxmatchvalue localmaxmatch;
-      unsigned long previouswithbestscore;
+      GtUword previouswithbestscore;
 
       localmaxmatch.defined = false;
       localmaxmatch.maxscore = 0;
@@ -690,7 +690,7 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
             gt_chain2dim_colinear(matchtable,1,leftmatch,rightmatch))
         {
           GtChain2Dimscoretype score = matchtable->matches[leftmatch].score;
-          unsigned long previous;
+          GtUword previous;
 
           if (score > 0)
           {
@@ -753,7 +753,7 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
     {
       const GtChain2Dimscoretype weightright
         = matchtable->matches[rightmatch].weight;
-      unsigned long leftmatch;
+      GtUword leftmatch;
 
       if (matchtable->previouscount[rightmatch] == 0)
       {
@@ -765,7 +765,7 @@ static void gt_chain2dim_ndbfchainscores(GtChain2Dimmatchtable *matchtable)
             gt_chain2dim_colinear(matchtable,1,leftmatch,rightmatch))
         {
           GtChain2Dimscoretype score = matchtable->matches[leftmatch].score;
-          unsigned long previous;
+          GtUword previous;
 
           if (score > 0)
           {
@@ -823,7 +823,7 @@ static int gt_chain2dim_cmpendMatchpoint2(const void* keya,
 
 static GtChain2Dimscoretype gt_chain2dim_evalpriority(bool addterminal,
                                      const GtChain2Dimmatchtable *matchtable,
-                                     unsigned long matchnum)
+                                     GtUword matchnum)
 {
   if (addterminal)
   {
@@ -905,10 +905,10 @@ static void gt_chain2dim_evalmatchscore(const GtChain2Dimmode *chainmode,
                                         GtChain2Dimmatchtable *matchtable,
                                         GtChain2DimMatchstore *matchstore,
                                         bool gapsL1,
-                                        unsigned long matchpointident,
+                                        GtUword matchpointident,
                                         unsigned int presortdim)
 {
-  unsigned long previous;
+  GtUword previous;
   GtChain2Dimpostype startpos2;
   GtChain2DimMatchpoint *qmatch2;
   GtChain2Dimscoretype score;
@@ -992,7 +992,7 @@ static void gt_chain2dim_evalmatchscore(const GtChain2Dimmode *chainmode,
 
 static bool gt_chain2dim_isrightmaximal_chain(
                                         const GtChain2Dimmatchtable *matchtable,
-                                        unsigned long currentmatch)
+                                        GtUword currentmatch)
 {
   if (currentmatch == matchtable->nextfree - 1)
   {
@@ -1018,7 +1018,7 @@ static bool gt_chain2dim_isrightmaximal_chain(
 static GtChain2DimBestofclass *gt_chain2dim_local_getclassrep(
                    GtChain2DimBestofclass *chainequivalenceclasses,
                    const GtChain2Dimmatchtable *matchtable,
-                   unsigned long matchnum)
+                   GtUword matchnum)
 {
   return chainequivalenceclasses + matchtable->matches[matchnum].firstinchain;
 }
@@ -1029,7 +1029,7 @@ static void gt_chain2dim_local_determineequivreps(
                                 GtChain2DimBestofclass *chainequivalenceclasses,
                                 const GtChain2Dimmatchtable *matchtable)
 {
-  unsigned long matchnum;
+  GtUword matchnum;
   GtChain2DimBestofclass *classptr, *classrep;
 
   for (classptr = chainequivalenceclasses;
@@ -1059,7 +1059,7 @@ static bool gt_chain2dim_retrievemaximalscore(GtChain2Dimscoretype *maxscore,
                                               const GtChain2Dimmatchtable
                                                 *matchtable)
 {
-  unsigned long matchnum;
+  GtUword matchnum;
   GtChain2Dimscoretype tgap;
   bool maxscoredefined = false;
 
@@ -1106,9 +1106,9 @@ static int comparescores(const void *key1,
 static void retrieve_local_chainbestscores(bool *minscoredefined,
                                     GtChain2Dimscoretype *minscore,
                                     const GtChain2Dimmatchtable *matchtable,
-                                    unsigned long howmanybest)
+                                    GtUword howmanybest)
 {
-  unsigned long idx, matchnum = 0;
+  GtUword idx, matchnum = 0;
   GtChain2Dimscoretype *scores;
   GtRankedList *dictbestmatches;
   void *minkey;
@@ -1148,7 +1148,7 @@ static void gt_chain2dim_retrievechainthreshold(
                              GtChain2Dimprocessor chainprocessor,
                              void *cpinfo)
 {
-  unsigned long matchnum;
+  GtUword matchnum;
   GtArrayGtChain2DimEdgelevel stack;
 
   GT_INITARRAY(&stack,GtChain2DimEdgelevel);
@@ -1223,7 +1223,7 @@ static int comparestartandend(const Matchchaininfo *sortedstartpoints,
 
 static GtChain2DimMatchpoint *makeactivationpoint(
                                        const GtChain2Dimmatchtable *matchtable,
-                                       unsigned long fpident,
+                                       GtUword fpident,
                                        unsigned int postsortdim)
 {
   GtChain2DimMatchpoint *fpptr;
@@ -1241,7 +1241,7 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
                                    bool gapsL1,
                                    unsigned int presortdim)
 {
-  unsigned long xidx, startcount, endcount;
+  GtUword xidx, startcount, endcount;
   const unsigned int postsortdim = 1U - presortdim;
   bool addterminal = (chainmode->chainkind == GLOBALCHAINING) ? false : true;
 
@@ -1307,7 +1307,7 @@ static unsigned int gt_chain2dim_findmaximalscores(
                                             void *cpinfo,
                                             GtLogger *logger)
 {
-  unsigned long matchnum;
+  GtUword matchnum;
   GtChain2Dimscoretype minscore = 0;
   GtChain2DimMatchpoint *maxpoint;
   GtChain2DimBestofclass *chainequivalenceclasses;
@@ -1391,11 +1391,11 @@ static unsigned int gt_chain2dim_findmaximalscores(
   return retval;
 }
 
-static void makesortedendpointpermutation(unsigned long *perm,
+static void makesortedendpointpermutation(GtUword *perm,
                                           GtChain2Dimmatchtable *matchtable,
                                           unsigned int presortdim)
 {
-  unsigned long temp, *iptr, *jptr, i, moves = 0;
+  GtUword temp, *iptr, *jptr, i, moves = 0;
 
   for (i = 0; i < matchtable->nextfree; i++)
   {
@@ -1675,7 +1675,7 @@ static int parseglobalchainingparameter(GtChain2Dimmode *chainmode,
   return -1;
 }
 
-GtChain2Dimmode *gt_chain_chainmode_new(unsigned long maxgap,
+GtChain2Dimmode *gt_chain_chainmode_new(GtUword maxgap,
                                         bool globalset,
                                         const char *globalargs,
                                         bool localset,
@@ -1755,7 +1755,7 @@ GtChain2Dimscoretype gt_chain_chainscore(const GtChain2Dim *chain)
   return chain->scoreofchain;
 }
 
-unsigned long gt_chain_chainlength(const GtChain2Dim *chain)
+GtUword gt_chain_chainlength(const GtChain2Dim *chain)
 {
   return chain->chainedmatches.nextfreeGtChain2Dimref;
 }
@@ -1767,7 +1767,7 @@ bool gt_chain_storedinreverseorder(const GtChain2Dim *chain)
 
 void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
                                const GtChain2Dimmatchtable *matchtable,
-                               const GtChain2Dim *chain,unsigned long idx)
+                               const GtChain2Dim *chain,GtUword idx)
 {
   const Matchchaininfo *fiptr;
 

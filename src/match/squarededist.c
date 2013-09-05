@@ -19,10 +19,10 @@
 #include "core/ma_api.h"
 #include "squarededist.h"
 
-static unsigned long gt_squarededistunit2 (const GtUchar *u, unsigned long m,
-                                        const GtUchar *v, unsigned long n)
+static GtUword gt_squarededistunit2 (const GtUchar *u, GtUword m,
+                                        const GtUchar *v, GtUword n)
 {
-  unsigned long val, we, nw, *ecol, *ecolptr;
+  GtUword val, we, nw, *ecol, *ecolptr;
   const GtUchar *uptr, *vptr;
 
   ecol = gt_malloc(sizeof *ecol * (m+1));
@@ -61,8 +61,8 @@ static unsigned long gt_squarededistunit2 (const GtUchar *u, unsigned long m,
   return val;
 }
 
-unsigned long gt_squarededistunit (const GtUchar *u, unsigned long m,
-                                const GtUchar *v, unsigned long n)
+GtUword gt_squarededistunit (const GtUchar *u, GtUword m,
+                                const GtUchar *v, GtUword n)
 {
   if (m < n)
   {

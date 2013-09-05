@@ -36,8 +36,8 @@ GthDPParam* gth_dp_param_new(GtArray *ranges,
                              GthSpliceSiteModel*,
                              GtAlphabet *gen_alphabet);
 /* Can return NULL */
-GthDPParam* gth_dp_param_new_with_range(unsigned long left,
-                                        unsigned long right,
+GthDPParam* gth_dp_param_new_with_range(GtUword left,
+                                        GtUword right,
                                         const unsigned char *gen_seq_tran,
                                         const GtRange *gen_seq_bounds,
                                         GthSpliceSiteModel*,

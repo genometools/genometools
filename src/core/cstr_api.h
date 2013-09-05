@@ -20,36 +20,37 @@
 #define CSTR_API_H
 
 #include <stdio.h>
+#include "core/types_api.h"
 
 /* Cstr module */
 
 /* Creates a duplicate of string <cstr> using the __GenomeTools__ memory
    allocator. */
-char*         gt_cstr_dup(const char *cstr);
+char*   gt_cstr_dup(const char *cstr);
 
 /* Splits the \0-terminated <cstr> at all positions where <sep> occurs and
    returns a C string array in which each element is a separate string between
    the occurrences of <sep>. The string array is terminated by NULL. The caller
    is responsible to free the result. */
-char**        gt_cstr_split(const char *cstr, char sep);
+char**  gt_cstr_split(const char *cstr, char sep);
 
 /* Creates a duplicate of string <cstr> using the __GenomeTools__ memory
    allocator. The string needs not be \0-terminated, instead its <length> must
    be given. */
-char*         gt_cstr_dup_nt(const char *cstr, unsigned long length);
+char*   gt_cstr_dup_nt(const char *cstr, GtUword length);
 
 /* Replace each occurence of <f> in <cstr> to <t>. */
-void          gt_cstr_rep(char *cstr, char f, char t);
+void    gt_cstr_rep(char *cstr, char f, char t);
 
 /* Outputs the first <length> characters of the string <cstr> to file pointer
    <outfp>. */
-void          gt_cstr_show(const char *cstr, unsigned long length, FILE *outfp);
+void    gt_cstr_show(const char *cstr, GtUword length, FILE *outfp);
 
 /* Returns the length of the prefix of <cstr> ending just before <c>, if <cstr>
    does not contain <c>, strlen(cstr) is returned. */
-unsigned long gt_cstr_length_up_to_char(const char *cstr, char c);
+GtUword gt_cstr_length_up_to_char(const char *cstr, char c);
 
 /* Removes all occurrences of <remove> from the right end of <cstr>. */
-char*         gt_cstr_rtrim(char* cstr, char remove);
+char*   gt_cstr_rtrim(char* cstr, char remove);
 
 #endif

@@ -24,6 +24,6 @@ typedef struct GthDescCache GthDescCache;
 GthDescCache* gth_desc_cache_new(GthSeqCon *seq_con);
 void          gth_desc_cache_delete(GthDescCache *desc_cache);
 GtStr*        gth_desc_cache_get(GthDescCache *desc_cache,
-                                 unsigned long seq_num);
+                                 GtUword seq_num);
 
 #endif

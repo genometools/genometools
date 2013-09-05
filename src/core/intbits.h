@@ -44,7 +44,7 @@ typedef uint32_t GtBitsequence;
 #define GT_WORDSIZE_INBYTES (sizeof (void *))
 
 #define GT_INTWORDSIZE\
-        (1 << GT_LOGWORDSIZE) /* # of bits in unsigned long = w */
+        (1 << GT_LOGWORDSIZE) /* # of bits in GtUword = w */
 #define GT_LASTHALVEBITS\
         ((((GtBitsequence) 1) << GT_DIV2(GT_INTWORDSIZE)) - 1)
 #define GT_FIRSTHALVEBITS\
@@ -197,12 +197,12 @@ static inline void gt_bitsequence_tostring_units(char *buffer,
   buffer[idx] = '\0';
 }
 
-/*@unused@*/ static inline unsigned long gt_unitsoftwobitencoding(unsigned long
+/*@unused@*/ static inline GtUword gt_unitsoftwobitencoding(GtUword
                                                                   totallength)
 {
   uint64_t unitsoftwobitencoding;
 
-  if (totallength < (unsigned long) GT_UNITSIN2BITENC) {
+  if (totallength < (GtUword) GT_UNITSIN2BITENC) {
     return 2UL;
   }
   unitsoftwobitencoding = (uint64_t) (2 +

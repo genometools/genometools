@@ -33,11 +33,11 @@
 
 #include "match/shu-dfs.h"
 
-static inline void add_filenum_count(unsigned long lower,
-                                     unsigned long upper,
+static inline void add_filenum_count(GtUword lower,
+                                     GtUword upper,
                                      ShuNode *parent,
                                      BwtSeqpositionextractor *pos_extractor,
-                                     unsigned long total_length,
+                                     GtUword total_length,
                                      const GtShuUnitFileInfo *unit_info,
                                      const GtEncseq *encseq)
 {
@@ -45,7 +45,7 @@ static inline void add_filenum_count(unsigned long lower,
 
   for (row = lower; row < upper; row++)
   {
-    unsigned long filenum, position;
+    GtUword filenum, position;
 
     position = gt_BwtSeqpositionextractor_extract(pos_extractor, row);
     if (total_length <= position)
@@ -70,11 +70,11 @@ static inline void add_filenum_count(unsigned long lower,
   }
 }
 
-static inline unsigned long **get_special_pos(const FMindex *index,
+static inline GtUword **get_special_pos(const FMindex *index,
                                          BwtSeqpositionextractor *pos_extractor,
-                                         unsigned long num_of_specials)
+                                         GtUword num_of_specials)
 {
-  unsigned long row_idx, special_idx = 0,
+  GtUword row_idx, special_idx = 0,
                 **special_char_rows_and_pos,
                 first_special_row;
   GtUchar cc;
@@ -100,11 +100,11 @@ static inline unsigned long **get_special_pos(const FMindex *index,
   return special_char_rows_and_pos;
 }
 
-static inline unsigned long get_start_idx_binary_search(ShuNode *parent,
-                                                  unsigned long **special_pos,
-                                                  unsigned long max_idx)
+static inline GtUword get_start_idx_binary_search(ShuNode *parent,
+                                                  GtUword **special_pos,
+                                                  GtUword max_idx)
 {
-  unsigned long start_idx = 0;
+  GtUword start_idx = 0;
 
   if (parent->lower <= special_pos[0][0])
   {
@@ -118,12 +118,12 @@ static inline unsigned long get_start_idx_binary_search(ShuNode *parent,
     }
     else
     {
-      unsigned long left, mid, right, len;
+      GtUword left, mid, right, len;
       left = 0;
       right = max_idx - 1;
       while (left<=right)
       {
-        len = (unsigned long) (right - left);
+        len = (GtUword) (right - left);
         mid = left + GT_DIV2(len);
         if (special_pos[0][mid] < parent->lower)
         {
@@ -155,16 +155,16 @@ static int visit_shu_children(const FMindex *index,
                               const GtEncseq *encseq,
                               Mbtab *tmpmbtab,
                               BwtSeqpositionextractor *pos_extractor,
-                              unsigned long *rangeOccs,
-                              unsigned long **special_pos,
-                              GT_UNUSED unsigned long numofchars,
+                              GtUword *rangeOccs,
+                              GtUword **special_pos,
+                              GT_UNUSED GtUword numofchars,
                               const GtShuUnitFileInfo *unit_info,
-                              unsigned long total_length,
-                              unsigned long max_idx,
+                              GtUword total_length,
+                              GtUword max_idx,
                               GT_UNUSED GtLogger *logger,
                               GT_UNUSED GtError *err)
 {
-  unsigned long rangesize, idx, num_of_rows;
+  GtUword rangesize, idx, num_of_rows;
   unsigned int offset;
 
   gt_assert(parent->lower < parent->upper);
@@ -221,7 +221,7 @@ static int visit_shu_children(const FMindex *index,
           }
           else
           {
-            unsigned long y_idx, file_idx;
+            GtUword y_idx, file_idx;
             for (y_idx = 0; y_idx < numofchars+1UL; y_idx++)
             {
               for (file_idx = 0;
@@ -243,8 +243,8 @@ static int visit_shu_children(const FMindex *index,
     }
   }
   if (parent->depth > 0 && num_of_rows > 0) {
-    unsigned long start_idx;
-    /* unsigned long max_idx - already determined*/
+    GtUword start_idx;
+    /* GtUword max_idx - already determined*/
 
     gt_assert(num_of_rows <= max_idx + 1);
     gt_assert(parent->lower <= special_pos[0][max_idx]);
@@ -257,7 +257,7 @@ static int visit_shu_children(const FMindex *index,
         special_pos[0][idx] < parent->upper && idx <= max_idx;
         idx++)
     {
-      unsigned long filenum,
+      GtUword filenum,
                     position = special_pos[1][idx];
 
       gt_assert(1UL <= num_of_rows);
@@ -293,14 +293,14 @@ static int visit_shu_children(const FMindex *index,
 static int process_shu_node(ShuNode *node,
                             GtStackShuNode *stack,
                             uint64_t **shulen,
-                            unsigned long num_of_genomes,
-                            unsigned long numofchars,
+                            GtUword num_of_genomes,
+                            GtUword numofchars,
                             GT_UNUSED GtLogger *logger,
                             GT_UNUSED GtError *err)
 {
   int had_err = 0;
   uint64_t old;
-  unsigned long idx_i, idx_j, termChild_x_i, idx_char;
+  GtUword idx_i, idx_j, termChild_x_i, idx_char;
   unsigned child_c;
   ShuNode *parent = NULL;
 
@@ -345,7 +345,7 @@ static int process_shu_node(ShuNode *node,
         }
       }
       /* scan branch */
-      for (child_c = 1U; (unsigned long) child_c <= numofchars; child_c++)
+      for (child_c = 1U; (GtUword) child_c <= numofchars; child_c++)
       {
         if (!had_err && node->countTermSubtree[child_c][idx_i] > 0)
         {
@@ -396,8 +396,8 @@ static int initialise_node(void *node)
 int gt_pck_calculate_shulen(const FMindex *index,
                             const GtShuUnitFileInfo *unit_info,
                             uint64_t **shulen,
-                            unsigned long numofchars,
-                            unsigned long total_length,
+                            GtUword numofchars,
+                            GtUword total_length,
                             GtTimer *timer,
                             GtLogger *logger,
                             GtError *err)
@@ -406,8 +406,8 @@ int gt_pck_calculate_shulen(const FMindex *index,
   GtStackShuNode stack;
   ShuNode *root;
   Mbtab *tmpmbtab;
-  const unsigned long resize = 64UL;
-  unsigned long *rangeOccs,
+  const GtUword resize = 64UL;
+  GtUword *rangeOccs,
                 **special_char_rows_and_pos,
                 depth_idx,
                 processed_nodes,

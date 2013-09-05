@@ -22,7 +22,7 @@ typedef struct GtPairBwtidx GtPairBwtidx;
 
 struct GtPairBwtidx
 {
-  unsigned long bwtpos,
+  GtUword bwtpos,
                 suftabvalue;
 };
 

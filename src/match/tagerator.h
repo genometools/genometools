@@ -56,7 +56,7 @@ typedef struct
   long userdefinedmaxdistance; /* maximal number of allowed differences */
   int userdefinedmaxdepth;   /* use pckbuckets only up to this depth */
   unsigned int outputmode;  /* mode of output of tag matches */
-  unsigned long maxintervalwidth; /* max width of interval */
+  GtUword maxintervalwidth; /* max width of interval */
   size_t numberofmodedescentries;
 } TageratorOptions;
 

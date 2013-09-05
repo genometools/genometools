@@ -28,7 +28,7 @@ struct GtFeatureOutStream
   GtStrArray *seqids;
   GtArray *regioncache,
           *featurecache;
-  unsigned long regindex,
+  GtUword regindex,
                 seqindex;
 };
 
@@ -104,7 +104,7 @@ const GtNodeStreamClass *gt_feature_out_stream_class(void)
 
 void feature_out_stream_init(GtFeatureOutStream *stream)
 {
-  unsigned long i;
+  GtUword i;
   GtError *error = gt_error_new();
 
   stream->featurecache = NULL;

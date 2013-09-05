@@ -70,7 +70,7 @@ typedef struct GtBaseQualDistr {
 } GtBaseQualDistr;
 
 typedef struct FastqFileInfo {
-  unsigned long readlength,
+  GtUword readlength,
                 readnum;
 } FastqFileInfo;
 
@@ -81,7 +81,7 @@ typedef struct GtHcrSeqEncoder {
   GtHuffman         *huffman;
   GtSampling        *sampling;
   GtUint64 total_num_of_symbols;
-  unsigned long      num_of_files;
+  GtUword      num_of_files;
   long               startofsamplingtab,
                      start_of_encoding;
   unsigned int       qual_offset;
@@ -91,7 +91,7 @@ struct GtHcrEncoder {
   GtEncdescEncoder *encdesc_encoder;
   GtHcrSeqEncoder  *seq_encoder;
   GtStrArray       *files;
-  unsigned long     num_of_reads,
+  GtUword     num_of_reads,
                     num_of_files,
                     sampling_rate,
                     pagesize;
@@ -105,7 +105,7 @@ typedef struct hcr_huff_mem_info {
   size_t        start,
                 end,
                 pos;
-  unsigned long pages_per_chunk,
+  GtUword pages_per_chunk,
                 bitseq_per_chunk,
                 pagesize,
                 blocksize;
@@ -123,7 +123,7 @@ typedef struct GtHcrSeqDecoder {
   GtSampling          *sampling;
   GtStr               *filename;
   HcrHuffDataIterator *data_iter;
-  unsigned long        readlength,
+  GtUword        readlength,
                        cur_read,
                        num_of_reads,
                        num_of_files;
@@ -144,7 +144,7 @@ typedef struct WriteNodeInfo {
 } WriteNodeInfo;
 
 static GtUint64 hcr_base_qual_distr_func(const void *distr,
-                                                   unsigned long symbol)
+                                                   GtUword symbol)
 {
   GtUint64 value;
   GtBaseQualDistr *bqd = (GtBaseQualDistr*)distr;
@@ -161,7 +161,7 @@ static void hcr_base_qual_distr_trim(GtBaseQualDistr *bqd)
              j;
 
     nrows_new = bqd->max_qual - bqd->min_qual + 1;
-    gt_array2dim_calloc(distr_trimmed, (unsigned long) nrows_new, bqd->ncols);
+    gt_array2dim_calloc(distr_trimmed, (GtUword) nrows_new, bqd->ncols);
 
     for (i = 0; i < nrows_new; i++)
       for (j = 0; j < bqd->ncols; j++)
@@ -183,7 +183,7 @@ static GtBaseQualDistr* hcr_base_qual_distr_new_from_file(FILE *fp,
   unsigned alpha_size,
            min_qual = HCR_HIGHESTQUALVALUE,
            max_qual = HCR_LOWESTQUALVALUE;
-  unsigned long numofleaves,
+  GtUword numofleaves,
                 i;
   GtUint64 cur_freq;
   GT_UNUSED size_t read,
@@ -243,9 +243,9 @@ static GtBaseQualDistr* hcr_base_qual_distr_new(GtAlphabet *alpha,
 }
 
 static int hcr_base_qual_distr_add(GtBaseQualDistr *bqd, const GtUchar *qual,
-                                   const GtUchar *seq, unsigned long len)
+                                   const GtUchar *seq, GtUword len)
 {
-  unsigned long i;
+  GtUword i;
   unsigned cur_char_code,
            cur_qual;
 
@@ -299,10 +299,10 @@ static int hcr_cmp_FastqFileInfo(const void *node1, const void *node2,
   return 0;
 }
 
-static unsigned long hcr_write_seq(GtHcrSeqEncoder *seq_encoder,
+static GtUword hcr_write_seq(GtHcrSeqEncoder *seq_encoder,
                                    const GtUchar *seq,
                                    const GtUchar *qual,
-                                   unsigned long len,
+                                   GtUword len,
                                    GtBitOutStream *bitstream,
                                    bool dry)
 {
@@ -310,7 +310,7 @@ static unsigned long hcr_write_seq(GtHcrSeqEncoder *seq_encoder,
            cur_char_code,
            cur_qual,
            symbol;
-  unsigned long i,
+  GtUword i,
                 written_bits = 0;
   GtBitsequence code;
 
@@ -335,7 +335,7 @@ static unsigned long hcr_write_seq(GtHcrSeqEncoder *seq_encoder,
     cur_qual = cur_qual - seq_encoder->qual_offset;
 
     symbol = gt_alphabet_size(seq_encoder->alpha) * cur_qual + cur_char_code;
-    gt_huffman_encode(seq_encoder->huffman, (unsigned long) symbol,
+    gt_huffman_encode(seq_encoder->huffman, (GtUword) symbol,
                       &code, &bits_to_write);
     written_bits += bits_to_write;
     if (!dry) {
@@ -348,7 +348,7 @@ static unsigned long hcr_write_seq(GtHcrSeqEncoder *seq_encoder,
 static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
 {
   int had_err = 0, seqit_err;
-  unsigned long bits_to_write = 0,
+  GtUword bits_to_write = 0,
                 len,
                 read_counter = 0,
                 page_counter = 0,
@@ -461,7 +461,7 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
   return had_err;
 }
 
-static int hcr_huffman_write_base_qual_freq(unsigned long symbol,
+static int hcr_huffman_write_base_qual_freq(GtUword symbol,
                                             GtUint64 freq,
                                             GT_UNUSED GtBitsequence code,
                                             GT_UNUSED unsigned code_length,
@@ -490,7 +490,7 @@ static int hcr_write_seqdistrtab(FILE *fp, GtHcrEncoder *hcr_enc)
 {
   WriteNodeInfo *info;
   int had_err = 0;
-  unsigned long numofleaves;
+  GtUword numofleaves;
 
   info = gt_calloc((size_t) 1, sizeof (WriteNodeInfo));
   info->alpha = hcr_enc->seq_encoder->alpha;
@@ -509,7 +509,7 @@ static int hcr_write_seqdistrtab(FILE *fp, GtHcrEncoder *hcr_enc)
 
 static void hcr_write_file_info(FILE *fp, GtHcrEncoder *hcr_enc)
 {
-  unsigned long i;
+  GtUword i;
 
   gt_xfwrite_one(&hcr_enc->num_of_files, fp);
 
@@ -524,7 +524,7 @@ static int hcr_write_seq_qual_data(const char *name, GtHcrEncoder *hcr_enc,
 {
   int had_err = 0;
   FILE *fp;
-  unsigned long dummy = 0;
+  GtUword dummy = 0;
   long pos;
 
   gt_error_check(err);
@@ -578,7 +578,7 @@ static int hcr_write_seq_qual_data(const char *name, GtHcrEncoder *hcr_enc,
 
 static void hcr_read_file_info(GtHcrSeqDecoder *seq_dec, FILE *fp)
 {
-  unsigned long i;
+  GtUword i;
   GT_UNUSED size_t read,
             one = (size_t) 1;
 
@@ -616,9 +616,9 @@ static HcrHuffDataIterator *decoder_init_data_iterator(
 }
 
 static int get_next_file_chunk_for_huffman(GtBitsequence **bits,
-                                           unsigned long *length,
-                                           unsigned long *offset,
-                                           unsigned long *pad_length,
+                                           GtUword *length,
+                                           GtUword *offset,
+                                           GtUword *pad_length,
                                            void *meminfo)
 {
   const int empty = 0,
@@ -628,7 +628,7 @@ static int get_next_file_chunk_for_huffman(GtBitsequence **bits,
   gt_assert(bits && length && offset && pad_length);
   data_iter = (HcrHuffDataIterator*) meminfo;
 
-  gt_log_log("pos in iter: %lu", (unsigned long) data_iter->pos);
+  gt_log_log("pos in iter: %lu", (GtUword) data_iter->pos);
   if (data_iter->pos < data_iter->end) {
     gt_fa_xmunmap(data_iter->data);
     data_iter->data = NULL;
@@ -665,7 +665,7 @@ static void reset_data_iterator_to_pos(HcrHuffDataIterator *data_iter,
   gt_assert(pos < data_iter->end);
   gt_assert(data_iter->start <= pos);
   gt_fa_xmunmap(data_iter->data);
-  gt_log_log("reset to pos: %lu", (unsigned long) pos);
+  gt_log_log("reset to pos: %lu", (GtUword) pos);
   data_iter->data = NULL;
   data_iter->pos = pos;
 }
@@ -684,11 +684,11 @@ static void data_iterator_delete(HcrHuffDataIterator *data_iter)
 }
 
 static GtRBTree *seq_decoder_init_file_info(FastqFileInfo *fileinfos,
-                                            unsigned long num_off_files)
+                                            GtUword num_off_files)
 {
   GtRBTree *tree;
   bool nodecreated = false;
-  unsigned long i;
+  GtUword i;
 
   tree = gt_rbtree_new(hcr_cmp_FastqFileInfo, NULL, NULL);
   for (i = 0; i < num_off_files; i++) {
@@ -701,7 +701,7 @@ static GtRBTree *seq_decoder_init_file_info(FastqFileInfo *fileinfos,
 static inline long decoder_calc_start_of_encoded_data(FILE *fp)
 {
   bool is_not_at_pageborder;
-  unsigned long pagesize = gt_pagesize();
+  GtUword pagesize = gt_pagesize();
 
   is_not_at_pageborder = (ftell(fp) % pagesize) != 0;
 
@@ -722,7 +722,7 @@ static void seq_decoder_init_huffman(GtHcrSeqDecoder *seq_dec,
 
   gt_assert(seq_dec->data_iter);
   seq_dec->huffman = gt_huffman_new(bqd, hcr_base_qual_distr_func,
-                                    (unsigned long) bqd->ncols * bqd->nrows);
+                                    (GtUword) bqd->ncols * bqd->nrows);
 
   seq_dec->huff_dec = gt_huffman_decoder_new_from_memory(seq_dec->huffman,
                                                 get_next_file_chunk_for_huffman,
@@ -843,13 +843,13 @@ bool gt_hcr_decoder_has_descs_support(GtHcrDecoder *hcr_dec)
 }
 
 static inline char get_qual_from_symbol(GtHcrSeqDecoder *seq_dec,
-                                        unsigned long symbol)
+                                        GtUword symbol)
 {
   return (char) (symbol / seq_dec->alphabet_size + seq_dec->qual_offset);
 }
 
 static unsigned char get_base_from_symbol(GtHcrSeqDecoder *seq_dec,
-                                 unsigned long symbol)
+                                 GtUword symbol)
 {
   unsigned char base = (unsigned char) symbol % seq_dec->alphabet_size;
   if (base == (unsigned char) seq_dec->alphabet_size)
@@ -866,7 +866,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
     SUCCESS
   };
   unsigned char base;
-  unsigned long i,
+  GtUword i,
                 nearestsample,
                 *symbol;
   size_t startofnearestsample = 0;
@@ -877,7 +877,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
   if (seq_dec->cur_read <= seq_dec->num_of_reads) {
     status = SUCCESS;
     if (seq_dec->symbols == NULL)
-      seq_dec->symbols = gt_array_new(sizeof (unsigned long));
+      seq_dec->symbols = gt_array_new(sizeof (GtUword));
     else
       gt_array_reset(seq_dec->symbols);
 
@@ -913,7 +913,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
     if (qual || seq) {
       gt_log_log("set strings");
       for (i = 0; i < gt_array_size(seq_dec->symbols); i++) {
-        symbol = (unsigned long*) gt_array_get(seq_dec->symbols, i);
+        symbol = (GtUword*) gt_array_get(seq_dec->symbols, i);
         if (qual != NULL)
           qual[i] = get_qual_from_symbol(seq_dec, *symbol);
         if (seq != NULL) {
@@ -932,10 +932,10 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
   return (int) status;
 }
 
-int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, unsigned long readnum,
+int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
                           char *seq, char *qual, GtStr *desc, GtError *err)
 {
-  unsigned long nearestsample = 0,
+  GtUword nearestsample = 0,
                 reads_to_read = 0,
                 idx,
                 current_read = hcr_dec->seq_dec->cur_read ;
@@ -978,7 +978,7 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, unsigned long readnum,
       }
       gt_log_log("reads to read: %lu, nearest sample: %lu",
                  reads_to_read,nearestsample);
-      gt_log_log("start of nearest: %lu", (unsigned long) startofnearestsample);
+      gt_log_log("start of nearest: %lu", (GtUword) startofnearestsample);
     }
     else {
       if (current_read <= readnum)
@@ -1018,14 +1018,14 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, unsigned long readnum,
 }
 
 int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
-                                unsigned long start, unsigned long end,
+                                GtUword start, GtUword end,
                                 GtTimer *timer, GtError *err)
 {
   char qual[BUFSIZ] = {0},
        seq[BUFSIZ] = {0};
   GtStr *desc = gt_str_new();
   int had_err = 0;
-  unsigned long cur_width,
+  GtUword cur_width,
                 cur_read;
   size_t i;
   FILE *output;
@@ -1077,14 +1077,14 @@ int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
   return had_err;
 }
 
-unsigned long gt_hcr_decoder_num_of_reads(GtHcrDecoder *hcr_dec)
+GtUword gt_hcr_decoder_num_of_reads(GtHcrDecoder *hcr_dec)
 {
   gt_assert(hcr_dec);
   return hcr_dec->seq_dec->num_of_reads;
 }
 
-unsigned long gt_hcr_decoder_readlength(GtHcrDecoder *hcr_dec,
-                                        unsigned long filenum)
+GtUword gt_hcr_decoder_readlength(GtHcrDecoder *hcr_dec,
+                                        GtUword filenum)
 {
   gt_assert(hcr_dec);
   gt_assert(hcr_dec->seq_dec->num_of_files > filenum);
@@ -1101,7 +1101,7 @@ GtHcrEncoder *gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
   GtStrArray *file;
   int had_err = 0,
       status;
-  unsigned long len1,
+  GtUword len1,
                 len2,
                 i,
                 num_of_reads = 0;
@@ -1205,7 +1205,7 @@ GtHcrEncoder *gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
     hcr_enc->seq_encoder->huffman =
       gt_huffman_new(bqd,
                      hcr_base_qual_distr_func,
-                     (unsigned long) bqd->ncols * bqd->nrows);
+                     (GtUword) bqd->ncols * bqd->nrows);
   }
   if (!had_err) {
     hcr_enc->seq_encoder->qual_offset = bqd->qual_offset;
@@ -1251,7 +1251,7 @@ void gt_hcr_encoder_set_sampling_page(GtHcrEncoder *hcr_enc)
 }
 
 void gt_hcr_encoder_set_sampling_rate(GtHcrEncoder *hcr_enc,
-                                      unsigned long srate)
+                                      GtUword srate)
 {
   gt_assert(hcr_enc);
   hcr_enc->sampling_rate = srate;
@@ -1260,7 +1260,7 @@ void gt_hcr_encoder_set_sampling_rate(GtHcrEncoder *hcr_enc,
     gt_encdesc_encoder_set_sampling_rate(hcr_enc->encdesc_encoder, srate);
 }
 
-unsigned long gt_hcr_encoder_get_sampling_rate(GtHcrEncoder *hcr_enc)
+GtUword gt_hcr_encoder_get_sampling_rate(GtHcrEncoder *hcr_enc)
 {
   gt_assert(hcr_enc);
   return hcr_enc->sampling_rate;

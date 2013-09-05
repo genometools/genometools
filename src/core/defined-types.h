@@ -19,11 +19,12 @@
 #define DEFINED_TYPES_H
 
 #include <stdbool.h>
+#include "core/types_api.h"
 
 typedef struct
 {
   bool defined;
-  unsigned long valueunsignedlong;
+  GtUword valueunsignedlong;
 } Definedunsignedlong;
 
 typedef struct

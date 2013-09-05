@@ -48,7 +48,7 @@
 */
 
 typedef struct {
-  unsigned long leftgenomicexonborder,    /* the borders of the exons in the */
+  GtUword leftgenomicexonborder,    /* the borders of the exons in the */
                 rightgenomicexonborder,   /*  genomic sequence               */
                 leftreferenceexonborder,  /* the borders of the exons in the */
                 rightreferenceexonborder; /* reference sequence              */
@@ -72,18 +72,18 @@ GthSA*         gth_sa_new(void);
 GthSA*         gth_sa_new_and_set(bool gen_strand_forward,
                                   bool ref_strand_forward,
                                   GthInput *input,
-                                  unsigned long gen_file_num,
-                                  unsigned long gen_seq_num,
-                                  unsigned long ref_file_num,
-                                  unsigned long ref_seq_num,
-                                  unsigned long call_number,
-                                  unsigned long gen_total_length,
-                                  unsigned long gen_offset,
-                                  unsigned long ref_total_length);
+                                  GtUword gen_file_num,
+                                  GtUword gen_seq_num,
+                                  GtUword ref_file_num,
+                                  GtUword ref_seq_num,
+                                  GtUword call_number,
+                                  GtUword gen_total_length,
+                                  GtUword gen_offset,
+                                  GtUword ref_total_length);
 void            gth_sa_set(GthSA*, GthAlphatype ref_alphatype,
-                           unsigned long gen_dp_start,
-                           unsigned long gen_dp_length);
-void            gth_sa_set_gen_dp_length(GthSA*, unsigned long gen_dp_length);
+                           GtUword gen_dp_start,
+                           GtUword gen_dp_length);
+void            gth_sa_set_gen_dp_length(GthSA*, GtUword gen_dp_length);
 void            gth_sa_delete(GthSA*);
 void            gth_sa_show_exons(const GthSA*, GtFile*);
 void            gth_sa_get_exons(const GthSA*, GtArray *ranges);
@@ -124,53 +124,53 @@ bool            gth_sa_B_is_better_than_A(const GthSA *saA, const GthSA *saB);
 
 /* Returns the left genomic exon border for <exon> of <spliced_alignment>
    (referring to the foward strand). */
-unsigned long   gth_sa_left_genomic_exon_border(const GthSA*,
-                                                unsigned long exon);
+GtUword   gth_sa_left_genomic_exon_border(const GthSA*,
+                                                GtUword exon);
 
 /* Returns the right genomic exon border for <exon> of <spliced_alignment>
    (referring to the foward strand). */
-unsigned long   gth_sa_right_genomic_exon_border(const GthSA*,
-                                                 unsigned long exon);
+GtUword   gth_sa_right_genomic_exon_border(const GthSA*,
+                                                 GtUword exon);
 
-double          gth_sa_exon_score(const GthSA*, unsigned long exon);
-GtRange         gth_sa_donor_site_range(const GthSA*, unsigned long intron);
-GtRange         gth_sa_acceptor_site_range(const GthSA*, unsigned long intron);
+double          gth_sa_exon_score(const GthSA*, GtUword exon);
+GtRange         gth_sa_donor_site_range(const GthSA*, GtUword intron);
+GtRange         gth_sa_acceptor_site_range(const GthSA*, GtUword intron);
 /* Return donor site probablity with three positions after decimal point. */
-float           gth_sa_donor_site_prob(const GthSA*, unsigned long intron);
+float           gth_sa_donor_site_prob(const GthSA*, GtUword intron);
 /* Return acceptor site probablity with three positions after decimal point. */
 float           gth_sa_acceptor_site_prob(const GthSA*,
-                                                      unsigned long intron);
-unsigned long   gth_sa_genomic_exon_length(const GthSA*, unsigned long exon);
-unsigned long   gth_sa_left_intron_border(const GthSA*, unsigned long intron);
-unsigned long   gth_sa_right_intron_border(const GthSA*, unsigned long intron);
-unsigned long   gth_sa_intron_length(const GthSA *, unsigned long intron);
+                                                      GtUword intron);
+GtUword   gth_sa_genomic_exon_length(const GthSA*, GtUword exon);
+GtUword   gth_sa_left_intron_border(const GthSA*, GtUword intron);
+GtUword   gth_sa_right_intron_border(const GthSA*, GtUword intron);
+GtUword   gth_sa_intron_length(const GthSA *, GtUword intron);
 
 /* XXX */
 GthBacktracePath* gth_sa_backtrace_path(const GthSA*);
 Editoperation*  gth_sa_get_editoperations(const GthSA*);
-unsigned long   gth_sa_get_editoperations_length(const GthSA*);
+GtUword   gth_sa_get_editoperations_length(const GthSA*);
 
-unsigned long   gth_sa_indelcount(const GthSA*);
-unsigned long   gth_sa_gen_dp_length(const GthSA*);
-unsigned long   gth_sa_gen_total_length(const GthSA*);
-void            gth_sa_set_gen_total_length(GthSA*, unsigned long);
-unsigned long   gth_sa_gen_offset(const GthSA*);
-void            gth_sa_set_gen_offset(GthSA*, unsigned long);
-unsigned long   gth_sa_ref_total_length(const GthSA*);
-void            gth_sa_set_ref_total_length(GthSA*, unsigned long);
-unsigned long   gth_sa_gen_dp_start(const GthSA*);
-unsigned long   gth_sa_gen_dp_start_show(const GthSA*);
-void            gth_sa_set_gen_dp_start(GthSA*, unsigned long);
-unsigned long   gth_sa_gen_dp_end(const GthSA*);
-unsigned long   gth_sa_gen_dp_end_show(const GthSA*);
-unsigned long   gth_sa_gen_file_num(const GthSA*);
-void            gth_sa_set_gen_file_num(GthSA*, unsigned long);
-unsigned long   gth_sa_gen_seq_num(const GthSA*);
-void            gth_sa_set_gen_seq_num(GthSA*, unsigned long);
-unsigned long   gth_sa_ref_file_num(const GthSA*);
-void            gth_sa_set_ref_file_num(GthSA*, unsigned long);
-unsigned long   gth_sa_ref_seq_num(const GthSA*);
-void            gth_sa_set_ref_seq_num(GthSA*, unsigned long);
+GtUword   gth_sa_indelcount(const GthSA*);
+GtUword   gth_sa_gen_dp_length(const GthSA*);
+GtUword   gth_sa_gen_total_length(const GthSA*);
+void            gth_sa_set_gen_total_length(GthSA*, GtUword);
+GtUword   gth_sa_gen_offset(const GthSA*);
+void            gth_sa_set_gen_offset(GthSA*, GtUword);
+GtUword   gth_sa_ref_total_length(const GthSA*);
+void            gth_sa_set_ref_total_length(GthSA*, GtUword);
+GtUword   gth_sa_gen_dp_start(const GthSA*);
+GtUword   gth_sa_gen_dp_start_show(const GthSA*);
+void            gth_sa_set_gen_dp_start(GthSA*, GtUword);
+GtUword   gth_sa_gen_dp_end(const GthSA*);
+GtUword   gth_sa_gen_dp_end_show(const GthSA*);
+GtUword   gth_sa_gen_file_num(const GthSA*);
+void            gth_sa_set_gen_file_num(GthSA*, GtUword);
+GtUword   gth_sa_gen_seq_num(const GthSA*);
+void            gth_sa_set_gen_seq_num(GthSA*, GtUword);
+GtUword   gth_sa_ref_file_num(const GthSA*);
+void            gth_sa_set_ref_file_num(GthSA*, GtUword);
+GtUword   gth_sa_ref_seq_num(const GthSA*);
+void            gth_sa_set_ref_seq_num(GthSA*, GtUword);
 const char*     gth_sa_gen_id(const GthSA*);
 GtStr*          gth_sa_gen_id_str(const GthSA*);
 void            gth_sa_set_gen_id(GthSA*, const char*);
@@ -188,30 +188,30 @@ void            gth_sa_set_gen_strand(GthSA*, bool forward);
 bool            gth_sa_ref_strand_forward(const GthSA*);
 char            gth_sa_ref_strand_char(const GthSA*);
 void            gth_sa_set_ref_strand(GthSA*, bool forward);
-unsigned long   gth_sa_genomiccutoff_start(const GthSA*);
-unsigned long   gth_sa_referencecutoff_start(const GthSA*);
-unsigned long   gth_sa_eopcutoff_start(const GthSA*);
-unsigned long   gth_sa_genomiccutoff_end(const GthSA*);
-unsigned long   gth_sa_referencecutoff_end(const GthSA*);
-unsigned long   gth_sa_eopcutoff_end(const GthSA*);
+GtUword   gth_sa_genomiccutoff_start(const GthSA*);
+GtUword   gth_sa_referencecutoff_start(const GthSA*);
+GtUword   gth_sa_eopcutoff_start(const GthSA*);
+GtUword   gth_sa_genomiccutoff_end(const GthSA*);
+GtUword   gth_sa_referencecutoff_end(const GthSA*);
+GtUword   gth_sa_eopcutoff_end(const GthSA*);
 void            gth_sa_set_cutoffs_start(GthSA*, Cutoffs*);
 void            gth_sa_set_cutoffs_end(GthSA*, Cutoffs*);
 GthAlphatype    gth_sa_alphatype(const GthSA*);
 const char*     gth_sa_alphastring(const GthSA*);
 void            gth_sa_set_alphatype(GthSA*, GthAlphatype);
-Exoninfo*       gth_sa_get_exon(const GthSA*, unsigned long);
+Exoninfo*       gth_sa_get_exon(const GthSA*, GtUword);
 void            gth_sa_add_exon(GthSA*, Exoninfo*);
-unsigned long   gth_sa_num_of_exons(const GthSA*);
-Introninfo*     gth_sa_get_intron(const GthSA*, unsigned long);
+GtUword   gth_sa_num_of_exons(const GthSA*);
+Introninfo*     gth_sa_get_intron(const GthSA*, GtUword);
 void            gth_sa_add_intron(GthSA*, Introninfo*);
-unsigned long   gth_sa_num_of_introns(const GthSA*);
+GtUword   gth_sa_num_of_introns(const GthSA*);
 void            gth_sa_calc_polyAtailpos(GthSA*,
                                          const unsigned char *ref_seq_tran,
                                          GtAlphabet *ref_alpha);
-unsigned long   gth_sa_polyAtail_start(const GthSA*);
-unsigned long   gth_sa_polyAtail_stop(const GthSA*);
-void            gth_sa_set_polyAtail_start(GthSA*, unsigned long);
-void            gth_sa_set_polyAtail_stop(GthSA*, unsigned long);
+GtUword   gth_sa_polyAtail_start(const GthSA*);
+GtUword   gth_sa_polyAtail_stop(const GthSA*);
+void            gth_sa_set_polyAtail_start(GthSA*, GtUword);
+void            gth_sa_set_polyAtail_stop(GthSA*, GtUword);
 GthFlt          gth_sa_score(const GthSA*);
 void            gth_sa_set_score(GthSA*, GthFlt);
 GthFlt          gth_sa_coverage(const GthSA*);
@@ -219,13 +219,13 @@ void            gth_sa_set_coverage(GthSA*, GthFlt);
 bool            gth_sa_genomic_cov_is_highest(const GthSA*);
 char            gth_sa_coverage_char(const GthSA*);
 void            gth_sa_set_highest_cov(GthSA*, bool genomic);
-unsigned long   gth_sa_cumlen_scored_exons(const GthSA*);
-void            gth_sa_set_cumlen_scored_exons(GthSA*, unsigned long);
-unsigned long   gth_sa_call_number(const GthSA*);
+GtUword   gth_sa_cumlen_scored_exons(const GthSA*);
+void            gth_sa_set_cumlen_scored_exons(GthSA*, GtUword);
+GtUword   gth_sa_call_number(const GthSA*);
 const char*     gth_sa_gff3_target_attribute(GthSA*, bool md5ids);
 void            gth_sa_determine_cutoffs(GthSA*, GthCutoffmode leadcutoffsmode,
                                          GthCutoffmode termcutoffsmode,
-                                         unsigned long cutoffsminexonlen);
+                                         GtUword cutoffsminexonlen);
 void            gth_sa_cutoff_start(GthSA*);
 void            gth_sa_cutoff_end(GthSA*);
 void            gth_sa_cutoff_walked_path(GthSA*, const GthPathWalker*,
@@ -241,17 +241,17 @@ void            gth_sa_echo_reference_description(const GthSA*, GthInput*,
 void            gth_sa_echo_reference_sequence(const GthSA*, GthInput*,
                                                bool format, GtFile*);
 void            gth_sa_echo_alignment(const GthSA *sa,
-                                      unsigned long showintronmaxlen,
-                                      unsigned long translationtable,
+                                      GtUword showintronmaxlen,
+                                      GtUword translationtable,
                                       bool wildcardimplosion, GthInput *input,
                                       GtFile *outfp);
 /* Fills the alignment lines (<first_line> and <second_line> for DNA alignments
    and <first_line>, <second_line>, and <third_line> for protein alignments). */
-unsigned long   gth_sa_get_alignment_lines(const GthSA *sa,
+GtUword   gth_sa_get_alignment_lines(const GthSA *sa,
                                            unsigned char **first_line,
                                            unsigned char **second_line,
                                            unsigned char **third_line,
-                                           unsigned long translationtable,
+                                           GtUword translationtable,
                                            GthInput *input);
 bool            gth_sa_is_valid(const GthSA*);
 void            gth_sa_show(GthSA*, GthInput*, GtFile*);

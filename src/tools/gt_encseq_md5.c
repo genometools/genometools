@@ -84,7 +84,7 @@ static int gt_encseq_md5_runner(GT_UNUSED int argc, const char **argv,
     had_err = -1;
 
   if (!had_err) {
-    unsigned long i;
+    GtUword i;
 
     if (arguments->fromindex) {
       GtMD5Tab *tab;
@@ -108,7 +108,7 @@ static int gt_encseq_md5_runner(GT_UNUSED int argc, const char **argv,
       char *seq,
            *md5str;
       for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
-        unsigned long len, start, end;
+        GtUword len, start, end;
         len = gt_encseq_seqlength(encseq, i);
         start = gt_encseq_seqstartpos(encseq, i);
         end = len + start -1;

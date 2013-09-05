@@ -21,9 +21,9 @@
 #include "core/unused_api.h"
 #include "core/ensure.h"
 
-void gt_spmproc_a_e(unsigned long suffix_seqnum, unsigned long prefix_seqnum,
-  unsigned long suffix_length, GT_UNUSED unsigned long prefix_length,
-  unsigned long unit_edist, bool suffixseq_direct, bool prefixseq_direct,
+void gt_spmproc_a_e(GtUword suffix_seqnum, GtUword prefix_seqnum,
+  GtUword suffix_length, GT_UNUSED GtUword prefix_length,
+  GtUword unit_edist, bool suffixseq_direct, bool prefixseq_direct,
   void *data)
 {
   GtSpmprocWithData* a_e_data = data;
@@ -34,8 +34,8 @@ void gt_spmproc_a_e(unsigned long suffix_seqnum, unsigned long prefix_seqnum,
   }
 }
 
-void gt_spmproc_skip(unsigned long suffix_seqnum, unsigned long prefix_seqnum,
-  unsigned long length, bool suffixseq_direct, bool prefixseq_direct,
+void gt_spmproc_skip(GtUword suffix_seqnum, GtUword prefix_seqnum,
+  GtUword length, bool suffixseq_direct, bool prefixseq_direct,
   void *data)
 {
   GtSpmprocSkipData *d = data;
@@ -56,11 +56,11 @@ void gt_spmproc_skip(unsigned long suffix_seqnum, unsigned long prefix_seqnum,
   }
 }
 
-void gt_spmproc_a_skip(unsigned long suffix_seqnum,
-                       unsigned long prefix_seqnum,
-                       unsigned long suffix_length,
-                       unsigned long prefix_length,
-                       unsigned long unit_edist,
+void gt_spmproc_a_skip(GtUword suffix_seqnum,
+                       GtUword prefix_seqnum,
+                       GtUword suffix_length,
+                       GtUword prefix_length,
+                       GtUword unit_edist,
                        bool suffixseq_direct,
                        bool prefixseq_direct,
                        void *data)
@@ -86,16 +86,16 @@ void gt_spmproc_a_skip(unsigned long suffix_seqnum,
 
 /* unit test */
 
-static void outproc(GT_UNUSED unsigned long suffix_seqnum,
-  GT_UNUSED unsigned long prefix_seqnum, GT_UNUSED unsigned long length,
+static void outproc(GT_UNUSED GtUword suffix_seqnum,
+  GT_UNUSED GtUword prefix_seqnum, GT_UNUSED GtUword length,
   GT_UNUSED bool suffixseq_direct, GT_UNUSED bool prefixseq_direct, void *data)
 {
   *(bool *)data = false;
 }
 
-static void outproc_a(GT_UNUSED unsigned long suffix_seqnum,
-  GT_UNUSED unsigned long prefix_seqnum, GT_UNUSED unsigned long suffix_length,
-  GT_UNUSED unsigned long prefix_length, GT_UNUSED unsigned long unit_edist,
+static void outproc_a(GT_UNUSED GtUword suffix_seqnum,
+  GT_UNUSED GtUword prefix_seqnum, GT_UNUSED GtUword suffix_length,
+  GT_UNUSED GtUword prefix_length, GT_UNUSED GtUword unit_edist,
   GT_UNUSED bool suffixseq_direct, GT_UNUSED bool prefixseq_direct, void *data)
 {
   *(bool *)data = false;
@@ -135,8 +135,8 @@ int gt_spmproc_skip_unit_test(GtError *err)
   return had_err;
 }
 
-void gt_spmproc_show_count(GT_UNUSED unsigned long suffix_seqnum,
-  GT_UNUSED unsigned long prefix_seqnum, GT_UNUSED unsigned long length,
+void gt_spmproc_show_count(GT_UNUSED GtUword suffix_seqnum,
+  GT_UNUSED GtUword prefix_seqnum, GT_UNUSED GtUword length,
   GT_UNUSED bool suffixseq_direct, GT_UNUSED bool prefixseq_direct,
   void *data)
 {

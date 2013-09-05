@@ -114,9 +114,9 @@ static void showmultieop(const char *eop_string, unsigned int eop_length,
 
 static void showoneeditopgeneric(GtFile *outfp, Editoperation eop,
                                  bool proteineop,
-                                 bool xmlout, unsigned long indentlevel,
+                                 bool xmlout, GtUword indentlevel,
                                  bool nexteopisdefined, Editoperation nexteop,
-                                 unsigned long *consecutive_eop_length)
+                                 GtUword *consecutive_eop_length)
 {
   unsigned int eop_length;
 
@@ -229,12 +229,12 @@ static void showoneeditopgeneric(GtFile *outfp, Editoperation eop,
     gt_file_xfputc(' ', outfp);
 }
 
-void gt_editoperation_show(Editoperation *eops, unsigned long num_of_eops,
+void gt_editoperation_show(Editoperation *eops, GtUword num_of_eops,
                         bool proteineops, bool xmlout, unsigned int indentlevel,
                         GtFile *outfp)
 {
   long i;
-  unsigned long consecutive_eop_length = 0;
+  GtUword consecutive_eop_length = 0;
 
   if (xmlout) {
     gth_indent(outfp, indentlevel);

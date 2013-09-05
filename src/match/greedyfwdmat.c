@@ -45,21 +45,21 @@ typedef void (*Preprocessgmatchlength)(uint64_t,
                                        void *);
 typedef void (*Processgmatchlength)(const GtAlphabet *,
                                     const GtUchar *,
-                                    unsigned long,
-                                    unsigned long,
-                                    unsigned long,
+                                    GtUword,
+                                    GtUword,
+                                    GtUword,
                                     void *);
 typedef void (*Postprocessgmatchlength)(const GtAlphabet *,
                                         uint64_t,
                                         const char *,
                                         const GtUchar *,
-                                        unsigned long,
+                                        GtUword,
                                         void *);
 
 typedef struct
 {
   const void *genericindex;
-  unsigned long totallength;
+  GtUword totallength;
   const GtAlphabet *alphabet;
   Greedygmatchforwardfunction gmatchforward;
   Preprocessgmatchlength preprocessgmatchlength;
@@ -71,11 +71,11 @@ typedef struct
 
 #ifndef NDEBUG
 static void checkifsequenceisthere(const GtEncseq *encseq,
-                                   unsigned long witnessposition,
-                                   unsigned long gmatchlength,
+                                   GtUword witnessposition,
+                                   GtUword gmatchlength,
                                    const GtUchar *qptr)
 {
-  unsigned long i;
+  GtUword i;
   GtUchar cc;
 
   for (i=0; i<gmatchlength; i++)
@@ -92,7 +92,7 @@ static void checkifsequenceisthere(const GtEncseq *encseq,
                      i,
                      (unsigned int) qptr[i],
                      (unsigned int) cc,
-                     witnessposition+(unsigned long) i);
+                     witnessposition+(GtUword) i);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
@@ -102,12 +102,12 @@ static void checkifsequenceisthere(const GtEncseq *encseq,
 static void gmatchposinsinglesequence(Substringinfo *substringinfo,
                                       uint64_t unitnum,
                                       const GtUchar *query,
-                                      unsigned long querylen,
+                                      GtUword querylen,
                                       const char *desc)
 {
   const GtUchar *qptr;
-  unsigned long gmatchlength, remaining;
-  unsigned long witnessposition, *wptr;
+  GtUword gmatchlength, remaining;
+  GtUword witnessposition, *wptr;
 
   if (substringinfo->preprocessgmatchlength != NULL)
   {
@@ -147,9 +147,9 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
       substringinfo->processgmatchlength(substringinfo->alphabet,
                                          query,
                                          gmatchlength,
-                                         (unsigned long) (qptr-query),
+                                         (GtUword) (qptr-query),
                                          wptr == NULL
-                                           ? (unsigned long) 0
+                                           ? (GtUword) 0
                                            : witnessposition,
                                          substringinfo->processinfo);
     }
@@ -179,9 +179,9 @@ static void showunitnum(uint64_t unitnum,
 
 static void showifinlengthrange(const GtAlphabet *alphabet,
                                 const GtUchar *start,
-                                unsigned long gmatchlength,
-                                unsigned long querystart,
-                                unsigned long subjectpos,
+                                GtUword gmatchlength,
+                                GtUword querystart,
+                                GtUword subjectpos,
                                 void *info)
 {
   Rangespecinfo *rangespecinfo = (Rangespecinfo *) info;
@@ -212,7 +212,7 @@ static void showifinlengthrange(const GtAlphabet *alphabet,
 
 int gt_findsubquerygmatchforward(const GtEncseq *encseq,
                               const void *genericindex,
-                              unsigned long totallength,
+                              GtUword totallength,
                               Greedygmatchforwardfunction gmatchforward,
                               const GtAlphabet *alphabet,
                               const GtStrArray *queryfilenames,
@@ -228,7 +228,7 @@ int gt_findsubquerygmatchforward(const GtEncseq *encseq,
   bool haserr = false;
   GtSeqIterator *seqit;
   const GtUchar *query;
-  unsigned long querylen;
+  GtUword querylen;
   char *desc = NULL;
   int retval;
   uint64_t unitnum;
@@ -284,9 +284,9 @@ int gt_findsubquerygmatchforward(const GtEncseq *encseq,
 #ifdef WITHrunsubstringiteration
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
-                          unsigned long totalwidth,
-                          const unsigned long *leftborder,
-                          const unsigned long *countspecialcodes,
+                          GtUword totalwidth,
+                          const GtUword *leftborder,
+                          const GtUword *countspecialcodes,
                           const Alphabet *alphabet,
                           unsigned int prefixlength,
                           const GtStrArray *queryfilenames,
@@ -297,7 +297,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   bool haserr = false;
   int retval;
   unsigned int numofchars;
-  unsigned long gmatchlength, gmatchlength2;
+  GtUword gmatchlength, gmatchlength2;
   GtCodetype maxcode;
   GtBucketspecification bucketspec;
 
@@ -319,7 +319,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
     {
       break;
     }
-    gt_assert(substring.remaining >= (unsigned long) prefixlength);
+    gt_assert(substring.remaining >= (GtUword) prefixlength);
     gmatchlength = gmatchforward(genericindex,
                                  0,
                                  0,
@@ -340,7 +340,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
       if (bucketspec.nonspecialsinbucket > 0)
       {
         gmatchlength2 = gmatchforward(genericindex,
-                                      (unsigned long) prefixlength,
+                                      (GtUword) prefixlength,
                                       bucketspec.left,
                                       bucketspec.left
                                         + bucketspec.nonspecialsinbucket - 1,
@@ -350,7 +350,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
 #ifndef NDEBUG
         if (gmatchlength2 != gmatchlength)
         {
-          fprintf(stderr,"at offset %lu:\n",(unsigned long)
+          fprintf(stderr,"at offset %lu:\n",(GtUword)
                                               (substring.currentptr -
                                                substring.start));
           fprintf(stderr,"bucketspec=(%lu,%lu)\n",
@@ -370,9 +370,9 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
 
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
-                          unsigned long totalwidth,
-                          const unsigned long *leftborder,
-                          const unsigned long *countspecialcodes,
+                          GtUword totalwidth,
+                          const GtUword *leftborder,
+                          const GtUword *countspecialcodes,
                           const Alphabet *alphabet,
                           unsigned int prefixlength,
                           const GtStrArray *queryfilenames,
@@ -380,14 +380,14 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
 {
   GtSeqIterator *seqit;
   const GtUchar *query;
-  unsigned long querylen;
+  GtUword querylen;
   char *desc = NULL;
   Substriter *substriter;
   Substring substring;
   bool haserr = false;
   int retval;
   unsigned int numofchars;
-  unsigned long gmatchlength, gmatchlength2;
+  GtUword gmatchlength, gmatchlength2;
   GtCodetype maxcode;
   GtBucketspecification bucketspec;
   bool haserr = false;

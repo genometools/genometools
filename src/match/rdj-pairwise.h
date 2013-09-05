@@ -84,14 +84,14 @@ nofreads:    if not NULL, the number of direct reads is written here
 
 void gt_rdj_pairwise_exact(GtOvlfindMode m, GtEncseq *encseq,
     bool revcompl, bool show_progressbar, bool use_kmp,
-    unsigned long min_length, bool find_nonmaximal, GtSpmproc proc,
+    GtUword min_length, bool find_nonmaximal, GtSpmproc proc,
     void *procdata, bool cntfilter, GtBitsequence *cntreads_in,
-    GtBitsequence **cntreads_out, unsigned long *nofreads);
+    GtBitsequence **cntreads_out, GtUword *nofreads);
 
 void gt_rdj_pairwise_approx(GtOvlfindMode m,  GtEncseq *encseq, bool revcompl,
-    bool show_progressbar, double max_error, unsigned long min_length,
+    bool show_progressbar, double max_error, GtUword min_length,
     bool find_nonmaximal, GtSpmprocA proc, void* procdata, bool cntfilter,
     GtBitsequence *cntreads_in, GtBitsequence **cntreads_out,
-    unsigned long *nofreads);
+    GtUword *nofreads);
 
 #endif

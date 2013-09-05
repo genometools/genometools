@@ -29,8 +29,8 @@ void             gt_csa_splice_form_delete(GtCSASpliceForm*);
 void             gt_csa_splice_form_add_sa(GtCSASpliceForm*,
                                            void *spliced_alignment);
 void*            gt_csa_splice_form_get_sa(const GtCSASpliceForm*,
-                                           unsigned long);
-unsigned long    gt_csa_splice_form_num_of_sas(const GtCSASpliceForm*);
+                                           GtUword);
+GtUword    gt_csa_splice_form_num_of_sas(const GtCSASpliceForm*);
 GtRange          gt_csa_splice_form_genomic_range(const GtCSASpliceForm*);
 GtStrand         gt_csa_splice_form_strand(const GtCSASpliceForm*);
 void*            gt_csa_splice_form_get_representative(const GtCSASpliceForm*);

@@ -24,18 +24,18 @@ typedef struct GtShredder GtShredder;
 
 /* Create new GtShredder for sequences in <bioseq>. The produced fragments will
    have at least length <minlength> and at most length <maxlength>. */
-GtShredder* gt_shredder_new(GtBioseq *bioseq, unsigned long minlength,
-                            unsigned long maxlength);
+GtShredder* gt_shredder_new(GtBioseq *bioseq, GtUword minlength,
+                            GtUword maxlength);
 void        gt_shredder_delete(GtShredder*);
 /* Set the <overlap> between shredded fragments, the default is 0. */
-void        gt_shredder_set_overlap(GtShredder*, unsigned long overlap);
+void        gt_shredder_set_overlap(GtShredder*, GtUword overlap);
 /* Set the <probabilty> that a generated fragment is returned. */
 void        gt_shredder_set_sample_probability(GtShredder*, double probability);
 /* Return the next shredded fragment or NULL if no additional fragment is
    available. The length of the fragment is stored in <fragment_length> and
    <desc> is set to the description of the corresponding sequence.
    The caller takes ownership of the returned sequence. */
-char*       gt_shredder_shred(GtShredder*, unsigned long *fragment_length,
+char*       gt_shredder_shred(GtShredder*, GtUword *fragment_length,
                               GtStr *desc);
 
 #endif

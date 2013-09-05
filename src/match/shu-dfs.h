@@ -27,8 +27,8 @@
 typedef struct ShuNode {
   bool process;
   unsigned parentOffset;
-  unsigned long **countTermSubtree;
-  unsigned long depth,
+  GtUword **countTermSubtree;
+  GtUword depth,
                 lower,
                 upper;
 } ShuNode;
@@ -38,8 +38,8 @@ GT_STACK_DECLARESTRUCT(ShuNode, 256UL);
 int gt_pck_calculate_shulen(const FMindex *index,
                             const GtShuUnitFileInfo *unit_info,
                             uint64_t **shulen,
-                            unsigned long numofchars,
-                            unsigned long total_length,
+                            GtUword numofchars,
+                            GtUword total_length,
                             GtTimer *timer,
                             GT_UNUSED GtLogger *logger,
                             GT_UNUSED GtError *err);

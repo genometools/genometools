@@ -27,7 +27,7 @@
 struct GthTxtPGLVisitor {
   const GthPGLVisitor parent_instance;
   GthInput *input;
-  unsigned long translationtable;
+  GtUword translationtable;
   unsigned int indentlevel;
   GthOutput *out;
 };
@@ -35,11 +35,11 @@ struct GthTxtPGLVisitor {
 #define txt_pgl_visitor_cast(GV)\
         gth_pgl_visitor_cast(gth_txt_pgl_visitor_class(), GV)
 
-static void outputAGSline(const GthAGS *ags, unsigned long agsnum,
+static void outputAGSline(const GthAGS *ags, GtUword agsnum,
                           GtFile *outfp)
 {
   GthExonAGS *exon;
-  unsigned long i;
+  GtUword i;
 
   gt_file_xprintf(outfp, "AGS-%lu (",  agsnum + OUTPUTOFFSET);
   for (i = 0; i < gth_ags_num_of_exons(ags); i++) {
@@ -55,7 +55,7 @@ static void outputAGSline(const GthAGS *ags, unsigned long agsnum,
 static void outputSCRline(const GthAGS *ags, GtFile *outfp)
 {
   GthSpliceSiteProb *splicesiteprob;
-  unsigned long i;
+  GtUword i;
 
   gt_file_xprintf(outfp, "SCR   (");
   for (i = 0; i < gt_array_size(ags->exons) - 1; i++) {
@@ -75,7 +75,7 @@ static void output_exon_intron_lines(const GthAGS *ags, int widthforgenpos,
 {
   GthSpliceSiteProb *splicesiteprob;
   GthExonAGS *exon;
-  unsigned long i, leftexonborder, rightexonborder, exonlength,
+  GtUword i, leftexonborder, rightexonborder, exonlength,
                 leftintronborder = GT_UNDEF_ULONG, rightintronborder,
                 intronlength;
   GthDbl exonscore;
@@ -117,7 +117,7 @@ static void output_exon_intron_lines(const GthAGS *ags, int widthforgenpos,
 
 static void outputPGSlines(GtArray *alignments, GtFile *outfp)
 {
-  unsigned long i, j;
+  GtUword i, j;
   GthSA *sa;
 
   for (i = 0; i < gt_array_size(alignments); i++) {
@@ -138,8 +138,8 @@ static void outputPGSlines(GtArray *alignments, GtFile *outfp)
   gt_file_xfputc('\n', outfp);
 }
 
-static void show_ags(const GthAGS *ags, unsigned long pglnum,
-                     unsigned long agsnum, unsigned long translationtable,
+static void show_ags(const GthAGS *ags, GtUword pglnum,
+                     GtUword agsnum, GtUword translationtable,
                      GthInput *input, unsigned int indentlevel, GthOutput *out)
 {
   GtFile *outfp = out->outfp;
@@ -164,11 +164,11 @@ static void show_ags(const GthAGS *ags, unsigned long pglnum,
   gt_file_xprintf(outfp, "\n\n\n");
 }
 
-static void show_pgl(GthPGL *pgl, unsigned long pglnum,
-                     unsigned long translationtable, GthInput *input,
+static void show_pgl(GthPGL *pgl, GtUword pglnum,
+                     GtUword translationtable, GthInput *input,
                      unsigned int indentlevel, GthOutput *out)
 {
-  unsigned long i;
+  GtUword i;
   GtFile *outfp = out->outfp;
 
   gt_assert(!out->gff3out);
@@ -221,9 +221,9 @@ static void show_pgl(GthPGL *pgl, unsigned long pglnum,
 }
 
 static void txt_pgl_visitor_preface(GthPGLVisitor *pgl_visitor,
-                                    unsigned long num_of_pgls)
+                                    GtUword num_of_pgls)
 {
-  unsigned long i;
+  GtUword i;
   GthTxtPGLVisitor *visitor = txt_pgl_visitor_cast(pgl_visitor);
   for (i = 0; i < DELIMITERLINELENGTH; i++)
     gt_file_xfputc(PGLS_DELIMITERCHAR, visitor->out->outfp);
@@ -233,7 +233,7 @@ static void txt_pgl_visitor_preface(GthPGLVisitor *pgl_visitor,
 }
 
 static void txt_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,
-                                      GthPGL *pgl, unsigned long pglnum)
+                                      GthPGL *pgl, GtUword pglnum)
 {
   GthTxtPGLVisitor *visitor = txt_pgl_visitor_cast(pgl_visitor);
   gt_assert(pgl);
@@ -253,7 +253,7 @@ const GthPGLVisitorClass* gth_txt_pgl_visitor_class()
 }
 
 GthPGLVisitor* gth_txt_pgl_visitor_new(GthInput *input,
-                                       unsigned long translationtable,
+                                       GtUword translationtable,
                                        unsigned int indentlevel,
                                        GthOutput *out)
 {

@@ -29,10 +29,10 @@ typedef struct GtMatchOpen GtMatchOpen;
    <end_seq1>, and <end_seq2>. */
 GtMatch* gt_match_open_new(char *seqid1,
                            char *seqid2,
-                           unsigned long start_seq1,
-                           unsigned long start_seq2,
-                           unsigned long end_seq1,
-                           unsigned long end_seq2,
+                           GtUword start_seq1,
+                           GtUword start_seq2,
+                           GtUword end_seq1,
+                           GtUword end_seq2,
                            long weight,
                            GtMatchDirection dir);
 

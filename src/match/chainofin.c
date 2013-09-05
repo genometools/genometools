@@ -28,7 +28,7 @@
         gt_error_set(err,"matchfile \"%s\", line %lu, column %lu: %s",\
                      matchfile,linenum+1,countcolumns+1,S)
 
-static int numberoflinesinfile(unsigned long *linenum,
+static int numberoflinesinfile(GtUword *linenum,
                                const char *filename,
                                GtError *err)
 {
@@ -57,7 +57,7 @@ GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                   GtError *err)
 {
   GtChain2Dimmatchtable *matchtable;
-  unsigned long linenum;
+  GtUword linenum;
   long storeinteger[READNUMS];
   FILE *matchfp;
   bool haserr = false;
@@ -80,9 +80,9 @@ GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                            &storeinteger[3],
                            &storeinteger[4]) == READNUMS; linenum++)
   {
-    unsigned long countcolumns;
+    GtUword countcolumns;
 
-    for (countcolumns = 0; countcolumns < (unsigned long) (READNUMS-1);
+    for (countcolumns = 0; countcolumns < (GtUword) (READNUMS-1);
          countcolumns++)
     {
       if (storeinteger[countcolumns] < 0)

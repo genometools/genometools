@@ -60,7 +60,7 @@ int           gt_sequence_buffer_next_with_original(GtSequenceBuffer*,
 
 /* Returns the index of the currently read sequence file in the input file
    <GtStrArray>. */
-unsigned long gt_sequence_buffer_get_file_index(GtSequenceBuffer*);
+GtUword gt_sequence_buffer_get_file_index(GtSequenceBuffer*);
 
 /* Assigns a symbol map to the sequence iterator to transform sequences with.
    Set to NULL to disable alphabet transformation (default). */
@@ -85,7 +85,7 @@ void          gt_sequence_buffer_set_desc_buffer(GtSequenceBuffer *si,
    characters in the expected alphabet.
    Set to NULL to disable character distribution counting (default). */
 void          gt_sequence_buffer_set_chardisttab(GtSequenceBuffer*,
-                                                 unsigned long*);
+                                                 GtUword*);
 
 /* Returns the length of the last processed continuous stretch of special
    characters (wildcards or separators, see chardef.h). */

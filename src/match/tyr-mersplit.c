@@ -40,7 +40,7 @@ struct Tyrbckinfo
 {
   void *mappedmbdfileptr;
   unsigned int prefixlength;
-  unsigned long numofcodes,
+  GtUword numofcodes,
                 *boundisdefined,
                 *bounds;
   GtUchar remainmask;
@@ -52,20 +52,20 @@ typedef struct
               *rightmer;
 } Merbounds;
 
-static unsigned long extractprefixbytecode(unsigned long merbytes,
+static GtUword extractprefixbytecode(GtUword merbytes,
                                            unsigned int prefixlength,
                                            const GtUchar *bytecode)
 {
-  unsigned long idx, code = 0;
+  GtUword idx, code = 0;
 
-  for (idx=0; idx < MIN((unsigned long) sizeof (unsigned long),merbytes); idx++)
+  for (idx=0; idx < MIN((GtUword) sizeof (GtUword),merbytes); idx++)
   {
     code = (code << 8) | bytecode[idx];
-    if (GT_MULT4(idx+1) == (unsigned long) prefixlength)
+    if (GT_MULT4(idx+1) == (GtUword) prefixlength)
     {
       break;
     }
-    if (GT_MULT4(idx+1) > (unsigned long) prefixlength)
+    if (GT_MULT4(idx+1) > (GtUword) prefixlength)
     {
       code >>= GT_MULT2(GT_MULT4(idx+1) - prefixlength);
       break;
@@ -75,27 +75,27 @@ static unsigned long extractprefixbytecode(unsigned long merbytes,
 }
 
 static GtUchar extractremainingbytes(const GtUchar remainmask,
-                                   unsigned long byteoffset,
+                                   GtUword byteoffset,
                                    const GtUchar *bytecode)
 {
   return bytecode[byteoffset] & remainmask;
 }
 
-static const GtUchar *remainingleftmost(unsigned long merbytes,
-                                      unsigned long byteoffset,
+static const GtUchar *remainingleftmost(GtUword merbytes,
+                                      GtUword byteoffset,
                                       GtUchar remainmask,
                                       GtUchar code,
                                       const GtUchar *leftptr,
                                       const GtUchar *rightptr)
 {
-  unsigned long len, halvemerbytes = GT_MULT2(merbytes);
+  GtUword len, halvemerbytes = GT_MULT2(merbytes);
   GtUchar midcode;
   const GtUchar *midptr;
 
   gt_assert(halvemerbytes > 0);
   while (leftptr + merbytes < rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/halvemerbytes;
+    len = (GtUword) (rightptr-leftptr)/halvemerbytes;
     midptr = leftptr + merbytes * len;
     midcode = extractremainingbytes(remainmask,byteoffset,midptr);
     if (code <= midcode)
@@ -109,21 +109,21 @@ static const GtUchar *remainingleftmost(unsigned long merbytes,
   return rightptr;
 }
 
-static const GtUchar *remainingrightmost(unsigned long merbytes,
-                                       unsigned long byteoffset,
+static const GtUchar *remainingrightmost(GtUword merbytes,
+                                       GtUword byteoffset,
                                        GtUchar remainmask,
                                        GtUchar code,
                                        const GtUchar *leftptr,
                                        const GtUchar *rightptr)
 {
-  unsigned long len, halvemerbytes = GT_MULT2(merbytes);
+  GtUword len, halvemerbytes = GT_MULT2(merbytes);
   GtUchar midcode;
   const GtUchar *midptr;
 
   gt_assert(halvemerbytes > 0);
   while (leftptr + merbytes < rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/halvemerbytes;
+    len = (GtUword) (rightptr-leftptr)/halvemerbytes;
     midptr = leftptr + merbytes * len;
     midcode = extractremainingbytes(remainmask,byteoffset,midptr);
     if (code >= midcode)
@@ -138,8 +138,8 @@ static const GtUchar *remainingrightmost(unsigned long merbytes,
 }
 
 static bool remainadvance(Merbounds *merbounds,
-                          unsigned long merbytes,
-                          unsigned long byteoffset,
+                          GtUword merbytes,
+                          GtUword byteoffset,
                           GtUchar remainmask,
                           const GtUchar *searchbytecode,
                           const GtUchar *leftptr,
@@ -192,7 +192,7 @@ const GtUchar *gt_searchinbuckets(const Tyrindex *tyrindex,
                              const GtUchar *bytecode)
 {
   const GtUchar *result;
-  unsigned long prefixcode, leftbound, merbytes;
+  GtUword prefixcode, leftbound, merbytes;
 
   gt_assert(tyrbckinfo != NULL);
   merbytes = gt_tyrindex_merbytes(tyrindex);
@@ -203,14 +203,14 @@ const GtUchar *gt_searchinbuckets(const Tyrindex *tyrindex,
   if (ISBOUNDDEFINED(tyrbckinfo->boundisdefined,prefixcode))
   {
     const GtUchar *mertable;
-    unsigned long rightbound;
+    GtUword rightbound;
 
     mertable = gt_tyrindex_mertable(tyrindex);
     rightbound = tyrbckinfo->bounds[prefixcode+1] - merbytes;
     if (GT_MOD4(tyrbckinfo->prefixlength) == 0)
     {
       result = gt_tyrindex_binmersearch(tyrindex,
-                                     (unsigned long)
+                                     (GtUword)
                                      GT_DIV4(tyrbckinfo->prefixlength),
                                      bytecode,
                                      mertable + leftbound,
@@ -222,7 +222,7 @@ const GtUchar *gt_searchinbuckets(const Tyrindex *tyrindex,
       merbounds.leftmer = merbounds.rightmer = NULL;
       if (!remainadvance(&merbounds,
                          merbytes,
-                         (unsigned long) GT_DIV4(tyrbckinfo->prefixlength),
+                         (GtUword) GT_DIV4(tyrbckinfo->prefixlength),
                          tyrbckinfo->remainmask,
                          bytecode,
                          mertable + leftbound,
@@ -234,7 +234,7 @@ const GtUchar *gt_searchinbuckets(const Tyrindex *tyrindex,
       } else
       {
         result = gt_tyrindex_binmersearch(tyrindex,
-                                       1UL + (unsigned long)
+                                       1UL + (GtUword)
                                              GT_DIV4(tyrbckinfo->prefixlength),
                                        bytecode,
                                        merbounds.leftmer,
@@ -248,18 +248,18 @@ const GtUchar *gt_searchinbuckets(const Tyrindex *tyrindex,
   return result;
 }
 
-static const GtUchar *findrightmostmer(unsigned long merbytes,
+static const GtUchar *findrightmostmer(GtUword merbytes,
                                      unsigned int prefixlength,
-                                     unsigned long code,
+                                     GtUword code,
                                      const GtUchar *leftptr,
                                      const GtUchar *rightptr)
 {
-  unsigned long len, midcode;
+  GtUword len, midcode;
   const GtUchar *midptr;
 
   while (leftptr + merbytes < rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/GT_MULT2(merbytes);
+    len = (GtUword) (rightptr-leftptr)/GT_MULT2(merbytes);
     midptr = leftptr + merbytes * len;
     midcode = extractprefixbytecode(merbytes,prefixlength,midptr);
     if (midcode > code)
@@ -278,7 +278,7 @@ static void splitmerinterval(Tyrbckinfo *tyrbckinfo,
 
 {
   const GtUchar *rightbound, *leftptr, *rightptr, *mertable, *lastmer;
-  unsigned long code, leftcode, rightcode, merbytes;
+  GtUword code, leftcode, rightcode, merbytes;
 
   mertable = gt_tyrindex_mertable(tyrindex);
   lastmer = gt_tyrindex_lastmer(tyrindex);
@@ -293,7 +293,7 @@ static void splitmerinterval(Tyrbckinfo *tyrbckinfo,
     leftcode = extractprefixbytecode(merbytes,
                                      tyrbckinfo->prefixlength,
                                      leftptr);
-    tyrbckinfo->bounds[leftcode] = (unsigned long) (leftptr - mertable);
+    tyrbckinfo->bounds[leftcode] = (GtUword) (leftptr - mertable);
     SETDEFINEDBOUND(tyrbckinfo->boundisdefined,leftcode);
     if (leftcode == rightcode)
     {
@@ -305,7 +305,7 @@ static void splitmerinterval(Tyrbckinfo *tyrbckinfo,
     leftptr = rightbound + merbytes;
   }
   tyrbckinfo->bounds[tyrbckinfo->numofcodes]
-    = (unsigned long) (lastmer + merbytes - mertable);
+    = (GtUword) (lastmer + merbytes - mertable);
   SETDEFINEDBOUND(tyrbckinfo->boundisdefined,tyrbckinfo->numofcodes);
   for (code = tyrbckinfo->numofcodes - 1; /* Nothing */ ; code--)
   {
@@ -371,7 +371,7 @@ int gt_constructmerbuckets(const char *inputindex,
   }
   if (!haserr && tyrindex != NULL && !gt_tyrindex_isempty(tyrindex))
   {
-    unsigned long pl_long = (unsigned long) tyrbckinfo.prefixlength;
+    GtUword pl_long = (GtUword) tyrbckinfo.prefixlength;
     gt_assert(bucketfp != NULL);
     gt_xfwrite(&pl_long, sizeof (pl_long), (size_t) 1, bucketfp);
   }
@@ -414,19 +414,19 @@ Tyrbckinfo *gt_tyrbckinfo_new(const char *tyrindexname,unsigned int alphasize,
   }
   if (!haserr)
   {
-    unsigned long pl_long;
+    GtUword pl_long;
 
     gt_assert(tyrbckinfo->mappedmbdfileptr != NULL);
-    pl_long = *((unsigned long *) tyrbckinfo->mappedmbdfileptr);
+    pl_long = *((GtUword *) tyrbckinfo->mappedmbdfileptr);
     tyrbckinfo->prefixlength = (unsigned int) pl_long;
     tyrbckinfo->numofcodes
       = gt_power_for_small_exponents(alphasize,tyrbckinfo->prefixlength);
     /*check if numofbytes == expected size*/
-    gt_assert(numofbytes == sizeof (unsigned long) *
+    gt_assert(numofbytes == sizeof (GtUword) *
                             (1UL +
                              (tyrbckinfo->numofcodes+1) +
                              GT_NUMOFINTSFORBITS(tyrbckinfo->numofcodes + 1)));
-    tyrbckinfo->bounds = ((unsigned long *) tyrbckinfo->mappedmbdfileptr) + 1;
+    tyrbckinfo->bounds = ((GtUword *) tyrbckinfo->mappedmbdfileptr) + 1;
     tyrbckinfo->boundisdefined
       = tyrbckinfo->bounds + tyrbckinfo->numofcodes + 1;
     if (tyrbckinfo->prefixlength > 0 && GT_MOD4(tyrbckinfo->prefixlength) > 0)

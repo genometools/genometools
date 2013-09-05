@@ -26,7 +26,7 @@
 
 struct GtMatchLAST {
   GtMatch parent_instance;
-  unsigned long seqno1,
+  GtUword seqno1,
                 seqno2,
                 score;
 };
@@ -46,13 +46,13 @@ const GtMatchClass* gt_match_last_class()
 
 GtMatch* gt_match_last_new(const char *seqid1,
                            const char *seqid2,
-                           unsigned long score,
-                           unsigned long seqno1,
-                           unsigned long seqno2,
-                           unsigned long start_seq1,
-                           unsigned long start_seq2,
-                           unsigned long end_seq1,
-                           unsigned long end_seq2,
+                           GtUword score,
+                           GtUword seqno1,
+                           GtUword seqno2,
+                           GtUword start_seq1,
+                           GtUword start_seq2,
+                           GtUword end_seq1,
+                           GtUword end_seq2,
                            GtMatchDirection dir)
 {
   GtMatch *match;
@@ -66,19 +66,19 @@ GtMatch* gt_match_last_new(const char *seqid1,
   return match;
 }
 
-unsigned long gt_match_last_get_seqno1(const GtMatchLAST *ms)
+GtUword gt_match_last_get_seqno1(const GtMatchLAST *ms)
 {
   gt_assert(ms);
   return ms->seqno1;
 }
 
-unsigned long gt_match_last_get_seqno2(const GtMatchLAST *ms)
+GtUword gt_match_last_get_seqno2(const GtMatchLAST *ms)
 {
   gt_assert(ms);
   return ms->seqno2;
 }
 
-unsigned long gt_match_last_get_score(const GtMatchLAST *ms)
+GtUword gt_match_last_get_score(const GtMatchLAST *ms)
 {
   gt_assert(ms);
   return ms->score;

@@ -60,14 +60,14 @@ static GtCodonIteratorStatus gt_codon_iterator_encseq_next(GtCodonIterator *ci,
   return GT_CODON_ITERATOR_OK;
 }
 
-static unsigned long gt_codon_iterator_encseq_current_position(GtCodonIterator
+static GtUword gt_codon_iterator_encseq_current_position(GtCodonIterator
                                                                             *ci)
 {
   gt_assert(ci);
   return ci->pvt->curpos;
 }
 
-static unsigned long gt_codon_iterator_encseq_length(GtCodonIterator *ci)
+static GtUword gt_codon_iterator_encseq_length(GtCodonIterator *ci)
 {
   gt_assert(ci);
   return ci->pvt->length;
@@ -104,8 +104,8 @@ const GtCodonIteratorClass* gt_codon_iterator_encseq_class(void)
 }
 
 GtCodonIterator* gt_codon_iterator_encseq_new_with_readmode(GtEncseq *encseq,
-                                                         unsigned long startpos,
-                                                         unsigned long length,
+                                                         GtUword startpos,
+                                                         GtUword length,
                                                          GtReadmode readmode,
                                                          GT_UNUSED GtError *err)
 {
@@ -124,8 +124,8 @@ GtCodonIterator* gt_codon_iterator_encseq_new_with_readmode(GtEncseq *encseq,
 }
 
 GtCodonIterator* gt_codon_iterator_encseq_new(GtEncseq *encseq,
-                                              unsigned long startpos,
-                                              unsigned long length,
+                                              GtUword startpos,
+                                              GtUword length,
                                               GT_UNUSED GtError *err)
 {
   return gt_codon_iterator_encseq_new_with_readmode(encseq, startpos, length,
@@ -138,7 +138,7 @@ static int gt_codon_iterator_encseq_single_test(GtEncseq *encseq,
                                                 GtReadmode readmode,
                                                 GT_UNUSED GtError *err)
 {
-  unsigned long j, k, i;
+  GtUword j, k, i;
   GtCodonIterator *ci;
   char n1, n2, n3;
   int had_err = 0;

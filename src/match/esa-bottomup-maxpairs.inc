@@ -35,17 +35,17 @@ static void initBUinfo_maxpairs(GtBUinfo_maxpairs *,GtBUstate_maxpairs *);
 static void freeBUinfo_maxpairs(GtBUinfo_maxpairs *,GtBUstate_maxpairs *);
 
 static int processleafedge_maxpairs(bool,
-    unsigned long,
+    GtUword,
     GtBUinfo_maxpairs *,
-    unsigned long, /* position */
+    GtUword, /* position */
     GtBUstate_maxpairs *,
     GtError *err);
 
 static int processbranchingedge_maxpairs(bool firstsucc,
-    unsigned long,
+    GtUword,
     GtBUinfo_maxpairs *,
-    unsigned long,
-    unsigned long,
+    GtUword,
+    GtUword,
     GtBUinfo_maxpairs *,
     GtBUstate_maxpairs *,
     GtError *);
@@ -77,14 +77,14 @@ static int processbranchingedge_maxpairs(bool firstsucc,
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtBUinfo_maxpairs info;
 } GtBUItvinfo_maxpairs;
 
 typedef struct
 {
   GtBUItvinfo_maxpairs *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 } GtArrayGtBUItvinfo_maxpairs;
 
@@ -100,7 +100,7 @@ GtArrayGtBUItvinfo_maxpairs *gt_GtArrayGtBUItvinfo_new_maxpairs(void)
 void gt_GtArrayGtBUItvinfo_delete_maxpairs(GtArrayGtBUItvinfo_maxpairs *stack,
                                   GtBUstate_maxpairs *state)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -111,11 +111,11 @@ void gt_GtArrayGtBUItvinfo_delete_maxpairs(GtArrayGtBUItvinfo_maxpairs *stack,
 }
 
 static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(GtBUItvinfo_maxpairs *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
+                                   GtUword currentallocated,
+                                   GtUword allocated,
                                    GtBUstate_maxpairs *state)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo_maxpairs *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -133,8 +133,8 @@ static int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                     /* no parameter snrp */
                     GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix = 0,
                 idx,
                 numberofsuffixes,
@@ -205,8 +205,8 @@ static int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallb = lastinterval->lb;
+        GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_maxpairs(lcpvalue,lastintervallb);
         if (processbranchingedge_maxpairs(true,

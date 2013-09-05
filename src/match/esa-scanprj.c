@@ -114,10 +114,10 @@ void gt_scannedprjkey_add(GtScannedprjkeytable *scannedprjkeytable,
 static int gt_scannedprjkey_scanline(uint32_t *lengthofkey,
                                      GtScannedprjvalue *scannedprjvalue,
                                      const char *linebuffer,
-                                     unsigned long linelength,
+                                     GtUword linelength,
                                      GtError *err)
 {
-  unsigned long idx;
+  GtUword idx;
   bool haserr = false, found = false;
   int retval = 0;
 
@@ -188,7 +188,7 @@ int gt_scannedprjkey_allkeysdefined(
                                GtLogger *logger,
                                GtError *err)
 {
-  unsigned long idx;
+  GtUword idx;
   GtScannedprjkey *rikptr;
 
   gt_error_check(err);
@@ -249,13 +249,13 @@ int gt_scannedprjkey_analyze(const char *indexname,
                              const char *suffix,
                              unsigned int linenum,
                              const char *linebuffer,
-                             unsigned long linelength,
+                             GtUword linelength,
                              GtScannedprjkeytable *scannedprjkeytable,
                              GtError *err)
 {
   GtScannedprjkey *rikptr;
   bool found = false, haserr = false;
-  unsigned long i;
+  GtUword i;
   int retval;
   GtScannedprjvalue scannedprjvalue;
   uint32_t lengthofkey;

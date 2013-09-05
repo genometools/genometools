@@ -69,7 +69,7 @@ typedef struct
   FILE *outfpsuftab,
        *outfpbwttab,
        *outfpbcktab;
-  unsigned long numberofallsortedsuffixes;
+  GtUword numberofallsortedsuffixes;
   const GtEncseq *encseq;
   Definedunsignedlong longest;
   GtOutlcpinfo *outlcpinfo;
@@ -80,11 +80,11 @@ typedef struct
 static void gt_suflcptab2genomediff(GT_UNUSED void *data,
                                     const GtSuffixsortspace *sssp,
                                     const GtLcpvalues *tableoflcpvalues,
-                                    unsigned long bucketoffset,
-                                    unsigned long width,
-                                    unsigned long posoffset)
+                                    GtUword bucketoffset,
+                                    GtUword width,
+                                    GtUword posoffset)
 {
-  unsigned long idx, lcpvalue, suffix;
+  GtUword idx, lcpvalue, suffix;
 
   for (idx=0; idx < width; idx++)
   {
@@ -98,9 +98,9 @@ static void gt_suflcptab2genomediff(GT_UNUSED void *data,
 static void gt_suflcptab2genomediff(void *data,
                                     const GtSuffixsortspace *sssp,
                                     const GtLcpvalues *tableoflcpvalues,
-                                    unsigned long bucketoffset,
-                                    unsigned long numberofsuffixes,
-                                    unsigned long posoffset)
+                                    GtUword bucketoffset,
+                                    GtUword numberofsuffixes,
+                                    GtUword posoffset)
 {
   (void) gt_sfx_multiesa2shulengthdist(
                   (GtBUstate_shulen *) data,
@@ -174,7 +174,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 static int bwttab2file(Outfileinfo *outfileinfo,
                        const GtSuffixsortspace *suffixsortspace,
                        GtReadmode readmode,
-                       unsigned long numberofsuffixes,
+                       GtUword numberofsuffixes,
                        GT_UNUSED GtError *err)
 {
   bool haserr = false;
@@ -182,7 +182,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
   gt_error_check(err);
   if (outfileinfo->outfpbwttab != NULL)
   {
-    unsigned long startpos, pos;
+    GtUword startpos, pos;
     GtUchar cc = 0;
 
     for (pos=0; pos < numberofsuffixes; pos++)
@@ -215,7 +215,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
                                   GtReadmode readmode,
                                   unsigned int prefixlength,
                                   unsigned int numofparts,
-                                  unsigned long maximumspace,
+                                  GtUword maximumspace,
                                   bool swallow_tail,
                                   const Sfxstrategy *sfxstrategy,
                                   GtTimer *sfxprogress,
@@ -245,12 +245,12 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
   {
     const GtSuffixsortspace *suffixsortspace;
     GtBitbuffer *bitbuffer = NULL;
-    unsigned long numberofsuffixes;
+    GtUword numberofsuffixes;
     bool specialsuffixes = false;
 
     if (sfxstrategy->compressedoutput)
     {
-      unsigned long totallength = gt_encseq_total_length(encseq);
+      GtUword totallength = gt_encseq_total_length(encseq);
       unsigned int bitsperentry = gt_determinebitspervalue(totallength);
 
       bitbuffer = gt_bitbuffer_new(outfileinfo->outfpsuftab,bitsperentry);
@@ -320,7 +320,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
 static int detpfxlen(unsigned int *prefixlength,
                      const Suffixeratoroptions *so,
                      unsigned int numofchars,
-                     unsigned long totallength,
+                     GtUword totallength,
                      bool withspecialsuffixes,
                      GtLogger *logger,
                      GtError *err)
@@ -667,7 +667,7 @@ int runsuffixerator(bool doesa,
   gt_fa_fclose(outfileinfo.outfpbcktab);
   if (!haserr)
   {
-    unsigned long numoflargelcpvalues, maxbranchdepth;
+    GtUword numoflargelcpvalues, maxbranchdepth;
     double averagelcp;
 
     if (outfileinfo.outlcpinfo == NULL)
@@ -733,8 +733,8 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
     GtLogger *logger = gt_logger_new(so.beverbose,
                                      GT_LOGGER_DEFLT_PREFIX, stdout);
 
-    gt_logger_log(logger,"sizeof (unsigned long)=%lu",
-                  (unsigned long) (sizeof (unsigned long) * CHAR_BIT));
+    gt_logger_log(logger,"sizeof (GtUword)=%lu",
+                  (GtUword) (sizeof (GtUword) * CHAR_BIT));
     if (runsuffixerator(doesa,&so,NULL,logger,err) < 0)
     {
       haserr = true;

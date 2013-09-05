@@ -28,7 +28,7 @@
 
 typedef struct
 {
-  unsigned long nextidx,
+  GtUword nextidx,
                 widthofpart,
                 suftaboffset,
                 sumofwidth,
@@ -41,7 +41,7 @@ struct GtSuftabparts_rc
   GtSuftabpartcomponent_rc *components;
   bool indexrange_available;
   unsigned int numofparts;
-  unsigned long largestsizemappedpartwise,
+  GtUword largestsizemappedpartwise,
                 largestsuftabwidth;
   const GtRandomcodestab *fct;
 };
@@ -50,7 +50,7 @@ void gt_suftabparts_rc_showallrecords(const GtSuftabparts_rc *suftabparts_rc,
                                    bool withminmaxindex)
 {
   unsigned int part;
-  unsigned long totalwidth;
+  GtUword totalwidth;
 
   gt_assert(suftabparts_rc != NULL);
   gt_assert(suftabparts_rc->numofparts >= 1U);
@@ -116,7 +116,7 @@ static GtCodetype gt_suftabparts_rc_maxindex_raw(
 }
 
 static void gt_suftabparts_rc_removeemptyparts(GtSuftabparts_rc *suftabparts_rc,
-                                            GT_UNUSED unsigned long totalwidth,
+                                            GT_UNUSED GtUword totalwidth,
                                             GtLogger *logger)
 {
 #undef SKDEBUG
@@ -128,7 +128,7 @@ static void gt_suftabparts_rc_removeemptyparts(GtSuftabparts_rc *suftabparts_rc,
   if (suftabparts_rc->numofparts > 0)
   {
     unsigned int destpart, srcpart;
-    unsigned long sumwidth = 0;
+    GtUword sumwidth = 0;
 
     for (destpart = 0, srcpart = 0; srcpart < suftabparts_rc->numofparts;
          srcpart++)
@@ -170,12 +170,12 @@ GtSuftabparts_rc *gt_suftabparts_rc_new(unsigned int numofparts,
                                   const GtBcktab *bcktab,
                                   const GtRandomcodestab *fct,
                                   const GtSfxmappedrangelist *sfxmrlist,
-                                  unsigned long numofsuffixestoinsert,
-                                  unsigned long fullspecials,
+                                  GtUword numofsuffixestoinsert,
+                                  GtUword fullspecials,
                                   GtLogger *logger)
 {
   GtSuftabparts_rc *suftabparts_rc;
-  unsigned long size_mapped;
+  GtUword size_mapped;
   unsigned int part;
 
   gt_assert((bcktab == NULL && fct != NULL) ||
@@ -189,7 +189,7 @@ GtSuftabparts_rc *gt_suftabparts_rc_new(unsigned int numofparts,
     suftabparts_rc->numofparts = 0;
   } else
   {
-    if (numofsuffixestoinsert < (unsigned long) numofparts ||
+    if (numofsuffixestoinsert < (GtUword) numofparts ||
         (bcktab != NULL && gt_bcktab_prefixlength(bcktab) == 1U))
     {
       suftabparts_rc->numofparts = 1U;
@@ -207,16 +207,16 @@ GtSuftabparts_rc *gt_suftabparts_rc_new(unsigned int numofparts,
   } else
   {
     unsigned int remainder;
-    unsigned long secondidx, randombound = 0, secondbound,
+    GtUword secondidx, randombound = 0, secondbound,
                   suftaboffset = 0, sumofwidth = 0;
-    const unsigned long widthofsuftabpart
+    const GtUword widthofsuftabpart
       = numofsuffixestoinsert/suftabparts_rc->numofparts;
 
     suftabparts_rc->components
       = gt_malloc(sizeof (*suftabparts_rc->components) *
           suftabparts_rc->numofparts);
     remainder = (unsigned int) (numofsuffixestoinsert %
-                                (unsigned long) suftabparts_rc->numofparts);
+                                (GtUword) suftabparts_rc->numofparts);
     suftabparts_rc->largestsuftabwidth = 0;
     for (part=0; part < suftabparts_rc->numofparts; part++)
     {
@@ -354,35 +354,35 @@ GtCodetype gt_suftabparts_rc_maxindex_last(
       suftabparts_rc);
 }
 
-unsigned long gt_suftabparts_rc_offset(unsigned int part,
+GtUword gt_suftabparts_rc_offset(unsigned int part,
                                     const GtSuftabparts_rc *suftabparts_rc)
 {
   gt_assert(suftabparts_rc != NULL && part < suftabparts_rc->numofparts);
   return suftabparts_rc->components[part].suftaboffset;
 }
 
-unsigned long gt_suftabparts_rc_sumofwidth(unsigned int part,
+GtUword gt_suftabparts_rc_sumofwidth(unsigned int part,
                                         const GtSuftabparts_rc *suftabparts_rc)
 {
   gt_assert(suftabparts_rc != NULL && part < suftabparts_rc->numofparts);
   return suftabparts_rc->components[part].sumofwidth;
 }
 
-unsigned long gt_suftabparts_rc_widthofpart(unsigned int part,
+GtUword gt_suftabparts_rc_widthofpart(unsigned int part,
                                          const GtSuftabparts_rc *suftabparts_rc)
 {
   gt_assert(suftabparts_rc != NULL && part < suftabparts_rc->numofparts);
   return suftabparts_rc->components[part].widthofpart;
 }
 
-unsigned long gt_suftabparts_rc_largest_width(
+GtUword gt_suftabparts_rc_largest_width(
     const GtSuftabparts_rc *suftabparts_rc)
 {
   gt_assert(suftabparts_rc != NULL);
   return suftabparts_rc->largestsuftabwidth;
 }
 
-unsigned long gt_suftabparts_rc_largestsizemappedpartwise(
+GtUword gt_suftabparts_rc_largestsizemappedpartwise(
     const GtSuftabparts_rc *suftabparts_rc)
 {
   gt_assert(suftabparts_rc != NULL);
@@ -397,26 +397,26 @@ unsigned int gt_suftabparts_rc_numofparts(
 }
 
 int gt_suftabparts_rc_fit_memlimit(size_t estimatedspace,
-                                unsigned long maximumspace,
+                                GtUword maximumspace,
                                 const GtBcktab *bcktab,
                                 const GtRandomcodestab *fct,
                                 const GtSfxmappedrangelist *sfxmrlist,
-                                unsigned long totallength,
+                                GtUword totallength,
                                 unsigned int bitsforseqnumrelpos,
-                                unsigned long specialcharacters,
-                                unsigned long numofsuffixestosort,
+                                GtUword specialcharacters,
+                                GtUword numofsuffixestosort,
                                 bool suftabuint,
                                 GtError *err)
 {
   unsigned int parts;
   GtSuftabparts_rc *suftabparts_rc;
-  unsigned long size_mapped = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
+  GtUword size_mapped = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
 
   gt_error_check(err);
   for (parts = 1U; parts <= 500U; parts++)
   {
     size_t suftabsize;
-    unsigned long numofentries;
+    GtUword numofentries;
 
     suftabparts_rc = gt_suftabparts_rc_new(parts,
                                      bcktab,
@@ -442,16 +442,16 @@ int gt_suftabparts_rc_fit_memlimit(size_t estimatedspace,
     }
     if (parts == 1U)
     {
-      if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
+      if ((GtUword) (suftabsize + estimatedspace) <= maximumspace)
       {
         gt_suftabparts_rc_delete(suftabparts_rc);
         return (int) parts;
       }
     } else
     {
-      unsigned long largest
+      GtUword largest
         = gt_suftabparts_rc_largestsizemappedpartwise(suftabparts_rc);
-      if ((unsigned long) (suftabsize + largest + estimatedspace - size_mapped)
+      if ((GtUword) (suftabsize + largest + estimatedspace - size_mapped)
                            <= maximumspace)
       {
         gt_log_log("return parts = %u as suftabsize=%.2f +"

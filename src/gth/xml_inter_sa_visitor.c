@@ -119,7 +119,7 @@ static void showexons(GthSA *sa, unsigned int indentlevel,
                       GtFile *outfp)
 {
   Exoninfo *exoninfo;
-  unsigned long i;
+  GtUword i;
 
   for (i = 0; i < gth_sa_num_of_exons(sa); i++) {
     exoninfo = gth_sa_get_exon(sa, i);
@@ -158,7 +158,7 @@ static void showintrons(GthSA *sa, bool dnaalpha,
                         unsigned int indentlevel, GtFile *outfp)
 {
   Introninfo *introninfo;
-  unsigned long i;
+  GtUword i;
 
   for (i = 0; i < gth_sa_num_of_introns(sa); i++) {
     introninfo = gth_sa_get_intron(sa, i);

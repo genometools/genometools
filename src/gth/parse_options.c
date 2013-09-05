@@ -95,7 +95,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                            GtShowVersionFunc show_version,
                            GthJumpTableNew jump_table_new, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   int ret, mode;
   double u12donorprob, u12donorprob1mism;
   GtStrArray *genomic_files, *cdna_files, *protein_files;

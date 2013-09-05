@@ -35,7 +35,7 @@ void gt_freeMyersonlineresources(
 
 void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
                             const GtUchar *pattern,
-                            unsigned long patternlength,
-                            unsigned long maxdistance);
+                            GtUword patternlength,
+                            GtUword maxdistance);
 
 #endif

@@ -31,11 +31,11 @@ static GtCodetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,
                                       const GtEncseq *encseq,
                                       GtReadmode readmode,
-                                      unsigned long startpos,
-                                      unsigned long totallength)
+                                      GtUword startpos,
+                                      GtUword totallength)
 {
   GtCodetype integercode;
-  unsigned long pos;
+  GtUword pos;
   bool foundspecial;
   GtUchar cc;
 
@@ -108,9 +108,9 @@ static void collectkmercode(GtArrayGtCodetype *codelist,
                             const GtEncseq *encseq,
                             unsigned int kmersize,
                             unsigned int numofchars,
-                            unsigned long stringtotallength)
+                            GtUword stringtotallength)
 {
-  unsigned long offset;
+  GtUword offset;
   GtCodetype code;
 
   for (offset=0; offset<=stringtotallength; offset++)
@@ -132,15 +132,15 @@ static int comparecodelists(const GtArrayGtCodetype *codeliststream,
                             const char *characters,
                             GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   char buffer1[64+1], buffer2[64+1];
 
   gt_error_check(err);
   if (codeliststream->nextfreeGtCodetype != codeliststring->nextfreeGtCodetype)
   {
     gt_error_set(err,"length codeliststream= %lu != %lu =length codeliststring",
-                  (unsigned long) codeliststream->nextfreeGtCodetype,
-                  (unsigned long) codeliststring->nextfreeGtCodetype);
+                  (GtUword) codeliststream->nextfreeGtCodetype,
+                  (GtUword) codeliststring->nextfreeGtCodetype);
     return -1;
   }
   for (i=0; i<codeliststream->nextfreeGtCodetype; i++)
@@ -226,7 +226,7 @@ static int verifycodelists(const GtEncseq *encseq,
   bool haserr = false;
   GtArrayGtCodetype codeliststring;
   const GtUchar *characters;
-  unsigned long stringtotallength;
+  GtUword stringtotallength;
 
   gt_error_check(err);
   stringtotallength = gt_encseq_total_length(encseq);

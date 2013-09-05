@@ -104,7 +104,7 @@ const char* gt_sequence_node_get_sequence(const GtSequenceNode *sn)
   return gt_str_get(sn->sequence);
 }
 
-unsigned long gt_sequence_node_get_sequence_length(const GtSequenceNode *sn)
+GtUword gt_sequence_node_get_sequence_length(const GtSequenceNode *sn)
 {
   gt_assert(sn);
   return gt_str_length(sn->sequence);

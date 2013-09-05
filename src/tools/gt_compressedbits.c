@@ -33,7 +33,7 @@
 
 typedef struct {
   unsigned int samplerate;
-  unsigned long size,
+  GtUword size,
                 benches;
   bool fill_random,
        check_consistency;
@@ -126,7 +126,7 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
 {
   GtCompressdbitsArguments *arguments = tool_arguments;
   int had_err = 0;
-  unsigned long idx;
+  GtUword idx;
   GtUint64 num_of_bits = 0ULL;
   GtBitsequence *bits = NULL;
   GtCompressedBitsequence *cbs = NULL, *read_cbs = NULL;
@@ -148,7 +148,7 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
     }
     if (!had_err) {
       gt_log_log("bits to read: "GT_LLU"", num_of_bits);
-      arguments->size = (unsigned long) GT_NUMOFINTSFORBITS(num_of_bits);
+      arguments->size = (GtUword) GT_NUMOFINTSFORBITS(num_of_bits);
       bits = gt_malloc(sizeof (*bits) * arguments->size);
       if ((size_t) arguments->size !=
           gt_xfread(bits, sizeof (*bits),
@@ -183,7 +183,7 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
     gt_log_log("size in words: %lu", arguments->size);
     cbs = gt_compressed_bitsequence_new(
                             bits, arguments->samplerate,
-                            (unsigned long) num_of_bits);
+                            (GtUword) num_of_bits);
     gt_log_log("original size in MB: %2.3f",
                (sizeof (*bits) * arguments->size) / (1024.0 * 1024.0));
     gt_log_log("compressed size in MB: %2.3f",

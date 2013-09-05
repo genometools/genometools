@@ -20,14 +20,14 @@
 #include "core/trans_table_api.h"
 
 int mg_combinedscore(ParseStruct *parsestruct_ptr,
-                     unsigned long hit_counter, GtError * err)
+                     GtUword hit_counter, GtError * err)
 {
   int had_err = 0;
 
   unsigned short current_row,
     k;
 
-  unsigned long contig_len = 0,
+  GtUword contig_len = 0,
     contig_seq_diff = 0,
     hit_len = 0,
     hit_seq_diff = 0,
@@ -95,7 +95,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     for (j = 0; j < contig_len; j++)
     {
       combinedscore_matrix[k][j].hit_number =
-        gt_array_new(sizeof (unsigned long));
+        gt_array_new(sizeof (GtUword));
     }
   }
 
@@ -111,7 +111,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   {
     /* Speicherplatz fuer die Hilfszeilen wird reserviert */
     matrix_row = gt_calloc(contig_len, sizeof (double));
-    count_row = gt_calloc(contig_len, sizeof (unsigned long));
+    count_row = gt_calloc(contig_len, sizeof (GtUword));
     contig_seq_tri = gt_calloc(4, sizeof (char));
     hit_seq_tri = gt_calloc(4, sizeof (char));
 
@@ -350,23 +350,23 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
                         char *hit_amino,
                         char *query_amino,
                         short current_row_fct,
-                        unsigned long position_contig,
-                        unsigned long position_hit,
-                        unsigned long hit_len,
-                        unsigned long contig_len,
-                        unsigned long hit_number,
+                        GtUword position_contig,
+                        GtUword position_hit,
+                        GtUword hit_len,
+                        GtUword contig_len,
+                        GtUword hit_number,
                         ParseStruct *parsestruct_ptr,
                         double *matrix_row,
-                        unsigned long *count_row_fct,
+                        GtUword *count_row_fct,
                         char *contig_seq,
                         char *hit_seq, HitInformation *hit_information)
 {
-  unsigned long j = 0,
+  GtUword j = 0,
     nr_of_strings = 0;
   unsigned short k = 0;
 
-  unsigned long query_from;
-  unsigned long query_to;
+  GtUword query_from;
+  GtUword query_to;
 
   query_from = LONG_VALUE(MATRIXSTRUCT(query_from), hit_number) - 1;
   query_to = LONG_VALUE(MATRIXSTRUCT(query_to), hit_number) - 1;
@@ -544,10 +544,10 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
 
 static void add_scores(ParseStruct *parsestruct_ptr,
                        double *matrix_row,
-                       unsigned long *count_row_fct,
+                       GtUword *count_row_fct,
                        short current_row_fct,
-                       unsigned long hit_number,
-                       unsigned long position,
+                       GtUword hit_number,
+                       GtUword position,
                        unsigned short k, double score)
 {
   /* Wenn der Query-Leserahmen negativ ist, muessen die Combined-Scores

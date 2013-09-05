@@ -41,17 +41,17 @@ static void freeDfsinfo_elcp(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
   gt_free((Lcpinterval *) adfsinfo);
 }
 
-static void showbranchingedgeDFS(bool firstsucc,unsigned long fd,
-                                 unsigned long flb,
-                                 unsigned long sd,unsigned long slb)
+static void showbranchingedgeDFS(bool firstsucc,GtUword fd,
+                                 GtUword flb,
+                                 GtUword sd,GtUword slb)
 {
   printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
 }
 
 static int processleafedge_elcp(bool firstsucc,
-                                unsigned long fatherdepth,
+                                GtUword fatherdepth,
                                 Dfsinfo *afather,
-                                unsigned long leafnumber,
+                                GtUword leafnumber,
                                 GT_UNUSED Dfsstate *astate,
                                 GT_UNUSED GtError *err)
 {
@@ -63,7 +63,7 @@ static int processleafedge_elcp(bool firstsucc,
 }
 
 static int processbranchedge_elcp(bool firstsucc,
-                                  unsigned long fatherdepth,
+                                  GtUword fatherdepth,
                                   Dfsinfo *afather,
                                   Dfsinfo *ason,
                                   Dfsstate *astate,
@@ -87,9 +87,9 @@ static int processbranchedge_elcp(bool firstsucc,
 }
 
 static int processcompletenode_elcp(
-                          unsigned long nodeptrdepth,
+                          GtUword nodeptrdepth,
                           Dfsinfo *anodeptr,
-                          GT_UNUSED unsigned long nodeptrminusonedepth,
+                          GT_UNUSED GtUword nodeptrminusonedepth,
                           Dfsstate *astate,
                           GT_UNUSED GtError *err)
 {
@@ -113,16 +113,16 @@ static int processcompletenode_elcp(
 }
 
 static void assignleftmostleaf_elcp(Dfsinfo *adfsinfo,
-                                    unsigned long leftmostleaf,
+                                    GtUword leftmostleaf,
                                     GT_UNUSED Dfsstate *dfsstate)
 {
   ((Lcpinterval *) adfsinfo)->left = leftmostleaf;
 }
 
 static void assignrightmostleaf_elcp(Dfsinfo *adfsinfo,
-                                     unsigned long currentindex,
-                                     GT_UNUSED unsigned long previoussuffix,
-                                     GT_UNUSED unsigned long currentlcp,
+                                     GtUword currentindex,
+                                     GT_UNUSED GtUword previoussuffix,
+                                     GT_UNUSED GtUword currentlcp,
                                      GT_UNUSED Dfsstate *dfsstate)
 {
   ((Lcpinterval *) adfsinfo)->right = currentindex;
@@ -237,7 +237,7 @@ int gt_runenumlcpvalues(const char *inputindex,
 static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
                              unsigned int mode,GtError *err)
 {
-  unsigned long lcpvalue,
+  GtUword lcpvalue,
                 previoussuffix = 0,
                 idx,
                 nonspecials,

@@ -23,19 +23,19 @@
 #define UNION_FIND_TEST_SIZE  1024
 
 typedef struct {
-  unsigned long parent/*, rank*/;
+  GtUword parent/*, rank*/;
 } GtUnionFindElement;
 
 struct GtUnionFind {
   GtUnionFindElement *elems;
-  unsigned long num_of_elems;
-  unsigned long allocated;
+  GtUword num_of_elems;
+  GtUword allocated;
 };
 
-GtUnionFind* gt_union_find_new(unsigned long num_of_elems)
+GtUnionFind* gt_union_find_new(GtUword num_of_elems)
 {
   GtUnionFind *uf;
-  unsigned long i;
+  GtUword i;
   gt_assert(num_of_elems);
   uf = gt_malloc(sizeof *uf);
   uf->elems = gt_calloc(sizeof (GtUnionFindElement), num_of_elems);
@@ -46,9 +46,9 @@ GtUnionFind* gt_union_find_new(unsigned long num_of_elems)
   return uf;
 }
 
-void gt_union_find_reset(GtUnionFind *uf, unsigned long num_of_elems)
+void gt_union_find_reset(GtUnionFind *uf, GtUword num_of_elems)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(num_of_elems);
   if (num_of_elems > uf->allocated)
   {
@@ -68,7 +68,7 @@ void gt_union_find_delete(GtUnionFind *uf)
   gt_free(uf);
 }
 
-unsigned long gt_union_find_find(GtUnionFind *uf, unsigned long elem)
+GtUword gt_union_find_find(GtUnionFind *uf, GtUword elem)
 {
   gt_assert(uf && elem < uf->num_of_elems);
   if (elem != uf->elems[elem].parent) /* path compression */
@@ -76,10 +76,10 @@ unsigned long gt_union_find_find(GtUnionFind *uf, unsigned long elem)
   return uf->elems[elem].parent;
 }
 
-void gt_union_find_union(GtUnionFind *uf, unsigned long elem_a,
-                         unsigned long elem_b)
+void gt_union_find_union(GtUnionFind *uf, GtUword elem_a,
+                         GtUword elem_b)
 {
-  unsigned long x, y;
+  GtUword x, y;
   gt_assert(uf && elem_a < uf->num_of_elems && elem_b < uf->num_of_elems);
   x = gt_union_find_find(uf, elem_a);
   y = gt_union_find_find(uf, elem_b);
@@ -97,7 +97,7 @@ void gt_union_find_union(GtUnionFind *uf, unsigned long elem_a,
 
 int gt_union_find_unit_test(GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtUnionFind *uf;
   int had_err = 0;
   gt_error_check(err);

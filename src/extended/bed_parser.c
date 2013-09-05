@@ -304,18 +304,18 @@ static void construct_thick_feature(GtBEDParser *bed_parser, GtFeatureNode *fn,
 }
 
 static int create_block_features(GtBEDParser *bed_parser, GtFeatureNode *fn,
-                                 unsigned long block_count,
+                                 GtUword block_count,
                                  GtSplitter *size_splitter,
                                  GtSplitter *start_splitter, GtIO *bed_file,
                                  GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_assert(fn && block_count && size_splitter && start_splitter);
   gt_assert(gt_splitter_size(size_splitter) == block_count);
   gt_assert(gt_splitter_size(start_splitter) == block_count);
   for (i = 0; !had_err && i < block_count; i++) {
-    unsigned long block_size, block_start, start, end;
+    GtUword block_size, block_start, start, end;
     GtGenomeNode *block;
     const char *name;
     if (gt_parse_ulong(&block_size, gt_splitter_get_token(size_splitter, i))) {
@@ -363,7 +363,7 @@ static void remove_terminal_comma(GtStr *str)
 }
 
 static int process_blocks(GtBEDParser *bed_parser, GtFeatureNode *fn,
-                          unsigned long block_count, GtStr *block_sizes,
+                          GtUword block_count, GtStr *block_sizes,
                           GtStr *block_starts, GtIO *bed_file, GtError *err)
 {
   GtSplitter *size_splitter = NULL , *start_splitter = NULL;
@@ -424,7 +424,7 @@ static int process_blocks(GtBEDParser *bed_parser, GtFeatureNode *fn,
 
 static int bed_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
 {
-  unsigned long block_count = 0;
+  GtUword block_count = 0;
   GtGenomeNode *gn = NULL;
   GtRange range;
   GtStr *seqid;

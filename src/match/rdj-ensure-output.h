@@ -50,7 +50,7 @@
                   EXPOUT);                                                 \
           fprintf(stderr, "\nFile content actually read "                  \
                          "(up to %lu bytes):\n%s\n",                       \
-               (unsigned long) strlen(EXPOUT), buffer);                    \
+               (GtUword) strlen(EXPOUT), buffer);                    \
         }
 
 #define GT_ENSURE_OUTPUT_RMFILE(GTFILE)                                    \

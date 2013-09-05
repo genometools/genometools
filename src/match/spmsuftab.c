@@ -20,17 +20,17 @@
 #include "core/minmax.h"
 #include "spmsuftab.h"
 
-GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
-                              unsigned long maxvalue,
+GtSpmsuftab *gt_spmsuftab_new(GtUword numofentries,
+                              GtUword maxvalue,
                               unsigned int bitsforseqnumrelpos,
                               GtLogger *logger)
 {
   GtSpmsuftab *spmsuftab;
   unsigned int bitsforpositions;
-  unsigned long required;
+  GtUword required;
 
   spmsuftab = gt_malloc(sizeof (*spmsuftab));
-  required = (unsigned long) gt_spmsuftab_requiredspace(numofentries,
+  required = (GtUword) gt_spmsuftab_requiredspace(numofentries,
                                                         maxvalue,
                                                         bitsforseqnumrelpos);
   bitsforpositions = gt_determinebitspervalue(maxvalue);
@@ -72,13 +72,13 @@ bool gt_spmsuftab_usebitsforpositions(const GtSpmsuftab *spmsuftab)
   return spmsuftab->usebitsforpositions;
 }
 
-void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,unsigned long offset)
+void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,GtUword offset)
 {
   spmsuftab->partoffset = offset;
 }
 
-size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
-                                  unsigned long maxvalue,
+size_t gt_spmsuftab_requiredspace(GtUword numofentries,
+                                  GtUword maxvalue,
                                   unsigned int bitsforseqnumrelpos)
 {
   unsigned int bitsforpositions = gt_determinebitspervalue(maxvalue);

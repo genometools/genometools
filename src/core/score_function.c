@@ -22,7 +22,7 @@ struct GtScoreFunction {
   GtScoreMatrix *sm;
   int deletion_score,
       insertion_score;
-  unsigned long reference_count;
+  GtUword reference_count;
 };
 
 GtScoreFunction* gt_score_function_new(GtScoreMatrix *sm, int deletion_score,

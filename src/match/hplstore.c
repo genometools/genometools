@@ -24,11 +24,11 @@
 struct GtHplstore
 {
   uint8_t *space;
-  unsigned long nofelements;
+  GtUword nofelements;
   bool finalized;
 };
 
-GtHplstore *gt_hplstore_new(unsigned long nofelements)
+GtHplstore *gt_hplstore_new(GtUword nofelements)
 {
   GtHplstore *hplstore;
   gt_assert(nofelements > 0);
@@ -49,7 +49,7 @@ void gt_hplstore_delete(GtHplstore *hplstore)
   }
 }
 
-void gt_hplstore_finalize(GtHplstore *hplstore, unsigned long nofelements)
+void gt_hplstore_finalize(GtHplstore *hplstore, GtUword nofelements)
 {
   gt_assert(hplstore != NULL);
   gt_assert(!hplstore->finalized);
@@ -64,7 +64,7 @@ void gt_hplstore_finalize(GtHplstore *hplstore, unsigned long nofelements)
   gt_log_log("finalized GtHplstore %p to %lu values", hplstore, nofelements);
 }
 
-void gt_hplstore_set(GtHplstore *hplstore, unsigned long pos, uint8_t value)
+void gt_hplstore_set(GtHplstore *hplstore, GtUword pos, uint8_t value)
 {
   gt_assert(hplstore != NULL);
   gt_assert(!hplstore->finalized);
@@ -73,7 +73,7 @@ void gt_hplstore_set(GtHplstore *hplstore, unsigned long pos, uint8_t value)
   hplstore->space[pos] = value;
 }
 
-uint8_t gt_hplstore_get(GtHplstore *hplstore, unsigned long pos)
+uint8_t gt_hplstore_get(GtHplstore *hplstore, GtUword pos)
 {
   gt_assert(hplstore != NULL);
   gt_assert(hplstore->finalized);
@@ -82,9 +82,9 @@ uint8_t gt_hplstore_get(GtHplstore *hplstore, unsigned long pos)
 }
 
 void gt_hplstore_get_range(const GtHplstore *hplstore, uint8_t *hplengths,
-    unsigned long from, unsigned long nofelements)
+    GtUword from, GtUword nofelements)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(hplstore != NULL);
   gt_assert(hplstore->finalized);
   gt_assert(from < GT_MULT2(hplstore->nofelements) - 1UL);
@@ -102,10 +102,10 @@ void gt_hplstore_get_range(const GtHplstore *hplstore, uint8_t *hplengths,
 }
 
 void gt_hplstore_show_decoded_sequence_using_hplengths(GtFile *outfile,
-    const uint8_t *hplengths, const GtEncseq *encseq, unsigned long encseq_from,
-    unsigned long nofelements)
+    const uint8_t *hplengths, const GtEncseq *encseq, GtUword encseq_from,
+    GtUword nofelements)
 {
-  unsigned long i;
+  GtUword i;
   uint8_t rep;
   gt_assert(encseq != NULL);
   gt_assert(hplengths != NULL);
@@ -129,8 +129,8 @@ void gt_hplstore_show_decoded_sequence_using_hplengths(GtFile *outfile,
 }
 
 void gt_hplstore_show_decoded_sequence(GtFile *outfile,
-    const GtHplstore *hplstore, const GtEncseq *encseq, unsigned long from,
-    unsigned long nofelements)
+    const GtHplstore *hplstore, const GtEncseq *encseq, GtUword from,
+    GtUword nofelements)
 {
   uint8_t *hplengths;
   gt_assert(encseq != NULL);
@@ -159,7 +159,7 @@ void gt_hplstore_save(const GtHplstore *hplstore, FILE *out_fp)
       (size_t)hplstore->nofelements, out_fp);
 }
 
-GtHplstore *gt_hplstore_load(FILE *in_fp, unsigned long nofelements)
+GtHplstore *gt_hplstore_load(FILE *in_fp, GtUword nofelements)
 {
   GtHplstore *hplstore = gt_hplstore_new(nofelements);
   gt_assert(in_fp != NULL);

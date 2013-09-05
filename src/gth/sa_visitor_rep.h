@@ -26,7 +26,7 @@ struct GthSAVisitorClass {
   void (*free)(GthSAVisitor*);
   void (*preface)(GthSAVisitor*);
   void (*visit_sa)(GthSAVisitor*, GthSA*);
-  void (*trailer)(GthSAVisitor*, unsigned long num_of_sas);
+  void (*trailer)(GthSAVisitor*, GtUword num_of_sas);
 };
 
 struct GthSAVisitor {

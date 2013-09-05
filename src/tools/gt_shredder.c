@@ -26,7 +26,7 @@
 #include "tools/gt_shredder.h"
 
 typedef struct {
-  unsigned long coverage,
+  GtUword coverage,
                 minlength,
                 maxlength,
                 overlap,
@@ -106,7 +106,7 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
 {
   ShredderArguments *arguments = tool_arguments;
   GtBioseqIterator *bsi;
-  unsigned long i;
+  GtUword i;
   GtBioseq *bioseq;
   int had_err;
   GtStr *desc;
@@ -122,7 +122,7 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
   while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
     for (i = 0; i < arguments->coverage; i++) {
       GtShredder *shredder;
-      unsigned long fragment_length;
+      GtUword fragment_length;
       char *fragment;
       shredder = gt_shredder_new(bioseq, arguments->minlength,
                               arguments->maxlength);

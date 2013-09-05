@@ -43,7 +43,7 @@ static int gt_fasta_reader_seqit_run(GtFastaReader *fasta_reader,
   GtFastaReaderSeqIt *gt_fasta_reader_seqit =
     gt_fasta_reader_seqit_cast(fasta_reader);
   const GtUchar *sequence;
-  unsigned long len;
+  GtUword len;
   char *desc;
   int rval, had_err = 0;
   gt_error_check(err);

@@ -79,7 +79,7 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
 }
 
 /* Formats a given position number for short display in the ruler. */
-void gt_format_ruler_label(char *txt,  unsigned long pos,
+void gt_format_ruler_label(char *txt,  GtUword pos,
                            const char *unitstr, size_t buflen)
 {
   double fpos;
@@ -99,7 +99,7 @@ void gt_format_ruler_label(char *txt,  unsigned long pos,
       logval--;
     }
     /*@ignore@*/
-    gt_str_append_ulong(formatstring, (unsigned long) logval);
+    gt_str_append_ulong(formatstring, (GtUword) logval);
     gt_str_append_cstr(formatstring, "fG%s");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos, unitstr);
     /*@end@*/
@@ -113,7 +113,7 @@ void gt_format_ruler_label(char *txt,  unsigned long pos,
       logval--;
     }
     /*@ignore@*/
-    gt_str_append_ulong(formatstring, (unsigned long) logval);
+    gt_str_append_ulong(formatstring, (GtUword) logval);
     gt_str_append_cstr(formatstring, "fM%s");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos, unitstr);
     /*@end@*/
@@ -127,7 +127,7 @@ void gt_format_ruler_label(char *txt,  unsigned long pos,
       logval--;
     }
     /*@ignore@*/
-    gt_str_append_ulong(formatstring, (unsigned long) logval);
+    gt_str_append_ulong(formatstring, (GtUword) logval);
     gt_str_append_cstr(formatstring, "fk%s");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos, unitstr);
     /*@end@*/
@@ -184,7 +184,7 @@ void* gt_canvas_try_cast(GT_UNUSED const GtCanvasClass *cc, GtCanvas *c)
   return NULL;
 }
 
-unsigned long gt_canvas_get_height(GtCanvas *canvas)
+GtUword gt_canvas_get_height(GtCanvas *canvas)
 {
   gt_assert(canvas);
   return canvas->pvt->height;

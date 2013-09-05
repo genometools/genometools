@@ -26,18 +26,18 @@
 
 struct GtCompactUlongStore
 {
-  unsigned long *tab,
+  GtUword *tab,
                 numofentries,
                 maskright;
   unsigned int bitsperentry,
                bitsleft;
 };
 
-GtCompactUlongStore *gt_compact_ulong_store_new(unsigned long numofentries,
+GtCompactUlongStore *gt_compact_ulong_store_new(GtUword numofentries,
                                                 unsigned int bitsperentry)
 {
   GtCompactUlongStore *cus;
-  unsigned long arraysize, totalbits;
+  GtUword arraysize, totalbits;
 
   /* if this assertion appears, then probably the 32-bit version of the
      code is used. Better use the 64-bit version by compiling with
@@ -58,10 +58,10 @@ GtCompactUlongStore *gt_compact_ulong_store_new(unsigned long numofentries,
   return cus;
 }
 
-size_t gt_compact_ulong_store_size(unsigned long numofentries,
+size_t gt_compact_ulong_store_size(GtUword numofentries,
                                    unsigned int bitsperentry)
 {
-  unsigned long arraysize, totalbits;
+  GtUword arraysize, totalbits;
 
   /* if this assertion appears, then probably the 32-bit version of the
      code is used. Better use the 64-bit version by compiling with
@@ -72,7 +72,7 @@ size_t gt_compact_ulong_store_size(unsigned long numofentries,
   if (GT_MODWORDSIZE(totalbits) > 0) {
     arraysize++;
   }
-  return sizeof (GtCompactUlongStore) + sizeof (unsigned long) * arraysize;
+  return sizeof (GtCompactUlongStore) + sizeof (GtUword) * arraysize;
 }
 
 void gt_compact_ulong_store_delete(GtCompactUlongStore *cus)
@@ -83,22 +83,22 @@ void gt_compact_ulong_store_delete(GtCompactUlongStore *cus)
   }
 }
 
-unsigned long gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
-                                         unsigned long idx)
+GtUword gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
+                                         GtUword idx)
 {
   unsigned int unitoffset;
-  unsigned long unitindex;
+  GtUword unitindex;
 
   gt_assert(idx < cus->numofentries);
   idx *= cus->bitsperentry;
   unitoffset = (unsigned int) GT_MODWORDSIZE(idx);
   unitindex = GT_DIVWORDSIZE(idx);
   if (unitoffset <= (unsigned int) cus->bitsleft) {
-    return (unsigned long) (cus->tab[unitindex] >>
+    return (GtUword) (cus->tab[unitindex] >>
                              (cus->bitsleft - unitoffset))
            & cus->maskright;
   } else {
-    return (unsigned long)
+    return (GtUword)
            ((cus->tab[unitindex] <<
                 (unitoffset + cus->bitsperentry - GT_INTWORDSIZE)) |
               (cus->tab[unitindex+1] >>
@@ -108,10 +108,10 @@ unsigned long gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
 }
 
 void gt_compact_ulong_store_update(GtCompactUlongStore *cus,
-                                   unsigned long idx, unsigned long value)
+                                   GtUword idx, GtUword value)
 {
   unsigned int unitoffset;
-  unsigned long unitindex;
+  GtUword unitindex;
 
   gt_assert(idx < cus->numofentries && value <= cus->maskright);
   idx *= cus->bitsperentry;
@@ -137,9 +137,9 @@ void gt_compact_ulong_store_update(GtCompactUlongStore *cus,
 int gt_compact_ulong_store_unit_test(GtError *err)
 {
   GtCompactUlongStore *cus;
-  const unsigned long constnums = 100000UL;
+  const GtUword constnums = 100000UL;
   unsigned int bits;
-  unsigned long value, nums, idx, numforbits, *checknumbers;
+  GtUword value, nums, idx, numforbits, *checknumbers;
   int had_err = 0;
 
   checknumbers = gt_malloc(sizeof (*checknumbers) * constnums);

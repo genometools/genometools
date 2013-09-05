@@ -79,7 +79,7 @@ unsigned int gt_marksubstring_shiftright(const Gtmarksubstring *mark)
   return mark->shiftright;
 }
 
-unsigned long gt_marksubstring_entries(const Gtmarksubstring *mark)
+GtUword gt_marksubstring_entries(const Gtmarksubstring *mark)
 {
   return mark->entries;
 }

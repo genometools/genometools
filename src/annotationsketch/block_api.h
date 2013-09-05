@@ -62,7 +62,7 @@ GtStrand              gt_block_get_strand(const GtBlock*);
 /* Returns the <GtBlock>'s top level feature as a <GtFeatureNode> object. */
 GtFeatureNode*        gt_block_get_top_level_feature(const GtBlock*);
 /* Returns the number of elements in the <GtBlock>. */
-unsigned long         gt_block_get_size(const GtBlock*);
+GtUword         gt_block_get_size(const GtBlock*);
 /* Returns the feature type of the <GtBlock>. */
 const char*           gt_block_get_type(const GtBlock*);
 /* Deletes a <GtBlock>. */

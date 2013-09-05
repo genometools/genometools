@@ -80,7 +80,7 @@ static void replace_previous_elem(GtDlistelem *previous_elem,
 static void select_targetbest(GtFeatureNode *current_feature,
                               GtDlist *trees, GtHashmap *target_to_elem)
 {
-  unsigned long num_of_targets;
+  GtUword num_of_targets;
   GtDlistelem *previous_elem;
   GtStr *first_target_id;
   const char *target;

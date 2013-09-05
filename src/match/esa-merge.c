@@ -30,7 +30,7 @@
 
 static void fillandinsert(Mergertrierep *trierep,
                           unsigned int idx,
-                          unsigned long suftabvalue,
+                          GtUword suftabvalue,
                           Mergertrienode *node,
                           GT_UNUSED uint64_t ident)
 {
@@ -45,14 +45,14 @@ static void fillandinsert(Mergertrierep *trierep,
 }
 
 static int inputthesequences(unsigned int *numofchars,
-                             unsigned long *nextpostable,
+                             GtUword *nextpostable,
                              Suffixarray *suffixarraytable,
                              const GtStrArray *indexnametab,
                              unsigned int demand,
                              GtLogger *logger,
                              GtError *err)
 {
-  unsigned long idx;
+  GtUword idx;
   const char *indexname;
 
   gt_error_check(err);
@@ -79,13 +79,13 @@ static int inputthesequences(unsigned int *numofchars,
 }
 
 static int insertfirstsuffixes(Mergertrierep *trierep,
-                               unsigned long *nextpostable,
+                               GtUword *nextpostable,
                                Suffixarray *suffixarraytable,
                                unsigned int numofindexes,
                                GtError *err)
 {
   unsigned int idx;
-  unsigned long suftabvalue;
+  GtUword suftabvalue;
   int retval;
 
   gt_error_check(err);
@@ -112,7 +112,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
 
 /*@null@*/ static Mergertrienode *findlargestnodeleqlcpvalue(
                                           Mergertrienode *smallest,
-                                          unsigned long lcpvalue,
+                                          GtUword lcpvalue,
                                           GtError *err)
 {
   Mergertrienode *tmp;
@@ -137,7 +137,7 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
   Largelcpvalue tmpexception;
   GtUchar tmpsmalllcpvalue;
   int retval;
-  unsigned long tmpsuftabvalue,
+  GtUword tmpsuftabvalue,
          tmplcpvalue,
          tmplastbranchdepth;
   unsigned int tmpidx;
@@ -192,7 +192,7 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
         tmplcpvalue = tmpexception.value;
       } else
       {
-        tmplcpvalue = (unsigned long) tmpsmalllcpvalue;
+        tmplcpvalue = (GtUword) tmpsmalllcpvalue;
       }
       if (tmplcpvalue > tmplastbranchdepth)
       {
@@ -271,7 +271,7 @@ int gt_emissionmergedesa_init(Emissionmergedesa *emmesa,
       emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
-    gt_mergertrie_initnodetable(&emmesa->trierep,(unsigned long) numofindexes,
+    gt_mergertrie_initnodetable(&emmesa->trierep,(GtUword) numofindexes,
                              numofindexes);
     if (insertfirstsuffixes(&emmesa->trierep,
                            emmesa->nextpostable,

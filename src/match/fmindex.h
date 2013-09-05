@@ -77,14 +77,14 @@
 
 GT_DECLAREARRAYSTRUCT(GtPairBwtidx);
 
-typedef int(*FMprocessqhit)(void *,unsigned long,unsigned long);
+typedef int(*FMprocessqhit)(void *,GtUword,GtUword);
 
 typedef struct
 {
   /* Note: do not use specialcharinfo of bwtformatching */
   GtEncseq *bwtformatching;
   GtUchar *bfreq;            /* bfreq[c][i] = #c in block i */
-  unsigned long bwtlength,        /* also totallength + 1 */
+  GtUword bwtlength,        /* also totallength + 1 */
          *tfreq,           /* tfreq[c] = #characters < c in text */
          *superbfreq,      /* superbfreq[c][i] = #c in all superblocks */
                            /* which are previous to superblock i */
@@ -105,8 +105,8 @@ typedef struct
            log2superbsizeminuslog2bsize, /* log{2}(superbsize)-log{2}(bsize) */
            log2markdist,     /* gt_log_{2}(markdist) */
            suffixlength;     /* len of suffix for which buckets are computed*/
-  unsigned long sizeofindex; /* size of the fmindex in bytes */
-  unsigned long nofblocks,          /* number of blocks (bwtlength/bsize + 1) */
+  GtUword sizeofindex; /* size of the fmindex in bytes */
+  GtUword nofblocks,          /* number of blocks (bwtlength/bsize + 1) */
          nofsuperblocks,     /* number of superblocks (bwtlength/superbsize+2)*/
          markdist,           /* multiple of entry num stored in suffix array */
          numofcodes;         /* number of entries in boundaries */

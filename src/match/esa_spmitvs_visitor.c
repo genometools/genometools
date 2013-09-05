@@ -28,12 +28,12 @@
 
 typedef struct
 {
-  unsigned long wholeleaf, wholeleafwidth, nowholeleaf, nowholeleafwidth;
+  GtUword wholeleaf, wholeleafwidth, nowholeleaf, nowholeleafwidth;
 } Lcpintervalcount;
 
 struct GtESASpmitvsVisitor {
   const GtESAVisitor parent_instance;
-  unsigned long unnecessaryleaves,
+  GtUword unnecessaryleaves,
                 totallength,
                 currentleafindex,
                 lastwholeleaf,
@@ -49,7 +49,7 @@ struct GtESASpmitvsVisitor {
 
 static bool gt_esa_spmitvs_visitor_iswholeleaf(const GtEncseq *encseq,
                                                GtReadmode readmode,
-                                               unsigned long leafnumber)
+                                               GtUword leafnumber)
 {
   return (leafnumber > 0)
     ? gt_encseq_position_is_separator(encseq,leafnumber - 1,readmode)
@@ -58,11 +58,11 @@ static bool gt_esa_spmitvs_visitor_iswholeleaf(const GtEncseq *encseq,
 
 static int gt_esa_spmitvs_visitor_processleafedge(GtESAVisitor *ev,
                                                   GT_UNUSED bool firstsucc,
-                                                  unsigned long fd,
-                                                  GT_UNUSED unsigned long flb,
+                                                  GtUword fd,
+                                                  GT_UNUSED GtUword flb,
                                                   GT_UNUSED
                                                          GtESAVisitorInfo *info,
-                                                  unsigned long leafnumber,
+                                                  GtUword leafnumber,
                                                   GT_UNUSED GtError *err)
 
 {
@@ -90,19 +90,19 @@ static int gt_esa_spmitvs_visitor_processleafedge(GtESAVisitor *ev,
 
 static int gt_esa_spmitvs_visitor_processbranchingedge(GtESAVisitor *ev,
                                                     GT_UNUSED bool firstsucc,
-                                                    unsigned long fd,
-                                                    GT_UNUSED unsigned long flb,
+                                                    GtUword fd,
+                                                    GT_UNUSED GtUword flb,
                                                     GT_UNUSED
                                                         GtESAVisitorInfo *finfo,
-                                                    unsigned long sd,
-                                                    unsigned long slb,
-                                                    unsigned long srb,
+                                                    GtUword sd,
+                                                    GtUword slb,
+                                                    GtUword srb,
                                                     GT_UNUSED
                                                         GtESAVisitorInfo *sinfo,
                                                     GT_UNUSED GtError *err)
 {
   GtESASpmitvsVisitor *esv;
-  unsigned long idx;
+  GtUword idx;
   gt_assert(ev);
   esv = gt_esa_spmitvs_visitor_cast(ev);
 
@@ -125,9 +125,9 @@ static int gt_esa_spmitvs_visitor_processbranchingedge(GtESAVisitor *ev,
 }
 
 static int gt_esa_spmitvs_visitor_processlcpinterval(GtESAVisitor *ev,
-                                                     unsigned long lcp,
-                                                     unsigned long lb,
-                                                     unsigned long rb,
+                                                     GtUword lcp,
+                                                     GtUword lb,
+                                                     GtUword rb,
                                                      GT_UNUSED
                                                          GtESAVisitorInfo *info,
                                                      GT_UNUSED GtError *err)
@@ -139,7 +139,7 @@ static int gt_esa_spmitvs_visitor_processlcpinterval(GtESAVisitor *ev,
   if (esv->lastwholeleaf != esv->totallength &&
       esv->lastwholeleaf >= lb)
   {
-    gt_assert(lcp <= (unsigned long) esv->maxlen);
+    gt_assert(lcp <= (GtUword) esv->maxlen);
     gt_assert(esv->lastwholeleaf <= rb);
     esv->wholeleafcount[lcp].wholeleaf++;
     esv->wholeleafcount[lcp].wholeleafwidth += (rb - lb + 1);
@@ -201,9 +201,9 @@ GtESAVisitor* gt_esa_spmitvs_visitor_new(const GtEncseq *encseq,
 }
 
 void gt_esa_spmitvs_visitor_print_results(GtESASpmitvsVisitor *esv,
-                                          unsigned long nonspecials)
+                                          GtUword nonspecials)
 {
-  unsigned long idx;
+  GtUword idx;
   printf("unnecessaryleaves=%lu (%.2f)\n",
          esv->unnecessaryleaves,
          (double) esv->unnecessaryleaves/nonspecials);

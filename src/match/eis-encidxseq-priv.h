@@ -26,29 +26,29 @@
 struct encIdxSeqClass
 {
   void (*delete)(EISeq *seq);
-  unsigned long (*rank)(EISeq *seq, Symbol sym, unsigned long pos,
+  GtUword (*rank)(EISeq *seq, Symbol sym, GtUword pos,
                  union EISHint *hint);
-  GtUlongPair (*posPairRank)(EISeq *seq, Symbol tSym, unsigned long posA,
-                                   unsigned long posB, union EISHint *hint);
+  GtUlongPair (*posPairRank)(EISeq *seq, Symbol tSym, GtUword posA,
+                                   GtUword posB, union EISHint *hint);
   void (*rangeRank)(struct encIdxSeq *eSeqIdx, unsigned range,
-                    unsigned long pos, unsigned long *rankCounts,
+                    GtUword pos, GtUword *rankCounts,
                     union EISHint *hint);
   void (*posPairRangeRank)(struct encIdxSeq *eSeqIdx, unsigned range,
-                           unsigned long posA, unsigned long posB,
-                           unsigned long *rankCounts, union EISHint *hint);
-  unsigned long (*select)(EISeq *seq, Symbol sym, unsigned long count,
+                           GtUword posA, GtUword posB,
+                           GtUword *rankCounts, union EISHint *hint);
+  GtUword (*select)(EISeq *seq, Symbol sym, GtUword count,
                    union EISHint *hint);
-  Symbol (*get)(EISeq *seq, unsigned long pos, EISHint hint);
+  Symbol (*get)(EISeq *seq, GtUword pos, EISHint hint);
   union EISHint *(*newHint)(const EISeq *seq);
   void (*deleteHint)(EISeq *seq, EISHint hint);
   const MRAEnc *(*getAlphabet)(const EISeq *seq);
-  void (*expose)(EISeq *seq, unsigned long pos, int persistent,
+  void (*expose)(EISeq *seq, GtUword pos, int persistent,
                  struct extBitsRetrieval *retval, union EISHint *hint);
   FILE *(*seekToHeader)(const EISeq *seq, uint16_t headerID,
                         uint32_t *lenRet);
-  int (*printPosDiags)(const EISeq *seq, unsigned long pos, FILE *fp,
+  int (*printPosDiags)(const EISeq *seq, GtUword pos, FILE *fp,
                        EISHint hint);
-  int (*printExtPosDiags)(const EISeq *seq, unsigned long pos, FILE *fp,
+  int (*printExtPosDiags)(const EISeq *seq, GtUword pos, FILE *fp,
                           EISHint hint);
 };
 
@@ -56,13 +56,13 @@ struct encIdxSeq
 {
   const struct encIdxSeqClass *classInfo;
   MRAEnc *alphabet;
-  unsigned long seqLen;
+  GtUword seqLen;
 };
 
 struct seqCache
 {
   size_t numEntries;
-  unsigned long *cachedPos;
+  GtUword *cachedPos;
   void **entriesPtr;
   void *entries;
 };

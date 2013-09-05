@@ -17,6 +17,8 @@
 #ifndef COMPAT_H
 #define COMPAT_H
 
+#include "core/types_api.h"
+
 #ifndef _WIN32
 #define GT_PATH_SEPARATOR     '/'
 #define GT_PATH_VAR_SEPARATOR ':'
@@ -46,7 +48,7 @@
 #define GT_ZU "%u"
 #endif
 
-int           gt_mkstemp(char *template);
-unsigned long gt_pagesize(void);
+int     gt_mkstemp(char *template);
+GtUword gt_pagesize(void);
 
 #endif

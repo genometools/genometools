@@ -22,7 +22,7 @@
 #include "core/undef_api.h"
 
 struct GtDynBittab {
-  unsigned long *tabptr,
+  GtUword *tabptr,
                 tabsize,
                 num_of_bits;
 };
@@ -32,55 +32,55 @@ GtDynBittab* gt_dyn_bittab_new(void)
   return gt_calloc(1, sizeof (GtDynBittab));
 }
 
-static unsigned long determine_tabsize(unsigned long num_of_bits)
+static GtUword determine_tabsize(GtUword num_of_bits)
 {
-  if (num_of_bits / (8UL * sizeof (unsigned long)))
-    return 1 + ((num_of_bits - 1) / (8UL * sizeof (unsigned long)));
+  if (num_of_bits / (8UL * sizeof (GtUword)))
+    return 1 + ((num_of_bits - 1) / (8UL * sizeof (GtUword)));
   return 1UL;
 }
 
-void gt_dyn_bittab_set_bit(GtDynBittab *b, unsigned long bit)
+void gt_dyn_bittab_set_bit(GtDynBittab *b, GtUword bit)
 {
-  unsigned long new_tabsize;
+  GtUword new_tabsize;
   gt_assert(b);
   /* make sure tab is large enough */
   if (bit >= b->num_of_bits) {
     if ((new_tabsize = determine_tabsize(bit + 1)) > b->tabsize) {
-      b->tabptr = gt_realloc(b->tabptr, new_tabsize * sizeof (unsigned long));
+      b->tabptr = gt_realloc(b->tabptr, new_tabsize * sizeof (GtUword));
       memset(b->tabptr + b->tabsize, 0,
-             (new_tabsize - b->tabsize) * sizeof (unsigned long));
+             (new_tabsize - b->tabsize) * sizeof (GtUword));
       b->tabsize = new_tabsize;
     }
     b->num_of_bits = bit + 1;
   }
   /* set bit */
-  b->tabptr[(bit >> 3) / sizeof (unsigned long)] |=
-    1UL << (bit & (8UL * sizeof (unsigned long) - 1));
+  b->tabptr[(bit >> 3) / sizeof (GtUword)] |=
+    1UL << (bit & (8UL * sizeof (GtUword) - 1));
 }
 
-void gt_dyn_bittab_unset_bit(GtDynBittab *b, unsigned long bit)
+void gt_dyn_bittab_unset_bit(GtDynBittab *b, GtUword bit)
 {
   gt_assert(b);
   if (bit < b->num_of_bits) {
-    b->tabptr[(bit >> 3) / sizeof (unsigned long)] &=
-      ~(1UL << (bit & (8UL * sizeof (unsigned long) - 1)));
+    b->tabptr[(bit >> 3) / sizeof (GtUword)] &=
+      ~(1UL << (bit & (8UL * sizeof (GtUword) - 1)));
   }
 }
 
-bool gt_dyn_bittab_bit_is_set(const GtDynBittab *b, unsigned long bit)
+bool gt_dyn_bittab_bit_is_set(const GtDynBittab *b, GtUword bit)
 {
   gt_assert(b);
   if (bit < b->num_of_bits &&
-      (b->tabptr[(bit >> 3) / sizeof (unsigned long)] &
-       1UL << (bit & (8UL * sizeof (unsigned long) - 1)))) {
+      (b->tabptr[(bit >> 3) / sizeof (GtUword)] &
+       1UL << (bit & (8UL * sizeof (GtUword) - 1)))) {
     return true;
   }
   return false;
 }
 
-unsigned long gt_dyn_bittab_get_first_bitnum(const GtDynBittab *b)
+GtUword gt_dyn_bittab_get_first_bitnum(const GtDynBittab *b)
 {
-  unsigned long i, rval = GT_UNDEF_ULONG;
+  GtUword i, rval = GT_UNDEF_ULONG;
   gt_assert(b);
   for (i = 0; i < b->num_of_bits; i++)
     if (gt_dyn_bittab_bit_is_set(b, i)) {
@@ -92,16 +92,16 @@ unsigned long gt_dyn_bittab_get_first_bitnum(const GtDynBittab *b)
   return rval;
 }
 
-unsigned long gt_dyn_bittab_get_last_bitnum(const GtDynBittab *b)
+GtUword gt_dyn_bittab_get_last_bitnum(const GtDynBittab *b)
 {
   gt_assert(b);
   return b->num_of_bits;
 }
 
-unsigned long gt_dyn_bittab_get_next_bitnum(const GtDynBittab *b,
-                                            unsigned long curnum)
+GtUword gt_dyn_bittab_get_next_bitnum(const GtDynBittab *b,
+                                            GtUword curnum)
 {
-  unsigned long i, rval = GT_UNDEF_ULONG;
+  GtUword i, rval = GT_UNDEF_ULONG;
 
   gt_assert(b);
   gt_assert(curnum < b->num_of_bits);
@@ -117,7 +117,7 @@ unsigned long gt_dyn_bittab_get_next_bitnum(const GtDynBittab *b,
 
 int gt_dyn_bittab_unit_test(GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtDynBittab *b;
   int had_err = 0;
 

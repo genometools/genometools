@@ -28,7 +28,7 @@
 struct GtCanvasMembers {
   GtRange viewrange;
   double factor, y, margins;
-  unsigned long width, height;
+  GtUword width, height;
   GtStyle *sty;
   GtTrack *current_track;
   bool show_track_captions;

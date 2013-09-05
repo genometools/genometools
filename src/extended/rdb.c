@@ -146,7 +146,7 @@ int gt_rdb_accept(GtRDB *db, GtRDBVisitor *v, GtError *err)
   return 0;
 }
 
-unsigned long gt_rdb_last_inserted_id(GtRDB *db, const char *table, GtError *e)
+GtUword gt_rdb_last_inserted_id(GtRDB *db, const char *table, GtError *e)
 {
   gt_assert(db && db->c_class);
   if (db->c_class->last_id_func)
@@ -186,7 +186,7 @@ void* gt_rdb_stmt_cast(GT_UNUSED const GtRDBStmtClass *stmtc, GtRDBStmt *stmt)
 }
 
 GtRDBStmt* gt_rdb_prepare(GtRDB *db, const char *query,
-                          unsigned long num_params, GtError *err)
+                          GtUword num_params, GtError *err)
 {
   gt_assert(db && db->c_class);
   if (db->c_class->prepare_func)
@@ -202,7 +202,7 @@ int gt_rdb_stmt_reset(GtRDBStmt *stmt, GtError *err)
   return 0;
 }
 
-int gt_rdb_stmt_bind_int(GtRDBStmt *stmt, unsigned long param_no,
+int gt_rdb_stmt_bind_int(GtRDBStmt *stmt, GtUword param_no,
                          int val, GtError *err)
 {
   gt_assert(stmt && stmt->c_class);
@@ -211,8 +211,8 @@ int gt_rdb_stmt_bind_int(GtRDBStmt *stmt, unsigned long param_no,
   return 0;
 }
 
-int gt_rdb_stmt_bind_ulong(GtRDBStmt *stmt, unsigned long param_no,
-                           unsigned long val, GtError *err)
+int gt_rdb_stmt_bind_ulong(GtRDBStmt *stmt, GtUword param_no,
+                           GtUword val, GtError *err)
 {
   gt_assert(stmt && stmt->c_class);
   if (stmt->c_class->bind_ulong_func)
@@ -220,7 +220,7 @@ int gt_rdb_stmt_bind_ulong(GtRDBStmt *stmt, unsigned long param_no,
   return 0;
 }
 
-int gt_rdb_stmt_bind_string(GtRDBStmt *stmt, unsigned long param_no,
+int gt_rdb_stmt_bind_string(GtRDBStmt *stmt, GtUword param_no,
                             const char *val, GtError *err)
 {
   gt_assert(stmt && stmt->c_class);
@@ -229,7 +229,7 @@ int gt_rdb_stmt_bind_string(GtRDBStmt *stmt, unsigned long param_no,
   return 0;
 }
 
-int gt_rdb_stmt_bind_double(GtRDBStmt *stmt, unsigned long param_no,
+int gt_rdb_stmt_bind_double(GtRDBStmt *stmt, GtUword param_no,
                             double val, GtError *err)
 {
   gt_assert(stmt && stmt->c_class);
@@ -255,8 +255,8 @@ void gt_rdb_stmt_delete(GtRDBStmt *stmt)
   gt_free(stmt);
 }
 
-int gt_rdb_stmt_get_ulong(GtRDBStmt *stmt, unsigned long field_no,
-                          unsigned long *result, GtError *err)
+int gt_rdb_stmt_get_ulong(GtRDBStmt *stmt, GtUword field_no,
+                          GtUword *result, GtError *err)
 {
   gt_assert(stmt && stmt->c_class && result);
   if (stmt->c_class->get_ulong_func)
@@ -264,7 +264,7 @@ int gt_rdb_stmt_get_ulong(GtRDBStmt *stmt, unsigned long field_no,
   return 0;
 }
 
-int gt_rdb_stmt_get_int(GtRDBStmt *stmt, unsigned long field_no,
+int gt_rdb_stmt_get_int(GtRDBStmt *stmt, GtUword field_no,
                         int *result, GtError *err)
 {
   gt_assert(stmt && stmt->c_class && result);
@@ -273,7 +273,7 @@ int gt_rdb_stmt_get_int(GtRDBStmt *stmt, unsigned long field_no,
   return 0;
 }
 
-int gt_rdb_stmt_get_string(GtRDBStmt *stmt, unsigned long field_no,
+int gt_rdb_stmt_get_string(GtRDBStmt *stmt, GtUword field_no,
                            GtStr *result, GtError *err)
 {
   gt_assert(stmt && stmt->c_class && result);
@@ -282,7 +282,7 @@ int gt_rdb_stmt_get_string(GtRDBStmt *stmt, unsigned long field_no,
   return 0;
 }
 
-int gt_rdb_stmt_get_double(GtRDBStmt *stmt, unsigned long field_no,
+int gt_rdb_stmt_get_double(GtRDBStmt *stmt, GtUword field_no,
                            double *result, GtError *err)
 {
   gt_assert(stmt && stmt->c_class && result);

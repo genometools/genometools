@@ -16,7 +16,7 @@ static gboolean on_expose_event(GtkWidget *widget,
 {
   cairo_t *cr;
   GtCanvas *canvas = NULL;
-  unsigned long height;
+  GtUword height;
   int rval;
   if (!d || widget->allocation.width <= 30) return FALSE;
 

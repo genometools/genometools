@@ -37,7 +37,7 @@ typedef unsigned char GtStrgraphLength;
 
 typedef uint32_t GtStrgraphVnum__Short;
 #if ULONG_MAX >= UINT32_MAX
-#define GT_STRGRAPH_N_READS_MAX (unsigned long)((UINT32_MAX >> 1) - 1)
+#define GT_STRGRAPH_N_READS_MAX (GtUword)((UINT32_MAX >> 1) - 1)
 #else
 #define GT_STRGRAPH_N_READS_MAX ((ULONG_MAX >> 1) - 1)
 #endif
@@ -209,7 +209,7 @@ int gt_strgraph_edges_compare_by_length(const void *edgea,
 
 #define GT_STRGRAPH_FIND_LONGEST_EDGE(STRGRAPH, VNUM, LONGEST) \
         {\
-          unsigned long ith_edge_before_last, vnofedges;\
+          GtUword ith_edge_before_last, vnofedges;\
           vnofedges = GT_STRGRAPH_V_NOFEDGES(STRGRAPH, VNUM);\
           LONGEST = GT_STRGRAPH__UNDEF_EDGE_LEN;\
           for (ith_edge_before_last = 0; ith_edge_before_last < vnofedges;\

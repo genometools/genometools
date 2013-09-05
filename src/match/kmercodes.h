@@ -23,11 +23,11 @@
 
 static inline GtCodetype gt_kmercode_at_position(
                                    const GtTwobitencoding *twobitencoding,
-                                   unsigned long pos,
+                                   GtUword pos,
                                    unsigned int kmersize)
 {
   const unsigned int unitoffset = (unsigned int) GT_MODBYUNITSIN2BITENC(pos);
-  const unsigned long unitindex = GT_DIVBYUNITSIN2BITENC(pos);
+  const GtUword unitindex = GT_DIVBYUNITSIN2BITENC(pos);
   const GtCodetype maskright = GT_MASKRIGHT(kmersize);
 
   if (unitoffset <= (unsigned int) GT_UNITSIN2BITENC - kmersize)

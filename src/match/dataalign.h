@@ -31,7 +31,7 @@ enum {
 };
 
 static inline GtUint64
-roundUp(GtUint64 v, unsigned long multipleOf)
+roundUp(GtUint64 v, GtUword multipleOf)
 {
   return v - v%multipleOf + multipleOf * (v%multipleOf?1:0);
 }

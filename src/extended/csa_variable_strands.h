@@ -32,7 +32,7 @@
 
 /* Returns an array of GtCSAGenes. */
 GtArray* gt_csa_variable_strands(const void *set_of_sas,
-                                 unsigned long number_of_sas,
+                                 GtUword number_of_sas,
                                  size_t size_of_sa, GetGenomicRangeFunc,
                                  GetStrandFunc, GetExonsFunc);
 

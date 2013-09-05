@@ -26,7 +26,7 @@
 
 typedef struct
 {
-  unsigned long lowerbound,
+  GtUword lowerbound,
                 upperbound;
   unsigned int depth;
   GtCodetype code;
@@ -37,7 +37,7 @@ GT_DECLAREARRAYSTRUCT(Pckbck_Boundsatdepth);
 struct Pckbuckettable
 {
   unsigned int numofchars, maxdepth;
-  unsigned long numofvalues, maxnumofvalues;
+  GtUword numofvalues, maxnumofvalues;
   Mbtab **mbtab;
   void *mapptr;
   GtCodetype *basepower;
@@ -156,12 +156,12 @@ static void pckbuckettable_followleafedge(Pckbuckettable *pckbt,
 
 Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
                                       unsigned int numofchars,
-                                      unsigned long totallength,
+                                      GtUword totallength,
                                       unsigned int maxdepth)
 {
   GtArrayPckbck_Boundsatdepth stack;
   Pckbck_Boundsatdepth parent, child;
-  unsigned long rangesize, idx, *rangeOccs;
+  GtUword rangesize, idx, *rangeOccs;
   Pckbuckettable *pckbt;
   Mbtab *tmpmbtab;
 
@@ -184,7 +184,7 @@ Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
                                                   fmindex,
                                                   parent.lowerbound,
                                                   parent.upperbound);
-    gt_assert(rangesize <= (unsigned long) numofchars);
+    gt_assert(rangesize <= (GtUword) numofchars);
     for (idx = 0; idx < rangesize; idx++)
     {
       child.lowerbound = tmpmbtab[idx].lowerbound;
@@ -220,7 +220,7 @@ int gt_pckbuckettable_2file(const char *indexname,
                             GtError *err)
 {
   FILE *fp;
-  unsigned long seqposmaxdepth;
+  GtUword seqposmaxdepth;
 
   gt_error_check(err);
   fp = gt_fa_fopen_with_suffix(indexname,PCKBUCKETTABLE,"wb",err);
@@ -228,8 +228,8 @@ int gt_pckbuckettable_2file(const char *indexname,
   {
     return -1;
   }
-  seqposmaxdepth = (unsigned long) pckbuckettable->maxdepth;
-  gt_xfwrite(&seqposmaxdepth,sizeof (unsigned long),(size_t) 1,fp);
+  seqposmaxdepth = (GtUword) pckbuckettable->maxdepth;
+  gt_xfwrite(&seqposmaxdepth,sizeof (GtUword),(size_t) 1,fp);
   gt_xfwrite(pckbuckettable->mbtab[0],sizeof (Mbtab),
              (size_t) pckbuckettable->maxnumofvalues,fp);
   gt_fa_fclose(fp);
@@ -264,13 +264,13 @@ Pckbuckettable *gt_pckbuckettable_map(const char *indexname,
   {
     return NULL;
   }
-  maxdepth = (unsigned int) ((unsigned long *) mapptr)[0];
+  maxdepth = (unsigned int) ((GtUword *) mapptr)[0];
   pckbt = pckbuckettable_allocandinittable(numofchars,maxdepth,false);
   pckbt->mapptr = mapptr;
-  pckbt->mbtab[0] = (Mbtab *) (((unsigned long *) mapptr) + 1);
+  pckbt->mbtab[0] = (Mbtab *) (((GtUword *) mapptr) + 1);
   pckbuckettable_settaboffsets(pckbt);
   gt_assert(numofbytes ==
-            sizeof (unsigned long) + sizeof (Mbtab) * pckbt->maxnumofvalues);
+            sizeof (GtUword) + sizeof (Mbtab) * pckbt->maxnumofvalues);
   return pckbt;
 }
 

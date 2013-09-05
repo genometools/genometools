@@ -18,7 +18,7 @@
 #include "core/undef_api.h"
 #include "gth/gthcluster.h"
 
-static void storeSAinnewPGL(GtArray *pgls, unsigned long *currentPGLindex,
+static void storeSAinnewPGL(GtArray *pgls, GtUword *currentPGLindex,
                             GthSA *sa)
 {
   GthPGL *pgl;
@@ -35,10 +35,10 @@ static void storeSAinnewPGL(GtArray *pgls, unsigned long *currentPGLindex,
   *currentPGLindex = gt_array_size(pgls) - 1;
 }
 
-static void storeSAincurrentPGL(GtArray *pgls, unsigned long currentPGLindex,
+static void storeSAincurrentPGL(GtArray *pgls, GtUword currentPGLindex,
                                 GthSA *sa)
 {
-  unsigned long leftgenomicexonborder, rightgenomicexonborder;
+  GtUword leftgenomicexonborder, rightgenomicexonborder;
   GthPGL *currentPGL;
 
   /* the current PGL index is defined */
@@ -62,8 +62,8 @@ static void storeSAincurrentPGL(GtArray *pgls, unsigned long currentPGLindex,
   gth_pgl_add_sa(currentPGL, sa);
 }
 
-static void saveSAtoPGLs(unsigned long *gen_file_num, unsigned long *maxright,
-                         unsigned long *currentPGLindex, GtArray *pgls,
+static void saveSAtoPGLs(GtUword *gen_file_num, GtUword *maxright,
+                         GtUword *currentPGLindex, GtArray *pgls,
                          GthSA *sa)
 {
   GtRange range;
@@ -93,7 +93,7 @@ static void saveSAtoPGLs(unsigned long *gen_file_num, unsigned long *maxright,
 #ifndef NDEBUG
 static bool cluster_is_consistent(GtArray *pgls)
 {
-  unsigned long i, j, maxright = GT_UNDEF_ULONG, gen_file_num = GT_UNDEF_ULONG;
+  GtUword i, j, maxright = GT_UNDEF_ULONG, gen_file_num = GT_UNDEF_ULONG;
   GthPGL *pgl;
   bool strandsign = GT_UNDEF_BOOL;
   GthSA *sa;
@@ -140,7 +140,7 @@ static bool cluster_is_consistent(GtArray *pgls)
 
 void gthclusterSAstoPGLs(GtArray *pgls, GthSACollection *sa_collection)
 {
-  unsigned long forwardgen_file_num,   /* the genomic file number of the
+  GtUword forwardgen_file_num,   /* the genomic file number of the
                                             current forward cluster */
                 forwardmaxright,         /* the maximal right position of the
                                             current forward cluster */

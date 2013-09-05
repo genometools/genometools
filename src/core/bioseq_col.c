@@ -29,7 +29,7 @@
 struct GtBioseqCol {
   GtSeqCol parent_instance;
   GtBioseq **bioseqs;
-  unsigned long num_of_seqfiles;
+  GtUword num_of_seqfiles;
   GtSeqInfoCache *grep_cache;
 };
 
@@ -39,7 +39,7 @@ const GtSeqColClass* gt_bioseq_col_class(void);
 
 static void gt_bioseq_col_delete(GtSeqCol *sc)
 {
-  unsigned long i;
+  GtUword i;
   GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
   if (!bsc) return;
@@ -49,10 +49,10 @@ static void gt_bioseq_col_delete(GtSeqCol *sc)
   gt_free(bsc->bioseqs);
 }
 
-static int grep_desc(GtBioseqCol *bsc, unsigned long *filenum,
-                     unsigned long *seqnum, GtStr *seqid, GtError *err)
+static int grep_desc(GtBioseqCol *bsc, GtUword *filenum,
+                     GtUword *seqnum, GtStr *seqid, GtError *err)
 {
-  unsigned long i, j;
+  GtUword i, j;
   const GtSeqInfo *seq_info_ptr;
   GtSeqInfo seq_info;
   bool match = false;
@@ -96,10 +96,10 @@ static int grep_desc(GtBioseqCol *bsc, unsigned long *filenum,
 }
 
 static int gt_bioseq_col_grep_desc(GtSeqCol *sc, char **seq,
-                                   unsigned long start, unsigned long end,
+                                   GtUword start, GtUword end,
                                    GtStr *seqid, GtError *err)
 {
-  unsigned long filenum = 0, seqnum = 0, seqlength;
+  GtUword filenum = 0, seqnum = 0, seqlength;
   int had_err;
   GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
@@ -127,7 +127,7 @@ static int gt_bioseq_col_grep_desc(GtSeqCol *sc, char **seq,
 static int gt_bioseq_col_grep_desc_md5(GtSeqCol *sc, const char **md5,
                                        GtStr *seqid, GtError *err)
 {
-  unsigned long filenum = 0, seqnum = 0;
+  GtUword filenum = 0, seqnum = 0;
   int had_err;
   GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
@@ -140,11 +140,11 @@ static int gt_bioseq_col_grep_desc_md5(GtSeqCol *sc, const char **md5,
 }
 
 static int gt_bioseq_col_grep_desc_sequence_length(GtSeqCol *sc,
-                                                   unsigned long *length,
+                                                   GtUword *length,
                                                    GtStr *seqid,
                                                    GtError *err)
 {
-  unsigned long filenum = 0, seqnum = 0;
+  GtUword filenum = 0, seqnum = 0;
   int had_err;
   GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
@@ -156,12 +156,12 @@ static int gt_bioseq_col_grep_desc_sequence_length(GtSeqCol *sc,
   return had_err;
 }
 
-static int md5_to_index(GtBioseq **bioseq, unsigned long *seqnum,
+static int md5_to_index(GtBioseq **bioseq, GtUword *seqnum,
                         GtBioseqCol *bsc, GtStr *md5_seqid, GtError *err)
 {
   bool seqid_changed = false;
   char *seqid = NULL;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(seqnum && bsc && md5_seqid);
@@ -195,10 +195,10 @@ static int md5_to_index(GtBioseq **bioseq, unsigned long *seqnum,
 }
 
 static int gt_bioseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
-                                    unsigned long start, unsigned long end,
+                                    GtUword start, GtUword end,
                                     GtStr *md5_seqid, GtError *err)
 {
-  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_ULONG;
   GtBioseq *bioseq = NULL;
   GtBioseqCol *bsc;
   int had_err = 0;
@@ -216,7 +216,7 @@ static int gt_bioseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
 static int gt_bioseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
                                             GtStr *md5_seqid, GtError *err)
 {
-  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_ULONG;
   GtBioseq *bioseq = NULL;
   GtBioseqCol *bsc;
   int had_err = 0;
@@ -231,10 +231,10 @@ static int gt_bioseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
   return had_err;
 }
 
-int gt_bioseq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
+int gt_bioseq_col_md5_to_sequence_length(GtSeqCol *sc, GtUword *len,
                                          GtStr *md5_seqid, GtError *err)
 {
-  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_ULONG;
   GtBioseq *bioseq = NULL;
   GtBioseqCol *bsc;
   int had_err = 0;
@@ -249,7 +249,7 @@ int gt_bioseq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
   return had_err;
 }
 
-static unsigned long gt_bioseq_col_num_of_files(const GtSeqCol *sc)
+static GtUword gt_bioseq_col_num_of_files(const GtSeqCol *sc)
 {
   const GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
@@ -257,8 +257,8 @@ static unsigned long gt_bioseq_col_num_of_files(const GtSeqCol *sc)
   return bsc->num_of_seqfiles;
 }
 
-static unsigned long gt_bioseq_col_num_of_seqs(const GtSeqCol *sc,
-                                               unsigned long filenum)
+static GtUword gt_bioseq_col_num_of_seqs(const GtSeqCol *sc,
+                                               GtUword filenum)
 {
   GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
@@ -267,8 +267,8 @@ static unsigned long gt_bioseq_col_num_of_seqs(const GtSeqCol *sc,
 }
 
 static const char* gt_bioseq_col_get_md5_fingerprint(const GtSeqCol *sc,
-                                                     unsigned long filenum,
-                                                     unsigned long seqnum)
+                                                     GtUword filenum,
+                                                     GtUword seqnum)
 {
   GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
@@ -277,10 +277,10 @@ static const char* gt_bioseq_col_get_md5_fingerprint(const GtSeqCol *sc,
 }
 
 static char* gt_bioseq_col_get_sequence(const GtSeqCol *sc,
-                                        unsigned long filenum,
-                                        unsigned long seqnum,
-                                        unsigned long start,
-                                        unsigned long end)
+                                        GtUword filenum,
+                                        GtUword seqnum,
+                                        GtUword start,
+                                        GtUword end)
 {
   GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
@@ -290,8 +290,8 @@ static char* gt_bioseq_col_get_sequence(const GtSeqCol *sc,
 }
 
 static char* gt_bioseq_col_get_description(const GtSeqCol *sc,
-                                           unsigned long filenum,
-                                           unsigned long seqnum)
+                                           GtUword filenum,
+                                           GtUword seqnum)
 {
   GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
@@ -299,9 +299,9 @@ static char* gt_bioseq_col_get_description(const GtSeqCol *sc,
   return gt_cstr_dup(gt_bioseq_get_description(bsc->bioseqs[filenum], seqnum));
 }
 
-static unsigned long gt_bioseq_col_get_sequence_length(const GtSeqCol *sc,
-                                                       unsigned long filenum,
-                                                       unsigned long seqnum)
+static GtUword gt_bioseq_col_get_sequence_length(const GtSeqCol *sc,
+                                                       GtUword filenum,
+                                                       GtUword seqnum)
 {
   GtBioseqCol *bsc;
   bsc = gt_bioseq_col_cast(sc);
@@ -337,7 +337,7 @@ GtSeqCol* gt_bioseq_col_new(GtStrArray *sequence_files, GtError *err)
 {
   GtSeqCol *sc;
   GtBioseqCol *bsc;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(sequence_files);

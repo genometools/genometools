@@ -30,20 +30,20 @@ typedef struct GtShortreadsortworkinfo GtShortreadsortworkinfo;
 
 typedef struct
 {
-  unsigned long *suftab_bucket;
+  GtUword *suftab_bucket;
   uint16_t *lcptab_bucket;
 } GtShortreadsortresult;
 
-size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize,
-                             unsigned long maxremain);
+size_t gt_shortreadsort_size(bool firstcodes,GtUword bucketsize,
+                             GtUword maxremain);
 
-GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
-                                              unsigned long maxremain,
+GtShortreadsortworkinfo *gt_shortreadsort_new(GtUword maxwidth,
+                                              GtUword maxremain,
                                               GtReadmode readmode,
                                               bool firstcodes,
                                               bool withmediumsizelcps);
 
-unsigned long gt_shortreadsort_sumofstoredvalues(
+GtUword gt_shortreadsort_sumofstoredvalues(
                                       const GtShortreadsortworkinfo *srsw);
 
 void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw);
@@ -53,36 +53,36 @@ void gt_shortreadsort_assigntableoflcpvalues(
 
 void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 const GtEncseq *encseq,
-                                unsigned long maxremain,
+                                GtUword maxremain,
                                 GtReadmode readmode,
                                 GtEncseqReader *esr,
                                 GtSuffixsortspace *sssp,
-                                unsigned long subbucketleft,
-                                unsigned long width,
-                                unsigned long depth,
-                                unsigned long maxdepth);
+                                GtUword subbucketleft,
+                                GtUword width,
+                                GtUword depth,
+                                GtUword maxdepth);
 
 void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
                                       GtShortreadsortworkinfo *srsw,
                                       const GtSeqnumrelpos *snrp,
                                       const GtEncseq *encseq,
                                       const GtSpmsuftab *spmsuftab,
-                                      unsigned long subbucketleft,
-                                      unsigned long width,
-                                      unsigned long depth,
-                                      unsigned long maxdepth);
+                                      GtUword subbucketleft,
+                                      GtUword width,
+                                      GtUword depth,
+                                      GtUword maxdepth);
 
 void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
-                                        unsigned long bucketleftidx,
-                                        unsigned long subbucketleft,
-                                        unsigned long width,
-                                        unsigned long maxdepth,
+                                        GtUword bucketleftidx,
+                                        GtUword subbucketleft,
+                                        GtUword width,
+                                        GtUword maxdepth,
                                         GtProcessunsortedsuffixrange
                                           processunsortedsuffixrange,
                                         void *processunsortedsuffixrangeinfo);
 
-unsigned long gt_shortreadsort_maxwidth(bool firstcodes,
-                                        unsigned long maxremain,
+GtUword gt_shortreadsort_maxwidth(bool firstcodes,
+                                        GtUword maxremain,
                                         size_t sizeofworkspace);
 
 #endif

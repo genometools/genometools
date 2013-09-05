@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 typedef struct GtDescBuffer GtDescBuffer;
 
@@ -30,7 +31,7 @@ GtDescBuffer* gt_desc_buffer_new(void);
 void          gt_desc_buffer_set_clip_at_whitespace(GtDescBuffer *db);
 /* Increase the reference count for <db> and return it. */
 GtDescBuffer* gt_desc_buffer_ref(GtDescBuffer *db);
-unsigned long gt_desc_buffer_length(const GtDescBuffer *s);
+GtUword       gt_desc_buffer_length(const GtDescBuffer *s);
 const char*   gt_desc_buffer_get_next(GtDescBuffer *db);
 /* Append character <c> to <db>. */
 void          gt_desc_buffer_append_char(GtDescBuffer *db, char c);
@@ -38,7 +39,7 @@ void          gt_desc_buffer_finish(GtDescBuffer *db);
 /* Reset <db> to length 0. */
 void          gt_desc_buffer_reset(GtDescBuffer *db);
 /* Returns the maximum length of any description passed through <db>. */
-unsigned long gt_desc_buffer_max_length(GtDescBuffer *db);
+GtUword gt_desc_buffer_max_length(GtDescBuffer *db);
 /* Decrease the reference count for <db> or delete it, if this was the last
    reference. */
 void          gt_desc_buffer_delete(GtDescBuffer *db);

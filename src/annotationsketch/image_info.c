@@ -29,7 +29,7 @@
 struct GtImageInfo {
   GtArray* recmaps;
   unsigned int height;
-  unsigned long reference_count;
+  GtUword reference_count;
 };
 
 GtImageInfo* gt_image_info_new()
@@ -50,7 +50,7 @@ GtImageInfo* gt_image_info_ref(GtImageInfo *ii)
 
 void gt_image_info_delete(GtImageInfo *image_info)
 {
-  unsigned long i;
+  GtUword i;
   if (!image_info) return;
   if (image_info->reference_count) {
     image_info->reference_count--;
@@ -83,14 +83,14 @@ unsigned int gt_image_info_get_height(GtImageInfo *image_info)
   return image_info->height;
 }
 
-unsigned long gt_image_info_num_of_rec_maps(GtImageInfo *image_info)
+GtUword gt_image_info_num_of_rec_maps(GtImageInfo *image_info)
 {
   gt_assert(image_info);
   return gt_array_size(image_info->recmaps);
 }
 
 const GtRecMap* gt_image_info_get_rec_map(GtImageInfo *image_info,
-                                          unsigned long i)
+                                          GtUword i)
 {
   gt_assert(image_info);
   return *(GtRecMap**) gt_array_get(image_info->recmaps, i);
@@ -101,7 +101,7 @@ int gt_image_info_unit_test(GtError *err)
   GtRecMap* rms[20];
   GtFeatureNode* features[20];
   GtImageInfo *ii;
-  unsigned long i;
+  GtUword i;
   GtStr *seqid;
   int had_err = 0;
   gt_assert(err);
@@ -113,7 +113,7 @@ int gt_image_info_unit_test(GtError *err)
   for (i=0;i<20;i++)
   {
     const GtRecMap* rm;
-    unsigned long rbase;
+    GtUword rbase;
     GtRange r;
     rbase = gt_rand_max(10);
     r.start = rbase;

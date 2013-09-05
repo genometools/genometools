@@ -53,7 +53,7 @@ typedef struct {
   /* TODO: test if this can be a GtHashtable, too */
   GtDiscDistri *zero_count;
   char         *data;
-  unsigned long delta_values_size,
+  GtUword delta_values_size,
                 len,
                 min_len,
                 num_values_size,
@@ -86,7 +86,7 @@ struct GtEncdesc {
   GtBitInStream     *bitinstream;
   GtSampling        *sampling;
   GtUint64 total_num_of_chars;
-  unsigned long      num_of_descs,
+  GtUword      num_of_descs,
                      num_of_fields,
                      cur_desc,
                      pagesize;
@@ -99,7 +99,7 @@ struct GtEncdesc {
 struct GtEncdescEncoder {
   GtTimer      *timer;
   GtEncdesc    *encdesc;
-  unsigned long sampling_rate;
+  GtUword sampling_rate;
   bool          regular_sampling,
                 page_sampling;
 };
@@ -114,7 +114,7 @@ GT_DECLAREARRAYSTRUCT(EncdescCode);
 typedef struct {
   GtArrayEncdescCode *codes;
   char               *descbuffer;
-  unsigned long       total_bits_prepared,
+  GtUword       total_bits_prepared,
                       bits_to_write,
                       cur_field_start_pos,
                       cur_field_num,

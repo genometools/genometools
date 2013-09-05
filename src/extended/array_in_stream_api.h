@@ -30,7 +30,7 @@ typedef struct GtArrayInStream GtArrayInStream;
 /* Creates a new <GtArrayInStream>, delivering nodes from <nodes>. Note that
    the array must contain pointers to <GtGenomeNode>s! For every node passed,
    the value pointed to by <progress> is incremented by 1. */
-GtNodeStream* gt_array_in_stream_new(GtArray *nodes, unsigned long *progress,
+GtNodeStream* gt_array_in_stream_new(GtArray *nodes, GtUword *progress,
                                      GtError *err);
 
 #endif

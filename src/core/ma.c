@@ -34,7 +34,7 @@ typedef struct {
   bool bookkeeping,
        global_space_peak;
   GtUint64 mallocevents;
-  unsigned long current_size,
+  GtUword current_size,
                 max_size;
 } MA;
 
@@ -51,7 +51,7 @@ typedef struct {
   bool has_leak;
 } CheckSpaceLeakInfo;
 
-static void* xcalloc(size_t nmemb, size_t size, unsigned long current_size,
+static void* xcalloc(size_t nmemb, size_t size, GtUword current_size,
                      const char *src_file, int src_line)
 {
   void *p;
@@ -66,7 +66,7 @@ static void* xcalloc(size_t nmemb, size_t size, unsigned long current_size,
   return p;
 }
 
-static void* xmalloc(size_t size, unsigned long current_size,
+static void* xmalloc(size_t size, GtUword current_size,
                      const char *src_file, int src_line)
 {
   void *p;
@@ -81,7 +81,7 @@ static void* xmalloc(size_t size, unsigned long current_size,
   return p;
 }
 
-static void* xrealloc(void *ptr, size_t size, unsigned long current_size,
+static void* xrealloc(void *ptr, size_t size, GtUword current_size,
                       const char *src_file, int src_line)
 {
   void *p;
@@ -114,7 +114,7 @@ void gt_ma_init(bool bookkeeping)
   ma->global_space_peak = false;
 }
 
-static void add_size(MA* ma, unsigned long size)
+static void add_size(MA* ma, GtUword size)
 {
   gt_assert(ma);
   ma->current_size += size;
@@ -124,7 +124,7 @@ static void add_size(MA* ma, unsigned long size)
     ma->max_size = ma->current_size;
 }
 
-static void subtract_size(MA *ma, unsigned long size)
+static void subtract_size(MA *ma, GtUword size)
 {
   gt_assert(ma);
   gt_assert(ma->current_size >= size);
@@ -264,13 +264,13 @@ void gt_ma_disable_global_spacepeak(void)
   ma->global_space_peak = false;
 }
 
-unsigned long gt_ma_get_space_peak(void)
+GtUword gt_ma_get_space_peak(void)
 {
   gt_assert(ma);
   return ma->max_size;
 }
 
-unsigned long gt_ma_get_space_current(void)
+GtUword gt_ma_get_space_current(void)
 {
   gt_assert(ma);
   return ma->current_size;

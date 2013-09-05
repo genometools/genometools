@@ -26,7 +26,7 @@ typedef struct Enumcodeatposition Enumcodeatposition;
 typedef struct
 {
   unsigned int maxprefixindex;
-  unsigned long position;
+  GtUword position;
 } Specialcontext;
 
 Enumcodeatposition *gt_Enumcodeatposition_new(const GtEncseq *encseq,
@@ -41,12 +41,12 @@ void gt_Enumcodeatposition_delete(Enumcodeatposition *ecp);
 
 GtCodetype gt_Enumcodeatposition_filledqgramcode(const Enumcodeatposition *ecp,
                                                  unsigned int prefixindex,
-                                                 unsigned long pos);
+                                                 GtUword pos);
 
 bool gt_Enumcodeatposition_filledqgramcodestopatmax(
                                      GtCodetype *code,
                                      const Enumcodeatposition *ecp,
                                      unsigned int prefixindex,
-                                     unsigned long pos,
+                                     GtUword pos,
                                      GtCodetype stopcode);
 #endif

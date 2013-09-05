@@ -29,7 +29,7 @@ typedef struct {
        gc_content,
        stat,
        seqlengthdistri;
-  unsigned long showseqnum,
+  GtUword showseqnum,
                 width;
   GtStr *reader;
   GtOutputFileInfo *ofi;

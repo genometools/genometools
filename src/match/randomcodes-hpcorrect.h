@@ -24,8 +24,8 @@
 #include "match/seqnumrelpos.h"
 
 int gt_randomcodes_hpcorrect_process_bucket(void *data,
-    const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
+    const GtUword *bucketofsuffixes, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword numberofsuffixes,
     unsigned int sortingdepth, GtError *err);
 
 typedef struct GtRandomcodesHpcorrectData GtRandomcodesHpcorrectData;
@@ -41,9 +41,9 @@ GtRandomcodesHpcorrectData *gt_randomcodes_hpcorrect_data_new(
                        false: use hard-coded distance matrix  */
     long clustering_param, /* best_score_clustering: minimal scores percentile;
                               otherwise: mimimal score */
-    unsigned long maxwidth, int rext_cl_minscore,
+    GtUword maxwidth, int rext_cl_minscore,
     int rext_I_minscore, int rext_J_minscore, int rext_R_minscore,
-    int rext_D_minscore, int rext_J_lminscore, unsigned long rext_J_lwidth,
+    int rext_D_minscore, int rext_J_lminscore, GtUword rext_J_lwidth,
     GtStr *indexname, unsigned int threadnum, GtError *err);
 
 void gt_randomcodes_hpcorrect_data_delete(GtRandomcodesHpcorrectData *sdata);

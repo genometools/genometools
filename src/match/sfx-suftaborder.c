@@ -30,14 +30,14 @@ static void showcomparisonfailure(const char *filename,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   const GtSuffixsortspace *suffixsortspace,
-                                  unsigned long subbucketleft,
-                                  unsigned long depth,
-                                  unsigned long idx1,
-                                  unsigned long idx2,
+                                  GtUword subbucketleft,
+                                  GtUword depth,
+                                  GtUword idx1,
+                                  GtUword idx2,
                                   int cmp,
-                                  unsigned long maxlcp)
+                                  GtUword maxlcp)
 {
-  unsigned long pos1, pos2;
+  GtUword pos1, pos2;
 
   pos1 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx1);
   pos2 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx2);
@@ -60,11 +60,11 @@ void gt_checkifprefixesareidentical(const char *filename,
                                     const GtEncseq *encseq,
                                     GtReadmode readmode,
                                     const GtSuffixsortspace *suffixsortspace,
-                                    unsigned long subbucketleft,
-                                    unsigned long width,
-                                    unsigned long depth)
+                                    GtUword subbucketleft,
+                                    GtUword width,
+                                    GtUword depth)
 {
-  unsigned long idx, maxlcp, pos1, pos2;
+  GtUword idx, maxlcp, pos1, pos2;
   int cmp;
   GtEncseqReader *esr1, *esr2;
 
@@ -106,10 +106,10 @@ void gt_checkifprefixesareidentical(const char *filename,
 void gt_showentiresuftab(const GtEncseq *encseq,
                          GtReadmode readmode,
                          const GtSuffixsortspace *suffixsortspace,
-                         unsigned long subbucketleft,
-                         unsigned long depth)
+                         GtUword subbucketleft,
+                         GtUword depth)
 {
-  unsigned long idx, pos, totallength = gt_encseq_total_length(encseq);
+  GtUword idx, pos, totallength = gt_encseq_total_length(encseq);
 
   for (idx = 0; idx <= totallength; idx++)
   {
@@ -125,13 +125,13 @@ void gt_checksortedsuffixes(const char *filename,
                             const GtEncseq *encseq,
                             GtReadmode readmode,
                             const GtSuffixsortspace *suffixsortspace,
-                            unsigned long subbucketleft,
-                            unsigned long numberofsuffixes,
+                            GtUword subbucketleft,
+                            GtUword numberofsuffixes,
                             bool specialsareequal,
                             bool specialsareequalatdepth0,
-                            unsigned long depth)
+                            GtUword depth)
 {
-  unsigned long idx, pos1, pos2, maxlcp,
+  GtUword idx, pos1, pos2, maxlcp,
                 totallength = gt_encseq_total_length(encseq);
   GtEncseqReader *esr1, *esr2;
   int cmp;

@@ -28,14 +28,14 @@
 typedef struct
 {
   unsigned int idx;  /* index of genome in list of all genomes */
-  unsigned long startpos;   /* in the range [0..totallength single index] */
+  GtUword startpos;   /* in the range [0..totallength single index] */
 } Indexedsuffix;
 
 typedef struct
 {
   unsigned int nextaccessidx,  /* in the range [0..SIZEOFMERGERESULTBUFFER] */
                nextstoreidx;   /* in the range [0..SIZEOFMERGERESULTBUFFER] */
-  unsigned long lcptabstore[SIZEOFMERGERESULTBUFFER];
+  GtUword lcptabstore[SIZEOFMERGERESULTBUFFER];
   Indexedsuffix suftabstore[SIZEOFMERGERESULTBUFFER];
   bool lastpage;
 } Suflcpbuffer;
@@ -45,7 +45,7 @@ typedef struct
   uint64_t ident;              /* can be arbitrary large */
   unsigned int numofentries,   /* in the range [0..numofindexes-1] */
                numofindexes;   /* number of indexes */
-  unsigned long *nextpostable; /* in the range [0..totallength single index] */
+  GtUword *nextpostable; /* in the range [0..totallength single index] */
   Suflcpbuffer buf;
   Mergertrierep trierep;
   Suffixarray *suffixarraytable;

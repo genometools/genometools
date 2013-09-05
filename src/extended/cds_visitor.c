@@ -38,7 +38,7 @@ struct GtCDSVisitor {
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
                              gene */
   GtRegionMapping *region_mapping;
-  unsigned long offset;
+  GtUword offset;
   bool start_codon,
        final_stop_codon,
        generic_start_codons;
@@ -93,7 +93,7 @@ static int extract_spliced_seq(GtFeatureNode *fn, GtCDSVisitor *visitor,
                                                   err);
 }
 
-static void save_orf(void *data, GtRange *orf, GT_UNUSED unsigned long framenum,
+static void save_orf(void *data, GtRange *orf, GT_UNUSED GtUword framenum,
                      GT_UNUSED const char *frame,
                      GT_UNUSED bool ends_with_stop_codon)
 {
@@ -173,7 +173,7 @@ static void set_phases(GtArray *cds_features)
 {
   GtPhase phase = GT_PHASE_ZERO;
   GtFeatureNode *cds_feature;
-  unsigned long i, length;
+  GtUword i, length;
   gt_assert(cds_features && gt_array_size(cds_features));
   for (i = 0; i < gt_array_size(cds_features); i++) {
     cds_feature = *(GtFeatureNode**) gt_array_get(cds_features, i);
@@ -189,7 +189,7 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
 {
   GtFeatureNode *representative, *cds_feature;
   GtArray *cds_features;
-  unsigned long i;
+  GtUword i;
   GtRange cds;
   GtStrand strand = gt_feature_node_get_strand(fn);
 
@@ -213,7 +213,7 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
   for (i = strand == GT_STRAND_FORWARD ? orf.start : orf.end;
        strand == GT_STRAND_FORWARD ? i < orf.end : i > orf.start;
        strand == GT_STRAND_FORWARD ? i++ : i--) {
-    GT_UNUSED unsigned long prev_length;
+    GT_UNUSED GtUword prev_length;
     if (gt_splicedseq_pos_is_border(v->splicedseq, i)) {
       gt_feature_node_set_end(cds_feature,
                               gt_splicedseq_map(v->splicedseq, i) + v->offset);

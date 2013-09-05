@@ -27,7 +27,7 @@
 
 struct GtStatVisitor {
   const GtNodeVisitor parent_instance;
-  unsigned long number_of_sequence_regions,
+  GtUword number_of_sequence_regions,
                 number_of_multi_features,
                 number_of_genes,
                 number_of_protein_coding_genes,
@@ -291,7 +291,7 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
   }
   if (sv->used_sources) {
     GtStrArray *sources;
-    unsigned long i;
+    GtUword i;
     gt_file_xprintf(outfp, "used source tags:\n");
     sources = gt_cstr_table_get_all(sv->used_sources);
     for (i = 0; i < gt_str_array_size(sources); i++)

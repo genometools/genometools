@@ -23,7 +23,7 @@
 typedef struct GtPriorityQueue GtPriorityQueue;
 
 GtPriorityQueue* gt_priority_queue_new(GtCompare cmpfun,
-                                       unsigned long maxnumofelements);
+                                       GtUword maxnumofelements);
 void             gt_priority_queue_add(GtPriorityQueue *pq,
                                        void *value);
 void*            gt_priority_queue_extract_min(GtPriorityQueue *pq);

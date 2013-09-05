@@ -560,7 +560,7 @@ GthBSSMSeqProcessor* gth_bssm_seq_processor_new(const char *outdir,
 
 static void bssm_seqs_delete(GtArray *seqs)
 {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < gt_array_size(seqs); i++)
     bssm_seq_delete(*(BSSMSeq**) gt_array_get(seqs, i));
   gt_array_delete(seqs);
@@ -675,7 +675,7 @@ void bssm_seqs_squash(GtArray *seqs)
 {
   BSSMSeq *cur_seq, *pre_seq;
   GtArray *tmp_seqs;
-  unsigned long i;
+  GtUword i;
   gt_assert(seqs);
   if (!gt_array_size(seqs))
     return;
@@ -716,7 +716,7 @@ void gth_bssm_seq_processor_squash(GthBSSMSeqProcessor *bsp)
 
 static int get_true_seq(GtArray *true_sites, BSSMSeq *intron,
                         const char *sequence,
-                        GT_UNUSED unsigned long sequence_length,
+                        GT_UNUSED GtUword sequence_length,
                         GtStr *seq, const GtRange *site_range, GtError *err)
 {
   int had_err = 0;
@@ -742,7 +742,7 @@ static int find_true_sites(GtArray *true_don_gt, GtArray *true_don_gc,
                            GtRegionMapping *region_mapping, bool gcdonor,
                            GtError *err)
 {
-  unsigned long i, len;
+  GtUword i, len;
   bool don_underflow, acc_underflow;
   const char *cseq;
   GtRange don_range, acc_range;
@@ -763,7 +763,7 @@ static int find_true_sites(GtArray *true_don_gt, GtArray *true_don_gc,
             (cseq[1]     == 'C' || cseq[1]     == 'c'))) &&
             (cseq[len-2] == 'A' || cseq[len-2] == 'a') &&
             (cseq[len-1] == 'G' || cseq[len-1] == 'g')) {
-        unsigned long sequence_length;
+        GtUword sequence_length;
         char *sequence = NULL;
         /* correct splice site found -> get flanking sequences */
         if (!intron->reverse) {
@@ -898,10 +898,10 @@ static int get_false_don_seq(GtArray *false_don_0_gt, GtArray *false_don_0_gc,
                              GtArray *false_don_1_gt, GtArray *false_don_1_gc,
                              GtArray *false_don_2_gt, GtArray *false_don_2_gc,
                              BSSMSeq *intron, const char *sequence,
-                             GT_UNUSED unsigned long sequence_length,
+                             GT_UNUSED GtUword sequence_length,
                              GtStr *seq, const GtRange *don_range,
                              bool proc_exons, GT_UNUSED bool gcdonor,
-                             unsigned long j, GtError *err)
+                             GtUword j, GtError *err)
 {
   unsigned int phase = 0;
   BSSMSeq *false_seq;
@@ -949,9 +949,9 @@ static int get_false_don_seq(GtArray *false_don_0_gt, GtArray *false_don_0_gc,
 static int get_false_acc_seq(GtArray *false_acc_0, GtArray *false_acc_1,
                              GtArray *false_acc_2, BSSMSeq *intron,
                              const char *sequence,
-                             GT_UNUSED unsigned long sequence_length,
+                             GT_UNUSED GtUword sequence_length,
                              GtStr *seq, const GtRange *acc_range,
-                             bool proc_exons, unsigned long j, GtError *err)
+                             bool proc_exons, GtUword j, GtError *err)
 {
   unsigned int phase = 0;
   BSSMSeq *false_seq;
@@ -996,7 +996,7 @@ static int find_false_sites(GtArray *false_don_0_gt, GtArray *false_don_0_gc,
                             GtRegionMapping *region_mapping, bool gcdonor,
                             GtError *err)
 {
-  unsigned long i, j, len;
+  GtUword i, j, len;
   bool don_underflow, acc_underflow;
   const char *cseq;
   GtRange don_range, acc_range;
@@ -1012,7 +1012,7 @@ static int find_false_sites(GtArray *false_don_0_gt, GtArray *false_don_0_gc,
     if (len >= 2) {
       cseq = gt_str_get(intron->seq);
       for (j = 0; !had_err && j < len - 1; j++) {
-        unsigned long sequence_length;
+        GtUword sequence_length;
         char *sequence = NULL;
         if ((proc_exons || j) && /* skip true donor site */
              (cseq[j]   == 'G' || cseq[j]   == 'g') &&
@@ -1183,15 +1183,15 @@ int gth_bssm_seq_processor_find_false_sites(GthBSSMSeqProcessor *bsp,
 
 static void bssm_seqs_write(GtArray *seqs, GtFile *outfp)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(seqs && outfp);
   for (i = 0; i < gt_array_size(seqs); i++)
     bssm_seq_write(*(BSSMSeq**) gt_array_get(seqs, i), outfp);
 }
 
-static void sample_bssm_seqs(GtArray *seqs, unsigned long target_size)
+static void sample_bssm_seqs(GtArray *seqs, GtUword target_size)
 {
-  unsigned long i, randnum, original_size, sample_size = 0;
+  GtUword i, randnum, original_size, sample_size = 0;
   GtBittab *samples;
   GtArray *tmp_seqs;
 
@@ -1284,7 +1284,7 @@ int gth_bssm_seq_processor_write_intermediate(GthBSSMSeqProcessor *bsp,
 static void show_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
                               GtFile *logfp)
 {
-  unsigned long len0, len1, len2;
+  GtUword len0, len1, len2;
 
   len0 = gt_array_size(bsp->i0_true_don_gt);
   len1 = gt_array_size(bsp->i1_true_don_gt);
@@ -1388,7 +1388,7 @@ static void show_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
 void gth_bssm_seq_processor_sample(GthBSSMSeqProcessor *bsp, bool verbose,
                                    GtFile *logfp)
 {
-  unsigned long len0, len1, len2;
+  GtUword len0, len1, len2;
   gt_assert(bsp);
 
   show_sample_sizes(bsp, verbose, logfp);

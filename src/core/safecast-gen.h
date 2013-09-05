@@ -53,6 +53,6 @@
 #define CALLCASTFUNC(FROMTYPEALIAS,TOTYPEALIAS,VAL)\
         gt_safecast_ ## FROMTYPEALIAS ## _ ## TOTYPEALIAS(__FILE__,__LINE__,VAL)
 
-GT_UNUSED DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
+GT_UNUSED DECLARESAFECASTFUNCTION(uint64_t,uint64_t,GtUword,unsigned_long)
 
 #endif

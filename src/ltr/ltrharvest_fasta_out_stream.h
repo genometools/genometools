@@ -25,7 +25,7 @@
 
 GtNodeStream* gt_ltrharvest_fasta_out_stream_new(GtNodeStream*, bool inner,
                                                  const GtEncseq *encseq,
-                                                 unsigned long width,
+                                                 GtUword width,
                                                  GtFile *outfp);
 
 #endif

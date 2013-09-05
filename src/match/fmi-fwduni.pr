@@ -1,19 +1,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long gt_skfmuniqueforward (const void *genericindex,
-                                 GT_UNUSED unsigned long offset,
-                                 GT_UNUSED unsigned long left,
-                                 GT_UNUSED unsigned long right,
-                                 GT_UNUSED unsigned long *witnessposition,
+GtUword gt_skfmuniqueforward (const void *genericindex,
+                                 GT_UNUSED GtUword offset,
+                                 GT_UNUSED GtUword left,
+                                 GT_UNUSED GtUword right,
+                                 GT_UNUSED GtUword *witnessposition,
                                  const GtUchar *qstart,
                                  const GtUchar *qend);
 
-unsigned long gt_skfmmstats (const void *genericindex,
-                          GT_UNUSED unsigned long offset,
-                          GT_UNUSED unsigned long left,
-                          GT_UNUSED unsigned long right,
-                          unsigned long *witnessposition,
+GtUword gt_skfmmstats (const void *genericindex,
+                          GT_UNUSED GtUword offset,
+                          GT_UNUSED GtUword left,
+                          GT_UNUSED GtUword right,
+                          GtUword *witnessposition,
                           const GtUchar *qstart,
                           const GtUchar *qend);
 

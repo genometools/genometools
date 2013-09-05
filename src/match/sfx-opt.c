@@ -124,7 +124,7 @@ static GtOPrval parse_options(int *parsed_args,
 
 static void showoptions(const Suffixeratoroptions *so)
 {
-  unsigned long i;
+  GtUword i;
   Sfxstrategy sfxtrategy;
   GtLogger *logger = gt_logger_new(true, GT_LOGGER_DEFLT_PREFIX, stdout);
 

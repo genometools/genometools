@@ -26,7 +26,7 @@
 #ifdef S_SPLINT_S
 #define Formatuint64_t "%lu"
 #define SCANint64_tcast(X) ((long *) (X))
-#define PRINTuint64_tcast(X) ((unsigned long) (X))
+#define PRINTuint64_tcast(X) ((GtUword) (X))
 #else
 #define Formatuint64_t "%" PRIu64
 #define SCANint64_tcast(X) (X)

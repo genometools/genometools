@@ -28,20 +28,20 @@ typedef struct {
 
 static void store_splice_form(GtArray *spliced_alignments_in_form,
                               const void *set_of_sas,
-                              GT_UNUSED unsigned long number_of_sas,
+                              GT_UNUSED GtUword number_of_sas,
                               size_t size_of_sa, void *data)
 {
   StoreSpliceFormInfo *info = data;
   GtCSASpliceForm *splice_form;
-  unsigned long i, sa;
+  GtUword i, sa;
   gt_assert(info);
   gt_assert(spliced_alignments_in_form &&
          gt_array_size(spliced_alignments_in_form));
-  sa = *(unsigned long*) gt_array_get(spliced_alignments_in_form, 0);
+  sa = *(GtUword*) gt_array_get(spliced_alignments_in_form, 0);
   splice_form = gt_csa_splice_form_new((char*) set_of_sas + sa * size_of_sa,
                                     info->get_genomic_range, info->get_strand);
   for (i = 1; i < gt_array_size(spliced_alignments_in_form); i++) {
-    sa = *(unsigned long*) gt_array_get(spliced_alignments_in_form, i);
+    sa = *(GtUword*) gt_array_get(spliced_alignments_in_form, i);
     gt_csa_splice_form_add_sa(splice_form,
                               (char*) set_of_sas + sa * size_of_sa);
   }
@@ -51,7 +51,7 @@ static void store_splice_form(GtArray *spliced_alignments_in_form,
 static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
 {
   GtCSAGene *forward_gene = NULL, *reverse_gene = NULL;
-  unsigned long i;
+  GtUword i;
   gt_assert(genes && splice_forms);
   /* put splice forms into appropirate genes */
   for (i = 0; i < gt_array_size(splice_forms); i++) {
@@ -96,7 +96,7 @@ static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
 }
 
 GtArray* gt_csa_variable_strands(const void *set_of_sas,
-                                 unsigned long number_of_sas,
+                                 GtUword number_of_sas,
                                  size_t size_of_sa,
                                  GetGenomicRangeFunc get_genomic_range,
                                  GetStrandFunc get_strand,

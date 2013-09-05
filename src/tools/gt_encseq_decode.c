@@ -39,7 +39,7 @@ typedef struct {
   GtEncseqOptions *eopts;
   GtReadmode rm;
   GtStr *dir;
-  unsigned long seq;
+  GtUword seq;
 } GtEncseqDecodeArguments;
 
 static void* gt_encseq_decode_arguments_new(void)
@@ -179,7 +179,7 @@ int gt_encseq_decode_arguments_check(GT_UNUSED int rest_argc,
 static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
                            const char *filename, GtError *err)
 {
-  unsigned long i, j, sfrom, sto;
+  GtUword i, j, sfrom, sto;
   int had_err = 0;
   bool has_desc;
   GtEncseqReader *esr;
@@ -219,7 +219,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
       sto = gt_encseq_num_of_sequences(encseq);
     }
     for (i = sfrom; i < sto; i++) {
-      unsigned long desclen, startpos, len;
+      GtUword desclen, startpos, len;
       char buf[BUFSIZ];
       const char *desc = NULL;
       /* XXX: maybe make this distinction in the functions via readmode? */
@@ -277,7 +277,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
   }
 
   if (strcmp(gt_str_get(args->mode), "concat") == 0) {
-    unsigned long from = 0,
+    GtUword from = 0,
                   to = gt_encseq_total_length(encseq) - 1;
     if (args->rng.start != GT_UNDEF_ULONG && args->rng.end != GT_UNDEF_ULONG) {
       if (args->rng.end > to) {

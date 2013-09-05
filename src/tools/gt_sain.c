@@ -124,17 +124,17 @@ static int gt_sain_option_parser_check(int rest_argc,
   }
 }
 
-static int gt_sain_checkmaxsequencelength(unsigned long len,bool forencseq,
+static int gt_sain_checkmaxsequencelength(GtUword len,bool forencseq,
                                           GtError *err)
 {
-  unsigned long maxsequencelength;
+  GtUword maxsequencelength;
 
   if (forencseq)
   {
-    maxsequencelength = (unsigned long) (~GT_FIRSTBIT) - 1 - GT_COMPAREOFFSET;
+    maxsequencelength = (GtUword) (~GT_FIRSTBIT) - 1 - GT_COMPAREOFFSET;
   } else
   {
-    maxsequencelength = (unsigned long) (~GT_FIRSTBIT) - 1;
+    maxsequencelength = (GtUword) (~GT_FIRSTBIT) - 1;
   }
   if (len > maxsequencelength)
   {
@@ -255,7 +255,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         had_err = -1;
       } else
       {
-        if (gt_sain_checkmaxsequencelength((unsigned long) len,false,err) != 0)
+        if (gt_sain_checkmaxsequencelength((GtUword) len,false,err) != 0)
         {
           had_err = -1;
         } else
@@ -271,7 +271,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           GtSainTimerandLogger *tl
             = gt_sain_timer_logger_new(arguments->verbose);
           gt_sain_plain_sortsuffixes(plainseq,
-                                     (unsigned long) len,
+                                     (GtUword) len,
                                      arguments->icheck,
                                      tl->logger,
                                      tl->timer);

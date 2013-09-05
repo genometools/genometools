@@ -39,15 +39,15 @@
 static void showprjinfo(FILE *outprj,
                         GtReadmode readmode,
                         const GtEncseq *encseq,
-                        unsigned long numberofallsortedsuffixes,
+                        GtUword numberofallsortedsuffixes,
                         unsigned int prefixlength,
-                        unsigned long numoflargelcpvalues,
+                        GtUword numoflargelcpvalues,
                         double averagelcp,
-                        unsigned long maxbranchdepth,
+                        GtUword maxbranchdepth,
                         const Definedunsignedlong *longest)
 {
-  unsigned long totallength;
-  unsigned long numofsequences;
+  GtUword totallength;
+  GtUword numofsequences;
 
   totallength = gt_encseq_total_length(encseq);
   fprintf(outprj,"totallength=%lu\n",totallength);
@@ -75,7 +75,7 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"averagelcp=%.2f\n",averagelcp);
   fprintf(outprj,"maxbranchdepth=%lu\n",maxbranchdepth);
   fprintf(outprj,"integersize=%u\n",
-                  (unsigned int) (sizeof (unsigned long) * CHAR_BIT));
+                  (unsigned int) (sizeof (GtUword) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",gt_is_little_endian() ? '1' : '0');
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
   fprintf(outprj,"mirrored=%c\n", gt_encseq_is_mirrored(encseq) ? '1' : '0');
@@ -84,11 +84,11 @@ static void showprjinfo(FILE *outprj,
 int gt_outprjfile(const char *indexname,
                   GtReadmode readmode,
                   const GtEncseq *encseq,
-                  unsigned long numberofallsortedsuffixes,
+                  GtUword numberofallsortedsuffixes,
                   unsigned int prefixlength,
-                  unsigned long numoflargelcpvalues,
+                  GtUword numoflargelcpvalues,
                   double averagelcp,
-                  unsigned long maxbranchdepth,
+                  GtUword maxbranchdepth,
                   const Definedunsignedlong *longest,
                   GtError *err)
 {

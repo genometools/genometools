@@ -22,7 +22,7 @@
 struct GtIO {
   GtFile *fp;
   GtStr *path;
-  unsigned long line_number;
+  GtUword line_number;
   bool line_start;
 };
 
@@ -104,7 +104,7 @@ signed char gt_io_next(GtIO *io)
   return c;
 }
 
-unsigned long gt_io_get_line_number(const GtIO *io)
+GtUword gt_io_get_line_number(const GtIO *io)
 {
   gt_assert(io);
   return io->line_number;

@@ -34,21 +34,21 @@ typedef struct GtUnionFind GtUnionFind;
 /* Create a new union-find data structures representing <num_of_elems> many
    elements (numbered from 0 up to <num_of_elems> - 1) contained in disjoined
    sets. */
-GtUnionFind*  gt_union_find_new(unsigned long num_of_elems);
+GtUnionFind*  gt_union_find_new(GtUword num_of_elems);
 
 /* Reset the union-find structure, by placing each element in a disjoined set;
    thereby resize the representation to <num_of_elems> elements. */
-void          gt_union_find_reset(GtUnionFind*, unsigned long num_of_elems);
+void          gt_union_find_reset(GtUnionFind*, GtUword num_of_elems);
 
 /* Delete the given union-find data structure. */
 void          gt_union_find_delete(GtUnionFind*);
 
 /* Find the representative set for the given <elem>. */
-unsigned long gt_union_find_find(GtUnionFind*, unsigned long elem);
+GtUword gt_union_find_find(GtUnionFind*, GtUword elem);
 
 /* Union the set containing <elem_a> with the set containing <elem_b>. */
-void          gt_union_find_union(GtUnionFind*, unsigned long elem_a,
-                                           unsigned long elem_b);
+void          gt_union_find_union(GtUnionFind*, GtUword elem_a,
+                                           GtUword elem_b);
 
 int           gt_union_find_unit_test(GtError*);
 

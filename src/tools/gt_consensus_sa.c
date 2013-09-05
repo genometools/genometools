@@ -42,7 +42,7 @@ static void get_exons(GtArray *exon_ranges, const void *sa)
 {
   GtSSplicedAlignment *alignment = *(GtSSplicedAlignment**) sa;
   GtRange exon;
-  unsigned long i;
+  GtUword i;
   gt_assert(alignment);
   for (i = 0; i < gt_sspliced_alignment_num_of_exons(alignment); i++) {
     exon = gt_sspliced_alignment_get_exon(alignment, i);
@@ -52,18 +52,18 @@ static void get_exons(GtArray *exon_ranges, const void *sa)
 
 static void process_splice_form(GtArray *spliced_alignments_in_form,
                                 GT_UNUSED const void *set_of_sas,
-                                GT_UNUSED unsigned long number_of_sas,
+                                GT_UNUSED GtUword number_of_sas,
                                 GT_UNUSED size_t size_of_sa,
                                 GT_UNUSED void *userdata)
 {
-  unsigned long i;
+  GtUword i;
 
   printf("contains [");
   for (i = 0; i < gt_array_size(spliced_alignments_in_form); i++) {
     if (i)
       gt_xputchar(',');
     printf("%lu",
-           *((unsigned long*) gt_array_get(spliced_alignments_in_form, i)));
+           *((GtUword*) gt_array_get(spliced_alignments_in_form, i)));
   }
   printf("]\n");
 }
@@ -85,7 +85,7 @@ static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
 {
   GtArray *spliced_alignments;
   GtSSplicedAlignment *sa;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_error_check(err);
 

@@ -53,7 +53,7 @@ static int get_seq(GtStr *seq, bool *process, const GtRange *range,
                    GtStr *seqid, bool reverse, GtRegionMapping *region_mapping,
                    GtError *err)
 {
-  unsigned long sequence_length;
+  GtUword sequence_length;
   char *sequence = NULL;
   int had_err;
   gt_error_check(err);
@@ -87,7 +87,7 @@ static int get_seq(GtStr *seq, bool *process, const GtRange *range,
 static int process_ranges(GtArray *ranges, GtStr *seqid, bool reverse,
                           GthBSSMTrainVisitor *visitor, GtError *err)
 {
-  unsigned long i, phase = 0;
+  GtUword i, phase = 0;
   GtRange range;
   GtStr *seq;
   bool process;

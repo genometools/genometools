@@ -20,6 +20,7 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include "core/types_api.h"
 
 /* The <GtBitbuffer> class provides means to sequentially write bit-compressed
    integer arrays into a file. */
@@ -35,23 +36,23 @@ typedef struct GtBitbuffer GtBitbuffer;
    for each call of <gt_bitbuffer_next_value()>. */
 GtBitbuffer* gt_bitbuffer_new(FILE *outfp, unsigned int bitsperentry);
 
-/* Appends unsigned long <value> of <bitsforvalue> bits to <bb>. */
-void         gt_bitbuffer_next_value(GtBitbuffer *bb, unsigned long value,
+/* Appends GtUword <value> of <bitsforvalue> bits to <bb>. */
+void         gt_bitbuffer_next_value(GtBitbuffer *bb, GtUword value,
                                      unsigned int bitsforvalue);
 
-/* Appends unsigned long <value> to <bb>. Requires that <bb> has been created
+/* Appends GtUword <value> to <bb>. Requires that <bb> has been created
    with a <bitsperentry> value > 0. */
 void         gt_bitbuffer_next_fixed_bits_value(GtBitbuffer *bb,
-                                                unsigned long value);
+                                                GtUword value);
 
 /* Appends unsigned 32-bit integer array <tab> of length <len> to <bb>. */
 void         gt_bitbuffer_next_uint32tab(GtBitbuffer *bb, const uint32_t *tab,
-                                         unsigned long len);
+                                         GtUword len);
 
-/* Appends unsigned long integer array <tab> of length <len> to <bb>. */
+/* Appends GtUword integer array <tab> of length <len> to <bb>. */
 void         gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
-                                        const unsigned long *tab,
-                                        unsigned long len);
+                                        const GtUword *tab,
+                                        GtUword len);
 
 /* Deletes <bb> and frees all associated memory. */
 void         gt_bitbuffer_delete(GtBitbuffer *bb);

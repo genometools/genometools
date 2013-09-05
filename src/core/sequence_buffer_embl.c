@@ -64,8 +64,8 @@ struct GtSequenceBufferEMBL {
 static inline int
 parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
                 GtStr *linebuf, const char **content,
-                unsigned long *linelen, unsigned long *currentfileread,
-                unsigned long *currentfileadd, unsigned long *currentoutpos,
+                GtUword *linelen, GtUword *currentfileread,
+                GtUword *currentfileadd, GtUword *currentoutpos,
                 GtError *err)
 {
   int currentchar, i, ret = 0;
@@ -91,7 +91,7 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
   (*currentfileread)++;
   if (currentchar == NEWLINESYMBOL) {
     gt_error_set(err, "2-character line code not found in line %lu",
-                 (unsigned long) pvt->linenum - 1);
+                 (GtUword) pvt->linenum - 1);
     return -2;
   }
   linecode[1] = currentchar;
@@ -118,7 +118,7 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
       if (!isspace(currentchar)) {
         gt_error_set(err, "3 blanks expected between line code and content "
                           "in line %lu",
-                     (unsigned long) pvt->linenum - 1);
+                     (GtUword) pvt->linenum - 1);
         return -2;
       }
     }
@@ -135,7 +135,7 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
       case SEQUENCE:
       /* sequences are 60 characters per line with 5 spaces in between */
         if (i++ < 65 && !isspace(currentchar)) {
-          if (*currentoutpos >= (unsigned long) OUTBUFSIZE) {
+          if (*currentoutpos >= (GtUword) OUTBUFSIZE) {
             /* if outbuffer is full, keep rest of sequence in overflow buffer */
             gt_str_append_char(linebuf, currentchar);
           } else {
@@ -167,7 +167,7 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
 
 static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
 {
-  unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0,
+  GtUword currentoutpos = 0, currentfileadd = 0, currentfileread = 0,
                 linelen = 0;
   GtSequenceBufferMembers *pvt;
   GtSequenceBufferEMBL *sbe;
@@ -185,7 +185,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
     sbe->state = EMBL_UNDEFINED;
     pvt->linenum = (uint64_t) 1;
     pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
-                                                  (unsigned long) pvt->filenum),
+                                                  (GtUword) pvt->filenum),
                                          "rb");
     pvt->currentinpos = 0;
     pvt->currentfillpos = 0;
@@ -193,7 +193,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
 
   if (gt_str_length(sbe->overflowbuffer) > 0) {
     /* we still have surplus sequence from the last line, process that first */
-    unsigned long i, len;
+    GtUword i, len;
     const char *overflowedstring;
     overflowedstring = gt_str_get_mem(sbe->overflowbuffer);
     len = gt_str_length(sbe->overflowbuffer);
@@ -216,7 +216,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
     if (had_err && had_err != EOF) {
       break;
     }
-    if (currentoutpos >= (unsigned long) OUTBUFSIZE) {
+    if (currentoutpos >= (GtUword) OUTBUFSIZE) {
       if (pvt->filelengthtab) {
         pvt->filelengthtab[pvt->filenum].length
           += (uint64_t) currentfileread;
@@ -252,9 +252,9 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         /* only a terminator may come after a sequence */
         if (lc != SEQUENCE) {
           gt_error_set(err, "unterminated sequence in line %lu of file %s",
-                            (unsigned long) pvt->linenum,
+                            (GtUword) pvt->linenum,
                             gt_str_array_get(pvt->filenametab,
-                                                (unsigned long) pvt->filenum));
+                                                (GtUword) pvt->filenum));
           return -1;
         }
         break;
@@ -289,7 +289,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         sbe->state = EMBL_UNDEFINED;
         pvt->linenum = (uint64_t) 1;
         pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
-                                                (unsigned long) pvt->filenum),
+                                                (GtUword) pvt->filenum),
                                             "rb");
         if (pvt->filelengthtab) {
           pvt->filelengthtab[pvt->filenum].length = 0;
@@ -325,7 +325,7 @@ static void gt_sequence_buffer_embl_free(GtSequenceBuffer *sb)
   gt_str_delete(sbe->overflowbuffer);
 }
 
-static unsigned long
+static GtUword
 gt_sequence_buffer_embl_get_file_index(GtSequenceBuffer *sb)
 {
   gt_assert(sb);

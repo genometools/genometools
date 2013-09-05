@@ -34,7 +34,7 @@
 typedef struct {
   GtRange splseqrange;   /* genomic positions refering to spliced seq.
                             (without stopcodon) */
-  unsigned long framenum,
+  GtUword framenum,
                 lengthwithstopcodon,
                 lengthwithoutstopcodon;
   const char *frame;
@@ -43,10 +43,10 @@ typedef struct {
 
 typedef struct {
   GtArray *maximalORFs;
-  unsigned long minORFlength;
+  GtUword minORFlength;
 } SaveORFInfo;
 
-static void saveORF(void *data, GtRange *range, unsigned long framenum,
+static void saveORF(void *data, GtRange *range, GtUword framenum,
                     const char *frame, bool ends_with_stop_codon)
 {
   MaximalORF orf;
@@ -94,7 +94,7 @@ static int compareORFs(const void *dataA, const void *dataB)
 static bool orfs_are_sorted(GtArray *maximalORFs)
 {
   MaximalORF *orfA, *orfB;
-  unsigned long i;
+  GtUword i;
   gt_assert(maximalORFs);
   for (i = 1; i < gt_array_size(maximalORFs); i++) {
     orfA = (MaximalORF*) gt_array_get(maximalORFs, i-1);
@@ -119,13 +119,13 @@ static void sortmaximalORFs(GtArray *maximalORFs)
 }
 
 static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
-                          unsigned long gen_total_length,
-                          unsigned long gen_offset, const char *gen_id,
-                          unsigned long pglnum, unsigned long agsnum,
-                          unsigned long ppsnum, GthSplicedSeq *splicedseq,
+                          GtUword gen_total_length,
+                          GtUword gen_offset, const char *gen_id,
+                          GtUword pglnum, GtUword agsnum,
+                          GtUword ppsnum, GthSplicedSeq *splicedseq,
                           unsigned int indentlevel, GthOutput *out)
 {
-  unsigned long i;
+  GtUword i;
   GT_UNUSED bool hasborder = false;
   GtFile *outfp = out->outfp;
 
@@ -277,17 +277,17 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
 
 static void outputconsolidatedORFs(GtArray *consolidatedORFs,
                                    bool gen_strand_forward,
-                                   unsigned long gen_total_length,
-                                   unsigned long gen_offset,
+                                   GtUword gen_total_length,
+                                   GtUword gen_offset,
                                    const char *gen_id,
-                                   unsigned long pglnum,
-                                   unsigned long agsnum,
+                                   GtUword pglnum,
+                                   GtUword agsnum,
                                    GthSplicedSeq *splicedseq,
                                    unsigned int indentlevel,
                                    GthOutput *out)
 {
   GtFile *outfp = out->outfp;
-  unsigned long i;
+  GtUword i;
 
   if (out->xmlout) {
     gth_indent(outfp, indentlevel);
@@ -331,9 +331,9 @@ static void outputconsolidatedORFs(GtArray *consolidatedORFs,
 }
 
 static bool overlapwithotherranges(GtRange range, GtArray *ranges,
-                                   unsigned long delta)
+                                   GtUword delta)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(ranges);
   for (i = 0; i < gt_array_size(ranges); i++) {
     if (gt_range_overlap_delta(&range, gt_array_get(ranges, i), delta))
@@ -344,7 +344,7 @@ static bool overlapwithotherranges(GtRange range, GtArray *ranges,
 
 static void consolidateORFs(GtArray *consolidatedORFs, GtArray *maximalORFs)
 {
-  unsigned long i, maxlength;
+  GtUword i, maxlength;
   MaximalORF *orf;
   GtArray *ranges;
 
@@ -380,11 +380,11 @@ static void consolidateORFs(GtArray *consolidatedORFs, GtArray *maximalORFs)
 }
 
 void gthshowORFs(char *frame0, char *frame1, char *frame2,
-                 unsigned long frame0len, unsigned long frame1len,
-                 unsigned long frame2len, bool gen_strand_forward,
-                 unsigned long gen_total_length, unsigned long gen_offset,
-                 const char *gen_id, unsigned long pglnum,
-                 unsigned long agsnum, GthSplicedSeq *splicedseq,
+                 GtUword frame0len, GtUword frame1len,
+                 GtUword frame2len, bool gen_strand_forward,
+                 GtUword gen_total_length, GtUword gen_offset,
+                 const char *gen_id, GtUword pglnum,
+                 GtUword agsnum, GthSplicedSeq *splicedseq,
                  unsigned int indentlevel, GthOutput *out)
 {
   GtArray *maximalORFs, *consolidatedORFs;

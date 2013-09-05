@@ -24,7 +24,7 @@
 #include "core/unused_api.h"
 
 /* returns the count of g's and c's per sequence. */
-unsigned long *gt_encseq_gc_count(const GtEncseq *encseq);
+GtUword *gt_encseq_gc_count(const GtEncseq *encseq);
 
 /* returns the per sequence relative gc-content of encseq (#gc / totallength) */
 double *gt_encseq_get_rel_gc(const GtEncseq *encseq,

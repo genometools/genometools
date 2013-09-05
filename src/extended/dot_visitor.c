@@ -31,7 +31,7 @@
 struct GtDotVisitor {
   const GtNodeVisitor parent_instance;
   GtHashmap *ids;
-  unsigned long idctr;
+  GtUword idctr;
 };
 
 #define dv_cast(GV)\
@@ -49,11 +49,11 @@ static int dv_output_edge(GtFeatureNode *fn, void *data,
 {
   GtFeatureNodeIterator *fni;
   GtFeatureNode *curnode = NULL;
-  unsigned long pid, cid;
+  GtUword pid, cid;
   int had_err = 0;
   GtDotVisitor *dv = (GtDotVisitor*) data;
 
-  if (!(pid = (unsigned long) gt_hashmap_get(dv->ids, fn))) {
+  if (!(pid = (GtUword) gt_hashmap_get(dv->ids, fn))) {
     pid = dv->idctr++;
     gt_hashmap_add(dv->ids, fn, (void*) pid);
   }
@@ -62,7 +62,7 @@ static int dv_output_edge(GtFeatureNode *fn, void *data,
 
   fni = gt_feature_node_iterator_new_direct(fn);
   while ((curnode = gt_feature_node_iterator_next(fni))) {
-    if (!(cid = (unsigned long) gt_hashmap_get(dv->ids, curnode))) {
+    if (!(cid = (GtUword) gt_hashmap_get(dv->ids, curnode))) {
       cid = dv->idctr++;
       gt_hashmap_add(dv->ids, curnode, (void*) cid);
     }
@@ -80,11 +80,11 @@ static int dv_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
 {
   GT_UNUSED GtDotVisitor *dv;
   int had_err = 0;
-  unsigned long pid;
+  GtUword pid;
   gt_error_check(err);
   dv = dv_cast(nv);
 
-  if (!(pid = (unsigned long) gt_hashmap_get(dv->ids, fn))) {
+  if (!(pid = (GtUword) gt_hashmap_get(dv->ids, fn))) {
     pid = dv->idctr++;
     printf("subgraph %lu {\n", pid);
     gt_hashmap_add(dv->ids, fn, (void*) pid);

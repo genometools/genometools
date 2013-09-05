@@ -22,7 +22,7 @@
 #include "extended/evaluator.h"
 
 struct GtEvaluator {
-  unsigned long T, /* true */
+  GtUword T, /* true */
                 A, /* actual */
                 P; /* predicted */
 };
@@ -39,13 +39,13 @@ void gt_evaluator_add_true(GtEvaluator *evaluator)
   evaluator->T++;
 }
 
-void gt_evaluator_add_actual(GtEvaluator *evaluator, unsigned long inc)
+void gt_evaluator_add_actual(GtEvaluator *evaluator, GtUword inc)
 {
   gt_assert(evaluator);
   evaluator->A += inc;
 }
 
-void gt_evaluator_add_predicted(GtEvaluator *evaluator, unsigned long inc)
+void gt_evaluator_add_predicted(GtEvaluator *evaluator, GtUword inc)
 {
   gt_assert(evaluator);
   evaluator->P += inc;

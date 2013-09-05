@@ -96,7 +96,7 @@ static int gt_wtree_bench_bench_encseq(GtEncseq *es, GtTimer *t,
                                        GT_UNUSED GtError *err)
 {
   int had_err = 0;
-  unsigned long idx, length, pos;
+  GtUword idx, length, pos;
   gt_error_check(err);
   length = gt_encseq_total_length(es);
   gt_timer_start(t);
@@ -120,7 +120,7 @@ static int gt_wtree_bench_bench_wtree(GtWtree *wt,
                                       GtTimer *timer)
 {
   int had_err = 0;
-  unsigned long idx,
+  GtUword idx,
                 length = gt_wtree_length(wt),
                 syms = gt_wtree_num_of_symbols(wt),
                 tmp, pos, *max_ranks;

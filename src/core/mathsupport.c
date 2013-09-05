@@ -79,9 +79,9 @@ bool gt_double_larger_double(double d1, double d2)
   return gt_double_compare(d1, d2) > 0;
 }
 
-unsigned long gt_rand_max(unsigned long maximal_value)
+GtUword gt_rand_max(GtUword maximal_value)
 {
-  unsigned long r;
+  GtUword r;
   gt_assert(maximal_value);
   r = ((double) random() / ((double) RAND_MAX + 1) * (maximal_value + 1));
   gt_assert(r <= maximal_value);
@@ -120,11 +120,11 @@ char gt_rand_char(void)
    is the number of bits. There are faster methods, see
    \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
    */
-unsigned int gt_determinebitspervalue(unsigned long maxvalue)
+unsigned int gt_determinebitspervalue(GtUword maxvalue)
 {
   unsigned int bits = 0;
 #ifndef USEbuiltin_clzl
-  unsigned long value, mask = (~0) << CHAR_BIT;
+  GtUword value, mask = (~0) << CHAR_BIT;
 
   for (value = maxvalue; (value & mask) != 0; value >>= CHAR_BIT) {
     bits += CHAR_BIT;
@@ -133,7 +133,7 @@ unsigned int gt_determinebitspervalue(unsigned long maxvalue)
 #else
   {
     if (maxvalue != 0) { /*__builtin_clz only defined != 0 */
-      bits = (unsigned int) (sizeof(unsigned long) * CHAR_BIT) -
+      bits = (unsigned int) (sizeof(GtUword) * CHAR_BIT) -
              __builtin_clzl(maxvalue);
     }
   }
@@ -142,7 +142,7 @@ unsigned int gt_determinebitspervalue(unsigned long maxvalue)
   return bits;
 }
 
-unsigned long gt_power_for_small_exponents(unsigned int base,
+GtUword gt_power_for_small_exponents(unsigned int base,
                                            unsigned int exponent)
 {
   unsigned int logvalue = 0;
@@ -182,7 +182,7 @@ unsigned long gt_power_for_small_exponents(unsigned int base,
     return 1UL << (logvalue * exponent);
   }
   else {
-    unsigned long powervalue = (unsigned long) base;
+    GtUword powervalue = (GtUword) base;
 
     while (exponent > 1U) {
       powervalue *= base;
@@ -264,7 +264,7 @@ void gt_out_power_for_small_exponents(void)
 int gt_mathsupport_unit_test(GtError *err)
 {
   int had_err = 0;
-  unsigned long i;
+  GtUword i;
   double less_than_epsilon = 0.0000000000000001;
   gt_error_check(err);
 

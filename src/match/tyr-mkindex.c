@@ -34,26 +34,26 @@
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
-  unsigned long leftmostleaf,
+  GtUword leftmostleaf,
                 rightmostleaf,
                 suftabrightmostleaf,
                 lcptabrightmostleafplus1;
 } TyrDfsinfo;
 
-typedef int (*Processoccurrencecount)(unsigned long,
-                                      unsigned long,
+typedef int (*Processoccurrencecount)(GtUword,
+                                      GtUword,
                                       void *,
                                       GtError *);
 
 typedef struct listUlong
 {
-  unsigned long position;
+  GtUword position;
   struct listUlong *nextptr;
 } ListUlong;
 
 typedef struct
 {
-  unsigned long occcount;
+  GtUword occcount;
   ListUlong *positionlist;
 } Countwithpositions;
 
@@ -61,7 +61,7 @@ GT_DECLAREARRAYSTRUCT(Countwithpositions);
 
 typedef struct /* global information */
 {
-  unsigned long mersize,
+  GtUword mersize,
                 totallength,
                 minocc,
                 maxocc;
@@ -75,9 +75,9 @@ typedef struct /* global information */
   bool performtest;
   bool storecounts;
   GtUchar *bytebuffer;
-  unsigned long sizeofbuffer;
+  GtUword sizeofbuffer;
   GtArrayLargecount largecounts;
-  unsigned long countoutputmers;
+  GtUword countoutputmers;
   const ESASuffixptr *suftab; /* only necessary for performtest */
   GtUchar *currentmer;    /* only necessary for performtest */
 } TyrDfsstate;
@@ -86,7 +86,7 @@ typedef struct /* global information */
 
 static uint64_t bruteforcecountnumofmers(const TyrDfsstate *state)
 {
-  unsigned long idx;
+  GtUword idx;
   uint64_t numofmers = 0;
 
   for (idx=0; idx <= state->totallength - state->mersize; idx++)
@@ -119,11 +119,11 @@ static void checknumofmers(const TyrDfsstate *state,
 }
 
 static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
-                                     unsigned long countocc,
-                                     unsigned long position)
+                                     GtUword countocc,
+                                     GtUword position)
 {
   GtMMsearchiterator *mmsi;
-  unsigned long idx, bfcount;
+  GtUword idx, bfcount;
 
   for (idx = 0; idx < dfsstate->mersize; idx++)
   {
@@ -149,7 +149,7 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
 }
 
 static /*@null@*/ ListUlong *insertListUlong(ListUlong *liststart,
-                                             unsigned long position)
+                                             GtUword position)
 {
   ListUlong *newnode;
 
@@ -180,7 +180,7 @@ static void wrapListUlong(ListUlong *node)
 }
 
 static void showListUlong(const GtEncseq *encseq,
-                          unsigned long mersize,
+                          GtUword mersize,
                           const ListUlong *node)
 {
   const ListUlong *tmp;
@@ -192,7 +192,7 @@ static void showListUlong(const GtEncseq *encseq,
   }
 }
 
-static bool decideifocc(const TyrDfsstate *state,unsigned long countocc)
+static bool decideifocc(const TyrDfsstate *state,GtUword countocc)
 {
   if (state->minocc > 0)
   {
@@ -224,7 +224,7 @@ static bool decideifocc(const TyrDfsstate *state,unsigned long countocc)
 
 static uint64_t addupdistribution(const GtArrayCountwithpositions *distribution)
 {
-  unsigned long idx;
+  GtUword idx;
   uint64_t addcount = 0;
 
   for (idx=0; idx < distribution->nextfreeCountwithpositions; idx++)
@@ -240,7 +240,7 @@ static uint64_t addupdistribution(const GtArrayCountwithpositions *distribution)
 
 static void showmerdistribution(const TyrDfsstate *state)
 {
-  unsigned long countocc;
+  GtUword countocc;
 
   for (countocc = 0;
       countocc < state->occdistribution.nextfreeCountwithpositions;
@@ -281,26 +281,26 @@ static void showfinalstatistics(const TyrDfsstate *state,
   gt_logger_log(logger,
               "number of %lu-mers in the sequences not containing a "
               "wildcard: " Formatuint64_t,
-              (unsigned long) state->mersize,
+              (GtUword) state->mersize,
               PRINTuint64_tcast(dnumofmers));
   gt_logger_log(logger,
               "show the distribution of the number of occurrences of %lu-mers",
-               (unsigned long) state->mersize);
+               (GtUword) state->mersize);
   gt_logger_log(logger,"not containing a wildcard as rows of the form "
               "i d where");
   gt_logger_log(logger,
               "d is the number of events that a %lu-mer occurs exactly i times",
-              (unsigned long) state->mersize);
+              (GtUword) state->mersize);
   showmerdistribution(state);
 }
 
 static void incrementdistribcounts(GtArrayCountwithpositions *occdistribution,
-                                   unsigned long countocc,unsigned long value)
+                                   GtUword countocc,GtUword value)
 {
   if (countocc >= occdistribution->allocatedCountwithpositions)
   {
-    const unsigned long addamount = 128UL;
-    unsigned long idx;
+    const GtUword addamount = 128UL;
+    GtUword idx;
 
     occdistribution->spaceCountwithpositions
       = gt_realloc(occdistribution->spaceCountwithpositions,
@@ -321,8 +321,8 @@ static void incrementdistribcounts(GtArrayCountwithpositions *occdistribution,
   occdistribution->spaceCountwithpositions[countocc].occcount += value;
 }
 
-static int adddistpos2distribution(unsigned long countocc,
-                                   unsigned long position,
+static int adddistpos2distribution(GtUword countocc,
+                                   GtUword position,
                                    void *adddistposinfo,
                                    GT_UNUSED GtError *err)
 {
@@ -346,15 +346,15 @@ static int adddistpos2distribution(unsigned long countocc,
 #define MAXSMALLMERCOUNT UCHAR_MAX
 
 static int outputsortedstring2indexviafileptr(const GtEncseq *encseq,
-                                              unsigned long mersize,
+                                              GtUword mersize,
                                               GtUchar *bytebuffer,
-                                              unsigned long sizeofbuffer,
+                                              GtUword sizeofbuffer,
                                               FILE *merindexfpout,
                                               FILE *countsfilefpout,
-                                              unsigned long position,
-                                              unsigned long countocc,
+                                              GtUword position,
+                                              GtUword countocc,
                                               GtArrayLargecount *largecounts,
-                                              unsigned long countoutputmers,
+                                              GtUword countoutputmers,
                                               GT_UNUSED GtError *err)
 {
   gt_encseq_sequence2bytecode(bytebuffer,encseq,position,mersize);
@@ -381,8 +381,8 @@ static int outputsortedstring2indexviafileptr(const GtEncseq *encseq,
   return 0;
 }
 
-static int outputsortedstring2index(unsigned long countocc,
-                                    unsigned long position,
+static int outputsortedstring2index(GtUword countocc,
+                                    GtUword position,
                                     void *adddistposinfo,
                                     GtError *err)
 {
@@ -424,9 +424,9 @@ static void tyr_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 }
 
 static int tyr_processleafedge(GT_UNUSED bool firstsucc,
-                           unsigned long fatherdepth,
+                           GtUword fatherdepth,
                            GT_UNUSED Dfsinfo *father,
-                           unsigned long leafnumber,
+                           GtUword leafnumber,
                            Dfsstate *astate,
                            GtError *err)
 {
@@ -448,9 +448,9 @@ static int tyr_processleafedge(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int tyr_processcompletenode(unsigned long nodeptrdepth,
+static int tyr_processcompletenode(GtUword nodeptrdepth,
                                Dfsinfo *anodeptr,
-                               unsigned long nodeptrminusonedepth,
+                               GtUword nodeptrminusonedepth,
                                Dfsstate *astate,
                                GtError *err)
 {
@@ -459,7 +459,7 @@ static int tyr_processcompletenode(unsigned long nodeptrdepth,
   gt_error_check(err);
   if (state->mersize <= nodeptrdepth)
   {
-    unsigned long fatherdepth;
+    GtUword fatherdepth;
 
     fatherdepth = nodeptr->lcptabrightmostleafplus1;
     if (fatherdepth < nodeptrminusonedepth)
@@ -468,7 +468,7 @@ static int tyr_processcompletenode(unsigned long nodeptrdepth,
     }
     if (fatherdepth < state->mersize)
     {
-      if (state->processoccurrencecount((unsigned long)
+      if (state->processoccurrencecount((GtUword)
                                         (nodeptr->rightmostleaf -
                                          nodeptr->leftmostleaf + 1),
                                         nodeptr->suftabrightmostleaf,
@@ -482,7 +482,7 @@ static int tyr_processcompletenode(unsigned long nodeptrdepth,
   return 0;
 }
 
-static void tyr_assignleftmostleaf(Dfsinfo *adfsinfo,unsigned long leftmostleaf,
+static void tyr_assignleftmostleaf(Dfsinfo *adfsinfo,GtUword leftmostleaf,
                                    GT_UNUSED Dfsstate *dfsstate)
 {
   TyrDfsinfo *dfsinfo = (TyrDfsinfo*) adfsinfo;
@@ -490,9 +490,9 @@ static void tyr_assignleftmostleaf(Dfsinfo *adfsinfo,unsigned long leftmostleaf,
 }
 
 static void tyr_assignrightmostleaf(Dfsinfo *adfsinfo,
-                                    unsigned long currentindex,
-                                    unsigned long previoussuffix,
-                                    unsigned long currentlcp,
+                                    GtUword currentindex,
+                                    GtUword previoussuffix,
+                                    GtUword currentlcp,
                                     GT_UNUSED Dfsstate *dfsstate)
 {
   TyrDfsinfo *dfsinfo = (TyrDfsinfo*) adfsinfo;
@@ -501,7 +501,7 @@ static void tyr_assignrightmostleaf(Dfsinfo *adfsinfo,
   dfsinfo->lcptabrightmostleafplus1 = currentlcp;
 }
 
-static void outputbytewiseUlongvalue(FILE *fpout,unsigned long value)
+static void outputbytewiseUlongvalue(FILE *fpout,GtUword value)
 {
   size_t i;
 
@@ -516,9 +516,9 @@ static int enumeratelcpintervals(const char *inputindex,
                                  Sequentialsuffixarrayreader *ssar,
                                  const char *storeindex,
                                  bool storecounts,
-                                 unsigned long mersize,
-                                 unsigned long minocc,
-                                 unsigned long maxocc,
+                                 GtUword mersize,
+                                 GtUword minocc,
+                                 GtUword maxocc,
                                  bool performtest,
                                  GtLogger *logger,
                                  GtError *err)
@@ -534,7 +534,7 @@ static int enumeratelcpintervals(const char *inputindex,
                                    gt_encseqSequentialsuffixarrayreader(ssar),
                                    gt_readmodeSequentialsuffixarrayreader(ssar),
                                    0);
-  state->mersize = (unsigned long) mersize;
+  state->mersize = (GtUword) mersize;
   state->encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   alphasize = gt_alphabet_num_of_chars(gt_encseq_alphabet(state->encseq));
   state->readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
@@ -626,7 +626,7 @@ static int enumeratelcpintervals(const char *inputindex,
       {
         gt_logger_log(logger,"write %lu mercounts > %lu to file \"%s%s\"",
                     state->largecounts.nextfreeLargecount,
-                    (unsigned long) MAXSMALLMERCOUNT,
+                    (GtUword) MAXSMALLMERCOUNT,
                     storeindex,
                     COUNTSSUFFIX);
         gt_xfwrite(state->largecounts.spaceLargecount, sizeof (Largecount),
@@ -641,15 +641,15 @@ static int enumeratelcpintervals(const char *inputindex,
                   state->countoutputmers);
       gt_logger_log(logger,"index size: %.2f megabytes\n",
                   GT_MEGABYTES(state->countoutputmers * state->sizeofbuffer +
-                               sizeof (unsigned long) * EXTRAINTEGERS));
+                               sizeof (GtUword) * EXTRAINTEGERS));
     }
   }
   /* now out EXTRAINTEGERS integer values */
   if (!haserr && state->merindexfpout != NULL)
   {
     outputbytewiseUlongvalue(state->merindexfpout,
-                             (unsigned long) state->mersize);
-    outputbytewiseUlongvalue(state->merindexfpout,(unsigned long) alphasize);
+                             (GtUword) state->mersize);
+    outputbytewiseUlongvalue(state->merindexfpout,(GtUword) alphasize);
   }
   gt_fa_xfclose(state->merindexfpout);
   gt_fa_xfclose(state->countsfilefpout);
@@ -663,9 +663,9 @@ static int enumeratelcpintervals(const char *inputindex,
 }
 
 int gt_merstatistics(const char *inputindex,
-                  unsigned long mersize,
-                  unsigned long minocc,
-                  unsigned long maxocc,
+                  GtUword mersize,
+                  GtUword minocc,
+                  GtUword maxocc,
                   const char *storeindex,
                   bool storecounts,
                   bool scanfile,

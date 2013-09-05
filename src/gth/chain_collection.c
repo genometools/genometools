@@ -31,7 +31,7 @@ GthChainCollection* gth_chain_collection_new(void)
 
 void gth_chain_collection_delete(GthChainCollection *chain_collection)
 {
-  unsigned long i;
+  GtUword i;
   if (!chain_collection) return;
   for (i = 0; i < gt_array_size(chain_collection->chains); i++)
     gth_chain_delete(*(GthChain**) gt_array_get(chain_collection->chains, i));
@@ -93,7 +93,7 @@ void gth_chain_collection_sort(GthChainCollection *chain_collection)
   }
 }
 
-unsigned long gth_chain_collection_size(const GthChainCollection
+GtUword gth_chain_collection_size(const GthChainCollection
                                         *chain_collection)
 {
   gt_assert(chain_collection);
@@ -101,7 +101,7 @@ unsigned long gth_chain_collection_size(const GthChainCollection
 }
 
 GthChain* gth_chain_collection_get(const GthChainCollection *chain_collection,
-                                   unsigned long idx)
+                                   GtUword idx)
 {
   gt_assert(chain_collection);
   return *(GthChain**) gt_array_get(chain_collection->chains, idx);

@@ -96,7 +96,7 @@ static int merge_feature_visitor_feature_node(GtNodeVisitor *nv,
 {
   GtMergeFeatureVisitor *v;
   GtFeatureNode *leaf;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_error_check(err);
   v = gt_merge_feature_visitor_cast(nv);

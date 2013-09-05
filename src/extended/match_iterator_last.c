@@ -172,7 +172,7 @@ static int last_prepare_fasta_seqs(const char *filename, GtEncseq *encseq,
   int had_err = 0;
   GtFile *fp;
   GtStr *header = NULL;
-  unsigned long desclen;
+  GtUword desclen;
   gt_assert(filename && encseq);
   gt_error_check(err);
 
@@ -180,7 +180,7 @@ static int last_prepare_fasta_seqs(const char *filename, GtEncseq *encseq,
     had_err = -1;
   header = gt_str_new();
   if (!had_err) {
-    unsigned long i, length, startpos, endpos;
+    GtUword i, length, startpos, endpos;
     for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
       char *desccpy;
       desc = gt_encseq_description(encseq, &desclen, i);
@@ -225,7 +225,7 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
                             GtError *err)
 {
   int had_err = 0;
-  unsigned long score = GT_UNDEF_ULONG,
+  GtUword score = GT_UNDEF_ULONG,
                 start1 = GT_UNDEF_ULONG,
                 start2 = GT_UNDEF_ULONG,
                 mlength1 = GT_UNDEF_ULONG,
@@ -259,9 +259,9 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
       had_err = -1;
     }
     if (!had_err) {
-      seqno1 = (unsigned long) gt_hashmap_get(mil->pvt->desc_to_seqno, seqid1);
+      seqno1 = (GtUword) gt_hashmap_get(mil->pvt->desc_to_seqno, seqid1);
       gt_assert(seqno1 != GT_UNDEF_ULONG);
-      seqno2 = (unsigned long) gt_hashmap_get(mil->pvt->desc_to_seqno, seqid2);
+      seqno2 = (GtUword) gt_hashmap_get(mil->pvt->desc_to_seqno, seqid2);
       gt_assert(seqno2 != GT_UNDEF_ULONG);
       *match = gt_match_last_new(seqid1, seqid2, score,
                                  seqno1, seqno2,

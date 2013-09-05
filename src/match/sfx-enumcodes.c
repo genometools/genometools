@@ -29,7 +29,7 @@ struct Enumcodeatposition
   GtRange previousrange;
   GtSpecialrangeiterator *sri;
   bool moveforward;
-  unsigned long totallength;
+  GtUword totallength;
   bool exhausted;
   const GtEncseq *encseq;
   GtReadmode readmode;
@@ -71,17 +71,17 @@ Enumcodeatposition *gt_Enumcodeatposition_new(const GtEncseq *encseq,
 }
 
 static bool newcodelistelem(Specialcontext *specialcontext,
-                            unsigned long smallerval,
-                            unsigned long largerval,
+                            GtUword smallerval,
+                            GtUword largerval,
                             const Enumcodeatposition *ecp)
 {
   if (smallerval < largerval)
   {
-    unsigned long distance = largerval - smallerval;
+    GtUword distance = largerval - smallerval;
 
-    if (distance > (unsigned long) (ecp->prefixlength-1))
+    if (distance > (GtUword) (ecp->prefixlength-1))
     {
-      distance = (unsigned long) (ecp->prefixlength-1);
+      distance = (GtUword) (ecp->prefixlength-1);
     }
     specialcontext->maxprefixindex = (unsigned int) distance;
     if (ecp->moveforward)
@@ -92,7 +92,7 @@ static bool newcodelistelem(Specialcontext *specialcontext,
       specialcontext->position = largerval;
     }
     gt_assert(specialcontext->position >=
-              (unsigned long) specialcontext->maxprefixindex);
+              (GtUword) specialcontext->maxprefixindex);
     return true;
   }
   return false;
@@ -168,7 +168,7 @@ void gt_Enumcodeatposition_delete(Enumcodeatposition *ecp)
 
 GtCodetype gt_Enumcodeatposition_filledqgramcode(const Enumcodeatposition *ecp,
                                                  unsigned int prefixindex,
-                                                 unsigned long pos)
+                                                 GtUword pos)
 {
   GtCodetype code;
   unsigned int idx;
@@ -178,7 +178,7 @@ GtCodetype gt_Enumcodeatposition_filledqgramcode(const Enumcodeatposition *ecp,
   code = ecp->filltable[prefixindex];
   for (idx=0; idx<prefixindex; idx++)
   {
-    gt_assert((unsigned long) (pos + idx) < ecp->totallength);
+    gt_assert((GtUword) (pos + idx) < ecp->totallength);
     cc = gt_encseq_get_encoded_char_nospecial(ecp->encseq,
                                               pos + idx,
                                               ecp->readmode);
@@ -192,7 +192,7 @@ bool gt_Enumcodeatposition_filledqgramcodestopatmax(
                                         GtCodetype *code,
                                         const Enumcodeatposition *ecp,
                                         unsigned int prefixindex,
-                                        unsigned long pos,
+                                        GtUword pos,
                                         GtCodetype stopcode)
 {
   GtCodetype tmpcode;
@@ -207,7 +207,7 @@ bool gt_Enumcodeatposition_filledqgramcodestopatmax(
   }
   for (idx=0; idx<prefixindex; idx++)
   {
-    gt_assert((unsigned long) (pos + idx) < ecp->totallength);
+    gt_assert((GtUword) (pos + idx) < ecp->totallength);
     cc = gt_encseq_get_encoded_char_nospecial(ecp->encseq,
                                               pos + idx,
                                               ecp->readmode);

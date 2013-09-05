@@ -50,7 +50,7 @@ typedef struct {
   char *current_outputfilename;
   GtFile **subset_files;
   GtStr **subset_filenames;
-  unsigned long *subset_file_sa_counter,
+  GtUword *subset_file_sa_counter,
                 num_of_subset_files;
   GthSAFilter *sa_filter; /* reference only */
   GthSAVisitor *sa_visitor;
@@ -59,7 +59,7 @@ typedef struct {
 static void close_output_files(Store_in_subset_file_data
                                *store_in_subset_file_data)
 {
-  unsigned long i;
+  GtUword i;
   GtStr *buf;
 
   buf = gt_str_new();
@@ -93,7 +93,7 @@ static int store_in_subset_file(void *data, GthSA *sa,
   Store_in_subset_file_data *store_in_subset_file_data =
     (Store_in_subset_file_data*) data;
   double split_determing_percentage = 0.0;
-  unsigned long filenum;
+  GtUword filenum;
   char filenamesuffix[4];
   int had_err = 0;
 
@@ -331,7 +331,7 @@ static int gthsplit_process_files(Gthsplitinfo *gthsplitinfo,
 {
   Store_in_subset_file_data store_in_subset_file_data;
   GthInput *inputinfo;
-  unsigned long i;
+  GtUword i;
   int had_err;
 
   gt_error_check(err);
@@ -349,7 +349,7 @@ static int gthsplit_process_files(Gthsplitinfo *gthsplitinfo,
     gt_malloc(sizeof (GtStr*) *
               store_in_subset_file_data.num_of_subset_files);
   store_in_subset_file_data.subset_file_sa_counter =
-    gt_malloc(sizeof (unsigned long) *
+    gt_malloc(sizeof (GtUword) *
               store_in_subset_file_data.num_of_subset_files);
   for (i = 0; i < store_in_subset_file_data.num_of_subset_files; i++) {
     store_in_subset_file_data.subset_files[i]           = NULL;

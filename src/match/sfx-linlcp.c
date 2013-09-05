@@ -27,23 +27,23 @@
 #include "sarr-def.h"
 #include "sfx-linlcp.h"
 
-unsigned long *gt_lcp13_manzini(const GtEncseq *encseq,
+GtUword *gt_lcp13_manzini(const GtEncseq *encseq,
                                 GtReadmode readmode,
-                                unsigned long partwidth,
-                                unsigned long totallength,
+                                GtUword partwidth,
+                                GtUword totallength,
                                 const ESASuffixptr *suftab,
                                 GtCompactUlongStore *inversesuftab)
 {
-  unsigned long pos, lcpvalue = 0, *lcptab;
+  GtUword pos, lcpvalue = 0, *lcptab;
 
-  lcptab = gt_malloc(sizeof (unsigned long) * partwidth);
+  lcptab = gt_malloc(sizeof (GtUword) * partwidth);
   lcptab[0] = 0;
   for (pos=0; pos <= totallength; pos++)
   {
-    unsigned long fillpos = gt_compact_ulong_store_get(inversesuftab,pos);
+    GtUword fillpos = gt_compact_ulong_store_get(inversesuftab,pos);
     if (fillpos > 0 && fillpos < partwidth)
     {
-      unsigned long previousstart = ESASUFFIXPTRGET(suftab,fillpos-1);
+      GtUword previousstart = ESASUFFIXPTRGET(suftab,fillpos-1);
       while (pos+lcpvalue < totallength &&
              previousstart+lcpvalue < totallength)
       {
@@ -70,18 +70,18 @@ unsigned long *gt_lcp13_manzini(const GtEncseq *encseq,
   return lcptab;
 }
 
-static unsigned long *computeocclesstab(const GtEncseq *encseq,
+static GtUword *computeocclesstab(const GtEncseq *encseq,
                                         GtReadmode readmode)
 {
-  unsigned long *occless;
+  GtUword *occless;
   unsigned int charidx, numofchars;
 
   numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
-  occless = gt_malloc(sizeof (unsigned long) * numofchars);
+  occless = gt_malloc(sizeof (GtUword) * numofchars);
   occless[0] = 0;
   for (charidx = 1U; charidx < numofchars; charidx++)
   {
-    unsigned long count;
+    GtUword count;
 
     if (GT_ISDIRCOMPLEMENT(readmode))
     {
@@ -109,11 +109,11 @@ static void setrelevantfrominversetab(GtCompactUlongStore *rightposinverse,
                                       const GtEncseq *encseq,
                                       GtReadmode readmode,
                                       const ESASuffixptr *suftab,
-                                      unsigned long partwidth)
+                                      GtUword partwidth)
 {
   if (gt_encseq_has_specialranges(encseq))
   {
-    unsigned long idx, pos;
+    GtUword idx, pos;
 
     for (idx = 0; idx < partwidth; idx++)
     {
@@ -130,16 +130,16 @@ static void setrelevantfrominversetab(GtCompactUlongStore *rightposinverse,
   }
 }
 
-static unsigned long *fillrightofpartwidth(
+static GtUword *fillrightofpartwidth(
                                      const GtCompactUlongStore *rightposinverse,
                                      const GtEncseq *encseq,
                                      GtReadmode readmode,
-                                     unsigned long partwidth,
-                                     unsigned long totallength)
+                                     GtUword partwidth,
+                                     GtUword totallength)
 {
   GtSpecialrangeiterator *sri;
   GtRange range;
-  unsigned long countlargeranges, *rightofpartwidth = NULL,
+  GtUword countlargeranges, *rightofpartwidth = NULL,
                 nextrightofpartwidth = 0;
 
   countlargeranges = gt_encseq_realspecialranges(encseq);
@@ -162,7 +162,7 @@ static unsigned long *fillrightofpartwidth(
         size_t allocsize = sizeof (*rightofpartwidth) * countlargeranges;
         rightofpartwidth = gt_malloc(allocsize);
         /*printf("allocated %lu bytes for rightofpartwidth (%.2f)\n",
-            (unsigned long) allocsize, (double) allocsize/totallength);*/
+            (GtUword) allocsize, (double) allocsize/totallength);*/
       }
       gt_assert(nextrightofpartwidth < countlargeranges);
       rightofpartwidth[nextrightofpartwidth++]
@@ -178,14 +178,14 @@ static void inversesuffixarray2specialranknext(
                          GtCompactUlongStore *ranknext,
                          const GtEncseq *encseq,
                          GtReadmode readmode,
-                         unsigned long partwidth,
-                         unsigned long totallength)
+                         GtUword partwidth,
+                         GtUword totallength)
 {
   if (gt_encseq_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    unsigned long idx, *rightofpartwidth = NULL,
+    GtUword idx, *rightofpartwidth = NULL,
                   specialranklistindex, nextrightofpartwidth = 0;
 
     rightofpartwidth = fillrightofpartwidth(rightposinverse,
@@ -231,14 +231,14 @@ static void inversesuffixarray2specialranknext(
   }
 }
 
-static unsigned long sa2ranknext(GtCompactUlongStore *ranknext,
+static GtUword sa2ranknext(GtCompactUlongStore *ranknext,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
-                                 unsigned long partwidth,
-                                 unsigned long totallength,
+                                 GtUword partwidth,
+                                 GtUword totallength,
                                  const ESASuffixptr *suftab)
 {
-  unsigned long idx, pos, longest = 0, *occless;
+  GtUword idx, pos, longest = 0, *occless;
 
   gt_assert(partwidth > 0);
 
@@ -266,7 +266,7 @@ static unsigned long sa2ranknext(GtCompactUlongStore *ranknext,
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    unsigned long specialidx;
+    GtUword specialidx;
 
     sri = gt_specialrangeiterator_new(encseq,
                                       GT_ISDIRREVERSE(readmode) ? false : true);
@@ -310,11 +310,11 @@ static unsigned long sa2ranknext(GtCompactUlongStore *ranknext,
 GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
-                                 unsigned long partwidth,
-                                 unsigned long totallength,
+                                 GtUword partwidth,
+                                 GtUword totallength,
                                  const ESASuffixptr *suftab)
 {
-  unsigned long pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0,
+  GtUword pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0,
                 previouscc1pos, previouscc2pos;
   GtCompactUlongStore *lcptab, *ranknext, *rightposinverse;
   GtUchar cc1, cc2;
@@ -409,16 +409,16 @@ GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
   return lcptab;
 }
 
-static unsigned long gt_check_for_range_occurrence(const ESASuffixptr *suftab,
-                                                   unsigned long suffix,
-                                                   unsigned long start,
-                                                   unsigned long end)
+static GtUword gt_check_for_range_occurrence(const ESASuffixptr *suftab,
+                                                   GtUword suffix,
+                                                   GtUword start,
+                                                   GtUword end)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx = start; idx <= end; idx++)
   {
-    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+    GtUword position = ESASUFFIXPTRGET(suftab,idx);
 
     if (suffix == position)
     {
@@ -430,7 +430,7 @@ static unsigned long gt_check_for_range_occurrence(const ESASuffixptr *suftab,
 
 typedef struct
 {
-  unsigned long start, end;
+  GtUword start, end;
   GtUchar firstchar;
 } GtRangewithchar;
 
@@ -458,14 +458,14 @@ typedef struct
 
 static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
                                      GtReadmode readmode,
-                                     unsigned long totallength,
+                                     GtUword totallength,
                                      unsigned int numofchars,
                                      const ESASuffixptr *suftab,
                                      const GtRangewithchar *rangestore,
                                      unsigned int numofranges)
 {
   unsigned int rangeidx;
-  unsigned long idx, *nexttab = gt_calloc((size_t) numofchars,sizeof(*nexttab));
+  GtUword idx, *nexttab = gt_calloc((size_t) numofchars,sizeof(*nexttab));
 
   for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
   {
@@ -473,14 +473,14 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
   }
   for (idx = 0; idx < totallength; idx++)
   {
-    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+    GtUword position = ESASUFFIXPTRGET(suftab,idx);
 
     if (position > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(encseq,position - 1,readmode);
       if (ISNOTSPECIAL(cc))
       {
-        unsigned long checkpos;
+        GtUword checkpos;
 
         checkpos = ESASUFFIXPTRGET(suftab,nexttab[(int) cc]) + 1;
         if (checkpos != position)
@@ -504,28 +504,28 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
    to perform the check in one linear scan.
 */
 
-static void gt_suftab_sk_suffixorder(unsigned long totallength,
+static void gt_suftab_sk_suffixorder(GtUword totallength,
                                      unsigned int numofchars,
                                      const ESASuffixptr *suftab,
                                      const GtRangewithchar *rangestore,
                                      unsigned int numofranges)
 {
   unsigned int rangeidx;
-  unsigned long numofcomparisons = 0;
+  GtUword numofcomparisons = 0;
   double ratio;
 
   for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
   {
-    unsigned long idx, start = 0;
+    GtUword idx, start = 0;
 
     for (idx = rangestore[rangeidx].start; idx <= rangestore[rangeidx].end;
          idx++)
     {
-      unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+      GtUword position = ESASUFFIXPTRGET(suftab,idx);
 
       if (position + 1 <= totallength)
       {
-        unsigned long found = gt_check_for_range_occurrence(suftab,
+        GtUword found = gt_check_for_range_occurrence(suftab,
                                                             position + 1,
                                                             start,
                                                             totallength);
@@ -552,11 +552,11 @@ static void gt_suftab_sk_suffixorder(unsigned long totallength,
 
 void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                                GtReadmode readmode,
-                               unsigned long totallength,
+                               GtUword totallength,
                                const ESASuffixptr *suftab,
                                GtLogger *logger)
 {
-  unsigned long idx, countbitsset = 0, previouspos = 0,
+  GtUword idx, countbitsset = 0, previouspos = 0,
                 firstspecial = totallength, rangestart = 0;
   unsigned int numofchars, charidx, rangeidx = 0, numofranges;
   GtBitsequence *startposoccurs;
@@ -569,7 +569,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   rangestore = gt_malloc(sizeof(*rangestore) * numofchars);
   for (idx = 0; idx < totallength; idx++)
   {
-    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+    GtUword position = ESASUFFIXPTRGET(suftab,idx);
     GtUchar cc;
 
     if (GT_ISIBITSET(startposoccurs,position))
@@ -658,7 +658,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   numofranges = rangeidx;
   for (charidx = 0, rangeidx = 0; charidx < numofchars; charidx++)
   {
-    unsigned long count;
+    GtUword count;
 
     if (GT_ISDIRCOMPLEMENT(readmode))
     {
@@ -707,7 +707,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
-  unsigned long partwidth, totallength = gt_encseq_total_length(encseq),
+  GtUword partwidth, totallength = gt_encseq_total_length(encseq),
                 idx, specials = gt_encseq_specialcharacters(encseq);
   GtCompactUlongStore *lcptab = NULL;
 
@@ -734,7 +734,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
   }
   for (idx = 1UL; /* Nothing */; idx++)
   {
-    unsigned long mlcpvalue, lcpvalue;
+    GtUword mlcpvalue, lcpvalue;
     int retval = gt_nextSequentiallcpvalue(&lcpvalue,ssar,err);
 
     if (retval < 0)

@@ -59,12 +59,12 @@ static int shu_unitfile_compare_inner_key_filenames(lua_State *L,
                                                    GtShuUnitFileInfo *unit_info,
                                                    bool *file_set,
                                                    GtStr *mapping_filename,
-                                                   unsigned long genome_idx,
+                                                   GtUword genome_idx,
                                                    GtError *err)
 {
   bool found = false;
   int had_err = 0;
-  unsigned long file_idx;
+  GtUword file_idx;
   GtStr *encseq_filename;
 
   gt_str_reset(mapping_filename);
@@ -102,8 +102,8 @@ static int shu_unitfile_traverse_inner_keys(lua_State *L,
                                             GtShuUnitFileInfo *unit_info,
                                             bool *file_set,
                                             GtStr *mapping_filename,
-                                            unsigned long genome_idx,
-                                            unsigned long *files_added,
+                                            GtUword genome_idx,
+                                            GtUword *files_added,
                                             GtError *err)
 {
   int had_err = 0;
@@ -128,7 +128,7 @@ static int traverse_units(lua_State *L,
                           GtError *err)
 {
   int had_err = 0;
-  unsigned long genome_idx = 0,
+  GtUword genome_idx = 0,
                 files_added = 0;
   bool *file_set;
   GtStr *mapping_filename = gt_str_new();
@@ -166,7 +166,7 @@ static int traverse_units(lua_State *L,
                  "differ!", unit_info->num_of_files, files_added);
   }
   if (!had_err) {
-    unsigned long file_idx;
+    GtUword file_idx;
     for (file_idx = 0; file_idx < unit_info->num_of_files; file_idx++) {
       gt_log_log("file: %lu belongs to genome: %s",
                  file_idx,
@@ -207,7 +207,7 @@ void gt_shu_unit_info_delete(GtShuUnitFileInfo *unit_info) {
 
 static void gt_shu_unit_info_files_as_units(GtShuUnitFileInfo *unit_info)
 {
-  unsigned long i_idx;
+  GtUword i_idx;
 
   unit_info->num_of_genomes = unit_info->num_of_files;
   unit_info->genome_names = gt_str_array_new();

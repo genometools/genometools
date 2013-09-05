@@ -29,11 +29,11 @@ struct GtESALcpintervalsVisitor {
 
 static int gt_esa_lcpitvs_visitor_processleafedge(GT_UNUSED GtESAVisitor *ev,
                                                   bool firstsucc,
-                                                  unsigned long fd,
-                                                  GT_UNUSED unsigned long flb,
+                                                  GtUword fd,
+                                                  GT_UNUSED GtUword flb,
                                                   GT_UNUSED
                                                          GtESAVisitorInfo *info,
-                                                  unsigned long leafnumber,
+                                                  GtUword leafnumber,
                                                   GT_UNUSED GtError *err)
 
 {
@@ -44,13 +44,13 @@ static int gt_esa_lcpitvs_visitor_processleafedge(GT_UNUSED GtESAVisitor *ev,
 static int gt_esa_lcpitvs_visitor_processbranchingedge(
                                                     GT_UNUSED GtESAVisitor *ev,
                                                     bool firstsucc,
-                                                    unsigned long fd,
-                                                    unsigned long flb,
+                                                    GtUword fd,
+                                                    GtUword flb,
                                                     GT_UNUSED
                                                         GtESAVisitorInfo *finfo,
-                                                    unsigned long sd,
-                                                    unsigned long slb,
-                                                    GT_UNUSED unsigned long srb,
+                                                    GtUword sd,
+                                                    GtUword slb,
+                                                    GT_UNUSED GtUword srb,
                                                     GT_UNUSED
                                                         GtESAVisitorInfo *sinfo,
                                                     GT_UNUSED GtError *err)

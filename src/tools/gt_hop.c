@@ -27,7 +27,7 @@
 
 typedef struct {
   GtStr  *encseqinput, *annotation, *map, *outfilename, *atype, *outprefix;
-  unsigned long hmin, clenmax, read_hmin, covmin, mapqmin, qmax;
+  GtUword hmin, clenmax, read_hmin, covmin, mapqmin, qmax;
   bool verbose, map_is_sam, chk, stats, allow_partial, allow_multiple,
        aggressive, moderate, conservative, expert, state_of_truth;
   double altmax, cogmin;
@@ -429,7 +429,7 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     GtSeqIterator **readset_iters = NULL;
     GtStrArray **infiles = NULL;
     GtFile **outfiles = NULL;
-    unsigned long nfiles = 0, i;
+    GtUword nfiles = 0, i;
     hpp = gt_hpol_processor_new(encseq, arguments->hmin);
     if (gt_str_length(arguments->map) > 0)
     {

@@ -19,11 +19,11 @@
 #define PCKDFS_H
 #include "eis-voiditf.h"
 
-typedef int (*Processlcp)(void *processinfo,unsigned long lcp,GtError *err);
+typedef int (*Processlcp)(void *processinfo,GtUword lcp,GtError *err);
 
 int gt_fmindex_dfstraverse(const FMindex *fmindex,
                             unsigned int numofchars,
-                            unsigned long totallength,
+                            GtUword totallength,
                             Processlcp processlcp,
                             void *processlcpdata,
                             GtError *err);

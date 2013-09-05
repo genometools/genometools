@@ -33,9 +33,9 @@ typedef GthFlt Hypo7table[HYPOTHESIS7][WINSIZE+2][4][4];
 #define BSSMPARAMVERSION        2
 
 typedef struct {
-  unsigned long hypothesis_num;  /* number of hypothesis, either HYPOTHESIS2 or
+  GtUword hypothesis_num;  /* number of hypothesis, either HYPOTHESIS2 or
                                     HYPOTHESIS7 */
-  unsigned long window_size_left,
+  GtUword window_size_left,
                 window_size_right;
   union {
     Hypo2table hypo2table;

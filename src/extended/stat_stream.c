@@ -27,7 +27,7 @@ struct GtStatStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *stat_visitor;
-  unsigned long number_of_DAGs;
+  GtUword number_of_DAGs;
 };
 
 const GtNodeStreamClass* gt_stat_stream_class(void);

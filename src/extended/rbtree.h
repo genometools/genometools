@@ -21,6 +21,7 @@
 
 #include "core/error.h"
 #include "core/fptr_api.h"
+#include "core/types_api.h"
 
 typedef enum
 {
@@ -33,8 +34,7 @@ typedef enum
 typedef struct GtRBTree GtRBTree;
 typedef struct GtRBTreeIter GtRBTreeIter;
 
-typedef int   (*GtRBTreeAction)(void *key, GtRBTreeContext, unsigned long,
-                                void*);
+typedef int   (*GtRBTreeAction)(void *key, GtRBTreeContext, GtUword, void*);
 typedef void  (*GtRBTreeFreeFunc)(void *p);
 
 GtRBTree*      gt_rbtree_new(GtCompareWithData cmp, GtRBTreeFreeFunc free,

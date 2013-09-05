@@ -26,7 +26,7 @@ struct GtRecMap {
          se_y;
   GtFeatureNode *fn;
   bool has_omitted_children;
-  unsigned long reference_count;
+  GtUword reference_count;
 };
 
 GtRecMap* gt_rec_map_new(double nw_x, double nw_y, double se_x, double se_y,

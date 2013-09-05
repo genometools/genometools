@@ -29,7 +29,7 @@
 
 typedef struct
 {
-  unsigned long seedwidth, numofonepositions;
+  GtUword seedwidth, numofonepositions;
   unsigned char *onepositions;
   GtBitsequence seedbitvector;
 } Spacedseed;
@@ -37,7 +37,7 @@ typedef struct
 static Spacedseed *spacedseed_new(const char *seedstring, GtError *err)
 {
   Spacedseed *spse;
-  unsigned long idx, fillindex;
+  GtUword idx, fillindex;
   bool haserr = false;
 
   spse = gt_malloc(sizeof (*spse));
@@ -46,7 +46,7 @@ static Spacedseed *spacedseed_new(const char *seedstring, GtError *err)
   spse->onepositions = NULL;
   for (idx = 0; seedstring[idx] != '\0'; idx++)
   {
-    if (spse->seedwidth == (unsigned long) GT_INTWORDSIZE)
+    if (spse->seedwidth == (GtUword) GT_INTWORDSIZE)
     {
       gt_error_set(err,"space seed cannot be longer than %u",
                        (unsigned int) GT_INTWORDSIZE);
@@ -104,11 +104,11 @@ static void singlewindowmatchspacedseed(Limdfsresources *limdfsresources,
 static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
                                        const AbstractDfstransformer *dfst,
                                        const GtUchar *query,
-                                       unsigned long querylen,
+                                       GtUword querylen,
                                        const Spacedseed *spse)
 {
   const GtUchar *qptr;
-  unsigned long offset, skipvalue;
+  GtUword offset, skipvalue;
 
   if (spse->seedwidth > querylen)
   {
@@ -146,8 +146,8 @@ static void onlinespacedseedsearch(const GtEncseq *encseq,
 {
   Windowiterator *wit;
   const GtUchar *buffer;
-  unsigned long currentpos, totallength;
-  unsigned long firstpos, windowschecked = 0;
+  GtUword currentpos, totallength;
+  GtUword firstpos, windowschecked = 0;
   Bitsequence bitmask;
   bool matched;
 
@@ -228,7 +228,7 @@ int gt_matchspacedseed(bool withesa,
   {
     GtSeqIterator *seqit;
     const GtUchar *query;
-    unsigned long querylen;
+    GtUword querylen;
     char *desc = NULL;
     uint64_t unitnum;
     int retval;
@@ -241,7 +241,7 @@ int gt_matchspacedseed(bool withesa,
     limdfsresources = gt_newLimdfsresources(genericindex,
                                          true,
                                          0,
-                                         (unsigned long) GT_INTWORDSIZE,
+                                         (GtUword) GT_INTWORDSIZE,
                                          false, /* keepexpandedonstack */
                                          cgr_showmatch,
                                          NULL, /* processmatch info */

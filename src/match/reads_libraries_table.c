@@ -22,19 +22,19 @@
 #include "match/reads_libraries_table.h"
 
 typedef struct {
-  unsigned long first_seqnum;
-  unsigned long insertlength;
-  unsigned long stdev;
+  GtUword first_seqnum;
+  GtUword insertlength;
+  GtUword stdev;
 } GtReadsLibrary;
 
 struct GtReadsLibrariesTable {
-  unsigned long noflibraries;
-  unsigned long firstunpaired;
+  GtUword noflibraries;
+  GtUword firstunpaired;
   GtReadsLibrary *library;
-  unsigned long nextfreelibrary;
+  GtUword nextfreelibrary;
 };
 
-GtReadsLibrariesTable* gt_reads_libraries_table_new(unsigned long noflibraries)
+GtReadsLibrariesTable* gt_reads_libraries_table_new(GtUword noflibraries)
 {
   GtReadsLibrariesTable *rlt;
   gt_assert(noflibraries > 0);
@@ -56,8 +56,8 @@ void gt_reads_libraries_table_delete(GtReadsLibrariesTable *rlt)
 }
 
 void gt_reads_libraries_table_add(GtReadsLibrariesTable *rlt,
-    unsigned long first_seqnum, unsigned long insertlength,
-    unsigned long stdev, bool paired)
+    GtUword first_seqnum, GtUword insertlength,
+    GtUword stdev, bool paired)
 {
   gt_assert(rlt != NULL);
   gt_assert(rlt->nextfreelibrary < rlt->noflibraries);
@@ -83,8 +83,8 @@ void gt_reads_libraries_table_add(GtReadsLibrariesTable *rlt,
 }
 
 void gt_reads_libraries_table_get_library(GtReadsLibrariesTable *rlt,
-    unsigned long libnum, unsigned long *first_seqnum,
-    unsigned long *insertlength, unsigned long *stdev)
+    GtUword libnum, GtUword *first_seqnum,
+    GtUword *insertlength, GtUword *stdev)
 {
   gt_assert(rlt != NULL);
   gt_assert(libnum < rlt->noflibraries);
@@ -96,13 +96,13 @@ void gt_reads_libraries_table_get_library(GtReadsLibrariesTable *rlt,
     *stdev = rlt->library[libnum].stdev;
 }
 
-unsigned long gt_reads_libraries_table_noflibraries(GtReadsLibrariesTable *rlt)
+GtUword gt_reads_libraries_table_noflibraries(GtReadsLibrariesTable *rlt)
 {
   gt_assert(rlt != NULL);
   return rlt->noflibraries;
 }
 
-unsigned long gt_reads_libraries_table_firstunpaired(GtReadsLibrariesTable *rlt)
+GtUword gt_reads_libraries_table_firstunpaired(GtReadsLibrariesTable *rlt)
 {
   gt_assert(rlt != NULL);
   return rlt->firstunpaired;
@@ -145,7 +145,7 @@ GtReadsLibrariesTable* gt_reads_libraries_table_load(FILE *rlt_fp,
     if (count != (size_t)rlt->noflibraries)
     {
       gt_error_set(err, "library table: %lu libraries expected, %lu found",
-          rlt->noflibraries, (unsigned long)count);
+          rlt->noflibraries, (GtUword)count);
       gt_free(rlt->library);
       gt_free(rlt);
       return NULL;

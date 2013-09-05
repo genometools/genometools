@@ -22,7 +22,7 @@
 
 typedef struct GtOBOStanza GtOBOStanza;
 
-GtOBOStanza*  gt_obo_stanza_new(const char *type, unsigned long line,
+GtOBOStanza*  gt_obo_stanza_new(const char *type, GtUword line,
                                 GtStr *filename);
 void          gt_obo_stanza_delete(GtOBOStanza *obo_stanza);
 void          gt_obo_stanza_add(GtOBOStanza *obo_stanza,
@@ -30,10 +30,10 @@ void          gt_obo_stanza_add(GtOBOStanza *obo_stanza,
 const char*   gt_obo_stanza_get_type(const GtOBOStanza *obo_stanza);
 const char*   gt_obo_stanza_get_value(const GtOBOStanza *obo_stanza,
                                       const char *stanza_key,
-                                      unsigned long num);
-unsigned long gt_obo_stanza_size(const GtOBOStanza *obo_stanza,
+                                      GtUword num);
+GtUword gt_obo_stanza_size(const GtOBOStanza *obo_stanza,
                                  const char *stanza_key);
 const char*   gt_obo_stanza_filename(const GtOBOStanza *obo_stanza);
-unsigned long gt_obo_stanza_line(const GtOBOStanza *obo_stanza);
+GtUword gt_obo_stanza_line(const GtOBOStanza *obo_stanza);
 
 #endif

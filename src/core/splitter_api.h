@@ -31,20 +31,20 @@ GtSplitter*   gt_splitter_new(void);
 /* Use <splitter> to split <string> of given <length> into tokens delimited by
    <delimiter>. Note that <string> is modified in the splitting process! */
 void          gt_splitter_split(GtSplitter *splitter, char *string,
-                                unsigned long length, char delimiter);
+                                GtUword length, char delimiter);
 
 /* Return all tokens split by <splitter> in an array. */
 char**        gt_splitter_get_tokens(GtSplitter *splitter);
 
 /* Return token with number <token_num> from <splitter>. */
 char*         gt_splitter_get_token(GtSplitter *splitter,
-                                    unsigned long token_num);
+                                    GtUword token_num);
 
 /* Reset the <splitter>. */
 void          gt_splitter_reset(GtSplitter *splitter);
 
 /* Return the number of tokens in <splitter>. */
-unsigned long gt_splitter_size(GtSplitter *splitter);
+GtUword gt_splitter_size(GtSplitter *splitter);
 
 /* Delete the <splitter>. */
 void          gt_splitter_delete(GtSplitter *splitter);

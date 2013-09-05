@@ -32,7 +32,7 @@
         } else\
         {\
           gt_assert((EXPORTPTR)->uinttabsectionptr != NULL);\
-          gt_assert(POS <= (unsigned long) UINT_MAX);\
+          gt_assert(POS <= (GtUword) UINT_MAX);\
           (EXPORTPTR)->uinttabsectionptr[INDEX] = (uint32_t) POS;\
         }\
         if (POS == 0)\
@@ -45,95 +45,95 @@ typedef struct GtSuffixsortspace GtSuffixsortspace;
 typedef struct
 {
   uint32_t *uinttabsectionptr;
-  unsigned long *ulongtabsectionptr;
+  GtUword *ulongtabsectionptr;
 } GtSuffixsortspace_exportptr;
 
 typedef void (*GtProcessunsortedsuffixrange)(void *,
-                                             unsigned long,
-                                             unsigned long,
-                                             unsigned long);
+                                             GtUword,
+                                             GtUword,
+                                             GtUword);
 
-GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
-                                          unsigned long maxvalue,
+GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
+                                          GtUword maxvalue,
                                           bool useuint,
                                           GtLogger *logger);
 
 GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
                                                    const char *filename,
-                                                   unsigned long numofentries,
-                                                   unsigned long maxvalue,
+                                                   GtUword numofentries,
+                                                   GtUword maxvalue,
                                                    bool useuint);
 
 void gt_suffixsortspace_delete(GT_UNUSED GtSuffixsortspace *suffixsortspace,
                                GT_UNUSED bool checklongestdefined);
 
 void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
-                                  unsigned long subbucketleft,
-                                  unsigned long width);
+                                  GtUword subbucketleft,
+                                  GtUword width);
 
 void gt_suffixsortspace_checkorder(const GtSuffixsortspace *sssp,
-                                   unsigned long subbucketleft,
-                                   unsigned long width);
+                                   GtUword subbucketleft,
+                                   GtUword width);
 
-unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
-                                           unsigned long idx);
+GtUword gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
+                                           GtUword idx);
 
 void gt_suffixsortspace_nooffsets(const GtSuffixsortspace *sssp);
 
 void gt_suffixsortspace_updatelongest(GtSuffixsortspace *sssp,
-                                      unsigned long idx);
+                                      GtUword idx);
 
 void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
-                                  unsigned long idx,
-                                  unsigned long value);
+                                  GtUword idx,
+                                  GtUword value);
 
 GtSuffixsortspace_exportptr *gt_suffixsortspace_exportptr(
-                                  unsigned long subbucketleft,
+                                  GtUword subbucketleft,
                                   GtSuffixsortspace *sssp);
 
 void gt_suffixsortspace_export_done(GtSuffixsortspace *sssp);
 
-unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
-                                     unsigned long subbucketleft,
-                                     unsigned long idx);
+GtUword gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
+                                     GtUword subbucketleft,
+                                     GtUword idx);
 
-const unsigned long *gt_suffixsortspace_getptr_ulong(
+const GtUword *gt_suffixsortspace_getptr_ulong(
                                                const GtSuffixsortspace *sssp,
-                                               unsigned long subbucketleft);
+                                               GtUword subbucketleft);
 
 const uint32_t *gt_suffixsortspace_getptr_uint32(const GtSuffixsortspace *sssp,
-                                                 unsigned long subbucketleft);
+                                                 GtUword subbucketleft);
 
 void gt_suffixsortspace_set(GtSuffixsortspace *sssp,
-                            unsigned long subbucketleft,
-                            unsigned long idx,
-                            unsigned long value);
+                            GtUword subbucketleft,
+                            GtUword idx,
+                            GtUword value);
 
-unsigned long gt_suffixsortspace_bucketleftidx_get(
+GtUword gt_suffixsortspace_bucketleftidx_get(
                     const GtSuffixsortspace *sssp);
 
 void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,
-                                          unsigned long value);
+                                          GtUword value);
 
 void gt_suffixsortspace_sortspace_delete(GtSuffixsortspace *sssp);
 
 void gt_suffixsortspace_partoffset_set(GtSuffixsortspace *sssp,
-                                       unsigned long partoffset);
+                                       GtUword partoffset);
 
-unsigned long *gt_suffixsortspace_ulong_get(const GtSuffixsortspace *sssp);
+GtUword *gt_suffixsortspace_ulong_get(const GtSuffixsortspace *sssp);
 
-unsigned long gt_suffixsortspace_longest(const GtSuffixsortspace *sssp);
+GtUword gt_suffixsortspace_longest(const GtSuffixsortspace *sssp);
 
-uint64_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
-                                          unsigned long maxvalue,
+uint64_t gt_suffixsortspace_requiredspace(GtUword numofentries,
+                                          GtUword maxvalue,
                                           bool useuint);
 
 void gt_suffixsortspace_to_file (FILE *outfpsuftab,
                                  const GtSuffixsortspace *sssp,
-                                 unsigned long numberofsuffixes);
+                                 GtUword numberofsuffixes);
 
 void gt_suffixsortspace_compressed_to_file (const GtSuffixsortspace *sssp,
                                             GtBitbuffer *bb,
-                                            unsigned long numberofsuffixes);
+                                            GtUword numberofsuffixes);
 
 #endif

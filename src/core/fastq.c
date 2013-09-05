@@ -20,10 +20,10 @@
 #include "core/xansi_api.h"
 
 static void gt_fastq_show_buffer(char separator, const char *description,
-    const char *buffer, unsigned long buffer_length, unsigned long width,
+    const char *buffer, GtUword buffer_length, GtUword width,
     GtFile *outfp)
 {
-  unsigned long i, current_length;
+  GtUword i, current_length;
   gt_file_xfputc(separator, outfp);
   if (description != NULL)
     gt_file_xfputs(description, outfp);
@@ -40,8 +40,8 @@ static void gt_fastq_show_buffer(char separator, const char *description,
 }
 
 void gt_fastq_show_entry(const char *description, const char *sequence,
-                         const char *qualities, unsigned long sequence_length,
-                         unsigned long width, bool repeat_description,
+                         const char *qualities, GtUword sequence_length,
+                         GtUword width, bool repeat_description,
                          GtFile *outfp)
 {
   gt_assert(sequence);

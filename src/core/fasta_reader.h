@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 #include "core/error.h"
+#include "core/types_api.h"
 
 /* the ``fasta reader'' interface */
 typedef struct GtFastaReaderClass GtFastaReaderClass;
@@ -33,14 +34,14 @@ typedef enum {
 
 /* Gets called for each description (the start of a fasta entry). */
 typedef int (*GtFastaReaderProcDescription)(const char *description,
-                                            unsigned long length, void *data,
+                                            GtUword length, void *data,
                                             GtError*);
 /* Gets called for each sequence part of a fasta entry. */
 typedef int (*GtFastaReaderProcSequencePart)(const char *seqpart,
-                                             unsigned long length, void *data,
+                                             GtUword length, void *data,
                                              GtError*);
 /* Gets called after a fasta entry has been read */
-typedef int (*GtFastaReaderProcSequenceLength)(unsigned long, void *data,
+typedef int (*GtFastaReaderProcSequenceLength)(GtUword, void *data,
                                                GtError*);
 
 /* Construct a new fasta reader for the file named <sequence_filename>, pass

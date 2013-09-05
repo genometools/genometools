@@ -121,8 +121,8 @@
                 gt_xfputs(desc,desfp);
                 if (sdsfp != NULL)
                 {
-                  unsigned long desoffset;
-                  desoffset = (unsigned long) ftello(desfp);
+                  GtUword desoffset;
+                  desoffset = (GtUword) ftello(desfp);
                   gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
                 }
                 gt_xfputc((int) '\n',desfp);

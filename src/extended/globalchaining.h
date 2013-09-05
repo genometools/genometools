@@ -23,7 +23,7 @@
 #include "extended/chain.h"
 
 typedef struct {
-  unsigned long startpos1, /* start of fragment in first sequence */
+  GtUword startpos1, /* start of fragment in first sequence */
                 endpos1,   /* end of fragment in first sequence */
                 startpos2, /* start of fragment in second sequence */
                 endpos2;   /* end of fragment in second sequence */
@@ -32,8 +32,8 @@ typedef struct {
 } GtFragment;
 
 typedef void (*GtChainProc)(GtChain*, GtFragment*,
-                            unsigned long num_of_fragments,
-                            unsigned long max_gap_width, void *cpinfo);
+                            GtUword num_of_fragments,
+                            GtUword max_gap_width, void *cpinfo);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
    in O(<num_of_fragments>^2) time.
@@ -41,8 +41,8 @@ typedef void (*GtChainProc)(GtChain*, GtFragment*,
    For all global chains of maximal score, the GtChainProc function is called.
    Thereby, GtChainProc does not get the ownership of the GtChain. */
 void gt_globalchaining_max(GtFragment *fragments,
-                           unsigned long num_of_fragments,
-                           unsigned long max_gap_width, GtChainProc,
+                           GtUword num_of_fragments,
+                           GtUword max_gap_width, GtChainProc,
                            void *cpinfo);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
@@ -53,9 +53,9 @@ void gt_globalchaining_max(GtFragment *fragments,
    GtChainProc function is called. Thereby, GtChainProc does not get the
    ownership of the GtChain. */
 void gt_globalchaining_coverage(GtFragment *fragments,
-                                unsigned long num_of_fragments,
-                                unsigned long max_gap_width,
-                                unsigned long seqlen1, double mincoverage,
+                                GtUword num_of_fragments,
+                                GtUword max_gap_width,
+                                GtUword seqlen1, double mincoverage,
                                 GtChainProc, void *cpinfo);
 
 #endif

@@ -151,7 +151,7 @@ static int gt_idxlocali_runner(GT_UNUSED int argc,
 {
   IdxlocaliOptions *arguments = tool_arguments;
   bool haserr = false;
-  unsigned long idx;
+  GtUword idx;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);

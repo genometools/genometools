@@ -28,7 +28,7 @@ typedef struct {
   bool mirror,
        specialranges;
   GtStr *readmode;
-  unsigned long bitpos,
+  GtUword bitpos,
                 stoppos;
 } GtEncseqBitextractArguments;
 
@@ -124,7 +124,7 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
     }
 
     if (!had_err) {
-      unsigned long ret;
+      GtUword ret;
       esr = gt_encseq_create_reader_with_readmode(encseq, rm,
                                                   arguments->bitpos);
       ret = gt_encseq_extract2bitencwithtwobitencodingstoppos(&etbe, esr,

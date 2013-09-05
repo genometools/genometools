@@ -28,16 +28,16 @@ typedef struct GtQuerymatch GtQuerymatch;
 GtQuerymatch *gt_querymatch_new(void);
 
 void gt_querymatch_fill(GtQuerymatch *querymatch,
-                        unsigned long dblen,
-                        unsigned long dbstart,
+                        GtUword dblen,
+                        GtUword dbstart,
                         GtReadmode readmode,
                         bool query_as_reversecopy,
                         long score,
-                        unsigned long edist,
+                        GtUword edist,
                         bool selfmatch,
                         uint64_t queryseqnum,
-                        unsigned long querylen,
-                        unsigned long querystart);
+                        GtUword querylen,
+                        GtUword querystart);
 
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
@@ -45,22 +45,22 @@ int gt_querymatch_output(void *info,
                          const GtEncseq *encseq,
                          const GtQuerymatch *querymatch,
                          const GtUchar *query,
-                         unsigned long query_totallength,
+                         GtUword query_totallength,
                          GtError *err);
 
-unsigned long gt_querymatch_querylen(const GtQuerymatch *querymatch);
+GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);
 
-unsigned long gt_querymatch_dbstart(const GtQuerymatch *querymatch);
+GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch);
 
-unsigned long gt_querymatch_querystart(const GtQuerymatch *querymatch);
+GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch);
 
 uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch);
 
 const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch);
 
-unsigned long gt_querymatch_querytotallength(const GtQuerymatch *querymatch);
+GtUword gt_querymatch_querytotallength(const GtQuerymatch *querymatch);
 
-unsigned long gt_querymatch_dbseqnum(const GtEncseq *encseq,
+GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
                                      const GtQuerymatch *querymatch);
 
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);

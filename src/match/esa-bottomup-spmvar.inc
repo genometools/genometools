@@ -32,23 +32,23 @@ static void initBUinfo_spmvar(GtBUinfo_spmvar *,GtBUstate_spmvar *);
 static void freeBUinfo_spmvar(GtBUinfo_spmvar *,GtBUstate_spmvar *);
 
 static int processleafedge_spmvar(bool,
-    unsigned long,
+    GtUword,
     GtBUinfo_spmvar *,
-    unsigned long, /* seqnum */
-    unsigned long, /* relpos */
+    GtUword, /* seqnum */
+    GtUword, /* relpos */
     GtBUstate_spmvar *,
     GtError *err);
 
 static int processbranchingedge_spmvar(bool firstsucc,
-    unsigned long,
+    GtUword,
     GtBUinfo_spmvar *,
-    unsigned long,
-    unsigned long,
+    GtUword,
+    GtUword,
     GtBUinfo_spmvar *,
     GtBUstate_spmvar *,
     GtError *);
 
-static int processlcpinterval_spmvar(unsigned long,
+static int processlcpinterval_spmvar(GtUword,
     GtBUinfo_spmvar *,
     GtBUstate_spmvar *,
     GtError *err);
@@ -78,14 +78,14 @@ static int processlcpinterval_spmvar(unsigned long,
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtBUinfo_spmvar info;
 } GtBUItvinfo_spmvar;
 
 typedef struct
 {
   GtBUItvinfo_spmvar *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 } GtArrayGtBUItvinfo_spmvar;
 
@@ -101,7 +101,7 @@ GtArrayGtBUItvinfo_spmvar *gt_GtArrayGtBUItvinfo_new_spmvar(void)
 void gt_GtArrayGtBUItvinfo_delete_spmvar(GtArrayGtBUItvinfo_spmvar *stack,
                                   GtBUstate_spmvar *state)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -112,11 +112,11 @@ void gt_GtArrayGtBUItvinfo_delete_spmvar(GtArrayGtBUItvinfo_spmvar *stack,
 }
 
 static GtBUItvinfo_spmvar *allocateBUstack_spmvar(GtBUItvinfo_spmvar *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
+                                   GtUword currentallocated,
+                                   GtUword allocated,
                                    GtBUstate_spmvar *state)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo_spmvar *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -129,16 +129,16 @@ static GtBUItvinfo_spmvar *allocateBUstack_spmvar(GtBUItvinfo_spmvar *ptr,
   return itvinfo;
 }
 
-static int gt_esa_bottomup_RAM_spmvar(const unsigned long *bucketofsuffixes,
+static int gt_esa_bottomup_RAM_spmvar(const GtUword *bucketofsuffixes,
                         const uint16_t *lcptab_bucket,
-                        unsigned long numberofsuffixes,
+                        GtUword numberofsuffixes,
                         GtArrayGtBUItvinfo_spmvar *stack,
                         GtBUstate_spmvar *bustate,
                         const GtSeqnumrelpos *snrp,
                         GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix,
                 idx;
   GtBUItvinfo_spmvar *lastinterval = NULL;
@@ -149,7 +149,7 @@ static int gt_esa_bottomup_RAM_spmvar(const unsigned long *bucketofsuffixes,
   gt_assert (numberofsuffixes > 0);
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
-    lcpvalue = (unsigned long) lcptab_bucket[idx+1];
+    lcpvalue = (GtUword) lcptab_bucket[idx+1];
     previoussuffix = bucketofsuffixes[idx];
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_spmvar.lcp)
@@ -213,8 +213,8 @@ static int gt_esa_bottomup_RAM_spmvar(const unsigned long *bucketofsuffixes,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallb = lastinterval->lb;
+        GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_spmvar(lcpvalue,lastintervallb);
         if (processbranchingedge_spmvar(true,
@@ -248,7 +248,7 @@ static int gt_esa_bottomup_RAM_spmvar(const unsigned long *bucketofsuffixes,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_spmvar.lcp > 0)
   {
-    unsigned long lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
+    GtUword lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
     if (processleafedge_spmvar(false,
                         TOP_ESA_BOTTOMUP_spmvar.lcp,
                         &TOP_ESA_BOTTOMUP_spmvar.info,

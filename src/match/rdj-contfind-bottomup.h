@@ -45,8 +45,8 @@
 * - GtBitsequence *contained:
 *   bits are set for each read respecting the definition
 */
-unsigned long gt_contfind_bottomup(Sequentialsuffixarrayreader *ssar,
+GtUword gt_contfind_bottomup(Sequentialsuffixarrayreader *ssar,
     bool show_progressbar, GtBitsequence *contained,
-    unsigned long firstrevcompl, unsigned long read_length);
+    GtUword firstrevcompl, GtUword read_length);
 
 #endif

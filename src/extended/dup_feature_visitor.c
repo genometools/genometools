@@ -45,7 +45,7 @@ static GtFeatureNode* duplicate_feature(const GtFeatureNode *fn,
 {
   GtFeatureNode *dup;
   GtStrArray *attr;
-  unsigned long i;
+  GtUword i;
   dup = (GtFeatureNode*)
         gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*) fn),
                             dest_type,

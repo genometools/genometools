@@ -23,18 +23,19 @@
 #include <stdlib.h>
 #include "core/ma_api.h"
 #include "core/error_api.h"
+#include "core/types_api.h"
 
-void          gt_ma_init(bool bookkeeping);
-void          gt_ma_enable_global_spacepeak(void);
-void          gt_ma_disable_global_spacepeak(void);
-unsigned long gt_ma_get_space_peak(void); /* in bytes */
-unsigned long gt_ma_get_space_current(void);
-void          gt_ma_show_space_peak(FILE*);
-void          gt_ma_show_allocations(FILE*);
-bool          gt_ma_bookkeeping_enabled(void);
+void    gt_ma_init(bool bookkeeping);
+void    gt_ma_enable_global_spacepeak(void);
+void    gt_ma_disable_global_spacepeak(void);
+GtUword gt_ma_get_space_peak(void); /* in bytes */
+GtUword gt_ma_get_space_current(void);
+void    gt_ma_show_space_peak(FILE*);
+void    gt_ma_show_allocations(FILE*);
+bool    gt_ma_bookkeeping_enabled(void);
 /* check if all allocated memory has been freed, prints to stderr */
-int           gt_ma_check_space_leak(void);
-void          gt_ma_clean(void);
-int           gt_ma_unit_test(GtError*);
+int     gt_ma_check_space_leak(void);
+void    gt_ma_clean(void);
+int     gt_ma_unit_test(GtError*);
 
 #endif

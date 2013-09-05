@@ -25,8 +25,8 @@ typedef struct GtEvaluator GtEvaluator;
 
 GtEvaluator* gt_evaluator_new(void);
 void         gt_evaluator_add_true(GtEvaluator*);
-void         gt_evaluator_add_actual(GtEvaluator*, unsigned long);
-void         gt_evaluator_add_predicted(GtEvaluator*, unsigned long);
+void         gt_evaluator_add_actual(GtEvaluator*, GtUword);
+void         gt_evaluator_add_predicted(GtEvaluator*, GtUword);
 double       gt_evaluator_get_sensitivity(const GtEvaluator*);
 double       gt_evaluator_get_specificity(const GtEvaluator*);
 void         gt_evaluator_show_sensitivity(const GtEvaluator*, GtFile*);

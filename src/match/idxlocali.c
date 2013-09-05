@@ -42,12 +42,12 @@ typedef struct
 static void showmatch(void *processinfo,const GtIdxMatch *match)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
-  unsigned long seqnum;
-  unsigned long relpos;
+  GtUword seqnum;
+  GtUword relpos;
 
   if (match->dbabsolute)
   {
-    unsigned long seqstartpos;
+    GtUword seqstartpos;
     seqnum = gt_encseq_seqnum(showmatchinfo->encseq, match->dbstartpos);
     seqstartpos = gt_encseq_seqstartpos(showmatchinfo->encseq, seqnum);
     gt_assert(seqstartpos <= match->dbstartpos);
@@ -83,7 +83,7 @@ typedef struct
 void gt_initstorematch(Storematchinfo *storematch,
                     const GtEncseq *encseq)
 {
-  unsigned long numofdbsequences = gt_encseq_num_of_sequences(encseq);
+  GtUword numofdbsequences = gt_encseq_num_of_sequences(encseq);
 
   storematch->encseq = encseq;
   GT_INITBITTAB(storematch->hasmatch,numofdbsequences);
@@ -92,7 +92,7 @@ void gt_initstorematch(Storematchinfo *storematch,
 static void storematch(void *info,const GtIdxMatch *match)
 {
   Storematchinfo *storematch = (Storematchinfo *) info;
-  unsigned long seqnum;
+  GtUword seqnum;
 
   if (match->dbabsolute)
   {
@@ -112,7 +112,7 @@ void gt_checkandresetstorematch(GT_UNUSED uint64_t queryunit,
                              Storematchinfo *storeonline,
                              Storematchinfo *storeoffline)
 {
-  unsigned long seqnum, countmatchseq = 0,
+  GtUword seqnum, countmatchseq = 0,
     numofdbsequences = gt_encseq_num_of_sequences(storeonline->encseq);
 
   for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
@@ -197,7 +197,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   {
     GtSeqIterator *seqit;
     const GtUchar *query;
-    unsigned long querylen;
+    GtUword querylen;
     char *desc = NULL;
     int retval;
     Limdfsresources *limdfsresources = NULL;

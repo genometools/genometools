@@ -118,6 +118,12 @@ for _, fn in ipairs(arg) do -- iterate over all files
              string.find(l, "%(long%s+long%)") then
         err(fn, ln, "do not use 'long long', use 'GtInt64' instead")
       end
+
+      -- check for unsigned long
+      if string.find(l, "unsigned%s+long[%s,%*]") or
+         string.find(l, "%(unsigned%s+long%)") then
+        err(fn, ln, "do not use 'unsigned long', use 'GtUword' instead")
+      end
     end
 
     if string.match(fn, "_api.h$") then

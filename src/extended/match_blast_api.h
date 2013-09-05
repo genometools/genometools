@@ -29,13 +29,13 @@ typedef struct GtMatchBlast GtMatchBlast;
    and <end_seq2>. */
 GtMatch* gt_match_blast_new(char *seqid1,
                             char *seqid2,
-                            unsigned long start_seq1,
-                            unsigned long start_seq2,
-                            unsigned long end_seq1,
-                            unsigned long end_seq2,
+                            GtUword start_seq1,
+                            GtUword start_seq2,
+                            GtUword end_seq1,
+                            GtUword end_seq2,
                             double evalue,
                             float bitscore,
-                            unsigned long ali_l,
+                            GtUword ali_l,
                             double similarity,
                             GtMatchDirection dir);
 
@@ -46,7 +46,7 @@ void gt_match_blast_set_evalue(GtMatchBlast *mb, long double evalue);
 void gt_match_blast_set_bitscore(GtMatchBlast *mb, float bits);
 
 /* Sets <length> to be the alignment length in <mb>. */
-void gt_match_blast_set_align_length(GtMatchBlast *mb, unsigned long length);
+void gt_match_blast_set_align_length(GtMatchBlast *mb, GtUword length);
 
 /* Sets <similarity> to be the match similarity in <mb>. */
 void gt_match_blast_set_similarity(GtMatchBlast *mb, double similarity);
@@ -58,7 +58,7 @@ long double gt_match_blast_get_evalue(GtMatchBlast *mb);
 float gt_match_blast_get_bitscore(GtMatchBlast *mb);
 
 /* Returns the alignment length stored in <mb>. */
-unsigned long gt_match_blast_get_align_length(GtMatchBlast *mb);
+GtUword gt_match_blast_get_align_length(GtMatchBlast *mb);
 
 /* Returns the alignment similarity stored in <mb>. */
 double gt_match_blast_get_similarity(GtMatchBlast *mb);

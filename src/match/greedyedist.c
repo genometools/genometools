@@ -43,19 +43,19 @@ typedef struct
 
 struct GtFrontResource
 {
-  unsigned long currentallocated;
+  GtUword currentallocated;
   long ulen,
        vlen,
        integermin;
   GtFrontvalue *frontspace;
 };
 
-static unsigned long sumofoddnumbers(unsigned long max)
+static GtUword sumofoddnumbers(GtUword max)
 {
   return max * max;
 }
 
-GtFrontResource *gt_frontresource_new(unsigned long maxdist)
+GtFrontResource *gt_frontresource_new(GtUword maxdist)
 {
   GtFrontResource *ftres = gt_malloc(sizeof *ftres);
 
@@ -182,13 +182,13 @@ static void evalentryforward(const GtSeqabstract *useq,
     if (ftres->ulen != 0 && ftres->vlen != 0 &&
         t < ftres->ulen && t + k < ftres->vlen)
     {
-      unsigned long lcp, minlen
-        = (unsigned long) MIN(ftres->ulen - t,ftres->vlen - (t + k));
+      GtUword lcp, minlen
+        = (GtUword) MIN(ftres->ulen - t,ftres->vlen - (t + k));
       lcp = gt_seqabstract_lcp(true,
                                useq,
                                vseq,
-                               (unsigned long) t,
-                               (unsigned long) (t + k),
+                               (GtUword) t,
+                               (GtUword) (t + k),
                                minlen);
       t += lcp;
     }
@@ -267,12 +267,12 @@ static void firstfrontforward(const GtSeqabstract *useq,
     GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),0);
   } else
   {
-    unsigned long lcp = gt_seqabstract_lcp(true,
+    GtUword lcp = gt_seqabstract_lcp(true,
                                            useq,
                                            vseq,
                                            0,
                                            0,
-                                           (unsigned long)
+                                           (GtUword)
                                            MIN(ftres->ulen,ftres->vlen));
     GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),(long) lcp);
   }
@@ -281,11 +281,11 @@ static void firstfrontforward(const GtSeqabstract *useq,
 #endif
 }
 
-unsigned long greedyunitedist(GtFrontResource *ftres,
+GtUword greedyunitedist(GtFrontResource *ftres,
                               const GtSeqabstract *useq,
                               const GtSeqabstract *vseq)
 {
-  unsigned long realdistance, kval;
+  GtUword realdistance, kval;
   long r;
   GtFrontspec frontspecspace[2], *fspec, *prevfspec;
   GtFrontvalue *fptr;
@@ -293,8 +293,8 @@ unsigned long greedyunitedist(GtFrontResource *ftres,
 #ifdef SKDEBUG
   printf("unitedistcheckSEPgeneric(ulen=%lu,vlen=%lu)\n",ulenvalue,vlenvalue);
 #endif
-  gt_assert(gt_seqabstract_length(useq) < (unsigned long) LONG_MAX);
-  gt_assert(gt_seqabstract_length(vseq) < (unsigned long) LONG_MAX);
+  gt_assert(gt_seqabstract_length(useq) < (GtUword) LONG_MAX);
+  gt_assert(gt_seqabstract_length(vseq) < (GtUword) LONG_MAX);
   ftres->ulen = (long) gt_seqabstract_length(useq);
   ftres->vlen = (long) gt_seqabstract_length(vseq);
   ftres->integermin = -MAX(ftres->ulen,ftres->vlen);
@@ -318,7 +318,7 @@ unsigned long greedyunitedist(GtFrontResource *ftres,
       }
       fspec->offset = prevfspec->offset + prevfspec->width;
       frontspecparms(ftres,fspec,(long) kval,r);
-      while ((unsigned long) (fspec->offset + fspec->width)
+      while ((GtUword) (fspec->offset + fspec->width)
              >= ftres->currentallocated)
       {
         ftres->currentallocated += kval+1;

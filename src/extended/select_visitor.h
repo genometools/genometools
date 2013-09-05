@@ -34,18 +34,18 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                      GtStrand strand,
                                      GtStrand targetstrand,
                                      bool has_CDS,
-                                     unsigned long max_gene_length,
-                                     unsigned long max_gene_num,
+                                     GtUword max_gene_length,
+                                     GtUword max_gene_num,
                                      double min_gene_score,
                                      double max_gene_score,
                                      double min_average_splice_site_prob,
-                                     unsigned long feature_num,
+                                     GtUword feature_num,
                                      GtStrArray *select_files,
                                      GtStr *select_logic,
                                      GtError *err);
 void           gt_select_visitor_set_single_intron_factor(GtNodeVisitor*,
                                                           double);
-unsigned long  gt_select_visitor_node_buffer_size(GtNodeVisitor*);
+GtUword  gt_select_visitor_node_buffer_size(GtNodeVisitor*);
 GtGenomeNode*  gt_select_visitor_get_node(GtNodeVisitor*);
 void           gt_select_visitor_set_drophandler(GtSelectVisitor *fv,
                                                  GtSelectNodeFunc fp,

@@ -29,7 +29,7 @@
 
 struct GtGTFVisitor {
   const GtNodeVisitor parent_instance;
-  unsigned long gene_id,
+  GtUword gene_id,
                 transcript_id;
   GtArray *exon_features,
           *CDS_features;
@@ -74,7 +74,7 @@ static int gtf_show_transcript(GtFeatureNode *feature_node,
                                GtGTFVisitor *gtf_visitor, GtError *err)
 {
   GtFeatureNode *fn;
-  unsigned long i;
+  GtUword i;
   int had_err;
   gt_error_check(err);
   gt_assert(feature_node && gtf_visitor);

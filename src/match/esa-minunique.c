@@ -23,11 +23,11 @@
 #include "esa-splititv.h"
 #include "esa-minunique.h"
 
-unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
-                                       unsigned long offset,
-                                       unsigned long left,
-                                       unsigned long right,
-                                       GT_UNUSED unsigned long
+GtUword gt_suffixarrayuniqueforward (const void *genericindex,
+                                       GtUword offset,
+                                       GtUword left,
+                                       GtUword right,
+                                       GT_UNUSED GtUword
                                           *witnessposition,
                                        const GtUchar *qstart,
                                        const GtUchar *qend)
@@ -35,7 +35,7 @@ unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
   Simplelcpinterval itv;
   const GtUchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
-  unsigned long totallength;
+  GtUword totallength;
 
   itv.left = left;
   itv.right = right;
@@ -65,18 +65,18 @@ unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
   return 0;
 }
 
-unsigned long gt_suffixarraymstats (const void *genericindex,
-                                    unsigned long offset,
-                                    unsigned long left,
-                                    unsigned long right,
-                                    unsigned long *witnessposition,
+GtUword gt_suffixarraymstats (const void *genericindex,
+                                    GtUword offset,
+                                    GtUword left,
+                                    GtUword right,
+                                    GtUword *witnessposition,
                                     const GtUchar *qstart,
                                     const GtUchar *qend)
 {
   Simplelcpinterval itv;
   const GtUchar *qptr;
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
-  unsigned long totallength;
+  GtUword totallength;
 
   itv.left = left;
   itv.right = right;
@@ -91,7 +91,7 @@ unsigned long gt_suffixarraymstats (const void *genericindex,
                                       suffixarray->suftab,
                                       &itv,
                                       *qptr,
-                                      (unsigned long) offset,
+                                      (GtUword) offset,
                                       itv.left,itv.right))
     {
       if (witnessposition != NULL)
@@ -104,18 +104,18 @@ unsigned long gt_suffixarraymstats (const void *genericindex,
   return offset;
 }
 
-unsigned long gt_suffixarrayfindmums (const void *genericindex,
-                                      unsigned long offset,
-                                      unsigned long left,
-                                      unsigned long right,
-                                      unsigned long *witnessposition,
+GtUword gt_suffixarrayfindmums (const void *genericindex,
+                                      GtUword offset,
+                                      GtUword left,
+                                      GtUword right,
+                                      GtUword *witnessposition,
                                       const GtUchar *qstart,
                                       const GtUchar *qend)
 {
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
   Simplelcpinterval itv;
   const GtUchar *qptr;
-  unsigned long totallength;
+  GtUword totallength;
 
   itv.left = left;
   itv.right = right;
@@ -146,16 +146,16 @@ unsigned long gt_suffixarrayfindmums (const void *genericindex,
 }
 
 GtRange gt_suffixarrayfindinterval (const void *genericindex,
-                                    unsigned long offset,
-                                    unsigned long left,
-                                    unsigned long right,
-                                    unsigned long *matchlength,
+                                    GtUword offset,
+                                    GtUword left,
+                                    GtUword right,
+                                    GtUword *matchlength,
                                     const GtUchar *qstart,
                                     const GtUchar *qend)
 {
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
   const GtUchar *qptr;
-  unsigned long totallength = gt_encseq_total_length(suffixarray->encseq);
+  GtUword totallength = gt_encseq_total_length(suffixarray->encseq);
   GtRange result;
 
   gt_assert(qstart < qend);
@@ -180,7 +180,7 @@ GtRange gt_suffixarrayfindinterval (const void *genericindex,
     left = itv.left;
     right = itv.right;
   }
-  *matchlength = (unsigned long) (qptr - qstart);
+  *matchlength = (GtUword) (qptr - qstart);
   result.start = left;
   result.end = right;
   return result;

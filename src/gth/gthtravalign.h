@@ -41,25 +41,25 @@ typedef struct {
 } Traversealignmentstate;
 
 typedef struct {
-  void (*processmismatch)(Traversealignmentstate*, void*, unsigned long);
-  void (*processdeletion)(Traversealignmentstate*, void*, unsigned long);
-  void (*processinsertion)(Traversealignmentstate*, void*, unsigned long);
-  void (*processmatch)(Traversealignmentstate*, void*, unsigned long);
-  void (*processintron)(Traversealignmentstate*, void*, unsigned long);
+  void (*processmismatch)(Traversealignmentstate*, void*, GtUword);
+  void (*processdeletion)(Traversealignmentstate*, void*, GtUword);
+  void (*processinsertion)(Traversealignmentstate*, void*, GtUword);
+  void (*processmatch)(Traversealignmentstate*, void*, GtUword);
+  void (*processintron)(Traversealignmentstate*, void*, GtUword);
   bool(*breakcondition)(void*);
   /* additional functions for protein edit operations */
   void (*processintron_with_1_base_left)(Traversealignmentstate*, void*,
-                                         unsigned long);
+                                         GtUword);
   void (*processintron_with_2_bases_left)(Traversealignmentstate*, void*,
-                                          unsigned long);
+                                          GtUword);
   void (*processmismatch_with_1_gap)(Traversealignmentstate*, void*,
-                                     unsigned long);
+                                     GtUword);
   void (*processmismatch_with_2_gaps)(Traversealignmentstate*, void*,
-                                      unsigned long);
+                                      GtUword);
   void (*processdeletion_with_1_gap)(Traversealignmentstate*, void*,
-                                     unsigned long);
+                                     GtUword);
   void (*processdeletion_with_2_gaps)(Traversealignmentstate*, void*,
-                                      unsigned long);
+                                      GtUword);
 } Traversealignmentfunctions;
 
 /* The following function checks if the sum of multi edit operations

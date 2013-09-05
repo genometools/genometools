@@ -30,7 +30,7 @@ typedef struct GtLineBreakerCaptions GtLineBreakerCaptions;
 
 const GtLineBreakerClass* gt_line_breaker_captions_class(void);
 GtLineBreaker*            gt_line_breaker_captions_new(GtLayout*,
-                                                       unsigned long width,
+                                                       GtUword width,
                                                        GtStyle*);
 
 #endif

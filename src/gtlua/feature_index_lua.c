@@ -99,7 +99,7 @@ static int feature_index_lua_add_feature_node(lua_State *L)
 
 static void push_features_as_table(lua_State *L, GtArray *features)
 {
-  unsigned long i;
+  GtUword i;
   if (features && gt_array_size(features)) {
     /* push table containing feature references onto the stack */
     lua_newtable(L);

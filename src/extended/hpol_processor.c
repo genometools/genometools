@@ -33,25 +33,25 @@
 struct GtHpolProcessor
 {
   GtEncseq *encseq;
-  unsigned long hmin, clenmax, read_hmin, mapqmin, covmin, qmax;
+  GtUword hmin, clenmax, read_hmin, mapqmin, covmin, qmax;
   bool allow_partial, allow_multiple;
   double altmax, refmin;
   GtDiscDistri *hdist, *hdist_e;
   GtSeqposClassifier *cds_oracle;
   GtAlignedSegmentsPile *asp;
-  unsigned long nof_complete_edited, nof_complete_not_edited,
+  GtUword nof_complete_edited, nof_complete_not_edited,
                 nof_skipped, nof_unmapped, nof_h, nof_h_e, hlen_max,
                 nof_multihits, nof_replaced;
   bool adjust_s_hlen;
   GtFile *outfp_segments, *outfp_stats, **outfiles;
   GtSeqIterator **reads_iters;
-  unsigned long nfiles;
+  GtUword nfiles;
   GtHashmap *processed_segments;
   GtAlphabet *alpha;
   bool output_segments, output_stats, output_multihit_stats;
 };
 
-GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin)
+GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, GtUword hmin)
 {
   GtHpolProcessor *hpp;
   hpp = gt_malloc(sizeof (GtHpolProcessor));
@@ -106,23 +106,23 @@ void gt_hpol_processor_restrict_to_feature_type(GtHpolProcessor *hpp,
 static void gt_hpol_processor_output_segment(GtAlignedSegment *as,
     bool may_be_gapped, GtFile *outfp, const char *desc)
 {
-  unsigned long slen;
+  GtUword slen;
   if (may_be_gapped)
     gt_aligned_segment_ungap_seq_and_qual(as);
-  slen = (unsigned long)strlen(gt_aligned_segment_seq(as));
-  gt_assert(slen == (unsigned long)strlen(gt_aligned_segment_qual(as)));
+  slen = (GtUword)strlen(gt_aligned_segment_seq(as));
+  gt_assert(slen == (GtUword)strlen(gt_aligned_segment_qual(as)));
   if (gt_aligned_segment_is_reverse(as))
   {
     GtError *err = gt_error_new();
     char *q = gt_aligned_segment_qual(as), tmp;
-    unsigned long i;
+    GtUword i;
     for (i = 0; i < (slen + 1UL) >> 1; i++)
     {
       tmp = q[i];
       q[i] = q[slen - i - 1UL];
       q[slen - i - 1UL] = tmp;
     }
-    gt_assert((unsigned long)strlen(gt_aligned_segment_qual(as)) == slen);
+    gt_assert((GtUword)strlen(gt_aligned_segment_qual(as)) == slen);
     if (gt_reverse_complement(gt_aligned_segment_seq(as), slen, err) != 0)
     {
       fprintf(stderr, "error: %s", gt_error_get(err));
@@ -242,14 +242,14 @@ static void gt_hpol_processor_refregioncheck(
     GtAlignedSegment *as, void *data)
 {
   GtHpolProcessor *hpp = data;
-  unsigned long rlen, i, startpos;
+  GtUword rlen, i, startpos;
   char *r;
   bool haserr = false;
   gt_assert(hpp != NULL);
   gt_aligned_segment_ungap_refregion(as);
   gt_aligned_segment_assign_refregion_chars(as, hpp->encseq);
   r = gt_aligned_segment_refregion(as);
-  rlen = (unsigned long)strlen(r);
+  rlen = (GtUword)strlen(r);
   startpos = gt_aligned_segment_refregion_startpos(as);
   for (i = 0; i < rlen; i++)
   {
@@ -302,9 +302,9 @@ void gt_hpol_processor_enable_aligned_segments_refregionscheck(
 }
 
 void gt_hpol_processor_enable_segments_hlen_adjustment(GtHpolProcessor *hpp,
-    GtAlignedSegmentsPile *asp, unsigned long read_hmin, unsigned long qmax,
-    double altmax, double refmin, unsigned long mapqmin, unsigned long covmin,
-    bool allow_partial, bool allow_multiple, unsigned long clenmax)
+    GtAlignedSegmentsPile *asp, GtUword read_hmin, GtUword qmax,
+    double altmax, double refmin, GtUword mapqmin, GtUword covmin,
+    bool allow_partial, bool allow_multiple, GtUword clenmax)
 {
   gt_assert(hpp != NULL);
   gt_assert(asp != NULL);
@@ -337,7 +337,7 @@ void gt_hpol_processor_enable_direct_segments_output(GtHpolProcessor *hpp,
 }
 
 void gt_hpol_processor_enable_sorted_segments_output(GtHpolProcessor *hpp,
-    unsigned long nfiles, GtSeqIterator **reads_iters, GtFile **outfiles)
+    GtUword nfiles, GtSeqIterator **reads_iters, GtFile **outfiles)
 {
   gt_assert(hpp != NULL);
   gt_aligned_segments_pile_disable_segment_deletion(hpp->asp);
@@ -388,15 +388,15 @@ static void gt_hpol_processor_output_stats_header(GtFile *outfp)
 
 #define GT_HPOL_PROCESSOR_PHREDOFFSET 33UL
 #define GT_HPOL_PROCESSOR_QUAL(QCHAR) \
-  (unsigned long)(QCHAR) - GT_HPOL_PROCESSOR_PHREDOFFSET;
+  (GtUword)(QCHAR) - GT_HPOL_PROCESSOR_PHREDOFFSET;
 
 static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
-    unsigned long r_hpos, unsigned long coverage, unsigned long r_hlen,
-    unsigned long r_supp, unsigned long s_hlen, unsigned long a_hlen,
-    unsigned long a_supp, char s_char, double s_q_ave,
-    unsigned long c_len, GtFile *outfp)
+    GtUword r_hpos, GtUword coverage, GtUword r_hlen,
+    GtUword r_supp, GtUword s_hlen, GtUword a_hlen,
+    GtUword a_supp, char s_char, double s_q_ave,
+    GtUword c_len, GtFile *outfp)
 {
-  unsigned long i, pos, s_hpos = 0, s_offset, s_q_bef, s_q_aft, s_q_value,
+  GtUword i, pos, s_hpos = 0, s_offset, s_q_bef, s_q_aft, s_q_value,
                 s_q_min, s_q_max, s_q_range, s_q_first, s_q_last = 0, s_hend,
                 s_mapq;
   char *s_qual, *q, edit, s_or;
@@ -527,11 +527,11 @@ void gt_hpol_processor_enable_statistics_output(GtHpolProcessor *hpp,
 }
 
 #ifdef GG_DEBUG
-static unsigned long gt_hpol_processor_determine_hlen_backwards(char *s,
-    char *q, unsigned long pos, char c, unsigned long *q_sum,
-    unsigned long *gaps)
+static GtUword gt_hpol_processor_determine_hlen_backwards(char *s,
+    char *q, GtUword pos, char c, GtUword *q_sum,
+    GtUword *gaps)
 {
-  unsigned long s_hlen = 0;
+  GtUword s_hlen = 0;
   pos++;
   while (pos > 0)
   {
@@ -554,11 +554,11 @@ static unsigned long gt_hpol_processor_determine_hlen_backwards(char *s,
 }
 #endif
 
-static unsigned long gt_hpol_processor_determine_hlen_forwards(char *s, char *q,
-    unsigned long pos, unsigned long maxpos, char c, unsigned long *q_sum,
-    unsigned long *gaps)
+static GtUword gt_hpol_processor_determine_hlen_forwards(char *s, char *q,
+    GtUword pos, GtUword maxpos, char c, GtUword *q_sum,
+    GtUword *gaps)
 {
-  unsigned long s_hlen = 0;
+  GtUword s_hlen = 0;
   while (pos <= maxpos)
   {
     if (s[pos] == c)
@@ -580,10 +580,10 @@ static unsigned long gt_hpol_processor_determine_hlen_forwards(char *s, char *q,
 }
 
 static void gt_hpol_processor_subst_in_range(char *s, char *q,
-    unsigned long left, unsigned long right, unsigned long length, char old,
+    GtUword left, GtUword right, GtUword length, char old,
     char new, char qual)
 {
-  unsigned long pos;
+  GtUword pos;
   for (pos = right + 1UL; pos > left && length > 0; /**/)
   {
     pos--;
@@ -597,27 +597,27 @@ static void gt_hpol_processor_subst_in_range(char *s, char *q,
   gt_assert(length == 0);
 }
 
-static void gt_hpol_processor_shrink_hpol(char *s, char *q, unsigned long left,
-    unsigned long right, unsigned long length, char c)
+static void gt_hpol_processor_shrink_hpol(char *s, char *q, GtUword left,
+    GtUword right, GtUword length, char c)
 {
   gt_hpol_processor_subst_in_range(s, q, left, right, length, c, '-',
       GT_UNDEF_CHAR);
 }
 
-static void gt_hpol_processor_enlarge_hpol(char *s, char *q, unsigned long left,
-    unsigned long right, unsigned long length, char c, char qual)
+static void gt_hpol_processor_enlarge_hpol(char *s, char *q, GtUword left,
+    GtUword right, GtUword length, char c, char qual)
 {
   gt_hpol_processor_subst_in_range(s, q, left, right, length, '-', c, qual);
 }
 
 static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
-    char c, unsigned long r_hstart, unsigned long coverage,
-    unsigned long r_hlen, unsigned long r_supp, unsigned long a_hlen,
-    unsigned long a_supp, unsigned long clenmax, bool allow_partial,
-    bool allow_multiple, unsigned long s_hmin, unsigned long qmax,
+    char c, GtUword r_hstart, GtUword coverage,
+    GtUword r_hlen, GtUword r_supp, GtUword a_hlen,
+    GtUword a_supp, GtUword clenmax, bool allow_partial,
+    bool allow_multiple, GtUword s_hmin, GtUword qmax,
     bool output_stats, GtFile *outfp_stats)
 {
-  unsigned long left, right, s_hlen = 0, q_sum = 0, s_free = 0;
+  GtUword left, right, s_hlen = 0, q_sum = 0, s_free = 0;
   char *s, *q;
   bool edited = false;
   double q_ave = 0.0;
@@ -645,7 +645,7 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
 #ifdef GG_DEBUG
   if (s_hlen != r_hlen)
   {
-    unsigned long i;
+    GtUword i;
     gt_aligned_segment_show(as, NULL);
     printf("   ");
     for (i = 0; i < left; i++)
@@ -670,7 +670,7 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   {
     if (s_free > 0)
     {
-      unsigned long hlen_diff = r_hlen - s_hlen;
+      GtUword hlen_diff = r_hlen - s_hlen;
       if (hlen_diff <= clenmax &&
           (q_ave <= (double)qmax) &&
           (s_free >= hlen_diff || allow_partial) &&
@@ -691,7 +691,7 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   }
   else if (s_hlen > r_hlen)
   {
-    unsigned long hlen_diff = s_hlen - r_hlen;
+    GtUword hlen_diff = s_hlen - r_hlen;
     if (hlen_diff <= clenmax &&
        (q_ave <= (double)qmax) &&
        (!gt_aligned_segment_seq_edited(as) || allow_multiple))
@@ -710,11 +710,11 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
 }
 
 static bool gt_hpol_processor_adjust_hlen_of_all_segments(
-    GtAlignedSegmentsPile *asp, char c, unsigned long r_hstart,
-    unsigned long coverage, unsigned long r_hlen, unsigned long r_supp,
-    unsigned long a_hlen, unsigned long a_supp, unsigned long clenmax,
-    bool allow_partial, bool allow_multiple, unsigned long s_hmin,
-    unsigned long qmax, unsigned long mapqmin, bool output_stats,
+    GtAlignedSegmentsPile *asp, char c, GtUword r_hstart,
+    GtUword coverage, GtUword r_hlen, GtUword r_supp,
+    GtUword a_hlen, GtUword a_supp, GtUword clenmax,
+    bool allow_partial, bool allow_multiple, GtUword s_hmin,
+    GtUword qmax, GtUword mapqmin, bool output_stats,
     GtFile *outfp_stats, GtHashmap *processed_segments,
     bool output_multihit_stats)
 {
@@ -751,13 +751,13 @@ static bool gt_hpol_processor_adjust_hlen_of_all_segments(
 }
 
 static void gt_hpol_processor_determine_alternative_consensus(
-    GtHpolProcessor *hpp, char c, unsigned long r_hstart, unsigned long r_hlen,
-    unsigned long *c_s_hlen, unsigned long *c_support, unsigned long *piled,
-    unsigned long *r_hlen_support)
+    GtHpolProcessor *hpp, char c, GtUword r_hstart, GtUword r_hlen,
+    GtUword *c_s_hlen, GtUword *c_support, GtUword *piled,
+    GtUword *r_hlen_support)
 {
-  unsigned long *occ;
+  GtUword *occ;
   GtDlistelem *dlistelem;
-  unsigned long s_hlen_max = r_hlen << 1, i;
+  GtUword s_hlen_max = r_hlen << 1, i;
   *c_support = 0;
   *piled = 0;
   occ = gt_calloc((size_t)(s_hlen_max + 1UL), sizeof (*occ));
@@ -765,7 +765,7 @@ static void gt_hpol_processor_determine_alternative_consensus(
       dlistelem != NULL; dlistelem = gt_dlistelem_next(dlistelem))
   {
     GtAlignedSegment *as;
-    unsigned long left, right, s_hlen;
+    GtUword left, right, s_hlen;
     char *s;
     as = gt_dlistelem_get_data(dlistelem);
 #ifdef GG_DEBUG
@@ -798,7 +798,7 @@ static void gt_hpol_processor_determine_alternative_consensus(
 }
 
 static void gt_hpol_processor_process_hpol_end(GtHpolProcessor *hpp,
-    GtUchar c, unsigned long endpos, unsigned long hlen)
+    GtUchar c, GtUword endpos, GtUword hlen)
 {
   bool edited = false;
   gt_disc_distri_add(hpp->hdist, hlen);
@@ -808,7 +808,7 @@ static void gt_hpol_processor_process_hpol_end(GtHpolProcessor *hpp,
   if (hpp->adjust_s_hlen)
   {
     char ch = gt_alphabet_decode(hpp->alpha, c);
-    unsigned long a_supp_max = ULONG_MAX, a_supp = 0, piled, r_supp = 0, a_hlen,
+    GtUword a_supp_max = ULONG_MAX, a_supp = 0, piled, r_supp = 0, a_hlen,
                   r_supp_min = 0;
     gt_aligned_segments_pile_move_over_position(hpp->asp, endpos + 1UL);
     piled = gt_aligned_segments_pile_size(hpp->asp);
@@ -817,8 +817,8 @@ static void gt_hpol_processor_process_hpol_end(GtHpolProcessor *hpp,
       gt_hpol_processor_determine_alternative_consensus(hpp, ch,
           endpos + 1UL - hlen, hlen, &a_hlen, &a_supp, &piled,
           &r_supp);
-      a_supp_max = (unsigned long)(hpp->altmax * (double)piled);
-      r_supp_min = (unsigned long)(hpp->refmin * (double)piled);
+      a_supp_max = (GtUword)(hpp->altmax * (double)piled);
+      r_supp_min = (GtUword)(hpp->refmin * (double)piled);
       if (r_supp < piled && r_supp >= r_supp_min && a_supp <= a_supp_max)
       {
         edited = gt_hpol_processor_adjust_hlen_of_all_segments(hpp->asp, ch,
@@ -839,7 +839,7 @@ static void gt_hpol_processor_process_hpol_end(GtHpolProcessor *hpp,
 
 static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(hpp != NULL);
   gt_assert(hpp->hdist != NULL);
   gt_logger_log(logger, "Distribution of homopolymers of length >= %lu %s",
@@ -848,11 +848,11 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
   gt_logger_log(logger, "length\toccurrences\tedited");
   for (i = hpp->hmin; i <= hpp->hlen_max; i++)
   {
-    unsigned long n = (unsigned long)gt_disc_distri_get(hpp->hdist, i);
+    GtUword n = (GtUword)gt_disc_distri_get(hpp->hdist, i);
     if (n > 0)
     {
       gt_logger_log(logger, "%-6lu\t%-11lu\t%-6lu\t(%.2f%%)", i, n,
-          (unsigned long)gt_disc_distri_get(hpp->hdist_e, i),
+          (GtUword)gt_disc_distri_get(hpp->hdist_e, i),
           (double)gt_disc_distri_get(hpp->hdist_e, i) * 100 / n);
     }
   }
@@ -866,9 +866,9 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
   }
   if (hpp->adjust_s_hlen)
   {
-    unsigned long nof_complete = hpp->nof_complete_edited +
+    GtUword nof_complete = hpp->nof_complete_edited +
       hpp->nof_complete_not_edited;
-    unsigned long total_segments =
+    GtUword total_segments =
       nof_complete + hpp->nof_skipped + hpp->nof_unmapped;
     gt_logger_log(logger, "segments in SAM file:       %lu",
         total_segments);
@@ -899,7 +899,7 @@ static int gt_hpol_processor_output_sorted_segments(GtHpolProcessor *hpp,
   const GtUchar *s;
   char *d;
   int next_rval;
-  unsigned long len, i;
+  GtUword len, i;
   GtStr *d_str = NULL;
   GtAlignedSegment *as;
   gt_assert(hpp != NULL);
@@ -910,7 +910,7 @@ static int gt_hpol_processor_output_sorted_segments(GtHpolProcessor *hpp,
       > 0)
   {
     gt_str_set(d_str, d);
-    for (i = 0; i < (unsigned long)strlen(d); i++)
+    for (i = 0; i < (GtUword)strlen(d); i++)
     {
       if (d[i] == ' ')
         d[i] = '\0';
@@ -931,7 +931,7 @@ static int gt_hpol_processor_output_sorted_segments(GtHpolProcessor *hpp,
 int gt_hpol_processor_run(GtHpolProcessor *hpp, GtLogger *logger, GtError *err)
 {
   int had_err = 0;
-  unsigned long i, hlen, tlen;
+  GtUword i, hlen, tlen;
   GtUchar prev, c;
   bool coding = false;
   bool end_of_annotation = true;

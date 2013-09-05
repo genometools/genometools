@@ -25,17 +25,17 @@ GtSeqnumrelpos *gt_seqnumrelpos_new(unsigned int bitsforrelpos,
 
 void gt_seqnumrelpos_delete(GtSeqnumrelpos *snrp);
 
-unsigned long gt_seqnumrelpos_decode_pos(const GtSeqnumrelpos *snrp,
-                                         unsigned long seqnumrelpos);
+GtUword gt_seqnumrelpos_decode_pos(const GtSeqnumrelpos *snrp,
+                                         GtUword seqnumrelpos);
 
-unsigned long gt_seqnumrelpos_decode_seqnum(const GtSeqnumrelpos *snrp,
-                                            unsigned long seqnumrelpos);
+GtUword gt_seqnumrelpos_decode_seqnum(const GtSeqnumrelpos *snrp,
+                                            GtUword seqnumrelpos);
 
-unsigned long gt_seqnumrelpos_decode_relpos(const GtSeqnumrelpos *snrp,
-                                            unsigned long seqnumrelpos);
+GtUword gt_seqnumrelpos_decode_relpos(const GtSeqnumrelpos *snrp,
+                                            GtUword seqnumrelpos);
 
-unsigned long gt_seqnumrelpos_encode(const GtSeqnumrelpos *snrp,
-                                     unsigned long seqnum,
-                                     unsigned long relpos);
+GtUword gt_seqnumrelpos_encode(const GtSeqnumrelpos *snrp,
+                                     GtUword seqnum,
+                                     GtUword relpos);
 
 #endif

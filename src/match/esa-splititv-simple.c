@@ -27,21 +27,21 @@
                                                                  POS, \
                                                                  readmode))
 
-static unsigned long lcpintervalfindfirst(const GtEncseq *encseq,
+static GtUword lcpintervalfindfirst(const GtEncseq *encseq,
                                           GtReadmode readmode,
-                                          unsigned long totallength,
+                                          GtUword totallength,
                                           const ESASuffixptr *suftab,
                                           GtUchar cc,
-                                          unsigned long offset,
-                                          unsigned long left,
-                                          unsigned long right)
+                                          GtUword offset,
+                                          GtUword left,
+                                          GtUword right)
 {
-  unsigned long found = ULONG_MAX;
+  GtUword found = ULONG_MAX;
 
   while (left <= right)
   {
-    unsigned long mid = left + GT_DIV2(right - left + 1);
-    unsigned long pos = ESASUFFIXPTRGET(suftab,mid) + offset;
+    GtUword mid = left + GT_DIV2(right - left + 1);
+    GtUword pos = ESASUFFIXPTRGET(suftab,mid) + offset;
     GtUchar midcc = SEQUENCE(encseq,pos);
     if (midcc < cc)
     {
@@ -62,21 +62,21 @@ static unsigned long lcpintervalfindfirst(const GtEncseq *encseq,
   return found;
 }
 
-static unsigned long lcpintervalfindlast(const GtEncseq *encseq,
+static GtUword lcpintervalfindlast(const GtEncseq *encseq,
                                          GtReadmode readmode,
-                                         unsigned long totallength,
+                                         GtUword totallength,
                                          const ESASuffixptr *suftab,
                                          GtUchar cc,
-                                         unsigned long offset,
-                                         unsigned long left,
-                                         unsigned long right)
+                                         GtUword offset,
+                                         GtUword left,
+                                         GtUword right)
 {
-  unsigned long found = ULONG_MAX;
+  GtUword found = ULONG_MAX;
 
   while (left <= right)
   {
-    unsigned long mid = left + GT_DIV2(right - left + 1);
-    unsigned long pos = ESASUFFIXPTRGET(suftab,mid) + offset;
+    GtUword mid = left + GT_DIV2(right - left + 1);
+    GtUword pos = ESASUFFIXPTRGET(suftab,mid) + offset;
     GtUchar midcc = SEQUENCE(encseq,pos);
     if (cc < midcc)
     {
@@ -99,15 +99,15 @@ static unsigned long lcpintervalfindlast(const GtEncseq *encseq,
 
 bool gt_lcpintervalfindcharchildintv_simple(const GtEncseq *encseq,
                                      GtReadmode readmode,
-                                     unsigned long totallength,
+                                     GtUword totallength,
                                      const ESASuffixptr *suftab,
                                      Simplelcpinterval *itv,
                                      GtUchar cc,
-                                     unsigned long offset,
-                                     unsigned long left,
-                                     unsigned long right)
+                                     GtUword offset,
+                                     GtUword left,
+                                     GtUword right)
 {
-  unsigned long pos;
+  GtUword pos;
 
   pos = ESASUFFIXPTRGET(suftab,left) + offset;
   if (cc < SEQUENCE(encseq,pos))
@@ -148,13 +148,13 @@ bool gt_lcpintervalfindcharchildintv_simple(const GtEncseq *encseq,
 
 bool gt_lcpintervalfindcharchildintv_withcheck(const GtEncseq *encseq,
                                      GtReadmode readmode,
-                                     unsigned long totallength,
+                                     GtUword totallength,
                                      const ESASuffixptr *suftab,
                                      Simplelcpinterval *itv,
                                      GtUchar cc,
-                                     unsigned long offset,
-                                     unsigned long left,
-                                     unsigned long right)
+                                     GtUword offset,
+                                     GtUword left,
+                                     GtUword right)
 {
   Simplelcpinterval itv2;
   bool occurs = gt_lcpintervalfindcharchildintv(encseq,

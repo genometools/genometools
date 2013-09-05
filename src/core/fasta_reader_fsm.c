@@ -47,7 +47,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
   GtFastaReaderFSM *fr = gt_fasta_reader_fsm_cast(fasta_reader);
   unsigned char cc;
   GtFastaReaderState state = EXPECTING_SEPARATOR;
-  unsigned long sequence_length = 0, line_counter = 1;
+  GtUword sequence_length = 0, line_counter = 1;
   GtStr *description, *sequence;
   int had_err = 0;
 

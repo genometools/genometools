@@ -145,13 +145,13 @@ static GtStrand gt_ppt_hit_get_strand(const GtPPTHit *h)
   return h->strand;
 }
 
-static unsigned long gt_ppt_results_get_number_of_hits(GtPPTResults *r)
+static GtUword gt_ppt_results_get_number_of_hits(GtPPTResults *r)
 {
   gt_assert(r);
   return gt_array_size(r->hits);
 }
 
-static GtPPTHit* gt_ppt_results_get_ranked_hit(GtPPTResults *r, unsigned long i)
+static GtPPTHit* gt_ppt_results_get_ranked_hit(GtPPTResults *r, GtUword i)
 {
   gt_assert(r);
   return *(GtPPTHit**) gt_array_get(r->hits, i);
@@ -256,10 +256,10 @@ static GtHMM* gt_ppt_hmm_new(const GtAlphabet *alpha, GtLTRdigestPPTVisitor *lv)
     return hmm;
 }
 
-static inline double gt_ppt_score(unsigned long radius, unsigned long end)
+static inline double gt_ppt_score(GtUword radius, GtUword end)
 {
   double ret;
-  unsigned long r2;
+  GtUword r2;
   r2 = radius * radius;
   ret = ((double) r2
            - pow(fabs((double) radius - (double) end), 2.0))/(double) r2;
@@ -292,12 +292,12 @@ static bool gt_ppt_ok(GtPPTHit *hit, GtRange pptlen)
 
 static void gt_group_hits(GtLTRdigestPPTVisitor *lv,
                           unsigned int *decoded, GtPPTResults *results,
-                          unsigned long radius, GT_UNUSED const char *seq,
+                          GtUword radius, GT_UNUSED const char *seq,
                           GtStrand strand)
 {
   GtPPTHit *cur_hit = NULL,
            *potential_ubox = NULL;
-  unsigned long i = 0;
+  GtUword i = 0;
 
   gt_assert(decoded && results && strand != GT_STRAND_UNKNOWN);
 
@@ -335,7 +335,7 @@ static void gt_group_hits(GtLTRdigestPPTVisitor *lv,
             if (potential_ubox != NULL)
             {
               if (cur_hit->rng.start - potential_ubox->rng.end
-                    <= (unsigned long) lv->max_ubox_dist)
+                    <= (GtUword) lv->max_ubox_dist)
               {
                 /* this PPT has a U-box, handle accordingly */
                 cur_hit->ubox = potential_ubox;
@@ -381,14 +381,14 @@ static void gt_group_hits(GtLTRdigestPPTVisitor *lv,
 
 static GtPPTResults* gt_ppt_find(GtLTRdigestPPTVisitor *v,
                                  const char *seq, const char *rev_seq,
-                                 unsigned long seqlen,
+                                 GtUword seqlen,
                                  GtRange rightltrrng,
                                  GtRange leftltrrng)
 {
   unsigned int *encoded_seq = NULL,
                *decoded = NULL;
   GtPPTResults *results = NULL;
-  unsigned long i = 0,
+  GtUword i = 0,
                 radius = 0,
                 ltrlen = 0;
 
@@ -400,7 +400,7 @@ static GtPPTResults* gt_ppt_find(GtLTRdigestPPTVisitor *v,
      -------------------------------- */
   ltrlen = gt_range_length(&rightltrrng);
   /* make sure that we do not cross the LTR boundary */
-  radius = MIN((unsigned long) v->radius, ltrlen-1);
+  radius = MIN((GtUword) v->radius, ltrlen-1);
   /* encode sequence */
   encoded_seq = gt_malloc(sizeof (unsigned int) * seqlen);
   for (i = 0; i < seqlen; i++) {
@@ -421,7 +421,7 @@ static GtPPTResults* gt_ppt_find(GtLTRdigestPPTVisitor *v,
      -------------------------------- */
   ltrlen = gt_range_length(&leftltrrng);
   /* make sure that we do not cross the LTR boundary */
-  radius = MIN((unsigned long) v->radius, ltrlen - 1);
+  radius = MIN((GtUword) v->radius, ltrlen - 1);
   /* encode sequence */
   for (i = 0; i < seqlen; i++) {
     encoded_seq[i] = (unsigned int) gt_alphabet_encode(v->alpha, rev_seq[i]);
@@ -446,7 +446,7 @@ static GtPPTResults* gt_ppt_find(GtLTRdigestPPTVisitor *v,
 
 void gt_ppt_results_delete(GtPPTResults *results)
 {
-  unsigned long i;
+  GtUword i;
   if (results == NULL) return;
 
   if (results->hits != NULL)
@@ -469,7 +469,7 @@ static void ppt_attach_results_to_gff3(GtLTRdigestPPTVisitor *lv,
                                        GtStrand *canonical_strand)
 {
   GtRange ppt_range;
-  unsigned long i = 0;
+  GtUword i = 0;
   GtGenomeNode *gf;
   GtPPTHit *hit = gt_ppt_results_get_ranked_hit(results, i++),
            *ubox;
@@ -550,7 +550,7 @@ static int gt_ltrdigest_ppt_visitor_feature_node(GtNodeVisitor *nv,
     GtRange rng;
     GtStrand canonical_strand = gt_feature_node_get_strand(ltr_retrotrans);
     GtPPTResults *res;
-    unsigned long seqlen;
+    GtUword seqlen;
     GtStr *seq = gt_str_new();
     rng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
     seqlen = gt_range_length(&rng);

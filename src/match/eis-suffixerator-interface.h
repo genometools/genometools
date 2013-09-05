@@ -57,12 +57,12 @@ sfxInterface *
 gt_newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
-                unsigned long maximumspace,
+                GtUword maximumspace,
                 const Sfxstrategy *sfxstrategy,
                 const GtEncseq *encseq,
                 GtTimer *sfxprogress,
                 bool withprogressbar,
-                unsigned long length,
+                GtUword length,
                 GtLogger *verbosity,
                 GtError *err);
 
@@ -92,7 +92,7 @@ sfxInterface *
 gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                            unsigned int prefixlength,
                            unsigned int numofparts,
-                           unsigned long maximumspace,
+                           GtUword maximumspace,
                            const Sfxstrategy *sfxstrategy,
                            size_t numReaders,
                            enum sfxDataRequest readerRequests[],
@@ -100,7 +100,7 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                            const GtEncseq *encseq,
                            GtTimer *sfxprogress,
                            bool withprogressbar,
-                           unsigned long length,
+                           GtUword length,
                            GtLogger *verbosity,
                            GtError *err);
 
@@ -177,7 +177,7 @@ gt_SfxIGetReadmode(const sfxInterface *si);
  * @return number of symbols actually read
  */
 size_t
-gt_SfxIGetOrigSeq(const void *si, Symbol *dest, unsigned long pos, size_t len);
+gt_SfxIGetOrigSeq(const void *si, Symbol *dest, GtUword pos, size_t len);
 
 /**
  * \brief Query original sequence for statistics.
@@ -197,7 +197,7 @@ gt_SfxIGetSeqStats(const sfxInterface *si);
  * @param si reference of interface to suffixerator
  * @return length of sequence
  */
-unsigned long
+GtUword
 gt_SfxIGetLength(const sfxInterface *si);
 
 /**
@@ -235,14 +235,14 @@ readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len, GtUchar *dest);
  */
 size_t
 readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
-                 unsigned long *dest, GtError *err);
+                 GtUword *dest, GtError *err);
 
 /**
  * @return actual number of symbols read
  */
 size_t
 readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
-                    unsigned long *dest);
+                    GtUword *dest);
 #endif
 
 SeqDataReader

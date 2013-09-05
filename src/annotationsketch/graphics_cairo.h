@@ -37,7 +37,7 @@ void                   gt_graphics_cairo_draw_curve_data(GtGraphics *gg,
                                                          double x, double y,
                                                          GtColor color,
                                                          double data[],
-                                                         unsigned long ndata,
+                                                         GtUword ndata,
                                                          GtRange valrange,
-                                                         unsigned long height);
+                                                         GtUword height);
 #endif

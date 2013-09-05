@@ -50,7 +50,7 @@ static const char *retracenames[]= {
 
 static void dp_table_core_free(DPtablecore *core)
 {
-  unsigned long t, n;
+  GtUword t, n;
 
   /* freeing space for core->score and core->path */
   for (t =  E_STATE; t < PROTEIN_NUMOFSTATES; t++) {
@@ -117,13 +117,13 @@ static void path_ic_state_write(GthDPtables *dpm, unsigned int n,
     dpm->core.path[n][m] |= (1 << 6);
 }
 
-static int dp_table_core_init(DPtablecore *core, unsigned long gen_dp_length,
-                              unsigned long ref_dp_length,
-                              unsigned long autoicmaxmatrixsize,
+static int dp_table_core_init(DPtablecore *core, GtUword gen_dp_length,
+                              GtUword ref_dp_length,
+                              GtUword autoicmaxmatrixsize,
                               bool introncutout, GthJumpTable *jump_table,
                               GthStat *stat)
 {
-  unsigned long matrixsize, t, n,
+  GtUword matrixsize, t, n,
                 sizeofpathtype = sizeof (GthPath);
 
   /* XXX: adjust this check for QUARTER_MATRIX case */
@@ -199,12 +199,12 @@ static void initinput(GthAlignInputProtein *input,
 }
 
 /* the following function allocates space for the DP tables for proteins */
-static int dp_tables_alloc(GthDPtables *dpm, unsigned long gen_dp_length,
-                           bool proteinexonpenal, unsigned long ref_dp_length,
-                           unsigned long autoicmaxmatrixsize, bool introncutout,
+static int dp_tables_alloc(GthDPtables *dpm, GtUword gen_dp_length,
+                           bool proteinexonpenal, GtUword ref_dp_length,
+                           GtUword autoicmaxmatrixsize, bool introncutout,
                            GthJumpTable *jump_table, GthStat *stat)
 {
-  unsigned long n;
+  GtUword n;
   int rval;
 
   /* allocate core */
@@ -216,14 +216,14 @@ static int dp_tables_alloc(GthDPtables *dpm, unsigned long gen_dp_length,
 
   /* allocating space for intronstart and splitcodon arrays */
   for (n = 0; n < PROTEIN_NUMOFSCORETABLES; n++) {
-    dpm->intronstart_A[n] = gt_malloc(sizeof (unsigned long) *
+    dpm->intronstart_A[n] = gt_malloc(sizeof (GtUword) *
                                       (ref_dp_length + 1));
-    dpm->intronstart_B[n] = gt_malloc(sizeof (unsigned long) *
+    dpm->intronstart_B[n] = gt_malloc(sizeof (GtUword) *
                                       (ref_dp_length + 1));
-    dpm->intronstart_C[n] = gt_malloc(sizeof (unsigned long) *
+    dpm->intronstart_C[n] = gt_malloc(sizeof (GtUword) *
                                       (ref_dp_length + 1));
     if (proteinexonpenal) {
-      dpm->exonstart[n] = gt_malloc(sizeof (unsigned long) *
+      dpm->exonstart[n] = gt_malloc(sizeof (GtUword) *
                                     (ref_dp_length + 1));
     }
     else
@@ -241,9 +241,9 @@ static int dp_tables_alloc(GthDPtables *dpm, unsigned long gen_dp_length,
 
 /* the following function initializes the DP tables for proteins */
 static void dp_tables_init(GthDPtables *dpm, bool proteinexonpenal,
-                           unsigned long ref_dp_length)
+                           GtUword ref_dp_length)
 {
-  unsigned long n, m;
+  GtUword n, m;
 
   /* initialize the DP matrices */
   for (n = 0; n <  PROTEIN_NUMOFSCORETABLES; n++) {
@@ -322,13 +322,13 @@ unsigned char gthgetcodon(unsigned char genomicchar1,
 static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
                                  bool proteinexonpenal,
                                  const unsigned char *gen_seq_tran,
-                                 unsigned long gen_dp_length,
-                                 unsigned long ref_dp_length,
+                                 GtUword gen_dp_length,
+                                 GtUword ref_dp_length,
                                  GthDPParam *dp_param,
                                  GthDPOptionsCore *dp_options_core,
                                  GthDPScoresProtein *dp_scores_protein)
 {
-  unsigned long n, m, modn, modnminus1, modnminus2, modnminus3;
+  GtUword n, m, modn, modnminus1, modnminus2, modnminus3;
   unsigned char origreferencechar;
   GthFlt value, maxvalue;
   GthPath retrace;
@@ -607,9 +607,9 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
 }
 
 static void include_exon(GthBacktracePath *backtrace_path,
-                         unsigned long exonlength)
+                         GtUword exonlength)
 {
-  unsigned long i,
+  GtUword i,
                 divresult = exonlength / GT_CODON_LENGTH,
                 modresult = exonlength % GT_CODON_LENGTH;
 
@@ -634,7 +634,7 @@ static void include_exon(GthBacktracePath *backtrace_path,
 }
 
 static void include_intron(GthBacktracePath *backtrace_path, GthPath pathtype,
-                           unsigned long intronlength)
+                           GtUword intronlength)
 {
   /* at least one editoperation already saved */
   gt_assert(gth_backtrace_path_length(backtrace_path));
@@ -671,16 +671,16 @@ typedef enum {
 } Dummystatus;
 
 static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
-                         unsigned long ref_dp_length,
+                         GtUword ref_dp_length,
                          const unsigned char *gen_seq_tran,
-                         unsigned long gen_dp_length, States actualstate,
+                         GtUword gen_dp_length, States actualstate,
                          bool introncutout, GthSplicedSeq *spliced_seq,
                          const GtTransTable *transtable, bool comments,
                          bool noicinintroncheck, GtAlphabet *gen_alphabet,
                          const unsigned char *ref_seq_orig,
                          GtFile *outfp)
 {
-  unsigned long genptr          = gen_dp_length, last_genptr = 0,
+  GtUword genptr          = gen_dp_length, last_genptr = 0,
                 genptr_tail     = gen_dp_length,
                 refptr          = ref_dp_length,
                 GT_UNUSED dummy_index     = GT_UNDEF_ULONG,
@@ -688,7 +688,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
                 dummy_b3_genptr = GT_UNDEF_ULONG,
                 dummy_c3_genptr = GT_UNDEF_ULONG;
 #ifndef NDEBUG
-  unsigned long numofincludedintrons = 0;
+  GtUword numofincludedintrons = 0;
 #endif
   GthPath pathtype = (GthPath) 0;
   Dummystatus dummystatus = DUMMY_STATUS_UNDEFINED;
@@ -988,9 +988,9 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
 }
 
 static int find_optimal_path(GthBacktracePath *backtrace_path, GthDPtables *dpm,
-                             unsigned long ref_dp_length,
+                             GtUword ref_dp_length,
                              const unsigned char *gen_seq_tran,
-                             unsigned long gen_dp_length, bool introncutout,
+                             GtUword gen_dp_length, bool introncutout,
                              GthSplicedSeq *spliced_seq,
                              const GtTransTable *transtable, bool comments,
                              bool noicintroncheck, GtAlphabet *gen_alphabet,
@@ -1027,7 +1027,7 @@ static int find_optimal_path(GthBacktracePath *backtrace_path, GthDPtables *dpm,
 /* the following function frees the DP tables for proteins */
 static void dp_tables_free(GthDPtables *dpm)
 {
-  unsigned long n;
+  GtUword n;
 
   /* free core */
   dp_table_core_free(&dpm->core);
@@ -1049,17 +1049,17 @@ int gth_align_protein(GthSA *sa,
                       const unsigned char *gen_seq_tran,
                       const unsigned char *ref_seq_tran,
                       const unsigned char *ref_seq_orig,
-                      unsigned long ref_dp_length,
+                      GtUword ref_dp_length,
                       GtAlphabet *gen_alphabet,
                       GtAlphabet *ref_alphabet,
                       GthInput *gth_input,
                       bool introncutout,
-                      unsigned long autoicmaxmatrixsize,
+                      GtUword autoicmaxmatrixsize,
                       bool proteinexonpenal,
                       bool showeops,
                       bool comments,
                       bool gs2out,
-                      unsigned long translationtable,
+                      GtUword translationtable,
                       const GtRange *gen_seq_bounds,
                       GthSpliceSiteModel *splice_site_model,
                       GthDPOptionsCore *dp_options_core,
@@ -1067,11 +1067,11 @@ int gth_align_protein(GthSA *sa,
                       GT_UNUSED GthProteinCompletePathMatrixJT
                       complete_path_matrix_jt,
                       GthJumpTable *jump_table,
-                      GT_UNUSED unsigned long ref_offset,
+                      GT_UNUSED GtUword ref_offset,
                       GthStat *stat,
                       GtFile *outfp)
 {
-  unsigned long gen_dp_start, gen_dp_end, gen_dp_length;
+  GtUword gen_dp_start, gen_dp_end, gen_dp_length;
   GthDPScoresProtein *dp_scores_protein;
   GthDPParam *dp_param;
   GthSplicedSeq *spliced_seq = NULL;

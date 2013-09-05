@@ -43,11 +43,11 @@ static GtFile* gt_contigpaths_get_file(const char *indexname,
 
 int gt_contigpaths_to_fasta(const char *indexname,
     const char *contigpaths_suffix, const char *fasta_suffix,
-    const GtEncseq *encseq, unsigned long min_contig_length, bool showpaths,
+    const GtEncseq *encseq, GtUword min_contig_length, bool showpaths,
     bool astat, double coverage, bool load_copynum, size_t buffersize,
     GtLogger *logger, GtError *err)
 {
-  unsigned long nofchars, seqnum, contig_length = 0;
+  GtUword nofchars, seqnum, contig_length = 0;
   GtFile *infp = NULL, *outfp = NULL;
   FILE *depthinfo_fp = NULL;
   int nvalues, i;
@@ -136,8 +136,8 @@ int gt_contigpaths_to_fasta(const char *indexname,
       nvalues /= (sizeof (GtContigpathElem) << 1);
       for (i = 0; i < nvalues; i++)
       {
-        nofchars = (unsigned long)buffer[(i << 1)];
-        seqnum = (unsigned long)buffer[(i << 1) + 1];
+        nofchars = (GtUword)buffer[(i << 1)];
+        seqnum = (GtUword)buffer[(i << 1) + 1];
         if (nofchars == 0)
         {
           /* end of contig */

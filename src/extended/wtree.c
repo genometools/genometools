@@ -48,7 +48,7 @@ void *gt_wtree_cast(GT_UNUSED const GtWtreeClass *wtree_c,
 }
 
 GtWtreeSymbol gt_wtree_access(GtWtree *wtree,
-                              unsigned long pos)
+                              GtUword pos)
 {
   gt_assert(wtree != NULL);
   gt_assert(wtree->c_class != NULL);
@@ -57,8 +57,8 @@ GtWtreeSymbol gt_wtree_access(GtWtree *wtree,
   return (GtWtreeSymbol) ULONG_MAX;
 }
 
-unsigned long gt_wtree_rank(GtWtree *wtree,
-                            unsigned long pos,
+GtUword gt_wtree_rank(GtWtree *wtree,
+                            GtUword pos,
                             GtWtreeSymbol symbol)
 {
   gt_assert(wtree != NULL);
@@ -68,8 +68,8 @@ unsigned long gt_wtree_rank(GtWtree *wtree,
   return ULONG_MAX;
 }
 
-unsigned long gt_wtree_select(GtWtree *wtree,
-                              unsigned long i,
+GtUword gt_wtree_select(GtWtree *wtree,
+                              GtUword i,
                               GtWtreeSymbol symbol)
 {
   gt_assert(wtree != NULL);
@@ -79,12 +79,12 @@ unsigned long gt_wtree_select(GtWtree *wtree,
   return ULONG_MAX;
 }
 
-unsigned long gt_wtree_length(GtWtree *wtree)
+GtUword gt_wtree_length(GtWtree *wtree)
 {
   return wtree->members->length;
 }
 
-unsigned long gt_wtree_num_of_symbols(GtWtree *wtree)
+GtUword gt_wtree_num_of_symbols(GtWtree *wtree)
 {
   return wtree->members->num_of_symbols;
 }

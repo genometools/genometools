@@ -28,9 +28,9 @@
 #define GT_CNTLIST_ASCII_HEADER (int)'['
 
 static inline void gt_cntlist_show_ascii(GtBitsequence *cntlist,
-    unsigned long nofreads, FILE *file)
+    GtUword nofreads, FILE *file)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(file != NULL);
   fprintf(file, "[n: %lu]\n", nofreads);
   for (i = 0; i < nofreads; i++)
@@ -38,26 +38,26 @@ static inline void gt_cntlist_show_ascii(GtBitsequence *cntlist,
       fprintf(file, "%lu\n", i);
 }
 
-void gt_cntlist_write_bin_header(unsigned long nofreads, FILE *file)
+void gt_cntlist_write_bin_header(GtUword nofreads, FILE *file)
 {
   gt_assert(file != NULL);
   gt_xfputc(GT_CNTLIST_BIN_HEADER, file);
-  gt_xfputc((char)sizeof(unsigned long), file);
-  gt_xfwrite(&(nofreads), sizeof (unsigned long), (size_t)1, file);
+  gt_xfputc((char)sizeof(GtUword), file);
+  gt_xfwrite(&(nofreads), sizeof (GtUword), (size_t)1, file);
 }
 
 static inline void gt_cntlist_show_bit(GtBitsequence *cntlist,
-    unsigned long nofreads, FILE *file)
+    GtUword nofreads, FILE *file)
 {
   gt_assert(file != NULL);
   gt_xfputc(GT_CNTLIST_BIT_HEADER, file);
-  gt_xfputc((char)sizeof(unsigned long), file);
-  gt_xfwrite(&(nofreads), sizeof (unsigned long), (size_t)1, file);
+  gt_xfputc((char)sizeof(GtUword), file);
+  gt_xfwrite(&(nofreads), sizeof (GtUword), (size_t)1, file);
   gt_xfwrite(cntlist, sizeof (GtBitsequence), GT_NUMOFINTSFORBITS(nofreads),
       file);
 }
 
-int gt_cntlist_show(GtBitsequence *cntlist, unsigned long nofreads,
+int gt_cntlist_show(GtBitsequence *cntlist, GtUword nofreads,
     const char *path, bool binary, GtError *err)
 {
   FILE *file;
@@ -79,7 +79,7 @@ int gt_cntlist_show(GtBitsequence *cntlist, unsigned long nofreads,
 }
 
 static int gt_cntlist_parse_bin_or_bit_header(FILE *infp,
-    unsigned long *nofreads, GtError *err)
+    GtUword *nofreads, GtError *err)
 {
   int c;
   size_t n;
@@ -92,13 +92,13 @@ static int gt_cntlist_parse_bin_or_bit_header(FILE *infp,
     gt_error_set(err, "contained reads list: unexpected end of file");
     return -1;
   }
-  else if (c != (char)sizeof(unsigned long))
+  else if (c != (char)sizeof(GtUword))
   {
     gt_error_set(err, "contained reads list: %dbit version "
         "of GenomeTools required to use this list", c * CHAR_BIT);
     return -1;
   }
-  n = fread(nofreads, sizeof (unsigned long), (size_t)1, infp);
+  n = fread(nofreads, sizeof (GtUword), (size_t)1, infp);
   if (n != (size_t)1 || *nofreads == 0)
   {
     gt_error_set(err, "contained reads list: unrecognized format");
@@ -108,7 +108,7 @@ static int gt_cntlist_parse_bin_or_bit_header(FILE *infp,
 }
 
 static int gt_cntlist_parse_bit(FILE *infp, bool alloc_cntlist,
-    GtBitsequence **cntlist, unsigned long *nofreads, GtError *err)
+    GtBitsequence **cntlist, GtUword *nofreads, GtError *err)
 {
   int had_err = gt_cntlist_parse_bin_or_bit_header(infp, nofreads, err);
   if (had_err == 0)
@@ -148,19 +148,19 @@ static int gt_cntlist_parse_bit(FILE *infp, bool alloc_cntlist,
 }
 
 static int gt_cntlist_parse_bin(FILE *infp, bool alloc_cntlist,
-    GtBitsequence **cntlist, unsigned long *nofreads, GtError *err)
+    GtBitsequence **cntlist, GtUword *nofreads, GtError *err)
 {
   int had_err = gt_cntlist_parse_bin_or_bit_header(infp, nofreads, err);
   if (had_err == 0)
   {
     size_t n;
-    unsigned long seqnum;
+    GtUword seqnum;
     gt_assert(cntlist != NULL);
     if (alloc_cntlist)
       GT_INITBITTAB(*cntlist, *nofreads);
     while (true)
     {
-      n = fread(&seqnum, sizeof (unsigned long), (size_t)1, infp);
+      n = fread(&seqnum, sizeof (GtUword), (size_t)1, infp);
       if (n != (size_t)1)
       {
         if (!feof(infp))
@@ -177,10 +177,10 @@ static int gt_cntlist_parse_bin(FILE *infp, bool alloc_cntlist,
 }
 
 static int gt_cntlist_parse_ascii(FILE *infp, bool alloc_cntlist,
-    GtBitsequence **cntlist, unsigned long *nofreads, GtError *err)
+    GtBitsequence **cntlist, GtUword *nofreads, GtError *err)
 {
   int n;
-  unsigned long seqnum;
+  GtUword seqnum;
 
   gt_assert(infp != NULL && nofreads != NULL && cntlist != NULL);
   /*@i1@*/ gt_error_check(err);
@@ -208,7 +208,7 @@ static int gt_cntlist_parse_ascii(FILE *infp, bool alloc_cntlist,
 }
 
 int gt_cntlist_parse(const char *filename, bool alloc_cntlist,
-    GtBitsequence **cntlist, unsigned long *nofreads, GtError *err)
+    GtBitsequence **cntlist, GtUword *nofreads, GtError *err)
 {
   int c, retval = 0;
   FILE *infp;
@@ -252,10 +252,10 @@ int gt_cntlist_parse(const char *filename, bool alloc_cntlist,
   return retval;
 }
 
-unsigned long gt_cntlist_count(const GtBitsequence *cntlist,
-    unsigned long nofreads)
+GtUword gt_cntlist_count(const GtBitsequence *cntlist,
+    GtUword nofreads)
 {
-  unsigned long i, counter = 0;
+  GtUword i, counter = 0;
 
   for (i = 0; i < nofreads; i++)
     if ((bool)GT_ISIBITSET(cntlist, i))
@@ -263,11 +263,11 @@ unsigned long gt_cntlist_count(const GtBitsequence *cntlist,
   return counter;
 }
 
-unsigned long gt_cntlist_xload(const char *filename, GtBitsequence **cntlist,
-    unsigned long expected_nofreads)
+GtUword gt_cntlist_xload(const char *filename, GtBitsequence **cntlist,
+    GtUword expected_nofreads)
 {
   int retval;
-  unsigned long found_nofreads;
+  GtUword found_nofreads;
   GtError *err;
 
   if (!gt_file_exists(filename))

@@ -29,7 +29,7 @@
 
 typedef struct
 {
-  unsigned long offset, leftbound,
+  GtUword offset, leftbound,
                 rightbound, specials_leftbound;
   bool visited;
 } RdjGusfieldIndexBounds;
@@ -40,7 +40,7 @@ static inline
 void maximize_child_offset(RdjGusfieldIndexBounds *child,
                            const Suffixarray *sarr)
 {
-  unsigned long idx, lcp;
+  GtUword idx, lcp;
   child->offset = lcptable_get(sarr, child->leftbound+1);
   for (idx = child->leftbound+2; idx <= child->rightbound; idx++)
   {
@@ -53,21 +53,21 @@ void maximize_child_offset(RdjGusfieldIndexBounds *child,
 }
 
 static inline
-void rdj_gusfield_processleafedge(unsigned long leafnumber,
+void rdj_gusfield_processleafedge(GtUword leafnumber,
                                   const GtEncseq *encseq,
-                                  unsigned long nofsequences,
+                                  GtUword nofsequences,
                                   GtArrayGtUlong *matchlen_stacks,
                                   GtBitsequence *has_match,
                                   GtBitsequence *sspbittab,
                                   bool find_submaximal,
-                                  unsigned long firstrevcompl,
+                                  GtUword firstrevcompl,
                                   GtSpmproc proc,
                                   void* procdata)
 {
-  unsigned long prefix_seqnum, suffix_seqnum, corrected_suffix_seqnum;
+  GtUword prefix_seqnum, suffix_seqnum, corrected_suffix_seqnum;
   bool suffixseq_direct = true, prefixseq_direct = true;
-  unsigned long *matchlen;
-  unsigned long stack_pos;
+  GtUword *matchlen;
+  GtUword stack_pos;
   gt_assert(encseq != NULL);
 
   if (leafnumber == 0 || (bool)GT_ISIBITSET(sspbittab, leafnumber-1))
@@ -114,7 +114,7 @@ void rdj_gusfield_processleafedge(unsigned long leafnumber,
             }
           }
           proc(corrected_suffix_seqnum, prefix_seqnum,
-               (unsigned long) *matchlen, suffixseq_direct,
+               (GtUword) *matchlen, suffixseq_direct,
                prefixseq_direct, procdata);
         }
         else /* process whole stack, not only the top */
@@ -132,7 +132,7 @@ void rdj_gusfield_processleafedge(unsigned long leafnumber,
                 continue;
             }
             proc(corrected_suffix_seqnum, prefix_seqnum,
-                 (unsigned long) *matchlen, suffixseq_direct,
+                 (GtUword) *matchlen, suffixseq_direct,
                  prefixseq_direct, procdata);
           }
         }
@@ -143,20 +143,20 @@ void rdj_gusfield_processleafedge(unsigned long leafnumber,
 
 /* search terminal edges and push/pop offset value on/from spm stacks */
 static inline
-void processspecials(unsigned long specials_leftbound,
-                     unsigned long rightbound,
-                     unsigned long offset,
+void processspecials(GtUword specials_leftbound,
+                     GtUword rightbound,
+                     GtUword offset,
                      bool visited,
-                     const unsigned long *suftab,
+                     const GtUword *suftab,
                      const GtEncseq *encseq,
-                     unsigned long totallength,
-                     unsigned long nofsequences,
+                     GtUword totallength,
+                     GtUword nofsequences,
                      GtArrayGtUlong *matchlen_stacks,
                      GtBitsequence *has_match,
                      GtBitsequence *sspbittab)
 {
-  unsigned long pos, leafnumber;
-  unsigned long seqnum;
+  GtUword pos, leafnumber;
+  GtUword seqnum;
 
   gt_assert(offset>0);
 
@@ -188,17 +188,17 @@ void processspecials(unsigned long specials_leftbound,
 }
 
 void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
-    unsigned long min_length, bool find_submaximal, bool show_progressbar,
-    unsigned long firstrevcompl, GtSpmproc proc, void* procdata)
+    GtUword min_length, bool find_submaximal, bool show_progressbar,
+    GtUword firstrevcompl, GtSpmproc proc, void* procdata)
 {
 
   /* index */
   const Suffixarray *sarr;
   const GtEncseq *encseq;
-  const unsigned long *suftab;
-  unsigned long nofsequences;
+  const GtUword *suftab;
+  GtUword nofsequences;
   GtReadmode readmode;
-  unsigned long totallength;
+  GtUword totallength;
   unsigned int numofchars;
   GtBitsequence *sspbittab;
 
@@ -206,8 +206,8 @@ void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
   GtArrayRdjGusfieldIndexBounds stack;
   GtArrayBoundswithchar bwci;
   RdjGusfieldIndexBounds parent, child, *parent_stack_ptr;
-  unsigned long seqpos_idx;
-  unsigned long idx;
+  GtUword seqpos_idx;
+  GtUword idx;
 
   /* stacks for spm determination */
   GtArrayGtUlong *matchlen_stacks;
@@ -255,7 +255,7 @@ void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
   bwci.spaceBoundswithchar = gt_malloc(sizeof *bwci.spaceBoundswithchar *
                                        (numofchars + 1));
   bwci.nextfreeBoundswithchar = 0UL;
-  bwci.allocatedBoundswithchar = (unsigned long) (numofchars + 1);
+  bwci.allocatedBoundswithchar = (GtUword) (numofchars + 1);
 
   /* get rid of compiler warnings */
   parent.specials_leftbound = 0UL;

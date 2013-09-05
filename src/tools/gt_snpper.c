@@ -39,7 +39,7 @@ typedef struct {
 static void* gt_snpper_arguments_new(void)
 {
   GtStrArray *descs;
-  unsigned long i;
+  GtUword i;
   GtSnpperArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->s2fi = gt_seqid2file_info_new();
   arguments->ofi = gt_output_file_info_new();

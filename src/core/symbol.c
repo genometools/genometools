@@ -60,7 +60,7 @@ void gt_symbol_clean(void)
 static void* test_symbol(GT_UNUSED void *data)
 {
   GtStr *symbol;
-  unsigned long i;
+  GtUword i;
   symbol = gt_str_new();
   for (i = 0; i < NUMBER_OF_SYMBOLS; i++) {
     gt_str_reset(symbol);

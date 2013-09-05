@@ -26,7 +26,7 @@
 struct GtLoadStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  unsigned long idx;
+  GtUword idx;
   GtArray *nodes;
   bool full;
 };
@@ -79,7 +79,7 @@ static int gt_load_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 
 static void gt_load_stream_free(GtNodeStream *ns)
 {
-  unsigned long i;
+  GtUword i;
   GtLoadStream *load_stream = gt_load_stream_cast(ns);
   for (i = load_stream->idx; i < gt_array_size(load_stream->nodes); i++) {
     gt_genome_node_delete(*(GtGenomeNode**)

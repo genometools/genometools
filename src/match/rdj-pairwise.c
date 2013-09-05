@@ -31,8 +31,8 @@
 
 struct Read {
   char* seq;
-  unsigned long len;
-  unsigned long seqnum;
+  GtUword len;
+  GtUword seqnum;
   bool direct;
   gt_kmp_t *pi;
 };
@@ -55,7 +55,7 @@ struct Data {
     (DATA).v = (V);\
   }
 
-static void call_spmproc(unsigned long length, bool suffix_of_u, void *data)
+static void call_spmproc(GtUword length, bool suffix_of_u, void *data)
 {
   struct Data *d = data;
   if (suffix_of_u)
@@ -67,7 +67,7 @@ static void call_spmproc(unsigned long length, bool suffix_of_u, void *data)
 }
 
 static inline GtContfind find_exact_overlaps(struct Data *d, bool use_kmp,
-    unsigned long min_length, bool find_nonmaximal)
+    GtUword min_length, bool find_nonmaximal)
 {
   GtContfind retval;
 
@@ -95,8 +95,8 @@ static inline GtContfind find_exact_overlaps(struct Data *d, bool use_kmp,
   return retval;
 }
 
-static void call_spmproc_a(unsigned long length_on_u, unsigned long length_on_v,
-    unsigned long unit_edist, bool suffix_of_u, void *data)
+static void call_spmproc_a(GtUword length_on_u, GtUword length_on_v,
+    GtUword unit_edist, bool suffix_of_u, void *data)
 {
   struct Data *d = data;
   if (suffix_of_u)
@@ -108,7 +108,7 @@ static void call_spmproc_a(unsigned long length_on_u, unsigned long length_on_v,
 }
 
 static inline GtContfind find_approx_overlaps(struct Data *d, double max_error,
-    unsigned long min_length, bool find_nonmaximal)
+    GtUword min_length, bool find_nonmaximal)
 {
   GtContfind retval;
 
@@ -127,9 +127,9 @@ static inline GtContfind find_approx_overlaps(struct Data *d, double max_error,
   return retval;
 }
 
-static gt_kmp_t** prepare_kmp_values(const GtEncseq *encseq, unsigned long n)
+static gt_kmp_t** prepare_kmp_values(const GtEncseq *encseq, GtUword n)
 {
-  unsigned long i, len, startpos;
+  GtUword i, len, startpos;
   char *seq;
   gt_kmp_t **kmp_values;
 
@@ -149,16 +149,16 @@ static gt_kmp_t** prepare_kmp_values(const GtEncseq *encseq, unsigned long n)
   return kmp_values;
 }
 
-static void free_kmp_values(gt_kmp_t** kmp_values, unsigned long n)
+static void free_kmp_values(gt_kmp_t** kmp_values, GtUword n)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(kmp_values != NULL);
   for (i = 0; i < n; i++) gt_free(kmp_values[i]);
   gt_free(kmp_values);
 }
 
-static inline void mark_contained(GtContfind c, unsigned long u_seqnum,
-    unsigned long v_seqnum, GtBitsequence *cntreads)
+static inline void mark_contained(GtContfind c, GtUword u_seqnum,
+    GtUword v_seqnum, GtBitsequence *cntreads)
 {
   gt_assert(cntreads != NULL);
   switch (c)
@@ -182,15 +182,15 @@ static inline void mark_contained(GtContfind c, unsigned long u_seqnum,
 
 static inline void rdj_pairwise_generic(bool use_dp, GtOvlfindMode m,
     GtEncseq *encseq, bool revcompl, bool show_progressbar, bool use_kmp,
-    double max_error, unsigned long min_length, bool find_nonmaximal,
+    double max_error, GtUword min_length, bool find_nonmaximal,
     GtSpmproc proc, GtSpmprocA proc_a, void* procdata, bool cntfilter,
     GtBitsequence *cntreads_in, GtBitsequence **cntreads_out,
-    unsigned long *nofreads)
+    GtUword *nofreads)
 {
   GtContfind containment_status;
   GtBitsequence *cntreads = NULL;
   GtUint64 progress = 0;
-  unsigned long i, j, startpos, v_seqnum, nofsequences, n;
+  GtUword i, j, startpos, v_seqnum, nofsequences, n;
   struct Read u, v;
   struct Data d;
   gt_kmp_t** kmp_values = NULL;
@@ -323,9 +323,9 @@ static inline bool rdj_pairwise_check_arguments(GtOvlfindMode m, void *proc,
 
 void gt_rdj_pairwise_exact(GtOvlfindMode m, GtEncseq *encseq,
     bool revcompl, bool show_progressbar, bool use_kmp,
-    unsigned long min_length, bool find_nonmaximal, GtSpmproc proc,
+    GtUword min_length, bool find_nonmaximal, GtSpmproc proc,
     void *procdata, bool cntfilter, GtBitsequence *cntreads_in,
-    GtBitsequence **cntreads_out, unsigned long *nofreads)
+    GtBitsequence **cntreads_out, GtUword *nofreads)
 {
   gt_assert(rdj_pairwise_check_arguments(m, proc, procdata, cntreads_in,
                             cntreads_out, cntfilter));
@@ -335,10 +335,10 @@ void gt_rdj_pairwise_exact(GtOvlfindMode m, GtEncseq *encseq,
 }
 
 void gt_rdj_pairwise_approx(GtOvlfindMode m,  GtEncseq *encseq, bool revcompl,
-    bool show_progressbar, double max_error, unsigned long min_length,
+    bool show_progressbar, double max_error, GtUword min_length,
     bool find_nonmaximal, GtSpmprocA proc, void* procdata, bool cntfilter,
     GtBitsequence *cntreads_in, GtBitsequence **cntreads_out,
-    unsigned long *nofreads)
+    GtUword *nofreads)
 {
   gt_assert(rdj_pairwise_check_arguments(m, proc, procdata, cntreads_in,
                             cntreads_out, cntfilter));

@@ -44,7 +44,7 @@ int gt_parse_int(int *out, const char *nptr)
 
 int gt_parse_uint(unsigned int *out, const char *nptr)
 {
-  unsigned long ulval;
+  GtUword ulval;
   char *ep;
   gt_assert(out && nptr);
   errno = 0;
@@ -73,9 +73,9 @@ int gt_parse_long(long *out, const char *nptr)
   return 0;
 }
 
-int gt_parse_ulong(unsigned long *out, const char *nptr)
+int gt_parse_ulong(GtUword *out, const char *nptr)
 {
-  unsigned long ulval;
+  GtUword ulval;
   char *ep;
   gt_assert(out && nptr);
   errno = 0;
@@ -309,7 +309,7 @@ int gt_parse_int_line(int *int_value, const char *integer,
 
 int gt_parse_description_range(const char *description, GtRange *range)
 {
-  unsigned long i, desclen;
+  GtUword i, desclen;
   char *desc, *descptr;
   gt_assert(description && range);
   desc = gt_cstr_dup(description);

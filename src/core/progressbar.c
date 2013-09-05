@@ -51,7 +51,7 @@ static time_t computation_start,
 static void set_window_size(void)
 {
   struct winsize winsize;
-  if (ioctl(STDOUT_FILENO, (unsigned long) TIOCGWINSZ, &winsize) != -1 &&
+  if (ioctl(STDOUT_FILENO, (GtUword) TIOCGWINSZ, &winsize) != -1 &&
       winsize.ws_col != 0) {
     if ((int) winsize.ws_col > MAXIMUM_WINDOW_SIZE)
       window_size = MAXIMUM_WINDOW_SIZE;

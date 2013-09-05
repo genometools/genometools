@@ -37,7 +37,7 @@ typedef struct GtKmercodeiterator GtKmercodeiterator;
                                             const GtEncseq *encseq,
                                             GtReadmode readmode,
                                             unsigned int kmersize,
-                                            unsigned long startpos);
+                                            GtUword startpos);
 
 const GtKmercode *gt_kmercodeiterator_encseq_next(
                        GtKmercodeiterator *kmercodeiterator);
@@ -66,7 +66,7 @@ void getencseqkmers(const GtEncseq *encseq,
                     GtReadmode readmode,
                     unsigned int kmersize,
                     void(*processkmercode)(void *,
-                                           unsigned long,
+                                           GtUword,
                                            const GtKmercode *),
                     void *processkmercodeinfo);
 #endif

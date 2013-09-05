@@ -44,7 +44,7 @@
 #define GT_MAXFASTAHEADER   256
 
 typedef struct GtLTRElement {
-  unsigned long leftLTR_3,
+  GtUword leftLTR_3,
                 leftLTR_5,
                 rightLTR_3,
                 rightLTR_5;
@@ -90,19 +90,19 @@ struct GtLTRdigestFileOutStream {
 #define gt_ltrdigest_file_out_stream_cast(GS)\
         gt_node_stream_cast(gt_ltrdigest_file_out_stream_class(), GS)
 
-static inline unsigned long gt_ltrelement_length(GtLTRElement *e)
+static inline GtUword gt_ltrelement_length(GtLTRElement *e)
 {
   gt_assert(e && (e->leftLTR_3 >= e->leftLTR_5));
   return e->rightLTR_3 - e->leftLTR_5 + 1;
 }
 
-static inline unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e)
+static inline GtUword gt_ltrelement_leftltrlen(GtLTRElement *e)
 {
   gt_assert(e && (e->leftLTR_3 >= e->leftLTR_5));
   return e->leftLTR_3-e->leftLTR_5 + 1;
 }
 
-static inline unsigned long gt_ltrelement_rightltrlen(GtLTRElement *e)
+static inline GtUword gt_ltrelement_rightltrlen(GtLTRElement *e)
 {
   gt_assert(e && (e->rightLTR_3 >= e->rightLTR_5));
   return e->rightLTR_3 - e->rightLTR_5 + 1;
@@ -244,7 +244,7 @@ static int write_pdom(GtLTRdigestFileOutStream *ls, GtArray *pdoms,
   GtFile *seqfile = NULL,
             *alifile = NULL,
             *aafile = NULL;
-  unsigned long i = 0,
+  GtUword i = 0,
                 seq_length = 0;
   GtStr *pdom_seq,
         *pdom_aaseq;
@@ -388,7 +388,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
           ppt_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
           pbs_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG};
   int had_err;
-  unsigned long i=0;
+  GtUword i=0;
 
   gt_error_check(err);
   ls = gt_ltrdigest_file_out_stream_cast(ns);
@@ -438,7 +438,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
                           (size_t) ls->seqnamelen)+1,
                       "%s", gt_str_get(sdesc));
       gt_cstr_rep(ls->element.seqid, ' ', '_');
-      if (gt_str_length(sdesc) > (unsigned long) ls->seqnamelen)
+      if (gt_str_length(sdesc) > (GtUword) ls->seqnamelen)
         ls->element.seqid[ls->seqnamelen] = '\0';
 
       (void) gt_ltrelement_format_description(&ls->element,
@@ -796,7 +796,7 @@ int gt_ltrdigest_file_out_stream_write_metadata(GtLTRdigestFileOutStream *ls,
 
   if (tests_to_run & GT_LTRDIGEST_RUN_PDOM)
   {
-    unsigned long i;
+    GtUword i;
     gt_file_xprintf(metadata_file,
                        "Protein domain models\t%lu (",
                        gt_str_array_size(hmm_files));

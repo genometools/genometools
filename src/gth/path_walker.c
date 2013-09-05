@@ -26,7 +26,7 @@ struct GthPathWalker {
                 *eopptr;
   long alignmentlength;
   Eoptype last_eop_type;
-  unsigned long last_eop_length,
+  GtUword last_eop_length,
                 eop_distance,
                 gen_distance,
                 ref_distance,
@@ -204,27 +204,27 @@ void gth_path_walker_next(GthPathWalker *pw)
   step(pw);
 }
 
-void gth_path_walker_try_steps(GthPathWalker *pw, unsigned long steps)
+void gth_path_walker_try_steps(GthPathWalker *pw, GtUword steps)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(pw);
   for (i = 0; gth_path_walker_has_next(pw) && i < steps; i++)
     gth_path_walker_next(pw);
 }
 
-unsigned long gth_path_walker_eop_distance(const GthPathWalker *pw)
+GtUword gth_path_walker_eop_distance(const GthPathWalker *pw)
 {
   gt_assert(pw);
   return pw->eop_distance;
 }
 
-unsigned long gth_path_walker_gen_distance(const GthPathWalker *pw)
+GtUword gth_path_walker_gen_distance(const GthPathWalker *pw)
 {
   gt_assert(pw);
   return pw->gen_distance;
 }
 
-unsigned long gth_path_walker_ref_distance(const GthPathWalker *pw)
+GtUword gth_path_walker_ref_distance(const GthPathWalker *pw)
 {
   gt_assert(pw);
   return pw->ref_distance;
@@ -240,7 +240,7 @@ void gth_path_walker_show(const GthPathWalker *pw, GtFile *outfp)
                      pw->actual_eops, pw->steps_in_current_eop);
 }
 
-unsigned long gth_path_walker_actual_eops(const GthPathWalker *pw)
+GtUword gth_path_walker_actual_eops(const GthPathWalker *pw)
 {
   gt_assert(pw);
   return pw->actual_eops;

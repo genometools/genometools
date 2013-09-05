@@ -27,7 +27,7 @@ typedef struct
 {
   unsigned int maxprefixindex:PREFIXLENBITS;
   unsigned int code:CODEBITS;
-  unsigned long position; /* get rid of this by using information from encseq */
+  GtUword position; /* get rid of this by using information from encseq */
 } Codeatposition;
 
 #endif

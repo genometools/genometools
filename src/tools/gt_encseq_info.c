@@ -174,7 +174,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
 
     if (!had_err) {
       const GtStrArray *filenames;
-      unsigned long i;
+      GtUword i;
 
       if (!arguments->noindexname) {
         gt_file_xprintf(arguments->outfp, "index name: ");
@@ -216,7 +216,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       for (i = 0; i < gt_str_array_size(filenames); i++) {
         gt_file_xprintf(arguments->outfp, "\t%s (%lu characters)\n",
                                           gt_str_array_get(filenames, i),
-                                          (unsigned long)
+                                          (GtUword)
                                      gt_encseq_effective_filelength(encseq, i));
       }
 
@@ -243,7 +243,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
 
       gt_file_xprintf(arguments->outfp, "character distribution:\n");
       for (i = 0; i < gt_alphabet_num_of_chars(alpha); i++) {
-        unsigned long cc;
+        GtUword cc;
         cc = gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, chars[i]));
         gt_file_xprintf(arguments->outfp, "\t%c: %lu (%.2f%%)\n",
                                           (char) chars[i],

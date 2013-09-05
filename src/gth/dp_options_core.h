@@ -32,7 +32,7 @@ typedef struct {
          shortintronpenalty;      /* penalty for short introns */
   GtRange btmatrixgenrange,
           btmatrixrefrange;
-  unsigned long jtoverlap;
+  GtUword jtoverlap;
   bool jtdebug;
 } GthDPOptionsCore;
 

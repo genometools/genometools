@@ -51,7 +51,7 @@ typedef struct {
        fixboundaries;
   long offset;
   GtStr *offsetfile, *newsource;
-  unsigned long width;
+  GtUword width;
   GtTypecheckInfo *tci;
   GtOutputFileInfo *ofi;
   GtFile *outfp;

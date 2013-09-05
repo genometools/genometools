@@ -30,7 +30,7 @@ struct GtDlist {
   GtDlistelem *first,
               *last;
   void *data;
-  unsigned long size;
+  GtUword size;
 };
 
 struct GtDlistelem {
@@ -91,7 +91,7 @@ GtDlistelem* gt_dlist_find(const GtDlist *dlist, void *new_data)
   return NULL;
 }
 
-unsigned long gt_dlist_size(const GtDlist *dlist)
+GtUword gt_dlist_size(const GtDlist *dlist)
 {
   return dlist ? dlist->size : 0;
 }

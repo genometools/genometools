@@ -21,7 +21,7 @@
 #include "match/eis-sa-common-priv.h"
 
 static inline GtUchar
-sfxIdx2BWTSym(unsigned long sufIdx, const GtEncseq *encseq,
+sfxIdx2BWTSym(GtUword sufIdx, const GtEncseq *encseq,
               GtReadmode readmode)
 {
   return sufIdx != 0
@@ -31,7 +31,7 @@ sfxIdx2BWTSym(unsigned long sufIdx, const GtEncseq *encseq,
 
 static inline size_t
 EncSeqGetSubSeq(const GtEncseq *encseq, GtReadmode readmode,
-                unsigned long pos, size_t len, GtUchar *subSeq)
+                GtUword pos, size_t len, GtUchar *subSeq)
 {
   size_t i;
   gt_assert(encseq);
@@ -52,7 +52,7 @@ SASSGetRot0Pos(const SASeqSrc *src)
   return src->getRot0Pos(src);
 }
 
-static inline unsigned long
+static inline GtUword
 SASSGetLength(const SASeqSrc *src)
 {
   return src->seqLen;
@@ -82,7 +82,7 @@ SASSGetSeqStats(const SASeqSrc *src)
 
 static inline size_t
 SASSAccessSequence(const SASeqSrc *src, Symbol *dest,
-                   unsigned long pos, size_t len)
+                   GtUword pos, size_t len)
 {
   return accessSequence(src->origSequenceAccess, dest, pos, len);
 }
@@ -94,7 +94,7 @@ SASSGetOrigSeqAccessor(const SASeqSrc *src)
 }
 
 static inline void
-initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
+initSASeqSrc(SASeqSrc *src, GtUword seqLen,
              createTranslatorFunc createTranslator,
              createReaderFunc createReader, getRot0PosFunc getRot0Pos,
              getSeqStatsFunc getSeqStats, RandomSeqAccessor origSeqAccess,
@@ -125,7 +125,7 @@ initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
   gt_initEmptySeqReaderSet(&src->readerSet,
                            SFX_REQUEST_NONE,
                            (createTranslator != NULL) ? true : false,
-                           sizeof (unsigned long),
+                           sizeof (GtUword),
                            generator, generatorState);
   gt_initSATaggedXltorStateList(&src->xltorStates);
 }

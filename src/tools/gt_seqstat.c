@@ -56,7 +56,7 @@ typedef struct
        docstats,
        showestimsize;
   unsigned int bucketsize;
-  unsigned long genome_length;
+  GtUword genome_length;
 } SeqstatArguments;
 
 static void* gt_seqstat_arguments_new(void)
@@ -137,30 +137,30 @@ static GtOptionParser* gt_seqstat_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static void showdistseqlen(unsigned long key, GtUint64 value,
+static void showdistseqlen(GtUword key, GtUint64 value,
                             void *data)
 {
-  unsigned long distvalue;
+  GtUword distvalue;
   unsigned int *bucketsize = data;
 
   gt_assert(value <= (GtUint64) ULONG_MAX);
-  distvalue = (unsigned long) value;
+  distvalue = (GtUword) value;
   printf("%lu--%lu %lu\n",
          (*bucketsize) * key,
          (*bucketsize) * (key+1) - 1,
          distvalue);
 }
 
-static void showdistseqlenbinary(unsigned long key, GtUint64 value,
+static void showdistseqlenbinary(GtUword key, GtUint64 value,
                             void *data)
 {
-  unsigned long value_ul;
+  GtUword value_ul;
   /*@ignore@*/
   FILE *file = data;
   /*@end@*/
 
   gt_assert(value <= (GtUint64) ULONG_MAX);
-  value_ul = (unsigned long) value;
+  value_ul = (GtUword) value;
   gt_xfwrite(&key, sizeof (key), (size_t)1, file);
   gt_xfwrite(&value_ul, sizeof (value_ul), (size_t)1, file);
 }
@@ -168,10 +168,10 @@ static void showdistseqlenbinary(unsigned long key, GtUint64 value,
 typedef struct
 {
   GtUint64 sumA, *mmercount;
-  unsigned long maxvalue, minkey;
+  GtUword maxvalue, minkey;
 } Astretchinfo;
 
-static void showastretches(unsigned long key, GtUint64 value,
+static void showastretches(GtUword key, GtUint64 value,
                            void *data)
 {
   Astretchinfo *astretchinfo = (Astretchinfo *) data;
@@ -186,10 +186,10 @@ static void showastretches(unsigned long key, GtUint64 value,
   /*@end@*/
 }
 
-static void showmeroccurrence(unsigned long key, GtUint64 value,
+static void showmeroccurrence(GtUword key, GtUint64 value,
                               void *data)
 {
-  unsigned long len;
+  GtUword len;
   Astretchinfo *astretchinfo = (Astretchinfo *) data;
 
   for (len=astretchinfo->minkey; len<= key; len++)
@@ -201,9 +201,9 @@ static void showmeroccurrence(unsigned long key, GtUint64 value,
 
 static GtUint64 accumulateastretch(GtDiscDistri *distastretch,
                                              const GtUchar *sequence,
-                                             unsigned long len)
+                                             GtUword len)
 {
-  unsigned long i, lenofastretch = 0;
+  GtUword i, lenofastretch = 0;
   GtUint64 countA = 0;
 
   for (i=0; i<len; i++)
@@ -232,7 +232,7 @@ static void processastretches(const GtDiscDistri *distastretch,
                               GT_UNUSED GtUint64 countA)
 {
   Astretchinfo astretchinfo;
-  unsigned long len;
+  GtUword len;
 
   astretchinfo.sumA = 0;
   astretchinfo.maxvalue = 0;
@@ -261,7 +261,7 @@ static int gt_seqstat_runner(int argc, const char **argv, int parsed_args,
   GtSeqIterator *seqit;
   const GtUchar *sequence;
   char *desc;
-  unsigned long len;
+  GtUword len;
   int i, had_err = 0;
   off_t totalsize;
   GtDiscDistri *distseqlen = NULL;
@@ -269,7 +269,7 @@ static int gt_seqstat_runner(int argc, const char **argv, int parsed_args,
   GtLogger *asc_logger = NULL;
   GtDiscDistri *distastretch = NULL;
   uint64_t numofseq = 0, sumlength = 0;
-  unsigned long minlength = 0, maxlength = 0;
+  GtUword minlength = 0, maxlength = 0;
   GtUint64 countA = 0;
   bool minlengthdefined = false;
 

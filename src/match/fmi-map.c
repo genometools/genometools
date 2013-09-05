@@ -205,7 +205,7 @@ int gt_mapfmindex (Fmindex *fmindex,const char *indexname,
   if (!haserr)
   {
     fmindex->specpos.nextfreeGtPairBwtidx
-      = (unsigned long) gt_determinenumberofspecialstostore(&specialcharinfo);
+      = (GtUword) gt_determinenumberofspecialstostore(&specialcharinfo);
     fmindex->specpos.spaceGtPairBwtidx = NULL;
     fmindex->specpos.allocatedGtPairBwtidx = 0;
     fmindex->alphabet = gt_alphabet_ref(

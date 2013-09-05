@@ -32,25 +32,25 @@ struct GtRMQ {
   /* array */
   const GtRMQvaluetype *arr_ptr;
   /* size of array a */
-  unsigned long n;
+  GtUword n;
   /* table M for the out-of-block queries (contains indices of block-minima) */
   unsigned char **M;
   /* depth of table M: */
-  unsigned long M_depth;
+  GtUword M_depth;
   /* table M' for superblock-queries (contains indices of block-minima) */
-  unsigned long **Mprime;
+  GtUword **Mprime;
   /* depth of table M': */
-  unsigned long Mprime_depth;
+  GtUword Mprime_depth;
   /* type of blocks */
   unsigned short *type;
   /* precomputed in-block queries */
   unsigned char **Prec;
   /* number of blocks (always n/blocksize) */
-  unsigned long nb;
+  GtUword nb;
   /* number of superblocks (always n/superblocksize) */
-  unsigned long nsb;
+  GtUword nsb;
   /* number of microblocks (always n/s) */
-  unsigned long nmb;
+  GtUword nmb;
   size_t memorycount;
   bool naive_impl;
 };
@@ -67,30 +67,30 @@ struct GtRMQ {
 
 /* because M just stores offsets (rel. to start of block), this method */
 /* re-calculates the true index: */
-static inline unsigned long gt_rmq_trueindex(const GtRMQ *rmq, unsigned long k,
-                                             unsigned long block)
+static inline GtUword gt_rmq_trueindex(const GtRMQ *rmq, GtUword k,
+                                             GtUword block)
 {
   return rmq->M[k][block] + GT_RMQ_MUL_blocksize(block);
 }
 
-static inline unsigned long gt_rmq_microblock(unsigned long idx)
+static inline GtUword gt_rmq_microblock(GtUword idx)
 {
   return GT_RMQ_DIV_microblocksize(idx);
 }
 
-static inline unsigned long gt_rmq_block(unsigned long idx)
+static inline GtUword gt_rmq_block(GtUword idx)
 {
   return GT_RMQ_DIV_blocksize(idx);
 }
 
-static inline unsigned long gt_rmq_superblock(unsigned long idx)
+static inline GtUword gt_rmq_superblock(GtUword idx)
 {
   return GT_RMQ_DIV_superblocksize(idx);
 }
 
 #define GT_RMQ_CATALAN_MAX 17
 
-static const unsigned long gt_rmq_catalan[GT_RMQ_CATALAN_MAX]
+static const GtUword gt_rmq_catalan[GT_RMQ_CATALAN_MAX]
                                          [GT_RMQ_CATALAN_MAX] =
 {
   {1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL},
@@ -146,9 +146,9 @@ static const int gt_rmq_LSBTable256[256] =
   4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0
 };
 
-static inline unsigned long gt_least_significant_bit(unsigned long v)
+static inline GtUword gt_least_significant_bit(GtUword v)
 {
-  return (unsigned long) gt_rmq_LSBTable256[v];
+  return (GtUword) gt_rmq_LSBTable256[v];
 }
 
 static const char gt_rmq_LogTable256[256] =
@@ -171,33 +171,33 @@ static const char gt_rmq_LogTable256[256] =
   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
 };
 
-static inline unsigned long gt_rmq_log2fast(unsigned long v)
+static inline GtUword gt_rmq_log2fast(GtUword v)
 {
-  unsigned long c = 0;          /* c will be lg(v) */
-  register unsigned long t, tt; /* temporaries */
+  GtUword c = 0;          /* c will be lg(v) */
+  register GtUword t, tt; /* temporaries */
 
   if ((tt = v >> 16))
   {
-    c = (t = v >> 24) ? 24UL + (unsigned long) gt_rmq_LogTable256[t]
-                      : 16 + (unsigned long) gt_rmq_LogTable256[tt & 0xFF];
+    c = (t = v >> 24) ? 24UL + (GtUword) gt_rmq_LogTable256[t]
+                      : 16 + (GtUword) gt_rmq_LogTable256[tt & 0xFF];
   } else
   {
-    c = (t = v >> 8) ? 8UL + (unsigned long) gt_rmq_LogTable256[t]
-                     : (unsigned long) gt_rmq_LogTable256[v];
+    c = (t = v >> 8) ? 8UL + (GtUword) gt_rmq_LogTable256[t]
+                     : (GtUword) gt_rmq_LogTable256[v];
   }
-  return (unsigned long) c;
+  return (GtUword) c;
 }
 
-static unsigned char gt_rmq_clearbits(unsigned char n, unsigned long x)
+static unsigned char gt_rmq_clearbits(unsigned char n, GtUword x)
 {
   return n & (unsigned char) (255 << x);
 }
 
-static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
-                                                unsigned long start,
-                                                unsigned long end)
+static GtUword gt_rmq_find_min_index_fast(const GtRMQ *rmq,
+                                                GtUword start,
+                                                GtUword end)
 {
-  unsigned long i = start,
+  GtUword i = start,
                 j = end,
                 mb_i,               /* i's microblock */
                 mb_j,               /* j's microblock */
@@ -215,12 +215,12 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
     min = min_i == 0 ? j : s_mi + gt_least_significant_bit(min_i);
   } else
   {
-    unsigned long b_i = gt_rmq_block(i);   /* i's block */
-    unsigned long b_j = gt_rmq_block(j);   /* j's block */
-    unsigned long s_mj
+    GtUword b_i = gt_rmq_block(i);   /* i's block */
+    GtUword b_j = gt_rmq_block(j);   /* j's block */
+    GtUword s_mj
       = GT_RMQ_MUL_microblocksize(mb_j); /* start of j's microblock */
-    unsigned long j_pos = j - s_mj;      /* position of j in its microblock */
-    unsigned long block_difference;
+    GtUword j_pos = j - s_mj;      /* position of j in its microblock */
+    GtUword block_difference;
     min_i = gt_rmq_clearbits(rmq->Prec[rmq->type[mb_i]]
                                       [GT_RMQ_microblocksize - 1],
                              i_pos);
@@ -236,8 +236,8 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
 
     if (mb_j > mb_i + 1)
      { /* otherwise we're done! */
-      unsigned long s_bi = GT_RMQ_MUL_blocksize(b_i);  /* start of block i */
-      unsigned long s_bj = GT_RMQ_MUL_blocksize(b_j);  /* start of block j */
+      GtUword s_bi = GT_RMQ_MUL_blocksize(b_i);  /* start of block i */
+      GtUword s_bj = GT_RMQ_MUL_blocksize(b_j);  /* start of block j */
       if (s_bi + GT_RMQ_microblocksize > i)
       { /* do another microblock-query! */
         mb_i++; /* go one microblock to the right */
@@ -264,7 +264,7 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
       block_difference = b_j - b_i;
       if (block_difference > 1UL)
       { /* otherwise we're done! */
-        unsigned long k, twotothek, block_tmp;  /* for index calculations in
+        GtUword k, twotothek, block_tmp;  /* for index calculations in
                                                    M and M' */
         b_i++; /* block where out-of-block-query starts */
         if (s_bj - s_bi - GT_RMQ_blocksize <= GT_RMQ_superblocksize)
@@ -276,8 +276,8 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
           min_i = rmq->arr_ptr[i] <= rmq->arr_ptr[j] ? i : j;
         } else
         { /* here we have to answer a superblock-query: */
-          unsigned long sb_i = gt_rmq_superblock(i); /* i's superblock */
-          unsigned long sb_j = gt_rmq_superblock(j); /* j's superblock */
+          GtUword sb_i = gt_rmq_superblock(i); /* i's superblock */
+          GtUword sb_j = gt_rmq_superblock(j); /* j's superblock */
 
           /* end of left out-of-block query */
           block_tmp = gt_rmq_block(GT_RMQ_MUL_superblocksize(sb_i+1));
@@ -318,9 +318,9 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
   return min;
 }
 
-unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
-                                    unsigned long start,
-                                    unsigned long end)
+GtUword gt_rmq_find_min_index(const GtRMQ *rmq,
+                                    GtUword start,
+                                    GtUword end)
 {
   gt_assert(rmq->arr_ptr != NULL && start <= end && end < rmq->n);
   if (start == end)
@@ -330,7 +330,7 @@ unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
   if (rmq->naive_impl)
   {
     GtRMQvaluetype minval;
-    unsigned long idx, ret;
+    GtUword idx, ret;
 
     minval = rmq->arr_ptr[start];
     ret = start;
@@ -350,8 +350,8 @@ unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
 }
 
 GtRMQvaluetype gt_rmq_find_min_value(const GtRMQ *rmq,
-                                     unsigned long start,
-                                     unsigned long end)
+                                     GtUword start,
+                                     GtUword end)
 {
   return rmq->arr_ptr[gt_rmq_find_min_index(rmq,start,end)];
 }
@@ -363,11 +363,11 @@ static void *rmq_calloc(GtRMQ *rmq,size_t nmemb,size_t size)
   return gt_calloc(nmemb,size);
 }
 
-GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
+GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, GtUword size)
 {
   GtRMQ *rmq;
   GtRMQvaluetype *rp;
-  unsigned long i, j,
+  GtUword i, j,
                 z = 0,            /* index in array a */
                 start,            /* start of current block */
                 end,              /* end of current block */
@@ -409,7 +409,7 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
 
   /* prec[i]: the jth bit is 1 iff j is 1. pos. to the left of i
       where a[j] < a[i]  */
-  gt_assert(GT_RMQ_microblocksize < (unsigned long) GT_RMQ_CATALAN_MAX);
+  gt_assert(GT_RMQ_microblocksize < (GtUword) GT_RMQ_CATALAN_MAX);
   rmq->Prec = rmq_calloc(rmq,(size_t) gt_rmq_catalan[GT_RMQ_microblocksize]
                                                     [GT_RMQ_microblocksize],
                          sizeof (*rmq->Prec));
@@ -423,7 +423,7 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
 
   rp = rmq_calloc(rmq,(size_t) GT_RMQ_microblocksize+1, sizeof (*rp));
        /* rp: rightmost path in Cartesian tree */
-  rp[0] = 0; /* originally LONG_MIN, but for unsigned long 0 suffices */
+  rp[0] = 0; /* originally LONG_MIN, but for GtUword 0 suffices */
   gstack = rmq_calloc(rmq,(size_t) GT_RMQ_microblocksize, sizeof (*gstack));
 
   for (i = 0; i < rmq->nmb; i++)
@@ -479,11 +479,11 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
   gt_free(gstack);
 
   /* space for out-of-block- and out-of-superblock-queries: */
-  rmq->M_depth = (unsigned long) floor(GT_LOG2(((double) GT_RMQ_superblocksize
+  rmq->M_depth = (GtUword) floor(GT_LOG2(((double) GT_RMQ_superblocksize
                                                / (double) GT_RMQ_blocksize)));
   rmq->M = rmq_calloc(rmq,(size_t) rmq->M_depth, sizeof (*rmq->M));
   rmq->M[0] = rmq_calloc(rmq,(size_t) rmq->nb, sizeof (**rmq->M));
-  rmq->Mprime_depth = (unsigned long) floor(GT_LOG2((double) rmq->nsb)) + 1;
+  rmq->Mprime_depth = (GtUword) floor(GT_LOG2((double) rmq->nsb)) + 1;
   rmq->Mprime = rmq_calloc(rmq,(size_t) rmq->Mprime_depth,
                            sizeof (*rmq->Mprime));
   rmq->Mprime[0] = rmq_calloc(rmq,(size_t) rmq->nsb, sizeof (**rmq->Mprime));
@@ -569,7 +569,7 @@ size_t gt_rmq_size(const GtRMQ *rmq)
 
 void gt_rmq_delete(GtRMQ *rmq)
 {
-  unsigned long i;
+  GtUword i;
   if (!rmq) return;
   gt_free(rmq->type);
   if (rmq->Prec != NULL)
@@ -602,12 +602,12 @@ void gt_rmq_delete(GtRMQ *rmq)
 }
 
 /* O(size) */
-static unsigned long gt_rmq_naive(const GtRMQvaluetype *data,
-                                  GT_UNUSED unsigned long size,
-                                  unsigned long start, unsigned long end)
+static GtUword gt_rmq_naive(const GtRMQvaluetype *data,
+                                  GT_UNUSED GtUword size,
+                                  GtUword start, GtUword end)
 {
   GtRMQvaluetype minval;
-  unsigned long idx, ret = 0UL;
+  GtUword idx, ret = 0UL;
 
   gt_assert(data && start < end && end < size);
   minval = data[start];
@@ -632,7 +632,7 @@ int gt_rmq_unit_test(GtError *err)
 {
   int had_err = 0;
   GtRMQvaluetype *data;
-  unsigned long i;
+  GtUword i;
   GtRMQ *rmq;
   gt_error_check(err);
 
@@ -647,7 +647,7 @@ int gt_rmq_unit_test(GtError *err)
 
   for (i = 0; i < GT_RMQ_NOFTESTS; i++)
   {
-    unsigned long start, end, res_naive, res_efficient;
+    GtUword start, end, res_naive, res_efficient;
     start = gt_rand_max(GT_RMQ_TESTARRSIZE - GT_RMQ_MAXRANGELENGTH - 2UL);
     end = start + gt_rand_max(GT_RMQ_MAXRANGELENGTH) + 1UL;
     res_naive = gt_rmq_naive(data, GT_RMQ_TESTARRSIZE, start, end);

@@ -18,6 +18,7 @@
 #define CLUSTERED_SET_H
 
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 typedef struct GtClusteredSet GtClusteredSet;
 typedef struct GtClusteredSetClass GtClusteredSetClass;
@@ -35,21 +36,21 @@ int gt_clustered_set_unit_test(GtError*);
 void gt_clustered_set_delete(GtClusteredSet*, GtError*);
 
 int gt_clustered_set_merge_clusters(GtClusteredSet*,
-                                    unsigned long,
-                                    unsigned long,
+                                    GtUword,
+                                    GtUword,
                                     GtError*);
 
-unsigned long gt_clustered_set_num_of_clusters(GtClusteredSet*, GtError*);
+GtUword gt_clustered_set_num_of_clusters(GtClusteredSet*, GtError*);
 
-unsigned long gt_clustered_set_num_of_elements(GtClusteredSet*, GtError*);
+GtUword gt_clustered_set_num_of_elements(GtClusteredSet*, GtError*);
 
 GtClusteredSetIterator* gt_clustered_set_get_iterator(GtClusteredSet*,
-                                                      unsigned long,
+                                                      GtUword,
                                                       GtError*);
 
 GtClusteredSetIteratorStatus
 gt_clustered_set_iterator_next(GtClusteredSetIterator*,
-                               unsigned long*,
+                               GtUword*,
                                GtError*);
 
 void gt_clustered_set_iterator_delete(GtClusteredSetIterator*, GtError*);

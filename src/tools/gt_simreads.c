@@ -34,7 +34,7 @@
 #include "tools/gt_simreads.h"
 
 typedef struct {
-  unsigned long num, minlen, maxlen, coverage;
+  GtUword num, minlen, maxlen, coverage;
   bool show_progressbar, verbose, ds, dl, singlestrand;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
@@ -220,7 +220,7 @@ static int gt_simreads_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static int gt_simreads_plot_disc_distri(unsigned long key,
+static int gt_simreads_plot_disc_distri(GtUword key,
                                         GtUint64 value,
                                         GtFile *outfile)
 {
@@ -253,15 +253,15 @@ static int gt_simreads_write_dist_file(const char *title, GtDiscDistri *dist,
 }
 
 typedef struct {
-  unsigned long value;
-  unsigned long length;
+  GtUword value;
+  GtUword length;
 } GtSimreadsDistvalue;
 
-static unsigned long gt_simreads_readlen_from_dist(
-    const GtSimreadsDistvalue *dist, const unsigned long value,
-    const unsigned long nofvalues)
+static GtUword gt_simreads_readlen_from_dist(
+    const GtSimreadsDistvalue *dist, const GtUword value,
+    const GtUword nofvalues)
 {
-  unsigned long l = 0, r = nofvalues - 1, m = r >> 1;
+  GtUword l = 0, r = nofvalues - 1, m = r >> 1;
   while (value != dist[m].value)
   {
     if (value < dist[m].value)
@@ -292,7 +292,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   GtEncseqReader *target_reader = NULL;
   GtReadmode readmode;
   GtStr *read = NULL, *description = NULL;
-  unsigned long output_bases = 0, output_reads = 0,
+  GtUword output_bases = 0, output_reads = 0,
                 output_rcmode_reads = 0,
                 required_output_bases = 0,
                 target_total_length,
@@ -360,13 +360,13 @@ static int gt_simreads_runner(GT_UNUSED int argc,
       gt_logger_log(logger, "read length distribution file: %s",
           gt_str_get(arguments->distlen_filename));
       nofvalues = gt_file_size(gt_str_get(arguments->distlen_filename)) /
-                       (off_t) (sizeof (unsigned long) << 1);
+                       (off_t) (sizeof (GtUword) << 1);
       input_distlen = gt_malloc(sizeof(GtSimreadsDistvalue) * nofvalues);
       for (j = 0; j < nofvalues; j++)
       {
-        (void)gt_xfread(&(input_distlen[j].length), sizeof (unsigned long),
+        (void)gt_xfread(&(input_distlen[j].length), sizeof (GtUword),
             (size_t)1, arguments->distlen_file);
-        (void)gt_xfread(&(input_distlen[j].value), sizeof (unsigned long),
+        (void)gt_xfread(&(input_distlen[j].value), sizeof (GtUword),
             (size_t)1, arguments->distlen_file);
       }
       for (j = (off_t)1; j < nofvalues; j++)
@@ -392,7 +392,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
         gt_assert(input_distlen != NULL);
         readlen = gt_simreads_readlen_from_dist(input_distlen,
             gt_rand_max(input_distlen[nofvalues - 1].value),
-            (unsigned long)nofvalues);
+            (GtUword)nofvalues);
         gt_assert(readlen <= input_distlen[nofvalues - 1].value);
       }
       else

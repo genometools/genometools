@@ -47,7 +47,7 @@ bool           gt_file_exists_with_suffix(const char *path, const char *suffix);
 bool           gt_file_is_newer(const char *a, const char *b);
 
 /* Returns the number of lines in a file. */
-unsigned long  gt_file_number_of_lines(const char*);
+GtUword  gt_file_number_of_lines(const char*);
 
 /* Set <path> to the dirname of <file>, if it has one, to "" otherwise. */
 void           gt_file_dirname(GtStr *path, const char *file);

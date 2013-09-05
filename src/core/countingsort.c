@@ -22,14 +22,14 @@
 #include "core/unused_api.h"
 
 void gt_countingsort(void *out, const void *in, size_t elem_size,
-                     unsigned long size, unsigned long max_elemvalue,
+                     GtUword size, GtUword max_elemvalue,
                      void *data, GtGetElemvalue get_elemvalue)
 {
-  unsigned long i, k, *c;
+  GtUword i, k, *c;
   gt_assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
 
   /* allocate count array */
-  c = gt_calloc(sizeof (unsigned long), max_elemvalue + 1);
+  c = gt_calloc(sizeof (GtUword), max_elemvalue + 1);
 
   /* count number of elements of a given value */
   for (i = 0; i < size; i++) {
@@ -53,11 +53,11 @@ void gt_countingsort(void *out, const void *in, size_t elem_size,
   gt_free(c);
 }
 
-unsigned long gt_countingsort_get_max(const void *in, size_t elem_size,
-                                      unsigned long size, void *data,
+GtUword gt_countingsort_get_max(const void *in, size_t elem_size,
+                                      GtUword size, void *data,
                                       GtGetElemvalue get_elemvalue)
 {
-  unsigned long i, value, max_value = 0;
+  GtUword i, value, max_value = 0;
   for (i = 0; i < size; i++) {
     value = get_elemvalue((const char*) in + elem_size * i, data);
     if (value > max_value)
@@ -66,7 +66,7 @@ unsigned long gt_countingsort_get_max(const void *in, size_t elem_size,
   return max_value;
 }
 
-static unsigned long get_int(const void *elem, GT_UNUSED void *data)
+static GtUword get_int(const void *elem, GT_UNUSED void *data)
 {
   gt_assert(elem);
   return *(unsigned int*) elem;

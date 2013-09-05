@@ -32,9 +32,9 @@ struct GtRDBStmt {
 };
 
 typedef void (*GtRDBFreeFunc)(GtRDB*);
-typedef GtRDBStmt* (*GtRDBPrepareFunc)(GtRDB*, const char*, unsigned long,
+typedef GtRDBStmt* (*GtRDBPrepareFunc)(GtRDB*, const char*, GtUword,
                                        GtError*);
-typedef unsigned long (*GtRDBGetLastInsertIDFunc)(GtRDB*, const char*,
+typedef GtUword (*GtRDBGetLastInsertIDFunc)(GtRDB*, const char*,
                                                   GtError*);
 typedef int (*GtRDBAcceptVisitorFunc)(GtRDB*, GtRDBVisitor*, GtError*);
 typedef GtCstrTable* (*GtRDBGetIndexesFunc)(GtRDB*, GtError*);
@@ -42,21 +42,21 @@ typedef GtCstrTable* (*GtRDBGetTablesFunc)(GtRDB*, GtError*);
 typedef int (*GtRDBRecreateFunc)(GtRDB*, GtError*);
 
 typedef int  (*GtRDBStmtResetFunc)(GtRDBStmt *stmt, GtError *err);
-typedef int  (*GtRDBStmtBindIntFunc)(GtRDBStmt*, unsigned long, int, GtError*);
-typedef int  (*GtRDBStmtBindUlongFunc)(GtRDBStmt*, unsigned long, unsigned long,
+typedef int  (*GtRDBStmtBindIntFunc)(GtRDBStmt*, GtUword, int, GtError*);
+typedef int  (*GtRDBStmtBindUlongFunc)(GtRDBStmt*, GtUword, GtUword,
                                        GtError*);
-typedef int  (*GtRDBStmtBindStringFunc)(GtRDBStmt*, unsigned long, const char*,
+typedef int  (*GtRDBStmtBindStringFunc)(GtRDBStmt*, GtUword, const char*,
                                         GtError*);
-typedef int  (*GtRDBStmtBindDoubleFunc)(GtRDBStmt*, unsigned long, double,
+typedef int  (*GtRDBStmtBindDoubleFunc)(GtRDBStmt*, GtUword, double,
                                         GtError*);
 typedef int  (*GtRDBStmtFetchFunc)(GtRDBStmt*, GtError*);
 typedef void (*GtRDBStmtFreeFunc)(GtRDBStmt*);
-typedef int  (*GtRDBStmtGetIntFunc)(GtRDBStmt*, unsigned long, int*, GtError*);
-typedef int  (*GtRDBStmtGetUlongFunc)(GtRDBStmt*, unsigned long, unsigned long*,
+typedef int  (*GtRDBStmtGetIntFunc)(GtRDBStmt*, GtUword, int*, GtError*);
+typedef int  (*GtRDBStmtGetUlongFunc)(GtRDBStmt*, GtUword, GtUword*,
                                      GtError*);
-typedef int  (*GtRDBStmtGetStringFunc)(GtRDBStmt*, unsigned long, GtStr*,
+typedef int  (*GtRDBStmtGetStringFunc)(GtRDBStmt*, GtUword, GtStr*,
                                       GtError*);
-typedef int  (*GtRDBStmtGetDoubleFunc)(GtRDBStmt*, unsigned long, double*,
+typedef int  (*GtRDBStmtGetDoubleFunc)(GtRDBStmt*, GtUword, double*,
                                       GtError*);
 
 const GtRDBClass* gt_rdb_class_new(size_t size,

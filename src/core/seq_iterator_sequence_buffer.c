@@ -98,7 +98,7 @@ static void gt_seq_iterator_sequence_buffer_set_sequence_output(
 
 static int gt_seq_iterator_sequence_buffer_next(GtSeqIterator *si,
                                                const GtUchar **sequence,
-                                               unsigned long *len,
+                                               GtUword *len,
                                                char **desc,
                                                GtError *err)
 {

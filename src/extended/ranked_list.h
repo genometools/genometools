@@ -33,7 +33,7 @@ typedef struct GtRankedList GtRankedList;
    inserted elements, with <compareinfo> to be used as additional external
    data. When an element is dropped from the list, <free_func> is called on the
    object if it is not NULL. */
-GtRankedList* gt_ranked_list_new(unsigned long maxsize,
+GtRankedList* gt_ranked_list_new(GtUword maxsize,
                                  GtCompareWithData comparefunction,
                                  GtFree free_func,
                                  void *compareinfo);
@@ -48,7 +48,7 @@ void*         gt_ranked_list_first(const GtRankedList *ranked_list);
 void*         gt_ranked_list_last(const GtRankedList *ranked_list);
 
 /* Returns the number of elements currently stored in <ranked_list>. */
-unsigned long gt_ranked_list_size(const GtRankedList *ranked_list);
+GtUword gt_ranked_list_size(const GtRankedList *ranked_list);
 
 /* Deletes <ranked_list> and frees all associated memory. */
 void          gt_ranked_list_delete(GtRankedList *ranked_list);

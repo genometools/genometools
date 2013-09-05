@@ -25,7 +25,7 @@ typedef void       (*GtSeqIteratorSetSymbolmapFunc)(GtSeqIterator*,
 typedef void       (*GtSeqIteratorSetSequenceOutFunc)(GtSeqIterator*, bool);
 typedef int        (*GtSeqIteratorNextFunc)(GtSeqIterator *seq_iterator,
                                             const GtUchar **sequence,
-                                            unsigned long *len,
+                                            GtUword *len,
                                             char **description, GtError*);
 typedef const GtUint64*
                    (*GtSeqIteratorGetCurrCounterFunc)(GtSeqIterator*,

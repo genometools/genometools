@@ -50,7 +50,7 @@ struct GtLTRRefseqMatchStream {
              *refseq_file,
              *seq_file,
              *source;
-  unsigned long params_id,
+  GtUword params_id,
                 next_index;
   bool first_next,
        dust,
@@ -78,7 +78,7 @@ static void gt_ltr_refseq_match_stream_free_hash_elem(void *elem)
 
 static int gt_ltr_refseq_match_stream_extract_sequences(
                                                     GtLTRRefseqMatchStream *rms,
-                                                    unsigned long *n_to_check,
+                                                    GtUword *n_to_check,
                                                     GtError *err)
 {
   GtStr *seqid;
@@ -92,7 +92,7 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
   char *buffer, header[BUFSIZ];
   const char *attr;
   int had_err = 0;
-  unsigned long i,
+  GtUword i,
                 seqnum,
                 startpos;
 
@@ -179,7 +179,7 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   GtRange fn_range, match_range1, match_range2;
   char target[BUFSIZ], *tmp, *tmp2, buf[BUFSIZ];
   const char *seqid1, *seqid2;
-  unsigned long ali_length,
+  GtUword ali_length,
                 fn_length,
                 min_ali_length;
   double similarity;
@@ -192,7 +192,7 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   fn = (GtFeatureNode*) gt_hashmap_get(rms->header_to_fn, (void*) seqid1);
   fn_length = gt_genome_node_get_length((GtGenomeNode*) fn);
   fn_range = gt_genome_node_get_range((GtGenomeNode*) fn);
-  min_ali_length = (unsigned long)
+  min_ali_length = (GtUword)
                                   ((rms->min_ali_len_perc / 100.0) * fn_length);
   ali_length = gt_match_blast_get_align_length((GtMatchBlast*) match);
   if (ali_length < min_ali_length) {
@@ -312,7 +312,7 @@ static int gt_ltr_refseq_match_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   GtLTRRefseqMatchStream *rms;
   GtGenomeNode *ref_gn;
   int had_err = 0;
-  unsigned long n_to_check = 0;
+  GtUword n_to_check = 0;
 
   gt_error_check(err);
   rms = gt_ltr_refseq_match_stream_cast(ns);
@@ -386,7 +386,7 @@ GtNodeStream* gt_ltr_refseq_match_stream_new(GtNodeStream *in_stream,
                                              const char *moreblast,
                                              bool flcands,
                                              double min_ali_len_perc,
-                                             unsigned long params_id,
+                                             GtUword params_id,
                                              const char *source,
                                              GT_UNUSED GtError *err)
 {

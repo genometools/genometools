@@ -39,7 +39,7 @@ int           gt_custom_track_render(GtCustomTrack *ctrack,
                                      GtRange viewrange,
                                      GtStyle *style, GtError *err);
 /* Returns the height of the given <ctrack> in pixels/points. */
-unsigned long gt_custom_track_get_height(GtCustomTrack *ctrack);
+GtUword gt_custom_track_get_height(GtCustomTrack *ctrack);
 /* Returns the title of the given <ctrack>. */
 const char*   gt_custom_track_get_title(GtCustomTrack *ctrack);
 

@@ -27,9 +27,9 @@
 #define GT_READJOINER_CORRECT_TAG ".corrected"
 
 typedef struct {
-  unsigned long k, c;
+  GtUword k, c;
   GtStr *indexname;
-  unsigned long debug_value;
+  GtUword debug_value;
   bool edit_twobitencoding;
 } GtReadjoinerCorrectArguments;
 

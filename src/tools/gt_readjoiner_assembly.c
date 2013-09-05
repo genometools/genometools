@@ -39,7 +39,7 @@ typedef struct {
   bool errors, paths2seq, redtrans, save, load, vd, astat, copynum;
   unsigned int deadend, bubble, deadend_depth;
   GtOption *refoptionbuffersize;
-  unsigned long buffersize;
+  GtUword buffersize;
   unsigned int nspmfiles;
   double coverage;
 } GtReadjoinerAssemblyArguments;
@@ -271,7 +271,7 @@ static int gt_readjoiner_assembly_count_spm(const char *readset, bool eqlen,
     gt_str_append_uint(filename, i);
     gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_SPMLIST);
     had_err = gt_spmlist_parse(gt_str_get(filename),
-        (unsigned long)minmatchlength,
+        (GtUword)minmatchlength,
         eqlen ? gt_spmproc_strgraph_count : gt_spmproc_skip,
         eqlen ? (void*)strgraph : (void*)&skipdata, err);
     gt_str_reset(filename);
@@ -285,7 +285,7 @@ static int gt_readjoiner_assembly_error_correction(GtStrgraph *strgraph,
     GtLogger *verbose_logger)
 {
   unsigned int i;
-  unsigned long retval, retval_sum;
+  GtUword retval, retval_sum;
   gt_logger_log(verbose_logger, "remove p-bubbles");
 
   retval_sum = 0;
@@ -305,7 +305,7 @@ static int gt_readjoiner_assembly_error_correction(GtStrgraph *strgraph,
   retval = 1UL;
   for (i = 0; i < deadend && retval > 0; i++)
   {
-    retval = gt_strgraph_reddepaths(strgraph, (unsigned long)deadend_depth,
+    retval = gt_strgraph_reddepaths(strgraph, (GtUword)deadend_depth,
         false);
     retval_sum += retval;
     gt_logger_log(verbose_logger, "removed dead-end path edges [round %u] = "
@@ -323,7 +323,7 @@ static void gt_readjoiner_assembly_pump_encseq_through_cache(
       encseq);
   uint64_t sum = 0; /* compute the sum, so that the compiler does no remove the
                        code accessing twobitencoding during optimization */
-  unsigned long idx, totallength = gt_encseq_total_length(encseq),
+  GtUword idx, totallength = gt_encseq_total_length(encseq),
                 numofunits = ! gt_encseq_is_mirrored(encseq)
                   ? gt_unitsoftwobitencoding(totallength)
                   : gt_unitsoftwobitencoding((totallength - 1)/2);
@@ -336,8 +336,8 @@ static void gt_readjoiner_assembly_pump_encseq_through_cache(
 }
 
 static int gt_readjoiner_assembly_paths2seq(const char *readset,
-    unsigned long lengthcutoff, bool showpaths, bool astat,
-    double coverage, bool load_copynum, unsigned long buffersize,
+    GtUword lengthcutoff, bool showpaths, bool astat,
+    double coverage, bool load_copynum, GtUword buffersize,
     GtLogger *default_logger, GtTimer **timer, GtError *err)
 {
   int had_err;
@@ -379,7 +379,7 @@ static int gt_readjoiner_assembly_paths2seq(const char *readset,
 
 static inline void gt_readjoiner_assembly_show_current_space(const char *label)
 {
-  unsigned long m, f;
+  GtUword m, f;
   if (gt_ma_bookkeeping_enabled())
   {
     m = gt_ma_get_space_current();
@@ -392,8 +392,8 @@ static inline void gt_readjoiner_assembly_show_current_space(const char *label)
 
 static int gt_readjoiner_assembly_build_graph(
     GtReadjoinerAssemblyArguments *arguments, GtStrgraph **strgraph,
-    GtEncseq *reads, const char *readset, bool eqlen, unsigned long rlen,
-    unsigned long nreads, GtBitsequence *contained, GtLogger *default_logger,
+    GtEncseq *reads, const char *readset, bool eqlen, GtUword rlen,
+    GtUword nreads, GtBitsequence *contained, GtLogger *default_logger,
     GtLogger *verbose_logger, GtTimer *timer, GtError *err)
 {
   int had_err = 0;
@@ -418,7 +418,7 @@ static int gt_readjoiner_assembly_build_graph(
     gt_strgraph_allocate_graph(*strgraph, rlen, reads);
     gt_readjoiner_assembly_show_current_space("(graph allocated)");
     had_err = gt_strgraph_load_spm_from_file(*strgraph,
-        (unsigned long)arguments->minmatchlength, arguments->redtrans,
+        (GtUword)arguments->minmatchlength, arguments->redtrans,
         contained, readset, arguments->nspmfiles,
         GT_READJOINER_SUFFIX_SPMLIST, err);
   }
@@ -426,7 +426,7 @@ static int gt_readjoiner_assembly_build_graph(
 }
 
 static void gt_readjoiner_assembly_load_graph(GtStrgraph **strgraph,
-    GtEncseq *reads, const char *readset, unsigned long rlen,
+    GtEncseq *reads, const char *readset, GtUword rlen,
     GtLogger *default_logger, GtTimer *timer)
 {
   *strgraph = gt_strgraph_new_from_file(reads, rlen, readset,
@@ -445,7 +445,7 @@ static int gt_readjoiner_assembly_build_contained_reads_list(
 {
   int had_err = 0;
   unsigned int i;
-  unsigned long nofreads, nofreads_i;
+  GtUword nofreads, nofreads_i;
   GtStr *filename;
 
   filename = gt_str_clone(arguments->readset);
@@ -480,7 +480,7 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
   GtBitsequence *contained = NULL;
   const char *readset = gt_str_get(arguments->readset);
   bool eqlen;
-  unsigned long nreads, tlen, rlen;
+  GtUword nreads, tlen, rlen;
   int had_err = 0;
 
   gt_assert(arguments);
@@ -603,8 +603,8 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
             stdout);
       gt_logger_log(default_logger, GT_READJOINER_ASSEMBLY_MSG_TRAVERSESG);
       gt_readjoiner_assembly_show_current_space("(before traversal)");
-      gt_strgraph_spell(strgraph, (unsigned long)arguments->depthcutoff,
-          (unsigned long)arguments->lengthcutoff, arguments->vd, readset,
+      gt_strgraph_spell(strgraph, (GtUword)arguments->depthcutoff,
+          (GtUword)arguments->lengthcutoff, arguments->vd, readset,
           GT_READJOINER_SUFFIX_CONTIG_PATHS, NULL, true, false,
           verbose_logger);
     }
@@ -621,7 +621,7 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
   {
     gt_readjoiner_assembly_show_current_space("(before paths2seq)");
     had_err = gt_readjoiner_assembly_paths2seq(readset,
-        (unsigned long)arguments->lengthcutoff, arguments->vd,
+        (GtUword)arguments->lengthcutoff, arguments->vd,
         arguments->astat, arguments->coverage, arguments->copynum,
         arguments->buffersize, default_logger, &timer, err);
   }

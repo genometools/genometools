@@ -26,7 +26,7 @@ struct GthTxtSAVisitor {
   GthInput *input;
   bool gs2out,
        showseqnums;
-  unsigned long minintronlength,
+  GtUword minintronlength,
                 widthforgenpos,
                 showintronmaxlen,
                 translationtable;
@@ -133,7 +133,7 @@ static void showmatchline(GthSA *sa, GtFile *outfp)
 */
 static void showpgsline(GthSA *sa, GtFile *outfp)
 {
-  unsigned long i, numofexons;
+  GtUword i, numofexons;
   gt_assert(sa);
   numofexons = gth_sa_num_of_exons(sa);
   gt_file_xprintf(outfp, "PGS_%s%c_%s%c\t(",
@@ -154,9 +154,9 @@ static void showpgsline(GthSA *sa, GtFile *outfp)
 }
 
 static void showalignmentheader(GthSA *sa, bool gs2out, int widthforgenpos,
-                                unsigned long minintronlength, GtFile *outfp)
+                                GtUword minintronlength, GtFile *outfp)
 {
-  unsigned long i, leftreferenceexonborder, rightreferenceexonborder,
+  GtUword i, leftreferenceexonborder, rightreferenceexonborder,
                 referenceexonlength;
   GthDbl exonscore, donorsitescore, acceptorsitescore;
   GthFlt donorsiteprobability, acceptorsiteprobability;
@@ -248,17 +248,17 @@ static void showalignmentheader(GthSA *sa, bool gs2out, int widthforgenpos,
 
 static void showdelimiterline(GtFile *outfp)
 {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < DELIMITERLINELENGTH; i++)
     gt_file_xfputc(SA_DELIMITERLINECHAR, outfp);
   gt_file_xfputc('\n', outfp);
 }
 
 static void show_spliced_alignment(GthSA *sa, GthInput *input, bool gs2out,
-                                   unsigned long minintronlength,
-                                   unsigned long widthforgenpos,
-                                   unsigned long showintronmaxlen,
-                                   unsigned long translationtable,
+                                   GtUword minintronlength,
+                                   GtUword widthforgenpos,
+                                   GtUword showintronmaxlen,
+                                   GtUword translationtable,
                                    bool showseqnums, GtFile *outfp)
 {
   bool wildcardimplosion = false;
@@ -308,10 +308,10 @@ const GthSAVisitorClass* gth_txt_sa_visitor_class()
 }
 
 GthSAVisitor* gth_txt_sa_visitor_new(GthInput *input, bool gs2out,
-                                     unsigned long minintronlength,
-                                     unsigned long widthforgenpos,
-                                     unsigned long showintronmaxlen,
-                                     unsigned long translationtable,
+                                     GtUword minintronlength,
+                                     GtUword widthforgenpos,
+                                     GtUword showintronmaxlen,
+                                     GtUword translationtable,
                                      bool showseqnums, GtFile *outfp)
 {
   GthSAVisitor *sa_visitor = gth_sa_visitor_create(gth_txt_sa_visitor_class());

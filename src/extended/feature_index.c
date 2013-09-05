@@ -179,7 +179,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
   GtGenomeNode *gn;
   GtArray *tmp;
   int had_err = 0;
-  unsigned long i;
+  GtUword i;
   gt_error_check(err);
   gt_assert(feature_index && gff3file);
   tmp = gt_array_new(sizeof (GtGenomeNode*));
@@ -326,7 +326,7 @@ typedef struct {
   GtError *err;
   GtArray *nodes;
   GtMutex *mutex;
-  unsigned long next_node_idx,
+  GtUword next_node_idx,
                 error_count;
 } GtFeatureIndexTestShared;
 
@@ -360,7 +360,7 @@ static void* gt_feature_index_unit_test_query(void *data)
   GtFeatureIndexTestShared *shm = (GtFeatureIndexTestShared*) data;
   GtRange rng;
   GtError *err = shm->err;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   GtArray *arr, *arr_ref;
 
@@ -468,7 +468,7 @@ int gt_feature_index_unit_test(GtFeatureIndex *fi, GtError *err)
 
   /* set up nodes to store */
   for (i=0;i<GT_FI_TEST_FEATURES_PER_THREAD*gt_jobs;i++) {
-    unsigned long start, end;
+    GtUword start, end;
     GtFeatureNode *fn;
     start = random() % (GT_FI_TEST_END - GT_FI_TEST_FEATURE_WIDTH);
     end = start + random() % (GT_FI_TEST_FEATURE_WIDTH);

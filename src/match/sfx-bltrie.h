@@ -26,7 +26,7 @@
 typedef struct GtBlindtrie GtBlindtrie;
 
 GtBlindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
-                              unsigned long maxnumofsuffixes,
+                              GtUword maxnumofsuffixes,
                               unsigned int nodenumberincrement,
                               const GtEncseq *encseq,
                               bool cmpcharbychar,
@@ -36,18 +36,18 @@ GtBlindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
 
 void gt_blindtrie_resize(GtBlindtrie *blindtrie,unsigned int maxnumofnodes);
 
-size_t gt_blindtrie_size(unsigned long maxnumofsuffixes);
+size_t gt_blindtrie_size(GtUword maxnumofsuffixes);
 
 size_t gt_blindtrie_current_size(const GtBlindtrie *blindtrie);
 
 void gt_blindtrie_reset(GtBlindtrie *blindtrie);
 
 void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
-                             unsigned long subbucketleft,
+                             GtUword subbucketleft,
                              GtLcpvalues *tableoflcpvalues,
-                             unsigned long numberofsuffixes,
-                             unsigned long offset,
-                             unsigned long sortmaxdepth,
+                             GtUword numberofsuffixes,
+                             GtUword offset,
+                             GtUword sortmaxdepth,
                              void *voiddcov,
                              GtProcessunsortedsuffixrange
                                processunsortedsuffixrange);
@@ -55,7 +55,7 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
 void gt_blindtrie_delete(GtBlindtrie *blindtrie);
 
 bool gt_blindtrie_retrieve(GtBlindtrie *blindtrie,
-                           unsigned long currentstartpos,
-                           unsigned long currenttwobitencodingstoppos);
+                           GtUword currentstartpos,
+                           GtUword currenttwobitencodingstoppos);
 
 #endif

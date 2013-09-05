@@ -31,7 +31,7 @@ struct GtChseqidsStream {
   GtNodeStream *in_stream;
   GtMapping *chseqids_mapping;
   GtArray *node_buffer;
-  unsigned long buffer_index;
+  GtUword buffer_index;
   bool sequence_regions_processed;
 };
 
@@ -55,7 +55,7 @@ static int chseqids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   GtGenomeNode *node, **gn_a, **gn_b;
   GtFeatureNode *feature_node;
   GtStr *changed_seqid;
-  unsigned long i;
+  GtUword i;
   int GT_UNUSED rval, had_err = 0;
   gt_error_check(err);
   cs = chseqids_stream_cast(ns);
@@ -147,7 +147,7 @@ static int chseqids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 static void chseqids_stream_free(GtNodeStream *ns)
 {
   GtChseqidsStream *cs;
-  unsigned long i;
+  GtUword i;
   cs = chseqids_stream_cast(ns);
   gt_mapping_delete(cs->chseqids_mapping);
   for (i = cs->buffer_index; i < gt_array_size(cs->node_buffer); i++)

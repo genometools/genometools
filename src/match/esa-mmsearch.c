@@ -38,19 +38,19 @@ typedef struct
   bool reversecopy;
   const GtEncseq *encseq;
   GtReadmode readmode;
-  unsigned long startpos, length;
+  GtUword startpos, length;
 } GtQueryrep;
 
 typedef struct
 {
   const GtQueryrep *queryrep;
-  unsigned long offset; /* position relative to startpos */
+  GtUword offset; /* position relative to startpos */
 } GtQuerysubstring;
 
 static GtUchar gt_mmsearch_accessquery(const GtQueryrep *queryrep,
-                                       unsigned long pos)
+                                       GtUword pos)
 {
-  unsigned long abspos;
+  GtUword abspos;
 
   gt_assert(queryrep != NULL && pos < queryrep->length);
   abspos = queryrep->startpos + pos;
@@ -75,7 +75,7 @@ static GtUchar gt_mmsearch_accessquery(const GtQueryrep *queryrep,
         }\
         for (/* Nothing */ ; /* Nothing */; sidx++, (LCPLEN)++)\
         {\
-          if ((LCPLEN) >= (unsigned long) minmatchlength)\
+          if ((LCPLEN) >= (GtUword) minmatchlength)\
           {\
             retcode = 0;\
             break;\
@@ -108,9 +108,9 @@ static bool gt_mmsearch(const GtEncseq *dbencseq,
                         GtReadmode readmode,
                         Lcpinterval *lcpitv,
                         const GtQuerysubstring *querysubstring,
-                        unsigned long minmatchlength)
+                        GtUword minmatchlength)
 {
-  unsigned long left, leftsave, mid, right, lpref, rpref,
+  GtUword left, leftsave, mid, right, lpref, rpref,
                 totallength, lcplen, sidx;
   int retcode = 0;
   GtUchar currentdbchar, currentquerychar;
@@ -192,7 +192,7 @@ static bool gt_mmsearch(const GtEncseq *dbencseq,
 struct GtMMsearchiterator
 {
   Lcpinterval lcpitv;
-  unsigned long sufindex;
+  GtUword sufindex;
   const ESASuffixptr *suftab;
   GtEncseqReader *esr;
 };
@@ -200,12 +200,12 @@ struct GtMMsearchiterator
 static GtMMsearchiterator *gt_mmsearchiterator_new_generic(
                                        const GtEncseq *dbencseq,
                                        const ESASuffixptr *suftab,
-                                       unsigned long leftbound,
-                                       unsigned long rightbound,
-                                       unsigned long itvoffset,
+                                       GtUword leftbound,
+                                       GtUword rightbound,
+                                       GtUword itvoffset,
                                        GtReadmode readmode,
                                        const GtQuerysubstring *querysubstring,
-                                       unsigned long minmatchlength)
+                                       GtUword minmatchlength)
 
 {
   GtMMsearchiterator *mmsi = gt_malloc(sizeof *mmsi);
@@ -228,12 +228,12 @@ static GtMMsearchiterator *gt_mmsearchiterator_new_generic(
 GtMMsearchiterator *gt_mmsearchiterator_new_complete_plain(
                                    const GtEncseq *dbencseq,
                                    const void *voidsuftab, /* XXX */
-                                   unsigned long leftbound,
-                                   unsigned long rightbound,
-                                   unsigned long itvoffset,
+                                   GtUword leftbound,
+                                   GtUword rightbound,
+                                   GtUword itvoffset,
                                    GtReadmode readmode,
                                    const GtUchar *pattern,
-                                   unsigned long patternlength)
+                                   GtUword patternlength)
 {
   GtQueryrep queryrep;
   GtQuerysubstring querysubstring;
@@ -244,7 +244,7 @@ GtMMsearchiterator *gt_mmsearchiterator_new_complete_plain(
   queryrep.encseq = NULL;
   queryrep.readmode = GT_READMODE_FORWARD;
   queryrep.startpos = 0;
-  queryrep.length = (unsigned long) patternlength;
+  queryrep.length = (GtUword) patternlength;
   querysubstring.queryrep = &queryrep;
   querysubstring.offset = 0;
   return gt_mmsearchiterator_new_generic(dbencseq,
@@ -257,7 +257,7 @@ GtMMsearchiterator *gt_mmsearchiterator_new_complete_plain(
                                          patternlength);
 }
 
-unsigned long gt_mmsearchiterator_count(const GtMMsearchiterator *mmsi)
+GtUword gt_mmsearchiterator_count(const GtMMsearchiterator *mmsi)
 {
   if (mmsi->lcpitv.left > mmsi->lcpitv.right)
   {
@@ -266,7 +266,7 @@ unsigned long gt_mmsearchiterator_count(const GtMMsearchiterator *mmsi)
   return mmsi->lcpitv.right - mmsi->lcpitv.left + 1;
 }
 
-bool gt_mmsearchiterator_next(unsigned long *dbstart,GtMMsearchiterator *mmsi)
+bool gt_mmsearchiterator_next(GtUword *dbstart,GtMMsearchiterator *mmsi)
 {
   if (mmsi->sufindex <= mmsi->lcpitv.right)
   {
@@ -301,7 +301,7 @@ void gt_mmsearchiterator_delete(GtMMsearchiterator *mmsi)
 
 static bool gt_mmsearch_isleftmaximal(const GtEncseq *dbencseq,
                                       GtReadmode readmode,
-                                      unsigned long dbstart,
+                                      GtUword dbstart,
                                       const GtQuerysubstring *querysubstring)
 {
   GtUchar dbleftchar;
@@ -324,8 +324,8 @@ static bool gt_mmsearch_isleftmaximal(const GtEncseq *dbencseq,
 
 static bool gt_mum_isleftmaximal(const GtEncseq *dbencseq,
                                  GtReadmode readmode,
-                                 unsigned long dbstart,
-                                 unsigned long queryoffset,
+                                 GtUword dbstart,
+                                 GtUword queryoffset,
                                  const GtUchar *query)
 {
   GtUchar dbleftchar;
@@ -344,17 +344,17 @@ static bool gt_mum_isleftmaximal(const GtEncseq *dbencseq,
   return false;
 }
 
-static unsigned long gt_mmsearch_extendright(const GtEncseq *dbencseq,
+static GtUword gt_mmsearch_extendright(const GtEncseq *dbencseq,
                                              GtEncseqReader *esr,
                                              GtReadmode readmode,
-                                             unsigned long totallength,
-                                             unsigned long dbend,
+                                             GtUword totallength,
+                                             GtUword dbend,
                                              const GtQuerysubstring
                                                *querysubstring,
-                                             unsigned long matchlength)
+                                             GtUword matchlength)
 {
   GtUchar dbchar;
-  unsigned long dbpos, querypos;
+  GtUword dbpos, querypos;
 
   if (dbend < totallength)
   {
@@ -379,13 +379,13 @@ static int gt_queryuniquematch(bool selfmatch,
                                const Suffixarray *suffixarray,
                                uint64_t queryunitnum,
                                const GtQueryrep *queryrep,
-                               unsigned long minmatchlength,
+                               GtUword minmatchlength,
                                GtProcessquerymatch processquerymatch,
                                void *processquerymatchinfo,
                                GtQuerymatch *querymatchspaceptr,
                                GtError *err)
 {
-  unsigned long offset,
+  GtUword offset,
                 totallength = gt_encseq_total_length(suffixarray->encseq),
                 localqueryoffset = 0;
   uint64_t localqueryunitnum = queryunitnum;
@@ -394,7 +394,7 @@ static int gt_queryuniquematch(bool selfmatch,
   gt_assert(!selfmatch && queryrep->length >= minmatchlength);
   for (offset = 0; offset <= queryrep->length - minmatchlength; offset++)
   {
-    unsigned long matchlen, dbstart;
+    GtUword matchlen, dbstart;
 
     matchlen = gt_suffixarrayfindmums (suffixarray,
                                        0,
@@ -452,17 +452,17 @@ static int gt_querysubstringmatch_generic(
                                      const GtEncseq *dbencseq,
                                      const ESASuffixptr *suftabpart,
                                      GtReadmode readmode,
-                                     unsigned long numberofsuffixes,
+                                     GtUword numberofsuffixes,
                                      uint64_t queryunitnum,
                                      const GtQueryrep *queryrep,
-                                     unsigned long minmatchlength,
+                                     GtUword minmatchlength,
                                      GtProcessquerymatch processquerymatch,
                                      void *processquerymatchinfo,
                                      GtQuerymatch *querymatchspaceptr,
                                      GtError *err)
 {
   GtMMsearchiterator *mmsi;
-  unsigned long totallength, localqueryoffset = 0;
+  GtUword totallength, localqueryoffset = 0;
   uint64_t localqueryunitnum = queryunitnum;
   GtQuerysubstring querysubstring;
   bool haserr = false;
@@ -474,7 +474,7 @@ static int gt_querysubstringmatch_generic(
        querysubstring.offset <= queryrep->length - minmatchlength;
        querysubstring.offset++)
   {
-    unsigned long dbstart;
+    GtUword dbstart;
 
     mmsi = gt_mmsearchiterator_new_generic(dbencseq,
                                            suftabpart,
@@ -491,7 +491,7 @@ static int gt_querysubstringmatch_generic(
                                     dbstart,
                                     &querysubstring))
       {
-        unsigned long extend = gt_mmsearch_extendright(dbencseq,
+        GtUword extend = gt_mmsearch_extendright(dbencseq,
                                                        mmsi->esr,
                                                        readmode,
                                                        totallength,
@@ -542,7 +542,7 @@ static int gt_querysubstringmatch(bool selfmatch,
                                   const Suffixarray *suffixarray,
                                   uint64_t queryunitnum,
                                   const GtQueryrep *queryrep,
-                                  unsigned long minmatchlength,
+                                  GtUword minmatchlength,
                                   GtProcessquerymatch processquerymatch,
                                   void *processquerymatchinfo,
                                   GtQuerymatch *querymatchspaceptr,
@@ -566,7 +566,7 @@ typedef int (*GtQuerysubstringmatchfunc)(bool,
                                          const Suffixarray *,
                                          uint64_t,
                                          const GtQueryrep *,
-                                         unsigned long,
+                                         GtUword,
                                          GtProcessquerymatch,
                                          void *,
                                          GtQuerymatch *,
@@ -596,11 +596,11 @@ static int gt_callenumquerymatches_withindex(
   {
     GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     const GtUchar *query;
-    unsigned long querylen;
+    GtUword querylen;
     int retval;
     uint64_t queryunitnum;
     GtUchar *queryreverse = NULL;
-    unsigned long queryreverse_length = 0;
+    GtUword queryreverse_length = 0;
     char *desc = NULL;
     int mode;
 
@@ -619,7 +619,7 @@ static int gt_callenumquerymatches_withindex(
       {
         break;
       }
-      if (querylen >= (unsigned long) userdefinedleastlength)
+      if (querylen >= (GtUword) userdefinedleastlength)
       {
         GtQueryrep queryrep;
 
@@ -668,7 +668,7 @@ static int gt_callenumquerymatches_withindex(
                                        suffixarray,
                                        queryunitnum,
                                        &queryrep,
-                                       (unsigned long) userdefinedleastlength,
+                                       (GtUword) userdefinedleastlength,
                                        processquerymatch,
                                        processquerymatchinfo,
                                        querymatchspaceptr,
@@ -755,7 +755,7 @@ int gt_callenumselfmatches(const char *indexname,
     haserr = true;
   } else
   {
-    unsigned long seqnum, numofsequences, seqlength, seqstartpos;
+    GtUword seqnum, numofsequences, seqlength, seqstartpos;
     GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     GtQueryrep queryrep;
 
@@ -768,7 +768,7 @@ int gt_callenumselfmatches(const char *indexname,
     {
       seqstartpos = gt_encseq_seqstartpos(suffixarray.encseq, seqnum);
       seqlength = gt_encseq_seqlength(suffixarray.encseq, seqnum);
-      if (seqlength >= (unsigned long) userdefinedleastlength)
+      if (seqlength >= (GtUword) userdefinedleastlength)
       {
         queryrep.startpos = seqstartpos;
         queryrep.length = seqlength;
@@ -776,7 +776,7 @@ int gt_callenumselfmatches(const char *indexname,
                                    &suffixarray,
                                    (uint64_t) seqnum,
                                    &queryrep,
-                                   (unsigned long) userdefinedleastlength,
+                                   (GtUword) userdefinedleastlength,
                                    processquerymatch,
                                    processquerymatchinfo,
                                    querymatchspaceptr,
@@ -798,9 +798,9 @@ static int gt_constructsarrandrunmmsearch(
                  GtReadmode readmode,
                  unsigned int prefixlength,
                  unsigned int numofparts,
-                 unsigned long maximumspace,
+                 GtUword maximumspace,
                  const GtUchar *query,
-                 unsigned long querylen,
+                 GtUword querylen,
                  unsigned int minlength,
                  GtProcessquerymatch processquerymatch,
                  void *processquerymatchinfo,
@@ -831,7 +831,7 @@ static int gt_constructsarrandrunmmsearch(
   } else
   {
     const GtSuffixsortspace *suffixsortspace;
-    unsigned long numberofsuffixes;
+    GtUword numberofsuffixes;
     GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     GtQueryrep queryrep;
 
@@ -840,7 +840,7 @@ static int gt_constructsarrandrunmmsearch(
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;
     queryrep.startpos = 0;
-    queryrep.length = (unsigned long) querylen;
+    queryrep.length = (GtUword) querylen;
     while (true)
     {
       suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,NULL,sfi);
@@ -857,7 +857,7 @@ static int gt_constructsarrandrunmmsearch(
                                 numberofsuffixes,
                                 0,
                                 &queryrep,
-                                (unsigned long) minlength,
+                                (GtUword) minlength,
                                 processquerymatch,
                                 processquerymatchinfo,
                                 querymatchspaceptr,
@@ -877,9 +877,9 @@ static int gt_constructsarrandrunmmsearch(
 }
 
 int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
-                               unsigned long dblen,
+                               GtUword dblen,
                                const GtUchar *query,
-                               unsigned long querylen,
+                               GtUword querylen,
                                unsigned int minlength,
                                GtAlphabet *alpha,
                                GtProcessquerymatch processquerymatch,

@@ -29,5 +29,5 @@
    Returnwert: void */
 int mg_computepath(CombinedScoreMatrixEntry **,
                    HitInformation *hit_information,
-                   unsigned long, unsigned long, ParseStruct *, GtError *);
+                   GtUword, GtUword, ParseStruct *, GtError *);
 #endif

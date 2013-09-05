@@ -23,7 +23,7 @@
 
 /* Show the GC-content for sequence <seq> with length <len> on <outfp>.
    <alpha> has to be compatible with a DNA alphabet. */
-void gt_gc_content_show(const char *seq, unsigned long len,
+void gt_gc_content_show(const char *seq, GtUword len,
                         GtAlphabet *alphabet, GtFile *outfp);
 
 #endif

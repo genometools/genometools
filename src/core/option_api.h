@@ -226,26 +226,26 @@ GtOption*       gt_option_new_long(const char *option_string,
    <default_value>. The result of the option parsing is stored in <value>. */
 GtOption*       gt_option_new_ulong(const char *option_string,
                                     const char *description,
-                                    unsigned long *value,
-                                    unsigned long default_value);
+                                    GtUword *value,
+                                    GtUword default_value);
 /* Return a new <GtOption> with the given <option_string>, <description>, and
    <default_value>. The result of the option parsing is stored in <value>.
   The argument to this option must at least have the <minimum_value>. */
 GtOption*       gt_option_new_ulong_min(const char *option_string,
                                         const char *description,
-                                        unsigned long *value,
-                                        unsigned long default_value,
-                                        unsigned long minimum_value);
+                                        GtUword *value,
+                                        GtUword default_value,
+                                        GtUword minimum_value);
 /* Return a new <GtOption> with the given <option_string>, <description>, and
    <default_value>. The result of the option parsing is stored in <value>.
   The argument to this option must at least have the <minimum_value> and at most
   the <maximum_value>. */
 GtOption*       gt_option_new_ulong_min_max(const char *option_string,
                                             const char *description,
-                                            unsigned long *value,
-                                            unsigned long default_value,
-                                            unsigned long minimum_value,
-                                            unsigned long maximum_value);
+                                            GtUword *value,
+                                            GtUword default_value,
+                                            GtUword minimum_value,
+                                            GtUword maximum_value);
 /* Return a new <GtOption> with the given <option_string>, <description>, and
    <default_value>. The result of the option parsing is stored in <value>.
    If <default_value> equals <NULL>, <GT_UNDEF_LONG> will be used as the default
@@ -262,8 +262,8 @@ GtOption*       gt_option_new_range_min_max(const char *option_string,
                                             const char *description,
                                             GtRange *value,
                                             GtRange *default_value,
-                                            unsigned long minimum_value,
-                                            unsigned long maximum_value);
+                                            GtUword minimum_value,
+                                            GtUword maximum_value);
 /* Return a new <GtOption> with the given <option_string>, <description>, and
    <default_value>. The result of the option parsing is stored in <value>. */
 GtOption*       gt_option_new_string(const char *option_string,
@@ -300,7 +300,7 @@ GtOption*       gt_option_new_verbose(bool *value);
 /* Return a new width <GtOption> object: <-width>, "set output width for FASTA
    sequence printing (0 disables formatting)", default is 0.
    The result of the option parsing is stored in <value> */
-GtOption*       gt_option_new_width(unsigned long *value);
+GtOption*       gt_option_new_width(GtUword *value);
 /* Increase the reference count for <option> and return it. */
 GtOption*       gt_option_ref(GtOption *option);
 /* Return the name of <option> */
@@ -350,7 +350,7 @@ void            gt_option_delete(GtOption*);
 /* Parse the argument to option -memlimit. Could be made into
    a special parser, but I do not know how. SK. 2011-09-19 */
 
-int gt_option_parse_spacespec(unsigned long *maximumspace,
+int gt_option_parse_spacespec(GtUword *maximumspace,
                               const char *optname,
                               const GtStr *memlimit,
                               GtError *err);

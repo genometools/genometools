@@ -26,7 +26,7 @@
 #define GT_STRGRAPH_COUNTS_REPRESENTATION "char array + hash table"
 
 typedef unsigned char GtStrgraphCount__Small;
-typedef unsigned long GtStrgraphCount__Large;
+typedef GtUword GtStrgraphCount__Large;
 typedef GtStrgraphCount__Large GtStrgraphCount;
 #define FormatGtStrgraphCount       "%lu"
 #define PRINTGtStrgraphCountcast(X) (X)

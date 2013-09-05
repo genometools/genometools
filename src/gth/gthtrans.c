@@ -98,10 +98,10 @@ static void createoutputlines(char *dotline,
                               char *frame1_in,
                               char *frame2_in,
                               GthSplicedSeq *splicedseq,
-                              unsigned long exonseparatorwidth,
-                              GT_UNUSED unsigned long outlen, bool gs2out)
+                              GtUword exonseparatorwidth,
+                              GT_UNUSED GtUword outlen, bool gs2out)
 {
-  unsigned long i,
+  GtUword i,
        dotcounter = DOTSPACING,
        incounter  = 0,
        outcounter = 0;
@@ -170,14 +170,14 @@ static void showoutputlines(char *dotline,
                             char *frame0_out,
                             char *frame1_out,
                             char *frame2_out,
-                            unsigned long outlen,
+                            GtUword outlen,
                             bool gen_strand_forward,
-                            unsigned long gen_total_length,
-                            unsigned long gen_offset,
-                            unsigned long *positionmapping,
+                            GtUword gen_total_length,
+                            GtUword gen_offset,
+                            GtUword *positionmapping,
                             GthOutput *out)
 {
-  unsigned long i, outcounter  = 0, origcounter = 0;
+  GtUword i, outcounter  = 0, origcounter = 0;
 
   while (outcounter < outlen) {
     OUTPUT_EXONPOSSPACE;
@@ -210,13 +210,13 @@ static void showtranslation(GthSplicedSeq *splicedseq,
                             char *frame2_in,
                             GtArray *exons,
                             bool gen_strand_forward,
-                            unsigned long gen_total_length,
-                            unsigned long gen_offset,
+                            GtUword gen_total_length,
+                            GtUword gen_offset,
                             unsigned int indentlevel,
                             GthOutput *out)
 {
   char *dotline, *template_out, *frame0_out, *frame1_out, *frame2_out;
-  unsigned long i, exonseparatorwidth =  strlen(EXONSEPARATORSTRING),
+  GtUword i, exonseparatorwidth =  strlen(EXONSEPARATORSTRING),
                 outlen = splicedseq->splicedseqlen +
                          ((gt_array_size(exons) - 1) * exonseparatorwidth) +
                          (splicedseq->splicedseqlen / TRANSLATIONLINEWIDTH);
@@ -291,14 +291,14 @@ static void showtranslation(GthSplicedSeq *splicedseq,
   gt_free(frame2_out);
 }
 
-void gt_outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
-                                unsigned long agsnum,
-                                unsigned long translationtable,
+void gt_outputtranslationandorf(GtUword pglnum, const GthAGS *ags,
+                                GtUword agsnum,
+                                GtUword translationtable,
                                 GthInput *input,
                                 unsigned int indentlevel,
                                 GthOutput *out)
 {
-  unsigned long i;
+  GtUword i;
   unsigned int nframe;
   const unsigned char *gen_seq_orig;
   GtStr *frame[3];

@@ -35,30 +35,30 @@ void                             gt_combinatorics_clean(void);
 
 /* Returns n! = 1 * 2 * ... * (n - 1) * n, where <n> number for which to
    compute factorial. */
-static inline unsigned long      gt_combinatorics_factorial(unsigned n);
+static inline GtUword      gt_combinatorics_factorial(unsigned n);
 
 /* Returns <n> choose <k> using exp(ln(n!) - ln(k!) - ln((n-k)!)).
    Returned value might deviate from correct result for large <n>. Overflows for
    n > 66 (64bit) or n > 32 (32bit). */
-unsigned long                    gt_combinatorics_binomial_ln(unsigned long n,
-                                                              unsigned long k);
+GtUword                    gt_combinatorics_binomial_ln(GtUword n,
+                                                              GtUword k);
 
 /* Returns <n> choose <k> using a DP table. Overflows for n > 67 (64bit) or
    n > 33 (32bit) */
-unsigned long                    gt_combinatorics_binomial_dp(unsigned long n,
-                                                              unsigned long k);
+GtUword                    gt_combinatorics_binomial_dp(GtUword n,
+                                                              GtUword k);
 
 /* Naive implementation of <n> choose <k>, but already somewhat optimised.
    Overflows for n > 62 (64bit) or n > 30 (32bit)*/
-unsigned long                    gt_combinatorics_binomial_simple(
-                                                               unsigned long n,
-                                                               unsigned long k);
+GtUword                    gt_combinatorics_binomial_simple(
+                                                               GtUword n,
+                                                               GtUword k);
 
 /* Returns multinomial coefficient
    n choose k_1, k_2 ... k_m = n! / k_1! * k_2! * ... * k_m! where
    <numBins> equals m and <binSizes> points to array which contains the <k_i>
    values. */
-static inline unsigned long      gt_combinatorics_multinomial(
+static inline GtUword      gt_combinatorics_multinomial(
                                                      unsigned n,
                                                      size_t numBins,
                                                      const unsigned binSizes[]);

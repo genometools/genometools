@@ -31,7 +31,7 @@ struct Tyrindex
   const char *indexfilename;
   unsigned int alphasize;
   size_t numofmers;
-  unsigned long mersize,
+  GtUword mersize,
                 merbytes;
   GtUchar *mertable,
         *lastmer;
@@ -43,17 +43,17 @@ struct Tyrcountinfo
   const char *indexfilename;
   GtUchar *smallcounts;
   Largecount *largecounts;
-  unsigned long numoflargecounts;
+  GtUword numoflargecounts;
 };
 
-unsigned long gt_decodesingleinteger(const GtUchar *start)
+GtUword gt_decodesingleinteger(const GtUchar *start)
 {
-  unsigned long idx, value;
+  GtUword idx, value;
 
-  value = (unsigned long) start[0];
-  for (idx=1UL; idx < (unsigned long) sizeof (unsigned long); idx++)
+  value = (GtUword) start[0];
+  for (idx=1UL; idx < (GtUword) sizeof (GtUword); idx++)
   {
-    value |= (((unsigned long) start[idx]) << GT_MULT8(idx));
+    value |= (((GtUword) start[idx]) << GT_MULT8(idx));
   }
   return value;
 }
@@ -76,11 +76,11 @@ Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err)
   if (!haserr)
   {
     tyrindex->mertable = (GtUchar *) tyrindex->mappedfileptr;
-    rest = sizeof (unsigned long) * EXTRAINTEGERS;
+    rest = sizeof (GtUword) * EXTRAINTEGERS;
     if (rest > numofbytes)
     {
       gt_error_set(err,"index must contain at least %lu bytes",
-                        (unsigned long) rest);
+                        (GtUword) rest);
       haserr = true;
     }
   }
@@ -92,12 +92,12 @@ Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err)
     tyrindex->alphasize
       = (unsigned int) gt_decodesingleinteger(tyrindex->mertable +
                                            numofbytes - rest +
-                                           sizeof (unsigned long));
+                                           sizeof (GtUword));
     tyrindex->merbytes = MERBYTES(tyrindex->mersize);
     if ((numofbytes - rest) % tyrindex->merbytes != 0)
     {
       gt_error_set(err,"size of index is %lu which is not a multiple of %lu",
-                   (unsigned long) (numofbytes - rest),
+                   (GtUword) (numofbytes - rest),
                    tyrindex->merbytes);
       haserr = true;
     }
@@ -132,7 +132,7 @@ void gt_tyrindex_show(const Tyrindex *tyrindex)
   printf("# indexfilename = %s\n",tyrindex->indexfilename);
   printf("# alphasize = %u\n",tyrindex->alphasize);
   printf("# mersize = %lu\n",tyrindex->mersize);
-  printf("# numofmers = %lu\n",(unsigned long) tyrindex->numofmers);
+  printf("# numofmers = %lu\n",(GtUword) tyrindex->numofmers);
   printf("# merbytes = %lu\n",tyrindex->merbytes);
 }
 
@@ -151,12 +151,12 @@ const GtUchar *gt_tyrindex_lastmer(const Tyrindex *tyrindex)
   return tyrindex->lastmer;
 }
 
-unsigned long gt_tyrindex_merbytes(const Tyrindex *tyrindex)
+GtUword gt_tyrindex_merbytes(const Tyrindex *tyrindex)
 {
   return tyrindex->merbytes;
 }
 
-unsigned long gt_tyrindex_mersize(const Tyrindex *tyrindex)
+GtUword gt_tyrindex_mersize(const Tyrindex *tyrindex)
 {
   return tyrindex->mersize;
 }
@@ -166,10 +166,10 @@ unsigned int gt_tyrindex_alphasize(const Tyrindex *tyrindex)
   return tyrindex->alphasize;
 }
 
-unsigned long gt_tyrindex_ptr2number(const Tyrindex *tyrindex,
+GtUword gt_tyrindex_ptr2number(const Tyrindex *tyrindex,
                                   const GtUchar *result)
 {
-  return (unsigned long) (result - tyrindex->mertable)/tyrindex->merbytes;
+  return (GtUword) (result - tyrindex->mertable)/tyrindex->merbytes;
 }
 
 void gt_tyrindex_delete(Tyrindex **tyrindexptr)
@@ -210,22 +210,22 @@ Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
     {
       gt_error_set(err,"size of file \"%s.%s\" is smaller than minimum size "
                        "%lu",tyrindexname,COUNTSSUFFIX,
-                       (unsigned long) tyrindex->numofmers);
+                       (GtUword) tyrindex->numofmers);
       haserr = true;
     }
   }
   if (!haserr && (numofbytes - tyrindex->numofmers) % sizeof (Largecount) != 0)
   {
     gt_error_set(err,"(numofbytes - numofmers) = %lu must be a multiple of %lu",
-           (unsigned long) (numofbytes - tyrindex->numofmers),
-           (unsigned long) sizeof (Largecount));
+           (GtUword) (numofbytes - tyrindex->numofmers),
+           (GtUword) sizeof (Largecount));
     haserr = true;
   }
   if (!haserr)
   {
     tyrcountinfo->numoflargecounts
-      = (unsigned long) (numofbytes - tyrindex->numofmers)/
-        (unsigned long) sizeof (Largecount);
+      = (GtUword) (numofbytes - tyrindex->numofmers)/
+        (GtUword) sizeof (Largecount);
   }
   if (haserr)
   {
@@ -239,16 +239,16 @@ Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
   return haserr ? NULL : tyrcountinfo;
 }
 
-static /*@null@*/ const Largecount *binsearchLargecount(unsigned long key,
+static /*@null@*/ const Largecount *binsearchLargecount(GtUword key,
                                                         const Largecount *left,
                                                         const Largecount *right)
 {
   const Largecount *leftptr = left, *midptr, *rightptr = right;
-  unsigned long len;
+  GtUword len;
 
   while (leftptr<=rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr);
+    len = (GtUword) (rightptr-leftptr);
     midptr = leftptr + GT_DIV2(len); /* halve len */
     if (key < midptr->idx)
     {
@@ -267,8 +267,8 @@ static /*@null@*/ const Largecount *binsearchLargecount(unsigned long key,
   return NULL;
 }
 
-unsigned long gt_tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
-                               unsigned long mernumber)
+GtUword gt_tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
+                               GtUword mernumber)
 {
   if (tyrcountinfo->smallcounts[mernumber] == 0)
   {
@@ -287,7 +287,7 @@ unsigned long gt_tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
     gt_assert (lc != NULL);
     return lc->value;
   }
-  return (unsigned long) tyrcountinfo->smallcounts[mernumber];
+  return (GtUword) tyrcountinfo->smallcounts[mernumber];
 }
 
 void gt_tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr)
@@ -300,10 +300,10 @@ void gt_tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr)
   *tyrcountinfoptr = NULL;
 }
 
-static int mymemcmp(unsigned long *offset,const GtUchar *s1,const GtUchar *s2,
-                    unsigned long len)
+static int mymemcmp(GtUword *offset,const GtUchar *s1,const GtUchar *s2,
+                    GtUword len)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=*offset; idx<len; idx++)
   {
@@ -322,20 +322,20 @@ static int mymemcmp(unsigned long *offset,const GtUchar *s1,const GtUchar *s2,
 }
 
 /*@null@*/ const GtUchar *gt_tyrindex_binmersearch(const Tyrindex *tyrindex,
-                                              unsigned long offset,
+                                              GtUword offset,
                                               const GtUchar *key,
                                               const GtUchar *leftbound,
                                               const GtUchar *rightbound)
 {
   const GtUchar *leftptr, *midptr, *rightptr;
   int cmpval;
-  unsigned long leftlength = offset, rightlength = offset, len;
+  GtUword leftlength = offset, rightlength = offset, len;
 
   leftptr = leftbound;
   rightptr = rightbound;
   while (leftptr <= rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr)/GT_MULT2(tyrindex->merbytes);
+    len = (GtUword) (rightptr-leftptr)/GT_MULT2(tyrindex->merbytes);
     midptr = leftptr + tyrindex->merbytes * len;
     cmpval = mymemcmp(&offset,midptr,key,tyrindex->merbytes);
     if (cmpval < 0)
@@ -370,8 +370,8 @@ void gt_tyrindex_check(GT_UNUSED const Tyrindex *tyrindex)
 #ifndef NDEBUG
   GtUchar *mercodeptr;
   const GtUchar *result;
-  unsigned long position;
-  GT_UNUSED unsigned long previousposition = 0;
+  GtUword position;
+  GT_UNUSED GtUword previousposition = 0;
 
   gt_assert(tyrindex->merbytes > 0);
   for (mercodeptr = tyrindex->mertable;
@@ -387,7 +387,7 @@ void gt_tyrindex_check(GT_UNUSED const Tyrindex *tyrindex)
       fprintf(stderr,"result is not multiple of %lu\n",tyrindex->merbytes);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    position = (unsigned long) (result-tyrindex->mertable)/
+    position = (GtUword) (result-tyrindex->mertable)/
                                tyrindex->merbytes;
     if (position > 0 && previousposition + 1 != position)
     {
@@ -409,7 +409,7 @@ int gt_determinetyrbckpfxlen(unsigned int *prefixlength,
   {
     unsigned int maxprefixlen
       = gt_whatisthemaximalprefixlength(tyrindex->alphasize,
-                                     (unsigned long) tyrindex->numofmers,
+                                     (GtUword) tyrindex->numofmers,
                                      0,true);
     if (maxprefixlen > (unsigned int) tyrindex->mersize)
     {
@@ -425,7 +425,7 @@ int gt_determinetyrbckpfxlen(unsigned int *prefixlength,
   {
     unsigned int recommendedprefixlength
       = gt_recommendedprefixlength(tyrindex->alphasize,
-                                   (unsigned long) tyrindex->numofmers,
+                                   (GtUword) tyrindex->numofmers,
                                    GT_RECOMMENDED_MULTIPLIER_DEFAULT,
                                    true);
     if (recommendedprefixlength > (unsigned int) tyrindex->mersize)

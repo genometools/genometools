@@ -25,9 +25,9 @@ struct GtAssemblyStatsCalculator
 {
   uint64_t numofseq;
   uint64_t sumlength;
-  unsigned long minlength;
-  unsigned long maxlength;
-  unsigned long genome_length;
+  GtUword minlength;
+  GtUword maxlength;
+  GtUword genome_length;
   GtDiscDistri *lengths;
 };
 
@@ -55,7 +55,7 @@ void gt_assembly_stats_calculator_delete(GtAssemblyStatsCalculator *asc)
 }
 
 void gt_assembly_stats_calculator_add(GtAssemblyStatsCalculator *asc,
-    unsigned long length)
+    GtUword length)
 {
   gt_assert(asc != NULL);
   gt_assert(length != 0);
@@ -69,7 +69,7 @@ void gt_assembly_stats_calculator_add(GtAssemblyStatsCalculator *asc,
 }
 
 void gt_assembly_stats_calculator_set_genome_length(
-    GtAssemblyStatsCalculator *asc, unsigned long genome_length)
+    GtAssemblyStatsCalculator *asc, GtUword genome_length)
 {
   gt_assert(asc != NULL);
   asc->genome_length = genome_length;
@@ -80,8 +80,8 @@ void gt_assembly_stats_calculator_set_genome_length(
 #define MAX_NOF_NSTATS 4
 typedef struct
 {
-  unsigned long       nvalue[MAX_NOF_NSTATS];
-  unsigned long       lvalue[MAX_NOF_NSTATS];
+  GtUword       nvalue[MAX_NOF_NSTATS];
+  GtUword       lvalue[MAX_NOF_NSTATS];
   GtUint64  min[MAX_NOF_NSTATS];
   bool                done[MAX_NOF_NSTATS];
   char                *name[MAX_NOF_NSTATS];
@@ -94,7 +94,7 @@ typedef struct
   GtUint64  half_num;
 } Nstats;
 
-static void calcNstats(unsigned long key, GtUint64 value,
+static void calcNstats(GtUword key, GtUint64 value,
                         void *data)
 {
   Nstats *nstats = data;
@@ -116,7 +116,7 @@ static void calcNstats(unsigned long key, GtUint64 value,
     {
       nstats->done[i] = true;
       nstats->nvalue[i] = key;
-      nstats->lvalue[i] = (unsigned long) nstats->current_num;
+      nstats->lvalue[i] = (GtUword) nstats->current_num;
     }
   }
 }

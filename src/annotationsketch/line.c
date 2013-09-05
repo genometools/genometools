@@ -83,7 +83,7 @@ int gt_line_get_height(GtLine *line, double *height, const GtStyle *sty,
                        GtError *err)
 {
   double line_height = 0;
-  unsigned long i;
+  GtUword i;
   gt_assert(line && sty);
   for (i = 0; i < gt_array_size(line->blocks); i++) {
     GtBlock *block;
@@ -206,7 +206,7 @@ int gt_line_unit_test(GtError *err)
 
 void gt_line_delete(GtLine *line)
 {
-  unsigned long i;
+  GtUword i;
   if (!line) return;
   for (i = 0; i < gt_array_size(line->blocks); i++)
     gt_block_delete(*(GtBlock**) gt_array_get(line->blocks, i));

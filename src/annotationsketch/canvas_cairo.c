@@ -65,7 +65,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
                                     GtError *err)
 {
   int had_err = 0;
-  unsigned long exceeded;
+  GtUword exceeded;
   bool show_track_captions = true;
 
   GtColor color;
@@ -326,14 +326,14 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
     if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
     {
       if (!gt_bittab_bit_is_set(canvas->pvt->bt,
-                                (unsigned long) draw_range.start)) {
+                                (GtUword) draw_range.start)) {
         gt_graphics_draw_vertical_line(canvas->pvt->g,
                                        block_start,
                                        canvas->pvt->y - bar_height/2,
                                        strokecolor,
                                        bar_height,
                                        stroke_width);
-        gt_bittab_set_bit(canvas->pvt->bt, (unsigned long) draw_range.start);
+        gt_bittab_set_bit(canvas->pvt->bt, (GtUword) draw_range.start);
       }
     } else {
       if (gt_style_get_color_with_track(canvas->pvt->sty,
@@ -529,9 +529,9 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   if (canvas->pvt->bt &&
           gt_double_smaller_double(draw_range.end-draw_range.start, 1.1))
   {
-    if ((unsigned long) draw_range.start > gt_bittab_size(canvas->pvt->bt))
+    if ((GtUword) draw_range.start > gt_bittab_size(canvas->pvt->bt))
       return had_err;
-    if (gt_bittab_bit_is_set(canvas->pvt->bt, (unsigned long) draw_range.start))
+    if (gt_bittab_bit_is_set(canvas->pvt->bt, (GtUword) draw_range.start))
       return had_err;
     gt_graphics_draw_vertical_line(canvas->pvt->g,
                                    elem_start,
@@ -539,7 +539,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
                                    elem_color,
                                    bar_height,
                                    stroke_width);
-    gt_bittab_set_bit(canvas->pvt->bt, (unsigned long) draw_range.start);
+    gt_bittab_set_bit(canvas->pvt->bt, (GtUword) draw_range.start);
   }
 
   /* register coordinates in GtImageInfo object if available */

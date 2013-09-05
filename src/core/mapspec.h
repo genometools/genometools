@@ -51,7 +51,7 @@ typedef void (*GtMapspecSetupFunc)(GtMapspec *mapspec, void *data,
 /* Adds a C string of length <n>, to be read from or written to the address to
    which <ptr> points to the <mapspec>. Usually, this method is not used
    directly, but <gt_mapspec_add_char()> is used instead. */
-void gt_mapspec_add_char_ptr(GtMapspec *mapspec, char **ptr, unsigned long n);
+void gt_mapspec_add_char_ptr(GtMapspec *mapspec, char **ptr, GtUword n);
 /* Adds a unsigned character array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_uchar(MAPSPEC, PTR, N)\
@@ -59,7 +59,7 @@ void gt_mapspec_add_char_ptr(GtMapspec *mapspec, char **ptr, unsigned long n);
 /* Adds a unsigned character array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_uchar_ptr(GtMapspec *mapspec, GtUchar **ptr,
-                              unsigned long n);
+                              GtUword n);
 /* Adds a uint16_t array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_uint16(MAPSPEC, PTR, N)\
@@ -67,15 +67,15 @@ void gt_mapspec_add_uchar_ptr(GtMapspec *mapspec, GtUchar **ptr,
 /* Adds a uint16_t array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_uint16_ptr(GtMapspec *mapspec, uint16_t **ptr,
-                               unsigned long n);
-/* Adds a unsigned long array of length <n>, to be read from or written
+                               GtUword n);
+/* Adds a GtUword array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_ulong(MAPSPEC, PTR, N)\
         gt_mapspec_add_ulong_ptr(MAPSPEC, &(PTR), N);
-/* Adds a unsigned long array of length <n>, to be read from or written
+/* Adds a GtUword array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
-void gt_mapspec_add_ulong_ptr(GtMapspec *mapspec, unsigned long **ptr,
-                              unsigned long n);
+void gt_mapspec_add_ulong_ptr(GtMapspec *mapspec, GtUword **ptr,
+                              GtUword n);
 /* Adds a <GtUlongBound> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_ulongbound(MAPSPEC, PTR, N)\
@@ -83,7 +83,7 @@ void gt_mapspec_add_ulong_ptr(GtMapspec *mapspec, unsigned long **ptr,
 /* Adds a <GtUlongBound> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_ulongbound_ptr(GtMapspec *mapspec, GtUlongBound **ptr,
-                                   unsigned long n);
+                                   GtUword n);
 /* Adds a uint32_t array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_uint32(MAPSPEC, PTR, N)\
@@ -91,7 +91,7 @@ void gt_mapspec_add_ulongbound_ptr(GtMapspec *mapspec, GtUlongBound **ptr,
 /* Adds a uint32_t array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_uint32_ptr(GtMapspec *mapspec, uint32_t **ptr,
-                               unsigned long n);
+                               GtUword n);
 /* Adds a uint64_t array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_uint64(MAPSPEC, PTR, N)\
@@ -99,7 +99,7 @@ void gt_mapspec_add_uint32_ptr(GtMapspec *mapspec, uint32_t **ptr,
 /* Adds a uint64_t array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_uint64_ptr(GtMapspec *mapspec, uint64_t **ptr,
-                               unsigned long n);
+                               GtUword n);
 /* Adds a <GtBitsequence> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_bitsequence(MAPSPEC, PTR, N)\
@@ -107,7 +107,7 @@ void gt_mapspec_add_uint64_ptr(GtMapspec *mapspec, uint64_t **ptr,
 /* Adds a <GtBitsequence> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_bitsequence_ptr(GtMapspec *mapspec, GtBitsequence **ptr,
-                                    unsigned long n);
+                                    GtUword n);
 /* Adds a <GtTwobitencoding> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_twobitencoding(MAPSPEC, PTR, N)\
@@ -115,7 +115,7 @@ void gt_mapspec_add_bitsequence_ptr(GtMapspec *mapspec, GtBitsequence **ptr,
 /* Adds a <GtTwobitencoding> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_twobitencoding_ptr(GtMapspec *mapspec,
-                                       GtTwobitencoding **ptr, unsigned long n);
+                                       GtTwobitencoding **ptr, GtUword n);
 /* Adds a <GtSpecialcharinfo> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_specialcharinfo(MAPSPEC, PTR, N)\
@@ -124,7 +124,7 @@ void gt_mapspec_add_twobitencoding_ptr(GtMapspec *mapspec,
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_specialcharinfo_ptr(GtMapspec *mapspec,
                                         GtSpecialcharinfo **ptr,
-                                        unsigned long n);
+                                        GtUword n);
 /* Adds a <BitElem> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_bitelem(MAPSPEC, PTR, N)\
@@ -132,7 +132,7 @@ void gt_mapspec_add_specialcharinfo_ptr(GtMapspec *mapspec,
 /* Adds a <BitElem> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_bitelem_ptr(GtMapspec *mapspec, BitElem **ptr,
-                                unsigned long n);
+                                GtUword n);
 /* Adds a <GtFilelengthvalues> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_filelengthvalues(MAPSPEC, PTR, N)\
@@ -141,7 +141,7 @@ void gt_mapspec_add_bitelem_ptr(GtMapspec *mapspec, BitElem **ptr,
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_filelengthvalues_ptr(GtMapspec *mapspec,
                                          GtFilelengthvalues **ptr,
-                                         unsigned long n);
+                                         GtUword n);
 /* Adds a <GtPairBwtidx> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_pairbwtindex(MAPSPEC, PTR, N)\
@@ -149,7 +149,7 @@ void gt_mapspec_add_filelengthvalues_ptr(GtMapspec *mapspec,
 /* Adds a <GtPairBwtidx> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_pairbwtindex_ptr(GtMapspec *mapspec, GtPairBwtidx **ptr,
-                                     unsigned long n);
+                                     GtUword n);
 /* Adds a unsigned int array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_uint(MAPSPEC, PTR, N)\
@@ -157,7 +157,7 @@ void gt_mapspec_add_pairbwtindex_ptr(GtMapspec *mapspec, GtPairBwtidx **ptr,
 /* Adds a unsigned int array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_uint_ptr(GtMapspec *mapspec, unsigned int **ptr,
-                             unsigned long n);
+                             GtUword n);
 
 /* Runs <setup> to build the map specification using <data> if given,
    then maps the file specified by <filename> with the expected size
@@ -165,7 +165,7 @@ void gt_mapspec_add_uint_ptr(GtMapspec *mapspec, unsigned int **ptr,
    corresponding values. The beginning of the mapped area is written to
    <mapped>. Returns 0 on success, -1 otherwise. <err> is set accordingly. */
 int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
-                     const char *filename, unsigned long expectedsize,
+                     const char *filename, GtUword expectedsize,
                      void **mapped, GtError *err);
 
 /* Runs <setup> to build the map specification using <data> if given, then maps
@@ -178,7 +178,7 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
    within it. Then unmapp und reread with <gt_mapspec_read> to get all data. */
 /* TODO: make this more intuitive */
 int  gt_mapspec_read_header(GtMapspecSetupFunc setup, void *data,
-                            const char *filename, unsigned long expectedsize,
+                            const char *filename, GtUword expectedsize,
                             void **mapped, GtError *err);
 
 /* Runs <setup> to build the map specification using <data> if given,
@@ -186,12 +186,12 @@ int  gt_mapspec_read_header(GtMapspecSetupFunc setup, void *data,
    file specified by <fp> with the expected file size <expectedsize>.
    Returns 0 on success, -1 otherwise. <err> is set accordingly. */
 int  gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp, void *data,
-                      unsigned long expectedsize, GtError *err);
+                      GtUword expectedsize, GtError *err);
 /* Pads file specified by <fp> at position <byteoffset> with zero bytes up to
    the next word boundary. The amount of padding in bytes is written to
    <bytes_written>. Returns 0 on success, -1 otherwise. <err> is set
    accordingly.*/
-int  gt_mapspec_pad(FILE *fp, unsigned long *bytes_written,
-                    unsigned long byteoffset, GtError *err);
+int  gt_mapspec_pad(FILE *fp, GtUword *bytes_written,
+                    GtUword byteoffset, GtError *err);
 
 #endif

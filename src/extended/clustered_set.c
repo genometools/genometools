@@ -58,33 +58,33 @@ void gt_clustered_set_delete(GtClusteredSet *cs, GtError *err)
 }
 
 int gt_clustered_set_merge_clusters(GtClusteredSet *cs,
-                                    unsigned long c1,
-                                    unsigned long c2,
+                                    GtUword c1,
+                                    GtUword c2,
                                     GtError *err)
 {
   return cs->c_class->merge_clusters(cs, c1, c2, err);
 }
 
-unsigned long gt_clustered_set_num_of_clusters(GtClusteredSet *cs, GtError *err)
+GtUword gt_clustered_set_num_of_clusters(GtClusteredSet *cs, GtError *err)
 {
   return cs->c_class->number_of_clusters(cs, err);
 }
 
-unsigned long gt_clustered_set_num_of_elements(GtClusteredSet *cs,
+GtUword gt_clustered_set_num_of_elements(GtClusteredSet *cs,
                                                   GtError *err)
 {
   return cs->c_class->number_of_elements(cs, err);
 }
 
-unsigned long gt_clustered_set_cluster_num(GtClusteredSet *cs,
+GtUword gt_clustered_set_cluster_num(GtClusteredSet *cs,
                                            GtError *err,
-                                           unsigned long e)
+                                           GtUword e)
 {
   return cs->c_class->cluster_num(cs, e, err);
 }
 
 GtClusteredSetIterator* gt_clustered_set_get_iterator(GtClusteredSet *cs,
-                                                      unsigned long c,
+                                                      GtUword c,
                                                       GtError *err)
 {
     return cs->c_class->iterator(cs, c, err);
@@ -92,7 +92,7 @@ GtClusteredSetIterator* gt_clustered_set_get_iterator(GtClusteredSet *cs,
 
 GtClusteredSetIteratorStatus
 gt_clustered_set_iterator_next(GtClusteredSetIterator *cs_i,
-                               unsigned long *elm,
+                               GtUword *elm,
                                GT_UNUSED GtError *err)
 {
   if (cs_i->curpos >= cs_i->length)

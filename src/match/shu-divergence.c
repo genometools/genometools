@@ -25,16 +25,16 @@
 #include "match/shu-divergence.h"
 
 static double pmax(double M, /* M value should be explored by simulation ??? */
-            unsigned long x,
+            GtUword x,
             double p,
-            unsigned long subjectLength,
+            GtUword subjectLength,
             int *thresholdReached,
             double *ln_n_fac,
             double *s1,
-            unsigned long n_s)
+            GtUword n_s)
 {
 
-  unsigned long k;
+  GtUword k;
   double s = 0.0, ln_x_choose_k;
   double ln, ln1, m1, m, delta;
 
@@ -94,12 +94,12 @@ static double expShulen(double T, /* absolute error */
                  double M, /* min logarithm */
                  double d,
                  double p,
-                 unsigned long subjectLength,
+                 GtUword subjectLength,
                  double *ln_n_fac,
                  double *s1,
-                 unsigned long n_s)
+                 GtUword n_s)
 {
-  unsigned long i;
+  GtUword i;
   int thresholdReached = 0;
 
   double prob_i, probOld, delta, factor;
@@ -142,10 +142,10 @@ double gt_divergence(double E, /* relative error for divergence calculation */
                    double M, /* minimum for logarithm */
                    double threshold, /* abs error for divergence */
                    double shulen,
-                   unsigned long subjectLength,
+                   GtUword subjectLength,
                    double gc,
                    double *ln_n_fac,
-                   unsigned long n_s)
+                   GtUword n_s)
 {
   double p, q,
          du, dl, dm, d, exp_shulen;
@@ -174,9 +174,9 @@ double gt_divergence(double E, /* relative error for divergence calculation */
   return d;
 }
 
-double *gt_get_ln_n_fac(unsigned long n)
+double *gt_get_ln_n_fac(GtUword n)
 {
-  unsigned long i;
+  GtUword i;
   double *ln_n_fac;
 
   ln_n_fac = gt_calloc((size_t) n + 1, sizeof (double));

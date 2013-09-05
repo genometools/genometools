@@ -25,7 +25,7 @@
 #include "tools/gt_seqfilter.h"
 
 typedef struct {
-  unsigned long minlength,
+  GtUword minlength,
                 maxlength,
                 maxseqnum,
                 width;
@@ -94,7 +94,7 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   SeqFilterArguments *arguments = tool_arguments;
   GtBioseqIterator *bsi;
   GtBioseq *bioseq;
-  unsigned long i;
+  GtUword i;
   GtUint64 passed = 0, filtered = 0, num_of_sequences = 0;
   int had_err = 0;
 

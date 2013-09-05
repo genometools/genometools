@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/types_api.h"
 #include "core/xansi_api.h"
 
 void gt_xatexit(void (*function)(void))
@@ -135,7 +136,7 @@ void gt_xfsetpos(FILE *stream, const fpos_t *pos)
 
 void gt_xfwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
-  unsigned long itemsperblock = (1 << 30) / size,
+  GtUword itemsperblock = (1 << 30) / size,
                 itemstowrite = nmemb,
                 itemswritten = 0;
   while (itemstowrite >= itemsperblock) {

@@ -22,7 +22,7 @@
 struct GtTwobitencEditor
 {
   GtTwobitencoding *twobitencoding;
-  unsigned long *charcount;
+  GtUword *charcount;
   unsigned char *mapptr;
 };
 
@@ -65,7 +65,7 @@ GtTwobitencEditor *gt_twobitenc_editor_new(const GtEncseq *encseq,
           encseqfilename), NULL, err);
     twobitenc_editor->twobitencoding = (GtTwobitencoding*)
       (twobitenc_editor->mapptr + t_offset);
-    twobitenc_editor->charcount = (unsigned long*)
+    twobitenc_editor->charcount = (GtUword*)
       (twobitenc_editor->mapptr + c_offset);
     gt_str_delete(encseqfilename);
   }
@@ -73,7 +73,7 @@ GtTwobitencEditor *gt_twobitenc_editor_new(const GtEncseq *encseq,
 }
 
 void gt_twobitenc_editor_edit(GtTwobitencEditor *twobitenc_editor,
-    unsigned long pos, GtUchar newchar)
+    GtUword pos, GtUchar newchar)
 {
   size_t codenum, posincode;
   GtTwobitencoding oldcode, newcode;

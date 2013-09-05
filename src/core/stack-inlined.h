@@ -48,7 +48,7 @@
 #define GT_STACK_DECLARESTRUCT(TYPE,STATICSIZE)\
         typedef struct\
         {\
-          unsigned long allocated, maxsize, nextfree,\
+          GtUword allocated, maxsize, nextfree,\
                         staticsize, sizeincrement;\
           TYPE staticspace[STATICSIZE], *space;\
           int (*initialiseelement)(void *);\
@@ -59,7 +59,7 @@
 */
 
 #define GT_STACK_INIT_WITH_INITFUNC(S,SIZEINCREMENT,INITFUNC)\
-        (S)->staticsize = (unsigned long) sizeof ((S)->staticspace)/\
+        (S)->staticsize = (GtUword) sizeof ((S)->staticspace)/\
                                           sizeof ((S)->staticspace[0]);\
         (S)->sizeincrement = SIZEINCREMENT;\
         (S)->allocated = (S)->staticsize;\
@@ -69,7 +69,7 @@
         (S)->initialiseelement = INITFUNC;\
         if ((S)->initialiseelement != NULL)\
         {\
-          unsigned long stackidx;\
+          GtUword stackidx;\
           (S)->initialiseelement = INITFUNC;\
           for (stackidx = 0; stackidx < (S)->staticsize; stackidx++)\
           {\
@@ -111,7 +111,7 @@
           }\
           if ((S)->initialiseelement != NULL)\
           {\
-            unsigned long stackidx;\
+            GtUword stackidx;\
             for (stackidx = 0; stackidx < (S)->sizeincrement; stackidx++)\
             {\
               (void) (S)->initialiseelement((S)->space + (S)->allocated + \

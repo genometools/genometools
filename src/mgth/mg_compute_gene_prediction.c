@@ -29,14 +29,14 @@
               Abspeichern der beteiligten Hits an einem Ergebnis
    Returnwert: void */
 static void gene_prediction(unsigned short,
-                            unsigned long,
+                            GtUword,
                             double,
                             PathMatrixEntry **,
                             CombinedScoreMatrixEntry **,
                             GtArray *,
                             HitInformation *,
                             ParseStruct *,
-                            RegionStruct **, unsigned long *, GtError *);
+                            RegionStruct **, GtUword *, GtError *);
 
 /* Funktion zur Vereinigung von genkodierenden Bereichen innerhalb des
    selben Leserahmen
@@ -58,7 +58,7 @@ static int frameshiftprocessing(ParseStruct *, RegionStruct **, short,
               aktueller Leserahmen
    Returnwert: 0 - kein Stop-Codon; 1 - Stop-Codon */
 static int check_coding(ParseStruct *,
-                        unsigned long, unsigned long, short, GtError *);
+                        GtUword, GtUword, short, GtError *);
 
 /* Funktion zum sortierten Einfuegen neuer Bereichsgrenzen kodierender
    Abschnitte in das real-Frame-Array
@@ -72,8 +72,8 @@ static void merge_array(RegionStruct **,
                         GtArray *,
                         GtArray *,
                         GtArray *,
-                        unsigned long,
-                        unsigned long, short, unsigned short);
+                        GtUword,
+                        GtUword, short, unsigned short);
 
 /* Funktion zum sortierten der GtArrays mit den neu einzufuegenden
    Bereichsgrenzen
@@ -85,7 +85,7 @@ static void sort_realtmp(GtArray *, GtArray *, GtArray *, GtArray *);
 int mg_compute_gene_prediction(CombinedScoreMatrixEntry
                                **combinedscore_matrix,
                                PathMatrixEntry **path_matrix,
-                               unsigned long contig_len,
+                               GtUword contig_len,
                                HitInformation *hit_information,
                                ParseStruct *parsestruct_ptr, GtError * err)
 {
@@ -102,7 +102,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
 
   /* Zaehlvariable fuer die Haeufigkeiten der einzelnen Frames sowie
      Variable fuer den Frame-Score */
-  unsigned long *frame_counter,
+  GtUword *frame_counter,
     real_frame_score;
 
   /* Struktur zur Speicherung der kodierenden Bereiche (from-to - Werte) */
@@ -135,13 +135,13 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
       gt_array2dim_calloc(regionmatrix, 7, 1);
       /* frame-counter zaehlt die Auftritts-haeufigkeiten der einzelnen
          Frames im opt. Pfad */
-      frame_counter = gt_calloc(7, sizeof (unsigned long));
+      frame_counter = gt_calloc(7, sizeof (GtUword));
       real_frame_score = 0;
 
       for (row_idx = 0; row_idx < 7; row_idx++)
       {
-        regionmatrix[row_idx][0].from = gt_array_new(sizeof (unsigned long));
-        regionmatrix[row_idx][0].to = gt_array_new(sizeof (unsigned long));
+        regionmatrix[row_idx][0].from = gt_array_new(sizeof (GtUword));
+        regionmatrix[row_idx][0].to = gt_array_new(sizeof (GtUword));
       }
       /* Aufruf der Genvorhersagemethode */
       gene_prediction(row_index,
@@ -210,7 +210,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
 }
 
 static void gene_prediction(unsigned short row,
-                            unsigned long column,
+                            GtUword column,
                             double max_lastcolumn,
                             PathMatrixEntry **path_matrix,
                             CombinedScoreMatrixEntry
@@ -219,9 +219,9 @@ static void gene_prediction(unsigned short row,
                             HitInformation *hit_information,
                             ParseStruct *parsestruct_ptr,
                             RegionStruct **regionmatrix,
-                            unsigned long *frame_counter, GtError * err)
+                            GtUword *frame_counter, GtError * err)
 {
-  unsigned long column_from,
+  GtUword column_from,
     column_to;
 
   gt_error_check(err);
@@ -496,7 +496,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
   unsigned short row_index,
     check_bp = 0;
 
-  unsigned long arraysize,
+  GtUword arraysize,
     arraysize_realframe,
     GT_UNUSED arraysize_real,
     arraysize_tmp,
@@ -523,14 +523,14 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
 
   gt_error_check(err);
 
-  tmp_from = gt_array_new(sizeof (unsigned long));
-  tmp_to = gt_array_new(sizeof (unsigned long));
-  real_from = gt_array_new(sizeof (unsigned long));
-  real_to = gt_array_new(sizeof (unsigned long));
-  real_fromtmp = gt_array_new(sizeof (unsigned long));
-  real_totmp = gt_array_new(sizeof (unsigned long));
-  realfrom = gt_array_new(sizeof (unsigned long));
-  realto = gt_array_new(sizeof (unsigned long));
+  tmp_from = gt_array_new(sizeof (GtUword));
+  tmp_to = gt_array_new(sizeof (GtUword));
+  real_from = gt_array_new(sizeof (GtUword));
+  real_to = gt_array_new(sizeof (GtUword));
+  real_fromtmp = gt_array_new(sizeof (GtUword));
+  real_totmp = gt_array_new(sizeof (GtUword));
+  realfrom = gt_array_new(sizeof (GtUword));
+  realto = gt_array_new(sizeof (GtUword));
 
   /* Vergleich mit allen anderen Frames - Der reale Frame ist der Frame
      mit der hoechsten Haeufigkeit (frame_counter) */
@@ -552,10 +552,10 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
           /* Grenzen des zu Betrachtenden Abschnitts - Abschnitte liegen
              in aufsteigender Reihenfolge vor */
           from_tmp =
-            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].from,
+            *(GtUword *) gt_array_get(regionmatrix[row_index][0].from,
                                             array_idx);
           to_tmp =
-            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].to,
+            *(GtUword *) gt_array_get(regionmatrix[row_index][0].to,
                                             array_idx);
 
           /* Aufruf der Methode zur Ueberpruefung auf Stop-Codons im
@@ -577,10 +577,10 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
             {
               /* Grenzen des kodierenden Bereichs des realen Frames */
               from_real =
-                *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].
+                *(GtUword *) gt_array_get(regionmatrix[real_frame][0].
                                              from, arrayreal_idx);
               to_real =
-                *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].
+                *(GtUword *) gt_array_get(regionmatrix[real_frame][0].
                                              to, arrayreal_idx);
 
               /* Bestimmen der Frames von realem und zu vergleichendem
@@ -598,10 +598,10 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
               {
                 min_value_tmp = min_value;
                 from_min = from_real =
-                  *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].
+                  *(GtUword *) gt_array_get(regionmatrix[real_frame][0].
                                                from, arrayreal_idx);
                 to_min = to_real =
-                  *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].
+                  *(GtUword *) gt_array_get(regionmatrix[real_frame][0].
                                                to, arrayreal_idx);
               }
             }
@@ -700,7 +700,7 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
 {
   unsigned short row_index;
   short check_bp;
-  unsigned long array_idx,
+  GtUword array_idx,
     arraysize,
     from_tmp,
     to_tmp,
@@ -712,8 +712,8 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
 
   gt_error_check(err);
 
-  tmp_from = gt_array_new(sizeof (unsigned long));
-  tmp_to = gt_array_new(sizeof (unsigned long));
+  tmp_from = gt_array_new(sizeof (GtUword));
+  tmp_to = gt_array_new(sizeof (GtUword));
 
   /* Frames werden nacheinander abgearbeitet - zeilenkodiert */
   for (row_index = 0; row_index < 7; row_index++)
@@ -735,17 +735,17 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
            verwendet werden */
         if (gt_array_size(tmp_from) > 0)
         {
-          from_tmp = *(unsigned long *) gt_array_get_last(tmp_from);
-          to_tmp = *(unsigned long *) gt_array_get_last(tmp_to);
+          from_tmp = *(GtUword *) gt_array_get_last(tmp_from);
+          to_tmp = *(GtUword *) gt_array_get_last(tmp_to);
         }
         /* ansonsten auslesen der Bereichsgrenzen aus dem "original" */
         else
         {
           from_tmp =
-            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].from,
+            *(GtUword *) gt_array_get(regionmatrix[row_index][0].from,
                                             array_idx);
           to_tmp =
-            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].to,
+            *(GtUword *) gt_array_get(regionmatrix[row_index][0].to,
                                             array_idx);
         }
 
@@ -756,10 +756,10 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
         {
           /* auslesen der Grenzen des nachfolgenden kodierenden Bereiches */
           from_tmp_next =
-            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].from,
+            *(GtUword *) gt_array_get(regionmatrix[row_index][0].from,
                                             array_idx);
           to_tmp_real =
-            *(unsigned long *) gt_array_get(regionmatrix[row_index][0].to,
+            *(GtUword *) gt_array_get(regionmatrix[row_index][0].to,
                                             array_idx);
 
           /* zusammenlegen kodierender Bereiche nur, wenn diese innerhalb
@@ -833,12 +833,12 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
 }
 
 static int check_coding(ParseStruct *parsestruct_ptr,
-                        unsigned long from,
-                        unsigned long to, short current_row, GtError * err)
+                        GtUword from,
+                        GtUword to, short current_row, GtError * err)
 {
   int had_err = 0;
 
-  unsigned long startpoint = 0,
+  GtUword startpoint = 0,
     endpoint = 0,
     contig_len = 0;
 
@@ -938,11 +938,11 @@ static void merge_array(RegionStruct **regionmatrix,
                         GtArray * real_to_ar,
                         GtArray * real_fromtmp,
                         GtArray * real_totmp,
-                        unsigned long real_index,
-                        unsigned long tmp_index,
+                        GtUword real_index,
+                        GtUword tmp_index,
                         short real_frame, unsigned short row_index)
 {
-  unsigned long real_from,
+  GtUword real_from,
     real_to,
     tmp_from,
     tmp_to;
@@ -953,8 +953,8 @@ static void merge_array(RegionStruct **regionmatrix,
       && tmp_index < gt_array_size(real_fromtmp))
   {
     /* Bereichsgrenzen des Realtmp-Arrays - from/to-Werte */
-    real_from = *(unsigned long *) gt_array_get(real_fromtmp, tmp_index);
-    real_to = *(unsigned long *) gt_array_get(real_totmp, tmp_index);
+    real_from = *(GtUword *) gt_array_get(real_fromtmp, tmp_index);
+    real_to = *(GtUword *) gt_array_get(real_totmp, tmp_index);
 
     /* solange sich noch Eintraege im realtmp-Array befinden */
     while (tmp_index < gt_array_size(real_fromtmp))
@@ -969,8 +969,8 @@ static void merge_array(RegionStruct **regionmatrix,
          naechsten Bereichsgrenzen ausgelesen */
       if (tmp_index < gt_array_size(real_fromtmp))
       {
-        real_from = *(unsigned long *) gt_array_get(real_fromtmp, tmp_index);
-        real_to = *(unsigned long *) gt_array_get(real_totmp, tmp_index);
+        real_from = *(GtUword *) gt_array_get(real_fromtmp, tmp_index);
+        real_to = *(GtUword *) gt_array_get(real_totmp, tmp_index);
       }
     }
   }
@@ -981,10 +981,10 @@ static void merge_array(RegionStruct **regionmatrix,
   {
     /* Bereichsgrenzen des Real-Arrays - from/to-Werte */
     tmp_from =
-      *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].from,
+      *(GtUword *) gt_array_get(regionmatrix[real_frame][0].from,
                                    real_index);
     tmp_to =
-      *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].to,
+      *(GtUword *) gt_array_get(regionmatrix[real_frame][0].to,
                                    real_index);
 
     /* solange sich noch Eintraege im real-Array befinden */
@@ -1001,10 +1001,10 @@ static void merge_array(RegionStruct **regionmatrix,
       if (real_index < gt_array_size(regionmatrix[real_frame][0].from))
       {
         tmp_from =
-          *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].from,
+          *(GtUword *) gt_array_get(regionmatrix[real_frame][0].from,
                                        real_index);
         tmp_to =
-          *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].to,
+          *(GtUword *) gt_array_get(regionmatrix[real_frame][0].to,
                                        real_index);
       }
     }
@@ -1015,13 +1015,13 @@ static void merge_array(RegionStruct **regionmatrix,
   {
     /* Bereichsgrenzen des Realtmp- und des real-Arrays - from/to-Werte */
     tmp_from =
-      *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].from,
+      *(GtUword *) gt_array_get(regionmatrix[real_frame][0].from,
                                    real_index);
     tmp_to =
-      *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].to,
+      *(GtUword *) gt_array_get(regionmatrix[real_frame][0].to,
                                    real_index);
-    real_from = *(unsigned long *) gt_array_get(real_fromtmp, tmp_index);
-    real_to = *(unsigned long *) gt_array_get(real_totmp, tmp_index);
+    real_from = *(GtUword *) gt_array_get(real_fromtmp, tmp_index);
+    real_to = *(GtUword *) gt_array_get(real_totmp, tmp_index);
 
     /* Fall: realtmp-Abschnitt liegt vor dem real_frame Abschnitt */
     if (real_from < tmp_from)
@@ -1040,8 +1040,8 @@ static void merge_array(RegionStruct **regionmatrix,
         if (tmp_index < gt_array_size(real_fromtmp))
         {
           real_from =
-            *(unsigned long *) gt_array_get(real_fromtmp, tmp_index);
-          real_to = *(unsigned long *) gt_array_get(real_totmp, tmp_index);
+            *(GtUword *) gt_array_get(real_fromtmp, tmp_index);
+          real_to = *(GtUword *) gt_array_get(real_totmp, tmp_index);
         }
       }
       /* rekursiver Aufruf der Sortierfunktion unter Beruecksichtigung der
@@ -1071,10 +1071,10 @@ static void merge_array(RegionStruct **regionmatrix,
         if (real_index < gt_array_size(regionmatrix[real_frame][0].from))
         {
           tmp_from =
-            *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].from,
+            *(GtUword *) gt_array_get(regionmatrix[real_frame][0].from,
                                          real_index);
           tmp_to =
-            *(unsigned long *) gt_array_get(regionmatrix[real_frame][0].to,
+            *(GtUword *) gt_array_get(regionmatrix[real_frame][0].to,
                                          real_index);
         }
       }
@@ -1094,7 +1094,7 @@ static void sort_realtmp(GtArray * realfrom,
                          GtArray * realto,
                          GtArray * real_fromtmp, GtArray * real_totmp)
 {
-  unsigned long index_outer,
+  GtUword index_outer,
     index_inner,
     max_value = 0,
     from,
@@ -1111,8 +1111,8 @@ static void sort_realtmp(GtArray * realfrom,
     for (index_inner = 0; index_inner < gt_array_size(real_fromtmp);
          index_inner++)
     {
-      from = *(unsigned long *) gt_array_get(real_fromtmp, index_inner);
-      to = *(unsigned long *) gt_array_get(real_totmp, index_inner);
+      from = *(GtUword *) gt_array_get(real_fromtmp, index_inner);
+      to = *(GtUword *) gt_array_get(real_totmp, index_inner);
 
       /* Fall: es gibt bereits Eintraege im tmp-Array */
       if (gt_array_size(realfrom) > 0)

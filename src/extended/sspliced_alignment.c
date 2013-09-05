@@ -56,14 +56,14 @@ void gt_sspliced_alignment_add_exon(GtSSplicedAlignment *sa, GtRange exon)
   gt_array_add(sa->exons, exon);
 }
 
-unsigned long gt_sspliced_alignment_num_of_exons(const GtSSplicedAlignment *sa)
+GtUword gt_sspliced_alignment_num_of_exons(const GtSSplicedAlignment *sa)
 {
   gt_assert(sa);
   return gt_array_size(sa->exons);
 }
 
 GtRange gt_sspliced_alignment_get_exon(const GtSSplicedAlignment *sa,
-                                  unsigned long exon_number)
+                                  GtUword exon_number)
 {
   gt_assert(sa);
   return *(GtRange*) gt_array_get(sa->exons, exon_number);

@@ -111,7 +111,7 @@ uint64_t      gt_safe_mult_u64_check_func(uint64_t, uint64_t, const char*, int,
 #define       gt_safe_mult_u64_check(i, j, func, data) \
               gt_safe_mult_u64_check_func(i, j, __FILE__, __LINE__, func, data)
 
-unsigned long gt_safe_mult_ulong_check_func(unsigned long, unsigned long,
+GtUword gt_safe_mult_ulong_check_func(GtUword, GtUword,
                                             const char*, int,
                                             GtOverflowHandlerFunc, void*);
 #define       gt_safe_mult_ulong(i, j) \
@@ -122,7 +122,7 @@ unsigned long gt_safe_mult_ulong_check_func(unsigned long, unsigned long,
               gt_safe_mult_ulong_check_func(i, j, __FILE__, __LINE__, func, \
                                             data)
 
-long          gt_safe_cast2long_check_func(unsigned long, const char*, int,
+long          gt_safe_cast2long_check_func(GtUword, const char*, int,
                                            GtOverflowHandlerFunc, void*);
 #define       gt_safe_cast2long(j) \
               gt_safe_cast2long_check_func(j, __FILE__, __LINE__, \
@@ -130,7 +130,7 @@ long          gt_safe_cast2long_check_func(unsigned long, const char*, int,
 #define       gt_safe_cast2long_check(j, func, data) \
               gt_safe_cast2long_check_func(j, __FILE__, __LINE__, func, data)
 
-unsigned long gt_safe_cast2ulong_check_func(long, const char*, int,
+GtUword gt_safe_cast2ulong_check_func(long, const char*, int,
                                             GtOverflowHandlerFunc, void*);
 #define       gt_safe_cast2ulong(j) \
               gt_safe_cast2ulong_check_func(j, __FILE__, __LINE__, \
@@ -138,7 +138,7 @@ unsigned long gt_safe_cast2ulong_check_func(long, const char*, int,
 #define       gt_safe_cast2ulong_check(j, func, data) \
               gt_safe_cast2ulong_check_func(j, __FILE__, __LINE__, func, data)
 
-unsigned long gt_safe_cast2ulong_64_check_func(uint64_t, const char*, int,
+GtUword gt_safe_cast2ulong_64_check_func(uint64_t, const char*, int,
                                                GtOverflowHandlerFunc, void*);
 #define       gt_safe_cast2ulong_64(j) \
               gt_safe_cast2ulong_64_check_func(j, __FILE__, __LINE__, \

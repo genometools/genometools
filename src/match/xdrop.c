@@ -48,7 +48,7 @@ typedef struct
 
 GT_DECLAREARRAYSTRUCT(GtXdropfrontvalue);
 
-#define GT_XDROP_FRONTIDX(D,K)    ((unsigned long) (D) * (D) + (D) + (K))
+#define GT_XDROP_FRONTIDX(D,K)    ((GtUword) (D) * (D) + (D) + (K))
 
 /*
   For each entry in the DP-matrix we store a single byte, and
@@ -73,7 +73,7 @@ void gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
                        long ulen,
                        long vlen)
 {
-  unsigned long l, max_l;
+  GtUword l, max_l;
   long i, j, k, d, filled = 0, integermax = MAX(ulen,vlen),
        integermin = -integermax;
 
@@ -82,7 +82,7 @@ void gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
   printf("%-3c ", vseqptr[0]);
   /* print vseq */
   max_l = MIN(fronts->nextfreeGtXdropfrontvalue,
-              (unsigned long) GT_XDROP_FRONTIDX(distance, distance));
+              (GtUword) GT_XDROP_FRONTIDX(distance, distance));
   for (i = 1L; i < vlen; i++)
     printf("%-3c ", vseqptr[i]);
 
@@ -190,14 +190,14 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
 
 static long gt_xdrop_frontvalue_get(const GtXdropresources *res, long d, long k)
 {
-  const unsigned long frontidx = GT_XDROP_FRONTIDX(d, k);
+  const GtUword frontidx = GT_XDROP_FRONTIDX(d, k);
   return res->fronts.spaceGtXdropfrontvalue[frontidx].row;
 }
 
 static void gt_xdrop_frontvalue_set(GtXdropresources *res, long d, long k,
                                     GtXdropfrontvalue value)
 {
-  const unsigned long frontidx = GT_XDROP_FRONTIDX(d, k);
+  const GtUword frontidx = GT_XDROP_FRONTIDX(d, k);
 
   if (frontidx >= res->fronts.allocatedGtXdropfrontvalue)
   {
@@ -217,8 +217,8 @@ void gt_evalxdroparbitscoresextend(bool forward,
                                    GtXdropresources *res,
                                    const GtSeqabstract *useq,
                                    const GtSeqabstract *vseq,
-                                   unsigned long uoffset,
-                                   unsigned long voffset,
+                                   GtUword uoffset,
+                                   GtUword voffset,
                                    GtXdropscore xdropbelowscore)
 {
   const long ulen = (long) gt_seqabstract_length(useq),
@@ -250,7 +250,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
                                   vseq,
                                   forward ? uoffset : uoffset - 1,
                                   forward ? voffset : voffset - 1,
-                                  (unsigned long) MIN(ulen,vlen));
+                                  (GtUword) MIN(ulen,vlen));
   /* alignment already finished */
   if (idx >= ulen || idx >= vlen) {
     lbound =  1L;
@@ -265,7 +265,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
   gt_xdrop_frontvalue_set(res,0,0,tmpfront);
   xdropbest->score = bigt_tmp = GT_XDROP_EVAL(idx + idx, 0);
   gt_assert(idx >= 0);
-  xdropbest->ivalue = xdropbest->jvalue = (unsigned long) idx;
+  xdropbest->ivalue = xdropbest->jvalue = (GtUword) idx;
   xdropbest->best_d = currd;
   xdropbest->best_k = 0;
   GT_STOREINARRAY (&res->big_t, GtXdropscore, 10, bigt_tmp);
@@ -335,13 +335,13 @@ void gt_evalxdroparbitscoresextend(bool forward,
               (gt_xdrop_frontvalue_get(res, currd-1, k) < i &&
                i <= MIN(ulen, vlen + k))) {
             if (ulen > i && vlen > j) {
-              unsigned long lcp;
-              gt_assert(forward || (uoffset > (unsigned long) i &&
-                                    voffset > (unsigned long) j));
+              GtUword lcp;
+              gt_assert(forward || (uoffset > (GtUword) i &&
+                                    voffset > (GtUword) j));
               lcp = gt_seqabstract_lcp(forward, useq, vseq,
                                        forward ? uoffset + i : uoffset - i - 1,
                                        forward ? voffset + j : voffset - j - 1,
-                                       (unsigned long) MIN(ulen - i,vlen - j));
+                                       (GtUword) MIN(ulen - i,vlen - j));
               i += lcp;
               j += lcp;
             }
@@ -350,8 +350,8 @@ void gt_evalxdroparbitscoresextend(bool forward,
             if (GT_XDROP_EVAL(i + j, currd) > bigt_tmp) {
               xdropbest->score = bigt_tmp = GT_XDROP_EVAL(i + j, currd);
               gt_assert(i >= 0 && j >= 0);
-              xdropbest->ivalue = (unsigned long) i;
-              xdropbest->jvalue = (unsigned long) j;
+              xdropbest->ivalue = (GtUword) i;
+              xdropbest->jvalue = (GtUword) j;
               xdropbest->best_d = currd;
               xdropbest->best_k = k;
             }
@@ -433,7 +433,7 @@ GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,
                                     GtXdropbest *best)
 {
   GtMultieoplist *meops = gt_multieoplist_new();
-  unsigned long idx, i;
+  GtUword idx, i;
   long k = best->best_k,
        d = best->best_d,
        old_row = (long) best->ivalue;
@@ -448,7 +448,7 @@ GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,
       d -= res->arbitdistances.ins; k++;
       idx = GT_XDROP_FRONTIDX(d, k);
       currfront = fronts[idx];
-      for (i = 0; i < (unsigned long) old_row - (currfront.row); ++i) {
+      for (i = 0; i < (GtUword) old_row - (currfront.row); ++i) {
         gt_multieoplist_add_match(meops);
       }
       gt_multieoplist_add_insertion(meops);
@@ -457,7 +457,7 @@ GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,
       d -= res->arbitdistances.del; k--;
       idx = GT_XDROP_FRONTIDX(d, k);
       currfront = fronts[idx];
-      for (i = 0; i < (unsigned long) old_row - (currfront.row + 1); ++i) {
+      for (i = 0; i < (GtUword) old_row - (currfront.row + 1); ++i) {
         gt_multieoplist_add_match(meops);
       }
       gt_multieoplist_add_deletion(meops);
@@ -466,7 +466,7 @@ GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,
       d -= res->arbitdistances.mis;
       idx = GT_XDROP_FRONTIDX(d, k);
       currfront = fronts[idx];
-      for (i = 0; i < (unsigned long) old_row - (currfront.row + 1); ++i) {
+      for (i = 0; i < (GtUword) old_row - (currfront.row + 1); ++i) {
         gt_multieoplist_add_match(meops);
       }
       gt_multieoplist_add_mismatch(meops);
@@ -499,7 +499,7 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
      (const GtUchar*) "TTTTTTTTTTTTTTTAAAGGGTTTCCTCAAAGGGTTTCCTTTTTTTTTTTTTTT",
      (const GtUchar*) "TTTTTTTTTTTTTTTAAACAGATCACCCGCTTTTTTTTTTTTTTTT",
      (const GtUchar*) "TTTTTTTTTTTTTTTAAACGGGTTTCTCAAAGGGTTCCCTTTTTTTTTTTTTTT"};
-  unsigned long lengths[GT_XDROP_NUM_OF_TESTS] =
+  GtUword lengths[GT_XDROP_NUM_OF_TESTS] =
                   {54UL, 46UL, 50UL, 54UL, 54UL, 54UL, 46UL, 54UL},
                 eval_scores[GT_XDROP_NUM_OF_TESTS *
                             GT_XDROP_NUM_OF_TESTS *

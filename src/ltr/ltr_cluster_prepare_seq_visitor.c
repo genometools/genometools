@@ -44,7 +44,7 @@ static int extract_feature_seq(GtEncseqBuilder *b, const char *header,
 {
   char *buffer;
   int had_err = 0;
-  unsigned long seqnum,
+  GtUword seqnum,
                 startpos;
 
   (void) sscanf(gt_str_get(seqid), "seq%lu", &seqnum);
@@ -91,7 +91,7 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
     fnt = gt_feature_node_get_type(curnode);
     if (strcmp(fnt, gt_ft_repeat_region) == 0) {
       const char *rid;
-      unsigned long id;
+      GtUword id;
       seqid = gt_genome_node_get_seqid((GtGenomeNode*) curnode);
       rid = gt_feature_node_get_attribute(curnode, "ID");
       (void) sscanf(rid, "repeat_region%lu", &id);

@@ -63,14 +63,14 @@ typedef struct
                addbscache_depth,
                forcek,
                iterations;
-  unsigned long maximumspace;
+  GtUword maximumspace;
   GtStr *encseqinput,
         *memlimitarg,
         *indexname;
   GtOption *refoptionmemlimit;
   GtStrArray *db;
   bool phred64;
-  unsigned long maxlow;
+  GtUword maxlow;
   unsigned int lowqual;
 } GtSeqcorrectArguments;
 
@@ -357,7 +357,7 @@ static int gt_seqcorrect_apply_corrections(GtEncseq *encseq,
       haserr = true;
     else
     {
-      unsigned long pos;
+      GtUword pos;
       GtUchar newchar;
       size_t retval;
       while ((retval = fread(&pos, sizeof (pos), (size_t)1, corrections))
@@ -386,7 +386,7 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
 {
   bool haserr = false;
   GtReads2Twobit *r2t;
-  unsigned long i;
+  GtUword i;
   bool autoindexname = false;
 
   gt_logger_log(verbose_logger, "input is a list of libraries");
@@ -426,7 +426,7 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
 
   if (!haserr)
   {
-    unsigned long nofreads_valid, nofreads_invalid, nofreads_input,
+    GtUword nofreads_valid, nofreads_invalid, nofreads_input,
                   tlen_valid;
     bool varlen;
     nofreads_valid = gt_reads2twobit_nofseqs(r2t);
@@ -486,7 +486,7 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
 #endif
   unsigned int iteration;
   unsigned int bucketkey_kmersize;
-  unsigned long cumulative_nofcorrections = 0;
+  GtUword cumulative_nofcorrections = 0;
   GtRandomcodesCorrectData **data_array = NULL;
 
   data_array = gt_malloc(sizeof (*data_array) * threads);
@@ -502,7 +502,7 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
       iteration++)
   {
     unsigned int threadcount;
-    unsigned long nofkmergroups = 0, nofkmeritvs = 0, nofcorrections = 0,
+    GtUword nofkmergroups = 0, nofkmeritvs = 0, nofcorrections = 0,
                   nofkmers = 0;
 
     gt_logger_log(verbose_logger, "iteration %u will now start...",
@@ -593,9 +593,9 @@ static bool gt_seqcorrect_find_seldom(GtSeqcorrectArguments *arguments,
   unsigned int bucketkey_kmersize;
   GtRandomcodesFindSeldomData **data_array = NULL;
   unsigned int threadcount;
-  unsigned long nofseldomkmers = 0;
+  GtUword nofseldomkmers = 0;
   GtBitsequence **seldom_reads = NULL;
-  unsigned long nofreads = GT_DIV2(gt_encseq_num_of_sequences(encseq));
+  GtUword nofreads = GT_DIV2(gt_encseq_num_of_sequences(encseq));
   size_t seldomsize = GT_NUMOFINTSFORBITS(nofreads);
 
   data_array = gt_malloc(sizeof (*data_array) * threads);

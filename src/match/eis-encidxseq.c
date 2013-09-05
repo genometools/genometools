@@ -80,18 +80,18 @@ const char *EISIntegrityCheckResultStrings[] =
  */
 enum EISIntegrityCheckResults
 gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
-                      unsigned long skip,
-                      unsigned long tickPrint, FILE *fp, int chkFlags,
+                      GtUword skip,
+                      GtUword tickPrint, FILE *fp, int chkFlags,
                       GtLogger *verbosity, GtError *err)
 {
   FILE *bwtFP;
-  unsigned long pos = 0,
+  GtUword pos = 0,
                 length = EISLength(seqIdx);
   Suffixarray suffixArray;
   Symbol symOrig;
   unsigned symEnc;
   EISHint hint;
-  unsigned long rankQueryResult, rankExpect;
+  GtUword rankQueryResult, rankExpect;
   const MRAEnc *alphabet;
   AlphabetRangeSize alphabetSize;
   AlphabetRangeID numRanges;
@@ -111,7 +111,7 @@ gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
   numRanges = MRAEncGetNumRanges(alphabet);
   do
   {
-    unsigned long rankTable[alphabetSize], rangeRanks[2][alphabetSize],
+    GtUword rankTable[alphabetSize], rangeRanks[2][alphabetSize],
       pairRangeRanks[2* alphabetSize], lastRangeRankPos = 0;
     int symRead, rt = 0;
     AlphabetRangeID lastRangeID = 0;

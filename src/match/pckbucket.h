@@ -30,7 +30,7 @@ void gt_pckbuckettable_delete(Pckbuckettable *pckbt);
 
 Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
                                       unsigned int numofchars,
-                                      unsigned long totallength,
+                                      GtUword totallength,
                                       unsigned int maxdepth);
 
 int gt_pckbuckettable_2file(const char *indexname,

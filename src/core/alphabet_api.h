@@ -45,7 +45,7 @@ GtAlphabet*    gt_alphabet_new_from_file_no_suffix(const char *filename,
 /* Return a <GtAlphabet> object, as read from a string of length <len>
    specified by <alphadef>. */
 GtAlphabet*    gt_alphabet_new_from_string(const char *alphadef,
-                                           unsigned long len, GtError *err);
+                                           GtUword len, GtError *err);
 /* Returns a new <GtAlphabet> object by scanning the sequence files in
    <filenametab> to determine whether they are DNA or protein sequences,
    and the appropriate alphabet will be used (see gt_alphabet_guess()).
@@ -54,7 +54,7 @@ GtAlphabet*    gt_alphabet_new_from_sequence(const GtStrArray *filenametab,
                                              GtError *err);
 /* Try to guess which type the given <sequence> with <length> has (DNA or
    protein) and return an according <GtAlphabet*> object. */
-GtAlphabet*    gt_alphabet_guess(const char *sequence, unsigned long seqlen);
+GtAlphabet*    gt_alphabet_guess(const char *sequence, GtUword seqlen);
 /* Return a clone of <alphabet>. */
 GtAlphabet*    gt_alphabet_clone(const GtAlphabet *alphabet);
 /* Returns TRUE if <a> and <b> are equal (i.e. have the same symbol
@@ -119,7 +119,7 @@ char           gt_alphabet_decode(const GtAlphabet *alphabet, GtUchar c);
 /* Encode sequence <in> of given <length> with <alphabet> and store the result
    in <out>. <in> has to be encodable with the given <alphabet>! */
 void           gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
-                                      const char *in, unsigned long length);
+                                      const char *in, GtUword length);
 /* Suppose the string <src> of length <len> was transformed according to the
    <alphabet>. The following method shows each character in <src> as the
    printable character specified in the transformation. The output is written
@@ -127,18 +127,18 @@ void           gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
 void           gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet,
                                             FILE *fpout,
                                             const GtUchar *src,
-                                            unsigned long len);
+                                            GtUword len);
 /* Analog to <gt_alphabet_decode_seq_to_fp()> but writing the output to
    <dest>. */
 void           gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet,
                                               char *dest,
                                               const GtUchar *src,
-                                              unsigned long len);
+                                              GtUword len);
 /* Analog to <gt_alphabet_decode_seq_to_fp()> writing the output to
    a new <GtStr>. */
 GtStr*         gt_alphabet_decode_seq_to_str(const GtAlphabet *alphabet,
                                              const GtUchar *src,
-                                             unsigned long len);
+                                             GtUword len);
 /* Decrease the reference count for <alphabet> or delete it, if this was the
    last reference. */
 void           gt_alphabet_delete(GtAlphabet *alphabet);

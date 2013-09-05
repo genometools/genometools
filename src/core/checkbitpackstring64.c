@@ -118,7 +118,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     if (had_err)
     {
       gt_log_log("Expected %"PRIu64", got %"PRIu64", i = %lu\n",
-              v, r, (unsigned long)i);
+              v, r, (GtUword)i);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
@@ -204,7 +204,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
                   "i = %lu, bits0=%u, bits1=%u\n",
                   (v0 > v1?">":(v0 < v1?"<":"==")),
                   (result > 0?">":(result < 0?"<":"==")), v0, v1,
-                  (unsigned long)i, bits0, bits1);
+                  (GtUword)i, bits0, bits1);
           freeResourcesAndReturn(had_err);
         }
         offset += bits0;
@@ -232,7 +232,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRIu64", got %"PRIu64",\n"
-                "i = %lu, bits=%u\n", v, r, (unsigned long)i, numBits);
+                "i = %lu, bits=%u\n", v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -251,7 +251,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       {
         gt_log_log( "Expected %"PRIu64", got %"PRIu64",\n"
                 " i = %lu, bits=%u\n",
-                v, r, (unsigned long)i, numBits);
+                v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -291,7 +291,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     {
       gt_log_log("Expected %"PRId64", got %"PRId64",\n"
                   "i = %lu, bits=%u\n",
-                  v, r, (unsigned long)i, bits);
+                  v, r, (GtUword)i, bits);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
@@ -316,7 +316,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       {
         gt_log_log("Expected %"PRId64", got %"PRId64",\n"
                     "i = %lu, numBits=%u\n",
-                    v, r, (unsigned long)i, numBits);
+                    v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -335,7 +335,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRId64", got %"PRId64", i = %lu\n",
-                v, r, (unsigned long)i);
+                v, r, (GtUword)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -379,7 +379,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       {
         gt_log_log("Expected %"PRIu64", got %"PRIu64",\n"
                 "i = %lu, bits=%u\n",
-                v, r, (unsigned long)i, numBits);
+                v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -401,7 +401,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       {
         gt_log_log( "Expected %"PRIu64", got %"PRIu64",\n"
                 " i = %lu, bits=%u\n",
-                v, r, (unsigned long)i, numBits);
+                v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -448,7 +448,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       {
         gt_log_log("Expected %"PRId64", got %"PRId64",\n"
                     "i = %lu, numBits=%u\n",
-                    v, r, (unsigned long)i, numBits);
+                    v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -471,7 +471,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRId64", got %"PRId64", i = %lu\n",
-                v, r, (unsigned long)i);
+                v, r, (GtUword)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -589,7 +589,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
           {
             gt_log_log( "Expected %"PRId64", got %"PRId64",\n"
                      "i = %lu, numBits=%u\n",
-                     v, r, (unsigned long)i, numBits);
+                     v, r, (GtUword)i, numBits);
             freeResourcesAndReturn(had_err);
           }
           offset += numBits;
@@ -602,7 +602,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
           {
             gt_log_log("Expected %"PRId64", got %"PRId64",\n"
                     "i = %lu, numBits=%u\n",
-                    cmpVal, r, (unsigned long)i, numBits);
+                    cmpVal, r, (GtUword)i, numBits);
             freeResourcesAndReturn(had_err);
           }
           offset += numBits;
@@ -616,7 +616,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
           {
             gt_log_log("Expected %"PRId64", got %"PRId64",\n"
                     "i = %lu, numBits=%u\n",
-                    v, r, (unsigned long)i, numBits);
+                    v, r, (GtUword)i, numBits);
             freeResourcesAndReturn(had_err);
           }
           offset += numBits;

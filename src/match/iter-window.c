@@ -22,16 +22,16 @@
 struct Windowiterator
 {
   GtUchar *buffer;
-  unsigned long firstpos, bufsize, windowsize;
-  unsigned long currentpos, endpos;
+  GtUword firstpos, bufsize, windowsize;
+  GtUword currentpos, endpos;
   const GtEncseq *encseq;
   GtEncseqReader *esr;
 };
 
 Windowiterator *gt_windowiterator_new(const GtEncseq *encseq,
-                                   unsigned long windowsize,
-                                   unsigned long startpos,
-                                   unsigned long endpos)
+                                   GtUword windowsize,
+                                   GtUword startpos,
+                                   GtUword endpos)
 {
   Windowiterator *wit;
 
@@ -56,8 +56,8 @@ void gt_windowiterator_delete(Windowiterator *wit)
   gt_free(wit);
 }
 
-const GtUchar *gt_windowiterator_next(unsigned long *currentpos,
-                                      unsigned long *firstpos,
+const GtUchar *gt_windowiterator_next(GtUword *currentpos,
+                                      GtUword *firstpos,
                                       Windowiterator *wit)
 {
   GtUchar currentchar;
@@ -84,7 +84,7 @@ const GtUchar *gt_windowiterator_next(unsigned long *currentpos,
     }
     if (wit->bufsize == wit->windowsize)
     {
-      gt_assert(wit->currentpos >= (unsigned long) (wit->windowsize-1));
+      gt_assert(wit->currentpos >= (GtUword) (wit->windowsize-1));
       gt_assert(wit->firstpos < wit->windowsize);
       *currentpos = wit->currentpos++;
       *firstpos = wit->firstpos;
@@ -98,11 +98,11 @@ const GtUchar *gt_windowiterator_next(unsigned long *currentpos,
 #ifdef  WITHWINDOWCHECK
 static void checkcurrentwindow(const GtEncseq *encseq,
                                const GtUchar *buffer,
-                               unsigned long windowsize,
-                               unsigned long firstpos,
-                               unsigned long currentpos)
+                               GtUword windowsize,
+                               GtUword firstpos,
+                               GtUword currentpos)
 {
-  unsigned long idx, bufpos, bfbufpos;
+  GtUword idx, bufpos, bfbufpos;
   GtUchar cc1, cc2;
 
   bufpos = firstpos;
@@ -123,16 +123,16 @@ static void checkcurrentwindow(const GtEncseq *encseq,
 }
 
 static void iteroverallwords(const GtEncseq *encseq,
-                             unsigned long windowsize,
-                             unsigned long startpos,
-                             unsigned long endpos)
+                             GtUword windowsize,
+                             GtUword startpos,
+                             GtUword endpos)
 {
-  unsigned long firstpos, bufsize;
+  GtUword firstpos, bufsize;
   GtUchar currentchar;
-  unsigned long currentpos;
+  GtUword currentpos;
   GtEncseqReader *esr;
   GtUchar *buffer;
-  unsigned long windowschecked = 0;
+  GtUword windowschecked = 0;
 
   gt_assert(endpos <= gt_encseq_total_length(encseq));
   esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD,
@@ -176,14 +176,14 @@ static void iteroverallwords(const GtEncseq *encseq,
 }
 
 static void iteroverallwords2(const GtEncseq *encseq,
-                              unsigned long windowsize,
-                              unsigned long startpos,
-                              unsigned long endpos)
+                              GtUword windowsize,
+                              GtUword startpos,
+                              GtUword endpos)
 {
   Windowiterator *wit;
   const GtUchar *buffer;
-  unsigned long currentpos;
-  unsigned long firstpos, windowschecked = 0;
+  GtUword currentpos;
+  GtUword firstpos, windowschecked = 0;
 
   wit = gt_windowiterator_new(encseq,windowsize,startpos,endpos);
   while (true)

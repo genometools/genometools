@@ -21,19 +21,19 @@
 #include <string.h>
 #include "core/array.h"
 
-typedef unsigned long
+typedef GtUword
   (*GtClusteredSetNumberOfClustersFunc)(GtClusteredSet*, GtError*);
 typedef int
-  (*GtClusteredSetMergeClustersFunc)(GtClusteredSet*, unsigned long, unsigned
+  (*GtClusteredSetMergeClustersFunc)(GtClusteredSet*, GtUword, unsigned
    long, GtError*);
 typedef void
   (*GtClusteredSetFreeFunc)(GtClusteredSet*, GtError*);
 typedef GtClusteredSetIterator*
-  (*GtClusteredSetIteratorFunc)(GtClusteredSet*, unsigned long, GtError*);
-typedef unsigned long
+  (*GtClusteredSetIteratorFunc)(GtClusteredSet*, GtUword, GtError*);
+typedef GtUword
   (*GtClusteredSetNumberOfElementsFunc)(GtClusteredSet*, GtError*);
-typedef unsigned long
-  (*GtClusteredSetClusterNumFunc)(GtClusteredSet*, unsigned long, GtError*);
+typedef GtUword
+  (*GtClusteredSetClusterNumFunc)(GtClusteredSet*, GtUword, GtError*);
 
 struct GtClusteredSetClass {
   size_t size;
@@ -51,7 +51,7 @@ struct GtClusteredSet {
 };
 
 struct GtClusteredSetIterator{
-  unsigned long curpos, length, *elems;
+  GtUword curpos, length, *elems;
 };
 
 const GtClusteredSetClass* gt_clustered_set_class_new(

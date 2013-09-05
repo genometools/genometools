@@ -32,7 +32,7 @@ typedef struct GtHpolProcessor GtHpolProcessor;
 
 /* Creates a new <GtHpolProcessor> for <encseq>, recognising homopolymers of
    length at least <hmin>. */
-GtHpolProcessor* gt_hpol_processor_new(GtEncseq *encseq, unsigned long hmin);
+GtHpolProcessor* gt_hpol_processor_new(GtEncseq *encseq, GtUword hmin);
 
 /* Start a scanning run over the sequence given at the instantiation of <hpp>.
    If <logger> is not NULL, then verbose information is directed there.
@@ -61,15 +61,15 @@ int              gt_hpol_processor_run(GtHpolProcessor *hpp, GtLogger *logger,
 void             gt_hpol_processor_enable_segments_hlen_adjustment(
                                                      GtHpolProcessor *hpp,
                                                      GtAlignedSegmentsPile *asp,
-                                                     unsigned long read_hmin,
-                                                     unsigned long qmax,
+                                                     GtUword read_hmin,
+                                                     GtUword qmax,
                                                      double altmax,
                                                      double refmin,
-                                                     unsigned long mapqmin,
-                                                     unsigned long covmin,
+                                                     GtUword mapqmin,
+                                                     GtUword covmin,
                                                      bool allow_partial,
                                                      bool allow_multiple,
-                                                     unsigned long clenmax);
+                                                     GtUword clenmax);
 
 /* Restrict processing to homopolymers whose end position is classified
    by <spc> as inside a feature (e.g. inside a CDS). */
@@ -97,7 +97,7 @@ void             gt_hpol_processor_enable_direct_segments_output(
    XXX: use a single input iterator and gt_seq_iterator_fastq_get_file_index()*/
 void             gt_hpol_processor_enable_sorted_segments_output(
                                                     GtHpolProcessor *hpp,
-                                                    unsigned long nfiles,
+                                                    GtUword nfiles,
                                                     GtSeqIterator **reads_iters,
                                                     GtFile **outfiles);
 

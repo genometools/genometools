@@ -18,10 +18,10 @@
 #include "core/assert_api.h"
 #include "core/gc_content.h"
 
-void gt_gc_content_show(const char *seq, unsigned long len,
+void gt_gc_content_show(const char *seq, GtUword len,
                         GtAlphabet *alphabet, GtFile *outfp)
 {
-  unsigned long i,
+  GtUword i,
                 gc = 0, /* number of G/C bases */
                 at = 0, /* number of A/T bases */
                 n  = 0; /* number of N   bases */

@@ -115,11 +115,11 @@ static bool io_zero_padding_needs_dist(DescField *field,
 
 typedef struct data {
   FILE         *fp;
-  unsigned long written_elems;
+  GtUword written_elems;
   long          minimum_element;
 } EncsecDistriData;
 
-static void encdesc_distri_iter_count(GT_UNUSED unsigned long symbol,
+static void encdesc_distri_iter_count(GT_UNUSED GtUword symbol,
                                       GT_UNUSED GtUint64 freq,
                                       void *data)
 {
@@ -127,7 +127,7 @@ static void encdesc_distri_iter_count(GT_UNUSED unsigned long symbol,
   this_data->written_elems++;
 }
 
-static void encdesc_distri_iter_write(unsigned long symbol,
+static void encdesc_distri_iter_write(GtUword symbol,
                                       GtUint64 freq,
                                       void *data)
 {
@@ -200,15 +200,15 @@ static enum iterator_op encdesc_li_ull_hashmap_iter_count(
                                              void *data,
                                              GT_UNUSED GtError *err)
 {
-  unsigned long *count = (unsigned long*) data;
+  GtUword *count = (GtUword*) data;
   (void) (*count)++;
   /* always continue since we cannot fail */
   return CONTINUE_ITERATION;
 }
 
-static unsigned long get_hashmap_distri_size(GtHashtable *h_table)
+static GtUword get_hashmap_distri_size(GtHashtable *h_table)
 {
-  unsigned long count = 0;
+  GtUword count = 0;
   /* error is NULL as encdesc_li_ull_hashmap_iter_count() is sane */
   (void) li_ull_gt_hashmap_foreach(h_table,
                                    encdesc_li_ull_hashmap_iter_count,
@@ -233,7 +233,7 @@ static enum iterator_op encdesc_li_ull_hashmap_iter_write(
 
 static void write_hashmap_distri(EncsecDistriData *data,
                                  GtHashtable *h_table,
-                                 GT_UNUSED unsigned long size)
+                                 GT_UNUSED GtUword size)
 {
   data->written_elems = 0;
   /* error is NULL as encdesc_li_ull_hashmap_iter_write() is sane */
@@ -246,11 +246,11 @@ static void write_hashmap_distri(EncsecDistriData *data,
   gt_assert(data->written_elems == size);
 }
 
-static void read_hashmap_distri(unsigned long size,
+static void read_hashmap_distri(GtUword size,
                                 GtHashtable *h_table,
                                 FILE *fp)
 {
-  unsigned long idx;
+  GtUword idx;
   long symbol;
   GtUint64 freq;
 
@@ -269,7 +269,7 @@ static void read_numeric_field_header(DescField *field,
   bool needs_zero_dist = false,
        needs_delta_dist = false,
        needs_value_dist = false;
-  unsigned long num_of_zero_leaves;
+  GtUword num_of_zero_leaves;
   /* EncdescHuffDist huffdist; */
 
   needs_zero_dist = io_zero_padding_needs_dist(field,
@@ -310,7 +310,7 @@ static void read_numeric_field_header(DescField *field,
   }
 
   if (needs_zero_dist) {
-    unsigned long idx,
+    GtUword idx,
                   symbol;
     GtUint64 freq;
     field->zero_count = gt_disc_distri_new();
@@ -333,7 +333,7 @@ static void write_numeric_field_header(DescField *field,
   bool needs_zero_dist = false,
        needs_delta_dist = false,
        needs_value_dist = false;
-  unsigned long num_of_zero_leaves;
+  GtUword num_of_zero_leaves;
   EncsecDistriData data;
 
   data.fp = fp;
@@ -392,7 +392,7 @@ static void io_field_len_header(DescField *field,
 static void read_field_header_bittab(DescField *field,
                                      FILE *fp)
 {
-  unsigned long char_idx,
+  GtUword char_idx,
                 num_of_chars = field->len / sizeof (char);
   char cc;
   size_t bit_idx;
@@ -405,7 +405,7 @@ static void read_field_header_bittab(DescField *field,
     for (bit_idx = 0; bit_idx < sizeof (char); bit_idx++) {
       if (cc & (1 << bit_idx))
         gt_bittab_set_bit(field->bittab,
-                          (unsigned long) ((sizeof (char) * char_idx) +
+                          (GtUword) ((sizeof (char) * char_idx) +
                                            bit_idx));
     }
   }
@@ -413,7 +413,7 @@ static void read_field_header_bittab(DescField *field,
 
 static void write_field_header_bittab(DescField *field, FILE *fp)
 {
-  unsigned long char_idx,
+  GtUword char_idx,
                 num_of_chars = field->len / sizeof (char);
   char cc = 0;
   size_t bit_idx;
@@ -424,7 +424,7 @@ static void write_field_header_bittab(DescField *field, FILE *fp)
   for (char_idx = 0; char_idx < num_of_chars; char_idx++) {
     for (bit_idx = 0; bit_idx < sizeof (char); bit_idx++) {
       if (gt_bittab_bit_is_set(field->bittab,
-                               (unsigned long) ((sizeof (char) * char_idx) +
+                               (GtUword) ((sizeof (char) * char_idx) +
                                                 bit_idx)))
         cc |= 1 << bit_idx;
     }
@@ -437,7 +437,7 @@ static void write_field_header_bittab(DescField *field, FILE *fp)
 static void write_field_char_dists(DescField *field,
                                    FILE *fp)
 {
-  unsigned long char_idx,
+  GtUword char_idx,
                 distr_len;
   EncsecDistriData data;
   data.fp = fp;
@@ -460,7 +460,7 @@ static void write_field_char_dists(DescField *field,
 static void read_field_char_dists(DescField *field,
                                   FILE *fp)
 {
-  unsigned long char_idx,
+  GtUword char_idx,
                 distr_len;
 
   for (char_idx = 0; char_idx < field->max_len; char_idx++) {
@@ -478,7 +478,7 @@ static void read_field_char_dists(DescField *field,
 
 void encdesc_write_header(GtEncdesc *encdesc, FILE *fp)
 {
-  unsigned long cur_field_num;
+  GtUword cur_field_num;
   DescField *cur_field;
 
   encdesc_header_io_basics(encdesc, fp, encdesc_xfwrite);
@@ -514,7 +514,7 @@ void encdesc_write_header(GtEncdesc *encdesc, FILE *fp)
 
 void encdesc_read_header(GtEncdesc *encdesc, FILE *fp)
 {
-  unsigned long cur_field_num;
+  GtUword cur_field_num;
   DescField *cur_field;
 
   encdesc_header_io_basics(encdesc, fp, encdesc_xfread);

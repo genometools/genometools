@@ -101,7 +101,7 @@ bool gt_nextbucketenumerator(Lcpinterval *itv,
       itv->left = bucketenumerator->bucketspec.left;
       itv->right = itv->left +
                    bucketenumerator->bucketspec.nonspecialsinbucket - 1;
-      itv->offset = (unsigned long) bucketenumerator->demandprefixlength;
+      itv->offset = (GtUword) bucketenumerator->demandprefixlength;
       return true;
     }
   }

@@ -20,22 +20,22 @@
 #include "gth/seq_con.h"
 
 typedef void     (*GthSeqConDemandOrigSeqFunc)(GthSeqCon*);
-typedef GtUchar* (*GthSeqConGetOrigSeqFunc)(GthSeqCon*, unsigned long seq_num);
-typedef GtUchar* (*GthSeqConGetTranSeqFunc)(GthSeqCon*, unsigned long seq_num);
+typedef GtUchar* (*GthSeqConGetOrigSeqFunc)(GthSeqCon*, GtUword seq_num);
+typedef GtUchar* (*GthSeqConGetTranSeqFunc)(GthSeqCon*, GtUword seq_num);
 typedef GtUchar* (*GthSeqConGetOrigSeqRCFunc)(GthSeqCon*,
-                                              unsigned long seq_num);
+                                              GtUword seq_num);
 typedef GtUchar* (*GthSeqConGetTranSeqRCFunc)(GthSeqCon*,
-                                              unsigned long seq_num);
+                                              GtUword seq_num);
 typedef void     (*GthSeqConGetDescriptionFunc)(GthSeqCon*,
-                                                unsigned long seq_num,
+                                                GtUword seq_num,
                                                 GtStr *desc);
 typedef void     (*GthSeqConEchoDescriptionFunc)(GthSeqCon*,
-                                                 unsigned long seq_num,
+                                                 GtUword seq_num,
                                                  GtFile *outfp);
-typedef unsigned long (*GthSeqConNumOfSeqsFunc)(GthSeqCon*);
-typedef unsigned long (*GthSeqConTotalLengthFunc)(GthSeqCon*);
+typedef GtUword (*GthSeqConNumOfSeqsFunc)(GthSeqCon*);
+typedef GtUword (*GthSeqConTotalLengthFunc)(GthSeqCon*);
 typedef GtRange       (*GthSeqConGetRangeFunc)(GthSeqCon*,
-                                               unsigned long seq_num);
+                                               GtUword seq_num);
 typedef GtAlphabet*   (*GthSeqConGetAlphabetFunc)(GthSeqCon*);
 typedef void          (*GthSeqConFreeFunc)(GthSeqCon*);
 

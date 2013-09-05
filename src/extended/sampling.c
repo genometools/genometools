@@ -38,7 +38,7 @@ typedef enum {
 struct GtSampling
 {
   size_t          *samplingtab;
-  unsigned long    arraysize,
+  GtUword    arraysize,
                    current_sample_elementnum,
                    current_sample_num,
                    numofsamples,
@@ -49,7 +49,7 @@ struct GtSampling
 };
 
 static void gt_sampling_init_sampling(GtSampling *sampling,
-                                   unsigned long rate)
+                                   GtUword rate)
 {
   sampling->numofsamples = 1UL;
   sampling->arraysize = 10UL;
@@ -59,7 +59,7 @@ static void gt_sampling_init_sampling(GtSampling *sampling,
   sampling->pagesize = gt_pagesize();
 }
 
-GtSampling *gt_sampling_new_regular(unsigned long rate, off_t first_offset)
+GtSampling *gt_sampling_new_regular(GtUword rate, off_t first_offset)
 {
   GtSampling *sampling = gt_malloc(sizeof (*sampling));
   sampling->method = GT_SAMPLING_REGULAR;
@@ -76,7 +76,7 @@ GtSampling *gt_sampling_new_regular(unsigned long rate, off_t first_offset)
   return sampling;
 }
 
-GtSampling *gt_sampling_new_page(unsigned long rate, off_t first_offset)
+GtSampling *gt_sampling_new_page(GtUword rate, off_t first_offset)
 {
   GtSampling *sampling = gt_sampling_new_regular(rate, first_offset);
   sampling->method = GT_SAMPLING_PAGES;
@@ -204,8 +204,8 @@ GtSampling *gt_sampling_read(FILE *fp)
 }
 
 static void get_regular_page(GtSampling *sampling,
-                             unsigned long element_num,
-                             unsigned long *sampled_element,
+                             GtUword element_num,
+                             GtUword *sampled_element,
                              size_t *position)
 {
   sampling->current_sample_num = element_num/sampling->sampling_rate;
@@ -218,11 +218,11 @@ static void get_regular_page(GtSampling *sampling,
 }
 
 static void get_pagewise_page(GtSampling *sampling,
-                              unsigned long element_num,
-                              unsigned long *sampled_element,
+                              GtUword element_num,
+                              GtUword *sampled_element,
                               size_t *position)
 {
-  unsigned long start = 0,
+  GtUword start = 0,
                 end, middle;
 
   gt_assert(sampling->numofsamples != 0);
@@ -257,8 +257,8 @@ static void get_pagewise_page(GtSampling *sampling,
 }
 
 void gt_sampling_get_page(GtSampling *sampling,
-                          unsigned long element_num,
-                          unsigned long *sampled_element,
+                          GtUword element_num,
+                          GtUword *sampled_element,
                           size_t *position)
 {
   gt_assert(sampling != NULL);
@@ -276,12 +276,12 @@ void gt_sampling_get_page(GtSampling *sampling,
   }
 }
 
-unsigned long gt_sampling_get_current_elementnum(GtSampling *sampling)
+GtUword gt_sampling_get_current_elementnum(GtSampling *sampling)
 {
   return sampling->current_sample_elementnum;
 }
 
-unsigned long gt_sampling_get_next_elementnum(GtSampling *sampling)
+GtUword gt_sampling_get_next_elementnum(GtSampling *sampling)
 {
   gt_assert(sampling->arraysize == sampling->numofsamples);
   gt_assert(sampling->current_sample_num < sampling->numofsamples);
@@ -299,7 +299,7 @@ unsigned long gt_sampling_get_next_elementnum(GtSampling *sampling)
 }
 
 int gt_sampling_get_next_sample(GtSampling *sampling,
-                                unsigned long *sampled_element,
+                                GtUword *sampled_element,
                                 size_t *position)
 {
   enum state {
@@ -340,7 +340,7 @@ bool gt_sampling_is_regular(GtSampling *sampling)
   return sampling->method == GT_SAMPLING_REGULAR;
 }
 
-unsigned long gt_sampling_get_rate(GtSampling *sampling)
+GtUword gt_sampling_get_rate(GtSampling *sampling)
 {
   gt_assert(sampling);
   return sampling->sampling_rate;
@@ -348,7 +348,7 @@ unsigned long gt_sampling_get_rate(GtSampling *sampling)
 
 void gt_sampling_add_sample(GtSampling *sampling,
                             size_t position,
-                            unsigned long element_num)
+                            GtUword element_num)
 {
   gt_assert(sampling);
   gt_assert(sampling->samplingtab);
@@ -375,10 +375,10 @@ void gt_sampling_add_sample(GtSampling *sampling,
 }
 
 bool gt_sampling_is_next_element_sample(GtSampling *sampling,
-                                        unsigned long pages_written,
-                                        unsigned long elements_written,
-                                        unsigned long elem_bit_size,
-                                        unsigned long free_pagespace_bitsize)
+                                        GtUword pages_written,
+                                        GtUword elements_written,
+                                        GtUword elem_bit_size,
+                                        GtUword free_pagespace_bitsize)
 {
   if (sampling->method == GT_SAMPLING_REGULAR)
     return elements_written >= sampling->sampling_rate;

@@ -16,12 +16,13 @@
 */
 
 #include <stdio.h>
+#include "core/types_api.h"
 #include "example_a.h"
 #include "example_rep.h"
 
 struct GtExampleA {
   GtExample parent_instance;
-  unsigned long my_property;
+  GtUword my_property;
 };
 
 static int gt_example_a_run(GtExample *e) /* hidden from outside  */

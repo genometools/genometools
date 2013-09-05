@@ -39,7 +39,7 @@ struct GthGFF3PGLVisitor {
 
 static void gff3_pgl_visitor_free(GthPGLVisitor *pgl_visitor)
 {
-  unsigned long i;
+  GtUword i;
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   for (i = 0; i < gt_array_size(visitor->nodes); i++)
     gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(visitor->nodes, i));
@@ -50,7 +50,7 @@ static void gff3_pgl_visitor_free(GthPGLVisitor *pgl_visitor)
 }
 
 static void gff3_pgl_visitor_preface(GthPGLVisitor *pgl_visitor,
-                                     GT_UNUSED unsigned long num_of_pgls)
+                                     GT_UNUSED GtUword num_of_pgls)
 {
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   gth_region_factory_save(visitor->region_factory, visitor->nodes,
@@ -72,7 +72,7 @@ static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags,
 {
   GtStr *target_attribute;
   GthSA *sa;
-  unsigned long i;
+  GtUword i;
   gt_assert(mrna_feature && ags);
   target_attribute = gt_str_new();
   for (i = 0; i < gt_array_size(ags->alignments); i++) {
@@ -97,7 +97,7 @@ static void save_pgl_in_gff3(GthPGL *pgl, GthRegionFactory *region_factory,
 {
   GthExonAGS *exon, *first_exon, *last_exon;
   GtFeatureNode *gene_feature, *mrna_feature, *exon_feature;
-  unsigned long i, j;
+  GtUword i, j;
   GtRange range;
   GtStr *seqid;
   GT_UNUSED int had_err;
@@ -195,7 +195,7 @@ static void save_pgl_in_gff3(GthPGL *pgl, GthRegionFactory *region_factory,
 
 static void gff3_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,
                                        GthPGL *pgl,
-                                       GT_UNUSED unsigned long pglnum)
+                                       GT_UNUSED GtUword pglnum)
 {
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   gt_assert(pgl);
@@ -223,7 +223,7 @@ const GthPGLVisitorClass* gth_gff3_pgl_visitor_class()
 }
 
 GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, bool use_desc_ranges,
-                                        unsigned long minORFlength,
+                                        GtUword minORFlength,
                                         bool start_codon, bool final_stop_codon,
                                         GtFile *outfp)
 {

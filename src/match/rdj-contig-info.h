@@ -26,8 +26,8 @@ typedef struct {
 } GtContigEdgesLink;
 
 typedef struct {
-  unsigned long  depth;
-  unsigned long  length;
+  GtUword  depth;
+  GtUword  length;
   float          firstread_copynum;
   float          internal_copynum;
   float          lastread_copynum;
@@ -35,7 +35,7 @@ typedef struct {
 } GtContigDepthInfo;
 
 typedef struct {
-  unsigned long junction_num;
+  GtUword junction_num;
   uint32_t contig_num;
   unsigned int length     :31;
   unsigned int firstnode  :1;

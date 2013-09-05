@@ -23,8 +23,8 @@
 #include "match/seqnumrelpos.h"
 
 int gt_randomcodes_correct_process_bucket(void *data,
-    const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
+    const GtUword *bucketofsuffixes, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword numberofsuffixes,
     unsigned int sortingdepth, GtError *err);
 
 typedef struct GtRandomcodesCorrectData GtRandomcodesCorrectData;
@@ -33,9 +33,9 @@ GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
     unsigned int k, unsigned int c, const char *indexname, const char *suffix,
     unsigned int threadnum, GtError *err);
 void gt_randomcodes_correct_data_collect_stats(GtRandomcodesCorrectData *cdata,
-    unsigned int threadnum, unsigned long *nofkmergroups,
-    unsigned long *nofkmeritvs, unsigned long *nofkmers,
-    unsigned long *nofcorrections);
+    unsigned int threadnum, GtUword *nofkmergroups,
+    GtUword *nofkmeritvs, GtUword *nofkmers,
+    GtUword *nofcorrections);
 void gt_randomcodes_correct_data_delete(GtRandomcodesCorrectData *cdata);
 
 #endif

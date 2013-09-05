@@ -37,7 +37,7 @@ typedef uint64_t GtStrgraphLength;
 #define GT_STRGRAPH_N_READS_MAX ((ULONG_MAX >> 1) - 1)
 #else
 /* N_READS_MAX is limited by __e_dest */
-#define GT_STRGRAPH_N_READS_MAX (unsigned long)((UINT64_MAX >> 1) - 1)
+#define GT_STRGRAPH_N_READS_MAX (GtUword)((UINT64_MAX >> 1) - 1)
 #endif
 
 #define GT_STRGRAPH_DECLARE_EDGES\

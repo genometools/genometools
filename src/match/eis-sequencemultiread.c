@@ -26,7 +26,7 @@
 struct seqReaderState
 {
   struct seqReaderState *next;
-  unsigned long nextReadPos;           /**< next position to be read/consumed */
+  GtUword nextReadPos;           /**< next position to be read/consumed */
   int tag;                      /**< set of bits defined by
                                  * application, can be used for value
                                  * or as bit set */
@@ -45,7 +45,7 @@ struct seqSinkState
   SeqDataWriter writer;
 };
 
-static inline unsigned long
+static inline GtUword
 seqReaderSetGetConsumerNextPos(struct seqReaderState *consumer)
 {
   gt_assert(consumer);
@@ -54,7 +54,7 @@ seqReaderSetGetConsumerNextPos(struct seqReaderState *consumer)
 
 static inline void
 seqReaderSetSetConsumerNextPos(struct seqReaderState *consumer,
-                               unsigned long newPos)
+                               GtUword newPos)
 {
   gt_assert(consumer && consumer->nextReadPos <= newPos);
   consumer->nextReadPos = newPos;
@@ -62,7 +62,7 @@ seqReaderSetSetConsumerNextPos(struct seqReaderState *consumer,
 
 static void
 seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
-                         unsigned long requestStart, size_t requestLen);
+                         GtUword requestStart, size_t requestLen);
 
 static size_t
 seqReaderSetRead(void *state, void *dest, size_t len);
@@ -173,7 +173,7 @@ seqReaderSetRead(void *src, void *dest, size_t len)
 {
   struct seqReaderState *state = src;
   struct seqReaderSet *readerSet;
-  unsigned long pos;
+  GtUword pos;
   size_t elemsLeft;
   gt_assert(src);
   readerSet = state->readerSet;
@@ -198,7 +198,7 @@ seqReaderSetRead(void *src, void *dest, size_t len)
       )
     {
       /* pos is in backlog */
-      unsigned long subLen, charsWritten;
+      GtUword subLen, charsWritten;
 
       subLen = MIN(elemsLeft, readerSet->backlogStartPos - pos
                               + readerSet->backlogLen);
@@ -231,10 +231,10 @@ seqReaderSetRead(void *src, void *dest, size_t len)
 #if 0
 /* These might be needed later when translation results values are
  * kept in backlog too */
-static inline unsigned long
+static inline GtUword
 seqReaderSetFindMinOpenRequestBySet(SeqReaderSet *readerSet, int setSpec)
 {
-  unsigned long min = -1;
+  GtUword min = -1;
   int i;
   gt_assert(readerSet);
   for (i = 0; i < readerSet->numConsumers; ++i)
@@ -243,10 +243,10 @@ seqReaderSetFindMinOpenRequestBySet(SeqReaderSet *readerSet, int setSpec)
   return min;
 }
 
-static inline unsigned long
+static inline GtUword
 seqReaderSetFindMinOpenRequestByVal(SeqReaderSet *readerSet, int tagVal)
 {
-  unsigned long min = -1;
+  GtUword min = -1;
   int i;
   gt_assert(readerSet);
   for (i = 0; i < readerSet->numConsumers; ++i)
@@ -256,11 +256,11 @@ seqReaderSetFindMinOpenRequestByVal(SeqReaderSet *readerSet, int tagVal)
 }
 #endif
 
-static inline unsigned long
+static inline GtUword
 seqReaderSetFindMinOpenRequest(SeqReaderSet *readerSet)
 {
   struct seqReaderState *p;
-  unsigned long min = -1;
+  GtUword min = -1;
   gt_assert(readerSet);
   p = readerSet->consumerList;
   while (p)
@@ -273,9 +273,9 @@ seqReaderSetFindMinOpenRequest(SeqReaderSet *readerSet)
 
 static void
 seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
-                         unsigned long requestStart, size_t requestLen)
+                         GtUword requestStart, size_t requestLen)
 {
-  unsigned long requestMinPos;
+  GtUword requestMinPos;
   struct seqReaderSet *readerSet = backlogState;
   gt_assert(backlogState && (requestLen?(seqData!=NULL):1));
   requestMinPos = seqReaderSetFindMinOpenRequest(readerSet);
@@ -310,12 +310,12 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
     readerSet->backlogStartPos = requestMinPos;
   }
   {
-    unsigned long copyStartPos = MAX(requestMinPos, requestStart);
+    GtUword copyStartPos = MAX(requestMinPos, requestStart);
     size_t copyLen = requestLen - copyStartPos + requestStart;
     /* 3. extend backlog to also accept all invalidated values still needed */
     if (copyLen)
     {
-      unsigned long *destSptr;
+      GtUword *destSptr;
 
       size_t idx, backlogSizeLeft
         = readerSet->backlogSize - readerSet->backlogLen;
@@ -327,7 +327,7 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
                        * newSize);
         readerSet->backlogSize = newSize;
       }
-      destSptr = ((unsigned long *) readerSet->seqDataBacklog) +
+      destSptr = ((GtUword *) readerSet->seqDataBacklog) +
                  readerSet->backlogLen;
       if (readerSet->fromSuffixsortspace)
       {

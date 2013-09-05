@@ -55,7 +55,7 @@
 #define GT_UNDEF_UINT \
         ~0U
 
-/* The undefined <unsigned long> value. */
+/* The undefined <GtUword> value. */
 #define GT_UNDEF_ULONG \
         ~0UL
 

@@ -20,19 +20,19 @@
 
 #include <stdbool.h>
 #include "core/error.h"
+#include "core/types_api.h"
 
 /* a bittab which grows on demand */
 typedef struct GtDynBittab GtDynBittab;
 
-GtDynBittab*  gt_dyn_bittab_new(void);
-void          gt_dyn_bittab_set_bit(GtDynBittab*, unsigned long);
-void          gt_dyn_bittab_unset_bit(GtDynBittab*, unsigned long);
-bool          gt_dyn_bittab_bit_is_set(const GtDynBittab*, unsigned long);
-unsigned long gt_dyn_bittab_get_first_bitnum(const GtDynBittab*);
-unsigned long gt_dyn_bittab_get_last_bitnum(const GtDynBittab*);
-unsigned long gt_dyn_bittab_get_next_bitnum(const GtDynBittab*,
-                                            unsigned long i);
-int           gt_dyn_bittab_unit_test(GtError*);
-void          gt_dyn_bittab_delete(GtDynBittab*);
+GtDynBittab* gt_dyn_bittab_new(void);
+void         gt_dyn_bittab_set_bit(GtDynBittab*, GtUword);
+void         gt_dyn_bittab_unset_bit(GtDynBittab*, GtUword);
+bool         gt_dyn_bittab_bit_is_set(const GtDynBittab*, GtUword);
+GtUword      gt_dyn_bittab_get_first_bitnum(const GtDynBittab*);
+GtUword      gt_dyn_bittab_get_last_bitnum(const GtDynBittab*);
+GtUword      gt_dyn_bittab_get_next_bitnum(const GtDynBittab*, GtUword i);
+int          gt_dyn_bittab_unit_test(GtError*);
+void         gt_dyn_bittab_delete(GtDynBittab*);
 
 #endif

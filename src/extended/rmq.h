@@ -23,21 +23,21 @@
 #include "core/error_api.h"
 
 #ifdef GT_LONGLCPVALUES
-typedef unsigned long GtRMQvaluetype;
+typedef GtUword GtRMQvaluetype;
 #else
 typedef uint32_t GtRMQvaluetype;
 #endif
 
 typedef struct GtRMQ GtRMQ;
 
-GtRMQ*        gt_rmq_new(const GtRMQvaluetype *data, unsigned long size);
+GtRMQ*        gt_rmq_new(const GtRMQvaluetype *data, GtUword size);
 
 size_t gt_rmq_size(const GtRMQ *rmq);
 
-unsigned long gt_rmq_find_min_index(const GtRMQ *rmq, unsigned long start,
-                                    unsigned long end);
-GtRMQvaluetype gt_rmq_find_min_value(const GtRMQ *rmq, unsigned long start,
-                                     unsigned long end);
+GtUword gt_rmq_find_min_index(const GtRMQ *rmq, GtUword start,
+                                    GtUword end);
+GtRMQvaluetype gt_rmq_find_min_value(const GtRMQ *rmq, GtUword start,
+                                     GtUword end);
 void          gt_rmq_delete(GtRMQ *rmq);
 
 int           gt_rmq_unit_test(GtError *err);

@@ -32,8 +32,8 @@ const GtGenomeNodeClass* gt_region_node_class(void);
    <start> has to be smaller or equal than <end>.
    The <GtRegionNode*> stores a new reference to <seqid>, so make sure you do
    not modify the original <seqid> afterwards! */
-GtGenomeNode* gt_region_node_new(GtStr *seqid, unsigned long start,
-                                               unsigned long end);
+GtGenomeNode* gt_region_node_new(GtStr *seqid, GtUword start,
+                                               GtUword end);
 
 /* Test whether the given genome node is a region node. If so, a pointer to the
    region node is returned. If not, NULL is returned. Note that in most cases,

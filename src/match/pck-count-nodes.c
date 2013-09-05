@@ -33,10 +33,10 @@ static void visit_count_children(const FMindex *index,
                            Nodecount *parent,
                            GtStackNodecount *stack,
                            Mbtab *tmpmbtab,
-                           unsigned long *rangeOccs,
+                           GtUword *rangeOccs,
                            GT_UNUSED unsigned int numofchars)
 {
-  unsigned long rangesize, idx, num_special;
+  GtUword rangesize, idx, num_special;
   unsigned int offset;
   Nodecount child;
 
@@ -46,7 +46,7 @@ static void visit_count_children(const FMindex *index,
                                              index,
                                              parent->lower,
                                              parent->upper);
-  gt_assert(rangesize <= (unsigned long) numofchars);
+  gt_assert(rangesize <= (GtUword) numofchars);
 
   offset = 0U;
   num_special = parent->upper - parent->lower;
@@ -108,15 +108,15 @@ static void process_count_node(GtStackNodecount *stack,
 }
 
 void gt_pck_count_nodes_dfs(const FMindex *index,
-                        unsigned long totallength,
+                        GtUword totallength,
                         unsigned int numofchars)
 {
   GtStackNodecount stack;
   Nodecount root;
   Nodecount *current;
   Mbtab *tmpmbtab;
-  unsigned long *rangeOccs;
-  unsigned long resize = 128UL; /* XXX make this user definable, or dependable
+  GtUword *rangeOccs;
+  GtUword resize = 128UL; /* XXX make this user definable, or dependable
                                  * on input data */
 
   GT_STACK_INIT(&stack, resize);

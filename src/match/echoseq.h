@@ -30,28 +30,28 @@ void gt_symbolstring2fasta(FILE *fpout,
                         const char *desc,
                         const GtAlphabet *alpha,
                         const GtUchar *w,
-                        unsigned long wlen,
-                        unsigned long width);
+                        GtUword wlen,
+                        GtUword width);
 
 void gt_encseq2symbolstring(FILE *fpout,
                          const GtEncseq *encseq,
                          GtReadmode readmode,
-                         unsigned long start,
-                         unsigned long wlen,
-                         unsigned long width);
+                         GtUword start,
+                         GtUword wlen,
+                         GtUword width);
 
 void gt_fprintfencseq(FILE *fpout,
                    const GtEncseq *encseq,
-                   unsigned long start,
-                   unsigned long wlen);
+                   GtUword start,
+                   GtUword wlen);
 
 void gt_encseq2fastaoutput(FILE *fpout,
                         const char *desc,
                         const GtEncseq *encseq,
                         GtReadmode readmode,
-                        unsigned long start,
-                        unsigned long wlen,
-                        unsigned long width);
+                        GtUword start,
+                        GtUword wlen,
+                        GtUword width);
 
 int gt_echodescriptionandsequence(const GtStrArray *filenametab,GtError *err);
 

@@ -25,7 +25,7 @@
 struct GthXMLPGLVisitor {
   const GthPGLVisitor parent_instance;
   GthInput *input;
-  unsigned long translationtable;
+  GtUword translationtable;
   unsigned int indentlevel;
   GthOutput *out;
 };
@@ -33,11 +33,11 @@ struct GthXMLPGLVisitor {
 #define xml_pgl_visitor_cast(GV)\
         gth_pgl_visitor_cast(gth_xml_pgl_visitor_class(), GV)
 
-static void xml_outputAGSline(const GthAGS *ags, unsigned long agsnum,
+static void xml_outputAGSline(const GthAGS *ags, GtUword agsnum,
                               unsigned int indentlevel, GtFile *outfp)
 {
   GthExonAGS *exon;
-  unsigned long i;
+  GtUword i;
 
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "<AGS_line AGS_serial=\"%lu\">\n",
@@ -67,7 +67,7 @@ static void xml_outputSCRline(const GthAGS *ags, unsigned int indentlevel,
                               GtFile *outfp)
 {
   GthSpliceSiteProb *splicesiteprob;
-  unsigned long i;
+  GtUword i;
 
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "<SCR_line>\n");
@@ -97,7 +97,7 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
 {
   GthSpliceSiteProb *splicesiteprob;
   GthExonAGS *exon;
-  unsigned long i, leftexonborder, rightexonborder, exonlength,
+  GtUword i, leftexonborder, rightexonborder, exonlength,
                 leftintronborder = GT_UNDEF_ULONG, rightintronborder,
                 intronlength;
   GthDbl exonscore;
@@ -166,7 +166,7 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
 static void xml_outputPGSlines(GtArray *alignments, unsigned int indentlevel,
                                GtFile *outfp)
 {
-  unsigned long i, j;
+  GtUword i, j;
   GthSA *sa;
 
   gth_indent(outfp, indentlevel);
@@ -215,8 +215,8 @@ static void xml_outputPGSlines(GtArray *alignments, unsigned int indentlevel,
   gt_file_xprintf(outfp, "</supporting_evidence>\n");
 }
 
-static void xml_show_ags(const GthAGS *ags, unsigned long pglnum,
-                         unsigned long agsnum, unsigned long translationtable,
+static void xml_show_ags(const GthAGS *ags, GtUword pglnum,
+                         GtUword agsnum, GtUword translationtable,
                          GthInput *input, unsigned int indentlevel,
                          GthOutput *out)
 {
@@ -245,11 +245,11 @@ static void xml_show_ags(const GthAGS *ags, unsigned long pglnum,
   gt_file_xprintf(out->outfp, "</AGS_information>\n");
 }
 
-static void xml_show_pgl(GthPGL *pgl, unsigned long pglnum,
-                         unsigned long translationtable, GthInput *input,
+static void xml_show_pgl(GthPGL *pgl, GtUword pglnum,
+                         GtUword translationtable, GthInput *input,
                          unsigned int indentlevel, GthOutput *out)
 {
-  unsigned long i;
+  GtUword i;
 
   gth_indent(out->outfp, indentlevel);
   gt_file_xprintf(out->outfp, "<predicted_gene_location>\n");
@@ -280,7 +280,7 @@ static void xml_show_pgl(GthPGL *pgl, unsigned long pglnum,
 }
 
 static void xml_pgl_visitor_preface(GthPGLVisitor *pgl_visitor,
-                                    GT_UNUSED unsigned long num_of_pgls)
+                                    GT_UNUSED GtUword num_of_pgls)
 {
   GthXMLPGLVisitor *visitor = xml_pgl_visitor_cast(pgl_visitor);
   gth_indent(visitor->out->outfp, visitor->indentlevel);
@@ -290,7 +290,7 @@ static void xml_pgl_visitor_preface(GthPGLVisitor *pgl_visitor,
 }
 
 static void xml_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,
-                                      GthPGL *pgl, unsigned long pglnum)
+                                      GthPGL *pgl, GtUword pglnum)
 {
   GthXMLPGLVisitor *visitor = xml_pgl_visitor_cast(pgl_visitor);
   gt_assert(pgl);
@@ -317,7 +317,7 @@ const GthPGLVisitorClass* gth_xml_pgl_visitor_class()
 }
 
 GthPGLVisitor* gth_xml_pgl_visitor_new(GthInput *input,
-                                       unsigned long translationtable,
+                                       GtUword translationtable,
                                        unsigned int indentlevel, GthOutput *out)
 {
   GthPGLVisitor *pgl_visitor =

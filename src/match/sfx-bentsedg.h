@@ -33,11 +33,11 @@
 typedef void (*GtCompletelargelcpvalues) (void *,
                                          const GtSuffixsortspace *,
                                          GtLcpvalues *,
-                                         unsigned long,
-                                         unsigned long);
+                                         GtUword,
+                                         GtUword);
 
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
-                       unsigned long numberofsuffixes,
+                       GtUword numberofsuffixes,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
@@ -55,7 +55,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        GtLogger *logger);
 
 void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
-                                 unsigned long numberofsuffixes,
+                                 GtUword numberofsuffixes,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  GtOutlcpinfo *outlcpinfo,

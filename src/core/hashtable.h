@@ -23,6 +23,7 @@
 
 #include "core/error.h"
 #include "core/fptr_api.h"
+#include "core/types_api.h"
 
 typedef struct GtHashtable GtHashtable;
 
@@ -114,8 +115,8 @@ gt_uint32_key_mul_hash(uint32_t key);
 uint32_t     gt_ht_ptr_elem_hash(const void *elem);
 
 /**
- * @brief Hash unsigned long by value
- * @param elem *(unsigned long *)elem is used as key to hash
+ * @brief Hash GtUword by value
+ * @param elem *(GtUword *)elem is used as key to hash
  */
 uint32_t     gt_ht_ul_elem_hash(const void *elem);
 
@@ -131,7 +132,7 @@ uint32_t     gt_ht_cstr_elem_hash(const void *elem);
 uint32_t     gt_uint32_data_hash(const void *data, size_t length);
 int          gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB);
 /*@unused@*/ static inline int
-gt_ht_ul_cmp(unsigned long a, unsigned long b);
+gt_ht_ul_cmp(GtUword a, GtUword b);
 int          gt_ht_ul_elem_cmp(const void *elemA, const void *elemB);
 int          gt_ht_cstr_elem_cmp(const void *elemA, const void *elemB);
 

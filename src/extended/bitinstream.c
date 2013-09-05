@@ -33,7 +33,7 @@
 struct GtBitInStream {
   size_t         cur_filepos,
                  filesize;
-  unsigned long  bufferlength,
+  GtUword  bufferlength,
                  cur_bitseq,
                  pages_to_map,
                  pagesize,
@@ -46,7 +46,7 @@ struct GtBitInStream {
 
 GtBitInStream *gt_bitinstream_new(const char* path,
                                   size_t offset,
-                                  unsigned long pages_to_map)
+                                  GtUword pages_to_map)
 {
   GtBitInStream *bitstream = gt_malloc(sizeof (*bitstream));
 
@@ -56,10 +56,10 @@ GtBitInStream *gt_bitinstream_new(const char* path,
   bitstream->path = gt_cstr_dup(path);
   bitstream->pages_to_map = pages_to_map;
 
-  if ((unsigned long) bitstream->filesize <
+  if ((GtUword) bitstream->filesize <
       (bitstream->pages_to_map * bitstream->pagesize))
     bitstream->pages_to_map =
-      (unsigned long) ((bitstream->filesize / bitstream->pagesize) + 1);
+      (GtUword) ((bitstream->filesize / bitstream->pagesize) + 1);
 
   bitstream->bitseqbuffer = NULL;
   bitstream->read_bits = 0;
@@ -85,7 +85,7 @@ void gt_bitinstream_reinit(GtBitInStream *bitstream,
 
   if (bitstream->cur_filepos + mapsize > bitstream->filesize) {
     mapsize = bitstream->filesize - bitstream->cur_filepos;
-    bitstream->bufferlength = (unsigned long)  mapsize /
+    bitstream->bufferlength = (GtUword)  mapsize /
                                 sizeof (*bitstream->bitseqbuffer);
     bitstream->last_chunk = true;
   }

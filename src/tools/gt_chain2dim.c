@@ -145,7 +145,7 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
   gt_assert(arguments->refoptionlocal != NULL);
   if (gt_option_is_set(arguments->refoptionglobal))
   {
-    unsigned long globalargsnum = gt_str_array_size(arguments->globalargs);
+    GtUword globalargsnum = gt_str_array_size(arguments->globalargs);
     if (globalargsnum > 1UL)
     {
       gt_error_set(err,"option -global can only have one optional argument");
@@ -158,7 +158,7 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
   }
   if (gt_option_is_set(arguments->refoptionlocal))
   {
-    unsigned long localargsnum = gt_str_array_size(arguments->localargs);
+    GtUword localargsnum = gt_str_array_size(arguments->localargs);
     if (localargsnum > 1UL)
     {
       gt_error_set(err,"option -local can only have one optional argument");
@@ -193,7 +193,7 @@ static int gt_chain2dim_arguments_check (GT_UNUSED int rest_argc,
 
 typedef struct
 {
-  unsigned long chaincounter;
+  GtUword chaincounter;
 } Counter;
 
 static void gt_outputformatchaingeneric(
@@ -202,7 +202,7 @@ static void gt_outputformatchaingeneric(
                                 const GtChain2Dimmatchtable *matchtable,
                                 const GtChain2Dim *chain)
 {
-  unsigned long idx, chainlength;
+  GtUword idx, chainlength;
   Counter *counter = (Counter *) data;
 
   chainlength = gt_chain_chainlength(chain);

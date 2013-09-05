@@ -33,7 +33,7 @@ struct GtExtractFeatureVisitor {
        translate,
        seqid,
        target;
-  unsigned long fastaseq_counter,
+  GtUword fastaseq_counter,
                 width;
   GtRegionMapping *region_mapping;
   GtFile *outfp;
@@ -50,7 +50,7 @@ static void extract_feature_visitor_free(GtNodeVisitor *nv)
 }
 
 static void construct_description(GtStr *description, const char *type,
-                                  unsigned long counter, bool join,
+                                  GtUword counter, bool join,
                                   bool translate, GtStr *seqid,
                                   GtStrArray *target_ids)
 {
@@ -69,7 +69,7 @@ static void construct_description(GtStr *description, const char *type,
     gt_str_append_char(description, ']');
   }
   if (target_ids && gt_str_array_size(target_ids)) {
-    unsigned long i;
+    GtUword i;
     gt_str_append_cstr(description, " [target IDs ");
     gt_str_append_cstr(description, gt_str_array_get(target_ids, 0));
     for (i = 1; i < gt_str_array_size(target_ids); i++) {
@@ -81,7 +81,7 @@ static void construct_description(GtStr *description, const char *type,
 }
 
 static int show_entry(GtStr *description, GtStr *sequence, bool translate,
-                      unsigned long width, GtFile *outfp)
+                      GtUword width, GtFile *outfp)
 {
   int had_err = 0;
   if (translate) {
@@ -186,7 +186,7 @@ const GtNodeVisitorClass* gt_extract_feature_visitor_class()
 GtNodeVisitor* gt_extract_feature_visitor_new(GtRegionMapping *rm,
                                               const char *type, bool join,
                                               bool translate, bool seqid,
-                                              bool target, unsigned long width,
+                                              bool target, GtUword width,
                                               GtFile *outfp)
 {
   GtNodeVisitor *nv;

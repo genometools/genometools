@@ -56,7 +56,7 @@ void gt_leftborderbuffer_flush(GtLeftborderOutbuffer *leftborderbuffer)
 
 GtStr *gt_leftborderbuffer_delete(GtLeftborderOutbuffer *lbbuf,
                                   GtFirstcodesspacelog *fcsl,
-                                  GT_UNUSED unsigned long expectedwritten)
+                                  GT_UNUSED GtUword expectedwritten)
 {
   GtStr *outfilename;
 

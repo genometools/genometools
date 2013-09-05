@@ -195,7 +195,7 @@ symCountFromComposition(struct compList *compositionTable,
 static inline void
 addSymCountsFromComposition(struct compList *compositionTable,
                             unsigned alphabetSize,
-                            PermCompIndex compIndex, unsigned long *counts)
+                            PermCompIndex compIndex, GtUword *counts)
 {
   BitOffset bitsPerComp, bitsPerCount;
   gt_assert(compositionTable);

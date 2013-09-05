@@ -47,7 +47,7 @@ static size_t gt_uint64hashtable_get_size(size_t n)
   k = n;
   if (k > (size_t)GT_UINT64TABLE_LARGEST_PRIME)
   {
-    fprintf(stderr, GT_UINT64TABLE_TOO_LARGE, (unsigned long)k);
+    fprintf(stderr, GT_UINT64TABLE_TOO_LARGE, (GtUword)k);
     exit(1);
   }
   if (k < (size_t)gt_uint64hashtable_primes[0])
@@ -86,7 +86,7 @@ static size_t gt_uint64hashtable_get_size(size_t n)
 typedef struct
 {
   uint64_t key;
-  unsigned long count;
+  GtUword count;
 } GtUint64hashstoredvalue;
 
 static int compareGtUint64hashstoredvalue(const void *a,const void *b,
@@ -113,7 +113,7 @@ struct GtUint64hashtable
   GtUint64hashstoredvalue *hspace;
   uint32_t *sortedhspace;
   size_t alloc;
-  unsigned long countcollisions, zero_count,
+  GtUword countcollisions, zero_count,
                 allentries;
   bool zero_occurs;
 };
@@ -227,7 +227,7 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
   }
 }
 
-unsigned long gt_uint64hashtable_insertionindex(GtUint64hashtable *table,
+GtUword gt_uint64hashtable_insertionindex(GtUint64hashtable *table,
                                                 uint64_t key)
 {
   gt_assert(table != NULL);
@@ -281,10 +281,10 @@ unsigned long gt_uint64hashtable_insertionindex(GtUint64hashtable *table,
   }
 }
 
-unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table)
+GtUword gt_uint64hashtable_countsum_get(const GtUint64hashtable *table)
 {
   size_t idx;
-  unsigned long sumcount = 0;
+  GtUword sumcount = 0;
 
   for (idx=0; idx < table->alloc; idx++)
   {
@@ -296,11 +296,11 @@ unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table)
   return sumcount + table->zero_count;
 }
 
-unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
+GtUword gt_uint64hashtable_partialsums(GtUint64hashtable *table,
                                              GtTimer *timer)
 {
   size_t idx, next = 0;
-  unsigned long psum, maxsize = 0;
+  GtUword psum, maxsize = 0;
 
   table->sortedhspace = gt_malloc((size_t) table->allentries *
                                   sizeof (*table->sortedhspace));

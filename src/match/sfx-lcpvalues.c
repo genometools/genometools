@@ -33,7 +33,7 @@ typedef struct
   FILE *outfplcptab,
        *outfpllvtab;
   GtArrayLargelcpvalue largelcpvalues;
-  unsigned long maxbranchdepth,
+  GtUword maxbranchdepth,
                 totalnumoflargelcpvalues,
                 countoutputlcpvalues;
   void *reservoir;
@@ -63,14 +63,14 @@ typedef struct
   unsigned int prefixindex;
 #undef SKDEBUG
 #ifdef SKDEBUG
-  unsigned long startpos;
+  GtUword startpos;
 #endif
 } Suffixwithcode;
 
 struct GtOutlcpinfo
 {
   Turningwheel *turnwheel;
-  unsigned long numsuffixes2output;
+  GtUword numsuffixes2output;
   unsigned int minchanged;
   size_t sizeofinfo;
   Suffixwithcode previoussuffix;
@@ -80,7 +80,7 @@ struct GtOutlcpinfo
 };
 
 const GtLcpvaluetype *gt_lcptab_getptr(const GtLcpvalues *tableoflcpvalues,
-                                       unsigned long subbucketleft)
+                                       GtUword subbucketleft)
 {
   return tableoflcpvalues->bucketoflcpvalues + tableoflcpvalues->lcptaboffset
                                              + subbucketleft;
@@ -88,7 +88,7 @@ const GtLcpvaluetype *gt_lcptab_getptr(const GtLcpvalues *tableoflcpvalues,
 
 /* Now some functions related to the computation of lcp values follow */
 
-static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
+static GtUword computelocallcpvalue(const Suffixwithcode *previoussuffix,
                                           const Suffixwithcode *currentsuffix,
                                           unsigned int minchanged)
 {
@@ -107,11 +107,11 @@ static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
       lcpvalue = minchanged;
     }
   }
-  return (unsigned long) lcpvalue;
+  return (GtUword) lcpvalue;
 }
 
 static void outsmalllcpvalues(Lcpoutput2file *lcp2file,
-                              unsigned long numoflcps)
+                              GtUword numoflcps)
 {
   gt_assert (lcp2file != NULL);
   lcp2file->countoutputlcpvalues += numoflcps;
@@ -124,14 +124,14 @@ static void outsmalllcpvalues(Lcpoutput2file *lcp2file,
 
 static unsigned int lcp_bucketends(Lcpsubtab *lcpsubtab,
                                    Suffixwithcode *previoussuffix,
-                                   GT_UNUSED unsigned long firstspecialsuffix,
+                                   GT_UNUSED GtUword firstspecialsuffix,
                                    unsigned int minchanged,
-                                   unsigned long nonspecialsinbucket,
-                                   unsigned long specialsinbucket,
+                                   GtUword nonspecialsinbucket,
+                                   GtUword specialsinbucket,
                                    GtCodetype code,
                                    const GtBcktab *bcktab)
 {
-  unsigned long lcpvalue;
+  GtUword lcpvalue;
   unsigned int maxprefixindex, minprefixindex;
   Suffixwithcode firstspecialsuffixwithcode;
 
@@ -150,13 +150,13 @@ static unsigned int lcp_bucketends(Lcpsubtab *lcpsubtab,
                           specialsinbucket,
                           bcktab,
                           code);
-      if (lcpsubtab->lcp2file->maxbranchdepth < (unsigned long) maxprefixindex)
+      if (lcpsubtab->lcp2file->maxbranchdepth < (GtUword) maxprefixindex)
       {
-        lcpsubtab->lcp2file->maxbranchdepth = (unsigned long) maxprefixindex;
+        lcpsubtab->lcp2file->maxbranchdepth = (GtUword) maxprefixindex;
       }
     } else
     {
-      unsigned long start = lcpsubtab->tableoflcpvalues.lcptaboffset +
+      GtUword start = lcpsubtab->tableoflcpvalues.lcptaboffset +
                             nonspecialsinbucket;
       maxprefixindex = gt_bcktab_pfxidx2lcpvalues_Lcpvaluetype(
                           &minprefixindex,
@@ -166,7 +166,7 @@ static unsigned int lcp_bucketends(Lcpsubtab *lcpsubtab,
                           code);
 #ifndef NDEBUG
       {
-        unsigned long idx;
+        GtUword idx;
 
         for (idx=start; idx<start + specialsinbucket; idx++)
         {
@@ -319,7 +319,7 @@ size_t gt_Outlcpinfo_size(const GtOutlcpinfo *outlcpinfo)
 }
 
 static size_t gt_tableoflcpvalues_realloc(GtLcpvalues *tableoflcpvalues,
-                                          unsigned long numoflcpvalues)
+                                          GtUword numoflcpvalues)
 {
   if (numoflcpvalues > tableoflcpvalues->numofentries)
   {
@@ -350,7 +350,7 @@ static size_t gt_tableoflcpvalues_realloc(GtLcpvalues *tableoflcpvalues,
 void gt_Outlcpinfo_reinit(GtOutlcpinfo *outlcpinfo,
                           unsigned int numofchars,
                           unsigned int prefixlength,
-                          unsigned long numoflcpvalues)
+                          GtUword numoflcpvalues)
 {
   if (outlcpinfo != NULL)
   {
@@ -369,10 +369,10 @@ void gt_Outlcpinfo_reinit(GtOutlcpinfo *outlcpinfo,
 }
 
 static void outlcpvalues(Lcpsubtab *lcpsubtab,
-                         unsigned long width,
-                         unsigned long posoffset)
+                         GtUword width,
+                         GtUword posoffset)
 {
-  unsigned long idx, lcpvalue;
+  GtUword idx, lcpvalue;
   Largelcpvalue *largelcpvalueptr;
 
   gt_assert(lcpsubtab != NULL && lcpsubtab->lcp2file != NULL);
@@ -396,7 +396,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
     {
       lcpsubtab->lcp2file->maxbranchdepth = lcpvalue;
     }
-    if (lcpvalue < (unsigned long) LCPOVERFLOW)
+    if (lcpvalue < (GtUword) LCPOVERFLOW)
     {
       lcpsubtab->lcp2file->smalllcpvalues[idx] = (uint8_t) lcpvalue;
     } else
@@ -432,10 +432,10 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   }
 }
 
-static unsigned long outmany0lcpvalues(unsigned long many,
+static GtUword outmany0lcpvalues(GtUword many,
                                        FILE *outfplcptab)
 {
-  unsigned long i, countout;
+  GtUword i, countout;
 #define GT_LCPBUF_NUMBEROFZEROS 1024
   uint8_t outvalues[GT_LCPBUF_NUMBEROFZEROS] = {0};
 
@@ -505,12 +505,12 @@ void gt_Outlcpinfo_delete(GtOutlcpinfo *outlcpinfo)
 void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    const GtSuffixsortspace *sortedsample,
-                                   unsigned long effectivesamplesize,
+                                   GtUword effectivesamplesize,
                                    const GtOutlcpinfo *outlcpinfosample,
                                    bool checkequality)
 {
   GT_UNUSED int cmp;
-  unsigned long idx, reallcp, startpos1, startpos2, currentlcp,
+  GtUword idx, reallcp, startpos1, startpos2, currentlcp,
                 totalcmpmissing = 0;
 
   if (effectivesamplesize == 0)
@@ -534,7 +534,7 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
     gt_assert(cmp <= 0);
     gt_assert(GT_ISIBITSET(outlcpinfosample->lcpsubtab.tableoflcpvalues
                                                       .isset,idx));
-    currentlcp = (unsigned long) outlcpinfosample->lcpsubtab.tableoflcpvalues.
+    currentlcp = (GtUword) outlcpinfosample->lcpsubtab.tableoflcpvalues.
                                  bucketoflcpvalues[idx];
     if ((checkequality && currentlcp != reallcp) ||
         (!checkequality && currentlcp > reallcp))
@@ -558,7 +558,7 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
          totalcmpmissing,(double) totalcmpmissing/effectivesamplesize);*/
 }
 
-unsigned long gt_Outlcpinfo_numoflargelcpvalues(const GtOutlcpinfo *outlcpinfo)
+GtUword gt_Outlcpinfo_numoflargelcpvalues(const GtOutlcpinfo *outlcpinfo)
 {
   if (outlcpinfo->lcpsubtab.lcp2file != NULL)
   {
@@ -574,12 +574,12 @@ double gt_Outlcpinfo_lcptabsum(const GtOutlcpinfo *outlcpinfo)
 }
 
 void gt_Outlcpinfo_numsuffixes2output_set(GtOutlcpinfo *outlcpinfo,
-                                          unsigned long numsuffixes2output)
+                                          GtUword numsuffixes2output)
 {
   outlcpinfo->numsuffixes2output = numsuffixes2output;
 }
 
-unsigned long gt_Outlcpinfo_maxbranchdepth(const GtOutlcpinfo *outlcpinfo)
+GtUword gt_Outlcpinfo_maxbranchdepth(const GtOutlcpinfo *outlcpinfo)
 {
   if (outlcpinfo->lcpsubtab.lcp2file != NULL)
   {
@@ -590,7 +590,7 @@ unsigned long gt_Outlcpinfo_maxbranchdepth(const GtOutlcpinfo *outlcpinfo)
 
 void gt_Outlcpinfo_prebucket(GtOutlcpinfo *outlcpinfo,
                              GtCodetype code,
-                             unsigned long lcptaboffset)
+                             GtUword lcptaboffset)
 {
   if (outlcpinfo != NULL)
   {
@@ -628,7 +628,7 @@ void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
 {
   if (outlcpinfo != NULL)
   {
-    unsigned long lcpvalue;
+    GtUword lcpvalue;
     Suffixwithcode firstsuffixofbucket;
 
     if (outlcpinfo->previoussuffix.defined)
@@ -704,7 +704,7 @@ void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
     if (bucketspec->specialsinbucket > 0)
     {
       unsigned int minprefixindex;
-      unsigned long suffixvalue
+      GtUword suffixvalue
         = gt_suffixsortspace_get(sssp,
                                  0,
                                  bucketspec->left
@@ -824,7 +824,7 @@ GtLcpvalues *gt_Outlcpinfo_resizereservoir(GtOutlcpinfo *outlcpinfo,
         = (GtLcpvaluetype *) lcpsubtab->lcp2file->reservoir;
       lcpsubtab->tableoflcpvalues.lcptaboffset = 0;
       lcpsubtab->tableoflcpvalues.numofentries
-        = (unsigned long) lcpsubtab->lcp2file->sizereservoir/
+        = (GtUword) lcpsubtab->lcp2file->sizereservoir/
           sizeof (*lcpsubtab->tableoflcpvalues.bucketoflcpvalues);
     }
   } else

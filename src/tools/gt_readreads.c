@@ -35,7 +35,7 @@ typedef struct {
        fasta,
        colorspace;
   GtStr *qualformat;
-  unsigned long fastawidth;
+  GtUword fastawidth;
 } GtReadreads;
 
 static void* gt_readreads_arguments_new(void)
@@ -126,7 +126,7 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
   GtStrArray *files;
   GtSeqIterator *siq;
   int had_err = 0;
-  unsigned long i,
+  GtUword i,
                 totalsize,
                 len;
   const GtUchar *seq,
@@ -138,11 +138,11 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
   gt_assert(opts);
 
   files = gt_str_array_new();
-  for (i = (unsigned long) parsed_args; i < (unsigned long) argc; i++)
+  for (i = (GtUword) parsed_args; i < (GtUword) argc; i++)
   {
     gt_str_array_add_cstr(files, argv[i]);
   }
-  totalsize = (unsigned long) gt_files_estimate_total_size(files);
+  totalsize = (GtUword) gt_files_estimate_total_size(files);
 
   if (opts->colorspace)
   {
@@ -171,10 +171,10 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
       gt_fasta_show_entry((char*)desc, (char*)seq, len, opts->fastawidth, NULL);
     }
     else if (opts->showseq) {
-      unsigned long *lens = gt_malloc(sizeof (unsigned long)*len);
+      GtUword *lens = gt_malloc(sizeof (GtUword)*len);
       gt_str_reset(scores);
       for (i=0;i<len;i++) {
-        unsigned long l;
+        GtUword l;
         if (strcmp(gt_str_get(opts->qualformat), "phred") == 0) {
           l = gt_str_length(scores);
           gt_assert(qual);

@@ -30,6 +30,6 @@
 #include "metagenomethreader.h"
 
 /* reverse 'dna_seq' of length 'seqlen' in place */
-int mg_reverse_complement(char *dna_seq, unsigned long seqlen, GtError *);
+int mg_reverse_complement(char *dna_seq, GtUword seqlen, GtError *);
 
 #endif

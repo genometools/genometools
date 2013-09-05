@@ -19,15 +19,15 @@
 #include "core/assert_api.h"
 #include "extended/permute_words.h"
 
-void gt_permute_word_init(char *w, unsigned long l)
+void gt_permute_word_init(char *w, GtUword l)
 {
   memset(w, 0, l);
 }
 
-unsigned int gt_permute_word_next(char *w, unsigned long l,
-                               unsigned long alphabet_size)
+unsigned int gt_permute_word_next(char *w, GtUword l,
+                               GtUword alphabet_size)
 {
-  unsigned long i;
+  GtUword i;
   unsigned int next = 1;
 
   gt_assert(w && l && alphabet_size);

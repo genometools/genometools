@@ -71,7 +71,7 @@ struct GtHashtable
   union link_data links;
   unsigned short table_size_log, high_fill_mul, low_fill_mul;
   GtRWLock *lock;
-  unsigned long reference_count;
+  GtUword reference_count;
   bool no_ma;
 };
 
@@ -564,7 +564,7 @@ int gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter,
 {
   GtArray *hash_entries;
   void *elem;
-  unsigned long i;
+  GtUword i;
   int had_err;
   gt_error_check(err);
   gt_assert(ht && iter && cmp);
@@ -780,7 +780,7 @@ int gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB)
 
 int gt_ht_ul_elem_cmp(const void *elemA, const void *elemB)
 {
-  return gt_ht_ul_cmp(*(unsigned long *)elemA, *(unsigned long *)elemB);
+  return gt_ht_ul_cmp(*(GtUword *)elemA, *(GtUword *)elemB);
 }
 
 int gt_ht_cstr_elem_cmp(const void *elemA, const void *elemB)

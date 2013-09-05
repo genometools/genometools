@@ -180,11 +180,11 @@ append2IdxOutput(struct appendState *state,
 static BitOffset
 appendCallBackOutput(struct appendState *state,
                      const struct blockCompositionSeq *seqIdx,
-                     bitInsertFunc biFunc, unsigned long start,
-                     unsigned long len, unsigned callBackDataOffsetBits,
+                     bitInsertFunc biFunc, GtUword start,
+                     GtUword len, unsigned callBackDataOffsetBits,
                      void *cbState);
 
-typedef unsigned long partialSymSum;
+typedef GtUword partialSymSum;
 
 static inline partialSymSum *
 newPartialSymSums(AlphabetRangeSize alphabetSize);
@@ -200,20 +200,20 @@ static inline void
 copyPartialSymSums(AlphabetRangeSize alphabetSize, partialSymSum *dest,
                    const partialSymSum *src);
 
-static inline unsigned long
-numBuckets(unsigned long seqLen, size_t bucketLen);
+static inline GtUword
+numBuckets(GtUword seqLen, size_t bucketLen);
 
 static inline off_t
 cwSize(const struct blockCompositionSeq *seqIdx);
 
 static inline BitOffset
-vwBits(unsigned long seqLen, unsigned blockSize, unsigned bucketBlocks,
+vwBits(GtUword seqLen, unsigned blockSize, unsigned bucketBlocks,
        unsigned maxPermIdxBits, varExtBitsEstimator biVarBits, void *cbState,
        struct varBitsEstimate *extVarBitsUpperBound);
 
 static void
 addRangeEncodedSyms(struct seqRangeList *rangeList, const Symbol *block,
-                    unsigned blockSize, unsigned long blockNum,
+                    unsigned blockSize, GtUword blockNum,
                     const MRAEnc *alphabet, int selection, const int *rangeSel);
 
 static int
@@ -253,7 +253,7 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
 static void
 addBlock2OutputBuffer(
   struct blockCompositionSeq *newSeqIdx,
-  partialSymSum *buck, unsigned long blockNum,
+  partialSymSum *buck, GtUword blockNum,
   Symbol *block, unsigned blockSize,
   const MRAEnc *alphabet, const int *modes,
   const MRAEnc *blockMapAlphabet, AlphabetRangeSize blockMapAlphabetSize,
@@ -284,7 +284,7 @@ addBlock2OutputBuffer(
 static int
 writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
                   struct appendState *aState, bitInsertFunc biFunc,
-                  unsigned long lastUpdatePos, size_t bucketLen,
+                  GtUword lastUpdatePos, size_t bucketLen,
                   unsigned callBackDataOffsetBits, void *cbState,
                   const partialSymSum *buckLast)
 {
@@ -317,7 +317,7 @@ writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
   break
 
 EISeq *
-gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
+gt_newGenBlockEncIdxSeq(GtUword totalLen, const char *projectName,
                         MRAEnc *alphabet, const struct seqStats *stats,
                         SeqDataReader BWTGenerator,
                         const struct seqBaseParam *params,
@@ -399,7 +399,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
     = newSeqIdx->partialSymSumBits + blockMapAlphabetSize;
   if (stats)
   {
-    unsigned long *symCounts;
+    GtUword *symCounts;
     symCounts = gt_malloc(sizeof (symCounts[0]) * blockMapAlphabetSize);
     switch (stats->sourceAlphaType)
     {
@@ -454,7 +454,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
       /* count special characters to estimate number of regions required */
       {
         Symbol eSym, rSym;
-        unsigned long regionSymCount = 0;
+        GtUword regionSymCount = 0;
         AlphabetRangeSize rangeMapAlphabetSize
           = gt_MRAEncGetSize(rangeMapAlphabet);
         unsigned i;
@@ -543,7 +543,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
         buckLast = newPartialSymSums(totalAlphabetSize);
         /* 2. read block sized chunks from bwttab and suffix array */
         {
-          unsigned long numFullBlocks = totalLen / blockSize, blockNum,
+          GtUword numFullBlocks = totalLen / blockSize, blockNum,
             lastUpdatePos = 0;
           /* pos == totalLen - symbolsLeft */
           struct appendState aState;
@@ -570,7 +570,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
             /* update on-disk structure */
             if (!((++blockNum) % bucketBlocks))
             {
-              unsigned long pos = blockNum * blockSize;
+              GtUword pos = blockNum * blockSize;
               if (writeOutputBuffer(newSeqIdx, &aState, biFunc, lastUpdatePos,
                                     bucketLen, callBackDataOffsetBits, cbState,
                                     buckLast) < 0)
@@ -586,7 +586,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
           /* handle last chunk */
           if (!hadGtError)
           {
-            unsigned long symbolsLeft = totalLen % blockSize;
+            GtUword symbolsLeft = totalLen % blockSize;
             if (symbolsLeft)
             {
               size_t readResult;
@@ -788,7 +788,7 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
          == seqIdx->symSumBits);
 }
 
-static inline unsigned long
+static inline GtUword
 sBlockGetPartialSymSum(struct superBlock *sBlock, Symbol sym,
                        const struct blockCompositionSeq *seqIdx)
 {
@@ -799,7 +799,7 @@ sBlockGetPartialSymSum(struct superBlock *sBlock, Symbol sym,
 static inline void
 sBlockGetPartialSymSums(struct superBlock *sBlock,
                         const struct blockCompositionSeq *seqIdx,
-                        unsigned long *sums)
+                        GtUword *sums)
 {
   gt_bsGetNonUniformUlongArray(
     sBlock->cwData, sBlock->cwIdxMemBase, seqIdx->blockMapAlphabetSize,
@@ -890,27 +890,27 @@ sBlockGetCompIdx(const struct superBlock *sBlock, unsigned compIdxNum,
   return gt_bsGetPermCompIndex(sBlock->cwData, offset, bitsPerCompositionIdx);
 }
 
-static inline unsigned long
-blockNumFromPos(const struct blockCompositionSeq *seqIdx, unsigned long pos)
+static inline GtUword
+blockNumFromPos(const struct blockCompositionSeq *seqIdx, GtUword pos)
 {
   return pos / seqIdx->blockSize;
 }
 
-static inline unsigned long
-bucketNumFromPos(const struct blockCompositionSeq *seqIdx, unsigned long pos)
+static inline GtUword
+bucketNumFromPos(const struct blockCompositionSeq *seqIdx, GtUword pos)
 {
   return pos / (seqIdx->bucketBlocks * seqIdx->blockSize);
 }
 
-static inline unsigned long
-bucketBasePos(const struct blockCompositionSeq *seqIdx, unsigned long bucketNum)
+static inline GtUword
+bucketBasePos(const struct blockCompositionSeq *seqIdx, GtUword bucketNum)
 {
   return bucketNum * seqIdx->bucketBlocks * seqIdx->blockSize;
 }
 
-static inline unsigned long
+static inline GtUword
 bucketNumFromBlockNum(struct blockCompositionSeq *seqIdx,
-                      unsigned long blockNum)
+                      GtUword blockNum)
 {
   return blockNum / seqIdx->bucketBlocks;
 }
@@ -923,7 +923,7 @@ bucketNumFromBlockNum(struct blockCompositionSeq *seqIdx,
 
 static struct superBlock *
 fetchSuperBlock(const struct blockCompositionSeq *seqIdx,
-                unsigned long bucketNum, struct superBlock *sBlockPreAlloc)
+                GtUword bucketNum, struct superBlock *sBlockPreAlloc)
 {
   struct superBlock *retval = NULL;
   gt_assert(seqIdx);
@@ -976,9 +976,9 @@ fetchSuperBlock(const struct blockCompositionSeq *seqIdx,
   return retval;
 }
 
-static unsigned long
+static GtUword
 blockCompSeqSelect(GT_UNUSED struct encIdxSeq *seq, GT_UNUSED Symbol sym,
-                   GT_UNUSED unsigned long count, GT_UNUSED union EISHint *hint)
+                   GT_UNUSED GtUword count, GT_UNUSED union EISHint *hint)
 {
   /* FIXME: implementation pending */
   abort();
@@ -991,7 +991,7 @@ blockCompSeqSelect(GT_UNUSED struct encIdxSeq *seq, GT_UNUSED Symbol sym,
  */
 
 static inline size_t
-pos2CachePos(struct seqCache *sCache, unsigned long pos)
+pos2CachePos(struct seqCache *sCache, GtUword pos)
 {
   return pos % sCache->numEntries;
 }
@@ -1010,13 +1010,13 @@ initSuperBlockSeqCache(struct seqCache *sBlockCache,
   superBlockSize = superBlockMemSize(seqIdx);
   sBlockCache->numEntries = numEntries;
   {
-    void *temp = gt_malloc((sizeof (unsigned long) + superBlockSize
+    void *temp = gt_malloc((sizeof (GtUword) + superBlockSize
                            + sizeof (void *)) * numEntries);
     sBlockCache->cachedPos = temp;
     sBlockCache->entriesPtr = (void **)((char *)temp
-                                        + sizeof (unsigned long) * numEntries);
+                                        + sizeof (GtUword) * numEntries);
     sBlockCache->entries =
-                      (char *)temp + (sizeof (unsigned long) + sizeof (void *))
+                      (char *)temp + (sizeof (GtUword) + sizeof (void *))
                          * numEntries;
   }
   {
@@ -1038,7 +1038,7 @@ destructSuperBlockSeqCache(struct seqCache *sBlockCache)
 }
 
 static inline int
-inSeqCache(struct seqCache *sCache, unsigned long pos)
+inSeqCache(struct seqCache *sCache, GtUword pos)
 {
   return sCache->cachedPos[pos2CachePos(sCache, pos)] == pos;
 }
@@ -1046,7 +1046,7 @@ inSeqCache(struct seqCache *sCache, unsigned long pos)
 #ifdef USE_SBLOCK_CACHE
 static struct superBlock *
 cacheFetchSuperBlock(const struct blockCompositionSeq *seqIdx,
-                     unsigned long superBlockNum, struct seqCache *sBlockCache)
+                     GtUword superBlockNum, struct seqCache *sBlockCache)
 {
   size_t cachePos = pos2CachePos(sBlockCache, superBlockNum);
   if (inSeqCache(sBlockCache, superBlockNum))
@@ -1109,14 +1109,14 @@ unpackBlock(const struct blockCompositionSeq *seqIdx,
  * regular, user-accessible query functions
  */
 static Symbol *
-blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, unsigned long blockNum,
+blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, GtUword blockNum,
                      struct blockEncIdxSeqHint *hint, int queryRangeEnc,
                      struct superBlock *sBlockPreFetch,
                      Symbol *blockPA)
 {
   struct superBlock *sBlock;
   BitOffset varDataMemOffset, cwIdxMemOffset;
-  GT_UNUSED unsigned long relBlockNum;
+  GT_UNUSED GtUword relBlockNum;
   unsigned blockSize;
   Symbol *block;
   gt_assert(seqIdx);
@@ -1127,7 +1127,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, unsigned long blockNum,
     sBlock = sBlockPreFetch;
   else
   {
-    unsigned long bucketNum = bucketNumFromBlockNum(seqIdx, blockNum);
+    GtUword bucketNum = bucketNumFromBlockNum(seqIdx, blockNum);
 #ifdef USE_SBLOCK_CACHE
     sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
                                   &hint->sBlockCache);
@@ -1155,14 +1155,14 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, unsigned long blockNum,
   return block;
 }
 
-static inline unsigned long
+static inline GtUword
 adjustPosRankForBlock(struct blockCompositionSeq *seqIdx,
-                      struct superBlock *sBlock, unsigned long pos, Symbol bSym,
-                      unsigned blockSize, unsigned long preBlockRankCount,
+                      struct superBlock *sBlock, GtUword pos, Symbol bSym,
+                      unsigned blockSize, GtUword preBlockRankCount,
                       BitOffset cwIdxMemOffset, BitOffset varDataMemOffset,
                       unsigned bitsPerCompositionIdx)
 {
-  unsigned long rankCount = preBlockRankCount;
+  GtUword rankCount = preBlockRankCount;
   unsigned inBlockPos;
   if ((inBlockPos = pos % blockSize)
       && symCountFromComposition(
@@ -1185,12 +1185,12 @@ adjustPosRankForBlock(struct blockCompositionSeq *seqIdx,
 
 /* Note: pos is meant exclusively, i.e. returns 0
    for any query where pos==0 because that corresponds to the empty prefix */
-static unsigned long
-blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, unsigned long pos,
+static GtUword
+blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, GtUword pos,
                  union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
-  unsigned long rankCount;
+  GtUword rankCount;
   gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
   gt_assert(gt_MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
@@ -1202,7 +1202,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, unsigned long pos,
     BitOffset varDataMemOffset, cwIdxMemOffset;
     struct superBlock *sBlock;
     Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym);
-    unsigned long blockNum, bucketNum;
+    GtUword blockNum, bucketNum;
     unsigned blockSize = seqIdx->blockSize, bitsPerCompositionIdx
       = seqIdx->compositionTable.compositionIdxBits;
     bucketNum = bucketNumFromPos(seqIdx, pos);
@@ -1225,7 +1225,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, unsigned long pos,
       varDataMemOffset, bitsPerCompositionIdx);
     if (bSym == seqIdx->blockEncFallback)
     {
-      unsigned long base = bucketBasePos(seqIdx, bucketNum);
+      GtUword base = bucketBasePos(seqIdx, bucketNum);
       rankCount -= gt_SRLAllSymbolsCountInSeqRegion(
         seqIdx->rangeEncs, base, pos, &hint->bcHint.rangeHint);
     }
@@ -1245,12 +1245,12 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, unsigned long pos,
    for any query where pos==0 because that corresponds to the empty prefix */
 static GtUlongPair
 blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
-                        unsigned long posA, unsigned long posB,
+                        GtUword posA, GtUword posB,
                         union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
   GtUlongPair rankCounts;
-  unsigned long bucketNum;
+  GtUword bucketNum;
   gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   gt_assert(posA <= posB);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
@@ -1260,7 +1260,7 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
   /* Only when both positions are in same bucket, special treatment
    * makes sense. */
   {
-    unsigned long bucketNumA, bucketNumB;
+    GtUword bucketNumA, bucketNumB;
     bucketNumA = bucketNumFromPos(seqIdx, posA);
     bucketNumB = bucketNumFromPos(seqIdx, posB);
     if (bucketNumA != bucketNumB)
@@ -1276,7 +1276,7 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
   {
     BitOffset varDataMemOffset, cwIdxMemOffset;
     struct superBlock *sBlock;
-    unsigned long blockNumA = blockNumFromPos(seqIdx, posA),
+    GtUword blockNumA = blockNumFromPos(seqIdx, posA),
       blockNumB = blockNumFromPos(seqIdx, posB);
     Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym);
     unsigned blockSize = seqIdx->blockSize, bitsPerCompositionIdx
@@ -1313,7 +1313,7 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
                             bitsPerCompositionIdx);
     if (bSym == seqIdx->blockEncFallback)
     {
-      unsigned long base = bucketBasePos(seqIdx, bucketNum);
+      GtUword base = bucketBasePos(seqIdx, bucketNum);
       rankCounts.a -= gt_SRLAllSymbolsCountInSeqRegion(
         seqIdx->rangeEncs, base, posA, &hint->bcHint.rangeHint);
       rankCounts.b -= gt_SRLAllSymbolsCountInSeqRegion(
@@ -1334,7 +1334,7 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym,
 }
 
 static void
-blockCompSeqExpose(struct encIdxSeq *eSeqIdx, unsigned long pos, int flags,
+blockCompSeqExpose(struct encIdxSeq *eSeqIdx, GtUword pos, int flags,
                    struct extBitsRetrieval *retval, union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
@@ -1343,7 +1343,7 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, unsigned long pos, int flags,
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
   {
     struct superBlock *sBlock;
-    unsigned long bucketNum, end;
+    GtUword bucketNum, end;
     bucketNum = bucketNumFromPos(seqIdx, pos);
     retval->start = bucketBasePos(seqIdx, bucketNum);
     end = bucketBasePos(seqIdx, bucketNum + 1);
@@ -1408,8 +1408,8 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, unsigned long pos, int flags,
 
 static inline void
 adjustRanksForBlock(struct blockCompositionSeq *seqIdx,
-                    struct superBlock *sBlock, unsigned long pos,
-                    unsigned blockSize, unsigned long rankCounts[],
+                    struct superBlock *sBlock, GtUword pos,
+                    unsigned blockSize, GtUword rankCounts[],
                     BitOffset cwIdxMemOffset, BitOffset varDataMemOffset)
 {
   unsigned inBlockPos = pos % blockSize;
@@ -1426,7 +1426,7 @@ adjustRanksForBlock(struct blockCompositionSeq *seqIdx,
 
 static void
 blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
-                      unsigned long pos, unsigned long *rankCounts,
+                      GtUword pos, GtUword *rankCounts,
                       union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
@@ -1439,7 +1439,7 @@ blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
     {
       BitOffset varDataMemOffset, cwIdxMemOffset;
       struct superBlock *sBlock;
-      unsigned long blockNum, bucketNum;
+      GtUword blockNum, bucketNum;
       unsigned blockSize = seqIdx->blockSize;
       bucketNum = bucketNumFromPos(seqIdx, pos);
 #ifdef USE_SBLOCK_CACHE
@@ -1460,7 +1460,7 @@ blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
         adjustRanksForBlock(seqIdx, sBlock, pos, blockSize, rankCounts,
                             cwIdxMemOffset, varDataMemOffset);
         {
-          unsigned long base = bucketBasePos(seqIdx, bucketNum);
+          GtUword base = bucketBasePos(seqIdx, bucketNum);
           rankCounts[seqIdx->blockEncFallback]
             -= gt_SRLAllSymbolsCountInSeqRegion(
               seqIdx->rangeEncs, base, pos, &hint->bcHint.rangeHint);
@@ -1487,8 +1487,8 @@ blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
 
 static void
 blockCompSeqPosPairRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
-                             unsigned long posA, unsigned long posB,
-                             unsigned long *rankCounts, union EISHint *hint)
+                             GtUword posA, GtUword posB,
+                             GtUword *rankCounts, union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
   gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
@@ -1503,7 +1503,7 @@ blockCompSeqPosPairRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
       AlphabetRangeSize rsize = MRAEncGetRangeSize(eSeqIdx->alphabet, range);
       /* Only when both positions are in same bucket, special treatment
        * makes sense. */
-      unsigned long bucketNum = bucketNumFromPos(seqIdx, posA);
+      GtUword bucketNum = bucketNumFromPos(seqIdx, posA);
       if (bucketNum != bucketNumFromPos(seqIdx, posB))
       {
         blockCompSeqRangeRank(eSeqIdx, range, posA, rankCounts, hint);
@@ -1517,7 +1517,7 @@ blockCompSeqPosPairRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
       sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL);
 #endif
       {
-        unsigned long blockNumA = blockNumFromPos(seqIdx, posA),
+        GtUword blockNumA = blockNumFromPos(seqIdx, posA),
           blockNumB = blockNumFromPos(seqIdx, posB);
         unsigned blockSize = seqIdx->blockSize,
           inBucketBlockNumA = blockNumA % seqIdx->bucketBlocks,
@@ -1542,7 +1542,7 @@ blockCompSeqPosPairRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
                             rankCounts + rsize,
                             cwIdxMemOffset, varDataMemOffset);
         {
-          unsigned long base = bucketBasePos(seqIdx, bucketNum);
+          GtUword base = bucketBasePos(seqIdx, bucketNum);
           rankCounts[seqIdx->blockEncFallback]
             -= gt_SRLAllSymbolsCountInSeqRegion(
               seqIdx->rangeEncs, base, posA, &hint->bcHint.rangeHint);
@@ -1577,7 +1577,7 @@ blockCompSeqPosPairRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
 }
 
 static Symbol
-blockCompSeqGet(struct encIdxSeq *seq, unsigned long pos, union EISHint *hint)
+blockCompSeqGet(struct encIdxSeq *seq, GtUword pos, union EISHint *hint)
 {
   Symbol sym;
   struct blockCompositionSeq *seqIdx;
@@ -1599,7 +1599,7 @@ blockCompSeqGet(struct encIdxSeq *seq, unsigned long pos, union EISHint *hint)
 static inline partialSymSum *
 newPartialSymSums(AlphabetRangeSize alphabetSize)
 {
-  return gt_calloc(alphabetSize, sizeof (unsigned long));
+  return gt_calloc(alphabetSize, sizeof (GtUword));
 }
 
 static inline void
@@ -1654,8 +1654,8 @@ superBlockVarMaxReadSize(const struct blockCompositionSeq *seqIdx)
                            + bitElemBits - 1);
 }
 
-static inline unsigned long
-numBuckets(unsigned long seqLen, size_t bucketLen)
+static inline GtUword
+numBuckets(GtUword seqLen, size_t bucketLen)
 {
   /* seqLen + 1 because the partial sums for seqLen are used  */
   return (seqLen + 1) / bucketLen + (((seqLen + 1) % bucketLen)?1:0);
@@ -1673,7 +1673,7 @@ cwSize(const struct blockCompositionSeq *seqIdx)
 }
 
 static inline BitOffset
-vwBitsSimple(unsigned long seqLen, unsigned blockSize, unsigned bucketBlocks,
+vwBitsSimple(GtUword seqLen, unsigned blockSize, unsigned bucketBlocks,
              unsigned maxPermIdxBits, BitOffset maxVarExtBitsPerBucket)
 {
   return numBuckets(seqLen, bucketBlocks * blockSize)
@@ -1681,7 +1681,7 @@ vwBitsSimple(unsigned long seqLen, unsigned blockSize, unsigned bucketBlocks,
 }
 
 static inline BitOffset
-vwBits(unsigned long seqLen, unsigned blockSize, unsigned bucketBlocks,
+vwBits(GtUword seqLen, unsigned blockSize, unsigned bucketBlocks,
        unsigned maxPermIdxBits, varExtBitsEstimator biVarBits, void *cbState,
        struct varBitsEstimate *extVarBitsUpperBound)
 {
@@ -1801,8 +1801,8 @@ append2IdxOutput(struct appendState *state,
 static BitOffset
 appendCallBackOutput(struct appendState *state,
                      const struct blockCompositionSeq *seqIdx,
-                     bitInsertFunc biFunc, unsigned long start,
-                     unsigned long len, unsigned callBackDataOffsetBits,
+                     bitInsertFunc biFunc, GtUword start,
+                     GtUword len, unsigned callBackDataOffsetBits,
                      void *cbState)
 {
   BitOffset bitsWritten;
@@ -1842,22 +1842,22 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
          + aState->varDiskOffset/bitElemBits * sizeof (BitElem)))
   {
     fprintf(stderr,"cwDatapos=%lu\n",
-           (unsigned long) seqIdx->externalData.cwDataPos);
-    fprintf(stderr,"cwDiskOffset=%lu\n",(unsigned long) aState->cwDiskOffset);
+           (GtUword) seqIdx->externalData.cwDataPos);
+    fprintf(stderr,"cwDiskOffset=%lu\n",(GtUword) aState->cwDiskOffset);
     fprintf(stderr,"varDataPos=%lu\n",
-                   (unsigned long) seqIdx->externalData.varDataPos);
-    fprintf(stderr,"bitElemBits=%lu\n",(unsigned long) bitElemBits);
+                   (GtUword) seqIdx->externalData.varDataPos);
+    fprintf(stderr,"bitElemBits=%lu\n",(GtUword) bitElemBits);
     fprintf(stderr,"aState->varDiskOffset=%lu\n",
-                    (unsigned long) aState->varDiskOffset);
+                    (GtUword) aState->varDiskOffset);
     fprintf(stderr,"aState->varDiskOffset/bitElemBits=%lu\n",
-                    (unsigned long) (aState->varDiskOffset/bitElemBits));
-    fprintf(stderr,"sizeof (BitElem)=%lu\n",(unsigned long) sizeof (BitElem));
+                    (GtUword) (aState->varDiskOffset/bitElemBits));
+    fprintf(stderr,"sizeof (BitElem)=%lu\n",(GtUword) sizeof (BitElem));
     fprintf(stderr,"aState->varDiskOffset/bitElemBits * sizeof (BitElem)=%lu\n",
-            (unsigned long) (aState->varDiskOffset/bitElemBits *
+            (GtUword) (aState->varDiskOffset/bitElemBits *
                              sizeof (BitElem)));
     fprintf(stderr,"seqIdx->externalData.varDataPos + "
                    "aState->varDiskOffset/bitElemBits * sizeof (BitElem)=%lu\n",
-            (unsigned long) (seqIdx->externalData.varDataPos +
+            (GtUword) (seqIdx->externalData.varDataPos +
                              aState->varDiskOffset/bitElemBits
                              * sizeof (BitElem)));
     exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -1868,7 +1868,7 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
   blockAlphabetSize = seqIdx->blockMapAlphabetSize;
   /* put bucket data for count up to the beginning of the current
    * block into the cw BitString */
-  gt_assert(sizeof (unsigned long) * CHAR_BIT >= seqIdx->bitsPerUlong);
+  gt_assert(sizeof (GtUword) * CHAR_BIT >= seqIdx->bitsPerUlong);
   {
     Symbol i;
     for (i = 0; i < blockAlphabetSize; ++i)
@@ -1921,7 +1921,7 @@ enum bdxHeader {
                                    * bits provided by callback */
   MEXB_HEADER_FIELD = 0x4d455842, /* maxVarExtBitsPerBucket */
   CEXB_HEADER_FIELD = 0x43455842, /* cwExtBitsPerBucket */
-  SPBT_HEADER_FIELD = 0x53504254, /* bits stored for unsigned long values */
+  SPBT_HEADER_FIELD = 0x53504254, /* bits stored for GtUword values */
   SSBT_HEADER_FIELD = 0x53534254, /* block map alphabet size */
   BEFB_HEADER_FIELD = 0x42454642, /* block encoding fallback symbol */
   REFB_HEADER_FIELD = 0x52454642, /* range encoding fallback symbol */
@@ -2497,7 +2497,7 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
 
 static void
 addRangeEncodedSyms(struct seqRangeList *rangeList, const Symbol *block,
-                    unsigned blockSize, unsigned long blockNum,
+                    unsigned blockSize, GtUword blockNum,
                     const MRAEnc *alphabet, int selection, const int *rangeSel)
 {
   unsigned i;
@@ -2555,10 +2555,10 @@ enum {
 };
 
 static int
-printBucket(const struct blockCompositionSeq *seqIdx, unsigned long bucketNum,
+printBucket(const struct blockCompositionSeq *seqIdx, GtUword bucketNum,
             int flags, FILE *fp, union EISHint *hint)
 {
-  unsigned long lastBucket = bucketNumFromPos(seqIdx,
+  GtUword lastBucket = bucketNumFromPos(seqIdx,
                                              EISLength(&seqIdx->baseClass)),
                 start, end;
   AlphabetRangeSize i, blockMapAlphabetSize = seqIdx->blockMapAlphabetSize;
@@ -2624,9 +2624,9 @@ printBucket(const struct blockCompositionSeq *seqIdx, unsigned long bucketNum,
       outCount +=
       fprintf(
         fp, "# block %u: comp idx: %lu, permIdxBits=%u, perm idx: %lu =>",
-        i, (unsigned long)compIndex,
+        i, (GtUword)compIndex,
         (unsigned)seqIdx->compositionTable.permutations[compIndex].permIdxBits,
-        (unsigned long)gt_bsGetPermCompIndex(
+        (GtUword)gt_bsGetPermCompIndex(
           sBlock->varData, varDataMemOffset,
           seqIdx->compositionTable.permutations[compIndex].permIdxBits));
       unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
@@ -2710,12 +2710,12 @@ gt_blockEncIdxSeqSegmentLen(const struct blockEncParams *params)
 }
 
 static int
-printBlockEncPosDiags(const EISeq *seq, unsigned long pos, FILE *fp,
+printBlockEncPosDiags(const EISeq *seq, GtUword pos, FILE *fp,
                       EISHint hint)
 {
   const struct blockCompositionSeq *seqIdx;
   int outCount = 0;
-  unsigned long bucketNum;
+  GtUword bucketNum;
   gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
   bucketNum = bucketNumFromPos(seqIdx, pos);
@@ -2741,12 +2741,12 @@ printBlockEncPosDiags(const EISeq *seq, unsigned long pos, FILE *fp,
 }
 
 static int
-displayBlockEncBlock(const EISeq *seq, unsigned long pos, FILE *fp,
+displayBlockEncBlock(const EISeq *seq, GtUword pos, FILE *fp,
                      EISHint hint)
 {
   const struct blockCompositionSeq *seqIdx;
   int outCount;
-  unsigned long bucketNum;
+  GtUword bucketNum;
   gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
   bucketNum = bucketNumFromPos(seqIdx, pos);

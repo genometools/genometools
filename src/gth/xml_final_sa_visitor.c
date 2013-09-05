@@ -24,7 +24,7 @@
 
 struct GthXMLFinalSAVisitor {
   const GthSAVisitor parent_instance;
-  unsigned long minintronlength,
+  GtUword minintronlength,
                 translationtable;
   GthInput *input;
   unsigned int indentlevel;
@@ -163,7 +163,7 @@ static void xml_showmatchline(GthSA *sa, unsigned int indentlevel,
 static void xml_showpgsline(GthSA *sa, unsigned int indentlevel,
                             GtFile *outfp)
 {
-  unsigned long i, numofexons;
+  GtUword i, numofexons;
   gt_assert(sa);
   numofexons = gth_sa_num_of_exons(sa);
   gth_indent(outfp, indentlevel);
@@ -201,10 +201,10 @@ static void xml_showpgsline(GthSA *sa, unsigned int indentlevel,
 }
 
 static void xml_showalignmentheader(GthSA *sa,
-                                    unsigned long minintronlength,
+                                    GtUword minintronlength,
                                     unsigned int indentlevel, GtFile *outfp)
 {
-  unsigned long i, leftreferenceexonborder, rightreferenceexonborder,
+  GtUword i, leftreferenceexonborder, rightreferenceexonborder,
                 referenceexonlength;
   GthDbl exonscore, donorsitescore, acceptorsitescore;
   GthFlt donorsiteprobability, acceptorsiteprobability;
@@ -310,9 +310,9 @@ static void xml_showalignmentheader(GthSA *sa,
 }
 
 static void showconcreteline(const unsigned char *alignmentline,
-                             unsigned long cols, GtFile *outfp)
+                             GtUword cols, GtFile *outfp)
 {
-  unsigned long i;
+  GtUword i;
 
   for (i = 0; i < cols; i++) {
     switch (alignmentline[i]) {
@@ -329,14 +329,14 @@ static void showconcreteline(const unsigned char *alignmentline,
 }
 
 static void xml_final_show_spliced_alignment(GthSA *sa, GthInput *input,
-                                             unsigned long minintronlength,
-                                             unsigned long translationtable,
+                                             GtUword minintronlength,
+                                             GtUword translationtable,
                                              unsigned int indentlevel,
                                              GtFile *outfp)
 {
   unsigned char *first_line, *second_line, *third_line;
   GT_UNUSED bool reverse_subject_pos = false;
-  unsigned long cols;
+  GtUword cols;
 
   gt_assert(sa && input);
 
@@ -434,7 +434,7 @@ static void xml_final_sa_visitor_visit_sa(GthSAVisitor *sa_visitor,
 }
 
 static void  xml_final_sa_visitor_trailer(GthSAVisitor *sa_visitor,
-                                          unsigned long num_of_sas)
+                                          GtUword num_of_sas)
 {
   GthXMLFinalSAVisitor *visitor = xml_final_sa_visitor_cast(sa_visitor);
   visitor->indentlevel++;
@@ -458,8 +458,8 @@ const GthSAVisitorClass* gth_xml_final_sa_visitor_class()
 }
 
 GthSAVisitor* gth_xml_final_sa_visitor_new(GthInput *input,
-                                           unsigned long minintronlength,
-                                           unsigned long translationtable,
+                                           GtUword minintronlength,
+                                           GtUword translationtable,
                                            unsigned int indentlevel,
                                            GtFile *outfp)
 {

@@ -25,10 +25,10 @@
 #define REVERSESTRANDCHAR '-'
 
 static int parse_input_line(GtSSplicedAlignment **alignment, const char *line,
-                            unsigned long line_length, GtError *err)
+                            GtUword line_length, GtError *err)
 {
   long leftpos, rightpos;
-  unsigned long i = 0;
+  GtUword i = 0;
   GtRange exon;
   GtStr *id;
   int had_err = 0;

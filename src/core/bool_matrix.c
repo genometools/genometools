@@ -33,8 +33,8 @@ GtBoolMatrix* gt_bool_matrix_new(void)
   return bm;
 }
 
-bool gt_bool_matrix_get(GtBoolMatrix *bm, unsigned long firstdim,
-                        unsigned long seconddim)
+bool gt_bool_matrix_get(GtBoolMatrix *bm, GtUword firstdim,
+                        GtUword seconddim)
 {
   GtDynBittab *bt;
   gt_assert(bm);
@@ -46,11 +46,11 @@ bool gt_bool_matrix_get(GtBoolMatrix *bm, unsigned long firstdim,
   return false;
 }
 
-void gt_bool_matrix_set(GtBoolMatrix *bm, unsigned long firstdim,
-                        unsigned long seconddim, bool b)
+void gt_bool_matrix_set(GtBoolMatrix *bm, GtUword firstdim,
+                        GtUword seconddim, bool b)
 {
   GtDynBittab *bt;
-  unsigned long i, elems_to_add;
+  GtUword i, elems_to_add;
 
   gt_assert(bm);
   /* make sure first dimension is large enough */
@@ -74,8 +74,8 @@ void gt_bool_matrix_set(GtBoolMatrix *bm, unsigned long firstdim,
   gt_assert(gt_bool_matrix_get(bm, firstdim, seconddim) == b);
 }
 
-unsigned long gt_bool_matrix_get_first_column(const GtBoolMatrix *bm,
-                                              unsigned long firstdim)
+GtUword gt_bool_matrix_get_first_column(const GtBoolMatrix *bm,
+                                              GtUword firstdim)
 {
   GtDynBittab *bt;
   gt_assert(bm);
@@ -86,8 +86,8 @@ unsigned long gt_bool_matrix_get_first_column(const GtBoolMatrix *bm,
   return GT_UNDEF_ULONG;
 }
 
-unsigned long gt_bool_matrix_get_last_column(const GtBoolMatrix *bm,
-                                             unsigned long firstdim)
+GtUword gt_bool_matrix_get_last_column(const GtBoolMatrix *bm,
+                                             GtUword firstdim)
 {
   GtDynBittab *bt;
   gt_assert(bm);
@@ -98,9 +98,9 @@ unsigned long gt_bool_matrix_get_last_column(const GtBoolMatrix *bm,
   return GT_UNDEF_ULONG;
 }
 
-unsigned long gt_bool_matrix_get_next_column(const GtBoolMatrix *bm,
-                                             unsigned long firstdim,
-                                             unsigned long i)
+GtUword gt_bool_matrix_get_next_column(const GtBoolMatrix *bm,
+                                             GtUword firstdim,
+                                             GtUword i)
 {
   GtDynBittab *bt;
   gt_assert(bm);
@@ -113,7 +113,7 @@ unsigned long gt_bool_matrix_get_next_column(const GtBoolMatrix *bm,
 
 void gt_bool_matrix_delete(GtBoolMatrix *bm)
 {
-  unsigned long i;
+  GtUword i;
   if (!bm) return;
   for (i = 0; i < gt_array_size(bm->dyn_bittabs); i++)
     gt_dyn_bittab_delete(*(GtDynBittab**) gt_array_get(bm->dyn_bittabs, i));

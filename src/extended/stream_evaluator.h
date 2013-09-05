@@ -26,7 +26,7 @@ typedef struct GtStreamEvaluator GtStreamEvaluator;
 GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reference,
                                            GtNodeStream *prediction,
                                            bool nuceval, bool evalLTR,
-                                           unsigned long LTRdelta);
+                                           GtUword LTRdelta);
 /* if <nv> is not NULL, it visits all nodes from reference and the prediction */
 int                gt_stream_evaluator_evaluate(GtStreamEvaluator*,
                                                 bool verbose, bool exondiff,

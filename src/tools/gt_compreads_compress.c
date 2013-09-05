@@ -42,7 +42,7 @@ typedef struct {
          *method,
          *name;
   GtStrArray *files;
-  unsigned long srate;
+  GtUword srate;
   GtQualRange qrng;
   GtRange arg_range;
 } GtCsrHcrEncodeArguments;
@@ -154,7 +154,7 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
         had_err = -1;
       }
       else {
-        unsigned long i;
+        GtUword i;
         char *basename;
         splitter = gt_splitter_new();
         basename = gt_basename(gt_str_array_get(arguments->files, 0));
@@ -217,9 +217,9 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
 
   if (!had_err) {
     if (arguments->arg_range.start != GT_UNDEF_ULONG) {
-      if (arguments->arg_range.start <= (unsigned long) UINT_MAX) {
+      if (arguments->arg_range.start <= (GtUword) UINT_MAX) {
         gt_safe_assign(arguments->qrng.start, arguments->arg_range.start);
-        if (arguments->arg_range.end <= (unsigned long) UINT_MAX)
+        if (arguments->arg_range.end <= (GtUword) UINT_MAX)
           gt_safe_assign(arguments->qrng.end, arguments->arg_range.end);
         else
           had_err = -1;

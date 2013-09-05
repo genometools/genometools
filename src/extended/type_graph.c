@@ -51,7 +51,7 @@ GtTypeGraph* gt_type_graph_new(void)
 
 void gt_type_graph_delete(GtTypeGraph *type_graph)
 {
-  unsigned long i;
+  GtUword i;
   if (!type_graph) return;
   gt_bool_matrix_delete(type_graph->part_of_in_edges);
   gt_bool_matrix_delete(type_graph->part_of_out_edges);
@@ -67,7 +67,7 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
                               const GtOBOStanza *stanza)
 {
   const char *id_value, *name_value;
-  unsigned long i, size;
+  GtUword i, size;
   GtTypeNode *node;
   GtStr *buf;
   gt_assert(type_graph && stanza && !type_graph->ready);
@@ -125,7 +125,7 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
 
 static void create_vertices(GtTypeGraph *type_graph)
 {
-  unsigned long i, j;
+  GtUword i, j;
   GtTypeNode *parent;
   const char *id;
   gt_assert(type_graph && !type_graph->ready);

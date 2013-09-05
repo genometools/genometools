@@ -47,17 +47,17 @@
 typedef struct
 {
   bool lastisleafedge;
-  unsigned long depth;
+  GtUword depth;
   Dfsinfo *dfsinfo;
 } Itvinfo;
 
 static Itvinfo *allocItvinfo(Itvinfo *ptr,
-                             unsigned long currentallocated,
-                             unsigned long allocated,
+                             GtUword currentallocated,
+                             GtUword allocated,
                              Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
                              Dfsstate *state)
 {
-  unsigned long i;
+  GtUword i;
   Itvinfo *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof *ptr * allocated);
@@ -74,11 +74,11 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
 }
 
 static void freeItvinfo(Itvinfo *ptr,
-                        unsigned long allocated,
+                        GtUword allocated,
                         void (*freeDfsinfo)(Dfsinfo *,Dfsstate *),
                         Dfsstate *state)
 {
-  unsigned long i;
+  GtUword i;
 
   for (i=0; i<allocated; i++)
   {
@@ -90,30 +90,30 @@ static void freeItvinfo(Itvinfo *ptr,
 int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
-                  int(*processleafedge)(bool,unsigned long,Dfsinfo *,
-                                        unsigned long,Dfsstate *,
+                  int(*processleafedge)(bool,GtUword,Dfsinfo *,
+                                        GtUword,Dfsstate *,
                                         GtError *),
                   int(*processbranchedge)(bool,
-                                          unsigned long,
+                                          GtUword,
                                           Dfsinfo *,
                                           Dfsinfo *,
                                           Dfsstate *,
                                           GtError *),
-                  int(*processcompletenode)(unsigned long,
-                                            Dfsinfo *,unsigned long,
+                  int(*processcompletenode)(GtUword,
+                                            Dfsinfo *,GtUword,
                                             Dfsstate *,GtError *),
-                  void (*assignleftmostleaf)(Dfsinfo *,unsigned long,
+                  void (*assignleftmostleaf)(Dfsinfo *,GtUword,
                                              Dfsstate *),
-                  void (*assignrightmostleaf)(Dfsinfo *,unsigned long,
-                                              unsigned long,
-                                              unsigned long,Dfsstate *),
+                  void (*assignrightmostleaf)(Dfsinfo *,GtUword,
+                                              GtUword,
+                                              GtUword,Dfsstate *),
                   Dfsstate *state,
                   GT_UNUSED GtLogger *logger,
                   GtError *err)
 {
   bool firstedge,
        firstrootedge;
-  unsigned long previoussuffix = 0,
+  GtUword previoussuffix = 0,
          previouslcp,
          currentindex,
          currentlcp = 0, /* May be necessary if currentlcp is used after the

@@ -43,7 +43,7 @@ struct GtFirstcodesspacelog
   double max_percent_difference;
   bool calc_difference;
   GtFirstcodespacelogentry *entries;
-  unsigned long nextfree, allocated;
+  GtUword nextfree, allocated;
 };
 
 GtFirstcodesspacelog *gt_firstcodes_spacelog_new(void)
@@ -88,7 +88,7 @@ size_t gt_firstcodes_spacelog_peak(const GtFirstcodesspacelog *fcsl)
 static GtFirstcodespacelogentry *gt_spacelog_find(GtFirstcodesspacelog *fcsl,
                                                   const char *title)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx = 0; idx < fcsl->nextfree; idx++)
   {
@@ -132,7 +132,7 @@ static void gt_spacelog_addentry(GtFirstcodesspacelog *fcsl,
 bool gt_firstcodes_spacelog_showentries(FILE *fp,
                                         const GtFirstcodesspacelog *fcsl)
 {
-  unsigned long idx;
+  GtUword idx;
   bool foundnonempty = false;
 
   for (idx = 0; idx < fcsl->nextfree; idx++)
@@ -144,7 +144,7 @@ bool gt_firstcodes_spacelog_showentries(FILE *fp,
                fcsl->entries[idx].line,
                fcsl->entries[idx].title,
                fcsl->entries[idx].work ? "work" : "split",
-               (unsigned long) fcsl->entries[idx].size);
+               (GtUword) fcsl->entries[idx].size);
       foundnonempty = true;
     }
   }
@@ -178,7 +178,7 @@ static void gt_firstcodes_subtract_error(const char *title,
   fprintf(stderr,"for title \"%s\" (from file %s, line %d) "
                  "in spacelog entries: "
                  "size=%lu > %lu=%sspace\n",title,filename,line,
-                 (unsigned long) size,(unsigned long) sumspace,
+                 (GtUword) size,(GtUword) sumspace,
                  work ? "work" : "split");
 }
 
@@ -313,7 +313,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
 #ifdef SKDEBUG
   if (gt_ma_bookkeeping_enabled())
   {
-    unsigned long realspace = gt_ma_get_space_current() +
+    GtUword realspace = gt_ma_get_space_current() +
                               gt_fa_get_space_current();
     gt_log_log("current space usage %.2f MB (%.2f+%.2f)",
                                 GT_MEGABYTES(realspace),
@@ -323,7 +323,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
     {
       double percent_difference;
 
-      if ((unsigned long) logspace > realspace)
+      if ((GtUword) logspace > realspace)
       {
         fprintf(stderr,"overestimating logspace\n");
         exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -332,7 +332,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
       {
         /*
         printf("realspace=%lu,logspace=%lu\n",realspace,
-                                              (unsigned long) logspace);
+                                              (GtUword) logspace);
         */
         percent_difference = 100.0 * (double) (realspace - logspace)/realspace;
         if (gt_double_larger_double(percent_difference,3.0))

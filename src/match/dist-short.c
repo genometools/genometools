@@ -25,7 +25,7 @@
 #include "dist-short.h"
 
 #define DECLARELOCALVARS\
-        unsigned long Pv = ~0UL,\
+        GtUword Pv = ~0UL,\
                       Mv = 0,\
                       Eq,\
                       Xv,\
@@ -39,7 +39,7 @@
         gt_assert((CC) != (GtUchar) SEPARATOR);\
         if ((CC) != (GtUchar) WILDCARD)\
         {\
-          Eq = eqsvector[(unsigned long) (CC)];\
+          Eq = eqsvector[(GtUword) (CC)];\
         } else\
         {\
           Eq = 0;\
@@ -68,17 +68,17 @@
         Pv = (Mh << 1) | ~ (Xv | Ph);\
         Mv = Ph & Xv
 
-unsigned long gt_distanceofshortstringsbytearray(unsigned long *eqsvector,
+GtUword gt_distanceofshortstringsbytearray(GtUword *eqsvector,
                                               unsigned int alphasize,
                                               const GtUchar *useq,
-                                              unsigned long ulen,
+                                              GtUword ulen,
                                               const GtUchar *vseq,
-                                              unsigned long vlen)
+                                              GtUword vlen)
 {
   DECLARELOCALVARS;
   const GtUchar *vptr;
 
-  gt_initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
+  gt_initeqsvector(eqsvector,(GtUword) alphasize,useq,ulen);
   for (vptr = vseq; vptr < vseq + vlen; vptr++)
   {
     COMPUTENEWDIST(*vptr);
@@ -86,19 +86,19 @@ unsigned long gt_distanceofshortstringsbytearray(unsigned long *eqsvector,
   return distval;
 }
 
-unsigned long gt_distanceofshortstringsencseq(unsigned long *eqsvector,
+GtUword gt_distanceofshortstringsencseq(GtUword *eqsvector,
                                            unsigned int alphasize,
                                            const GtUchar *useq,
-                                           unsigned long ulen,
+                                           GtUword ulen,
                                            const GtEncseq *encseq,
-                                           unsigned long vstartpos,
-                                           unsigned long vlen)
+                                           GtUword vstartpos,
+                                           GtUword vlen)
 {
   DECLARELOCALVARS;
   GtUchar cc;
-  unsigned long pos;
+  GtUword pos;
 
-  gt_initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
+  gt_initeqsvector(eqsvector,(GtUword) alphasize,useq,ulen);
   for (pos = vstartpos; pos < vstartpos + vlen; pos++)
   {
     cc = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
@@ -107,18 +107,18 @@ unsigned long gt_distanceofshortstringsencseq(unsigned long *eqsvector,
   return distval;
 }
 
-unsigned long gt_reversesuffixmatch(unsigned long *eqsvector,
+GtUword gt_reversesuffixmatch(GtUword *eqsvector,
                                  unsigned int alphasize,
                                  const GtUchar *useq,
-                                 unsigned long ulen,
+                                 GtUword ulen,
                                  const GtUchar *vseq,
-                                 unsigned long vlen,
-                                 unsigned long maxdistance)
+                                 GtUword vlen,
+                                 GtUword maxdistance)
 {
   DECLARELOCALVARS;
   const GtUchar *vptr;
 
-  gt_initeqsvectorrev(eqsvector,(unsigned long) alphasize,useq,ulen);
+  gt_initeqsvectorrev(eqsvector,(GtUword) alphasize,useq,ulen);
   gt_assert(maxdistance > 0);
   for (vptr = vseq + vlen - 1; vptr >= vseq; vptr--)
   {
@@ -129,28 +129,28 @@ unsigned long gt_reversesuffixmatch(unsigned long *eqsvector,
     }
   }
   /* gt_assert(distval <= maxdistance); */
-  return (unsigned long) (vseq + vlen - vptr);
+  return (GtUword) (vseq + vlen - vptr);
 }
 
 Definedunsignedlong gt_forwardprefixmatch(const GtEncseq *encseq,
                                        unsigned int alphasize,
-                                       unsigned long startpos,
+                                       GtUword startpos,
                                        bool nowildcards,
-                                       unsigned long *eqsvector,
+                                       GtUword *eqsvector,
                                        const GtUchar *useq,
-                                       unsigned long ulen,
-                                       unsigned long maxdistance)
+                                       GtUword ulen,
+                                       GtUword maxdistance)
 {
   DECLARELOCALVARS;
-  unsigned long pos, totallength = gt_encseq_total_length(encseq);
+  GtUword pos, totallength = gt_encseq_total_length(encseq);
   GtUchar cc;
   Definedunsignedlong result;
 
-  gt_initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
+  gt_initeqsvector(eqsvector,(GtUword) alphasize,useq,ulen);
   gt_assert(maxdistance > 0);
   for (pos = startpos; /* Nothing */; pos++)
   {
-    gt_assert(pos - startpos <= (unsigned long) (ulen + maxdistance));
+    gt_assert(pos - startpos <= (GtUword) (ulen + maxdistance));
     cc = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
     if (nowildcards && cc == (GtUchar) WILDCARD)
     {
@@ -165,6 +165,6 @@ Definedunsignedlong gt_forwardprefixmatch(const GtEncseq *encseq,
     }
   }
   result.defined = true;
-  result.valueunsignedlong = (unsigned long) (pos - startpos + 1);
+  result.valueunsignedlong = (GtUword) (pos - startpos + 1);
   return result;
 }

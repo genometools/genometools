@@ -42,16 +42,16 @@ GtSamAlignment* gt_sam_alignment_clone(GtSamAlignment *sam_alignment);
 int32_t         gt_sam_alignment_ref_num(GtSamAlignment *sam_alignment);
 
 /* Returns the starting position of the alignment in the reference sequence */
-unsigned long   gt_sam_alignment_pos(GtSamAlignment *sam_alignment);
+GtUword   gt_sam_alignment_pos(GtSamAlignment *sam_alignment);
 
 /* Returns the ending position of the alignment in the reference sequence */
-unsigned long gt_sam_alignment_rightmost_pos(GtSamAlignment *sam_alignment);
+GtUword gt_sam_alignment_rightmost_pos(GtSamAlignment *sam_alignment);
 
 /* Returns length of read, not length of the alignment */
-unsigned long   gt_sam_alignment_read_length(GtSamAlignment *sam_alignment);
+GtUword   gt_sam_alignment_read_length(GtSamAlignment *sam_alignment);
 
 /* Returns mapping quality value */
-unsigned long gt_sam_alignment_mapping_quality(GtSamAlignment *sam_alignment);
+GtUword gt_sam_alignment_mapping_quality(GtSamAlignment *sam_alignment);
 
 /* Returns encoded read sequence from <sam_alignment>. */
 const GtUchar*  gt_sam_alignment_sequence(GtSamAlignment *sam_alignment);
@@ -59,7 +59,7 @@ const GtUchar*  gt_sam_alignment_sequence(GtSamAlignment *sam_alignment);
 /* lower level version of <gt_sam_alignment_sequence> using an external
  * buffer to save the sequence information */
 void gt_sam_alignment_sequence_external_buffer(GtSamAlignment *sam_alignment,
-    GtUchar **seq_buffer, unsigned long *bufsize);
+    GtUchar **seq_buffer, GtUword *bufsize);
 
 /* Returns string of qualities in ASCII format as in Sanger FASTQ for the
    read sequence from <sam_alignment>.
@@ -73,7 +73,7 @@ uint16_t        gt_sam_alignment_cigar_length(GtSamAlignment *sam_alignment);
  * buffer to save the sequence information */
 void gt_sam_alignment_qualitystring_external_buffer(
     GtSamAlignment *sam_alignment, GtUchar **qual_buffer,
-    unsigned long *bufsize);
+    GtUword *bufsize);
 
 /* Returns the length of CIGAR operation <i> in <sam_alignment>. */
 uint32_t        gt_sam_alignment_cigar_i_length(GtSamAlignment *sam_alignment,

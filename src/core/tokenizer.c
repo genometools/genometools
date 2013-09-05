@@ -115,7 +115,7 @@ void gt_tokenizer_next_token(GtTokenizer *t)
   t->token = NULL;
 }
 
-unsigned long gt_tokenizer_get_line_number(const GtTokenizer *t)
+GtUword gt_tokenizer_get_line_number(const GtTokenizer *t)
 {
   gt_assert(t);
   return gt_io_get_line_number(t->io);

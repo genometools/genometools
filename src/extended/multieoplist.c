@@ -23,7 +23,7 @@
 
 struct GtMultieoplist {
   GtArray *meoplist;
-  unsigned long refcount;
+  GtUword refcount;
 };
 
 GtMultieoplist *gt_multieoplist_new(void)
@@ -112,9 +112,9 @@ void gt_multieoplist_remove_last(GtMultieoplist *multieops)
     meop_ptr->steps--;
 }
 
-unsigned long gt_multieoplist_get_repdel_length(GtMultieoplist *multieops)
+GtUword gt_multieoplist_get_repdel_length(GtMultieoplist *multieops)
 {
-  unsigned long len = 0, i;
+  GtUword len = 0, i;
   GtMultieop meop;
   for (i = gt_array_size(multieops->meoplist); i > 0; i--) {
     meop = *(GtMultieop*) gt_array_get(multieops->meoplist, i-1);
@@ -132,9 +132,9 @@ unsigned long gt_multieoplist_get_repdel_length(GtMultieoplist *multieops)
   return len;
 }
 
-unsigned long gt_multieoplist_get_repins_length(GtMultieoplist *multieops)
+GtUword gt_multieoplist_get_repins_length(GtMultieoplist *multieops)
 {
-  unsigned long len = 0, i;
+  GtUword len = 0, i;
   GtMultieop meop;
   for (i = gt_array_size(multieops->meoplist); i > 0; i--) {
     meop = *(GtMultieop*) gt_array_get(multieops->meoplist, i-1);
@@ -152,13 +152,13 @@ unsigned long gt_multieoplist_get_repins_length(GtMultieoplist *multieops)
   return len;
 }
 
-unsigned long gt_multieoplist_get_length(GtMultieoplist *multieops)
+GtUword gt_multieoplist_get_length(GtMultieoplist *multieops)
 {
   return(gt_array_size(multieops->meoplist));
 }
 
 GtMultieop *gt_multieoplist_get_entry(GtMultieoplist *multieops,
-                                      unsigned long index)
+                                      GtUword index)
 {
   gt_assert(index < gt_array_size(multieops->meoplist));
   return((GtMultieop *) gt_array_get(multieops->meoplist, index));
@@ -166,7 +166,7 @@ GtMultieop *gt_multieoplist_get_entry(GtMultieoplist *multieops,
 
 void gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp)
 {
-  unsigned long i, size;
+  GtUword i, size;
   GtMultieop meop;
 
   gt_assert(multieops != NULL);

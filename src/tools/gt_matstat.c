@@ -135,7 +135,7 @@ static GtOptionParser* gt_matstat_option_parser_new(void *tool_arguments)
                                    "if >= given minimum length",
                                    &arguments->minlength.
                                           valueunsignedlong,
-                                   0,(unsigned long) 1);
+                                   0,(GtUword) 1);
   gt_option_parser_add_option(op, arguments->optionmin);
 
   arguments->optionmax = gt_option_new_ulong_min("max",
@@ -143,7 +143,7 @@ static GtOptionParser* gt_matstat_option_parser_new(void *tool_arguments)
                                    "if <= given maximum length",
                                    &arguments->maxlength.
                                           valueunsignedlong,
-                                   0,(unsigned long) 1);
+                                   0,(GtUword) 1);
   gt_option_parser_add_option(op, arguments->optionmax);
 
   arguments->optionoutput = gt_option_new_string_array("output",
@@ -241,7 +241,7 @@ static int gt_matstat_arguments_check(GT_UNUSED int rest_argc,
         return -1;
       } else
       {
-        unsigned long i;
+        GtUword i;
         for (i=0; i<gt_str_array_size(arguments->flagsoutputoption); i++)
         {
           if (arguments->doms)
@@ -303,7 +303,7 @@ static int gt_matstat_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 #ifdef WITHBCKTAB
   unsigned int prefixlength = 0;
 #endif
-  unsigned long totallength;
+  GtUword totallength;
   bool gt_mapfmindexfail = false;
   gt_error_check(err);
   gt_assert(arguments);

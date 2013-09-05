@@ -25,36 +25,36 @@ typedef struct GtSeqCol GtSeqCol;
 
 void          gt_seq_col_delete(GtSeqCol*);
 int           gt_seq_col_grep_desc(GtSeqCol*, char **seq,
-                                   unsigned long start, unsigned long end,
+                                   GtUword start, GtUword end,
                                    GtStr *seqid, GtError*);
 int           gt_seq_col_grep_desc_md5(GtSeqCol*, const char **md5,
                                        GtStr *seqid, GtError*);
 int           gt_seq_col_grep_desc_sequence_length(GtSeqCol *sc,
-                                                   unsigned long *length,
+                                                   GtUword *length,
                                                    GtStr *seqid,
                                                    GtError *err);
 int           gt_seq_col_md5_to_seq(GtSeqCol*, char **seq,
-                                    unsigned long start, unsigned long end,
+                                    GtUword start, GtUword end,
                                     GtStr *md5_seqid, GtError *err);
 int           gt_seq_col_md5_to_description(GtSeqCol*, GtStr *desc,
                                             GtStr *md5_seqid, GtError *err);
-int           gt_seq_col_md5_to_sequence_length(GtSeqCol*, unsigned long *len,
+int           gt_seq_col_md5_to_sequence_length(GtSeqCol*, GtUword *len,
                                                 GtStr *md5_seqid, GtError *err);
-unsigned long gt_seq_col_num_of_files(const GtSeqCol*);
-unsigned long gt_seq_col_num_of_seqs(const GtSeqCol*, unsigned long filenum);
+GtUword gt_seq_col_num_of_files(const GtSeqCol*);
+GtUword gt_seq_col_num_of_seqs(const GtSeqCol*, GtUword filenum);
 const char*   gt_seq_col_get_md5_fingerprint(const GtSeqCol*,
-                                             unsigned long filenum,
-                                             unsigned long seqnum);
+                                             GtUword filenum,
+                                             GtUword seqnum);
 char*         gt_seq_col_get_sequence(const GtSeqCol*,
-                                      unsigned long filenum,
-                                      unsigned long seqnum,
-                                      unsigned long start,
-                                      unsigned long end);
+                                      GtUword filenum,
+                                      GtUword seqnum,
+                                      GtUword start,
+                                      GtUword end);
 char*         gt_seq_col_get_description(const GtSeqCol*,
-                                         unsigned long filenum,
-                                         unsigned long seqnum);
-unsigned long gt_seq_col_get_sequence_length(const GtSeqCol*,
-                                             unsigned long filenum,
-                                             unsigned long seqnum);
+                                         GtUword filenum,
+                                         GtUword seqnum);
+GtUword gt_seq_col_get_sequence_length(const GtSeqCol*,
+                                             GtUword filenum,
+                                             GtUword seqnum);
 
 #endif

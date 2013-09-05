@@ -36,7 +36,7 @@
 typedef struct {
   bool descs,
        verbose;
-  unsigned long bench;
+  GtUword bench;
   GtStr  *file,
          *smap,
          *alphabet,
@@ -122,13 +122,13 @@ gt_compreads_decompress_option_parser_new(void *tool_arguments)
 }
 
 static int gt_compreads_decompress_benchmark(GtHcrDecoder *hcrd,
-                                             unsigned long amount,
+                                             GtUword amount,
                                              GtTimer *timer,
                                              GtError *err) {
   char qual[BUFSIZ] = {0},
        seq[BUFSIZ] = {0};
   int had_err = 0;
-  unsigned long rand,
+  GtUword rand,
                 max_rand = gt_hcr_decoder_num_of_reads(hcrd) - 1,
                 count;
 
@@ -176,7 +176,7 @@ static int gt_compreads_decompress_runner(GT_UNUSED int argc,
   GtAlphabet *alpha = NULL;
   GtHcrDecoder *hcrd = NULL;
   GtTimer *timer = NULL;
-  unsigned long start,
+  GtUword start,
                 end;
 
   gt_error_check(err);

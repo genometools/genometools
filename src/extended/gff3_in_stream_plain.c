@@ -30,7 +30,7 @@
 
 struct GtGFF3InStreamPlain {
   const GtNodeStream parent_instance;
-  unsigned long next_file;
+  GtUword next_file;
   GtStrArray *files;
   GtStr *stdinstr;
   bool ensure_sorting,

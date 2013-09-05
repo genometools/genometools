@@ -48,7 +48,7 @@
 
 typedef struct
 {
-  unsigned long pos1,         /* first position of maximal repeat (seed) */
+  GtUword pos1,         /* first position of maximal repeat (seed) */
                 offset,       /* second position = pos1 + offset */
                 len,          /* length of maximal repeat  */
                 contignumber; /* number of contig for this repeat */
@@ -61,7 +61,7 @@ GT_DECLAREARRAYSTRUCT(Repeat);
 typedef struct
 {
   GtArrayRepeat repeats; /* array of maximal repeats (seeds) */
-  unsigned long lmin,        /* minimum allowed length of a LTR */
+  GtUword lmin,        /* minimum allowed length of a LTR */
                 lmax,        /* maximum allowed length of a LTR */
                 dmin,        /* minimum distance between LTRs */
                 dmax;        /* maximum distance between LTRs,
@@ -76,7 +76,7 @@ typedef struct
 typedef struct
 {
   GtArrayRepeat repeats; /* array of maximal repeats for TSDs */
-  unsigned long tsd_lmin,    /* minimal length of TSD */
+  GtUword tsd_lmin,    /* minimal length of TSD */
                 tsd_lmax,    /* maximal length of TSD */
                 offset1, /* offset1 for absolute position 1 in sequence */
                 offset2; /* offset2 for absolute position 2 in sequence */
@@ -85,7 +85,7 @@ typedef struct
 
 typedef struct
 {
-  unsigned long contignumber,   /* ordinal number of sequence in encseq */
+  GtUword contignumber,   /* ordinal number of sequence in encseq */
                 leftLTR_5,      /* 5' boundary of left LTR */
                 leftLTR_3,      /* 3' boundary of left LTR */
                 rightLTR_5,     /* 5' boundary of right LTR */
@@ -118,18 +118,18 @@ struct GtLTRharvestStream
   const GtNodeStream parent_instance;
   RepeatInfo repeatinfo;
   GtStr *str_indexname;
-  unsigned long minseedlength;
+  GtUword minseedlength;
   double similaritythreshold;
   int xdropbelowscore;
   GtXdropArbitraryscores arbitscores;
   unsigned int allowedmismatches;
   GtLTRFourCharMotif *motif;
-  unsigned long offset;
+  GtUword offset;
   unsigned int minlengthTSD,
                maxlengthTSD;
-  unsigned long numofboundaries;
-  unsigned long vicinityforcorrectboundaries;
-  unsigned long prevseqnum;
+  GtUword numofboundaries;
+  GtUword vicinityforcorrectboundaries;
+  GtUword prevseqnum;
   const LTRboundaries **bdptrtab;
   GtArrayLTRboundaries arrayLTRboundaries;
   const GtEncseq *encseq;
@@ -139,7 +139,7 @@ struct GtLTRharvestStream
        bestoverlaps,
        output_md5,
        output_seqids;
-  unsigned long cur_elem_index;
+  GtUword cur_elem_index;
   GtLTRharvestStreamState state;
 };
 
@@ -183,17 +183,17 @@ static int bdcompare(const void *a, const void *b)
 }
 
 static int gt_simpleexactselfmatchstore(void *info, const GtEncseq *encseq,
-                                        unsigned long len, unsigned long pos1,
-                                        unsigned long pos2,
+                                        GtUword len, GtUword pos1,
+                                        GtUword pos2,
                                         GT_UNUSED GtError *err)
 {
-  unsigned long distance;
+  GtUword distance;
   RepeatInfo *repeatinfo = (RepeatInfo *) info;
 
   gt_error_check(err);
   if (pos1 > pos2)
   {
-    unsigned long tmp = pos1;
+    GtUword tmp = pos1;
     pos1 = pos2;
     pos2 = tmp;
   }
@@ -211,8 +211,8 @@ static int gt_simpleexactselfmatchstore(void *info, const GtEncseq *encseq,
   if (len <= repeatinfo->lmax && repeatinfo->dmin <= distance
                               && distance <= repeatinfo->dmax)
   {
-    const unsigned long seqnum1 = gt_encseq_seqnum(encseq,pos1);
-    const unsigned long seqnum2 = gt_encseq_seqnum(encseq,pos2);
+    const GtUword seqnum1 = gt_encseq_seqnum(encseq,pos1);
+    const GtUword seqnum2 = gt_encseq_seqnum(encseq,pos2);
 
     if (seqnum1 == seqnum2)
     {
@@ -232,7 +232,7 @@ static int gt_subsimpleexactselfmatchstore(void *info,
                                             GT_UNUSED const GtEncseq *encseq,
                                             const GtQuerymatch *querymatch,
                                             GT_UNUSED const GtUchar *query,
-                                            GT_UNUSED unsigned long
+                                            GT_UNUSED GtUword
                                               query_totallength,
                                             GT_UNUSED GtError *err)
 {
@@ -249,10 +249,10 @@ static int gt_subsimpleexactselfmatchstore(void *info,
   return 0;
 }
 
-static const LTRboundaries **compactboundaries(unsigned long *numofboundaries,
+static const LTRboundaries **compactboundaries(GtUword *numofboundaries,
                                                const GtArrayLTRboundaries *ltr)
 {
-  unsigned long countboundaries = 0, nextfill = 0;
+  GtUword countboundaries = 0, nextfill = 0;
   const LTRboundaries *bd, **bdptrtab;
 
   for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries +
@@ -294,7 +294,7 @@ static void searchforbestTSDandormotifatborders(const SubRepeatInfo
                                                 LTRboundaries *boundaries,
                                                 LTRMotifmismatches *mismatches)
 {
-  unsigned long motifpos1,
+  GtUword motifpos1,
                 motifpos2,
                 back, forward,
                 oldleftLTR_5  = boundaries->leftLTR_5,
@@ -358,14 +358,14 @@ static void searchforbestTSDandormotifatborders(const SubRepeatInfo
         if (tmp_mm.left <= lo->motif->allowedmismatches
             && tmp_mm.right <= lo->motif->allowedmismatches)
         {
-          const unsigned long tsd_len = rep->len - back - forward;
+          const GtUword tsd_len = rep->len - back - forward;
 
           /* TSD length not too big */
           if (tsd_len <= subrepeatinfo->tsd_lmax)
           {
             if (!boundaries->motif_near_tsd)
             {
-              unsigned long max, min;
+              GtUword max, min;
 
               /* save number of mismatches */
               *mismatches = tmp_mm;
@@ -389,7 +389,7 @@ static void searchforbestTSDandormotifatborders(const SubRepeatInfo
               hitcounter++;
             } else
             {
-              unsigned long max, min, difffromnewboundary1,
+              GtUword max, min, difffromnewboundary1,
                    difffromnewboundary2;
 
               /* test if hit is nearer to old boundaries than previous hit */
@@ -429,17 +429,17 @@ static void searchforbestTSDandormotifatborders(const SubRepeatInfo
    at the 5'-border of left LTR and 3'-border of right LTR. */
 static void searchformotifonlyborders(const GtLTRharvestStream *lo,
                                       LTRboundaries *boundaries,
-                                      unsigned long startleftLTR,
-                                      unsigned long endleftLTR,
-                                      unsigned long startrightLTR,
-                                      unsigned long endrightLTR,
+                                      GtUword startleftLTR,
+                                      GtUword endleftLTR,
+                                      GtUword startrightLTR,
+                                      GtUword endrightLTR,
                                       LTRMotifmismatches *motifmismatches)
 {
   bool motif1 = false,
        motif2 = false;
   LTRMotifmismatches tmp_mm;
   unsigned int motifmismatches_frombestmatch = 0;
-  unsigned long idx,
+  GtUword idx,
          oldleftLTR_5  = boundaries->leftLTR_5,
          oldrightLTR_3 = boundaries->rightLTR_3,
          difffromoldboundary = 0;
@@ -463,7 +463,7 @@ static void searchformotifonlyborders(const GtLTRharvestStream *lo,
        /* first hit */
        if (!motif1)
        {
-         unsigned long max, min;
+         GtUword max, min;
 
          motifmismatches_frombestmatch = tmp_mm.left;
          boundaries->leftLTR_5 = idx;
@@ -473,7 +473,7 @@ static void searchformotifonlyborders(const GtLTRharvestStream *lo,
          difffromoldboundary = max - min;
        } else /* next hit */
        {
-         unsigned long maxval, minval, difffromnewboundary;
+         GtUword maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
          maxval = MAX(oldleftLTR_5, idx);
@@ -510,7 +510,7 @@ static void searchformotifonlyborders(const GtLTRharvestStream *lo,
        /* first hit */
        if (!motif2)
        {
-         unsigned long max, min;
+         GtUword max, min;
 
          motifmismatches_frombestmatch = tmp_mm.right;
          boundaries->rightLTR_3 = idx;
@@ -520,7 +520,7 @@ static void searchformotifonlyborders(const GtLTRharvestStream *lo,
          difffromoldboundary = max - min;
        } else /* next hit */
        {
-         unsigned long maxval, minval, difffromnewboundary;
+         GtUword maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
          maxval = MAX(oldrightLTR_3, idx);
@@ -553,7 +553,7 @@ static void searchformotifonlyinside(const GtLTRharvestStream *lo,
 {
   bool motif1 = false,
        motif2 = false;
-  unsigned long startleftLTR,
+  GtUword startleftLTR,
          endleftLTR,
          startrightLTR,
          endrightLTR,
@@ -616,7 +616,7 @@ static void searchformotifonlyinside(const GtLTRharvestStream *lo,
        /* first hit */
        if (!motif1)
        {
-         unsigned long maxval, minval;
+         GtUword maxval, minval;
 
          motifmismatches_frombestmatch = tmp_mm.left;
          boundaries->leftLTR_3 = idx;
@@ -626,7 +626,7 @@ static void searchformotifonlyinside(const GtLTRharvestStream *lo,
          difffromoldboundary = maxval - minval;
        } else /* next hit */
        {
-         unsigned long maxval, minval, difffromnewboundary;
+         GtUword maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
          maxval = MAX(oldleftLTR_3, idx);
@@ -664,7 +664,7 @@ static void searchformotifonlyinside(const GtLTRharvestStream *lo,
        /* first hit */
        if (!motif2)
        {
-         unsigned long maxval, minval;
+         GtUword maxval, minval;
 
          motifmismatches_frombestmatch = tmp_mm.right;
          boundaries->rightLTR_5 = idx;
@@ -674,7 +674,7 @@ static void searchformotifonlyinside(const GtLTRharvestStream *lo,
          difffromoldboundary = maxval - minval;
        } else /* next hit */
        {
-         unsigned long maxval, minval, difffromnewboundary;
+         GtUword maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
          maxval = MAX(oldrightLTR_5, idx);
@@ -708,7 +708,7 @@ static int searchforTSDandorMotifoutside(const GtLTRharvestStream *lo,
                                          LTRMotifmismatches *motifmismatches,
                                          GtError *err)
 {
-  unsigned long startleftLTR,
+  GtUword startleftLTR,
          endleftLTR,
          startrightLTR,
          endrightLTR,
@@ -789,8 +789,8 @@ static int searchforTSDandorMotifoutside(const GtLTRharvestStream *lo,
     gt_encseq_extract_encoded(lo->encseq,dbseq,startleftLTR,endleftLTR);
     gt_encseq_extract_encoded(lo->encseq,query,startrightLTR,endrightLTR);
     GT_INITARRAY(&subrepeatinfo.repeats, Repeat);
-    subrepeatinfo.tsd_lmin = (unsigned long) lo->minlengthTSD;
-    subrepeatinfo.tsd_lmax = (unsigned long) lo->maxlengthTSD;
+    subrepeatinfo.tsd_lmin = (GtUword) lo->minlengthTSD;
+    subrepeatinfo.tsd_lmax = (GtUword) lo->maxlengthTSD;
     gt_assert(startleftLTR < startrightLTR);
     subrepeatinfo.offset1 = startleftLTR;
     subrepeatinfo.offset2 = startrightLTR;
@@ -858,7 +858,7 @@ static int gt_findcorrectboundaries(const GtLTRharvestStream *lo,
 static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
                                               const RepeatInfo *repeatinfo)
 {
-  unsigned long ulen, vlen, dist_between_LTRs;
+  GtUword ulen, vlen, dist_between_LTRs;
 
   ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1;
   vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
@@ -883,10 +883,10 @@ static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
 
 static void adjustboundariesfromXdropextension(GtXdropbest xdropbest_left,
                                                GtXdropbest xdropbest_right,
-                                               unsigned long seed1_startpos,
-                                               unsigned long seed2_startpos,
-                                               unsigned long seed1_endpos,
-                                               unsigned long seed2_endpos,
+                                               GtUword seed1_startpos,
+                                               GtUword seed2_startpos,
+                                               GtUword seed1_endpos,
+                                               GtUword seed2_endpos,
                                                LTRboundaries *boundaries)
 {
   /* left alignment */
@@ -904,21 +904,21 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                             GtArrayLTRboundaries *arrayLTRboundaries,
                             GT_UNUSED GtMutex *rmutex,
                             GT_UNUSED GtMutex *wmutex,
-                            unsigned long *cur_seed,
+                            GtUword *cur_seed,
                             GtError *err)
 {
-  unsigned long my_seed;
+  GtUword my_seed;
   GtXdropresources *xdropresources;
   GtXdropbest xdropbest_left, xdropbest_right;
 #undef GT_GREEDY_BUFFER
 #ifdef GT_GREEDY_BUFFER
-  unsigned long maxulen = 0, maxvlen = 0;
+  GtUword maxulen = 0, maxvlen = 0;
   GtUchar *useq = NULL,
           *vseq = NULL;
 #endif
   GtSeqabstract *sa_useq = gt_seqabstract_new_empty(),
                 *sa_vseq = gt_seqabstract_new_empty();
-  unsigned long edist,
+  GtUword edist,
                 alilen = 0;
   Repeat *repeatptr;
   LTRboundaries boundaries, *boundaries_ptr;
@@ -930,7 +930,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
 
   /* XXX: do thread-synchronized error checking */
   while (true) {
-    unsigned long ulen,
+    GtUword ulen,
                   vlen,
                   seqend,
                   seqstart;
@@ -1014,12 +1014,12 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     }
 
     boundaries.contignumber = repeatptr->contignumber;
-    boundaries.leftLTR_5 = (unsigned long) 0;
-    boundaries.leftLTR_3 = (unsigned long) 0;
-    boundaries.rightLTR_5 = (unsigned long) 0;
-    boundaries.rightLTR_3 = (unsigned long) 0;
-    boundaries.lenleftTSD = (unsigned long) 0;
-    boundaries.lenrightTSD = (unsigned long) 0;
+    boundaries.leftLTR_5 = (GtUword) 0;
+    boundaries.leftLTR_3 = (GtUword) 0;
+    boundaries.rightLTR_5 = (GtUword) 0;
+    boundaries.rightLTR_3 = (GtUword) 0;
+    boundaries.lenleftTSD = (GtUword) 0;
+    boundaries.lenrightTSD = (GtUword) 0;
     boundaries.tsd = false;
     boundaries.motif_near_tsd = false;
     boundaries.motif_far_tsd = false;
@@ -1131,7 +1131,7 @@ typedef struct {
   const GtEncseq *encseq;
   GtError *err;
   GtMutex *rmutex, *wmutex;
-  unsigned long cur_seed;
+  GtUword cur_seed;
 } GtLTRharvestThreadInfo;
 
 static void* gt_searchforLTRs_threadfunc(void *data) {
@@ -1149,7 +1149,7 @@ static void* gt_searchforLTRs_threadfunc(void *data) {
    are extended to same boundary coordinates. */
 static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
 {
-  unsigned long i;
+  GtUword i;
   LTRboundaries *oldboundaries,
                 *boundaries;
 
@@ -1178,7 +1178,7 @@ static void gt_removeoverlapswithlowersimilarity(GtArrayLTRboundaries
                                                             *arrayLTRboundaries,
                                                  bool nooverlapallowed)
 {
-  unsigned long i;
+  GtUword i;
   LTRboundaries *boundaries,
                 *oldboundaries,
                 *maxsimboundaries = NULL;
@@ -1298,7 +1298,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
   if (!had_err && ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_REGIONS) {
     bool skip = false;
     if (ltrh_stream->cur_elem_index < ltrh_stream->numofboundaries) {
-      unsigned long seqnum, seqlength;
+      GtUword seqnum, seqlength;
       GtGenomeNode *rn;
       GtStr *seqid;
       seqnum = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
@@ -1343,7 +1343,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
         if (!had_err) {
           if (gt_encseq_has_description_support(ltrh_stream->encseq)
                 && ltrh_stream->output_seqids) {
-            unsigned long desclength = 0UL,
+            GtUword desclength = 0UL,
                           i = 0UL;
             const char *desc;
             desc = gt_encseq_description(ltrh_stream->encseq,
@@ -1356,9 +1356,9 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
             gt_str_append_ulong(seqid, seqnum);
           }
           rn = gt_region_node_new(seqid,
-                                  1 + (unsigned long) ltrh_stream->offset,
+                                  1 + (GtUword) ltrh_stream->offset,
                                   seqlength
-                                    + (unsigned long) ltrh_stream->offset);
+                                    + (GtUword) ltrh_stream->offset);
           gt_str_delete(seqid);
           *gn = rn;
           ltrh_stream->cur_elem_index++;
@@ -1390,7 +1390,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
     {
       const char *desc;
       char buf[BUFSIZ];
-      unsigned long desclen, seqnum;
+      GtUword desclen, seqnum;
       GtGenomeNode *cn;
       seqnum = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
       if (ltrh_stream->prevseqnum == GT_UNDEF_ULONG)
@@ -1443,7 +1443,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
       GtGenomeNode *node, *parent;
       const LTRboundaries *elem =
         (ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]);
-      unsigned long seqstartpos;
+      GtUword seqstartpos;
 
       seqstartpos = gt_encseq_seqstartpos(ltrh_stream->encseq,
                                           elem->contignumber);
@@ -1469,7 +1469,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
 
       if (!had_err && gt_encseq_has_description_support(ltrh_stream->encseq)
             && ltrh_stream->output_seqids) {
-        unsigned long desclength = 0UL,
+        GtUword desclength = 0UL,
                       i = 0UL;
         const char *desc;
         desc = gt_encseq_description(ltrh_stream->encseq,
@@ -1673,11 +1673,11 @@ void gt_ltrharvest_stream_enable_seqids(GtLTRharvestStream *ltrh_stream)
 
 GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                        GtRange searchrange,
-                                       unsigned long minseedlength,
-                                       unsigned long minltrlength,
-                                       unsigned long maxltrlength,
-                                       unsigned long mindistance,
-                                       unsigned long maxdistance,
+                                       GtUword minseedlength,
+                                       GtUword minltrlength,
+                                       GtUword maxltrlength,
+                                       GtUword mindistance,
+                                       GtUword maxdistance,
                                        double similaritythreshold,
                                        int xdropbelowscore,
                                        GtXdropArbitraryscores arbitscores,
@@ -1686,14 +1686,14 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                        bool nooverlaps,
                                        bool bestoverlaps,
                                        bool scan,
-                                       unsigned long offset,
+                                       GtUword offset,
                                        unsigned int minlengthTSD,
                                        unsigned int maxlengthTSD,
-                                       unsigned long vicinity,
+                                       GtUword vicinity,
                                        GtError *err)
 {
   int had_err = 0;
-  unsigned long max_contiglength;
+  GtUword max_contiglength;
   GtNodeStream *ns = gt_node_stream_create(gt_ltrharvest_stream_class(), false);
   GtLTRharvestStream *ltrh_stream = gt_ltrharvest_stream_cast(ns);
 

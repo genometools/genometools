@@ -33,8 +33,8 @@
 
 struct chkIndexOptions
 {
-  unsigned long skipCount;
-  unsigned long progressInterval;
+  GtUword skipCount;
+  GtUword progressInterval;
   int checkFlags;
   bool verboseOutput;
   enum seqBaseEncoding encType;

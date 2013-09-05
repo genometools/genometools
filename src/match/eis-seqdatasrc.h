@@ -86,13 +86,13 @@ typedef union translatorState TranslatorState;
  * @return number of chars! written to dest
  */
 typedef size_t (*seqDataTranslateFunc)(void *translator, void *dest,
-                                       const unsigned long *src, size_t len);
+                                       const GtUword *src, size_t len);
 
 typedef size_t (*seqDataTranslateSuffixsortspaceFunc)(
                                void *translator,
                                void *dest,
                                const GtSuffixsortspace *suffixsortspace,
-                               unsigned long offset,
+                               GtUword offset,
                                size_t len);
 
 struct seqDataTranslator
@@ -105,7 +105,7 @@ struct seqDataTranslator
 typedef struct seqDataTranslator SeqDataTranslator;
 
 static inline size_t
-SDRTranslate(SeqDataTranslator xltor, void *dest, const unsigned long *src,
+SDRTranslate(SeqDataTranslator xltor, void *dest, const GtUword *src,
              size_t len)
 {
   if (xltor.translateData != NULL)
@@ -120,7 +120,7 @@ SDRTranslate(SeqDataTranslator xltor, void *dest, const unsigned long *src,
 static inline size_t
 SDRTranslateSuffixsortspace(SeqDataTranslator xltor, void *dest,
                             const GtSuffixsortspace *suffixsortspace,
-                            unsigned long offset, size_t len)
+                            GtUword offset, size_t len)
 {
   if (xltor.translateDataSuffixsortspace != NULL)
   {
@@ -131,7 +131,7 @@ SDRTranslateSuffixsortspace(SeqDataTranslator xltor, void *dest,
   /* fall back to zero-translation i.e. verbatim copy */
   {
     size_t idx;
-    unsigned long *ulongdest = (unsigned long *) dest;
+    GtUword *ulongdest = (GtUword *) dest;
     for (idx = 0; idx < len; idx++)
     {
       ulongdest[idx] = gt_suffixsortspace_getdirect(suffixsortspace,offset+idx);

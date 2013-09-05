@@ -28,25 +28,25 @@
 #include "core/error_api.h"         /* GtError */
 
 /* writes cntlist to file */
-int gt_cntlist_show(GtBitsequence *cntlist, unsigned long nofreads,
+int gt_cntlist_show(GtBitsequence *cntlist, GtUword nofreads,
     const char *path, bool binary, GtError *err);
 
 /* prepare a file for output of cntlist in bin format */
-void gt_cntlist_write_bin_header(unsigned long nofreads, FILE *file);
+void gt_cntlist_write_bin_header(GtUword nofreads, FILE *file);
 
 /* parses a cntlist file, format is automatically recognized;
  * if alloc_cntlist is true, **cntlist is allocated, otherwise
  * **cntlist must be a valid bit sequence with the correct size */
 int gt_cntlist_parse(const char *filename, bool alloc_cntlist,
-    GtBitsequence **cntlist, unsigned long *nofreads, GtError *err);
+    GtBitsequence **cntlist, GtUword *nofreads, GtError *err);
 
 /* variant of parse: parses, checks that the number of reads is the one
  * specified, returns number of cnt reads, exits on error */
-unsigned long gt_cntlist_xload(const char *filename, GtBitsequence **cntlist,
-    unsigned long expected_nofreads);
+GtUword gt_cntlist_xload(const char *filename, GtBitsequence **cntlist,
+    GtUword expected_nofreads);
 
 /* counts the number of bit set in bitsequence cntlist */
-unsigned long gt_cntlist_count(const GtBitsequence *cntlist,
-    unsigned long nofreads);
+GtUword gt_cntlist_count(const GtBitsequence *cntlist,
+    GtUword nofreads);
 
 #endif

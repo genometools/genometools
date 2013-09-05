@@ -34,7 +34,7 @@
 #define SHOW_COMPUTE_MATCHES_STATUS_BUF_SIZE    160
 
 typedef struct {
-  unsigned long call_number;
+  GtUword call_number;
   bool significant_match_found,
        max_call_number_reached,
        stop_amino_acid_warning;
@@ -44,13 +44,13 @@ static void show_matrix_calculation_status(GthShowVerbose showverbose,
                                            bool gen_strand_forward,
                                            bool ref_strand_forward,
                                            bool introncutout,
-                                           unsigned long chainctr,
-                                           unsigned long num_of_chains,
-                                           unsigned long icdelta,
-                                           unsigned long gen_file_num,
-                                           unsigned long num_of_gen_files,
-                                           unsigned long ref_file_num,
-                                           unsigned long num_of_ref_files,
+                                           GtUword chainctr,
+                                           GtUword num_of_chains,
+                                           GtUword icdelta,
+                                           GtUword gen_file_num,
+                                           GtUword num_of_gen_files,
+                                           GtUword ref_file_num,
+                                           GtUword num_of_ref_files,
                                            bool directmatches,
                                            bool verboseseqs,
                                            const char *gen_id,
@@ -101,23 +101,23 @@ static void show_matrix_calculation_status(GthShowVerbose showverbose,
 static int callsahmt(bool call_dna_dp,
                      GthSA *sa,
                      bool forward,
-                     unsigned long gen_file_num,
-                     unsigned long ref_file_num,
+                     GtUword gen_file_num,
+                     GtUword ref_file_num,
                      GthChain *raw_chain,
-                     unsigned long gen_total_length,
-                     unsigned long gen_offset,
+                     GtUword gen_total_length,
+                     GtUword gen_offset,
                      const GtRange *gen_seq_bounds,
                      const GtRange *gen_seq_bounds_rc,
                      const unsigned char *ref_seq_tran,
                      const unsigned char *ref_seq_orig,
-                     unsigned long ref_total_length,
-                     unsigned long ref_offset,
+                     GtUword ref_total_length,
+                     GtUword ref_offset,
                      GthInput *input,
                      Introncutoutinfo *introncutoutinfo,
                      GthStat *stat,
-                     unsigned long chainctr,
-                     unsigned long num_of_chains,
-                     unsigned long translationtable,
+                     GtUword chainctr,
+                     GtUword num_of_chains,
+                     GtUword translationtable,
                      bool directmatches,
                      bool proteinexonpenal,
                      GthSpliceSiteModel *splice_site_model,
@@ -131,7 +131,7 @@ static int callsahmt(bool call_dna_dp,
 {
   int rval;
   GthChain *actual_chain, *contracted_chain, *used_chain;
-  unsigned long icdelta = introncutoutinfo->icinitialdelta,
+  GtUword icdelta = introncutoutinfo->icinitialdelta,
                 iciterations = introncutoutinfo->iciterations;
   bool useintroncutout = introncutoutinfo->introncutout;
   /* initially useintron is set to the value of introncutoutinfo->introncutout,
@@ -357,15 +357,15 @@ static bool isunsuccessfulalignment(GthSA *sa,
 static int call_dna_DP(bool directmatches, GthCallInfo *call_info,
                        GthInput *input, GthStat *stat,
                        GthSACollection *sa_collection, GthSA *saA,
-                       unsigned long gen_file_num,
-                       unsigned long ref_file_num,
-                       unsigned long gen_total_length,
-                       unsigned long gen_offset,
+                       GtUword gen_file_num,
+                       GtUword ref_file_num,
+                       GtUword gen_total_length,
+                       GtUword gen_offset,
                        const GtRange *gen_seq_bounds,
                        const GtRange *gen_seq_bounds_rc,
-                       unsigned long ref_total_length, unsigned long ref_offset,
-                       unsigned long chainctr,
-                       unsigned long num_of_chains, GthMatchInfo *match_info,
+                       GtUword ref_total_length, GtUword ref_offset,
+                       GtUword chainctr,
+                       GtUword num_of_chains, GthMatchInfo *match_info,
                        const unsigned char *ref_seq_tran,
                        const unsigned char *ref_seq_orig,
                        const unsigned char *ref_seq_tran_rc,
@@ -505,16 +505,16 @@ static int call_protein_DP(bool directmatches,
                            GthStat *stat,
                            GthSACollection *sa_collection,
                            GthSA *saA,
-                           unsigned long gen_file_num,
-                           unsigned long ref_file_num,
-                           unsigned long gen_total_length,
-                           unsigned long gen_offset,
+                           GtUword gen_file_num,
+                           GtUword ref_file_num,
+                           GtUword gen_total_length,
+                           GtUword gen_offset,
                            const GtRange *gen_seq_bounds,
                            const GtRange *gen_seq_bounds_rc,
-                           unsigned long ref_total_length,
-                           unsigned long ref_offset,
-                           unsigned long chainctr,
-                           unsigned long num_of_chains,
+                           GtUword ref_total_length,
+                           GtUword ref_offset,
+                           GtUword chainctr,
+                           GtUword num_of_chains,
                            GthMatchInfo *match_info,
                            const unsigned char *ref_seq_tran,
                            const unsigned char *ref_seq_orig,
@@ -586,8 +586,8 @@ static void show_no_match_line(GthAlphatype overallalphatype, GtFile *outfp)
 static GthChainCollection* match_and_chain(GthCallInfo *call_info,
                                            GthInput *input,
                                            GthStat *stat,
-                                           unsigned long gen_file_num,
-                                           unsigned long ref_file_num,
+                                           GtUword gen_file_num,
+                                           GtUword ref_file_num,
                                            bool directmatches,
                                            GthMatchInfo *match_info,
                                            const GthPlugins *plugins)
@@ -630,8 +630,8 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
                                    GthCallInfo *call_info,
                                    GthInput *input,
                                    GthStat *stat,
-                                   unsigned long gen_file_num,
-                                   unsigned long ref_file_num,
+                                   GtUword gen_file_num,
+                                   GtUword ref_file_num,
                                    bool directmatches,
                                    GthMatchInfo *match_info,
                                    GthDNACompletePathMatrixJT
@@ -641,7 +641,7 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
 {
   const unsigned char *ref_seq_tran, *ref_seq_orig, *ref_seq_tran_rc = NULL,
                       *ref_seq_orig_rc = NULL;
-  unsigned long chainctr, gen_offset = GT_UNDEF_ULONG, gen_total_length,
+  GtUword chainctr, gen_offset = GT_UNDEF_ULONG, gen_total_length,
                 ref_total_length;
   GtFile *outfp = call_info->out->outfp;
   GtRange gen_seq_bounds, gen_seq_bounds_rc;
@@ -793,10 +793,10 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
 }
 
 static void show_compute_matches_status(bool direct, GthShowVerbose showverbose,
-                                        unsigned long gen_file_num,
-                                        unsigned long num_of_gen_files,
-                                        unsigned long ref_file_num,
-                                        unsigned long num_of_ref_files)
+                                        GtUword gen_file_num,
+                                        GtUword num_of_gen_files,
+                                        GtUword ref_file_num,
+                                        GtUword num_of_ref_files)
 {
   char buf[SHOW_COMPUTE_MATCHES_STATUS_BUF_SIZE];
   GT_UNUSED int rval;
@@ -836,7 +836,7 @@ static int compute_sa_collection(GthSACollection *sa_collection,
 {
   GthChainCollection *chain_collection;
   GthMatchInfo match_info;
-  unsigned long g, r;
+  GtUword g, r;
   int rval = 0;
 
   match_info.call_number = 0;

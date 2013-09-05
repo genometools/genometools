@@ -44,7 +44,7 @@
         gt_match_iterator_cast(gt_match_iterator_open_class(), M)
 
 typedef struct {
-  unsigned long curpos;
+  GtUword curpos;
   FILE *matchfilep;
   GtFile *gtmatchfilep;
   const char *matchfile;
@@ -61,7 +61,7 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
                                                          GtMatch **match,
                                                          GtError *err)
 {
-  unsigned long columncount = 0;
+  GtUword columncount = 0;
   int readnums;
   long storeinteger[READNUMS];
   int had_err = 0, i = 0;
@@ -121,7 +121,7 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
     }
   }
 
-  for (columncount = 0; columncount < (unsigned long) (READNUMS);
+  for (columncount = 0; columncount < (GtUword) (READNUMS);
        columncount++) {
     if (storeinteger[columncount] < 0) {
          GT_MATCHER_OPEN_CANNOTPARSECOLUMN("non-negative integer expected");

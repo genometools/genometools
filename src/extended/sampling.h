@@ -36,14 +36,14 @@ typedef struct GtSampling GtSampling;
 /* Returns a new <GtSampling> object which uses regular sampling, <rate> sets
    the sampling rate and <first_offset> is the position of the first sample in
    the file, has to be a multiple of the pagesize. */
-GtSampling*   gt_sampling_new_regular(unsigned long rate, off_t first_offset);
+GtSampling*   gt_sampling_new_regular(GtUword rate, off_t first_offset);
 
 /* Returns a new <GtSampling> object which uses page oriented sampling, that is:
    the sampling rate defines how many pages should be filled before sampling the
    next element. <rate> sets the sampling rate and <first_offset> is the
    position of the first sample in the file, has to be a multiple of the
    pagesize. */
-GtSampling*   gt_sampling_new_page(unsigned long rate, off_t first_offset);
+GtSampling*   gt_sampling_new_page(GtUword rate, off_t first_offset);
 
 /* Writes <sampling> to <FILE> <fp>. */
 void          gt_sampling_write(GtSampling *sampling, FILE *fp);
@@ -57,28 +57,28 @@ GtSampling*   gt_sampling_read(FILE *fp);
    sets <*position> to the offset where that sample starts. Returns -1 in case
    of error. */
 void          gt_sampling_get_page(GtSampling *sampling,
-                                   unsigned long element_num,
-                                   unsigned long *sampled_element,
+                                   GtUword element_num,
+                                   GtUword *sampled_element,
                                    size_t *position);
 
 /* Returns the number of the sampled element of the current sample, this changes
    when <gt_sampling_get_page> or <gt_sampling_get_next_sample> are called */
-unsigned long gt_sampling_get_current_elementnum(GtSampling *sampling);
+GtUword gt_sampling_get_current_elementnum(GtSampling *sampling);
 
 /* This does NOT iterate, it just reports the number of the next sampled
    element, returns 0 if current sample is the last sampled. */
-unsigned long gt_sampling_get_next_elementnum(GtSampling *sampling);
+GtUword gt_sampling_get_next_elementnum(GtSampling *sampling);
 
 /* Sets <*sampled_element> to the next start of sampled elements, and
    <*position> to the corresponding offset in the file. This is an iterator, so
    subsequent calls will have different results. Returns 1 if sample was found,
    0 if there is no next sample, -1 on error. */
 int           gt_sampling_get_next_sample(GtSampling *sampling,
-                                          unsigned long *sampled_element,
+                                          GtUword *sampled_element,
                                           size_t *position);
 
 /* Returns the sampling rate of <sampling>. */
-unsigned long gt_sampling_get_rate(GtSampling *sampling);
+GtUword gt_sampling_get_rate(GtSampling *sampling);
 
 /* Returns true if <sampling> uses regular sampling. */
 bool          gt_sampling_is_regular(GtSampling *sampling);
@@ -88,15 +88,15 @@ bool          gt_sampling_is_regular(GtSampling *sampling);
    pagesize. */
 void          gt_sampling_add_sample(GtSampling *sampling,
                                      size_t position,
-                                     unsigned long element_num);
+                                     GtUword element_num);
 
 /* TODO: document me */
 bool          gt_sampling_is_next_element_sample(
                                           GtSampling *sampling,
-                                          unsigned long pages_written,
-                                          unsigned long elements_written,
-                                          unsigned long elem_bit_size,
-                                          unsigned long free_pagespace_bitsize);
+                                          GtUword pages_written,
+                                          GtUword elements_written,
+                                          GtUword elem_bit_size,
+                                          GtUword free_pagespace_bitsize);
 
 void          gt_sampling_delete(GtSampling *sampling);
 

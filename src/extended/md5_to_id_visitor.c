@@ -55,7 +55,7 @@ static int m2i_change_target_seqids(GtFeatureNode *fn, const char *target,
   GtStrArray *target_ids;
   GtArray *target_ranges, *target_strands;
   GtStr *desc, *new_seqid;
-  unsigned long i;
+  GtUword i;
   int had_err;
   gt_error_check(err);
   gt_assert(fn && target);

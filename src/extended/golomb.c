@@ -24,9 +24,9 @@
 #include "extended/golomb.h"
 
 struct GtGolomb {
-  unsigned long median;
-  unsigned long len;
-  unsigned long two_pow_len;
+  GtUword median;
+  GtUword len;
+  GtUword two_pow_len;
 };
 
 typedef enum {
@@ -35,7 +35,7 @@ typedef enum {
 } GolombStatus;
 
 struct GtGolombBitwiseDecoder {
-  unsigned long median,
+  GtUword median,
                 cur_r_bit,
                 quotient,
                 remain,
@@ -44,26 +44,26 @@ struct GtGolombBitwiseDecoder {
   GolombStatus status;
 };
 
-GtGolomb* gt_golomb_new(unsigned long median)
+GtGolomb* gt_golomb_new(GtUword median)
 {
   GtGolomb *golomb;
   gt_assert(median > 0);
   golomb = gt_malloc(sizeof (*golomb));
   golomb->median = median;
-  golomb->len = (unsigned long) ceil(GT_LOG2((double) golomb->median));
+  golomb->len = (GtUword) ceil(GT_LOG2((double) golomb->median));
   golomb->two_pow_len = GT_POW2(golomb->len);
   return golomb;
 }
 
-unsigned long gt_golomb_get_m(GtGolomb *golomb)
+GtUword gt_golomb_get_m(GtGolomb *golomb)
 {
   gt_assert(golomb);
   return golomb->median;
 }
 
-GtBittab* gt_golomb_encode(GtGolomb *golomb, unsigned long x)
+GtBittab* gt_golomb_encode(GtGolomb *golomb, GtUword x)
 {
-  unsigned long quotient,
+  GtUword quotient,
                 remain,
                 mask,
                 idx_i;
@@ -125,7 +125,7 @@ GtGolombBitwiseDecoder *gt_golomb_bitwise_decoder_new(GtGolomb *golomb)
 }
 
 int gt_golomb_bitwise_decoder_next(GtGolombBitwiseDecoder *gbwd,
-                                   bool bit, unsigned long *x)
+                                   bool bit, GtUword *x)
 {
   gt_assert(gbwd);
   if (gbwd->status == IN_Q) {
@@ -192,7 +192,7 @@ int gt_golomb_unit_test(GtError *err)
   GtGolomb *golomb;
   GtBittab *code = NULL;
   GtGolombBitwiseDecoder *gbwd = NULL;
-  unsigned long unit_test_x_size = 128UL,
+  GtUword unit_test_x_size = 128UL,
                 idx_i,
                 idx_j,
                 idx_k,

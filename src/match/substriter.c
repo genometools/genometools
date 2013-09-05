@@ -28,7 +28,7 @@
 struct Substriter
 {
   const GtUchar *currentptr, *start;
-  unsigned long remaining;
+  GtUword remaining;
   GtCodetype currentcode;
   unsigned int qvalue,
                numofchars;
@@ -48,7 +48,7 @@ Substriter *gt_substriter_new(const GtAlphabet *alphabet,unsigned int qvalue)
 }
 
 void gt_substriter_init(Substriter *substriter,const GtUchar *start,
-                    unsigned long len)
+                    GtUword len)
 {
   substriter->start = substriter->currentptr = start;
   substriter->remaining = len;
@@ -61,7 +61,7 @@ int gt_substriter_next(Substriter *substriter)
 
   while (true)
   {
-    if (substriter->remaining >= (unsigned long) substriter->qvalue)
+    if (substriter->remaining >= (GtUword) substriter->qvalue)
     {
       firstspecial = qgram2code(&substriter->currentcode,
                                 (const GtCodetype **) substriter->multimappower,

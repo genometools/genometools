@@ -22,7 +22,7 @@
 
 size_t gt_translateSuftab2BWT(void *translator,
                               void *voiddest,
-                              const unsigned long *src,
+                              const GtUword *src,
                               size_t len)
 {
   struct encSeqTrState *trState = (struct encSeqTrState *) translator;
@@ -42,7 +42,7 @@ size_t gt_translateSuftab2BWTSuffixsortspace(
                                        void *translator,
                                        void *voiddest,
                                        const GtSuffixsortspace *suffixsortspace,
-                                       unsigned long offset,
+                                       GtUword offset,
                                        size_t len)
 {
   struct encSeqTrState *trState = (struct encSeqTrState *) translator;

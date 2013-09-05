@@ -44,7 +44,7 @@ void            gt_seq_iterator_set_sequence_output(GtSeqIterator*, bool);
    accordingly). */
 int             gt_seq_iterator_next(GtSeqIterator *seqit,
                                      const GtUchar **sequence,
-                                     unsigned long *len,
+                                     GtUword *len,
                                      char **description,
                                      GtError *err);
 

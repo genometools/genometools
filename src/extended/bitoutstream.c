@@ -27,7 +27,7 @@
 
 struct GtBitOutStream {
   FILE         *fp;
-  unsigned long written_bits,
+  GtUword written_bits,
                 pagesize;
   GtBitsequence bitseqbuffer;
   int           bits_left;
@@ -69,7 +69,7 @@ void gt_bitoutstream_append(GtBitOutStream *bitstream,
 
 void gt_bitoutstream_append_bittab(GtBitOutStream *bitstream,
                                    GtBittab *tab) {
-  unsigned long j,
+  GtUword j,
                 size = gt_bittab_size(tab);
   for (j = 0; j < size; j++) {
     if (bitstream->bits_left == 0) {

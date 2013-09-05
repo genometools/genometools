@@ -65,7 +65,7 @@ static int gt_merge_runner(int argc, const char **argv, int parsed_args,
                 *merge_stream,
                 *gff3_out_stream;
   GtArray *genome_streams;
-  unsigned long i;
+  GtUword i;
   int had_err;
 
   gt_error_check(err);

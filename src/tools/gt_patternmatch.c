@@ -32,7 +32,7 @@
 
 typedef struct
 {
-  unsigned long minpatternlen, maxpatternlen, numofsamples;
+  GtUword minpatternlen, maxpatternlen, numofsamples;
   bool showpatt, usebcktab, immediate;
   GtStr *indexname;
 } Pmatchoptions;
@@ -67,10 +67,10 @@ static void comparemmsis(const GtMMsearchiterator *mmsi1,
 static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
 {
   Suffixarray suffixarray;
-  unsigned long totallength = 0;
+  GtUword totallength = 0;
   bool haserr = false;
   const GtUchar *pptr;
-  unsigned long patternlen;
+  GtUword patternlen;
   unsigned int demand = SARR_SUFTAB | SARR_ESQTAB;
 
   if (pmopt->usebcktab)
@@ -90,18 +90,18 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
   }
   if (!haserr)
   {
-    unsigned long trial;
-    unsigned long dbstart;
+    GtUword trial;
+    GtUword dbstart;
     Enumpatterniterator *epi;
     GT_UNUSED unsigned int firstspecial;
     GtMMsearchiterator *mmsibck = NULL, *mmsiimm = NULL;
     GtBucketspecification bucketspec;
     Bucketenumerator *bucketenumerator;
     Lcpinterval itv;
-    unsigned long refstart;
+    GtUword refstart;
     GtEncseqReader *esr1, *esr2;
     GT_UNUSED int retval;
-    unsigned long idx, maxlcp;
+    GtUword idx, maxlcp;
     GtCodetype code = 0;
     const GtCodetype **multimappower;
     const GtAlphabet *alpha;
@@ -132,7 +132,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
       }
       if (pmopt->usebcktab)
       {
-        if (patternlen < (unsigned long) suffixarray.prefixlength)
+        if (patternlen < (GtUword) suffixarray.prefixlength)
         {
           mmsibck = NULL;
           bucketenumerator
@@ -188,7 +188,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                        bucketspec.left,
                                        bucketspec.left +
                                          bucketspec.nonspecialsinbucket-1,
-                                       (unsigned long) suffixarray.prefixlength,
+                                       (GtUword) suffixarray.prefixlength,
                                        suffixarray.readmode,
                                        pptr,
                                        patternlen);
@@ -257,16 +257,16 @@ static GtOPrval parse_options(Pmatchoptions *pmopt,
 
   option = gt_option_new_ulong("minpl","Specify minimum length of pattern",
                            &pmopt->minpatternlen,
-                           (unsigned long) 20);
+                           (GtUword) 20);
   gt_option_parser_add_option(op, option);
   option = gt_option_new_ulong("maxpl","Specify maximum length of pattern",
                             &pmopt->maxpatternlen,
-                            (unsigned long) 30);
+                            (GtUword) 30);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_ulong("samples","Specify number of samples",
                             &pmopt->numofsamples,
-                           (unsigned long) 100000);
+                           (GtUword) 100000);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("s","Show generated pattern",

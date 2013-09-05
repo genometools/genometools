@@ -187,7 +187,7 @@ struct GtMD5Encoder {
   WORD32 d[4];
   WORD32 d_old[4];
   WORD32 wbuff[16];
-  unsigned long len;
+  GtUword len;
   int status;
 };
 
@@ -213,7 +213,7 @@ void gt_md5_encoder_reset(GtMD5Encoder *enc)
 }
 
 void gt_md5_encoder_add_block(GtMD5Encoder *enc, const char *message,
-                              unsigned long len)
+                              GtUword len)
 {
   gt_assert(enc && message && len < 65);
   if (enc->len > 0) {

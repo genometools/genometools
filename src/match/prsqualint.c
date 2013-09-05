@@ -106,7 +106,7 @@ Qualifiedinteger *gt_parsequalifiedinteger(const char *option,
       haserr = true;
     }
   }
-  qualint->integervalue = (unsigned long) readint;
+  qualint->integervalue = (GtUword) readint;
   gt_free(lparamcopy);
   if (haserr)
   {

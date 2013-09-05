@@ -39,11 +39,11 @@
 #define GT_INCONSISTENT(BASE)\
         /*gt_log_log("code=%lu with wildcard %c: inconsistent " \
                    "aminoacids %c and %c",\
-                   (unsigned long) codeof2, wildcard, aa, newaa);*/\
+                   (GtUword) codeof2, wildcard, aa, newaa);*/\
         return GT_AMINOACIDFAIL
 
 #define GT_ILLEGALCHAR(V)\
-        gt_error_set(err, "illegal char %s='%c'(%lu)",#V,V,(unsigned long)(V));\
+        gt_error_set(err, "illegal char %s='%c'(%lu)",#V,V,(GtUword)(V));\
         return GT_AMINOACIDFAIL
 
 #define GT_T_BIT  ((unsigned char) 1)
@@ -737,12 +737,12 @@ static inline char codon2amino(const char *aminos, bool forward,
 /* 'static' function */
 GtStrArray* gt_trans_table_get_scheme_descriptions()
 {
-  unsigned long i;
+  GtUword i;
   GtTranslationScheme *scheme;
   GtStr *str;
   GtStrArray *sa = gt_str_array_new();
   str = gt_str_new();
-  for (i = 1UL; i < (unsigned long) GT_SIZEOFTRANSRANGE; i++) {
+  for (i = 1UL; i < (GtUword) GT_SIZEOFTRANSRANGE; i++) {
     if (transnum2index[i] == GT_UNDEFTRANSNUM)
       continue;
     scheme = schemetable + transnum2index[i];
@@ -846,7 +846,7 @@ int gt_trans_table_unit_test(GtError *err)
   /* check retrieval of table descriptions */
   schemes = gt_trans_table_get_scheme_descriptions();
   gt_ensure(
-         gt_str_array_size(schemes) == (unsigned long) GT_NUMOFTRANSSCHEMES);
+         gt_str_array_size(schemes) == (GtUword) GT_NUMOFTRANSSCHEMES);
 
   /* check switching translation scheme */
   /* test_errnum = gt_translator_set_translation_scheme(tr, 3, test_err);

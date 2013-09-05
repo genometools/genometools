@@ -34,7 +34,7 @@ typedef enum {
 
 typedef struct {
   AlignmentEoptype type;
-  unsigned long steps;
+  GtUword steps;
 } GtMultieop;
 /* XXX: possible improvement to save memory: combine both parts into a single
         variable (use bit shifting operations) */
@@ -50,11 +50,11 @@ void            gt_multieoplist_add_mismatch(GtMultieoplist *multieops);
 void            gt_multieoplist_add_match(GtMultieoplist *multieops);
 void            gt_multieoplist_reset(GtMultieoplist *multieops);
 void            gt_multieoplist_remove_last(GtMultieoplist *multieops);
-unsigned long   gt_multieoplist_get_length(GtMultieoplist *multieops);
+GtUword   gt_multieoplist_get_length(GtMultieoplist *multieops);
 GtMultieop*     gt_multieoplist_get_entry(GtMultieoplist *multieops,
-                                          unsigned long index);
-unsigned long   gt_multieoplist_get_repdel_length(GtMultieoplist *multieops);
-unsigned long   gt_multieoplist_get_repins_length(GtMultieoplist *multieops);
+                                          GtUword index);
+GtUword   gt_multieoplist_get_repdel_length(GtMultieoplist *multieops);
+GtUword   gt_multieoplist_get_repins_length(GtMultieoplist *multieops);
 
 void            gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp);
 

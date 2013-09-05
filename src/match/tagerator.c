@@ -46,7 +46,7 @@
 
 typedef struct
 {
-  unsigned long dbstartpos,
+  GtUword dbstartpos,
          matchlength;
   bool rcmatch;
 } TgrSimplematch;
@@ -56,7 +56,7 @@ typedef struct
   const GtUchar *tagptr;
   GtUchar transformedtag[MAXTAGSIZE],
         rctransformedtag[MAXTAGSIZE];
-  unsigned long taglen;
+  GtUword taglen;
 } TgrTagwithlength;
 
 typedef struct
@@ -65,7 +65,7 @@ typedef struct
   unsigned int alphasize;
   const GtUchar *tagptr;
   const GtAlphabet *alpha;
-  unsigned long *eqsvector;
+  GtUword *eqsvector;
   const TgrTagwithlength *twlptr;
   const GtEncseq *encseq;
 } TgrShowmatchinfo;
@@ -98,7 +98,7 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
       printf("%lu",match->dbstartpos);
     } else
     {
-      unsigned long seqstartpos,
+      GtUword seqstartpos,
                     seqnum = gt_encseq_seqnum(showmatchinfo->encseq,
                                                   match->dbstartpos);
       seqstartpos = gt_encseq_seqstartpos(showmatchinfo->encseq, seqnum);
@@ -113,7 +113,7 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
     gt_alphabet_decode_seq_to_fp(showmatchinfo->alpha,
                                  stdout,
                                  match->dbsubstring,
-                                 (unsigned long) match->dblen);
+                                 (GtUword) match->dblen);
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
   {
@@ -132,14 +132,14 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
       if (showmatchinfo->tageratoroptions->outputmode &
           (TAGOUT_TAGSTARTPOS | TAGOUT_TAGLENGTH | TAGOUT_TAGSUFFIXSEQ))
       {
-        unsigned long suffixlength
+        GtUword suffixlength
           = gt_reversesuffixmatch(showmatchinfo->eqsvector,
                                showmatchinfo->alphasize,
                                match->dbsubstring,
-                               (unsigned long) match->dblen,
+                               (GtUword) match->dblen,
                                showmatchinfo->tagptr,
                                match->querylen,
-                               (unsigned long) showmatchinfo->tageratoroptions->
+                               (GtUword) showmatchinfo->tageratoroptions->
                                                         userdefinedmaxdistance);
         gt_assert(match->querylen >= suffixlength);
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
@@ -192,7 +192,7 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
 typedef struct
 {
   TgrSimplematch *spaceTgrSimplematch;
-  unsigned long nextfreeTgrSimplematch, allocatedTgrSimplematch;
+  GtUword nextfreeTgrSimplematch, allocatedTgrSimplematch;
   const TgrTagwithlength *twlptr;
 } ArrayTgrSimplematch;
 
@@ -209,12 +209,12 @@ static void tgr_storematch(void *processinfo,const GtIdxMatch *match)
 
 static void checkmstats(void *processinfo,
                         const void *patterninfo,
-                        unsigned long patternstartpos,
-                        unsigned long mstatlength,
-                        unsigned long leftbound,
-                        unsigned long rightbound)
+                        GtUword patternstartpos,
+                        GtUword mstatlength,
+                        GtUword leftbound,
+                        GtUword rightbound)
 {
-  GT_UNUSED unsigned long realmstatlength;
+  GT_UNUSED GtUword realmstatlength;
   TgrTagwithlength *twl = (TgrTagwithlength *) patterninfo;
 
   realmstatlength = genericmstats((const Limdfsresources *) processinfo,
@@ -233,8 +233,8 @@ static void checkmstats(void *processinfo,
                        rightbound))
   {
     GtUchar cc;
-    unsigned long *sptr, witnessposition;
-    unsigned long idx;
+    GtUword *sptr, witnessposition;
+    GtUword idx;
     GtArrayGtUlong *mstatspos = gt_fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
                                   leftbound,
@@ -258,7 +258,7 @@ static void checkmstats(void *processinfo,
                           idx,
                           (unsigned int) twl->tagptr[idx],
                           (unsigned int) cc,
-                          (unsigned long)
+                          (GtUword)
                           (witnessposition+idx-patternstartpos));
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
@@ -269,10 +269,10 @@ static void checkmstats(void *processinfo,
 
 static void showmstats(void *processinfo,
                        const void *patterninfo,
-                       GT_UNUSED unsigned long patternstartpos,
-                       unsigned long mstatlength,
-                       unsigned long leftbound,
-                       unsigned long rightbound)
+                       GT_UNUSED GtUword patternstartpos,
+                       GtUword mstatlength,
+                       GtUword leftbound,
+                       GtUword rightbound)
 {
   TgrTagwithlength *twl = (TgrTagwithlength *) patterninfo;
 
@@ -280,7 +280,7 @@ static void showmstats(void *processinfo,
   if (gt_intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
-    unsigned long idx;
+    GtUword idx;
     GtArrayGtUlong *mstatspos = gt_fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
                                   leftbound,
@@ -321,20 +321,20 @@ static int cmpdescend(const void *a,const void *b)
 static int dotransformtag(GtUchar *transformedtag,
                           const GtUchar *symbolmap,
                           const GtUchar *currenttag,
-                          unsigned long taglen,
+                          GtUword taglen,
                           uint64_t tagnumber,
                           bool replacewildcard,
                           GtError *err)
 {
-  unsigned long idx;
+  GtUword idx;
   GtUchar charcode;
 
-  if (taglen > (unsigned long) MAXTAGSIZE)
+  if (taglen > (GtUword) MAXTAGSIZE)
   {
     gt_error_set(err,"tag \"%*.*s\" of length %lu; "
                   "tags must not be longer than %lu",
                    (int) taglen,(int) taglen,currenttag,taglen,
-                   (unsigned long) MAXTAGSIZE);
+                   (GtUword) MAXTAGSIZE);
     return -1;
   }
   for (idx = 0; idx < taglen; idx++)
@@ -366,15 +366,15 @@ static int dotransformtag(GtUchar *transformedtag,
 
 static bool performpatternsearch(const AbstractDfstransformer *dfst,
                                  bool domstats,
-                                 unsigned long maxdistance,
+                                 GtUword maxdistance,
                                  bool doonline,
                                  bool docompare,
-                                 unsigned long maxintervalwidth,
+                                 GtUword maxintervalwidth,
                                  bool skpp,
                                  Myersonlineresources *mor,
                                  Limdfsresources *limdfsresources,
                                  const GtUchar *tagptr,
-                                 unsigned long taglen)
+                                 GtUword taglen)
 {
   if (doonline || (!domstats && docompare))
   {
@@ -406,7 +406,7 @@ static bool performpatternsearch(const AbstractDfstransformer *dfst,
 static void compareresults(const ArrayTgrSimplematch *storeonline,
                            const ArrayTgrSimplematch *storeoffline)
 {
-  unsigned long ss;
+  GtUword ss;
 
   if (storeonline->nextfreeTgrSimplematch
         != storeoffline->nextfreeTgrSimplematch)
@@ -480,7 +480,7 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
 {
   int try;
   bool domstats, matchfound;
-  unsigned long maxdistance, mindistance, distance;
+  GtUword maxdistance, mindistance, distance;
 
   if (tageratoroptions->userdefinedmaxdistance < 0)
   {
@@ -490,7 +490,7 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
   {
     domstats = false;
     gt_assert(tageratoroptions->userdefinedmaxdistance >= 0);
-    maxdistance = (unsigned long) tageratoroptions->userdefinedmaxdistance;
+    maxdistance = (GtUword) tageratoroptions->userdefinedmaxdistance;
     if (tageratoroptions->best)
     {
       mindistance = 0;
@@ -645,16 +645,16 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     }
     if (!tageratoroptions->doonline || tageratoroptions->docompare)
     {
-      unsigned long maxpathlength;
+      GtUword maxpathlength;
 
       if (tageratoroptions->userdefinedmaxdistance >= 0)
       {
-        maxpathlength = (unsigned long) (1+ MAXTAGSIZE +
+        maxpathlength = (GtUword) (1+ MAXTAGSIZE +
                                          tageratoroptions->
                                          userdefinedmaxdistance);
       } else
       {
-        maxpathlength = (unsigned long) (1+MAXTAGSIZE);
+        maxpathlength = (GtUword) (1+MAXTAGSIZE);
       }
       limdfsresources = gt_newLimdfsresources(genericindex,
                                            tageratoroptions->nowildcards,
@@ -726,7 +726,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         storeoffline.nextfreeTgrSimplematch = 0;
         storeonline.nextfreeTgrSimplematch = 0;
         if (tageratoroptions->userdefinedmaxdistance > 0 &&
-            twl.taglen <= (unsigned long)
+            twl.taglen <= (GtUword)
                           tageratoroptions->userdefinedmaxdistance)
         {
           gt_error_set(err,"tag \"%*.*s\" of length %lu; "
@@ -741,7 +741,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
           break;
         }
         gt_assert(tageratoroptions->userdefinedmaxdistance < 0 ||
-                  twl.taglen > (unsigned long)
+                  twl.taglen > (GtUword)
                                tageratoroptions->userdefinedmaxdistance);
         searchoverstrands(tageratoroptions,
                           &twl,

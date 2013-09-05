@@ -25,7 +25,7 @@
 
 typedef struct
 {
-  unsigned long lowerbound,
+  GtUword lowerbound,
          upperbound,
          rank;
 } Rankedbounds;
@@ -37,7 +37,7 @@ Rankedbounds *gt_fillrankbounds(const GtEncseq *encseq,
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    unsigned long currentrank = 0, realspecialranges;
+    GtUword currentrank = 0, realspecialranges;
     Rankedbounds *rankedbounds, *rbptr;
 
     realspecialranges = gt_encseq_realspecialranges(encseq);
@@ -61,15 +61,15 @@ Rankedbounds *gt_fillrankbounds(const GtEncseq *encseq,
   return NULL;
 }
 
-unsigned long gt_frompos2rank(const Rankedbounds *leftptr,
+GtUword gt_frompos2rank(const Rankedbounds *leftptr,
                               const Rankedbounds *rightptr,
-                              unsigned long specialpos)
+                              GtUword specialpos)
 {
   const Rankedbounds *midptr;
 
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((GtUword) (rightptr-leftptr));
     if (specialpos < midptr->lowerbound)
     {
       rightptr = midptr-1;
@@ -92,15 +92,15 @@ unsigned long gt_frompos2rank(const Rankedbounds *leftptr,
   /*@end@*/
 }
 
-unsigned long gt_fromrank2pos(const Rankedbounds *leftptr,
+GtUword gt_fromrank2pos(const Rankedbounds *leftptr,
                               const Rankedbounds *rightptr,
-                              unsigned long rank)
+                              GtUword rank)
 {
   const Rankedbounds *midptr;
 
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((GtUword) (rightptr-leftptr));
     if (rank < midptr->rank)
     {
       rightptr = midptr-1;
@@ -125,7 +125,7 @@ unsigned long gt_fromrank2pos(const Rankedbounds *leftptr,
 
 typedef struct
 {
-  unsigned long specialrank,
+  GtUword specialrank,
          key;
 } Specialrank;
 
@@ -148,14 +148,14 @@ static int compareSpecialrank(const void *a,const void *b)
 
 Specialrank *gt_fillspecialranklist(const GtEncseq *encseq,
                                  GtReadmode readmode,
-                                 const unsigned long *inversesuftab)
+                                 const GtUword *inversesuftab)
 {
   if (gt_encseq_has_specialranges(encseq))
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    unsigned long realspecialranges, specialrank;
-    GT_UNUSED unsigned long totallength;
+    GtUword realspecialranges, specialrank;
+    GT_UNUSED GtUword totallength;
     Specialrank *specialranklist, *rbptr;
 
     totallength = gt_encseq_total_length(encseq);

@@ -169,11 +169,11 @@ int gt_bitpackarray_unit_test(GtError*);
 /*
 static inline void showbitpackarray(const BitPackArray *bitpackarray)
 {
-  unsigned long numofunits, idx;
+  GtUword numofunits, idx;
 
   gt_assert(bitpackarray != NULL);
   gt_assert(bitpackarray->store != NULL);
-  numofunits = (unsigned long) sizeofbitarray(bitpackarray->bitsPerElem,
+  numofunits = (GtUword) sizeofbitarray(bitpackarray->bitsPerElem,
                                               bitpackarray->numElems);
   printf("numofunits=%lu\n",numofunits);
   for (idx=0; idx < numofunits; idx++)

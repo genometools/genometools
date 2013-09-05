@@ -20,7 +20,7 @@
 typedef struct GtSeqInfoCache GtSeqInfoCache;
 
 typedef struct {
-  unsigned long filenum,
+  GtUword filenum,
                 seqnum;
 } GtSeqInfo;
 

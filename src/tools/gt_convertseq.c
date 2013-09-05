@@ -45,7 +45,7 @@ typedef struct
        showflv,
        showseq,
        verbose;
-  unsigned long fastawidth;
+  GtUword fastawidth;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtConvertseqArguments;
@@ -124,7 +124,7 @@ static int gt_convertseq_runner(int argc, const char **argv, int parsed_args,
   GtStrArray *files;
   const GtUchar *sequence;
   char *desc;
-  unsigned long len, j;
+  GtUword len, j;
   off_t totalsize;
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -174,7 +174,7 @@ static int gt_convertseq_runner(int argc, const char **argv, int parsed_args,
       if (!arguments->showseq) {
         bool in_wildcard = false;
         gt_file_xprintf(arguments->outfp, ">%s\n", desc);
-        for (i = 0; (unsigned long) i < len; i++) {
+        for (i = 0; (GtUword) i < len; i++) {
           if (arguments->reduce_wc_dna) {
             switch (seq[i]) {
               case 'a':
@@ -248,8 +248,8 @@ static int gt_convertseq_runner(int argc, const char **argv, int parsed_args,
         fprintf(stderr, "file %lu (%s): %lu/%lu\n",
                j,
                gt_str_array_get(files, j),
-               (unsigned long) flv[j].length,
-               (unsigned long) flv[j].effectivelength);
+               (GtUword) flv[j].length,
+               (GtUword) flv[j].effectivelength);
       }
     }
     gt_sequence_buffer_delete(sb);

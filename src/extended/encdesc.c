@@ -65,26 +65,26 @@ static void numeric_field_prepare_zero_padding(GtEncdesc *encdesc,
 
 static void numeric_field_sample_prepare_verbose_value(GtEncdesc *encdesc,
                                                        EncdescWriteInfo *info,
-                                                       unsigned long value);
+                                                       GtUword value);
 
 static void numeric_field_prepare_huffman_value(GtEncdesc *encdesc,
                                                 EncdescWriteInfo *info,
-                                                unsigned long value);
+                                                GtUword value);
 
 static void numeric_field_prepare_verbose_value(GtEncdesc *encdesc,
                                                 EncdescWriteInfo *info,
-                                                unsigned long value);
+                                                GtUword value);
 
 static inline void prepare_numeric_field(GtEncdesc *encdesc,
                                          EncdescWriteInfo *info);
 
 static void inline regular_field_prepare_length(GtEncdesc *encdesc,
                                                 EncdescWriteInfo *info,
-                                                unsigned long endpos);
+                                                GtUword endpos);
 
 static void inline regular_field_prepare_char(GtEncdesc *encdesc,
                                               EncdescWriteInfo *info,
-                                              unsigned long char_pos);
+                                              GtUword char_pos);
 
 static inline void prepare_generic(EncdescWriteInfo *info,
                                    unsigned length,
@@ -101,8 +101,8 @@ static inline void reset_info(EncdescWriteInfo *info);
 
 static inline unsigned count_leading_zeros(const char *number);
 
-static unsigned encdesc_digits_per_value(unsigned long value,
-                                         unsigned long base)
+static unsigned encdesc_digits_per_value(GtUword value,
+                                         GtUword base)
 {
   if (value > 0) {
     double log_val, log_base;
@@ -135,7 +135,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
 {
   int status, had_err = 0;
   unsigned zero_count;
-  unsigned long cur_desc = 0,
+  GtUword cur_desc = 0,
                 j_idx,
                 k_idx,
                 desc_char_idx,
@@ -173,7 +173,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
       return status;
     gt_assert(descbuffer != NULL);
 
-    desclength = (unsigned long) strlen(descbuffer);
+    desclength = (GtUword) strlen(descbuffer);
 
     tmp_numoffields = 0;
     for (desc_char_idx = 0; desc_char_idx <= desclength; desc_char_idx++) {
@@ -210,7 +210,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
 
     /* analyze description with maximum number of fields and initialize fields
      */
-    desclength = (unsigned long) strlen(longest_desc);
+    desclength = (GtUword) strlen(longest_desc);
     start_pos = 0;
 
     for (desc_char_idx = 0; desc_char_idx <= desclength; desc_char_idx++) {
@@ -279,7 +279,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
       gt_assert(descbuffer != NULL);
 
       gt_free(mutable_desc);
-      desclength = (unsigned long) strlen(descbuffer);
+      desclength = (GtUword) strlen(descbuffer);
       encdesc->total_num_of_chars += desclength;
       mutable_desc = gt_cstr_dup(descbuffer);
 
@@ -343,7 +343,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
               if (zero_count > cur_field->max_zero)
                 cur_field->max_zero = zero_count;
               gt_disc_distri_add(cur_field->zero_count,
-                                 (unsigned long) zero_count);
+                                 (GtUword) zero_count);
 
               if (cur_desc == 0) {
                 cur_field->global_value =
@@ -453,7 +453,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
         if (!cur_field->is_cons) {
           len_diff = cur_field->max_len - cur_field->min_len;
           cur_field->bits_per_len =
-            encdesc_digits_per_value((unsigned long) len_diff, 2UL);
+            encdesc_digits_per_value((GtUword) len_diff, 2UL);
         }
       }
       else {
@@ -471,9 +471,9 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
           value_diff = delta_range;
         }
         cur_field->bits_per_num =
-          encdesc_digits_per_value((unsigned long) value_diff, 2UL);
+          encdesc_digits_per_value((GtUword) value_diff, 2UL);
         cur_field->bits_per_value =
-          encdesc_digits_per_value((unsigned long) value_range, 2UL);
+          encdesc_digits_per_value((GtUword) value_range, 2UL);
       }
     }
     encdesc->bits_per_field =
@@ -488,7 +488,7 @@ static int encdesc_write_encoding(GtEncdesc *encdesc,
 {
   int had_err = 0, striter_err;
   const char *descbuffer;
-  unsigned long desc_counter = 0,
+  GtUword desc_counter = 0,
                 page_counter = 0,
                 idx = 0,
                 bits_left_in_page;
@@ -496,7 +496,7 @@ static int encdesc_write_encoding(GtEncdesc *encdesc,
   EncdescWriteInfo *info = gt_calloc((size_t) 1, sizeof (*info));
   GtBitOutStream *bitstream;
 
-  bits_left_in_page = (unsigned long) encdesc->pagesize * 8UL;
+  bits_left_in_page = (GtUword) encdesc->pagesize * 8UL;
 
   info->codes = gt_malloc(sizeof (*info->codes));
   info->cur_desc = 0;
@@ -543,14 +543,14 @@ static int encdesc_write_encoding(GtEncdesc *encdesc,
 
           desc_counter = 0;
           page_counter = 0;
-          bits_left_in_page = (unsigned long) encdesc->pagesize * 8;
+          bits_left_in_page = (GtUword) encdesc->pagesize * 8;
         }
       }
 
       while (bits_left_in_page < info->total_bits_prepared) {
         page_counter++;
         info->total_bits_prepared -= bits_left_in_page;
-        bits_left_in_page = (unsigned long) encdesc->pagesize * 8;
+        bits_left_in_page = (GtUword) encdesc->pagesize * 8;
       }
       bits_left_in_page -= info->total_bits_prepared;
       /* always set first page as written */
@@ -614,22 +614,22 @@ static void prepare_write_data_and_count_bits(GtEncdesc *encdesc,
         else {
           if (!cur_field->fieldlen_is_const) {
             regular_field_prepare_length(encdesc, info,
-                                         (unsigned long) desc_char_idx);
+                                         (GtUword) desc_char_idx);
           }
           for (field_char_idx = 0;
                field_char_idx < desc_char_idx - info->cur_field_start_pos;
                field_char_idx++) {
             if (field_char_idx >= (size_t) cur_field->len ||
                 !gt_bittab_bit_is_set(cur_field->bittab,
-                                     (unsigned long) field_char_idx)) {
+                                     (GtUword) field_char_idx)) {
               regular_field_prepare_char(encdesc, info,
-                                         (unsigned long) field_char_idx);
+                                         (GtUword) field_char_idx);
             }
           }
 
         }
       }
-      info->cur_field_start_pos = (unsigned long) desc_char_idx + 1;
+      info->cur_field_start_pos = (GtUword) desc_char_idx + 1;
       info->cur_field_num++;
       cur_field = &encdesc->fields[info->cur_field_num];
     }
@@ -640,7 +640,7 @@ static inline void prepare_numeric_field(GtEncdesc *encdesc,
                                          EncdescWriteInfo *info)
 {
   long value = 0;
-  unsigned long to_store;
+  GtUword to_store;
   DescField *cur_field = &encdesc->fields[info->cur_field_num];
 
   parse_number_out_of_current_field(info, &value);
@@ -650,19 +650,19 @@ static inline void prepare_numeric_field(GtEncdesc *encdesc,
   }
 
   if (info->cur_desc == 0 || info->sample) {
-    to_store = (unsigned long) (value - cur_field->min_value);
+    to_store = (GtUword) (value - cur_field->min_value);
     numeric_field_sample_prepare_verbose_value(encdesc, info, to_store);
   }
   else if (!cur_field->is_value_cons || !cur_field->is_delta_cons) {
     if (cur_field->use_delta_coding) {
-      to_store = (unsigned long)
+      to_store = (GtUword)
         ((value - cur_field->prev_value) - cur_field->min_delta);
-      gt_assert(to_store <= (unsigned long) cur_field->max_delta -
+      gt_assert(to_store <= (GtUword) cur_field->max_delta -
                               cur_field->min_delta);
     }
     else {
-      to_store = (unsigned long) (value - cur_field->min_value);
-      gt_assert(to_store <= (unsigned long) cur_field->max_value -
+      to_store = (GtUword) (value - cur_field->min_value);
+      gt_assert(to_store <= (GtUword) cur_field->max_value -
                               cur_field->min_value);
     }
 
@@ -711,7 +711,7 @@ static void numeric_field_prepare_zero_padding(GtEncdesc *encdesc,
   huffman = cur_field->huffman_zero_count;
   gt_assert(huffman != NULL);
   gt_huffman_encode(huffman,
-                    (unsigned long) zero_count,
+                    (GtUword) zero_count,
                     &code,
                     &length);
   prepare_generic(info, length, code);
@@ -732,7 +732,7 @@ static inline unsigned count_leading_zeros(const char *number)
 
 static void numeric_field_sample_prepare_verbose_value(GtEncdesc *encdesc,
                                                        EncdescWriteInfo *info,
-                                                       unsigned long value)
+                                                       GtUword value)
 {
   DescField *cur_field = &encdesc->fields[info->cur_field_num];
 
@@ -743,7 +743,7 @@ static void numeric_field_sample_prepare_verbose_value(GtEncdesc *encdesc,
 
 static void numeric_field_prepare_huffman_value(GtEncdesc *encdesc,
                                                 EncdescWriteInfo *info,
-                                                unsigned long value)
+                                                GtUword value)
 {
   GtBitsequence code;
   unsigned length;
@@ -762,7 +762,7 @@ static void numeric_field_prepare_huffman_value(GtEncdesc *encdesc,
 
 static void numeric_field_prepare_verbose_value(GtEncdesc *encdesc,
                                                 EncdescWriteInfo *info,
-                                                unsigned long value)
+                                                GtUword value)
 {
   DescField *cur_field = &encdesc->fields[info->cur_field_num];
 
@@ -774,7 +774,7 @@ static void numeric_field_prepare_verbose_value(GtEncdesc *encdesc,
 
 static void inline regular_field_prepare_length(GtEncdesc *encdesc,
                                                 EncdescWriteInfo *info,
-                                                unsigned long endpos)
+                                                GtUword endpos)
 {
   DescField *field = &encdesc->fields[info->cur_field_num];
   GtBitsequence code = (GtBitsequence)
@@ -784,7 +784,7 @@ static void inline regular_field_prepare_length(GtEncdesc *encdesc,
 
 static void inline regular_field_prepare_char(GtEncdesc *encdesc,
                                               EncdescWriteInfo *info,
-                                              unsigned long char_pos)
+                                              GtUword char_pos)
 {
   DescField *field = &encdesc->fields[info->cur_field_num];
   GtBitsequence code;
@@ -794,7 +794,7 @@ static void inline regular_field_prepare_char(GtEncdesc *encdesc,
 
   gt_assert(huffman != NULL);
   gt_huffman_encode(huffman,
-                    (unsigned long) cur_char,
+                    (GtUword) cur_char,
                     &code,
                     &length);
   prepare_generic(info, length, code);
@@ -819,7 +819,7 @@ static inline void
 append_data_to_bitstream_and_reset_info(EncdescWriteInfo *info,
                                         GtBitOutStream *bitstream)
 {
-  unsigned long number_of_codes, idx;
+  GtUword number_of_codes, idx;
   EncdescCode *codes = info->codes->spaceEncdescCode;
 
   number_of_codes = info->codes->nextfreeEncdescCode;
@@ -908,20 +908,20 @@ bool gt_encdesc_sampling_is_page(GtEncdescEncoder *ee)
 }
 
 void gt_encdesc_encoder_set_sampling_rate(GtEncdescEncoder *ee,
-                                          unsigned long sampling_rate)
+                                          GtUword sampling_rate)
 {
   gt_assert(ee);
   ee->sampling_rate = sampling_rate;
 }
 
-unsigned long gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee)
+GtUword gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee)
 {
   gt_assert(ee);
   return ee->sampling_rate;
 }
 
 GtUint64 encdesc_hashmap_distr_get_corrected(const void *data,
-                                                       unsigned long key)
+                                                       GtUword key)
 {
   EncdescHuffDist *dist = (EncdescHuffDist*) data;
   GtUint64 *valueptr;
@@ -934,14 +934,14 @@ GtUint64 encdesc_hashmap_distr_get_corrected(const void *data,
 }
 
 static GtUint64 encdesc_distri_get_symbol_freq(const void *distri,
-                                                         unsigned long symbol)
+                                                         GtUword symbol)
 {
   GtDiscDistri *distr = (GtDiscDistri*) distri;
   return gt_disc_distri_get(distr, symbol);
 }
 
 GtUint64 encdesc_hashmap_distr_get(const void *hm_distri,
-                                             unsigned long key)
+                                             GtUword key)
 {
   GtHashtable *hashmap = (GtHashtable*) hm_distri;
   GtUint64 *valueptr;
@@ -954,10 +954,10 @@ GtUint64 encdesc_hashmap_distr_get(const void *hm_distri,
 static void encdesc_init_huffman(GtEncdesc *encdesc)
 {
   DescField *field;
-  unsigned long field_idx,
+  GtUword field_idx,
                 alphabet_size = 0,
                 char_idx;
-  unsigned long const char_alphabet_size = 256UL;
+  GtUword const char_alphabet_size = 256UL;
   EncdescHuffDist huffdist;
 
   for (field_idx = 0;
@@ -971,14 +971,14 @@ static void encdesc_init_huffman(GtEncdesc *encdesc)
           gt_assert(field->delta_values != NULL);
           huffdist.li_ull_hashmap = field->delta_values;
           alphabet_size =
-            (unsigned long) labs(field->max_delta - field->min_delta) + 1;
+            (GtUword) labs(field->max_delta - field->min_delta) + 1;
         }
         else if (!field->is_value_cons && field->use_hc) {
           huffdist.correction_base = field->min_value;
           gt_assert(field->num_values != NULL);
           huffdist.li_ull_hashmap = field->num_values;
           alphabet_size =
-            (unsigned long) labs(field->max_value - field->min_value) + 1;
+            (GtUword) labs(field->max_value - field->min_value) + 1;
         }
 
         if (field->use_hc) {
@@ -991,7 +991,7 @@ static void encdesc_init_huffman(GtEncdesc *encdesc)
           field->huffman_zero_count =
             gt_huffman_new(field->zero_count,
                            encdesc_distri_get_symbol_freq,
-                           (unsigned long) field->max_zero + 1);
+                           (GtUword) field->max_zero + 1);
         }
       }
       else {
@@ -1021,7 +1021,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
   GtStr *name1;
   long pos = 0,
        start_of_encoding;
-  unsigned long dummy = 0,
+  GtUword dummy = 0,
                 pagesize;
 
   gt_assert(ee != NULL);
@@ -1091,7 +1091,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
                              "description encoding finished", stdout);
     }
     if (gt_log_enabled()) {
-      unsigned long rate;
+      GtUword rate;
       name1 = gt_str_new_cstr(name);
       gt_str_append_cstr(name1, GT_ENCDESC_FILESUFFIX);
       gt_log_log("description encoding overview:");
@@ -1156,7 +1156,7 @@ GtEncdesc* gt_encdesc_load(const char *name,
   FILE *fp;
   GtStr *filename;
   int fd;
-  unsigned long const pages_to_map = 5UL;
+  GtUword const pages_to_map = 5UL;
 
   gt_assert(name);
   encdesc = encdesc_new();
@@ -1199,7 +1199,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
   unsigned readbits,
            bits_to_read;
   long tmp = 0;
-  unsigned long cur_field_num,
+  GtUword cur_field_num,
                 fieldlen = 0,
                 idx,
                 numoffields,
@@ -1248,7 +1248,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
       else if (bit)
         bitseq = bitseq | (GtBitsequence) 1;
     }
-    numoffields = (unsigned long) bitseq;
+    numoffields = (GtUword) bitseq;
   }
   else
     numoffields = encdesc->num_of_fields;
@@ -1373,14 +1373,14 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
         cur_field->prev_value = tmp;
         if (cur_field->has_zero_padding && cur_field->fieldlen_is_const) {
           zero_count = cur_field->len -
-                       encdesc_digits_per_value((unsigned long) tmp, 10UL);
+                       encdesc_digits_per_value((GtUword) tmp, 10UL);
           for (idx = 0;
                desc != NULL && idx < zero_count;
                idx++)
             gt_str_append_char(desc, '0');
         }
         if (desc != NULL) {
-          gt_str_append_ulong(desc, (unsigned long) tmp);
+          gt_str_append_ulong(desc, (GtUword) tmp);
           gt_str_append_char(desc, cur_field->sep);
         }
         continue;
@@ -1403,7 +1403,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
 
       }
       if (!had_err)
-        fieldlen = (unsigned long) bitseq + cur_field->min_len;
+        fieldlen = (GtUword) bitseq + cur_field->min_len;
     }
     else
       fieldlen = cur_field->len;
@@ -1455,19 +1455,19 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
     return success;
 }
 
-unsigned long gt_encdesc_num_of_descriptions(GtEncdesc *encdesc)
+GtUword gt_encdesc_num_of_descriptions(GtEncdesc *encdesc)
 {
   gt_assert(encdesc);
   return encdesc->num_of_descs;
 }
 
 int gt_encdesc_decode(GtEncdesc *encdesc,
-                      unsigned long num,
+                      GtUword num,
                       GtStr *desc,
                       GtError *err)
 {
   int had_err = 0;
-  unsigned long descs2read = 0,
+  GtUword descs2read = 0,
                 nearestsample = 0,
                 idx;
   size_t startofnearestsample = 0;
@@ -1523,9 +1523,9 @@ int gt_encdesc_decode(GtEncdesc *encdesc,
 }
 
 static void encdesc_delete_desc_fields(DescField *fields,
-                                      unsigned long numoffields)
+                                      GtUword numoffields)
 {
-  unsigned long idx,
+  GtUword idx,
                 j_idx;
 
   if (!fields)

@@ -36,7 +36,7 @@
 typedef struct GtWtreeEncseqFillOffset {
   struct GtWtreeEncseqFillOffset *left,
                                  *right;
-  unsigned long                   offset,
+  GtUword                   offset,
                                   left_size;
 }GtWtreeEncseqFillOffset;
 
@@ -48,7 +48,7 @@ struct GtWtreeEncseq {
   GtWtreeEncseqFillOffset *root_fo,
                           *current_fo;
   GtCompressedBitsequence *c_bits;
-  unsigned long            bits_size,
+  GtUword            bits_size,
                            node_start,
                            num_of_bits;
   unsigned int             alpha_size,
@@ -61,15 +61,15 @@ const GtWtreeClass* gt_wtree_encseq_class(void);
         gt_wtree_cast(gt_wtree_encseq_class(), wtree)
 
 static GtWtreeSymbol gt_wtree_encseq_access_rec(GtWtreeEncseq *we,
-                                                unsigned long pos,
-                                                unsigned long node_start,
-                                                unsigned long node_size,
+                                                GtUword pos,
+                                                GtUword node_start,
+                                                GtUword node_size,
                                                 unsigned int alpha_start,
                                                 unsigned int alpha_end)
 {
   unsigned int middle = (alpha_start + alpha_end) >> 1;
   int bit;
-  unsigned long zero_rank_prefix = 0,
+  GtUword zero_rank_prefix = 0,
                 one_rank_prefix = 0,
                 left_child_size;
   gt_assert(pos < node_size);
@@ -113,11 +113,11 @@ static GtWtreeSymbol gt_wtree_encseq_access_rec(GtWtreeEncseq *we,
 }
 
 static GtWtreeSymbol gt_wtree_encseq_access(GtWtree *wtree,
-                                            unsigned long pos)
+                                            GtUword pos)
 {
   unsigned int alpha_start = 0,
                alpha_end;
-  unsigned long node_start = 0,
+  GtUword node_start = 0,
                 node_size;
   GtWtreeEncseq *we;
   gt_assert(wtree != NULL);
@@ -132,22 +132,22 @@ static GtWtreeSymbol gt_wtree_encseq_access(GtWtree *wtree,
                                     alpha_end);
 }
 
-static unsigned long gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
-                                              unsigned long pos,
+static GtUword gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
+                                              GtUword pos,
                                               GtWtreeSymbol sym,
-                                              unsigned long node_start,
-                                              unsigned long node_size,
+                                              GtUword node_start,
+                                              GtUword node_size,
                                               unsigned int alpha_start,
                                               unsigned int alpha_end)
 {
   unsigned int middle = (alpha_start + alpha_end) >> 1;
   int bit;
-  unsigned long zero_rank_prefix = 0,
+  GtUword zero_rank_prefix = 0,
                 one_rank_prefix = 0,
                 left_child_size,
                 rank;
   gt_log_log("alphabet: %u-%u-%u, sym: %lu", alpha_start, middle, alpha_end,
-             (unsigned long) sym);
+             (GtUword) sym);
   gt_log_log("pos: %lu", pos);
   gt_assert(pos < node_size);
 
@@ -194,13 +194,13 @@ static unsigned long gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
   return pos + 1; /* convert position to count */
 }
 
-static unsigned long gt_wtree_encseq_rank(GtWtree *wtree,
-                                          unsigned long pos,
+static GtUword gt_wtree_encseq_rank(GtWtree *wtree,
+                                          GtUword pos,
                                           GtWtreeSymbol symbol)
 {
   unsigned int alpha_start = 0,
                alpha_end;
-  unsigned long node_start = 0,
+  GtUword node_start = 0,
                 node_size;
   GtWtreeEncseq *we;
   gt_assert(wtree != NULL);
@@ -215,17 +215,17 @@ static unsigned long gt_wtree_encseq_rank(GtWtree *wtree,
                                   alpha_start, alpha_end);
 }
 
-static unsigned long gt_wtree_encseq_select_rec(GtWtreeEncseq *we,
-                                                unsigned long i,
+static GtUword gt_wtree_encseq_select_rec(GtWtreeEncseq *we,
+                                                GtUword i,
                                                 GtWtreeSymbol sym,
-                                                unsigned long node_start,
-                                                unsigned long node_size,
+                                                GtUword node_start,
+                                                GtUword node_size,
                                                 unsigned int alpha_start,
                                                 unsigned int alpha_end)
 {
   unsigned int middle = (alpha_start + alpha_end) >> 1;
   int bit;
-  unsigned long zero_rank_prefix = 0,
+  GtUword zero_rank_prefix = 0,
                 one_rank_prefix = 0,
                 left_child_size, child_start;
 
@@ -274,13 +274,13 @@ static unsigned long gt_wtree_encseq_select_rec(GtWtreeEncseq *we,
   return ULONG_MAX;
 }
 
-static unsigned long gt_wtree_encseq_select(GtWtree *wtree,
-                                            unsigned long i,
+static GtUword gt_wtree_encseq_select(GtWtree *wtree,
+                                            GtUword i,
                                             GtWtreeSymbol symbol)
 {
   unsigned int alpha_start = 0,
                alpha_end;
-  unsigned long node_start = 0,
+  GtUword node_start = 0,
                 node_size;
   GtWtreeEncseq *we;
   gt_assert(wtree != NULL);
@@ -420,7 +420,7 @@ static bool gt_wtree_encseq_set_nodestart_and_current_fo(GtWtreeEncseq *we,
 static void gt_wtree_encseq_fill_bits(GtWtreeEncseq *we)
 {
   unsigned int level_idx;
-  unsigned long sym_idx;
+  GtUword sym_idx;
   GtEncseqReader *er =
     gt_encseq_create_reader_with_readmode(we->encseq, GT_READMODE_FORWARD, 0);
   gt_assert(we != NULL);
@@ -470,10 +470,10 @@ GtWtree* gt_wtree_encseq_new(GtEncseq *encseq)
   /* encoded chars + WC given by gt_alphabet_size,
      we have to encode UNDEFCHAR and SEPARATOR too */
   wtree_encseq->alpha_size = gt_alphabet_size(wtree_encseq->alpha) + 2;
-  wtree->members->num_of_symbols = (unsigned long) wtree_encseq->alpha_size;
+  wtree->members->num_of_symbols = (GtUword) wtree_encseq->alpha_size;
   /* levels in tree: \lceil log_2(\sigma)\rceil */
   wtree_encseq->levels =
-    gt_determinebitspervalue((unsigned long) wtree_encseq->alpha_size);
+    gt_determinebitspervalue((GtUword) wtree_encseq->alpha_size);
   wtree_encseq->root_fo = gt_wtree_encseq_fill_offset_new();
   wtree_encseq->current_fo = wtree_encseq->root_fo;
   wtree->members->length =

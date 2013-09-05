@@ -40,7 +40,7 @@ typedef struct {
         *matchfile,
         *query,
         *db;
-  unsigned long minlen,
+  GtUword minlen,
                 maxedist;
 } GtMatchtoolArguments;
 
@@ -258,7 +258,7 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
     }
     gt_encseq_loader_delete(el);
     if (!had_err) {
-      unsigned long i, j;
+      GtUword i, j;
       GtAlphabet *a;
       gt_assert(es1 && es2);
       a = gt_encseq_alphabet(es1);

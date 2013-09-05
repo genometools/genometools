@@ -72,7 +72,7 @@ const uint64_t gt_compressed_bitsequence_ps_overflow[] = {
 
 typedef struct
 {
-  unsigned long block_offset,
+  GtUword block_offset,
                 idx,
                 rank_sum;
   unsigned int class,
@@ -81,7 +81,7 @@ typedef struct
 
 typedef struct
 {
-  unsigned long *c_offsets_size,
+  GtUword *c_offsets_size,
                 *classes_size,
                 *num_of_bits,
                 *num_of_blocks,
@@ -106,7 +106,7 @@ struct GtCompressedBitsequence
                                    *superblockranks;
   GtCompressedBitsequenceBlockInfo *cbs_bi;
   void                             *mmapped;
-  unsigned long                     c_offsets_size,
+  GtUword                     c_offsets_size,
                                     classes_size,
                                     num_of_bits,
                                     num_of_blocks,
@@ -182,14 +182,14 @@ static void gt_compressed_bitsequence_data_setup_mapspec(GtMapspec *mapspec,
    <len> least significant positions */
 static inline GtBitsequence gt_compressed_bitsequence_get_variable_field(
                                                           GtBitsequence *bitseq,
-                                                          unsigned long start,
+                                                          GtUword start,
                                                           unsigned int len)
 {
   GtBitsequence result = 0;
   gt_assert(len <= (unsigned int) GT_INTWORDSIZE);
   if (len != 0) {
     const unsigned int bit_offset = (unsigned int) GT_MODWORDSIZE(start);
-    const unsigned long word_offset = GT_DIVWORDSIZE(start);
+    const GtUword word_offset = GT_DIVWORDSIZE(start);
 
     result = bitseq[word_offset] << (GtBitsequence) bit_offset;
     if ((unsigned int) bit_offset + len > (unsigned int) GT_INTWORDSIZE)
@@ -204,13 +204,13 @@ static inline GtBitsequence gt_compressed_bitsequence_get_variable_field(
    filled in <len> least significant bits (as usualy numbers are) */
 static inline void
 gt_compressed_bitsequence_set_variable_field(GtBitsequence *bitseq,
-                                             GT_UNUSED unsigned long size,
-                                             unsigned long start,
+                                             GT_UNUSED GtUword size,
+                                             GtUword start,
                                              unsigned int len,
                                              GtBitsequence value)
 {
   const unsigned int bit_offset = (unsigned int) GT_MODWORDSIZE(start);
-  const unsigned long word_offset = GT_DIVWORDSIZE(start);
+  const GtUword word_offset = GT_DIVWORDSIZE(start);
   const unsigned int bits_left = (unsigned int) (GT_INTWORDSIZE - bit_offset);
   GtBitsequence mask = ~((GtBitsequence) 0) << (GtBitsequence) bits_left;
   if (bits_left == (unsigned int) GT_INTWORDSIZE)
@@ -240,7 +240,7 @@ gt_compressed_bitsequence_set_variable_field(GtBitsequence *bitseq,
 
 static inline unsigned int
 gt_compressed_bitsequence_get_class(GtCompressedBitsequence *cbs,
-                                    unsigned long idx)
+                                    GtUword idx)
 {
   gt_assert(cbs != NULL);
   gt_assert(cbs->classes != NULL);
@@ -253,7 +253,7 @@ gt_compressed_bitsequence_get_class(GtCompressedBitsequence *cbs,
 static inline void
 gt_compressed_bitsequence_set_class(GtCompressedBitsequence *cbs,
                                     unsigned int class,
-                                    unsigned long idx)
+                                    GtUword idx)
 {
   gt_compressed_bitsequence_set_variable_field(cbs->classes,
                                                cbs->classes_size,
@@ -269,7 +269,7 @@ static void gt_compressed_bitsequence_fill_tabs(GtCompressedBitsequence *cbs,
                samplecount = 0,
                c_offset_bits,
                block_len = cbs->blocksize;
-  unsigned long idx,
+  GtUword idx,
                 samplenum = 0;
   GtBitsequence block, offsets_bitpos,
                 bitpos = 0,
@@ -286,10 +286,10 @@ static void gt_compressed_bitsequence_fill_tabs(GtCompressedBitsequence *cbs,
                                                          block_len);
     offsets_bitpos = (GtBitsequence) gt_popcount_tab_get_offset_for_block(
                                                          cbs->popcount_tab,
-                                                         (unsigned long) block);
+                                                         (GtUword) block);
     gt_compressed_bitsequence_set_variable_field(cbs->c_offsets,
                                                  cbs->c_offsets_size,
-                                                 (unsigned long) bitpos,
+                                                 (GtUword) bitpos,
                                                  c_offset_bits, offsets_bitpos);
     rank_sum += class;
     bitpos += c_offset_bits;
@@ -333,9 +333,9 @@ static void gt_compressed_bitsequence_init_s_tabs(GtCompressedBitsequence *cbs)
   if (cbs->num_of_blocks % cbs->superblocksize != 0)
     cbs->num_of_superblocks++;
 
-  cbs->superblockoffsets_size = (unsigned long)
+  cbs->superblockoffsets_size = (GtUword)
     GT_NUMOFINTSFORBITS(cbs->num_of_superblocks * cbs->superblockoffsets_bits);
-  cbs->superblockranks_size = (unsigned long)
+  cbs->superblockranks_size = (GtUword)
     GT_NUMOFINTSFORBITS(cbs->num_of_superblocks * cbs->superblockranks_bits);
   GT_INITBITTAB(cbs->superblockoffsets,
                 cbs->num_of_superblocks * cbs->superblockoffsets_bits);
@@ -345,7 +345,7 @@ static void gt_compressed_bitsequence_init_s_tabs(GtCompressedBitsequence *cbs)
 
 static void gt_compressed_bitsequence_init_c_tab(GtCompressedBitsequence *cbs)
 {
-  unsigned long classes_bits;
+  GtUword classes_bits;
   cbs->num_of_blocks = cbs->num_of_bits / cbs->blocksize;
   if (cbs->num_of_bits % cbs->blocksize != 0 || cbs->num_of_blocks == 0)
     cbs->num_of_blocks++;
@@ -353,10 +353,10 @@ static void gt_compressed_bitsequence_init_c_tab(GtCompressedBitsequence *cbs)
   cbs->class_bits = (unsigned int)
     (sizeof (unsigned int) * CHAR_BIT - __builtin_clz(cbs->blocksize));
 #else
-  cbs->class_bits = gt_determinebitspervalue((unsigned long) cbs->blocksize);
+  cbs->class_bits = gt_determinebitspervalue((GtUword) cbs->blocksize);
 #endif
   classes_bits = cbs->num_of_blocks * cbs->class_bits;
-  cbs->classes_size = (unsigned long) GT_NUMOFINTSFORBITS(classes_bits);
+  cbs->classes_size = (GtUword) GT_NUMOFINTSFORBITS(classes_bits);
   GT_INITBITTAB(cbs->classes, classes_bits);
 }
 
@@ -366,7 +366,7 @@ gt_compressed_bitsequence_fill_c_tab_init_o_tab(GtCompressedBitsequence *cbs,
 {
   unsigned int block_len = cbs->blocksize,
                current_class;
-  unsigned long idx, o_size = 0, ones = 0;
+  GtUword idx, o_size = 0, ones = 0;
   GtBitsequence current_blk;
 
   for (idx = 0; idx < cbs->num_of_blocks; idx++) {
@@ -378,12 +378,12 @@ gt_compressed_bitsequence_fill_c_tab_init_o_tab(GtCompressedBitsequence *cbs,
                                                            idx * cbs->blocksize,
                                                            block_len);
     current_class = gt_popcount_tab_class(cbs->popcount_tab,
-                                          (unsigned long) current_blk);
+                                          (GtUword) current_blk);
     gt_compressed_bitsequence_set_class(cbs, current_class, idx);
     o_size += gt_popcount_tab_offset_bits(cbs->popcount_tab, current_class);
     ones += current_blk;
   }
-  cbs->c_offsets_size = (unsigned long) GT_NUMOFINTSFORBITS(o_size);
+  cbs->c_offsets_size = (GtUword) GT_NUMOFINTSFORBITS(o_size);
 #ifdef __SSE4_2__
   cbs->superblockoffsets_bits = __builtin_clzl(o_size);
   cbs->superblockranks_bits = __builtin_clzl(ones);
@@ -406,7 +406,7 @@ static GtCompressedBitsequence* gt_compressed_bitsequence_new_empty(void)
 
 static inline void gt_compressed_bitsequence_init(GtCompressedBitsequence *cbs,
                                                   unsigned int samplerate,
-                                                  unsigned long num_of_bits)
+                                                  GtUword num_of_bits)
 {
   cbs->superblocksize = samplerate;
   cbs->popcount_tab = gt_popcount_tab_new(cbs->blocksize);
@@ -421,7 +421,7 @@ static inline void gt_compressed_bitsequence_init(GtCompressedBitsequence *cbs,
 GtCompressedBitsequence *
 gt_compressed_bitsequence_new(GtBitsequence *bitseq,
                               unsigned int samplerate,
-                              unsigned long num_of_bits)
+                              GtUword num_of_bits)
 {
   GtCompressedBitsequence *cbs;
 
@@ -451,9 +451,9 @@ gt_compressed_bitsequence_new(GtBitsequence *bitseq,
 
 static inline void
 gt_compressed_bitsequence_calc_block_info(GtCompressedBitsequence *cbs,
-                                          unsigned long position)
+                                          GtUword position)
 {
-  unsigned long idx;
+  GtUword idx;
   GtCompressedBitsequenceBlockInfo *bi = cbs->cbs_bi;
 
   idx = position / cbs->blocksize;
@@ -466,7 +466,7 @@ gt_compressed_bitsequence_calc_block_info(GtCompressedBitsequence *cbs,
 
   if (idx != bi->idx) {
     unsigned int offset_bits;
-    unsigned long jdx, sample, offsets_bitpos;
+    GtUword jdx, sample, offsets_bitpos;
 
     bi->idx = idx;
     bi->block_len = cbs->blocksize;
@@ -479,12 +479,12 @@ gt_compressed_bitsequence_calc_block_info(GtCompressedBitsequence *cbs,
       bi->rank_sum = 0;
     }
     else {
-      offsets_bitpos = (unsigned long)
+      offsets_bitpos = (GtUword)
         gt_compressed_bitsequence_get_variable_field(
                                      cbs->superblockoffsets,
                                      (sample - 1) * cbs->superblockoffsets_bits,
                                      cbs->superblockoffsets_bits);
-      bi->rank_sum = (unsigned long)
+      bi->rank_sum = (GtUword)
         gt_compressed_bitsequence_get_variable_field(
                                        cbs->superblockranks,
                                        (sample - 1) * cbs->superblockranks_bits,
@@ -498,7 +498,7 @@ gt_compressed_bitsequence_calc_block_info(GtCompressedBitsequence *cbs,
     }
     bi->class = gt_compressed_bitsequence_get_class(cbs, idx);
     offset_bits = gt_popcount_tab_offset_bits(cbs->popcount_tab, bi->class);
-    bi->block_offset = (unsigned long)
+    bi->block_offset = (GtUword)
       gt_compressed_bitsequence_get_variable_field(cbs->c_offsets,
                                                    offsets_bitpos,
                                                    offset_bits);
@@ -506,11 +506,11 @@ gt_compressed_bitsequence_calc_block_info(GtCompressedBitsequence *cbs,
 }
 
 int gt_compressed_bitsequence_access(GtCompressedBitsequence *cbs,
-                                     unsigned long position)
+                                     GtUword position)
 {
   int bit;
   unsigned int pos_in_block;
-  unsigned long block;
+  GtUword block;
   GtCompressedBitsequenceBlockInfo *cbs_bi;
 
   gt_assert(cbs != NULL);
@@ -534,8 +534,8 @@ int gt_compressed_bitsequence_access(GtCompressedBitsequence *cbs,
   return bit;
 }
 
-unsigned long gt_compressed_bitsequence_rank_1(GtCompressedBitsequence *cbs,
-                                               unsigned long position)
+GtUword gt_compressed_bitsequence_rank_1(GtCompressedBitsequence *cbs,
+                                               GtUword position)
 {
   unsigned int pos_in_block;
   GtCompressedBitsequenceBlockInfo *cbs_bi;
@@ -560,11 +560,11 @@ unsigned long gt_compressed_bitsequence_rank_1(GtCompressedBitsequence *cbs,
                                                    pos_in_block);
 }
 
-unsigned long gt_compressed_bitsequence_rank_0(GtCompressedBitsequence *cbs,
-                                               unsigned long position)
+GtUword gt_compressed_bitsequence_rank_0(GtCompressedBitsequence *cbs,
+                                               GtUword position)
 {
   unsigned int pos_in_block;
-  unsigned long rank_sum0;
+  GtUword rank_sum0;
   GtCompressedBitsequenceBlockInfo *cbs_bi;
 
   gt_assert(cbs != NULL);
@@ -641,12 +641,12 @@ gt_compressed_bitsequence_select_1_word(uint64_t word, unsigned int i)
 #endif
 }
 
-unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
-                                                 unsigned long num)
+GtUword gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
+                                                 GtUword num)
 {
   unsigned int  block_offset_bits,
                 class = cbs->blocksize + 1;
-  unsigned long block_idx,
+  GtUword block_idx,
                 blocks_offset_pos,
                 containing_s_block,
                 end_s_block, middle_s_block, start_s_block,
@@ -660,12 +660,12 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
   gt_assert(num < cbs->num_of_bits);
 
   /* if larger then max rank1 */
-  if (num > (unsigned long) gt_compressed_bitsequence_get_variable_field(
+  if (num > (GtUword) gt_compressed_bitsequence_get_variable_field(
                       cbs->superblockranks,
                       (cbs->num_of_superblocks - 1) * cbs->superblockranks_bits,
                       cbs->superblockranks_bits))
     return cbs->num_of_bits;
-  if (num <= (unsigned long)
+  if (num <= (GtUword)
       gt_compressed_bitsequence_get_variable_field(cbs->superblockranks, 0,
                                                    cbs->superblockranks_bits)) {
     rank_sum = 0;
@@ -679,12 +679,12 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
     middle_s_block = GT_DIV2(start_s_block + end_s_block);
     while (start_s_block < end_s_block) {
       start = middle_s_block * cbs->superblockranks_bits;
-      if ((unsigned long) gt_compressed_bitsequence_get_variable_field(
+      if ((GtUword) gt_compressed_bitsequence_get_variable_field(
                                                   cbs->superblockranks, start,
                                                   cbs->superblockranks_bits)
           < num) {
         start_r = start + cbs->superblockranks_bits;
-        if ((unsigned long) gt_compressed_bitsequence_get_variable_field(
+        if ((GtUword) gt_compressed_bitsequence_get_variable_field(
                                                   cbs->superblockranks, start_r,
                                                   cbs->superblockranks_bits)
             < num)
@@ -694,7 +694,7 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
       }
       else {
         start_l = start - cbs->superblockranks_bits;
-        if ((unsigned long) gt_compressed_bitsequence_get_variable_field(
+        if ((GtUword) gt_compressed_bitsequence_get_variable_field(
                                                   cbs->superblockranks, start_l,
                                                   cbs->superblockranks_bits)
             >= num)
@@ -706,12 +706,12 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
       }
       middle_s_block = GT_DIV2(start_s_block + end_s_block);
     }
-    blocks_offset_pos = (unsigned long)
+    blocks_offset_pos = (GtUword)
       gt_compressed_bitsequence_get_variable_field(
                                    cbs->superblockoffsets,
                                    middle_s_block * cbs->superblockoffsets_bits,
                                    cbs->superblockoffsets_bits);
-    rank_sum = (unsigned long) gt_compressed_bitsequence_get_variable_field(
+    rank_sum = (GtUword) gt_compressed_bitsequence_get_variable_field(
                                      cbs->superblockranks,
                                      middle_s_block * cbs->superblockranks_bits,
                                      cbs->superblockranks_bits);
@@ -738,7 +738,7 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
 
     /* search within block */
     block = (uint64_t)
-      gt_popcount_tab_get(cbs->popcount_tab, class, (unsigned long)
+      gt_popcount_tab_get(cbs->popcount_tab, class, (GtUword)
                           gt_compressed_bitsequence_get_variable_field(
                                              cbs->c_offsets, blocks_offset_pos,
                                              block_offset_bits));
@@ -755,12 +755,12 @@ unsigned long gt_compressed_bitsequence_select_1(GtCompressedBitsequence *cbs,
   return position;
 }
 
-unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
-                                                 unsigned long num)
+GtUword gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
+                                                 GtUword num)
 {
   unsigned int block_offset_bits,
                class = cbs->blocksize + 1;
-  unsigned long block_idx,
+  GtUword block_idx,
                 blocks_offset_pos,
                 containing_s_block,
                 end_s_block, middle_s_block, start_s_block,
@@ -776,7 +776,7 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
   gt_assert(cbs != NULL);
   gt_assert(num < cbs->num_of_bits);
 
-  s_block_bits = (unsigned long) cbs->blocksize * cbs->superblocksize;
+  s_block_bits = (GtUword) cbs->blocksize * cbs->superblocksize;
   max_0_rank = cbs->num_of_bits - gt_compressed_bitsequence_get_variable_field(
                       cbs->superblockranks,
                       (cbs->num_of_superblocks - 1) * cbs->superblockranks_bits,
@@ -794,7 +794,7 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
     blocks_offset_pos = 0;
   }
   else {
-    unsigned long middle_s_block_max,
+    GtUword middle_s_block_max,
                   middle_s_block_r_max,
                   middle_s_block_l_max;
     /* search for superblock */
@@ -837,12 +837,12 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
       middle_s_block = GT_DIV2(start_s_block + end_s_block);
     }
     middle_s_block_max = s_block_bits * (middle_s_block + 1);
-    blocks_offset_pos = (unsigned long)
+    blocks_offset_pos = (GtUword)
       gt_compressed_bitsequence_get_variable_field(
                                    cbs->superblockoffsets,
                                    middle_s_block * cbs->superblockoffsets_bits,
                                    cbs->superblockoffsets_bits);
-    rank_sum = (unsigned long)
+    rank_sum = (GtUword)
       middle_s_block_max - gt_compressed_bitsequence_get_variable_field(
                                      cbs->superblockranks,
                                      middle_s_block * cbs->superblockranks_bits,
@@ -869,7 +869,7 @@ unsigned long gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
 
     /* search within block */
     block = (uint64_t)
-      gt_popcount_tab_get(cbs->popcount_tab, class, (unsigned long)
+      gt_popcount_tab_get(cbs->popcount_tab, class, (GtUword)
                           gt_compressed_bitsequence_get_variable_field(
                                              cbs->c_offsets, blocks_offset_pos,
                                              block_offset_bits));
@@ -940,7 +940,7 @@ int gt_compressed_bitsequence_write(GtCompressedBitsequence *cbs,
                                     GtError *err)
 {
   int had_err = 0;
-  unsigned long expectedsize = 0;
+  GtUword expectedsize = 0;
   FILE *fp = NULL;
 
   fp = gt_fa_fopen(filename, "w", err);
@@ -948,7 +948,7 @@ int gt_compressed_bitsequence_write(GtCompressedBitsequence *cbs,
     had_err = -1;
 
   if (!had_err) {
-    expectedsize = (unsigned long) gt_compressed_bitsequence_file_size(cbs);
+    expectedsize = (GtUword) gt_compressed_bitsequence_file_size(cbs);
     had_err = gt_mapspec_write(gt_compressed_bitsequence_data_setup_mapspec,
                                fp, cbs, expectedsize, err);
   }
@@ -984,11 +984,11 @@ gt_compressed_bitsequence_new_from_file(const char *filename,
                                         GtError *err)
 {
   int had_err = 0;
-  unsigned long expectedsize = 0;
+  GtUword expectedsize = 0;
   GtCompressedBitsequence *cbs = gt_compressed_bitsequence_new_empty();
   gt_assert(filename != NULL);
   if (gt_file_exists(filename)) {
-    expectedsize = (unsigned long) gt_compressed_bitsequence_header_size(cbs);
+    expectedsize = (GtUword) gt_compressed_bitsequence_header_size(cbs);
     had_err =
       gt_mapspec_read_header(
                      gt_compressed_bitsequence_header_setup_mapspec,
@@ -1034,7 +1034,7 @@ gt_compressed_bitsequence_new_from_file(const char *filename,
              expectedsize);
     }
     if (!had_err) {
-      expectedsize = (unsigned long) gt_compressed_bitsequence_file_size(cbs);
+      expectedsize = (GtUword) gt_compressed_bitsequence_file_size(cbs);
       gt_log_log("new expected: %lu\n", expectedsize);
       had_err =
         gt_mapspec_read(
@@ -1099,7 +1099,7 @@ void gt_compressed_bitsequence_delete(GtCompressedBitsequence *cbs)
 static int gt_compressed_bitsequence_unit_test_variable_field(
                                             GtError *err,
                                             GtBitsequence *bitseq,
-                                            unsigned long size)
+                                            GtUword size)
 {
   int had_err = 0;
   GtBitsequence result,
@@ -1152,11 +1152,11 @@ static int gt_compressed_bitsequence_unit_test_block_identical(
                                             GtError *err,
                                             GtBitsequence *bitseq,
                                             const unsigned int sample_testratio,
-                                            const unsigned long cbs_testsize)
+                                            const GtUword cbs_testsize)
 {
   int had_err = 0;
   unsigned int class, len, block_len;
-  unsigned long block_offset = 0,
+  GtUword block_offset = 0,
                 offsets_bitpos, sample, block,
                 idx, jdx;
   GtBitsequence orig_block;
@@ -1180,7 +1180,7 @@ static int gt_compressed_bitsequence_unit_test_block_identical(
     if (sample==0)
       offsets_bitpos = 0;
     else {
-      offsets_bitpos = (unsigned long)
+      offsets_bitpos = (GtUword)
         gt_compressed_bitsequence_get_variable_field(
                                      cbs->superblockoffsets,
                                      (sample - 1) * cbs->superblockoffsets_bits,
@@ -1192,7 +1192,7 @@ static int gt_compressed_bitsequence_unit_test_block_identical(
     }
     class = gt_compressed_bitsequence_get_class(cbs, idx);
     len = gt_popcount_tab_offset_bits(cbs->popcount_tab, class);
-    block_offset = (unsigned long)
+    block_offset = (GtUword)
       gt_compressed_bitsequence_get_variable_field(cbs->c_offsets,
                                                    offsets_bitpos, len);
     block = gt_popcount_tab_get(cbs->popcount_tab, class, block_offset);
@@ -1200,7 +1200,7 @@ static int gt_compressed_bitsequence_unit_test_block_identical(
                                                          bitseq,
                                                          idx * cbs->blocksize,
                                                          block_len);
-    gt_ensure(block == (unsigned long) orig_block);
+    gt_ensure(block == (GtUword) orig_block);
   }
   gt_compressed_bitsequence_delete(cbs);
   return had_err;
@@ -1210,11 +1210,11 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
 {
   const unsigned int sample_testratio = 32U;
   int had_err = 0;
-  const unsigned long bitseq_testsize = 256UL,
+  const GtUword bitseq_testsize = 256UL,
                       cbs_testsize = (GT_LOGWORDSIZE == 6) ?
                                      16380UL :
                                      8192UL;
-  unsigned long idx;
+  GtUword idx;
   GtBitsequence *bitseq;
   GtCompressedBitsequence *cbs;
 
@@ -1266,12 +1266,12 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
     gt_ensure(cbs != NULL);
 
     if (cbs != NULL) {
-      unsigned long rank1, rank0;
+      GtUword rank1, rank0;
 
       rank1 = gt_compressed_bitsequence_rank_1(cbs,
-                               (unsigned long) GT_INTWORDSIZE - 1UL);
-      gt_ensure(rank1 == (unsigned long) GT_DIV2(GT_INTWORDSIZE));
-      for (idx = (unsigned long) GT_INTWORDSIZE - 1UL;
+                               (GtUword) GT_INTWORDSIZE - 1UL);
+      gt_ensure(rank1 == (GtUword) GT_DIV2(GT_INTWORDSIZE));
+      for (idx = (GtUword) GT_INTWORDSIZE - 1UL;
            !had_err && idx < cbs_testsize;
            idx += idx + 1) {
         rank1 = gt_compressed_bitsequence_rank_1(cbs, idx);
@@ -1288,7 +1288,7 @@ int gt_compressed_bitsequence_unit_test(GtError *err)
   if (!had_err) {
     cbs = gt_compressed_bitsequence_new(bitseq, sample_testratio, cbs_testsize);
     if (cbs != NULL) {
-      unsigned long ranktotal1, select1, rank1, select0, rank0;
+      GtUword ranktotal1, select1, rank1, select0, rank0;
       ranktotal1 = gt_compressed_bitsequence_rank_1(cbs, cbs_testsize - 1);
       for (idx = 1UL; !had_err && idx <= ranktotal1; idx++) {
         select1 = gt_compressed_bitsequence_select_1(cbs, idx);

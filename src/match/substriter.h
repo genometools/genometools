@@ -29,7 +29,7 @@ typedef struct Substriter Substriter;
 Substriter *gt_substriter_new(const GtAlphabet *alphabet,unsigned int qvalue);
 
 void gt_substriter_init(Substriter *substriter,const GtUchar *start,
-                     unsigned long len);
+                     GtUword len);
 
 int gt_substriter_next(Substriter *substriter);
 

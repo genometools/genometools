@@ -42,7 +42,7 @@ typedef struct {
         *str_fastaoutputfilenameinnerregion,
         *str_gff3filename;
   GtRange searchrange;
-  unsigned long minseedlength,
+  GtUword minseedlength,
                 minltrlength,
                 maxltrlength,
                 mindistance,
@@ -625,7 +625,7 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
                                          arguments->offset,
                                          arguments->minlengthTSD,
                                          arguments->maxlengthTSD,
-                                         (unsigned long) arguments->vicinity,
+                                         (GtUword) arguments->vicinity,
                                          err);
   if (ltrh_stream == NULL)
     return -1;

@@ -39,7 +39,7 @@ typedef struct {
   GtStrArray *db;
   /* rdj-radixsort test */
   bool testrs, testrs_print;
-  unsigned long testrs_depth, testrs_maxdepth, maxlow;
+  GtUword testrs_depth, testrs_maxdepth, maxlow;
   unsigned int lowqual;
 } GtReadjoinerPrefilterArguments;
 
@@ -225,7 +225,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
 static void gt_readjoiner_prefilter_list_input_files(
     GtReadjoinerPrefilterArguments *arguments, GtLogger *verbose_logger)
 {
-  unsigned long i;
+  GtUword i;
   GtStr *inputfileslist = gt_str_new();
   for (i = 0; i < gt_str_array_size(arguments->db); i++)
   {
@@ -254,8 +254,8 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
   GtReadjoinerPrefilterArguments *arguments = tool_arguments;
   int had_err = 0;
   bool varlen;
-  unsigned long i;
-  unsigned long nofreads_valid, nofreads_invalid, nofreads_input,
+  GtUword i;
+  GtUword nofreads_valid, nofreads_invalid, nofreads_input,
                 nofreads_output,
                 tlen_valid, tlen_invalid, tlen_input;
   GtLogger *default_logger, *verbose_logger;
@@ -349,7 +349,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     else
     {
       GtContfinder *contfinder;
-      unsigned long nofreads_contained, nofreads_matesofc;
+      GtUword nofreads_contained, nofreads_matesofc;
       contfinder = gt_contfinder_new(r2t);
       gt_contfinder_run(contfinder, !arguments->singlestrand,
           arguments->copynum);

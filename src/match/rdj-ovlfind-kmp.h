@@ -35,16 +35,16 @@
 typedef uint16_t gt_kmp_t;
 #define GT_KMP_MAX UINT16_MAX
 
-gt_kmp_t* gt_kmp_preproc(const char *seq, unsigned long seqlen);
+gt_kmp_t* gt_kmp_preproc(const char *seq, GtUword seqlen);
 
-GtContfind gt_ovlfind_kmp(const char *u, unsigned long u_length,
+GtContfind gt_ovlfind_kmp(const char *u, GtUword u_length,
                           const gt_kmp_t *u_pi,
                           const char *v /* use NULL for u vs. u */,
-                          unsigned long v_length, const gt_kmp_t *v_pi,
-                          GtOvlfindMode m, unsigned long min_length,
+                          GtUword v_length, const gt_kmp_t *v_pi,
+                          GtOvlfindMode m, GtUword min_length,
                           bool find_nonmaximal,
                           void(*spmproc)
-                            (unsigned long /* overlap length */,
+                            (GtUword /* overlap length */,
                              bool /* true if suffix of u == prefix of v
                                      false if prefix of u == suffix of v */,
                              void* /* spmprocdata */),

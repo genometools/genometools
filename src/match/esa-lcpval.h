@@ -27,10 +27,10 @@ typedef struct Lcpvalueiterator Lcpvalueiterator;
 Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
                                       GtReadmode readmode);
 
-unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
+GtUword gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
                                       bool firstpage,
                                       const ESASuffixptr *suftabptr,
-                                      unsigned long numberofsuffixes);
+                                      GtUword numberofsuffixes);
 
 void gt_freeLcpvalueiterator(Lcpvalueiterator *lvi);
 

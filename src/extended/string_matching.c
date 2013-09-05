@@ -29,11 +29,11 @@
 #define STRING_MATCHING_MAX_STRING_LENGTH   100000
 #define STRING_MATCHING_MAX_PATTERN_LENGTH  66
 
-void gt_string_matching_bmh(const char *s, unsigned long n,
-                            const char *p, unsigned long m,
+void gt_string_matching_bmh(const char *s, GtUword n,
+                            const char *p, GtUword m,
                             GtProcessMatch process_match, void *data)
 {
-  unsigned long i, j, pos, d[UCHAR_MAX];
+  GtUword i, j, pos, d[UCHAR_MAX];
   gt_assert(s && p);
   if (m > n || !m || !n) /* no match possible */
     return;
@@ -56,12 +56,12 @@ void gt_string_matching_bmh(const char *s, unsigned long n,
   }
 }
 
-static unsigned long* compute_prefixtab(const char *p, unsigned long m)
+static GtUword* compute_prefixtab(const char *p, GtUword m)
 {
-  unsigned long i, vlen = 0, *prefixtab;
+  GtUword i, vlen = 0, *prefixtab;
   char b;
   gt_assert(p);
-  prefixtab = gt_malloc(sizeof (unsigned long) * (m+1));
+  prefixtab = gt_malloc(sizeof (GtUword) * (m+1));
   prefixtab[0] = GT_UNDEF_ULONG; /* paranoia */
   if (m)
     prefixtab[1] = 0;
@@ -76,11 +76,11 @@ static unsigned long* compute_prefixtab(const char *p, unsigned long m)
   return prefixtab;
 }
 
-unsigned long gt_string_matching_kmp(const char *s, unsigned long n,
-                                     const char *p, unsigned long m,
+GtUword gt_string_matching_kmp(const char *s, GtUword n,
+                                     const char *p, GtUword m,
                                      GtProcessMatch process_match, void *data)
 {
-  unsigned long *prefixtab,
+  GtUword *prefixtab,
                 j = 0,   /* position in s corresponding to the first character
                             in p */
                 cpl = 0; /* length of common prefix of s[j]..s[n-1] and p */
@@ -121,12 +121,12 @@ unsigned long gt_string_matching_kmp(const char *s, unsigned long n,
   return cpl;
 }
 
-void gt_string_matching_shift_and(const char *s, unsigned long n,
-                                  const char *p, unsigned long m,
+void gt_string_matching_shift_and(const char *s, GtUword n,
+                                  const char *p, GtUword m,
                                   GtProcessMatch process_match, void *data)
 {
   GtBittab *D, *B[UCHAR_MAX] = { NULL };
-  unsigned long i, j;
+  GtUword i, j;
   gt_assert(s && p);
   if (m > n || !m || !n) /* no match possible */
     return;
@@ -156,16 +156,16 @@ void gt_string_matching_shift_and(const char *s, unsigned long n,
   gt_bittab_delete(D);
 }
 
-void gt_string_matching_brute_force(const char *s, unsigned long n,
-                                    const char *p, unsigned long m,
+void gt_string_matching_brute_force(const char *s, GtUword n,
+                                    const char *p, GtUword m,
                                     GtProcessMatch process_match, void *data)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(s && p);
   if (m > n || !m || !n) /* no match possible */
     return;
   for (i = 0; i <= n - m; i++) {
-    unsigned long j = 0;
+    GtUword j = 0;
     while (j < m && s[i+j] == p[j])
       j++;
     if (j == m && process_match) {
@@ -175,15 +175,15 @@ void gt_string_matching_brute_force(const char *s, unsigned long n,
   }
 }
 
-static bool store_first_match(unsigned long pos, void *data)
+static bool store_first_match(GtUword pos, void *data)
 {
-  unsigned long *match = data;
+  GtUword *match = data;
   gt_assert(match);
   *match = pos;
   return true;
 }
 
-static bool store_match(unsigned long pos, void *data)
+static bool store_match(GtUword pos, void *data)
 {
   GtArray *positions = data;
   gt_assert(positions);
@@ -199,15 +199,15 @@ int gt_string_matching_unit_test(GtError *err)
         *bmh_matches,
         *kmp_matches,
         *shift_and_matches;
-  unsigned long i, brute_force_match, bmh_match, kmp_match, shift_and_match;
+  GtUword i, brute_force_match, bmh_match, kmp_match, shift_and_match;
   int had_err = 0;
 
   gt_error_check(err);
 
-  brute_force_matches = gt_array_new(sizeof (unsigned long));
-  bmh_matches = gt_array_new(sizeof (unsigned long));
-  kmp_matches = gt_array_new(sizeof (unsigned long));
-  shift_and_matches = gt_array_new(sizeof (unsigned long));
+  brute_force_matches = gt_array_new(sizeof (GtUword));
+  bmh_matches = gt_array_new(sizeof (GtUword));
+  kmp_matches = gt_array_new(sizeof (GtUword));
+  shift_and_matches = gt_array_new(sizeof (GtUword));
 
   /* match the empty pattern */
   gt_string_matching_brute_force(text, strlen(text), "", 0, store_match,
@@ -223,7 +223,7 @@ int gt_string_matching_unit_test(GtError *err)
   gt_ensure(!gt_array_size(shift_and_matches));
 
   for (i = 0; !had_err && i < STRING_MATCHING_NUM_OF_TESTS; i++) {
-    unsigned long j, n, m;
+    GtUword j, n, m;
     /* generate random string and pattern */
     n = gt_rand_max(STRING_MATCHING_MAX_STRING_LENGTH);
     m = gt_rand_max(STRING_MATCHING_MAX_PATTERN_LENGTH);

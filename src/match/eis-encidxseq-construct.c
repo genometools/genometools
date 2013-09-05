@@ -45,7 +45,7 @@ gt_createEncIdxSeq(const char *projectName,
 {
   Suffixarray suffixArray;
   struct encIdxSeq *newSeqIdx;
-  unsigned long length;
+  GtUword length;
   gt_assert(projectName);
   /* map and interpret index project file */
   if (streamsuffixarray(&suffixArray,
@@ -63,7 +63,7 @@ gt_createEncIdxSeq(const char *projectName,
 }
 
 EISeq *
-gt_createEncIdxSeqFromSA(Suffixarray *sa, unsigned long totalLen,
+gt_createEncIdxSeqFromSA(Suffixarray *sa, GtUword totalLen,
                       const char *projectName,
                       const struct seqBaseParam *params,
                       size_t numExtHeaders, const uint16_t *headerIDs,
@@ -158,7 +158,7 @@ gt_createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
 }
 
 EISeq *
-gt_createEncIdxSeqGen(unsigned long totalLen, const char *projectName,
+gt_createEncIdxSeqGen(GtUword totalLen, const char *projectName,
                    MRAEnc *alphabet, const struct seqStats *stats,
                    SeqDataReader seqGenerator,
                    const struct seqBaseParam *params,

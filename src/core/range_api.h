@@ -26,7 +26,7 @@
 typedef struct GtRange GtRange;
 
 struct GtRange {
-  unsigned long start,
+  GtUword start,
                 end;
 };
 
@@ -41,23 +41,23 @@ int           gt_range_compare(const GtRange *range_a, const GtRange *range_b);
    before <range_b>, and 1 else. */
 int           gt_range_compare_with_delta(const GtRange *range_a,
                                           const GtRange *range_b,
-                                          unsigned long delta);
+                                          GtUword delta);
 /* Returns <true> if <range_a> and <range_b> overlap, <false> otherwise. */
 bool          gt_range_overlap(const GtRange *range_a, const GtRange *range_b);
 /* Returns <true> if <range_a> and <range_b> overlap ___at least___ <delta> many
    positions, <false> otherwise. */
 bool          gt_range_overlap_delta(const GtRange *range_a,
                                      const GtRange *range_b,
-                                     unsigned long delta);
+                                     GtUword delta);
 /* Returns <true> if <range_b> is contained in <range_a>, <false> otherwise. */
 bool          gt_range_contains(const GtRange *range_a, const GtRange *range_b);
 /* Returns <true> if <point> lies within <range>, <false> otherwise. */
-bool          gt_range_within(const GtRange *range, unsigned long point);
+bool          gt_range_within(const GtRange *range, GtUword point);
 /* Join <range_a> and <range_b> and return the result. */
 GtRange       gt_range_join(const GtRange *range_a, const GtRange *range_b);
 /* Transform start and end of <range> by <offset> and return the result. */
 GtRange       gt_range_offset(const GtRange *range, long offset);
 /* Returns the length of the given <range>. */
-unsigned long gt_range_length(const GtRange *range);
+GtUword gt_range_length(const GtRange *range);
 
 #endif

@@ -23,7 +23,7 @@
 #include "match/esa-seqread.h"
 
 int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
-    unsigned long k, unsigned long c, unsigned long debug_value,
+    GtUword k, GtUword c, GtUword debug_value,
     bool edit_twobitencoding, const char *indexname, GtError *err);
 
 #endif

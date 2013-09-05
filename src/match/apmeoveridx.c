@@ -32,19 +32,19 @@
 
 typedef struct
 {
-  unsigned long Pv,       /* the plus-vector for Myers Algorithm */
+  GtUword Pv,       /* the plus-vector for Myers Algorithm */
                 Mv,       /* the minus-vector for Myers Algorithm */
                 maxleqk;  /* \(\max\{i\in[0,m]\mid D(i)\leq k\}\) where
                           \(m\) is the length of the pattern, \(k\) is the
                           distance threshold, and \(D\) is
                           the current distance column */
-  unsigned long lastdistvalue;   /* the score for the given depth */
+  GtUword lastdistvalue;   /* the score for the given depth */
 } ApmeoveridxLimdfsstate;
 
 typedef struct
 {
   bool skpp;
-  unsigned long maxintervalwidth,
+  GtUword maxintervalwidth,
                 patternlength,
                 maxdistance,
                 *eqsvector;
@@ -52,7 +52,7 @@ typedef struct
 
 #ifdef SKDEBUG
 
-static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
+static void showmaxleqvalue(FILE *fp,GtUword maxleqk,
                             const Limdfsconstinfo *mti)
 {
   if (maxleqk == UNDEFMAXLEQK)
@@ -65,7 +65,7 @@ static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
 }
 
 static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
-                                 unsigned long currentdepth,
+                                 GtUword currentdepth,
                                  const Limdfsconstinfo *mt)
 {
   const ApmeoveridxLimdfsstate *col = (const ApmeoveridxLimdfsstate *) aliascol;
@@ -77,7 +77,7 @@ static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
     printf("[]");
   } else
   {
-    unsigned long idx, backmask, score = currentdepth;
+    GtUword idx, backmask, score = currentdepth;
 
     printf("[%lu",score);
     for (idx=1UL, backmask = 1UL; idx<=col->maxleqk; idx++, backmask <<= 1)
@@ -100,9 +100,9 @@ static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
 
 static void verifycolumnvalues(const Limdfsconstinfo *mt,
                                const Limdfsstate *acol,
-                               unsigned long startscore)
+                               GtUword startscore)
 {
-  unsigned long idx, score, minscore, mask, bfmaxleqk;
+  GtUword idx, score, minscore, mask, bfmaxleqk;
   const ApmeoveridxLimdfsstate *col = (const ApmeoveridxLimdfsstate *) acol;
   const ApmeoveridxLimdfsconstinfo *mti =
                                         (const ApmeoveridxLimdfsconstinfo *) mt;
@@ -161,9 +161,9 @@ static void apme_initdfsconstinfo(Limdfsconstinfo *mt,
                                  /* Variable argument list is as follows:
                                     unsigned int alphasize
                                     const GtUchar *pattern,
-                                    unsigned long patternlength,
-                                    unsigned long maxdistance,
-                                    unsigned long maxintervalwidth,
+                                    GtUword patternlength,
+                                    GtUword maxdistance,
+                                    GtUword maxintervalwidth,
                                     bool skpp
                                  */
 {
@@ -173,13 +173,13 @@ static void apme_initdfsconstinfo(Limdfsconstinfo *mt,
 
   va_start(ap,alphasize);
   pattern = va_arg(ap, const GtUchar *);
-  mti->patternlength = va_arg(ap, unsigned long);
-  mti->maxdistance = va_arg(ap, unsigned long);
-  mti->maxintervalwidth = va_arg(ap, unsigned long);
+  mti->patternlength = va_arg(ap, GtUword);
+  mti->maxdistance = va_arg(ap, GtUword);
+  mti->maxintervalwidth = va_arg(ap, GtUword);
   mti->skpp = (bool) va_arg(ap, int);
   va_end(ap);
   gt_assert(mti->maxdistance < mti->patternlength);
-  gt_initeqsvector(mti->eqsvector,(unsigned long) alphasize,
+  gt_initeqsvector(mti->eqsvector,(GtUword) alphasize,
                 pattern,mti->patternlength);
 }
 
@@ -221,10 +221,10 @@ static void apme_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
 
 static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                       DECLAREPTRDFSSTATE(aliascolumn),
-                                      GT_UNUSED unsigned long leftbound,
-                                      GT_UNUSED unsigned long rightbound,
-                                      unsigned long width,
-                                      GT_UNUSED unsigned long currentdepth,
+                                      GT_UNUSED GtUword leftbound,
+                                      GT_UNUSED GtUword rightbound,
+                                      GtUword width,
+                                      GT_UNUSED GtUword currentdepth,
                                       Limdfsconstinfo *mt)
 {
   ApmeoveridxLimdfsstate *col = (ApmeoveridxLimdfsstate *) aliascolumn;
@@ -235,7 +235,7 @@ static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
     limdfsresult->status = Limdfsstop; /* stop depth first traversal */
     return;
   }
-  if (mti->maxintervalwidth == 0 || width == (unsigned long) 1)
+  if (mti->maxintervalwidth == 0 || width == (GtUword) 1)
   {
     if (col->maxleqk == SUCCESSMAXLEQK)
     {
@@ -247,7 +247,7 @@ static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
     }
   } else
   {
-    if (width <= (unsigned long) mti->maxintervalwidth)
+    if (width <= (GtUword) mti->maxintervalwidth)
     {
       /* success with match of length maxleqk */
       gt_assert(col->maxleqk > 0);
@@ -263,11 +263,11 @@ static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
 
 static void apme_nextLimdfsstate(const Limdfsconstinfo *mt,
                                  DECLAREPTRDFSSTATE(aliasoutcol),
-                                 GT_UNUSED unsigned long currentdepth,
+                                 GT_UNUSED GtUword currentdepth,
                                  GtUchar currentchar,
                                  const DECLAREPTRDFSSTATE(aliasincol))
 {
-  unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
+  GtUword Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,               /* only one bit is on */
                 idx,                    /* a counter */
                 score;                  /* current score */
@@ -282,7 +282,7 @@ static void apme_nextLimdfsstate(const Limdfsconstinfo *mt,
   gt_assert(currentchar != (GtUchar) SEPARATOR);
   if (currentchar != (GtUchar) WILDCARD)
   {
-    Eq = mti->eqsvector[(unsigned long) currentchar];
+    Eq = mti->eqsvector[(GtUword) currentchar];
   }
   Xv = Eq | incol->Mv;
   Xh = (((Eq & incol->Pv) + incol->Pv) ^ incol->Pv) | Eq;
@@ -348,10 +348,10 @@ static void apme_nextLimdfsstate(const Limdfsconstinfo *mt,
 
 static void apme_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
                                         DECLAREPTRDFSSTATE(aliascol),
-                                        GT_UNUSED unsigned long currentdepth,
+                                        GT_UNUSED GtUword currentdepth,
                                         GtUchar currentchar)
 {
-  unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
+  GtUword Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,           /* only one bit is on */
                 idx,                /* a counter */
                 score;              /* current score */
@@ -363,7 +363,7 @@ static void apme_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
   gt_assert(mti->maxintervalwidth > 0 || col->maxleqk != SUCCESSMAXLEQK);
   if (currentchar != (GtUchar) WILDCARD)
   {
-    Eq = mti->eqsvector[(unsigned long) currentchar];
+    Eq = mti->eqsvector[(GtUword) currentchar];
   }
   Xv = Eq | col->Mv;
   Xh = (((Eq & col->Pv) + col->Pv) ^ col->Pv) | Eq;
@@ -382,7 +382,7 @@ static void apme_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
   {
     if (Ph & backmask)
     {
-      unsigned long tmpmaxleqk = UNDEFMAXLEQK;
+      GtUword tmpmaxleqk = UNDEFMAXLEQK;
       score = mti->maxdistance+1;
       if (col->maxleqk > 0)
       {

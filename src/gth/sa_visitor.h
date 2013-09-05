@@ -26,7 +26,7 @@ typedef struct GthSAVisitor GthSAVisitor;
 
 void gth_sa_visitor_preface(GthSAVisitor*);
 void gth_sa_visitor_visit_sa(GthSAVisitor*, GthSA*);
-void gth_sa_visitor_trailer(GthSAVisitor*, unsigned long num_of_sas);
+void gth_sa_visitor_trailer(GthSAVisitor*, GtUword num_of_sas);
 void gth_sa_visitor_delete(GthSAVisitor*);
 
 #endif

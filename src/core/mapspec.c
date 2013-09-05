@@ -53,7 +53,7 @@ typedef struct
   const char *function;
   void *startptr;
   size_t sizeofunit;
-  unsigned long numofunits;
+  GtUword numofunits;
 } GtMapspecification;
 
 GT_DECLAREARRAYSTRUCT(GtMapspecification);
@@ -99,14 +99,14 @@ static void showmapspec(const GtMapspecification *mapspec)
 {
   printf("(%s,size=%lu,elems=%lu)",
            mapspec->function,
-           (unsigned long) mapspec->sizeofunit,
+           (GtUword) mapspec->sizeofunit,
            mapspec->numofunits);
 }
 #endif
 
 static int assigncorrecttype(GtMapspecification *mapspec,
                              void *ptr,
-                             unsigned long byteoffset,
+                             GtUword byteoffset,
                              GtError *err)
 {
   void *voidptr;
@@ -131,7 +131,7 @@ static int assigncorrecttype(GtMapspecification *mapspec,
       ASSIGNPTR2STARTPTR(uint32_t);
       break;
     case GtUlongType:
-      ASSIGNPTR2STARTPTR(unsigned long);
+      ASSIGNPTR2STARTPTR(GtUword);
       break;
     case Uint64Type:
       ASSIGNPTR2STARTPTR(uint64_t);
@@ -159,7 +159,7 @@ static int assigncorrecttype(GtMapspecification *mapspec,
       break;
     default:
       gt_error_set(err,"no assignment specification for size %lu",
-                    (unsigned long) mapspec->sizeofunit);
+                    (GtUword) mapspec->sizeofunit);
       had_err = -1;
   }
   return had_err;
@@ -170,16 +170,16 @@ struct GtMapspec {
 };
 
 int  gt_mapspec_read_header(GtMapspecSetupFunc setup, void *data,
-                            const char *filename, unsigned long expectedsize,
+                            const char *filename, GtUword expectedsize,
                             void **mapped, GtError *err)
 {
   void *mapptr;
-  unsigned long byteoffset = 0;
+  GtUword byteoffset = 0;
   size_t numofbytes;
   GtMapspec *ms = gt_malloc(sizeof (GtMapspec));
   GtMapspecification *mapspecptr;
   int had_err = 0;
-  unsigned long totalpadunits = 0;
+  GtUword totalpadunits = 0;
 
   gt_error_check(err);
   GT_INITARRAY(&ms->mapspectable, GtMapspecification);
@@ -207,12 +207,12 @@ int  gt_mapspec_read_header(GtMapspecSetupFunc setup, void *data,
     byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
                               (uint64_t) (mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
-    if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
+    if (byteoffset % (GtUword) GT_WORDSIZE_INBYTES > 0)
     {
       size_t padunits
         = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
-      byteoffset += (unsigned long) padunits;
-      totalpadunits += (unsigned long) padunits;
+      byteoffset += (GtUword) padunits;
+      totalpadunits += (GtUword) padunits;
     }
     for (mapspecptr++;
          mapspecptr < ms->mapspectable.spaceGtMapspecification +
@@ -227,12 +227,12 @@ int  gt_mapspec_read_header(GtMapspecSetupFunc setup, void *data,
                                 (uint64_t) (byteoffset +
                                             mapspecptr->sizeofunit *
                                             mapspecptr->numofunits));
-      if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
+      if (byteoffset % (GtUword) GT_WORDSIZE_INBYTES > 0)
       {
         size_t padunits
           = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
-        byteoffset += (unsigned long) padunits;
-        totalpadunits += (unsigned long) padunits;
+        byteoffset += (GtUword) padunits;
+        totalpadunits += (GtUword) padunits;
       }
     }
   }
@@ -252,17 +252,17 @@ int  gt_mapspec_read_header(GtMapspecSetupFunc setup, void *data,
 }
 
 int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
-                     const char *filename, unsigned long expectedsize,
+                     const char *filename, GtUword expectedsize,
                      void **mapped, GtError *err)
 {
   void *mapptr;
   uint64_t expectedaccordingtomapspec;
-  unsigned long byteoffset = 0;
+  GtUword byteoffset = 0;
   size_t numofbytes;
   GtMapspec *ms = gt_malloc(sizeof (GtMapspec));
   GtMapspecification *mapspecptr;
   int had_err = 0;
-  unsigned long totalpadunits = 0;
+  GtUword totalpadunits = 0;
 
   gt_error_check(err);
   GT_INITARRAY(&ms->mapspectable, GtMapspecification);
@@ -290,7 +290,7 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
     {
       gt_error_set(err,"%lu bytes read from %s, but " Formatuint64_t
                          " expected",
-                         (unsigned long) numofbytes,
+                         (GtUword) numofbytes,
                          filename,
                          PRINTuint64_tcast(expectedaccordingtomapspec));
       had_err = -1;
@@ -303,12 +303,12 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
     byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
                               (uint64_t) (mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
-    if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
+    if (byteoffset % (GtUword) GT_WORDSIZE_INBYTES > 0)
     {
       size_t padunits
         = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
-      byteoffset += (unsigned long) padunits;
-      totalpadunits += (unsigned long) padunits;
+      byteoffset += (GtUword) padunits;
+      totalpadunits += (GtUword) padunits;
     }
     for (mapspecptr++;
          mapspecptr < ms->mapspectable.spaceGtMapspecification +
@@ -323,12 +323,12 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
                                 (uint64_t) (byteoffset +
                                             mapspecptr->sizeofunit *
                                             mapspecptr->numofunits));
-      if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
+      if (byteoffset % (GtUword) GT_WORDSIZE_INBYTES > 0)
       {
         size_t padunits
           = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
-        byteoffset += (unsigned long) padunits;
-        totalpadunits += (unsigned long) padunits;
+        byteoffset += (GtUword) padunits;
+        totalpadunits += (GtUword) padunits;
       }
     }
   }
@@ -347,16 +347,16 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
   return had_err;
 }
 
-int gt_mapspec_pad(FILE *fp, unsigned long *bytes_written,
-                   unsigned long byteoffset, GT_UNUSED GtError *err)
+int gt_mapspec_pad(FILE *fp, GtUword *bytes_written,
+                   GtUword byteoffset, GT_UNUSED GtError *err)
 {
-  if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
+  if (byteoffset % (GtUword) GT_WORDSIZE_INBYTES > 0)
   {
     GtUchar padbuffer[GT_WORDSIZE_INBYTES-1] = {0};
 
     size_t padunits = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
     gt_xfwrite(padbuffer,sizeof (GtUchar),padunits,fp);
-    *bytes_written = (unsigned long) padunits;
+    *bytes_written = (GtUword) padunits;
   } else
   {
     *bytes_written = 0;
@@ -365,13 +365,13 @@ int gt_mapspec_pad(FILE *fp, unsigned long *bytes_written,
 }
 
 int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
-                     void *data, unsigned long expectedsize, GtError *err)
+                     void *data, GtUword expectedsize, GtError *err)
 {
   GtMapspecification *mapspecptr;
-  unsigned long byteoffset = 0;
+  GtUword byteoffset = 0;
   int had_err = 0;
-  unsigned long totalpadunits = 0;
-  unsigned long byteswritten;
+  GtUword totalpadunits = 0;
+  GtUword byteswritten;
   GtMapspec *ms = gt_malloc(sizeof (GtMapspec));
 
   gt_error_check(err);
@@ -436,7 +436,7 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
           break;
         default:
            gt_error_set(err,"no map specification for size %lu",
-                         (unsigned long) mapspecptr->sizeofunit);
+                         (GtUword) mapspecptr->sizeofunit);
            had_err = -1;
       }
     }
@@ -480,7 +480,7 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
         mapspecptr->numofunits = ELEMS;\
         mapspecptr->function = __func__
 
-void gt_mapspec_add_char_ptr(GtMapspec *mapspec, char **ptr, unsigned long n)
+void gt_mapspec_add_char_ptr(GtMapspec *mapspec, char **ptr, GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -488,7 +488,7 @@ void gt_mapspec_add_char_ptr(GtMapspec *mapspec, char **ptr, unsigned long n)
 }
 
 void gt_mapspec_add_uchar_ptr(GtMapspec *mapspec, GtUchar **ptr,
-                              unsigned long n)
+                              GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -496,23 +496,23 @@ void gt_mapspec_add_uchar_ptr(GtMapspec *mapspec, GtUchar **ptr,
 }
 
 void gt_mapspec_add_uint16_ptr(GtMapspec *mapspec, uint16_t **ptr,
-                               unsigned long n)
+                               GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
   NEWMAPSPEC(mapspec, ptr, Uint16Type, sizeof (uint16_t), n);
 }
 
-void gt_mapspec_add_ulong_ptr(GtMapspec *mapspec, unsigned long **ptr,
-                              unsigned long n)
+void gt_mapspec_add_ulong_ptr(GtMapspec *mapspec, GtUword **ptr,
+                              GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
-  NEWMAPSPEC(mapspec, ptr, GtUlongType, sizeof (unsigned long), n);
+  NEWMAPSPEC(mapspec, ptr, GtUlongType, sizeof (GtUword), n);
 }
 
 void gt_mapspec_add_ulongbound_ptr(GtMapspec *mapspec, GtUlongBound **ptr,
-                                   unsigned long n)
+                                   GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -520,7 +520,7 @@ void gt_mapspec_add_ulongbound_ptr(GtMapspec *mapspec, GtUlongBound **ptr,
 }
 
 void gt_mapspec_add_uint32_ptr(GtMapspec *mapspec, uint32_t **ptr,
-                               unsigned long n)
+                               GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -528,7 +528,7 @@ void gt_mapspec_add_uint32_ptr(GtMapspec *mapspec, uint32_t **ptr,
 }
 
 void gt_mapspec_add_uint64_ptr(GtMapspec *mapspec, uint64_t **ptr,
-                               unsigned long n)
+                               GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -536,14 +536,14 @@ void gt_mapspec_add_uint64_ptr(GtMapspec *mapspec, uint64_t **ptr,
 }
 
 void gt_mapspec_add_bitsequence_ptr(GtMapspec *mapspec, GtBitsequence **ptr,
-                                    unsigned long n)
+                                    GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
   NEWMAPSPEC(mapspec, ptr, GtBitsequenceType, sizeof (GtBitsequence), n);
 }
 void gt_mapspec_add_twobitencoding_ptr(GtMapspec *mapspec,
-                                       GtTwobitencoding **ptr, unsigned long n)
+                                       GtTwobitencoding **ptr, GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -552,7 +552,7 @@ void gt_mapspec_add_twobitencoding_ptr(GtMapspec *mapspec,
 
 void gt_mapspec_add_specialcharinfo_ptr(GtMapspec *mapspec,
                                         GtSpecialcharinfo **ptr,
-                                        unsigned long n)
+                                        GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -561,7 +561,7 @@ void gt_mapspec_add_specialcharinfo_ptr(GtMapspec *mapspec,
 }
 
 void gt_mapspec_add_bitelem_ptr(GtMapspec *mapspec, BitElem **ptr,
-                                unsigned long n)
+                                GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -570,7 +570,7 @@ void gt_mapspec_add_bitelem_ptr(GtMapspec *mapspec, BitElem **ptr,
 
 void gt_mapspec_add_filelengthvalues_ptr(GtMapspec *mapspec,
                                          GtFilelengthvalues **ptr,
-                                         unsigned long n)
+                                         GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -579,7 +579,7 @@ void gt_mapspec_add_filelengthvalues_ptr(GtMapspec *mapspec,
 }
 
 void gt_mapspec_add_pairbwtindex_ptr(GtMapspec *mapspec, GtPairBwtidx **ptr,
-                                     unsigned long n)
+                                     GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
@@ -587,7 +587,7 @@ void gt_mapspec_add_pairbwtindex_ptr(GtMapspec *mapspec, GtPairBwtidx **ptr,
 }
 
 void gt_mapspec_add_uint_ptr(GtMapspec *mapspec, unsigned int **ptr,
-                             unsigned long n)
+                             GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);

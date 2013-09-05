@@ -34,7 +34,7 @@
 
 struct BWTSeqContextRetrieverFactory
 {
-  unsigned long seqLen, currentSfxPos, moduloMask;
+  GtUword seqLen, currentSfxPos, moduloMask;
   bool constructionComplete;
   unsigned short mapIntervalLog2;
   FILE *mapTableDiskBackingStore;
@@ -53,12 +53,12 @@ die_func(const char *errMsg, const char *file, int line)
 
 enum
 {
-  BLOCK_IO_SIZE = BUFSIZ / sizeof (unsigned long),
+  BLOCK_IO_SIZE = BUFSIZ / sizeof (GtUword),
 };
 
 static void
 initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
-                                  unsigned long seqLen,
+                                  GtUword seqLen,
                                   short mapIntervalLog2)
 {
   FILE *fp;
@@ -78,7 +78,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
                         TMPFP_AUTOREMOVE | TMPFP_OPENBINARY);
   {
     off_t backingStoreSize = numMapEntries(seqLen, mapIntervalLog2), i;
-    unsigned long buf[BLOCK_IO_SIZE];
+    GtUword buf[BLOCK_IO_SIZE];
     memset(buf, 0, sizeof (buf));
     for (i = BLOCK_IO_SIZE; i < backingStoreSize; i += BLOCK_IO_SIZE)
     {
@@ -94,7 +94,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
 }
 
 BWTSeqContextRetrieverFactory *
-gt_newBWTSeqContextRetrieverFactory(unsigned long seqLen, short mapIntervalLog2)
+gt_newBWTSeqContextRetrieverFactory(GtUword seqLen, short mapIntervalLog2)
 {
   BWTSeqContextRetrieverFactory *newFactory;
   newFactory = gt_malloc(sizeof (*newFactory));
@@ -118,11 +118,11 @@ gt_deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
 
 static inline void
 addMapVal(BWTSeqContextRetrieverFactory *factory,
-          unsigned long currentSfxPos, unsigned long origPos)
+          GtUword currentSfxPos, GtUword origPos)
 {
   off_t mapPos = ((off_t)origPos >> factory->mapIntervalLog2)
-    * sizeof (unsigned long);
-  unsigned long mapVal = currentSfxPos;
+    * sizeof (GtUword);
+  GtUword mapVal = currentSfxPos;
   FILE *fp = factory->mapTableDiskBackingStore;
   if (fseeko(fp, mapPos, SEEK_SET) == -1)
     die("failed to seek in backing store");
@@ -132,16 +132,16 @@ addMapVal(BWTSeqContextRetrieverFactory *factory,
 /**
  * @return number of not processed suffix indices, i.e. 0 on success
  */
-unsigned long
+GtUword
 gt_BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
-                   unsigned long chunkSize,
+                   GtUword chunkSize,
                    SeqDataReader readSfxIdx)
 {
-  unsigned long buf[BLOCK_IO_SIZE], sfxIdxLeft = chunkSize;
+  GtUword buf[BLOCK_IO_SIZE], sfxIdxLeft = chunkSize;
   gt_assert(factory);
   while (sfxIdxLeft)
   {
-    unsigned long len = MIN(BLOCK_IO_SIZE, sfxIdxLeft);
+    GtUword len = MIN(BLOCK_IO_SIZE, sfxIdxLeft);
     if (SDRRead(readSfxIdx, buf, len)
         != len)
     {
@@ -156,15 +156,15 @@ gt_BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
 
 size_t
 gt_BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory,
-                  const unsigned long *src,
+                  const GtUword *src,
                   size_t len)
 {
-  unsigned long currentSfxPos;
+  GtUword currentSfxPos;
   gt_assert(factory);
   currentSfxPos = factory->currentSfxPos;
   {
     size_t i;
-    unsigned long mask = factory->moduloMask,
+    GtUword mask = factory->moduloMask,
       seqLen = factory->seqLen;
     for (i = 0; i < len; ++i)
     {
@@ -189,7 +189,7 @@ readBS2Map(BWTSeqContextRetrieverFactory *factory,
 static inline bool
 BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
                 unsigned short bitsPerUlong,
-                unsigned long seqLen,
+                GtUword seqLen,
                 const char *projectName,
                 bool createMapFile,
                 BWTSeqContextRetriever *gt_newBWTSeqCR);
@@ -221,7 +221,7 @@ gt_BWTSCRFGet(BWTSeqContextRetrieverFactory *factory,
 
 static inline void
 readBlock2Buf(FILE *fp,
-              unsigned long *buf,
+              GtUword *buf,
               size_t len,
               BitString bitstring,
               BitOffset offset,
@@ -242,7 +242,7 @@ readBS2Map(BWTSeqContextRetrieverFactory *factory,
            BWTSeqContextRetriever *gt_newBWTSeqCR)
 {
   FILE *fp = factory->mapTableDiskBackingStore;
-  unsigned long buf[BLOCK_IO_SIZE];
+  GtUword buf[BLOCK_IO_SIZE];
   off_t i, numFullBlocks, lastBlockLen;
   BitString revMap =  gt_newBWTSeqCR->revMap;
   BitOffset storePos = 0;
@@ -270,7 +270,7 @@ enum {
 static inline bool
 BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
                 unsigned short bitsPerUlong,
-                unsigned long seqLen,
+                GtUword seqLen,
                 const char *projectName,
                 bool createMapFile,
                 BWTSeqContextRetriever *gt_newBWTSeqCR)
@@ -340,7 +340,7 @@ gt_BWTSeqCRLoad(const BWTSeq *bwtSeq,
              const char *projectName,
              short mapIntervalLog2)
 {
-  unsigned long seqLen;
+  GtUword seqLen;
   unsigned short bitsPerUlong;
   BWTSeqContextRetriever *gt_newBWTSeqCR;
   gt_assert(bwtSeq && projectName);
@@ -388,7 +388,7 @@ gt_deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
 
 void
 gt_BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
-                     unsigned long start, size_t len, Symbol subseq[])
+                     GtUword start, size_t len, Symbol subseq[])
 {
   struct SeqMark currentPos;
   struct extBitsRetrieval extBits;
@@ -398,7 +398,7 @@ gt_BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
   gt_assert(start < BWTSeqLength(bwtSeqCR->bwtSeq));
   bwtSeq = bwtSeqCR->bwtSeq;
   {
-    unsigned long end = start + len - 1;
+    GtUword end = start + len - 1;
     currentPos = BWTSeqCRNextMark(bwtSeqCR, end);
     gt_assert(currentPos.textPos >= end);
     while (currentPos.textPos > end)
@@ -408,7 +408,7 @@ gt_BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
     }
   }
   {
-    unsigned long i = len;
+    GtUword i = len;
     while (i)
     {
       --i;

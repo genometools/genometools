@@ -37,9 +37,9 @@ GtArrayGtBUItvinfo *gt_GtArrayGtBUItvinfo_new(void);
 void gt_GtArrayGtBUItvinfo_delete(GtArrayGtBUItvinfo *stack,
                                   GtESAVisitor *ev);
 
-int gt_esa_bottomup_RAM(const unsigned long *suftab,
+int gt_esa_bottomup_RAM(const GtUword *suftab,
                         const uint16_t *lcptab_bucket,
-                        unsigned long nonspecials,
+                        GtUword nonspecials,
                         GtArrayGtBUItvinfo *stack,
                         GtESAVisitor *ev,
                         GtError *err);

@@ -48,14 +48,14 @@ static const char* dna_showretracenames(DnaRetrace retrace)
 
 /* the following function allocates space for the DP tables for cDNAs/ESTs */
 static int dp_matrix_init(GthDPMatrix *dpm,
-                          unsigned long gen_dp_length,
-                          unsigned long ref_dp_length,
-                          unsigned long autoicmaxmatrixsize,
+                          GtUword gen_dp_length,
+                          GtUword ref_dp_length,
+                          GtUword autoicmaxmatrixsize,
                           bool introncutout,
                           GthJumpTable *jump_table,
                           GthStat *stat)
 {
-  unsigned long t, n, m, matrixsize, sizeofpathtype =  sizeof (GthPath);
+  GtUword t, n, m, matrixsize, sizeofpathtype =  sizeof (GthPath);
 
   /* XXX: adjust this check for QUARTER_MATRIX case */
   if (DNA_NUMOFSTATES * sizeofpathtype * (gen_dp_length + 1) >=
@@ -138,7 +138,7 @@ static int dp_matrix_init(GthDPMatrix *dpm,
 }
 
 #if 0
-static unsigned long dp_matrix_get_reference_length(DPMatrix *dpm)
+static GtUword dp_matrix_get_reference_length(DPMatrix *dpm)
 {
   return dpm->ref_dp_length;
 }
@@ -147,7 +147,7 @@ static unsigned long dp_matrix_get_reference_length(DPMatrix *dpm)
 /* the following function evaluates state E_1m for indices 1 and <m> and
    stores a backtrace reference */
 static void E_1m(GthDPMatrix *dpm, unsigned char genomicchar,
-                 const unsigned char *ref_seq_tran, unsigned long m,
+                 const unsigned char *ref_seq_tran, GtUword m,
                  GtAlphabet *gen_alphabet, GthDbl log_probies,
                  GthDPOptionsEST *dp_options_est,
                  GthDPOptionsCore *dp_options_core)
@@ -245,7 +245,7 @@ static void E_1m(GthDPMatrix *dpm, unsigned char genomicchar,
 
 /* the following function evaluates state I_1m for indices 1 and <m> and
    stores a backtrace reference */
-static void I_1m(GthDPMatrix *dpm, unsigned long m, GthDbl log_1minusprobies)
+static void I_1m(GthDPMatrix *dpm, GtUword m, GthDbl log_1minusprobies)
 {
   GthFlt value, maxvalue;
   GthPath retrace;
@@ -279,7 +279,7 @@ static void I_1m(GthDPMatrix *dpm, unsigned long m, GthDbl log_1minusprobies)
 static void dna_complete_path_matrix(GthDPMatrix *dpm,
                                      const unsigned char *gen_seq_tran,
                                      const unsigned char *ref_seq_tran,
-                                     unsigned long genomic_offset,
+                                     GtUword genomic_offset,
                                      GtAlphabet *gen_alphabet,
                                      GthDPParam *dp_param,
                                      GthDPOptionsEST *dp_options_est,
@@ -287,7 +287,7 @@ static void dna_complete_path_matrix(GthDPMatrix *dpm,
 {
   GthFlt value, maxvalue;
   GthPath retrace;
-  unsigned long n, m, modn, modnminus1;
+  GtUword n, m, modn, modnminus1;
   GthDbl rval, outputweight, **outputweights,
          log_probies,          /* initial exon state probability */
          log_1minusprobies;    /* initial intron state probability */
@@ -495,7 +495,7 @@ static void dna_complete_path_matrix(GthDPMatrix *dpm,
 }
 
 static void dna_include_exon(GthBacktracePath *backtrace_path,
-                             unsigned long exonlength)
+                             GtUword exonlength)
 {
   /* at least one editoperation already saved */
   gt_assert(gth_backtrace_path_length(backtrace_path));
@@ -512,7 +512,7 @@ static void dna_include_exon(GthBacktracePath *backtrace_path,
 }
 
 static void dna_include_intron(GthBacktracePath *backtrace_path,
-                               unsigned long intronlength)
+                               GtUword intronlength)
 {
   /* at least one editoperation already saved */
   gt_assert(gth_backtrace_path_length(backtrace_path));
@@ -531,7 +531,7 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
                              bool noicinintroncheck, GthPathMatrix *pm,
                              GtFile *outfp)
 {
-  unsigned long genptr = dpm->gen_dp_length, last_genptr = 0,
+  GtUword genptr = dpm->gen_dp_length, last_genptr = 0,
                 refptr = dpm->ref_dp_length;
   GthPath pathtype, pathtype_jt = 0;
   bool lower;
@@ -745,7 +745,7 @@ static int dna_find_optimal_path(GthBacktracePath *backtrace_path,
 /* the following function frees the DP tables for cDNAs/ESTs */
 static void dp_matrix_free(GthDPMatrix *dpm)
 {
-  unsigned long t, n;
+  GtUword t, n;
 
   /* freeing space for dpm->intronstart and dpm->exonstart */
   for (n = 0; n < DNA_NUMOFSCORETABLES; n++) {
@@ -767,65 +767,65 @@ static void dp_matrix_free(GthDPMatrix *dpm)
 
 #if 0
 static GthFlt dp_matrix_get_score_e_state(DPMatrix *dpm,
-                                                   unsigned long n,
-                                                   unsigned long m)
+                                                   GtUword n,
+                                                   GtUword m)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   return dpm->score[DNA_E_STATE][GT_MOD2(n)][m];
 }
 
 static GthFlt dp_matrix_get_score_i_state(DPMatrix *dpm,
-                                                   unsigned long n,
-                                                   unsigned long m)
+                                                   GtUword n,
+                                                   GtUword m)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   return dpm->score[DNA_I_STATE][GT_MOD2(n)][m];
 }
 
-static void dp_matrix_set_score_e_state(DPMatrix *dpm, unsigned long n,
-                                        unsigned long m, GthFlt score)
+static void dp_matrix_set_score_e_state(DPMatrix *dpm, GtUword n,
+                                        GtUword m, GthFlt score)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   dpm->score[DNA_E_STATE][GT_MOD2(n)][m] = score;
 }
 
-static void dp_matrix_set_score_i_state(DPMatrix *dpm, unsigned long n,
-                                        unsigned long m, GthFlt score)
+static void dp_matrix_set_score_i_state(DPMatrix *dpm, GtUword n,
+                                        GtUword m, GthFlt score)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   dpm->score[DNA_I_STATE][GT_MOD2(n)][m] = score;
 }
 
-static unsigned long dp_matrix_get_intronstart(DPMatrix *dpm, unsigned long n,
-                                                              unsigned long m)
+static GtUword dp_matrix_get_intronstart(DPMatrix *dpm, GtUword n,
+                                                              GtUword m)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   return dpm->intronstart[GT_MOD2(n)][m];
 }
 
-static void dp_matrix_set_intronstart(DPMatrix *dpm, unsigned long n,
-                                      unsigned long m, unsigned long start)
+static void dp_matrix_set_intronstart(DPMatrix *dpm, GtUword n,
+                                      GtUword m, GtUword start)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   dpm->intronstart[GT_MOD2(n)][m] = start;
 }
 
-static unsigned long dp_matrix_get_exonstart(DPMatrix *dpm, unsigned long n,
-                                                            unsigned long m)
+static GtUword dp_matrix_get_exonstart(DPMatrix *dpm, GtUword n,
+                                                            GtUword m)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   return dpm->exonstart[GT_MOD2(n)][m];
 }
 
-static void dp_matrix_set_exonstart(DPMatrix *dpm, unsigned long n,
-                                    unsigned long m, unsigned long start)
+static void dp_matrix_set_exonstart(DPMatrix *dpm, GtUword n,
+                                    GtUword m, GtUword start)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   dpm->exonstart[GT_MOD2(n)][m] = start;
 }
 
-static DnaRetrace dp_matrix_get_retrace_e_state(DPMatrix *dpm, unsigned long n,
-                                                               unsigned long m)
+static DnaRetrace dp_matrix_get_retrace_e_state(DPMatrix *dpm, GtUword n,
+                                                               GtUword m)
 {
   GthPath pathtype;
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
@@ -840,8 +840,8 @@ static DnaRetrace dp_matrix_get_retrace_e_state(DPMatrix *dpm, unsigned long n,
   return pathtype;
 }
 
-static DnaRetrace dp_matrix_get_retrace_i_state(DPMatrix *dpm, unsigned long n,
-                                                               unsigned long m)
+static DnaRetrace dp_matrix_get_retrace_i_state(DPMatrix *dpm, GtUword n,
+                                                               GtUword m)
 {
   GthPath pathtype;
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
@@ -857,8 +857,8 @@ static DnaRetrace dp_matrix_get_retrace_i_state(DPMatrix *dpm, unsigned long n,
   return pathtype;
 }
 
-static void dp_matrix_set_retrace_e_state(DPMatrix *dpm, unsigned long n,
-                                          unsigned long m, DnaRetrace retrace)
+static void dp_matrix_set_retrace_e_state(DPMatrix *dpm, GtUword n,
+                                          GtUword m, DnaRetrace retrace)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   gt_assert(retrace < DNA_NUMOFRETRACE);
@@ -872,8 +872,8 @@ static void dp_matrix_set_retrace_e_state(DPMatrix *dpm, unsigned long n,
   }
 }
 
-static void dp_matrix_set_retrace_i_state(DPMatrix *dpm, unsigned long n,
-                                          unsigned long m, DnaRetrace retrace)
+static void dp_matrix_set_retrace_i_state(DPMatrix *dpm, GtUword n,
+                                          GtUword m, DnaRetrace retrace)
 {
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   gt_assert(retrace == DNA_I_N || retrace == DNA_E_N);
@@ -890,12 +890,12 @@ static void dp_matrix_set_retrace_i_state(DPMatrix *dpm, unsigned long n,
 
 #if 0
 static void dp_matrix_copy_terminal(DPMatrix *dpm_terminal, DPMatrix *dpm,
-                                    unsigned long genomic_offset,
-                                    unsigned long genomic_overlap,
-                                    unsigned long reference_offset)
+                                    GtUword genomic_offset,
+                                    GtUword genomic_overlap,
+                                    GtUword reference_offset)
 {
   GthFlt score;
-  unsigned long n, m, start;
+  GtUword n, m, start;
   DnaRetrace retrace;
   gt_assert(dpm_terminal && dpm);
   /* copy last score, intronstart, and exonstart row */
@@ -933,11 +933,11 @@ static void dp_matrix_copy_terminal(DPMatrix *dpm_terminal, DPMatrix *dpm,
 #define DETECT_SMALL_EXONS_EXTRA_OVERLAP  0
 
 static void detect_small_terminal_exons(GthSA *sa,
-                                        unsigned long gen_dp_start,
+                                        GtUword gen_dp_start,
                                         const unsigned char *gen_seq_tran,
-                                        unsigned long gen_dp_length,
+                                        GtUword gen_dp_length,
                                         const unsigned char *ref_seq_tran,
-                                        unsigned long ref_dp_length,
+                                        GtUword ref_dp_length,
                                         const GtRange *gen_seq_bounds,
                                         bool comments,
                                         GthSpliceSiteModel *splice_site_model,
@@ -947,7 +947,7 @@ static void detect_small_terminal_exons(GthSA *sa,
                                         GthDPOptionsCore *dp_options_core,
                                         GthStat *stat, GtFile *outfp)
 {
-  unsigned long gen_dp_start_terminal, gen_dp_length_terminal,
+  GtUword gen_dp_start_terminal, gen_dp_length_terminal,
                 ref_dp_start_terminal, ref_dp_length_terminal;
   GthDPParam *dp_param_terminal;
   GthDPMatrix dpm_terminal;
@@ -1062,9 +1062,9 @@ static void detect_small_terminal_exons(GthSA *sa,
 }
 
 static void detect_small_initial_exons(GthSA *sa,
-                                       unsigned long *gen_dp_start,
+                                       GtUword *gen_dp_start,
                                        const unsigned char *gen_seq_tran,
-                                       unsigned long gen_dp_length,
+                                       GtUword gen_dp_length,
                                        const unsigned char *ref_seq_tran,
                                        const GtRange *gen_seq_bounds,
                                        bool showeops, bool comments,
@@ -1074,7 +1074,7 @@ static void detect_small_initial_exons(GthSA *sa,
                                        GthDPOptionsCore *dp_options_core,
                                        GthStat *stat, GtFile *outfp)
 {
-  unsigned long gen_dp_start_initial, gen_dp_length_initial,
+  GtUword gen_dp_start_initial, gen_dp_length_initial,
                 ref_dp_start_initial, ref_dp_length_initial;
   GthDPParam *dp_param_initial;
   GthDPMatrix dpm_initial;
@@ -1184,11 +1184,11 @@ static void detect_small_initial_exons(GthSA *sa,
   *gen_dp_start = gen_dp_start_initial;
 }
 
-static void detect_small_exons(GthSA *sa, unsigned long *gen_dp_start,
+static void detect_small_exons(GthSA *sa, GtUword *gen_dp_start,
                                const unsigned char *gen_seq_tran,
-                               unsigned long gen_dp_length,
+                               GtUword gen_dp_length,
                                const unsigned char *ref_seq_tran,
-                               unsigned long ref_dp_length,
+                               GtUword ref_dp_length,
                                const GtRange *gen_seq_bounds, bool showeops,
                                bool comments,
                                GthSpliceSiteModel *splice_site_model,
@@ -1227,11 +1227,11 @@ int gth_align_dna(GthSA *sa,
                   GT_UNUSED const unsigned char *gen_seq_orig,
                   const unsigned char *ref_seq_tran,
                   const unsigned char *ref_seq_orig,
-                  unsigned long ref_dp_length,
+                  GtUword ref_dp_length,
                   GtAlphabet *gen_alphabet,
                   GtAlphabet *ref_alphabet,
                   bool introncutout,
-                  unsigned long autoicmaxmatrixsize,
+                  GtUword autoicmaxmatrixsize,
                   bool showeops,
                   bool comments,
                   bool gs2out,
@@ -1242,11 +1242,11 @@ int gth_align_dna(GthSA *sa,
                   GthDPOptionsPostpro *dp_options_postpro,
                   GthDNACompletePathMatrixJT dna_complete_path_matrix_jt,
                   GthJumpTable *jump_table,
-                  unsigned long ref_offset,
+                  GtUword ref_offset,
                   GthStat *stat,
                   GtFile *outfp)
 {
-  unsigned long gen_dp_start, gen_dp_end, gen_dp_length;
+  GtUword gen_dp_start, gen_dp_end, gen_dp_length;
   GthSplicedSeq *spliced_seq = NULL;
   GthPathMatrix *pm = NULL;
   GthDPParam *dp_param;
@@ -1381,11 +1381,11 @@ int gth_align_dna(GthSA *sa,
 
 GthSA* gth_align_dna_simple(GthInput *input,
                             const GtRange *gen_range,
-                            unsigned long gen_file_num,
-                            unsigned long gen_seq_num,
+                            GtUword gen_file_num,
+                            GtUword gen_seq_num,
                             bool gen_strand_forward,
-                            unsigned long ref_file_num,
-                            unsigned long ref_seq_num,
+                            GtUword ref_file_num,
+                            GtUword ref_seq_num,
                             GthSpliceSiteModel *splice_site_model)
 {
   GthDPOptionsCore *dp_options_core;

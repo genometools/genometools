@@ -32,7 +32,7 @@
 /* Keep in sync with gth_sas_are_equal()! */
 struct GthSA {
   GthBacktracePath *backtrace_path;  /* the edit operations */
-  unsigned long gen_total_length,    /* total length of the genomic sequence */
+  GtUword gen_total_length,    /* total length of the genomic sequence */
                 gen_offset,          /* offset of the genomic sequence where
                                         this SA refers to */
                 ref_total_length,    /* total length of reference sequence */
@@ -71,7 +71,7 @@ struct GthSA {
                                         segment, whichever is highest
                                         (GS2 = cvrge) */
   bool genomic_cov_is_highest;       /* (GS2 = no equivalent) */
-  unsigned long cumlen_scored_exons, /* cumulative length of scored exons
+  GtUword cumlen_scored_exons, /* cumulative length of scored exons
                                         (GS2 = mlgth) */
                 call_number;         /* the consecutive number of successful DP
                                         calls. not really usefull, only for
@@ -104,14 +104,14 @@ GthSA* gth_sa_new(void)
 GthSA* gth_sa_new_and_set(bool gen_strand_forward,
                           bool ref_strand_forward,
                           GthInput *input,
-                          unsigned long gen_file_num,
-                          unsigned long gen_seq_num,
-                          unsigned long ref_file_num,
-                          unsigned long ref_seq_num,
-                          unsigned long call_number,
-                          unsigned long gen_total_length,
-                          unsigned long gen_offset,
-                          unsigned long ref_total_length)
+                          GtUword gen_file_num,
+                          GtUword gen_seq_num,
+                          GtUword ref_file_num,
+                          GtUword ref_seq_num,
+                          GtUword call_number,
+                          GtUword gen_total_length,
+                          GtUword gen_offset,
+                          GtUword ref_total_length)
 {
   GthSA *sa;
 
@@ -157,7 +157,7 @@ GthSA* gth_sa_new_and_set(bool gen_strand_forward,
 }
 
 void gth_sa_set(GthSA *sa, GthAlphatype ref_alphatype,
-                unsigned long gen_dp_start, unsigned long gen_dp_length)
+                GtUword gen_dp_start, GtUword gen_dp_length)
 {
   gth_backtrace_path_set_gen_dp_start(sa->backtrace_path, gen_dp_start);
   gth_backtrace_path_set_gen_dp_length(sa->backtrace_path, gen_dp_length);
@@ -173,7 +173,7 @@ void gth_sa_set(GthSA *sa, GthAlphatype ref_alphatype,
   gt_array_reset(sa->introns);
 }
 
-void gth_sa_set_gen_dp_length(GthSA *sa, unsigned long gen_dp_length)
+void gth_sa_set_gen_dp_length(GthSA *sa, GtUword gen_dp_length)
 {
   gt_assert(sa);
   gth_backtrace_path_set_gen_dp_length(sa->backtrace_path, gen_dp_length);
@@ -198,7 +198,7 @@ void gth_sa_delete(GthSA *sa)
 void gth_sa_show_exons(const GthSA *sa, GtFile *outfp)
 {
   Exoninfo *exoninfo;
-  unsigned long i;
+  GtUword i;
   gt_assert(sa);
   for (i = 0; i < gt_array_size(sa->exons); i++) {
     exoninfo = (Exoninfo*) gt_array_get(sa->exons, i);
@@ -211,7 +211,7 @@ void gth_sa_show_exons(const GthSA *sa, GtFile *outfp)
 void gth_sa_get_exons(const GthSA *sa, GtArray *ranges)
 {
   Exoninfo *exoninfo;
-  unsigned long i;
+  GtUword i;
   GtRange range;
   gt_assert(sa && ranges);
   for (i = 0; i < gt_array_size(sa->exons); i++) {
@@ -241,7 +241,7 @@ bool gth_sa_exons_are_forward_and_consecutive(const GthSA *sa)
 GtRange gth_sa_range_forward(const GthSA *sa)
 {
   GtRange range;
-  unsigned long leftgenomicborder, rightgenomicborder;
+  GtUword leftgenomicborder, rightgenomicborder;
 
   gt_assert(sa);
 
@@ -284,7 +284,7 @@ GtRange gth_sa_range_actual(const GthSA *sa)
 
 GthFlt gth_sa_average_splice_site_prob(const GthSA *sa)
 {
-  unsigned long i, numofintrons;
+  GtUword i, numofintrons;
   GthFlt averagepdpa = 0.0;
   Introninfo *introninfo;
   gt_assert(sa);
@@ -302,7 +302,7 @@ GthFlt gth_sa_average_splice_site_prob(const GthSA *sa)
 
 bool gth_sa_is_poor(const GthSA *sa, GthFlt minaveragessp)
 {
-  unsigned long num_of_introns;
+  GtUword num_of_introns;
   GthFlt averagepdpa;
 
   gt_assert(sa);
@@ -341,8 +341,8 @@ bool gth_sa_B_is_better_than_A(const GthSA *saA, const GthSA *saB)
     return false;
 }
 
-unsigned long gth_sa_left_genomic_exon_border(const GthSA *sa,
-                                              unsigned long exon)
+GtUword gth_sa_left_genomic_exon_border(const GthSA *sa,
+                                              GtUword exon)
 {
   Exoninfo *exoninfo;
   gt_assert(sa);
@@ -352,8 +352,8 @@ unsigned long gth_sa_left_genomic_exon_border(const GthSA *sa,
                     sa->gen_offset, exoninfo->leftgenomicexonborder);
 }
 
-unsigned long gth_sa_right_genomic_exon_border(const GthSA *sa,
-                                               unsigned long exon)
+GtUword gth_sa_right_genomic_exon_border(const GthSA *sa,
+                                               GtUword exon)
 {
   Exoninfo *exoninfo;
   gt_assert(sa);
@@ -363,7 +363,7 @@ unsigned long gth_sa_right_genomic_exon_border(const GthSA *sa,
                     sa->gen_offset, exoninfo->rightgenomicexonborder);
 }
 
-double gth_sa_exon_score(const GthSA *sa, unsigned long exon)
+double gth_sa_exon_score(const GthSA *sa, GtUword exon)
 {
   Exoninfo *exoninfo;
   gt_assert(sa);
@@ -371,7 +371,7 @@ double gth_sa_exon_score(const GthSA *sa, unsigned long exon)
   return exoninfo->exonscore;
 }
 
-GtRange gth_sa_donor_site_range(const GthSA *sa, unsigned long intron)
+GtRange gth_sa_donor_site_range(const GthSA *sa, GtUword intron)
 {
   GtRange range;
   gt_assert(sa);
@@ -380,7 +380,7 @@ GtRange gth_sa_donor_site_range(const GthSA *sa, unsigned long intron)
   return range;
 }
 
-GtRange gth_sa_acceptor_site_range(const GthSA *sa, unsigned long intron)
+GtRange gth_sa_acceptor_site_range(const GthSA *sa, GtUword intron)
 {
   GtRange range;
   gt_assert(sa);
@@ -389,7 +389,7 @@ GtRange gth_sa_acceptor_site_range(const GthSA *sa, unsigned long intron)
   return range;
 }
 
-float gth_sa_donor_site_prob(const GthSA *sa, unsigned long intron)
+float gth_sa_donor_site_prob(const GthSA *sa, GtUword intron)
 {
   float prob;
   gt_assert(sa);
@@ -400,7 +400,7 @@ float gth_sa_donor_site_prob(const GthSA *sa, unsigned long intron)
   return prob;
 }
 
-float gth_sa_acceptor_site_prob(const GthSA *sa, unsigned long intron)
+float gth_sa_acceptor_site_prob(const GthSA *sa, GtUword intron)
 {
   float prob;
   gt_assert(sa);
@@ -411,7 +411,7 @@ float gth_sa_acceptor_site_prob(const GthSA *sa, unsigned long intron)
   return prob;
 }
 
-unsigned long gth_sa_genomic_exon_length(const GthSA *sa, unsigned long exon)
+GtUword gth_sa_genomic_exon_length(const GthSA *sa, GtUword exon)
 {
   Exoninfo *exoninfo;
   gt_assert(sa);
@@ -419,7 +419,7 @@ unsigned long gth_sa_genomic_exon_length(const GthSA *sa, unsigned long exon)
   return exoninfo->rightgenomicexonborder - exoninfo->leftgenomicexonborder + 1;
 }
 
-unsigned long gth_sa_left_intron_border(const GthSA *sa, unsigned long intron)
+GtUword gth_sa_left_intron_border(const GthSA *sa, GtUword intron)
 {
   Exoninfo *exoninfo;
   gt_assert(sa);
@@ -430,7 +430,7 @@ unsigned long gth_sa_left_intron_border(const GthSA *sa, unsigned long intron)
                     exoninfo->rightgenomicexonborder + 1);
 }
 
-unsigned long gth_sa_right_intron_border(const GthSA *sa, unsigned long intron)
+GtUword gth_sa_right_intron_border(const GthSA *sa, GtUword intron)
 {
   Exoninfo *exoninfo;
   gt_assert(sa);
@@ -441,7 +441,7 @@ unsigned long gth_sa_right_intron_border(const GthSA *sa, unsigned long intron)
                     exoninfo->leftgenomicexonborder - 1);
 }
 
-unsigned long gth_sa_intron_length(const GthSA *sa, unsigned long intron)
+GtUword gth_sa_intron_length(const GthSA *sa, GtUword intron)
 {
   Exoninfo *left_exon, *right_exon;
   gt_assert(sa);
@@ -463,55 +463,55 @@ Editoperation* gth_sa_get_editoperations(const GthSA *sa)
   return gth_backtrace_path_get(sa->backtrace_path);
 }
 
-unsigned long gth_sa_get_editoperations_length(const GthSA *sa)
+GtUword gth_sa_get_editoperations_length(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_length(sa->backtrace_path);
 }
 
-unsigned long gth_sa_indelcount(const GthSA *sa)
+GtUword gth_sa_indelcount(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_indelcount(sa->backtrace_path);
 }
 
-unsigned long gth_sa_gen_dp_length(const GthSA *sa)
+GtUword gth_sa_gen_dp_length(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_gen_dp_length(sa->backtrace_path);
 }
 
-unsigned long gth_sa_gen_total_length(const GthSA *sa)
+GtUword gth_sa_gen_total_length(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->gen_total_length;
 }
 
-void gth_sa_set_gen_total_length(GthSA *sa, unsigned long gen_total_length)
+void gth_sa_set_gen_total_length(GthSA *sa, GtUword gen_total_length)
 {
   gt_assert(sa);
   sa->gen_total_length = gen_total_length;
 }
 
-unsigned long gth_sa_gen_offset(const GthSA *sa)
+GtUword gth_sa_gen_offset(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->gen_offset;
 }
 
-void gth_sa_set_gen_offset(GthSA *sa, unsigned long gen_offset)
+void gth_sa_set_gen_offset(GthSA *sa, GtUword gen_offset)
 {
   gt_assert(sa);
   sa->gen_offset = gen_offset;
 }
 
-unsigned long gth_sa_ref_total_length(const GthSA *sa)
+GtUword gth_sa_ref_total_length(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->ref_total_length;
 }
 
-void gth_sa_set_ref_total_length(GthSA *sa, unsigned long reflen)
+void gth_sa_set_ref_total_length(GthSA *sa, GtUword reflen)
 {
   gt_assert(sa);
   sa->ref_total_length = reflen;
@@ -519,13 +519,13 @@ void gth_sa_set_ref_total_length(GthSA *sa, unsigned long reflen)
   gth_backtrace_path_set_ref_dp_length(sa->backtrace_path, reflen);
 }
 
-unsigned long gth_sa_gen_dp_start(const GthSA *sa)
+GtUword gth_sa_gen_dp_start(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_gen_dp_start(sa->backtrace_path);
 }
 
-unsigned long gth_sa_gen_dp_start_show(const GthSA *sa)
+GtUword gth_sa_gen_dp_start_show(const GthSA *sa)
 {
   gt_assert(sa);
   return SHOWGENPOS(sa->gen_strand_forward,
@@ -534,19 +534,19 @@ unsigned long gth_sa_gen_dp_start_show(const GthSA *sa)
                     gth_backtrace_path_gen_dp_start(sa->backtrace_path));
 }
 
-void gth_sa_set_gen_dp_start(GthSA *sa, unsigned long gen_dp_start)
+void gth_sa_set_gen_dp_start(GthSA *sa, GtUword gen_dp_start)
 {
   gt_assert(sa);
   gth_backtrace_path_set_gen_dp_start(sa->backtrace_path, gen_dp_start);
 }
 
-unsigned long gth_sa_gen_dp_end(const GthSA *sa)
+GtUword gth_sa_gen_dp_end(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_sa_gen_dp_start(sa) + gth_sa_gen_dp_length(sa) - 1;
 }
 
-unsigned long gth_sa_gen_dp_end_show(const GthSA *sa)
+GtUword gth_sa_gen_dp_end_show(const GthSA *sa)
 {
   gt_assert(sa);
   return SHOWGENPOS(sa->gen_strand_forward,
@@ -555,49 +555,49 @@ unsigned long gth_sa_gen_dp_end_show(const GthSA *sa)
                     gth_sa_gen_dp_start(sa) + gth_sa_gen_dp_length(sa) - 1);
 }
 
-unsigned long gth_sa_gen_file_num(const GthSA *sa)
+GtUword gth_sa_gen_file_num(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->gen_file_num;
 }
 
-void gth_sa_set_gen_file_num(GthSA *sa, unsigned long filenum)
+void gth_sa_set_gen_file_num(GthSA *sa, GtUword filenum)
 {
   gt_assert(sa);
   sa->gen_file_num = filenum;
 }
 
-unsigned long gth_sa_gen_seq_num(const GthSA *sa)
+GtUword gth_sa_gen_seq_num(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->gen_seq_num;
 }
 
-void gth_sa_set_gen_seq_num(GthSA *sa, unsigned long seqnum)
+void gth_sa_set_gen_seq_num(GthSA *sa, GtUword seqnum)
 {
   gt_assert(sa);
   sa->gen_seq_num = seqnum;
 }
 
-unsigned long gth_sa_ref_file_num(const GthSA *sa)
+GtUword gth_sa_ref_file_num(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->ref_file_num;
 }
 
-void gth_sa_set_ref_file_num(GthSA *sa, unsigned long filenum)
+void gth_sa_set_ref_file_num(GthSA *sa, GtUword filenum)
 {
   gt_assert(sa);
   sa->ref_file_num = filenum;
 }
 
-unsigned long gth_sa_ref_seq_num(const GthSA *sa)
+GtUword gth_sa_ref_seq_num(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->ref_seq_num;
 }
 
-void gth_sa_set_ref_seq_num(GthSA *sa, unsigned long seqnum)
+void gth_sa_set_ref_seq_num(GthSA *sa, GtUword seqnum)
 {
   gt_assert(sa);
   sa->ref_seq_num = seqnum;
@@ -705,37 +705,37 @@ void gth_sa_set_ref_strand(GthSA *sa, bool forward)
   sa->ref_strand_forward = forward;
 }
 
-unsigned long gth_sa_genomiccutoff_start(const GthSA *sa)
+GtUword gth_sa_genomiccutoff_start(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_genomiccutoff_start(sa->backtrace_path);
 }
 
-unsigned long gth_sa_referencecutoff_start(const GthSA *sa)
+GtUword gth_sa_referencecutoff_start(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_referencecutoff_start(sa->backtrace_path);
 }
 
-unsigned long gth_sa_eopcutoff_start(const GthSA *sa)
+GtUword gth_sa_eopcutoff_start(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_eopcutoff_start(sa->backtrace_path);
 }
 
-unsigned long gth_sa_genomiccutoff_end(const GthSA *sa)
+GtUword gth_sa_genomiccutoff_end(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_genomiccutoff_end(sa->backtrace_path);
 }
 
-unsigned long gth_sa_referencecutoff_end(const GthSA *sa)
+GtUword gth_sa_referencecutoff_end(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_referencecutoff_end(sa->backtrace_path);
 }
 
-unsigned long gth_sa_eopcutoff_end(const GthSA *sa)
+GtUword gth_sa_eopcutoff_end(const GthSA *sa)
 {
   gt_assert(sa);
   return gth_backtrace_path_eopcutoff_end(sa->backtrace_path);
@@ -771,7 +771,7 @@ void gth_sa_set_alphatype(GthSA *sa, GthAlphatype alphatype)
   gth_backtrace_path_set_alphatype(sa->backtrace_path, alphatype);
 }
 
-Exoninfo* gth_sa_get_exon(const GthSA *sa, unsigned long exon)
+Exoninfo* gth_sa_get_exon(const GthSA *sa, GtUword exon)
 {
   gt_assert(sa && sa->exons);
   gt_assert(exon < gt_array_size(sa->exons));
@@ -784,13 +784,13 @@ void gth_sa_add_exon(GthSA *sa, Exoninfo *exoninfo)
   gt_array_add(sa->exons, *exoninfo);
 }
 
-unsigned long gth_sa_num_of_exons(const GthSA *sa)
+GtUword gth_sa_num_of_exons(const GthSA *sa)
 {
   gt_assert(sa && sa->exons);
   return gt_array_size(sa->exons);
 }
 
-Introninfo* gth_sa_get_intron(const GthSA *sa, unsigned long intron)
+Introninfo* gth_sa_get_intron(const GthSA *sa, GtUword intron)
 {
   gt_assert(sa && sa->introns);
   gt_assert(intron < gt_array_size(sa->exons));
@@ -803,7 +803,7 @@ void gth_sa_add_intron(GthSA *sa, Introninfo *introninfo)
   gt_array_add(sa->introns, *introninfo);
 }
 
-unsigned long gth_sa_num_of_introns(const GthSA *sa)
+GtUword gth_sa_num_of_introns(const GthSA *sa)
 {
   gt_assert(sa && sa->introns);
   return gt_array_size(sa->introns);
@@ -812,7 +812,7 @@ unsigned long gth_sa_num_of_introns(const GthSA *sa)
 void gth_sa_calc_polyAtailpos(GthSA *sa, const unsigned char *ref_seq_tran,
                               GtAlphabet *ref_alphabet)
 {
-  unsigned long ppa, mma, rightreferenceborder, referencelength;
+  GtUword ppa, mma, rightreferenceborder, referencelength;
   long i, leftreferenceborder;
 
   sa->polyAtailpos.start = 0;
@@ -895,25 +895,25 @@ void gth_sa_calc_polyAtailpos(GthSA *sa, const unsigned char *ref_seq_tran,
   }
 }
 
-unsigned long gth_sa_polyAtail_start(const GthSA *sa)
+GtUword gth_sa_polyAtail_start(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->polyAtailpos.start;
 }
 
-unsigned long gth_sa_polyAtail_stop(const GthSA *sa)
+GtUword gth_sa_polyAtail_stop(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->polyAtailpos.end;
 }
 
-void gth_sa_set_polyAtail_start(GthSA *sa, unsigned long start)
+void gth_sa_set_polyAtail_start(GthSA *sa, GtUword start)
 {
   gt_assert(sa);
   sa->polyAtailpos.start = start;
 }
 
-void gth_sa_set_polyAtail_stop(GthSA *sa, unsigned long stop)
+void gth_sa_set_polyAtail_stop(GthSA *sa, GtUword stop)
 {
   gt_assert(sa);
   sa->polyAtailpos.end = stop;
@@ -968,19 +968,19 @@ void gth_sa_set_highest_cov(GthSA *sa, bool genomic)
   sa->genomic_cov_is_highest = genomic;
 }
 
-unsigned long gth_sa_cumlen_scored_exons(const GthSA *sa)
+GtUword gth_sa_cumlen_scored_exons(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->cumlen_scored_exons;
 }
 
-void gth_sa_set_cumlen_scored_exons(GthSA *sa, unsigned long cumlen)
+void gth_sa_set_cumlen_scored_exons(GthSA *sa, GtUword cumlen)
 {
   gt_assert(sa);
   sa->cumlen_scored_exons = cumlen;
 }
 
-unsigned long gth_sa_call_number(const GthSA *sa)
+GtUword gth_sa_call_number(const GthSA *sa)
 {
   gt_assert(sa);
   return sa->call_number;
@@ -1028,7 +1028,7 @@ const char* gth_sa_gff3_target_attribute(GthSA *sa, bool md5ids)
 
 void gth_sa_determine_cutoffs(GthSA *sa, GthCutoffmode leadcutoffsmode,
                               GthCutoffmode termcutoffsmode,
-                              unsigned long cutoffsminexonlen)
+                              GtUword cutoffsminexonlen)
 {
   gt_assert(sa);
   gth_backtrace_path_determine_cutoffs(sa->backtrace_path, leadcutoffsmode,
@@ -1104,12 +1104,12 @@ void gth_sa_echo_reference_sequence(const GthSA *sa, GthInput *input,
                                     outfp);
 }
 
-void gth_sa_echo_alignment(const GthSA *sa, unsigned long showintronmaxlen,
-                           unsigned long translationtable,
+void gth_sa_echo_alignment(const GthSA *sa, GtUword showintronmaxlen,
+                           GtUword translationtable,
                            bool wildcardimplosion, GthInput *input,
                            GtFile *outfp)
 {
-  unsigned long genomicstartcutoff, genomicendcutoff, genomictotalcutoff,
+  GtUword genomicstartcutoff, genomicendcutoff, genomictotalcutoff,
                 referencestartcutoff, referenceendcutoff, referencetotalcutoff;
   bool reverse_subject_pos = false;
   const unsigned char *gen_seq_orig, *ref_seq_orig;
@@ -1192,14 +1192,14 @@ void gth_sa_echo_alignment(const GthSA *sa, unsigned long showintronmaxlen,
   }
 }
 
-unsigned long gth_sa_get_alignment_lines(const GthSA *sa,
+GtUword gth_sa_get_alignment_lines(const GthSA *sa,
                                          unsigned char **first_line,
                                          unsigned char **second_line,
                                          unsigned char **third_line,
-                                         unsigned long translationtable,
+                                         GtUword translationtable,
                                          GthInput *input)
 {
-  unsigned long genomicstartcutoff, genomicendcutoff, genomictotalcutoff,
+  GtUword genomicstartcutoff, genomicendcutoff, genomictotalcutoff,
                 referencestartcutoff, referenceendcutoff, referencetotalcutoff;
   GT_UNUSED bool reverse_subject_pos = false;
 
@@ -1215,7 +1215,7 @@ unsigned long gth_sa_get_alignment_lines(const GthSA *sa,
 
   /* sequences */
   unsigned char *gen_seq_orig, *ref_seq_orig;
-  unsigned long cols = 0;
+  GtUword cols = 0;
   GthSeqCon *ref_seq_con;
 
   /* make sure that the correct files are loaded */
@@ -1324,7 +1324,7 @@ bool gth_sas_are_equal(const GthSA *saA, const GthSA *saB)
 {
   Exoninfo *exoninfoA, *exoninfoB;
   Introninfo *introninfoA, *introninfoB;
-  unsigned long i;
+  GtUword i;
 
   /* compare element 0 */
   if (gth_sa_alphatype(saA) != gth_sa_alphatype(saB))

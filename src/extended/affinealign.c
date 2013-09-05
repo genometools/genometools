@@ -28,7 +28,7 @@ typedef enum {
 } Edge;
 
 typedef struct {
-  unsigned long Rdist,
+  GtUword Rdist,
                 Ddist,
                 Idist;
   Edge Redge,
@@ -36,7 +36,7 @@ typedef struct {
        Iedge;
 } AffinealignDPentry;
 
-static unsigned long infadd(unsigned long inf, unsigned long s)
+static GtUword infadd(GtUword inf, GtUword s)
 {
   if (inf == ULONG_MAX)
     return inf;
@@ -44,12 +44,12 @@ static unsigned long infadd(unsigned long inf, unsigned long s)
 }
 
 static void affinealign_fill_table(AffinealignDPentry **dptable,
-                                   const char *u, unsigned long ulen,
-                                   const char *v, unsigned long vlen,
+                                   const char *u, GtUword ulen,
+                                   const char *v, GtUword vlen,
                                    int replacement_cost, int gap_opening,
                                    int gap_extension)
 {
-  unsigned long i, j, Rvalue, Dvalue, Ivalue, minvalue;
+  GtUword i, j, Rvalue, Dvalue, Ivalue, minvalue;
   int rcost;
   gt_assert(dptable && u && ulen && v && vlen);
   for (i = 0; i <= ulen; i++) {
@@ -121,9 +121,9 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
 }
 
 static void affinealign_traceback(GtAlignment *a, AffinealignDPentry **dptable,
-                                  unsigned long i, unsigned long j)
+                                  GtUword i, GtUword j)
 {
-  unsigned long minvalue;
+  GtUword minvalue;
   Edge edge;
   gt_assert(a && dptable);
   /* determine min{A_affine(m,n,x) | x in {R,D,I}} */
@@ -162,8 +162,8 @@ static void affinealign_traceback(GtAlignment *a, AffinealignDPentry **dptable,
   }
 }
 
-GtAlignment* gt_affinealign(const char *u, unsigned long ulen,
-                            const char *v, unsigned long vlen,
+GtAlignment* gt_affinealign(const char *u, GtUword ulen,
+                            const char *v, GtUword vlen,
                             int replacement_cost, int gap_opening_cost,
                             int gap_extension_cost)
 {

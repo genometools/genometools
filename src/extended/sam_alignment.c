@@ -88,30 +88,30 @@ static GtUchar bambase2gtbase(uint8_t base, GtAlphabet *alphabet)
   }
 }
 
-unsigned long gt_sam_alignment_pos(GtSamAlignment *sam_alignment)
+GtUword gt_sam_alignment_pos(GtSamAlignment *sam_alignment)
 {
   gt_assert(sam_alignment != NULL);
-  return (unsigned long) sam_alignment->s_alignment->core.pos;
+  return (GtUword) sam_alignment->s_alignment->core.pos;
 }
 
-unsigned long gt_sam_alignment_read_length(GtSamAlignment *sam_alignment)
+GtUword gt_sam_alignment_read_length(GtSamAlignment *sam_alignment)
 {
   gt_assert(sam_alignment != NULL);
-  return (unsigned long) sam_alignment->s_alignment->core.l_qseq;
+  return (GtUword) sam_alignment->s_alignment->core.l_qseq;
 }
 
-unsigned long gt_sam_alignment_mapping_quality(GtSamAlignment *sam_alignment)
+GtUword gt_sam_alignment_mapping_quality(GtSamAlignment *sam_alignment)
 {
   gt_assert(sam_alignment != NULL);
-  return (unsigned long) sam_alignment->s_alignment->core.qual;
+  return (GtUword) sam_alignment->s_alignment->core.qual;
 }
 
-unsigned long gt_sam_alignment_rightmost_pos(GtSamAlignment *sam_alignment)
+GtUword gt_sam_alignment_rightmost_pos(GtSamAlignment *sam_alignment)
 {
   gt_assert(sam_alignment != NULL);
   if (sam_alignment->rightmost == GT_UNDEF_ULONG)
   {
-    sam_alignment->rightmost = (unsigned long)bam_calend(
+    sam_alignment->rightmost = (GtUword)bam_calend(
         &sam_alignment->s_alignment->core,
         bam1_cigar(sam_alignment->s_alignment));
   }
@@ -131,12 +131,12 @@ int32_t gt_sam_alignment_ref_num(GtSamAlignment *sam_alignment)
 }
 
 void gt_sam_alignment_sequence_external_buffer(GtSamAlignment *sam_alignment,
-    GtUchar **seq_buffer, unsigned long *bufsize)
+    GtUchar **seq_buffer, GtUword *bufsize)
 {
-  unsigned long query_len, idx;
+  GtUword query_len, idx;
   uint8_t *bam_seq;
 
-  query_len = (unsigned long) sam_alignment->s_alignment->core.l_qseq;
+  query_len = (GtUword) sam_alignment->s_alignment->core.l_qseq;
   if ((*bufsize) < query_len) {
     (*seq_buffer) = gt_realloc(*seq_buffer, sizeof (**seq_buffer) *
                                    (query_len + 1UL));
@@ -162,14 +162,14 @@ const GtUchar *gt_sam_alignment_sequence(GtSamAlignment *sam_alignment)
 
 void gt_sam_alignment_qualitystring_external_buffer(
     GtSamAlignment *sam_alignment, GtUchar **qual_buffer,
-    unsigned long *bufsize)
+    GtUword *bufsize)
 {
-  unsigned long query_len, idx;
+  GtUword query_len, idx;
   uint8_t *qual;
 
   gt_assert(qual_buffer != NULL);
   gt_assert(bufsize != NULL);
-  query_len = (unsigned long) sam_alignment->s_alignment->core.l_qseq;
+  query_len = (GtUword) sam_alignment->s_alignment->core.l_qseq;
   if ((*bufsize) < query_len) {
     (*qual_buffer) = gt_realloc((*qual_buffer), sizeof (**qual_buffer) *
         (query_len + 1UL));

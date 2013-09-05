@@ -24,9 +24,9 @@
 #include "core/logger.h"
 
 int gt_merstatistics(const char *inputindex,
-                     unsigned long mersize,
-                     unsigned long minocc,
-                     unsigned long maxocc,
+                     GtUword mersize,
+                     GtUword minocc,
+                     GtUword maxocc,
                      const char *storeindex,
                      bool storecounts,
                      bool scanfile,

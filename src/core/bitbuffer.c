@@ -51,7 +51,7 @@ GtBitbuffer *gt_bitbuffer_new(FILE *outfp,unsigned int bitsperentry)
   return bitbuffer;
 }
 
-void gt_bitbuffer_next_value(GtBitbuffer *bb, unsigned long value,
+void gt_bitbuffer_next_value(GtBitbuffer *bb, GtUword value,
                              unsigned int bitsforvalue)
 {
   unsigned int bits2store = bitsforvalue;
@@ -84,29 +84,29 @@ void gt_bitbuffer_next_value(GtBitbuffer *bb, unsigned long value,
   }
 }
 
-void gt_bitbuffer_next_fixed_bits_value (GtBitbuffer *bb, unsigned long value)
+void gt_bitbuffer_next_fixed_bits_value (GtBitbuffer *bb, GtUword value)
 {
   gt_assert(bb->bitsperentry > 0);
   gt_bitbuffer_next_value (bb, value, bb->bitsperentry);
 }
 
 void gt_bitbuffer_next_uint32tab(GtBitbuffer *bb,const uint32_t *tab,
-                                 unsigned long len)
+                                 GtUword len)
 {
   const uint32_t *uintptr;
 
   gt_assert (tab != NULL);
   for (uintptr = tab; uintptr < tab + len; uintptr++)
   {
-    gt_bitbuffer_next_fixed_bits_value (bb, (unsigned long) *uintptr);
+    gt_bitbuffer_next_fixed_bits_value (bb, (GtUword) *uintptr);
   }
 }
 
 void gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
-                                const unsigned long *tab,
-                                unsigned long len)
+                                const GtUword *tab,
+                                GtUword len)
 {
-  const unsigned long *ulongptr;
+  const GtUword *ulongptr;
 
   gt_assert (tab != NULL);
   for (ulongptr = tab; ulongptr < tab + len; ulongptr++)

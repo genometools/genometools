@@ -21,16 +21,16 @@
 
 struct GtEditscript
 {
-  unsigned long encseq_orig_start;
-  unsigned long encseq_orig_end;
-  unsigned long encseq_align_start;
-  unsigned long encseq_align_end;
-  unsigned long encseq_compressed_start;
-  unsigned long seqlen;
+  GtUword encseq_orig_start;
+  GtUword encseq_orig_end;
+  GtUword encseq_align_start;
+  GtUword encseq_align_end;
+  GtUword encseq_compressed_start;
+  GtUword seqlen;
   GtMultieoplist *eops;
   char *charlist;
-  unsigned long charidx;
-  unsigned long maxchar;
+  GtUword charidx;
+  GtUword maxchar;
 };
 
 GtEditscript *gt_editscript_new(void)
@@ -109,7 +109,7 @@ void gt_editscript_remove_last(GtEditscript *editscript)
 void gt_editscript_show(const GtEncseq *encseq, const GtEditscript *editscript,
                         FILE* fp)
 {
-  unsigned long i, j, charidx = editscript->seqlen - 1, meoplen;
+  GtUword i, j, charidx = editscript->seqlen - 1, meoplen;
   GtEncseqReader *esr;
   GtMultieop *meop;
   char c;
@@ -151,56 +151,56 @@ void gt_editscript_show(const GtEncseq *encseq, const GtEditscript *editscript,
   gt_encseq_reader_delete(esr);
 }
 
-unsigned long gt_editscript_get_orig_start(GtEditscript *editscript)
+GtUword gt_editscript_get_orig_start(GtEditscript *editscript)
 {
   gt_assert(editscript);
   return(editscript->encseq_orig_start);
 }
 
-void gt_editscript_set_orig_start(GtEditscript *editscript, unsigned long value)
+void gt_editscript_set_orig_start(GtEditscript *editscript, GtUword value)
 {
   gt_assert(editscript);
   editscript->encseq_orig_start = value;
 }
 
-unsigned long gt_editscript_get_orig_end(GtEditscript *editscript)
+GtUword gt_editscript_get_orig_end(GtEditscript *editscript)
 {
   gt_assert(editscript);
   return(editscript->encseq_orig_end);
 }
 
-void gt_editscript_set_orig_end(GtEditscript *editscript, unsigned long value)
+void gt_editscript_set_orig_end(GtEditscript *editscript, GtUword value)
 {
   gt_assert(editscript);
   editscript->encseq_orig_end = value;
 }
 
-unsigned long gt_editscript_get_align_start(GtEditscript *editscript)
+GtUword gt_editscript_get_align_start(GtEditscript *editscript)
 {
   gt_assert(editscript);
   return(editscript->encseq_align_start);
 }
 
 void gt_editscript_set_align_start(GtEditscript *editscript,
-    unsigned long value)
+    GtUword value)
 {
   gt_assert(editscript);
   editscript->encseq_align_start = value;
 }
 
-unsigned long gt_editscript_get_align_end(GtEditscript *editscript)
+GtUword gt_editscript_get_align_end(GtEditscript *editscript)
 {
   gt_assert(editscript);
   return(editscript->encseq_align_end);
 }
 
-void gt_editscript_set_align_end(GtEditscript *editscript, unsigned long value)
+void gt_editscript_set_align_end(GtEditscript *editscript, GtUword value)
 {
   gt_assert(editscript);
   editscript->encseq_align_end = value;
 }
 
-unsigned long gt_editscript_get_seqlen(GtEditscript *editscript)
+GtUword gt_editscript_get_seqlen(GtEditscript *editscript)
 {
   gt_assert(editscript);
   return(editscript->seqlen);

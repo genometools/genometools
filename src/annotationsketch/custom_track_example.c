@@ -24,7 +24,7 @@
 
 struct GtCustomTrackExample {
   const GtCustomTrack parent_instance;
-  unsigned long height;
+  GtUword height;
   GtStr *title;
 };
 
@@ -83,7 +83,7 @@ int gt_custom_track_example_sketch(GtCustomTrack *ct, GtGraphics *graphics,
   return had_err;
 }
 
-unsigned long gt_custom_track_example_get_height(GtCustomTrack *ct)
+GtUword gt_custom_track_example_get_height(GtCustomTrack *ct)
 {
   GtCustomTrackExample *cte;
   cte = gt_custom_track_example_cast(ct);

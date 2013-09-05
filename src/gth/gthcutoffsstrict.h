@@ -28,7 +28,7 @@
 typedef struct {
   Cutoffs *cutoffs;
   bool breakforloop;
-  unsigned long cutoffsminexonlen,
+  GtUword cutoffsminexonlen,
                 actualexonlengthgenomic,
                 actualexonlengthreference,
                 actualexonnumofeops;
@@ -36,6 +36,6 @@ typedef struct {
 
 void gt_initStrictcutoffsTravfunctions(Traversealignmentfunctions*);
 void gt_initStrictcutoffsdata(Strictcutoffsdata*, Cutoffs*,
-                           unsigned long cutoffsminexonlen);
+                           GtUword cutoffsminexonlen);
 
 #endif

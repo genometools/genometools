@@ -102,9 +102,9 @@ static void allocatefmtables(Fmindex *fm,
                                                       fm->markdist));
     fm->specpos.nextfreeGtPairBwtidx = 0;
     fm->specpos.allocatedGtPairBwtidx
-      = (unsigned long) gt_determinenumberofspecialstostore(specialcharinfo);
+      = (GtUword) gt_determinenumberofspecialstostore(specialcharinfo);
     printf("# %lu wildcards in the last %lu characters (%.2f)\n",
-           (unsigned long) specialcharinfo->specialcharacters -
+           (GtUword) specialcharinfo->specialcharacters -
                            fm->specpos.allocatedGtPairBwtidx,
            specialcharinfo->specialcharacters,
             (double) (specialcharinfo->specialcharacters -
@@ -124,18 +124,18 @@ static void allocatefmtables(Fmindex *fm,
 
 static void set0frequencies(Fmindex *fm)
 {
-  unsigned long i;
+  GtUword i;
 
-  for (i = 0; i < (unsigned long) TFREQSIZE(fm->mapsize); i++)
+  for (i = 0; i < (GtUword) TFREQSIZE(fm->mapsize); i++)
   {
     fm->tfreq[i] = 0;
   }
-  for (i = 0; i < (unsigned long) BFREQSIZE(fm->mapsize,fm->nofblocks); i++)
+  for (i = 0; i < (GtUword) BFREQSIZE(fm->mapsize,fm->nofblocks); i++)
   {
     fm->bfreq[i] = 0;
   }
   for (i = 0;
-       i < (unsigned long) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks);
+       i < (GtUword) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks);
        i++)
   {
     fm->superbfreq[i] = 0;
@@ -145,7 +145,7 @@ static void set0frequencies(Fmindex *fm)
 static void finalizefmfrequencies(Fmindex *fm)
 {
   unsigned int j;
-  unsigned long i, *freqptr;
+  GtUword i, *freqptr;
 
   for (j = 2U; j <= fm->mapsize; j++)
   {
@@ -154,7 +154,7 @@ static void finalizefmfrequencies(Fmindex *fm)
   freqptr = fm->superbfreq;
   for (j = 0; j < fm->mapsize; j++)
   {
-    for (i = (unsigned long) 2; i < fm->nofsuperblocks; i++)
+    for (i = (GtUword) 2; i < fm->nofsuperblocks; i++)
     {
       freqptr[i] += freqptr[i-1];
     }
@@ -163,16 +163,16 @@ static void finalizefmfrequencies(Fmindex *fm)
 }
 
 static void showconstructionmessage(const char *indexname,
-                                    unsigned long totallength,
-                                    unsigned long fmsize,
+                                    GtUword totallength,
+                                    GtUword fmsize,
                                     unsigned int log2bsize,
                                     unsigned int log2markdist,
                                     unsigned int numofchars)
 {
   printf("# construct fmindex \"%s\" for bsize=%lu, superbsize=%lu,",
           indexname,
-          (unsigned long) GT_POW2(log2bsize),
-          (unsigned long) GT_POW2(log2markdist));
+          (GtUword) GT_POW2(log2bsize),
+          (GtUword) GT_POW2(log2markdist));
   printf(" len=%lu, alphasize=%u: size ",
           totallength,
           numofchars);
@@ -183,10 +183,10 @@ static void showconstructionmessage(const char *indexname,
 
 static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
                                        GtUchar *bwtvalue,
-                                       unsigned long *suftabvalue,
+                                       GtUword *suftabvalue,
                                        Emissionmergedesa *emmesa,
-                                       const unsigned long *sequenceoffsettable,
-                                       unsigned long bwtpos,
+                                       const GtUword *sequenceoffsettable,
+                                       GtUword bwtpos,
                                        GtError *err)
 {
   Indexedsuffix indexedsuffix;
@@ -253,7 +253,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
   Suffixarray suffixarray;
   Emissionmergedesa emmesa;
   GtUchar cc;
-  unsigned long bwtpos,
+  GtUword bwtpos,
          totallength = 0,
          suftabvalue = 0,
          *sequenceoffsettable = NULL,
@@ -414,7 +414,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
           {
             break;
           }
-          suftabvalue = (unsigned long) tmpsuftabvalue;
+          suftabvalue = (GtUword) tmpsuftabvalue;
         }
         retval = gt_readnextfromstream_GtUchar(&cc,&suffixarray.bwttabstream);
         if (retval == 0)

@@ -26,14 +26,14 @@ void           gth_path_walker_delete(GthPathWalker*);
 bool           gth_path_walker_is_forward(const GthPathWalker*);
 bool           gth_path_walker_has_next(const GthPathWalker*);
 void           gth_path_walker_next(GthPathWalker*);
-void           gth_path_walker_try_steps(GthPathWalker*, unsigned long);
-unsigned long  gth_path_walker_eop_distance(const GthPathWalker*);
-unsigned long  gth_path_walker_gen_distance(const GthPathWalker*);
-unsigned long  gth_path_walker_ref_distance(const GthPathWalker*);
+void           gth_path_walker_try_steps(GthPathWalker*, GtUword);
+GtUword  gth_path_walker_eop_distance(const GthPathWalker*);
+GtUword  gth_path_walker_gen_distance(const GthPathWalker*);
+GtUword  gth_path_walker_ref_distance(const GthPathWalker*);
 void           gth_path_walker_show(const GthPathWalker*, GtFile*);
 
 /* these methods expose internals, don't use */
-unsigned long  gth_path_walker_actual_eops(const GthPathWalker*);
+GtUword  gth_path_walker_actual_eops(const GthPathWalker*);
 unsigned int   gth_path_walker_steps_in_current_eop(const GthPathWalker*);
 
 #endif

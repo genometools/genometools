@@ -35,17 +35,17 @@ static void initBUinfo_rdjcv(GtBUinfo_rdjcv *,GtBUstate_rdjcv *);
 static void freeBUinfo_rdjcv(GtBUinfo_rdjcv *,GtBUstate_rdjcv *);
 
 static int processleafedge_rdjcv(bool,
-    unsigned long,
+    GtUword,
     GtBUinfo_rdjcv *,
-    unsigned long, /* position */
+    GtUword, /* position */
     GtBUstate_rdjcv *,
     GtError *err);
 
 static int processbranchingedge_rdjcv(bool firstsucc,
-    unsigned long,
+    GtUword,
     GtBUinfo_rdjcv *,
-    unsigned long,
-    unsigned long,
+    GtUword,
+    GtUword,
     GtBUinfo_rdjcv *,
     GtBUstate_rdjcv *,
     GtError *);
@@ -77,14 +77,14 @@ static int processbranchingedge_rdjcv(bool firstsucc,
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtBUinfo_rdjcv info;
 } GtBUItvinfo_rdjcv;
 
 typedef struct
 {
   GtBUItvinfo_rdjcv *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 } GtArrayGtBUItvinfo_rdjcv;
 
@@ -100,7 +100,7 @@ GtArrayGtBUItvinfo_rdjcv *gt_GtArrayGtBUItvinfo_new_rdjcv(void)
 void gt_GtArrayGtBUItvinfo_delete_rdjcv(GtArrayGtBUItvinfo_rdjcv *stack,
                                   GtBUstate_rdjcv *state)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -111,11 +111,11 @@ void gt_GtArrayGtBUItvinfo_delete_rdjcv(GtArrayGtBUItvinfo_rdjcv *stack,
 }
 
 static GtBUItvinfo_rdjcv *allocateBUstack_rdjcv(GtBUItvinfo_rdjcv *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
+                                   GtUword currentallocated,
+                                   GtUword allocated,
                                    GtBUstate_rdjcv *state)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo_rdjcv *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -133,8 +133,8 @@ static int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
                     /* no parameter snrp */
                     GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix = 0,
                 idx,
                 numberofsuffixes,
@@ -205,8 +205,8 @@ static int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallb = lastinterval->lb;
+        GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_rdjcv(lcpvalue,lastintervallb);
         if (processbranchingedge_rdjcv(true,

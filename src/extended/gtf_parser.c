@@ -117,7 +117,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   GtStrand mRNA_strand;
   GtRange mRNA_range;
   GtStr *mRNA_seqid;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
 
   gt_error_check(err);
@@ -186,7 +186,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   GtStrand gene_strand;
   GtRange gene_range;
   GtStr *gene_seqid;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
 
   gt_error_check(err);
@@ -244,7 +244,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
   GtStr *seqid_str, *source_str, *line_buffer;
   char *line;
   size_t line_length;
-  unsigned long i, line_number = 0;
+  GtUword i, line_number = 0;
   GtGenomeNode *gn;
   GtRange range;
   GtPhase phase_value;

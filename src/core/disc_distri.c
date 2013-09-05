@@ -36,17 +36,17 @@ GtDiscDistri* gt_disc_distri_new(void)
   return gt_calloc((size_t) 1, sizeof (GtDiscDistri));
 }
 
-void gt_disc_distri_add(GtDiscDistri *d, unsigned long key)
+void gt_disc_distri_add(GtDiscDistri *d, GtUword key)
 {
   gt_disc_distri_add_multi(d, key, (GtUint64) 1);
 }
 
-DECLARE_HASHMAP(unsigned long, ul, GtUint64, ull, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, GtUint64, ull, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(GtUword, ul, GtUint64, ull, static, inline)
+DEFINE_HASHMAP(GtUword, ul, GtUint64, ull, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
-void gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
+void gt_disc_distri_add_multi(GtDiscDistri *d, GtUword key,
                               GtUint64 occurrences)
 {
   GtUint64 *valueptr;
@@ -65,7 +65,7 @@ void gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
   d->num_of_occurrences += occurrences;
 }
 
-GtUint64 gt_disc_distri_get(const GtDiscDistri *d, unsigned long key)
+GtUint64 gt_disc_distri_get(const GtDiscDistri *d, GtUword key)
 {
   GtUint64 *valueptr;
   gt_assert(d);
@@ -81,7 +81,7 @@ typedef struct {
 } GtShowValueInfo;
 
 static enum iterator_op
-showvalue(unsigned long key, GtUint64 occurrences,
+showvalue(GtUword key, GtUint64 occurrences,
           void *data, GT_UNUSED GtError *err)
 {
   double probability;
@@ -121,7 +121,7 @@ typedef struct {
 } DiscDistriForeachInfo;
 
 static enum iterator_op
-disc_distri_foreach_iterfunc(unsigned long key, GtUint64 occurrences,
+disc_distri_foreach_iterfunc(GtUword key, GtUint64 occurrences,
                              void *data, GT_UNUSED GtError *err)
 {
   DiscDistriForeachInfo *info;
@@ -163,7 +163,7 @@ void gt_disc_distri_foreach(const GtDiscDistri *d, GtDiscDistriIterFunc func,
 }
 
 static int
-rev_key_cmp(const unsigned long a, const unsigned long b)
+rev_key_cmp(const GtUword a, const GtUword b)
 {
   return -gt_ht_ul_elem_cmp(&a,&b);
 }
@@ -188,7 +188,7 @@ struct ForeachTesterData
 };
 
 /* helper function for unit test of foreach */
-static void foreachtester(unsigned long key,
+static void foreachtester(GtUword key,
                           GtUint64 value, void *data)
 {
   struct ForeachTesterData *tdata = data;
@@ -196,7 +196,7 @@ static void foreachtester(unsigned long key,
   GtError *err = tdata->err;
   tdata->counter++;
   gt_ensure(tdata->counter < DISC_DISTRI_FOREACHTESTSIZE);
-  gt_ensure((unsigned long) tdata->expkeys[tdata->counter] == key);
+  gt_ensure((GtUword) tdata->expkeys[tdata->counter] == key);
   gt_ensure((GtUint64) tdata->expvalues[tdata->counter] == value);
   *(tdata->had_err) = had_err;
 }

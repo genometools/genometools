@@ -58,7 +58,7 @@ typedef struct GtLTRdigestOptions {
   GtSeqid2FileInfo *s2fi;
   GtPdomCutoff cutoff;
   double evalue_cutoff;
-  unsigned long nthreads;
+  GtUword nthreads;
   unsigned int chain_max_gap_length,
                seqnamelen;
   GtRange ppt_len, ubox_len;

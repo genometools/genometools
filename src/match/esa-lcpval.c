@@ -21,7 +21,7 @@
 
  struct Lcpvalueiterator
 {
-  unsigned long relpos,
+  GtUword relpos,
          lastsuftabentry;
   GtReadmode readmode;
   const GtEncseq *encseq;
@@ -43,12 +43,12 @@ Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
   return lvi;
 }
 
-unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
+GtUword gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
                                       bool firstpage,
                                       const ESASuffixptr *suftabptr,
-                                      unsigned long numberofsuffixes)
+                                      GtUword numberofsuffixes)
 {
-  unsigned long lcpvalue;
+  GtUword lcpvalue;
 
   gt_assert(lvi->relpos < numberofsuffixes);
   if (firstpage && lvi->relpos == 0)

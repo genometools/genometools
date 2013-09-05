@@ -25,11 +25,11 @@
 int gt_outprjfile(const char *indexname,
                   GtReadmode readmode,
                   const GtEncseq *encseq,
-                  unsigned long numberofallsortedsuffixes,
+                  GtUword numberofallsortedsuffixes,
                   unsigned int prefixlength,
-                  unsigned long numoflargelcpvalues,
+                  GtUword numoflargelcpvalues,
                   double averagelcp,
-                  unsigned long maxbranchdepth,
+                  GtUword maxbranchdepth,
                   const Definedunsignedlong *longest,
                   GtError *err);
 

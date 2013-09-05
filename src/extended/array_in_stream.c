@@ -24,7 +24,7 @@
 struct GtArrayInStream {
   const GtNodeStream parent_instance;
   GtArray *nodes;
-  unsigned long next_index,
+  GtUword next_index,
                 *progress;
 };
 
@@ -65,7 +65,7 @@ const GtNodeStreamClass* gt_array_in_stream_class(void)
 }
 
 GtNodeStream* gt_array_in_stream_new(GtArray *nodes,
-                                     unsigned long *progress,
+                                     GtUword *progress,
                                      GT_UNUSED GtError *err)
 {
   GtNodeStream *gs;

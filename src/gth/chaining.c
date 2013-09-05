@@ -22,7 +22,7 @@
 #define SHOW_CHAIN_CALCULATION_STATUS_BUF_SIZE  160
 
 typedef struct {
-  unsigned long seqnum1,  /* number of reference sequence */
+  GtUword seqnum1,  /* number of reference sequence */
                 seqnum2,  /* number of genomic sequence */
                 startpos,
                 length;
@@ -77,10 +77,10 @@ static int compare_matches(const void *dataA, const void *dataB)
 
 #ifndef NDEBUG
 static bool sum_of_bucket_lengths_equals_num_of_matches(GtArray *buckets,
-                                                        unsigned long
+                                                        GtUword
                                                         numofmatches)
 {
-  unsigned long i, sumofbucketlengths = 0;
+  GtUword i, sumofbucketlengths = 0;
   gt_assert(buckets);
   for (i = 0; i < gt_array_size(buckets); i++)
     sumofbucketlengths += ((Bucket*) gt_array_get(buckets, i))->length;
@@ -91,9 +91,9 @@ static bool sum_of_bucket_lengths_equals_num_of_matches(GtArray *buckets,
 #endif
 
 static void sort_matches_and_calc_buckets(GtArray *matches, GtArray *buckets,
-                                          unsigned long *maxbucketlength)
+                                          GtUword *maxbucketlength)
 {
-  unsigned long i, currentstart = 0, currentend = 0;
+  GtUword i, currentstart = 0, currentend = 0;
   GthMatch *matchptr;
   Bucket bucket, *bucketptr;
 
@@ -147,7 +147,7 @@ static void sort_matches_and_calc_buckets(GtArray *matches, GtArray *buckets,
 static void outputbuckets(GtArray *buckets, GthMatch *sortedmatches,
                           GtFile *outfp)
 {
-  unsigned long i, startpos;
+  GtUword i, startpos;
   Bucket *bucket;
   for (i = 0; i < gt_array_size(buckets); i++) {
     bucket = gt_array_get(buckets, i);
@@ -173,7 +173,7 @@ static void outputbuckets(GtArray *buckets, GthMatch *sortedmatches,
 static void transform_refseq_positions(GtArray *matches,
                                        GthSeqCon *ref_seq_con)
 {
-  unsigned long i, referencelength, referenceoffset;
+  GtUword i, referencelength, referenceoffset;
   GtRange original, transformed;
   GthMatch *match;
   GtRange range;
@@ -215,10 +215,10 @@ static void transform_refseq_positions(GtArray *matches,
 */
 
 static void gthinitfragments(GtFragment *fragments,
-                             unsigned long *num_of_fragments,
+                             GtUword *num_of_fragments,
                              GthMatch *storematchtab,
-                             unsigned long numofmatches,
-                             unsigned long rare,
+                             GtUword numofmatches,
+                             GtUword rare,
                              double fragweightfactor)
 {
   GthMatch *mptr;
@@ -273,16 +273,16 @@ static void gthinitfragments(GtFragment *fragments,
 }
 
 static void show_chain_calc_status(GthShowVerbose showverbose,
-                                   unsigned long chainnum,
-                                   unsigned long numofchains,
-                                   unsigned long numofmatches,
-                                   unsigned long currentgen_file_num,
-                                   unsigned long numofgenomicfiles,
-                                   unsigned long currentreffilenum,
-                                   unsigned long numofreffiles,
+                                   GtUword chainnum,
+                                   GtUword numofchains,
+                                   GtUword numofmatches,
+                                   GtUword currentgen_file_num,
+                                   GtUword numofgenomicfiles,
+                                   GtUword currentreffilenum,
+                                   GtUword numofreffiles,
                                    bool directmatches, bool verboseseqs,
-                                   unsigned long genseqnum,
-                                   unsigned long refseqnum)
+                                   GtUword genseqnum,
+                                   GtUword refseqnum)
 {
   char buf[SHOW_CHAIN_CALCULATION_STATUS_BUF_SIZE];
   GT_UNUSED int rval;
@@ -323,8 +323,8 @@ static void chaining_info_init(GthChainingInfo *chaining_info,
                                GthCallInfo *call_info,
                                GthInput *input,
                                GthStat *stat,
-                               unsigned long gen_file_num,
-                               unsigned long ref_file_num)
+                               GtUword gen_file_num,
+                               GtUword ref_file_num)
 {
   chaining_info->directmatches    = directmatches;
   chaining_info->refseqisindex    = call_info->simfilterparam.inverse ||
@@ -339,10 +339,10 @@ static void chaining_info_init(GthChainingInfo *chaining_info,
   chaining_info->maxbucketnum     = ~0;
 }
 
-static void showmatches(GthMatch *matches, unsigned long numofmatches,
+static void showmatches(GthMatch *matches, GtUword numofmatches,
                         GtFile *outfp)
 {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < numofmatches; i++) {
     gt_file_xprintf(outfp, "%c refseqnum=%lu, genseqnum=%lu, refpos=%lu, "
                            "reflen=%lu, genpos=%lu, genlen=%lu\n", COMMENTCHAR,
@@ -360,14 +360,14 @@ static void calc_chains_from_matches(GthChainCollection *chain_collection,
                                      GthChainingInfo *chaining_info,
                                      GthSeqCon *gen_seq_con,
                                      GthSeqCon *ref_seq_con,
-                                     unsigned long rare,
+                                     GtUword rare,
                                      double fragweightfactor,
                                      GthJumpTableNew jump_table_new,
                                      GthJumpTableNewReverse
                                      jump_table_new_reverse,
                                      GthJumpTableDelete jump_table_delete)
 {
-  unsigned long i, numofchains = 0, num_of_fragments, maxbucketlength = 0;
+  GtUword i, numofchains = 0, num_of_fragments, maxbucketlength = 0;
   GtRange range;
   GtFile *outfp = chaining_info->call_info->out->outfp;
   GtFragment *fragments;
@@ -535,8 +535,8 @@ static void match_processor_info_init(GthMatchProcessorInfo
                                       bool directmatches, bool refseqisdna,
                                       bool online, bool inverse, GthStat *stat,
                                       GthChainingInfo *chaining_info,
-                                      unsigned long maxnumofmatches,
-                                      unsigned long rare,
+                                      GtUword maxnumofmatches,
+                                      GtUword rare,
                                       double fragweightfactor,
                                       GthJumpTableNew jump_table_new,
                                       GthJumpTableNewReverse
@@ -613,15 +613,15 @@ int gth_match_processor(GthMatchProcessorInfo *info, GthSeqCon *gen_seq_con,
 }
 
 void gth_chaining(GthChainCollection *chain_collection,
-                  unsigned long gen_file_num,
-                  unsigned long ref_file_num,
+                  GtUword gen_file_num,
+                  GtUword ref_file_num,
                   GthCallInfo *call_info,
                   GthInput *input,
                   GthStat *stat,
                   bool directmatches,
                   const GthPlugins *plugins)
 {
-  unsigned long i, numofsequences = 0;
+  GtUword i, numofsequences = 0;
   GtArray *matches;
   GthChainingInfo chaining_info;
   void *matcher_arguments;
@@ -688,12 +688,12 @@ void gth_chaining(GthChainCollection *chain_collection,
       gth_stat_get_matchnumdistri(stat)) {
     /* alloc space of match number counter */
     numofsequences = gth_input_num_of_ref_seqs(input, ref_file_num);
-    match_processor_info.matchnumcounter = gt_malloc(sizeof (unsigned long) *
+    match_processor_info.matchnumcounter = gt_malloc(sizeof (GtUword) *
                                                      numofsequences);
 
     /* init match number counter to 0 */
     memset(match_processor_info.matchnumcounter, 0,
-           (size_t) numofsequences * sizeof (unsigned long));
+           (size_t) numofsequences * sizeof (GtUword));
   }
 
   /* free input, which contains the virtual trees.

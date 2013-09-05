@@ -96,7 +96,7 @@ int gt_custom_track_sketch(GtCustomTrack *ctrack, GtCanvas *canvas,
   return gt_canvas_visit_custom_track(canvas, ctrack, err);
 }
 
-unsigned long gt_custom_track_get_height(GtCustomTrack *ctrack)
+GtUword gt_custom_track_get_height(GtCustomTrack *ctrack)
 {
   gt_assert(ctrack && ctrack->c_class);
   return ctrack->c_class->get_height(ctrack);

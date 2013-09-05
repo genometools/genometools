@@ -24,7 +24,7 @@
  * index produced unless NULL is returned
  */
 EISeq *
-gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
+gt_newGenBlockEncIdxSeq(GtUword totalLen, const char *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
                      SeqDataReader BWTGenerator,
                      const struct seqBaseParam *params,

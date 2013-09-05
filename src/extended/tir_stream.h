@@ -29,19 +29,19 @@ typedef struct GtTIRStream GtTIRStream;
 /* XXX: Needs documentation. */
 const GtNodeStreamClass* gt_tir_stream_class(void);
 GtNodeStream*   gt_tir_stream_new(GtStr *str_indexname,
-                                  unsigned long min_seed_length,
-                                  unsigned long min_TIR_length,
-                                  unsigned long max_TIR_length,
-                                  unsigned long min_TIR_distance,
-                                  unsigned long max_TIR_distance,
+                                  GtUword min_seed_length,
+                                  GtUword min_TIR_length,
+                                  GtUword max_TIR_length,
+                                  GtUword min_TIR_distance,
+                                  GtUword max_TIR_distance,
                                   GtXdropArbitraryscores arbit_scores,
                                   int xdrop_belowscore,
                                   double similarity_threshold,
                                   bool best_overlaps,
                                   bool no_overlaps,
-                                  unsigned long min_TSD_length,
-                                  unsigned long max_TSD_length,
-                                  unsigned long vicinity,
+                                  GtUword min_TSD_length,
+                                  GtUword max_TSD_length,
+                                  GtUword vicinity,
                                   GtError *err);
 
 const GtEncseq* gt_tir_stream_get_encseq(GtTIRStream *ts);

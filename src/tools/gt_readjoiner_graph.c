@@ -36,7 +36,7 @@ typedef struct {
        save, dot, mdot, adj, spm, subgraph_mono, subgraph_extend;
   unsigned int deadend, bubble, deadend_depth;
   GtStrArray *subgraph, *subgraph_other;
-  unsigned long subgraph_depth;
+  GtUword subgraph_depth;
 } GtReadjoinerGraphArguments;
 
 static void* gt_readjoiner_graph_arguments_new(void)
@@ -250,7 +250,7 @@ static int gt_readjoiner_graph_error_correction(GtStrgraph *strgraph,
     GtLogger *verbose_logger)
 {
   unsigned int i;
-  unsigned long retval, retval_sum;
+  GtUword retval, retval_sum;
   gt_logger_log(verbose_logger, "remove p-bubbles");
 
   retval_sum = 0;
@@ -270,7 +270,7 @@ static int gt_readjoiner_graph_error_correction(GtStrgraph *strgraph,
   retval = 1UL;
   for (i = 0; i < deadend && retval > 0; i++)
   {
-    retval = gt_strgraph_reddepaths(strgraph, (unsigned long)deadend_depth,
+    retval = gt_strgraph_reddepaths(strgraph, (GtUword)deadend_depth,
         false);
     retval_sum += retval;
     gt_logger_log(verbose_logger, "removed dead-end path edges [round %u] = "
@@ -283,7 +283,7 @@ static int gt_readjoiner_graph_error_correction(GtStrgraph *strgraph,
 
 static inline void gt_readjoiner_graph_show_current_space(const char *label)
 {
-  unsigned long m, f;
+  GtUword m, f;
   if (gt_ma_bookkeeping_enabled())
   {
     m = gt_ma_get_space_current();
@@ -295,7 +295,7 @@ static inline void gt_readjoiner_graph_show_current_space(const char *label)
 }
 
 static void gt_readjoiner_graph_load_graph(GtStrgraph **strgraph,
-    GtEncseq *reads, const char *readset, unsigned long rlen,
+    GtEncseq *reads, const char *readset, GtUword rlen,
     GtLogger *default_logger, GtTimer *timer)
 {
   *strgraph = gt_strgraph_new_from_file(reads, rlen, readset,
@@ -310,12 +310,12 @@ static void gt_readjoiner_graph_load_graph(GtStrgraph **strgraph,
 
 static int gt_readjoiner_graph_show_subgraph(GtStrgraph *strgraph,
     GtStrArray *subgraph, GtStrArray *subgraph_other,
-    unsigned long subgraph_depth, bool subgraph_mono, bool subgraph_extend,
+    GtUword subgraph_depth, bool subgraph_mono, bool subgraph_extend,
     const char *readsetname, GtLogger *default_logger, GtTimer *timer,
     GtError *err)
 {
   int had_err = 0;
-  unsigned long i, *rlist, rlistsize = gt_str_array_size(subgraph),
+  GtUword i, *rlist, rlistsize = gt_str_array_size(subgraph),
                 *olist = NULL, olistsize = gt_str_array_size(subgraph_other);
   const char *num;
   gt_assert(rlistsize > 0);
@@ -368,7 +368,7 @@ static int gt_readjoiner_graph_runner(GT_UNUSED int argc,
   GtStrgraph *strgraph = NULL;
   const char *readset = gt_str_get(arguments->readset);
   bool eqlen;
-  unsigned long nreads, tlen, rlen;
+  GtUword nreads, tlen, rlen;
   int had_err = 0;
 
   gt_assert(arguments);

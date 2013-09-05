@@ -23,13 +23,13 @@
 #include "core/md5_fingerprint_api.h"
 #include "core/safearith.h"
 
-char* gt_md5_fingerprint(const char *sequence, unsigned long seqlen)
+char* gt_md5_fingerprint(const char *sequence, GtUword seqlen)
 {
   unsigned char output[16];
   char buf[64];
   char *fingerprint;
   GtMD5Encoder *enc;
-  unsigned long i, pos = 0;
+  GtUword i, pos = 0;
 
   enc = gt_md5_encoder_new();
   for (i = 0; i < seqlen; i++) {

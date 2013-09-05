@@ -31,9 +31,9 @@ struct GtSeqposClassifier
   GtGenomeNode *gn;
   GtFeatureNode *fn;
   GtFeatureNodeIterator *fni;
-  unsigned long nof_specified_ft_found;
-  unsigned long next_inside;
-  unsigned long next_not_inside;
+  GtUword nof_specified_ft_found;
+  GtUword next_inside;
+  GtUword next_not_inside;
   const char *specified_ft;
 };
 
@@ -131,7 +131,7 @@ static int gt_seqpos_classifier_next_specified_ft(
 }
 
 int gt_seqpos_classifier_position_is_inside_feature(
-    GtSeqposClassifier *seqpos_classifier, unsigned long i, bool *inside,
+    GtSeqposClassifier *seqpos_classifier, GtUword i, bool *inside,
     bool *end_of_annotation, GtError *err)
 {
   int had_err = 0;
@@ -211,7 +211,7 @@ int gt_seqpos_classifier_position_is_inside_feature(
   return had_err;
 }
 
-unsigned long gt_seqpos_classifier_nof_features_found(
+GtUword gt_seqpos_classifier_nof_features_found(
     GtSeqposClassifier *seqpos_classifier)
 {
   gt_assert(seqpos_classifier);

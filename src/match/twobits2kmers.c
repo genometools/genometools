@@ -46,7 +46,7 @@ typedef struct
   GtTwobitencoding currentencoding;
 } Singlecharacterbitstreamstate;
 
-static void showdifferentkmers(int line,unsigned long pos,GtCodetype kmer1,
+static void showdifferentkmers(int line,GtUword pos,GtCodetype kmer1,
                                GtCodetype kmer2)
 {
   char buffer[2*GT_INTWORDSIZE+1];
@@ -143,7 +143,7 @@ static inline GtCodetype mcbs_next(Multicharacterbitstreamstate *mcbs,
 
 static void gt_checkkmercode(GT_UNUSED void *processinfo,
                              GT_UNUSED bool firstinrange,
-                             GT_UNUSED unsigned long pos,
+                             GT_UNUSED GtUword pos,
                              GT_UNUSED GtCodetype code)
 {
 #ifndef NDEBUG
@@ -189,7 +189,7 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
                                        Bitstreamreadmode bsrsmode,
                                        unsigned int kmersize)
 {
-  unsigned long totallength, pos;
+  GtUword totallength, pos;
   GtCodetype kmer;
   GtKmercodeiterator *kmercodeiterator = NULL;
   const GtKmercode *kmercodeptr;
@@ -198,7 +198,7 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
 
   gt_assert(kmersize <= (unsigned int) GT_UNITSIN2BITENC);
   totallength = gt_encseq_total_length(encseq);
-  if (totallength < (unsigned long) kmersize)
+  if (totallength < (GtUword) kmersize)
   {
     return;
   }
@@ -216,7 +216,7 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
       {
         uint64_t kmersum = 0;
 
-        for (pos = 0; pos <= totallength - (unsigned long) kmersize; pos++)
+        for (pos = 0; pos <= totallength - (GtUword) kmersize; pos++)
         {
           kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator);
           gt_assert(kmercodeptr != NULL);
@@ -227,7 +227,7 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
       }
     case BSRS_stream_reader_multi:
       mcbs_init(&mcbs,twobitencoding,kmersize);
-      for (pos = 0; pos <= totallength - (unsigned long) kmersize; pos++)
+      for (pos = 0; pos <= totallength - (GtUword) kmersize; pos++)
       {
         kmer = mcbs_next(&mcbs,kmersize);
         READNEXTCODEANDCHECKIGNORESPECIAL(pos);
@@ -254,7 +254,7 @@ void gt_encseq_faststream(const GtEncseq *encseq,
   twobitencoding = gt_encseq_twobitencoding_export(encseq);
   if (twobitencoding != NULL)
   {
-    unsigned long idx, totallength, pos;
+    GtUword idx, totallength, pos;
     uint64_t pairbitsum = 0, pairbitsumBF;
     GtUchar cc, ccesr;
     GtEncseqReader *esr = NULL;

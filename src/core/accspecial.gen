@@ -23,7 +23,7 @@ static bool GT_APPENDINT(binarysearchpage)(const GT_SPECIALTABLETYPE *leftptr,
 
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((GtUword) (rightptr-leftptr));
     if (pos < *midptr)
     {
       rightptr = midptr-1;
@@ -42,9 +42,9 @@ static bool GT_APPENDINT(binarysearchpage)(const GT_SPECIALTABLETYPE *leftptr,
 }
 
 static bool GT_APPENDINT(checkspecial)(const GT_APPENDINT(GtSWtable) *swtable,
-                                       unsigned long pos)
+                                       GtUword pos)
 {
-  unsigned long pagenumber = GT_POS2PAGENUM(pos);
+  GtUword pagenumber = GT_POS2PAGENUM(pos);
 
   if (pagenumber == 0)
   {
@@ -77,17 +77,17 @@ static bool GT_APPENDINT(checkspecial)(const GT_APPENDINT(GtSWtable) *swtable,
   return false;
 }
 
-/*@null@*/ static unsigned long GT_APPENDINT(sepnum2pageoffset)(
+/*@null@*/ static GtUword GT_APPENDINT(sepnum2pageoffset)(
                                        const GT_APPENDINT(GtSWtable) *swtable,
-                                       unsigned long sepnum)
+                                       GtUword sepnum)
 {
-  unsigned long *leftptr, *midptr, *rightptr, *found = NULL;
+  GtUword *leftptr, *midptr, *rightptr, *found = NULL;
 
   leftptr = swtable->endidxinpage;
   rightptr = swtable->endidxinpage + swtable->numofpages - 1;
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((GtUword) (rightptr-leftptr));
     if (sepnum < *midptr)
     {
       rightptr = midptr - 1;
@@ -99,14 +99,14 @@ static bool GT_APPENDINT(checkspecial)(const GT_APPENDINT(GtSWtable) *swtable,
   }
   if (found != NULL)
   {
-    return (unsigned long) (found - swtable->endidxinpage + 1);
+    return (GtUword) (found - swtable->endidxinpage + 1);
   }
   return 0;
 }
 
-static unsigned long GT_APPENDINT(gt_encseq_seqstartposSW)(
+static GtUword GT_APPENDINT(gt_encseq_seqstartposSW)(
                            const GT_APPENDINT(GtSWtable) *swtable,
-                           unsigned long seqnum)
+                           GtUword seqnum)
 {
   return (seqnum > 0)
            ? GT_PAGENUM2OFFSET(GT_APPENDINT(sepnum2pageoffset)
@@ -115,12 +115,12 @@ static unsigned long GT_APPENDINT(gt_encseq_seqstartposSW)(
            : 0;
 }
 
-static unsigned long GT_APPENDINT(position2seqnum)(
+static GtUword GT_APPENDINT(position2seqnum)(
                                    const GT_SPECIALTABLETYPE *recordseps,
-                                   unsigned long numofrecords,
+                                   GtUword numofrecords,
                                    GT_SPECIALTABLETYPE position)
 {
-  unsigned long left, mid, right, len;
+  GtUword left, mid, right, len;
 
   gt_assert(numofrecords > 0);
   if (numofrecords == 1UL || position <= recordseps[0])
@@ -154,15 +154,15 @@ static unsigned long GT_APPENDINT(position2seqnum)(
     }
   }
   fprintf(stderr,"gt_encseq_sep2seqnum: cannot find position %lu\n",
-           (unsigned long) position);
+           (GtUword) position);
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-static unsigned long GT_APPENDINT(gt_encseq_seqnum)(
+static GtUword GT_APPENDINT(gt_encseq_seqnum)(
                                 const GT_APPENDINT(GtSWtable) *swtable,
-                                unsigned long pos)
+                                GtUword pos)
 {
-  unsigned long pagenumber = GT_POS2PAGENUM(pos);
+  GtUword pagenumber = GT_POS2PAGENUM(pos);
 
   if (pagenumber == 0)
   {

@@ -34,23 +34,23 @@ typedef struct {
   unsigned int currentchar;
 
   /* parameters */
-  unsigned long k; /* k-mer length */
-  unsigned long c; /* min count for k-mer to be trusted */
+  GtUword k; /* k-mer length */
+  GtUword c; /* min count for k-mer to be trusted */
 
-  unsigned long *kpositions;
-  unsigned long *count;
+  GtUword *kpositions;
+  GtUword *count;
   bool seprange;
 
-  unsigned long debug_value;
+  GtUword debug_value;
   bool quiet;
 
-  unsigned long firstmirrorpos;
-  unsigned long totallength;
+  GtUword firstmirrorpos;
+  GtUword totallength;
 
   GtTwobitencEditor *editor;
 
   /* statistics */
-  unsigned long ncorrections;
+  GtUword ncorrections;
 } GtBUstate_errfind;
 
 typedef struct { /* empty */ } GtBUinfo_errfind;
@@ -76,10 +76,10 @@ static inline void gt_errfind_reset(GtBUstate_errfind *state)
   state->seprange = false;
 }
 
-static inline void gt_errfind_process_kmer(unsigned long leafnumber,
+static inline void gt_errfind_process_kmer(GtUword leafnumber,
     GtBUstate_errfind *state)
 {
-  unsigned long current_count = ++state->count[state->currentchar];
+  GtUword current_count = ++state->count[state->currentchar];
   if (current_count <= state->c)
   {
     gt_assert(leafnumber + state->k - 1 <
@@ -109,18 +109,18 @@ static inline void gt_errfind_process_kmer(unsigned long leafnumber,
    gt_encseq_position_is_separator((ENCSEQ), (POS), GT_READMODE_FORWARD))
 
 GT_UNUSED
-static inline unsigned long gt_errfind_sfxlength(const GtEncseq *encseq,
-    unsigned long pos)
+static inline GtUword gt_errfind_sfxlength(const GtEncseq *encseq,
+    GtUword pos)
 {
-  unsigned long seqnum = gt_encseq_seqnum(encseq, pos);
-  unsigned long seqstartpos = gt_encseq_seqstartpos(encseq, seqnum);
-  unsigned long seqlength = gt_encseq_seqlength(encseq, seqnum);
+  GtUword seqnum = gt_encseq_seqnum(encseq, pos);
+  GtUword seqstartpos = gt_encseq_seqstartpos(encseq, seqnum);
+  GtUword seqlength = gt_encseq_seqlength(encseq, seqnum);
   return seqstartpos + (seqlength - 1) - pos;
 }
 
 static int processleafedge_errfind(GT_UNUSED bool firstsucc,
-    unsigned long fatherdepth,
-    GT_UNUSED GtBUinfo_errfind *father, unsigned long leafnumber,
+    GtUword fatherdepth,
+    GT_UNUSED GtBUinfo_errfind *father, GtUword leafnumber,
     GtBUstate_errfind *state, GT_UNUSED GtError *err)
 {
 #ifdef RDJ_ERRFIND_DEBUG
@@ -155,9 +155,9 @@ static int processleafedge_errfind(GT_UNUSED bool firstsucc,
 }
 
 static int processbranchingedge_errfind(GT_UNUSED bool firstsucc,
-    GT_UNUSED unsigned long fatherdepth,
-    GT_UNUSED GtBUinfo_errfind *father, GT_UNUSED unsigned long sondepth,
-    GT_UNUSED unsigned long sonwidth,
+    GT_UNUSED GtUword fatherdepth,
+    GT_UNUSED GtBUinfo_errfind *father, GT_UNUSED GtUword sondepth,
+    GT_UNUSED GtUword sonwidth,
     GT_UNUSED GtBUinfo_errfind *son, GT_UNUSED GtBUstate_errfind *state,
     GT_UNUSED GtError *err)
 {
@@ -191,7 +191,7 @@ static inline GtUchar gt_errfind_trusted_char(const GtBUstate_errfind *state)
 {
   unsigned int cnum;
   GtUchar trusted_char = (GtUchar)GT_UNDEF_UCHAR;
-  unsigned long trusted_count = 0;
+  GtUword trusted_count = 0;
   for (cnum = 0; cnum < state->alphasize &&
       trusted_char == (GtUchar)GT_UNDEF_UCHAR; cnum++)
   {
@@ -209,7 +209,7 @@ static inline GtUchar gt_errfind_trusted_char(const GtBUstate_errfind *state)
   return trusted_char;
 }
 
-static int processlcpinterval_errfind(unsigned long lcp,
+static int processlcpinterval_errfind(GtUword lcp,
     GT_UNUSED GtBUinfo_errfind *info, GtBUstate_errfind *state,
     GT_UNUSED GtError *err)
 {
@@ -223,10 +223,10 @@ static int processlcpinterval_errfind(unsigned long lcp,
       {
         if (state->count[cnum] < state->c)
         {
-          unsigned long i;
+          GtUword i;
           for (i = 0; i < state->count[cnum]; i++)
           {
-            unsigned long pos = state->kpositions[cnum * state->c + i];
+            GtUword pos = state->kpositions[cnum * state->c + i];
             GtUchar newchar = trusted_char;
             if (pos >= state->firstmirrorpos)
             {
@@ -251,7 +251,7 @@ static int processlcpinterval_errfind(unsigned long lcp,
 #include "match/esa-bottomup-errfind.inc"
 
 int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
-    unsigned long k, unsigned long c, unsigned long debug_value,
+    GtUword k, GtUword c, GtUword debug_value,
     bool edit_twobitencoding, const char *indexname, GtError *err)
 {
   GtBUstate_errfind *state;
@@ -259,8 +259,8 @@ int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
 
   state = gt_malloc(sizeof (*state));
   state->alphasize = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
-  state->kpositions = gt_malloc(sizeof (unsigned long) * state->alphasize * c);
-  state->count = gt_malloc(sizeof (unsigned long) * state->alphasize);
+  state->kpositions = gt_malloc(sizeof (GtUword) * state->alphasize * c);
+  state->count = gt_malloc(sizeof (GtUword) * state->alphasize);
   state->encseq = encseq;
   state->totallength = gt_encseq_total_length(encseq);
   state->firstmirrorpos = state->totallength;

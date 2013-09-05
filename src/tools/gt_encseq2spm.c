@@ -48,7 +48,7 @@ typedef struct
                singlescan,
                addbscache_depth,
                forcek;
-  unsigned long maximumspace,
+  GtUword maximumspace,
                 phase2extra;
   GtStr *encseqinput,
         *spmspec,
@@ -411,7 +411,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
         spmsk_states[threadcount]
           = gt_spmsk_inl_new(encseq,
                              readmode,
-                             (unsigned long) arguments->minmatchlength,
+                             (GtUword) arguments->minmatchlength,
                              arguments->countspms,
                              arguments->outputspms,
                              gt_str_get(arguments->encseqinput));
@@ -453,7 +453,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
     }
     if (spmsk_states != NULL)
     {
-      unsigned long countmatches = 0;
+      GtUword countmatches = 0;
 
       for (threadcount = 0; threadcount < threads; threadcount++)
       {

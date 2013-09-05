@@ -105,12 +105,12 @@ static void orf_attach_results_to_gff3(GtFeatureNode *gf,
 
 static void process_orf(GtRange orf_rng, unsigned int orf_frame,
                         GtStrand strand, GtFeatureNode *gf,
-                        unsigned long offset, unsigned int min,
+                        GtUword offset, unsigned int min,
                         unsigned int max, GT_UNUSED GtError *err)
 {
 
   gt_assert(gf);
-  unsigned long tmp;
+  GtUword tmp;
 
   if ((gt_range_length(&orf_rng) >= min) &&
       (gt_range_length(&orf_rng) <= max)) {
@@ -134,15 +134,15 @@ static void process_orf(GtRange orf_rng, unsigned int orf_frame,
 
 static int run_orffinder(GtRegionMapping *rmap,
                          GtFeatureNode *gf,
-                         unsigned long start,
-                         GT_UNUSED unsigned long end,
+                         GtUword start,
+                         GT_UNUSED GtUword end,
                          unsigned int min,
                          unsigned int max,
                          bool all,
                          GtError *err)
 {
   int had_err = 0, i;
-  unsigned long sum;
+  GtUword sum;
   GtCodonIterator* ci = NULL;
   GtTranslator* translator = NULL;
   GtORFIterator* orfi = NULL;
@@ -211,7 +211,7 @@ static int run_orffinder(GtRegionMapping *rmap,
     /* reverse strand */
     if (!had_err) {
       GT_UNUSED int rval = 0;
-      unsigned long length = gt_str_length(seq);
+      GtUword length = gt_str_length(seq);
       char *strp = (char*) gt_str_get_mem(seq);
       rval = gt_reverse_complement(strp, gt_str_length(seq), err);
       gt_assert(!rval); /* XXX */

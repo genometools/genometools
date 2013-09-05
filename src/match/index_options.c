@@ -48,7 +48,7 @@ struct GtIndexOptions
 {
   unsigned int numofparts,
                prefixlength;
-  unsigned long maximumspace;
+  GtUword maximumspace;
   GtStrArray *algbounds;
   GtReadmode readmode;
   bool outsuftab,
@@ -136,7 +136,7 @@ static GtIndexOptions* gt_index_options_new(void)
                              "numbers");\
             haserr = true;\
           }\
-          sfxstrategy->COMP = (unsigned long) readint;\
+          sfxstrategy->COMP = (GtUword) readint;\
         }
 
 int gt_parse_algbounds(Sfxstrategy *sfxstrategy,
@@ -591,7 +591,7 @@ GT_INDEX_OPTS_GETTER_DEF(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF_OPT(spmopt);
 /* these are available as values only, set _after_ option processing */
 GT_INDEX_OPTS_GETTER_DEF_VAL(lcpdist, bool);
-GT_INDEX_OPTS_GETTER_DEF_VAL(maximumspace, unsigned long);
+GT_INDEX_OPTS_GETTER_DEF_VAL(maximumspace, GtUword);
 GT_INDEX_OPTS_GETTER_DEF_VAL(numofparts, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF_VAL(outkyssort, bool);
 GT_INDEX_OPTS_GETTER_DEF_VAL(outkystab, bool);

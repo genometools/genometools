@@ -34,7 +34,7 @@ void          gt_genome_node_change_seqid(GtGenomeNode*, GtStr*);
 int           gt_genome_node_compare(GtGenomeNode**, GtGenomeNode**);
 int           gt_genome_node_compare_with_data(GtGenomeNode**, GtGenomeNode**,
                                                void *unused);
-/* <delta> has to point to a variable of type unsigned long. */
+/* <delta> has to point to a variable of type GtUword. */
 int           gt_genome_node_compare_delta(GtGenomeNode**, GtGenomeNode**,
                                            void *delta);
 
