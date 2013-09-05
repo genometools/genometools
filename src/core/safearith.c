@@ -49,12 +49,10 @@ long gt_safe_labs_check_func(long j, const char *src_file, int src_line,
   return rval;
 }
 
-long long gt_safe_llabs_check_func(long long j, const char *src_file,
-                                   int src_line,
-                                   GtOverflowHandlerFunc handler_func,
-                                   void *data)
+GtInt64 gt_safe_llabs_check_func(GtInt64 j, const char *src_file, int src_line,
+                                 GtOverflowHandlerFunc handler_func, void *data)
 {
-  long long rval = j < 0 ? -j : j;
+  GtInt64 rval = j < 0 ? -j : j;
   if (rval < 0) { /* overflow */
     handler_func(src_file, src_line, data);
   }
@@ -205,8 +203,8 @@ int gt_safearith_unit_test(GtError *err)
     gt_ensure(__MAX(unsigned long) == ULONG_MAX);
 
 #ifdef LLONG_MIN
-    gt_ensure(__MIN(long long) == LLONG_MIN);
-    gt_ensure(__MAX(long long) == LLONG_MAX);
+    gt_ensure(__MIN(GtInt64) == LLONG_MIN);
+    gt_ensure(__MAX(GtInt64) == LLONG_MAX);
     gt_ensure(__MIN(GtUint64) == 0);
     gt_ensure(__MAX(GtUint64) == ULLONG_MAX);
 #endif
@@ -280,7 +278,7 @@ int gt_safearith_unit_test(GtError *err)
   {
     int i;
     long l;
-    long long ll;
+    GtInt64 ll;
 
     i = gt_safe_abs(0);
     gt_ensure(i == 0);

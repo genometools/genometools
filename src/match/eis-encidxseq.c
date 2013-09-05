@@ -125,7 +125,7 @@ gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
       {
         gt_logger_log(verbosity, "Invalid skip request: "GT_LLD","
                     " too large for sequence length: %lu",
-                    (long long)skip, length);
+                    (GtInt64)skip, length);
         return -1;
       }
       fseeko(bwtFP, skip, SEEK_SET);

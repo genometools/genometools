@@ -109,11 +109,14 @@ for _, fn in ipairs(arg) do -- iterate over all files
     if string.find(l, " do%(")     then err(fn, ln, "missing blank") end
     if string.find(l, "%){")       then err(fn, ln, "missing blank") end
 
-    -- check for unsigned long long
     if not string.match(fn, "types_api.h$") then
+      -- check for unsigned long long and long long
       if string.find(l, "unsigned%s+long%s+long[%s,%*]") or
          string.find(l, "%(unsigned%s+long%s+long%)") then
         err(fn, ln, "do not use 'unsigned long long', use 'GtUint64' instead")
+      elseif string.find(l, "long%s+long[%s,%*]") or
+             string.find(l, "%(long%s+long%)") then
+        err(fn, ln, "do not use 'long long', use 'GtInt64' instead")
       end
     end
 

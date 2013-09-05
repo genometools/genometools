@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include "core/error.h"
 #include "core/safearith_imp.h"
+#include "core/types_api.h"
 
 /*
   This module allows one to do safe arithmetics in C (preventing overflows).
@@ -84,7 +85,7 @@ long          gt_safe_labs_check_func(long, const char*, int,
 #define       gt_safe_labs_check(j, func, data) \
               gt_safe_labs_check_func(j, __FILE__, __LINE__, func, data)
 
-long long     gt_safe_llabs_check_func(long long, const char*, int,
+GtInt64       gt_safe_llabs_check_func(GtInt64, const char*, int,
                                        GtOverflowHandlerFunc, void*);
 #define       gt_safe_llabs(j) \
               gt_safe_llabs_check_func(j, __FILE__, __LINE__, \
