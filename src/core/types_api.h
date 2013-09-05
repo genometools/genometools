@@ -41,10 +41,12 @@ typedef long long          GtInt64;
 typedef unsigned long long GtUint64;
 
 typedef unsigned char GtUchar;
-typedef unsigned long GtUlong;
 
-typedef struct
-{
+/* deprecated */
+typedef GtUword GtUlong;
+
+/* deprecated */
+typedef struct {
   GtUlong a, b;
 } GtUlongPair;
 
