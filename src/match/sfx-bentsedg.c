@@ -130,7 +130,7 @@ typedef struct
 {
   unsigned long suffix;
   unsigned char lcpwithpivot;
-  char cmpresult;
+  signed char cmpresult;
 } GtCountingsortinfo;
 
 GT_DECLAREARRAYSTRUCT(GtMKVstack);
