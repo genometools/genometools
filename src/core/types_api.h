@@ -37,6 +37,9 @@ typedef long long GtWord;
 typedef int GtWord;
 #endif
 
+typedef long long          GtInt64;
+typedef unsigned long long GtUint64;
+
 typedef uint8_t       GtUchar;
 typedef unsigned long GtUlong;
 
