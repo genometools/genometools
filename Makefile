@@ -751,6 +751,7 @@ GTDISTBASENAME:="gt-$(VERSION)-$(SYSTEMNAME)-${BIT}"
 DISTDIR:="$(CURDIR)/dist/$(SYSTEMNAME)"
 SCRIPTSDIR:="$(CURDIR)/scripts"
 GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
+STRIP:=strip
 
 dist: all
 	@echo "[build distribution]"
@@ -762,7 +763,7 @@ dist: all
 	@cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
 	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
 	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin
-	@strip $(GTDISTDIR)/bin/gt
+	@$(STRIP) $(GTDISTDIR)/bin/gt
 	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
 	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)
