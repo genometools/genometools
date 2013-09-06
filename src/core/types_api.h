@@ -41,7 +41,11 @@
 #endif
 
 /* Define the conversion string for 'ld' in platform independent fashion. */
+#ifndef S_SPLINT_S
 #define GT_LD "%"GT_LDS
+#else
+#define GT_LD "%ld"
+#endif
 
 /* Define the conversion string for 'lu' in platform independent fashion. */
 #ifndef _WIN64
@@ -51,7 +55,11 @@
 #endif
 
 /* Define the conversion string for '%lu' in platform independent fashion. */
+#ifndef S_SPLINT_S
 #define GT_LU "%"GT_LUS
+#else
+#define GT_LU "%lu"
+#endif
 
 /* Define the conversion string for '%zu' in platform independent fashion. */
 #if !defined(_WIN32)
