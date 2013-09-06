@@ -7,6 +7,7 @@ make CC=x86_64-w64-mingw32-gcc                                  \
      curses=no                                                  \
      with-sqlite=no                                             \
      sharedlib=no                                               \
+     64bit=yes                                                  \
      SYSTEM=Windows                                             \
      CFLAGS='-Wno-error=attributes -Wno-error=unused-parameter' \
      $*
