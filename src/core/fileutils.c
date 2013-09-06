@@ -124,9 +124,9 @@ const char* gt_file_suffix(const char *path)
 
 void gt_file_dirname(GtStr *path, const char *file)
 {
-  long i;
+  GtWord i;
   gt_str_reset(path);
-  for (i = (long) (strlen(file) - 1); i >= 0; i--) {
+  for (i = (GtWord) (strlen(file) - 1); i >= 0; i--) {
     if (file[i] == '/')
       break;
   }
@@ -254,7 +254,7 @@ void gt_xfile_cmp(const char *file1,const char *file2)
     cc2 = fgetc(fp2);
     if (cc1 != cc2)
     {
-      fprintf(stderr,"files %s and %s differ in byte %lu: %d != %d\n",
+      fprintf(stderr,"files %s and %s differ in byte "GT_LU": %d != %d\n",
                       file1,file2,(GtUword) offset,cc1,cc2);
       exit(EXIT_FAILURE);
     }

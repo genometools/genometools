@@ -2292,9 +2292,9 @@ static void gt_strgraph_show_contigpaths(GtStrgraph *strgraph,
   pdata.strgraph = strgraph;
 
   /* leave space for header */
-  gt_xfseek(ji_file, (long) sizeof (pdata.jnum), SEEK_SET);
-  gt_xfseek(cjl_i_file, (long) sizeof (pdata.contignum), SEEK_SET);
-  gt_xfseek(cjl_o_file, (long) sizeof (pdata.contignum), SEEK_SET);
+  gt_xfseek(ji_file, (GtWord) sizeof (pdata.jnum), SEEK_SET);
+  gt_xfseek(cjl_i_file, (GtWord) sizeof (pdata.contignum), SEEK_SET);
+  gt_xfseek(cjl_o_file, (GtWord) sizeof (pdata.contignum), SEEK_SET);
 
   gt_strgraph_traverse(strgraph, gt_strgraph_show_contigpath_vertex,
       gt_strgraph_show_contigpath_edge, &pdata, show_progressbar);

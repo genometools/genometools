@@ -409,7 +409,7 @@ static int inputsuffixarray(bool map,
       INITBufferedfile(indexname,&suffixarray->lcptabstream,GtUchar,
                        GT_LCPTABSUFFIX);
       if (!haserr &&
-          fseek(suffixarray->lcptabstream.fp,(long) sizeof (GtUchar),SEEK_SET))
+          fseek(suffixarray->lcptabstream.fp,(GtWord) sizeof (GtUchar),SEEK_SET))
       {
         gt_error_set(err,"fseek(esastream) failed: %s",strerror(errno));
         haserr = true;
