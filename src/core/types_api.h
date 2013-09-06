@@ -19,6 +19,27 @@
 #ifndef TYPES_API_H
 #define TYPES_API_H
 
+/* Define the conversion string for '%lld' in platform independent fashion. */
+#ifndef _WIN32
+#define GT_LLD "%lld"
+#else
+#define GT_LLD "%I64d"
+#endif
+
+/* Define the conversion string for '%llu' in platform independent fashion. */
+#ifndef _WIN32
+#define GT_LLU "%llu"
+#else
+#define GT_LLU "%I64u"
+#endif
+
+/* Define the conversion string for '%zu' in platform independent fashion. */
+#ifndef _WIN32
+#define GT_ZU "%zu"
+#else
+#define GT_ZU "%u"
+#endif
+
 /* Define GtUword as an unsigned integer with the machine word size (4 byte on
    32-bit systems and 8 byte on 64-bit systems). */
 #ifdef _WIN64

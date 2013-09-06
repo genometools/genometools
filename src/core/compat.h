@@ -27,27 +27,6 @@
 #define GT_PATH_VAR_SEPARATOR ';'
 #endif
 
-/* Define the conversion string for '%lld' in platform independent fashion. */
-#ifndef _WIN32
-#define GT_LLD "%lld"
-#else
-#define GT_LLD "%I64d"
-#endif
-
-/* Define the conversion string for '%llu' in platform independent fashion. */
-#ifndef _WIN32
-#define GT_LLU "%llu"
-#else
-#define GT_LLU "%I64u"
-#endif
-
-/* Define the conversion string for '%zu' in platform independent fashion. */
-#ifndef _WIN32
-#define GT_ZU "%zu"
-#else
-#define GT_ZU "%u"
-#endif
-
 int     gt_mkstemp(char *template);
 GtUword gt_pagesize(void);
 
