@@ -24,7 +24,6 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/lpeg-0.10.2 \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.6 \
-            -I$(CURDIR)/src/external/libtecla-1.6.1 \
             -I$(CURDIR)/src/external/samtools-0.1.18 \
             -I$(CURDIR)/src/external/sqlite-3.8.0.1
 
@@ -62,10 +61,8 @@ EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
-# tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
 # zlib needs -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
-EXT_FLAGS:= -DHAVE_MEMMOVE -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO \
-            -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
+EXT_FLAGS:= -DHAVE_MEMMOVE -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
 GT_CPPFLAGS:=$(INCLUDEOPT)
 GT_CXXFLAGS:=-g -pipe
@@ -135,19 +132,6 @@ LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 LUAMAIN_SRC:=src/external/lua-5.1.5/etc/all.c
 LUAMAIN_OBJ:=$(LUAMAIN_SRC:%.c=obj/%.o)
 LUAMAIN_DEP:=$(LUAMAIN_SRC:%.c=obj/%.d)
-
-TECLA_DIR:=src/external/libtecla-1.6.1
-LIBTECLA_SRC:=$(TECLA_DIR)/chrqueue.c $(TECLA_DIR)/cplfile.c \
-              $(TECLA_DIR)/cplmatch.c $(TECLA_DIR)/direader.c \
-              $(TECLA_DIR)/errmsg.c $(TECLA_DIR)/expand.c \
-              $(TECLA_DIR)/freelist.c $(TECLA_DIR)/getline.c \
-              $(TECLA_DIR)/hash.c $(TECLA_DIR)/history.c \
-              $(TECLA_DIR)/homedir.c $(TECLA_DIR)/ioutil.c \
-              $(TECLA_DIR)/keytab.c $(TECLA_DIR)/pathutil.c \
-              $(TECLA_DIR)/pcache.c $(TECLA_DIR)/stringrp.c \
-              $(TECLA_DIR)/strngmem.c $(TECLA_DIR)/version.c
-LIBTECLA_OBJ:=$(LIBTECLA_SRC:%.c=obj/%.o)
-LIBTECLA_DEP:=$(LIBTECLA_SRC:%.c=obj/%.d)
 
 BZ2_DIR:=src/external/bzip2-1.0.6
 LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
@@ -257,15 +241,6 @@ ifeq ($(curl),yes)
   EXP_CPPFLAGS += -DCURLDEF
   GT_CPPFLAGS += -I/usr/include/curl -I/usr/local/include/curl
   EXP_LDLIBS += -lcurl
-endif
-
-ifneq ($(curses),no)
-  EXP_CPPFLAGS += -DCURSES
-  ifeq ($(findstring CYGWIN,$(SYSTEM)),CYGWIN)
-    EXP_CPPFLAGS += $(shell pkg-config --cflags-only-I ncurses)
-  endif
-  EXP_LDLIBS += -lncurses
-  GTLIBS := lib/libtecla.a
 endif
 
 ifdef testthreads
@@ -542,14 +517,6 @@ lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(ADDITIONAL_SO_DEPS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
 	-o $@ $(GTSHAREDLIB_LIBDEP)
 
-lib/libtecla.a: $(LIBTECLA_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(AR) ru $@ $(LIBTECLA_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
 define PROGRAM_template
 $(1): $(2)
 	@echo "[link $$(@F)]"
@@ -737,7 +704,6 @@ obj/src/core/versionfunc.o: obj/gt_config.h
          $(SKPROTO_DEP) \
          $(TOOLS_DEP) \
          $(LUAMAIN_DEP) \
-         $(LIBTECLA_DEP) \
          $(LIBBZ2_DEP) \
          $(ZLIB_DEP) \
          $(SAMTOOLS_DEP) \

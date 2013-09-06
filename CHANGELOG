@@ -27,6 +27,7 @@ changes in version 1.5.2 (2013-XX-XX)
 - C API: replace 'long' by 'GtWord'
 - C API: replace 'uint8_t ' by 'unsigned char'
 - C API: replace 'long double' by 'double'
+- the dependency on ncurses has been removed
 
 
 changes in version 1.5.1 (2013-03-07)
