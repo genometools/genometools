@@ -25,7 +25,7 @@
 #define READNUMS 5
 
 #define CANNOTPARSELINE(S)\
-        gt_error_set(err,"matchfile \"%s\", line %lu, column %lu: %s",\
+        gt_error_set(err,"matchfile \"%s\", line "GT_LU", column "GT_LU": %s",\
                      matchfile,linenum+1,countcolumns+1,S)
 
 static int numberoflinesinfile(GtUword *linenum,
@@ -73,7 +73,7 @@ GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
     return NULL;
   }
   matchtable = gt_chain_matchtable_new(linenum);
-  for (linenum = 0; fscanf(matchfp,"%ld %ld %ld %ld %ld\n",
+  for (linenum = 0; fscanf(matchfp,""GT_LD" "GT_LD" "GT_LD" "GT_LD" "GT_LD"\n",
                            &storeinteger[0],
                            &storeinteger[1],
                            &storeinteger[2],

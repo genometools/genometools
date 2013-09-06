@@ -166,7 +166,7 @@ int gt_querymatch_output(GT_UNUSED void *info,
                 querystart,
                 querymatch->readmode);
 #endif
-    printf("%lu %lu %lu %c %lu " Formatuint64_t " %lu",
+    printf(""GT_LU" "GT_LU" "GT_LU" %c "GT_LU" " Formatuint64_t " "GT_LU"",
            querymatch->dblen,
            dbseqnum,
            dbstart_relative,
@@ -180,7 +180,7 @@ int gt_querymatch_output(GT_UNUSED void *info,
         ? 100.0
         : 100.0 * (1.0 - querymatch->edist/
                          (double) MIN(querymatch->dblen,querymatch->querylen));
-      printf(" %ld %lu %.2f\n",querymatch->score,querymatch->edist,similarity);
+      printf(" "GT_LD" "GT_LU" %.2f\n",querymatch->score,querymatch->edist,similarity);
     } else
     {
       printf("\n");

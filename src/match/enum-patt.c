@@ -45,7 +45,7 @@ Enumpatterniterator *gt_newenumpatterniterator(GtUword minpatternlen,
 
   if (maxpatternlen < minpatternlen)
   {
-    gt_error_set(err,"maxpatternlen=%lu < %lu",
+    gt_error_set(err,"maxpatternlen="GT_LU" < "GT_LU"",
                     maxpatternlen,
                     minpatternlen);
     return NULL;
@@ -54,7 +54,7 @@ Enumpatterniterator *gt_newenumpatterniterator(GtUword minpatternlen,
   epi->totallength = gt_encseq_total_length(encseq);
   if (epi->totallength <= (GtUword) maxpatternlen)
   {
-    gt_error_set(err,"totallength=%lu <= maxpatternlen = %lu",
+    gt_error_set(err,"totallength="GT_LU" <= maxpatternlen = "GT_LU"",
                     epi->totallength,
                     maxpatternlen);
     gt_free(epi);
@@ -141,7 +141,7 @@ void gt_showPatterndistribution(const Enumpatterniterator *epi)
   GtUword i;
   double addprob, probsum = 0.0;
 
-  printf("# %lu pattern with the following length distribution:\n",
+  printf("# "GT_LU" pattern with the following length distribution:\n",
          epi->samplecount);
   for (i=epi->minpatternlen; i<=epi->maxpatternlen; i++)
   {
@@ -149,7 +149,7 @@ void gt_showPatterndistribution(const Enumpatterniterator *epi)
     {
       addprob = (double) epi->patternstat[i] / epi->samplecount;
       probsum += addprob;
-      printf("# %lu: %lu (prob=%.4f,cumulative=%.4f)\n",
+      printf("# "GT_LU": "GT_LU" (prob=%.4f,cumulative=%.4f)\n",
              i,
              epi->patternstat[i],
              addprob,

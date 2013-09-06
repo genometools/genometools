@@ -306,24 +306,24 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     tlen_invalid = gt_reads2twobit_invalid_seqs_totallength(r2t);
     tlen_input = tlen_valid + tlen_invalid;
 
-    gt_logger_log(default_logger, "number of reads in complete readset = %lu",
+    gt_logger_log(default_logger, "number of reads in complete readset = "GT_LU"",
         nofreads_input);
 
     varlen = (gt_reads2twobit_seqlen_eqlen(r2t) == 0);
     if (varlen)
-      gt_logger_log(verbose_logger, "read length = variable [%lu..%lu]",
+      gt_logger_log(verbose_logger, "read length = variable ["GT_LU".."GT_LU"]",
           gt_reads2twobit_seqlen_min(r2t), gt_reads2twobit_seqlen_max(r2t));
     else
-      gt_logger_log(verbose_logger, "read length = %lu",
+      gt_logger_log(verbose_logger, "read length = "GT_LU"",
           gt_reads2twobit_seqlen_eqlen(r2t) - 1UL);
 
-    gt_logger_log(verbose_logger, "total length of complete readset = %lu",
+    gt_logger_log(verbose_logger, "total length of complete readset = "GT_LU"",
         tlen_input);
-    gt_logger_log(verbose_logger, "low-quality reads = %lu "
+    gt_logger_log(verbose_logger, "low-quality reads = "GT_LU" "
         "[%.2f %% of input]", nofreads_invalid, (float)nofreads_invalid * 100 /
         (float)nofreads_input);
     if (!arguments->verbose)
-      gt_logger_log(default_logger, "low-quality reads = %lu",
+      gt_logger_log(default_logger, "low-quality reads = "GT_LU"",
           nofreads_invalid);
     nofreads_output = nofreads_valid;
     if (arguments->encodeonly)
@@ -343,7 +343,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
         gt_logger_log(verbose_logger, "readset saved: %s.%s",
             gt_str_get(arguments->readset), varlen ? "(esq|ssp)" : "esq");
       }
-      gt_logger_log(default_logger, "number of reads in output readset = %lu",
+      gt_logger_log(default_logger, "number of reads in output readset = "GT_LU"",
           nofreads_output);
     }
     else
@@ -357,11 +357,11 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
       nofreads_contained = gt_contfinder_nofcontained(contfinder);
       nofreads_output -= nofreads_contained;
 
-      gt_logger_log(verbose_logger, "contained reads = %lu [%.2f %% of input]",
+      gt_logger_log(verbose_logger, "contained reads = "GT_LU" [%.2f %% of input]",
           nofreads_contained, (float)nofreads_contained * 100 /
           (float)nofreads_input);
       if (!arguments->verbose)
-        gt_logger_log(default_logger, "contained reads = %lu",
+        gt_logger_log(default_logger, "contained reads = "GT_LU"",
             nofreads_contained);
 
       if (gt_reads2twobit_has_paired(r2t))
@@ -371,15 +371,15 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
         nofreads_output -= nofreads_matesofc;
 
         gt_logger_log(verbose_logger,
-            "mates of contained reads = %lu [%.2f %% of input]",
+            "mates of contained reads = "GT_LU" [%.2f %% of input]",
             nofreads_matesofc, (float)nofreads_matesofc * 100 /
             (float)nofreads_input);
         if (!arguments->verbose)
-          gt_logger_log(default_logger, "mates of contained reads = %lu",
+          gt_logger_log(default_logger, "mates of contained reads = "GT_LU"",
               nofreads_matesofc);
       }
 
-      gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
+      gt_logger_log(default_logger, "number of reads in filtered readset = "GT_LU"",
           nofreads_output);
 
       if (!had_err && arguments->cntlist)

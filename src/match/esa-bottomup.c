@@ -87,7 +87,7 @@ static void showstack(const GtBUItvinfo *stackspace,
 
   for (idx=0; idx<nextfreeItvinfo; idx++)
   {
-    printf("# stack %lu: lcp=%lu,lb=%lu\n",
+    printf("# stack "GT_LU": lcp="GT_LU",lb="GT_LU"\n",
             idx,
             stackspace[idx].lcp,
             stackspace[idx].lb);

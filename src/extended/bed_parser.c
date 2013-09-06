@@ -199,7 +199,7 @@ static int skip_blanks(GtIO *bed_file, GtError *err)
 {
   gt_error_check(err);
   if (!bed_separator(bed_file)) {
-    gt_error_set(err, "file \"%s\": line %lu: expected blank or tabulator, got "
+    gt_error_set(err, "file \"%s\": line "GT_LU": expected blank or tabulator, got "
                       "'%c'", gt_io_get_filename(bed_file),
                       gt_io_get_line_number(bed_file), gt_io_peek(bed_file));
     return -1;
@@ -234,7 +234,7 @@ static int track_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
     if (!had_err && !strcmp(gt_str_get(bed_parser->word), OFFSET_KEYWORD)) {
       if (gt_parse_long(&bed_parser->offset,
                          gt_str_get(bed_parser->another_word))) {
-        gt_error_set(err, "file \"%s\": line %lu: could not parse offset value "
+        gt_error_set(err, "file \"%s\": line "GT_LU": could not parse offset value "
                      "'%s'", gt_io_get_filename(bed_file),
                      gt_io_get_line_number(bed_file),
                      gt_str_get(bed_parser->another_word));
@@ -268,7 +268,7 @@ static int parse_bed_range(GtRange *range, GtStr *start, GtStr *end,
      handle that case later. */
   if (!thick) {
     if (!had_err && range->start > range->end) {
-      gt_error_set(err, "file \"%s\": line %lu: BED feature has length 0",
+      gt_error_set(err, "file \"%s\": line "GT_LU": BED feature has length 0",
                    gt_io_get_filename(bed_file),
                    gt_io_get_line_number(bed_file));
       had_err = -1;
@@ -319,7 +319,7 @@ static int create_block_features(GtBEDParser *bed_parser, GtFeatureNode *fn,
     GtGenomeNode *block;
     const char *name;
     if (gt_parse_ulong(&block_size, gt_splitter_get_token(size_splitter, i))) {
-      gt_error_set(err, "file \"%s\": line %lu: could not parse blockSize '%s'",
+      gt_error_set(err, "file \"%s\": line "GT_LU": could not parse blockSize '%s'",
                    gt_io_get_filename(bed_file),
                    gt_io_get_line_number(bed_file),
                    gt_splitter_get_token(size_splitter, i));
@@ -327,7 +327,7 @@ static int create_block_features(GtBEDParser *bed_parser, GtFeatureNode *fn,
     }
     if (!had_err && gt_parse_ulong(&block_start,
                                    gt_splitter_get_token(start_splitter, i))) {
-      gt_error_set(err, "file \"%s\": line %lu: could not parse blockStart "
+      gt_error_set(err, "file \"%s\": line "GT_LU": could not parse blockStart "
                    "'%s'", gt_io_get_filename(bed_file),
                    gt_io_get_line_number(bed_file),
                    gt_splitter_get_token(start_splitter, i));
@@ -372,14 +372,14 @@ static int process_blocks(GtBEDParser *bed_parser, GtFeatureNode *fn,
   gt_assert(fn && block_count && block_sizes && block_starts);
   if (!gt_str_length(block_sizes)) {
     gt_error_set(err,
-                 "file \"%s\": line %lu: blockCount given without blockSizes",
+                 "file \"%s\": line "GT_LU": blockCount given without blockSizes",
                  gt_io_get_filename(bed_file),
                  gt_io_get_line_number(bed_file));
     had_err = -1;
   }
   if (!had_err && !gt_str_length(block_starts)) {
     gt_error_set(err,
-                 "file \"%s\": line %lu: blockCount given without blockStarts",
+                 "file \"%s\": line "GT_LU": blockCount given without blockStarts",
                  gt_io_get_filename(bed_file),
                  gt_io_get_line_number(bed_file));
     had_err = -1;
@@ -394,8 +394,8 @@ static int process_blocks(GtBEDParser *bed_parser, GtFeatureNode *fn,
     gt_splitter_split(size_splitter, gt_str_get(block_sizes),
                       gt_str_length(block_sizes), ',');
     if (gt_splitter_size(size_splitter) != block_count) {
-      gt_error_set(err, "file \"%s\": line %lu: blockSizes column does not "
-                        "have blockCount=%lu many comma separated fields",
+      gt_error_set(err, "file \"%s\": line "GT_LU": blockSizes column does not "
+                        "have blockCount="GT_LU" many comma separated fields",
                    gt_io_get_filename(bed_file),
                    gt_io_get_line_number(bed_file), block_count);
       had_err = -1;
@@ -406,8 +406,8 @@ static int process_blocks(GtBEDParser *bed_parser, GtFeatureNode *fn,
     gt_splitter_split(start_splitter, gt_str_get(block_starts),
                       gt_str_length(block_starts), ',');
     if (gt_splitter_size(start_splitter) != block_count) {
-      gt_error_set(err, "file \"%s\": line %lu: blockStarts column does not "
-                        "have " "blockCount=%lu many comma separated fields",
+      gt_error_set(err, "file \"%s\": line "GT_LU": blockStarts column does not "
+                        "have " "blockCount="GT_LU" many comma separated fields",
                    gt_io_get_filename(bed_file),
                    gt_io_get_line_number(bed_file), block_count);
       had_err = -1;
@@ -532,7 +532,7 @@ static int bed_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
     word(bed_parser->word, bed_file);
     if (gt_str_length(bed_parser->word)) {
       if (gt_parse_ulong(&block_count, gt_str_get(bed_parser->word))) {
-        gt_error_set(err, "file \"%s\": line %lu: could not parse blockCount",
+        gt_error_set(err, "file \"%s\": line "GT_LU": could not parse blockCount",
                      gt_io_get_filename(bed_file),
                      gt_io_get_line_number(bed_file));
         had_err = -1;

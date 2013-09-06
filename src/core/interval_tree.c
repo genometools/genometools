@@ -507,7 +507,7 @@ static void gt_interval_tree_print_rec(GtIntervalTree *it,
   if (n == it->nil) return;
   printf("(");
   gt_interval_tree_print_rec(it, n->left);
-  printf("[%lu,%lu]", n->low, n->high);
+  printf("["GT_LU","GT_LU"]", n->low, n->high);
   gt_interval_tree_print_rec(it, n->right);
   printf(")");
 }

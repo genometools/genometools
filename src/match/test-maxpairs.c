@@ -326,7 +326,7 @@ static int showSubstringmatch(void *a, GT_UNUSED void *info,
 {
   Substringmatch *m = (Substringmatch *) a;
 
-  printf("%lu %lu " Formatuint64_t " %lu\n",
+  printf(""GT_LU" "GT_LU" " Formatuint64_t " "GT_LU"\n",
            m->len,
            m->dbstart,
            PRINTuint64_tcast(m->queryseqnum),
@@ -381,7 +381,7 @@ int gt_testmaxpairs(const char *indexname,
   Maxmatchselfinfo maxmatchselfinfo;
   GtEncseqLoader *el;
 
-  gt_logger_log(logger,"draw %lu samples",samples);
+  gt_logger_log(logger,"draw "GT_LU" samples",samples);
 
   el = gt_encseq_loader_new();
   gt_encseq_loader_do_not_require_des_tab(el);
@@ -411,8 +411,8 @@ int gt_testmaxpairs(const char *indexname,
   {
     dblen = samplesubstring(dbseq,encseq,substringlength);
     querylen = samplesubstring(query,encseq,substringlength);
-    gt_logger_log(logger,"run query match for dblen=%lu"
-                         ",querylen= %lu, minlength=%u",
+    gt_logger_log(logger,"run query match for dblen="GT_LU""
+                         ",querylen= "GT_LU", minlength=%u",
                          dblen,
                          querylen,
                          minlength);
@@ -431,8 +431,8 @@ int gt_testmaxpairs(const char *indexname,
       haserr = true;
       break;
     }
-    gt_logger_log(logger,"run self match for dblen=%lu"
-                         ",querylen= %lu, minlength=%u",
+    gt_logger_log(logger,"run self match for dblen="GT_LU""
+                         ",querylen= "GT_LU", minlength=%u",
                          dblen,
                          querylen,
                          minlength);
@@ -462,7 +462,7 @@ int gt_testmaxpairs(const char *indexname,
                         orderSubstringmatch))
     {
       const GtUword width = 60UL;
-      printf("failure for query of length %lu\n",(GtUword) querylen);
+      printf("failure for query of length "GT_LU"\n",(GtUword) querylen);
       printf("querymatches\n");
       (void) gt_array_iterate(tabmaxquerymatches,showSubstringmatch,NULL,
                            err);
@@ -482,7 +482,7 @@ int gt_testmaxpairs(const char *indexname,
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     gt_free(maxmatchselfinfo.querymarkpos);
-    printf("# numberofmatches=%lu\n",gt_array_size(tabmaxquerymatches));
+    printf("# numberofmatches="GT_LU"\n",gt_array_size(tabmaxquerymatches));
     gt_array_delete(tabmaxquerymatches);
     gt_array_delete(maxmatchselfinfo.results);
   }

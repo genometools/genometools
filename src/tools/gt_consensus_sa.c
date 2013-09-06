@@ -62,7 +62,7 @@ static void process_splice_form(GtArray *spliced_alignments_in_form,
   for (i = 0; i < gt_array_size(spliced_alignments_in_form); i++) {
     if (i)
       gt_xputchar(',');
-    printf("%lu",
+    printf(""GT_LU"",
            *((GtUword*) gt_array_get(spliced_alignments_in_form, i)));
   }
   printf("]\n");

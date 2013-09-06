@@ -406,7 +406,7 @@ int gt_ltrdigest_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   if (arguments->nthreads > 0) {
     gt_warning("The '-threads' option is deprecated. Please use the '-j'"
                "option of the 'gt' call instead, e.g.:\n"
-               "  gt -j %lu ltrdigest ...", arguments->nthreads);
+               "  gt -j "GT_LU" ltrdigest ...", arguments->nthreads);
   }
 
   /* -trnas */

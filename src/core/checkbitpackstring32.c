@@ -86,7 +86,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
   int had_err = 0;
   offset = offsetStart = random()%(sizeof (uint32_t) * CHAR_BIT);
   numRnd = random() % (MAX_RND_NUMS_uint32_t + 1);
-  gt_log_log("offset=%lu, numRnd=%lu\n",
+  gt_log_log("offset="GT_LU", numRnd="GT_LU"\n",
           (GtUword)offsetStart, (GtUword)numRnd);
   {
     BitOffset numBits = sizeof (uint32_t) * CHAR_BIT * numRnd + offsetStart;
@@ -117,7 +117,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
     gt_ensure(r == v);
     if (had_err)
     {
-      gt_log_log("Expected %"PRIu32", got %"PRIu32", i = %lu\n",
+      gt_log_log("Expected %"PRIu32", got %"PRIu32", i = "GT_LU"\n",
               v, r, (GtUword)i);
       freeResourcesAndReturn(had_err);
     }
@@ -201,7 +201,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
         {
           gt_log_log("Expected v0 %s v1, got v0 %s v1,\n for v0=%"
                   PRIu32" and v1=%"PRIu32",\n"
-                  "i = %lu, bits0=%u, bits1=%u\n",
+                  "i = "GT_LU", bits0=%u, bits1=%u\n",
                   (v0 > v1?">":(v0 < v1?"<":"==")),
                   (result > 0?">":(result < 0?"<":"==")), v0, v1,
                   (GtUword)i, bits0, bits1);
@@ -232,7 +232,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRIu32", got %"PRIu32",\n"
-                "i = %lu, bits=%u\n", v, r, (GtUword)i, numBits);
+                "i = "GT_LU", bits=%u\n", v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -250,7 +250,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log( "Expected %"PRIu32", got %"PRIu32",\n"
-                " i = %lu, bits=%u\n",
+                " i = "GT_LU", bits=%u\n",
                 v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
@@ -290,7 +290,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
     if (had_err)
     {
       gt_log_log("Expected %"PRId32", got %"PRId32",\n"
-                  "i = %lu, bits=%u\n",
+                  "i = "GT_LU", bits=%u\n",
                   v, r, (GtUword)i, bits);
       freeResourcesAndReturn(had_err);
     }
@@ -315,7 +315,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRId32", got %"PRId32",\n"
-                    "i = %lu, numBits=%u\n",
+                    "i = "GT_LU", numBits=%u\n",
                     v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
@@ -334,7 +334,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
       gt_ensure(r == v);
       if (had_err)
       {
-        gt_log_log("Expected %"PRId32", got %"PRId32", i = %lu\n",
+        gt_log_log("Expected %"PRId32", got %"PRId32", i = "GT_LU"\n",
                 v, r, (GtUword)i);
         freeResourcesAndReturn(had_err);
       }
@@ -378,7 +378,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRIu32", got %"PRIu32",\n"
-                "i = %lu, bits=%u\n",
+                "i = "GT_LU", bits=%u\n",
                 v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
@@ -400,7 +400,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log( "Expected %"PRIu32", got %"PRIu32",\n"
-                " i = %lu, bits=%u\n",
+                " i = "GT_LU", bits=%u\n",
                 v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
@@ -447,7 +447,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRId32", got %"PRId32",\n"
-                    "i = %lu, numBits=%u\n",
+                    "i = "GT_LU", numBits=%u\n",
                     v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
@@ -470,7 +470,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
       gt_ensure(r == v);
       if (had_err)
       {
-        gt_log_log("Expected %"PRId32", got %"PRId32", i = %lu\n",
+        gt_log_log("Expected %"PRId32", got %"PRId32", i = "GT_LU"\n",
                 v, r, (GtUword)i);
         freeResourcesAndReturn(had_err);
       }
@@ -588,7 +588,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
           if (had_err)
           {
             gt_log_log( "Expected %"PRId32", got %"PRId32",\n"
-                     "i = %lu, numBits=%u\n",
+                     "i = "GT_LU", numBits=%u\n",
                      v, r, (GtUword)i, numBits);
             freeResourcesAndReturn(had_err);
           }
@@ -601,7 +601,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
           if (had_err)
           {
             gt_log_log("Expected %"PRId32", got %"PRId32",\n"
-                    "i = %lu, numBits=%u\n",
+                    "i = "GT_LU", numBits=%u\n",
                     cmpVal, r, (GtUword)i, numBits);
             freeResourcesAndReturn(had_err);
           }
@@ -615,7 +615,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
           if (had_err)
           {
             gt_log_log("Expected %"PRId32", got %"PRId32",\n"
-                    "i = %lu, numBits=%u\n",
+                    "i = "GT_LU", numBits=%u\n",
                     v, r, (GtUword)i, numBits);
             freeResourcesAndReturn(had_err);
           }

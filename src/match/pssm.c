@@ -45,7 +45,7 @@ void gt_showProfilematrix(const Profilematrix *prof,
 {
   GtUword d, a;
 
-  printf("# %lu x %lu matrix\n",prof->numofcharacters,
+  printf("# "GT_LU" x "GT_LU" matrix\n",prof->numofcharacters,
                                 prof->dimension);
   printf("# mintotalscore=");
   SHOWProfScore(stdout,prof->mintotalscore);

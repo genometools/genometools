@@ -106,12 +106,12 @@ static bool ltr_candidates_compatible(GtGenomeNode *candidate1,
     if (curnode2 != NULL) {
       clid1 = gt_feature_node_get_attribute(curnode1, "clid");
       if (clid1 != NULL)
-        (void) sscanf(clid1, "%lu", &clnum1);
+        (void) sscanf(clid1, ""GT_LU"", &clnum1);
       else
         clnum1 = GT_UNDEF_ULONG;
       clid2 = gt_feature_node_get_attribute(curnode2, "clid");
       if (clid2 != NULL)
-        (void) sscanf(clid2, "%lu", &clnum2);
+        (void) sscanf(clid2, ""GT_LU"", &clnum2);
       else
         clnum2 = GT_UNDEF_ULONG;
       if (clnum1 == clnum2) {
@@ -230,9 +230,9 @@ static int annotate_nodes(GtArray *candidates, GtArray *groups,
       if (strcmp(gt_feature_node_get_type(curnode), gt_ft_repeat_region) == 0) {
         char fam[BUFSIZ];
         if (famprefix != NULL)
-          (void) snprintf(fam, BUFSIZ, "%s%lu", famprefix, famno);
+          (void) snprintf(fam, BUFSIZ, "%s"GT_LU"", famprefix, famno);
         else
-          (void) snprintf(fam, BUFSIZ, "ltrfam_%lu", famno);
+          (void) snprintf(fam, BUFSIZ, "ltrfam_"GT_LU"", famno);
         gt_feature_node_set_attribute(curnode, "ltrfam", fam);
       } else {
         gt_feature_node_iterator_delete(fni);

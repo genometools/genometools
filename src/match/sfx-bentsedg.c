@@ -316,7 +316,7 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
       } else
       {
 #ifdef SKDEBUG
-        printf("%s[%lu,%lu] at offset %lu\n",__func__,sval1,sval2,offset);
+        printf("%s["GT_LU","GT_LU"] at offset "GT_LU"\n",__func__,sval1,sval2,offset);
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
                                  bsr->complement,
@@ -449,7 +449,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
         }
       }
 #ifdef SKDEBUG
-      printf("cmp %lu and %lu: retval = %d, lcplen = %lu\n",
+      printf("cmp "GT_LU" and "GT_LU": retval = %d, lcplen = "GT_LU"\n",
              sval1, sval2, retval, (GtUword) lcplen);
 #endif
       if (bsr->tableoflcpvalues != NULL)
@@ -486,13 +486,13 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
     GtUword bucketleftidx
      = gt_suffixsortspace_bucketleftidx_get(bsr->sssp);
 #ifdef SKDEBUG
-    printf("ordered suffix %lu\n",gt_suffixsortspace_get(bsr->sssp,
+    printf("ordered suffix "GT_LU"\n",gt_suffixsortspace_get(bsr->sssp,
                                                          subbucketleft,0));
 #endif
     for (idx = 1UL; idx < width; idx++)
     {
 #ifdef SKDEBUG
-      printf("ordered suffix %lu, equalwithprevious=%s\n",
+      printf("ordered suffix "GT_LU", equalwithprevious=%s\n",
               gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx),
               bsr->equalwithprevious[idx] ? "true" : "false");
 #endif
@@ -505,7 +505,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
         if (equalsrangewidth > 0)
         {
 #ifdef SKDEBUG
-          printf("process interval of width %lu\n",
+          printf("process interval of width "GT_LU"\n",
                  equalsrangewidth + 1);
 #endif
           if (bsr->processunsortedsuffixrange != NULL)
@@ -523,7 +523,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
     if (equalsrangewidth > 0)
     {
 #ifdef SKDEBUG
-      printf("process interval of width %lu\n",
+      printf("process interval of width "GT_LU"\n",
              equalsrangewidth + 1);
 #endif
       if (bsr->processunsortedsuffixrange != NULL)
@@ -690,7 +690,7 @@ static void checkmedian(bool fwd,
       }
     }
   }
-  fprintf(stderr,"problem with equal=%lu,smaller=%lu,larger=%lu\n",
+  fprintf(stderr,"problem with equal="GT_LU",smaller="GT_LU",larger="GT_LU"\n",
                   equal,smaller,larger);
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
@@ -782,9 +782,9 @@ static GtUword blockcmpdelivermedian(const GtBentsedgresources *bsr,
 static void showcountingsortinfo(const GtCountingsortinfo *countingsortinfo,
                               GtUword idx)
 {
-  printf("countingsortinfo[%lu]=(%lu,",idx,
+  printf("countingsortinfo["GT_LU"]=("GT_LU",",idx,
           (GtUword) countingsortinfo[idx].suffix);
-  printf("%lu,",(GtUword) countingsortinfo[idx].lcpwithpivot);
+  printf(""GT_LU",",(GtUword) countingsortinfo[idx].lcpwithpivot);
   printf("%d)\n",countingsortinfo[idx].cmpresult);
 }
 */
@@ -1512,12 +1512,12 @@ static void bentsedgresources_delete(GtBentsedgresources *bsr, GtLogger *logger)
   gt_free(bsr->equalwithprevious);
   GT_FREEARRAY(&bsr->mkvauxstack,GtMKVstack);
   gt_radixsort_str_delete(bsr->rsi);
-  gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
-  gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
-  gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
-  gt_logger_log(logger,"countshortreadsort=%lu",bsr->countshortreadsort);
-  gt_logger_log(logger,"countradixsort=%lu",bsr->countradixsort);
-  gt_logger_log(logger,"counttqsort=%lu",bsr->counttqsort);
+  gt_logger_log(logger,"countinsertionsort="GT_LU"",bsr->countinsertionsort);
+  gt_logger_log(logger,"countbltriesort="GT_LU"",bsr->countbltriesort);
+  gt_logger_log(logger,"countcountingsort="GT_LU"",bsr->countcountingsort);
+  gt_logger_log(logger,"countshortreadsort="GT_LU"",bsr->countshortreadsort);
+  gt_logger_log(logger,"countradixsort="GT_LU"",bsr->countradixsort);
+  gt_logger_log(logger,"counttqsort="GT_LU"",bsr->counttqsort);
 }
 
 /*
@@ -1625,7 +1625,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                              code);
   }
 #ifdef CHECKFORWHOLELEAFS
-  printf("saved_intervals=%lu,saved_width=%lu (%.2f)\n",
+  printf("saved_intervals="GT_LU",saved_width="GT_LU" (%.2f)\n",
           saved_intervals,saved_width,100.0 *
                                       (double) saved_width/numberofsuffixes);
   saved_intervals = 0;

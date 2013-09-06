@@ -154,13 +154,13 @@ static int gt_alignment_is_valid(const GtAlignment *alignment)
   /* check ulen */
   len = gt_multieoplist_get_repdel_length(alignment->eops);
   if (len != alignment->ulen) {
-    printf("ulen: %lu, repdel: %lu\n", alignment->ulen, len);
+    printf("ulen: "GT_LU", repdel: "GT_LU"\n", alignment->ulen, len);
     return 0;
   }
   /* check vlen */
   len = gt_multieoplist_get_repins_length(alignment->eops);
   if (len != alignment->vlen) {
-    printf("vlen: %lu, repins: %lu\n", alignment->vlen, len);
+    printf("vlen: "GT_LU", repins: "GT_LU"\n", alignment->vlen, len);
     return 0;
   }
   return 1;

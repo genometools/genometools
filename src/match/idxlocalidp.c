@@ -104,7 +104,7 @@ static void showscorecolumn(const LocaliColumn *column,
                             GtUword currentdepth)
 {
   gt_assert(column != NULL);
-  printf("at depth %lu: ",currentdepth);
+  printf("at depth "GT_LU": ",currentdepth);
   if (column->colvalues == NULL)
   {
     gt_assert(column->lenval == 0);
@@ -118,10 +118,10 @@ static void showscorecolumn(const LocaliColumn *column,
     {
       if (column->colvalues[idx].bestcell > 0)
       {
-        printf("(%lu,%ld) ",idx,column->colvalues[idx].bestcell);
+        printf("("GT_LU","GT_LD") ",idx,column->colvalues[idx].bestcell);
       }
     }
-    printf("max=%lu\n",column->maxvalue);
+    printf("max="GT_LU"\n",column->maxvalue);
   }
 }
 
@@ -136,7 +136,7 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
 
 #ifdef SKDEBUG
 #define REALLOCMSG(COL)\
-        printf("line %d: %salloc %lu entries",\
+        printf("line %d: %salloc "GT_LU" entries",\
                 __LINE__,(COL)->colvalues == NULL ? "m" : "re",\
                 lci->maxcollen)
 
@@ -585,13 +585,13 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
 #ifndef NDEBUG
     if (destcol->lenval < lci->querylength+1)
     {
-      fprintf(stderr,"destcol->lenval = %lu < %lu lci->querylength+1\n",
+      fprintf(stderr,"destcol->lenval = "GT_LU" < "GT_LU" lci->querylength+1\n",
                       destcol->lenval,lci->querylength+1);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (srccol->lenval < lci->querylength+1)
     {
-      fprintf(stderr,"srccol->lenval = %lu < %lu lci->querylength+1\n",
+      fprintf(stderr,"srccol->lenval = "GT_LU" < "GT_LU" lci->querylength+1\n",
                       srccol->lenval,lci->querylength+1);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -700,9 +700,9 @@ void gt_processelemLocaliTracebackstate(Limdfsconstinfo *lci,
   while (true)
   {
     /*
-    printf(" coord(i=%lu,j=%lu) with ",tbs->querypos,
+    printf(" coord(i="GT_LU",j="GT_LU") with ",tbs->querypos,
                                        (GtUword) tbs->dbcurrent);
-    printf("cellvalue=%ld, ",column->colvalues[tbs->querypos].bestcell);
+    printf("cellvalue="GT_LD", ",column->colvalues[tbs->querypos].bestcell);
     */
     switch (column->colvalues[tbs->querypos].tracebit)
     {
@@ -730,7 +730,7 @@ void gt_processelemLocaliTracebackstate(Limdfsconstinfo *lci,
         break; /* stay in the same column => so next iteration */
       case Notraceback:
         fprintf(stderr,"tracebit = Notraceback not allowed\n");
-        fprintf(stderr,"column->colvalues[tbs->querypos].bestcell=%ld\n",
+        fprintf(stderr,"column->colvalues[tbs->querypos].bestcell="GT_LD"\n",
                         column->colvalues[tbs->querypos].bestcell);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       default:
@@ -769,7 +769,7 @@ const void *gt_completealignmentfromLocaliTracebackstate(
                                            lci->scorevalues.gapextend);
   if (evalscore < 0 || (GtUword) evalscore < lci->threshold)
   {
-    fprintf(stderr,"unexpected eval score %ld\n",evalscore);
+    fprintf(stderr,"unexpected eval score "GT_LD"\n",evalscore);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 #endif

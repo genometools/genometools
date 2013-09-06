@@ -495,12 +495,12 @@ void gt_bioseq_show_stat(GtBioseq *bs, GtFile *outfp)
   num_of_seqs = gt_bioseq_number_of_sequences(bs);
   gt_file_xprintf(outfp, "showing statistics for sequence file \"%s\"\n",
                   gt_str_get(bs->sequence_file));
-  gt_file_xprintf(outfp, "number of sequences: %lu\n", num_of_seqs);
-  gt_file_xprintf(outfp, "total length: %lu\n",
+  gt_file_xprintf(outfp, "number of sequences: "GT_LU"\n", num_of_seqs);
+  gt_file_xprintf(outfp, "total length: "GT_LU"\n",
                     gt_encseq_total_length(bs->encseq)
                       - gt_encseq_num_of_sequences(bs->encseq) + 1);
   for (i = 0; i < num_of_seqs; i++) {
-    gt_file_xprintf(outfp, "sequence #%lu length: %lu\n", i+1,
+    gt_file_xprintf(outfp, "sequence #"GT_LU" length: "GT_LU"\n", i+1,
                     gt_bioseq_get_sequence_length(bs, i));
   }
 }

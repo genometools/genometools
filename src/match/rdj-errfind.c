@@ -95,7 +95,7 @@ static inline void gt_errfind_process_kmer(GtUword leafnumber,
         GT_READMODE_FORWARD) \
     : '-'
 #define RDJ_ERRFIND_SHOW_KMER \
-  gt_log_log("ln: %lu; fd: %lu; k-mer: %c...%c%c%c%c%c%c%c%c%c%c%c(%c)",\
+  gt_log_log("ln: "GT_LU"; fd: "GT_LU"; k-mer: %c...%c%c%c%c%c%c%c%c%c%c%c(%c)",\
     leafnumber, fatherdepth, RDJ_ERRFIND_KMINUSITHCHAR(state->k),\
     RDJ_ERRFIND_KMINUSITHCHAR(11), RDJ_ERRFIND_KMINUSITHCHAR(10),\
     RDJ_ERRFIND_KMINUSITHCHAR(9), RDJ_ERRFIND_KMINUSITHCHAR(8),\
@@ -182,7 +182,7 @@ static inline bool gt_errfind_are_all_trusted(const GtBUstate_errfind *state)
       alltrusted = false;
 #ifdef RDJ_ERRFIND_DEBUG
   for (cnum = 0; cnum < state->alphasize; cnum++)
-    gt_log_log("cnum %u count: %lu", cnum, state->count[cnum]);
+    gt_log_log("cnum %u count: "GT_LU"", cnum, state->count[cnum]);
 #endif
   return alltrusted;
 }
@@ -200,7 +200,7 @@ static inline GtUchar gt_errfind_trusted_char(const GtBUstate_errfind *state)
       trusted_char = gt_encseq_get_encoded_char_nospecial(state->encseq,
          state->kpositions[cnum * state->c], GT_READMODE_FORWARD);
 #ifdef RDJ_ERRFIND_DEBUG
-      gt_log_log("trusted_char: %c (cnum: %u), count: %lu, pos: %lu",
+      gt_log_log("trusted_char: %c (cnum: %u), count: "GT_LU", pos: "GT_LU"",
           "acgt"[trusted_char], cnum, state->count[cnum],
           state->kpositions[cnum * state->c]);
 #endif
@@ -236,7 +236,7 @@ static int processlcpinterval_errfind(GtUword lcp,
             if (state->editor != NULL)
             {
 #ifdef RDJ_ERRFIND_DEBUG
-              printf("%lu:%u\n", pos, (unsigned int)newchar);
+              printf(""GT_LU":%u\n", pos, (unsigned int)newchar);
 #endif
               gt_twobitenc_editor_edit(state->editor, pos, newchar);
             }

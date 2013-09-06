@@ -40,7 +40,7 @@ int gt_asqg_writer_show_header(GtAsqgWriter *aw, float erate,
 {
   gt_assert(aw != NULL);
   gt_file_xprintf(aw->file,
-      "HT\tVN:i:%lu\tER:f:%g\tOL:i:%lu\tIN:Z:%s\tCN:i:%c\tTE:i:%c\n",
+      "HT\tVN:i:"GT_LU"\tER:f:%g\tOL:i:"GT_LU"\tIN:Z:%s\tCN:i:%c\tTE:i:%c\n",
       GT_ASQG_VERSION, erate, minlen, inputfilename,
       has_containments ? '1' : '0', has_transitives ? '1' : '0');
   return 0;
@@ -49,7 +49,7 @@ int gt_asqg_writer_show_header(GtAsqgWriter *aw, float erate,
 static inline void gt_asqg_writer_show_vertex_line(GtFile *file,
     GtUword seqnum, const char *sequence, bool subsequence)
 {
-  gt_file_xprintf(file, "VT\t%lu\t%s\tSS:i:%c\n", seqnum, sequence,
+  gt_file_xprintf(file, "VT\t"GT_LU"\t%s\tSS:i:%c\n", seqnum, sequence,
       subsequence ? '1' : '0');
 }
 
@@ -109,7 +109,7 @@ static inline void gt_asqg_writer_show_edge_line(GtFile *file,
     GtUword end2, GtUword seqlen2, bool revcompl,
     GtUword edist)
 {
-  gt_file_xprintf(file, "ED\t%lu %lu %lu %lu %lu %lu %lu %lu %c %lu\n",
+  gt_file_xprintf(file, "ED\t"GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" %c "GT_LU"\n",
       seqnum1, seqnum2, start1, end1, seqlen1, start2, end2, seqlen2,
       revcompl ? '1' : '0', edist);
 }

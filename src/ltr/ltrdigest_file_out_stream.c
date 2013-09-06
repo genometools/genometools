@@ -119,7 +119,7 @@ static int gt_ltrelement_format_description(GtLTRElement *e,
   (void) snprintf(tmpstr, MIN(BUFSIZ, (size_t) seqnamelen+1), "%s", e->seqid);
   tmpstr[seqnamelen+1] = '\0';
   gt_cstr_rep(tmpstr, ' ', '_');
-  ret = snprintf(buf, buflen, "%s_%lu_%lu", tmpstr, e->leftLTR_5+1,
+  ret = snprintf(buf, buflen, "%s_"GT_LU"_"GT_LU"", tmpstr, e->leftLTR_5+1,
                  e->rightLTR_3+1);
   return ret;
 }
@@ -452,7 +452,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
       rltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.rightLTR);
       rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
       gt_file_xprintf(ls->tabout_file,
-                         "%lu\t%lu\t%lu\t%s\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t",
+                         ""GT_LU"\t"GT_LU"\t"GT_LU"\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t",
                          rng.start,
                          rng.end,
                          gt_ltrelement_length(&ls->element),
@@ -478,7 +478,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
                                        NULL, NULL, ls->rmap, err);
       if (!had_err) {
         gt_file_xprintf(ls->tabout_file,
-                         "%lu\t%lu\t%s\t",
+                         ""GT_LU"\t"GT_LU"\t%s\t",
                          tsd_rng.start,
                          tsd_rng.end,
                          gt_str_get(seq));
@@ -498,7 +498,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
                                        NULL, NULL, ls->rmap, err);
       if (!had_err) {
         gt_file_xprintf(ls->tabout_file,
-                           "%lu\t%lu\t%s\t",
+                           ""GT_LU"\t"GT_LU"\t%s\t",
                            tsd_rng.start,
                            tsd_rng.end,
                            gt_str_get(seq));
@@ -520,7 +520,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
         gt_fasta_show_entry(desc, gt_str_get(seq), gt_range_length(&ppt_rng),
                             GT_FSWIDTH, ls->pptout_file);
         gt_file_xprintf(ls->tabout_file,
-                           "%lu\t%lu\t%s\t%c\t%d\t",
+                           ""GT_LU"\t"GT_LU"\t%s\t%c\t%d\t",
                            ppt_rng.start,
                            ppt_rng.end,
                            gt_str_get(seq),
@@ -547,7 +547,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
         gt_fasta_show_entry(desc, gt_str_get(seq), gt_range_length(&pbs_rng),
                             GT_FSWIDTH, ls->pbsout_file);
         gt_file_xprintf(ls->tabout_file,
-                         "%lu\t%lu\t%c\t%s\t%s\t%s\t%s\t%s\t",
+                         ""GT_LU"\t"GT_LU"\t%c\t%s\t%s\t%s\t%s\t%s\t",
                          pbs_rng.start,
                          pbs_rng.end,
                          GT_STRAND_CHARS[pbs_strand],
@@ -751,11 +751,11 @@ int gt_ltrdigest_file_out_stream_write_metadata(GtLTRdigestFileOutStream *ls,
   if (tests_to_run & GT_LTRDIGEST_RUN_PPT)
   {
     gt_file_xprintf(metadata_file,
-                       "PPT length\t%lu-%lunt\t8-30nt\n",
+                       "PPT length\t"GT_LU"-"GT_LU"nt\t8-30nt\n",
                        ppt_len.start,
                        ppt_len.end);
     gt_file_xprintf(metadata_file,
-                       "U-box length\t%lu-%lunt\t3-30nt\n",
+                       "U-box length\t"GT_LU"-"GT_LU"nt\t3-30nt\n",
                        ubox_len.start,
                        ubox_len.end);
     gt_file_xprintf(metadata_file,
@@ -774,7 +774,7 @@ int gt_ltrdigest_file_out_stream_write_metadata(GtLTRdigestFileOutStream *ls,
                          trnafilename);
     gt_file_xprintf(metadata_file,
                        "allowed PBS/tRNA alignment length"
-                       " range\t%lu-%lunt\t11-30nt\n",
+                       " range\t"GT_LU"-"GT_LU"nt\t11-30nt\n",
                        alilen.start,
                        alilen.end);
     gt_file_xprintf(metadata_file,
@@ -782,12 +782,12 @@ int gt_ltrdigest_file_out_stream_write_metadata(GtLTRdigestFileOutStream *ls,
                        max_edist);
     gt_file_xprintf(metadata_file,
                        "allowed PBS offset from 5' LTR range"
-                       "\t%lu-%lunt\t0-5nt\n",
+                       "\t"GT_LU"-"GT_LU"nt\t0-5nt\n",
                        offsetlen.start,
                        offsetlen.end);
     gt_file_xprintf(metadata_file,
                        "allowed PBS offset from 3' tRNA end"
-                       " range\t%lu-%lunt\t0-5nt\n",
+                       " range\t"GT_LU"-"GT_LU"nt\t0-5nt\n",
                        trnaoffsetlen.start,
                        trnaoffsetlen.end);
     gt_file_xprintf(metadata_file,
@@ -798,7 +798,7 @@ int gt_ltrdigest_file_out_stream_write_metadata(GtLTRdigestFileOutStream *ls,
   {
     GtUword i;
     gt_file_xprintf(metadata_file,
-                       "Protein domain models\t%lu (",
+                       "Protein domain models\t"GT_LU" (",
                        gt_str_array_size(hmm_files));
     for (i=0;i<gt_str_array_size(hmm_files);i++)
     {

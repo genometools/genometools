@@ -103,7 +103,7 @@ static void allocatefmtables(Fmindex *fm,
     fm->specpos.nextfreeGtPairBwtidx = 0;
     fm->specpos.allocatedGtPairBwtidx
       = (GtUword) gt_determinenumberofspecialstostore(specialcharinfo);
-    printf("# %lu wildcards in the last %lu characters (%.2f)\n",
+    printf("# "GT_LU" wildcards in the last "GT_LU" characters (%.2f)\n",
            (GtUword) specialcharinfo->specialcharacters -
                            fm->specpos.allocatedGtPairBwtidx,
            specialcharinfo->specialcharacters,
@@ -169,14 +169,14 @@ static void showconstructionmessage(const char *indexname,
                                     unsigned int log2markdist,
                                     unsigned int numofchars)
 {
-  printf("# construct fmindex \"%s\" for bsize=%lu, superbsize=%lu,",
+  printf("# construct fmindex \"%s\" for bsize="GT_LU", superbsize="GT_LU",",
           indexname,
           (GtUword) GT_POW2(log2bsize),
           (GtUword) GT_POW2(log2markdist));
-  printf(" len=%lu, alphasize=%u: size ",
+  printf(" len="GT_LU", alphasize=%u: size ",
           totallength,
           numofchars);
-  printf("%lu bytes, space overhead %.2f\n",
+  printf(""GT_LU" bytes, space overhead %.2f\n",
           fmsize,
           (double) fmsize/(double) (totallength+1));
 }
@@ -217,7 +217,7 @@ static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
     {
       if (longest->defined)
       {
-        gt_error_set(err,"longest is already defined as %lu",
+        gt_error_set(err,"longest is already defined as "GT_LU"",
                       longest->valueunsignedlong);
         return -2;
       }
@@ -376,7 +376,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
   }
   if (!haserr)
   {
-    printf("# firstignorespecial=%lu\n",
+    printf("# firstignorespecial="GT_LU"\n",
               firstignorespecial);
     gt_computefmkeyvalues (fmindex,
                         specialcharinfo,
@@ -489,7 +489,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
         fmindex->specpos.nextfreeGtPairBwtidx)
     {
       gt_error_set(err,"program error: too much space for specpos: "
-                    "allocated = %lu != %lu = used",
+                    "allocated = "GT_LU" != "GT_LU" = used",
                     fmindex->specpos.allocatedGtPairBwtidx,
                     fmindex->specpos.nextfreeGtPairBwtidx);
       haserr = true;

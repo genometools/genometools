@@ -153,7 +153,7 @@ void gt_timer_show_formatted(GT_UNUSED GtTimer *t, GT_UNUSED const char *fmt,
 
 void gt_timer_show(GtTimer *t, FILE *fp)
 {
-  gt_timer_show_formatted(t, "%ld.%06lds real %lds user %lds system\n", fp);
+  gt_timer_show_formatted(t, ""GT_LD".%06lds real "GT_LD"s user "GT_LD"s system\n", fp);
 }
 
 #ifndef _WIN32
@@ -161,12 +161,12 @@ static void gt_timer_print_progress_report(GtTimer *t,
     struct timeval *elapsed_tv, struct timeval *elapsed_user_tv,
     struct timeval *elapsed_sys_tv, const char *desc, FILE *fp)
 {
-  fprintf(fp,"# TIME %s %ld.%02ld",
+  fprintf(fp,"# TIME %s "GT_LD".%02ld",
           desc,
           (GtWord)(elapsed_tv->tv_sec),
           (GtWord)(elapsed_tv->tv_usec)/10000);
   if (t->show_cpu_time) {
-    fprintf(fp, " (user: %ld.%02ld; sys: %ld.%02ld)\n",
+    fprintf(fp, " (user: "GT_LD".%02ld; sys: "GT_LD".%02ld)\n",
             (GtWord)(elapsed_user_tv->tv_sec),
             (GtWord)(elapsed_user_tv->tv_usec)/10000,
             (GtWord)(elapsed_sys_tv->tv_sec),

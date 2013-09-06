@@ -144,7 +144,7 @@ GtReadsLibrariesTable* gt_reads_libraries_table_load(FILE *rlt_fp,
         (size_t)rlt->noflibraries, rlt_fp);
     if (count != (size_t)rlt->noflibraries)
     {
-      gt_error_set(err, "library table: %lu libraries expected, %lu found",
+      gt_error_set(err, "library table: "GT_LU" libraries expected, "GT_LU" found",
           rlt->noflibraries, (GtUword)count);
       gt_free(rlt->library);
       gt_free(rlt);

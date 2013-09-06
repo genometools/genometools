@@ -335,7 +335,7 @@ static int process_shu_node(ShuNode *node,
             {
               had_err = -1;
               gt_error_set(err, "overflow in addition of shuSums! "
-                                Formatuint64_t "+ %lu ="
+                                Formatuint64_t "+ "GT_LU" ="
                                 Formatuint64_t "\n",
                   PRINTuint64_tcast(old),
                   (node->depth + 1) * termChild_x_i,
@@ -362,7 +362,7 @@ static int process_shu_node(ShuNode *node,
               {
                 had_err = -1;
                 gt_error_set(err, "overflow in addition of shuSums! "
-                                  Formatuint64_t "+ %lu ="
+                                  Formatuint64_t "+ "GT_LU" ="
                                   Formatuint64_t "\n",
                     PRINTuint64_tcast(old),
                     (node->depth + 1) * termChild_x_i,
@@ -478,8 +478,8 @@ int gt_pck_calculate_shulen(const FMindex *index,
                                    err);
     }
   }
-  gt_logger_log(logger, "max stack depth = %lu", GT_STACK_MAXSIZE(&stack));
-  gt_log_log("processed nodes= %lu", processed_nodes);
+  gt_logger_log(logger, "max stack depth = "GT_LU"", GT_STACK_MAXSIZE(&stack));
+  gt_log_log("processed nodes= "GT_LU"", processed_nodes);
   for (depth_idx = 0; depth_idx < GT_STACK_MAXSIZE(&stack); depth_idx++)
   {
     gt_array2dim_delete(stack.space[depth_idx].countTermSubtree);

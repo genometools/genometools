@@ -59,7 +59,7 @@ static void showsimpleoptions(const Cmppairwiseopt *opt)
   }
   if (opt->charlistlen != NULL)
   {
-    printf("# alphalen \"%s\" %lu\n",
+    printf("# alphalen \"%s\" "GT_LU"\n",
              gt_str_get(opt->charlistlen->charlist),
              opt->charlistlen->len);
     return;
@@ -158,7 +158,7 @@ static GtOPrval parse_options(int *parsed_args,
           pw->charlistlen->charlist =
             gt_str_ref(gt_str_array_get_str(charlistlen,
                                                                   0));
-          if (sscanf(gt_str_array_get(charlistlen,1UL),"%ld",&readint) != 1 ||
+          if (sscanf(gt_str_array_get(charlistlen,1UL),""GT_LD"",&readint) != 1 ||
               readint < 1L)
           {
             gt_error_set(err,
@@ -264,14 +264,14 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
-      printf("%lu\n",edist);
+      printf(""GT_LU"\n",edist);
     }
     else
     {
       GtUword testcases;
       testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
                                                     &cmppairwise);
-      printf("# number of testcases: %lu\n",testcases);
+      printf("# number of testcases: "GT_LU"\n",testcases);
     }
   }
   freesimpleoption(&cmppairwise);

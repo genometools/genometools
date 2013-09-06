@@ -745,13 +745,13 @@ gt_SRLPrintRangesInfo(struct seqRangeList *rangeList,
       Symbol sym;
       fputs("# range partial sums:", fp);
       for (sym = 0; sym < numSyms; ++sym)
-        fprintf(fp, " sum[%u]=%lu",
+        fprintf(fp, " sum[%u]="GT_LU"",
                 MRAEncRevMapSymbol(rangeList->alphabet, sym),
                 rangeList->partialSymSums[pOff * numSyms + sym]);
       fputs("\n", fp);
     }
     if (result +=
-        fprintf(fp, "# range overlap: symbol %u, start=%lu, length=%lu\n",
+        fprintf(fp, "# range overlap: symbol %u, start="GT_LU", length="GT_LU"\n",
                 MRAEncRevMapSymbol(rangeList->alphabet,
                                    seqRangeSym(nextRange, symBits)),
                 nextRange->startPos, seqRangeLen(nextRange, symBits)) < 0)

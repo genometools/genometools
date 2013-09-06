@@ -110,9 +110,9 @@ static int gt_bioseq_col_grep_desc(GtSeqCol *sc, char **seq,
     seqlength = gt_bioseq_get_sequence_length(bsc->bioseqs[filenum], seqnum);
     if (start > seqlength - 1 || end > seqlength - 1) {
       had_err = -1;
-      gt_error_set(err, "trying to extract range %lu-%lu on sequence "
+      gt_error_set(err, "trying to extract range "GT_LU"-"GT_LU" on sequence "
                          "``%s''which is not covered by that sequence (only "
-                         "%lu characters in size). Has the sequence-region "
+                         ""GT_LU" characters in size). Has the sequence-region "
                          "to sequence mapping been defined correctly?",
                          start, end, gt_str_get(seqid), seqlength);
     }

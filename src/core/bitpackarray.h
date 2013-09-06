@@ -175,10 +175,10 @@ static inline void showbitpackarray(const BitPackArray *bitpackarray)
   gt_assert(bitpackarray->store != NULL);
   numofunits = (GtUword) sizeofbitarray(bitpackarray->bitsPerElem,
                                               bitpackarray->numElems);
-  printf("numofunits=%lu\n",numofunits);
+  printf("numofunits="GT_LU"\n",numofunits);
   for (idx=0; idx < numofunits; idx++)
   {
-    printf("%lu: %u\n",idx,(unsigned int) bitpackarray->store[idx]);
+    printf(""GT_LU": %u\n",idx,(unsigned int) bitpackarray->store[idx]);
     fflush(stdout);
   }
 }

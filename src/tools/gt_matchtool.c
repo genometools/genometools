@@ -321,7 +321,7 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);
         gt_match_get_range_seq2(match, &range_seq2);
-        fprintf(stdout, "%s\t%s\t%lu\t%lu\t%lu\t%lu\t%lu\n",
+        fprintf(stdout, "%s\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\n",
                 gt_match_get_seqid1(match),
                 gt_match_get_seqid2(match),
                 range_seq1.start,
@@ -347,7 +347,7 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);
         gt_match_get_range_seq2(match, &range_seq2);
-        fprintf(stdout, "%s\t%s\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\n",
+        fprintf(stdout, "%s\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\n",
                 gt_match_get_seqid1(match),
                 gt_match_get_seqid2(match),
                 range_seq1.start,
@@ -374,7 +374,7 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);
         gt_match_get_range_seq2(match, &range_seq2);
-        fprintf(stdout, "%lu\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\n",
+        fprintf(stdout, ""GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\n",
                 gt_match_last_get_seqno1(matchl),
                 gt_match_last_get_seqno2(matchl),
                 range_seq1.start,
@@ -400,7 +400,7 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);
         gt_match_get_range_seq2(match, &range_seq2);
-        fprintf(stdout, "%s\t%s\t%lu\t%lu\t%lu\t%lu\t%.3f\t%Lg\t%lu\n",
+        fprintf(stdout, "%s\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t%.3f\t%Lg\t"GT_LU"\n",
                 gt_match_get_seqid1(match),
                 gt_match_get_seqid2(match),
                 range_seq1.start,

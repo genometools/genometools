@@ -1367,7 +1367,7 @@ static unsigned int gt_chain2dim_findmaximalscores(
   if (minscoredefined)
   {
     gt_logger_log(logger,
-                  "compute %soptimal %s chains with score >= %ld",
+                  "compute %soptimal %s chains with score >= "GT_LD"",
                   chainmode->chainkind == GLOBALCHAININGALLCHAINS ? "all " : "",
                   chain2dim_chainkind_global(chainmode->chainkind) ? "global"
                                                                    : "local",
@@ -1786,8 +1786,8 @@ void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
 void gt_chain_printchainelem(FILE *outfp,const GtChain2Dimmatchvalues *value)
 {
   fprintf(outfp,
-          "%lu %lu %lu %lu"
-          " %ld\n",value->startpos[0],
+          ""GT_LU" "GT_LU" "GT_LU" "GT_LU""
+          " "GT_LD"\n",value->startpos[0],
                    value->endpos[0],
                    value->startpos[1],
                    value->endpos[1],

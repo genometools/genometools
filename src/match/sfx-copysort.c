@@ -230,7 +230,7 @@ static void showbucketspec2(const GtBucketspec2 *bucketspec2)
   {
     for (idx2 = 0; idx2 < bucketspec2->numofchars; idx2++)
     {
-      printf("subbucket[%u][%u]=%lu",idx1,idx2,
+      printf("subbucket[%u][%u]="GT_LU"",idx1,idx2,
               bucketspec2->subbuckettab[idx1][idx2].bucketend);
       if (bucketspec2->subbuckettab[idx1][idx2].sorted)
       {
@@ -240,7 +240,7 @@ static void showbucketspec2(const GtBucketspec2 *bucketspec2)
         printf("\n");
       }
     }
-    printf("superbucket[%u]=%lu\n",idx1,
+    printf("superbucket[%u]="GT_LU"\n",idx1,
            bucketspec2->superbuckettab[idx1].bucketend);
   }
 }
@@ -262,7 +262,7 @@ static void showexpandcode(const GtBucketspec2 *bucketspec2,
                         bucketspec2->numofchars,
                         prefixlength,
                         (const char *) characters);
-    printf("code2=%u = %lu %s\n",(unsigned int) code2,ecode,buffer);
+    printf("code2=%u = "GT_LU" %s\n",(unsigned int) code2,ecode,buffer);
   }
 }
 #endif
@@ -538,7 +538,7 @@ void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
     bucketspec2->superbuckettab[source].sorted = true;
   }
   gt_free(targetoffset);
-  gt_logger_log(logger,"hardwork = %lu (%.2f)",
+  gt_logger_log(logger,"hardwork = "GT_LU" (%.2f)",
                 hardwork,
                 (double) hardwork/gt_encseq_total_length(bucketspec2->encseq));
 }

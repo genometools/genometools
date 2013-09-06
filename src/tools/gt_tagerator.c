@@ -287,11 +287,11 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
       printf(" without differences (exact matches)");
     } else
     {
-      printf(" with up to %ld differences",arguments->userdefinedmaxdistance);
+      printf(" with up to "GT_LD" differences",arguments->userdefinedmaxdistance);
     }
     if (arguments->maxintervalwidth > 0)
     {
-      printf(" and at most %lu occurrences in the subject sequences",
+      printf(" and at most "GT_LU" occurrences in the subject sequences",
              arguments->maxintervalwidth);
     }
     printf("\n");

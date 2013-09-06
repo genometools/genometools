@@ -172,8 +172,8 @@ static int cluster_sequences(GtArray *matches,
   if (gt_clustered_set_num_of_elements(cs, err) != num_of_seq) {
     had_err = -1;
     gt_error_set(err,
-                 "number of sequences (%lu) unequals number of elements in"
-                 " clustered set (%lu)",
+                 "number of sequences ("GT_LU") unequals number of elements in"
+                 " clustered set ("GT_LU")",
                  num_of_seq, gt_clustered_set_num_of_elements(cs, err));
   }
   if (!had_err) {
@@ -256,8 +256,8 @@ GT_UNUSED static int gt_cluster_matches_gap(GtArray *matches,
   if (gt_clustered_set_num_of_elements(cs, err) != num_of_matches) {
     had_err = -1;
     gt_error_set(err,
-                 "number of matches (%lu) unequals number of elements in"
-                 "clustered set (%lu)",
+                 "number of matches ("GT_LU") unequals number of elements in"
+                 "clustered set ("GT_LU")",
                  num_of_matches, gt_clustered_set_num_of_elements(cs, err));
   }
   if (!had_err) {
@@ -328,8 +328,8 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
         GtUword id;
         seqid = gt_genome_node_get_seqid((GtGenomeNode*) curnode);
         rid = gt_feature_node_get_attribute(curnode, "ID");
-        (void) sscanf(rid, "repeat_region%lu", &id);
-        (void) snprintf(buffer, BUFSIZ, "%s_%lu", gt_str_get(seqid), id);
+        (void) sscanf(rid, "repeat_region"GT_LU"", &id);
+        (void) snprintf(buffer, BUFSIZ, "%s_"GT_LU"", gt_str_get(seqid), id);
       } else if (strcmp(fnt, gt_ft_protein_match) == 0) {
         GtRange range;
         const char *attr;
@@ -341,7 +341,7 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
         range = gt_genome_node_get_range((GtGenomeNode*) curnode);
         if ((range.end - range.start + 1) < 10UL)
           continue;
-        (void) snprintf(header, BUFSIZ, "%s_%lu_%lu", buffer, range.start,
+        (void) snprintf(header, BUFSIZ, "%s_"GT_LU"_"GT_LU"", buffer, range.start,
                         range.end);
         gt_hashmap_add(desc2node, (void*) gt_cstr_dup(header), (void*) curnode);
       } else if (strcmp(fnt, real_feature) == 0) {
@@ -349,7 +349,7 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
         range = gt_genome_node_get_range((GtGenomeNode*) curnode);
         if ((range.end - range.start + 1) < 10UL)
           continue;
-        (void) snprintf(header, BUFSIZ, "%s_%lu_%lu", buffer, range.start,
+        (void) snprintf(header, BUFSIZ, "%s_"GT_LU"_"GT_LU"", buffer, range.start,
                         range.end);
         gt_hashmap_add(desc2node, (void*) gt_cstr_dup(header), (void*) curnode);
       }
@@ -373,7 +373,7 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
         (void) strncpy(encseqid, encseqdesc, (size_t) desclen);
         encseqid[desclen] = '\0';
         tmp = (GtFeatureNode*) gt_hashmap_get(desc2node, (void*) encseqid);
-        (void) snprintf(clid, BUFSIZ, "%lu", i);
+        (void) snprintf(clid, BUFSIZ, ""GT_LU"", i);
         gt_feature_node_set_attribute(tmp, "clid", clid);
         gt_free(encseqid);
       }

@@ -96,10 +96,10 @@ static char* mutate_seq(const char *seq, GtUword len,
       mutated_seq[j++] = seq[i]; /* keep original character */
   }
   mutated_seq[j] = '\0'; /* terminate */
-  gt_log_log("total number of mutation events: %lu", total_events);
-  gt_log_log("number of substitution events: %lu", substitution_events);
-  gt_log_log("number of insertion events: %lu", insertion_events);
-  gt_log_log("number of deletion events: %lu", deletion_events);
+  gt_log_log("total number of mutation events: "GT_LU"", total_events);
+  gt_log_log("number of substitution events: "GT_LU"", substitution_events);
+  gt_log_log("number of insertion events: "GT_LU"", insertion_events);
+  gt_log_log("number of deletion events: "GT_LU"", deletion_events);
   return mutated_seq;
 }
 

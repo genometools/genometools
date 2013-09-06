@@ -131,7 +131,7 @@ int gt_bitinstream_get_next_bit(GtBitInStream *bitstream,
 void gt_bitinstream_delete(GtBitInStream *bitstream)
 {
   if (bitstream != NULL) {
-    gt_log_log("read %lu bits", bitstream->read_bits);
+    gt_log_log("read "GT_LU" bits", bitstream->read_bits);
     gt_fa_xmunmap(bitstream->bitseqbuffer);
     gt_free(bitstream->path);
     gt_free(bitstream);

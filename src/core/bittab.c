@@ -298,7 +298,7 @@ void gt_bittab_show(const GtBittab *b, FILE *outfp)
   gt_assert(b && outfp);
   /* header line */
   for (i = 0; i < b->num_of_bits; i++)
-    fprintf(outfp, "%lu", i % 10);
+    fprintf(outfp, ""GT_LU"", i % 10);
   gt_xfputc('\n', outfp);
   /* actual bits */
   for (i = 0; i < b->num_of_bits; i++) {

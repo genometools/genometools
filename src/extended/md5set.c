@@ -196,7 +196,7 @@ static void gt_md5set_alloc_table(GtMD5Set *set, GtUword newsize)
   set->table = gt_calloc((size_t)newsize, sizeof (gt_md5_t));
   if (oldtable != NULL)
   {
-    gt_log_log("rehashing %lu elements; old size: %lu, new size: %lu\n",
+    gt_log_log("rehashing "GT_LU" elements; old size: "GT_LU", new size: "GT_LU"\n",
         set->fill, oldsize, newsize);
     gt_md5set_rehash(set, oldtable, oldsize);
     gt_free(oldtable);

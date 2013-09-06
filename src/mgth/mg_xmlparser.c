@@ -315,7 +315,7 @@ int mg_xmlparser(ParseStruct *parsestruct_ptr, GtFile * fp_xmlfile,
     {
       error = XML_GetErrorCode(parser);
       gt_error_set(err,
-                "an error occurred parsing line %lu of file \"%s\": %s",
+                "an error occurred parsing line "GT_LU" of file \"%s\": %s",
                 PARSESTRUCT(xml_linenumber), gt_str_get(PARSESTRUCT(xmlfile)),
                 XML_ErrorString(error));
 

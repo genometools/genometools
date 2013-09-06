@@ -101,7 +101,7 @@ static int callpairswisesshulendistdist(const char *indexname,
       haserr = true;
     } else
     {
-      printf("%lu\n",totalgmatchlength);
+      printf(""GT_LU"\n",totalgmatchlength);
     }
   }
   gt_freesuffixarray(&suffixarray);

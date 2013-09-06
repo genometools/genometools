@@ -187,7 +187,7 @@ static int processleafedge_maxpairs(bool firstsucc,
   GtUchar leftchar;
 
 #ifdef SKDEBUG
-  printf("%s %lu firstsucc=%s, __func__," " depth(father)= %lu\n",
+  printf("%s "GT_LU" firstsucc=%s, __func__," " depth(father)= "GT_LU"\n",
          leafnumber,
          firstsucc ? "true" : "false",
          fatherdepth);
@@ -269,7 +269,7 @@ static int processbranchingedge_maxpairs(bool firstsucc,
   GtUword *start, *spptr, *fptr, *fstart;
 
 #ifdef SKDEBUG
-  printf("%s firstsucc=%s, depth(father)= %lu\n",
+  printf("%s firstsucc=%s, depth(father)= "GT_LU"\n",
           __func__,firstsucc ? "true" : "false",fatherdepth);
 #endif
   if (fatherdepth < (GtUword) state->searchlength)

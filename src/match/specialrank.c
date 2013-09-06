@@ -84,7 +84,7 @@ GtUword gt_frompos2rank(const Rankedbounds *leftptr,
       }
     }
   }
-  fprintf(stderr,"frompos2rank: cannot find pos %lu"
+  fprintf(stderr,"frompos2rank: cannot find pos "GT_LU""
                  " in ranges",specialpos);
   exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/
@@ -115,7 +115,7 @@ GtUword gt_fromrank2pos(const Rankedbounds *leftptr,
       }
     }
   }
-  fprintf(stderr,"fromrank2rank: cannot find rank %lu"
+  fprintf(stderr,"fromrank2rank: cannot find rank "GT_LU""
                  " in ranges",rank);
   exit(GT_EXIT_PROGRAMMING_ERROR);
   /*@ignore@*/

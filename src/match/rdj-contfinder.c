@@ -767,14 +767,14 @@ int gt_contfinder_write_seqnums(GtContfinder *contfinder, bool sorted,
     for (i = 0; i < contfinder->logicalnofseqs; i++)
       if (!GT_ISIBITSET(contfinder->contained,
             GT_READJOINER_CONTFINDER_GET_SEQNUM(contfinder->seqnums, i)))
-        gt_file_xprintf(outfp, "%lu\n", (GtUword)
+        gt_file_xprintf(outfp, ""GT_LU"\n", (GtUword)
             GT_READJOINER_CONTFINDER_GET_SEQNUM(contfinder->seqnums, i));
   }
   else
   {
     for (i = 0; i < contfinder->nofseqs; i++)
       if (!GT_ISIBITSET(contfinder->contained, i))
-        gt_file_xprintf(outfp, "%lu\n", (GtUword)i);
+        gt_file_xprintf(outfp, ""GT_LU"\n", (GtUword)i);
   }
   return had_err;
 }
@@ -968,7 +968,7 @@ void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
   {
     for (i = 0; i < width; i++)
     {
-      printf("%lu\n", suffixes[i]);
+      printf(""GT_LU"\n", suffixes[i]);
     }
   }
   gt_free(suffixes);

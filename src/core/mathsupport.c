@@ -244,19 +244,19 @@ void gt_out_power_for_small_exponents(void)
   unsigned int exponent;
 
   for (exponent=1U; exponent<64U; exponent++) {
-    printf("pow(2UL,%u)=%lu\n",exponent,
+    printf("pow(2UL,%u)="GT_LU"\n",exponent,
             gt_power_for_small_exponents(2U,exponent));
   }
   for (exponent=1U; exponent<32U; exponent++) {
-    printf("pow(4UL,%u)=%lu\n",exponent,
+    printf("pow(4UL,%u)="GT_LU"\n",exponent,
             gt_power_for_small_exponents(4U,exponent));
   }
   for (exponent=1U; exponent<16U; exponent++) {
-    printf("pow(8UL,%u)=%lu\n",exponent,
+    printf("pow(8UL,%u)="GT_LU"\n",exponent,
             gt_power_for_small_exponents(8U,exponent));
   }
   for (exponent=1U; exponent<32U; exponent++) {
-    printf("pow(3UL,%u)=%lu\n",exponent,
+    printf("pow(3UL,%u)="GT_LU"\n",exponent,
             gt_power_for_small_exponents(3U,exponent));
   }
 }

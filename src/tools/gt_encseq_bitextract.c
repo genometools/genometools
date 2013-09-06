@@ -118,7 +118,7 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err && arguments->bitpos != GT_UNDEF_ULONG) {
     if (arguments->bitpos >= gt_encseq_total_length(encseq)) {
-      gt_error_set(err, "position %lu exceeds encoded sequence length of %lu",
+      gt_error_set(err, "position "GT_LU" exceeds encoded sequence length of "GT_LU"",
                    arguments->bitpos, gt_encseq_total_length(encseq));
       had_err = -1;
     }
@@ -133,8 +133,8 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
       gt_bitsequence_tostring(buffer, etbe.tbe);
       printf("Twobitencoding   %s\n"
              "unitsnotspecial  %u\n"
-             "position         %lu\n"
-             "returnvalue      %lu\n",
+             "position         "GT_LU"\n"
+             "returnvalue      "GT_LU"\n",
              buffer,
              etbe.unitsnotspecial,
              arguments->bitpos,
@@ -145,7 +145,7 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err && arguments->stoppos != GT_UNDEF_ULONG) {
     if (arguments->stoppos >= gt_encseq_total_length(encseq)) {
-      gt_error_set(err, "position %lu exceeds encoded sequence length of %lu",
+      gt_error_set(err, "position "GT_LU" exceeds encoded sequence length of "GT_LU"",
                    arguments->stoppos, gt_encseq_total_length(encseq));
       had_err = -1;
     }
@@ -154,7 +154,7 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
       /* check stoppos stuff */
       gt_encseq_reader_reinit_with_readmode(esr, encseq, rm,
                                             arguments->stoppos);
-      printf("%lu: %lu\n", arguments->stoppos,
+      printf(""GT_LU": "GT_LU"\n", arguments->stoppos,
                            gt_getnexttwobitencodingstoppos(fwd, esr));
       gt_encseq_reader_delete(esr);
     }
@@ -167,7 +167,7 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
       while (true) {
         it1 = gt_specialrangeiterator_next(sri, &srng);
         if (it1)
-          printf("%lu:%lu\n", srng.start, srng.end);
+          printf(""GT_LU":"GT_LU"\n", srng.start, srng.end);
         else break;
       }
       gt_specialrangeiterator_delete(sri);

@@ -1577,7 +1577,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
       gt_feature_node_set_attribute((GtFeatureNode*) node,
                                     "ltr_similarity",
                                     buf);
-      (void) snprintf(buf, BUFSIZ-1, "%lu", elem->contignumber);
+      (void) snprintf(buf, BUFSIZ-1, ""GT_LU"", elem->contignumber);
       gt_feature_node_set_attribute((GtFeatureNode*) node,
                                     "seq_number",
                                     buf);

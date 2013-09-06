@@ -78,7 +78,7 @@ static void gt_suffixsortspace_overflow_abort(GT_UNUSED const char *f,
                                               void *data)
 {
   fprintf(stderr, "error: overflow detected while calculating size of "
-                  "suffix sorting space: %lu * %lu bytes is too large for "
+                  "suffix sorting space: "GT_LU" * "GT_LU" bytes is too large for "
                   "the current platform, please recompile GenomeTools with "
                   "support for a larger address space to prevent this (e.g. "
                   "64 bit instead of 32 bit) or use the `-parts' option.\n",
@@ -106,7 +106,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
   suffixsortspace->currentexport = false;
 #if defined (_LP64) || defined (_WIN64)
   gt_logger_log(logger,"suftab uses %dbit values: "
-                         "maxvalue=%lu,numofentries=%lu",
+                         "maxvalue="GT_LU",numofentries="GT_LU"",
                          gt_decide_to_use_uint(useuint,maxvalue) ? 32 : 64,
                          maxvalue,numofentries);
 #endif
@@ -118,7 +118,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
                                numofentries,
                                gt_suffixsortspace_overflow_abort,
                                &numofentries);
-  gt_log_log("sizeof (suftab)=%lu bytes",sufspacesize);
+  gt_log_log("sizeof (suftab)="GT_LU" bytes",sufspacesize);
   if (gt_decide_to_use_uint(useuint,maxvalue))
   {
     suffixsortspace->ulongtab = NULL;
@@ -242,13 +242,13 @@ void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
 {
   GtUword idx;
 
-  printf("%lu,%lu=",sssp->bucketleftidx+subbucketleft-sssp->partoffset,
+  printf(""GT_LU","GT_LU"=",sssp->bucketleftidx+subbucketleft-sssp->partoffset,
                     sssp->bucketleftidx+subbucketleft+width-1-sssp->partoffset);
   for (idx=sssp->bucketleftidx+subbucketleft-sssp->partoffset;
        idx<sssp->bucketleftidx+subbucketleft+width-sssp->partoffset;
        idx++)
   {
-    printf(" %lu", gt_suffixsortspace_getdirect(sssp,idx));
+    printf(" "GT_LU"", gt_suffixsortspace_getdirect(sssp,idx));
   }
 }
 

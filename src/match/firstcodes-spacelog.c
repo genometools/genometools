@@ -139,7 +139,7 @@ bool gt_firstcodes_spacelog_showentries(FILE *fp,
   {
     if (fcsl->entries[idx].size > 0)
     {
-      fprintf(fp,"%s %d %s %s %lu\n",
+      fprintf(fp,"%s %d %s %s "GT_LU"\n",
                fcsl->entries[idx].filename,
                fcsl->entries[idx].line,
                fcsl->entries[idx].title,
@@ -177,7 +177,7 @@ static void gt_firstcodes_subtract_error(const char *title,
 {
   fprintf(stderr,"for title \"%s\" (from file %s, line %d) "
                  "in spacelog entries: "
-                 "size=%lu > %lu=%sspace\n",title,filename,line,
+                 "size="GT_LU" > "GT_LU"=%sspace\n",title,filename,line,
                  (GtUword) size,(GtUword) sumspace,
                  work ? "work" : "split");
 }
@@ -331,7 +331,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
       if (realspace >= 1000000UL)
       {
         /*
-        printf("realspace=%lu,logspace=%lu\n",realspace,
+        printf("realspace="GT_LU",logspace="GT_LU"\n",realspace,
                                               (GtUword) logspace);
         */
         percent_difference = 100.0 * (double) (realspace - logspace)/realspace;

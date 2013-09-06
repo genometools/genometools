@@ -213,7 +213,7 @@ static void draw_header(cairo_t *cr, const char *text, GT_UNUSED const char *fn,
   cairo_show_text(cr, seqid);
   xpos = TEXT_SPACER;
   cairo_move_to(cr, xpos, height - 2*TEXT_SPACER - theight);
-  (void) snprintf(buffer, BUFSIZ, "Page %lu", pagenum+1);
+  (void) snprintf(buffer, BUFSIZ, "Page "GT_LU"", pagenum+1);
   cairo_show_text(cr, buffer);
   cairo_restore(cr);
 }
@@ -412,7 +412,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
                 arguments->theight);
     cairo_show_page(cr);
     num_pages++;
-    gt_log_log("finished, should be %lu pages\n", num_pages);
+    gt_log_log("finished, should be "GT_LU" pages\n", num_pages);
     gt_text_width_calculator_delete(twc);
     cairo_destroy(cr);
     cairo_surface_flush(surf);

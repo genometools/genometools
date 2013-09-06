@@ -335,7 +335,7 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
 
     if (relpos2 + matchlen == seqlen2)
     {
-      printf("%lu %lu %lu\n",seqnum2,seqnum1,matchlen);
+      printf(""GT_LU" "GT_LU" "GT_LU"\n",seqnum2,seqnum1,matchlen);
     }
   } else
   {
@@ -345,7 +345,7 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
 
       if (relpos1 + matchlen == seqlen1)
       {
-        printf("%lu %lu %lu\n",seqnum1,seqnum2,matchlen);
+        printf(""GT_LU" "GT_LU" "GT_LU"\n",seqnum1,seqnum2,matchlen);
       }
     }
   }

@@ -99,7 +99,7 @@ static GtWord overlapcost(GtFragment *fragments,
   if (GETSTOREDSTARTPOINT(2, j) <= GETSTOREDENDPOINT(2, i))
     overlaplength += GETSTOREDENDPOINT(2, i) - GETSTOREDSTARTPOINT(2, j) + 1;
 
-  gt_log_log("overlap total  (#%lu, #%lu)=%lu", i, j, overlaplength);
+  gt_log_log("overlap total  (#"GT_LU", #"GT_LU")="GT_LU"", i, j, overlaplength);
 
   return (GtWord) overlaplength;
 }
@@ -385,7 +385,7 @@ static void log_fragments(GtFragment *fragments, GtUword num_of_fragments)
   gt_log_log("show chaining fragments");
   for (i = 0; i < num_of_fragments; i++) {
     GtFragment *frag = fragments + i;
-    gt_log_log("#%lu: s1=%lu, s1=%lu, l1=%lu, s2=%lu, e2=%lu, l2=%lu, w=%lu", i,
+    gt_log_log("#"GT_LU": s1="GT_LU", s1="GT_LU", l1="GT_LU", s2="GT_LU", e2="GT_LU", l2="GT_LU", w="GT_LU"", i,
             frag->startpos1, frag->endpos1, frag->endpos1 - frag->startpos1 + 1,
             frag->startpos2, frag->endpos2, frag->endpos2 - frag->startpos2 + 1,
             frag->weight);

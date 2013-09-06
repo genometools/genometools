@@ -173,19 +173,19 @@ static GtContigsGraph* gt_contigs_graph_init(void)
   cg->nofscfedges = 0;
   cg->e_scf = NULL;
   cg->rlt = NULL;
-  gt_log_log("sizeof (GtContigEdgesLink) = %lu",
+  gt_log_log("sizeof (GtContigEdgesLink) = "GT_LU"",
       (GtUword) sizeof (GtContigEdgesLink));
-  gt_log_log("sizeof (GtContigJunctionInfo) = %lu",
+  gt_log_log("sizeof (GtContigJunctionInfo) = "GT_LU"",
       (GtUword) sizeof (GtContigJunctionInfo));
-  gt_log_log("sizeof (GtContigDepthInfo) = %lu",
+  gt_log_log("sizeof (GtContigDepthInfo) = "GT_LU"",
       (GtUword) sizeof (GtContigDepthInfo));
-  gt_log_log("sizeof (GtContigsGraphSpmEdge) = %lu",
+  gt_log_log("sizeof (GtContigsGraphSpmEdge) = "GT_LU"",
       (GtUword) sizeof (GtContigsGraphSpmEdge));
-  gt_log_log("sizeof (GtContigsGraphScfEdge) = %lu",
+  gt_log_log("sizeof (GtContigsGraphScfEdge) = "GT_LU"",
       (GtUword) sizeof (GtContigsGraphScfEdge));
-  gt_log_log("sizeof (GtContigsGraphMarks) = %lu",
+  gt_log_log("sizeof (GtContigsGraphMarks) = "GT_LU"",
       (GtUword) sizeof (GtContigsGraphMarks));
-  gt_log_log("sizeof (GtContigsGraphSeqUnit) = %lu",
+  gt_log_log("sizeof (GtContigsGraphSeqUnit) = "GT_LU"",
       (GtUword) sizeof (GtContigsGraphSeqUnit));
   cg->dot_show_deleted = false;
   return cg;
@@ -200,8 +200,8 @@ void gt_contigs_graph_output_paths(GtContigsGraph *cg, FILE *fp)
   gt_assert(cg != NULL);
   gt_assert(fp != NULL);
   elems[0] = 0;
-  gt_log_log("nof_simple_v: %lu", cg->nof_simple_v);
-  gt_log_log("nof_v: %lu", cg->nof_v);
+  gt_log_log("nof_simple_v: "GT_LU"", cg->nof_simple_v);
+  gt_log_log("nof_v: "GT_LU"", cg->nof_v);
   for (cnum = 0; cnum < (uint32_t)cg->nof_simple_v; cnum++)
   {
     if (cg->v_m[cnum].deleted || cg->v_m[cnum].optional)
@@ -241,7 +241,7 @@ void gt_contigs_graph_enable_dot_show_deleted(GtContigsGraph *cg)
     if (count != (size_t)(COUNT))\
     {\
       gt_error_set(err, "error reading " ERRSTR1 " from " ERRSTR2 " file "\
-          "(exp:%lu; found=%lu)", (GtUword)COUNT, (GtUword)count);\
+          "(exp:"GT_LU"; found="GT_LU")", (GtUword)COUNT, (GtUword)count);\
       had_err = -1;\
     }\
   }
@@ -254,7 +254,7 @@ static void gt_contigs_graph_show_junctions(GtContigJunctionInfo *j_info,
   FILE *fp = fopen(path, "w");
   for (jnum = 0; jnum < nofjinfos; jnum++)
   {
-    fprintf(fp, "junction=%lu contig=%u\n",
+    fprintf(fp, "junction="GT_LU" contig=%u\n",
         j_info[jnum].junction_num,
         j_info[jnum].contig_num);
   }
@@ -268,7 +268,7 @@ static void gt_contigs_graph_show_e_links(GtContigEdgesLink *el,
   FILE *fp = fopen(path, "w");
   for (vnum = 0; vnum < nof_v; vnum++)
   {
-    fprintf(fp, "contignum=%lu deg=%lu ptr=%lu\n", vnum,
+    fprintf(fp, "contignum="GT_LU" deg="GT_LU" ptr="GT_LU"\n", vnum,
         (GtUword)el[vnum].deg, (GtUword)el[vnum].ptr);
   }
   (void)fclose(fp);
@@ -285,7 +285,7 @@ GtUword gt_contigs_graph_append_vertex(GtContigsGraph *cg,
 {
   unsigned int incoming;
   gt_assert(cg->nof_v <= cg->alloc_v);
-  gt_log_log("append_vertex(nof_spm_o=%lu, nof_spm_i=%lu, nof_units=%lu)",
+  gt_log_log("append_vertex(nof_spm_o="GT_LU", nof_spm_i="GT_LU", nof_units="GT_LU")",
       nof_spm_o, nof_spm_i, nof_units);
   if (cg->nof_v == cg->alloc_v)
   {
@@ -360,7 +360,7 @@ static int gt_contigs_graph_create_vertices(GtContigsGraph *cg,
     if (nofv != cg->nof_v)
     {
       gt_error_set(err, "number of contigs differ in "
-      "incoming (%lu) and outgoing (%lu) contigs-junctions links files",
+      "incoming ("GT_LU") and outgoing ("GT_LU") contigs-junctions links files",
       (GtUword)cg->nof_v, (GtUword)nofv);
     }
   }
@@ -543,7 +543,7 @@ static void gt_contigs_graph_show_dot_vertex(GtContigsGraph *cg,
              *style = GT_CONTIGS_GRAPH_DOT_SELECT_V_STYLE(cg, cnum),
              *color = GT_CONTIGS_GRAPH_DOT_SELECT_V_COLOR(cg, cnum);
 
-  gt_file_xprintf(outfp, "  %lu [style=%s,color=%s,shape=%s];\n", cnum,
+  gt_file_xprintf(outfp, "  "GT_LU" [style=%s,color=%s,shape=%s];\n", cnum,
         style, color, shape);
 }
 
@@ -559,7 +559,7 @@ static void gt_contigs_graph_show_dot_for_contig(GtContigsGraph *cg,
       if (!cg->v_m[edge->dest].processed)
       {
         if (cg->dot_show_deleted || !edge->deleted)
-          gt_file_xprintf(outfp, "  %lu -- %lu "
+          gt_file_xprintf(outfp, "  "GT_LU" -- "GT_LU" "
               "[dir=both,arrowtail=%s,arrowhead=%s%s];\n", cnum,
               (GtUword)edge->dest,
               incoming ? "normal" : "inv",
@@ -594,7 +594,7 @@ GtContigsGraphSpmEdge* gt_contigs_graph_find_only_spm_edge(GtContigsGraph *cg,
     GtUword cnum, unsigned int incoming)
 {
   GtContigsGraphSpmEdge *edge;
-  gt_log_log("find_only_spm_edge(cnum=%lu,incoming=%u)",cnum,incoming);
+  gt_log_log("find_only_spm_edge(cnum="GT_LU",incoming=%u)",cnum,incoming);
   for (GT_CONTIGS_GRAPH_EACH_SPM_EDGE(cg, cnum, incoming, edge))
   {
     if (!edge->deleted)
@@ -608,7 +608,7 @@ GtContigsGraphSpmEdge* gt_contigs_graph_find_spm_edge(GtContigsGraph *cg,
     GtUword cnum, unsigned int incoming, GtUword dest)
 {
   GtContigsGraphSpmEdge *edge;
-  gt_log_log("find_spm_edge(cnum=%lu,incoming=%u,dest=%lu)",cnum,incoming,dest);
+  gt_log_log("find_spm_edge(cnum="GT_LU",incoming=%u,dest="GT_LU")",cnum,incoming,dest);
   for (GT_CONTIGS_GRAPH_EACH_SPM_EDGE(cg, cnum, incoming, edge))
   {
     if (edge->deleted)
@@ -624,7 +624,7 @@ GtContigsGraphSpmEdge* gt_contigs_graph_find_deleted_spm_edge(
     GtContigsGraph *cg, GtUword cnum, unsigned int incoming)
 {
   GtContigsGraphSpmEdge *edge;
-  gt_log_log("find_deleted_spm_edge(cnum=%lu,incoming=%u)",cnum,incoming);
+  gt_log_log("find_deleted_spm_edge(cnum="GT_LU",incoming=%u)",cnum,incoming);
   gt_assert(cg->v_spm[incoming][cnum + 1UL].ptr >
       cg->v_spm[incoming][cnum].ptr + cg->v_spm[incoming][cnum].deg);
   for (GT_CONTIGS_GRAPH_EACH_SPM_EDGE(cg, cnum, incoming, edge))
@@ -641,7 +641,7 @@ void gt_contigs_graph_rm_spm_edge(GtContigsGraph *cg,
 {
   GtContigsGraphSpmEdge *reverse_edge;
   unsigned int reverse_incoming;
-  gt_log_log("rm spm edge %lu -- %lu", cnum, (GtUword)edge->dest);
+  gt_log_log("rm spm edge "GT_LU" -- "GT_LU"", cnum, (GtUword)edge->dest);
   for (reverse_incoming = 0; reverse_incoming < 2U; reverse_incoming++)
   {
     for (GT_CONTIGS_GRAPH_EACH_SPM_EDGE(cg, edge->dest,
@@ -670,7 +670,7 @@ void gt_contigs_graph_rm_vertex(GtContigsGraph *cg, GtUword cnum)
 {
   GtContigsGraphSpmEdge *edge;
   unsigned int incoming;
-  gt_log_log("rm vertex %lu", cnum);
+  gt_log_log("rm vertex "GT_LU"", cnum);
   for (incoming = 0; incoming < 2U; incoming++)
   {
     for (GT_CONTIGS_GRAPH_EACH_SPM_EDGE(cg, cnum, incoming, edge))
@@ -708,7 +708,7 @@ void gt_contigs_graph_rm_optional_neighbours(GtContigsGraph *cg,
       continue;
     if (GT_CONTIGS_GRAPH_IS_OPTIONAL(cg, edge->dest))
     {
-      /*gt_log_log("rm edge %lu -- %u", cnum, edge->dest);*/
+      /*gt_log_log("rm edge "GT_LU" -- %u", cnum, edge->dest);*/
       gt_contigs_graph_rm_spm_edge(cg, cnum, incoming, edge);
       /* if optional is now untraversable, rm it */
       if (cg->v_spm[0][edge->dest].deg == 0 ||
@@ -748,7 +748,7 @@ void gt_contigs_graph_simplify_from_contig(GtContigsGraph *cg,
       {
         cnum = (GtUword)edge->dest;
         incoming = GT_CONTIGS_GRAPH_VALID_PATH_DIR(incoming, edge->reverse);
-        /*gt_log_log("... continue from contig %lu (incoming=%u, deg=%u)", cnum,
+        /*gt_log_log("... continue from contig "GT_LU" (incoming=%u, deg=%u)", cnum,
             incoming, cg->v_spm[incoming][cnum].deg);*/
       }
       else
@@ -773,7 +773,7 @@ void gt_contigs_graph_simplify_from_contig(GtContigsGraph *cg,
           GT_CONTIGS_GRAPH_SET_DIR_MARK(cg, cnum, incoming);
           break;
         }
-        /*gt_log_log("... repeat contig %lu (incoming=%u, deg=%u)", cnum,
+        /*gt_log_log("... repeat contig "GT_LU" (incoming=%u, deg=%u)", cnum,
             incoming, cg->v_spm[incoming][cnum].deg);*/
       }
       else
@@ -824,14 +824,14 @@ void gt_contigs_graph_simplify(GtContigsGraph *cg, bool restrict_rm_optionals)
     {
       if (!cg->v_m[cnum].mark0)
       {
-        /*gt_log_log("simplify from contig %lu (incoming=0, deg=%u)", cnum,
+        /*gt_log_log("simplify from contig "GT_LU" (incoming=0, deg=%u)", cnum,
               cg->v_spm[0U][cnum].deg);*/
         gt_contigs_graph_simplify_from_contig(cg, cnum, 0U,
             restrict_rm_optionals);
       }
       if (!cg->v_m[cnum].mark1)
       {
-        /*gt_log_log("simplify from contig %lu (incoming=1, deg=%u)", cnum,
+        /*gt_log_log("simplify from contig "GT_LU" (incoming=1, deg=%u)", cnum,
               cg->v_spm[1U][cnum].deg);*/
         gt_contigs_graph_simplify_from_contig(cg, cnum, 1U,
             restrict_rm_optionals);
@@ -852,7 +852,7 @@ void gt_contigs_graph_find_path_end(GtContigsGraphPathEndInfo *info,
   info->dir = incoming;
   info->t = GT_CONTIGS_GRAPH_JUNCTION;
   info->depth = 0;
-  gt_log_log("find_path_end(cnum=%lu, incoming=%u)", cnum, incoming);
+  gt_log_log("find_path_end(cnum="GT_LU", incoming=%u)", cnum, incoming);
   path->nextfreeGtContigsGraphPathElem = 0;
   do {
     GtContigsGraphSpmEdge *edge;
@@ -911,7 +911,7 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
   GT_UNUSED unsigned int enddir;
   gt_log_log("... create_composite_vertex");
   for (dir = 0; dir <= 1U; dir++)
-    gt_log_log("info[%u]: cnum = %lu, dest = %lu, depth = %lu, "
+    gt_log_log("info[%u]: cnum = "GT_LU", dest = "GT_LU", depth = "GT_LU", "
         "dir = %u, t = %s",
         dir,
         info[dir].cnum,
@@ -941,9 +941,9 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
       info[1].t == GT_CONTIGS_GRAPH_JUNCTION ? 1UL : 0,
       nof_units);
 #endif
-  gt_log_log("appended: vertex %lu (units: %lu)", new_cnum, nof_units);
+  gt_log_log("appended: vertex "GT_LU" (units: "GT_LU")", new_cnum, nof_units);
   cnum = info[1].cnum;
-  gt_log_log("--- start traversal from %lu", cnum);
+  gt_log_log("--- start traversal from "GT_LU"", cnum);
   dir = info[1].dir;
   offset = 0;
   for (i = 0; i < nof_units; i++)
@@ -976,10 +976,10 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
       offset = (GtUword)edge->ovlen;
     }
   }
-  gt_log_log("cnum = %lu, info[0].cnum = %lu", cnum, info[0].cnum);
+  gt_log_log("cnum = "GT_LU", info[0].cnum = "GT_LU"", cnum, info[0].cnum);
   gt_assert(cnum == info[0].cnum);
   cnum = info[1].cnum;
-  gt_log_log("--- start traversal from %lu", cnum);
+  gt_log_log("--- start traversal from "GT_LU"", cnum);
   gt_assert(nof_units >= 1UL);
   if (info[1].t == GT_CONTIGS_GRAPH_CIRCULAR)
   {
@@ -1006,12 +1006,12 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
     }
     edge = gt_contigs_graph_find_spm_edge(cg, cnum, dir, dest);
     cnum = (GtUword)edge->dest;
-    gt_log_log("traverse edge %lu -- %lu", src, cnum);
+    gt_log_log("traverse edge "GT_LU" -- "GT_LU"", src, cnum);
     /*dir = GT_CONTIGS_GRAPH_VALID_PATH_DIR(dir, edge->reverse);*/
     if (cg->v_spm[0][src].deg == (uint64_t)1 &&
         cg->v_spm[1][src].deg == (uint64_t)1)
     {
-      gt_log_log("mark vertex %lu (internal)", src);
+      gt_log_log("mark vertex "GT_LU" (internal)", src);
       cg->v_m[src].selected = true;
      /* if (!extended && i > 1 && i < nof_units - 2)
         cg->v_m[src].processed = true;*/
@@ -1019,27 +1019,27 @@ void gt_contigs_graph_create_composite_vertex(GtContigsGraph *cg,
   }
   if (info[1].t != GT_CONTIGS_GRAPH_CIRCULAR)
   {
-    gt_log_log("cnum = %lu, info[0].cnum = %lu", cnum, info[0].cnum);
+    gt_log_log("cnum = "GT_LU", info[0].cnum = "GT_LU"", cnum, info[0].cnum);
     gt_assert(cnum == info[0].cnum);
   }
   else
   {
-    gt_log_log("cnum = %lu, info[0].dest = %lu", cnum, info[0].dest);
+    gt_log_log("cnum = "GT_LU", info[0].dest = "GT_LU"", cnum, info[0].dest);
     gt_assert(cnum == info[0].dest);
   }
   if (info[1].t == GT_CONTIGS_GRAPH_CIRCULAR)
   {
-    gt_log_log("mark vertex %lu (circle end)", info[1].cnum);
+    gt_log_log("mark vertex "GT_LU" (circle end)", info[1].cnum);
     cg->v_m[info[1].cnum].selected = true;
   }
   if (info[0].t == GT_CONTIGS_GRAPH_SINGLE_END)
   {
-    gt_log_log("mark vertex %lu (single end)", info[0].cnum);
+    gt_log_log("mark vertex "GT_LU" (single end)", info[0].cnum);
     cg->v_m[info[0].cnum].selected = true;
   }
   if (info[1].t == GT_CONTIGS_GRAPH_SINGLE_END)
   {
-    gt_log_log("mark vertex %lu (single end)", info[1].cnum);
+    gt_log_log("mark vertex "GT_LU" (single end)", info[1].cnum);
     cg->v_m[info[1].cnum].selected = true;
   }
 #if 0
@@ -1082,7 +1082,7 @@ void gt_contigs_graph_extend_contigs(GtContigsGraph *cg, bool use_only_internal)
     cg->v_m[cnum].visited = false;
   }
   nof_v_before = cg->nof_v;
-  gt_log_log("nof_v before extending contigs = %lu", cg->nof_v);
+  gt_log_log("nof_v before extending contigs = "GT_LU"", cg->nof_v);
   for (cnum = 0; cnum < nof_v_before; cnum++)
   {
     GtContigsGraphPathEndInfo info[2];
@@ -1096,7 +1096,7 @@ void gt_contigs_graph_extend_contigs(GtContigsGraph *cg, bool use_only_internal)
         (deg[1] > 1UL) || /* junction */
         (deg[0] == 0 && deg[1] == 0)) /* isolated */
       continue;
-    gt_log_log("extend_contigs, cnum = %lu", cnum);
+    gt_log_log("extend_contigs, cnum = "GT_LU"", cnum);
     for (startdir = 0; startdir < 2U; startdir++)
     {
       if (cg->v_spm[startdir][cnum].deg == 0)
@@ -1164,8 +1164,8 @@ int gt_contigs_graph_show_dot_subgraph(GtContigsGraph *cg,
     cnum = cnums[i];
     if (cnum >= cg->nof_v)
     {
-      gt_error_set(err, "Error by context output for contig %lu: "
-          "number of contigs is %lu", cnum, cg->nof_v);
+      gt_error_set(err, "Error by context output for contig "GT_LU": "
+          "number of contigs is "GT_LU"", cnum, cg->nof_v);
       gt_array_delete(stack);
       return -1;
     }

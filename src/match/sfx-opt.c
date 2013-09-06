@@ -162,7 +162,7 @@ static void showoptions(const Suffixeratoroptions *so)
                         sfxtrategy.storespecialcodes ? "true" : "false");
   for (i=0; i<gt_str_array_size(so->db); i++)
   {
-    gt_logger_log_force(logger, "inputfile[%lu]=%s", i,
+    gt_logger_log_force(logger, "inputfile["GT_LU"]=%s", i,
                    gt_str_array_get(so->db, i));
   }
   if (gt_str_length(so->inputindex) > 0)
@@ -199,11 +199,11 @@ static void showoptions(const Suffixeratoroptions *so)
     gt_logger_log_force(logger, "parts=%u",
                             gt_index_options_numofparts_value(so->idxopts));
   }
-  gt_logger_log_force(logger, "maxinsertionsort=%lu",
+  gt_logger_log_force(logger, "maxinsertionsort="GT_LU"",
                         sfxtrategy.maxinsertionsort);
-  gt_logger_log_force(logger, "maxbltriesort=%lu",
+  gt_logger_log_force(logger, "maxbltriesort="GT_LU"",
                         sfxtrategy.maxbltriesort);
-  gt_logger_log_force(logger, "maxcountingsort=%lu",
+  gt_logger_log_force(logger, "maxcountingsort="GT_LU"",
                         sfxtrategy.maxcountingsort);
   gt_logger_log_force(logger, "lcpdist=%s",
                         gt_index_options_lcpdist_value(so->idxopts)

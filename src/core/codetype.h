@@ -27,6 +27,6 @@ typedef GtUword GtCodetype;
 
 /* The following is the format character this the GtCodetype. */
 
-#define FormatGtCodetype "%lu"
+#define FormatGtCodetype ""GT_LU""
 
 #endif

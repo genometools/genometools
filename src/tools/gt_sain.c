@@ -138,8 +138,8 @@ static int gt_sain_checkmaxsequencelength(GtUword len,bool forencseq,
   }
   if (len > maxsequencelength)
   {
-    gt_error_set(err,"sequence of size %lu is too long: sain algorithm "
-                     "can only compute sequence of length up to %lu",
+    gt_error_set(err,"sequence of size "GT_LU" is too long: sain algorithm "
+                     "can only compute sequence of length up to "GT_LU"",
                      len,maxsequencelength);
     return -1;
   }

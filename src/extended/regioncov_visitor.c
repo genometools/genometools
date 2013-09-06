@@ -126,7 +126,7 @@ static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
     printf("%s:\n", (char*) key);
     for (i = 0; i < gt_array_size(rangelist); i++) {
       rangeptr = gt_array_get(rangelist, i);
-      printf("%lu, %lu\n", rangeptr->start, rangeptr->end);
+      printf(""GT_LU", "GT_LU"\n", rangeptr->start, rangeptr->end);
     }
   }
   return 0;

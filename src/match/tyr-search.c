@@ -121,13 +121,13 @@ static void mermatchoutput(const Tyrindex *tyrindex,
   if (tyrsearchinfo->showmode & SHOWQPOS)
   {
     ADDTABULATOR;
-    printf("%c%lu",forward ? '+' : '-',queryposition);
+    printf("%c"GT_LU"",forward ? '+' : '-',queryposition);
   }
   if (tyrsearchinfo->showmode & SHOWCOUNTS)
   {
     GtUword mernumber = gt_tyrindex_ptr2number(tyrindex,result);
     ADDTABULATOR;
-    printf("%lu",gt_tyrcountinfo_get(tyrcountinfo,mernumber));
+    printf(""GT_LU"",gt_tyrcountinfo_get(tyrcountinfo,mernumber));
   }
   if (tyrsearchinfo->showmode & SHOWSEQUENCE)
   {

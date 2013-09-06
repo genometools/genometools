@@ -33,6 +33,20 @@
 #define GT_LLU "%I64u"
 #endif
 
+/* Define the conversion string for '%ld' in platform independent fashion. */
+#ifndef _WIN64
+#define GT_LD "%ld"
+#else
+#define GT_LD "%I64d"
+#endif
+
+/* Define the conversion string for '%lu' in platform independent fashion. */
+#ifndef _WIN64
+#define GT_LU "%lu"
+#else
+#define GT_LU "%I64u"
+#endif
+
 /* Define the conversion string for '%zu' in platform independent fashion. */
 #ifndef _WIN32
 #define GT_ZU "%zu"

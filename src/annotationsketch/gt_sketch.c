@@ -231,8 +231,8 @@ static int gt_sketch_arguments_check(GT_UNUSED int rest_argc,
   if (arguments->start != GT_UNDEF_ULONG &&
       arguments->end != GT_UNDEF_ULONG &&
       !(arguments->start < arguments->end)) {
-    gt_error_set(err, "start of query range (%lu) must be before "
-                      "end of query range (%lu)",
+    gt_error_set(err, "start of query range ("GT_LU") must be before "
+                      "end of query range ("GT_LU")",
                       arguments->start, arguments->end);
     had_err = -1;
   }
@@ -383,7 +383,7 @@ static int gt_sketch_runner(int argc, const char **argv, int parsed_args,
 
   if (!had_err) {
     if (arguments->verbose)
-      fprintf(stderr, "# of results: %lu\n", gt_array_size(results));
+      fprintf(stderr, "# of results: "GT_LU"\n", gt_array_size(results));
 
     /* find and load style file */
     if (!(sty = gt_style_new(err)))

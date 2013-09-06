@@ -197,7 +197,7 @@ GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
   }
   if (!haserr && cdata->totallength > (ULONG_MAX >> 2))
   {
-    gt_error_set(err, "totallength %lu larger than %lu", cdata->totallength,
+    gt_error_set(err, "totallength "GT_LU" larger than "GT_LU"", cdata->totallength,
         ULONG_MAX >> 2);
     haserr = true;
   }
@@ -208,7 +208,7 @@ GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
 }
 
 #define GT_RANDOMCODES_COLLECT_STAT(S)\
-  gt_log_log("thread %u: " #S " %lu", threadnum, cdata->S);\
+  gt_log_log("thread %u: " #S " "GT_LU"", threadnum, cdata->S);\
   if (S != NULL)\
     *S += cdata->S;
 

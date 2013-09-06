@@ -125,15 +125,15 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
       }
       attr = gt_feature_node_get_attribute(curnode, ATTR_LTRFAM);
       if (attr != NULL)
-        (void) snprintf(header, BUFSIZ, "%s_%s_%lu_%lu", attr,
+        (void) snprintf(header, BUFSIZ, "%s_%s_"GT_LU"_"GT_LU"", attr,
                         gt_str_get(seqid), range.start, range.end);
       else
-        (void) snprintf(header, BUFSIZ, "%s_%lu_%lu", gt_str_get(seqid),
+        (void) snprintf(header, BUFSIZ, "%s_"GT_LU"_"GT_LU"", gt_str_get(seqid),
                         range.start, range.end);
       gt_cstr_rep(header, ' ', '+');
       gt_hashmap_add(rms->header_to_fn, (void*) gt_cstr_dup(header),
                      (void*) curnode);
-      (void) sscanf(gt_str_get(seqid), "seq%lu", &seqnum);
+      (void) sscanf(gt_str_get(seqid), "seq"GT_LU"", &seqnum);
       buffer = gt_calloc((size_t) gt_range_length(&range) + 1, sizeof (char));
       startpos = gt_encseq_seqstartpos(encseq, seqnum);
       gt_encseq_extract_decoded(encseq, buffer, startpos + range.start - 1,
@@ -215,7 +215,7 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   if (rms->params_id != GT_UNDEF_ULONG) {
     char params_id[BUFSIZ];
 
-    (void) snprintf(params_id, BUFSIZ, "%lu", rms->params_id);
+    (void) snprintf(params_id, BUFSIZ, ""GT_LU"", rms->params_id);
     gt_feature_node_set_attribute((GtFeatureNode*) new_node, ATTR_PARAMS,
                                   params_id);
   }
@@ -231,11 +231,11 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
       gt_str_append_cstr(tmpstr, gt_cstr_dup(tmp2));
       gt_free(tmp2);
     }
-    (void) snprintf(target, BUFSIZ, "%s %lu %lu", gt_str_get(tmpstr),
+    (void) snprintf(target, BUFSIZ, "%s "GT_LU" "GT_LU"", gt_str_get(tmpstr),
                     match_range2.start, match_range2.end);
     gt_str_delete(tmpstr);
   } else
-    (void) snprintf(target, BUFSIZ, "%s %lu %lu", seqid2, match_range2.start,
+    (void) snprintf(target, BUFSIZ, "%s "GT_LU" "GT_LU"", seqid2, match_range2.start,
                     match_range2.end);
   gt_feature_node_set_attribute((GtFeatureNode*) new_node, ATTR_TARGET,
                                 target);

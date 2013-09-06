@@ -919,7 +919,7 @@ GtBlindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
     = gt_malloc(sizeof (*blindtrie->spaceBlindtrienode) *
                 blindtrie->allocatedBlindtrienode);
   /*
-  printf("# sizeof (blindtrie)=%lu\n",
+  printf("# sizeof (blindtrie)="GT_LU"\n",
             (GtUword) (sizeof (GtBlindtrie) +
                              blindtrie->allocatedBlindtrienode *
                              sizeof (GtBlindtrienode)));
@@ -1009,7 +1009,7 @@ static void gt_blindtrie_showleaf(const GtBlindtrie *blindtrie,
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
   gt_assert(current != GT_BLINDTRIE_REFNULL);
-  printf("Leaf(%u,firstchar=%u,startpos=%lu,rightsibling=%u)\n",
+  printf("Leaf(%u,firstchar=%u,startpos="GT_LU",rightsibling=%u)\n",
          NODENUM(current),
          (unsigned int) blindtrie_firstchar_get(blindtrie,current),
          blindtrie_nodestartpos_get(blindtrie,current),
@@ -1022,7 +1022,7 @@ static void gt_blindtrie_showintern(const GtBlindtrie *blindtrie,
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
   gt_assert(current != GT_BLINDTRIE_REFNULL);
-  printf("Intern(%u,firstchar=%lu,depth=%lu"
+  printf("Intern(%u,firstchar="GT_LU",depth="GT_LU""
          ",firstchild=%u,rightsibling=%u)\n",
           NODENUM(current),
           blindtrie_firstchar_get(blindtrie,current),
@@ -1064,10 +1064,10 @@ static void blindtrie_showstate(const GtBlindtrie *blindtrie,
 {
   GtUword idx;
 
-  printf("insert suffixes at offset %lu:\n",offset);
+  printf("insert suffixes at offset "GT_LU":\n",offset);
   for (idx=0; idx < numberofsuffixes; idx++)
   {
-    printf("%lu ",
+    printf(""GT_LU" ",
            gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx) + offset);
   }
   printf("\nstep 0\n");

@@ -506,7 +506,7 @@ int gt_mapsuffixarray(Suffixarray *suffixarray,
                       GtError *err)
 {
   gt_error_check(err);
-  /* printf("sizeof (Suffixarray)=%lu\n",sizeof (Suffixarray)); */
+  /* printf("sizeof (Suffixarray)="GT_LU"\n",sizeof (Suffixarray)); */
   return inputsuffixarray(true,
                           suffixarray,
                           demand,

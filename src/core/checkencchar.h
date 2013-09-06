@@ -25,7 +25,7 @@
                                                             READMODE);\
           if ((CC) != cctmp)\
           {\
-            printf("file %s, line %d: pos = %lu:cc = %u != %u = ccreal\n",\
+            printf("file %s, line %d: pos = "GT_LU":cc = %u != %u = ccreal\n",\
                    __FILE__,__LINE__,\
                    (GtUword) (POS),\
                    (unsigned int) (CC),\

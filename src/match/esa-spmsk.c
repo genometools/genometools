@@ -103,7 +103,7 @@ static int processlcpinterval_spmsk(GtUword lcp,
 
         for (widx = firstpos; widx < state->Wset.nextfreeGtUlong; widx++)
         {
-          printf("%lu %lu %lu\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
+          printf(""GT_LU" "GT_LU" "GT_LU"\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
         }
       } else
       {

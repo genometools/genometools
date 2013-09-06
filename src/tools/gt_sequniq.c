@@ -188,7 +188,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
 
   /* show statistics */
   if (!had_err) {
-    fprintf(stderr, "# %lu out of %lu sequences have been removed (%.3f%%)\n",
+    fprintf(stderr, "# "GT_LU" out of "GT_LU" sequences have been removed (%.3f%%)\n",
             (GtUword)duplicates, (GtUword)num_of_sequences,
             ((double) duplicates / (double)num_of_sequences) * 100.0);
   }

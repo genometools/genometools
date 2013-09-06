@@ -1543,10 +1543,10 @@ static void show_nucleotide_values(NucEval *nucleotides, const char *level,
                   (nucleotides->TP + nucleotides->FP);
   }
   gt_file_xprintf(outfp, "nucleotide sensitivity (%s level): %6.2f%% "
-                  "(TP=%lu/(TP=%lu + FN=%lu))\n", level, sensitivity * 100.0,
+                  "(TP="GT_LU"/(TP="GT_LU" + FN="GT_LU"))\n", level, sensitivity * 100.0,
                   nucleotides->TP, nucleotides->TP, nucleotides->FN);
   gt_file_xprintf(outfp, "nucleotide specificity (%s level): %6.2f%% "
-                  "(TP=%lu/(TP=%lu + FP=%lu))\n", level, specificity * 100.0,
+                  "(TP="GT_LU"/(TP="GT_LU" + FP="GT_LU"))\n", level, specificity * 100.0,
                   nucleotides->TP, nucleotides->TP, nucleotides->FP);
 }
 
@@ -1558,36 +1558,36 @@ void gt_stream_evaluator_show(GtStreamEvaluator *se, GtFile *outfp)
     /* gene level */
     gt_file_xprintf(outfp, "gene sensitivity (mRNA level): ");
     gt_evaluator_show_sensitivity(se->mRNA_gene_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
+    gt_file_xprintf(outfp, " (missing genes: "GT_LU")\n", se->missing_genes);
 
     gt_file_xprintf(outfp, "gene specificity (mRNA level): ");
     gt_evaluator_show_specificity(se->mRNA_gene_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
+    gt_file_xprintf(outfp, " (wrong genes: "GT_LU")\n", se->wrong_genes);
 
     gt_file_xprintf(outfp, "gene sensitivity (CDS level): ");
     gt_evaluator_show_sensitivity(se->CDS_gene_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
+    gt_file_xprintf(outfp, " (missing genes: "GT_LU")\n", se->missing_genes);
 
     gt_file_xprintf(outfp, "gene specificity (CDS level): ");
     gt_evaluator_show_specificity(se->CDS_gene_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
+    gt_file_xprintf(outfp, " (wrong genes: "GT_LU")\n", se->wrong_genes);
 
     /* mRNA level */
     gt_file_xprintf(outfp, "mRNA sensitivity (mRNA level): ");
     gt_evaluator_show_sensitivity(se->mRNA_mRNA_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
+    gt_file_xprintf(outfp, " (missing mRNAs: "GT_LU")\n", se->missing_mRNAs);
 
     gt_file_xprintf(outfp, "mRNA specificity (mRNA level): ");
     gt_evaluator_show_specificity(se->mRNA_mRNA_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
+    gt_file_xprintf(outfp, " (wrong mRNAs: "GT_LU")\n", se->wrong_mRNAs);
 
     gt_file_xprintf(outfp, "mRNA sensitivity (CDS level): ");
     gt_evaluator_show_sensitivity(se->CDS_mRNA_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
+    gt_file_xprintf(outfp, " (missing mRNAs: "GT_LU")\n", se->missing_mRNAs);
 
     gt_file_xprintf(outfp, "mRNA specificity (CDS level): ");
     gt_evaluator_show_specificity(se->CDS_mRNA_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
+    gt_file_xprintf(outfp, " (wrong mRNAs: "GT_LU")\n", se->wrong_mRNAs);
 
     /* mRNA exon level */
     show_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
@@ -1610,11 +1610,11 @@ void gt_stream_evaluator_show(GtStreamEvaluator *se, GtFile *outfp)
     /* LTR_retrotransposon prediction */
     gt_file_xprintf(outfp, "LTR_retrotransposon sensitivity: ");
     gt_evaluator_show_sensitivity(se->LTR_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing LTRs: %lu)\n", se->missing_LTRs);
+    gt_file_xprintf(outfp, " (missing LTRs: "GT_LU")\n", se->missing_LTRs);
 
     gt_file_xprintf(outfp, "LTR_retrotransposon specificity: ");
     gt_evaluator_show_specificity(se->LTR_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong LTRs: %lu)\n", se->wrong_LTRs);
+    gt_file_xprintf(outfp, " (wrong LTRs: "GT_LU")\n", se->wrong_LTRs);
   }
 }
 

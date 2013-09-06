@@ -35,7 +35,7 @@ GtHplstore *gt_hplstore_new(GtUword nofelements)
   hplstore = gt_malloc(sizeof (GtHplstore));
   hplstore->nofelements = nofelements;
   hplstore->space = gt_malloc(sizeof (*hplstore->space) * nofelements);
-  gt_log_log("initialized GtHplstore %p for %lu values", hplstore, nofelements);
+  gt_log_log("initialized GtHplstore %p for "GT_LU" values", hplstore, nofelements);
   hplstore->finalized = false;
   return hplstore;
 }
@@ -61,7 +61,7 @@ void gt_hplstore_finalize(GtHplstore *hplstore, GtUword nofelements)
        sizeof (*hplstore->space) * nofelements);
   }
   hplstore->finalized = true;
-  gt_log_log("finalized GtHplstore %p to %lu values", hplstore, nofelements);
+  gt_log_log("finalized GtHplstore %p to "GT_LU" values", hplstore, nofelements);
 }
 
 void gt_hplstore_set(GtHplstore *hplstore, GtUword pos, uint8_t value)

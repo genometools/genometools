@@ -313,7 +313,7 @@ static void output_header_txt(const ParseStruct *parsestruct_ptr)
                   ARGUMENTSSTRUCT(outputfile_format));
   gt_file_xprintf(FILEPOINTEROUT, "Hitfile (yes=1/no=0): %d\n ",
                   ARGUMENTSSTRUCT(hitfile_bool));
-  gt_file_xprintf(FILEPOINTEROUT, "Min Protein-Length (>=15): %lu\n ",
+  gt_file_xprintf(FILEPOINTEROUT, "Min Protein-Length (>=15): "GT_LU"\n ",
                   ARGUMENTSSTRUCT(min_as));
   gt_file_xprintf(FILEPOINTEROUT, "Min Result-Percentage: %.4f\n ",
                   ARGUMENTSSTRUCT(percent_value));
@@ -483,7 +483,7 @@ static void output_header_html(const ParseStruct *parsestruct_ptr)
                   "    <td width=\"200\"><font class=\"class\">"
                   "Min-Protein-Length<br>(>=15): </font></td>\n");
   gt_file_xprintf(FILEPOINTEROUT,
-                  "    <td valign=\"top\"><font class=\"class\">%lu</font>"
+                  "    <td valign=\"top\"><font class=\"class\">"GT_LU"</font>"
                   "</td>\n",
                   ARGUMENTSSTRUCT(min_as));
   gt_file_xprintf(FILEPOINTEROUT,"   </tr>\n");
@@ -597,7 +597,7 @@ static void output_header_xml(const ParseStruct *parsestruct_ptr)
                   "      <Parameters_hitfile>%d</Parameters_hitfile>\n",
                   ARGUMENTSSTRUCT(hitfile_bool));
   gt_file_xprintf(FILEPOINTEROUT,
-                  "      <Parameters_min-as>%lu</Parameters_min-as>\n",
+                  "      <Parameters_min-as>"GT_LU"</Parameters_min-as>\n",
                   ARGUMENTSSTRUCT(min_as));
   gt_file_xprintf(FILEPOINTEROUT,
                   "      <Parameters_min_resultpercentage>%.4f"

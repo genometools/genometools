@@ -93,7 +93,7 @@ static int seqid_info_get(SeqidInfo *seqid_info, GtUword *seqnum,
       return 0;
     }
   }
-  gt_error_set(err, "cannot find sequence ID \"%s\" (with range %lu,%lu) in "
+  gt_error_set(err, "cannot find sequence ID \"%s\" (with range "GT_LU","GT_LU") in "
                "sequence file \"%s\"", seqid, inrange->start, inrange->end,
                filename);
   return -1;

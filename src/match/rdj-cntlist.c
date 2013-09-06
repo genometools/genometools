@@ -32,10 +32,10 @@ static inline void gt_cntlist_show_ascii(GtBitsequence *cntlist,
 {
   GtUword i;
   gt_assert(file != NULL);
-  fprintf(file, "[n: %lu]\n", nofreads);
+  fprintf(file, "[n: "GT_LU"]\n", nofreads);
   for (i = 0; i < nofreads; i++)
     if (GT_ISIBITSET(cntlist, i))
-      fprintf(file, "%lu\n", i);
+      fprintf(file, ""GT_LU"\n", i);
 }
 
 void gt_cntlist_write_bin_header(GtUword nofreads, FILE *file)
@@ -184,7 +184,7 @@ static int gt_cntlist_parse_ascii(FILE *infp, bool alloc_cntlist,
 
   gt_assert(infp != NULL && nofreads != NULL && cntlist != NULL);
   /*@i1@*/ gt_error_check(err);
-  n = fscanf(infp, "[n: %lu]\n", nofreads);
+  n = fscanf(infp, "[n: "GT_LU"]\n", nofreads);
   if (n!=1 || *nofreads == 0)
   {
     gt_error_set(err, "contained reads file: unrecognized format");
@@ -194,7 +194,7 @@ static int gt_cntlist_parse_ascii(FILE *infp, bool alloc_cntlist,
     GT_INITBITTAB(*cntlist, *nofreads);
   while (true)
   {
-    n = fscanf(infp, "%lu\n", &seqnum);
+    n = fscanf(infp, ""GT_LU"\n", &seqnum);
     if (n == EOF)
       break;
     else if (n != 1)
@@ -290,7 +290,7 @@ GtUword gt_cntlist_xload(const char *filename, GtBitsequence **cntlist,
   if (found_nofreads != expected_nofreads)
   {
     fprintf(stderr, "FATAL: error by parsing contained reads list: "
-        "file specifies a wrong number of reads\nexpected %lu, found %lu\n",
+        "file specifies a wrong number of reads\nexpected "GT_LU", found "GT_LU"\n",
         expected_nofreads, found_nofreads);
     exit(EXIT_FAILURE);
   }

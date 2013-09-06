@@ -420,7 +420,7 @@ gt_newGenBlockEncIdxSeq(GtUword totalLen, const char *projectName,
 #ifdef EIS_DEBUG
         for (i = 0; i < blockMapAlphabetSize; ++i)
         {
-          gt_log_log("symCount[%"PRIuSymbol"]=%lu\n", (Symbol) i,
+          gt_log_log("symCount[%"PRIuSymbol"]="GT_LU"\n", (Symbol) i,
                   stats->symbolDistributionTable[i]);
         }
 #endif /* EIS_DEBUG */
@@ -467,7 +467,7 @@ gt_newGenBlockEncIdxSeq(GtUword totalLen, const char *projectName,
             regionSymCount += stats->symbolDistributionTable[i];
         regionsEstimate = regionSymCount/20;
 #ifdef EIS_DEBUG
-        gt_log_log("Expected %lu symbols to encode in regions.\n",
+        gt_log_log("Expected "GT_LU" symbols to encode in regions.\n",
                     regionSymCount);
 #endif
       }
@@ -1841,22 +1841,22 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
          < seqIdx->externalData.varDataPos
          + aState->varDiskOffset/bitElemBits * sizeof (BitElem)))
   {
-    fprintf(stderr,"cwDatapos=%lu\n",
+    fprintf(stderr,"cwDatapos="GT_LU"\n",
            (GtUword) seqIdx->externalData.cwDataPos);
-    fprintf(stderr,"cwDiskOffset=%lu\n",(GtUword) aState->cwDiskOffset);
-    fprintf(stderr,"varDataPos=%lu\n",
+    fprintf(stderr,"cwDiskOffset="GT_LU"\n",(GtUword) aState->cwDiskOffset);
+    fprintf(stderr,"varDataPos="GT_LU"\n",
                    (GtUword) seqIdx->externalData.varDataPos);
-    fprintf(stderr,"bitElemBits=%lu\n",(GtUword) bitElemBits);
-    fprintf(stderr,"aState->varDiskOffset=%lu\n",
+    fprintf(stderr,"bitElemBits="GT_LU"\n",(GtUword) bitElemBits);
+    fprintf(stderr,"aState->varDiskOffset="GT_LU"\n",
                     (GtUword) aState->varDiskOffset);
-    fprintf(stderr,"aState->varDiskOffset/bitElemBits=%lu\n",
+    fprintf(stderr,"aState->varDiskOffset/bitElemBits="GT_LU"\n",
                     (GtUword) (aState->varDiskOffset/bitElemBits));
-    fprintf(stderr,"sizeof (BitElem)=%lu\n",(GtUword) sizeof (BitElem));
-    fprintf(stderr,"aState->varDiskOffset/bitElemBits * sizeof (BitElem)=%lu\n",
+    fprintf(stderr,"sizeof (BitElem)="GT_LU"\n",(GtUword) sizeof (BitElem));
+    fprintf(stderr,"aState->varDiskOffset/bitElemBits * sizeof (BitElem)="GT_LU"\n",
             (GtUword) (aState->varDiskOffset/bitElemBits *
                              sizeof (BitElem)));
     fprintf(stderr,"seqIdx->externalData.varDataPos + "
-                   "aState->varDiskOffset/bitElemBits * sizeof (BitElem)=%lu\n",
+                   "aState->varDiskOffset/bitElemBits * sizeof (BitElem)="GT_LU"\n",
             (GtUword) (seqIdx->externalData.varDataPos +
                              aState->varDiskOffset/bitElemBits
                              * sizeof (BitElem)));
@@ -2566,7 +2566,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, GtUword bucketNum,
   gt_assert(seqIdx && fp && hint);
   if (bucketBasePos(seqIdx, bucketNum) >= EISLength(&seqIdx->baseClass))
   {
-    gt_log_log("warning: querying bucket %lu"
+    gt_log_log("warning: querying bucket "GT_LU""
             " beyond end of sequence!\n", bucketNum);
     bucketNum = lastBucket;
   }
@@ -2575,8 +2575,8 @@ printBucket(const struct blockCompositionSeq *seqIdx, GtUword bucketNum,
          bucketBasePos(seqIdx, bucketNum + 1):
          EISLength(&seqIdx->baseClass));
   outCount +=
-    fprintf(fp, "# Inspecting bucket: %lu\n"
-            "# bucket position start=%lu, end=%lu\n"
+    fprintf(fp, "# Inspecting bucket: "GT_LU"\n"
+            "# bucket position start="GT_LU", end="GT_LU"\n"
             "# partial symbol sums up to start:\n",
             bucketNum, start, end - 1);
   {
@@ -2600,7 +2600,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, GtUword bucketNum,
                             seqIdx->partialSymSumBits[i]);
       }
       outCount +=
-        fprintf(fp, "# partial sum[%u]=%lu\n", i,
+        fprintf(fp, "# partial sum[%u]="GT_LU"\n", i,
                 sBlockGetPartialSymSum(sBlock, i, seqIdx));
     }
     if (flags & BUCKET_PRINT_BITSIZES)
@@ -2623,7 +2623,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, GtUword bucketNum,
       seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
       outCount +=
       fprintf(
-        fp, "# block %u: comp idx: %lu, permIdxBits=%u, perm idx: %lu =>",
+        fp, "# block %u: comp idx: "GT_LU", permIdxBits=%u, perm idx: "GT_LU" =>",
         i, (GtUword)compIndex,
         (unsigned)seqIdx->compositionTable.permutations[compIndex].permIdxBits,
         (GtUword)gt_bsGetPermCompIndex(

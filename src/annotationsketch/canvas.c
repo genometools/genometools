@@ -133,7 +133,7 @@ void gt_format_ruler_label(char *txt,  GtUword pos,
     /*@end@*/
   } else {
     /*@ignore@*/
-    (void) snprintf(txt, buflen, " %lu%s", pos, unitstr);
+    (void) snprintf(txt, buflen, " "GT_LU"%s", pos, unitstr);
     /*@end@*/
   }
 

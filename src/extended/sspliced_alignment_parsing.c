@@ -86,7 +86,7 @@ static int parse_input_line(GtSSplicedAlignment **alignment, const char *line,
     if (line[i] == DELIMITER) {
       i++;
       CHECKLINELENGTH;
-      if (!had_err && sscanf(line+i, "%ld-%ld", &leftpos, &rightpos) != 2) {
+      if (!had_err && sscanf(line+i, ""GT_LD"-"GT_LD"", &leftpos, &rightpos) != 2) {
         gt_error_set(err, "incomplete input line\nline=%s", line);
         had_err = -1;
       }

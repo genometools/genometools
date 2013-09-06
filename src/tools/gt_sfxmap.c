@@ -365,8 +365,8 @@ static void gt_sfxmap_showcomparisonfailureESA(const char *filename,
                                      GtUword maxlcp)
 {
   fprintf(stderr,"ERROR: file \"%s\", line %d: ",filename,line);
-  fprintf(stderr,"%s(%lu vs %lu"
-                 " %lu=\"",
+  fprintf(stderr,"%s("GT_LU" vs "GT_LU""
+                 " "GT_LU"=\"",
                        where,
                        idx1,
                        idx2,
@@ -376,7 +376,7 @@ static void gt_sfxmap_showcomparisonfailureESA(const char *filename,
   fprintf(stderr,"\",\"");
   gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,
                                     ESASUFFIXPTRGET(suftab,idx2),depth);
-  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",ESASUFFIXPTRGET(suftab,idx2),
+  fprintf(stderr,"\"="GT_LU")=%d with maxlcp "GT_LU"\n",ESASUFFIXPTRGET(suftab,idx2),
                                                 cmp,
                                                 maxlcp);
 }
@@ -542,7 +542,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
     GtUword position = ESASUFFIXPTRGET(suftab,idx);
     if (GT_ISIBITSET(startposoccurs,position))
     {
-      fprintf(stderr,"ERROR: suffix with startpos %lu already occurs\n",
+      fprintf(stderr,"ERROR: suffix with startpos "GT_LU" already occurs\n",
               ESASUFFIXPTRGET(suftab,idx));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -554,7 +554,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
                                                            position - 1,
                                                            readmode))
       {
-        /*printf("whole %lu\n",position);*/
+        /*printf("whole "GT_LU"\n",position);*/
         wholeleafcount++;
       }
     }
@@ -567,7 +567,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
       = gt_sfxmap_determinenumberofwholeleaves(encseq,readmode);
     if (wholeleafcount != expectednumofwholeleaves)
     {
-      fprintf(stderr,"wholeleafcount=%lu != %lu=expectednumofwholeleaves\n",
+      fprintf(stderr,"wholeleafcount="GT_LU" != "GT_LU"=expectednumofwholeleaves\n",
                       wholeleafcount,expectednumofwholeleaves);
       exit(EXIT_FAILURE);
     }
@@ -622,8 +622,8 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
       NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
       if (maxlcp != currentlcp)
       {
-        fprintf(stderr,"%lu: startpos=%lu, firstchar=%u, "
-                "startpos=%lu,firstchar=%u",
+        fprintf(stderr,""GT_LU": startpos="GT_LU", firstchar=%u, "
+                "startpos="GT_LU",firstchar=%u",
                 idx,
                 ESASUFFIXPTRGET(suftab,idx-1),
                 (unsigned int)
@@ -637,7 +637,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
                                                                      idx),
                                                      readmode)
                    : SEPARATOR);
-        fprintf(stderr,", maxlcp(bruteforce) = %lu != %lu(fast)\n",
+        fprintf(stderr,", maxlcp(bruteforce) = "GT_LU" != "GT_LU"(fast)\n",
                           maxlcp, currentlcp);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
@@ -814,7 +814,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
             }
           }
         }
-        gt_logger_log(logger,"bwtdifferentconsecutive=%lu (%.4f)",
+        gt_logger_log(logger,"bwtdifferentconsecutive="GT_LU" (%.4f)",
                bwtdifferentconsecutive,
                (double) bwtdifferentconsecutive/totallength);
       }
@@ -1020,7 +1020,7 @@ static int gt_sfxmap_comparelcpvalue(void *info,GtUword lcp,GtError *err)
     NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
     if (lcp != currentlcpvalue)
     {
-      gt_error_set(err,"lcp=%lu != %lu=currentlcpvalue",lcp,currentlcpvalue);
+      gt_error_set(err,"lcp="GT_LU" != "GT_LU"=currentlcpvalue",lcp,currentlcpvalue);
       haserr = true;
       break;
     }
@@ -1104,7 +1104,7 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
         NEXTSEQUENTIALSUFTABVALUE(currentsuffix,ssar);
         gt_assert(pos == currentsuffix);
       }
-      /*printf("%lu: pos = %lu\n",idx,pos);*/
+      /*printf(""GT_LU": pos = "GT_LU"\n",idx,pos);*/
     }
     gt_assert(idx == numofnonspecials);
     gt_Bwtseqpositioniterator_delete(bspi);

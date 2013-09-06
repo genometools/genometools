@@ -224,7 +224,7 @@ static int gt_readjoiner_cgraph_runner(GT_UNUSED int argc,
       for (i = 0; i < nofcnums && !had_err; i++)
       {
         cnum_str = gt_str_array_get(arguments->subgraph, i);
-        if (sscanf(cnum_str, "%lu", cnums + i) != 1)
+        if (sscanf(cnum_str, ""GT_LU"", cnums + i) != 1)
         {
           gt_error_set(err, "argument of option -subgraph is invalid");
           had_err = -1;

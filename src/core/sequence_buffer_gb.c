@@ -165,7 +165,7 @@ static inline int get_sequence(GtSequenceBuffer *sb,
   if ((num_chars = eat_digits(sb, currentfileread)) == EOF)
     return EOF;
   if (num_chars == 0) {
-    gt_error_set(err, "sequence offset numbers missing in line %lu of file %s",
+    gt_error_set(err, "sequence offset numbers missing in line "GT_LU" of file %s",
                       (GtUword) sb->pvt->linenum,
                       gt_str_array_get(sb->pvt->filenametab,
                                        (GtUword) sb->pvt->filenum));
@@ -177,7 +177,7 @@ static inline int get_sequence(GtSequenceBuffer *sb,
   (*currentfileread)++;
   /* expect one blank */
   if (currentchar != ' ') {
-    gt_error_set(err, "blank expected between offset and sequence in line %lu "
+    gt_error_set(err, "blank expected between offset and sequence in line "GT_LU" "
                       "of file %s",
                       (GtUword) sb->pvt->linenum,
                       gt_str_array_get(sb->pvt->filenametab,
@@ -296,7 +296,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         } else if (strcmp(gt_str_get(sbe->keywordbuffer),
                    GB_ORIGIN_STRING) == 0) {
           gt_warning("sequence started without prior DEFINITION line in entry "
-                     "in line %lu of file %s",
+                     "in line "GT_LU" of file %s",
                      (GtUword) pvt->linenum-1,
                      gt_str_array_get(pvt->filenametab,
                                      (GtUword) pvt->filenum));
@@ -318,7 +318,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
           if (strcmp(gt_str_get(sbe->keywordbuffer),
                      GB_DEFINITION_STRING) == 0) {
             gt_error_set(err, "encountered another DEFINITION line within one "
-                              "entry in line %lu of file %s",
+                              "entry in line "GT_LU" of file %s",
                               (GtUword) pvt->linenum-1,
                               gt_str_array_get(pvt->filenametab,
                                                 (GtUword) pvt->filenum));
@@ -352,7 +352,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         if (gt_str_length(sbe->keywordbuffer) != 0) {
           gt_error_set(err, "only terminators allowed after a "
                             "sequence section, but found '%s' instead "
-                            "in line %lu of file %s",
+                            "in line "GT_LU" of file %s",
                             gt_str_get(sbe->keywordbuffer),
                             (GtUword) pvt->linenum-1,
                             gt_str_array_get(pvt->filenametab,

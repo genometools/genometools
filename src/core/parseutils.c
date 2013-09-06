@@ -182,14 +182,14 @@ static int parse_range(GtRange *range, const char *start, const char *end,
   if (start_val > end_val) {
     if (tidy) {
       long tmp_val;
-      gt_warning("start '%lu' is larger then end '%lu' on line %u in file "
+      gt_warning("start '"GT_LU"' is larger then end '"GT_LU"' on line %u in file "
                  "'%s'; swap them", start_val, end_val, line_number, filename);
       tmp_val = start_val;
       start_val = end_val;
       end_val = tmp_val;
     }
     else {
-      gt_error_set(err, "start '%lu' is larger then end '%lu' on line %u in "
+      gt_error_set(err, "start '"GT_LU"' is larger then end '"GT_LU"' on line %u in "
                    "file '%s'", start_val, end_val, line_number, filename);
       return -1;
     }

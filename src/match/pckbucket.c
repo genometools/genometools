@@ -69,7 +69,7 @@ static Pckbuckettable *pckbuckettable_allocandinittable(unsigned int numofchars,
   pckbt->maxnumofvalues = pckbt->numofvalues = 0;
   for (idx=0; idx <= maxdepth; idx++)
   {
-    /*printf("basepower[%u]=%lu\n",idx,pckbt->basepower[idx]); */
+    /*printf("basepower[%u]="GT_LU"\n",idx,pckbt->basepower[idx]); */
     pckbt->maxnumofvalues += pckbt->basepower[idx];
   }
   pckbt->mbtab = gt_malloc(sizeof (Mbtab *) * (maxdepth+1));
@@ -78,7 +78,7 @@ static Pckbuckettable *pckbuckettable_allocandinittable(unsigned int numofchars,
     pckbt->mapptr = NULL;
     pckbt->mbtab[0] = gt_malloc(sizeof (Mbtab) * pckbt->maxnumofvalues);
     /*
-    printf("allocated = %u * %lu\n",sizeof (Mbtab),pckbt->maxnumofvalues);
+    printf("allocated = %u * "GT_LU"\n",sizeof (Mbtab),pckbt->maxnumofvalues);
     */
     for (cptr = pckbt->mbtab[0];
          cptr < pckbt->mbtab[0] + pckbt->maxnumofvalues; cptr++)
@@ -115,7 +115,7 @@ static void pckbuckettable_storeBoundsatdepth(Pckbuckettable *pckbt,
   gt_assert(bd->depth <= pckbt->maxdepth);
   gt_assert(bd->code <= pckbt->basepower[bd->depth]);
   /*
-  printf("bd->depth=%u,bd->code=%lu\n",bd->depth,bd->code);
+  printf("bd->depth=%u,bd->code="GT_LU"\n",bd->depth,bd->code);
   */
   gt_assert(pckbt->mbtab[bd->depth][bd->code].lowerbound == 0 &&
             pckbt->mbtab[bd->depth][bd->code].upperbound == 0);
@@ -208,7 +208,7 @@ Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
   GT_FREEARRAY(&stack,Pckbck_Boundsatdepth);
   gt_free(rangeOccs);
   gt_free(tmpmbtab);
-  printf("filled: %lu (%.2f)\n",pckbt->numofvalues,
+  printf("filled: "GT_LU" (%.2f)\n",pckbt->numofvalues,
                         (double) pckbt->numofvalues/pckbt->maxnumofvalues);
   return pckbt;
 }

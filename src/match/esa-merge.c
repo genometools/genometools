@@ -125,7 +125,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
       return tmp;
     }
   }
-  gt_error_set(err,"path does not contain a node of depth <= %lu",
+  gt_error_set(err,"path does not contain a node of depth <= "GT_LU"",
                 lcpvalue);
   return NULL;
 }

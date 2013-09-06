@@ -37,13 +37,13 @@
 #define CHECKCLUSTER(C)\
         if ((C) >= cs_uf->next_free_cluster_info)\
         {\
-         gt_error_set(err, "cluster %lu is too large, must be smaller than"\
-                      "%lu", C, cs_uf->next_free_cluster_info);\
+         gt_error_set(err, "cluster "GT_LU" is too large, must be smaller than"\
+                      ""GT_LU"", C, cs_uf->next_free_cluster_info);\
           had_err = -1;\
         }\
         if (CINFO(C)->cluster_size == 0)\
         {\
-         gt_error_set(err, "cluster %lu is empty", C);\
+         gt_error_set(err, "cluster "GT_LU" is empty", C);\
          had_err = -1;\
         }
 
@@ -230,21 +230,21 @@ int gt_clustered_set_union_find_merge_clusters(GtClusteredSet *cs,
   GtUword target = 0, source = 0, c1 = 0, c2 = 0;
   GtClusteredSetUF *cs_uf = (GtClusteredSetUF*) cs;
   if (e1 == e2) {
-    gt_error_set(err, "expected %lu to be unequal %lu", e1, e2 );
+    gt_error_set(err, "expected "GT_LU" to be unequal "GT_LU"", e1, e2 );
     had_err = -1;
   }
 
   if (e1 >= cs_uf->num_of_elems || e2 >= cs_uf->num_of_elems) {
-    gt_error_set(err, "%lu and %lu must not be larger than %lu",
+    gt_error_set(err, ""GT_LU" and "GT_LU" must not be larger than "GT_LU"",
                  e1, e2, cs_uf->num_of_elems);
     had_err = -1;
   }
 
   if (!had_err) {
     if (SINGLETON(e1)) {
-       /* printf("%lu is singleton\n", e1); */
+       /* printf(""GT_LU" is singleton\n", e1); */
       if (SINGLETON(e2)) {
-        /* printf("%lu is singleton\n", e2);*/
+        /* printf(""GT_LU" is singleton\n", e2);*/
         gt_clustered_set_union_find_make_new_cluster(cs_uf, e1, e2, err);
         gt_bittab_set_bit(cs_uf->in_cluster, e2);
       }

@@ -128,7 +128,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
         msg = "(1 block not shown due to exceeded line limit)";
         strncpy(buf, msg, BUFSIZ);
       } else {
-        msg = "(%lu blocks not shown due to exceeded line limit)";
+        msg = "("GT_LU" blocks not shown due to exceeded line limit)";
         /*@ignore@*/
         snprintf(buf, BUFSIZ, msg, exceeded);
         /*@end@*/
@@ -470,7 +470,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
          /*&& gt_dlistelem_next(delem) == NULL*/)
     arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
-  gt_log_log("processing element from %lu to %lu, strand %d\n",
+  gt_log_log("processing element from "GT_LU" to "GT_LU", strand %d\n",
              elem_range.start, elem_range.end, (int) strand);
 
   draw_range = gt_coords_calc_generic_range(elem_range, canvas->pvt->viewrange);

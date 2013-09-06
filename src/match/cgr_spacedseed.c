@@ -135,8 +135,8 @@ static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
 static void cgr_showmatch(GT_UNUSED void *processinfo,
                       const GtIdxMatch *match)
 {
-  printf("%lu\t",match->dblen);
-  printf("%lu\n",match->dbstartpos);
+  printf(""GT_LU"\t",match->dblen);
+  printf(""GT_LU"\n",match->dbstartpos);
 }
 
 #ifdef WITHONLINE

@@ -127,7 +127,7 @@ void gt_block_print(const GtBlock* block)
     elem = gt_element_ref(*(GtElement**) gt_array_get(block->elements, i));
     gt_assert(elem);
     GtRange r = gt_element_get_range(elem);
-    printf("%s\t%lu-%lu\n", gt_element_get_type(elem),
+    printf("%s\t"GT_LU"-"GT_LU"\n", gt_element_get_type(elem),
                            r.start,
                            r.end);
   }

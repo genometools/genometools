@@ -105,7 +105,7 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 &hashfirstcodes,
                                 NULL,
                                 NULL);
-  printf("# number of different codes=%lu (%.4f) in %lu sequences\n",
+  printf("# number of different codes="GT_LU" (%.4f) in "GT_LU" sequences\n",
           hashfirstcodes.differentcodes,
           (double) hashfirstcodes.differentcodes/numofsequences,
           numofsequences);

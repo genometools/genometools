@@ -132,7 +132,7 @@ static GtRDBStmt* gt_rdb_mysql_prepare(GtRDB *rdb, const char *query,
     int param_count;
     param_count = mysql_stmt_param_count(tmp);
     if (param_count != num_params) {
-      gt_error_set(err, "invalid parameter count: %lu expected, %d given",
+      gt_error_set(err, "invalid parameter count: "GT_LU" expected, %d given",
                    num_params, param_count);
       mysql_stmt_close(tmp);
       had_err = -1;

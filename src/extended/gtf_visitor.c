@@ -92,8 +92,8 @@ static int gtf_show_transcript(GtFeatureNode *feature_node,
     for (i = 0; i < gt_array_size(gtf_visitor->exon_features); i++) {
       fn = *(GtFeatureNode**) gt_array_get(gtf_visitor->exon_features, i);
       gt_gff3_output_leading(fn, gtf_visitor->outfp);
-      gt_file_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
-                      "\"%lu.%lu\";\n", gtf_visitor->gene_id,
+      gt_file_xprintf(gtf_visitor->outfp, "gene_id \""GT_LU"\"; transcript_id "
+                      "\""GT_LU"."GT_LU"\";\n", gtf_visitor->gene_id,
                       gtf_visitor->gene_id, gtf_visitor->transcript_id);
     }
   }
@@ -111,8 +111,8 @@ static int gtf_show_transcript(GtFeatureNode *feature_node,
     for (i = 0; i < gt_array_size(gtf_visitor->CDS_features); i++) {
       fn = *(GtFeatureNode**) gt_array_get(gtf_visitor->CDS_features, i);
       gt_gff3_output_leading(fn, gtf_visitor->outfp);
-      gt_file_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
-                      "\"%lu.%lu\";\n", gtf_visitor->gene_id,
+      gt_file_xprintf(gtf_visitor->outfp, "gene_id \""GT_LU"\"; transcript_id "
+                      "\""GT_LU"."GT_LU"\";\n", gtf_visitor->gene_id,
                       gtf_visitor->gene_id, gtf_visitor->transcript_id);
     }
     /* XXX: show stop_codon feature and shorten last CDS feature */

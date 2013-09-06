@@ -95,7 +95,7 @@ static void gt_bench_character_extractions(const GtEncseq *encseq,
     cc = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
     ccsum += (GtUword) cc;
   }
-  printf("ccsum=%lu\n",ccsum);
+  printf("ccsum="GT_LU"\n",ccsum);
   if (timer != NULL) {
     gt_timer_show_progress_final(timer, stdout);
     gt_timer_delete(timer);
@@ -143,8 +143,8 @@ static GtSortedlengthinfo *gt_sortedlengthinfo_new(const GtEncseq *encseq,
 
       if (seqnum > 0) {
         if (previousseqlen > seqlen) {
-          gt_error_set(err,"sequence %lu of length %lu is longer than "
-                           "sequence %lu of length %lu",
+          gt_error_set(err,"sequence "GT_LU" of length "GT_LU" is longer than "
+                           "sequence "GT_LU" of length "GT_LU"",
                            seqnum-1,previousseqlen,seqnum,seqlen);
           had_err = -1;
           break;
@@ -300,7 +300,7 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
         if (seqnum != ULONG_MAX) {
           GtUword seqnum2 = gt_encseq_seqnum(encseq,position);
           if (seqnum2 != seqnum) {
-            fprintf(stderr,"position %lu: seqnum2 = %lu != %lu = seqnum\n",
+            fprintf(stderr,"position "GT_LU": seqnum2 = "GT_LU" != "GT_LU" = seqnum\n",
                     position,seqnum,seqnum2);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           }
@@ -313,7 +313,7 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
         GtUword seqstart2 = gt_sortedlengthinfo_seqstart(encseq,
                                    sortedlengthinfo,seqnum);
         if (seqstart != seqstart2) {
-          fprintf(stderr,"seqnum=%lu: seqstart = %lu != %lu = seqstart2\n",
+          fprintf(stderr,"seqnum="GT_LU": seqstart = "GT_LU" != "GT_LU" = seqstart2\n",
                           seqnum,seqstart,seqstart2);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }

@@ -21,7 +21,7 @@
 #define GT_STRGRAPH_EDGES_REPRESENTATION "bitfield"
 
 typedef GtUword GtStrgraphLength;
-#define FormatGtStrgraphLength       "%lu"
+#define FormatGtStrgraphLength       ""GT_LU""
 #define PRINTGtStrgraphLengthcast(X) (X)
 #define SCANGtStrgraphLengthcast(X)  (X)
 #define GT_STRGRAPH__LEN_BITS        18

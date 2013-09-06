@@ -29,7 +29,7 @@
 #include "extended/uint64hashtable_primes.h"
 
 #define GT_UINT64TABLE_TOO_LARGE \
-  "fatal: no prime number larger than %lu in lookup table\n" \
+  "fatal: no prime number larger than "GT_LU" in lookup table\n" \
   "developers: modify scripts/makeprimestable.sh to create a larger table\n"
 
 #define GT_UINT64TABLE_NOFPRIMES \

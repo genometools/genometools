@@ -161,7 +161,7 @@ static GtUword *fillrightofpartwidth(
       {
         size_t allocsize = sizeof (*rightofpartwidth) * countlargeranges;
         rightofpartwidth = gt_malloc(allocsize);
-        /*printf("allocated %lu bytes for rightofpartwidth (%.2f)\n",
+        /*printf("allocated "GT_LU" bytes for rightofpartwidth (%.2f)\n",
             (GtUword) allocsize, (double) allocsize/totallength);*/
       }
       gt_assert(nextrightofpartwidth < countlargeranges);
@@ -485,7 +485,7 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
         checkpos = ESASUFFIXPTRGET(suftab,nexttab[(int) cc]) + 1;
         if (checkpos != position)
         {
-          fprintf(stderr,"idx=%lu,checkpos=%lu,position=%lu\n",
+          fprintf(stderr,"idx="GT_LU",checkpos="GT_LU",position="GT_LU"\n",
                           idx,checkpos,position);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
@@ -531,7 +531,7 @@ static void gt_suftab_sk_suffixorder(GtUword totallength,
                                                             totallength);
         if (found == ULONG_MAX)
         {
-          fprintf(stderr,"Cannot find position+1=%lu in range [%lu,%lu]\n",
+          fprintf(stderr,"Cannot find position+1="GT_LU" in range ["GT_LU","GT_LU"]\n",
                             position+1,start,totallength);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
@@ -574,7 +574,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
 
     if (GT_ISIBITSET(startposoccurs,position))
     {
-      fprintf(stderr,"ERROR: suffix with startpos %lu already occurs\n",
+      fprintf(stderr,"ERROR: suffix with startpos "GT_LU" already occurs\n",
               ESASUFFIXPTRGET(suftab,idx));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -597,8 +597,8 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
         {
           if (previouspos > position)
           {
-            fprintf(stderr,"incorrect order: %lu = %lu=SPECIAL > SPECIAL=%lu "
-                           " = %lu\n",
+            fprintf(stderr,"incorrect order: "GT_LU" = "GT_LU"=SPECIAL > SPECIAL="GT_LU" "
+                           " = "GT_LU"\n",
                       idx-1,position,previouspos,idx);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           }
@@ -607,14 +607,14 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
       {
         if (ISSPECIAL(previouscc))
         {
-          fprintf(stderr,"incorrect order: %lu=%lu=SPECIAL > %u=%lu=%lu\n",
+          fprintf(stderr,"incorrect order: "GT_LU"="GT_LU"=SPECIAL > %u="GT_LU"="GT_LU"\n",
                     idx-1,position,(unsigned int) cc,previouspos,idx);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         } else
         {
           if (previouscc > cc)
           {
-            fprintf(stderr,"incorrect order: %lu = %lu=%u > %u=%lu=%lu\n",
+            fprintf(stderr,"incorrect order: "GT_LU" = "GT_LU"=%u > %u="GT_LU"="GT_LU"\n",
                       idx-1,position,(unsigned int) previouscc,
                       (unsigned int) cc,previouspos,idx);
             exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -643,7 +643,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   }
   if (countbitsset != totallength)
   {
-    fprintf(stderr,"ERROR: only %lu of %lu suffixes occur\n",countbitsset,
+    fprintf(stderr,"ERROR: only "GT_LU" of "GT_LU" suffixes occur\n",countbitsset,
                                 totallength);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -755,7 +755,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
     }
     if (mlcpvalue != lcpvalue)
     {
-      fprintf(stderr,"%lu: mlcpvalue = %lu != %lu = lcpvalue\n",
+      fprintf(stderr,""GT_LU": mlcpvalue = "GT_LU" != "GT_LU" = lcpvalue\n",
                        idx,mlcpvalue,lcpvalue);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }

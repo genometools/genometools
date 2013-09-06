@@ -37,13 +37,13 @@
 #define GT_UNDEFTRANSNUM GT_NUMOFTRANSSCHEMES
 
 #define GT_INCONSISTENT(BASE)\
-        /*gt_log_log("code=%lu with wildcard %c: inconsistent " \
+        /*gt_log_log("code="GT_LU" with wildcard %c: inconsistent " \
                    "aminoacids %c and %c",\
                    (GtUword) codeof2, wildcard, aa, newaa);*/\
         return GT_AMINOACIDFAIL
 
 #define GT_ILLEGALCHAR(V)\
-        gt_error_set(err, "illegal char %s='%c'(%lu)",#V,V,(GtUword)(V));\
+        gt_error_set(err, "illegal char %s='%c'("GT_LU")",#V,V,(GtUword)(V));\
         return GT_AMINOACIDFAIL
 
 #define GT_T_BIT  ((unsigned char) 1)

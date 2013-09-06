@@ -945,7 +945,7 @@ static int nrbt_walk_tree(GtRBTree *tree,GtUword expected_count)
   if (gt_rbtree_max_depth >
       (GtUword) (log ((double) expected_count) * 2.0 +
                        2.0)) {
-    printf("Depth too large during tree walk (%lu vs %lu).\n",
+    printf("Depth too large during tree walk ("GT_LU" vs "GT_LU").\n",
                          gt_rbtree_max_depth,
                          (GtUword) (log ((double) expected_count) * 2.0 +
                          2.0) );

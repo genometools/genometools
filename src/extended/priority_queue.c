@@ -227,7 +227,7 @@ int gt_priority_queue_unit_test(GtError *err)
       elem = gt_priority_queue_extract_min(pq);
       if (*((GtUword *) elem) != numbers[j])
       {
-        fprintf(stderr,"elem=%lu != %lu = numbers[%lu]\n",
+        fprintf(stderr,"elem="GT_LU" != "GT_LU" = numbers["GT_LU"]\n",
                       *((GtUword *) elem),numbers[j],j);
         exit(EXIT_FAILURE);
       }

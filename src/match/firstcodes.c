@@ -569,8 +569,8 @@ static int gt_firstcodes_thread_sortremaining(
       threadinfo[t].sumofwidth = sumofwidth;
     }
     gt_assert(lb < threadinfo[t].sumofwidth);
-    gt_logger_log(logger,"thread %u: process [%lu,%lu]=[%lu,%lu] "
-                         "of width %lu",t,threadinfo[t].minindex,
+    gt_logger_log(logger,"thread %u: process ["GT_LU","GT_LU"]=["GT_LU","GT_LU"] "
+                         "of width "GT_LU"",t,threadinfo[t].minindex,
                                           threadinfo[t].maxindex,
                                           lb,
                                           threadinfo[t].sumofwidth,
@@ -722,8 +722,8 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
   {
     gt_seqnumrelpos_delete(fci->buf.snrp);
     fci->buf.snrp = NULL;
-    gt_error_set(err,"cannot process encoded sequences with %lu sequences "
-                     "of length up to %lu (%u+%u bits)",
+    gt_error_set(err,"cannot process encoded sequences with "GT_LU" sequences "
+                     "of length up to "GT_LU" (%u+%u bits)",
                      fci->numofsequences,maxseqlength,bitsforseqnum,
                      bitsforrelpos);
     haserr = true;
@@ -783,7 +783,7 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
                                 NULL,
                                 NULL);
   fci->numofsequences = fci->countsequences;
-  gt_logger_log(logger,"have stored %lu prefix codes",fci->numofsequences);
+  gt_logger_log(logger,"have stored "GT_LU" prefix codes",fci->numofsequences);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "to sort initial prefixes",stdout);
@@ -898,15 +898,15 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
                 GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)));
   gt_firstcodes_accum_runkmerscan(encseq, kmersize, minmatchlength,&fci->buf);
   gt_firstcodes_accumulatecounts_flush(fci);
-  gt_logger_log(logger,"codebuffer_total=%lu (%.3f%% of all suffixes)",
+  gt_logger_log(logger,"codebuffer_total="GT_LU" (%.3f%% of all suffixes)",
                 fci->codebuffer_total,
                 100.0 * (double) fci->codebuffer_total/
                                  gt_encseq_total_length(encseq));
   if (fci->firstcodehits > 0)
   {
     gt_assert(fci->flushcount > 0);
-    gt_logger_log(logger,"firstcodehits=%lu (%.3f%% of all suffixes), "
-                         "%u rounds (avg length %lu)",
+    gt_logger_log(logger,"firstcodehits="GT_LU" (%.3f%% of all suffixes), "
+                         "%u rounds (avg length "GT_LU")",
                          fci->firstcodehits,
                          100.0 * (double) fci->firstcodehits/
                                           gt_encseq_total_length(encseq),
@@ -1367,7 +1367,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_firstcodes_restore_from_differences(&fci);
     gt_logger_log(logger,"maximum space after computing partial sums: %.2f MB",
                   GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
-    gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
+    gt_logger_log(logger,"maxbucketsize="GT_LU"",maxbucketsize);
     gt_firstcodes_map_sections(&fci,sfxmrlist);
     if (numofparts == 0 || maximumspace > 0)
     {
@@ -1496,8 +1496,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     if (!onlyaccumulation)
     {
       gt_assert(fci.flushcount > 0);
-      gt_logger_log(logger,"firstcodeposhits=%lu (%.3f%% of all suffixes), "
-                           "%u rounds (avg length %lu)",
+      gt_logger_log(logger,"firstcodeposhits="GT_LU" (%.3f%% of all suffixes), "
+                           "%u rounds (avg length "GT_LU")",
                            fci.firstcodeposhits,
                            100.0 * (double) fci.firstcodeposhits/totallength,
                            fci.flushcount,

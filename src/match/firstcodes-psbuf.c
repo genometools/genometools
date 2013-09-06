@@ -64,7 +64,7 @@ GtStr *gt_leftborderbuffer_delete(GtLeftborderOutbuffer *lbbuf,
   gt_leftborderbuffer_flush(lbbuf);
   gt_fa_fclose(lbbuf->fp);
   lbbuf->fp = NULL;
-  gt_log_log("write %s to file %s (%lu units of size %u)",
+  gt_log_log("write %s to file %s ("GT_LU" units of size %u)",
              gt_str_get(lbbuf->name),
              gt_str_get(lbbuf->outfilename),
              lbbuf->totalwrite,(unsigned int) sizeof (*lbbuf->spaceuint32_t));

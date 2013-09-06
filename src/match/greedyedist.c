@@ -87,10 +87,10 @@ static void showfront(const GtFrontResource *ftres,
   {
     if (r <= 0 || k <= -r || k >= r)
     {
-      printf("(k=%ld)%ld ",k,GT_FRONT_ROWVALUE(fval));
+      printf("(k="GT_LD")"GT_LD" ",k,GT_FRONT_ROWVALUE(fval));
     } else
     {
-      printf("(k=%ld)undef ",k);
+      printf("(k="GT_LD")undef ",k);
     }
   }
   (void) putchar('\n');
@@ -112,7 +112,7 @@ static void frontspecparms(const GtFrontResource *ftres,
     fspec->width = MIN(ftres->vlen,p) - fspec->left + 1;
   }
 #ifdef SKDEBUG
-  printf("p=%ld,offset=%ld,left=%ld,width=%ld\n",p,
+  printf("p="GT_LD",offset="GT_LD",left="GT_LD",width="GT_LD"\n",p,
                                                  fspec->offset,
                                                  fspec->left,
                                                  fspec->width);
@@ -147,17 +147,17 @@ static void evalentryforward(const GtSeqabstract *useq,
   GtFrontvalue *fptr;
 
 #ifdef SKDEBUG
-  printf("evalentryforward(k=%ld)\n",k);
+  printf("evalentryforward(k="GT_LD")\n",k);
 #endif
   fptr = ftres->frontspace + fspec->offset - fspec->left;
   t = accessfront(ftres,fptr,fspec,k) + 1;         /* same diagonal */
 #ifdef SKDEBUG
-  printf("same: access(k=%ld)=%ld\n",k,t-1);
+  printf("same: access(k="GT_LD")="GT_LD"\n",k,t-1);
 #endif
 
   value = accessfront(ftres,fptr,fspec,k-1);       /* diagonal below */
 #ifdef SKDEBUG
-  printf("below: access(k=%ld)=%ld\n",k-1,value);
+  printf("below: access(k="GT_LD")="GT_LD"\n",k-1,value);
 #endif
   if (t < value)
   {
@@ -165,14 +165,14 @@ static void evalentryforward(const GtSeqabstract *useq,
   }
   value = accessfront(ftres,fptr,fspec,k+1) + 1;     /* diagonal above */
 #ifdef SKDEBUG
-  printf("above: access(k=%ld)=%ld\n",k+1,value-1);
+  printf("above: access(k="GT_LD")="GT_LD"\n",k+1,value-1);
 #endif
   if (t < value)
   {
     t = value;
   }
 #ifdef SKDEBUG
-  printf("maximum: t=%ld\n",t);   /* the maximum over three values */
+  printf("maximum: t="GT_LD"\n",t);   /* the maximum over three values */
 #endif
   if (t < 0 || t+k < 0)             /* no negative value */
   {
@@ -230,21 +230,21 @@ static bool evalfrontforward(const GtSeqabstract *useq,
         defined = true;
       }
 #ifdef SKDEBUG
-      printf("store front[k=%ld]=%ld ",k,GT_FRONT_ROWVALUE(fval));
-      printf("at index %ld\n",(GtWord) (fval-ftres->frontspace));
+      printf("store front[k="GT_LD"]="GT_LD" ",k,GT_FRONT_ROWVALUE(fval));
+      printf("at index "GT_LD"\n",(GtWord) (fval-ftres->frontspace));
 #endif
     } else
     {
 #ifdef SKDEBUG
-      printf("store front[k=%ld]=GT_FRONT_MINUSINFINITY ",k);
-      printf("at index %ld\n",(GtWord) (fval-ftres->frontspace));
+      printf("store front[k="GT_LD"]=GT_FRONT_MINUSINFINITY ",k);
+      printf("at index "GT_LD"\n",(GtWord) (fval-ftres->frontspace));
 #endif
       GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(fval),
                      GT_FRONT_MINUSINFINITY(ftres));
     }
   }
 #ifdef SKDEBUG
-  printf("frontvalues[r=%ld]=",r);
+  printf("frontvalues[r="GT_LD"]=",r);
   showfront(ftres,fspec,r);
 #endif
   return defined;
@@ -277,7 +277,7 @@ static void firstfrontforward(const GtSeqabstract *useq,
     GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),(GtWord) lcp);
   }
 #ifdef SKDEBUG
-  printf("forward front[0]=%ld\n",GT_FRONT_ROWVALUE(&ftres->frontspace[0]));
+  printf("forward front[0]="GT_LD"\n",GT_FRONT_ROWVALUE(&ftres->frontspace[0]));
 #endif
 }
 
@@ -291,7 +291,7 @@ GtUword greedyunitedist(GtFrontResource *ftres,
   GtFrontvalue *fptr;
 
 #ifdef SKDEBUG
-  printf("unitedistcheckSEPgeneric(ulen=%lu,vlen=%lu)\n",ulenvalue,vlenvalue);
+  printf("unitedistcheckSEPgeneric(ulen="GT_LU",vlen="GT_LU")\n",ulenvalue,vlenvalue);
 #endif
   gt_assert(gt_seqabstract_length(useq) < (GtUword) LONG_MAX);
   gt_assert(gt_seqabstract_length(vseq) < (GtUword) LONG_MAX);
@@ -344,7 +344,7 @@ GtUword greedyunitedist(GtFrontResource *ftres,
     }
   }
 #ifdef SKDEBUG
-  printf("unitedistfrontSEP returns %ld\n",realdistance);
+  printf("unitedistfrontSEP returns "GT_LD"\n",realdistance);
 #endif
   return realdistance;
 }
