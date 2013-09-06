@@ -43,12 +43,6 @@
 /* Define the conversion string for 'ld' in platform independent fashion. */
 #define GT_LD "%"GT_LDS
 
-#ifndef _WIN64
-#define GT_LDSF "%ld"
-#else
-#define GT_LDSF "%lld"
-#endif
-
 /* Define the conversion string for 'lu' in platform independent fashion. */
 #ifndef _WIN64
 #define GT_LUS "lu"
