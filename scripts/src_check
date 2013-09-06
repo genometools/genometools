@@ -127,17 +127,18 @@ for _, fn in ipairs(arg) do -- iterate over all files
              string.find(l, "%(long%)") then
         err(fn, ln, "do not use 'long', use 'GtWord' instead")
       end
-    end
 
-    if string.match(fn, "_api.h$") then
-      -- check for stdint.h
-      if string.find(l, "^#include <stdint.h>") then
-        err(fn, ln, "do not use stdint.h in API header")
+      -- check flag characters
+      if string.find(l, "%%lld") then
+        err(fn, ln, "do not use '%lld', use 'GT_LLD' instead")
       end
 
-      -- check for inttypes.h
-      if string.find(l, "^#include <inttypes.h>") then
-        err(fn, ln, "do not use inttypes.h in API header")
+      if string.find(l, "%%llu") then
+        err(fn, ln, "do not use '%llu', use 'GT_LLU' instead")
+      end
+
+      if string.find(l, "%%zu") then
+        err(fn, ln, "do not use '%zu', use 'GT_ZU' instead")
       end
     end
 
