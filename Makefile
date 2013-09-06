@@ -17,7 +17,7 @@
 #
 
 INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
-            -I$(CURDIR)/src/external/zlib-1.2.7 \
+            -I$(CURDIR)/src/external/zlib-1.2.8 \
             -I$(CURDIR)/src/external/md5-1.1.2/src \
             -I$(CURDIR)/src/external/lua-5.1.5/src \
             -I$(CURDIR)/src/external/luafilesystem-1.5.0/src \
@@ -161,7 +161,7 @@ SQLITE3_SRC:=$(SQLITE3_DIR)/sqlite3.c
 SQLITE3_OBJ:=$(SQLITE3_SRC:%.c=obj/%.o)
 SQLITE3_DEP:=$(SQLITE3_SRC:%.c=obj/%.d)
 
-ZLIB_DIR:=src/external/zlib-1.2.7
+ZLIB_DIR:=src/external/zlib-1.2.8
 ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
           $(ZLIB_DIR)/gzclose.c $(ZLIB_DIR)/gzlib.c $(ZLIB_DIR)/gzread.c \
           $(ZLIB_DIR)/gzwrite.c $(ZLIB_DIR)/uncompr.c $(ZLIB_DIR)/deflate.c \
