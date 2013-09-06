@@ -40,7 +40,7 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             GtMatchDirection dir);
 
 /* Sets <evalue> to be the E-value in <mb>. */
-void gt_match_blast_set_evalue(GtMatchBlast *mb, long double evalue);
+void gt_match_blast_set_evalue(GtMatchBlast *mb, double evalue);
 
 /* Sets <bits> to be the bit-score in <mb>. */
 void gt_match_blast_set_bitscore(GtMatchBlast *mb, float bits);
@@ -52,7 +52,7 @@ void gt_match_blast_set_align_length(GtMatchBlast *mb, GtUword length);
 void gt_match_blast_set_similarity(GtMatchBlast *mb, double similarity);
 
 /* Returns the E-value stored in <mb>. */
-long double gt_match_blast_get_evalue(GtMatchBlast *mb);
+double gt_match_blast_get_evalue(GtMatchBlast *mb);
 
 /* Returns the bit-score value stored in <mb>. */
 float gt_match_blast_get_bitscore(GtMatchBlast *mb);

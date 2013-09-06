@@ -150,6 +150,11 @@ for _, fn in ipairs(arg) do -- iterate over all files
       end
     end
 
+    -- check for long double
+    if string.find(l, "long double") then
+      err (fn, ln, "do not use 'long double', use 'double' instead")
+    end
+
     -- check for superfluous blanks
     if string.find(l, "return  ") then err(fn, ln, "superfluous blank") end
 

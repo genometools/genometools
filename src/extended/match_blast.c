@@ -29,7 +29,7 @@ const GtMatchClass* gt_match_blast_class(void);
 
 struct GtMatchBlast {
   GtMatch parent_instance;
-  long double evalue;
+  double evalue;
   float bitscore;
   GtUword ali_length;
   double similarity;
@@ -87,7 +87,7 @@ GtMatch* gt_match_blast_new(char *seqid1,
   return match;
 }
 
-void gt_match_blast_set_evalue(GtMatchBlast *mb, long double evalue)
+void gt_match_blast_set_evalue(GtMatchBlast *mb, double evalue)
 {
   gt_assert(mb);
   mb->evalue = evalue;
@@ -111,7 +111,7 @@ void gt_match_blast_set_similarity(GtMatchBlast *mb, double similarity)
   mb->similarity = similarity;
 }
 
-long double gt_match_blast_get_evalue(GtMatchBlast *mb)
+double gt_match_blast_get_evalue(GtMatchBlast *mb)
 {
   gt_assert(mb);
   return mb->evalue;

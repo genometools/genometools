@@ -17,9 +17,6 @@
 */
 
 #include <errno.h>
-#ifdef _WIN32
-#define __USE_MINGW_ANSI_STDIO 1
-#endif
 #include <stdio.h>
 #include "core/class_alloc_lock.h"
 #include "core/ma.h"
@@ -71,7 +68,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
   gt_assert(gm);
   GtUword columncount = 0;
   GtWord storeinteger[READNUMS], tmp;
-  long double e_value;
+  double e_value;
   float bitscore, identity;
   bool reverse = false;
   char query_seq[BUFSIZ], db_seq[BUFSIZ], buffer[BUFSIZ];

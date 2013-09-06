@@ -16,9 +16,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifdef _WIN32
-#define __USE_MINGW_ANSI_STDIO 1
-#endif
 #include <string.h>
 #include "core/ma.h"
 #include "core/undef_api.h"
@@ -400,7 +397,7 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);
         gt_match_get_range_seq2(match, &range_seq2);
-        fprintf(stdout, "%s\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t%.3f\t%Lg\t"GT_LU"\n",
+        fprintf(stdout, "%s\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t%.3f\t%g\t"GT_LU"\n",
                 gt_match_get_seqid1(match),
                 gt_match_get_seqid2(match),
                 range_seq1.start,
