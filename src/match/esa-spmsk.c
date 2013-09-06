@@ -25,14 +25,14 @@
 
 typedef struct
 {
-  unsigned long firstinW;
+  GtUword firstinW;
 } GtBUinfo_spmsk;
 
 struct GtBUstate_spmsk /* global information */
 {
   const GtEncseq *encseq;
   GtReadmode readmode;
-  unsigned long totallength,
+  GtUword totallength,
                 minmatchlength,
                 spmcounter,
                 spaceforbucketprocessing;
@@ -57,10 +57,10 @@ static void freeBUinfo_spmsk(GT_UNUSED GtBUinfo_spmsk *info,
 }
 
 static int processleafedge_spmsk(bool firstedge,
-                                 unsigned long fd,
+                                 GtUword fd,
                                  GtBUinfo_spmsk *finfo,
-                                 unsigned long seqnum,
-                                 unsigned long relpos,
+                                 GtUword seqnum,
+                                 GtUword relpos,
                                  GtBUstate_spmsk *state,
                                  GT_UNUSED GtError *err)
 
@@ -84,14 +84,14 @@ static int processleafedge_spmsk(bool firstedge,
   return 0;
 }
 
-static int processlcpinterval_spmsk(unsigned long lcp,
+static int processlcpinterval_spmsk(GtUword lcp,
                                     GtBUinfo_spmsk *info,
                                     GtBUstate_spmsk *state,
                                     GT_UNUSED GtError *err)
 {
   if (lcp >= state->minmatchlength)
   {
-    unsigned long lidx, widx, firstpos;
+    GtUword lidx, widx, firstpos;
 
     gt_assert(info != NULL);
     firstpos = ((GtBUinfo_spmsk *) info)->firstinW;
@@ -99,11 +99,11 @@ static int processlcpinterval_spmsk(unsigned long lcp,
     {
       if (state->outputspms)
       {
-        unsigned long lpos = state->Lset.spaceGtUlong[lidx];
+        GtUword lpos = state->Lset.spaceGtUlong[lidx];
 
         for (widx = firstpos; widx < state->Wset.nextfreeGtUlong; widx++)
         {
-          printf("%lu %lu %lu\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
+          printf(""GT_LU" "GT_LU" "GT_LU"\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
         }
       } else
       {
@@ -126,7 +126,7 @@ static int processlcpinterval_spmsk(unsigned long lcp,
 
 GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
                             GtReadmode readmode,
-                            unsigned long minmatchlength,
+                            GtUword minmatchlength,
                             bool countspms,
                             bool outputspms,
                             GT_UNUSED const char *indexname)
@@ -146,11 +146,11 @@ GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
   return state;
 }
 
-unsigned long gt_spmsk_inl_delete(GtBUstate_spmsk *state)
+GtUword gt_spmsk_inl_delete(GtBUstate_spmsk *state)
 {
   if (state != NULL)
   {
-    unsigned long tmpcount;
+    GtUword tmpcount;
 
     GT_FREEARRAY(&state->Wset,GtUlong);
     GT_FREEARRAY(&state->Lset,GtUlong);
@@ -164,11 +164,11 @@ unsigned long gt_spmsk_inl_delete(GtBUstate_spmsk *state)
 }
 
 int gt_spmsk_inl_process(void *data,
-                         const unsigned long *seqnum_relpos_bucket,
+                         const GtUword *seqnum_relpos_bucket,
                          const GtSeqnumrelpos *snrp,
                          const uint16_t *lcptab_bucket,
-                         unsigned long nonspecials,
-                         unsigned long spaceforbucketprocessing,
+                         GtUword nonspecials,
+                         GtUword spaceforbucketprocessing,
                          GtError *err)
 {
   GtBUstate_spmsk *state = (GtBUstate_spmsk *) data;

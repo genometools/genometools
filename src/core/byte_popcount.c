@@ -15,9 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdint.h>
 #include "core/byte_popcount_api.h"
 
-const uint8_t gt_byte_popcount[] = {
+const unsigned char gt_byte_popcount[] = {
   (uint8_t) 0, (uint8_t) 1, (uint8_t) 1, (uint8_t) 2,
   (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,
   (uint8_t) 1, (uint8_t) 2, (uint8_t) 2, (uint8_t) 3,

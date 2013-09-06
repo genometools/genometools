@@ -40,7 +40,7 @@ struct GtPdomModelSet
 GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
 {
   GtStr *concat_dbnames, *cmdline, *indexfilename = NULL;
-  unsigned long i;
+  GtUword i;
   char *md5_hash, ch;
   const char *tmpdir;
   int had_err = 0, rval;

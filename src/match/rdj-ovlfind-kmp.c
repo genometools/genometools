@@ -24,11 +24,11 @@
 #include "core/array_api.h"
 #include "core/ensure.h"
 
-gt_kmp_t* gt_kmp_preproc(const char *seq, unsigned long seqlen)
+gt_kmp_t* gt_kmp_preproc(const char *seq, GtUword seqlen)
 {
   gt_kmp_t* pi;
   gt_kmp_t k;
-  unsigned long q;
+  GtUword q;
 
   pi = gt_malloc(sizeof (gt_kmp_t) * seqlen);
   pi[0] = 0;
@@ -44,10 +44,10 @@ gt_kmp_t* gt_kmp_preproc(const char *seq, unsigned long seqlen)
 }
 
 static inline gt_kmp_t findnextmatch(const char *a, const char *b,
-    unsigned long from, unsigned long to, const gt_kmp_t *pi)
+    GtUword from, GtUword to, const gt_kmp_t *pi)
 {
   gt_kmp_t q;
-  unsigned long i;
+  GtUword i;
   q = 0;
   for (i = from; i <= to; i++)
   {
@@ -59,34 +59,34 @@ static inline gt_kmp_t findnextmatch(const char *a, const char *b,
   return q;
 }
 
-static inline void spmfind_kmp(const char *a, unsigned long alen,
-    const char *b, unsigned long blen, const gt_kmp_t *pi,
-    unsigned long min_length, bool find_submaximal, bool self_comparison,
-    void(*proc)(unsigned long, bool, void*), bool direction,
+static inline void spmfind_kmp(const char *a, GtUword alen,
+    const char *b, GtUword blen, const gt_kmp_t *pi,
+    GtUword min_length, bool find_submaximal, bool self_comparison,
+    void(*proc)(GtUword, bool, void*), bool direction,
     void* procdata)
 {
   gt_kmp_t q;
-  unsigned long max_matchlen;
+  GtUword max_matchlen;
   max_matchlen = MIN(alen, blen);
   if (self_comparison)
     max_matchlen -= 1;
   q = findnextmatch(a, b, alen - max_matchlen, alen - 1, pi);
-  if ((unsigned long)q >= min_length)
-    proc((unsigned long)q, direction, procdata);
+  if ((GtUword)q >= min_length)
+    proc((GtUword)q, direction, procdata);
   if (find_submaximal)
     while (q > 0)
     {
       q = findnextmatch(a, b, alen - q + 1, alen - 1, pi);
-      if ((unsigned long)q >= min_length)
-        proc((unsigned long)q, direction, procdata);
+      if ((GtUword)q >= min_length)
+        proc((GtUword)q, direction, procdata);
     }
 }
 
-static inline bool contfind_kmp(const char *a, unsigned long alen,
-    const gt_kmp_t *pi, const char *b, unsigned long blen)
+static inline bool contfind_kmp(const char *a, GtUword alen,
+    const gt_kmp_t *pi, const char *b, GtUword blen)
 {
   gt_kmp_t q;
-  unsigned long i;
+  GtUword i;
   q = 0;
   gt_assert(alen < blen);
   for (i = 0; i < blen; i++)
@@ -95,16 +95,16 @@ static inline bool contfind_kmp(const char *a, unsigned long alen,
       q = pi[q - 1];
     if (a[q] == b[i])
       q++;
-    if ((unsigned long)q == alen)
+    if ((GtUword)q == alen)
       return true;
   }
   return false;
 }
 
-GtContfind gt_ovlfind_kmp(const char *u, unsigned long u_length,
-    const gt_kmp_t *u_pi, const char *v, unsigned long v_length,
-    const gt_kmp_t *v_pi, GtOvlfindMode m, unsigned long min_length,
-    bool find_nonmaximal, void(*spmproc) (unsigned long /* overlap length */,
+GtContfind gt_ovlfind_kmp(const char *u, GtUword u_length,
+    const gt_kmp_t *u_pi, const char *v, GtUword v_length,
+    const gt_kmp_t *v_pi, GtOvlfindMode m, GtUword min_length,
+    bool find_nonmaximal, void(*spmproc) (GtUword /* overlap length */,
     bool /* true if suffix of u == prefix of v, false if prefix of
     u == suffix of v */, void* /* spmprocdata */), void* spmprocdata)
 {
@@ -169,10 +169,10 @@ int gt_kmp_preproc_unit_test(GtError *err)
   return had_err;
 }
 
-struct GtOvlfindKmpResult { bool u_suffix; unsigned long length; };
+struct GtOvlfindKmpResult { bool u_suffix; GtUword length; };
 
 static
-void ovlfind_kmp_test_save(unsigned long length, bool u_suffix, void *a)
+void ovlfind_kmp_test_save(GtUword length, bool u_suffix, void *a)
 {
   struct GtOvlfindKmpResult r = {u_suffix, length};
   gt_array_add((GtArray*)a,r);

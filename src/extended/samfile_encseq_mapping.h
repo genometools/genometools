@@ -40,10 +40,10 @@ GtSamfileEncseqMapping* gt_samfile_encseq_mapping_new(
 
 /* Returns the coordinate in the <GtEncseq> corresponding to a given read with
    number <reference_num> in the SAM file and <reference_seqpos> */
-unsigned long           gt_samfile_encseq_mapping_seqpos(
+GtUword           gt_samfile_encseq_mapping_seqpos(
                                  GtSamfileEncseqMapping *samfile_encseq_mapping,
                                  int32_t reference_num,
-                                 unsigned long reference_seqpos);
+                                 GtUword reference_seqpos);
 
 /* Deletes <samfile_encseq_mapping> and frees all associated space. */
 void                    gt_samfile_encseq_mapping_delete(

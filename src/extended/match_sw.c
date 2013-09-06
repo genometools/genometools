@@ -26,7 +26,7 @@
 
 struct GtMatchSW {
   GtMatch parent_instance;
-  unsigned long seqno1,
+  GtUword seqno1,
                 seqno2,
                 edist,
                 alilen;
@@ -47,14 +47,14 @@ const GtMatchClass* gt_match_sw_class()
 
 GtMatch* gt_match_sw_new(const char *seqid1,
                          const char *seqid2,
-                         unsigned long seqno1,
-                         unsigned long seqno2,
-                         unsigned long length,
-                         unsigned long edist,
-                         unsigned long start_seq1,
-                         unsigned long start_seq2,
-                         unsigned long end_seq1,
-                         unsigned long end_seq2,
+                         GtUword seqno1,
+                         GtUword seqno2,
+                         GtUword length,
+                         GtUword edist,
+                         GtUword start_seq1,
+                         GtUword start_seq2,
+                         GtUword end_seq1,
+                         GtUword end_seq2,
                          GtMatchDirection dir)
 {
   GtMatch *match;
@@ -69,25 +69,25 @@ GtMatch* gt_match_sw_new(const char *seqid1,
   return match;
 }
 
-unsigned long gt_match_sw_get_seqno1(const GtMatchSW *ms)
+GtUword gt_match_sw_get_seqno1(const GtMatchSW *ms)
 {
   gt_assert(ms);
   return ms->seqno1;
 }
 
-unsigned long gt_match_sw_get_seqno2(const GtMatchSW *ms)
+GtUword gt_match_sw_get_seqno2(const GtMatchSW *ms)
 {
   gt_assert(ms);
   return ms->seqno2;
 }
 
-unsigned long gt_match_sw_get_alignment_length(const GtMatchSW *ms)
+GtUword gt_match_sw_get_alignment_length(const GtMatchSW *ms)
 {
   gt_assert(ms);
   return ms->alilen;
 }
 
-unsigned long gt_match_sw_get_edist(const GtMatchSW *ms)
+GtUword gt_match_sw_get_edist(const GtMatchSW *ms)
 {
   gt_assert(ms);
   return ms->edist;

@@ -33,16 +33,16 @@ static void initBUinfo_spmsk(GtBUinfo_spmsk *,GtBUstate_spmsk *);
 static void freeBUinfo_spmsk(GtBUinfo_spmsk *,GtBUstate_spmsk *);
 
 static int processleafedge_spmsk(bool,
-    unsigned long,
+    GtUword,
     GtBUinfo_spmsk *,
-    unsigned long, /* seqnum */
-    unsigned long, /* relpos */
+    GtUword, /* seqnum */
+    GtUword, /* relpos */
     GtBUstate_spmsk *,
     GtError *err);
 
 /* no declaration of processbranchingedge_spmsk */
 
-static int processlcpinterval_spmsk(unsigned long,
+static int processlcpinterval_spmsk(GtUword,
     GtBUinfo_spmsk *,
     GtBUstate_spmsk *,
     GtError *err);
@@ -72,14 +72,14 @@ static int processlcpinterval_spmsk(unsigned long,
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtBUinfo_spmsk info;
 } GtBUItvinfo_spmsk;
 
 typedef struct
 {
   GtBUItvinfo_spmsk *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 } GtArrayGtBUItvinfo_spmsk;
 
@@ -95,7 +95,7 @@ GtArrayGtBUItvinfo_spmsk *gt_GtArrayGtBUItvinfo_new_spmsk(void)
 void gt_GtArrayGtBUItvinfo_delete_spmsk(GtArrayGtBUItvinfo_spmsk *stack,
                                   GtBUstate_spmsk *state)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -106,11 +106,11 @@ void gt_GtArrayGtBUItvinfo_delete_spmsk(GtArrayGtBUItvinfo_spmsk *stack,
 }
 
 static GtBUItvinfo_spmsk *allocateBUstack_spmsk(GtBUItvinfo_spmsk *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
+                                   GtUword currentallocated,
+                                   GtUword allocated,
                                    GtBUstate_spmsk *state)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo_spmsk *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -123,16 +123,16 @@ static GtBUItvinfo_spmsk *allocateBUstack_spmsk(GtBUItvinfo_spmsk *ptr,
   return itvinfo;
 }
 
-static int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
+static int gt_esa_bottomup_RAM_spmsk(const GtUword *bucketofsuffixes,
                         const uint16_t *lcptab_bucket,
-                        unsigned long numberofsuffixes,
+                        GtUword numberofsuffixes,
                         GtArrayGtBUItvinfo_spmsk *stack,
                         GtBUstate_spmsk *bustate,
                         const GtSeqnumrelpos *snrp,
                         GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix,
                 idx;
   GtBUItvinfo_spmsk *lastinterval = NULL;
@@ -143,7 +143,7 @@ static int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
   gt_assert (numberofsuffixes > 0);
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
-    lcpvalue = (unsigned long) lcptab_bucket[idx+1];
+    lcpvalue = (GtUword) lcptab_bucket[idx+1];
     previoussuffix = bucketofsuffixes[idx];
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
@@ -193,7 +193,7 @@ static int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
+        GtUword lastintervallb = lastinterval->lb;
         PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,lastintervallb);
         lastinterval = NULL;
       } else
@@ -215,7 +215,7 @@ static int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_spmsk.lcp > 0)
   {
-    unsigned long lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
+    GtUword lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
     if (processleafedge_spmsk(false,
                         TOP_ESA_BOTTOMUP_spmsk.lcp,
                         &TOP_ESA_BOTTOMUP_spmsk.info,

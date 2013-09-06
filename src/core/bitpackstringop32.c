@@ -27,7 +27,7 @@
 uint32_t
 gt_bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits)
 {
-  unsigned long accum = 0;
+  GtUword accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
   size_t elemStart = offset/bitElemBits;
   const BitElem *p = str + elemStart;
@@ -39,10 +39,10 @@ gt_bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits)
   gt_assert(numBits <= sizeof (accum)*CHAR_BIT);
   if (bitTop)
   {
-    unsigned long mask;
+    GtUword mask;
     unsigned bits2Read = MIN(bitElemBits - bitTop, bitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
-    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
     bitsLeft -= bits2Read;
   }
@@ -56,7 +56,7 @@ gt_bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits)
   if (bitsLeft)
   {
     accum = accum << bitsLeft |
-      (((*p) & ((~(unsigned long)0)<<(bitElemBits - bitsLeft)))
+      (((*p) & ((~(GtUword)0)<<(bitElemBits - bitsLeft)))
        >>(bitElemBits - bitsLeft));
   }
   return accum;
@@ -75,8 +75,8 @@ gt_bsStoreUInt32(BitString str, BitOffset offset,
   /* set bits of first element, accounting for bits to be preserved */
   if (bitTop)
   {
-    unsigned long mask = ~(unsigned long)0;
-    if (bitElemBits < (sizeof (unsigned long)*CHAR_BIT))
+    GtUword mask = ~(GtUword)0;
+    if (bitElemBits < (sizeof (GtUword)*CHAR_BIT))
     {
       mask <<= bitElemBits;
     }
@@ -88,7 +88,7 @@ gt_bsStoreUInt32(BitString str, BitOffset offset,
     if (numBits < bitElemBits - bitTop)
     {
       unsigned backShift = bitElemBits - numBits - bitTop;
-      mask &= ~(unsigned long)0 << backShift;
+      mask &= ~(GtUword)0 << backShift;
       *p = (*p & ~mask) | ((val << backShift) & mask);
       /* TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below */
       return;
@@ -109,10 +109,10 @@ gt_bsStoreUInt32(BitString str, BitOffset offset,
   /* set bits for last elem */
   if (bitsLeft)
   {
-    unsigned long mask =
-      ((~(unsigned long)0)<<(bitElemBits - bitsLeft));
-    if (bitElemBits < (sizeof (unsigned long)*CHAR_BIT))
-      mask &= (~(~(unsigned long)0<<bitElemBits));
+    GtUword mask =
+      ((~(GtUword)0)<<(bitElemBits - bitsLeft));
+    if (bitElemBits < (sizeof (GtUword)*CHAR_BIT))
+      mask &= (~(~(GtUword)0<<bitElemBits));
     *p = (*p & ~mask) | ((val << (bitElemBits - bitsLeft)) & mask);
   }
 }
@@ -169,7 +169,7 @@ gt_bsGetUniformUInt32Array(constBitString str, BitOffset offset,
     bitsRead = 0; /*< how many bits in current *p are read */
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
-  unsigned long accum = 0, valMask = ~(unsigned long)0;
+  GtUword accum = 0, valMask = ~(GtUword)0;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
   gt_assert(str && val);
@@ -182,10 +182,10 @@ gt_bsGetUniformUInt32Array(constBitString str, BitOffset offset,
   /* get bits of first element if not aligned */
   if (bitTop)
   {
-    unsigned long mask; /*< all of the bits we want to get from *p */
+    GtUword mask; /*< all of the bits we want to get from *p */
     unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
-    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
     bitsInAccum += bits2Read;
     totalBitsLeft -= bits2Read;
@@ -195,9 +195,9 @@ gt_bsGetUniformUInt32Array(constBitString str, BitOffset offset,
     while (bitsInAccum < numBits && totalBitsLeft)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      unsigned long mask;
+      GtUword mask;
       bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
-      mask = (~((~(unsigned long)0) << bits2Read));
+      mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
       bitsInAccum += bits2Read;
@@ -231,7 +231,7 @@ gt_bsGetNonUniformUInt32Array(
     bitsRead = 0; /*< how many bits in current *p are read */
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
-  unsigned long accum = 0;
+  GtUword accum = 0;
   gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
@@ -241,10 +241,10 @@ gt_bsGetNonUniformUInt32Array(
   /* get bits of first element if not aligned */
   if (bitTop)
   {
-    unsigned long mask; /*< all of the bits we want to get from *p */
+    GtUword mask; /*< all of the bits we want to get from *p */
     unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
-    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
     bitsInAccum += bits2Read;
     totalBitsLeft -= bits2Read;
@@ -254,9 +254,9 @@ gt_bsGetNonUniformUInt32Array(
     while (bitsInAccum < numBitsList[j] && totalBitsLeft)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      unsigned long mask;
+      GtUword mask;
       bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
-      mask = (~((~(unsigned long)0) << bits2Read));
+      mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
       bitsInAccum += bits2Read;
@@ -272,9 +272,9 @@ gt_bsGetNonUniformUInt32Array(
       /* now we have enough bits in accum */
       while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
       {
-        unsigned long valMask;
+        GtUword valMask;
         gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
-        valMask = ~(unsigned long)0;
+        valMask = ~(GtUword)0;
         if (numBits < (sizeof (val[0])*CHAR_BIT))
           valMask = ~(valMask << numBits);
         val[j++] = ((accum >> (bitsInAccum - numBits)) & valMask );
@@ -298,7 +298,7 @@ gt_bsGetNonUniformInt32Array(
     bitsRead = 0; /*< how many bits in current *p are read */
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
-  unsigned long accum = 0;
+  GtUword accum = 0;
   gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
@@ -308,10 +308,10 @@ gt_bsGetNonUniformInt32Array(
   /* get bits of first element if not aligned */
   if (bitTop)
   {
-    unsigned long mask; /*< all of the bits we want to get from *p */
+    GtUword mask; /*< all of the bits we want to get from *p */
     unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
-    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
     bitsInAccum += bits2Read;
     totalBitsLeft -= bits2Read;
@@ -321,9 +321,9 @@ gt_bsGetNonUniformInt32Array(
     while (bitsInAccum < numBitsList[j] && totalBitsLeft)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      unsigned long mask;
+      GtUword mask;
       bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
-      mask = (~((~(unsigned long)0) << bits2Read));
+      mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
       bitsInAccum += bits2Read;
@@ -339,8 +339,8 @@ gt_bsGetNonUniformInt32Array(
       /* now we have enough bits in accum */
       while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
       {
-        unsigned long valMask = (numBits < 32)
-          ? ~((~(unsigned long)0) << numBits) : ~(unsigned long)0;
+        GtUword valMask = (numBits < 32)
+          ? ~((~(GtUword)0) << numBits) : ~(GtUword)0;
         int32_t m = (int32_t)1 << (numBits - 1);
         gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         val[j++] = ((((accum >> (bitsInAccum - numBits)) & valMask)
@@ -382,7 +382,7 @@ gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset,
     bitsLeft; /*< how many bits in currentVal == val[j] are left */
   BitElem *p = str + offset/bitElemBits;
   unsigned bitsInAccum;
-  unsigned long accum, valMask = ~(unsigned long)0, currentVal;
+  GtUword accum, valMask = ~(GtUword)0, currentVal;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
   gt_assert(str && val);
@@ -407,7 +407,7 @@ gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset,
   /* set bits of first element if not aligned */
   if (bitTop)
   {
-    BitElem mask = ~(~(unsigned long)0 << (bitElemBits - bitTop));
+    BitElem mask = ~(~(GtUword)0 << (bitElemBits - bitTop));
     while ((totalBitsLeft || bitsLeft) && bitsInAccum < bitElemBits - bitTop)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
@@ -431,7 +431,7 @@ gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset,
     {
       /* no there's not enough */
       unsigned backShift = bitElemBits - bitsInAccum - bitTop;
-      mask &= ~(unsigned long)0 << backShift;
+      mask &= ~(GtUword)0 << backShift;
       *p = (*p & ~mask) | ((accum << backShift) & mask);
       /* TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below */
       return; /* if we couldn't gather more bits, there's none left */
@@ -454,7 +454,7 @@ gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset,
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
       if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
-        unsigned long mask = ~((~(unsigned long)0) << bits2Read);
+        GtUword mask = ~((~(GtUword)0) << bits2Read);
         accum = accum << bits2Read
           | ((currentVal >> (bitsLeft - bits2Read)) & mask);
       }
@@ -485,8 +485,8 @@ gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset,
   }
   if (bitsInAccum)
   {
-    unsigned long mask =
-      ~(unsigned long)0 << (bitElemBits - bitsInAccum);
+    GtUword mask =
+      ~(GtUword)0 << (bitElemBits - bitsInAccum);
     *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);
   }
 }
@@ -503,7 +503,7 @@ gt_bsStoreNonUniformUInt32Array(
     bitsLeft; /*< how many bits in currentVal == val[j] are left */
   BitElem *p = str + offset/bitElemBits;
   unsigned bitsInAccum;
-  unsigned long accum, valMask = ~(unsigned long)0, currentVal;
+  GtUword accum, valMask = ~(GtUword)0, currentVal;
   gt_assert(numBitsList != NULL);
   gt_assert(val != NULL);
   gt_assert(numValues != 0);
@@ -535,7 +535,7 @@ gt_bsStoreNonUniformUInt32Array(
   /* set bits of first element if not aligned */
   if (bitTop)
   {
-    BitElem mask = ~(~(unsigned long)0 << (bitElemBits - bitTop));
+    BitElem mask = ~(~(GtUword)0 << (bitElemBits - bitTop));
     while ((totalBitsLeft || bitsLeft) && bitsInAccum < bitElemBits - bitTop)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
@@ -565,7 +565,7 @@ gt_bsStoreNonUniformUInt32Array(
     {
       /* no there's not enough */
       unsigned backShift = bitElemBits - bitsInAccum - bitTop;
-      mask &= ~(unsigned long)0 << backShift;
+      mask &= ~(GtUword)0 << backShift;
       *p = (*p & ~mask) | ((accum << backShift) & mask);
       /* TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below */
       return; /* if we couldn't gather more bits, there's none left */
@@ -588,7 +588,7 @@ gt_bsStoreNonUniformUInt32Array(
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
       if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
-        unsigned long mask = ~((~(unsigned long)0) << bits2Read);
+        GtUword mask = ~((~(GtUword)0) << bits2Read);
         accum = accum << bits2Read
           | ((currentVal >> (bitsLeft - bits2Read)) & mask);
       }
@@ -625,8 +625,8 @@ gt_bsStoreNonUniformUInt32Array(
   }
   if (bitsInAccum)
   {
-    unsigned long mask =
-      ~(unsigned long)0 << (bitElemBits - bitsInAccum);
+    GtUword mask =
+      ~(GtUword)0 << (bitElemBits - bitsInAccum);
     *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);
   }
 }
@@ -661,7 +661,7 @@ gt_bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
     bitsRead = 0; /*< how many bits in current *p are read */
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
-  unsigned long accum = 0, valMask = ~(unsigned long)0;
+  GtUword accum = 0, valMask = ~(GtUword)0;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
   gt_assert(str && val);
@@ -674,10 +674,10 @@ gt_bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
   /* get bits of first element if not aligned */
   if (bitTop)
   {
-    unsigned long mask; /*< all of the bits we want to get from *p */
+    GtUword mask; /*< all of the bits we want to get from *p */
     unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
-    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
     bitsInAccum += bits2Read;
     totalBitsLeft -= bits2Read;
@@ -687,9 +687,9 @@ gt_bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
     while (bitsInAccum < numBits && totalBitsLeft)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      unsigned long mask;
+      GtUword mask;
       bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
-      mask = (~((~(unsigned long)0) << bits2Read));
+      mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
       bitsInAccum += bits2Read;
@@ -723,7 +723,7 @@ gt_bsGetNonUniformUInt32ArrayAdd(
     bitsRead = 0; /*< how many bits in current *p are read */
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
-  unsigned long accum = 0;
+  GtUword accum = 0;
   gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
@@ -733,10 +733,10 @@ gt_bsGetNonUniformUInt32ArrayAdd(
   /* get bits of first element if not aligned */
   if (bitTop)
   {
-    unsigned long mask; /*< all of the bits we want to get from *p */
+    GtUword mask; /*< all of the bits we want to get from *p */
     unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
-    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
     bitsInAccum += bits2Read;
     totalBitsLeft -= bits2Read;
@@ -746,9 +746,9 @@ gt_bsGetNonUniformUInt32ArrayAdd(
     while (bitsInAccum < numBitsList[j] && totalBitsLeft)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      unsigned long mask;
+      GtUword mask;
       bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
-      mask = (~((~(unsigned long)0) << bits2Read));
+      mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
       bitsInAccum += bits2Read;
@@ -764,9 +764,9 @@ gt_bsGetNonUniformUInt32ArrayAdd(
       /* now we have enough bits in accum */
       while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
       {
-        unsigned long valMask;
+        GtUword valMask;
         gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
-        valMask = ~(unsigned long)0;
+        valMask = ~(GtUword)0;
         if (numBits < (sizeof (val[0])*CHAR_BIT))
           valMask = ~(valMask << numBits);
         val[j++] += ((accum >> (bitsInAccum - numBits)) & valMask );
@@ -790,7 +790,7 @@ gt_bsGetNonUniformInt32ArrayAdd(
     bitsRead = 0; /*< how many bits in current *p are read */
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
-  unsigned long accum = 0;
+  GtUword accum = 0;
   gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
@@ -800,10 +800,10 @@ gt_bsGetNonUniformInt32ArrayAdd(
   /* get bits of first element if not aligned */
   if (bitTop)
   {
-    unsigned long mask; /*< all of the bits we want to get from *p */
+    GtUword mask; /*< all of the bits we want to get from *p */
     unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
-    mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+    mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
     bitsInAccum += bits2Read;
     totalBitsLeft -= bits2Read;
@@ -813,9 +813,9 @@ gt_bsGetNonUniformInt32ArrayAdd(
     while (bitsInAccum < numBitsList[j] && totalBitsLeft)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      unsigned long mask;
+      GtUword mask;
       bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
-      mask = (~((~(unsigned long)0) << bits2Read));
+      mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
       bitsInAccum += bits2Read;
@@ -831,8 +831,8 @@ gt_bsGetNonUniformInt32ArrayAdd(
       /* now we have enough bits in accum */
       while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
       {
-        unsigned long valMask = (numBits < 32)
-          ? ~((~(unsigned long)0) << numBits) : ~(unsigned long)0;
+        GtUword valMask = (numBits < 32)
+          ? ~((~(GtUword)0) << numBits) : ~(GtUword)0;
         int32_t m = (int32_t)1 << (numBits - 1);
         gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         val[j++] += ((((accum >> (bitsInAccum - numBits)) & valMask)

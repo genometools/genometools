@@ -52,7 +52,7 @@ enum rangeSortMode {
  */
 struct matchBound
 {
-  unsigned long start,                 /**< index of first boundary row */
+  GtUword start,                 /**< index of first boundary row */
     end;                        /**< index of second boundary row */
 };
 
@@ -137,14 +137,14 @@ BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq);
  * @return read-only reference of index containing the sequence
  */
 static inline Symbol
-BWTSeqGetSym(const BWTSeq *bwtSeq, unsigned long pos);
+BWTSeqGetSym(const BWTSeq *bwtSeq, GtUword pos);
 
 /**
  * \brief Query length of stored sequence.
  * @param bwtSeq reference of object to query
  * @return length of sequence
  */
-static inline unsigned long
+static inline GtUword
 BWTSeqLength(const BWTSeq *bwtSeq);
 
 /**
@@ -154,7 +154,7 @@ BWTSeqLength(const BWTSeq *bwtSeq);
  * @param bwtSeq reference of object to query
  * @return position of terminator
  */
-static inline unsigned long
+static inline GtUword
 BWTSeqTerminatorPos(const BWTSeq *bwtSeq);
 
 /**
@@ -166,8 +166,8 @@ BWTSeqTerminatorPos(const BWTSeq *bwtSeq);
  * @param pos right bound of BWT prefix queried
  * @return number of occurrences of symbol up to but not including pos
  */
-static inline unsigned long
-BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tSym, unsigned long pos);
+static inline GtUword
+BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tSym, GtUword pos);
 
 /**
  * \brief Query BWT sequence for the number of occurences of a symbol in a
@@ -177,8 +177,8 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tSym, unsigned long pos);
  * @param pos right bound of BWT prefix queried
  * @return number of occurrences of symbol up to but not including pos
  */
-static inline unsigned long
-BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long pos);
+static inline GtUword
+BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, GtUword pos);
 
 /**
  * \brief Query BWT sequence for the number of occurences of a symbol
@@ -193,7 +193,7 @@ BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long pos);
  */
 static inline GtUlongPair
 BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
-                            unsigned long posA, unsigned long posB);
+                            GtUword posA, GtUword posB);
 
 /**
  * \brief Query BWT sequence for the number of occurences of a symbol
@@ -207,7 +207,7 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
  */
 static inline GtUlongPair
 BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym,
-                 unsigned long posA, unsigned long posB);
+                 GtUword posA, GtUword posB);
 
 /**
  * \brief Query BWT sequence for the number of occurences of all symbols in a
@@ -222,11 +222,11 @@ BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym,
  * MRAEncRevMapSymbol(alphabet, i + MRAEncGetRangeBase(alphabet, range))
  */
 static inline void
-BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, unsigned long pos,
-               unsigned long *rangeOccs);
+BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, GtUword pos,
+               GtUword *rangeOccs);
 
 /* XXX: range 0 for range = 0 for regular symbols;
-   unsigned long rangeOcc[4]; */
+   GtUword rangeOcc[4]; */
 
 /**
  * \brief Query BWT sequence for the number of occurences of all symbols in a
@@ -246,8 +246,8 @@ BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, unsigned long pos,
  */
 static inline void
 BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range,
-                      unsigned long posA, unsigned long posB,
-                      unsigned long *rangeOccs);
+                      GtUword posA, GtUword posB,
+                      GtUword *rangeOccs);
 
 /**
  * \brief Given a position in the L-column of the matrix of rotations,
@@ -257,8 +257,8 @@ BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range,
  * @param extBits modified in intermediate queries
  * @return index of corresponding row F-column
  */
-static inline unsigned long
-BWTSeqLFMap(const BWTSeq *bwtSeq, unsigned long pos,
+static inline GtUword
+BWTSeqLFMap(const BWTSeq *bwtSeq, GtUword pos,
             struct extBitsRetrieval *extBits);
 
 /**
@@ -269,7 +269,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, unsigned long pos,
  * @param sym symbol to query counts sum for
  * @return aggregate count
  */
-static inline unsigned long
+static inline GtUword
 BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym);
 
 /**
@@ -285,7 +285,7 @@ BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym);
  * @param tSym symbol to query counts sum for
  * reference for core functions @return aggregate count
  */
-static inline unsigned long
+static inline GtUword
 BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym);
 
 /**
@@ -297,7 +297,7 @@ BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym);
  * @param forward direction of processing the query
  * @return number of matches
  */
-unsigned long
+GtUword
 gt_BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  bool forward);
 
@@ -376,7 +376,7 @@ enum verifyBWTSeqFlags
 enum verifyBWTSeqErrCode
 gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
                       int checkFlags,
-                      unsigned long tickPrint, FILE *fp,
+                      GtUword tickPrint, FILE *fp,
                       GtLogger *verbosity, GtError *err);
 
 /**
@@ -472,7 +472,7 @@ gt_deleteEMIterator(BWTSeqExactMatchesIterator *iter);
  * @return true if another match could be found, false otherwise
  */
 static inline bool
-EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, unsigned long *pos,
+EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, GtUword *pos,
                 const BWTSeq *bwtSeq);
 
 /**
@@ -480,7 +480,7 @@ EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, unsigned long *pos,
  * @param iter reference of iterator object
  * @return total number of matches
  */
-unsigned long
+GtUword
 gt_EMINumMatchesTotal(const BWTSeqExactMatchesIterator *iter);
 
 /**
@@ -489,7 +489,7 @@ gt_EMINumMatchesTotal(const BWTSeqExactMatchesIterator *iter);
  * @param iter reference of iterator object
  * @return number of matches left
  */
-unsigned long
+GtUword
 gt_EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
 
 /**
@@ -502,12 +502,12 @@ gt_EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
  * @param err
  * @return 0 if not unique, otherwise length of minmum unique prefix.
  */
-unsigned long gt_packedindexuniqueforward(const BWTSeq *bwtseq,
+GtUword gt_packedindexuniqueforward(const BWTSeq *bwtseq,
                                        const GtUchar *qstart,
                                        const GtUchar *qend);
 
-unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtseq,
-                                       unsigned long *witnessposition,
+GtUword gt_packedindexmstatsforward(const BWTSeq *bwtseq,
+                                       GtUword *witnessposition,
                                        const GtUchar *qstart,
                                        const GtUchar *qend);
 

@@ -77,7 +77,7 @@ void* gt_codon_iterator_try_cast(const GtCodonIteratorClass *cic,
   return NULL;
 }
 
-unsigned long gt_codon_iterator_current_position(GtCodonIterator *ci)
+GtUword gt_codon_iterator_current_position(GtCodonIterator *ci)
 {
   gt_assert(ci && ci->c_class);
   if (ci->c_class->current_pos)
@@ -85,7 +85,7 @@ unsigned long gt_codon_iterator_current_position(GtCodonIterator *ci)
   return 0;
 }
 
-unsigned long gt_codon_iterator_length(GtCodonIterator *ci)
+GtUword gt_codon_iterator_length(GtCodonIterator *ci)
 {
   gt_assert(ci && ci->c_class);
   if (ci->c_class->current_pos)

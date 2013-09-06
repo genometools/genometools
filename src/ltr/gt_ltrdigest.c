@@ -58,7 +58,7 @@ typedef struct GtLTRdigestOptions {
   GtSeqid2FileInfo *s2fi;
   GtPdomCutoff cutoff;
   double evalue_cutoff;
-  unsigned long nthreads;
+  GtUword nthreads;
   unsigned int chain_max_gap_length,
                seqnamelen;
   GtRange ppt_len, ubox_len;
@@ -406,7 +406,7 @@ int gt_ltrdigest_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   if (arguments->nthreads > 0) {
     gt_warning("The '-threads' option is deprecated. Please use the '-j'"
                "option of the 'gt' call instead, e.g.:\n"
-               "  gt -j %lu ltrdigest ...", arguments->nthreads);
+               "  gt -j "GT_LU" ltrdigest ...", arguments->nthreads);
   }
 
   /* -trnas */

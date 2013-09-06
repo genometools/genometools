@@ -30,10 +30,10 @@
 
 static inline void calculate_rel_gc(const GtEncseq *encseq,
                                     double *gc_content,
-                                    unsigned long seq_idx,
-                                    unsigned long gc_count)
+                                    GtUword seq_idx,
+                                    GtUword gc_count)
 {
-  unsigned long length;
+  GtUword length;
   gt_assert(seq_idx < gt_encseq_num_of_sequences(encseq));
   length = gt_encseq_seqlength(encseq, seq_idx);
   gt_assert(gc_count <= length);
@@ -42,11 +42,11 @@ static inline void calculate_rel_gc(const GtEncseq *encseq,
   gt_assert(gt_double_compare(gc_content[seq_idx], 1.0) != 1);
 }
 
-unsigned long *gt_encseq_gc_count(const GtEncseq *encseq)
+GtUword *gt_encseq_gc_count(const GtEncseq *encseq)
 {
   GtEncseqReader *reader;
   GtAlphabet *alphabet;
-  unsigned long *gc_count_per_seq,
+  GtUword *gc_count_per_seq,
                 char_idx, totallength, max_unit,
                 seq_idx = 0,
                 nextsep = 0;
@@ -106,7 +106,7 @@ double *gt_encseq_get_rel_gc(const GtEncseq *encseq,
                              GT_UNUSED GtError *err)
 {
   double *gc_content;
-  unsigned long *gc_count_per_seq,
+  GtUword *gc_count_per_seq,
                 max_unit,
                 seq_idx = 0;
   bool is_mirrored_encseq;
@@ -132,7 +132,7 @@ double *gt_encseq_get_rel_gc(const GtEncseq *encseq,
   }
   if (is_mirrored_encseq)
   {
-    unsigned long double_max_unit = GT_MULT2(max_unit);
+    GtUword double_max_unit = GT_MULT2(max_unit);
     for (seq_idx = 0; seq_idx < max_unit; seq_idx++)
     {
       gc_content[double_max_unit - seq_idx - 1] = gc_content[seq_idx];

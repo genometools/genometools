@@ -48,7 +48,7 @@ static OBOHeader* obo_header_new(void)
 
 static void obo_header_delete(OBOHeader *obo_header)
 {
-  unsigned long i;
+  GtUword i;
   if (!obo_header) return;
   for (i = 0; i < gt_array_size(obo_header->content); i++) {
     OBOHeaderEntry *entry = *(OBOHeaderEntry**)
@@ -74,7 +74,7 @@ static void obo_header_add(OBOHeader *obo_header,
 
 static const char* obo_header_get(OBOHeader *obo_header, const char *tag)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(obo_header && tag);
   for (i = 0; i < gt_array_size(obo_header->content); i++) {
     OBOHeaderEntry *entry = *(OBOHeaderEntry**)
@@ -117,7 +117,7 @@ static int validate_value(const GtOBOStanza *obo_stanza, const char *value,
   gt_error_check(err);
   gt_assert(obo_stanza && value);
   if (!gt_obo_stanza_get_value(obo_stanza, value, 0)) {
-    gt_error_set(err, "%s stanza starting on line %lu in file \"%s\" lacks "
+    gt_error_set(err, "%s stanza starting on line "GT_LU" in file \"%s\" lacks "
                  "required \"%s\" tag", gt_obo_stanza_get_type(obo_stanza),
                  gt_obo_stanza_line(obo_stanza),
                  gt_obo_stanza_filename(obo_stanza), value);
@@ -130,7 +130,7 @@ static int gt_obo_parse_tree_validate_stanzas(const GtOBOParseTree
                                               *obo_parse_tree,
                                               GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(obo_parse_tree);
@@ -252,16 +252,16 @@ static int proc_any_char(GtIO *obo_file, GtStr *capture, bool be_permissive,
   gt_assert(obo_file && capture);
   if (!any_char(obo_file, be_permissive)) {
     if (gt_io_peek(obo_file) == GT_END_OF_FILE) {
-      gt_error_set(err, "file \"%s\": line %lu: unexpected end-of-file",
+      gt_error_set(err, "file \"%s\": line "GT_LU": unexpected end-of-file",
                 gt_io_get_filename(obo_file), gt_io_get_line_number(obo_file));
     }
     else if ((gt_io_peek(obo_file) == GT_CARRIAGE_RETURN) ||
              (gt_io_peek(obo_file) == GT_END_OF_LINE)) {
-      gt_error_set(err, "file \"%s\": line %lu: unexpected newline",
+      gt_error_set(err, "file \"%s\": line "GT_LU": unexpected newline",
                 gt_io_get_filename(obo_file), gt_io_get_line_number(obo_file));
     }
     else {
-      gt_error_set(err, "file \"%s\": line %lu: unexpected character '%c'",
+      gt_error_set(err, "file \"%s\": line "GT_LU": unexpected character '%c'",
                 gt_io_get_filename(obo_file), gt_io_get_line_number(obo_file),
                 gt_io_peek(obo_file));
     }
@@ -343,7 +343,7 @@ static int stanza_line(GtIO *obo_file, GtStr *type, GtError *err)
 
 static int stanza(GtOBOParseTree *obo_parse_tree, GtIO *obo_file, GtError *err)
 {
-  unsigned long stanza_line_number;
+  GtUword stanza_line_number;
   int had_err;
   GtStr *type, *tag, *value;
   gt_error_check(err);
@@ -436,7 +436,7 @@ GtOBOParseTree* gt_obo_parse_tree_new(const char *obo_file_path, GtError *err)
 
 void gt_obo_parse_tree_delete(GtOBOParseTree *obo_parse_tree)
 {
-  unsigned long i;
+  GtUword i;
   if (!obo_parse_tree) return;
   for (i = 0; i < gt_array_size(obo_parse_tree->stanzas); i++) {
     gt_obo_stanza_delete(*(GtOBOStanza**)
@@ -449,7 +449,7 @@ void gt_obo_parse_tree_delete(GtOBOParseTree *obo_parse_tree)
 
 const char* gt_obo_parse_tree_get_stanza_type(const GtOBOParseTree
                                               *obo_parse_tree,
-                                              unsigned long stanza_num)
+                                              GtUword stanza_num)
 {
   gt_assert(obo_parse_tree);
   return gt_obo_stanza_get_type(*(GtOBOStanza**)
@@ -459,7 +459,7 @@ const char* gt_obo_parse_tree_get_stanza_type(const GtOBOParseTree
 
 const char* gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree
                                                *obo_parse_tree,
-                                               unsigned long stanza_num,
+                                               GtUword stanza_num,
                                                const char *stanza_key)
 {
   gt_assert(obo_parse_tree);
@@ -470,13 +470,13 @@ const char* gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree
 
 const GtOBOStanza* gt_obo_parse_tree_get_stanza(const GtOBOParseTree
                                                 *obo_parse_tree,
-                                                unsigned long stanza_num)
+                                                GtUword stanza_num)
 {
   gt_assert(obo_parse_tree);
   return *(GtOBOStanza**) gt_array_get(obo_parse_tree->stanzas, stanza_num);
 }
 
-unsigned long gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree
+GtUword gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree
                                                *obo_parse_tree)
 {
   gt_assert(obo_parse_tree);

@@ -22,6 +22,7 @@
 
 #include "core/error.h"
 #include "core/file.h"
+#include "core/types_api.h"
 #include "gth/gthstrandchar.h"
 
 /* The initial XML indent level */
@@ -78,7 +79,7 @@ typedef struct {
        final_stop_codon;            /* final ORF must end with a stop codon */
   double sortagswf;                 /* weight factor for the sorting of AGSs */
   unsigned int maxagsnum;           /* the maximum number of AGSs per PGL */
-  unsigned long minORFlength,       /* minimum ORF length shown in assembly */
+  GtUword       minORFlength,       /* minimum ORF length shown in assembly */
                 showintronmaxlen;   /* up to  length an intron is shown
                                        completly, otherwise a part in the middle
                                        is not shown.

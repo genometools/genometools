@@ -26,10 +26,10 @@
 #include "seqnumrelpos.h"
 
 typedef int (*GtRandomcodesintervalprocess)(void *,
-                                           const unsigned long *,
+                                           const GtUword *,
                                            const GtSeqnumrelpos *,
                                            const uint16_t *,
-                                           unsigned long,
+                                           GtUword,
                                            unsigned int,
                                            GtError *);
 
@@ -41,7 +41,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(
                     const GtEncseq *encseq,
                     unsigned int bucketkeysize,
                     unsigned int numofparts,
-                    unsigned long maximumspace,
+                    GtUword maximumspace,
                     unsigned int sortingdepth,
                     unsigned int skipshorter,
                     bool usefirstcodes,
@@ -50,7 +50,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(
                     bool onlyaccumulation, /* set to false, only for tests */
                     bool onlyallrandomcodes, /* set to false, only for tests */
                     GT_UNUSED unsigned int addbscache_depth, /* set to 5U */
-                    unsigned long phase2extra, /* extra space needed in proc.
+                    GtUword phase2extra, /* extra space needed in proc.
                                                   intervals */
                     bool radixsmall,      /* set to true */
                     unsigned int radixparts, /* set to 2U */

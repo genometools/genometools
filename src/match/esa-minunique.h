@@ -22,36 +22,36 @@
 #include "core/types_api.h"
 #include "core/range_api.h"
 
-unsigned long gt_suffixarrayuniqueforward (const void *genericindex,
-                                           unsigned long offset,
-                                           unsigned long left,
-                                           unsigned long right,
-                                           GT_UNUSED unsigned long
+GtUword gt_suffixarrayuniqueforward (const void *genericindex,
+                                           GtUword offset,
+                                           GtUword left,
+                                           GtUword right,
+                                           GT_UNUSED GtUword
                                               *witnessposition,
                                            const GtUchar *qstart,
                                            const GtUchar *qend);
 
-unsigned long gt_suffixarraymstats (const void *genericindex,
-                                    unsigned long offset,
-                                    unsigned long left,
-                                    unsigned long right,
-                                    unsigned long *witnessposition,
+GtUword gt_suffixarraymstats (const void *genericindex,
+                                    GtUword offset,
+                                    GtUword left,
+                                    GtUword right,
+                                    GtUword *witnessposition,
                                     const GtUchar *qstart,
                                     const GtUchar *qend);
 
-unsigned long gt_suffixarrayfindmums (const void *genericindex,
-                                      unsigned long offset,
-                                      unsigned long left,
-                                      unsigned long right,
-                                      unsigned long *witnessposition,
+GtUword gt_suffixarrayfindmums (const void *genericindex,
+                                      GtUword offset,
+                                      GtUword left,
+                                      GtUword right,
+                                      GtUword *witnessposition,
                                       const GtUchar *qstart,
                                       const GtUchar *qend);
 
 GtRange gt_suffixarrayfindinterval (const void *genericindex,
-                                    unsigned long offset,
-                                    unsigned long left,
-                                    unsigned long right,
-                                    unsigned long *matchlength,
+                                    GtUword offset,
+                                    GtUword left,
+                                    GtUword right,
+                                    GtUword *matchlength,
                                     const GtUchar *qstart,
                                     const GtUchar *qend);
 #endif

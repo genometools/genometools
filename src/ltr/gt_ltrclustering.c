@@ -30,7 +30,7 @@ typedef struct {
   GtFile *outfp;
   GtOutputFileInfo *ofi;
   GtStr  *file_prefix;
-  unsigned long psmall,
+  GtUword psmall,
                 plarge;
   double xdrop,
          identity;

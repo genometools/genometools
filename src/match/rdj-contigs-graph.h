@@ -44,9 +44,9 @@ void            gt_contigs_graph_show_dot(GtContigsGraph *cg,
 
 int             gt_contigs_graph_show_dot_subgraph(GtContigsGraph *cg,
                                                    GtFile *outfp,
-                                                   unsigned long *cnums,
-                                                   unsigned long nofcnums,
-                                                   unsigned long maxdepth,
+                                                   GtUword *cnums,
+                                                   GtUword nofcnums,
+                                                   GtUword maxdepth,
                                                    GtError *err);
 
 void            gt_contigs_graph_enable_dot_show_deleted(GtContigsGraph *cg);

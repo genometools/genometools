@@ -30,7 +30,7 @@ typedef struct {
                                    gthtraversealignment()) */
                 *eopptr;       /* the pointer to the current editoperation of
                                   the alignment (changes) */
-  long alignmentlength,        /* its length, i.e. the number of Editoperations
+  GtWord alignmentlength,      /* its length, i.e. the number of Editoperations
                                 */
        genomicptr,             /* the pointer to the current character of the
                                   genomic sequence */
@@ -41,25 +41,25 @@ typedef struct {
 } Traversealignmentstate;
 
 typedef struct {
-  void (*processmismatch)(Traversealignmentstate*, void*, unsigned long);
-  void (*processdeletion)(Traversealignmentstate*, void*, unsigned long);
-  void (*processinsertion)(Traversealignmentstate*, void*, unsigned long);
-  void (*processmatch)(Traversealignmentstate*, void*, unsigned long);
-  void (*processintron)(Traversealignmentstate*, void*, unsigned long);
+  void (*processmismatch)(Traversealignmentstate*, void*, GtUword);
+  void (*processdeletion)(Traversealignmentstate*, void*, GtUword);
+  void (*processinsertion)(Traversealignmentstate*, void*, GtUword);
+  void (*processmatch)(Traversealignmentstate*, void*, GtUword);
+  void (*processintron)(Traversealignmentstate*, void*, GtUword);
   bool(*breakcondition)(void*);
   /* additional functions for protein edit operations */
   void (*processintron_with_1_base_left)(Traversealignmentstate*, void*,
-                                         unsigned long);
+                                         GtUword);
   void (*processintron_with_2_bases_left)(Traversealignmentstate*, void*,
-                                          unsigned long);
+                                          GtUword);
   void (*processmismatch_with_1_gap)(Traversealignmentstate*, void*,
-                                     unsigned long);
+                                     GtUword);
   void (*processmismatch_with_2_gaps)(Traversealignmentstate*, void*,
-                                      unsigned long);
+                                      GtUword);
   void (*processdeletion_with_1_gap)(Traversealignmentstate*, void*,
-                                     unsigned long);
+                                     GtUword);
   void (*processdeletion_with_2_gaps)(Traversealignmentstate*, void*,
-                                      unsigned long);
+                                      GtUword);
 } Traversealignmentfunctions;
 
 /* The following function checks if the sum of multi edit operations
@@ -67,8 +67,8 @@ typedef struct {
    If alignmentlength is less than 0 it is true returned, no matter what
    referencelength is. */
 bool gt_eops_equal_referencelength(Editoperation *alignment,
-                                   long alignmentlength,
-                                   long referencelength, bool proteineop);
+                                   GtWord alignmentlength,
+                                   GtWord referencelength, bool proteineop);
 
 /* The following function traverses an alignment given by an
    Traversealignmentstate structure <state> in forward direction, if

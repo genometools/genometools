@@ -32,7 +32,7 @@
 
 typedef struct {
   unsigned char *buf;
-  unsigned long length;
+  GtUword length;
 } GtEncseqExtractedBuffer;
 
 static void gt_lua_encseq_reader_push(lua_State *L, GtEncseqReader *reader)
@@ -76,7 +76,7 @@ static int encseq_reader_lua_reinit_with_readmode(lua_State *L)
 {
   GtEncseq **encseq;
   GtEncseqReader **reader;
-  unsigned long startpos;
+  GtUword startpos;
   GtReadmode readmode;
   reader = check_encseq_reader(L, 1);
   encseq = check_encseq(L, 2);
@@ -109,7 +109,7 @@ static int encseq_lua_num_of_sequences(lua_State *L)
 static int encseq_lua_get_encoded_char(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long pos;
+  GtUword pos;
   int readmode;
   unsigned char cc;
   encseq = check_encseq(L, 1);
@@ -125,7 +125,7 @@ static int encseq_lua_get_encoded_char(lua_State *L)
 static int encseq_lua_get_decoded_char(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long pos;
+  GtUword pos;
   int readmode;
   char cc;
   encseq = check_encseq(L, 1);
@@ -139,9 +139,9 @@ static int encseq_lua_get_decoded_char(lua_State *L)
 }
 
 static inline void push_values_as_table(lua_State *L, unsigned char *buf,
-                                        unsigned long length)
+                                        GtUword length)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(buf && length > 0);
   lua_newtable(L);
   for (i = 0; i < length; i++) {
@@ -152,7 +152,7 @@ static inline void push_values_as_table(lua_State *L, unsigned char *buf,
 }
 
 static int encseq_lua_push_buffer(lua_State *L, unsigned char *arr,
-                                  unsigned long len)
+                                  GtUword len)
 {
   GtEncseqExtractedBuffer** buf;
   buf = lua_newuserdata(L, sizeof (GtEncseqExtractedBuffer*));
@@ -170,7 +170,7 @@ static int encseq_lua_index_buffer(lua_State *L)
 {
   GtEncseqExtractedBuffer **buf = luaL_checkudata(L, 1,
                                                   ENCSEQ_BUFFER_METATABLE);
-  unsigned long num = luaL_checknumber(L, 2);
+  GtUword num = luaL_checknumber(L, 2);
   luaL_argcheck(L, num <= (*buf)->length, 2,
                 "must be inside extracted substring");
   lua_pushinteger(L, ((*buf)->buf)[num-1]);
@@ -189,7 +189,7 @@ static int encseq_lua_delete_buffer(lua_State *L)
 static int encseq_lua_extract_encoded(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long from, to;
+  GtUword from, to;
   unsigned char *string;
   encseq = check_encseq(L, 1);
   from = luaL_checknumber(L, 2);
@@ -206,7 +206,7 @@ static int encseq_lua_extract_encoded(lua_State *L)
 static int encseq_lua_extract_decoded(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long from, to;
+  GtUword from, to;
   char *string;
   encseq = check_encseq(L, 1);
   from = luaL_checknumber(L, 2);
@@ -224,7 +224,7 @@ static int encseq_lua_extract_decoded(lua_State *L)
 static int encseq_lua_seqlength(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long pos;
+  GtUword pos;
   encseq = check_encseq(L, 1);
   pos = luaL_checknumber(L, 2);
   luaL_argcheck(L, pos < gt_encseq_num_of_sequences(*encseq), 2,
@@ -236,7 +236,7 @@ static int encseq_lua_seqlength(lua_State *L)
 static int encseq_lua_seqstartpos(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long pos;
+  GtUword pos;
   encseq = check_encseq(L, 1);
   pos = luaL_checknumber(L, 2);
   luaL_argcheck(L, pos < gt_encseq_num_of_sequences(*encseq), 2,
@@ -248,7 +248,7 @@ static int encseq_lua_seqstartpos(lua_State *L)
 static int encseq_lua_seqnum(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long pos;
+  GtUword pos;
   encseq = check_encseq(L, 1);
   pos = luaL_checknumber(L, 2);
   luaL_argcheck(L, pos < gt_encseq_total_length(*encseq), 2,
@@ -276,7 +276,7 @@ static int encseq_lua_has_description_support(lua_State *L)
 static int encseq_lua_description(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long seqno, desclen;
+  GtUword seqno, desclen;
   const char *string;
   encseq = check_encseq(L, 1);
   seqno = luaL_checknumber(L, 2);
@@ -298,7 +298,7 @@ static int encseq_lua_num_of_files(lua_State *L)
 static int encseq_lua_effective_filelength(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long fileno;
+  GtUword fileno;
   encseq = check_encseq(L, 1);
   fileno = luaL_checknumber(L, 2);
   luaL_argcheck(L, fileno < gt_encseq_num_of_files(*encseq), 2,
@@ -310,7 +310,7 @@ static int encseq_lua_effective_filelength(lua_State *L)
 static int encseq_lua_filestartpos(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long fileno;
+  GtUword fileno;
   encseq = check_encseq(L, 1);
   fileno = luaL_checknumber(L, 2);
   luaL_argcheck(L, fileno < gt_encseq_num_of_files(*encseq), 2,
@@ -322,7 +322,7 @@ static int encseq_lua_filestartpos(lua_State *L)
 static int encseq_lua_filenum(lua_State *L)
 {
   GtEncseq **encseq;
-  unsigned long pos;
+  GtUword pos;
   encseq = check_encseq(L, 1);
   pos = luaL_checknumber(L, 2);
   luaL_argcheck(L, pos < gt_encseq_total_length(*encseq), 2,
@@ -335,7 +335,7 @@ static int encseq_lua_filenames(lua_State *L)
 {
   GtEncseq **encseq;
   const GtStrArray *filenames;
-  unsigned long i;
+  GtUword i;
   encseq = check_encseq(L, 1);
   filenames = gt_encseq_filenames(*encseq);
   lua_newtable(L);
@@ -394,7 +394,7 @@ static int encseq_lua_create_reader_with_readmode(lua_State *L)
 {
   GtEncseq **encseq;
   GtEncseqReader *reader;
-  unsigned long startpos;
+  GtUword startpos;
   GtReadmode readmode;
   encseq = check_encseq(L, 1);
   readmode = luaL_checknumber(L, 2);
@@ -798,11 +798,11 @@ static int encseq_builder_lua_add_str(lua_State *L)
 
 static inline int gt_lua_get_table_as_uchararray(lua_State *L, int index,
                                                  unsigned char **outarray,
-                                                 unsigned long *arrlen,
+                                                 GtUword *arrlen,
                                                  GtError *err)
 {
   int had_err = 0, val;
-  unsigned long i;
+  GtUword i;
   unsigned char *arr;
   if (!lua_istable(L, index)) {
     gt_error_set(err, "argument is not a table");
@@ -835,7 +835,7 @@ static int encseq_builder_lua_add_encoded(lua_State *L)
   GtEncseqBuilder **builder;
   const char *desc;
   unsigned char *arr = NULL;
-  unsigned long arrlen = 0;
+  GtUword arrlen = 0;
   GtError *err;
   builder = check_encseq_builder(L, 1);
   err = gt_error_new();

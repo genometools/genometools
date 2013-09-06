@@ -22,11 +22,11 @@
 
 typedef struct GtFrontResource GtFrontResource;
 
-GtFrontResource *gt_frontresource_new(unsigned long maxdist);
+GtFrontResource *gt_frontresource_new(GtUword maxdist);
 
 void gt_frontresource_delete(GtFrontResource *ftres);
 
-unsigned long greedyunitedist(GtFrontResource *ftres,
+GtUword greedyunitedist(GtFrontResource *ftres,
                               const GtSeqabstract *useq,
                               const GtSeqabstract *vseq);
 

@@ -49,7 +49,7 @@ static int gt_seqids_runner(GT_UNUSED int argc, const char **argv,
   had_err = gt_node_stream_pull(v_stream, err);
   if (!had_err) {
     GtStrArray *seqids;
-    unsigned long i;
+    GtUword i;
     seqids = gt_cstr_table_get_all(cst);
     for (i = 0; i < gt_str_array_size(seqids); i++) {
       printf("%s\n", gt_str_array_get(seqids, i));

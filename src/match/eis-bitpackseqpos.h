@@ -20,44 +20,44 @@
 /**
  * @file eis-bitpackseqpos.h
  * @brief Defines appropriate width routines for storing and retrieving
- * unsigned long values in/from BitString.
+ * GtUword values in/from BitString.
  */
 
 #include "core/bitpackstring.h"
 
-#ifndef _LP64
-/** retrieve unsigned long from BitString */
+#if !(defined (_LP64) || defined (_WIN64))
+/** retrieve GtUword from BitString */
 #define gt_bsGetUlong gt_bsGetUInt32
-/** store unsigned long in BitString */
+/** store GtUword in BitString */
 #define gt_bsStoreUlong gt_bsStoreUInt32
-/** read back array of unsigned long values in BitString */
+/** read back array of GtUword values in BitString */
 #define gt_bsGetUniformUlongArray gt_bsGetUniformUInt32Array
-/** read back array of unsigned long values in BitString */
+/** read back array of GtUword values in BitString */
 #define gt_bsGetUniformUlongArrayAdd gt_bsGetUniformUInt32ArrayAdd
-/** read back array of unsigned long values in BitString */
+/** read back array of GtUword values in BitString */
 #define gt_bsGetNonUniformUlongArray gt_bsGetNonUniformUInt32Array
-/** read back array of unsigned long values in BitString */
+/** read back array of GtUword values in BitString */
 #define gt_bsGetNonUniformUlongArrayAdd gt_bsGetNonUniformUInt32ArrayAdd
-/** store array of unsigned long values in BitString */
+/** store array of GtUword values in BitString */
 #define gt_bsStoreUniformUlongArray gt_bsStoreUniformUInt32Array
-/** how many bits are required to store given unsigned long value */
+/** how many bits are required to store given GtUword value */
 #define requiredUlongBits gt_requiredUInt32Bits
 #else
-/** retrieve unsigned long from BitString */
+/** retrieve GtUword from BitString */
 #define gt_bsGetUlong gt_bsGetUInt64
-/** store unsigned long in BitString */
+/** store GtUword in BitString */
 #define gt_bsStoreUlong gt_bsStoreUInt64
-/** read back array of unsigned long values in BitString */
+/** read back array of GtUword values in BitString */
 #define gt_bsGetUniformUlongArray gt_bsGetUniformUInt64Array
-/** read back array of unsigned long values in BitString */
+/** read back array of GtUword values in BitString */
 #define gt_bsGetUniformUlongArrayAdd gt_bsGetUniformUInt64ArrayAdd
-/** read back array of unsigned long values in BitString */
+/** read back array of GtUword values in BitString */
 #define gt_bsGetNonUniformUlongArray gt_bsGetNonUniformUInt64Array
-/** read back array of unsigned long values in BitString */
+/** read back array of GtUword values in BitString */
 #define gt_bsGetNonUniformUlongArrayAdd gt_bsGetNonUniformUInt64ArrayAdd
-/** store array of unsigned long values in BitString  */
+/** store array of GtUword values in BitString  */
 #define gt_bsStoreUniformUlongArray gt_bsStoreUniformUInt64Array
-/** how many bits are required to store given unsigned long value */
+/** how many bits are required to store given GtUword value */
 #define requiredUlongBits gt_requiredUInt64Bits
 #endif
 

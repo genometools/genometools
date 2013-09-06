@@ -69,7 +69,7 @@ void              gt_reads2twobit_use_phred64(GtReads2Twobit *r2t);
    whose quality is no more than <lowqual>;
    it must be called before <gt_reads2twobit_encode> */
 void              gt_reads2twobit_set_quality_filter(GtReads2Twobit *r2t,
-                                                     unsigned long maxlow,
+                                                     GtUword maxlow,
                                                      char lowqual);
 
 /* use a run-length encoding, in which the two-bit representation
@@ -85,13 +85,13 @@ int               gt_reads2twobit_encode(GtReads2Twobit *r2t,
                                          GtError *err);
 
 /* encoding statistics, must be called after <gt_reads2twobit_encode> */
-unsigned long     gt_reads2twobit_nofseqs(const GtReads2Twobit *r2t);
-unsigned long     gt_reads2twobit_seqlen_eqlen(const GtReads2Twobit *r2t);
-unsigned long     gt_reads2twobit_seqlen_max(const GtReads2Twobit *r2t);
-unsigned long     gt_reads2twobit_seqlen_min(const GtReads2Twobit *r2t);
-unsigned long     gt_reads2twobit_total_seqlength(const GtReads2Twobit *r2t);
-unsigned long     gt_reads2twobit_nof_invalid_seqs(const GtReads2Twobit *r2t);
-unsigned long     gt_reads2twobit_invalid_seqs_totallength(
+GtUword     gt_reads2twobit_nofseqs(const GtReads2Twobit *r2t);
+GtUword     gt_reads2twobit_seqlen_eqlen(const GtReads2Twobit *r2t);
+GtUword     gt_reads2twobit_seqlen_max(const GtReads2Twobit *r2t);
+GtUword     gt_reads2twobit_seqlen_min(const GtReads2Twobit *r2t);
+GtUword     gt_reads2twobit_total_seqlength(const GtReads2Twobit *r2t);
+GtUword     gt_reads2twobit_nof_invalid_seqs(const GtReads2Twobit *r2t);
+GtUword     gt_reads2twobit_invalid_seqs_totallength(
                                             const GtReads2Twobit *r2t);
 
 /* Writes the sequence collection to disk in a GtEncseq-compatible format;
@@ -111,7 +111,7 @@ int               gt_reads2twobit_write_fasta(const GtReads2Twobit *r2t,
 /* decodes the specified sequence in Fasta format; the <decoded> buffer
    must be large enough */
 void              gt_reads2twobit_decode_sequence(const GtReads2Twobit *r2t,
-                                                  unsigned long seqnum,
+                                                  GtUword seqnum,
                                                   char *decoded);
 
 /* decodes the sequences <seqnum_from> to <seqnum_from>+<nofseqs>-1
@@ -119,8 +119,8 @@ void              gt_reads2twobit_decode_sequence(const GtReads2Twobit *r2t,
    then skips any sequence for which the corresponding bit is set */
 void              gt_reads2twobit_decode_range(const GtReads2Twobit *r2t,
                                                GtFile *outfp,
-                                               unsigned long seqnum_from,
-                                               unsigned long nofseqs,
+                                               GtUword seqnum_from,
+                                               GtUword nofseqs,
                                                const GtBitsequence *skip);
 
 /* writes the sequence <seqnum> to <outputbuffer>; starts writing at
@@ -130,7 +130,7 @@ void              gt_reads2twobit_decode_range(const GtReads2Twobit *r2t,
   (which can be used as <outputoffset> for subsequent calls to the function)
  */
 GtTwobitencoding* gt_reads2twobit_write_encoded(GtReads2Twobit *r2t,
-                                                unsigned long seqnum,
+                                                GtUword seqnum,
                                                 GtTwobitencoding *outputbuffer,
                                                 GtTwobitencoding outputoffset,
                                           GtTwobitencoding *lastcodeoffsetptr);
@@ -145,7 +145,7 @@ int               gt_reads2twobit_write_seppos(GtReads2Twobit *r2t,
 
 /* set bit for second member of a pair for which one bit is set;
    return the number of new bit set */
-unsigned long     gt_reads2twobit_mark_mates_of_contained(GtReads2Twobit *r2t,
+GtUword     gt_reads2twobit_mark_mates_of_contained(GtReads2Twobit *r2t,
                                                           GtBitsequence *list);
 
 /* delete the sequences for which a bit is set in the list;
@@ -162,7 +162,7 @@ GtTwobitencoding* gt_reads2twobit_export_twobitencoding(
 
 /* pointer to the internal seppos array;
    it must be called after <gt_reads2twobit_encode> */
-unsigned long*    gt_reads2twobit_export_seppos(const GtReads2Twobit *r2t);
+GtUword*    gt_reads2twobit_export_seppos(const GtReads2Twobit *r2t);
 
 /* sort the sequences according to the specified comparator function <cmp> */
 void              gt_reads2twobit_sort(GtReads2Twobit *r2t,

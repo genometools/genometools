@@ -25,11 +25,11 @@ typedef void       (*GtSeqIteratorSetSymbolmapFunc)(GtSeqIterator*,
 typedef void       (*GtSeqIteratorSetSequenceOutFunc)(GtSeqIterator*, bool);
 typedef int        (*GtSeqIteratorNextFunc)(GtSeqIterator *seq_iterator,
                                             const GtUchar **sequence,
-                                            unsigned long *len,
+                                            GtUword *len,
                                             char **description, GtError*);
-typedef const unsigned long long*
+typedef const GtUint64*
                    (*GtSeqIteratorGetCurrCounterFunc)(GtSeqIterator*,
-                                                      unsigned long long);
+                                                      GtUint64);
 typedef void       (*GtSeqIteratorSetQualBufferFunc)(GtSeqIterator*,
                                                      const GtUchar **qualities);
 typedef void       (*GtSeqIteratorFreeFunc)(GtSeqIterator*);

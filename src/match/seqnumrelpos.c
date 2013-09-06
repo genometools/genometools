@@ -22,7 +22,7 @@
 struct GtSeqnumrelpos
 {
   const GtEncseq *encseq;
-  unsigned long relposmask;
+  GtUword relposmask;
   unsigned int bitsforrelpos;
 };
 
@@ -43,31 +43,31 @@ void gt_seqnumrelpos_delete(GtSeqnumrelpos *snrp)
   gt_free(snrp);
 }
 
-unsigned long gt_seqnumrelpos_decode_pos(const GtSeqnumrelpos *snrp,
-                                         unsigned long seqnumrelpos)
+GtUword gt_seqnumrelpos_decode_pos(const GtSeqnumrelpos *snrp,
+                                         GtUword seqnumrelpos)
 {
-  unsigned long seqnum, relpos;
+  GtUword seqnum, relpos;
 
   seqnum = seqnumrelpos >> snrp->bitsforrelpos;
   relpos = seqnumrelpos & snrp->relposmask;
   return gt_encseq_seqstartpos(snrp->encseq,seqnum) + relpos;
 }
 
-unsigned long gt_seqnumrelpos_decode_seqnum(const GtSeqnumrelpos *snrp,
-                                            unsigned long seqnumrelpos)
+GtUword gt_seqnumrelpos_decode_seqnum(const GtSeqnumrelpos *snrp,
+                                            GtUword seqnumrelpos)
 {
   return seqnumrelpos >> snrp->bitsforrelpos;
 }
 
-unsigned long gt_seqnumrelpos_decode_relpos(const GtSeqnumrelpos *snrp,
-                                            unsigned long seqnumrelpos)
+GtUword gt_seqnumrelpos_decode_relpos(const GtSeqnumrelpos *snrp,
+                                            GtUword seqnumrelpos)
 {
   return seqnumrelpos & snrp->relposmask;
 }
 
-unsigned long gt_seqnumrelpos_encode(const GtSeqnumrelpos *snrp,
-                                     unsigned long seqnum,
-                                        unsigned long relpos)
+GtUword gt_seqnumrelpos_encode(const GtSeqnumrelpos *snrp,
+                                     GtUword seqnum,
+                                        GtUword relpos)
 {
   gt_assert(relpos <= snrp->relposmask);
   return (seqnum << snrp->bitsforrelpos) | relpos;

@@ -81,7 +81,7 @@ static int gt_script_filter_runner(int argc, const char **argv, int parsed_args,
 {
   GtScriptFilterArguments *arguments = tool_arguments;
   int had_err = 0;
-  unsigned long i;
+  GtUword i;
 
   gt_error_check(err);
   gt_assert(arguments);

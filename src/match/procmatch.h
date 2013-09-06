@@ -23,11 +23,11 @@
 typedef struct
 {
   bool dbabsolute;
-  unsigned long dbseqnum;
-  unsigned long dbstartpos,
+  GtUword dbseqnum;
+  GtUword dbstartpos,
          dblen;
   const GtUchar *dbsubstring;
-  unsigned long querystartpos,
+  GtUword querystartpos,
                 querylen,
                 distance;
   const void *alignment;
@@ -38,9 +38,9 @@ typedef void (*ProcessIdxMatch)(void *processinfo,
 
 typedef void (*Processresult)(void *,
                               const void *,
-                              unsigned long,
-                              unsigned long,
-                              unsigned long,
-                              unsigned long);
+                              GtUword,
+                              GtUword,
+                              GtUword,
+                              GtUword);
 
 #endif

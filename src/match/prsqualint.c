@@ -49,7 +49,7 @@ Qualifiedinteger *gt_parsequalifiedinteger(const char *option,
                                         const char *lparam,
                                         GtError *err)
 {
-  long readint = 0;
+  GtWord readint = 0;
   size_t i;
   char *lparamcopy;
   bool haserr = false;
@@ -91,7 +91,7 @@ Qualifiedinteger *gt_parsequalifiedinteger(const char *option,
         qualint->qualtag = Qualabsolute;
       }
     }
-    if (sscanf(lparamcopy,"%ld",&readint) != 1 || readint <= 0)
+    if (sscanf(lparamcopy,""GT_LD"",&readint) != 1 || readint <= 0)
     {
       ERRORLPARAM;
       haserr = true;
@@ -106,7 +106,7 @@ Qualifiedinteger *gt_parsequalifiedinteger(const char *option,
       haserr = true;
     }
   }
-  qualint->integervalue = (unsigned long) readint;
+  qualint->integervalue = (GtUword) readint;
   gt_free(lparamcopy);
   if (haserr)
   {

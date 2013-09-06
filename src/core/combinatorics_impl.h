@@ -34,21 +34,21 @@
 #define GT_BINOMIAL_MAX_N_DP 33UL
 #endif
 
-static inline unsigned long gt_combinatorics_factorial(unsigned n)
+static inline GtUword gt_combinatorics_factorial(unsigned n)
 {
-  unsigned long k = 1UL;
+  GtUword k = 1UL;
   while (n > 1U)
     k *= n--;
   return k;
 }
 
 /*@unused@*/
-static inline unsigned long long gt_combinatorics_i_pow(unsigned long long x,
+static inline GtUint64 gt_combinatorics_i_pow(GtUint64 x,
                                                         unsigned int i)
 {
-   unsigned long long result = 1ULL;
+   GtUint64 result = 1ULL;
    if (x == 2ULL)
-     return 1ULL << (unsigned long long) i;
+     return 1ULL << (GtUint64) i;
    while (i != 0) {
      if (i & 1)
        result *= x;
@@ -59,15 +59,15 @@ static inline unsigned long long gt_combinatorics_i_pow(unsigned long long x,
 }
 
 /*@unused@*/
-static inline unsigned long gt_combinatorics_multinomial(
+static inline GtUword gt_combinatorics_multinomial(
                                                       unsigned n,
                                                       size_t numBins,
                                                       const unsigned binSizes[])
 {
-  unsigned long accum = 1UL, nfac;
+  GtUword accum = 1UL, nfac;
   size_t i, maxBin = 0, maxBinSize = 0;
 #ifndef NDEBUG
-  unsigned long binSum = 0;
+  GtUword binSum = 0;
 #endif
   gt_assert(n > 0 && numBins > 0 && binSizes);
   for (i = 0; i < numBins; ++i) {
@@ -79,8 +79,8 @@ static inline unsigned long gt_combinatorics_multinomial(
       maxBin = i;
     }
   }
-  gt_assert(binSum <= (unsigned long) n);
-  for (nfac = (unsigned long) maxBinSize + 1; nfac <= (unsigned long) n; ++nfac)
+  gt_assert(binSum <= (GtUword) n);
+  for (nfac = (GtUword) maxBinSize + 1; nfac <= (GtUword) n; ++nfac)
     accum *= nfac;
   for (i = 0; i < numBins; ++i)
     if (i != maxBin)

@@ -30,7 +30,7 @@
 typedef struct
 {
   GtStr *charlist;
-  unsigned long len;
+  GtUword len;
 } Charlistlen;
 
 typedef struct
@@ -59,7 +59,7 @@ static void showsimpleoptions(const Cmppairwiseopt *opt)
   }
   if (opt->charlistlen != NULL)
   {
-    printf("# alphalen \"%s\" %lu\n",
+    printf("# alphalen \"%s\" "GT_LU"\n",
              gt_str_get(opt->charlistlen->charlist),
              opt->charlistlen->len);
     return;
@@ -146,7 +146,7 @@ static GtOPrval parse_options(int *parsed_args,
       {
         if (gt_option_is_set(optioncharlistlen))
         {
-          long readint;
+          GtWord readint;
 
           if (gt_str_array_size(charlistlen) != 2UL)
           {
@@ -158,14 +158,14 @@ static GtOPrval parse_options(int *parsed_args,
           pw->charlistlen->charlist =
             gt_str_ref(gt_str_array_get_str(charlistlen,
                                                                   0));
-          if (sscanf(gt_str_array_get(charlistlen,1UL),"%ld",&readint) != 1 ||
+          if (sscanf(gt_str_array_get(charlistlen,1UL),""GT_LD"",&readint) != 1 ||
               readint < 1L)
           {
             gt_error_set(err,
                          "option -a requires charlist and length argument");
             oprval = GT_OPTION_PARSER_ERROR;
           }
-          pw->charlistlen->len = (unsigned long) readint;
+          pw->charlistlen->len = (GtUword) readint;
         } else
         {
           if (!gt_option_is_set(optiontext))
@@ -200,7 +200,7 @@ static void freesimpleoption(Cmppairwiseopt *cmppairwise)
   }
 }
 
-static unsigned long applycheckfunctiontosimpleoptions(
+static GtUword applycheckfunctiontosimpleoptions(
                                   Checkcmppairfuntype checkfunction,
                                   const Cmppairwiseopt *opt)
 {
@@ -211,9 +211,9 @@ static unsigned long applycheckfunctiontosimpleoptions(
     {
       checkfunction(forward,
                     (const GtUchar *) gt_str_array_get(opt->strings,0),
-                    (unsigned long) strlen(gt_str_array_get(opt->strings,0)),
+                    (GtUword) strlen(gt_str_array_get(opt->strings,0)),
                     (const GtUchar *) gt_str_array_get(opt->strings,1UL),
-                    (unsigned long) strlen(gt_str_array_get(opt->strings,1UL)));
+                    (GtUword) strlen(gt_str_array_get(opt->strings,1UL)));
       if (!forward)
       {
         break;
@@ -258,20 +258,20 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
     showsimpleoptions(&cmppairwise);
     if (cmppairwise.showedist)
     {
-      unsigned long edist;
+      GtUword edist;
       edist = gt_computegreedyunitedist(
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),
-        (unsigned long) strlen(gt_str_array_get(cmppairwise.strings,0)),
+        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
-        (unsigned long) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
-      printf("%lu\n",edist);
+        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
+      printf(""GT_LU"\n",edist);
     }
     else
     {
-      unsigned long testcases;
+      GtUword testcases;
       testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
                                                     &cmppairwise);
-      printf("# number of testcases: %lu\n",testcases);
+      printf("# number of testcases: "GT_LU"\n",testcases);
     }
   }
   freesimpleoption(&cmppairwise);

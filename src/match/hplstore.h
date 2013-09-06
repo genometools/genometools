@@ -41,7 +41,7 @@ typedef struct GtHplstore GtHplstore;
 
 /* create a new <GtHplstore> for a collection of sequences with
    <nofelements> symbols including the separators */
-GtHplstore *gt_hplstore_new(unsigned long nofelements);
+GtHplstore *gt_hplstore_new(GtUword nofelements);
 
 /* deletes <hplstore> */
 void       gt_hplstore_delete(GtHplstore *hplstore);
@@ -51,23 +51,23 @@ void       gt_hplstore_delete(GtHplstore *hplstore);
    less than the initial nofelements used for <gt_hplstore_new>;
    a <GtHplstore> may only be finalized once */
 void       gt_hplstore_finalize(GtHplstore *hplstore,
-                                unsigned long nofelements);
+                                GtUword nofelements);
 
 /* sets the value at position <pos> of <hplstore> to <value>;
    this method may only be called after <gt_hplstore_finalize> */
-void       gt_hplstore_set(GtHplstore *hplstore, unsigned long pos,
+void       gt_hplstore_set(GtHplstore *hplstore, GtUword pos,
                            uint8_t value);
 
 /* gets the value at position <pos> of <hplstore>;
    this method may only be called before <gt_hplstore_finalize> */
-uint8_t    gt_hplstore_get(GtHplstore *hplstore, unsigned long pos);
+uint8_t    gt_hplstore_get(GtHplstore *hplstore, GtUword pos);
 
 /* copy <nofelements> values stored in the <GtHplstore> from position
    <from>in the array pointed by <hplengths>;
    the caller is responsible to allocate enough space in <hplengths>;
    this method may only be called after <gt_hplstore_finalize> */
 void       gt_hplstore_get_range(const GtHplstore *hplstore, uint8_t *hplengths,
-                                 unsigned long from, unsigned long nofelements);
+                                 GtUword from, GtUword nofelements);
 
 /* show to <outfile> the sequence of <nofelements> homopolymers starting from
    homopolymer position <from>, obtained by combining the homopolymer
@@ -76,8 +76,8 @@ void       gt_hplstore_get_range(const GtHplstore *hplstore, uint8_t *hplengths,
 void       gt_hplstore_show_decoded_sequence(GtFile *outfile,
                                              const GtHplstore *hplstore,
                                              const GtEncseq *encseq,
-                                             unsigned long from,
-                                             unsigned long nofelements);
+                                             GtUword from,
+                                             GtUword nofelements);
 
 /* more efficient variant of <gt_hplstore_show_decoded_sequence> in which the
    length component is provided as an array such that obtained by the method
@@ -87,8 +87,8 @@ void       gt_hplstore_show_decoded_sequence_using_hplengths(
                                              GtFile *outfile,
                                              const uint8_t *hplengths,
                                              const GtEncseq *encseq,
-                                             unsigned long encseq_from,
-                                             unsigned long nofelements);
+                                             GtUword encseq_from,
+                                             GtUword nofelements);
 
 /* save a finalized <GtHplstore> to the file <out_fp>;
    the number of values must be stored separately elsewhere;
@@ -97,6 +97,6 @@ void       gt_hplstore_save(const GtHplstore *hplstore, FILE *out_fp);
 
 /* load a finalized <GtHplstore> containing <nofelements> values
    from the file <in_fp> */
-GtHplstore *gt_hplstore_load(FILE *in_fp, unsigned long nofelements);
+GtHplstore *gt_hplstore_load(FILE *in_fp, GtUword nofelements);
 
 #endif

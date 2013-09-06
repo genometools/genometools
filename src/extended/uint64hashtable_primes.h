@@ -1,7 +1,7 @@
 #ifndef UINT64HASHTABLE_PRIMES_H
 #define UINT64HASHTABLE_PRIMES_H
 
-static const unsigned long gt_uint64hashtable_primes[] =
+static const GtUword gt_uint64hashtable_primes[] =
 {
   1048583UL,
   5242891UL,

@@ -33,7 +33,7 @@
 struct CSAVisitor {
   const GtNodeVisitor parent_instance;
   GtQueue *gt_genome_node_buffer;
-  unsigned long join_length;
+  GtUword join_length;
   GtArray *cluster;
   GtFeatureNode *buffered_feature;
   GtRange first_range,
@@ -164,7 +164,7 @@ const GtNodeVisitorClass* gt_csa_visitor_class()
   return nvc;
 }
 
-GtNodeVisitor* gt_csa_visitor_new(unsigned long join_length)
+GtNodeVisitor* gt_csa_visitor_new(GtUword join_length)
 {
   GtNodeVisitor *nv = gt_node_visitor_create(gt_csa_visitor_class());
   CSAVisitor *csa_visitor = csa_visitor_cast(nv);
@@ -176,7 +176,7 @@ GtNodeVisitor* gt_csa_visitor_new(unsigned long join_length)
   return nv;
 }
 
-unsigned long gt_csa_visitor_node_buffer_size(GtNodeVisitor *nv)
+GtUword gt_csa_visitor_node_buffer_size(GtNodeVisitor *nv)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(nv);
   return gt_queue_size(csa_visitor->gt_genome_node_buffer);
@@ -238,7 +238,7 @@ static void add_sa_to_exon_feature_array(GtArray *exon_nodes,
                                          GtStrand gene_strand)
 {
   GtArray *exons_from_sa;
-  unsigned long i,
+  GtUword i,
                 exon_feature_index = 0,
                 exons_from_sa_index = 0;
   GtFeatureNode *exon_feature, *exons_from_sa_feature;
@@ -345,7 +345,7 @@ static void add_sa_to_exon_feature_array(GtArray *exon_nodes,
 static bool genome_nodes_are_sorted_and_do_not_overlap(GtArray *exon_nodes)
 {
   GtArray *ranges = gt_array_new(sizeof (GtRange));
-  unsigned long i;
+  GtUword i;
   GtRange range;
   bool rval;
   gt_assert(exon_nodes);
@@ -363,7 +363,7 @@ static bool genome_nodes_are_sorted_and_do_not_overlap(GtArray *exon_nodes)
 static void mRNA_set_target_attribute(GtFeatureNode *mRNA_feature,
                                       const GtCSASpliceForm *csa_splice_form)
 {
-  unsigned long i;
+  GtUword i;
   GtStr *targets;
   gt_assert(mRNA_feature && csa_splice_form);
   targets = gt_str_new();
@@ -389,7 +389,7 @@ static GtFeatureNode* create_mRNA_feature(GtCSASpliceForm *csa_splice_form,
 {
   GtFeatureNode *mRNA_feature;
   GtArray *exon_nodes;
-  unsigned long i;
+  GtUword i;
   GtRange range;
   GtStrand strand;
   GtStr *seqid;
@@ -433,7 +433,7 @@ static GtFeatureNode* create_gene_feature(GtCSAGene *csa_gene,
 {
   GtFeatureNode *gene_feature, *mRNA_feature;
   GtRange range;
-  unsigned long i;
+  GtUword i;
   gt_assert(csa_gene && gt_csa_source_str);
 
   /* create top-level gene feature */
@@ -459,7 +459,7 @@ static void process_csa_genes(GtQueue *gt_genome_node_buffer,
                               GtArray *csa_genes,
                               GtStr *gt_csa_source_str)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(csa_genes);
   for (i = 0; i < gt_array_size(csa_genes); i++) {
     GtFeatureNode *gene_feature = create_gene_feature(*(GtCSAGene**)
@@ -474,7 +474,7 @@ void gt_csa_visitor_process_cluster(GtNodeVisitor *nv, bool final_cluster)
   CSAVisitor *csa_visitor = csa_visitor_cast(nv);
   GT_UNUSED GtFeatureNode *first_feature;
   GtArray *csa_genes;
-  unsigned long i;
+  GtUword i;
 
   if (final_cluster) {
     gt_assert(!gt_array_size(csa_visitor->cluster) ||

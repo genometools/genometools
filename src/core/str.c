@@ -28,7 +28,7 @@
 
 struct GtStr {
   char *cstr;           /* the actual string (always '\0' terminated) */
-  unsigned long length; /* currently used length (without trailing '\0') */
+  GtUword length; /* currently used length (without trailing '\0') */
   size_t allocated;     /* currently allocated memory */
   unsigned int reference_count;
 };
@@ -91,7 +91,7 @@ void gt_str_append_cstr(GtStr *dest, const char *cstr)
   dest->length += cstrlen;
 }
 
-void gt_str_append_cstr_nt(GtStr *dest, const char *cstr, unsigned long length)
+void gt_str_append_cstr_nt(GtStr *dest, const char *cstr, GtUword length)
 {
   gt_assert(dest && cstr);
   dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
@@ -101,10 +101,10 @@ void gt_str_append_cstr_nt(GtStr *dest, const char *cstr, unsigned long length)
 }
 
 /* inspired by D. J. Bernstein's fmt_ulong() */
-void gt_str_append_ulong(GtStr *dest, unsigned long u)
+void gt_str_append_ulong(GtStr *dest, GtUword u)
 {
   unsigned int ulength = 1;
-  unsigned long q = u;
+  GtUword q = u;
   char *s;
   gt_assert(dest);
   /* determine length of u */
@@ -178,12 +178,12 @@ void* gt_str_get_mem(const GtStr *s)
   return s->cstr;
 }
 
-unsigned long gt_str_length(const GtStr *s)
+GtUword gt_str_length(const GtStr *s)
 {
   return s ? s->length : 0;
 }
 
-void gt_str_set_length(GtStr *s, unsigned long length)
+void gt_str_set_length(GtStr *s, GtUword length)
 {
   gt_assert(s && length <= s->length);
   s->length = length;

@@ -23,10 +23,10 @@
 typedef struct GtSeq GtSeq;
 
 /* Stores <seq> pointer. */
-GtSeq*            gt_seq_new(const char *seq, unsigned long seqlen,
+GtSeq*            gt_seq_new(const char *seq, GtUword seqlen,
                              GtAlphabet *seqalpha);
 /* Takes ownership of <seq>. */
-GtSeq*            gt_seq_new_own(char *seq, unsigned long seqlen,
+GtSeq*            gt_seq_new_own(char *seq, GtUword seqlen,
                                  GtAlphabet *seqalpha);
 /* Stores <desc> pointer. */
 void              gt_seq_set_description(GtSeq*, const char *desc);
@@ -37,7 +37,7 @@ const char*       gt_seq_get_description(GtSeq*);
 const char*       gt_seq_get_orig(const GtSeq*); /* not '\0' terminated */
 const GtUchar*    gt_seq_get_encoded(GtSeq*);
 const GtAlphabet* gt_seq_get_alphabet(const GtSeq*);
-unsigned long     gt_seq_length(const GtSeq*);
+GtUword     gt_seq_length(const GtSeq*);
 void              gt_seq_delete(GtSeq*);
 
 #endif

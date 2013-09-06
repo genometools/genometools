@@ -25,9 +25,9 @@ struct GtAssemblyStatsCalculator
 {
   uint64_t numofseq;
   uint64_t sumlength;
-  unsigned long minlength;
-  unsigned long maxlength;
-  unsigned long genome_length;
+  GtUword minlength;
+  GtUword maxlength;
+  GtUword genome_length;
   GtDiscDistri *lengths;
 };
 
@@ -55,7 +55,7 @@ void gt_assembly_stats_calculator_delete(GtAssemblyStatsCalculator *asc)
 }
 
 void gt_assembly_stats_calculator_add(GtAssemblyStatsCalculator *asc,
-    unsigned long length)
+    GtUword length)
 {
   gt_assert(asc != NULL);
   gt_assert(length != 0);
@@ -69,7 +69,7 @@ void gt_assembly_stats_calculator_add(GtAssemblyStatsCalculator *asc,
 }
 
 void gt_assembly_stats_calculator_set_genome_length(
-    GtAssemblyStatsCalculator *asc, unsigned long genome_length)
+    GtAssemblyStatsCalculator *asc, GtUword genome_length)
 {
   gt_assert(asc != NULL);
   asc->genome_length = genome_length;
@@ -80,21 +80,21 @@ void gt_assembly_stats_calculator_set_genome_length(
 #define MAX_NOF_NSTATS 4
 typedef struct
 {
-  unsigned long       nvalue[MAX_NOF_NSTATS];
-  unsigned long       lvalue[MAX_NOF_NSTATS];
-  unsigned long long  min[MAX_NOF_NSTATS];
+  GtUword       nvalue[MAX_NOF_NSTATS];
+  GtUword       lvalue[MAX_NOF_NSTATS];
+  GtUint64  min[MAX_NOF_NSTATS];
   bool                done[MAX_NOF_NSTATS];
   char                *name[MAX_NOF_NSTATS];
-  unsigned long long  limit[NOF_LIMITS];
-  unsigned long long  larger_than_limit[NOF_LIMITS];
-  unsigned long long  current_len;
-  unsigned long long  current_num;
+  GtUint64  limit[NOF_LIMITS];
+  GtUint64  larger_than_limit[NOF_LIMITS];
+  GtUint64  current_len;
+  GtUint64  current_num;
   unsigned int        nofstats;
-  unsigned long long  median;
-  unsigned long long  half_num;
+  GtUint64  median;
+  GtUint64  half_num;
 } Nstats;
 
-static void calcNstats(unsigned long key, unsigned long long value,
+static void calcNstats(GtUword key, GtUint64 value,
                         void *data)
 {
   Nstats *nstats = data;
@@ -103,12 +103,12 @@ static void calcNstats(unsigned long key, unsigned long long value,
   nstats->current_num += value;
   for (i = 0; i < (unsigned int) NOF_LIMITS; i++)
   {
-    if ((unsigned long long) key > nstats->limit[i])
+    if ((GtUint64) key > nstats->limit[i])
       nstats->larger_than_limit[i] = nstats->current_num;
   }
   if (nstats->median == 0 && nstats->current_num >= nstats->half_num)
   {
-    nstats->median = (unsigned long long) key;
+    nstats->median = (GtUint64) key;
   }
   for (i = 0; i < nstats->nofstats; i++)
   {
@@ -116,21 +116,21 @@ static void calcNstats(unsigned long key, unsigned long long value,
     {
       nstats->done[i] = true;
       nstats->nvalue[i] = key;
-      nstats->lvalue[i] = (unsigned long) nstats->current_num;
+      nstats->lvalue[i] = (GtUword) nstats->current_num;
     }
   }
 }
 
 #define initNstat(INDEX, NAME, LENGTH)\
   nstats.name[INDEX] = (NAME);\
-  nstats.min[INDEX] = (unsigned long long) (LENGTH);\
+  nstats.min[INDEX] = (GtUint64) (LENGTH);\
   nstats.nvalue[INDEX] = 0;\
   nstats.lvalue[INDEX] = 0;\
   nstats.done[INDEX] = false;\
   nstats.nofstats++
 
 #define initLimit(INDEX, LENGTH)\
-  nstats.limit[INDEX] = (unsigned long long) (LENGTH);\
+  nstats.limit[INDEX] = (GtUint64) (LENGTH);\
   nstats.larger_than_limit[INDEX] = 0
 
 void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
@@ -156,7 +156,7 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   initLimit(4, 1000000ULL);
   nstats.current_len = 0;
   nstats.current_num = 0;
-  nstats.half_num = (unsigned long long) (asc->numofseq >> 1);
+  nstats.half_num = (GtUint64) (asc->numofseq >> 1);
   nstats.median = 0;
   gt_disc_distri_foreach_in_reverse_order(asc->lengths, calcNstats, &nstats);
 
@@ -164,7 +164,7 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
       PRINTuint64_tcast(asc->numofseq));
   if (asc->genome_length > 0)
   {
-    gt_logger_log(logger, "genome length:         %lu",
+    gt_logger_log(logger, "genome length:         "GT_LU"",
         PRINTuint64_tcast(asc->genome_length));
   }
   gt_logger_log(logger, "total contigs length:  "Formatuint64_t"",
@@ -177,8 +177,8 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   gt_logger_log(logger, "mean contig size:      %.2f",
       (double) asc->sumlength / asc->numofseq);
   gt_logger_log(logger, "median contig size:    "GT_LLU"", nstats.median);
-  gt_logger_log(logger, "longest contig:        %lu", asc->maxlength);
-  gt_logger_log(logger, "shortest contig:       %lu", asc->minlength);
+  gt_logger_log(logger, "longest contig:        "GT_LU"", asc->maxlength);
+  gt_logger_log(logger, "shortest contig:       "GT_LU"", asc->minlength);
   gt_logger_log(logger, "contigs > 500 nt:      "GT_LLU" (%.2f %%)",
       nstats.larger_than_limit[0], (double) nstats.larger_than_limit[0] * 100
       / asc->numofseq);
@@ -198,9 +198,9 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   {
     if (nstats.nvalue[i] > 0)
     {
-      gt_logger_log(logger, "N%s                  %lu", nstats.name[i],
+      gt_logger_log(logger, "N%s                  "GT_LU"", nstats.name[i],
           nstats.nvalue[i]);
-      gt_logger_log(logger, "L%s                  %lu", nstats.name[i],
+      gt_logger_log(logger, "L%s                  "GT_LU"", nstats.name[i],
           nstats.lvalue[i]);
     }
     else

@@ -33,18 +33,18 @@
 #define READNUMS 5
 
 #define GT_MATCHER_OPEN_CANNOTPARSECOLUMN(S)\
-        gt_error_set(err,"file %s, line %lu, column %lu: %s", \
+        gt_error_set(err,"file %s, line "GT_LU", column "GT_LU": %s", \
                      mpi->pvt->matchfile, mpi->pvt->curpos, columncount+1, S)
 
 #define GT_MATCHER_OPEN_CANNOTPARSELINE(S)\
-        gt_error_set(err,"file %s, line %lu: %s", \
+        gt_error_set(err,"file %s, line "GT_LU": %s", \
                      mpi->pvt->matchfile, mpi->pvt->curpos, S)
 
 #define gt_match_iterator_open_cast(M)\
         gt_match_iterator_cast(gt_match_iterator_open_class(), M)
 
 typedef struct {
-  unsigned long curpos;
+  GtUword curpos;
   FILE *matchfilep;
   GtFile *gtmatchfilep;
   const char *matchfile;
@@ -61,9 +61,9 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
                                                          GtMatch **match,
                                                          GtError *err)
 {
-  unsigned long columncount = 0;
+  GtUword columncount = 0;
   int readnums;
-  long storeinteger[READNUMS];
+  GtWord storeinteger[READNUMS];
   int had_err = 0, i = 0;
   char buffer[BUFSIZ], seqid1[BUFSIZ], seqid2[BUFSIZ], matchtype;
   GtMatchIteratorOpen *mpi = gt_match_iterator_open_cast(gmpi);
@@ -77,8 +77,8 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
       } else break;
     }
     fseek(mpi->pvt->matchfilep, -1, SEEK_CUR);
-    readnums = fscanf(mpi->pvt->matchfilep," %ld %s %ld %c %ld %s %ld %*d %*e "
-                      "%ld %*f\n",
+    readnums = fscanf(mpi->pvt->matchfilep," "GT_LD" %s "GT_LD" %c "GT_LD" %s "GT_LD" %*d %*e "
+                      ""GT_LD" %*f\n",
                       &storeinteger[0],
                       seqid1,
                       &storeinteger[1],
@@ -107,7 +107,7 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
         i = 0;
       } else break;
     }
-    if (sscanf(buffer," %ld %s %ld %*c %ld %s %ld %*d %*e %ld %*f\n",
+    if (sscanf(buffer," "GT_LD" %s "GT_LD" %*c "GT_LD" %s "GT_LD" %*d %*e "GT_LD" %*f\n",
                &storeinteger[0],
                seqid1,
                &storeinteger[1],
@@ -121,7 +121,7 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
     }
   }
 
-  for (columncount = 0; columncount < (unsigned long) (READNUMS);
+  for (columncount = 0; columncount < (GtUword) (READNUMS);
        columncount++) {
     if (storeinteger[columncount] < 0) {
          GT_MATCHER_OPEN_CANNOTPARSECOLUMN("non-negative integer expected");

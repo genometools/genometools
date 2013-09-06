@@ -25,39 +25,39 @@ typedef struct GtSeqColClass GtSeqColClass;
 
 typedef void          (*GtSeqColFreeFunc)(GtSeqCol*);
 typedef int           (*GtSeqColGrepDescFunc)(GtSeqCol*, char **seq,
-                                              unsigned long start,
-                                              unsigned long end,
+                                              GtUword start,
+                                              GtUword end,
                                               GtStr *seqid, GtError*);
 typedef int           (*GtSeqColGrepDescMD5Func)(GtSeqCol*, const char **md5,
                                                  GtStr *seqid, GtError*);
-typedef int           (*GtSeqColGrepDescSeqlenFunc)(GtSeqCol*, unsigned long*,
+typedef int           (*GtSeqColGrepDescSeqlenFunc)(GtSeqCol*, GtUword*,
                                                     GtStr *, GtError*);
 typedef int           (*GtSeqColMD5ToSeqFunc)(GtSeqCol*, char **seq,
-                                              unsigned long start,
-                                              unsigned long end,
+                                              GtUword start,
+                                              GtUword end,
                                               GtStr *md5_seqid, GtError *err);
 typedef int           (*GtSeqColMD5ToDescFunc)(GtSeqCol*, GtStr *desc,
                                                GtStr *md5_seqid, GtError *err);
-typedef int           (*GtSeqColMD5ToSeqlenFunc)(GtSeqCol*, unsigned long*,
+typedef int           (*GtSeqColMD5ToSeqlenFunc)(GtSeqCol*, GtUword*,
                                                  GtStr *md5_seqid,
                                                  GtError *err);
-typedef unsigned long (*GtSeqColNumFilesFunc)(const GtSeqCol*);
-typedef unsigned long (*GtSeqColNumSeqsFunc)(const GtSeqCol*,
-                                             unsigned long filenum);
+typedef GtUword (*GtSeqColNumFilesFunc)(const GtSeqCol*);
+typedef GtUword (*GtSeqColNumSeqsFunc)(const GtSeqCol*,
+                                             GtUword filenum);
 typedef const char*   (*GtSeqColGetMD5Func)(const GtSeqCol*,
-                                            unsigned long filenum,
-                                            unsigned long seqnum);
+                                            GtUword filenum,
+                                            GtUword seqnum);
 typedef       char*   (*GtSeqColGetSeqFunc)(const GtSeqCol*,
-                                            unsigned long filenum,
-                                            unsigned long seqnum,
-                                            unsigned long start,
-                                            unsigned long end);
+                                            GtUword filenum,
+                                            GtUword seqnum,
+                                            GtUword start,
+                                            GtUword end);
 typedef       char*   (*GtSeqColGetDescFunc)(const GtSeqCol*,
-                                             unsigned long filenum,
-                                             unsigned long seqnum);
-typedef unsigned long (*GtSeqColGetSeqlenFunc)(const GtSeqCol*,
-                                               unsigned long filenum,
-                                               unsigned long seqnum);
+                                             GtUword filenum,
+                                             GtUword seqnum);
+typedef GtUword (*GtSeqColGetSeqlenFunc)(const GtSeqCol*,
+                                               GtUword filenum,
+                                               GtUword seqnum);
 
 struct GtSeqColClass {
   size_t size;

@@ -176,12 +176,12 @@ static int gt_readjoiner_spmtest_runner(GT_UNUSED int argc,
     {
       case GT_READJOINER_SPMTEST_BRUTEFORCE:
         gt_rdj_pairwise_exact(GT_OVLFIND_SPM, reads, !arguments->singlestrand,
-            false, false, (unsigned long)arguments->minmatchlength, true,
+            false, false, (GtUword)arguments->minmatchlength, true,
             gt_spmproc_show_ascii, NULL, false, NULL, NULL, NULL);
         break;
       case GT_READJOINER_SPMTEST_KMP:
         gt_rdj_pairwise_exact(GT_OVLFIND_SPM, reads, !arguments->singlestrand,
-            false, true, (unsigned long)arguments->minmatchlength, true,
+            false, true, (GtUword)arguments->minmatchlength, true,
             gt_spmproc_show_ascii, NULL, false, NULL, NULL, NULL);
         break;
       case GT_READJOINER_SPMTEST_GUSFIELD:
@@ -191,7 +191,7 @@ static int gt_readjoiner_spmtest_runner(GT_UNUSED int argc,
         if (gt_error_is_set(err))
           had_err = -1;
         else
-          gt_rdj_gusfield(ssar, (unsigned long)arguments->minmatchlength, true,
+          gt_rdj_gusfield(ssar, (GtUword)arguments->minmatchlength, true,
               true, arguments->singlestrand ? 0 :
               GT_DIV2(gt_encseq_num_of_sequences(reads)), gt_spmproc_show_ascii,
               NULL);

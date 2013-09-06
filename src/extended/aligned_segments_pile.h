@@ -41,7 +41,7 @@ GtAlignedSegmentsPile* gt_aligned_segments_pile_new(GtSamfileIterator *sfi,
    position if the function has been called before. */
 void                   gt_aligned_segments_pile_move_over_position(
                                                      GtAlignedSegmentsPile *asp,
-                                                     unsigned long position);
+                                                     GtUword position);
 
 /* Returns a <GtDlist> of <GtAlignedSegment> objects, sorted by end coordinate
    on the reference sequence. */
@@ -49,7 +49,7 @@ const GtDlist*         gt_aligned_segments_pile_get(
                                               const GtAlignedSegmentsPile *asp);
 
 /* Returns the number of segments currently on the pile. */
-unsigned long          gt_aligned_segments_pile_size(
+GtUword          gt_aligned_segments_pile_size(
                                                     GtAlignedSegmentsPile *asp);
 
 /* Switches on the enable edit tracking feature of the aligned segments in <asp>

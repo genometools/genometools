@@ -90,7 +90,7 @@ gt_uint64_key_mul_hash(uint64_t key)
 }
 
 static inline int
-gt_ht_ul_cmp(unsigned long a, unsigned long b)
+gt_ht_ul_cmp(GtUword a, GtUword b)
 {
   return (int) (a > b) - (int) (a < b);
 }

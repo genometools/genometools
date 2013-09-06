@@ -86,8 +86,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
   int had_err = 0;
   offset = offsetStart = random()%(sizeof (uint8_t) * CHAR_BIT);
   numRnd = random() % (MAX_RND_NUMS_uint8_t + 1);
-  gt_log_log("offset=%lu, numRnd=%lu\n",
-          (long unsigned)offsetStart, (long unsigned)numRnd);
+  gt_log_log("offset="GT_LU", numRnd="GT_LU"\n",
+          (GtUword)offsetStart, (GtUword)numRnd);
   {
     BitOffset numBits = sizeof (uint8_t) * CHAR_BIT * numRnd + offsetStart;
     randSrc = gt_malloc(sizeof (uint8_t)*numRnd);
@@ -117,8 +117,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
     gt_ensure(r == v);
     if (had_err)
     {
-      gt_log_log("Expected %"PRIu8", got %"PRIu8", i = %lu\n",
-              v, r, (unsigned long)i);
+      gt_log_log("Expected %"PRIu8", got %"PRIu8", i = "GT_LU"\n",
+              v, r, (GtUword)i);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
@@ -141,7 +141,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %d, got %d, i = "GT_LLU"\n",
-                lowBit, (int)r, (unsigned long long)i);
+                lowBit, (int)r, (GtUint64)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -201,10 +201,10 @@ gt_bitPackStringInt8_unit_test(GtError *err)
         {
           gt_log_log("Expected v0 %s v1, got v0 %s v1,\n for v0=%"
                   PRIu8" and v1=%"PRIu8",\n"
-                  "i = %lu, bits0=%u, bits1=%u\n",
+                  "i = "GT_LU", bits0=%u, bits1=%u\n",
                   (v0 > v1?">":(v0 < v1?"<":"==")),
                   (result > 0?">":(result < 0?"<":"==")), v0, v1,
-                  (unsigned long)i, bits0, bits1);
+                  (GtUword)i, bits0, bits1);
           freeResourcesAndReturn(had_err);
         }
         offset += bits0;
@@ -232,7 +232,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRIu8", got %"PRIu8",\n"
-                "i = %lu, bits=%u\n", v, r, (unsigned long)i, numBits);
+                "i = "GT_LU", bits=%u\n", v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -250,8 +250,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log( "Expected %"PRIu8", got %"PRIu8",\n"
-                " i = %lu, bits=%u\n",
-                v, r, (unsigned long)i, numBits);
+                " i = "GT_LU", bits=%u\n",
+                v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -290,8 +290,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
     if (had_err)
     {
       gt_log_log("Expected %"PRId8", got %"PRId8",\n"
-                  "i = %lu, bits=%u\n",
-                  v, r, (unsigned long)i, bits);
+                  "i = "GT_LU", bits=%u\n",
+                  v, r, (GtUword)i, bits);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
@@ -315,8 +315,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRId8", got %"PRId8",\n"
-                    "i = %lu, numBits=%u\n",
-                    v, r, (unsigned long)i, numBits);
+                    "i = "GT_LU", numBits=%u\n",
+                    v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -334,8 +334,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       gt_ensure(r == v);
       if (had_err)
       {
-        gt_log_log("Expected %"PRId8", got %"PRId8", i = %lu\n",
-                v, r, (unsigned long)i);
+        gt_log_log("Expected %"PRId8", got %"PRId8", i = "GT_LU"\n",
+                v, r, (GtUword)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -378,8 +378,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRIu8", got %"PRIu8",\n"
-                "i = %lu, bits=%u\n",
-                v, r, (unsigned long)i, numBits);
+                "i = "GT_LU", bits=%u\n",
+                v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -400,8 +400,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log( "Expected %"PRIu8", got %"PRIu8",\n"
-                " i = %lu, bits=%u\n",
-                v, r, (unsigned long)i, numBits);
+                " i = "GT_LU", bits=%u\n",
+                v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -447,8 +447,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected %"PRId8", got %"PRId8",\n"
-                    "i = %lu, numBits=%u\n",
-                    v, r, (unsigned long)i, numBits);
+                    "i = "GT_LU", numBits=%u\n",
+                    v, r, (GtUword)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
@@ -470,8 +470,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       gt_ensure(r == v);
       if (had_err)
       {
-        gt_log_log("Expected %"PRId8", got %"PRId8", i = %lu\n",
-                v, r, (unsigned long)i);
+        gt_log_log("Expected %"PRId8", got %"PRId8", i = "GT_LU"\n",
+                v, r, (GtUword)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -539,9 +539,9 @@ gt_bitPackStringInt8_unit_test(GtError *err)
         gt_log_log("Expected equality on bitstrings\n"
                     "offset = "GT_LLU", destOffset = "GT_LLU","
                     " numCopyBits="GT_LLU"\n",
-                    (unsigned long long)offset,
-                    (unsigned long long)destOffset,
-                    (unsigned long long)numCopyBits);
+                    (GtUint64)offset,
+                    (GtUint64)destOffset,
+                    (GtUint64)numCopyBits);
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
       }
@@ -588,8 +588,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
           if (had_err)
           {
             gt_log_log( "Expected %"PRId8", got %"PRId8",\n"
-                     "i = %lu, numBits=%u\n",
-                     v, r, (unsigned long)i, numBits);
+                     "i = "GT_LU", numBits=%u\n",
+                     v, r, (GtUword)i, numBits);
             freeResourcesAndReturn(had_err);
           }
           offset += numBits;
@@ -601,8 +601,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
           if (had_err)
           {
             gt_log_log("Expected %"PRId8", got %"PRId8",\n"
-                    "i = %lu, numBits=%u\n",
-                    cmpVal, r, (unsigned long)i, numBits);
+                    "i = "GT_LU", numBits=%u\n",
+                    cmpVal, r, (GtUword)i, numBits);
             freeResourcesAndReturn(had_err);
           }
           offset += numBits;
@@ -615,8 +615,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
           if (had_err)
           {
             gt_log_log("Expected %"PRId8", got %"PRId8",\n"
-                    "i = %lu, numBits=%u\n",
-                    v, r, (unsigned long)i, numBits);
+                    "i = "GT_LU", numBits=%u\n",
+                    v, r, (GtUword)i, numBits);
             freeResourcesAndReturn(had_err);
           }
           offset += numBits;
@@ -663,8 +663,8 @@ gt_bitPackStringInt8_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("Expected "GT_LLU", got "GT_LLU",\n"
-                "numBits=%u\n", (unsigned long long)bitCountRef,
-                (unsigned long long)bitCountCmp, numBits);
+                "numBits=%u\n", (GtUint64)bitCountRef,
+                (GtUint64)bitCountCmp, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;

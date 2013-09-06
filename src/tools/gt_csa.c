@@ -28,7 +28,7 @@
 
 typedef struct {
   bool verbose;
-  unsigned long join_length;
+  GtUword join_length;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } CSAArguments;

@@ -19,6 +19,7 @@
 #define FASTQ_H
 
 #include "core/file.h"
+#include "core/types_api.h"
 
 #define GT_FASTQ_SEPARATOR_SEQ '@'
 #define GT_FASTQ_SEPARATOR_QUAL '+'
@@ -29,8 +30,7 @@
    true, the description is output also before the qualities, otherwise
    only before the sequence. */
 void gt_fastq_show_entry(const char *description, const char *sequence,
-                         const char *qualities, unsigned long sequence_length,
-                         unsigned long width, bool repeat_description,
-                         GtFile *outfp);
+                         const char *qualities, GtUword sequence_length,
+                         GtUword width, bool repeat_description, GtFile *outfp);
 
 #endif

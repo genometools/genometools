@@ -29,41 +29,41 @@
 
 typedef struct
 {
-  unsigned long prefixofsuffixbits;
+  GtUword prefixofsuffixbits;
 } GtMssufpatLimdfsstate;
 
 typedef struct
 {
-  unsigned long patternlength,
+  GtUword patternlength,
                 mstatlength[GT_INTWORDSIZE],
                 *eqsvector;
-  unsigned long mstatwitnessleftbound[GT_INTWORDSIZE],
+  GtUword mstatwitnessleftbound[GT_INTWORDSIZE],
          mstatwitnessrightbound[GT_INTWORDSIZE];
 } GtMssufpatLimdfsconstinfo;
 
 #ifdef SKDEBUG
 
 static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
-                                unsigned long currentdepth,
+                                GtUword currentdepth,
                                 const Limdfsconstinfo *mti)
 {
   const GtMssufpatLimdfsstate *col = (const GtMssufpatLimdfsstate *) aliascol;
   bool first = true;
 
-  unsigned long idx, backmask;
+  GtUword idx, backmask;
 
-  printf("at depth %lu: [",currentdepth);
+  printf("at depth "GT_LU": [",currentdepth);
   for (idx=0, backmask = 1UL; idx<mti->patternlength; idx++, backmask <<= 1)
   {
     if (col->prefixofsuffixbits & backmask)
     {
       if (first)
       {
-        printf("%lu",idx);
+        printf(""GT_LU"",idx);
         first = false;
       } else
       {
-        printf(",%lu",idx);
+        printf(","GT_LU"",idx);
       }
     }
   }
@@ -87,7 +87,7 @@ static void pms_initdfsconstinfo(Limdfsconstinfo *mt,
                                  /* Variable argument list is as follows:
                                     unsigned int alphasize
                                     const GtUchar *pattern,
-                                    unsigned long patternlength
+                                    GtUword patternlength
                                  */
 {
   va_list ap;
@@ -96,9 +96,9 @@ static void pms_initdfsconstinfo(Limdfsconstinfo *mt,
 
   va_start(ap,alphasize);
   pattern = va_arg(ap, const GtUchar *);
-  mti->patternlength = va_arg(ap, unsigned long);
+  mti->patternlength = va_arg(ap, GtUword);
   va_end(ap);
-  gt_initeqsvector(mti->eqsvector,(unsigned long) alphasize,
+  gt_initeqsvector(mti->eqsvector,(GtUword) alphasize,
                 pattern,mti->patternlength);
 }
 
@@ -107,7 +107,7 @@ static void pms_extractdfsconstinfo(Processresult processresult,
                                     const void *patterninfo,
                                     Limdfsconstinfo *mt)
 {
-  unsigned long idx;
+  GtUword idx;
   GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
 
   for (idx=0; idx<mti->patternlength; idx++)
@@ -126,9 +126,9 @@ static void pms_freedfsconstinfo(Limdfsconstinfo **mtptr)
   *mtiptr = NULL;
 }
 
-static unsigned long zerosontheright(unsigned long v)
+static GtUword zerosontheright(GtUword v)
 {
-  unsigned long c;     /* c will be the number of zero bits on the right,
+  GtUword c;     /* c will be the number of zero bits on the right,
                          so if v is 1101000 (base 2), then c will be 3 */
   gt_assert(v > 0);
   if (v & 0x1)
@@ -174,10 +174,10 @@ static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
 {
   GtMssufpatLimdfsstate *column = (GtMssufpatLimdfsstate *) aliascolumn;
   GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
-  unsigned long idx;
+  GtUword idx;
 
   column->prefixofsuffixbits = ~0UL;
-  gt_assert(mti->patternlength <= (unsigned long) GT_INTWORDSIZE);
+  gt_assert(mti->patternlength <= (GtUword) GT_INTWORDSIZE);
   for (idx = 0; idx<mti->patternlength; idx++)
   {
     mti->mstatlength[idx] = 0;
@@ -188,10 +188,10 @@ static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
 
 static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                      DECLAREPTRDFSSTATE(aliascolumn),
-                                     unsigned long leftbound,
-                                     unsigned long rightbound,
-                                     GT_UNUSED unsigned long width,
-                                     unsigned long currentdepth,
+                                     GtUword leftbound,
+                                     GtUword rightbound,
+                                     GT_UNUSED GtUword width,
+                                     GtUword currentdepth,
                                      Limdfsconstinfo *mt)
 {
   GtMssufpatLimdfsstate *limdfsstate = (GtMssufpatLimdfsstate *) aliascolumn;
@@ -199,7 +199,7 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
 
   if (limdfsstate->prefixofsuffixbits > 0)
   {
-    unsigned long bitindex = 0,
+    GtUword bitindex = 0,
                   first1,
                   tmp = limdfsstate->prefixofsuffixbits;
     do
@@ -209,9 +209,9 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
       if (mti->mstatlength[bitindex+first1] < currentdepth)
       {
         /*
-        printf("set mstatlength[%lu]=%lu\n",bitindex+first1,currentdepth);
-        printf("set mstatwitnessleftbound[%lu]=%lu\n",bitindex+first1,
-                                                 (unsigned long) leftbound);
+        printf("set mstatlength["GT_LU"]="GT_LU"\n",bitindex+first1,currentdepth);
+        printf("set mstatwitnessleftbound["GT_LU"]="GT_LU"\n",bitindex+first1,
+                                                 (GtUword) leftbound);
         */
         mti->mstatlength[bitindex+first1] = currentdepth;
         mti->mstatwitnessleftbound[bitindex+first1] = leftbound;
@@ -229,7 +229,7 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
 
 static void pms_nextLimdfsstate(const Limdfsconstinfo *mt,
                                 DECLAREPTRDFSSTATE(aliasoutcol),
-                                unsigned long currentdepth,
+                                GtUword currentdepth,
                                 GtUchar currentchar,
                                 const DECLAREPTRDFSSTATE(aliasincol))
 {
@@ -256,19 +256,19 @@ static void pms_nextLimdfsstate(const Limdfsconstinfo *mt,
 #ifdef SKDEBUG
   bitsequence2string(buffer1,(Bitsequence) incol->prefixofsuffixbits);
   bitsequence2string(buffer2,(Bitsequence) outcol->prefixofsuffixbits);
-  printf("next(%s,%u,depth=%lu)->%s\n",buffer1,(unsigned int) currentchar,
+  printf("next(%s,%u,depth="GT_LU")->%s\n",buffer1,(unsigned int) currentchar,
                                        currentdepth,buffer2);
 #endif
 }
 
 static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
                                        DECLAREPTRDFSSTATE(aliascol),
-                                       unsigned long currentdepth,
+                                       GtUword currentdepth,
                                        GtUchar currentchar)
 {
 #ifdef SKDEBUG
   char buffer1[INTWORDSIZE+1], buffer2[INTWORDSIZE+1];
-  unsigned long tmp;
+  GtUword tmp;
 #endif
   GtMssufpatLimdfsstate *col = (GtMssufpatLimdfsstate *) aliascol;
   GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
@@ -281,7 +281,7 @@ static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
 #ifdef SKDEBUG
   bitsequence2string(buffer1,(uint32_t) tmp);
   bitsequence2string(buffer2,(uint32_t) col->prefixofsuffixbits);
-  printf("inplacenext(%s,%u,%lu)->%s\n",buffer1,(unsigned int) currentchar,
+  printf("inplacenext(%s,%u,"GT_LU")->%s\n",buffer1,(unsigned int) currentchar,
                                         currentdepth,buffer2);
 #endif
 }

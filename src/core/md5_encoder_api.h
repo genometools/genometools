@@ -27,7 +27,7 @@ GtMD5Encoder* gt_md5_encoder_new(void);
 /* Processes <message> of length <len> (max. block length 64 bytes) to be
    incorporated in the hash currently represented by <enc>. */
 void          gt_md5_encoder_add_block(GtMD5Encoder *enc, const char *message,
-                                       unsigned long len);
+                                       GtUword len);
 /* Finishes <enc> to produce the final MD5 value, written to the 16-byte array
    <output>. If <outstr> is not NULL, a \0-terminated string representation of
    the hash will be written to the 32-byte string buffer it points to. */

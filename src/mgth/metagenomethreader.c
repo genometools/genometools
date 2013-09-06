@@ -223,12 +223,12 @@ static GtOPrval mgth_parse_options(int *parsed_args,
   return oprval;
 }
 
-DEFINE_HASHMAP(char *, gt_cstr_nofree, unsigned long *,
+DEFINE_HASHMAP(char *, gt_cstr_nofree, GtUword *,
                ulp, gt_ht_cstr_elem_hash,
                gt_ht_cstr_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,,)
 
 typedef struct {
-  unsigned long *statpos;
+  GtUword *statpos;
   const char *string;
   ParseStruct *parsestruct;
 } GtMgthStatsPair;
@@ -258,7 +258,7 @@ static int statspair_cmp(const void *y, const void *z)
 }
 
 static enum iterator_op
-insert_into_outlist(char *key, unsigned long *value, void *data,
+insert_into_outlist(char *key, GtUword *value, void *data,
                     GT_UNUSED GtError *err)
 {
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;
@@ -282,7 +282,7 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
 
   /* Variablen/Zeiger zur Erstellung des Hashes fuer die GtBioseq-Strukturen
    */
-  unsigned long *querynum,
+  GtUword *querynum,
    *hitnum = NULL,
     nrofseq,
     loop_index;
@@ -386,11 +386,11 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
     parsestruct.result_hits = gt_str_new();
 
     /* diverse Zeiger auf Informationen aus dem XML-File */
-    parsestruct.matrix_info.query_from = gt_array_new(sizeof (unsigned long));
-    parsestruct.matrix_info.query_to = gt_array_new(sizeof (unsigned long));
-    parsestruct.matrix_info.query_frame = gt_array_new(sizeof (unsigned long));
-    parsestruct.matrix_info.hit_frame = gt_array_new(sizeof (unsigned long));
-    parsestruct.value_tmp = gt_array_new(sizeof (unsigned long));
+    parsestruct.matrix_info.query_from = gt_array_new(sizeof (GtUword));
+    parsestruct.matrix_info.query_to = gt_array_new(sizeof (GtUword));
+    parsestruct.matrix_info.query_frame = gt_array_new(sizeof (GtUword));
+    parsestruct.matrix_info.hit_frame = gt_array_new(sizeof (GtUword));
+    parsestruct.value_tmp = gt_array_new(sizeof (GtUword));
 
     /* mit dem schliessenden Iteration_hits XML-Tag wird im Programmablauf
        der Abschluss eines Query-Eintrages erkannt */
@@ -461,9 +461,9 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
 
     /* Speicher fuer die Statistik reservieren und zuweisen */
     parsestruct.hits_statistics.hitsnum =
-      gt_calloc(MGTH_MEMORY_SIZE, sizeof (unsigned long));
+      gt_calloc(MGTH_MEMORY_SIZE, sizeof (GtUword));
     parsestruct.hits_statistics.memory =
-      gt_calloc(MGTH_MEMORY_SIZE, sizeof (unsigned long));
+      gt_calloc(MGTH_MEMORY_SIZE, sizeof (GtUword));
 
     /* Variable der Umgebungsvariablen - genometools.org */
     parsestruct.err = err;
@@ -477,7 +477,7 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
     nrofseq = gt_bioseq_number_of_sequences(parsestruct.queryseq);
     /* Speicherbereich reservieren fuer Zeiger auf die Indices der
        Query-DNA-Eintraege in der GtBioseq-Struktur */
-    querynum = gt_calloc(nrofseq, sizeof (unsigned long));
+    querynum = gt_calloc(nrofseq, sizeof (GtUword));
     /* Hash erzeugen - Eintraege: Key - Query-FASTA-Def; Value - Zeiger
        auf deren Indices in der GtBioseq - Struktur */
     parsestruct.queryhash = gt_cstr_nofree_ulp_gt_hashmap_new();
@@ -509,7 +509,7 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
       nrofseq = gt_bioseq_number_of_sequences(parsestruct.hitseq);
       /* Speicherbereich reservieren fuer Zeiger auf die Indices der
          Hit-DNA-Eintraege in der GtBioseq-Struktur */
-      hitnum = gt_calloc(nrofseq, sizeof (unsigned long));
+      hitnum = gt_calloc(nrofseq, sizeof (GtUword));
       /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile; Value - Zeiger
          auf deren Indices in der GtBioseq - Struktur */
       parsestruct.hithash = gt_cstr_nofree_ulp_gt_hashmap_new();
@@ -577,7 +577,7 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
       gi_numbers_txt = gt_str_new();
 
       gt_str_set(gi_numbers_txt, "gi_numbers.txt");
-      unsigned long row_width = 150;
+      GtUword row_width = 150;
 
       if (gt_str_length(ARGUMENTS(giexpfile_name)) == 0 )
       {
@@ -631,7 +631,7 @@ int gt_metagenomethreader(int argc, const char **argv, GtError * err)
             nrofseq = gt_bioseq_number_of_sequences(parsestruct.hitseq);
             /* Speicherbereich reservieren fuer Zeiger auf die Indices der
                Hit-DNA-Eintraege in der GtBioseq-Struktur */
-            hitnum = gt_calloc(nrofseq, sizeof (unsigned long));
+            hitnum = gt_calloc(nrofseq, sizeof (GtUword));
             /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile;
                Value - Zeiger
                auf deren Indices in der GtBioseq - Struktur */

@@ -27,17 +27,17 @@
 
 #include "core/encseq.h"
 
-typedef unsigned long (*Greedygmatchforwardfunction) (const void *,
-                                                      unsigned long offset,
-                                                      unsigned long left,
-                                                      unsigned long right,
-                                                      unsigned long *,
+typedef GtUword (*Greedygmatchforwardfunction) (const void *,
+                                                      GtUword offset,
+                                                      GtUword left,
+                                                      GtUword right,
+                                                      GtUword *,
                                                       const GtUchar *,
                                                       const GtUchar *);
 
 int gt_findsubquerygmatchforward(const GtEncseq *encseq,
                               const void *genericindex,
-                              unsigned long totallength,
+                              GtUword totallength,
                               Greedygmatchforwardfunction gmatchforward,
                               const GtAlphabet *alphabet,
                               const GtStrArray *queryfilenames,
@@ -50,9 +50,9 @@ int gt_findsubquerygmatchforward(const GtEncseq *encseq,
 
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
-                          unsigned long totalwidth,
-                          const unsigned long *leftborder,
-                          const unsigned long *countspecialcodes,
+                          GtUword totalwidth,
+                          const GtUword *leftborder,
+                          const GtUword *countspecialcodes,
                           const GtAlphabet *alphabet,
                           unsigned int prefixlength,
                           const GtStrArray *queryfilenames,

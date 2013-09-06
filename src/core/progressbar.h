@@ -18,9 +18,11 @@
 #ifndef PROGRESSBAR_H
 #define PROGRESSBAR_H
 
+#include "core/types_api.h"
+
 /* Start showing a progress bar on stdout if possible. */
-void gt_progressbar_start(const unsigned long long *current_computation,
-                          unsigned long long number_of_computations);
+void gt_progressbar_start(const GtUint64 *current_computation,
+                          GtUint64 number_of_computations);
 
 /* Stop showing a progress bar. */
 void gt_progressbar_stop(void);

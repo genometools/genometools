@@ -33,8 +33,8 @@
 #include "extended/rbtree.h"
 
 typedef struct GtHuffmanSymbol {
-  unsigned long long freq;
-  unsigned long      symbol;
+  GtUint64 freq;
+  GtUword      symbol;
 } GtHuffmanSymbol;
 
 typedef struct GtHuffmanCode {
@@ -57,7 +57,7 @@ struct GtHuffman {
   GtHuffmanTree *root_huffman_tree;   /* stores the final huffmantree */
   GtRBTree      *rbt_root;            /* red black tree */
   GtHuffmanCode *code_tab;            /* table for encoding */
-  unsigned long  num_of_coded_symbols,/* number of nodes in red black tree, */
+  GtUword  num_of_coded_symbols,/* number of nodes in red black tree, */
                                       /* e.g. symbols with frequency > 0*/
                  num_of_symbols;      /* symbols with frequency >= 0 */
 };
@@ -68,7 +68,7 @@ struct GtHuffmanDecoder {
   GtHuffmanDecoderGetMemFunc mem_func;
   GtHuffmanTree             *cur_node;
   void                      *info;
-  unsigned long              cur_bitseq,
+  GtUword              cur_bitseq,
                              cur_bit,
                              pad_length,
                              length;
@@ -117,8 +117,8 @@ static void huffman_tree_delete(void *tree)
   }
 }
 
-static GtHuffmanTree *huffman_tree_new(unsigned long symbol,
-                                       unsigned long long freq)
+static GtHuffmanTree *huffman_tree_new(GtUword symbol,
+                                       GtUint64 freq)
 {
   GtHuffmanTree *huffptr;
   huffptr = gt_malloc(sizeof (GtHuffmanTree));
@@ -145,8 +145,8 @@ static void initialise_rbt(GtHuffman *huffman,
 {
   GtHuffmanTree *huffptr;
   GT_UNUSED GtHuffmanTree *huffptr2;
-  unsigned long i;
-  unsigned long long ret;
+  GtUword i;
+  GtUint64 ret;
   bool nodecreated;
 
   huffman->num_of_coded_symbols = 0;
@@ -167,7 +167,7 @@ static void initialise_rbt(GtHuffman *huffman,
       huffman->num_of_coded_symbols++;
     }
   }
-  gt_log_log("added %lu of %lu symbols as nodes",
+  gt_log_log("added "GT_LU" of "GT_LU" symbols as nodes",
              huffman->num_of_coded_symbols,
              huffman->num_of_symbols);
 }
@@ -178,9 +178,9 @@ static void make_huffman_tree(GtHuffman *huffman)
                 *n2 = NULL,
                 *newnode = NULL;
   GT_UNUSED GtHuffmanTree *n3 = NULL;
-  unsigned long i,
+  GtUword i,
                 symbol;
-  unsigned long long freq;
+  GtUint64 freq;
   int GT_UNUSED deleted;
   bool nodecreated = false;
   gt_assert(huffman->num_of_coded_symbols <= huffman->num_of_symbols);
@@ -241,8 +241,8 @@ static void print_huff_code(unsigned length, GtBitsequence code)
   }
 }
 
-static int store_codes(unsigned long symbol,
-                       GT_UNUSED unsigned long long freq,
+static int store_codes(GtUword symbol,
+                       GT_UNUSED GtUint64 freq,
                        const GtBitsequence code,
                        unsigned int code_len,
                        void *huffman)
@@ -253,21 +253,21 @@ static int store_codes(unsigned long symbol,
   return 0;
 }
 
-static int print_codes(unsigned long symbol,
-                       unsigned long long freq,
+static int print_codes(GtUword symbol,
+                       GtUint64 freq,
                        const GtBitsequence code,
                        unsigned int code_len,
                        GT_UNUSED void *unused)
 {
 #ifndef S_SPLINT_S
-  printf("control symbol %lu, freq "GT_LLU", codelength %u: ",
+  printf("control symbol "GT_LU", freq "GT_LLU", codelength %u: ",
          symbol,
          freq,
          code_len);
 #else
-  printf("control symbol %lu, freq %lu, codelength %u: ",
+  printf("control symbol "GT_LU", freq "GT_LU", codelength %u: ",
          symbol,
-         (unsigned long) freq,
+         (GtUword) freq,
          code_len);
 #endif
   print_huff_code(code_len, code);
@@ -276,8 +276,8 @@ static int print_codes(unsigned long symbol,
   return 0;
 }
 
-static int calc_size(GT_UNUSED unsigned long symbol,
-                     unsigned long long freq,
+static int calc_size(GT_UNUSED GtUword symbol,
+                     GtUint64 freq,
                      GT_UNUSED const GtBitsequence code,
                      unsigned int code_len,
                      void *huffman)
@@ -338,7 +338,7 @@ static int visit_huffman_leaves_rec(GtHuffmanTree *h_tree,
 
 GtHuffman *gt_huffman_new(const void *distribution,
                           GtDistrFunc distr_func,
-                          unsigned long num_of_symbols)
+                          GtUword num_of_symbols)
 {
   GtHuffman *huff;
 
@@ -403,7 +403,7 @@ void gt_huffman_print_codes(const GtHuffman *huffman)
 }
 
 void gt_huffman_encode(const GtHuffman *huffman,
-                       unsigned long symbol,
+                       GtUword symbol,
                        GtBitsequence *code,
                        unsigned int *codelength)
 {
@@ -413,13 +413,13 @@ void gt_huffman_encode(const GtHuffman *huffman,
   *codelength = huffman->code_tab[symbol].numofbits;
 }
 
-unsigned long gt_huffman_numofsymbols(const GtHuffman *huffman)
+GtUword gt_huffman_numofsymbols(const GtHuffman *huffman)
 {
   gt_assert(huffman != NULL);
   return huffman->num_of_coded_symbols;
 }
 
-unsigned long gt_huffman_totalnumofsymbols(const GtHuffman *huffman)
+GtUword gt_huffman_totalnumofsymbols(const GtHuffman *huffman)
 {
   gt_assert(huffman != NULL);
   return huffman->num_of_symbols;
@@ -427,9 +427,9 @@ unsigned long gt_huffman_totalnumofsymbols(const GtHuffman *huffman)
 
 GtHuffmanDecoder *gt_huffman_decoder_new(GtHuffman *huffman,
                                          GtBitsequence *bitsequence,
-                                         unsigned long length,
-                                         unsigned long bit_offset,
-                                         unsigned long pad_length)
+                                         GtUword length,
+                                         GtUword bit_offset,
+                                         GtUword pad_length)
 {
   GtHuffmanDecoder *huff_decoder = gt_malloc(sizeof (*huff_decoder));
 
@@ -473,7 +473,7 @@ GtHuffmanDecoder *gt_huffman_decoder_new_from_memory(
     gt_error_set(err, "error calling mem_func");
     return NULL;
   }
-  gt_log_log("%lu, %lu, %lu",huff_decoder->length,huff_decoder->cur_bit,
+  gt_log_log(""GT_LU", "GT_LU", "GT_LU"",huff_decoder->length,huff_decoder->cur_bit,
              huff_decoder->pad_length);
   gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
   gt_assert(huff_decoder->mem_func_stat == 1);
@@ -499,7 +499,7 @@ int gt_huffman_decoder_get_new_mem_chunk(GtHuffmanDecoder *huff_decoder,
     return huff_decoder->mem_func_stat;
   }
   huff_decoder->cur_bitseq = 0;
-  gt_log_log("%lu, %lu, %lu",huff_decoder->length,huff_decoder->cur_bit,
+  gt_log_log(""GT_LU", "GT_LU", "GT_LU"",huff_decoder->length,huff_decoder->cur_bit,
              huff_decoder->pad_length);
   gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
   return had_err;
@@ -507,15 +507,15 @@ int gt_huffman_decoder_get_new_mem_chunk(GtHuffmanDecoder *huff_decoder,
 
 int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
                             GtArray *symbols,
-                            unsigned long symbols_to_read,
+                            GtUword symbols_to_read,
                             GtError *err)
 {
   int had_err = 0,
       bits_to_read = GT_INTWORDSIZE;
-  unsigned long read_symbols = 0;
+  GtUword read_symbols = 0;
 
   gt_assert((symbols_to_read > 0) && huff_decoder &&
-            (gt_array_elem_size(symbols) == sizeof (unsigned long)));
+            (gt_array_elem_size(symbols) == sizeof (GtUword)));
 
   if (huff_decoder->cur_bitseq == huff_decoder->length - 1)
     gt_safe_assign(bits_to_read, (GT_INTWORDSIZE - huff_decoder->pad_length));
@@ -537,7 +537,7 @@ int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
     /* huffman was initialized with empty dist */
     gt_assert(huff_decoder->cur_node != NULL);
 
-    if (!had_err && huff_decoder->cur_bit == (unsigned long) bits_to_read) {
+    if (!had_err && huff_decoder->cur_bit == (GtUword) bits_to_read) {
       huff_decoder->cur_bitseq++;
 
       if (huff_decoder->cur_bitseq == huff_decoder->length - 1)
@@ -557,7 +557,7 @@ int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
                                  &huff_decoder->cur_bit,
                                  &huff_decoder->pad_length,
                                  huff_decoder->info);
-        gt_log_log("%lu, %lu, %lu",huff_decoder->length,huff_decoder->cur_bit,
+        gt_log_log(""GT_LU", "GT_LU", "GT_LU"",huff_decoder->length,huff_decoder->cur_bit,
                    huff_decoder->pad_length);
         if (huff_decoder->mem_func_stat == -1) {
           gt_error_set(err, "error calling mem_func");
@@ -621,7 +621,7 @@ GtHuffmanBitwiseDecoder *gt_huffman_bitwise_decoder_new(GtHuffman *huffman,
 }
 
 int gt_huffman_bitwise_decoder_next(GtHuffmanBitwiseDecoder *hbwd,
-                                    bool bit, unsigned long *symbol,
+                                    bool bit, GtUword *symbol,
                                     GT_UNUSED GtError *err)
 {
   int status = 0;
@@ -653,9 +653,9 @@ void gt_huffman_bitwise_decoder_delete(GtHuffmanBitwiseDecoder *hbwd)
   gt_free(hbwd);
 }
 
-unsigned long long unit_test_distr_func(const void *distr, unsigned long symbol)
+GtUint64 unit_test_distr_func(const void *distr, GtUword symbol)
 {
-  unsigned long long *distrull = (unsigned long long*) distr;
+  GtUint64 *distrull = (GtUint64*) distr;
   return distrull[symbol];
 }
 
@@ -663,14 +663,14 @@ static int test_bitwise(GtError *err)
 {
   int had_err = 0,
       stat;
-  unsigned long i,j,
+  GtUword i,j,
                 symbol;
   unsigned length1 = 0,
            length2 = 0;
   GtHuffman *huffman;
   GtHuffmanBitwiseDecoder *hbwd;
   GtBitsequence bitseq;
-  unsigned long long distr[6] = {45ULL, 16ULL, 13ULL, 12ULL, 9ULL, 5ULL};
+  GtUint64 distr[6] = {45ULL, 16ULL, 13ULL, 12ULL, 9ULL, 5ULL};
 
   huffman = gt_huffman_new(&distr,unit_test_distr_func, 6UL);
 
@@ -688,7 +688,7 @@ static int test_bitwise(GtError *err)
       j++;
     }
     gt_ensure(stat == 0);
-    gt_ensure(j == (unsigned long) length2);
+    gt_ensure(j == (GtUword) length2);
     gt_ensure(symbol == i);
     length1 = length2;
   }
@@ -749,7 +749,7 @@ static int test_bitwise(GtError *err)
 
 typedef struct huffman_unit_test_meminfo {
   GtBitsequence *data;
-  unsigned long  chunk,
+  GtUword  chunk,
                  chunks,
                  size,
                  lastchunk_size,
@@ -757,9 +757,9 @@ typedef struct huffman_unit_test_meminfo {
 } HuffmanUnitTestMeminfo;
 
 static int huffman_unit_get_next_block(GtBitsequence **bits,
-                                       unsigned long *length,
-                                       unsigned long *offset,
-                                       unsigned long *pad_length,
+                                       GtUword *length,
+                                       GtUword *offset,
+                                       GtUword *pad_length,
                                        void *meminfo)
 {
   HuffmanUnitTestMeminfo *info = (HuffmanUnitTestMeminfo*) meminfo;
@@ -787,18 +787,18 @@ int test_mem(GtError *err)
   unsigned int code_len;
   int decoder_stat = 1,
       had_err = 0;
-  unsigned long const max_num = (unsigned long) (1000 * gt_rand_0_to_1() + 100),
-                      dist_size = (unsigned long) (10 + 10 * gt_rand_0_to_1()),
-                      step_size = (unsigned long) (10 + 5 * gt_rand_0_to_1());
-  unsigned long range = 0,
+  GtUword const max_num = (GtUword) (1000 * gt_rand_0_to_1() + 100),
+                      dist_size = (GtUword) (10 + 10 * gt_rand_0_to_1()),
+                      step_size = (GtUword) (10 + 5 * gt_rand_0_to_1());
+  GtUword range = 0,
                 idx, idx_j;
   uint64_t total_bits;
-  unsigned long long *distribution = gt_malloc(sizeof (*distribution) *
+  GtUint64 *distribution = gt_malloc(sizeof (*distribution) *
                                      dist_size);
   GtBitsequence buffer = 0,
                 code;
   GtArray *numbers = gt_array_new(sizeof (unsigned char));
-  GtArray *encoded = gt_array_new(sizeof (unsigned long));
+  GtArray *encoded = gt_array_new(sizeof (GtUword));
   GtArray *codes = gt_array_new(sizeof (GtBitsequence));
   GtHuffman *huff = NULL;
   GtHuffmanDecoder *huffdec = NULL;
@@ -888,17 +888,17 @@ int test_mem(GtError *err)
     gt_ensure(decoder_stat == 1);
     decoder_stat = gt_huffman_decoder_next(huffdec,
                                            encoded,
-                                           (unsigned long) step_size,
+                                           (GtUword) step_size,
                                            err);
     if (decoder_stat == 1)
-      gt_ensure(gt_array_size(encoded) == (unsigned long) step_size);
+      gt_ensure(gt_array_size(encoded) == (GtUword) step_size);
     else
       gt_ensure(decoder_stat == 0);
 
     gt_ensure(decoder_stat != -1);
     if (!had_err) {
       for (idx_j = 0; !had_err && idx_j < gt_array_size(encoded); idx_j++) {
-        unsigned long ist = *(unsigned long*) gt_array_get(encoded, idx_j);
+        GtUword ist = *(GtUword*) gt_array_get(encoded, idx_j);
         unsigned char soll =
           *(unsigned char*)gt_array_get(numbers, idx + idx_j);
         gt_ensure((ist == soll));
@@ -940,7 +940,7 @@ int test_mem(GtError *err)
     gt_ensure(decoder_stat != -1);
     if (!had_err) {
       for (idx_j = 0; !had_err && idx_j < gt_array_size(encoded); idx_j++) {
-        unsigned long ist = *(unsigned long*)gt_array_get(encoded, idx_j);
+        GtUword ist = *(GtUword*)gt_array_get(encoded, idx_j);
         unsigned char soll =
           *(unsigned char*)gt_array_get(numbers, idx + idx_j);
         gt_ensure((ist == soll));

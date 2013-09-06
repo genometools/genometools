@@ -34,8 +34,8 @@ GtSuftabparts_rc *gt_suftabparts_rc_new(unsigned int numofparts,
                                   const GtBcktab *bcktab,
                                   const GtRandomcodestab *fct,
                                   const GtSfxmappedrangelist *sfxmrlist,
-                                  unsigned long numofsuffixestoinsert,
-                                  unsigned long fullspecials,
+                                  GtUword numofsuffixestoinsert,
+                                  GtUword fullspecials,
                                   GtLogger *logger);
 
 void gt_suftabparts_rc_delete(GtSuftabparts_rc *suftabparts_rc);
@@ -49,35 +49,35 @@ GtCodetype gt_suftabparts_rc_maxindex(unsigned int part,
 GtCodetype gt_suftabparts_rc_maxindex_last(
     const GtSuftabparts_rc *suftabparts_rc);
 
-unsigned long gt_suftabparts_rc_offset(unsigned int part,
+GtUword gt_suftabparts_rc_offset(unsigned int part,
                                     const GtSuftabparts_rc *suftabparts_rc);
 
-unsigned long gt_suftabparts_rc_sumofwidth(unsigned int part,
+GtUword gt_suftabparts_rc_sumofwidth(unsigned int part,
                                         const GtSuftabparts_rc *suftabparts_rc);
 
-unsigned long gt_suftabparts_rc_widthofpart(unsigned int part,
+GtUword gt_suftabparts_rc_widthofpart(unsigned int part,
     const GtSuftabparts_rc *suftabparts_rc);
 
-unsigned long gt_suftabparts_rc_largest_width(
+GtUword gt_suftabparts_rc_largest_width(
     const GtSuftabparts_rc *suftabparts_rc);
 
 unsigned int gt_suftabparts_rc_numofparts(
     const GtSuftabparts_rc *suftabparts_rc);
 
-unsigned long gt_suftabparts_rc_largestsizemappedpartwise(
+GtUword gt_suftabparts_rc_largestsizemappedpartwise(
                                        const GtSuftabparts_rc *suftabparts_rc);
 
 double gt_suftabparts_rc_variance(const GtSuftabparts_rc *suftabparts_rc);
 
 int gt_suftabparts_rc_fit_memlimit(size_t estimatedspace,
-                                unsigned long maximumspace,
+                                GtUword maximumspace,
                                 const GtBcktab *bcktab,
                                 const GtRandomcodestab *fct,
                                 const GtSfxmappedrangelist *sfxmrlist,
-                                unsigned long totallength,
+                                GtUword totallength,
                                 unsigned int bitsforseqnumrelpos,
-                                unsigned long specialcharacters,
-                                unsigned long numofsuffixestosort,
+                                GtUword specialcharacters,
+                                GtUword numofsuffixestosort,
                                 bool suftabuint,
                                 GtError *err);
 

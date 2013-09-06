@@ -19,12 +19,14 @@
 #ifndef CODETYPE_H
 #define CODETYPE_H
 
+#include "core/types_api.h"
+
 /* This type is integer codes computed from strings of some fixed length. */
 
-typedef unsigned long GtCodetype;
+typedef GtUword GtCodetype;
 
 /* The following is the format character this the GtCodetype. */
 
-#define FormatGtCodetype "%lu"
+#define FormatGtCodetype ""GT_LU""
 
 #endif

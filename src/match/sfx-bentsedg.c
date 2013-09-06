@@ -44,7 +44,7 @@
 
 #define DEREFSTOPPOSSEQ(VAR,POS,STOPPOS,ESR)\
         (((POS) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHARSEQ(ESR))) ?\
-        ((unsigned long) VAR) : GT_UNIQUEINT(POS))
+        ((GtUword) VAR) : GT_UNIQUEINT(POS))
 
 #define DEREFSEQ(VAR,POS,ESR) DEREFSTOPPOSSEQ(VAR,POS,bsr->totallength,ESR)
 
@@ -74,13 +74,13 @@
                         depth)\
                 < bsr->totallength &&\
                 ISNOTSPECIAL(TMPVAR = ACCESSCHARRAND(cptr)))\
-                    ? ((unsigned long) TMPVAR) : GT_UNIQUEINT(cptr))
+                    ? ((GtUword) TMPVAR) : GT_UNIQUEINT(cptr))
 
 typedef GtEndofTwobitencoding GtSfxcmp;
 
 #define PTR2INTSTOREPOS(TMPVAR,SUBBUCKETLEFT,IDX,POSASSIGNMENT)\
         {\
-          unsigned long pos\
+          GtUword pos\
             = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX);\
           POSASSIGNMENT;\
           TMPVAR.referstartpos = pos;\
@@ -113,7 +113,7 @@ typedef GtEndofTwobitencoding GtSfxcmp;
 
 typedef struct
 {
-  unsigned long subbucketleft,
+  GtUword subbucketleft,
                 width,
                 depth;
 } GtMKVstack;
@@ -121,14 +121,14 @@ typedef struct
 typedef struct
 {
   GtEndofTwobitencoding etbe;
-  unsigned long suftaboffset;
+  GtUword suftaboffset;
 } GtMedianinfo;
 
 typedef GtMedianinfo GtMedianElem;
 
 typedef struct
 {
-  unsigned long suffix;
+  GtUword suffix;
   unsigned char lcpwithpivot;
   signed char cmpresult;
 } GtCountingsortinfo;
@@ -142,7 +142,7 @@ typedef struct
                  *esr2;
   GtReadmode readmode;
   bool fwd, complement;
-  unsigned long totallength;
+  GtUword totallength;
   GtArrayGtMKVstack mkvauxstack; /* XXX be careful with threads */
   GtLcpvalues *tableoflcpvalues;
   GtMedianinfo *medianinfospace;
@@ -151,21 +151,21 @@ typedef struct
   unsigned int sortmaxdepth,
                prefixlength;
   GtBlindtrie *blindtrie;
-  unsigned long leftlcpdist[GT_UNITSIN2BITENC],
+  GtUword leftlcpdist[GT_UNITSIN2BITENC],
                 rightlcpdist[GT_UNITSIN2BITENC];
   GtSuffixsortspace *sssp;
   GtProcessunsortedsuffixrange processunsortedsuffixrange;
   void *processunsortedsuffixrangeinfo;
   bool *equalwithprevious;
   size_t sizeofworkspace;
-  unsigned long countinsertionsort,
+  GtUword countinsertionsort,
                 counttqsort,
                 countshortreadsort,
                 countradixsort,
                 countcountingsort,
                 countbltriesort,
                 srs_maxremain; /* only relevant for short read sort */
-  unsigned long radixsortminwidth,
+  GtUword radixsortminwidth,
                 radixsortmaxwidth,
                 shortreadsort_maxwidth;
   GtShortreadsortworkinfo *srsw;
@@ -174,10 +174,10 @@ typedef struct
 } GtBentsedgresources;
 
 #ifdef WITHCHECKSTARTPOINTER
-static unsigned int checkstartpointorder(const unsigned long *left,
-                                         const unsigned long *right)
+static unsigned int checkstartpointorder(const GtUword *left,
+                                         const GtUword *right)
 {
-  const unsigned long *ptr;
+  const GtUword *ptr;
   bool ascending;
 
   gt_assert(left < right);
@@ -207,14 +207,14 @@ static unsigned int checkstartpointorder(const unsigned long *left,
 }
 #endif
 
-static unsigned long medianof3cmpcharbychar(const GtBentsedgresources *bsr,
-                                            unsigned long subbucketleft,
-                                            unsigned long depth,
-                                            unsigned long a,
-                                            unsigned long b,
-                                            unsigned long c)
+static GtUword medianof3cmpcharbychar(const GtBentsedgresources *bsr,
+                                            GtUword subbucketleft,
+                                            GtUword depth,
+                                            GtUword a,
+                                            GtUword b,
+                                            GtUword c)
 {
-  unsigned long vala, valb, valc, cptr;
+  GtUword vala, valb, valc, cptr;
   GtUchar tmpavar, tmpbvar;
 
   CMPCHARBYCHARPTR2INT(vala,subbucketleft,tmpavar,a);
@@ -233,12 +233,12 @@ static unsigned long medianof3cmpcharbychar(const GtBentsedgresources *bsr,
       : (valb > valc ? b : (vala < valc ? a : c));
 }
 
-static unsigned long medianof3(const GtBentsedgresources *bsr,
-                               unsigned long subbucketleft,
-                               unsigned long depth,
-                               unsigned long a,
-                               unsigned long b,
-                               unsigned long c)
+static GtUword medianof3(const GtBentsedgresources *bsr,
+                               GtUword subbucketleft,
+                               GtUword depth,
+                               GtUword a,
+                               GtUword b,
+                               GtUword c)
 {
   GtSfxcmp vala, valb, valc;
   GtCommonunits commonunits;
@@ -268,11 +268,11 @@ static unsigned long medianof3(const GtBentsedgresources *bsr,
 }
 
 static void bs_insertionsort(GtBentsedgresources *bsr,
-                             unsigned long subbucketleft,
-                             unsigned long width,
-                             unsigned long offset)
+                             GtUword subbucketleft,
+                             GtUword width,
+                             GtUword offset)
 {
-  unsigned long sval1, sval2, pm, pl, startpos1, startpos2, lcplen = 0;
+  GtUword sval1, sval2, pm, pl, startpos1, startpos2, lcplen = 0;
   int retval;
   GtCommonunits commonunits;
 
@@ -299,7 +299,7 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
         }
         for (;;)
         {
-          unsigned long ccs, cct;
+          GtUword ccs, cct;
           GtUchar tmp1, tmp2;
 
           ccs = DEREFSEQ(tmp1,startpos1,bsr->esr1);
@@ -316,7 +316,7 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
       } else
       {
 #ifdef SKDEBUG
-        printf("%s[%lu,%lu] at offset %lu\n",__func__,sval1,sval2,offset);
+        printf("%s["GT_LU","GT_LU"] at offset "GT_LU"\n",__func__,sval1,sval2,offset);
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
                                  bsr->complement,
@@ -362,12 +362,12 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
 }
 
 static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
-                                     unsigned long subbucketleft,
-                                     unsigned long width,
-                                     unsigned long offset,
-                                     unsigned long sortmaxdepth)
+                                     GtUword subbucketleft,
+                                     GtUword width,
+                                     GtUword offset,
+                                     GtUword sortmaxdepth)
 {
-  unsigned long sval1, sval2, pm, pl, startpos1, startpos2,
+  GtUword sval1, sval2, pm, pl, startpos1, startpos2,
                 lcplen = 0, idx = 0;
   int retval;
   bool tempb;
@@ -382,7 +382,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
       sval2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pl);
       if (bsr->sfxstrategy->cmpcharbychar)
       {
-        unsigned long endpos1, endpos2;
+        GtUword endpos1, endpos2;
 
         endpos1 = sval1+sortmaxdepth;
         if (endpos1 > bsr->totallength)
@@ -408,7 +408,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
         }
         for (;;)
         {
-          unsigned long ccs, cct;
+          GtUword ccs, cct;
           GtUchar tmp1, tmp2;
 
           ccs = DEREFSTOPPOSSEQ(tmp1,startpos1,endpos1,bsr->esr1);
@@ -449,8 +449,8 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
         }
       }
 #ifdef SKDEBUG
-      printf("cmp %lu and %lu: retval = %d, lcplen = %lu\n",
-             sval1, sval2, retval, (unsigned long) lcplen);
+      printf("cmp "GT_LU" and "GT_LU": retval = %d, lcplen = "GT_LU"\n",
+             sval1, sval2, retval, (GtUword) lcplen);
 #endif
       if (bsr->tableoflcpvalues != NULL)
       {
@@ -482,17 +482,17 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
   }
   if (idx > 0)
   {
-    unsigned long equalsrangewidth = 0;
-    unsigned long bucketleftidx
+    GtUword equalsrangewidth = 0;
+    GtUword bucketleftidx
      = gt_suffixsortspace_bucketleftidx_get(bsr->sssp);
 #ifdef SKDEBUG
-    printf("ordered suffix %lu\n",gt_suffixsortspace_get(bsr->sssp,
+    printf("ordered suffix "GT_LU"\n",gt_suffixsortspace_get(bsr->sssp,
                                                          subbucketleft,0));
 #endif
     for (idx = 1UL; idx < width; idx++)
     {
 #ifdef SKDEBUG
-      printf("ordered suffix %lu, equalwithprevious=%s\n",
+      printf("ordered suffix "GT_LU", equalwithprevious=%s\n",
               gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx),
               bsr->equalwithprevious[idx] ? "true" : "false");
 #endif
@@ -505,7 +505,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
         if (equalsrangewidth > 0)
         {
 #ifdef SKDEBUG
-          printf("process interval of width %lu\n",
+          printf("process interval of width "GT_LU"\n",
                  equalsrangewidth + 1);
 #endif
           if (bsr->processunsortedsuffixrange != NULL)
@@ -523,7 +523,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
     if (equalsrangewidth > 0)
     {
 #ifdef SKDEBUG
-      printf("process interval of width %lu\n",
+      printf("process interval of width "GT_LU"\n",
              equalsrangewidth + 1);
 #endif
       if (bsr->processunsortedsuffixrange != NULL)
@@ -557,7 +557,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
  */
 
 static GtMedianElem *quickmedian (bool fwd,bool complement,
-                                  GtMedianElem *arr,unsigned long width)
+                                  GtMedianElem *arr,GtUword width)
 {
   GtMedianElem *low, *high, *median, *middle, *ll, *hh;
   GtCommonunits commonunits;
@@ -639,9 +639,9 @@ static void checkmedian(bool fwd,
                         bool complement,
                         const GtMedianinfo *median,
                         const GtMedianinfo *space,
-                        unsigned long width)
+                        GtUword width)
 {
-  unsigned long sum1, sum2, idx, smaller = 0, larger = 0, equal = 0, equalpart;
+  GtUword sum1, sum2, idx, smaller = 0, larger = 0, equal = 0, equalpart;
   unsigned int commonunits;
   int cmp;
 
@@ -690,19 +690,19 @@ static void checkmedian(bool fwd,
       }
     }
   }
-  fprintf(stderr,"problem with equal=%lu,smaller=%lu,larger=%lu\n",
+  fprintf(stderr,"problem with equal="GT_LU",smaller="GT_LU",larger="GT_LU"\n",
                   equal,smaller,larger);
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 #endif
 
-static unsigned long realmedian(const GtBentsedgresources *bsr,
-                                unsigned long subbucketleft,
-                                unsigned long width,
-                                unsigned long depth)
+static GtUword realmedian(const GtBentsedgresources *bsr,
+                                GtUword subbucketleft,
+                                GtUword width,
+                                GtUword depth)
 {
   GtMedianinfo *medianptr;
-  unsigned long idx;
+  GtUword idx;
 
   for (idx = 0; idx < width; idx++)
   {
@@ -719,18 +719,18 @@ static unsigned long realmedian(const GtBentsedgresources *bsr,
 
 #define MINMEDIANOF9WIDTH 31UL
 
-static unsigned long cmpcharbychardelivermedian(const GtBentsedgresources *bsr,
-                                                unsigned long subbucketleft,
-                                                unsigned long width,
-                                                unsigned long depth)
+static GtUword cmpcharbychardelivermedian(const GtBentsedgresources *bsr,
+                                                GtUword subbucketleft,
+                                                GtUword width,
+                                                GtUword depth)
 {
-  unsigned long pl = 0,
+  GtUword pl = 0,
                 pm = GT_DIV2(width),
                 pr = width - 1;
 
   if (width >= MINMEDIANOF9WIDTH)
   { /* On big arrays, pseudomedian of 9 */
-    unsigned long offset, doubleoffset;
+    GtUword offset, doubleoffset;
     offset = GT_DIV8(width);
     doubleoffset = GT_MULT2(offset);
     pl = medianof3cmpcharbychar(bsr,subbucketleft,depth,pl,pl+offset,
@@ -744,13 +744,13 @@ static unsigned long cmpcharbychardelivermedian(const GtBentsedgresources *bsr,
   return medianof3cmpcharbychar(bsr,subbucketleft,depth,pl,pm,pr);
 }
 
-static unsigned long blockcmpdelivermedian(const GtBentsedgresources *bsr,
-                                           unsigned long subbucketleft,
-                                           unsigned long width,
-                                           unsigned long depth,
-                                           unsigned long maxwidthrealmedian)
+static GtUword blockcmpdelivermedian(const GtBentsedgresources *bsr,
+                                           GtUword subbucketleft,
+                                           GtUword width,
+                                           GtUword depth,
+                                           GtUword maxwidthrealmedian)
 {
-  unsigned long pl = 0,
+  GtUword pl = 0,
                 pm = GT_DIV2(width),
                 pr = width - 1;
 
@@ -758,7 +758,7 @@ static unsigned long blockcmpdelivermedian(const GtBentsedgresources *bsr,
   {
     if (width > maxwidthrealmedian)
     { /* On big arrays, pseudomedian of 9 */
-      unsigned long offset, doubleoffset;
+      GtUword offset, doubleoffset;
       offset = GT_DIV8(width);
       doubleoffset = GT_MULT2(offset);
       pl = medianof3(bsr,subbucketleft,depth,pl,pl+offset,
@@ -780,11 +780,11 @@ static unsigned long blockcmpdelivermedian(const GtBentsedgresources *bsr,
 
 /*
 static void showcountingsortinfo(const GtCountingsortinfo *countingsortinfo,
-                              unsigned long idx)
+                              GtUword idx)
 {
-  printf("countingsortinfo[%lu]=(%lu,",idx,
-          (unsigned long) countingsortinfo[idx].suffix);
-  printf("%lu,",(unsigned long) countingsortinfo[idx].lcpwithpivot);
+  printf("countingsortinfo["GT_LU"]=("GT_LU",",idx,
+          (GtUword) countingsortinfo[idx].suffix);
+  printf(""GT_LU",",(GtUword) countingsortinfo[idx].lcpwithpivot);
   printf("%d)\n",countingsortinfo[idx].cmpresult);
 }
 */
@@ -792,10 +792,10 @@ static void showcountingsortinfo(const GtCountingsortinfo *countingsortinfo,
 #undef CHECKFORWHOLELEAFS
 #ifdef CHECKFORWHOLELEAFS
 static bool gt_containswholeleaf(const GtBentsedgresources *bsr,
-                                 unsigned long subbucketleft,
-                                 unsigned long width)
+                                 GtUword subbucketleft,
+                                 GtUword width)
 {
-  unsigned long position, idx;
+  GtUword position, idx;
 
   for (idx = 0;  idx < width; idx++)
   {
@@ -809,14 +809,14 @@ static bool gt_containswholeleaf(const GtBentsedgresources *bsr,
   }
   return false;
 }
-static unsigned long saved_intervals = 0, saved_width = 0;
+static GtUword saved_intervals = 0, saved_width = 0;
 #endif
 
 static bool multistrategysort(GtBentsedgresources *bsr,
-                              unsigned long subbucketleft,
-                              unsigned long width,
-                              unsigned long depth,
-                              unsigned long sortmaxdepth)
+                              GtUword subbucketleft,
+                              GtUword width,
+                              GtUword depth,
+                              GtUword sortmaxdepth)
 {
   gt_assert(width > 1UL);
   if (width <= bsr->sfxstrategy->maxinsertionsort)
@@ -847,9 +847,9 @@ static bool multistrategysort(GtBentsedgresources *bsr,
 }
 
 static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
-                                     unsigned long subbucketleft,
-                                     unsigned long width,
-                                     unsigned long depth)
+                                     GtUword subbucketleft,
+                                     GtUword width,
+                                     GtUword depth)
 {
   gt_assert(width > 1UL);
   if (width > 1UL)
@@ -902,7 +902,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                                  subbucketleft,
                                  width,
                                  depth,
-                                 (unsigned long) bsr->sortmaxdepth);
+                                 (GtUword) bsr->sortmaxdepth);
       if (bsr->sortmaxdepth > 0)
       {
         gt_shortreadsort_sssp_add_unsorted(
@@ -910,14 +910,14 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                               gt_suffixsortspace_bucketleftidx_get(bsr->sssp),
                               subbucketleft,
                               width,
-                              (unsigned long) bsr->sortmaxdepth,
+                              (GtUword) bsr->sortmaxdepth,
                               bsr->processunsortedsuffixrange,
                               bsr->processunsortedsuffixrangeinfo);
       }
       bsr->countshortreadsort++;
       return;
     }
-    if (bsr->sortmaxdepth > 0 && depth >= (unsigned long) bsr->sortmaxdepth)
+    if (bsr->sortmaxdepth > 0 && depth >= (GtUword) bsr->sortmaxdepth)
     {
       if (bsr->processunsortedsuffixrange != NULL)
       {
@@ -930,7 +930,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       return;
     }
     if (multistrategysort(bsr,subbucketleft,width,depth,
-                          (unsigned long) bsr->sortmaxdepth))
+                          (GtUword) bsr->sortmaxdepth))
     {
       return;
     }
@@ -944,17 +944,17 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
 }
 
 static void sarrcountingsort(GtBentsedgresources *bsr,
-                             unsigned long subbucketleft,
-                             unsigned long width,
+                             GtUword subbucketleft,
+                             GtUword width,
                              const GtSfxcmp *pivotcmpbits,
-                             unsigned long pivotidx,
-                             unsigned long depth)
+                             GtUword pivotidx,
+                             GtUword depth)
 {
   int cmp;
   unsigned int maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
   GtCommonunits commonunits;
   GtEndofTwobitencoding etbecurrent;
-  unsigned long idx, smaller = 0, larger = 0,
+  GtUword idx, smaller = 0, larger = 0,
                 insertindex, end, equaloffset, currentwidth;
   GtCountingsortinfo *csiptr;
   /* const bool cmpcharbychar = false; */
@@ -1010,11 +1010,11 @@ static void sarrcountingsort(GtBentsedgresources *bsr,
       bsr->countingsortinfo[idx].cmpresult = (char) 0;
     }
   }
-  for (idx = 1UL; idx <= (unsigned long) maxsmallerwithlcp; idx++)
+  for (idx = 1UL; idx <= (GtUword) maxsmallerwithlcp; idx++)
   {
     bsr->leftlcpdist[idx] += bsr->leftlcpdist[idx-1];
   }
-  for (idx = 1UL; idx <= (unsigned long) maxlargerwithlcp; idx++)
+  for (idx = 1UL; idx <= (GtUword) maxlargerwithlcp; idx++)
   {
     bsr->rightlcpdist[idx] += bsr->rightlcpdist[idx-1];
   }
@@ -1042,9 +1042,9 @@ static void sarrcountingsort(GtBentsedgresources *bsr,
         break;
     }
   }
-  for (idx = 0; idx <= (unsigned long) maxsmallerwithlcp; idx++)
+  for (idx = 0; idx <= (GtUword) maxsmallerwithlcp; idx++)
   {
-    if (idx < (unsigned long) maxsmallerwithlcp)
+    if (idx < (GtUword) maxsmallerwithlcp)
     {
       end = bsr->leftlcpdist[idx+1];
     } else
@@ -1073,9 +1073,9 @@ static void sarrcountingsort(GtBentsedgresources *bsr,
                              currentwidth,
                              depth + GT_UNITSIN2BITENC);
   }
-  for (idx = 0; idx <= (unsigned long) maxlargerwithlcp; idx++)
+  for (idx = 0; idx <= (GtUword) maxlargerwithlcp; idx++)
   {
-    if (idx < (unsigned long) maxlargerwithlcp)
+    if (idx < (GtUword) maxlargerwithlcp)
     {
       end = bsr->rightlcpdist[idx+1];
     } else
@@ -1102,11 +1102,11 @@ static void sarrcountingsort(GtBentsedgresources *bsr,
 }
 
 static inline void vectorswap(GtSuffixsortspace *sssp,
-                              unsigned long subbucketleft1,
-                              unsigned long subbucketleft2,
-                              unsigned long width)
+                              GtUword subbucketleft1,
+                              GtUword subbucketleft2,
+                              GtUword width)
 {
-  unsigned long idx, tmp;
+  GtUword idx, tmp;
 
   for (idx = 0; idx < width; idx++)
   {
@@ -1118,8 +1118,8 @@ static inline void vectorswap(GtSuffixsortspace *sssp,
 }
 
 static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
-                                     unsigned long width,
-                                     unsigned long depth)
+                                     GtUword width,
+                                     GtUword depth)
 {
   bsr->mkvauxstack.nextfreeGtMKVstack = 0;
 /*#ifndef NDEBUG
@@ -1128,7 +1128,7 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
   subsort_bentleysedgewick(bsr, 0, width, depth);
   while (bsr->mkvauxstack.nextfreeGtMKVstack > 0)
   {
-    unsigned long leftplusw, pa, pb, pc, pd, pm, bucketright,
+    GtUword leftplusw, pa, pb, pc, pd, pm, bucketright,
                   cptr, temp, pivotcmpcharbychar = 0, valcmpcharbychar,
                   wtmp, subbucketleft;
     unsigned int smallermaxlcp, greatermaxlcp, smallerminlcp, greaterminlcp;
@@ -1340,7 +1340,7 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
     }
 
     gt_assert(pd >= pc);
-    if ((wtmp = (unsigned long) (pd-pc)) > 0)
+    if ((wtmp = (GtUword) (pd-pc)) > 0)
     {
       if (bsr->tableoflcpvalues != NULL)
       {
@@ -1374,7 +1374,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
                                    const Sfxstrategy *sfxstrategy,
                                    bool withlcps)
 {
-  unsigned long idx;
+  GtUword idx;
 
   bsr->readmode = readmode;
   bsr->totallength = gt_encseq_total_length(encseq);
@@ -1402,7 +1402,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   {
     if (sortmaxdepth > prefixlength)
     {
-      bsr->srs_maxremain = sortmaxdepth - (unsigned long) prefixlength;
+      bsr->srs_maxremain = sortmaxdepth - (GtUword) prefixlength;
     } else
     {
       bsr->srs_maxremain = 0;
@@ -1410,7 +1410,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   } else
   {
     if (gt_encseq_lengthoflongestnonspecial(encseq) >
-        (unsigned long) prefixlength)
+        (GtUword) prefixlength)
     {
       bsr->srs_maxremain = gt_encseq_lengthoflongestnonspecial(encseq) -
                            prefixlength;
@@ -1439,7 +1439,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
       bsr->srsw = gt_shortreadsort_new(0,bsr->srs_maxremain,readmode,false,
                                        withmediumsizelcps);
     }
-    for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
+    for (idx = 0; idx < (GtUword) GT_UNITSIN2BITENC; idx++)
     {
       bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
     }
@@ -1512,12 +1512,12 @@ static void bentsedgresources_delete(GtBentsedgresources *bsr, GtLogger *logger)
   gt_free(bsr->equalwithprevious);
   GT_FREEARRAY(&bsr->mkvauxstack,GtMKVstack);
   gt_radixsort_str_delete(bsr->rsi);
-  gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
-  gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
-  gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
-  gt_logger_log(logger,"countshortreadsort=%lu",bsr->countshortreadsort);
-  gt_logger_log(logger,"countradixsort=%lu",bsr->countradixsort);
-  gt_logger_log(logger,"counttqsort=%lu",bsr->counttqsort);
+  gt_logger_log(logger,"countinsertionsort="GT_LU"",bsr->countinsertionsort);
+  gt_logger_log(logger,"countbltriesort="GT_LU"",bsr->countbltriesort);
+  gt_logger_log(logger,"countcountingsort="GT_LU"",bsr->countcountingsort);
+  gt_logger_log(logger,"countshortreadsort="GT_LU"",bsr->countshortreadsort);
+  gt_logger_log(logger,"countradixsort="GT_LU"",bsr->countradixsort);
+  gt_logger_log(logger,"counttqsort="GT_LU"",bsr->counttqsort);
 }
 
 /*
@@ -1528,7 +1528,7 @@ static void bentsedgresources_delete(GtBentsedgresources *bsr, GtLogger *logger)
 */
 
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
-                       unsigned long numberofsuffixes,
+                       GtUword numberofsuffixes,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
@@ -1542,7 +1542,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        const Sfxstrategy *sfxstrategy,
                        GtProcessunsortedsuffixrange processunsortedsuffixrange,
                        void *processunsortedsuffixrangeinfo,
-                       unsigned long long *bucketiterstep,
+                       GtUint64 *bucketiterstep,
                        GtLogger *logger)
 {
   GtCodetype code;
@@ -1607,7 +1607,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
       {
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,bucketspec.left);
         gt_sort_bentleysedgewick(&bsr,bucketspec.nonspecialsinbucket,
-                                 (unsigned long) prefixlength);
+                                 (GtUword) prefixlength);
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
       }
       gt_Outlcpinfo_nonspecialsbucket(outlcpinfo,
@@ -1625,7 +1625,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                              code);
   }
 #ifdef CHECKFORWHOLELEAFS
-  printf("saved_intervals=%lu,saved_width=%lu (%.2f)\n",
+  printf("saved_intervals="GT_LU",saved_width="GT_LU" (%.2f)\n",
           saved_intervals,saved_width,100.0 *
                                       (double) saved_width/numberofsuffixes);
   saved_intervals = 0;
@@ -1635,7 +1635,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 }
 
 void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
-                                 unsigned long numberofsuffixes,
+                                 GtUword numberofsuffixes,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  GtOutlcpinfo *outlcpinfo,

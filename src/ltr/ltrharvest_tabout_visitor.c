@@ -43,11 +43,11 @@ struct GtLTRharvestTaboutVisitor {
 static inline void
 gt_ltrharvest_tabout_visitor_seq4feat(GtLTRharvestTaboutVisitor *nv,
                                       GtFeatureNode *fn, GtStr *out,
-                                      unsigned long seqnum)
+                                      GtUword seqnum)
 {
   char *buf;
   GtRange rng;
-  unsigned long startpos;
+  GtUword startpos;
   gt_assert(nv && fn && out);
   rng = gt_genome_node_get_range((GtGenomeNode*) fn);
   buf = gt_calloc((size_t) (gt_range_length(&rng)+1), sizeof (char));
@@ -82,7 +82,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
   GtStr *line;
   GtRange rng;
   bool no_element = false;
-  unsigned long seqnum = 0;
+  GtUword seqnum = 0;
   const char *fnt;
   char buf[BUFSIZ];
   lv = gt_ltrharvest_tabout_visitor_cast(nv);
@@ -187,7 +187,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
     if (ltr_retrotrans != NULL) {
       /* whole element */
       rng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
-      (void) snprintf(buf, BUFSIZ-1, "%lu  %lu  %lu  ", rng.start,
+      (void) snprintf(buf, BUFSIZ-1, ""GT_LU"  "GT_LU"  "GT_LU"  ", rng.start,
                       rng.end, gt_range_length(&rng));
       gt_str_append_cstr(line, buf);
     } else {
@@ -198,7 +198,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
   if (!had_err && !no_element) {
     /* left LTR */
     rng = gt_genome_node_get_range((GtGenomeNode*) leftltr);
-    (void) snprintf(buf, BUFSIZ-1, "%lu  %lu  %lu  ", rng.start,
+    (void) snprintf(buf, BUFSIZ-1, ""GT_LU"  "GT_LU"  "GT_LU"  ", rng.start,
                     rng.end, gt_range_length(&rng));
     gt_str_append_cstr(line, buf);
     /* left TSD */
@@ -221,7 +221,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
 
     /* right LTR */
     rng = gt_genome_node_get_range((GtGenomeNode*) rightltr);
-    (void) snprintf(buf, BUFSIZ-1, "%lu  %lu  %lu  ", rng.start,
+    (void) snprintf(buf, BUFSIZ-1, ""GT_LU"  "GT_LU"  "GT_LU"  ", rng.start,
                     rng.end, gt_range_length(&rng));
     gt_str_append_cstr(line, buf);
     /* right TSD */

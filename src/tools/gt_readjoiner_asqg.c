@@ -156,7 +156,7 @@ static int gt_readjoiner_asqg_use_spmfiles(GtSpmproc proc, void *procdata,
     gt_str_append_uint(filename, i);
     gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_SPMLIST);
     had_err = gt_spmlist_parse(gt_str_get(filename),
-        (unsigned long)minmatchlength,
+        (GtUword)minmatchlength,
         contained == NULL ? proc : gt_spmproc_skip,
         contained == NULL ? (void*)procdata : (void*)&skipdata, err);
     gt_str_reset(filename);
@@ -167,7 +167,7 @@ static int gt_readjoiner_asqg_use_spmfiles(GtSpmproc proc, void *procdata,
 
 static inline void gt_readjoiner_asqg_show_current_space(const char *label)
 {
-  unsigned long m, f;
+  GtUword m, f;
   if (gt_ma_bookkeeping_enabled())
   {
     m = gt_ma_get_space_current();
@@ -191,7 +191,7 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
   GtBitsequence *contained = NULL;
   const char *readset = gt_str_get(arguments->readset);
   bool eqlen;
-  unsigned long nreads;
+  GtUword nreads;
   int had_err = 0;
 
   if (gt_showtime_enabled())
@@ -225,7 +225,7 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
   if (!eqlen)
   {
     unsigned int i;
-    unsigned long nofreads;
+    GtUword nofreads;
     GtStr *filename = gt_str_clone(arguments->readset);
     if (gt_showtime_enabled())
       gt_timer_show_progress(timer, GT_READJOINER_ASQG_MSG_CNT, stdout);
@@ -235,7 +235,7 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
         &nofreads, err);
     for (i = 1U; i < arguments->nspmfiles && had_err == 0; i++)
     {
-      unsigned long nofreads_i;
+      GtUword nofreads_i;
       gt_str_reset(filename);
       gt_str_append_str(filename, arguments->readset);
       gt_str_append_char(filename, '.');
@@ -271,7 +271,7 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
             stdout);
       gt_logger_log(default_logger, GT_READJOINER_ASQG_MSG_VERTICES);
       had_err = gt_asqg_writer_show_header(aw, 0.0,
-          (unsigned long)arguments->minmatchlength,
+          (GtUword)arguments->minmatchlength,
           gt_str_get(arguments->readset), false, false, err);
     }
     if (had_err == 0)
@@ -315,7 +315,7 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
           eqlen ? gt_encseq_seqlength(reads, 0) : 0,
           eqlen ? NULL : reads);
       had_err = gt_strgraph_load_spm_from_file(strgraph,
-          (unsigned long)arguments->minmatchlength, false,
+          (GtUword)arguments->minmatchlength, false,
           contained, readset, arguments->nspmfiles,
           GT_READJOINER_SUFFIX_SPMLIST, err);
       gt_readjoiner_asqg_show_current_space(GT_READJOINER_ASQG_MSG_INSERT);

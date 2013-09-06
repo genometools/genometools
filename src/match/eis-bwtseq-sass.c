@@ -32,7 +32,7 @@ struct BWTSeqReaderState
 {
   BWTSeqReaderState *next;
   struct BWTSASeqSrc *backLink;
-  unsigned long nextReadPos;
+  GtUword nextReadPos;
 };
 
 struct BWTSASeqSrc
@@ -91,7 +91,7 @@ gt_deleteBWTSeqSASS(struct SASeqSrc *baseClass)
 static size_t
 BWTSASSAccessOrigSeq(const void *state,
                      Symbol *dest,
-                     unsigned long pos,
+                     GtUword pos,
                      size_t len)
 {
   const BWTSeqContextRetriever *ctxMap = state;
@@ -161,9 +161,9 @@ BWTSASSReadSufTab(SeqDataSrc src, void *dest, size_t len)
   initExtBitsRetrieval(&extBits);
   bwtSeq = ((BWTSeqReaderState *)src)->backLink->bwtSeq;
   size_t i;
-  unsigned long pos = ((BWTSeqReaderState *)src)->nextReadPos;
+  GtUword pos = ((BWTSeqReaderState *)src)->nextReadPos;
   for (i = 0; i < len; ++i)
-    ((unsigned long *)dest)[i] = gt_BWTSeqLocateMatch(bwtSeq,
+    ((GtUword *)dest)[i] = gt_BWTSeqLocateMatch(bwtSeq,
                                                       pos + i,
                                                       &extBits);
   ((BWTSeqReaderState *)src)->nextReadPos = pos + len;
@@ -186,7 +186,7 @@ BWTSASSReadBWT(SeqDataSrc src, void *dest, size_t len)
   gt_assert(src);
   bwtSeq = ((BWTSeqReaderState *)src)->backLink->bwtSeq;
   size_t i;
-  unsigned long pos = ((BWTSeqReaderState *)src)->nextReadPos;
+  GtUword pos = ((BWTSeqReaderState *)src)->nextReadPos;
   for (i = 0; i < len; ++i)
     ((Symbol *)dest)[i] = BWTSeqGetSym(bwtSeq, pos + i);
   ((BWTSeqReaderState *)src)->nextReadPos = pos + len;

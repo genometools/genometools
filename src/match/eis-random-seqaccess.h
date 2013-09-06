@@ -38,7 +38,7 @@
  */
 typedef size_t (*accessSeqSubStr)(const void *state,
                                   Symbol *dest,
-                                  unsigned long pos,
+                                  GtUword pos,
                                   size_t len);
 
 struct randomSeqAccessor
@@ -50,7 +50,7 @@ struct randomSeqAccessor
 typedef struct randomSeqAccessor RandomSeqAccessor;
 
 static inline size_t
-accessSequence(RandomSeqAccessor accessor, Symbol *dest, unsigned long pos,
+accessSequence(RandomSeqAccessor accessor, Symbol *dest, GtUword pos,
                size_t len)
 {
   return accessor.accessFunc(accessor.state, dest, pos, len);

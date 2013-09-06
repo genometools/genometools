@@ -48,16 +48,16 @@ GthPGL*        gth_pgl_new(bool forward);
 void           gth_pgl_delete(GthPGL*);
 void           gth_pgl_add_sa(GthPGL*, GthSA*);
 /* Returns alternative gene structure <i> from <pgl>. */
-struct GthAGS* gth_pgl_get_ags(const GthPGL*, unsigned long i);
+struct GthAGS* gth_pgl_get_ags(const GthPGL*, GtUword i);
 /* Returns the number of alternative gene structures in <pgl>. */
-unsigned long  gth_pgl_num_of_ags(const GthPGL*);
+GtUword  gth_pgl_num_of_ags(const GthPGL*);
 /* Set the maximum number of AGSs (<maxagsnum>) which are allowed for <pgl>. */
 void           gth_pgl_set_max_ags(GthPGL *pgl, unsigned int maxagsnum);
 bool           gth_pgl_is_forward(const GthPGL*);
-unsigned long  gth_pgl_filenum(const GthPGL*);
-unsigned long  gth_pgl_seqnum(const GthPGL*);
-unsigned long  gth_pgl_total_length(const GthPGL*);
-unsigned long  gth_pgl_genomic_offset(const GthPGL*);
+GtUword  gth_pgl_filenum(const GthPGL*);
+GtUword  gth_pgl_seqnum(const GthPGL*);
+GtUword  gth_pgl_total_length(const GthPGL*);
+GtUword  gth_pgl_genomic_offset(const GthPGL*);
 GtRange        gth_pgl_genomic_range(const GthPGL*);
 GtStrand       gth_pgl_genomic_strand(const GthPGL*);
 const char*    gth_pgl_gen_id(const GthPGL*);

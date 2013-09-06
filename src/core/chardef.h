@@ -70,10 +70,10 @@
 
 #define ISBWTSPECIAL(C) ((C) >= (GtUchar) UNDEFBWTCHAR)
 
-/*@unused@*/ static inline unsigned long
+/*@unused@*/ static inline GtUword
                             containsspecialbytestring(const GtUchar *seq,
-                                                      unsigned long offset,
-                                                      unsigned long len)
+                                                      GtUword offset,
+                                                      GtUword len)
 {
   const GtUchar *sptr;
 
@@ -82,7 +82,7 @@
   {
     if (ISSPECIAL(*sptr))
     {
-      return (unsigned long) (sptr - seq);
+      return (GtUword) (sptr - seq);
     }
   }
   return len;
@@ -90,7 +90,7 @@
 
 typedef struct
 {
-  unsigned long specialcharacters,      /* total number of special syms */
+  GtUword specialcharacters,      /* total number of special syms */
                 specialranges,          /* number of stored ranges (of maximal
                                            length according to the chosen
                                            representation) with special syms */

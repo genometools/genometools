@@ -34,14 +34,14 @@ void
 gt_registerCtxMapOptions(GtOptionParser *op, int *ilogOut);
 
 static inline bool
-ctxMapILogIsValid(unsigned long seqLen, short mapIntervalLog2)
+ctxMapILogIsValid(GtUword seqLen, short mapIntervalLog2)
 {
   return (mapIntervalLog2 == CTX_MAP_ILOG_NOMAP
           || mapIntervalLog2 == CTX_MAP_ILOG_AUTOSIZE
           || (mapIntervalLog2 >= 0
               && mapIntervalLog2
               < MIN(requiredUlongBits(seqLen),
-                    sizeof (unsigned long) * CHAR_BIT)));
+                    sizeof (GtUword) * CHAR_BIT)));
 }
 
 #endif

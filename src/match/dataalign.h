@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include "core/minmax.h"
+#include "core/types_api.h"
 
 /*
  * functionality to layout data at correct alignment (=> fewer
@@ -29,8 +30,8 @@ enum {
   MIN_ALIGN_REQUREMENT = 4,
 };
 
-static inline unsigned long long
-roundUp(unsigned long long v, unsigned long multipleOf)
+static inline GtUint64
+roundUp(GtUint64 v, GtUword multipleOf)
 {
   return v - v%multipleOf + multipleOf * (v%multipleOf?1:0);
 }

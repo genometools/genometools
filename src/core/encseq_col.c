@@ -47,11 +47,11 @@ static void gt_encseq_col_delete(GtSeqCol *sc)
   gt_encseq_delete(esc->encseq);
 }
 
-static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, unsigned long *filenum,
-                                      unsigned long *seqnum, GtStr *seqid,
+static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
+                                      GtUword *seqnum, GtStr *seqid,
                                       GtError *err)
 {
-  unsigned long j;
+  GtUword j;
   const GtSeqInfo *seq_info_ptr;
   GtSeqInfo seq_info;
   bool match = false;
@@ -72,7 +72,7 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, unsigned long *filenum,
   for (j = 0; !had_err && j < gt_encseq_num_of_sequences(esc->encseq); j++) {
     const char *desc;
     char *buf;
-    unsigned long desc_len;
+    GtUword desc_len;
     desc = gt_encseq_description(esc->encseq, &desc_len, j);
     buf = gt_calloc(desc_len + 1, sizeof (char));
     memcpy(buf, desc, desc_len * sizeof (char));
@@ -97,10 +97,10 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, unsigned long *filenum,
 }
 
 static int gt_encseq_col_grep_desc(GtSeqCol *sc, char **seq,
-                                   unsigned long start, unsigned long end,
+                                   GtUword start, GtUword end,
                                    GtStr *seqid, GtError *err)
 {
-  unsigned long filenum = 0, seqnum = 0;
+  GtUword filenum = 0, seqnum = 0;
   int had_err;
   GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
@@ -116,7 +116,7 @@ static int gt_encseq_col_grep_desc(GtSeqCol *sc, char **seq,
 static int gt_encseq_col_grep_desc_md5(GtSeqCol *sc, const char **md5,
                                        GtStr *seqid, GtError *err)
 {
-  unsigned long filenum = 0, seqnum = 0;
+  GtUword filenum = 0, seqnum = 0;
   int had_err;
   GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
@@ -129,11 +129,11 @@ static int gt_encseq_col_grep_desc_md5(GtSeqCol *sc, const char **md5,
 }
 
 static int gt_encseq_col_grep_desc_sequence_length(GtSeqCol *sc,
-                                                   unsigned long *length,
+                                                   GtUword *length,
                                                    GtStr *seqid,
                                                    GtError *err)
 {
-  unsigned long filenum = 0, seqnum = 0;
+  GtUword filenum = 0, seqnum = 0;
   int had_err;
   GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
@@ -146,10 +146,10 @@ static int gt_encseq_col_grep_desc_sequence_length(GtSeqCol *sc,
 }
 
 static int gt_encseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
-                                    unsigned long start, unsigned long end,
+                                    GtUword start, GtUword end,
                                     GtStr *md5_seqid, GtError *err)
 {
-  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_ULONG;
   char seqid[GT_MD5_SEQID_HASH_LEN + 1];
   int had_err = 0;
   GtEncseqCol *esc;
@@ -172,7 +172,7 @@ static int gt_encseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
   }
   seqnum = gt_md5_tab_map(esc->md5_tab, seqid);
   if (seqnum != GT_UNDEF_ULONG) {
-    unsigned long startpos = gt_encseq_seqstartpos(esc->encseq, seqnum),
+    GtUword startpos = gt_encseq_seqstartpos(esc->encseq, seqnum),
                   GT_UNUSED seqlength = gt_encseq_seqlength(esc->encseq,
                                                             seqnum);
     *seq = gt_calloc(end - start + 1, sizeof (char));
@@ -188,7 +188,7 @@ static int gt_encseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
 static int gt_encseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
                                             GtStr *md5_seqid, GtError *err)
 {
-  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_ULONG;
   char seqid[GT_MD5_SEQID_HASH_LEN + 1];
   int had_err = 0;
   GtEncseqCol *esc;
@@ -212,7 +212,7 @@ static int gt_encseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
   seqnum = gt_md5_tab_map(esc->md5_tab, seqid);
   if (seqnum != GT_UNDEF_ULONG) {
     const char *cdesc;
-    unsigned long desc_len;
+    GtUword desc_len;
     gt_assert(seqnum < gt_encseq_num_of_sequences(esc->encseq));
     cdesc = gt_encseq_description(esc->encseq, &desc_len, seqnum);
     gt_str_append_cstr_nt(desc, cdesc, desc_len);
@@ -223,10 +223,10 @@ static int gt_encseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
   return had_err;
 }
 
-int gt_encseq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
+int gt_encseq_col_md5_to_sequence_length(GtSeqCol *sc, GtUword *len,
                                          GtStr *md5_seqid, GtError *err)
 {
-  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_ULONG;
   int had_err = 0;
   GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
@@ -245,7 +245,7 @@ int gt_encseq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
   return had_err;
 }
 
-static unsigned long gt_encseq_col_num_of_files(const GtSeqCol *sc)
+static GtUword gt_encseq_col_num_of_files(const GtSeqCol *sc)
 {
   const GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
@@ -253,8 +253,8 @@ static unsigned long gt_encseq_col_num_of_files(const GtSeqCol *sc)
   return gt_encseq_num_of_files(esc->encseq);
 }
 
-static unsigned long gt_encseq_col_num_of_seqs(const GtSeqCol *sc,
-                                               unsigned long filenum)
+static GtUword gt_encseq_col_num_of_seqs(const GtSeqCol *sc,
+                                               GtUword filenum)
 {
   GtEncseqCol *esc;
   /* XXX cache function evaluated values */
@@ -266,7 +266,7 @@ static unsigned long gt_encseq_col_num_of_seqs(const GtSeqCol *sc,
     return (gt_encseq_num_of_sequences(esc->encseq)
               - gt_encseq_filenum_first_seqnum(esc->encseq, filenum));
   } else {
-    unsigned long firstpos, nextpos;
+    GtUword firstpos, nextpos;
     gt_assert(filenum < gt_encseq_num_of_files(esc->encseq) - 1);
     firstpos = gt_encseq_filenum_first_seqnum(esc->encseq, filenum);
     nextpos = gt_encseq_filenum_first_seqnum(esc->encseq, filenum + 1);
@@ -275,8 +275,8 @@ static unsigned long gt_encseq_col_num_of_seqs(const GtSeqCol *sc,
 }
 
 static const char* gt_encseq_col_get_md5_fingerprint(const GtSeqCol *sc,
-                                                     unsigned long filenum,
-                                                     unsigned long seqnum)
+                                                     GtUword filenum,
+                                                     GtUword seqnum)
 {
   GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
@@ -287,14 +287,14 @@ static const char* gt_encseq_col_get_md5_fingerprint(const GtSeqCol *sc,
 }
 
 static char* gt_encseq_col_get_sequence(const GtSeqCol *sc,
-                                        unsigned long filenum,
-                                        unsigned long seqnum,
-                                        unsigned long start,
-                                        unsigned long end)
+                                        GtUword filenum,
+                                        GtUword seqnum,
+                                        GtUword start,
+                                        GtUword end)
 {
   GtEncseqCol *esc;
   char *out;
-  unsigned long encseq_seqnum, startpos;
+  GtUword encseq_seqnum, startpos;
   esc = gt_encseq_col_cast(sc);
   gt_assert(esc && filenum < gt_encseq_num_of_files(esc->encseq));
   encseq_seqnum = gt_encseq_filenum_first_seqnum(esc->encseq, filenum) + seqnum;
@@ -307,12 +307,12 @@ static char* gt_encseq_col_get_sequence(const GtSeqCol *sc,
 }
 
 static char* gt_encseq_col_get_description(const GtSeqCol *sc,
-                                           unsigned long filenum,
-                                           unsigned long seqnum)
+                                           GtUword filenum,
+                                           GtUword seqnum)
 {
   GtEncseqCol *esc;
   const char *desc;
-  unsigned long encseq_seqnum, desclen;
+  GtUword encseq_seqnum, desclen;
   esc = gt_encseq_col_cast(sc);
   gt_assert(esc && filenum < gt_encseq_num_of_files(esc->encseq));
   encseq_seqnum = gt_encseq_filenum_first_seqnum(esc->encseq, filenum) + seqnum;
@@ -322,12 +322,12 @@ static char* gt_encseq_col_get_description(const GtSeqCol *sc,
   return gt_cstr_dup_nt(desc, desclen);;
 }
 
-static unsigned long gt_encseq_col_get_sequence_length(const GtSeqCol *sc,
-                                                       unsigned long filenum,
-                                                       unsigned long seqnum)
+static GtUword gt_encseq_col_get_sequence_length(const GtSeqCol *sc,
+                                                       GtUword filenum,
+                                                       GtUword seqnum)
 {
   GtEncseqCol *esc;
-  unsigned long encseq_seqnum;
+  GtUword encseq_seqnum;
   esc = gt_encseq_col_cast(sc);
   gt_assert(esc && filenum < gt_encseq_num_of_files(esc->encseq));
   encseq_seqnum = gt_encseq_filenum_first_seqnum(esc->encseq, filenum) + seqnum;

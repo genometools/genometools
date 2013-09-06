@@ -87,8 +87,8 @@ const GtGenomeNodeClass* gt_region_node_class()
   return gnc;
 }
 
-GtGenomeNode* gt_region_node_new(GtStr *seqid, unsigned long start,
-                                               unsigned long end)
+GtGenomeNode* gt_region_node_new(GtStr *seqid, GtUword start,
+                                               GtUword end)
 {
   GtGenomeNode *gn = gt_genome_node_create(gt_region_node_class());
   GtRegionNode *rn = gt_region_node_cast(gn);

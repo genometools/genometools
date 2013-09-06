@@ -143,7 +143,7 @@ int gt_colorspace_decode_string(GtStr *color_string, GtStr *result,
                                 GtError *err)
 {
   int had_err = 0;
-  unsigned long str_len, idx;
+  GtUword str_len, idx;
   char *input;
   GtColorSpaceDecoder *cd;
 

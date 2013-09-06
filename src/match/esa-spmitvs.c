@@ -42,7 +42,7 @@ int gt_process_spmitv(const char *inputindex, GtLogger *logger, GtError *err)
   if (!haserr)
   {
     GtESAVisitor *ev;
-    unsigned long nonspecials;
+    GtUword nonspecials;
 
     nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
     ev = gt_esa_spmitvs_visitor_new(

@@ -30,14 +30,14 @@
 
 struct GtTrack {
   GtStr *title;
-  unsigned long max_num_lines, discarded_blocks;
+  GtUword max_num_lines, discarded_blocks;
   GtLineBreaker *lb;
   bool split;
-  unsigned long y_index;
+  GtUword y_index;
   GtArray *lines;
 };
 
-GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines,
+GtTrack* gt_track_new(GtStr *title, GtUword max_num_lines,
                       bool split_lines, GtLineBreaker *lb)
 {
   GtTrack *track;
@@ -56,7 +56,7 @@ GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines,
 static int get_next_free_line(GtTrack *track, GtLine **result, GtBlock *block,
                               GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtLine* line;
   int had_err = 0;
   bool is_occupied;
@@ -106,19 +106,19 @@ static int get_next_free_line(GtTrack *track, GtLine **result, GtBlock *block,
   return had_err;
 }
 
-unsigned long gt_track_get_y_index(const GtTrack *track)
+GtUword gt_track_get_y_index(const GtTrack *track)
 {
   gt_assert(track);
   return track->y_index;
 }
 
-void gt_track_set_y_index(GtTrack *track, unsigned long y_index)
+void gt_track_set_y_index(GtTrack *track, GtUword y_index)
 {
   gt_assert(track);
   track->y_index = y_index;
 }
 
-unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track)
+GtUword gt_track_get_number_of_discarded_blocks(GtTrack *track)
 {
   gt_assert(track);
   return track->discarded_blocks;
@@ -148,7 +148,7 @@ GtStr* gt_track_get_title(const GtTrack *track)
   return track->title;
 }
 
-static unsigned long gt_track_get_number_of_lines(const GtTrack *track)
+static GtUword gt_track_get_number_of_lines(const GtTrack *track)
 {
   gt_assert(track);
   return gt_array_size(track->lines);
@@ -176,7 +176,7 @@ int gt_track_sketch(GtTrack* track, GtCanvas *canvas, GtError *err)
 int gt_track_get_height(const GtTrack *track, double *height,
                         const GtStyle *sty, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   double track_height = 0,
          bheight = TEXT_SIZE_DEFAULT,
          theight = TEXT_SIZE_DEFAULT,
@@ -277,7 +277,7 @@ int gt_track_unit_test(GtError *err)
   GtStr *title;
   double height, tmp;
   GtStyle *sty;
-  unsigned long i;
+  GtUword i;
   GtLineBreaker *lb;
   double t_rest = 0,
          l_rest = 0;
@@ -403,7 +403,7 @@ int gt_track_unit_test(GtError *err)
 
 void gt_track_delete(GtTrack *track)
 {
-  unsigned long i;
+  GtUword i;
   if (!track) return;
   if (track->lb)
     gt_line_breaker_delete(track->lb);

@@ -69,7 +69,7 @@ typedef struct GtFeatureNode GtFeatureNode;
    <start> and <end> always refer to the forward strand, therefore <start> has
    to be smaller or equal than <end>. */
 GtGenomeNode*  gt_feature_node_new(GtStr *seqid, const char *type,
-                                   unsigned long start, unsigned long end,
+                                   GtUword start, GtUword end,
                                    GtStrand strand);
 /* Return a new pseudo-<GtFeatureNode> object on sequence with ID <seqid> which
    lies from <start> to <end> on strand <strand>. Pseudo-features do not have a
@@ -77,8 +77,8 @@ GtGenomeNode*  gt_feature_node_new(GtStr *seqid, const char *type,
    you do not modify the original <seqid> afterwards.  <start> and <end> always
    refer to the forward strand, therefore <start> has to be smaller or equal
    than <end>. */
-GtGenomeNode*  gt_feature_node_new_pseudo(GtStr *seqid, unsigned long start,
-                                          unsigned long end, GtStrand strand);
+GtGenomeNode*  gt_feature_node_new_pseudo(GtStr *seqid, GtUword start,
+                                          GtUword end, GtStrand strand);
 
 /* Return a new pseudo-<GtFeatureNode> object which uses <feature_node> as
    template.  That is, the sequence ID, range, strand, and source are taken from
@@ -119,12 +119,12 @@ bool           gt_feature_node_has_type(GtFeatureNode *feature_node,
                                         const char *type);
 
 /* Return the number of children for given <feature_node>. */
-unsigned long  gt_feature_node_number_of_children(const GtFeatureNode
+GtUword  gt_feature_node_number_of_children(const GtFeatureNode
                                                   *feature_node);
 
 /* Return the number of children of type <node>
    for given GtFeatureNode <parent>. */
-unsigned long  gt_feature_node_number_of_children_of_type(const GtFeatureNode
+GtUword  gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                           *parent,
                                                           const GtFeatureNode
                                                           *node);

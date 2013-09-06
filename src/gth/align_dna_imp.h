@@ -78,7 +78,7 @@ struct GthDPMatrix {
   GthPath **path;                   /* backtrace table of size
                                         gen_dp_length * ref_dp_length */
   GthPath **path_jt;
-  unsigned long *intronstart[DNA_NUMOFSCORETABLES],
+  GtUword *intronstart[DNA_NUMOFSCORETABLES],
                 *exonstart[DNA_NUMOFSCORETABLES],
                 gen_dp_length,
                 ref_dp_length;

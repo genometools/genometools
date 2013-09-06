@@ -47,24 +47,24 @@
 #define GT_MAXVALUEWITHBITS(BITNUM)     ((1U << (BITNUM)) - 1)
 
 static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
-                                             unsigned long maxbytes,
+                                             GtUword maxbytes,
                                              double factor,
-                                             unsigned long maxvalue,
+                                             GtUword maxvalue,
                                              bool withspecialsuffixes)
 {
   unsigned int prefixlength;
   uint64_t sizeofrep;
 
 #ifdef WITHINFO
-  printf("maxbytes = %lu\n",(unsigned long) (maxbytes * factor));
+  printf("maxbytes = "GT_LU"\n",(GtUword) (maxbytes * factor));
 #endif
   for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
     sizeofrep = gt_bcktab_sizeoftable(numofchars,prefixlength,
                                       maxvalue,withspecialsuffixes);
 #ifdef WITHINFO
-    printf("sizeofrep = %lu, after divide %lu\n",(unsigned long) sizeofrep,
-                                        (unsigned long) (sizeofrep/factor));
+    printf("sizeofrep = "GT_LU", after divide "GT_LU"\n",(GtUword) sizeofrep,
+                                        (GtUword) (sizeofrep/factor));
 #endif
     if (sizeofrep/factor > (uint64_t) maxbytes)
     {
@@ -80,7 +80,7 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
 }
 
 unsigned int gt_recommendedprefixlength(unsigned int numofchars,
-                                        unsigned long totallength,
+                                        GtUword totallength,
                                         double recommendedmultiplier,
                                         bool withspecialsuffixes)
 {
@@ -107,7 +107,7 @@ unsigned int gt_recommendedprefixlength(unsigned int numofchars,
 }
 
 unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
-                                             unsigned long totallength,
+                                             GtUword totallength,
                                              unsigned int prefixlenbits,
                                              bool withspecialsuffixes)
 {
@@ -124,7 +124,7 @@ unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
     unsigned int tmplength;
     tmplength
       = prefixlengthwithmaxspace(numofchars,
-                                 (unsigned long)
+                                 (GtUword)
                                  MAXREMAININGAFTERPREFIXLEN(prefixlenbits),
                                  GT_RECOMMENDED_MULTIPLIER_DEFAULT,
                                  totallength+1,

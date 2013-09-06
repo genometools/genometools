@@ -36,7 +36,7 @@ typedef int           (*GtCtScriptRenderFunc)(GtGraphics*,
                                               GtRange*,
                                               GtStyle*,
                                               GtError*);
-typedef unsigned long (*GtCtScriptGetHeightFunc)(void*);
+typedef GtUword (*GtCtScriptGetHeightFunc)(void*);
 typedef void          (*GtCtScriptGetTitleFunc)(void*, GtStr*);
 typedef void          (*GtCtScriptFreeFunc)(void*);
 

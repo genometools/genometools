@@ -24,7 +24,7 @@ GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
                                             GtRegionMapping *rm,
                                             const char *type, bool join,
                                             bool translate, bool seqid,
-                                            bool target, unsigned long width,
+                                            bool target, GtUword width,
                                             GtFile *outfp)
 {
   GtNodeVisitor *nv = gt_extract_feature_visitor_new(rm, type, join, translate,

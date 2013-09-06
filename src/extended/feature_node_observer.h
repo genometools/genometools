@@ -79,7 +79,7 @@ struct GtFeatureNodeObserver {
   GtFeatureNodeChildAddedCallback child_added;
   GtFeatureNodeDeletedCallback deleted;
   void *data;
-  unsigned long reference_count;
+  GtUword reference_count;
 };
 
 GtFeatureNodeObserver* gt_feature_node_observer_new(void);

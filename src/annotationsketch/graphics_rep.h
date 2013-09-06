@@ -50,9 +50,9 @@ typedef void    (*GtGraphicsDrawCurveDataFunc)(GtGraphics *g,
                                                double x, double y,
                                                GtColor color,
                                                double data[],
-                                               unsigned long ndata,
+                                               GtUword ndata,
                                                GtRange,
-                                               unsigned long height);
+                                               GtUword height);
 typedef int     (*GtGraphicsSaveToFileFunc)(const GtGraphics*, const char*,
                                             GtError*);
 typedef void    (*GtGraphicsSaveToStreamFunc)(const GtGraphics*, GtStr*);

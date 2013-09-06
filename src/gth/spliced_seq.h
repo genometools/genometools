@@ -26,7 +26,7 @@ typedef struct {
                                      have been used for processing */
   const unsigned char *origseq;   /* the original sequence */
         unsigned char *splicedseq;/* the processed sequence */
-  unsigned long splicedseqlen,    /* the length of the processed sequence */
+  GtUword splicedseqlen,    /* the length of the processed sequence */
                 *positionmapping; /* maps the positions on the spliced sequence
                                      back to the original sequence */
 } GthSplicedSeq;
@@ -38,14 +38,14 @@ GthSplicedSeq* gth_spliced_seq_new_with_comments(const unsigned char *sequence,
                                                  GtFile *outfp);
 void           gth_spliced_seq_delete(GthSplicedSeq*);
 bool           gth_spliced_seq_pos_is_border(const GthSplicedSeq*,
-                                             unsigned long position);
-unsigned long  gth_spliced_seq_border_length(const GthSplicedSeq*,
-                                             unsigned long position);
-unsigned long  gth_spliced_seq_num_of_borders(const GthSplicedSeq*);
+                                             GtUword position);
+GtUword  gth_spliced_seq_border_length(const GthSplicedSeq*,
+                                             GtUword position);
+GtUword  gth_spliced_seq_num_of_borders(const GthSplicedSeq*);
 /* The following function computes the spliced sequence position of a given
    original position <origpos> of a position mapping <positionmapping> of length
    <splicedseqlen> via binary search. */
-unsigned long  gth_spliced_seq_orig_to_spliced_pos(const GthSplicedSeq*,
-                                                   unsigned long orig_pos);
+GtUword  gth_spliced_seq_orig_to_spliced_pos(const GthSplicedSeq*,
+                                                   GtUword orig_pos);
 
 #endif

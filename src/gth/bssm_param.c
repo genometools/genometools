@@ -69,7 +69,7 @@ static char *filenames[] =
 static void write_model(GtStr *str, const char *model_cstr,
                         const GthBSSMModel *model)
 {
-  unsigned long i, j, k, l;
+  GtUword i, j, k, l;
   gt_assert(str && model_cstr && model);
   gt_assert(model->hypothesis_num == 2 || model->hypothesis_num == 7);
   gt_str_append_cstr(str, "  ");
@@ -139,7 +139,7 @@ static int read_bssm_model(GthBSSMModel *bssm_model, lua_State *L, GtError *err)
 #ifndef NDEBUG
   int stack_size;
 #endif
-  unsigned long i, j, k, l;
+  GtUword i, j, k, l;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(bssm_model && L);
@@ -354,15 +354,15 @@ static int bssm_model_read(GthBSSMModel *bssm_model, FILE *file, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
-  gt_xfread(&bssm_model->hypothesis_num, sizeof (unsigned long), 1, file);
+  gt_xfread(&bssm_model->hypothesis_num, sizeof (GtUword), 1, file);
   if (bssm_model->hypothesis_num != HYPOTHESIS7 &&
       bssm_model->hypothesis_num != HYPOTHESIS2) {
     gt_error_set(err, "BSSM model contains unknown hypothesis number");
     had_err = -1;
   }
   if (!had_err) {
-    gt_xfread(&bssm_model->window_size_left, sizeof (unsigned long), 1, file);
-    gt_xfread(&bssm_model->window_size_right, sizeof (unsigned long), 1, file);
+    gt_xfread(&bssm_model->window_size_left, sizeof (GtUword), 1, file);
+    gt_xfread(&bssm_model->window_size_right, sizeof (GtUword), 1, file);
     switch (bssm_model->hypothesis_num) {
       case HYPOTHESIS2:
         gt_xfread(&bssm_model->hypotables.hypo2table, sizeof (Hypo2table), 1,
@@ -492,10 +492,10 @@ GthBSSMParam* gth_bssm_param_load(const char *filename, GtError *err)
   return bssm_param;
 }
 
-GthBSSMParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
+GthBSSMParam* gth_bssm_param_extract(GtUword speciesnum, GtError *err)
 {
   GthBSSMParam *bssm_param;
-  unsigned long i, j, k, l;
+  GtUword i, j, k, l;
 
   gt_error_check(err);
 
@@ -540,7 +540,7 @@ GthBSSMParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
     }
   }
   else {
-    gt_error_set(err, "illegal speciesnum (speciesnum == %lu)", speciesnum);
+    gt_error_set(err, "illegal speciesnum (speciesnum == "GT_LU")", speciesnum);
     gth_bssm_param_delete(bssm_param);
     return NULL;
   }
@@ -608,12 +608,12 @@ bool gth_bssm_param_is_seven_class(const GthBSSMParam  *bssm_param)
    It is assumed that the Hypo7table is used. */
 static void bssm_model_echo(const GthBSSMModel *bssm_model, FILE *outfp)
 {
-  unsigned long i, j, k, l;
+  GtUword i, j, k, l;
 
   gt_assert(bssm_model_is_seven_class(bssm_model));
 
   for (i = 0; i < HYPOTHESIS7; i++) {
-    fprintf(outfp,"\n\nHypothesis: %lu", i);
+    fprintf(outfp,"\n\nHypothesis: "GT_LU"", i);
     for (j = 0; j < STRINGSIZE; j++) {
       fprintf(outfp,"\n");
       for (k = 0; k < ALPHSIZE; k++) {
@@ -698,11 +698,11 @@ static void set_window_sizes_in_Bssmmodel(GthBSSMModel *bssm_model)
 static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
                        unsigned int hypothesisnum)
 {
-  unsigned long mono_ct[STRINGSIZE-1][ALPHSIZE],         /* Mononuc freq */
+  GtUword mono_ct[STRINGSIZE-1][ALPHSIZE],         /* Mononuc freq */
                 di_ct[STRINGSIZE-1][ALPHSIZE][ALPHSIZE]; /* Dinuc freq */
   double mono_freq,      /* Mononuc relative freq */
          di_freq;        /* Dinuc relative freq */
-  unsigned long i, j, k, /* Iterator variables */
+  GtUword i, j, k, /* Iterator variables */
                 len, curlen = 0,
                 num_entries = gt_bioseq_number_of_sequences(bioseq);
   GtUchar *encoded_seq = NULL;
@@ -811,7 +811,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
   GtAlphabet *alphabet = NULL;
   GtBioseq *bioseq;
   GtStr *file2proc;
-  unsigned long i, j;
+  GtUword i, j;
   int had_err = 0;
   gt_error_check(err);
 
@@ -871,7 +871,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
       GtUchar encoded_seq[2];
       /* check length */
       if (gt_bioseq_get_sequence_length(bioseq, j) != STRINGSIZE) {
-        gt_error_set(err, "sequence %lu in file \"%s\" does not have length %u",
+        gt_error_set(err, "sequence "GT_LU" in file \"%s\" does not have length %u",
                      j, gt_str_get(file2proc), STRINGSIZE);
         had_err = -1;
       }
@@ -883,7 +883,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
           case GT_DONOR_TYPE:
             if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'G') ||
                 encoded_seq[1] != gt_alphabet_encode(alphabet, 'T')) {
-              gt_error_set(err, "sequence %lu in file \"%s\" is not a GT "
+              gt_error_set(err, "sequence "GT_LU" in file \"%s\" is not a GT "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
@@ -891,7 +891,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
           case GC_DONOR_TYPE:
             if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'G') ||
                 encoded_seq[1] != gt_alphabet_encode(alphabet, 'C')) {
-              gt_error_set(err, "sequence %lu in file \"%s\" is not a GC "
+              gt_error_set(err, "sequence "GT_LU" in file \"%s\" is not a GC "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
@@ -899,7 +899,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
           case AG_ACCEPTOR_TYPE:
             if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'A') ||
                 encoded_seq[1] != gt_alphabet_encode(alphabet, 'G')) {
-              gt_error_set(err, "sequence %lu in file \"%s\" is not a AG "
+              gt_error_set(err, "sequence "GT_LU" in file \"%s\" is not a AG "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }

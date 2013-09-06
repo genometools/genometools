@@ -28,19 +28,19 @@ typedef struct GtBUstate_spmsk GtBUstate_spmsk;
 
 GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
                                   GtReadmode readmode,
-                                  unsigned long minmatchlength,
+                                  GtUword minmatchlength,
                                   bool countspms,
                                   bool outputspms,
                                   GT_UNUSED const char *indexname);
 
-unsigned long gt_spmsk_inl_delete(GtBUstate_spmsk *state);
+GtUword gt_spmsk_inl_delete(GtBUstate_spmsk *state);
 
 int gt_spmsk_inl_process(void *data,
-                         const unsigned long *seqnum_relpos_bucket,
+                         const GtUword *seqnum_relpos_bucket,
                          const GtSeqnumrelpos *snrp,
                          const uint16_t *lcptab_bucket,
-                         unsigned long nonspecials,
-                         unsigned long spaceforbucketprocessing,
+                         GtUword nonspecials,
+                         GtUword spaceforbucketprocessing,
                          /* this parameter can be 0 in case where
                             user defined memlimit or derived
                             memlimit is not available. If it is available

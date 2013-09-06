@@ -38,7 +38,7 @@ struct GthGFF3SAVisitor {
 
 static void gff3_sa_visitor_free(GthSAVisitor *sa_visitor)
 {
-  unsigned long i;
+  GtUword i;
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
   for (i = 0; i < gt_array_size(visitor->nodes); i++)
     gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(visitor->nodes, i));
@@ -60,8 +60,8 @@ static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
   GtFeatureNode *gene_feature, *exon_feature;
   GtRange range;
   GtStr *seqid;
-  unsigned long i;
-  long offset;
+  GtUword i;
+  GtWord offset;
 
   gt_assert(sa && region_factory && nodes);
 
@@ -137,7 +137,7 @@ static void gff3_sa_visitor_visit_sa(GthSAVisitor *sa_visitor, GthSA *sa)
 }
 
 static void gff3_sa_visitor_trailer(GthSAVisitor *sa_visitor,
-                                    GT_UNUSED unsigned long num_of_sas)
+                                    GT_UNUSED GtUword num_of_sas)
 {
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
   gt_genome_nodes_sort_stable(visitor->nodes);

@@ -35,7 +35,7 @@
 /** The constructor for the base index must conform to this
  * signature. */
 typedef EISeq *(*indexCreateFunc)(
-  unsigned long totalLen, const char *projectName, MRAEnc *alphabet,
+  GtUword totalLen, const char *projectName, MRAEnc *alphabet,
   const struct seqStats *stats, SeqDataReader BWTGenerator,
   const struct seqBaseParam *params, size_t numExtHeaders,
   const uint16_t *headerIDs, const uint32_t *extHeaderSizes,
@@ -73,11 +73,11 @@ gt_createBWTSeqGeneric(const struct bwtParam *params,
                        GtError *err);
 
 int
-gt_BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, unsigned long pos,
+gt_BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, GtUword pos,
                        struct extBitsRetrieval *extBits);
 
-unsigned long
-gt_BWTSeqGetRankSort(const BWTSeq *bwtSeq, unsigned long pos,
+GtUword
+gt_BWTSeqGetRankSort(const BWTSeq *bwtSeq, GtUword pos,
                   AlphabetRangeID range, struct extBitsRetrieval *extBits);
 
 void

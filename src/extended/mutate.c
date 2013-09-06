@@ -28,7 +28,7 @@
 
 static char* mutate_description(const char *description, unsigned int rate)
 {
-  unsigned long mutated_description_len;
+  GtUword mutated_description_len;
   char *mutated_description;
   GT_UNUSED int rval;
   gt_assert(description);
@@ -54,10 +54,10 @@ static char random_character(GtAlphabet *alphabet, bool upper_case)
   return tolower(random_char);
 }
 
-static char* mutate_seq(const char *seq, unsigned long len,
+static char* mutate_seq(const char *seq, GtUword len,
                         GtAlphabet *alphabet, unsigned int rate)
 {
-  unsigned long i, j, allocated, substitution_events = 0, insertion_events = 0,
+  GtUword i, j, allocated, substitution_events = 0, insertion_events = 0,
                 deletion_events = 0, total_events = 0;
   double rand_prob, mutate_prob;
   char *mutated_seq;
@@ -96,15 +96,15 @@ static char* mutate_seq(const char *seq, unsigned long len,
       mutated_seq[j++] = seq[i]; /* keep original character */
   }
   mutated_seq[j] = '\0'; /* terminate */
-  gt_log_log("total number of mutation events: %lu", total_events);
-  gt_log_log("number of substitution events: %lu", substitution_events);
-  gt_log_log("number of insertion events: %lu", insertion_events);
-  gt_log_log("number of deletion events: %lu", deletion_events);
+  gt_log_log("total number of mutation events: "GT_LU"", total_events);
+  gt_log_log("number of substitution events: "GT_LU"", substitution_events);
+  gt_log_log("number of insertion events: "GT_LU"", insertion_events);
+  gt_log_log("number of deletion events: "GT_LU"", deletion_events);
   return mutated_seq;
 }
 
 GtSeq* gt_mutate_seq(const char *description, const char *orig_seq,
-                     unsigned long len, GtAlphabet *alphabet, unsigned int rate)
+                     GtUword len, GtAlphabet *alphabet, unsigned int rate)
 {
   char *mutated_description, *mutated_seq;
   GtSeq *seq;

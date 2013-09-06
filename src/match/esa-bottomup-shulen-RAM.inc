@@ -35,15 +35,15 @@
 /* no include for seqnumrelpos.h */
 
 static int gt_esa_bottomup_RAM_previousfromlast_shulen(
-                        unsigned long previoussuffix,
-                        unsigned long lcpvalue,
+                        GtUword previoussuffix,
+                        GtUword lcpvalue,
                         GtArrayGtBUItvinfo_shulen *stack,
                         GtBUstate_shulen *bustate,
                         /* no parameter snrp */
                         GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long idx = 0;
+  const GtUword incrementstacksize = 32UL;
+  GtUword idx = 0;
   GtBUItvinfo_shulen *lastinterval = NULL;
   bool haserr = false, firstedge,
        firstedgefromroot = bustate->firstedgefromroot;
@@ -103,8 +103,8 @@ static int gt_esa_bottomup_RAM_previousfromlast_shulen(
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallb = lastinterval->lb;
+        GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_shulen(lcpvalue,lastintervallb);
         if (processbranchingedge_shulen(true,
@@ -140,17 +140,17 @@ static int gt_esa_bottomup_RAM_previousfromlast_shulen(
   return haserr ? -1 : 0;
 }
 
-static int gt_esa_bottomup_RAM_shulen(const unsigned long *bucketofsuffixes,
+static int gt_esa_bottomup_RAM_shulen(const GtUword *bucketofsuffixes,
                         const uint32_t *bucketofsuffixes_uint32,
                         const GtLcpvaluetype *lcptab_bucket,
-                        unsigned long numberofsuffixes,
+                        GtUword numberofsuffixes,
                         GtArrayGtBUItvinfo_shulen *stack,
                         GtBUstate_shulen *bustate,
                         /* no parameter snrp */
                         GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix,
                 idx;
   GtBUItvinfo_shulen *lastinterval = NULL;
@@ -167,9 +167,9 @@ static int gt_esa_bottomup_RAM_shulen(const unsigned long *bucketofsuffixes,
   gt_assert (numberofsuffixes > 0);
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
-    lcpvalue = (unsigned long) lcptab_bucket[idx+1];
+    lcpvalue = (GtUword) lcptab_bucket[idx+1];
     previoussuffix = bucketofsuffixes != NULL ? bucketofsuffixes[idx]
-                                 : (unsigned long)
+                                 : (GtUword)
                                    bucketofsuffixes_uint32[idx];
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
@@ -226,8 +226,8 @@ static int gt_esa_bottomup_RAM_shulen(const unsigned long *bucketofsuffixes,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallb = lastinterval->lb;
+        GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_shulen(lcpvalue,lastintervallb);
         if (processbranchingedge_shulen(true,
@@ -261,7 +261,7 @@ static int gt_esa_bottomup_RAM_shulen(const unsigned long *bucketofsuffixes,
   {
     bustate->previousbucketlastsuffix
       = bucketofsuffixes != NULL ? bucketofsuffixes[numberofsuffixes-1]
-                                 : (unsigned long)
+                                 : (GtUword)
                                    bucketofsuffixes_uint32[numberofsuffixes-1];
     bustate->firstedgefromroot = firstedgefromroot;
   }

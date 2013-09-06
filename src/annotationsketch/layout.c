@@ -52,7 +52,7 @@ typedef struct {
 } GtRenderTraverseInfo;
 
 typedef struct {
-  unsigned long height;
+  GtUword height;
   GtStyle *style;
 } GtTracklineInfo;
 
@@ -65,7 +65,7 @@ struct GtLayout {
   GtHashmap *tracks,
             *blocks;
   GtRange viewrange;
-  unsigned long nof_tracks;
+  GtUword nof_tracks;
   unsigned int width;
   GtRWLock *lock;
   GtTrackOrderingFunc track_ordering_func;
@@ -98,7 +98,7 @@ static int add_tracklines(GT_UNUSED void *key, void *value,
 static int layout_tracks(void *key, void *value, void *data,
                          GtError *err)
 {
-  unsigned long i,
+  GtUword i,
                 max = 50;
   GtTrack *track = NULL;
   GtLayoutTraverseInfo *lti = (GtLayoutTraverseInfo*) data;
@@ -151,7 +151,7 @@ static int layout_tracks(void *key, void *value, void *data,
   }
 
   if (!had_err) {
-    max = (unsigned long) tmp;
+    max = (GtUword) tmp;
     track = gt_track_new(gt_track_key, max, split,
                          gt_line_breaker_captions_new(lti->layout,
                                                       lti->layout->width,
@@ -324,7 +324,7 @@ static int track_cmp_wrapper(const void *t1, const void *t2, void *data)
 int gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas, GtError *err)
 {
   int had_err = 0;
-  unsigned long i;
+  GtUword i;
   GtRenderTraverseInfo rti;
   gt_assert(layout && target_canvas);
 
@@ -400,14 +400,14 @@ GtTextWidthCalculator* gt_layout_get_twc(const GtLayout *layout)
   return layout->twc;
 }
 
-int gt_layout_get_height(GtLayout *layout, unsigned long *result,
+int gt_layout_get_height(GtLayout *layout, GtUword *result,
                          GtError *err)
 {
   int had_err = 0;
   GtTracklineInfo lines;
   double tmp, head_track_space = HEAD_TRACK_SPACE_DEFAULT;
   bool show_track_captions = true;
-  unsigned long height, i;
+  GtUword height, i;
   gt_assert(layout);
 
   had_err = layout_all_tracks(layout, err);

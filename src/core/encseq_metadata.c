@@ -28,7 +28,7 @@ struct GtEncseqMetadata
 {
   GtEncseqAccessType sat;
   GtUchar is64bit;
-  unsigned long version,
+  GtUword version,
                 totallength,
                 numofdbsequences,
                 numofdbfiles,
@@ -54,12 +54,12 @@ struct GtEncseqMetadata
           }\
           if (!had_err) {\
             byteoffset += sizeof (VAL);\
-            if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)\
+            if (byteoffset % (GtUword) GT_WORDSIZE_INBYTES > 0)\
             {\
               char buffer[GT_WORDSIZE_INBYTES];\
               size_t padunits\
                 = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);\
-              byteoffset += (unsigned long) padunits;\
+              byteoffset += (GtUword) padunits;\
               ret = fread(buffer, (size_t) 1, (size_t) padunits, fp);\
             }\
             if (ferror(fp))\
@@ -79,7 +79,7 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
 {
   FILE *fp;
   bool had_err = false;
-  unsigned long cc, byteoffset = 0, alphatype;
+  GtUword cc, byteoffset = 0, alphatype;
   char *alphadef;
 
   gt_error_check(err);
@@ -97,8 +97,8 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
                    indexname, GT_ENCSEQFILESUFFIX);
       had_err = true;
     }
-    if (!had_err && ((emd->is64bit && sizeof (unsigned long) != (size_t) 8)
-          || (!emd->is64bit && sizeof (unsigned long) == (size_t) 8)))
+    if (!had_err && ((emd->is64bit && sizeof (GtUword) != (size_t) 8)
+          || (!emd->is64bit && sizeof (GtUword) == (size_t) 8)))
     {
       gt_error_set(err, "trying to load 64-bit index \"%s%s\" on a 32-bit "
                         "system or vice versa -- please use correct index "
@@ -110,8 +110,8 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
   if (!had_err)
   {
     if (emd->version < GT_ENCSEQ_VERSION)    {
-      gt_error_set(err, "index \"%s%s\" is format version %lu, current is "
-                        "%lu -- please re-encode",
+      gt_error_set(err, "index \"%s%s\" is format version "GT_LU", current is "
+                        "%d -- please re-encode",
                         indexname, GT_ENCSEQFILESUFFIX,
                         emd->version, GT_ENCSEQ_VERSION);
       had_err = true;
@@ -120,9 +120,9 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
   NEXTFREAD(cc);
   if (!had_err)
   {
-    if (cc >= (unsigned long) GT_ACCESS_TYPE_UNDEFINED)
+    if (cc >= (GtUword) GT_ACCESS_TYPE_UNDEFINED)
     {
-      gt_error_set(err, "illegal type %lu in \"%s%s\"", cc,
+      gt_error_set(err, "illegal type "GT_LU" in \"%s%s\"", cc,
                    indexname, GT_ENCSEQFILESUFFIX);
       had_err = true;
     }
@@ -140,7 +140,7 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
   NEXTFREAD(alphatype);
   if (!had_err) {
     if (alphatype > 2UL) {
-      gt_error_set(err, "illegal alphabet type %lu in \"%s%s\"", alphatype,
+      gt_error_set(err, "illegal alphabet type "GT_LU" in \"%s%s\"", alphatype,
                    indexname, GT_ENCSEQFILESUFFIX);
       had_err = true;
     }
@@ -197,13 +197,13 @@ GtAlphabet* gt_encseq_metadata_alphabet(GtEncseqMetadata *emd)
   return emd->alpha;
 }
 
-unsigned long gt_encseq_metadata_total_length(GtEncseqMetadata *emd)
+GtUword gt_encseq_metadata_total_length(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->totallength;
 }
 
-unsigned long gt_encseq_metadata_version(GtEncseqMetadata *emd)
+GtUword gt_encseq_metadata_version(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->version;
@@ -215,37 +215,37 @@ bool gt_encseq_metadata_is64bit(GtEncseqMetadata *emd)
   return ((int) emd->is64bit == 1);
 }
 
-unsigned long gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd)
+GtUword gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->maxseqlen;
 }
 
-unsigned long gt_encseq_metadata_min_seq_length(GtEncseqMetadata *emd)
+GtUword gt_encseq_metadata_min_seq_length(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->minseqlen;
 }
 
-unsigned long gt_encseq_metadata_num_of_sequences(GtEncseqMetadata *emd)
+GtUword gt_encseq_metadata_num_of_sequences(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->numofdbsequences;
 }
 
-unsigned long gt_encseq_metadata_num_of_files(GtEncseqMetadata *emd)
+GtUword gt_encseq_metadata_num_of_files(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->numofdbfiles;
 }
 
-unsigned long gt_encseq_metadata_length_of_filenames(GtEncseqMetadata *emd)
+GtUword gt_encseq_metadata_length_of_filenames(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->lengthofdbfilenames;
 }
 
-unsigned long gt_encseq_metadata_length_of_alphadef(GtEncseqMetadata *emd)
+GtUword gt_encseq_metadata_length_of_alphadef(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->lengthofdbfilenames;

@@ -36,7 +36,7 @@ struct GtRDBStmtSqlite {
   const GtRDBStmt parent_instance;
   sqlite3_stmt *stmt;
   sqlite3 *db;
-  unsigned long num_params;
+  GtUword num_params;
 };
 
 const GtRDBClass*     gt_rdb_sqlite_class(void);
@@ -71,7 +71,7 @@ GtRDB* gt_rdb_sqlite_new(const char *dbpath, GtError *err)
   return (had_err ? NULL : rdb);
 }
 
-static unsigned long gt_rdb_sqlite_last_inserted_id(GtRDB *rdb,
+static GtUword gt_rdb_sqlite_last_inserted_id(GtRDB *rdb,
                                                    GT_UNUSED const char *table,
                                                    GT_UNUSED GtError *err)
 {
@@ -79,7 +79,7 @@ static unsigned long gt_rdb_sqlite_last_inserted_id(GtRDB *rdb,
   gt_assert(rdb);
   gt_error_check(err);
   rdbs = gt_rdb_sqlite_cast(rdb);
-  return (unsigned long) sqlite3_last_insert_rowid(rdbs->db);
+  return (GtUword) sqlite3_last_insert_rowid(rdbs->db);
 }
 
 static int gt_rdb_sqlite_accept(GtRDB *rdb, GtRDBVisitor *v, GtError *err)
@@ -101,7 +101,7 @@ static void gt_rdb_sqlite_delete(GtRDB *rdb)
 }
 
 static GtRDBStmt* gt_rdb_sqlite_prepare(GtRDB *rdb, const char *query,
-                                        unsigned long num_params, GtError *err)
+                                        GtUword num_params, GtError *err)
 {
   GtRDBStmt *st = NULL;
   GtRDBStmtSqlite *sts = NULL;
@@ -157,7 +157,7 @@ static void gt_rdb_stmt_sqlite_delete(GtRDBStmt *st)
     sqlite3_finalize(sts->stmt);
 }
 
-static int gt_rdb_stmt_sqlite_bind_int(GtRDBStmt *st, unsigned long param_no,
+static int gt_rdb_stmt_sqlite_bind_int(GtRDBStmt *st, GtUword param_no,
                                        int val, GtError *err)
 {
   GtRDBStmtSqlite *sts;
@@ -174,8 +174,8 @@ static int gt_rdb_stmt_sqlite_bind_int(GtRDBStmt *st, unsigned long param_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_sqlite_bind_ulong(GtRDBStmt *st, unsigned long param_no,
-                                         unsigned long val, GtError *err)
+static int gt_rdb_stmt_sqlite_bind_ulong(GtRDBStmt *st, GtUword param_no,
+                                         GtUword val, GtError *err)
 {
   GtRDBStmtSqlite *sts;
   int rval, had_err = 0;
@@ -191,7 +191,7 @@ static int gt_rdb_stmt_sqlite_bind_ulong(GtRDBStmt *st, unsigned long param_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_sqlite_bind_string(GtRDBStmt *st, unsigned long param_no,
+static int gt_rdb_stmt_sqlite_bind_string(GtRDBStmt *st, GtUword param_no,
                                           const char *val, GtError *err)
 {
   GtRDBStmtSqlite *sts;
@@ -209,7 +209,7 @@ static int gt_rdb_stmt_sqlite_bind_string(GtRDBStmt *st, unsigned long param_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_sqlite_bind_double(GtRDBStmt *st, unsigned long param_no,
+static int gt_rdb_stmt_sqlite_bind_double(GtRDBStmt *st, GtUword param_no,
                                           double val, GtError *err)
 {
   GtRDBStmtSqlite *sts;
@@ -247,7 +247,7 @@ static int gt_rdb_stmt_sqlite_exec(GtRDBStmt *st, GtError *err)
   return had_err;
 }
 
-static int gt_rdb_stmt_sqlite_get_int(GtRDBStmt *st, unsigned long field_no,
+static int gt_rdb_stmt_sqlite_get_int(GtRDBStmt *st, GtUword field_no,
                                       int *result, GtError *err)
 {
   GtRDBStmtSqlite *sts;
@@ -265,8 +265,8 @@ static int gt_rdb_stmt_sqlite_get_int(GtRDBStmt *st, unsigned long field_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_sqlite_get_ulong(GtRDBStmt *st, unsigned long field_no,
-                                        unsigned long *result, GtError *err)
+static int gt_rdb_stmt_sqlite_get_ulong(GtRDBStmt *st, GtUword field_no,
+                                        GtUword *result, GtError *err)
 {
   GtRDBStmtSqlite *sts;
   int had_err = 0;
@@ -278,12 +278,12 @@ static int gt_rdb_stmt_sqlite_get_ulong(GtRDBStmt *st, unsigned long field_no,
     had_err = -1;
   }
   if (!had_err) {
-    *result = (unsigned long) sqlite3_column_int(sts->stmt, field_no);
+    *result = (GtUword) sqlite3_column_int(sts->stmt, field_no);
   }
   return had_err;
 }
 
-static int gt_rdb_stmt_sqlite_get_string(GtRDBStmt *st, unsigned long field_no,
+static int gt_rdb_stmt_sqlite_get_string(GtRDBStmt *st, GtUword field_no,
                                          GtStr *result, GtError *err)
 {
   GtRDBStmtSqlite *sts;
@@ -303,7 +303,7 @@ static int gt_rdb_stmt_sqlite_get_string(GtRDBStmt *st, unsigned long field_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_sqlite_get_double(GtRDBStmt *st, unsigned long field_no,
+static int gt_rdb_stmt_sqlite_get_double(GtRDBStmt *st, GtUword field_no,
                                          double *result, GtError *err)
 {
   GtRDBStmtSqlite *sts;

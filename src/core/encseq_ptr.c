@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdint.h>
 #include "core/encseq_api.h"
 #include "core/range_api.h"
 
@@ -24,14 +25,14 @@
    May be removed when we move on to something better. */
 
 GtUchar gt_encseq_get_encoded_char_p(const GtEncseq *encseq,
-                                     unsigned long *pos,
+                                     GtUword *pos,
                                      GtReadmode readmode)
 {
   return gt_encseq_get_encoded_char(encseq, *pos, readmode);
 }
 
 char gt_encseq_get_decoded_char_p(const GtEncseq *encseq,
-                                  unsigned long *pos,
+                                  GtUword *pos,
                                   GtReadmode readmode)
 {
   return gt_encseq_get_decoded_char(encseq, *pos, readmode);
@@ -52,75 +53,75 @@ void gt_encseq_extract_decoded_p(const GtEncseq *encseq,
 }
 
 void gt_encseq_total_length_p(const GtEncseq *encseq,
-                              unsigned long *totallength)
+                              GtUword *totallength)
 {
   *totallength = gt_encseq_total_length(encseq);
 }
 
 void gt_encseq_seqlength_p(const GtEncseq *encseq,
-                           unsigned long *seqnumber,
-                           unsigned long *seqlength)
+                           GtUword *seqnumber,
+                           GtUword *seqlength)
 {
   *seqlength = gt_encseq_seqlength(encseq, *seqnumber);
 }
 
 void gt_encseq_seqnum_p(const GtEncseq *encseq,
-                        unsigned long *seqnumber,
-                        unsigned long *pos)
+                        GtUword *seqnumber,
+                        GtUword *pos)
 {
   *seqnumber = gt_encseq_seqnum(encseq, *pos);
 }
 
 void gt_encseq_filenum_p(const GtEncseq *encseq,
-                         unsigned long *filenumber,
-                         unsigned long *pos)
+                         GtUword *filenumber,
+                         GtUword *pos)
 {
   *filenumber = gt_encseq_filenum(encseq, *pos);
 }
 
 void gt_encseq_seqstartpos_p(const GtEncseq *encseq,
-                             unsigned long *seqnumber,
-                             unsigned long *startpos)
+                             GtUword *seqnumber,
+                             GtUword *startpos)
 {
   *startpos = gt_encseq_seqstartpos(encseq, *seqnumber);
 }
 
 void gt_encseq_filestartpos_p(const GtEncseq *encseq,
-                              unsigned long *filenumber,
-                              unsigned long *startpos)
+                              GtUword *filenumber,
+                              GtUword *startpos)
 {
   *startpos = gt_encseq_seqstartpos(encseq, *filenumber);
 }
 
 void gt_encseq_num_of_files_p(const GtEncseq *encseq,
-                              unsigned long *numoffiles)
+                              GtUword *numoffiles)
 {
   *numoffiles = gt_encseq_num_of_files(encseq);
 }
 
 void gt_encseq_num_of_sequences_p(const GtEncseq *encseq,
-                                  unsigned long *numofseqs)
+                                  GtUword *numofseqs)
 {
   *numofseqs = gt_encseq_num_of_sequences(encseq);
 }
 
 const char* gt_encseq_description_p(const GtEncseq *encseq,
-                                    unsigned long *desclen,
-                                    unsigned long *seqnum)
+                                    GtUword *desclen,
+                                    GtUword *seqnum)
 {
   return gt_encseq_description(encseq, desclen, *seqnum);
 }
 
 void gt_encseq_effective_filelength_p(const GtEncseq *encseq,
                                       uint64_t *result,
-                                      unsigned long *filenum)
+                                      GtUword *filenum)
 {
   *result = gt_encseq_effective_filelength(encseq, *filenum);
 }
 
 GtEncseqReader* gt_encseq_create_reader_with_readmode_p(const GtEncseq *encseq,
                                                         GtReadmode readmode,
-                                                        unsigned long *pos)
+                                                        GtUword *pos)
 {
   return gt_encseq_create_reader_with_readmode(encseq, readmode, *pos);
 }

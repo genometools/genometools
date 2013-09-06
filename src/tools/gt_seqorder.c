@@ -109,7 +109,7 @@ static int gt_seqorder_arguments_check(GT_UNUSED int rest_argc,
 static void gt_seqorder_sort(GtSuffixsortspace *suffixsortspace,
     GtEncseq *encseq)
 {
-  unsigned long i;
+  GtUword i;
   Sfxstrategy sfxstrategy;
 
   defaultsfxstrategy(&sfxstrategy, false);
@@ -121,10 +121,10 @@ static void gt_seqorder_sort(GtSuffixsortspace *suffixsortspace,
       &sfxstrategy, NULL, NULL, NULL);
 }
 
-static void gt_seqorder_get_shuffled_seqnums(unsigned long nofseqs,
-    unsigned long *seqnums)
+static void gt_seqorder_get_shuffled_seqnums(GtUword nofseqs,
+    GtUword *seqnums)
 {
-  unsigned long i, j;
+  GtUword i, j;
 
   gt_assert(seqnums != NULL);
   seqnums[0] = 0;
@@ -136,12 +136,12 @@ static void gt_seqorder_get_shuffled_seqnums(unsigned long nofseqs,
   }
 }
 
-static void gt_seqorder_output(unsigned long seqnum, GtEncseq *encseq)
+static void gt_seqorder_output(GtUword seqnum, GtEncseq *encseq)
 {
   GtEncseqReader *esr;
-  unsigned long startpos, len, desclen = 0;
+  GtUword startpos, len, desclen = 0;
   const char *desc = NULL;
-  unsigned long i;
+  GtUword i;
 
   startpos = gt_encseq_seqstartpos(encseq, seqnum);
   len = gt_encseq_seqlength(encseq, seqnum);
@@ -169,7 +169,7 @@ static int gt_seqorder_runner(GT_UNUSED int argc, const char **argv,
   int had_err = 0;
   GtEncseq *encseq;
   GtEncseqLoader *loader;
-  unsigned long i, nofseqs;
+  GtUword i, nofseqs;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -191,8 +191,8 @@ static int gt_seqorder_runner(GT_UNUSED int argc, const char **argv,
     }
     else if (arguments->shuffle)
     {
-      unsigned long *seqnums;
-      seqnums = gt_malloc(sizeof (unsigned long) * nofseqs);
+      GtUword *seqnums;
+      seqnums = gt_malloc(sizeof (GtUword) * nofseqs);
       gt_seqorder_get_shuffled_seqnums(nofseqs, seqnums);
       for (i = 0; i < nofseqs; i++)
         gt_seqorder_output(seqnums[i], encseq);

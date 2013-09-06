@@ -34,7 +34,7 @@
 #include "tools/gt_simreads.h"
 
 typedef struct {
-  unsigned long num, minlen, maxlen, coverage;
+  GtUword num, minlen, maxlen, coverage;
   bool show_progressbar, verbose, ds, dl, singlestrand;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
@@ -220,11 +220,11 @@ static int gt_simreads_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static int gt_simreads_plot_disc_distri(unsigned long key,
-                                        unsigned long long value,
+static int gt_simreads_plot_disc_distri(GtUword key,
+                                        GtUint64 value,
                                         GtFile *outfile)
 {
-  gt_file_xprintf(outfile, "%lu "GT_LLU"\n", key, value);
+  gt_file_xprintf(outfile, ""GT_LU" "GT_LLU"\n", key, value);
   return 0;
 }
 
@@ -253,15 +253,15 @@ static int gt_simreads_write_dist_file(const char *title, GtDiscDistri *dist,
 }
 
 typedef struct {
-  unsigned long value;
-  unsigned long length;
+  GtUword value;
+  GtUword length;
 } GtSimreadsDistvalue;
 
-static unsigned long gt_simreads_readlen_from_dist(
-    const GtSimreadsDistvalue *dist, const unsigned long value,
-    const unsigned long nofvalues)
+static GtUword gt_simreads_readlen_from_dist(
+    const GtSimreadsDistvalue *dist, const GtUword value,
+    const GtUword nofvalues)
 {
-  unsigned long l = 0, r = nofvalues - 1, m = r >> 1;
+  GtUword l = 0, r = nofvalues - 1, m = r >> 1;
   while (value != dist[m].value)
   {
     if (value < dist[m].value)
@@ -292,12 +292,12 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   GtEncseqReader *target_reader = NULL;
   GtReadmode readmode;
   GtStr *read = NULL, *description = NULL;
-  unsigned long output_bases = 0, output_reads = 0,
+  GtUword output_bases = 0, output_reads = 0,
                 output_rcmode_reads = 0,
                 required_output_bases = 0,
                 target_total_length,
                 startpos, readlen, i;
-  unsigned long long progress = 0;
+  GtUint64 progress = 0;
   bool fixed_readlen;
   int had_err = 0;
   GtUchar ch;
@@ -332,26 +332,26 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     target_total_length = gt_encseq_total_length(target);
-    gt_logger_log(logger, "number of templates: %lu",
+    gt_logger_log(logger, "number of templates: "GT_LU"",
                   gt_encseq_num_of_sequences(target));
-    gt_logger_log(logger, "total template length: %lu",
+    gt_logger_log(logger, "total template length: "GT_LU"",
                   target_total_length);
     if (arguments->coverage != GT_UNDEF_ULONG)
     {
-      gt_logger_log(logger, "required coverage: %lu",
+      gt_logger_log(logger, "required coverage: "GT_LU"",
                             arguments->coverage);
       required_output_bases = arguments->coverage * target_total_length;
       if (arguments->show_progressbar)
         gt_progressbar_start(&progress,
-            (unsigned long long)required_output_bases);
+            (GtUint64)required_output_bases);
     }
     else
     {
       gt_assert(arguments->num != GT_UNDEF_ULONG);
-      gt_logger_log(logger, "required number of reads: %lu",
+      gt_logger_log(logger, "required number of reads: "GT_LU"",
                             arguments->num);
       if (arguments->show_progressbar)
-        gt_progressbar_start(&progress, (unsigned long long)arguments->num);
+        gt_progressbar_start(&progress, (GtUint64)arguments->num);
     }
     read = gt_str_new();
     description = gt_str_new();
@@ -360,13 +360,13 @@ static int gt_simreads_runner(GT_UNUSED int argc,
       gt_logger_log(logger, "read length distribution file: %s",
           gt_str_get(arguments->distlen_filename));
       nofvalues = gt_file_size(gt_str_get(arguments->distlen_filename)) /
-                       (off_t) (sizeof (unsigned long) << 1);
+                       (off_t) (sizeof (GtUword) << 1);
       input_distlen = gt_malloc(sizeof(GtSimreadsDistvalue) * nofvalues);
       for (j = 0; j < nofvalues; j++)
       {
-        (void)gt_xfread(&(input_distlen[j].length), sizeof (unsigned long),
+        (void)gt_xfread(&(input_distlen[j].length), sizeof (GtUword),
             (size_t)1, arguments->distlen_file);
-        (void)gt_xfread(&(input_distlen[j].value), sizeof (unsigned long),
+        (void)gt_xfread(&(input_distlen[j].value), sizeof (GtUword),
             (size_t)1, arguments->distlen_file);
       }
       for (j = (off_t)1; j < nofvalues; j++)
@@ -375,10 +375,10 @@ static int gt_simreads_runner(GT_UNUSED int argc,
       }
     }
     else if (fixed_readlen)
-      gt_logger_log(logger, "required read length (fixed): %lu",
+      gt_logger_log(logger, "required read length (fixed): "GT_LU"",
                     arguments->minlen);
     else
-      gt_logger_log(logger, "required read length range: %lu-%lu",
+      gt_logger_log(logger, "required read length range: "GT_LU"-"GT_LU"",
                     arguments->minlen, arguments->maxlen);
   }
 
@@ -392,7 +392,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
         gt_assert(input_distlen != NULL);
         readlen = gt_simreads_readlen_from_dist(input_distlen,
             gt_rand_max(input_distlen[nofvalues - 1].value),
-            (unsigned long)nofvalues);
+            (GtUword)nofvalues);
         gt_assert(readlen <= input_distlen[nofvalues - 1].value);
       }
       else
@@ -454,7 +454,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     if (arguments->coverage != GT_UNDEF_ULONG)
     {
       if (arguments->show_progressbar)
-        progress = (unsigned long long)output_bases;
+        progress = (GtUint64)output_bases;
       if (output_bases >= required_output_bases)
         break;
     }
@@ -462,7 +462,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     {
       gt_assert(arguments->num != GT_UNDEF_ULONG);
       if (arguments->show_progressbar)
-        progress = (unsigned long long)output_reads;
+        progress = (GtUint64)output_reads;
       if (output_reads == arguments->num)
         break;
     }
@@ -472,13 +472,13 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   {
     gt_logger_log(logger, "coverage: %.3f",
                   (float) output_bases / target_total_length);
-    gt_logger_log(logger, "total reads length: %lu", output_bases);
+    gt_logger_log(logger, "total reads length: "GT_LU"", output_bases);
     if (!fixed_readlen)
       gt_logger_log(logger, "average reads length: %.1f",
                     (float) output_bases / output_reads);
-    gt_logger_log(logger, "number of reads: %lu", output_reads);
-    gt_logger_log(logger, "- forward: %lu", output_reads-output_rcmode_reads);
-    gt_logger_log(logger, "- revcompl: %lu", output_rcmode_reads);
+    gt_logger_log(logger, "number of reads: "GT_LU"", output_reads);
+    gt_logger_log(logger, "- forward: "GT_LU"", output_reads-output_rcmode_reads);
+    gt_logger_log(logger, "- revcompl: "GT_LU"", output_rcmode_reads);
   }
 
   if (!had_err && arguments->dl)

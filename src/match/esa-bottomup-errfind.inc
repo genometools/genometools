@@ -34,22 +34,22 @@ static void initBUinfo_errfind(GtBUinfo_errfind *,GtBUstate_errfind *);
 static void freeBUinfo_errfind(GtBUinfo_errfind *,GtBUstate_errfind *);
 
 static int processleafedge_errfind(bool,
-    unsigned long,
+    GtUword,
     GtBUinfo_errfind *,
-    unsigned long, /* position */
+    GtUword, /* position */
     GtBUstate_errfind *,
     GtError *err);
 
 static int processbranchingedge_errfind(bool firstsucc,
-    unsigned long,
+    GtUword,
     GtBUinfo_errfind *,
-    unsigned long,
-    unsigned long,
+    GtUword,
+    GtUword,
     GtBUinfo_errfind *,
     GtBUstate_errfind *,
     GtError *);
 
-static int processlcpinterval_errfind(unsigned long,
+static int processlcpinterval_errfind(GtUword,
     GtBUinfo_errfind *,
     GtBUstate_errfind *,
     GtError *err);
@@ -79,14 +79,14 @@ static int processlcpinterval_errfind(unsigned long,
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtBUinfo_errfind info;
 } GtBUItvinfo_errfind;
 
 typedef struct
 {
   GtBUItvinfo_errfind *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 } GtArrayGtBUItvinfo_errfind;
 
@@ -102,7 +102,7 @@ GtArrayGtBUItvinfo_errfind *gt_GtArrayGtBUItvinfo_new_errfind(void)
 void gt_GtArrayGtBUItvinfo_delete_errfind(GtArrayGtBUItvinfo_errfind *stack,
                                   GtBUstate_errfind *state)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -113,11 +113,11 @@ void gt_GtArrayGtBUItvinfo_delete_errfind(GtArrayGtBUItvinfo_errfind *stack,
 }
 
 static GtBUItvinfo_errfind *allocateBUstack_errfind(GtBUItvinfo_errfind *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
+                                   GtUword currentallocated,
+                                   GtUword allocated,
                                    GtBUstate_errfind *state)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo_errfind *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -135,8 +135,8 @@ static int gt_esa_bottomup_errfind(Sequentialsuffixarrayreader *ssar,
                     /* no parameter snrp */
                     GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix = 0,
                 idx,
                 numberofsuffixes,
@@ -213,8 +213,8 @@ static int gt_esa_bottomup_errfind(Sequentialsuffixarrayreader *ssar,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallb = lastinterval->lb;
+        GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_errfind(lcpvalue,lastintervallb);
         if (processbranchingedge_errfind(true,

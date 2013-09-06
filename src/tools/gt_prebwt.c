@@ -76,7 +76,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
                             GT_UNUSED int parsed_args,
                             void *tool_arguments, GtError *err)
 {
-  unsigned long totallength = 0;
+  GtUword totallength = 0;
   FMindex *fmindex = NULL;
   bool haserr = false;
   GtEncseqMetadata *emd = NULL;

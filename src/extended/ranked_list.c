@@ -27,7 +27,7 @@
 
 struct GtRankedList
 {
-  unsigned long currentsize,
+  GtUword currentsize,
                 maxsize;
   GtRBTree *root;
   GtCompareWithData comparefunction;
@@ -42,7 +42,7 @@ struct GtRankedListIter
   GtDlistelem *current_elem;
 };
 
-GtRankedList* gt_ranked_list_new(unsigned long maxsize,
+GtRankedList* gt_ranked_list_new(GtUword maxsize,
                                  GtCompareWithData comparefunction,
                                  GtFree free_func,
                                  void *compareinfo)
@@ -130,7 +130,7 @@ void* gt_ranked_list_first(const GtRankedList *ranked_list)
     return NULL;
 }
 
-unsigned long gt_ranked_list_size(const GtRankedList *ranked_list)
+GtUword gt_ranked_list_size(const GtRankedList *ranked_list)
 {
   /* return ranked_list->currentsize; */
   return gt_dlist_size(ranked_list->list);
@@ -214,7 +214,7 @@ static int gt_ranked_list_cmp_numbers(const void *n1, const void *n2,
 }
 
 typedef struct {
-  unsigned long id, score;
+  GtUword id, score;
 } GtRankedListTestStruct;
 
 static int gt_ranked_list_cmp_teststructs(const void *n1, const void *n2,
@@ -236,7 +236,7 @@ int gt_ranked_list_unit_test(GtError *err)
   GtRankedList *rl;
   GtRankedListIter *iter;
   GtArray *arr;
-  const unsigned long nof_best = 30UL, nof_tests = 100UL;
+  const GtUword nof_best = 30UL, nof_tests = 100UL;
   GtRankedListTestStruct *mystr;
   int values[8] = {-3, 4, 1, 545, 24, 33, 22, 42},
       i, j;
@@ -263,7 +263,7 @@ int gt_ranked_list_unit_test(GtError *err)
   for (i = 0; i < 8; i++) {
     gt_ranked_list_insert(rl, values+i);
     if (i < 5)
-      gt_ensure(gt_ranked_list_size(rl) == (unsigned long) i + 1UL);
+      gt_ensure(gt_ranked_list_size(rl) == (GtUword) i + 1UL);
     else
       gt_ensure(gt_ranked_list_size(rl) == 5UL);
   }
@@ -271,22 +271,22 @@ int gt_ranked_list_unit_test(GtError *err)
   gt_ensure((*(int*) gt_ranked_list_last(rl)) == 22);
   gt_ranked_list_delete(rl);
 
-  for (j = 0; (unsigned long) j < nof_tests; j++) {
+  for (j = 0; (GtUword) j < nof_tests; j++) {
     rl = gt_ranked_list_new(30UL, gt_ranked_list_cmp_teststructs, gt_free_func,
                             NULL);
     arr = gt_array_new(sizeof (GtRankedListTestStruct));
     for (i = 0; i < 200; i++) {
       GtRankedListTestStruct newstr,
                              *ptr;
-      newstr.id = (unsigned long) i;
-      newstr.score = (unsigned long) (random() % (2*nof_best));
+      newstr.id = (GtUword) i;
+      newstr.score = (GtUword) (random() % (2*nof_best));
       gt_array_add(arr, newstr);
       ptr = gt_malloc(sizeof (*ptr));
       ptr->id = newstr.id;
       ptr->score = newstr.score;
       gt_ranked_list_insert(rl, ptr);
-        if ((unsigned long) i < nof_best)
-        gt_ensure(gt_ranked_list_size(rl) == (unsigned long) i + 1UL);
+        if ((GtUword) i < nof_best)
+        gt_ensure(gt_ranked_list_size(rl) == (GtUword) i + 1UL);
       else
         gt_ensure(gt_ranked_list_size(rl) == nof_best);
     }
@@ -301,11 +301,11 @@ int gt_ranked_list_unit_test(GtError *err)
          mystr != NULL;
          mystr = gt_ranked_list_iter_next(iter)) {
       GtRankedListTestStruct *str = (GtRankedListTestStruct*)
-                                         gt_array_get(arr, (unsigned long) i++);
+                                         gt_array_get(arr, (GtUword) i++);
       gt_ensure(mystr != NULL);
       gt_ensure(mystr->id == str->id);
       gt_ensure(mystr->score == str->score);
-      /* printf("id: %lu/%lu, score %lu/%lu\n", mystr->id, str->id,
+      /* printf("id: "GT_LU"/"GT_LU", score "GT_LU"/"GT_LU"\n", mystr->id, str->id,
                                                 mystr->score, str->score); */
     }
     gt_ranked_list_iter_delete(iter);

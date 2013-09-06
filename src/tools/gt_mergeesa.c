@@ -73,7 +73,7 @@ int gt_mergeesa(int argc, const char **argv, GtError *err)
   }
   if (!haserr)
   {
-    unsigned long i;
+    GtUword i;
     GtLogger *logger;
 
     printf("# storeindex=%s\n",gt_str_get(storeindex));

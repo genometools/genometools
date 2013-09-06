@@ -18,14 +18,16 @@
 #ifndef SPACEPEAK_H
 #define SPACEPEAK_H
 
+#include "core/types_api.h"
+
 /* The spacepeak module allows access to a combined space peak across multiple
    allocator objects. */
 
-void          gt_spacepeak_init(void);
-void          gt_spacepeak_add(unsigned long size);
-void          gt_spacepeak_free(unsigned long size);
-unsigned long gt_spacepeak_get_space_peak(void);
-void          gt_spacepeak_show_space_peak(FILE *outfp);
-void          gt_spacepeak_clean(void);
+void    gt_spacepeak_init(void);
+void    gt_spacepeak_add(GtUword size);
+void    gt_spacepeak_free(GtUword size);
+GtUword gt_spacepeak_get_space_peak(void);
+void    gt_spacepeak_show_space_peak(FILE *outfp);
+void    gt_spacepeak_clean(void);
 
 #endif

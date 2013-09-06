@@ -21,36 +21,36 @@
 #include "core/encseq_api.h"
 #include "core/types_api.h"
 
-unsigned long gt_distanceofshortstringsbytearray(unsigned long *eqsvector,
+GtUword gt_distanceofshortstringsbytearray(GtUword *eqsvector,
                                      unsigned int alphasize,
                                      const GtUchar *useq,
-                                     unsigned long ulen,
+                                     GtUword ulen,
                                      const GtUchar *vseq,
-                                     unsigned long vlen);
+                                     GtUword vlen);
 
-unsigned long gt_distanceofshortstringsencseq(unsigned long *eqsvector,
+GtUword gt_distanceofshortstringsencseq(GtUword *eqsvector,
                                            unsigned int alphasize,
                                            const GtUchar *useq,
-                                           unsigned long ulen,
+                                           GtUword ulen,
                                            const GtEncseq *encseq,
-                                           unsigned long vstartpos,
-                                           unsigned long vlen);
+                                           GtUword vstartpos,
+                                           GtUword vlen);
 
-unsigned long gt_reversesuffixmatch(unsigned long *eqsvector,
+GtUword gt_reversesuffixmatch(GtUword *eqsvector,
                                  unsigned int alphasize,
                                  const GtUchar *useq,
-                                 unsigned long ulen,
+                                 GtUword ulen,
                                  const GtUchar *vseq,
-                                 unsigned long vlen,
-                                 unsigned long maxdistance);
+                                 GtUword vlen,
+                                 GtUword maxdistance);
 
 Definedunsignedlong gt_forwardprefixmatch(const GtEncseq *encseq,
                                        unsigned int alphasize,
-                                       unsigned long startpos,
+                                       GtUword startpos,
                                        bool nowildcards,
-                                       unsigned long *eqsvector,
+                                       GtUword *eqsvector,
                                        const GtUchar *useq,
-                                       unsigned long ulen,
-                                       unsigned long maxdistance);
+                                       GtUword ulen,
+                                       GtUword maxdistance);
 
 #endif

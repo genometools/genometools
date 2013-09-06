@@ -825,10 +825,10 @@ GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
 
 void gt_graphics_cairo_draw_curve_data(GtGraphics *gg, double x, double y,
                                        GtColor color, double data[],
-                                       unsigned long ndata, GtRange valrange,
-                                       unsigned long height)
+                                       GtUword ndata, GtRange valrange,
+                                       GtUword height)
 {
-  unsigned long i, rnglen;
+  GtUword i, rnglen;
   double xpos;
   GtGraphicsCairo *g;
   g = gt_graphics_cairo_cast(gg);

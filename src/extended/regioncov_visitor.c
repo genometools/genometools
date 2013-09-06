@@ -28,7 +28,7 @@
 
 struct GtRegionCovVisitor {
   const GtNodeVisitor parent_instance;
-  unsigned long max_feature_dist;
+  GtUword max_feature_dist;
   GtHashmap *region2rangelist;
 };
 
@@ -102,7 +102,7 @@ const GtNodeVisitorClass* gt_regioncov_visitor_class()
   return nvc;
 }
 
-GtNodeVisitor* gt_regioncov_visitor_new(unsigned long max_feature_dist)
+GtNodeVisitor* gt_regioncov_visitor_new(GtUword max_feature_dist)
 {
   GtNodeVisitor *nv = gt_node_visitor_create(gt_regioncov_visitor_class());
   GtRegionCovVisitor *regioncov_visitor = gt_regioncov_visitor_cast(nv);
@@ -115,7 +115,7 @@ GtNodeVisitor* gt_regioncov_visitor_new(unsigned long max_feature_dist)
 static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
                           GT_UNUSED GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtArray *rangelist;
   GtRange *rangeptr;
   gt_error_check(err);
@@ -126,7 +126,7 @@ static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
     printf("%s:\n", (char*) key);
     for (i = 0; i < gt_array_size(rangelist); i++) {
       rangeptr = gt_array_get(rangelist, i);
-      printf("%lu, %lu\n", rangeptr->start, rangeptr->end);
+      printf(""GT_LU", "GT_LU"\n", rangeptr->start, rangeptr->end);
     }
   }
   return 0;

@@ -20,53 +20,53 @@
 
 #include <stdio.h>
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 /* Objects of the <GtStr> class are strings which grow on demand. */
 typedef struct GtStr GtStr;
 
 /* Return an empty <GtStr> object. */
-GtStr*        gt_str_new(void);
+GtStr*  gt_str_new(void);
 /* Return a new <GtStr> object whose content is set to <cstr>. */
-GtStr*        gt_str_new_cstr(const char *cstr);
+GtStr*  gt_str_new_cstr(const char *cstr);
 /* Return a clone of <str>. */
-GtStr*        gt_str_clone(const GtStr *str);
+GtStr*  gt_str_clone(const GtStr *str);
 /* Increase the reference count for <str> and return it.
    If <str> is <NULL>, <NULL> is returned without any side effects. */
-GtStr*        gt_str_ref(GtStr *str);
+GtStr*  gt_str_ref(GtStr *str);
 /* Return the content of <str>.  Never returns NULL, and the content is always
    <\0>-terminated */
-char*         gt_str_get(const GtStr *str);
+char*   gt_str_get(const GtStr *str);
 /* Set the content of <str> to <cstr>. */
-void          gt_str_set(GtStr *str, const char *cstr);
+void    gt_str_set(GtStr *str, const char *cstr);
 /* Append the string <src> to <dest>. */
-void          gt_str_append_str(GtStr *dest, const GtStr *src);
+void    gt_str_append_str(GtStr *dest, const GtStr *src);
 /* Append the <\0>-terminated <cstr> to <str>. */
-void          gt_str_append_cstr(GtStr *str, const char *cstr);
+void    gt_str_append_cstr(GtStr *str, const char *cstr);
 /* Append the (not necessarily <\0>-terminated) <cstr> with given <length> to
    <str>. */
-void          gt_str_append_cstr_nt(GtStr *str,
-                                    const char *cstr, unsigned long length);
+void    gt_str_append_cstr_nt(GtStr *str, const char *cstr, GtUword length);
 /* Append character <c> to <str>. */
-void          gt_str_append_char(GtStr *str, char c);
+void    gt_str_append_char(GtStr *str, char c);
 /* Append double <d> to <str> with given <precision>. */
-void          gt_str_append_double(GtStr *str, double d, int precision);
+void    gt_str_append_double(GtStr *str, double d, int precision);
 /* Append <ulong> to <str>. */
-void          gt_str_append_ulong(GtStr *str, unsigned long ulong);
+void    gt_str_append_ulong(GtStr *str, GtUword ulong);
 /* Append <intval> to <str>. */
-void          gt_str_append_int(GtStr *str, int intval);
+void    gt_str_append_int(GtStr *str, int intval);
 /* Append <uint> to <str>. */
-void          gt_str_append_uint(GtStr *str, unsigned int uint);
+void    gt_str_append_uint(GtStr *str, unsigned int uint);
 /* Set length of <str> to <length>. <length> must be smaller or equal than
    <gt_str_length(str)>. */
-void          gt_str_set_length(GtStr *str, unsigned long length);
+void    gt_str_set_length(GtStr *str, GtUword length);
 /* Reset <str> to length 0. */
-void          gt_str_reset(GtStr *str);
+void    gt_str_reset(GtStr *str);
 /* Compare <str1> and <str2> and return the result (similar to <strcmp(3)>). */
-int           gt_str_cmp(const GtStr *str1, const GtStr *str2);
+int     gt_str_cmp(const GtStr *str1, const GtStr *str2);
 /* Return the length of <str>. If <str> is <NULL>, 0 is returned. */
-unsigned long gt_str_length(const GtStr *str);
+GtUword gt_str_length(const GtStr *str);
 /* Decrease the reference count for <str> or delete it, if this was the last
    reference. */
-void          gt_str_delete(GtStr *str);
+void    gt_str_delete(GtStr *str);
 
 #endif

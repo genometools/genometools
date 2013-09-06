@@ -23,7 +23,7 @@
 
 typedef struct
 {
-  unsigned long lbound,
+  GtUword lbound,
          rbound;
   GtUchar inchar;
 } Boundswithchar;

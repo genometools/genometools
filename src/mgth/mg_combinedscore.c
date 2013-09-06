@@ -20,14 +20,14 @@
 #include "core/trans_table_api.h"
 
 int mg_combinedscore(ParseStruct *parsestruct_ptr,
-                     unsigned long hit_counter, GtError * err)
+                     GtUword hit_counter, GtError * err)
 {
   int had_err = 0;
 
   unsigned short current_row,
     k;
 
-  unsigned long contig_len = 0,
+  GtUword contig_len = 0,
     contig_seq_diff = 0,
     hit_len = 0,
     hit_seq_diff = 0,
@@ -95,7 +95,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     for (j = 0; j < contig_len; j++)
     {
       combinedscore_matrix[k][j].hit_number =
-        gt_array_new(sizeof (unsigned long));
+        gt_array_new(sizeof (GtUword));
     }
   }
 
@@ -111,7 +111,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   {
     /* Speicherplatz fuer die Hilfszeilen wird reserviert */
     matrix_row = gt_calloc(contig_len, sizeof (double));
-    count_row = gt_calloc(contig_len, sizeof (unsigned long));
+    count_row = gt_calloc(contig_len, sizeof (GtUword));
     contig_seq_tri = gt_calloc(4, sizeof (char));
     hit_seq_tri = gt_calloc(4, sizeof (char));
 
@@ -332,7 +332,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
 }
 
 /* Funktion zur Bestimmung der dem Leserahmen entsprechenden Matrix-Zeile */
-short get_matrix_row(long frame_fct)
+short get_matrix_row(GtWord frame_fct)
 {
   gt_assert(frame_fct >= -3 && frame_fct <= 3);
   return 3 - frame_fct;         /* [-3..3] -> [6..0] */
@@ -340,7 +340,7 @@ short get_matrix_row(long frame_fct)
 
 /* Umkehrfunktion zu get_matrix_row - aus der Matrix-Zeile wird der Leserahmen
    bestimmt */
-short get_current_frame(long row_fct)
+short get_current_frame(GtWord row_fct)
 {
   gt_assert(row_fct >= 0 && row_fct <= 6);
   return 3 - row_fct;           /* [0..6] -> [3..-3] */
@@ -350,23 +350,23 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
                         char *hit_amino,
                         char *query_amino,
                         short current_row_fct,
-                        unsigned long position_contig,
-                        unsigned long position_hit,
-                        unsigned long hit_len,
-                        unsigned long contig_len,
-                        unsigned long hit_number,
+                        GtUword position_contig,
+                        GtUword position_hit,
+                        GtUword hit_len,
+                        GtUword contig_len,
+                        GtUword hit_number,
                         ParseStruct *parsestruct_ptr,
                         double *matrix_row,
-                        unsigned long *count_row_fct,
+                        GtUword *count_row_fct,
                         char *contig_seq,
                         char *hit_seq, HitInformation *hit_information)
 {
-  unsigned long j = 0,
+  GtUword j = 0,
     nr_of_strings = 0;
   unsigned short k = 0;
 
-  unsigned long query_from;
-  unsigned long query_to;
+  GtUword query_from;
+  GtUword query_to;
 
   query_from = LONG_VALUE(MATRIXSTRUCT(query_from), hit_number) - 1;
   query_to = LONG_VALUE(MATRIXSTRUCT(query_to), hit_number) - 1;
@@ -374,7 +374,7 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
   /* das Ende von Blast-Hits innerhalb der Query-Sequenz wird mit -10
      bewertet */
   if (position_hit == hit_len - 3
-      && *(long *) MATRIXSTRUCT(query_to) != contig_len && k == 3)
+      && *(GtWord *) MATRIXSTRUCT(query_to) != contig_len && k == 3)
   {
     /* Wenn der Leserahmen negativ ist, muessen die Combined-Scores von
        Rechts nach Links in die Combined-Score Matrix eingetragen werden -
@@ -544,10 +544,10 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
 
 static void add_scores(ParseStruct *parsestruct_ptr,
                        double *matrix_row,
-                       unsigned long *count_row_fct,
+                       GtUword *count_row_fct,
                        short current_row_fct,
-                       unsigned long hit_number,
-                       unsigned long position,
+                       GtUword hit_number,
+                       GtUword position,
                        unsigned short k, double score)
 {
   /* Wenn der Query-Leserahmen negativ ist, muessen die Combined-Scores

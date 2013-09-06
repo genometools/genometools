@@ -40,7 +40,7 @@
    the bins can be sorted by independet threads which have independent
    workspace.
 
-   5) The implementation allows one to sort an unsigned long -array and an array
+   5) The implementation allows one to sort an GtUword -array and an array
    over type <GtUlongPair>, where the component <a> is the soring key.
 */
 
@@ -66,13 +66,13 @@
 #define GT_RADIX_KEY_PTR(MASK,SHIFT,PTR)  GT_RADIX_KEY(MASK,SHIFT,*(PTR))
 
 #ifdef SKDEBUG
-static void gt_radix_showbytewise(unsigned long value)
+static void gt_radix_showbytewise(GtUword value)
 {
   int shift;
 
   for (shift = GT_INTWORDSIZE - 8; shift >= 0; shift-=8)
   {
-    printf("%lu ",GT_RADIX_KEY(UINT8_MAX,shift,&value));
+    printf(""GT_LU" ",GT_RADIX_KEY(UINT8_MAX,shift,&value));
     if (shift > 0)
     {
       printf(" ");
@@ -82,24 +82,24 @@ static void gt_radix_showbytewise(unsigned long value)
 #endif
 
 /* if sorting for tables larger than UINT32_MAX is required, set the following
-   type to unsigned long. */
+   type to GtUword. */
 
 #undef GT_RADIX_LARGEARRAYS
 #ifdef GT_RADIX_LARGEARRAYS
-typedef unsigned long GtCountbasetype;
+typedef GtUword GtCountbasetype;
 #define GT_COUNTBASETYPE_MAX ULONG_MAX
 #else
 typedef uint32_t GtCountbasetype;
 #define GT_COUNTBASETYPE_MAX UINT32_MAX
 #endif
 
-static void gt_radixsort_lsb_linear_phase(unsigned long *count,
-                                          unsigned long *source,
-                                          unsigned long *dest,
-                                          unsigned long len,
+static void gt_radixsort_lsb_linear_phase(GtUword *count,
+                                          GtUword *source,
+                                          GtUword *dest,
+                                          GtUword len,
                                           size_t shift)
 {
-  unsigned long idx, *cptr, *countptr, *sptr;
+  GtUword idx, *cptr, *countptr, *sptr;
 
   /* count occurences of every byte value */
   countptr = count;
@@ -128,17 +128,17 @@ static void gt_radixsort_lsb_linear_phase(unsigned long *count,
 }
 
 static void gt_radixsort_lsb_linear_generic(size_t enditer,
-                                            unsigned long *source,
-                                            unsigned long *dest,
-                                            unsigned long len)
+                                            GtUword *source,
+                                            GtUword *dest,
+                                            GtUword len)
 {
   size_t iter;
-  unsigned long *origdest, count[UINT8_MAX+1];
+  GtUword *origdest, count[UINT8_MAX+1];
 
   origdest = dest;
   for (iter = 0; iter <= enditer; iter++)
   {
-    unsigned long *ptr;
+    GtUword *ptr;
 
     gt_radixsort_lsb_linear_phase (count,source, dest, len,
                                    iter * CHAR_BIT * sizeof (uint8_t));
@@ -153,11 +153,11 @@ static void gt_radixsort_lsb_linear_generic(size_t enditer,
   }
 }
 
-void gt_radixsort_lsb_linear(unsigned long *source,unsigned long len)
+void gt_radixsort_lsb_linear(GtUword *source,GtUword len)
 {
-  unsigned long *dest = gt_malloc(sizeof (*dest) * len);
+  GtUword *dest = gt_malloc(sizeof (*dest) * len);
 
-  gt_radixsort_lsb_linear_generic(sizeof (unsigned long) - 1,
+  gt_radixsort_lsb_linear_generic(sizeof (GtUword) - 1,
                                   source,
                                   dest,
                                   len);
@@ -165,23 +165,23 @@ void gt_radixsort_lsb_linear(unsigned long *source,unsigned long len)
 }
 
 #ifdef GT_THREADS_ENABLED
-static unsigned long gt_radixsort_findfirstlarger(const unsigned long
+static GtUword gt_radixsort_findfirstlarger(const GtUword
                                                     *leftborder,
-                                                  unsigned long start,
-                                                  unsigned long end,
-                                                  unsigned long offset)
+                                                  GtUword start,
+                                                  GtUword end,
+                                                  GtUword offset)
 {
-  const unsigned long *left = leftborder + start,
+  const GtUword *left = leftborder + start,
                       *right = leftborder + end,
                       *found = leftborder + end;
 
   while (left <= right)
   {
-    const unsigned long *mid = left + GT_DIV2(right-left);
+    const GtUword *mid = left + GT_DIV2(right-left);
     gt_assert(mid >= leftborder + start && mid <= leftborder + end);
     if (offset == *mid)
     {
-      return (unsigned long) (mid - leftborder);
+      return (GtUword) (mid - leftborder);
     }
     if (offset < *mid)
     {
@@ -193,16 +193,16 @@ static unsigned long gt_radixsort_findfirstlarger(const unsigned long
     }
   }
   gt_assert(found >= leftborder);
-  return (unsigned long) (found - leftborder);
+  return (GtUword) (found - leftborder);
 }
 
-static void gt_evenly_divide_lentab(unsigned long *endindexes,
-                                    unsigned long *lentab,
-                                    unsigned long numofelems,
-                                    unsigned long len,
+static void gt_evenly_divide_lentab(GtUword *endindexes,
+                                    GtUword *lentab,
+                                    GtUword numofelems,
+                                    GtUword len,
                                     unsigned int numofparts)
 {
-  unsigned long *leftborder, widthofpart, idx, previousvalue, offset = 0;
+  GtUword *leftborder, widthofpart, idx, previousvalue, offset = 0;
   unsigned int part, remainder;
 
   gt_assert(numofparts >= 2U);
@@ -210,12 +210,12 @@ static void gt_evenly_divide_lentab(unsigned long *endindexes,
   previousvalue = leftborder[0];
   for (idx = 1UL; idx < numofelems; idx++)
   {
-    unsigned long tmp = leftborder[idx-1] + previousvalue;
+    GtUword tmp = leftborder[idx-1] + previousvalue;
     previousvalue = leftborder[idx];
     leftborder[idx] = tmp;
   }
   widthofpart = len/numofparts;
-  remainder = (unsigned int) (len % (unsigned long) numofparts);
+  remainder = (unsigned int) (len % (GtUword) numofparts);
   for (part=0; part < numofparts; part++)
   {
     if (remainder > 0)
@@ -231,7 +231,7 @@ static void gt_evenly_divide_lentab(unsigned long *endindexes,
       endindexes[part] = numofelems-1;
     } else
     {
-      unsigned long start = part == 0 ? 0 : endindexes[part-1] + 1;
+      GtUword start = part == 0 ? 0 : endindexes[part-1] + 1;
 
       endindexes[part] = gt_radixsort_findfirstlarger(leftborder,start,
                                                       numofelems-1,offset);
@@ -242,7 +242,7 @@ static void gt_evenly_divide_lentab(unsigned long *endindexes,
 
 typedef union
 {
-  unsigned long *ulongptr;
+  GtUword *ulongptr;
   GtUlongPair *ulongpairptr;
 } GtRadixvalues;
 
@@ -257,7 +257,7 @@ GT_STACK_DECLARESTRUCT(GtRadixsort_stackelem,2 * (UINT8_MAX+1));
 
 typedef struct
 {
-  unsigned long buf_size, cachesize, countcached, countuncached,
+  GtUword buf_size, cachesize, countcached, countuncached,
            countinsertionsort;
   GtCountbasetype *startofbin, *endofbin;
   uint8_t *nextidx;
@@ -347,18 +347,18 @@ struct GtRadixsortinfo
   GtStackGtRadixsort_stackelem stack;
   GtRadixbuffer *rbuf;
   GtRadixvalues sortspace;
-  unsigned long maxlen;
+  GtUword maxlen;
   bool pairs;
   size_t size;
 #ifdef GT_THREADS_ENABLED
-  unsigned long *lentab, *endindexes;
+  GtUword *lentab, *endindexes;
   GtRadixinplacethreadinfo *threadinfo;
 #endif
 };
 
 #define GT_THREADS_JOBS gt_jobs
 
-static GtRadixsortinfo *gt_radixsort_new(bool pairs,unsigned long maxlen)
+static GtRadixsortinfo *gt_radixsort_new(bool pairs,GtUword maxlen)
 {
   GtRadixsortinfo *radixsortinfo = gt_malloc(sizeof (*radixsortinfo));
 
@@ -415,12 +415,12 @@ static GtRadixsortinfo *gt_radixsort_new(bool pairs,unsigned long maxlen)
   return radixsortinfo;
 }
 
-GtRadixsortinfo *gt_radixsort_new_ulong(unsigned long maxlen)
+GtRadixsortinfo *gt_radixsort_new_ulong(GtUword maxlen)
 {
   return gt_radixsort_new(false,maxlen);
 }
 
-GtRadixsortinfo *gt_radixsort_new_ulongpair(unsigned long maxlen)
+GtRadixsortinfo *gt_radixsort_new_ulongpair(GtUword maxlen)
 {
   return gt_radixsort_new(true,maxlen);
 }
@@ -468,31 +468,31 @@ void gt_radixsort_delete(GtRadixsortinfo *radixsortinfo)
 
 static size_t gt_radixsort_elemsize(bool pair)
 {
-  return pair ? sizeof (GtUlongPair) : sizeof (unsigned long);
+  return pair ? sizeof (GtUlongPair) : sizeof (GtUword);
 }
 
-unsigned long gt_radixsort_max_num_of_entries_ulong(size_t memlimit)
+GtUword gt_radixsort_max_num_of_entries_ulong(size_t memlimit)
 {
-  return (unsigned long) memlimit/gt_radixsort_elemsize(false);
+  return (GtUword) memlimit/gt_radixsort_elemsize(false);
 }
 
-unsigned long gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit)
+GtUword gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit)
 {
-  return (unsigned long) memlimit/gt_radixsort_elemsize(true);
+  return (GtUword) memlimit/gt_radixsort_elemsize(true);
 }
 
 static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                                  GtRadixvalues *radixvalues,
-                                 unsigned long len)
+                                 GtUword len)
 {
-  const size_t shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
+  const size_t shift = (sizeof (GtUword) - 1) * CHAR_BIT;
 #ifdef GT_THREADS_ENABLED
   const unsigned int threads = GT_THREADS_JOBS;
 #else
   const unsigned int threads = 1U;
 #endif
 
-  if (len > (unsigned long) GT_COUNTBASETYPE_MAX)
+  if (len > (GtUword) GT_COUNTBASETYPE_MAX)
   {
     fprintf(stderr,"%s, line %d: assertion failed: if you want to sort arrays "
                     "of length > 2^{32}-1, then recompile code by setting "
@@ -523,7 +523,7 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                                    radixsortinfo->rbuf,
                                    radixvalues->ulongptr,shift);
   }
-  if (threads == 1U || radixsortinfo->stack.nextfree < (unsigned long) threads)
+  if (threads == 1U || radixsortinfo->stack.nextfree < (GtUword) threads)
   {
     if (radixsortinfo->pairs)
     {
@@ -536,13 +536,13 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
   } else
   {
 #ifdef GT_THREADS_ENABLED
-    unsigned long last = 0, j;
+    GtUword last = 0, j;
     unsigned int t;
 
     gt_assert(radixsortinfo->stack.nextfree <= UINT8_MAX+1);
     for (j=0; j<radixsortinfo->stack.nextfree; j++)
     {
-      radixsortinfo->lentab[j] = (unsigned long)
+      radixsortinfo->lentab[j] = (GtUword)
                                               radixsortinfo->stack.space[j].len;
     }
     gt_evenly_divide_lentab(radixsortinfo->endindexes,
@@ -571,7 +571,7 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
   }
 }
 
-void gt_radixsort_inplace_ulong(unsigned long *source, unsigned long len)
+void gt_radixsort_inplace_ulong(GtUword *source, GtUword len)
 {
   GtRadixvalues radixvalues;
   GtRadixsortinfo *radixsortinfo;
@@ -582,7 +582,7 @@ void gt_radixsort_inplace_ulong(unsigned long *source, unsigned long len)
   gt_radixsort_delete(radixsortinfo);
 }
 
-void gt_radixsort_inplace_GtUlongPair(GtUlongPair *source, unsigned long len)
+void gt_radixsort_inplace_GtUlongPair(GtUlongPair *source, GtUword len)
 {
   GtRadixvalues radixvalues;
   GtRadixsortinfo *radixsortinfo;
@@ -593,12 +593,12 @@ void gt_radixsort_inplace_GtUlongPair(GtUlongPair *source, unsigned long len)
   gt_radixsort_delete(radixsortinfo);
 }
 
-void gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,unsigned long len)
+void gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,GtUword len)
 {
   gt_radixsort_inplace(radixsortinfo,&radixsortinfo->sortspace,len);
 }
 
-unsigned long *gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo)
+GtUword *gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo)
 {
   gt_assert(!radixsortinfo->pairs);
   return radixsortinfo->sortspace.ulongptr;

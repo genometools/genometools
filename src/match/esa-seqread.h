@@ -36,7 +36,7 @@ typedef enum
 struct Sequentialsuffixarrayreader
 {
   Suffixarray *suffixarray;
-  unsigned long nonspecials,
+  GtUword nonspecials,
          numberofsuffixes,
          nextsuftabindex, /* for SEQ_mappedboth | SEQ_suftabfrommemory */
          nextlcptabindex, /* for SEQ_mappedboth */
@@ -58,13 +58,13 @@ void gt_updateSequentialsuffixarrayreaderfromRAM(
                     Sequentialsuffixarrayreader *ssar,
                     const ESASuffixptr *suftab,
                     bool firstpage,
-                    unsigned long numberofsuffixes);
+                    GtUword numberofsuffixes);
 
-int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
+int gt_nextSequentiallcpvalue(GtUword *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
                            GtError *err);
 
-int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
+int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
                                  Sequentialsuffixarrayreader *ssar);
 
 #define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,TYPE)\
@@ -93,7 +93,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
               }\
             }\
           }\
-          SUFTABVALUE = (unsigned long)buf->bufferedfilespace[buf->nextread++];\
+          SUFTABVALUE = (GtUword)buf->bufferedfilespace[buf->nextread++];\
         }
 
 #if defined (_LP64) || defined (_WIN64)
@@ -138,7 +138,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
             {\
               if (tmpsmalllcpvalue < LCPOVERFLOW)\
               {\
-                LCPVALUE = (unsigned long) tmpsmalllcpvalue;\
+                LCPVALUE = (GtUword) tmpsmalllcpvalue;\
               } else\
               {\
                 Largelcpvalue tmpexception;\
@@ -168,7 +168,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
                   = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
                 if (tmpsmalllcpvalue < LCPOVERFLOW)\
                 {\
-                  LCPVALUE = (unsigned long) tmpsmalllcpvalue;\
+                  LCPVALUE = (GtUword) tmpsmalllcpvalue;\
                 } else\
                 {\
                   gt_assert((SSAR)->suffixarray->llvtab[(SSAR)->largelcpindex]\
@@ -208,7 +208,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
             {\
               if (tmpsmalllcpvalue < LCPOVERFLOW)\
               {\
-                LCPVALUE = (unsigned long) tmpsmalllcpvalue;\
+                LCPVALUE = (GtUword) tmpsmalllcpvalue;\
               } else\
               {\
                 Largelcpvalue tmpexception;\
@@ -239,7 +239,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
                   = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
                 if (tmpsmalllcpvalue < LCPOVERFLOW)\
                 {\
-                  LCPVALUE = (unsigned long) tmpsmalllcpvalue;\
+                  LCPVALUE = (GtUword) tmpsmalllcpvalue;\
                 } else\
                 {\
                   gt_assert((SSAR)->suffixarray->llvtab[(SSAR)->largelcpindex]\
@@ -287,7 +287,7 @@ const GtEncseq *gt_encseqSequentialsuffixarrayreader(
 GtReadmode gt_readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
-unsigned long gt_Sequentialsuffixarrayreader_nonspecials(
+GtUword gt_Sequentialsuffixarrayreader_nonspecials(
                           const Sequentialsuffixarrayreader *ssar);
 
 const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
@@ -296,10 +296,10 @@ const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
 const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);
 
-unsigned long gt_Sequentialsuffixarrayreader_totallength(
+GtUword gt_Sequentialsuffixarrayreader_totallength(
               const Sequentialsuffixarrayreader *ssar);
 
-unsigned long gt_Sequentialsuffixarrayreader_maxbranchdepth(
+GtUword gt_Sequentialsuffixarrayreader_maxbranchdepth(
               const Sequentialsuffixarrayreader *ssar);
 
 unsigned int gt_Sequentialsuffixarrayreader_prefixlength(

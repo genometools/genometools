@@ -27,10 +27,10 @@ typedef struct GthTxtSAVisitor GthTxtSAVisitor;
 const GthSAVisitorClass* gth_txt_sa_visitor_class(void);
 GthSAVisitor*            gth_txt_sa_visitor_new(GthInput*,
                                                 bool gs2out,
-                                                unsigned long minintronlength,
-                                                unsigned long widthforgenpos,
-                                                unsigned long showintronmaxlen,
-                                                unsigned long translationtable,
+                                                GtUword minintronlength,
+                                                GtUword widthforgenpos,
+                                                GtUword showintronmaxlen,
+                                                GtUword translationtable,
                                                 bool showseqnums,
                                                 GtFile *outfp);
 

@@ -35,7 +35,7 @@
 static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
                                        GtFirstcodestab *fct,
                                        unsigned int bitsforcount,
-                                       unsigned long numofsequences)
+                                       GtUword numofsequences)
 {
   if (bitsforcount < (unsigned int) (sizeof (GtCountAFCtype) * CHAR_BIT))
   {
@@ -58,9 +58,9 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
 }
 
 static void gt_firstcodes_countocc_set(GtFirstcodestab *fct,
-                                       unsigned long *differences,
-                                       unsigned long idx,
-                                       unsigned long value)
+                                       GtUword *differences,
+                                       GtUword idx,
+                                       GtUword value)
 {
   gt_assert(value > 0);
   if (fct->countocc_small == NULL)
@@ -91,11 +91,11 @@ static void gt_firstcodes_countocc_set(GtFirstcodestab *fct,
 }
 
 static void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
-                                             unsigned long *differences,
-                                             unsigned long idx,
-                                             unsigned long inc)
+                                             GtUword *differences,
+                                             GtUword idx,
+                                             GtUword inc)
 {
-  unsigned long count;
+  GtUword count;
 
   if (fct->countocc_small == NULL)
   {
@@ -121,7 +121,7 @@ static void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
     }
   } else
   {
-    if ((count = (unsigned long) fct->countocc_small[idx]) > 0)
+    if ((count = (GtUword) fct->countocc_small[idx]) > 0)
     {
       if (inc + count <= GT_FIRSTCODES_MAXSMALL)
       {
@@ -146,7 +146,7 @@ static void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
 
 static void gt_firstcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
                                           GtFirstcodestab *fct,
-                                          unsigned long numofdifferentcodes)
+                                          GtUword numofdifferentcodes)
 {
   if (fct->countocc_small != NULL)
   {
@@ -163,13 +163,13 @@ static void gt_firstcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
 
 typedef struct
 {
-  unsigned long smallcount, smallsum,
+  GtUword smallcount, smallsum,
                 largecount, largesum,
                 hugecount, hugesum;
 } GtCountdistri_info;
 
-static void gt_firstcodes_evaluate_distvalue(unsigned long key,
-                                             unsigned long long value,
+static void gt_firstcodes_evaluate_distvalue(GtUword key,
+                                             GtUint64 value,
                                              void *data)
 {
   GtCountdistri_info *cdi = (GtCountdistri_info *) data;
@@ -196,7 +196,7 @@ static void gt_firstcodes_evaluate_distvalue(unsigned long key,
 static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
 {
   GtCountdistri_info cdi;
-  unsigned long sum;
+  GtUword sum;
   size_t spacenow, spacedirectstore, spaceopt, spacewithhash;;
 
   cdi.smallcount = 0;
@@ -207,11 +207,11 @@ static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
   cdi.hugesum = 0;
   gt_disc_distri_foreach(countdistri,gt_firstcodes_evaluate_distvalue,&cdi);
   sum = cdi.smallsum + cdi.largesum + cdi.hugesum;
-  gt_log_log("small=%lu,%lu (%.2f)",cdi.smallcount,cdi.smallsum,
+  gt_log_log("small="GT_LU","GT_LU" (%.2f)",cdi.smallcount,cdi.smallsum,
           (double) cdi.smallsum/sum);
-  gt_log_log("large=%lu,%lu (%.2f)",cdi.largecount,cdi.largesum,
+  gt_log_log("large="GT_LU","GT_LU" (%.2f)",cdi.largecount,cdi.largesum,
           (double) cdi.largesum/sum);
-  gt_log_log("huge=%lu,%lu (%.2f)",cdi.hugecount,cdi.hugesum,
+  gt_log_log("huge="GT_LU","GT_LU" (%.2f)",cdi.hugecount,cdi.hugesum,
           (double) cdi.largesum/sum);
   spacenow = sizeof (uint32_t) * sum;
   spaceopt = sizeof (uint8_t) * sum;
@@ -224,10 +224,10 @@ static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
 }
 #endif
 
-unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
+GtUword gt_firstcodes_remdups(GtUword *allfirstcodes,
                                     GtFirstcodesspacelog *fcsl,
                                     GtFirstcodestab *fct,
-                                    unsigned long numofsequences,
+                                    GtUword numofsequences,
                                     Gtmarksubstring *markprefix,
                                     Gtmarksubstring *marksuffix,
                                     GtArrayGtIndexwithcode **binsearchcache,
@@ -240,7 +240,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     fct->differentcodes = 0;
   } else
   {
-    unsigned long numofdifferentcodes = 1UL, storeidx, readidx, previouscode,
+    GtUword numofdifferentcodes = 1UL, storeidx, readidx, previouscode,
                   idx, maxdifference = 0, cachewidth, nextstorecache, lastocc,
                   storedvalue, diff, *distbits = NULL;
     unsigned int bitsformaxdifference, bitsforcount;
@@ -248,7 +248,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     previouscode = allfirstcodes[0];
     for (idx=1UL; idx < numofsequences; idx++)
     {
-      unsigned long currentcode = allfirstcodes[idx];
+      GtUword currentcode = allfirstcodes[idx];
       if (previouscode != currentcode)
       {
         numofdifferentcodes++;
@@ -261,16 +261,16 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     }
     bitsformaxdifference = gt_determinebitspervalue(maxdifference);
     fct->differencemask = (1UL << bitsformaxdifference) - 1UL;
-    gt_assert(sizeof (unsigned long) * CHAR_BIT >=
+    gt_assert(sizeof (GtUword) * CHAR_BIT >=
               (size_t) bitsformaxdifference);
     bitsforcount = (unsigned int)
-                   sizeof (unsigned long) * CHAR_BIT - bitsformaxdifference;
+                   sizeof (GtUword) * CHAR_BIT - bitsformaxdifference;
     fct->countmax = (1UL << bitsforcount) - 1UL;
     fct->shiftforcounts = bitsformaxdifference;
-    gt_logger_log(logger,"maximum difference of neighbored codes %lu (%u bits)",
+    gt_logger_log(logger,"maximum difference of neighbored codes "GT_LU" (%u bits)",
                   maxdifference,bitsformaxdifference);
     /*
-    printf("maxdifference=%lu,bitsformaxdifference=%u,bitsforcount=%u\n",
+    printf("maxdifference="GT_LU",bitsformaxdifference=%u,bitsforcount=%u\n",
             maxdifference,bitsformaxdifference,bitsforcount);
     */
     gt_firstcodes_countocc_new(fcsl,fct,bitsforcount,numofsequences);
@@ -293,7 +293,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     }
     for (storeidx = 0, readidx = 1UL; readidx < numofsequences; readidx++)
     {
-      unsigned long readvalue = allfirstcodes[readidx];
+      GtUword readvalue = allfirstcodes[readidx];
 
       if (storedvalue != readvalue)
       {
@@ -331,13 +331,13 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
       {
         if (distbits[bits] > 0)
         {
-          printf("%d bits: %lu\n",bits,distbits[bits]);
+          printf("%d bits: "GT_LU"\n",bits,distbits[bits]);
         }
       }
       gt_free(distbits);
     }
     gt_firstcodes_countocc_set(fct,allfirstcodes,storeidx,lastocc);
-    gt_assert(numofdifferentcodes == (unsigned long) (storeidx + 1));
+    gt_assert(numofdifferentcodes == (GtUword) (storeidx + 1));
     if (numofdifferentcodes < numofsequences)
     {
       /* reduce the memory requirement, as the duplicated elements are not
@@ -346,25 +346,25 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     }
     fct->differentcodes = numofdifferentcodes;
   }
-  gt_logger_log(logger,"number of different first codes=%lu (%.2f%%) "
-                       "in %lu sequences",
+  gt_logger_log(logger,"number of different first codes="GT_LU" (%.2f%%) "
+                       "in "GT_LU" sequences",
                 fct->differentcodes,
                 100.00 * (double) fct->differentcodes/numofsequences,
                 numofsequences);
   return fct->differentcodes;
 }
 
-unsigned long gt_firstcodes_accumulatecounts_merge(
+GtUword gt_firstcodes_accumulatecounts_merge(
                                         GtFirstcodestab *tab,
-                                        unsigned long *differences,
-                                        unsigned long differentcodes,
-                                        const unsigned long *querystream_fst,
-                                        const unsigned long *querystream_lst,
-                                        unsigned long subjectindex,
-                                        unsigned long subjectcode)
+                                        GtUword *differences,
+                                        GtUword differentcodes,
+                                        const GtUword *querystream_fst,
+                                        const GtUword *querystream_lst,
+                                        GtUword subjectindex,
+                                        GtUword subjectcode)
 {
-  unsigned long found = 0, lastocc = 0;
-  const unsigned long *query = querystream_fst;
+  GtUword found = 0, lastocc = 0;
+  const GtUword *query = querystream_fst;
 
   gt_assert(subjectindex < differentcodes);
   while (query <= querystream_lst)
@@ -404,12 +404,12 @@ unsigned long gt_firstcodes_accumulatecounts_merge(
 }
 
 static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
-                                           const unsigned long *differences,
-                                           unsigned long idx)
+                                           const GtUword *differences,
+                                           GtUword idx)
 {
   if (fct->countocc_small == NULL)
   {
-    unsigned long count;
+    GtUword count;
 
     if ((count = (differences[idx] >> fct->shiftforcounts)) > 0)
     {
@@ -447,29 +447,29 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
         gt_assert(samplecount < fct->numofsamples);\
         fct->leftborder_samples[samplecount++] = PARTSUM
 
-unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
+GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
-                                        const unsigned long *differences,
-                                        GT_UNUSED unsigned long
+                                        const GtUword *differences,
+                                        GT_UNUSED GtUword
                                                             expectedlastpartsum)
 {
-  unsigned long idx, partsum, maxbucketsize, bitmask, samplecount = 0,
+  GtUword idx, partsum, maxbucketsize, bitmask, samplecount = 0,
                 spacewithhashmap = 0, spacewithouthashmap = 0;
   uint32_t currentcount;
   GtLeftborderOutbuffer *leftborderbuffer_all = NULL;
 #if defined (_LP64) || defined (_WIN64)
   const unsigned int btp = gt_determinebitspervalue(expectedlastpartsum);
-  unsigned long exceedvalue = 1UL << GT_MODVALUEBITS;
+  GtUword exceedvalue = (GtUword) 1 << GT_MODVALUEBITS;
 #endif
 #ifdef SKDEBUG
   GtDiscDistri *countdistri = gt_disc_distri_new();
 #endif
 
   gt_assert(fct->differentcodes < UINT32_MAX);
-  gt_log_log("hashmap_addcount=%lu (%.5f%%)",fct->hashmap_addcount,
+  gt_log_log("hashmap_addcount="GT_LU" (%.5f%%)",fct->hashmap_addcount,
                   100.0 * (double) fct->hashmap_addcount/
                                    fct->differentcodes);
-  gt_log_log("hashmap_getcount=%lu (%.5f%%)",
+  gt_log_log("hashmap_getcount="GT_LU" (%.5f%%)",
                   fct->hashmap_getcount,
                   100.0 * (double) fct->hashmap_getcount/
                                    fct->differentcodes);
@@ -482,7 +482,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   } else
   {
     fct->bitchangepoints.allocatedGtUlong = 1UL << (btp - GT_MODVALUEBITS);
-    gt_log_log("lastpartsum=%lu, bitchangepoints.allocated=%lu",
+    gt_log_log("lastpartsum="GT_LU", bitchangepoints.allocated="GT_LU"",
               expectedlastpartsum,fct->bitchangepoints.allocatedGtUlong);
     fct->bitchangepoints.spaceGtUlong
       = gt_malloc(sizeof (*fct->bitchangepoints.spaceGtUlong)
@@ -491,10 +491,10 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   fct->bitchangepoints.nextfreeGtUlong = 0;
 #endif
   currentcount = gt_firstcodes_countocc_get(fct,differences,0);
-  partsum = (unsigned long) currentcount;
-  maxbucketsize = (unsigned long) currentcount;
+  partsum = (GtUword) currentcount;
+  maxbucketsize = (GtUword) currentcount;
 #ifdef SKDEBUG
-  gt_disc_distri_add(countdistri,(unsigned long) currentcount);
+  gt_disc_distri_add(countdistri,(GtUword) currentcount);
 #endif
   fct->sampleshift = 9U;
   while (true)
@@ -522,11 +522,11 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     gt_assert(currentcount <= GT_MODVALUEMASK);
 #endif
 #ifdef SKDEBUG
-    gt_disc_distri_add(countdistri,(unsigned long) currentcount);
+    gt_disc_distri_add(countdistri,(GtUword) currentcount);
 #endif
-    if (maxbucketsize < (unsigned long) currentcount)
+    if (maxbucketsize < (GtUword) currentcount)
     {
-      maxbucketsize = (unsigned long) currentcount;
+      maxbucketsize = (GtUword) currentcount;
     }
     partsum += currentcount;
 #if defined (_LP64) || defined (_WIN64)
@@ -576,52 +576,52 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   gt_hashtable_delete(fct->countocc_exceptions);
   if (fct->hashmap_addcount > 0 && gt_ma_bookkeeping_enabled())
   {
-    unsigned long hashmapspace;
+    GtUword hashmapspace;
 
     spacewithouthashmap = gt_ma_get_space_current() + gt_fa_get_space_current();
     gt_assert(spacewithouthashmap < spacewithhashmap);
     hashmapspace = spacewithhashmap - spacewithouthashmap;
-    gt_log_log("space for hashmap=%.2f (%lu bytes per entry)",
+    gt_log_log("space for hashmap=%.2f ("GT_LU" bytes per entry)",
                GT_MEGABYTES(hashmapspace),hashmapspace/fct->hashmap_addcount);
   }
   fct->countocc_exceptions = NULL;
   return maxbucketsize;
 }
 
-unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
-                                       unsigned long idx)
+GtUword gt_firstcodes_get_sample(const GtFirstcodestab *fct,
+                                       GtUword idx)
 {
   gt_assert(idx <= fct->numofsamples);
   return fct->leftborder_samples[idx];
 }
 
-unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
-                                           unsigned long idx)
+GtUword gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
+                                           GtUword idx)
 {
 #if defined (_LP64) || defined (_WIN64)
   GT_CHANGEPOINT_GET(changepoint);
 
-  return (unsigned long) fct->leftborder[idx]
+  return (GtUword) fct->leftborder[idx]
                          + (changepoint << GT_MODVALUEBITS);
 #else
-  return (unsigned long) fct->leftborder[idx];
+  return (GtUword) fct->leftborder[idx];
 #endif
 }
 
-unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct)
+GtUword gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct)
 {
   return fct->differentcodes + 1;
 }
 
-unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct)
+GtUword gt_firstcodes_numofsamples(const GtFirstcodestab *fct)
 {
   return fct->numofsamples;
 }
 
-unsigned long gt_firstcodes_findfirstsamplelarger(const GtFirstcodestab *fct,
-                                                  unsigned long suftaboffset)
+GtUword gt_firstcodes_findfirstsamplelarger(const GtFirstcodestab *fct,
+                                                  GtUword suftaboffset)
 {
-  unsigned long left = 0, right, mid, midval, found;
+  GtUword left = 0, right, mid, midval, found;
 
   right = found = fct->numofsamples;
   while (left+1 < right)
@@ -645,8 +645,8 @@ unsigned long gt_firstcodes_findfirstsamplelarger(const GtFirstcodestab *fct,
   return found;
 }
 
-unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
-                                        unsigned long idx)
+GtUword gt_firstcodes_sample2full(const GtFirstcodestab *fct,
+                                        GtUword idx)
 {
   gt_assert(idx <= fct->numofsamples);
   if (idx < fct->numofsamples)

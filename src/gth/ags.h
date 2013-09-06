@@ -54,7 +54,7 @@ typedef struct GthAGS {
           *alignments;           /* pointer to the generating spliced alignments
                                     I.e., the alignments which constitute this
                                     alternative gene structure. */
-  unsigned long numofstoredsaclusters; /* number of stored SA clusters */
+  GtUword numofstoredsaclusters; /* number of stored SA clusters */
                                  /* (needed in assembly phase) */
   GthDbl overallscore; /* overall score used for sorting of AGSs */
 
@@ -64,16 +64,16 @@ typedef struct GthAGS {
 GthAGS*       gth_ags_new(const GthPGL*);
 void          gth_ags_delete(GthAGS*);
 bool          gth_ags_is_forward(const GthAGS*);
-unsigned long gth_ags_filenum(const GthAGS*);
-unsigned long gth_ags_total_length(const GthAGS*);
-unsigned long gth_ags_genomic_offset(const GthAGS*);
+GtUword gth_ags_filenum(const GthAGS*);
+GtUword gth_ags_total_length(const GthAGS*);
+GtUword gth_ags_genomic_offset(const GthAGS*);
 GtStr*        gth_ags_get_gen_id(const GthAGS*);
-GthExonAGS*   gth_ags_get_exon(const GthAGS *ags, unsigned long exon);
-unsigned long gth_ags_num_of_exons(const GthAGS *ags);
+GthExonAGS*   gth_ags_get_exon(const GthAGS *ags, GtUword exon);
+GtUword gth_ags_num_of_exons(const GthAGS *ags);
 GtStrand      gth_ags_genomic_strand(const GthAGS*);
-GtRange       gth_ags_donor_site_range(const GthAGS*, unsigned long intron);
-GtRange       gth_ags_acceptor_site_range(const GthAGS*, unsigned long intron);
-double        gth_ags_donor_site_prob(const GthAGS*, unsigned long intron);
-double        gth_ags_acceptor_site_prob(const GthAGS*, unsigned long intron);
+GtRange       gth_ags_donor_site_range(const GthAGS*, GtUword intron);
+GtRange       gth_ags_acceptor_site_range(const GthAGS*, GtUword intron);
+double        gth_ags_donor_site_prob(const GthAGS*, GtUword intron);
+double        gth_ags_acceptor_site_prob(const GthAGS*, GtUword intron);
 
 #endif

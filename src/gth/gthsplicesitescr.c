@@ -31,14 +31,14 @@ typedef struct {
   GthDPOptionsEST *dp_options_est;
   GthFlt splicesiteweight,    /* (GS2 = sscr) */
          maxsplicesiteweight; /* (GS2 = osscr) */
-  unsigned long processedalignmentpositions;
+  GtUword processedalignmentpositions;
 } Calcsplicesitescoredata;
 
 static void calcsplicesitescoreprocmismatchordeletion(Traversealignmentstate
                                                       *state,
                                                       void *data,
                                                       GT_UNUSED
-                                                      unsigned long lengthofeop)
+                                                      GtUword lengthofeop)
 {
   Calcsplicesitescoredata *d = (Calcsplicesitescoredata*) data;
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(d->gen_alphabet);
@@ -56,7 +56,7 @@ static void calcsplicesitescoreprocmismatchordeletion(Traversealignmentstate
 static void calcsplicesitescoreprocinsertion(Traversealignmentstate *state,
                                              void *data,
                                              GT_UNUSED
-                                             unsigned long lengthofeop)
+                                             GtUword lengthofeop)
 {
   Calcsplicesitescoredata *d = (Calcsplicesitescoredata*) data;
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(d->gen_alphabet);
@@ -74,13 +74,13 @@ static void calcsplicesitescoreprocinsertion(Traversealignmentstate *state,
 }
 
 static void calcsplicesitescoreprocmatch(Traversealignmentstate *state,
-                                         void *data, unsigned long lengthofeop)
+                                         void *data, GtUword lengthofeop)
 {
   Calcsplicesitescoredata *d = (Calcsplicesitescoredata*) data;
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(d->gen_alphabet);
   GthDPOptionsEST *dp_options_est = d->dp_options_est;
   unsigned char genomicchar, referencechar;
-  unsigned long numofmatchestoprocess, alignmentpositionsleft;
+  GtUword numofmatchestoprocess, alignmentpositionsleft;
   GthFlt genomicinterimvalue   = 0.0,
          referenceinterimvalue = 0.0;
   if (d->processedalignmentpositions < SPLICE_SITE_SCORE_WINDOW) {
@@ -106,7 +106,7 @@ static void calcsplicesitescoreprocintron(GT_UNUSED
                                           Traversealignmentstate *state,
                                           void *data,
                                           GT_UNUSED
-                                          unsigned long lengthofeop)
+                                          GtUword lengthofeop)
 {
   Calcsplicesitescoredata *d = (Calcsplicesitescoredata*) data;
   d->breaktraversealignment = true;

@@ -29,21 +29,21 @@
 
 struct GtCustomTrackGcContent {
   const GtCustomTrack parent_instance;
-  unsigned long windowsize,
+  GtUword windowsize,
                 height;
   double avg;
   bool show_scale;
   GtStr *title;
   const char *seq;
-  unsigned long seqlen;
+  GtUword seqlen;
 };
 
 #define gt_custom_track_gc_content_cast(ct)\
         gt_custom_track_cast(gt_custom_track_gc_content_class(), ct)
 
-static double get_val_for_pos(GtCustomTrackGcContent *ctgc, unsigned long pos)
+static double get_val_for_pos(GtCustomTrackGcContent *ctgc, GtUword pos)
 {
-  unsigned long i,
+  GtUword i,
                 gc_count = 0,
                 bases = 0;
   for (i=0;i<ctgc->windowsize;i++)
@@ -68,7 +68,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
   int had_err = 0;
   GtCustomTrackGcContent *ctgc;
   double iter, iter_step, GT_UNUSED value, *data;
-  unsigned long n;
+  GtUword n;
   GtRange value_range = {0, 1};
   GtColor color, grey, black;
   gt_assert(ct && graphics && viewrange.start <= viewrange.end);
@@ -88,7 +88,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                 / ((double) gt_graphics_get_image_width(graphics)
                    - 2*gt_graphics_get_xmargins(graphics));
 
-  gt_log_log("len=%lu, iter_step = %f, width = %f, margins = %f\n",
+  gt_log_log("len="GT_LU", iter_step = %f, width = %f, margins = %f\n",
                       gt_range_length(&viewrange),
                       iter_step, gt_graphics_get_image_width(graphics),
                       gt_graphics_get_xmargins(graphics));
@@ -104,7 +104,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
     data[n++] = get_val_for_pos(ctgc, floor(iter));
   }
 
-  gt_log_log("i=%lu, widthval = %f\n", n,
+  gt_log_log("i="GT_LU", widthval = %f\n", n,
                  (gt_graphics_get_image_width(graphics)
                     - 2*gt_graphics_get_xmargins(graphics)));
   if (ctgc->show_scale)
@@ -161,7 +161,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
   return had_err;
 }
 
-unsigned long gt_custom_track_gc_content_get_height(GtCustomTrack *ct)
+GtUword gt_custom_track_gc_content_get_height(GtCustomTrack *ct)
 {
   GtCustomTrackGcContent *ctgc;
   ctgc = gt_custom_track_gc_content_cast(ct);
@@ -200,9 +200,9 @@ const GtCustomTrackClass* gt_custom_track_gc_content_class(void)
 }
 
 GtCustomTrack* gt_custom_track_gc_content_new(const char *seq,
-                                              unsigned long seqlen,
-                                              unsigned long windowsize,
-                                              unsigned long height,
+                                              GtUword seqlen,
+                                              GtUword windowsize,
+                                              GtUword height,
                                               double avg,
                                               bool show_scale)
 {

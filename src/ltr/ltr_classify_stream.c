@@ -38,7 +38,7 @@ struct GtLTRClassifyStream {
   const char *famprefix;
   char **current_state;
   bool first_next;
-  unsigned long next_index,
+  GtUword next_index,
                 *progress;
 };
 
@@ -62,7 +62,7 @@ static bool ltr_candidates_compatible(GtGenomeNode *candidate1,
   bool compatible = false,
        seen_a = false,
        first_ltr = true;
-  unsigned long clnum1,
+  GtUword clnum1,
                 clnum2;
 
   gt_error_check(err);
@@ -106,12 +106,12 @@ static bool ltr_candidates_compatible(GtGenomeNode *candidate1,
     if (curnode2 != NULL) {
       clid1 = gt_feature_node_get_attribute(curnode1, "clid");
       if (clid1 != NULL)
-        (void) sscanf(clid1, "%lu", &clnum1);
+        (void) sscanf(clid1, ""GT_LU"", &clnum1);
       else
         clnum1 = GT_UNDEF_ULONG;
       clid2 = gt_feature_node_get_attribute(curnode2, "clid");
       if (clid2 != NULL)
-        (void) sscanf(clid2, "%lu", &clnum2);
+        (void) sscanf(clid2, ""GT_LU"", &clnum2);
       else
         clnum2 = GT_UNDEF_ULONG;
       if (clnum1 == clnum2) {
@@ -140,16 +140,16 @@ static bool ltr_group_compatible(GtArray *candidates, GtGenomeNode *candidate1,
   GtArray *group_member;
   GtGenomeNode *candidate2;
   bool compatible = true;
-  unsigned long i, index;
+  GtUword i, index;
 
   gt_assert(candidates && candidate1 && group);
   gt_error_check(err);
 
-  group_member = gt_array_new(sizeof(unsigned long));
+  group_member = gt_array_new(sizeof(GtUword));
   gt_bittab_get_all_bitnums(group, group_member);
 
   for (i = 0; i < gt_array_size(group_member); i++) {
-    index = *(unsigned long*) gt_array_get(group_member, i);
+    index = *(GtUword*) gt_array_get(group_member, i);
     candidate2 = *(GtGenomeNode**) gt_array_get(candidates, index);
     if (!(compatible = ltr_candidates_compatible(candidate1, candidate2,
                                                  features, err)))
@@ -162,14 +162,14 @@ static bool ltr_group_compatible(GtArray *candidates, GtGenomeNode *candidate1,
 
 static int check_ambiguous_candidates(GtArray *candidates, GtArray *groups,
                                       GtHashmap *features,
-                                      unsigned long *progress,
+                                      GtUword *progress,
                                       GtError *err)
 {
   GtGenomeNode *candidate;
   GtBittab *group;
   GtArray *compat_groups;
   int had_err = 0;
-  unsigned long i,
+  GtUword i,
                 j;
 
   gt_error_check(err);
@@ -209,30 +209,30 @@ static int annotate_nodes(GtArray *candidates, GtArray *groups,
   GtFeatureNodeIterator *fni = NULL;
   GtGenomeNode *gn;
   int had_err = 0;
-  unsigned long i, j, index, famno = 0;
+  GtUword i, j, index, famno = 0;
 
   gt_assert(candidates && groups);
   gt_error_check(err);
 
   for (i = 0; i < gt_array_size(groups); i++) {
     group = *(GtBittab**) gt_array_get(groups, i);
-    group_member = gt_array_new(sizeof(unsigned long));
+    group_member = gt_array_new(sizeof(GtUword));
     gt_bittab_get_all_bitnums(group, group_member);
     if (gt_array_size(group_member) < 2UL) {
       gt_array_delete(group_member);
       continue;
     }
     for (j = 0; j < gt_array_size(group_member); j++) {
-      index = *(unsigned long*) gt_array_get(group_member, j);
+      index = *(GtUword*) gt_array_get(group_member, j);
       gn = *(GtGenomeNode**) gt_array_get(candidates, index);
       fni = gt_feature_node_iterator_new((GtFeatureNode*) gn);
       curnode = gt_feature_node_iterator_next(fni);
       if (strcmp(gt_feature_node_get_type(curnode), gt_ft_repeat_region) == 0) {
         char fam[BUFSIZ];
         if (famprefix != NULL)
-          (void) snprintf(fam, BUFSIZ, "%s%lu", famprefix, famno);
+          (void) snprintf(fam, BUFSIZ, "%s"GT_LU"", famprefix, famno);
         else
-          (void) snprintf(fam, BUFSIZ, "ltrfam_%lu", famno);
+          (void) snprintf(fam, BUFSIZ, "ltrfam_"GT_LU"", famno);
         gt_feature_node_set_attribute(curnode, "ltrfam", fam);
       } else {
         gt_feature_node_iterator_delete(fni);
@@ -263,7 +263,7 @@ static void add_fnmap_to_candidates(GtArray *candidates)
   GtHashmap *fnmap;
   bool first_ltr;
   const char *fnt;
-  unsigned long i;
+  GtUword i;
 
   for (i = 0; i < gt_array_size(candidates); i++) {
     gn = *(GtGenomeNode**) gt_array_get(candidates, i);
@@ -298,7 +298,7 @@ static void add_fnmap_to_candidates(GtArray *candidates)
 static void remove_fnmap_from_candidates(GtArray *candidates)
 {
   GtGenomeNode *gn;
-  unsigned long i;
+  GtUword i;
 
   for (i = 0; i < gt_array_size(candidates); i++) {
     gn = *(GtGenomeNode**) gt_array_get(candidates, i);
@@ -310,7 +310,7 @@ static void remove_fnmap_from_candidates(GtArray *candidates)
 
 static int classify_ltrs(GtArray *candidates, GtHashmap *features,
                          const char *famprefix, char **current_state,
-                         unsigned long *progress, GtError *err)
+                         GtUword *progress, GtError *err)
 {
   GtBittab *group,
            *new_group;
@@ -318,7 +318,7 @@ static int classify_ltrs(GtArray *candidates, GtHashmap *features,
   GtGenomeNode *candidate;
   bool sorted;
   int had_err = 0;
-  unsigned long i, j, num_of_cands;
+  GtUword i, j, num_of_cands;
 
   gt_error_check(err);
   gt_assert(candidates);
@@ -412,7 +412,7 @@ static int gt_ltr_classify_stream_next(GtNodeStream *ns,
 
 static void gt_ltr_classify_stream_free(GtNodeStream *ns)
 {
-  unsigned long i;
+  GtUword i;
   GtLTRClassifyStream *lcs = gt_ltr_classify_stream_cast(ns);
   for (i = 0; i < gt_array_size(lcs->nodes); i++)
     gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(lcs->nodes, i));
@@ -437,7 +437,7 @@ GtNodeStream* gt_ltr_classify_stream_new(GtNodeStream *in_stream,
                                          GtHashmap *features,
                                          const char *famprefix,
                                          char **current_state,
-                                         unsigned long *progress,
+                                         GtUword *progress,
                                          GT_UNUSED GtError *err)
 {
   GtNodeStream *ns;

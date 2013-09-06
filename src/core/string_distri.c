@@ -24,11 +24,11 @@
 
 struct GtStringDistri {
   GtHashtable *hashdist;
-  unsigned long num_of_occurrences;
+  GtUword num_of_occurrences;
 };
 
-DECLARE_HASHMAP(char *, cstr, unsigned long, ul, static, inline)
-DEFINE_HASHMAP(char *, cstr, unsigned long, ul, gt_ht_cstr_elem_hash,
+DECLARE_HASHMAP(char *, cstr, GtUword, ul, static, inline)
+DEFINE_HASHMAP(char *, cstr, GtUword, ul, gt_ht_cstr_elem_hash,
                gt_ht_cstr_elem_cmp, gt_free, NULL_DESTRUCTOR, static,
                inline)
 
@@ -43,7 +43,7 @@ GtStringDistri* gt_string_distri_new(void)
 
 void gt_string_distri_add(GtStringDistri *sd, const char *key)
 {
-  unsigned long *valueptr;
+  GtUword *valueptr;
   gt_assert(sd && key);
   valueptr = cstr_ul_gt_hashmap_get(sd->hashdist, key);
   if (!valueptr) {
@@ -56,7 +56,7 @@ void gt_string_distri_add(GtStringDistri *sd, const char *key)
 
 void gt_string_distri_sub(GtStringDistri *sd, const char *key)
 {
-  unsigned long *valueptr;
+  GtUword *valueptr;
   gt_assert(sd && key && gt_string_distri_get(sd, key) &&
             sd->num_of_occurrences);
   valueptr = cstr_ul_gt_hashmap_get(sd->hashdist, key);
@@ -66,9 +66,9 @@ void gt_string_distri_sub(GtStringDistri *sd, const char *key)
   sd->num_of_occurrences--;
 }
 
-unsigned long gt_string_distri_get(const GtStringDistri *sd, const char *key)
+GtUword gt_string_distri_get(const GtStringDistri *sd, const char *key)
 {
-  unsigned long *valueptr;
+  GtUword *valueptr;
   gt_assert(sd && key);
   if ((valueptr = cstr_ul_gt_hashmap_get(sd->hashdist, key)))
     return *valueptr;
@@ -78,7 +78,7 @@ unsigned long gt_string_distri_get(const GtStringDistri *sd, const char *key)
 
 double gt_string_distri_get_prob(const GtStringDistri *sd, const char *key)
 {
-  unsigned long occ;
+  GtUword occ;
   gt_assert(sd && key);
   if ((occ = gt_string_distri_get(sd, key)))
     return (double) occ / sd->num_of_occurrences;
@@ -88,11 +88,11 @@ double gt_string_distri_get_prob(const GtStringDistri *sd, const char *key)
 typedef struct {
   GtStringDistriIterFunc func;
   void *data;
-  unsigned long num_of_occurrences;
+  GtUword num_of_occurrences;
 } StringDistriForeachInfo;
 
 static enum iterator_op
-string_distri_foreach_iterfunc(char *key, unsigned long occurrences, void *data,
+string_distri_foreach_iterfunc(char *key, GtUword occurrences, void *data,
                                GT_UNUSED GtError *err)
 {
   StringDistriForeachInfo *info;

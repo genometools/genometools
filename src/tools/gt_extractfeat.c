@@ -34,7 +34,7 @@ typedef struct {
        verbose;
   GtStr *type;
   GtSeqid2FileInfo *s2fi;
-  unsigned long width;
+  GtUword width;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtExtractFeatArguments;

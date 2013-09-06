@@ -38,7 +38,7 @@ static int merge_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtMergeStream *ms;
   GtGenomeNode *min_node = NULL;
-  unsigned long i, j, min_i = GT_UNDEF_ULONG;
+  GtUword i, j, min_i = GT_UNDEF_ULONG;
   unsigned int gt_genome_node_consolidated;
   int had_err = 0;
 
@@ -107,7 +107,7 @@ static int merge_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 static void merge_stream_free(GtNodeStream *ns)
 {
   GtMergeStream *ms = gt_merge_stream_cast(ns);
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < gt_array_size(ms->node_streams); i++)
     gt_node_stream_delete(*(GtNodeStream**) gt_array_get(ms->node_streams, i));
   gt_array_delete(ms->node_streams);
@@ -132,7 +132,7 @@ GtNodeStream* gt_merge_stream_new(const GtArray *node_streams)
   GtNodeStream *in_stream,
                *ns = gt_node_stream_create(gt_merge_stream_class(), true);
   GtMergeStream *ms = gt_merge_stream_cast(ns);
-  unsigned long i;
+  GtUword i;
 #ifndef NDEBUG
   gt_assert(gt_array_size(node_streams)); /* at least on input stream given */
   /* each input stream is sorted */

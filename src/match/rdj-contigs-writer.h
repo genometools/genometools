@@ -39,11 +39,11 @@ void             gt_contigs_writer_enable_astat_calculation(
                                              FILE *depthinfo_fp);
 
 void             gt_contigs_writer_start(GtContigsWriter *contigs_writer,
-                                         unsigned long seqnum);
+                                         GtUword seqnum);
 
 void             gt_contigs_writer_append(GtContigsWriter *contigs_writer,
-                                          unsigned long seqnum,
-                                          unsigned long nofchars);
+                                          GtUword seqnum,
+                                          GtUword nofchars);
 
 void             gt_contigs_writer_write(GtContigsWriter *contigs_writer);
 

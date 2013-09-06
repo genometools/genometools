@@ -28,18 +28,18 @@ typedef struct GtEncseqMetadata GtEncseqMetadata;
 GtEncseqMetadata*    gt_encseq_metadata_new(const char *indexname,
                                             GtError *err);
 GtAlphabet*          gt_encseq_metadata_alphabet(GtEncseqMetadata *emd);
-unsigned long        gt_encseq_metadata_version(GtEncseqMetadata *emd);
+GtUword        gt_encseq_metadata_version(GtEncseqMetadata *emd);
 bool                 gt_encseq_metadata_is64bit(GtEncseqMetadata *emd);
-unsigned long        gt_encseq_metadata_total_length(GtEncseqMetadata *emd);
-unsigned long        gt_encseq_metadata_num_of_sequences(GtEncseqMetadata *emd);
-unsigned long        gt_encseq_metadata_num_of_files(GtEncseqMetadata *emd);
-unsigned long        gt_encseq_metadata_min_seq_length(GtEncseqMetadata *emd);
-unsigned long        gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd);
-unsigned long        gt_encseq_metadata_length_of_filenames(
+GtUword        gt_encseq_metadata_total_length(GtEncseqMetadata *emd);
+GtUword        gt_encseq_metadata_num_of_sequences(GtEncseqMetadata *emd);
+GtUword        gt_encseq_metadata_num_of_files(GtEncseqMetadata *emd);
+GtUword        gt_encseq_metadata_min_seq_length(GtEncseqMetadata *emd);
+GtUword        gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd);
+GtUword        gt_encseq_metadata_length_of_filenames(
                                                          GtEncseqMetadata *emd);
 bool                 gt_encseq_metadata_has_custom_alphabet(
                                                          GtEncseqMetadata *emd);
-unsigned long        gt_encseq_metadata_length_of_alphadef(
+GtUword        gt_encseq_metadata_length_of_alphadef(
                                                          GtEncseqMetadata *emd);
 GtEncseqAccessType   gt_encseq_metadata_accesstype(GtEncseqMetadata *emd);
 GtSpecialcharinfo    gt_encseq_metadata_specialcharinfo(GtEncseqMetadata *emd);

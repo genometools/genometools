@@ -28,7 +28,7 @@ GtNodeStream* gt_ltr_classify_stream_new(GtNodeStream *in_stream,
                                          GtHashmap *features,
                                          const char *famprefix,
                                          char **current_state,
-                                         unsigned long *progress,
+                                         GtUword *progress,
                                          GtError *err);
 
 #endif

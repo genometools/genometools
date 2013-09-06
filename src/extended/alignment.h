@@ -28,11 +28,11 @@
 typedef struct GtAlignment GtAlignment;
 
 GtAlignment*  gt_alignment_new(void);
-GtAlignment*  gt_alignment_new_with_seqs(const GtUchar *u, unsigned long ulen,
-                                         const GtUchar *v, unsigned long vlen);
+GtAlignment*  gt_alignment_new_with_seqs(const GtUchar *u, GtUword ulen,
+                                         const GtUchar *v, GtUword vlen);
 void          gt_alignment_set_seqs(GtAlignment *alignment,
-                                    const GtUchar *u, unsigned long ulen,
-                                    const GtUchar *v, unsigned long vlen);
+                                    const GtUchar *u, GtUword ulen,
+                                    const GtUchar *v, GtUword vlen);
 /* uses gt_multieoplist_ref()! a reset of <alignment> will also reset <eoplist>
  */
 void          gt_alignment_set_multieop_list(GtAlignment *alignment,
@@ -45,17 +45,17 @@ void          gt_alignment_set_vrange(GtAlignment *alignment, GtRange range);
 void          gt_alignment_add_replacement(GtAlignment *alignment);
 void          gt_alignment_add_deletion(GtAlignment *alignment);
 void          gt_alignment_add_insertion(GtAlignment *alignment);
-unsigned long gt_alignment_get_length(const GtAlignment *alignment);
+GtUword gt_alignment_get_length(const GtAlignment *alignment);
 /* undo last add operation */
 void          gt_alignment_remove_last(GtAlignment *alignment);
 /* reset list of edit operations to empty */
 void          gt_alignment_reset(GtAlignment *alignment);
 /* returns unit cost */
-unsigned long gt_alignment_eval(const GtAlignment*);
-long          gt_alignment_eval_with_score(const GtAlignment *alignment,
-                                           long matchscore,
-                                           long mismatchscore,
-                                           long gapscore);
+GtUword gt_alignment_eval(const GtAlignment*);
+GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
+                                           GtWord matchscore,
+                                           GtWord mismatchscore,
+                                           GtWord gapscore);
 void          gt_alignment_show(const GtAlignment *alignment, FILE *fp);
 void          gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                                   const GtUchar *characters,

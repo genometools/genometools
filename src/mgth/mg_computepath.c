@@ -22,7 +22,7 @@
    Parameter: aktueller Leserahmen, Position in der Query-Sequence,
    (Zeiger auf) GtArray der moeglichen Vorgaenger
    Returnwert: void */
-static void compute_precursors(short, unsigned long, short *);
+static void compute_precursors(short, GtUword, short *);
 
 enum {
   NUM_PRECURSORS = 3,
@@ -30,8 +30,8 @@ enum {
 
 int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
                    HitInformation *hit_information,
-                   unsigned long rows,
-                   unsigned long contig_len,
+                   GtUword rows,
+                   GtUword contig_len,
                    ParseStruct *parsestruct_ptr, GtError * err)
 {
   int had_err = 0;
@@ -48,7 +48,7 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
     maxpath_frame = 0;
 
   /* Position in der Query-DNA */
-  unsigned long column_index = 0;
+  GtUword column_index = 0;
 
   /* Variablen fuer den aktuellen Frame, den vorherigen Frame(speichert
      einen Wert aus precursors[], die Zeile des vorherigen Frames, GtArray
@@ -166,7 +166,7 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
 
 /* Methode zur Berechnung der moeglichen Vorgaengerleserahmen */
 static void compute_precursors(short current_frame,
-                               unsigned long position,
+                               GtUword position,
                                short *precursors_fct)
 {
   short j = 0;

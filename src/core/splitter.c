@@ -26,7 +26,7 @@
 
 struct GtSplitter {
   char **tokens;
-  unsigned long num_of_tokens;
+  GtUword num_of_tokens;
   size_t allocated;
 };
 
@@ -35,7 +35,7 @@ GtSplitter* gt_splitter_new(void)
   return gt_calloc(1, sizeof (GtSplitter));
 }
 
-void gt_splitter_split(GtSplitter *s, char *string, unsigned long length,
+void gt_splitter_split(GtSplitter *s, char *string, GtUword length,
                     char delimiter)
 {
 
@@ -71,7 +71,7 @@ char** gt_splitter_get_tokens(GtSplitter *s)
   return s->tokens;
 }
 
-char* gt_splitter_get_token(GtSplitter *s, unsigned long token_num)
+char* gt_splitter_get_token(GtSplitter *s, GtUword token_num)
 {
   gt_assert(s && token_num < s->num_of_tokens);
   return s->tokens[token_num];
@@ -84,7 +84,7 @@ void gt_splitter_reset(GtSplitter *s)
   s->num_of_tokens = 0;
 }
 
-unsigned long gt_splitter_size(GtSplitter *s)
+GtUword gt_splitter_size(GtSplitter *s)
 {
   gt_assert(s);
   return s->num_of_tokens;

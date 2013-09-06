@@ -34,14 +34,14 @@ typedef struct
 } GtXdropArbitraryscores;
 
 /* This is the type for the xdrop scores. */
-typedef long GtXdropscore;
+typedef GtWord GtXdropscore;
 
 typedef struct
 {
-  unsigned long ivalue, jvalue;
+  GtUword ivalue, jvalue;
   GtXdropscore score;
-  long best_d;
-  long best_k;
+  GtWord best_d;
+  GtWord best_k;
 } GtXdropbest;
 
 GT_DECLAREARRAYSTRUCT(GtXdropscore);
@@ -67,8 +67,8 @@ void              gt_evalxdroparbitscoresextend(bool forward,
                                                 GtXdropresources *res,
                                                 const GtSeqabstract *useq,
                                                 const GtSeqabstract *vseq,
-                                                unsigned long uoffset,
-                                                unsigned long voffset,
+                                                GtUword uoffset,
+                                                GtUword voffset,
                                                 GtXdropscore xdropbelowscore);
 
 void              gt_xdrop_resources_delete(GtXdropresources *);

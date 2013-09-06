@@ -33,11 +33,11 @@
 #define UNDEFTABVALUE ULONG_MAX
 
 static double *ln_n_fac_tab = NULL;
-static unsigned long **binomial_dp_tab = NULL;
+static GtUword **binomial_dp_tab = NULL;
 
 static inline void init_ln_n_fac_tab(void)
 {
-  unsigned long idx;
+  GtUword idx;
 
   if (ln_n_fac_tab == NULL) {
     ln_n_fac_tab = gt_calloc((size_t) (GT_BINOMIAL_MAX_N_LN + 1),
@@ -54,7 +54,7 @@ static inline void init_ln_n_fac_tab(void)
 static inline void init_binomial_dp_tab(void)
 {
   if (binomial_dp_tab == NULL) {
-    unsigned long idx, jdx,
+    GtUword idx, jdx,
                   rows = GT_BINOMIAL_MAX_N_DP + 1UL,
                   cols = GT_DIV2(GT_BINOMIAL_MAX_N_DP) + 1;
     gt_array2dim_malloc(binomial_dp_tab, rows, cols);
@@ -89,12 +89,12 @@ void gt_combinatorics_clean(void)
   binomial_dp_tab = NULL;
 }
 
-unsigned long gt_combinatorics_binomial_dp(unsigned long n, unsigned long k)
+GtUword gt_combinatorics_binomial_dp(GtUword n, GtUword k)
 {
   return binomial_dp_tab[n][k];
 }
 
-unsigned long gt_combinatorics_binomial_ln(unsigned long n, unsigned long k)
+GtUword gt_combinatorics_binomial_ln(GtUword n, GtUword k)
 {
   if (k == 0 || n <= k)
     return 1UL;
@@ -109,10 +109,10 @@ unsigned long gt_combinatorics_binomial_ln(unsigned long n, unsigned long k)
                                                  ln_n_fac_tab[n - k])));
 }
 
-unsigned long gt_combinatorics_binomial_simple(unsigned long n, unsigned long k)
+GtUword gt_combinatorics_binomial_simple(GtUword n, GtUword k)
 {
-  unsigned long idx;
-  unsigned long result;
+  GtUword idx;
+  GtUword result;
   if (n < k)
     return 0;
   if (k == 0 || k == n)
@@ -123,10 +123,10 @@ unsigned long gt_combinatorics_binomial_simple(unsigned long n, unsigned long k)
   result = n - k + 1;
   for (idx = 2UL; idx <= k; idx++) {
 #if defined (_LP64) || defined (_WIN64)
-    result = (unsigned long) gt_safe_mult_u64((uint64_t) result,
+    result = (GtUword) gt_safe_mult_u64((uint64_t) result,
                                               (uint64_t) (n - k + idx));
 #else
-    result = (unsigned long) gt_safe_mult_u32((uint32_t) result,
+    result = (GtUword) gt_safe_mult_u32((uint32_t) result,
                                               (uint32_t) (n - k + idx));
 #endif
     result /= idx;
@@ -137,13 +137,13 @@ unsigned long gt_combinatorics_binomial_simple(unsigned long n, unsigned long k)
 int gt_combinatorics_unit_test(GtError *err)
 {
   int had_err = 0;
-  unsigned long n,k;
-  static const unsigned long max_n = GT_BINOMIAL_MAX_N,
+  GtUword n,k;
+  static const GtUword max_n = GT_BINOMIAL_MAX_N,
                              max_fac_stable = 47UL;
   gt_error_check(err);
   for (n = 0; n <= max_n; n++) {
     for (k = 0; k <= GT_DIV2(n); k++) {
-      unsigned long a = gt_combinatorics_binomial_dp(n, k),
+      GtUword a = gt_combinatorics_binomial_dp(n, k),
                     b = gt_combinatorics_binomial_simple(n, k),
                     c;
       gt_ensure(a == b);

@@ -29,8 +29,8 @@ struct Myersonlineresources
 {
   GtEncseqReader *esr;
   const GtEncseq *encseq;
-  unsigned long totallength;
-  unsigned long *eqsvectorrev,
+  GtUword totallength;
+  GtUword *eqsvectorrev,
                 *eqsvector;
   unsigned int alphasize;
   bool nowildcards;
@@ -74,10 +74,10 @@ void gt_freeMyersonlineresources(Myersonlineresources *ptrmyersonlineresources)
 
 void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
                                const GtUchar *pattern,
-                               unsigned long patternlength,
-                               unsigned long maxdistance)
+                               GtUword patternlength,
+                               GtUword maxdistance)
 {
-  unsigned long Pv = ~0UL,
+  GtUword Pv = ~0UL,
                 Mv = 0UL,
                 Eq,
                 Xv,
@@ -85,14 +85,14 @@ void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
                 Ph,
                 Mh,
                 score;
-  const unsigned long Ebit = 1UL << (patternlength-1);
+  const GtUword Ebit = 1UL << (patternlength-1);
   GtUchar cc;
-  unsigned long pos;
+  GtUword pos;
   const GtReadmode readmode = GT_READMODE_REVERSE;
   GtIdxMatch match;
 
   gt_initeqsvectorrev(mor->eqsvectorrev,
-                   (unsigned long) mor->alphasize,
+                   (GtUword) mor->alphasize,
                    pattern,patternlength);
   score = patternlength;
   gt_encseq_reader_reinit_with_readmode(mor->esr, mor->encseq, readmode, 0);
@@ -116,7 +116,7 @@ void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
         Eq = 0;
       } else
       {
-        Eq = mor->eqsvectorrev[(unsigned long) cc];   /*  6 */
+        Eq = mor->eqsvectorrev[(GtUword) cc];   /*  6 */
       }
       Xv = Eq | Mv;                                   /*  7 */
       Xh = (((Eq & Pv) + Pv) ^ Pv) | Eq;              /*  8 */
@@ -141,7 +141,7 @@ void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
       Mv = Ph & Xv;                                   /* 18 */
       if (score <= maxdistance)
       {
-        unsigned long dbstartpos = GT_REVERSEPOS(mor->totallength,pos);
+        GtUword dbstartpos = GT_REVERSEPOS(mor->totallength,pos);
         Definedunsignedlong matchlength;
 
         if (maxdistance > 0)
@@ -163,7 +163,7 @@ void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
         if (matchlength.defined)
         {
           match.dbstartpos = dbstartpos;
-          match.dblen = (unsigned long) matchlength.valueunsignedlong;
+          match.dblen = (GtUword) matchlength.valueunsignedlong;
           match.distance = score;
           mor->processmatch(mor->processmatchinfo,&match);
         }

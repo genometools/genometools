@@ -29,7 +29,7 @@ typedef struct {
        gc_content,
        stat,
        seqlengthdistri;
-  unsigned long showseqnum,
+  GtUword showseqnum,
                 width;
   GtStr *reader;
   GtOutputFileInfo *ofi;
@@ -161,8 +161,8 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
 
     if (!had_err && arguments->showseqnum != GT_UNDEF_ULONG) {
       if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
-        gt_error_set(err, "argument '%lu' to option '-showseqnum' is too "
-                     "large. The sequence index contains only '%lu' sequences.",
+        gt_error_set(err, "argument '"GT_LU"' to option '-showseqnum' is too "
+                     "large. The sequence index contains only '"GT_LU"' sequences.",
                      arguments->showseqnum,
                      gt_bioseq_number_of_sequences(bioseq));
         had_err = -1;

@@ -34,7 +34,7 @@ struct GtAlignment {
   const GtUchar  *u,
                  *v;
   GtMultieoplist *eops;
-  unsigned long   ulen,
+  GtUword   ulen,
                   vlen,
                   alilen;
 };
@@ -52,8 +52,8 @@ GtAlignment* gt_alignment_new(void)
   return alignment;
 }
 
-GtAlignment* gt_alignment_new_with_seqs(const GtUchar *u, unsigned long ulen,
-                                        const GtUchar *v, unsigned long vlen)
+GtAlignment* gt_alignment_new_with_seqs(const GtUchar *u, GtUword ulen,
+                                        const GtUchar *v, GtUword vlen)
 {
   GtAlignment *alignment;
   gt_assert(u && v);
@@ -63,8 +63,8 @@ GtAlignment* gt_alignment_new_with_seqs(const GtUchar *u, unsigned long ulen,
 }
 
 void gt_alignment_set_seqs(GtAlignment *alignment, const GtUchar *u,
-                           unsigned long ulen, const GtUchar *v,
-                           unsigned long vlen)
+                           GtUword ulen, const GtUchar *v,
+                           GtUword vlen)
 {
   gt_assert(alignment && u && v);
   alignment->u = u;
@@ -91,7 +91,7 @@ GtRange gt_alignment_get_urange(const GtAlignment *alignment)
   return alignment->aligned_range_u;
 }
 
-unsigned long gt_alignment_get_length(const GtAlignment *alignment)
+GtUword gt_alignment_get_length(const GtAlignment *alignment)
 {
   gt_assert(alignment);
   return alignment->alilen;
@@ -150,26 +150,26 @@ void gt_alignment_remove_last(GtAlignment *alignment)
 #ifndef NDEBUG
 static int gt_alignment_is_valid(const GtAlignment *alignment)
 {
-  unsigned long len;
+  GtUword len;
   /* check ulen */
   len = gt_multieoplist_get_repdel_length(alignment->eops);
   if (len != alignment->ulen) {
-    printf("ulen: %lu, repdel: %lu\n", alignment->ulen, len);
+    printf("ulen: "GT_LU", repdel: "GT_LU"\n", alignment->ulen, len);
     return 0;
   }
   /* check vlen */
   len = gt_multieoplist_get_repins_length(alignment->eops);
   if (len != alignment->vlen) {
-    printf("vlen: %lu, repins: %lu\n", alignment->vlen, len);
+    printf("vlen: "GT_LU", repins: "GT_LU"\n", alignment->vlen, len);
     return 0;
   }
   return 1;
 }
 #endif
 
-unsigned long gt_alignment_eval(const GtAlignment *alignment)
+GtUword gt_alignment_eval(const GtAlignment *alignment)
 {
-  unsigned long i, j, idx_u = 0, idx_v = 0, sumcost = 0, meoplen;
+  GtUword i, j, idx_u = 0, idx_v = 0, sumcost = 0, meoplen;
   GtMultieop *meop;
 
   gt_assert(alignment != NULL);
@@ -210,13 +210,13 @@ unsigned long gt_alignment_eval(const GtAlignment *alignment)
   return sumcost;
 }
 
-long gt_alignment_eval_with_score(const GtAlignment *alignment,
-                                  long matchscore,
-                                  long mismatchscore,
-                                  long gapscore)
+GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
+                                  GtWord matchscore,
+                                  GtWord mismatchscore,
+                                  GtWord gapscore)
 {
-  unsigned long i, j, idx_u = 0, idx_v = 0, meoplen;
-  long sumscore = 0;
+  GtUword i, j, idx_u = 0, idx_v = 0, meoplen;
+  GtWord sumscore = 0;
   GtMultieop *meop;
 
   gt_assert(alignment != NULL);
@@ -258,7 +258,7 @@ long gt_alignment_eval_with_score(const GtAlignment *alignment,
 /* XXX: add width parameter and format the GtAlignment accordingly */
 void gt_alignment_show(const GtAlignment *alignment, FILE *fp)
 {
-  unsigned long i, j, idx_u, idx_v, meoplen;
+  GtUword i, j, idx_u, idx_v, meoplen;
   GtMultieop *meop;
 
   gt_assert(alignment);
@@ -341,7 +341,7 @@ void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                          GtUchar wildcardshow,
                                          FILE *fp)
 {
-  unsigned long i, j, idx_u, idx_v, meoplen;
+  GtUword i, j, idx_u, idx_v, meoplen;
   GtMultieop *meop;
 
   gt_assert(alignment);
@@ -469,9 +469,9 @@ int gt_alignment_unit_test(GtError *err)
   */
 
   alignment = gt_alignment_new_with_seqs((const GtUchar *) u,
-                                 (unsigned long) strlen(u),
+                                 (GtUword) strlen(u),
                                  (const GtUchar *) v,
-                                 (unsigned long) strlen(v));
+                                 (GtUword) strlen(v));
   gt_alignment_add_replacement(alignment);
   gt_alignment_add_replacement(alignment);
   gt_alignment_add_replacement(alignment);

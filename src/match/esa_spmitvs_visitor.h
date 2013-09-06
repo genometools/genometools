@@ -33,6 +33,6 @@ GtESAVisitor*            gt_esa_spmitvs_visitor_new(const GtEncseq *encseq,
                                                     GtError *err);
 void                     gt_esa_spmitvs_visitor_print_results(
                                                      GtESASpmitvsVisitor*,
-                                                     unsigned long nonspecials);
+                                                     GtUword nonspecials);
 
 #endif

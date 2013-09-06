@@ -22,7 +22,7 @@
 static void relaxedcutoffsprocmatchormismatch(Traversealignmentstate *state,
                                               void *data,
                                               GT_UNUSED
-                                              unsigned long lengthofeop)
+                                              GtUword lengthofeop)
 {
   Relaxedcutoffsdata *d = (Relaxedcutoffsdata*) data;
 
@@ -47,7 +47,7 @@ static void relaxedcutoffsprocindelorintron(GT_UNUSED
                                             Traversealignmentstate *state,
                                             void *data,
                                             GT_UNUSED
-                                            unsigned long lengthofeop)
+                                            GtUword lengthofeop)
 {
   Relaxedcutoffsdata *d = (Relaxedcutoffsdata*) data;
   d->cutoffs->eopcutoff++;

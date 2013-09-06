@@ -63,8 +63,8 @@ void gt_spmlist_write_header_bin ## BITS(FILE *file)\
 {\
   gt_xfputc((int)GT_SPMLIST_BIN ## BITS, file);\
 }\
-void gt_spmproc_show_bin ## BITS(unsigned long suffix_seqnum,\
-    unsigned long prefix_seqnum, unsigned long length, bool suffixseq_direct,\
+void gt_spmproc_show_bin ## BITS(GtUword suffix_seqnum,\
+    GtUword prefix_seqnum, GtUword length, bool suffixseq_direct,\
     bool prefixseq_direct, void *file)\
 {\
   uint ## BITS ## _t spmdata[3];\
@@ -74,10 +74,10 @@ void gt_spmproc_show_bin ## BITS(unsigned long suffix_seqnum,\
     length |= 2;\
   if (prefixseq_direct)\
     length |= 1;\
-  GT_SPMLIST_ASSERT_CAST_SAFE(suffix_seqnum, unsigned long, uint ## BITS ## _t,\
+  GT_SPMLIST_ASSERT_CAST_SAFE(suffix_seqnum, GtUword, uint ## BITS ## _t,\
       UINT ## BITS ## _MAX);\
   spmdata[0] = (uint ## BITS ## _t) suffix_seqnum;\
-  GT_SPMLIST_ASSERT_CAST_SAFE(prefix_seqnum, unsigned long, uint ## BITS ## _t,\
+  GT_SPMLIST_ASSERT_CAST_SAFE(prefix_seqnum, GtUword, uint ## BITS ## _t,\
       UINT ## BITS ## _MAX);\
   spmdata[1] = (uint ## BITS ## _t) prefix_seqnum;\
   spmdata[2] = (uint ## BITS ## _t) length;\
@@ -85,13 +85,13 @@ void gt_spmproc_show_bin ## BITS(unsigned long suffix_seqnum,\
   gt_xfwrite(&spmdata, sizeof (uint ## BITS ## _t), (size_t)3, (FILE*)file);\
   /*@end@*/\
 }\
-static int gt_spmlist_parse_bin ## BITS(FILE *file, unsigned long min_length,\
+static int gt_spmlist_parse_bin ## BITS(FILE *file, GtUword min_length,\
     GtSpmproc processoverlap, void *data, GtError *err)\
 {\
   int had_err = 0;\
   size_t retval;\
   uint ## BITS ## _t spmdata[3];\
-  unsigned long length;\
+  GtUword length;\
   bool suffixseq_direct, prefixseq_direct;\
   while (!feof(file))\
   {\
@@ -101,21 +101,21 @@ static int gt_spmlist_parse_bin ## BITS(FILE *file, unsigned long min_length,\
     if (retval != (size_t)3)\
     {\
       had_err = -1;\
-      gt_log_log("retval: %lu", (unsigned long)retval);\
+      gt_log_log("retval: "GT_LU"", (GtUword)retval);\
       gt_error_set(err, "SPM binary file error: %s", feof(file) ?\
           "premature EOF" : strerror(errno));\
     }\
     GT_SPMLIST_ASSERT_CAST_SAFE(spmdata[2] >> 2, uint ## BITS ## _t,\
-        unsigned long, ULONG_MAX);\
-    length = (unsigned long)(spmdata[2] >> 2);\
+        GtUword, ULONG_MAX);\
+    length = (GtUword)(spmdata[2] >> 2);\
     suffixseq_direct = (spmdata[2] & 2) != 0;\
     prefixseq_direct = (spmdata[2] & 1) != 0;\
     GT_SPMLIST_ASSERT_CAST_SAFE(spmdata[0], uint ## BITS ## _t,\
-        unsigned long, ULONG_MAX);\
+        GtUword, ULONG_MAX);\
     GT_SPMLIST_ASSERT_CAST_SAFE(spmdata[1], uint ## BITS ## _t,\
-        unsigned long, ULONG_MAX);\
+        GtUword, ULONG_MAX);\
     if (had_err == 0 && length >= min_length)\
-      processoverlap((unsigned long)spmdata[0], (unsigned long)spmdata[1],\
+      processoverlap((GtUword)spmdata[0], (GtUword)spmdata[1],\
           length, suffixseq_direct, prefixseq_direct, data);\
   }\
   return had_err;\
@@ -159,13 +159,13 @@ static inline int parse_plusminus(bool *destination, const char *source)
       gt_error_set(err, "Token %i unrecognized", NR);\
   }
 
-static inline int parse_line(GtStr *s, unsigned long min_length,
+static inline int parse_line(GtStr *s, GtUword min_length,
     GtSpmproc proc_e, GtSpmprocA proc_a, void *data, GtError *err)
 {
   int had_err = 0;
   GtSplitter *splitter;
   char **tokens = NULL;
-  unsigned long suffix_seqnum = 0, prefix_seqnum = 0, suffix_length = 0,
+  GtUword suffix_seqnum = 0, prefix_seqnum = 0, suffix_length = 0,
                 prefix_length, unit_edist;
   bool suffixseq_direct = true, prefixseq_direct = true, exact;
 
@@ -209,7 +209,7 @@ static inline int parse_line(GtStr *s, unsigned long min_length,
 }
 
 static int gt_spmlist_parse_ascii_generic(GtFile *infp,
-    unsigned long min_length, GtSpmproc proc_e, GtSpmprocA proc_a, void *data,
+    GtUword min_length, GtSpmproc proc_e, GtSpmprocA proc_a, void *data,
     GtError *err)
 {
   int had_err = 0;
@@ -225,7 +225,7 @@ static int gt_spmlist_parse_ascii_generic(GtFile *infp,
   return had_err;
 }
 
-static inline int gt_spmlist_parse_ascii(GtFile *infp, unsigned long min_length,
+static inline int gt_spmlist_parse_ascii(GtFile *infp, GtUword min_length,
     GtSpmproc processoverlap, void *data, GtError *err)
 {
   return gt_spmlist_parse_ascii_generic(infp, min_length, processoverlap, NULL,
@@ -233,7 +233,7 @@ static inline int gt_spmlist_parse_ascii(GtFile *infp, unsigned long min_length,
 }
 
 int gt_spmlist_parse_ascii_approx(const char* filename,
-    unsigned long min_length, GtSpmprocA processoverlap, void *data,
+    GtUword min_length, GtSpmprocA processoverlap, void *data,
     GtError *err)
 {
   int retval = 0;
@@ -248,7 +248,7 @@ int gt_spmlist_parse_ascii_approx(const char* filename,
   return retval;
 }
 
-int gt_spmlist_parse(const char* filename, unsigned long min_length,
+int gt_spmlist_parse(const char* filename, GtUword min_length,
     GtSpmproc processoverlap, void *data, GtError *err)
 {
   int c, retval = 0;
@@ -307,19 +307,19 @@ static inline int parse_plusminus_unit_test(GtError *err)
 
 struct GtSpmParseExactResult
 {
-  unsigned long suffix_seqnum, prefix_seqnum, length;
+  GtUword suffix_seqnum, prefix_seqnum, length;
   bool suffixseq_direct, prefixseq_direct;
 };
 
 struct GtSpmParseApproxResult
 {
-  unsigned long suffix_seqnum, prefix_seqnum,
+  GtUword suffix_seqnum, prefix_seqnum,
                 suffix_length, prefix_length, unit_edist;
   bool suffixseq_direct, prefixseq_direct;
 };
 
-static void gt_spmlist_test_save(unsigned long suffix_seqnum,
-    unsigned long prefix_seqnum, unsigned long length, bool suffixseq_direct,
+static void gt_spmlist_test_save(GtUword suffix_seqnum,
+    GtUword prefix_seqnum, GtUword length, bool suffixseq_direct,
     bool prefixseq_direct, void* data)
 {
   struct GtSpmParseExactResult *r = data;
@@ -330,9 +330,9 @@ static void gt_spmlist_test_save(unsigned long suffix_seqnum,
   r->prefixseq_direct = prefixseq_direct;
 }
 
-static void gt_spmlist_test_save_a(unsigned long suffix_seqnum,
-    unsigned long prefix_seqnum, unsigned long suffix_length,
-    unsigned long prefix_length, unsigned long unit_edist,
+static void gt_spmlist_test_save_a(GtUword suffix_seqnum,
+    GtUword prefix_seqnum, GtUword suffix_length,
+    GtUword prefix_length, GtUword unit_edist,
     bool suffixseq_direct, bool prefixseq_direct, void* data)
 {
   struct GtSpmParseApproxResult *r = data;
@@ -435,30 +435,30 @@ static int gt_spmlist_parse_unit_test(GtError *err)
   return had_err;
 }
 
-void gt_spmproc_show_ascii(unsigned long suffix_seqnum,
-    unsigned long prefix_seqnum,
-    unsigned long length,
+void gt_spmproc_show_ascii(GtUword suffix_seqnum,
+    GtUword prefix_seqnum,
+    GtUword length,
     bool suffixseq_direct,
     bool prefixseq_direct,
     void *data)
 {
   GtFile *file = data;
-  gt_file_xprintf(file, "%lu %s %lu %s %lu\n", suffix_seqnum,
+  gt_file_xprintf(file, ""GT_LU" %s "GT_LU" %s "GT_LU"\n", suffix_seqnum,
       suffixseq_direct ? "+" : "-", prefix_seqnum,
       prefixseq_direct ? "+" : "-", length);
 }
 
-void gt_spmproc_a_show_ascii(unsigned long suffix_seqnum,
-    unsigned long prefix_seqnum,
-    unsigned long suffix_length,
-    unsigned long prefix_length,
-    unsigned long unit_edist,
+void gt_spmproc_a_show_ascii(GtUword suffix_seqnum,
+    GtUword prefix_seqnum,
+    GtUword suffix_length,
+    GtUword prefix_length,
+    GtUword unit_edist,
     bool suffixseq_direct,
     bool prefixseq_direct,
     void *data)
 {
   GtFile *file = data;
-  gt_file_xprintf(file, "%lu %s %lu %s %lu %lu %lu\n", suffix_seqnum,
+  gt_file_xprintf(file, ""GT_LU" %s "GT_LU" %s "GT_LU" "GT_LU" "GT_LU"\n", suffix_seqnum,
       suffixseq_direct ? "+" : "-", prefix_seqnum,
       prefixseq_direct ? "+" : "-", suffix_length, prefix_length,
       unit_edist);

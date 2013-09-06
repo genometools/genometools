@@ -25,14 +25,14 @@
 
 int gt_extractkeysfromfastafile(bool verbose,
                                 GtFile *outfp,
-                                unsigned long width,
+                                GtUword width,
                                 const GtStr *fileofkeystoextract,
                                 GtStrArray *referencefiletab,
                                 GtError *err);
 
 int gt_extractkeysfromfastaindex(const char *indexname,
                                  const GtStr *fileofkeystoextract,
-                                 unsigned long linewidth,GtError *err);
+                                 GtUword linewidth,GtError *err);
 
 int gt_extractkeysfromdesfile(const char *indexname,
                               bool sortkeys,

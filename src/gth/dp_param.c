@@ -43,14 +43,14 @@
 static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
                                        const unsigned char *gen_seq_tran,
                                        const GtRange *gen_seq_bounds,
-                                       unsigned long genpos,
+                                       GtUword genpos,
                                        const GtUchar *gen_alphabet_symbolmap,
                                        GthBSSMModel *bssmmodel)
 {
-  unsigned long pc, /* previous char */
+  GtUword pc, /* previous char */
                 cc, /* current char */
                 d, i, j;
-  long startpos, endpos;
+  GtWord startpos, endpos;
   GthDbl pval = 0.5, Tv[3] = { 0.0 }, Fv[4] = { 0.0 };
   gt_assert(bssmmodel);
 
@@ -124,7 +124,7 @@ static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
 }
 
 static void evaldonorprob(GthFlt *prob, const unsigned char *gen_seq_tran,
-                          const GtRange *gen_seq_bounds, unsigned long genpos,
+                          const GtRange *gen_seq_bounds, GtUword genpos,
                           const GtUchar *gen_alphabet_symbolmap,
                           GthBSSMParam *bssm_param)
 {
@@ -151,7 +151,7 @@ static void evaldonorprob(GthFlt *prob, const unsigned char *gen_seq_tran,
 
 static void evalacceptorprob(GthFlt *prob, const unsigned char *gen_seq_tran,
                              const GtRange *gen_seq_bounds,
-                             unsigned long genpos,
+                             GtUword genpos,
                              const GtUchar *gen_alphabet_symbolmap,
                              GthBSSMParam *bssm_param)
 {
@@ -179,10 +179,10 @@ static void evalacceptorprob(GthFlt *prob, const unsigned char *gen_seq_tran,
 
 static void evaluateU12intronmodel(GthFlt *log_Pdonor, GthFlt *log_1minusPdonor,
                                    const unsigned char *gen_seq_tran,
-                                   unsigned long left,
-                                   unsigned long right,
-                                   unsigned long probindex,
-                                   GT_UNUSED unsigned long probindex_afterwards,
+                                   GtUword left,
+                                   GtUword right,
+                                   GtUword probindex,
+                                   GT_UNUSED GtUword probindex_afterwards,
                                    GthFlt log_U12typedonorprob,
                                    GthFlt log1minus_U12typedonorprob,
                                    GthFlt log_U12typedonorprobonemismatch,
@@ -192,7 +192,7 @@ static void evaluateU12intronmodel(GthFlt *log_Pdonor, GthFlt *log_1minusPdonor,
                                    unsigned char Gchar,
                                    unsigned char Tchar)
 {
-  unsigned long mismatchcounter;
+  GtUword mismatchcounter;
   const unsigned char *sptr, *pptr;
 
 #define CONSENSUS_PATTERN_SIZE  8
@@ -249,7 +249,7 @@ static void evaluateU12intronmodel(GthFlt *log_Pdonor, GthFlt *log_1minusPdonor,
   gt_assert(probindex + CONSENSUS_PATTERN_SIZE - 1 == probindex_afterwards);
 }
 
-static void calculateprobabilities(GtArray *ranges, unsigned long totallength,
+static void calculateprobabilities(GtArray *ranges, GtUword totallength,
                                    GthFlt *log_Pdonor,
                                    GthFlt *log_1minusPdonor,
                                    GthFlt *log_Pacceptor,
@@ -266,7 +266,7 @@ static void calculateprobabilities(GtArray *ranges, unsigned long totallength,
                       Cchar = gen_alphabet_symbolmap['C'],
                       Gchar = gen_alphabet_symbolmap['G'],
                       Tchar = gen_alphabet_symbolmap['T'];
-  unsigned long rangeindex,
+  GtUword rangeindex,
                 startpos,
                 endpos,
                 genomicindex,
@@ -457,7 +457,7 @@ static void filllogvaluesforonestrand(GtArray *ranges,
                                       const GtUchar *gen_alphabet_symbolmap,
                                       GthSpliceSiteModel *splice_site_model)
 {
-  unsigned long rangeindex,
+  GtUword rangeindex,
        startpos,
        endpos,
        genomicindex,
@@ -524,7 +524,7 @@ static void filllogvaluesforonestrand(GtArray *ranges,
 
 GthDPParam* dp_param_alloc(GtArray *ranges)
 {
-  unsigned long totallength;
+  GtUword totallength;
   GthDPParam *dp_param;
 
   gt_assert(ranges);
@@ -568,8 +568,8 @@ GthDPParam* gth_dp_param_new(GtArray *ranges,
  return dp_param;
 }
 
-GthDPParam* gth_dp_param_new_with_range(unsigned long start,
-                                        unsigned long end,
+GthDPParam* gth_dp_param_new_with_range(GtUword start,
+                                        GtUword end,
                                         const unsigned char *gen_seq_tran,
                                         const GtRange *gen_seq_bounds,
                                         GthSpliceSiteModel *splice_site_model,

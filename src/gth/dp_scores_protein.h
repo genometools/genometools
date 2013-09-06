@@ -37,7 +37,7 @@ static inline GthFlt GTHGETSCORE(GthDPScoresProtein *scores,
   return scores->score[scores->codon2amino[n1][n2][n3]][aa];
 }
 
-GthDPScoresProtein* gth_dp_scores_protein_new(unsigned long translationtable,
+GthDPScoresProtein* gth_dp_scores_protein_new(GtUword translationtable,
                                               GtScoreMatrix *score_matrix,
                                               GtAlphabet
                                               *score_matrix_alphabet);

@@ -36,7 +36,7 @@ struct GthPathMatrix {
 
 static void path_matrix_fill(GthPathMatrix *pm, GthPath **path, GtRowInfo *ri)
 {
-  unsigned long genptr, refptr, genidx, refidx;
+  GtUword genptr, refptr, genidx, refidx;
   GthPath e_path, i_path;
   bool lower;
 
@@ -72,8 +72,8 @@ static void path_matrix_fill(GthPathMatrix *pm, GthPath **path, GtRowInfo *ri)
 }
 
 GthPathMatrix* gth_path_matrix_new(GthPath **path,
-                                   unsigned long gen_dp_length,
-                                   unsigned long ref_dp_length,
+                                   GtUword gen_dp_length,
+                                   GtUword ref_dp_length,
                                    const GtRange *btmatrixgenrange,
                                    const GtRange *btmatrixrefrange,
                                    GtRowInfo *ri)
@@ -131,17 +131,17 @@ static char direction_char(GthPath path)
 
 void gth_path_matrix_show(GthPathMatrix *pm)
 {
-  unsigned long genptr, refptr, genidx, refidx;
+  GtUword genptr, refptr, genidx, refidx;
   PMEntry entry;
   gt_assert(pm);
   printf("    ");
   for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++)
-    printf("%4lu", genptr);
+    printf("%4"GT_LUS, genptr);
   printf("\n\n");
 
   for (refptr = pm->ref_range.start; refptr <= pm->ref_range.end; refptr++) {
     refidx = refptr - pm->ref_range.start;
-    printf("%4lu", refptr);
+    printf("%4"GT_LUS, refptr);
     for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++) {
       genidx = genptr - pm->gen_range.start;
       entry = pm->entries[genidx][refidx];
@@ -167,10 +167,10 @@ void gth_path_matrix_show(GthPathMatrix *pm)
   }
 }
 
-void gth_path_matrix_set_max_path(GthPathMatrix *pm, unsigned long genptr,
-                                  unsigned long refptr, bool e_state)
+void gth_path_matrix_set_max_path(GthPathMatrix *pm, GtUword genptr,
+                                  GtUword refptr, bool e_state)
 {
-  unsigned long genidx, refidx;
+  GtUword genidx, refidx;
   gt_assert(pm);
   if (genptr >= pm->gen_range.start && genptr <= pm->gen_range.end &&
       refptr >= pm->ref_range.start && refptr <= pm->ref_range.end) {

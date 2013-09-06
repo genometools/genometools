@@ -84,7 +84,7 @@ static int gt_encseq_md5_runner(GT_UNUSED int argc, const char **argv,
     had_err = -1;
 
   if (!had_err) {
-    unsigned long i;
+    GtUword i;
 
     if (arguments->fromindex) {
       GtMD5Tab *tab;
@@ -99,7 +99,7 @@ static int gt_encseq_md5_runner(GT_UNUSED int argc, const char **argv,
         if (tab) {
           for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
             gt_file_xprintf(arguments->outfp,
-                            "%lu: %s\n", i, gt_md5_tab_get(tab, i));
+                            ""GT_LU": %s\n", i, gt_md5_tab_get(tab, i));
           }
           gt_md5_tab_delete(tab);
         } else had_err = -1;
@@ -108,14 +108,14 @@ static int gt_encseq_md5_runner(GT_UNUSED int argc, const char **argv,
       char *seq,
            *md5str;
       for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
-        unsigned long len, start, end;
+        GtUword len, start, end;
         len = gt_encseq_seqlength(encseq, i);
         start = gt_encseq_seqstartpos(encseq, i);
         end = len + start -1;
         seq = gt_malloc(len * sizeof (char));
         gt_encseq_extract_decoded(encseq, seq, start, end);
         md5str = gt_md5_fingerprint(seq, len);
-        gt_file_xprintf(arguments->outfp, "%lu: %s\n", i, md5str);
+        gt_file_xprintf(arguments->outfp, ""GT_LU": %s\n", i, md5str);
         gt_free(seq);
         gt_free(md5str);
       }

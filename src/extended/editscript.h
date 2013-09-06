@@ -33,19 +33,19 @@ void          gt_editscript_add_mismatch(GtEditscript *editscript, char c);
 void          gt_editscript_reset(GtEditscript *editscript);
 void          gt_editscript_remove_last(GtEditscript *editscript);
 
-unsigned long gt_editscript_get_orig_start(GtEditscript *editscript);
+GtUword gt_editscript_get_orig_start(GtEditscript *editscript);
 void          gt_editscript_set_orig_start(GtEditscript *editscript,
-                                           unsigned long value);
-unsigned long gt_editscript_get_orig_end(GtEditscript *editscript);
+                                           GtUword value);
+GtUword gt_editscript_get_orig_end(GtEditscript *editscript);
 void          gt_editscript_set_orig_end(GtEditscript *editscript,
-                                         unsigned long value);
-unsigned long gt_editscript_get_align_start(GtEditscript *editscript);
+                                         GtUword value);
+GtUword gt_editscript_get_align_start(GtEditscript *editscript);
 void          gt_editscript_set_align_start(GtEditscript *editscript,
-                                            unsigned long value);
-unsigned long gt_editscript_get_align_end(GtEditscript *editscript);
+                                            GtUword value);
+GtUword gt_editscript_get_align_end(GtEditscript *editscript);
 void          gt_editscript_set_align_end(GtEditscript *editscript,
-                                          unsigned long value);
-unsigned long gt_editscript_get_seqlen(GtEditscript *editscript);
+                                          GtUword value);
+GtUword gt_editscript_get_seqlen(GtEditscript *editscript);
 
 void          gt_editscript_show_sequence(const GtEncseq *encseq,
                                           const GtEditscript *editscript,

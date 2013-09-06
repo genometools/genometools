@@ -27,7 +27,7 @@
 
 struct GtStatVisitor {
   const GtNodeVisitor parent_instance;
-  unsigned long number_of_sequence_regions,
+  GtUword number_of_sequence_regions,
                 number_of_multi_features,
                 number_of_genes,
                 number_of_protein_coding_genes,
@@ -38,7 +38,7 @@ struct GtStatVisitor {
                 number_of_LTR_retrotransposons,
                 exon_number_for_distri,
                 cds_length_for_distri;
-  unsigned long long total_length_of_sequence_regions;
+  GtUint64 total_length_of_sequence_regions;
   GtDiscDistri *gene_length_distribution,
                *gene_score_distribution,
                *exon_length_distribution,
@@ -237,32 +237,32 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
 {
   GtStatVisitor *sv = stat_visitor_cast(nv);
   if (sv->number_of_sequence_regions) {
-    gt_file_xprintf(outfp, "sequence regions: %lu (total length: "GT_LLU")\n",
+    gt_file_xprintf(outfp, "sequence regions: "GT_LU" (total length: "GT_LLU")\n",
                     sv->number_of_sequence_regions,
                     sv->total_length_of_sequence_regions);
   }
   if (sv->number_of_multi_features) {
-    gt_file_xprintf(outfp, "multi-features: %lu\n",
+    gt_file_xprintf(outfp, "multi-features: "GT_LU"\n",
                     sv->number_of_multi_features);
   }
   if (sv->number_of_genes)
-    gt_file_xprintf(outfp, "genes: %lu\n", sv->number_of_genes);
+    gt_file_xprintf(outfp, "genes: "GT_LU"\n", sv->number_of_genes);
   if (sv->number_of_protein_coding_genes) {
-    gt_file_xprintf(outfp, "protein-coding genes: %lu\n",
+    gt_file_xprintf(outfp, "protein-coding genes: "GT_LU"\n",
                     sv->number_of_protein_coding_genes);
   }
   if (sv->number_of_mRNAs)
-    gt_file_xprintf(outfp, "mRNAs: %lu\n", sv->number_of_mRNAs);
+    gt_file_xprintf(outfp, "mRNAs: "GT_LU"\n", sv->number_of_mRNAs);
   if (sv->number_of_protein_coding_mRNAs) {
-    gt_file_xprintf(outfp, "protein-coding mRNAs: %lu\n",
+    gt_file_xprintf(outfp, "protein-coding mRNAs: "GT_LU"\n",
                     sv->number_of_protein_coding_mRNAs);
   }
   if (sv->number_of_exons)
-    gt_file_xprintf(outfp, "exons: %lu\n", sv->number_of_exons);
+    gt_file_xprintf(outfp, "exons: "GT_LU"\n", sv->number_of_exons);
   if (sv->number_of_CDSs)
-    gt_file_xprintf(outfp, "CDSs: %lu\n", sv->number_of_CDSs);
+    gt_file_xprintf(outfp, "CDSs: "GT_LU"\n", sv->number_of_CDSs);
   if (sv->number_of_LTR_retrotransposons) {
-    gt_file_xprintf(outfp, "LTR_retrotransposons: %lu\n",
+    gt_file_xprintf(outfp, "LTR_retrotransposons: "GT_LU"\n",
                     sv->number_of_LTR_retrotransposons);
   }
   if (sv->gene_length_distribution) {
@@ -291,7 +291,7 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
   }
   if (sv->used_sources) {
     GtStrArray *sources;
-    unsigned long i;
+    GtUword i;
     gt_file_xprintf(outfp, "used source tags:\n");
     sources = gt_cstr_table_get_all(sv->used_sources);
     for (i = 0; i < gt_str_array_size(sources); i++)

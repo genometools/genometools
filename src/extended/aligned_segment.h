@@ -47,10 +47,10 @@ char*             gt_aligned_segment_refregion(GtAlignedSegment *as);
 const char*       gt_aligned_segment_description(const GtAlignedSegment *as);
 
 /* Returns the original length of the ungapped segment sequence in <as>. */
-unsigned long     gt_aligned_segment_orig_seqlen(const GtAlignedSegment *as);
+GtUword     gt_aligned_segment_orig_seqlen(const GtAlignedSegment *as);
 
 /* Returns the current length of the alignment in <as> (i.e. including gaps). */
-unsigned long     gt_aligned_segment_length(const GtAlignedSegment *as);
+GtUword     gt_aligned_segment_length(const GtAlignedSegment *as);
 
 /* Returns TRUE if the original alignment of <as> is on the opposite strand
    than the reference sequence. The editable segment and refregion are however
@@ -61,7 +61,7 @@ bool              gt_aligned_segment_is_reverse(const GtAlignedSegment *as);
 bool              gt_aligned_segment_has_indels(const GtAlignedSegment *as);
 
 /* Returns the m apping quality of the segment in <as>. */
-unsigned long     gt_aligned_segment_mapping_quality(GtAlignedSegment *as);
+GtUword     gt_aligned_segment_mapping_quality(GtAlignedSegment *as);
 
 /* Sets the edited bit of <as>. */
 void              gt_aligned_segment_seq_set_edited(GtAlignedSegment *as);
@@ -71,19 +71,19 @@ bool              gt_aligned_segment_seq_edited(const GtAlignedSegment *as);
 
 /* Returns the start coordinate of the reference region on the reference
    sequence according to <as>. */
-unsigned long     gt_aligned_segment_refregion_startpos(const
+GtUword     gt_aligned_segment_refregion_startpos(const
                                                           GtAlignedSegment *as);
 
 /* Returns the end coordinates of the reference region on the reference sequence
    according to <as>. */
-unsigned long     gt_aligned_segment_refregion_endpos(const
+GtUword     gt_aligned_segment_refregion_endpos(const
                                                           GtAlignedSegment *as);
 
 /* Returns the coordinates in the reference region of a given reference
    coordinate <refpos> taking gaps into account. */
-unsigned long     gt_aligned_segment_offset_for_refpos(const
+GtUword     gt_aligned_segment_offset_for_refpos(const
                                                            GtAlignedSegment *as,
-                                                       unsigned long refpos);
+                                                       GtUword refpos);
 
 /* Changes '?' symbols in refregion of <as> to real characters from <encseq>.
    Useful e.g. for debug output. */
@@ -115,9 +115,9 @@ const char*       gt_aligned_segment_orig_seq(GtAlignedSegment *as);
    <refpos> on the reference sequence. Takes gaps into account and works
    correctly even if the alignment is reverse.
    Requires that edit tracking is enabled for <as>. */
-unsigned long     gt_aligned_segment_orig_seqpos_for_refpos(
+GtUword     gt_aligned_segment_orig_seqpos_for_refpos(
                                                      const GtAlignedSegment *as,
-                                                     unsigned long refpos);
+                                                     GtUword refpos);
 
 /* Deletes the aligned segment <as>. */
 void              gt_aligned_segment_delete(GtAlignedSegment *as);

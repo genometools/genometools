@@ -101,7 +101,7 @@ gt_createEncIdxSeqFromSfxI(sfxInterface *si,
  */
 EISeq *
 gt_createEncIdxSeqFromSA(Suffixarray *sa,
-                      unsigned long totalLen, const char *projectName,
+                      GtUword totalLen, const char *projectName,
                       const struct seqBaseParam *params,
                       size_t numExtHeaders, const uint16_t *headerIDs,
                       const uint32_t *extHeaderSizes,
@@ -219,7 +219,7 @@ gt_loadEncIdxSeq(const char *projectName,
               GtLogger *verbosity, GtError *err);
 
 EISeq *
-gt_createEncIdxSeqGen(unsigned long totalLen, const char *projectName,
+gt_createEncIdxSeqGen(GtUword totalLen, const char *projectName,
                    MRAEnc *alphabet, const struct seqStats *stats,
                    SeqDataReader seqGenerator,
                    const struct seqBaseParam *params,

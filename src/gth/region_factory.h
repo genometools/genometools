@@ -30,10 +30,10 @@ void              gth_region_factory_delete(GthRegionFactory*);
 void              gth_region_factory_save(GthRegionFactory *region_factory,
                                           GtArray *nodes, GthInput *input);
 GtStr*            gth_region_factory_get_seqid(GthRegionFactory*,
-                                               unsigned long filenum,
-                                               unsigned long seqnum);
-long              gth_region_factory_offset(GthRegionFactory*,
-                                            unsigned long filenum,
-                                            unsigned long seqnum);
+                                               GtUword filenum,
+                                               GtUword seqnum);
+GtWord            gth_region_factory_offset(GthRegionFactory*,
+                                            GtUword filenum,
+                                            GtUword seqnum);
 
 #endif

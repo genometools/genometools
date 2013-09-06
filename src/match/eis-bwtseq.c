@@ -43,7 +43,7 @@
  */
 static int
 initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
-                        MRAEnc *alphabet, unsigned long *counts,
+                        MRAEnc *alphabet, GtUword *counts,
                         enum rangeSortMode *rangeSort,
                         const enum rangeSortMode *defaultRangeSort)
 {
@@ -73,7 +73,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
   bwtSeq->hint = hint = newEISHint(seqIdx);
   {
     Symbol i;
-    unsigned long len = EISLength(seqIdx), *count = bwtSeq->count;
+    GtUword len = EISLength(seqIdx), *count = bwtSeq->count;
     count[0] = 0;
     for (i = 0; i < bwtTerminatorFlat; ++i)
       count[i + 1] = count[i]
@@ -89,9 +89,9 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
     /* and finally place the 1-count for the terminator */
     count[i] = count[i - 1] + 1;
 #ifdef EIS_DEBUG
-    gt_log_log("count[alphabetSize]=%lu, len=%lu",count[alphabetSize], len);
+    gt_log_log("count[alphabetSize]="GT_LU", len="GT_LU"",count[alphabetSize], len);
     for (i = 0; i <= alphabetSize; ++i)
-      gt_log_log("count[%u]=%lu", (unsigned)i, count[i]);
+      gt_log_log("count[%u]="GT_LU"", (unsigned)i, count[i]);
 #endif
     gt_assert(count[alphabetSize] == len);
   }
@@ -108,7 +108,7 @@ gt_newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
           const enum rangeSortMode *defaultRangeSort)
 {
   BWTSeq *bwtSeq;
-  unsigned long *counts;
+  GtUword *counts;
   size_t countsOffset, rangeSortOffset, totalSize;
   enum rangeSortMode *rangeSort;
   unsigned alphabetSize;
@@ -116,15 +116,15 @@ gt_newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
   /* alphabetSize is increased by one to handle the flattened
    * terminator symbol correctly */
   alphabetSize = gt_MRAEncGetSize(alphabet) + 1;
-  countsOffset = offsetAlign(sizeof (struct BWTSeq), sizeof (unsigned long));
+  countsOffset = offsetAlign(sizeof (struct BWTSeq), sizeof (GtUword));
   rangeSortOffset = offsetAlign(countsOffset
-                                + sizeof (unsigned long) * (alphabetSize + 1),
+                                + sizeof (GtUword) * (alphabetSize + 1),
                                 sizeof (enum rangeSortMode));
   totalSize = rangeSortOffset + sizeof (enum rangeSortMode)
     * MRAEncGetNumRanges(alphabet);
   bwtSeq = gt_malloc(totalSize);
   bwtSeq->pckbuckettable = NULL;
-  counts = (unsigned long *)((char  *)bwtSeq + countsOffset);
+  counts = (GtUword *)((char  *)bwtSeq + countsOffset);
   rangeSort = (enum rangeSortMode *)((char *)bwtSeq + rangeSortOffset);
   if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, counts, rangeSort,
                                defaultRangeSort))
@@ -221,7 +221,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   }
 }
 
-unsigned long gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
+GtUword gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
                                           const GtUchar *qstart,
                                           const GtUchar *qend)
 {
@@ -248,7 +248,7 @@ unsigned long gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
   bwtbound.start = bwtSeq->count[curSym];
   bwtbound.end = bwtSeq->count[curSym+1];
 #ifdef SKDEBUG
-  printf("# bounds=%lu,%lu = %lu"
+  printf("# bounds="GT_LU","GT_LU" = "GT_LU""
           "occurrences\n",
          bwtbound.start,
          bwtbound.end,
@@ -270,7 +270,7 @@ unsigned long gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
-    printf("# bounds=%lu,%lu = %lu"
+    printf("# bounds="GT_LU","GT_LU" = "GT_LU""
             "occurrences\n",
            bwtbound.start,
            bwtbound.end,
@@ -280,23 +280,23 @@ unsigned long gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
   }
   if (bwtbound.start + 1 == bwtbound.end)
   {
-    return (unsigned long) (qptr - qstart);
+    return (GtUword) (qptr - qstart);
   }
   return 0;
 }
 
-unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
-                                       unsigned long *witnessleftbound,
+GtUword gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
+                                       GtUword *witnessleftbound,
                                        const GtUchar *qstart,
                                        const GtUchar *qend)
 {
   GtUchar cc;
   const GtUchar *qptr;
-  unsigned long prevlbound;
+  GtUword prevlbound;
   struct matchBound bwtbound;
   GtUlongPair seqpospair;
   Symbol curSym;
-  unsigned long matchlength;
+  GtUword matchlength;
   const MRAEnc *alphabet;
 
   gt_assert(bwtSeq && qstart && qstart < qend);
@@ -319,7 +319,7 @@ unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
     return 0;
   }
 #ifdef SKDEBUG
-  printf("# bounds=%lu,%lu = %lu"
+  printf("# bounds="GT_LU","GT_LU" = "GT_LU""
           "occurrences\n",
          bwtbound.start,
          bwtbound.end,
@@ -342,7 +342,7 @@ unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
-    printf("# bounds=%lu,%lu = %lu"
+    printf("# bounds="GT_LU","GT_LU" = "GT_LU""
             "occurrences\n",
            bwtbound.start,
            bwtbound.end,
@@ -354,7 +354,7 @@ unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
     }
     prevlbound = bwtbound.start;
   }
-  matchlength = (unsigned long) (qptr - qstart);
+  matchlength = (GtUword) (qptr - qstart);
   if (witnessleftbound != NULL)
   {
     *witnessleftbound = prevlbound;
@@ -362,7 +362,7 @@ unsigned long gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
   return matchlength;
 }
 
-unsigned long
+GtUword
 gt_BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  bool forward)
 {
@@ -443,7 +443,7 @@ gt_deleteEMIterator(struct BWTSeqExactMatchesIterator *iter)
   gt_free(iter);
 }
 
-unsigned long
+GtUword
 gt_EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
 {
   gt_assert(iter);
@@ -453,7 +453,7 @@ gt_EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
     return iter->bounds.end - iter->bounds.start;
 }
 
-unsigned long
+GtUword
 gt_EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 {
   gt_assert(iter);
@@ -475,7 +475,7 @@ enum
 int
 gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
                       int checkFlags,
-                      unsigned long tickPrint, FILE *fp,
+                      GtUword tickPrint, FILE *fp,
                       GtLogger *verbosity, GtError *err)
 {
   Suffixarray suffixArray;
@@ -484,7 +484,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
   enum verifyBWTSeqErrCode retval = VERIFY_BWTSEQ_NO_ERROR;
   do
   {
-    unsigned long seqLen;
+    GtUword seqLen;
     gt_assert(bwtSeq && projectName && err);
     gt_error_check(err);
 
@@ -513,17 +513,17 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
     if (checkFlags & VERIFY_BWTSEQ_SUFVAL
         && BWTSeqHasLocateInformation(bwtSeq))
     {
-      unsigned long i;
+      GtUword i;
       for (i = 0; i < seqLen && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
       {
         if (gt_BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits))
         {
-          unsigned long sfxArrayValue = gt_BWTSeqLocateMatch(bwtSeq, i,
+          GtUword sfxArrayValue = gt_BWTSeqLocateMatch(bwtSeq, i,
                                                              &extBits);
           if (sfxArrayValue != ESASUFFIXPTRGET(suffixArray.suftab,i))
           {
             gt_error_set(err, "Failed suffix array value comparison"
-                          " at position %lu: %lu != %lu",
+                          " at position "GT_LU": "GT_LU" != "GT_LU"",
                           i, sfxArrayValue,
                           ESASUFFIXPTRGET(suffixArray.suftab,i));
             retval = VERIFY_BWTSEQ_SUFVAL_ERROR;
@@ -552,12 +552,12 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
     }
     if (BWTSeqHasLocateInformation(bwtSeq))
     {
-      unsigned long nextLocate = BWTSeqTerminatorPos(bwtSeq);
+      GtUword nextLocate = BWTSeqTerminatorPos(bwtSeq);
       if (suffixArray.longest.defined &&
           suffixArray.longest.valueunsignedlong != nextLocate)
       {
-        gt_error_set(err, "terminator/0-rotation position mismatch %lu"
-                  " vs. %lu", suffixArray.longest.valueunsignedlong,
+        gt_error_set(err, "terminator/0-rotation position mismatch "GT_LU""
+                  " vs. "GT_LU"", suffixArray.longest.valueunsignedlong,
                   nextLocate);
         retval = VERIFY_BWTSEQ_TERMPOS_ERROR;
         break;
@@ -565,14 +565,14 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
       if ((checkFlags & VERIFY_BWTSEQ_LFMAPWALK)
           && (bwtSeq->featureToggles & BWTReversiblySorted))
       {
-        unsigned long i = seqLen;
+        GtUword i = seqLen;
         /* handle first symbol specially because the encseq
          * will not return the terminator symbol */
         {
           Symbol sym = BWTSeqGetSym(bwtSeq, nextLocate);
           if (sym != UNDEFBWTCHAR)
           {
-            gt_error_set(err, "symbol mismatch at position %lu: "
+            gt_error_set(err, "symbol mismatch at position "GT_LU": "
                       "%d vs. reference symbol %d", i - 1, (int)sym,
                       (int)UNDEFBWTCHAR);
             retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
@@ -590,7 +590,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
           Symbol symCmp = BWTSeqGetSym(bwtSeq, nextLocate);
           if (symCmp != symRef)
           {
-            gt_error_set(err, "symbol mismatch at position %lu: "
+            gt_error_set(err, "symbol mismatch at position "GT_LU": "
                       "%d vs. reference symbol %d", i, symCmp, symRef);
             retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
             break;
@@ -622,7 +622,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
       }
       fputs("Checking context regeneration.\n", stderr);
       {
-        unsigned long i, start, subSeqLen,
+        GtUword i, start, subSeqLen,
           maxSubSeqLen = MIN(MAX(MIN_CONTEXT_LEN, seqLen/CONTEXT_FRACTION),
                              MAX_CONTEXT_LEN),
           numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
@@ -634,7 +634,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
                                                  0);
         for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
         {
-          unsigned long j, end, inSubSeqLen;
+          GtUword j, end, inSubSeqLen;
           subSeqLen = random()%maxSubSeqLen + 1;
           start = random()%(seqLen - subSeqLen + 1);
           end = start + subSeqLen;
@@ -648,7 +648,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
-              gt_error_set(err, "symbol mismatch at position %lu: "
+              gt_error_set(err, "symbol mismatch at position "GT_LU": "
                         "%d vs. reference symbol %d", start + j, (int)symCmp,
                         (int)symRef);
               retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;
@@ -661,7 +661,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
-              gt_error_set(err, "symbol mismatch at position %lu: "
+              gt_error_set(err, "symbol mismatch at position "GT_LU": "
                         "%d vs. reference symbol %d", start + j, (int)symCmp,
                         (int)symRef);
               retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;

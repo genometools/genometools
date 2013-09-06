@@ -30,26 +30,26 @@ typedef struct GtMatchSW GtMatchSW;
    <start_seq1>, <start_seq2>, <end_seq1> and <end_seq2>. */
 GtMatch*      gt_match_sw_new(const char *seqid1,
                               const char *seqid2,
-                              unsigned long seqno1,
-                              unsigned long seqno2,
-                              unsigned long length,
-                              unsigned long edist,
-                              unsigned long start_seq1,
-                              unsigned long start_seq2,
-                              unsigned long end_seq1,
-                              unsigned long end_seq2,
+                              GtUword seqno1,
+                              GtUword seqno2,
+                              GtUword length,
+                              GtUword edist,
+                              GtUword start_seq1,
+                              GtUword start_seq2,
+                              GtUword end_seq1,
+                              GtUword end_seq2,
                               GtMatchDirection dir);
 
 /* Returns the sequence number of the match <ms> in the first sequence set. */
-unsigned long gt_match_sw_get_seqno1(const GtMatchSW *ms);
+GtUword gt_match_sw_get_seqno1(const GtMatchSW *ms);
 
 /* Returns the sequence number of the match <ms> in the second sequence set. */
-unsigned long gt_match_sw_get_seqno2(const GtMatchSW *ms);
+GtUword gt_match_sw_get_seqno2(const GtMatchSW *ms);
 
 /* Returns the alignment length of the match <ms>. */
-unsigned long gt_match_sw_get_alignment_length(const GtMatchSW *ms);
+GtUword gt_match_sw_get_alignment_length(const GtMatchSW *ms);
 
 /* Returns the edit distance of the match <ms>. */
-unsigned long gt_match_sw_get_edist(const GtMatchSW *ms);
+GtUword gt_match_sw_get_edist(const GtMatchSW *ms);
 
 #endif

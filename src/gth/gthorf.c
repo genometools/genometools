@@ -34,7 +34,7 @@
 typedef struct {
   GtRange splseqrange;   /* genomic positions refering to spliced seq.
                             (without stopcodon) */
-  unsigned long framenum,
+  GtUword framenum,
                 lengthwithstopcodon,
                 lengthwithoutstopcodon;
   const char *frame;
@@ -43,10 +43,10 @@ typedef struct {
 
 typedef struct {
   GtArray *maximalORFs;
-  unsigned long minORFlength;
+  GtUword minORFlength;
 } SaveORFInfo;
 
-static void saveORF(void *data, GtRange *range, unsigned long framenum,
+static void saveORF(void *data, GtRange *range, GtUword framenum,
                     const char *frame, bool ends_with_stop_codon)
 {
   MaximalORF orf;
@@ -94,7 +94,7 @@ static int compareORFs(const void *dataA, const void *dataB)
 static bool orfs_are_sorted(GtArray *maximalORFs)
 {
   MaximalORF *orfA, *orfB;
-  unsigned long i;
+  GtUword i;
   gt_assert(maximalORFs);
   for (i = 1; i < gt_array_size(maximalORFs); i++) {
     orfA = (MaximalORF*) gt_array_get(maximalORFs, i-1);
@@ -119,13 +119,13 @@ static void sortmaximalORFs(GtArray *maximalORFs)
 }
 
 static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
-                          unsigned long gen_total_length,
-                          unsigned long gen_offset, const char *gen_id,
-                          unsigned long pglnum, unsigned long agsnum,
-                          unsigned long ppsnum, GthSplicedSeq *splicedseq,
+                          GtUword gen_total_length,
+                          GtUword gen_offset, const char *gen_id,
+                          GtUword pglnum, GtUword agsnum,
+                          GtUword ppsnum, GthSplicedSeq *splicedseq,
                           unsigned int indentlevel, GthOutput *out)
 {
-  unsigned long i;
+  GtUword i;
   GT_UNUSED bool hasborder = false;
   GtFile *outfp = out->outfp;
 
@@ -140,8 +140,8 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
     gt_file_xprintf(outfp, "<gDNA id=\"%s\" strand=\"%c\"/>\n", gen_id,
                     SHOWSTRAND(gen_strand_forward));
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<serials PGL_serial=\"%lu\" AGS_serial=\"%lu\" "
-                    "PPS_serial=\"%lu\"/>\n", pglnum + OUTPUTOFFSET,
+    gt_file_xprintf(outfp, "<serials PGL_serial=\""GT_LU"\" AGS_serial=\""GT_LU"\" "
+                    "PPS_serial=\""GT_LU"\"/>\n", pglnum + OUTPUTOFFSET,
                     agsnum + OUTPUTOFFSET,  ppsnum + OUTPUTOFFSET);
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp, "<orf_info>\n");
@@ -150,14 +150,14 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
     gt_file_xprintf(outfp, "<exon_boundaries>\n");
     indentlevel++;
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<exon start=\"%lu\" ",
+    gt_file_xprintf(outfp, "<exon start=\""GT_LU"\" ",
                     SHOWGENPOS(gen_strand_forward, gen_total_length,
                                gen_offset,
                                splicedseq
                                ->positionmapping[orf->splseqrange.start]));
   }
   else {
-    gt_file_xprintf(outfp, ">%s%c_PGL-%lu_AGS-%lu_PPS_%lu (%lu  ", gen_id,
+    gt_file_xprintf(outfp, ">%s%c_PGL-"GT_LU"_AGS-"GT_LU"_PPS_"GT_LU" ("GT_LU"  ", gen_id,
                     SHOWSTRAND(gen_strand_forward), pglnum + OUTPUTOFFSET,
                     agsnum + OUTPUTOFFSET,  ppsnum + OUTPUTOFFSET,
                     SHOWGENPOS(gen_strand_forward, gen_total_length,
@@ -170,18 +170,18 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
        i < orf->splseqrange.end + orf->stopcodon * GT_CODON_LENGTH; i++) {
     if (gth_spliced_seq_pos_is_border(splicedseq, i)) {
       if (out->xmlout) {
-        gt_file_xprintf(outfp, "stop=\"%lu\"/>\n",
+        gt_file_xprintf(outfp, "stop=\""GT_LU"\"/>\n",
                         SHOWGENPOS(gen_strand_forward, gen_total_length,
                                    gen_offset,
                                    splicedseq->positionmapping[i]));
         gth_indent(outfp, indentlevel);
-        gt_file_xprintf(outfp, "<exon start=\"%lu\" ",
+        gt_file_xprintf(outfp, "<exon start=\""GT_LU"\" ",
                         SHOWGENPOS(gen_strand_forward, gen_total_length,
                                    gen_offset,
                                    splicedseq->positionmapping[i+1]));
       }
       else {
-        gt_file_xprintf(outfp, "%lu,%lu  ",
+        gt_file_xprintf(outfp, ""GT_LU","GT_LU"  ",
                         SHOWGENPOS(gen_strand_forward, gen_total_length,
                                    gen_offset,
                                    splicedseq->positionmapping[i]),
@@ -195,7 +195,7 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
   }
 
   if (out->xmlout) {
-    gt_file_xprintf(outfp, "stop=\"%lu\"/>\n",
+    gt_file_xprintf(outfp, "stop=\""GT_LU"\"/>\n",
                     SHOWGENPOS(gen_strand_forward, gen_total_length,
                                gen_offset, splicedseq
                                ->positionmapping[orf->splseqrange.end +
@@ -206,7 +206,7 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
     gt_file_xprintf(outfp, "</exon_boundaries>\n");
   }
   else {
-    gt_file_xprintf(outfp, "%lu)",
+    gt_file_xprintf(outfp, ""GT_LU")",
                     SHOWGENPOS(gen_strand_forward,
                                gen_total_length, gen_offset, splicedseq
                                ->positionmapping[orf->splseqrange.end +
@@ -218,13 +218,13 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
   {
 
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<frame>%lu</frame>\n",  orf->framenum);
+    gt_file_xprintf(outfp, "<frame>"GT_LU"</frame>\n",  orf->framenum);
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<number_coding_nucleotides>%lu"
+    gt_file_xprintf(outfp, "<number_coding_nucleotides>"GT_LU""
                     "</number_coding_nucleotides>\n",
                     orf->lengthwithoutstopcodon * GT_CODON_LENGTH);
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<number_encoded_amino_acids>%lu"
+    gt_file_xprintf(outfp, "<number_encoded_amino_acids>"GT_LU""
                     "</number_encoded_amino_acids>\n",
                     orf->lengthwithoutstopcodon);
     indentlevel--;
@@ -232,7 +232,7 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
     gt_file_xprintf(outfp, "</orf_info>\n");
   }
   else {
-    gt_file_xprintf(outfp, "\t(frame '%lu'; %*lu bp, %*lu residues)",
+    gt_file_xprintf(outfp, "\t(frame '"GT_LU"'; %*"GT_LUS" bp, %*"GT_LUS" residues)",
                     orf->framenum, ORFBPWIDTH,
                     orf->lengthwithoutstopcodon * GT_CODON_LENGTH,
                     ORFRESIDUESWIDTH,
@@ -252,7 +252,7 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
       if (i % ORFBLOCKWIDTH == 0)
         gt_file_xfputc(' ', outfp);
       if (i % ORFLINEWIDTH == 0) {
-        gt_file_xprintf(outfp, "\n%*lu  ", out->widthforgenpos,
+        gt_file_xprintf(outfp, "\n%*"GT_LUS"  ", out->widthforgenpos,
                         i + OUTPUTOFFSET);
       }
     }
@@ -277,17 +277,17 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
 
 static void outputconsolidatedORFs(GtArray *consolidatedORFs,
                                    bool gen_strand_forward,
-                                   unsigned long gen_total_length,
-                                   unsigned long gen_offset,
+                                   GtUword gen_total_length,
+                                   GtUword gen_offset,
                                    const char *gen_id,
-                                   unsigned long pglnum,
-                                   unsigned long agsnum,
+                                   GtUword pglnum,
+                                   GtUword agsnum,
                                    GthSplicedSeq *splicedseq,
                                    unsigned int indentlevel,
                                    GthOutput *out)
 {
   GtFile *outfp = out->outfp;
-  unsigned long i;
+  GtUword i;
 
   if (out->xmlout) {
     gth_indent(outfp, indentlevel);
@@ -300,7 +300,7 @@ static void outputconsolidatedORFs(GtArray *consolidatedORFs,
   }
   else {
     gt_file_xprintf(outfp,
-              "Maximal non-overlapping open reading frames (>= %lu codons)\n",
+              "Maximal non-overlapping open reading frames (>= "GT_LU" codons)\n",
                 out->minORFlength);
   }
 
@@ -331,9 +331,9 @@ static void outputconsolidatedORFs(GtArray *consolidatedORFs,
 }
 
 static bool overlapwithotherranges(GtRange range, GtArray *ranges,
-                                   unsigned long delta)
+                                   GtUword delta)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(ranges);
   for (i = 0; i < gt_array_size(ranges); i++) {
     if (gt_range_overlap_delta(&range, gt_array_get(ranges, i), delta))
@@ -344,7 +344,7 @@ static bool overlapwithotherranges(GtRange range, GtArray *ranges,
 
 static void consolidateORFs(GtArray *consolidatedORFs, GtArray *maximalORFs)
 {
-  unsigned long i, maxlength;
+  GtUword i, maxlength;
   MaximalORF *orf;
   GtArray *ranges;
 
@@ -380,11 +380,11 @@ static void consolidateORFs(GtArray *consolidatedORFs, GtArray *maximalORFs)
 }
 
 void gthshowORFs(char *frame0, char *frame1, char *frame2,
-                 unsigned long frame0len, unsigned long frame1len,
-                 unsigned long frame2len, bool gen_strand_forward,
-                 unsigned long gen_total_length, unsigned long gen_offset,
-                 const char *gen_id, unsigned long pglnum,
-                 unsigned long agsnum, GthSplicedSeq *splicedseq,
+                 GtUword frame0len, GtUword frame1len,
+                 GtUword frame2len, bool gen_strand_forward,
+                 GtUword gen_total_length, GtUword gen_offset,
+                 const char *gen_id, GtUword pglnum,
+                 GtUword agsnum, GthSplicedSeq *splicedseq,
                  unsigned int indentlevel, GthOutput *out)
 {
   GtArray *maximalORFs, *consolidatedORFs;

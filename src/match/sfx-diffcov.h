@@ -41,7 +41,7 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
                                           unsigned int outerprefixlength,
                                           GtLogger *logger);
 
-unsigned long gt_differencecover_samplesize(const GtDifferencecover *dcov);
+GtUword gt_differencecover_samplesize(const GtDifferencecover *dcov);
 
 GtDifferencecover *gt_differencecover_prepare_sample(
                                         unsigned int vparam,
@@ -61,15 +61,15 @@ void gt_differencecover_delete(GtDifferencecover *dcov);
 size_t gt_differencecover_requiredspace(const GtDifferencecover *dcov);
 
 void gt_differencecover_sortunsortedbucket(void *data,
-                                           unsigned long blisbl,
-                                           unsigned long width,
-                                           GT_UNUSED unsigned long depth);
+                                           GtUword blisbl,
+                                           GtUword width,
+                                           GT_UNUSED GtUword depth);
 
 void gt_differencecover_completelargelcpvalues(void *data,
                                                const GtSuffixsortspace *sssp,
                                                GtLcpvalues *tableoflcpvalues,
-                                               unsigned long width,
-                                               unsigned long posoffset);
+                                               GtUword width,
+                                               GtUword posoffset);
 
 void gt_differencecover_set_sssp_lcp(GtDifferencecover *dcov,
                                      GtSuffixsortspace *sssp,

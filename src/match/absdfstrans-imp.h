@@ -21,7 +21,7 @@
 #include "absdfstrans-def.h"
 #include "procmatch.h"
 
-typedef unsigned long Aliasdfsstate;
+typedef GtUword Aliasdfsstate;
 
 #define DECLAREPTRDFSSTATE(V)\
         Aliasdfsstate * V
@@ -38,7 +38,7 @@ typedef enum
 typedef struct
 {
   Limdfsstatus status;
-  unsigned long pprefixlen, /* only defined if limdfsstatus = Limdfssuccess */
+  GtUword pprefixlen, /* only defined if limdfsstatus = Limdfssuccess */
                 distance;   /* only defined if limdfsstatus = Limdfssuccess */
 } Limdfsresult;
 
@@ -63,23 +63,23 @@ struct AbstractDfstransformer
                           Limdfsconstinfo *dfsconstinfo);
   void (*fullmatchLimdfsstate)(Limdfsresult *limdfsresult,
                                DECLAREPTRDFSSTATE(aliascolumn),
-                               unsigned long left,
-                               unsigned long right,
-                               unsigned long width,
-                               unsigned long currentdepth,
+                               GtUword left,
+                               GtUword right,
+                               GtUword width,
+                               GtUword currentdepth,
                                Limdfsconstinfo *dfsconstinfo);
   void (*nextLimdfsstate)(const Limdfsconstinfo *dfsconstinfo,
                           DECLAREPTRDFSSTATE(aliasoutstate),
-                          unsigned long currentdepth,
+                          GtUword currentdepth,
                           GtUchar currentchar,
                           const DECLAREPTRDFSSTATE(aliasinstate));
   void (*inplacenextLimdfsstate)(const Limdfsconstinfo *dfsconstinfo,
                                  DECLAREPTRDFSSTATE(aliasstate),
-                                 unsigned long currentdepth,
+                                 GtUword currentdepth,
                                  GtUchar currentchar);
 #ifdef SKDEBUG
   void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliasstate),
-                          unsigned long currentdepth,
+                          GtUword currentdepth,
                           const Limdfsconstinfo *dfsconstinfo);
 #endif
 };

@@ -57,7 +57,7 @@ typedef struct {
        force,
        use_streams;
   GtStr *seqid, *format, *stylefile, *input;
-  unsigned long start,
+  GtUword start,
                 end;
   unsigned int width;
 } GtSketchArguments;
@@ -231,8 +231,8 @@ static int gt_sketch_arguments_check(GT_UNUSED int rest_argc,
   if (arguments->start != GT_UNDEF_ULONG &&
       arguments->end != GT_UNDEF_ULONG &&
       !(arguments->start < arguments->end)) {
-    gt_error_set(err, "start of query range (%lu) must be before "
-                      "end of query range (%lu)",
+    gt_error_set(err, "start of query range ("GT_LU") must be before "
+                      "end of query range ("GT_LU")",
                       arguments->start, arguments->end);
     had_err = -1;
   }
@@ -271,7 +271,7 @@ static int gt_sketch_runner(int argc, const char **argv, int parsed_args,
   GtLayout *l = NULL;
   GtImageInfo* ii = NULL;
   GtCanvas *canvas = NULL;
-  unsigned long height;
+  GtUword height;
   bool has_seqid;
   int had_err = 0;
   gt_error_check(err);
@@ -383,7 +383,7 @@ static int gt_sketch_runner(int argc, const char **argv, int parsed_args,
 
   if (!had_err) {
     if (arguments->verbose)
-      fprintf(stderr, "# of results: %lu\n", gt_array_size(results));
+      fprintf(stderr, "# of results: "GT_LU"\n", gt_array_size(results));
 
     /* find and load style file */
     if (!(sty = gt_style_new(err)))
@@ -447,7 +447,7 @@ static int gt_sketch_runner(int argc, const char **argv, int parsed_args,
       }
       if (!had_err) {
         if (arguments->showrecmaps) {
-          unsigned long i;
+          GtUword i;
           const GtRecMap *rm;
           for (i = 0; i < gt_image_info_num_of_rec_maps(ii) ;i++) {
             char buf[BUFSIZ];

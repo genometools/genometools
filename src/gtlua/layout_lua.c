@@ -71,7 +71,7 @@ static int layout_lua_get_height(lua_State *L)
   GtLayout **layout;
   GtError *err;
   int had_err = 0;
-  unsigned long height;
+  GtUword height;
   layout = check_layout(L, 1);
   err = gt_error_new();
   had_err = gt_layout_get_height(*layout, &height, err);

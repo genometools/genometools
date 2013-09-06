@@ -38,7 +38,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned int prefixlength,
                                 unsigned int numofparts,
-                                unsigned long maximumspace,
+                                GtUword maximumspace,
                                 const Sfxstrategy *sfxstrategy,
                                 GtTimer *sfxprogress,
                                 bool withprogressbar,
@@ -50,7 +50,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 GtReadmode readmode,
                                 unsigned int prefixlength,
                                 unsigned int numofparts,
-                                unsigned long maximumspace,
+                                GtUword maximumspace,
                                 void *voidoutlcpinfo,
                                 FILE *outfpbcktab,
                                 const Sfxstrategy *sfxstrategy,
@@ -59,7 +59,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 GtLogger *logger,
                                 GtError *err);
 
-const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
+const GtSuffixsortspace *gt_Sfxiterator_next(GtUword *numberofsuffixes,
                                              bool *specialsuffixes,
                                              Sfxiterator *sfi);
 
@@ -69,7 +69,7 @@ int gt_Sfxiterator_postsortfromstream(Sfxiterator *sfi,
 
 int gt_Sfxiterator_bcktab2file(FILE *fp,Sfxiterator *sfi,GtError *err);
 
-unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi);
+GtUword gt_Sfxiterator_longest(const Sfxiterator *sfi);
 
 GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
                                    unsigned int kmersize);
@@ -81,13 +81,13 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    bool onlyfirst,
                                    void(*processkmercode)(void *,
                                                           bool,
-                                                          unsigned long,
+                                                          GtUword,
                                                           GtCodetype),
                                    void *processkmercodeinfo,
                                    void(*processkmerspecial)(void *,
                                                              unsigned int,
                                                              unsigned int,
-                                                             unsigned long),
+                                                             GtUword),
                                    void *processkmerspecialinfo);
 
 #endif

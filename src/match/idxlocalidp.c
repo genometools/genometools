@@ -31,10 +31,10 @@
 
 typedef struct
 {
-  unsigned long dbcurrent, dbprefixlen;
-  unsigned long querypos, queryend;
+  GtUword dbcurrent, dbprefixlen;
+  GtUword querypos, queryend;
   GtUchar *spaceGtUchardbsubstring;
-  unsigned long allocatedGtUchardbsubstring;
+  GtUword allocatedGtUchardbsubstring;
   GtAlignment *alignment;
 } LocaliTracebackstate;
 
@@ -42,7 +42,7 @@ struct Limdfsconstinfo
 {
   Scorevalues scorevalues;
   const GtUchar *query;
-  unsigned long maxcollen,
+  GtUword maxcollen,
                 querylength,
                 threshold;
   LocaliTracebackstate tbs;
@@ -71,7 +71,7 @@ typedef struct
 typedef struct
 {
   LocaliMatrixvalue *colvalues;
-  unsigned long lenval,
+  GtUword lenval,
                 pprefixlen,
                 maxvalue;
 } LocaliColumn;
@@ -79,7 +79,7 @@ typedef struct
 typedef struct
 {
   Limdfsstatus status;
-  unsigned long qseqendpos;
+  GtUword qseqendpos;
   Scoretype alignmentscore;
 } Idxlocaliresult;
 
@@ -100,33 +100,33 @@ static inline Scoretype max3 (Scoretype a,Scoretype b,Scoretype c)
 
 #ifdef SKDEBUG
 static void showscorecolumn(const LocaliColumn *column,
-                            unsigned long querylength,
-                            unsigned long currentdepth)
+                            GtUword querylength,
+                            GtUword currentdepth)
 {
   gt_assert(column != NULL);
-  printf("at depth %lu: ",currentdepth);
+  printf("at depth "GT_LU": ",currentdepth);
   if (column->colvalues == NULL)
   {
     gt_assert(column->lenval == 0);
     printf("empty column\n");
   } else
   {
-    unsigned long idx;
+    GtUword idx;
 
     gt_assert(column->colvalues != NULL);
     for (idx = 0; idx <= querylength; idx++)
     {
       if (column->colvalues[idx].bestcell > 0)
       {
-        printf("(%lu,%ld) ",idx,column->colvalues[idx].bestcell);
+        printf("("GT_LU","GT_LD") ",idx,column->colvalues[idx].bestcell);
       }
     }
-    printf("max=%lu\n",column->maxvalue);
+    printf("max="GT_LU"\n",column->maxvalue);
   }
 }
 
 void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
-                            unsigned long currentdepth,
+                            GtUword currentdepth,
                             const Limdfsconstinfo *lci)
 {
   showscorecolumn((const LocaliColumn *) aliasstate,
@@ -136,7 +136,7 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
 
 #ifdef SKDEBUG
 #define REALLOCMSG(COL)\
-        printf("line %d: %salloc %lu entries",\
+        printf("line %d: %salloc "GT_LU" entries",\
                 __LINE__,(COL)->colvalues == NULL ? "m" : "re",\
                 lci->maxcollen)
 
@@ -158,7 +158,7 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
 static void secondcolumn (const Limdfsconstinfo *lci,LocaliColumn *outcol,
                           GtUchar dbchar)
 {
-  unsigned long i;
+  GtUword i;
 
   if (outcol->lenval < lci->maxcollen)
   {
@@ -205,7 +205,7 @@ static void secondcolumn (const Limdfsconstinfo *lci,LocaliColumn *outcol,
     if (outcol->colvalues[i].bestcell > 0 &&
         outcol->colvalues[i].bestcell > (Scoretype) outcol->maxvalue)
     {
-      outcol->maxvalue = (unsigned long) outcol->colvalues[i].bestcell;
+      outcol->maxvalue = (GtUword) outcol->colvalues[i].bestcell;
       outcol->pprefixlen = i;
     }
   }
@@ -216,7 +216,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
                         const GtUchar dbchar,
                         const LocaliColumn *incol)
 {
-  unsigned long i;
+  GtUword i;
 #ifndef AFFINE
   Scoretype temp;
 #endif
@@ -360,7 +360,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
     if (outcol->colvalues[i].bestcell > 0 &&
         outcol->colvalues[i].bestcell > (Scoretype) outcol->maxvalue)
     {
-      outcol->maxvalue = (unsigned long) outcol->colvalues[i].bestcell;
+      outcol->maxvalue = (GtUword) outcol->colvalues[i].bestcell;
       outcol->pprefixlen = i;
     }
   }
@@ -371,7 +371,7 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
                                const GtUchar dbchar,
                                LocaliColumn *column)
 {
-  unsigned long i;
+  GtUword i;
   LocaliMatrixvalue nw, west;
 
   column->colvalues[0].repcell = column->colvalues[0].delcell = MINUSINFTY;
@@ -403,7 +403,7 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
   column->colvalues[0].bestcell = max3 (column->colvalues[0].repcell,
                                         column->colvalues[0].inscell,
                                         column->colvalues[0].delcell);
-  column->maxvalue = (unsigned long) max2(0,column->colvalues[0].bestcell);
+  column->maxvalue = (GtUword) max2(0,column->colvalues[0].bestcell);
   column->pprefixlen = 0;
   nw = column->colvalues[0];
   for (i = 1UL; i <= lci->querylength; i++)
@@ -475,7 +475,7 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
     if (column->colvalues[i].bestcell > 0 &&
         column->colvalues[i].bestcell > (Scoretype) column->maxvalue)
     {
-      column->maxvalue = (unsigned long) column->colvalues[i].bestcell;
+      column->maxvalue = (GtUword) column->colvalues[i].bestcell;
       column->pprefixlen = i;
     }
   }
@@ -505,9 +505,9 @@ static void locali_initdfsconstinfo (Limdfsconstinfo *lci,
   lci->scorevalues.mismatchscore = va_arg (ap, Scoretype);
   lci->scorevalues.gapstart = va_arg (ap, Scoretype);
   lci->scorevalues.gapextend = va_arg (ap, Scoretype);
-  lci->threshold = va_arg (ap, unsigned long);
+  lci->threshold = va_arg (ap, GtUword);
   lci->query = va_arg (ap, const GtUchar *);
-  lci->querylength = va_arg (ap, unsigned long);
+  lci->querylength = va_arg (ap, GtUword);
   if (lci->maxcollen < lci->querylength + 1)
   {
     lci->maxcollen = lci->querylength+1;
@@ -571,7 +571,7 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
 
   if (srccol->colvalues != NULL)
   {
-    unsigned long idx;
+    GtUword idx;
 
     if (destcol->lenval < lci->maxcollen)
     {
@@ -585,13 +585,13 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
 #ifndef NDEBUG
     if (destcol->lenval < lci->querylength+1)
     {
-      fprintf(stderr,"destcol->lenval = %lu < %lu lci->querylength+1\n",
+      fprintf(stderr,"destcol->lenval = "GT_LU" < "GT_LU" lci->querylength+1\n",
                       destcol->lenval,lci->querylength+1);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (srccol->lenval < lci->querylength+1)
     {
-      fprintf(stderr,"srccol->lenval = %lu < %lu lci->querylength+1\n",
+      fprintf(stderr,"srccol->lenval = "GT_LU" < "GT_LU" lci->querylength+1\n",
                       srccol->lenval,lci->querylength+1);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -607,10 +607,10 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
 
 static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
                                          DECLAREPTRDFSSTATE(aliasstate),
-                                         GT_UNUSED unsigned long leftbound,
-                                         GT_UNUSED unsigned long rightbound,
-                                         GT_UNUSED unsigned long width,
-                                         GT_UNUSED unsigned long currentdepth,
+                                         GT_UNUSED GtUword leftbound,
+                                         GT_UNUSED GtUword rightbound,
+                                         GT_UNUSED GtUword width,
+                                         GT_UNUSED GtUword currentdepth,
                                          Limdfsconstinfo *lci)
 {
   LocaliColumn *column = (LocaliColumn *) aliasstate;
@@ -640,7 +640,7 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
 
 static void locali_nextLimdfsstate (const Limdfsconstinfo *lci,
                                     DECLAREPTRDFSSTATE (aliasoutcol),
-                                    GT_UNUSED unsigned long currentdepth,
+                                    GT_UNUSED GtUword currentdepth,
                                     GtUchar currentchar,
                                     const DECLAREPTRDFSSTATE (aliasincol))
 {
@@ -659,7 +659,7 @@ static void locali_nextLimdfsstate (const Limdfsconstinfo *lci,
 #ifdef AFFINE
 static void locali_inplacenextLimdfsstate (const Limdfsconstinfo *lci,
                                            DECLAREPTRDFSSTATE (aliasstate),
-                                           GT_UNUSED unsigned long currentdepth,
+                                           GT_UNUSED GtUword currentdepth,
                                            GtUchar currentchar)
 {
   LocaliColumn *column = (LocaliColumn *) aliasstate;
@@ -675,14 +675,14 @@ static void locali_inplacenextLimdfsstate (const Limdfsconstinfo *lci,
 #endif
 
 void gt_reinitLocaliTracebackstate(Limdfsconstinfo *lci,
-                                unsigned long dbprefixlen,
-                                unsigned long pprefixlen)
+                                GtUword dbprefixlen,
+                                GtUword pprefixlen)
 {
   LocaliTracebackstate *tbs = &lci->tbs;
 
   tbs->dbprefixlen = tbs->dbcurrent = dbprefixlen;
   tbs->queryend = tbs->querypos = pprefixlen;
-  if (dbprefixlen > (unsigned long) tbs->allocatedGtUchardbsubstring)
+  if (dbprefixlen > (GtUword) tbs->allocatedGtUchardbsubstring)
   {
     tbs->spaceGtUchardbsubstring = gt_realloc(tbs->spaceGtUchardbsubstring,
                                             sizeof (GtUchar) * dbprefixlen);
@@ -700,9 +700,9 @@ void gt_processelemLocaliTracebackstate(Limdfsconstinfo *lci,
   while (true)
   {
     /*
-    printf(" coord(i=%lu,j=%lu) with ",tbs->querypos,
-                                       (unsigned long) tbs->dbcurrent);
-    printf("cellvalue=%ld, ",column->colvalues[tbs->querypos].bestcell);
+    printf(" coord(i="GT_LU",j="GT_LU") with ",tbs->querypos,
+                                       (GtUword) tbs->dbcurrent);
+    printf("cellvalue="GT_LD", ",column->colvalues[tbs->querypos].bestcell);
     */
     switch (column->colvalues[tbs->querypos].tracebit)
     {
@@ -730,7 +730,7 @@ void gt_processelemLocaliTracebackstate(Limdfsconstinfo *lci,
         break; /* stay in the same column => so next iteration */
       case Notraceback:
         fprintf(stderr,"tracebit = Notraceback not allowed\n");
-        fprintf(stderr,"column->colvalues[tbs->querypos].bestcell=%ld\n",
+        fprintf(stderr,"column->colvalues[tbs->querypos].bestcell="GT_LD"\n",
                         column->colvalues[tbs->querypos].bestcell);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       default:
@@ -742,7 +742,7 @@ void gt_processelemLocaliTracebackstate(Limdfsconstinfo *lci,
 }
 
 const void *gt_completealignmentfromLocaliTracebackstate(
-                                        unsigned long *alignedquerylength,
+                                        GtUword *alignedquerylength,
                                         const Limdfsconstinfo *lci)
 {
 #ifndef NDEBUG
@@ -761,15 +761,15 @@ const void *gt_completealignmentfromLocaliTracebackstate(
                         querysubstart,
                         *alignedquerylength,
                         lci->tbs.spaceGtUchardbsubstring,
-                        (unsigned long) lci->tbs.dbprefixlen);
+                        (GtUword) lci->tbs.dbprefixlen);
 #ifndef NDEBUG
   evalscore = gt_alignment_eval_with_score(lci->tbs.alignment,
                                            lci->scorevalues.matchscore,
                                            lci->scorevalues.mismatchscore,
                                            lci->scorevalues.gapextend);
-  if (evalscore < 0 || (unsigned long) evalscore < lci->threshold)
+  if (evalscore < 0 || (GtUword) evalscore < lci->threshold)
   {
-    fprintf(stderr,"unexpected eval score %ld\n",evalscore);
+    fprintf(stderr,"unexpected eval score "GT_LD"\n",evalscore);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 #endif

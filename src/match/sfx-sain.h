@@ -30,7 +30,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                                  GtTimer *timer);
 
 void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
-                                unsigned long len,
+                                GtUword len,
                                 bool intermediatecheck,
                                 GtLogger *logger,
                                 GtTimer *timer);

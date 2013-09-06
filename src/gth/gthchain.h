@@ -31,7 +31,7 @@
 */
 
 typedef struct {
-  unsigned long gen_file_num,
+  GtUword gen_file_num,
                 gen_seq_num,
                 ref_file_num,
                 ref_seq_num;
@@ -52,21 +52,21 @@ void      gth_chain_copy(GthChain*, const GthChain*);
 void      gth_chain_extend_borders(GthChain *dprange,
                                    const GtRange *gen_seq_bounds,
                                    const GtRange *gen_seq_bounds_rc,
-                                   unsigned long gen_total_length,
-                                   unsigned long gen_offset);
+                                   GtUword gen_total_length,
+                                   GtUword gen_offset);
 /* shorten the potential introns contained in the chain */
 void      gth_chain_shorten_introns(GthChain *dprange,
-                                    unsigned long icdelta,
-                                    unsigned long icminremintronlength,
-                                    unsigned long gen_total_length,
-                                    unsigned long gen_offset,
+                                    GtUword icdelta,
+                                    GtUword icminremintronlength,
+                                    GtUword gen_total_length,
+                                    GtUword gen_offset,
                                     bool comments,
                                     GtFile *outfp);
 void      gth_chain_contract(GthChain*, const GthChain*);
 
 typedef struct {
   GthChainCollection *chain_collection;
-  unsigned long gen_file_num,
+  GtUword gen_file_num,
                 gen_seq_num,
                 ref_file_num,
                 ref_seq_num,
@@ -91,6 +91,6 @@ typedef struct {
   GtFile *outfp;
 } GthSaveChainInfo;
 
-void gth_save_chain(GtChain*, GtFragment*, unsigned long, unsigned long, void*);
+void gth_save_chain(GtChain*, GtFragment*, GtUword, GtUword, void*);
 
 #endif

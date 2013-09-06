@@ -21,7 +21,7 @@
 
 struct GtShredder {
   GtBioseq *bioseq;
-  unsigned long minlength,
+  GtUword minlength,
                 maxlength,
                 overlap,
                 seqnum,
@@ -29,8 +29,8 @@ struct GtShredder {
   double sample_probability;
 };
 
-GtShredder* gt_shredder_new(GtBioseq *bioseq, unsigned long minlength,
-                                       unsigned long maxlength)
+GtShredder* gt_shredder_new(GtBioseq *bioseq, GtUword minlength,
+                                       GtUword maxlength)
 {
   GtShredder *shredder = gt_calloc(1, sizeof *shredder);
   gt_assert(bioseq && minlength && minlength <= maxlength);
@@ -47,7 +47,7 @@ void gt_shredder_delete(GtShredder *shredder)
   gt_free(shredder);
 }
 
-void gt_shredder_set_overlap(GtShredder *shredder, unsigned long overlap)
+void gt_shredder_set_overlap(GtShredder *shredder, GtUword overlap)
 {
   gt_assert(shredder);
   shredder->overlap = overlap;
@@ -62,12 +62,12 @@ void gt_shredder_set_sample_probability(GtShredder *shredder,
 }
 
 static char* generate_fragment(GtShredder *shredder,
-                               unsigned long *fragment_length,
+                               GtUword *fragment_length,
                                GtStr *desc)
 {
   gt_assert(shredder && fragment_length);
   if (shredder->seqnum < gt_bioseq_number_of_sequences(shredder->bioseq)) {
-    unsigned long seqlen, fraglen;
+    GtUword seqlen, fraglen;
     char *frag;
     seqlen = gt_bioseq_get_sequence_length(shredder->bioseq, shredder->seqnum);
     fraglen = (shredder->maxlength == shredder->minlength
@@ -99,7 +99,7 @@ static char* generate_fragment(GtShredder *shredder,
   return NULL;
 }
 
-char* gt_shredder_shred(GtShredder *shredder, unsigned long *fragment_length,
+char* gt_shredder_shred(GtShredder *shredder, GtUword *fragment_length,
                         GtStr *desc)
 {
   char *frag;

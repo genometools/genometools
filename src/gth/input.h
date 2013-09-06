@@ -61,75 +61,75 @@ void           gth_input_add_protein_file(GthInput*, const char *filename);
 void           gth_input_add_reference_file(GthInput*, const char *filename,
                                             GthAlphatype);
 const char*    gth_input_get_genomic_filename(const GthInput*,
-                                              unsigned long gen_file_num);
+                                              GtUword gen_file_num);
 const char*    gth_input_get_reference_filename(const GthInput*,
-                                                unsigned long ref_file_num);
-GthAlphatype   gth_input_get_alphatype(const GthInput*, unsigned long);
-bool           gth_input_ref_file_is_dna(const GthInput*, unsigned long);
+                                                GtUword ref_file_num);
+GthAlphatype   gth_input_get_alphatype(const GthInput*, GtUword);
+bool           gth_input_ref_file_is_dna(const GthInput*, GtUword);
 bool           gth_input_md5ids(const GthInput*);
 const
 unsigned char* gth_input_original_genomic_sequence(GthInput*,
-                                                   unsigned long filenum,
+                                                   GtUword filenum,
                                                    bool forward);
 void           gth_input_echo_genomic_description(GthInput*,
-                                                  unsigned long filenum,
-                                                  unsigned long seqnum,
+                                                  GtUword filenum,
+                                                  GtUword seqnum,
                                                   GtFile*);
 void           gth_input_echo_reference_description(GthInput*,
-                                                    unsigned long filenum,
-                                                    unsigned long seqnum,
+                                                    GtUword filenum,
+                                                    GtUword seqnum,
                                                     GtFile*);
 void           gth_input_echo_reference_sequence(GthInput*, bool format,
-                                                 unsigned long filenum,
-                                                 unsigned long seqnum,
+                                                 GtUword filenum,
+                                                 GtUword seqnum,
                                                  bool forward,
                                                  GtFile*);
 void           gth_input_get_genomic_description(GthInput*, GtStr *desc,
-                                                 unsigned long filenum,
-                                                 unsigned long seqnum);
+                                                 GtUword filenum,
+                                                 GtUword seqnum);
 void           gth_input_save_gen_id(GthInput*, GtStr *id,
-                                     unsigned long file_num,
-                                     unsigned long seq_num);
+                                     GtUword file_num,
+                                     GtUword seq_num);
 /* save the genomic identifier used for output */
 void           gth_input_save_gen_identifier(GthInput*, GtStr *id,
-                                             unsigned long file_num,
-                                             unsigned long seq_num);
+                                             GtUword file_num,
+                                             GtUword seq_num);
 void           gth_input_save_ref_id(GthInput*, GtStr *id,
-                                     unsigned long file_num,
-                                     unsigned long seq_num);
+                                     GtUword file_num,
+                                     GtUword seq_num);
 void           gth_input_save_gen_md5(GthInput*, GtStr **md5,
-                                      unsigned long file_num,
-                                      unsigned long seq_num);
+                                      GtUword file_num,
+                                      GtUword seq_num);
 void           gth_input_save_ref_md5(GthInput*, GtStr **md5,
-                                      unsigned long file_num,
-                                      unsigned long seq_num);
+                                      GtUword file_num,
+                                      GtUword seq_num);
 void           gth_input_save_gen_desc(GthInput*, GtStr **desc,
-                                       unsigned long file_num,
-                                       unsigned long seq_num);
+                                       GtUword file_num,
+                                       GtUword seq_num);
 void           gth_input_save_ref_desc(GthInput*, GtStr **desc,
-                                       unsigned long file_num,
-                                       unsigned long seq_num);
-unsigned long  gth_input_num_of_gen_files(const GthInput*);
-unsigned long  gth_input_num_of_ref_files(const GthInput*);
-unsigned long  gth_input_num_of_gen_seqs(GthInput*, unsigned long filenum);
-unsigned long  gth_input_num_of_ref_seqs(GthInput*, unsigned long filenum);
-unsigned long  gth_input_genomic_file_total_length(GthInput*,
-                                                   unsigned long filenum);
+                                       GtUword file_num,
+                                       GtUword seq_num);
+GtUword  gth_input_num_of_gen_files(const GthInput*);
+GtUword  gth_input_num_of_ref_files(const GthInput*);
+GtUword  gth_input_num_of_gen_seqs(GthInput*, GtUword filenum);
+GtUword  gth_input_num_of_ref_seqs(GthInput*, GtUword filenum);
+GtUword  gth_input_genomic_file_total_length(GthInput*,
+                                                   GtUword filenum);
 GtRange        gth_input_get_relative_genomic_range(GthInput*,
-                                                    unsigned long filenum,
-                                                    unsigned long seqnum);
+                                                    GtUword filenum,
+                                                    GtUword seqnum);
 GtRange        gth_input_get_genomic_range(GthInput*,
-                                           unsigned long filenum,
-                                           unsigned long seqnum);
+                                           GtUword filenum,
+                                           GtUword seqnum);
 GtRange        gth_input_get_reference_range(GthInput*,
-                                             unsigned long filenum,
-                                             unsigned long seqnum);
+                                             GtUword filenum,
+                                             GtUword seqnum);
 
 #define        gth_input_load_genomic_file(input, gen_file_num, translate) \
                gth_input_load_genomic_file_func(input, gen_file_num, translate,\
                                                 __FILE__, __LINE__)
 void           gth_input_load_genomic_file_func(GthInput *input,
-                                                unsigned long gen_file_num,
+                                                GtUword gen_file_num,
                                                 bool translate,
                                                 const char *src_file,
                                                 int src_line);
@@ -137,7 +137,7 @@ void           gth_input_load_genomic_file_func(GthInput *input,
                gth_input_load_reference_file_func(input, ref_file_num,\
                                                   translate, __FILE__, __LINE__)
 void           gth_input_load_reference_file_func(GthInput *input,
-                                                  unsigned long ref_file_num,
+                                                  GtUword ref_file_num,
                                                   bool translate,
                                                   const char *src_file,
                                                   int src_line);
@@ -154,20 +154,20 @@ bool           gth_input_forward(const GthInput*);
 bool           gth_input_reverse(const GthInput*);
 bool           gth_input_both(const GthInput*);
 GthAlphatype   gth_input_overall_alphatype(const GthInput*);
-long           gth_input_determine_genomic_file_index(const GthInput*,
+GtWord         gth_input_determine_genomic_file_index(const GthInput*,
                                                       const char *filename);
-long           gth_input_determine_reference_file_index(const GthInput*,
+GtWord         gth_input_determine_reference_file_index(const GthInput*,
                                                         const char *filename);
 int            gth_input_set_and_check_substring_spec(GthInput*, GtError*);
 bool           gth_input_use_substring_spec(const GthInput*);
-unsigned long  gth_input_genomic_substring_from(const GthInput*);
-unsigned long  gth_input_genomic_substring_to(const GthInput*);
+GtUword  gth_input_genomic_substring_from(const GthInput*);
+GtUword  gth_input_genomic_substring_to(const GthInput*);
 /* for option parsing */
-unsigned long* gth_input_genomicfrompos_ptr(GthInput*);
+GtUword* gth_input_genomicfrompos_ptr(GthInput*);
 /* for option parsing */
-unsigned long* gth_input_genomicwidth_ptr(GthInput*);
+GtUword* gth_input_genomicwidth_ptr(GthInput*);
 /* for option parsing */
-unsigned long* gth_input_genomictopos_ptr(GthInput*);
+GtUword* gth_input_genomictopos_ptr(GthInput*);
 
 int            gth_input_make_indices(GthInput*, const char *progname,
                                       GtError*);

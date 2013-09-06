@@ -54,7 +54,7 @@
  */
 typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
                                    BitString varDest, BitOffset varOffset,
-                                   unsigned long start, unsigned long len,
+                                   GtUword start, GtUword len,
                                    void *cbState);
 
 /**
@@ -77,7 +77,7 @@ struct extBitsRetrieval
             varOffset;          /**< offset in variable-width string
                                  * at which data was earlier stored by
                                  * a bitInsertFunc  */
-  unsigned long start,          /**< start position of region for
+  GtUword start,          /**< start position of region for
                                  * which the retried information was
                                  * stored */
                 len;            /**< length of region */
@@ -109,7 +109,7 @@ enum extBitsRetrievalFlags
  */
 struct seqStats
 {
-  unsigned long *symbolDistributionTable;   /**< indexed by symbol value */
+  GtUword *symbolDistributionTable;   /**< indexed by symbol value */
   enum sourceEncType sourceAlphaType;       /**< defines alphabet width */
 };
 
@@ -122,7 +122,7 @@ struct varBitsEstimate
 
 struct segmentDesc
 {
-  unsigned long repeatCount;
+  GtUword repeatCount;
   size_t len;
 };
 
@@ -169,8 +169,8 @@ EISGetAlphabet(const EISeq *seq);
  * @param hint provides cache and direction information for queries
  * based on previous queries
  */
-static inline unsigned long
-EISRank(EISeq *seq, Symbol sym, unsigned long pos, union EISHint *hint);
+static inline GtUword
+EISRank(EISeq *seq, Symbol sym, GtUword pos, union EISHint *hint);
 
 /**
  * \brief Return number of occurrences of symbol tSym in index up to
@@ -182,8 +182,8 @@ EISRank(EISeq *seq, Symbol sym, unsigned long pos, union EISHint *hint);
  * @param hint provides cache and direction information for queries
  * based on previous queries
  */
-static inline unsigned long
-EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
+static inline GtUword
+EISSymTransformedRank(EISeq *seq, Symbol tSym, GtUword pos,
                       union EISHint *hint);
 
 /**
@@ -201,7 +201,7 @@ EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
  * posA and posB respectively
  */
 static inline GtUlongPair
-EISPosPairRank(EISeq *seq, Symbol sym, unsigned long posA, unsigned long posB,
+EISPosPairRank(EISeq *seq, Symbol sym, GtUword posA, GtUword posB,
                union EISHint *hint);
 
 /**
@@ -220,8 +220,8 @@ EISPosPairRank(EISeq *seq, Symbol sym, unsigned long posA, unsigned long posB,
  * posA and posB respectively
  */
 static inline GtUlongPair
-EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
-                             unsigned long posB, union EISHint *hint);
+EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, GtUword posA,
+                             GtUword posB, union EISHint *hint);
 
 /**
  * \brief Return number of occurrences of all symbols in selected
@@ -239,8 +239,8 @@ EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
  * based on previous queries
  */
 static inline void
-EISRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long pos,
-             unsigned long *rankCounts, union EISHint *hint);
+EISRangeRank(EISeq *seq, AlphabetRangeID range, GtUword pos,
+             GtUword *rankCounts, union EISHint *hint);
 
 /**
  * \brief Return number of occurrences of all symbols in selected
@@ -262,8 +262,8 @@ EISRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long pos,
  * based on previous queries
  */
 static inline void
-EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long posA,
-                    unsigned long posB, unsigned long *rankCounts,
+EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, GtUword posA,
+                    GtUword posB, GtUword *rankCounts,
                     union EISHint *hint);
 
 /**
@@ -276,7 +276,7 @@ EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long posA,
  * @param hint provides cache and direction information for queries
  */
 static inline void
-EISRetrieveExtraBits(EISeq *seq, unsigned long pos, int flags,
+EISRetrieveExtraBits(EISeq *seq, GtUword pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint);
 
 /**
@@ -313,15 +313,15 @@ deleteExtBitsRetrieval(struct extBitsRetrieval *r);
 /**
  * \brief Find positions of nth symbol occurrence. TODO: NOT IMPLEMENTED
  */
-unsigned long
-EISSelect(EISeq *seq, Symbol sym, unsigned long count);
+GtUword
+EISSelect(EISeq *seq, Symbol sym, GtUword count);
 
 /**
  * \brief Query length of stored sequence.
  * @param seq indexed sequence object to query
  * @return length of sequence
  */
-static inline unsigned long
+static inline GtUword
 EISLength(const EISeq *seq);
 
 /**
@@ -334,7 +334,7 @@ EISLength(const EISeq *seq);
  * @return value of symbol as encoded in original alphabet
  */
 static inline Symbol
-EISGetSym(EISeq *seq, unsigned long pos, EISHint hint);
+EISGetSym(EISeq *seq, GtUword pos, EISHint hint);
 
 /**
  * \brief Return symbol at specified position. Comparable to c[pos] if the
@@ -347,7 +347,7 @@ EISGetSym(EISeq *seq, unsigned long pos, EISHint hint);
  * @return value of symbol as processed by encoding alphabet
  */
 static inline Symbol
-EISGetTransformedSym(EISeq *seq, unsigned long pos, EISHint hint);
+EISGetTransformedSym(EISeq *seq, GtUword pos, EISHint hint);
 
 /**
  * \brief Construct new hinting structure to accelerate operations on
@@ -415,8 +415,8 @@ enum EISIntegrityCheckFlags
  */
 enum EISIntegrityCheckResults
 gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
-                      unsigned long skip,
-                      unsigned long tickPrint, FILE *fp, int chkFlags,
+                      GtUword skip,
+                      GtUword tickPrint, FILE *fp, int chkFlags,
                       GtLogger *verbosity, GtError *err);
 
 /**
@@ -439,7 +439,7 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
  * @return 0 if an I/O error occured wrt fp
  */
 static inline int
-EISPrintDiagsForPos(const EISeq *seqIdx, unsigned long pos, FILE *fp,
+EISPrintDiagsForPos(const EISeq *seqIdx, GtUword pos, FILE *fp,
                     EISHint hint);
 
 #include "match/eis-encidxseq-siop.h"

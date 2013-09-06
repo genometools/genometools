@@ -33,24 +33,24 @@
 
 typedef struct GtRadixsortstringinfo GtRadixsortstringinfo;
 
-unsigned long gt_radixsort_str_minwidth(void);
+GtUword gt_radixsort_str_minwidth(void);
 
-unsigned long gt_radixsort_str_maxwidth(const GtRadixsortstringinfo *rsi);
+GtUword gt_radixsort_str_maxwidth(const GtRadixsortstringinfo *rsi);
 
 GtRadixsortstringinfo *gt_radixsort_str_new(const GtTwobitencoding
                                              *twobitencoding,
-                                            unsigned long realtotallength,
-                                            unsigned long equallengthplus1,
-                                            unsigned long maxwidth);
+                                            GtUword realtotallength,
+                                            GtUword equallengthplus1,
+                                            GtUword maxwidth);
 
 void gt_radixsort_str_delete(GtRadixsortstringinfo *rsi);
 
 void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
-                            unsigned long *suffixes,
+                            GtUword *suffixes,
                             GtLcpvalues *lcpvalues,
-                            unsigned long subbucketleft,
-                            unsigned long depth,
-                            unsigned long sortmaxdepth,
-                            unsigned long width);
+                            GtUword subbucketleft,
+                            GtUword depth,
+                            GtUword sortmaxdepth,
+                            GtUword width);
 
 #endif

@@ -135,7 +135,7 @@ static int mg_complement(char *reverse_char, char dna_char, GtError * err)
   }
 }
 
-int mg_reverse_complement(char *dna_seq, unsigned long seqlen, GtError * err)
+int mg_reverse_complement(char *dna_seq, GtUword seqlen, GtError * err)
 {
   char *front_char,
    *back_char,

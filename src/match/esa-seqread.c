@@ -86,7 +86,7 @@ void gt_updateSequentialsuffixarrayreaderfromRAM(
                     Sequentialsuffixarrayreader *ssar,
                     const ESASuffixptr *suftab,
                     bool firstpage,
-                    unsigned long numberofsuffixes)
+                    GtUword numberofsuffixes)
 {
   ssar->nextsuftabindex = 0;
   ssar->suftab = suftab;
@@ -111,7 +111,7 @@ void gt_freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
   gt_free(*ssar);
 }
 
-int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
+int gt_nextSequentiallcpvalue(GtUword *currentlcp,
                               Sequentialsuffixarrayreader *ssar,
                               GtError *err)
 {
@@ -127,7 +127,7 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
       {
         if (tmpsmalllcpvalue < LCPOVERFLOW)
         {
-          *currentlcp = (unsigned long) tmpsmalllcpvalue;
+          *currentlcp = (GtUword) tmpsmalllcpvalue;
         } else
         {
           Largelcpvalue tmpexception;
@@ -153,7 +153,7 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
         tmpsmalllcpvalue = ssar->suffixarray->lcptab[ssar->nextlcptabindex++];
         if (tmpsmalllcpvalue < LCPOVERFLOW)
         {
-          *currentlcp = (unsigned long) tmpsmalllcpvalue;
+          *currentlcp = (GtUword) tmpsmalllcpvalue;
         } else
         {
           gt_assert(ssar->suffixarray->llvtab[ssar->largelcpindex].position ==
@@ -182,7 +182,7 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
   return 1;
 }
 
-int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
+int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
                                  Sequentialsuffixarrayreader *ssar)
 {
   if (ssar->seqactype == SEQ_scan)
@@ -198,7 +198,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
       int ret = gt_readnextfromstream_uint32_t(
                                  &readvalue,
                                  &ssar->suffixarray->suftabstream_uint32_t);
-      *currentsuffix = (unsigned long) readvalue;
+      *currentsuffix = (GtUword) readvalue;
       return ret;
     }
 #else
@@ -245,20 +245,20 @@ const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
   return ssar->suffixarray;
 }
 
-unsigned long gt_Sequentialsuffixarrayreader_nonspecials(
+GtUword gt_Sequentialsuffixarrayreader_nonspecials(
                           const Sequentialsuffixarrayreader *ssar)
 {
   return ssar->nonspecials;
 }
 
-unsigned long gt_Sequentialsuffixarrayreader_totallength(
+GtUword gt_Sequentialsuffixarrayreader_totallength(
               const Sequentialsuffixarrayreader *ssar)
 {
   gt_assert(ssar->numberofsuffixes > 0);
   return ssar->numberofsuffixes - 1;
 }
 
-unsigned long gt_Sequentialsuffixarrayreader_maxbranchdepth(
+GtUword gt_Sequentialsuffixarrayreader_maxbranchdepth(
               const Sequentialsuffixarrayreader *ssar)
 {
   gt_assert(ssar->suffixarray->maxbranchdepth.defined);

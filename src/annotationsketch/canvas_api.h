@@ -18,14 +18,16 @@
 #ifndef CANVAS_API_H
 #define CANVAS_API_H
 
+#include "core/types_api.h"
+
 /* The <GtCanvas> class is an abstraction of a stateful drawing surface.
    Constructors must be implemented in subclasses as different arguments are
    required for drawing to specific graphics back-ends. */
 typedef struct GtCanvas GtCanvas;
 
 /* Returns the height of the given <canvas>. */
-unsigned long gt_canvas_get_height(GtCanvas *canvas);
+GtUword gt_canvas_get_height(GtCanvas *canvas);
 /* Delete the given <canvas>. */
-void          gt_canvas_delete(GtCanvas *canvas);
+void    gt_canvas_delete(GtCanvas *canvas);
 
 #endif

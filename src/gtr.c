@@ -40,6 +40,7 @@
 #include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/tool_iterator.h"
+#include "core/types_api.h"
 #include "core/unit_testing.h"
 #include "core/versionfunc.h"
 #include "core/xansi_api.h"
@@ -348,7 +349,7 @@ static int create_manpages(GtR *gtr, const char *outdir, GtError *err)
 
 static int check64bit(void)
 {
-  if (sizeof (unsigned long) == 8)
+  if (sizeof (GtUword) == 8)
     return EXIT_SUCCESS;
   return EXIT_FAILURE;
 }
@@ -368,11 +369,11 @@ static int run_tests(GtR *gtr, GtError *err)
   gt_ensure(sizeof (unsigned short) == 2);
   gt_ensure(sizeof (int) == 4);
   gt_ensure(sizeof (unsigned int) == 4);
-  gt_ensure(sizeof (long) == 4 || sizeof (long) == 8);
-  gt_ensure(sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
-  gt_ensure(sizeof (unsigned long) >= sizeof (size_t));
-  gt_ensure(sizeof (long long) == 8);
-  gt_ensure(sizeof (unsigned long long) == 8);
+  gt_ensure(sizeof (GtWord) == 4 || sizeof (GtWord) == 8);
+  gt_ensure(sizeof (GtUword) == 4 || sizeof (GtUword) == 8);
+  gt_ensure(sizeof (GtUword) >= sizeof (size_t));
+  gt_ensure(sizeof (GtInt64) == 8);
+  gt_ensure(sizeof (GtUint64) == 8);
 
   /* show seed */
   printf("seed=%u\n", gtr->seed);

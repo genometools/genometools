@@ -169,16 +169,16 @@ int gt_bitpackarray_unit_test(GtError*);
 /*
 static inline void showbitpackarray(const BitPackArray *bitpackarray)
 {
-  unsigned long numofunits, idx;
+  GtUword numofunits, idx;
 
   gt_assert(bitpackarray != NULL);
   gt_assert(bitpackarray->store != NULL);
-  numofunits = (unsigned long) sizeofbitarray(bitpackarray->bitsPerElem,
+  numofunits = (GtUword) sizeofbitarray(bitpackarray->bitsPerElem,
                                               bitpackarray->numElems);
-  printf("numofunits=%lu\n",numofunits);
+  printf("numofunits="GT_LU"\n",numofunits);
   for (idx=0; idx < numofunits; idx++)
   {
-    printf("%lu: %u\n",idx,(unsigned int) bitpackarray->store[idx]);
+    printf(""GT_LU": %u\n",idx,(unsigned int) bitpackarray->store[idx]);
     fflush(stdout);
   }
 }
@@ -200,7 +200,7 @@ typedef struct
   /* and others */
 } BitPackArray;
 
-typedef unsigned long long BitOffset;
+typedef GtUint64 BitOffset;
 size_t sizeofbitarray(unsigned bits, BitOffset numValues);
 void bitpackarray_delete(BitPackArray *bpa);
 BitPackArray *bitpackarray_new(unsigned bits, BitOffset numValues,

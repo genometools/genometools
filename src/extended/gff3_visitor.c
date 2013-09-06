@@ -41,7 +41,7 @@ struct GtGFF3Visitor {
   GtStringDistri *id_counter;
   GtHashmap *feature_node_to_id_array,
             *feature_node_to_unique_id_str;
-  unsigned long fasta_width;
+  GtUword fasta_width;
   GtFile *outfp;
   GtCstrTable *used_ids;
 };
@@ -129,7 +129,7 @@ static int gff3_show_feature_node(GtFeatureNode *fn, void *data,
   GtGFF3Visitor *gff3_visitor = (GtGFF3Visitor*) data;
   GtArray *parent_features = NULL;
   ShowAttributeInfo info;
-  unsigned long i;
+  GtUword i;
   GtStr *id;
 
   gt_error_check(err);
@@ -194,7 +194,7 @@ static GtStr* create_unique_id(GtGFF3Visitor *gff3_visitor, GtFeatureNode *fn)
   return id;
 }
 
-static void make_unique_id_string(GtStr *current_id, unsigned long counter)
+static void make_unique_id_string(GtStr *current_id, GtUword counter)
 {
   /* name => name.1 */
   gt_str_append_char(current_id, '.');
@@ -202,7 +202,7 @@ static void make_unique_id_string(GtStr *current_id, unsigned long counter)
 }
 
 static bool id_string_is_unique(GtStr *id, GtStr *buf, GtCstrTable *tab,
-                                unsigned long i)
+                                GtUword i)
 {
   gt_str_reset(buf);
   gt_str_append_str(buf, id);
@@ -212,7 +212,7 @@ static bool id_string_is_unique(GtStr *id, GtStr *buf, GtCstrTable *tab,
 
 static GtStr* make_id_unique(GtGFF3Visitor *gff3_visitor, GtFeatureNode *fn)
 {
-  unsigned long i = 1;
+  GtUword i = 1;
   GtStr *id = gt_str_new_cstr(gt_feature_node_get_attribute(fn, "ID"));
 
   if (gt_cstr_table_get(gff3_visitor->used_ids, gt_str_get(id))) {
@@ -347,7 +347,7 @@ static int gff3_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && rn);
   gff3_version_string(nv);
-  gt_file_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n",
+  gt_file_xprintf(gff3_visitor->outfp, "%s   %s "GT_LU" "GT_LU"\n",
                   GT_GFF_SEQUENCE_REGION,
                   gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn)),
                   gt_genome_node_get_start((GtGenomeNode*) rn),
@@ -425,7 +425,7 @@ void gt_gff3_visitor_retain_id_attributes(GtGFF3Visitor *gff3_visitor)
 }
 
 void gt_gff3_visitor_set_fasta_width(GtGFF3Visitor *gff3_visitor,
-                                     unsigned long fasta_width)
+                                     GtUword fasta_width)
 {
   gt_assert(gff3_visitor);
   gff3_visitor->fasta_width = fasta_width;

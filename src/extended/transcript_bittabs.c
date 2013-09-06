@@ -26,11 +26,11 @@ struct GtTranscriptBittabs {
            *gt_bittab_terminal;
 };
 
-GtTranscriptBittabs* gt_transcript_bittabs_new(unsigned long size_all,
-                                               unsigned long size_single,
-                                               unsigned long size_initial,
-                                               unsigned long size_internal,
-                                               unsigned long size_terminal)
+GtTranscriptBittabs* gt_transcript_bittabs_new(GtUword size_all,
+                                               GtUword size_single,
+                                               GtUword size_initial,
+                                               GtUword size_internal,
+                                               GtUword size_terminal)
 {
   GtTranscriptBittabs *tb = gt_calloc(1, sizeof (GtTranscriptBittabs));
   if (size_all) tb->gt_bittab_all = gt_bittab_new(size_all);

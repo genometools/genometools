@@ -37,7 +37,7 @@
 struct GtLTRharvestFastaOutVisitor {
   const GtNodeVisitor parent_instance;
   GtFile* outfp;
-  unsigned long width;
+  GtUword width;
   bool inner;
   const GtEncseq *encseq;
 };
@@ -59,7 +59,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
       added_ltr = 0;
   GtRange rng,
           outrng;
-  unsigned long seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_ULONG;
   const char *fnt;
   lv = gt_ltrharvest_fasta_out_visitor_cast(nv);
   gt_assert(lv);
@@ -127,7 +127,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
       char *buf;
       const char *seqdesc;
       GtStr *desc;
-      unsigned long startpos,
+      GtUword startpos,
                     seqdesclen;
       gt_assert(seqnum != GT_UNDEF_ULONG
                   && seqnum < gt_encseq_num_of_sequences(lv->encseq));
@@ -154,7 +154,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
       GtRange rootrng;
       rootrng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
       gt_warning("trying to output empty%s sequence for candidate at "
-                 "%lu-%lu on sequence %lu",
+                 ""GT_LU"-"GT_LU" on sequence "GT_LU"",
                  (lv->inner ? " inner" : ""),
                  rootrng.start,
                  rootrng.end,
@@ -184,7 +184,7 @@ const GtNodeVisitorClass* gt_ltrharvest_fasta_out_visitor_class(void)
 
 GtNodeVisitor* gt_ltrharvest_fasta_out_visitor_new(const GtEncseq *encseq,
                                                    bool inner,
-                                                   unsigned long width,
+                                                   GtUword width,
                                                    GtFile *outfp)
 {
   GtNodeVisitor *nv;

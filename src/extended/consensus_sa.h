@@ -41,11 +41,11 @@ typedef GtStrand (*GetStrandFunc)(const void *sa);
 typedef void   (*GetExonsFunc)(GtArray *exon_ranges, const void *sa);
 typedef void   (*ProcessSpliceFormFunc)(GtArray *spliced_alignments_in_form,
                                         const void *set_of_sas,
-                                        unsigned long number_of_sas,
+                                        GtUword number_of_sas,
                                         size_t size_of_sa,
                                         void *userdata);
 
-void gt_consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
+void gt_consensus_sa(const void *set_of_sas, GtUword number_of_sas,
                      size_t size_of_sa, GetGenomicRangeFunc, GetStrandFunc,
                      GetExonsFunc, ProcessSpliceFormFunc, void *userdata);
 

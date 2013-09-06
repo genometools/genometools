@@ -26,15 +26,15 @@
 typedef struct
 {
   GtUint64hashtable *table;
-  unsigned long differentcodes;
+  GtUword differentcodes;
   unsigned int kmersize;
-  unsigned long *suftab;
-  unsigned long finalpsum;
+  GtUword *suftab;
+  GtUword finalpsum;
 } GtHashfirstcodes;
 
 static void gt_hashfirstcodes(void *processinfo,
                               GT_UNUSED bool firstinrange,
-                              GT_UNUSED unsigned long pos,
+                              GT_UNUSED GtUword pos,
                               GtCodetype code)
 {
   GtHashfirstcodes *hashfirstcodes = (GtHashfirstcodes *) processinfo;
@@ -49,7 +49,7 @@ static void gt_hashfirstcodes(void *processinfo,
 
 static void gt_hashremainingcodes(void *processinfo,
                                   bool firstinrange,
-                                  GT_UNUSED unsigned long pos,
+                                  GT_UNUSED GtUword pos,
                                   GtCodetype code)
 {
   GtUint64hashtable *table = (GtUint64hashtable *) processinfo;
@@ -62,12 +62,12 @@ static void gt_hashremainingcodes(void *processinfo,
 
 static void gt_insertallcodeswithhashtable(void *processinfo,
                                            GT_UNUSED bool firstinrange,
-                                           unsigned long pos,
+                                           GtUword pos,
                                            GtCodetype code)
 {
   GtHashfirstcodes *hashfirstcodes = (GtHashfirstcodes *) processinfo;
 
-  unsigned long idx = gt_uint64hashtable_insertionindex(hashfirstcodes->table,
+  GtUword idx = gt_uint64hashtable_insertionindex(hashfirstcodes->table,
                                                         (uint64_t) code);
   if (idx != ULONG_MAX)
   {
@@ -81,9 +81,9 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 {
   GtTimer *timer = NULL;
   GtHashfirstcodes hashfirstcodes;
-  unsigned long numofsequences, psum;
-  GT_UNUSED unsigned long totallength;
-  /*GT_UNUSED unsigned long countsum;*/
+  GtUword numofsequences, psum;
+  GT_UNUSED GtUword totallength;
+  /*GT_UNUSED GtUword countsum;*/
   const unsigned int spmopt = 45U;
 
   if (gt_showtime_enabled())
@@ -105,7 +105,7 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 &hashfirstcodes,
                                 NULL,
                                 NULL);
-  printf("# number of different codes=%lu (%.4f) in %lu sequences\n",
+  printf("# number of different codes="GT_LU" (%.4f) in "GT_LU" sequences\n",
           hashfirstcodes.differentcodes,
           (double) hashfirstcodes.differentcodes/numofsequences,
           numofsequences);

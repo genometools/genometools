@@ -33,7 +33,7 @@ void                     gt_gff3_in_stream_set_type_checker(GtNodeStream*,
    The caller is responsible to free it! */
 GtStrArray*              gt_gff3_in_stream_get_used_types(GtNodeStream
                                                           *gff3_in_stream);
-void                     gt_gff3_in_stream_set_offset(GtNodeStream*, long);
+void                     gt_gff3_in_stream_set_offset(GtNodeStream*, GtWord);
 int                      gt_gff3_in_stream_set_offsetfile(GtNodeStream*, GtStr*,
                                                           GtError*);
 void                     gt_gff3_in_stream_disable_add_ids(GtNodeStream*);

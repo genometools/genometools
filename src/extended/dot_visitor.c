@@ -31,7 +31,7 @@
 struct GtDotVisitor {
   const GtNodeVisitor parent_instance;
   GtHashmap *ids;
-  unsigned long idctr;
+  GtUword idctr;
 };
 
 #define dv_cast(GV)\
@@ -49,26 +49,26 @@ static int dv_output_edge(GtFeatureNode *fn, void *data,
 {
   GtFeatureNodeIterator *fni;
   GtFeatureNode *curnode = NULL;
-  unsigned long pid, cid;
+  GtUword pid, cid;
   int had_err = 0;
   GtDotVisitor *dv = (GtDotVisitor*) data;
 
-  if (!(pid = (unsigned long) gt_hashmap_get(dv->ids, fn))) {
+  if (!(pid = (GtUword) gt_hashmap_get(dv->ids, fn))) {
     pid = dv->idctr++;
     gt_hashmap_add(dv->ids, fn, (void*) pid);
   }
-  printf("%lu [shape=record, label=\"{ %lu | %s | %p }\"]\n",
+  printf(""GT_LU" [shape=record, label=\"{ "GT_LU" | %s | %p }\"]\n",
              pid, pid, gt_feature_node_get_type(fn), fn);
 
   fni = gt_feature_node_iterator_new_direct(fn);
   while ((curnode = gt_feature_node_iterator_next(fni))) {
-    if (!(cid = (unsigned long) gt_hashmap_get(dv->ids, curnode))) {
+    if (!(cid = (GtUword) gt_hashmap_get(dv->ids, curnode))) {
       cid = dv->idctr++;
       gt_hashmap_add(dv->ids, curnode, (void*) cid);
     }
-    printf("%lu [shape=record, label=\"{ %lu | %s | %p }\"]\n",
+    printf(""GT_LU" [shape=record, label=\"{ "GT_LU" | %s | %p }\"]\n",
              cid, cid, gt_feature_node_get_type(curnode), curnode);
-    printf("%lu -> %lu\n", pid, cid);
+    printf(""GT_LU" -> "GT_LU"\n", pid, cid);
   }
   gt_feature_node_iterator_delete(fni);
 
@@ -80,13 +80,13 @@ static int dv_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
 {
   GT_UNUSED GtDotVisitor *dv;
   int had_err = 0;
-  unsigned long pid;
+  GtUword pid;
   gt_error_check(err);
   dv = dv_cast(nv);
 
-  if (!(pid = (unsigned long) gt_hashmap_get(dv->ids, fn))) {
+  if (!(pid = (GtUword) gt_hashmap_get(dv->ids, fn))) {
     pid = dv->idctr++;
-    printf("subgraph %lu {\n", pid);
+    printf("subgraph "GT_LU" {\n", pid);
     gt_hashmap_add(dv->ids, fn, (void*) pid);
   }
   had_err = gt_feature_node_traverse_children(fn, dv,

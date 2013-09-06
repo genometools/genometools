@@ -25,7 +25,7 @@
 
 typedef struct
 {
-  unsigned long position,
+  GtUword position,
                 value;
 } Largelcpvalue;
 

@@ -20,8 +20,8 @@
 
 #define GT_STRGRAPH_EDGES_REPRESENTATION "bitfield"
 
-typedef unsigned long GtStrgraphLength;
-#define FormatGtStrgraphLength       "%lu"
+typedef GtUword GtStrgraphLength;
+#define FormatGtStrgraphLength       ""GT_LU""
 #define PRINTGtStrgraphLengthcast(X) (X)
 #define SCANGtStrgraphLengthcast(X)  (X)
 #define GT_STRGRAPH__LEN_BITS        18
@@ -36,7 +36,7 @@ typedef unsigned long GtStrgraphLength;
 #endif
 
 #if GT_STRGRAPH__DEST_MAX >= ULONG_MAX
-#define GT_STRGRAPH_N_READS_MAX (unsigned long)(GT_STRGRAPH__DEST_MAX >> 1)
+#define GT_STRGRAPH_N_READS_MAX (GtUword)(GT_STRGRAPH__DEST_MAX >> 1)
 #else
 #define GT_STRGRAPH_N_READS_MAX (ULONG_MAX >> 1)
 #endif

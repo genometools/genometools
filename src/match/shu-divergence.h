@@ -24,15 +24,15 @@ double gt_divergence (double E, /* relative error for shulen length */
                    double M,
                    double threshold, /* break criteria for pmax calculation */
                    double shulen, /*avg shulength*/
-                   unsigned long subjectLength, /*subjectlength*/
+                   GtUword subjectLength, /*subjectlength*/
                    double gc, /*combined gc-content*/
                    double *ln_n_fac,
-                   unsigned long n_s /*length of s-array*/);
+                   GtUword n_s /*length of s-array*/);
 
 /* Jukes-Cantor transform of divergence: Kr */
 double gt_calculateKr(double d);
 
 /* Calculates ln(n!) for numbers 0 to given n */
-double *gt_get_ln_n_fac(unsigned long n);
+double *gt_get_ln_n_fac(GtUword n);
 
 #endif

@@ -23,14 +23,14 @@
 #include "sfx-lcpvalues.h"
 
 void gt_sfx_radixsort_str(GtRadixsortstringinfo *rsi,
-                          unsigned long depth,
+                          GtUword depth,
                           unsigned int sortmaxdepth,
-                          unsigned long subbucketleft,
-                          unsigned long width,
+                          GtUword subbucketleft,
+                          GtUword width,
                           GtSuffixsortspace *sssp,
                           GtLcpvalues *lcpvalues)
 {
-  unsigned long idx, *suffixes;
+  GtUword idx, *suffixes;
   GtSuffixsortspace_exportptr *exportptr
     = gt_suffixsortspace_exportptr(subbucketleft, sssp);
   bool allocated = false;
@@ -44,7 +44,7 @@ void gt_sfx_radixsort_str(GtRadixsortstringinfo *rsi,
     allocated = true;
     for (idx = 0; idx < width; idx++)
     {
-      suffixes[idx] = (unsigned long) exportptr->uinttabsectionptr[idx];
+      suffixes[idx] = (GtUword) exportptr->uinttabsectionptr[idx];
     }
   }
   gt_radixsort_str_eqlen(rsi,
@@ -52,7 +52,7 @@ void gt_sfx_radixsort_str(GtRadixsortstringinfo *rsi,
                          lcpvalues,
                          subbucketleft,
                          depth,
-                         (unsigned long) sortmaxdepth,
+                         (GtUword) sortmaxdepth,
                          width);
   if (allocated)
   {

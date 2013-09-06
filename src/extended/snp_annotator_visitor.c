@@ -76,8 +76,8 @@ static void snp_annotator_visitor_free(GtNodeVisitor *nv)
 static int snp_annotator_classify_snp(GtSNPAnnotatorVisitor *sav,
                                       GtFeatureNode *mRNA,
                                       GtFeatureNode *snp,
-                                      unsigned long variant_pos,
-                                      unsigned long variant_idx,
+                                      GtUword variant_pos,
+                                      GtUword variant_idx,
                                       char variant_char,
 #ifndef NDEBUG
                                       GT_UNUSED char reference_char,
@@ -98,8 +98,8 @@ static int snp_annotator_classify_snp(GtSNPAnnotatorVisitor *sav,
     GtStr *effect_string;
     char oldamino,
          newamino;
-    GT_UNUSED unsigned long mrnalen;
-    unsigned long startpos = variant_pos / GT_CODON_LENGTH,
+    GT_UNUSED GtUword mrnalen;
+    GtUword startpos = variant_pos / GT_CODON_LENGTH,
                   variantoffset = variant_pos % GT_CODON_LENGTH;
     mrnalen = strlen(mrnaseq);
     gt_assert(variant_pos < mrnalen);
@@ -198,7 +198,7 @@ static int snp_annotator_visitor_feature_node(GtNodeVisitor *nv,
 #ifndef NDEBUG
       const char *refstr;
 #endif
-      unsigned long mrnasnppos = 0;
+      GtUword mrnasnppos = 0;
       mrnafni = gt_feature_node_iterator_new(curnode);
       while (!had_err && (curnode2 = gt_feature_node_iterator_next(mrnafni))) {
         if (gt_feature_node_get_type(curnode2) == sav->CDS_type) {
@@ -230,7 +230,7 @@ static int snp_annotator_visitor_feature_node(GtNodeVisitor *nv,
             variantchars = variantptr = gt_cstr_dup(
                          gt_feature_node_get_attribute(fn, GT_GVF_VARIANT_SEQ));
             if (!had_err && variantchars) {
-              unsigned long i = 0;
+              GtUword i = 0;
 
               while (!had_err &&
                               (*variantchars != ';' && *variantchars != '\0')) {

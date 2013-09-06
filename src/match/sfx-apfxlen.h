@@ -23,12 +23,12 @@
 #define GT_RECOMMENDED_MULTIPLIER_DEFAULT 0.25
 
 unsigned int gt_recommendedprefixlength(unsigned int numofchars,
-                                        unsigned long totallength,
+                                        GtUword totallength,
                                         double recommendedmultiplier,
                                         bool withspecialsuffixes);
 
 unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
-                                          unsigned long totallength,
+                                          GtUword totallength,
                                           unsigned int prefixlenbits,
                                           bool withspecialsuffixes);
 

@@ -40,8 +40,8 @@ const GtMatchClass* gt_match_class_new(size_t size,
 }
 
 GtMatch* gt_match_create(const GtMatchClass *matchc,
-                         unsigned long start1, unsigned long end1,
-                         unsigned long start2, unsigned long end2,
+                         GtUword start1, GtUword end1,
+                         GtUword start2, GtUword end2,
                          const char *seqid1, const char *seqid2,
                          GtMatchDirection dir)
 {
@@ -102,7 +102,7 @@ void gt_match_set_seqid2(GtMatch *match, const char *seqid)
 }
 
 void gt_match_set_seqid1_nt(GtMatch *match, const char *seqid,
-                            unsigned long len)
+                            GtUword len)
 {
   gt_assert(match && seqid);
   if (!match->seqid1)
@@ -113,7 +113,7 @@ void gt_match_set_seqid1_nt(GtMatch *match, const char *seqid,
 }
 
 void gt_match_set_seqid2_nt(GtMatch *match, const char *seqid,
-                            unsigned long len)
+                            GtUword len)
 {
   gt_assert(match && seqid);
   if (!match->seqid2)
@@ -149,8 +149,8 @@ void gt_match_get_range_seq2(const GtMatch *match, GtRange *range)
   range->end = match->range_seq2.end;
 }
 
-void gt_match_set_range_seq1(GtMatch *match, unsigned long start,
-                             unsigned long end)
+void gt_match_set_range_seq1(GtMatch *match, GtUword start,
+                             GtUword end)
 {
   gt_assert(match);
   gt_assert(start <= end);
@@ -158,8 +158,8 @@ void gt_match_set_range_seq1(GtMatch *match, unsigned long start,
   match->range_seq1.end = end;
 }
 
-void gt_match_set_range_seq2(GtMatch *match, unsigned long start,
-                             unsigned long end)
+void gt_match_set_range_seq2(GtMatch *match, GtUword start,
+                             GtUword end)
 {
   gt_assert(match);
   gt_assert(start <= end);

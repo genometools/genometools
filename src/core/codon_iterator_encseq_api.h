@@ -28,8 +28,8 @@ typedef struct GtCodonIteratorEncseq GtCodonIteratorEncseq;
    starting at concatenated position <startpos>. If an error occurs, NULL is
    returned and <err> is set accordingly. */
 GtCodonIterator*            gt_codon_iterator_encseq_new(GtEncseq *encseq,
-                                                         unsigned long startpos,
-                                                         unsigned long length,
+                                                         GtUword startpos,
+                                                         GtUword length,
                                                          GtError *err);
 
 /* Creates a new <GtCodonIterator> traversing <encseq> over a length of <len>
@@ -38,8 +38,8 @@ GtCodonIterator*            gt_codon_iterator_encseq_new(GtEncseq *encseq,
    accordingly. */
 GtCodonIterator*            gt_codon_iterator_encseq_new_with_readmode(
                                                         GtEncseq *encseq,
-                                                        unsigned long startpos,
-                                                        unsigned long length,
+                                                        GtUword startpos,
+                                                        GtUword length,
                                                         GtReadmode readmode,
                                                         GtError *err);
 

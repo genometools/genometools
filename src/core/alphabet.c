@@ -144,7 +144,7 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
 {
   char cc;
   unsigned int cnum, allocateddomainsize = 0;
-  unsigned long linecount, column;
+  GtUword linecount, column;
   bool blankfound, ignore, preamble = true, haserr = false;
   const char *currentline;
   GtUchar chartoshow;
@@ -215,11 +215,11 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
             }
             if (mapfile != NULL) {
               gt_error_set(err,
-                           "illegal character '%c' in line %lu of mapfile %s",
+                           "illegal character '%c' in line "GT_LU" of mapfile %s",
                            cc,linecount,mapfile);
             } else {
               gt_error_set(err,
-                           "illegal character '%c' in line %lu of alphabet "
+                           "illegal character '%c' in line "GT_LU" of alphabet "
                            "definition",
                            cc,linecount);
             }
@@ -237,11 +237,11 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
           {
             if (mapfile != NULL) {
               gt_error_set(err,"illegal character '%c' at the end of "
-                            "line %lu in mapfile %s",
+                            "line "GT_LU" in mapfile %s",
                             LINE(column+1),linecount,mapfile);
             } else {
               gt_error_set(err,"illegal character '%c' at the end of "
-                            "line %lu of alphabet definition",
+                            "line "GT_LU" of alphabet definition",
                             LINE(column+1),linecount);
             }
             haserr  = true;
@@ -280,7 +280,7 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
      hence there are mapsize+1 symbols in the range 0..mapsize.
      that is, mapsize is the largest symbol and we obtain */
   alpha->bitspersymbol
-    = gt_determinebitspervalue((unsigned long) alpha->mapsize);
+    = gt_determinebitspervalue((GtUword) alpha->mapsize);
   return haserr ? -1 : 0;
 }
 
@@ -415,7 +415,7 @@ void gt_alphabet_add_mapping(GtAlphabet *alphabet, const char *characters)
     alphabet->symbolmap[(int) characters[i]] = (GtUchar) alphabet->mapsize;
   alphabet->mapsize++;
   alphabet->bitspersymbol
-    = gt_determinebitspervalue((unsigned long) alphabet->mapsize);
+    = gt_determinebitspervalue((GtUword) alphabet->mapsize);
 }
 
 void gt_alphabet_add_wildcard(GtAlphabet *alphabet, char wildcard)
@@ -607,12 +607,12 @@ GtAlphabet* gt_alphabet_new_empty(void)
   return a;
 }
 
-GtAlphabet* gt_alphabet_guess(const char *sequence, unsigned long seqlen)
+GtAlphabet* gt_alphabet_guess(const char *sequence, GtUword seqlen)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(sequence && seqlen);
   for (i = 0;
-       i < seqlen && i < (unsigned long) ALPHABET_GUESS_MAX_LENGTH;
+       i < seqlen && i < (GtUword) ALPHABET_GUESS_MAX_LENGTH;
         i++) {
     if (strchr(ALPHABET_GUESS_PROTEIN_CHARS, sequence[i]) != NULL)
       return gt_alphabet_new_protein();
@@ -726,9 +726,9 @@ void gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout)
 }
 
 void gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet, FILE *fpout,
-                                  const GtUchar *src, unsigned long len)
+                                  const GtUchar *src, GtUword len)
 {
-  unsigned long i;
+  GtUword i;
   const GtUchar *characters;
   gt_assert(fpout != NULL && (len == 0 || src != NULL));
 
@@ -746,7 +746,7 @@ void gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet, FILE *fpout,
 }
 
 void gt_alphabet_printf_symbolstring(const GtAlphabet *alphabet,
-                                     const GtUchar *w, unsigned long len)
+                                     const GtUchar *w, GtUword len)
 {
   gt_alphabet_decode_seq_to_fp(alphabet, stdout, w, len);
 }
@@ -763,9 +763,9 @@ static inline char converttoprettysymbol(const GtAlphabet *alphabet,
 }
 
 void gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet, char *dest,
-                                      const GtUchar *src, unsigned long len)
+                                      const GtUchar *src, GtUword len)
 {
-  unsigned long i;
+  GtUword i;
 
   for (i = 0; i < len; i++)
   {
@@ -776,7 +776,7 @@ void gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet, char *dest,
 
 GtStr* gt_alphabet_decode_seq_to_str(const GtAlphabet *alphabet,
                                      const GtUchar *src,
-                                     unsigned long len)
+                                     GtUword len)
 {
   char *buffer;
   GtStr *ret;
@@ -934,9 +934,9 @@ char gt_alphabet_decode(const GtAlphabet *alphabet, GtUchar c)
 }
 
 void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
-                            const char *in, unsigned long length)
+                            const char *in, GtUword length)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(alphabet && out && in);
   for (i = 0; i < length; i++) {
     gt_assert(alphabet->symbolmap[(int) in[i]] != (GtUchar) UNDEFCHAR);
@@ -957,10 +957,10 @@ GtAlphabet *gt_alphabet_new_from_file(const char *filename,
   return a;
 }
 
-GtAlphabet* gt_alphabet_new_from_string(const char *alphadef, unsigned long len,
+GtAlphabet* gt_alphabet_new_from_string(const char *alphadef, GtUword len,
                                         GtError *err)
 {
-  unsigned long i, j;
+  GtUword i, j;
   GtStrArray *sa;
   GtAlphabet *alpha;
   gt_assert(alphadef && len > 0);

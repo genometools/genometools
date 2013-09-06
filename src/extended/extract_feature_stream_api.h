@@ -40,7 +40,7 @@ GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
                                             GtRegionMapping *region_Mapping,
                                             const char *type, bool join,
                                             bool translate, bool seqid,
-                                            bool target, unsigned long width,
+                                            bool target, GtUword width,
                                             GtFile *outfp);
 
 #endif

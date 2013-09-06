@@ -34,7 +34,7 @@ typedef struct GtGenomediffArguments {
        with_pck,
        with_units;
   int user_max_depth;
-  unsigned long max_ln_n_fac;
+  GtUword max_ln_n_fac;
   double divergence_abs_err, /* kr2 T */
          divergence_m, /* kr2 M */
          divergence_rel_err, /* kr2 E */

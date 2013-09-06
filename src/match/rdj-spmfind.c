@@ -38,12 +38,12 @@
 #define GT_SPMFIND_BLTRIE_ALLOC   (1U << 6)
 
 typedef struct {
-  unsigned long seqnum;
+  GtUword seqnum;
   GtBlindtrie *blindtrie;
 } WholereadInfo;
 
 typedef struct {
-  unsigned long w_left;
+  GtUword w_left;
 } GtBUinfo_spmeq;
 
 typedef GtBUinfo_spmeq GtBUinfo_spmvar;
@@ -56,66 +56,66 @@ struct GtBUstate_spm {
   GtError *err;
 
   /* algorithm parameters: */
-  unsigned long minmatchlength;
+  GtUword minmatchlength;
   bool elimtrans;
 
   /* sequence */
   const char *indexname;
   const GtEncseq *encseq;
-  unsigned long totallength;
-  unsigned long read_length;
-  unsigned long nofreads;
-  unsigned long first_revcompl;
+  GtUword totallength;
+  GtUword read_length;
+  GtUword nofreads;
+  GtUword first_revcompl;
 
   /* terminal edges set */
-  unsigned long *l_set;
-  unsigned long l_nextfree;
-  unsigned long l_allocated;
+  GtUword *l_set;
+  GtUword l_nextfree;
+  GtUword l_allocated;
 
   /* whole-read leaves set */
   WholereadInfo *w_set;
-  unsigned long w_nextfree;
-  unsigned long w_allocated;
-  unsigned long w_offset;
-  unsigned long w_count;
-  unsigned long w_maxsize;
+  GtUword w_nextfree;
+  GtUword w_allocated;
+  GtUword w_offset;
+  GtUword w_count;
+  GtUword w_maxsize;
   bool w_overflow;
 
   /* function called when results are found, and its data pointer: */
   GtSpmproc proc;
   void* procdata;
-  unsigned long nofvalidspm;
-  unsigned long nof_transitive_withrc;
-  unsigned long nof_transitive_other;
+  GtUword nofvalidspm;
+  GtUword nof_transitive_withrc;
+  GtUword nof_transitive_other;
 
   /* varlen contained reads detection */
-  unsigned long shortest;
+  GtUword shortest;
   FILE *cntfile;
-  unsigned long nof_contained;
+  GtUword nof_contained;
 
-  unsigned long spaceforbucketprocessing;
+  GtUword spaceforbucketprocessing;
   unsigned int threadnum;
 
 #ifdef GT_READJOINER_STATISTICS
   /* statistics */
-  unsigned long nof_terminals;
-  unsigned long nof_combinable_terminals; /* where w_set is not empty */
-  unsigned long nof_t_w_combinations;
-  unsigned long nof_wrong_direction;
-  unsigned long nof_w_set_realloc;
-  unsigned long nof_l_set_realloc;
-  unsigned long nof_subtrees; /* with w_set not empty */
-  unsigned long nof_terminals_in_subtree;
-  unsigned long max_nof_terminals_in_subtree;
-  unsigned long nof_overlaps_in_subtree;
-  unsigned long max_nof_overlaps_in_subtree;
-  unsigned long max_w_nextfree;
-  unsigned long max_l_nextfree;
-  unsigned long max_blindtrie_size;
-  unsigned long max_total_blindtrie_size;
+  GtUword nof_terminals;
+  GtUword nof_combinable_terminals; /* where w_set is not empty */
+  GtUword nof_t_w_combinations;
+  GtUword nof_wrong_direction;
+  GtUword nof_w_set_realloc;
+  GtUword nof_l_set_realloc;
+  GtUword nof_subtrees; /* with w_set not empty */
+  GtUword nof_terminals_in_subtree;
+  GtUword max_nof_terminals_in_subtree;
+  GtUword nof_overlaps_in_subtree;
+  GtUword max_nof_overlaps_in_subtree;
+  GtUword max_w_nextfree;
+  GtUword max_l_nextfree;
+  GtUword max_blindtrie_size;
+  GtUword max_total_blindtrie_size;
   GtDiscDistri *w_per_terminal;
-  unsigned long initial_l_allocated;
-  unsigned long initial_w_allocated;
+  GtUword initial_l_allocated;
+  GtUword initial_w_allocated;
 #endif
 };
 
@@ -123,7 +123,7 @@ typedef struct GtBUstate_spm GtBUstate_spm;
 
 static void initwset_spm(GtBUstate_spm *state)
 {
-  unsigned long i;
+  GtUword i;
   state->w_allocated = GT_SPMFIND_WSET_ALLOC_INC;
   state->w_set = gt_malloc(sizeof (WholereadInfo) * (state->w_allocated));
   state->w_nextfree = 0;
@@ -133,7 +133,7 @@ static void initwset_spm(GtBUstate_spm *state)
 
 static inline void expandwset_spm(GtBUstate_spm *state)
 {
-  unsigned long prevsize, i;
+  GtUword prevsize, i;
   prevsize = state->w_allocated;
   state->w_allocated += GT_SPMFIND_WSET_ALLOC_INC;
   state->w_set = gt_realloc(state->w_set, sizeof (WholereadInfo) *
@@ -146,7 +146,7 @@ static inline void expandwset_spm(GtBUstate_spm *state)
 #endif
 }
 
-static inline void appendtowset_spm(unsigned long seqnum,
+static inline void appendtowset_spm(GtUword seqnum,
   GtBUstate_spm *state)
 {
   WholereadInfo *w;
@@ -167,8 +167,8 @@ static inline void appendtowset_spm(unsigned long seqnum,
 
   /* add element */
 #ifdef GT_READJOINER_DEBUG
-  gt_log_log("-- add to wset: %lu", seqnum);
-  gt_log_log("offset: %lu", state->w_offset);
+  gt_log_log("-- add to wset: "GT_LU"", seqnum);
+  gt_log_log("offset: "GT_LU"", state->w_offset);
 #endif
   w = state->w_set + state->w_nextfree;
   state->w_nextfree++;
@@ -191,7 +191,7 @@ static inline void appendtowset_spm(unsigned long seqnum,
 
 static inline void printcurrentspace_spm(const char *label)
 {
-  unsigned long m, f;
+  GtUword m, f;
   if (gt_ma_bookkeeping_enabled())
   {
     m = gt_ma_get_space_current();
@@ -203,7 +203,7 @@ static inline void printcurrentspace_spm(const char *label)
 
 static inline void resetwsetbt_spm(GtBUstate_spm *state)
 {
-  unsigned long i, bsize_sum = 0, nofbltries = 0;
+  GtUword i, bsize_sum = 0, nofbltries = 0;
   GtBlindtrie *b;
   printcurrentspace_spm("before resizing");
   for (i = 0; i < state->w_allocated; i++)
@@ -218,15 +218,15 @@ static inline void resetwsetbt_spm(GtBUstate_spm *state)
     else
       break;
   }
-  gt_log_log("current number of blindtries: %lu", nofbltries);
+  gt_log_log("current number of blindtries: "GT_LU"", nofbltries);
   gt_log_log("total size of the blindtries: %.2f MB", GT_MEGABYTES(bsize_sum));
   printcurrentspace_spm("after resizing");
 }
 
 static void deletewset_spm(WholereadInfo *w_set,
-    unsigned long w_allocated)
+    GtUword w_allocated)
 {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < w_allocated; i++)
     gt_blindtrie_delete(w_set[i].blindtrie);
   gt_free(w_set);
@@ -250,7 +250,7 @@ static inline void expandlset_spm(GtBUstate_spm *state)
 #endif
 }
 
-static inline void appendtolset_spm(unsigned long seqnum,
+static inline void appendtolset_spm(GtUword seqnum,
     GtBUstate_spm *state)
 {
   /* realloc if necessary */
@@ -294,7 +294,7 @@ static void freeBUinfo_spmvar(GT_UNUSED GtBUinfo_spmvar *info,
 #ifdef GT_READJOINER_STATISTICS
 static void save_blindtrie_statistics(GtBUstate_spm *state)
 {
-  unsigned long j, bsize, bsize_sum = 0;
+  GtUword j, bsize, bsize_sum = 0;
   for (j = 0; j < state->w_nextfree; j++)
   {
     bsize = gt_blindtrie_current_size(state->w_set[j].blindtrie);
@@ -324,11 +324,11 @@ static void reset_subtree_stats(GtBUstate_spm *state)
 }
 #endif
 
-static void combine_terminal_with_wset(unsigned long seqnum,
-    unsigned long seqstartpos, unsigned long seqlen, unsigned long w_left,
-    unsigned long lcp, GtBUstate_spm *state)
+static void combine_terminal_with_wset(GtUword seqnum,
+    GtUword seqstartpos, GtUword seqlen, GtUword w_left,
+    GtUword lcp, GtBUstate_spm *state)
 {
-  unsigned long j, suffix_readnum = seqnum;
+  GtUword j, suffix_readnum = seqnum;
   bool suffixseq_direct = true;
 
   GT_READJOINER_CORRECT_REVCOMPL(suffix_readnum, state->first_revcompl,
@@ -348,7 +348,7 @@ static void combine_terminal_with_wset(unsigned long seqnum,
   {
     bool prefixseq_direct = true;
     WholereadInfo *w = state->w_set + j;
-    unsigned long prefix_readnum = w->seqnum;
+    GtUword prefix_readnum = w->seqnum;
     GT_READJOINER_CORRECT_REVCOMPL(prefix_readnum, state->first_revcompl,
         state->nofreads, prefixseq_direct);
     if (!state->elimtrans ||
@@ -360,7 +360,7 @@ static void combine_terminal_with_wset(unsigned long seqnum,
             suffixseq_direct, prefix_readnum, prefixseq_direct))
       {
 #ifdef GT_READJOINER_DEBUG
-        gt_log_log("%lu %s %lu %s %lu\n", suffix_readnum, suffixseq_direct ? "+"
+        gt_log_log(""GT_LU" %s "GT_LU" %s "GT_LU"\n", suffix_readnum, suffixseq_direct ? "+"
             : "-", prefix_readnum, prefixseq_direct ? "+" : "-", lcp);
 #endif
         state->proc(suffix_readnum, prefix_readnum, lcp, suffixseq_direct,
@@ -389,8 +389,8 @@ static void combine_terminal_with_wset(unsigned long seqnum,
 }
 
 static inline int processleafedge_spmeq(bool firstsucc,
-    unsigned long fatherdepth,
-    GtBUinfo_spmeq *father, unsigned long seqnum, unsigned long relpos,
+    GtUword fatherdepth,
+    GtBUinfo_spmeq *father, GtUword seqnum, GtUword relpos,
     GtBUstate_spmeq *state, GT_UNUSED GtError *err)
 {
   if (fatherdepth >= state->minmatchlength)
@@ -418,13 +418,13 @@ static inline int processleafedge_spmeq(bool firstsucc,
 }
 
 static inline int processleafedge_spmvar(bool firstsucc,
-    unsigned long fatherdepth,
-    GtBUinfo_spmeq *father, unsigned long seqnum, unsigned long relpos,
+    GtUword fatherdepth,
+    GtBUinfo_spmeq *father, GtUword seqnum, GtUword relpos,
     GtBUstate_spmeq *state, GT_UNUSED GtError *err)
 {
   if (fatherdepth >= state->minmatchlength)
   {
-    unsigned long seqlen = gt_encseq_seqlength(state->encseq, seqnum);
+    GtUword seqlen = gt_encseq_seqlength(state->encseq, seqnum);
     if (firstsucc)
     {
       gt_assert(father != NULL);
@@ -435,9 +435,9 @@ static inline int processleafedge_spmvar(bool firstsucc,
       appendtowset_spm(seqnum, state);
       if (fatherdepth == seqlen)
       {
-        unsigned long readnum = GT_READJOINER_READNUM(seqnum,
+        GtUword readnum = GT_READJOINER_READNUM(seqnum,
             state->first_revcompl, state->nofreads);
-        (void)fwrite(&(readnum), sizeof (unsigned long), (size_t)1,
+        (void)fwrite(&(readnum), sizeof (GtUword), (size_t)1,
             state->cntfile);
         state->nof_contained++;
       }
@@ -456,9 +456,9 @@ static inline int processleafedge_spmvar(bool firstsucc,
 }
 
 static inline int processbranchingedge_spmeq(GT_UNUSED bool firstsucc,
-    unsigned long fatherdepth,
-    GT_UNUSED GtBUinfo_spmeq *afather, GT_UNUSED unsigned long sondepth,
-    GT_UNUSED unsigned long sonwidth,
+    GtUword fatherdepth,
+    GT_UNUSED GtBUinfo_spmeq *afather, GT_UNUSED GtUword sondepth,
+    GT_UNUSED GtUword sonwidth,
     GT_UNUSED GtBUinfo_spmeq *ason, GT_UNUSED GtBUstate_spmeq *state,
     GT_UNUSED GtError *err)
 {
@@ -473,9 +473,9 @@ static inline int processbranchingedge_spmeq(GT_UNUSED bool firstsucc,
 }
 
 static inline int processbranchingedge_spmvar(GT_UNUSED bool firstsucc,
-    unsigned long fatherdepth,
-    GT_UNUSED GtBUinfo_spmvar *afather, GT_UNUSED unsigned long sondepth,
-    GT_UNUSED unsigned long sonwidth,
+    GtUword fatherdepth,
+    GT_UNUSED GtBUinfo_spmvar *afather, GT_UNUSED GtUword sondepth,
+    GT_UNUSED GtUword sonwidth,
     GT_UNUSED GtBUinfo_spmvar *ason, GT_UNUSED GtBUstate_spmvar *state,
     GT_UNUSED GtError *err)
 {
@@ -489,12 +489,12 @@ static inline int processbranchingedge_spmvar(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int processlcpinterval_spmvar(unsigned long lcp,
+static int processlcpinterval_spmvar(GtUword lcp,
     GtBUinfo_spmvar *info, GtBUstate_spmvar *state, GT_UNUSED GtError *err)
 {
   if (lcp >= state->minmatchlength)
   {
-    unsigned long i;
+    GtUword i;
     for (i = 0; i < state->l_nextfree; i++)
     {
       combine_terminal_with_wset(state->l_set[i],
@@ -509,10 +509,10 @@ static int processlcpinterval_spmvar(unsigned long lcp,
 
 #ifdef GT_READJOINER_STATISTICS
 
-static int show_disc_distri_datapoint_spm(unsigned long key,
-    unsigned long long value, GtFile *outfile)
+static int show_disc_distri_datapoint_spm(GtUword key,
+    GtUint64 value, GtFile *outfile)
 {
-  gt_file_xprintf(outfile, "%lu "GT_LLU"\n", key, value);
+  gt_file_xprintf(outfile, ""GT_LU" "GT_LLU"\n", key, value);
   return 0;
 }
 
@@ -537,77 +537,77 @@ void show_wsize_distri_spm(GtBUstate_spmeq *state)
 
 static void showstatistics_spm(GtBUstate_spmeq *state)
 {
-  unsigned long nof_correct_dir_transitive;
+  GtUword nof_correct_dir_transitive;
 
   gt_logger_log(state->verbose_logger, "--- statistics for thread %u ---",
       state->threadnum);
 
   /* encseq */
-  gt_logger_log(state->verbose_logger, "encseq: number of reads: %lu",
+  gt_logger_log(state->verbose_logger, "encseq: number of reads: "GT_LU"",
       gt_encseq_num_of_sequences(state->encseq));
-  gt_logger_log(state->verbose_logger, "encseq: total length: %lu",
+  gt_logger_log(state->verbose_logger, "encseq: total length: "GT_LU"",
       state->totallength);
 
   /* subtrees */
-  gt_logger_log(state->verbose_logger, "subtrees: number: %lu",
+  gt_logger_log(state->verbose_logger, "subtrees: number: "GT_LU"",
       state->nof_subtrees);
 
   /* terminals */
-  gt_logger_log(state->verbose_logger, "terminals: all: %lu",
+  gt_logger_log(state->verbose_logger, "terminals: all: "GT_LU"",
       state->nof_terminals);
-  gt_logger_log(state->verbose_logger, "terminals: on w-paths %lu",
+  gt_logger_log(state->verbose_logger, "terminals: on w-paths "GT_LU"",
       state->nof_combinable_terminals);
-  gt_logger_log(state->verbose_logger, "terminals: max in subtree: %lu",
+  gt_logger_log(state->verbose_logger, "terminals: max in subtree: "GT_LU"",
       state->max_nof_terminals_in_subtree);
   gt_logger_log(state->verbose_logger,
-      "terminals: combinations with w-paths: %lu", state->nof_t_w_combinations);
+      "terminals: combinations with w-paths: "GT_LU"", state->nof_t_w_combinations);
   show_wsize_distri_spm(state);
 
   /* spm */
   gt_logger_log(state->verbose_logger,
-      "spm: irreducible - correct-direction: %lu", state->nofvalidspm);
+      "spm: irreducible - correct-direction: "GT_LU"", state->nofvalidspm);
   gt_logger_log(state->verbose_logger,
-      "spm: irreducible - wrong-direction: %lu", state->nof_wrong_direction);
+      "spm: irreducible - wrong-direction: "GT_LU"", state->nof_wrong_direction);
   gt_logger_log(state->verbose_logger, "spm: transitive - "
-      "derived from own revcompl: %lu", state->nof_transitive_withrc);
+      "derived from own revcompl: "GT_LU"", state->nof_transitive_withrc);
   gt_logger_log(state->verbose_logger, "spm: transitive - correct/wrong dir - "
-      "derived from other: %lu", state->nof_transitive_other);
-  nof_correct_dir_transitive = (unsigned long)(state->nof_transitive_withrc) +
-    (unsigned long)(state->nof_transitive_other >> 1);
+      "derived from other: "GT_LU"", state->nof_transitive_other);
+  nof_correct_dir_transitive = (GtUword)(state->nof_transitive_withrc) +
+    (GtUword)(state->nof_transitive_other >> 1);
   gt_logger_log(state->verbose_logger, "spm: transitive - "
-      "correct direction: %lu", nof_correct_dir_transitive);
-  gt_logger_log(state->verbose_logger, "spm: max in subtree: %lu",
+      "correct direction: "GT_LU"", nof_correct_dir_transitive);
+  gt_logger_log(state->verbose_logger, "spm: max in subtree: "GT_LU"",
       state->max_nof_overlaps_in_subtree);
 
   /* l_set */
-  gt_logger_log(state->verbose_logger, "l_set: max nextfree: %lu",
+  gt_logger_log(state->verbose_logger, "l_set: max nextfree: "GT_LU"",
       state->max_l_nextfree);
-  gt_logger_log(state->verbose_logger, "l_set: sizeof: %lu",
-      (unsigned long)(sizeof (state->l_set)));
-  gt_logger_log(state->verbose_logger, "l_set: initial alloc: %lu (%lu bytes)",
+  gt_logger_log(state->verbose_logger, "l_set: sizeof: "GT_LU"",
+      (GtUword)(sizeof (state->l_set)));
+  gt_logger_log(state->verbose_logger, "l_set: initial alloc: "GT_LU" ("GT_LU" bytes)",
       state->initial_l_allocated, state->initial_l_allocated *
       sizeof (state->l_set));
-  gt_logger_log(state->verbose_logger, "l_set: final alloc: %lu (%lu bytes)",
+  gt_logger_log(state->verbose_logger, "l_set: final alloc: "GT_LU" ("GT_LU" bytes)",
       state->l_allocated, state->l_allocated * sizeof (state->l_set));
-  gt_logger_log(state->verbose_logger, "l_set: reallocs: %lu",
+  gt_logger_log(state->verbose_logger, "l_set: reallocs: "GT_LU"",
       state->nof_l_set_realloc);
 
   /* w_set */
-  gt_logger_log(state->verbose_logger, "w_set: max nextfree: %lu",
+  gt_logger_log(state->verbose_logger, "w_set: max nextfree: "GT_LU"",
       state->max_w_nextfree);
-  gt_logger_log(state->verbose_logger, "w_set: sizeof: %lu",
-      (unsigned long)(sizeof (WholereadInfo)));
-  gt_logger_log(state->verbose_logger, "w_set: initial alloc: %lu (%lu bytes)",
+  gt_logger_log(state->verbose_logger, "w_set: sizeof: "GT_LU"",
+      (GtUword)(sizeof (WholereadInfo)));
+  gt_logger_log(state->verbose_logger, "w_set: initial alloc: "GT_LU" ("GT_LU" bytes)",
       state->initial_w_allocated,
       state->initial_w_allocated * sizeof (WholereadInfo));
-  gt_logger_log(state->verbose_logger, "w_set: final alloc: %lu (%lu bytes)",
+  gt_logger_log(state->verbose_logger, "w_set: final alloc: "GT_LU" ("GT_LU" bytes)",
       state->w_allocated, state->w_allocated * sizeof (WholereadInfo));
-  gt_logger_log(state->verbose_logger, "w_set: reallocs: %lu",
+  gt_logger_log(state->verbose_logger, "w_set: reallocs: "GT_LU"",
       state->nof_w_set_realloc);
-  gt_logger_log(state->verbose_logger, "w_set: largest blindtrie: %lu bytes",
+  gt_logger_log(state->verbose_logger, "w_set: largest blindtrie: "GT_LU" bytes",
       state->max_blindtrie_size);
   gt_logger_log(state->verbose_logger, "w_set: sum of blindtrie sizes: "
-      "%lu bytes", state->max_total_blindtrie_size);
+      ""GT_LU" bytes", state->max_total_blindtrie_size);
 }
 #endif
 
@@ -616,7 +616,7 @@ static void showstatistics_spm(GtBUstate_spmeq *state)
 #include "esa-bottomup-spmvar.inc"
 
 static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
-    unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
+    GtUword minmatchlength, GtUword w_maxsize, bool elimtrans,
     bool showspm, const char *indexname, unsigned int threadnum,
     GtLogger *default_logger, GtLogger *verbose_logger, GtError *err)
 {
@@ -660,22 +660,22 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
     gt_logger_log(verbose_logger, "readset name = %s", indexname);
     if (state->first_revcompl == 0)
       gt_logger_log(verbose_logger, "single strand mode");
-    gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
+    gt_logger_log(default_logger, "number of reads in filtered readset = "GT_LU"",
         state->first_revcompl > 0 ? state->first_revcompl : state->nofreads);
-    gt_logger_log(verbose_logger, "total length of filtered readset = %lu",
+    gt_logger_log(verbose_logger, "total length of filtered readset = "GT_LU"",
         gt_encseq_is_mirrored(encseq) ? (state->totallength -
           state->nofreads + 1) >> 1 : (state->totallength -
             state->nofreads + 1));
     if (eqlen)
-      gt_logger_log(verbose_logger, "read length = %lu", state->read_length);
+      gt_logger_log(verbose_logger, "read length = "GT_LU"", state->read_length);
     else
       gt_logger_log(verbose_logger, "read length = variable");
-    gt_logger_log(verbose_logger, "minimal match length = %lu",
+    gt_logger_log(verbose_logger, "minimal match length = "GT_LU"",
         state->minmatchlength);
     if (w_maxsize == 0)
       gt_logger_log(verbose_logger, "wset size limit = unlimited");
     else
-      gt_logger_log(verbose_logger, "wset size limit = %lu",
+      gt_logger_log(verbose_logger, "wset size limit = "GT_LU"",
           state->w_maxsize);
     gt_logger_log(verbose_logger, "eliminate transitive SPM = %s",
         state->elimtrans ? "true" : "false");
@@ -736,7 +736,7 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
 }
 
 GtBUstate_spmeq *gt_spmfind_eqlen_state_new(const GtEncseq *encseq,
-    unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
+    GtUword minmatchlength, GtUword w_maxsize, bool elimtrans,
     bool showspm, const char *indexname, unsigned int threadnum,
     GtLogger *default_logger, GtLogger *verbose_logger, GtError *err)
 {
@@ -746,7 +746,7 @@ GtBUstate_spmeq *gt_spmfind_eqlen_state_new(const GtEncseq *encseq,
 }
 
 GtBUstate_spmvar *gt_spmfind_varlen_state_new(const GtEncseq *encseq,
-    unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
+    GtUword minmatchlength, GtUword w_maxsize, bool elimtrans,
     bool showspm, const char *indexname, unsigned int threadnum,
     GtLogger *default_logger, GtLogger *verbose_logger, GtError *err)
 {
@@ -755,32 +755,32 @@ GtBUstate_spmvar *gt_spmfind_varlen_state_new(const GtEncseq *encseq,
       verbose_logger, err);
 }
 
-static unsigned long gt_spmfind_nof_trans_spm(GtBUstate_spm *state)
+static GtUword gt_spmfind_nof_trans_spm(GtBUstate_spm *state)
 {
   return state->nof_transitive_withrc + (state->nof_transitive_other >> 1);
 }
 
-static unsigned long gt_spmfind_nof_irr_spm(GtBUstate_spm *state)
+static GtUword gt_spmfind_nof_irr_spm(GtBUstate_spm *state)
 {
   return state->nofvalidspm;
 }
 
-unsigned long gt_spmfind_varlen_nof_trans_spm(GtBUstate_spmvar *state)
+GtUword gt_spmfind_varlen_nof_trans_spm(GtBUstate_spmvar *state)
 {
   return gt_spmfind_nof_trans_spm(state);
 }
 
-unsigned long gt_spmfind_varlen_nof_irr_spm(GtBUstate_spmvar *state)
+GtUword gt_spmfind_varlen_nof_irr_spm(GtBUstate_spmvar *state)
 {
   return gt_spmfind_nof_irr_spm(state);
 }
 
-unsigned long gt_spmfind_eqlen_nof_trans_spm(GtBUstate_spmeq *state)
+GtUword gt_spmfind_eqlen_nof_trans_spm(GtBUstate_spmeq *state)
 {
   return gt_spmfind_nof_trans_spm(state);
 }
 
-unsigned long gt_spmfind_eqlen_nof_irr_spm(GtBUstate_spmeq *state)
+GtUword gt_spmfind_eqlen_nof_irr_spm(GtBUstate_spmeq *state)
 {
   return gt_spmfind_nof_irr_spm(state);
 }
@@ -790,11 +790,11 @@ static void gt_spmfind_state_delete(bool eqlen, GtBUstate_spm *state)
   if (state != NULL)
   {
     gt_logger_log(state->verbose_logger, "number of %ssuffix-prefix matches "
-        "[thread %u] = %lu", state->elimtrans ? "irreducible " : "",
+        "[thread %u] = "GT_LU"", state->elimtrans ? "irreducible " : "",
         state->threadnum, state->nofvalidspm);
     if (state->elimtrans)
       gt_logger_log(state->verbose_logger, "number of transitive "
-          "suffix-prefix matches [thread %u] = %lu",
+          "suffix-prefix matches [thread %u] = "GT_LU"",
           state->threadnum, state->nof_transitive_withrc +
           (state->nof_transitive_other >> 1));
 #ifdef GT_READJOINER_STATISTICS
@@ -813,7 +813,7 @@ static void gt_spmfind_state_delete(bool eqlen, GtBUstate_spm *state)
       gt_str_append_cstr(path, GT_READJOINER_SUFFIX_CNTLIST);
 
       gt_logger_log(state->verbose_logger, "number of internally contained "
-          "reads [thread %u] = %lu", state->threadnum, state->nof_contained);
+          "reads [thread %u] = "GT_LU"", state->threadnum, state->nof_contained);
 
       gt_str_delete(path);
       gt_GtArrayGtBUItvinfo_delete_spmvar(
@@ -839,9 +839,9 @@ void gt_spmfind_varlen_state_delete(GtBUstate_spmeq *state)
 }
 
 int gt_spmfind_eqlen_process(void *data,
-    const unsigned long *seqnum_relpos_bucket, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long nonspecials,
-    unsigned long spaceforbucketprocessing, GtError *err)
+    const GtUword *seqnum_relpos_bucket, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword nonspecials,
+    GtUword spaceforbucketprocessing, GtError *err)
 {
   GtBUstate_spmeq *state = data;
   unsigned int nof_w_parts = 0;
@@ -887,9 +887,9 @@ void gt_spmfind_varlen_process_end(void *data)
 }
 
 int gt_spmfind_varlen_process(void *data,
-    const unsigned long *seqnum_relpos_bucket, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long nonspecials,
-    unsigned long spaceforbucketprocessing, GtError *err)
+    const GtUword *seqnum_relpos_bucket, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword nonspecials,
+    GtUword spaceforbucketprocessing, GtError *err)
 {
   GtBUstate_spmvar *state = data;
   unsigned int nof_w_parts = 0;

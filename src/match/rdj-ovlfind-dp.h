@@ -30,11 +30,11 @@
   - no notion of wildcards (i.e. n == n)
 */
 
-GtContfind gt_ovlfind_dp(const char *u, unsigned long m,
-    const char *v /* use NULL for self-comparison of u */, unsigned long n,
-    double max_error, GtOvlfindMode mode, unsigned long min_length,
-    bool find_submaximal, void (*smpproc) (unsigned long /* length on u */,
-    unsigned long /* length on v */, unsigned long /* unit edit distance */,
+GtContfind gt_ovlfind_dp(const char *u, GtUword m,
+    const char *v /* use NULL for self-comparison of u */, GtUword n,
+    double max_error, GtOvlfindMode mode, GtUword min_length,
+    bool find_submaximal, void (*smpproc) (GtUword /* length on u */,
+    GtUword /* length on v */, GtUword /* unit edit distance */,
     bool /* true if suffix comes from u, false if suffix comes from v */,
     void* /* procdata */), void* smpprocdata);
 

@@ -25,10 +25,10 @@
 #define REVERSESTRANDCHAR '-'
 
 static int parse_input_line(GtSSplicedAlignment **alignment, const char *line,
-                            unsigned long line_length, GtError *err)
+                            GtUword line_length, GtError *err)
 {
-  long leftpos, rightpos;
-  unsigned long i = 0;
+  GtWord leftpos, rightpos;
+  GtUword i = 0;
   GtRange exon;
   GtStr *id;
   int had_err = 0;
@@ -86,7 +86,7 @@ static int parse_input_line(GtSSplicedAlignment **alignment, const char *line,
     if (line[i] == DELIMITER) {
       i++;
       CHECKLINELENGTH;
-      if (!had_err && sscanf(line+i, "%ld-%ld", &leftpos, &rightpos) != 2) {
+      if (!had_err && sscanf(line+i, ""GT_LD"-"GT_LD"", &leftpos, &rightpos) != 2) {
         gt_error_set(err, "incomplete input line\nline=%s", line);
         had_err = -1;
       }

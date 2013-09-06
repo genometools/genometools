@@ -28,8 +28,8 @@ typedef GtCodonIteratorStatus (*CodonIteratorNextFunc)(GtCodonIterator*,
                                                        GtError*);
 typedef void                  (*CodonIteratorFreeFunc)(GtCodonIterator*);
 typedef void                  (*CodonIteratorRewindFunc)(GtCodonIterator*);
-typedef unsigned long         (*CodonIteratorCurrentPosFunc)(GtCodonIterator*);
-typedef unsigned long         (*CodonIteratorLengthFunc)(GtCodonIterator*);
+typedef GtUword         (*CodonIteratorCurrentPosFunc)(GtCodonIterator*);
+typedef GtUword         (*CodonIteratorLengthFunc)(GtCodonIterator*);
 
 typedef struct GtCodonIteratorMembers GtCodonIteratorMembers;
 
@@ -39,10 +39,10 @@ struct GtCodonIterator {
 };
 
 struct GtCodonIteratorMembers {
-  unsigned long length,
+  GtUword length,
                 curpos,
                 startpos;
-  unsigned long curframe;
+  GtUword curframe;
 };
 
 const GtCodonIteratorClass* gt_codon_iterator_class_new(size_t size,

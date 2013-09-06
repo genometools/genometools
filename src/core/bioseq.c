@@ -252,7 +252,7 @@ GtBioseq* gt_bioseq_new_str(GtStr *sequence_file, GtError *err)
 
 void gt_bioseq_delete(GtBioseq *bs)
 {
-  unsigned long i;
+  GtUword i;
   if (!bs) return;
   gt_str_delete(bs->sequence_file);
   gt_md5_tab_delete(bs->md5_tab);
@@ -272,7 +272,7 @@ GtAlphabet* gt_bioseq_get_alphabet(GtBioseq *bs)
   return gt_encseq_alphabet(bs->encseq);
 }
 
-GtSeq* gt_bioseq_get_seq(GtBioseq *bs, unsigned long idx)
+GtSeq* gt_bioseq_get_seq(GtBioseq *bs, GtUword idx)
 {
   GtSeq *seq;
   gt_assert(bs);
@@ -284,8 +284,8 @@ GtSeq* gt_bioseq_get_seq(GtBioseq *bs, unsigned long idx)
   return seq;
 }
 
-GtSeq* gt_bioseq_get_seq_range(GtBioseq *bs, unsigned long idx,
-                               unsigned long start, unsigned long end)
+GtSeq* gt_bioseq_get_seq_range(GtBioseq *bs, GtUword idx,
+                               GtUword start, GtUword end)
 {
   GtSeq *seq;
   gt_assert(bs);
@@ -299,11 +299,11 @@ GtSeq* gt_bioseq_get_seq_range(GtBioseq *bs, unsigned long idx,
   return seq;
 }
 
-const char* gt_bioseq_get_description(GtBioseq *bs, unsigned long idx)
+const char* gt_bioseq_get_description(GtBioseq *bs, GtUword idx)
 {
   const char *desc;
   char *mydesc;
-  unsigned long desclen;
+  GtUword desclen;
   gt_assert(bs && bs->encseq);
   gt_assert(idx < gt_encseq_num_of_sequences(bs->encseq));
   if (!(mydesc = bs->descriptions[idx])) {
@@ -315,10 +315,10 @@ const char* gt_bioseq_get_description(GtBioseq *bs, unsigned long idx)
   return (const char*) mydesc;
 }
 
-char gt_bioseq_get_char(const GtBioseq *bs, unsigned long index,
-                        unsigned long position)
+char gt_bioseq_get_char(const GtBioseq *bs, GtUword index,
+                        GtUword position)
 {
-  unsigned long startpos;
+  GtUword startpos;
   gt_assert(bs);
   gt_assert(index < gt_encseq_num_of_sequences(bs->encseq));
   startpos = gt_encseq_seqstartpos(bs->encseq, index);
@@ -326,10 +326,10 @@ char gt_bioseq_get_char(const GtBioseq *bs, unsigned long index,
                                     GT_READMODE_FORWARD);
 }
 
-char* gt_bioseq_get_sequence(const GtBioseq *bs, unsigned long idx)
+char* gt_bioseq_get_sequence(const GtBioseq *bs, GtUword idx)
 {
   char *out;
-  unsigned long startpos;
+  GtUword startpos;
   gt_assert(bs);
   gt_assert(idx < gt_encseq_num_of_sequences(bs->encseq));
   out = gt_calloc(gt_encseq_seqlength(bs->encseq, idx), sizeof (char));
@@ -340,11 +340,11 @@ char* gt_bioseq_get_sequence(const GtBioseq *bs, unsigned long idx)
   return out;
 }
 
-char* gt_bioseq_get_sequence_range(const GtBioseq *bs, unsigned long idx,
-                                   unsigned long start, unsigned long end)
+char* gt_bioseq_get_sequence_range(const GtBioseq *bs, GtUword idx,
+                                   GtUword start, GtUword end)
 {
   char *out;
-  unsigned long startpos;
+  GtUword startpos;
   gt_assert(bs);
   gt_assert(idx < gt_encseq_num_of_sequences(bs->encseq) && end >= start);
   out = gt_malloc((end - start + 1) * sizeof (char));
@@ -353,10 +353,10 @@ char* gt_bioseq_get_sequence_range(const GtBioseq *bs, unsigned long idx,
   return out;
 }
 
-GtUchar gt_bioseq_get_encoded_char(const GtBioseq *bs, unsigned long index,
-                                   unsigned long position)
+GtUchar gt_bioseq_get_encoded_char(const GtBioseq *bs, GtUword index,
+                                   GtUword position)
 {
-  unsigned long startpos;
+  GtUword startpos;
   gt_assert(bs);
   gt_assert(index < gt_encseq_num_of_sequences(bs->encseq));
   startpos = gt_encseq_seqstartpos(bs->encseq, index);
@@ -365,9 +365,9 @@ GtUchar gt_bioseq_get_encoded_char(const GtBioseq *bs, unsigned long index,
 }
 
 void gt_bioseq_get_encoded_sequence(const GtBioseq *bs, GtUchar *out,
-                                    unsigned long idx)
+                                    GtUword idx)
 {
-  unsigned long startpos;
+  GtUword startpos;
   gt_assert(bs);
   gt_assert(idx < gt_encseq_num_of_sequences(bs->encseq));
   startpos = gt_encseq_seqstartpos(bs->encseq, idx);
@@ -377,18 +377,18 @@ void gt_bioseq_get_encoded_sequence(const GtBioseq *bs, GtUchar *out,
 }
 
 void gt_bioseq_get_encoded_sequence_range(const GtBioseq *bs, GtUchar *out,
-                                          unsigned long idx,
-                                          unsigned long start,
-                                          unsigned long end)
+                                          GtUword idx,
+                                          GtUword start,
+                                          GtUword end)
 {
-  unsigned long startpos;
+  GtUword startpos;
   gt_assert(bs);
   gt_assert(idx < gt_encseq_num_of_sequences(bs->encseq) && end >= start);
   startpos = gt_encseq_seqstartpos(bs->encseq, idx);
   gt_encseq_extract_encoded(bs->encseq, out, startpos + start, startpos + end);
 }
 
-const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
+const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, GtUword idx)
 {
   gt_assert(bs && idx < gt_bioseq_number_of_sequences(bs));
   if (!bs->md5_tab) {
@@ -404,27 +404,27 @@ const char* gt_bioseq_filename(const GtBioseq *bs)
   return gt_str_get(bs->sequence_file);
 }
 
-unsigned long gt_bioseq_get_sequence_length(const GtBioseq *bs,
-                                            unsigned long idx)
+GtUword gt_bioseq_get_sequence_length(const GtBioseq *bs,
+                                            GtUword idx)
 {
   gt_assert(bs);
   return gt_encseq_seqlength(bs->encseq, idx);
 }
 
-unsigned long gt_bioseq_get_total_length(const GtBioseq *bs)
+GtUword gt_bioseq_get_total_length(const GtBioseq *bs)
 {
   gt_assert(bs);
   return gt_encseq_total_length(bs->encseq)
            - gt_encseq_num_of_sequences(bs->encseq) + 1;
 }
 
-unsigned long gt_bioseq_number_of_sequences(GtBioseq *bs)
+GtUword gt_bioseq_number_of_sequences(GtBioseq *bs)
 {
   gt_assert(bs);
   return gt_encseq_num_of_sequences(bs->encseq);
 }
 
-unsigned long gt_bioseq_md5_to_index(GtBioseq *bs, const char *md5)
+GtUword gt_bioseq_md5_to_index(GtBioseq *bs, const char *md5)
 {
   gt_assert(bs && md5 && gt_encseq_has_md5_support(bs->encseq));
   if (!bs->md5_tab) {
@@ -433,9 +433,9 @@ unsigned long gt_bioseq_md5_to_index(GtBioseq *bs, const char *md5)
   return gt_md5_tab_map(bs->md5_tab, md5);
 }
 
-void gt_bioseq_show_as_fasta(GtBioseq *bs, unsigned long width, GtFile *outfp)
+void gt_bioseq_show_as_fasta(GtBioseq *bs, GtUword width, GtFile *outfp)
 {
-  unsigned long i;
+  GtUword i;
 
   gt_assert(bs);
 
@@ -448,8 +448,8 @@ void gt_bioseq_show_as_fasta(GtBioseq *bs, unsigned long width, GtFile *outfp)
   }
 }
 
-void gt_bioseq_show_sequence_as_fasta(GtBioseq *bs, unsigned long seqnum,
-                                      unsigned long width, GtFile *outfp)
+void gt_bioseq_show_sequence_as_fasta(GtBioseq *bs, GtUword seqnum,
+                                      GtUword width, GtFile *outfp)
 {
   char *seq = NULL;
   gt_assert(bs);
@@ -467,7 +467,7 @@ void gt_bioseq_show_gc_content(GtBioseq *bs, GtFile *outfp)
 {
   gt_assert(bs);
   if (gt_alphabet_is_dna(gt_encseq_alphabet(bs->encseq))) {
-    unsigned long i, GT_UNUSED purecharlen;
+    GtUword i, GT_UNUSED purecharlen;
     GtStr *str = gt_str_new();
     purecharlen = gt_encseq_total_length(bs->encseq)
                     - gt_encseq_num_of_sequences(bs->encseq) + 1;
@@ -490,17 +490,17 @@ void gt_bioseq_show_gc_content(GtBioseq *bs, GtFile *outfp)
 
 void gt_bioseq_show_stat(GtBioseq *bs, GtFile *outfp)
 {
-  unsigned long i, num_of_seqs;
+  GtUword i, num_of_seqs;
   gt_assert(bs);
   num_of_seqs = gt_bioseq_number_of_sequences(bs);
   gt_file_xprintf(outfp, "showing statistics for sequence file \"%s\"\n",
                   gt_str_get(bs->sequence_file));
-  gt_file_xprintf(outfp, "number of sequences: %lu\n", num_of_seqs);
-  gt_file_xprintf(outfp, "total length: %lu\n",
+  gt_file_xprintf(outfp, "number of sequences: "GT_LU"\n", num_of_seqs);
+  gt_file_xprintf(outfp, "total length: "GT_LU"\n",
                     gt_encseq_total_length(bs->encseq)
                       - gt_encseq_num_of_sequences(bs->encseq) + 1);
   for (i = 0; i < num_of_seqs; i++) {
-    gt_file_xprintf(outfp, "sequence #%lu length: %lu\n", i+1,
+    gt_file_xprintf(outfp, "sequence #"GT_LU" length: "GT_LU"\n", i+1,
                     gt_bioseq_get_sequence_length(bs, i));
   }
 }
@@ -508,7 +508,7 @@ void gt_bioseq_show_stat(GtBioseq *bs, GtFile *outfp)
 void gt_bioseq_show_seqlengthdistri(GtBioseq *bs, GtFile *outfp)
 {
   GtDiscDistri *d;
-  unsigned long i;
+  GtUword i;
   gt_assert(bs);
   d = gt_disc_distri_new();
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++)

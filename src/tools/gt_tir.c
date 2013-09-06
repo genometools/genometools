@@ -35,7 +35,7 @@
 /* struct with all arguments */
 typedef struct {
   GtStr *str_indexname, *cutoffs;
-  unsigned long min_seed_length,
+  GtUword min_seed_length,
                 min_TIR_length,
                 max_TIR_length,
                 min_TIR_distance,

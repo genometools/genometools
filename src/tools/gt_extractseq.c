@@ -33,7 +33,7 @@
 typedef struct {
   GtStr *pattern,
         *fastakeyfile;
-  unsigned long frompos,
+  GtUword frompos,
                 topos,
                 width;
   GtOutputFileInfo *ofi;
@@ -139,13 +139,13 @@ static int gt_extractseq_arguments_check(GT_UNUSED int argc,
 }
 
 static int extractseq_pos(GtFile *outfp, GtBioseq *bs,
-                          unsigned long frompos, unsigned long topos,
-                          unsigned long width, GtError *err)
+                          GtUword frompos, GtUword topos,
+                          GtUword width, GtError *err)
 {
   int had_err = 0;
   GtStr *buf;
   char *out = NULL;
-  unsigned long accupos = 0,
+  GtUword accupos = 0,
                 newstartpos = 0,
                 len = topos - frompos + 1,
                 i = 0;
@@ -154,8 +154,8 @@ static int extractseq_pos(GtFile *outfp, GtBioseq *bs,
 
   if (frompos > gt_bioseq_get_total_length(bs)
         || topos > gt_bioseq_get_total_length(bs)) {
-    gt_error_set(err, "invalid position pair %lu-%lu one value is larger than "
-                      "sequence length %lu", frompos, topos,
+    gt_error_set(err, "invalid position pair "GT_LU"-"GT_LU" one value is larger than "
+                      "sequence length "GT_LU"", frompos, topos,
                       gt_bioseq_get_total_length(bs));
     return -1;
   }
@@ -185,7 +185,7 @@ static int extractseq_pos(GtFile *outfp, GtBioseq *bs,
     gt_free(out);
   } else {
     /* yes, first output the part on this sequence... */
-    unsigned long restlen = gt_bioseq_get_sequence_length(bs, i) - newstartpos,
+    GtUword restlen = gt_bioseq_get_sequence_length(bs, i) - newstartpos,
                   restfulllen = topos - accupos + 1;
     out = gt_bioseq_get_sequence_range(bs, i, newstartpos,
                                        newstartpos + restlen - 1);
@@ -197,7 +197,7 @@ static int extractseq_pos(GtFile *outfp, GtBioseq *bs,
     /* ...then determine whether we need to output full seqs in between... */
     while (restfulllen > gt_bioseq_get_sequence_length(bs, i)
              && i < gt_bioseq_number_of_sequences(bs) - 1) {
-      unsigned long thislen = gt_bioseq_get_sequence_length(bs, i);
+      GtUword thislen = gt_bioseq_get_sequence_length(bs, i);
       out = gt_bioseq_get_sequence_range(bs, i, 0, thislen - 1);
       gt_str_append_cstr_nt(buf, out, thislen);
       gt_free(out);
@@ -219,11 +219,11 @@ static int extractseq_pos(GtFile *outfp, GtBioseq *bs,
 }
 
 static int extractseq_match(GtFile *outfp, GtBioseq *bs,
-                            const char *pattern, unsigned long width,
+                            const char *pattern, GtUword width,
                             GtError *err)
 {
   const char *desc;
-  unsigned long i;
+  GtUword i;
   bool match;
   int had_err = 0;
 
@@ -246,7 +246,7 @@ static int extractseq_match(GtFile *outfp, GtBioseq *bs,
 }
 
 static int process_fastakeyfile(GtStr *fastakeyfile, int argc,
-                                const char **argv, unsigned long width,
+                                const char **argv, GtUword width,
                                 GtFile *outfp, GtError *err)
 {
   int had_err = 0;

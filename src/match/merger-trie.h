@@ -25,7 +25,7 @@
 typedef struct
 {
   unsigned int idx;
-  unsigned long startpos;
+  GtUword startpos;
 #ifdef WITHTRIEIDENT
   uint64_t  ident;
 #endif
@@ -37,7 +37,7 @@ typedef struct Mergertrienode
   struct Mergertrienode *firstchild,
                         *rightsibling,
                         *parent;
-  unsigned long depth;
+  GtUword depth;
 } Mergertrienode;
 
 typedef Mergertrienode * Mergertrienodeptr;
@@ -80,7 +80,7 @@ void gt_mergertrie_deletesmallestpath(Mergertrienode *smallest,
                                    Mergertrierep *trierep);
 
 void gt_mergertrie_initnodetable(Mergertrierep *trierep,
-                              unsigned long numofsuffixes,
+                              GtUword numofsuffixes,
                               unsigned int numofindexes);
 
 void gt_mergertrie_delete(Mergertrierep *trierep);

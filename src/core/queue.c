@@ -226,7 +226,7 @@ int gt_queue_iterate_reverse(GtQueue *q, GtQueueProcessor gt_queue_processor,
   return 0;
 }
 
-unsigned long gt_queue_size(const GtQueue *q)
+GtUword gt_queue_size(const GtQueue *q)
 {
   gt_assert(q);
   if ((q->front < q->back) || ((q->front == 0) && (q->back == 0)))
@@ -290,7 +290,7 @@ static int fail_func(GT_UNUSED void **elem, GT_UNUSED void *info,
 int gt_queue_unit_test(GtError *err)
 {
   long check_counter = 0, check_counter_reverse = 1023;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   GtQueue *q;
 

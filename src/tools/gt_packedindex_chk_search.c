@@ -37,8 +37,8 @@
 struct chkSearchOptions
 {
   struct bwtOptions idx;
-  long minPatLen, maxPatLen;
-  unsigned long numOfSamples, progressInterval;
+  GtWord minPatLen, maxPatLen;
+  GtUword numOfSamples, progressInterval;
   int flags;
   bool verboseOutput;
 };
@@ -115,8 +115,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       EMIterInitialized = true;
     }
     {
-      unsigned long totalLen, dbstart;
-      unsigned long trial, patternLen;
+      GtUword totalLen, dbstart;
+      GtUword trial, patternLen;
 
       if ((had_err =
            gt_mapsuffixarray(&suffixarray, SARR_SUFTAB | SARR_ESQTAB,
@@ -131,7 +131,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
                       && params.minPatLen > params.maxPatLen)))
       {
-        gt_error_set(err, "Invalid pattern lengths selected: min=%ld, max=%ld;"
+        gt_error_set(err, "Invalid pattern lengths selected: min="GT_LD", max="GT_LD";"
                   " min <= max is required.", params.minPatLen,
                   params.maxPatLen);
         break;
@@ -156,12 +156,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
         else
           params.maxPatLen = MAX(params.maxPatLen, params.minPatLen);
       }
-      fprintf(stderr, "Using patterns of lengths %lu to %lu\n",
+      fprintf(stderr, "Using patterns of lengths "GT_LU" to "GT_LU"\n",
               params.minPatLen, params.maxPatLen);
       if ((had_err = totalLen + 1 != BWTSeqLength(bwtSeq)))
       {
         gt_error_set(err, "base suffix array and index have diferrent lengths!"
-                          "%lu vs. %lu",  totalLen + 1,
+                          ""GT_LU" vs. "GT_LU"",  totalLen + 1,
                   BWTSeqLength(bwtSeq));
         break;
       }
@@ -201,7 +201,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                       == gt_mmsearchiterator_count(mmsi));
           while (gt_mmsearchiterator_next(&dbstart,mmsi))
           {
-            unsigned long matchPos = 0;
+            GtUword matchPos = 0;
             bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = !match))
             {
@@ -212,13 +212,13 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
             if ((had_err = matchPos != dbstart))
             {
               gt_error_set(err, "packedindex match doesn't equal mmsearch "
-                           "match result!\n%lu vs. %lu\n",
+                           "match result!\n"GT_LU" vs. "GT_LU"\n",
                            matchPos, dbstart);
             }
           }
           if (!had_err)
           {
-            unsigned long matchPos;
+            GtUword matchPos;
             bool trailingMatch = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = trailingMatch))
             {
@@ -229,14 +229,14 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
         }
         else
         {
-          unsigned long numFMIMatches = gt_BWTSeqMatchCount(bwtSeq, pptr,
+          GtUword numFMIMatches = gt_BWTSeqMatchCount(bwtSeq, pptr,
                                                          patternLen,
                                                          false),
             numMMSearchMatches = gt_mmsearchiterator_count(mmsi);
           if ((had_err = numFMIMatches != numMMSearchMatches))
           {
             gt_error_set(err, "Number of matches not equal for suffix array ("
-                              "%lu) and fmindex (%lu).\n",
+                              ""GT_LU") and fmindex ("GT_LU").\n",
                       numFMIMatches, numMMSearchMatches);
           }
         }
@@ -247,7 +247,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       }
       if (params.progressInterval)
         putc('\n', stderr);
-      fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
+      fprintf(stderr, "Finished "GT_LU" of "GT_LU" matchings successfully.\n",
               trial, params.numOfSamples);
     }
   } while (0);

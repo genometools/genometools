@@ -28,7 +28,7 @@ struct GtMD5Tab{
   FILE *fingerprints_file; /* used to lock the memory mapped fingerprints */
   char *fingerprints; /* holds memory mapped fingerprints */
   char **md5_fingerprints;
-  unsigned long num_of_md5s,
+  GtUword num_of_md5s,
                 reference_count;
   bool owns_md5s;
   GtHashmap *md5map; /* maps md5 to index */
@@ -61,9 +61,9 @@ static bool read_fingerprints(GtMD5Tab *md5_tab,
 
 static void add_fingerprints(char **md5_fingerprints, void *seqs,
                              GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
-                             unsigned long num_of_seqs)
+                             GtUword num_of_seqs)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(md5_fingerprints && seqs && get_seq && get_seq_len);
   for (i = 0; i < num_of_seqs; i++) {
     md5_fingerprints[i] = gt_md5_fingerprint(get_seq(seqs, i),
@@ -72,9 +72,9 @@ static void add_fingerprints(char **md5_fingerprints, void *seqs,
 }
 
 static void dump_md5_fingerprints(char **md5_fingerprints,
-                                  unsigned long num_of_md5s, FILE *outfp)
+                                  GtUword num_of_md5s, FILE *outfp)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(md5_fingerprints && num_of_md5s && outfp);
   for (i = 0; i < num_of_md5s; i++) {
     gt_xfputs(md5_fingerprints[i], outfp);
@@ -83,7 +83,7 @@ static void dump_md5_fingerprints(char **md5_fingerprints,
 }
 
 static void write_fingerprints(char **md5_fingerprints,
-                               unsigned long num_of_md5s,
+                               GtUword num_of_md5s,
                                GtStr *fingerprints_filename,
                                bool use_file_locking)
 {
@@ -100,7 +100,7 @@ static void write_fingerprints(char **md5_fingerprints,
 
 GtMD5Tab* gt_md5_tab_new(const char *sequence_file, void *seqs,
                          GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
-                         unsigned long num_of_seqs, bool use_cache_file,
+                         GtUword num_of_seqs, bool use_cache_file,
                          bool use_file_locking)
 {
   GtMD5Tab *md5_tab;
@@ -134,7 +134,7 @@ GtMD5Tab* gt_md5_tab_new(const char *sequence_file, void *seqs,
 }
 
 GtMD5Tab* gt_md5_tab_new_from_cache_file(const char *cache_file,
-                                         unsigned long num_of_seqs,
+                                         GtUword num_of_seqs,
                                          bool use_file_locking,
                                          GtError *err)
 {
@@ -169,7 +169,7 @@ GtMD5Tab* gt_md5_tab_ref(GtMD5Tab *md5_tab)
 
 void gt_md5_tab_delete(GtMD5Tab *md5_tab)
 {
-  unsigned long i;
+  GtUword i;
   if (!md5_tab) return;
   if (md5_tab->reference_count) {
     md5_tab->reference_count--;
@@ -187,7 +187,7 @@ void gt_md5_tab_delete(GtMD5Tab *md5_tab)
   gt_free(md5_tab);
 }
 
-const char* gt_md5_tab_get(const GtMD5Tab *md5_tab, unsigned long idx)
+const char* gt_md5_tab_get(const GtMD5Tab *md5_tab, GtUword idx)
 {
   gt_assert(md5_tab && idx < md5_tab->num_of_md5s);
   if (md5_tab->owns_md5s)
@@ -197,7 +197,7 @@ const char* gt_md5_tab_get(const GtMD5Tab *md5_tab, unsigned long idx)
 
 static void build_md5map(GtMD5Tab *md5_tab)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(md5_tab);
   md5_tab->md5map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
   for (i = 0; i < md5_tab->num_of_md5s; i++) {
@@ -206,7 +206,7 @@ static void build_md5map(GtMD5Tab *md5_tab)
   }
 }
 
-unsigned long gt_md5_tab_map(GtMD5Tab *md5_tab, const char *md5)
+GtUword gt_md5_tab_map(GtMD5Tab *md5_tab, const char *md5)
 {
   const char *value;
   gt_assert(md5_tab && md5);
@@ -215,11 +215,11 @@ unsigned long gt_md5_tab_map(GtMD5Tab *md5_tab, const char *md5)
   gt_assert(md5_tab->md5map);
   value = gt_hashmap_get(md5_tab->md5map, md5);
   if (value)
-    return ((unsigned long) value) - 1;
+    return ((GtUword) value) - 1;
   return GT_UNDEF_ULONG;
 }
 
-unsigned long gt_md5_tab_size(const GtMD5Tab *md5_tab)
+GtUword gt_md5_tab_size(const GtMD5Tab *md5_tab)
 {
   gt_assert(md5_tab);
   return md5_tab->num_of_md5s;

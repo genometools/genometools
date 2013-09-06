@@ -26,7 +26,7 @@ static void fillsplicedseq(unsigned char *splicedseq,
                            const unsigned char *origseq, GtArray *ranges)
 {
   const unsigned char *genomicptr;
-  unsigned long i;
+  GtUword i;
   gt_assert(ranges);
   for (i = 0; i < gt_array_size(ranges); i++) {
     for (genomicptr = origseq + ((GtRange*) gt_array_get(ranges, i))->start;
@@ -36,11 +36,11 @@ static void fillsplicedseq(unsigned char *splicedseq,
   }
 }
 
-static void computepositionmapping(unsigned long *positionmapping,
+static void computepositionmapping(GtUword *positionmapping,
                                    GtArray *ranges,
-                                   GT_UNUSED unsigned long splicedseqlen)
+                                   GT_UNUSED GtUword splicedseqlen)
 {
-  unsigned long i, rangecounter, templatepos = 0;
+  GtUword i, rangecounter, templatepos = 0;
   for (rangecounter = 0; rangecounter < gt_array_size(ranges); rangecounter++) {
     for (i = ((GtRange*) gt_array_get(ranges, rangecounter))->start;
          i <= ((GtRange*) gt_array_get(ranges, rangecounter))->end;
@@ -69,7 +69,7 @@ GthSplicedSeq* gth_spliced_seq_new(const unsigned char *sequence,
   /* allocate space */
   spliced_seq->splicedseq = gt_malloc(sizeof (unsigned char) *
                                       spliced_seq->splicedseqlen);
-  spliced_seq->positionmapping = gt_malloc(sizeof (unsigned long) *
+  spliced_seq->positionmapping = gt_malloc(sizeof (GtUword) *
                                            spliced_seq->splicedseqlen);
 
   /* processing */
@@ -112,7 +112,7 @@ void gth_spliced_seq_delete(GthSplicedSeq *spliced_seq)
 }
 
 bool gth_spliced_seq_pos_is_border(const GthSplicedSeq *spliced_seq,
-                                   unsigned long position)
+                                   GtUword position)
 {
   gt_assert(spliced_seq);
   /* position is legal */
@@ -125,17 +125,17 @@ bool gth_spliced_seq_pos_is_border(const GthSplicedSeq *spliced_seq,
   return false;
 }
 
-unsigned long gth_spliced_seq_border_length(const GthSplicedSeq *spliced_seq,
-                                            unsigned long position)
+GtUword gth_spliced_seq_border_length(const GthSplicedSeq *spliced_seq,
+                                            GtUword position)
 {
   gt_assert(gth_spliced_seq_pos_is_border(spliced_seq, position));
   return spliced_seq->positionmapping[position+1] -
          spliced_seq->positionmapping[position] - 1;
 }
 
-unsigned long gth_spliced_seq_num_of_borders(const GthSplicedSeq *spliced_seq)
+GtUword gth_spliced_seq_num_of_borders(const GthSplicedSeq *spliced_seq)
 {
-  unsigned long i, borders = 0;
+  GtUword i, borders = 0;
   gt_assert(spliced_seq);
   for (i = 0; i < spliced_seq->splicedseqlen; i++) {
     if (gth_spliced_seq_pos_is_border(spliced_seq, i))
@@ -146,18 +146,18 @@ unsigned long gth_spliced_seq_num_of_borders(const GthSplicedSeq *spliced_seq)
 
 static int cmpulong(const void *u1, const void *u2)
 {
-  return *(unsigned long*) u1 - *(unsigned long*) u2;
+  return *(GtUword*) u1 - *(GtUword*) u2;
 }
 
-unsigned long gth_spliced_seq_orig_to_spliced_pos(const GthSplicedSeq
+GtUword gth_spliced_seq_orig_to_spliced_pos(const GthSplicedSeq
                                                   *spliced_seq,
-                                                  unsigned long orig_pos)
+                                                  GtUword orig_pos)
 {
-  unsigned long *splicedposptr ;
+  GtUword *splicedposptr ;
   gt_assert(spliced_seq);
   splicedposptr = bsearch(&orig_pos, spliced_seq->positionmapping,
                           spliced_seq->splicedseqlen,
-                          sizeof (unsigned long), cmpulong);
+                          sizeof (GtUword), cmpulong);
   if (splicedposptr)
     return splicedposptr - spliced_seq->positionmapping;
   return GT_UNDEF_ULONG;

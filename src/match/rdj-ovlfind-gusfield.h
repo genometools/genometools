@@ -21,7 +21,7 @@
 #include "match/rdj-spmproc.h"
 
 void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
-    unsigned long min_length, bool find_submaximal, bool show_progressbar,
-    unsigned long firstrevcompl, GtSpmproc proc, void* procdata);
+    GtUword min_length, bool find_submaximal, bool show_progressbar,
+    GtUword firstrevcompl, GtSpmproc proc, void* procdata);
 
 #endif

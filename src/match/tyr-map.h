@@ -28,14 +28,14 @@ typedef struct Tyrindex Tyrindex;
 Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err);
 const GtUchar *gt_tyrindex_mertable(const Tyrindex *tyrindex);
 const GtUchar *gt_tyrindex_lastmer(const Tyrindex *tyrindex);
-unsigned long gt_tyrindex_merbytes(const Tyrindex *tyrindex);
+GtUword gt_tyrindex_merbytes(const Tyrindex *tyrindex);
 unsigned int gt_tyrindex_alphasize(const Tyrindex *tyrindex);
-unsigned long gt_tyrindex_mersize(const Tyrindex *tyrindex);
+GtUword gt_tyrindex_mersize(const Tyrindex *tyrindex);
 bool gt_tyrindex_isempty(const Tyrindex *tyrindex);
 void gt_tyrindex_show(const Tyrindex *tyrindex);
 void gt_tyrindex_delete(Tyrindex **tyrindexptr);
 /*@null@*/ const GtUchar *gt_tyrindex_binmersearch(const Tyrindex *tyrindex,
-                                              unsigned long offset,
+                                              GtUword offset,
                                               const GtUchar *key,
                                               const GtUchar *leftbound,
                                               const GtUchar *rightbound);
@@ -44,15 +44,15 @@ int gt_determinetyrbckpfxlen(unsigned int *prefixlength,
                           const Tyrindex *tyrindex,
                           const Definedunsignedint *callprefixlength,
                           GtError *err);
-unsigned long gt_tyrindex_ptr2number(const Tyrindex *tyrindex,
+GtUword gt_tyrindex_ptr2number(const Tyrindex *tyrindex,
                                   const GtUchar *result);
 typedef struct Tyrcountinfo Tyrcountinfo;
 
 Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
                                   const char *tyrindexname,
                                   GtError *err);
-unsigned long gt_tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
-                               unsigned long mernumber);
+GtUword gt_tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
+                               GtUword mernumber);
 void gt_tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr);
 
 #endif

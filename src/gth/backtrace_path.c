@@ -50,7 +50,7 @@ struct GthBacktracePath {
                                          for dna MAXIDENTICALLENGTH should be
                                          used and for protein
                                          MAXIDENTICALLENGTH_PROTEIN */
-  unsigned long gen_dp_start,
+  GtUword gen_dp_start,
                 gen_dp_length,
                 ref_dp_start,
                 ref_dp_length,
@@ -58,10 +58,10 @@ struct GthBacktracePath {
   Alignmentcutoffs cutoffs;
 };
 
-GthBacktracePath* gth_backtrace_path_new(unsigned long gen_dp_start,
-                                         unsigned long gen_dp_length,
-                                         unsigned long ref_dp_start,
-                                         unsigned long ref_dp_length)
+GthBacktracePath* gth_backtrace_path_new(GtUword gen_dp_start,
+                                         GtUword gen_dp_length,
+                                         GtUword ref_dp_start,
+                                         GtUword ref_dp_length)
 {
   GthBacktracePath *bp;
   bp = gt_calloc(1, sizeof *bp);
@@ -75,49 +75,49 @@ GthBacktracePath* gth_backtrace_path_new(unsigned long gen_dp_start,
   return bp;
 }
 
-unsigned long gth_backtrace_path_gen_dp_start(const GthBacktracePath *bp)
+GtUword gth_backtrace_path_gen_dp_start(const GthBacktracePath *bp)
 {
   gt_assert(bp && bp->gen_dp_start != GT_UNDEF_ULONG);
   return bp->gen_dp_start;
 }
 
 void gth_backtrace_path_set_gen_dp_start(GthBacktracePath *bp,
-                                         unsigned long gen_dp_start)
+                                         GtUword gen_dp_start)
 {
   gt_assert(bp && gen_dp_start != GT_UNDEF_ULONG);
   bp->gen_dp_start = gen_dp_start;
 }
 
-unsigned long gth_backtrace_path_gen_dp_length(const GthBacktracePath *bp)
+GtUword gth_backtrace_path_gen_dp_length(const GthBacktracePath *bp)
 {
   gt_assert(bp && bp->gen_dp_length != GT_UNDEF_ULONG);
   return bp->gen_dp_length;
 }
 
 void gth_backtrace_path_set_gen_dp_length(GthBacktracePath *bp,
-                                          unsigned long gen_dp_length)
+                                          GtUword gen_dp_length)
 {
   gt_assert(bp && gen_dp_length != GT_UNDEF_ULONG);
   bp->gen_dp_length = gen_dp_length;
 }
 
-unsigned long gth_backtrace_path_ref_dp_length(const GthBacktracePath *bp)
+GtUword gth_backtrace_path_ref_dp_length(const GthBacktracePath *bp)
 {
   gt_assert(bp && bp->ref_dp_length != GT_UNDEF_LONG);
   return bp->ref_dp_length;
 }
 
 void gth_backtrace_path_set_ref_dp_length(GthBacktracePath *bp,
-                                          unsigned long ref_dp_length)
+                                          GtUword ref_dp_length)
 {
   gt_assert(bp && ref_dp_length != GT_UNDEF_ULONG);
   bp->ref_dp_length = ref_dp_length;
 }
 
-unsigned long gt_compute_indelcount(Editoperation *alignment,
-                                 unsigned long alignmentlength, bool proteineop)
+GtUword gt_compute_indelcount(Editoperation *alignment,
+                                 GtUword alignmentlength, bool proteineop)
 {
-  unsigned long i, eoplength, indelcount = 0;
+  GtUword i, eoplength, indelcount = 0;
   Eoptype eoptype;
 
   for (i = 0; i < alignmentlength; i++) {
@@ -165,7 +165,7 @@ unsigned long gt_compute_indelcount(Editoperation *alignment,
   return indelcount;
 }
 
-unsigned long gth_backtrace_path_indelcount(const GthBacktracePath *bp)
+GtUword gth_backtrace_path_indelcount(const GthBacktracePath *bp)
 {
   gt_assert(bp);
   gt_assert(bp->alphatype == DNA_ALPHA || bp->alphatype == PROTEIN_ALPHA);
@@ -174,38 +174,38 @@ unsigned long gth_backtrace_path_indelcount(const GthBacktracePath *bp)
                             bp->alphatype == PROTEIN_ALPHA);
 }
 
-unsigned long gth_backtrace_path_genomiccutoff_start(const GthBacktracePath *bt)
+GtUword gth_backtrace_path_genomiccutoff_start(const GthBacktracePath *bt)
 {
   gt_assert(bt);
   return bt->cutoffs.start.genomiccutoff;
 }
 
-unsigned long gth_backtrace_path_referencecutoff_start(const
+GtUword gth_backtrace_path_referencecutoff_start(const
                                                        GthBacktracePath *bt)
 {
   gt_assert(bt);
   return bt->cutoffs.start.referencecutoff;
 }
 
-unsigned long gth_backtrace_path_eopcutoff_start(const GthBacktracePath *bt)
+GtUword gth_backtrace_path_eopcutoff_start(const GthBacktracePath *bt)
 {
   gt_assert(bt);
   return bt->cutoffs.start.eopcutoff;
 }
 
-unsigned long gth_backtrace_path_genomiccutoff_end(const GthBacktracePath *bt)
+GtUword gth_backtrace_path_genomiccutoff_end(const GthBacktracePath *bt)
 {
   gt_assert(bt);
   return bt->cutoffs.end.genomiccutoff;
 }
 
-unsigned long gth_backtrace_path_referencecutoff_end(const GthBacktracePath *bt)
+GtUword gth_backtrace_path_referencecutoff_end(const GthBacktracePath *bt)
 {
   gt_assert(bt);
   return bt->cutoffs.end.referencecutoff;
 }
 
-unsigned long gth_backtrace_path_eopcutoff_end(const GthBacktracePath *bt)
+GtUword gth_backtrace_path_eopcutoff_end(const GthBacktracePath *bt)
 {
   gt_assert(bt);
   return bt->cutoffs.end.eopcutoff;
@@ -246,7 +246,7 @@ void gth_backtrace_path_set_alphatype(GthBacktracePath *bp,
 static void determine_cutoffs(GthBacktracePath *bp,
                               GthCutoffmode leadcutoffsmode,
                               GthCutoffmode termcutoffsmode,
-                              unsigned long cutoffsminexonlen)
+                              GtUword cutoffsminexonlen)
 {
   Traversealignmentfunctions travfunctions;
   Traversealignmentstate travstate;
@@ -331,7 +331,7 @@ static void determine_cutoffs(GthBacktracePath *bp,
 void gth_backtrace_path_determine_cutoffs(GthBacktracePath *bp,
                                           GthCutoffmode leadcutoffsmode,
                                           GthCutoffmode termcutoffsmode,
-                                          unsigned long cutoffsminexonlen)
+                                          GtUword cutoffsminexonlen)
 {
   gt_assert(bp);
   /* ref_alphatype is valid */
@@ -362,10 +362,10 @@ static bool is_intron(Editoperation eop)
    This is necessary for the gthcomputescores() function to work correctly.
    Otherwise one would get exons with borders (i, i-1) which can not be
    processed by the successive functions. */
-void gt_remove_zero_base_exons(Editoperation *alignment, long alignmentlength,
+void gt_remove_zero_base_exons(Editoperation *alignment, GtWord alignmentlength,
                             GthStat *stat)
 {
-  long i, j;
+  GtWord i, j;
   for (i = 1; i < alignmentlength - 1; i++) {
     if (is_insertion(alignment[i])) {
       /* editoperation is insertion, check for surrounding introns */
@@ -408,9 +408,9 @@ void gth_backtrace_path_remove_zero_base_exons(GthBacktracePath *bp,
 }
 
 static bool contains_no_zero_base_exons(Editoperation *alignment,
-                                        long alignmentlength)
+                                        GtWord alignmentlength)
 {
-  long i, j;
+  GtWord i, j;
 
   for (i = 1; i < alignmentlength - 1; i++) {
     if (is_insertion(alignment[i])) {
@@ -441,13 +441,13 @@ bool gth_backtrace_path_contains_no_zero_base_exons(const GthBacktracePath *bp)
 }
 
 static void add_eop_type_to_eop_array(GtArray *bp, Eoptype eoptype,
-                                      unsigned long length, bool proteineop)
+                                      GtUword length, bool proteineop)
 {
   Editoperation eop,
                 maxlen = proteineop ? (Editoperation) MAXIDENTICALLENGTH_PROTEIN
                                     : (Editoperation) MAXIDENTICALLENGTH;
   Eoptype tmp_eoptype;
-  unsigned long i, times_maxlen = 0;
+  GtUword i, times_maxlen = 0;
 
   gt_assert(length > 0);
 
@@ -549,7 +549,7 @@ static void add_eop_type_to_eop_array(GtArray *bp, Eoptype eoptype,
 }
 
 void gth_backtrace_path_add_eop(GthBacktracePath *bp, Eoptype eoptype,
-                            unsigned long length)
+                            GtUword length)
 {
   gt_assert(bp);
   gt_assert(bp->alphatype == DNA_ALPHA || bp->alphatype == PROTEIN_ALPHA);
@@ -561,7 +561,7 @@ void gth_backtrace_path_add_match(GthBacktracePath *bp,
                                   bool ensure_single_match)
 {
   Editoperation *eopptr, match_eop = 1;
-  unsigned long eopid, lenid;
+  GtUword eopid, lenid;
   gt_assert(bp);
   gt_assert(bp->alphatype == DNA_ALPHA || bp->alphatype == PROTEIN_ALPHA);
   if (!gt_array_size(bp->editoperations) || ensure_single_match)
@@ -604,7 +604,7 @@ void gth_backtrace_path_add_insertion(GthBacktracePath *bp)
 void gth_backtrace_path_add_intron(GthBacktracePath *bp)
 {
   Editoperation *eopptr, intron_eop = DELETIONEOP + 1;
-  unsigned long eopid, lenid;
+  GtUword eopid, lenid;
   gt_assert(bp);
   gt_assert(bp->alphatype == DNA_ALPHA || bp->alphatype == PROTEIN_ALPHA);
   if (!gt_array_size(bp->editoperations))
@@ -660,7 +660,7 @@ void gth_backtrace_path_add_intron_with_1_base_left(GthBacktracePath *bp)
 {
   Editoperation *eopptr,
                 intron_with_1_base_left_eop = DELETION_WITH_1_GAP_EOP + 1;
-  unsigned long eopid, lenid;
+  GtUword eopid, lenid;
   gt_assert(bp);
   gt_assert(bp->alphatype == PROTEIN_ALPHA);
   gt_assert(bp->max_identical_length == MAXIDENTICALLENGTH_PROTEIN);
@@ -683,7 +683,7 @@ void gth_backtrace_path_add_intron_with_2_bases_left(GthBacktracePath *bp)
 {
   Editoperation *eopptr,
                 intron_with_2_bases_left_eop = DELETION_WITH_2_GAPS_EOP + 1;
-  unsigned long eopid, lenid;
+  GtUword eopid, lenid;
   gt_assert(bp);
   gt_assert(bp->alphatype == PROTEIN_ALPHA);
   gt_assert(bp->max_identical_length == MAXIDENTICALLENGTH_PROTEIN);
@@ -763,7 +763,7 @@ bool gth_backtrace_path_last_is_intron(const GthBacktracePath *bp)
 void gth_backtrace_path_reverse(GthBacktracePath *bp)
 {
   Editoperation *front, *back, tmp;
-  unsigned long i = 0;
+  GtUword i = 0;
   gt_assert(bp);
   for (front = gt_array_get_space(bp->editoperations),
        back  = (Editoperation*) gt_array_get_space(bp->editoperations) +
@@ -779,7 +779,7 @@ static void ensure_eop_of_len_1_before_introns(GtArray *editoperations)
 {
   Editoperation eop, *eopptr;
   Eoptype eoptype;
-  unsigned long eoplength;
+  GtUword eoplength;
   GtArray *backup;
   bool processing_necessary = false,
        split_match          = false;
@@ -1012,10 +1012,10 @@ void gth_backtrace_path_cutoff_walked_path(GthBacktracePath *bp,
 
 /* XXX: remove */
 #if 0
-static void cutoff_end_refseq(GthBacktracePath *bp, unsigned long reflength)
+static void cutoff_end_refseq(GthBacktracePath *bp, GtUword reflength)
 {
 
-  unsigned long eoplength, i = 0;
+  GtUword eoplength, i = 0;
   bool breakloop = false;
   Editoperation *eop;
   Eoptype eoptype;
@@ -1135,9 +1135,9 @@ Editoperation* gth_backtrace_path_get(const GthBacktracePath *bp)
          + bp->cutoffs.end.eopcutoff;
 }
 
-unsigned long gth_backtrace_path_length(const GthBacktracePath *bp)
+GtUword gth_backtrace_path_length(const GthBacktracePath *bp)
 {
-  unsigned long num_of_eops;
+  GtUword num_of_eops;
   gt_assert(bp);
   num_of_eops = gt_array_size(bp->editoperations);
   if (bp->cutoffs.start.eopcutoff + bp->cutoffs.end.eopcutoff >= num_of_eops)

@@ -24,10 +24,10 @@
 #include "sfx-suffixgetset.h"
 
 void gt_sfx_radixsort_str(GtRadixsortstringinfo *rsi,
-                          unsigned long depth,
+                          GtUword depth,
                           unsigned int sortmaxdepth,
-                          unsigned long subbucketleft,
-                          unsigned long width,
+                          GtUword subbucketleft,
+                          GtUword width,
                           GtSuffixsortspace *sssp,
                           GtLcpvalues *lcpvalues);
 

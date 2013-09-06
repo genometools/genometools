@@ -27,7 +27,7 @@ struct Gtmarksubstring
 {
   size_t size;
   unsigned int units, shiftright;
-  unsigned long entries;
+  GtUword entries;
   GtCodetype mask;
   GtBitsequence *bits;
 };
@@ -49,7 +49,7 @@ bool gt_marksubstring_checkmark(const Gtmarksubstring *mark,GtCodetype code);
 
 unsigned int gt_marksubstring_shiftright(const Gtmarksubstring *mark);
 
-unsigned long gt_marksubstring_entries(const Gtmarksubstring *mark);
+GtUword gt_marksubstring_entries(const Gtmarksubstring *mark);
 
 size_t gt_marksubstring_size(const Gtmarksubstring *mark);
 

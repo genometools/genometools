@@ -63,14 +63,14 @@ typedef struct
                addbscache_depth,
                forcek,
                iterations;
-  unsigned long maximumspace;
+  GtUword maximumspace;
   GtStr *encseqinput,
         *memlimitarg,
         *indexname;
   GtOption *refoptionmemlimit;
   GtStrArray *db;
   bool phred64;
-  unsigned long maxlow;
+  GtUword maxlow;
   unsigned int lowqual;
 } GtSeqcorrectArguments;
 
@@ -357,7 +357,7 @@ static int gt_seqcorrect_apply_corrections(GtEncseq *encseq,
       haserr = true;
     else
     {
-      unsigned long pos;
+      GtUword pos;
       GtUchar newchar;
       size_t retval;
       while ((retval = fread(&pos, sizeof (pos), (size_t)1, corrections))
@@ -386,7 +386,7 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
 {
   bool haserr = false;
   GtReads2Twobit *r2t;
-  unsigned long i;
+  GtUword i;
   bool autoindexname = false;
 
   gt_logger_log(verbose_logger, "input is a list of libraries");
@@ -426,7 +426,7 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
 
   if (!haserr)
   {
-    unsigned long nofreads_valid, nofreads_invalid, nofreads_input,
+    GtUword nofreads_valid, nofreads_invalid, nofreads_input,
                   tlen_valid;
     bool varlen;
     nofreads_valid = gt_reads2twobit_nofseqs(r2t);
@@ -436,23 +436,23 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
       gt_reads2twobit_nofseqs(r2t);
 
     gt_logger_log(default_logger, "number of reads in original read set "
-        "= %lu", nofreads_input);
+        "= "GT_LU"", nofreads_input);
 
     varlen = (gt_reads2twobit_seqlen_eqlen(r2t) == 0);
     if (varlen)
-      gt_logger_log(verbose_logger, "read length = variable [%lu..%lu]",
+      gt_logger_log(verbose_logger, "read length = variable ["GT_LU".."GT_LU"]",
           gt_reads2twobit_seqlen_min(r2t), gt_reads2twobit_seqlen_max(r2t));
     else
-      gt_logger_log(verbose_logger, "read length = %lu",
+      gt_logger_log(verbose_logger, "read length = "GT_LU"",
           gt_reads2twobit_seqlen_eqlen(r2t) - 1UL);
 
-    gt_logger_log(verbose_logger, "total length of original read set = %lu",
+    gt_logger_log(verbose_logger, "total length of original read set = "GT_LU"",
         tlen_valid + gt_reads2twobit_invalid_seqs_totallength(r2t));
-    gt_logger_log(verbose_logger, "low-quality reads = %lu "
+    gt_logger_log(verbose_logger, "low-quality reads = "GT_LU" "
         "[%.2f %% of input]", nofreads_invalid, (float)nofreads_invalid *
         100 / (float)nofreads_input);
     if (!arguments->verbose)
-      gt_logger_log(default_logger, "low-quality reads = %lu",
+      gt_logger_log(default_logger, "low-quality reads = "GT_LU"",
           nofreads_invalid);
     if (!haserr)
     {
@@ -461,9 +461,9 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
       if (!haserr)
       {
         gt_logger_log(verbose_logger,
-            "number of reads in output read set = %lu", nofreads_valid);
+            "number of reads in output read set = "GT_LU"", nofreads_valid);
         gt_logger_log(verbose_logger,
-            "total length of output read set = %lu", tlen_valid);
+            "total length of output read set = "GT_LU"", tlen_valid);
         gt_logger_log(verbose_logger, "read set saved as GtEncseq: %s.%s",
             gt_str_get(arguments->indexname), varlen ?
             "(esq|ssp)" : "esq");
@@ -486,7 +486,7 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
 #endif
   unsigned int iteration;
   unsigned int bucketkey_kmersize;
-  unsigned long cumulative_nofcorrections = 0;
+  GtUword cumulative_nofcorrections = 0;
   GtRandomcodesCorrectData **data_array = NULL;
 
   data_array = gt_malloc(sizeof (*data_array) * threads);
@@ -502,7 +502,7 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
       iteration++)
   {
     unsigned int threadcount;
-    unsigned long nofkmergroups = 0, nofkmeritvs = 0, nofcorrections = 0,
+    GtUword nofkmergroups = 0, nofkmeritvs = 0, nofcorrections = 0,
                   nofkmers = 0;
 
     gt_logger_log(verbose_logger, "iteration %u will now start...",
@@ -558,13 +558,13 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
     cumulative_nofcorrections += nofcorrections;
 
     gt_logger_log(verbose_logger, "[iteration %u] "
-        "total number of k-mers: %lu", iteration, nofkmers);
+        "total number of k-mers: "GT_LU"", iteration, nofkmers);
     gt_logger_log(verbose_logger, "[iteration %u] "
-        "number of different k-mers: %lu", iteration, nofkmeritvs);
+        "number of different k-mers: "GT_LU"", iteration, nofkmeritvs);
     gt_logger_log(verbose_logger, "[iteration %u] "
-        "number of different k-1-mers: %lu", iteration, nofkmergroups);
+        "number of different k-1-mers: "GT_LU"", iteration, nofkmergroups);
     gt_logger_log(verbose_logger, "[iteration %u] "
-        "number of kmer corrections: %lu", iteration, nofcorrections);
+        "number of kmer corrections: "GT_LU"", iteration, nofcorrections);
 
     if (!haserr) {
       gt_logger_log(verbose_logger, "[iteration %u] apply corrections...",
@@ -575,7 +575,7 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
       }
     }
   }
-  gt_logger_log(verbose_logger, "total corrections: %lu",
+  gt_logger_log(verbose_logger, "total corrections: "GT_LU"",
       cumulative_nofcorrections);
   gt_free(data_array);
   return haserr;
@@ -593,9 +593,9 @@ static bool gt_seqcorrect_find_seldom(GtSeqcorrectArguments *arguments,
   unsigned int bucketkey_kmersize;
   GtRandomcodesFindSeldomData **data_array = NULL;
   unsigned int threadcount;
-  unsigned long nofseldomkmers = 0;
+  GtUword nofseldomkmers = 0;
   GtBitsequence **seldom_reads = NULL;
-  unsigned long nofreads = GT_DIV2(gt_encseq_num_of_sequences(encseq));
+  GtUword nofreads = GT_DIV2(gt_encseq_num_of_sequences(encseq));
   size_t seldomsize = GT_NUMOFINTSFORBITS(nofreads);
 
   data_array = gt_malloc(sizeof (*data_array) * threads);
@@ -663,7 +663,7 @@ static bool gt_seqcorrect_find_seldom(GtSeqcorrectArguments *arguments,
   if (!haserr)
   {
     GtStr *filename = gt_str_clone(arguments->encseqinput);
-    gt_logger_log(verbose_logger, "total seldom k-mers: %lu", nofseldomkmers);
+    gt_logger_log(verbose_logger, "total seldom k-mers: "GT_LU"", nofseldomkmers);
     gt_str_append_cstr(filename, GT_SEQCORRECT_SELDOMREADS_FILESUFFIX);
     if (gt_cntlist_show(seldom_reads[0], nofreads, gt_str_get(filename),
           false, err) != 0)

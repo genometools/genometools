@@ -401,8 +401,8 @@ void gt_graphics_draw_arrowhead(GtGraphics *g, double x, double y,
 
 void gt_graphics_draw_curve_data(GtGraphics *g, double x, double y,
                                  GtColor color,
-                                 double data[], unsigned long ndata,
-                                 GtRange valrange, unsigned long height)
+                                 double data[], GtUword ndata,
+                                 GtRange valrange, GtUword height)
 {
   gt_assert(g && g->c_class);
   gt_rwlock_wrlock(g->pvt->lock);
@@ -661,10 +661,10 @@ typedef struct {
 void gt_graphics_draw_curve_data_p(GtGraphics *g,
                                    GraphicsDrawCurveFuncParams *params,
                                    double *data,
-                                   unsigned long rngstart,
-                                   unsigned long rngend,
-                                   unsigned long ndata,
-                                   unsigned long height)
+                                   GtUword rngstart,
+                                   GtUword rngend,
+                                   GtUword ndata,
+                                   GtUword height)
 {
   GtRange rng;
   gt_assert(g && g->c_class && params);

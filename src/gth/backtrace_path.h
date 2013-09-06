@@ -29,7 +29,7 @@ typedef struct GthBacktracePath GthBacktracePath;
 #include "gth/path_walker.h"
 
 typedef struct {
-  unsigned long genomiccutoff,   /* the number of bp, which will be cut
+  GtUword genomiccutoff,   /* the number of bp, which will be cut
                                     off when showing the alignment */
                 referencecutoff, /* the number of reference bp, which will be
                                     cut off when showing the alignment */
@@ -40,27 +40,27 @@ typedef struct {
                                     are encoded as one multi edit operation */
 } Cutoffs;
 
-GthBacktracePath* gth_backtrace_path_new(unsigned long gen_dp_start,
-                                         unsigned long gen_dp_length,
-                                         unsigned long ref_dp_start,
-                                         unsigned long ref_dp_length);
-unsigned long   gth_backtrace_path_gen_dp_start(const GthBacktracePath*);
+GthBacktracePath* gth_backtrace_path_new(GtUword gen_dp_start,
+                                         GtUword gen_dp_length,
+                                         GtUword ref_dp_start,
+                                         GtUword ref_dp_length);
+GtUword   gth_backtrace_path_gen_dp_start(const GthBacktracePath*);
 void            gth_backtrace_path_set_gen_dp_start(GthBacktracePath*,
-                                                    unsigned long);
-unsigned long   gth_backtrace_path_gen_dp_length(const GthBacktracePath*);
+                                                    GtUword);
+GtUword   gth_backtrace_path_gen_dp_length(const GthBacktracePath*);
 void            gth_backtrace_path_set_gen_dp_length(GthBacktracePath*,
-                                                     unsigned long);
-unsigned long   gth_backtrace_path_ref_dp_length(const GthBacktracePath*);
+                                                     GtUword);
+GtUword   gth_backtrace_path_ref_dp_length(const GthBacktracePath*);
 void            gth_backtrace_path_set_ref_dp_length(GthBacktracePath*,
-                                                     unsigned long);
-unsigned long   gth_backtrace_path_indelcount(const GthBacktracePath*);
-unsigned long   gth_backtrace_path_genomiccutoff_start(const GthBacktracePath*);
-unsigned long   gth_backtrace_path_referencecutoff_start(const
+                                                     GtUword);
+GtUword   gth_backtrace_path_indelcount(const GthBacktracePath*);
+GtUword   gth_backtrace_path_genomiccutoff_start(const GthBacktracePath*);
+GtUword   gth_backtrace_path_referencecutoff_start(const
                                                          GthBacktracePath*);
-unsigned long   gth_backtrace_path_eopcutoff_start(const GthBacktracePath*);
-unsigned long   gth_backtrace_path_genomiccutoff_end(const GthBacktracePath*);
-unsigned long   gth_backtrace_path_referencecutoff_end(const GthBacktracePath*);
-unsigned long   gth_backtrace_path_eopcutoff_end(const GthBacktracePath*);
+GtUword   gth_backtrace_path_eopcutoff_start(const GthBacktracePath*);
+GtUword   gth_backtrace_path_genomiccutoff_end(const GthBacktracePath*);
+GtUword   gth_backtrace_path_referencecutoff_end(const GthBacktracePath*);
+GtUword   gth_backtrace_path_eopcutoff_end(const GthBacktracePath*);
 void            gth_backtrace_path_set_cutoffs_start(GthBacktracePath*,
                                                      Cutoffs*);
 void            gth_backtrace_path_set_cutoffs_end(GthBacktracePath*,
@@ -73,7 +73,7 @@ void            gth_backtrace_path_determine_cutoffs(GthBacktracePath*,
                                                      leadcutoffsmode,
                                                      GthCutoffmode
                                                      termcutoffsmode,
-                                                     unsigned long
+                                                     GtUword
                                                      cutoffsminexonlen);
 void            gth_backtrace_path_remove_zero_base_exons(GthBacktracePath*,
                                                           GthStat*);
@@ -82,7 +82,7 @@ bool            gth_backtrace_path_contains_no_zero_base_exons(const
 
 /* add <length> times edit operations of type <eoptype> */
 void            gth_backtrace_path_add_eop(GthBacktracePath*, Eoptype eoptype,
-                                       unsigned long length);
+                                       GtUword length);
 
 /* add the corresponding edit operation */
 void            gth_backtrace_path_add_match(GthBacktracePath*,
@@ -149,6 +149,6 @@ void            gth_backtrace_path_delete(GthBacktracePath*);
 /* return the underlying edit operations (without cutoffs) */
 Editoperation*  gth_backtrace_path_get(const GthBacktracePath*);
 /* return the number of underlying edit operations (without cutoffs) */
-unsigned long   gth_backtrace_path_length(const GthBacktracePath*);
+GtUword   gth_backtrace_path_length(const GthBacktracePath*);
 
 #endif

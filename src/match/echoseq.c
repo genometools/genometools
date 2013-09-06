@@ -26,10 +26,10 @@ void gt_symbolstring2fasta(FILE *fpout,
                         const char *desc,
                         const GtAlphabet *alpha,
                         const GtUchar *w,
-                        unsigned long wlen,
-                        unsigned long width)
+                        GtUword wlen,
+                        GtUword width)
 {
-  unsigned long i, j;
+  GtUword i, j;
   GtUchar currentchar;
 
   gt_assert(width > 0);
@@ -71,11 +71,11 @@ void gt_symbolstring2fasta(FILE *fpout,
 void gt_encseq2symbolstring(FILE *fpout,
                             const GtEncseq *encseq,
                             GtReadmode readmode,
-                            unsigned long start,
-                            unsigned long wlen,
-                            unsigned long width)
+                            GtUword start,
+                            GtUword wlen,
+                            GtUword width)
 {
-  unsigned long j, idx, lastpos;
+  GtUword j, idx, lastpos;
   GtUchar currentchar;
   GtEncseqReader *esr;
   const GtAlphabet *alpha;
@@ -115,10 +115,10 @@ void gt_encseq2symbolstring(FILE *fpout,
 
 void gt_fprintfencseq(FILE *fpout,
                       const GtEncseq *encseq,
-                      unsigned long start,
-                      unsigned long wlen)
+                      GtUword start,
+                      GtUword wlen)
 {
-  unsigned long idx;
+  GtUword idx;
   GtUchar currentchar;
   const GtAlphabet *alpha;
 
@@ -137,9 +137,9 @@ void gt_encseq2fastaoutput(FILE *fpout,
                            const char *desc,
                            const GtEncseq *encseq,
                            GtReadmode readmode,
-                           unsigned long start,
-                           unsigned long wlen,
-                           unsigned long width)
+                           GtUword start,
+                           GtUword wlen,
+                           GtUword width)
 {
   gt_assert(width > 0);
   if (desc == NULL)
@@ -162,7 +162,7 @@ int gt_echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
   GtSeqIterator *seqit;
   char *desc = NULL;
   const GtUchar *sequence;
-  unsigned long seqlen;
+  GtUword seqlen;
   bool haserr = false;
   int retval;
 

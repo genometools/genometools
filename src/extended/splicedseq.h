@@ -24,14 +24,14 @@ typedef struct Splicedseq Splicedseq;
 
 Splicedseq*   gt_splicedseq_new(void);
 /* adds an ``exon'' to the spliced sequence */
-void          gt_splicedseq_add(Splicedseq*, unsigned long start,
-                                unsigned long end,
+void          gt_splicedseq_add(Splicedseq*, GtUword start,
+                                GtUword end,
                                 const char *original_sequence);
 char*         gt_splicedseq_get(const Splicedseq*);
-bool          gt_splicedseq_pos_is_border(const Splicedseq*, unsigned long);
+bool          gt_splicedseq_pos_is_border(const Splicedseq*, GtUword);
 /* maps the given position back to the original coordinate system */
-unsigned long gt_splicedseq_map(const Splicedseq*, unsigned long);
-unsigned long gt_splicedseq_length(const Splicedseq*);
+GtUword gt_splicedseq_map(const Splicedseq*, GtUword);
+GtUword gt_splicedseq_length(const Splicedseq*);
 int           gt_splicedseq_reverse(Splicedseq*, GtError*);
 void          gt_splicedseq_reset(Splicedseq*);
 int           gt_splicedseq_unit_test(GtError*);

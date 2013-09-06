@@ -25,14 +25,14 @@
 /* Prototype for functions processing exact/approximate overlaps */
 
 /* Exact: */
-typedef void(*GtSpmproc)(unsigned long /*suffix_seqnum*/,
-  unsigned long /*prefix_seqnum*/, unsigned long /*length*/,
+typedef void(*GtSpmproc)(GtUword /*suffix_seqnum*/,
+  GtUword /*prefix_seqnum*/, GtUword /*length*/,
   bool /*suffixseq_direct*/, bool /*prefixseq_direct*/, void* /*data*/);
 
 /* Approximate: */
-typedef void(*GtSpmprocA)(unsigned long /*suffix_seqnum*/,
-  unsigned long /*prefix_seqnum*/, unsigned long /*suffix_length*/,
-  unsigned long /*prefix_length*/, unsigned long /*unit_edist*/,
+typedef void(*GtSpmprocA)(GtUword /*suffix_seqnum*/,
+  GtUword /*prefix_seqnum*/, GtUword /*suffix_length*/,
+  GtUword /*prefix_length*/, GtUword /*unit_edist*/,
   bool /*suffixseq_direct*/, bool /*prefixseq_direct*/, void* /*data*/);
 
 /* structs containing an spmproc and its data */
@@ -42,13 +42,13 @@ typedef union {GtSpmprocWithData e; GtSpmprocAWithData a;} GtSpmprocXWithData;
 
 /* allow to use GtSpmproc where GtSpmprocA is expected skipping overlaps with
    unit edist > 0; data must be a pointer to GtSpmprocWithData */
-void gt_spmproc_a_e(unsigned long suffix_seqnum, unsigned long prefix_seqnum,
-  unsigned long suffix_length, unsigned long prefix_length,
-  unsigned long unit_edist, bool suffixseq_direct, bool prefixseq_direct,
+void gt_spmproc_a_e(GtUword suffix_seqnum, GtUword prefix_seqnum,
+  GtUword suffix_length, GtUword prefix_length,
+  GtUword unit_edist, bool suffixseq_direct, bool prefixseq_direct,
   void *data);
 
-void gt_spmproc_count(unsigned long suffix_seqnum, unsigned long prefix_seqnum,
-  unsigned long length, bool suffixseq_direct, bool prefixseq_direct,
+void gt_spmproc_count(GtUword suffix_seqnum, GtUword prefix_seqnum,
+  GtUword length, bool suffixseq_direct, bool prefixseq_direct,
   void *data);
 
 /*
@@ -60,16 +60,16 @@ The void* data must be of type GtSpmprocSkipData.
 typedef struct {
   GtBitsequence *to_skip;
   GtSpmprocXWithData out;
-  unsigned long skipped_counter;
+  GtUword skipped_counter;
 } GtSpmprocSkipData;
 
-void gt_spmproc_skip(unsigned long suffix_seqnum, unsigned long prefix_seqnum,
-  unsigned long length, bool suffixseq_direct, bool prefixseq_direct,
+void gt_spmproc_skip(GtUword suffix_seqnum, GtUword prefix_seqnum,
+  GtUword length, bool suffixseq_direct, bool prefixseq_direct,
   void *data);
 
-void gt_spmproc_a_skip(unsigned long suffix_seqnum,
-  unsigned long prefix_seqnum, unsigned long suffix_length,
-  unsigned long prefix_length, unsigned long unit_edist, bool suffixseq_direct,
+void gt_spmproc_a_skip(GtUword suffix_seqnum,
+  GtUword prefix_seqnum, GtUword suffix_length,
+  GtUword prefix_length, GtUword unit_edist, bool suffixseq_direct,
   bool prefixseq_direct, void *data);
 
 int gt_spmproc_skip_unit_test(GtError *err);

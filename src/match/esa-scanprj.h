@@ -43,7 +43,7 @@ int gt_scannedprjkey_analyze(const char *indexname,
                              const char *suffix,
                              unsigned int linenum,
                              const char *linebuffer,
-                             unsigned long linelength,
+                             GtUword linelength,
                              GtScannedprjkeytable *scannedprjkeytable,
                              GtError *err);
 

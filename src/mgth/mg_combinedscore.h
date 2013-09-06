@@ -23,7 +23,7 @@
 #include "mg_computepath.h"
 
 #define LONG_VALUE(VALUE, INDEX)\
-                *(long*)gt_array_get((VALUE), (INDEX))
+                *(GtWord*)gt_array_get((VALUE), (INDEX))
 
 #define POSITION(QUERY_FROM, HIT_NUMBER, POSITION, K)\
            LONG_VALUE(QUERY_FROM, HIT_NUMBER)+(POSITION)+(K)-1
@@ -41,14 +41,14 @@ static void fill_matrix(CombinedScoreMatrixEntry **,
                         char *,
                         char *,
                         short,
-                        unsigned long,
-                        unsigned long,
-                        unsigned long,
-                        unsigned long,
-                        unsigned long,
+                        GtUword,
+                        GtUword,
+                        GtUword,
+                        GtUword,
+                        GtUword,
                         ParseStruct *,
                         double *,
-                        unsigned long *,
+                        GtUword *,
                         char *,
                         char *,
                         HitInformation *);
@@ -62,10 +62,10 @@ static void fill_matrix(CombinedScoreMatrixEntry **,
    Returnwert: void */
 static void add_scores(ParseStruct *,
                        double *,
-                       unsigned long *,
+                       GtUword *,
                        short,
-                       unsigned long,
-                       unsigned long,
+                       GtUword,
+                       GtUword,
                        unsigned short,
                        double);
 

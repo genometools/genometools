@@ -58,7 +58,7 @@ static AutomaticSequenceRegion* automatic_sequence_region_new(bool is_circular)
 
 static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr)
 {
-  unsigned long i;
+  GtUword i;
   if (!auto_sr) return;
   gt_genome_node_delete(auto_sr->sequence_region);
   for (i = 0; i < gt_array_size(auto_sr->feature_nodes); i++) {
@@ -249,7 +249,7 @@ GtNodeVisitor* gt_add_ids_visitor_new(bool ensure_sorting)
   return nv;
 }
 
-unsigned long gt_add_ids_visitor_node_buffer_size(GtNodeVisitor *nv)
+GtUword gt_add_ids_visitor_node_buffer_size(GtNodeVisitor *nv)
 {
   GtAddIDsVisitor *add_ids_visitor = add_ids_visitor_cast(nv);
   return gt_queue_size(add_ids_visitor->node_buffer);

@@ -25,7 +25,7 @@
 typedef struct
 {
   uint32_t *spaceuint32_t;
-  unsigned long nextfree, allocated, totalwrite;
+  GtUword nextfree, allocated, totalwrite;
   GtStr *outfilename, *name;
   FILE *fp;
 } GtLeftborderOutbuffer;
@@ -37,6 +37,6 @@ void gt_leftborderbuffer_flush(GtLeftborderOutbuffer *leftborderbuffer);
 
 GtStr *gt_leftborderbuffer_delete(GtLeftborderOutbuffer *lbbuf,
                                   GtFirstcodesspacelog *fcsl,
-                                  GT_UNUSED unsigned long expectedwritten);
+                                  GT_UNUSED GtUword expectedwritten);
 
 #endif

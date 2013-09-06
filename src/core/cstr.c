@@ -27,7 +27,7 @@ char** gt_cstr_split(const char *cstr, char sep)
 {
   size_t n = 0;
   char **res;
-  unsigned long i,
+  GtUword i,
                 lastpos = 0,
                 respos = 0;
   gt_assert(cstr);
@@ -64,7 +64,7 @@ char* gt_cstr_dup(const char *cstr)
   return copy;
 }
 
-char* gt_cstr_dup_nt(const char *cstr, unsigned long length)
+char* gt_cstr_dup_nt(const char *cstr, GtUword length)
 {
   char *copy;
   gt_assert(cstr);
@@ -86,15 +86,15 @@ void gt_cstr_rep(char *cstr, char f, char t)
   }
 }
 
-void gt_cstr_show(const char *cstr, unsigned long length, FILE *fp)
+void gt_cstr_show(const char *cstr, GtUword length, FILE *fp)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(cstr && fp);
   for (i = 0; i < length; i++)
     gt_xfputc(cstr[i], fp);
 }
 
-unsigned long gt_cstr_length_up_to_char(const char *cstr, char c)
+GtUword gt_cstr_length_up_to_char(const char *cstr, char c)
 {
   char *suffix;
   gt_assert(cstr);

@@ -27,36 +27,36 @@
 
 typedef struct
 {
-  unsigned long left,
+  GtUword left,
          right;
 } Simplelcpinterval;
 
 bool gt_lcpintervalfindcharchildintv(const GtEncseq *encseq,
                                   GtReadmode readmode,
-                                  unsigned long totallength,
+                                  GtUword totallength,
                                   const ESASuffixptr *suftab,
                                   Simplelcpinterval *itv,
                                   GtUchar cc,
-                                  unsigned long offset,
-                                  unsigned long left,
-                                  unsigned long right);
+                                  GtUword offset,
+                                  GtUword left,
+                                  GtUword right);
 
 void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     const GtEncseq *encseq,
                                     GtReadmode readmode,
-                                    unsigned long totallength,
+                                    GtUword totallength,
                                     const ESASuffixptr *suftab,
-                                    unsigned long parentoffset,
-                                    unsigned long parentleft,
-                                    unsigned long parentright);
+                                    GtUword parentoffset,
+                                    GtUword parentleft,
+                                    GtUword parentright);
 
 GtUchar gt_lcpintervalextendlcp(const GtEncseq *encseq,
                            GtReadmode readmode,
                            const ESASuffixptr *suftab,
-                           unsigned long totallength,
+                           GtUword totallength,
                            GtUchar alphasize,
-                           unsigned long parentoffset,
-                           unsigned long parentleft,
-                           unsigned long parentright);
+                           GtUword parentoffset,
+                           GtUword parentleft,
+                           GtUword parentright);
 
 #endif

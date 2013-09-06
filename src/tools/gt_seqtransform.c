@@ -24,7 +24,7 @@
 
 typedef struct {
   bool addstopaminos;
-  unsigned long width;
+  GtUword width;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } SeqtransformArguments;
@@ -76,7 +76,7 @@ static int gt_seqtransform_runner(int argc, const char **argv, int parsed_args,
 {
   SeqtransformArguments *arguments = tool_arguments;
   GtBioseqIterator *bsi;
-  unsigned long i;
+  GtUword i;
   GtBioseq *bioseq;
   int had_err;
 
@@ -93,7 +93,7 @@ static int gt_seqtransform_runner(int argc, const char **argv, int parsed_args,
     for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
       const char *desc, *suffix = NULL;
       char *seq;
-      unsigned long seqlen;
+      GtUword seqlen;
       desc = gt_bioseq_get_description(bioseq, i);
       seq = gt_bioseq_get_sequence(bioseq, i);
       seqlen = gt_bioseq_get_sequence_length(bioseq, i);

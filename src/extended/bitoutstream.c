@@ -27,7 +27,7 @@
 
 struct GtBitOutStream {
   FILE         *fp;
-  unsigned long written_bits,
+  GtUword written_bits,
                 pagesize;
   GtBitsequence bitseqbuffer;
   int           bits_left;
@@ -69,7 +69,7 @@ void gt_bitoutstream_append(GtBitOutStream *bitstream,
 
 void gt_bitoutstream_append_bittab(GtBitOutStream *bitstream,
                                    GtBittab *tab) {
-  unsigned long j,
+  GtUword j,
                 size = gt_bittab_size(tab);
   for (j = 0; j < size; j++) {
     if (bitstream->bits_left == 0) {
@@ -99,7 +99,7 @@ void gt_bitoutstream_flush(GtBitOutStream *bitstream)
 
 void gt_bitoutstream_flush_advance(GtBitOutStream *bitstream)
 {
-  long fpos;
+  GtWord fpos;
   bool is_not_at_pageborder = (ftell(bitstream->fp) % bitstream->pagesize) != 0;
 
   gt_assert(bitstream);
@@ -113,7 +113,7 @@ void gt_bitoutstream_flush_advance(GtBitOutStream *bitstream)
   }
 }
 
-long gt_bitoutstream_pos(const GtBitOutStream *bitstream)
+GtWord gt_bitoutstream_pos(const GtBitOutStream *bitstream)
 {
   return ftell(bitstream->fp);
 }
@@ -121,6 +121,6 @@ long gt_bitoutstream_pos(const GtBitOutStream *bitstream)
 void gt_bitoutstream_delete(GtBitOutStream *bitstream)
 {
   if (bitstream != NULL)
-    gt_log_log("written %lu bits", bitstream->written_bits);
+    gt_log_log("written "GT_LU" bits", bitstream->written_bits);
   gt_free(bitstream);
 }

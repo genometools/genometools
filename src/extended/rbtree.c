@@ -435,7 +435,7 @@ size_t gt_rbtree_size(GtRBTree *tree)
 }
 
 static int gt_rbtree_recurse(GtRBTreeNode *root, GtRBTreeAction action,
-                             unsigned long level, void *actinfo)
+                             GtUword level, void *actinfo)
 {
   if (root->link[0] == NULL && root->link[1] == NULL) {
     if (action(root->key, GT_RBTREE_LEAF, level, actinfo) != 0) {
@@ -471,7 +471,7 @@ static int gt_rbtree_recurse(GtRBTreeNode *root, GtRBTreeAction action,
         }
 
 static int gt_rbtree_recursewithstop(GtRBTreeNode *root, GtRBTreeAction action,
-                                     unsigned long level, void *actinfo)
+                                     GtUword level, void *actinfo)
 {
   int retcode;
 
@@ -501,7 +501,7 @@ static int gt_rbtree_recursewithstop(GtRBTreeNode *root, GtRBTreeAction action,
 
 static int gt_rbtree_recursereverseorder(GtRBTreeNode *root,
                                          GtRBTreeAction action,
-                                         unsigned long level, void *actinfo)
+                                         GtUword level, void *actinfo)
 {
   if (root->link[0] == NULL && root->link[1] == NULL) {
     if (action(root->key, GT_RBTREE_LEAF, level, actinfo) != 0)
@@ -839,12 +839,12 @@ void gt_rbtree_iter_delete (GtRBTreeIter *trav)
 #define GT_RBTREE_SIZE 100
 
 /* Shuffle an array of integers.  */
-static void gt_rbtree_permuteintarray (unsigned long *arr)
+static void gt_rbtree_permuteintarray (GtUword *arr)
 {
-  unsigned long i, j, c;
+  GtUword i, j, c;
 
-  for (i = 0; i < (unsigned long) GT_RBTREE_SIZE; ++i) {
-    j = (unsigned long) (random () % GT_RBTREE_SIZE);
+  for (i = 0; i < (GtUword) GT_RBTREE_SIZE; ++i) {
+    j = (GtUword) (random () % GT_RBTREE_SIZE);
     c = arr[i];
     arr[i] = arr[j];
     arr[j] = c;
@@ -867,30 +867,30 @@ typedef enum
 } GtRBTreeDoAction;
 
 /* The keys we add to the tree.  */
-static unsigned long *gt_rbtree_xtab;
+static GtUword *gt_rbtree_xtab;
 
 /*
  * Pointers into the key array, possibly permutated, to define an order for
  * insertion/removal.
  */
-static unsigned long *gt_rbtree_ytab;
+static GtUword *gt_rbtree_ytab;
 
 /* Flags set for each element visited during a tree walk.  */
-static unsigned long *gt_rbtree_ztab;
+static GtUword *gt_rbtree_ztab;
 
 /*
  * Depths for all the elements, to check that the depth is constant for all
  * three visits.
  */
-static unsigned long *gt_rbtree_depths;
+static GtUword *gt_rbtree_depths;
 
 /* Maximum depth during a tree walk.  */
-static unsigned long gt_rbtree_max_depth;
+static GtUword gt_rbtree_max_depth;
 
 static int nrbt_walk_action(void* nodekey, const GtRBTreeContext which,
-                            const unsigned long depth, GT_UNUSED void *actinfo)
+                            const GtUword depth, GT_UNUSED void *actinfo)
 {
-  unsigned long key = *(unsigned long *) nodekey;
+  GtUword key = *(GtUword *) nodekey;
 
   if (depth > gt_rbtree_max_depth) {
     gt_rbtree_max_depth = depth;
@@ -910,10 +910,10 @@ static int nrbt_walk_action(void* nodekey, const GtRBTreeContext which,
 
 static int nrbt_cmp_fn(const void* a, const void* b, GT_UNUSED void *info)
 {
-  unsigned long va, vb;
+  GtUword va, vb;
 
-  va = *(unsigned long *) a;
-  vb = *(unsigned long *) b;
+  va = *(GtUword *) a;
+  vb = *(GtUword *) b;
 
   if (va < vb) {
     return -1;
@@ -924,9 +924,9 @@ static int nrbt_cmp_fn(const void* a, const void* b, GT_UNUSED void *info)
   return 0;
 }
 
-static int nrbt_walk_tree(GtRBTree *tree,unsigned long expected_count)
+static int nrbt_walk_tree(GtRBTree *tree,GtUword expected_count)
 {
-  unsigned long i;
+  GtUword i;
   int error = 0;
 
   memset(gt_rbtree_ztab, 0, (GT_RBTREE_SIZE * sizeof (*gt_rbtree_ztab)));
@@ -943,11 +943,11 @@ static int nrbt_walk_tree(GtRBTree *tree,unsigned long expected_count)
     }
   }
   if (gt_rbtree_max_depth >
-      (unsigned long) (log ((double) expected_count) * 2.0 +
+      (GtUword) (log ((double) expected_count) * 2.0 +
                        2.0)) {
-    printf("Depth too large during tree walk (%lu vs %lu).\n",
+    printf("Depth too large during tree walk ("GT_LU" vs "GT_LU").\n",
                          gt_rbtree_max_depth,
-                         (unsigned long) (log ((double) expected_count) * 2.0 +
+                         (GtUword) (log ((double) expected_count) * 2.0 +
                          2.0) );
     error = 1;
   }
@@ -955,20 +955,20 @@ static int nrbt_walk_tree(GtRBTree *tree,unsigned long expected_count)
 }
 
 static bool nrbt_mangle_tree(GtRBTreeSearchOrder how, GtRBTreeDoAction what,
-                             GtRBTree *tree, unsigned long lag, GtError *err)
+                             GtRBTree *tree, GtUword lag, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   bool nodecreated, haserr = false;
 
   if (how == GT_RBTREE_RANDOMORDER) {
-    for (i = 0; i < (unsigned long) GT_RBTREE_SIZE; ++i) {
+    for (i = 0; i < (GtUword) GT_RBTREE_SIZE; ++i) {
       gt_rbtree_ytab[i] = i;
     }
     gt_rbtree_permuteintarray (gt_rbtree_ytab);
   }
   for (i = 0; i < GT_RBTREE_SIZE + lag; ++i) {
     void *elem;
-    unsigned long j, k;
+    GtUword j, k;
 
     switch (how) {
       case GT_RBTREE_RANDOMORDER:
@@ -997,7 +997,7 @@ static bool nrbt_mangle_tree(GtRBTreeSearchOrder how, GtRBTreeDoAction what,
     switch (what) {
       case GtRBTreeBuildDelete:
       case GtRBTreeBuild:
-        if (i < (unsigned long) GT_RBTREE_SIZE) {
+        if (i < (GtUword) GT_RBTREE_SIZE) {
           if (gt_rbtree_find (tree, gt_rbtree_xtab + j) != NULL) {
             gt_error_set(err,"Found element which is not in tree yet");
             haserr = true;
@@ -1038,13 +1038,13 @@ static bool nrbt_mangle_tree(GtRBTreeSearchOrder how, GtRBTreeDoAction what,
         gt_ensure(!nrbt_mangle_tree(ORDER, MODE, tree, LAG,err))
 
 #define NRBT_WALKCHECK\
-        gt_ensure(!nrbt_walk_tree(tree, (unsigned long) GT_RBTREE_SIZE))
+        gt_ensure(!nrbt_walk_tree(tree, (GtUword) GT_RBTREE_SIZE))
 
 int gt_rbtree_unit_test(GtError *err)
 {
   int had_err = 0;
   GtRBTree *tree = NULL;
-  unsigned long i, j, k, *v;
+  GtUword i, j, k, *v;
   gt_error_check (err);
 
   gt_rbtree_xtab = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_xtab));
@@ -1054,12 +1054,12 @@ int gt_rbtree_unit_test(GtError *err)
 
   tree = gt_rbtree_new(nrbt_cmp_fn, NULL, NULL);
   gt_ensure(tree != NULL);
-  for (i = 0; i < (unsigned long) GT_RBTREE_SIZE; ++i) {
+  for (i = 0; i < (GtUword) GT_RBTREE_SIZE; ++i) {
     gt_rbtree_xtab[i] = i;
   }
   /* Do this loop several times to get different permutations for the random
      case. */
-  for (i = 0; i < (unsigned long) GT_RBTREE_PASSES; ++i) {
+  for (i = 0; i < (GtUword) GT_RBTREE_PASSES; ++i) {
     NRBT_MANGLECHECK(GT_RBTREE_ASCENDING, GtRBTreeBuild, 0);
     NRBT_MANGLECHECK(GT_RBTREE_ASCENDING, GtRBTreeFind, 0);
     NRBT_MANGLECHECK(GT_RBTREE_DESCENDING, GtRBTreeFind, 0);
@@ -1097,11 +1097,11 @@ int gt_rbtree_unit_test(GtError *err)
     NRBT_WALKCHECK;
     NRBT_MANGLECHECK (GT_RBTREE_RANDOMORDER, GtRBTreeDelete, 0);
 
-    for (j = 1UL; j < (unsigned long) GT_RBTREE_SIZE; j *= 2) {
+    for (j = 1UL; j < (GtUword) GT_RBTREE_SIZE; j *= 2) {
       NRBT_MANGLECHECK (GT_RBTREE_RANDOMORDER, GtRBTreeBuildDelete, j);
     }
   }
-  for (i = 1UL; i < (unsigned long) GT_RBTREE_SIZE; i *= 2) {
+  for (i = 1UL; i < (GtUword) GT_RBTREE_SIZE; i *= 2) {
     NRBT_MANGLECHECK (GT_RBTREE_ASCENDING, GtRBTreeBuildDelete, i);
     NRBT_MANGLECHECK (GT_RBTREE_DESCENDING, GtRBTreeBuildDelete, i);
     NRBT_MANGLECHECK (GT_RBTREE_ASCENDING, GtRBTreeBuildDelete, i);

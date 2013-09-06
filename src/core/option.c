@@ -85,8 +85,8 @@ struct GtOption {
     double d;
     int i;
     unsigned int ui;
-    long l;
-    unsigned long ul;
+    GtWord l;
+    GtUword ul;
     GtRange r;
     const char *s;
   } default_value;
@@ -95,13 +95,13 @@ struct GtOption {
     double d;
     int i;
     unsigned int ui;
-    unsigned long ul;
+    GtUword ul;
   } min_value;
   union {
     double d;
     int i;
     unsigned int ui;
-    unsigned long ul;
+    GtUword ul;
   } max_value;
   bool is_set,
        is_mandatory,
@@ -197,10 +197,10 @@ static void gt_option_reset(GtOption *option)
     *(unsigned int*) option->value = option->default_value.ui;
   }
   else if (option->option_type == OPTION_LONG) {
-    *(long*) option->value = option->default_value.l;
+    *(GtWord*) option->value = option->default_value.l;
   }
   else if (option->option_type == OPTION_ULONG) {
-    *(unsigned long*) option->value = option->default_value.ul;
+    *(GtUword*) option->value = option->default_value.ul;
   }
   else if (option->option_type == OPTION_RANGE) {
    *(GtRange*) option->value = option->default_value.r;
@@ -296,12 +296,12 @@ void gt_option_parser_set_mail_address(GtOptionParser *op, const char *address)
   op->mail_address = address;
 }
 
-static void show_description(unsigned long initial_space, const char *desc,
-                             unsigned long len)
+static void show_description(GtUword initial_space, const char *desc,
+                             GtUword len)
 {
-  const unsigned long width = GT_OPTION_PARSER_TERMINAL_WIDTH - initial_space;
+  const GtUword width = GT_OPTION_PARSER_TERMINAL_WIDTH - initial_space;
   const char *tmp_ptr, *desc_ptr = desc;
-  unsigned long i;
+  GtUword i;
   bool continue_while = false;
 
   /* got space to show option */
@@ -358,7 +358,7 @@ static void show_description(unsigned long initial_space, const char *desc,
 
 static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
 {
-  unsigned long i, max_option_length = 0;
+  GtUword i, max_option_length = 0;
   GtOption *option;
   int had_err = 0;
   gt_error_check(err);
@@ -434,21 +434,21 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
         if (option->default_value.ul == GT_UNDEF_LONG)
           gt_xputs("undefined");
         else
-          printf("%ld\n", option->default_value.l);
+          printf(""GT_LD"\n", option->default_value.l);
       }
       else if (option->option_type == OPTION_ULONG) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.ul == GT_UNDEF_ULONG)
           gt_xputs("undefined");
         else
-          printf("%lu\n", option->default_value.ul);
+          printf(""GT_LU"\n", option->default_value.ul);
       }
       else if (option->option_type == OPTION_RANGE) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.r.start == GT_UNDEF_ULONG)
           gt_xputs("undefined");
         else {
-          printf("%lu %lu\n", option->default_value.r.start,
+          printf(""GT_LU" "GT_LU"\n", option->default_value.r.start,
                  option->default_value.r.end);
         }
       }
@@ -476,7 +476,7 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
 }
 
 static void print_asciidoc_header(const char *hdr, GtStr *outstr) {
-  unsigned long i;
+  GtUword i;
   gt_str_append_cstr(outstr, hdr);
   gt_str_append_char(outstr, '\n');
   for (i = 0; i < strlen(hdr); i++)
@@ -485,7 +485,7 @@ static void print_asciidoc_header(const char *hdr, GtStr *outstr) {
 }
 
 static void print_toolname(const char *toolname, GtStr *outstr, bool upper) {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < strlen(toolname); i++) {
     char c = toolname[i];
     if (c == ' ')
@@ -501,7 +501,7 @@ static void print_toolname(const char *toolname, GtStr *outstr, bool upper) {
 
 static bool has_extended_option(GtArray *options)
 {
-  unsigned long i;
+  GtUword i;
   GtOption *option;
   gt_assert(options);
   for (i = 0; i < gt_array_size(options); i++) {
@@ -533,7 +533,7 @@ static void add_common_options(GtOptionParser *op)
 int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
                              GtStr *outstr, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtOption *option;
   GtStr *default_string;
   int had_err = 0;
@@ -672,7 +672,7 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
     int old_stdout, out_pipe[2];
 #ifndef _WIN32
     int rval;
-    long flags;
+    GtWord flags;
 #endif
     char c,
          prognamebuf[BUFSIZ];
@@ -773,7 +773,7 @@ static int check_missing_argument_and_minus_sign(int argnum, int argc,
 
 static int check_mandatory_options(GtOptionParser *op, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtOption *o;
   gt_error_check(err);
   gt_assert(op);
@@ -790,7 +790,7 @@ static int check_mandatory_options(GtOptionParser *op, GtError *err)
 
 static int check_option_implications(GtOptionParser *op, GtError *err)
 {
-  unsigned long i, j, k, l;
+  GtUword i, j, k, l;
   GtArray *implied_option_array;
   GtOption *o, *implied_option;
   unsigned int option_set;
@@ -860,7 +860,7 @@ static int check_option_implications(GtOptionParser *op, GtError *err)
 
 static int check_option_exclusions(GtOptionParser *op, GtError *err)
 {
-  unsigned long i, j;
+  GtUword i, j;
   GtOption *o, *excluded_option;
   gt_error_check(err);
 
@@ -883,7 +883,7 @@ static int check_option_exclusions(GtOptionParser *op, GtError *err)
 
 static int check_mandatory_either_options(GtOptionParser *op, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtOption *o, *meo_a, *meo_b, *meo_c;
   gt_error_check(err);
 
@@ -963,13 +963,13 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
 {
   int argnum, int_value;
   unsigned int uint_value;
-  unsigned long i;
+  GtUword i;
   double double_value;
   HookInfo *hookinfo;
   GtOption *option;
   bool option_parsed;
-  long long_value;
-  unsigned long ulong_value;
+  GtWord long_value;
+  GtUword ulong_value;
   int minus_offset, had_err = 0;
   GtStr *gt_error_str;
 
@@ -1217,7 +1217,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 }
               }
               if (!had_err) {
-                *(long*) option->value = long_value;
+                *(GtWord*) option->value = long_value;
                 option_parsed = true;
               }
               break;
@@ -1243,7 +1243,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     ulong_value < option->min_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                               "integer >= %lu", gt_str_get(option->option_str),
+                               "integer >= "GT_LU"", gt_str_get(option->option_str),
                                option->min_value.ul);
                   had_err = -1;
                 }
@@ -1253,13 +1253,13 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     ulong_value > option->max_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                               "integer <= %lu", gt_str_get(option->option_str),
+                               "integer <= "GT_LU"", gt_str_get(option->option_str),
                                option->max_value.ul);
                   had_err = -1;
                 }
               }
               if (!had_err) {
-                *(unsigned long*) option->value = ulong_value;
+                *(GtUword*) option->value = ulong_value;
                 option_parsed = true;
               }
               break;
@@ -1288,7 +1288,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     long_value < option->min_value.ul) {
                   gt_error_set(err, "first argument to option \"-%s\" must be "
-                               "an integer >= %lu",
+                               "an integer >= "GT_LU"",
                                gt_str_get(option->option_str),
                                option->min_value.ul);
                   had_err = -1;
@@ -1318,7 +1318,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     long_value > option->max_value.ul) {
                   gt_error_set(err, "second argument to option \"-%s\" must be "
-                               "an integer <= %lu",
+                               "an integer <= "GT_LU"",
                                gt_str_get(option->option_str),
                                option->max_value.ul);
                   had_err = -1;
@@ -1329,8 +1329,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               /* check arguments */
               if (!had_err && (((GtRange*) option->value)->start >
                                ((GtRange*) option->value)->end)) {
-                gt_error_set(err, "first argument %lu to option \"-%s\" must "
-                             "be <= than second argument %lu",
+                gt_error_set(err, "first argument "GT_LU" to option \"-%s\" must "
+                             "be <= than second argument "GT_LU"",
                              ((GtRange*) option->value)->start,
                              gt_str_get(option->option_str),
                              ((GtRange*) option->value)->end);
@@ -1452,7 +1452,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
 
 void gt_option_parser_delete(GtOptionParser *op)
 {
-  unsigned long i;
+  GtUword i;
   if (!op) return;
   gt_free(op->progname);
   gt_free(op->synopsis);
@@ -1478,7 +1478,7 @@ GtOption* gt_option_new_verbose(bool *value)
   return gt_option_new_bool("v", "be verbose", value, false);
 }
 
-GtOption* gt_option_new_width(unsigned long *value)
+GtOption* gt_option_new_width(GtUword *value)
 {
   return gt_option_new_ulong("width", "set output width for FASTA sequence "
                              "printing\n(0 disables formatting)", value, 0);
@@ -1635,7 +1635,7 @@ GtOption *gt_option_new_uint_min_max(const char *option_str,
 }
 
 GtOption* gt_option_new_long(const char *option_str, const char *description,
-                             long *value, long default_value)
+                             GtWord *value, GtWord default_value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_LONG;
@@ -1645,7 +1645,7 @@ GtOption* gt_option_new_long(const char *option_str, const char *description,
 }
 
 GtOption* gt_option_new_ulong(const char *option_str, const char *description,
-                              unsigned long *value, unsigned long default_value)
+                              GtUword *value, GtUword default_value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_ULONG;
@@ -1656,9 +1656,9 @@ GtOption* gt_option_new_ulong(const char *option_str, const char *description,
 
 GtOption* gt_option_new_ulong_min(const char *option_str,
                                   const char *description,
-                                  unsigned long *value,
-                                  unsigned long default_value,
-                                  unsigned long min_value)
+                                  GtUword *value,
+                                  GtUword default_value,
+                                  GtUword min_value)
 {
   GtOption *o = gt_option_new_ulong(option_str, description, value,
                                     default_value);
@@ -1669,10 +1669,10 @@ GtOption* gt_option_new_ulong_min(const char *option_str,
 
 GtOption *gt_option_new_ulong_min_max(const char *option_str,
                                       const char *description,
-                                      unsigned long *value,
-                                      unsigned long default_value,
-                                      unsigned long min_value,
-                                      unsigned long max_value)
+                                      GtUword *value,
+                                      GtUword default_value,
+                                      GtUword min_value,
+                                      GtUword max_value)
 {
   GtOption *o = gt_option_new_ulong(option_str, description, value,
                                     default_value);
@@ -1700,8 +1700,8 @@ GtOption* gt_option_new_range(const char *option_str, const char *description,
 GtOption* gt_option_new_range_min_max(const char *option_str,
                                       const char *description, GtRange *value,
                                       GtRange *default_value,
-                                      unsigned long min_value,
-                                      unsigned long max_value)
+                                      GtUword min_value,
+                                      GtUword max_value)
 {
    GtOption *o = gt_option_new_range(option_str, description, value,
                                      default_value);
@@ -1760,7 +1760,7 @@ GtOption* gt_option_new_choice(const char *option_str, const char *description,
 {
   GtOption *o;
 #ifndef NDEBUG
-  unsigned long in_domain = 1;
+  GtUword in_domain = 1;
   if (default_value) {
     while (domain[in_domain - 1] != NULL) {
       if (domain[in_domain - 1] == default_value) {
@@ -1905,7 +1905,7 @@ bool gt_option_is_set(const GtOption *o)
 
 void gt_option_delete(GtOption *o)
 {
-  unsigned long i;
+  GtUword i;
   if (!o) return;
   if (o->reference_count) {
     o->reference_count--;
@@ -1921,7 +1921,7 @@ void gt_option_delete(GtOption *o)
   gt_free(o);
 }
 
-int gt_option_parse_spacespec(unsigned long *maximumspace,
+int gt_option_parse_spacespec(GtUword *maximumspace,
                               const char *optname,
                               const GtStr *memlimit,
                               GtError *err)
@@ -1943,10 +1943,10 @@ int gt_option_parse_spacespec(unsigned long *maximumspace,
     char buffer[2+1];
 
     (void) sscanf(gt_str_get(memlimit), "%d%s", &readint, buffer);
-    *maximumspace = (unsigned long) readint;
+    *maximumspace = (GtUword) readint;
     if (strcmp(buffer, "GB") == 0)
     {
-      if (sizeof (unsigned long) == (size_t) 4 && *maximumspace > 3UL)
+      if (sizeof (GtUword) == (size_t) 4 && *maximumspace > 3UL)
       {
         gt_error_set(err,"option -%s: for 32bit binaries one cannot "
                          "specify more than 3 GB as maximum space",optname);
@@ -1960,7 +1960,7 @@ int gt_option_parse_spacespec(unsigned long *maximumspace,
     {
       if (strcmp(buffer, "MB") == 0)
       {
-        if (sizeof (unsigned long) == (size_t) 4 && *maximumspace > 4095UL)
+        if (sizeof (GtUword) == (size_t) 4 && *maximumspace > 4095UL)
         {
           gt_error_set(err,"option -%s: for 32bit binaries one cannot "
                            "specify more than 4095 MB as maximum space",

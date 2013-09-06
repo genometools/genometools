@@ -19,10 +19,10 @@
 #include "gth/bssm_param_rep.h"
 #include "gth/bssm_param_rmsd.h"
 
-static void compute_rmsd(GthDbl *rmsd, unsigned long *n,
+static void compute_rmsd(GthDbl *rmsd, GtUword *n,
                          GthBSSMModel *bssm_model_1, GthBSSMModel *bssm_model_2)
 {
-  unsigned long i, j, k, l;
+  GtUword i, j, k, l;
   GthDbl x, y;
   gt_assert(rmsd && n && bssm_model_1 && bssm_model_2);
   *rmsd = 0.0;
@@ -46,7 +46,7 @@ static void compute_rmsd(GthDbl *rmsd, unsigned long *n,
 static int show_rmsd(GthBSSMParam *bssm_1, GthBSSMParam *bssm_2, GtError *err)
 {
   unsigned int current = 0;
-  unsigned long ns[3];
+  GtUword ns[3];
   GthDbl rmsds[3];
   gt_error_check(err);
   gt_assert(bssm_1 && bssm_2);
@@ -72,7 +72,7 @@ static int show_rmsd(GthBSSMParam *bssm_1, GthBSSMParam *bssm_2, GtError *err)
   }
   if (current) {
     GthDbl overall_rmsd = 0.0;
-    unsigned long i, n = 0;
+    GtUword i, n = 0;
     for (i = 0; i < current; i++) {
       overall_rmsd += rmsds[i] * rmsds[i] * ns[i];
       n += ns[i];

@@ -91,7 +91,7 @@ static int callpairswisesshulendistdist(const char *indexname,
   }
   if (!haserr)
   {
-    unsigned long totalgmatchlength = 0;
+    GtUword totalgmatchlength = 0;
 
     if (gt_esa2shulengthqueryfiles(&totalgmatchlength,
                                    &suffixarray,
@@ -101,7 +101,7 @@ static int callpairswisesshulendistdist(const char *indexname,
       haserr = true;
     } else
     {
-      printf("%lu\n",totalgmatchlength);
+      printf(""GT_LU"\n",totalgmatchlength);
     }
   }
   gt_freesuffixarray(&suffixarray);

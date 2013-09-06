@@ -36,7 +36,7 @@ typedef struct {
        save, dot, mdot, adj, spm, subgraph_mono, subgraph_extend;
   unsigned int deadend, bubble, deadend_depth;
   GtStrArray *subgraph, *subgraph_other;
-  unsigned long subgraph_depth;
+  GtUword subgraph_depth;
 } GtReadjoinerGraphArguments;
 
 static void* gt_readjoiner_graph_arguments_new(void)
@@ -250,7 +250,7 @@ static int gt_readjoiner_graph_error_correction(GtStrgraph *strgraph,
     GtLogger *verbose_logger)
 {
   unsigned int i;
-  unsigned long retval, retval_sum;
+  GtUword retval, retval_sum;
   gt_logger_log(verbose_logger, "remove p-bubbles");
 
   retval_sum = 0;
@@ -259,10 +259,10 @@ static int gt_readjoiner_graph_error_correction(GtStrgraph *strgraph,
   {
     retval = gt_strgraph_redpbubbles(strgraph, 0, 1UL, false);
     retval_sum += retval;
-    gt_logger_log(verbose_logger, "removed p-bubble edges [round %u] = %lu",
+    gt_logger_log(verbose_logger, "removed p-bubble edges [round %u] = "GT_LU"",
         i + 1, retval);
   }
-  gt_logger_log(verbose_logger, "removed p-bubble edges [%u rounds] = %lu", i,
+  gt_logger_log(verbose_logger, "removed p-bubble edges [%u rounds] = "GT_LU"", i,
       retval_sum);
   gt_logger_log(verbose_logger, "remove dead-end paths");
 
@@ -270,20 +270,20 @@ static int gt_readjoiner_graph_error_correction(GtStrgraph *strgraph,
   retval = 1UL;
   for (i = 0; i < deadend && retval > 0; i++)
   {
-    retval = gt_strgraph_reddepaths(strgraph, (unsigned long)deadend_depth,
+    retval = gt_strgraph_reddepaths(strgraph, (GtUword)deadend_depth,
         false);
     retval_sum += retval;
     gt_logger_log(verbose_logger, "removed dead-end path edges [round %u] = "
-        "%lu", i + 1, retval);
+        ""GT_LU"", i + 1, retval);
   }
   gt_logger_log(verbose_logger,
-      "removed dead-end path edges [%u rounds] = %lu", i, retval_sum);
+      "removed dead-end path edges [%u rounds] = "GT_LU"", i, retval_sum);
   return 0;
 }
 
 static inline void gt_readjoiner_graph_show_current_space(const char *label)
 {
-  unsigned long m, f;
+  GtUword m, f;
   if (gt_ma_bookkeeping_enabled())
   {
     m = gt_ma_get_space_current();
@@ -295,7 +295,7 @@ static inline void gt_readjoiner_graph_show_current_space(const char *label)
 }
 
 static void gt_readjoiner_graph_load_graph(GtStrgraph **strgraph,
-    GtEncseq *reads, const char *readset, unsigned long rlen,
+    GtEncseq *reads, const char *readset, GtUword rlen,
     GtLogger *default_logger, GtTimer *timer)
 {
   *strgraph = gt_strgraph_new_from_file(reads, rlen, readset,
@@ -310,12 +310,12 @@ static void gt_readjoiner_graph_load_graph(GtStrgraph **strgraph,
 
 static int gt_readjoiner_graph_show_subgraph(GtStrgraph *strgraph,
     GtStrArray *subgraph, GtStrArray *subgraph_other,
-    unsigned long subgraph_depth, bool subgraph_mono, bool subgraph_extend,
+    GtUword subgraph_depth, bool subgraph_mono, bool subgraph_extend,
     const char *readsetname, GtLogger *default_logger, GtTimer *timer,
     GtError *err)
 {
   int had_err = 0;
-  unsigned long i, *rlist, rlistsize = gt_str_array_size(subgraph),
+  GtUword i, *rlist, rlistsize = gt_str_array_size(subgraph),
                 *olist = NULL, olistsize = gt_str_array_size(subgraph_other);
   const char *num;
   gt_assert(rlistsize > 0);
@@ -326,7 +326,7 @@ static int gt_readjoiner_graph_show_subgraph(GtStrgraph *strgraph,
   for (i = 0; i < rlistsize && !had_err; i++)
   {
     num = gt_str_array_get(subgraph, i);
-    if (sscanf(num, "%lu", rlist + i) != 1)
+    if (sscanf(num, ""GT_LU"", rlist + i) != 1)
     {
       gt_error_set(err, GT_READJOINER_GRAPH_ERR_SUBGRAPH);
       had_err = -1;
@@ -338,7 +338,7 @@ static int gt_readjoiner_graph_show_subgraph(GtStrgraph *strgraph,
     for (i = 0; i < olistsize && !had_err; i++)
     {
       num = gt_str_array_get(subgraph_other, i);
-      if (sscanf(num, "%lu", olist + i) != 1)
+      if (sscanf(num, ""GT_LU"", olist + i) != 1)
       {
         gt_error_set(err, GT_READJOINER_GRAPH_ERR_SOTHER);
         had_err = -1;
@@ -368,7 +368,7 @@ static int gt_readjoiner_graph_runner(GT_UNUSED int argc,
   GtStrgraph *strgraph = NULL;
   const char *readset = gt_str_get(arguments->readset);
   bool eqlen;
-  unsigned long nreads, tlen, rlen;
+  GtUword nreads, tlen, rlen;
   int had_err = 0;
 
   gt_assert(arguments);
@@ -400,16 +400,16 @@ static int gt_readjoiner_graph_runner(GT_UNUSED int argc,
   gt_assert(reads != NULL);
   eqlen = gt_encseq_accesstype_get(reads) == GT_ACCESS_TYPE_EQUALLENGTH;
   nreads = gt_encseq_num_of_sequences(reads);
-  gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
+  gt_logger_log(default_logger, "number of reads in filtered readset = "GT_LU"",
       nreads);
   tlen = gt_encseq_total_length(reads) - nreads + 1;
-  gt_logger_log(verbose_logger, "total length of filtered readset = %lu",
+  gt_logger_log(verbose_logger, "total length of filtered readset = "GT_LU"",
       tlen);
 
   if (eqlen)
   {
     rlen = gt_encseq_seqlength(reads, 0);
-    gt_logger_log(verbose_logger, "read length = %lu", rlen);
+    gt_logger_log(verbose_logger, "read length = "GT_LU"", rlen);
     gt_encseq_delete(reads);
     reads = NULL;
   }

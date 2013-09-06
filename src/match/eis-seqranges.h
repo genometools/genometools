@@ -85,8 +85,8 @@ gt_deleteSeqRangeList(struct seqRangeList *rangeList);
  */
 void
 gt_SRLAppendNewRange(struct seqRangeList *rangeList,
-                  unsigned long pos,
-                  unsigned long len,
+                  GtUword pos,
+                  GtUword len,
                   Symbol sym);
 
 /**
@@ -96,7 +96,7 @@ gt_SRLAppendNewRange(struct seqRangeList *rangeList,
  * @param sym this symbol occurs
  */
 void
-gt_SRLAddPosition(struct seqRangeList *rangeList, unsigned long pos,
+gt_SRLAddPosition(struct seqRangeList *rangeList, GtUword pos,
                Symbol sym);
 
 /**
@@ -117,7 +117,7 @@ gt_SRLInitListSearchHint(struct seqRangeList *rangeList,
  * @return NULL if no range overlaps or succeeds pos
  */
 struct seqRange *
-gt_SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
+gt_SRLFindPositionNext(struct seqRangeList *rangeList, GtUword pos,
                     seqRangeListSearchHint *hint);
 
 /**
@@ -131,7 +131,7 @@ gt_SRLFindPositionNext(struct seqRangeList *rangeList, unsigned long pos,
  * @return true if an overlap exits, false if not
  */
 int
-gt_SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
+gt_SRLOverlapsPosition(struct seqRangeList *rangeList, GtUword pos,
                     seqRangeListSearchHint *hint, Symbol *symAtPos);
 
 /**
@@ -146,8 +146,8 @@ gt_SRLOverlapsPosition(struct seqRangeList *rangeList, unsigned long pos,
  * @param hint
  */
 void
-gt_SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
-                      unsigned long end, unsigned long *occStore,
+gt_SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, GtUword start,
+                      GtUword end, GtUword *occStore,
                       seqRangeListSearchHint *hint);
 
 /**
@@ -158,10 +158,10 @@ gt_SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, unsigned long start,
  * @param sym only account for ranges matching this symbol
  * @param hint
  */
-unsigned long
+GtUword
 gt_SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
-                          unsigned long start,
-                          unsigned long end,
+                          GtUword start,
+                          GtUword end,
                           Symbol sym,
                           seqRangeListSearchHint *hint);
 
@@ -172,10 +172,10 @@ gt_SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
  * @param end
  * @param hint
  */
-unsigned long
+GtUword
 gt_SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
-                              unsigned long start,
-                              unsigned long end,
+                              GtUword start,
+                              GtUword end,
                               seqRangeListSearchHint *hint);
 
 /**
@@ -193,9 +193,9 @@ gt_SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
 void
 gt_SRLApplyRangesToSubString(struct seqRangeList *rangeList,
                           Symbol *subString,
-                          unsigned long start,
-                          unsigned long len,
-                          unsigned long subStringOffset,
+                          GtUword start,
+                          GtUword len,
+                          GtUword subStringOffset,
                           seqRangeListSearchHint *hint);
 
 /**
@@ -212,8 +212,8 @@ gt_SRLApplyRangesToSubString(struct seqRangeList *rangeList,
 int
 gt_SRLPrintRangesInfo(struct seqRangeList *rangeList,
                    FILE *fp,
-                   unsigned long start,
-                   unsigned long len,
+                   GtUword start,
+                   GtUword len,
                    seqRangeListSearchHint *hint);
 /**
  * @brief Save a range list structure to file.

@@ -102,9 +102,9 @@ static void allocatefmtables(Fmindex *fm,
                                                       fm->markdist));
     fm->specpos.nextfreeGtPairBwtidx = 0;
     fm->specpos.allocatedGtPairBwtidx
-      = (unsigned long) gt_determinenumberofspecialstostore(specialcharinfo);
-    printf("# %lu wildcards in the last %lu characters (%.2f)\n",
-           (unsigned long) specialcharinfo->specialcharacters -
+      = (GtUword) gt_determinenumberofspecialstostore(specialcharinfo);
+    printf("# "GT_LU" wildcards in the last "GT_LU" characters (%.2f)\n",
+           (GtUword) specialcharinfo->specialcharacters -
                            fm->specpos.allocatedGtPairBwtidx,
            specialcharinfo->specialcharacters,
             (double) (specialcharinfo->specialcharacters -
@@ -124,18 +124,18 @@ static void allocatefmtables(Fmindex *fm,
 
 static void set0frequencies(Fmindex *fm)
 {
-  unsigned long i;
+  GtUword i;
 
-  for (i = 0; i < (unsigned long) TFREQSIZE(fm->mapsize); i++)
+  for (i = 0; i < (GtUword) TFREQSIZE(fm->mapsize); i++)
   {
     fm->tfreq[i] = 0;
   }
-  for (i = 0; i < (unsigned long) BFREQSIZE(fm->mapsize,fm->nofblocks); i++)
+  for (i = 0; i < (GtUword) BFREQSIZE(fm->mapsize,fm->nofblocks); i++)
   {
     fm->bfreq[i] = 0;
   }
   for (i = 0;
-       i < (unsigned long) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks);
+       i < (GtUword) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks);
        i++)
   {
     fm->superbfreq[i] = 0;
@@ -145,7 +145,7 @@ static void set0frequencies(Fmindex *fm)
 static void finalizefmfrequencies(Fmindex *fm)
 {
   unsigned int j;
-  unsigned long i, *freqptr;
+  GtUword i, *freqptr;
 
   for (j = 2U; j <= fm->mapsize; j++)
   {
@@ -154,7 +154,7 @@ static void finalizefmfrequencies(Fmindex *fm)
   freqptr = fm->superbfreq;
   for (j = 0; j < fm->mapsize; j++)
   {
-    for (i = (unsigned long) 2; i < fm->nofsuperblocks; i++)
+    for (i = (GtUword) 2; i < fm->nofsuperblocks; i++)
     {
       freqptr[i] += freqptr[i-1];
     }
@@ -163,30 +163,30 @@ static void finalizefmfrequencies(Fmindex *fm)
 }
 
 static void showconstructionmessage(const char *indexname,
-                                    unsigned long totallength,
-                                    unsigned long fmsize,
+                                    GtUword totallength,
+                                    GtUword fmsize,
                                     unsigned int log2bsize,
                                     unsigned int log2markdist,
                                     unsigned int numofchars)
 {
-  printf("# construct fmindex \"%s\" for bsize=%lu, superbsize=%lu,",
+  printf("# construct fmindex \"%s\" for bsize="GT_LU", superbsize="GT_LU",",
           indexname,
-          (unsigned long) GT_POW2(log2bsize),
-          (unsigned long) GT_POW2(log2markdist));
-  printf(" len=%lu, alphasize=%u: size ",
+          (GtUword) GT_POW2(log2bsize),
+          (GtUword) GT_POW2(log2markdist));
+  printf(" len="GT_LU", alphasize=%u: size ",
           totallength,
           numofchars);
-  printf("%lu bytes, space overhead %.2f\n",
+  printf(""GT_LU" bytes, space overhead %.2f\n",
           fmsize,
           (double) fmsize/(double) (totallength+1));
 }
 
 static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
                                        GtUchar *bwtvalue,
-                                       unsigned long *suftabvalue,
+                                       GtUword *suftabvalue,
                                        Emissionmergedesa *emmesa,
-                                       const unsigned long *sequenceoffsettable,
-                                       unsigned long bwtpos,
+                                       const GtUword *sequenceoffsettable,
+                                       GtUword bwtpos,
                                        GtError *err)
 {
   Indexedsuffix indexedsuffix;
@@ -217,7 +217,7 @@ static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
     {
       if (longest->defined)
       {
-        gt_error_set(err,"longest is already defined as %lu",
+        gt_error_set(err,"longest is already defined as "GT_LU"",
                       longest->valueunsignedlong);
         return -2;
       }
@@ -253,7 +253,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
   Suffixarray suffixarray;
   Emissionmergedesa emmesa;
   GtUchar cc;
-  unsigned long bwtpos,
+  GtUword bwtpos,
          totallength = 0,
          suftabvalue = 0,
          *sequenceoffsettable = NULL,
@@ -376,7 +376,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
   }
   if (!haserr)
   {
-    printf("# firstignorespecial=%lu\n",
+    printf("# firstignorespecial="GT_LU"\n",
               firstignorespecial);
     gt_computefmkeyvalues (fmindex,
                         specialcharinfo,
@@ -414,7 +414,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
           {
             break;
           }
-          suftabvalue = (unsigned long) tmpsuftabvalue;
+          suftabvalue = (GtUword) tmpsuftabvalue;
         }
         retval = gt_readnextfromstream_GtUchar(&cc,&suffixarray.bwttabstream);
         if (retval == 0)
@@ -489,7 +489,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
         fmindex->specpos.nextfreeGtPairBwtidx)
     {
       gt_error_set(err,"program error: too much space for specpos: "
-                    "allocated = %lu != %lu = used",
+                    "allocated = "GT_LU" != "GT_LU" = used",
                     fmindex->specpos.allocatedGtPairBwtidx,
                     fmindex->specpos.nextfreeGtPairBwtidx);
       haserr = true;

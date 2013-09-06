@@ -105,64 +105,64 @@ void gth_seq_con_demand_orig_seq(GthSeqCon *seq_con)
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->demand_orig_seq);
   seq_con->c_class->demand_orig_seq(seq_con);
 }
-GtUchar* gth_seq_con_get_orig_seq(GthSeqCon *seq_con, unsigned long seq_num)
+GtUchar* gth_seq_con_get_orig_seq(GthSeqCon *seq_con, GtUword seq_num)
 {
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->get_orig_seq);
   return seq_con->c_class->get_orig_seq(seq_con, seq_num);
 }
 
-GtUchar* gth_seq_con_get_tran_seq(GthSeqCon *seq_con, unsigned long seq_num)
+GtUchar* gth_seq_con_get_tran_seq(GthSeqCon *seq_con, GtUword seq_num)
 {
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->get_tran_seq);
   return seq_con->c_class->get_tran_seq(seq_con, seq_num);
 }
 
-GtUchar* gth_seq_con_get_orig_seq_rc(GthSeqCon *seq_con, unsigned long seq_num)
+GtUchar* gth_seq_con_get_orig_seq_rc(GthSeqCon *seq_con, GtUword seq_num)
 {
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->get_orig_seq_rc);
   return seq_con->c_class->get_orig_seq_rc(seq_con, seq_num);
 }
 
-GtUchar* gth_seq_con_get_tran_seq_rc(GthSeqCon *seq_con, unsigned long seq_num)
+GtUchar* gth_seq_con_get_tran_seq_rc(GthSeqCon *seq_con, GtUword seq_num)
 {
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->get_tran_seq_rc);
   return seq_con->c_class->get_tran_seq_rc(seq_con, seq_num);
 }
 
-void gth_seq_con_get_description(GthSeqCon *seq_con, unsigned long seq_num,
+void gth_seq_con_get_description(GthSeqCon *seq_con, GtUword seq_num,
                                  GtStr *desc)
 {
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->get_description);
   seq_con->c_class->get_description(seq_con, seq_num, desc);
 }
 
-void gth_seq_con_echo_description(GthSeqCon *seq_con, unsigned long seq_num,
+void gth_seq_con_echo_description(GthSeqCon *seq_con, GtUword seq_num,
                                   GtFile *outfp)
 {
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->echo_description);
   seq_con->c_class->echo_description(seq_con, seq_num, outfp);
 }
 
-unsigned long gth_seq_con_num_of_seqs(GthSeqCon *seq_con)
+GtUword gth_seq_con_num_of_seqs(GthSeqCon *seq_con)
 {
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->num_of_seqs);
   return seq_con->c_class->num_of_seqs(seq_con);
 }
 
-unsigned long gth_seq_con_total_length(GthSeqCon *seq_con)
+GtUword gth_seq_con_total_length(GthSeqCon *seq_con)
 {
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->total_length);
   return seq_con->c_class->total_length(seq_con);
 }
 
-GtRange gth_seq_con_get_range(GthSeqCon *seq_con, unsigned long seq_num)
+GtRange gth_seq_con_get_range(GthSeqCon *seq_con, GtUword seq_num)
 {
   gt_assert(seq_con && seq_con->c_class && seq_con->c_class->get_range);
   return seq_con->c_class->get_range(seq_con, seq_num);
 }
 
 GtRange gth_seq_con_get_relative_range(GthSeqCon *seq_con,
-                                       unsigned long seq_num)
+                                       GtUword seq_num)
 {
   GtRange relative_range, range;
   gt_assert(seq_con);
@@ -173,7 +173,7 @@ GtRange gth_seq_con_get_relative_range(GthSeqCon *seq_con,
   return relative_range;
 }
 
-unsigned long gth_seq_con_get_length(GthSeqCon *seq_con, unsigned long seq_num)
+GtUword gth_seq_con_get_length(GthSeqCon *seq_con, GtUword seq_num)
 {
   GtRange range;
   gt_assert(seq_con);

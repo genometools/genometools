@@ -27,18 +27,18 @@ typedef enum {
 
 struct GtEliasGammaBitwiseDecoder {
   EliasGammaStatus status;
-  unsigned long    cur_bit,
+  GtUword    cur_bit,
                    length_in_bits,
                    x;
 };
 
-GtBittab* gt_elias_gamma_encode(unsigned long x)
+GtBittab* gt_elias_gamma_encode(GtUword x)
 {
   GtBittab* code = NULL;
-  unsigned long length_in_bits, idx;
+  GtUword length_in_bits, idx;
 
   gt_assert(x > 0);
-  length_in_bits = (unsigned long) gt_determinebitspervalue(x);
+  length_in_bits = (GtUword) gt_determinebitspervalue(x);
   code = gt_bittab_new(length_in_bits + length_in_bits - 1UL);
   for (idx = 0; idx < length_in_bits; idx++)
     if (((x >> idx) & 1))
@@ -65,7 +65,7 @@ void reset_decoder(GtEliasGammaBitwiseDecoder *egbd)
 }
 
 int gt_elias_gamma_bitwise_decoder_next(GtEliasGammaBitwiseDecoder *egbd,
-                                        bool bit, unsigned long *x)
+                                        bool bit, GtUword *x)
 {
   gt_assert(egbd);
   if (egbd->status == LEADING_ZEROS) {
@@ -104,7 +104,7 @@ int gt_elias_gamma_unit_test(GtError *err)
 {
   int stat = -1,
       had_err = 0;
-  unsigned long idx,
+  GtUword idx,
                 idx_j,
                 unit_test_x_size = 100UL,
                 number = unit_test_x_size + 1;

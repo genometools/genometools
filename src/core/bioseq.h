@@ -35,47 +35,47 @@ GtBioseq*     gt_bioseq_new_str(GtStr* sequence_file, GtError*);
 void          gt_bioseq_delete(GtBioseq*);
 void          gt_bioseq_delete_indices(GtBioseq*);
 GtAlphabet*   gt_bioseq_get_alphabet(GtBioseq*);
-GtSeq*        gt_bioseq_get_seq(GtBioseq*, unsigned long);
-GtSeq*        gt_bioseq_get_seq_range(GtBioseq*, unsigned long index,
-                                      unsigned long start, unsigned long end);
-const char*   gt_bioseq_get_description(GtBioseq*, unsigned long);
-char          gt_bioseq_get_char(const GtBioseq*, unsigned long index,
-                                 unsigned long position);
+GtSeq*        gt_bioseq_get_seq(GtBioseq*, GtUword);
+GtSeq*        gt_bioseq_get_seq_range(GtBioseq*, GtUword index,
+                                      GtUword start, GtUword end);
+const char*   gt_bioseq_get_description(GtBioseq*, GtUword);
+char          gt_bioseq_get_char(const GtBioseq*, GtUword index,
+                                 GtUword position);
 /* Return sequence with given <index> (not '\0' terminated). */
-char*         gt_bioseq_get_sequence(const GtBioseq*, unsigned long index);
-char*         gt_bioseq_get_sequence_range(const GtBioseq*, unsigned long index,
-                                           unsigned long start,
-                                           unsigned long end);
-GtUchar       gt_bioseq_get_encoded_char(const GtBioseq*, unsigned long index,
-                                         unsigned long position);
+char*         gt_bioseq_get_sequence(const GtBioseq*, GtUword index);
+char*         gt_bioseq_get_sequence_range(const GtBioseq*, GtUword index,
+                                           GtUword start,
+                                           GtUword end);
+GtUchar       gt_bioseq_get_encoded_char(const GtBioseq*, GtUword index,
+                                         GtUword position);
 void          gt_bioseq_get_encoded_sequence(const GtBioseq*, GtUchar *out,
-                                             unsigned long index);
+                                             GtUword index);
 void          gt_bioseq_get_encoded_sequence_range(const GtBioseq*,
                                                    GtUchar *out,
-                                                   unsigned long index,
-                                                   unsigned long start,
-                                                   unsigned long end);
+                                                   GtUword index,
+                                                   GtUword start,
+                                                   GtUword end);
 /* Return MD5 fingerprint of sequence with given <index>. */
-const char*   gt_bioseq_get_md5_fingerprint(GtBioseq*, unsigned long index);
+const char*   gt_bioseq_get_md5_fingerprint(GtBioseq*, GtUword index);
 /* Return filename of sequence file underlying <bioseq>. */
 const char*   gt_bioseq_filename(const GtBioseq *bioseq);
-unsigned long gt_bioseq_get_sequence_length(const GtBioseq*,
-                                            unsigned long index);
-unsigned long gt_bioseq_get_total_length(const GtBioseq*);
-unsigned long gt_bioseq_number_of_sequences(GtBioseq*);
+GtUword gt_bioseq_get_sequence_length(const GtBioseq*,
+                                            GtUword index);
+GtUword gt_bioseq_get_total_length(const GtBioseq*);
+GtUword gt_bioseq_number_of_sequences(GtBioseq*);
 /* Return the index of the (first) sequence with given <MD5> contained in
    <bioseq>, if it exists. Otherwise <GT_UNDEF_ULONG> is returned. */
-unsigned long gt_bioseq_md5_to_index(GtBioseq *bioseq, const char *MD5);
+GtUword gt_bioseq_md5_to_index(GtBioseq *bioseq, const char *MD5);
 
 /* Shows a <bioseq> on <outfp> (in fasta format).
    If <width> is != 0 the sequences are formatted accordingly. */
-void gt_bioseq_show_as_fasta(GtBioseq *bioseq, unsigned long width,
+void gt_bioseq_show_as_fasta(GtBioseq *bioseq, GtUword width,
                              GtFile *outfp);
 
 /* Shows a sequence with number <seqnum> from a <bioseq> on <outfp> (in fasta
    format). If <width> is != 0 the sequences are formatted accordingly. */
-void gt_bioseq_show_sequence_as_fasta(GtBioseq *bioseq, unsigned long seqnum,
-                                      unsigned long width, GtFile *outfp);
+void gt_bioseq_show_sequence_as_fasta(GtBioseq *bioseq, GtUword seqnum,
+                                      GtUword width, GtFile *outfp);
 
 /* Shows GC-content on <outfp> (for DNA files). */
 void gt_bioseq_show_gc_content(GtBioseq*, GtFile *outfp);

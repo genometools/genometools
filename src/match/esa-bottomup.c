@@ -46,14 +46,14 @@
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtESAVisitorInfo *info;
 } GtBUItvinfo;
 
 struct GtArrayGtBUItvinfo
 {
   GtBUItvinfo *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 };
 
@@ -69,7 +69,7 @@ GtArrayGtBUItvinfo *gt_GtArrayGtBUItvinfo_new(void)
 void gt_GtArrayGtBUItvinfo_delete(GtArrayGtBUItvinfo *stack,
                                   GtESAVisitor *ev)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -81,13 +81,13 @@ void gt_GtArrayGtBUItvinfo_delete(GtArrayGtBUItvinfo *stack,
 
 #ifdef SKDEBUG
 static void showstack(const GtBUItvinfo *stackspace,
-                      unsigned long nextfreeItvinfo)
+                      GtUword nextfreeItvinfo)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<nextfreeItvinfo; idx++)
   {
-    printf("# stack %lu: lcp=%lu,lb=%lu\n",
+    printf("# stack "GT_LU": lcp="GT_LU",lb="GT_LU"\n",
             idx,
             stackspace[idx].lcp,
             stackspace[idx].lb);
@@ -96,11 +96,11 @@ static void showstack(const GtBUItvinfo *stackspace,
 #endif
 
 static GtBUItvinfo *allocateBUstack(GtBUItvinfo *ptr,
-                                    unsigned long currentallocated,
-                                    unsigned long allocated,
+                                    GtUword currentallocated,
+                                    GtUword allocated,
                                     GtESAVisitor *ev)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -117,8 +117,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                     GtESAVisitor *ev,
                     GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix = 0,
                 idx,
                 nonspecials,
@@ -206,7 +206,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallcp = lastinterval->lcp,
                       lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP(lcpvalue,lastintervallb);
@@ -272,15 +272,15 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-int gt_esa_bottomup_RAM(const unsigned long *suftab,
+int gt_esa_bottomup_RAM(const GtUword *suftab,
                         const uint16_t *lcptab_bucket,
-                        unsigned long nonspecials,
+                        GtUword nonspecials,
                         GtArrayGtBUItvinfo *stack,
                         GtESAVisitor *ev,
                         GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix = 0,
                 idx;
   GtBUItvinfo *lastinterval = NULL;
@@ -290,7 +290,7 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
   PUSH_ESA_BOTTOMUP(0,0);
   for (idx = 0; idx < nonspecials-1; idx++)
   {
-    lcpvalue = (unsigned long) lcptab_bucket[idx+1];
+    lcpvalue = (GtUword) lcptab_bucket[idx+1];
     previoussuffix = suftab[idx];
     if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
     {
@@ -364,7 +364,7 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallcp = lastinterval->lcp,
                       lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP(lcpvalue,lastintervallb);
@@ -403,7 +403,7 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP.lcp > 0)
   {
-    unsigned long lastsuftabvalue = suftab[nonspecials-1];
+    GtUword lastsuftabvalue = suftab[nonspecials-1];
     if (gt_esa_visitor_visit_leaf_edge(ev,
                                        false,
                                        TOP_ESA_BOTTOMUP.lcp,

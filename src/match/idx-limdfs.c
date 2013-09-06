@@ -38,7 +38,7 @@
 struct Genericindex
 {
   Suffixarray *suffixarray;
-  unsigned long totallength;
+  GtUword totallength;
   FMindex *packedindex;
   bool withesa;
   const Mbtab **mbtab;      /* only relevant for packedindex */
@@ -168,7 +168,7 @@ Genericindex *genericindex_new(const char *indexname,
 
 typedef struct
 {
-  unsigned long offset,
+  GtUword offset,
                 leftbound,
                 rightbound;
   GtCodetype code;
@@ -182,7 +182,7 @@ typedef struct
   /* the following two components are only required if keepexpandedonstack
      is true */
   bool keeponstack;
-  unsigned long previousstackelem;
+  GtUword previousstackelem;
 } Lcpintervalwithinfo;
 
 GT_DECLAREARRAYSTRUCT(Lcpintervalwithinfo);
@@ -194,19 +194,19 @@ struct Limdfsresources
   GtArrayLcpintervalwithinfo stack;
   Lcpintervalwithinfo copyofparent;
   DECLAREDFSSTATE(copyofcopyofparentstate);
-  unsigned long parentindex;
+  GtUword parentindex;
   bool keepexpandedonstack;
   GtUchar alphasize;
   void *patterninfo;
   const Genericindex *genericindex;
   bool nowildcards;
-  unsigned long maxintervalwidth;
-  unsigned long *rangeOccs;
+  GtUword maxintervalwidth;
+  GtUword *rangeOccs;
   const GtEncseq *encseq;
   GtArrayGtUlong mstatspos;
   GtUchar *currentpathspace;
-  unsigned long allocatedpathspace;
-  unsigned long numberofmatches;
+  GtUword allocatedpathspace;
+  GtUword numberofmatches;
   ProcessIdxMatch processmatch;
   void *processmatchinfo;
   Processresult processresult;
@@ -214,8 +214,8 @@ struct Limdfsresources
 
 Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
                                     bool nowildcards,
-                                    unsigned long maxintervalwidth,
-                                    unsigned long maxpathlength,
+                                    GtUword maxintervalwidth,
+                                    GtUword maxpathlength,
                                     bool keepexpandedonstack,
                                     ProcessIdxMatch processmatch,
                                     void *processmatchinfo,
@@ -235,7 +235,7 @@ Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
                 * (numofchars+1));
   limdfsresources->bwci.nextfreeBoundswithchar = 0;
   limdfsresources->bwci.allocatedBoundswithchar
-    = (unsigned long) (numofchars+1);
+    = (GtUword) (numofchars+1);
   GT_INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   gt_assert(numofchars <= GT_MAXALPHABETCHARACTER);
   limdfsresources->alphasize = (GtUchar) numofchars;
@@ -289,10 +289,10 @@ Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
 
 static void tracethestackelems(GtIdxMatch *match,
                                Limdfsresources *limdfsresources,
-                               unsigned long pprefixlen,
+                               GtUword pprefixlen,
                                const Lcpintervalwithinfo *runptr)
 {
-  unsigned long previous = 0;
+  GtUword previous = 0;
 
   gt_assert(runptr != NULL);
   gt_reinitLocaliTracebackstate(limdfsresources->dfsconstinfo,
@@ -328,8 +328,8 @@ static Lcpintervalwithinfo *allocateStackspace(Limdfsresources *limdfsresources,
 
   if (stack->nextfreeLcpintervalwithinfo >= stack->allocatedLcpintervalwithinfo)
   {
-    unsigned long idx;
-    const unsigned long addelems = 32UL;
+    GtUword idx;
+    const GtUword addelems = 32UL;
 
     stack->spaceLcpintervalwithinfo
       = gt_realloc(stack->spaceLcpintervalwithinfo,
@@ -383,7 +383,7 @@ void gt_freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
   GT_FREEARRAY(&limdfsresources->bwci,Boundswithchar);
   if (adfst->freeLimdfsstackelem != NULL)
   {
-    unsigned long idx;
+    GtUword idx;
 
     for (idx = 0; idx < limdfsresources->stack.allocatedLcpintervalwithinfo;
          idx++)
@@ -410,10 +410,10 @@ static void gen_esa_overinterval(const Genericindex *genericindex,
                                  ProcessIdxMatch processmatch,
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
-                                 GT_UNUSED unsigned long totallength,
+                                 GT_UNUSED GtUword totallength,
                                  GtIdxMatch *match)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
   {
@@ -440,11 +440,11 @@ static void gen_pck_overinterval(const Genericindex *genericindex,
                                  ProcessIdxMatch processmatch,
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
-                                 unsigned long totallength,
+                                 GtUword totallength,
                                  GtIdxMatch *match)
 {
   Bwtseqpositioniterator *bspi;
-  unsigned long dbstartpos;
+  GtUword dbstartpos;
 
   gt_assert(itv->leftbound < itv->rightbound);
   bspi = gt_Bwtseqpositioniterator_new(genericindex->packedindex,
@@ -481,7 +481,7 @@ static void storemstatsposition(void *processinfo,const GtIdxMatch *match)
 
 static int comparepositions(const void *a, const void *b)
 {
-  if (*((unsigned long *) a) < *((unsigned long *) b))
+  if (*((GtUword *) a) < *((GtUword *) b))
   {
     return -1;
   }
@@ -490,9 +490,9 @@ static int comparepositions(const void *a, const void *b)
 
 GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
                                              Limdfsresources *limdfsresources,
-                                             unsigned long leftbound,
-                                             unsigned long rightbound,
-                                             unsigned long offset)
+                                             GtUword leftbound,
+                                             GtUword rightbound,
+                                             GtUword offset)
 {
   Indexbounds itv;
   GtIdxMatch match;
@@ -521,7 +521,7 @@ GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
      &match);
   qsort(limdfsresources->mstatspos.spaceGtUlong,
         (size_t) limdfsresources->mstatspos.nextfreeGtUlong,
-        sizeof (unsigned long), comparepositions);
+        sizeof (GtUword), comparepositions);
   if (limdfsresources->genericindex->withesa)
   {
     limdfsresources->numberofmatches += (rightbound - leftbound + 1);
@@ -552,10 +552,10 @@ static void initparentcopy(Limdfsresources *limdfsresources,
 }
 
 static Lcpintervalwithinfo *expandsingleton(Limdfsresources *limdfsresources,
-                                            unsigned long *resetvalue,
+                                            GtUword *resetvalue,
                                             bool notfirst,
                                             GtUchar cc,
-                                            unsigned long currentdepth,
+                                            GtUword currentdepth,
                                             const AbstractDfstransformer *adfst)
 {
   if (limdfsresources->keepexpandedonstack)
@@ -565,7 +565,7 @@ static Lcpintervalwithinfo *expandsingleton(Limdfsresources *limdfsresources,
 
     outstate = allocateStackspace(limdfsresources,adfst);
     outstate->keeponstack = true;
-    outstate->lcpitv.offset = (unsigned long) currentdepth;
+    outstate->lcpitv.offset = (GtUword) currentdepth;
     outstate->lcpitv.inchar = cc;
     if (notfirst)
     {
@@ -597,7 +597,7 @@ static Lcpintervalwithinfo *expandsingleton(Limdfsresources *limdfsresources,
   return NULL;
 }
 
-static void addpathchar(Limdfsresources *limdfsresources,unsigned long idx,
+static void addpathchar(Limdfsresources *limdfsresources,GtUword idx,
                         GtUchar cc)
 {
   if (limdfsresources->currentpathspace != NULL)
@@ -613,8 +613,8 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                             const Indexbounds *child,
                             const AbstractDfstransformer *adfst)
 {
-  unsigned long pos, startpos;
-  unsigned long resetvalue = 0;
+  GtUword pos, startpos;
+  GtUword resetvalue = 0;
   GtUchar cc;
   Limdfsresult limdfsresult;
   GtIdxMatch match;
@@ -623,7 +623,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   startpos = ESASUFFIXPTRGET(limdfsresources->genericindex->suffixarray->suftab,
                              child->leftbound);
 #ifdef SKDEBUG
-  printf("retrieve context of startpos=%lu\n",(unsigned long) startpos);
+  printf("retrieve context of startpos="GT_LU"\n",(GtUword) startpos);
 #endif
   for (pos = startpos + child->offset - 1;
        pos < limdfsresources->genericindex->totallength; pos++)
@@ -640,13 +640,13 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 #endif
       Lcpintervalwithinfo *outstate;
 
-      addpathchar(limdfsresources,(unsigned long) (pos - startpos),cc);
+      addpathchar(limdfsresources,(GtUword) (pos - startpos),cc);
       outstate = expandsingleton(limdfsresources,
                                  &resetvalue,
                                  (pos > startpos + child->offset - 1)
                                     ? true : false,
                                  cc,
-                                 (unsigned long) (pos - startpos + 1),
+                                 (GtUword) (pos - startpos + 1),
                                  adfst);
       adfst->fullmatchLimdfsstate(&limdfsresult,
                                   limdfsresources->keepexpandedonstack
@@ -654,8 +654,8 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                     :  limdfsresources->copyofcopyofparentstate,
                                   child->leftbound,
                                   child->leftbound,
-                                  (unsigned long) 1,
-                                  (unsigned long) (pos-startpos+1),
+                                  (GtUword) 1,
+                                  (GtUword) (pos-startpos+1),
                                   limdfsresources->dfsconstinfo);
       if (limdfsresult.status == Limdfsstop)
       {
@@ -705,9 +705,9 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                             const AbstractDfstransformer *adfst)
 {
   GtUchar cc;
-  unsigned long contextlength, resetvalue = 0;
+  GtUword contextlength, resetvalue = 0;
   bool processinchar = true;
-  unsigned long bound;
+  GtUword bound;
   Bwtseqcontextiterator *bsci;
   Limdfsresult limdfsresult;
   GtIdxMatch match;
@@ -719,7 +719,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                    bound);
   initparentcopy(limdfsresources,adfst);
 #ifdef SKDEBUG
-  printf("retrieve context for bound = %lu\n",(unsigned long) bound);
+  printf("retrieve context for bound = "GT_LU"\n",(GtUword) bound);
 #endif
   for (contextlength = 0; /* nothing */; contextlength++)
   {
@@ -739,12 +739,12 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       printf("cc=%u\n",(unsigned int) cc);
 #endif
       addpathchar(limdfsresources,
-                  (unsigned long) (child->offset - 1 + contextlength),cc);
+                  (GtUword) (child->offset - 1 + contextlength),cc);
       outstate = expandsingleton(limdfsresources,
                                  &resetvalue,
                                  (contextlength > 0) ? true : false,
                                  cc,
-                                 (unsigned long) (child->offset+contextlength),
+                                 (GtUword) (child->offset+contextlength),
                                  adfst);
       adfst->fullmatchLimdfsstate(&limdfsresult,
                                   limdfsresources->keepexpandedonstack
@@ -752,8 +752,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                     : limdfsresources->copyofcopyofparentstate,
                                   bound,
                                   bound+1,
-                                  (unsigned long) 1,
-                                  (unsigned long) (child->offset+contextlength),
+                                  (GtUword) 1,
+                                  (GtUword) (child->offset+contextlength),
                                   limdfsresources->dfsconstinfo);
       if (limdfsresult.status == Limdfsstop)
       {
@@ -761,7 +761,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       }
       if (limdfsresult.status == Limdfssuccess)
       {
-        unsigned long startpos;
+        GtUword startpos;
 
         startpos = gt_bwtseqfirstmatch(
                                     limdfsresources->genericindex->packedindex,
@@ -825,25 +825,25 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
                                const AbstractDfstransformer *adfst)
 {
   Limdfsresult limdfsresult;
-  unsigned long width;
+  GtUword width;
   Lcpintervalwithinfo *stackptr;
 
 #ifdef SKDEBUG
   printf("(2) nextLimdfsstate(");
   adfst->showLimdfsstate(currentparent(limdfsresources)->aliasstate,
-                         (unsigned long) (child->offset-1),
+                         (GtUword) (child->offset-1),
                          limdfsresources->dfsconstinfo);
   printf(",%u)=",(unsigned int) child->inchar);
 #endif
   stackptr = allocateStackspace(limdfsresources,adfst);
   adfst->nextLimdfsstate(limdfsresources->dfsconstinfo,
                          stackptr->aliasstate,
-                         (unsigned long) child->offset,
+                         (GtUword) child->offset,
                          child->inchar,
                          currentparent(limdfsresources)->aliasstate);
 #ifdef SKDEBUG
   adfst->showLimdfsstate(stackptr->aliasstate,
-                         (unsigned long) child->offset,
+                         (GtUword) child->offset,
                          limdfsresources->dfsconstinfo);
   printf("\n");
 #endif
@@ -859,7 +859,7 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
                               child->leftbound,
                               child->rightbound,
                               width,
-                              (unsigned long) child->offset,
+                              (GtUword) child->offset,
                               limdfsresources->dfsconstinfo);
   if (limdfsresult.status == Limdfscontinue)
   {
@@ -930,13 +930,13 @@ static void processchildinterval(Limdfsresources *limdfsresources,
 
 static void showLCPinterval(bool withesa,const Indexbounds *itv)
 {
-  unsigned long width;
+  GtUword width;
 
   width = withesa ? (itv->rightbound - itv->leftbound + 1)
                   : itv->rightbound - itv->leftbound;
-  printf("(%lu,width=%lu)",(unsigned long) itv->offset,(unsigned long) width);
-  printf("(%lu,%lu)",(unsigned long) itv->leftbound,
-                     (unsigned long)
+  printf("("GT_LU",width="GT_LU")",(GtUword) itv->offset,(GtUword) width);
+  printf("("GT_LU","GT_LU")",(GtUword) itv->leftbound,
+                     (GtUword)
                      (withesa ? itv->rightbound : itv->rightbound-1));
 }
 
@@ -945,9 +945,9 @@ static void showLCPinterval(bool withesa,const Indexbounds *itv)
 static void esa_splitandprocess(Limdfsresources *limdfsresources,
                                 const AbstractDfstransformer *adfst)
 {
-  unsigned long firstspecial;
+  GtUword firstspecial;
   GtUchar extendchar;
-  unsigned long idx;
+  GtUword idx;
   const Indexbounds *parent = &(currentparent(limdfsresources)->lcpitv);
 
   extendchar = gt_lcpintervalextendlcp(
@@ -990,7 +990,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
     child.code = 0; /* not used, but we better define it */
-    addpathchar(limdfsresources,(unsigned long) parent->offset,child.inchar);
+    addpathchar(limdfsresources,(GtUword) parent->offset,child.inchar);
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) child.inchar);
     showLCPinterval(limdfsresources->genericindex->withesa,parent);
@@ -1004,7 +1004,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
   if (!limdfsresources->nowildcards)
   {
     Indexbounds child;
-    unsigned long bound;
+    GtUword bound;
 
     child.inchar = (GtUchar) WILDCARD;
     child.offset = parent->offset+1;
@@ -1021,7 +1021,7 @@ static void smalldepthbwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                                   const Mbtab **mbtab,
                                                   GtUchar alphasize,
                                                   GtCodetype parentcode,
-                                                  unsigned long childdepth)
+                                                  GtUword childdepth)
 {
   GtCodetype childcode;
   const Mbtab *mbptr;
@@ -1048,18 +1048,18 @@ static void smalldepthbwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
 static void pck_splitandprocess(Limdfsresources *limdfsresources,
                                 const AbstractDfstransformer *adfst)
 {
-  unsigned long idx;
-  unsigned long sumwidth = 0;
+  GtUword idx;
+  GtUword sumwidth = 0;
   const Indexbounds *parent = &(currentparent(limdfsresources)->lcpitv);
   GtCodetype startcode;
 
-  if (parent->offset < (unsigned long) limdfsresources->genericindex->maxdepth)
+  if (parent->offset < (GtUword) limdfsresources->genericindex->maxdepth)
   {
     smalldepthbwtrangesplitwithoutspecial(&limdfsresources->bwci,
                                           limdfsresources->genericindex->mbtab,
                                           limdfsresources->alphasize,
                                           parent->code,
-                                          (unsigned long) (parent->offset + 1));
+                                          (GtUword) (parent->offset + 1));
     startcode = parent->code * limdfsresources->alphasize;
   } else
   {
@@ -1082,7 +1082,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
     gt_assert(child.inchar < limdfsresources->alphasize);
     child.code = startcode + child.inchar;
-    addpathchar(limdfsresources,(unsigned long) parent->offset,child.inchar);
+    addpathchar(limdfsresources,(GtUword) parent->offset,child.inchar);
     sumwidth += child.rightbound - child.leftbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) child.inchar);
@@ -1095,7 +1095,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   }
   if (!limdfsresources->nowildcards)
   {
-    unsigned long bound;
+    GtUword bound;
     Indexbounds child;
 
     for (bound = parent->leftbound + sumwidth;
@@ -1122,7 +1122,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
         showLCPinterval(limdfsresources->genericindex->withesa,\
                         &(STACKPTR)->lcpitv);\
         adfst->showLimdfsstate((STACKPTR)->aliasstate,\
-                               (unsigned long) (STACKPTR)->lcpitv.offset,\
+                               (GtUword) (STACKPTR)->lcpitv.offset,\
                                limdfsresources->dfsconstinfo);\
         printf("\n")
 #else
@@ -1142,7 +1142,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
   {
     gt_assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
     /*
-    printf("nextfreeLcpintervalwithinfo=%lu\n",
+    printf("nextfreeLcpintervalwithinfo="GT_LU"\n",
                limdfsresources->stack.nextfreeLcpintervalwithinfo);
     */
     stackptr = limdfsresources->stack.spaceLcpintervalwithinfo +
@@ -1177,7 +1177,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
     if (currentparent(limdfsresources)->lcpitv.offset > 0)
     {
       addpathchar(limdfsresources,
-                  (unsigned long)
+                  (GtUword)
                    (currentparent(limdfsresources)->lcpitv.offset-1),
                   currentparent(limdfsresources)->lcpitv.inchar);
     }
@@ -1214,9 +1214,9 @@ typedef enum
 
 bool gt_indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const GtUchar *pattern,
-                                     unsigned long patternlength,
-                                     unsigned long maxdistance,
-                                     unsigned long maxintervalwidth,
+                                     GtUword patternlength,
+                                     GtUword maxdistance,
+                                     GtUword maxintervalwidth,
                                      bool skpp,
                                      const AbstractDfstransformer *adfst)
 {
@@ -1233,7 +1233,7 @@ bool gt_indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
 
 void gt_indexbasedmstats(Limdfsresources *limdfsresources,
                       const GtUchar *pattern,
-                      unsigned long patternlength,
+                      GtUword patternlength,
                       const AbstractDfstransformer *adfst)
 {
   adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
@@ -1246,7 +1246,7 @@ void gt_indexbasedmstats(Limdfsresources *limdfsresources,
 void gt_indexbasedspacedseeds(Limdfsresources *limdfsresources,
                            const GtUchar *pattern,
                            GtBitsequence seedbitvector,
-                           unsigned long seedweight,
+                           GtUword seedweight,
                            const AbstractDfstransformer *adfst)
 {
   adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
@@ -1258,13 +1258,13 @@ void gt_indexbasedspacedseeds(Limdfsresources *limdfsresources,
 }
 
 void gt_indexbasedlocali(Limdfsresources *limdfsresources,
-                      long matchscore,
-                      long mismatchscore,
-                      long gapstart,
-                      long gapextend,
-                      unsigned long threshold,
+                      GtWord matchscore,
+                      GtWord mismatchscore,
+                      GtWord gapstart,
+                      GtWord gapextend,
+                      GtUword threshold,
                       const GtUchar *query,
-                      unsigned long querylength,
+                      GtUword querylength,
                       const AbstractDfstransformer *adfst)
 {
   adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
@@ -1279,7 +1279,7 @@ void gt_indexbasedlocali(Limdfsresources *limdfsresources,
   runlimdfs(limdfsresources,adfst);
 }
 
-unsigned long genericmstats(const Limdfsresources *limdfsresources,
+GtUword genericmstats(const Limdfsresources *limdfsresources,
                             const GtUchar *qstart,
                             const GtUchar *qend)
 {
@@ -1306,13 +1306,13 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
 
 static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
                                      const GtUchar *pattern,
-                                     unsigned long patternlength,
+                                     GtUword patternlength,
                                      GT_UNUSED const GtUchar *dbsubstring,
                                      ProcessIdxMatch processmatch,
                                      void *processmatchinfo)
 {
   GtMMsearchiterator *mmsi;
-  unsigned long dbstartpos,
+  GtUword dbstartpos,
          totallength = gt_encseq_total_length(suffixarray->encseq);
   bool nomatches;
   GtIdxMatch match;
@@ -1327,7 +1327,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
                                            patternlength);
   nomatches = gt_mmsearchiterator_isempty(mmsi);
   match.dbabsolute = true;
-  match.dblen = (unsigned long) patternlength;
+  match.dblen = (GtUword) patternlength;
   match.dbsubstring = pattern;
   match.querystartpos = 0;
   match.querylen = patternlength;
@@ -1345,7 +1345,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
 
 bool gt_indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const GtUchar *pattern,
-                                    unsigned long patternlength)
+                                    GtUword patternlength)
 {
   if (limdfsresources->genericindex->withesa)
   {
@@ -1369,7 +1369,7 @@ bool gt_indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
 }
 
 GtUchar gt_limdfs_getencodedchar(const Limdfsresources *limdfsresources,
-                              unsigned long pos,
+                              GtUword pos,
                               GtReadmode readmode)
 {
   gt_assert(limdfsresources->encseq != NULL);
@@ -1380,9 +1380,9 @@ GtUchar gt_limdfs_getencodedchar(const Limdfsresources *limdfsresources,
 }
 
 bool gt_intervalwidthleq(const Limdfsresources *limdfsresources,
-                      unsigned long leftbound,unsigned long rightbound)
+                      GtUword leftbound,GtUword rightbound)
 {
-  unsigned long width;
+  GtUword width;
 
   if (limdfsresources->genericindex->withesa)
   {
@@ -1403,7 +1403,7 @@ bool gt_intervalwidthleq(const Limdfsresources *limdfsresources,
       width = rightbound - leftbound;
     }
   }
-  if (width > 0 && width <= (unsigned long) limdfsresources->maxintervalwidth)
+  if (width > 0 && width <= (GtUword) limdfsresources->maxintervalwidth)
   {
     return true;
   }
@@ -1416,17 +1416,17 @@ const FMindex *genericindex_get_packedindex(const Genericindex *genericindex)
   return genericindex->packedindex;
 }
 
-unsigned long genericindex_get_totallength(const Genericindex *genericindex)
+GtUword genericindex_get_totallength(const Genericindex *genericindex)
 {
   gt_assert(genericindex && genericindex->totallength != 0);
   return genericindex->totallength;
 }
 
-unsigned long esa_exact_pattern_count(const Suffixarray *suffixarray,
+GtUword esa_exact_pattern_count(const Suffixarray *suffixarray,
                                       const GtUchar *pattern,
-                                      unsigned long patternlength) {
+                                      GtUword patternlength) {
   GtMMsearchiterator *mmsi;
-  unsigned long count,
+  GtUword count,
                 totallength = gt_encseq_total_length(suffixarray->encseq);
 
   mmsi = gt_mmsearchiterator_new_complete_plain(suffixarray->encseq,
@@ -1443,10 +1443,10 @@ unsigned long esa_exact_pattern_count(const Suffixarray *suffixarray,
   return count;
 }
 
-unsigned long gt_indexbased_exact_pattern_count(
+GtUword gt_indexbased_exact_pattern_count(
                                               const Genericindex *genericindex,
                                               const GtUchar *pattern,
-                                              unsigned long patternlength) {
+                                              GtUword patternlength) {
   if (genericindex->withesa) {
     return esa_exact_pattern_count(genericindex->suffixarray,
                                     pattern,

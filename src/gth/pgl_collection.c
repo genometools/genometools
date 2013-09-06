@@ -52,7 +52,7 @@ static void get_exons_func(GtArray *exons, const void *sa)
   GthSACluster *sacluster = *(GthSACluster**) sa;
   GtArray *genomicexons;
   GtRange exon;
-  unsigned long i;
+  GtUword i;
 
   genomicexons = gt_array_new(sizeof (GtRange));
   gth_sa_get_exons(sacluster->representative, genomicexons);
@@ -68,20 +68,20 @@ static void get_exons_func(GtArray *exons, const void *sa)
 /* necessary to call consensus_sa() */
 static void process_splice_form_func(GtArray *spliced_alignments_in_form,
                                      GT_UNUSED const void *set_of_sas,
-                                     GT_UNUSED unsigned long number_of_sas,
+                                     GT_UNUSED GtUword number_of_sas,
                                      GT_UNUSED size_t size_of_sa,
                                      void *userdata)
 {
   GthPGL *pgl = (GthPGL*) userdata;
   GthAGS *ags;
   GtBittab *assemblytab;
-  unsigned long i;
+  GtUword i;
 
   ags = gth_ags_new(pgl);
 
   assemblytab = gt_bittab_new(gt_array_size(pgl->saclusters));
   for (i = 0; i < gt_array_size(spliced_alignments_in_form); i++) {
-    gt_bittab_set_bit(assemblytab, *(unsigned long*)
+    gt_bittab_set_bit(assemblytab, *(GtUword*)
                                 gt_array_get(spliced_alignments_in_form, i));
   }
 
@@ -96,7 +96,7 @@ void assemble_cluster(GthPGL *pgl, bool disableclustersas)
 {
   GthSACluster *sacluster;
   GthSA *sa;
-  unsigned long i;
+  GtUword i;
 
   sacluster = gt_malloc(sizeof (GthSACluster));
   sacluster->representative = *(GthSA**) gt_array_get_first(pgl->alignments);
@@ -127,7 +127,7 @@ GthPGLCollection* gth_pgl_collection_new(GthSACollection *sacollection,
 {
   GthPGLCollection *pgl_collection;
   GthPGL *pgl;
-  unsigned long i;
+  GtUword i;
   gt_assert(sacollection);
 
   /* init */
@@ -162,7 +162,7 @@ GthPGLCollection* gth_pgl_collection_new(GthSACollection *sacollection,
 
 void gth_pgl_collection_delete(GthPGLCollection *pgl_collection)
 {
-  unsigned long i;
+  GtUword i;
   if (!pgl_collection) return;
   for (i = 0; i < gt_array_size(pgl_collection->pgls); i++)
     gth_pgl_delete(*(GthPGL**) gt_array_get(pgl_collection->pgls, i));
@@ -182,7 +182,7 @@ void gth_pgl_collection_sortAGSs(GthPGLCollection *pgl_collection,
 void gth_pgl_collection_set_max_ags(GthPGLCollection *pgl_collection,
                                     unsigned int maxagsnum)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(pgl_collection && maxagsnum && maxagsnum != GT_UNDEF_UINT);
   for (i = 0; i < gt_array_size(pgl_collection->pgls); i++) {
     gth_pgl_set_max_ags(*(GthPGL**) gt_array_get(pgl_collection->pgls, i),
@@ -191,14 +191,14 @@ void gth_pgl_collection_set_max_ags(GthPGLCollection *pgl_collection,
 }
 
 static GthPGL* gth_pgl_collection_get(const GthPGLCollection *pgl_collection,
-                                      unsigned long i)
+                                      GtUword i)
 {
   gt_assert(pgl_collection && pgl_collection->pgls);
   gt_assert(i < gt_array_size(pgl_collection->pgls));
   return *(GthPGL**) gt_array_get(pgl_collection->pgls, i);
 }
 
-unsigned long gth_pgl_collection_size(const GthPGLCollection *pgl_collection)
+GtUword gth_pgl_collection_size(const GthPGLCollection *pgl_collection)
 {
   gt_assert(pgl_collection && pgl_collection->pgls);
   return gt_array_size(pgl_collection->pgls);
@@ -208,12 +208,12 @@ void gth_pgl_collection_traverse(const GthPGLCollection *pgl_collection,
                                  GthPGLVisitor *pgl_visitor, GthInput *input,
                                  bool use_desc_ranges)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(pgl_collection && pgl_visitor && input);
   gth_pgl_visitor_preface(pgl_visitor, gth_pgl_collection_size(pgl_collection));
   for (i = 0; i < gth_pgl_collection_size(pgl_collection); i++) {
     GtRegionMapping *region_mapping;
-    unsigned long file_num, seq_num, offset = 1;
+    GtUword file_num, seq_num, offset = 1;
     GthSeqCon *seq_con;
     GthPGL *pgl = gth_pgl_collection_get(pgl_collection, i);
     file_num = gth_pgl_filenum(pgl);

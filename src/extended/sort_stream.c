@@ -26,7 +26,7 @@
 struct GtSortStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  unsigned long idx;
+  GtUword idx;
   GtArray *nodes;
   bool sorted;
 };
@@ -98,7 +98,7 @@ static int gt_sort_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 
 static void gt_sort_stream_free(GtNodeStream *ns)
 {
-  unsigned long i;
+  GtUword i;
   GtSortStream *sort_stream = gt_sort_stream_cast(ns);
   for (i = sort_stream->idx; i < gt_array_size(sort_stream->nodes); i++) {
     gt_genome_node_delete(*(GtGenomeNode**)

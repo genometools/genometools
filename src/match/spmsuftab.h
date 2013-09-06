@@ -24,14 +24,14 @@
 
 typedef struct
 {
-  unsigned long partoffset, numofentries, maxvalue;
+  GtUword partoffset, numofentries, maxvalue;
   bool usebitsforpositions;
   GtCompactUlongStore *bitpackarray;
 } GtSpmsuftab;
 
 GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
-                                              unsigned long idx,
-                                              unsigned long value)
+                                              GtUword idx,
+                                              GtUword value)
 {
   gt_assert(idx >= spmsuftab->partoffset);
   idx -= spmsuftab->partoffset;
@@ -40,9 +40,9 @@ GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
   gt_compact_ulong_store_update(spmsuftab->bitpackarray,idx,value);
 }
 
-GT_UNUSED static inline unsigned long gt_spmsuftab_get(
+GT_UNUSED static inline GtUword gt_spmsuftab_get(
                                       const GtSpmsuftab *spmsuftab,
-                                      unsigned long idx)
+                                      GtUword idx)
 {
   gt_assert(idx >= spmsuftab->partoffset);
   idx -= spmsuftab->partoffset;
@@ -50,8 +50,8 @@ GT_UNUSED static inline unsigned long gt_spmsuftab_get(
   return gt_compact_ulong_store_get(spmsuftab->bitpackarray,idx);
 }
 
-GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
-                              unsigned long maxvalue,
+GtSpmsuftab *gt_spmsuftab_new(GtUword numofentries,
+                              GtUword maxvalue,
                               unsigned int bitsforseqnumrelpos,
                               GtLogger *logger);
 
@@ -59,11 +59,11 @@ bool gt_spmsuftab_usebitsforpositions(const GtSpmsuftab *spmsuftab);
 
 void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab);
 
-size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
-                                  unsigned long maxvalue,
+size_t gt_spmsuftab_requiredspace(GtUword numofentries,
+                                  GtUword maxvalue,
                                   unsigned int bitsforseqnumrelpos);
 
 void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,
-                             unsigned long offset);
+                             GtUword offset);
 
 #endif

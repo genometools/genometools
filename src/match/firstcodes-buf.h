@@ -26,7 +26,7 @@ typedef void (*GtCodeposbufferflushfunction)(void *);
 
 typedef struct
 {
-  unsigned long currentmincode,
+  GtUword currentmincode,
                 currentmaxcode,
                 nextfree,
                 allocated;

@@ -55,7 +55,7 @@ void            gt_bitoutstream_flush_advance(GtBitOutStream *bitstream);
 /* Returns the position in the file associated with <bitstream>. For reliable
    results gt_bitoutstream_flush needs to be called before. Returns -1 on
    error. */
-long            gt_bitoutstream_pos(const GtBitOutStream *bitstream);
+GtWord          gt_bitoutstream_pos(const GtBitOutStream *bitstream);
 
 void            gt_bitoutstream_delete(GtBitOutStream *bitstream);
 

@@ -115,20 +115,20 @@ static bool io_zero_padding_needs_dist(DescField *field,
 
 typedef struct data {
   FILE         *fp;
-  unsigned long written_elems;
-  long          minimum_element;
+  GtUword written_elems;
+  GtWord          minimum_element;
 } EncsecDistriData;
 
-static void encdesc_distri_iter_count(GT_UNUSED unsigned long symbol,
-                                      GT_UNUSED unsigned long long freq,
+static void encdesc_distri_iter_count(GT_UNUSED GtUword symbol,
+                                      GT_UNUSED GtUint64 freq,
                                       void *data)
 {
   EncsecDistriData *this_data = (EncsecDistriData*) data;
   this_data->written_elems++;
 }
 
-static void encdesc_distri_iter_write(unsigned long symbol,
-                                      unsigned long long freq,
+static void encdesc_distri_iter_write(GtUword symbol,
+                                      GtUint64 freq,
                                       void *data)
 {
   EncsecDistriData *this_data = (EncsecDistriData*) data;
@@ -181,7 +181,7 @@ static void numeric_field_check_distri_dependence(DescField *field,
         field->delta_values_size <= GT_ENCDESC_MAX_NUM_VAL_HUF) {
       *needs_delta_dist = true;
       field->use_hc = true;
-      gt_log_log("delta_values_size: %lu", field->delta_values_size);
+      gt_log_log("delta_values_size: "GT_LU"", field->delta_values_size);
     }
   }
   else {
@@ -189,26 +189,26 @@ static void numeric_field_check_distri_dependence(DescField *field,
         field->num_values_size <= GT_ENCDESC_MAX_NUM_VAL_HUF) {
       *needs_value_dist = true;
       field->use_hc = true;
-      gt_log_log("num_values_size: %lu", field->num_values_size);
+      gt_log_log("num_values_size: "GT_LU"", field->num_values_size);
     }
   }
 }
 
 static enum iterator_op encdesc_li_ull_hashmap_iter_count(
-                                             GT_UNUSED long key,
-                                             GT_UNUSED unsigned long long value,
+                                             GT_UNUSED GtWord key,
+                                             GT_UNUSED GtUint64 value,
                                              void *data,
                                              GT_UNUSED GtError *err)
 {
-  unsigned long *count = (unsigned long*) data;
+  GtUword *count = (GtUword*) data;
   (void) (*count)++;
   /* always continue since we cannot fail */
   return CONTINUE_ITERATION;
 }
 
-static unsigned long get_hashmap_distri_size(GtHashtable *h_table)
+static GtUword get_hashmap_distri_size(GtHashtable *h_table)
 {
-  unsigned long count = 0;
+  GtUword count = 0;
   /* error is NULL as encdesc_li_ull_hashmap_iter_count() is sane */
   (void) li_ull_gt_hashmap_foreach(h_table,
                                    encdesc_li_ull_hashmap_iter_count,
@@ -218,8 +218,8 @@ static unsigned long get_hashmap_distri_size(GtHashtable *h_table)
 }
 
 static enum iterator_op encdesc_li_ull_hashmap_iter_write(
-                                                       long key,
-                                                       unsigned long long value,
+                                                       GtWord key,
+                                                       GtUint64 value,
                                                        void *data,
                                                        GT_UNUSED GtError *err)
 {
@@ -233,7 +233,7 @@ static enum iterator_op encdesc_li_ull_hashmap_iter_write(
 
 static void write_hashmap_distri(EncsecDistriData *data,
                                  GtHashtable *h_table,
-                                 GT_UNUSED unsigned long size)
+                                 GT_UNUSED GtUword size)
 {
   data->written_elems = 0;
   /* error is NULL as encdesc_li_ull_hashmap_iter_write() is sane */
@@ -242,17 +242,17 @@ static void write_hashmap_distri(EncsecDistriData *data,
                                    data,
                                    NULL);
   if (data->written_elems != size)
-    gt_log_log("%lu != %lu", size, data->written_elems);
+    gt_log_log(""GT_LU" != "GT_LU"", size, data->written_elems);
   gt_assert(data->written_elems == size);
 }
 
-static void read_hashmap_distri(unsigned long size,
+static void read_hashmap_distri(GtUword size,
                                 GtHashtable *h_table,
                                 FILE *fp)
 {
-  unsigned long idx;
-  long symbol;
-  unsigned long long freq;
+  GtUword idx;
+  GtWord symbol;
+  GtUint64 freq;
 
   gt_assert(h_table != NULL);
   for (idx = 0; idx < size; idx++) {
@@ -269,7 +269,7 @@ static void read_numeric_field_header(DescField *field,
   bool needs_zero_dist = false,
        needs_delta_dist = false,
        needs_value_dist = false;
-  unsigned long num_of_zero_leaves;
+  GtUword num_of_zero_leaves;
   /* EncdescHuffDist huffdist; */
 
   needs_zero_dist = io_zero_padding_needs_dist(field,
@@ -310,9 +310,9 @@ static void read_numeric_field_header(DescField *field,
   }
 
   if (needs_zero_dist) {
-    unsigned long idx,
+    GtUword idx,
                   symbol;
-    unsigned long long freq;
+    GtUint64 freq;
     field->zero_count = gt_disc_distri_new();
     GT_ENCDESC_READ_ONE(num_of_zero_leaves, fp);
     for (idx = 0; idx < num_of_zero_leaves; idx++) {
@@ -333,7 +333,7 @@ static void write_numeric_field_header(DescField *field,
   bool needs_zero_dist = false,
        needs_delta_dist = false,
        needs_value_dist = false;
-  unsigned long num_of_zero_leaves;
+  GtUword num_of_zero_leaves;
   EncsecDistriData data;
 
   data.fp = fp;
@@ -392,7 +392,7 @@ static void io_field_len_header(DescField *field,
 static void read_field_header_bittab(DescField *field,
                                      FILE *fp)
 {
-  unsigned long char_idx,
+  GtUword char_idx,
                 num_of_chars = field->len / sizeof (char);
   char cc;
   size_t bit_idx;
@@ -405,7 +405,7 @@ static void read_field_header_bittab(DescField *field,
     for (bit_idx = 0; bit_idx < sizeof (char); bit_idx++) {
       if (cc & (1 << bit_idx))
         gt_bittab_set_bit(field->bittab,
-                          (unsigned long) ((sizeof (char) * char_idx) +
+                          (GtUword) ((sizeof (char) * char_idx) +
                                            bit_idx));
     }
   }
@@ -413,7 +413,7 @@ static void read_field_header_bittab(DescField *field,
 
 static void write_field_header_bittab(DescField *field, FILE *fp)
 {
-  unsigned long char_idx,
+  GtUword char_idx,
                 num_of_chars = field->len / sizeof (char);
   char cc = 0;
   size_t bit_idx;
@@ -424,7 +424,7 @@ static void write_field_header_bittab(DescField *field, FILE *fp)
   for (char_idx = 0; char_idx < num_of_chars; char_idx++) {
     for (bit_idx = 0; bit_idx < sizeof (char); bit_idx++) {
       if (gt_bittab_bit_is_set(field->bittab,
-                               (unsigned long) ((sizeof (char) * char_idx) +
+                               (GtUword) ((sizeof (char) * char_idx) +
                                                 bit_idx)))
         cc |= 1 << bit_idx;
     }
@@ -437,7 +437,7 @@ static void write_field_header_bittab(DescField *field, FILE *fp)
 static void write_field_char_dists(DescField *field,
                                    FILE *fp)
 {
-  unsigned long char_idx,
+  GtUword char_idx,
                 distr_len;
   EncsecDistriData data;
   data.fp = fp;
@@ -460,7 +460,7 @@ static void write_field_char_dists(DescField *field,
 static void read_field_char_dists(DescField *field,
                                   FILE *fp)
 {
-  unsigned long char_idx,
+  GtUword char_idx,
                 distr_len;
 
   for (char_idx = 0; char_idx < field->max_len; char_idx++) {
@@ -478,7 +478,7 @@ static void read_field_char_dists(DescField *field,
 
 void encdesc_write_header(GtEncdesc *encdesc, FILE *fp)
 {
-  unsigned long cur_field_num;
+  GtUword cur_field_num;
   DescField *cur_field;
 
   encdesc_header_io_basics(encdesc, fp, encdesc_xfwrite);
@@ -514,7 +514,7 @@ void encdesc_write_header(GtEncdesc *encdesc, FILE *fp)
 
 void encdesc_read_header(GtEncdesc *encdesc, FILE *fp)
 {
-  unsigned long cur_field_num;
+  GtUword cur_field_num;
   DescField *cur_field;
 
   encdesc_header_io_basics(encdesc, fp, encdesc_xfread);

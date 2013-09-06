@@ -32,7 +32,7 @@
 
 typedef struct
 {
-  unsigned long differentcodes,
+  GtUword differentcodes,
                 numofsamples,
                 sampledistance,
                 hashmap_addcount,
@@ -43,9 +43,9 @@ typedef struct
   uint32_t *leftborder;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
-  unsigned long *leftborder_samples;
+  GtUword *leftborder_samples;
   GtStr *outfilenameleftborder;
-  unsigned long lastincremented_idx;
+  GtUword lastincremented_idx;
   uint32_t *lastincremented_valueptr;
 #if defined (_LP64) || defined (_WIN64)
   uint32_t modvaluemask;
@@ -56,7 +56,7 @@ typedef struct
 
 GT_UNUSED
 static inline void gt_randomcodes_countocc_increment(GtRandomcodestab *rct,
-                                                    unsigned long idx)
+                                                    GtUword idx)
 {
   rct->all_incrementcount++;
   if (rct->countocc_small[idx] != GT_RANDOMCODES_COUNTOCC_OVERFLOW)
@@ -100,22 +100,22 @@ static inline void gt_randomcodes_countocc_increment(GtRandomcodestab *rct,
 
 #if defined (_LP64) || defined (_WIN64)
 #define GT_CHANGEPOINT_GET_RCT(CP)\
-        unsigned long CP = 0;\
+        GtUword CP = 0;\
         while (CP < rct->bitchangepoints.nextfreeGtUlong &&\
                  idx > rct->bitchangepoints.spaceGtUlong[CP])\
           CP++;
 #endif
 
 GT_UNUSED
-static inline unsigned long gt_randomcodes_insertionindex(GtRandomcodestab *rct,
-                                                         unsigned long idx)
+static inline GtUword gt_randomcodes_insertionindex(GtRandomcodestab *rct,
+                                                         GtUword idx)
 {
 #if defined (_LP64) || defined (_WIN64)
   GT_CHANGEPOINT_GET_RCT(changepoint);
   gt_assert(idx < rct->differentcodes);
   if (rct->leftborder[idx] > 0)
   {
-    return (unsigned long) --rct->leftborder[idx]
+    return (GtUword) --rct->leftborder[idx]
                            + (changepoint << rct->modvaluebits);
   } else
   {
@@ -123,26 +123,26 @@ static inline unsigned long gt_randomcodes_insertionindex(GtRandomcodestab *rct,
     changepoint--;
     rct->bitchangepoints.spaceGtUlong[changepoint]++;
     rct->leftborder[idx] = rct->modvaluemask;
-    return (unsigned long)
+    return (GtUword)
            rct->leftborder[idx] + (changepoint << rct->modvaluebits);
   }
 #else
   gt_assert(idx < rct->differentcodes && rct->leftborder[idx] > 0);
-  return (unsigned long) --rct->leftborder[idx];
+  return (GtUword) --rct->leftborder[idx];
 #endif
 }
 
-unsigned long gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
+GtUword gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtRandomcodestab *rct,
-                                        unsigned long expectedlastpartsum);
+                                        GtUword expectedlastpartsum);
 
-unsigned long gt_randomcodes_get_leftborder(const GtRandomcodestab *rct,
-                                           unsigned long idx);
+GtUword gt_randomcodes_get_leftborder(const GtRandomcodestab *rct,
+                                           GtUword idx);
 
-unsigned long gt_randomcodes_numofsamples(const GtRandomcodestab *rct);
+GtUword gt_randomcodes_numofsamples(const GtRandomcodestab *rct);
 
-unsigned long gt_randomcodes_findfirstsamplelarger(const GtRandomcodestab *rct,
-                                                  unsigned long suftaboffset);
+GtUword gt_randomcodes_findfirstsamplelarger(const GtRandomcodestab *rct,
+                                                  GtUword suftaboffset);
 
 void gt_randomcodes_samples_delete(GtFirstcodesspacelog *fcsl,
                                   GtRandomcodestab *rct);
@@ -155,11 +155,11 @@ void gt_randomcodes_tab_delete(GtFirstcodesspacelog *fcsl,
 
 void gt_randomcodes_countocc_new(GtFirstcodesspacelog *fcsl,
                                        GtRandomcodestab *rct,
-                                       unsigned long numofsequences);
+                                       GtUword numofsequences);
 
 void gt_randomcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
                                           GtRandomcodestab *rct,
-                                          unsigned long numofdifferentcodes);
+                                          GtUword numofdifferentcodes);
 
 void gt_randomcodes_countocc_setnull(GtRandomcodestab *rct);
 
@@ -169,17 +169,17 @@ void gt_randomcodes_leftborder_remap(GtRandomcodestab *rct,uint32_t *ptr);
 
 const GtStr *gt_randomcodes_outfilenameleftborder(const GtRandomcodestab *rct);
 
-unsigned long gt_randomcodes_sample2full(const GtRandomcodestab *rct,
-                                        unsigned long idx);
+GtUword gt_randomcodes_sample2full(const GtRandomcodestab *rct,
+                                        GtUword idx);
 
-unsigned long gt_randomcodes_leftborder_entries(const GtRandomcodestab *rct);
+GtUword gt_randomcodes_leftborder_entries(const GtRandomcodestab *rct);
 
-unsigned long gt_randomcodes_leftborder_entries(const GtRandomcodestab *rct);
+GtUword gt_randomcodes_leftborder_entries(const GtRandomcodestab *rct);
 
-unsigned long gt_randomcodes_get_sample(const GtRandomcodestab *rct,
-                                       unsigned long idx);
+GtUword gt_randomcodes_get_sample(const GtRandomcodestab *rct,
+                                       GtUword idx);
 
-unsigned long gt_randomcodes_remdups(unsigned long *allrandomcodes,
-    unsigned int codesize, unsigned long numofcodes, GtLogger *logger);
+GtUword gt_randomcodes_remdups(GtUword *allrandomcodes,
+    unsigned int codesize, GtUword numofcodes, GtLogger *logger);
 
 #endif

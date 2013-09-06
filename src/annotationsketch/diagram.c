@@ -176,7 +176,7 @@ static int get_caption_display_status(GtDiagram *d, const char *gft,
   status = (bool*) gt_hashmap_get(d->caption_display_status, gft);
   if (!status)
   {
-    unsigned long threshold = GT_UNDEF_ULONG;
+    GtUword threshold = GT_UNDEF_ULONG;
     double tmp = GT_UNDEF_DOUBLE;
     status = gt_malloc(sizeof (bool));
     *status = true;
@@ -436,7 +436,7 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
              *parent_gft = NULL;
   double tmp;
   GtStyleQueryStatus rval;
-  unsigned long max_show_width = GT_UNDEF_ULONG,
+  GtUword max_show_width = GT_UNDEF_ULONG,
                 par_max_show_width = GT_UNDEF_ULONG;
 
   gt_assert(d && node);
@@ -683,11 +683,11 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
   GtDiagram *diagram = (GtDiagram*) data;
   GtBlock *block = NULL;
   GtStr *trackid_str;
-  unsigned long i = 0;
+  GtUword i = 0;
   trackid_str = gt_str_new();
   for (i = 0; i < gt_str_array_size(ni->types); i++) {
     const char *type;
-    unsigned long j;
+    GtUword j;
     GtArray *list;
     PerTypeInfo *type_struc = NULL;
     GtBlock* mainblock = NULL;
@@ -764,7 +764,7 @@ static int traverse_genome_nodes(GtFeatureNode *fn, void *nti)
 
 static void blocklist_delete(void *value)
 {
-  unsigned long i;
+  GtUword i;
   GtArray *a;
   if (!value) return;
   a = (GtArray*) value;
@@ -775,7 +775,7 @@ static void blocklist_delete(void *value)
 
 static int gt_diagram_build(GtDiagram *diagram, GtError *err)
 {
-  unsigned long i = 0;
+  GtUword i = 0;
   int had_err = 0;
   NodeTraverseInfo nti;
   gt_assert(diagram);
@@ -950,7 +950,7 @@ void* gt_diagram_unit_test_sketch_func(void *data)
 {
   int had_err = 0;
   GtLayout *l = NULL;
-  unsigned long height;
+  GtUword height;
   GtCanvas *c = NULL;
   GtDiagramTestShared *sh = (GtDiagramTestShared*) data;
 

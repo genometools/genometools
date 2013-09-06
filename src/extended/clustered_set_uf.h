@@ -25,24 +25,24 @@ typedef struct GtClusteredSetUF GtClusteredSetUF;
 
 const GtClusteredSetClass* gt_clustered_set_union_find_class(void);
 
-GtClusteredSet*  gt_clustered_set_union_find_new(unsigned long, GtError*);
+GtClusteredSet*  gt_clustered_set_union_find_new(GtUword, GtError*);
 
 int gt_clustered_set_union_find_merge_clusters(GtClusteredSet*,
-                                               unsigned long c1,
-                                               unsigned long c2,
+                                               GtUword c1,
+                                               GtUword c2,
                                                GtError*);
 
-unsigned long gt_clustered_set_union_find_num_of_clusters(GtClusteredSet*,
+GtUword gt_clustered_set_union_find_num_of_clusters(GtClusteredSet*,
                                                              GtError*);
 
-unsigned long gt_clustered_set_union_find_num_of_elements(GtClusteredSet*,
+GtUword gt_clustered_set_union_find_num_of_elements(GtClusteredSet*,
                                                           GtError*);
 
 void gt_clustered_set_union_find_delete(GtClusteredSet*, GtError*);
 
 GtClusteredSetIterator*
 gt_clustered_set_union_find_iterator_new(GtClusteredSet*,
-                                         unsigned long,
+                                         GtUword,
                                          GtError*);
 int gt_clustered_set_union_find_unit_test(GtError *err);
 

@@ -23,8 +23,8 @@
 #include "match/seqnumrelpos.h"
 
 int gt_randomcodes_find_seldom_process_bucket(void *data,
-    const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
+    const GtUword *bucketofsuffixes, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword numberofsuffixes,
     unsigned int sortingdepth, GtError *err);
 
 typedef struct GtRandomcodesFindSeldomData GtRandomcodesFindSeldomData;
@@ -35,7 +35,7 @@ GtRandomcodesFindSeldomData *gt_randomcodes_find_seldom_data_new(
 
 void gt_randomcodes_find_seldom_data_collect_stats(
     GtRandomcodesFindSeldomData *sdata, unsigned int threadnum,
-    unsigned long *nofseldomkmers);
+    GtUword *nofseldomkmers);
 
 void gt_randomcodes_find_seldom_data_delete(GtRandomcodesFindSeldomData *sdata);
 

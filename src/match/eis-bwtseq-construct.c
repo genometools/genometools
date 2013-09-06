@@ -33,7 +33,7 @@ gt_availBWTSeq(const struct bwtParam *params, GtLogger *verbosity,
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
-  unsigned long len;
+  GtUword len;
   gt_assert(params && err);
   gt_error_check(err);
   if (streamsuffixarray(&suffixArray, SARR_SUFTAB | SARR_BWTTAB
@@ -68,7 +68,7 @@ gt_trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
-  unsigned long len;
+  GtUword len;
   gt_assert(params && err);
   gt_error_check(err);
   do
@@ -96,7 +96,7 @@ gt_trSuftab2BWTSeq(const struct bwtParam *params, GtLogger *verbosity,
 
 BWTSeq *
 gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
-                  unsigned long totalLen, GtError *err)
+                  GtUword totalLen, GtError *err)
 {
   BWTSeq *bwtSeq;
   gt_assert(sa && params && err);
@@ -186,7 +186,7 @@ gt_loadBWTSeqForSA(const char *projectName, enum seqBaseEncoding encType,
 
 BWTSeq *
 gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
-                   unsigned long totalLen, GtError *err)
+                   GtUword totalLen, GtError *err)
 {
   BWTSeq *bwtSeq = NULL;
   if (!sa->longest.defined)
@@ -206,7 +206,7 @@ gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
 
 static inline void
 buildSpRTable(const struct bwtParam *params,
-              unsigned long totalLen,
+              GtUword totalLen,
               const GtEncseq *encseq,
               GtReadmode readmode,
               SpecialsRankLookup **sprTable,

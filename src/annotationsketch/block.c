@@ -39,7 +39,7 @@ struct GtBlock {
   GtStrand strand;
   const char *type;
   GtFeatureNode *top_level_feature;
-  unsigned long reference_count;
+  GtUword reference_count;
 };
 
 /* This function orders GtElements by z-index or type. This enables the sketch
@@ -119,7 +119,7 @@ GtBlock* gt_block_ref(GtBlock *block)
 
 void gt_block_print(const GtBlock* block)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(block);
   for (i=0;i<gt_array_size(block->elements);i++)
   {
@@ -127,7 +127,7 @@ void gt_block_print(const GtBlock* block)
     elem = gt_element_ref(*(GtElement**) gt_array_get(block->elements, i));
     gt_assert(elem);
     GtRange r = gt_element_get_range(elem);
-    printf("%s\t%lu-%lu\n", gt_element_get_type(elem),
+    printf("%s\t"GT_LU"-"GT_LU"\n", gt_element_get_type(elem),
                            r.start,
                            r.end);
   }
@@ -193,7 +193,7 @@ void gt_block_merge(GtBlock *b1, GtBlock *b2)
 GtBlock* gt_block_clone(GtBlock *block)
 {
   GtBlock* newblock;
-  unsigned long i;
+  GtUword i;
   gt_assert(block);
   newblock = gt_block_new();
   for (i=0;i<gt_array_size(block->elements);i++)
@@ -243,7 +243,7 @@ void gt_block_set_range(GtBlock *block, GtRange r)
 bool gt_block_has_only_one_fullsize_element(const GtBlock *block)
 {
   bool ret = false;
-  unsigned long bsize;
+  GtUword bsize;
   gt_assert(block);
   bsize = gt_array_size(block->elements);
   if (bsize == 1) {
@@ -309,9 +309,9 @@ const char* gt_block_get_type(const GtBlock *block)
 int gt_block_get_max_height(const GtBlock *block, double *result,
                             const GtStyle *sty, GtError *err)
 {
-  unsigned long max_height = 0;
+  GtUword max_height = 0;
   GtStyleQueryStatus rval = GT_STYLE_QUERY_OK;
-  unsigned long i;
+  GtUword i;
   gt_assert(block && sty);
   for (i=0;i<gt_array_size(block->elements);i++) {
     GtElement *elem;
@@ -344,7 +344,7 @@ int gt_block_get_max_height(const GtBlock *block, double *result,
   return 0;
 }
 
-unsigned long gt_block_get_size(const GtBlock *block)
+GtUword gt_block_get_size(const GtBlock *block)
 {
   gt_assert(block && block->elements);
   return gt_array_size(block->elements);
@@ -353,7 +353,7 @@ unsigned long gt_block_get_size(const GtBlock *block)
 int gt_block_sketch(GtBlock *block, GtCanvas *canvas, GtError *err)
 {
   int had_err = 0;
-  unsigned long i;
+  GtUword i;
   gt_assert(block && canvas && err);
   /* if resulting block was too short,
      do not traverse this feature tree further */
@@ -474,7 +474,7 @@ int gt_block_unit_test(GtError *err)
 
 void gt_block_delete(GtBlock *block)
 {
-  unsigned long i;
+  GtUword i;
   if (!block) return;
   if (block->reference_count) {
     block->reference_count--;

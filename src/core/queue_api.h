@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 /* <GtQueue> objects are generic queues which can be used to process objects of
    any type in an First-In-First-Out (FIFO) fashion. */
@@ -39,7 +40,7 @@ void*         gt_queue_head(GtQueue *queue);
    O(<gt_queue_size(queue)>) worst-case running time. */
 void          gt_queue_remove(GtQueue *queue, void *elem);
 /* Return the number of elements in <queue>. */
-unsigned long gt_queue_size(const GtQueue *queue);
+GtUword gt_queue_size(const GtQueue *queue);
 /* Delete <queue>. Elements contained in <queue> are not freed! */
 void          gt_queue_delete(GtQueue *queue);
 

@@ -36,7 +36,7 @@ GtSeqIterator* gt_seq_iterator_fastq_new_colorspace(const GtStrArray
 
 /* Returns the number of the file in the file name array which <seqit> is
    currently reading.  */
-unsigned long  gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit);
+GtUword  gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit);
 
 /* Disable checking if quality description is equal to read description in
    <seqit> (it should be, but it is not in output of some tools, e.g. Coral). */

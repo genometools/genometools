@@ -17,13 +17,13 @@
 
 static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                     const GtSfxmapped4constinfo *mapped4info,
-                                    GT_UNUSED unsigned long specialfreeunit,
+                                    GT_UNUSED GtUword specialfreeunit,
                                     const GtReadmode readmode,
                                     PROCESSKMERTYPE *processkmercodeinfo,
-                                    unsigned long startpos,
-                                    unsigned long endpos)
+                                    GtUword startpos,
+                                    GtUword endpos)
 {
-  unsigned long position, unitindex, relpos = 0;
+  GtUword position, unitindex, relpos = 0;
   GtCodetype code, transcode;
   GtTwobitencoding currentencoding;
   unsigned int shiftright;
@@ -32,8 +32,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
   gt_assert(mapped4info->kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))
   {
-    gt_assert(endpos >= (unsigned long) mapped4info->upperkmersize);
-    position = endpos - (unsigned long) mapped4info->kmersize;
+    gt_assert(endpos >= (GtUword) mapped4info->upperkmersize);
+    position = endpos - (GtUword) mapped4info->kmersize;
     unitindex = (position > 0) ? GT_DIVBYUNITSIN2BITENC(position-1) : 0;
     code
       = gt_kmercode_reverse(gt_kmercode_at_position(mapped4info->twobitencoding,
@@ -102,7 +102,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                  GT_MULT2(GT_UNITSIN2BITENC - 1 -
                           GT_MODBYUNITSIN2BITENC(startpos +
                                                  mapped4info->kmersize));
-    gt_assert(endpos >= (unsigned long) mapped4info->upperkmersize);
+    gt_assert(endpos >= (GtUword) mapped4info->upperkmersize);
     endpos -= mapped4info->upperkmersize;
     while (position < endpos)
     {
@@ -136,12 +136,12 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
 
 static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                               const GtSfxmapped4constinfo *mapped4info,
-                              unsigned long specialfreeunit,
+                              GtUword specialfreeunit,
                               GtReadmode readmode,
                               PROCESSKMERTYPE *processkmercodeinfo,
                               PROCESSKMERSPECIALTYPE *processkmerspecialinfo,
-                              unsigned long startpos,
-                              unsigned long endpos)
+                              GtUword startpos,
+                              GtUword endpos)
 {
   GT_UNUSED GtCodetype lastcode;
 
@@ -160,14 +160,14 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
     }
     if (startpos > endpos)
     {
-      unsigned long tmp = startpos;
+      GtUword tmp = startpos;
       startpos = endpos;
       endpos = tmp;
     }
     gt_assert(startpos <= endpos);
     gt_assert(endpos <= mapped4info->realtotallength);
   }
-  if (endpos - startpos >= (unsigned long) mapped4info->upperkmersize)
+  if (endpos - startpos >= (GtUword) mapped4info->upperkmersize)
   {
     gt_assert(endpos > 0);
     lastcode = PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
@@ -236,7 +236,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                PROCESSKMERTYPE *processkmercodeinfo,
                                PROCESSKMERSPECIALTYPE *processkmerspecialinfo)
 {
-  unsigned long laststart = 0, lastend, specialfreeunit = 0;
+  GtUword laststart = 0, lastend, specialfreeunit = 0;
   GtSfxmapped4constinfo mapped4info;
 
   mapped4info.twobitencoding = gt_encseq_twobitencoding_export(encseq);

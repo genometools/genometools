@@ -22,14 +22,14 @@
 
 struct GtChain {
   GtArray *fragments;
-  long score;
+  GtWord score;
 };
 
 GtChain* gt_chain_new(void)
 {
   GtChain *chain;
   chain = gt_calloc((size_t) 1, sizeof *chain);
-  chain->fragments = gt_array_new(sizeof (unsigned long));
+  chain->fragments = gt_array_new(sizeof (GtUword));
   return chain;
 }
 
@@ -40,42 +40,42 @@ void gt_chain_reset(GtChain *chain)
   gt_array_reset(chain->fragments);
 }
 
-long gt_chain_get_score(const GtChain *chain)
+GtWord gt_chain_get_score(const GtChain *chain)
 {
   gt_assert(chain);
   return chain->score;
 }
 
-void gt_chain_set_score(GtChain *chain, long score)
+void gt_chain_set_score(GtChain *chain, GtWord score)
 {
   gt_assert(chain);
   chain->score = score;
 }
 
-void gt_chain_add_fragnum(GtChain *chain, unsigned long fragnum)
+void gt_chain_add_fragnum(GtChain *chain, GtUword fragnum)
 {
   gt_assert(chain);
   gt_array_add(chain->fragments, fragnum);
 }
 
-void gt_chain_set_fragnum(GtChain *chain, unsigned long idx,
-                          unsigned long fragnum)
+void gt_chain_set_fragnum(GtChain *chain, GtUword idx,
+                          GtUword fragnum)
 {
-  unsigned long *fragments;
+  GtUword *fragments;
   gt_assert(chain);
   gt_assert(idx < gt_array_size(chain->fragments));
   fragments = gt_array_get_space(chain->fragments);
   fragments[idx] = fragnum;
 }
 
-unsigned long gt_chain_get_fragnum(const GtChain *chain, unsigned long idx)
+GtUword gt_chain_get_fragnum(const GtChain *chain, GtUword idx)
 {
   gt_assert(chain);
   gt_assert(idx < gt_array_size(chain->fragments));
-  return *(unsigned long*) gt_array_get(chain->fragments, idx);
+  return *(GtUword*) gt_array_get(chain->fragments, idx);
 }
 
-unsigned long gt_chain_size(const GtChain *chain)
+GtUword gt_chain_size(const GtChain *chain)
 {
   gt_assert(chain);
   return gt_array_size(chain->fragments);

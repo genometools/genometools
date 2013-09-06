@@ -52,7 +52,7 @@ typedef struct
 
 typedef struct
 {
-  unsigned long mersize,
+  GtUword mersize,
                 userdefinedminocc,
                 userdefinedmaxocc;
   unsigned int userdefinedprefixlength;
@@ -222,17 +222,17 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
   logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (arguments->verbose)
   {
-    printf("# mersize=%lu\n",arguments->mersize);
+    printf("# mersize="GT_LU"\n",arguments->mersize);
     if (arguments->userdefinedminocc > 0)
     {
-      printf("# minocc=%lu\n",arguments->userdefinedminocc);
+      printf("# minocc="GT_LU"\n",arguments->userdefinedminocc);
     } else
     {
       printf("# minocc=undefined\n");
     }
     if (arguments->userdefinedmaxocc > 0)
     {
-      printf("# maxocc=%lu\n",arguments->userdefinedmaxocc);
+      printf("# maxocc="GT_LU"\n",arguments->userdefinedmaxocc);
     } else
     {
       printf("# maxocc=undefined\n");
@@ -309,7 +309,7 @@ typedef struct
   GtStrArray *mersizesstrings, *outputspec;
   GtStr *str_inputindex;
   GtOption *refoptionmersizes;
-  unsigned long minmersize, maxmersize, stepmersize;
+  GtUword minmersize, maxmersize, stepmersize;
   GtBitsequence *outputvector;
   unsigned int outputmode;
   bool scanfile,
@@ -446,8 +446,8 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
   }
   if (gt_option_is_set(arguments->refoptionmersizes))
   {
-    unsigned long *mersizes = NULL;
-    unsigned long idx,
+    GtUword *mersizes = NULL;
+    GtUword idx,
                   numofmersizes = gt_str_array_size(arguments->mersizesstrings);
     if (numofmersizes == 0)
     {
@@ -458,10 +458,10 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
       mersizes = gt_malloc(sizeof (*mersizes) * numofmersizes);
       for (idx=0; idx<numofmersizes; idx++)
       {
-        long readnum;
+        GtWord readnum;
 
         if (sscanf(gt_str_array_get(arguments->mersizesstrings,idx),
-                   "%ld",&readnum) != 1 || readnum <= 0)
+                   ""GT_LD"",&readnum) != 1 || readnum <= 0)
         {
           gt_error_set(err,"invalid argument \"%s\" of option -mersizes: "
                        "must be a positive integer",
@@ -469,7 +469,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
           haserr = true;
           break;
         }
-        mersizes[idx] = (unsigned long) readnum;
+        mersizes[idx] = (GtUword) readnum;
         if (idx > 0 && mersizes[idx-1] >= mersizes[idx])
         {
           gt_error_set(err,"invalid argumnt %s to option -mersizes: "
@@ -529,7 +529,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
     }
     if (!haserr)
     {
-      unsigned long outputval;
+      GtUword outputval;
 
       GT_INITBITTAB(arguments->outputvector,arguments->maxmersize+1);
       for (outputval = arguments->minmersize;
@@ -542,7 +542,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
   }
   if (!haserr)
   {
-    unsigned long idx;
+    GtUword idx;
     for (idx=0; idx<gt_str_array_size(arguments->outputspec); idx++)
     {
       if (gt_optionargaddbitmask(outputmodedesctable,
@@ -577,7 +577,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
 static void showitvdistribution(const GtArrayuint64_t *dist,
                                 const GtBitsequence *outputvector)
 {
-  unsigned long idx;
+  GtUword idx;
 
   gt_assert(outputvector != NULL);
   for (idx=0; idx < dist->nextfreeuint64_t; idx++)
@@ -585,7 +585,7 @@ static void showitvdistribution(const GtArrayuint64_t *dist,
     if (GT_ISIBITSET(outputvector,idx) && dist->spaceuint64_t[idx] > 0)
     {
       /*@ignore@*/
-      printf("%lu " Formatuint64_t "\n",
+      printf(""GT_LU" " Formatuint64_t "\n",
               idx,
               PRINTuint64_tcast(dist->spaceuint64_t[idx]));
       /*@end@*/
@@ -605,7 +605,7 @@ static void showitvsumdistributionoftwo(Summode mode,
                                         const GtArrayuint64_t *dist2,
                                         const GtBitsequence *outputvector)
 {
-  unsigned long idx;
+  GtUword idx;
   uint64_t sumoftwo, tmp;
 
   gt_assert(outputvector != NULL);
@@ -637,7 +637,7 @@ static void showitvsumdistributionoftwo(Summode mode,
         if (mode == Onlyshowsum)
         {
           /*@ignore@*/
-          printf("%lu " Formatuint64_t "\n",
+          printf(""GT_LU" " Formatuint64_t "\n",
                   idx,
                   PRINTuint64_tcast(sumoftwo));
           /*@end@*/
@@ -657,7 +657,7 @@ static void showitvsumdistributionoftwo(Summode mode,
           if (tmp > 0)
           {
             /*@ignore@*/
-            printf("%lu " Formatuint64_t " %.3f\n",
+            printf(""GT_LU" " Formatuint64_t " %.3f\n",
                   idx,
                   PRINTuint64_tcast(tmp),
                   (double) tmp/(double) sumoftwo);
@@ -896,7 +896,7 @@ static int gt_tyr_search_arguments_check(int rest_argc,
     {"p","reverse strand",STRAND_REVERSE},
     {"fp","forward and reverse strand",STRAND_FORWARD | STRAND_REVERSE}
   };
-  unsigned long idx;
+  GtUword idx;
   Tyr_search_options *arguments = tool_arguments;
 
   if (rest_argc != 0)

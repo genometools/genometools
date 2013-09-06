@@ -26,8 +26,8 @@
 
 int gt_tyr_occratio_func(const char *inputindex,
                          bool scanfile,
-                         unsigned long minmersize,
-                         unsigned long maxmersize,
+                         GtUword minmersize,
+                         GtUword maxmersize,
                          GtArrayuint64_t *uniquedistribution,
                          GtArrayuint64_t *nonuniquedistribution,
                          GtArrayuint64_t *nonuniquemultidistribution,

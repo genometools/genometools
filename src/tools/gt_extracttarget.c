@@ -77,10 +77,10 @@ static GtOptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
 
 typedef struct {
   GtBioseq *bioseq;
-  unsigned long seqnum;
+  GtUword seqnum;
 } TargetInfo;
 
-static bool show_target(GT_UNUSED unsigned long pos, void *data)
+static bool show_target(GT_UNUSED GtUword pos, void *data)
 {
   TargetInfo *ti = data;
   char *seq;
@@ -101,7 +101,7 @@ static int extracttarget_from_seqfiles(const char *target,
   GtStr *unescaped_target;
   char *escaped_target;
   GtSplitter *splitter;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(target && seqfiles);
@@ -119,9 +119,9 @@ static int extracttarget_from_seqfiles(const char *target,
                                strlen(gt_splitter_get_token(blank_splitter, 0)),
                                err);
     if (!had_err) {
-      unsigned long j;
+      GtUword j;
       for (j = 0; j < gt_str_array_size(seqfiles); j++) {
-        unsigned long k;
+        GtUword k;
         GtBioseq *bioseq;
         if (!(bioseq =  gt_bioseq_new(gt_str_array_get(seqfiles, j), err))) {
           had_err = -1;

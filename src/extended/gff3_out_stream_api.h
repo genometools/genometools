@@ -35,7 +35,7 @@ GtNodeStream* gt_gff3_out_stream_new(GtNodeStream *in_stream, GtFile *outfp);
    Per default, each FASTA entry is shown on a single line. */
 void          gt_gff3_out_stream_set_fasta_width(GtGFF3OutStream
                                                  *gff3_out_stream,
-                                                 unsigned long fasta_width);
+                                                 GtUword fasta_width);
 /* If this method is called upon <gff3_out_stream>, use the original ID
    attributes provided in the input (instead of creating new ones, which
    is the default). Memory consumption for <gff3_out_stream> is raised from O(1)

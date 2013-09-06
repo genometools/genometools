@@ -94,7 +94,7 @@ const GtNodeStreamClass* gt_csa_stream_class(void)
 }
 
 GtNodeStream* gt_csa_stream_new(GtNodeStream *in_stream,
-                                unsigned long join_length)
+                                GtUword join_length)
 {
   GtNodeStream *ns = gt_node_stream_create(gt_csa_stream_class(),
                                            gt_node_stream_is_sorted(in_stream));

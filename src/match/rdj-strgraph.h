@@ -27,10 +27,10 @@ typedef struct GtStrgraph GtStrgraph;
 
 /* --- preparation --- */
 
-GtStrgraph* gt_strgraph_new(unsigned long nofreads);
+GtStrgraph* gt_strgraph_new(GtUword nofreads);
 
-void gt_spmproc_strgraph_count(unsigned long suffix_readnum,
-    unsigned long prefix_readnum, unsigned long length, bool suffixseq_direct,
+void gt_spmproc_strgraph_count(GtUword suffix_readnum,
+    GtUword prefix_readnum, GtUword length, bool suffixseq_direct,
     bool prefixseq_direct, void *strgraph);
 
 int gt_strgraph_save_counts(GtStrgraph *strgraph, const char *indexname,
@@ -47,26 +47,26 @@ void gt_strgraph_set_encseq(GtStrgraph *strgraph, const GtEncseq *encseq);
 /* --- spmlist file --- */
 
 int gt_strgraph_open_spmlist_file(GtStrgraph *strgraph, const char *indexname,
-    const char *suffix, bool binary, unsigned long bufsize, GtError *err);
+    const char *suffix, bool binary, GtUword bufsize, GtError *err);
 
 void gt_strgraph_close_spmlist_file(GtStrgraph *strgraph);
 
-void gt_spmproc_strgraph_count_and_save(unsigned long suffix_readnum,
-    unsigned long prefix_readnum, unsigned long length,
+void gt_spmproc_strgraph_count_and_save(GtUword suffix_readnum,
+    GtUword prefix_readnum, GtUword length,
     bool suffixseq_direct, bool prefixseq_direct, void *strgraph);
 
 int gt_strgraph_load_spm_from_file(GtStrgraph *strgraph,
-    unsigned long min_length, bool load_self_spm, GtBitsequence *contained,
+    GtUword min_length, bool load_self_spm, GtBitsequence *contained,
     const char *indexname, unsigned int nspmfiles, const char *suffix,
     GtError *err);
 
 /* --- construction --- */
 
-void gt_strgraph_allocate_graph(GtStrgraph *strgraph, unsigned long fixlen,
+void gt_strgraph_allocate_graph(GtStrgraph *strgraph, GtUword fixlen,
     const GtEncseq *encseq);
 
-void gt_spmproc_strgraph_add(unsigned long suffix_readnum,
-    unsigned long prefix_readnum, unsigned long length,
+void gt_spmproc_strgraph_add(GtUword suffix_readnum,
+    GtUword prefix_readnum, GtUword length,
     bool suffixseq_direct, bool prefixseq_direct, void *graph);
 
 /* --- log information --- */
@@ -76,8 +76,8 @@ void gt_strgraph_show_limits_debug_log(void);
 void gt_strgraph_log_space(const GtStrgraph *strgraph);
 void gt_strgraph_log_stats(const GtStrgraph *strgraph, GtLogger *logger);
 
-unsigned long gt_strgraph_nofreads(const GtStrgraph *strgraph);
-unsigned long gt_strgraph_nofspm(const GtStrgraph *strgraph);
+GtUword gt_strgraph_nofreads(const GtStrgraph *strgraph);
+GtUword gt_strgraph_nofspm(const GtStrgraph *strgraph);
 
 void gt_strgraph_show_edge_lengths_distribution(const GtStrgraph *strgraph,
     const char *indexname, const char *suffix);
@@ -100,9 +100,9 @@ void gt_strgraph_show(const GtStrgraph *strgraph, GtStrgraphFormat format,
     const char *indexname, const char *suffix, bool show_progressbar);
 
 int gt_strgraph_show_context(GtStrgraph *strgraph, GtStrgraphFormat format,
-    const char *indexname, const char *suffix, unsigned long *readnums,
-    unsigned long nofreadnums, unsigned long *otherreadnums,
-    unsigned long nofotherreadnums, unsigned long maxdepth, bool extend,
+    const char *indexname, const char *suffix, GtUword *readnums,
+    GtUword nofreadnums, GtUword *otherreadnums,
+    GtUword nofotherreadnums, GtUword maxdepth, bool extend,
     GtError *err);
 
 /* --- reads library table --- */
@@ -113,41 +113,41 @@ int gt_strgraph_load_reads_library_table(GtStrgraph *strgraph,
 /* --- load from file --- */
 
 GtStrgraph* gt_strgraph_new_from_file(const GtEncseq *encseq,
-    unsigned long fixlen, const char *indexname, const char *suffix);
+    GtUword fixlen, const char *indexname, const char *suffix);
 
 /* --- simplify --- */
 
 void gt_strgraph_sort_edges_by_len(GtStrgraph *strgraph, bool show_progressbar);
 
 /* return value: number of transitive matches */
-unsigned long gt_strgraph_redtrans(GtStrgraph *strgraph, bool show_progressbar);
+GtUword gt_strgraph_redtrans(GtStrgraph *strgraph, bool show_progressbar);
 
 /* return value: number of submaximal matches */
-unsigned long gt_strgraph_redsubmax(GtStrgraph *strgraph,
+GtUword gt_strgraph_redsubmax(GtStrgraph *strgraph,
     bool show_progressbar);
 
 /* return value: number of self-match matches */
-unsigned long gt_strgraph_redself(GtStrgraph *strgraph, bool show_progressbar);
+GtUword gt_strgraph_redself(GtStrgraph *strgraph, bool show_progressbar);
 
 /* return value: number of matches vs. rc edges */
-unsigned long gt_strgraph_redwithrc(GtStrgraph *strgraph,
+GtUword gt_strgraph_redwithrc(GtStrgraph *strgraph,
     bool show_progressbar);
 
 /* return value: number of reduced edges */
-unsigned long gt_strgraph_reddepaths(GtStrgraph *strgraph,
-    unsigned long maxdepth, bool show_progressbar);
+GtUword gt_strgraph_reddepaths(GtStrgraph *strgraph,
+    GtUword maxdepth, bool show_progressbar);
 
 /* return value: number of reduced edges */
-unsigned long gt_strgraph_redpbubbles(GtStrgraph *strgraph,
-    unsigned long maxwidth, unsigned long maxdiff, bool show_progressbar);
+GtUword gt_strgraph_redpbubbles(GtStrgraph *strgraph,
+    GtUword maxwidth, GtUword maxdiff, bool show_progressbar);
 
 /* remove marked edges and realloc edges list */
 void gt_strgraph_compact(GtStrgraph *strgraph, bool show_progressbar);
 
 /* --- spell contigs --- */
 
-void gt_strgraph_spell(GtStrgraph *strgraph, unsigned long min_path_depth,
-    unsigned long min_contig_length, bool showpaths, const char *indexname,
+void gt_strgraph_spell(GtStrgraph *strgraph, GtUword min_path_depth,
+    GtUword min_contig_length, bool showpaths, const char *indexname,
     const char *suffix, const GtEncseq *encseq, bool delay_reads_mapping,
     bool show_progressbar, GtLogger *logger);
 

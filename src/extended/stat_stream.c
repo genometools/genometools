@@ -27,7 +27,7 @@ struct GtStatStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *stat_visitor;
-  unsigned long number_of_DAGs;
+  GtUword number_of_DAGs;
 };
 
 const GtNodeStreamClass* gt_stat_stream_class(void);
@@ -95,6 +95,6 @@ GtNodeStream* gt_stat_stream_new(GtNodeStream *in_stream,
 
 void gt_stat_stream_show_stats(GtStatStream *ss, GtFile *outfp)
 {
-  gt_file_xprintf(outfp, "parsed genome node DAGs: %lu\n", ss->number_of_DAGs);
+  gt_file_xprintf(outfp, "parsed genome node DAGs: "GT_LU"\n", ss->number_of_DAGs);
   gt_stat_visitor_show_stats(ss->stat_visitor, outfp);
 }

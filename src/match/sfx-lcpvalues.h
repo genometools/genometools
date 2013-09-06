@@ -34,7 +34,7 @@ typedef struct
   GtBitsequence *isset;
 #endif
   GtLcpvaluetype *bucketoflcpvalues;
-  unsigned long numofentries,
+  GtUword numofentries,
                 numoflargelcpvalues,
                 lcptaboffset; /* This can be positive when the lcp-values
                                  for an entire range of suffixes (covering
@@ -48,14 +48,14 @@ typedef struct
 typedef void (*GtFinalProcessBucket)(void *,
                                      const GtSuffixsortspace *,
                                      const GtLcpvalues *,
-                                     unsigned long,
-                                     unsigned long,
-                                     unsigned long);
+                                     GtUword,
+                                     GtUword,
+                                     GtUword);
 
 /*@unused@*/ static inline void gt_lcptab_update(GtLcpvalues *tableoflcpvalues,
-                                                 unsigned long subbucketleft,
-                                                 unsigned long idx,
-                                                 unsigned long value)
+                                                 GtUword subbucketleft,
+                                                 GtUword idx,
+                                                 GtUword value)
 {
   gt_assert (tableoflcpvalues != NULL &&
              tableoflcpvalues->bucketoflcpvalues != NULL &&
@@ -72,7 +72,7 @@ typedef void (*GtFinalProcessBucket)(void *,
   tableoflcpvalues->bucketoflcpvalues[tableoflcpvalues->lcptaboffset +
                                       subbucketleft + idx]
                                       = (GtLcpvaluetype) value;
-  if (value >= (unsigned long) LCPOVERFLOW)
+  if (value >= (GtUword) LCPOVERFLOW)
   {
     tableoflcpvalues->numoflargelcpvalues++; /* this may overcount as there may
                                                 be some value at index <idx>
@@ -80,10 +80,10 @@ typedef void (*GtFinalProcessBucket)(void *,
   }
 }
 
-/*@unused@*/ static inline unsigned long gt_lcptab_getvalue(
+/*@unused@*/ static inline GtUword gt_lcptab_getvalue(
                                         const GtLcpvalues *tableoflcpvalues,
-                                        unsigned long subbucketleft,
-                                        unsigned long idx)
+                                        GtUword subbucketleft,
+                                        GtUword idx)
 {
   gt_assert (tableoflcpvalues != NULL &&
              tableoflcpvalues->bucketoflcpvalues != NULL &&
@@ -92,12 +92,12 @@ typedef void (*GtFinalProcessBucket)(void *,
   gt_assert(tableoflcpvalues->isset == NULL ||
             GT_ISIBITSET(tableoflcpvalues->isset,
                          tableoflcpvalues->lcptaboffset+subbucketleft+idx));
-  return (unsigned long) tableoflcpvalues->bucketoflcpvalues
+  return (GtUword) tableoflcpvalues->bucketoflcpvalues
                            [tableoflcpvalues->lcptaboffset+subbucketleft+idx];
 }
 
 const GtLcpvaluetype *gt_lcptab_getptr(const GtLcpvalues *tableoflcpvalues,
-                                       unsigned long subbucketleft);
+                                       GtUword subbucketleft);
 
 GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                                 unsigned int numofchars,
@@ -113,22 +113,22 @@ size_t gt_Outlcpinfo_size(const GtOutlcpinfo *outlcpinfo);
 void gt_Outlcpinfo_reinit(GtOutlcpinfo *outlcpinfo,
                           unsigned int numofchars,
                           unsigned int prefixlength,
-                          unsigned long numoflcpvalues);
+                          GtUword numoflcpvalues);
 
 void gt_Outlcpinfo_delete(GtOutlcpinfo *outlcpinfo);
 
-unsigned long gt_Outlcpinfo_numoflargelcpvalues(const GtOutlcpinfo *outlcpinfo);
+GtUword gt_Outlcpinfo_numoflargelcpvalues(const GtOutlcpinfo *outlcpinfo);
 
 double gt_Outlcpinfo_lcptabsum(const GtOutlcpinfo *outlcpinfo);
 
 void gt_Outlcpinfo_numsuffixes2output_set(GtOutlcpinfo *outlcpinfo,
-                                          unsigned long numsuffixes2output);
+                                          GtUword numsuffixes2output);
 
-unsigned long gt_Outlcpinfo_maxbranchdepth(const GtOutlcpinfo *outlcpinfo);
+GtUword gt_Outlcpinfo_maxbranchdepth(const GtOutlcpinfo *outlcpinfo);
 
 void gt_Outlcpinfo_prebucket(GtOutlcpinfo *outlcpinfo,
                              GtCodetype code,
-                             unsigned long lcptaboffset);
+                             GtUword lcptaboffset);
 
 void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
                                      unsigned int prefixlength,
@@ -152,7 +152,7 @@ GtLcpvalues *gt_Outlcpinfo_lcpvalues_ref(GtOutlcpinfo *outlcpinfo);
 void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    const GtSuffixsortspace *sortedsample,
-                                   unsigned long effectivesamplesize,
+                                   GtUword effectivesamplesize,
                                    const GtOutlcpinfo *outlcpinfosample,
                                    bool checkequality);
 

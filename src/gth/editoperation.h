@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "core/file.h"
+#include "core/types_api.h"
 
 /*
   An edit operation is an uint16_t value which stores
@@ -89,7 +90,7 @@ void         gt_editoperation_set_length(Editoperation*, unsigned int,
                                          bool proteineop);
 
 void         gt_editoperation_show(Editoperation *eops,
-                                   unsigned long num_of_eops,
+                                   GtUword num_of_eops,
                                    bool proteineops, bool xmlout,
                                    unsigned int indentlevel,
                                    GtFile *outfp);

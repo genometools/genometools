@@ -96,7 +96,7 @@ const GtCanvasClass* gt_canvas_cairo_file_class(void)
 
 GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
                                    GtGraphicsOutType output_type,
-                                   unsigned long width, unsigned long height,
+                                   GtUword width, GtUword height,
                                    GtImageInfo *image_info,
                                    GtError *err)
 {

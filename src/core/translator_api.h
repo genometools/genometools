@@ -77,7 +77,7 @@ GtTranslatorStatus gt_translator_next(GtTranslator *translator,
    start codon, GT_TRANSLATOR_END is returned.
    Otherwise, GT_TRANSLATOR_OK (equal to 0) is returned. */
 GtTranslatorStatus gt_translator_find_startcodon(GtTranslator *translator,
-                                                 unsigned long *pos,
+                                                 GtUword *pos,
                                                  GtError *err);
 
 /* Moves the <translator> to the beginning of the first codon in <dnaseq> (of
@@ -89,7 +89,7 @@ GtTranslatorStatus gt_translator_find_startcodon(GtTranslator *translator,
    stop codon, GT_TRANSLATOR_END is returned.
    Otherwise, GT_TRANSLATOR_OK (equal to 0) is returned. */
 GtTranslatorStatus gt_translator_find_stopcodon(GtTranslator *translator,
-                                                unsigned long *pos,
+                                                GtUword *pos,
                                                 GtError *err);
 
 /* Moves the <translator> to the beginning of the first codon in <dnaseq> (of
@@ -101,7 +101,7 @@ GtTranslatorStatus gt_translator_find_stopcodon(GtTranslator *translator,
    Otherwise, GT_TRANSLATOR_OK (equal to 0) is returned. */
 GtTranslatorStatus gt_translator_find_codon(GtTranslator *translator,
                                             GtStrArray *codons,
-                                            unsigned long *pos,
+                                            GtUword *pos,
                                             GtError *err);
 
 /* Delete <translator>. */

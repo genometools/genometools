@@ -22,31 +22,31 @@
 
 typedef struct GtReadsLibrariesTable GtReadsLibrariesTable;
 
-GtReadsLibrariesTable* gt_reads_libraries_table_new(unsigned long noflibraries);
+GtReadsLibrariesTable* gt_reads_libraries_table_new(GtUword noflibraries);
 
 void                   gt_reads_libraries_table_delete(
                                             GtReadsLibrariesTable *rlt);
 
 void                   gt_reads_libraries_table_add(GtReadsLibrariesTable *rlt,
-                                                    unsigned long first_seqnum,
-                                                    unsigned long insertlength,
-                                                    unsigned long stdev,
+                                                    GtUword first_seqnum,
+                                                    GtUword insertlength,
+                                                    GtUword stdev,
                                                     bool paired);
 
 void                   gt_reads_libraries_table_get_library(
                                             GtReadsLibrariesTable *rlt,
-                                            unsigned long libnum,
-                                            unsigned long *first_seqnum,
-                                            unsigned long *insertlength,
-                                            unsigned long *stdev);
+                                            GtUword libnum,
+                                            GtUword *first_seqnum,
+                                            GtUword *insertlength,
+                                            GtUword *stdev);
 
 void                   gt_reads_libraries_table_save(GtReadsLibrariesTable *rlt,
                                                      FILE *rlt_fp);
 
-unsigned long          gt_reads_libraries_table_noflibraries(
+GtUword          gt_reads_libraries_table_noflibraries(
                                             GtReadsLibrariesTable *rlt);
 
-unsigned long          gt_reads_libraries_table_firstunpaired(
+GtUword          gt_reads_libraries_table_firstunpaired(
                                             GtReadsLibrariesTable *rlt);
 
 GtReadsLibrariesTable* gt_reads_libraries_table_load(FILE *rlt_fp,

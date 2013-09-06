@@ -32,17 +32,18 @@
 #include <stdlib.h>
 
 #include "core/error.h"
+#include "core/types_api.h"
 
 /** basic unit of addressing BitStrings */
-/* Caution: sizeof (BitElem) <= sizeof (unsigned long) must be met */
+/* Caution: sizeof (BitElem) <= sizeof (GtUword) must be met */
 typedef unsigned char BitElem;
 /** Stores arbitrary bit sequences */
 typedef BitElem *BitString;
 /** Immutable BitStrings */
 typedef const BitElem *constBitString;
 /** Since even on 32-bit architectures 512MiB hold over 2 billion
- * bits, offsets into BitStrings must be stored as unsigned long long x*/
-typedef unsigned long long BitOffset;
+ * bits, offsets into BitStrings must be stored as GtUint64 x*/
+typedef GtUint64 BitOffset;
 
 enum {
   /** bits held in one BitElem */

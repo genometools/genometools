@@ -26,7 +26,7 @@
 typedef struct
 {
  GtInl_Queueelem *queuespace;  /* the space to store the queue elements */
- unsigned long enqueueindex, /* entry into which element is to be enqued */
+ GtUword enqueueindex, /* entry into which element is to be enqued */
                dequeueindex, /* last element of queue */
                queuesize,    /* size of the queue */
                noofelements; /* no ofelements between enqueueindex+1
@@ -41,7 +41,7 @@ typedef int (*GtInl_Queueprocessor)(GtInl_Queueelem *,void *info);
   reservoir can, if necessary, be enlarged.
 */
 
-static inline GtInl_Queue *gt_inl_queue_new(unsigned long queuesize)
+static inline GtInl_Queue *gt_inl_queue_new(GtUword queuesize)
 {
   GtInl_Queue *q;
 
@@ -84,7 +84,7 @@ static inline bool gt_inl_queue_isempty(const GtInl_Queue *q)
 
 static inline void extendqueuesize(GtInl_Queue *q,bool doublesize)
 {
-  unsigned long addconst, idx, newsize;
+  GtUword addconst, idx, newsize;
 
   gt_assert(q != NULL);
   if (doublesize)
@@ -104,8 +104,8 @@ static inline void extendqueuesize(GtInl_Queue *q,bool doublesize)
   }
   q->enqueueindex += addconst;
   /*
-  printf("from queue of size %lu to queue of size %lu\n",q->queuesize,newsize);
-  printf("now enqueindex=%lu,dequeuindex=%lu\n",
+  printf("from queue of size "GT_LU" to queue of size "GT_LU"\n",q->queuesize,newsize);
+  printf("now enqueindex="GT_LU",dequeuindex="GT_LU"\n",
          q->enqueueindex,q->dequeueindex);
   */
   q->queuesize = newsize;
@@ -197,7 +197,7 @@ static inline GtInl_Queueelem gt_inl_queue_get(GtInl_Queue *q)
   gt_assert(q != NULL);
   if (q->noofelements > 0)
   {
-    unsigned long idx;
+    GtUword idx;
 
     if (q->enqueueindex < q->dequeueindex)
     {

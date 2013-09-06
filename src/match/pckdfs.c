@@ -25,22 +25,22 @@ typedef struct
   {
     struct
     {
-      unsigned long lowerbound,
+      GtUword lowerbound,
                     upperbound;
       GtUchar inchar;
     } pckitv;
-    unsigned long remainingspecial;
+    GtUword remainingspecial;
   } either;
-  unsigned long depth,
+  GtUword depth,
                 lcpnodedepth;
   bool isinterval;
 } Dfs_Boundsatdepth;
 
 GT_DECLAREARRAYSTRUCT(Dfs_Boundsatdepth);
 
-static unsigned long dfsnonspecialwidth(const GtArrayBoundswithchar *bwci)
+static GtUword dfsnonspecialwidth(const GtArrayBoundswithchar *bwci)
 {
-  unsigned long idx, addwidth = 0;
+  GtUword idx, addwidth = 0;
 
   for (idx = 0; idx < bwci->nextfreeBoundswithchar; idx++)
   {
@@ -54,7 +54,7 @@ static unsigned long dfsnonspecialwidth(const GtArrayBoundswithchar *bwci)
 #ifdef SKDEBUG
 static void showcurrentpath(const GtArrayGtUchar *currentpath)
 {
-  unsigned long idx;
+  GtUword idx;
 
   printf("path=");
   for (idx = 0; idx < currentpath->nextfreeGtUchar; idx++)
@@ -69,21 +69,21 @@ static void showDfs_Boundsatdepth(const char *kind,const Dfs_Boundsatdepth *bd)
   printf("%s ",kind);
   if (bd->isinterval)
   {
-    printf("l=%lu u=%lu i=%u d=%lu\n",bd->either.pckitv.lowerbound,
+    printf("l="GT_LU" u="GT_LU" i=%u d="GT_LU"\n",bd->either.pckitv.lowerbound,
                                       bd->either.pckitv.upperbound,
                                       (unsigned int)
                                       bd->either.pckitv.inchar,
                                       bd->depth);
   } else
   {
-    printf("w=%lu d=%lu\n",bd->either.remainingspecial,bd->depth);
+    printf("w="GT_LU" d="GT_LU"\n",bd->either.remainingspecial,bd->depth);
   }
 }
 #endif
 
 int gt_fmindex_dfstraverse(const FMindex *fmindex,
                            unsigned int numofchars,
-                           unsigned long totallength,
+                           GtUword totallength,
                            Processlcp processlcp,
                            void *processlcpdata,
                            GtError *err)
@@ -93,7 +93,7 @@ int gt_fmindex_dfstraverse(const FMindex *fmindex,
   Boundswithchar *bwciptr;
   Dfs_Boundsatdepth parent, child;
   GtArrayGtUchar currentpath;
-  unsigned long nonspecialwidth, parentwidth, *rangeOccs;
+  GtUword nonspecialwidth, parentwidth, *rangeOccs;
   bool haserr = false, firstleaf = true;
 
   GT_INITARRAY(&stack,Dfs_Boundsatdepth);
@@ -101,7 +101,7 @@ int gt_fmindex_dfstraverse(const FMindex *fmindex,
   bwci.spaceBoundswithchar = gt_malloc(sizeof (*bwci.spaceBoundswithchar) *
                                        (numofchars+1));
   bwci.nextfreeBoundswithchar = 0;
-  bwci.allocatedBoundswithchar = (unsigned long) (numofchars+1);
+  bwci.allocatedBoundswithchar = (GtUword) (numofchars+1);
   child.isinterval = true;
   child.depth = 0;
   child.lcpnodedepth = 0;
@@ -125,7 +125,7 @@ int gt_fmindex_dfstraverse(const FMindex *fmindex,
       gt_assert(parent.depth > 0);
       if (processlcp != NULL)
       {
-        unsigned long idx;
+        GtUword idx;
 
         for (idx = 0; idx<parent.either.remainingspecial; idx++)
         {
@@ -193,7 +193,7 @@ int gt_fmindex_dfstraverse(const FMindex *fmindex,
                                        parent.either.pckitv.upperbound);
         nonspecialwidth = dfsnonspecialwidth(&bwci);
 #ifdef SKDEBUG
-        printf("split %lu %lu into %lu intervals of width %lu\n",
+        printf("split "GT_LU" "GT_LU" into "GT_LU" intervals of width "GT_LU"\n",
                parent.either.pckitv.lowerbound,
                parent.either.pckitv.upperbound,
                bwci.nextfreeBoundswithchar,

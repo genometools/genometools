@@ -51,17 +51,17 @@
   return had_err;
 } */
 
-static unsigned long*
+static GtUword*
 genomediff_calculate_genome_lengths(GtShuUnitFileInfo *unit_info)
 {
   bool mirrored = gt_encseq_is_mirrored(unit_info->encseq);
-  unsigned long eff_file_length,
+  GtUword eff_file_length,
                 filestart,
                 sep_per_file = 0,
                 seqs_passed = 0,
                 seqs_upto_fileend,
                 i_idx;
-  unsigned long *genome_lengths = gt_calloc((size_t) unit_info->num_of_genomes,
+  GtUword *genome_lengths = gt_calloc((size_t) unit_info->num_of_genomes,
                                            sizeof (*genome_lengths));
   for (i_idx = 0UL; i_idx < unit_info->num_of_files; i_idx++) {
     eff_file_length = gt_safe_cast2ulong_64(
@@ -101,18 +101,18 @@ genomediff_calculate_genome_lengths(GtShuUnitFileInfo *unit_info)
   }
   if (gt_log_enabled()) {
     for  (i_idx = 0UL; i_idx < unit_info->num_of_genomes; i_idx++) {
-      gt_log_log("file/genome %lu has length %lu",
+      gt_log_log("file/genome "GT_LU" has length "GT_LU"",
           i_idx, genome_lengths[i_idx]);
     }
   }
   return genome_lengths;
 }
 
-static double *genomediff_calculate_gc(unsigned long *genome_lengths,
+static double *genomediff_calculate_gc(GtUword *genome_lengths,
                                        GtShuUnitFileInfo *unit_info,
                                        GT_UNUSED GtError *err)
 {
-  unsigned long file_idx = 0UL,
+  GtUword file_idx = 0UL,
                 genome_idx,
                 idx,
                 *seq_gc_content = NULL,
@@ -150,7 +150,7 @@ static double *genomediff_calculate_gc(unsigned long *genome_lengths,
                 seq_gc_content[idx]);
   }
   for (idx = 0; idx < unit_info->num_of_genomes; idx++) {
-    gt_log_log("file/genome %lu has gc %lu", idx, genome_gc_content[idx]);
+    gt_log_log("file/genome "GT_LU" has gc "GT_LU"", idx, genome_gc_content[idx]);
   }
 
   for (idx = 0; idx < unit_info->num_of_genomes; idx++) {
@@ -165,14 +165,14 @@ static double *genomediff_calculate_gc(unsigned long *genome_lengths,
 
 static void genomediff_calculate_div(GtShuUnitFileInfo *unit_info,
                                      double **div, double *gc_content,
-                                     unsigned long *genome_lengths,
+                                     GtUword *genome_lengths,
                                      const GtGenomediffArguments *arguments,
                                      GtTimer *timer)
 {
   double query_gc,
          query_shulen,
          *ln_n_fac;
-  unsigned long subject_len,
+  GtUword subject_len,
                 i_idx, j_idx,
                 subject, query;
 
@@ -231,7 +231,7 @@ uint64_t **gt_genomediff_shulen_sum(const GtGenomediffArguments *arguments,
                                     GtError *err)
 {
   int had_err = 0;
-  unsigned long i_idx, j_idx;
+  GtUword i_idx, j_idx;
   uint64_t **shulensums = NULL;
   const GtEncseq *encseq = NULL;
   Genericindex *generic_index_subject = NULL;
@@ -293,11 +293,11 @@ uint64_t **gt_genomediff_shulen_sum(const GtGenomediffArguments *arguments,
     }
     else {
       const FMindex *subjectindex = NULL;
-      unsigned long num_of_chars,
+      GtUword num_of_chars,
                     total_length;
       const GtAlphabet *alphabet = gt_encseq_alphabet(unit_info->encseq);
 
-      num_of_chars = (unsigned long) gt_alphabet_num_of_chars(alphabet);
+      num_of_chars = (GtUword) gt_alphabet_num_of_chars(alphabet);
       total_length = genericindex_get_totallength(generic_index_subject);
 
       subjectindex = genericindex_get_packedindex(generic_index_subject);
@@ -351,7 +351,7 @@ uint64_t **gt_genomediff_shulen_sum(const GtGenomediffArguments *arguments,
 static void genomediff_print_table(double **tab,
                                    GtShuUnitFileInfo *unit_info)
 {
-  unsigned long i_idx, j_idx;
+  GtUword i_idx, j_idx;
 
   for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
     printf("# %s\t", gt_str_array_get(unit_info->genome_names, i_idx));
@@ -375,8 +375,8 @@ int gt_genomediff_calculate_div_from_avg(double **avgshu,
   int had_err = 0;
   const GtAlphabet *alphabet;
   double *gc_content = NULL;
-  unsigned long i_idx, j_idx;
-  unsigned long *genome_lengths = NULL;
+  GtUword i_idx, j_idx;
+  GtUword *genome_lengths = NULL;
 
   genome_lengths = genomediff_calculate_genome_lengths(unit_info);
 
@@ -412,7 +412,7 @@ int gt_genomediff_calculate_div_from_avg(double **avgshu,
 
   if (!had_err) {
     gt_logger_log(logger, "# Table of Kr");
-    printf("%lu\n", unit_info->num_of_genomes);
+    printf(""GT_LU"\n", unit_info->num_of_genomes);
     for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
       printf("%s\t", gt_str_array_get(unit_info->genome_names, i_idx));
       for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++) {
@@ -439,7 +439,7 @@ int gt_genomediff_kr_calc(uint64_t **shulensums,
   int had_err = 0;
   double **div = NULL,
          *gc_content = NULL;
-  unsigned long *genome_lengths = NULL,
+  GtUword *genome_lengths = NULL,
                 i_idx, j_idx;
   const GtAlphabet *alphabet;
 
@@ -457,7 +457,7 @@ int gt_genomediff_kr_calc(uint64_t **shulensums,
                       unit_info->num_of_genomes);
 
   for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
-    unsigned long length_i;
+    GtUword length_i;
     length_i = genome_lengths[i_idx];
 
     for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++) {
@@ -503,7 +503,7 @@ int gt_genomediff_kr_calc(uint64_t **shulensums,
 
   if (!had_err) {
     gt_logger_log(logger, "# Table of Kr");
-    printf("%lu\n", unit_info->num_of_genomes);
+    printf(""GT_LU"\n", unit_info->num_of_genomes);
     for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++) {
       printf("%s\t", gt_str_array_get(unit_info->genome_names, i_idx));
       for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++) {

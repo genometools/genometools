@@ -26,6 +26,7 @@
 #include <float.h>
 #include "core/error.h"
 #include "core/file.h"
+#include "core/types_api.h"
 
 typedef struct GthBSSMParam GthBSSMParam;
 
@@ -47,7 +48,7 @@ typedef enum {
 GthBSSMParam* gth_bssm_param_new(void);
 /* Read a bssm parameter file on the path $BSSMDIR. */
 GthBSSMParam* gth_bssm_param_load(const char *filename, GtError*);
-GthBSSMParam* gth_bssm_param_extract(unsigned long speciesnum, GtError*);
+GthBSSMParam* gth_bssm_param_extract(GtUword speciesnum, GtError*);
 void          gth_bssm_param_delete(GthBSSMParam*);
 /* Save the data contained in <bssm_param> to a file named <filename>. */
 int           gth_bssm_param_save(GthBSSMParam*, const char *filename,

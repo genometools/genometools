@@ -41,7 +41,7 @@ static int imageinfo_lua_new(lua_State *L)
 static int imageinfo_lua_get_height(lua_State *L)
 {
   GtImageInfo **ii;
-  unsigned long height;
+  GtUword height;
   GtError *err = NULL;
   ii = check_imageinfo(L, 1);
   gt_assert(ii);
@@ -61,7 +61,7 @@ static int imageinfo_lua_get_height(lua_State *L)
 static int imageinfo_lua_num_of_recmaps(lua_State *L)
 {
   GtImageInfo **ii;
-  unsigned long nof_rm;
+  GtUword nof_rm;
   GtError *err = NULL;
   ii = check_imageinfo(L, 1);
   gt_assert(ii);
@@ -103,7 +103,7 @@ static void push_recmap_as_table(lua_State *L, const GtRecMap *rm)
 static int imageinfo_lua_recmaps_as_table(lua_State *L)
 {
   GtImageInfo **ii;
-  unsigned long num, i;
+  GtUword num, i;
   ii = check_imageinfo(L, 1);
   gt_assert(ii);
   num = gt_image_info_num_of_rec_maps(*ii);

@@ -20,12 +20,12 @@
 #include "fmindex.h"
 #include "fmi-occ.gen"
 
-static unsigned long searchsmallestgeq(const GtPairBwtidx *left,
+static GtUword searchsmallestgeq(const GtPairBwtidx *left,
                                 const GtPairBwtidx *right,
-                                unsigned long key)
+                                GtUword key)
 {
   const GtPairBwtidx *leftptr, *midptr, *rightptr, *found = NULL;
-  unsigned long len;
+  GtUword len;
 
   gt_assert(left != NULL);
   gt_assert(right != NULL);
@@ -33,7 +33,7 @@ static unsigned long searchsmallestgeq(const GtPairBwtidx *left,
   rightptr = right;
   while (leftptr<=rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr);
+    len = (GtUword) (rightptr-leftptr);
     midptr = leftptr + GT_DIV2(len);
     if (key < midptr->bwtpos)
     {
@@ -54,16 +54,16 @@ static unsigned long searchsmallestgeq(const GtPairBwtidx *left,
   return found->suftabvalue;
 }
 
-unsigned long gt_fmfindtextpos (const Fmindex *fm,unsigned long idx)
+GtUword gt_fmfindtextpos (const Fmindex *fm,GtUword idx)
 {
-  unsigned long offset = 0;
+  GtUword offset = 0;
   GtUchar cc;
 
   while ((idx & fm->markdistminus1) != 0)
   {
     if (idx == fm->longestsuffixpos || ISSPECIAL(cc = ACCESSBWTTEXT(idx)))
     {
-      unsigned long smallestgeq
+      GtUword smallestgeq
                = searchsmallestgeq(fm->specpos.spaceGtPairBwtidx,
                                    fm->specpos.spaceGtPairBwtidx +
                                    fm->specpos.nextfreeGtPairBwtidx - 1,

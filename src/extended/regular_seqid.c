@@ -20,7 +20,7 @@
 
 void gt_regular_seqid_save(GtStr *seqid, GtStr *description)
 {
-  unsigned long i, len;
+  GtUword i, len;
   unsigned char *desc, cc;
 
   gt_assert(seqid && description);

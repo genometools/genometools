@@ -24,37 +24,37 @@
 
  struct Enumpatterniterator
 {
-  unsigned long minpatternlen,
+  GtUword minpatternlen,
                 maxpatternlen,
                 samplecount,
                 *patternstat;
   GtUchar *patternspace;
   const GtEncseq *sampleencseq;
   unsigned int alphasize;
-  unsigned long totallength;
+  GtUword totallength;
   GtEncseqReader *esr;
 };
 
-Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
-                                               unsigned long maxpatternlen,
+Enumpatterniterator *gt_newenumpatterniterator(GtUword minpatternlen,
+                                               GtUword maxpatternlen,
                                                const GtEncseq *encseq,
                                                GtError *err)
 {
   Enumpatterniterator *epi = NULL;
-  unsigned long i;
+  GtUword i;
 
   if (maxpatternlen < minpatternlen)
   {
-    gt_error_set(err,"maxpatternlen=%lu < %lu",
+    gt_error_set(err,"maxpatternlen="GT_LU" < "GT_LU"",
                     maxpatternlen,
                     minpatternlen);
     return NULL;
   }
   epi = gt_malloc(sizeof *epi);
   epi->totallength = gt_encseq_total_length(encseq);
-  if (epi->totallength <= (unsigned long) maxpatternlen)
+  if (epi->totallength <= (GtUword) maxpatternlen)
   {
-    gt_error_set(err,"totallength=%lu <= maxpatternlen = %lu",
+    gt_error_set(err,"totallength="GT_LU" <= maxpatternlen = "GT_LU"",
                     epi->totallength,
                     maxpatternlen);
     gt_free(epi);
@@ -76,7 +76,7 @@ Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
   return epi;
 }
 
-static void reversesequenceinplace(GtUchar *s,unsigned long len)
+static void reversesequenceinplace(GtUchar *s,GtUword len)
 {
   GtUchar *front, *back, tmp;
 
@@ -88,11 +88,11 @@ static void reversesequenceinplace(GtUchar *s,unsigned long len)
   }
 }
 
-const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
+const GtUchar *gt_nextEnumpatterniterator(GtUword *patternlen,
                                        Enumpatterniterator *epi)
 {
-  unsigned long start;
-  unsigned long j;
+  GtUword start;
+  GtUword j;
   GtUchar cc;
 
   if (epi->minpatternlen == epi->maxpatternlen)
@@ -100,14 +100,14 @@ const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
     *patternlen = epi->minpatternlen;
   } else
   {
-    *patternlen = (unsigned long) (epi->minpatternlen +
+    *patternlen = (GtUword) (epi->minpatternlen +
                                    (random() %
                                       (epi->maxpatternlen -
                                        epi->minpatternlen+1)));
   }
   start =
-        (unsigned long) (random() % (epi->totallength - *patternlen));
-  gt_assert(start < (unsigned long) (epi->totallength - *patternlen));
+        (GtUword) (random() % (epi->totallength - *patternlen));
+  gt_assert(start < (GtUword) (epi->totallength - *patternlen));
   if (epi->esr == NULL) {
     epi->esr = gt_encseq_create_reader_with_readmode(epi->sampleencseq,
                                           GT_READMODE_FORWARD,
@@ -138,10 +138,10 @@ const GtUchar *gt_nextEnumpatterniterator(unsigned long *patternlen,
 
 void gt_showPatterndistribution(const Enumpatterniterator *epi)
 {
-  unsigned long i;
+  GtUword i;
   double addprob, probsum = 0.0;
 
-  printf("# %lu pattern with the following length distribution:\n",
+  printf("# "GT_LU" pattern with the following length distribution:\n",
          epi->samplecount);
   for (i=epi->minpatternlen; i<=epi->maxpatternlen; i++)
   {
@@ -149,7 +149,7 @@ void gt_showPatterndistribution(const Enumpatterniterator *epi)
     {
       addprob = (double) epi->patternstat[i] / epi->samplecount;
       probsum += addprob;
-      printf("# %lu: %lu (prob=%.4f,cumulative=%.4f)\n",
+      printf("# "GT_LU": "GT_LU" (prob=%.4f,cumulative=%.4f)\n",
              i,
              epi->patternstat[i],
              addprob,

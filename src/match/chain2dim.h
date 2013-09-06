@@ -40,11 +40,11 @@
 /* the followin type is used for the position values in the matches to be
    chained */
 
-typedef unsigned long GtChain2Dimpostype;
+typedef GtUword GtChain2Dimpostype;
 
 /* the following type is used for scores of chains */
 
-typedef long GtChain2Dimscoretype;
+typedef GtWord GtChain2Dimscoretype;
 
 /* the anonymous type for a chain */
 
@@ -79,7 +79,7 @@ typedef struct GtChain2Dimmode GtChain2Dimmode;
 
 /* the constructor for tables of matches */
 
-GtChain2Dimmatchtable *gt_chain_matchtable_new(unsigned long numberofmatches);
+GtChain2Dimmatchtable *gt_chain_matchtable_new(GtUword numberofmatches);
 
 /* the destructor for tables of matches */
 
@@ -119,7 +119,7 @@ void gt_chain_possiblysortmatches(GtLogger *logger,
 /* the constructor for chainmode objects. Use err = NULL to print
    error messages to stderr. */
 
-GtChain2Dimmode *gt_chain_chainmode_new(unsigned long maxgap,
+GtChain2Dimmode *gt_chain_chainmode_new(GtUword maxgap,
                                         bool globalset,
                                         const char *globalargs,
                                         bool localset,
@@ -156,7 +156,7 @@ GtChain2Dimscoretype gt_chain_chainscore(const GtChain2Dim *chain);
 
 /* obtain the length of a chain */
 
-unsigned long gt_chain_chainlength(const GtChain2Dim *chain);
+GtUword gt_chain_chainlength(const GtChain2Dim *chain);
 
 /* return true iff chain is stored in reverse order */
 
@@ -167,7 +167,7 @@ bool gt_chain_storedinreverseorder(const GtChain2Dim *chain);
 void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
                                const GtChain2Dimmatchtable *matchtable,
                                const GtChain2Dim *chain,
-                               unsigned long idx);
+                               GtUword idx);
 
 /* print a chain element to the given file pointer */
 

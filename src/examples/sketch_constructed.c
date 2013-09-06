@@ -51,7 +51,7 @@ static void draw_example_features(GtArray *features, const char *style_file,
   GtDiagram *diagram;
   GtLayout *layout;
   GtCanvas *canvas;
-  unsigned long height;
+  GtUword height;
   GtError *err = gt_error_new();
 
   /* create style */
@@ -98,7 +98,7 @@ static void draw_example_features(GtArray *features, const char *style_file,
 
 static void delete_example_features(GtArray *features)
 {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < gt_array_size(features); i++)
     gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(features, i));
   gt_array_delete(features);

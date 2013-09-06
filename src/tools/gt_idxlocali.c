@@ -151,7 +151,7 @@ static int gt_idxlocali_runner(GT_UNUSED int argc,
 {
   IdxlocaliOptions *arguments = tool_arguments;
   bool haserr = false;
-  unsigned long idx;
+  GtUword idx;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -163,7 +163,7 @@ static int gt_idxlocali_runner(GT_UNUSED int argc,
   {
     printf("# queryfile=%s\n",gt_str_array_get (arguments->queryfiles, idx));
   }
-  printf("# threshold=%lu\n", arguments->threshold);
+  printf("# threshold="GT_LU"\n", arguments->threshold);
   if (!haserr && gt_runidxlocali (arguments, err) != 0)
   {
     haserr = true;

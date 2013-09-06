@@ -25,17 +25,17 @@
 typedef struct GtBoolMatrix GtBoolMatrix;
 
 GtBoolMatrix* gt_bool_matrix_new(void);
-bool          gt_bool_matrix_get(GtBoolMatrix*, unsigned long firstdim,
-                                 unsigned long seconddim);
-void          gt_bool_matrix_set(GtBoolMatrix*, unsigned long firstdim,
-                                 unsigned long seconddim, bool);
-unsigned long gt_bool_matrix_get_first_column(const GtBoolMatrix*,
-                                              unsigned long firstdim);
-unsigned long gt_bool_matrix_get_last_column(const GtBoolMatrix*,
-                                             unsigned long firstdim);
-unsigned long gt_bool_matrix_get_next_column(const GtBoolMatrix*,
-                                             unsigned long firstdim,
-                                             unsigned long i);
+bool          gt_bool_matrix_get(GtBoolMatrix*, GtUword firstdim,
+                                 GtUword seconddim);
+void          gt_bool_matrix_set(GtBoolMatrix*, GtUword firstdim,
+                                 GtUword seconddim, bool);
+GtUword gt_bool_matrix_get_first_column(const GtBoolMatrix*,
+                                              GtUword firstdim);
+GtUword gt_bool_matrix_get_last_column(const GtBoolMatrix*,
+                                             GtUword firstdim);
+GtUword gt_bool_matrix_get_next_column(const GtBoolMatrix*,
+                                             GtUword firstdim,
+                                             GtUword i);
 void          gt_bool_matrix_delete(GtBoolMatrix*);
 
 #endif

@@ -24,11 +24,11 @@
 
 void gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
                        unsigned int framenum, const char *frame,
-                       unsigned long framelen, bool start_codon,
+                       GtUword framelen, bool start_codon,
                        bool final_stop_codon, bool framepos,
                        const char *start_codons)
 {
-  unsigned long i;
+  GtUword i;
   GtRange orf;
   gt_assert(orf_processor && framenum <= 2 && frame);
   orf.start = GT_UNDEF_ULONG;
