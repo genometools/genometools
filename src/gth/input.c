@@ -288,7 +288,7 @@ static void format_reference_seq(unsigned char *seq, GtUword len,
   /* show sequence */
   for (i = 0, j = 0, tennercount = 0; /* nothing */; i++) {
     if (showcharnum) {
-      gt_file_xprintf(outfp, "  %*lu  ", width, i + OUTPUTOFFSET);
+      gt_file_xprintf(outfp, "  %*"GT_LUS"  ", width, i + OUTPUTOFFSET);
       showcharnum = false;
     }
     gt_file_xfputc(toupper(seq[i]), outfp);
@@ -517,7 +517,7 @@ void gth_input_load_genomic_file_func(GthInput *input,
   gt_assert(input && gen_file_num < gt_str_array_size(input->genomicfiles));
 
 #if INPUT_DEBUG
-  printf("load genomic   (file %s, line %d): gen_file_num: %lu, translate=%s\n",
+  printf("load genomic   (file %s, line %d): gen_file_num: "GT_LU", translate=%s\n",
          src_file, src_line, gen_file_num, translate ? "true" : "false");
 #endif
 
@@ -575,7 +575,7 @@ void gth_input_load_reference_file_func(GthInput *input,
             ref_file_num < gt_str_array_size(input->referencefiles));
 
 #if INPUT_DEBUG
-  printf("load reference (file %s, line %d): ref_file_num: %lu, translate=%s\n",
+  printf("load reference (file %s, line %d): ref_file_num: "GT_LU", translate=%s\n",
          src_file, src_line, ref_file_num, translate ? "true" : "false");
 #endif
 

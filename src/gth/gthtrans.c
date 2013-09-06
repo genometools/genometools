@@ -184,7 +184,7 @@ static void showoutputlines(char *dotline,
     OUTPUT_LINE(dotline);
 
     /* output exon position */
-    gt_file_xprintf(out->outfp, "%*lu  ", out->widthforgenpos,
+    gt_file_xprintf(out->outfp, "%*"GT_LUS"  ", out->widthforgenpos,
                     SHOWGENPOS(gen_strand_forward, gen_total_length,
                                gen_offset, positionmapping[origcounter]));
     OUTPUT_LINE(template_out);
@@ -320,13 +320,13 @@ void gt_outputtranslationandorf(GtUword pglnum, const GthAGS *ags,
                     "three_phase_translation/\">\n");
     indentlevel++;
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<description PGL_serial=\"%lu\" "
-                              "AGS_serial=\"%lu\" gDNA_strand=\"%c\"/>\n",
+    gt_file_xprintf(outfp, "<description PGL_serial=\""GT_LU"\" "
+                              "AGS_serial=\""GT_LU"\" gDNA_strand=\"%c\"/>\n",
                        pglnum + OUTPUTOFFSET, agsnum + OUTPUTOFFSET,
                        SHOWSTRAND(gth_ags_is_forward(ags)));
   }
   else {
-    gt_file_xprintf(outfp, "3-phase translation of AGS-%lu (%cstrand):\n\n",
+    gt_file_xprintf(outfp, "3-phase translation of AGS-"GT_LU" (%cstrand):\n\n",
                        agsnum + OUTPUTOFFSET,
                        SHOWSTRAND(gth_ags_is_forward(ags)));
   }

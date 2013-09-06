@@ -48,7 +48,7 @@ int gt_bitpackarray_unit_test(GtError *err)
     else
       mask = ~((~(uint32_t)0)<<bits);
 
-    gt_log_log("numRnd="GT_LU"\n", (long unsigned)numRnd);
+    gt_log_log("numRnd="GT_LU"\n", (GtUword)numRnd);
     randSrc = gt_malloc(sizeof (uint32_t)*numRnd);
     bitStore = bitpackarray_new(bits, numRnd,true);
     randCmp = gt_malloc(sizeof (uint32_t)*numRnd);

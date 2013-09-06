@@ -90,7 +90,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
     if (!m->pvt->process)
       fseek(m->pvt->matchfilep, -1, SEEK_CUR);
     readvalues = fscanf(m->pvt->matchfilep,
-                        "%s %s %f "GT_LD" %*d %*d "GT_LD" "GT_LD" "GT_LD" "GT_LD" "
+                        "%s %s %f "GT_LDSF" %*d %*d "GT_LDSF" "GT_LDSF" "GT_LDSF" "GT_LDSF" "
                         "%Lg %f\n", query_seq, db_seq, &identity,
                         &storeinteger[0],
                         &storeinteger[1], &storeinteger[2], &storeinteger[3],
@@ -115,7 +115,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
         i = 0;
       } else break;
     }
-    if ((readvalues = sscanf(buffer,"%s %s %f "GT_LD" %*d %*d "GT_LD" "GT_LD" "GT_LD" "GT_LD" %Lg "
+    if ((readvalues = sscanf(buffer,"%s %s %f "GT_LDSF" %*d %*d "GT_LDSF" "GT_LDSF" "GT_LDSF" "GT_LDSF" %Lg "
                              "%f\n", query_seq, db_seq, &identity,
                              &storeinteger[0],
                              &storeinteger[1], &storeinteger[2],

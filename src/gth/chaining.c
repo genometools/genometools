@@ -151,13 +151,13 @@ static void outputbuckets(GtArray *buckets, GthMatch *sortedmatches,
   Bucket *bucket;
   for (i = 0; i < gt_array_size(buckets); i++) {
     bucket = gt_array_get(buckets, i);
-    gt_file_xprintf(outfp, "%c bucket %lu: seqnum1=%lu, startpos=%lu, "
-                    "length=%lu\n", COMMENTCHAR, i, bucket->seqnum1,
+    gt_file_xprintf(outfp, "%c bucket "GT_LU": seqnum1="GT_LU", startpos="GT_LU", "
+                    "length="GT_LU"\n", COMMENTCHAR, i, bucket->seqnum1,
                     bucket->startpos, bucket->length);
-    gt_file_xprintf(outfp, "%c first match in bucket %lu:\n", COMMENTCHAR, i);
+    gt_file_xprintf(outfp, "%c first match in bucket "GT_LU":\n", COMMENTCHAR, i);
     startpos = bucket->startpos;
-    gt_file_xprintf(outfp, "%c seqnum1=%lu, seqnum2=%lu, p1=%lu, l1=%lu, "
-                    "p2=%lu, l2=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c seqnum1="GT_LU", seqnum2="GT_LU", p1="GT_LU", l1="GT_LU", "
+                    "p2="GT_LU", l2="GT_LU"\n", COMMENTCHAR,
                     sortedmatches[startpos].Storeseqnumreference,
                     sortedmatches[startpos].Storeseqnumgenomic,
                     sortedmatches[startpos].Storepositionreference,
@@ -291,14 +291,14 @@ static void show_chain_calc_status(GthShowVerbose showverbose,
 
   if (numofgenomicfiles == 1 && numofreffiles == 1) {
     rval = snprintf(buf, SHOW_CHAIN_CALCULATION_STATUS_BUF_SIZE,
-                    "d=%c, compute chains for bucket %lu/%lu (matches in "
-                    "bucket=%lu)", SHOWSTRAND(directmatches), chainnum,
+                    "d=%c, compute chains for bucket "GT_LU"/"GT_LU" (matches in "
+                    "bucket="GT_LU")", SHOWSTRAND(directmatches), chainnum,
                     numofchains, numofmatches);
   }
   else {
     rval = snprintf(buf, SHOW_CHAIN_CALCULATION_STATUS_BUF_SIZE,
-                    "gf=%lu/%lu, d=%c, rf=%lu/%lu, compute chains for bucket "
-                    "%lu/%lu (matches in bucket=%lu)",
+                    "gf="GT_LU"/"GT_LU", d=%c, rf="GT_LU"/"GT_LU", compute chains for bucket "
+                    ""GT_LU"/"GT_LU" (matches in bucket="GT_LU")",
                     currentgen_file_num + 1,
                     numofgenomicfiles, SHOWSTRAND(directmatches),
                     currentreffilenum + 1, numofreffiles, chainnum, numofchains,
@@ -310,7 +310,7 @@ static void show_chain_calc_status(GthShowVerbose showverbose,
 
   if (verboseseqs) {
     rval = snprintf(buf, SHOW_CHAIN_CALCULATION_STATUS_BUF_SIZE,
-                    "genseqnum=%lu, refseqnum=%lu", genseqnum, refseqnum);
+                    "genseqnum="GT_LU", refseqnum="GT_LU"", genseqnum, refseqnum);
     /* buf[SHOW_CHAIN_CALCULATION_STATUS_BUF_SIZE] is large enough */
     gt_assert(rval < SHOW_CHAIN_CALCULATION_STATUS_BUF_SIZE);
     showverbose(buf);
@@ -344,8 +344,8 @@ static void showmatches(GthMatch *matches, GtUword numofmatches,
 {
   GtUword i;
   for (i = 0; i < numofmatches; i++) {
-    gt_file_xprintf(outfp, "%c refseqnum=%lu, genseqnum=%lu, refpos=%lu, "
-                           "reflen=%lu, genpos=%lu, genlen=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c refseqnum="GT_LU", genseqnum="GT_LU", refpos="GT_LU", "
+                           "reflen="GT_LU", genpos="GT_LU", genlen="GT_LU"\n", COMMENTCHAR,
                     matches[i].Storeseqnumreference,
                     matches[i].Storeseqnumgenomic,
                     matches[i].Storepositionreference,

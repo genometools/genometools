@@ -61,7 +61,7 @@ static void show_matrix_calculation_status(GthShowVerbose showverbose,
   GT_UNUSED int rval;
 
   if (introncutout) {
-    rval =  snprintf(icdeltastring, ICDELTASTRINGLENGTH, ", icdelta=%lu",
+    rval =  snprintf(icdeltastring, ICDELTASTRINGLENGTH, ", icdelta="GT_LU"",
                      icdelta);
     /* buffer icdeltastring[ICDELTASTRINGLENGTH] is large enough */
     gt_assert(rval <  ICDELTASTRINGLENGTH);
@@ -70,15 +70,15 @@ static void show_matrix_calculation_status(GthShowVerbose showverbose,
   if (num_of_gen_files == 1 && num_of_ref_files == 1) {
     rval = snprintf(buf, SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE,
                     "d=%c, compute spliced alignment, genseq=%c, "
-                    "chain=%lu/%lu, refseq=%c%s", SHOWSTRAND(directmatches),
+                    "chain="GT_LU"/"GT_LU", refseq=%c%s", SHOWSTRAND(directmatches),
                     SHOWSTRAND(gen_strand_forward),  chainctr + 1,
                     num_of_chains, SHOWSTRAND(ref_strand_forward),
                     introncutout ? icdeltastring : "");
   }
   else {
     rval = snprintf(buf, SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE,
-                    "gf=%lu/%lu, d=%c, rf=%lu/%lu, compute spliced alignment, "
-                    "gs=%c, chain=%lu/%lu, rs=%c%s", gen_file_num + 1,
+                    "gf="GT_LU"/"GT_LU", d=%c, rf="GT_LU"/"GT_LU", compute spliced alignment, "
+                    "gs=%c, chain="GT_LU"/"GT_LU", rs=%c%s", gen_file_num + 1,
                     num_of_gen_files, SHOWSTRAND(directmatches),
                     ref_file_num + 1, num_of_ref_files,
                     SHOWSTRAND(gen_strand_forward), chainctr + 1,
@@ -721,7 +721,7 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
       GtStr *ref_id = gt_str_new();
       gth_input_save_ref_id(input, ref_id, chain->ref_file_num,
                             chain->ref_seq_num);
-      gt_warning("protein sequence '%s' (#%lu in file %s) does not end with a "
+      gt_warning("protein sequence '%s' (#"GT_LU" in file %s) does not end with a "
                  "stop amino acid ('%c'). If it is not a protein fragment you "
                  "should add a stop amino acid to improve the prediction. "
                  "For example with `gt seqtransform -addstopaminos` (see "
@@ -810,15 +810,15 @@ static void show_compute_matches_status(bool direct, GthShowVerbose showverbose,
   else {
     if (direct) {
       rval = snprintf(buf, SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE,
-                      "compute direct matches for genomic file (gf) %lu/%lu "
-                      "and reference file (rf) %lu/%lu",
+                      "compute direct matches for genomic file (gf) "GT_LU"/"GT_LU" "
+                      "and reference file (rf) "GT_LU"/"GT_LU"",
                       gen_file_num + 1, num_of_gen_files,
                       ref_file_num + 1, num_of_ref_files);
     }
     else {
       rval = snprintf(buf, SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE,
                       "compute palindromic matches for genomic file (gf) "
-                      "%lu/%lu and reference file (rf) %lu/%lu",
+                      ""GT_LU"/"GT_LU" and reference file (rf) "GT_LU"/"GT_LU"",
                       gen_file_num + 1,  num_of_gen_files,
                       ref_file_num + 1,  num_of_ref_files);
     }

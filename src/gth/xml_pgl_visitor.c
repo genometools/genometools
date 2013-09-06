@@ -40,7 +40,7 @@ static void xml_outputAGSline(const GthAGS *ags, GtUword agsnum,
   GtUword i;
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<AGS_line AGS_serial=\"%lu\">\n",
+  gt_file_xprintf(outfp, "<AGS_line AGS_serial=\""GT_LU"\">\n",
                   agsnum + OUTPUTOFFSET);
   indentlevel++;
   gth_indent(outfp, indentlevel);
@@ -50,7 +50,7 @@ static void xml_outputAGSline(const GthAGS *ags, GtUword agsnum,
   for (i = 0; i < gth_ags_num_of_exons(ags); i++) {
     exon = gth_ags_get_exon(ags, i);
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<exon e_start=\"%lu\" e_stop=\"%lu\"/>\n",
+    gt_file_xprintf(outfp, "<exon e_start=\""GT_LU"\" e_stop=\""GT_LU"\"/>\n",
                     SHOWGENPOSAGS(exon->range.start),
                     SHOWGENPOSAGS(exon->range.end));
   }
@@ -127,14 +127,14 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
 
       /* output intron */
       gth_indent(outfp, indentlevel);
-      gt_file_xprintf(outfp, "<intron i_serial=\"%lu\" don_prob=\"%.3f\" "
+      gt_file_xprintf(outfp, "<intron i_serial=\""GT_LU"\" don_prob=\"%.3f\" "
                       "acc_prob=\"%.3f\">\n",  i - 1 + OUTPUTOFFSET,
                       donorsiteprob, acceptorsiteprob);
       indentlevel++;
       gth_indent(outfp, indentlevel);
       gt_file_xprintf(outfp,
-                      "<gDNA_intron_boundary i_start=\"%lu\" i_stop=\"%lu\" "
-                      "i_length=\"%lu\"/>\n",
+                      "<gDNA_intron_boundary i_start=\""GT_LU"\" i_stop=\""GT_LU"\" "
+                      "i_length=\""GT_LU"\"/>\n",
                       SHOWGENPOSAGS(leftintronborder),
                       SHOWGENPOSAGS(rightintronborder),  intronlength);
       indentlevel--;
@@ -145,13 +145,13 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
 
     /* output exon */
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<exon e_serial=\"%lu\" e_score=\"%.3f\">\n",
+    gt_file_xprintf(outfp, "<exon e_serial=\""GT_LU"\" e_score=\"%.3f\">\n",
                     i + OUTPUTOFFSET, exonscore);
     indentlevel++;
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp,
-                    "<gDNA_exon_boundary e_start=\"%lu\" e_stop=\"%lu\" "
-                    "e_length=\"%lu\"/>\n", SHOWGENPOSAGS(leftexonborder),
+                    "<gDNA_exon_boundary e_start=\""GT_LU"\" e_stop=\""GT_LU"\" "
+                    "e_length=\""GT_LU"\"/>\n", SHOWGENPOSAGS(leftexonborder),
                     SHOWGENPOSAGS(rightexonborder), exonlength);
     indentlevel--;
     gth_indent(outfp, indentlevel);
@@ -188,7 +188,7 @@ static void xml_outputPGSlines(GtArray *alignments, unsigned int indentlevel,
 
     for (j = 0; j < gth_sa_num_of_exons(sa); j++) {
       gth_indent(outfp, indentlevel);
-      gt_file_xprintf(outfp, "<exon start=\"%lu\" stop=\"%lu\"/>\n",
+      gt_file_xprintf(outfp, "<exon start=\""GT_LU"\" stop=\""GT_LU"\"/>\n",
                       gth_sa_left_genomic_exon_border(sa, j),
                       gth_sa_right_genomic_exon_border(sa, j));
     }
@@ -256,8 +256,8 @@ static void xml_show_pgl(GthPGL *pgl, GtUword pglnum,
   indentlevel++;
   gth_indent(out->outfp, indentlevel);
   gt_file_xprintf(out->outfp,
-                     "<PGL_line PGL_serial=\"%lu\" PGL_strand=\"%c\" "
-                     "PGL_start=\"%lu\" PGL_stop=\"%lu\"/>\n",
+                     "<PGL_line PGL_serial=\""GT_LU"\" PGL_strand=\"%c\" "
+                     "PGL_start=\""GT_LU"\" PGL_stop=\""GT_LU"\"/>\n",
                      pglnum + OUTPUTOFFSET,
                      SHOWSTRAND(gth_pgl_is_forward(pgl)),
                      SHOWGENPOS(gth_pgl_is_forward(pgl),

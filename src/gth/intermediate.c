@@ -69,12 +69,12 @@
                                         "cumulativelengthofscoredexons"
 
 #define ILLEGAL_DATA\
-        fprintf(stderr, "illegal data in line %lu of file \"%s\"\n",\
+        fprintf(stderr, "illegal data in line "GT_LU" of file \"%s\"\n",\
                 parseinfo->linenumber , parseinfo->outputfilename);\
         exit(EXIT_FAILURE)
 
 #define SCANUINT\
-        if (sscanf(data, "%ld", &ret) != 1 || ret < 0)\
+        if (sscanf(data, ""GT_LD"", &ret) != 1 || ret < 0)\
         {\
           ILLEGAL_DATA;\
         }
@@ -514,7 +514,7 @@ int gt_parse_intermediate_output(GthInput *input,
     if (XML_Parse(parser, gt_str_get(line), gt_str_length(line), false) ==
         XML_STATUS_ERROR) {
       error = XML_GetErrorCode(parser);
-      gt_error_set(err, "an error occured parsing line %lu of file \"%s\": %s",
+      gt_error_set(err, "an error occured parsing line "GT_LU" of file \"%s\": %s",
                    parseinfo.linenumber, outputfilename,
                    XML_ErrorString(error));
       had_err = -1;

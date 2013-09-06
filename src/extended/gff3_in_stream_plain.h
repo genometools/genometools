@@ -42,7 +42,7 @@ void          gt_gff3_in_stream_plain_show_progress_bar(GtGFF3InStreamPlain*);
 void          gt_gff3_in_stream_plain_set_type_checker(GtNodeStream*,
                                                        GtTypeChecker*);
 GtStrArray*   gt_gff3_in_stream_plain_get_used_types(GtNodeStream*);
-void          gt_gff3_in_stream_plain_set_offset(GtNodeStream*, long);
+void          gt_gff3_in_stream_plain_set_offset(GtNodeStream*, GtWord);
 int           gt_gff3_in_stream_plain_set_offsetfile(GtNodeStream*, GtStr*,
                                                      GtError*);
 

@@ -198,7 +198,7 @@ GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
   if (!haserr && cdata->totallength > (ULONG_MAX >> 2))
   {
     gt_error_set(err, "totallength "GT_LU" larger than "GT_LU"", cdata->totallength,
-        ULONG_MAX >> 2);
+        (GtUword) ULONG_MAX >> 2);
     haserr = true;
   }
   gt_str_delete(path);

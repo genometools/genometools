@@ -84,13 +84,13 @@ static void showalignmentcutoffs(GthSA *sa, unsigned int indentlevel,
   gt_file_xprintf(outfp, "<cutoffsstart>\n");
   indentlevel++;
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<genomiccutoff>%lu</genomiccutoff>\n",
+  gt_file_xprintf(outfp, "<genomiccutoff>"GT_LU"</genomiccutoff>\n",
                      gth_sa_genomiccutoff_start(sa));
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<referencecutoff>%lu</referencecutoff>\n",
+  gt_file_xprintf(outfp, "<referencecutoff>"GT_LU"</referencecutoff>\n",
                      gth_sa_referencecutoff_start(sa));
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<eopcutoff>%lu</eopcutoff>\n",
+  gt_file_xprintf(outfp, "<eopcutoff>"GT_LU"</eopcutoff>\n",
                      gth_sa_eopcutoff_start(sa));
   indentlevel--;
   gth_indent(outfp, indentlevel);
@@ -99,13 +99,13 @@ static void showalignmentcutoffs(GthSA *sa, unsigned int indentlevel,
   gt_file_xprintf(outfp, "<cutoffsend>\n");
   indentlevel++;
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<genomiccutoff>%lu</genomiccutoff>\n",
+  gt_file_xprintf(outfp, "<genomiccutoff>"GT_LU"</genomiccutoff>\n",
                      gth_sa_genomiccutoff_end(sa));
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<referencecutoff>%lu</referencecutoff>\n",
+  gt_file_xprintf(outfp, "<referencecutoff>"GT_LU"</referencecutoff>\n",
                      gth_sa_referencecutoff_end(sa));
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<eopcutoff>%lu</eopcutoff>\n",
+  gt_file_xprintf(outfp, "<eopcutoff>"GT_LU"</eopcutoff>\n",
                      gth_sa_eopcutoff_end(sa));
   indentlevel--;
   gth_indent(outfp, indentlevel);
@@ -130,18 +130,18 @@ static void showexons(GthSA *sa, unsigned int indentlevel,
 
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp,
-                    "<leftgenomicexonborder>%lu</leftgenomicexonborder>\n",
+                    "<leftgenomicexonborder>"GT_LU"</leftgenomicexonborder>\n",
                     exoninfo->leftgenomicexonborder);
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp,
-                    "<rightgenomicexonborder>%lu</rightgenomicexonborder>\n",
+                    "<rightgenomicexonborder>"GT_LU"</rightgenomicexonborder>\n",
                     exoninfo->rightgenomicexonborder);
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp,
-                    "<leftreferenceexonborder>%lu</leftreferenceexonborder>\n",
+                    "<leftreferenceexonborder>"GT_LU"</leftreferenceexonborder>\n",
                     exoninfo->leftreferenceexonborder);
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<rightreferenceexonborder>%lu</"
+    gt_file_xprintf(outfp, "<rightreferenceexonborder>"GT_LU"</"
                     "rightreferenceexonborder>\n",
                     exoninfo->rightreferenceexonborder);
     gth_indent(outfp, indentlevel);
@@ -203,10 +203,10 @@ static void showpolyAtailpos(GthSA *sa, unsigned int indentlevel,
   indentlevel++;
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<polyAstart>%lu</polyAstart>\n",
+  gt_file_xprintf(outfp, "<polyAstart>"GT_LU"</polyAstart>\n",
                      gth_sa_polyAtail_start(sa));
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<polyAstop>%lu</polyAstop>\n",
+  gt_file_xprintf(outfp, "<polyAstop>"GT_LU"</polyAstop>\n",
                      gth_sa_polyAtail_stop(sa));
 
   indentlevel--;
@@ -250,43 +250,43 @@ static void xml_inter_show_spliced_alignment(GthSA *sa, GthInput *input,
   gt_file_xprintf(outfp, "</editoperations>\n");
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<indelcount>%lu</indelcount>\n",
+  gt_file_xprintf(outfp, "<indelcount>"GT_LU"</indelcount>\n",
                      gth_sa_indelcount(sa));
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<genomiclengthDP>%lu</genomiclengthDP>\n",
+  gt_file_xprintf(outfp, "<genomiclengthDP>"GT_LU"</genomiclengthDP>\n",
                      gth_sa_gen_dp_length(sa));
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<genomiclengthtotal>%lu</genomiclengthtotal>\n",
+  gt_file_xprintf(outfp, "<genomiclengthtotal>"GT_LU"</genomiclengthtotal>\n",
                      gth_sa_gen_total_length(sa));
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<genomicoffset>%lu</genomicoffset>\n",
+  gt_file_xprintf(outfp, "<genomicoffset>"GT_LU"</genomicoffset>\n",
                      gth_sa_gen_offset(sa));
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<referencelength>%lu</referencelength>\n",
+  gt_file_xprintf(outfp, "<referencelength>"GT_LU"</referencelength>\n",
                      gth_sa_ref_total_length(sa));
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<dpstartpos>%lu</dpstartpos>\n",
+  gt_file_xprintf(outfp, "<dpstartpos>"GT_LU"</dpstartpos>\n",
                      gth_sa_gen_dp_start(sa));
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<dpendpos>%lu</dpendpos>\n",
+  gt_file_xprintf(outfp, "<dpendpos>"GT_LU"</dpendpos>\n",
                      gth_sa_gen_dp_end(sa));
 
   showgenomicfilename(sa, input, indentlevel, outfp);
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<genomicseqnum>%lu</genomicseqnum>\n",
+  gt_file_xprintf(outfp, "<genomicseqnum>"GT_LU"</genomicseqnum>\n",
                      gth_sa_gen_seq_num(sa));
 
   showreferencefilename(sa, input, indentlevel, outfp);
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<referenceseqnum>%lu</referenceseqnum>\n",
+  gt_file_xprintf(outfp, "<referenceseqnum>"GT_LU"</referenceseqnum>\n",
                      gth_sa_ref_seq_num(sa));
 
   gth_indent(outfp, indentlevel);
@@ -328,7 +328,7 @@ static void xml_inter_show_spliced_alignment(GthSA *sa, GthInput *input,
                   GTH_SHOWBOOL(gth_sa_genomic_cov_is_highest(sa)));
 
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<cumulativelengthofscoredexons>%lu"
+  gt_file_xprintf(outfp, "<cumulativelengthofscoredexons>"GT_LU""
                      "</cumulativelengthofscoredexons>\n",
                      gth_sa_cumlen_scored_exons(sa));
 

@@ -104,7 +104,7 @@ void gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
         if (i == fronts->spaceGtXdropfrontvalue[l].row) {
           for (d = 0; d <= distance; d++) {
             if (k >= -d && k <= d && l == GT_XDROP_FRONTIDX(d, i - j)) {
-              printf("%-3ld ", d);
+              printf("%-3"GT_LDS" ", d);
               l = fronts->nextfreeGtXdropfrontvalue;
               filled++;
               break;

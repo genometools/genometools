@@ -145,7 +145,7 @@ int gt_parse_algbounds(Sfxstrategy *sfxstrategy,
 {
   bool haserr = false;
   const char *arg;
-  long readint;
+  GtWord readint;
 
   if (gt_str_array_size(algbounds) != 3UL)
   {

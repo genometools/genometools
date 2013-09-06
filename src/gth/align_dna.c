@@ -575,7 +575,7 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
 
     if (dpm->path_jt) {
 #if 0
-      printf("genptr=%lu, refptr=%lu\n", genptr, refptr);
+      printf("genptr="GT_LU", refptr="GT_LU"\n", genptr, refptr);
       printf("pathtype=%d, pathtype_jt=%d\n", pathtype, pathtype_jt);
 #endif
       gt_assert(pathtype == pathtype_jt);
@@ -602,7 +602,7 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
             else {
               if (comments) {
                 gt_file_xprintf(outfp, "%c abort backtracing, intron cutout "
-                                   "at p=%s (genpos=%lu (actual strand!))\n",
+                                   "at p=%s (genpos="GT_LU" (actual strand!))\n",
                                    COMMENTCHAR,
                                    dna_showretracenames((DnaRetrace) pathtype),
                                    spliced_seq->positionmapping[genptr]);
@@ -970,13 +970,13 @@ static void detect_small_terminal_exons(GthSA *sa,
   if (comments) {
     gt_file_xprintf(outfp, "%c detect_small_terminal_exons():\n",
                        COMMENTCHAR);
-    gt_file_xprintf(outfp, "%c gen_dp_start_terminal=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_start_terminal="GT_LU"\n", COMMENTCHAR,
                        gen_dp_start_terminal);
-    gt_file_xprintf(outfp, "%c gen_dp_length_terminal=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_length_terminal="GT_LU"\n", COMMENTCHAR,
                        gen_dp_length_terminal);
-    gt_file_xprintf(outfp, "%c gen_dp_length=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_length="GT_LU"\n", COMMENTCHAR,
                        gen_dp_length);
-    gt_file_xprintf(outfp, "%c gen_seq_bounds=%lu, %lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_seq_bounds="GT_LU", "GT_LU"\n", COMMENTCHAR,
                        gen_seq_bounds->start, gen_seq_bounds->end);
   }
   if (gen_dp_start_terminal + gen_dp_length_terminal - 1 >
@@ -989,9 +989,9 @@ static void detect_small_terminal_exons(GthSA *sa,
   gt_assert(gen_dp_start_terminal + gen_dp_length_terminal - 1 <=
             gen_seq_bounds->end);
   if (comments) {
-    gt_file_xprintf(outfp, "%c gen_dp_start_terminal=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_start_terminal="GT_LU"\n", COMMENTCHAR,
                        gen_dp_start_terminal);
-    gt_file_xprintf(outfp, "%c gen_dp_length_terminal=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_length_terminal="GT_LU"\n", COMMENTCHAR,
                        gen_dp_length_terminal);
   }
 
@@ -1085,11 +1085,11 @@ static void detect_small_initial_exons(GthSA *sa,
   if (comments) {
     gt_file_xprintf(outfp, "%c detect_small_initial_exons():\n",
                        COMMENTCHAR);
-    gt_file_xprintf(outfp, "%c gen_dp_start=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_start="GT_LU"\n", COMMENTCHAR,
                        *gen_dp_start);
     gt_file_xprintf(outfp, "%c DETECT_SMALL_EXONS_DP_LENGTH=%d\n",
                        COMMENTCHAR, DETECT_SMALL_EXONS_DP_LENGTH);
-    gt_file_xprintf(outfp, "%c genomic_cutoff=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c genomic_cutoff="GT_LU"\n", COMMENTCHAR,
                        gth_sa_genomiccutoff_start(sa));
   }
 
@@ -1117,13 +1117,13 @@ static void detect_small_initial_exons(GthSA *sa,
     gt_file_xprintf(outfp, "%c detect_small_initial_exons():\n",
                        COMMENTCHAR);
     gth_path_walker_show(path_walker, outfp);
-    gt_file_xprintf(outfp, "%c gen_dp_start=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_start="GT_LU"\n", COMMENTCHAR,
                        *gen_dp_start);
-    gt_file_xprintf(outfp, "%c gen_dp_start_initial=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_start_initial="GT_LU"\n", COMMENTCHAR,
                        gen_dp_start_initial);
-    gt_file_xprintf(outfp, "%c gen_dp_length_initial=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_length_initial="GT_LU"\n", COMMENTCHAR,
                        gen_dp_length_initial);
-    gt_file_xprintf(outfp, "%c gen_dp_length=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c gen_dp_length="GT_LU"\n", COMMENTCHAR,
                        gen_dp_length);
   }
   if (gen_dp_start_initial + gen_dp_length_initial - 1 > gen_seq_bounds->end) {

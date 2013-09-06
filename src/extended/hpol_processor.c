@@ -851,12 +851,12 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
     GtUword n = (GtUword)gt_disc_distri_get(hpp->hdist, i);
     if (n > 0)
     {
-      gt_logger_log(logger, "%-6lu\t%-11lu\t%-6lu\t(%.2f%%)", i, n,
+      gt_logger_log(logger, "%-6"GT_LUS"\t%-11"GT_LUS"\t%-6"GT_LUS"\t(%.2f%%)", i, n,
           (GtUword)gt_disc_distri_get(hpp->hdist_e, i),
           (double)gt_disc_distri_get(hpp->hdist_e, i) * 100 / n);
     }
   }
-  gt_logger_log(logger, "total \t%-11lu\t%-6lu\t(%.2f%%)",
+  gt_logger_log(logger, "total \t%-11"GT_LUS"\t%-6"GT_LUS"\t(%.2f%%)",
       hpp->nof_h, hpp->nof_h_e, (double)hpp->nof_h_e * 100 /
       (double)hpp->nof_h);
   if (hpp->cds_oracle != NULL)
@@ -872,21 +872,21 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
       nof_complete + hpp->nof_skipped + hpp->nof_unmapped;
     gt_logger_log(logger, "segments in SAM file:       "GT_LU"",
         total_segments);
-    gt_logger_log(logger, "- processed:                %-7lu (%.2f%%)",
+    gt_logger_log(logger, "- processed:                %-7"GT_LUS" (%.2f%%)",
         nof_complete, (double)nof_complete * 100 / total_segments);
-    gt_logger_log(logger, "  ... and not edited:       %-7lu (%.2f%%)",
+    gt_logger_log(logger, "  ... and not edited:       %-7"GT_LUS" (%.2f%%)",
         hpp->nof_complete_not_edited,
         (double)hpp->nof_complete_not_edited * 100 / total_segments);
-    gt_logger_log(logger, "  ... and edited:           %-7lu (%.2f%%)",
+    gt_logger_log(logger, "  ... and edited:           %-7"GT_LUS" (%.2f%%)",
         hpp->nof_complete_edited,
         (double)hpp->nof_complete_edited * 100 / total_segments);
-    gt_logger_log(logger, "- not processed:            %-7lu (%.2f%%)",
+    gt_logger_log(logger, "- not processed:            %-7"GT_LUS" (%.2f%%)",
         hpp->nof_skipped, (double)hpp->nof_skipped * 100 / total_segments);
-    gt_logger_log(logger, "- not mapping:              %-7lu (%.2f%%)",
+    gt_logger_log(logger, "- not mapping:              %-7"GT_LUS" (%.2f%%)",
         hpp->nof_unmapped, (double)hpp->nof_unmapped * 100 / total_segments);
     if (hpp->processed_segments != NULL)
     {
-      gt_logger_log(logger, "- multiple hits:            %-7lu",
+      gt_logger_log(logger, "- multiple hits:            %-7"GT_LUS"",
           hpp->nof_multihits);
       gt_log_log("replacements in hashmap: "GT_LU"", hpp->nof_replaced);
     }

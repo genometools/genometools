@@ -148,7 +148,7 @@ void gt_bittab_shift_left_equal(GtBittab *b)
   GtUword i, new_carry, old_carry = 0;
   gt_assert(b);
   for (i = 0; i < b->tabsize; i++) {
-    new_carry = b->tabptr[i] & (1UL << (8UL * sizeof (GtUword) - 1));
+    new_carry = b->tabptr[i] & ((GtUword) 1 << (8UL * sizeof (GtUword) - 1));
     b->tabptr[i] = (b->tabptr[i] << 1) | old_carry;
     old_carry = new_carry >> (8UL * sizeof (GtUword) - 1);
   }

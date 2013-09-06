@@ -61,7 +61,7 @@ static void showgthreferenceinformation(GthSA *sa, GthInput *input,
   gth_sa_echo_reference_description(sa, input, outfp);
 
   if (showseqnums)
-    gt_file_xprintf(outfp, ", seqnum=%lu",  gth_sa_ref_seq_num(sa));
+    gt_file_xprintf(outfp, ", seqnum="GT_LU"",  gth_sa_ref_seq_num(sa));
 
   gt_file_xfputc('\n', outfp);
   gt_file_xfputc('\n', outfp);
@@ -69,7 +69,7 @@ static void showgthreferenceinformation(GthSA *sa, GthInput *input,
 
 static void showgs2referenceinformation(GthSA *sa, GtFile *outfp)
 {
-  gt_file_xprintf(outfp, "EST sequence %4lu %cstrand (File: %s%c)\n\n",
+  gt_file_xprintf(outfp, "EST sequence %4"GT_LUS" %cstrand (File: %s%c)\n\n",
                      gth_sa_call_number(sa),
                      gth_sa_ref_strand_char(sa),
                      gth_sa_ref_id(sa),
@@ -81,8 +81,8 @@ static void showgthgenomicinformation(GthSA *sa, GthInput *input,
 {
   gt_assert(gth_sa_gen_file_num(sa) != GT_UNDEF_ULONG);
 
-  gt_file_xprintf(outfp, "Genomic Template: file=%s, strand=%c, from=%lu, "
-                            "to=%lu, description=",
+  gt_file_xprintf(outfp, "Genomic Template: file=%s, strand=%c, from="GT_LU", "
+                            "to="GT_LU", description=",
                      gth_input_get_genomic_filename(input,
                                                     gth_sa_gen_file_num(sa)),
                      gth_sa_gen_strand_char(sa),
@@ -92,7 +92,7 @@ static void showgthgenomicinformation(GthSA *sa, GthInput *input,
   gth_sa_echo_genomic_description(sa, input, outfp);
 
   if (showseqnums)
-    gt_file_xprintf(outfp, ", seqnum=%lu",  gth_sa_gen_seq_num(sa));
+    gt_file_xprintf(outfp, ", seqnum="GT_LU"",  gth_sa_gen_seq_num(sa));
 
   gt_file_xfputc('\n', outfp);
   gt_file_xfputc('\n', outfp);
@@ -108,7 +108,7 @@ static void showppaline(GthSA *sa, GtFile *outfp)
   if (gth_sa_polyAtail_start(sa) ||
       gth_sa_polyAtail_stop(sa)) {
     gt_file_xprintf(outfp,
-                       " PPA                                  cDNA %6lu %6lu\n",
+                       " PPA                                  cDNA %6"GT_LUS" %6"GT_LUS"\n",
                        gth_sa_polyAtail_start(sa) + OUTPUTOFFSET,
                        gth_sa_polyAtail_stop(sa) + OUTPUTOFFSET);
   }
@@ -117,7 +117,7 @@ static void showppaline(GthSA *sa, GtFile *outfp)
 /* The following function prints the "classic" GeneSeqer2 MATCH line */
 static void showmatchline(GthSA *sa, GtFile *outfp)
 {
-  gt_file_xprintf(outfp, "MATCH\t%s%c\t%s%c\t%5.3f\t%lu\t%5.3f\t%c\n",
+  gt_file_xprintf(outfp, "MATCH\t%s%c\t%s%c\t%5.3f\t"GT_LU"\t%5.3f\t%c\n",
                      gth_sa_gen_id(sa),
                      gth_sa_gen_strand_char(sa),
                      gth_sa_ref_id(sa),
@@ -143,7 +143,7 @@ static void showpgsline(GthSA *sa, GtFile *outfp)
                      gth_sa_ref_strand_char(sa));
 
   for (i = 0; i < numofexons; i++) {
-    gt_file_xprintf(outfp, "%lu  %lu",
+    gt_file_xprintf(outfp, ""GT_LU"  "GT_LU"",
                     gth_sa_left_genomic_exon_border(sa, i),
                     gth_sa_right_genomic_exon_border(sa, i));
     if (i == numofexons - 1)
@@ -165,7 +165,7 @@ static void showalignmentheader(GthSA *sa, bool gs2out, int widthforgenpos,
 
   gt_file_xprintf(outfp, "Predicted gene structure");
   if (gs2out) {
-    gt_file_xprintf(outfp, " (within gDNA segment %lu to %lu):\n",
+    gt_file_xprintf(outfp, " (within gDNA segment "GT_LU" to "GT_LU"):\n",
                        gth_sa_gen_dp_start_show(sa),
                        gth_sa_gen_dp_end_show(sa));
   }
@@ -188,7 +188,7 @@ static void showalignmentheader(GthSA *sa, bool gs2out, int widthforgenpos,
       acceptorsiteprobability = introninfo->acceptorsiteprobability;
       acceptorsitescore       = introninfo->acceptorsitescore;
 
-      gt_file_xprintf(outfp, "  Intron %2lu %*lu %*lu (%4lu n); ",
+      gt_file_xprintf(outfp, "  Intron %2"GT_LUS" %*"GT_LUS" %*"GT_LUS" (%4"GT_LUS" n); ",
                       i - 1 + OUTPUTOFFSET, widthforgenpos,
                       gth_sa_left_intron_border(sa, i-1),
                       widthforgenpos,
@@ -219,7 +219,7 @@ static void showalignmentheader(GthSA *sa, bool gs2out, int widthforgenpos,
     }
 
     gt_file_xprintf(outfp,
-                    " Exon %2lu %*lu %*lu (%4lu n);  %s %6lu %6lu (%4lu %s); "
+                    " Exon %2"GT_LUS" %*"GT_LUS" %*"GT_LUS" (%4"GT_LUS" n);  %s %6"GT_LUS" %6"GT_LUS" (%4"GT_LUS" %s); "
                     "score: %5.3f\n", i + OUTPUTOFFSET, widthforgenpos,
                     gth_sa_left_genomic_exon_border(sa, i),
                     widthforgenpos,

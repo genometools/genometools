@@ -136,12 +136,12 @@ void gth_path_matrix_show(GthPathMatrix *pm)
   gt_assert(pm);
   printf("    ");
   for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++)
-    printf("%4lu", genptr);
+    printf("%4"GT_LUS, genptr);
   printf("\n\n");
 
   for (refptr = pm->ref_range.start; refptr <= pm->ref_range.end; refptr++) {
     refidx = refptr - pm->ref_range.start;
-    printf("%4lu", refptr);
+    printf("%4"GT_LUS, refptr);
     for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++) {
       genidx = genptr - pm->gen_range.start;
       entry = pm->entries[genidx][refidx];

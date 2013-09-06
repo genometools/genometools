@@ -37,7 +37,7 @@
 #include "core/types_api.h"
 #include "core/arraydef.h"
 
-#define GT_ENCSEQ_VERSION  3UL
+#define GT_ENCSEQ_VERSION  3
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))

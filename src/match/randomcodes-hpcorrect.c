@@ -40,7 +40,11 @@
 
 /* define a type for hmer pw_scores */
 typedef GtWord gt_rchc_score_t;
+#ifndef _WIN64
 #define GT_RCHC_PRIscore "ld"
+#else
+#define GT_RCHC_PRIscore "I64d"
+#endif
 
 static int gt_rchc_score_t_cmp(const void *a, const void *b)
 {

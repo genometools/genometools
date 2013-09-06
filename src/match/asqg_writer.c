@@ -40,7 +40,7 @@ int gt_asqg_writer_show_header(GtAsqgWriter *aw, float erate,
 {
   gt_assert(aw != NULL);
   gt_file_xprintf(aw->file,
-      "HT\tVN:i:"GT_LU"\tER:f:%g\tOL:i:"GT_LU"\tIN:Z:%s\tCN:i:%c\tTE:i:%c\n",
+      "HT\tVN:i:%d\tER:f:%g\tOL:i:"GT_LU"\tIN:Z:%s\tCN:i:%c\tTE:i:%c\n",
       GT_ASQG_VERSION, erate, minlen, inputfilename,
       has_containments ? '1' : '0', has_transitives ? '1' : '0');
   return 0;

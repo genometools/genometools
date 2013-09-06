@@ -27,7 +27,7 @@
 typedef struct GtAsqgWriter GtAsqgWriter;
 
 /* <GT_ASQG_VERSION> is the supported version of the asqg format. */
-#define GT_ASQG_VERSION 1UL
+#define GT_ASQG_VERSION 1
 
 /* Creates a new <GtAsqgWriter> object, using <file> for output
    and <encseq> as source of information. */

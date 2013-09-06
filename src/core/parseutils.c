@@ -107,7 +107,7 @@ static int parse_range(GtRange *range, const char *start, const char *end,
                        unsigned int line_number, const char *filename,
                        bool tidy, bool correct_negative, GtError *err)
 {
-  long start_val, end_val;
+  GtWord start_val, end_val;
   char *ep;
 
   gt_assert(start && end && filename);

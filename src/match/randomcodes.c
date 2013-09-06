@@ -449,7 +449,7 @@ static GtUword gt_randomcodes_codelcp(GtUword a, GtUword b)
   GtUword lcpvalue = 0;
   GtUword mask;
   const GtUword xorvalue = a ^ b;
-  for (mask = 3UL << GT_MULT2(GT_UNITSIN2BITENC - 1);
+  for (mask = (GtUword) 3 << GT_MULT2(GT_UNITSIN2BITENC - 1);
       mask > 0; mask >>= 2, lcpvalue++)
     if (xorvalue & mask)
       return lcpvalue;

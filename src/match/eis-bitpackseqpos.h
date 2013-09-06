@@ -25,7 +25,7 @@
 
 #include "core/bitpackstring.h"
 
-#ifndef _LP64
+#if !(defined (_LP64) || defined (_WIN64))
 /** retrieve GtUword from BitString */
 #define gt_bsGetUlong gt_bsGetUInt32
 /** store GtUword in BitString */

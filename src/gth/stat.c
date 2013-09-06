@@ -301,7 +301,7 @@ static void outputgeneralstatistics(GthStat *stat, bool show_full_stats,
                            COMMENTCHAR);
         break;
       default:
-        gt_file_xprintf(outfp, "%c %lu chains have been computed\n",
+        gt_file_xprintf(outfp, "%c "GT_LU" chains have been computed\n",
                         COMMENTCHAR, stat->numofchains);
     }
   }
@@ -316,18 +316,18 @@ static void outputmemorystatistics(GthStat *stat, bool show_full_stats,
   INFOCHAR;
   gt_file_xprintf(outfp, "memory statistics:\n");
   INFOCHAR;
-  gt_file_xprintf(outfp, "%lu spliced alignments have been stored\n",
+  gt_file_xprintf(outfp, ""GT_LU" spliced alignments have been stored\n",
             stat->numofSAs);
 
   /* PGL memory statistics */
   INFOCHAR;
-  gt_file_xprintf(outfp, "%lu predicted gene locations have been stored\n",
+  gt_file_xprintf(outfp, ""GT_LU" predicted gene locations have been stored\n",
             stat->numofPGLs_stored);
 
   /* DP memory statistics */
   if (show_full_stats) {
     gt_file_xprintf(outfp,
-              "%c %lu megabytes was the average size of the backtrace matrix\n",
+              "%c "GT_LU" megabytes was the average size of the backtrace matrix\n",
               COMMENTCHAR, (stat->numofbacktracematrixallocations > 0
                            ? stat->totalsizeofbacktracematricesinMB /
                              stat->numofbacktracematrixallocations
@@ -342,7 +342,7 @@ static void outputmemorystatistics(GthStat *stat, bool show_full_stats,
                   COMMENTCHAR);
         break;
       default:
-        gt_file_xprintf(outfp,"%c %lu backtrace matrices have been "
+        gt_file_xprintf(outfp,"%c "GT_LU" backtrace matrices have been "
                         "allocated\n", COMMENTCHAR,
                         stat->numofbacktracematrixallocations);
     }
@@ -438,34 +438,34 @@ void gth_stat_show(GthStat *stat, bool show_full_stats, bool xmlout,
     gt_file_xprintf(outfp, "%c\n", COMMENTCHAR);
     gt_file_xprintf(outfp, "%c important messages:\n", COMMENTCHAR);
     if (stat->numofremovedzerobaseexons > 0) {
-      gt_file_xprintf(outfp, "%c %lu removed zero base exons\n",
+      gt_file_xprintf(outfp, "%c "GT_LU" removed zero base exons\n",
                          COMMENTCHAR, stat->numofremovedzerobaseexons);
     }
     if (stat->numofautointroncutoutcalls > 0) {
-      gt_file_xprintf(outfp, "%c %lu times the intron cutout technique was "
+      gt_file_xprintf(outfp, "%c "GT_LU" times the intron cutout technique was "
                          "used automatically\n", COMMENTCHAR,
                          stat->numofautointroncutoutcalls);
     }
     if (stat->numofunsuccessfulintroncutoutDPs > 0) {
-      gt_file_xprintf(outfp, "%c %lu unsuccessful DP calls using intron "
+      gt_file_xprintf(outfp, "%c "GT_LU" unsuccessful DP calls using intron "
                          "cutout technique\n", COMMENTCHAR,
                          stat->numofunsuccessfulintroncutoutDPs);
     }
     if (stat->numoffailedDPparameterallocations > 0) {
-      gt_file_xprintf(outfp, "%c %lu DP parameter allocations failed\n",
+      gt_file_xprintf(outfp, "%c "GT_LU" DP parameter allocations failed\n",
                          COMMENTCHAR, stat->numoffailedDPparameterallocations);
     }
     if (stat->numoffailedmatrixallocations > 0) {
-      gt_file_xprintf(outfp, "%c %lu matrix allocations failed\n",
+      gt_file_xprintf(outfp, "%c "GT_LU" matrix allocations failed\n",
                          COMMENTCHAR, stat->numoffailedmatrixallocations);
     }
     if (stat->numofundeterminedSAs > 0) {
-      gt_file_xprintf(outfp, "%c %lu undetermined spliced alignments\n",
+      gt_file_xprintf(outfp, "%c "GT_LU" undetermined spliced alignments\n",
                          COMMENTCHAR, stat->numofundeterminedSAs);
     }
     if (stat->numoffilteredpolyAtailmatches > 0) {
       gt_file_xprintf(outfp,
-                      "%c %lu matches containing a poly(A) tail filtered\n",
+                      "%c "GT_LU" matches containing a poly(A) tail filtered\n",
                          COMMENTCHAR, stat->numoffilteredpolyAtailmatches);
     }
   }

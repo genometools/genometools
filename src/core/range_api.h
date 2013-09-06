@@ -27,7 +27,7 @@ typedef struct GtRange GtRange;
 
 struct GtRange {
   GtUword start,
-                end;
+          end;
 };
 
 /* Compare <range_a> and <range_b>. Returns 0 if <range_a> equals <range_b>, -1

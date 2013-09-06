@@ -216,7 +216,7 @@ void gt_strgraph_show_limits_debug_log(void)
 
 void gt_strgraph_show_limits(void)
 {
-  printf("# max number of reads: "GT_LU"\n", GT_STRGRAPH_N_READS_MAX);
+  printf("# max number of reads: "GT_LU"\n", (GtUword) GT_STRGRAPH_N_READS_MAX);
   printf("# max read length: "FormatGtStrgraphLength"\n",
       PRINTGtStrgraphLengthcast(GT_STRGRAPH_LENGTH_MAX));
   printf("# max degree of a vertex: "FormatGtStrgraphVEdgenum"\n",

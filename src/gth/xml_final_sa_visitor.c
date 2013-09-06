@@ -92,7 +92,7 @@ static void xml_showgthgenomicinformation(GthSA *sa,
   gt_file_xprintf(outfp, "\">\n");
   indentlevel++;
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<position start=\"%lu\" stop=\"%lu\"/>\n",
+  gt_file_xprintf(outfp, "<position start=\""GT_LU"\" stop=\""GT_LU"\"/>\n",
                      gth_sa_gen_dp_start_show(sa),
                      gth_sa_gen_dp_end_show(sa));
   indentlevel--;
@@ -115,7 +115,7 @@ static void xml_showppaline(GthSA *sa, unsigned int indentlevel,
       gth_sa_polyAtail_stop(sa)) {
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp,
-                       "<PPA_line polyA_start=\"%lu\" polyA_stop=\"%lu\"/>\n",
+                       "<PPA_line polyA_start=\""GT_LU"\" polyA_stop=\""GT_LU"\"/>\n",
                        gth_sa_polyAtail_start(sa) + OUTPUTOFFSET,
                        gth_sa_polyAtail_stop(sa) + OUTPUTOFFSET);
   }
@@ -143,7 +143,7 @@ static void xml_showmatchline(GthSA *sa, unsigned int indentlevel,
                      "<total_alignment_score>%.3f</total_alignment_score>\n",
                      gth_sa_score(sa));
   gth_indent(outfp, indentlevel);
-  gt_file_xprintf(outfp, "<cumulative_length_of_scored_exons>%lu"
+  gt_file_xprintf(outfp, "<cumulative_length_of_scored_exons>"GT_LU""
                      "</cumulative_length_of_scored_exons>\n",
                      gth_sa_cumlen_scored_exons(sa));
   gth_indent(outfp, indentlevel);
@@ -187,7 +187,7 @@ static void xml_showpgsline(GthSA *sa, unsigned int indentlevel,
 
   for (i = 0; i < numofexons; i++) {
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<exon e_start=\"%lu\" e_stop=\"%lu\"/>\n",
+    gt_file_xprintf(outfp, "<exon e_start=\""GT_LU"\" e_stop=\""GT_LU"\"/>\n",
                     gth_sa_left_genomic_exon_border(sa, i),
                     gth_sa_right_genomic_exon_border(sa, i));
   }
@@ -234,13 +234,13 @@ static void xml_showalignmentheader(GthSA *sa,
       acceptorsitescore       = introninfo->acceptorsitescore;
 
       gth_indent(outfp, indentlevel);
-      gt_file_xprintf(outfp, "<intron i_serial=\"%lu\">\n",
+      gt_file_xprintf(outfp, "<intron i_serial=\""GT_LU"\">\n",
                       i - 1 + OUTPUTOFFSET);
       indentlevel++;
       gth_indent(outfp, indentlevel);
       gt_file_xprintf(outfp,
-                      "<gDNA_intron_boundary i_start=\"%lu\" i_stop=\"%lu\" "
-                      "i_length=\"%lu\">\n",
+                      "<gDNA_intron_boundary i_start=\""GT_LU"\" i_stop=\""GT_LU"\" "
+                      "i_length=\""GT_LU"\">\n",
                       gth_sa_left_intron_border(sa, i-1),
                       gth_sa_right_intron_border(sa, i-1),
                       gth_sa_intron_length(sa, i-1));
@@ -273,18 +273,18 @@ static void xml_showalignmentheader(GthSA *sa,
     }
 
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<exon e_serial=\"%lu\">\n", i + OUTPUTOFFSET);
+    gt_file_xprintf(outfp, "<exon e_serial=\""GT_LU"\">\n", i + OUTPUTOFFSET);
     indentlevel++;
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<gDNA_exon_boundary g_start=\"%lu\" g_stop="
-                    "\"%lu\" g_length=\"%lu\"/>\n",
+    gt_file_xprintf(outfp, "<gDNA_exon_boundary g_start=\""GT_LU"\" g_stop="
+                    "\""GT_LU"\" g_length=\""GT_LU"\"/>\n",
                     gth_sa_left_genomic_exon_border(sa, i),
                     gth_sa_right_genomic_exon_border(sa, i),
                     gth_sa_genomic_exon_length(sa, i));
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp,
-                    "<reference_exon_boundary r_type=\"%s\" r_start=\"%lu\" "
-                    "r_stop=\"%lu\" r_length=\"%lu\" r_score=\"%5.3f\"/>\n",
+                    "<reference_exon_boundary r_type=\"%s\" r_start=\""GT_LU"\" "
+                    "r_stop=\""GT_LU"\" r_length=\""GT_LU"\" r_score=\"%5.3f\"/>\n",
                     gth_sa_alphastring(sa),
                     leftreferenceexonborder  + OUTPUTOFFSET ,
                     rightreferenceexonborder + OUTPUTOFFSET ,
@@ -439,7 +439,7 @@ static void  xml_final_sa_visitor_trailer(GthSAVisitor *sa_visitor,
   GthXMLFinalSAVisitor *visitor = xml_final_sa_visitor_cast(sa_visitor);
   visitor->indentlevel++;
   gth_indent(visitor->outfp, visitor->indentlevel);
-  gt_file_xprintf(visitor->outfp, "<total_number_ESTs_reported>%lu"
+  gt_file_xprintf(visitor->outfp, "<total_number_ESTs_reported>"GT_LU""
                   "</total_number_ESTs_reported>\n", num_of_sas);
   gth_indent(visitor->outfp, visitor->indentlevel);
   gt_file_xprintf(visitor->outfp, "</alignment_module>\n");

@@ -459,7 +459,7 @@ GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GtLeftborderOutbuffer *leftborderbuffer_all = NULL;
 #if defined (_LP64) || defined (_WIN64)
   const unsigned int btp = gt_determinebitspervalue(expectedlastpartsum);
-  GtUword exceedvalue = 1UL << GT_MODVALUEBITS;
+  GtUword exceedvalue = (GtUword) 1 << GT_MODVALUEBITS;
 #endif
 #ifdef SKDEBUG
   GtDiscDistri *countdistri = gt_disc_distri_new();

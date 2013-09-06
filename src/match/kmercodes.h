@@ -52,8 +52,8 @@ static inline GtCodetype gt_kmercode_complement(GtCodetype kmer,
   return kmer ^ maskright;
 }
 
-#define GT_SWAPBITPAIRS(KMER,L1,L2,D) (((KMER) & (3UL << L1)) >> D) |\
-                                      (((KMER) & (3UL << L2)) << D)
+#define GT_SWAPBITPAIRS(KMER,L1,L2,D) (((KMER) & ((GtUword) 3 << L1)) >> D) |\
+                                      (((KMER) & ((GtUword) 3 << L2)) << D)
 
 static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
                                              unsigned int kmersize)
