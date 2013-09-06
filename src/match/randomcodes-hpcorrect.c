@@ -864,7 +864,7 @@ static GtUword gt_randomcodes_hpcorrect_cluster(bool *allidentical,
   return nofclusters;
 }
 
-static void gt_randomcodes_hpcorrect_process_kmer_itv(
+static inline void gt_randomcodes_hpcorrect_process_kmer_itv(
     const GtSeqnumrelpos *snrp, const GtUword *suffixes,
     GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata);
 
