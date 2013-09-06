@@ -60,7 +60,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
 {
   uint32_t integersize, littleendian, readmodeint, mirrored;
   unsigned int linenum;
-  unsigned long currentlinelength;
+  GtUword currentlinelength;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
   GtScannedprjkeytable *scannedprjkeytable;
@@ -68,7 +68,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   /* the following five variables are local as the parsed values are
      not required: they are determined by reading the encseq */
   GtSpecialcharinfo specialcharinfo;
-  unsigned long totallength,
+  GtUword totallength,
                 numofsequences,
                 numofdbsequences,
                 numofquerysequences;
@@ -157,12 +157,12 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                  indexname,GT_PROJECTFILESUFFIX);
     haserr = true;
   }
-  if (!haserr && integersize != (uint32_t) (sizeof (unsigned long) * CHAR_BIT))
+  if (!haserr && integersize != (uint32_t) (sizeof (GtUword) * CHAR_BIT))
   {
     gt_error_set(err,"index was generated for %u-bit integers while "
                       "this program uses %u-bit integers",
                       (unsigned int) integersize,
-                      (unsigned int) (sizeof (unsigned long) * CHAR_BIT));
+                      (unsigned int) (sizeof (GtUword) * CHAR_BIT));
     haserr = true;
   }
   if (!haserr)
@@ -302,7 +302,7 @@ static int inputsuffixarray(bool map,
 {
   bool haserr = false;
   GtEncseqLoader *el;
-  unsigned long totallength = 0;
+  GtUword totallength = 0;
 
   gt_error_check(err);
   initsuffixarray(suffixarray);
@@ -409,7 +409,7 @@ static int inputsuffixarray(bool map,
       INITBufferedfile(indexname,&suffixarray->lcptabstream,GtUchar,
                        GT_LCPTABSUFFIX);
       if (!haserr &&
-          fseek(suffixarray->lcptabstream.fp,(long) sizeof (GtUchar),SEEK_SET))
+          fseek(suffixarray->lcptabstream.fp,(GtWord) sizeof (GtUchar),SEEK_SET))
       {
         gt_error_set(err,"fseek(esastream) failed: %s",strerror(errno));
         haserr = true;
@@ -427,7 +427,7 @@ static int inputsuffixarray(bool map,
         suffixarray->llvtab
           = gt_fa_mmap_check_size_with_suffix(indexname,
                                            GT_LARGELCPTABSUFFIX,
-                                           (unsigned long)
+                                           (GtUword)
                                            suffixarray->numoflargelcpvalues.
                                            valueunsignedlong,
                                            sizeof (*suffixarray->llvtab),
@@ -506,7 +506,7 @@ int gt_mapsuffixarray(Suffixarray *suffixarray,
                       GtError *err)
 {
   gt_error_check(err);
-  /* printf("sizeof (Suffixarray)=%lu\n",sizeof (Suffixarray)); */
+  /* printf("sizeof (Suffixarray)="GT_LU"\n",sizeof (Suffixarray)); */
   return inputsuffixarray(true,
                           suffixarray,
                           demand,

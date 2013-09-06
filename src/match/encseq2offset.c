@@ -20,15 +20,15 @@
 #include "sarr-def.h"
 #include "core/safecast-gen.h"
 
-unsigned long *gt_encseqtable2sequenceoffsets(
-                                    unsigned long *totallength,
+GtUword *gt_encseqtable2sequenceoffsets(
+                                    GtUword *totallength,
                                     GtSpecialcharinfo *specialcharinfo,
                                     const Suffixarray *suffixarraytable,
                                     unsigned int numofindexes)
 {
   unsigned int idx;
   GtUchar lastofprevious, firstofcurrent;
-  unsigned long tmplength, numofsequences = 0, *sequenceoffsettable;
+  GtUword tmplength, numofsequences = 0, *sequenceoffsettable;
   uint64_t tmpspecialcharacters,
            tmpwildcards,
            tmpspecialranges,
@@ -106,18 +106,18 @@ unsigned long *gt_encseqtable2sequenceoffsets(
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmpwildcardranges);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmprealspecialranges);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmprealwildcardranges);
-    printf("# seqlen[%u] = %lu\n",
+    printf("# seqlen[%u] = "GT_LU"\n",
            idx,
            gt_encseq_total_length(suffixarraytable[idx].encseq));
   }
   tmplength = gt_encseq_total_length(suffixarraytable[numofindexes -1].encseq);
   *totallength = sequenceoffsettable[numofindexes-1] + tmplength;
-  specialcharinfo->specialcharacters = (unsigned long) tmpspecialcharacters;
-  specialcharinfo->wildcards = (unsigned long) tmpwildcards;
-  specialcharinfo->specialranges = (unsigned long) tmpspecialranges;
-  specialcharinfo->wildcardranges = (unsigned long) tmpwildcardranges;
-  specialcharinfo->realspecialranges = (unsigned long) tmprealspecialranges;
-  specialcharinfo->realwildcardranges = (unsigned long) tmprealwildcardranges;
+  specialcharinfo->specialcharacters = (GtUword) tmpspecialcharacters;
+  specialcharinfo->wildcards = (GtUword) tmpwildcards;
+  specialcharinfo->specialranges = (GtUword) tmpspecialranges;
+  specialcharinfo->wildcardranges = (GtUword) tmpwildcardranges;
+  specialcharinfo->realspecialranges = (GtUword) tmprealspecialranges;
+  specialcharinfo->realwildcardranges = (GtUword) tmprealwildcardranges;
   specialcharinfo->lengthofspecialprefix
     = gt_encseq_lengthofspecialprefix(suffixarraytable[0].encseq);
   specialcharinfo->lengthofwildcardprefix

@@ -36,10 +36,10 @@ typedef struct GtCanvasClass GtCanvasClass;
 void*           gt_canvas_cast(const GtCanvasClass *cc, GtCanvas *c);
 void*           gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
 
-unsigned long   gt_canvas_calculate_height(GtCanvas*, GtDiagram*);
+GtUword   gt_canvas_calculate_height(GtCanvas*, GtDiagram*);
 int             gt_canvas_draw_ruler(GtCanvas*, GtRange, GtError *err);
 
-void            gt_format_ruler_label(char *txt, unsigned long pos,
+void            gt_format_ruler_label(char *txt, GtUword pos,
                                       const char *unitstr, size_t buflen);
 GtStyle*        gt_canvas_get_style(GtCanvas *canvas);
 

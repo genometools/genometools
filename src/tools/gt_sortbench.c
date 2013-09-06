@@ -35,7 +35,7 @@
 
 typedef struct {
   GtStr *impl;
-  unsigned long num_values,
+  GtUword num_values,
                 maxvalue;
   bool use_aqsort,
        use_permute,
@@ -118,10 +118,10 @@ static int gt_sortbench_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static void gt_qbenchsort_permute_ulong_array (unsigned long *arr,
-                                               unsigned long size)
+static void gt_qbenchsort_permute_ulong_array (GtUword *arr,
+                                               GtUword size)
 {
-  unsigned long i, j, c;
+  GtUword i, j, c;
 
   for (i = 0; i < size; ++i)
   {
@@ -132,17 +132,17 @@ static void gt_qbenchsort_permute_ulong_array (unsigned long *arr,
   }
 }
 
-unsigned long *val;         /* array, solidified on the fly */
-unsigned long ncmp;         /* number of comparisons */
-unsigned long nsolid;       /* number of solid items */
-unsigned long candidate;    /* pivot candidate */
-unsigned long gas;          /* gas value = highest sorted value */
+GtUword *val;         /* array, solidified on the fly */
+GtUword ncmp;         /* number of comparisons */
+GtUword nsolid;       /* number of solid items */
+GtUword candidate;    /* pivot candidate */
+GtUword gas;          /* gas value = highest sorted value */
 #define freeze(x) val[x] = nsolid++
 
 static int gt_sortbench_cmp(const void *px, const void *py)
 {
-  const unsigned long x = *(const unsigned long*)px;
-  const unsigned long y = *(const unsigned long*)py;
+  const GtUword x = *(const GtUword*)px;
+  const GtUword y = *(const GtUword*)py;
   ncmp++;
   if (val[x]==gas && val[y]==gas) {
     if (x == candidate) {
@@ -166,10 +166,10 @@ static int gt_sortbench_cmp(const void *px, const void *py)
   return 0;
 }
 
-static void gt_sortbench_aqsort(unsigned long n, unsigned long *a)
+static void gt_sortbench_aqsort(GtUword n, GtUword *a)
 {
-  unsigned long i;
-  unsigned long *ptr = gt_malloc(sizeof (*ptr) * n);
+  GtUword i;
+  GtUword *ptr = gt_malloc(sizeof (*ptr) * n);
 
   val = a;
   gas = n-1;
@@ -184,9 +184,9 @@ static void gt_sortbench_aqsort(unsigned long n, unsigned long *a)
   gt_free(ptr);
 }
 
-typedef unsigned long Sorttype;
+typedef GtUword Sorttype;
 
-static unsigned long cmpcount = 0;
+static GtUword cmpcount = 0;
 
 static int qsortcmp(const Sorttype *a,const Sorttype *b,
                     const GT_UNUSED void *data)
@@ -215,11 +215,11 @@ static int qsortcmp(const Sorttype *a,const Sorttype *b,
 
 typedef void * QSORTNAME(Datatype);
 
-typedef unsigned long QSORTNAME(Sorttype);
+typedef GtUword QSORTNAME(Sorttype);
 
 static int QSORTNAME(qsortcmparr)(const QSORTNAME(Sorttype) *arr,
-                                  unsigned long a,
-                                  unsigned long b,
+                                  GtUword a,
+                                  GtUword b,
                                   const GT_UNUSED void *data)
 {
   cmpcount++;
@@ -234,10 +234,10 @@ static int QSORTNAME(qsortcmparr)(const QSORTNAME(Sorttype) *arr,
   return 0;
 }
 
-static void gt_sortbench_verify(GT_UNUSED const unsigned long *arr,
-                                 unsigned long len)
+static void gt_sortbench_verify(GT_UNUSED const GtUword *arr,
+                                 GtUword len)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx = 1UL; idx < len; idx++)
   {
@@ -248,13 +248,13 @@ static void gt_sortbench_verify(GT_UNUSED const unsigned long *arr,
 
 #include "match/qsort-array.gen"
 
-static void check_inlinedarr_qsort(unsigned long *arr, unsigned long len)
+static void check_inlinedarr_qsort(GtUword *arr, GtUword len)
 {
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, arr, len, NULL);
   gt_sortbench_verify(arr,len);
 }
 
-static void check_direct_qsort(unsigned long *arr, unsigned long len)
+static void check_direct_qsort(GtUword *arr, GtUword len)
 {
   gt_direct_qsort_ulong (6UL, false, arr, len);
   gt_sortbench_verify(arr,len);
@@ -276,7 +276,7 @@ static int sortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 
 #include "match/qsort-inplace.gen"
 
-static void check_thomas_qsort(unsigned long *arr, unsigned long len)
+static void check_thomas_qsort(GtUword *arr, GtUword len)
 {
   gt_qsort_r(arr,(size_t) len,sizeof (Sorttype),NULL, sortcmpwithdata);
   gt_sortbench_verify(arr,len);
@@ -296,19 +296,19 @@ static int sortcmpnodata(const void *a,const void *b)
   return 0;
 }
 
-static void check_gnu_qsort(unsigned long *arr, unsigned long len)
+static void check_gnu_qsort(GtUword *arr, GtUword len)
 {
   qsort(arr,(size_t) len, sizeof (Sorttype), sortcmpnodata);
   gt_sortbench_verify(arr,len);
 }
 
-static void check_inlinedptr_qsort(unsigned long *arr, unsigned long len)
+static void check_inlinedptr_qsort(GtUword *arr, GtUword len)
 {
   gt_inlined_qsort_r(arr, len, NULL);
   gt_sortbench_verify(arr,len);
 }
 
-static void check_radixsort_lsb(unsigned long *arr, unsigned long len)
+static void check_radixsort_lsb(GtUword *arr, GtUword len)
 {
   /* note that lsb_linear allocates extra temp space of size equal to
      the area to be sorted */
@@ -316,13 +316,13 @@ static void check_radixsort_lsb(unsigned long *arr, unsigned long len)
   gt_sortbench_verify(arr,len);
 }
 
-static void check_radixsort_inplace(unsigned long *arr, unsigned long len)
+static void check_radixsort_inplace(GtUword *arr, GtUword len)
 {
   gt_radixsort_inplace_ulong(arr,len);
   gt_sortbench_verify(arr,len);
 }
 
-typedef void (*GtQsortimplementationfunc)(unsigned long *,unsigned long);
+typedef void (*GtQsortimplementationfunc)(GtUword *,GtUword);
 
 static GtQsortimplementationfunc gt_sort_implementation_funcs[] =
 {
@@ -347,13 +347,13 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   int had_err = 0;
   size_t method;
   GtTimer *timer;
-  unsigned long *array, idx;
+  GtUword *array, idx;
 
   gt_error_check(err);
   gt_assert(arguments);
   if (arguments->verbose) {
-    printf("# number of items = %lu\n", arguments->num_values);
-    printf("# max value items = %lu\n", arguments->maxvalue);
+    printf("# number of items = "GT_LU"\n", arguments->num_values);
+    printf("# max value items = "GT_LU"\n", arguments->maxvalue);
     printf("# implementation = %s\n", gt_str_get(arguments->impl));
   }
 
@@ -403,7 +403,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_free(array);
   if (cmpcount > 0)
   {
-    printf("cmpcount = %lu\n",cmpcount);
+    printf("cmpcount = "GT_LU"\n",cmpcount);
   }
   return had_err;
 }

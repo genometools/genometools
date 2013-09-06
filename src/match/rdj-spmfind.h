@@ -33,41 +33,41 @@
 typedef struct GtBUstate_spm GtBUstate_spmeq;
 
 GtBUstate_spmeq *gt_spmfind_eqlen_state_new(const GtEncseq *encseq,
-    unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
+    GtUword minmatchlength, GtUword w_maxsize, bool elimtrans,
     bool showspm, const char *indexname, unsigned int threadnum,
     GtLogger *default_logger, GtLogger *verbose_logger, GtError *err);
 
 void gt_spmfind_eqlen_state_delete(GtBUstate_spmeq *state);
 
 int gt_spmfind_eqlen_process(void *data,
-    const unsigned long *seqnum_relpos_bucket, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long nonspecials,
-    unsigned long spaceforbucketprocessing, GtError *err);
+    const GtUword *seqnum_relpos_bucket, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword nonspecials,
+    GtUword spaceforbucketprocessing, GtError *err);
 
 void gt_spmfind_eqlen_process_end(void *data);
 
 typedef struct GtBUstate_spm GtBUstate_spmvar;
 
 GtBUstate_spmvar *gt_spmfind_varlen_state_new(const GtEncseq *encseq,
-    unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
+    GtUword minmatchlength, GtUword w_maxsize, bool elimtrans,
     bool showspm, const char *indexname, unsigned int threadnum,
     GtLogger *default_logger, GtLogger *verbose_logger, GtError *err);
 
 void gt_spmfind_varlen_state_delete(GtBUstate_spmvar *state);
 
 int gt_spmfind_varlen_process(void *data,
-    const unsigned long *seqnum_relpos_bucket, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long nonspecials,
-    unsigned long spaceforbucketprocessing, GtError *err);
+    const GtUword *seqnum_relpos_bucket, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword nonspecials,
+    GtUword spaceforbucketprocessing, GtError *err);
 
 void gt_spmfind_varlen_process_end(void *data);
 
-unsigned long gt_spmfind_varlen_nof_trans_spm(GtBUstate_spmvar *state);
+GtUword gt_spmfind_varlen_nof_trans_spm(GtBUstate_spmvar *state);
 
-unsigned long gt_spmfind_varlen_nof_irr_spm(GtBUstate_spmvar *state);
+GtUword gt_spmfind_varlen_nof_irr_spm(GtBUstate_spmvar *state);
 
-unsigned long gt_spmfind_eqlen_nof_trans_spm(GtBUstate_spmeq *state);
+GtUword gt_spmfind_eqlen_nof_trans_spm(GtBUstate_spmeq *state);
 
-unsigned long gt_spmfind_eqlen_nof_irr_spm(GtBUstate_spmeq *state);
+GtUword gt_spmfind_eqlen_nof_irr_spm(GtBUstate_spmeq *state);
 
 #endif

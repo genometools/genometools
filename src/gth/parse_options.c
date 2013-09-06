@@ -95,7 +95,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                            GtShowVersionFunc show_version,
                            GthJumpTableNew jump_table_new, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   int ret, mode;
   double u12donorprob, u12donorprob1mism;
   GtStrArray *genomic_files, *cdna_files, *protein_files;
@@ -1472,7 +1472,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
       call_info->simfilterparam.minmatchlength <
       call_info->simfilterparam.seedlength) {
-    gt_error_set(err, "-%s %lu must be >= -%s %lu", MINMATCHLEN_OPT_CSTR,
+    gt_error_set(err, "-%s "GT_LU" must be >= -%s "GT_LU"", MINMATCHLEN_OPT_CSTR,
               call_info->simfilterparam.minmatchlength, SEEDLENGTH_OPT_CSTR,
               call_info->simfilterparam.seedlength);
     oprval = GT_OPTION_PARSER_ERROR;
@@ -1482,7 +1482,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
       call_info->simfilterparam.prminmatchlen <
       call_info->simfilterparam.prseedlength) {
-    gt_error_set(err, "-%s %lu must be >= -%s %lu", PRMINMATCHLEN_OPT_CSTR,
+    gt_error_set(err, "-%s "GT_LU" must be >= -%s "GT_LU"", PRMINMATCHLEN_OPT_CSTR,
               call_info->simfilterparam.prminmatchlen, PRSEEDLENGTH_OPT_CSTR,
               call_info->simfilterparam.prseedlength);
     oprval = GT_OPTION_PARSER_ERROR;

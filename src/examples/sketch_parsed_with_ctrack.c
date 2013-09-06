@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
   GtLayout *layout;
   GtCanvas *canvas;
   GtCustomTrack *custom;
-  unsigned long height, windowsize;
+  GtUword height, windowsize;
   GtError *err;
 
   if (argc != 9) {

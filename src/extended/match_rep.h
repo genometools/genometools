@@ -50,8 +50,8 @@ const GtMatchClass* gt_match_class_new(size_t size,
                                        GtMatchAcceptFunc accept);
 
 GtMatch* gt_match_create(const GtMatchClass*,
-                         unsigned long start1, unsigned long end1,
-                         unsigned long start2, unsigned long end2,
+                         GtUword start1, GtUword end1,
+                         GtUword start2, GtUword end2,
                          const char *seqid1, const char *seqid2,
                          GtMatchDirection dir);
 

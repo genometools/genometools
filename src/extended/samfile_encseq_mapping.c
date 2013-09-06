@@ -24,8 +24,8 @@
 struct GtSamfileEncseqMapping
 {
   const GtEncseq *encseq;
-  unsigned long *samfile2encseq;
-  unsigned long nof_sequences;
+  GtUword *samfile2encseq;
+  GtUword nof_sequences;
 };
 
 GtSamfileEncseqMapping *gt_samfile_encseq_mapping_new(
@@ -41,7 +41,7 @@ GtSamfileEncseqMapping *gt_samfile_encseq_mapping_new(
   samfile_encseq_mapping->nof_sequences = gt_encseq_num_of_sequences(encseq);
   samfile_encseq_mapping->samfile2encseq = NULL;
   samfile_encseq_mapping->encseq = encseq;
-  if ((unsigned long)gt_samfile_iterator_number_of_references(samfile_iterator)
+  if ((GtUword)gt_samfile_iterator_number_of_references(samfile_iterator)
       != samfile_encseq_mapping->nof_sequences)
   {
     gt_error_set(err, "The number of sequences in the encoded sequence "
@@ -51,7 +51,7 @@ GtSamfileEncseqMapping *gt_samfile_encseq_mapping_new(
   else
   {
     GtHashmap *seqid2seqnum;
-    unsigned long i, cnum, dlen, *stored, *seqnum;
+    GtUword i, cnum, dlen, *stored, *seqnum;
     int32_t refnum;
     const char *d;
     char *seqid = NULL;
@@ -77,7 +77,7 @@ GtSamfileEncseqMapping *gt_samfile_encseq_mapping_new(
       }
       else
       {
-        seqnum = gt_malloc(sizeof (unsigned long));
+        seqnum = gt_malloc(sizeof (GtUword));
         *seqnum = i;
         gt_hashmap_add(seqid2seqnum, seqid, seqnum);
       }
@@ -112,7 +112,7 @@ GtSamfileEncseqMapping *gt_samfile_encseq_mapping_new(
     return samfile_encseq_mapping;
 }
 
-static unsigned long gt_samfile_encseq_mapping_seqnum(
+static GtUword gt_samfile_encseq_mapping_seqnum(
     GtSamfileEncseqMapping *samfile_encseq_mapping,
     int32_t reference_num)
 {
@@ -121,11 +121,11 @@ static unsigned long gt_samfile_encseq_mapping_seqnum(
   return samfile_encseq_mapping->samfile2encseq[reference_num];
 }
 
-unsigned long gt_samfile_encseq_mapping_seqpos(
+GtUword gt_samfile_encseq_mapping_seqpos(
     GtSamfileEncseqMapping *samfile_encseq_mapping, int32_t reference_num,
-    unsigned long reference_seqpos)
+    GtUword reference_seqpos)
 {
-  unsigned long seqnum, seqstartpos;
+  GtUword seqnum, seqstartpos;
   gt_assert(samfile_encseq_mapping != NULL);
   seqnum = gt_samfile_encseq_mapping_seqnum(samfile_encseq_mapping,
       reference_num);

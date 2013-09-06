@@ -20,8 +20,8 @@
 
 #include "match/eis-specialsrank.h"
 
-typedef unsigned long (*RankReportFunc)(const SpecialsRankLookup *ranker,
-                                 unsigned long pos);
+typedef GtUword (*RankReportFunc)(const SpecialsRankLookup *ranker,
+                                 GtUword pos);
 
 struct specialsRankLookup
 {
@@ -32,16 +32,16 @@ struct specialsRankLookup
     struct specialsRankTable
     {
       GtEncseqReader *scanState;
-      unsigned long *rankSumSamples, numSamples, sampleInterval;
+      GtUword *rankSumSamples, numSamples, sampleInterval;
       GtReadmode readmode;
       unsigned sampleIntervalLog2;
     } sampleTable;
-    unsigned long lastSeqPos;
+    GtUword lastSeqPos;
   } implementationData;
 };
 
-static inline unsigned long
-specialsRank(const SpecialsRankLookup *ranker, unsigned long pos)
+static inline GtUword
+specialsRank(const SpecialsRankLookup *ranker, GtUword pos)
 {
   return ranker->rankFunc(ranker, pos);
 }

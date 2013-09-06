@@ -23,7 +23,7 @@
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-priv.h"
 
-static inline unsigned long
+static inline GtUword
 EISLength(const EISeq *seq)
 {
   return seq->seqLen;
@@ -37,7 +37,7 @@ EISGetAlphabet(const EISeq *seq)
 }
 
 static inline Symbol
-EISGetSym(EISeq *seq, unsigned long pos, EISHint hint)
+EISGetSym(EISeq *seq, GtUword pos, EISHint hint)
 {
   gt_assert(seq && hint);
   return MRAEncRevMapSymbol(seq->alphabet,
@@ -45,22 +45,22 @@ EISGetSym(EISeq *seq, unsigned long pos, EISHint hint)
 }
 
 static inline Symbol
-EISGetTransformedSym(EISeq *seq, unsigned long pos, EISHint hint)
+EISGetTransformedSym(EISeq *seq, GtUword pos, EISHint hint)
 {
   gt_assert(seq && hint);
   return seq->classInfo->get(seq, pos, hint);
 }
 
-static inline unsigned long
-EISRank(EISeq *seq, Symbol sym, unsigned long pos, union EISHint *hint)
+static inline GtUword
+EISRank(EISeq *seq, Symbol sym, GtUword pos, union EISHint *hint)
 {
   Symbol mSym;
   mSym = MRAEncMapSymbol(seq->alphabet, sym);
   return seq->classInfo->rank(seq, mSym, pos, hint);
 }
 
-static inline unsigned long
-EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
+static inline GtUword
+EISSymTransformedRank(EISeq *seq, Symbol tSym, GtUword pos,
                       union EISHint *hint)
 {
   gt_assert(tSym < gt_MRAEncGetSize(EISGetAlphabet(seq)));
@@ -68,7 +68,7 @@ EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
 }
 
 static inline GtUlongPair
-EISPosPairRank(EISeq *seq, Symbol sym, unsigned long posA, unsigned long posB,
+EISPosPairRank(EISeq *seq, Symbol sym, GtUword posA, GtUword posB,
                union EISHint *hint)
 {
   Symbol tSym;
@@ -77,29 +77,29 @@ EISPosPairRank(EISeq *seq, Symbol sym, unsigned long posA, unsigned long posB,
 }
 
 static inline void
-EISRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long pos,
-             unsigned long *rankCounts, union EISHint *hint)
+EISRangeRank(EISeq *seq, AlphabetRangeID range, GtUword pos,
+             GtUword *rankCounts, union EISHint *hint)
 {
   return seq->classInfo->rangeRank(seq, range, pos, rankCounts, hint);
 }
 
 static inline void
-EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, unsigned long posA,
-                    unsigned long posB, unsigned long *rankCounts,
+EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, GtUword posA,
+                    GtUword posB, GtUword *rankCounts,
                     union EISHint *hint)
 {
   seq->classInfo->posPairRangeRank(seq, range, posA, posB, rankCounts, hint);
 }
 
 static inline GtUlongPair
-EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
-                             unsigned long posB, union EISHint *hint)
+EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, GtUword posA,
+                             GtUword posB, union EISHint *hint)
 {
   if (tSym >= gt_MRAEncGetSize(EISGetAlphabet(seq)))
   {
-    fprintf(stderr,"tsym=%lu,gt_MRAEncGetSize(EISGetAlphabet(seq)=%lu\n",
-           (unsigned long) tSym,
-           (unsigned long) gt_MRAEncGetSize(EISGetAlphabet(seq)));
+    fprintf(stderr,"tsym="GT_LU",gt_MRAEncGetSize(EISGetAlphabet(seq)="GT_LU"\n",
+           (GtUword) tSym,
+           (GtUword) gt_MRAEncGetSize(EISGetAlphabet(seq)));
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_assert(tSym < gt_MRAEncGetSize(EISGetAlphabet(seq)));
@@ -107,7 +107,7 @@ EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
 }
 
 static inline void
-EISRetrieveExtraBits(EISeq *seq, unsigned long pos, int flags,
+EISRetrieveExtraBits(EISeq *seq, GtUword pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint)
 {
   return seq->classInfo->expose(seq, pos, flags, retval, hint);
@@ -165,7 +165,7 @@ deleteEISHint(EISeq *seq, EISHint hint)
 }
 
 static inline int
-EISPrintDiagsForPos(const EISeq *seq, unsigned long pos, FILE *fp, EISHint hint)
+EISPrintDiagsForPos(const EISeq *seq, GtUword pos, FILE *fp, EISHint hint)
 {
   if (seq->classInfo->printPosDiags)
     return seq->classInfo->printPosDiags(seq, pos, fp, hint);
@@ -174,7 +174,7 @@ EISPrintDiagsForPos(const EISeq *seq, unsigned long pos, FILE *fp, EISHint hint)
 }
 
 static inline int
-EISPrintExtDiagsForPos(const EISeq *seq, unsigned long pos, FILE *fp,
+EISPrintExtDiagsForPos(const EISeq *seq, GtUword pos, FILE *fp,
                        EISHint hint)
 {
   if (seq->classInfo->printExtPosDiags)

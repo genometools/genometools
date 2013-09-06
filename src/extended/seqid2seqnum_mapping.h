@@ -50,9 +50,9 @@ int                    gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping
                                                    *seqid2seqnum_mapping,
                                                    const char *seqid,
                                                    const GtRange *range,
-                                                   unsigned long *seqnum,
-                                                   unsigned long *filenum,
-                                                   unsigned long *offset,
+                                                   GtUword *seqnum,
+                                                   GtUword *filenum,
+                                                   GtUword *offset,
                                                    GtError *err);
 
 #endif

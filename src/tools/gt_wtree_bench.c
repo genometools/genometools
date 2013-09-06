@@ -96,7 +96,7 @@ static int gt_wtree_bench_bench_encseq(GtEncseq *es, GtTimer *t,
                                        GT_UNUSED GtError *err)
 {
   int had_err = 0;
-  unsigned long idx, length, pos;
+  GtUword idx, length, pos;
   gt_error_check(err);
   length = gt_encseq_total_length(es);
   gt_timer_start(t);
@@ -120,7 +120,7 @@ static int gt_wtree_bench_bench_wtree(GtWtree *wt,
                                       GtTimer *timer)
 {
   int had_err = 0;
-  unsigned long idx,
+  GtUword idx,
                 length = gt_wtree_length(wt),
                 syms = gt_wtree_num_of_symbols(wt),
                 tmp, pos, *max_ranks;
@@ -152,9 +152,9 @@ static int gt_wtree_bench_bench_wtree(GtWtree *wt,
     tmp = gt_wtree_rank(wt, pos, symbol);
     c = gt_wtree_encseq_unmap_decoded(wt, symbol);
     if (isprint(c))
-      printf("rank of %c at %lu: %lu\n", c, pos, tmp);
+      printf("rank of %c at "GT_LU": "GT_LU"\n", c, pos, tmp);
     else
-      printf("rank of %d at %lu: %lu\n", c, pos, tmp);
+      printf("rank of %d at "GT_LU": "GT_LU"\n", c, pos, tmp);
   }
   printf("\n");
   gt_timer_show_progress(timer, "1M random select", stderr);
@@ -173,9 +173,9 @@ static int gt_wtree_bench_bench_wtree(GtWtree *wt,
     tmp = gt_wtree_select(wt, pos, symbol);
     c = gt_wtree_encseq_unmap_decoded(wt, symbol);
     if (isprint(c))
-      printf("select %luth %c: at %lu\n", pos, c, tmp);
+      printf("select "GT_LU"th %c: at "GT_LU"\n", pos, c, tmp);
     else
-      printf("select %luth %d: at %lu\n", pos, c, tmp);
+      printf("select "GT_LU"th %d: at "GT_LU"\n", pos, c, tmp);
   }
   printf("\n");
   gt_free(max_ranks);

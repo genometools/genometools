@@ -19,7 +19,7 @@
 
 typedef struct {
   GthDbl exonscore;        /* the score of this exonnode */
-  unsigned long lengthofscoringexon; /* the length of the exon where the
+  GtUword lengthofscoringexon; /* the length of the exon where the
                                         exonscore came from */
 } Exonscoreinfo;
 
@@ -61,7 +61,7 @@ typedef enum
   of the exon to be processed.
 */
 
-Exonnode getcoreExonnodefromSA(GthSA *sa, unsigned long exonindex)
+Exonnode getcoreExonnodefromSA(GthSA *sa, GtUword exonindex)
 {
   Exonnode node;
   Exonscoreinfo scoreinfo;
@@ -261,7 +261,7 @@ static void mergerightside(Exonnode *nodeA, Exonnode *nodeB)
 
 static void mergenodes(Exonnode *nodeA, Exonnode *nodeB)
 {
-  unsigned long i;
+  GtUword i;
 
   gt_assert(nodesaremergeable(nodeA, nodeB));
 
@@ -286,7 +286,7 @@ static void mergenodes(Exonnode *nodeA, Exonnode *nodeB)
 
 static GthDbl computeexonscore(Exonnode *node)
 {
-  unsigned long i, maxlength = 0;
+  GtUword i, maxlength = 0;
   GthDbl maxscore = DBL_MIN;
   Exonscoreinfo *exonscoreinfo;
 
@@ -312,7 +312,7 @@ static GthDbl computeexonscore(Exonnode *node)
 
 static void addSAtoAGS(GthAGS *ags, GthSACluster *sacluster, GtArray *nodes)
 {
-  unsigned long i, currentnode = 0, currentexon = 0,
+  GtUword i, currentnode = 0, currentexon = 0,
                 numofexons = gth_sa_num_of_exons(sacluster->representative);
   Exonnode node;
 
@@ -371,7 +371,7 @@ static void addSAtoAGS(GthAGS *ags, GthSACluster *sacluster, GtArray *nodes)
 void gth_build_AGS_from_assembly(GthAGS *ags, GtBittab *assembly,
                                  GtArray *saclusters)
 {
-  unsigned long i;
+  GtUword i;
   GtArray *nodes;
   GthExonAGS exonAGS;
   GthSpliceSiteProb splicesiteprob;

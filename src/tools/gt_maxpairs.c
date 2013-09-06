@@ -37,7 +37,7 @@
 typedef struct
 {
   unsigned int userdefinedleastlength;
-  unsigned long samples;
+  GtUword samples;
   bool scanfile, beverbose, forward, reverse, searchspm, extendseed;
   GtStr *indexname;
   GtStrArray *queryfiles;
@@ -46,17 +46,17 @@ typedef struct
 
 static int gt_simpleexactselfmatchoutput(void *info,
                                          const GtEncseq *encseq,
-                                         unsigned long len,
-                                         unsigned long pos1,
-                                         unsigned long pos2,
+                                         GtUword len,
+                                         GtUword pos1,
+                                         GtUword pos2,
                                          GT_UNUSED GtError *err)
 {
-  unsigned long queryseqnum, seqstartpos, seqlength;
+  GtUword queryseqnum, seqstartpos, seqlength;
   GtQuerymatch *querymatch = (GtQuerymatch *) info;
 
   if (pos1 > pos2)
   {
-    unsigned long tmp = pos1;
+    GtUword tmp = pos1;
     pos1 = pos2;
     pos2 = tmp;
   }
@@ -89,26 +89,26 @@ typedef struct
   GtXdropscore belowscore;
   GtSeqabstract *useq, *vseq;
   const GtUchar *query_sequence;
-  unsigned long query_totallength;
+  GtUword query_totallength;
 } GtXdropmatchinfo;
 
 static int gt_simplexdropselfmatchoutput(void *info,
                                          const GtEncseq *encseq,
-                                         unsigned long len,
-                                         unsigned long pos1,
-                                         unsigned long pos2,
+                                         GtUword len,
+                                         GtUword pos1,
+                                         GtUword pos2,
                                          GtError *err)
 {
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
   GtXdropscore score;
-  unsigned long dbseqnum, dbseqstartpos, dbseqlength, dbstart, dblen,
+  GtUword dbseqnum, dbseqstartpos, dbseqlength, dbstart, dblen,
                 querystart, queryseqnum, querylen, queryseqlength,
                 queryseqstartpos;
-  const unsigned long dbtotallength = gt_encseq_total_length(encseq);
+  const GtUword dbtotallength = gt_encseq_total_length(encseq);
 
   if (pos1 > pos2)
   {
-    unsigned long tmp = pos1;
+    GtUword tmp = pos1;
     pos1 = pos2;
     pos2 = tmp;
   }
@@ -151,8 +151,8 @@ static int gt_simplexdropselfmatchoutput(void *info,
   }
   if (pos1 + len < dbtotallength && pos2 + len < dbtotallength)
   {
-    const unsigned long seqend1 = dbseqstartpos + dbseqlength;
-    const unsigned long seqend2 = queryseqstartpos + queryseqlength;
+    const GtUword seqend1 = dbseqstartpos + dbseqlength;
+    const GtUword seqend2 = queryseqstartpos + queryseqlength;
 
     gt_assert(seqend1 >= pos1 + len && seqend2 >= pos2 + len);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
@@ -173,8 +173,8 @@ static int gt_simplexdropselfmatchoutput(void *info,
     xdropmatchinfo->best_right.jvalue = 0;
     xdropmatchinfo->best_right.score = 0;
   }
-  gt_assert(pos1 >= (unsigned long) xdropmatchinfo->best_left.ivalue &&
-            pos2 >= (unsigned long) xdropmatchinfo->best_left.jvalue);
+  gt_assert(pos1 >= (GtUword) xdropmatchinfo->best_left.ivalue &&
+            pos2 >= (GtUword) xdropmatchinfo->best_left.jvalue);
   querystart = pos2 - xdropmatchinfo->best_left.jvalue;
   gt_assert(querystart >= queryseqstartpos);
   dblen = len + xdropmatchinfo->best_left.ivalue
@@ -214,18 +214,18 @@ static int gt_processxdropquerymatches(void *info,
                                        const GtEncseq *encseq,
                                        const GtQuerymatch *querymatch,
                                        const GtUchar *query,
-                                       unsigned long query_totallength,
+                                       GtUword query_totallength,
                                        GtError *err)
 {
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
   GtXdropscore score;
-  unsigned long querystart, dblen, dbstart, querylen;
-  unsigned long pos1 = gt_querymatch_dbstart(querymatch);
-  unsigned long pos2 = gt_querymatch_querystart(querymatch);
-  unsigned long len = gt_querymatch_querylen(querymatch);
-  const unsigned long dbtotallength = gt_encseq_total_length(encseq);
+  GtUword querystart, dblen, dbstart, querylen;
+  GtUword pos1 = gt_querymatch_dbstart(querymatch);
+  GtUword pos2 = gt_querymatch_querystart(querymatch);
+  GtUword len = gt_querymatch_querylen(querymatch);
+  const GtUword dbtotallength = gt_encseq_total_length(encseq);
   uint64_t queryseqnum;
-  unsigned long dbseqnum, dbseqstartpos, dbseqlength;
+  GtUword dbseqnum, dbseqstartpos, dbseqlength;
 
   dbseqnum = gt_encseq_seqnum(encseq,pos1);
   dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
@@ -271,8 +271,8 @@ static int gt_processxdropquerymatches(void *info,
     xdropmatchinfo->best_right.jvalue = 0;
     xdropmatchinfo->best_right.score = 0;
   }
-  gt_assert(pos1 >= (unsigned long) xdropmatchinfo->best_left.ivalue &&
-            pos2 >= (unsigned long) xdropmatchinfo->best_left.jvalue);
+  gt_assert(pos1 >= (GtUword) xdropmatchinfo->best_left.ivalue &&
+            pos2 >= (GtUword) xdropmatchinfo->best_left.jvalue);
   querystart = pos2 - xdropmatchinfo->best_left.jvalue;
   queryseqnum = gt_querymatch_queryseqnum(querymatch);
   dblen = len + xdropmatchinfo->best_left.ivalue
@@ -308,16 +308,16 @@ static int gt_processxdropquerymatches(void *info,
 
 static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
                                             const GtEncseq *encseq,
-                                            unsigned long matchlen,
-                                            unsigned long pos1,
-                                            unsigned long pos2,
+                                            GtUword matchlen,
+                                            GtUword pos1,
+                                            GtUword pos2,
                                             GT_UNUSED GtError *err)
 {
-  unsigned long seqnum1, relpos1, seqnum2, relpos2, seqstartpos;
+  GtUword seqnum1, relpos1, seqnum2, relpos2, seqstartpos;
 
   if (pos1 > pos2)
   {
-    unsigned long tmp = pos1;
+    GtUword tmp = pos1;
     pos1 = pos2;
     pos2 = tmp;
   }
@@ -331,21 +331,21 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
   relpos2 = pos2 - seqstartpos;
   if (relpos1 == 0)
   {
-    unsigned long seqlen2 = gt_encseq_seqlength(encseq,seqnum2);
+    GtUword seqlen2 = gt_encseq_seqlength(encseq,seqnum2);
 
     if (relpos2 + matchlen == seqlen2)
     {
-      printf("%lu %lu %lu\n",seqnum2,seqnum1,matchlen);
+      printf(""GT_LU" "GT_LU" "GT_LU"\n",seqnum2,seqnum1,matchlen);
     }
   } else
   {
     if (relpos2 == 0)
     {
-      unsigned long seqlen1 = gt_encseq_seqlength(encseq,seqnum1);
+      GtUword seqlen1 = gt_encseq_seqlength(encseq,seqnum1);
 
       if (relpos1 + matchlen == seqlen1)
       {
-        printf("%lu %lu %lu\n",seqnum1,seqnum2,matchlen);
+        printf(""GT_LU" "GT_LU" "GT_LU"\n",seqnum1,seqnum2,matchlen);
       }
     }
   }
@@ -588,7 +588,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
         if (gt_testmaxpairs(gt_str_get(arguments->indexname),
                             arguments->samples,
                             arguments->userdefinedleastlength,
-                            (unsigned long)
+                            (GtUword)
                             (100 * arguments->userdefinedleastlength),
                             logger,
                             err) != 0)

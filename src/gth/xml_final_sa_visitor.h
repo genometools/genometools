@@ -26,9 +26,9 @@ typedef struct GthXMLFinalSAVisitor GthXMLFinalSAVisitor;
 
 const GthSAVisitorClass* gth_xml_final_sa_visitor_class(void);
 GthSAVisitor*            gth_xml_final_sa_visitor_new(GthInput*,
-                                                      unsigned long
+                                                      GtUword
                                                       minintronlength,
-                                                      unsigned long
+                                                      GtUword
                                                       translationtable,
                                                       unsigned int indentlevel,
                                                       GtFile *outfp);

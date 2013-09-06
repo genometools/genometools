@@ -18,13 +18,11 @@
 #ifndef BYTE_SELECT_API_H
 #define BYTE_SELECT_API_H
 
-#include <stdint.h>
-
 /* ByteSelect module */
 
 /* Contains 256 * 8 select values, Entry at index 256 * <j> + <i> equals the
    position of the (<j> + 1)-th set bit in byte <i>. Positions lie in the range
    [0..7]. Returns 8 if byte <i> contains less than <j> set bits. */
-extern const uint8_t gt_byte_select[2048];
+extern const unsigned char gt_byte_select[2048];
 
 #endif

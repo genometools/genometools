@@ -25,11 +25,11 @@
 struct GtOBOStanza {
   char *type;
   GtHashmap *content;
-  unsigned long line;
+  GtUword line;
   GtStr *filename;
 };
 
-GtOBOStanza* gt_obo_stanza_new(const char *type, unsigned long line,
+GtOBOStanza* gt_obo_stanza_new(const char *type, GtUword line,
                                GtStr *filename)
 {
   GtOBOStanza *obo_stanza = gt_malloc(sizeof *obo_stanza);
@@ -72,7 +72,7 @@ const char* gt_obo_stanza_get_type(const GtOBOStanza *obo_stanza)
 
 const char* gt_obo_stanza_get_value(const GtOBOStanza *obo_stanza,
                                     const char *stanza_key,
-                                    unsigned long num)
+                                    GtUword num)
 {
   GtStrArray *sa;
   gt_assert(obo_stanza);
@@ -81,7 +81,7 @@ const char* gt_obo_stanza_get_value(const GtOBOStanza *obo_stanza,
   return NULL;
 }
 
-unsigned long gt_obo_stanza_size(const GtOBOStanza *obo_stanza,
+GtUword gt_obo_stanza_size(const GtOBOStanza *obo_stanza,
                                  const char *stanza_key)
 {
   GtStrArray *sa;
@@ -97,7 +97,7 @@ const char* gt_obo_stanza_filename(const GtOBOStanza *obo_stanza)
   return gt_str_get(obo_stanza->filename);
 }
 
-unsigned long gt_obo_stanza_line(const GtOBOStanza *obo_stanza)
+GtUword gt_obo_stanza_line(const GtOBOStanza *obo_stanza)
 {
   gt_assert(obo_stanza);
   return obo_stanza->line;

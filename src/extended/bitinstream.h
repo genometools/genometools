@@ -35,7 +35,7 @@ typedef struct GtBitInStream GtBitInStream;
    a time. If <path> is not valid exits with <EXIT_FAILURE>. */
 GtBitInStream* gt_bitinstream_new(const char *path,
                                   size_t offset,
-                                  unsigned long pages_to_map);
+                                  GtUword pages_to_map);
 
 /* Tells <bitstream> to remap the file with a new offset. */
 void           gt_bitinstream_reinit(GtBitInStream *bitstream,

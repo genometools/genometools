@@ -21,7 +21,7 @@
 
 struct BWTSeqContextRetriever
 {
-  unsigned long mapInterval, mapMask;
+  GtUword mapInterval, mapMask;
   const BWTSeq *bwtSeq;
   BitString revMapMMap,         /**< holds the page aligned result
                                  * from mmap, later used in munmap  */
@@ -31,7 +31,7 @@ struct BWTSeqContextRetriever
   uint16_t bitsPerUlong;
 };
 
-static inline unsigned long
-numMapEntries(unsigned long seqLen, unsigned short mapIntervalLog2);
+static inline GtUword
+numMapEntries(GtUword seqLen, unsigned short mapIntervalLog2);
 
 #endif

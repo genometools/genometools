@@ -630,14 +630,14 @@ void anno_db_gfflike_free(GtAnnoDBSchema *s)
 }
 
 /* for the node->id cache */
-DECLARE_HASHMAP(GtFeatureNode*, node, unsigned long, ul, static, inline)
-DEFINE_HASHMAP(GtFeatureNode*, node, unsigned long, ul, gt_ht_ptr_elem_hash,
+DECLARE_HASHMAP(GtFeatureNode*, node, GtUword, ul, static, inline)
+DEFINE_HASHMAP(GtFeatureNode*, node, GtUword, ul, gt_ht_ptr_elem_hash,
                gt_ht_ptr_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
 /* for the id->node cache */
-DECLARE_HASHMAP(unsigned long, ul, GtFeatureNode*, node, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, GtFeatureNode*, node, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(GtUword, ul, GtFeatureNode*, node, static, inline)
+DEFINE_HASHMAP(GtUword, ul, GtFeatureNode*, node, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
@@ -742,12 +742,12 @@ static int set_parents(void *key, void *value, void *data,
                 *parent = NULL;
   GtArray *parent_array = (GtArray*) value;
   GtFeatureIndexGFFlike *fi = (GtFeatureIndexGFFlike*) data;
-  unsigned long *num, *parent_id;
+  GtUword *num, *parent_id;
 
   num = node_ul_gt_hashmap_get(fi->cache_node2id, fn);
   gt_assert(num);
   if (parent_array && gt_array_size(parent_array)) {
-    unsigned long i;
+    GtUword i;
     int rval = 0;
     for (i=0;i<gt_array_size(parent_array);i++) {
       if (rval < 0) {
@@ -769,13 +769,13 @@ static int set_parents(void *key, void *value, void *data,
 }
 
 static int insert_single_node(GtFeatureIndexGFFlike *fi,
-                              unsigned long *id,
+                              GtUword *id,
                               GtFeatureNode *fn,
                               GtError *err)
 {
   GtRange rng;
   GtStrArray *attribs;
-  unsigned long i, *myid;
+  GtUword i, *myid;
   int type_id           = GT_UNDEF_INT,
       source_id         = GT_UNDEF_INT,
       sequenceregion_id = GT_UNDEF_INT,
@@ -846,7 +846,7 @@ static int insert_single_node(GtFeatureIndexGFFlike *fi,
     GtFeatureNode *rep;
     multi = 1;
     if ((rep = gt_feature_node_get_multi_representative(fn)) != fn) {
-      unsigned long *multi_rep_id;
+      GtUword *multi_rep_id;
       multi_rep_id = node_ul_gt_hashmap_get(fi->cache_node2id, rep);
       gt_assert(multi_rep_id);
       multi_rep = *multi_rep_id;
@@ -895,7 +895,7 @@ static int insert_feature_node(GtFeatureIndexGFFlike *fi,
   GtFeatureNodeIterator *fni;
   GtFeatureNode *toplevel;
   int had_err = 0;
-  unsigned long num;
+  GtUword num;
 
   /* TODO: locking! subgraph insertion is a transaction
       we also need to avoid nesting */
@@ -941,7 +941,7 @@ static void node_attribute_change_callback(GtFeatureNode *changed,
                                            GT_UNUSED const char *value,
                                            void *data)
 {
-  unsigned long *id;
+  GtUword *id;
   ObserverCallbackInfo *info = (ObserverCallbackInfo*) data;
   gt_assert(changed);
   if ((id = node_ul_gt_hashmap_get(info->fis->cache_node2id, changed))) {
@@ -953,7 +953,7 @@ static void node_attribute_delete_callback(GtFeatureNode *changed,
                                            GT_UNUSED const char *key,
                                            GT_UNUSED void *data)
 {
-  unsigned long *id;
+  GtUword *id;
   ObserverCallbackInfo *info = (ObserverCallbackInfo*) data;
   gt_assert(changed);
   if ((id = node_ul_gt_hashmap_get(info->fis->cache_node2id, changed))) {
@@ -966,7 +966,7 @@ static int node_child_add_callback(GtFeatureNode *parent,
                                    void *data)
 {
   int had_err = 0;
-  unsigned long *id, *child_id;
+  GtUword *id, *child_id;
   ObserverCallbackInfo *info = (ObserverCallbackInfo*) data;
   gt_assert(parent && child);
 
@@ -983,7 +983,7 @@ static void node_score_changed_callback(GtFeatureNode *changed,
                                         GT_UNUSED double score,
                                         void *data)
 {
-  unsigned long *id;
+  GtUword *id;
   ObserverCallbackInfo *info = (ObserverCallbackInfo*) data;
   gt_assert(changed);
   if ((id = node_ul_gt_hashmap_get(info->fis->cache_node2id, changed))) {
@@ -995,7 +995,7 @@ static void node_phase_changed_callback(GtFeatureNode *changed,
                                         GT_UNUSED GtPhase phase,
                                         void *data)
 {
-  unsigned long *id;
+  GtUword *id;
   ObserverCallbackInfo *info = (ObserverCallbackInfo*) data;
   if ((id = node_ul_gt_hashmap_get(info->fis->cache_node2id, changed))) {
     gt_hashmap_add(info->fis->changed, changed, (void*) 1);
@@ -1006,7 +1006,7 @@ static void node_strand_changed_callback(GtFeatureNode *changed,
                                          GT_UNUSED GtStrand strand,
                                          void *data)
 {
-  unsigned long *id;
+  GtUword *id;
   ObserverCallbackInfo *info = (ObserverCallbackInfo*) data;
   if ((id = node_ul_gt_hashmap_get(info->fis->cache_node2id, changed))) {
     gt_hashmap_add(info->fis->changed, changed, (void*) 1);
@@ -1031,10 +1031,10 @@ int gt_feature_index_gfflike_add_feature_node(GtFeatureIndex *gfi,
   return had_err;
 }
 
-static int remove_node_by_id(GtFeatureIndexGFFlike *fis, unsigned long id,
+static int remove_node_by_id(GtFeatureIndexGFFlike *fis, GtUword id,
                              GtError *err)
 {
-  unsigned long parent_count;
+  GtUword parent_count;
   int had_err = 0;
 
   if (had_err >= 0) {
@@ -1118,7 +1118,7 @@ static int gt_feature_index_gfflike_save_del(void *key, GT_UNUSED void *val,
 {
   GtFeatureNode *fn = (GtFeatureNode*) key;
   GtFeatureNodeIterator *it;
-  unsigned long *id;
+  GtUword *id;
   ObserverCallbackInfo *oci = (ObserverCallbackInfo*) data;
   int had_err = 0;
 
@@ -1150,7 +1150,7 @@ static int gt_feature_index_gfflike_save_add(void *key, GT_UNUSED void *val,
 
 typedef struct {
   GtFeatureIndexGFFlike *fis;
-  unsigned long id;
+  GtUword id;
   GtError *err;
 } GFFlikeAttributeInfo;
 
@@ -1172,7 +1172,7 @@ static int gt_feature_index_gfflike_save_chg(void *key, GT_UNUSED void *val,
                                              void *data, GtError *err)
 {
   GtFeatureNode *fn = (GtFeatureNode*) key, *child;
-  unsigned long *id;
+  GtUword *id;
   ObserverCallbackInfo *oci = (ObserverCallbackInfo*) data;
   GFFlikeAttributeInfo ai;
   GtFeatureNodeIterator *fni;
@@ -1226,7 +1226,7 @@ static int gt_feature_index_gfflike_save_chg(void *key, GT_UNUSED void *val,
                             err);
     fni = gt_feature_node_iterator_new_direct(fn);
     while ((child = gt_feature_node_iterator_next(fni))) {
-      unsigned long *child_id;
+      GtUword *child_id;
       if ((child_id = node_ul_gt_hashmap_get(oci->fis->cache_node2id, child))) {
         gt_rdb_stmt_reset(oci->fis->stmts[GT_PSTMT_PARENT_INSERT], err);
         gt_rdb_stmt_bind_int(oci->fis->stmts[GT_PSTMT_PARENT_INSERT],
@@ -1301,13 +1301,13 @@ static int get_nodes_for_stmt(GtFeatureIndexGFFlike *fi,
 {
   GtRDBStmt *attr_stmt, *parent_stmt;
   int had_err = 0;
-  unsigned long i;
+  GtUword i;
   GtArray *nodes;
   bool is_child;
   gt_assert(fi && results && stmt);
   attr_stmt = fi->stmts[GT_PSTMT_GET_ATTRIBUTE_SELECT];
   parent_stmt = fi->stmts[GT_PSTMT_GET_PARENTS_SELECT];
-  nodes = gt_array_new(sizeof (unsigned long));
+  nodes = gt_array_new(sizeof (GtUword));
   HashElemInfo node_hashtype = {
     gt_ht_ptr_elem_hash,
     { NULL },
@@ -1318,7 +1318,7 @@ static int get_nodes_for_stmt(GtFeatureIndexGFFlike *fi,
   GtHashtable *seen_as_children = gt_hashtable_new(node_hashtype);
 
   while (!had_err && gt_rdb_stmt_exec(stmt, err) == 0) {
-    unsigned long id = GT_UNDEF_ULONG, multi_rep = GT_UNDEF_ULONG, *idp;
+    GtUword id = GT_UNDEF_ULONG, multi_rep = GT_UNDEF_ULONG, *idp;
     int phase, is_multi = 0, strand = GT_STRAND_UNKNOWN;
     GtGenomeNode *newgn;
     GtFeatureNode *newfn;
@@ -1402,7 +1402,7 @@ static int get_nodes_for_stmt(GtFeatureIndexGFFlike *fi,
 
   /* rebuild DAG */
   for (i=0;i<gt_array_size(nodes);i++) {
-    unsigned long id = *(unsigned long*) gt_array_get(nodes, i);
+    GtUword id = *(GtUword*) gt_array_get(nodes, i);
     is_child = false;
     GtFeatureNode *newfn = *(GtFeatureNode**)
                                   ul_node_gt_hashmap_get(fi->cache_id2node, id);
@@ -1411,7 +1411,7 @@ static int get_nodes_for_stmt(GtFeatureIndexGFFlike *fi,
     gt_rdb_stmt_reset(parent_stmt, err);
     gt_rdb_stmt_bind_ulong(parent_stmt, 0, id, err);
     while (gt_rdb_stmt_exec(parent_stmt, err) == 0) {
-      unsigned long par_id;
+      GtUword par_id;
       GtFeatureNode *parent;
       is_child = true;
       gt_rdb_stmt_get_ulong(parent_stmt, 0, &par_id, err);
@@ -1431,7 +1431,7 @@ static int get_nodes_for_stmt(GtFeatureIndexGFFlike *fi,
     }
   }
   for (i=0;i<gt_array_size(nodes);i++) {
-    unsigned long id = *(unsigned long*) gt_array_get(nodes, i);
+    GtUword id = *(GtUword*) gt_array_get(nodes, i);
     GtFeatureNode *newfn = *(GtFeatureNode**)
                                   ul_node_gt_hashmap_get(fi->cache_id2node, id);
     gt_feature_node_set_observer(newfn, fi->obs);
@@ -1647,7 +1647,7 @@ static void unregister_observers(GtFeatureIndexGFFlike *fis, GtError *err)
 void gt_feature_index_gfflike_delete(GtFeatureIndex *gfi)
 {
   GtFeatureIndexGFFlike *fi;
-  unsigned long i;
+  GtUword i;
   if (!gfi) return;
   fi = feature_index_gfflike_cast(gfi);
   for (i=0;i<GT_PSTMT_NOF_STATEMENTS;i++) {

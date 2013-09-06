@@ -21,10 +21,10 @@
 #include "core/safecast-gen.h"
 #include "fmindex.h"
 
-unsigned long gt_determinenumberofspecialstostore(const GtSpecialcharinfo
+GtUword gt_determinenumberofspecialstostore(const GtSpecialcharinfo
                                                         *specialcharinfo)
 {
-  unsigned long addprefixsuffix = 0;
+  GtUword addprefixsuffix = 0;
 
   if (specialcharinfo->lengthofspecialprefix > 0)
   {
@@ -37,7 +37,7 @@ unsigned long gt_determinenumberofspecialstostore(const GtSpecialcharinfo
   return specialcharinfo->realspecialranges + 1 - addprefixsuffix;
 }
 
-static unsigned long determinefmindexsize (const Fmindex *fm,
+static GtUword determinefmindexsize (const Fmindex *fm,
                                            const GtSpecialcharinfo
                                               *specialcharinfo,
                                            unsigned int suffixlength,
@@ -46,12 +46,12 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
   uint64_t sumsize = 0;
 
   sumsize +=
-          (uint64_t) sizeof (unsigned long) * (uint64_t) TFREQSIZE(fm->mapsize);
-  sumsize += (uint64_t) sizeof (unsigned long) *
+          (uint64_t) sizeof (GtUword) * (uint64_t) TFREQSIZE(fm->mapsize);
+  sumsize += (uint64_t) sizeof (GtUword) *
              (uint64_t) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks);
   if (storeindexpos)
   {
-    sumsize += (uint64_t) sizeof (unsigned long) *
+    sumsize += (uint64_t) sizeof (GtUword) *
                (uint64_t) MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist);
   }
   if (suffixlength > 0)
@@ -70,7 +70,7 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
 
 void gt_computefmkeyvalues (Fmindex *fm,
                             const GtSpecialcharinfo *specialcharinfo,
-                            unsigned long bwtlength,
+                            GtUword bwtlength,
                             unsigned int log2bsize,
                             unsigned int log2markdist,
                             unsigned int numofchars,
@@ -85,12 +85,12 @@ void gt_computefmkeyvalues (Fmindex *fm,
   fm->bsize = (unsigned int) GT_POW2 (fm->log2bsize);
   fm->bsizehalve = GT_DIV2(fm->bsize);
   fm->superbsize = (unsigned int) GT_POW2 (fm->log2superbsize);
-  fm->nofblocks = (unsigned long) (fm->bwtlength / fm->bsize) + 1;
-  fm->nofsuperblocks = (unsigned long) (fm->bwtlength / fm->superbsize) + 2;
-  fm->markdist = (unsigned long) GT_POW2 (fm->log2markdist);
-  fm->markdistminus1 = (unsigned long) (fm->markdist - 1);
-  fm->negatebsizeones = ~ (unsigned long) (fm->bsize - 1);
-  fm->negatesuperbsizeones = ~ (unsigned long) (fm->superbsize - 1);
+  fm->nofblocks = (GtUword) (fm->bwtlength / fm->bsize) + 1;
+  fm->nofsuperblocks = (GtUword) (fm->bwtlength / fm->superbsize) + 2;
+  fm->markdist = (GtUword) GT_POW2 (fm->log2markdist);
+  fm->markdistminus1 = (GtUword) (fm->markdist - 1);
+  fm->negatebsizeones = ~ (GtUword) (fm->bsize - 1);
+  fm->negatesuperbsizeones = ~ (GtUword) (fm->superbsize - 1);
   fm->log2superbsizeminuslog2bsize = fm->log2superbsize - fm->log2bsize;
   fm->mapsize = numofchars+1;
   fm->suffixlength = suffixlength;

@@ -47,7 +47,7 @@ struct GtLTRdigestPBSVisitor{
   GtRegionMapping *rmap;
   GtStr *tag;
   GtFeatureNode *ltr_retrotrans;
-  unsigned long leftLTR_3,
+  GtUword leftLTR_3,
                 rightLTR_5,
                 leftltrlen,
                 rightltrlen;
@@ -68,7 +68,7 @@ typedef struct {
 } GtPBSResults;
 
 typedef struct {
-  unsigned long start,
+  GtUword start,
                 end,
                 edist,
                 offset,
@@ -80,11 +80,11 @@ typedef struct {
   GtPBSResults *res;
 } GtPBSHit;
 
-static GtPBSHit* gt_pbs_hit_new(unsigned long alilen, GtStrand strand,
-                                const char *tRNA, unsigned long tstart,
-                                unsigned long start, unsigned long end,
-                                unsigned long offset,
-                                unsigned long edist, double score,
+static GtPBSHit* gt_pbs_hit_new(GtUword alilen, GtStrand strand,
+                                const char *tRNA, GtUword tstart,
+                                GtUword start, GtUword end,
+                                GtUword offset,
+                                GtUword edist, double score,
                                 GtPBSResults *r)
 {
   GtPBSHit *hit = gt_malloc(sizeof (GtPBSHit));
@@ -132,7 +132,7 @@ static GtRange gt_pbs_hit_get_coords(GtLTRdigestPBSVisitor *lv,
   return rng;
 }
 
-static unsigned long gt_pbs_hit_get_offset(const GtPBSHit *h)
+static GtUword gt_pbs_hit_get_offset(const GtPBSHit *h)
 {
   gt_assert(h);
   return h->offset;
@@ -144,7 +144,7 @@ static double gt_pbs_hit_get_score(const GtPBSHit *h)
   return h->score;
 }
 
-static unsigned long gt_pbs_hit_get_edist(const GtPBSHit *h)
+static GtUword gt_pbs_hit_get_edist(const GtPBSHit *h)
 {
   gt_assert(h);
   return h->edist;
@@ -156,7 +156,7 @@ static const char* gt_pbs_hit_get_trna(const GtPBSHit *h)
   return h->trna;
 }
 
-static unsigned long gt_pbs_hit_get_tstart(const GtPBSHit *h)
+static GtUword gt_pbs_hit_get_tstart(const GtPBSHit *h)
 {
   gt_assert(h);
   return h->tstart;
@@ -168,14 +168,14 @@ static GtStrand gt_pbs_hit_get_strand(const GtPBSHit *h)
   return h->strand;
 }
 
-static unsigned long gt_pbs_results_get_number_of_hits(const GtPBSResults *r)
+static GtUword gt_pbs_results_get_number_of_hits(const GtPBSResults *r)
 {
   gt_assert(r);
   return gt_array_size(r->hits);
 }
 
 static GtPBSHit* gt_pbs_results_get_ranked_hit(const GtPBSResults *r,
-                                               unsigned long i)
+                                               GtUword i)
 {
   gt_assert(r);
   return *(GtPBSHit**) gt_array_get(r->hits, i);
@@ -203,9 +203,9 @@ static GtScoreFunction* gt_dna_scorefunc_new(GtAlphabet *a, int match,
   return sf;
 }
 
-static double gt_pbs_score_func(unsigned long edist, unsigned long offset,
-                                unsigned long alilen, unsigned long trnalen,
-                                unsigned long trna_offset)
+static double gt_pbs_score_func(GtUword edist, GtUword offset,
+                                GtUword alilen, GtUword trnalen,
+                                GtUword trna_offset)
 {
   double penalties;
   if (edist == 0 || offset == 0)
@@ -217,7 +217,7 @@ static double gt_pbs_score_func(unsigned long edist, unsigned long offset,
           /penalties;
 }
 
-static inline unsigned long gt_ulongabs(unsigned long nr1, unsigned long nr2)
+static inline GtUword gt_ulongabs(GtUword nr1, GtUword nr2)
 {
   if (nr1 == nr2) return 0UL;
   if (nr1 > nr2)
@@ -227,12 +227,12 @@ static inline unsigned long gt_ulongabs(unsigned long nr1, unsigned long nr2)
 }
 
 static void gt_pbs_add_hit(GtLTRdigestPBSVisitor *lv, GtArray *hitlist,
-                           GtAlignment *ali, unsigned long trna_seqlen,
+                           GtAlignment *ali, GtUword trna_seqlen,
                            const char *desc, GtStrand strand, GtPBSResults *r)
 {
-  unsigned long dist;
+  GtUword dist;
   GtPBSHit *hit;
-  unsigned long offset, alilen;
+  GtUword offset, alilen;
   GtRange urange, vrange;
   gt_assert(hitlist && desc);
 
@@ -242,10 +242,10 @@ static void gt_pbs_add_hit(GtLTRdigestPBSVisitor *lv, GtArray *hitlist,
   dist = gt_alignment_eval(ali);
   urange = gt_alignment_get_urange(ali);
   vrange = gt_alignment_get_vrange(ali);
-  offset = gt_ulongabs((unsigned long) lv->radius, urange.start);
+  offset = gt_ulongabs((GtUword) lv->radius, urange.start);
   alilen = gt_ulongabs(urange.end, urange.start)+1;
 
-  if (dist <= (unsigned long) lv->max_edist
+  if (dist <= (GtUword) lv->max_edist
         && offset <= lv->offsetlen.end
         && offset >= lv->offsetlen.start
         && alilen <= lv->alilen.end
@@ -283,7 +283,7 @@ static GtPBSResults* gt_pbs_find(GtLTRdigestPBSVisitor *lv, const char *seq,
 {
   GtSeq *seq_forward, *seq_rev;
   GtPBSResults *results;
-  unsigned long j;
+  GtUword j;
   GtAlignment *ali;
   GtAlphabet *a = gt_alphabet_new_dna();
   GtScoreFunction *sf;
@@ -296,19 +296,19 @@ static GtPBSResults* gt_pbs_find(GtLTRdigestPBSVisitor *lv, const char *seq,
 
   seq_forward = gt_seq_new(seq + (lv->leftltrlen)
                                - (lv->radius),
-                           (unsigned long) (2 * lv->radius + 1),
+                           (GtUword) (2 * lv->radius + 1),
                            a);
 
   seq_rev     = gt_seq_new(rev_seq + (lv->rightltrlen)
                                    - (lv->radius),
-                           (unsigned long) (2 * lv->radius + 1),
+                           (GtUword) (2 * lv->radius + 1),
                            a);
 
   for (j = 0; j < gt_bioseq_number_of_sequences(lv->trna_lib); j++)
   {
     GtSeq *trna_seq, *trna_from3;
     char *trna_from3_full;
-    unsigned long trna_seqlen;
+    GtUword trna_seqlen;
 
     trna_seq = gt_bioseq_get_seq(lv->trna_lib, j);
     trna_seqlen = gt_seq_length(trna_seq);
@@ -344,7 +344,7 @@ static GtPBSResults* gt_pbs_find(GtLTRdigestPBSVisitor *lv, const char *seq,
 
 static void gt_pbs_results_delete(GtPBSResults *results)
 {
-    unsigned long i;
+    GtUword i;
     if (!results) return;
     if (results->hits != NULL)
     {
@@ -364,7 +364,7 @@ static void pbs_attach_results_to_gff3(GtLTRdigestPBSVisitor *lv,
                                        GtStrand *canonical_strand)
 {
   GtRange pbs_range;
-  unsigned long i = 0;
+  GtUword i = 0;
   GtGenomeNode *gf;
   char buffer[BUFSIZ];
   GtPBSHit* hit = gt_pbs_results_get_ranked_hit(results, i++);
@@ -401,11 +401,11 @@ static void pbs_attach_results_to_gff3(GtLTRdigestPBSVisitor *lv,
                                    gt_pbs_hit_get_trna(hit));
   }
   gt_feature_node_set_strand(mainnode, gt_pbs_hit_get_strand(hit));
-  (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_tstart(hit));
+  (void) snprintf(buffer, BUFSIZ-1, ""GT_LU"", gt_pbs_hit_get_tstart(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf, "trnaoffset", buffer);
-  (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_offset(hit));
+  (void) snprintf(buffer, BUFSIZ-1, ""GT_LU"", gt_pbs_hit_get_offset(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf, "pbsoffset", buffer);
-  (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_edist(hit));
+  (void) snprintf(buffer, BUFSIZ-1, ""GT_LU"", gt_pbs_hit_get_edist(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf, "edist", buffer);
 
   gt_feature_node_add_child(mainnode, (GtFeatureNode*) gf);
@@ -457,7 +457,7 @@ static int gt_ltrdigest_pbs_visitor_feature_node(GtNodeVisitor *nv,
     char *rev_seq;
     GtRange rng;
     GtStrand canonical_strand = gt_feature_node_get_strand(lv->ltr_retrotrans);
-    unsigned long seqlen;
+    GtUword seqlen;
     GtStr *seq = gt_str_new();
     rng = gt_genome_node_get_range((GtGenomeNode*) lv->ltr_retrotrans);
     seqlen = gt_range_length(&rng);
@@ -613,7 +613,7 @@ int gt_ltrdigest_pbs_visitor_unit_test(GT_UNUSED GtError *err)
   memcpy(seq,     fullseq + 20, (size_t) 600);
   memcpy(rev_seq, fullseq + 20, (size_t) 600);
   gt_ensure(
-            !gt_reverse_complement(rev_seq, (unsigned long) 600, NULL));
+            !gt_reverse_complement(rev_seq, (GtUword) 600, NULL));
 
   /* try to find PBS in sequences */
   res = gt_pbs_find(seq, rev_seq, &element, &o, err);

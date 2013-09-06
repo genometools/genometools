@@ -45,7 +45,7 @@ GtNodeStream* gt_ltr_refseq_match_stream_new(GtNodeStream *in_stream,
                                              const char *moreblast,
                                              bool flcands,
                                              double min_ali_len_perc,
-                                             unsigned long params_id,
+                                             GtUword params_id,
                                              const char *source,
                                              GtError *err);
 

@@ -290,7 +290,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
   GtArray *alignmentstodelete;
   bool discard = false,
        replace = false;
-  unsigned long i;
+  GtUword i;
 
   /* filter */
   if (sa_filter) {
@@ -432,7 +432,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
 }
 
 static int storealignmentptr(void* data, GtRBTreeContext which,
-                             GT_UNUSED unsigned long depth, void *actinfo)
+                             GT_UNUSED GtUword depth, void *actinfo)
 {
   GthSA *sa = (GthSA*) data;
   GtArray *alignments = (GtArray*) actinfo;
@@ -467,7 +467,7 @@ bool gth_sa_collections_are_equal(const GthSACollection *sa_collectionA,
                                   const GthSACollection *sa_collectionB)
 {
   GtArray *alignments_from_A, *alignments_from_B;
-  unsigned long i;
+  GtUword i;
 
   /* compute arrays of SAs from the trees */
   alignments_from_A = sa_collection_get_alignments(sa_collectionA);
@@ -507,7 +507,7 @@ void gth_sa_collection_traverse(const GthSACollection *sa_collection,
                                 GthSAVisitor *sa_visitor, GthInput *input)
 {
   GthSACollectionIterator *iterator;
-  unsigned long num_of_sas = 0;
+  GtUword num_of_sas = 0;
   GthSA *sa;
   gt_assert(sa_collection && sa_visitor && input);
   gth_sa_visitor_preface(sa_visitor);
@@ -551,7 +551,7 @@ void gth_sa_collection_delete(GthSACollection *sa_collection)
 
 struct GthSACollectionIterator {
   GtArray *alignments;
-  unsigned long counter;
+  GtUword counter;
 };
 
 GthSACollectionIterator* gth_sa_collection_iterator_new(const GthSACollection

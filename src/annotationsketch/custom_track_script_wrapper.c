@@ -43,7 +43,7 @@ int gt_custom_track_script_wrapper_sketch(GtCustomTrack *ct,
   return cte->render_func(graphics, start_ypos, &viewrange, style, err);
 }
 
-unsigned long gt_custom_track_script_wrapper_get_height(GtCustomTrack *ct)
+GtUword gt_custom_track_script_wrapper_get_height(GtCustomTrack *ct)
 {
   GtCustomTrackScriptWrapper *cte;
   cte = gt_custom_track_script_wrapper_cast(ct);

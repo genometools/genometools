@@ -28,8 +28,8 @@ void                gth_chain_collection_delete(GthChainCollection*);
 void                gth_chain_collection_add(GthChainCollection*,
                                              GthChain *chain);
 void                gth_chain_collection_sort(GthChainCollection*);
-unsigned long       gth_chain_collection_size(const GthChainCollection*);
+GtUword       gth_chain_collection_size(const GthChainCollection*);
 GthChain*           gth_chain_collection_get(const GthChainCollection*,
-                                             unsigned long);
+                                             GtUword);
 
 #endif

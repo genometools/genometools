@@ -94,9 +94,9 @@ bool gt_file_is_newer(const char *a, const char *b)
   return false;
 }
 
-unsigned long gt_file_number_of_lines(const char *path)
+GtUword gt_file_number_of_lines(const char *path)
 {
-  unsigned long number_of_lines = 0;
+  GtUword number_of_lines = 0;
   GtFile *fp;
   int cc;
   gt_assert(path);
@@ -124,14 +124,14 @@ const char* gt_file_suffix(const char *path)
 
 void gt_file_dirname(GtStr *path, const char *file)
 {
-  long i;
+  GtWord i;
   gt_str_reset(path);
-  for (i = (long) (strlen(file) - 1); i >= 0; i--) {
+  for (i = (GtWord) (strlen(file) - 1); i >= 0; i--) {
     if (file[i] == '/')
       break;
   }
   if (i > 0)
-    gt_str_append_cstr_nt(path, file, (unsigned long) i);
+    gt_str_append_cstr_nt(path, file, (GtUword) i);
 }
 
 static int file_find_in_env_generic(GtStr *path, const char *file,
@@ -140,7 +140,7 @@ static int file_find_in_env_generic(GtStr *path, const char *file,
 {
   char *pathvariable, *pathcomponent = NULL;
   GtSplitter *splitter = NULL;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
 
   gt_error_check(err);
@@ -163,7 +163,7 @@ static int file_find_in_env_generic(GtStr *path, const char *file,
   if (!had_err) {
     splitter = gt_splitter_new();
     gt_splitter_split(splitter, pathvariable,
-                      (unsigned long) strlen(pathvariable), ':');
+                      (GtUword) strlen(pathvariable), ':');
     for (i = 0; i < gt_splitter_size(splitter); i++) {
       pathcomponent = gt_splitter_get_token(splitter, i);
       gt_str_reset(path);
@@ -254,8 +254,8 @@ void gt_xfile_cmp(const char *file1,const char *file2)
     cc2 = fgetc(fp2);
     if (cc1 != cc2)
     {
-      fprintf(stderr,"files %s and %s differ in byte %lu: %d != %d\n",
-                      file1,file2,(unsigned long) offset,cc1,cc2);
+      fprintf(stderr,"files %s and %s differ in byte "GT_LU": %d != %d\n",
+                      file1,file2,(GtUword) offset,cc1,cc2);
       exit(EXIT_FAILURE);
     }
     if (cc1 == EOF)
@@ -283,7 +283,7 @@ off_t gt_file_size_with_suffix(const char *path, const char *suffix)
 
 off_t gt_files_estimate_total_size(const GtStrArray *filenames)
 {
-  unsigned long filenum;
+  GtUword filenum;
   off_t totalsize = 0;
 
   for (filenum = 0; filenum < gt_str_array_size(filenames); filenum++)

@@ -36,9 +36,9 @@ static void evalnewexonifpossible(bool proteineop, bool *newexon,
                                   GthDPOptionsEST *dp_options_est,
                                   const unsigned char *gen_seq_tran,
                                   const unsigned char *ref_seq_tran,
-                                  unsigned long gen_dp_start)
+                                  GtUword gen_dp_start)
 {
-  unsigned long splicedpos;
+  GtUword splicedpos;
 
   if (*newexon) { /* in this case an intron will be saved */
     exon->leftgenomicexonborder = gen_dp_start + travstate->genomicptr;
@@ -94,7 +94,7 @@ static void evalnewintronifpossible(bool proteineop, bool *newexon,
                                     GthFlt *maxsingleexonweight,
                                     GthFlt *overallexonweight,
                                     GthFlt *maxoverallexonweight,
-                                    unsigned long
+                                    GtUword
                                     *cumulativelengthofscoredexons,
                                     GthSA *sa,
                                     Traversealignmentstate *travstate,
@@ -103,10 +103,10 @@ static void evalnewintronifpossible(bool proteineop, bool *newexon,
                                     GthDPOptionsEST *dp_options_est,
                                     const unsigned char *gen_seq_tran,
                                     const unsigned char *ref_seq_tran,
-                                    unsigned long gen_dp_start,
-                                    unsigned long scoreminexonlen)
+                                    GtUword gen_dp_start,
+                                    GtUword scoreminexonlen)
 {
-  unsigned long genomicexonlength, splicedpos;
+  GtUword genomicexonlength, splicedpos;
 
   if (*newintron) { /* in this case an exon will be saved */
     exon->rightgenomicexonborder = gen_dp_start + travstate->genomicptr - 1;
@@ -200,7 +200,7 @@ typedef struct
                   maxsingleexonweight,           /* (GS2 = oescr) */
                   overallexonweight,             /* (GS2 = gescr) */
                   maxoverallexonweight;          /* (GS2 = ogescr) */
-  unsigned long   cumulativelengthofscoredexons; /* (GS2 = mlght) */
+  GtUword   cumulativelengthofscoredexons; /* (GS2 = mlght) */
   Exoninfo exon;
   Introninfo intron;
   GthSA *sa;
@@ -210,7 +210,7 @@ typedef struct
                       *ref_seq_tran,
                       *ref_seq_orig;
   const GtTransTable *transtable;
-  unsigned long gen_dp_start,
+  GtUword gen_dp_start,
                 scoreminexonlen,
                 ref_dp_length;
   GtAlphabet *gen_alphabet;     /* used if proteineop == true */
@@ -226,7 +226,7 @@ typedef struct
 static void computescoresprocmismatchordeletion(Traversealignmentstate *state,
                                                 void *data,
                                                 GT_UNUSED
-                                                unsigned long lengthofeop)
+                                                GtUword lengthofeop)
 {
   Computebordersandscoresdata *d = (Computebordersandscoresdata*) data;
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(d->gen_alphabet);
@@ -290,7 +290,7 @@ static void computescoresprocmismatchordeletion(Traversealignmentstate *state,
 }
 
 static void computescoresprocmismatch(Traversealignmentstate *state,
-                                      void *data, unsigned long lengthofeop)
+                                      void *data, GtUword lengthofeop)
 {
 #ifndef NDEBUG
   Computebordersandscoresdata *d = (Computebordersandscoresdata*) data;
@@ -300,7 +300,7 @@ static void computescoresprocmismatch(Traversealignmentstate *state,
 }
 
 static void computescoresprocdeletion(Traversealignmentstate *state,
-                                      void *data, unsigned long lengthofeop)
+                                      void *data, GtUword lengthofeop)
 {
 #ifndef NDEBUG
   Computebordersandscoresdata *d = (Computebordersandscoresdata*) data;
@@ -313,7 +313,7 @@ static void computescoresprocmismatchordeletionwithgap(Traversealignmentstate
                                                        *state,
                                                        void *data,
                                                        GT_UNUSED
-                                                       unsigned long
+                                                       GtUword
                                                        lengthofeop)
 {
   Computebordersandscoresdata *d = (Computebordersandscoresdata*) data;
@@ -348,7 +348,7 @@ static void computescoresprocmismatchordeletionwithgap(Traversealignmentstate
 static void computebordersandscoresprocinsertion(Traversealignmentstate *state,
                                                  void *data,
                                                  GT_UNUSED
-                                                 unsigned long lengthofeop)
+                                                 GtUword lengthofeop)
 {
   Computebordersandscoresdata *d = (Computebordersandscoresdata*) data;
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(d->gen_alphabet);
@@ -400,7 +400,7 @@ static void computebordersandscoresprocinsertion(Traversealignmentstate *state,
 
 static void computebordersandscoresprocmatch(Traversealignmentstate *state,
                                              void *data,
-                                             unsigned long lengthofeop)
+                                             GtUword lengthofeop)
 {
   Computebordersandscoresdata *d = (Computebordersandscoresdata*) data;
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(d->gen_alphabet);
@@ -462,7 +462,7 @@ static void computebordersandscoresprocmatch(Traversealignmentstate *state,
     genomicchar1      = d->gen_seq_tran[state->genomicptr];
     /* referenceptr in valid range */
     gt_assert(state->referenceptr >= 0 &&
-              state->referenceptr <  (long) d->ref_dp_length);
+              state->referenceptr <  (GtWord) d->ref_dp_length);
     referencechar = d->ref_seq_tran[state->referenceptr];
     /* genomic char equals reference char */
     gt_assert(genomicchar1 == referencechar);
@@ -481,7 +481,7 @@ static void computebordersandscoresprocmatch(Traversealignmentstate *state,
 static void computebordersandscoresprocintron(Traversealignmentstate *state,
                                               void *data,
                                               GT_UNUSED
-                                              unsigned long lengthofeop)
+                                              GtUword lengthofeop)
 {
   Computebordersandscoresdata *d = (Computebordersandscoresdata*) data;
   evalnewintronifpossible(d->proteineop, &d->newexon, &d->newintron,
@@ -498,11 +498,11 @@ static void computebordersandscoresprocintron(Traversealignmentstate *state,
 #ifndef NDEBUG
 static bool containsintronsorinsertions(bool leading,
                                         Editoperation *alignment,
-                                        long alignmentlength,
+                                        GtWord alignmentlength,
                                         bool proteineop)
 {
   Eoptype eoptype;
-  long i;
+  GtWord i;
   bool breakforloop = false;
 
   /* check for introns or insertions */
@@ -542,7 +542,7 @@ static bool containsintronsorinsertions(bool leading,
 #ifndef NDEBUG
 static bool containsnoleadingorterminalintronsorinsertions(Editoperation
                                                            *alignment,
-                                                           long
+                                                           GtWord
                                                            alignmentlength,
                                                            bool proteineop)
 {
@@ -568,12 +568,12 @@ void gth_compute_scores(GthSA *sa,
                         const unsigned char *ref_seq_tran,
                         const unsigned char *ref_seq_orig,
                         const GtTransTable *transtable,
-                        unsigned long gen_dp_start,
-                        unsigned long scoreminexonlen,
+                        GtUword gen_dp_start,
+                        GtUword scoreminexonlen,
                         bool introncutout,
                         bool gs2out,
                         GthSplicedSeq *spliced_seq,
-                        unsigned long ref_dp_length,
+                        GtUword ref_dp_length,
                         GtAlphabet *gen_alphabet,
                         GtAlphabet *ref_alphabet,
                         GthDPScoresProtein *dp_scores_protein)

@@ -20,24 +20,24 @@
 #include "core/minmax.h"
 #include "spmsuftab.h"
 
-GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
-                              unsigned long maxvalue,
+GtSpmsuftab *gt_spmsuftab_new(GtUword numofentries,
+                              GtUword maxvalue,
                               unsigned int bitsforseqnumrelpos,
                               GtLogger *logger)
 {
   GtSpmsuftab *spmsuftab;
   unsigned int bitsforpositions;
-  unsigned long required;
+  GtUword required;
 
   spmsuftab = gt_malloc(sizeof (*spmsuftab));
-  required = (unsigned long) gt_spmsuftab_requiredspace(numofentries,
+  required = (GtUword) gt_spmsuftab_requiredspace(numofentries,
                                                         maxvalue,
                                                         bitsforseqnumrelpos);
   bitsforpositions = gt_determinebitspervalue(maxvalue);
   if (bitsforpositions < bitsforseqnumrelpos)
   {
-    gt_logger_log(logger,"use %lu bitpackarray-entries for all positions "
-                         "(%u bits each,%lu bytes total)",
+    gt_logger_log(logger,"use "GT_LU" bitpackarray-entries for all positions "
+                         "(%u bits each,"GT_LU" bytes total)",
                          numofentries,bitsforpositions,required);
     spmsuftab->bitpackarray
       = gt_compact_ulong_store_new(numofentries,bitsforpositions);
@@ -45,8 +45,8 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
     spmsuftab->maxvalue = maxvalue;
   } else
   {
-    gt_logger_log(logger,"use %lu bitpackarray-entries for all "
-                         "seqnum/relpos-pairs (%u bits each,%lu bytes total)",
+    gt_logger_log(logger,"use "GT_LU" bitpackarray-entries for all "
+                         "seqnum/relpos-pairs (%u bits each,"GT_LU" bytes total)",
                          numofentries,bitsforseqnumrelpos,required);
     spmsuftab->bitpackarray
       = gt_compact_ulong_store_new(numofentries,bitsforseqnumrelpos);
@@ -72,13 +72,13 @@ bool gt_spmsuftab_usebitsforpositions(const GtSpmsuftab *spmsuftab)
   return spmsuftab->usebitsforpositions;
 }
 
-void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,unsigned long offset)
+void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,GtUword offset)
 {
   spmsuftab->partoffset = offset;
 }
 
-size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
-                                  unsigned long maxvalue,
+size_t gt_spmsuftab_requiredspace(GtUword numofentries,
+                                  GtUword maxvalue,
                                   unsigned int bitsforseqnumrelpos)
 {
   unsigned int bitsforpositions = gt_determinebitspervalue(maxvalue);

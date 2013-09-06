@@ -25,9 +25,9 @@
 typedef struct GthPGLVisitorClass GthPGLVisitorClass;
 typedef struct GthPGLVisitor GthPGLVisitor;
 
-void gth_pgl_visitor_preface(GthPGLVisitor*, unsigned long num_of_pgls);
+void gth_pgl_visitor_preface(GthPGLVisitor*, GtUword num_of_pgls);
 void gth_pgl_visitor_set_region_mapping(GthPGLVisitor*, GtRegionMapping*);
-void gth_pgl_visitor_visit_pgl(GthPGLVisitor*, GthPGL*, unsigned long pglnum);
+void gth_pgl_visitor_visit_pgl(GthPGLVisitor*, GthPGL*, GtUword pglnum);
 void gth_pgl_visitor_trailer(GthPGLVisitor*);
 void gth_pgl_visitor_delete(GthPGLVisitor*);
 

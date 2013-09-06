@@ -74,7 +74,7 @@ static GthFlt get_score(GtScoreMatrix *score_matrix,
   return rval;
 }
 
-static GtUchar*** precompute_codon2amino(unsigned long translationtable)
+static GtUchar*** precompute_codon2amino(GtUword translationtable)
 {
   GtUchar ***codon2amino;
   GtTransTable *transtable;
@@ -118,7 +118,7 @@ static GthFlt** precompute_scores(GtScoreMatrix *score_matrix,
   return score;
 }
 
-GthDPScoresProtein* gth_dp_scores_protein_new(unsigned long translationtable,
+GthDPScoresProtein* gth_dp_scores_protein_new(GtUword translationtable,
                                               GtScoreMatrix *score_matrix,
                                               GtAlphabet *score_matrix_alphabet)
 {

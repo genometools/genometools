@@ -64,8 +64,8 @@ const GtCanvasClass* gt_canvas_cairo_context_class(void)
 
 GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
                                       double offsetpos,
-                                      unsigned long width,
-                                      unsigned long height,
+                                      GtUword width,
+                                      GtUword height,
                                       GtImageInfo *image_info,
                                       GtError *err)
 {

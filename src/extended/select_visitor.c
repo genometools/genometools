@@ -44,7 +44,7 @@ struct GtSelectVisitor {
   GtStrand strand,
            targetstrand;
   bool has_CDS;
-  unsigned long max_gene_length,
+  GtUword max_gene_length,
                 gene_num,     /* the number of passed genes */
                 max_gene_num, /* the maximal number of genes which can pass */
                 current_feature,
@@ -139,7 +139,7 @@ static bool filter_targetstrand(GtFeatureNode *fn, GtStrand targetstrand)
   gt_assert(fn);
   if (targetstrand != GT_NUM_OF_STRAND_TYPES &&
       (target = gt_feature_node_get_attribute(fn, GT_GFF_TARGET))) {
-    unsigned long num_of_targets;
+    GtUword num_of_targets;
     GtStrand parsed_strand;
     GT_UNUSED int had_err;
     had_err = gt_gff3_parser_parse_target_attributes(target, &num_of_targets,
@@ -167,7 +167,7 @@ static bool filter_min_average_ssp(GtFeatureNode *fn, double minaveragessp,
 {
   gt_assert(fn);
   if (minaveragessp != GT_UNDEF_DOUBLE && gt_feature_node_has_splice_site(fn)) {
-    unsigned long num_ss;
+    GtUword num_ss;
     double avg_ssp = gt_feature_node_average_splice_site_prob(fn, &num_ss);
     if (num_ss <= 2 && avg_ssp < singleintronfactor * minaveragessp)
       return true;
@@ -181,7 +181,7 @@ static int filter_lua(GtArray *filters, GtFeatureNode *fn, GtSelectLogic logic,
                       bool *select_node, GtError *err)
 {
   int had_err = 0;
-  unsigned long i;
+  GtUword i;
   gt_assert(filters && fn && select_node);
   gt_error_check(err);
 
@@ -374,12 +374,12 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                      const GtRange *overlap_range,
                                      GtStrand strand, GtStrand targetstrand,
                                      bool has_CDS,
-                                     unsigned long max_gene_length,
-                                     unsigned long max_gene_num,
+                                     GtUword max_gene_length,
+                                     GtUword max_gene_num,
                                      double min_gene_score,
                                      double max_gene_score,
                                      double min_average_splice_site_prob,
-                                     unsigned long feature_num,
+                                     GtUword feature_num,
                                      GtStrArray *select_files,
                                      GtStr *select_logic,
                                      GtError *err)
@@ -449,7 +449,7 @@ void gt_select_visitor_set_single_intron_factor(GtNodeVisitor *nv,
   select_visitor->single_intron_factor = single_intron_factor;
 }
 
-unsigned long gt_select_visitor_node_buffer_size(GtNodeVisitor *nv)
+GtUword gt_select_visitor_node_buffer_size(GtNodeVisitor *nv)
 {
   GtSelectVisitor *select_visitor = select_visitor_cast(nv);
   return gt_queue_size(select_visitor->node_buffer);

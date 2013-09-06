@@ -34,19 +34,19 @@ typedef struct
 typedef struct
 {
   GtBitsequence seedbitvector;
-  unsigned long seedweight;
+  GtUword seedweight;
   const GtUchar *pattern;
 } SpseLimdfsconstinfo;
 
 #ifdef SKDEBUG
 
 static void spse_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
-                                unsigned long currentdepth,
+                                GtUword currentdepth,
                                 GT_UNUSED const Limdfsconstinfo *mti)
 {
   const SpseLimdfsstate *col = (const SpseLimdfsstate *) aliascol;
 
-  printf("at depth %lu (pathmatches=%s)\n",currentdepth,
+  printf("at depth "GT_LU" (pathmatches=%s)\n",currentdepth,
                                            col->pathmatches ? "true" : "false");
 }
 
@@ -65,7 +65,7 @@ static void spse_initdfsconstinfo(Limdfsconstinfo *mt,
                                  /* Variable argument list is as follows:
                                     const GtUchar *pattern,
                                     Bitsequence seedbitvector,
-                                    unsigned long seedweight
+                                    GtUword seedweight
                                  */
 {
   va_list ap;
@@ -74,7 +74,7 @@ static void spse_initdfsconstinfo(Limdfsconstinfo *mt,
   va_start(ap,alphasize);
   mti->pattern = va_arg(ap, const GtUchar *);
   mti->seedbitvector = va_arg(ap, GtBitsequence);
-  mti->seedweight = va_arg(ap, unsigned long);
+  mti->seedweight = va_arg(ap, GtUword);
   va_end(ap);
 }
 
@@ -94,10 +94,10 @@ static void spse_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
 
 static void spse_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                       DECLAREPTRDFSSTATE(aliascolumn),
-                                      GT_UNUSED unsigned long leftbound,
-                                      GT_UNUSED unsigned long rightbound,
-                                      GT_UNUSED unsigned long width,
-                                      unsigned long currentdepth,
+                                      GT_UNUSED GtUword leftbound,
+                                      GT_UNUSED GtUword rightbound,
+                                      GT_UNUSED GtUword width,
+                                      GtUword currentdepth,
                                       Limdfsconstinfo *mt)
 {
   SpseLimdfsstate *limdfsstate = (SpseLimdfsstate *) aliascolumn;
@@ -123,7 +123,7 @@ static void spse_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
 
 static bool setpathmatch(GtBitsequence seedbitvector,
                          const GtUchar *pattern,
-                         unsigned long currentdepth,
+                         GtUword currentdepth,
                          GtUchar currentchar)
 {
   return (!GT_ISBITSET(seedbitvector,currentdepth-1) ||
@@ -132,7 +132,7 @@ static bool setpathmatch(GtBitsequence seedbitvector,
 
 static void spse_nextLimdfsstate(const Limdfsconstinfo *mt,
                                  DECLAREPTRDFSSTATE(aliasoutcol),
-                                 unsigned long currentdepth,
+                                 GtUword currentdepth,
                                  GtUchar currentchar,
                                  GT_UNUSED const DECLAREPTRDFSSTATE(aliasincol))
 {
@@ -154,7 +154,7 @@ static void spse_nextLimdfsstate(const Limdfsconstinfo *mt,
 
 static void spse_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
                                         DECLAREPTRDFSSTATE(aliascol),
-                                        unsigned long currentdepth,
+                                        GtUword currentdepth,
                                         GtUchar currentchar)
 {
   SpseLimdfsstate *col = (SpseLimdfsstate *) aliascol;

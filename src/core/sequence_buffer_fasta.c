@@ -43,7 +43,7 @@ struct GtSequenceBufferFasta {
 static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
 {
   int currentchar, ret = 0;
-  unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
+  GtUword currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
   GtSequenceBufferMembers *pvt;
   GtSequenceBufferFasta *sbf;
 
@@ -53,7 +53,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
   pvt = sb->pvt;
   while (true)
   {
-    if (currentoutpos >= (unsigned long) OUTBUFSIZE)
+    if (currentoutpos >= (GtUword) OUTBUFSIZE)
     {
       if (pvt->filelengthtab != NULL)
       {
@@ -78,7 +78,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
       currentfileread = 0;
       pvt->linenum = (uint64_t) 1;
       pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
-                                                  (unsigned long) pvt->filenum),
+                                                  (GtUword) pvt->filenum),
                                        "rb");
       pvt->currentinpos = 0;
       pvt->currentfillpos = 0;
@@ -94,7 +94,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
           pvt->filelengthtab[pvt->filenum].length += currentfileread;
           pvt->filelengthtab[pvt->filenum].effectivelength += currentfileadd;
         }
-        if ((unsigned long) pvt->filenum
+        if ((GtUword) pvt->filenum
                                      == gt_str_array_size(pvt->filenametab)-1)
         {
           pvt->complete = true;
@@ -176,11 +176,11 @@ static void gt_sequence_buffer_fasta_free(GtSequenceBuffer *sb)
   gt_str_delete(sbf->headerbuffer);
 }
 
-static unsigned long
+static GtUword
 gt_sequence_buffer_fasta_get_file_index(GtSequenceBuffer *sb)
 {
   gt_assert(sb);
-  return (unsigned long) sb->pvt->filenum;
+  return (GtUword) sb->pvt->filenum;
 }
 
 bool gt_sequence_buffer_fasta_guess(const char* txt)

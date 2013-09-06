@@ -87,11 +87,11 @@ static void
 computeDeBruijn()
 {
   unsigned prod, i;
-  unsigned long long v;
+  GtUint64 v;
   int MultiplyDeBruijnBitPosition[64];
   for (v = 1, i = 1; i <= 64; ++i, v <<= 1)
   {
-    prod = ((unsigned long long)v * 0x26752B916FC7B0DULL) >> 58;
+    prod = ((GtUint64)v * 0x26752B916FC7B0DULL) >> 58;
     printf("v = "GT_LLU", i = %u, prod = %u\n", v, i, prod);
     gt_assert(prod < 64);
     MultiplyDeBruijnBitPosition[prod] = i;
@@ -110,7 +110,7 @@ int gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
   size_t elemStartA = offsetA/bitElemBits, elemStartB = offsetB/bitElemBits;
   unsigned bitTopA = offsetA%bitElemBits, bitTopB = offsetB%bitElemBits;
   const BitElem *pA = a + elemStartA, *pB = b + elemStartB;
-  unsigned long accumA = 0, accumB = 0;
+  GtUword accumA = 0, accumB = 0;
   unsigned bitsInAccumA, bitsInAccumB;
   gt_assert(a && b);
   /* user requested zero length comparison, treat as equality */
@@ -128,10 +128,10 @@ int gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
       bitsInAccumB = 0;
       if (bitTopB)
       {
-        unsigned long mask; /*< all of the bits we want to get from *pB */
+        GtUword mask; /*< all of the bits we want to get from *pB */
         unsigned bits2Read = MIN(bitElemBits - bitTopB, comparePreBits);
         unsigned unreadRightBits = (bitElemBits - bitTopB - bits2Read);
-        mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+        mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
         accumB = ((*pB++) & mask) >> unreadRightBits;
         bitsInAccumB += bits2Read;
         totalBitsLeftB -= bits2Read;
@@ -141,9 +141,9 @@ int gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
       {
         unsigned bits2Read,
           bitsFree = (CHAR_BIT * sizeof (accumA)) - bitsInAccumB;
-        unsigned long mask;
+        GtUword mask;
         bits2Read = MIN3(bitsFree, bitElemBits, comparePreBits);
-        mask = ~((~(unsigned long)0) << bits2Read);
+        mask = ~((~(GtUword)0) << bits2Read);
         accumB = accumB << bits2Read
           | (((*pB) >> (bitElemBits - bits2Read)) & mask);
         bitsInAccumB += bits2Read;
@@ -164,10 +164,10 @@ int gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
     /* get bits of first element if not aligned */
     if (bitTopA)
     {
-      unsigned long mask; /*< all of the bits we want to get from *pA */
+      GtUword mask; /*< all of the bits we want to get from *pA */
       unsigned bits2Read = MIN(bitElemBits - bitTopA, totalBitsLeftA);
       unsigned unreadRightBits = (bitElemBits - bitTopA - bits2Read);
-      mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+      mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
       accumA = ((*pA++) & mask) >> unreadRightBits;
       bitsInAccumA += bits2Read;
       totalBitsLeftA -= bits2Read;
@@ -177,10 +177,10 @@ int gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
     /* get bits of first element if not aligned */
     if (bitTopB)
     {
-      unsigned long mask; /*< all of the bits we want to get from *pB */
+      GtUword mask; /*< all of the bits we want to get from *pB */
       unsigned bits2Read = MIN(bitElemBits - bitTopB, totalBitsLeftB);
       unsigned unreadRightBits = (bitElemBits - bitTopB - bits2Read);
-      mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+      mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
       accumB = ((*pB++) & mask) >> unreadRightBits;
       bitsInAccumB += bits2Read;
       totalBitsLeftB -= bits2Read;
@@ -191,9 +191,9 @@ int gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
     {
       unsigned bits2Read,
                bitsFree = (CHAR_BIT * sizeof (accumA)) - bitsInAccumA;
-      unsigned long mask;
+      GtUword mask;
       bits2Read = MIN3(bitsFree, bitElemBits, totalBitsLeftA);
-      mask = (~((~(unsigned long)0) << bits2Read));
+      mask = (~((~(GtUword)0) << bits2Read));
       accumA = accumA << bits2Read
         | (((*pA) >> (bitElemBits - bits2Read)) & mask);
       bitsInAccumA += bits2Read;
@@ -208,9 +208,9 @@ int gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
     {
       unsigned bits2Read,
         bitsFree = (CHAR_BIT * sizeof (accumA)) - bitsInAccumB;
-      unsigned long mask;
+      GtUword mask;
       bits2Read = MIN3(bitsFree, bitElemBits, totalBitsLeftB);
-      mask = (~((~(unsigned long)0) << bits2Read));
+      mask = (~((~(GtUword)0) << bits2Read));
       accumB = accumB << bits2Read
         | (((*pB) >> (bitElemBits - bits2Read)) & mask);
       bitsInAccumB += bits2Read;
@@ -273,17 +273,17 @@ gt_bsCopy(constBitString src, BitOffset offsetSrc,
   }
   else
   {
-    unsigned long accum = 0;
+    GtUword accum = 0;
     unsigned bitsInAccum = 0;
     while (bitsLeft && (bitTopSrc || bitTopDest))
     {
       if (bitTopSrc)
       {
-        unsigned long mask;
+        GtUword mask;
         unsigned bits2Read = MIN3(bitElemBits - bitTopSrc, bitsLeft,
                                   sizeof (accum) * CHAR_BIT - bitsInAccum);
         unsigned unreadRightBits = (bitElemBits - bitTopSrc - bits2Read);
-        mask = (~((~(unsigned long)0) << bits2Read));
+        mask = (~((~(GtUword)0) << bits2Read));
         accum = (accum << bits2Read) | (((*p) >> unreadRightBits) & mask);
         bitsLeft -= bits2Read;
         bitsInAccum += bits2Read;
@@ -307,11 +307,11 @@ gt_bsCopy(constBitString src, BitOffset offsetSrc,
            * just to fill the first incomplete element */
           while (bitsInAccum < bits2Write)
           {
-            unsigned long mask;
+            GtUword mask;
             unsigned bits2Read = MIN3(sizeof (accum) * CHAR_BIT - bitsInAccum,
                                       bitsLeft, bitElemBits);
             unsigned unreadRightBits = (bitElemBits - bits2Read);
-            mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
+            mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
             accum = (accum << bits2Read) | ((*p) & mask) >> unreadRightBits;
             bitsLeft -= bits2Read;
             bitsInAccum += bits2Read;
@@ -322,8 +322,8 @@ gt_bsCopy(constBitString src, BitOffset offsetSrc,
         {
           unsigned unwrittenRightBits = bitElemBits
             - bitTopDest - bits2Write;
-          unsigned long mask =
-            (~((~(unsigned long)0) << bits2Write)) << unwrittenRightBits;
+          GtUword mask =
+            (~((~(GtUword)0) << bits2Write)) << unwrittenRightBits;
           *q = (*q & ~mask)
             | (((accum >> (bitsInAccum -= bits2Write))
                 << unwrittenRightBits) & mask);
@@ -362,8 +362,8 @@ gt_bsCopy(constBitString src, BitOffset offsetSrc,
         unsigned bits2Read = MIN3(bitsLeft, bitElemBits - bitTopSrc,
                                   sizeof (accum) * CHAR_BIT - bitsInAccum);
         unsigned unreadRightBits = (bitElemBits - bitTopSrc - bits2Read);
-        unsigned long mask =
-          ~((~(unsigned long)0) << bits2Read);
+        GtUword mask =
+          ~((~(GtUword)0) << bits2Read);
         accum = (accum << bits2Read) | (((*p) >> unreadRightBits) & mask);
         bitsLeft -= bits2Read;
         bitsInAccum += bits2Read;
@@ -374,7 +374,7 @@ gt_bsCopy(constBitString src, BitOffset offsetSrc,
       {
         unsigned bits2Write = MIN(bitsInAccum, bitElemBits - bitTopDest),
           unwrittenRightBits = bitElemBits - bits2Write - bitTopDest;
-        unsigned long mask = (~(unsigned long)0);
+        GtUword mask = (~(GtUword)0);
         if (bits2Write != bitElemBits)
         {
           mask = (~(mask << bits2Write)) << unwrittenRightBits;
@@ -396,14 +396,14 @@ gt_bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
     bitTop = offset%bitElemBits;
   size_t elemStart = offset/bitElemBits;
   BitElem *p = str + elemStart;
-  unsigned long bitPatSource = 0UL;
+  GtUword bitPatSource = 0UL;
   gt_assert(str);
   if (bitVal)
     bitPatSource = ~0UL;
   if (bitTop)
   {
-    unsigned long mask = ~0UL;
-    if (bitElemBits < (sizeof (unsigned long)*CHAR_BIT))
+    GtUword mask = ~0UL;
+    if (bitElemBits < (sizeof (GtUword)*CHAR_BIT))
     {
       mask <<= bitElemBits;
     }
@@ -434,8 +434,8 @@ gt_bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
   }
   if (bitsLeft)
   {
-    unsigned long mask = ((~0UL)<<(bitElemBits - bitsLeft));
-    if (bitElemBits < (sizeof (unsigned long)*CHAR_BIT))
+    GtUword mask = ((~0UL)<<(bitElemBits - bitsLeft));
+    if (bitElemBits < (sizeof (GtUword)*CHAR_BIT))
       mask &= (~(~0UL<<bitElemBits));
     *p = (*p & ~mask) | (bitPatSource & mask);
   }

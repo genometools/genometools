@@ -192,7 +192,7 @@ GtNodeVisitor* gt_tidy_region_node_visitor_new(void)
   return nv;
 }
 
-unsigned long gt_tidy_region_node_visitor_node_buffer_size(GtNodeVisitor *nv)
+GtUword gt_tidy_region_node_visitor_node_buffer_size(GtNodeVisitor *nv)
 {
   GtTidyRegionNodeVisitor *tidy_region_node_visitor =
                                               tidy_region_node_visitor_cast(nv);

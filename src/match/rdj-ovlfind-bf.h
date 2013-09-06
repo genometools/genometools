@@ -29,13 +29,13 @@
   - no notion of wildcards (i.e. n == n)
 */
 
-GtContfind gt_ovlfind_bf(const char *u, unsigned long u_length,
+GtContfind gt_ovlfind_bf(const char *u, GtUword u_length,
                          const char *v, /* NULL for u vs. u */
-                         unsigned long v_length,
-                         GtOvlfindMode m, unsigned long min_length,
+                         GtUword v_length,
+                         GtOvlfindMode m, GtUword min_length,
                          bool find_nonmaximal,
                          void(*spmproc)
-                           (unsigned long /* overlap length */,
+                           (GtUword /* overlap length */,
                             bool /* true if suffix of u == prefix of v
                                     false if prefix of u == suffix of v */,
                             void* /* spmprocdata */),

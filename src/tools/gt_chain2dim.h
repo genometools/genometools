@@ -31,7 +31,7 @@ typedef struct
   bool silent,
        verbose;
   double weightfactor;
-  unsigned long maxgap;
+  GtUword maxgap;
   GtStr *matchfile;
   GtStrArray *globalargs,
              *localargs;

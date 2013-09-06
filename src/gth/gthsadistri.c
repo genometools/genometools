@@ -21,7 +21,7 @@ static void addSAtoexondistribution(GtDiscDistri *exondistribution,
                                     GthSA *sa)
 {
   Exoninfo *exoninfo;
-  unsigned long i;
+  GtUword i;
 
   /* add values to exondistribution */
   for (i = 0; i < gth_sa_num_of_exons(sa); i++) {
@@ -34,7 +34,7 @@ static void addSAtoexondistribution(GtDiscDistri *exondistribution,
 static void addSAtointrondistribution(GtDiscDistri *introndistribution,
                                       GthSA *sa)
 {
-  unsigned long i;
+  GtUword i;
 
   /* add values to introndistribution */
   for (i = 0; i < gth_sa_num_of_introns(sa); i++) {

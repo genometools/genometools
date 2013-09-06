@@ -44,14 +44,14 @@ static int extract_feature_seq(GtEncseqBuilder *b, const char *header,
 {
   char *buffer;
   int had_err = 0;
-  unsigned long seqnum,
+  GtUword seqnum,
                 startpos;
 
-  (void) sscanf(gt_str_get(seqid), "seq%lu", &seqnum);
+  (void) sscanf(gt_str_get(seqid), "seq"GT_LU"", &seqnum);
   if (seqnum >= gt_encseq_num_of_sequences(encseq)) {
-    gt_error_set(err, "annotation encountered for sequence %lu, but the "
+    gt_error_set(err, "annotation encountered for sequence "GT_LU", but the "
                       "supplied encoded sequence only contains sequences "
-                      "0-%lu", seqnum, gt_encseq_num_of_sequences(encseq)-1);
+                      "0-"GT_LU"", seqnum, gt_encseq_num_of_sequences(encseq)-1);
     had_err = -1;
   }
 
@@ -91,11 +91,11 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
     fnt = gt_feature_node_get_type(curnode);
     if (strcmp(fnt, gt_ft_repeat_region) == 0) {
       const char *rid;
-      unsigned long id;
+      GtUword id;
       seqid = gt_genome_node_get_seqid((GtGenomeNode*) curnode);
       rid = gt_feature_node_get_attribute(curnode, "ID");
-      (void) sscanf(rid, "repeat_region%lu", &id);
-      (void) snprintf(buffer, BUFSIZ, "%s_%lu", gt_str_get(seqid), id);
+      (void) sscanf(rid, "repeat_region"GT_LU"", &id);
+      (void) snprintf(buffer, BUFSIZ, "%s_"GT_LU"", gt_str_get(seqid), id);
     } else if (strcmp(fnt, gt_ft_protein_match) == 0) {
       GtRange range;
       const char *attr;
@@ -105,7 +105,7 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
       if (!attr)
         continue;
       range = gt_genome_node_get_range((GtGenomeNode*) curnode);
-      (void) snprintf(header, BUFSIZ, "%s_%lu_%lu", buffer, range.start,
+      (void) snprintf(header, BUFSIZ, "%s_"GT_LU"_"GT_LU"", buffer, range.start,
                       range.end);
       if (!gt_hashmap_get(lcv->encseq_builders, attr)) {
         eb = gt_encseq_builder_new(gt_encseq_alphabet(lcv->src_encseq));
@@ -142,7 +142,7 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
         gt_free(tmp);
         continue;
       }
-      (void) snprintf(header, BUFSIZ, "%s_%lu_%lu", buffer, range.start,
+      (void) snprintf(header, BUFSIZ, "%s_"GT_LU"_"GT_LU"", buffer, range.start,
                       range.end);
       if (!gt_hashmap_get(lcv->encseq_builders, tmp)) {
         eb = gt_encseq_builder_new(gt_encseq_alphabet(lcv->src_encseq));

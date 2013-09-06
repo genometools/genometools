@@ -33,7 +33,7 @@ typedef uint8_t GtCountAFCtype;
 
 typedef struct
 {
-  unsigned long differentcodes,
+  GtUword differentcodes,
                 numofsamples,
                 sampledistance,
                 hashmap_addcount,
@@ -42,9 +42,9 @@ typedef struct
   uint32_t *leftborder;
   GtCountAFCtype *countocc_small;
   GtHashtable *countocc_exceptions;
-  unsigned long *leftborder_samples;
+  GtUword *leftborder_samples;
   GtStr *outfilenameleftborder;
-  unsigned long differencemask, /* for extracting the difference */
+  GtUword differencemask, /* for extracting the difference */
                 countmax;
   unsigned int shiftforcounts;
 #if defined (_LP64) || defined (_WIN64)
@@ -52,14 +52,14 @@ typedef struct
 #endif
 } GtFirstcodestab;
 
-DECLARE_HASHMAP(unsigned long, ul, uint32_t, u32, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(GtUword, ul, uint32_t, u32, static, inline)
+DEFINE_HASHMAP(GtUword, ul, uint32_t, u32, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
 #if defined (_LP64) || defined (_WIN64)
 #define GT_CHANGEPOINT_GET(CP)\
-        unsigned long CP = 0;\
+        GtUword CP = 0;\
         while (CP < fct->bitchangepoints.nextfreeGtUlong &&\
                  idx > fct->bitchangepoints.spaceGtUlong[CP])\
           CP++;
@@ -69,15 +69,15 @@ DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
 #define GT_MODVALUEMASK UINT32_MAX
 
 GT_UNUSED
-static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
-                                                         unsigned long idx)
+static inline GtUword gt_firstcodes_insertionindex(GtFirstcodestab *fct,
+                                                         GtUword idx)
 {
 #if defined (_LP64) || defined (_WIN64)
   GT_CHANGEPOINT_GET(changepoint);
   gt_assert(idx < fct->differentcodes);
   if (fct->leftborder[idx] > 0)
   {
-    return (unsigned long) --fct->leftborder[idx]
+    return (GtUword) --fct->leftborder[idx]
                            + (changepoint << GT_MODVALUEBITS);
   } else
   {
@@ -85,27 +85,27 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
     changepoint--;
     fct->bitchangepoints.spaceGtUlong[changepoint]++;
     fct->leftborder[idx] = GT_MODVALUEMASK;
-    return (unsigned long)
+    return (GtUword)
            fct->leftborder[idx] + (changepoint << GT_MODVALUEBITS);
   }
 #else
   gt_assert(idx < fct->differentcodes && fct->leftborder[idx] > 0);
-  return (unsigned long) --fct->leftborder[idx];
+  return (GtUword) --fct->leftborder[idx];
 #endif
 }
 
-unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
+GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
-                                        const unsigned long *differences,
-                                        unsigned long expectedlastpartsum);
+                                        const GtUword *differences,
+                                        GtUword expectedlastpartsum);
 
-unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
-                                           unsigned long idx);
+GtUword gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
+                                           GtUword idx);
 
-unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct);
+GtUword gt_firstcodes_numofsamples(const GtFirstcodestab *fct);
 
-unsigned long gt_firstcodes_findfirstsamplelarger(const GtFirstcodestab *fct,
-                                                  unsigned long suftaboffset);
+GtUword gt_firstcodes_findfirstsamplelarger(const GtFirstcodestab *fct,
+                                                  GtUword suftaboffset);
 
 void gt_firstcodes_samples_delete(GtFirstcodesspacelog *fcsl,
                                   GtFirstcodestab *fct);
@@ -124,20 +124,20 @@ void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr);
 
 const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct);
 
-unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
-                                        unsigned long idx);
+GtUword gt_firstcodes_sample2full(const GtFirstcodestab *fct,
+                                        GtUword idx);
 
-unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
+GtUword gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 
-unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
+GtUword gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 
-unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
-                                       unsigned long idx);
+GtUword gt_firstcodes_get_sample(const GtFirstcodestab *fct,
+                                       GtUword idx);
 
-unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
+GtUword gt_firstcodes_remdups(GtUword *allfirstcodes,
                                     GtFirstcodesspacelog *fcsl,
                                     GtFirstcodestab *fct,
-                                    unsigned long numofsequences,
+                                    GtUword numofsequences,
                                     Gtmarksubstring *markprefix,
                                     Gtmarksubstring *marksuffix,
                                     GtArrayGtIndexwithcode **binsearchcache,
@@ -145,13 +145,13 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     bool withdistbits,
                                     GtLogger *logger);
 
-unsigned long gt_firstcodes_accumulatecounts_merge(
+GtUword gt_firstcodes_accumulatecounts_merge(
                                         GtFirstcodestab *tab,
-                                        unsigned long *differences,
-                                        unsigned long differentcodes,
-                                        const unsigned long *querystream_fst,
-                                        const unsigned long *querystream_lst,
-                                        unsigned long subjectindex,
-                                        unsigned long subjectcode);
+                                        GtUword *differences,
+                                        GtUword differentcodes,
+                                        const GtUword *querystream_fst,
+                                        const GtUword *querystream_lst,
+                                        GtUword subjectindex,
+                                        GtUword subjectcode);
 
 #endif

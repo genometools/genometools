@@ -26,7 +26,7 @@ typedef struct GthXMLPGLVisitor GthXMLPGLVisitor;
 
 const GthPGLVisitorClass* gth_xml_pgl_visitor_class(void);
 GthPGLVisitor*            gth_xml_pgl_visitor_new(GthInput*,
-                                                  unsigned long
+                                                  GtUword
                                                   translationtable,
                                                   unsigned int indentlevel,
                                                   GthOutput*);

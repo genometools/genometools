@@ -50,7 +50,7 @@
 
 typedef struct
 {
-  unsigned long firstcodehits,
+  GtUword firstcodehits,
                 firstcodeposhits,
                 countsequences,
                 numofsequences,
@@ -71,7 +71,7 @@ typedef struct
   GtSfxmappedrange *mappedleftborder,
                    *mappedallfirstcodes,
                    *mappedmarkprefix;
-  unsigned long *allfirstcodes,
+  GtUword *allfirstcodes,
                 allfirstcodes0_save;
   GtFirstcodesspacelog *fcsl;
   GtCodeposbuffer buf;
@@ -83,7 +83,7 @@ static double gt_firstcodes_round(double d)
   return floor(d + 0.5);
 }
 
-static unsigned long gt_kmercode2prefix_index(unsigned long idx,
+static GtUword gt_kmercode2prefix_index(GtUword idx,
                                               const void *data)
 {
   const GtFirstcodesinfo *fci = (const GtFirstcodesinfo *) data;
@@ -92,8 +92,8 @@ static unsigned long gt_kmercode2prefix_index(unsigned long idx,
   return fci->allfirstcodes[idx] >> fci->shiftright2index;
 }
 
-static void gt_minmax_index_kmercode2prefix(unsigned long *minindex,
-                                            unsigned long *maxindex,
+static void gt_minmax_index_kmercode2prefix(GtUword *minindex,
+                                            GtUword *maxindex,
                                             const void *data)
 {
   *minindex = gt_kmercode2prefix_index(*minindex,data);
@@ -102,7 +102,7 @@ static void gt_minmax_index_kmercode2prefix(unsigned long *minindex,
 
 static void gt_storefirstcodes(void *processinfo,
                                GT_UNUSED bool firstinrange,
-                               GT_UNUSED unsigned long pos,
+                               GT_UNUSED GtUword pos,
                                GtCodetype code)
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) processinfo;
@@ -115,7 +115,7 @@ static void gt_storefirstcodes(void *processinfo,
 
 static void gt_firstcodes_restore_from_differences(GtFirstcodesinfo *fci)
 {
-  unsigned long idx;
+  GtUword idx;
 
   fci->allfirstcodes[0] = fci->allfirstcodes0_save;
   for (idx=1UL; idx < fci->differentcodes; idx++)
@@ -132,7 +132,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
 
   if (fci->buf.nextfree > 0)
   {
-    unsigned long foundindex, foundcode;
+    GtUword foundindex, foundcode;
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
@@ -161,16 +161,16 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
   }
 }
 
-const unsigned long *gt_firstcodes_find_insert(const GtFirstcodesinfo *fci,
-                                               unsigned long code)
+const GtUword *gt_firstcodes_find_insert(const GtFirstcodesinfo *fci,
+                                               GtUword code)
 {
-  const unsigned long *found = NULL, *leftptr = NULL, *midptr, *rightptr = NULL;
+  const GtUword *found = NULL, *leftptr = NULL, *midptr, *rightptr = NULL;
 
   leftptr = fci->allfirstcodes + fci->currentminindex;
   rightptr = fci->allfirstcodes + fci->currentmaxindex;
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+    midptr = leftptr + GT_DIV2((GtUword) (rightptr-leftptr));
     if (code < *midptr)
     {
       rightptr = midptr - 1;
@@ -189,16 +189,16 @@ const unsigned long *gt_firstcodes_find_insert(const GtFirstcodesinfo *fci,
   return found;
 }
 
-static unsigned long gt_firstcodes_insertsuffixes_merge(
+static GtUword gt_firstcodes_insertsuffixes_merge(
                                         GtFirstcodesinfo *fci,
                                         const GtUlongPair *querystream_fst,
-                                        const unsigned long *subjectstream_fst)
+                                        const GtUword *subjectstream_fst)
 {
-  unsigned long found = 0, idx;
+  GtUword found = 0, idx;
   const GtUlongPair *query = querystream_fst,
                     *querystream_lst = fci->buf.spaceGtUlongPair +
                                        fci->buf.nextfree - 1;
-  const unsigned long *subject = subjectstream_fst,
+  const GtUword *subject = subjectstream_fst,
                       *subjectstream_lst = fci->allfirstcodes +
                                            fci->currentmaxindex;
 
@@ -209,7 +209,7 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
       if (query->a == *subject)
       {
         idx = gt_firstcodes_insertionindex(&fci->tab,
-                                           (unsigned long)
+                                           (GtUword)
                                            (subject - fci->allfirstcodes));
         gt_assert(idx < fci->firstcodehits + fci->numofsequences);
         gt_spmsuftab_set(fci->spmsuftab,idx,
@@ -233,7 +233,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
 
   if (fci->buf.nextfree > 0)
   {
-    const unsigned long *ptr;
+    const GtUword *ptr;
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
@@ -254,18 +254,18 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                              GtReadmode readmode,
                                              GtEncseqReader *esr1,
                                              GtEncseqReader *esr2,
-                                             unsigned long previoussuffix,
+                                             GtUword previoussuffix,
                                              bool previousdefined,
-                                             const unsigned long
+                                             const GtUword
                                                *seqnum_relpos_bucket,
                                              const GtSeqnumrelpos *snrp,
                                              GT_UNUSED const uint16_t
                                                *lcptab_bucket,
-                                             unsigned long numberofsuffixes)
+                                             GtUword numberofsuffixes)
 {
-  unsigned long idx, current, maxlcp,
+  GtUword idx, current, maxlcp,
                 totallength = gt_encseq_total_length(encseq);
-  const unsigned long depth = 0;
+  const GtUword depth = 0;
   GT_UNUSED int cmp;
   const bool specialsareequal = false, specialsareequalatdepth0 = false;
 
@@ -287,7 +287,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                                esr1,
                                                esr2);
       gt_assert(cmp <= 0);
-      gt_assert(idx == 0 || maxlcp == (unsigned long) lcptab_bucket[idx]);
+      gt_assert(idx == 0 || maxlcp == (GtUword) lcptab_bucket[idx]);
     }
     previoussuffix = current;
     previousdefined = true;
@@ -300,11 +300,11 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        const GtSpmsuftab *spmsuftab,
                                        const GtSeqnumrelpos *snrp,
                                        const GtFirstcodestab *fct,
-                                       unsigned long minindex,
-                                       unsigned long maxindex,
-                                       unsigned long sumofwidth,
-                                       unsigned long spaceforbucketprocessing,
-                                       unsigned long depth,
+                                       GtUword minindex,
+                                       GtUword maxindex,
+                                       GtUword sumofwidth,
+                                       GtUword spaceforbucketprocessing,
+                                       GtUword depth,
                                        GtFirstcodesintervalprocess itvprocess,
                                        GtFirstcodesintervalprocess_end
                                               itvprocess_end,
@@ -312,7 +312,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        bool withsuftabcheck,
                                        GtError *err)
 {
-  unsigned long current,
+  GtUword current,
                 next = GT_UNDEF_ULONG,
                 idx,
                 width,
@@ -390,12 +390,12 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
 
 #ifdef GT_THREADS_ENABLED
 
-static unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
-                                                   unsigned long start,
-                                                   unsigned long end,
-                                                   unsigned long offset)
+static GtUword gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
+                                                   GtUword start,
+                                                   GtUword end,
+                                                   GtUword offset)
 {
-  unsigned long left = start, right = end, found = end, mid, midval;
+  GtUword left = start, right = end, found = end, mid, midval;
 
   while (left+1 < right)
   {
@@ -417,20 +417,20 @@ static unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
   return found;
 }
 
-static unsigned long *gt_evenly_divide_part(const GtFirstcodestab *fct,
-                                            unsigned long partminindex,
-                                            unsigned long partmaxindex,
-                                            unsigned long numofsuffixes,
+static GtUword *gt_evenly_divide_part(const GtFirstcodestab *fct,
+                                            GtUword partminindex,
+                                            GtUword partmaxindex,
+                                            GtUword numofsuffixes,
                                             unsigned int numofparts)
 {
-  unsigned long *endindexes, widthofpart, offset;
+  GtUword *endindexes, widthofpart, offset;
   unsigned int part, remainder;
 
   gt_assert(partminindex < partmaxindex && numofparts >= 2U);
   widthofpart = numofsuffixes/numofparts;
   endindexes = gt_malloc(sizeof (*endindexes) * numofparts);
   offset = gt_firstcodes_get_leftborder(fct,partminindex);
-  remainder = (unsigned int) (numofsuffixes % (unsigned long) numofparts);
+  remainder = (unsigned int) (numofsuffixes % (GtUword) numofparts);
   for (part=0; part < numofparts; part++)
   {
     if (remainder > 0)
@@ -446,7 +446,7 @@ static unsigned long *gt_evenly_divide_part(const GtFirstcodestab *fct,
       endindexes[part] = partmaxindex;
     } else
     {
-      unsigned long start = (part == 0) ? partminindex : endindexes[part-1] + 1;
+      GtUword start = (part == 0) ? partminindex : endindexes[part-1] + 1;
 
       endindexes[part] = gt_firstcodes_findfirstlarger(fct,start,partmaxindex,
                                                        offset);
@@ -464,7 +464,7 @@ typedef struct
   const GtSpmsuftab *spmsuftab;
   const GtSeqnumrelpos *snrp;
   const GtFirstcodestab *fct;
-  unsigned long depth,
+  GtUword depth,
                 minindex,
                 maxindex,
                 sumofwidth,
@@ -510,12 +510,12 @@ static int gt_firstcodes_thread_sortremaining(
                                        const GtSpmsuftab *spmsuftab,
                                        const GtSeqnumrelpos *snrp,
                                        const GtFirstcodestab *fct,
-                                       unsigned long partminindex,
-                                       unsigned long partmaxindex,
-                                       unsigned long widthofpart,
-                                       unsigned long sumofwidth,
-                                       unsigned long spaceforbucketprocessing,
-                                       unsigned long depth,
+                                       GtUword partminindex,
+                                       GtUword partmaxindex,
+                                       GtUword widthofpart,
+                                       GtUword sumofwidth,
+                                       GtUword spaceforbucketprocessing,
+                                       GtUword depth,
                                        GtFirstcodesintervalprocess itvprocess,
                                        GtFirstcodesintervalprocess_end
                                          itvprocess_end,
@@ -526,7 +526,7 @@ static int gt_firstcodes_thread_sortremaining(
                                        GtError *err)
 {
   unsigned int t;
-  unsigned long sum = 0, *endindexes;
+  GtUword sum = 0, *endindexes;
   GtSortRemainingThreadinfo *threadinfo;
   bool haserr = false;
 
@@ -536,7 +536,7 @@ static int gt_firstcodes_thread_sortremaining(
   threadinfo = gt_malloc(sizeof (*threadinfo) * threads);
   for (t=0; t<threads; t++)
   {
-    unsigned long lb;
+    GtUword lb;
 
     threadinfo[t].srsw = srswtab[t];
     threadinfo[t].encseq = encseq;
@@ -569,8 +569,8 @@ static int gt_firstcodes_thread_sortremaining(
       threadinfo[t].sumofwidth = sumofwidth;
     }
     gt_assert(lb < threadinfo[t].sumofwidth);
-    gt_logger_log(logger,"thread %u: process [%lu,%lu]=[%lu,%lu] "
-                         "of width %lu",t,threadinfo[t].minindex,
+    gt_logger_log(logger,"thread %u: process ["GT_LU","GT_LU"]=["GT_LU","GT_LU"] "
+                         "of width "GT_LU"",t,threadinfo[t].minindex,
                                           threadinfo[t].maxindex,
                                           lb,
                                           threadinfo[t].sumofwidth,
@@ -635,8 +635,8 @@ static void gt_firstcode_delete_before_end(GtFirstcodesinfo *fci)
   }
 }
 
-static unsigned long gt_firstcodes_idx2code(const GtFirstcodesinfo *fci,
-                                            unsigned long idx)
+static GtUword gt_firstcodes_idx2code(const GtFirstcodesinfo *fci,
+                                            GtUword idx)
 {
   gt_assert(idx <= fci->differentcodes);
   if (idx == fci->differentcodes)
@@ -668,7 +668,7 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
                               unsigned int minmatchlength,
                               GtError *err)
 {
-  unsigned long totallength, maxseqlength, maxrelpos;
+  GtUword totallength, maxseqlength, maxrelpos;
   unsigned int logtotallength, bitsforrelpos, bitsforseqnum;
   bool haserr = false;
 
@@ -703,9 +703,9 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
   }
   gt_log_log("markprefixunits=%u,marksuffixunits=%u",fci->markprefixunits,
                                                      fci->marksuffixunits);
-  if (maxseqlength > (unsigned long) minmatchlength)
+  if (maxseqlength > (GtUword) minmatchlength)
   {
-    maxrelpos = maxseqlength - (unsigned long) minmatchlength;
+    maxrelpos = maxseqlength - (GtUword) minmatchlength;
   } else
   {
     maxrelpos = 0;
@@ -722,8 +722,8 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
   {
     gt_seqnumrelpos_delete(fci->buf.snrp);
     fci->buf.snrp = NULL;
-    gt_error_set(err,"cannot process encoded sequences with %lu sequences "
-                     "of length up to %lu (%u+%u bits)",
+    gt_error_set(err,"cannot process encoded sequences with "GT_LU" sequences "
+                     "of length up to "GT_LU" (%u+%u bits)",
                      fci->numofsequences,maxseqlength,bitsforseqnum,
                      bitsforrelpos);
     haserr = true;
@@ -783,7 +783,7 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
                                 NULL,
                                 NULL);
   fci->numofsequences = fci->countsequences;
-  gt_logger_log(logger,"have stored %lu prefix codes",fci->numofsequences);
+  gt_logger_log(logger,"have stored "GT_LU" prefix codes",fci->numofsequences);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "to sort initial prefixes",stdout);
@@ -830,13 +830,13 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
 
 static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
                                     unsigned int numofparts,
-                                    unsigned long maximumspace,
-                                    unsigned long phase2extra,
+                                    GtUword maximumspace,
+                                    GtUword phase2extra,
                                     GtError *err)
 {
   if (maximumspace > 0)
   {
-    if ((unsigned long) gt_firstcodes_spacelog_total(fci->fcsl) +
+    if ((GtUword) gt_firstcodes_spacelog_total(fci->fcsl) +
                         phase2extra >= maximumspace)
     {
       gt_error_set(err,"already used %.2f MB of memory and need %.2f MB later "
@@ -898,15 +898,15 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
                 GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)));
   gt_firstcodes_accum_runkmerscan(encseq, kmersize, minmatchlength,&fci->buf);
   gt_firstcodes_accumulatecounts_flush(fci);
-  gt_logger_log(logger,"codebuffer_total=%lu (%.3f%% of all suffixes)",
+  gt_logger_log(logger,"codebuffer_total="GT_LU" (%.3f%% of all suffixes)",
                 fci->codebuffer_total,
                 100.0 * (double) fci->codebuffer_total/
                                  gt_encseq_total_length(encseq));
   if (fci->firstcodehits > 0)
   {
     gt_assert(fci->flushcount > 0);
-    gt_logger_log(logger,"firstcodehits=%lu (%.3f%% of all suffixes), "
-                         "%u rounds (avg length %lu)",
+    gt_logger_log(logger,"firstcodehits="GT_LU" (%.3f%% of all suffixes), "
+                         "%u rounds (avg length "GT_LU")",
                          fci->firstcodehits,
                          100.0 * (double) fci->firstcodehits/
                                           gt_encseq_total_length(encseq),
@@ -948,21 +948,21 @@ static void gt_firstcodes_map_sections(GtFirstcodesinfo *fci,
 static int gt_firstcodes_auto_parts(GtFirstcodesinfo *fci,
                                     GtSfxmappedrangelist *sfxmrlist,
                                     unsigned int numofparts,
-                                    unsigned long *maximumspace,
-                                    unsigned long maxbucketsize,
+                                    GtUword *maximumspace,
+                                    GtUword maxbucketsize,
                                     unsigned int kmersize,
-                                    unsigned long totallength,
-                                    unsigned long maxseqlength,
-                                    unsigned long suftabentries,
-                                    unsigned long phase2extra,
+                                    GtUword totallength,
+                                    GtUword maxseqlength,
+                                    GtUword suftabentries,
+                                    GtUword phase2extra,
                                     GtError *err)
 {
   int retval;
-  unsigned long leftbordersize_all;
+  GtUword leftbordersize_all;
 
   if (numofparts == 0 && *maximumspace == 0)
   {
-    *maximumspace = (unsigned long)
+    *maximumspace = (GtUword)
                     (gt_firstcodes_spacelog_peak(fci->fcsl) +
                      phase2extra +
                      gt_shortreadsort_size(true,maxbucketsize,
@@ -1042,19 +1042,19 @@ static void gt_firstcodes_handle_tmp(GtFirstcodesinfo *fci,
 }
 
 static void gt_firstcodes_allocsize_for_insertion(GtFirstcodesinfo *fci,
-                                                  unsigned long maximumspace,
+                                                  GtUword maximumspace,
                                                   const GtSuftabparts
                                                     *suftabparts,
-                                                  unsigned long phase2extra)
+                                                  GtUword phase2extra)
 {
   if (maximumspace > 0)
   {
-    const unsigned long maxrounds = 400UL;
+    const GtUword maxrounds = 400UL;
     size_t used = gt_firstcodes_spacelog_workspace(fci->fcsl) +
                   phase2extra +
                   gt_suftabparts_largestsizemappedpartwise(suftabparts);
 
-    if ((unsigned long) used < maximumspace)
+    if ((GtUword) used < maximumspace)
     {
       fci->buf.allocated = gt_radixsort_max_num_of_entries_ulongpair(
                                                 (size_t) maximumspace - used);
@@ -1062,7 +1062,7 @@ static void gt_firstcodes_allocsize_for_insertion(GtFirstcodesinfo *fci,
     {
       fci->buf.allocated /= 4UL;
     }
-    if ((unsigned long) (fci->codebuffer_total+fci->numofsequences)/
+    if ((GtUword) (fci->codebuffer_total+fci->numofsequences)/
                         fci->buf.allocated > maxrounds)
     {
       fci->buf.allocated
@@ -1081,12 +1081,12 @@ static int gt_firstcodes_process_part(GtFirstcodesinfo *fci,
                                       unsigned int minmatchlength,
                                       const GtSuftabparts *suftabparts,
                                       unsigned int part,
-                                      unsigned long maximumspace,
+                                      GtUword maximumspace,
 #ifndef GT_THREADS_ENABLED
                                       GT_UNUSED
 #endif
                                       unsigned int threads,
-                                      unsigned long suftabentries,
+                                      GtUword suftabentries,
                                       bool withsuftabcheck,
                                       GtShortreadsortworkinfo **srswtab,
                                       GtFirstcodesintervalprocess itvprocess,
@@ -1097,7 +1097,7 @@ static int gt_firstcodes_process_part(GtFirstcodesinfo *fci,
                                       GtTimer *timer,
                                       GtError *err)
 {
-  unsigned long spaceforbucketprocessing = 0;
+  GtUword spaceforbucketprocessing = 0;
   void *mapptr;
   bool haserr = false;
 
@@ -1113,7 +1113,7 @@ static int gt_firstcodes_process_part(GtFirstcodesinfo *fci,
   if (fci->mappedallfirstcodes != NULL)
   {
     fci->allfirstcodes
-      = (unsigned long *)
+      = (GtUword *)
         gt_Sfxmappedrange_map(fci->mappedallfirstcodes,
                               fci->currentminindex,
                               fci->currentmaxindex);
@@ -1177,11 +1177,11 @@ static int gt_firstcodes_process_part(GtFirstcodesinfo *fci,
   }
   if (maximumspace > 0)
   {
-    if ((unsigned long) gt_firstcodes_spacelog_total(fci->fcsl)
+    if ((GtUword) gt_firstcodes_spacelog_total(fci->fcsl)
         < maximumspace)
     {
       spaceforbucketprocessing = maximumspace -
-                                 (unsigned long)
+                                 (GtUword)
                                  gt_firstcodes_spacelog_total(fci->fcsl);
       gt_log_log("space left for sortremaining: %.2f",
                  GT_MEGABYTES(spaceforbucketprocessing));
@@ -1205,7 +1205,7 @@ static int gt_firstcodes_process_part(GtFirstcodesinfo *fci,
                                    gt_suftabparts_widthofpart(part,suftabparts),
                                    gt_suftabparts_sumofwidth(part,suftabparts),
                                    spaceforbucketprocessing,
-                                   (unsigned long) kmersize,
+                                   (GtUword) kmersize,
                                    itvprocess,
                                    itvprocess_end,
                                    itvprocessdatatab,
@@ -1229,7 +1229,7 @@ static int gt_firstcodes_process_part(GtFirstcodesinfo *fci,
                                     fci->currentmaxindex,
                                     gt_suftabparts_sumofwidth(part,suftabparts),
                                     spaceforbucketprocessing,
-                                    (unsigned long) kmersize,
+                                    (GtUword) kmersize,
                                     itvprocess,
                                     itvprocess_end,
                                     itvprocessdatatab == NULL
@@ -1252,14 +1252,14 @@ static int gt_firstcodes_process_part(GtFirstcodesinfo *fci,
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize,
                                                   unsigned int numofparts,
-                                                  unsigned long maximumspace,
+                                                  GtUword maximumspace,
                                                   unsigned int minmatchlength,
                                                   bool withsuftabcheck,
                                                   bool onlyaccumulation,
                                                   bool onlyallfirstcodes,
                                                   GT_UNUSED
                                                   unsigned int addbscache_depth,
-                                                  unsigned long phase2extra,
+                                                  GtUword phase2extra,
                     GT_UNUSED bool radixsmall,      /* set to true */
                     GT_UNUSED unsigned int radixparts, /* set to 2U */
                                                   GtFirstcodesintervalprocess
@@ -1274,7 +1274,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtFirstcodesinfo fci;
   size_t suftab_size = 0;
   unsigned int part, threadcount;
-  unsigned long maxbucketsize, suftabentries = 0, largest_width,
+  GtUword maxbucketsize, suftabentries = 0, largest_width,
                 totallength = gt_encseq_total_length(encseq),
                 maxseqlength = gt_encseq_max_seq_length(encseq);
   GtSfxmappedrangelist *sfxmrlist = NULL;
@@ -1288,7 +1288,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   const unsigned int threads = 1U;
 #endif
 
-  if (maxseqlength < (unsigned long) minmatchlength)
+  if (maxseqlength < (GtUword) minmatchlength)
   {
     return 0;
   }
@@ -1367,7 +1367,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_firstcodes_restore_from_differences(&fci);
     gt_logger_log(logger,"maximum space after computing partial sums: %.2f MB",
                   GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
-    gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
+    gt_logger_log(logger,"maxbucketsize="GT_LU"",maxbucketsize);
     gt_firstcodes_map_sections(&fci,sfxmrlist);
     if (numofparts == 0 || maximumspace > 0)
     {
@@ -1481,7 +1481,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   if (!haserr && !onlyaccumulation && srswtab != NULL)
   {
-    unsigned long sumofstoredvalues = 0;
+    GtUword sumofstoredvalues = 0;
 
     for (threadcount=0; threadcount<threads; threadcount++)
     {
@@ -1496,8 +1496,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     if (!onlyaccumulation)
     {
       gt_assert(fci.flushcount > 0);
-      gt_logger_log(logger,"firstcodeposhits=%lu (%.3f%% of all suffixes), "
-                           "%u rounds (avg length %lu)",
+      gt_logger_log(logger,"firstcodeposhits="GT_LU" (%.3f%% of all suffixes), "
+                           "%u rounds (avg length "GT_LU")",
                            fci.firstcodeposhits,
                            100.0 * (double) fci.firstcodeposhits/totallength,
                            fci.flushcount,

@@ -23,13 +23,13 @@
 struct GtRandomcodesCorrectData {
   const GtEncseq *encseq;
   unsigned int alphasize;
-  unsigned long firstmirrorpos;
-  unsigned long totallength;
+  GtUword firstmirrorpos;
+  GtUword totallength;
 
   unsigned int k;
   unsigned int c;
   unsigned int *count;
-  unsigned long *kpositions;
+  GtUword *kpositions;
   FILE *outfile;
 
   unsigned int currentchar;
@@ -37,7 +37,7 @@ struct GtRandomcodesCorrectData {
   bool alltrusted;
 
   /* stats */
-  unsigned long nofkmergroups,
+  GtUword nofkmergroups,
                 nofkmeritvs,
                 nofkmers,
                 nofcorrections;
@@ -55,14 +55,14 @@ static inline void gt_randomcodes_correct_data_reset(
 }
 
 static inline void gt_randomcodes_correct_process_kmer_itv(
-    const unsigned long *suffixes,
-    unsigned long nofsuffixes,
+    const GtUword *suffixes,
+    GtUword nofsuffixes,
     GtRandomcodesCorrectData *cdata)
 {
   unsigned int i, c = cdata->c;
   cdata->nofkmeritvs++;
   cdata->nofkmers += nofsuffixes;
-  if (nofsuffixes < (unsigned long)cdata->c)
+  if (nofsuffixes < (GtUword)cdata->c)
   {
     cdata->alltrusted = false;
     c = (unsigned int)nofsuffixes;
@@ -92,7 +92,7 @@ static inline void gt_randomcodes_correct_process_kmergroup_end(
     }
     if (max_count >= cdata->c)
     {
-      const unsigned long trusted_char_seqnumrelpos =
+      const GtUword trusted_char_seqnumrelpos =
         (cdata->kpositions + countpos * cdata->c)[0];
       GtUchar trusted_char = gt_encseq_get_encoded_char_nospecial(cdata->encseq,
           gt_encseq_seqstartpos(cdata->encseq, gt_seqnumrelpos_decode_seqnum(
@@ -107,9 +107,9 @@ static inline void gt_randomcodes_correct_process_kmergroup_end(
           for (j = 0; j < cdata->count[i]; j++)
           {
             GtUchar newchar = trusted_char;
-            const unsigned long
+            const GtUword
               seqnumrelpos = (cdata->kpositions + i * cdata->c)[j];
-            unsigned long abspos;
+            GtUword abspos;
             abspos = gt_encseq_seqstartpos(cdata->encseq,
                 gt_seqnumrelpos_decode_seqnum(snrp,seqnumrelpos)) +
               gt_seqnumrelpos_decode_relpos(snrp,seqnumrelpos) + cdata->k - 1;
@@ -133,11 +133,11 @@ static inline void gt_randomcodes_correct_process_kmergroup_end(
 }
 
 int gt_randomcodes_correct_process_bucket(void *data,
-    const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
+    const GtUword *bucketofsuffixes, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword numberofsuffixes,
     GT_UNUSED unsigned int sortingdepth, GT_UNUSED GtError *err)
 {
-  unsigned long itvstart, next_itvstart;
+  GtUword itvstart, next_itvstart;
   unsigned int lcpvalue;
   bool haserr = false;
   GtRandomcodesCorrectData *cdata = data;
@@ -197,8 +197,8 @@ GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
   }
   if (!haserr && cdata->totallength > (ULONG_MAX >> 2))
   {
-    gt_error_set(err, "totallength %lu larger than %lu", cdata->totallength,
-        ULONG_MAX >> 2);
+    gt_error_set(err, "totallength "GT_LU" larger than "GT_LU"", cdata->totallength,
+        (GtUword) ULONG_MAX >> 2);
     haserr = true;
   }
   gt_str_delete(path);
@@ -208,14 +208,14 @@ GtRandomcodesCorrectData *gt_randomcodes_correct_data_new(GtEncseq *encseq,
 }
 
 #define GT_RANDOMCODES_COLLECT_STAT(S)\
-  gt_log_log("thread %u: " #S " %lu", threadnum, cdata->S);\
+  gt_log_log("thread %u: " #S " "GT_LU"", threadnum, cdata->S);\
   if (S != NULL)\
     *S += cdata->S;
 
 void gt_randomcodes_correct_data_collect_stats(GtRandomcodesCorrectData *cdata,
-    unsigned int threadnum, unsigned long *nofkmergroups,
-    unsigned long *nofkmeritvs, unsigned long *nofkmers,
-    unsigned long *nofcorrections)
+    unsigned int threadnum, GtUword *nofkmergroups,
+    GtUword *nofkmeritvs, GtUword *nofkmers,
+    GtUword *nofcorrections)
 {
   GT_RANDOMCODES_COLLECT_STAT(nofkmergroups);
   GT_RANDOMCODES_COLLECT_STAT(nofkmeritvs);

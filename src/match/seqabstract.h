@@ -29,40 +29,40 @@ GtSeqabstract* gt_seqabstract_new_empty(void);
    <offset>. That is the abstract sequence will be of length <len> - <offset>!
  */
 GtSeqabstract* gt_seqabstract_new_gtuchar(const GtUchar *string,
-                                          unsigned long len,
-                                          unsigned long offset);
+                                          GtUword len,
+                                          GtUword offset);
 
 /* Creates new <GtSeqabstract> object from <encseq> of length <len> starting at
    <offset>. That is the abstract sequence will be of length <len> - <offset>!
  */
 GtSeqabstract* gt_seqabstract_new_encseq(const GtEncseq *encseq,
-                                         unsigned long len,
-                                         unsigned long offset);
+                                         GtUword len,
+                                         GtUword offset);
 
 /* reinitialize <sa> with <string> of length <len> starting at <offset> */
 void           gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
                                              const GtUchar *string,
-                                             unsigned long len,
-                                             unsigned long offset);
+                                             GtUword len,
+                                             GtUword offset);
 
 /* reinitialize <sa> with <encseq> of length <len> starting at <offset> */
 void           gt_seqabstract_reinit_encseq(GtSeqabstract *sa,
                                             const GtEncseq *encseq,
-                                            unsigned long len,
-                                            unsigned long offset);
+                                            GtUword len,
+                                            GtUword offset);
 
-unsigned long  gt_seqabstract_length(const GtSeqabstract *sa);
+GtUword  gt_seqabstract_length(const GtSeqabstract *sa);
 
 GtUchar        gt_seqabstract_encoded_char(const GtSeqabstract *sa,
-                                           unsigned long idx);
+                                           GtUword idx);
 
 void           gt_seqabstract_delete(GtSeqabstract *sa);
 
-unsigned long gt_seqabstract_lcp(bool forward,
+GtUword gt_seqabstract_lcp(bool forward,
                                  const GtSeqabstract *useq,
                                  const GtSeqabstract *vseq,
-                                 unsigned long leftstart,
-                                 unsigned long rightstart,
-                                 unsigned long minlen);
+                                 GtUword leftstart,
+                                 GtUword rightstart,
+                                 GtUword minlen);
 
 #endif

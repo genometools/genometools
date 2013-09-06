@@ -139,7 +139,7 @@ static int gt_readjoiner_cnttest_runner(GT_UNUSED int argc,
   GtEncseqLoader *el = NULL;
   GtEncseq *reads = NULL;
   GtBitsequence *bits = NULL;
-  unsigned long nofreads;
+  GtUword nofreads;
   int had_err = 0;
 
   gt_error_check(err);
@@ -176,7 +176,7 @@ static int gt_readjoiner_cnttest_runner(GT_UNUSED int argc,
   else if (arguments->test == GT_READJOINER_CNTTEST_ESA)
   {
     Sequentialsuffixarrayreader *ssar = NULL;
-    unsigned long readlength = 0, firstrevcompl = 0;
+    GtUword readlength = 0, firstrevcompl = 0;
     GtLogger *verbose_logger = gt_logger_new(arguments->verbose,
         GT_LOGGER_DEFLT_PREFIX, stderr);
     ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(

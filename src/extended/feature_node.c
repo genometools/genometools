@@ -77,7 +77,7 @@ typedef struct {
 
 typedef struct {
   const char *type;
-  unsigned long number;
+  GtUword number;
 } GtTypeTraverseInfo;
 
 static void feature_node_free(GtGenomeNode *gn)
@@ -231,7 +231,7 @@ static void set_tree_status(unsigned int *bit_field, TreeStatus tree_status)
 }
 
 GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
-                                  unsigned long start, unsigned long end,
+                                  GtUword start, GtUword end,
                                   GtStrand strand)
 {
   GtGenomeNode *gn;
@@ -260,8 +260,8 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
   return gn;
 }
 
-GtGenomeNode* gt_feature_node_new_pseudo(GtStr *seqid, unsigned long start,
-                                         unsigned long end, GtStrand strand)
+GtGenomeNode* gt_feature_node_new_pseudo(GtStr *seqid, GtUword start,
+                                         GtUword end, GtStrand strand)
 {
   GtFeatureNode *pf;
   GtGenomeNode *pn;
@@ -346,7 +346,7 @@ GtFeatureNode* gt_feature_node_clone(const GtFeatureNode *template)
   GtFeatureNode *fn;
   GtStr *seqid;
   const char *type;
-  unsigned long i, start, end;
+  GtUword i, start, end;
   GtStrand strand;
   GtStrArray *attributes;
   gt_assert(template && !gt_feature_node_has_children(template));
@@ -554,7 +554,7 @@ static int save_exons_and_cds(GtFeatureNode *fn, void *data,
 static void set_transcript_types(GtArray *features, GtStrand parent_strand)
 {
   GtFeatureNode *fn;
-  unsigned long i;
+  GtUword i;
   gt_assert(features);
   if (gt_array_size(features)) {
     if (gt_array_size(features) == 1) {
@@ -622,7 +622,7 @@ GtTranscriptFeatureType gt_feature_node_get_transcriptfeaturetype(GtFeatureNode
          TRANSCRIPT_FEATURE_TYPE_MASK;
 }
 
-void gt_feature_node_set_end(GtFeatureNode *fn, unsigned long end)
+void gt_feature_node_set_end(GtFeatureNode *fn, GtUword end)
 {
   gt_assert(fn && fn->range.start <= end);
   fn->range.end = end;
@@ -713,7 +713,7 @@ static bool feature_node_has_gft(const GtFeatureNode *fn, const char **fnts)
   gt_assert(fn && fnts && fnts[0] != NULL);
   fni = gt_feature_node_iterator_new(fn);
   while ((child = gt_feature_node_iterator_next(fni))) {
-    unsigned long i = 0;
+    GtUword i = 0;
     while (fnts[i] != NULL) {
       if (gt_feature_node_has_type((GtFeatureNode*) child, fnts[i])) {
         has_gft = true;
@@ -745,11 +745,11 @@ bool gt_feature_node_has_splice_site(const GtFeatureNode *fn)
 }
 
 double gt_feature_node_average_splice_site_prob(const GtFeatureNode *fn,
-                                                unsigned long *num_ss)
+                                                GtUword *num_ss)
 {
   GtFeatureNodeIterator *fni;
   GtFeatureNode *child;
-  unsigned long num_of_splice_sites = 0;
+  GtUword num_of_splice_sites = 0;
   double averagessp = 0.0;
   gt_assert(fn);
   fni = gt_feature_node_iterator_new(fn);
@@ -854,7 +854,7 @@ int gt_feature_node_traverse_children(GtFeatureNode *feature_node, void *data,
   GtArray *node_stack = NULL, *list_of_children;
   GtFeatureNode *fn, *fn_ref, *child_feature;
   GtDlistelem *dlistelem;
-  unsigned long i;
+  GtUword i;
   GtHashtable *traversed_nodes = NULL;
   bool has_node_with_multiple_parents = false;
   int had_err = 0;
@@ -1049,13 +1049,13 @@ int gt_feature_node_traverse_direct_children(GtFeatureNode *fn,
   return had_err;
 }
 
-unsigned long gt_feature_node_number_of_children(const GtFeatureNode *fn)
+GtUword gt_feature_node_number_of_children(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   return gt_dlist_size(fn->children);
 }
 
-unsigned long gt_feature_node_number_of_children_of_type(const GtFeatureNode
+GtUword gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                          *parent,
                                                          const GtFeatureNode
                                                          *node)
@@ -1272,7 +1272,7 @@ bool gt_feature_node_overlaps_nodes(GtFeatureNode *fn, GtArray *nodes)
 bool gt_feature_node_overlaps_nodes_mark(GtFeatureNode *fn, GtArray *nodes,
                                          GtBittab *b)
 {
-  unsigned long i;
+  GtUword i;
   GtGenomeNode *node;
   GtRange fn_range, node_range;
   bool rval = false;

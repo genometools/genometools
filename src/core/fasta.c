@@ -21,7 +21,7 @@
 #include "core/xansi_api.h"
 
 void gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
+                         GtUword sequence_length, GtUword width,
                          GtFile *outfp)
 {
   gt_fasta_show_entry_with_suffix(description, sequence, sequence_length, NULL,
@@ -30,11 +30,11 @@ void gt_fasta_show_entry(const char *description, const char *sequence,
 
 void gt_fasta_show_entry_with_suffix(const char *description,
                                      const char *sequence,
-                                     unsigned long sequence_length,
-                                     const char *suffix, unsigned long width,
+                                     GtUword sequence_length,
+                                     const char *suffix, GtUword width,
                                      GtFile *outfp)
 {
-  unsigned long i, current_length, suffix_length;
+  GtUword i, current_length, suffix_length;
   gt_assert(sequence);
   gt_file_xfputc(GT_FASTA_SEPARATOR, outfp);
   if (description)

@@ -108,7 +108,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       }
 
       gt_file_xprintf(arguments->outfp, "file format version: ");
-      gt_file_xprintf(arguments->outfp, "%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"\n",
                                           gt_encseq_metadata_version(emd));
 
       gt_file_xprintf(arguments->outfp, "64-bit file: ");
@@ -117,20 +117,20 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
                                                   : "no");
 
       gt_file_xprintf(arguments->outfp, "total length: ");
-      gt_file_xprintf(arguments->outfp, "%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"\n",
                                         gt_encseq_metadata_total_length(emd));
 
       gt_file_xprintf(arguments->outfp, "number of sequences: ");
-      gt_file_xprintf(arguments->outfp, "%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"\n",
                                       gt_encseq_metadata_num_of_sequences(emd));
 
       gt_file_xprintf(arguments->outfp, "number of files: ");
-      gt_file_xprintf(arguments->outfp, "%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"\n",
                                         gt_encseq_metadata_num_of_files(emd));
 
       gt_file_xprintf(arguments->outfp, "length of shortest/longest "
                                         "sequence: ");
-      gt_file_xprintf(arguments->outfp, "%lu/%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"/"GT_LU"\n",
                                         gt_encseq_metadata_min_seq_length(emd),
                                         gt_encseq_metadata_max_seq_length(emd));
 
@@ -174,7 +174,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
 
     if (!had_err) {
       const GtStrArray *filenames;
-      unsigned long i;
+      GtUword i;
 
       if (!arguments->noindexname) {
         gt_file_xprintf(arguments->outfp, "index name: ");
@@ -182,7 +182,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       }
 
       gt_file_xprintf(arguments->outfp, "file format version: ");
-      gt_file_xprintf(arguments->outfp, "%lu\n", gt_encseq_version(encseq));
+      gt_file_xprintf(arguments->outfp, ""GT_LU"\n", gt_encseq_version(encseq));
 
       gt_file_xprintf(arguments->outfp, "64-bit file: ");
       gt_file_xprintf(arguments->outfp, "%s\n", gt_encseq_is_64_bit(encseq)
@@ -190,33 +190,33 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
                                                    : "no");
 
       gt_file_xprintf(arguments->outfp, "total length: ");
-      gt_file_xprintf(arguments->outfp, "%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"\n",
                                         gt_encseq_total_length(encseq));
 
       gt_file_xprintf(arguments->outfp, "compressed size: ");
-      gt_file_xprintf(arguments->outfp, "%lu bytes\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU" bytes\n",
                                         gt_encseq_sizeofrep(encseq));
 
       gt_file_xprintf(arguments->outfp, "number of sequences: ");
-      gt_file_xprintf(arguments->outfp, "%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"\n",
                                         gt_encseq_num_of_sequences(encseq));
 
       gt_file_xprintf(arguments->outfp, "number of files: ");
-      gt_file_xprintf(arguments->outfp, "%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"\n",
                                         gt_encseq_num_of_files(encseq));
 
       gt_file_xprintf(arguments->outfp, "length of shortest/longest "
                                         "sequence: ");
-      gt_file_xprintf(arguments->outfp, "%lu/%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"/"GT_LU"\n",
                                       gt_encseq_min_seq_length(encseq),
                                       gt_encseq_max_seq_length(encseq));
 
       filenames = gt_encseq_filenames(encseq);
       gt_file_xprintf(arguments->outfp, "original filenames:\n");
       for (i = 0; i < gt_str_array_size(filenames); i++) {
-        gt_file_xprintf(arguments->outfp, "\t%s (%lu characters)\n",
+        gt_file_xprintf(arguments->outfp, "\t%s ("GT_LU" characters)\n",
                                           gt_str_array_get(filenames, i),
-                                          (unsigned long)
+                                          (GtUword)
                                      gt_encseq_effective_filelength(encseq, i));
       }
 
@@ -243,9 +243,9 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
 
       gt_file_xprintf(arguments->outfp, "character distribution:\n");
       for (i = 0; i < gt_alphabet_num_of_chars(alpha); i++) {
-        unsigned long cc;
+        GtUword cc;
         cc = gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, chars[i]));
-        gt_file_xprintf(arguments->outfp, "\t%c: %lu (%.2f%%)\n",
+        gt_file_xprintf(arguments->outfp, "\t%c: "GT_LU" (%.2f%%)\n",
                                           (char) chars[i],
                                           cc,
                              (cc /(double) (gt_encseq_total_length(encseq)
@@ -253,18 +253,18 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       }
 
       gt_file_xprintf(arguments->outfp, "number of wildcards: ");
-      gt_file_xprintf(arguments->outfp, "%lu (%lu range(s))\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU" ("GT_LU" range(s))\n",
                                         gt_encseq_wildcards(encseq),
                                         gt_encseq_realwildcardranges(encseq));
 
       gt_file_xprintf(arguments->outfp, "number of special characters: ");
-      gt_file_xprintf(arguments->outfp, "%lu (%lu range(s))\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU" ("GT_LU" range(s))\n",
                                         gt_encseq_specialcharacters(encseq),
                                         gt_encseq_realspecialranges(encseq));
 
       gt_file_xprintf(arguments->outfp, "length of longest non-special "
                                         "character stretch: ");
-      gt_file_xprintf(arguments->outfp, "%lu\n",
+      gt_file_xprintf(arguments->outfp, ""GT_LU"\n",
                                    gt_encseq_lengthoflongestnonspecial(encseq));
 
       gt_file_xprintf(arguments->outfp, "accesstype: ");
@@ -291,7 +291,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
 
       if (gt_encseq_has_description_support(encseq)) {
         gt_file_xprintf(arguments->outfp, "length of longest description: ");
-        gt_file_xprintf(arguments->outfp, "%lu\n",
+        gt_file_xprintf(arguments->outfp, ""GT_LU"\n",
                                           gt_encseq_max_desc_length(encseq));
       }
 

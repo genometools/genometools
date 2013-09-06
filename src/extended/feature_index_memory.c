@@ -42,7 +42,7 @@ struct GtFeatureIndexMemory {
   GtHashmap *nodes_in_index;
   GtArray *ids;
   char *firstseqid;
-  unsigned long nof_region_nodes,
+  GtUword nof_region_nodes,
                 reference_count,
                 nof_nodes;
 };

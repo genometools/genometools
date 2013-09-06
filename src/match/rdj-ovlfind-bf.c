@@ -24,23 +24,23 @@
 #include "core/array_api.h"
 #include "core/ensure.h"
 
-static inline bool contfind_bf(const char *a, unsigned long alen,
-    const char *b, unsigned long blen)
+static inline bool contfind_bf(const char *a, GtUword alen,
+    const char *b, GtUword blen)
 {
-  unsigned long offset;
+  GtUword offset;
   gt_assert(alen < blen);
   for (offset = 0; offset <= blen-alen; offset++)
     if (memcmp(a, b+offset, (size_t)alen) == 0) return true;
   return false;
 }
 
-static inline void spmfind_bf(const char *a, unsigned long alen,
-    const char *b, unsigned long blen, unsigned long minlen,
+static inline void spmfind_bf(const char *a, GtUword alen,
+    const char *b, GtUword blen, GtUword minlen,
     bool find_nonmaximal, bool self_comparison,
-    void(*proc)(unsigned long, bool, void*), bool direction,
+    void(*proc)(GtUword, bool, void*), bool direction,
     void* procdata)
 {
-  unsigned long len, from;
+  GtUword len, from;
   from = MIN(alen, blen);
   if (self_comparison)
     from -= 1;
@@ -52,10 +52,10 @@ static inline void spmfind_bf(const char *a, unsigned long alen,
     }
 }
 
-GtContfind gt_ovlfind_bf(const char *u, unsigned long u_length,
-    const char *v, unsigned long v_length, GtOvlfindMode m,
-    unsigned long min_length, bool find_nonmaximal,
-    void(*spmproc) (unsigned long /* overlap length */,
+GtContfind gt_ovlfind_bf(const char *u, GtUword u_length,
+    const char *v, GtUword v_length, GtOvlfindMode m,
+    GtUword min_length, bool find_nonmaximal,
+    void(*spmproc) (GtUword /* overlap length */,
         bool /* true if suffix of u == prefix of v;
             false if prefix of u == suffix of v */,
         void* /* spmprocdata */), void* spmprocdata)
@@ -105,10 +105,10 @@ GtContfind gt_ovlfind_bf(const char *u, unsigned long u_length,
 
 /*--------------------------   UNIT TEST   --------------------------*/
 
-struct GtOvlfindBfResult { bool u_suffix; unsigned long length; };
+struct GtOvlfindBfResult { bool u_suffix; GtUword length; };
 
 static
-void ovlfind_bf_test_save(unsigned long length, bool u_suffix, void *a)
+void ovlfind_bf_test_save(GtUword length, bool u_suffix, void *a)
 {
   struct GtOvlfindBfResult r = {u_suffix, length};
   gt_array_add((GtArray*)a,r);

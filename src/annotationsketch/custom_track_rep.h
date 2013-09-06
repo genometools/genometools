@@ -27,7 +27,7 @@
 typedef int           (*GtCustomTrackRenderFunc)(GtCustomTrack*, GtGraphics*,
                                                  unsigned int, GtRange,
                                                  GtStyle*, GtError*);
-typedef unsigned long (*GtCustomTrackGetHeightFunc)(GtCustomTrack*);
+typedef GtUword (*GtCustomTrackGetHeightFunc)(GtCustomTrack*);
 typedef const char*   (*GtCustomTrackGetTitleFunc)(GtCustomTrack*);
 typedef void          (*GtCustomTrackFreeFunc)(GtCustomTrack*);
 

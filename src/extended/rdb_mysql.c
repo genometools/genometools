@@ -37,7 +37,7 @@ struct GtRDBMySQL {
 
 struct GtRDBStmtMySQL {
     const GtRDBStmt parent_instance;
-    unsigned long num_params;
+    GtUword num_params;
     GtHashtable *buffers, *returned_strings;
     bool executed;
     my_bool update_maxlengths;
@@ -95,7 +95,7 @@ static void free_str(void *elem)
 }
 
 static GtRDBStmt* gt_rdb_mysql_prepare(GtRDB *rdb, const char *query,
-                                       unsigned long num_params, GtError *err)
+                                       GtUword num_params, GtError *err)
 {
   GtRDBStmt *st = NULL;
   GtRDBStmtMySQL *stm = NULL;
@@ -132,7 +132,7 @@ static GtRDBStmt* gt_rdb_mysql_prepare(GtRDB *rdb, const char *query,
     int param_count;
     param_count = mysql_stmt_param_count(tmp);
     if (param_count != num_params) {
-      gt_error_set(err, "invalid parameter count: %lu expected, %d given",
+      gt_error_set(err, "invalid parameter count: "GT_LU" expected, %d given",
                    num_params, param_count);
       mysql_stmt_close(tmp);
       had_err = -1;
@@ -156,7 +156,7 @@ static GtRDBStmt* gt_rdb_mysql_prepare(GtRDB *rdb, const char *query,
   return st;
 }
 
-static unsigned long gt_rdb_mysql_last_inserted_id(GtRDB *rdb,
+static GtUword gt_rdb_mysql_last_inserted_id(GtRDB *rdb,
                                                    GT_UNUSED const char *table,
                                                    GT_UNUSED GtError *err)
 {
@@ -188,7 +188,7 @@ static GtCstrTable* gt_rdb_mysql_get_tables(GtRDB *rdb, GtError *err)
   tab = gt_cstr_table_new();
   while ((row = mysql_fetch_row(res))) {
     char buf[BUFSIZ];
-    unsigned long *lengths;
+    GtUword *lengths;
     memset(buf, 0, BUFSIZ);
     lengths = mysql_fetch_lengths(res);
     (void) snprintf(buf, MIN(BUFSIZ, lengths[0])*sizeof (char), "%s",
@@ -289,7 +289,7 @@ static int gt_rdb_stmt_mysql_reset(GtRDBStmt *st, GtError *err)
   return had_err;
 }
 
-static int gt_rdb_stmt_mysql_bind_int(GtRDBStmt *st, unsigned long param_no,
+static int gt_rdb_stmt_mysql_bind_int(GtRDBStmt *st, GtUword param_no,
                                       int val, GT_UNUSED GtError *err)
 {
   GtRDBStmtMySQL *stm;
@@ -308,18 +308,18 @@ static int gt_rdb_stmt_mysql_bind_int(GtRDBStmt *st, unsigned long param_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_mysql_bind_ulong(GtRDBStmt *st, unsigned long param_no,
-                                        unsigned long val,
+static int gt_rdb_stmt_mysql_bind_ulong(GtRDBStmt *st, GtUword param_no,
+                                        GtUword val,
                                         GT_UNUSED GtError *err)
 {
   GtRDBStmtMySQL *stm;
-  unsigned long *lval;
+  GtUword *lval;
   int had_err = 0;
   gt_assert(st);
   gt_error_check(err);
   stm = gt_rdb_stmt_mysql_cast(st);
   gt_assert(param_no < stm->num_params);
-  lval = gt_malloc(sizeof (unsigned long));
+  lval = gt_malloc(sizeof (GtUword));
   *lval = val;
   gt_hashtable_add(stm->buffers, &lval);
   stm->params[param_no].buffer_type = MYSQL_TYPE_LONG;
@@ -330,14 +330,14 @@ static int gt_rdb_stmt_mysql_bind_ulong(GtRDBStmt *st, unsigned long param_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_mysql_bind_string(GtRDBStmt *st, unsigned long param_no,
+static int gt_rdb_stmt_mysql_bind_string(GtRDBStmt *st, GtUword param_no,
                                          const char *val,
                                          GT_UNUSED GtError *err)
 {
   GtRDBStmtMySQL *stm;
   int had_err = 0;
   char *str;
-  unsigned long *length;
+  GtUword *length;
   gt_assert(st);
   gt_error_check(err);
   stm = gt_rdb_stmt_mysql_cast(st);
@@ -347,7 +347,7 @@ static int gt_rdb_stmt_mysql_bind_string(GtRDBStmt *st, unsigned long param_no,
   strncpy(str, val, strlen(val));
   gt_hashtable_add(stm->buffers, &str);
   /* allocate space for length */
-  length = gt_malloc(sizeof (unsigned long));
+  length = gt_malloc(sizeof (GtUword));
   *length = strlen(str);
   gt_hashtable_add(stm->buffers, &length);
   /* fill param structure */
@@ -359,7 +359,7 @@ static int gt_rdb_stmt_mysql_bind_string(GtRDBStmt *st, unsigned long param_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_mysql_bind_double(GtRDBStmt *st, unsigned long param_no,
+static int gt_rdb_stmt_mysql_bind_double(GtRDBStmt *st, GtUword param_no,
                                          double val, GT_UNUSED GtError *err)
 {
   GtRDBStmtMySQL *stm;
@@ -390,7 +390,7 @@ static int gt_rdb_stmt_mysql_bind_double(GtRDBStmt *st, unsigned long param_no,
     had_err = -1; \
   }
 
-static int gt_rdb_stmt_mysql_get_int(GtRDBStmt *st, unsigned long field_no,
+static int gt_rdb_stmt_mysql_get_int(GtRDBStmt *st, GtUword field_no,
                                      int *result, GtError *err)
 {
   GtRDBStmtMySQL *stm;
@@ -430,8 +430,8 @@ static int gt_rdb_stmt_mysql_get_int(GtRDBStmt *st, unsigned long field_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_mysql_get_ulong(GtRDBStmt *st, unsigned long field_no,
-                                       unsigned long *result, GtError *err)
+static int gt_rdb_stmt_mysql_get_ulong(GtRDBStmt *st, GtUword field_no,
+                                       GtUword *result, GtError *err)
 {
   GtRDBStmtMySQL *stm;
   int had_err = 0;
@@ -444,11 +444,11 @@ static int gt_rdb_stmt_mysql_get_ulong(GtRDBStmt *st, unsigned long field_no,
     had_err = -1;
   }
   if (!had_err)
-    *result = *(unsigned long*) stm->results[field_no].buffer;
+    *result = *(GtUword*) stm->results[field_no].buffer;
   return had_err;
 }
 
-static int gt_rdb_stmt_mysql_get_string(GtRDBStmt *st, unsigned long field_no,
+static int gt_rdb_stmt_mysql_get_string(GtRDBStmt *st, GtUword field_no,
                                         GtStr *result, GtError *err)
 {
   GtRDBStmtMySQL *stm;
@@ -478,7 +478,7 @@ static int gt_rdb_stmt_mysql_get_string(GtRDBStmt *st, unsigned long field_no,
   return had_err;
 }
 
-static int gt_rdb_stmt_mysql_get_double(GtRDBStmt *st, unsigned long field_no,
+static int gt_rdb_stmt_mysql_get_double(GtRDBStmt *st, GtUword field_no,
                                         double *result, GtError *err)
 {
   GtRDBStmtMySQL *stm;
@@ -578,7 +578,7 @@ static int gt_rdb_stmt_mysql_exec(GtRDBStmt *st, GtError *err)
             case MYSQL_TYPE_BIT:
               {char *str = gt_calloc(field->max_length+1, sizeof (char));
               gt_hashtable_add(stm->buffers, &str);
-              unsigned long *length = gt_calloc(1, sizeof (unsigned long));
+              GtUword *length = gt_calloc(1, sizeof (GtUword));
               gt_hashtable_add(stm->buffers, &length);
               stm->results[i].buffer = str;
               stm->results[i].buffer_length = field->max_length;

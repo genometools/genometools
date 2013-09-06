@@ -32,6 +32,7 @@
 #include "core/ma.h"
 #include "core/spacepeak.h"
 #include "core/thread_api.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/xbsd.h"
@@ -45,7 +46,7 @@ typedef struct {
           *mmap_mutex;
   GtHashmap *file_pointer,
             *memory_maps;
-  unsigned long current_size,
+  GtUword current_size,
                 max_size;
   bool global_space_peak;
 } FA;
@@ -474,7 +475,7 @@ static size_t fd_to_file_size(int fd,const char *path,bool hard_fail,
   }
   if (sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX) {
     gt_error_set(err,"file \"%s\" of size "GT_LLU" is too large to map",
-                 path, (unsigned long long) sb.st_size);
+                 path, (GtUint64) sb.st_size);
     return -1;
   }
   return sb.st_size;
@@ -660,19 +661,19 @@ void* gt_fa_mmap_read_with_suffix_func(const char *path, const char *suffix,
 static int check_mapped_file_size(const char *path,
                                   const char *suffix,
                                   size_t numofbytes,
-                                  unsigned long expectedunits,
+                                  GtUword expectedunits,
                                   size_t sizeofunit,
                                   GtError *err)
 {
   gt_error_check(err);
-  if (expectedunits != (unsigned long) (numofbytes/sizeofunit))
+  if (expectedunits != (GtUword) (numofbytes/sizeofunit))
   {
     gt_error_set(err,"mapping file %s%s: number of mapped units (of size %u) "
-                     " = %lu != %lu = expected number of mapped units",
+                     " = "GT_LU" != "GT_LU" = expected number of mapped units",
                       path,
                       suffix,
                       (unsigned int) sizeofunit,
-                      (unsigned long) (numofbytes/sizeofunit),
+                      (GtUword) (numofbytes/sizeofunit),
                       expectedunits);
     return -1;
   }
@@ -680,7 +681,7 @@ static int check_mapped_file_size(const char *path,
 }
 
 void* gt_fa_mmap_check_size_with_suffix(const char *path, const char *suffix,
-                                        unsigned long expectedunits,
+                                        GtUword expectedunits,
                                      size_t sizeofunit, GtError *err)
 {
   size_t numofbytes;
@@ -758,13 +759,13 @@ void gt_fa_enable_global_spacepeak(void)
   fa->global_space_peak = true;
 }
 
-unsigned long gt_fa_get_space_peak(void)
+GtUword gt_fa_get_space_peak(void)
 {
   gt_assert(fa != NULL);
   return fa->max_size;
 }
 
-unsigned long gt_fa_get_space_current(void)
+GtUword gt_fa_get_space_current(void)
 {
   gt_assert(fa != NULL);
   return fa->current_size;

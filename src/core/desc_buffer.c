@@ -31,7 +31,7 @@
 
 struct GtDescBuffer {
   char *buf;
-  unsigned long length,
+  GtUword length,
                 maxlength,
                 curlength;
   size_t allocated;
@@ -92,7 +92,7 @@ void gt_desc_buffer_append_char(GtDescBuffer *db, char c)
 const char* gt_desc_buffer_get_next(GtDescBuffer *db)
 {
   gt_assert(db);
-  unsigned long startpos = (unsigned long) gt_queue_get(db->startqueue);
+  GtUword startpos = (GtUword) gt_queue_get(db->startqueue);
   db->dirty = true;
   return db->buf + startpos;
 }
@@ -109,14 +109,14 @@ void gt_desc_buffer_finish(GtDescBuffer *db)
   db->finished = true;
 }
 
-unsigned long gt_desc_buffer_length(const GtDescBuffer *db)
+GtUword gt_desc_buffer_length(const GtDescBuffer *db)
 {
   return db ? db->length : 0;
 }
 
 void gt_desc_buffer_reset(GtDescBuffer *db)
 {
-  unsigned long laststartpos;
+  GtUword laststartpos;
   gt_assert(db);
 
   if (!db->dirty) return;
@@ -125,9 +125,9 @@ void gt_desc_buffer_reset(GtDescBuffer *db)
     db->dirty = false;
     return;
   }
-  laststartpos = (unsigned long) gt_queue_head(db->startqueue);
+  laststartpos = (GtUword) gt_queue_head(db->startqueue);
   if (laststartpos != 0) {
-    laststartpos = (unsigned long) gt_queue_get(db->startqueue);
+    laststartpos = (GtUword) gt_queue_get(db->startqueue);
     db->length = db->length - laststartpos;
     if (db->length >= laststartpos) {
       /* strings overlap */
@@ -141,7 +141,7 @@ void gt_desc_buffer_reset(GtDescBuffer *db)
   db->dirty = false;
 }
 
-unsigned long gt_desc_buffer_max_length(GtDescBuffer *db)
+GtUword gt_desc_buffer_max_length(GtDescBuffer *db)
 {
   gt_assert(db);
   return db->maxlength;
@@ -169,7 +169,7 @@ void gt_desc_buffer_delete(GtDescBuffer *db)
 static int queueprinter(void **elem, GT_UNUSED void *info,
                         GT_UNUSED GtError *err)
 {
-  printf("%lu ", *(unsigned long*) elem);
+  printf(""GT_LU" ", *(GtUword*) elem);
   return 0;
 }
 
@@ -187,7 +187,7 @@ int gt_desc_buffer_unit_test(GtError *err)
   static char *strs[] = { "foo", "bar", "baz"};
   const char *ret;
   int had_err = 0;
-  unsigned long i, j;
+  GtUword i, j;
   gt_error_check(err);
 
   s = gt_desc_buffer_new();

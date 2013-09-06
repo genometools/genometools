@@ -257,7 +257,7 @@ static inline GtContfinderKmercodeWithOverflow gt_contfinder_get_code(
 
 typedef struct {
   GtReadjoinerContfinderSeqnumsType *seqnums;
-  unsigned long seqnums_offset;
+  GtUword seqnums_offset;
   gt_contfinder_seqnum_t nofseqs;
   size_t depth;
 } GtContfinderBucketInfo;
@@ -767,14 +767,14 @@ int gt_contfinder_write_seqnums(GtContfinder *contfinder, bool sorted,
     for (i = 0; i < contfinder->logicalnofseqs; i++)
       if (!GT_ISIBITSET(contfinder->contained,
             GT_READJOINER_CONTFINDER_GET_SEQNUM(contfinder->seqnums, i)))
-        gt_file_xprintf(outfp, "%lu\n", (unsigned long)
+        gt_file_xprintf(outfp, ""GT_LU"\n", (GtUword)
             GT_READJOINER_CONTFINDER_GET_SEQNUM(contfinder->seqnums, i));
   }
   else
   {
     for (i = 0; i < contfinder->nofseqs; i++)
       if (!GT_ISIBITSET(contfinder->contained, i))
-        gt_file_xprintf(outfp, "%lu\n", (unsigned long)i);
+        gt_file_xprintf(outfp, ""GT_LU"\n", (GtUword)i);
   }
   return had_err;
 }
@@ -800,7 +800,7 @@ int gt_contfinder_write_cntlist(GtContfinder *contfinder, char* path,
 {
   int had_err;
   had_err = gt_cntlist_show(contfinder->contained,
-      (unsigned long)contfinder->nofseqs, path, true, err);
+      (GtUword)contfinder->nofseqs, path, true, err);
   return had_err;
 }
 
@@ -817,7 +817,7 @@ int gt_contfinder_write_copynum(GtContfinder *contfinder, char* path,
   {
 #ifndef NDEBUG
     gt_contfinder_seqnum_t n_noncontained = 0;
-    unsigned long cnsum = 0;
+    GtUword cnsum = 0;
     bool had_overflow = false;
 #endif
     gt_contfinder_copynum_t cn;
@@ -840,7 +840,7 @@ int gt_contfinder_write_copynum(GtContfinder *contfinder, char* path,
     }
     gt_assert(n_noncontained == contfinder->nofseqs -
         gt_contfinder_nofcontained(contfinder));
-    gt_assert(had_overflow || (cnsum == (unsigned long)contfinder->nofseqs));
+    gt_assert(had_overflow || (cnsum == (GtUword)contfinder->nofseqs));
     gt_fa_fclose(file);
   }
   return had_err;
@@ -908,11 +908,11 @@ void gt_contfinder_delete(GtContfinder *contfinder)
   }
 }
 
-unsigned long gt_contfinder_nofcontained(GtContfinder *contfinder)
+GtUword gt_contfinder_nofcontained(GtContfinder *contfinder)
 {
   size_t i;
   GtBitsequence v;
-  unsigned long nofcontained;
+  GtUword nofcontained;
   const size_t tabsize = GT_NUMOFINTSFORBITS(contfinder->nofseqs);
   if (contfinder->contained == NULL)
     return 0;
@@ -946,19 +946,19 @@ GtContfinder* gt_contfinder_new(GtReads2Twobit *r2t)
 #include "match/radixsort_str.h"
 
 void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
-    bool mirrored, unsigned long depth,
-    unsigned long maxdepth, bool print)
+    bool mirrored, GtUword depth,
+    GtUword maxdepth, bool print)
 {
-  unsigned long *suffixes, totallength, width, i;
+  GtUword *suffixes, totallength, width, i;
   GtRadixsortstringinfo *rsi;
 
-  totallength = (unsigned long) contfinder->nofseqs * contfinder->len - 1;
+  totallength = (GtUword) contfinder->nofseqs * contfinder->len - 1;
   width = mirrored ? GT_MULT2(totallength + 1) : (totallength + 1);
   rsi = gt_radixsort_str_new(contfinder->twobitencoding,
                              totallength,
-                             (unsigned long) contfinder->len,
+                             (GtUword) contfinder->len,
                              GT_MULT2(width));
-  suffixes = gt_malloc(sizeof (unsigned long) * width);
+  suffixes = gt_malloc(sizeof (GtUword) * width);
   for (i = 0; i < width; i++)
   {
     suffixes[i] = i;
@@ -968,7 +968,7 @@ void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
   {
     for (i = 0; i < width; i++)
     {
-      printf("%lu\n", suffixes[i]);
+      printf(""GT_LU"\n", suffixes[i]);
     }
   }
   gt_free(suffixes);

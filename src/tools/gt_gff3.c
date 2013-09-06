@@ -49,9 +49,9 @@ typedef struct {
        tidy,
        show,
        fixboundaries;
-  long offset;
+  GtWord offset;
   GtStr *offsetfile, *newsource;
-  unsigned long width;
+  GtUword width;
   GtTypecheckInfo *tci;
   GtOutputFileInfo *ofi;
   GtFile *outfp;

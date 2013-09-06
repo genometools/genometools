@@ -24,7 +24,7 @@
 
 struct GtCustomTrackExample {
   const GtCustomTrack parent_instance;
-  unsigned long height;
+  GtUword height;
   GtStr *title;
 };
 
@@ -66,7 +66,7 @@ int gt_custom_track_example_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                              start_ypos + gt_graphics_get_text_height(graphics),
                              ((const char*) buffer));
 
-  sprintf(buffer, "Range %lu - %lu", viewrange.start, viewrange.end);
+  sprintf(buffer, "Range "GT_LU" - "GT_LU"", viewrange.start, viewrange.end);
   gt_graphics_draw_text_centered(graphics,
                            margins+((gt_graphics_get_image_width(graphics)
                              - 2*margins) /2),
@@ -83,7 +83,7 @@ int gt_custom_track_example_sketch(GtCustomTrack *ct, GtGraphics *graphics,
   return had_err;
 }
 
-unsigned long gt_custom_track_example_get_height(GtCustomTrack *ct)
+GtUword gt_custom_track_example_get_height(GtCustomTrack *ct)
 {
   GtCustomTrackExample *cte;
   cte = gt_custom_track_example_cast(ct);

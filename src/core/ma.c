@@ -24,6 +24,7 @@
 #include "core/multithread_api.h"
 #include "core/spacecalc.h"
 #include "core/spacepeak.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 
@@ -32,8 +33,8 @@ typedef struct {
   GtHashmap *allocated_pointer;
   bool bookkeeping,
        global_space_peak;
-  unsigned long long mallocevents;
-  unsigned long current_size,
+  GtUint64 mallocevents;
+  GtUword current_size,
                 max_size;
 } MA;
 
@@ -50,7 +51,7 @@ typedef struct {
   bool has_leak;
 } CheckSpaceLeakInfo;
 
-static void* xcalloc(size_t nmemb, size_t size, unsigned long current_size,
+static void* xcalloc(size_t nmemb, size_t size, GtUword current_size,
                      const char *src_file, int src_line)
 {
   void *p;
@@ -59,13 +60,13 @@ static void* xcalloc(size_t nmemb, size_t size, unsigned long current_size,
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
            src_file);
     if (current_size)
-      fprintf(stderr, "%lu bytes were allocated altogether\n", current_size);
+      fprintf(stderr, ""GT_LU" bytes were allocated altogether\n", current_size);
     exit(EXIT_FAILURE);
   }
   return p;
 }
 
-static void* xmalloc(size_t size, unsigned long current_size,
+static void* xmalloc(size_t size, GtUword current_size,
                      const char *src_file, int src_line)
 {
   void *p;
@@ -74,13 +75,13 @@ static void* xmalloc(size_t size, unsigned long current_size,
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
             src_file);
     if (current_size)
-      fprintf(stderr, "%lu bytes were allocated altogether\n", current_size);
+      fprintf(stderr, ""GT_LU" bytes were allocated altogether\n", current_size);
     exit(EXIT_FAILURE);
   }
   return p;
 }
 
-static void* xrealloc(void *ptr, size_t size, unsigned long current_size,
+static void* xrealloc(void *ptr, size_t size, GtUword current_size,
                       const char *src_file, int src_line)
 {
   void *p;
@@ -89,7 +90,7 @@ static void* xrealloc(void *ptr, size_t size, unsigned long current_size,
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
             src_file);
     if (current_size)
-      fprintf(stderr, "%lu bytes were allocated altogether\n", current_size);
+      fprintf(stderr, ""GT_LU" bytes were allocated altogether\n", current_size);
     exit(EXIT_FAILURE);
   }
   return p;
@@ -113,7 +114,7 @@ void gt_ma_init(bool bookkeeping)
   ma->global_space_peak = false;
 }
 
-static void add_size(MA* ma, unsigned long size)
+static void add_size(MA* ma, GtUword size)
 {
   gt_assert(ma);
   ma->current_size += size;
@@ -123,7 +124,7 @@ static void add_size(MA* ma, unsigned long size)
     ma->max_size = ma->current_size;
 }
 
-static void subtract_size(MA *ma, unsigned long size)
+static void subtract_size(MA *ma, GtUword size)
 {
   gt_assert(ma);
   gt_assert(ma->current_size >= size);
@@ -263,13 +264,13 @@ void gt_ma_disable_global_spacepeak(void)
   ma->global_space_peak = false;
 }
 
-unsigned long gt_ma_get_space_peak(void)
+GtUword gt_ma_get_space_peak(void)
 {
   gt_assert(ma);
   return ma->max_size;
 }
 
-unsigned long gt_ma_get_space_current(void)
+GtUword gt_ma_get_space_current(void)
 {
   gt_assert(ma);
   return ma->current_size;

@@ -47,7 +47,7 @@ typedef struct {
   GtStr *new_seqid;
   GtRegionMapping *region_mapping;
   bool substitute_target_ids;
-  unsigned long offset;
+  GtUword offset;
 } I2MChangeSeqidInfo;
 
 static int i2m_change_target_seqids(GtFeatureNode *fn, const char *target,
@@ -56,7 +56,7 @@ static int i2m_change_target_seqids(GtFeatureNode *fn, const char *target,
 {
   GtArray *target_ranges, *target_strands;
   GtStrArray *target_ids;
-  unsigned long i;
+  GtUword i;
   GtStr *md5str;
   int had_err;
   gt_error_check(err);
@@ -72,7 +72,7 @@ static int i2m_change_target_seqids(GtFeatureNode *fn, const char *target,
                                                        err);
   for (i = 0; !had_err && i < gt_str_array_size(target_ids); i++) {
     GtStr *seqid;
-    unsigned long offset;
+    GtUword offset;
     const char *md5;
     GtRange *range;
     seqid = gt_str_array_get_str(target_ids, i);
@@ -138,7 +138,7 @@ static int seqid_to_md5(GtGenomeNode *gn, GtRegionMapping *region_mapping,
   seqid = gt_genome_node_get_seqid(gn);
   if (!gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
     /* seqid is not already a MD5 seqid -> change id */
-    unsigned long offset;
+    GtUword offset;
     const char *md5;
     GtRange range = gt_genome_node_get_range(gn);
     if (!(md5 = gt_region_mapping_get_md5_fingerprint(region_mapping, seqid,

@@ -50,7 +50,7 @@ struct sfxInterface
   Sfxiterator *sfi;
   Definedunsignedlong rot0Pos;
   /* data relevant to holding portions of the suffix array */
-  unsigned long lastGeneratedLen, lastGeneratedStart;
+  GtUword lastGeneratedLen, lastGeneratedStart;
   const GtSuffixsortspace *lastGeneratedSufTabSegment;
 };
 
@@ -73,7 +73,7 @@ SfxIRequest2XltorFunc(sfxInterface *sfxi,
     tr.translateDataSuffixsortspace = gt_translateSuftab2BWTSuffixsortspace;
     break;
   case SFX_REQUEST_SUFTAB:
-    tr.state.elemSize = sizeof (unsigned long);
+    tr.state.elemSize = sizeof (GtUword);
     gt_assert(tr.translateData == NULL);
     break;
   default:
@@ -140,7 +140,7 @@ SfxIGenerate(void *iface,
              void *backlogState,
              move2BacklogFunc move2Backlog,
              void *output,
-             unsigned long generateStart,
+             GtUword generateStart,
              size_t len,
              SeqDataTranslator xltor);
 
@@ -148,12 +148,12 @@ sfxInterface *
 gt_newSfxInterface(GtReadmode readmode,
                 unsigned int prefixlength,
                 unsigned int numofparts,
-                unsigned long maximumspace,
+                GtUword maximumspace,
                 const Sfxstrategy *sfxstrategy,
                 const GtEncseq *encseq,
                 GtTimer *sfxprogress,
                 bool withprogressbar,
-                unsigned long length,
+                GtUword length,
                 GtLogger *verbosity,
                 GtError *err)
 {
@@ -175,28 +175,28 @@ gt_newSfxInterface(GtReadmode readmode,
 
 static struct seqStats *
 newSeqStatsFromCharDist(const GtEncseq *encseq,
-                        const GtAlphabet *alpha, unsigned long len)
+                        const GtAlphabet *alpha, GtUword len)
 {
   struct seqStats *stats = NULL;
   unsigned i, numofchars;
-  unsigned long regularSymsSum = 0;
-  stats = gt_malloc(offsetAlign(sizeof (*stats), sizeof (unsigned long))
-                    + (UINT8_MAX + 1) * sizeof (unsigned long));
+  GtUword regularSymsSum = 0;
+  stats = gt_malloc(offsetAlign(sizeof (*stats), sizeof (GtUword))
+                    + (UINT8_MAX + 1) * sizeof (GtUword));
   unsigned int numOfSeqs;
 
   numOfSeqs = gt_encseq_num_of_sequences(encseq);
   stats->sourceAlphaType = sourceUInt8;
   stats->symbolDistributionTable =
-    (unsigned long *)((char *)stats + offsetAlign(sizeof (*stats),
-                                                  sizeof (unsigned long)));
+    (GtUword *)((char *)stats + offsetAlign(sizeof (*stats),
+                                                  sizeof (GtUword)));
   memset(stats->symbolDistributionTable,
          0,
-         sizeof (unsigned long) * (UINT8_MAX + 1));
+         sizeof (GtUword) * (UINT8_MAX + 1));
   numofchars = gt_alphabet_num_of_chars(alpha);
   for (i = 0; i < numofchars; ++i)
   {
     stats->symbolDistributionTable[i]
-      = (unsigned long) gt_encseq_charcount(encseq,(GtUchar) i);
+      = (GtUword) gt_encseq_charcount(encseq,(GtUchar) i);
     regularSymsSum += stats->symbolDistributionTable[i];
   }
   stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;
@@ -223,7 +223,7 @@ sfxInterface *
 gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                               unsigned int prefixlength,
                               unsigned int numofparts,
-                              unsigned long maximumspace,
+                              GtUword maximumspace,
                               const Sfxstrategy *sfxstrategy,
                               size_t numReaders,
                               enum sfxDataRequest readerRequests[],
@@ -231,7 +231,7 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
                               const GtEncseq *encseq,
                               GtTimer *sfxprogress,
                               bool withprogressbar,
-                              unsigned long length,
+                              GtUword length,
                               GtLogger *verbosity, GtError *err)
 {
   sfxInterface *sfxi = NULL;
@@ -310,7 +310,7 @@ gt_SfxINewMRAEnc(const sfxInterface *si)
   return alphabet;
 }
 
-unsigned long
+GtUword
 gt_SfxIGetLength(const sfxInterface *si)
 {
   gt_assert(si);
@@ -349,7 +349,7 @@ gt_SfxIRegisterReader(sfxInterface *sfxi, enum sfxDataRequest rtype)
 }
 
 size_t
-gt_SfxIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos,
+gt_SfxIGetOrigSeq(const void *state, Symbol *dest, GtUword pos,
                   size_t len)
 {
   const struct sfxInterface *sfxi;
@@ -365,7 +365,7 @@ SfxIGenerate(void *iface,
              void *backlogState,
              move2BacklogFunc move2Backlog,
              void *output,
-             unsigned long generateStart,
+             GtUword generateStart,
              size_t len,
              SeqDataTranslator xltor)
 {

@@ -88,7 +88,7 @@ GtCodetype **gt_initmultimappower(unsigned int numofchars,unsigned int qvalue)
   unsigned int mapindex;
   GtCodetype thepower = (GtCodetype) 1, *mmptr, **multimappower;
 
-  gt_array2dim_malloc(multimappower,(unsigned long) qvalue,numofchars);
+  gt_array2dim_malloc(multimappower,(GtUword) qvalue,numofchars);
   for (offset=(int) (qvalue - 1); offset>=0; offset--)
   {
     mmptr = multimappower[offset];

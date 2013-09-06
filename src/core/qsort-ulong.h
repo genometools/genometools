@@ -3,9 +3,9 @@
 
 #include <stdbool.h>
 
-void gt_direct_qsort_ulong (unsigned long insertionsortthreshold,
+void gt_direct_qsort_ulong (GtUword insertionsortthreshold,
                             bool handlenotswapped,
-                            unsigned long *arr,
-                            unsigned long len);
+                            GtUword *arr,
+                            GtUword len);
 
 #endif

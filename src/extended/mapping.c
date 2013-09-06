@@ -99,7 +99,7 @@ GtMapping* gt_mapping_new(GtStr *mapping_file, const char *global_name,
   return m;
 }
 
-static int map_table(GtMapping *m, GtStr **stroutput, long *integeroutput,
+static int map_table(GtMapping *m, GtStr **stroutput, GtWord *integeroutput,
                      const char *input, GtError *err)
 {
   int had_err = 0;
@@ -147,7 +147,7 @@ static int map_table(GtMapping *m, GtStr **stroutput, long *integeroutput,
   return had_err;
 }
 
-static int map_function(GtMapping *m, GtStr **stroutput, long *integeroutput,
+static int map_function(GtMapping *m, GtStr **stroutput, GtWord *integeroutput,
                         const char *input, GtError *err)
 {
   int had_err = 0;
@@ -192,7 +192,7 @@ static int map_function(GtMapping *m, GtStr **stroutput, long *integeroutput,
   return had_err;
 }
 
-static int map_generic(GtMapping *m, GtStr **stroutput, long *integeroutput,
+static int map_generic(GtMapping *m, GtStr **stroutput, GtWord *integeroutput,
                        const char *input, GtError *err)
 {
   gt_error_check(err);
@@ -212,7 +212,7 @@ GtStr* gt_mapping_map_string(GtMapping *m, const char *input, GtError *err)
   return output;
 }
 
-int gt_mapping_map_integer(GtMapping *m, long *output, const char *input,
+int gt_mapping_map_integer(GtMapping *m, GtWord *output, const char *input,
                            GtError *err)
 {
   gt_error_check(err);

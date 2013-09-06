@@ -31,7 +31,7 @@
 
 typedef struct {
   bool seqit, verbose, rev;
-  unsigned long width, nofseqs;
+  GtUword width, nofseqs;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtSequniqArguments;
@@ -105,7 +105,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              void *tool_arguments, GtError *err)
 {
   GtSequniqArguments *arguments = tool_arguments;
-  unsigned long long duplicates = 0, num_of_sequences = 0;
+  GtUint64 duplicates = 0, num_of_sequences = 0;
   int i, had_err = 0;
   GtMD5Set *md5set;
 
@@ -113,7 +113,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   gt_assert(arguments);
   md5set = gt_md5set_new(arguments->nofseqs);
   if (!arguments->seqit) {
-    unsigned long j;
+    GtUword j;
     GtBioseq *bs;
 
     for (i = parsed_args; !had_err && i < argc; i++) {
@@ -147,7 +147,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     off_t totalsize;
     const GtUchar *sequence;
     char *desc;
-    unsigned long len;
+    GtUword len;
 
     files = gt_str_array_new();
     for (i = parsed_args; i < argc; i++)
@@ -159,9 +159,9 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err) {
       if (arguments->verbose) {
         gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
-                                                            (unsigned long long)
+                                                            (GtUint64)
                                                             totalsize),
-                             (unsigned long long) totalsize);
+                             (GtUint64) totalsize);
       }
       while (!had_err) {
         GtMD5SetStatus retval;
@@ -188,8 +188,8 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
 
   /* show statistics */
   if (!had_err) {
-    fprintf(stderr, "# %lu out of %lu sequences have been removed (%.3f%%)\n",
-            (unsigned long)duplicates, (unsigned long)num_of_sequences,
+    fprintf(stderr, "# "GT_LU" out of "GT_LU" sequences have been removed (%.3f%%)\n",
+            (GtUword)duplicates, (GtUword)num_of_sequences,
             ((double) duplicates / (double)num_of_sequences) * 100.0);
   }
 

@@ -19,6 +19,7 @@
 #include <limits.h>
 #include "core/ensure.h"
 #include "core/safearith.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 
 void gt_safe_default_overflow_handler(const char *src_file, int src_line,
@@ -38,22 +39,20 @@ int gt_safe_abs_check_func(int j, const char *src_file, int src_line,
   return rval;
 }
 
-long gt_safe_labs_check_func(long j, const char *src_file, int src_line,
+GtWord gt_safe_labs_check_func(GtWord j, const char *src_file, int src_line,
                              GtOverflowHandlerFunc handler_func, void *data)
 {
-  long rval = j < 0 ? -j : j;
+  GtWord rval = j < 0 ? -j : j;
   if (rval < 0) { /* overflow */
     handler_func(src_file, src_line, data);
   }
   return rval;
 }
 
-long long gt_safe_llabs_check_func(long long j, const char *src_file,
-                                   int src_line,
-                                   GtOverflowHandlerFunc handler_func,
-                                   void *data)
+GtInt64 gt_safe_llabs_check_func(GtInt64 j, const char *src_file, int src_line,
+                                 GtOverflowHandlerFunc handler_func, void *data)
 {
-  long long rval = j < 0 ? -j : j;
+  GtInt64 rval = j < 0 ? -j : j;
   if (rval < 0) { /* overflow */
     handler_func(src_file, src_line, data);
   }
@@ -65,7 +64,7 @@ uint32_t gt_safe_mult_u32_check_func(uint32_t a, uint32_t b,
                                      GtOverflowHandlerFunc handler_func,
                                      void *data)
 {
-  unsigned long long x = (unsigned long long) a * b;
+  GtUint64 x = (GtUint64) a * b;
   if (x > 0xffffffff) { /* overflow */
     handler_func(src_file, src_line, data);
   }
@@ -98,22 +97,22 @@ uint64_t gt_safe_mult_u64_check_func(uint64_t a, uint64_t b,
   return (a << 32) + (uint64_t)(a_lo) * b_lo;
 }
 
-unsigned long gt_safe_mult_ulong_check_func(unsigned long a, unsigned long b,
+GtUword gt_safe_mult_ulong_check_func(GtUword a, GtUword b,
                                             const char *src_file, int src_line,
                                             GtOverflowHandlerFunc handler_func,
                                             void *data)
 {
-  gt_assert(sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
-  if (sizeof (unsigned long) == 4) {
+  gt_assert(sizeof (GtUword) == 4 || sizeof (GtUword) == 8);
+  if (sizeof (GtUword) == 4) {
     return gt_safe_mult_u32_check_func(a, b, src_file, src_line, handler_func,
                                        data);
-  } else { /* sizeof (unsigned long) == 8 */
+  } else { /* sizeof (GtUword) == 8 */
     return gt_safe_mult_u64_check_func(a, b, src_file, src_line, handler_func,
                                        data);
   }
 }
 
-long gt_safe_cast2long_check_func(unsigned long value, const char *src_file,
+GtWord gt_safe_cast2long_check_func(GtUword value, const char *src_file,
                                   int src_line,
                                   GtOverflowHandlerFunc handler_func,
                                   void *data)
@@ -124,7 +123,7 @@ long gt_safe_cast2long_check_func(unsigned long value, const char *src_file,
   return value;
 }
 
-unsigned long gt_safe_cast2ulong_check_func(long value, const char *src_file,
+GtUword gt_safe_cast2ulong_check_func(GtWord value, const char *src_file,
                                             int src_line,
                                             GtOverflowHandlerFunc handler_func,
                                             void *data)
@@ -135,7 +134,7 @@ unsigned long gt_safe_cast2ulong_check_func(long value, const char *src_file,
   return value;
 }
 
-unsigned long gt_safe_cast2ulong_64_check_func(uint64_t value,
+GtUword gt_safe_cast2ulong_64_check_func(uint64_t value,
                                              const char *src_file,
                                              int src_line,
                                              GtOverflowHandlerFunc handler_func,
@@ -144,13 +143,13 @@ unsigned long gt_safe_cast2ulong_64_check_func(uint64_t value,
   if (value > (uint64_t) ULONG_MAX) {
     handler_func(src_file, src_line, data);
   }
-  return (unsigned long) value;
+  return (GtUword) value;
 }
 
 int gt_safearith_example(GT_UNUSED GtError *err)
 {
-  unsigned long ulong;
-  long slong;
+  GtUword ulong;
+  GtWord slong;
   unsigned int a, b, c;
   gt_error_check(err);
 
@@ -198,22 +197,22 @@ int gt_safearith_unit_test(GtError *err)
     gt_ensure(__MIN(unsigned int) == 0);
     gt_ensure(__MAX(unsigned int) == UINT_MAX);
 
-    gt_ensure(__MIN(long) == LONG_MIN);
-    gt_ensure(__MAX(long) == LONG_MAX);
-    gt_ensure(__MIN(unsigned long) == 0);
-    gt_ensure(__MAX(unsigned long) == ULONG_MAX);
+    gt_ensure(__MIN(GtWord) == LONG_MIN);
+    gt_ensure(__MAX(GtWord) == LONG_MAX);
+    gt_ensure(__MIN(GtUword) == 0);
+    gt_ensure(__MAX(GtUword) == ULONG_MAX);
 
 #ifdef LLONG_MIN
-    gt_ensure(__MIN(long long) == LLONG_MIN);
-    gt_ensure(__MAX(long long) == LLONG_MAX);
-    gt_ensure(__MIN(unsigned long long) == 0);
-    gt_ensure(__MAX(unsigned long long) == ULLONG_MAX);
+    gt_ensure(__MIN(GtInt64) == LLONG_MIN);
+    gt_ensure(__MAX(GtInt64) == LLONG_MAX);
+    gt_ensure(__MIN(GtUint64) == 0);
+    gt_ensure(__MAX(GtUint64) == ULLONG_MAX);
 #endif
   }
 
   {
-    unsigned long ulong;
-    long slong;
+    GtUword ulong;
+    GtWord slong;
 
     slong = -1;
     gt_ensure(assign(ulong, slong));
@@ -278,8 +277,8 @@ int gt_safearith_unit_test(GtError *err)
 
   {
     int i;
-    long l;
-    long long ll;
+    GtWord l;
+    GtInt64 ll;
 
     i = gt_safe_abs(0);
     gt_ensure(i == 0);

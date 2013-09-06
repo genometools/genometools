@@ -57,7 +57,7 @@ struct GtGFF3Parser {
        eof_emitted,
        gvf_mode;
   GtGenomeNode *gff3_pragma;
-  long offset;
+  GtWord offset;
   GtMapping *offset_mapping;
   GtOrphanage *orphanage;
   GtTypeChecker *type_checker;
@@ -125,7 +125,7 @@ void gt_gff3_parser_do_not_check_region_boundaries(GtGFF3Parser *parser)
   parser->checkregions = false;
 }
 
-void gt_gff3_parser_set_offset(GtGFF3Parser *parser, long offset)
+void gt_gff3_parser_set_offset(GtGFF3Parser *parser, GtWord offset)
 {
   gt_assert(parser);
   gt_assert(!parser->offset_mapping);
@@ -165,7 +165,7 @@ void gt_gff3_parser_enable_tidy_mode(GtGFF3Parser *parser)
   parser->tidy = true;
 }
 
-static int offset_possible(const GtRange *range, long offset,
+static int offset_possible(const GtRange *range, GtWord offset,
                            const char *filename, unsigned int line_number,
                            GtError *err)
 {
@@ -173,16 +173,16 @@ static int offset_possible(const GtRange *range, long offset,
   gt_error_check(err);
   if (offset < 0) {
     /* check for underflow */
-    unsigned long result = range->start + offset;
+    GtUword result = range->start + offset;
     if (result == 0) {
       gt_error_set(err, "==0");
-      gt_error_set(err, "adding offset %ld to node on line %u in file \"%s\" "
+      gt_error_set(err, "adding offset "GT_LD" to node on line %u in file \"%s\" "
                    "leads to start 0 (GFF3 files are 1-based)",
                    offset, line_number, filename);
       had_err = -1;
     }
     else if (result > range->start) {
-      gt_error_set(err, "adding offset %ld to node on line %u in file \"%s\" "
+      gt_error_set(err, "adding offset "GT_LD" to node on line %u in file \"%s\" "
                    "leads to underflow", offset, line_number, filename);
       had_err = -1;
     }
@@ -192,7 +192,7 @@ static int offset_possible(const GtRange *range, long offset,
 
 static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
                                    const char *seqid, const char *filename,
-                                   unsigned long line_number, GtError *err)
+                                   GtUword line_number, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -203,7 +203,7 @@ static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
       *range = gt_range_offset(range, parser->offset);
   }
   else if (parser->offset_mapping) {
-    long offset;
+    GtWord offset;
     had_err = gt_mapping_map_integer(parser->offset_mapping, &offset, seqid,
                                      err);
     if (!had_err)
@@ -257,7 +257,7 @@ static int parse_target_attribute(const char *value, bool tidy,
                                   const char *filename,
                                   unsigned int line_number, GtError *err)
 {
-  unsigned long num_of_tokens;
+  GtUword num_of_tokens;
   GtStr *unescaped_target;
   char *escaped_target;
   GtStrand parsed_strand;
@@ -335,7 +335,7 @@ static int parse_target_attribute(const char *value, bool tidy,
 }
 
 static int parse_target_attributes(const char *values, bool tidy,
-                                   unsigned long *num_of_targets,
+                                   GtUword *num_of_targets,
                                    GtStr *first_target_id,
                                    GtRange *first_target_range,
                                    GtStrand *first_target_strand,
@@ -347,7 +347,7 @@ static int parse_target_attributes(const char *values, bool tidy,
                                    GtError *err)
 {
   GtSplitter *splitter;
-  unsigned long i;
+  GtUword i;
   char *targets;
   int had_err = 0;
   gt_error_check(err);
@@ -371,7 +371,7 @@ static int parse_target_attributes(const char *values, bool tidy,
 }
 
 int gt_gff3_parser_parse_target_attributes(const char *values,
-                                           unsigned long *num_of_targets,
+                                           GtUword *num_of_targets,
                                            GtStr *first_target_id,
                                            GtRange *first_target_range,
                                            GtStrand *first_target_strand,
@@ -418,8 +418,8 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
   }
   else if (parser->checkregions && !ssr->is_circular &&
            !gt_range_contains(&ssr->range, &range) && parser->checkregions) {
-    gt_error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" is "
-                 "not contained in range (%lu,%lu) of corresponding sequence "
+    gt_error_set(err, "range ("GT_LU","GT_LU") of feature on line %u in file \"%s\" is "
+                 "not contained in range ("GT_LU","GT_LU") of corresponding sequence "
                  "region on line %u", range.start, range.end, line_number,
                  filename, ssr->range.start, ssr->range.end, ssr->line_number);
     had_err = -1;
@@ -579,7 +579,7 @@ static int store_id(const char *id, GtFeatureNode *feature_node,
 static GtArray* find_roots(GtStrArray *parents, GtFeatureInfo *feature_info)
 {
   GtArray *roots;
-  unsigned long i;
+  GtUword i;
   gt_assert(parents);
   roots = gt_array_new(sizeof (GtGenomeNode*));
   for (i = 0; i < gt_str_array_size(parents); i++) {
@@ -593,7 +593,7 @@ static GtArray* find_roots(GtStrArray *parents, GtFeatureInfo *feature_info)
 static bool roots_differ(GtArray *roots)
 {
   GtGenomeNode *first_root;
-  unsigned long i;
+  GtUword i;
   gt_assert(roots);
   first_root = *(GtGenomeNode**) gt_array_get(roots, 0);
   for (i = 1; i < gt_array_size(roots); i++) {
@@ -692,7 +692,7 @@ static void join_roots(GtArray *roots, GtFeatureInfo *feature_info,
                        GtQueue *genome_nodes)
 {
   GtFeatureNode *master_root;
-  unsigned long i;
+  GtUword i;
   gt_assert(roots && feature_info && genome_nodes);
   master_root = *(GtFeatureNode**) gt_array_get(roots, 0);
   for (i = 1; i < gt_array_size(roots); i++) {
@@ -710,7 +710,7 @@ static int process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
 {
   GtStrArray *valid_parents;
   GtGenomeNode* parent_gf;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(child && parent_splitter && feature_info && genome_nodes);
@@ -802,7 +802,7 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
   bool orphaned_parent = false;
   GtGenomeNode* parent_gf;
   const char *parent;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
 
   gt_error_check(err);
@@ -890,7 +890,7 @@ static int check_missing_attributes(GtGenomeNode *this_feature,
                                     const char *id, const char *filename,
                                     GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(this_feature && this_attributes && other_feature);
@@ -915,7 +915,7 @@ static int compare_target_attribute(GtFeatureNode *new_gf,
                                     GtFeatureNode *old_gf,
                                     const char *id, GtError *err)
 {
-  unsigned long new_target_num, old_target_num;
+  GtUword new_target_num, old_target_num;
   GtStr *new_target_str, *old_target_str;
   const char *new_target, *old_target;
   int had_err;
@@ -1063,7 +1063,7 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
                                          err);
     }
     if (!had_err) {
-      unsigned long i;
+      GtUword i;
       gt_assert(gt_str_array_size(new_attributes) ==
              gt_str_array_size(old_attributes));
       for (i = 0; !had_err && i < gt_str_array_size(new_attributes); i++) {
@@ -1089,7 +1089,7 @@ void gt_gff3_parser_build_target_str(GtStr *target, GtStrArray *target_ids,
                                      GtArray *target_ranges,
                                      GtArray *target_strands)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(target && target_ids && target_ranges && target_strands);
   for (i = 0; i < gt_str_array_size(target_ids); i++) {
     GtRange *range;
@@ -1155,7 +1155,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
 {
   GtSplitter *attribute_splitter, *tmp_splitter, *parent_splitter;
   char *id_value = NULL, *parent_value = NULL;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
 
   gt_error_check(err);
@@ -1551,7 +1551,7 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
 
 static int parse_first_gff3_line(const char *line, const char *filename,
                                  GtQueue *genome_nodes, GtStr *filenamestr,
-                                 unsigned long long *line_number,
+                                 GtUint64 *line_number,
                                  bool *gvf_mode,
                                  bool tidy, GtError *err)
 {
@@ -1670,7 +1670,7 @@ static int process_orphans(GtOrphanage *orphanage, GtFeatureInfo *feature_info,
     const char *parent_attr;
     char *parent_attr_dup;
     GtSplitter *splitter;
-    unsigned long i;
+    GtUword i;
     parent_attr = gt_feature_node_get_attribute((GtFeatureNode*) orphan,
                                                 GT_GFF_PARENT);
     gt_assert(parent_attr);
@@ -2003,7 +2003,7 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
                                       GtQueue *genome_nodes,
                                       GtCstrTable *used_types,
                                       GtStr *filenamestr,
-                                      unsigned long long *line_number,
+                                      GtUint64 *line_number,
                                       GtFile *fpin, GtError *err)
 {
   size_t line_length;

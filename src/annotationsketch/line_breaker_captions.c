@@ -30,7 +30,7 @@
 struct GtLineBreakerCaptions {
   const GtLineBreaker parent_instance;
   GtLayout *layout;
-  unsigned long width;
+  GtUword width;
   double margins;
   GtHashmap *linepositions;
 };
@@ -130,7 +130,7 @@ const GtLineBreakerClass* gt_line_breaker_captions_class(void)
 }
 
 GtLineBreaker* gt_line_breaker_captions_new(GtLayout *layout,
-                                            unsigned long width,
+                                            GtUword width,
                                             GtStyle *style)
 {
   GtLineBreakerCaptions *lbcap;

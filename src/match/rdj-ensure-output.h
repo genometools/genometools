@@ -49,8 +49,8 @@
           fprintf(stderr, "\nExpected file content: \n%s\n",               \
                   EXPOUT);                                                 \
           fprintf(stderr, "\nFile content actually read "                  \
-                         "(up to %lu bytes):\n%s\n",                       \
-               (unsigned long) strlen(EXPOUT), buffer);                    \
+                         "(up to "GT_LU" bytes):\n%s\n",                       \
+               (GtUword) strlen(EXPOUT), buffer);                    \
         }
 
 #define GT_ENSURE_OUTPUT_RMFILE(GTFILE)                                    \

@@ -31,7 +31,7 @@
    the orginal exons and the rightmost postions, respectively. They are needed
    to be able to convert a GthInvertedChain (back) to a GthChain. */
 typedef struct {
-  unsigned long gen_file_num,
+  GtUword gen_file_num,
                 gen_seq_num,
                 ref_file_num,
                 ref_seq_num,
@@ -111,8 +111,8 @@ void gth_chain_copy(GthChain *dest, const GthChain *src)
 
 #ifndef NDEBUG
 static bool chain_is_filled_and_consistent(GthChain *chain,
-                                           unsigned long gen_total_length,
-                                           unsigned long gen_offset)
+                                           GtUword gen_total_length,
+                                           GtUword gen_offset)
 {
   GtArray *testranges;
 
@@ -144,7 +144,7 @@ static bool chain_is_filled_and_consistent(GthChain *chain,
 static void convert_chain_to_inverted_chain(GthInvertedChain *inverted_chain,
                                             GthChain *chain)
 {
-  unsigned long i, lastexonnum = gt_array_size(chain->forwardranges) - 1;
+  GtUword i, lastexonnum = gt_array_size(chain->forwardranges) - 1;
   GtRange range;
 
   /* inverted chain is empty */
@@ -178,10 +178,10 @@ static void convert_chain_to_inverted_chain(GthInvertedChain *inverted_chain,
 
 static void convert_inverted_chain_to_chain(GthChain *chain,
                                             GthInvertedChain *inverted_chain,
-                                            unsigned long gen_total_length,
-                                            unsigned long gen_offset)
+                                            GtUword gen_total_length,
+                                            GtUword gen_offset)
 {
-  unsigned long i, numofintrons = gt_array_size(inverted_chain->forwardranges);
+  GtUword i, numofintrons = gt_array_size(inverted_chain->forwardranges);
   GtRange range;
 
   /* chain is empty */
@@ -217,11 +217,11 @@ static void convert_inverted_chain_to_chain(GthChain *chain,
 #ifndef NDEBUG
 static bool conversion_is_correct(GthChain *orig_chain,
                                   GthInvertedChain *inverted_chain,
-                                  unsigned long gen_total_length,
-                                  unsigned long gen_offset)
+                                  GtUword gen_total_length,
+                                  GtUword gen_offset)
 {
   GthChain *check_chain;
-  unsigned long i;
+  GtUword i;
 
   check_chain = gth_chain_new();
   convert_inverted_chain_to_chain(check_chain, inverted_chain, gen_total_length,
@@ -258,12 +258,12 @@ static bool conversion_is_correct(GthChain *orig_chain,
 #endif
 
 static void potentialintronspostpro(GtArray *intronstoprocess,
-                                    unsigned long icdelta,
-                                    unsigned long icminremintronlength)
+                                    GtUword icdelta,
+                                    GtUword icminremintronlength)
 {
   GtArray *originalintrons;
   GtRange potintron;
-  unsigned long i, potintronlength,
+  GtUword i, potintronlength,
        minintronlength = 2 * icdelta + icminremintronlength;
 
   originalintrons = gt_array_new(sizeof (GtRange));
@@ -296,10 +296,10 @@ static void potentialintronspostpro(GtArray *intronstoprocess,
 /* XXX: change this function: add more sophisticated extension strategy */
 void gth_chain_extend_borders(GthChain *chain, const GtRange *gen_seq_bounds,
                               const GtRange *gen_seq_bounds_rc,
-                              GT_UNUSED unsigned long gen_total_length,
-                              GT_UNUSED unsigned long gen_offset)
+                              GT_UNUSED GtUword gen_total_length,
+                              GT_UNUSED GtUword gen_offset)
 {
-  long tmpborder;
+  GtWord tmpborder;
 
   /* at least one range in chain */
   gt_assert(gt_array_size(chain->forwardranges));
@@ -359,10 +359,10 @@ void gth_chain_extend_borders(GthChain *chain, const GtRange *gen_seq_bounds,
                                            gen_offset));
 }
 
-void gth_chain_shorten_introns(GthChain *chain, unsigned long icdelta,
-                               unsigned long icminremintronlength,
-                               unsigned long gen_total_length,
-                               unsigned long gen_offset, bool comments,
+void gth_chain_shorten_introns(GthChain *chain, GtUword icdelta,
+                               GtUword icminremintronlength,
+                               GtUword gen_total_length,
+                               GtUword gen_offset, bool comments,
                                GtFile *outfp)
 {
   GthInvertedChain inverted_chain;
@@ -409,17 +409,17 @@ void gth_chain_shorten_introns(GthChain *chain, unsigned long icdelta,
 
 static void showfragment(GtFragment *fragment, GtFile *outfp)
 {
-  gt_file_xprintf(outfp, "%c %lu %lu %lu %lu %ld\n", COMMENTCHAR,
+  gt_file_xprintf(outfp, "%c "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LD"\n", COMMENTCHAR,
                   fragment->startpos1, fragment->endpos1,
                   fragment->startpos2, fragment->endpos2, fragment->weight);
 }
 
-static unsigned long totallengthoffragments(GtChain *chain,
+static GtUword totallengthoffragments(GtChain *chain,
                                             GtFragment *fragments)
 {
   GtRange currentrange, previousrange;
-  unsigned long i, fragnum;
-  long totallength = 0;
+  GtUword i, fragnum;
+  GtWord totallength = 0;
 
   previousrange.end = GT_UNDEF_ULONG;
 
@@ -449,20 +449,20 @@ static unsigned long totallengthoffragments(GtChain *chain,
 
 static bool globalchainislongenough(GtChain *chain, GtFragment *fragments,
                                     double *refseqcoverage,
-                                    unsigned long gcfilterthreshold,
-                                    unsigned long referencelength,
+                                    GtUword gcfilterthreshold,
+                                    GtUword referencelength,
                                     GthStat *stat,
                                     bool comments,
                                     GtFile *outfp)
 {
-  unsigned long chain_length;
+  GtUword chain_length;
 
   chain_length = totallengthoffragments(chain, fragments);
 
   if (comments) {
-    gt_file_xprintf(outfp, "%c chain_length=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c chain_length="GT_LU"\n", COMMENTCHAR,
                        chain_length);
-    gt_file_xprintf(outfp, "%c referencelength=%lu\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c referencelength="GT_LU"\n", COMMENTCHAR,
                        referencelength);
   }
 
@@ -489,7 +489,7 @@ static bool globalchainislongenough(GtChain *chain, GtFragment *fragments,
 static bool chain_is_colinear(GtChain *chain, GtFragment *fragments)
 {
   GtFragment *firstfragment, *secondfragment;
-  unsigned long i;
+  GtUword i;
 
   if (gt_chain_size(chain) > 1) {
     for (i = 0; i < gt_chain_size(chain) - 1; i++) {
@@ -519,12 +519,12 @@ static GtRange chain_get_genomicrange(GthChain *chain)
 }
 
 static void enrich_chain(GthChain *chain, GtFragment *fragments,
-                         unsigned long num_of_fragments, bool comments,
+                         GtUword num_of_fragments, bool comments,
                          GtFile *outfp)
 {
   GtRange genomicrange, fragmentrange;
   GtArray *enrichment;
-  unsigned long i;
+  GtUword i;
   gt_assert(chain && fragments && num_of_fragments);
   if (comments) {
     gt_file_xprintf(outfp, "%c enrich global chain with the following "
@@ -597,11 +597,11 @@ void gth_chain_contract(GthChain *dest, const GthChain *src)
 
 static GtArray* make_list_of_chain_fragments(GtChain *chain,
                                              GtFragment *fragments,
-                                             unsigned long num_of_fragments,
+                                             GtUword num_of_fragments,
                                              bool enrichchains,
                                              const GtRange *genomicrange)
 {
-  unsigned long i, fragnum;
+  GtUword i, fragnum;
   GtArray *chain_fragments;
   GthJTMatch match;
   gt_assert(chain && fragments && num_of_fragments);
@@ -637,19 +637,19 @@ static GtArray* make_list_of_chain_fragments(GtChain *chain,
 }
 
 void gth_save_chain(GtChain *chain, GtFragment *fragments,
-                    unsigned long num_of_fragments,
-                    GT_UNUSED unsigned long max_gap_width,
+                    GtUword num_of_fragments,
+                    GT_UNUSED GtUword max_gap_width,
                     void *data)
 {
   GthSaveChainInfo *info = (GthSaveChainInfo*) data;
   GtRange range;
   GthChain *gth_chain;
-  unsigned long i, fragnum;
+  GtUword i, fragnum;
 
   gt_assert(chain_is_colinear(chain, fragments));
 
   if (info->comments) {
-    gt_file_xprintf(info->outfp, "%c process global chain with score %ld\n",
+    gt_file_xprintf(info->outfp, "%c process global chain with score "GT_LD"\n",
                        COMMENTCHAR, gt_chain_get_score(chain));
     gt_file_xprintf(info->outfp, "%c process global chain with the "
                        "following fragments\n", COMMENTCHAR);
@@ -758,8 +758,8 @@ void gth_save_chain(GtChain *chain, GtFragment *fragments,
      */
     if (info->stopafterchaining) {
       gt_file_xprintf(info->outfp,
-                      "%c gl. chain with coverage=%.2f and score %ld "
-                      "(genseq=%lu, str.=%c, refseq=%lu)\n", COMMENTCHAR,
+                      "%c gl. chain with coverage=%.2f and score "GT_LD" "
+                      "(genseq="GT_LU", str.=%c, refseq="GT_LU")\n", COMMENTCHAR,
                       gth_chain->refseqcoverage, gt_chain_get_score(chain),
                       gth_chain->gen_seq_num, SHOWSTRAND(info->directmatches),
                       gth_chain->ref_seq_num);

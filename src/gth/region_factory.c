@@ -25,20 +25,20 @@
 #include "gth/region_factory.h"
 
 typedef struct {
-  unsigned long num_of_files,
+  GtUword num_of_files,
                 *num_of_sequences;
   GtStr ***store;
-  unsigned long **offsets;
+  GtUword **offsets;
 } SeqidStore;
 
 static SeqidStore* seqid_store_new(GthInput *input)
 {
   SeqidStore *ss;
-  unsigned long i, j;
+  GtUword i, j;
   gt_assert(input);
   ss = gt_malloc(sizeof *ss);
   ss->num_of_files = gth_input_num_of_gen_files(input);
-  ss->num_of_sequences = gt_calloc(ss->num_of_files, sizeof (unsigned long));
+  ss->num_of_sequences = gt_calloc(ss->num_of_files, sizeof (GtUword));
   /* allocate room for store */
   ss->store = gt_calloc(ss->num_of_files, sizeof *ss->store);
   for (i = 0; i < ss->num_of_files; i++) {
@@ -60,7 +60,7 @@ static SeqidStore* seqid_store_new(GthInput *input)
 
 static void seqid_store_delete(SeqidStore *ss)
 {
-  unsigned long i, j;
+  GtUword i, j;
   if (!ss) return;
   for (i = 0; i < ss->num_of_files; i++)
     gt_free(ss->offsets[i]);
@@ -75,9 +75,9 @@ static void seqid_store_delete(SeqidStore *ss)
   gt_free(ss);
 }
 
-static void seqid_store_add(SeqidStore *ss, unsigned long filenum,
-                            unsigned long seqnum, GtStr *seqid,
-                            unsigned long offset)
+static void seqid_store_add(SeqidStore *ss, GtUword filenum,
+                            GtUword seqnum, GtStr *seqid,
+                            GtUword offset)
 {
   gt_assert(ss && seqid);
   gt_assert(gt_str_length(seqid)); /* is not empty */
@@ -88,8 +88,8 @@ static void seqid_store_add(SeqidStore *ss, unsigned long filenum,
   ss->offsets[filenum][seqnum] = offset == GT_UNDEF_ULONG ? 1 : offset;
 }
 
-static GtStr* seqid_store_get(SeqidStore *ss, unsigned long filenum,
-                              unsigned long seqnum)
+static GtStr* seqid_store_get(SeqidStore *ss, GtUword filenum,
+                              GtUword seqnum)
 {
   GtStr *seqid;
   gt_assert(ss);
@@ -101,10 +101,10 @@ static GtStr* seqid_store_get(SeqidStore *ss, unsigned long filenum,
   return seqid;
 }
 
-static unsigned long seqid_store_offset(SeqidStore *ss, unsigned long filenum,
-                                        unsigned long seqnum)
+static GtUword seqid_store_offset(SeqidStore *ss, GtUword filenum,
+                                        GtUword seqnum)
 {
-  unsigned long offset;
+  GtUword offset;
   gt_assert(ss);
   gt_assert(filenum < ss->num_of_files);
   gt_assert(seqnum < ss->num_of_sequences[filenum]);
@@ -140,10 +140,10 @@ static void make_sequence_region(GtHashmap *sequence_regions,
                                  GtStr *sequenceid,
                                  GthRegionFactory *srf,
                                  GthInput *input,
-                                 unsigned long filenum,
-                                 unsigned long seqnum)
+                                 GtUword filenum,
+                                 GtUword seqnum)
 {
-  unsigned long offset_is_defined = false;
+  GtUword offset_is_defined = false;
   GtRange range, descrange;
   GtGenomeNode *sr = NULL;
   gt_assert(sequence_regions && sequenceid && srf && input);
@@ -233,7 +233,7 @@ void gth_region_factory_save(GthRegionFactory *rf, GtArray *nodes,
                              GthInput *input)
 {
   GtHashmap *sequence_regions;
-  unsigned long i, j;
+  GtUword i, j;
   GtStr *sequenceid;
   GT_UNUSED int had_err;
   gt_assert(rf && nodes && input);
@@ -258,14 +258,14 @@ void gth_region_factory_save(GthRegionFactory *rf, GtArray *nodes,
 }
 
 GtStr* gth_region_factory_get_seqid(GthRegionFactory *srf,
-                                    unsigned long filenum, unsigned long seqnum)
+                                    GtUword filenum, GtUword seqnum)
 {
   gt_assert(srf && srf->factory_was_used);
   return seqid_store_get(srf->seqid_store, filenum, seqnum);
 }
 
-long gth_region_factory_offset(GthRegionFactory *srf,
-                               unsigned long filenum, unsigned long seqnum)
+GtWord gth_region_factory_offset(GthRegionFactory *srf, GtUword filenum,
+                                 GtUword seqnum)
 {
   gt_assert(srf && srf->factory_was_used);
   return seqid_store_offset(srf->seqid_store, filenum, seqnum);

@@ -25,7 +25,7 @@
 typedef struct GtStringDistri GtStringDistri;
 
 typedef void (*GtStringDistriIterFunc)(const char *string,
-                                       unsigned long occurrences,
+                                       GtUword occurrences,
                                        double probability, void *data);
 
 GtStringDistri* gt_string_distri_new(void);
@@ -33,7 +33,7 @@ void            gt_string_distri_add(GtStringDistri*, const char*);
 /* <string_distri> must contain at least one element with given <key>. */
 void            gt_string_distri_sub(GtStringDistri *string_distri,
                                      const char *key);
-unsigned long   gt_string_distri_get(const GtStringDistri*, const char*);
+GtUword   gt_string_distri_get(const GtStringDistri*, const char*);
 /* return probability */
 double          gt_string_distri_get_prob(const GtStringDistri*, const char*);
 void            gt_string_distri_foreach(const GtStringDistri*,

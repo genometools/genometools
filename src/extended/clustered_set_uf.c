@@ -37,22 +37,22 @@
 #define CHECKCLUSTER(C)\
         if ((C) >= cs_uf->next_free_cluster_info)\
         {\
-         gt_error_set(err, "cluster %lu is too large, must be smaller than"\
-                      "%lu", C, cs_uf->next_free_cluster_info);\
+         gt_error_set(err, "cluster "GT_LU" is too large, must be smaller than"\
+                      ""GT_LU"", C, cs_uf->next_free_cluster_info);\
           had_err = -1;\
         }\
         if (CINFO(C)->cluster_size == 0)\
         {\
-         gt_error_set(err, "cluster %lu is empty", C);\
+         gt_error_set(err, "cluster "GT_LU" is empty", C);\
          had_err = -1;\
         }
 
 struct GtClusteredSetUFElem {
-  unsigned long cluster_num, next_elem;
+  GtUword cluster_num, next_elem;
 };
 
 struct GtClusteredSetUFClusterInfo {
-  unsigned long first_elem, last_elem, cluster_size;
+  GtUword first_elem, last_elem, cluster_size;
 };
 
 struct GtClusteredSetUF {
@@ -60,16 +60,16 @@ struct GtClusteredSetUF {
   GtClusteredSetUFElem *cluster_elems;
   GtArray *cluster_info;
   GtBittab *in_cluster;
-  unsigned long num_of_elems, next_free_cluster_info;
+  GtUword num_of_elems, next_free_cluster_info;
 };
 
 static void
 gt_clustered_set_union_find_change_cluster_number(GtClusteredSetUF *cs_uf,
-                                                  unsigned long first_elem,
-                                                  unsigned long target)
+                                                  GtUword first_elem,
+                                                  GtUword target)
 {
 
-  unsigned long i;
+  GtUword i;
   i = first_elem;
   while (1)
   {
@@ -81,11 +81,11 @@ gt_clustered_set_union_find_change_cluster_number(GtClusteredSetUF *cs_uf,
 
 static void
 gt_clustered_set_union_find_make_new_cluster(GtClusteredSetUF *cs_uf,
-                                             unsigned long elem1,
-                                             unsigned long elem2,
+                                             GtUword elem1,
+                                             GtUword elem2,
                                              GT_UNUSED GtError *err)
 {
-  unsigned long cluster_num;
+  GtUword cluster_num;
   cluster_num = cs_uf->next_free_cluster_info++;
 
   cs_uf->cluster_elems[elem1].cluster_num = cluster_num;
@@ -94,7 +94,7 @@ gt_clustered_set_union_find_make_new_cluster(GtClusteredSetUF *cs_uf,
   cs_uf->cluster_elems[elem2].next_elem = cs_uf->num_of_elems;
 
   GtClusteredSetUFClusterInfo cluster_info;
-  cluster_info.cluster_size = (unsigned long) 2;
+  cluster_info.cluster_size = (GtUword) 2;
   cluster_info.first_elem = elem1;
   cluster_info.last_elem = elem2;
 
@@ -103,8 +103,8 @@ gt_clustered_set_union_find_make_new_cluster(GtClusteredSetUF *cs_uf,
 
 static void
 gt_clustered_set_union_find_append_elem(GtClusteredSetUF *cs_uf,
-                                        unsigned long c,
-                                        unsigned long elem,
+                                        GtUword c,
+                                        GtUword elem,
                                         GT_UNUSED GtError *err)
 {
   GtClusteredSetUFClusterInfo *cluster_info;
@@ -118,8 +118,8 @@ gt_clustered_set_union_find_append_elem(GtClusteredSetUF *cs_uf,
 
 static void
 gt_clustered_set_union_find_join_clusters(GtClusteredSetUF *cs_uf,
-                                           unsigned long c1,
-                                           unsigned long c2,
+                                           GtUword c1,
+                                           GtUword c2,
                                            GT_UNUSED GtError *err)
 {
   GtClusteredSetUFClusterInfo *cluster_info_c1;
@@ -138,22 +138,22 @@ gt_clustered_set_union_find_join_clusters(GtClusteredSetUF *cs_uf,
   cluster_info_c2->first_elem = cs_uf->num_of_elems;
   cluster_info_c1->cluster_size += cluster_info_c2->cluster_size;
   cluster_info_c1->last_elem = cluster_info_c2->last_elem;
-  cluster_info_c2->cluster_size = (unsigned long) 0;
+  cluster_info_c2->cluster_size = (GtUword) 0;
 }
 
 GtClusteredSetIterator*
 gt_clustered_set_union_find_iterator_new(GtClusteredSet *cs,
-                                         unsigned long c,
+                                         GtUword c,
                                          GT_UNUSED GtError *err)
 {
   gt_assert(cs);
   GtClusteredSetUF *cs_uf = (GtClusteredSetUF*) cs;
   GtClusteredSetIterator *cs_i = gt_calloc(1, sizeof (GtClusteredSetIterator));
-  unsigned long i = 0, j = 0;
+  GtUword i = 0, j = 0;
   if (SINGLETON(c)) {
-    cs_i->length = (unsigned long) 1;
-    cs_i->curpos = (unsigned long) 0;
-    cs_i->elems = gt_calloc(1, sizeof (unsigned long));
+    cs_i->length = (GtUword) 1;
+    cs_i->curpos = (GtUword) 0;
+    cs_i->elems = gt_calloc(1, sizeof (GtUword));
     cs_i->elems[j] = c;
   }
   else {
@@ -161,9 +161,9 @@ gt_clustered_set_union_find_iterator_new(GtClusteredSet *cs,
       GtClusteredSetUFClusterInfo *cluster_info;
       cluster_info = CINFO(c);
       cs_i->length = cluster_info->cluster_size;
-      cs_i->curpos = (unsigned long) 0;
+      cs_i->curpos = (GtUword) 0;
       cs_i->elems = gt_calloc(cluster_info->cluster_size,
-                              sizeof (unsigned long));
+                              sizeof (GtUword));
       i = cluster_info->first_elem;
 
       do {
@@ -189,7 +189,7 @@ void gt_clustered_set_union_find_delete(GtClusteredSet *cs,
   gt_bittab_delete(cs_uf->in_cluster);
 }
 
-unsigned long gt_clustered_set_union_find_num_of_clusters(GtClusteredSet *cs,
+GtUword gt_clustered_set_union_find_num_of_clusters(GtClusteredSet *cs,
                                                        GT_UNUSED GtError *err)
 {
   gt_assert(cs);
@@ -197,7 +197,7 @@ unsigned long gt_clustered_set_union_find_num_of_clusters(GtClusteredSet *cs,
   return cs_uf->next_free_cluster_info;
 }
 
-unsigned long gt_clustered_set_union_find_num_of_elements(GtClusteredSet *cs,
+GtUword gt_clustered_set_union_find_num_of_elements(GtClusteredSet *cs,
                                                        GT_UNUSED GtError *err)
 {
   gt_assert(cs);
@@ -205,8 +205,8 @@ unsigned long gt_clustered_set_union_find_num_of_elements(GtClusteredSet *cs,
   return cs_uf->num_of_elems;
 }
 
-unsigned long gt_clustered_set_union_find_cluster_num(GtClusteredSet *cs,
-                                                      unsigned long e,
+GtUword gt_clustered_set_union_find_cluster_num(GtClusteredSet *cs,
+                                                      GtUword e,
                                                       GT_UNUSED GtError *err
                                                       )
 {
@@ -219,32 +219,32 @@ unsigned long gt_clustered_set_union_find_cluster_num(GtClusteredSet *cs,
 }
 
 int gt_clustered_set_union_find_merge_clusters(GtClusteredSet *cs,
-                                               unsigned long e1,
-                                               unsigned long e2,
+                                               GtUword e1,
+                                               GtUword e2,
                                                GtError *err)
 {
   gt_assert(cs);
   int had_err = 0;
   GtClusteredSetUFClusterInfo *cluster_info_c1 = NULL;
   GtClusteredSetUFClusterInfo *cluster_info_c2 = NULL;
-  unsigned long target = 0, source = 0, c1 = 0, c2 = 0;
+  GtUword target = 0, source = 0, c1 = 0, c2 = 0;
   GtClusteredSetUF *cs_uf = (GtClusteredSetUF*) cs;
   if (e1 == e2) {
-    gt_error_set(err, "expected %lu to be unequal %lu", e1, e2 );
+    gt_error_set(err, "expected "GT_LU" to be unequal "GT_LU"", e1, e2 );
     had_err = -1;
   }
 
   if (e1 >= cs_uf->num_of_elems || e2 >= cs_uf->num_of_elems) {
-    gt_error_set(err, "%lu and %lu must not be larger than %lu",
+    gt_error_set(err, ""GT_LU" and "GT_LU" must not be larger than "GT_LU"",
                  e1, e2, cs_uf->num_of_elems);
     had_err = -1;
   }
 
   if (!had_err) {
     if (SINGLETON(e1)) {
-       /* printf("%lu is singleton\n", e1); */
+       /* printf(""GT_LU" is singleton\n", e1); */
       if (SINGLETON(e2)) {
-        /* printf("%lu is singleton\n", e2);*/
+        /* printf(""GT_LU" is singleton\n", e2);*/
         gt_clustered_set_union_find_make_new_cluster(cs_uf, e1, e2, err);
         gt_bittab_set_bit(cs_uf->in_cluster, e2);
       }
@@ -302,7 +302,7 @@ const GtClusteredSetClass* gt_clustered_set_union_find_class(void)
 }
 
 GtClusteredSet*
-gt_clustered_set_union_find_new(unsigned long num_of_elems,
+gt_clustered_set_union_find_new(GtUword num_of_elems,
                                 GT_UNUSED GtError *err)
 {
   GtClusteredSet *cs;
@@ -313,7 +313,7 @@ gt_clustered_set_union_find_new(unsigned long num_of_elems,
   cs_uf->cluster_elems = gt_calloc(num_of_elems, sizeof (GtClusteredSetUFElem));
   cs_uf->cluster_info = gt_array_new(sizeof (GtClusteredSetUFClusterInfo));
   cs_uf->in_cluster = gt_bittab_new(num_of_elems);
-  cs_uf->next_free_cluster_info = (unsigned long) 0;
+  cs_uf->next_free_cluster_info = (GtUword) 0;
 
   return cs;
 }

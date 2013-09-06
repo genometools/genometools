@@ -40,13 +40,13 @@ void           gt_feature_node_get_exons(GtFeatureNode*,
 void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);
 GtTranscriptFeatureType
                gt_feature_node_get_transcriptfeaturetype(GtFeatureNode*);
-void           gt_feature_node_set_end(GtFeatureNode*, unsigned long);
+void           gt_feature_node_set_end(GtFeatureNode*, GtUword);
 void           gt_feature_node_foreach_attribute(GtFeatureNode*,
                                                  AttributeIterFunc, void *data);
 bool           gt_feature_node_has_CDS(const GtFeatureNode*);
 bool           gt_feature_node_has_splice_site(const GtFeatureNode*);
 double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*,
-                                                        unsigned long *num_ss);
+                                                        GtUword *num_ss);
 void           gt_feature_node_set_observer(GtFeatureNode*,
                                             GtFeatureNodeObserver*);
 void           gt_feature_node_unset_observer(GtFeatureNode*);

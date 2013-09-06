@@ -94,7 +94,7 @@ DECLAREREADFUNCTION(GtUchar);
 DECLAREBufferedfiletype(Largelcpvalue);
 DECLAREREADFUNCTION(Largelcpvalue);
 
-typedef unsigned long ESASuffixptr;
+typedef GtUword ESASuffixptr;
 
 #define ESASUFFIXPTRGET(TAB,IDX)     TAB[IDX]
 
@@ -107,7 +107,7 @@ typedef struct
   Definedunsignedlong longest; /* for BWT */
   GtReadmode readmode; /* relevant when reading the encoded sequence */
   bool mirroredencseq;
-  unsigned long numberofallsortedsuffixes;
+  GtUword numberofallsortedsuffixes;
   /* either with mapped input */
   const ESASuffixptr *suftab;
   const GtUchar *lcptab;
@@ -127,10 +127,10 @@ typedef struct
 
 /*@unused@*/ static inline const Largelcpvalue *getlargelcpvalue(
                        const Suffixarray *suffixarray,
-                       unsigned long pos)
+                       GtUword pos)
 {
   const Largelcpvalue *leftptr, *rightptr, *midptr;
-  unsigned long len;
+  GtUword len;
 
   gt_assert(suffixarray->numoflargelcpvalues.defined);
 
@@ -140,7 +140,7 @@ typedef struct
 
   while (leftptr<=rightptr)
   {
-    len = (unsigned long) (rightptr-leftptr);
+    len = (GtUword) (rightptr-leftptr);
     midptr = leftptr + GT_DIV2(len);
     if (pos < midptr->position)
     {
@@ -159,9 +159,9 @@ typedef struct
   return NULL;
 }
 
-/*@unused@*/ static inline unsigned long lcptable_get(
+/*@unused@*/ static inline GtUword lcptable_get(
                        const Suffixarray *suffixarray,
-                       unsigned long pos)
+                       GtUword pos)
 {
   GtUchar smalllcpvalue;
   const Largelcpvalue *largelcpvalue;
@@ -170,7 +170,7 @@ typedef struct
   smalllcpvalue = suffixarray->lcptab[pos];
   if (smalllcpvalue != LCPOVERFLOW)
   {
-    return (unsigned long) smalllcpvalue;
+    return (GtUword) smalllcpvalue;
   }
   largelcpvalue = getlargelcpvalue(suffixarray,pos);
   gt_assert(largelcpvalue != NULL);

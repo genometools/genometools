@@ -208,7 +208,7 @@ static int gt_featureindex_runner(GT_UNUSED int argc,
   GtAnnoDBSchema *adbs = NULL;
   GtNodeVisitor *gff3visitor = NULL;
   GtGenomeNode *regn = NULL;
-  unsigned long i = 0;
+  GtUword i = 0;
   int had_err = 0;
 
   gt_error_check(err);

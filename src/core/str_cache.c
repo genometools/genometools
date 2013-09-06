@@ -21,12 +21,12 @@ struct GtStrCache {
   GtStr **cache;
   void *source;
   GtStrConstructorFunc constructor;
-  unsigned long num_of_strings;
+  GtUword num_of_strings;
 };
 
 GtStrCache* gt_str_cache_new(void *str_source,
                              GtStrConstructorFunc str_constructor,
-                             unsigned long num_of_strings)
+                             GtUword num_of_strings)
 {
   GtStrCache *str_cache;
   gt_assert(str_source && str_constructor && num_of_strings);
@@ -40,7 +40,7 @@ GtStrCache* gt_str_cache_new(void *str_source,
 
 void gt_str_cache_delete(GtStrCache *str_cache)
 {
-  unsigned long i;
+  GtUword i;
   if (!str_cache) return;
   for (i = 0; i < str_cache->num_of_strings; i++)
     gt_str_delete(str_cache->cache[i]);
@@ -48,7 +48,7 @@ void gt_str_cache_delete(GtStrCache *str_cache)
   gt_free(str_cache);
 }
 
-GtStr* gt_str_cache_get(GtStrCache *str_cache, unsigned long index)
+GtStr* gt_str_cache_get(GtStrCache *str_cache, GtUword index)
 {
   gt_assert(str_cache && index < str_cache->num_of_strings);
   if (!str_cache->cache[index])

@@ -35,21 +35,21 @@ GtAsqgWriter* gt_asqg_writer_new(GtFile *file, const GtEncseq *encseq)
 }
 
 int gt_asqg_writer_show_header(GtAsqgWriter *aw, float erate,
-    unsigned long minlen, const char *inputfilename, bool has_containments,
+    GtUword minlen, const char *inputfilename, bool has_containments,
     bool has_transitives, GT_UNUSED GtError *err)
 {
   gt_assert(aw != NULL);
   gt_file_xprintf(aw->file,
-      "HT\tVN:i:%lu\tER:f:%g\tOL:i:%lu\tIN:Z:%s\tCN:i:%c\tTE:i:%c\n",
+      "HT\tVN:i:%d\tER:f:%g\tOL:i:"GT_LU"\tIN:Z:%s\tCN:i:%c\tTE:i:%c\n",
       GT_ASQG_VERSION, erate, minlen, inputfilename,
       has_containments ? '1' : '0', has_transitives ? '1' : '0');
   return 0;
 }
 
 static inline void gt_asqg_writer_show_vertex_line(GtFile *file,
-    unsigned long seqnum, const char *sequence, bool subsequence)
+    GtUword seqnum, const char *sequence, bool subsequence)
 {
-  gt_file_xprintf(file, "VT\t%lu\t%s\tSS:i:%c\n", seqnum, sequence,
+  gt_file_xprintf(file, "VT\t"GT_LU"\t%s\tSS:i:%c\n", seqnum, sequence,
       subsequence ? '1' : '0');
 }
 
@@ -57,7 +57,7 @@ int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
 {
   const GtTwobitencoding *nextencoded;
   GtTwobitencoding code = 0;
-  unsigned long seqnum = 0, nofseqs = gt_encseq_num_of_sequences(aw->encseq),
+  GtUword seqnum = 0, nofseqs = gt_encseq_num_of_sequences(aw->encseq),
                 pos = 0, next_stop, i,
                 tlen = gt_encseq_total_length(aw->encseq), charsincode = 0;
   char *seqbuffer;
@@ -82,7 +82,7 @@ int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
       if (charsincode == 0)
       {
         code = *(nextencoded++);
-        charsincode = (unsigned long)GT_UNITSIN2BITENC;
+        charsincode = (GtUword)GT_UNITSIN2BITENC;
       }
       seqbuffer[pos++] = code2char[code >> ((--charsincode) << 1) & 3];
     }
@@ -94,7 +94,7 @@ int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
     if (charsincode == 0)
     {
       code = *(nextencoded++);
-      charsincode = (unsigned long)GT_UNITSIN2BITENC;
+      charsincode = (GtUword)GT_UNITSIN2BITENC;
     }
     charsincode--;
     seqnum++;
@@ -104,22 +104,22 @@ int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
 }
 
 static inline void gt_asqg_writer_show_edge_line(GtFile *file,
-    unsigned long seqnum1, unsigned long seqnum2, unsigned long start1,
-    unsigned long end1, unsigned long seqlen1, unsigned long start2,
-    unsigned long end2, unsigned long seqlen2, bool revcompl,
-    unsigned long edist)
+    GtUword seqnum1, GtUword seqnum2, GtUword start1,
+    GtUword end1, GtUword seqlen1, GtUword start2,
+    GtUword end2, GtUword seqlen2, bool revcompl,
+    GtUword edist)
 {
-  gt_file_xprintf(file, "ED\t%lu %lu %lu %lu %lu %lu %lu %lu %c %lu\n",
+  gt_file_xprintf(file, "ED\t"GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" %c "GT_LU"\n",
       seqnum1, seqnum2, start1, end1, seqlen1, start2, end2, seqlen2,
       revcompl ? '1' : '0', edist);
 }
 
-void gt_spmproc_show_asgq(unsigned long suffix_readnum,
-    unsigned long prefix_readnum, unsigned long length,
+void gt_spmproc_show_asgq(GtUword suffix_readnum,
+    GtUword prefix_readnum, GtUword length,
     bool suffixseq_direct, bool prefixseq_direct, void *asqg_writer)
 {
   GtAsqgWriter *aw = asqg_writer;
-  const unsigned long sl1 = gt_encseq_seqlength(aw->encseq, suffix_readnum),
+  const GtUword sl1 = gt_encseq_seqlength(aw->encseq, suffix_readnum),
                       sl2 = gt_encseq_seqlength(aw->encseq, prefix_readnum);
   gt_asqg_writer_show_edge_line(aw->file, suffix_readnum, prefix_readnum,
       suffixseq_direct ? sl1 - length : 0,

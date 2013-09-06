@@ -25,7 +25,7 @@
 struct GtLTRORFAnnotatorStream {
   const GtNodeStream parent_instance;
   GtNodeStream *orf_stream;
-  unsigned long *progress_loc;
+  GtUword *progress_loc;
   GtHashmap *types;
 };
 
@@ -90,7 +90,7 @@ GtNodeStream* gt_ltr_orf_annotator_stream_new(GtNodeStream *in_stream,
 
 void gt_ltr_orf_annotator_stream_set_progress_location(
                                                      GtLTRORFAnnotatorStream *s,
-                                                     unsigned long *loc)
+                                                     GtUword *loc)
 {
   gt_assert(s);
   s->progress_loc = loc;

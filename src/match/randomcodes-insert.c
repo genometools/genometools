@@ -47,19 +47,19 @@ static void gt_randomcodes_insert_kmerscan_range(
                                          const GtBitsequence *twobitencoding,
                                          unsigned int kmersize,
                                          unsigned int skipshorter,
-                                         unsigned long startpos,
-                                         unsigned long length,
-                                         unsigned long fseqnum,
-                                         unsigned long rseqnum,
-                                         unsigned long maxunitindex,
+                                         GtUword startpos,
+                                         GtUword length,
+                                         GtUword fseqnum,
+                                         GtUword rseqnum,
+                                         GtUword maxunitindex,
                                          GtCodeposbuffer *buf)
 {
-  const unsigned long maskright = GT_MASKRIGHT(kmersize);
-  const unsigned long lastpossiblepos = length - skipshorter;
-  const unsigned long lastfrelpos = length - kmersize;
+  const GtUword maskright = GT_MASKRIGHT(kmersize);
+  const GtUword lastpossiblepos = length - skipshorter;
+  const GtUword lastfrelpos = length - kmersize;
   const unsigned int shiftleft = GT_MULT2(kmersize-1);
   unsigned int shiftright;
-  unsigned long unitindex, frelpos;
+  GtUword unitindex, frelpos;
   GtTwobitencoding currentencoding;
   GtCodetype cc, fcode, rccode;
 
@@ -107,17 +107,17 @@ static void gt_randomcodes_insert_kmerscan_range(
 
 static void gt_randomcodes_insert_kmerscan_eqlen(
                                      const GtBitsequence *twobitencoding,
-                                     unsigned long equallength,
-                                     unsigned long totallength,
-                                     unsigned long numofsequences,
-                                     unsigned long maxunitindex,
+                                     GtUword equallength,
+                                     GtUword totallength,
+                                     GtUword numofsequences,
+                                     GtUword maxunitindex,
                                      unsigned int kmersize,
                                      unsigned int skipshorter,
                                      GtCodeposbuffer *buf)
 {
-  unsigned long startpos, fseqnum;
+  GtUword startpos, fseqnum;
 
-  if (equallength >= (unsigned long) kmersize)
+  if (equallength >= (GtUword) kmersize)
   {
     for (startpos = 0, fseqnum = 0; startpos < totallength;
          startpos += equallength+1, fseqnum++)
@@ -137,14 +137,14 @@ static void gt_randomcodes_insert_kmerscan_eqlen(
 
 static void gt_randomcodes_insert_kmerscan(const GtEncseq *encseq,
                                           const GtBitsequence *twobitencoding,
-                                          unsigned long totallength,
-                                          unsigned long numofsequences,
-                                          unsigned long maxunitindex,
+                                          GtUword totallength,
+                                          GtUword numofsequences,
+                                          GtUword maxunitindex,
                                           unsigned int kmersize,
                                           unsigned int skipshorter,
                                           GtCodeposbuffer *buf)
 {
-  unsigned long laststart = 0, fseqnum = 0;
+  GtUword laststart = 0, fseqnum = 0;
 
   if (gt_encseq_has_specialranges(encseq))
   {
@@ -156,7 +156,7 @@ static void gt_randomcodes_insert_kmerscan(const GtEncseq *encseq,
            && range.start < totallength)
     {
       gt_assert(range.start >= laststart);
-      if (range.start - laststart >= (unsigned long) skipshorter)
+      if (range.start - laststart >= (GtUword) skipshorter)
       {
         gt_randomcodes_insert_kmerscan_range(twobitencoding,
                                             kmersize,
@@ -173,7 +173,7 @@ static void gt_randomcodes_insert_kmerscan(const GtEncseq *encseq,
     }
     gt_specialrangeiterator_delete(sri);
   }
-  if (totallength - laststart >= (unsigned long) skipshorter)
+  if (totallength - laststart >= (GtUword) skipshorter)
   {
     gt_randomcodes_insert_kmerscan_range(twobitencoding,
                                         kmersize,
@@ -194,7 +194,7 @@ void gt_randomcodes_insert_runkmerscan(const GtEncseq *encseq,
 {
   const GtTwobitencoding *twobitencoding
     = gt_encseq_twobitencoding_export(encseq);
-  unsigned long totallength, maxunitindex, numofsequences;
+  GtUword totallength, maxunitindex, numofsequences;
 
   gt_assert(skipshorter>=kmersize);
   if (gt_encseq_is_mirrored(encseq))
@@ -208,9 +208,9 @@ void gt_randomcodes_insert_runkmerscan(const GtEncseq *encseq,
   maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
   if (gt_encseq_accesstype_get(encseq) == GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    unsigned long equallength = gt_encseq_equallength(encseq);
+    GtUword equallength = gt_encseq_equallength(encseq);
 
-    gt_assert(equallength >= (unsigned long) kmersize);
+    gt_assert(equallength >= (GtUword) kmersize);
     gt_randomcodes_insert_kmerscan_eqlen(twobitencoding,
                                         equallength,
                                         totallength,

@@ -156,7 +156,7 @@ GtNodeVisitor* gt_splice_site_info_visitor_new(GtRegionMapping *rm)
   return nv;
 }
 
-static void showsplicesite(const char *string, unsigned long occurrences,
+static void showsplicesite(const char *string, GtUword occurrences,
                            double probability, GT_UNUSED void *unused)
 {
   gt_assert(string && strlen(string) == 4);
@@ -165,14 +165,14 @@ static void showsplicesite(const char *string, unsigned long occurrences,
   gt_xputchar('-');
   gt_xputchar(string[2]);
   gt_xputchar(string[3]);
-  printf(": %6.2f%% (n=%lu)\n", probability * 100.0, occurrences);
+  printf(": %6.2f%% (n="GT_LU")\n", probability * 100.0, occurrences);
 }
 
-static void showsinglesite(const char *string, unsigned long occurrences,
+static void showsinglesite(const char *string, GtUword occurrences,
                            double probability, GT_UNUSED void *unused)
 {
   gt_assert(string && strlen(string) == 2);
-  printf("%s: %6.2f%% (n=%lu)\n", string, probability * 100.0, occurrences);
+  printf("%s: %6.2f%% (n="GT_LU")\n", string, probability * 100.0, occurrences);
 }
 
 bool gt_splice_site_info_visitor_show(GtNodeVisitor *nv, GtFile *outfp)
@@ -215,14 +215,14 @@ bool gt_splice_site_info_visitor_show_canonical(GtNodeVisitor *nv, bool show_gc)
   ssiv = splice_site_info_visitor_cast(nv);
 
   if (ssiv->show) {
-    unsigned long occ;
+    GtUword occ;
     if ((occ = gt_string_distri_get(ssiv->splicesites, "gtag"))) {
-      printf("gt-ag: %6.2f%% (n=%lu)\n",
+      printf("gt-ag: %6.2f%% (n="GT_LU")\n",
              gt_string_distri_get_prob(ssiv->splicesites, "gtag") * 100.0, occ);
       canonical_shown = true;
     }
     if (show_gc && (occ = gt_string_distri_get(ssiv->splicesites, "gcag"))) {
-      printf("gc-ag: %6.2f%% (n=%lu)\n",
+      printf("gc-ag: %6.2f%% (n="GT_LU")\n",
              gt_string_distri_get_prob(ssiv->splicesites, "gcag") * 100.0, occ);
       canonical_shown = true;
     }

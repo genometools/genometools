@@ -23,6 +23,6 @@
 
 GtStrArray* gt_str_array_new_file(const char *path);
 /* Returns an internal GtStr pointer (i.e., _not_ a new reference!). */
-GtStr*      gt_str_array_get_str(const GtStrArray*, unsigned long strnum);
+GtStr*      gt_str_array_get_str(const GtStrArray*, GtUword strnum);
 
 #endif

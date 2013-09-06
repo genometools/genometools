@@ -34,11 +34,11 @@ typedef struct suffixarrayFileInterface SuffixarrayFileInterface;
 
 void
 gt_initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
-                             unsigned long seqLen,
+                             GtUword seqLen,
                              Suffixarray *sa);
 
 SuffixarrayFileInterface *
-gt_newSuffixarrayFileInterface(Suffixarray *sa, unsigned long seqLen);
+gt_newSuffixarrayFileInterface(Suffixarray *sa, GtUword seqLen);
 
 void
 gt_destructSuffixarrayFileInterface(SuffixarrayFileInterface *sai);
@@ -64,7 +64,7 @@ gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai);
  * @return actual number of symbols read
  */
 size_t
-gt_SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos,
+gt_SAIGetOrigSeq(const void *state, Symbol *dest, GtUword pos,
                  size_t len);
 
 /**
@@ -89,7 +89,7 @@ SAIGetEncSeq(const SuffixarrayFileInterface *sai);
 static inline GtReadmode
 SAIGetGtReadmode(const SuffixarrayFileInterface *sai);
 
-static inline unsigned long
+static inline GtUword
 SAIGetLength(const SuffixarrayFileInterface *sai);
 
 /**

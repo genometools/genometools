@@ -68,10 +68,10 @@ bool          gt_hcr_encoder_sampling_is_page(GtHcrEncoder *hcr_enc);
 
 /* Sets sampling rate to <srate> for the object <hcr_enc>. */
 void          gt_hcr_encoder_set_sampling_rate(GtHcrEncoder *hcr_enc,
-                                               unsigned long srate);
+                                               GtUword srate);
 
 /* Returns the sampling rate of the object <hcr_enc>. */
-unsigned long gt_hcr_encoder_get_sampling_rate(GtHcrEncoder *hcr_enc);
+GtUword gt_hcr_encoder_get_sampling_rate(GtHcrEncoder *hcr_enc);
 
 /* Encodes <hcr_enc> and writes the encoding to a file with base name <name>. */
 int           gt_hcr_encoder_encode(GtHcrEncoder *hcr_enc, const char *name,
@@ -90,22 +90,22 @@ bool          gt_hcr_decoder_has_descs_support(GtHcrDecoder *hcr_dec);
    pointers. The addresses of the pointer must be allocated with sufficient
    memory space. <desc> gets reset and filled. */
 int           gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec,
-                                    unsigned long readnum, char *seq,
+                                    GtUword readnum, char *seq,
                                     char *qual, GtStr * desc, GtError *err);
 
 /* Decodes the hcr encoded file starting at record number <start> until record
    number <end> and writes the decoding to a file with base name <name>. */
 int           gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec,
-                                          const char *name, unsigned long start,
-                                          unsigned long end, GtTimer *timer,
+                                          const char *name, GtUword start,
+                                          GtUword end, GtTimer *timer,
                                           GtError *err);
 
 /* Returns the total number of reads in <hcr_dec>. */
-unsigned long gt_hcr_decoder_num_of_reads(GtHcrDecoder *hcr_dec);
+GtUword gt_hcr_decoder_num_of_reads(GtHcrDecoder *hcr_dec);
 
 /* Returns the read length of the reads in file with filenumber <filenum>. */
-unsigned long gt_hcr_decoder_readlength(GtHcrDecoder *hcr_dec,
-                                        unsigned long filenum);
+GtUword gt_hcr_decoder_readlength(GtHcrDecoder *hcr_dec,
+                                        GtUword filenum);
 
 void          gt_hcr_encoder_delete(GtHcrEncoder *hcr_enc);
 

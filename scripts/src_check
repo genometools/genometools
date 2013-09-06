@@ -109,6 +109,52 @@ for _, fn in ipairs(arg) do -- iterate over all files
     if string.find(l, " do%(")     then err(fn, ln, "missing blank") end
     if string.find(l, "%){")       then err(fn, ln, "missing blank") end
 
+    if not string.match(fn, "types_api.h$") then
+      -- check for unsigned long long and long long
+      if string.find(l, "unsigned%s+long%s+long[%s,%*]") or
+         string.find(l, "%(unsigned%s+long%s+long%)") then
+        err(fn, ln, "do not use 'unsigned long long', use 'GtUint64' instead")
+      elseif string.find(l, "long%s+long[%s,%*]") or
+             string.find(l, "%(long%s+long%)") then
+        err(fn, ln, "do not use 'long long', use 'GtInt64' instead")
+      end
+
+      -- check for unsigned long and long
+      if string.find(l, "unsigned%s+long[%s,%*]") or
+         string.find(l, "%(unsigned%s+long%)") then
+        err(fn, ln, "do not use 'unsigned long', use 'GtUword' instead")
+      elseif string.find(l, "%slong[,%*]") or
+             string.find(l, "%(long%)") then
+        err(fn, ln, "do not use 'long', use 'GtWord' instead")
+      end
+
+      -- check flag characters
+      if string.find(l, "%%lld") then
+        err(fn, ln, "do not use '%lld', use 'GT_LLD' instead")
+      end
+
+      if string.find(l, "%%llu") then
+        err(fn, ln, "do not use '%llu', use 'GT_LLU' instead")
+      end
+
+      if string.find(l, "%%ld") then
+        err(fn, ln, "do not use '%ld', use 'GT_LD' instead")
+      end
+
+      if string.find(l, "%%lu") then
+        err(fn, ln, "do not use '%lu', use 'GT_LU' instead")
+      end
+
+      if string.find(l, "%%zu") then
+        err(fn, ln, "do not use '%zu', use 'GT_ZU' instead")
+      end
+    end
+
+    -- check for long double
+    if string.find(l, "long double") then
+      err (fn, ln, "do not use 'long double', use 'double' instead")
+    end
+
     -- check for superfluous blanks
     if string.find(l, "return  ") then err(fn, ln, "superfluous blank") end
 

@@ -34,7 +34,7 @@ GtCSAGene* gt_csa_gene_new(GtCSASpliceForm *splice_form)
 
 void gt_csa_gene_delete(GtCSAGene *gene)
 {
-  unsigned long i;
+  GtUword i;
   if (!gene) return;
   for (i = 0; i < gt_array_size(gene->splice_forms); i++) {
     gt_csa_splice_form_delete(*(GtCSASpliceForm**)
@@ -54,13 +54,13 @@ void gt_csa_gene_add_splice_form(GtCSAGene *gene, GtCSASpliceForm *splice_form)
 }
 
 GtCSASpliceForm* gt_csa_gene_get_splice_form(const GtCSAGene *gene,
-                                           unsigned long sf)
+                                           GtUword sf)
 {
   gt_assert(gene);
   return *(GtCSASpliceForm**) gt_array_get(gene->splice_forms, sf);
 }
 
-unsigned long gt_csa_gene_num_of_splice_forms(const GtCSAGene *gene)
+GtUword gt_csa_gene_num_of_splice_forms(const GtCSAGene *gene)
 {
   gt_assert(gene);
   return gt_array_size(gene->splice_forms);
@@ -69,7 +69,7 @@ unsigned long gt_csa_gene_num_of_splice_forms(const GtCSAGene *gene)
 GtRange gt_csa_gene_genomic_range(const GtCSAGene *gene)
 {
   GtRange gene_range, tmp_range;
-  unsigned long i;
+  GtUword i;
   gt_assert(gene);
   gene_range.start = ~0UL;
   gene_range.end = 0UL;

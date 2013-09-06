@@ -32,7 +32,7 @@
 struct GtSequenceBufferClass {
   size_t        size;
   int           (*advance)(GtSequenceBuffer*, GtError*);
-  unsigned long (*get_file_index)(GtSequenceBuffer*);
+  GtUword (*get_file_index)(GtSequenceBuffer*);
   void          (*free)(GtSequenceBuffer*);
 };
 
@@ -51,14 +51,14 @@ struct GtSequenceBufferMembers {
        use_ungetchar;
   GtDescBuffer *descptr;
   GtFile *inputstream;
-  unsigned long reference_count,
+  GtUword reference_count,
                 *chardisttab,
                 currentfillpos,
                 currentinpos,
                 nextread,
                 nextfree;
   uint64_t lastspeciallength;
-  unsigned long long counter;
+  GtUint64 counter;
   const GtStrArray *filenametab;
   unsigned char ungetchar,
                 inbuf[INBUFSIZE],

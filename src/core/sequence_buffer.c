@@ -102,7 +102,7 @@ GtSequenceBuffer* gt_sequence_buffer_new_guess_type(const GtStrArray *seqs,
   return sb;
 }
 
-unsigned long gt_sequence_buffer_get_file_index(GtSequenceBuffer *si)
+GtUword gt_sequence_buffer_get_file_index(GtSequenceBuffer *si)
 {
   gt_assert(si && si->c_class && si->c_class->get_file_index);
   return si->c_class->get_file_index(si);
@@ -135,13 +135,13 @@ void gt_sequence_buffer_set_filelengthtab(GtSequenceBuffer *si,
 }
 
 void gt_sequence_buffer_set_chardisttab(GtSequenceBuffer *si,
-                                        unsigned long *chardisttab)
+                                        GtUword *chardisttab)
 {
   gt_assert(si && si->pvt);
   si->pvt->chardisttab = chardisttab;
 }
 
-const unsigned long long*
+const GtUint64*
 gt_sequence_buffer_get_counter(const GtSequenceBuffer *si)
 {
   gt_assert(si && si->pvt);
@@ -217,7 +217,7 @@ int gt_sequence_buffer_unit_test(GtError *err)
   GtSequenceBuffer *sb;
   GtStrArray *testfiles;
   GtStr *tmpfilename;
-  unsigned long i;
+  GtUword i;
   FILE *tmpfp;
 
   gt_error_check(err);

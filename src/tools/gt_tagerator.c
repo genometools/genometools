@@ -189,7 +189,7 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
                                         GtError *err)
 {
   TageratorOptions *arguments = tool_arguments;
-  unsigned long idx;
+  GtUword idx;
 
   if (!arguments->nowildcards && arguments->userdefinedmaxdistance <= 0)
   {
@@ -264,7 +264,7 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
 {
   TageratorOptions *arguments = tool_arguments;
   bool haserr = false;
-  unsigned long idx;
+  GtUword idx;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -287,11 +287,11 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
       printf(" without differences (exact matches)");
     } else
     {
-      printf(" with up to %ld differences",arguments->userdefinedmaxdistance);
+      printf(" with up to "GT_LD" differences",arguments->userdefinedmaxdistance);
     }
     if (arguments->maxintervalwidth > 0)
     {
-      printf(" and at most %lu occurrences in the subject sequences",
+      printf(" and at most "GT_LU" occurrences in the subject sequences",
              arguments->maxintervalwidth);
     }
     printf("\n");

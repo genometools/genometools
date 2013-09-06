@@ -23,12 +23,12 @@
 #include "core/unused_api.h"
 
 typedef struct GtShuUnitFileInfo {
-  unsigned long num_of_genomes,
+  GtUword num_of_genomes,
                 num_of_files;
   GtStrArray *genome_names;
   const GtStrArray *file_names;
   /*array holding the mapping of file to genome*/
-  unsigned long *map_files;
+  GtUword *map_files;
   const GtEncseq *encseq;
 } GtShuUnitFileInfo;
 

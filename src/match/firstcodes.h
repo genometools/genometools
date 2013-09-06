@@ -25,11 +25,11 @@
 #include "seqnumrelpos.h"
 
 typedef int (*GtFirstcodesintervalprocess)(void *,
-                                           const unsigned long *,
+                                           const GtUword *,
                                            const GtSeqnumrelpos *,
                                            const uint16_t *,
-                                           unsigned long,
-                                           unsigned long,
+                                           GtUword,
+                                           GtUword,
                                            GtError *);
 
 typedef void (*GtFirstcodesintervalprocess_end)(void *);
@@ -40,13 +40,13 @@ int storefirstcodes_getencseqkmers_twobitencoding(
                     const GtEncseq *encseq,
                     unsigned int kmersize,
                     unsigned int numofparts,
-                    unsigned long maximumspace,
+                    GtUword maximumspace,
                     unsigned int minmatchlength,
                     bool withsuftabcheck, /* set to false, only for tests */
                     bool onlyaccumulation, /* set to false, only for tests */
                     bool onlyallfirstcodes, /* set to false, only for tests */
                     GT_UNUSED unsigned int addbscache_depth, /* set to 5U */
-                    unsigned long phase2extra, /* extra space needed in proc.
+                    GtUword phase2extra, /* extra space needed in proc.
                                                   intervals */
                     bool radixsmall,      /* set to true */
                     unsigned int radixparts, /* set to 2U */

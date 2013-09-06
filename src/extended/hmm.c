@@ -375,7 +375,7 @@ void gt_hmm_decode(const GtHMM *hmm,
 /* [DEKM98, p. 58] */
 static void compute_forward_table(double **f, const GtHMM *hmm,
                                   const unsigned int *emissions,
-                                  unsigned long num_of_emissions)
+                                  GtUword num_of_emissions)
 {
   int row, column, previous_row;
   double tmp_prob;
@@ -432,7 +432,7 @@ double gt_hmm_forward(const GtHMM* hmm, const unsigned int *emissions,
 /* [DEKM98, p. 59] */
 static void compute_backward_table(double **b, const GtHMM *hmm,
                                    const unsigned int *emissions,
-                                   unsigned long num_of_emissions)
+                                   GtUword num_of_emissions)
 {
   int row, column, next_row;
   double tmp_prob;
@@ -487,11 +487,11 @@ double gt_hmm_backward(const GtHMM* hmm, const unsigned int *emissions,
   return P;
 }
 
-void gt_hmm_emit(GtHMM *hmm, unsigned long num_of_emissions,
+void gt_hmm_emit(GtHMM *hmm, GtUword num_of_emissions,
               void (*proc_emission)(unsigned int symbol, void *data),
               void *data)
 {
-  unsigned long i;
+  GtUword i;
   unsigned int state, symbol, next_state;
   double random_value, cumulative_prob;
   gt_assert(hmm);

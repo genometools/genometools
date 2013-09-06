@@ -40,22 +40,22 @@ void          gth_stat_increment_numoffailedDPparameterallocations(GthStat*);
 void          gth_stat_increment_numofbacktracematrixallocations(GthStat*);
 void          gth_stat_increment_numofremovedzerobaseexons(GthStat*);
 void          gth_stat_increment_numofSAs(GthStat*);
-void          gth_stat_increase_numofchains(GthStat*, unsigned long);
+void          gth_stat_increase_numofchains(GthStat*, GtUword);
 void          gth_stat_increase_totalsizeofbacktracematricesinMB(GthStat*,
-                                                                 unsigned long);
-void          gth_stat_increase_numofPGLs_stored(GthStat*, unsigned long);
-unsigned long gth_stat_get_numofSAs(GthStat*);
+                                                                 GtUword);
+void          gth_stat_increase_numofPGLs_stored(GthStat*, GtUword);
+GtUword gth_stat_get_numofSAs(GthStat*);
 bool          gth_stat_get_exondistri(GthStat*);
 bool          gth_stat_get_introndistri(GthStat*);
 GtDiscDistri* gth_stat_get_exondistribution(GthStat*);
 GtDiscDistri* gth_stat_get_introndistribution(GthStat*);
 bool          gth_stat_get_matchnumdistri(GthStat*);
 bool          gth_stat_get_refseqcovdistri(GthStat*);
-void          gth_stat_add_to_matchnumdistri(GthStat*, unsigned long);
-void          gth_stat_add_to_refseqcovdistri(GthStat*, unsigned long);
+void          gth_stat_add_to_matchnumdistri(GthStat*, GtUword);
+void          gth_stat_add_to_refseqcovdistri(GthStat*, GtUword);
 void          gth_stat_add_to_sa_alignment_score_distri(GthStat*,
-                                                        unsigned long);
-void          gth_stat_add_to_sa_coverage_distri(GthStat*, unsigned long);
+                                                        GtUword);
+void          gth_stat_add_to_sa_coverage_distri(GthStat*, GtUword);
 void          gth_stat_show(GthStat*, bool show_full_stats, bool xmlout,
                             GtFile*);
 void          gth_stat_delete(GthStat*);

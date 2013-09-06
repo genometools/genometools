@@ -22,7 +22,7 @@
 #include "extended/type_node.h"
 
 struct GtTypeNode {
-  unsigned long num;
+  GtUword num;
   const char *id;
   GtArray *is_a_list,
           *part_of_list;
@@ -30,7 +30,7 @@ struct GtTypeNode {
   GtHashmap *cache;
 };
 
-GtTypeNode* gt_type_node_new(unsigned long num, const char *id)
+GtTypeNode* gt_type_node_new(GtUword num, const char *id)
 {
   GtTypeNode *node = gt_calloc(1, sizeof *node);
   node->num = num;
@@ -48,7 +48,7 @@ void  gt_type_node_delete(GtTypeNode *type_node)
   gt_free(type_node);
 }
 
-unsigned long gt_type_node_num(const GtTypeNode *type_node)
+GtUword gt_type_node_num(const GtTypeNode *type_node)
 {
   gt_assert(type_node);
   return type_node->num;
@@ -63,13 +63,13 @@ void gt_type_node_is_a_add(GtTypeNode *type_node, const char *id)
 }
 
 const char* gt_type_node_is_a_get(const GtTypeNode *type_node,
-                                  unsigned long idx)
+                                  GtUword idx)
 {
   gt_assert(type_node && idx < gt_type_node_is_a_size(type_node));
   return *(const char**) gt_array_get(type_node->is_a_list, idx);
 }
 
-unsigned long gt_type_node_is_a_size(const GtTypeNode *type_node)
+GtUword gt_type_node_is_a_size(const GtTypeNode *type_node)
 {
   gt_assert(type_node);
   return (type_node->is_a_list) ? gt_array_size(type_node->is_a_list) : 0;
@@ -84,13 +84,13 @@ void gt_type_node_part_of_add(GtTypeNode *type_node, const char *id)
 }
 
 const char* gt_type_node_part_of_get(const GtTypeNode *type_node,
-                                  unsigned long idx)
+                                  GtUword idx)
 {
   gt_assert(type_node && idx < gt_type_node_part_of_size(type_node));
   return *(const char**) gt_array_get(type_node->part_of_list, idx);
 }
 
-unsigned long gt_type_node_part_of_size(const GtTypeNode *type_node)
+GtUword gt_type_node_part_of_size(const GtTypeNode *type_node)
 {
   gt_assert(type_node);
   return (type_node->part_of_list) ? gt_array_size(type_node->part_of_list) : 0;
@@ -109,7 +109,7 @@ static void create_transitive_part_of_edges(GtTypeNode *node,
                                             GtBoolMatrix *part_of_in_edges,
                                             GtArray *node_stack)
 {
-  unsigned long i, j;
+  GtUword i, j;
   if (gt_array_size(node_stack)) {
     for (i  = gt_bool_matrix_get_first_column(part_of_in_edges, node->num);
          i != gt_bool_matrix_get_last_column(part_of_in_edges, node->num);
@@ -137,7 +137,7 @@ bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
 {
   GtArray *node_stack;
   GtTypeNode *parent;
-  unsigned long i;
+  GtUword i;
   bool *result;
   gt_assert(node && id);
   gt_log_log("check if node %s has parent %s", node->id, id);

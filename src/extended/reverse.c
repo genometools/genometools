@@ -19,7 +19,7 @@
 #include "core/complement.h"
 #include "extended/reverse_api.h"
 
-int gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError *err)
+int gt_reverse_complement(char *dna_seq, GtUword seqlen, GtError *err)
 {
   char *front_char, *back_char, tmp_char;
   int had_err = 0;

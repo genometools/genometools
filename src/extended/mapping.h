@@ -37,8 +37,8 @@ GtMapping*  gt_mapping_new(GtStr *mapping_file, const char *global_name,
 /* map <input> to string, returns NULL on error */
 GtStr*      gt_mapping_map_string(GtMapping*, const char *input, GtError*);
 /* map <input> to integer <output>, returns -1 on error */
-int         gt_mapping_map_integer(GtMapping*, long *output, const char *input,
-                                   GtError*);
+int         gt_mapping_map_integer(GtMapping*, GtWord *output,
+                                   const char *input, GtError*);
 void        gt_mapping_delete(GtMapping*);
 
 #endif

@@ -66,7 +66,7 @@ void gt_str_array_add_cstr(GtStrArray *sa, const char *cstr)
 }
 
 void gt_str_array_add_cstr_nt(GtStrArray *sa, const char *cstr,
-                             unsigned long length)
+                             GtUword length)
 {
   GtStr *str;
   gt_assert(sa && cstr);
@@ -83,19 +83,19 @@ void gt_str_array_add(GtStrArray *sa, const GtStr *str)
   gt_array_add(sa->strings, clone);
 }
 
-const char* gt_str_array_get(const GtStrArray *sa, unsigned long strnum)
+const char* gt_str_array_get(const GtStrArray *sa, GtUword strnum)
 {
   gt_assert(sa && strnum < gt_array_size(sa->strings));
   return gt_str_get(*(GtStr**) gt_array_get(sa->strings, strnum));
 }
 
-GtStr* gt_str_array_get_str(const GtStrArray *sa, unsigned long strnum)
+GtStr* gt_str_array_get_str(const GtStrArray *sa, GtUword strnum)
 {
   gt_assert(sa && strnum < gt_array_size(sa->strings));
   return *(GtStr**) gt_array_get(sa->strings, strnum);
 }
 
-void gt_str_array_set_cstr(GtStrArray *sa, unsigned long strnum,
+void gt_str_array_set_cstr(GtStrArray *sa, GtUword strnum,
                            const char *cstr)
 {
   GtStr *str;
@@ -104,7 +104,7 @@ void gt_str_array_set_cstr(GtStrArray *sa, unsigned long strnum,
   gt_str_set(str, cstr);
 }
 
-void gt_str_array_set(GtStrArray *sa, unsigned long strnum, const GtStr *instr)
+void gt_str_array_set(GtStrArray *sa, GtUword strnum, const GtStr *instr)
 {
   GtStr *str;
   gt_assert(sa && strnum < gt_array_size(sa->strings) && instr);
@@ -112,9 +112,9 @@ void gt_str_array_set(GtStrArray *sa, unsigned long strnum, const GtStr *instr)
   gt_str_set(str, gt_str_get(instr));
 }
 
-void gt_str_array_set_size(GtStrArray *sa, unsigned long size)
+void gt_str_array_set_size(GtStrArray *sa, GtUword size)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(sa && size <= gt_array_size(sa->strings));
   for (i = size; i < gt_array_size(sa->strings); i++)
     gt_str_delete(*(GtStr**) gt_array_get(sa->strings, i));
@@ -127,7 +127,7 @@ void gt_str_array_reset(GtStrArray *sa)
   gt_str_array_set_size(sa, 0);
 }
 
-unsigned long gt_str_array_size(const GtStrArray *sa)
+GtUword gt_str_array_size(const GtStrArray *sa)
 {
   gt_assert(sa);
   return gt_array_size(sa->strings);
@@ -135,7 +135,7 @@ unsigned long gt_str_array_size(const GtStrArray *sa)
 
 void gt_str_array_delete(GtStrArray *sa)
 {
-  unsigned long i;
+  GtUword i;
   if (!sa) return;
   if (sa->reference_count) {
     sa->reference_count--;

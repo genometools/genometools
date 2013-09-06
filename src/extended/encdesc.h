@@ -56,11 +56,11 @@ bool              gt_encdesc_encoder_sampling_is_regular(GtEncdescEncoder *ee);
 
 /* Sets the sampling rate */
 void              gt_encdesc_encoder_set_sampling_rate(GtEncdescEncoder *ee,
-                                                   unsigned long sampling_rate);
+                                                   GtUword sampling_rate);
 
 /* Returns the samplingrate set in <ee>. Returns GT_UNDEF_ULONG if sampling is
    disabled. */
-unsigned long     gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee);
+GtUword     gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee);
 
 /* Uses the settings in <ee> to encode the strings provided by <cstr_iterator>
    and writes them to a file with prefix <name>. Returns 0 on success, otherwise
@@ -74,13 +74,13 @@ int               gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
 GtEncdesc*        gt_encdesc_load(const char *name, GtError *err);
 
 /* Returns the number of encoded headers in <encdesc> */
-unsigned long     gt_encdesc_num_of_descriptions(GtEncdesc *encdesc);
+GtUword     gt_encdesc_num_of_descriptions(GtEncdesc *encdesc);
 
 /* Decodes description with number <num> and writes it to <desc>, which will be
    reset before writing to it. Returns 1 on success, 0 on EOF and -1 on
    error. <err> is set accordingly. */
 int               gt_encdesc_decode(GtEncdesc *encdesc,
-                                    unsigned long num,
+                                    GtUword num,
                                     GtStr *desc,
                                     GtError *err);
 

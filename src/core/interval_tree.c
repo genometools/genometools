@@ -35,18 +35,18 @@ struct GtIntervalTreeNode {
   GtIntervalTreeNode *parent, *left, *right;
   void *data;
   GtIntervalTreeNodeColor color;
-  unsigned long low, high, max;
+  GtUword low, high, max;
 };
 
 struct GtIntervalTree {
   GtIntervalTreeNode *root, sentinel, *nil;
-  unsigned long size;
+  GtUword size;
   GtFree free_func;
 };
 
 GtIntervalTreeNode* gt_interval_tree_node_new(void *data,
-                                         unsigned long low,
-                                         unsigned long high)
+                                         GtUword low,
+                                         GtUword high)
 {
   GtIntervalTreeNode* n;
   n = gt_calloc(1, sizeof (GtIntervalTreeNode));
@@ -66,7 +66,7 @@ GtIntervalTree* gt_interval_tree_new(GtFree func)
   return it;
 }
 
-unsigned long gt_interval_tree_size(GtIntervalTree *it)
+GtUword gt_interval_tree_size(GtIntervalTree *it)
 {
   gt_assert(it);
   return it->size;
@@ -98,8 +98,8 @@ static void interval_tree_node_rec_delete(GtIntervalTree *it,
 static GtIntervalTreeNode* interval_tree_search_internal(GtIntervalTree *it,
                                                          GtIntervalTreeNode
                                                           *node,
-                                                         unsigned long low,
-                                                         unsigned long high)
+                                                         GtUword low,
+                                                         GtUword high)
 {
   GtIntervalTreeNode *x;
   x = node;
@@ -114,8 +114,8 @@ static GtIntervalTreeNode* interval_tree_search_internal(GtIntervalTree *it,
 }
 
 GtIntervalTreeNode* gt_interval_tree_find_first_overlapping(GtIntervalTree *it,
-                                                            unsigned long low,
-                                                            unsigned long high)
+                                                            GtUword low,
+                                                            GtUword high)
 {
   gt_assert(it);
   if (it->root == it->nil)
@@ -157,8 +157,8 @@ static int store_interval_node_in_array(GtIntervalTreeNode *x, void *data)
 static void interval_tree_find_all_internal(GtIntervalTree *it,
                                             GtIntervalTreeNode *node,
                                             GtIntervalTreeIteratorFunc func,
-                                            unsigned long low,
-                                            unsigned long high,
+                                            GtUword low,
+                                            GtUword high,
                                             void *data)
 {
   GtIntervalTreeNode* x;
@@ -174,8 +174,8 @@ static void interval_tree_find_all_internal(GtIntervalTree *it,
 }
 
 void gt_interval_tree_find_all_overlapping(GtIntervalTree *it,
-                                           unsigned long start,
-                                           unsigned long end, GtArray* a)
+                                           GtUword start,
+                                           GtUword end, GtArray* a)
 {
   gt_assert(it && a && start <= end);
   if (it->root == it->nil) return;
@@ -185,8 +185,8 @@ void gt_interval_tree_find_all_overlapping(GtIntervalTree *it,
 
 void gt_interval_tree_iterate_overlapping(GtIntervalTree *it,
                                           GtIntervalTreeIteratorFunc func,
-                                          unsigned long start,
-                                          unsigned long end,
+                                          GtUword start,
+                                          GtUword end,
                                           void *data)
 {
   gt_assert(it && func && start <= end);
@@ -507,7 +507,7 @@ static void gt_interval_tree_print_rec(GtIntervalTree *it,
   if (n == it->nil) return;
   printf("(");
   gt_interval_tree_print_rec(it, n->left);
-  printf("[%lu,%lu]", n->low, n->high);
+  printf("["GT_LU","GT_LU"]", n->low, n->high);
   gt_interval_tree_print_rec(it, n->right);
   printf(")");
 }
@@ -546,7 +546,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
 {
   GtIntervalTree *it = NULL;
   GtIntervalTreeNode *res = NULL;
-  unsigned long i = 0;
+  GtUword i = 0;
   int had_err = 0, num_testranges = 3000,
       num_samples = 300000, num_find_all_samples = 10000,
       gt_range_max_basepos = 90000, width = 700,
@@ -559,7 +559,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
   /* generate test ranges */
   for (i = 0;i<num_testranges;i++)
   {
-    unsigned long start;
+    GtUword start;
     GtRange *rng;
     rng  = gt_calloc(1, sizeof (GtRange));
     start = gt_rand_max(gt_range_max_basepos);
@@ -584,7 +584,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
   /* perform test queries */
   for (i = 0; i < num_samples && !had_err; i++)
   {
-    unsigned long start = gt_rand_max(gt_range_max_basepos);
+    GtUword start = gt_rand_max(gt_range_max_basepos);
     qrange.start = start;
     qrange.end = start + gt_rand_max(width);
     res = gt_interval_tree_find_first_overlapping(it, qrange.start, qrange.end);
@@ -597,7 +597,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
       /* no hit, check whether there really is no overlapping
          interval in tree */
       GtRange *this_rng;
-      unsigned long j;
+      GtUword j;
       bool found = false;
       for (j = 0; j < gt_array_size(arr); j++)
       {
@@ -615,7 +615,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
   /* test searching for all overlapping intervals */
   for (i = 0; i < num_find_all_samples && !had_err; i++)
   {
-    unsigned long start = gt_rand_max(gt_range_max_basepos);
+    GtUword start = gt_rand_max(gt_range_max_basepos);
     qrange.start = start;
     qrange.end = start + gt_rand_max(query_width);
     GtArray *res = gt_array_new(sizeof (GtRange*));
@@ -624,7 +624,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     {
       /* generate reference overlapping interval list by linear search */
       GtArray *ref;
-      unsigned long j;
+      GtUword j;
       ref = gt_array_new(sizeof (GtRange*));
       for (j = 0; j < gt_array_size(arr); j++)
       {
@@ -652,7 +652,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
   /* generate test ranges */
   for (i = 0;i<num_testranges && !had_err;i++)
   {
-    unsigned long start;
+    GtUword start;
     GtIntervalTreeNode *new_node;
     start = gt_rand_max(gt_range_max_basepos);
     new_node = gt_interval_tree_node_new((void*) i, start,
@@ -663,7 +663,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
 
   narr = gt_array_new(sizeof (GtIntervalTreeNode*));
   for (i = 0; i < num_testranges && !had_err; i++) {
-    unsigned long idx, n, val;
+    GtUword idx, n, val;
     GtIntervalTreeNode *node = NULL;
 
     /* get all nodes referenced by the interval tree */
@@ -674,7 +674,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     idx = gt_rand_max(gt_array_size(narr)-1);
     node = *(GtIntervalTreeNode**) gt_array_get(narr, idx);
     gt_ensure(node != NULL);
-    val = (unsigned long) gt_interval_tree_node_get_data(node);
+    val = (GtUword) gt_interval_tree_node_get_data(node);
     gt_interval_tree_remove(it, node);
     gt_array_reset(narr);
 
@@ -685,7 +685,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     gt_ensure(gt_array_size(narr) == num_testranges - (i+1));
     for (n = 0; !had_err && n < gt_array_size(narr); n++) {
       GtIntervalTreeNode *onode = *(GtIntervalTreeNode**) gt_array_get(narr, n);
-      gt_ensure((unsigned long) gt_interval_tree_node_get_data(onode)
+      gt_ensure((GtUword) gt_interval_tree_node_get_data(onode)
                            != val);
     }
   }

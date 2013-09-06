@@ -30,6 +30,6 @@
    Returnwert: void */
 int mg_compute_gene_prediction(CombinedScoreMatrixEntry **,
                                PathMatrixEntry **,
-                               unsigned long,
+                               GtUword,
                                HitInformation *, ParseStruct *, GtError *);
 #endif

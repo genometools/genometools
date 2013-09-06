@@ -67,7 +67,7 @@ void          gt_layout_unset_track_ordering_func(GtLayout *layout);
    calculation, this function returns -1 and <err> is set accordingly.
    Returns 0 on success. */
 int           gt_layout_get_height(GtLayout *layout,
-                                   unsigned long *result,
+                                   GtUword *result,
                                    GtError *err);
 /* Renders <layout> on the <target_canvas>. */
 int           gt_layout_sketch(GtLayout *layout, GtCanvas *target_canvas,

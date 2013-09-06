@@ -81,7 +81,7 @@ const GtTypeCheckerClass* gt_type_checker_obo_class(void)
 
 static void add_feature_node_from_tree(GtTypeCheckerOBO *tco,
                                        GtOBOParseTree *obo_parse_tree,
-                                       unsigned long stanza_num,
+                                       GtUword stanza_num,
                                        const char *stanza_key)
 {
   const char *value;
@@ -99,7 +99,7 @@ static int create_feature_nodes(GtTypeCheckerOBO *tco,
                                 const char *obo_file_path, GtError *err)
 {
   GtOBOParseTree *obo_parse_tree;
-  unsigned long i;
+  GtUword i;
   gt_error_check(err);
   gt_assert(tco && obo_file_path);
   if ((obo_parse_tree = gt_obo_parse_tree_new(obo_file_path, err))) {

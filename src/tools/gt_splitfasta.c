@@ -27,7 +27,7 @@
 #include "tools/gt_splitfasta.h"
 
 typedef struct {
-  unsigned long max_filesize_in_MB, width;
+  GtUword max_filesize_in_MB, width;
   unsigned int num_files;
   GtStr *splitdesc;
   bool force;
@@ -88,7 +88,7 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static unsigned long buf_contains_separator(char *buf, int offset,
+static GtUword buf_contains_separator(char *buf, int offset,
                                             int read_bytes)
 {
   char *cc;
@@ -101,9 +101,9 @@ static unsigned long buf_contains_separator(char *buf, int offset,
 }
 
 static int split_description(const char *filename, GtStr *splitdesc,
-                             unsigned long width, bool force, GtError *err)
+                             GtUword width, bool force, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtBioseq *bioseq;
   GtStr *descname;
   int had_err = 0;
@@ -141,12 +141,12 @@ static int split_description(const char *filename, GtStr *splitdesc,
   return had_err;
 }
 
-static int split_fasta_file(const char *filename, unsigned long max_filesize,
+static int split_fasta_file(const char *filename, GtUword max_filesize,
                             bool force, GtError *err)
 {
   GtFile *srcfp = NULL, *destfp = NULL;
   GtStr *destfilename = NULL;
-  unsigned long filenum = 0, bytecount = 0, separator_pos;
+  GtUword filenum = 0, bytecount = 0, separator_pos;
   int read_bytes, had_err = 0;
   char buf[BUFSIZ];
 
@@ -256,7 +256,7 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
                                 arguments->width, arguments->force, err);
   }
   else {
-    unsigned long max_filesize;
+    GtUword max_filesize;
     if (num_files) {
       /* set the maxfile size based on requested number of files */
       file_size = gt_file_estimate_size(filename);

@@ -34,25 +34,25 @@ typedef GthSeqCon* (*GthSeqConConstructor)(const char *indexname,
 void          gth_seq_con_delete(GthSeqCon*);
 void          gth_seq_con_demand_orig_seq(GthSeqCon *seq_con);
 GtUchar*      gth_seq_con_get_orig_seq(GthSeqCon *seq_con,
-                                       unsigned long seq_num);
+                                       GtUword seq_num);
 GtUchar*      gth_seq_con_get_tran_seq(GthSeqCon *seq_con,
-                                       unsigned long seq_num);
+                                       GtUword seq_num);
 GtUchar*      gth_seq_con_get_orig_seq_rc(GthSeqCon *seq_con,
-                                          unsigned long seq_num);
+                                          GtUword seq_num);
 GtUchar*      gth_seq_con_get_tran_seq_rc(GthSeqCon *seq_con,
-                                          unsigned long seq_num);
+                                          GtUword seq_num);
 void          gth_seq_con_get_description(GthSeqCon *seq_con,
-                                          unsigned long seq_num, GtStr *desc);
+                                          GtUword seq_num, GtStr *desc);
 void          gth_seq_con_echo_description(GthSeqCon *seq_con,
-                                           unsigned long seq_num,
+                                           GtUword seq_num,
                                            GtFile *outfp);
-unsigned long gth_seq_con_num_of_seqs(GthSeqCon *seq_con);
-unsigned long gth_seq_con_total_length(GthSeqCon *seq_con);
-GtRange       gth_seq_con_get_range(GthSeqCon *seq_con, unsigned long seq_num);
+GtUword gth_seq_con_num_of_seqs(GthSeqCon *seq_con);
+GtUword gth_seq_con_total_length(GthSeqCon *seq_con);
+GtRange       gth_seq_con_get_range(GthSeqCon *seq_con, GtUword seq_num);
 
 GtRange       gth_seq_con_get_relative_range(GthSeqCon *seq_con,
-                                             unsigned long seq_num);
-unsigned long gth_seq_con_get_length(GthSeqCon *seq_con, unsigned long seq_num);
+                                             GtUword seq_num);
+GtUword gth_seq_con_get_length(GthSeqCon *seq_con, GtUword seq_num);
 GtAlphabet*   gth_seq_con_get_alphabet(GthSeqCon *seq_con);
 
 #endif

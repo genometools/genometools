@@ -18,15 +18,17 @@
 #ifndef PERMUTE_WORDS_H
 #define PERMUTE_WORDS_H
 
+#include "core/types_api.h"
+
 /* module for word permutation */
 
 /* initializes the word w of length l with 0's */
-void gt_permute_word_init(char *w, unsigned long l);
+void gt_permute_word_init(char *w, GtUword l);
 
 /* computes the next permutation and returns True if one exists,
    False otherwise */
-unsigned int gt_permute_word_next(char *w, unsigned long l,
-                               unsigned long alphabet_size);
+unsigned int gt_permute_word_next(char *w, GtUword l,
+                               GtUword alphabet_size);
 
 #if 0
   a typical use:

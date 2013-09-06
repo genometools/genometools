@@ -30,7 +30,7 @@ typedef unsigned consumerID;
 
 /* moves data that can no longer be regenerated to the backlog */
 typedef void (*move2BacklogFunc)(void *backlogState, const void *seqData,
-                                 unsigned long requestStart, size_t requestLen);
+                                 GtUword requestStart, size_t requestLen);
 
 /**
  * basic idea: let this function write the required data to output
@@ -40,7 +40,7 @@ typedef void (*move2BacklogFunc)(void *backlogState, const void *seqData,
  */
 typedef size_t (*generatorFunc)(void *generatorState, void *backlogState,
                                 move2BacklogFunc move2Backlog, void *output,
-                                unsigned long generateStart, size_t len,
+                                GtUword generateStart, size_t len,
                                 SeqDataTranslator xltor);
 
 typedef struct seqReaderSet SeqReaderSet;
@@ -51,7 +51,7 @@ struct seqReaderSet
   int tagSuperSet;
   struct seqReaderState *consumerList;
   struct seqSinkState *autoConsumerList;
-  unsigned long backlogStartPos;
+  GtUword backlogStartPos;
   bool fromSuffixsortspace;
   size_t backlogSize, backlogLen, backlogElemSize;
   void *seqDataBacklog, *generatorState;

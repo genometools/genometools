@@ -34,23 +34,23 @@
 #include "stamp.h"
 
 #define PRJSPECIALOUT(VAL)\
-        fprintf(outprj,"%s=%lu\n",#VAL,gt_encseq_##VAL(encseq))
+        fprintf(outprj,"%s="GT_LU"\n",#VAL,gt_encseq_##VAL(encseq))
 
 static void showprjinfo(FILE *outprj,
                         GtReadmode readmode,
                         const GtEncseq *encseq,
-                        unsigned long numberofallsortedsuffixes,
+                        GtUword numberofallsortedsuffixes,
                         unsigned int prefixlength,
-                        unsigned long numoflargelcpvalues,
+                        GtUword numoflargelcpvalues,
                         double averagelcp,
-                        unsigned long maxbranchdepth,
+                        GtUword maxbranchdepth,
                         const Definedunsignedlong *longest)
 {
-  unsigned long totallength;
-  unsigned long numofsequences;
+  GtUword totallength;
+  GtUword numofsequences;
 
   totallength = gt_encseq_total_length(encseq);
-  fprintf(outprj,"totallength=%lu\n",totallength);
+  fprintf(outprj,"totallength="GT_LU"\n",totallength);
   PRJSPECIALOUT(specialcharacters);
   PRJSPECIALOUT(specialranges);
   PRJSPECIALOUT(realspecialranges);
@@ -62,20 +62,20 @@ static void showprjinfo(FILE *outprj,
   PRJSPECIALOUT(lengthofwildcardprefix);
   PRJSPECIALOUT(lengthofwildcardsuffix);
   numofsequences = gt_encseq_num_of_sequences(encseq);
-  fprintf(outprj,"numofsequences=%lu\n",numofsequences);
-  fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
+  fprintf(outprj,"numofsequences="GT_LU"\n",numofsequences);
+  fprintf(outprj,"numofdbsequences="GT_LU"\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
-  fprintf(outprj,"numberofallsortedsuffixes=%lu\n",numberofallsortedsuffixes);
+  fprintf(outprj,"numberofallsortedsuffixes="GT_LU"\n",numberofallsortedsuffixes);
   if (longest->defined)
   {
-    fprintf(outprj,"longest=%lu\n",longest->valueunsignedlong);
+    fprintf(outprj,"longest="GT_LU"\n",longest->valueunsignedlong);
   }
   fprintf(outprj,"prefixlength=%u\n",prefixlength);
-  fprintf(outprj,"largelcpvalues=%lu\n",numoflargelcpvalues);
+  fprintf(outprj,"largelcpvalues="GT_LU"\n",numoflargelcpvalues);
   fprintf(outprj,"averagelcp=%.2f\n",averagelcp);
-  fprintf(outprj,"maxbranchdepth=%lu\n",maxbranchdepth);
+  fprintf(outprj,"maxbranchdepth="GT_LU"\n",maxbranchdepth);
   fprintf(outprj,"integersize=%u\n",
-                  (unsigned int) (sizeof (unsigned long) * CHAR_BIT));
+                  (unsigned int) (sizeof (GtUword) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",gt_is_little_endian() ? '1' : '0');
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
   fprintf(outprj,"mirrored=%c\n", gt_encseq_is_mirrored(encseq) ? '1' : '0');
@@ -84,11 +84,11 @@ static void showprjinfo(FILE *outprj,
 int gt_outprjfile(const char *indexname,
                   GtReadmode readmode,
                   const GtEncseq *encseq,
-                  unsigned long numberofallsortedsuffixes,
+                  GtUword numberofallsortedsuffixes,
                   unsigned int prefixlength,
-                  unsigned long numoflargelcpvalues,
+                  GtUword numoflargelcpvalues,
                   double averagelcp,
-                  unsigned long maxbranchdepth,
+                  GtUword maxbranchdepth,
                   const Definedunsignedlong *longest,
                   GtError *err)
 {

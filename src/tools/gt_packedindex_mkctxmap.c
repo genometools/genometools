@@ -76,7 +76,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
                            GT_LOGGER_DEFLT_PREFIX, stdout);
     /* try to find appropriate suffix source */
     {
-      unsigned long len;
+      GtUword len;
       if (streamsuffixarray(&sa, SARR_SUFTAB, projectName, logger, err))
       {
         gt_error_unset(err);

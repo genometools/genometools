@@ -79,8 +79,8 @@
 #define DEFAULTMQUAL 0
 #define DEFAULTQUAL '-'
 
-DECLARE_HASHMAP(long int, rcr_li, unsigned long long, ull, static, inline)
-DEFINE_HASHMAP(long int, rcr_li, unsigned long long, ull, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(GtWord, rcr_li, GtUint64, ull, static, inline)
+DEFINE_HASHMAP(GtWord, rcr_li, GtUint64, ull, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
@@ -107,9 +107,9 @@ struct GtRcrEncoder {
   bam1_t             *sam_align;
   const GtEncseq     *encseq;
   const char         *samfilename;
-  unsigned long long *ins_bases;
+  GtUint64 *ins_bases;
   GtQueue            *not_exact_matches;
-  unsigned long long  all_bits,
+  GtUint64  all_bits,
                       dellen_bits,
                       encodedbases,
                       exact_match_flag_bits,
@@ -125,7 +125,7 @@ struct GtRcrEncoder {
                       subs_bits,
                       varpos_bits,
                       vartype_bits;
-  unsigned long       cur_read,
+  GtUword       cur_read,
                       cur_seq_startpos,
                       max_read_length,
                       numofreads,
@@ -154,9 +154,9 @@ struct GtRcrDecoder {
   GtStr              *inputname;
   const GtEncseq     *encseq;
   const char         *basename;
-  unsigned long long *ins_bases;
-  unsigned long long  present_cigar_ops[ENDOFRECORD + 1];
-  unsigned long       numofreads,
+  GtUint64 *ins_bases;
+  GtUint64  present_cigar_ops[ENDOFRECORD + 1];
+  GtUword       numofreads,
                       cur_bit,
                       cur_bitseq,
                       readlength,
@@ -169,9 +169,9 @@ struct GtRcrDecoder {
 };
 
 typedef struct MedianData {
-  unsigned long long n,
+  GtUint64 n,
                      x;
-  unsigned long      median;
+  GtUword      median;
 } MedianData;
 
 static inline char rcr_bambase2char(uint8_t base)
@@ -326,7 +326,7 @@ static GtUchar rcr_transdecode(GtUchar ref, GtBitsequence transcode,
 
 static void rcr_convert_cigar_string(GtStr *cigar_str)
 {
-  unsigned long i,
+  GtUword i,
                 cur_cigar_len = 1UL;
   char cur_cigar_op = gt_str_get(cigar_str)[0];
   GtStr *new_cigar_str = gt_str_new();
@@ -355,9 +355,9 @@ static void rcr_convert_cigar_string(GtStr *cigar_str)
 }
 
 static void rcr_write_read_to_file(FILE *fp, uint8_t *seq, uint8_t *qual,
-                                  const char *desc, unsigned long seq_l)
+                                  const char *desc, GtUword seq_l)
 {
-  unsigned long i,
+  GtUword i,
                 cur_width;
   gt_xfputc(DESCSEPSEQ, fp);
   gt_xfputs(desc, fp);
@@ -386,7 +386,7 @@ static void rcr_write_read_to_file(FILE *fp, uint8_t *seq, uint8_t *qual,
 
 static void rcr_huff_encode_write(GtRcrEncoder *rcr_enc,
                                   GtHuffman *huff,
-                                  unsigned long val)
+                                  GtUword val)
 {
   GtBitsequence code;
   unsigned bits_to_write;
@@ -399,10 +399,10 @@ static void rcr_huff_encode_write(GtRcrEncoder *rcr_enc,
 
 static void rcr_golomb_encode_write(GtRcrEncoder *rcr_enc,
                                     GtGolomb *gol,
-                                    unsigned long val)
+                                    GtUword val)
 {
   GtBittab *code = gt_golomb_encode(gol, val);
-  unsigned long size = gt_bittab_size(code);
+  GtUword size = gt_bittab_size(code);
   rcr_enc->all_bits += size;
   rcr_enc->varpos_bits += size;
   gt_bitoutstream_append_bittab(rcr_enc->bitstream, code);
@@ -410,10 +410,10 @@ static void rcr_golomb_encode_write(GtRcrEncoder *rcr_enc,
 }
 
 static void rcr_elias_encode_write(GtRcrEncoder *rcr_enc,
-                                   unsigned long val)
+                                   GtUword val)
 {
   GtBittab *code = gt_elias_gamma_encode(val);
-  unsigned long size = gt_bittab_size(code);
+  GtUword size = gt_bittab_size(code);
   rcr_enc->all_bits += size;
   rcr_enc->dellen_bits += size;
   gt_bitoutstream_append_bittab(rcr_enc->bitstream, code);
@@ -421,13 +421,13 @@ static void rcr_elias_encode_write(GtRcrEncoder *rcr_enc,
 }
 
 static void rcr_encode_write_var_type(GtRcrEncoder *rcr_enc,
-                                      unsigned long cigar_op)
+                                      GtUword cigar_op)
 {
   rcr_huff_encode_write(rcr_enc, rcr_enc->cigar_ops_huff, cigar_op);
 }
 
 static void rcr_encode_write_var_pos(GtRcrEncoder *rcr_enc,
-                                     unsigned long rel_varpos)
+                                     GtUword rel_varpos)
 {
   rcr_golomb_encode_write(rcr_enc, rcr_enc->varpos_golomb, rel_varpos);
 }
@@ -443,11 +443,11 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
   int had_err = 0;
   GtUchar ref,
           base;
-  unsigned long cigar_op,
+  GtUword cigar_op,
                 cigar_len;
   unsigned bits_to_write,
            one_bit = 1U;
-  unsigned long alpha_size,
+  GtUword alpha_size,
                 i,
                 j,
                 prev_varpos,
@@ -468,7 +468,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
   const bam1_core_t *core;
   GtAlphabet *encseq_alpha = gt_encseq_alphabet(rcr_enc->encseq);
 
-  alpha_size = (unsigned long) gt_alphabet_size(encseq_alpha);
+  alpha_size = (GtUword) gt_alphabet_size(encseq_alpha);
 
   core = &alignment->core;
   qual_string = bam1_qual(alignment);
@@ -485,7 +485,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
                              seq_string,
                              qual_string,
                              bam1_qname(alignment),
-                             (unsigned long) core->l_qseq);
+                             (GtUword) core->l_qseq);
     gt_bitoutstream_append(rcr_enc->bitstream, one, one_bit);
     return 0;
   }
@@ -494,7 +494,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
 
   /* encode read length */
   if (!rcr_enc->cons_readlength) {
-    readlength = (unsigned long) core->l_qseq;
+    readlength = (GtUword) core->l_qseq;
     rcr_huff_encode_write(rcr_enc, rcr_enc->readlenghts_huff, readlength);
   }
   else
@@ -516,13 +516,13 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
 
   /* write mapping qual */
   if (rcr_enc->store_mapping_qual) {
-    qual = (unsigned long) core->qual;
+    qual = (GtUword) core->qual;
     rcr_huff_encode_write(rcr_enc, rcr_enc->qual_mapping_huff, qual);
   }
   /* encode qual string */
   if (rcr_enc->store_all_qual) {
     for (i = 0; i < readlength; i++) {
-      qual = ((unsigned long) qual_string[i]) + PHREDOFFSET;
+      qual = ((GtUword) qual_string[i]) + PHREDOFFSET;
       rcr_huff_encode_write(rcr_enc, rcr_enc->qual_huff, qual);
     }
   }
@@ -546,12 +546,12 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
 
     prev_varpos = 0;
 
-    for (i = 0; i < (unsigned long) core->n_cigar; i++) {
+    for (i = 0; i < (GtUword) core->n_cigar; i++) {
       gt_safe_assign(cigar_op, (cigar[i] & 0xf));
       gt_safe_assign(cigar_len, (cigar[i]>>4));
 
-      if (cigar_op == (unsigned long) BAM_CEQUAL ||
-          cigar_op == (unsigned long) BAM_CDIFF)
+      if (cigar_op == (GtUword) BAM_CEQUAL ||
+          cigar_op == (GtUword) BAM_CDIFF)
         cigar_op = BAM_CMATCH;
 
       switch (cigar_op) {
@@ -564,7 +564,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
               rcr_bambase2gtbase((uint8_t) bam1_seqi(seq_string, read_i + j),
                                  encseq_alpha);
             if (ref != base) {
-              rcr_encode_write_var_type(rcr_enc, (unsigned long) cigar_op);
+              rcr_encode_write_var_type(rcr_enc, (GtUword) cigar_op);
 
               /* encode variation position */
               varpos = read_i + j;
@@ -582,7 +582,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
               gt_bitoutstream_append(rcr_enc->bitstream, code, bits_to_write);
 
               if (rcr_enc->store_var_qual) {
-                qual = ((unsigned long) qual_string[varpos]) + PHREDOFFSET;
+                qual = ((GtUword) qual_string[varpos]) + PHREDOFFSET;
                 rcr_huff_encode_write(rcr_enc, rcr_enc->qual_huff, qual);
               }
             }
@@ -593,7 +593,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
 
         case BAM_CDEL:
         case BAM_CREF_SKIP:
-          rcr_encode_write_var_type(rcr_enc, (unsigned long) cigar_op);
+          rcr_encode_write_var_type(rcr_enc, (GtUword) cigar_op);
 
           /* encode variation position */
           varpos = read_i;
@@ -608,7 +608,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
 
         case BAM_CINS:
         case BAM_CSOFT_CLIP:
-          rcr_encode_write_var_type(rcr_enc, (unsigned long) cigar_op);
+          rcr_encode_write_var_type(rcr_enc, (GtUword) cigar_op);
 
           /* encode varation position */
           varpos = read_i;
@@ -628,7 +628,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
               base = (GtUchar) (alpha_size - 1);
 
             rcr_huff_encode_write(rcr_enc, rcr_enc->bases_huff,
-                                  (unsigned long) base);
+                                  (GtUword) base);
           }
 
           /* append end symbol */
@@ -636,7 +636,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
 
           if (rcr_enc->store_var_qual) {
             for (j = 0; j < cigar_len; j++) {
-              qual = ((unsigned long) qual_string[read_i + j]) + PHREDOFFSET;
+              qual = ((GtUword) qual_string[read_i + j]) + PHREDOFFSET;
               rcr_huff_encode_write(rcr_enc, rcr_enc->qual_huff, qual);
             }
           }
@@ -644,16 +644,16 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
           break;
         default:
           /* XXX gt_error nutzen */
-          gt_log_log("encountered funny cigar_op: %lu", cigar_op);
+          gt_log_log("encountered funny cigar_op: "GT_LU"", cigar_op);
           return -1;
           ;
       }
     }
     /* end symbol of a record */
-    rcr_encode_write_var_type(rcr_enc, (unsigned long) ENDOFRECORD);
+    rcr_encode_write_var_type(rcr_enc, (GtUword) ENDOFRECORD);
     if (readlength != read_i) {
       /* XXX gt_error nutzen */
-      gt_log_log("readlength: %lu, read_i: %lu", readlength, read_i);
+      gt_log_log("readlength: "GT_LU", read_i: "GT_LU"", readlength, read_i);
       return -1;
     }
   }
@@ -666,7 +666,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
   return 0;
 }
 
-static void rcr_get_m(unsigned long key, unsigned long long value,
+static void rcr_get_m(GtUword key, GtUint64 value,
                       void *data)
 {
   MedianData *md = (MedianData*) data;
@@ -675,16 +675,16 @@ static void rcr_get_m(unsigned long key, unsigned long long value,
     md->median = key;
 }
 
-static void rcr_get_n(GT_UNUSED unsigned long key, unsigned long long value,
+static void rcr_get_n(GT_UNUSED GtUword key, GtUint64 value,
                       void *data)
 {
   MedianData *md = (MedianData*) data;
   md->n = md->n + value;
 }
 
-static unsigned long rcr_get_median(GtDiscDistri *distr)
+static GtUword rcr_get_median(GtDiscDistri *distr)
 {
-  unsigned long median;
+  GtUword median;
   MedianData *md;
 
   md = gt_malloc(sizeof (MedianData));
@@ -698,17 +698,17 @@ static unsigned long rcr_get_median(GtDiscDistri *distr)
   return median;
 }
 
-static unsigned long long rcr_disc_distri_func(const void *data,
-                                               unsigned long symbol)
+static GtUint64 rcr_disc_distri_func(const void *data,
+                                               GtUword symbol)
 {
   GtDiscDistri *distr = (GtDiscDistri*)data;
   return gt_disc_distri_get(distr, symbol);
 }
 
-static unsigned long long rcr_array_func(const void *data, unsigned long symbol)
+static GtUint64 rcr_array_func(const void *data, GtUword symbol)
 {
-  unsigned long *distr = (unsigned long*)data;
-  return (unsigned long long) distr[symbol];
+  GtUword *distr = (GtUword*)data;
+  return (GtUint64) distr[symbol];
 }
 
 static int rcr_initialize_encoders(GtRcrEncoder *rcr_enc,
@@ -716,7 +716,7 @@ static int rcr_initialize_encoders(GtRcrEncoder *rcr_enc,
                                    GtError *err)
 {
   bool has_var = true;
-  unsigned long median;
+  GtUword median;
 
   if (timer != NULL)
     gt_timer_show_progress(timer, "initializing encoders", stdout);
@@ -773,7 +773,7 @@ static int rcr_initialize_encoders(GtRcrEncoder *rcr_enc,
   rcr_enc->bases_huff =
     gt_huffman_new(rcr_enc->ins_bases,
                    rcr_array_func,
-                   (unsigned long)
+                   (GtUword)
                      gt_alphabet_size(gt_encseq_alphabet(rcr_enc->encseq)) + 1);
   if (!(rcr_enc->bases_huff)) {
     gt_error_set(err, "unable to initialize GtHuffmanCoding object");
@@ -787,7 +787,7 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
 {
   uint32_t *cigar;
   const bam1_core_t *bam_core;
-  unsigned long i,
+  GtUword i,
                 j,
                 rel_readpos,
                 readpos,
@@ -815,9 +815,9 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
     return 0;
   if (rcr_enc->store_mapping_qual)
     gt_disc_distri_add(rcr_enc->qual_mapping_distr,
-                       (unsigned long) bam_core->qual);
+                       (GtUword) bam_core->qual);
 
-  readlength = (unsigned long) bam_core->l_qseq;
+  readlength = (GtUword) bam_core->l_qseq;
   gt_disc_distri_add(rcr_enc->readlength_distr, readlength);
   if (rcr_enc->readlength == 0) {
     rcr_enc->readlength = readlength;
@@ -833,12 +833,12 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
 
   if (rcr_enc->store_all_qual) {
     for (j = 0; j < readlength; j++) {
-      q = ((unsigned long) qual_string[j]) + PHREDOFFSET;
+      q = ((GtUword) qual_string[j]) + PHREDOFFSET;
       gt_disc_distri_add(rcr_enc->qual_distr, q);
     }
   }
 
-  readpos = (unsigned long) bam_core->pos;
+  readpos = (GtUword) bam_core->pos;
   ref_i = readpos;
   read_i = 0;
 
@@ -849,7 +849,7 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
   varpos = 0;
   prev_varpos = 0;
 
-  for (i = 0; i < (unsigned long) bam_core->n_cigar; i++) {
+  for (i = 0; i < (GtUword) bam_core->n_cigar; i++) {
     GtAlphabet *alpha = gt_encseq_alphabet(rcr_enc->encseq);
     unsigned int alpha_size = gt_alphabet_size(alpha);
 
@@ -861,7 +861,7 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
       cigar_op = BAM_CMATCH;
     switch (cigar_op) {
       case BAM_CMATCH:
-        for (j = 0; j < (unsigned long) cigar_len; j++) {
+        for (j = 0; j < (GtUword) cigar_len; j++) {
           base = rcr_bambase2gtbase((uint8_t) bam1_seqi(seq_string, read_i + j),
                                 alpha);
           ref = gt_encseq_get_encoded_char(rcr_enc->encseq,
@@ -873,7 +873,7 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
             varpos = read_i + j;
 
             if (rcr_enc->store_var_qual) {
-              q = ((unsigned long) qual_string[read_i + j]) + PHREDOFFSET;
+              q = ((GtUword) qual_string[read_i + j]) + PHREDOFFSET;
               gt_disc_distri_add(rcr_enc->qual_distr, q);
             }
           }
@@ -887,7 +887,7 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
         exact_match = false;
         varpos = read_i;
 
-        for (j = 0; j < (unsigned long) cigar_len; j++) {
+        for (j = 0; j < (GtUword) cigar_len; j++) {
           base = rcr_bambase2gtbase((uint8_t) bam1_seqi(seq_string, read_i + j),
                                    alpha);
 
@@ -900,8 +900,8 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
         }
 
         if (rcr_enc->store_var_qual) {
-          for (j = 0; j < (unsigned long) cigar_len; j++) {
-            q = ((unsigned long) qual_string[read_i + j]) + PHREDOFFSET;
+          for (j = 0; j < (GtUword) cigar_len; j++) {
+            q = ((GtUword) qual_string[read_i + j]) + PHREDOFFSET;
             gt_disc_distri_add(rcr_enc->qual_distr, q);
           }
         }
@@ -927,7 +927,7 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
         exact_match = false;
         varpos = read_i;
 
-        for (j = 0; j < (unsigned long) cigar_len; j++) {
+        for (j = 0; j < (GtUword) cigar_len; j++) {
           base = rcr_bambase2gtbase((uint8_t) bam1_seqi(seq_string, read_i + j),
                                    alpha);
 
@@ -941,8 +941,8 @@ static int rcr_get_read_infos(const bam1_t *alignment, GtRcrEncoder *rcr_enc)
         rcr_enc->ins_bases[alpha_size]++;
 
         if (rcr_enc->store_var_qual) {
-          for (j = 0; j < (unsigned long) cigar_len; j++) {
-            q = ((unsigned long) qual_string[read_i + j]) + PHREDOFFSET;
+          for (j = 0; j < (GtUword) cigar_len; j++) {
+            q = ((GtUword) qual_string[read_i + j]) + PHREDOFFSET;
             gt_disc_distri_add(rcr_enc->qual_distr, q);
           }
         }
@@ -970,7 +970,7 @@ static inline GtRcrEncoder *gt_rcr_encoder_init(const char *filename,
                                                 const GtEncseq *ref)
 {
   unsigned alpha_size= gt_alphabet_size(gt_encseq_alphabet(ref));
-  unsigned long i;
+  GtUword i;
 
   GtRcrEncoder *rcr_enc = gt_malloc(sizeof (*rcr_enc));
 
@@ -1008,11 +1008,11 @@ static inline GtRcrEncoder *gt_rcr_encoder_init(const char *filename,
   rcr_enc->readlength = 0;
 
   rcr_enc->ins_bases = gt_calloc((size_t) (alpha_size + 1),
-                              sizeof (unsigned long long));
-  for (i = 0; i < (unsigned long) (alpha_size + 1); i ++)
+                              sizeof (GtUint64));
+  for (i = 0; i < (GtUword) (alpha_size + 1); i ++)
     rcr_enc->ins_bases[i] = 0;
 
-  for (i = 0; i <= (unsigned long) ENDOFRECORD; i++)
+  for (i = 0; i <= (GtUword) ENDOFRECORD; i++)
     rcr_enc->present_cigar_ops[i] = 0;
 
   return rcr_enc;
@@ -1044,9 +1044,9 @@ static inline int gt_rcr_analyse_alignment_data(GtRcrEncoder *rcr_enc,
       rcr_enc->prev_readpos = 0;
       seq_id = rcr_enc->sam_align->core.tid;
       rcr_enc->cur_seq_startpos = gt_encseq_seqstartpos(rcr_enc->encseq,
-                                                        (unsigned long) seq_id);
+                                                        (GtUword) seq_id);
     }
-    if (rcr_enc->prev_readpos > (unsigned long) rcr_enc->sam_align->core.pos) {
+    if (rcr_enc->prev_readpos > (GtUword) rcr_enc->sam_align->core.pos) {
       gt_error_set(err, "file %s is not sorted", rcr_enc->samfilename);
       had_err = -1;
     }
@@ -1062,7 +1062,7 @@ static inline int gt_rcr_analyse_alignment_data(GtRcrEncoder *rcr_enc,
   }
 
   /* end symbol */
-  rcr_enc->present_cigar_ops[ENDOFRECORD] = (unsigned long long)
+  rcr_enc->present_cigar_ops[ENDOFRECORD] = (GtUint64)
                                               rcr_enc->numofreads;
   samclose(samfile);
 
@@ -1155,8 +1155,8 @@ typedef struct{
   FILE *fp;
 } RcrData;
 
-static int rcr_write_node(unsigned long symbol,
-                          unsigned long long freq,
+static int rcr_write_node(GtUword symbol,
+                          GtUint64 freq,
                           GT_UNUSED GtBitsequence code,
                           GT_UNUSED unsigned length,
                           void *pt)
@@ -1177,7 +1177,7 @@ static int rcr_write_distr_to_file(FILE *fp, GtHuffman *huff)
 
 static int rcr_write_header_to_file(GtRcrEncoder *rcr_enc)
 {
-  unsigned long numofleaves,
+  GtUword numofleaves,
                 m;
   FILE *fp = rcr_enc->output;
 
@@ -1227,7 +1227,7 @@ static int rcr_write_header_to_file(GtRcrEncoder *rcr_enc)
   gt_xfwrite(rcr_enc->present_cigar_ops, sizeof (*rcr_enc->present_cigar_ops),
              (size_t) (ENDOFRECORD + 1), fp);
 
-  gt_xfwrite(rcr_enc->ins_bases, sizeof (unsigned long long),
+  gt_xfwrite(rcr_enc->ins_bases, sizeof (GtUint64),
              (size_t) gt_alphabet_size(gt_encseq_alphabet(rcr_enc->encseq)) + 1,
              fp);
 
@@ -1274,9 +1274,9 @@ static int rcr_write_encoding_to_file(GtRcrEncoder *rcr_enc, GtError *err)
       tid = rcr_enc->sam_align->core.tid;
       rcr_enc->prev_readpos = 0;
       rcr_enc->cur_seq_startpos =
-        gt_encseq_seqstartpos(rcr_enc->encseq, (unsigned long) tid);
+        gt_encseq_seqstartpos(rcr_enc->encseq, (GtUword) tid);
       gt_bitoutstream_append(rcr_enc->bitstream, new_ref, one_bit);
-      gt_log_log("reset pos for new ref %lu", rcr_enc->cur_seq_startpos);
+      gt_log_log("reset pos for new ref "GT_LU"", rcr_enc->cur_seq_startpos);
     }
     else
       gt_bitoutstream_append(rcr_enc->bitstream, old_ref, one_bit);
@@ -1291,7 +1291,7 @@ static int rcr_write_encoding_to_file(GtRcrEncoder *rcr_enc, GtError *err)
 
 #ifndef S_SPLINT_S
   if (rcr_enc->is_verbose) {
-    printf("encoded %lu BAM records, %lu reads(s) unmapped\n",
+    printf("encoded "GT_LU" BAM records, "GT_LU" reads(s) unmapped\n",
            rcr_enc->numofreads, rcr_enc->numofunmappedreads);
     printf("encoded "GT_LLU" bases\n",rcr_enc->encodedbases);
     printf("total number of bits used for encoding: "GT_LLU"\n",
@@ -1332,8 +1332,8 @@ static int rcr_write_data(const char *name, GtRcrEncoder *rcr_enc, GtError *err)
 {
   bool is_not_at_pageborder;
   int had_err = 0;
-  long fpos;
-  unsigned long pagesize = gt_pagesize();
+  GtWord fpos;
+  GtUword pagesize = gt_pagesize();
   GtStr *unmapped_reads_filename;
   gt_error_check(err);
 
@@ -1413,12 +1413,12 @@ void gt_rcr_encoder_disable_verbosity(GtRcrEncoder *rcr_enc)
 static void rcr_read_header(GtRcrDecoder *rcr_dec)
 {
   unsigned alpha_size;
-  unsigned long numofleaves,
+  GtUword numofleaves,
                 m,
                 i,
                 symbol,
                 max_read_length;
-  unsigned long long freq;
+  GtUint64 freq;
   GT_UNUSED size_t read,
             one = (size_t) 1;
 
@@ -1518,7 +1518,7 @@ static void rcr_read_header(GtRcrDecoder *rcr_dec)
   rcr_dec->cigar_ops_huff =
     gt_huffman_new(rcr_dec->present_cigar_ops,
                    rcr_array_func,
-                   (unsigned long) (ENDOFRECORD + 1));
+                   (GtUword) (ENDOFRECORD + 1));
 
   alpha_size = gt_alphabet_size(gt_encseq_alphabet(rcr_dec->encseq));
   read = gt_xfread(rcr_dec->ins_bases,
@@ -1530,7 +1530,7 @@ static void rcr_read_header(GtRcrDecoder *rcr_dec)
   rcr_dec->bases_huff =
     gt_huffman_new(rcr_dec->ins_bases,
                    rcr_array_func,
-                   (unsigned long) (alpha_size + 1));
+                   (GtUword) (alpha_size + 1));
   gt_assert(rcr_dec->bases_huff != NULL);
 
 }
@@ -1554,14 +1554,14 @@ typedef struct RcrDecodeInfo {
   GtStr                      *base_string,
                              *qual_string,
                              *cigar_string;
-  unsigned long               alpha_size,
+  GtUword               alpha_size,
                               offset,
                               inserted_bases;
 } RcrDecodeInfo;
 
 static int rcr_huff_read(GtHuffmanBitwiseDecoder *hbwd,
                          GtBitInStream *bitstream,
-                         unsigned long *val,
+                         GtUword *val,
                          GtError *err)
 {
   bool bit;
@@ -1579,12 +1579,12 @@ static int rcr_huff_read(GtHuffmanBitwiseDecoder *hbwd,
 
 static int rcr_huff_read_string(GtHuffmanBitwiseDecoder *hbwd,
                                 GtBitInStream *bitstream,
-                                unsigned long length,
+                                GtUword length,
                                 GtStr *str,
                                 GtError *err)
 {
   int had_err = 0;
-  unsigned long symbol,
+  GtUword symbol,
                 read = 0;
   while (!had_err && read < length) {
     had_err = rcr_huff_read(hbwd, bitstream, &symbol, err);
@@ -1598,7 +1598,7 @@ static int rcr_huff_read_string(GtHuffmanBitwiseDecoder *hbwd,
 
 static int rcr_golomb_read(GtGolombBitwiseDecoder *gbwd,
                            GtBitInStream *bitstream,
-                           unsigned long *val,
+                           GtUword *val,
                            GtError *err)
 {
   bool bit;
@@ -1617,11 +1617,11 @@ static int rcr_golomb_read(GtGolombBitwiseDecoder *gbwd,
 /* XXX struct with all strings, and struct with info */
 static void rcr_decode_exact_range(GtRcrDecoder *rcr_dec,
                                    RcrDecodeInfo *info,
-                                   unsigned long start,
-                                   unsigned long end)
+                                   GtUword start,
+                                   GtUword end)
 {
   GtUchar ref;
-  unsigned long i;
+  GtUword i;
   for (i = start; i < end ; i++) {
     ref = (GtUchar) gt_encseq_get_decoded_char(rcr_dec->encseq, i,
                                                GT_READMODE_FORWARD);
@@ -1634,15 +1634,15 @@ static void rcr_decode_exact_range(GtRcrDecoder *rcr_dec,
 
 static void rcr_decode_exact(GtRcrDecoder *rcr_dec,
                              RcrDecodeInfo *info,
-                             unsigned long readlength,
-                             unsigned long seqstart,
-                             unsigned long readpos)
+                             GtUword readlength,
+                             GtUword seqstart,
+                             GtUword readpos)
 {
   rcr_decode_exact_range(rcr_dec, info, seqstart + readpos,
                          seqstart + readpos + readlength);
 }
 
-static int rcr_decode_mismatch(GtRcrDecoder *rcr_dec, unsigned long pos,
+static int rcr_decode_mismatch(GtRcrDecoder *rcr_dec, GtUword pos,
                                RcrDecodeInfo *info, GtBitInStream *bitstream,
                                GtError *err)
 {
@@ -1677,7 +1677,7 @@ static int rcr_decode_mismatch_qual(GtRcrDecoder *rcr_dec,
                                     GtError *err)
 {
   int had_err = 0;
-  unsigned long symbol = 0;
+  GtUword symbol = 0;
 
   if (rcr_dec->store_var_qual) {
     had_err = rcr_huff_read(info->qual_hbwd, bitstream, &symbol, err);
@@ -1697,7 +1697,7 @@ static int rcr_decode_insert_var(GtRcrDecoder *rcr_dec,
                                  GtError *err)
 {
   int had_err = 0;
-  unsigned long symbol = 0, i;
+  GtUword symbol = 0, i;
   GtUchar base;
 
   info->inserted_bases = 0;
@@ -1737,7 +1737,7 @@ static int rcr_decode_insert_var(GtRcrDecoder *rcr_dec,
 
 static inline int rcr_elias_read(GtEliasGammaBitwiseDecoder *ebwd,
                                  GtBitInStream *bitstream,
-                                 unsigned long *symbol,
+                                 GtUword *symbol,
                                  GtError *err)
 {
   bool bit;
@@ -1757,7 +1757,7 @@ static int rcr_decode_delete_var(RcrDecodeInfo *info,
 {
   /* XXX remove loop and just set in as xD */
   int had_err = 0;
-  unsigned long del_length , i;
+  GtUword del_length , i;
   had_err = rcr_elias_read(info->del_len_ebwd, bitstream, &del_length, err);
   if (!had_err) {
     for (i = 0; i < del_length; i++)
@@ -1786,7 +1786,7 @@ static RcrDecodeInfo *rcr_init_decode_info(GtRcrDecoder *rcr_dec, GtError *err)
     info->del_len_ebwd = gt_elias_gamma_bitwise_decoder_new();
 
     info->alphabet = gt_encseq_alphabet(rcr_dec->encseq);
-    info->alpha_size = (unsigned long) gt_alphabet_size(info->alphabet);
+    info->alpha_size = (GtUword) gt_alphabet_size(info->alphabet);
     info->qual_hbwd = NULL;
     info->varpos_gbwd = NULL;
     info->base_string = gt_str_new();
@@ -1827,13 +1827,13 @@ static void rcr_delete_decode_info(RcrDecodeInfo *info)
 static inline int rcr_decode_inexact(GtRcrDecoder *rcr_dec,
                                      GtBitInStream *bitstream,
                                      RcrDecodeInfo *info,
-                                     unsigned long seq_i,
-                                     unsigned long readlength,
+                                     GtUword seq_i,
+                                     GtUword readlength,
                                      GtError *err)
 {
   int had_err = 0,
       cigar_op = GT_UNDEF_INT;
-  unsigned long end,
+  GtUword end,
                 prev_varpos = 0,
                 read_i = 0,
                 rel_varpos = 0,
@@ -1915,7 +1915,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
        strand;
   int had_err = 0;
   uint32_t mapping_qual = 0;
-  unsigned long
+  GtUword
                 cur_read = 0,
                 i,
                 l,
@@ -1959,11 +1959,11 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
 
     for (i = 0; i < gt_encseq_num_of_sequences(rcr_dec->encseq); i++) {
       const char *seqname = gt_encseq_description(rcr_dec->encseq, &l, i);
-      unsigned long len = gt_encseq_seqlength(rcr_dec->encseq, i);
-      fprintf(rcr_dec->fp, "@SQ\tSN:%.*s\tLN:%lu\n", (int) l, seqname, len);
+      GtUword len = gt_encseq_seqlength(rcr_dec->encseq, i);
+      fprintf(rcr_dec->fp, "@SQ\tSN:%.*s\tLN:"GT_LU"\n", (int) l, seqname, len);
     }
 
-    gt_log_log("start to decode %lu reads", rcr_dec->numofreads);
+    gt_log_log("start to decode "GT_LU" reads", rcr_dec->numofreads);
   }
 
   while (!had_err &&
@@ -1973,7 +1973,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
     if (RCR_NEXT_BIT(bit)) {
       if (bit) {
         seqstart = gt_encseq_seqstartpos(rcr_dec->encseq, refnum);
-        gt_log_log("get start for new ref %lu: %lu", refnum, seqstart);
+        gt_log_log("get start for new ref "GT_LU": "GT_LU"", refnum, seqstart);
         refnum++;
         prev_readpos = 0;
       }
@@ -2034,7 +2034,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
     }
     if (!had_err) {
       /* exact match? */
-      unsigned long seq_i = seqstart + readpos;
+      GtUword seq_i = seqstart + readpos;
       if (RCR_NEXT_BIT(bit)) {
         if (bit)
           rcr_decode_exact(rcr_dec, info, readlength, seqstart, readpos);
@@ -2044,14 +2044,14 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
 
         /* write read to file */
         if (readlength != gt_str_length(info->base_string)) {
-          gt_log_log("readlen: %lu, stringlen: %lu, read: %lu",
+          gt_log_log("readlen: "GT_LU", stringlen: "GT_LU", read: "GT_LU"",
                      readlength, gt_str_length(info->base_string), cur_read);
         }
         gt_assert(readlength == gt_str_length(info->base_string));
         gt_assert(readlength == gt_str_length(info->qual_string));
         fprintf(rcr_dec->fp, "%s", gt_str_get(qname));
         fprintf(rcr_dec->fp, "\t%c", strand?'-':'+');
-        fprintf(rcr_dec->fp, "\t%lu", readpos + 1);
+        fprintf(rcr_dec->fp, "\t"GT_LU"", readpos + 1);
         if (rcr_dec->store_mapping_qual)
           fprintf(rcr_dec->fp, "\t%u", (unsigned) mapping_qual);
         else
@@ -2074,7 +2074,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
   gt_golomb_bitwise_decoder_delete(readpos_gbwd);
   gt_bitinstream_delete(bitstream);
   rcr_delete_decode_info(info);
-  gt_log_log("decoded %lu reads", cur_read);
+  gt_log_log("decoded "GT_LU" reads", cur_read);
   return had_err;
 }
 
@@ -2098,7 +2098,7 @@ static GtRcrDecoder *gt_rcr_decoder_init(const char *name,
   rcr_dec->readpos_golomb = NULL;
   rcr_dec->varpos_golomb = NULL;
 
-  rcr_dec->ins_bases = gt_calloc(alpha_size + 1, sizeof (unsigned long long));
+  rcr_dec->ins_bases = gt_calloc(alpha_size + 1, sizeof (GtUint64));
 
   rcr_dec->fp = gt_fa_fopen(gt_str_get(rcr_dec->inputname),
                             "rb", err);
@@ -2113,8 +2113,8 @@ GtRcrDecoder *gt_rcr_decoder_new(const char *name, const GtEncseq *ref,
                                  GtTimer *timer, GtError *err)
 {
   bool is_not_at_pageborder;
-  unsigned long pagesize = gt_pagesize();
-  long filepos;
+  GtUword pagesize = gt_pagesize();
+  GtWord filepos;
   GtRcrDecoder *rcr_dec;
 
   gt_assert(name);

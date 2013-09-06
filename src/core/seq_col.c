@@ -80,8 +80,8 @@ void* gt_seq_col_cast(GT_UNUSED const GtSeqColClass *scc, const GtSeqCol *sc)
   return (void*) sc;
 }
 
-int gt_seq_col_grep_desc(GtSeqCol *sc, char **seq, unsigned long start,
-                         unsigned long end, GtStr *seqid, GtError *err)
+int gt_seq_col_grep_desc(GtSeqCol *sc, char **seq, GtUword start,
+                         GtUword end, GtStr *seqid, GtError *err)
 {
   gt_assert(sc && seq && seqid);
   if (sc->c_class->grep_desc)
@@ -98,7 +98,7 @@ int gt_seq_col_grep_desc_md5(GtSeqCol *sc, const char **md5, GtStr *seqid,
   return 0;
 }
 
-int gt_seq_col_grep_desc_sequence_length(GtSeqCol *sc, unsigned long *length,
+int gt_seq_col_grep_desc_sequence_length(GtSeqCol *sc, GtUword *length,
                                          GtStr *seqid, GtError *err)
 {
   gt_assert(sc && length && seqid);
@@ -108,7 +108,7 @@ int gt_seq_col_grep_desc_sequence_length(GtSeqCol *sc, unsigned long *length,
 }
 
 int gt_seq_col_md5_to_seq(GtSeqCol *sc, char **seq,
-                          unsigned long start, unsigned long end,
+                          GtUword start, GtUword end,
                           GtStr *md5_seqid, GtError *err)
 {
   gt_assert(sc && seq && md5_seqid);
@@ -126,7 +126,7 @@ int gt_seq_col_md5_to_description(GtSeqCol *sc, GtStr *desc, GtStr *md5_seqid,
   return 0;
 }
 
-int gt_seq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
+int gt_seq_col_md5_to_sequence_length(GtSeqCol *sc, GtUword *len,
                                       GtStr *md5_seqid, GtError *err)
 {
   gt_assert(sc && len && md5_seqid);
@@ -135,7 +135,7 @@ int gt_seq_col_md5_to_sequence_length(GtSeqCol *sc, unsigned long *len,
   return 0;
 }
 
-unsigned long gt_seq_col_num_of_files(const GtSeqCol *sc)
+GtUword gt_seq_col_num_of_files(const GtSeqCol *sc)
 {
   gt_assert(sc);
   if (sc->c_class->num_files)
@@ -143,7 +143,7 @@ unsigned long gt_seq_col_num_of_files(const GtSeqCol *sc)
   return 0;
 }
 
-unsigned long gt_seq_col_num_of_seqs(const GtSeqCol *sc, unsigned long filenum)
+GtUword gt_seq_col_num_of_seqs(const GtSeqCol *sc, GtUword filenum)
 {
  gt_assert(sc);
   if (sc->c_class->num_seqs)
@@ -152,8 +152,8 @@ unsigned long gt_seq_col_num_of_seqs(const GtSeqCol *sc, unsigned long filenum)
 }
 
 const char* gt_seq_col_get_md5_fingerprint(const GtSeqCol *sc,
-                                           unsigned long filenum,
-                                           unsigned long seqnum)
+                                           GtUword filenum,
+                                           GtUword seqnum)
 {
   gt_assert(sc);
   if (sc->c_class->get_md5)
@@ -161,9 +161,9 @@ const char* gt_seq_col_get_md5_fingerprint(const GtSeqCol *sc,
   return 0;
 }
 
-char* gt_seq_col_get_sequence(const GtSeqCol *sc, unsigned long filenum,
-                              unsigned long seqnum,unsigned long start,
-                              unsigned long end)
+char* gt_seq_col_get_sequence(const GtSeqCol *sc, GtUword filenum,
+                              GtUword seqnum,GtUword start,
+                              GtUword end)
 {
   gt_assert(sc);
   if (sc->c_class->get_seq)
@@ -171,8 +171,8 @@ char* gt_seq_col_get_sequence(const GtSeqCol *sc, unsigned long filenum,
   return 0;
 }
 
-char* gt_seq_col_get_description(const GtSeqCol *sc, unsigned long filenum,
-                                 unsigned long seqnum)
+char* gt_seq_col_get_description(const GtSeqCol *sc, GtUword filenum,
+                                 GtUword seqnum)
 {
   gt_assert(sc);
   if (sc->c_class->get_seq)
@@ -180,9 +180,9 @@ char* gt_seq_col_get_description(const GtSeqCol *sc, unsigned long filenum,
   return 0;
 }
 
-unsigned long gt_seq_col_get_sequence_length(const GtSeqCol *sc,
-                                             unsigned long filenum,
-                                             unsigned long seqnum)
+GtUword gt_seq_col_get_sequence_length(const GtSeqCol *sc,
+                                             GtUword filenum,
+                                             GtUword seqnum)
 {
   gt_assert(sc);
   if (sc->c_class->get_seqlen)

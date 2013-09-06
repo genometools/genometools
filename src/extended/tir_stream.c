@@ -44,12 +44,12 @@
 
 typedef struct
 {
-  unsigned long pos1;         /* position of first seed */
-  unsigned long pos2;         /* position of second seed (other contig) */
-  unsigned long offset;       /* distance between them related to the actual
+  GtUword pos1;         /* position of first seed */
+  GtUword pos2;         /* position of second seed (other contig) */
+  GtUword offset;       /* distance between them related to the actual
                                  sequence (not mirrored) */
-  unsigned long len;          /* length of the seed  */
-  unsigned long contignumber; /* number of contig for this seed */
+  GtUword len;          /* length of the seed  */
+  GtUword contignumber; /* number of contig for this seed */
 } Seed;
 
 GT_DECLAREARRAYSTRUCT(Seed);
@@ -57,27 +57,27 @@ GT_DECLAREARRAYSTRUCT(Seed);
 typedef struct
 {
   GtArraySeed seed;
-  unsigned long max_tir_length;
-  unsigned long min_tir_length;
-  unsigned long max_tir_distance;
-  unsigned long min_tir_distance;
-  unsigned long num_of_contigs;
-  unsigned long midpos;
-  unsigned long totallength;
+  GtUword max_tir_length;
+  GtUword min_tir_length;
+  GtUword max_tir_distance;
+  GtUword min_tir_distance;
+  GtUword num_of_contigs;
+  GtUword midpos;
+  GtUword totallength;
 } SeedInfo;
 
 typedef struct
 {
-  unsigned long contignumber,
+  GtUword contignumber,
                 left_tir_start,  /* first position of TIR on forward strand */
                 left_tir_end,    /* last position of TIR on forward strand */
                 right_tir_start, /* first position of TIR on reverse strand */
                 right_tir_end;   /* last position of TIR on reverse strand */
   double        similarity;      /* similarity of the two TIRs */
   bool          skip;            /* needed to remove overlaps if wanted */
-  unsigned long tsd_length;      /* length of tsd at start of left tir and end
+  GtUword tsd_length;      /* length of tsd at start of left tir and end
                                     of right tir */
-  unsigned long right_transformed_start,
+  GtUword right_transformed_start,
                 right_transformed_end;
 } TIRPair;
 
@@ -85,7 +85,7 @@ GT_DECLAREARRAYSTRUCT(TIRPair);
 
 typedef struct
 {
-  unsigned long left_start_pos,   /* represents the start position for the TSD
+  GtUword left_start_pos,   /* represents the start position for the TSD
                                      search */
                 right_start_pos;
   GtArraySeed TSDs;               /* array to store the TSDs */
@@ -109,13 +109,13 @@ struct GtTIRStream
   GtArrayTIRPair              first_pairs;
   GtTIRStreamState            state;
 
-  unsigned long               num_of_tirs,
+  GtUword               num_of_tirs,
                               cur_elem_index,
                               prev_seqnum;
 
   /* options */
   GtStr                       *str_indexname;
-  unsigned long               min_seed_length,
+  GtUword               min_seed_length,
                               min_TIR_length,
                               max_TIR_length,
                               min_TIR_distance,
@@ -125,26 +125,26 @@ struct GtTIRStream
   double                      similarity_threshold;
   bool                        no_overlaps;
   bool                        best_overlaps;
-  unsigned long               min_TSD_length,
+  GtUword               min_TSD_length,
                               max_TSD_length,
                               vicinity;
 };
 
 /* optimized to discard irrelevant seeds as soon as possible */
 static int gt_tir_store_seeds(void *info, const GtEncseq *encseq,
-                              unsigned long len, unsigned long pos1,
-                              unsigned long pos2, GT_UNUSED GtError *err)
+                              GtUword len, GtUword pos1,
+                              GtUword pos2, GT_UNUSED GtError *err)
 {
-  unsigned long seqnum1,
+  GtUword seqnum1,
                 seqnum2;
   Seed *nextfreeseedpointer;
-  unsigned long distance;
+  GtUword distance;
   SeedInfo *seeds = (SeedInfo *) info;
   gt_error_check(err);
 
   /* ensure order of seeds */
   if (pos1 > pos2) {
-    unsigned long tmp = 0;
+    GtUword tmp = 0;
     tmp = pos1;
     pos1 = pos2;
     pos2 = tmp;
@@ -181,7 +181,7 @@ static int gt_tir_store_seeds(void *info, const GtEncseq *encseq,
 static int gt_tir_store_TSDs(void *info, GT_UNUSED const GtEncseq *encseq,
                              const GtQuerymatch *querymatch,
                              GT_UNUSED const GtUchar *query,
-                             GT_UNUSED unsigned long query_totallength,
+                             GT_UNUSED GtUword query_totallength,
                              GT_UNUSED GtError *err)
 {
   Seed *nextfree;
@@ -226,7 +226,7 @@ static inline bool tirboundaries_overlap(GtRange *a, TIRPair *b) {
 static void gt_tir_remove_overlaps(GtArrayTIRPair *arrayTIRPair,
                                    bool nooverlapallowed)
 {
-  unsigned long i;
+  GtUword i;
   TIRPair *boundaries, *oldboundaries, *maxsimboundaries = NULL;
   GtRange refrng;
   gt_assert(arrayTIRPair != NULL);
@@ -269,10 +269,10 @@ static void gt_tir_remove_overlaps(GtArrayTIRPair *arrayTIRPair,
   }
 }
 
-static const TIRPair** tir_compactboundaries(unsigned long *numofboundaries,
+static const TIRPair** tir_compactboundaries(GtUword *numofboundaries,
                                              const GtArrayTIRPair *pairs)
 {
-  unsigned long countboundaries = 0, nextfill = 0;
+  GtUword countboundaries = 0, nextfill = 0;
   const TIRPair *bd, **bdptrtab = NULL;
 
   for (bd = pairs->spaceTIRPair; bd < pairs->spaceTIRPair +
@@ -298,7 +298,7 @@ static const TIRPair** tir_compactboundaries(unsigned long *numofboundaries,
 static void gt_tir_find_best_TSD(TSDinfo *info, GtTIRStream *tir_stream,
                                  TIRPair *tir_pair)
 {
-  unsigned long tsd_length,
+  GtUword tsd_length,
                 new_left_tir_start = tir_pair->left_tir_start,
                 new_right_tir_end = tir_pair->right_tir_end,
                 new_cost_left = 0,
@@ -360,7 +360,7 @@ static void gt_tir_find_best_TSD(TSDinfo *info, GtTIRStream *tir_stream,
 static int gt_tir_search_for_TSDs(GtTIRStream *tir_stream, TIRPair *tir_pair,
                                   const GtEncseq *encseq, GtError *err)
 {
-  unsigned long start_left_tir,
+  GtUword start_left_tir,
                 end_left_tir,
                 start_right_tir,
                 end_right_tir,
@@ -369,7 +369,7 @@ static int gt_tir_search_for_TSDs(GtTIRStream *tir_stream, TIRPair *tir_pair,
                 seq_start_pos1,
                 seq_end_pos2,
                 seq_length;
-  unsigned long contignumber = tir_pair->contignumber;
+  GtUword contignumber = tir_pair->contignumber;
   TSDinfo info;
   int had_err = 0;
   gt_error_check(err);
@@ -453,11 +453,11 @@ static int gt_tir_search_for_TSDs(GtTIRStream *tir_stream, TIRPair *tir_pair,
 static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
                                 const GtEncseq *encseq, GtError *err)
 {
-  unsigned long seedcounter = 0;
+  GtUword seedcounter = 0;
   GtArrayTIRPair new;             /* need to remove overlaps */
   GtXdropresources *xdropresources;
-  unsigned long total_length = 0;
-  unsigned long alilen,
+  GtUword total_length = 0;
+  GtUword alilen,
                 seqstart1, seqend1,
                 seqstart2, seqend2,
                 edist, ulen, vlen;
@@ -497,7 +497,7 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
         gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen, 0);
       } else
       {
-        unsigned long maxleft = MIN(seedptr->pos1 - seqstart1,
+        GtUword maxleft = MIN(seedptr->pos1 - seqstart1,
                                     seedptr->pos2 - seqstart2);
         gt_seqabstract_reinit_encseq(sa_useq, encseq, maxleft, 0);
         gt_seqabstract_reinit_encseq(sa_vseq, encseq, maxleft, 0);
@@ -528,7 +528,7 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
         gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen, 0);
       } else
       {
-        unsigned long maxright = MIN(seqend1 - (seedptr->pos1 + seedptr->len),
+        GtUword maxright = MIN(seqend1 - (seedptr->pos1 + seedptr->len),
                                      seqend2 - (seedptr->pos2 + seedptr->len));
         gt_seqabstract_reinit_encseq(sa_useq, encseq, maxright, 0);
         gt_seqabstract_reinit_encseq(sa_vseq, encseq, maxright, 0);
@@ -651,7 +651,7 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
 
     /* check whether index is valid */
     if (tir_stream->cur_elem_index < tir_stream->num_of_tirs) {
-      unsigned long seqnum,
+      GtUword seqnum,
                     seqlength;
       GtGenomeNode *rn;
       GtStr *seqid;
@@ -723,7 +723,7 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
     bool skip = false;
     if (tir_stream->cur_elem_index < tir_stream->num_of_tirs) {
       const char *description;
-      unsigned long description_len, seqnum;
+      GtUword description_len, seqnum;
       GtGenomeNode *cn;
 
       seqnum = tir_stream->tir_pairs[tir_stream->cur_elem_index]->contignumber;
@@ -785,7 +785,7 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
       GtGenomeNode *node, GT_UNUSED *parent;
       const TIRPair *pair =
                 tir_stream->tir_pairs[tir_stream->cur_elem_index];
-      unsigned long seqstartpos;
+      GtUword seqstartpos;
       char buf[BUFSIZ];
 
       gt_assert(!pair->skip);
@@ -916,19 +916,19 @@ const GtNodeStreamClass* gt_tir_stream_class(void)
 }
 
 GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
-                                unsigned long min_seed_length,
-                                unsigned long min_TIR_length,
-                                unsigned long max_TIR_length,
-                                unsigned long min_TIR_distance,
-                                unsigned long max_TIR_distance,
+                                GtUword min_seed_length,
+                                GtUword min_TIR_length,
+                                GtUword max_TIR_length,
+                                GtUword min_TIR_distance,
+                                GtUword max_TIR_distance,
                                 GtXdropArbitraryscores arbit_scores,
                                 int xdrop_belowscore,
                                 double similarity_threshold,
                                 bool best_overlaps,
                                 bool no_overlaps,
-                                unsigned long min_TSD_length,
-                                unsigned long max_TSD_length,
-                                unsigned long vicinity,
+                                GtUword min_TSD_length,
+                                GtUword max_TSD_length,
+                                GtUword vicinity,
                                 GtError *err)
 {
   int had_err = 0;

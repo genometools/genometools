@@ -31,7 +31,7 @@ typedef struct {
        exondiffcollapsed,
        nuceval,
        evalLTR;
-  unsigned long LTRdelta;
+  GtUword LTRdelta;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } EvalArguments;

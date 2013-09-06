@@ -94,7 +94,7 @@ void gt_lua_export_metatable(lua_State *L, const char *metatable_desc)
 
 void gt_lua_push_strarray_as_table(lua_State *L, GtStrArray *sa)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(L && sa);
   lua_newtable(L);
   for (i = 0; i < gt_str_array_size(sa); i++) {

@@ -37,7 +37,7 @@
 #include "core/types_api.h"
 #include "core/arraydef.h"
 
-#define GT_ENCSEQ_VERSION  3UL
+#define GT_ENCSEQ_VERSION  3
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))
@@ -70,7 +70,7 @@ typedef struct
 {
   GtTwobitencoding tbe;           /* two bit encoding */
   unsigned int unitsnotspecial;   /* units which are not special */
-  unsigned long referstartpos;    /* position of suffix to be compared */
+  GtUword referstartpos;    /* position of suffix to be compared */
 } GtEndofTwobitencoding;
 
 /* The following type stores the result of comparing a pair of twobit
@@ -87,7 +87,7 @@ typedef struct
   unsigned int common;
   bool leftspecial,
        rightspecial;
-  unsigned long finaldepth;
+  GtUword finaldepth;
 } GtCommonunits;
 
 /* The <GtSpecialrangeiterator> type. */
@@ -110,7 +110,7 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
   The function only works for the case that encodesequence[pos] does not
   contain a special character. */
 GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
-                                             unsigned long pos,
+                                             GtUword pos,
                                              GtReadmode readmode);
 
 /* The following function extracts from the byte sequence of length <len>
@@ -118,15 +118,15 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
   encoding four consecutive characters in one byte. */
 void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
                                  const GtUchar *seq,
-                                 unsigned long len);
+                                 GtUword len);
 
 /* The following function extracts from an encoded sequence a substring of
   length <len> beginning at position <startindex> and stores the result
   in the byte sequence encoding four consecutive characters in one byte. */
 void gt_encseq_sequence2bytecode(GtUchar *dest,
                                  const GtEncseq *encseq,
-                                 unsigned long startindex,
-                                 unsigned long len);
+                                 GtUword startindex,
+                                 GtUword len);
 
 /* Returns true is <encseq> has special ranges, false otherwise. */
 bool gt_encseq_has_specialranges(const GtEncseq *encseq);
@@ -147,7 +147,7 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
                                        GtReadmode readmode,
                                        GtEncseqReader *esr,
                                        const GtCodetype **multimappower,
-                                       unsigned long frompos,
+                                       GtUword frompos,
                                        unsigned int prefixlength);
 
 /* The following function compares two substrings in <encseq1> and
@@ -167,10 +167,10 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         GtReadmode readmode,
                                         GtEncseqReader *esr1,
                                         GtEncseqReader *esr2,
-                                        unsigned long pos1,
-                                        unsigned long pos2,
-                                        unsigned long depth,
-                                        unsigned long maxdepth);
+                                        GtUword pos1,
+                                        GtUword pos2,
+                                        GtUword depth,
+                                        GtUword maxdepth);
 
 const GtTwobitencoding *gt_encseq_twobitencoding_export(const GtEncseq *encseq);
 
@@ -186,14 +186,14 @@ size_t gt_encseq_chardistri_mapoffset(const GtEncseq *encseq);
    index of the given name. Only sequence collections of type eqlength are
    supported. The other parameters must be consistent with this. */
 int gt_encseq_equallength_write_twobitencoding_to_file(const char *indexname,
-                                     unsigned long totallength,
-                                     unsigned long lengthofsinglesequence,
+                                     GtUword totallength,
+                                     GtUword lengthofsinglesequence,
                                      GtTwobitencoding *twobitencoding,
-                                     unsigned long numofsequences,
-                                     unsigned long numoffiles,
+                                     GtUword numofsequences,
+                                     GtUword numoffiles,
                                      const GtFilelengthvalues *filelengthtab,
                                      const GtStrArray *filenametab,
-                                     const unsigned long *characterdistribution,
+                                     const GtUword *characterdistribution,
                                      GtError *err);
 
 /* Saves an encoded sequence characterized by the given parameters into the
@@ -201,20 +201,20 @@ int gt_encseq_equallength_write_twobitencoding_to_file(const char *indexname,
    are UCHAR, USHORT, UINT32 are supported. The other parameters must be
    consistent with this. */
 int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
-                                     unsigned long totallength,
+                                     GtUword totallength,
                                      GtEncseqAccessType sat,
-                                     unsigned long lengthofsinglesequence,
-                                     unsigned long minseqlen,
-                                     unsigned long maxseqlen,
-                                     unsigned long lengthofspecialprefix,
-                                     unsigned long lengthofspecialsuffix,
-                                     unsigned long lengthoflongestnonspecial,
+                                     GtUword lengthofsinglesequence,
+                                     GtUword minseqlen,
+                                     GtUword maxseqlen,
+                                     GtUword lengthofspecialprefix,
+                                     GtUword lengthofspecialsuffix,
+                                     GtUword lengthoflongestnonspecial,
                                      GtTwobitencoding *twobitencoding,
-                                     unsigned long numofsequences,
-                                     unsigned long numoffiles,
+                                     GtUword numofsequences,
+                                     GtUword numoffiles,
                                      const GtFilelengthvalues *filelengthtab,
                                      const GtStrArray *filenametab,
-                                     const unsigned long *characterdistribution,
+                                     const GtUword *characterdistribution,
                                      GtError *err);
 
 /* The following type is used for computing stoppositions when
@@ -229,10 +229,10 @@ void gt_Viatwobitkeyvalues_reinit(GtViatwobitkeyvalues *vtk,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   GtEncseqReader *esr,
-                                  unsigned long pos,
-                                  unsigned long depth,
-                                  unsigned long maxdepth,
-                                  unsigned long stoppos);
+                                  GtUword pos,
+                                  GtUword depth,
+                                  GtUword maxdepth,
+                                  GtUword stoppos);
 
 /* The following is the destructor for the latter type */
 void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk);
@@ -252,8 +252,8 @@ int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
                                     const GtEncseq *encseq1,
                                     const GtEncseq *encseq2,
                                     GtReadmode readmode,
-                                    unsigned long depth,
-                                    unsigned long maxdepth,
+                                    GtUword depth,
+                                    GtUword maxdepth,
                                     GtViatwobitkeyvalues *vtk1,
                                     GtViatwobitkeyvalues *vtk2);
 
@@ -261,19 +261,19 @@ bool gt_encseq_has_twobitencoding(const GtEncseq *encseq);
 
 bool gt_encseq_has_twobitencoding_stoppos_support(const GtEncseq *encseq);
 
-unsigned long gt_getnexttwobitencodingstoppos(bool fwd, GtEncseqReader *esr);
+GtUword gt_getnexttwobitencodingstoppos(bool fwd, GtEncseqReader *esr);
 
 /* The following function extracts a twobit encoding at position
   <pos> with the given <readmode> in the sequence encoded by <encseq>.
   The <esr> structure refers to a memory area reinitialized in the
   function. The result is stored in <ptbe>. */
 
-unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
+GtUword gt_encseq_extract2bitencwithtwobitencodingstoppos(
                                          GtEndofTwobitencoding *ptbe,
                                          GtEncseqReader *esr,
                                          const GtEncseq *encseq,
                                          GtReadmode readmode,
-                                         unsigned long pos);
+                                         GtUword pos);
 
 /* The following function extracts the twobitencoding beginning at position
    <pos> in the given encoded sequence <encseq> and ending at
@@ -287,9 +287,9 @@ unsigned int gt_encseq_extract2bitencvector(
                                          const GtEncseq *encseq,
                                          GtEncseqReader *esr,
                                          GtReadmode readmode,
-                                         unsigned long pos,
+                                         GtUword pos,
                                          bool withstoppos,
-                                         unsigned long stoppos);
+                                         GtUword stoppos);
 
 /* The following function extracts the twobitencoding for the
    sequence with sequence number <seqnum> beginning at the relative
@@ -301,9 +301,9 @@ unsigned int gt_encseq_extract2bitencvector(
 unsigned int gt_encseq_relpos_extract2bitencvector(
                                           GtArrayGtTwobitencoding *tbereservoir,
                                           const GtEncseq *encseq,
-                                          unsigned long seqnum,
-                                          unsigned long relpos,
-                                          unsigned long maxnofelem);
+                                          GtUword seqnum,
+                                          GtUword relpos,
+                                          GtUword maxnofelem);
 
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
   and stores the result of the comparison in <commonunits>. The comparison is
@@ -341,18 +341,18 @@ int gt_encseq_compare_pairof_different_twobitencodings(
 bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 GtEncseqReader *esr,
-                                unsigned long startpos,
-                                unsigned long len);
+                                GtUword startpos,
+                                GtUword len);
 
 /* Returns the sequence number from the given <position> for an array of
   SEPARATOR positions <recordseps>.  */
-unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
-                                   unsigned long numofrecords,
-                                   unsigned long totalwidth,
-                                   unsigned long position);
+GtUword gt_encseq_sep2seqnum(const GtUword *recordseps,
+                                   GtUword numofrecords,
+                                   GtUword totalwidth,
+                                   GtUword position);
 
 /* Returns the number of times that <cc> occurs in the sequences in <encseq>. */
-unsigned long gt_encseq_charcount(const GtEncseq *encseq,
+GtUword gt_encseq_charcount(const GtEncseq *encseq,
                                   GtUchar cc);
 
 /* Prints information about <encseq> via <logger>. If <withfilenames> is set,
@@ -365,53 +365,53 @@ void gt_encseq_show_features(const GtEncseq *encseq,
   of the sequences starts at offset <depth>. */
 
 /* Return the number of positions in <encseq> containing special characters */
-unsigned long gt_encseq_specialcharacters(const GtEncseq *encseq);
+GtUword gt_encseq_specialcharacters(const GtEncseq *encseq);
 
 /* Return the number of positions in <encseq> containing wildcard */
-unsigned long gt_encseq_wildcards(const GtEncseq *encseq);
+GtUword gt_encseq_wildcards(const GtEncseq *encseq);
 
 /* Return the number of ranges of consecutive runs of special characters
   where the length of each range is limited by UCHAR_MAX, USHORT_MAX, and
   UINT32_MAX, depending on whether the GT_ACCESS_TYPE_UCHARTABLES,
   GT_ACCESS_TYPE_USHORTTABLES, GT_ACCESS_TYPE_UINT32TABLES are used */
-unsigned long gt_encseq_specialranges(const GtEncseq *encseq);
+GtUword gt_encseq_specialranges(const GtEncseq *encseq);
 
-unsigned long gt_encseq_exceptioncharacters(const GtEncseq *encseq);
+GtUword gt_encseq_exceptioncharacters(const GtEncseq *encseq);
 
-unsigned long gt_encseq_exceptionranges(const GtEncseq *encseq);
+GtUword gt_encseq_exceptionranges(const GtEncseq *encseq);
 
-unsigned long gt_encseq_max_subalpha_size(const GtEncseq *encseq);
+GtUword gt_encseq_max_subalpha_size(const GtEncseq *encseq);
 
 /* Return the number of ranges of consecutive runs of wildcards
   where the length of each range is limited by UCHAR_MAX, USHORT_MAX, and
   UINT32_MAX, depending on whether the GT_ACCESS_TYPE_UCHARTABLES,
   GT_ACCESS_TYPE_USHORTTABLES, GT_ACCESS_TYPE_UINT32TABLES are used */
-unsigned long gt_encseq_wildcardranges(const GtEncseq *encseq);
+GtUword gt_encseq_wildcardranges(const GtEncseq *encseq);
 
 /* Return the number of ranges of consecutive runs of special characters */
-unsigned long gt_encseq_realspecialranges(const GtEncseq *encseq);
+GtUword gt_encseq_realspecialranges(const GtEncseq *encseq);
 
 /* Return the number of ranges of consecutive runs of wildcards */
-unsigned long gt_encseq_realwildcardranges(const GtEncseq *encseq);
+GtUword gt_encseq_realwildcardranges(const GtEncseq *encseq);
 
 /* Return the length of the longest consecutive run of non-special characters */
-unsigned long gt_encseq_lengthoflongestnonspecial(const GtEncseq *encseq);
+GtUword gt_encseq_lengthoflongestnonspecial(const GtEncseq *encseq);
 
 /* Return the length of the longest prefix of <encseq> consisting of
   special characters only. */
-unsigned long gt_encseq_lengthofspecialprefix(const GtEncseq *encseq);
+GtUword gt_encseq_lengthofspecialprefix(const GtEncseq *encseq);
 
 /* Return the length of the longest prefix of <encseq> consisting of
   wildcards only. */
-unsigned long gt_encseq_lengthofwildcardprefix(const GtEncseq *encseq);
+GtUword gt_encseq_lengthofwildcardprefix(const GtEncseq *encseq);
 
 /* Return the length of the longest suffix of <encseq> consisting of
   special characters only. */
-unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq);
+GtUword gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq);
 
 /* Return the length of the longest suffix of <encseq> consisting of
   wildcards only. */
-unsigned long gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq);
+GtUword gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq);
 
 /* Returns number of characters in the alphabet which is part of the
    <encseq>. The number does not include the wildcards. */
@@ -439,13 +439,13 @@ void gt_encseq_showatstartpos(FILE *fp,
                               bool fwd,
                               bool complement,
                               const GtEncseq *encseq,
-                              unsigned long startpos);
+                              GtUword startpos);
 
 /* Writes the result of gt_encseq_effective_filelength() into the
    location pointed to by <result>. Needed for the Ruby bindings. */
 void gt_encseq_effective_filelength_ptr(const GtEncseq *encseq,
                                         uint64_t *result,
-                                        unsigned long filenum);
+                                        GtUword filenum);
 
 /* The following function shows the encoded sequence at position <startpos> up
    to the first <depth> characters or 30 positions, whichever is the minimum.
@@ -455,27 +455,27 @@ void gt_encseq_effective_filelength_ptr(const GtEncseq *encseq,
 void gt_encseq_showatstartposwithdepth(FILE *fp,
                                        const GtEncseq *encseq,
                                        GtReadmode readmode,
-                                       unsigned long start,
-                                       unsigned long depth);
+                                       GtUword start,
+                                       GtUword depth);
 
 /* Determines the size of the final representation of the encoded sequence
    with the given characteristics, given the access type <sat>. */
 uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
-                                  unsigned long totallength,
-                                  unsigned long numofsequences,
-                                  unsigned long numofdbfiles,
-                                  unsigned long lengthofdbfilenames,
-                                  unsigned long wildcardranges,
+                                  GtUword totallength,
+                                  GtUword numofsequences,
+                                  GtUword numofdbfiles,
+                                  GtUword lengthofdbfilenames,
+                                  GtUword wildcardranges,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol,
-                                  unsigned long lengthofalphadef);
+                                  GtUword lengthofalphadef);
 
 /* The following function returns the size of the encoded sequence in bytes. */
-unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq);
+GtUword gt_encseq_sizeofrep(const GtEncseq *encseq);
 
 /* The following function returns the size of the GtEncseq-structure
    in bytes. */
-unsigned long gt_encseq_sizeofstructure(void);
+GtUword gt_encseq_sizeofstructure(void);
 
 /* The following function delivers the accesstype of a given encoded
    sequence. */
@@ -483,7 +483,7 @@ GtEncseqAccessType gt_encseq_accesstype_get(const GtEncseq *encseq);
 
 /* The following function delivers the encseq->equallength.valueunsignedlong
    if encseq->equallength.defined is true */
-unsigned long gt_encseq_equallength(const GtEncseq *encseq);
+GtUword gt_encseq_equallength(const GtEncseq *encseq);
 
 /* Returns a new <GtMD5Tab> allowing to match MD5 sums to sequence numbers for a
    given <encseq>. */
@@ -491,16 +491,16 @@ GtMD5Tab*  gt_encseq_get_md5_tab(const GtEncseq *encseq, GtError *err);
 
 /* for a given array of at least one separator positions */
 int gt_encseq_seppos2ssptab(const char *indexname,
-                            unsigned long totallength,
-                            unsigned long numofdbsequences,
-                            const unsigned long *seppostab,
+                            GtUword totallength,
+                            GtUword numofdbsequences,
+                            const GtUword *seppostab,
                             GtError *err);
 
 /* The following functions are for testing */
 
 #ifndef NDEBUG
 void gt_GtSpecialcharinfo_check(const GtSpecialcharinfo *specialcharinfo,
-                                unsigned long numofseparatorpositions);
+                                GtUword numofseparatorpositions);
 #endif
 
 int gt_encseq_builder_unit_test(GtError *err);
@@ -521,12 +521,12 @@ int gt_encseq_builder_unit_test(GtError *err);
   beginning at position <start2>. */
 int gt_encseq_check_comparetwosuffixes(const GtEncseq *encseq,
                                        GtReadmode readmode,
-                                       unsigned long *maxlcp,
+                                       GtUword *maxlcp,
                                        bool specialsareequal,
                                        bool specialsareequalatdepth0,
-                                       unsigned long maxdepth,
-                                       unsigned long start1,
-                                       unsigned long start2,
+                                       GtUword maxdepth,
+                                       GtUword start1,
+                                       GtUword start2,
                                        GtEncseqReader *esr1,
                                        GtEncseqReader *esr2);
 
@@ -565,8 +565,8 @@ int gt_encseq_check_minmax(const GtEncseq *encseq, GtError *err);
 int gt_encseq_check_consistency(const GtEncseq *encseq,
                                 const GtStrArray *filenametab,
                                 GtReadmode readmode,
-                                unsigned long scantrials,
-                                unsigned long multicharcmptrials,
+                                GtUword scantrials,
+                                GtUword multicharcmptrials,
                                 bool withseqnumcheck,
                                 bool withcheckunit,
                                 GtLogger *logger,
@@ -586,19 +586,19 @@ uint64_t gt_encseq_pairbitsum(const GtEncseq *encseq);
    of variable length. */
 
 void gt_encseq_relpos_seqnum_check(const char *filename,int line,
-                                   const GtEncseq *encseq,unsigned long relpos,
-                                   unsigned long seqnum,unsigned long position);
+                                   const GtEncseq *encseq,GtUword relpos,
+                                   GtUword seqnum,GtUword position);
 
 /* for a position outside the range from 0 to totallength -1 deliver a
    unique integer */
-#define GT_UNIQUEINT(POS)        ((unsigned long) ((POS) + GT_COMPAREOFFSET))
+#define GT_UNIQUEINT(POS)        ((GtUword) ((POS) + GT_COMPAREOFFSET))
 #define GT_ISUNIQUEINT(POS)      ((POS) >= GT_COMPAREOFFSET)
 
 /* Reverse the range with respect to the given total length */
-void gt_range_reverse(unsigned long totallength,GtRange *range);
+void gt_range_reverse(GtUword totallength,GtRange *range);
 
 /* Return the length of the longest description in <encseq>.
    Requires that the description support is enabled in <encseq>.  */
-unsigned long gt_encseq_max_desc_length(const GtEncseq *encseq);
+GtUword gt_encseq_max_desc_length(const GtEncseq *encseq);
 
 #endif

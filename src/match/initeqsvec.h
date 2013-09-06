@@ -20,14 +20,14 @@
 
 #include "core/types_api.h"
 
-void gt_initeqsvector(unsigned long *eqsvector,
-                   unsigned long eqslen,
+void gt_initeqsvector(GtUword *eqsvector,
+                   GtUword eqslen,
                    const GtUchar *pattern,
-                   unsigned long patternlength);
+                   GtUword patternlength);
 
-void gt_initeqsvectorrev(unsigned long *eqsvectorrev,
-                      unsigned long eqslen,
+void gt_initeqsvectorrev(GtUword *eqsvectorrev,
+                      GtUword eqslen,
                       const GtUchar *pattern,
-                      unsigned long patternlength);
+                      GtUword patternlength);
 
 #endif

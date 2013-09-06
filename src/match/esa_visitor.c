@@ -89,10 +89,10 @@ void gt_esa_visitor_info_delete(GtESAVisitorInfo *info, GtESAVisitor *ev)
 
 int gt_esa_visitor_visit_leaf_edge(GtESAVisitor *ev,
                                    bool firstsucc,
-                                   unsigned long fd,
-                                   unsigned long flb,
+                                   GtUword fd,
+                                   GtUword flb,
                                    GtESAVisitorInfo *info,
-                                   unsigned long leafnumber,
+                                   GtUword leafnumber,
                                    GtError *err)
 {
   gt_error_check(err);
@@ -105,12 +105,12 @@ int gt_esa_visitor_visit_leaf_edge(GtESAVisitor *ev,
 
 int gt_esa_visitor_visit_branching_edge(GtESAVisitor *ev,
                                         bool firstsucc,
-                                        unsigned long fd,
-                                        unsigned long flb,
+                                        GtUword fd,
+                                        GtUword flb,
                                         GtESAVisitorInfo *finfo,
-                                        unsigned long sd,
-                                        unsigned long slb,
-                                        unsigned long srb,
+                                        GtUword sd,
+                                        GtUword slb,
+                                        GtUword srb,
                                         GtESAVisitorInfo *sinfo,
                                         GtError *err)
 {
@@ -123,9 +123,9 @@ int gt_esa_visitor_visit_branching_edge(GtESAVisitor *ev,
 }
 
 int gt_esa_visitor_visit_lcp_interval(GtESAVisitor *ev,
-                                      unsigned long lcp,
-                                      unsigned long lb,
-                                      unsigned long rb,
+                                      GtUword lcp,
+                                      GtUword lb,
+                                      GtUword rb,
                                       GtESAVisitorInfo *info,
                                       GtError *err)
 {

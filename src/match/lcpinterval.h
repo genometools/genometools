@@ -18,11 +18,13 @@
 #ifndef LCPINTERVAL_H
 #define LCPINTERVAL_H
 
+#include "core/types_api.h"
+
 typedef struct
 {
-  unsigned long offset,
-                left,
-                right;
+  GtUword offset,
+          left,
+          right;
 } Lcpinterval;
 
 #endif

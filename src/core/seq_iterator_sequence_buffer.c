@@ -33,9 +33,9 @@ struct GtSeqIteratorSequenceBuffer
   const GtUchar *symbolmap;
   GtDescBuffer *descptr;
   GtArrayGtUchar sequencebuffer;
-  unsigned long long unitnum;
+  GtUint64 unitnum;
   bool withsequence, exhausted;
-  unsigned long long currentread,
+  GtUint64 currentread,
                      maxread;
 };
 
@@ -98,7 +98,7 @@ static void gt_seq_iterator_sequence_buffer_set_sequence_output(
 
 static int gt_seq_iterator_sequence_buffer_next(GtSeqIterator *si,
                                                const GtUchar **sequence,
-                                               unsigned long *len,
+                                               GtUword *len,
                                                char **desc,
                                                GtError *err)
 {
@@ -190,9 +190,9 @@ static int gt_seq_iterator_sequence_buffer_next(GtSeqIterator *si,
   return 0;
 }
 
-static const unsigned long long*
+static const GtUint64*
 gt_seq_iterator_sequence_buffer_getcurrentcounter(GtSeqIterator *si,
-                                                 unsigned long long maxread)
+                                                 GtUint64 maxread)
 {
   GtSeqIteratorSequenceBuffer *seqit;
   gt_assert(si);

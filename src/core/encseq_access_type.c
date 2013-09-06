@@ -94,17 +94,17 @@ bool gt_encseq_access_type_isviautables(GtEncseqAccessType sat)
         }
 
 static GtEncseqAccessType determinesmallestrep(
-                                  unsigned long *specialranges,
-                                  unsigned long *wildcardranges,
+                                  GtUword *specialranges,
+                                  GtUword *wildcardranges,
                                   const Definedunsignedlong *equallength,
-                                  unsigned long totallength,
-                                  unsigned long numofsequences,
-                                  unsigned long numofdbfiles,
-                                  unsigned long lengthofdbfilenames,
-                                  const unsigned long *specialrangestab,
-                                  const unsigned long *wildcardrangestab,
+                                  GtUword totallength,
+                                  GtUword numofsequences,
+                                  GtUword numofdbfiles,
+                                  GtUword lengthofdbfilenames,
+                                  const GtUword *specialrangestab,
+                                  const GtUword *wildcardrangestab,
                                   unsigned int numofchars,
-                                  unsigned long lengthofalphadef)
+                                  GtUword lengthofalphadef)
 {
   GtEncseqAccessType cret;
   uint64_t tmp, cmin;
@@ -128,15 +128,15 @@ static GtEncseqAccessType determinesmallestrep(
   return cret;
 }
 
-int gt_encseq_access_type_determine(unsigned long *specialranges,
-                                    unsigned long *wildcardranges,
-                                    unsigned long totallength,
-                                    unsigned long numofsequences,
-                                    unsigned long numofdbfiles,
-                                    unsigned long lengthofalphadef,
-                                    unsigned long lengthofdbfilenames,
-                                    const unsigned long *specialrangestab,
-                                    const unsigned long *wildcardrangestab,
+int gt_encseq_access_type_determine(GtUword *specialranges,
+                                    GtUword *wildcardranges,
+                                    GtUword totallength,
+                                    GtUword numofsequences,
+                                    GtUword numofdbfiles,
+                                    GtUword lengthofalphadef,
+                                    GtUword lengthofdbfilenames,
+                                    const GtUword *specialrangestab,
+                                    const GtUword *wildcardrangestab,
                                     const Definedunsignedlong *equallength,
                                     unsigned int numofchars,
                                     const char *str_sat,

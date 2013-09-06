@@ -22,9 +22,9 @@
 #include "core/types_api.h"
 
 /* This file describes the interface of a radixsort implementation
-   which allows for keys of type <unsigned long>, optionally associated
-   with values of type <unsigned long>. Thus the implementation can
-   sort arrays referenced by pointers of type <unsigned long *>,
+   which allows for keys of type <GtUword>, optionally associated
+   with values of type <GtUword>. Thus the implementation can
+   sort arrays referenced by pointers of type <GtUword *>,
    or arrays referenced by pointers of type <GtUlongPair *>.
 <<<<<<< HEAD
    In the latter case, the component <a> is the key and <b> is the
@@ -54,35 +54,35 @@
    efficiency reasons, is not opaque and mainly accessed via macros. */
 
 /* Same as before, but for the case that pairs are to be sorted. */
-void gt_radixsort_lsb_linear(unsigned long *source,unsigned long len);
+void gt_radixsort_lsb_linear(GtUword *source,GtUword len);
 
-/* Determine the maximum number of entries in an array of <unsigned long> such
+/* Determine the maximum number of entries in an array of <GtUword> such
    that the given memory limit <memlimit> (in bytes) for the array itself and
    the auxiliary array is not exceeded. */
-unsigned long gt_radixsort_max_num_of_entries_ulong(size_t memlimit);
+GtUword gt_radixsort_max_num_of_entries_ulong(size_t memlimit);
 
 /* Determine the maximum number of entries in an array of <GtUlongPair>s such
    that the given memory limit <memlimit> (in bytes) for the array itself and
    the auxiliary array is not exceeded. */
-unsigned long gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit);
+GtUword gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit);
 
-/* sort an array of values of type <unsigned long> */
+/* sort an array of values of type <GtUword> */
 
-void gt_radixsort_inplace_ulong(unsigned long *source, unsigned long len);
+void gt_radixsort_inplace_ulong(GtUword *source, GtUword len);
 
-/* Determine maximum number of entries in an array of type <unsigned long>
+/* Determine maximum number of entries in an array of type <GtUword>
    such that the given memory limit <memlimit> (in bytes) for the array
    is not exceeded.
 */
 
-unsigned long gt_radixsort_max_num_of_entries_ulong(size_t memlimit);
+GtUword gt_radixsort_max_num_of_entries_ulong(size_t memlimit);
 
 /* Determine maximum number of entries in an array of type <GtPairUlong>
    such that the given memory limit <memlimit> (in bytes) for the array
    is not exceeded.
 */
 
-unsigned long gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit);
+GtUword gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit);
 
 /* The following type represents the workspace for the radixsort
    implementation. We use it in applications with on the order of hundred
@@ -93,15 +93,15 @@ typedef struct GtRadixsortinfo GtRadixsortinfo;
 
 /* The following function creates an object of class <GtRadixsortinfo> and
    returns a pointer to it. The object can be used to sort arrays of
-   <unsigned long>-integers. <maxlen> is the
+   <GtUword>-integers. <maxlen> is the
    maximum size of the array to be sorted.
 */
 
-GtRadixsortinfo *gt_radixsort_new_ulong(unsigned long maxlen);
+GtRadixsortinfo *gt_radixsort_new_ulong(GtUword maxlen);
 
 /* The following function is like the previous, except that the
    created object can be used to sort arrays of <GtUlongPair> values. */
-GtRadixsortinfo* gt_radixsort_new_ulongpair(unsigned long maxlen);
+GtRadixsortinfo* gt_radixsort_new_ulongpair(GtUword maxlen);
 
 /* Return the size of the <GtRadixsortinfo> object. */
 size_t           gt_radixsort_size(const GtRadixsortinfo *radixsortinfo);
@@ -109,11 +109,11 @@ size_t           gt_radixsort_size(const GtRadixsortinfo *radixsortinfo);
 /* This is the function to perform the sorting task for the first
    <len> elements of the array stored in the object <radixsortinfo> */
 void             gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,
-                                           unsigned long len);
+                                           GtUword len);
 
 /* Return a pointer to the memory area in which the elements to
    be sorted can be stored. */
-unsigned long*   gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo);
+GtUword*   gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo);
 
 /* The analogue function as before, but for the case that
    arrays over type <GtUlongPair> are to be sorted. */
@@ -126,6 +126,6 @@ void             gt_radixsort_delete(GtRadixsortinfo *radixsortinfo);
    the least signifcant bits.
 */
 
-void gt_radixsort_lsb_linear(unsigned long *source,unsigned long len);
+void gt_radixsort_lsb_linear(GtUword *source,GtUword len);
 
 #endif

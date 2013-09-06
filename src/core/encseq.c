@@ -73,7 +73,7 @@
 
 #define EXTRACTENCODEDCHARSCALARFROMLEFT(SCALAR, PREFIX)\
         (((SCALAR) >> \
-         GT_MULT2(GT_UNITSIN2BITENC - 1 - (unsigned long) (PREFIX)))\
+         GT_MULT2(GT_UNITSIN2BITENC - 1 - (GtUword) (PREFIX)))\
          & (GtTwobitencoding) 3)
 
 #define EXTRACTENCODEDCHARSCALARFROMRIGHT(SCALAR, SUFFIX)\
@@ -81,12 +81,12 @@
 
 #define EXTRACTENCODEDCHAR(TWOBITENCODING, IDX)\
         EXTRACTENCODEDCHARSCALARFROMLEFT(\
-                  TWOBITENCODING[(unsigned long) GT_DIVBYUNITSIN2BITENC(IDX)],\
+                  TWOBITENCODING[(GtUword) GT_DIVBYUNITSIN2BITENC(IDX)],\
                   GT_MODBYUNITSIN2BITENC(IDX))
 
 #define DECLARESEQBUFFER(TABLE)\
         GtTwobitencoding bitwise = 0;\
-        unsigned long widthbuffer = 0;\
+        GtUword widthbuffer = 0;\
         GtTwobitencoding *twobitencodingptr;\
         encseq->unitsoftwobitencoding\
           = gt_unitsoftwobitencoding(encseq->totallength);\
@@ -107,9 +107,9 @@
 
 void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
                                  const GtUchar *seq,
-                                 unsigned long len)
+                                 GtUword len)
 {
-  unsigned long j;
+  GtUword j;
   const GtUchar *seqptr;
 
   for (seqptr=seq, j=0; seqptr < seq + len - 3; seqptr+=4, j++) {
@@ -133,10 +133,10 @@ void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
 
 static void encseq2bytecode(GtUchar *dest,
                             const GtEncseq *encseq,
-                            const unsigned long startindex,
-                            const unsigned long len)
+                            const GtUword startindex,
+                            const GtUword len)
 {
-  unsigned long i, j;
+  GtUword i, j;
 
   gt_assert(encseq != NULL && dest != NULL);
   if (encseq->twobitencoding != NULL) {
@@ -209,8 +209,8 @@ static void encseq2bytecode(GtUchar *dest,
 
 void gt_encseq_sequence2bytecode(GtUchar *dest,
                                  const GtEncseq *encseq,
-                                 unsigned long startindex,
-                                 unsigned long len)
+                                 GtUword startindex,
+                                 GtUword len)
 {
   if (encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS)
     gt_encseq_plainseq2bytecode(dest, encseq->plainseq + startindex, len);
@@ -218,7 +218,7 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
     encseq2bytecode(dest, encseq, startindex, len);
 }
 
-unsigned long gt_encseq_version(const GtEncseq *encseq)
+GtUword gt_encseq_version(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
   return encseq->version;
@@ -230,26 +230,26 @@ bool gt_encseq_is_64_bit(const GtEncseq *encseq)
   return ((int) encseq->is64bit == 1);
 }
 
-unsigned long gt_encseq_total_length(const GtEncseq *encseq)
+GtUword gt_encseq_total_length(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
   return encseq->logicaltotallength;
 }
 
-unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
+GtUword gt_encseq_num_of_sequences(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
   return encseq->logicalnumofdbsequences;
 }
 
 static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
-                                          unsigned long pos);
+                                          GtUword pos);
 
 static bool issinglepositioninspecialrangeViaequallength(const GtEncseq *encseq,
-                                                         unsigned long pos);
+                                                         GtUword pos);
 
 GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
-                                   unsigned long pos,
+                                   GtUword pos,
                                    GtReadmode readmode)
 {
   gt_assert(encseq != NULL && pos < encseq->logicaltotallength);
@@ -269,12 +269,12 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   }
   gt_assert(pos < encseq->totallength);
   if (encseq->twobitencoding != NULL) {
-    unsigned long twobits;
+    GtUword twobits;
 
     twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding, pos);
     if (encseq->accesstype_via_utables) {
       if (!encseq->has_specialranges ||
-          twobits != (unsigned long) encseq->leastprobablecharacter) {
+          twobits != (GtUword) encseq->leastprobablecharacter) {
         return GT_ISDIRCOMPLEMENT(readmode)
                  ? GT_COMPLEMENTBASE((GtUchar) twobits)
                  : (GtUchar) twobits;
@@ -293,7 +293,7 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
     else {
       if (encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) {
         if (encseq->numofdbsequences == 1UL ||
-            twobits != (unsigned long) encseq->leastprobablecharacter ||
+            twobits != (GtUword) encseq->leastprobablecharacter ||
             !issinglepositioninspecialrangeViaequallength(encseq, pos)) {
           return GT_ISDIRCOMPLEMENT(readmode)
                    ? GT_COMPLEMENTBASE((GtUchar) twobits)
@@ -304,13 +304,13 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
       else {
         gt_assert(encseq->sat == GT_ACCESS_TYPE_BITACCESS);
         if (!encseq->has_specialranges ||
-            twobits > (unsigned long) GT_TWOBITS_FOR_SEPARATOR ||
+            twobits > (GtUword) GT_TWOBITS_FOR_SEPARATOR ||
             !GT_ISIBITSET(encseq->specialbits, pos)) {
           return GT_ISDIRCOMPLEMENT(readmode)
                    ? GT_COMPLEMENTBASE((GtUchar) twobits)
                    : (GtUchar) twobits;
         }
-        return (twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
+        return (twobits == (GtUword) GT_TWOBITS_FOR_SEPARATOR)
                    ? (GtUchar) SEPARATOR
                    : (GtUchar) WILDCARD;
       }
@@ -331,7 +331,7 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   }
 }
 
-char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
+char gt_encseq_get_decoded_char(const GtEncseq *encseq, GtUword pos,
                                 GtReadmode readmode)
 {
   char cc;
@@ -343,7 +343,7 @@ char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
     if (GT_ISDIRREVERSE(readmode))
       pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
     if (encseq->has_exceptiontable) {
-      unsigned long mappos = GT_UNDEF_ULONG;
+      GtUword mappos = GT_UNDEF_ULONG;
       if (pos > encseq->totallength) {
         pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
         gt_readmode_invert(readmode);
@@ -376,7 +376,7 @@ char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
 }
 
 GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
-                                             unsigned long pos,
+                                             GtUword pos,
                                              GtReadmode readmode)
 {
   gt_assert(encseq != NULL && pos < encseq->logicaltotallength);
@@ -395,7 +395,7 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
   }
   gt_assert(pos < encseq->totallength);
   if (encseq->twobitencoding != NULL) {
-    unsigned long twobits;
+    GtUword twobits;
 
     twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding, pos);
     return GT_ISDIRCOMPLEMENT(readmode)
@@ -418,7 +418,7 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
 }
 
 bool gt_encseq_position_is_separator(const GtEncseq *encseq,
-                                     unsigned long pos,
+                                     GtUword pos,
                                      GtReadmode readmode)
 {
   gt_assert(encseq != NULL && pos < encseq->logicaltotallength);
@@ -449,7 +449,7 @@ bool gt_encseq_position_is_separator(const GtEncseq *encseq,
    GT_ACCESS_TYPE_UINT32TABLES */
 
 typedef struct {
-  unsigned long firstcell, /* first index of tables with startpos and length */
+  GtUword firstcell, /* first index of tables with startpos and length */
                 lastcell,  /* last index of tables with startpos and length */
                 nextpage;  /* next page to be used */
   GtRange previousrange,  /* previous range of special characters */
@@ -466,7 +466,7 @@ struct GtEncseqReader
   GtEncseq *encseq;
   GtReadmode readmode,
              originalreadmode;   /* only important for mirroring */
-  unsigned long currentpos,
+  GtUword currentpos,
                 nextseparatorpos; /* only for equallength */
   bool startedonmiddle;
   GtEncseqReaderViatablesinfo *wildcardrangestate,
@@ -605,7 +605,7 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
 
     ccc = esr->encseq->seqdeliverchar(esr);
     if (ccc != (GtUchar) SEPARATOR) {
-      unsigned long mappos = GT_UNDEF_ULONG;
+      GtUword mappos = GT_UNDEF_ULONG;
       if (esr->encseq->specialcharinfo.realexceptionranges > 0UL
             && esr->encseq->getexceptionmapping(esr->encseq,
                                                 &mappos, esr->currentpos)) {
@@ -665,8 +665,8 @@ const char* gt_encseq_indexname(const GtEncseq *encseq)
 bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 GtEncseqReader *esr,
-                                unsigned long startpos,
-                                unsigned long len)
+                                GtUword startpos,
+                                GtUword len)
 {
   gt_assert(len >= 1UL && encseq != NULL &&
             startpos + len <= encseq->totallength);
@@ -677,19 +677,19 @@ bool gt_encseq_contains_special(const GtEncseq *encseq,
 static void showGtRange(const GtRange *range)
 {
   if (range->start + 1 == range->end)
-    printf("%lu", range->start);
+    printf(""GT_LU"", range->start);
   else
-    printf("%lu, %lu", range->start, range->end);
+    printf(""GT_LU", "GT_LU"", range->start, range->end);
 }
 #endif
 
 void gt_encseq_extract_encoded(const GtEncseq *encseq,
                                GtUchar *buffer,
-                               unsigned long frompos,
-                               unsigned long topos)
+                               GtUword frompos,
+                               GtUword topos)
 {
   GtEncseqReader *esr;
-  unsigned long idx, pos;
+  GtUword idx, pos;
 
   gt_assert(frompos <= topos && encseq != NULL &&
             topos < encseq->logicaltotallength);
@@ -704,11 +704,11 @@ void gt_encseq_extract_encoded(const GtEncseq *encseq,
 
 void gt_encseq_extract_decoded(const GtEncseq *encseq,
                                char *buffer,
-                               unsigned long frompos,
-                               unsigned long topos)
+                               GtUword frompos,
+                               GtUword topos)
 {
   GtEncseqReader *esr;
-  unsigned long idx, pos;
+  GtUword idx, pos;
 
   gt_assert(frompos <= topos && encseq != NULL &&
             topos < encseq->logicaltotallength);
@@ -765,10 +765,10 @@ static void addswtabletomapspectable(GtMapspec *mapspec,
                                      GtSWtable *swtable,
                                      bool withrangelengths,
                                      bool withmappositions,
-                                     unsigned long totallength,
+                                     GtUword totallength,
                                      GtEncseqAccessType sat)
 {
-  unsigned long numofunits;
+  GtUword numofunits;
 
   switch (sat) {
     case GT_ACCESS_TYPE_UCHARTABLES:
@@ -834,7 +834,7 @@ static void addswtabletomapspectable(GtMapspec *mapspec,
 
 typedef struct
 {
-  unsigned long totallength,
+  GtUword totallength,
                 numofdbsequences;
   GtEncseqAccessType satsep;
   GtSWtable *ssptabptr;
@@ -856,14 +856,14 @@ static void assignssptabmapspecification(GtMapspec *mapspec,
 
 #define SIZEOFSWTABLE(BASETYPE, MAXRANGEVALUE)\
         (withrangelength ? 2 : 1) * ((uint64_t) sizeof (BASETYPE) * items) +\
-        (uint64_t) sizeof (unsigned long) * (totallength/(MAXRANGEVALUE)+1) +\
-        (withmappositions ? 1 : 0) * ((uint64_t) sizeof (unsigned long) * items)
+        (uint64_t) sizeof (GtUword) * (totallength/(MAXRANGEVALUE)+1) +\
+        (withmappositions ? 1 : 0) * ((uint64_t) sizeof (GtUword) * items)
 
 static uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
                                         bool withrangelength,
                                         bool withmappositions,
-                                        unsigned long totallength,
-                                        unsigned long items)
+                                        GtUword totallength,
+                                        GtUword items)
 {
   if (items == 0)
     return 0;
@@ -893,7 +893,7 @@ static int flushssptab2file(const char *indexname,
   if (fp == NULL)
     haserr = true;
   if (!haserr) {
-    unsigned long sizessptab;
+    GtUword sizessptab;
 
     sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
                               gt_encseq_sizeofSWtable(ssptransferinfo->satsep,
@@ -919,7 +919,7 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
 {
   bool haserr = false;
   GtStr *tmpfilename;
-  unsigned long sizessptab;
+  GtUword sizessptab;
   Gtssptransferinfo ssptransferinfo;
 
   gt_error_check(err);
@@ -953,15 +953,15 @@ static void assignoistabmapspecification(GtMapspec *mapspec,
                                          bool writemode)
 {
   GtEncseq *encseq = (GtEncseq *) voidinfo;
-  unsigned long numofunits;
+  GtUword numofunits;
   unsigned int bitsforsubalpha;
 
   if (writemode) {
     encseq->exceptionheaderptr.classstartpositionsptr
-      = gt_malloc(UCHAR_MAX * sizeof (unsigned long));
+      = gt_malloc(UCHAR_MAX * sizeof (GtUword));
     memcpy(encseq->exceptionheaderptr.classstartpositionsptr,
            encseq->classstartpositions,
-           UCHAR_MAX * sizeof (unsigned long));
+           UCHAR_MAX * sizeof (GtUword));
 
     encseq->exceptionheaderptr.maxcharsptr
       = gt_malloc(UCHAR_MAX * sizeof (char));
@@ -987,14 +987,14 @@ static void assignoistabmapspecification(GtMapspec *mapspec,
                       encseq->numofallchars);
   gt_mapspec_add_char(mapspec,
                       encseq->exceptionheaderptr.maxcharsptr,
-                      (unsigned long) UCHAR_MAX);
+                      (GtUword) UCHAR_MAX);
   gt_mapspec_add_uchar(mapspec,
                        encseq->exceptionheaderptr.subsymbolmapptr,
-                       (unsigned long) UCHAR_MAX);
+                       (GtUword) UCHAR_MAX);
   bitsforsubalpha
-    = gt_determinebitspervalue((unsigned long) encseq->maxsubalphasize-1);
+    = gt_determinebitspervalue((GtUword) encseq->maxsubalphasize-1);
   numofunits
-   = (unsigned long) sizeofbitarray(bitsforsubalpha,
+   = (GtUword) sizeofbitarray(bitsforsubalpha,
                        (BitOffset) encseq->specialcharinfo.exceptioncharacters);
   if (!writemode) {
     encseq->exceptions =
@@ -1011,8 +1011,8 @@ static void assignoistabmapspecification(GtMapspec *mapspec,
 }
 
 static void alphabet_to_key_values(const GtAlphabet *alpha,
-                                   unsigned long *alphatype,
-                                   unsigned long *lengthofalphadef,
+                                   GtUword *alphatype,
+                                   GtUword *lengthofalphadef,
                                    char **alphadef, bool customalphabet)
 {
   gt_assert(alpha);
@@ -1045,7 +1045,7 @@ static void alphabet_to_key_values(const GtAlphabet *alpha,
 
 static size_t gt_encseq_size_of_exceptiontablemap(GtEncseq *encseq)
 {
-  unsigned long sizeoistab;
+  GtUword sizeoistab;
   unsigned int bitsforsubalpha;
 
   sizeoistab = CALLCASTFUNC(uint64_t, unsigned_long,   /* exceptiontables */
@@ -1054,11 +1054,11 @@ static size_t gt_encseq_size_of_exceptiontablemap(GtEncseq *encseq)
                                 true,
                                 encseq->totallength,
                                 encseq->specialcharinfo.realexceptionranges));
-  sizeoistab += UCHAR_MAX * sizeof (unsigned long);    /* classstartpositions */
+  sizeoistab += UCHAR_MAX * sizeof (GtUword);    /* classstartpositions */
   sizeoistab += encseq->numofallchars * sizeof (char); /* allchars */
   sizeoistab += UCHAR_MAX * sizeof (char);             /* maxchars */
   sizeoistab += UCHAR_MAX * sizeof (unsigned char);    /* subsymbolmap */
-  bitsforsubalpha = gt_determinebitspervalue((unsigned long)
+  bitsforsubalpha = gt_determinebitspervalue((GtUword)
                                              encseq->maxsubalphasize-1);
   sizeoistab += sizeofbitarray(bitsforsubalpha,
                               (BitOffset) encseq->
@@ -1078,7 +1078,7 @@ static int flushoistab2file(const char *indexname, GtEncseq *encseq,
   if (fp == NULL)
     had_err = -1;
   if (!had_err) {
-    unsigned long sizeoistab = (unsigned long)
+    GtUword sizeoistab = (GtUword)
                                     gt_encseq_size_of_exceptiontablemap(encseq);
     if (gt_mapspec_write(assignoistabmapspecification, fp, encseq, sizeoistab,
                          err) != 0) {
@@ -1099,13 +1099,13 @@ static int filloistabmapspecstartptr(GtEncseq *encseq,
 {
   bool haserr = false;
   GtStr *tmpfilename;
-  unsigned long sizeoistab;
+  GtUword sizeoistab;
 
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(tmpfilename, GT_OISTABFILESUFFIX);
 
-  sizeoistab = (unsigned long) gt_encseq_size_of_exceptiontablemap(encseq);
+  sizeoistab = (GtUword) gt_encseq_size_of_exceptiontablemap(encseq);
 
   if (gt_mapspec_read(assignoistabmapspecification, encseq,
                       gt_str_get(tmpfilename),
@@ -1129,34 +1129,34 @@ static void gt_encseq_assign_header_mapspec(GtMapspec *mapspec,
                                              GtEncseqHeaderPtr *headerptr,
                                              bool writemode,
                                              GtEncseqAccessType sat,
-                                             unsigned long totallength,
+                                             GtUword totallength,
                                              unsigned int numofchars,
-                                             unsigned long numofdbsequences,
-                                             unsigned long numofdbfiles,
-                                             unsigned long lengthofdbfilenames,
-                                             unsigned long minseqlen,
-                                             unsigned long maxseqlen,
+                                             GtUword numofdbsequences,
+                                             GtUword numofdbfiles,
+                                             GtUword lengthofdbfilenames,
+                                             GtUword minseqlen,
+                                             GtUword maxseqlen,
                                              unsigned char maxsubalphasize,
-                                             unsigned long numofallchars,
+                                             GtUword numofallchars,
                                              GtSpecialcharinfo *specialcharinfo,
                                              const GtStrArray *filenametab,
-                                             unsigned long lengthofalphadef,
+                                             GtUword lengthofalphadef,
                                              char *alphadef,
-                                             unsigned long alphatype)
+                                             GtUword alphatype)
 {
   if (writemode) {
-    unsigned long idx, offset = 0;
+    GtUword idx, offset = 0;
 
     headerptr->is64bitptr = gt_malloc(sizeof (*headerptr->is64bitptr));
-    headerptr->is64bitptr[0] = (GtUchar) (sizeof (unsigned long) == (size_t) 8
+    headerptr->is64bitptr[0] = (GtUchar) (sizeof (GtUword) == (size_t) 8
                                          ? 1
                                          : 0);
 
     headerptr->versionptr = gt_malloc(sizeof (*headerptr->versionptr));
-    headerptr->versionptr[0] = (unsigned long) GT_ENCSEQ_VERSION;
+    headerptr->versionptr[0] = (GtUword) GT_ENCSEQ_VERSION;
 
     headerptr->satcharptr = gt_malloc(sizeof (*headerptr->satcharptr));
-    headerptr->satcharptr[0] = (unsigned long) sat;
+    headerptr->satcharptr[0] = (GtUword) sat;
 
     headerptr->totallengthptr = gt_malloc(sizeof (*headerptr->totallengthptr));
     headerptr->totallengthptr[0] = totallength;
@@ -1237,7 +1237,7 @@ static void gt_encseq_assign_header_mapspec(GtMapspec *mapspec,
   gt_mapspec_add_filelengthvalues(mapspec, headerptr->filelengthtab,
                                   numofdbfiles);
   gt_mapspec_add_ulong(mapspec, headerptr->characterdistribution,
-                       (unsigned long) numofchars);
+                       (GtUword) numofchars);
 }
 
 static void gt_encseq_headerptr_delete(GtEncseqHeaderPtr *headerptr)
@@ -1281,7 +1281,7 @@ static void gt_encseq_assign_sequence_mapspec(GtMapspec *mapspec,
                                               bool writemode)
 {
   GtEncseq *encseq = (GtEncseq *) data;
-  unsigned long numofunits;
+  GtUword numofunits;
   unsigned int bitspersymbol;
 
  switch (encseq->sat) {
@@ -1292,7 +1292,7 @@ static void gt_encseq_assign_sequence_mapspec(GtMapspec *mapspec,
     case GT_ACCESS_TYPE_BYTECOMPRESS:
       bitspersymbol = gt_alphabet_bits_per_symbol(encseq->alpha);
       numofunits
-        = (unsigned long) sizeofbitarray(bitspersymbol,
+        = (GtUword) sizeofbitarray(bitspersymbol,
                                          (BitOffset) encseq->totallength);
       if (!writemode) {
         gt_assert(encseq->bitpackarray == NULL);
@@ -1313,7 +1313,7 @@ static void gt_encseq_assign_sequence_mapspec(GtMapspec *mapspec,
       gt_mapspec_add_twobitencoding(mapspec, encseq->twobitencoding,
                                     encseq->unitsoftwobitencoding);
       if (encseq->has_specialranges) {
-        numofunits = (unsigned long)
+        numofunits = (GtUword)
                       GT_NUMOFINTSFORBITS(encseq->totallength + GT_INTWORDSIZE);
         gt_mapspec_add_bitsequence(mapspec, encseq->specialbits, numofunits);
       }
@@ -1389,9 +1389,9 @@ static int gt_encseq_flush2file(const char *indexname,
   return haserr ? -1 : 0;
 }
 
-static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
+static GtUword determinelengthofdbfilenames(const GtStrArray *filenametab)
 {
-  unsigned long idx, lengthofdbfilenames = 0;
+  GtUword idx, lengthofdbfilenames = 0;
 
   for (idx = 0; idx < gt_str_array_size(filenametab); idx++) {
     lengthofdbfilenames
@@ -1401,14 +1401,14 @@ static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
 }
 
 static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
-                                          unsigned long totallength,
-                                          unsigned long numofsequences,
-                                          unsigned long numofdbfiles,
-                                          unsigned long lengthofdbfilenames,
-                                          unsigned long wildcardranges,
-                                          unsigned long exceptionranges,
-                                          unsigned long minseqlen,
-                                          unsigned long maxseqlen,
+                                          GtUword totallength,
+                                          GtUword numofsequences,
+                                          GtUword numofdbfiles,
+                                          GtUword lengthofdbfilenames,
+                                          GtUword wildcardranges,
+                                          GtUword exceptionranges,
+                                          GtUword minseqlen,
+                                          GtUword maxseqlen,
                                           bool oistab,
                                           bool no_esq_header,
                                           const Definedunsignedlong
@@ -1418,20 +1418,20 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           GtLogger *logger);
 
 int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
-                                     unsigned long totallength,
+                                     GtUword totallength,
                                      GtEncseqAccessType sat,
-                                     unsigned long lengthofsinglesequence,
-                                     unsigned long minseqlen,
-                                     unsigned long maxseqlen,
-                                     unsigned long lengthofspecialprefix,
-                                     unsigned long lengthofspecialsuffix,
-                                     unsigned long lengthoflongestnonspecial,
+                                     GtUword lengthofsinglesequence,
+                                     GtUword minseqlen,
+                                     GtUword maxseqlen,
+                                     GtUword lengthofspecialprefix,
+                                     GtUword lengthofspecialsuffix,
+                                     GtUword lengthoflongestnonspecial,
                                      GtTwobitencoding *twobitencoding,
-                                     unsigned long numofsequences,
-                                     unsigned long numoffiles,
+                                     GtUword numofsequences,
+                                     GtUword numoffiles,
                                      const GtFilelengthvalues *filelengthtab,
                                      const GtStrArray *filenametab,
-                                     const unsigned long *characterdistribution,
+                                     const GtUword *characterdistribution,
                                      GtError *err)
 {
   FILE *fp;
@@ -1443,7 +1443,7 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
   if (fp == NULL)
     haserr = true;
   if (!haserr) {
-    unsigned long idx;
+    GtUword idx;
     Definedunsignedlong equallength;
     GtAlphabet *alphabet = gt_alphabet_new_dna();
 
@@ -1496,7 +1496,7 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
       = gt_malloc(encseq->numofchars *
                   sizeof (*encseq->headerptr.characterdistribution));
     encseq->numofallchars = 0;
-    for (idx = 0; idx < (unsigned long) encseq->numofchars; idx++) {
+    for (idx = 0; idx < (GtUword) encseq->numofchars; idx++) {
       encseq->headerptr.characterdistribution[idx] = characterdistribution[idx];
       if (encseq->headerptr.characterdistribution[idx] > 0)
         encseq->numofallchars++;
@@ -1537,14 +1537,14 @@ int gt_encseq_generic_write_twobitencoding_to_file(const char *indexname,
 }
 
 int gt_encseq_equallength_write_twobitencoding_to_file(const char *indexname,
-                                     unsigned long totallength,
-                                     unsigned long lengthofsinglesequence,
+                                     GtUword totallength,
+                                     GtUword lengthofsinglesequence,
                                      GtTwobitencoding *twobitencoding,
-                                     unsigned long numofsequences,
-                                     unsigned long numoffiles,
+                                     GtUword numofsequences,
+                                     GtUword numoffiles,
                                      const GtFilelengthvalues *filelengthtab,
                                      const GtStrArray *filenametab,
-                                     const unsigned long *characterdistribution,
+                                     const GtUword *characterdistribution,
                                      GtError *err)
 {
   gt_assert (lengthofsinglesequence > 0);
@@ -1574,7 +1574,7 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   bool haserr = false;
   GtStr *tmpfilename;
   char *nextstart;
-  unsigned long idx;
+  GtUword idx;
 
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(indexname);
@@ -1645,8 +1645,8 @@ static void setencsequtablesNULL(GtEncseqAccessType sat,
 }
 
 static GtEncseqAccessType determineoptimalsssptablerep(
-                                  unsigned long totallength,
-                                  unsigned long numofseparators)
+                                  GtUword totallength,
+                                  GtUword numofseparators)
 {
   uint64_t sepsizemin, sepsize;
   GtEncseqAccessType satmin;
@@ -1669,25 +1669,25 @@ static GtEncseqAccessType determineoptimalsssptablerep(
 }
 
 static void initSWtable(GtSWtable *swtable,
-                        unsigned long totallength,
+                        GtUword totallength,
                         GtEncseqAccessType sat,
-                        unsigned long items)
+                        GtUword items)
 {
   switch (sat) {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      swtable->st_uchar.maxrangevalue = (unsigned long) UCHAR_MAX;
+      swtable->st_uchar.maxrangevalue = (GtUword) UCHAR_MAX;
       swtable->st_uchar.numofpages
         = totallength/swtable->st_uchar.maxrangevalue + 1;
       swtable->st_uchar.numofpositionstostore = items;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      swtable->st_uint16.maxrangevalue = (unsigned long) USHRT_MAX;
+      swtable->st_uint16.maxrangevalue = (GtUword) USHRT_MAX;
       swtable->st_uint16.numofpages
         = totallength/swtable->st_uint16.maxrangevalue + 1;
       swtable->st_uint16.numofpositionstostore = items;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      swtable->st_uint32.maxrangevalue = (unsigned long) UINT32_MAX;
+      swtable->st_uint32.maxrangevalue = (GtUword) UINT32_MAX;
       swtable->st_uint32.numofpages
         = totallength/swtable->st_uint32.maxrangevalue + 1;
       swtable->st_uint32.numofpositionstostore = items;
@@ -1703,12 +1703,12 @@ typedef struct
 {
   GtSWtable *ssptabptr;
   GtEncseqAccessType satsep;
-  unsigned long nextcheckpos, nextcheckincrement, pagenumber, fillpos,
+  GtUword nextcheckpos, nextcheckincrement, pagenumber, fillpos,
                 numofpages;
 } Gtssptaboutinfo;
 
-static Gtssptaboutinfo *ssptaboutinfo_new(unsigned long totallength,
-                                          unsigned long numofsequences,
+static Gtssptaboutinfo *ssptaboutinfo_new(GtUword totallength,
+                                          GtUword numofsequences,
                                           GtSWtable *ssptab)
 {
   Gtssptaboutinfo *ssptaboutinfo;
@@ -1772,7 +1772,7 @@ static void ssptaboutinfo_delete(Gtssptaboutinfo *ssptaboutinfo)
 }
 
 static void ssptaboutinfo_processseppos(Gtssptaboutinfo *ssptaboutinfo,
-                                        unsigned long seppos)
+                                        GtUword seppos)
 {
   if (ssptaboutinfo != NULL) {
     switch (ssptaboutinfo->satsep) {
@@ -1825,7 +1825,7 @@ static void ssptaboutinfo_setendidx(Gtssptaboutinfo *ssptaboutinfo)
 }
 
 static void ssptaboutinfo_processanyposition(Gtssptaboutinfo *ssptaboutinfo,
-                                             unsigned long currentposition)
+                                             GtUword currentposition)
 {
   if (ssptaboutinfo != NULL && currentposition == ssptaboutinfo->nextcheckpos) {
     ssptaboutinfo_setendidx(ssptaboutinfo);
@@ -2042,17 +2042,17 @@ static void showallSWtablewithpages(GtEncseqAccessType sat,
 {
   switch (sat) {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      printf("uchar pages of maximum value %lu\n",
+      printf("uchar pages of maximum value "GT_LU"\n",
               swtable->st_uchar.maxrangevalue);
       showallSWtablewithpages_uchar(&swtable->st_uchar);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      printf("ushort pages of maximum value %lu\n",
+      printf("ushort pages of maximum value "GT_LU"\n",
               swtable->st_uint16.maxrangevalue);
       showallSWtablewithpages_uint16(&swtable->st_uint16);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      printf("uint32 pages of maximum value %lu\n",
+      printf("uint32 pages of maximum value "GT_LU"\n",
               swtable->st_uint32.maxrangevalue);
       showallSWtablewithpages_uint32(&swtable->st_uint32);
       break;
@@ -2097,7 +2097,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
                                GtSequenceBuffer *fb,
                                GtError *err)
 {
-  unsigned long currentposition,
+  GtUword currentposition,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
                 nextcheckpos = GT_UNDEF_ULONG,
@@ -2213,10 +2213,10 @@ static GtUchar seqdelivercharViadirectaccess(GtEncseqReader *esr)
 static bool containsspecialViadirectaccess(const GtEncseq *encseq,
                                            GtReadmode readmode,
                                            GT_UNUSED GtEncseqReader *esr,
-                                           unsigned long startpos,
-                                           unsigned long len)
+                                           GtUword startpos,
+                                           GtUword len)
 {
-  unsigned long pos;
+  GtUword pos;
 
   gt_assert(encseq != NULL);
   if (!GT_ISDIRREVERSE(readmode)) {
@@ -2241,13 +2241,13 @@ static bool containsspecialViadirectaccess(const GtEncseq *encseq,
 
 static bool issinglepositioninwildcardrangeViadirectaccess(
                                                    const GtEncseq *encseq,
-                                                   unsigned long pos)
+                                                   GtUword pos)
 {
   return (encseq->plainseq[pos] == (GtUchar) WILDCARD) ? true : false;
 }
 
 static bool issinglepositionseparatorViadirectaccess(const GtEncseq *encseq,
-                                                     unsigned long pos)
+                                                     GtUword pos)
 {
   return (encseq->plainseq[pos] == (GtUchar) SEPARATOR) ? true : false;
 }
@@ -2259,7 +2259,7 @@ static int fillViabytecompress(GtEncseq *encseq,
                                GtSequenceBuffer *fb,
                                GtError *err)
 {
-  unsigned long currentposition,
+  GtUword currentposition,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
                 nextcheckpos = GT_UNDEF_ULONG,
@@ -2381,7 +2381,7 @@ static int fillViabytecompress(GtEncseq *encseq,
 }
 
 static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
-                                          unsigned long pos)
+                                          GtUword pos)
 {
   uint32_t cc;
 
@@ -2392,8 +2392,8 @@ static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
     return (GtUchar) WILDCARD;
   if (cc == (uint32_t) (encseq->numofchars+1))
     return (GtUchar) SEPARATOR;
-  fprintf(stderr, "delivercharViabytecompress: cc=%lu not possible\n",
-                  (unsigned long) cc);
+  fprintf(stderr, "delivercharViabytecompress: cc="GT_LU" not possible\n",
+                  (GtUword) cc);
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
@@ -2405,10 +2405,10 @@ static GtUchar seqdelivercharViabytecompress(GtEncseqReader *esr)
 static bool containsspecialViabytecompress(const GtEncseq *encseq,
                                            GtReadmode readmode,
                                            GT_UNUSED GtEncseqReader *esr,
-                                           unsigned long startpos,
-                                           unsigned long len)
+                                           GtUword startpos,
+                                           GtUword len)
 {
-  unsigned long pos;
+  GtUword pos;
   GtUchar cc;
 
   if (!GT_ISDIRREVERSE(readmode)) {
@@ -2435,7 +2435,7 @@ static bool containsspecialViabytecompress(const GtEncseq *encseq,
 
 static bool issinglepositioninwildcardrangeViabytecompress(
                                                    const GtEncseq *encseq,
-                                                   unsigned long pos)
+                                                   GtUword pos)
 {
   return (delivercharViabytecompress(encseq, pos) == (GtUchar) WILDCARD)
              ? true
@@ -2443,7 +2443,7 @@ static bool issinglepositioninwildcardrangeViabytecompress(
 }
 
 static bool issinglepositionseparatorViabytecompress(const GtEncseq *encseq,
-                                                     unsigned long pos)
+                                                     GtUword pos)
 {
   return (delivercharViabytecompress(encseq, pos) == (GtUchar) SEPARATOR)
              ? true
@@ -2459,7 +2459,7 @@ static int fillViaequallength(GtEncseq *encseq,
 {
   GtUchar cc;
   char orig;
-  unsigned long pos,
+  GtUword pos,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
                 nextcheckpos = GT_UNDEF_ULONG,
@@ -2532,7 +2532,7 @@ static int fillViaequallength(GtEncseq *encseq,
         gt_assert(cc == (GtUchar) SEPARATOR);
         bitwise |= (GtTwobitencoding) encseq->leastprobablecharacter;
       }
-      if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
+      if (widthbuffer < (GtUword) (GT_UNITSIN2BITENC - 1))
         widthbuffer++;
       else {
         *twobitencodingptr++ = bitwise;
@@ -2572,7 +2572,7 @@ static int fillViaequallength(GtEncseq *encseq,
 }
 
 static bool issinglepositioninspecialrangeViaequallength(const GtEncseq *encseq,
-                                                         unsigned long pos)
+                                                         GtUword pos)
 {
   gt_assert(encseq != NULL);
   gt_assert(encseq->equallength.defined);
@@ -2613,25 +2613,25 @@ static bool issinglepositioninseparatorViaequallength(GtEncseqReader *esr)
 
 static GtUchar seqdelivercharViaequallength(GtEncseqReader *esr)
 {
-  unsigned long twobits = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+  GtUword twobits = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
                                              esr->currentpos);
 
-  if (twobits != (unsigned long) esr->encseq->leastprobablecharacter ||
+  if (twobits != (GtUword) esr->encseq->leastprobablecharacter ||
       !issinglepositioninseparatorViaequallength(esr) || esr->currentpos == 0)
     return (GtUchar) twobits;
   return (GtUchar) SEPARATOR;
 }
 
-static unsigned long gt_encseq_seqnum_Viaequallength(const GtEncseq *encseq,
-                                                     unsigned long pos)
+static GtUword gt_encseq_seqnum_Viaequallength(const GtEncseq *encseq,
+                                                     GtUword pos)
 {
   gt_assert(!issinglepositioninspecialrangeViaequallength(encseq, pos));
   return (pos + 1)/(encseq->equallength.valueunsignedlong + 1);
 }
 
-static unsigned long gt_encseq_seqstartpos_Viaequallength(
+static GtUword gt_encseq_seqstartpos_Viaequallength(
                                                   const GtEncseq *encseq,
-                                                  unsigned long seqnum)
+                                                  GtUword seqnum)
 {
   gt_assert(encseq != NULL && seqnum < encseq->logicalnumofdbsequences);
   return seqnum * (encseq->equallength.valueunsignedlong + 1);
@@ -2640,8 +2640,8 @@ static unsigned long gt_encseq_seqstartpos_Viaequallength(
 static bool containsspecialViaequallength(const GtEncseq *encseq,
                                           GtReadmode readmode,
                                           GT_UNUSED GtEncseqReader *esr,
-                                          unsigned long startpos,
-                                          unsigned long len)
+                                          GtUword startpos,
+                                          GtUword len)
 {
   gt_assert(encseq != NULL);
   if (!GT_ISDIRREVERSE(readmode)) {
@@ -2673,7 +2673,7 @@ static int fillViabitaccess(GtEncseq *encseq,
                             Gtssptaboutinfo *ssptaboutinfo,
                             GtSequenceBuffer *fb, GtError *err)
 {
-   unsigned long currentposition,
+   GtUword currentposition,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
                 nextcheckpos = GT_UNDEF_ULONG,
@@ -2760,7 +2760,7 @@ static int fillViabitaccess(GtEncseq *encseq,
         if (cc == (GtUchar) SEPARATOR)
           bitwise |= (GtTwobitencoding) GT_TWOBITS_FOR_SEPARATOR;
       }
-      if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
+      if (widthbuffer < (GtUword) (GT_UNITSIN2BITENC - 1))
         widthbuffer++;
       else {
         *twobitencodingptr++ = bitwise;
@@ -2800,11 +2800,11 @@ static int fillViabitaccess(GtEncseq *encseq,
 
 static GtUchar seqdelivercharViabitaccessSpecial(GtEncseqReader *esr)
 {
-  unsigned long twobits = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+  GtUword twobits = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
                                              esr->currentpos);
   if (twobits > 1UL || !GT_ISIBITSET(esr->encseq->specialbits, esr->currentpos))
     return (GtUchar) twobits;
-  return (twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
+  return (twobits == (GtUword) GT_TWOBITS_FOR_SEPARATOR)
            ? (GtUchar) SEPARATOR
            : (GtUchar) WILDCARD;
 }
@@ -2812,10 +2812,10 @@ static GtUchar seqdelivercharViabitaccessSpecial(GtEncseqReader *esr)
 static bool containsspecialViabitaccess(const GtEncseq *encseq,
                                         GtReadmode readmode,
                                         GT_UNUSED GtEncseqReader *esr,
-                                        unsigned long startpos,
-                                        unsigned long len)
+                                        GtUword startpos,
+                                        GtUword len)
 {
-  unsigned long pos;
+  GtUword pos;
 
   gt_assert(encseq != NULL);
   if (GT_ISDIRREVERSE(readmode)) {
@@ -2844,7 +2844,7 @@ static bool containsspecialViabitaccess(const GtEncseq *encseq,
 }
 
 static bool issinglepositioninwildcardrangeViabitaccess(const GtEncseq *encseq,
-                                                        unsigned long pos)
+                                                        GtUword pos)
 {
   return (GT_ISIBITSET(encseq->specialbits, pos) &&
           EXTRACTENCODEDCHAR(encseq->twobitencoding, pos) ==
@@ -2852,11 +2852,11 @@ static bool issinglepositioninwildcardrangeViabitaccess(const GtEncseq *encseq,
 }
 
 static bool issinglepositionseparatorViabitaccess(const GtEncseq *encseq,
-                                                  unsigned long pos)
+                                                  GtUword pos)
 {
   return (GT_ISIBITSET(encseq->specialbits, pos) &&
           EXTRACTENCODEDCHAR(encseq->twobitencoding, pos) ==
-          (unsigned long) GT_TWOBITS_FOR_SEPARATOR) ? true : false;
+          (GtUword) GT_TWOBITS_FOR_SEPARATOR) ? true : false;
 }
 
 /* GT_ACCESS_TYPE_UCHARTABLES | GT_ACCESS_TYPE_USHORTTABLES |
@@ -2864,7 +2864,7 @@ static bool issinglepositionseparatorViabitaccess(const GtEncseq *encseq,
 
 #define DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(FCTNAME, CHECKFUN,\
                                                          EXISTS, TYPE)\
-static bool FCTNAME##TYPE(const GtEncseq *encseq, unsigned long pos)\
+static bool FCTNAME##TYPE(const GtEncseq *encseq, GtUword pos)\
 {\
   return (encseq->EXISTS) &&\
          CHECKFUN##_##TYPE(&encseq->wildcardrangetable.st_##TYPE, NULL, pos);\
@@ -2872,7 +2872,7 @@ static bool FCTNAME##TYPE(const GtEncseq *encseq, unsigned long pos)\
 
 #define DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(FCTNAME, CHECKFUN,\
                                                           EXISTS, TYPE)\
-static bool FCTNAME##TYPE(const GtEncseq *encseq, unsigned long pos)\
+static bool FCTNAME##TYPE(const GtEncseq *encseq, GtUword pos)\
 {\
   return (encseq->EXISTS) &&\
          CHECKFUN##_##TYPE(&encseq->ssptab.st_##TYPE, pos);\
@@ -2880,8 +2880,8 @@ static bool FCTNAME##TYPE(const GtEncseq *encseq, unsigned long pos)\
 
 #define DECLAREISSINGLEPOSITIONEXCEPTIONVIATABLESFUNCTION(FCTNAME, CHECKFUN,\
                                                           EXISTS, TYPE)\
-static bool FCTNAME##TYPE(const GtEncseq *encseq, unsigned long *mappos,\
-                          unsigned long pos)\
+static bool FCTNAME##TYPE(const GtEncseq *encseq, GtUword *mappos,\
+                          GtUword pos)\
 {\
   return (encseq->EXISTS) &&\
          CHECKFUN##_##TYPE(&encseq->exceptiontable.st_##TYPE, mappos, pos);\
@@ -2972,7 +2972,7 @@ static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
 void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                            const GtEncseq *encseq,
                                            GtReadmode readmode,
-                                           unsigned long startpos)
+                                           GtUword startpos)
 {
   gt_assert(esr != NULL && encseq != NULL);
   if (encseq != esr->encseq) {
@@ -3025,7 +3025,7 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       }
       binpreparenextrangeGtEncseqReader(esr, SWtable_wildcardrange);
 #ifdef GT_RANGEDEBUG
-      printf("wildcardranges: start advance at (%lu, %lu) in page %lu\n",
+      printf("wildcardranges: start advance at ("GT_LU", "GT_LU") in page "GT_LU"\n",
                        esr->wildcardrangestate->firstcell,
                        esr->wildcardrangestate->lastcell,
                        esr->wildcardrangestate->nextpage);
@@ -3040,7 +3040,7 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       }
       binpreparenextrangeGtEncseqReader(esr, SWtable_ssptab);
 #ifdef GT_RANGEDEBUG
-      printf("ssptab: start advance at (%lu, %lu) in page %lu\n",
+      printf("ssptab: start advance at ("GT_LU", "GT_LU") in page "GT_LU"\n",
                        esr->ssptabstate->firstcell,
                        esr->ssptabstate->lastcell,
                        esr->ssptabstate->nextpage);
@@ -3062,7 +3062,7 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
         esr->nextseparatorpos = startpos;
       }
       else {
-        unsigned long seqnum = (startpos + 1)/
+        GtUword seqnum = (startpos + 1)/
                                (encseq->equallength.valueunsignedlong + 1);
         if (!GT_ISDIRREVERSE(esr->readmode)) {
           esr->nextseparatorpos = encseq->equallength.valueunsignedlong +
@@ -3086,7 +3086,7 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
 
 GtEncseqReader* gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
                                                       GtReadmode readmode,
-                                                      unsigned long startpos)
+                                                      GtUword startpos)
 {
   GtEncseqReader *esr = gt_calloc((size_t) 1, sizeof (*esr));
   /* the following is implicit by using calloc, but we better initialize
@@ -3108,8 +3108,8 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   gt_free(esr);
 }
 
-static unsigned long gt_encseq_seqstartpos_viautables(const GtEncseq *encseq,
-                                                      unsigned long seqnum)
+static GtUword gt_encseq_seqstartpos_viautables(const GtEncseq *encseq,
+                                                      GtUword seqnum)
 {
   switch (encseq->satsep) {
     case GT_ACCESS_TYPE_UCHARTABLES:
@@ -3129,8 +3129,8 @@ static unsigned long gt_encseq_seqstartpos_viautables(const GtEncseq *encseq,
 
 static bool containsSWViatables(const GtEncseq *encseq,
                                 GtEncseqReader *esr,
-                                unsigned long startpos,
-                                unsigned long len,
+                                GtUword startpos,
+                                GtUword len,
                                 KindofSWtable kindsw)
 {
   GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr, kindsw);
@@ -3159,8 +3159,8 @@ static bool containsSWViatables(const GtEncseq *encseq,
 static bool containsspecialViatables(const GtEncseq *encseq,
                                      GtReadmode readmode,
                                      GtEncseqReader *esr,
-                                     unsigned long startpos,
-                                     unsigned long len)
+                                     GtUword startpos,
+                                     GtUword len)
 {
   bool cspecial = false;
 
@@ -3209,7 +3209,7 @@ struct GtSpecialrangeiterator
   bool moveforward, exhausted, reflected, skipnext, originalmoveforward,
        middle_separator_emitted;
   GtEncseqReader *esr;
-  unsigned long lengthofspecialrange,
+  GtUword lengthofspecialrange,
                 jumppos; /* position jumping along the sequence to find the
                             special ranges, only need when
                             !encseq->accesstype_via_utables */
@@ -3218,7 +3218,7 @@ struct GtSpecialrangeiterator
 void gt_specialrangeiterator_reinit_with_startpos(GtSpecialrangeiterator *sri,
                                                   const GtEncseq *encseq,
                                                   bool moveforward,
-                                                  unsigned long startpos)
+                                                  GtUword startpos)
 {
   gt_assert(sri != NULL && (encseq->has_specialranges
               || (encseq->hasmirror
@@ -3437,9 +3437,9 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
         break;
       }
       if (currentword == 0) {
-        gt_assert(GT_MODWORDSIZE(sri->jumppos) == (unsigned long)
+        gt_assert(GT_MODWORDSIZE(sri->jumppos) == (GtUword)
                                                   (GT_INTWORDSIZE-1));
-        if (sri->jumppos < (unsigned long) GT_INTWORDSIZE) {
+        if (sri->jumppos < (GtUword) GT_INTWORDSIZE) {
           sri->exhausted = true;
           break;
         }
@@ -3622,7 +3622,7 @@ static inline void gt_specialrangeiterator_invert_range(GtEncseq *encseq,
   range->end = GT_REVERSEPOS(encseq->logicaltotallength,
                              range->end);
   if (range->end <= range->start) {
-    unsigned long tmp;
+    GtUword tmp;
     tmp = ++range->end;
     range->end = ++range->start;
     range->start = tmp;
@@ -3714,7 +3714,7 @@ static void gt_addmarkpos(GtArrayGtUlong *asp,
                           GtEncseqReader *esr,
                           const GtRange *seqrange)
 {
-  unsigned long pos;
+  GtUword pos;
   GtUchar currentchar;
 
   for (pos=seqrange->start; pos<seqrange->end; pos++) {
@@ -3727,7 +3727,7 @@ static void gt_addmarkpos(GtArrayGtUlong *asp,
   }
 }
 
-static unsigned long *encseq2markpositions(const GtEncseq *encseq)
+static GtUword *encseq2markpositions(const GtEncseq *encseq)
 {
   GtArrayGtUlong asp;
   GtSpecialrangeiterator *sri;
@@ -3755,12 +3755,12 @@ static unsigned long *encseq2markpositions(const GtEncseq *encseq)
   return asp.spaceGtUlong;
 }
 
-unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
-                                   unsigned long numofrecords,
-                                   unsigned long totalwidth,
-                                   unsigned long position)
+GtUword gt_encseq_sep2seqnum(const GtUword *recordseps,
+                                   GtUword numofrecords,
+                                   GtUword totalwidth,
+                                   GtUword position)
 {
-  unsigned long left, mid, right, len;
+  GtUword left, mid, right, len;
 
   gt_assert(numofrecords > 0);
   if (numofrecords == 1UL || position <= recordseps[0])
@@ -3769,7 +3769,7 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
     if (position < totalwidth)
       return numofrecords - 1;
     fprintf(stderr,
-            "gt_encseq_sep2seqnum: cannot find position %lu\n", position);
+            "gt_encseq_sep2seqnum: cannot find position "GT_LU"\n", position);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   left = 0;
@@ -3788,12 +3788,12 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
       right = mid-1;
     }
   }
-  fprintf(stderr, "gt_encseq_sep2seqnum: cannot find position %lu\n", position);
+  fprintf(stderr, "gt_encseq_sep2seqnum: cannot find position "GT_LU"\n", position);
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-unsigned long gt_encseq_seqnum_ssptab(const GtEncseq *encseq,
-                                         unsigned long position)
+GtUword gt_encseq_seqnum_ssptab(const GtEncseq *encseq,
+                                         GtUword position)
 {
   gt_assert(position < encseq->totallength);
   switch (encseq->satsep) {
@@ -3809,10 +3809,10 @@ unsigned long gt_encseq_seqnum_ssptab(const GtEncseq *encseq,
   }
 }
 
-unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
-                               unsigned long position)
+GtUword gt_encseq_seqnum(const GtEncseq *encseq,
+                               GtUword position)
 {
-  unsigned long num;
+  GtUword num;
   bool wasmirrored = false;
   if (encseq->hasmirror && position >= encseq->totallength) {
     position = encseq->logicaltotallength - 1 - position;
@@ -3836,10 +3836,10 @@ unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
   return num;
 }
 
-unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
-                                    unsigned long seqnum)
+GtUword gt_encseq_seqstartpos(const GtEncseq *encseq,
+                                    GtUword seqnum)
 {
-  unsigned long pos;
+  GtUword pos;
   bool wasmirrored = false;
   gt_assert(encseq != NULL && seqnum < encseq->logicalnumofdbsequences);
   if (encseq->hasmirror && seqnum >= encseq->numofdbsequences) {
@@ -3881,7 +3881,7 @@ unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
   return pos;
 }
 
-unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
+GtUword gt_encseq_seqlength(const GtEncseq *encseq, GtUword seqnum)
 {
   gt_assert(encseq != NULL && seqnum < encseq->logicalnumofdbsequences);
   if (encseq->hasmirror && seqnum >= encseq->numofdbsequences) {
@@ -3895,7 +3895,7 @@ unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
         return gt_encseq_seqstartpos_viautables(encseq, 1UL) - 1;
     }
     else {
-      unsigned long startpos = gt_encseq_seqstartpos(encseq, seqnum);
+      GtUword startpos = gt_encseq_seqstartpos(encseq, seqnum);
       if (seqnum == encseq->numofdbsequences - 1)
         return encseq->totallength - startpos;
       else {
@@ -3911,7 +3911,7 @@ unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
 void gt_encseq_check_markpos(const GtEncseq *encseq)
 {
   if (encseq->numofdbsequences > 1UL) {
-    unsigned long *markpos, totallength, pos, currentseqnum = 0, seqnum;
+    GtUword *markpos, totallength, pos, currentseqnum = 0, seqnum;
     GtUchar currentchar;
     GtEncseqReader *esr;
 
@@ -3927,7 +3927,7 @@ void gt_encseq_check_markpos(const GtEncseq *encseq)
         seqnum = gt_encseq_sep2seqnum(markpos, encseq->numofdbsequences,
                                       totallength, pos);
         if (seqnum != currentseqnum) {
-          fprintf(stderr, "pos= %lu seqnum = %lu != %lu = currentseqnum\n",
+          fprintf(stderr, "pos= "GT_LU" seqnum = "GT_LU" != "GT_LU" = currentseqnum\n",
                           pos, seqnum, currentseqnum);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
@@ -3947,22 +3947,22 @@ GtEncseq* gt_encseq_ref(GtEncseq *encseq)
   return encseq;
 }
 
-static double determine_spaceinbitsperchar(unsigned long sizeofrep,
-                                           unsigned long totallength)
+static double determine_spaceinbitsperchar(GtUword sizeofrep,
+                                           GtUword totallength)
 {
   return (double) ((uint64_t) CHAR_BIT * (uint64_t) sizeofrep)/
                   (double) totallength;
 }
 
 static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
-                                          unsigned long totallength,
-                                          unsigned long numofsequences,
-                                          unsigned long numofdbfiles,
-                                          unsigned long lengthofdbfilenames,
-                                          unsigned long wildcardranges,
-                                          unsigned long exceptionranges,
-                                          unsigned long minseqlen,
-                                          unsigned long maxseqlen,
+                                          GtUword totallength,
+                                          GtUword numofsequences,
+                                          GtUword numofdbfiles,
+                                          GtUword lengthofdbfilenames,
+                                          GtUword wildcardranges,
+                                          GtUword exceptionranges,
+                                          GtUword minseqlen,
+                                          GtUword maxseqlen,
                                           bool oistab,
                                           bool no_esq_header,
                                           const Definedunsignedlong
@@ -4080,17 +4080,17 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   if (encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) {
     gt_assert(encseq->equallength.defined);
     gt_logger_log(logger,
-                  "init character encoding (%s %lu, %lu bytes, %.2f "
+                  "init character encoding (%s "GT_LU", "GT_LU" bytes, %.2f "
                   "bits/symbol)",
                   encseq->satname, encseq->equallength.valueunsignedlong,
                   encseq->sizeofrep, spaceinbitsperchar);
   }
   else {
     gt_logger_log(logger,
-                  "init character encoding (%s, %lu bytes, %.2f bits/symbol)",
+                  "init character encoding (%s, "GT_LU" bytes, %.2f bits/symbol)",
                   encseq->satname, encseq->sizeofrep, spaceinbitsperchar);
     if (encseq->numofdbsequences > 1UL) {
-      unsigned long sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
+      GtUword sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
                                      gt_encseq_sizeofSWtable(encseq->satsep,
                                               false,
                                               false,
@@ -4099,7 +4099,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
       spaceinbitsperchar = determine_spaceinbitsperchar(sizessptab,
                                                         totallength);
       gt_logger_log(logger,
-                    "init ssptab encoding (%s, %lu bytes, %.2f bits/symbol)",
+                    "init ssptab encoding (%s, "GT_LU" bytes, %.2f bits/symbol)",
                     gt_encseq_access_type_str(encseq->satsep),
                     sizessptab,
                     spaceinbitsperchar);
@@ -4145,7 +4145,7 @@ GtUchar gt_encseq_alphabetwildcardshow(const GtEncseq *encseq)
   return gt_alphabet_wildcard_show(encseq->alpha);
 }
 
-unsigned long gt_encseq_charcount(const GtEncseq *encseq, GtUchar cc)
+GtUword gt_encseq_charcount(const GtEncseq *encseq, GtUchar cc)
 {
   gt_assert(encseq != NULL &&
             (unsigned int) cc < gt_alphabet_num_of_chars(encseq->alpha));
@@ -4155,13 +4155,13 @@ unsigned long gt_encseq_charcount(const GtEncseq *encseq, GtUchar cc)
   } else return encseq->headerptr.characterdistribution[cc];
 }
 
-unsigned long gt_encseq_min_seq_length(const GtEncseq *encseq)
+GtUword gt_encseq_min_seq_length(const GtEncseq *encseq)
 {
   gt_assert(encseq);
   return encseq->minseqlen;
 }
 
-unsigned long gt_encseq_max_seq_length(const GtEncseq *encseq)
+GtUword gt_encseq_max_seq_length(const GtEncseq *encseq)
 {
   gt_assert(encseq);
   return encseq->maxseqlen;
@@ -4184,19 +4184,19 @@ typedef struct
 {
   const char *funcname;
   bool(*function)(const GtEncseq *, GtReadmode, GtEncseqReader *,
-                  unsigned long, unsigned long);
+                  GtUword, GtUword);
 } Containsspecialfunc;
 
 typedef struct
 {
   const char *funcname;
-  bool(*function)(const GtEncseq *, unsigned long);
+  bool(*function)(const GtEncseq *, GtUword);
 } Issinglepositionspecialfunc;
 
 typedef struct
 {
   const char *funcname;
-  bool(*function)(const GtEncseq *, unsigned long*, unsigned long);
+  bool(*function)(const GtEncseq *, GtUword*, GtUword);
 } Getexceptionmappingfunc;
 
 /* Do not change the order of the following components */
@@ -4357,11 +4357,11 @@ static GtEncseqfunctions encodedseqfunctab[] =
         }
 
 static unsigned int determineleastprobablecharacter(const GtAlphabet *alpha,
-                                                     const unsigned long
+                                                     const GtUword
                                                      *characterdistribution)
 {
   unsigned int idx, minidx;
-  unsigned long mindist;
+  GtUword mindist;
 
   gt_assert(gt_alphabet_num_of_chars(alpha) > 0);
   mindist = characterdistribution[0];
@@ -4376,15 +4376,15 @@ static unsigned int determineleastprobablecharacter(const GtAlphabet *alpha,
 }
 
 int gt_encseq_seppos2ssptab(const char *indexname,
-                            unsigned long totallength,
-                            unsigned long numofdbsequences,
-                            const unsigned long *seppostab,
+                            GtUword totallength,
+                            GtUword numofdbsequences,
+                            const GtUword *seppostab,
                             GtError *err)
 {
   GtSWtable ssptab;
   Gtssptaboutinfo *ssptaboutinfo;
-  unsigned long idx;
-  const unsigned long *sepposptr;
+  GtUword idx;
+  const GtUword *sepposptr;
   Gtssptransferinfo ssptransferinfo;
   GtEncseqAccessType satsep;
   int ret;
@@ -4420,26 +4420,26 @@ int gt_encseq_seppos2ssptab(const char *indexname,
 static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
                                        const GtFilelengthvalues *filelengthtab,
                                        bool plainformat,
-                                       unsigned long totallength,
+                                       GtUword totallength,
                                        bool outssptab,
                                        bool no_esq_header,
-                                       unsigned long numofsequences,
+                                       GtUword numofsequences,
                                        const Definedunsignedlong *equallength,
                                        GtAlphabet *alphabet,
                                        bool customalphabet,
                                        GtEncseqAccessType sat,
-                                       unsigned long *characterdistribution,
-                                       unsigned long *classstartpositions,
+                                       GtUword *characterdistribution,
+                                       GtUword *classstartpositions,
                                        char *maxchars,
                                        char *allchars,
-                                       unsigned long numofallchars,
+                                       GtUword numofallchars,
                                        unsigned char *subsymbolmap,
                                        unsigned char maxsubalphasize,
                                        bool outoistab,
                                        const GtSpecialcharinfo *specialcharinfo,
-                                       unsigned long wildcardranges,
-                                       unsigned long minseqlength,
-                                       unsigned long maxseqlength,
+                                       GtUword wildcardranges,
+                                       GtUword minseqlength,
+                                       GtUword maxseqlength,
                                        GtLogger *logger,
                                        GtError *err)
 {
@@ -4450,7 +4450,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
 
   gt_error_check(err);
   if (!haserr) {
-    unsigned long lengthofdbfilenames
+    GtUword lengthofdbfilenames
       = determinelengthofdbfilenames(filenametab);
 
     encseq = determineencseqkeyvalues(sat,
@@ -4510,7 +4510,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
     }
     if (encseq->has_exceptiontable) {
       unsigned int bitsforsubalpha
-        = gt_determinebitspervalue((unsigned long) encseq->maxsubalphasize-1);
+        = gt_determinebitspervalue((GtUword) encseq->maxsubalphasize-1);
 
       encseq->exceptions
         = bitpackarray_new(bitsforsubalpha,
@@ -4566,14 +4566,14 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
     GtSpecialcharinfo si;
     Definedunsignedlong equallength;
     GtEncseqAccessType sat;
-    unsigned long numofdbsequences, totallength;
+    GtUword numofdbsequences, totallength;
 
     si = gt_encseq_metadata_specialcharinfo(emd);
     sat = gt_encseq_metadata_accesstype(emd);
     totallength = gt_encseq_metadata_total_length(emd);
     numofdbsequences = gt_encseq_metadata_num_of_sequences(emd);
     if (sat == GT_ACCESS_TYPE_EQUALLENGTH) {
-      unsigned long effectivelengthsum;
+      GtUword effectivelengthsum;
 
       equallength.defined = true;
       gt_assert(numofdbsequences > 0);
@@ -4627,7 +4627,7 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
                                                  GT_DESTABFILESUFFIX,
                                                  &numofbytes,
                                                  err);
-    encseq->destablength = (unsigned long) numofbytes;
+    encseq->destablength = (GtUword) numofbytes;
     if (encseq->destab == NULL)
       haserr = true;
   }
@@ -4678,11 +4678,11 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
   if (!haserr) {
     gt_assert(encseq != NULL);
     if (encseq->numofdbfiles > 1UL) {
-      unsigned long i,
+      GtUword i,
                     nextsep = 0;
       gt_assert(encseq->fsptab == NULL);
       encseq->fsptab = gt_calloc((size_t) encseq->numofdbfiles - 1,
-                                 sizeof (unsigned long));
+                                 sizeof (GtUword));
       gt_assert(encseq->headerptr.filelengthtab != NULL);
       for (i = 0; i < encseq->numofdbfiles - 1; i++) {
         nextsep += encseq->headerptr.filelengthtab[i].effectivelength;
@@ -4705,10 +4705,10 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
 }
 
 const char* gt_encseq_description(const GtEncseq *encseq,
-                                  unsigned long *desclen,
-                                  unsigned long seqnum)
+                                  GtUword *desclen,
+                                  GtUword seqnum)
 {
-  unsigned long destablen;
+  GtUword destablen;
 
   gt_assert(encseq != NULL && encseq->destab != NULL);
   if (encseq->destab[encseq->destablength - 1] == '\n') {
@@ -4716,13 +4716,13 @@ const char* gt_encseq_description(const GtEncseq *encseq,
   } else {
     /* XXX: hard-coded! final two ulongs are max desc length and
        terminator constant */
-    destablen = encseq->destablength - (2 * sizeof (unsigned long));
+    destablen = encseq->destablength - (2 * sizeof (GtUword));
   }
   if (seqnum >= encseq->numofdbsequences) {
       seqnum = encseq->logicalnumofdbsequences - 1 - seqnum;
   }
   if (seqnum > 0) {
-    unsigned long nextend;
+    GtUword nextend;
     gt_assert(seqnum < encseq->numofdbsequences);
     if (seqnum < encseq->numofdbsequences - 1)
       nextend = encseq->sdstab[seqnum];
@@ -4743,15 +4743,15 @@ const char* gt_encseq_description(const GtEncseq *encseq,
   return encseq->destab;
 }
 
-unsigned long gt_encseq_max_desc_length(const GtEncseq *encseq)
+GtUword gt_encseq_max_desc_length(const GtEncseq *encseq)
 {
   gt_assert(encseq && encseq->destab);
   /* decides whether destab contains max desc length as a separate field */
   if (encseq->destab[encseq->destablength - 1] == '\n') {
-    unsigned long i,
+    GtUword i,
                   maxlen = 0;
     for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
-      unsigned long len;
+      GtUword len;
       (void) gt_encseq_description(encseq, &len, i);
       if (len > maxlen)
         maxlen = len;
@@ -4759,8 +4759,8 @@ unsigned long gt_encseq_max_desc_length(const GtEncseq *encseq)
     return maxlen;
   } else {
     void *ptr;
-    ptr = encseq->destab + encseq->destablength - 2 * (sizeof (unsigned long));
-    return *(unsigned long*) ptr;
+    ptr = encseq->destab + encseq->destablength - 2 * (sizeof (GtUword));
+    return *(GtUword*) ptr;
   }
 }
 
@@ -4772,7 +4772,7 @@ const GtStrArray *gt_encseq_filenames(const GtEncseq *encseq)
 
 void gt_encseq_check_descriptions(const GtEncseq *encseq)
 {
-  unsigned long desclen, seqnum, totaldesclength, offset = 0;
+  GtUword desclen, seqnum, totaldesclength, offset = 0;
   const char *desptr;
   char *copydestab;
 
@@ -4799,14 +4799,14 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
 
 void gt_encseq_check_startpositions(const GtEncseq *encseq, GtLogger *logger)
 {
-  unsigned long *startpostable, i, pos = 0;
+  GtUword *startpostable, i, pos = 0;
   GtEncseqReader *esr;
   gt_assert(encseq != NULL);
-  startpostable = gt_malloc(sizeof (unsigned long)
+  startpostable = gt_malloc(sizeof (GtUword)
                         * gt_encseq_num_of_sequences(encseq));
   esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD, 0);
   startpostable[pos++] = 0;
-  gt_logger_log(logger, "sequential iteration of sequence of length %lu ...",
+  gt_logger_log(logger, "sequential iteration of sequence of length "GT_LU" ...",
                  gt_encseq_total_length(encseq));
   for (i = 0; i < gt_encseq_total_length(encseq); i++) {
     if (gt_encseq_reader_next_encoded_char(esr) == (GtUchar) SEPARATOR) {
@@ -4816,14 +4816,14 @@ void gt_encseq_check_startpositions(const GtEncseq *encseq, GtLogger *logger)
     }
   }
   gt_encseq_reader_delete(esr);
-  gt_logger_log(logger, "checking start posititions over %lu sequences ...",
+  gt_logger_log(logger, "checking start posititions over "GT_LU" sequences ...",
                  gt_encseq_num_of_sequences(encseq));
   for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
-    unsigned long ssp1 = gt_encseq_seqstartpos(encseq, i),
+    GtUword ssp1 = gt_encseq_seqstartpos(encseq, i),
                   ssp2 = startpostable[i];
     if (ssp1 != ssp2) {
-      fprintf(stderr, "startpos of seq %lu, (wrong) %lu != %lu "
-                      " (correct)! difference %lu\n", i,
+      fprintf(stderr, "startpos of seq "GT_LU", (wrong) "GT_LU" != "GT_LU" "
+                      " (correct)! difference "GT_LU"\n", i,
                       ssp1, ssp2, ssp2-ssp1);
     }
   }
@@ -4846,14 +4846,14 @@ bool gt_encseq_has_description_support(const GtEncseq *encseq)
   return ret;
 }
 
-unsigned long gt_encseq_specialcharacters(const GtEncseq *encseq)
+GtUword gt_encseq_specialcharacters(const GtEncseq *encseq)
 {
   if (encseq->hasmirror)
     return (encseq->specialcharinfo.specialcharacters*2)+1;
   return encseq->specialcharinfo.specialcharacters;
 }
 
-unsigned long gt_encseq_specialranges(const GtEncseq *encseq)
+GtUword gt_encseq_specialranges(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
   if (encseq->hasmirror) {
@@ -4868,27 +4868,27 @@ unsigned long gt_encseq_specialranges(const GtEncseq *encseq)
   return encseq->specialcharinfo.specialranges;
 }
 
-unsigned long gt_encseq_exceptioncharacters(const GtEncseq *encseq)
+GtUword gt_encseq_exceptioncharacters(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
   return encseq->specialcharinfo.exceptioncharacters
            * (encseq->hasmirror ? 2 : 1);
 }
 
-unsigned long gt_encseq_exceptionranges(const GtEncseq *encseq)
+GtUword gt_encseq_exceptionranges(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
   return encseq->specialcharinfo.realexceptionranges
            * (encseq->hasmirror ? 2 : 1);
 }
 
-unsigned long gt_encseq_max_subalpha_size(const GtEncseq *encseq)
+GtUword gt_encseq_max_subalpha_size(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
   return encseq->maxsubalphasize;
 }
 
-unsigned long gt_encseq_realspecialranges(const GtEncseq *encseq)
+GtUword gt_encseq_realspecialranges(const GtEncseq *encseq)
 {
   if (encseq->hasmirror) {
     /* check whether central specialranges can be merged */
@@ -4902,55 +4902,55 @@ unsigned long gt_encseq_realspecialranges(const GtEncseq *encseq)
   return encseq->specialcharinfo.realspecialranges;
 }
 
-unsigned long gt_encseq_lengthofspecialprefix(const GtEncseq *encseq)
+GtUword gt_encseq_lengthofspecialprefix(const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.lengthofspecialprefix;
 }
 
-unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq)
+GtUword gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.lengthofspecialsuffix;
 }
 
-unsigned long gt_encseq_wildcards(const GtEncseq *encseq)
+GtUword gt_encseq_wildcards(const GtEncseq *encseq)
 {
   if (encseq->hasmirror)
     return (encseq->specialcharinfo.wildcards*2);
   return encseq->specialcharinfo.wildcards;
 }
 
-unsigned long gt_encseq_wildcardranges(const GtEncseq *encseq)
+GtUword gt_encseq_wildcardranges(const GtEncseq *encseq)
 {
   if (encseq->hasmirror)
     return (encseq->specialcharinfo.wildcardranges*2);
   return encseq->specialcharinfo.wildcardranges;
 }
 
-unsigned long gt_encseq_realwildcardranges(const GtEncseq *encseq)
+GtUword gt_encseq_realwildcardranges(const GtEncseq *encseq)
 {
   if (encseq->hasmirror)
     return (encseq->specialcharinfo.realwildcardranges*2);
   return encseq->specialcharinfo.realwildcardranges;
 }
 
-unsigned long gt_encseq_lengthofwildcardprefix(const GtEncseq *encseq)
+GtUword gt_encseq_lengthofwildcardprefix(const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.lengthofwildcardprefix;
 }
 
-unsigned long gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq)
+GtUword gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.lengthofwildcardsuffix;
 }
 
-unsigned long gt_encseq_lengthoflongestnonspecial(const GtEncseq *encseq)
+GtUword gt_encseq_lengthoflongestnonspecial(const GtEncseq *encseq)
 {
   return encseq->specialcharinfo.lengthoflongestnonspecial;
 }
 
-static unsigned long currentspecialrangevalue(unsigned long len,
-                                              unsigned long occcount,
-                                              unsigned long maxrangevalue)
+static GtUword currentspecialrangevalue(GtUword len,
+                                              GtUword occcount,
+                                              GtUword maxrangevalue)
 {
   if (maxrangevalue == UINT32_MAX) {
     gt_assert(len - 1 <= UINT32_MAX);
@@ -4966,35 +4966,35 @@ static unsigned long currentspecialrangevalue(unsigned long len,
 typedef struct
 {
   GtLogger *logger;
-  unsigned long ranges_uint8_t,
+  GtUword ranges_uint8_t,
                 ranges_uint16_t,
                 ranges_uint32_t,
                 realranges;
   const char *kind;
 } Updatesumrangeinfo;
 
-static void updatesumranges(unsigned long key, unsigned long long value,
+static void updatesumranges(GtUword key, GtUint64 value,
                             void *data)
 {
-  unsigned long distvalue;
+  GtUword distvalue;
   Updatesumrangeinfo *updatesumrangeinfo = (Updatesumrangeinfo *) data;
 
-  gt_assert(value <= (unsigned long long) ULONG_MAX);
-  distvalue = (unsigned long) value;
+  gt_assert(value <= (GtUint64) ULONG_MAX);
+  distvalue = (GtUword) value;
   updatesumrangeinfo->ranges_uint8_t
-     += currentspecialrangevalue(key, distvalue, (unsigned long) UCHAR_MAX);
+     += currentspecialrangevalue(key, distvalue, (GtUword) UCHAR_MAX);
   updatesumrangeinfo->ranges_uint16_t
-     += currentspecialrangevalue(key, distvalue, (unsigned long) USHRT_MAX);
+     += currentspecialrangevalue(key, distvalue, (GtUword) USHRT_MAX);
   updatesumrangeinfo->ranges_uint32_t
-     += currentspecialrangevalue(key, distvalue, (unsigned long) UINT32_MAX);
+     += currentspecialrangevalue(key, distvalue, (GtUword) UINT32_MAX);
   updatesumrangeinfo->realranges += distvalue;
-  gt_logger_log(updatesumrangeinfo->logger, "%sranges of length %lu=%lu",
+  gt_logger_log(updatesumrangeinfo->logger, "%sranges of length "GT_LU"="GT_LU"",
                 updatesumrangeinfo->kind, key, distvalue);
 }
 
-static unsigned long calcswranges(const char *kind,
+static GtUword calcswranges(const char *kind,
                                   bool dolog,
-                                  unsigned long *rangestab,
+                                  GtUword *rangestab,
                                   const GtDiscDistri *distrangelength,
                                   GtLogger *logger)
 {
@@ -5016,13 +5016,13 @@ static unsigned long calcswranges(const char *kind,
 }
 
 static uint64_t detencseqofsatviautables(int kind,
-                                         unsigned long totallength,
-                                         unsigned long numofsequences,
-                                         unsigned long numofdbfiles,
-                                         unsigned long lengthofdbfilenames,
-                                         unsigned long wildcardranges,
+                                         GtUword totallength,
+                                         GtUword numofsequences,
+                                         GtUword numofdbfiles,
+                                         GtUword lengthofdbfilenames,
+                                         GtUword wildcardranges,
                                          unsigned int numofchars,
-                                         unsigned long lengthofalphadef)
+                                         GtUword lengthofalphadef)
 {
   GtEncseqAccessType sat[] = {GT_ACCESS_TYPE_UCHARTABLES,
                               GT_ACCESS_TYPE_USHORTTABLES,
@@ -5036,14 +5036,14 @@ static uint64_t detencseqofsatviautables(int kind,
 }
 
 uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
-                                  unsigned long totallength,
-                                  unsigned long numofsequences,
-                                  unsigned long numofdbfiles,
-                                  unsigned long lengthofdbfilenames,
-                                  unsigned long wildcardranges,
+                                  GtUword totallength,
+                                  GtUword numofsequences,
+                                  GtUword numofdbfiles,
+                                  GtUword lengthofdbfilenames,
+                                  GtUword wildcardranges,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol,
-                                  unsigned long lengthofalphadef)
+                                  GtUword lengthofalphadef)
 {
   uint64_t sum,
            sizeoftwobitencoding
@@ -5081,37 +5081,37 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
          exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   sum += sizeof (GtUchar); /* for is64bit type */
-  sum += sizeof (unsigned long); /* for version type */
-  sum += sizeof (unsigned long); /* for sat type */
+  sum += sizeof (GtUword); /* for version type */
+  sum += sizeof (GtUword); /* for sat type */
   sum += sizeof (totallength);   /* for totallength */
-  sum += sizeof (unsigned long); /* for numofdbsequences type */
-  sum += sizeof (unsigned long); /* for numofdbfilenames type */
-  sum += sizeof (unsigned long); /* for lengthofdbfilenames type */
+  sum += sizeof (GtUword); /* for numofdbsequences type */
+  sum += sizeof (GtUword); /* for numofdbfilenames type */
+  sum += sizeof (GtUword); /* for lengthofdbfilenames type */
   sum += sizeof (GtSpecialcharinfo); /* for specialcharinfo */
-  sum += sizeof (unsigned long); /* for minseqlen type */
-  sum += sizeof (unsigned long); /* for maxseqlen type */
-  sum += sizeof (unsigned long); /* for numofallchars type */
+  sum += sizeof (GtUword); /* for minseqlen type */
+  sum += sizeof (GtUword); /* for maxseqlen type */
+  sum += sizeof (GtUword); /* for numofallchars type */
   sum += sizeof (unsigned char); /* for maxsubalphasize type */
   sum += sizeof (GtFilelengthvalues) * numofdbfiles; /* for filelengthtab */
-  sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
+  sum += sizeof (GtUword) * numofchars; /* for characterdistribution */
   sum += sizeof (char) * lengthofdbfilenames; /* for firstfilename */
-  sum += sizeof (unsigned long); /* for alphatype */
-  sum += sizeof (unsigned long); /* for lengthofalphadef */
+  sum += sizeof (GtUword); /* for alphatype */
+  sum += sizeof (GtUword); /* for lengthofalphadef */
   sum += sizeof (char) * lengthofalphadef; /* for alphadef */
   return sum;
 }
 
 static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
                               unsigned int forcetable,
-                              unsigned long totallength,
-                              unsigned long numofsequences,
-                              unsigned long numofdbfiles,
-                              unsigned long lengthofdbfilenames,
+                              GtUword totallength,
+                              GtUword numofsequences,
+                              GtUword numofdbfiles,
+                              GtUword lengthofdbfilenames,
                               unsigned int numofchars,
-                              unsigned long lengthofalphadef,
-                              unsigned long *specialrangestab,
+                              GtUword lengthofalphadef,
+                              GtUword *specialrangestab,
                               const GtDiscDistri *distspecialrangelength,
-                              unsigned long *wildcardrangestab,
+                              GtUword *wildcardrangestab,
                               const GtDiscDistri *distwildcardrangelength,
                               GtLogger *logger)
 {
@@ -5146,7 +5146,7 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
 
 #ifndef NDEBUG
 void gt_GtSpecialcharinfo_check(const GtSpecialcharinfo *specialcharinfo,
-                                unsigned long numofseparatorpositions)
+                                GtUword numofseparatorpositions)
 {
   gt_assert(specialcharinfo->wildcards + numofseparatorpositions ==
             specialcharinfo->specialcharacters);
@@ -5166,11 +5166,11 @@ static void determine_original_subdist(const GtAlphabet *alpha,
                                        char **allchars,
                                        unsigned char *subsymbolmap,
                                        unsigned char *maxsubalphasize,
-                                       unsigned long *numofallchars,
-                                       unsigned long *classstartpositions,
-                                       unsigned long *originaldistribution)
+                                       GtUword *numofallchars,
+                                       GtUword *classstartpositions,
+                                       GtUword *originaldistribution)
 {
-  unsigned long i, *maxima, offset = 0, j;
+  GtUword i, *maxima, offset = 0, j;
   unsigned char encodedchar = UNDEFCHAR;
   GtStr **origchars;
   const char *classchars;
@@ -5179,7 +5179,7 @@ static void determine_original_subdist(const GtAlphabet *alpha,
   origchars = gt_calloc((size_t) UCHAR_MAX, sizeof (*origchars));
   *maxsubalphasize = 0UL;
 
-  for (i = 0; i < (unsigned long) gt_alphabet_num_of_chars(alpha); i++) {
+  for (i = 0; i < (GtUword) gt_alphabet_num_of_chars(alpha); i++) {
     maxchars[i] = gt_alphabet_decode(alpha, (GtUchar) i);
     origchars[i] = gt_str_new();
   }
@@ -5202,10 +5202,10 @@ static void determine_original_subdist(const GtAlphabet *alpha,
     }
   }
   *allchars = gt_malloc((size_t) (*numofallchars * sizeof (char)));
-  for (i = 0UL; i < (unsigned long) gt_alphabet_num_of_chars(alpha); i++) {
+  for (i = 0UL; i < (GtUword) gt_alphabet_num_of_chars(alpha); i++) {
     classchars = gt_str_get(origchars[i]);
-    gt_log_log("encoding class %lu: chars: %s, "
-               "most frequent character %d(%c) (%lu occs)",
+    gt_log_log("encoding class "GT_LU": chars: %s, "
+               "most frequent character %d(%c) ("GT_LU" occs)",
                i, classchars, maxchars[i], maxchars[i], maxima[i]);
     strncpy(*allchars + offset,
             classchars,
@@ -5213,19 +5213,19 @@ static void determine_original_subdist(const GtAlphabet *alpha,
     classstartpositions[i] = offset;
     offset += gt_str_length(origchars[i]);
     for (j = 0; j < gt_str_length(origchars[i]); j++) {
-      gt_assert(j < (unsigned long) UCHAR_MAX);
+      gt_assert(j < (GtUword) UCHAR_MAX);
       subsymbolmap[(int) classchars[j]] = (unsigned char) j;
     }
     if (gt_str_length(origchars[i]) > *maxsubalphasize) {
-      gt_assert(gt_str_length(origchars[i]) < (unsigned long) UCHAR_MAX);
+      gt_assert(gt_str_length(origchars[i]) < (GtUword) UCHAR_MAX);
       *maxsubalphasize = (unsigned char) gt_str_length(origchars[i]);
     }
     gt_str_delete(origchars[i]);
   }
   i = WILDCARD;
   classchars = gt_str_get(origchars[i]);
-  gt_log_log("encoding class %lu: chars: %s, "
-             "most frequent character %d(%c) (%lu occs)",
+  gt_log_log("encoding class "GT_LU": chars: %s, "
+             "most frequent character %d(%c) ("GT_LU" occs)",
                i, classchars, maxchars[i], maxchars[i], maxima[i]);
   strncpy(*allchars + offset,
           classchars,
@@ -5233,11 +5233,11 @@ static void determine_original_subdist(const GtAlphabet *alpha,
   classstartpositions[i] = offset;
   offset += gt_str_length(origchars[i]);
   for (j = 0; j < gt_str_length(origchars[i]); j++) {
-    gt_assert(j < (unsigned long) UCHAR_MAX);
+    gt_assert(j < (GtUword) UCHAR_MAX);
     subsymbolmap[(int) classchars[j]] = (unsigned char) j;
   }
   if (gt_str_length(origchars[i]) > *maxsubalphasize) {
-      gt_assert(gt_str_length(origchars[i]) < (unsigned long) UCHAR_MAX);
+      gt_assert(gt_str_length(origchars[i]) < (GtUword) UCHAR_MAX);
       *maxsubalphasize = (unsigned char) gt_str_length(origchars[i]);
     }
   gt_str_delete(origchars[i]);
@@ -5256,7 +5256,7 @@ static int countnumberofexceptionranges(const GtAlphabet *alpha,
 {
   int had_err = 0;
   GtSequenceBuffer *fb;
-  unsigned long currentpos;
+  GtUword currentpos;
   if (plainformat)
     fb = gt_sequence_buffer_plain_new(filenametab);
   else
@@ -5308,12 +5308,12 @@ static int countnumberofexceptionranges(const GtAlphabet *alpha,
 }
 
 static int gt_inputfiles2sequencekeyvalues(const char *indexname,
-                                           unsigned long *totallength,
+                                           GtUword *totallength,
                                            GtSpecialcharinfo *specialcharinfo,
                                            Definedunsignedlong *equallength,
                                            unsigned int forcetable,
-                                           unsigned long *specialrangestab,
-                                           unsigned long *wildcardrangestab,
+                                           GtUword *specialrangestab,
+                                           GtUword *wildcardrangestab,
                                            const GtStrArray *filenametab,
                                            GtFilelengthvalues **filelengthtab,
                                            const GtAlphabet *alpha,
@@ -5322,17 +5322,17 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            bool outdestab,
                                            bool outsdstab,
                                            bool outmd5tab,
-                                           unsigned long *characterdistribution,
-                                           unsigned long *classstartpositions,
+                                           GtUword *characterdistribution,
+                                           GtUword *classstartpositions,
                                            char *maxchars,
                                            char **allchars,
-                                           unsigned long *numofallchars,
+                                           GtUword *numofallchars,
                                            unsigned char *subsymbolmap,
                                            unsigned char *maxsubalphasize,
                                            bool outoistab,
-                                           unsigned long *numofseparators,
-                                           unsigned long *minseqlen,
-                                           unsigned long *maxseqlen,
+                                           GtUword *numofseparators,
+                                           GtUword *minseqlen,
+                                           GtUword *maxseqlen,
                                            bool clip_desc,
                                            GtLogger *logger,
                                            GtError *err)
@@ -5340,7 +5340,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   GtSequenceBuffer *fb = NULL;
   GtUchar charcode;
   int retval;
-  unsigned long currentpos = 0,
+  GtUword currentpos = 0,
                 lastspecialrangelength = 0,
                 lastwildcardrangelength = 0,
                 lastnonspecialrangelength = 0,
@@ -5408,14 +5408,14 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     distspecialrangelength = gt_disc_distri_new();
     distwildcardrangelength = gt_disc_distri_new();
     originaldistribution = gt_calloc((size_t) UCHAR_MAX,
-                                     sizeof (unsigned long));
+                                     sizeof (GtUword));
     if (md5fp != NULL)
       md5enc = gt_md5_encoder_new();
     for (currentpos = 0; !haserr; currentpos++) {
 #if !(defined (_LP64) || defined (_WIN64))
 #define MAXSFXLENFOR32BIT 4294000000UL
       if (currentpos > MAXSFXLENFOR32BIT) {
-        gt_error_set(err, "input sequence must not be longer than %lu",
+        gt_error_set(err, "input sequence must not be longer than "GT_LU"",
                      MAXSFXLENFOR32BIT);
         haserr = true;
         break;
@@ -5500,7 +5500,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   }
   if (!haserr) {
     if (desfp != NULL) {
-      unsigned long longestdesc,
+      GtUword longestdesc,
                     fin = ~0UL;
       desc = (char*) gt_desc_buffer_get_next(descqueue);
       longestdesc = gt_desc_buffer_max_length(descqueue) - 1;
@@ -5578,12 +5578,12 @@ bool gt_encseq_has_md5_support(const GtEncseq *encseq)
 
 static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
                                      const GtUchar *seq,
-                                     const unsigned long len,
+                                     const GtUword len,
                                      GtAlphabet *a,
                                      GtLogger *logger)
 {
   GtUchar charcode;
-  unsigned long currentpos,
+  GtUword currentpos,
                 lastspecialrangelength = 0,
                 lastnonspecialrangelength = 0,
                 lastwildcardrangelength = 0,
@@ -5632,12 +5632,12 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   gt_md5_encoder_delete(md5enc);
 }
 
-static unsigned long fwdgetnexttwobitencodingstopposViaequallength(
+static GtUword fwdgetnexttwobitencodingstopposViaequallength(
                                                      const GtEncseq *encseq,
-                                                     unsigned long pos)
+                                                     GtUword pos)
 {
   if (!issinglepositioninspecialrangeViaequallength(encseq, pos)) {
-    unsigned long seqnum = gt_encseq_seqnum_Viaequallength(encseq, pos);
+    GtUword seqnum = gt_encseq_seqnum_Viaequallength(encseq, pos);
 
     return seqnum * (encseq->equallength.valueunsignedlong + 1) +
                      encseq->equallength.valueunsignedlong;
@@ -5645,12 +5645,12 @@ static unsigned long fwdgetnexttwobitencodingstopposViaequallength(
   return pos;
 }
 
-static unsigned long revgetnexttwobitencodingstopposViaequallength(
+static GtUword revgetnexttwobitencodingstopposViaequallength(
                                                      const GtEncseq *encseq,
-                                                     unsigned long pos)
+                                                     GtUword pos)
 {
   if (!issinglepositioninspecialrangeViaequallength(encseq, pos)) {
-    unsigned long seqnum = gt_encseq_seqnum_Viaequallength(encseq, pos);
+    GtUword seqnum = gt_encseq_seqnum_Viaequallength(encseq, pos);
 
     return seqnum * (encseq->equallength.valueunsignedlong + 1);
   }
@@ -5658,12 +5658,12 @@ static unsigned long revgetnexttwobitencodingstopposViaequallength(
 }
 
 static inline GtTwobitencoding calctbeforward(const GtTwobitencoding *tbe,
-                                              unsigned long startpos)
+                                              GtUword startpos)
 {
-  unsigned long remain = GT_MODBYUNITSIN2BITENC(startpos);
+  GtUword remain = GT_MODBYUNITSIN2BITENC(startpos);
 
   if (remain > 0) {
-    unsigned long unit = GT_DIVBYUNITSIN2BITENC(startpos);
+    GtUword unit = GT_DIVBYUNITSIN2BITENC(startpos);
     return (GtTwobitencoding)
            ((tbe[unit] << GT_MULT2(remain)) |
             (tbe[unit+1] >> GT_MULT2(GT_UNITSIN2BITENC - remain)));
@@ -5672,13 +5672,13 @@ static inline GtTwobitencoding calctbeforward(const GtTwobitencoding *tbe,
 }
 
 static inline GtTwobitencoding calctbereverse(const GtTwobitencoding *tbe,
-                                              unsigned long startpos)
+                                              GtUword startpos)
 {
-  unsigned long remain = GT_MODBYUNITSIN2BITENC(startpos);
+  GtUword remain = GT_MODBYUNITSIN2BITENC(startpos);
 
   /* right end of word */
-  if (remain < (unsigned long) (GT_UNITSIN2BITENC - 1)) {
-    unsigned long unit = GT_DIVBYUNITSIN2BITENC(startpos);
+  if (remain < (GtUword) (GT_UNITSIN2BITENC - 1)) {
+    GtUword unit = GT_DIVBYUNITSIN2BITENC(startpos);
     GtTwobitencoding tmp = (GtTwobitencoding)
                         (tbe[unit] >> GT_MULT2(GT_UNITSIN2BITENC - 1 - remain));
     if (unit > 0)
@@ -5690,13 +5690,13 @@ static inline GtTwobitencoding calctbereverse(const GtTwobitencoding *tbe,
 
 static inline GtBitsequence fwdextractspecialbits(
                                                const GtBitsequence *specialbits,
-                                               unsigned long startpos)
+                                               GtUword startpos)
 {
-  unsigned long remain, unit;
+  GtUword remain, unit;
 
   remain = GT_MODWORDSIZE(startpos);
   unit = GT_DIVWORDSIZE(startpos);
-  if (remain <= (unsigned long) GT_DIV2(GT_INTWORDSIZE))
+  if (remain <= (GtUword) GT_DIV2(GT_INTWORDSIZE))
     return (GtBitsequence) ((specialbits[unit] << remain) & GT_FIRSTHALVEBITS);
   else {
     return (GtBitsequence) (((specialbits[unit] << remain) |
@@ -5707,10 +5707,10 @@ static inline GtBitsequence fwdextractspecialbits(
 
 static inline GtBitsequence revextractspecialbits(
                                                const GtBitsequence *specialbits,
-                                               unsigned long startpos)
+                                               GtUword startpos)
 {
   int remain;
-  unsigned long unit;
+  GtUword unit;
 
   remain = (int) GT_MODWORDSIZE(startpos);
   unit = GT_DIVWORDSIZE(startpos);
@@ -5795,38 +5795,38 @@ static inline int requiredUIntBits(GtBitsequence v)
 
 static inline unsigned fwdbitaccessunitsnotspecial0(const GtEncseq
                                                     *encseq,
-                                                    unsigned long startpos)
+                                                    GtUword startpos)
 {
   gt_assert(startpos < encseq->totallength);
-  if (encseq->totallength - startpos > (unsigned long) GT_UNITSIN2BITENC)
+  if (encseq->totallength - startpos > (GtUword) GT_UNITSIN2BITENC)
     return (unsigned int) GT_UNITSIN2BITENC;
   return (unsigned int) (encseq->totallength - startpos);
 }
 
 static inline unsigned int fwdbitaccessunitsnotspecial(GtBitsequence spbits,
                                                        const GtEncseq *encseq,
-                                                       unsigned long startpos)
+                                                       GtUword startpos)
 {
   return (spbits == 0) ? fwdbitaccessunitsnotspecial0(encseq, startpos)
                        : (unsigned int) (GT_INTWORDSIZE -
                                          requiredUIntBits(spbits));
 }
 
-static inline unsigned int revbitaccessunitsnotspecial0(unsigned long startpos)
+static inline unsigned int revbitaccessunitsnotspecial0(GtUword startpos)
 {
-  if (startpos + 1 > (unsigned long) GT_UNITSIN2BITENC)
+  if (startpos + 1 > (GtUword) GT_UNITSIN2BITENC)
     return (unsigned int) GT_UNITSIN2BITENC;
   return (unsigned int) (startpos + 1);
 }
 
 static inline unsigned int revbitaccessunitsnotspecial(GtBitsequence spbits,
-                                                       unsigned long startpos)
+                                                       GtUword startpos)
 {
   return (spbits == 0) ? revbitaccessunitsnotspecial0(startpos)
                        : (unsigned int) numberoftrailingzeros(spbits);
 }
 
-static unsigned long fwdgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
+static GtUword fwdgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
                                       KindofSWtable kindsw)
 {
   if (gt_encseq_has_specialranges(esr->encseq)) {
@@ -5849,16 +5849,16 @@ static unsigned long fwdgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
    return esr->encseq->totallength;
 }
 
-static unsigned long fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
+static GtUword fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        const GtEncseq *encseq,
-                                       unsigned long currentpos,
-                                       unsigned long twobitencodingstoppos)
+                                       GtUword currentpos,
+                                       GtUword twobitencodingstoppos)
 {
   gt_assert(encseq != NULL && currentpos < encseq->totallength);
   if (encseq->sat != GT_ACCESS_TYPE_BITACCESS) {
     if (currentpos < twobitencodingstoppos) {
       if (twobitencodingstoppos - currentpos >
-          (unsigned long) GT_UNITSIN2BITENC) {
+          (GtUword) GT_UNITSIN2BITENC) {
         ptbe->unitsnotspecial = (unsigned int) GT_UNITSIN2BITENC;
       }
       else {
@@ -5889,10 +5889,10 @@ static unsigned long fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
     else
       ptbe->tbe = calctbeforward(encseq->twobitencoding, currentpos);
   }
-  return currentpos + (unsigned long) GT_UNITSIN2BITENC;
+  return currentpos + (GtUword) GT_UNITSIN2BITENC;
 }
 
-static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
+static GtUword revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
                                       KindofSWtable kindsw)
 {
   if (gt_encseq_has_specialranges(esr->encseq)) {
@@ -5916,7 +5916,7 @@ static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
   }
 }
 
-static unsigned long fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
+static GtUword fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
 {
   if (gt_encseq_has_specialranges(esr->encseq)) {
     if (esr->encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) {
@@ -5924,7 +5924,7 @@ static unsigned long fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
                                                            esr->currentpos);
     }
     else {
-      unsigned long stopposwildcard, stopposssptab;
+      GtUword stopposwildcard, stopposssptab;
 
       if (esr->encseq->has_wildcardranges) {
         stopposwildcard = fwdgetnexttwobitencodingstopposSW(esr,
@@ -5948,7 +5948,7 @@ static unsigned long fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
   }
 }
 
-static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
+static GtUword revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
 {
   if (gt_encseq_has_specialranges(esr->encseq)) {
     if (esr->encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) {
@@ -5956,7 +5956,7 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
                                                            esr->currentpos);
     }
     else {
-      unsigned long stopposwildcard, stopposssptab;
+      GtUword stopposwildcard, stopposssptab;
 
       if (esr->encseq->has_wildcardranges) {
         stopposwildcard = revgetnexttwobitencodingstopposSW(esr,
@@ -5980,16 +5980,16 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
   }
 }
 
-static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
+static GtUword revextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        const GtEncseq *encseq,
-                                       unsigned long currentpos,
-                                       unsigned long twobitencodingstoppos)
+                                       GtUword currentpos,
+                                       GtUword twobitencodingstoppos)
 {
   gt_assert(encseq != NULL && currentpos < encseq->totallength);
   if (encseq->sat != GT_ACCESS_TYPE_BITACCESS) {
     if (currentpos >= twobitencodingstoppos) {
       if (currentpos - twobitencodingstoppos + 1 >
-          (unsigned long) GT_UNITSIN2BITENC) {
+          (GtUword) GT_UNITSIN2BITENC) {
         ptbe->unitsnotspecial = (unsigned int) GT_UNITSIN2BITENC;
       }
       else {
@@ -6020,18 +6020,18 @@ static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
       ptbe->tbe = calctbereverse(encseq->twobitencoding, currentpos);
     }
   }
-  if (currentpos > (unsigned long) GT_UNITSIN2BITENC) {
-    return currentpos - (unsigned long) GT_UNITSIN2BITENC;
+  if (currentpos > (GtUword) GT_UNITSIN2BITENC) {
+    return currentpos - (GtUword) GT_UNITSIN2BITENC;
   }
   else {
     return 0;
   }
 }
 
-unsigned long gt_getnexttwobitencodingstoppos(GT_UNUSED bool fwd,
+GtUword gt_getnexttwobitencodingstoppos(GT_UNUSED bool fwd,
                                               GtEncseqReader *esr)
 {
-  unsigned long rawstoppos;
+  GtUword rawstoppos;
 
   if (esr->currentpos == esr->encseq->totallength) {
     return esr->currentpos + (GT_ISDIRREVERSE(esr->originalreadmode) ? 1 : 0);
@@ -6046,15 +6046,15 @@ unsigned long gt_getnexttwobitencodingstoppos(GT_UNUSED bool fwd,
   return rawstoppos;
 }
 
-static unsigned long gt_encseq_extract2bitenc(
+static GtUword gt_encseq_extract2bitenc(
                                             GtEndofTwobitencoding *ptbe,
                                             const GtEncseq *encseq,
                                             bool fwd,
-                                            unsigned long currentpos,
-                                            unsigned long twobitencodingstoppos)
+                                            GtUword currentpos,
+                                            GtUword twobitencodingstoppos)
 {
   bool mirrored = false;
-  unsigned long pos;
+  GtUword pos;
 
   gt_assert(currentpos < encseq->logicaltotallength);
   if (encseq->hasmirror && currentpos >= encseq->totallength) {
@@ -6088,7 +6088,7 @@ static unsigned long gt_encseq_extract2bitenc(
       ptbe->tbe ^= ~0;
     /* handle the fact that the position returned by (fwd|rev)extract2bitenc()
        cannot be negative */
-    if (pos == 0 && currentpos < (unsigned long) GT_UNITSIN2BITENC) {
+    if (pos == 0 && currentpos < (GtUword) GT_UNITSIN2BITENC) {
       pos = GT_REVERSEPOS(encseq->logicaltotallength, currentpos)
               + GT_UNITSIN2BITENC;
     } else {
@@ -6104,14 +6104,14 @@ static unsigned long gt_encseq_extract2bitenc(
 #define GT_TWOBITENCODINGSTOPPOSUNDEF(PTR)\
         ((PTR)->hasmirror ? (PTR)->logicaltotallength : (PTR)->totallength)
 
-unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
+GtUword gt_encseq_extract2bitencwithtwobitencodingstoppos(
                                          GtEndofTwobitencoding *ptbe,
                                          GtEncseqReader *esr,
                                          const GtEncseq *encseq,
                                          GtReadmode readmode,
-                                         unsigned long pos)
+                                         GtUword pos)
 {
-  unsigned long twobitencodingstoppos, ret;
+  GtUword twobitencodingstoppos, ret;
   bool fwd;
 
   gt_assert(pos < encseq->logicaltotallength);
@@ -6141,12 +6141,12 @@ unsigned int gt_encseq_extract2bitencvector(
                                        const GtEncseq *encseq,
                                        GtEncseqReader *esr,
                                        GtReadmode readmode,
-                                       unsigned long pos,
+                                       GtUword pos,
                                        bool withstoppos,
-                                       unsigned long stoppos)
+                                       GtUword stoppos)
 {
   GtEndofTwobitencoding etbecurrent;
-  unsigned long twobitencodingstoppos;
+  GtUword twobitencodingstoppos;
   unsigned int offset;
   int idx;
   bool fwd;
@@ -6204,8 +6204,8 @@ unsigned int gt_encseq_extract2bitencvector(
       pos += GT_UNITSIN2BITENC;
     }
     else {
-      if (pos >= (unsigned long) GT_UNITSIN2BITENC) {
-        pos -= (unsigned long) GT_UNITSIN2BITENC;
+      if (pos >= (GtUword) GT_UNITSIN2BITENC) {
+        pos -= (GtUword) GT_UNITSIN2BITENC;
       }
       else {
         return offset + etbecurrent.unitsnotspecial;
@@ -6223,12 +6223,12 @@ unsigned int gt_encseq_extract2bitencvector(
 unsigned int gt_encseq_relpos_extract2bitencvector(
                                           GtArrayGtTwobitencoding *tbereservoir,
                                           const GtEncseq *encseq,
-                                          unsigned long seqnum,
-                                          unsigned long relpos,
-                                          unsigned long maxnofelem)
+                                          GtUword seqnum,
+                                          GtUword relpos,
+                                          GtUword maxnofelem)
 {
   GtEndofTwobitencoding etbecurrent;
-  unsigned long pos, twobitencodingstoppos;
+  GtUword pos, twobitencodingstoppos;
   unsigned int offset, idx;
 
   if (seqnum < gt_encseq_num_of_sequences(encseq) - 1) {
@@ -6239,7 +6239,7 @@ unsigned int gt_encseq_relpos_extract2bitencvector(
   }
   pos = gt_encseq_seqstartpos(encseq, seqnum) + relpos;
   if (maxnofelem > 0) {
-    unsigned long maxpos = pos + maxnofelem;
+    GtUword maxpos = pos + maxnofelem;
     if (twobitencodingstoppos > maxpos)
       twobitencodingstoppos = maxpos;
   }
@@ -6419,7 +6419,7 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
 #define GT_ENCSEQ_DEREF_STOPPOS(VAR, SPECIAL, TMPVAR, ENCSEQ, READMODE, POS)\
         TMPVAR = gt_encseq_get_encoded_char(ENCSEQ, POS, READMODE);\
         if (ISNOTSPECIAL(TMPVAR)) {\
-          VAR = (unsigned long) TMPVAR;\
+          VAR = (GtUword) TMPVAR;\
           SPECIAL = false;\
         }\
         else {\
@@ -6429,7 +6429,7 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
 
 struct GtViatwobitkeyvalues
 {
-  unsigned long pos,
+  GtUword pos,
                 twobitcurrentpos,
                 endpos,
                 twobitencodingstoppos;
@@ -6445,9 +6445,9 @@ static void gt_Viatwobitkeyvalues_reinit_without_stoppos(
                                          const GtEncseq *encseq,
                                          GtReadmode readmode,
                                          GtEncseqReader *esr,
-                                         unsigned long pos,
-                                         unsigned long depth,
-                                         unsigned long maxdepth)
+                                         GtUword pos,
+                                         GtUword depth,
+                                         GtUword maxdepth)
 {
   if (maxdepth == 0) {
     vtk->endpos = encseq->logicaltotallength;
@@ -6480,10 +6480,10 @@ void gt_Viatwobitkeyvalues_reinit(GtViatwobitkeyvalues *vtk,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   GtEncseqReader *esr,
-                                  unsigned long pos,
-                                  unsigned long depth,
-                                  unsigned long maxdepth,
-                                  unsigned long stoppos)
+                                  GtUword pos,
+                                  GtUword depth,
+                                  GtUword maxdepth,
+                                  GtUword stoppos)
 {
   gt_Viatwobitkeyvalues_reinit_without_stoppos(vtk,
                                                encseq,
@@ -6506,14 +6506,14 @@ int gt_encseq_twobitencoding_strcmp(GtCommonunits *commonunits,
                                     const GtEncseq *encseq1,
                                     const GtEncseq *encseq2,
                                     GtReadmode readmode,
-                                    unsigned long depth,
-                                    unsigned long maxdepth,
+                                    GtUword depth,
+                                    GtUword maxdepth,
                                     GtViatwobitkeyvalues *vtk1,
                                     GtViatwobitkeyvalues *vtk2)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
-  unsigned long cc1, cc2;
+  GtUword cc1, cc2;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   GtUchar tmp;
@@ -6611,10 +6611,10 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         GtReadmode readmode,
                                         GtEncseqReader *esr1,
                                         GtEncseqReader *esr2,
-                                        unsigned long pos1,
-                                        unsigned long pos2,
-                                        unsigned long depth,
-                                        unsigned long maxdepth)
+                                        GtUword pos1,
+                                        GtUword pos2,
+                                        GtUword depth,
+                                        GtUword maxdepth)
 {
   GtViatwobitkeyvalues vtk1, vtk2;
 
@@ -6637,10 +6637,10 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
 
 static void fwdextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
                                          const GtEncseq *encseq,
-                                         unsigned long startpos)
+                                         GtUword startpos)
 {
   GtUchar cc;
-  unsigned long pos;
+  GtUword pos;
 
   ptbe->tbe = 0;
   for (pos = startpos; pos < startpos + GT_UNITSIN2BITENC; pos++) {
@@ -6663,11 +6663,11 @@ static void fwdextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
 
 static void revextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
                                          const GtEncseq *encseq,
-                                         unsigned long startpos)
+                                         GtUword startpos)
 {
   GtUchar cc;
   unsigned int unit;
-  unsigned long pos;
+  GtUword pos;
 
   ptbe->tbe = 0;
   for (unit = 0, pos = startpos;
@@ -6692,7 +6692,7 @@ static void revextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
 static void extract2bitenc_bruteforce(bool fwd,
                                       GtEndofTwobitencoding *ptbe,
                                       const GtEncseq *encseq,
-                                      unsigned long startpos)
+                                      GtUword startpos)
 {
   bool mirrored = false;
   if (encseq->hasmirror && startpos >= encseq->totallength) {
@@ -6746,9 +6746,9 @@ void gt_encseq_showatstartpos(FILE *fp,
                               bool fwd,
                               bool complement,
                               const GtEncseq *encseq,
-                              unsigned long startpos)
+                              GtUword startpos)
 {
-  unsigned long pos, endpos;
+  GtUword pos, endpos;
   GtUchar buffer[GT_UNITSIN2BITENC];
 
   fprintf(fp, "          0123456789012345");
@@ -6764,7 +6764,7 @@ void gt_encseq_showatstartpos(FILE *fp,
     }
   }
   else {
-    if (startpos > (unsigned long) (GT_UNITSIN2BITENC-1)) {
+    if (startpos > (GtUword) (GT_UNITSIN2BITENC-1)) {
       endpos = startpos - (GT_UNITSIN2BITENC-1);
     }
     else {
@@ -6781,11 +6781,11 @@ void gt_encseq_showatstartpos(FILE *fp,
 void gt_encseq_showatstartposwithdepth(FILE *fp,
                                        const GtEncseq *encseq,
                                        GtReadmode readmode,
-                                       unsigned long start,
-                                       unsigned long depth)
+                                       GtUword start,
+                                       GtUword depth)
 {
-  unsigned long idx, end, totallength;
-  const unsigned long maxshow = 30UL;
+  GtUword idx, end, totallength;
+  const GtUword maxshow = 30UL;
   GtUchar cc;
   const GtUchar *characters;
 
@@ -6811,13 +6811,13 @@ void gt_encseq_showatstartposwithdepth(FILE *fp,
   }
 }
 
-static unsigned long derefcharboundaries(const GtEncseq *encseq,
+static GtUword derefcharboundaries(const GtEncseq *encseq,
                                          bool fwd,
                                          bool complement,
-                                         unsigned long start,
-                                         unsigned long maxoffset,
-                                         unsigned long currentoffset,
-                                         unsigned long totallength)
+                                         GtUword start,
+                                         GtUword maxoffset,
+                                         GtUword currentoffset,
+                                         GtUword totallength)
 {
   if (fwd) {
     if (start + currentoffset == totallength) {
@@ -6827,7 +6827,7 @@ static unsigned long derefcharboundaries(const GtEncseq *encseq,
   }
   else {
     if (start < currentoffset) {
-      return currentoffset - start + (unsigned long) GT_COMPAREOFFSET;
+      return currentoffset - start + (GtUword) GT_COMPAREOFFSET;
     }
     start -= currentoffset;
   }
@@ -6840,7 +6840,7 @@ static unsigned long derefcharboundaries(const GtEncseq *encseq,
     if (complement) {
       cc = GT_COMPLEMENTBASE(cc);
     }
-    return (unsigned long) cc;
+    return (GtUword) cc;
   }
   return start + GT_COMPAREOFFSET;
 }
@@ -6858,12 +6858,12 @@ static unsigned long derefcharboundaries(const GtEncseq *encseq,
 static int gt_encseq_check_comparetwostrings(const GtEncseq *encseq,
                                              bool fwd,
                                              bool complement,
-                                             unsigned long *maxcommon,
-                                             unsigned long pos1,
-                                             unsigned long pos2,
-                                             unsigned long maxdepth)
+                                             GtUword *maxcommon,
+                                             GtUword pos1,
+                                             GtUword pos2,
+                                             GtUword maxdepth)
 {
-  unsigned long currentoffset, maxoffset, cc1, cc2,
+  GtUword currentoffset, maxoffset, cc1, cc2,
          totallength = encseq->logicaltotallength;
 
   if (fwd) {
@@ -6887,13 +6887,13 @@ static int gt_encseq_check_comparetwostrings(const GtEncseq *encseq,
                               pos2, maxoffset, currentoffset, totallength);
     *maxcommon = currentoffset;
     if (cc1 != cc2) {
-      if (!fwd && cc1 >= (unsigned long) GT_COMPAREOFFSET
-               && cc2 >= (unsigned long) GT_COMPAREOFFSET) {
+      if (!fwd && cc1 >= (GtUword) GT_COMPAREOFFSET
+               && cc2 >= (GtUword) GT_COMPAREOFFSET) {
         return cc1 > cc2 ? -1 : 1;
       }
       return cc1 < cc2 ? -1 : 1;
     }
-    if (pos1 == pos2 && cc1 >= (unsigned long) GT_COMPAREOFFSET) {
+    if (pos1 == pos2 && cc1 >= (GtUword) GT_COMPAREOFFSET) {
       return 0;
     }
   }
@@ -6950,9 +6950,9 @@ static bool checktbe(bool fwd, GtTwobitencoding tbe1, GtTwobitencoding tbe2,
 static inline GtBitsequence fwdextractspecialbits_bruteforce(
                                                unsigned int *unitsnotspecial,
                                                const GtBitsequence *specialbits,
-                                               unsigned long startpos)
+                                               GtUword startpos)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBitsequence result = 0, mask = GT_FIRSTBIT;
   bool found = false;
 
@@ -6973,14 +6973,14 @@ static inline GtBitsequence fwdextractspecialbits_bruteforce(
 static inline GtBitsequence revextractspecialbits_bruteforce(
                                     unsigned int *unitsnotspecial,
                                     const GtBitsequence *specialbits,
-                                    unsigned long startpos)
+                                    GtUword startpos)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBitsequence result = 0, mask = (GtBitsequence) 1;
   bool found = false;
-  unsigned long twobitencodingstoppos;
+  GtUword twobitencodingstoppos;
 
-  if (startpos >= (unsigned long) GT_UNITSIN2BITENC) {
+  if (startpos >= (GtUword) GT_UNITSIN2BITENC) {
     twobitencodingstoppos = startpos - GT_UNITSIN2BITENC + 1;
     *unitsnotspecial = (unsigned int) GT_UNITSIN2BITENC;
   }
@@ -7008,7 +7008,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   GtEncseqReader *esr;
-  unsigned long startpos, twobitencodingstoppos;
+  GtUword startpos, twobitencodingstoppos;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
@@ -7029,7 +7029,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
                                                twobitencodingstoppos);
     extract2bitenc_bruteforce(fwd, &ptbe2, encseq, startpos);
     if (ptbe1.unitsnotspecial != ptbe2.unitsnotspecial) {
-      fprintf(stderr, "fwd=%s, complement=%s: pos %lu"
+      fprintf(stderr, "fwd=%s, complement=%s: pos "GT_LU""
                      ": fast.unitsnotspecial = %u "
                      " != %u = brute.unitsnotspecial\n",
               fwd ? "true" : "false",
@@ -7041,7 +7041,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!checktbe(fwd, ptbe1.tbe, ptbe2.tbe, ptbe1.unitsnotspecial)) {
-      fprintf(stderr, "fwd=%s, complement=%s: pos %lu\n",
+      fprintf(stderr, "fwd=%s, complement=%s: pos "GT_LU"\n",
                       fwd ? "true" : "false",
                       complement ? "true" : "false",
                       esr->currentpos);
@@ -7057,7 +7057,7 @@ static void checkextractspecialbits(const GtEncseq *encseq, bool fwd)
 {
   if (encseq->sat == GT_ACCESS_TYPE_BITACCESS  &&
       gt_encseq_has_specialranges(encseq)) {
-    unsigned long startpos;
+    GtUword startpos;
     GtBitsequence spbits1, spbits2;
     unsigned int unitsnotspecial_bruteforce, unitsnotspecial;
 
@@ -7081,7 +7081,7 @@ static void checkextractspecialbits(const GtEncseq *encseq, bool fwd)
         char buffer[GT_INTWORDSIZE+1];
 
         gt_bitsequence_tostring(buffer, spbits2);
-        fprintf(stderr, "%sextractspecialbits at startpos %lu"
+        fprintf(stderr, "%sextractspecialbits at startpos "GT_LU""
                        " (unitsnotspecial=%u)\n correct=%s!=\n",
                        fwd ? "fwd" : "rev",
                        startpos, unitsnotspecial, buffer);
@@ -7105,12 +7105,12 @@ static void checkextractspecialbits(const GtEncseq *encseq, bool fwd)
 
 static void multicharactercompare_withtest(const GtEncseq *encseq,
                                            GtReadmode readmode,
-                                           unsigned long pos1,
-                                           unsigned long pos2)
+                                           GtUword pos1,
+                                           GtUword pos2)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   GtCommonunits commonunits1;
-  unsigned long commonunits2, twobitencodingstoppos1, twobitencodingstoppos2;
+  GtUword commonunits2, twobitencodingstoppos1, twobitencodingstoppos2;
   int ret1, ret2;
   GtEncseqReader *esr1, *esr2;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
@@ -7141,23 +7141,23 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
   ret1 = gt_encseq_compare_pairof_twobitencodings(fwd, complement,
                                                   &commonunits1, &ptbe1,
                                                   &ptbe2);
-  commonunits2 = (unsigned long) GT_UNITSIN2BITENC;
+  commonunits2 = (GtUword) GT_UNITSIN2BITENC;
   if (GT_ISDIRREVERSE(readmode)) {
     pos1 = GT_REVERSEPOS(encseq->totallength, pos1);
     pos2 = GT_REVERSEPOS(encseq->totallength, pos2);
   }
   ret2 = gt_encseq_check_comparetwostrings(encseq, fwd, complement,
                                            &commonunits2, pos1, pos2, 0);
-  if (ret1 != ret2 || commonunits2 != (unsigned long) commonunits1.common) {
+  if (ret1 != ret2 || commonunits2 != (GtUword) commonunits1.common) {
     char buf1[GT_INTWORDSIZE+1], buf2[GT_INTWORDSIZE+1];
 
     fprintf(stderr, "fwd=%s, complement=%s: "
-                   "pos1=%lu, pos2=%lu\n",
+                   "pos1="GT_LU", pos2="GT_LU"\n",
             fwd ? "true" : "false",
             complement ? "true" : "false",
             pos1, pos2);
     fprintf(stderr, "ret1=%d, ret2=%d\n", ret1, ret2);
-    fprintf(stderr, "commonunits1=%u, commonunits2=%lu\n",
+    fprintf(stderr, "commonunits1=%u, commonunits2="GT_LU"\n",
             commonunits1.common, commonunits2);
     gt_encseq_showatstartpos(stderr, fwd, complement, encseq, pos1);
     gt_bitsequence_tostring(buf1, ptbe1.tbe);
@@ -7175,10 +7175,10 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
                                        GtReadmode readmode,
                                        GtEncseqReader *esr,
                                        const GtCodetype **multimappower,
-                                       unsigned long frompos,
+                                       GtUword frompos,
                                        unsigned int prefixlength)
 {
-  unsigned long pos, twobitencodingstoppos;
+  GtUword pos, twobitencodingstoppos;
   GtCodetype code = 0;
   GtUchar cc;
 
@@ -7211,7 +7211,7 @@ static void showcharacterdistribution(const GtEncseq *encseq, GtLogger *logger)
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   gt_assert(encseq->headerptr.characterdistribution != NULL);
   for (idx=0; idx<numofchars; idx++) {
-    gt_logger_log(logger, "occurrences(%c)=%lu",
+    gt_logger_log(logger, "occurrences(%c)="GT_LU"",
                          (int) gt_alphabet_pretty_symbol(encseq->alpha, idx),
                          gt_encseq_charcount(encseq, (GtUchar) idx));
   }
@@ -7221,7 +7221,7 @@ void gt_encseq_show_features(const GtEncseq *encseq,
                              GtLogger *logger,
                              bool withfilenames)
 {
-  unsigned long idx;
+  GtUword idx;
 
   if (withfilenames) {
     for (idx = 0; idx < encseq->numofdbfiles; idx++) {
@@ -7233,20 +7233,20 @@ void gt_encseq_show_features(const GtEncseq *encseq,
                                        effectivelength));
     }
   }
-  gt_logger_log(logger, "totallength=%lu",
+  gt_logger_log(logger, "totallength="GT_LU"",
                        gt_encseq_total_length(encseq));
-  gt_logger_log(logger, "numofsequences=%lu", encseq->logicalnumofdbsequences);
-  gt_logger_log(logger, "specialcharacters=%lu",
+  gt_logger_log(logger, "numofsequences="GT_LU"", encseq->logicalnumofdbsequences);
+  gt_logger_log(logger, "specialcharacters="GT_LU"",
                        gt_encseq_specialcharacters(encseq));
-  gt_logger_log(logger, "specialranges=%lu",
+  gt_logger_log(logger, "specialranges="GT_LU"",
                        gt_encseq_specialranges(encseq));
-  gt_logger_log(logger, "realspecialranges=%lu",
+  gt_logger_log(logger, "realspecialranges="GT_LU"",
                        gt_encseq_realspecialranges(encseq));
-  gt_logger_log(logger, "wildcards=%lu",
+  gt_logger_log(logger, "wildcards="GT_LU"",
                        gt_encseq_wildcards(encseq));
-  gt_logger_log(logger, "wildcardranges=%lu",
+  gt_logger_log(logger, "wildcardranges="GT_LU"",
                        gt_encseq_wildcardranges(encseq));
-  gt_logger_log(logger, "realwildcardranges=%lu",
+  gt_logger_log(logger, "realwildcardranges="GT_LU"",
                        gt_encseq_realwildcardranges(encseq));
 
   gt_assert(encseq->headerptr.characterdistribution != NULL);
@@ -7255,17 +7255,17 @@ void gt_encseq_show_features(const GtEncseq *encseq,
 
 int gt_encseq_check_comparetwosuffixes(const GtEncseq *encseq,
                                        GtReadmode readmode,
-                                       unsigned long *maxlcp,
+                                       GtUword *maxlcp,
                                        bool specialsareequal,
                                        bool specialsareequalatdepth0,
-                                       unsigned long maxdepth,
-                                       unsigned long start1,
-                                       unsigned long start2,
+                                       GtUword maxdepth,
+                                       GtUword start1,
+                                       GtUword start2,
                                        GtEncseqReader *esr1,
                                        GtEncseqReader *esr2)
 {
   GtUchar cc1, cc2;
-  unsigned long pos1, pos2, end1, end2;
+  GtUword pos1, pos2, end1, end2;
   int retval;
 
   end1 = end2 = encseq->logicaltotallength;
@@ -7348,22 +7348,22 @@ int gt_encseq_check_comparetwosuffixes(const GtEncseq *encseq,
 }
 
 void gt_encseq_relpos_seqnum_check(const char *filename, int line,
-                                   const GtEncseq *encseq, unsigned long relpos,
-                                   unsigned long seqnum, unsigned long position)
+                                   const GtEncseq *encseq, GtUword relpos,
+                                   GtUword seqnum, GtUword position)
 {
   if (encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) {
-    unsigned long seqnum2, relpos2;
+    GtUword seqnum2, relpos2;
 
     seqnum2 = gt_encseq_seqnum(encseq, position);
     relpos2 = position - gt_encseq_seqstartpos(encseq, seqnum2);
     if (seqnum != seqnum2) {
-      fprintf(stderr, "file %s, line %d: pos=%lu, seqnum = %lu != %lu "
+      fprintf(stderr, "file %s, line %d: pos="GT_LU", seqnum = "GT_LU" != "GT_LU" "
                      " = seqnum.correct\n", filename, line, position,
                      seqnum, seqnum2);
       exit(EXIT_FAILURE);
     }
     if (relpos != relpos2) {
-      fprintf(stderr, "file %s, line %d: pos=%lu, relpos=%lu != %lu "
+      fprintf(stderr, "file %s, line %d: pos="GT_LU", relpos="GT_LU" != "GT_LU" "
                      " = relpos.correct\n", filename, line, position,
                      relpos, relpos2);
       exit(EXIT_FAILURE);
@@ -7371,9 +7371,9 @@ void gt_encseq_relpos_seqnum_check(const char *filename, int line,
   }
 }
 
-static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
+static GtUword *initcharacterdistribution(const GtAlphabet *alpha)
 {
-  unsigned long *characterdistribution;
+  GtUword *characterdistribution;
   unsigned int numofchars, idx;
 
   numofchars = gt_alphabet_num_of_chars(alpha);
@@ -7409,7 +7409,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
   GtAlphabet *alphabet = NULL;
   bool alphabetisbound = false, customalphabet = false;
   GtFilelengthvalues *filelengthtab = NULL;
-  unsigned long totallength = 0, specialrangestab[3], wildcardrangestab[3],
+  GtUword totallength = 0, specialrangestab[3], wildcardrangestab[3],
                 numofseparators = 0,
                 *characterdistribution = NULL,
                 *classstartpositions = NULL,
@@ -7500,7 +7500,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
   }
   if (!haserr) {
     int retcode;
-    unsigned long lengthofalphadef;
+    GtUword lengthofalphadef;
 
     if (sfxprogress != NULL) {
       gt_timer_show_progress(sfxprogress, "computing sequence encoding",
@@ -7603,18 +7603,18 @@ uint64_t gt_encseq_pairbitsum(const GtEncseq *encseq)
   uint64_t pairbitsum = 0;
 
   for (idx = 0; idx < numofchars; idx++) {
-    printf("idx=%u, add=%lu\n", idx,
+    printf("idx=%u, add="GT_LU"\n", idx,
            encseq->headerptr.characterdistribution[idx]);
     pairbitsum += (uint64_t) encseq->headerptr.characterdistribution[idx] *
                   (uint64_t) idx;
   }
   if (encseq->sat == GT_ACCESS_TYPE_BITACCESS) {
-    printf("numofseparators=%lu\n", encseq->numofdbsequences - 1);
+    printf("numofseparators="GT_LU"\n", encseq->numofdbsequences - 1);
     pairbitsum += (uint64_t) (encseq->numofdbsequences - 1) *
                   (uint64_t) GT_TWOBITS_FOR_SEPARATOR;
   }
   else {
-    printf("specials=%lu, leastprob=%u\n",
+    printf("specials="GT_LU", leastprob=%u\n",
                 gt_encseq_specialcharacters(encseq),
                 encseq->leastprobablecharacter);
     pairbitsum += (uint64_t) gt_encseq_specialcharacters(encseq) *
@@ -7625,21 +7625,21 @@ uint64_t gt_encseq_pairbitsum(const GtEncseq *encseq)
 
 static void runscanatpostrial(const GtEncseq *encseq,
                               GtEncseqReader *esr,
-                              GtReadmode readmode, unsigned long startpos)
+                              GtReadmode readmode, GtUword startpos)
 {
-  unsigned long pos, totallength;
+  GtUword pos, totallength;
   GtUchar ccra, ccsr;
 
   totallength = encseq->logicaltotallength;
   gt_encseq_reader_reinit_with_readmode(esr, encseq, readmode, startpos);
-  printf("runscanatpostrial with startpos %lu\n", startpos);
+  printf("runscanatpostrial with startpos "GT_LU"\n", startpos);
   for (pos=startpos; pos < totallength; pos++) {
     /* Random access */
     ccra = gt_encseq_get_encoded_char(encseq, pos, readmode);
     ccsr = gt_encseq_reader_next_encoded_char(esr);
     if (ccra != ccsr) {
-      fprintf(stderr, "startpos = %lu"
-                     " access=%s, mode=%s: position=%lu"
+      fprintf(stderr, "startpos = "GT_LU""
+                     " access=%s, mode=%s: position="GT_LU""
                      ": random access (correct) = %u != %u = "
                      " sequential read (wrong)\n",
                      startpos,
@@ -7657,7 +7657,7 @@ static void testseqnumextraction(const GtEncseq *encseq)
 {
   GtUchar cc;
   bool startofsequence = true;
-  unsigned long pos, totallength, currentseqnum = 0;
+  GtUword pos, totallength, currentseqnum = 0;
 
   totallength = encseq->logicaltotallength;
   for (pos=0; pos < totallength; pos++) {
@@ -7668,12 +7668,12 @@ static void testseqnumextraction(const GtEncseq *encseq)
       startofsequence = true;
     }
     else {
-      unsigned long seqnum1;
+      GtUword seqnum1;
 
       seqnum1 = gt_encseq_seqnum(encseq, pos);
       if (currentseqnum != seqnum1) {
-        fprintf(stderr, "testseqnumextraction: pos=%lu: currentseqnum = %lu "
-                       "!= %lu = seqnum\n", pos, currentseqnum, seqnum1);
+        fprintf(stderr, "testseqnumextraction: pos="GT_LU": currentseqnum = "GT_LU" "
+                       "!= "GT_LU" = seqnum\n", pos, currentseqnum, seqnum1);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
       if (startofsequence) {
@@ -7686,18 +7686,18 @@ static void testseqnumextraction(const GtEncseq *encseq)
 
 static void testscanatpos(const GtEncseq *encseq,
                           GtReadmode readmode,
-                          unsigned long scantrials)
+                          GtUword scantrials)
 {
   GtEncseqReader *esr = NULL;
-  unsigned long startpos, totallength, trial;
+  GtUword startpos, totallength, trial;
 
   totallength = encseq->logicaltotallength;
   esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   runscanatpostrial(encseq, esr, readmode, 0);
   runscanatpostrial(encseq, esr, readmode, totallength-1);
   for (trial = 0; trial < scantrials; trial++) {
-    startpos = (unsigned long) (random() % totallength);
-    printf("trial %lu at %lu\n", trial, startpos);
+    startpos = (GtUword) (random() % totallength);
+    printf("trial "GT_LU" at "GT_LU"\n", trial, startpos);
     runscanatpostrial(encseq, esr, readmode, startpos);
   }
   gt_encseq_reader_delete(esr);
@@ -7705,10 +7705,10 @@ static void testscanatpos(const GtEncseq *encseq,
 
 static void testmulticharactercompare(const GtEncseq *encseq,
                                       GtReadmode readmode,
-                                      unsigned long multicharcmptrials)
+                                      GtUword multicharcmptrials)
 {
-  unsigned long pos1, pos2, totallength;
-  unsigned long trial;
+  GtUword pos1, pos2, totallength;
+  GtUword trial;
 
   totallength = encseq->logicaltotallength;
   (void) multicharactercompare_withtest(encseq, readmode, 0, 0);
@@ -7717,8 +7717,8 @@ static void testmulticharactercompare(const GtEncseq *encseq,
   (void) multicharactercompare_withtest(encseq, readmode, totallength-1,
                                                         totallength-1);
   for (trial = 0; trial < multicharcmptrials; trial++) {
-    pos1 = (unsigned long) (random() % totallength);
-    pos2 = (unsigned long) (random() % totallength);
+    pos1 = (GtUword) (random() % totallength);
+    pos2 = (GtUword) (random() % totallength);
     (void) multicharactercompare_withtest(encseq, readmode, pos1, pos2);
   }
 }
@@ -7728,17 +7728,17 @@ static int testfullscan(const GtStrArray *filenametab,
                         GtReadmode readmode,
                         GtError *err)
 {
-  unsigned long pos, totallength;
+  GtUword pos, totallength;
   GtUchar ccscan = 0, ccra, ccsr;
   GtSequenceBuffer *fb = NULL;
   int retval;
   bool haserr = false;
   GtEncseqReader *esr = NULL;
-  unsigned long long fullscanpbar = 0;
+  GtUint64 fullscanpbar = 0;
 
   gt_error_check(err);
   totallength = encseq->totallength;
-  /* gt_progressbar_start(&fullscanpbar, (unsigned long long) totallength); */
+  /* gt_progressbar_start(&fullscanpbar, (GtUint64) totallength); */
   if (filenametab != NULL) {
     fb = gt_sequence_buffer_new_guess_type(filenametab, err);
     if (!fb)
@@ -7765,7 +7765,7 @@ static int testfullscan(const GtStrArray *filenametab,
       ccra = gt_encseq_get_encoded_char(encseq, pos, readmode);
       if (filenametab != NULL && readmode == GT_READMODE_FORWARD) {
         if (ccscan != ccra) {
-          gt_error_set(err, "access=%s, position=%lu"
+          gt_error_set(err, "access=%s, position="GT_LU""
                             ": scan (readnextchar) = %u != "
                             "%u = random access",
                             gt_encseq_accessname(encseq),
@@ -7778,7 +7778,7 @@ static int testfullscan(const GtStrArray *filenametab,
       }
       ccsr = gt_encseq_reader_next_encoded_char(esr);
       if (ccra != ccsr) {
-        gt_error_set(err, "access=%s, mode=%s: position=%lu"
+        gt_error_set(err, "access=%s, mode=%s: position="GT_LU""
                           ": random access = %u != %u = sequential read",
                           gt_encseq_accessname(encseq),
                           gt_readmode_show(readmode),
@@ -7794,7 +7794,7 @@ static int testfullscan(const GtStrArray *filenametab,
   }
   if (!haserr) {
     if (pos != totallength) {
-      gt_error_set(err, "sequence length must be %lu but is %lu",
+      gt_error_set(err, "sequence length must be "GT_LU" but is "GT_LU"",
                        totallength, pos);
       haserr = true;
     }
@@ -7807,7 +7807,7 @@ static int testfullscan(const GtStrArray *filenametab,
 int gt_encseq_check_minmax(const GtEncseq *encseq, GtError *err)
 {
   int had_err = 0;
-  unsigned long i,
+  GtUword i,
                 min,
                 max;
   gt_assert(encseq);
@@ -7816,13 +7816,13 @@ int gt_encseq_check_minmax(const GtEncseq *encseq, GtError *err)
   max = gt_encseq_max_seq_length(encseq);
   for (i = 0UL; !had_err && i < gt_encseq_num_of_sequences(encseq); i++) {
     if (min > gt_encseq_seqlength(encseq, i)) {
-      gt_error_set(err, "sequence %lu has length %lu, but indexed minimum is "
-                        "%lu", i, gt_encseq_seqlength(encseq, i), min);
+      gt_error_set(err, "sequence "GT_LU" has length "GT_LU", but indexed minimum is "
+                        ""GT_LU"", i, gt_encseq_seqlength(encseq, i), min);
       had_err = -1;
     }
     if (!had_err && max < gt_encseq_seqlength(encseq, i)) {
-      gt_error_set(err, "sequence %lu has length %lu, but indexed maximum is "
-                        "%lu", i, gt_encseq_seqlength(encseq, i), max);
+      gt_error_set(err, "sequence "GT_LU" has length "GT_LU", but indexed maximum is "
+                        ""GT_LU"", i, gt_encseq_seqlength(encseq, i), max);
       had_err = -1;
     }
   }
@@ -7832,8 +7832,8 @@ int gt_encseq_check_minmax(const GtEncseq *encseq, GtError *err)
 int gt_encseq_check_consistency(const GtEncseq *encseq,
                                 const GtStrArray *filenametab,
                                 GtReadmode readmode,
-                                unsigned long scantrials,
-                                unsigned long multicharcmptrials,
+                                GtUword scantrials,
+                                GtUword multicharcmptrials,
                                 bool withseqnumcheck,
                                 bool withcheckunit,
                                 GtLogger *logger,
@@ -7859,7 +7859,7 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
     checkextractspecialbits(encseq, fwd);
   }
   if (scantrials > 0) {
-    gt_logger_log(logger, "run testscanatpos for %lu trials", scantrials);
+    gt_logger_log(logger, "run testscanatpos for "GT_LU" trials", scantrials);
     testscanatpos(encseq, readmode, scantrials);
   }
   if (withseqnumcheck && readmode == GT_READMODE_FORWARD) {
@@ -7884,7 +7884,7 @@ int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
   else {
     char *indexnamecopy;
     size_t indexname_len = strlen(indexname);
-    unsigned long numofdbsequences = gt_encseq_num_of_sequences(encseq);
+    GtUword numofdbsequences = gt_encseq_num_of_sequences(encseq);
 
     indexnamecopy = gt_malloc(sizeof(char) * (indexname_len+1+1));
     strcpy(indexnamecopy, indexname);
@@ -7926,7 +7926,7 @@ int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
         haserr = true;
       }
       if (!haserr && numofdbsequences > 1UL) {
-        unsigned long seqnum, *seppostab;
+        GtUword seqnum, *seppostab;
 
         seppostab = gt_malloc(sizeof (*seppostab) * (numofdbsequences-1));
         for (seqnum = 0; seqnum < numofdbsequences - 1; seqnum++) {
@@ -7958,7 +7958,7 @@ static void makeerrormsg(const GtRange *vala,
                          const GtRange *valb,
                          const char *cmpflag)
 {
-  fprintf(stderr, "(%lu,%lu) %s (%lu,%lu)\n",
+  fprintf(stderr, "("GT_LU","GT_LU") %s ("GT_LU","GT_LU")\n",
                   vala->start,
                   vala->end,
                   cmpflag,
@@ -8659,7 +8659,7 @@ void gt_encseq_loader_delete(GtEncseqLoader *el)
 
 struct GtEncseqBuilder {
   GtUchar *plainseq;
-  unsigned long seqlen,
+  GtUword seqlen,
                 nof_seqs,
                 minseqlen,
                 maxseqlen;
@@ -8757,9 +8757,9 @@ void gt_encseq_builder_disable_multiseq_support(GtEncseqBuilder *eb)
 }
 
 void gt_encseq_builder_add_cstr(GtEncseqBuilder *eb, const char *str,
-                                unsigned long strlen, const char *desc)
+                                GtUword strlen, const char *desc)
 {
-  unsigned long i, offset;
+  GtUword i, offset;
   gt_assert(eb && str);
   if (eb->plainseq && !eb->own) {
     GtUchar *theirseq = eb->plainseq;
@@ -8819,11 +8819,11 @@ void gt_encseq_builder_add_str(GtEncseqBuilder *eb, GtStr *str,
 
 static void gt_encseq_builder_add_encoded_generic(GtEncseqBuilder *eb,
                                                   const GtUchar *str,
-                                                  unsigned long strlen,
+                                                  GtUword strlen,
                                                   const char *desc,
                                                   bool copy)
 {
-  unsigned long i, offset;
+  GtUword i, offset;
   gt_assert(eb && str);
   if (eb->plainseq == NULL) {
     if (!copy) {
@@ -8901,7 +8901,7 @@ static void gt_encseq_builder_add_encoded_generic(GtEncseqBuilder *eb,
 
 void gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
                                    const GtUchar *str,
-                                   unsigned long strlen,
+                                   GtUword strlen,
                                    const char *desc)
 {
   gt_encseq_builder_add_encoded_generic(eb, str, strlen, desc, false);
@@ -8909,7 +8909,7 @@ void gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
 
 void gt_encseq_builder_add_encoded_own(GtEncseqBuilder *eb,
                                        const GtUchar *str,
-                                       unsigned long strlen,
+                                       GtUword strlen,
                                        const char *desc)
 {
   gt_encseq_builder_add_encoded_generic(eb, str, strlen, desc, true);
@@ -8951,7 +8951,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
   GtEncseq *encseq = NULL;
   const GtEncseqAccessType sat = GT_ACCESS_TYPE_DIRECTACCESS;
   Gtssptaboutinfo *ssptaboutinfo;
-  unsigned long i, lastnonspecialrangelength = 0;
+  GtUword i, lastnonspecialrangelength = 0;
   GtSpecialcharinfo samplespecialcharinfo =
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -9049,7 +9049,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   const char testseq[] = "agctttnttgca",
              *desc;
   GtUchar buffer[65];
-  unsigned long desclen;
+  GtUword desclen;
   GtEncseq *encseq;
   const GtStrArray *filenames;
   gt_error_check(err);
@@ -9325,14 +9325,14 @@ void gt_encseq_builder_delete(GtEncseqBuilder *eb)
   gt_free(eb);
 }
 
-unsigned long gt_encseq_num_of_files(const GtEncseq *encseq)
+GtUword gt_encseq_num_of_files(const GtEncseq *encseq)
 {
   gt_assert(encseq && encseq->filenametab);
   return encseq->numofdbfiles;
 }
 
-uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
-                                        unsigned long filenum)
+GtUint64 gt_encseq_effective_filelength(const GtEncseq *encseq,
+                                        GtUword filenum)
 {
   if (encseq->numofdbfiles == 1UL)
     return (uint64_t) encseq->totallength;
@@ -9341,8 +9341,8 @@ uint64_t gt_encseq_effective_filelength(const GtEncseq *encseq,
   return encseq->headerptr.filelengthtab[filenum].effectivelength;
 }
 
-unsigned long gt_encseq_filenum(const GtEncseq *encseq,
-                                unsigned long position)
+GtUword gt_encseq_filenum(const GtEncseq *encseq,
+                                GtUword position)
 {
   gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
 
@@ -9361,8 +9361,8 @@ unsigned long gt_encseq_filenum(const GtEncseq *encseq,
                               position);
 }
 
-unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
-                                     unsigned long filenum)
+GtUword gt_encseq_filestartpos(const GtEncseq *encseq,
+                                     GtUword filenum)
 {
   gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
   if (filenum > 0)
@@ -9370,8 +9370,8 @@ unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
   return 0;
 }
 
-unsigned long gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
-                                             unsigned long filenum)
+GtUword gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
+                                             GtUword filenum)
 {
   gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
   if (filenum > 0)
@@ -9379,14 +9379,14 @@ unsigned long gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
   return 0;
 }
 
-unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq)
+GtUword gt_encseq_sizeofrep(const GtEncseq *encseq)
 {
   return encseq->sizeofrep;
 }
 
-unsigned long gt_encseq_sizeofstructure(void)
+GtUword gt_encseq_sizeofstructure(void)
 {
-  return (unsigned long) sizeof (GtEncseq);
+  return (GtUword) sizeof (GtEncseq);
 }
 
 GtEncseqAccessType gt_encseq_accesstype_get(const GtEncseq *encseq)
@@ -9394,7 +9394,7 @@ GtEncseqAccessType gt_encseq_accesstype_get(const GtEncseq *encseq)
   return encseq->sat;
 }
 
-unsigned long gt_encseq_equallength(const GtEncseq *encseq)
+GtUword gt_encseq_equallength(const GtEncseq *encseq)
 {
   gt_assert(encseq->equallength.defined);
   return encseq->equallength.valueunsignedlong;
@@ -9453,9 +9453,9 @@ bool gt_encseq_is_mirrored(const GtEncseq *encseq)
   return encseq->hasmirror;
 }
 
-void gt_range_reverse(unsigned long totallength, GtRange *range)
+void gt_range_reverse(GtUword totallength, GtRange *range)
 {
-  unsigned long tmp;
+  GtUword tmp;
 
   tmp = range->start;
   range->start = GT_REVERSEPOS(totallength, range->end) + 1;

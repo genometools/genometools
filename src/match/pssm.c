@@ -32,7 +32,7 @@ typedef int ProfScore;
 
 typedef struct
 {
-  unsigned long dimension,
+  GtUword dimension,
                 numofcharacters;
   ProfScore *itmthreshold,  /* intermediate thresholds */
             maxtotalscore,  /* the maximum score */
@@ -43,9 +43,9 @@ typedef struct
 void gt_showProfilematrix(const Profilematrix *prof,
                               const GtUchar *characters)
 {
-  unsigned long d, a;
+  GtUword d, a;
 
-  printf("# %lu x %lu matrix\n",prof->numofcharacters,
+  printf("# "GT_LU" x "GT_LU" matrix\n",prof->numofcharacters,
                                 prof->dimension);
   printf("# mintotalscore=");
   SHOWProfScore(stdout,prof->mintotalscore);
@@ -72,8 +72,8 @@ void gt_showProfilematrix(const Profilematrix *prof,
 void gt_makeitmthresholds(Profilematrix *prof,
                               ProfScore minscore)
 {
-  unsigned long d, a;
-  long ddown;
+  GtUword d, a;
+  GtWord ddown;
   ProfScore partsum,
             score,
             *maxscore;
@@ -92,7 +92,7 @@ void gt_makeitmthresholds(Profilematrix *prof,
   }
   partsum = (ProfScore) 0;
   gt_assert(prof->itmthreshold != NULL);
-  for (ddown = (long) (prof->dimension-1); ddown>=0; ddown--)
+  for (ddown = (GtWord) (prof->dimension-1); ddown>=0; ddown--)
   {
     prof->itmthreshold[ddown] = minscore - partsum;
     partsum += maxscore[ddown];
@@ -103,11 +103,11 @@ void gt_makeitmthresholds(Profilematrix *prof,
 void gt_lookaheadsearchPSSM(const GtEncseq *encseq,
                             const Profilematrix *prof)
 {
-  unsigned long firstpos, bufsize;
+  GtUword firstpos, bufsize;
   GtUchar currentchar;
-  unsigned long pos;
+  GtUword pos;
   GtEncseqReader *esr;
-  unsigned long totallength = gt_encseq_total_length(encseq);
+  GtUword totallength = gt_encseq_total_length(encseq);
   GtUchar *buffer;
 
   esr = gt_encseq_create_reader_with_readmode(encseq,GT_READMODE_FORWARD,0);

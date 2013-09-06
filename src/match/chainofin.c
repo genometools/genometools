@@ -25,10 +25,10 @@
 #define READNUMS 5
 
 #define CANNOTPARSELINE(S)\
-        gt_error_set(err,"matchfile \"%s\", line %lu, column %lu: %s",\
+        gt_error_set(err,"matchfile \"%s\", line "GT_LU", column "GT_LU": %s",\
                      matchfile,linenum+1,countcolumns+1,S)
 
-static int numberoflinesinfile(unsigned long *linenum,
+static int numberoflinesinfile(GtUword *linenum,
                                const char *filename,
                                GtError *err)
 {
@@ -57,8 +57,8 @@ GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                                                   GtError *err)
 {
   GtChain2Dimmatchtable *matchtable;
-  unsigned long linenum;
-  long storeinteger[READNUMS];
+  GtUword linenum;
+  GtWord storeinteger[READNUMS];
   FILE *matchfp;
   bool haserr = false;
   GtChain2Dimmatchvalues fragment;
@@ -73,16 +73,16 @@ GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
     return NULL;
   }
   matchtable = gt_chain_matchtable_new(linenum);
-  for (linenum = 0; fscanf(matchfp,"%ld %ld %ld %ld %ld\n",
+  for (linenum = 0; fscanf(matchfp,""GT_LD" "GT_LD" "GT_LD" "GT_LD" "GT_LD"\n",
                            &storeinteger[0],
                            &storeinteger[1],
                            &storeinteger[2],
                            &storeinteger[3],
                            &storeinteger[4]) == READNUMS; linenum++)
   {
-    unsigned long countcolumns;
+    GtUword countcolumns;
 
-    for (countcolumns = 0; countcolumns < (unsigned long) (READNUMS-1);
+    for (countcolumns = 0; countcolumns < (GtUword) (READNUMS-1);
          countcolumns++)
     {
       if (storeinteger[countcolumns] < 0)

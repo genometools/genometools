@@ -36,7 +36,7 @@ typedef struct {
        detect_collisions;
   GtStr *checklist,
         *extract;
-  unsigned long width;
+  GtUword width;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } FingerprintArguments;
@@ -129,7 +129,7 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
 }
 
 static void proc_superfluous_sequence(const char *string,
-                                      GT_UNUSED unsigned long occurrences,
+                                      GT_UNUSED GtUword occurrences,
                                       GT_UNUSED double probability, void *data)
 {
   bool *comparisons_failed = data;
@@ -173,16 +173,16 @@ static int compare_fingerprints(GtStringDistri *sd, const char *checklist,
 }
 
 typedef struct {
-  unsigned long long duplicates,
+  GtUint64 duplicates,
                      num_of_sequences;
 } FingerprintInfo;
 
-static void show_duplicate(const char *fingerprint, unsigned long occurrences,
+static void show_duplicate(const char *fingerprint, GtUword occurrences,
                            GT_UNUSED double probability, void *data)
 {
   FingerprintInfo *info = data;
   if (occurrences > 1) {
-    printf("%s\t%lu\n", fingerprint, occurrences);
+    printf("%s\t"GT_LU"\n", fingerprint, occurrences);
     info->duplicates += occurrences - 1;
   }
   info->num_of_sequences += occurrences;
@@ -206,10 +206,10 @@ static int show_duplicates(GtStringDistri *sd, GtError *err)
 }
 
 static int compare_md5s(GtBioseqCol *bsc, const GtSeqInfo *si,
-                        unsigned long filenum, unsigned long seqnum,
+                        GtUword filenum, GtUword seqnum,
                         const char *md5, GtError *err)
 {
-  unsigned long i, seq_a_len, seq_b_len;
+  GtUword i, seq_a_len, seq_b_len;
   char *seq_a_upper, *seq_b_upper;
   char *seq_a, *seq_b;
   int had_err = 0;
@@ -243,7 +243,7 @@ static int compare_md5s(GtBioseqCol *bsc, const GtSeqInfo *si,
 
 static int detect_collisions_on_bsc(GtBioseqCol *bsc, GtError *err)
 {
-  unsigned long filenum, seqnum;
+  GtUword filenum, seqnum;
   GtSeqInfoCache *sic;
   gt_error_check(err);
   gt_assert(bsc);
@@ -277,7 +277,7 @@ static int detect_collisions(int num_of_seqfiles, const char **seqfiles,
 {
   GtStrArray *sequence_files;
   GtSeqCol *sc;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
   gt_error_check(err);
   sequence_files = gt_str_array_new();
@@ -299,7 +299,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
   bool extract_found = true;
   GtBioseq *bs;
   GtStringDistri *sd;
-  unsigned long i, j;
+  GtUword i, j;
   int had_err = 0;
 
   gt_error_check(err);

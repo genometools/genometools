@@ -51,8 +51,8 @@ void gt_runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
   gt_error_delete(err);
   while (true)
   {
-    checkfunction(forward,useq,(unsigned long) ulen,
-                          vseq,(unsigned long) vlen);
+    checkfunction(forward,useq,(GtUword) ulen,
+                          vseq,(GtUword) vlen);
     if (!forward)
     {
       break;
@@ -63,12 +63,12 @@ void gt_runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
   gt_fa_xmunmap((void *) vseq);
 }
 
-unsigned long gt_runcheckfunctionontext(Checkcmppairfuntype checkfunction,
+GtUword gt_runcheckfunctionontext(Checkcmppairfuntype checkfunction,
                                      const char *text)
 {
-  unsigned long i, len;
+  GtUword i, len;
 
-  len = (unsigned long) strlen(text);
+  len = (GtUword) strlen(text);
   for (i=1UL; i<=len/2; i++)
   {
     checkfunction(true,
@@ -80,11 +80,11 @@ unsigned long gt_runcheckfunctionontext(Checkcmppairfuntype checkfunction,
   return len/2;
 }
 
-unsigned long gt_applycheckfunctiontotext(const GtUchar *text,
-                                       unsigned long textlen,
+GtUword gt_applycheckfunctiontotext(const GtUchar *text,
+                                       GtUword textlen,
                                        void *info)
 {
-  unsigned long i;
+  GtUword i;
   Checkcmppairfuntype checkfunction = (Checkcmppairfuntype) info;
 
 #ifdef SKDEBUG
@@ -97,15 +97,15 @@ unsigned long gt_applycheckfunctiontotext(const GtUchar *text,
   return textlen/2+1;
 }
 
-static unsigned long applyall(const char *alpha,
-                              unsigned long textlen,void *info,
-                              unsigned long (*apply)(const GtUchar *,
-                                                     unsigned long,
+static GtUword applyall(const char *alpha,
+                              GtUword textlen,void *info,
+                              GtUword (*apply)(const GtUchar *,
+                                                     GtUword,
                                                      void *))
 {
-  unsigned long i, *w, z = textlen-1,
+  GtUword i, *w, z = textlen-1,
                 testcases = 0,
-                asize = (unsigned long) strlen(alpha);
+                asize = (GtUword) strlen(alpha);
   GtUchar *text;
   bool stop = false;
 
@@ -147,9 +147,9 @@ static unsigned long applyall(const char *alpha,
   return testcases;
 }
 
-unsigned long gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
+GtUword gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                          const char *charlist,
-                                         unsigned long len)
+                                         GtUword len)
 {
   return applyall(charlist,
                   len,
@@ -157,12 +157,12 @@ unsigned long gt_runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                   gt_applycheckfunctiontotext);
 }
 
-unsigned long gt_computegreedyunitedist(const GtUchar *useq,
-                                        unsigned long ulen,
+GtUword gt_computegreedyunitedist(const GtUchar *useq,
+                                        GtUword ulen,
                                         const GtUchar *vseq,
-                                        unsigned long vlen)
+                                        GtUword vlen)
 {
-  unsigned long edist;
+  GtUword edist;
   GtFrontResource *frontresource = gt_frontresource_new(10UL);
   GtSeqabstract *greedyedistuseq = gt_seqabstract_new_gtuchar(useq,ulen,0),
                 *greedyedistvseq = gt_seqabstract_new_gtuchar(vseq,vlen,0);
@@ -175,11 +175,11 @@ unsigned long gt_computegreedyunitedist(const GtUchar *useq,
 
 void gt_checkgreedyunitedist(GT_UNUSED bool forward,
                              const GtUchar *useq,
-                             unsigned long ulen,
+                             GtUword ulen,
                              const GtUchar *vseq,
-                             unsigned long vlen)
+                             GtUword vlen)
 {
-  unsigned long edist1, edist2;
+  GtUword edist1, edist2;
   GtFrontResource *frontresource = gt_frontresource_new(10UL);
   GtSeqabstract *greedyedistuseq = gt_seqabstract_new_gtuchar(useq,ulen,0),
                 *greedyedistvseq = gt_seqabstract_new_gtuchar(vseq,vlen,0);
@@ -187,11 +187,11 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
   edist1 = greedyunitedist(frontresource,greedyedistuseq,greedyedistvseq);
   edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);
 #ifdef SKDEBUG
-  printf("edist = %lu\n",edist1);
+  printf("edist = "GT_LU"\n",edist1);
 #endif
   if (edist1 != edist2)
   {
-    fprintf(stderr,"greedyunitedist = %lu != %lu = gt_squarededistunit\n",
+    fprintf(stderr,"greedyunitedist = "GT_LU" != "GT_LU" = gt_squarededistunit\n",
                    edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }

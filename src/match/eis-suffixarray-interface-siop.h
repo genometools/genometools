@@ -38,7 +38,7 @@ SAIGetGtReadmode(const SuffixarrayFileInterface *sai)
   return sai->sa->readmode;
 }
 
-static inline unsigned long
+static inline GtUword
 SAIGetLength(const SuffixarrayFileInterface *sai)
 {
   return SASSGetLength(constSAI2SASS(sai));

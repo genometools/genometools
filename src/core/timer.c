@@ -140,10 +140,10 @@ void gt_timer_show_formatted(GT_UNUSED GtTimer *t, GT_UNUSED const char *fmt,
   gt_assert(t->state == TIMER_STOPPED);
   timeval_subtract(&elapsed_tv, &t->stop_tv, &t->gstart_tv);
   fprintf(fp, fmt,
-          (long)(elapsed_tv.tv_sec),
-          (long)(elapsed_tv.tv_usec),
-          (long)(t->stop_ru.ru_utime.tv_sec - t->start_ru.ru_utime.tv_sec),
-          (long)(t->stop_ru.ru_stime.tv_sec - t->start_ru.ru_stime.tv_sec));
+          (GtWord)(elapsed_tv.tv_sec),
+          (GtWord)(elapsed_tv.tv_usec),
+          (GtWord)(t->stop_ru.ru_utime.tv_sec - t->start_ru.ru_utime.tv_sec),
+          (GtWord)(t->stop_ru.ru_stime.tv_sec - t->start_ru.ru_stime.tv_sec));
 #else
   /* XXX */
   fprintf(stderr, "gt_timer_show_formatted() not implemented\n");
@@ -153,7 +153,7 @@ void gt_timer_show_formatted(GT_UNUSED GtTimer *t, GT_UNUSED const char *fmt,
 
 void gt_timer_show(GtTimer *t, FILE *fp)
 {
-  gt_timer_show_formatted(t, "%ld.%06lds real %lds user %lds system\n", fp);
+  gt_timer_show_formatted(t, ""GT_LD".%06lds real "GT_LD"s user "GT_LD"s system\n", fp);
 }
 
 #ifndef _WIN32
@@ -161,16 +161,16 @@ static void gt_timer_print_progress_report(GtTimer *t,
     struct timeval *elapsed_tv, struct timeval *elapsed_user_tv,
     struct timeval *elapsed_sys_tv, const char *desc, FILE *fp)
 {
-  fprintf(fp,"# TIME %s %ld.%02ld",
+  fprintf(fp,"# TIME %s "GT_LD".%02ld",
           desc,
-          (long)(elapsed_tv->tv_sec),
-          (long)(elapsed_tv->tv_usec)/10000);
+          (GtWord)(elapsed_tv->tv_sec),
+          (GtWord)(elapsed_tv->tv_usec)/10000);
   if (t->show_cpu_time) {
-    fprintf(fp, " (user: %ld.%02ld; sys: %ld.%02ld)\n",
-            (long)(elapsed_user_tv->tv_sec),
-            (long)(elapsed_user_tv->tv_usec)/10000,
-            (long)(elapsed_sys_tv->tv_sec),
-            (long)(elapsed_sys_tv->tv_usec)/10000);
+    fprintf(fp, " (user: "GT_LD".%02ld; sys: "GT_LD".%02ld)\n",
+            (GtWord)(elapsed_user_tv->tv_sec),
+            (GtWord)(elapsed_user_tv->tv_usec)/10000,
+            (GtWord)(elapsed_sys_tv->tv_sec),
+            (GtWord)(elapsed_sys_tv->tv_usec)/10000);
   }
   else {
     fprintf(fp, "\n");

@@ -47,7 +47,7 @@ void gt_csa_splice_form_delete(GtCSASpliceForm *splice_form)
 }
 
 #ifndef NDEBUG
-static unsigned long csa_splice_form_start(const GtCSASpliceForm *splice_form)
+static GtUword csa_splice_form_start(const GtCSASpliceForm *splice_form)
 {
   return splice_form
          ->get_genomic_range(*(void**)
@@ -68,13 +68,13 @@ void gt_csa_splice_form_add_sa(GtCSASpliceForm *splice_form,
 }
 
 void* gt_csa_splice_form_get_sa(const GtCSASpliceForm *splice_form,
-                                unsigned long sa)
+                                GtUword sa)
 {
   gt_assert(splice_form);
   return *(void**) gt_array_get(splice_form->spliced_alignments, sa);
 }
 
-unsigned long gt_csa_splice_form_num_of_sas(const GtCSASpliceForm *splice_form)
+GtUword gt_csa_splice_form_num_of_sas(const GtCSASpliceForm *splice_form)
 {
   gt_assert(splice_form);
   return gt_array_size(splice_form->spliced_alignments);
@@ -83,7 +83,7 @@ unsigned long gt_csa_splice_form_num_of_sas(const GtCSASpliceForm *splice_form)
 GtRange gt_csa_splice_form_genomic_range(const GtCSASpliceForm *splice_form)
 {
   GtRange splice_form_range, tmp_range;
-  unsigned long i;
+  GtUword i;
   gt_assert(splice_form);
   splice_form_range.start = ~0UL;
   splice_form_range.end = 0UL;

@@ -42,7 +42,7 @@ typedef struct {
         *str_fastaoutputfilenameinnerregion,
         *str_gff3filename;
   GtRange searchrange;
-  unsigned long minseedlength,
+  GtUword minseedlength,
                 minltrlength,
                 maxltrlength,
                 mindistance,
@@ -104,15 +104,15 @@ static void gt_ltrharvest_showopts(const LTRharvestArguments *lo)
   }
   printf("#   xdropbelowscore: %d\n", lo->xdropbelowscore);
   printf("#   similaritythreshold: %.2f\n", lo->similaritythreshold);
-  printf("#   minseedlength: %lu\n", lo->minseedlength);
+  printf("#   minseedlength: "GT_LU"\n", lo->minseedlength);
   printf("#   matchscore: %d\n", lo->arbitscores.mat);
   printf("#   mismatchscore: %d\n", lo->arbitscores.mis);
   printf("#   insertionscore: %d\n", lo->arbitscores.ins);
   printf("#   deletionscore: %d\n", lo->arbitscores.del);
-  printf("#   minLTRlength: %lu\n",  lo->minltrlength);
-  printf("#   maxLTRlength: %lu\n",  lo->maxltrlength);
-  printf("#   minLTRdistance: %lu\n",  lo->mindistance);
-  printf("#   maxLTRdistance: %lu\n",  lo->maxdistance);
+  printf("#   minLTRlength: "GT_LU"\n",  lo->minltrlength);
+  printf("#   maxLTRlength: "GT_LU"\n",  lo->maxltrlength);
+  printf("#   minLTRdistance: "GT_LU"\n",  lo->mindistance);
+  printf("#   maxLTRdistance: "GT_LU"\n",  lo->maxdistance);
   if (lo->nooverlaps)
   {
     printf("#   overlaps: no\n");
@@ -136,7 +136,7 @@ static void gt_ltrharvest_showopts(const LTRharvestArguments *lo)
   if (lo->searchrange.start != 0 ||
       lo->searchrange.end != 0)
   {
-    printf("# ltrsearchseqrange=(%lu,%lu)\n",
+    printf("# ltrsearchseqrange=("GT_LU","GT_LU")\n",
           lo->searchrange.start,
           lo->searchrange.end);
   }
@@ -625,7 +625,7 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
                                          arguments->offset,
                                          arguments->minlengthTSD,
                                          arguments->maxlengthTSD,
-                                         (unsigned long) arguments->vicinity,
+                                         (GtUword) arguments->vicinity,
                                          err);
   if (ltrh_stream == NULL)
     return -1;

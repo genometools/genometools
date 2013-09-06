@@ -21,13 +21,13 @@
 struct GtSeq {
   char *seq, *description;
   GtUchar *encoded_seq;
-  unsigned long seqlen;
+  GtUword seqlen;
   bool own_seq,
        own_description;
   GtAlphabet *seqalpha;
 };
 
-GtSeq* gt_seq_new(const char *seq, unsigned long seqlen, GtAlphabet *seqalpha)
+GtSeq* gt_seq_new(const char *seq, GtUword seqlen, GtAlphabet *seqalpha)
 {
   GtSeq *s;
   gt_assert(seq && seqalpha);
@@ -38,7 +38,7 @@ GtSeq* gt_seq_new(const char *seq, unsigned long seqlen, GtAlphabet *seqalpha)
   return s;
 }
 
-GtSeq* gt_seq_new_own(char* seq, unsigned long seqlen, GtAlphabet *seqalpha)
+GtSeq* gt_seq_new_own(char* seq, GtUword seqlen, GtAlphabet *seqalpha)
 {
   GtSeq *s = gt_seq_new(seq, seqlen, seqalpha);
   s->own_seq = true;
@@ -90,7 +90,7 @@ const GtAlphabet* gt_seq_get_alphabet(const GtSeq *s)
   return s->seqalpha;
 }
 
-unsigned long gt_seq_length(const GtSeq *s)
+GtUword gt_seq_length(const GtSeq *s)
 {
   gt_assert(s);
   return s->seqlen;

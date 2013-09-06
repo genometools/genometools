@@ -47,7 +47,7 @@ void gth_sa_visitor_visit_sa(GthSAVisitor *sav, GthSA *sa)
   sav->c_class->visit_sa(sav, sa);
 }
 
-void gth_sa_visitor_trailer(GthSAVisitor *sav, unsigned long num_of_sas)
+void gth_sa_visitor_trailer(GthSAVisitor *sav, GtUword num_of_sas)
 {
   gt_assert(sav && sav->c_class);
   if (sav->c_class->trailer)

@@ -20,7 +20,7 @@
 #include "core/array2dim_api.h"
 
 typedef struct {
-  unsigned long offset,
+  GtUword offset,
                 length;
 } GtRowInfo;
 
@@ -32,7 +32,7 @@ typedef struct {
 #define gt_array2dim_sparse_calloc(ARRAY2DIM, ROWS, SIZE, ROWINFO)             \
         {                                                                      \
           GtRowInfo *gt_ri = (ROWINFO);                                        \
-          unsigned long gt_a2d_i;                                              \
+          GtUword gt_a2d_i;                                              \
           gt_assert(gt_ri[0].offset == 0);                                     \
           ARRAY2DIM = gt_malloc(sizeof *ARRAY2DIM * (ROWS));                   \
           (ARRAY2DIM)[0] = gt_calloc((SIZE), sizeof **ARRAY2DIM);              \

@@ -25,7 +25,7 @@ struct GthMD5Cache {
   GtStrCache *str_cache;
 };
 
-static const char* seq_con_get_seq(void *seqs, unsigned long index)
+static const char* seq_con_get_seq(void *seqs, GtUword index)
 {
   GthSeqCon *seq_con = seqs;
   const char *seq;
@@ -39,14 +39,14 @@ static const char* seq_con_get_seq(void *seqs, unsigned long index)
   return seq;
 }
 
-static unsigned long seq_con_get_seq_len(void *seqs, unsigned long index)
+static GtUword seq_con_get_seq_len(void *seqs, GtUword index)
 {
   GthSeqCon *seq_con = seqs;
   gt_assert(seq_con);
   return gth_seq_con_get_length(seq_con, index);
 }
 
-static GtStr* get_md5_str(void *str_source, unsigned long index)
+static GtStr* get_md5_str(void *str_source, GtUword index)
 {
   const GtMD5Tab *md5_tab = str_source;
   gt_assert(md5_tab);
@@ -75,7 +75,7 @@ void gth_md5_cache_delete(GthMD5Cache *md5_cache)
   gt_free(md5_cache);
 }
 
-GtStr* gth_md5_cache_get(GthMD5Cache *md5_cache, unsigned long seq_num)
+GtStr* gth_md5_cache_get(GthMD5Cache *md5_cache, GtUword seq_num)
 {
   gt_assert(md5_cache);
   return gt_str_cache_get(md5_cache->str_cache, seq_num);

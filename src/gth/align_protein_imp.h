@@ -103,10 +103,10 @@ typedef struct {
    programming for proteins */
 struct GthDPtables {
   DPtablecore core; /* the core tables */
-  unsigned long *intronstart_A[PROTEIN_NUMOFSCORETABLES],
+  GtUword *intronstart_A[PROTEIN_NUMOFSCORETABLES],
                 *intronstart_B[PROTEIN_NUMOFSCORETABLES],
                 *intronstart_C[PROTEIN_NUMOFSCORETABLES];
-  unsigned long *exonstart[PROTEIN_NUMOFSCORETABLES];
+  GtUword *exonstart[PROTEIN_NUMOFSCORETABLES];
   unsigned char *splitcodon_B[PROTEIN_NUMOFSCORETABLES],
                 *splitcodon_C1[PROTEIN_NUMOFSCORETABLES],
                 *splitcodon_C2[PROTEIN_NUMOFSCORETABLES];

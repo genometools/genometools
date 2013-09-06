@@ -25,7 +25,7 @@ typedef struct GtTidyRegionNodeVisitor GtTidyRegionNodeVisitor;
 
 const GtNodeVisitorClass* gt_tidy_region_node_visitor_class(void);
 GtNodeVisitor* gt_tidy_region_node_visitor_new(void);
-unsigned long  gt_tidy_region_node_visitor_node_buffer_size(GtNodeVisitor*);
+GtUword  gt_tidy_region_node_visitor_node_buffer_size(GtNodeVisitor*);
 GtGenomeNode*  gt_tidy_region_node_visitor_get_node(GtNodeVisitor*);
 
 #endif

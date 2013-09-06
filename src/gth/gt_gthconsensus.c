@@ -25,7 +25,7 @@
 
 static int process_consensus_files(GtStrArray *consensusfiles,
                                    GthCallInfo *call_info, GthInput *input,
-                                   GthStat *stat, unsigned long indentlevel,
+                                   GthStat *stat, GtUword indentlevel,
                                    GtError *err)
 {
   GthSACollection *sa_collection;

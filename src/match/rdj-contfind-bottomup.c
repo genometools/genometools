@@ -24,27 +24,27 @@
 typedef struct
 {
   /* length of the shortest sequence in the array */
-  unsigned long shortest;
+  GtUword shortest;
 
-  unsigned long spacing; /* for eqlen read length mode */
+  GtUword spacing; /* for eqlen read length mode */
 
   const GtEncseq *encseq;
   GtBitsequence *sspbittab;
 
   GtBitsequence *contained;
 
-  unsigned long cmin;
-  unsigned long csize;
+  GtUword cmin;
+  GtUword csize;
 
   /* progressbar */
   bool show_progressbar;
-  unsigned long long progress;
+  GtUint64 progress;
 
   /* revcompl mode */
-  unsigned long firstrevcompl;
-  unsigned long nofsequences;
+  GtUword firstrevcompl;
+  GtUword nofsequences;
 
-  unsigned long counter;
+  GtUword counter;
 } ContfindBUstate;
 
 typedef ContfindBUstate GtBUstate_rdjce;
@@ -76,7 +76,7 @@ static inline void freeBUinfo_rdjce(GT_UNUSED GtBUinfo_rdjce *info,
   /* nothing to do */
 }
 
-static inline void processcontained(unsigned long seqnum,
+static inline void processcontained(GtUword seqnum,
     ContfindBUstate *state)
 {
   if (state->firstrevcompl > 0)
@@ -93,11 +93,11 @@ static inline void processcontained(unsigned long seqnum,
 }
 
 static inline int processleafedge_rdjcv(GT_UNUSED bool firstsucc,
-    unsigned long fatherdepth,
-    GT_UNUSED GtBUinfo_rdjcv *father, unsigned long leafnumber,
+    GtUword fatherdepth,
+    GT_UNUSED GtBUinfo_rdjcv *father, GtUword leafnumber,
     GtBUstate_rdjcv *state, GT_UNUSED GtError *err)
 {
-  unsigned long seqnum;
+  GtUword seqnum;
 
   if (fatherdepth >= state->shortest)
   {
@@ -114,11 +114,11 @@ static inline int processleafedge_rdjcv(GT_UNUSED bool firstsucc,
 }
 
 static inline int processleafedge_rdjce(GT_UNUSED bool firstsucc,
-    unsigned long fatherdepth,
-    GT_UNUSED GtBUinfo_rdjce *father, unsigned long leafnumber,
+    GtUword fatherdepth,
+    GT_UNUSED GtBUinfo_rdjce *father, GtUword leafnumber,
     GtBUstate_rdjce *state, GT_UNUSED GtError *err)
 {
-  unsigned long seqnum;
+  GtUword seqnum;
 
   if (fatherdepth == state->shortest && (leafnumber % state->spacing) == 0)
   {
@@ -130,9 +130,9 @@ static inline int processleafedge_rdjce(GT_UNUSED bool firstsucc,
 }
 
 static inline int processbranchingedge_rdjce(GT_UNUSED bool firstsucc,
-    GT_UNUSED unsigned long fatherdepth,
-    GT_UNUSED GtBUinfo_rdjce *father, unsigned long sondepth,
-    GT_UNUSED unsigned long sonwidth,
+    GT_UNUSED GtUword fatherdepth,
+    GT_UNUSED GtBUinfo_rdjce *father, GtUword sondepth,
+    GT_UNUSED GtUword sonwidth,
     GT_UNUSED GtBUinfo_rdjce *son, GtBUstate_rdjce *state,
     GT_UNUSED GtError *err)
 {
@@ -150,9 +150,9 @@ static inline int processbranchingedge_rdjce(GT_UNUSED bool firstsucc,
 }
 
 static inline int processbranchingedge_rdjcv(GT_UNUSED bool firstsucc,
-    GT_UNUSED unsigned long fatherdepth,
-    GT_UNUSED GtBUinfo_rdjcv *father, unsigned long sondepth,
-    unsigned long sonwidth, GT_UNUSED GtBUinfo_rdjcv *son,
+    GT_UNUSED GtUword fatherdepth,
+    GT_UNUSED GtBUinfo_rdjcv *father, GtUword sondepth,
+    GtUword sonwidth, GT_UNUSED GtBUinfo_rdjcv *son,
     GtBUstate_rdjcv *state, GT_UNUSED GtError *err)
 {
   if (sondepth >= state->shortest)
@@ -175,10 +175,10 @@ static inline int processbranchingedge_rdjcv(GT_UNUSED bool firstsucc,
 #include "match/esa-bottomup-rdjce.inc"
 
 /* prepare sspbittab and determine length of shortest sequence */
-static void prepare_sspbittab_and_shortest(unsigned long totallength,
+static void prepare_sspbittab_and_shortest(GtUword totallength,
     ContfindBUstate *state)
 {
-  unsigned long length, lastseqstart, i, ssp;
+  GtUword length, lastseqstart, i, ssp;
 
   GT_INITBITTAB(state->sspbittab, totallength + 1);
   lastseqstart = 0;
@@ -198,13 +198,13 @@ static void prepare_sspbittab_and_shortest(unsigned long totallength,
     state->shortest = length;
 }
 
-unsigned long gt_contfind_bottomup(Sequentialsuffixarrayreader *ssar,
+GtUword gt_contfind_bottomup(Sequentialsuffixarrayreader *ssar,
                      bool show_progressbar, GtBitsequence *contained,
-                     unsigned long firstrevcompl,
-                     unsigned long read_length /* 0 = variable */)
+                     GtUword firstrevcompl,
+                     GtUword read_length /* 0 = variable */)
 {
   ContfindBUstate state;
-  unsigned long totallength;
+  GtUword totallength;
   GT_UNUSED int retval;
 
   gt_assert(ssar != NULL);
@@ -235,7 +235,7 @@ unsigned long gt_contfind_bottomup(Sequentialsuffixarrayreader *ssar,
   {
     state.progress = 0;
     gt_progressbar_start(&(state.progress),
-        (unsigned long long)totallength);
+        (GtUint64)totallength);
   }
 
   retval = (read_length == 0)

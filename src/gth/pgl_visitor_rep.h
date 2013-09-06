@@ -24,9 +24,9 @@
 struct GthPGLVisitorClass {
   size_t size;
   void (*free)(GthPGLVisitor*);
-  void (*preface)(GthPGLVisitor*, unsigned long num_of_pgls);
+  void (*preface)(GthPGLVisitor*, GtUword num_of_pgls);
   void (*set_region_mapping)(GthPGLVisitor*, GtRegionMapping*);
-  void (*visit_pgl)(GthPGLVisitor*, GthPGL*, unsigned long pglnum);
+  void (*visit_pgl)(GthPGLVisitor*, GthPGL*, GtUword pglnum);
   void (*trailer)(GthPGLVisitor*);
 };
 

@@ -34,7 +34,7 @@ struct GtContigsWriter
   GtEncseqReader *esr;
   GtArraychar contig;
   GtStr *contig_desc, *path_desc;
-  unsigned long contignum, lastseqnum, nofseqs, rlen;
+  GtUword contignum, lastseqnum, nofseqs, rlen;
   double arrival_rate;
   GtContigDepthInfo depthinfo;
   unsigned char *rcn;
@@ -131,9 +131,9 @@ void gt_contigs_writer_abort(GtContigsWriter *contigs_writer)
 
 GT_UNUSED
 static void gt_contigs_writer_append_chars(GtContigsWriter *contigs_writer,
-    unsigned long nofchars)
+    GtUword nofchars)
 {
-  unsigned long i;
+  GtUword i;
   char *c;
 
   gt_assert(contigs_writer != NULL);
@@ -237,9 +237,9 @@ void gt_contigs_writer_write(GtContigsWriter *contigs_writer)
 }
 
 void gt_contigs_writer_append(GtContigsWriter *contigs_writer,
-    unsigned long seqnum, unsigned long nofchars)
+    GtUword seqnum, GtUword nofchars)
 {
-  unsigned long pos, i;
+  GtUword pos, i;
   gt_assert(contigs_writer != NULL);
   pos = gt_encseq_seqstartpos(contigs_writer->reads, seqnum) +
       gt_encseq_seqlength(contigs_writer->reads, seqnum) - nofchars;
@@ -274,9 +274,9 @@ void gt_contigs_writer_append(GtContigsWriter *contigs_writer,
 }
 
 void gt_contigs_writer_start(GtContigsWriter *contigs_writer,
-    unsigned long seqnum)
+    GtUword seqnum)
 {
-  unsigned long pos, nofchars, i;
+  GtUword pos, nofchars, i;
   gt_assert(contigs_writer != NULL);
   pos = gt_encseq_seqstartpos(contigs_writer->reads, seqnum);
   nofchars = gt_encseq_seqlength(contigs_writer->reads, seqnum);

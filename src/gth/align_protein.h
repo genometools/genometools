@@ -48,8 +48,8 @@ typedef void (*GthProteinCompletePathMatrixJT)(GthDPtables *dpm,
                                                bool proteinexonpenal,
                                                const unsigned char
                                                *gen_seq_tran,
-                                               unsigned long gen_dp_length,
-                                               unsigned long ref_dp_length,
+                                               GtUword gen_dp_length,
+                                               GtUword ref_dp_length,
                                                GthDPParam *dp_param,
                                                GthDPOptionsCore
                                                *dp_options_core,
@@ -57,7 +57,7 @@ typedef void (*GthProteinCompletePathMatrixJT)(GthDPtables *dpm,
                                                *dp_scores_protein,
                                                GthJumpTable *jump_table,
                                                GtArray *gen_ranges,
-                                               unsigned long ref_offset);
+                                               GtUword ref_offset);
 
 /* The following function implements the Spliced Alignment of Genomic DNA with
    protein, as described by Usuka and Brendel. */
@@ -66,24 +66,24 @@ int gth_align_protein(GthSA*,
                       const unsigned char *gen_seq_tran,
                       const unsigned char *ref_seq_tran,
                       const unsigned char *ref_seq_orig,
-                      unsigned long referencelength,
+                      GtUword referencelength,
                       GtAlphabet *gen_alphabet,
                       GtAlphabet *ref_alphabet,
                       GthInput *gth_input,
                       bool introncutout,
-                      unsigned long autoicmaxmatrixsize,
+                      GtUword autoicmaxmatrixsize,
                       bool proteinexonpenal,
                       bool showeops,
                       bool comments,
                       bool gs2out,
-                      unsigned long translationtable,
+                      GtUword translationtable,
                       const GtRange *gen_seq_bounds,
                       GthSpliceSiteModel *splice_site_model,
                       GthDPOptionsCore *dp_options_core,
                       GthDPOptionsPostpro *dp_options_postpro,
                       GthProteinCompletePathMatrixJT complete_path_matrix_jt,
                       GthJumpTable *jump_table,
-                      unsigned long ref_offset,
+                      GtUword ref_offset,
                       GthStat*,
                       GtFile*);
 

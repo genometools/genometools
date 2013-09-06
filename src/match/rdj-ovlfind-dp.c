@@ -27,12 +27,12 @@
 
 typedef struct
 {
-  unsigned long edist, start_i, start_j;
+  GtUword edist, start_i, start_j;
 } GtOvlfindDpCell;
 
 /* true if u == v (approximatively) */
 static inline
-bool eqlfind_dp(unsigned long max_edist, GtOvlfindDpCell *mn_cell)
+bool eqlfind_dp(GtUword max_edist, GtOvlfindDpCell *mn_cell)
 {
   return mn_cell->edist <= max_edist &&
          mn_cell->start_i == 0 &&
@@ -41,10 +41,10 @@ bool eqlfind_dp(unsigned long max_edist, GtOvlfindDpCell *mn_cell)
 
 /* true if u is approximatively contained in v */
 static inline
-bool u_contfind_dp(unsigned long max_edist, unsigned long n,
+bool u_contfind_dp(GtUword max_edist, GtUword n,
                   GtOvlfindDpCell **lastrow)
 {
-  unsigned long j;
+  GtUword j;
   for (j = 0; j <= n; j++)
     if ((*lastrow)[j].edist <= max_edist &&
         (*lastrow)[j].start_i == 0)
@@ -54,10 +54,10 @@ bool u_contfind_dp(unsigned long max_edist, unsigned long n,
 
 /* true if v is approximatively contained in u */
 static inline
-bool v_contfind_dp(unsigned long max_edist, unsigned long m,
+bool v_contfind_dp(GtUword max_edist, GtUword m,
                   GtOvlfindDpCell **lastcol)
 {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i <= m; i++)
     if ((*lastcol)[i].edist <= max_edist &&
         (*lastcol)[i].start_j == 0)
@@ -66,13 +66,13 @@ bool v_contfind_dp(unsigned long max_edist, unsigned long m,
 }
 
 /* find approximate suffix-prefix matches, with the suffix coming from u */
-static inline void u_smpfind_dp(unsigned long min_length,
-    unsigned long max_edist, bool find_submaximal,
-    unsigned long m, unsigned long n, GtOvlfindDpCell **lastrow,
-    void (*proc)(unsigned long, unsigned long, unsigned long, bool,
+static inline void u_smpfind_dp(GtUword min_length,
+    GtUword max_edist, bool find_submaximal,
+    GtUword m, GtUword n, GtOvlfindDpCell **lastrow,
+    void (*proc)(GtUword, GtUword, GtUword, bool,
     void*), void* procdata)
 {
-  unsigned long j, suffix_length;
+  GtUword j, suffix_length;
 
   gt_assert(m > 0);
   gt_assert(n > 0);
@@ -93,14 +93,14 @@ static inline void u_smpfind_dp(unsigned long min_length,
 
 /* find approximate suffix-prefix matches, with the suffix coming from v */
 static inline
-void v_smpfind_dp(unsigned long min_length, unsigned long max_edist,
-                  bool find_submaximal, unsigned long m,
-                  unsigned long n, GtOvlfindDpCell **lastcol,
-                  void (*proc)(unsigned long, unsigned long,
-                               unsigned long, bool, void*),
+void v_smpfind_dp(GtUword min_length, GtUword max_edist,
+                  bool find_submaximal, GtUword m,
+                  GtUword n, GtOvlfindDpCell **lastcol,
+                  void (*proc)(GtUword, GtUword,
+                               GtUword, bool, void*),
                   void* procdata)
 {
-  unsigned long i, prefix_length;
+  GtUword i, prefix_length;
 
   gt_assert(m > 0);
   gt_assert(n > 0);
@@ -120,10 +120,10 @@ void v_smpfind_dp(unsigned long min_length, unsigned long max_edist,
 }
 
 static inline
-void run_dp(const char *u, unsigned long m, const char *v, unsigned long n,
+void run_dp(const char *u, GtUword m, const char *v, GtUword n,
             GtOvlfindDpCell **row, GtOvlfindDpCell **col)
 {
-  unsigned long i, j, cost_r, cost_d, cost_i;
+  GtUword i, j, cost_r, cost_d, cost_i;
   GtOvlfindDpCell cell_r, next_cell_r;
 
   /* first row */
@@ -173,35 +173,35 @@ void run_dp(const char *u, unsigned long m, const char *v, unsigned long n,
   }
 }
 
-GT_UNUSED static void print_row_and_col(GtOvlfindDpCell *row, unsigned long m,
-    GtOvlfindDpCell *col, unsigned long n)
+GT_UNUSED static void print_row_and_col(GtOvlfindDpCell *row, GtUword m,
+    GtOvlfindDpCell *col, GtUword n)
 {
-  unsigned long i, j;
+  GtUword i, j;
 
   for (i = 0; i <= m; i++)
-    gt_log_log("col[%lu]=((%lu,%lu),%lu)\n", i, col[i].start_i,
+    gt_log_log("col["GT_LU"]=(("GT_LU","GT_LU"),"GT_LU")\n", i, col[i].start_i,
         col[i].start_j, col[i].edist);
 
   for (j = 0; j <= n; j++)
-    gt_log_log("row[%lu]=((%lu,%lu),%lu)\n", j, row[j].start_i,
+    gt_log_log("row["GT_LU"]=(("GT_LU","GT_LU"),"GT_LU")\n", j, row[j].start_i,
         row[j].start_j, row[j].edist);
 }
 
-GtContfind gt_ovlfind_dp(const char *u, unsigned long m,
-                         const char *v, unsigned long n,
+GtContfind gt_ovlfind_dp(const char *u, GtUword m,
+                         const char *v, GtUword n,
                          double max_error, GtOvlfindMode mode,
-                         unsigned long min_length, bool find_submaximal,
+                         GtUword min_length, bool find_submaximal,
                          void (*smpproc)
-                           (unsigned long /* length on u */,
-                            unsigned long /* length on v */,
-                            unsigned long /* unit edit distance */,
+                           (GtUword /* length on u */,
+                            GtUword /* length on v */,
+                            GtUword /* unit edit distance */,
                             bool /* true if suffix comes from u,
                                     false if suffix comes from v */,
                             void* /* procdata */),
                          void* smpprocdata)
 {
   GtOvlfindDpCell *row, *col;
-  unsigned long max_edist;
+  GtUword max_edist;
   GtContfind retval = GT_CONTFIND_OFF;
   bool self_comparison;
 
@@ -214,7 +214,7 @@ GtContfind gt_ovlfind_dp(const char *u, unsigned long m,
 
   if (self_comparison)
   {
-    max_edist = (unsigned long)(max_error * m);
+    max_edist = (GtUword)(max_error * m);
     row = gt_malloc(sizeof (GtOvlfindDpCell) * (m + 1));
     col = gt_malloc(sizeof (GtOvlfindDpCell) * (m + 1));
 
@@ -222,7 +222,7 @@ GtContfind gt_ovlfind_dp(const char *u, unsigned long m,
   }
   else
   {
-    max_edist = (unsigned long)(max_error * MAX(m,n));
+    max_edist = (GtUword)(max_error * MAX(m,n));
     row = gt_malloc(sizeof (GtOvlfindDpCell) * (n + 1));
     col = gt_malloc(sizeof (GtOvlfindDpCell) * (m + 1));
 
@@ -268,11 +268,11 @@ GtContfind gt_ovlfind_dp(const char *u, unsigned long m,
 
 /*--------------------------   UNIT TEST   --------------------------*/
 
-struct GtOvlfindDpResult { unsigned long ulen, vlen, edist; bool dir; };
+struct GtOvlfindDpResult { GtUword ulen, vlen, edist; bool dir; };
 
 static
-void ovlfind_dp_test_save(unsigned long ulen, unsigned long vlen,
-                          unsigned long edist, bool dir, void *a)
+void ovlfind_dp_test_save(GtUword ulen, GtUword vlen,
+                          GtUword edist, bool dir, void *a)
 {
   struct GtOvlfindDpResult r = {ulen, vlen, edist, dir};
   gt_array_add((GtArray*)a,r);

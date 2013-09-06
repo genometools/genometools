@@ -41,7 +41,7 @@ struct GtSequenceBufferFastQ
 
 static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
 {
-  unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0,
+  GtUword currentoutpos = 0, currentfileadd = 0, currentfileread = 0,
                 seqlen = 0, desclen, cnt, newfilenum;
   GtSequenceBufferMembers *pvt;
   GtSequenceBufferFastQ *sbfq;
@@ -124,7 +124,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
 
     /* copy sequence */
     for (cnt=0;cnt<seqlen;cnt++) {
-      if (currentoutpos >= (unsigned long) OUTBUFSIZE) {
+      if (currentoutpos >= (GtUword) OUTBUFSIZE) {
         gt_str_append_char(sbfq->overflowbuffer, seq[cnt]);
       } else {
         if ((had_err = process_char(sb, currentoutpos, seq[cnt], err)))
@@ -137,7 +137,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
 
     /* place separator after sequence (or defer) */
     if (gt_str_length(sbfq->overflowbuffer) == 0) {
-      if (currentoutpos >= (unsigned long) OUTBUFSIZE)
+      if (currentoutpos >= (GtUword) OUTBUFSIZE)
         sbfq->carryseparator = true;
       else {
         pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
@@ -160,7 +160,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
     }
 
     /* if buffer is full, return it */
-    if (currentoutpos >= (unsigned long) OUTBUFSIZE) {
+    if (currentoutpos >= (GtUword) OUTBUFSIZE) {
       pvt->nextfree = MIN(currentoutpos, OUTBUFSIZE);
       had_err = 0;
       break;
@@ -185,7 +185,7 @@ static void gt_sequence_buffer_fastq_free(GtSequenceBuffer *sb)
   gt_str_delete(sbfq->overflowbuffer);
 }
 
-static unsigned long
+static GtUword
 gt_sequence_buffer_fastq_get_file_index(GtSequenceBuffer *sb)
 {
   GtSequenceBufferFastQ *sbfq;

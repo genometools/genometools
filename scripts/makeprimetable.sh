@@ -26,7 +26,7 @@ touch $OUTFILE
 echo "#ifndef MD5SET_PRIMES_TABLE_H" >> $OUTFILE
 echo "#define MD5SET_PRIMES_TABLE_H" >> $OUTFILE
 
-echo "static const unsigned long long gt_md5set_primes[] = {" >> $OUTFILE
+echo "static const GtUint64 gt_md5set_primes[] = {" >> $OUTFILE
 
 #           min    max    step
 printprimes $mb1   $gb4   $mb4   $OUTFILE

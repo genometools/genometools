@@ -32,14 +32,14 @@
 
 #define GT_ENCDESC_MAX_NUM_VAL_HUF 512UL
 
-DECLARE_HASHMAP(long int, li, unsigned long long, ull, static, inline)
-DEFINE_HASHMAP(long int, li, unsigned long long, ull, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(GtWord, li, GtUint64, ull, static, inline)
+DEFINE_HASHMAP(GtWord, li, GtUint64, ull, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
 typedef struct {
   GtHashtable *li_ull_hashmap;
-  long         correction_base;
+  GtWord         correction_base;
 } EncdescHuffDist;
 
 typedef struct {
@@ -53,12 +53,12 @@ typedef struct {
   /* TODO: test if this can be a GtHashtable, too */
   GtDiscDistri *zero_count;
   char         *data;
-  unsigned long delta_values_size,
+  GtUword delta_values_size,
                 len,
                 min_len,
                 num_values_size,
                 max_len;
-  long          global_delta,
+  GtWord          global_delta,
                 global_value,
                 max_delta,
                 max_value,
@@ -85,12 +85,12 @@ struct GtEncdesc {
   DescField         *fields;
   GtBitInStream     *bitinstream;
   GtSampling        *sampling;
-  unsigned long long total_num_of_chars;
-  unsigned long      num_of_descs,
+  GtUint64 total_num_of_chars;
+  GtUword      num_of_descs,
                      num_of_fields,
                      cur_desc,
                      pagesize;
-  long               start_of_samplingtab,
+  GtWord             start_of_samplingtab,
                      start_of_encoding;
   unsigned int       bits_per_field;
   bool               num_of_fields_is_cons;
@@ -99,7 +99,7 @@ struct GtEncdesc {
 struct GtEncdescEncoder {
   GtTimer      *timer;
   GtEncdesc    *encdesc;
-  unsigned long sampling_rate;
+  GtUword sampling_rate;
   bool          regular_sampling,
                 page_sampling;
 };
@@ -114,7 +114,7 @@ GT_DECLAREARRAYSTRUCT(EncdescCode);
 typedef struct {
   GtArrayEncdescCode *codes;
   char               *descbuffer;
-  unsigned long       total_bits_prepared,
+  GtUword       total_bits_prepared,
                       bits_to_write,
                       cur_field_start_pos,
                       cur_field_num,

@@ -27,7 +27,7 @@
 typedef struct GtAsqgWriter GtAsqgWriter;
 
 /* <GT_ASQG_VERSION> is the supported version of the asqg format. */
-#define GT_ASQG_VERSION 1UL
+#define GT_ASQG_VERSION 1
 
 /* Creates a new <GtAsqgWriter> object, using <file> for output
    and <encseq> as source of information. */
@@ -40,7 +40,7 @@ GtAsqgWriter* gt_asqg_writer_new(GtFile *file, const GtEncseq *encseq);
    present. Returns 0 on success, -1 on error and sets <err>. */
 int           gt_asqg_writer_show_header(GtAsqgWriter *aw,
                                          float erate,
-                                         unsigned long minlen,
+                                         GtUword minlen,
                                          const char *inputfilename,
                                          bool has_containments,
                                          bool has_transitives,
@@ -51,9 +51,9 @@ int           gt_asqg_writer_show_vertices(GtAsqgWriter *aw,
                                            GtError *err);
 
 /* Writes an edge using Readjoiner SPM information. */
-void          gt_spmproc_show_asgq(unsigned long suffix_readnum,
-                                   unsigned long prefix_readnum,
-                                   unsigned long length,
+void          gt_spmproc_show_asgq(GtUword suffix_readnum,
+                                   GtUword prefix_readnum,
+                                   GtUword length,
                                    bool suffixseq_direct,
                                    bool prefixseq_direct,
                                    void *asqg_writer);

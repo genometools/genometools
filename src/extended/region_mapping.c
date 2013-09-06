@@ -46,7 +46,7 @@ struct GtRegionMapping {
   GtSeqCol *seq_col;
   GtSeqid2SeqnumMapping *seqid2seqnum_mapping;
   const char *rawseq;
-  unsigned long rawlength,
+  GtUword rawlength,
                 rawoffset;
   unsigned int reference_count;
 };
@@ -102,8 +102,8 @@ GtRegionMapping* gt_region_mapping_new_encseq_seqno(GtEncseq *encseq)
 }
 
 GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
-                                              unsigned long length,
-                                              unsigned long offset)
+                                              GtUword length,
+                                              GtUword offset)
 {
   GtRegionMapping *rm;
   gt_assert(rawseq);
@@ -197,11 +197,11 @@ static int update_seq_col_if_necessary(GtRegionMapping *rm, GtStr *seqid,
 }
 
 int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
-                                   GtStr *seqid, unsigned long start,
-                                   unsigned long end, GtError *err)
+                                   GtStr *seqid, GtUword start,
+                                   GtUword end, GtError *err)
 {
   int had_err = 0;
-  unsigned long offset = 1;
+  GtUword offset = 1;
   GtRange range = {GT_UNDEF_ULONG, GT_UNDEF_ULONG};
   gt_error_check(err);
   gt_assert(rm && seq && seqid && gt_str_length(seqid) > 0);
@@ -231,7 +231,7 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
     gt_assert(!rm->usedesc || rm->seqid2seqnum_mapping);
     gt_assert(rm->mapping || rm->seq_col);
     if (rm->usedesc) {
-      unsigned long seqnum, filenum;
+      GtUword seqnum, filenum;
       gt_assert(rm->seqid2seqnum_mapping);
       range.start = start;
       range.end = end;
@@ -244,9 +244,9 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
               range.end >= gt_seq_col_get_sequence_length(rm->seq_col, filenum,
                                                           seqnum)
               + offset) {
-          gt_error_set(err, "trying to extract range %lu-%lu on sequence "
+          gt_error_set(err, "trying to extract range "GT_LU"-"GT_LU" on sequence "
                        "``%s'' which is not covered by that sequence (with "
-                       "boundaries %lu-%lu). Has the sequence-region "
+                       "boundaries "GT_LU"-"GT_LU"). Has the sequence-region "
                        "to sequence mapping been defined correctly?",
                        start, end, gt_str_get(seqid),
                        range.start, range.end);
@@ -265,9 +265,9 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
                                        seqid, err);
       }
     } else if (rm->useseqno) {
-      unsigned long seqno = GT_UNDEF_ULONG;
+      GtUword seqno = GT_UNDEF_ULONG;
       gt_assert(rm->encseq);
-      if (1 != sscanf(gt_str_get(seqid), "seq%lu", &seqno)) {
+      if (1 != sscanf(gt_str_get(seqid), "seq"GT_LU"", &seqno)) {
         gt_error_set(err, "seqid '%s' does not have the form 'seqX' "
                           "where X is a sequence number in the encoded "
                           "sequence", gt_str_get(seqid));
@@ -275,24 +275,24 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
       }
       gt_assert(had_err || seqno != GT_UNDEF_ULONG);
       if (!had_err && seqno >= gt_encseq_num_of_sequences(rm->encseq)) {
-          gt_error_set(err, "trying to access sequence %lu, but encoded "
-                            "sequence contains only %lu sequences",
+          gt_error_set(err, "trying to access sequence "GT_LU", but encoded "
+                            "sequence contains only "GT_LU" sequences",
                             seqno, gt_encseq_num_of_sequences(rm->encseq));
           had_err = -1;
       }
       if (!had_err) {
-        unsigned long seqlength = gt_encseq_seqlength(rm->encseq, seqno);
+        GtUword seqlength = gt_encseq_seqlength(rm->encseq, seqno);
         if (start > seqlength || end > seqlength) {
-          gt_error_set(err, "trying to extract range %lu-%lu on sequence "
+          gt_error_set(err, "trying to extract range "GT_LU"-"GT_LU" on sequence "
                        "``%s'' which is not covered by that sequence (only "
-                       "%lu characters in size). Has the sequence-region "
+                       ""GT_LU" characters in size). Has the sequence-region "
                        "to sequence mapping been defined correctly?",
                        start, end, gt_str_get(seqid), seqlength);
           had_err = -1;
         }
       }
       if (!had_err) {
-        unsigned long seqstartpos;
+        GtUword seqstartpos;
         *seq = gt_calloc(end - start + 1, sizeof (char));
         seqstartpos = gt_encseq_seqstartpos(rm->encseq, seqno);
         gt_encseq_extract_decoded(rm->encseq, *seq, seqstartpos + start - 1,
@@ -305,13 +305,13 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
     } else {
       gt_assert(rm->seq_col);
       if (!had_err) {
-        unsigned long seqlength = gt_seq_col_get_sequence_length(rm->seq_col,
+        GtUword seqlength = gt_seq_col_get_sequence_length(rm->seq_col,
                                                                  0, 0);
         if (start > seqlength || end > seqlength) {
           had_err = -1;
-          gt_error_set(err, "trying to extract range %lu-%lu on sequence "
+          gt_error_set(err, "trying to extract range "GT_LU"-"GT_LU" on sequence "
                        "``%s'' which is not covered by that sequence (only "
-                       "%lu characters in size). Has the sequence-region "
+                       ""GT_LU" characters in size). Has the sequence-region "
                        "to sequence mapping been defined correctly?",
                        start, end, gt_str_get(seqid), seqlength);
         }
@@ -326,10 +326,10 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
 }
 
 int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
-                                          unsigned long *length, GtStr *seqid,
+                                          GtUword *length, GtStr *seqid,
                                           GtError *err)
 {
-  unsigned long filenum, seqnum;
+  GtUword filenum, seqnum;
   int had_err;
   gt_error_check(err);
   GT_UNUSED GtRange range;
@@ -356,9 +356,9 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
                                                      seqid, err);
     }
     else if (rm->useseqno) {
-      unsigned long seqno = GT_UNDEF_ULONG;
+      GtUword seqno = GT_UNDEF_ULONG;
       gt_assert(rm->encseq);
-      if (1 != sscanf(gt_str_get(seqid), "seq%lu", &seqno)) {
+      if (1 != sscanf(gt_str_get(seqid), "seq"GT_LU"", &seqno)) {
         gt_error_set(err, "seqid '%s' does not have the form 'seqX' "
                           "where X is a sequence number in the encoded "
                           "sequence", gt_str_get(seqid));
@@ -366,8 +366,8 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
       }
       gt_assert(had_err || seqno != GT_UNDEF_ULONG);
       if (!had_err && seqno >= gt_encseq_num_of_sequences(rm->encseq)) {
-          gt_error_set(err, "trying to access sequence %lu, but encoded "
-                            "sequence contains only %lu sequences",
+          gt_error_set(err, "trying to access sequence "GT_LU", but encoded "
+                            "sequence contains only "GT_LU" sequences",
                             seqno, gt_encseq_num_of_sequences(rm->encseq));
           had_err = -1;
       }
@@ -401,7 +401,7 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
   }
   if (!had_err) {
     if (rm->usedesc) {
-      unsigned long filenum, seqnum;
+      GtUword filenum, seqnum;
       gt_assert(rm->seqid2seqnum_mapping);
       had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
                                             gt_str_get(seqid), NULL, &seqnum,
@@ -415,9 +415,9 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
       }
     }
     else if (rm->useseqno) {
-      unsigned long seqno = GT_UNDEF_ULONG;
+      GtUword seqno = GT_UNDEF_ULONG;
       gt_assert(rm->encseq);
-      if (1 != sscanf(gt_str_get(seqid), "seq%lu", &seqno)) {
+      if (1 != sscanf(gt_str_get(seqid), "seq"GT_LU"", &seqno)) {
         gt_error_set(err, "seqid '%s' does not have the form 'seqX' "
                           "where X is a sequence number in the encoded "
                           "sequence", gt_str_get(seqid));
@@ -425,13 +425,13 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
       }
       gt_assert(had_err || seqno != GT_UNDEF_ULONG);
       if (!had_err && seqno >= gt_encseq_num_of_sequences(rm->encseq)) {
-          gt_error_set(err, "trying to access sequence %lu, but encoded"
-                            "sequence contains only %lu sequences",
+          gt_error_set(err, "trying to access sequence "GT_LU", but encoded"
+                            "sequence contains only "GT_LU" sequences",
                             seqno, gt_encseq_num_of_sequences(rm->encseq));
           had_err = -1;
       }
       if (!had_err) {
-        unsigned long desclen;
+        GtUword desclen;
         const char *edesc;
         edesc = gt_encseq_description(rm->encseq, &desclen, seqno);
         gt_str_append_cstr_nt(desc, edesc, desclen);
@@ -462,12 +462,12 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
 const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
                                                   GtStr *seqid,
                                                   const GtRange *range,
-                                                  unsigned long *offset,
+                                                  GtUword *offset,
                                                   GtError *err)
 {
   const char *md5 = NULL;
   int had_err;
-  unsigned long filenum, seqnum;
+  GtUword filenum, seqnum;
   gt_error_check(err);
   gt_assert(rm && seqid);
   gt_assert(!rm->userawseq); /* not implemented */
@@ -498,9 +498,9 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
     }
     else if (rm->useseqno) {
       GtMD5Tab *tab = NULL;
-      unsigned long seqno = GT_UNDEF_ULONG;
+      GtUword seqno = GT_UNDEF_ULONG;
       gt_assert(rm->encseq);
-      if (1 != sscanf(gt_str_get(seqid), "seq%lu", &seqno)) {
+      if (1 != sscanf(gt_str_get(seqid), "seq"GT_LU"", &seqno)) {
         gt_error_set(err, "seqid '%s' does not have the form 'seqX' "
                           "where X is a sequence number in the encoded "
                           "sequence", gt_str_get(seqid));
@@ -508,8 +508,8 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
       }
       gt_assert(had_err || seqno != GT_UNDEF_ULONG);
       if (!had_err && seqno >= gt_encseq_num_of_sequences(rm->encseq)) {
-          gt_error_set(err, "trying to access sequence %lu, but encoded"
-                            "sequence contains only %lu sequences",
+          gt_error_set(err, "trying to access sequence "GT_LU", but encoded"
+                            "sequence contains only "GT_LU" sequences",
                             seqno, gt_encseq_num_of_sequences(rm->encseq));
           had_err = -1;
       }

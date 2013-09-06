@@ -29,7 +29,7 @@ const GtNodeVisitorClass* gt_ltrharvest_fasta_out_visitor_class(void);
 GtNodeVisitor*            gt_ltrharvest_fasta_out_visitor_new(const GtEncseq
                                                                         *encseq,
                                                             bool inner,
-                                                            unsigned long width,
+                                                            GtUword width,
                                                             GtFile *outfp);
 
 #endif

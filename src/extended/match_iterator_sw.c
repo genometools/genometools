@@ -37,7 +37,7 @@ const GtMatchIteratorClass* gt_match_iterator_sw_class(void);
 typedef struct {
   GtScoreFunction *sf;
   GtEncseq *es1, *es2;
-  unsigned long seqno_es1,
+  GtUword seqno_es1,
                 seqno_es2,
                 min_len,
                 max_edist;
@@ -58,7 +58,7 @@ static GtMatchIteratorStatus gt_match_iterator_sw_next(GtMatchIterator *mi,
   char *a, *b;
   const char *adesc, *bdesc;
   GtAlignment *ali = NULL;
-  unsigned long seqlen_a, seqlen_b, seqpos;
+  GtUword seqlen_a, seqlen_b, seqpos;
   GtRange arng, brng;
   gt_assert(mi && match);
 
@@ -119,8 +119,8 @@ static GtMatchIteratorStatus gt_match_iterator_sw_next(GtMatchIterator *mi,
 
 GtMatchIterator* gt_match_iterator_sw_new(GtEncseq *es1, GtEncseq *es2,
                                           GtScoreFunction *sf,
-                                          unsigned long min_len,
-                                          unsigned long max_edist,
+                                          GtUword min_len,
+                                          GtUword max_edist,
                                           GT_UNUSED GtError *err)
 {
   GtMatchIterator *mi;

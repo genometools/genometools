@@ -29,17 +29,17 @@ typedef struct GtMatchOpen GtMatchOpen;
    <end_seq1>, and <end_seq2>. */
 GtMatch* gt_match_open_new(char *seqid1,
                            char *seqid2,
-                           unsigned long start_seq1,
-                           unsigned long start_seq2,
-                           unsigned long end_seq1,
-                           unsigned long end_seq2,
-                           long weight,
+                           GtUword start_seq1,
+                           GtUword start_seq2,
+                           GtUword end_seq1,
+                           GtUword end_seq2,
+                           GtWord weight,
                            GtMatchDirection dir);
 
 /* Sets <weight> to be the weight value in <mo>. */
-void gt_match_open_set_weight(GtMatchOpen *mo, long weight);
+void gt_match_open_set_weight(GtMatchOpen *mo, GtWord weight);
 
 /* Returns the weight value stored in <mo>. */
-long gt_match_open_get_weight(GtMatchOpen *mo);
+GtWord gt_match_open_get_weight(GtMatchOpen *mo);
 
 #endif

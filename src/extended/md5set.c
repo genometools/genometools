@@ -24,6 +24,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/safearith.h"
+#include "core/types_api.h"
 #include "extended/md5set.h"
 #include "extended/md5set_primes_table.h"
 #include "extended/reverse_api.h"
@@ -45,18 +46,18 @@ typedef struct {
 #ifndef S_SPLINT_S
 /* if n is in lookup table return it;
  * otherwise return first element in lookup table larger than n */
-static unsigned long gt_md5set_get_size(unsigned long n)
+static GtUword gt_md5set_get_size(GtUword n)
 {
-  unsigned long long u, l, i, k, k_i;
+  GtUint64 u, l, i, k, k_i;
 
-  k = (unsigned long long)n;
+  k = (GtUint64)n;
   if (k > GT_MD5SET_LARGEST_PRIME)
   {
     fprintf(stderr, GT_MD5SET_TOO_LARGE, k);
     exit(1);
   }
   if (k < gt_md5set_primes[0])
-    return (unsigned long)gt_md5set_primes[0];
+    return (GtUword)gt_md5set_primes[0];
   l = 0;
   u = GT_MD5SET_NOFPRIMES - 1;
   do {
@@ -65,8 +66,8 @@ static unsigned long gt_md5set_get_size(unsigned long n)
     if (u - l == 1)
     {
       return (gt_md5set_primes[l] == k)
-          ? (unsigned long)k
-          : (unsigned long)gt_md5set_primes[u];
+          ? (GtUword)k
+          : (GtUword)gt_md5set_primes[u];
     }
     k_i = gt_md5set_primes[i];
     if (k < k_i)
@@ -79,7 +80,7 @@ static unsigned long gt_md5set_get_size(unsigned long n)
     }
     else
     {
-      return (unsigned long)k_i;
+      return (GtUword)k_i;
     }
   } while (1);
   return 0;
@@ -90,12 +91,12 @@ struct GtMD5Set
 {
   /* hash table */
   gt_md5_t       *table;
-  unsigned long  alloc;
-  unsigned long  fill;
-  unsigned long  maxfill;
+  GtUword  alloc;
+  GtUword  fill;
+  GtUword  maxfill;
   /* string temp buffer */
   char           *buffer;
-  unsigned long  bufsize;
+  GtUword  bufsize;
 };
 
 #define GT_MD5SET_PREPARE_INSERTION(SET) \
@@ -106,7 +107,7 @@ struct GtMD5Set
         gt_md5set_get_size((SET)->alloc + 1));\
   gt_assert((SET)->fill <= (SET)->maxfill)
 
-static void gt_md5set_alloc_table(GtMD5Set *set, unsigned long newsize);
+static void gt_md5set_alloc_table(GtMD5Set *set, GtUword newsize);
 
 enum GtMD5SetSearchResult
 {
@@ -116,7 +117,7 @@ enum GtMD5SetSearchResult
 };
 
 static inline enum GtMD5SetSearchResult gt_md5set_search_pos(GtMD5Set *set,
-    gt_md5_t k, bool insert_if_not_found, unsigned long i)
+    gt_md5_t k, bool insert_if_not_found, GtUword i)
 {
   if (GT_MD5_T_IS_EMPTY(set->table[i]))
   {
@@ -143,19 +144,19 @@ static inline enum GtMD5SetSearchResult gt_md5set_search_pos(GtMD5Set *set,
 static bool gt_md5set_search(GtMD5Set *set, gt_md5_t k,
     bool insert_if_not_found)
 {
-  unsigned long i, c;
+  GtUword i, c;
 #ifndef NDEBUG
-  unsigned long first_i;
+  GtUword first_i;
 #endif
   enum GtMD5SetSearchResult retval;
 
-  i = (unsigned long)GT_MD5SET_H1(k, set->alloc);
+  i = (GtUword)GT_MD5SET_H1(k, set->alloc);
   retval = gt_md5set_search_pos(set, k, insert_if_not_found, i);
   if (retval != GT_MD5SET_COLLISION)
     return retval == GT_MD5SET_EMPTY ? false : true;
 
   /* open addressing by double hashing */
-  c = (unsigned long)GT_MD5SET_H2(k, set->alloc);
+  c = (GtUword)GT_MD5SET_H2(k, set->alloc);
   gt_assert(c > 0);
 #ifndef NDEBUG
   first_i = i;
@@ -171,9 +172,9 @@ static bool gt_md5set_search(GtMD5Set *set, gt_md5_t k,
 }
 
 static void gt_md5set_rehash(GtMD5Set *set, gt_md5_t *oldtable,
-    unsigned long oldsize)
+    GtUword oldsize)
 {
-  unsigned long i;
+  GtUword i;
   set->fill = 0;
   for (i = 0; i < oldsize; i++)
     if (!GT_MD5_T_IS_EMPTY(oldtable[i]))
@@ -182,27 +183,27 @@ static void gt_md5set_rehash(GtMD5Set *set, gt_md5_t *oldtable,
 
 #define GT_MD5SET_MAX_LOAD_FACTOR 0.8
 
-static void gt_md5set_alloc_table(GtMD5Set *set, unsigned long newsize)
+static void gt_md5set_alloc_table(GtMD5Set *set, GtUword newsize)
 {
   gt_md5_t *oldtable;
-  unsigned long oldsize;
+  GtUword oldsize;
 
   oldsize = set->alloc;
   oldtable = set->table;
   set->alloc = newsize;
   set->maxfill =
-    (unsigned long)((double)newsize * GT_MD5SET_MAX_LOAD_FACTOR);
+    (GtUword)((double)newsize * GT_MD5SET_MAX_LOAD_FACTOR);
   set->table = gt_calloc((size_t)newsize, sizeof (gt_md5_t));
   if (oldtable != NULL)
   {
-    gt_log_log("rehashing %lu elements; old size: %lu, new size: %lu\n",
+    gt_log_log("rehashing "GT_LU" elements; old size: "GT_LU", new size: "GT_LU"\n",
         set->fill, oldsize, newsize);
     gt_md5set_rehash(set, oldtable, oldsize);
     gt_free(oldtable);
   }
 }
 
-GtMD5Set *gt_md5set_new(unsigned long nof_elements)
+GtMD5Set *gt_md5set_new(GtUword nof_elements)
 {
   GtMD5Set *md5set;
   md5set = gt_malloc(sizeof (GtMD5Set));
@@ -227,7 +228,7 @@ void gt_md5set_delete(GtMD5Set *set)
   }
 }
 
-static void gt_md5set_prepare_buffer(GtMD5Set *md5set, unsigned long bufsize)
+static void gt_md5set_prepare_buffer(GtMD5Set *md5set, GtUword bufsize)
 {
   gt_assert(md5set != NULL);
 
@@ -247,11 +248,11 @@ static void gt_md5set_prepare_buffer(GtMD5Set *md5set, unsigned long bufsize)
   md5((BUF), gt_safe_cast2long(LEN), (char*)&(MD5))
 
 GtMD5SetStatus gt_md5set_add_sequence(GtMD5Set *set, const char* seq,
-                           unsigned long seqlen, bool both_strands,
+                           GtUword seqlen, bool both_strands,
                            GtError *err)
 {
   gt_md5_t md5sum, md5sum_rc;
-  unsigned long i;
+  GtUword i;
   int retval = 0;
   bool found;
 

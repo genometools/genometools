@@ -27,18 +27,18 @@
 
 typedef struct
 {
-  unsigned long afcindex, code;
+  GtUword afcindex, code;
 } GtIndexwithcode;
 
 struct GtArrayGtIndexwithcode
 {
   GtIndexwithcode *spaceGtIndexwithcode;
-  unsigned long width, nextfreeGtIndexwithcode, allocatedGtIndexwithcode;
+  GtUword width, nextfreeGtIndexwithcode, allocatedGtIndexwithcode;
   unsigned int depth;
 };
 
 GtArrayGtIndexwithcode *gt_firstcodes_binsearchcache_new(
-                                      unsigned long differentcodes,
+                                      GtUword differentcodes,
                                       unsigned int addbscache_depth,
                                       GtFirstcodesspacelog *fcsl)
 {
@@ -46,7 +46,7 @@ GtArrayGtIndexwithcode *gt_firstcodes_binsearchcache_new(
                        (unsigned int) log10((double) differentcodes);
   while (true)
   {
-    unsigned long allocated = 1UL << (depth+1);
+    GtUword allocated = 1UL << (depth+1);
     if (allocated < differentcodes && differentcodes/allocated >= 32UL)
     {
       GtArrayGtIndexwithcode *binsearchcache;
@@ -61,9 +61,9 @@ GtArrayGtIndexwithcode *gt_firstcodes_binsearchcache_new(
                    * binsearchcache->allocatedGtIndexwithcode;
       gt_assert(binsearchcache->width > 0);
       binsearchcache->spaceGtIndexwithcode = gt_malloc(allocbytes);
-      gt_log_log("binsearchcache->depth=%u => %lu bytes",
+      gt_log_log("binsearchcache->depth=%u => "GT_LU" bytes",
                  binsearchcache->depth,
-                 (unsigned long) allocbytes);
+                 (GtUword) allocbytes);
       GT_FCI_ADDWORKSPACE(fcsl,"binsearchcache",allocbytes);
       return binsearchcache;
     } else
@@ -80,7 +80,7 @@ GtArrayGtIndexwithcode *gt_firstcodes_binsearchcache_new(
   return NULL;
 }
 
-unsigned long gt_firstcodes_binsearchcache_width(const GtArrayGtIndexwithcode
+GtUword gt_firstcodes_binsearchcache_width(const GtArrayGtIndexwithcode
                                                  *binsearchcache)
 {
   return binsearchcache->width;
@@ -88,8 +88,8 @@ unsigned long gt_firstcodes_binsearchcache_width(const GtArrayGtIndexwithcode
 
 void gt_firstcodes_binsearchcache_set_index_code(GtArrayGtIndexwithcode
                                                  *binsearchcache,
-                                                 unsigned long afcindex,
-                                                 unsigned long code)
+                                                 GtUword afcindex,
+                                                 GtUword code)
 {
   if (binsearchcache->nextfreeGtIndexwithcode <
       binsearchcache->allocatedGtIndexwithcode)
@@ -102,13 +102,13 @@ void gt_firstcodes_binsearchcache_set_index_code(GtArrayGtIndexwithcode
 }
 
 void gt_firstcodes_binsearchcache_check(GtArrayGtIndexwithcode *binsearchcache,
-                                       GT_UNUSED const unsigned long
+                                       GT_UNUSED const GtUword
                                                                  *allfirstcodes,
-                                       unsigned long differentcodes)
+                                       GtUword differentcodes)
 {
   if (binsearchcache != NULL)
   {
-    unsigned long idx, current = binsearchcache->width;
+    GtUword idx, current = binsearchcache->width;
 
     gt_assert(binsearchcache->spaceGtIndexwithcode != NULL);
     for (idx=0; idx < binsearchcache->nextfreeGtIndexwithcode &&
@@ -136,16 +136,16 @@ void gt_firstcodes_binsearchcache_delete(GtArrayGtIndexwithcode *binsearchcache,
   }
 }
 
-unsigned long gt_firstcodes_find_accu(unsigned long *foundcode,
-                                      const unsigned long *differences,
-                                      unsigned long allfirstcodes0,
-                                      unsigned long differentcodes,
-                                      unsigned long differencemask,
+GtUword gt_firstcodes_find_accu(GtUword *foundcode,
+                                      const GtUword *differences,
+                                      GtUword allfirstcodes0,
+                                      GtUword differentcodes,
+                                      GtUword differencemask,
                                       const GtArrayGtIndexwithcode
                                          *binsearchcache,
-                                      unsigned long code)
+                                      GtUword code)
 {
-  unsigned long leftptr = ULONG_MAX, rightptr = ULONG_MAX,
+  GtUword leftptr = ULONG_MAX, rightptr = ULONG_MAX,
                 foundindex = ULONG_MAX, previouscode = ULONG_MAX;
 
   if (code <= allfirstcodes0)
@@ -165,7 +165,7 @@ unsigned long gt_firstcodes_find_accu(unsigned long *foundcode,
               binsearchcache->nextfreeGtIndexwithcode - 1;
     for (depth = 0; /* Nothing */; depth++)
     {
-      midic = leftic + GT_DIV2((unsigned long) (rightic-leftic));
+      midic = leftic + GT_DIV2((GtUword) (rightic-leftic));
       if (code < midic->code)
       {
         foundindex = midic->afcindex;
@@ -232,7 +232,7 @@ unsigned long gt_firstcodes_find_accu(unsigned long *foundcode,
   }
   if (leftptr <= rightptr)
   {
-    unsigned long idx;
+    GtUword idx;
 
     for (idx = leftptr; idx <= rightptr; idx++)
     {

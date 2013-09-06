@@ -29,7 +29,7 @@
   array over some type T
   is implemented by a structure consisting of three components:
   - space##T is a pointer to the space block of type T allocated for the array.
-  - allocated##T is an unsigned long value storing the number of entries in the
+  - allocated##T is an GtUword value storing the number of entries in the
     array currently allocated.
   - nextfree##T holds the smallest index of the array where no value is stored.
   Here ## is the concatenation operator of the C-preprocessor.
@@ -41,7 +41,7 @@
         typedef struct                  \
         {                               \
           TYPE *space##TYPE;            \
-          unsigned long allocated##TYPE,\
+          GtUword allocated##TYPE,\
           nextfree##TYPE;               \
         } GtArray##TYPE
 

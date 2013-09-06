@@ -40,7 +40,7 @@ void             gt_match_set_seqid1(GtMatch *match, const char *seqid);
    <seqid>. The string <seqid> needs not be null-terminated, its length is
    given by <len>. */
 void             gt_match_set_seqid1_nt(GtMatch *match, const char *seqid,
-                                        unsigned long len);
+                                        GtUword len);
 /* Sets the sequence ID of the second sequence involved in the match <match> to
    <seqid>. The string <seqid> must be null-terminated. */
 void             gt_match_set_seqid2(GtMatch *match, const char *seqid);
@@ -48,7 +48,7 @@ void             gt_match_set_seqid2(GtMatch *match, const char *seqid);
    <seqid>. The string <seqid> needs not be null-terminated, its length is
    given by <len>. */
 void             gt_match_set_seqid2_nt(GtMatch *match, const char *seqid,
-                                        unsigned long len);
+                                        GtUword len);
 /* Returns the sequence ID of the first sequence involved in the match
    <match>. */
 const char*      gt_match_get_seqid1(const GtMatch *match);
@@ -57,12 +57,12 @@ const char*      gt_match_get_seqid1(const GtMatch *match);
 const char*      gt_match_get_seqid2(const GtMatch *match);
 /* Sets the range of the first sequence involved in the match <match> to
    <start>-<end>. */
-void             gt_match_set_range_seq1(GtMatch *match, unsigned long start,
-                                         unsigned long end);
+void             gt_match_set_range_seq1(GtMatch *match, GtUword start,
+                                         GtUword end);
 /* Sets the range of the second sequence involved in the match <match> to
    <start>-<end>. */
-void             gt_match_set_range_seq2(GtMatch *match, unsigned long start,
-                                         unsigned long end);
+void             gt_match_set_range_seq2(GtMatch *match, GtUword start,
+                                         GtUword end);
 /* Writes the range of the first sequence involved in the match <match> to the
    location pointed to by <range>. */
 void             gt_match_get_range_seq1(const GtMatch *match, GtRange *range);

@@ -75,7 +75,7 @@ static GtOptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
 
 static void translate_sequence_file(GtBioseq *bs)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(bs);
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
     printf("%s\t%s\n", gt_bioseq_get_md5_fingerprint(bs, i),
@@ -89,7 +89,7 @@ static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 {
   MagicMatchArguments *arguments = tool_arguments;
   GtBioseq *bioseq;
-  unsigned long i;
+  GtUword i;
   int had_err = 0;
 
   gt_error_check(err);

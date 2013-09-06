@@ -19,13 +19,13 @@
 #include "gth/gthtravalign.h"
 
 bool gt_eops_equal_referencelength(Editoperation *alignment,
-                                long alignmentlength,
-                                long referencelength,
+                                GtWord alignmentlength,
+                                GtWord referencelength,
                                 bool proteineop)
 {
   Eoptype eoptype;
-  unsigned long eoplength;
-  long i, sumofeops = 0;
+  GtUword eoplength;
+  GtWord i, sumofeops = 0;
 
   for (i = 0; i < alignmentlength; i++) {
     eoptype   = gt_editoperation_type(alignment[i], proteineop);
@@ -59,7 +59,7 @@ bool gt_eops_equal_referencelength(Editoperation *alignment,
 static void match_mismatch_after_travfunc(bool forward,
                                           Traversealignmentstate *state,
                                           bool proteineop,
-                                          unsigned long eoplength)
+                                          GtUword eoplength)
 {
   if (proteineop) {
     if (state->processing_intron_with_1_base_left) {
@@ -116,7 +116,7 @@ void gthtraversealignment(bool forward, Traversealignmentstate *state,
                           Traversealignmentfunctions *travfunctions)
 {
   Eoptype eoptype;
-  unsigned long eoplength;
+  GtUword eoplength;
 
   for (;forward ? state->eopptr >= state->alignment
                 : state->eopptr <= state->alignment

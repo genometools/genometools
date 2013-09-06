@@ -27,32 +27,32 @@
 
 typedef struct specialsRankTable SpecialsRankTable;
 
-static unsigned long
+static GtUword
 specialsRankFromSampleTable(const SpecialsRankLookup *rankTable,
-                            unsigned long pos);
+                            GtUword pos);
 
-static unsigned long
+static GtUword
 specialsRankFromTermPos(const SpecialsRankLookup *rankTable,
-                        unsigned long pos);
+                        GtUword pos);
 
 static inline struct specialsRankLookup *
 allocSpecialsRankTable(const GtEncseq *encseq,
-                       unsigned long lastSeqPos,
+                       GtUword lastSeqPos,
                        unsigned sampleIntervalLog2,
                        GtReadmode readmode)
 {
   struct specialsRankTable *rankTable;
   struct specialsRankLookup *ranker;
-  unsigned long numSamples = (lastSeqPos >> sampleIntervalLog2) + 1;
+  GtUword numSamples = (lastSeqPos >> sampleIntervalLog2) + 1;
 
-  ranker = gt_malloc(offsetAlign(sizeof (*ranker), sizeof (unsigned long))
-                     + numSamples * sizeof (unsigned long));
+  ranker = gt_malloc(offsetAlign(sizeof (*ranker), sizeof (GtUword))
+                     + numSamples * sizeof (GtUword));
   rankTable = &ranker->implementationData.sampleTable;
   rankTable->rankSumSamples
-    = (unsigned long *)((char *)ranker + offsetAlign(sizeof (*ranker),
-                                              sizeof (unsigned long)));
+    = (GtUword *)((char *)ranker + offsetAlign(sizeof (*ranker),
+                                              sizeof (GtUword)));
   rankTable->sampleIntervalLog2 = sampleIntervalLog2;
-  rankTable->sampleInterval = ((unsigned long)1) << sampleIntervalLog2;
+  rankTable->sampleInterval = ((GtUword)1) << sampleIntervalLog2;
   rankTable->readmode = readmode;
   rankTable->numSamples = numSamples;
   rankTable->scanState = gt_encseq_create_reader_with_readmode(encseq,
@@ -64,7 +64,7 @@ allocSpecialsRankTable(const GtEncseq *encseq,
 
 static inline struct specialsRankLookup *
 allocEmptySpecialsRankLookup(const GtEncseq *encseq,
-                             unsigned long lastSeqPos)
+                             GtUword lastSeqPos)
 {
   struct specialsRankLookup *ranker;
   ranker = gt_malloc(sizeof (*ranker));
@@ -76,14 +76,14 @@ allocEmptySpecialsRankLookup(const GtEncseq *encseq,
 
 static inline bool
 nextRange(GtRange *range, GtSpecialrangeiterator *sri,
-          GtReadmode readmode, unsigned long seqLastPos)
+          GtReadmode readmode, GtUword seqLastPos)
 {
   bool hasNextRange = gt_specialrangeiterator_next(sri, range);
   if (hasNextRange)
   {
     if (GT_ISDIRREVERSE(readmode))
     {
-      unsigned long temp = range->end;
+      GtUword temp = range->end;
       range->end = seqLastPos - range->start;
       range->start = seqLastPos - temp;
     }
@@ -98,10 +98,10 @@ gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
                          unsigned sampleIntervalLog2)
 {
   struct specialsRankLookup *ranker;
-  unsigned long seqLastPos, seqLen;
-  unsigned long sampleInterval = ((unsigned long)1) << sampleIntervalLog2;
+  GtUword seqLastPos, seqLen;
+  GtUword sampleInterval = ((GtUword)1) << sampleIntervalLog2;
   gt_assert(encseq);
-  gt_assert(sampleIntervalLog2 < sizeof (unsigned long) * CHAR_BIT);
+  gt_assert(sampleIntervalLog2 < sizeof (GtUword) * CHAR_BIT);
   seqLastPos = gt_encseq_total_length(encseq);
   seqLen = seqLastPos + 1;
   if (gt_encseq_has_specialranges(encseq))
@@ -109,7 +109,7 @@ gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
     /* this sequence has some special characters */
     struct specialsRankTable *rankTable;
     GtSpecialrangeiterator *sri;
-    unsigned long *sample, *maxSample, sum = 0, pos = 0, nextSamplePos;
+    GtUword *sample, *maxSample, sum = 0, pos = 0, nextSamplePos;
     GtRange range = { 0, 0 };
     ranker = allocSpecialsRankTable(encseq, seqLen, sampleIntervalLog2,
                                     readmode);
@@ -155,11 +155,11 @@ gt_deleteSpecialsRankLookup(SpecialsRankLookup *ranker)
   gt_free(ranker);
 }
 
-static unsigned long
-specialsRankFromSampleTable(const SpecialsRankLookup *ranker, unsigned long pos)
+static GtUword
+specialsRankFromSampleTable(const SpecialsRankLookup *ranker, GtUword pos)
 {
   const SpecialsRankTable *rankTable = &ranker->implementationData.sampleTable;
-  unsigned long rankCount, samplePos, encSeqLen;
+  GtUword rankCount, samplePos, encSeqLen;
   gt_assert(ranker);
   encSeqLen = gt_encseq_total_length(ranker->encseq);
   gt_assert(pos <= encSeqLen + 1);
@@ -172,7 +172,7 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, unsigned long pos)
     const GtEncseq *encseq = ranker->encseq;
     GtEncseqReader *esr = rankTable->scanState;
     GtReadmode readmode = rankTable->readmode;
-    unsigned long encseqQueryMax = MIN(pos, encSeqLen);
+    GtUword encseqQueryMax = MIN(pos, encSeqLen);
     if (samplePos < encseqQueryMax)
     {
       gt_encseq_reader_reinit_with_readmode(esr, encseq, readmode, samplePos);
@@ -188,8 +188,8 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, unsigned long pos)
   return rankCount;
 }
 
-static unsigned long
-specialsRankFromTermPos(const SpecialsRankLookup *ranker, unsigned long pos)
+static GtUword
+specialsRankFromTermPos(const SpecialsRankLookup *ranker, GtUword pos)
 {
   gt_assert(pos <= ranker->implementationData.lastSeqPos + 1);
   return ((pos == ranker->implementationData.lastSeqPos + 1)?1:0);

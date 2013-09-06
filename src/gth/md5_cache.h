@@ -23,6 +23,6 @@ typedef struct GthMD5Cache GthMD5Cache;
 
 GthMD5Cache* gth_md5_cache_new(const char *indexname, GthSeqCon *seq_con);
 void         gth_md5_cache_delete(GthMD5Cache *md5_cache);
-GtStr*       gth_md5_cache_get(GthMD5Cache *md5_cache, unsigned long seq_num);
+GtStr*       gth_md5_cache_get(GthMD5Cache *md5_cache, GtUword seq_num);
 
 #endif

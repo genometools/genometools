@@ -29,13 +29,13 @@ BWTSeqGetAlphabet(const BWTSeq *seq)
   return seq->alphabet;
 }
 
-static inline unsigned long
+static inline GtUword
 BWTSeqLength(const BWTSeq *seq)
 {
   return EISLength(seq->seqIdx);
 }
 
-static inline unsigned long
+static inline GtUword
 BWTSeqTerminatorPos(const BWTSeq *bwtSeq)
 {
   return bwtSeq->rot0Pos;
@@ -47,8 +47,8 @@ BWTSeqHasLocateInformation(const BWTSeq *bwtSeq)
   return bwtSeq->locateSampleInterval != 0;
 }
 
-static inline unsigned long
-BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, unsigned long pos)
+static inline GtUword
+BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, GtUword pos)
 {
   gt_assert(bwtSeq);
   /* two counts must be treated specially:
@@ -71,7 +71,7 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, unsigned long pos)
 
 static inline GtUlongPair
 BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
-                            unsigned long posA, unsigned long posB)
+                            GtUword posA, GtUword posB)
 {
   gt_assert(bwtSeq);
   /* two counts must be treated specially:
@@ -98,8 +98,8 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
   }
 }
 
-static inline unsigned long
-BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long pos)
+static inline GtUword
+BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, GtUword pos)
 {
   gt_assert(bwtSeq);
   Symbol tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
@@ -107,8 +107,8 @@ BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long pos)
 }
 
 static inline GtUlongPair
-BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long posA,
-                 unsigned long posB)
+BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, GtUword posA,
+                 GtUword posB)
 {
   gt_assert(bwtSeq);
   Symbol tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
@@ -116,8 +116,8 @@ BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, unsigned long posA,
 }
 
 static inline void
-BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, unsigned long pos,
-               unsigned long *rangeOccs)
+BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, GtUword pos,
+               GtUword *rangeOccs)
 {
   gt_assert(bwtSeq && rangeOccs);
   gt_assert(range < MRAEncGetNumRanges(BWTSeqGetAlphabet(bwtSeq)));
@@ -142,8 +142,8 @@ BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, unsigned long pos,
 
 static inline void
 BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range,
-                      unsigned long posA, unsigned long posB,
-                      unsigned long *rangeOccs)
+                      GtUword posA, GtUword posB,
+                      GtUword *rangeOccs)
 {
   gt_assert(bwtSeq && rangeOccs);
   gt_assert(posA <= posB);
@@ -178,12 +178,12 @@ BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range,
   }
 }
 
-static inline unsigned long
-BWTSeqLFMap(const BWTSeq *bwtSeq, unsigned long LPos,
+static inline GtUword
+BWTSeqLFMap(const BWTSeq *bwtSeq, GtUword LPos,
             struct extBitsRetrieval *extBits)
 {
   Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, LPos, bwtSeq->hint);
-  unsigned long FPos;
+  GtUword FPos;
   const MRAEnc *alphabet = BWTSeqGetAlphabet(bwtSeq);
   if (LPos != BWTSeqTerminatorPos(bwtSeq))
   {
@@ -204,7 +204,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, unsigned long LPos,
             stderr);
       abort();
 #endif
-      FPos = (unsigned long)-1;
+      FPos = (GtUword)-1;
       break;
     }
   }
@@ -216,7 +216,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, unsigned long LPos,
   return FPos;
 }
 
-static inline unsigned long
+static inline GtUword
 BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym)
 {
   Symbol  tSym;
@@ -226,7 +226,7 @@ BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym)
   return bwtSeq->count[tSym];
 }
 
-static inline unsigned long
+static inline GtUword
 BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym)
 {
   gt_assert(bwtSeq);
@@ -261,19 +261,19 @@ BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq)
 }
 
 static inline Symbol
-BWTSeqGetSym(const BWTSeq *bwtSeq, unsigned long pos)
+BWTSeqGetSym(const BWTSeq *bwtSeq, GtUword pos)
 {
   gt_assert(bwtSeq);
   return EISGetSym(bwtSeq->seqIdx, pos, bwtSeq->hint);
 }
 
 static inline bool
-EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, unsigned long *pos,
+EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, GtUword *pos,
                 const BWTSeq *bwtSeq)
 {
   if (iter->nextMatchBWTPos < iter->bounds.end)
   {
-    /*printf("nextMatchBWTPos=%lu\n",(unsigned long) iter->nextMatchBWTPos);*/
+    /*printf("nextMatchBWTPos="GT_LU"\n",(GtUword) iter->nextMatchBWTPos);*/
     *pos = gt_BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
     iter->nextMatchBWTPos++;
     return true;

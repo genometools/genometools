@@ -26,6 +26,7 @@
 #endif
 #include "core/assert_api.h"
 #include "core/process.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/xposix.h"
 
@@ -37,11 +38,11 @@
                                     snprintf() statment producing the bar! */
 
 static int window_size; /* the window size of the terminal */
-static unsigned long long last_computation;
-static unsigned long long processed_counter;
-static unsigned long long computed_eta;
+static GtUint64 last_computation;
+static GtUint64 processed_counter;
+static GtUint64 computed_eta;
 /* progress counter */
-static volatile const unsigned long long *computation_counter;
+static volatile const GtUint64 *computation_counter;
 static volatile sig_atomic_t window_resized;
 static time_t computation_start,
               computed_eta_time,
@@ -50,7 +51,7 @@ static time_t computation_start,
 static void set_window_size(void)
 {
   struct winsize winsize;
-  if (ioctl(STDOUT_FILENO, (unsigned long) TIOCGWINSZ, &winsize) != -1 &&
+  if (ioctl(STDOUT_FILENO, (GtUword) TIOCGWINSZ, &winsize) != -1 &&
       winsize.ws_col != 0) {
     if ((int) winsize.ws_col > MAXIMUM_WINDOW_SIZE)
       window_size = MAXIMUM_WINDOW_SIZE;
@@ -196,9 +197,9 @@ static void gt_sig_winch(GT_UNUSED int sigraised)
 }
 #endif
 
-void gt_progressbar_start(GT_UNUSED const unsigned long long
+void gt_progressbar_start(GT_UNUSED const GtUint64
                                     *current_computation,
-                          GT_UNUSED unsigned long long number_of_computations)
+                          GT_UNUSED GtUint64 number_of_computations)
 {
 #ifndef _WIN32
   computation_counter = current_computation;

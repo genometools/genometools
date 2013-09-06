@@ -19,6 +19,7 @@
 #define CODON_ITERATOR_API_H
 
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 typedef enum {
   GT_CODON_ITERATOR_OK    =  0,
@@ -32,10 +33,10 @@ typedef struct GtCodonIteratorClass GtCodonIteratorClass;
 
 /* Return the current reading offset of <codin_iterator>, starting from the
    position in the sequence given at iterator instantiation time. */
-unsigned long          gt_codon_iterator_current_position(GtCodonIterator
+GtUword          gt_codon_iterator_current_position(GtCodonIterator
                                                           *codon_iterator);
 /* Return the length of the substring to scan, given at instantiation time. */
-unsigned long          gt_codon_iterator_length(GtCodonIterator
+GtUword          gt_codon_iterator_length(GtCodonIterator
                                                 *codon_iterator);
 /* Rewind the <codon_iterator> to point again to the position in the sequence
    given at iterator instantiation time. */

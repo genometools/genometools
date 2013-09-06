@@ -33,7 +33,7 @@ typedef enum GtSeqabstractType {
 
 struct GtSeqabstract
 {
-  unsigned long len, offset, totallength;
+  GtUword len, offset, totallength;
   GtEncseqReader *esr;
   GtSeqabstractType seqtype;
   bool cmpcharbychar,
@@ -62,8 +62,8 @@ GtSeqabstract *gt_seqabstract_new_empty(void)
 
 void gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
                                    const GtUchar *string,
-                                   unsigned long len,
-                                   unsigned long offset)
+                                   GtUword len,
+                                   GtUword offset)
 {
   if (sa->esr != NULL)
   {
@@ -80,8 +80,8 @@ void gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
 }
 
 GtSeqabstract *gt_seqabstract_new_gtuchar(const GtUchar *string,
-                                          unsigned long len,
-                                          unsigned long offset)
+                                          GtUword len,
+                                          GtUword offset)
 {
   GtSeqabstract *sa = gt_seqabstract_new_empty();
 
@@ -91,8 +91,8 @@ GtSeqabstract *gt_seqabstract_new_gtuchar(const GtUchar *string,
 
 void gt_seqabstract_reinit_encseq(GtSeqabstract *sa,
                                   const GtEncseq *encseq,
-                                  unsigned long len,
-                                  unsigned long offset)
+                                  GtUword len,
+                                  GtUword offset)
 {
   if (sa->esr != NULL)
   {
@@ -117,8 +117,8 @@ void gt_seqabstract_reinit_encseq(GtSeqabstract *sa,
 }
 
 GtSeqabstract *gt_seqabstract_new_encseq(const GtEncseq *encseq,
-                                         unsigned long len,
-                                         unsigned long offset)
+                                         GtUword len,
+                                         GtUword offset)
 {
   GtSeqabstract *sa = gt_seqabstract_new_empty();
 
@@ -126,7 +126,7 @@ GtSeqabstract *gt_seqabstract_new_encseq(const GtEncseq *encseq,
   return sa;
 }
 
-unsigned long gt_seqabstract_length(const GtSeqabstract *sa)
+GtUword gt_seqabstract_length(const GtSeqabstract *sa)
 {
   return sa->len;
 }
@@ -138,7 +138,7 @@ void gt_seqabstract_delete(GtSeqabstract *sa)
 }
 
 GtUchar gt_seqabstract_encoded_char(const GtSeqabstract *sa,
-                                    unsigned long idx)
+                                    GtUword idx)
 {
   return sa->seqtype == GT_SEQABSTRACT_STRING ?
     sa->seq.string[idx] :
@@ -152,15 +152,15 @@ GtUchar gt_seqabstract_encoded_char(const GtSeqabstract *sa,
           break;\
         }
 
-static unsigned long
+static GtUword
 gt_seqabstract_lcp_gtuchar_gtuchar(bool forward,
                                    const GtSeqabstract *useq,
                                    const GtSeqabstract *vseq,
-                                   unsigned long leftstart,
-                                   unsigned long rightstart,
-                                   unsigned long minlen)
+                                   GtUword leftstart,
+                                   GtUword rightstart,
+                                   GtUword minlen)
 {
-  unsigned long lcp;
+  GtUword lcp;
   GtUchar a, b;
   if (useq->seq.string == vseq->seq.string &&
       useq->offset == vseq->offset &&
@@ -186,15 +186,15 @@ gt_seqabstract_lcp_gtuchar_gtuchar(bool forward,
   return lcp;
 }
 
-static unsigned long
+static GtUword
 gt_seqabstract_lcp_gtuchar_encseq(bool forward,
                                   const GtSeqabstract *useq,
                                   const GtSeqabstract *vseq,
-                                  unsigned long leftstart,
-                                  unsigned long rightstart,
-                                  unsigned long minlen)
+                                  GtUword leftstart,
+                                  GtUword rightstart,
+                                  GtUword minlen)
 {
-  unsigned long lcp;
+  GtUword lcp;
   GtUchar a, b;
   for (lcp = 0; lcp < minlen; lcp++)
   {
@@ -209,14 +209,14 @@ gt_seqabstract_lcp_gtuchar_encseq(bool forward,
   return lcp;
 }
 
-static unsigned long gt_seqabstract_lcp_encseq_encseq(bool forward,
+static GtUword gt_seqabstract_lcp_encseq_encseq(bool forward,
                                                       const GtSeqabstract *useq,
                                                       const GtSeqabstract *vseq,
-                                                      unsigned long leftstart,
-                                                      unsigned long rightstart,
-                                                      unsigned long minlen)
+                                                      GtUword leftstart,
+                                                      GtUword rightstart,
+                                                      GtUword minlen)
 {
-  unsigned long lcp;
+  GtUword lcp;
   GtUchar a, b;
   bool is_same_sequence = (useq->seq.encseq == vseq->seq.encseq) &&
     ((useq->offset + leftstart) == (vseq->offset + rightstart));
@@ -241,8 +241,8 @@ static unsigned long gt_seqabstract_lcp_encseq_encseq(bool forward,
   else {
     if (useq->stoppossupport)
     {
-      unsigned long stoppos;
-      const unsigned long startpos
+      GtUword stoppos;
+      const GtUword startpos
          = forward ? (useq->offset + leftstart)
                    : GT_REVERSEPOS(useq->totallength,
                                    useq->offset + leftstart);
@@ -262,7 +262,7 @@ static unsigned long gt_seqabstract_lcp_encseq_encseq(bool forward,
       lcp = MIN(minlen,stoppos - startpos);
     } else
     {
-      unsigned long startpos = useq->offset + leftstart;
+      GtUword startpos = useq->offset + leftstart;
       for (lcp = 0; lcp < minlen; lcp++)
       {
         a = gt_encseq_get_encoded_char(useq->seq.encseq,
@@ -279,14 +279,14 @@ static unsigned long gt_seqabstract_lcp_encseq_encseq(bool forward,
   return lcp;
 }
 
-unsigned long gt_seqabstract_lcp(bool forward,
+GtUword gt_seqabstract_lcp(bool forward,
                                  const GtSeqabstract *useq,
                                  const GtSeqabstract *vseq,
-                                 unsigned long leftstart,
-                                 unsigned long rightstart,
-                                 unsigned long minlen)
+                                 GtUword leftstart,
+                                 GtUword rightstart,
+                                 GtUword minlen)
 {
-  unsigned long lcp;
+  GtUword lcp;
 
   if (minlen == 0)
   {

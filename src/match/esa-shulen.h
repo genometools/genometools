@@ -32,7 +32,7 @@ int gt_multiesa2shulengthdist_print(Sequentialsuffixarrayreader *ssar,
                                     const GtEncseq *encseq,
                                     GtError *err);
 
-int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
+int gt_esa2shulengthqueryfiles(GtUword *totalgmatchlength,
                                const Suffixarray *suffixarray,
                                const GtStrArray *queryfilenames,
                                GtError *err);
@@ -47,10 +47,10 @@ GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq,
                                                    GenomediffInfo *gd_info);
 
 int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
-                                  const unsigned long *bucketofsuffixes,
+                                  const GtUword *bucketofsuffixes,
                                   const uint32_t *bucketofsuffixes_uint32,
                                   const GtLcpvaluetype *lcptab_bucket,
-                                  unsigned long numberofsuffixes,
+                                  GtUword numberofsuffixes,
                                   GtError *err);
 
 int gt_sfx_multiesa2shulengthdist_last(GtBUstate_shulen *bustate,

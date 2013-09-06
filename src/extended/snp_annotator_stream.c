@@ -60,8 +60,8 @@ static int snp_annotator_stream_process_current_gene(GtSNPAnnotatorStream *sas,
                                                      GtError *err)
 {
   int had_err = 0;
-  unsigned long i;
-  unsigned long nof_genes = gt_array_size(sas->cur_gene_set);
+  GtUword i;
+  GtUword nof_genes = gt_array_size(sas->cur_gene_set);
   gt_error_check(err);
 
   if (gt_queue_size(sas->snps) > 0) {
@@ -199,7 +199,7 @@ static int snp_annotator_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 
 static void snp_annotator_stream_free(GtNodeStream *ns)
 {
-  unsigned long i;
+  GtUword i;
   GtSNPAnnotatorStream *sas;
   if (!ns) return;
   sas = gt_snp_annotator_stream_cast(ns);

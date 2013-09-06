@@ -29,7 +29,7 @@ struct GtScriptFilter
 {
   lua_State *L;
   GtStr *filename;
-  unsigned long reference_count;
+  GtUword reference_count;
 };
 
 static const luaL_Reg script_filter_luasecurelibs[] = {

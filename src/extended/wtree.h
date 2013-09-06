@@ -14,8 +14,11 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #ifndef WTREE_H
 #define WTREE_H
+
+#include "core/types_api.h"
 
 /* Abstract class GtWtree,
    Used to store sequences or Permutations.
@@ -24,7 +27,7 @@
 typedef struct GtWtree GtWtree;
 
 /* Type used by GtWtree to represent symbols */
-typedef unsigned long GtWtreeSymbol;
+typedef GtUword GtWtreeSymbol;
 
 /* Increases the reference count of the <GtWtree>. */
 GtWtree*      gt_wtree_ref(GtWtree *wtree);
@@ -33,29 +36,29 @@ GtWtree*      gt_wtree_ref(GtWtree *wtree);
    <wtree>.
    Returns ULONG_MAX if function is not implemented. */
 GtWtreeSymbol gt_wtree_access(GtWtree *wtree,
-                              unsigned long pos);
+                              GtUword pos);
 
 /* Returns the number of symbols <symbol> in the prefix of <wtree> upto position
    <pos>. Note that <pos> < length of <wtree>.
    Returns ULONG_MAX if function is not implemented. */
-unsigned long gt_wtree_rank(GtWtree *wtree,
-                            unsigned long pos,
+GtUword gt_wtree_rank(GtWtree *wtree,
+                            GtUword pos,
                             GtWtreeSymbol symbol);
 
 /* Returns the position of the <i>th <symbol> in wtree, returns ULONG_MAX if the
    <wtree> contains less than <i> symbols. Note that 0 < <i> <= length of
    <wtree>.
    Returns ULONG_MAX if function is not implemented. */
-unsigned long gt_wtree_select(GtWtree *wtree,
-                              unsigned long i,
+GtUword gt_wtree_select(GtWtree *wtree,
+                              GtUword i,
                               GtWtreeSymbol symbol);
 
 /* Returns the length of the sequence/permutation encoded by <wtree>. */
-unsigned long gt_wtree_length(GtWtree *wtree);
+GtUword gt_wtree_length(GtWtree *wtree);
 
 /* Returns the number of distinct symbols recognized by <wtree>. Corresponding
    to alphabet or set-size. */
-unsigned long gt_wtree_num_of_symbols(GtWtree *wtree);
+GtUword gt_wtree_num_of_symbols(GtWtree *wtree);
 
 /* Frees all memory associated with <wtree>. */
 void          gt_wtree_delete(GtWtree *wtree);

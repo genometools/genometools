@@ -19,6 +19,7 @@
 
 #include "core/error_api.h"
 #include "core/ma_api.h"
+#include "core/types_api.h"
 
 /* Array3dim module */
 
@@ -28,7 +29,7 @@
    <ARRAY3DIM> pointer. */
 #define gt_array3dim_malloc(ARRAY3DIM, X_SIZE, Y_SIZE, Z_SIZE)                 \
         {                                                                      \
-          unsigned long gt_a3d_x, gt_a3d_y;                                    \
+          GtUword gt_a3d_x, gt_a3d_y;                                          \
           ARRAY3DIM = gt_malloc(sizeof *ARRAY3DIM * (X_SIZE));                 \
           (ARRAY3DIM)[0] = gt_malloc(sizeof **ARRAY3DIM * (X_SIZE) * (Y_SIZE));\
           for (gt_a3d_x = 1UL; gt_a3d_x < (X_SIZE); gt_a3d_x++)                \
@@ -55,7 +56,7 @@
    <ARRAY3DIM> pointer. */
 #define gt_array3dim_calloc(ARRAY3DIM, X_SIZE, Y_SIZE, Z_SIZE)                 \
         {                                                                      \
-          unsigned long gt_a3d_x, gt_a3d_y;                                    \
+          GtUword gt_a3d_x, gt_a3d_y;                                          \
           ARRAY3DIM = gt_malloc(sizeof *ARRAY3DIM * (X_SIZE));                 \
           (ARRAY3DIM)[0] = gt_malloc(sizeof **ARRAY3DIM * (X_SIZE) * (Y_SIZE));\
           for (gt_a3d_x = 1UL; gt_a3d_x < (X_SIZE); gt_a3d_x++)                \

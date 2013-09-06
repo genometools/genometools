@@ -26,8 +26,8 @@
    accordingly. */
 void gt_fasta_show_entry_with_suffix(const char *description,
                                      const char *sequence,
-                                     unsigned long sequence_length,
-                                     const char *suffix, unsigned long width,
+                                     GtUword sequence_length,
+                                     const char *suffix, GtUword width,
                                      GtFile *outfp);
 
 #endif

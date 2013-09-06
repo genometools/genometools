@@ -27,13 +27,13 @@ typedef struct GtBittab GtBittab;
 
 /* Return a new <GtBittab> of length <num_of_bits>, initialised to 0.
    <num_of_bits> has to be > 0 */
-GtBittab*     gt_bittab_new(unsigned long num_of_bits);
+GtBittab*     gt_bittab_new(GtUword num_of_bits);
 
 /* Set bit <i> in <bittab> to 1. */
-void          gt_bittab_set_bit(GtBittab *bittab, unsigned long i);
+void          gt_bittab_set_bit(GtBittab *bittab, GtUword i);
 
 /* Set bit <i> in <bittab> to 0. */
-void          gt_bittab_unset_bit(GtBittab *bittab, unsigned long i);
+void          gt_bittab_unset_bit(GtBittab *bittab, GtUword i);
 
 /* Set <bittab_a> to be the complement of <bittab_b>. */
 void          gt_bittab_complement(GtBittab *bittab_a,
@@ -76,27 +76,27 @@ void          gt_bittab_show(const GtBittab *bittab, FILE *fp);
 void          gt_bittab_get_all_bitnums(const GtBittab *bittab, GtArray *array);
 
 /* Return <true> if bit <i> is set in <bittab>. */
-bool          gt_bittab_bit_is_set(const GtBittab *bittab, unsigned long i);
+bool          gt_bittab_bit_is_set(const GtBittab *bittab, GtUword i);
 
 /* Return <true> if <bittab_a> and <bittab_b> are identical. */
 bool          gt_bittab_cmp(const GtBittab *bittab_a, const GtBittab *bittab_b);
 
 /* Return the index of the first set bit in <bittab>. */
-unsigned long gt_bittab_get_first_bitnum(const GtBittab *bittab);
+GtUword gt_bittab_get_first_bitnum(const GtBittab *bittab);
 
 /* Return the index of the last set bit in <bittab>. */
-unsigned long gt_bittab_get_last_bitnum(const GtBittab *bittab);
+GtUword gt_bittab_get_last_bitnum(const GtBittab *bittab);
 
 /* Return the index of the next set bit in <bittab> with an index greater
    than <i>. */
-unsigned long gt_bittab_get_next_bitnum(const GtBittab *bittab,
-                                        unsigned long i);
+GtUword gt_bittab_get_next_bitnum(const GtBittab *bittab,
+                                        GtUword i);
 
 /* Return the number of set bits in <bittab>. */
-unsigned long gt_bittab_count_set_bits(const GtBittab *bittab);
+GtUword gt_bittab_count_set_bits(const GtBittab *bittab);
 
 /* Return the total number of bits of <bittab>. */
-unsigned long gt_bittab_size(GtBittab *bittab);
+GtUword gt_bittab_size(GtBittab *bittab);
 
 /* Delete <bittab>. */
 void          gt_bittab_delete(GtBittab *bittab);

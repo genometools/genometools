@@ -45,14 +45,14 @@ GtSeqposClassifier* gt_seqpos_classifier_new(const char *filename,
    set accordingly. */
 int                 gt_seqpos_classifier_position_is_inside_feature(
                                           GtSeqposClassifier *seqpos_classifier,
-                                          unsigned long i, bool *inside,
+                                          GtUword i, bool *inside,
                                           bool *end_of_annotation,
                                           GtError *err);
 
 /* Returns the number of features of the feature type modeled in
    <seqpos_classifier> found up to this point, referring to calls of
    <gt_seqpos_classifier_position_is_inside_feature()>. */
-unsigned long       gt_seqpos_classifier_nof_features_found(
+GtUword       gt_seqpos_classifier_nof_features_found(
                                          GtSeqposClassifier *seqpos_classifier);
 
 void                gt_seqpos_classifier_delete(

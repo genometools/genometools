@@ -76,7 +76,7 @@ static char *gt_default_format_style =
 struct GtStyle
 {
   lua_State *L;
-  unsigned long reference_count;
+  GtUword reference_count;
   GtRWLock *lock, *clone_lock;
   bool unsafe;
   char *filename;

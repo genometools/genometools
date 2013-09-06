@@ -28,11 +28,11 @@
 typedef GtArray SeqidInfo;
 
 typedef struct {
-  unsigned long seqnum, filenum;
+  GtUword seqnum, filenum;
   GtRange descrange;
 } SeqidInfoElem;
 
-static SeqidInfo* seqid_info_new(unsigned long seqnum, unsigned long filenum,
+static SeqidInfo* seqid_info_new(GtUword seqnum, GtUword filenum,
                                  const GtRange *descrange)
 {
   SeqidInfoElem seqid_info_elem;
@@ -52,8 +52,8 @@ static void seqid_info_delete(SeqidInfo *seqid_info)
   gt_array_delete(seqid_info);
 }
 
-static int seqid_info_add(SeqidInfo *seqid_info, unsigned long seqnum,
-                          unsigned long filenum, const GtRange *range,
+static int seqid_info_add(SeqidInfo *seqid_info, GtUword seqnum,
+                          GtUword filenum, const GtRange *range,
                           const char *filename, const char *seqid, GtError *err)
 {
   SeqidInfoElem *seqid_info_elem_ptr, seqid_info_elem;
@@ -74,13 +74,13 @@ static int seqid_info_add(SeqidInfo *seqid_info, unsigned long seqnum,
   return 0;
 }
 
-static int seqid_info_get(SeqidInfo *seqid_info, unsigned long *seqnum,
-                          unsigned long *filenum, GtRange *outrange,
+static int seqid_info_get(SeqidInfo *seqid_info, GtUword *seqnum,
+                          GtUword *filenum, GtRange *outrange,
                           const GtRange *inrange, const char *filename,
                           const char *seqid, GtError *err)
 {
   SeqidInfoElem *seqid_info_elem;
-  unsigned long i;
+  GtUword i;
   gt_error_check(err);
   gt_assert(seqid_info && seqnum && outrange && inrange);
   for (i = 0; i < gt_array_size(seqid_info); i++) {
@@ -93,7 +93,7 @@ static int seqid_info_get(SeqidInfo *seqid_info, unsigned long *seqnum,
       return 0;
     }
   }
-  gt_error_set(err, "cannot find sequence ID \"%s\" (with range %lu,%lu) in "
+  gt_error_set(err, "cannot find sequence ID \"%s\" (with range "GT_LU","GT_LU") in "
                "sequence file \"%s\"", seqid, inrange->start, inrange->end,
                filename);
   return -1;
@@ -103,17 +103,17 @@ struct GtSeqid2SeqnumMapping {
   char *filename;
   GtHashmap *map;
   const char *cached_seqid;
-  unsigned long cached_seqnum,
+  GtUword cached_seqnum,
                 cached_filenum;
   GtRange cached_range;
 };
 
 static int handle_description(GtSeqid2SeqnumMapping *mapping, const char *desc,
-                              unsigned long seqnum, unsigned long filenum,
+                              GtUword seqnum, GtUword filenum,
                               GtError *err)
 {
   GtRange descrange;
-  unsigned long j;
+  GtUword j;
   int had_err = 0;
   SeqidInfo *seqid_info;
   if (gt_parse_description_range(desc, &descrange)) {
@@ -154,7 +154,7 @@ static int handle_description(GtSeqid2SeqnumMapping *mapping, const char *desc,
 static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
                         GtSeqCol *seqcol, GT_UNUSED GtError *err)
 {
-  unsigned long i, j, nof_sequences, nof_files;
+  GtUword i, j, nof_sequences, nof_files;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(mapping && (bioseq || seqcol) && !(bioseq && seqcol));
@@ -230,8 +230,8 @@ void gt_seqid2seqnum_mapping_delete(GtSeqid2SeqnumMapping *mapping)
 
 int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
                                 const char *seqid, const GtRange *inrange,
-                                unsigned long *seqnum, unsigned long *filenum,
-                                unsigned long *offset, GtError *err)
+                                GtUword *seqnum, GtUword *filenum,
+                                GtUword *offset, GtError *err)
 {
   SeqidInfo *seqid_info;
   GtRange outrange;

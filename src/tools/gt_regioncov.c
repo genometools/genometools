@@ -23,7 +23,7 @@
 #include "tools/gt_regioncov.h"
 
 typedef struct {
-  unsigned long max_feature_dist;
+  GtUword max_feature_dist;
   bool verbose;
 } RegionCovArguments;
 

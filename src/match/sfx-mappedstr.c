@@ -442,7 +442,7 @@ static void kmerstream_delete(GtKmerstream *spwp)
 
 struct GtKmercodeiterator
 {
-  unsigned long totallength, startpos, currentposition;
+  GtUword totallength, startpos, currentposition;
   bool hasprocessedfirst, inputexhausted;
   const GtEncseq *encseq;
   GtEncseqReader *esr;
@@ -456,7 +456,7 @@ struct GtKmercodeiterator
                                             const GtEncseq *encseq,
                                             GtReadmode readmode,
                                             unsigned int kmersize,
-                                            unsigned long startpos)
+                                            GtUword startpos)
 {
   GtKmercodeiterator *kmercodeiterator;
   unsigned int numofchars;
@@ -467,7 +467,7 @@ struct GtKmercodeiterator
   kmercodeiterator->totallength = gt_encseq_total_length(encseq);
   kmercodeiterator->startpos = startpos;
   gt_assert(startpos < kmercodeiterator->totallength);
-  if (kmercodeiterator->totallength - startpos < (unsigned long) kmersize)
+  if (kmercodeiterator->totallength - startpos < (GtUword) kmersize)
   {
     kmercodeiterator->inputexhausted = true;
     kmercodeiterator->fb = NULL;
@@ -487,7 +487,7 @@ struct GtKmercodeiterator
     kmercodeiterator->spwp = kmerstream_new(numofchars,kmersize);
     kmercodeiterator->hasprocessedfirst = false;
     for (kmercodeiterator->currentposition = startpos;
-         kmercodeiterator->currentposition < startpos+(unsigned long) kmersize;
+         kmercodeiterator->currentposition < startpos+(GtUword) kmersize;
          kmercodeiterator->currentposition++)
     {
       charcode = gt_encseq_reader_next_encoded_char(kmercodeiterator->esr);
@@ -597,7 +597,7 @@ GtKmercodeiterator *gt_kmercodeiterator_filetab_new(
   {
     gt_sequence_buffer_set_symbolmap(kmercodeiterator->fb, symbolmap);
     for (kmercodeiterator->currentposition = 0;
-         kmercodeiterator->currentposition < (unsigned long) kmersize;
+         kmercodeiterator->currentposition < (GtUword) kmersize;
          kmercodeiterator->currentposition++)
     {
       retval = gt_sequence_buffer_next(kmercodeiterator->fb,&charcode,err);
@@ -697,25 +697,25 @@ void getencseqkmers(const GtEncseq *encseq,
                     GtReadmode readmode,
                     unsigned int kmersize,
                     void(*processkmercode)(void *,
-                                           unsigned long,
+                                           GtUword,
                                            const GtKmercode *),
                     void *processkmercodeinfo)
 {
-  unsigned long currentposition = 0, totallength;
+  GtUword currentposition = 0, totallength;
   GtKmerstream *spwp;
   GtUchar charcode;
   GtEncseqReader *esr;
   unsigned int numofchars, overshoot;
 
   totallength = gt_encseq_total_length(encseq);
-  if (totallength < (unsigned long) kmersize)
+  if (totallength < (GtUword) kmersize)
   {
     return;
   }
   numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   spwp = kmerstream_new(numofchars,kmersize);
   esr = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
-  for (currentposition = 0; currentposition < (unsigned long) kmersize;
+  for (currentposition = 0; currentposition < (GtUword) kmersize;
        currentposition++)
   {
     charcode = gt_encseq_reader_next_encoded_char(esr);
@@ -725,7 +725,7 @@ void getencseqkmers(const GtEncseq *encseq,
   }
   kmerstream_newcode(&spwp->currentkmercode,spwp);
   processkmercode(processkmercodeinfo,0,&spwp->currentkmercode);
-  for (currentposition = (unsigned long) kmersize; currentposition<totallength;
+  for (currentposition = (GtUword) kmersize; currentposition<totallength;
        currentposition++)
   {
     charcode = gt_encseq_reader_next_encoded_char(esr);

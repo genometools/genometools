@@ -22,7 +22,7 @@
 struct GtIO {
   GtFile *fp;
   GtStr *path;
-  unsigned long line_number;
+  GtUword line_number;
   bool line_start;
 };
 
@@ -104,7 +104,7 @@ signed char gt_io_next(GtIO *io)
   return c;
 }
 
-unsigned long gt_io_get_line_number(const GtIO *io)
+GtUword gt_io_get_line_number(const GtIO *io)
 {
   gt_assert(io);
   return io->line_number;
@@ -134,16 +134,16 @@ int gt_io_expect(GtIO *io, char expected_char, GtError *err)
       return 0;
     }
     if (expected_char == GT_END_OF_FILE) {
-      gt_error_set(err, "file \"%s\": line %lu: expected end-of-file, got '%c'",
+      gt_error_set(err, "file \"%s\": line "GT_LU": expected end-of-file, got '%c'",
                    gt_io_get_filename(io), gt_io_get_line_number(io), cc);
     }
     else if ((cc == GT_CARRIAGE_RETURN) || (cc == GT_END_OF_LINE)) {
-      gt_error_set(err, "file \"%s\": line %lu: expected character '%c', got "
+      gt_error_set(err, "file \"%s\": line "GT_LU": expected character '%c', got "
                    "newline", gt_io_get_filename(io), gt_io_get_line_number(io),
                    expected_char);
     }
     else {
-      gt_error_set(err, "file \"%s\": line %lu: expected character '%c', got "
+      gt_error_set(err, "file \"%s\": line "GT_LU": expected character '%c', got "
                    "'%c'", gt_io_get_filename(io), gt_io_get_line_number(io),
                    expected_char, cc);
     }

@@ -69,12 +69,12 @@
                                         "cumulativelengthofscoredexons"
 
 #define ILLEGAL_DATA\
-        fprintf(stderr, "illegal data in line %lu of file \"%s\"\n",\
+        fprintf(stderr, "illegal data in line "GT_LU" of file \"%s\"\n",\
                 parseinfo->linenumber , parseinfo->outputfilename);\
         exit(EXIT_FAILURE)
 
 #define SCANUINT\
-        if (sscanf(data, "%ld", &ret) != 1 || ret < 0)\
+        if (sscanf(data, ""GT_LD"", &ret) != 1 || ret < 0)\
         {\
           ILLEGAL_DATA;\
         }
@@ -90,7 +90,7 @@ typedef struct {
   GtStr *databuf,
         *genomicfilename,
         *referencefilename;
-  unsigned long linenumber;
+  GtUword linenumber;
   const char *outputfilename;
   Eoptype eoptype;
   bool proteineop;
@@ -166,11 +166,11 @@ static bool hashes_are_the_same(char *filehash, GT_UNUSED FILE *fp)
    is compared with the hash <filehash>. If the hashes are the same, the
    filename is added to the array and the index is returned. Otherwise, the
    function calls exit(). */
-static unsigned long process_file(GthInput *input, char *filename,
+static GtUword process_file(GthInput *input, char *filename,
                                   char *filehash, bool isreferencefile,
                                   GthAlphatype alphatype)
 {
-  long fileindex;
+  GtWord fileindex;
   FILE *fp;
 
   if (isreferencefile)
@@ -213,9 +213,9 @@ static void end_element_handler(void *info, const XML_Char *name)
 {
   Parseinfo *parseinfo = (Parseinfo*) info;
   GthSA *sa = parseinfo->currentSA;
-  unsigned long datalength;
+  GtUword datalength;
   double retdouble;
-  long ret;
+  GtWord ret;
   char *data;
 
   /* save data and data length */
@@ -514,7 +514,7 @@ int gt_parse_intermediate_output(GthInput *input,
     if (XML_Parse(parser, gt_str_get(line), gt_str_length(line), false) ==
         XML_STATUS_ERROR) {
       error = XML_GetErrorCode(parser);
-      gt_error_set(err, "an error occured parsing line %lu of file \"%s\": %s",
+      gt_error_set(err, "an error occured parsing line "GT_LU" of file \"%s\": %s",
                    parseinfo.linenumber, outputfilename,
                    XML_ErrorString(error));
       had_err = -1;
@@ -554,7 +554,7 @@ bool gth_intermediate_output_is_correct(char *outputfilename,
   GtFileMode file_mode;
   bool rval;
 #ifndef NDEBUG
-  unsigned long numofgenomicfiles, numofreferencefiles;
+  GtUword numofgenomicfiles, numofreferencefiles;
 #endif
 
   gt_error_check(err);
@@ -604,8 +604,8 @@ bool gth_intermediate_output_is_correct(char *outputfilename,
 }
 
 static void show_parse_file_status(GthShowVerbose showverbose,
-                                   unsigned long filenum,
-                                   unsigned long numoffiles,
+                                   GtUword filenum,
+                                   GtUword numoffiles,
                                    const char *filename)
 {
   GtStr *buf = gt_str_new();
@@ -626,7 +626,7 @@ int gth_process_intermediate_files(GthInput *input, GtStrArray *consensusfiles,
                                    GthSAProcessFunc saprocessfunc, void *data,
                                    GthShowVerbose showverbose, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtFile *fp, *genfile;
   int had_err = 0;
 

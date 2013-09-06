@@ -22,7 +22,7 @@
 
 typedef struct {
   /* dna vmatch call: */
-  unsigned long minmatchlength,  /* minimum match length */
+  GtUword minmatchlength,  /* minimum match length */
                 seedlength,      /* seed length */
                 exdrop,          /* xdrop value for edit distance extension */
 

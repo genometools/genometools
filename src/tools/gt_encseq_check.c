@@ -24,7 +24,7 @@
 #include "tools/gt_encseq_check.h"
 
 typedef struct {
-  unsigned long scantrials,
+  GtUword scantrials,
                 multicharcmptrials,
                 prefixlength;
   bool verbose,

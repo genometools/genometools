@@ -79,10 +79,10 @@ static GtOptionParser* gt_seqlensort_option_parser_new(void *tool_arguments)
 
 static int gt_seqlensort_cmp(const void *a, const void *b, void *data)
 {
-  const unsigned long seqnum_a = *(const unsigned long*)a,
-                      seqnum_b = *(const unsigned long*)b;
-  unsigned long seqlen_a = GT_SEQLENSORT_SEQLEN(seqnum_a, (unsigned long*)data),
-                seqlen_b = GT_SEQLENSORT_SEQLEN(seqnum_b, (unsigned long*)data);
+  const GtUword seqnum_a = *(const GtUword*)a,
+                      seqnum_b = *(const GtUword*)b;
+  GtUword seqlen_a = GT_SEQLENSORT_SEQLEN(seqnum_a, (GtUword*)data),
+                seqlen_b = GT_SEQLENSORT_SEQLEN(seqnum_b, (GtUword*)data);
   if (seqlen_a == seqlen_b)
     return (int)((seqnum_a > seqnum_b) - (seqnum_a < seqnum_b));
   return (int)((seqlen_a > seqlen_b) - (seqlen_a < seqlen_b));
@@ -94,7 +94,7 @@ static int gt_seqlensort_runner(GT_UNUSED int argc,
 {
   GtSeqlensortArguments *arguments = tool_arguments;
   int had_err = 0;
-  unsigned long i;
+  GtUword i;
   GtReads2Twobit *r2t = NULL;
 
   gt_error_check(err);

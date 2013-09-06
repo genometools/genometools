@@ -146,7 +146,7 @@ static int gt_cge_spacedseed_runner(GT_UNUSED int argc,
   logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (arguments->verbose)
   {
-    unsigned long idx;
+    GtUword idx;
 
     printf("# %sindex=%s\n",arguments->withesa ? "esa" : "pck",
                             gt_str_get(arguments->str_inputindex));

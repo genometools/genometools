@@ -43,33 +43,33 @@ typedef struct
 {
   GtUchar *positions,
           *rangelengths;
-  unsigned long *endidxinpage;
-  unsigned long *mappositions;
-  unsigned long numofpages;
-  unsigned long numofpositionstostore;
-  unsigned long maxrangevalue;  /* maximal value of special type */
+  GtUword *endidxinpage;
+  GtUword *mappositions;
+  GtUword numofpages;
+  GtUword numofpositionstostore;
+  GtUword maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uchar;
 
 typedef struct
 {
   uint16_t *positions,
            *rangelengths;
-  unsigned long *endidxinpage;
-  unsigned long *mappositions;
-  unsigned long numofpages;
-  unsigned long numofpositionstostore;
-  unsigned long maxrangevalue;  /* maximal value of special type */
+  GtUword *endidxinpage;
+  GtUword *mappositions;
+  GtUword numofpages;
+  GtUword numofpositionstostore;
+  GtUword maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uint16;
 
 typedef struct
 {
   uint32_t *positions,
            *rangelengths;
-  unsigned long *endidxinpage;
-  unsigned long *mappositions;
-  unsigned long numofpages;
-  unsigned long numofpositionstostore;
-  unsigned long maxrangevalue;  /* maximal value of special type */
+  GtUword *endidxinpage;
+  GtUword *mappositions;
+  GtUword numofpages;
+  GtUword numofpositionstostore;
+  GtUword maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uint32;
 
 typedef union
@@ -82,7 +82,7 @@ typedef union
 typedef struct
 {
   GtUchar *is64bitptr;
-  unsigned long *versionptr,
+  GtUword *versionptr,
                 *satcharptr,
                 *totallengthptr,
                 *numofdbsequencesptr,
@@ -98,12 +98,12 @@ typedef struct
   char *firstfilename,
        *alphadef;
   GtFilelengthvalues *filelengthtab;
-  unsigned long *characterdistribution;
+  GtUword *characterdistribution;
 } GtEncseqHeaderPtr;
 
 typedef struct
 {
-  unsigned long *classstartpositionsptr;
+  GtUword *classstartpositionsptr;
   char *maxcharsptr,
        *allcharsptr;
   GtUchar *subsymbolmapptr;
@@ -120,7 +120,7 @@ struct GtEncseq
   bool has_specialranges,
        has_wildcardranges,
        has_ssptab;
-  unsigned long totallength,
+  GtUword totallength,
                 logicaltotallength,
                 numofdbsequences,
                 logicalnumofdbsequences,
@@ -131,7 +131,7 @@ struct GtEncseq
 
   GtEncseqHeaderPtr headerptr;
 
-  unsigned long version;
+  GtUword version;
   GtUchar is64bit;
 
   GtUchar(*seqdeliverchar)(GtEncseqReader *);
@@ -139,16 +139,16 @@ struct GtEncseq
   bool(*delivercontainsspecial)(const GtEncseq *,
                                 GtReadmode,
                                 GtEncseqReader *,
-                                unsigned long,
-                                unsigned long);
+                                GtUword,
+                                GtUword);
   const char *delivercontainsspecialname;
-  bool(*issinglepositioninspecialrange)(const GtEncseq *,unsigned long);
+  bool(*issinglepositioninspecialrange)(const GtEncseq *,GtUword);
   const char *issinglepositioninspecialrangename;
-  bool(*issinglepositioninwildcardrange)(const GtEncseq *,unsigned long);
+  bool(*issinglepositioninwildcardrange)(const GtEncseq *,GtUword);
   const char *issinglepositioninwildcardrangename;
-  bool(*getexceptionmapping)(const GtEncseq *,unsigned long*, unsigned long);
+  bool(*getexceptionmapping)(const GtEncseq *,GtUword*, GtUword);
   const char *getexceptionmappingname;
-  bool(*issinglepositionseparator)(const GtEncseq *,unsigned long);
+  bool(*issinglepositionseparator)(const GtEncseq *,GtUword);
   const char *issinglepositionseparatorname;
 
   unsigned int leastprobablecharacter;
@@ -160,19 +160,19 @@ struct GtEncseq
   bool hasallocateddestab,
        hasallocatedssptab,
        hasallocatedsdstab;
-  unsigned long destablength, *sdstab;
+  GtUword destablength, *sdstab;
 
   /* alphabet representation */
   GtAlphabet *alpha;
   char *alphadef;
-  unsigned long lengthofalphadef,
+  GtUword lengthofalphadef,
                 alphatype;
 
   /* separator index structure */
   GtSWtable ssptab;
 
   /* file start position table */
-  unsigned long *fsptab; /* is NULL when numofdbfiles is 1
+  GtUword *fsptab; /* is NULL when numofdbfiles is 1
                             otherwise has numofdbfiles - 1 entries */
 
   /* only for GT_ACCESS_TYPE_EQUALLENGTH,
@@ -181,7 +181,7 @@ struct GtEncseq
               GT_ACCESS_TYPE_USHORTTABLES,
               GT_ACCESS_TYPE_UINT32TABLES */
   GtTwobitencoding *twobitencoding;
-  unsigned long unitsoftwobitencoding;
+  GtUword unitsoftwobitencoding;
 
   /* only for  GT_ACCESS_TYPE_DIRECTACCESS */
   GtUchar *plainseq;
@@ -203,7 +203,7 @@ struct GtEncseq
   bool has_exceptiontable;
   GtSWtable exceptiontable;
   BitPackArray *exceptions;
-  unsigned long *classstartpositions,
+  GtUword *classstartpositions,
                 numofallchars;
   char *maxchars,
        *allchars;
@@ -213,7 +213,7 @@ struct GtEncseq
   GtEncseqAccessType oissat;
 
   /* reference counting */
-  unsigned long reference_count;
+  GtUword reference_count;
   GtMutex *refcount_lock;
 
   /* MD5 sums */
@@ -222,7 +222,7 @@ struct GtEncseq
   bool hasmirror,
        accesstype_via_utables;
 
-  unsigned long minseqlen,
+  GtUword minseqlen,
                 maxseqlen;
 };
 #endif

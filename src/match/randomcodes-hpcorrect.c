@@ -39,8 +39,12 @@
   ((SDATA)->hmers + ((I) * (SDATA)->hmers_width))
 
 /* define a type for hmer pw_scores */
-typedef long gt_rchc_score_t;
+typedef GtWord gt_rchc_score_t;
+#ifndef _WIN64
 #define GT_RCHC_PRIscore "ld"
+#else
+#define GT_RCHC_PRIscore "I64d"
+#endif
 
 static int gt_rchc_score_t_cmp(const void *a, const void *b)
 {
@@ -57,39 +61,39 @@ static int gt_rchc_score_t_cmp(const void *a, const void *b)
 struct GtRandomcodesHpcorrectData {
   const GtEncseq *encseq;
   GtHplstore *hplstore;
-  unsigned long nofreads;
-  unsigned long mirror_nofseqs;
-  unsigned long k;
+  GtUword nofreads;
+  GtUword mirror_nofseqs;
+  GtUword k;
   unsigned int maxuntrustp;
   unsigned int mintrustp;
   uint8_t *hmers;
-  unsigned long *cluster_size;
-  unsigned long hmers_alloc;
-  unsigned long hmers_width;
+  GtUword *cluster_size;
+  GtUword hmers_alloc;
+  GtUword hmers_width;
   uint8_t *consensus_hmer;
   unsigned int *hdistri;
   bool skip_read_ends;
-  unsigned long frompos;
-  unsigned long topos;
+  GtUword frompos;
+  GtUword topos;
   bool skip_rc;
-  long clustering_minscore;
-  unsigned long *hmer_cluster;
+  GtWord clustering_minscore;
+  GtUword *hmer_cluster;
   bool *skip;
   GtUnionFind *union_find;
   GtFile *outfile;
   gt_rchc_score_t *pw_scores;
   gt_rchc_score_t *pw_scores_copy;
   unsigned int quantile;
-  unsigned long maxwidth;
+  GtUword maxwidth;
   bool manhattan;
   /* firstpass data: */
   bool firstpass;
   unsigned int r;
-  unsigned long *rextset;
+  GtUword *rextset;
   unsigned int *rextset_size;
   gt_rchc_score_t rext_cl_minscore, rext_I_minscore, rext_J_minscore,
                   rext_R_minscore, rext_D_minscore, rext_J_lminscore;
-  unsigned long rext_J_lwidth;
+  GtUword rext_J_lwidth;
   GtEncseqReader *esr1, *esr2;
 };
 
@@ -109,9 +113,9 @@ static gt_rchc_score_t gt_rchc_hscore[100] =
 
 static inline gt_rchc_score_t gt_randomcodes_hpcorrect_compute_hscore_manhattan(
     bool *identical, const uint8_t *hmer1, const uint8_t *hmer2,
-    unsigned long k)
+    GtUword k)
 {
-  unsigned long i;
+  GtUword i;
   gt_rchc_score_t total_score = 0;
   if (identical != NULL)
     *identical = true;
@@ -133,9 +137,9 @@ GT_UNUSED
 static inline gt_rchc_score_t
     gt_randomcodes_hpcorrect_compute_hscore_manhattan_threshold(
     bool *identical, const uint8_t *hmer1, const uint8_t *hmer2,
-    unsigned long k, gt_rchc_score_t minscore /* use LONG_MAX to disable */)
+    GtUword k, gt_rchc_score_t minscore /* use LONG_MAX to disable */)
 {
-  unsigned long i;
+  GtUword i;
   gt_rchc_score_t total_score = 0;
   gt_assert(identical != NULL);
   *identical = true;
@@ -154,10 +158,10 @@ static inline gt_rchc_score_t
 GT_UNUSED
 static inline gt_rchc_score_t gt_randomcodes_hpcorrect_compute_hscore_flexible(
     bool *identical, const uint8_t *hmer1, const uint8_t *hmer2,
-    unsigned long k, bool manhattan,
+    GtUword k, bool manhattan,
     gt_rchc_score_t minscore /* use LONG_MAX to disable */)
 {
-  unsigned long i;
+  GtUword i;
   gt_rchc_score_t total_score = 0;
   gt_rchc_score_t max_reachable = manhattan ? 0 : (GT_RCHC_HSCORE_BEST * k);
   gt_assert(identical != NULL);
@@ -193,9 +197,9 @@ GT_UNUSED
 static inline gt_rchc_score_t
     gt_randomcodes_hpcorrect_compute_hscore_matrix_threshold(
     bool *identical, const uint8_t *hmer1, const uint8_t *hmer2,
-    unsigned long k, gt_rchc_score_t minscore /* use LONG_MAX to disable */)
+    GtUword k, gt_rchc_score_t minscore /* use LONG_MAX to disable */)
 {
-  unsigned long i;
+  GtUword i;
   gt_rchc_score_t score, total_score = 0;
   gt_rchc_score_t max_reachable = GT_RCHC_HSCORE_BEST * k;
   gt_assert(identical != NULL);
@@ -220,9 +224,9 @@ static inline gt_rchc_score_t
 static inline gt_rchc_score_t
     gt_randomcodes_hpcorrect_compute_hscore(
     bool *identical, const uint8_t *hmer1, const uint8_t *hmer2,
-    unsigned long k)
+    GtUword k)
 {
-  unsigned long i;
+  GtUword i;
   gt_rchc_score_t total_score = 0;
   gt_assert(identical != NULL);
   *identical = true;
@@ -242,17 +246,17 @@ static inline gt_rchc_score_t
 
 GT_UNUSED
 static void gt_randomcodes_hpcorrect_show_expanded_kmer(
-    GtRandomcodesHpcorrectData *sdata, const unsigned long *bucketofsuffixes,
-    const GtSeqnumrelpos *snrp, unsigned long sfx, unsigned long info)
+    GtRandomcodesHpcorrectData *sdata, const GtUword *bucketofsuffixes,
+    const GtSeqnumrelpos *snrp, GtUword sfx, GtUword info)
 {
-  unsigned long relpos, seqnum, startpos, kmerpos;
+  GtUword relpos, seqnum, startpos, kmerpos;
   relpos = gt_seqnumrelpos_decode_relpos(snrp, bucketofsuffixes[sfx]);
   seqnum = gt_seqnumrelpos_decode_seqnum(snrp, bucketofsuffixes[sfx]);
   startpos = gt_encseq_seqstartpos(sdata->encseq, seqnum);
   kmerpos = startpos + relpos;
-  gt_file_xprintf(sdata->outfile, "# [%lu", sfx);
+  gt_file_xprintf(sdata->outfile, "# ["GT_LU"", sfx);
   if (info != GT_UNDEF_ULONG)
-    gt_file_xprintf(sdata->outfile, "-%lu", info);
+    gt_file_xprintf(sdata->outfile, "-"GT_LU"", info);
   gt_file_xprintf(sdata->outfile, "] ");
   gt_hplstore_show_decoded_sequence(sdata->outfile, sdata->hplstore,
       sdata->encseq, kmerpos, sdata->k);
@@ -260,18 +264,18 @@ static void gt_randomcodes_hpcorrect_show_expanded_kmer(
   {
     gt_file_xprintf(sdata->outfile, "|");
     gt_hplstore_show_decoded_sequence(sdata->outfile, sdata->hplstore,
-        sdata->encseq, kmerpos + sdata->k, (unsigned long)sdata->r + 1UL);
+        sdata->encseq, kmerpos + sdata->k, (GtUword)sdata->r + 1UL);
   }
-  gt_file_xprintf(sdata->outfile, " (%lu:%lu)\n", seqnum, relpos);
+  gt_file_xprintf(sdata->outfile, " ("GT_LU":"GT_LU")\n", seqnum, relpos);
 }
 
 GT_UNUSED
 static inline void gt_randomcodes_hpcorrect_show_all_expanded_kmers(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata,
-    unsigned long clusternum /* GT_UNDEF_ULONG for all clusters */)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata,
+    GtUword clusternum /* GT_UNDEF_ULONG for all clusters */)
 {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < nofsuffixes; i++)
   {
     if (clusternum == GT_UNDEF_ULONG || \
@@ -282,10 +286,10 @@ static inline void gt_randomcodes_hpcorrect_show_all_expanded_kmers(
 }
 
 static inline uint8_t gt_randomcodes_hpcorrect_compute_consensus_for_pos(
-    unsigned long pos, unsigned long nofsuffixes,
-    GtRandomcodesHpcorrectData *sdata, unsigned long clusternum)
+    GtUword pos, GtUword nofsuffixes,
+    GtRandomcodesHpcorrectData *sdata, GtUword clusternum)
 {
-  unsigned long i;
+  GtUword i;
   unsigned int maxfreq = 0;
   uint8_t value, consensus = GT_HPLSTORE_UNDEF;
   unsigned int mintrust = (unsigned int)sdata->cluster_size[clusternum] *
@@ -316,10 +320,10 @@ static inline uint8_t gt_randomcodes_hpcorrect_compute_consensus_for_pos(
 }
 
 static inline void gt_randomcodes_hpcorrect_compute_consensus_hmer(
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata,
-    unsigned long clusternum)
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata,
+    GtUword clusternum)
 {
-  unsigned long pos;
+  GtUword pos;
   for (pos = 0; pos < sdata->k; pos++)
   {
     sdata->consensus_hmer[pos] =
@@ -329,9 +333,9 @@ static inline void gt_randomcodes_hpcorrect_compute_consensus_hmer(
 }
 
 static inline void gt_randomcodes_hpcorrect_fill_pw_scores_matrix(
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata)
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata)
 {
-  unsigned long i, j;
+  GtUword i, j;
   bool identical;
   for (i = 0; i < nofsuffixes; i++)
   {
@@ -348,19 +352,19 @@ static inline void gt_randomcodes_hpcorrect_fill_pw_scores_matrix(
 
 GT_UNUSED
 static inline void gt_randomcodes_hpcorrect_show_pw_scores(
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata)
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata)
 {
-  unsigned long i, j;
+  GtUword i, j;
   gt_rchc_score_t score;
   gt_file_xprintf(sdata->outfile, "# ");
   for (i = 0; i < nofsuffixes; i++)
   {
-    gt_file_xprintf(sdata->outfile, "\t(%lu)", i);
+    gt_file_xprintf(sdata->outfile, "\t("GT_LU")", i);
   }
   gt_file_xprintf(sdata->outfile, "\n");
   for (i = 0; i < nofsuffixes; i++)
   {
-    gt_file_xprintf(sdata->outfile, "# (%lu)\t", i);
+    gt_file_xprintf(sdata->outfile, "# ("GT_LU")\t", i);
     for (j = 0; j <= i; j++)
     {
       gt_file_xprintf(sdata->outfile, "\t");
@@ -374,12 +378,12 @@ static inline void gt_randomcodes_hpcorrect_show_pw_scores(
   }
 }
 
-static inline unsigned long gt_randomcodes_hpcorrect_cluster_greedy(
-    bool *allidentical, unsigned long nofsuffixes, long clustering_minscore,
+static inline GtUword gt_randomcodes_hpcorrect_cluster_greedy(
+    bool *allidentical, GtUword nofsuffixes, GtWord clustering_minscore,
     GtRandomcodesHpcorrectData *sdata)
 {
   gt_rchc_score_t hscore;
-  unsigned long i, j, nofclusters = 0;
+  GtUword i, j, nofclusters = 0;
   bool identical = false;
   gt_assert(allidentical != NULL);
   *allidentical = true;
@@ -413,12 +417,12 @@ static inline unsigned long gt_randomcodes_hpcorrect_cluster_greedy(
   return nofclusters;
 }
 
-static inline unsigned long gt_randomcodes_hpcorrect_cluster_union_find(
-    bool *allidentical, unsigned long nofsuffixes, long clustering_minscore,
+static inline GtUword gt_randomcodes_hpcorrect_cluster_union_find(
+    bool *allidentical, GtUword nofsuffixes, GtWord clustering_minscore,
     GtRandomcodesHpcorrectData *sdata)
 {
   gt_rchc_score_t hscore;
-  unsigned long i, j, nofclusters;
+  GtUword i, j, nofclusters;
   bool identical = false;
   gt_assert(allidentical != NULL);
   *allidentical = true;
@@ -463,14 +467,14 @@ static inline unsigned long gt_randomcodes_hpcorrect_cluster_union_find(
 
 GT_UNUSED
 static inline void gt_randomcodes_hpcorrect_show_kplus1(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata,
-    unsigned long clusternum)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata,
+    GtUword clusternum)
 {
-  unsigned long i, relpos, seqnum, startpos, kmerpos, kplus1pos;
+  GtUword i, relpos, seqnum, startpos, kmerpos, kplus1pos;
   char kplus1char;
   bool rc;
-  gt_file_xprintf(sdata->outfile, "# clusternum: %lu\n", clusternum);
+  gt_file_xprintf(sdata->outfile, "# clusternum: "GT_LU"\n", clusternum);
   for (i = 0; i < nofsuffixes; i++)
   {
     if (GT_RANDOMCODES_HPCORRECT_CLUSTERNUM(sdata, i) != clusternum)
@@ -485,16 +489,16 @@ static inline void gt_randomcodes_hpcorrect_show_kplus1(
     rc = (seqnum >= sdata->nofreads);
     if (rc)
     {
-      unsigned long seqlen;
+      GtUword seqlen;
       if (sdata->skip_rc)
         continue;
       seqlen = gt_encseq_seqlength(sdata->encseq, seqnum);
-      gt_file_xprintf(sdata->outfile,"# rc: %lu %lu, seqlen=%lu\n",
+      gt_file_xprintf(sdata->outfile,"# rc: "GT_LU" "GT_LU", seqlen="GT_LU"\n",
           seqnum, kplus1pos, seqlen);
       kplus1pos = seqlen - 1UL - kplus1pos;
       seqnum = sdata->mirror_nofseqs - 1UL - seqnum;
     }
-    gt_file_xprintf(sdata->outfile,"# kplus1\t%lu\t%lu\t%c\trextset=%lu\n",
+    gt_file_xprintf(sdata->outfile,"# kplus1\t"GT_LU"\t"GT_LU"\t%c\trextset="GT_LU"\n",
         seqnum, kplus1pos, kplus1char, sdata->rextset[i]);
   }
 }
@@ -512,22 +516,22 @@ static char gt_randomcodes_complement(char dna_char)
 
 /* compare sdata->r letters from position kmerpos + sdata->k + offset */
 static inline bool gt_randomcodes_hpcorrect_same_rext_letters(
-    GtRandomcodesHpcorrectData *sdata, unsigned long u_kmerpos, int u_offset,
-    unsigned long t_kmerpos, int t_offset)
+    GtRandomcodesHpcorrectData *sdata, GtUword u_kmerpos, int u_offset,
+    GtUword t_kmerpos, int t_offset)
 {
   GtCommonunits commonunits;
   return (u_kmerpos + u_offset == t_kmerpos + t_offset) ||
       (gt_encseq_compare_viatwobitencoding(&commonunits,
         sdata->encseq, sdata->encseq, GT_READMODE_FORWARD, sdata->esr1,
         sdata->esr2, u_kmerpos + u_offset + sdata->k,
-        t_kmerpos + t_offset + sdata->k, 0, (unsigned long)sdata->r) == 0);
+        t_kmerpos + t_offset + sdata->k, 0, (GtUword)sdata->r) == 0);
 }
 
 /* compare right extensions letters and homopolymer lengths */
 static inline bool gt_randomcodes_hpcorrect_similar_rext(
     GtRandomcodesHpcorrectData *sdata,
-    unsigned long u_sfx, unsigned long u_kmerpos, int u_offset,
-    unsigned long t_sfx, unsigned long t_kmerpos, int t_offset,
+    GtUword u_sfx, GtUword u_kmerpos, int u_offset,
+    GtUword t_sfx, GtUword t_kmerpos, int t_offset,
     gt_rchc_score_t minscore)
 {
   return (gt_randomcodes_hpcorrect_same_rext_letters(sdata, u_kmerpos, u_offset,
@@ -535,13 +539,13 @@ static inline bool gt_randomcodes_hpcorrect_similar_rext(
     (gt_randomcodes_hpcorrect_compute_hscore_manhattan(NULL,
           GT_RANDOMCODES_HPCORRECT_HMER(sdata, u_sfx) + sdata->k + u_offset,
           GT_RANDOMCODES_HPCORRECT_HMER(sdata, t_sfx) + sdata->k + t_offset,
-          (unsigned long)sdata->r) >= minscore);
+          (GtUword)sdata->r) >= minscore);
 }
 
 static inline bool gt_randomcodes_hpcorrect_detect_double_insertion(
-    GtRandomcodesHpcorrectData *sdata, unsigned long u_sfx,
-    unsigned long u_kmerpos, unsigned long t_sfx, unsigned long t_kmerpos,
-    gt_rchc_score_t r_minscore, unsigned long l_width,
+    GtRandomcodesHpcorrectData *sdata, GtUword u_sfx,
+    GtUword u_kmerpos, GtUword t_sfx, GtUword t_kmerpos,
+    gt_rchc_score_t r_minscore, GtUword l_width,
     gt_rchc_score_t l_minscore)
 {
   return (gt_randomcodes_hpcorrect_same_rext_letters(sdata, u_kmerpos, -1,
@@ -549,7 +553,7 @@ static inline bool gt_randomcodes_hpcorrect_detect_double_insertion(
     (gt_randomcodes_hpcorrect_compute_hscore_manhattan(NULL,
      GT_RANDOMCODES_HPCORRECT_HMER(sdata, u_sfx) + sdata->k,
      GT_RANDOMCODES_HPCORRECT_HMER(sdata, t_sfx) + sdata->k + 2UL,
-     (unsigned long)sdata->r - 1UL) >= r_minscore) &&
+     (GtUword)sdata->r - 1UL) >= r_minscore) &&
     (gt_randomcodes_hpcorrect_compute_hscore_manhattan(NULL,
      GT_RANDOMCODES_HPCORRECT_HMER(sdata, u_sfx) + sdata->k - l_width - 1UL,
      GT_RANDOMCODES_HPCORRECT_HMER(sdata, t_sfx) + sdata->k - l_width - 1UL,
@@ -557,18 +561,18 @@ static inline bool gt_randomcodes_hpcorrect_detect_double_insertion(
 }
 
 static void gt_randomcodes_hpcorrect_firstpass_correct(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata,
-    unsigned long u, unsigned long t)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata,
+    GtUword u, GtUword t)
 {
   char t_char;
   uint8_t t_hlen, t_hlen_b, t_hlen_a, t_hlen_sum, u_hlen_b;
-  unsigned long u_sfx, u_relpos, u_seqnum, u_startpos, u_kmerpos, u_kplus1pos,
+  GtUword u_sfx, u_relpos, u_seqnum, u_startpos, u_kmerpos, u_kplus1pos,
                 t_sfx, t_relpos, t_seqnum, t_startpos, t_kmerpos;
   bool rc;
 #ifdef GT_RANDOMCODES_HPCORRECT_DEBUG
   gt_file_xprintf(sdata->outfile,
-      "# firstpass_correct, u: %lu, t: %lu\n", u, t);
+      "# firstpass_correct, u: "GT_LU", t: "GT_LU"\n", u, t);
 #endif
   for (t_sfx = 0; t_sfx < nofsuffixes && sdata->rextset[t_sfx] != t; t_sfx++)
     { /* nothing */ }
@@ -609,11 +613,11 @@ static void gt_randomcodes_hpcorrect_firstpass_correct(
       sdata->rextset_size[u]--;
       sdata->rextset[u_sfx] = GT_UNDEF_ULONG;
       if (rc)
-        gt_file_xprintf(sdata->outfile,"%lu\t%lu\tI\t%c\t%u\t%u\t%u\n",
+        gt_file_xprintf(sdata->outfile,""GT_LU"\t"GT_LU"\tI\t%c\t%u\t%u\t%u\n",
             u_seqnum, u_kplus1pos, gt_randomcodes_complement(t_char),
             t_hlen_a, t_hlen, t_hlen_b);
       else
-        gt_file_xprintf(sdata->outfile,"%lu\t%lu\tI\t%c\t%u\t%u\t%u\n",
+        gt_file_xprintf(sdata->outfile,""GT_LU"\t"GT_LU"\tI\t%c\t%u\t%u\t%u\n",
             u_seqnum, u_kplus1pos - 1UL, t_char,
             t_hlen_b, t_hlen, t_hlen_a);
     }
@@ -624,11 +628,11 @@ static void gt_randomcodes_hpcorrect_firstpass_correct(
       sdata->rextset_size[u]--;
       sdata->rextset[u_sfx] = GT_UNDEF_ULONG;
       if (rc)
-        gt_file_xprintf(sdata->outfile,"%lu\t%lu\tR\t%c\t0\t%u\t%u\n",
+        gt_file_xprintf(sdata->outfile,""GT_LU"\t"GT_LU"\tR\t%c\t0\t%u\t%u\n",
             u_seqnum, u_kplus1pos, gt_randomcodes_complement(t_char),
             t_hlen, t_hlen_b);
       else
-        gt_file_xprintf(sdata->outfile,"%lu\t%lu\tR\t%c\t0\t%u\t%u\n",
+        gt_file_xprintf(sdata->outfile,""GT_LU"\t"GT_LU"\tR\t%c\t0\t%u\t%u\n",
             u_seqnum, u_kplus1pos, t_char, t_hlen, t_hlen_a);
     }
     else if (((t_hlen_sum >= u_hlen_b &&
@@ -643,11 +647,11 @@ static void gt_randomcodes_hpcorrect_firstpass_correct(
       sdata->rextset_size[u]--;
       sdata->rextset[u_sfx] = GT_UNDEF_ULONG;
       if (rc)
-        gt_file_xprintf(sdata->outfile,"%lu\t%lu\tJ\t%c\t%u\t%u\t%u\n",
+        gt_file_xprintf(sdata->outfile,""GT_LU"\t"GT_LU"\tJ\t%c\t%u\t%u\t%u\n",
             u_seqnum, u_kplus1pos + 1UL, gt_randomcodes_complement(t_char),
             t_hlen_a, t_hlen, t_hlen_b);
       else
-        gt_file_xprintf(sdata->outfile,"%lu\t%lu\tJ\t%c\t%u\t%u\t%u\n",
+        gt_file_xprintf(sdata->outfile,""GT_LU"\t"GT_LU"\tJ\t%c\t%u\t%u\t%u\n",
             u_seqnum, u_kplus1pos - 1UL, t_char,
             t_hlen_b, t_hlen, t_hlen_a);
     }
@@ -657,23 +661,23 @@ static void gt_randomcodes_hpcorrect_firstpass_correct(
       /* insertion found in u */
       sdata->rextset_size[u]--;
       sdata->rextset[u_sfx] = GT_UNDEF_ULONG;
-      gt_file_xprintf(sdata->outfile,"%lu\t%lu\tD\t-\t0\t0\t%u\n", u_seqnum,
+      gt_file_xprintf(sdata->outfile,""GT_LU"\t"GT_LU"\tD\t-\t0\t0\t%u\n", u_seqnum,
           u_kplus1pos, t_hlen_a);
     }
   }
 }
 
-static inline unsigned long
+static inline GtUword
   gt_randomcodes_hpcorrect_firstpass_cluster_right_extensions(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata,
-    unsigned long clusternum)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata,
+    GtUword clusternum)
 {
-  unsigned long current_rextset = 0;
-  unsigned long i, relpos_i, seqnum_i, startpos_i, kmerpos_i,
+  GtUword current_rextset = 0;
+  GtUword i, relpos_i, seqnum_i, startpos_i, kmerpos_i,
                 j, relpos_j, seqnum_j, startpos_j, kmerpos_j;
 #ifdef GT_RANDOMCODES_HPCORRECT_DEBUG
-  gt_file_xprintf(sdata->outfile, "# clusternum: %lu, clustersize: %lu\n",
+  gt_file_xprintf(sdata->outfile, "# clusternum: "GT_LU", clustersize: "GT_LU"\n",
       clusternum, sdata->cluster_size[clusternum]);
 #endif
   for (i = 0; i < nofsuffixes; i++)
@@ -717,11 +721,11 @@ static inline unsigned long
 }
 
 static inline void gt_randomcodes_hpcorrect_correct_hmers(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata,
-    unsigned long clusternum)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata,
+    GtUword clusternum)
 {
-  unsigned long i, pos, relpos, seqnum, hpos, maxpos;
+  GtUword i, pos, relpos, seqnum, hpos, maxpos;
   uint8_t *values, consensus, value;
   bool rc = false;
   unsigned int *hdistri, maxuntrust =
@@ -757,24 +761,24 @@ static inline void gt_randomcodes_hpcorrect_correct_hmers(
         continue;
       if (consensus > value)
       {
-        gt_file_xprintf(sdata->outfile, "%lu\t%lu\tI\t%u\n", seqnum, hpos,
+        gt_file_xprintf(sdata->outfile, ""GT_LU"\t"GT_LU"\tI\t%u\n", seqnum, hpos,
             (unsigned int)(consensus - value));
       }
       else
       {
         gt_assert(consensus < value);
-        gt_file_xprintf(sdata->outfile, "%lu\t%lu\tD\t%u\n", seqnum, hpos,
+        gt_file_xprintf(sdata->outfile, ""GT_LU"\t"GT_LU"\tD\t%u\n", seqnum, hpos,
             (unsigned int)(value - consensus));
       }
     }
   }
 }
 
-static inline void gt_randomcode_realloc_hmers_data(unsigned long nofsuffixes,
+static inline void gt_randomcode_realloc_hmers_data(GtUword nofsuffixes,
     GtRandomcodesHpcorrectData *sdata)
 {
   sdata->hmers_alloc = nofsuffixes + GT_RANDOMCODES_HPCORRECT_HMERS_EXTRA;
-  gt_log_log("realloc hmers array to %lu elements", sdata->hmers_alloc);
+  gt_log_log("realloc hmers array to "GT_LU" elements", sdata->hmers_alloc);
   sdata->hmers = gt_realloc(sdata->hmers,
       sizeof (sdata->hmers) * sdata->hmers_alloc * sdata->hmers_width);
   sdata->cluster_size = gt_realloc(sdata->cluster_size,
@@ -809,13 +813,13 @@ static inline void gt_randomcode_realloc_hmers_data(unsigned long nofsuffixes,
 }
 
 static void gt_randomcodes_hpcorrect_fill_hmers(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata)
 {
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < nofsuffixes; i++)
   {
-    unsigned long relpos, seqnum, startpos, kmerpos;
+    GtUword relpos, seqnum, startpos, kmerpos;
     relpos = gt_seqnumrelpos_decode_relpos(snrp, suffixes[i]);
     seqnum = gt_seqnumrelpos_decode_seqnum(snrp, suffixes[i]);
     startpos = gt_encseq_seqstartpos(sdata->encseq, seqnum);
@@ -825,10 +829,10 @@ static void gt_randomcodes_hpcorrect_fill_hmers(
   }
 }
 
-static unsigned long gt_randomcodes_hpcorrect_cluster(bool *allidentical,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata)
+static GtUword gt_randomcodes_hpcorrect_cluster(bool *allidentical,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata)
 {
-  unsigned long nofclusters;
+  GtUword nofclusters;
   gt_assert(allidentical != NULL);
   if (sdata->pw_scores != NULL)
   {
@@ -851,7 +855,7 @@ static unsigned long gt_randomcodes_hpcorrect_cluster(bool *allidentical,
         sdata->clustering_minscore, sdata);
 #ifdef GT_RANDOMCODES_HPCORRECT_VERBOSE
     gt_file_xprintf(sdata->outfile,
-        "# nsfx:\t%lu\tncls:\t%lu\n", nofsuffixes, nofclusters);
+        "# nsfx:\t"GT_LU"\tncls:\t"GT_LU"\n", nofsuffixes, nofclusters);
 #endif
 #ifdef GT_RANDOMCODES_HPCORRECT_DEBUG
   if (sdata->pw_scores != NULL)
@@ -861,14 +865,14 @@ static unsigned long gt_randomcodes_hpcorrect_cluster(bool *allidentical,
 }
 
 static void gt_randomcodes_hpcorrect_process_kmer_itv(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata);
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata);
 
 static void gt_randomcodes_hpcorrect_partition_kmer_itv(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata)
 {
-    unsigned long partnum, partsize, offset, nof_parts;
+    GtUword partnum, partsize, offset, nof_parts;
     gt_assert(sdata->maxwidth > 0);
     nof_parts = 1 + nofsuffixes / sdata->maxwidth;
     partsize = nofsuffixes / nof_parts;
@@ -884,15 +888,15 @@ static void gt_randomcodes_hpcorrect_partition_kmer_itv(
 }
 
 static inline void gt_randomcodes_hpcorrect_firstpass_process_cluster(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata,
-    unsigned long clusternum)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata,
+    GtUword clusternum)
 {
-  unsigned long nofrextsets, u_rextsetnum, t_rextsetnum, untrusted, trusted;
+  GtUword nofrextsets, u_rextsetnum, t_rextsetnum, untrusted, trusted;
   nofrextsets = gt_randomcodes_hpcorrect_firstpass_cluster_right_extensions(
       snrp, suffixes, nofsuffixes, sdata, clusternum);
 #ifdef GT_RANDOMCODES_HPCORRECT_VERBOSE
-  gt_file_xprintf(sdata->outfile, "# nofrextsets:%lu\n", nofrextsets);
+  gt_file_xprintf(sdata->outfile, "# nofrextsets:"GT_LU"\n", nofrextsets);
 #endif
 #ifdef GT_RANDOMCODES_HPCORRECT_DEBUG
   gt_randomcodes_hpcorrect_show_kplus1(snrp, suffixes, nofsuffixes, sdata,
@@ -905,7 +909,7 @@ static inline void gt_randomcodes_hpcorrect_firstpass_process_cluster(
   if (trusted <= untrusted)
     trusted = untrusted + 1UL;
 #ifdef GT_RANDOMCODES_HPCORRECT_VERBOSE
-  gt_file_xprintf(sdata->outfile, "# untrusted: %lu, trusted: %lu\n",
+  gt_file_xprintf(sdata->outfile, "# untrusted: "GT_LU", trusted: "GT_LU"\n",
       untrusted, trusted);
 #endif
   for (u_rextsetnum = 0; u_rextsetnum < nofrextsets; u_rextsetnum++)
@@ -913,7 +917,7 @@ static inline void gt_randomcodes_hpcorrect_firstpass_process_cluster(
     if (sdata->rextset_size[u_rextsetnum] <= (unsigned int)untrusted)
     {
 #ifdef GT_RANDOMCODES_HPCORRECT_DEBUG
-      gt_file_xprintf(sdata->outfile, "# rextset %lu is untrusted\n",
+      gt_file_xprintf(sdata->outfile, "# rextset "GT_LU" is untrusted\n",
           u_rextsetnum);
 #endif
       for (t_rextsetnum = 0; t_rextsetnum < nofrextsets; t_rextsetnum++)
@@ -922,7 +926,7 @@ static inline void gt_randomcodes_hpcorrect_firstpass_process_cluster(
             sdata->rextset_size[t_rextsetnum] >= (unsigned int)trusted)
         {
 #ifdef GT_RANDOMCODES_HPCORRECT_DEBUG
-          gt_file_xprintf(sdata->outfile, "# ... and rextset %lu is trusted\n",
+          gt_file_xprintf(sdata->outfile, "# ... and rextset "GT_LU" is trusted\n",
               t_rextsetnum);
 #endif
           gt_randomcodes_hpcorrect_firstpass_correct(snrp, suffixes,
@@ -937,9 +941,9 @@ static inline void gt_randomcodes_hpcorrect_firstpass_process_cluster(
 }
 
 static inline void gt_randomcodes_hpcorrect_process_cluster(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata,
-    unsigned long clusternum)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata,
+    GtUword clusternum)
 {
   gt_randomcodes_hpcorrect_compute_consensus_hmer(nofsuffixes, sdata,
       clusternum);
@@ -948,10 +952,10 @@ static inline void gt_randomcodes_hpcorrect_process_cluster(
 }
 
 static inline void gt_randomcodes_hpcorrect_process_kmer_itv(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesHpcorrectData *sdata)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesHpcorrectData *sdata)
 {
-  unsigned long clusternum, nofclusters;
+  GtUword clusternum, nofclusters;
   bool allidentical;
   if (nofsuffixes > sdata->maxwidth)
   {
@@ -960,7 +964,7 @@ static inline void gt_randomcodes_hpcorrect_process_kmer_itv(
     return;
   }
 #ifdef GT_RANDOMCODES_HPCORRECT_VERBOSE
-  gt_file_xprintf(sdata->outfile, "# nofsfx:\t%lu\n", nofsuffixes);
+  gt_file_xprintf(sdata->outfile, "# nofsfx:\t"GT_LU"\n", nofsuffixes);
 #endif
   if (nofsuffixes < 3UL)
     return;
@@ -988,16 +992,16 @@ static inline void gt_randomcodes_hpcorrect_process_kmer_itv(
 }
 
 int gt_randomcodes_hpcorrect_process_bucket(void *data,
-    const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
+    const GtUword *bucketofsuffixes, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword numberofsuffixes,
     GT_UNUSED unsigned int sortingdepth, GT_UNUSED GtError *err)
 {
-  unsigned long itvstart, next_itvstart;
+  GtUword itvstart, next_itvstart;
   unsigned int lcpvalue;
   GtRandomcodesHpcorrectData *sdata = data;
 
 #ifdef GT_RANDOMCODES_HPCORRECT_DEBUG
-  gt_file_xprintf(sdata->outfile, "# bucketsize:\t%lu\n", numberofsuffixes);
+  gt_file_xprintf(sdata->outfile, "# bucketsize:\t"GT_LU"\n", numberofsuffixes);
 #endif
   for (itvstart = 0, next_itvstart = 1UL; next_itvstart < numberofsuffixes;
       next_itvstart++)
@@ -1010,7 +1014,7 @@ int gt_randomcodes_hpcorrect_process_bucket(void *data,
     if (lcpvalue < (unsigned int)sdata->k)
     {
 #ifdef GT_RANDOMCODES_HPCORRECT_DEBUG
-      gt_file_xprintf(sdata->outfile, "# orig-nofsfx:\t%lu\n",
+      gt_file_xprintf(sdata->outfile, "# orig-nofsfx:\t"GT_LU"\n",
           next_itvstart - itvstart);
 #endif
       gt_randomcodes_hpcorrect_process_kmer_itv(snrp,
@@ -1021,7 +1025,7 @@ int gt_randomcodes_hpcorrect_process_bucket(void *data,
 #ifdef GT_RANDOMCODES_HPCORRECT_DEBUG
   gt_randomcodes_hpcorrect_show_expanded_kmer(sdata, bucketofsuffixes, snrp,
       next_itvstart - 1UL, lcpvalue);
-  gt_file_xprintf(sdata->outfile, "# orig-nofsfx:\t%lu\n",
+  gt_file_xprintf(sdata->outfile, "# orig-nofsfx:\t"GT_LU"\n",
       next_itvstart - itvstart);
 #endif
   gt_randomcodes_hpcorrect_process_kmer_itv(snrp,
@@ -1053,9 +1057,9 @@ GtRandomcodesHpcorrectData *gt_randomcodes_hpcorrect_data_new(
     unsigned int maxuntrustp, bool greedy_clustering,
     bool skip_read_ends, bool skip_hmer_ends, bool skip_rc,
     bool non_redundant, bool best_score_clustering, bool manhattan,
-    long clustering_param, unsigned long maxwidth, int rext_cl_minscore,
+    GtWord clustering_param, GtUword maxwidth, int rext_cl_minscore,
     int rext_I_minscore, int rext_J_minscore, int rext_R_minscore,
-    int rext_D_minscore, int rext_J_lminscore, unsigned long rext_J_lwidth,
+    int rext_D_minscore, int rext_J_lminscore, GtUword rext_J_lwidth,
     GtStr *indexname, unsigned int threadnum, GtError *err)
 {
   GtRandomcodesHpcorrectData *sdata = gt_malloc(sizeof *sdata);
@@ -1066,7 +1070,7 @@ GtRandomcodesHpcorrectData *gt_randomcodes_hpcorrect_data_new(
     gt_str_append_cstr(path, GT_RANDOMCODES_HPCORRECT_FIRSTPASS_FILESFX);
   else
     gt_str_append_cstr(path, GT_RANDOMCODES_HPCORRECT_FILESFX);
-  sdata->k = (unsigned long)k;
+  sdata->k = (GtUword)k;
   sdata->firstpass = firstpass;
   sdata->mintrustp = mintrustp;
   sdata->maxuntrustp = maxuntrustp;

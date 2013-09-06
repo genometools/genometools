@@ -22,12 +22,12 @@
 #include "core/error_api.h"
 
 /* The <GtCompactUlongStore> class stores fixed bit witdh unsigned integers.
-   Maximum bitwidth is sizeof (unsigned long) * CHAR_BIT. */
+   Maximum bitwidth is sizeof (GtUword) * CHAR_BIT. */
 typedef struct GtCompactUlongStore GtCompactUlongStore;
 
 /* Return a new <GtCompactUlongStore> object with <numofentries> elements of
    <bitsperentry> bit width */
-GtCompactUlongStore* gt_compact_ulong_store_new(unsigned long numofentries,
+GtCompactUlongStore* gt_compact_ulong_store_new(GtUword numofentries,
                                                 unsigned int bitsperentry);
 
 /* Deletes <cus> object and frees all associated memory */
@@ -35,17 +35,17 @@ void                 gt_compact_ulong_store_delete(GtCompactUlongStore *cus);
 
 /* Calculates the size in bytes for a <GtCompactUlongStore> with <numofentries>
    elements of <bitsperentry> bit width */
-size_t               gt_compact_ulong_store_size(unsigned long numofentries,
+size_t               gt_compact_ulong_store_size(GtUword numofentries,
                                                  unsigned int bitsperentry);
 
-/* Return element stored in <cus> at position <idx> cast to unsigned long */
-unsigned long        gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
-                                                unsigned long idx);
+/* Return element stored in <cus> at position <idx> cast to GtUword */
+GtUword        gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
+                                                GtUword idx);
 
 /* Set element at position <idx> in <cus> to <value> */
 void                 gt_compact_ulong_store_update(GtCompactUlongStore *cus,
-                                                   unsigned long idx,
-                                                   unsigned long value);
+                                                   GtUword idx,
+                                                   GtUword value);
 
 int                  gt_compact_ulong_store_unit_test(GtError *err);
 

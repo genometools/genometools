@@ -43,7 +43,7 @@ static GtOPrval gthmkbssmfiles_parse_options(int *parsed_args, int argc,
 
 int gt_gthmkbssmfiles(int argc, const char **argv, GtError *err)
 {
-  unsigned long i;
+  GtUword i;
   GtStr *filename;
   int parsed_args, had_err = 0;
 

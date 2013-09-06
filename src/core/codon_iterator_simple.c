@@ -53,14 +53,14 @@ static GtCodonIteratorStatus gt_codon_iterator_simple_next(GtCodonIterator *ci,
   return GT_CODON_ITERATOR_OK;
 }
 
-static unsigned long gt_codon_iterator_simple_current_position(GtCodonIterator
+static GtUword gt_codon_iterator_simple_current_position(GtCodonIterator
                                                                             *ci)
 {
   gt_assert(ci);
   return ci->pvt->curpos;
 }
 
-static unsigned long gt_codon_iterator_simple_length(GtCodonIterator *ci)
+static GtUword gt_codon_iterator_simple_length(GtCodonIterator *ci)
 {
   gt_assert(ci);
   return ci->pvt->length;
@@ -89,7 +89,7 @@ const GtCodonIteratorClass* gt_codon_iterator_simple_class(void)
 }
 
 GtCodonIterator* gt_codon_iterator_simple_new(const char *seq,
-                                              unsigned long length,
+                                              GtUword length,
                                               GT_UNUSED GtError *err)
 {
   GtCodonIteratorSimple *cis;

@@ -21,7 +21,7 @@
 
 static int gt_lua_mathsupport_rand_max(lua_State *L)
 {
-  unsigned long max = luaL_checknumber(L, 1);
+  GtUword max = luaL_checknumber(L, 1);
 
   lua_pushnumber(L, gt_rand_max(max));
   return 1;

@@ -27,8 +27,8 @@
 #include "gth/plugins.h"
 
 void gth_chaining(GthChainCollection *chain_collection,
-                  unsigned long gen_file_num,
-                  unsigned long ref_file_num,
+                  GtUword gen_file_num,
+                  GtUword ref_file_num,
                   GthCallInfo*,
                   GthInput*,
                   GthStat*,
@@ -42,7 +42,7 @@ typedef struct {
   GthCallInfo *call_info;
   GthInput *input;
   GthStat *stat;
-  unsigned long gen_file_num,
+  GtUword gen_file_num,
                 ref_file_num,
                 bucketnum,
                 maxbucketnum;
@@ -57,7 +57,7 @@ typedef struct {
        refseqisindex; /* (inverse || !refseqisdna) */
   GthStat *stat;
   GthChainingInfo *chaining_info;
-  unsigned long *matchnumcounter,
+  GtUword *matchnumcounter,
                 maxnumofmatches,
                 rare,
                 lastrefseqnum;

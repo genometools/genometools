@@ -46,7 +46,7 @@ SAIBaseGetRot0Pos(const SASeqSrc *baseClass)
 }
 
 static inline size_t
-SAIBaseGetOrigSeq(const SASeqSrc *baseClass, Symbol *dest, unsigned long pos,
+SAIBaseGetOrigSeq(const SASeqSrc *baseClass, Symbol *dest, GtUword pos,
                   size_t len)
 {
   return gt_SAIGetOrigSeq(constSASS2SAI(baseClass), dest, pos, len);
@@ -61,12 +61,12 @@ gt_SAIBaseNewMRAEnc(const SASeqSrc *baseClass)
 static size_t
 SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
-            unsigned long generateStart, size_t len,
+            GtUword generateStart, size_t len,
             SeqDataTranslator xltor);
 
 void
 gt_initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
-                             unsigned long seqLen, Suffixarray *sa)
+                             GtUword seqLen, Suffixarray *sa)
 {
   {
     RandomSeqAccessor origSeqAccess = { gt_SAIGetOrigSeq, sai };
@@ -82,7 +82,7 @@ gt_initSuffixarrayFileInterface(SuffixarrayFileInterface *sai,
 }
 
 SuffixarrayFileInterface *
-gt_newSuffixarrayFileInterface(Suffixarray *sa, unsigned long seqLen)
+gt_newSuffixarrayFileInterface(Suffixarray *sa, GtUword seqLen)
 {
   SuffixarrayFileInterface *sai = gt_malloc(sizeof (*sai));
   gt_initSuffixarrayFileInterface(sai, seqLen, sa);
@@ -152,7 +152,7 @@ gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai)
   if (sai->sa->suftabstream_GtUlong.fp)
   {
     struct seqDataTranslator xltor = {
-      { .elemSize = sizeof (unsigned long) }, NULL, NULL,
+      { .elemSize = sizeof (GtUword) }, NULL, NULL,
     };
     reader = gt_seqReaderSetRegisterConsumer(&sai->baseClass.readerSet,
                                              SFX_REQUEST_SUFTAB, xltor);
@@ -202,7 +202,7 @@ SAIReadBWT(void *state, GtUchar *dest, size_t len, GT_UNUSED GtError *err)
 }
 
 size_t
-gt_SAIGetOrigSeq(const void *state, Symbol *dest, unsigned long pos, size_t len)
+gt_SAIGetOrigSeq(const void *state, Symbol *dest, GtUword pos, size_t len)
 {
   const SuffixarrayFileInterface *sai;
   gt_assert(state);
@@ -231,13 +231,13 @@ gt_SANewMRAEnc(const GtAlphabet *gtalphabet)
 static size_t
 SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
-            unsigned long generateStart, size_t len,
+            GtUword generateStart, size_t len,
             SeqDataTranslator xltor)
 {
   size_t idx;
   SuffixarrayFileInterface *sai = generatorState;
   Suffixarray *sa;
-  unsigned long buf[len];
+  GtUword buf[len];
 
   gt_assert(sai);
   sa = sai->sa;

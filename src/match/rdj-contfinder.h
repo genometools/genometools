@@ -31,7 +31,7 @@ void gt_contfinder_run(GtContfinder *contfinder, bool mirrored,
 
 GtBitsequence *gt_contfinder_contained(GtContfinder *contfinder);
 
-unsigned long gt_contfinder_nofcontained(GtContfinder *contfinder);
+GtUword gt_contfinder_nofcontained(GtContfinder *contfinder);
 
 int gt_contfinder_write_seqnums(GtContfinder *contfinder, bool sorted,
     GtFile *outfp, GtError *err);
@@ -48,7 +48,7 @@ int gt_contfinder_write_copynum(GtContfinder *contfinder, char* path,
 void gt_contfinder_delete(GtContfinder *contfinder);
 
 void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
-    bool mirrored, unsigned long depth,
-    unsigned long maxdepth, bool print);
+    bool mirrored, GtUword depth,
+    GtUword maxdepth, bool print);
 
 #endif

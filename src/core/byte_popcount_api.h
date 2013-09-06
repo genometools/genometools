@@ -18,12 +18,10 @@
 #ifndef BYTE_POPCOUNT_API_H
 #define BYTE_POPCOUNT_API_H
 
-#include <stdint.h>
-
 /* BytePopcount module */
 
 /* Lookup table containing the popcount (number of set bits). Entry at <i>
    equals popcount(<i>). */
-extern const uint8_t gt_byte_popcount[256];
+extern const unsigned char gt_byte_popcount[256];
 
 #endif

@@ -33,21 +33,21 @@ Splicedseq* gt_splicedseq_new(void)
 {
   Splicedseq *ss = gt_malloc(sizeof (Splicedseq));
   ss->splicedseq = gt_str_new();
-  ss->positionmapping = gt_array_new(sizeof (unsigned long));
+  ss->positionmapping = gt_array_new(sizeof (GtUword));
   ss->forward = true;
   return ss;
 }
 
-void gt_splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
+void gt_splicedseq_add(Splicedseq *ss, GtUword start, GtUword end,
                        const char *original_sequence)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(ss && start <= end && original_sequence);
   gt_str_append_cstr_nt(ss->splicedseq, original_sequence,
                         end - start + 1);
   /* make sure elements are added in ascending order */
   gt_assert(!gt_array_size(ss->positionmapping) ||
-            start > *(unsigned long*) gt_array_get_last(ss->positionmapping));
+            start > *(GtUword*) gt_array_get_last(ss->positionmapping));
   for (i = start; i <= end; i++)
     gt_array_add(ss->positionmapping, i);
 }
@@ -57,33 +57,33 @@ char* gt_splicedseq_get(const Splicedseq *ss)
   return gt_str_get(ss->splicedseq);
 }
 
-bool gt_splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
+bool gt_splicedseq_pos_is_border(const Splicedseq *ss, GtUword pos)
 {
   gt_assert(ss &&
          gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
   gt_assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
   if (ss->forward && pos + 1 < gt_array_size(ss->positionmapping) &&
-      *(unsigned long*) gt_array_get(ss->positionmapping, pos) + 1 !=
-      *(unsigned long*) gt_array_get(ss->positionmapping, pos+1)) {
+      *(GtUword*) gt_array_get(ss->positionmapping, pos) + 1 !=
+      *(GtUword*) gt_array_get(ss->positionmapping, pos+1)) {
     return true;
   }
   if (!ss->forward && pos &&
-      *(unsigned long*) gt_array_get(ss->positionmapping, pos-1) - 1 !=
-      *(unsigned long*) gt_array_get(ss->positionmapping, pos)) {
+      *(GtUword*) gt_array_get(ss->positionmapping, pos-1) - 1 !=
+      *(GtUword*) gt_array_get(ss->positionmapping, pos)) {
     return true;
   }
   return false;
 }
 
-unsigned long gt_splicedseq_map(const Splicedseq *ss, unsigned long pos)
+GtUword gt_splicedseq_map(const Splicedseq *ss, GtUword pos)
 {
   gt_assert(ss &&
          gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
   gt_assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
-  return *(unsigned long*) gt_array_get(ss->positionmapping, pos);
+  return *(GtUword*) gt_array_get(ss->positionmapping, pos);
 }
 
-unsigned long gt_splicedseq_length(const Splicedseq *ss)
+GtUword gt_splicedseq_length(const Splicedseq *ss)
 {
   gt_assert(ss);
   return gt_str_length(ss->splicedseq);

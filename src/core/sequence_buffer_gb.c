@@ -54,7 +54,7 @@ struct GtSequenceBufferGB {
         gt_sequence_buffer_cast(gt_sequence_buffer_gb_class(), SB)
 
 static inline int eat_newline(GtSequenceBuffer *sb,
-                              unsigned long *currentfileread)
+                              GtUword *currentfileread)
 {
   int currentchar;
   currentchar = inlinebuf_getchar(sb, sb->pvt->inputstream);
@@ -66,7 +66,7 @@ static inline int eat_newline(GtSequenceBuffer *sb,
 }
 
 static inline int eat_whitespace(GtSequenceBuffer *sb,
-                                 unsigned long *currentfileread)
+                                 GtUword *currentfileread)
 {
   int currentchar;
   do {
@@ -81,10 +81,10 @@ static inline int eat_whitespace(GtSequenceBuffer *sb,
 }
 
 static inline int eat_digits(GtSequenceBuffer *sb,
-                             unsigned long *currentfileread)
+                             GtUword *currentfileread)
 {
   int currentchar;
-  unsigned long i = 0;
+  GtUword i = 0;
   do {
     currentchar = inlinebuf_getchar(sb, sb->pvt->inputstream);
     if (currentchar == EOF)
@@ -98,7 +98,7 @@ static inline int eat_digits(GtSequenceBuffer *sb,
 }
 
 static inline int eat_line(GtSequenceBuffer *sb,
-                           unsigned long *currentfileread)
+                           GtUword *currentfileread)
 {
   int currentchar;
   do {
@@ -113,7 +113,7 @@ static inline int eat_line(GtSequenceBuffer *sb,
 }
 
 static inline int get_keyword(GtSequenceBuffer *sb, GtStr *kwbuf,
-                              unsigned long *currentfileread)
+                              GtUword *currentfileread)
 {
   int currentchar;
   currentchar = inlinebuf_getchar(sb, sb->pvt->inputstream);
@@ -133,7 +133,7 @@ static inline int get_keyword(GtSequenceBuffer *sb, GtStr *kwbuf,
 }
 
 static inline int get_description(GtSequenceBuffer *sb,
-                                  unsigned long *currentfileread)
+                                  GtUword *currentfileread)
 {
   int currentchar;
   currentchar = inlinebuf_getchar(sb, sb->pvt->inputstream);
@@ -155,9 +155,9 @@ static inline int get_description(GtSequenceBuffer *sb,
 
 static inline int get_sequence(GtSequenceBuffer *sb,
                                GtStr *linebuf,
-                               unsigned long *currentoutpos,
-                               unsigned long *currentfileread,
-                               unsigned long *currentfileadd,
+                               GtUword *currentoutpos,
+                               GtUword *currentfileread,
+                               GtUword *currentfileadd,
                                GtError *err)
 {
   int currentchar, ret = 0, num_chars;
@@ -165,10 +165,10 @@ static inline int get_sequence(GtSequenceBuffer *sb,
   if ((num_chars = eat_digits(sb, currentfileread)) == EOF)
     return EOF;
   if (num_chars == 0) {
-    gt_error_set(err, "sequence offset numbers missing in line %lu of file %s",
-                      (unsigned long) sb->pvt->linenum,
+    gt_error_set(err, "sequence offset numbers missing in line "GT_LU" of file %s",
+                      (GtUword) sb->pvt->linenum,
                       gt_str_array_get(sb->pvt->filenametab,
-                                       (unsigned long) sb->pvt->filenum));
+                                       (GtUword) sb->pvt->filenum));
     return -2;
   }
   currentchar = inlinebuf_getchar(sb, sb->pvt->inputstream);
@@ -177,11 +177,11 @@ static inline int get_sequence(GtSequenceBuffer *sb,
   (*currentfileread)++;
   /* expect one blank */
   if (currentchar != ' ') {
-    gt_error_set(err, "blank expected between offset and sequence in line %lu "
+    gt_error_set(err, "blank expected between offset and sequence in line "GT_LU" "
                       "of file %s",
-                      (unsigned long) sb->pvt->linenum,
+                      (GtUword) sb->pvt->linenum,
                       gt_str_array_get(sb->pvt->filenametab,
-                                       (unsigned long) sb->pvt->filenum));
+                                       (GtUword) sb->pvt->filenum));
     return -2;
   }
   /* read sequence */
@@ -191,7 +191,7 @@ static inline int get_sequence(GtSequenceBuffer *sb,
       return EOF;
     (*currentfileread)++;
     if (!isspace(currentchar)) {
-      if (*currentoutpos >= (unsigned long) OUTBUFSIZE) {
+      if (*currentoutpos >= (GtUword) OUTBUFSIZE) {
         /* if outbuffer is full, keep rest of sequence in overflow buffer */
         gt_str_append_char(linebuf, currentchar);
       } else {
@@ -210,7 +210,7 @@ static inline int get_sequence(GtSequenceBuffer *sb,
 
 static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
 {
-  unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
+  GtUword currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
   GtSequenceBufferMembers *pvt;
   GtSequenceBufferGB *sbe;
   int had_err = 0;
@@ -224,7 +224,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     sbe->state = GB_OUT_OF_ENTRY;
     pvt->linenum = (uint64_t) 1;
     pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
-                                                  (unsigned long) pvt->filenum),
+                                                  (GtUword) pvt->filenum),
                                         "rb");
     pvt->currentinpos = 0;
     pvt->currentfillpos = 0;
@@ -232,7 +232,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
 
   if (gt_str_length(sbe->overflowbuffer) > 0) {
     /* we still have surplus sequence from the last line, process that first */
-    unsigned long i;
+    GtUword i;
     const char *overflowedstring;
     overflowedstring = gt_str_get_mem(sbe->overflowbuffer);
     for (i=0;i<gt_str_length(sbe->overflowbuffer);i++) {
@@ -248,7 +248,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     if (had_err && had_err != EOF)
       break;
 
-    if (currentoutpos >= (unsigned long) OUTBUFSIZE) {
+    if (currentoutpos >= (GtUword) OUTBUFSIZE) {
       if (pvt->filelengthtab) {
         pvt->filelengthtab[pvt->filenum].length
           += (uint64_t) currentfileread;
@@ -296,10 +296,10 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         } else if (strcmp(gt_str_get(sbe->keywordbuffer),
                    GB_ORIGIN_STRING) == 0) {
           gt_warning("sequence started without prior DEFINITION line in entry "
-                     "in line %lu of file %s",
-                     (unsigned long) pvt->linenum-1,
+                     "in line "GT_LU" of file %s",
+                     (GtUword) pvt->linenum-1,
                      gt_str_array_get(pvt->filenametab,
-                                     (unsigned long) pvt->filenum));
+                                     (GtUword) pvt->filenum));
           had_err = eat_line(sb, &currentfileread);
           sbe->state = GB_IN_SEQUENCE;
         } else {
@@ -318,10 +318,10 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
           if (strcmp(gt_str_get(sbe->keywordbuffer),
                      GB_DEFINITION_STRING) == 0) {
             gt_error_set(err, "encountered another DEFINITION line within one "
-                              "entry in line %lu of file %s",
-                              (unsigned long) pvt->linenum-1,
+                              "entry in line "GT_LU" of file %s",
+                              (GtUword) pvt->linenum-1,
                               gt_str_array_get(pvt->filenametab,
-                                                (unsigned long) pvt->filenum));
+                                                (GtUword) pvt->filenum));
             return -1;
           } else {
             if (pvt->descptr) {
@@ -352,11 +352,11 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         if (gt_str_length(sbe->keywordbuffer) != 0) {
           gt_error_set(err, "only terminators allowed after a "
                             "sequence section, but found '%s' instead "
-                            "in line %lu of file %s",
+                            "in line "GT_LU" of file %s",
                             gt_str_get(sbe->keywordbuffer),
-                            (unsigned long) pvt->linenum-1,
+                            (GtUword) pvt->linenum-1,
                             gt_str_array_get(pvt->filenametab,
-                                                (unsigned long) pvt->filenum));
+                                                (GtUword) pvt->filenum));
           return -1;
         } else {
           had_err = eat_whitespace(sb, &currentfileread);
@@ -385,7 +385,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         sbe->state = GB_OUT_OF_ENTRY;
         pvt->linenum = (uint64_t) 1;
         pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
-                                                  (unsigned long) pvt->filenum),
+                                                  (GtUword) pvt->filenum),
                                             "rb");
         if (pvt->filelengthtab) {
           pvt->filelengthtab[pvt->filenum].length = 0;
@@ -422,7 +422,7 @@ static void gt_sequence_buffer_gb_free(GtSequenceBuffer *sb)
   gt_str_delete(sbe->keywordbuffer);
 }
 
-static unsigned long
+static GtUword
 gt_sequence_buffer_gb_get_file_index(GtSequenceBuffer *sb)
 {
   gt_assert(sb);

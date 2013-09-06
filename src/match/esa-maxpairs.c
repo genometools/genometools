@@ -40,14 +40,14 @@
 
 typedef struct
 {
-  unsigned long start,
+  GtUword start,
                 length;
 } Listtype;
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
   GtUchar commonchar;
-  unsigned long uniquecharposstart,
+  GtUword uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
   Listtype *nodeposlist;
 } GtBUinfo_maxpairs;
@@ -80,7 +80,7 @@ static void freeBUinfo_maxpairs(GtBUinfo_maxpairs *buinfo,
 
 static void add2poslist_maxpairs(GtBUstate_maxpairs *state,
                                  GtBUinfo_maxpairs *ninfo,
-                                 unsigned int base,unsigned long leafnumber)
+                                 unsigned int base,GtUword leafnumber)
 {
   GtArrayGtUlong *ptr;
 
@@ -110,13 +110,13 @@ static void concatlists_maxpairs(GtBUstate_maxpairs *state,
 }
 
 static int cartproduct1_maxpairs(GtBUstate_maxpairs *state,
-                                 unsigned long fatherdepth,
+                                 GtUword fatherdepth,
                                  const GtBUinfo_maxpairs *ninfo,
                                  unsigned int base,
-                                 unsigned long leafnumber,GtError *err)
+                                 GtUword leafnumber,GtError *err)
 {
   Listtype *pl;
-  unsigned long *spptr, *start;
+  GtUword *spptr, *start;
 
   pl = &NODEPOSLISTENTRY(ninfo,base);
   start = state->poslist[base].spaceGtUlong + pl->start;
@@ -132,7 +132,7 @@ static int cartproduct1_maxpairs(GtBUstate_maxpairs *state,
 }
 
 static int cartproduct2_maxpairs(GtBUstate_maxpairs *state,
-                                 unsigned long fatherdepth,
+                                 GtUword fatherdepth,
                                  const GtBUinfo_maxpairs *ninfo1,
                                  unsigned int base1,
                                  const GtBUinfo_maxpairs *ninfo2,
@@ -140,7 +140,7 @@ static int cartproduct2_maxpairs(GtBUstate_maxpairs *state,
                                  GtError *err)
 {
   Listtype *pl1, *pl2;
-  unsigned long *start1, *start2, *spptr1, *spptr2;
+  GtUword *start1, *start2, *spptr1, *spptr2;
 
   pl1 = &NODEPOSLISTENTRY(ninfo1,base1);
   start1 = state->poslist[base1].spaceGtUlong + pl1->start;
@@ -176,23 +176,23 @@ static void setpostabto0_maxpairs(GtBUstate_maxpairs *state)
 }
 
 static int processleafedge_maxpairs(bool firstsucc,
-                                    unsigned long fatherdepth,
+                                    GtUword fatherdepth,
                                     GtBUinfo_maxpairs *father,
-                                    unsigned long leafnumber,
+                                    GtUword leafnumber,
                                     GtBUstate_maxpairs *state,
                                     GtError *err)
 {
   unsigned int base;
-  unsigned long *start, *spptr;
+  GtUword *start, *spptr;
   GtUchar leftchar;
 
 #ifdef SKDEBUG
-  printf("%s %lu firstsucc=%s, __func__," " depth(father)= %lu\n",
+  printf("%s "GT_LU" firstsucc=%s, __func__," " depth(father)= "GT_LU"\n",
          leafnumber,
          firstsucc ? "true" : "false",
          fatherdepth);
 #endif
-  if (fatherdepth < (unsigned long) state->searchlength)
+  if (fatherdepth < (GtUword) state->searchlength)
   {
     setpostabto0_maxpairs(state);
     return 0;
@@ -257,22 +257,22 @@ static int processleafedge_maxpairs(bool firstsucc,
 }
 
 static int processbranchingedge_maxpairs(bool firstsucc,
-                                         unsigned long fatherdepth,
+                                         GtUword fatherdepth,
                                          GtBUinfo_maxpairs *father,
-                                         GT_UNUSED unsigned long sondepth,
-                                         GT_UNUSED unsigned long sonwidth,
+                                         GT_UNUSED GtUword sondepth,
+                                         GT_UNUSED GtUword sonwidth,
                                          GtBUinfo_maxpairs *son,
                                          GtBUstate_maxpairs *state,
                                          GtError *err)
 {
   unsigned int chfather, chson;
-  unsigned long *start, *spptr, *fptr, *fstart;
+  GtUword *start, *spptr, *fptr, *fstart;
 
 #ifdef SKDEBUG
-  printf("%s firstsucc=%s, depth(father)= %lu\n",
+  printf("%s firstsucc=%s, depth(father)= "GT_LU"\n",
           __func__,firstsucc ? "true" : "false",fatherdepth);
 #endif
-  if (fatherdepth < (unsigned long) state->searchlength)
+  if (fatherdepth < (GtUword) state->searchlength)
   {
     setpostabto0_maxpairs(state);
     return 0;

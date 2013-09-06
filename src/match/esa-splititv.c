@@ -27,16 +27,16 @@
                                                                  POS, \
                                                                  readmode))
 
-static unsigned long lcpintervalfindrightbound(const GtEncseq *encseq,
+static GtUword lcpintervalfindrightbound(const GtEncseq *encseq,
                                         GtReadmode readmode,
-                                        unsigned long totallength,
+                                        GtUword totallength,
                                         const ESASuffixptr *suftab,
                                         GtUchar cc,
-                                        unsigned long offset,
-                                        unsigned long left,
-                                        unsigned long right)
+                                        GtUword offset,
+                                        GtUword left,
+                                        GtUword right)
 {
-  unsigned long pos, mid;
+  GtUword pos, mid;
   GtUchar midcc;
 
   while (right > left+1)
@@ -57,16 +57,16 @@ static unsigned long lcpintervalfindrightbound(const GtEncseq *encseq,
 
 bool gt_lcpintervalfindcharchildintv(const GtEncseq *encseq,
                                      GtReadmode readmode,
-                                     unsigned long totallength,
+                                     GtUword totallength,
                                      const ESASuffixptr *suftab,
                                      Simplelcpinterval *itv,
                                      GtUchar cc,
-                                     unsigned long offset,
-                                     unsigned long left,
-                                     unsigned long right)
+                                     GtUword offset,
+                                     GtUword left,
+                                     GtUword right)
 {
   GtUchar leftcc, rightcc;
-  unsigned long pos, rightbound, leftbound = left;
+  GtUword pos, rightbound, leftbound = left;
 
   pos = ESASUFFIXPTRGET(suftab,right) + offset;
   rightcc = SEQUENCE(encseq,pos);
@@ -117,14 +117,14 @@ bool gt_lcpintervalfindcharchildintv(const GtEncseq *encseq,
 void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                        const GtEncseq *encseq,
                                        GtReadmode readmode,
-                                       unsigned long totallength,
+                                       GtUword totallength,
                                        const ESASuffixptr *suftab,
-                                       unsigned long parentoffset,
-                                       unsigned long parentleft,
-                                       unsigned long parentright)
+                                       GtUword parentoffset,
+                                       GtUword parentleft,
+                                       GtUword parentright)
 {
   GtUchar leftcc, rightcc;
-  unsigned long rightbound = 0, leftbound = parentleft;
+  GtUword rightbound = 0, leftbound = parentleft;
 
   /* call gt_lcpintervalextendlcp and verify if interval can be extended by
      some character */
@@ -160,11 +160,11 @@ void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
 GtUchar gt_lcpintervalextendlcp(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 const ESASuffixptr *suftab,
-                                unsigned long totallength,
+                                GtUword totallength,
                                 GtUchar alphasize,
-                                unsigned long parentoffset,
-                                unsigned long parentleft,
-                                unsigned long parentright)
+                                GtUword parentoffset,
+                                GtUword parentleft,
+                                GtUword parentright)
 {
   GtUchar ccl, ccr;
 

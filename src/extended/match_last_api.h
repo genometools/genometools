@@ -28,22 +28,22 @@ typedef struct GtMatchLAST GtMatchLAST;
    LAST software. */
 GtMatch*      gt_match_last_new(const char *seqid1,
                                 const char *seqid2,
-                                unsigned long score,
-                                unsigned long seqno1,
-                                unsigned long seqno2,
-                                unsigned long start_seq1,
-                                unsigned long start_seq2,
-                                unsigned long end_seq1,
-                                unsigned long end_seq2,
+                                GtUword score,
+                                GtUword seqno1,
+                                GtUword seqno2,
+                                GtUword start_seq1,
+                                GtUword start_seq2,
+                                GtUword end_seq1,
+                                GtUword end_seq2,
                                 GtMatchDirection dir);
 
 /* Returns the sequence number of the match <ms> in the first sequence set. */
-unsigned long gt_match_last_get_seqno1(const GtMatchLAST *ml);
+GtUword gt_match_last_get_seqno1(const GtMatchLAST *ml);
 
 /* Returns the sequence number of the match <ms> in the second sequence set. */
-unsigned long gt_match_last_get_seqno2(const GtMatchLAST *ml);
+GtUword gt_match_last_get_seqno2(const GtMatchLAST *ml);
 
 /* Returns the LAST score of the match <ms>. */
-unsigned long gt_match_last_get_score(const GtMatchLAST *ml);
+GtUword gt_match_last_get_score(const GtMatchLAST *ml);
 
 #endif

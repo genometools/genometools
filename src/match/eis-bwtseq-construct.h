@@ -41,7 +41,7 @@
  */
 BWTSeq *
 gt_availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
-                  unsigned long totalLen, GtError *err);
+                  GtUword totalLen, GtError *err);
 
 /**
  * \brief Loads an encoded indexed sequence object of the
@@ -80,7 +80,7 @@ gt_createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
  */
 BWTSeq *
 gt_createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
-                   unsigned long totalLen, GtError *err);
+                   GtUword totalLen, GtError *err);
 
 /**
  * \brief Creates or loads an encoded indexed sequence object of the

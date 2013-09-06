@@ -36,8 +36,8 @@ typedef struct
        showalignment,
        doonline,
        docompare;
-  unsigned long threshold;
-  long matchscore,
+  GtUword threshold;
+  GtWord matchscore,
        mismatchscore,
        gapstart,
        gapextend;

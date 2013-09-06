@@ -31,9 +31,9 @@
         }
 #endif
 
-static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
-                     (const QSORTNAME(Sorttype) *arr,unsigned long a,
-                      unsigned long b, unsigned long c,
+static inline GtUword QSORTNAME(gt_inlined_qsort_arr_r_med3)
+                     (const QSORTNAME(Sorttype) *arr,GtUword a,
+                      GtUword b, GtUword c,
                       QSORTNAME(Datatype) data)
 {
   return QSORTNAME(qsortcmparr) (arr, a, b, data) < 0
@@ -51,7 +51,7 @@ static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
 #ifndef GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
 typedef struct
 {
-  unsigned long startindex,
+  GtUword startindex,
                 len;
 } Intervalarrtobesorted;
 
@@ -60,13 +60,13 @@ GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
 #endif
 
 static void QSORTNAME(gt_inlinedarr_qsort_r) (
-                                   unsigned long insertionsortthreshold,
+                                   GtUword insertionsortthreshold,
                                    bool handlenotswapped,
                                    QSORTNAME(Sorttype) *arr,
-                                   unsigned long len,
+                                   GtUword len,
                                    QSORTNAME(Datatype) data)
 {
-  unsigned long tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s;
+  GtUword tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s;
   int r;
   bool swapped;
   GtStackIntervalarrtobesorted intervalstack;
@@ -178,23 +178,23 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     pn = current.startindex + current.len;
     gt_assert(pa >= current.startindex);
     gt_assert(pb >= pa);
-    s = MIN ((unsigned long) (pa - current.startindex),
-             (unsigned long) (pb - pa));
+    s = MIN ((GtUword) (pa - current.startindex),
+             (GtUword) (pb - pa));
     gt_assert(pb >= s);
     GT_QSORT_ARR_VECSWAP (arr, current.startindex, pb - s, s);
     gt_assert(pd >= pc);
     gt_assert(pn > pd);
-    s = MIN ((unsigned long) (pd - pc), (unsigned long) (pn - pd - 1));
+    s = MIN ((GtUword) (pd - pc), (GtUword) (pn - pd - 1));
     gt_assert(pn > s);
     GT_QSORT_ARR_VECSWAP (arr, pb, pn - s, s);
     gt_assert(pb >= pa);
-    if ((s = (unsigned long) (pb - pa)) > 1UL)
+    if ((s = (GtUword) (pb - pa)) > 1UL)
     {
       current.len = s;
       GT_STACK_PUSH(&intervalstack,current);
     }
     gt_assert(pd >= pc);
-    if ((s = (unsigned long) (pd - pc)) > 1UL)
+    if ((s = (GtUword) (pd - pc)) > 1UL)
     {
       gt_assert(pn >= s);
       current.startindex = pn - s;

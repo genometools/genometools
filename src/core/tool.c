@@ -29,7 +29,7 @@ struct GtTool {
   void *arguments;
   GtOptionParser *op;
   GtToolbox *toolbox;
-  unsigned long reference_count;
+  GtUword reference_count;
 };
 
 GtTool* gt_tool_new(GtToolArgumentsNew tool_arguments_new,

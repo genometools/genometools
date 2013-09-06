@@ -178,8 +178,8 @@ void   gt_graphics_draw_arrowhead(GtGraphics*, double x, double y, GtColor,
    data range is encountered, the drawing will be stopped at this data point. */
 void   gt_graphics_draw_curve_data(GtGraphics *g, double x, double y,
                                    GtColor color,
-                                   double data[], unsigned long ndata,
-                                   GtRange valrange, unsigned long height);
+                                   double data[], GtUword ndata,
+                                   GtRange valrange, GtUword height);
 /* Write out the <GtGraphics> object to the given file with <filename>. */
 int    gt_graphics_save_to_file(const GtGraphics*, const char *filename,
                                 GtError*);

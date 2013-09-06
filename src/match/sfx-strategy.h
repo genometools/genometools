@@ -27,7 +27,7 @@
 
 typedef struct
 {
-  unsigned long maxwidthrealmedian,
+  GtUword maxwidthrealmedian,
                 maxinsertionsort,
                 maxbltriesort,
                 maxcountingsort;

@@ -17,9 +17,6 @@
 */
 
 #include <errno.h>
-#ifdef _WIN32
-#define __USE_MINGW_ANSI_STDIO 1
-#endif
 #include <stdio.h>
 #include "core/class_alloc_lock.h"
 #include "core/ma.h"
@@ -39,18 +36,18 @@
 #define READVALUES 10
 
 #define GT_MATCHER_BLAST_CANNOTPARSECOLUMN(S)\
-        gt_error_set(err,"file %s, line %lu, column %lu: %s", \
+        gt_error_set(err,"file %s, line "GT_LU", column "GT_LU": %s", \
                      m->pvt->matchfile, m->pvt->curpos, columncount + 1, S)
 
 #define GT_MATCHER_BLAST_CANNOTPARSELINE(S)\
-        gt_error_set(err,"file %s, line %lu: %s", \
+        gt_error_set(err,"file %s, line "GT_LU": %s", \
                      m->pvt->matchfile, m->pvt->curpos, S)
 
 #define gt_match_iterator_blast_cast(M)\
         gt_match_iterator_cast(gt_match_iterator_blast_class(), M)
 
 typedef struct {
-  unsigned long curpos;
+  GtUword curpos;
   FILE *matchfilep;
   GtFile *gtmatchfilep;
   const char *matchfile;
@@ -69,9 +66,9 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
                                                           GtError *err)
 {
   gt_assert(gm);
-  unsigned long columncount = 0;
-  long storeinteger[READNUMS], tmp;
-  long double e_value;
+  GtUword columncount = 0;
+  GtWord storeinteger[READNUMS], tmp;
+  double e_value;
   float bitscore, identity;
   bool reverse = false;
   char query_seq[BUFSIZ], db_seq[BUFSIZ], buffer[BUFSIZ];
@@ -90,8 +87,8 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
     if (!m->pvt->process)
       fseek(m->pvt->matchfilep, -1, SEEK_CUR);
     readvalues = fscanf(m->pvt->matchfilep,
-                        "%s %s %f %ld %*d %*d %ld %ld %ld %ld "
-                        "%Lg %f\n", query_seq, db_seq, &identity,
+                        "%s %s %f "GT_LD" %*d %*d "GT_LD" "GT_LD" "GT_LD" "GT_LD" "
+                        "%lg %f\n", query_seq, db_seq, &identity,
                         &storeinteger[0],
                         &storeinteger[1], &storeinteger[2], &storeinteger[3],
                         &storeinteger[4], &e_value, &bitscore);
@@ -115,7 +112,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
         i = 0;
       } else break;
     }
-    if ((readvalues = sscanf(buffer,"%s %s %f %ld %*d %*d %ld %ld %ld %ld %Lg "
+    if ((readvalues = sscanf(buffer,"%s %s %f "GT_LD" %*d %*d "GT_LD" "GT_LD" "GT_LD" "GT_LD" %lg "
                              "%f\n", query_seq, db_seq, &identity,
                              &storeinteger[0],
                              &storeinteger[1], &storeinteger[2],
@@ -126,7 +123,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
     }
   }
 
-  for (columncount = 0; columncount < (unsigned long) (READNUMS);
+  for (columncount = 0; columncount < (GtUword) (READNUMS);
        columncount++) {
     if (storeinteger[columncount] < 0) {
          GT_MATCHER_BLAST_CANNOTPARSECOLUMN("non-negative integer expected");

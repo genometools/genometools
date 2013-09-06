@@ -24,11 +24,11 @@
 #include "gth/spliced_seq.h"
 
 void gthshowORFs(char *frame0, char *frame1, char *frame2,
-                 unsigned long frame0len, unsigned long frame1len,
-                 unsigned long frame2len, bool gen_strand_forward,
-                 unsigned long gen_total_length, unsigned long gen_offset,
-                 const char *gen_id, unsigned long pglnum,
-                 unsigned long agsnum, GthSplicedSeq *splicedseq,
+                 GtUword frame0len, GtUword frame1len,
+                 GtUword frame2len, bool gen_strand_forward,
+                 GtUword gen_total_length, GtUword gen_offset,
+                 const char *gen_id, GtUword pglnum,
+                 GtUword agsnum, GthSplicedSeq *splicedseq,
                  unsigned int indentlevel, GthOutput *out);
 
 #endif

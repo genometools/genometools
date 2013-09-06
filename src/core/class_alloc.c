@@ -33,7 +33,7 @@ void* gt_class_alloc(size_t size)
 
 void  gt_class_alloc_clean(void)
 {
-  unsigned long i;
+  GtUword i;
   if (!c_classes) return;
   for (i = 0; i < gt_array_size(c_classes); i++)
     gt_free(*(void**) gt_array_get(c_classes, i));

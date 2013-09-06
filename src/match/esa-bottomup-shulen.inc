@@ -35,17 +35,17 @@ static void initBUinfo_shulen(GtBUinfo_shulen *,GtBUstate_shulen *);
 static void freeBUinfo_shulen(GtBUinfo_shulen *,GtBUstate_shulen *);
 
 static int processleafedge_shulen(bool,
-    unsigned long,
+    GtUword,
     GtBUinfo_shulen *,
-    unsigned long, /* position */
+    GtUword, /* position */
     GtBUstate_shulen *,
     GtError *err);
 
 static int processbranchingedge_shulen(bool firstsucc,
-    unsigned long,
+    GtUword,
     GtBUinfo_shulen *,
-    unsigned long,
-    unsigned long,
+    GtUword,
+    GtUword,
     GtBUinfo_shulen *,
     GtBUstate_shulen *,
     GtError *);
@@ -77,14 +77,14 @@ static int processbranchingedge_shulen(bool firstsucc,
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtBUinfo_shulen info;
 } GtBUItvinfo_shulen;
 
 typedef struct
 {
   GtBUItvinfo_shulen *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 } GtArrayGtBUItvinfo_shulen;
 
@@ -100,7 +100,7 @@ GtArrayGtBUItvinfo_shulen *gt_GtArrayGtBUItvinfo_new_shulen(void)
 void gt_GtArrayGtBUItvinfo_delete_shulen(GtArrayGtBUItvinfo_shulen *stack,
                                   GtBUstate_shulen *state)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -111,11 +111,11 @@ void gt_GtArrayGtBUItvinfo_delete_shulen(GtArrayGtBUItvinfo_shulen *stack,
 }
 
 static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
+                                   GtUword currentallocated,
+                                   GtUword allocated,
                                    GtBUstate_shulen *state)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo_shulen *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -133,8 +133,8 @@ static int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                     /* no parameter snrp */
                     GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix = 0,
                 idx,
                 numberofsuffixes,
@@ -205,8 +205,8 @@ static int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallb = lastinterval->lb;
+        GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_shulen(lcpvalue,lastintervallb);
         if (processbranchingedge_shulen(true,

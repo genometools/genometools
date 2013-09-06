@@ -41,7 +41,7 @@ typedef struct
   NameandFILE outsuf,
               outlcp,
               outllv;
-  unsigned long currentlcpindex,
+  GtUword currentlcpindex,
          absstartpostable[SIZEOFMERGERESULTBUFFER];
 } Mergeoutinfo;
 
@@ -68,14 +68,14 @@ static void freeNameandFILE(NameandFILE *nf)
 }
 
 static int outputsuflcpllv(void *processinfo,
-                           const unsigned long *sequenceoffsettable,
+                           const GtUword *sequenceoffsettable,
                            const Suflcpbuffer *buf,
                            GT_UNUSED GtError *err)
 {
   Mergeoutinfo *mergeoutinfo = (Mergeoutinfo *) processinfo;
 
   unsigned int i, lastindex;
-  unsigned long lcpvalue;
+  GtUword lcpvalue;
   Largelcpvalue currentexception;
   GtUchar smallvalue;
   bool haserr = false;
@@ -87,7 +87,7 @@ static int outputsuflcpllv(void *processinfo,
       = sequenceoffsettable[buf->suftabstore[i].idx] +
         buf->suftabstore[i].startpos;
   }
-  gt_xfwrite(mergeoutinfo->absstartpostable, sizeof (unsigned long),
+  gt_xfwrite(mergeoutinfo->absstartpostable, sizeof (GtUword),
             (size_t) buf->nextstoreidx, mergeoutinfo->outsuf.fp);
   if (!haserr)
   {
@@ -101,7 +101,7 @@ static int outputsuflcpllv(void *processinfo,
     for (i=0; i<lastindex; i++)
     {
       lcpvalue = buf->lcptabstore[i];
-      if (lcpvalue < (unsigned long) LCPOVERFLOW)
+      if (lcpvalue < (GtUword) LCPOVERFLOW)
       {
         smallvalue = (GtUchar) lcpvalue;
       } else
@@ -127,7 +127,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
   Mergeoutinfo mergeoutinfo;
   GtUchar smalllcpvalue;
   GtSpecialcharinfo specialcharinfo;
-  unsigned long *sequenceoffsettable, totallength;
+  GtUword *sequenceoffsettable, totallength;
   bool haserr = false;
 
   gt_error_check(err);
@@ -164,7 +164,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
   }
   if (!haserr)
   {
-    mergeoutinfo.currentlcpindex = (unsigned long) 1;
+    mergeoutinfo.currentlcpindex = (GtUword) 1;
     sequenceoffsettable = gt_encseqtable2sequenceoffsets(&totallength,
                                                       &specialcharinfo,
                                                       emmesa->suffixarraytable,

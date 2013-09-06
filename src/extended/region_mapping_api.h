@@ -54,8 +54,8 @@ GtRegionMapping* gt_region_mapping_new_encseq(GtEncseq *encseq, bool matchdesc,
 /* Return a new <GtRegionMapping> object which maps to the given sequence
    <rawseq> with the corresponding <length> and <offset>. */
 GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
-                                              unsigned long length,
-                                              unsigned long offset);
+                                              GtUword length,
+                                              GtUword offset);
 
 /* Increase the reference count for <region_mapping> and return it. */
 GtRegionMapping* gt_region_mapping_ref(GtRegionMapping *region_mapping);
@@ -66,8 +66,8 @@ GtRegionMapping* gt_region_mapping_ref(GtRegionMapping *region_mapping);
    In the case of an error, -1 is returned and <err> is set accordingly. */
 int              gt_region_mapping_get_sequence(GtRegionMapping *region_mapping,
                                                 char **seq, GtStr *seqid,
-                                                unsigned long start,
-                                                unsigned long end,
+                                                GtUword start,
+                                                GtUword end,
                                                 GtError *err);
 
 /* Use <region_mapping> to retrieve the sequence length of the given
@@ -75,7 +75,7 @@ int              gt_region_mapping_get_sequence(GtRegionMapping *region_mapping,
    In the case of an error, -1 is returned and <err> is set accordingly. */
 int              gt_region_mapping_get_sequence_length(GtRegionMapping
                                                        *region_mapping,
-                                                       unsigned long *length,
+                                                       GtUword *length,
                                                        GtStr *seqid,
                                                        GtError *err);
 
@@ -96,7 +96,7 @@ const char*      gt_region_mapping_get_md5_fingerprint(GtRegionMapping
                                                        *region_mapping,
                                                        GtStr *seqid,
                                                        const GtRange *range,
-                                                       unsigned long *offset,
+                                                       GtUword *offset,
                                                        GtError *err);
 
 /* Delete <region_mapping>. */

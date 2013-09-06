@@ -60,7 +60,7 @@
 typedef struct
 {
   double matrix_score;
-  unsigned long count;
+  GtUword count;
   GtArray *hit_number;
 } CombinedScoreMatrixEntry;
 
@@ -111,7 +111,7 @@ typedef struct
     homology_mode,
     extended_mode,
     testmodus_mode;
-  unsigned long min_as;
+  GtUword min_as;
 } MetagenomeThreaderArguments;
 
 /* Typdefinition der Struktur zur Aufnahme von Informationen aus dem
@@ -140,7 +140,7 @@ typedef struct
 typedef struct
 {
   GtStrArray *hits_statistic;
-  unsigned long *hitsnum,
+  GtUword *hitsnum,
    *memory,
     hitsnumber,
     stat_pos;
@@ -155,7 +155,7 @@ typedef struct
     query_array_index_end,
     hit_array_index_end,
     hit_hsp_array_index_end;
-  unsigned long hit_counter;
+  GtUword hit_counter;
 } XMLparser_static;
 
 /* Struktur fuer Variablen in der mg_compute_gene_prediction-Datei */
@@ -166,7 +166,7 @@ typedef struct
   short current_frame,
     frame_before,
     function_stop;
-  unsigned long noncodingcounter,
+  GtUword noncodingcounter,
     codingcounter;
 } GenePrediction_static;
 
@@ -209,7 +209,7 @@ typedef struct
     xml_tag_flag,
     giexp_flag,
     gi_flag;
-  unsigned long xml_linenumber,
+  GtUword xml_linenumber,
     hits_memory;
   double syn,
     non_syn;
@@ -221,8 +221,8 @@ typedef struct
 } ParseStruct;
 
 /* specific access mode of queryhash */
-DECLARE_HASHMAP(char *, gt_cstr_nofree, unsigned long *, ulp,,)
-DECLARE_SAFE_DEREF(unsigned long *, ulp)
+DECLARE_HASHMAP(char *, gt_cstr_nofree, GtUword *, ulp,,)
+DECLARE_SAFE_DEREF(GtUword *, ulp)
 
 /* Funktion, mit der der Metagenomethreader gestartet wird
    Parameter: Anzahl der Kommandozeilenargumente, Zeiger auf die
@@ -242,13 +242,13 @@ short gt_check_stopcodon(char *);
                auf Hit-From und String-Zeiger auf den Hit-To String,
                GtError-Variable
    Returnwert: void */
-int mg_curl(ParseStruct *, unsigned long, GtError *);
+int mg_curl(ParseStruct *, GtUword, GtError *);
 
 /* Funktion zur Berechnung der Combined-Scores
    Parameter: Zeiger auf die Parsestruct; Anzahl der Hits zur betrachteten
               Hit-GI-Nr; GtError-Variable
    Returnwert: void */
-int mg_combinedscore(ParseStruct *, unsigned long, GtError *);
+int mg_combinedscore(ParseStruct *, GtUword, GtError *);
 
 /* Funktion zur Ausgabe der berechneten Ergebnisse
    Parameter:  Zeiger auf ParseStruct-Struktur, CombinedScore-Matrix,
@@ -262,16 +262,16 @@ void mg_outputwriter(ParseStruct *,
 /* Funktion zur Bestimmung der zu einem Lesereahmen gehoerigen Matrix-Zeile
    Parameter: aktueller Leserahmen
    Returnwert: Matrixzeile */
-short get_matrix_row(long);
+short get_matrix_row(GtWord);
 
 /* Funktion zur Bestimmung des Leserahmens zu einer Matrix-Zeile
    Parameter: Matrixzeile
    Returnwert: Leserahmen */
-short get_current_frame(long);
+short get_current_frame(GtWord);
 
 /* Funktion zur Berechnung des reversen Komplements
    Parameter: Zeiger auf eine Seq., Seq-Laenge, GtError-Variable
    Returnwert: had_err */
-int mg_reverse_complement(char *, unsigned long, GtError *);
+int mg_reverse_complement(char *, GtUword, GtError *);
 
 #endif

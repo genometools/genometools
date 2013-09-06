@@ -44,12 +44,12 @@ GtArray*      gt_ranges_uniq_count(GtArray*, const GtArray*);
 GtArray*      gt_ranges_uniq_in_place_count(GtArray*);
 
 bool          gt_ranges_are_consecutive(const GtArray*);
-unsigned long gt_ranges_total_length(const GtArray*);
-unsigned long gt_ranges_spanned_length(const GtArray*);
+GtUword gt_ranges_total_length(const GtArray*);
+GtUword gt_ranges_spanned_length(const GtArray*);
 void          gt_ranges_copy_to_opposite_strand(GtArray *outranges,
                                                 const GtArray *inranges,
-                                                unsigned long gen_total_length,
-                                                unsigned long gen_offset);
+                                                GtUword gen_total_length,
+                                                GtUword gen_offset);
 bool          gt_ranges_borders_are_in_region(GtArray *ranges,
                                               const GtRange *region);
 void          gt_ranges_show(GtArray *ranges, GtFile *outfp);

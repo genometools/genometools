@@ -43,13 +43,13 @@ struct GtSeqIteratorFastQ
         *qualsbuffer;
   GtStr *qdescbuffer;
   GtFile *curfile;
-  unsigned long *chardisttab,
+  GtUword *chardisttab,
                 currentfillpos,
                 currentinpos,
                 curline,
                 reference_count;
   uint64_t lastspeciallength;
-  unsigned long long maxread,
+  GtUint64 maxread,
                      currentread;
   const GtStrArray *filenametab;
   unsigned char ungetchar,
@@ -104,7 +104,7 @@ static inline int parse_fastq_seqname(GtSeqIteratorFastQ *seqit,
     return EOF;
   seqit->currentread++;
   if (currentchar != startchar) {
-    gt_error_set(err, "'%c' expected, '%c' encountered instead in line %lu",
+    gt_error_set(err, "'%c' expected, '%c' encountered instead in line "GT_LU"",
                       startchar,
                       currentchar,
                       seqit->curline);
@@ -151,7 +151,7 @@ static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
     seqit->currentread++;
   }
   if (!gt_str_length(tmp_str)) {
-    gt_error_set(err, "empty sequence given in file '%s', line %lu",
+    gt_error_set(err, "empty sequence given in file '%s', line "GT_LU"",
                       gt_str_array_get(seqit->filenametab,
                                        seqit->filenum),
                       seqit->curline-1);
@@ -172,17 +172,17 @@ static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
     {
       int charcode;
       char *input_str = gt_str_get(tmp_str);
-      unsigned long str_len = gt_str_length(tmp_str),
+      GtUword str_len = gt_str_length(tmp_str),
                     idx;
       for (idx = 0; !had_err && idx < str_len; idx++)
       {
         charcode = seqit->symbolmap[(unsigned int) input_str[idx]];
         if (charcode == UNDEFCHAR) {
-          gt_error_set(err, "illegal character '%c': file \"%s\", line %lu",
+          gt_error_set(err, "illegal character '%c': file \"%s\", line "GT_LU"",
                             input_str[idx],
                             gt_str_array_get(seqit->filenametab,
                                              seqit->filenum),
-                            (unsigned long) seqit->curline);
+                            (GtUword) seqit->curline);
           had_err = -2;
         }
         if (ISSPECIAL(charcode)) {
@@ -208,7 +208,7 @@ static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
                                         GT_UNUSED GtError *err)
 {
   char currentchar;
-  unsigned long i = 0;
+  GtUword i = 0;
   gt_assert(gt_str_length(seqit->sequencebuffer) > 0);
   if ((currentchar = fastq_buf_getchar(seqit)) == EOF)
     return EOF;
@@ -232,8 +232,8 @@ static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
   }
   /* expect newline at end of qualities */
   if (currentchar != GT_FASTQ_NEWLINESYMBOL) {
-    gt_error_set(err, "qualities string of sequence length %lu is not ended "
-                      "by newline in file '%s', line %lu -- this may be a "
+    gt_error_set(err, "qualities string of sequence length "GT_LU" is not ended "
+                      "by newline in file '%s', line "GT_LU" -- this may be a "
                       "sign for sequence and qualities strings of different "
                       "length",
                       gt_str_length(seqit->sequencebuffer),
@@ -247,11 +247,11 @@ static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
 
 #define gt_fastq_premature_end_check(had_err, seqit) \
   if (had_err == EOF) { \
-    gt_error_set(err, "premature end of file '%s' in line %lu: " \
+    gt_error_set(err, "premature end of file '%s' in line "GT_LU": " \
                       "file ended before end of block", \
                       gt_str_array_get((seqit)->filenametab, \
                                        (seqit)->filenum), \
-                      (unsigned long) (seqit)->curline-1); \
+                      (GtUword) (seqit)->curline-1); \
     return -2; \
   }
 
@@ -285,7 +285,7 @@ static inline int parse_fastq_block(GtSeqIteratorFastQ *seqit, GtError *err)
       && gt_str_cmp(seqit->descbuffer, seqit->qdescbuffer) != 0)
   {
       gt_error_set(err, "sequence description '%s' is not equal to "
-                        "qualities description '%s' in line %lu",
+                        "qualities description '%s' in line "GT_LU"",
                         gt_str_get(seqit->descbuffer),
                         gt_str_get(seqit->qdescbuffer),
                         seqit->curline-1);
@@ -298,7 +298,7 @@ static inline int parse_fastq_block(GtSeqIteratorFastQ *seqit, GtError *err)
           != gt_str_length(seqit->sequencebuffer))
     {
       gt_error_set(err, "lengths of character sequence and qualities "
-                        "sequence differ (%lu <-> %lu)",
+                        "sequence differ ("GT_LU" <-> "GT_LU")",
                         gt_str_length(seqit->qualsbuffer),
                         gt_str_length(seqit->sequencebuffer));
       return -2;
@@ -307,7 +307,7 @@ static inline int parse_fastq_block(GtSeqIteratorFastQ *seqit, GtError *err)
   return had_err;
 }
 
-unsigned long gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit)
+GtUword gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit)
 {
   gt_assert(seqit);
   return seqit->filenum;
@@ -332,7 +332,7 @@ void gt_seq_iterator_fastq_set_symbolmap(GtSeqIterator *si,
 }
 
 void gt_seq_iterator_fastq_set_chardisttab(GtSeqIterator *si,
-                                          unsigned long *chardist)
+                                          GtUword *chardist)
 {
   GtSeqIteratorFastQ *seqit;
   gt_assert(si && chardist);
@@ -350,7 +350,7 @@ uint64_t gt_seq_iterator_fastq_get_lastspeciallength(const GtSeqIterator *si)
 
 int gt_seq_iterator_fastq_next(GtSeqIterator *seqit,
                               const GtUchar **sequence,
-                              unsigned long *len,
+                              GtUword *len,
                               char **desc,
                               GtError *err)
 {
@@ -407,9 +407,9 @@ int gt_seq_iterator_fastq_next(GtSeqIterator *seqit,
   return errstatus;
 }
 
-const unsigned long long*
+const GtUint64*
 gt_seq_iterator_fastq_getcurrentcounter(GtSeqIterator *si,
-                                       unsigned long long maxread)
+                                       GtUint64 maxread)
 {
   GtSeqIteratorFastQ *seqit;
   gt_assert(si);

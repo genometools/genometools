@@ -23,7 +23,7 @@
 static void strictcutoffsprocindelorintron(GT_UNUSED
                                            Traversealignmentstate *state,
                                            void *data,
-                                           GT_UNUSED unsigned long lengthofeop)
+                                           GT_UNUSED GtUword lengthofeop)
 {
   Strictcutoffsdata *d = (Strictcutoffsdata*) data;
   d->cutoffs->eopcutoff++;
@@ -34,12 +34,12 @@ static void strictcutoffsprocindelorintron(GT_UNUSED
 
 static void strictcutoffsprocmatchormismatch_generic(Traversealignmentstate
                                                      *state, void *data,
-                                                     unsigned long lengthofeop,
-                                                     unsigned long
+                                                     GtUword lengthofeop,
+                                                     GtUword
                                                      genomic_eoplen_proteins)
 {
   Strictcutoffsdata *d = (Strictcutoffsdata*) data;
-  unsigned long eop_length_factor = state->proteineop
+  GtUword eop_length_factor = state->proteineop
                                     ? genomic_eoplen_proteins
                                     : 1;
 
@@ -48,10 +48,10 @@ static void strictcutoffsprocmatchormismatch_generic(Traversealignmentstate
       d->actualexonlengthgenomic + lengthofeop * eop_length_factor >=
       d->cutoffsminexonlen) {
     gt_safe_sub(d->cutoffs->genomiccutoff,
-                (unsigned long) gt_safe_labs(state->genomicptr),
+                (GtUword) gt_safe_labs(state->genomicptr),
                 d->actualexonlengthgenomic);
     gt_safe_sub(d->cutoffs->referencecutoff,
-                (unsigned long) gt_safe_labs(state->referenceptr),
+                (GtUword) gt_safe_labs(state->referenceptr),
                 d->actualexonlengthreference);
     d->cutoffs->eopcutoff = d->cutoffs->eopcutoff - d->actualexonnumofeops;
     d->breakforloop = true;
@@ -66,7 +66,7 @@ static void strictcutoffsprocmatchormismatch_generic(Traversealignmentstate
 
 static void strictcutoffsprocmatchormismatch(Traversealignmentstate *state,
                                              void *data,
-                                             unsigned long lengthofeop)
+                                             GtUword lengthofeop)
 {
   strictcutoffsprocmatchormismatch_generic(state, data, lengthofeop,
                                            GT_CODON_LENGTH);
@@ -74,14 +74,14 @@ static void strictcutoffsprocmatchormismatch(Traversealignmentstate *state,
 
 static void strictcutoffsprocmismatch_with_1_gap(Traversealignmentstate *state,
                                                  void *data,
-                                                 unsigned long lengthofeop)
+                                                 GtUword lengthofeop)
 {
   return strictcutoffsprocmatchormismatch_generic(state, data, lengthofeop, 2);
 }
 
 static void strictcutoffsprocmismatch_with_2_gaps(Traversealignmentstate *state,
                                                   void *data,
-                                                  unsigned long lengthofeop)
+                                                  GtUword lengthofeop)
 {
   return strictcutoffsprocmatchormismatch_generic(state, data, lengthofeop, 1);
 }
@@ -118,7 +118,7 @@ void gt_initStrictcutoffsTravfunctions(Traversealignmentfunctions
 }
 
 void gt_initStrictcutoffsdata(Strictcutoffsdata *strictcutoffsdata,
-                              Cutoffs *cutoffs, unsigned long cutoffsminexonlen)
+                              Cutoffs *cutoffs, GtUword cutoffsminexonlen)
 {
   strictcutoffsdata->cutoffs                   = cutoffs;
   strictcutoffsdata->breakforloop              = false;

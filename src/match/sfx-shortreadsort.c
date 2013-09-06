@@ -27,7 +27,7 @@
 
 typedef struct
 {
-  unsigned long suffixrepresentation;
+  GtUword suffixrepresentation;
   uint32_t tbeidx;
   unsigned int unitsnotspecial;
 } GtShortreadsort;
@@ -41,19 +41,19 @@ struct GtShortreadsortworkinfo
   uint16_t *mediumsizelcpvalues; /* always NULL for firstcodes;
                                     otherwise: NULL if lcpvalues are
                                     not required */
-  unsigned long *seqnum_relpos_bucket; /* only for firstcodes */
+  GtUword *seqnum_relpos_bucket; /* only for firstcodes */
   GtArrayGtTwobitencoding tbereservoir;
-  unsigned long tmplcplen, currentbucketsize, sumofstoredvalues;
+  GtUword tmplcplen, currentbucketsize, sumofstoredvalues;
   bool fwd, complement, withmediumsizelcps;
 };
 
-static double gt_shortreadsort_encoding_factor(unsigned long maxremain)
+static double gt_shortreadsort_encoding_factor(GtUword maxremain)
 {
   double factor = 1.0;
 
-  if (maxremain > (2UL * (unsigned long) GT_UNITSIN2BITENC))
+  if (maxremain > (2UL * (GtUword) GT_UNITSIN2BITENC))
   {
-    factor += maxremain/(2UL * (unsigned long) GT_UNITSIN2BITENC);
+    factor += maxremain/(2UL * (GtUword) GT_UNITSIN2BITENC);
   } else
   {
     factor = 1.0;
@@ -61,44 +61,44 @@ static double gt_shortreadsort_encoding_factor(unsigned long maxremain)
   return factor;
 }
 
-static unsigned long gt_shortreadsort_encoding_size(unsigned long bucketsize,
-                                                    unsigned long maxremain)
+static GtUword gt_shortreadsort_encoding_size(GtUword bucketsize,
+                                                    GtUword maxremain)
 {
-  return (unsigned long) (bucketsize *
+  return (GtUword) (bucketsize *
                           gt_shortreadsort_encoding_factor(maxremain));
 }
 
 static size_t gt_shortreadsort_size_perbucketentry(bool firstcodes,
-                                                   unsigned long maxremain)
+                                                   GtUword maxremain)
 {
   return (firstcodes ? sizeof (uint16_t) : 0) +
-         sizeof (GtShortreadsort) + sizeof (unsigned long) +
+         sizeof (GtShortreadsort) + sizeof (GtUword) +
          sizeof (GtTwobitencoding) *
          gt_shortreadsort_encoding_factor(maxremain);
 }
 
-size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize,
-                             unsigned long maxremain)
+size_t gt_shortreadsort_size(bool firstcodes,GtUword bucketsize,
+                             GtUword maxremain)
 {
   return (size_t) bucketsize *
          gt_shortreadsort_size_perbucketentry(firstcodes,maxremain);
 }
 
-unsigned long gt_shortreadsort_maxwidth(bool firstcodes,
-                                        unsigned long maxremain,
+GtUword gt_shortreadsort_maxwidth(bool firstcodes,
+                                        GtUword maxremain,
                                         size_t sizeofworkspace)
 {
-  return (unsigned long) sizeofworkspace/
+  return (GtUword) sizeofworkspace/
          gt_shortreadsort_size_perbucketentry(firstcodes,maxremain);
 }
 
 static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
                                     bool firstcodes,
-                                    unsigned long bucketsize,
-                                    unsigned long maxremain)
+                                    GtUword bucketsize,
+                                    GtUword maxremain)
 {
   gt_assert(!firstcodes || !srsw->withmediumsizelcps);
-  gt_assert(bucketsize <= (unsigned long) UINT32_MAX);
+  gt_assert(bucketsize <= (GtUword) UINT32_MAX);
   if (srsw->currentbucketsize < bucketsize)
   {
     srsw->shortreadsorttable = gt_realloc(srsw->shortreadsorttable,
@@ -132,8 +132,8 @@ static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
   }
 }
 
-GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
-                                              unsigned long maxremain,
+GtShortreadsortworkinfo *gt_shortreadsort_new(GtUword maxwidth,
+                                              GtUword maxremain,
                                               GtReadmode readmode,
                                               bool firstcodes,
                                               bool withmediumsizelcps)
@@ -158,7 +158,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   return srsw;
 }
 
-unsigned long gt_shortreadsort_sumofstoredvalues(const GtShortreadsortworkinfo
+GtUword gt_shortreadsort_sumofstoredvalues(const GtShortreadsortworkinfo
                                                        *srsw)
 {
   return srsw->sumofstoredvalues;
@@ -216,7 +216,7 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
                               srsw->complement,
                               &commonunits,
                               aval,bval);
-        srsw->tmplcplen = (unsigned long) (maxprefix - GT_UNITSIN2BITENC +
+        srsw->tmplcplen = (GtUword) (maxprefix - GT_UNITSIN2BITENC +
                                            commonunits.common);
         return retval;
       }
@@ -241,7 +241,7 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
                                                         &commonunits,
                                                         &tbe_a,
                                                         &tbe_b);
-      srsw->tmplcplen = (unsigned long) (maxprefix - GT_UNITSIN2BITENC +
+      srsw->tmplcplen = (GtUword) (maxprefix - GT_UNITSIN2BITENC +
                                          commonunits.common);
       return retval;
     }
@@ -261,8 +261,8 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
 
 typedef GtShortreadsortworkinfo * QSORTNAME(Datatype);
 
-static int QSORTNAME(qsortcmparr) (unsigned long a,
-                                   unsigned long b,
+static int QSORTNAME(qsortcmparr) (GtUword a,
+                                   GtUword b,
                                    const QSORTNAME(Datatype) data)
 {
   return gt_shortreadsort_compare(&QSORTNAME(ARRAY_GET)(NULL,a),
@@ -270,7 +270,7 @@ static int QSORTNAME(qsortcmparr) (unsigned long a,
                                   data);
 }
 
-typedef unsigned long QSORTNAME(Sorttype);
+typedef GtUword QSORTNAME(Sorttype);
 
 /*
  * Qsort routine from Bentley & McIlroy's ``Engineering a Sort Function''.
@@ -300,8 +300,8 @@ typedef unsigned long QSORTNAME(Sorttype);
         }
 #endif
 
-static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
-                     (unsigned long a, unsigned long b, unsigned long c,
+static inline GtUword QSORTNAME(gt_inlined_qsort_arr_r_med3)
+                     (GtUword a, GtUword b, GtUword c,
                       QSORTNAME(Datatype) data)
 {
   return QSORTNAME(qsortcmparr) (a, b, data) < 0
@@ -316,7 +316,7 @@ static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
 #ifndef GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
 typedef struct
 {
-  unsigned long startindex,
+  GtUword startindex,
                 len;
 } Intervalarrtobesorted;
 
@@ -325,14 +325,14 @@ GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
 #endif
 
 static void QSORTNAME(gt_inlinedarr_qsort_r) (
-                                   unsigned long insertionsortthreshold,
+                                   GtUword insertionsortthreshold,
                                    bool handlenotswapped,
-                                   unsigned long len,
+                                   GtUword len,
                                    QSORTNAME(Datatype) data,
-                                   unsigned long depth,
-                                   unsigned long subbucketleft)
+                                   GtUword depth,
+                                   GtUword subbucketleft)
 {
-  unsigned long pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s,
+  GtUword pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s,
                 smallermaxlcp, greatermaxlcp;
   GtShortreadsort tmp;
   int r;
@@ -489,16 +489,16 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     }
     pn = current.startindex + current.len;
     gt_assert(pa >= current.startindex && pb >= pa);
-    s = MIN ((unsigned long) (pa - current.startindex),
-             (unsigned long) (pb - pa));
+    s = MIN ((GtUword) (pa - current.startindex),
+             (GtUword) (pb - pa));
     gt_assert(pb >= s);
     GT_QSORT_ARR_VECSWAP (arr, current.startindex, pb - s, s);
     gt_assert(pd >= pc && pn > pd);
-    s = MIN ((unsigned long) (pd - pc), (unsigned long) (pn - pd - 1));
+    s = MIN ((GtUword) (pd - pc), (GtUword) (pn - pd - 1));
     gt_assert(pn > s);
     GT_QSORT_ARR_VECSWAP (arr, pb, pn - s, s);
     gt_assert(pb >= pa);
-    if ((s = (unsigned long) (pb - pa)) > 0)
+    if ((s = (GtUword) (pb - pa)) > 0)
     {
       if (data->mediumsizelcpvalues != NULL)
       {
@@ -527,7 +527,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
       }
     }
     gt_assert(pd >= pc);
-    if ((s = (unsigned long) (pd - pc)) > 0)
+    if ((s = (GtUword) (pd - pc)) > 0)
     {
       if (data->mediumsizelcpvalues != NULL)
       {
@@ -562,16 +562,16 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
 
 void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 const GtEncseq *encseq,
-                                unsigned long maxremain,
+                                GtUword maxremain,
                                 GtReadmode readmode,
                                 GtEncseqReader *esr,
                                 GtSuffixsortspace *sssp,
-                                unsigned long subbucketleft,
-                                unsigned long width,
-                                unsigned long depth,
-                                unsigned long maxdepth)
+                                GtUword subbucketleft,
+                                GtUword width,
+                                GtUword depth,
+                                GtUword maxdepth)
 {
-  unsigned long idx, pos;
+  GtUword idx, pos;
   GtSuffixsortspace_exportptr *exportptr;
 
   gt_shortreadsort_resize(srsw, false, width, maxremain);
@@ -598,7 +598,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   {
     for (idx = 0; idx < width; idx++)
     {
-      pos = (unsigned long) exportptr->uinttabsectionptr[idx];
+      pos = (GtUword) exportptr->uinttabsectionptr[idx];
       srsw->shortreadsorttable[idx].suffixrepresentation = pos;
       srsw->shortreadsorttable[idx].tbeidx
         = (uint32_t) srsw->tbereservoir.nextfreeGtTwobitencoding;
@@ -641,21 +641,21 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
 }
 
 void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
-                                        unsigned long bucketleftidx,
-                                        unsigned long subbucketleft,
-                                        unsigned long width,
-                                        unsigned long maxdepth,
+                                        GtUword bucketleftidx,
+                                        GtUword subbucketleft,
+                                        GtUword width,
+                                        GtUword maxdepth,
                                         GtProcessunsortedsuffixrange
                                           processunsortedsuffixrange,
                                         void *processunsortedsuffixrangeinfo)
 {
-  unsigned long idx, lcpvalue, laststart = 0;
+  GtUword idx, lcpvalue, laststart = 0;
 
   gt_assert(srsw->mediumsizelcpvalues != NULL || srsw->sssplcpvalues != NULL);
   for (idx = 1UL; idx < width; idx++)
   {
     lcpvalue = srsw->mediumsizelcpvalues != NULL
-                 ? (unsigned long) srsw->mediumsizelcpvalues[idx]
+                 ? (GtUword) srsw->mediumsizelcpvalues[idx]
                  : gt_lcptab_getvalue(srsw->sssplcpvalues,subbucketleft,idx);
     if (lcpvalue < maxdepth)
     {
@@ -687,12 +687,12 @@ void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
                                       const GtSeqnumrelpos *snrp,
                                       const GtEncseq *encseq,
                                       const GtSpmsuftab *spmsuftab,
-                                      unsigned long subbucketleft,
-                                      unsigned long width,
-                                      unsigned long depth,
-                                      unsigned long maxdepth)
+                                      GtUword subbucketleft,
+                                      GtUword width,
+                                      GtUword depth,
+                                      GtUword maxdepth)
 {
-  unsigned long idx, pos, seqnum, relpos, seqnum_relpos;
+  GtUword idx, pos, seqnum, relpos, seqnum_relpos;
   gt_assert(maxdepth == 0 || maxdepth > depth);
 
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;

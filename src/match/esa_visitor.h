@@ -21,6 +21,7 @@
 
 #include <stdbool.h>
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 typedef struct GtESAVisitor GtESAVisitor;
 typedef struct GtESAVisitorClass GtESAVisitorClass;
@@ -29,25 +30,25 @@ typedef struct GtESAVisitorInfo GtESAVisitorInfo;
 void*             gt_esa_visitor_cast(const GtESAVisitorClass*, GtESAVisitor*);
 int               gt_esa_visitor_visit_leaf_edge(GtESAVisitor*,
                                                  bool,
-                                                 unsigned long,
-                                                 unsigned long,
+                                                 GtUword,
+                                                 GtUword,
                                                  GtESAVisitorInfo*,
-                                                 unsigned long,
+                                                 GtUword,
                                                  GtError*);
 int               gt_esa_visitor_visit_branching_edge(GtESAVisitor*,
                                                       bool,
-                                                      unsigned long,
-                                                      unsigned long,
+                                                      GtUword,
+                                                      GtUword,
                                                       GtESAVisitorInfo*,
-                                                      unsigned long,
-                                                      unsigned long,
-                                                      unsigned long,
+                                                      GtUword,
+                                                      GtUword,
+                                                      GtUword,
                                                       GtESAVisitorInfo*,
                                                       GtError*);
 int               gt_esa_visitor_visit_lcp_interval(GtESAVisitor*,
-                                                    unsigned long,
-                                                    unsigned long,
-                                                    unsigned long,
+                                                    GtUword,
+                                                    GtUword,
+                                                    GtUword,
                                                     GtESAVisitorInfo*,
                                                     GtError*);
 void              gt_esa_visitor_delete(GtESAVisitor *ev);

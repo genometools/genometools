@@ -27,7 +27,7 @@ GtTwobitencEditor *gt_twobitenc_editor_new(const GtEncseq *encseq,
     const char* indexname, GtError *err);
 
 void gt_twobitenc_editor_edit(GtTwobitencEditor *twobitenc_editor,
-    unsigned long pos, GtUchar newchar);
+    GtUword pos, GtUchar newchar);
 
 void gt_twobitenc_editor_delete(GtTwobitencEditor *twobitenc_editor);
 

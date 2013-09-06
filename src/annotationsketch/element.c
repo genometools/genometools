@@ -27,7 +27,7 @@
 
 struct GtElement {
   const char *type;
-  unsigned long refcount;
+  GtUword refcount;
   GtStrand strand;
   GtFeatureNode *gn;
   GtRange range;

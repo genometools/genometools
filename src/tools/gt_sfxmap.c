@@ -68,7 +68,7 @@ typedef struct
        compresslcp,
        spmitv,
        ownencseq2file;
-  unsigned long delspranges;
+  GtUword delspranges;
   GtStr *esaindexname,
         *pckindexname;
   unsigned int sortmaxdepth,
@@ -78,12 +78,12 @@ typedef struct
 } Sfxmapoptions;
 
 static void gt_sfxmap_deletethespranges(const GtEncseq *encseq,
-                                        unsigned long delspranges)
+                                        GtUword delspranges)
 {
   GtSpecialrangeiterator *sri;
   GtRange range;
-  unsigned long rangewidth, nextpos = 0, totallength;
-  const unsigned long fastawidth = 70UL;
+  GtUword rangewidth, nextpos = 0, totallength;
+  const GtUword fastawidth = 70UL;
 
   sri = gt_specialrangeiterator_new(encseq,true);
   printf(">\n");
@@ -91,7 +91,7 @@ static void gt_sfxmap_deletethespranges(const GtEncseq *encseq,
   {
     gt_assert(range.end > range.start);
     rangewidth = range.end - range.start;
-    if (rangewidth > (unsigned long) delspranges)
+    if (rangewidth > (GtUword) delspranges)
     {
       if (range.start == 0)
       {
@@ -358,15 +358,15 @@ static void gt_sfxmap_showcomparisonfailureESA(const char *filename,
                                      const GtEncseq *encseq,
                                      GtReadmode readmode,
                                      const ESASuffixptr *suftab,
-                                     unsigned long depth,
-                                     unsigned long idx1,
-                                     unsigned long idx2,
+                                     GtUword depth,
+                                     GtUword idx1,
+                                     GtUword idx2,
                                      int cmp,
-                                     unsigned long maxlcp)
+                                     GtUword maxlcp)
 {
   fprintf(stderr,"ERROR: file \"%s\", line %d: ",filename,line);
-  fprintf(stderr,"%s(%lu vs %lu"
-                 " %lu=\"",
+  fprintf(stderr,"%s("GT_LU" vs "GT_LU""
+                 " "GT_LU"=\"",
                        where,
                        idx1,
                        idx2,
@@ -376,16 +376,16 @@ static void gt_sfxmap_showcomparisonfailureESA(const char *filename,
   fprintf(stderr,"\",\"");
   gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,
                                     ESASUFFIXPTRGET(suftab,idx2),depth);
-  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",ESASUFFIXPTRGET(suftab,idx2),
+  fprintf(stderr,"\"="GT_LU")=%d with maxlcp "GT_LU"\n",ESASUFFIXPTRGET(suftab,idx2),
                                                 cmp,
                                                 maxlcp);
 }
 
-static unsigned long gt_sfxmap_determinenumberofwholeleaves(
+static GtUword gt_sfxmap_determinenumberofwholeleaves(
                                                   const GtEncseq *encseq,
                                                   GtReadmode readmode)
 {
-  unsigned long idx, wholeleafcount = 0, totallength;
+  GtUword idx, wholeleafcount = 0, totallength;
   GtEncseqReader* esr;
   GtUchar cc;
   bool sequencestart = true;
@@ -416,14 +416,14 @@ static unsigned long gt_sfxmap_determinenumberofwholeleaves(
 
 static int gt_sfxmap_comparefullsuffixes(const GtEncseq *encseq,
                                          GtReadmode readmode,
-                                         unsigned long *maxlcp,
-                                         unsigned long start1,
-                                         unsigned long start2,
+                                         GtUword *maxlcp,
+                                         GtUword start1,
+                                         GtUword start2,
                                          GtEncseqReader *esr1,
                                          GtEncseqReader *esr2)
 {
   GtUchar cc1, cc2;
-  unsigned long pos1, pos2, totallength;
+  GtUword pos1, pos2, totallength;
   int retval;
 
   totallength = gt_encseq_total_length(encseq);
@@ -506,15 +506,15 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 const ESASuffixptr *suftab,
-                                unsigned long numberofsuffixes,
+                                GtUword numberofsuffixes,
                                 bool wholeleafcheck,
                                 Sequentialsuffixarrayreader *ssar,
                                 GT_UNUSED bool specialsareequal,
                                 GT_UNUSED bool specialsareequalatdepth0,
-                                unsigned long depth,
+                                GtUword depth,
                                 GT_UNUSED GtError *err)
 {
-  unsigned long idx, maxlcp,
+  GtUword idx, maxlcp,
                 currentlcp = 0,
                 countbitsset = 0,
                 wholeleafcount = 0,
@@ -526,7 +526,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
   GtEncseqReader *esr;
   /*
 #define MAXDIST 100
-  unsigned long countdist[MAXDIST+1] = {0};
+  GtUword countdist[MAXDIST+1] = {0};
   */
 
   gt_error_check(err);
@@ -539,10 +539,10 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
   esr = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
   for (idx = 0; idx < numberofsuffixes; idx++)
   {
-    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+    GtUword position = ESASUFFIXPTRGET(suftab,idx);
     if (GT_ISIBITSET(startposoccurs,position))
     {
-      fprintf(stderr,"ERROR: suffix with startpos %lu already occurs\n",
+      fprintf(stderr,"ERROR: suffix with startpos "GT_LU" already occurs\n",
               ESASUFFIXPTRGET(suftab,idx));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -554,7 +554,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
                                                            position - 1,
                                                            readmode))
       {
-        /*printf("whole %lu\n",position);*/
+        /*printf("whole "GT_LU"\n",position);*/
         wholeleafcount++;
       }
     }
@@ -563,11 +563,11 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
   gt_free(startposoccurs);
   if (wholeleafcheck)
   {
-    unsigned long expectednumofwholeleaves
+    GtUword expectednumofwholeleaves
       = gt_sfxmap_determinenumberofwholeleaves(encseq,readmode);
     if (wholeleafcount != expectednumofwholeleaves)
     {
-      fprintf(stderr,"wholeleafcount=%lu != %lu=expectednumofwholeleaves\n",
+      fprintf(stderr,"wholeleafcount="GT_LU" != "GT_LU"=expectednumofwholeleaves\n",
                       wholeleafcount,expectednumofwholeleaves);
       exit(EXIT_FAILURE);
     }
@@ -622,8 +622,8 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
       NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
       if (maxlcp != currentlcp)
       {
-        fprintf(stderr,"%lu: startpos=%lu, firstchar=%u, "
-                "startpos=%lu,firstchar=%u",
+        fprintf(stderr,""GT_LU": startpos="GT_LU", firstchar=%u, "
+                "startpos="GT_LU",firstchar=%u",
                 idx,
                 ESASUFFIXPTRGET(suftab,idx-1),
                 (unsigned int)
@@ -637,7 +637,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
                                                                      idx),
                                                      readmode)
                    : SEPARATOR);
-        fprintf(stderr,", maxlcp(bruteforce) = %lu != %lu(fast)\n",
+        fprintf(stderr,", maxlcp(bruteforce) = "GT_LU" != "GT_LU"(fast)\n",
                           maxlcp, currentlcp);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
@@ -705,7 +705,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
       gt_sfxmap_deletethespranges(suffixarray.encseq,arguments->delspranges);
     } else
     {
-      unsigned long totallength = gt_encseq_total_length(suffixarray.encseq);
+      GtUword totallength = gt_encseq_total_length(suffixarray.encseq);
       if (!haserr && arguments->inputsuf && !arguments->usestream)
       {
         if (suffixarray.numberofallsortedsuffixes != totallength + 1 ||
@@ -774,8 +774,8 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
       }
       if (!haserr && arguments->inputbwt)
       {
-        unsigned long bwtdifferentconsecutive = 0, idx;
-        GT_UNUSED unsigned long longest;
+        GtUword bwtdifferentconsecutive = 0, idx;
+        GT_UNUSED GtUword longest;
 
         gt_assert(suffixarray.longest.defined);
         longest = suffixarray.longest.valueunsignedlong;
@@ -788,7 +788,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
         }
         if (!arguments->usestream)
         {
-          for (idx = (unsigned long) 1; idx<totallength; idx++)
+          for (idx = (GtUword) 1; idx<totallength; idx++)
           {
             if (suffixarray.bwttab[idx-1] != suffixarray.bwttab[idx] ||
                 ISSPECIAL(suffixarray.bwttab[idx]))
@@ -814,7 +814,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
             }
           }
         }
-        gt_logger_log(logger,"bwtdifferentconsecutive=%lu (%.4f)",
+        gt_logger_log(logger,"bwtdifferentconsecutive="GT_LU" (%.4f)",
                bwtdifferentconsecutive,
                (double) bwtdifferentconsecutive/totallength);
       }
@@ -846,8 +846,8 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
   {
     uint64_t writtenbits;
     uint8_t bitsperentry;
-    unsigned long numberofentries = 0;
-    unsigned long totallength = gt_encseq_total_length(encseq);
+    GtUword numberofentries = 0;
+    GtUword totallength = gt_encseq_total_length(encseq);
     FILE *fp;
 
     fp = gt_fa_fopen_with_suffix(indexname,GT_SUFTABSUFFIX_BYTECOMPRESSED,
@@ -879,7 +879,7 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
         haserr = true;
       }
       gt_assert(writtenbits % bitsperentry == 0);
-      numberofentries = (unsigned long) (writtenbits/bitsperentry);
+      numberofentries = (GtUword) (writtenbits/bitsperentry);
       gt_assert(numberofentries == totallength + 1);
     }
     if (!haserr)
@@ -888,7 +888,7 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
       const unsigned int bitspervalue = 64U;
       unsigned int bits2add = (unsigned int) bitsperentry,
                    remainingbits = 0;
-      unsigned long bitbuffer = 0,
+      GtUword bitbuffer = 0,
                     countentries = 0,
                     *suftabptr,
                     *suftab = gt_malloc(sizeof *suftab *
@@ -912,7 +912,7 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
             {
               break;
             }
-            bitbuffer |= ((unsigned long) (readvalue) &
+            bitbuffer |= ((GtUword) (readvalue) &
                          ((1UL << bits2add) - 1)) << (bitsperentry-bits2add);
             readvalue >>= bits2add;
             remainingbits -= bits2add;
@@ -961,10 +961,10 @@ static int gt_sfxmap_compresslcp(const char *indexname,
   }
   if (!haserr)
   {
-    unsigned long elems = 0;
-    GT_UNUSED unsigned long totallength
+    GtUword elems = 0;
+    GT_UNUSED GtUword totallength
       = gt_Sequentialsuffixarrayreader_totallength(ssar);
-    unsigned long maxbranchdepth
+    GtUword maxbranchdepth
       = gt_Sequentialsuffixarrayreader_maxbranchdepth(ssar);
     FILE *fpcompressedlcp = gt_fa_fopen_with_suffix(indexname,
                                      GT_LCPTABSUFFIX_BYTECOMPRESSED,"wb",err);
@@ -986,7 +986,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
         gt_bitbuffer_next_fixed_bits_value (bitbuffer,0UL);
         while (true)
         {
-          unsigned long currentlcp;
+          GtUword currentlcp;
 
           NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
           gt_bitbuffer_next_fixed_bits_value (bitbuffer,currentlcp);
@@ -1008,9 +1008,9 @@ static int gt_sfxmap_compresslcp(const char *indexname,
   return haserr ? -1 : 0;
 }
 
-static int gt_sfxmap_comparelcpvalue(void *info,unsigned long lcp,GtError *err)
+static int gt_sfxmap_comparelcpvalue(void *info,GtUword lcp,GtError *err)
 {
-  unsigned long currentlcpvalue;
+  GtUword currentlcpvalue;
   Sequentialsuffixarrayreader *ssar = (Sequentialsuffixarrayreader *) info;
   bool haserr = false;
 
@@ -1020,7 +1020,7 @@ static int gt_sfxmap_comparelcpvalue(void *info,unsigned long lcp,GtError *err)
     NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
     if (lcp != currentlcpvalue)
     {
-      gt_error_set(err,"lcp=%lu != %lu=currentlcpvalue",lcp,currentlcpvalue);
+      gt_error_set(err,"lcp="GT_LU" != "GT_LU"=currentlcpvalue",lcp,currentlcpvalue);
       haserr = true;
       break;
     }
@@ -1034,7 +1034,7 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
 {
   bool haserr = false;
   FMindex *fmindex;
-  unsigned long totallength = 0;
+  GtUword totallength = 0;
   unsigned int numofchars = 0;
   GtEncseqMetadata *encseqmetadata = NULL;
   Sequentialsuffixarrayreader *ssar;
@@ -1079,8 +1079,8 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
   }
   if (!haserr)
   {
-    unsigned long idx, pos, numofnonspecials;
-    GT_UNUSED unsigned long currentsuffix = 0;
+    GtUword idx, pos, numofnonspecials;
+    GT_UNUSED GtUword currentsuffix = 0;
     GtSpecialcharinfo specialcharinfo;
     Bwtseqpositioniterator *bspi;
 
@@ -1104,7 +1104,7 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
         NEXTSEQUENTIALSUFTABVALUE(currentsuffix,ssar);
         gt_assert(pos == currentsuffix);
       }
-      /*printf("%lu: pos = %lu\n",idx,pos);*/
+      /*printf(""GT_LU": pos = "GT_LU"\n",idx,pos);*/
     }
     gt_assert(idx == numofnonspecials);
     gt_Bwtseqpositioniterator_delete(bspi);
@@ -1172,7 +1172,7 @@ static int gt_sfxmap_stream_esq(const Sfxmapoptions *arguments,GtError *err)
   bool haserr = false;
   Bitstreamreadmode brsmode = BSRS_stream_single;
   int multiarg = 0;
-  unsigned long streamesq_size = gt_str_array_size(arguments->streamesq);
+  GtUword streamesq_size = gt_str_array_size(arguments->streamesq);
 
   gt_error_check(err);
   if (streamesq_size == 2UL || streamesq_size == 3UL)
@@ -1269,9 +1269,9 @@ typedef struct
 } Checkunsortedrangeinfo;
 
 static void gt_sfxmap_sortmaxdepth_processunsortedrange(void *voiddcov,
-                                              unsigned long subbucketleft,
-                                              unsigned long width,
-                                              GT_UNUSED unsigned long depth)
+                                              GtUword subbucketleft,
+                                              GtUword width,
+                                              GT_UNUSED GtUword depth)
 {
   Checkunsortedrangeinfo *curi = voiddcov;
 
@@ -1282,7 +1282,7 @@ static void gt_sfxmap_sortmaxdepth_processunsortedrange(void *voiddcov,
                                  curi->sssp,
                                  subbucketleft,
                                  width,
-                                 (unsigned long) curi->sortmaxdepth);
+                                 (GtUword) curi->sortmaxdepth);
 }
 
 static int gt_sfxmap_performsortmaxdepth(const Sfxmapoptions *arguments,
@@ -1316,7 +1316,7 @@ static int gt_sfxmap_performsortmaxdepth(const Sfxmapoptions *arguments,
   }
   if (!haserr)
   {
-    unsigned long idx, totallength = gt_encseq_total_length(curi.encseq);
+    GtUword idx, totallength = gt_encseq_total_length(curi.encseq);
 
     curi.sssp = gt_suffixsortspace_new(totallength+1, totallength, true,
                                        logger);
@@ -1345,7 +1345,7 @@ static int gt_sfxmap_performsortmaxdepth(const Sfxmapoptions *arguments,
                            totallength+1,
                            false, /* specialsareequal  */
                            false,  /* specialsareequalatdepth0 */
-                           (unsigned long) curi.sortmaxdepth);
+                           (GtUword) curi.sortmaxdepth);
     gt_suffixsortspace_delete(curi.sssp,false);
   }
   gt_encseq_delete(curi.encseq);

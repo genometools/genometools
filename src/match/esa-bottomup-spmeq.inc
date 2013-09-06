@@ -33,18 +33,18 @@ static void initBUinfo_spmeq(GtBUinfo_spmeq *,GtBUstate_spmeq *);
 static void freeBUinfo_spmeq(GtBUinfo_spmeq *,GtBUstate_spmeq *);
 
 static int processleafedge_spmeq(bool,
-    unsigned long,
+    GtUword,
     GtBUinfo_spmeq *,
-    unsigned long, /* seqnum */
-    unsigned long, /* relpos */
+    GtUword, /* seqnum */
+    GtUword, /* relpos */
     GtBUstate_spmeq *,
     GtError *err);
 
 static int processbranchingedge_spmeq(bool firstsucc,
-    unsigned long,
+    GtUword,
     GtBUinfo_spmeq *,
-    unsigned long,
-    unsigned long,
+    GtUword,
+    GtUword,
     GtBUinfo_spmeq *,
     GtBUstate_spmeq *,
     GtError *);
@@ -76,14 +76,14 @@ static int processbranchingedge_spmeq(bool firstsucc,
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtBUinfo_spmeq info;
 } GtBUItvinfo_spmeq;
 
 typedef struct
 {
   GtBUItvinfo_spmeq *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 } GtArrayGtBUItvinfo_spmeq;
 
@@ -99,7 +99,7 @@ GtArrayGtBUItvinfo_spmeq *gt_GtArrayGtBUItvinfo_new_spmeq(void)
 void gt_GtArrayGtBUItvinfo_delete_spmeq(GtArrayGtBUItvinfo_spmeq *stack,
                                   GtBUstate_spmeq *state)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -110,11 +110,11 @@ void gt_GtArrayGtBUItvinfo_delete_spmeq(GtArrayGtBUItvinfo_spmeq *stack,
 }
 
 static GtBUItvinfo_spmeq *allocateBUstack_spmeq(GtBUItvinfo_spmeq *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
+                                   GtUword currentallocated,
+                                   GtUword allocated,
                                    GtBUstate_spmeq *state)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo_spmeq *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -127,16 +127,16 @@ static GtBUItvinfo_spmeq *allocateBUstack_spmeq(GtBUItvinfo_spmeq *ptr,
   return itvinfo;
 }
 
-static int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
+static int gt_esa_bottomup_RAM_spmeq(const GtUword *bucketofsuffixes,
                         const uint16_t *lcptab_bucket,
-                        unsigned long numberofsuffixes,
+                        GtUword numberofsuffixes,
                         GtArrayGtBUItvinfo_spmeq *stack,
                         GtBUstate_spmeq *bustate,
                         const GtSeqnumrelpos *snrp,
                         GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix,
                 idx;
   GtBUItvinfo_spmeq *lastinterval = NULL;
@@ -147,7 +147,7 @@ static int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
   gt_assert (numberofsuffixes > 0);
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
-    lcpvalue = (unsigned long) lcptab_bucket[idx+1];
+    lcpvalue = (GtUword) lcptab_bucket[idx+1];
     previoussuffix = bucketofsuffixes[idx];
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_spmeq.lcp)
@@ -205,8 +205,8 @@ static int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallb = lastinterval->lb;
+        GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_spmeq(lcpvalue,lastintervallb);
         if (processbranchingedge_spmeq(true,
@@ -240,7 +240,7 @@ static int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_spmeq.lcp > 0)
   {
-    unsigned long lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
+    GtUword lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
     if (processleafedge_spmeq(false,
                         TOP_ESA_BOTTOMUP_spmeq.lcp,
                         &TOP_ESA_BOTTOMUP_spmeq.info,

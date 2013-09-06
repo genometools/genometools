@@ -67,7 +67,7 @@ GT_INDEX_OPTS_GETTER_DECL(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DECL_OPT(spmopt);
 GT_INDEX_OPTS_GETTER_DECL_VAL(bwtIdxParams, struct bwtOptions);
 GT_INDEX_OPTS_GETTER_DECL_VAL(lcpdist, bool);
-GT_INDEX_OPTS_GETTER_DECL_VAL(maximumspace, unsigned long);
+GT_INDEX_OPTS_GETTER_DECL_VAL(maximumspace, GtUword);
 GT_INDEX_OPTS_GETTER_DECL_VAL(numofparts, unsigned int);
 GT_INDEX_OPTS_GETTER_DECL_VAL(outkyssort, bool);
 GT_INDEX_OPTS_GETTER_DECL_VAL(readmode, GtReadmode);

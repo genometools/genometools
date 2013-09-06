@@ -24,7 +24,7 @@
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
-  unsigned long leftmostleaf,
+  GtUword leftmostleaf,
                 rightmostleaf,
                 lcptabrightmostleafplus1;
 } OccDfsinfo;
@@ -33,8 +33,8 @@ typedef struct /* global information */
 {
   const GtEncseq *encseq;
   GtReadmode readmode;
-  unsigned long totallength;
-  unsigned long minmersize,
+  GtUword totallength;
+  GtUword minmersize,
                 maxmersize;
   GtArrayuint64_t *uniquedistribution,
                   *nonuniquedistribution,
@@ -58,13 +58,13 @@ static void occ_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 }
 
 static void adddistributionuint64_t(GtArrayuint64_t *occdistribution,
-                                    unsigned long countocc,
-                                    unsigned long value)
+                                    GtUword countocc,
+                                    GtUword value)
 {
   if (countocc >= occdistribution->allocateduint64_t)
   {
-    const unsigned long addamount = 128UL;
-    unsigned long idx;
+    const GtUword addamount = 128UL;
+    GtUword idx;
 
     occdistribution->spaceuint64_t
       = gt_realloc(occdistribution->spaceuint64_t,
@@ -87,36 +87,36 @@ static void adddistributionuint64_t(GtArrayuint64_t *occdistribution,
 static void iteritvdistribution(GtArrayuint64_t *distribution,
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
-                                unsigned long totallength,
-                                unsigned long minmersize,
-                                unsigned long maxmersize,
-                                unsigned long length,
-                                unsigned long startpos)
+                                GtUword totallength,
+                                GtUword minmersize,
+                                GtUword maxmersize,
+                                GtUword length,
+                                GtUword startpos)
 {
 
-  if (length <= (unsigned long) maxmersize)
+  if (length <= (GtUword) maxmersize)
   {
-    unsigned long ulen, pos;
+    GtUword ulen, pos;
 
     for (ulen = length,
          pos = startpos + length - 1;
-         ulen <= (unsigned long) maxmersize &&
+         ulen <= (GtUword) maxmersize &&
          pos < totallength &&
          ISNOTSPECIAL(gt_encseq_get_encoded_char(encseq,pos,readmode));
          pos++, ulen++)
     {
-      if (ulen >= (unsigned long) minmersize)
+      if (ulen >= (GtUword) minmersize)
       {
-        adddistributionuint64_t(distribution,(unsigned long) ulen,1UL);
+        adddistributionuint64_t(distribution,(GtUword) ulen,1UL);
       }
     }
   }
 }
 
 static int occ_processleafedge(GT_UNUSED bool firstsucc,
-                           unsigned long fatherdepth,
+                           GtUword fatherdepth,
                            GT_UNUSED Dfsinfo *father,
-                           unsigned long leafnumber,
+                           GtUword leafnumber,
                            Dfsstate *astate,
                            GT_UNUSED GtError *err)
 {
@@ -132,14 +132,14 @@ static int occ_processleafedge(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int occ_processcompletenode(unsigned long nodeptrdepth,
+static int occ_processcompletenode(GtUword nodeptrdepth,
                                Dfsinfo *anodeptr,
-                               unsigned long nodeptrminusonedepth,
+                               GtUword nodeptrminusonedepth,
                                Dfsstate *astate,
                                GT_UNUSED GtError *err)
 {
-  unsigned long fatherdepth;
-  unsigned long startlength, endlength;
+  GtUword fatherdepth;
+  GtUword startlength, endlength;
   OccDfsinfo *nodeptr = (OccDfsinfo*) anodeptr;
   OccDfsstate *state = (OccDfsstate*) astate;
 
@@ -148,26 +148,26 @@ static int occ_processcompletenode(unsigned long nodeptrdepth,
   {
     fatherdepth = nodeptrminusonedepth;
   }
-  startlength = (unsigned long) (fatherdepth + 1);
+  startlength = (GtUword) (fatherdepth + 1);
   if (startlength < state->minmersize)
   {
     startlength = state->minmersize;
   }
-  endlength = (unsigned long) nodeptrdepth;
+  endlength = (GtUword) nodeptrdepth;
   if (endlength > state->maxmersize)
   {
     endlength = state->maxmersize;
   }
   if (startlength <= endlength)
   {
-    unsigned long lenval;
-    unsigned long occcount = nodeptr->rightmostleaf - nodeptr->leftmostleaf + 1;
+    GtUword lenval;
+    GtUword occcount = nodeptr->rightmostleaf - nodeptr->leftmostleaf + 1;
 
     for (lenval = startlength; lenval <= endlength; lenval++)
     {
       adddistributionuint64_t(state->nonuniquemultidistribution,
                               lenval,
-                              (unsigned long) occcount);
+                              (GtUword) occcount);
       adddistributionuint64_t(state->nonuniquedistribution,
                               lenval,
                               1UL);
@@ -176,7 +176,7 @@ static int occ_processcompletenode(unsigned long nodeptrdepth,
   return 0;
 }
 
-static void occ_assignleftmostleaf(Dfsinfo *adfsinfo,unsigned long leftmostleaf,
+static void occ_assignleftmostleaf(Dfsinfo *adfsinfo,GtUword leftmostleaf,
                                    GT_UNUSED Dfsstate *dfsstate)
 {
   OccDfsinfo *dfsinfo = (OccDfsinfo*) adfsinfo;
@@ -184,9 +184,9 @@ static void occ_assignleftmostleaf(Dfsinfo *adfsinfo,unsigned long leftmostleaf,
 }
 
 static void occ_assignrightmostleaf(Dfsinfo *adfsinfo,
-                                    unsigned long currentindex,
-                                    GT_UNUSED unsigned long previoussuffix,
-                                    unsigned long currentlcp,
+                                    GtUword currentindex,
+                                    GT_UNUSED GtUword previoussuffix,
+                                    GtUword currentlcp,
                                     GT_UNUSED Dfsstate *dfsstate)
 {
   OccDfsinfo *dfsinfo = (OccDfsinfo*) adfsinfo;
@@ -195,8 +195,8 @@ static void occ_assignrightmostleaf(Dfsinfo *adfsinfo,
 }
 
 static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
-                                  unsigned long minmersize,
-                                  unsigned long maxmersize,
+                                  GtUword minmersize,
+                                  GtUword maxmersize,
                                   GtArrayuint64_t *uniquedistribution,
                                   GtArrayuint64_t *nonuniquedistribution,
                                   GtArrayuint64_t *nonuniquemultidistribution,
@@ -236,8 +236,8 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
 
 int gt_tyr_occratio_func(const char *inputindex,
                          bool scanfile,
-                         unsigned long minmersize,
-                         unsigned long maxmersize,
+                         GtUword minmersize,
+                         GtUword maxmersize,
                          GtArrayuint64_t *uniquedistribution,
                          GtArrayuint64_t *nonuniquedistribution,
                          GtArrayuint64_t *nonuniquemultidistribution,

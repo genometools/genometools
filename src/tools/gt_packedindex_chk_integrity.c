@@ -33,8 +33,8 @@
 
 struct chkIndexOptions
 {
-  unsigned long skipCount;
-  unsigned long progressInterval;
+  GtUword skipCount;
+  GtUword progressInterval;
   int checkFlags;
   bool verboseOutput;
   enum seqBaseEncoding encType;
@@ -78,7 +78,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
   }
   else
   {
-    fprintf(stderr, "# Using index over sequence %lu"
+    fprintf(stderr, "# Using index over sequence "GT_LU""
             " symbols long.\n", EISLength(seq));
     {
       int corrupt

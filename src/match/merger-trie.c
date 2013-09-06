@@ -55,7 +55,7 @@ typedef struct
 
 static GtUchar getfirstedgechar(const Mergertrierep *trierep,
                               const Mergertrienode *node,
-                              unsigned long prevdepth)
+                              GtUword prevdepth)
 {
   Encseqreadinfo *eri = trierep->encseqreadinfo + node->suffixinfo.idx;
 
@@ -119,7 +119,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
                             const Mergertrienode *node)
 {
   GtUchar cc = 0;
-  unsigned long pos, endpos;
+  GtUword pos, endpos;
   Mergertrienode *current;
 
   for (current = node->firstchild;
@@ -157,7 +157,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
       }
     } else
     {
-      printf(" d=%lu,i=" Formatuint64_t "\n",
+      printf(" d="GT_LU",i=" Formatuint64_t "\n",
             current->depth,
             PRINTuint64_tcast(current->suffixinfo.ident));
       showmergertrie2(trierep,characters,level+1,current);
@@ -194,11 +194,11 @@ static void checkmergertrie2(Mergertrierep *trierep,
 
   if (MTRIE_ISLEAF(node))
   {
-    unsigned long start = node->suffixinfo.startpos;
+    GtUword start = node->suffixinfo.startpos;
 #ifndef NDEBUG
     if (ISIBITSET(leafused,start))
     {
-      fprintf(stderr,"leaf %lu already found\n",start);
+      fprintf(stderr,"leaf "GT_LU" already found\n",start);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
@@ -213,7 +213,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
 #ifndef NDEBUG
       if (father->depth >= node->depth)
       {
-        fprintf(stderr,"father.depth = %lu >= %lu = node.depth\n",
+        fprintf(stderr,"father.depth = "GT_LU" >= "GT_LU" = node.depth\n",
                        father->depth,
                        node->depth);
         exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -390,7 +390,7 @@ static void makesuccs(Mergertrienode *newbranch,Mergertrienode *first,
 
 static Mergertrienode *mtrie_makenewbranch(Mergertrierep *trierep,
                                      Suffixinfo *suffixinfo,
-                                     unsigned long currentdepth,
+                                     GtUword currentdepth,
                                      Mergertrienode *oldnode)
 {
   Mergertrienode *newbranch, *newleaf;
@@ -430,14 +430,14 @@ static Mergertrienode *mtrie_makenewbranch(Mergertrierep *trierep,
   return newbranch;
 }
 
-static unsigned long getlcp(const GtEncseq *encseq1,
+static GtUword getlcp(const GtEncseq *encseq1,
                             GtReadmode readmode1,
-                            unsigned long start1, unsigned long end1,
+                            GtUword start1, GtUword end1,
                             const GtEncseq *encseq2,
                             GtReadmode readmode2,
-                            unsigned long start2, unsigned long end2)
+                            GtUword start2, GtUword end2)
 {
-  unsigned long i1, i2;
+  GtUword i1, i2;
   GtUchar cc1;
 
   for (i1=start1, i2=start2; i1 <= end1 && i2 <= end2; i1++, i2++)
@@ -454,7 +454,7 @@ static unsigned long getlcp(const GtEncseq *encseq1,
 
 static bool hassuccessor(const Mergertrierep *trierep,
                          Nodepair *np,
-                         unsigned long prevdepth,
+                         GtUword prevdepth,
                          const Mergertrienode *node,
                          GtUchar cc2,
                          unsigned int idx2)
@@ -491,7 +491,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
     trierep->root = mtrie_makeroot(trierep,suffixinfo);
   } else
   {
-    unsigned long currentdepth, lcpvalue, totallength;
+    GtUword currentdepth, lcpvalue, totallength;
     Mergertrienode *currentnode, *newleaf, *newbranch, *succ;
     Nodepair np;
     GtUchar cc;
@@ -645,7 +645,7 @@ void gt_mergertrie_deletesmallestpath(Mergertrienode *smallest,
 }
 
 void gt_mergertrie_initnodetable(Mergertrierep *trierep,
-                              unsigned long numofsuffixes,
+                              GtUword numofsuffixes,
                               unsigned int numofindexes)
 {
   trierep->numofindexes = numofindexes;

@@ -27,6 +27,7 @@
 #include "core/ma.h"
 #include "core/qsort_r.h"
 #include "core/thread_api.h"
+#include "core/types_api.h"
 
 union link_data
 {
@@ -70,7 +71,7 @@ struct GtHashtable
   union link_data links;
   unsigned short table_size_log, high_fill_mul, low_fill_mul;
   GtRWLock *lock;
-  unsigned long reference_count;
+  GtUword reference_count;
   bool no_ma;
 };
 
@@ -105,10 +106,10 @@ gt_ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
     ht->table = gt_realloc(ht->table, table_info.elem_size * table_size);
   ht->high_fill_mul = high_mul;
   ht->high_fill
-    = (unsigned long long)ht->high_fill_mul * table_size / FILL_DIVISOR;
+    = (GtUint64)ht->high_fill_mul * table_size / FILL_DIVISOR;
   ht->low_fill_mul = low_mul;
   ht->low_fill
-    = (unsigned long long)ht->low_fill_mul * table_size / FILL_DIVISOR;
+    = (GtUint64)ht->low_fill_mul * table_size / FILL_DIVISOR;
   {
     uint32_t i;
     if (ht->no_ma)
@@ -563,7 +564,7 @@ int gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter,
 {
   GtArray *hash_entries;
   void *elem;
-  unsigned long i;
+  GtUword i;
   int had_err;
   gt_error_check(err);
   gt_assert(ht && iter && cmp);
@@ -779,7 +780,7 @@ int gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB)
 
 int gt_ht_ul_elem_cmp(const void *elemA, const void *elemB)
 {
-  return gt_ht_ul_cmp(*(unsigned long *)elemA, *(unsigned long *)elemB);
+  return gt_ht_ul_cmp(*(GtUword *)elemA, *(GtUword *)elemB);
 }
 
 int gt_ht_cstr_elem_cmp(const void *elemA, const void *elemB)

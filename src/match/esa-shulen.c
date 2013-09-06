@@ -32,29 +32,29 @@
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
-  unsigned long *gnumdist;
+  GtUword *gnumdist;
 #ifdef SHUDEBUG
-  unsigned long id;
+  GtUword id;
 #endif
 } GtBUinfo_shulen;
 
 struct GtBUstate_shulen /* global information */
 {
-  unsigned long numofdbfiles;
+  GtUword numofdbfiles;
   uint64_t **shulengthdist;
   const GtEncseq *encseq;
-  unsigned long *file_to_genome_map;
+  GtUword *file_to_genome_map;
 #undef GENOMEDIFF_PAPER_IMPL
 #ifdef GENOMEDIFF_PAPER_IMPL
-  unsigned long *leafdist;
+  GtUword *leafdist;
 #endif
 #ifdef SHUDEBUG
-  unsigned long lastleafnumber,
+  GtUword lastleafnumber,
                 nextid;
 #endif
   /* the remaining components are used for the genomediff function
      called from the suffixerator */
-  unsigned long idxoffset,
+  GtUword idxoffset,
                 previousbucketlastsuffix;
   bool firstedgefromroot;
   GtShuUnitFileInfo *unit_info;
@@ -62,12 +62,12 @@ struct GtBUstate_shulen /* global information */
 };
 
 static void resetgnumdist_shulen(GtBUinfo_shulen *father,
-                                 unsigned long numofdbfiles)
+                                 GtUword numofdbfiles)
 {
-  unsigned long idx;
+  GtUword idx;
 
 #ifdef SHUDEBUG
-  printf("reset node %lu\n",father->id);
+  printf("reset node "GT_LU"\n",father->id);
 #endif
   for (idx = 0; idx < numofdbfiles; idx++)
   {
@@ -92,13 +92,13 @@ static void freeBUinfo_shulen(GtBUinfo_shulen *buinfo,
 
 static void contribute_shulen(GT_UNUSED int line,
                               uint64_t **shulengthdist,
-                              unsigned long referidx,
-                              unsigned long shulenidx,
-                              unsigned long count,
-                              unsigned long depth)
+                              GtUword referidx,
+                              GtUword shulenidx,
+                              GtUword count,
+                              GtUword depth)
 {
 #ifdef SHUDEBUG
-  printf("line %d: add[%lu][%lu]+=count=%lu*depth=%lu\n",line,referidx,
+  printf("line %d: add["GT_LU"]["GT_LU"]+=count="GT_LU"*depth="GT_LU"\n",line,referidx,
                                                         shulenidx,count,depth);
 #endif
   shulengthdist[referidx][shulenidx] += count * depth;
@@ -110,15 +110,15 @@ static void shownode(int line,
                      const char *kind,
                      const GtBUinfo_shulen *node)
 {
-  unsigned long idx;
+  GtUword idx;
 
-  printf("line %d: %s(id=%lu,numofdbfiles=%lu):",line,kind,node->id,
+  printf("line %d: %s(id="GT_LU",numofdbfiles="GT_LU"):",line,kind,node->id,
                                                  state->numofdbfiles);
   for (idx=0; idx < state->numofdbfiles; idx++)
   {
     if (node->gnumdist[idx] > 0)
     {
-      printf(" %lu->%lu",idx,node->gnumdist[idx]);
+      printf(" "GT_LU"->"GT_LU"",idx,node->gnumdist[idx]);
     }
   }
   printf("\n");
@@ -126,11 +126,11 @@ static void shownode(int line,
 #endif
 
 static void cartproduct_shulen(GtBUstate_shulen *state,
-                               unsigned long depth,
-                               const unsigned long *refnumdist,
-                               const unsigned long *querynumdist)
+                               GtUword depth,
+                               const GtUword *refnumdist,
+                               const GtUword *querynumdist)
 {
-  unsigned long referidx, shulenidx;
+  GtUword referidx, shulenidx;
 
   for (referidx=0; referidx < state->numofdbfiles; referidx++)
   {
@@ -154,11 +154,11 @@ static void cartproduct_shulen(GtBUstate_shulen *state,
 }
 
 static void shu_compute_leaf_edge_contrib(GtBUstate_shulen *state,
-                                          const unsigned long *fathernumdist,
-                                          unsigned long gnum,
-                                          unsigned long fatherdepth)
+                                          const GtUword *fathernumdist,
+                                          GtUword gnum,
+                                          GtUword fatherdepth)
 {
-  unsigned long idx;
+  GtUword idx;
 #ifdef GENOMEDIFF_PAPER_IMPL
   gt_assert(state->leafdist != NULL);
   for (idx = 0; idx < state->numofdbfiles; idx++)
@@ -194,17 +194,17 @@ static void shu_compute_leaf_edge_contrib(GtBUstate_shulen *state,
 }
 
 static int processleafedge_shulen(bool firstsucc,
-                                  unsigned long fatherdepth,
+                                  GtUword fatherdepth,
                                   GtBUinfo_shulen *father,
-                                  unsigned long leafnumber,
+                                  GtUword leafnumber,
                                   GtBUstate_shulen *state,
                                   GT_UNUSED GtError *err)
 {
-  unsigned long gnum;
+  GtUword gnum;
 
 #ifdef SHUDEBUG
-  printf("processleafedge %lu firstsucc=%s, "
-         " depth(father)=%lu, path=",
+  printf("processleafedge "GT_LU" firstsucc=%s, "
+         " depth(father)="GT_LU", path=",
          leafnumber,
          firstsucc ? "true" : "false",
          fatherdepth);
@@ -247,7 +247,7 @@ static int processleafedge_shulen(bool firstsucc,
   }
   father->gnumdist[gnum]++;
 #ifdef SHUDEBUG
-  printf("gnumdist[id=%lu,filenum=%lu]=%lu\n",father->id,gnum,
+  printf("gnumdist[id="GT_LU",filenum="GT_LU"]="GT_LU"\n",father->id,gnum,
                                               father->gnumdist[gnum]);
   state->lastleafnumber = leafnumber;
 #endif
@@ -255,18 +255,18 @@ static int processleafedge_shulen(bool firstsucc,
 }
 
 static int processbranchingedge_shulen(bool firstsucc,
-                                       unsigned long fatherdepth,
+                                       GtUword fatherdepth,
                                        GtBUinfo_shulen *father,
-                                       GT_UNUSED unsigned long sondepth,
-                                       GT_UNUSED unsigned long sonwidth,
+                                       GT_UNUSED GtUword sondepth,
+                                       GT_UNUSED GtUword sonwidth,
                                        GtBUinfo_shulen *son,
                                        GtBUstate_shulen *state,
                                        GT_UNUSED GtError *err)
 {
-  unsigned long idx;
+  GtUword idx;
 
 #ifdef SHUDEBUG
-  printf("%s firstsucc=%s, depth(father)=%lu,path=",__func__,
+  printf("%s firstsucc=%s, depth(father)="GT_LU",path=",__func__,
          firstsucc ? "true" : "false",fatherdepth);
   if (fatherdepth > 0)
   {
@@ -308,18 +308,18 @@ static int processbranchingedge_shulen(bool firstsucc,
       father->gnumdist[idx] += son->gnumdist[idx];
       son->gnumdist[idx] = 0;
 #ifdef SHUDEBUG
-      printf("gnumdist[id=%lu,filenum=%lu]=%lu\n",father->id,idx,
+      printf("gnumdist[id="GT_LU",filenum="GT_LU"]="GT_LU"\n",father->id,idx,
                                                   father->gnumdist[idx]);
-      printf("gnumdist[id=%lu,filenum=%lu]=0\n",son->id,idx);
+      printf("gnumdist[id="GT_LU",filenum="GT_LU"]=0\n",son->id,idx);
 #endif
     }
   }
   return 0;
 }
 
-static uint64_t **shulengthdist_new(unsigned long numofdbfiles)
+static uint64_t **shulengthdist_new(GtUword numofdbfiles)
 {
-  unsigned long idx1, idx2;
+  GtUword idx1, idx2;
   uint64_t **shulengthdist;
 
   gt_array2dim_malloc(shulengthdist,numofdbfiles,numofdbfiles);
@@ -340,12 +340,12 @@ static uint64_t **shulengthdist_new(unsigned long numofdbfiles)
 
 static void shulengthdist_print(const GtStrArray *file_names,
                                 const uint64_t * const*shulengthdist,
-                                unsigned long numofdbfiles)
+                                GtUword numofdbfiles)
 {
-  unsigned long idx1, idx2;
+  GtUword idx1, idx2;
 
   /*shulengthdist[0][0] = 0; for testing */
-  printf("# sum of shulen\n%lu\n",numofdbfiles);
+  printf("# sum of shulen\n"GT_LU"\n",numofdbfiles);
   for (idx2=0; idx2 < numofdbfiles; idx2++)
   {
     if (file_names != NULL)
@@ -353,7 +353,7 @@ static void shulengthdist_print(const GtStrArray *file_names,
       printf("%s\t",gt_str_array_get(file_names,idx2));
     } else
     {
-      printf("%lu\t",idx2);
+      printf(""GT_LU"\t",idx2);
     }
     for (idx1=0; idx1 < numofdbfiles; idx1++)
     {
@@ -406,11 +406,11 @@ int gt_multiesa2shulengthdist_print(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-static unsigned long gt_esa2shulengthatposition(const Suffixarray *suffixarray,
-                                                unsigned long totallength,
-                                                unsigned long offset,
-                                                unsigned long left,
-                                                unsigned long right,
+static GtUword gt_esa2shulengthatposition(const Suffixarray *suffixarray,
+                                                GtUword totallength,
+                                                GtUword offset,
+                                                GtUword left,
+                                                GtUword right,
                                                 const GtUchar *qstart,
                                                 const GtUchar *qend)
 {
@@ -449,17 +449,17 @@ static unsigned long gt_esa2shulengthatposition(const Suffixarray *suffixarray,
       break;
     }
   }
-  /*printf("add %lu\n",offset+1); */
+  /*printf("add "GT_LU"\n",offset+1); */
   return offset+1;
 }
 
-static unsigned long gt_esa2shulengthquery(const Suffixarray *suffixarray,
+static GtUword gt_esa2shulengthquery(const Suffixarray *suffixarray,
                                            const GtUchar *query,
-                                           unsigned long querylen)
+                                           GtUword querylen)
 {
   const GtUchar *qptr;
-  unsigned long totalgmatchlength = 0, gmatchlength, remaining;
-  unsigned long totallength = gt_encseq_total_length(suffixarray->encseq);
+  GtUword totalgmatchlength = 0, gmatchlength, remaining;
+  GtUword totallength = gt_encseq_total_length(suffixarray->encseq);
 
   for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
@@ -481,7 +481,7 @@ static unsigned long gt_esa2shulengthquery(const Suffixarray *suffixarray,
   return totalgmatchlength;
 }
 
-int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
+int gt_esa2shulengthqueryfiles(GtUword *totalgmatchlength,
                                const Suffixarray *suffixarray,
                                const GtStrArray *queryfilenames,
                                GtError *err)
@@ -489,7 +489,7 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
   bool haserr = false;
   GtSeqIterator *seqit;
   const GtUchar *query;
-  unsigned long querylen;
+  GtUword querylen;
   char *desc = NULL;
   int retval;
   GtAlphabet *alphabet;
@@ -596,10 +596,10 @@ GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq,
 #include "esa-bottomup-shulen-RAM.inc"
 
 int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
-                                  const unsigned long *bucketofsuffixes,
+                                  const GtUword *bucketofsuffixes,
                                   const uint32_t *bucketofsuffixes_uint32,
                                   const GtLcpvaluetype *lcptab_bucket,
-                                  unsigned long numberofsuffixes,
+                                  GtUword numberofsuffixes,
                                   GtError *err)
 {
   bool haserr = false;
@@ -607,7 +607,7 @@ int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
   if (bustate->previousbucketlastsuffix != ULONG_MAX &&
       gt_esa_bottomup_RAM_previousfromlast_shulen(
                                  bustate->previousbucketlastsuffix,
-                                 (unsigned long) lcptab_bucket[0],
+                                 (GtUword) lcptab_bucket[0],
                                  bustate->stack,
                                  bustate,
                                  err) != 0)

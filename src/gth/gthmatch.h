@@ -19,6 +19,7 @@
 #define GTHMATCH_H
 
 #include <stdbool.h>
+#include "core/types_api.h"
 
 /*
   The following structure is used to store matches in gth which have been
@@ -29,8 +30,8 @@
 */
 
 typedef struct {
-  long          Storescore;             /* the score */
-  unsigned long Storepositionreference, /* position of reference instance
+  GtWord        Storescore;             /* the score */
+  GtUword       Storepositionreference, /* position of reference instance
                                            w.r.t. sequence start */
                 Storelengthreference,   /* length of reference instance */
                 Storepositiongenomic,   /* position of genomic instance

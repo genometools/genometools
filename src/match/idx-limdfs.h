@@ -51,8 +51,8 @@ typedef struct Limdfsresources Limdfsresources;
 
 Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
                                     bool nowildcards,
-                                    unsigned long maxintervalwidth,
-                                    unsigned long maxpathlength,
+                                    GtUword maxintervalwidth,
+                                    GtUword maxpathlength,
                                     bool keepexpandedonstack,
                                     ProcessIdxMatch processmatch,
                                     void *processmatchinfo,
@@ -65,61 +65,61 @@ void gt_freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
 
 bool gt_indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const GtUchar *pattern,
-                                     unsigned long patternlength,
-                                     unsigned long maxdistance,
-                                     unsigned long maxintervalwidth,
+                                     GtUword patternlength,
+                                     GtUword maxdistance,
+                                     GtUword maxintervalwidth,
                                      bool skpp,
                                      const AbstractDfstransformer *adfst);
 
 void gt_indexbasedmstats(Limdfsresources *limdfsresources,
                       const GtUchar *pattern,
-                      unsigned long patternlength,
+                      GtUword patternlength,
                       const AbstractDfstransformer *adfst);
 
 void gt_indexbasedspacedseeds(Limdfsresources *limdfsresources,
                            const GtUchar *pattern,
                            GtBitsequence seedbitvector,
-                           unsigned long seedweight,
+                           GtUword seedweight,
                            const AbstractDfstransformer *adfst);
 
 void gt_indexbasedlocali(Limdfsresources *limdfsresources,
-                      long matchscore,
-                      long mismatchscore,
-                      long gapstart,
-                      long gapextend,
-                      unsigned long threshold,
+                      GtWord matchscore,
+                      GtWord mismatchscore,
+                      GtWord gapstart,
+                      GtWord gapextend,
+                      GtUword threshold,
                       const GtUchar *query,
-                      unsigned long querylength,
+                      GtUword querylength,
                       const AbstractDfstransformer *adfst);
 
-unsigned long genericmstats(const Limdfsresources *limdfsresources,
+GtUword genericmstats(const Limdfsresources *limdfsresources,
                             const GtUchar *qstart,
                             const GtUchar *qend);
 
 bool gt_indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const GtUchar *pattern,
-                                    unsigned long patternlength);
+                                    GtUword patternlength);
 
 GtUchar gt_limdfs_getencodedchar(const Limdfsresources *limdfsresources,
-                              unsigned long pos,
+                              GtUword pos,
                               GtReadmode readmode);
 
 bool gt_intervalwidthleq(const Limdfsresources *limdfsresources,
-                      unsigned long leftbound,unsigned long rightbound);
+                      GtUword leftbound,GtUword rightbound);
 
 GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
                                           Limdfsresources *limdfsresources,
-                                          unsigned long leftbound,
-                                          unsigned long rightbound,
-                                          unsigned long offset);
+                                          GtUword leftbound,
+                                          GtUword rightbound,
+                                          GtUword offset);
 
 const FMindex *genericindex_get_packedindex(const Genericindex *genericindex);
 
-unsigned long genericindex_get_totallength(const Genericindex *genericindex);
+GtUword genericindex_get_totallength(const Genericindex *genericindex);
 
-unsigned long gt_indexbased_exact_pattern_count(
+GtUword gt_indexbased_exact_pattern_count(
                                               const Genericindex *genericindex,
                                               const GtUchar *pattern,
-                                              unsigned long patternlength);
+                                              GtUword patternlength);
 
 #endif

@@ -36,7 +36,7 @@ static int gt_fasta_header_iterator_next(GtCstrIterator *cstr_iterator,
                                    GtError *err)
 {
   GtFastaHeaderIterator *fhi = gt_fasta_header_iterator_cast(cstr_iterator);
-  GT_UNUSED unsigned long len;
+  GT_UNUSED GtUword len;
   return gt_seq_iterator_next(fhi->seq_iter, NULL, &len,
                              (char **) desc_str, err);
 }

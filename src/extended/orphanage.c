@@ -63,7 +63,7 @@ void gt_orphanage_add(GtOrphanage *o, GtGenomeNode *orphan,
                       const char *orphan_id, GtStrArray *missing_parents)
 {
   const char *missing_parent;
-  unsigned long i;
+  GtUword i;
   gt_assert(o && orphan);
   gt_assert(gt_feature_node_get_attribute((GtFeatureNode*) orphan,
                                           GT_GFF_PARENT));

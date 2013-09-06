@@ -83,7 +83,7 @@ static void gt_gff3_escape_controlchar2hex(GtStr *escaped_seq, char ctrlchar)
 }
 
 void gt_gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
-                    unsigned long length)
+                    GtUword length)
 {
   const char *cc;
   gt_assert(escaped_seq && unescaped_seq);
@@ -103,7 +103,7 @@ void gt_gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
 }
 
 int gt_gff3_unescape(GtStr *unescaped_seq, const char *escaped_seq,
-                     unsigned long length, GtError *err)
+                     GtUword length, GtError *err)
 {
   const char *cc;
   int had_err = 0;

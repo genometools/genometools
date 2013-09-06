@@ -20,13 +20,14 @@
 
 #include <stdbool.h>
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 #define GT_MD5_TAB_FILE_SUFFIX ".md5"
 
 typedef struct GtMD5Tab GtMD5Tab;
 
-typedef const char*   (*GtGetSeqFunc)(void *seqs, unsigned long index);
-typedef unsigned long (*GtGetSeqLenFunc)(void *seqs, unsigned long index);
+typedef const char* (*GtGetSeqFunc)(void *seqs, GtUword index);
+typedef GtUword     (*GtGetSeqLenFunc)(void *seqs, GtUword index);
 
 /* Create a new MD5 table object for sequences contained in <sequence_file>.
    The sequences have to be stored in <seqs> (<num_of_seqs> many) and have to be
@@ -38,7 +39,7 @@ typedef unsigned long (*GtGetSeqLenFunc)(void *seqs, unsigned long index);
    cache file (recommended). */
 GtMD5Tab*     gt_md5_tab_new(const char *sequence_file, void *seqs,
                              GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
-                             unsigned long num_of_seqs, bool use_cache_file,
+                             GtUword num_of_seqs, bool use_cache_file,
                              bool use_file_locking);
 /* Create a new MD5 table object for sequences directly from a <cache_file>,
    containing MD5 sums for <num_of_seqs> many sequences. If <use_file_locking>
@@ -46,17 +47,17 @@ GtMD5Tab*     gt_md5_tab_new(const char *sequence_file, void *seqs,
    Returns NULL if an error occurred opening the cache file, <err> is set
    accordingly. */
 GtMD5Tab*     gt_md5_tab_new_from_cache_file(const char *cache_file,
-                                             unsigned long num_of_seqs,
+                                             GtUword num_of_seqs,
                                              bool use_file_locking,
                                              GtError *err);
 
 GtMD5Tab*     gt_md5_tab_ref(GtMD5Tab *md5_tab);
 void          gt_md5_tab_disable_file_locking(GtMD5Tab *md5_tab);
 /* Return the MD5 sum for sequence <index>. */
-const char*   gt_md5_tab_get(const GtMD5Tab*, unsigned long index);
+const char*   gt_md5_tab_get(const GtMD5Tab*, GtUword index);
 /* Map <md5> back to sequence index. */
-unsigned long gt_md5_tab_map(GtMD5Tab*, const char *md5);
-unsigned long gt_md5_tab_size(const GtMD5Tab*);
+GtUword gt_md5_tab_map(GtMD5Tab*, const char *md5);
+GtUword gt_md5_tab_size(const GtMD5Tab*);
 void          gt_md5_tab_delete(GtMD5Tab *md5_tab);
 
 #endif

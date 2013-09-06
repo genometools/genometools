@@ -15,9 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdint.h>
 #include "core/byte_select_api.h"
 
-const uint8_t gt_byte_select[] = {
+const unsigned char gt_byte_select[] = {
   /* select first bit */
   (uint8_t) 8, (uint8_t) 7, (uint8_t) 6, (uint8_t) 6, (uint8_t) 5, (uint8_t) 5,
   (uint8_t) 5, (uint8_t) 5, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4, (uint8_t) 4,

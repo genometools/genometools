@@ -24,28 +24,28 @@
 #include "extended/swalign.h"
 
 typedef struct {
-  unsigned long x,
-                y;
+  GtUword x,
+          y;
 } Coordinate;
 
 typedef struct {
-  long score;
+  GtWord score;
   bool max_replacement,
        max_deletion,
        max_insertion;
 } DPentry;
 
 static void swalign_fill_table(DPentry **dptable,
-                               const GtUchar *u, unsigned long ulen,
-                               const GtUchar *v, unsigned long vlen,
+                               const GtUchar *u, GtUword ulen,
+                               const GtUchar *v, GtUword vlen,
                                const int **scores,
                                int deletion_score, int insertion_score,
                                Coordinate *max_coordinate,
                                unsigned int u_alpha_size,
                                unsigned int v_alpha_size)
 {
-  unsigned long i, j;
-  long maxscore, repscore, delscore, insscore, overall_maxscore = LONG_MIN;
+  GtUword i, j;
+  GtWord maxscore, repscore, delscore, insscore, overall_maxscore = LONG_MIN;
   gt_assert(dptable && u && ulen && v && vlen && max_coordinate && u_alpha_size
             && v_alpha_size);
   for (j = 1; j <= vlen; j++) {
@@ -71,7 +71,7 @@ static void swalign_fill_table(DPentry **dptable,
 }
 
 static Coordinate traceback(GtAlignment *a, DPentry **dptable,
-                            unsigned long i, unsigned long j)
+                            GtUword i, GtUword j)
 {
   Coordinate start_coordinate = { GT_UNDEF_ULONG, GT_UNDEF_ULONG };
   gt_assert(a && dptable);
@@ -102,8 +102,8 @@ static GtAlignment* smith_waterman_align(const char *u_orig,
                                          const char *v_orig,
                                          const GtUchar *u_enc,
                                          const GtUchar *v_enc,
-                                         unsigned long u_len,
-                                         unsigned long v_len,
+                                         GtUword u_len,
+                                         GtUword v_len,
                                          const int **scores,
                                          int deletion_score,
                                          int insertion_score,

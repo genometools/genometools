@@ -33,7 +33,7 @@ typedef enum {
 
 /* Create a new <GtMD5Set> with <nof_elements> sequences. If the number of
    sequences is not known, set <nof_elements> to 0. */
-GtMD5Set* gt_md5set_new(unsigned long nof_elements);
+GtMD5Set* gt_md5set_new(GtUword nof_elements);
 
 /* Deletes a <GtMD5Set> and frees all associated memory. */
 void      gt_md5set_delete(GtMD5Set *set);
@@ -49,7 +49,7 @@ void      gt_md5set_delete(GtMD5Set *set);
    <GT_MD5SET_RC_FOUND> if <seq> was already present in the reverse complement
    direction. */
 GtMD5SetStatus gt_md5set_add_sequence(GtMD5Set *set, const char* seq,
-                                 unsigned long seqlen, bool both_strands,
+                                 GtUword seqlen, bool both_strands,
                                  GtError *err);
 
 #endif

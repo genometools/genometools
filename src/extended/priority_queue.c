@@ -33,12 +33,12 @@
 struct GtPriorityQueue
 {
   GtCompare cmpfun;
-  unsigned long capacity, numofelements;
+  GtUword capacity, numofelements;
   void *minelement, **elements;
 };
 
 GtPriorityQueue *gt_priority_queue_new(GtCompare cmpfun,
-                                       unsigned long maxnumofelements)
+                                       GtUword maxnumofelements)
 {
   GtPriorityQueue *pq = gt_malloc(sizeof *pq);
   pq->elements = gt_malloc(sizeof (*pq->elements) * (maxnumofelements + 1));
@@ -65,7 +65,7 @@ bool gt_priority_queue_is_full(const GtPriorityQueue *pq)
 void gt_priority_queue_add(GtPriorityQueue *pq, void *value)
 {
   gt_assert(pq != NULL && !gt_priority_queue_is_full(pq));
-  if (pq->capacity < (unsigned long) GT_MINPQSIZE)
+  if (pq->capacity < (GtUword) GT_MINPQSIZE)
   {
     void **ptr;
 
@@ -87,11 +87,11 @@ void gt_priority_queue_add(GtPriorityQueue *pq, void *value)
     pq->numofelements++;
   } else
   {
-    unsigned long idx = ++pq->numofelements;
+    GtUword idx = ++pq->numofelements;
 
     while (true)
     {
-      const unsigned long newidx = GT_HEAP_PARENT(idx);
+      const GtUword newidx = GT_HEAP_PARENT(idx);
 
       if (newidx == 0 || pq->cmpfun(pq->elements[newidx],value) <= 0)
       {
@@ -109,13 +109,13 @@ void gt_priority_queue_add(GtPriorityQueue *pq, void *value)
 void *gt_priority_queue_extract_min(GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL && !gt_priority_queue_is_empty(pq));
-  if (pq->capacity < (unsigned long) GT_MINPQSIZE)
+  if (pq->capacity < (GtUword) GT_MINPQSIZE)
   {
     gt_assert(pq->numofelements > 0);
     pq->minelement = pq->elements[--pq->numofelements];
   } else
   {
-    unsigned long idx, child;
+    GtUword idx, child;
     void *lastelement;
 
     pq->minelement = pq->elements[1];
@@ -147,7 +147,7 @@ const void *gt_priority_queue_find_min(const GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL && !gt_priority_queue_is_empty(pq));
   return pq->elements +
-         (pq->capacity < (unsigned long) GT_MINPQSIZE ? pq->numofelements-1
+         (pq->capacity < (GtUword) GT_MINPQSIZE ? pq->numofelements-1
                                                       : 1UL);
 }
 
@@ -162,17 +162,17 @@ void gt_priority_queue_delete(GtPriorityQueue *pq)
 
 static int cmpUlong(const void *aptr,const void *bptr)
 {
-  unsigned long a, b;
+  GtUword a, b;
 
   gt_assert(aptr != NULL && bptr != NULL);
-  a = *((const unsigned long *) aptr);
-  b = *((const unsigned long *) bptr);
+  a = *((const GtUword *) aptr);
+  b = *((const GtUword *) bptr);
   return a < b ? -1 : (a > b ? 1 : 0);
 }
 
-static void gt_priority_sort(unsigned long *numbers,unsigned long len)
+static void gt_priority_sort(GtUword *numbers,GtUword len)
 {
-  unsigned long j, previousvalue = ULONG_MAX;
+  GtUword j, previousvalue = ULONG_MAX;
   GtPriorityQueue *pq = gt_priority_queue_new(cmpUlong,len);
 
   for (j = 0; j < len; j++)
@@ -186,9 +186,9 @@ static void gt_priority_sort(unsigned long *numbers,unsigned long len)
 
     if (previousvalue != ULONG_MAX)
     {
-      gt_assert(previousvalue <= *((unsigned long *) elem));
+      gt_assert(previousvalue <= *((GtUword *) elem));
     }
-    previousvalue = *((unsigned long *) elem);
+    previousvalue = *((GtUword *) elem);
   }
   gt_assert(gt_priority_queue_is_empty(pq));
   gt_priority_queue_delete(pq);
@@ -197,19 +197,19 @@ static void gt_priority_sort(unsigned long *numbers,unsigned long len)
 int gt_priority_queue_unit_test(GtError *err)
 {
   int had_err = 0;
-  unsigned long idx,
+  GtUword idx,
                 maxsize = 10000UL,
                 trials = 1000UL,
                 *numbers = gt_malloc(sizeof *numbers * maxsize),
                 *numbers_copy = gt_malloc(sizeof *numbers_copy * maxsize);
 
-  unsigned long arr[] = {76UL, 132UL, 136UL, 538UL, 545UL, 401UL};
+  GtUword arr[] = {76UL, 132UL, 136UL, 538UL, 545UL, 401UL};
 
   gt_error_check (err);
-  gt_priority_sort(arr,(unsigned long) sizeof arr/sizeof arr[0]);
+  gt_priority_sort(arr,(GtUword) sizeof arr/sizeof arr[0]);
   for (idx = 0; idx < trials; idx++)
   {
-    unsigned long j,
+    GtUword j,
                   size = gt_rand_max(maxsize),
                   maximal_value = 1 + gt_rand_max(1000UL);
     GtPriorityQueue *pq = gt_priority_queue_new(cmpUlong,size);
@@ -225,13 +225,13 @@ int gt_priority_queue_unit_test(GtError *err)
     for (j = 0; j < size; j++)
     {
       elem = gt_priority_queue_extract_min(pq);
-      if (*((unsigned long *) elem) != numbers[j])
+      if (*((GtUword *) elem) != numbers[j])
       {
-        fprintf(stderr,"elem=%lu != %lu = numbers[%lu]\n",
-                      *((unsigned long *) elem),numbers[j],j);
+        fprintf(stderr,"elem="GT_LU" != "GT_LU" = numbers["GT_LU"]\n",
+                      *((GtUword *) elem),numbers[j],j);
         exit(EXIT_FAILURE);
       }
-      gt_ensure(*((unsigned long *) elem) == numbers[j]);
+      gt_ensure(*((GtUword *) elem) == numbers[j]);
     }
     gt_ensure(gt_priority_queue_is_empty(pq));
     gt_priority_queue_delete(pq);

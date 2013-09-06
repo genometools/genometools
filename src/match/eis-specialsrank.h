@@ -29,8 +29,8 @@ gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
 void
 gt_deleteSpecialsRankLookup(SpecialsRankLookup *table);
 
-static inline unsigned long
-specialsRank(const SpecialsRankLookup *rankTable, unsigned long pos);
+static inline GtUword
+specialsRank(const SpecialsRankLookup *rankTable, GtUword pos);
 
 const GtEncseq *
 gt_SPRTGetOrigEncseq(const SpecialsRankLookup *rankTable);

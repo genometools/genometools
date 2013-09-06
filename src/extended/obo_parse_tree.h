@@ -31,15 +31,15 @@ GtOBOParseTree*    gt_obo_parse_tree_new(const char *obo_file_path,
 void               gt_obo_parse_tree_delete(GtOBOParseTree*);
 /* Return the type of stanza number <stanza_number>. */
 const char*        gt_obo_parse_tree_get_stanza_type(const GtOBOParseTree*,
-                                                     unsigned long stanza_num);
+                                                     GtUword stanza_num);
 /* Return the value of entry <stanza_key> in stanza number <stanza_number>. */
 const char*        gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree*,
-                                                      unsigned long stanza_num,
+                                                      GtUword stanza_num,
                                                       const char *stanza_key);
 /* Return OBO stanza with number <stanza_number. */
 const GtOBOStanza* gt_obo_parse_tree_get_stanza(const GtOBOParseTree*,
-                                                unsigned long stanza_num);
+                                                GtUword stanza_num);
 /* Return the number of stanzas. */
-unsigned long      gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree*);
+GtUword      gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree*);
 
 #endif

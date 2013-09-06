@@ -24,7 +24,7 @@
 #include "core/sequence_buffer_rep.h"
 
 /*@unused@*/ static inline int process_char(GtSequenceBuffer *sb,
-                                            unsigned long currentoutpos,
+                                            GtUword currentoutpos,
                                             unsigned char cc,
                                             GtError *err)
 {
@@ -37,8 +37,8 @@
       gt_error_set(err, "illegal character '%c': file \"%s\", line "GT_LLU"",
                         cc,
                         gt_str_array_get(pvt->filenametab,
-                                         (unsigned long) pvt->filenum),
-                        (unsigned long long) pvt->linenum);
+                                         (GtUword) pvt->filenum),
+                        (GtUint64) pvt->linenum);
       return -1;
     }
     if (ISSPECIAL((GtUchar) charcode)) {
@@ -67,7 +67,7 @@
     return (int) pvt->ungetchar;
   } else {
     if (pvt->currentinpos >= pvt->currentfillpos) {
-      pvt->currentfillpos = (unsigned long) gt_file_xread(f, pvt->inbuf,
+      pvt->currentfillpos = (GtUword) gt_file_xread(f, pvt->inbuf,
                                                           (size_t) INBUFSIZE);
       if (pvt->currentfillpos == 0)
          return EOF;

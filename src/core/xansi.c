@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/types_api.h"
 #include "core/xansi_api.h"
 
 void gt_xatexit(void (*function)(void))
@@ -117,7 +118,7 @@ size_t gt_xfread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   return rval;
 }
 
-void  gt_xfseek(FILE *stream, long offset, int whence)
+void  gt_xfseek(FILE *stream, GtWord offset, int whence)
 {
   if (fseek(stream, offset, whence)) {
     perror("cannot seek of file");
@@ -135,7 +136,7 @@ void gt_xfsetpos(FILE *stream, const fpos_t *pos)
 
 void gt_xfwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
-  unsigned long itemsperblock = (1 << 30) / size,
+  GtUword itemsperblock = (1 << 30) / size,
                 itemstowrite = nmemb,
                 itemswritten = 0;
   while (itemstowrite >= itemsperblock) {

@@ -20,16 +20,16 @@
 #include "core/chardef.h"
 #include "initeqsvec.h"
 
-void gt_initeqsvector(unsigned long *eqsvector,
-                   unsigned long eqslen,
+void gt_initeqsvector(GtUword *eqsvector,
+                   GtUword eqslen,
                    const GtUchar *pattern,
-                   unsigned long patternlength)
+                   GtUword patternlength)
 {
-  unsigned long *eptr, shiftmask;
+  GtUword *eptr, shiftmask;
   const GtUchar *pptr;
 
   gt_assert(patternlength <=
-            (unsigned long) (CHAR_BIT * sizeof (unsigned long)));
+            (GtUword) (CHAR_BIT * sizeof (GtUword)));
   for (eptr = eqsvector; eptr < eqsvector + eqslen; eptr++)
   {
     *eptr = 0;
@@ -41,21 +41,21 @@ void gt_initeqsvector(unsigned long *eqsvector,
     gt_assert(*pptr != (GtUchar) SEPARATOR);
     if (*pptr != (GtUchar) WILDCARD)
     {
-      eqsvector[(unsigned long) *pptr] |= shiftmask;
+      eqsvector[(GtUword) *pptr] |= shiftmask;
     }
   }
 }
 
-void gt_initeqsvectorrev(unsigned long *eqsvectorrev,
-                      unsigned long eqslen,
+void gt_initeqsvectorrev(GtUword *eqsvectorrev,
+                      GtUword eqslen,
                       const GtUchar *pattern,
-                      unsigned long patternlength)
+                      GtUword patternlength)
 {
-  unsigned long *eptr, shiftmask;
+  GtUword *eptr, shiftmask;
   const GtUchar *pptr;
 
   gt_assert(patternlength <=
-            (unsigned long) (CHAR_BIT * sizeof (unsigned long)));
+            (GtUword) (CHAR_BIT * sizeof (GtUword)));
   for (eptr = eqsvectorrev; eptr < eqsvectorrev + eqslen; eptr++)
   {
     *eptr = 0;
@@ -67,7 +67,7 @@ void gt_initeqsvectorrev(unsigned long *eqsvectorrev,
     gt_assert(*pptr != (GtUchar) SEPARATOR);
     if (*pptr != (GtUchar) WILDCARD)
     {
-      eqsvectorrev[(unsigned long) *pptr] |= shiftmask;
+      eqsvectorrev[(GtUword) *pptr] |= shiftmask;
     }
   }
 }

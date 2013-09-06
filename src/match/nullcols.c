@@ -21,26 +21,26 @@
 
 typedef struct
 {
-  unsigned long *endindex,
+  GtUword *endindex,
                 *positions;
 } Charatpos;
 
-Charatpos *gt_newCharatpos(unsigned long patternlength,unsigned int alphasize)
+Charatpos *gt_newCharatpos(GtUword patternlength,unsigned int alphasize)
 {
   Charatpos *catpos;
 
   catpos = gt_malloc(sizeof (*catpos));
-  catpos->endindex = gt_malloc(sizeof (unsigned long) * alphasize);
-  catpos->positions = gt_malloc(sizeof (unsigned long) * patternlength);
+  catpos->endindex = gt_malloc(sizeof (GtUword) * alphasize);
+  catpos->positions = gt_malloc(sizeof (GtUword) * patternlength);
   return catpos;
 }
 
 Charatpos *gt_reinitCharatpos(Charatpos *catpos,
-                           const GtUchar *pattern,unsigned long patternlength,
+                           const GtUchar *pattern,GtUword patternlength,
                            unsigned int alphasize)
 {
   const GtUchar *pptr;
-  unsigned long partialsum, tmp;
+  GtUword partialsum, tmp;
   unsigned int idx;
 
   for (idx=0; idx<alphasize; idx++)
@@ -62,7 +62,7 @@ Charatpos *gt_reinitCharatpos(Charatpos *catpos,
   for (pptr=pattern; pptr<pattern+patternlength; pptr++)
   {
     catpos->positions[catpos->endindex[*pptr]++]
-      = (unsigned long) (pptr - pattern);
+      = (GtUword) (pptr - pattern);
   }
   return catpos;
 }
@@ -77,14 +77,14 @@ void gt_wrapCharatpos(Charatpos **catposptr)
 }
 
 void gt_maintainnullcols(const Charatpos *catpos,
-                      unsigned long *front0,GtUchar cc,unsigned long depth)
+                      GtUword *front0,GtUchar cc,GtUword depth)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx = (cc == 0) ? 0 : catpos->endindex[cc-1];
        idx < catpos->endindex[cc]; idx++)
   {
-    unsigned long pos = catpos->positions[idx];
+    GtUword pos = catpos->positions[idx];
     if (front0[pos] == depth)
     {
       front0[pos]++;

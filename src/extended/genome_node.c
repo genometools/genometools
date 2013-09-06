@@ -157,7 +157,7 @@ int gt_genome_node_cmp(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 
 static int compare_genome_nodes_with_delta(GtGenomeNode *gn_a,
                                            GtGenomeNode *gn_b,
-                                           unsigned long delta)
+                                           GtUword delta)
 {
   GtRange range_a, range_b;
   int rval;
@@ -247,12 +247,12 @@ GtStr* gt_genome_node_get_idstr(GtGenomeNode *gn)
   return gn->c_class->get_idstr(gn);
 }
 
-unsigned long gt_genome_node_get_start(GtGenomeNode *gn)
+GtUword gt_genome_node_get_start(GtGenomeNode *gn)
 {
   return gt_genome_node_get_range(gn).start;
 }
 
-unsigned long gt_genome_node_get_end(GtGenomeNode *gn)
+GtUword gt_genome_node_get_end(GtGenomeNode *gn)
 {
   return gt_genome_node_get_range(gn).end;
 }
@@ -263,7 +263,7 @@ GtRange gt_genome_node_get_range(GtGenomeNode *gn)
   return gn->c_class->get_range(gn);
 }
 
-unsigned long gt_genome_node_get_length(GtGenomeNode *gn)
+GtUword gt_genome_node_get_length(GtGenomeNode *gn)
 {
   GtRange range;
   gt_assert(gn && gn->c_class && gn->c_class->get_range);
@@ -305,7 +305,7 @@ int gt_genome_node_compare_with_data(GtGenomeNode **gn_a, GtGenomeNode **gn_b,
 int gt_genome_node_compare_delta(GtGenomeNode **gn_a, GtGenomeNode **gn_b,
                                  void *delta)
 {
-  unsigned long *deltaptr = delta;
+  GtUword *deltaptr = delta;
   gt_assert(delta);
   return compare_genome_nodes_with_delta(*gn_a, *gn_b, *deltaptr);
 }
@@ -325,7 +325,7 @@ void gt_genome_nodes_sort_stable(GtArray *nodes)
 void gt_genome_nodes_show(GtArray *nodes, GtFile *outfp)
 {
   GtNodeVisitor *gff3_visitor;
-  unsigned long i;
+  GtUword i;
   gt_assert(nodes);
   gff3_visitor = gt_gff3_visitor_new(outfp);
   for (i = 0; i < gt_array_size(nodes); i++) {
@@ -354,7 +354,7 @@ bool gt_genome_nodes_are_equal_region_nodes(GtGenomeNode *gn_a,
 
 bool gt_genome_nodes_are_sorted(const GtArray *nodes)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(nodes);
   for (i = 1; i < gt_array_size(nodes); i++) {
     if (gt_genome_node_compare(gt_array_get(nodes, i-1),

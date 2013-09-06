@@ -24,10 +24,10 @@
 typedef struct GtWtreeClass GtWtreeClass;
 typedef struct GtWtreeMembers GtWtreeMembers;
 
-typedef GtWtreeSymbol (*GtWtreeAccessFunc)(GtWtree*, unsigned long);
-typedef unsigned long (*GtWtreeRankFunc)(GtWtree*, unsigned long,
+typedef GtWtreeSymbol (*GtWtreeAccessFunc)(GtWtree*, GtUword);
+typedef GtUword (*GtWtreeRankFunc)(GtWtree*, GtUword,
                                          GtWtreeSymbol);
-typedef unsigned long (*GtWtreeSelectFunc)(GtWtree*, unsigned long,
+typedef GtUword (*GtWtreeSelectFunc)(GtWtree*, GtUword,
                                           GtWtreeSymbol);
 typedef void (*GtWtreeDeleteFunc)(GtWtree*);
 
@@ -45,7 +45,7 @@ struct GtWtreeClass {
 };
 
 struct GtWtreeMembers {
-  unsigned long length,
+  GtUword length,
                 num_of_symbols,
                 refcount;
 };

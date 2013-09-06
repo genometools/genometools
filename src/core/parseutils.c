@@ -44,7 +44,7 @@ int gt_parse_int(int *out, const char *nptr)
 
 int gt_parse_uint(unsigned int *out, const char *nptr)
 {
-  unsigned long ulval;
+  GtUword ulval;
   char *ep;
   gt_assert(out && nptr);
   errno = 0;
@@ -58,7 +58,7 @@ int gt_parse_uint(unsigned int *out, const char *nptr)
   return 0;
 }
 
-int gt_parse_long(long *out, const char *nptr)
+int gt_parse_long(GtWord *out, const char *nptr)
 {
   long lval;
   char *ep;
@@ -73,9 +73,9 @@ int gt_parse_long(long *out, const char *nptr)
   return 0;
 }
 
-int gt_parse_ulong(unsigned long *out, const char *nptr)
+int gt_parse_ulong(GtUword *out, const char *nptr)
 {
-  unsigned long ulval;
+  GtUword ulval;
   char *ep;
   gt_assert(out && nptr);
   errno = 0;
@@ -107,7 +107,7 @@ static int parse_range(GtRange *range, const char *start, const char *end,
                        unsigned int line_number, const char *filename,
                        bool tidy, bool correct_negative, GtError *err)
 {
-  long start_val, end_val;
+  GtWord start_val, end_val;
   char *ep;
 
   gt_assert(start && end && filename);
@@ -182,14 +182,14 @@ static int parse_range(GtRange *range, const char *start, const char *end,
   if (start_val > end_val) {
     if (tidy) {
       long tmp_val;
-      gt_warning("start '%lu' is larger then end '%lu' on line %u in file "
+      gt_warning("start '"GT_LU"' is larger then end '"GT_LU"' on line %u in file "
                  "'%s'; swap them", start_val, end_val, line_number, filename);
       tmp_val = start_val;
       start_val = end_val;
       end_val = tmp_val;
     }
     else {
-      gt_error_set(err, "start '%lu' is larger then end '%lu' on line %u in "
+      gt_error_set(err, "start '"GT_LU"' is larger then end '"GT_LU"' on line %u in "
                    "file '%s'", start_val, end_val, line_number, filename);
       return -1;
     }
@@ -309,7 +309,7 @@ int gt_parse_int_line(int *int_value, const char *integer,
 
 int gt_parse_description_range(const char *description, GtRange *range)
 {
-  unsigned long i, desclen;
+  GtUword i, desclen;
   char *desc, *descptr;
   gt_assert(description && range);
   desc = gt_cstr_dup(description);

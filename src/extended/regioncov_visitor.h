@@ -24,7 +24,7 @@ typedef struct GtRegionCovVisitor GtRegionCovVisitor;
 #include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_regioncov_visitor_class(void);
-GtNodeVisitor*            gt_regioncov_visitor_new(unsigned long
+GtNodeVisitor*            gt_regioncov_visitor_new(GtUword
                                                    max_feature_dist);
 void                      gt_regioncov_visitor_show_coverage(GtNodeVisitor*);
 

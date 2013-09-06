@@ -52,7 +52,7 @@ double gt_hmm_forward(const GtHMM*, const unsigned int *emissions,
 /* Backward algorithm, returns log(P(emissions)) */
 double gt_hmm_backward(const GtHMM*, const unsigned int *emissions,
                        unsigned int num_of_emissions);
-void   gt_hmm_emit(GtHMM*, unsigned long num_of_emissions,
+void   gt_hmm_emit(GtHMM*, GtUword num_of_emissions,
                    void (*proc_emission)(unsigned int symbol, void *data),
                    void *data);
 bool   gt_hmm_is_valid(const GtHMM*);

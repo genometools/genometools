@@ -23,6 +23,6 @@
 /* Returns an MD5 fingerprint of <sequence> with length <seqlen> transformed to
    upper case letters (with toupper(3)).
    It is the responsibility of the caller to free the returned string. */
-char* gt_md5_fingerprint(const char *sequence, unsigned long seqlen);
+char* gt_md5_fingerprint(const char *sequence, GtUword seqlen);
 
 #endif

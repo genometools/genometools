@@ -24,11 +24,11 @@
 #include "fmi-occ.gen"
 #include "fmi-locate.pr"
 
-unsigned long gt_skfmuniqueforward (const void *genericindex,
-                                 GT_UNUSED unsigned long offset,
-                                 GT_UNUSED unsigned long left,
-                                 GT_UNUSED unsigned long right,
-                                 GT_UNUSED unsigned long *witnessposition,
+GtUword gt_skfmuniqueforward (const void *genericindex,
+                                 GT_UNUSED GtUword offset,
+                                 GT_UNUSED GtUword left,
+                                 GT_UNUSED GtUword right,
+                                 GT_UNUSED GtUword *witnessposition,
                                  const GtUchar *qstart,
                                  const GtUchar *qend)
 {
@@ -61,23 +61,23 @@ unsigned long gt_skfmuniqueforward (const void *genericindex,
   }
   if (bwtbound.lbound + 1 == bwtbound.ubound)
   {
-    return (unsigned long) (qptr - qstart);
+    return (GtUword) (qptr - qstart);
   }
   return 0;
 }
 
-unsigned long gt_skfmmstats (const void *genericindex,
-                          GT_UNUSED unsigned long offset,
-                          GT_UNUSED unsigned long left,
-                          GT_UNUSED unsigned long right,
-                          unsigned long *witnessposition,
+GtUword gt_skfmmstats (const void *genericindex,
+                          GT_UNUSED GtUword offset,
+                          GT_UNUSED GtUword left,
+                          GT_UNUSED GtUword right,
+                          GtUword *witnessposition,
                           const GtUchar *qstart,
                           const GtUchar *qend)
 {
   GtUchar cc;
   const GtUchar *qptr;
-  unsigned long prevlbound;
-  unsigned long matchlength;
+  GtUword prevlbound;
+  GtUword matchlength;
   GtUlongBound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
@@ -112,10 +112,10 @@ unsigned long gt_skfmmstats (const void *genericindex,
     }
     prevlbound = bwtbound.lbound;
   }
-  matchlength = (unsigned long) (qptr - qstart);
+  matchlength = (GtUword) (qptr - qstart);
   if (witnessposition != NULL)
   {
-    unsigned long startpos = gt_fmfindtextpos (fmindex,prevlbound);
+    GtUword startpos = gt_fmfindtextpos (fmindex,prevlbound);
     gt_assert((fmindex->bwtlength-1) >= (startpos + matchlength));
     *witnessposition = (fmindex->bwtlength-1) - (startpos + matchlength);
   }

@@ -21,27 +21,27 @@
 #include <stdbool.h>
 
 /* Gets called for every match. If it returns true, the matching is stopped. */
-typedef bool (*GtProcessMatch)(unsigned long pos, void *data);
+typedef bool (*GtProcessMatch)(GtUword pos, void *data);
 
 /* Boyer-Moore-Horspool alg. (O(n*m) time worst-case; sublinear on average). */
-void gt_string_matching_bmh(const char *s, unsigned long n,
-                            const char *p, unsigned long m,
+void gt_string_matching_bmh(const char *s, GtUword n,
+                            const char *p, GtUword m,
                             GtProcessMatch, void *data);
 
 /* Knuth-Morris-Pratt algorithm (O(n+m) time).
    Returns the last common prefix length.*/
-unsigned long gt_string_matching_kmp(const char *s, unsigned long n,
-                                     const char *p, unsigned long m,
+GtUword gt_string_matching_kmp(const char *s, GtUword n,
+                                     const char *p, GtUword m,
                                      GtProcessMatch, void *data);
 
 /* Shift-And algorithm (O(n*(m/|w|) time, |w| is the word size). */
-void gt_string_matching_shift_and(const char *s, unsigned long n,
-                                  const char *p, unsigned long m,
+void gt_string_matching_shift_and(const char *s, GtUword n,
+                                  const char *p, GtUword m,
                                   GtProcessMatch, void *data);
 
 /* Brute Force algorithm (O(n*m) time worst-case). */
-void gt_string_matching_brute_force(const char *s, unsigned long n,
-                                    const char *p, unsigned long m,
+void gt_string_matching_brute_force(const char *s, GtUword n,
+                                    const char *p, GtUword m,
                                     GtProcessMatch, void *data);
 
 int  gt_string_matching_unit_test(GtError*);

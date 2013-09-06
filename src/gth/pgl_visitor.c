@@ -34,7 +34,7 @@ void* gth_pgl_visitor_cast(GT_UNUSED const GthPGLVisitorClass *pglvc,
   return pglv;
 }
 
-void gth_pgl_visitor_preface(GthPGLVisitor *pglv, unsigned long num_of_pgls)
+void gth_pgl_visitor_preface(GthPGLVisitor *pglv, GtUword num_of_pgls)
 {
   gt_assert(pglv && pglv->c_class);
   if (pglv->c_class->preface)
@@ -50,7 +50,7 @@ void gth_pgl_visitor_set_region_mapping(GthPGLVisitor *pglv,
 }
 
 void gth_pgl_visitor_visit_pgl(GthPGLVisitor *pglv, GthPGL *pgl,
-                               unsigned long pglnum)
+                               GtUword pglnum)
 {
   gt_assert(pglv && pgl && pglv->c_class && pglv->c_class->visit_pgl);
   pglv->c_class->visit_pgl(pglv, pgl, pglnum);

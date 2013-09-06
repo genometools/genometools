@@ -25,7 +25,7 @@
 #include "match/eis-voiditf.h"
 
 typedef struct Nodecount_tag {
-  unsigned long leaves, branching, lower, upper;
+  GtUword leaves, branching, lower, upper;
   unsigned int parentOffset;
   bool visited, on_branch;
 } Nodecount;
@@ -33,7 +33,7 @@ typedef struct Nodecount_tag {
 GT_STACK_DECLARESTRUCT(Nodecount, 256UL);
 
 void gt_pck_count_nodes_dfs(const FMindex *index,
-                        unsigned long totallength,
+                        GtUword totallength,
                         unsigned int numofchars);
 
 #endif

@@ -29,7 +29,7 @@
 
 typedef struct
 {
-  unsigned long idx,
+  GtUword idx,
                 value;
 } Largecount;
 

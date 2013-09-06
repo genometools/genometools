@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
   GtDiagram *diagram;
   GtLayout *layout;
   GtCanvas *canvas;
-  unsigned long height;
+  GtUword height;
   GtError *err;
 
   if (argc != 4) {

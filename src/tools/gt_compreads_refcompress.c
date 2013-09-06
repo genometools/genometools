@@ -44,7 +44,7 @@ typedef struct {
   GtStr *name,
         *ref,
         *align;
-  unsigned long srate;
+  GtUword srate;
   GtRange qrng;
 } GtCsrRcrEncodeArguments;
 
@@ -154,7 +154,7 @@ static int gt_compreads_refcompress_runner(GT_UNUSED int argc,
   GtEncseqLoader *el = NULL;
   GtSplitter *splitter = NULL;
   GtStr *buffer;
-  unsigned long i;
+  GtUword i;
   gt_error_check(err);
   gt_assert(arguments);
   if (gt_showtime_enabled()) {

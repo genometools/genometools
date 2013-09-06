@@ -22,7 +22,7 @@ typedef struct GtUlongBound GtUlongBound;
 
 struct GtUlongBound
 {
-  unsigned long lbound,
+  GtUword lbound,
                 ubound;
 };
 

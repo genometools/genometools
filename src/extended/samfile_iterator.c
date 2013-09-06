@@ -33,7 +33,7 @@ struct GtSamfileIterator {
                  *mode;
   samfile_t      *samfile;
   void           *aux;
-  unsigned long   ref_count;
+  GtUword   ref_count;
 };
 
 GtSamfileIterator* gt_samfile_iterator_new(const char *filename,

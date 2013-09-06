@@ -63,7 +63,7 @@ static unsigned char forbiddenstring(GtStr *line)
 static void removecomments(GtStr *line, int *incomment)
 {
   unsigned char *buffer;
-  unsigned long pos=0, bufpos=0;
+  GtUword pos=0, bufpos=0;
 
   if (!line || !gt_str_length(line))
     return;
@@ -81,7 +81,7 @@ static void removecomments(GtStr *line, int *incomment)
         pos++;
     }
     else {
-      if (gt_str_length(line)     >  (unsigned long) 2   &&
+      if (gt_str_length(line)     >  (GtUword) 2   &&
           gt_str_get(line)[pos]   == '/' &&
           gt_str_get(line)[pos+1] == '/') {
         break;
@@ -123,10 +123,10 @@ static void skproto(const char *filename, FILE *fpin)
     if (gt_str_length(line)) {
       if (startfunction) {
         if (isalpha((int) (gt_str_get(line)[0])) ||
-            (gt_str_length(line) >= (unsigned long) 3 &&
+            (gt_str_length(line) >= (GtUword) 3 &&
              strncmp(gt_str_get(line), "/*@", (size_t) 3) == 0)) {
           if (!forbiddenstring(line)) {
-            if (gt_str_length(line) >= (unsigned long) MAX_LINE_LENGTH)
+            if (gt_str_length(line) >= (GtUword) MAX_LINE_LENGTH)
               gt_warning("file %s, line %d too long\n", filename, linenum);
             printf("%s", gt_str_get(line));
             if (gt_str_get(line)[gt_str_length(line)-1] == ')') {
@@ -140,7 +140,7 @@ static void skproto(const char *filename, FILE *fpin)
         }
       }
       else {
-        if (gt_str_length(line) >= (unsigned long) MAX_LINE_LENGTH)
+        if (gt_str_length(line) >= (GtUword) MAX_LINE_LENGTH)
           gt_warning("file %s, line %d too long\n", filename, linenum);
         printf("%s", gt_str_get(line));
         if (gt_str_get(line)[gt_str_length(line)-1] == ')') {

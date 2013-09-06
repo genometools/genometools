@@ -32,14 +32,14 @@
 #include "extended/transcript_used_exons.h"
 
 typedef struct {
-  unsigned long TP, FP, FN;
+  GtUword TP, FP, FN;
 } NucEval;
 
 struct GtStreamEvaluator {
   GtNodeStream *reference,
                *prediction;
   bool nuceval, evalLTR;
-  unsigned long LTRdelta;
+  GtUword LTRdelta;
   GtHashmap *slots; /* sequence id -> slot */
   GtEvaluator *mRNA_gene_evaluator,
               *CDS_gene_evaluator,
@@ -50,7 +50,7 @@ struct GtStreamEvaluator {
                          *mRNA_exon_evaluators_collapsed,
                          *CDS_exon_evaluators,
                          *CDS_exon_evaluators_collapsed;
-  unsigned long missing_genes,
+  GtUword missing_genes,
                 wrong_genes,
                 missing_mRNAs,
                 wrong_mRNAs,
@@ -75,7 +75,7 @@ typedef struct {
                      *CDS_counts_forward,
                      *CDS_counts_reverse;
   GtRange real_range;
-  unsigned long FP_mRNA_nucleotides_forward,
+  GtUword FP_mRNA_nucleotides_forward,
                 FP_mRNA_nucleotides_reverse,
                 FP_CDS_nucleotides_forward,
                 FP_CDS_nucleotides_reverse;
@@ -124,7 +124,7 @@ typedef struct {
        verbose,
        exondiff,
        exondiffcollapsed;
-  unsigned long LTRdelta;
+  GtUword LTRdelta;
   GtEvaluator *mRNA_gene_evaluator,
               *CDS_gene_evaluator,
               *mRNA_mRNA_evaluator,
@@ -134,14 +134,14 @@ typedef struct {
                          *mRNA_exon_evaluators_collapsed,
                          *CDS_exon_evaluators,
                          *CDS_exon_evaluators_collapsed;
-  unsigned long *wrong_genes,
+  GtUword *wrong_genes,
                 *wrong_mRNAs,
                 *wrong_LTRs;
 } ProcessPredictedFeatureInfo;
 
 static Slot* slot_new(bool nuceval, GtRange range)
 {
-  unsigned long length;
+  GtUword length;
   Slot *s = gt_calloc(1, sizeof (Slot));
   length = gt_range_length(&range);
   s->genes_forward = gt_array_new(sizeof (GtGenomeNode*));
@@ -173,7 +173,7 @@ static Slot* slot_new(bool nuceval, GtRange range)
 
 static void slot_delete(Slot *s)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(s);
   for (i = 0; i < gt_array_size(s->genes_forward); i++)
     gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(s->genes_forward, i));
@@ -234,7 +234,7 @@ static void slot_delete(Slot *s)
 GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reference,
                                            GtNodeStream *prediction,
                                            bool nuceval, bool evalLTR,
-                                           unsigned long LTRdelta)
+                                           GtUword LTRdelta)
 {
   GtStreamEvaluator *evaluator = gt_calloc(1, sizeof (GtStreamEvaluator));
   evaluator->reference = gt_node_stream_ref(reference);
@@ -441,9 +441,9 @@ static void add_real_exon(GtTranscriptExons *te, GtRange range,
 }
 
 static void add_nucleotide_exon(GtBittab *nucleotides, GtRange range,
-                                GtRange real_range, unsigned long *FP)
+                                GtRange real_range, GtUword *FP)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(nucleotides);
   for (i = range.start; i <= range.end; i++) {
     if (gt_range_within(&real_range, i)) {
@@ -648,7 +648,7 @@ static bool genes_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2,
 {
   GtArray *exons_1, *exons_2, *mRNAs_1, *mRNAs_2;
   StoreGeneFeatureInfo info;
-  unsigned long i;
+  GtUword i;
   bool equal;
   GT_UNUSED int had_err;
 
@@ -806,7 +806,7 @@ static void determine_true_exon(GtFeatureNode *fn, GtStrand predicted_strand,
                                 GtEvaluator *exon_evaluator_collapsed)
 {
   GtRange *actual_range;
-  unsigned long num, *ctr_ptr;
+  GtUword num, *ctr_ptr;
 
   if ((actual_range = bsearch(predicted_range,
                               predicted_strand == GT_STRAND_FORWARD
@@ -960,7 +960,7 @@ static void compare_features(GtArray *real_genome_nodes, GtFeatureNode *fn,
 {
   GtStrand predicted_strand;
   GtGenomeNode **real_gn;
-  unsigned long i, num;
+  GtUword i, num;
   gt_assert(real_genome_nodes && fn && genes_forward && genes_reverse);
   gt_assert(gene_evaluator && features_are_equal && feature_type);
   predicted_strand = gt_feature_node_get_strand(fn);
@@ -994,7 +994,7 @@ static int process_predicted_feature(GtFeatureNode *fn, void *data,
 {
   ProcessPredictedFeatureInfo *info = (ProcessPredictedFeatureInfo*) data;
   GtRange predicted_range;
-  unsigned long i, num;
+  GtUword i, num;
   GtStrand predicted_strand;
   GtArray *real_genome_nodes;
   GtGenomeNode **real_gn;
@@ -1543,10 +1543,10 @@ static void show_nucleotide_values(NucEval *nucleotides, const char *level,
                   (nucleotides->TP + nucleotides->FP);
   }
   gt_file_xprintf(outfp, "nucleotide sensitivity (%s level): %6.2f%% "
-                  "(TP=%lu/(TP=%lu + FN=%lu))\n", level, sensitivity * 100.0,
+                  "(TP="GT_LU"/(TP="GT_LU" + FN="GT_LU"))\n", level, sensitivity * 100.0,
                   nucleotides->TP, nucleotides->TP, nucleotides->FN);
   gt_file_xprintf(outfp, "nucleotide specificity (%s level): %6.2f%% "
-                  "(TP=%lu/(TP=%lu + FP=%lu))\n", level, specificity * 100.0,
+                  "(TP="GT_LU"/(TP="GT_LU" + FP="GT_LU"))\n", level, specificity * 100.0,
                   nucleotides->TP, nucleotides->TP, nucleotides->FP);
 }
 
@@ -1558,36 +1558,36 @@ void gt_stream_evaluator_show(GtStreamEvaluator *se, GtFile *outfp)
     /* gene level */
     gt_file_xprintf(outfp, "gene sensitivity (mRNA level): ");
     gt_evaluator_show_sensitivity(se->mRNA_gene_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
+    gt_file_xprintf(outfp, " (missing genes: "GT_LU")\n", se->missing_genes);
 
     gt_file_xprintf(outfp, "gene specificity (mRNA level): ");
     gt_evaluator_show_specificity(se->mRNA_gene_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
+    gt_file_xprintf(outfp, " (wrong genes: "GT_LU")\n", se->wrong_genes);
 
     gt_file_xprintf(outfp, "gene sensitivity (CDS level): ");
     gt_evaluator_show_sensitivity(se->CDS_gene_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
+    gt_file_xprintf(outfp, " (missing genes: "GT_LU")\n", se->missing_genes);
 
     gt_file_xprintf(outfp, "gene specificity (CDS level): ");
     gt_evaluator_show_specificity(se->CDS_gene_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
+    gt_file_xprintf(outfp, " (wrong genes: "GT_LU")\n", se->wrong_genes);
 
     /* mRNA level */
     gt_file_xprintf(outfp, "mRNA sensitivity (mRNA level): ");
     gt_evaluator_show_sensitivity(se->mRNA_mRNA_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
+    gt_file_xprintf(outfp, " (missing mRNAs: "GT_LU")\n", se->missing_mRNAs);
 
     gt_file_xprintf(outfp, "mRNA specificity (mRNA level): ");
     gt_evaluator_show_specificity(se->mRNA_mRNA_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
+    gt_file_xprintf(outfp, " (wrong mRNAs: "GT_LU")\n", se->wrong_mRNAs);
 
     gt_file_xprintf(outfp, "mRNA sensitivity (CDS level): ");
     gt_evaluator_show_sensitivity(se->CDS_mRNA_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
+    gt_file_xprintf(outfp, " (missing mRNAs: "GT_LU")\n", se->missing_mRNAs);
 
     gt_file_xprintf(outfp, "mRNA specificity (CDS level): ");
     gt_evaluator_show_specificity(se->CDS_mRNA_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
+    gt_file_xprintf(outfp, " (wrong mRNAs: "GT_LU")\n", se->wrong_mRNAs);
 
     /* mRNA exon level */
     show_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
@@ -1610,11 +1610,11 @@ void gt_stream_evaluator_show(GtStreamEvaluator *se, GtFile *outfp)
     /* LTR_retrotransposon prediction */
     gt_file_xprintf(outfp, "LTR_retrotransposon sensitivity: ");
     gt_evaluator_show_sensitivity(se->LTR_evaluator, outfp);
-    gt_file_xprintf(outfp, " (missing LTRs: %lu)\n", se->missing_LTRs);
+    gt_file_xprintf(outfp, " (missing LTRs: "GT_LU")\n", se->missing_LTRs);
 
     gt_file_xprintf(outfp, "LTR_retrotransposon specificity: ");
     gt_evaluator_show_specificity(se->LTR_evaluator, outfp);
-    gt_file_xprintf(outfp, " (wrong LTRs: %lu)\n", se->wrong_LTRs);
+    gt_file_xprintf(outfp, " (wrong LTRs: "GT_LU")\n", se->wrong_LTRs);
   }
 }
 

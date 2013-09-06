@@ -42,7 +42,7 @@ static int check_cds_phases(GtArray *cds_features, GtCDSCheckVisitor *v,
   GtPhase current_phase, correct_phase = GT_PHASE_ZERO;
   GtFeatureNode *fn;
   GtStrand strand;
-  unsigned long i, current_length;
+  GtUword i, current_length;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(cds_features);
@@ -204,7 +204,7 @@ static GtArray* find_cds_parents(GtFeatureNode *cds_feature, GtFeatureNode *fn)
 static void split_cds_feature(GtFeatureNode *cds_feature, GtFeatureNode *fn)
 {
   GtArray *parents;
-  unsigned long i;
+  GtUword i;
   gt_assert(cds_feature && fn);
 
   /* find parents */
@@ -235,7 +235,7 @@ static void split_cds_feature(GtFeatureNode *cds_feature, GtFeatureNode *fn)
 static void split_cds_features(GtHashmap *features_to_split, GtFeatureNode *fn)
 {
   GtArray *cds_features;
-  unsigned long i;
+  GtUword i;
   GT_UNUSED int had_err;
   gt_assert(features_to_split && fn);
   cds_features = gt_array_new(sizeof (GtFeatureNode*));

@@ -34,7 +34,7 @@ typedef struct
   GtUchar *bytecode,  /* buffer for encoded word to be searched */
         *rcbuf;
   const GtUchar *mertable, *lastmer;
-  unsigned long mersize;
+  GtUword mersize;
   unsigned int showmode,
                searchstrand;
   GtAlphabet *dnaalpha;
@@ -45,7 +45,7 @@ static void gt_tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
                                unsigned int showmode,
                                unsigned int searchstrand)
 {
-  unsigned long merbytes;
+  GtUword merbytes;
 
   merbytes = gt_tyrindex_merbytes(tyrindex);
   tyrsearchinfo->mersize = gt_tyrindex_mersize(tyrindex);
@@ -110,9 +110,9 @@ static void mermatchoutput(const Tyrindex *tyrindex,
                            bool forward)
 {
   bool firstitem = true;
-  unsigned long queryposition;
+  GtUword queryposition;
 
-  queryposition = (unsigned long) (qptr-query);
+  queryposition = (GtUword) (qptr-query);
   if (tyrsearchinfo->showmode & SHOWQSEQNUM)
   {
     printf(Formatuint64_t,PRINTuint64_tcast(unitnum));
@@ -121,13 +121,13 @@ static void mermatchoutput(const Tyrindex *tyrindex,
   if (tyrsearchinfo->showmode & SHOWQPOS)
   {
     ADDTABULATOR;
-    printf("%c%lu",forward ? '+' : '-',queryposition);
+    printf("%c"GT_LU"",forward ? '+' : '-',queryposition);
   }
   if (tyrsearchinfo->showmode & SHOWCOUNTS)
   {
-    unsigned long mernumber = gt_tyrindex_ptr2number(tyrindex,result);
+    GtUword mernumber = gt_tyrindex_ptr2number(tyrindex,result);
     ADDTABULATOR;
-    printf("%lu",gt_tyrcountinfo_get(tyrcountinfo,mernumber));
+    printf(""GT_LU"",gt_tyrcountinfo_get(tyrcountinfo,mernumber));
   }
   if (tyrsearchinfo->showmode & SHOWSEQUENCE)
   {
@@ -149,11 +149,11 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
                                const Tyrbckinfo *tyrbckinfo,
                                uint64_t unitnum,
                                const GtUchar *query,
-                               unsigned long querylen,
+                               GtUword querylen,
                                GT_UNUSED const char *desc)
 {
   const GtUchar *qptr, *result;
-  unsigned long offset, skipvalue;
+  GtUword offset, skipvalue;
 
   if (tyrsearchinfo->mersize > querylen)
   {
@@ -268,7 +268,7 @@ int gt_tyrsearch(const char *tyrindexname,
   if (!haserr)
   {
     const GtUchar *query;
-    unsigned long querylen;
+    GtUword querylen;
     char *desc = NULL;
     uint64_t unitnum;
     int retval;

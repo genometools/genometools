@@ -29,7 +29,7 @@
 
 #define OUTCHAR(C)         gt_file_xfputc((C),outfp)
 
-#define OUTSTRINGNUM(N,S)  gt_file_xprintf(outfp,"%*lu",(int) (N), (S))
+#define OUTSTRINGNUM(N,S)  gt_file_xprintf(outfp,"%*"GT_LUS,(int) (N), (S))
 
 #define CHECK_FOR_IDENTICAL_SUBSTRING_OF_LENGTH_0(EOPPTR)\
         if ((EOPPTR) == 0)\
@@ -68,12 +68,12 @@
 
 #define NUMWIDTH  12  /* width of position right of alignment */
 
-static unsigned long calctotallengthofintron(unsigned long *numofeopsinintron,
+static GtUword calctotallengthofintron(GtUword *numofeopsinintron,
                                     Editoperation *intronstart,
                                     Editoperation *alignmentstart)
 {
   Editoperation *eopptr;
-  unsigned long totalintronlength = 0;
+  GtUword totalintronlength = 0;
   bool breakforloop = false;
 
   *numofeopsinintron = 0;
@@ -109,15 +109,15 @@ static unsigned long calctotallengthofintron(unsigned long *numofeopsinintron,
   of the alignment.
 */
 
-static unsigned long fillthelines(GtUchar *firstline,GtUchar *secondline,
+static GtUword fillthelines(GtUchar *firstline,GtUchar *secondline,
                                   const GtUchar *useq, const GtUchar *vseq,
                                   Editoperation *alignment,
-                                  unsigned long lenalg, unsigned long linewidth,
-                                  unsigned long showintronmaxlen,
+                                  GtUword lenalg, GtUword linewidth,
+                                  GtUword showintronmaxlen,
                                   GtArrayShortIntronInfo *shortintroninfo)
 {
   Editoperation *eopptr;
-  unsigned long l, intronlength, totalintronlength, numofeopsinintron,
+  GtUword l, intronlength, totalintronlength, numofeopsinintron,
                 restlength, end, completeshortintronlen = 0, i = 0, j = 0;
   GtUchar *fptr = firstline, *sptr = secondline;
   ShortIntronInfo oneshortintron;
@@ -138,7 +138,7 @@ static unsigned long fillthelines(GtUchar *firstline,GtUchar *secondline,
         switch (*eopptr & ~MAXIDENTICALLENGTH) {
         case 0:                               /* match */
           CHECK_FOR_IDENTICAL_SUBSTRING_OF_LENGTH_0(*eopptr);
-          for (l = 0; l < (unsigned long) *eopptr; l++) {
+          for (l = 0; l < (GtUword) *eopptr; l++) {
             *fptr++ = useq[i];
             i++;
           }
@@ -151,7 +151,7 @@ static unsigned long fillthelines(GtUchar *firstline,GtUchar *secondline,
 
             /* compute the rest length which is necessary to fill the current
                line */
-            restlength = (unsigned long) (fptr - firstline) % linewidth;
+            restlength = (GtUword) (fptr - firstline) % linewidth;
             if (restlength != 0) {
               /* restlength is strictly smaller than linewidth" */
               gt_assert(restlength < linewidth);
@@ -171,7 +171,7 @@ static unsigned long fillthelines(GtUchar *firstline,GtUchar *secondline,
 
                /* store short intron information if necessary */
                if (shortintroninfo) {
-                 oneshortintron.start  = (unsigned long) (fptr - firstline +
+                 oneshortintron.start  = (GtUword) (fptr - firstline +
                                                  completeshortintronlen);
                  end = oneshortintron.start +
                        ((totalintronlength - restlength - 2 * linewidth)
@@ -231,7 +231,7 @@ static unsigned long fillthelines(GtUchar *firstline,GtUchar *secondline,
         switch (*eopptr & ~MAXIDENTICALLENGTH) {
         case 0:                               /* match */
           CHECK_FOR_IDENTICAL_SUBSTRING_OF_LENGTH_0(*eopptr);
-          for (l = 0; l < (unsigned long) *eopptr; l++) {
+          for (l = 0; l < (GtUword) *eopptr; l++) {
             *sptr++ = vseq[j];
             j++;
           }
@@ -244,7 +244,7 @@ static unsigned long fillthelines(GtUchar *firstline,GtUchar *secondline,
 
             /* compute the rest length which is necessary to fill the current
                line */
-            restlength = (unsigned long) (sptr - secondline) % linewidth;
+            restlength = (GtUword) (sptr - secondline) % linewidth;
             if (restlength != 0) {
               /* restlength is strictly smaller than linewidth */
               gt_assert(restlength < linewidth);
@@ -282,7 +282,7 @@ static unsigned long fillthelines(GtUchar *firstline,GtUchar *secondline,
     }
   }
 
-  return (unsigned long) (sptr-secondline);
+  return (GtUword) (sptr-secondline);
 }
 
 static void match_mismatch_genomicdnaline(GtUchar **genomicdnaptr,
@@ -291,7 +291,7 @@ static void match_mismatch_genomicdnaline(GtUchar **genomicdnaptr,
                                           bool
                                           *processing_intron_with_2_bases_left,
                                           const GtUchar *genseqorig,
-                                          unsigned long *genseqindex)
+                                          GtUword *genseqindex)
 {
   if (*processing_intron_with_2_bases_left) {
     /* this means we are after an intron with 2 bases left
@@ -322,16 +322,16 @@ static void match_mismatch_genomicdnaline(GtUchar **genomicdnaptr,
   protein alignments.
 */
 
-static unsigned long construct_genomic_dna_line(GtUchar *genomicdnaline,
-                                       GT_UNUSED unsigned long
+static GtUword construct_genomic_dna_line(GtUchar *genomicdnaline,
+                                       GT_UNUSED GtUword
                                        lengthofgenomicdnaline,
                                        const GtUchar *genseqorig,
                                        Editoperation *alignment,
-                                       unsigned long lenalg)
+                                       GtUword lenalg)
 {
   Editoperation *eopptr;
   Eoptype eoptype;
-  unsigned long eoplength, l,
+  GtUword eoplength, l,
        i = 0;
   GtUchar *genomicdnaptr = genomicdnaline;
 #ifndef NDEBUG
@@ -435,7 +435,7 @@ static unsigned long construct_genomic_dna_line(GtUchar *genomicdnaline,
   gt_assert(!processing_intron_with_1_base_left);
   gt_assert(!processing_intron_with_2_bases_left);
 
-  return (unsigned long) (genomicdnaptr - genomicdnaline);
+  return (GtUword) (genomicdnaptr - genomicdnaline);
 }
 
 static void match_mismatch_genomicproteinline(GtUchar **genomicproteinptr,
@@ -447,8 +447,8 @@ static void match_mismatch_genomicproteinline(GtUchar **genomicproteinptr,
                                           GtUchar *first_base_left,
                                           GtUchar *second_base_left,
                                           GtUchar *dummyptr,
-                                          unsigned long *genseqindex,
-                                          unsigned long translationschemenumber)
+                                          GtUword *genseqindex,
+                                          GtUword translationschemenumber)
 {
   GtUchar dna[GT_CODON_LENGTH];
   GtTransTable *transtable;
@@ -517,18 +517,18 @@ static void match_mismatch_genomicproteinline(GtUchar **genomicproteinptr,
   protein alignments.
 */
 
-static unsigned long construct_genomic_protein_line(GtUchar *genomicproteinline,
-                                                    GT_UNUSED unsigned long
+static GtUword construct_genomic_protein_line(GtUchar *genomicproteinline,
+                                                    GT_UNUSED GtUword
                                                     lengthofgenomicproteinline,
                                                     const GtUchar *genseqorig,
                                                     Editoperation *alignment,
-                                                    unsigned long lenalg,
-                                                    unsigned long
+                                                    GtUword lenalg,
+                                                    GtUword
                                                     translationschemenumber)
 {
   Editoperation *eopptr;
   Eoptype eoptype;
-  unsigned long eoplength, l,
+  GtUword eoplength, l,
        i = 0;
   GtUchar first_base_left    = (GtUchar) UNDEFCHAR,
         second_base_left   = (GtUchar) UNDEFCHAR,
@@ -636,7 +636,7 @@ static unsigned long construct_genomic_protein_line(GtUchar *genomicproteinline,
   gt_assert(!processing_intron_with_1_base_left);
   gt_assert(!processing_intron_with_2_bases_left);
 
-  return (unsigned long) (genomicproteinptr - genomicproteinline);
+  return (GtUword) (genomicproteinptr - genomicproteinline);
 }
 
 static void match_mismatch_referenceproteinline(GtUchar **referenceproteinptr,
@@ -645,7 +645,7 @@ static void match_mismatch_referenceproteinline(GtUchar **referenceproteinptr,
                                           bool
                                           *processing_intron_with_2_bases_left,
                                           const GtUchar *refseqorig,
-                                          unsigned long *refseqindex)
+                                          GtUword *refseqindex)
 {
   if (*processing_intron_with_2_bases_left) {
     *processing_intron_with_2_bases_left = false;
@@ -672,17 +672,17 @@ static void match_mismatch_referenceproteinline(GtUchar **referenceproteinptr,
   protein alignments.
 */
 
-static unsigned long construct_reference_protein_line(GtUchar
+static GtUword construct_reference_protein_line(GtUchar
                                                       *referenceproteinline,
-                                                      GT_UNUSED unsigned long
+                                                      GT_UNUSED GtUword
                                                    lengthofreferenceproteinline,
                                                       const GtUchar *refseqorig,
                                                       Editoperation *alignment,
-                                                      unsigned long lenalg)
+                                                      GtUword lenalg)
 {
   Editoperation *eopptr;
   Eoptype eoptype;
-  unsigned long eoplength, l,
+  GtUword eoplength, l,
        i = 0;
   GtUchar *referenceproteinptr = referenceproteinline;
 #ifndef NDEBUG
@@ -771,22 +771,22 @@ static unsigned long construct_reference_protein_line(GtUchar
   gt_assert(!processing_intron_with_1_base_left);
   gt_assert(!processing_intron_with_2_bases_left);
 
-  return (unsigned long) (referenceproteinptr - referenceproteinline);
+  return (GtUword) (referenceproteinptr - referenceproteinline);
 }
 
-static unsigned long filltheproteinlines(GtUchar *genomicdnaline,
+static GtUword filltheproteinlines(GtUchar *genomicdnaline,
                                 GtUchar *genomicproteinline,
                                 GtUchar *referenceproteinline,
-                                unsigned long lengthofgenomicdnaline,
-                                unsigned long lengthofgenomicproteinline,
-                                unsigned long lengthofreferenceproteinline,
+                                GtUword lengthofgenomicdnaline,
+                                GtUword lengthofgenomicproteinline,
+                                GtUword lengthofreferenceproteinline,
                                 const GtUchar *genseqorig,
                                 const GtUchar *refseqorig,
                                 Editoperation *alignment,
-                                unsigned long lenalg,
-                                unsigned long translationschemenumber)
+                                GtUword lenalg,
+                                GtUword translationschemenumber)
 {
-  unsigned long GT_UNUSED genomicdnalinelen,
+  GtUword GT_UNUSED genomicdnalinelen,
        GT_UNUSED genomicproteinlinelen,
        referenceproteinlinelen;
 
@@ -842,12 +842,12 @@ static GtUchar implodewildcard(GtUchar c, bool wildcardimplosion,
   \texttt{outfp}.
 */
 
-static void formatseqwithgaps(GtFile *outfp, GtUchar *sorig, unsigned long len,
-                              unsigned long *insertioncount,
+static void formatseqwithgaps(GtFile *outfp, GtUchar *sorig, GtUword len,
+                              GtUword *insertioncount,
                               bool countproteininsertions, GtAlphabet *alphabet,
                               bool wildcardimplosion)
 {
-  unsigned long i;
+  GtUword i;
 
   for (i=0; i<len; i++)
   {
@@ -913,10 +913,10 @@ static void formatseqwithgaps(GtFile *outfp, GtUchar *sorig, unsigned long len,
 static void showeditopline(GtFile *outfp,
                            GtUchar *firstlineorig,
                            GtUchar *secondlineorig,
-                           unsigned long len,
+                           GtUword len,
                            GtAlphabet *alphabet)
 {
-  unsigned long i;
+  GtUword i;
   GtUchar acompare, bcompare, aorig, borig;
   bool charequal, charinline = false;
 
@@ -975,11 +975,11 @@ static void showeditopline(GtFile *outfp,
 static void showeditoplineprotein(GtFile *outfp,
                                   GtUchar *genomicproteinline,
                                   GtUchar *referenceproteinline,
-                                  unsigned long len,
+                                  GtUword len,
                                   GtScoreMatrix *score_matrix,
                                   GtAlphabet *score_matrix_alphabet)
 {
-  unsigned long i;
+  GtUword i;
   GtUchar genchar, refchar;
   int score;
 
@@ -1044,21 +1044,21 @@ static void showeditoplineprotein(GtFile *outfp,
 */
 
 static void formatalignment(GtFile *outfp, GtUchar *firstlineorig,
-                            GtUchar *secondlineorig, unsigned long numofcols,
-                            unsigned long linewidth, unsigned long startfirst,
-                            unsigned long startsecond, unsigned long totalulen,
+                            GtUchar *secondlineorig, GtUword numofcols,
+                            GtUword linewidth, GtUword startfirst,
+                            GtUword startsecond, GtUword totalulen,
                             GtAlphabet *alphabet,
                             GtArrayShortIntronInfo *shortintroninfo,
                             bool reverse_subject_pos, bool wildcardimplosion)
 {
-  unsigned long len, i = 0;
-  unsigned long tennerblocksadjustment = 0,
+  GtUword len, i = 0;
+  GtUword tennerblocksadjustment = 0,
        firstinsertioncount    = 0,
        secondinsertioncount   = 0,
        currentshortintroninfo = 0,
        completeshortintronlen = 0;
-  long j, numofblanks;
-  unsigned long shortintronstart,
+  GtWord j, numofblanks;
+  GtUword shortintronstart,
        shortintronend,
        shortintronlength;
 
@@ -1128,13 +1128,13 @@ static void formatalignment(GtFile *outfp, GtUchar *firstlineorig,
         shortintronlength = shortintroninfo->spaceShortIntronInfo
                             [currentshortintroninfo].length;
 
-        numofblanks  = (long) linewidth - 33;
+        numofblanks  = (GtWord) linewidth - 33;
         numofblanks -= floor(log10((double) shortintronstart))+1;
         numofblanks -= floor(log10((double) shortintronend))+1;
         numofblanks -= floor(log10((double) shortintronlength))+1;
         numofblanks += (linewidth / 10 ) - 1;
 
-        gt_file_xprintf(outfp, "// intron part %lu %lu (%lu n) not shown",
+        gt_file_xprintf(outfp, "// intron part "GT_LU" "GT_LU" ("GT_LU" n) not shown",
                         shortintronstart, shortintronend, shortintronlength);
 
         for (j = 0; j < numofblanks; j++) {
@@ -1143,7 +1143,7 @@ static void formatalignment(GtFile *outfp, GtUchar *firstlineorig,
 
         gt_file_xprintf(outfp, "//\n\n");
         gt_file_xprintf(outfp, "//");
-        for (j = 2; j < (long) linewidth - 2; j++) {
+        for (j = 2; j < (GtWord) linewidth - 2; j++) {
           if ((j != 0) && (j%10 == 0)) {
             OUTCHAR(' ');
           }
@@ -1166,18 +1166,18 @@ static void formatproteinalignment(GtFile *outfp,
                                    GtUchar *genomicdnaline,
                                    GtUchar *genomicproteinline,
                                    GtUchar *referenceproteinline,
-                                   unsigned long numofcols,
-                                   unsigned long linewidth,
-                                   unsigned long startfirst,
-                                   unsigned long startsecond,
-                                   unsigned long totalulen,
+                                   GtUword numofcols,
+                                   GtUword linewidth,
+                                   GtUword startfirst,
+                                   GtUword startsecond,
+                                   GtUword totalulen,
                                    GtAlphabet *alphabet,
                                    GtScoreMatrix *score_matrix,
                                    GtAlphabet *score_matrix_alphabet,
                                    bool reverse_subject_pos,
                                    bool wildcardimplosion)
 {
-  unsigned long len, codon_remainder, i = 0,
+  GtUword len, codon_remainder, i = 0,
                 tennerblocksadjustment = 0,
                 genomicdnainsertioncount = 0,
                 referenceproteininsertioncount = 0,
@@ -1241,19 +1241,19 @@ static void formatproteinalignment(GtFile *outfp,
   OUTCHAR('\n');
 }
 
-unsigned long gthfillthethreealignmentlines(GtUchar **firstline,
+GtUword gthfillthethreealignmentlines(GtUchar **firstline,
                                    GtUchar **secondline,
                                    GtUchar **thirdline,
                                    Editoperation *alignment,
-                                   unsigned long lenalg,
-                                   unsigned long indelcount,
+                                   GtUword lenalg,
+                                   GtUword indelcount,
                                    const GtUchar *genseqorig,
-                                   unsigned long genseqlen,
+                                   GtUword genseqlen,
                                    const GtUchar *refseqorig,
-                                   unsigned long refseqlen,
-                                   unsigned long translationschemenumber)
+                                   GtUword refseqlen,
+                                   GtUword translationschemenumber)
 {
-  unsigned long lengthofgenomicdnaline,
+  GtUword lengthofgenomicdnaline,
                 lengthofgenomicproteinline,
                 lengthofreferenceproteinline;
 
@@ -1285,26 +1285,26 @@ unsigned long gthfillthethreealignmentlines(GtUchar **firstline,
 }
 
 void gthshowalignmentprotein(GtFile *outfp,
-                             unsigned long linewidth,
+                             GtUword linewidth,
                              Editoperation *alignment,
-                             unsigned long lenalg,
-                             unsigned long indelcount,
+                             GtUword lenalg,
+                             GtUword indelcount,
                              const GtUchar *genseqorig,
-                             unsigned long genseqlen,
+                             GtUword genseqlen,
                              const GtUchar *refseqorig,
-                             unsigned long refseqlen,
-                             unsigned long startfirst,
-                             unsigned long startsecond,
-                             unsigned long totalulen,
-                             GT_UNUSED unsigned long showintronmaxlen,
+                             GtUword refseqlen,
+                             GtUword startfirst,
+                             GtUword startsecond,
+                             GtUword totalulen,
+                             GT_UNUSED GtUword showintronmaxlen,
                              GtAlphabet *alphabet,
-                             unsigned long translationschemenumber,
+                             GtUword translationschemenumber,
                              GtScoreMatrix *score_matrix,
                              GtAlphabet *score_matrix_alphabet,
                              bool reverse_subject_pos,
                              bool wildcardimplosion)
 {
-  unsigned long numofcols;
+  GtUword numofcols;
   GtUchar *genomicdnaline,
           *genomicproteinline,
           *referenceproteinline;
@@ -1339,19 +1339,19 @@ void gthshowalignmentprotein(GtFile *outfp,
   gt_free(referenceproteinline);
 }
 
-unsigned long gthfillthetwoalignmentlines(GtUchar **firstline,
+GtUword gthfillthetwoalignmentlines(GtUchar **firstline,
                                           GtUchar **secondline,
                                           const GtUchar *useq,
-                                          unsigned long ulen,
+                                          GtUword ulen,
                                           const GtUchar *vseq,
-                                          unsigned long vlen,
+                                          GtUword vlen,
                                           Editoperation *alignment,
-                                          unsigned long lenalg,
-                                          unsigned long linewidth,
-                                          unsigned long showintronmaxlen,
+                                          GtUword lenalg,
+                                          GtUword linewidth,
+                                          GtUword showintronmaxlen,
                                           GtArrayShortIntronInfo
                                           *shortintroninfo,
-                                          unsigned long indelcount)
+                                          GtUword indelcount)
 {
   *firstline = gt_malloc(ulen + MIN(indelcount, vlen) * sizeof (GtUchar));
   *secondline = gt_malloc(vlen + MIN(indelcount, ulen) * sizeof (GtUchar));
@@ -1379,24 +1379,24 @@ unsigned long gthfillthetwoalignmentlines(GtUchar **firstline,
 */
 
 void gthshowalignmentdna(GtFile *outfp,
-                         unsigned long linewidth,
+                         GtUword linewidth,
                          Editoperation *alignment,
-                         unsigned long lenalg,
-                         unsigned long indelcount,
+                         GtUword lenalg,
+                         GtUword indelcount,
                          const GtUchar *useqorig,
-                         unsigned long ulen,
+                         GtUword ulen,
                          const GtUchar *vseqorig,
-                         unsigned long vlen,
-                         unsigned long startfirst,
-                         unsigned long startsecond,
-                         unsigned long totalulen,
-                         unsigned long showintronmaxlen,
+                         GtUword vlen,
+                         GtUword startfirst,
+                         GtUword startsecond,
+                         GtUword totalulen,
+                         GtUword showintronmaxlen,
                          GtAlphabet *alphabet,
                          bool reverse_subject_pos,
                          bool wildcardimplosion)
 {
   GtUchar *firstlineorig, *secondlineorig;
-  unsigned long numofcolsorig;
+  GtUword numofcolsorig;
   GtArrayShortIntronInfo shortintroninfo;
 
   GT_INITARRAY(&shortintroninfo, ShortIntronInfo);

@@ -23,7 +23,7 @@
 void gt_gff3_parser_enable_strict_mode(GtGFF3Parser*);
 int  gt_gff3_parser_set_offsetfile(GtGFF3Parser*, GtStr*, GtError*);
 int  gt_gff3_parser_parse_target_attributes(const char *values,
-                                            unsigned long *num_of_targets,
+                                            GtUword *num_of_targets,
                                             GtStr *first_target_id,
                                             GtRange *first_target_range,
                                             GtStrand *first_target_strand,

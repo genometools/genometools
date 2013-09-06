@@ -47,7 +47,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
   GtFastaReaderFSM *fr = gt_fasta_reader_fsm_cast(fasta_reader);
   unsigned char cc;
   GtFastaReaderState state = EXPECTING_SEPARATOR;
-  unsigned long sequence_length = 0, line_counter = 1;
+  GtUword sequence_length = 0, line_counter = 1;
   GtStr *description, *sequence;
   int had_err = 0;
 
@@ -100,7 +100,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
           if (!sequence_length) {
             gt_assert(line_counter);
             gt_error_set(err, "empty sequence after description given in line "
-                              "%lu", line_counter - 1);
+                              ""GT_LU"", line_counter - 1);
             had_err = -1;
             break;
           }
@@ -154,7 +154,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
         had_err = -1;
         break;
       case READING_DESCRIPTION:
-        gt_error_set(err, "unfinished fasta entry in line %lu of sequence file "
+        gt_error_set(err, "unfinished fasta entry in line "GT_LU" of sequence file "
                   "\"%s\"", line_counter, gt_str_get(fr->sequence_filename));
         had_err = -1;
         break;
@@ -163,7 +163,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
         if (!sequence_length) {
           gt_assert(line_counter);
           gt_error_set(err, "empty sequence after description given in line "
-                            "%lu", line_counter - 1);
+                            ""GT_LU"", line_counter - 1);
           had_err = -1;
         }
         else {

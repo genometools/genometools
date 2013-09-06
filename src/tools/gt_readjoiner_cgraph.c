@@ -32,7 +32,7 @@ typedef struct {
   bool verbose, quiet, dot, smp1, smp2, dotdel, ext;
   GtStr  *readset;
   GtStrArray *subgraph;
-  unsigned long subgraph_depth;
+  GtUword subgraph_depth;
 } GtReadjoinerCgraphArguments;
 
 static void* gt_readjoiner_cgraph_arguments_new(void)
@@ -214,17 +214,17 @@ static int gt_readjoiner_cgraph_runner(GT_UNUSED int argc,
   }
   if (!had_err)
   {
-    unsigned long nofcnums = gt_str_array_size(arguments->subgraph);
+    GtUword nofcnums = gt_str_array_size(arguments->subgraph);
     if (nofcnums > 0)
     {
       FILE *dot_fp = NULL;
-      unsigned long i, *cnums;
+      GtUword i, *cnums;
       const char *cnum_str;
       cnums = gt_malloc(sizeof (*cnums) * nofcnums);
       for (i = 0; i < nofcnums && !had_err; i++)
       {
         cnum_str = gt_str_array_get(arguments->subgraph, i);
-        if (sscanf(cnum_str, "%lu", cnums + i) != 1)
+        if (sscanf(cnum_str, ""GT_LU"", cnums + i) != 1)
         {
           gt_error_set(err, "argument of option -subgraph is invalid");
           had_err = -1;

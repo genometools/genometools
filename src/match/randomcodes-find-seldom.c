@@ -22,18 +22,18 @@
 
 struct GtRandomcodesFindSeldomData {
   const GtEncseq *encseq;
-  unsigned long nofreads;
-  unsigned long mirror_nofseqs;
+  GtUword nofreads;
+  GtUword mirror_nofseqs;
   GtBitsequence *seldom_reads;
-  unsigned long k, c;
-  unsigned long nofseldomkmers;
+  GtUword k, c;
+  GtUword nofseldomkmers;
 };
 
 static inline void gt_randomcodes_find_seldom_process_kmer_itv(
-    const GtSeqnumrelpos *snrp, const unsigned long *suffixes,
-    unsigned long nofsuffixes, GtRandomcodesFindSeldomData *sdata)
+    const GtSeqnumrelpos *snrp, const GtUword *suffixes,
+    GtUword nofsuffixes, GtRandomcodesFindSeldomData *sdata)
 {
-  unsigned long i, relpos, seqnum;
+  GtUword i, relpos, seqnum;
   if (nofsuffixes < sdata->c)
   {
     for (i = 0; i < nofsuffixes; i++)
@@ -46,7 +46,7 @@ static inline void gt_randomcodes_find_seldom_process_kmer_itv(
       {
         GT_SETIBIT(sdata->seldom_reads, seqnum);
         sdata->nofseldomkmers++;
-        /*gt_log_log("seldom %lu-mer, count=%lu, relpos=%lu, seqnum=%lu",
+        /*gt_log_log("seldom "GT_LU"-mer, count="GT_LU", relpos="GT_LU", seqnum="GT_LU"",
             sdata->k, nofsuffixes, relpos, seqnum);*/
       }
     }
@@ -54,11 +54,11 @@ static inline void gt_randomcodes_find_seldom_process_kmer_itv(
 }
 
 int gt_randomcodes_find_seldom_process_bucket(void *data,
-    const unsigned long *bucketofsuffixes, const GtSeqnumrelpos *snrp,
-    const uint16_t *lcptab_bucket, unsigned long numberofsuffixes,
+    const GtUword *bucketofsuffixes, const GtSeqnumrelpos *snrp,
+    const uint16_t *lcptab_bucket, GtUword numberofsuffixes,
     GT_UNUSED unsigned int sortingdepth, GT_UNUSED GtError *err)
 {
-  unsigned long itvstart, next_itvstart;
+  GtUword itvstart, next_itvstart;
   unsigned int lcpvalue;
   GtRandomcodesFindSeldomData *sdata = data;
 
@@ -83,8 +83,8 @@ GtRandomcodesFindSeldomData *gt_randomcodes_find_seldom_data_new(
     GtBitsequence *seldom_reads)
 {
   GtRandomcodesFindSeldomData *sdata = gt_malloc(sizeof *sdata);
-  sdata->k = (unsigned long)k;
-  sdata->c = (unsigned long)c;
+  sdata->k = (GtUword)k;
+  sdata->c = (GtUword)c;
   sdata->encseq = encseq;
   sdata->mirror_nofseqs = gt_encseq_num_of_sequences(encseq);
   sdata->nofreads = sdata->mirror_nofseqs;
@@ -97,9 +97,9 @@ GtRandomcodesFindSeldomData *gt_randomcodes_find_seldom_data_new(
 
 void gt_randomcodes_find_seldom_data_collect_stats(
     GtRandomcodesFindSeldomData *sdata, unsigned int threadnum,
-    unsigned long *nofseldomkmers)
+    GtUword *nofseldomkmers)
 {
-  gt_log_log("thread %u: %lu", threadnum, sdata->nofseldomkmers);
+  gt_log_log("thread %u: "GT_LU"", threadnum, sdata->nofseldomkmers);
   *nofseldomkmers += sdata->nofseldomkmers;
 }
 

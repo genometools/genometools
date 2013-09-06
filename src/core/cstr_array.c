@@ -23,7 +23,7 @@
 
 char** gt_cstr_array_dup(const char **cstr_array)
 {
-  unsigned long i, size = 0;
+  GtUword i, size = 0;
   char **copy;
   gt_assert(cstr_array);
   while (cstr_array[size++]);
@@ -36,7 +36,7 @@ char** gt_cstr_array_dup(const char **cstr_array)
 
 char** gt_cstr_array_prefix_first(const char **cstr_array, const char *p)
 {
-  unsigned long i, a_len, f_len;
+  GtUword i, a_len, f_len;
   char **a;
   gt_assert(cstr_array && p);
   a_len = gt_cstr_array_size(cstr_array);
@@ -52,7 +52,7 @@ char** gt_cstr_array_prefix_first(const char **cstr_array, const char *p)
 
 char** gt_cstr_array_preprend(const char **cstr_array, const char *p)
 {
-  unsigned long i, a_len;
+  GtUword i, a_len;
   char **a;
   gt_assert(cstr_array && p);
   a_len = gt_cstr_array_size(cstr_array);
@@ -66,7 +66,7 @@ char** gt_cstr_array_preprend(const char **cstr_array, const char *p)
 
 void gt_cstr_array_show(char **cstr_array, FILE *fp)
 {
-  unsigned long i = 0;
+  GtUword i = 0;
   while (cstr_array[i]) {
     if (i)
       gt_xfputc(' ', fp);
@@ -78,7 +78,7 @@ void gt_cstr_array_show(char **cstr_array, FILE *fp)
 
 void gt_cstr_array_show_genfile(const char **cstr_array, GtFile *fp)
 {
-  unsigned long i = 0;
+  GtUword i = 0;
   while (cstr_array[i]) {
     if (i)
       gt_file_xfputc(' ', fp);
@@ -88,9 +88,9 @@ void gt_cstr_array_show_genfile(const char **cstr_array, GtFile *fp)
   gt_file_xfputc('\n', fp);
 }
 
-unsigned long gt_cstr_array_size(const char **cstr_array)
+GtUword gt_cstr_array_size(const char **cstr_array)
 {
-  unsigned long i = 0;
+  GtUword i = 0;
   while (cstr_array[i])
     i++;
   return i;
@@ -98,7 +98,7 @@ unsigned long gt_cstr_array_size(const char **cstr_array)
 
 void gt_cstr_array_delete(char **cstr_array)
 {
-  unsigned long i = 0;
+  GtUword i = 0;
   if (!cstr_array) return;
   while (cstr_array[i])
     gt_free(cstr_array[i++]);

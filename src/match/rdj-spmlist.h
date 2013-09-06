@@ -30,29 +30,29 @@ typedef enum {
 
 #define DECLARE_GT_SPMLIST_BIN_FORMAT(BITS)\
 void gt_spmlist_write_header_bin ## BITS(FILE *file);\
-void gt_spmproc_show_bin ## BITS(unsigned long suffix_seqnum,\
-    unsigned long prefix_seqnum, unsigned long length, bool suffixseq_direct,\
+void gt_spmproc_show_bin ## BITS(GtUword suffix_seqnum,\
+    GtUword prefix_seqnum, GtUword length, bool suffixseq_direct,\
     bool prefixseq_direct, void *file)
 
 DECLARE_GT_SPMLIST_BIN_FORMAT(32);
 DECLARE_GT_SPMLIST_BIN_FORMAT(64);
 
 /* parse a spmlist file; format is recognized by reading the first byte */
-int gt_spmlist_parse(const char* filename, unsigned long min_length,
+int gt_spmlist_parse(const char* filename, GtUword min_length,
     GtSpmproc processoverlap, void *data, GtError *err);
 
-void gt_spmproc_show_ascii(unsigned long suffix_seqnum,
-    unsigned long prefix_seqnum, unsigned long length, bool suffixseq_direct,
+void gt_spmproc_show_ascii(GtUword suffix_seqnum,
+    GtUword prefix_seqnum, GtUword length, bool suffixseq_direct,
     bool prefixseq_direct, void *data /* GtFile */);
 
 /* approx overlaps: */
 
-int gt_spmlist_approx_parse(const char* filename, unsigned long min_length,
+int gt_spmlist_approx_parse(const char* filename, GtUword min_length,
     GtSpmprocA processoverlap, void *data, GtError *err);
 
-void gt_spmproc_a_show_ascii(unsigned long suffix_seqnum,
-    unsigned long prefix_seqnum, unsigned long suffix_length,
-    unsigned long prefix_length, unsigned long unit_edist,
+void gt_spmproc_a_show_ascii(GtUword suffix_seqnum,
+    GtUword prefix_seqnum, GtUword suffix_length,
+    GtUword prefix_length, GtUword unit_edist,
     bool suffixseq_direct, bool prefixseq_direct, void *data /* GtFile */);
 
 /* tests */

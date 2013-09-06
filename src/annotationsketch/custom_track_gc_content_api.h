@@ -31,9 +31,9 @@ typedef struct GtCustomTrackGcContent GtCustomTrackGcContent;
    with <avg> between 0 and 1. If <show_scale> is set to true, then a vertical
    scale rule is drawn at the left end of the curve. */
 GtCustomTrack* gt_custom_track_gc_content_new(const char *seq,
-                                              unsigned long seqlen,
-                                              unsigned long windowsize,
-                                              unsigned long height,
+                                              GtUword seqlen,
+                                              GtUword windowsize,
+                                              GtUword height,
                                               double avg,
                                               bool show_scale);
 #endif

@@ -48,7 +48,7 @@ typedef struct {
           overlap_range;
   GtStrand strand,
            targetstrand;
-  unsigned long max_gene_length,
+  GtUword max_gene_length,
                 max_gene_num,
                 feature_num;
   double min_gene_score,

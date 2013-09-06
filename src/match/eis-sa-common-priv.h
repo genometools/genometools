@@ -37,7 +37,7 @@ typedef MRAEnc *(*newMRAEncFunc)(const SASeqSrc *src);
 
 struct SASeqSrc
 {
-  unsigned long seqLen;
+  GtUword seqLen;
   createReaderFunc createReader;
   createTranslatorFunc createTranslator;
   getRot0PosFunc getRot0Pos;
@@ -51,7 +51,7 @@ struct SASeqSrc
 };
 
 static inline void
-initSASeqSrc(SASeqSrc *src, unsigned long seqLen,
+initSASeqSrc(SASeqSrc *src, GtUword seqLen,
              createTranslatorFunc createTranslator,
              createReaderFunc createReader,
              getRot0PosFunc getRot0Pos, getSeqStatsFunc getSeqStats,

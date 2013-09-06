@@ -20,7 +20,7 @@
 
 #include "core/types_api.h"
 
-unsigned long gt_squarededistunit (const GtUchar *u, unsigned long m,
-                                const GtUchar *v, unsigned long n);
+GtUword gt_squarededistunit (const GtUchar *u, GtUword m,
+                                const GtUchar *v, GtUword n);
 
 #endif

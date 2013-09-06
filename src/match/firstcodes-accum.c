@@ -44,17 +44,17 @@ static void gt_firstcodes_accum_kmerscan_range(
                                          const GtBitsequence *twobitencoding,
                                          unsigned int kmersize,
                                          unsigned int minmatchlength,
-                                         unsigned long startpos,
-                                         unsigned long length,
-                                         unsigned long maxunitindex,
+                                         GtUword startpos,
+                                         GtUword length,
+                                         GtUword maxunitindex,
                                          GtCodeposbuffer *buf)
 {
-  const unsigned long maskright = GT_MASKRIGHT(kmersize);
-  const unsigned long lastpossiblepos = length - minmatchlength;
-  const unsigned long lastfrelpos = length - kmersize;
+  const GtUword maskright = GT_MASKRIGHT(kmersize);
+  const GtUword lastpossiblepos = length - minmatchlength;
+  const GtUword lastfrelpos = length - kmersize;
   const unsigned int shiftleft = GT_MULT2(kmersize-1);
   unsigned int shiftright;
-  unsigned long unitindex, frelpos;
+  GtUword unitindex, frelpos;
   GtTwobitencoding currentencoding;
   GtCodetype cc, marksubstringtmpcode, fcode, rccode;
 
@@ -102,16 +102,16 @@ static void gt_firstcodes_accum_kmerscan_range(
 
 static void gt_firstcodes_accum_kmerscan_eqlen(
                                      const GtBitsequence *twobitencoding,
-                                     unsigned long equallength,
-                                     unsigned long totallength,
-                                     unsigned long maxunitindex,
+                                     GtUword equallength,
+                                     GtUword totallength,
+                                     GtUword maxunitindex,
                                      unsigned int kmersize,
                                      unsigned int minmatchlength,
                                      GtCodeposbuffer *buf)
 {
-  unsigned long startpos;
+  GtUword startpos;
 
-  if (equallength >= (unsigned long) kmersize)
+  if (equallength >= (GtUword) kmersize)
   {
     for (startpos = 0; startpos < totallength; startpos += equallength+1)
     {
@@ -128,13 +128,13 @@ static void gt_firstcodes_accum_kmerscan_eqlen(
 
 static void gt_firstcodes_accum_kmerscan(const GtEncseq *encseq,
                                          const GtBitsequence *twobitencoding,
-                                         unsigned long totallength,
-                                         unsigned long maxunitindex,
+                                         GtUword totallength,
+                                         GtUword maxunitindex,
                                          unsigned int kmersize,
                                          unsigned int minmatchlength,
                                          GtCodeposbuffer *buf)
 {
-  unsigned long laststart = 0;
+  GtUword laststart = 0;
 
   if (gt_encseq_has_specialranges(encseq))
   {
@@ -146,7 +146,7 @@ static void gt_firstcodes_accum_kmerscan(const GtEncseq *encseq,
            && range.start < totallength)
     {
       gt_assert(range.start >= laststart);
-      if (range.start - laststart >= (unsigned long) minmatchlength)
+      if (range.start - laststart >= (GtUword) minmatchlength)
       {
         gt_firstcodes_accum_kmerscan_range(twobitencoding,
                                            kmersize,
@@ -160,7 +160,7 @@ static void gt_firstcodes_accum_kmerscan(const GtEncseq *encseq,
     }
     gt_specialrangeiterator_delete(sri);
   }
-  if (totallength - laststart >= (unsigned long) minmatchlength)
+  if (totallength - laststart >= (GtUword) minmatchlength)
   {
     gt_firstcodes_accum_kmerscan_range(twobitencoding,
                                        kmersize,
@@ -179,7 +179,7 @@ void gt_firstcodes_accum_runkmerscan(const GtEncseq *encseq,
 {
   const GtTwobitencoding *twobitencoding
     = gt_encseq_twobitencoding_export(encseq);
-  unsigned long totallength, maxunitindex;
+  GtUword totallength, maxunitindex;
 
   if (gt_encseq_is_mirrored(encseq))
   {
@@ -191,9 +191,9 @@ void gt_firstcodes_accum_runkmerscan(const GtEncseq *encseq,
   maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
   if (gt_encseq_accesstype_get(encseq) == GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    unsigned long equallength = gt_encseq_equallength(encseq);
+    GtUword equallength = gt_encseq_equallength(encseq);
 
-    gt_assert(equallength >= (unsigned long) kmersize);
+    gt_assert(equallength >= (GtUword) kmersize);
     gt_firstcodes_accum_kmerscan_eqlen(twobitencoding,
                                        equallength,
                                        totallength,

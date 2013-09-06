@@ -48,12 +48,12 @@ enum sfxDataRequest {
  * @return Symbol at position sufIdx or UNDEFBWTCHAR i.e. the terminator
  */
 static inline GtUchar
-sfxIdx2BWTSym(unsigned long sufIdx, const GtEncseq *encseq,
+sfxIdx2BWTSym(GtUword sufIdx, const GtEncseq *encseq,
               GtReadmode readmode);
 
 static inline size_t
 EncSeqGetSubSeq(const GtEncseq *encseq, GtReadmode readmode,
-                unsigned long pos, size_t len, GtUchar *subStr);
+                GtUword pos, size_t len, GtUchar *subStr);
 
 struct encSeqTrState
 {
@@ -73,14 +73,14 @@ struct encSeqTrState
 
 size_t gt_translateSuftab2BWT(void *data,
                               void *voiddest,
-                              const unsigned long *src,
+                              const GtUword *src,
                               size_t len);
 
 size_t gt_translateSuftab2BWTSuffixsortspace(
                                        void *translator,
                                        void *voiddest,
                                        const GtSuffixsortspace *suffixsortspace,
-                                       unsigned long offset,
+                                       GtUword offset,
                                        size_t len);
 
 struct saTaggedXltorState
@@ -115,7 +115,7 @@ SASSCreateReader(SASeqSrc *src, enum sfxDataRequest request);
 static inline Definedunsignedlong
 SASSGetRot0Pos(const SASeqSrc *src);
 
-static inline unsigned long
+static inline GtUword
 SASSGetLength(const SASeqSrc *src);
 
 static inline MRAEnc *
@@ -130,7 +130,7 @@ SASSGetSeqStats(const SASeqSrc *src);
 static inline size_t
 SASSAccessSequence(const SASeqSrc *src,
                    Symbol *dest,
-                   unsigned long pos,
+                   GtUword pos,
                    size_t len);
 
 static inline RandomSeqAccessor

@@ -28,23 +28,23 @@ static void assignfmmapspecification(GtMapspec *mapspec,
 
   fmindex = fmwithoptions->fmptr;
   gt_mapspec_add_ulong(mapspec, fmindex->tfreq,
-                       (unsigned long) TFREQSIZE(fmindex->mapsize));
+                       (GtUword) TFREQSIZE(fmindex->mapsize));
   gt_mapspec_add_ulong(mapspec, fmindex->superbfreq,
-                       (unsigned long) SUPERBFREQSIZE(fmindex->mapsize,
+                       (GtUword) SUPERBFREQSIZE(fmindex->mapsize,
                                                       fmindex->nofsuperblocks));
   gt_mapspec_add_ulong(mapspec, fmindex->markpostable,
                        fmwithoptions->storeindexpos
-                       ? (unsigned long) MARKPOSTABLELENGTH(fmindex->bwtlength,
+                       ? (GtUword) MARKPOSTABLELENGTH(fmindex->bwtlength,
                                                             fmindex->markdist)
                        : 0);
   gt_mapspec_add_ulongbound(mapspec, fmindex->boundarray,
-                            (unsigned long) fmindex->numofcodes);
+                            (GtUword) fmindex->numofcodes);
   gt_mapspec_add_pairbwtindex(mapspec, fmindex->specpos.spaceGtPairBwtidx,
                               fmwithoptions->storeindexpos
                               ? fmindex->specpos.nextfreeGtPairBwtidx
                               : 0);
   gt_mapspec_add_uchar(mapspec, fmindex->bfreq,
-                (unsigned long) BFREQSIZE(fmindex->mapsize,fmindex->nofblocks));
+                (GtUword) BFREQSIZE(fmindex->mapsize,fmindex->nofblocks));
 }
 
 int gt_flushfmindex2file(FILE *fp,

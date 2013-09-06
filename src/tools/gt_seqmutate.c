@@ -26,7 +26,7 @@
 
 typedef struct {
   unsigned int rate; /* the mutate rate */
-  unsigned long width;
+  GtUword width;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } MutateArguments;
@@ -77,7 +77,7 @@ static int gt_seqmutate_runner(int argc, const char **argv, int parsed_args,
 {
   MutateArguments *arguments = tool_arguments;
   GtBioseqIterator *bsi;
-  unsigned long i;
+  GtUword i;
   GtBioseq *bioseq;
   GtSeq *mutated_seq;
   int had_err;

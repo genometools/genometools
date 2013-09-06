@@ -26,7 +26,7 @@ struct GthPGLObject {
                                      predicted gene location lie on the forward
                                      strand of the genomic sequence.
                                      false otherwise */
-  unsigned long gen_file_num,     /* genomic file number */
+  GtUword gen_file_num,     /* genomic file number */
                 gen_seq_num,      /* genomic sequence number */
                 gen_total_length, /* total length of the genomic sequence */
                 gen_offset;       /* offset of the genomic sequence where this
@@ -57,7 +57,7 @@ GthPGL* gth_pgl_new(bool forward)
 static void sa_clusters_free(GtArray *saclusters)
 {
   GthSACluster *sacluster;
-  unsigned long i;
+  GtUword i;
   for (i = 0; i < gt_array_size(saclusters); i++) {
     sacluster = *(GthSACluster**) gt_array_get(saclusters, i);
     gt_array_delete(sacluster->members);
@@ -68,7 +68,7 @@ static void sa_clusters_free(GtArray *saclusters)
 
 void gth_pgl_delete(GthPGL *pgl)
 {
-  unsigned long i;
+  GtUword i;
 
   if (!pgl) return;
 
@@ -108,14 +108,14 @@ void gth_pgl_add_sa(GthPGL *pgl, GthSA *sa)
   gt_array_add(pgl->alignments, sa);
 }
 
-GthAGS* gth_pgl_get_ags(const GthPGL *pgl, unsigned long i)
+GthAGS* gth_pgl_get_ags(const GthPGL *pgl, GtUword i)
 {
   gt_assert(pgl && pgl->assemblies);
   gt_assert(i < gt_array_size(pgl->assemblies));
   return *(GthAGS**) gt_array_get(pgl->assemblies, i);
 }
 
-unsigned long gth_pgl_num_of_ags(const GthPGL *pgl)
+GtUword gth_pgl_num_of_ags(const GthPGL *pgl)
 {
   gt_assert(pgl && pgl->assemblies);
   return gt_array_size(pgl->assemblies);
@@ -123,7 +123,7 @@ unsigned long gth_pgl_num_of_ags(const GthPGL *pgl)
 
 void gth_pgl_set_max_ags(GthPGL *pgl, unsigned int maxagsnum)
 {
-  unsigned long i;
+  GtUword i;
   gt_assert(pgl && maxagsnum && maxagsnum != GT_UNDEF_UINT);
   if (maxagsnum < gt_array_size(pgl->assemblies)) {
     for (i = maxagsnum; i < gt_array_size(pgl->assemblies); i++)
@@ -138,25 +138,25 @@ bool gth_pgl_is_forward(const GthPGL *pgl)
   return pgl->pglo->gen_strand_forward;
 }
 
-unsigned long gth_pgl_filenum(const GthPGL *pgl)
+GtUword gth_pgl_filenum(const GthPGL *pgl)
 {
   gt_assert(pgl);
   return pgl->pglo->gen_file_num;
 }
 
-unsigned long gth_pgl_seqnum(const GthPGL *pgl)
+GtUword gth_pgl_seqnum(const GthPGL *pgl)
 {
   gt_assert(pgl);
   return pgl->pglo->gen_seq_num;
 }
 
-unsigned long gth_pgl_total_length(const GthPGL *pgl)
+GtUword gth_pgl_total_length(const GthPGL *pgl)
 {
   gt_assert(pgl);
   return pgl->pglo->gen_total_length;
 }
 
-unsigned long gth_pgl_genomic_offset(const GthPGL *pgl)
+GtUword gth_pgl_genomic_offset(const GthPGL *pgl)
 {
   gt_assert(pgl);
   return pgl->pglo->gen_offset;
@@ -164,7 +164,7 @@ unsigned long gth_pgl_genomic_offset(const GthPGL *pgl)
 
 GtRange gth_pgl_genomic_range(const GthPGL *pgl)
 {
-  unsigned long GT_UNUSED gen_offset, GT_UNUSED gen_total_length;
+  GtUword GT_UNUSED gen_offset, GT_UNUSED gen_total_length;
   GtRange range;
   GthAGS *ags;
   gt_assert(pgl);

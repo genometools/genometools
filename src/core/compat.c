@@ -43,7 +43,7 @@ int gt_mkstemp(char *template)
 #endif
 }
 
-unsigned long gt_pagesize(void)
+GtUword gt_pagesize(void)
 {
 #ifndef _WIN32
   return sysconf(_SC_PAGESIZE);
