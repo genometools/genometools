@@ -362,10 +362,10 @@ static bool is_intron(Editoperation eop)
    This is necessary for the gthcomputescores() function to work correctly.
    Otherwise one would get exons with borders (i, i-1) which can not be
    processed by the successive functions. */
-void gt_remove_zero_base_exons(Editoperation *alignment, long alignmentlength,
+void gt_remove_zero_base_exons(Editoperation *alignment, GtWord alignmentlength,
                             GthStat *stat)
 {
-  long i, j;
+  GtWord i, j;
   for (i = 1; i < alignmentlength - 1; i++) {
     if (is_insertion(alignment[i])) {
       /* editoperation is insertion, check for surrounding introns */
@@ -408,9 +408,9 @@ void gth_backtrace_path_remove_zero_base_exons(GthBacktracePath *bp,
 }
 
 static bool contains_no_zero_base_exons(Editoperation *alignment,
-                                        long alignmentlength)
+                                        GtWord alignmentlength)
 {
-  long i, j;
+  GtWord i, j;
 
   for (i = 1; i < alignmentlength - 1; i++) {
     if (is_insertion(alignment[i])) {

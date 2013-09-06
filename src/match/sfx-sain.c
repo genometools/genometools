@@ -408,23 +408,23 @@ static void gt_sainbuffer_delete(GtSainbuffer *buf)
         }
 
 static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
-                                              long *suftab,
-                                              long position);
+                                              GtWord *suftab,
+                                              GtWord position);
 
 static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
                                                    const GtEncseq *encseq,
-                                                   long *suftab);
+                                                   GtWord *suftab);
 
 static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
-                                              long *suftab,
-                                              long position,
+                                              GtWord *suftab,
+                                              GtWord position,
                                               GT_UNUSED GtUword
                                                 nonspecialentries);
 
 static void gt_sain_induceStypes2fromspecialranges(
                                    const GtSainseq *sainseq,
                                    const GtEncseq *encseq,
-                                   long *suftab,
+                                   GtWord *suftab,
                                    GtUword nonspecialentries);
 
 #include "match/sfx-sain.inc"
@@ -469,7 +469,7 @@ static void gt_sain_incrementfirstSstar(GtSainseq *sainseq,
 }
 
 static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   switch (sainseq->seqtype)
@@ -495,27 +495,27 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
   }
 }
 
-static void gt_sain_adjustsuftab(GtUword totallength,long *suftab,
+static void gt_sain_adjustsuftab(GtUword totallength,GtWord *suftab,
                                  GtUword nonspecialentries)
 {
-  long *suftabptr;
+  GtWord *suftabptr;
 
   for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
        suftabptr--)
   {
-    if (*suftabptr > 0 && *suftabptr < (long) totallength)
+    if (*suftabptr > 0 && *suftabptr < (GtWord) totallength)
     {
-      long *nextgteq;
+      GtWord *nextgteq;
 
-      *suftabptr += (long) totallength;
+      *suftabptr += (GtWord) totallength;
       nextgteq = suftabptr - 1;
-      while (nextgteq >= suftab && *nextgteq < (long) totallength)
+      while (nextgteq >= suftab && *nextgteq < (GtWord) totallength)
       {
         nextgteq--;
       }
-      if (*nextgteq >= (long) totallength)
+      if (*nextgteq >= (GtWord) totallength)
       {
-        *nextgteq -= (long) totallength;
+        *nextgteq -= (GtWord) totallength;
       }
       suftabptr = nextgteq;
     }
@@ -523,8 +523,8 @@ static void gt_sain_adjustsuftab(GtUword totallength,long *suftab,
 }
 
 static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
-                                              long *suftab,
-                                              long position)
+                                              GtWord *suftab,
+                                              GtWord position)
 {
   GtUword currentcc = gt_sainseq_getchar(sainseq,
                                                (GtUword) position);
@@ -561,7 +561,7 @@ static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
 
 static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
                                                    const GtEncseq *encseq,
-                                                   long *suftab)
+                                                   GtWord *suftab)
 {
   if (gt_encseq_has_specialranges(encseq))
   {
@@ -580,7 +580,7 @@ static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
       {
         gt_sain_special_singleSinduction1(sainseq,
                                           suftab,
-                                          (long) (range.start - 1));
+                                          (GtWord) (range.start - 1));
       }
     }
     gt_specialrangeiterator_delete(sri);
@@ -588,7 +588,7 @@ static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
 }
 
 static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   switch (sainseq->seqtype)
@@ -615,11 +615,11 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
 }
 
 static void gt_sain_moveSstar2front(GtUword countSstartype,
-                                    long *suftab,
+                                    GtWord *suftab,
                                     GT_UNUSED GtUword nonspecialentries)
 {
   GtUword readidx, writeidx = 0;
-  long position;
+  GtWord position;
 
   for (readidx = 0; (position = suftab[readidx]) < 0; readidx++)
   {
@@ -657,16 +657,16 @@ static void gt_sain_moveSstar2front(GtUword countSstartype,
 static GtUword gt_sain_fast_moveSstar2front(
                                       GtUword totallength,
                                       GtUword countSstartype,
-                                      long *suftab,
+                                      GtWord *suftab,
                                       GT_UNUSED GtUword nonspecialentries)
 {
   GtUword readidx, namecount = 0, writeidx = 0;
-  long position;
+  GtWord position;
 
   for (readidx = 0; (position = suftab[readidx]) < 0; readidx++)
   {
     position = ~position;
-    if (position >= (long) totallength)
+    if (position >= (GtWord) totallength)
     {
       namecount++;
     }
@@ -681,7 +681,7 @@ static GtUword gt_sain_fast_moveSstar2front(
       if ((position = suftab[readidx]) < 0)
       {
         position = ~position;
-        if (position >= (long) totallength)
+        if (position >= (GtWord) totallength)
         {
           namecount++;
         }
@@ -747,7 +747,7 @@ static void gt_sain_fast_assignSstarnames(GtUword totallength,
 }
 
 static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   switch (sainseq->seqtype)
@@ -768,8 +768,8 @@ static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
 }
 
 static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
-                                              long *suftab,
-                                              long position,
+                                              GtWord *suftab,
+                                              GtWord position,
                                               GT_UNUSED GtUword
                                                 nonspecialentries)
 {
@@ -796,7 +796,7 @@ static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
 static void gt_sain_induceStypes2fromspecialranges(
                                    const GtSainseq *sainseq,
                                    const GtEncseq *encseq,
-                                   long *suftab,
+                                   GtWord *suftab,
                                    GtUword nonspecialentries)
 {
   if (gt_encseq_has_specialranges(encseq))
@@ -816,7 +816,7 @@ static void gt_sain_induceStypes2fromspecialranges(
       {
         gt_sain_special_singleSinduction2(sainseq,
                                           suftab,
-                                          (long) range.start,
+                                          (GtWord) range.start,
                                           nonspecialentries);
       }
     }
@@ -825,7 +825,7 @@ static void gt_sain_induceStypes2fromspecialranges(
 }
 
 static void gt_sain_induceStypesuffixes2(const GtSainseq *sainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   switch (sainseq->seqtype)
@@ -1214,20 +1214,21 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     GT_SAIN_SHOWTIMER(sainseq->roundtable == NULL
                       ? "induce L suffixes" : "fast induce L suffixes");
 
-    gt_sain_induceLtypesuffixes1(sainseq,(long *) suftab,nonspecialentries);
+    gt_sain_induceLtypesuffixes1(sainseq,(GtWord *) suftab,nonspecialentries);
     if (sainseq->roundtable != NULL)
     {
-      gt_sain_adjustsuftab(sainseq->totallength,(long *) suftab,
+      gt_sain_adjustsuftab(sainseq->totallength,(GtWord *) suftab,
                            nonspecialentries);
     }
     gt_sain_endbuckets(sainseq);
     GT_SAIN_SHOWTIMER(sainseq->roundtable == NULL
                       ? "induce S suffixes" : "fast induce S suffixes");
-    gt_sain_induceStypesuffixes1(sainseq,(long *) suftab,nonspecialentries);
+    gt_sain_induceStypesuffixes1(sainseq,(GtWord *) suftab,nonspecialentries);
     if (sainseq->roundtable == NULL)
     {
       GT_SAIN_SHOWTIMER("simple moverSstar2front");
-      gt_sain_moveSstar2front(countSstartype,(long *) suftab,nonspecialentries);
+      gt_sain_moveSstar2front(countSstartype,(GtWord *) suftab,
+                              nonspecialentries);
       GT_SAIN_SHOWTIMER("simple assignSstarlength");
       gt_sain_assignSstarlength(sainseq,suftab + countSstartype);
       GT_SAIN_SHOWTIMER("simple assignSstarnames");
@@ -1237,7 +1238,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
       GT_SAIN_SHOWTIMER("fast moveSstar2front");
       numberofnames = gt_sain_fast_moveSstar2front(sainseq->totallength,
                                                    countSstartype,
-                                                   (long *) suftab,
+                                                   (GtWord *) suftab,
                                                    nonspecialentries);
       if (!sainseq->roundtablepoints2suftab)
       {
@@ -1311,10 +1312,10 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   }
   gt_sain_startbuckets(sainseq);
   GT_SAIN_SHOWTIMER("final induce L suffixes");
-  gt_sain_induceLtypesuffixes2(sainseq,(long *) suftab,nonspecialentries);
+  gt_sain_induceLtypesuffixes2(sainseq,(GtWord *) suftab,nonspecialentries);
   gt_sain_endbuckets(sainseq);
   GT_SAIN_SHOWTIMER("final induce S suffixes");
-  gt_sain_induceStypesuffixes2(sainseq,(long *) suftab,nonspecialentries);
+  gt_sain_induceStypesuffixes2(sainseq,(GtWord *) suftab,nonspecialentries);
   if (nonspecialentries > 0)
   {
     if (intermediatecheck)

@@ -58,7 +58,7 @@ static inline void encdesc_prepare_num_of_fields(GtEncdesc *encdesc,
                                                  EncdescWriteInfo *info);
 
 static void parse_number_out_of_current_field(EncdescWriteInfo *info,
-                                              long *retval);
+                                              GtWord *retval);
 
 static void numeric_field_prepare_zero_padding(GtEncdesc *encdesc,
                                                EncdescWriteInfo *info);
@@ -114,7 +114,7 @@ static unsigned encdesc_digits_per_value(GtUword value,
     return 1U;
 }
 
-static int encdesc_hashmap_distr_add(GtHashtable *hm_distri, long key)
+static int encdesc_hashmap_distr_add(GtHashtable *hm_distri, GtWord key)
 {
   GtUint64 *valueptr;
   gt_assert(hm_distri != NULL);
@@ -147,7 +147,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
                 tmp_numoffields,
                 chars_len,
                 len_diff;
-  long value,
+  GtWord value,
        value_diff,
        out,
        value_delta;
@@ -316,7 +316,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
 
           for (k_idx = 0; k_idx < chars_len; k_idx++) {
             (void) encdesc_hashmap_distr_add(cur_field->chars[k_idx],
-                                        (long) mutable_desc[start_pos + k_idx]);
+                                      (GtWord) mutable_desc[start_pos + k_idx]);
           }
 
           if (cur_field->is_cons) {
@@ -459,7 +459,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
       else {
         /* TODO range can be large, but the size of the dist is more important
            for huffman coding */
-        long value_range, delta_range;
+        GtWord value_range, delta_range;
         value_range = labs(cur_field->max_value - cur_field->min_value);
         delta_range = labs(cur_field->max_delta - cur_field->min_delta);
         if (value_range < delta_range || cur_field->delta_values_size == 0) {
@@ -639,7 +639,7 @@ static void prepare_write_data_and_count_bits(GtEncdesc *encdesc,
 static inline void prepare_numeric_field(GtEncdesc *encdesc,
                                          EncdescWriteInfo *info)
 {
-  long value = 0;
+  GtWord value = 0;
   GtUword to_store;
   DescField *cur_field = &encdesc->fields[info->cur_field_num];
 
@@ -689,7 +689,7 @@ static inline void encdesc_prepare_num_of_fields(GtEncdesc *encdesc,
 }
 
 static void parse_number_out_of_current_field(EncdescWriteInfo *info,
-                                              long *retval)
+                                              GtWord *retval)
 {
   char *cur_field_num = info->descbuffer + info->cur_field_start_pos;
   GT_UNUSED int had_err = gt_parse_long(retval, cur_field_num);
@@ -925,7 +925,7 @@ GtUint64 encdesc_hashmap_distr_get_corrected(const void *data,
 {
   EncdescHuffDist *dist = (EncdescHuffDist*) data;
   GtUint64 *valueptr;
-  long corrected_key = (long) key + dist->correction_base;
+  GtWord corrected_key = (GtWord) key + dist->correction_base;
   gt_assert(dist->li_ull_hashmap);
   if (!(valueptr = li_ull_gt_hashmap_get(dist->li_ull_hashmap,
                                          corrected_key)))
@@ -946,7 +946,7 @@ GtUint64 encdesc_hashmap_distr_get(const void *hm_distri,
   GtHashtable *hashmap = (GtHashtable*) hm_distri;
   GtUint64 *valueptr;
   gt_assert(hashmap != NULL);
-  if (!(valueptr = li_ull_gt_hashmap_get(hashmap, (long) key)))
+  if (!(valueptr = li_ull_gt_hashmap_get(hashmap, (GtWord) key)))
     return 0;
   return *valueptr;
 }
@@ -1019,7 +1019,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
   bool is_not_at_pageborder;
   FILE *fp = NULL;
   GtStr *name1;
-  long pos = 0,
+  GtWord pos = 0,
        start_of_encoding;
   GtUword dummy = 0,
                 pagesize;
@@ -1079,7 +1079,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
       gt_xfwrite(&ee->encdesc->start_of_samplingtab,
                  sizeof (ee->encdesc->start_of_samplingtab), (size_t) 1, fp);
     else {
-      const long null = 0;
+      const GtWord null = 0;
       gt_xfwrite_one(&null, fp);
     }
   }
@@ -1198,7 +1198,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
        sampled = false;
   unsigned readbits,
            bits_to_read;
-  long tmp = 0;
+  GtWord tmp = 0;
   GtUword cur_field_num,
                 fieldlen = 0,
                 idx,
@@ -1306,7 +1306,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
 
         }
         if (!had_err) {
-          tmp = (long) bitseq + cur_field->min_value;
+          tmp = (GtWord) bitseq + cur_field->min_value;
           cur_field->prev_value = tmp;
         }
       }
@@ -1331,7 +1331,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
                     gt_assert(gt_error_is_set(err));
                   }
                   else
-                    tmp = (long) tmp_symbol;
+                    tmp = (GtWord) tmp_symbol;
                 }
               }
               gt_huffman_bitwise_decoder_delete(huff_bitwise_decoder);
@@ -1352,7 +1352,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
                   bitseq = bitseq | (GtBitsequence) 1;
               }
               if (!had_err)
-                tmp = (long) bitseq;
+                tmp = (GtWord) bitseq;
             }
           }
           else
@@ -1431,7 +1431,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
               had_err = stat;
             }
             else
-              tmp = (long) tmp_symbol;
+              tmp = (GtWord) tmp_symbol;
           }
         }
         if (!had_err && desc != NULL) {
@@ -1599,7 +1599,7 @@ int gt_encdesc_unit_test(GtError *err)
 
   /* test parse_number_out_of_current_field */
   if (!had_err) {
-    long retval = 0;
+    GtWord retval = 0;
     info->descbuffer = "abc00666";
     info->cur_field_start_pos = 3UL;
     parse_number_out_of_current_field(info, &retval);

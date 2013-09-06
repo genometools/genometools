@@ -200,7 +200,7 @@ static inline double gt_round(double x)
   return integer - x >= 0.5 ? integer - 1.0 : integer;
 }
 
-long int gt_round_to_long(double x)
+GtWord gt_round_to_long(double x)
 {
   int64_t intgr;
   double rounded = gt_round(x);
@@ -212,7 +212,7 @@ long int gt_round_to_long(double x)
     /* 1 with the sign of result, i.e. -1 or 1. */
     intgr -= ((intgr >> 62) | ((int64_t) 1));
   }
-  return (long int) intgr;
+  return (GtWord) intgr;
 }
 
 unsigned int gt_gcd_uint(unsigned int m, unsigned int n)

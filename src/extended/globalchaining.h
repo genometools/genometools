@@ -27,7 +27,7 @@ typedef struct {
                 endpos1,   /* end of fragment in first sequence */
                 startpos2, /* start of fragment in second sequence */
                 endpos2;   /* end of fragment in second sequence */
-  long weight;             /* weight of fragment */
+  GtWord weight;           /* weight of fragment */
   void *data;              /* arbitrary data associated with fragment */
 } GtFragment;
 

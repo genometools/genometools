@@ -653,7 +653,7 @@ static int gt_ltrdigest_pdom_visitor_process_hit(GT_UNUSED void *key, void *val,
       frags[i].endpos1   = h->hmmto;
       frags[i].startpos2 = h->alifrom;
       frags[i].endpos2   = h->alito;
-      frags[i].weight    = (long) (h->alito - h->alifrom + 1) * h->score;
+      frags[i].weight    = (GtWord) (h->alito - h->alifrom + 1) * h->score;
       frags[i].data      = h;
     }
     qsort(frags, (size_t) nof_hits, sizeof (GtFragment),

@@ -37,7 +37,7 @@ typedef struct
        doonline,
        docompare;
   GtUword threshold;
-  long matchscore,
+  GtWord matchscore,
        mismatchscore,
        gapstart,
        gapextend;

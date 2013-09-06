@@ -813,7 +813,7 @@ void gth_sa_calc_polyAtailpos(GthSA *sa, const unsigned char *ref_seq_tran,
                               GtAlphabet *ref_alphabet)
 {
   GtUword ppa, mma, rightreferenceborder, referencelength;
-  long i, leftreferenceborder;
+  GtWord i, leftreferenceborder;
 
   sa->polyAtailpos.start = 0;
   sa->polyAtailpos.end = 0;

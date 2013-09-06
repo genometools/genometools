@@ -20,6 +20,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include "core/types_api.h"
 
 /* XANSI module */
 
@@ -63,7 +64,7 @@ size_t gt_xfread(void *ptr, size_t size, size_t nmemb, FILE *fp);
         gt_xfread(ptr, sizeof (*ptr), (size_t) 1, fp)
 
 /* Similar to <fseek(3)>, terminates on error. */
-void   gt_xfseek(FILE*, long offset, int whence);
+void   gt_xfseek(FILE*, GtWord offset, int whence);
 
 /* Similar to <fsetpos(3)>, terminates on error. */
 void   gt_xfsetpos(FILE*, const fpos_t*);

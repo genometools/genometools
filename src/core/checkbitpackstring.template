@@ -84,7 +84,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
   offset = offsetStart = random()%(sizeof (@uOpType@) * CHAR_BIT);
   numRnd = random() % (MAX_RND_NUMS_@uOpType@ + 1);
   gt_log_log("offset=%lu, numRnd=%lu\n",
-          (long unsigned)offsetStart, (long unsigned)numRnd);
+          (GtUword)offsetStart, (GtUword)numRnd);
   {
     BitOffset numBits = sizeof (@uOpType@) * CHAR_BIT * numRnd + offsetStart;
     randSrc = gt_malloc(sizeof (@uOpType@)*numRnd);

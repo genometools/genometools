@@ -299,7 +299,7 @@ void gth_chain_extend_borders(GthChain *chain, const GtRange *gen_seq_bounds,
                               GT_UNUSED GtUword gen_total_length,
                               GT_UNUSED GtUword gen_offset)
 {
-  long tmpborder;
+  GtWord tmpborder;
 
   /* at least one range in chain */
   gt_assert(gt_array_size(chain->forwardranges));
@@ -419,7 +419,7 @@ static GtUword totallengthoffragments(GtChain *chain,
 {
   GtRange currentrange, previousrange;
   GtUword i, fragnum;
-  long totallength = 0;
+  GtWord totallength = 0;
 
   previousrange.end = GT_UNDEF_ULONG;
 

@@ -50,7 +50,7 @@ static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
   GtUword pc, /* previous char */
                 cc, /* current char */
                 d, i, j;
-  long startpos, endpos;
+  GtWord startpos, endpos;
   GthDbl pval = 0.5, Tv[3] = { 0.0 }, Fv[4] = { 0.0 };
   gt_assert(bssmmodel);
 

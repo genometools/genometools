@@ -58,7 +58,7 @@ GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
 {
   GtChain2Dimmatchtable *matchtable;
   GtUword linenum;
-  long storeinteger[READNUMS];
+  GtWord storeinteger[READNUMS];
   FILE *matchfp;
   bool haserr = false;
   GtChain2Dimmatchvalues fragment;

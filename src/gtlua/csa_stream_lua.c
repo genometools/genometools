@@ -24,7 +24,7 @@
 static int csa_stream_lua_new(lua_State *L)
 {
   GtNodeStream **csa_stream, **in_stream;
-  long join_length;
+  GtWord join_length;
   in_stream = check_genome_stream(L, 1);
   if (lua_gettop(L) >= 2) {
     join_length = luaL_checklong(L, 2);

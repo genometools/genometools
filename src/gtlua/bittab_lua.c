@@ -28,7 +28,7 @@
 
 static int bittab_lua_new(lua_State *L)
 {
-  long num_of_bits;
+  GtWord num_of_bits;
   GtBittab **bittab;
   gt_assert(L);
   num_of_bits = luaL_checklong(L, 1);
@@ -41,7 +41,7 @@ static int bittab_lua_new(lua_State *L)
   return 1;
 }
 
-static void get_bittab_and_bit(lua_State *L, GtBittab ***bittab, long *bit)
+static void get_bittab_and_bit(lua_State *L, GtBittab ***bittab, GtWord *bit)
 {
   *bittab = check_bittab(L, 1);
   *bit = luaL_checklong(L, 2);
@@ -60,7 +60,7 @@ static void get_two_bittabs(lua_State *L, GtBittab ***bt1, GtBittab ***bt2)
 static int bittab_lua_set_bit(lua_State *L)
 {
   GtBittab **bittab;
-  long bit;
+  GtWord bit;
   get_bittab_and_bit(L, &bittab, &bit);
   gt_bittab_set_bit(*bittab, bit);
   return 0;
@@ -69,7 +69,7 @@ static int bittab_lua_set_bit(lua_State *L)
 static int bittab_lua_unset_bit(lua_State *L)
 {
   GtBittab **bittab;
-  long bit;
+  GtWord bit;
   get_bittab_and_bit(L, &bittab, &bit);
   gt_bittab_unset_bit(*bittab, bit);
   return 0;
@@ -102,7 +102,7 @@ static int bittab_lua_and_equal(lua_State *L)
 static int bittab_lua_bit_is_set(lua_State *L)
 {
   GtBittab **bittab;
-  long bit;
+  GtWord bit;
   get_bittab_and_bit(L, &bittab, &bit);
   lua_pushboolean(L, gt_bittab_bit_is_set(*bittab, bit));
   return 1;

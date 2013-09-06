@@ -34,15 +34,15 @@
         (GETSTOREDENDPOINT(DIM,IDX) - GETSTOREDSTARTPOINT(DIM,IDX))
 
 typedef struct {
-  long maxscore;
+  GtWord maxscore;
   GtUword maxfragnum;
   bool defined;
 } Maxfragvalue;
 
 typedef struct {
   GtUword previousinchain;  /* previous index in chain */
-  long score;                     /* score of highest scoring chain ending here,
-                                     computed */
+  GtWord score;             /* score of highest scoring chain ending here,
+                               computed */
 } GtChaininfo;
 
 /*
@@ -86,7 +86,7 @@ static bool colinearfragments(GtFragment *fragments,
   return false;
 }
 
-static long overlapcost(GtFragment *fragments,
+static GtWord overlapcost(GtFragment *fragments,
                         GtUword i, GtUword j)
 {
   GtUword overlaplength = 0;
@@ -101,7 +101,7 @@ static long overlapcost(GtFragment *fragments,
 
   gt_log_log("overlap total  (#%lu, #%lu)=%lu", i, j, overlaplength);
 
-  return (long) overlaplength;
+  return (GtWord) overlaplength;
 }
 
 static void chainingboundarycases(GtChain *chain,
@@ -175,7 +175,7 @@ static void bruteforcechainingscores(GtChaininfo *chaininfo,
                                      Overlapinfo *overlapinfo)
 {
   GtUword previous, leftfrag, rightfrag, overlaplength;
-  long weightright, score;
+  GtWord weightright, score;
   Maxfragvalue localmaxfrag;
   bool combinable;
 
@@ -259,7 +259,7 @@ static bool isrightmaximallocalchain(GtChaininfo *chaininfo,
   return false;
 }
 
-static bool retrievemaximalscore(long *maxscore, GtChaininfo *chaininfo,
+static bool retrievemaximalscore(GtWord *maxscore, GtChaininfo *chaininfo,
                                  GtUword num_of_fragments)
 {
   GtUword i;
@@ -281,7 +281,7 @@ static void retrievechainthreshold(GtChaininfo *chaininfo,
                                    GtFragment *fragments,
                                    GtUword num_of_fragments,
                                    GtUword max_gap_width,
-                                   GtChain *chain, long minscore,
+                                   GtChain *chain, GtWord minscore,
                                    GtChainProc chainprocessor,
                                    void *cpinfo)
 {
@@ -306,7 +306,7 @@ static void findmaximalscores(GtChain *chain, GtChaininfo *chaininfo,
                               GtUword max_gap_width,
                               GtChainProc chainprocessor, void *cpinfo)
 {
-  long minscore;
+  GtWord minscore;
   bool minscoredefined = false;
 
   minscoredefined = retrievemaximalscore(&minscore, chaininfo,

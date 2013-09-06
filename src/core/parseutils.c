@@ -58,7 +58,7 @@ int gt_parse_uint(unsigned int *out, const char *nptr)
   return 0;
 }
 
-int gt_parse_long(long *out, const char *nptr)
+int gt_parse_long(GtWord *out, const char *nptr)
 {
   long lval;
   char *ep;

@@ -39,10 +39,10 @@ int gt_safe_abs_check_func(int j, const char *src_file, int src_line,
   return rval;
 }
 
-long gt_safe_labs_check_func(long j, const char *src_file, int src_line,
+GtWord gt_safe_labs_check_func(GtWord j, const char *src_file, int src_line,
                              GtOverflowHandlerFunc handler_func, void *data)
 {
-  long rval = j < 0 ? -j : j;
+  GtWord rval = j < 0 ? -j : j;
   if (rval < 0) { /* overflow */
     handler_func(src_file, src_line, data);
   }
@@ -112,7 +112,7 @@ GtUword gt_safe_mult_ulong_check_func(GtUword a, GtUword b,
   }
 }
 
-long gt_safe_cast2long_check_func(GtUword value, const char *src_file,
+GtWord gt_safe_cast2long_check_func(GtUword value, const char *src_file,
                                   int src_line,
                                   GtOverflowHandlerFunc handler_func,
                                   void *data)
@@ -123,7 +123,7 @@ long gt_safe_cast2long_check_func(GtUword value, const char *src_file,
   return value;
 }
 
-GtUword gt_safe_cast2ulong_check_func(long value, const char *src_file,
+GtUword gt_safe_cast2ulong_check_func(GtWord value, const char *src_file,
                                             int src_line,
                                             GtOverflowHandlerFunc handler_func,
                                             void *data)
@@ -149,7 +149,7 @@ GtUword gt_safe_cast2ulong_64_check_func(uint64_t value,
 int gt_safearith_example(GT_UNUSED GtError *err)
 {
   GtUword ulong;
-  long slong;
+  GtWord slong;
   unsigned int a, b, c;
   gt_error_check(err);
 
@@ -197,8 +197,8 @@ int gt_safearith_unit_test(GtError *err)
     gt_ensure(__MIN(unsigned int) == 0);
     gt_ensure(__MAX(unsigned int) == UINT_MAX);
 
-    gt_ensure(__MIN(long) == LONG_MIN);
-    gt_ensure(__MAX(long) == LONG_MAX);
+    gt_ensure(__MIN(GtWord) == LONG_MIN);
+    gt_ensure(__MAX(GtWord) == LONG_MAX);
     gt_ensure(__MIN(GtUword) == 0);
     gt_ensure(__MAX(GtUword) == ULONG_MAX);
 
@@ -212,7 +212,7 @@ int gt_safearith_unit_test(GtError *err)
 
   {
     GtUword ulong;
-    long slong;
+    GtWord slong;
 
     slong = -1;
     gt_ensure(assign(ulong, slong));
@@ -277,7 +277,7 @@ int gt_safearith_unit_test(GtError *err)
 
   {
     int i;
-    long l;
+    GtWord l;
     GtInt64 ll;
 
     i = gt_safe_abs(0);

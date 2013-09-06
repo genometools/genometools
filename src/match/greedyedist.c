@@ -27,11 +27,11 @@
 #define GT_FRONT_ROWVALUE(FVAL)        *(FVAL)
 #define GT_FRONT_MINUSINFINITY(GL)     ((GL)->integermin)
 
-typedef long GtFrontvalue;
+typedef GtWord GtFrontvalue;
 
 typedef struct
 {
-  long offset,   /* absolute base address of the front */
+  GtWord offset,   /* absolute base address of the front */
        width,    /* width of the front */
        left;     /* left boundary (negative), */
                  /* -left is relative address of entry */
@@ -44,7 +44,7 @@ typedef struct
 struct GtFrontResource
 {
   GtUword currentallocated;
-  long ulen,
+  GtWord ulen,
        vlen,
        integermin;
   GtFrontvalue *frontspace;
@@ -77,10 +77,10 @@ void gt_frontresource_delete(GtFrontResource *ftres)
 #ifdef SKDEBUG
 static void showfront(const GtFrontResource *ftres,
                       const GtFrontspec *fspec,
-                      long r)
+                      GtWord r)
 {
   GtFrontvalue *fval;
-  long k;
+  GtWord k;
 
   for (fval = ftres->frontspace + fspec->offset, k=fspec->left;
        k < fspec->left + fspec->width; k++, fval++)
@@ -99,8 +99,8 @@ static void showfront(const GtFrontResource *ftres,
 
 static void frontspecparms(const GtFrontResource *ftres,
                            GtFrontspec *fspec,
-                           long p,
-                           long r)
+                           GtWord p,
+                           GtWord r)
 {
   if (r <= 0)
   {
@@ -119,10 +119,10 @@ static void frontspecparms(const GtFrontResource *ftres,
 #endif
 }
 
-static long accessfront(const GtFrontResource *ftres,
+static GtWord accessfront(const GtFrontResource *ftres,
                         GtFrontvalue *fval,
                         const GtFrontspec *fspec,
-                        long k)
+                        GtWord k)
 {
   if (fspec->left <= k && k < fspec->left + fspec->width)
   {
@@ -141,9 +141,9 @@ static void evalentryforward(const GtSeqabstract *useq,
                              GtFrontResource *ftres,
                              GtFrontvalue *fval,
                              const GtFrontspec *fspec,
-                             long k)
+                             GtWord k)
 {
-  long value, t;
+  GtWord value, t;
   GtFrontvalue *fptr;
 
 #ifdef SKDEBUG
@@ -213,9 +213,9 @@ static bool evalfrontforward(const GtSeqabstract *useq,
                              GtFrontResource *ftres,
                              const GtFrontspec *prevfspec,
                              const GtFrontspec *fspec,
-                             long r)
+                             GtWord r)
 {
-  long k;
+  GtWord k;
   bool defined = false;
   GtFrontvalue *fval;
 
@@ -231,13 +231,13 @@ static bool evalfrontforward(const GtSeqabstract *useq,
       }
 #ifdef SKDEBUG
       printf("store front[k=%ld]=%ld ",k,GT_FRONT_ROWVALUE(fval));
-      printf("at index %ld\n",(long) (fval-ftres->frontspace));
+      printf("at index %ld\n",(GtWord) (fval-ftres->frontspace));
 #endif
     } else
     {
 #ifdef SKDEBUG
       printf("store front[k=%ld]=GT_FRONT_MINUSINFINITY ",k);
-      printf("at index %ld\n",(long) (fval-ftres->frontspace));
+      printf("at index %ld\n",(GtWord) (fval-ftres->frontspace));
 #endif
       GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(fval),
                      GT_FRONT_MINUSINFINITY(ftres));
@@ -274,7 +274,7 @@ static void firstfrontforward(const GtSeqabstract *useq,
                                            0,
                                            (GtUword)
                                            MIN(ftres->ulen,ftres->vlen));
-    GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),(long) lcp);
+    GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),(GtWord) lcp);
   }
 #ifdef SKDEBUG
   printf("forward front[0]=%ld\n",GT_FRONT_ROWVALUE(&ftres->frontspace[0]));
@@ -286,7 +286,7 @@ GtUword greedyunitedist(GtFrontResource *ftres,
                               const GtSeqabstract *vseq)
 {
   GtUword realdistance, kval;
-  long r;
+  GtWord r;
   GtFrontspec frontspecspace[2], *fspec, *prevfspec;
   GtFrontvalue *fptr;
 
@@ -295,8 +295,8 @@ GtUword greedyunitedist(GtFrontResource *ftres,
 #endif
   gt_assert(gt_seqabstract_length(useq) < (GtUword) LONG_MAX);
   gt_assert(gt_seqabstract_length(vseq) < (GtUword) LONG_MAX);
-  ftres->ulen = (long) gt_seqabstract_length(useq);
-  ftres->vlen = (long) gt_seqabstract_length(vseq);
+  ftres->ulen = (GtWord) gt_seqabstract_length(useq);
+  ftres->vlen = (GtWord) gt_seqabstract_length(vseq);
   ftres->integermin = -MAX(ftres->ulen,ftres->vlen);
   prevfspec = &frontspecspace[0];
   firstfrontforward(useq,vseq,ftres,prevfspec);
@@ -317,7 +317,7 @@ GtUword greedyunitedist(GtFrontResource *ftres,
         fspec = &frontspecspace[0];
       }
       fspec->offset = prevfspec->offset + prevfspec->width;
-      frontspecparms(ftres,fspec,(long) kval,r);
+      frontspecparms(ftres,fspec,(GtWord) kval,r);
       while ((GtUword) (fspec->offset + fspec->width)
              >= ftres->currentallocated)
       {

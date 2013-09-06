@@ -140,10 +140,10 @@ void gt_timer_show_formatted(GT_UNUSED GtTimer *t, GT_UNUSED const char *fmt,
   gt_assert(t->state == TIMER_STOPPED);
   timeval_subtract(&elapsed_tv, &t->stop_tv, &t->gstart_tv);
   fprintf(fp, fmt,
-          (long)(elapsed_tv.tv_sec),
-          (long)(elapsed_tv.tv_usec),
-          (long)(t->stop_ru.ru_utime.tv_sec - t->start_ru.ru_utime.tv_sec),
-          (long)(t->stop_ru.ru_stime.tv_sec - t->start_ru.ru_stime.tv_sec));
+          (GtWord)(elapsed_tv.tv_sec),
+          (GtWord)(elapsed_tv.tv_usec),
+          (GtWord)(t->stop_ru.ru_utime.tv_sec - t->start_ru.ru_utime.tv_sec),
+          (GtWord)(t->stop_ru.ru_stime.tv_sec - t->start_ru.ru_stime.tv_sec));
 #else
   /* XXX */
   fprintf(stderr, "gt_timer_show_formatted() not implemented\n");
@@ -163,14 +163,14 @@ static void gt_timer_print_progress_report(GtTimer *t,
 {
   fprintf(fp,"# TIME %s %ld.%02ld",
           desc,
-          (long)(elapsed_tv->tv_sec),
-          (long)(elapsed_tv->tv_usec)/10000);
+          (GtWord)(elapsed_tv->tv_sec),
+          (GtWord)(elapsed_tv->tv_usec)/10000);
   if (t->show_cpu_time) {
     fprintf(fp, " (user: %ld.%02ld; sys: %ld.%02ld)\n",
-            (long)(elapsed_user_tv->tv_sec),
-            (long)(elapsed_user_tv->tv_usec)/10000,
-            (long)(elapsed_sys_tv->tv_sec),
-            (long)(elapsed_sys_tv->tv_usec)/10000);
+            (GtWord)(elapsed_user_tv->tv_sec),
+            (GtWord)(elapsed_user_tv->tv_usec)/10000,
+            (GtWord)(elapsed_sys_tv->tv_sec),
+            (GtWord)(elapsed_sys_tv->tv_usec)/10000);
   }
   else {
     fprintf(fp, "\n");

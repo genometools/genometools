@@ -44,7 +44,7 @@ typedef GtUword GtChain2Dimpostype;
 
 /* the following type is used for scores of chains */
 
-typedef long GtChain2Dimscoretype;
+typedef GtWord GtChain2Dimscoretype;
 
 /* the anonymous type for a chain */
 

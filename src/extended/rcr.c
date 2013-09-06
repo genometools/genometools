@@ -79,8 +79,8 @@
 #define DEFAULTMQUAL 0
 #define DEFAULTQUAL '-'
 
-DECLARE_HASHMAP(long int, rcr_li, GtUint64, ull, static, inline)
-DEFINE_HASHMAP(long int, rcr_li, GtUint64, ull, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(GtWord, rcr_li, GtUint64, ull, static, inline)
+DEFINE_HASHMAP(GtWord, rcr_li, GtUint64, ull, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
@@ -1332,7 +1332,7 @@ static int rcr_write_data(const char *name, GtRcrEncoder *rcr_enc, GtError *err)
 {
   bool is_not_at_pageborder;
   int had_err = 0;
-  long fpos;
+  GtWord fpos;
   GtUword pagesize = gt_pagesize();
   GtStr *unmapped_reads_filename;
   gt_error_check(err);
@@ -2114,7 +2114,7 @@ GtRcrDecoder *gt_rcr_decoder_new(const char *name, const GtEncseq *ref,
 {
   bool is_not_at_pageborder;
   GtUword pagesize = gt_pagesize();
-  long filepos;
+  GtWord filepos;
   GtRcrDecoder *rcr_dec;
 
   gt_assert(name);

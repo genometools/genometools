@@ -85,7 +85,7 @@ struct GtOption {
     double d;
     int i;
     unsigned int ui;
-    long l;
+    GtWord l;
     GtUword ul;
     GtRange r;
     const char *s;
@@ -197,7 +197,7 @@ static void gt_option_reset(GtOption *option)
     *(unsigned int*) option->value = option->default_value.ui;
   }
   else if (option->option_type == OPTION_LONG) {
-    *(long*) option->value = option->default_value.l;
+    *(GtWord*) option->value = option->default_value.l;
   }
   else if (option->option_type == OPTION_ULONG) {
     *(GtUword*) option->value = option->default_value.ul;
@@ -672,7 +672,7 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
     int old_stdout, out_pipe[2];
 #ifndef _WIN32
     int rval;
-    long flags;
+    GtWord flags;
 #endif
     char c,
          prognamebuf[BUFSIZ];
@@ -968,7 +968,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
   HookInfo *hookinfo;
   GtOption *option;
   bool option_parsed;
-  long long_value;
+  GtWord long_value;
   GtUword ulong_value;
   int minus_offset, had_err = 0;
   GtStr *gt_error_str;
@@ -1217,7 +1217,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 }
               }
               if (!had_err) {
-                *(long*) option->value = long_value;
+                *(GtWord*) option->value = long_value;
                 option_parsed = true;
               }
               break;
@@ -1635,7 +1635,7 @@ GtOption *gt_option_new_uint_min_max(const char *option_str,
 }
 
 GtOption* gt_option_new_long(const char *option_str, const char *description,
-                             long *value, long default_value)
+                             GtWord *value, GtWord default_value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_LONG;

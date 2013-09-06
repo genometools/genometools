@@ -32,7 +32,7 @@ void              gth_region_factory_save(GthRegionFactory *region_factory,
 GtStr*            gth_region_factory_get_seqid(GthRegionFactory*,
                                                GtUword filenum,
                                                GtUword seqnum);
-long              gth_region_factory_offset(GthRegionFactory*,
+GtWord            gth_region_factory_offset(GthRegionFactory*,
                                             GtUword filenum,
                                             GtUword seqnum);
 

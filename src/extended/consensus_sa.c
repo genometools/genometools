@@ -389,7 +389,7 @@ static void compute_R(GtBittab **R, GtBittab **C, GtBittab **right,
                       GtUword number_of_sas)
 {
   GtUword sa_1, sa_2, sa_1_size = 0, sa_2_size;
-  long sa;
+  GtWord sa;
   GtBittab *tmpset = gt_bittab_new(number_of_sas);
 
   for (sa = number_of_sas-1; sa >= 0; sa--) {

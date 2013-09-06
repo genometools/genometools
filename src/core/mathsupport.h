@@ -47,7 +47,7 @@ GtUword      gt_power_for_small_exponents(unsigned int base,
                                           unsigned int exponent);
 /* Return <x> rounded to the nearest long integer, similar to
    <lrint()> which may not be available on older glibc versions. */
-long         gt_round_to_long(double x);
+GtWord       gt_round_to_long(double x);
 /* Compute the greatest common divisor of two unsigned integers */
 unsigned int gt_gcd_uint(unsigned int m, unsigned int n);
 /* Compute the least common multiplier of two unsigned integers */

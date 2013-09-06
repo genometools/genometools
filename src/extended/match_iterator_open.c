@@ -63,7 +63,7 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
 {
   GtUword columncount = 0;
   int readnums;
-  long storeinteger[READNUMS];
+  GtWord storeinteger[READNUMS];
   int had_err = 0, i = 0;
   char buffer[BUFSIZ], seqid1[BUFSIZ], seqid2[BUFSIZ], matchtype;
   GtMatchIteratorOpen *mpi = gt_match_iterator_open_cast(gmpi);

@@ -33,13 +33,13 @@ GtMatch* gt_match_open_new(char *seqid1,
                            GtUword start_seq2,
                            GtUword end_seq1,
                            GtUword end_seq2,
-                           long weight,
+                           GtWord weight,
                            GtMatchDirection dir);
 
 /* Sets <weight> to be the weight value in <mo>. */
-void gt_match_open_set_weight(GtMatchOpen *mo, long weight);
+void gt_match_open_set_weight(GtMatchOpen *mo, GtWord weight);
 
 /* Returns the weight value stored in <mo>. */
-long gt_match_open_get_weight(GtMatchOpen *mo);
+GtWord gt_match_open_get_weight(GtMatchOpen *mo);
 
 #endif

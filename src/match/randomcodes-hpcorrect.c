@@ -39,7 +39,7 @@
   ((SDATA)->hmers + ((I) * (SDATA)->hmers_width))
 
 /* define a type for hmer pw_scores */
-typedef long gt_rchc_score_t;
+typedef GtWord gt_rchc_score_t;
 #define GT_RCHC_PRIscore "ld"
 
 static int gt_rchc_score_t_cmp(const void *a, const void *b)
@@ -72,7 +72,7 @@ struct GtRandomcodesHpcorrectData {
   GtUword frompos;
   GtUword topos;
   bool skip_rc;
-  long clustering_minscore;
+  GtWord clustering_minscore;
   GtUword *hmer_cluster;
   bool *skip;
   GtUnionFind *union_find;
@@ -375,7 +375,7 @@ static inline void gt_randomcodes_hpcorrect_show_pw_scores(
 }
 
 static inline GtUword gt_randomcodes_hpcorrect_cluster_greedy(
-    bool *allidentical, GtUword nofsuffixes, long clustering_minscore,
+    bool *allidentical, GtUword nofsuffixes, GtWord clustering_minscore,
     GtRandomcodesHpcorrectData *sdata)
 {
   gt_rchc_score_t hscore;
@@ -414,7 +414,7 @@ static inline GtUword gt_randomcodes_hpcorrect_cluster_greedy(
 }
 
 static inline GtUword gt_randomcodes_hpcorrect_cluster_union_find(
-    bool *allidentical, GtUword nofsuffixes, long clustering_minscore,
+    bool *allidentical, GtUword nofsuffixes, GtWord clustering_minscore,
     GtRandomcodesHpcorrectData *sdata)
 {
   gt_rchc_score_t hscore;
@@ -1053,7 +1053,7 @@ GtRandomcodesHpcorrectData *gt_randomcodes_hpcorrect_data_new(
     unsigned int maxuntrustp, bool greedy_clustering,
     bool skip_read_ends, bool skip_hmer_ends, bool skip_rc,
     bool non_redundant, bool best_score_clustering, bool manhattan,
-    long clustering_param, GtUword maxwidth, int rext_cl_minscore,
+    GtWord clustering_param, GtUword maxwidth, int rext_cl_minscore,
     int rext_I_minscore, int rext_J_minscore, int rext_R_minscore,
     int rext_D_minscore, int rext_J_lminscore, GtUword rext_J_lwidth,
     GtStr *indexname, unsigned int threadnum, GtError *err)

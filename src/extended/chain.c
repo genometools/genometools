@@ -22,7 +22,7 @@
 
 struct GtChain {
   GtArray *fragments;
-  long score;
+  GtWord score;
 };
 
 GtChain* gt_chain_new(void)
@@ -40,13 +40,13 @@ void gt_chain_reset(GtChain *chain)
   gt_array_reset(chain->fragments);
 }
 
-long gt_chain_get_score(const GtChain *chain)
+GtWord gt_chain_get_score(const GtChain *chain)
 {
   gt_assert(chain);
   return chain->score;
 }
 
-void gt_chain_set_score(GtChain *chain, long score)
+void gt_chain_set_score(GtChain *chain, GtWord score)
 {
   gt_assert(chain);
   chain->score = score;

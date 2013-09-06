@@ -61,7 +61,7 @@ static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
   GtRange range;
   GtStr *seqid;
   GtUword i;
-  long offset;
+  GtWord offset;
 
   gt_assert(sa && region_factory && nodes);
 

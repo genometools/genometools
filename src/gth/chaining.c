@@ -223,7 +223,7 @@ static void gthinitfragments(GtFragment *fragments,
 {
   GthMatch *mptr;
   GtFragment *fragmentptr;
-  long tmp, largestdim1 = 0, largestdim2 = 0;
+  GtWord tmp, largestdim1 = 0, largestdim2 = 0;
   GtDiscDistri *startpointdistri = NULL;
 
   /* init number of fragments */
@@ -254,7 +254,7 @@ static void gthinitfragments(GtFragment *fragments,
         (mptr == storematchtab || /* is the first match */
          !gth_matches_are_equal(mptr, mptr-1))) { /* or is different from last
                                                      one */
-      fragmentptr->weight     = (long) (fragweightfactor *
+      fragmentptr->weight     = (GtWord) (fragweightfactor *
                                         (double) abs(mptr->Storescore));
       fragmentptr->startpos1  = mptr->Storepositionreference;
       fragmentptr->endpos1    = mptr->Storepositionreference

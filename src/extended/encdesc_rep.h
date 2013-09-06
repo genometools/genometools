@@ -32,14 +32,14 @@
 
 #define GT_ENCDESC_MAX_NUM_VAL_HUF 512UL
 
-DECLARE_HASHMAP(long int, li, GtUint64, ull, static, inline)
-DEFINE_HASHMAP(long int, li, GtUint64, ull, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(GtWord, li, GtUint64, ull, static, inline)
+DEFINE_HASHMAP(GtWord, li, GtUint64, ull, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
 typedef struct {
   GtHashtable *li_ull_hashmap;
-  long         correction_base;
+  GtWord         correction_base;
 } EncdescHuffDist;
 
 typedef struct {
@@ -58,7 +58,7 @@ typedef struct {
                 min_len,
                 num_values_size,
                 max_len;
-  long          global_delta,
+  GtWord          global_delta,
                 global_value,
                 max_delta,
                 max_value,
@@ -90,7 +90,7 @@ struct GtEncdesc {
                      num_of_fields,
                      cur_desc,
                      pagesize;
-  long               start_of_samplingtab,
+  GtWord             start_of_samplingtab,
                      start_of_encoding;
   unsigned int       bits_per_field;
   bool               num_of_fields_is_cons;

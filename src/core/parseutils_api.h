@@ -35,7 +35,7 @@ int gt_parse_uint(unsigned int *out, const char *nptr);
 
 /* Parse long from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */
-int gt_parse_long(long *out, const char *nptr);
+int gt_parse_long(GtWord *out, const char *nptr);
 
 /* Parse GtUword from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */

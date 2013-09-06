@@ -221,7 +221,7 @@ GtOption*       gt_option_new_uint_min_max(const char *option_string,
    <default_value>. The result of the option parsing is stored in <value>. */
 GtOption*       gt_option_new_long(const char *option_string,
                                    const char *description,
-                                   long *value, long default_value);
+                                   GtWord *value, GtWord default_value);
 /* Return a new <GtOption> with the given <option_string>, <description>, and
    <default_value>. The result of the option parsing is stored in <value>. */
 GtOption*       gt_option_new_ulong(const char *option_string,

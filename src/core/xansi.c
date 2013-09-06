@@ -118,7 +118,7 @@ size_t gt_xfread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   return rval;
 }
 
-void  gt_xfseek(FILE *stream, long offset, int whence)
+void  gt_xfseek(FILE *stream, GtWord offset, int whence)
 {
   if (fseek(stream, offset, whence)) {
     perror("cannot seek of file");

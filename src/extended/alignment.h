@@ -52,10 +52,10 @@ void          gt_alignment_remove_last(GtAlignment *alignment);
 void          gt_alignment_reset(GtAlignment *alignment);
 /* returns unit cost */
 GtUword gt_alignment_eval(const GtAlignment*);
-long          gt_alignment_eval_with_score(const GtAlignment *alignment,
-                                           long matchscore,
-                                           long mismatchscore,
-                                           long gapscore);
+GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
+                                           GtWord matchscore,
+                                           GtWord mismatchscore,
+                                           GtWord gapscore);
 void          gt_alignment_show(const GtAlignment *alignment, FILE *fp);
 void          gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                                   const GtUchar *characters,

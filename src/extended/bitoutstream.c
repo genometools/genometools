@@ -99,7 +99,7 @@ void gt_bitoutstream_flush(GtBitOutStream *bitstream)
 
 void gt_bitoutstream_flush_advance(GtBitOutStream *bitstream)
 {
-  long fpos;
+  GtWord fpos;
   bool is_not_at_pageborder = (ftell(bitstream->fp) % bitstream->pagesize) != 0;
 
   gt_assert(bitstream);
@@ -113,7 +113,7 @@ void gt_bitoutstream_flush_advance(GtBitOutStream *bitstream)
   }
 }
 
-long gt_bitoutstream_pos(const GtBitOutStream *bitstream)
+GtWord gt_bitoutstream_pos(const GtBitOutStream *bitstream)
 {
   return ftell(bitstream->fp);
 }

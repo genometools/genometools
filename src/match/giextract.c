@@ -171,7 +171,7 @@ static int extractkeyfromcurrentline(Fastakeyquery *fastakeyptr,
                                      GtError *err)
 {
   char *lineptr = gt_str_get(currentline);
-  long readlongfrompos, readlongtopos;
+  GtWord readlongfrompos, readlongtopos;
   size_t idx;
   bool haserr = false;
 

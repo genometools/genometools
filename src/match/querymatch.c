@@ -31,7 +31,7 @@ struct GtQuerymatch
       dbstart, /* absolute start position of match in database seq */
       querystart, /* start of match in query, relative to start of query */
       edist; /* 0 for exact match */
-   long score; /* 0 for exact match */
+   GtWord score; /* 0 for exact match */
    uint64_t queryseqnum; /* ordinal number of match in query */
    GtReadmode readmode; /* readmode by which reference sequence was accessed */
    bool selfmatch,       /* true if both instances of the match refer to the
@@ -49,7 +49,7 @@ void gt_querymatch_fill(GtQuerymatch *querymatch,
                         GtUword dbstart,
                         GtReadmode readmode,
                         bool query_as_reversecopy,
-                        long score,
+                        GtWord score,
                         GtUword edist,
                         bool selfmatch,
                         uint64_t queryseqnum,

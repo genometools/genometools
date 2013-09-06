@@ -170,7 +170,7 @@ static GtUword process_file(GthInput *input, char *filename,
                                   char *filehash, bool isreferencefile,
                                   GthAlphatype alphatype)
 {
-  long fileindex;
+  GtWord fileindex;
   FILE *fp;
 
   if (isreferencefile)
@@ -215,7 +215,7 @@ static void end_element_handler(void *info, const XML_Char *name)
   GthSA *sa = parseinfo->currentSA;
   GtUword datalength;
   double retdouble;
-  long ret;
+  GtWord ret;
   char *data;
 
   /* save data and data length */

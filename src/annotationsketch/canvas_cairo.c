@@ -747,7 +747,7 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
 {
   double step, minorstep, vmajor, vminor,
          theight = gt_graphics_get_text_height(canvas->pvt->g);
-  long base_length, tick;
+  GtWord base_length, tick;
   GtColor rulercol, gridcol;
   GtStr *left_str, *right_str, *unit;
   char str[BUFSIZ];

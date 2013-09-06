@@ -52,12 +52,12 @@ plainseq[position];
 
 static void gt_sain_PLAINSEQ_fast_induceLtypesuffixes1(GtSainseq *sainseq,
                                                  const GtUchar *plainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_assert(sainseq->roundtable != NULL);
   for (suftabptr = suftab, sainseq->currentround = 0;
@@ -67,10 +67,10 @@ static void gt_sain_PLAINSEQ_fast_induceLtypesuffixes1(GtSainseq *sainseq,
     {
       GtUword currentcc;
 
-      if (position >= (long) sainseq->totallength)
+      if (position >= (GtWord) sainseq->totallength)
       {
         sainseq->currentround++;
-        position -= (long) sainseq->totallength;
+        position -= (GtWord) sainseq->totallength;
       }
       currentcc = (GtUword)
 plainseq[(GtUword) position];
@@ -89,7 +89,7 @@ plainseq[(GtUword) position];
                     sainseq->roundtable[t] <= sainseq->currentround);
           if (sainseq->roundtable[t] < sainseq->currentround)
           {
-            position += (long) sainseq->totallength;
+            position += (GtWord) sainseq->totallength;
             sainseq->roundtable[t] = sainseq->currentround;
           }
           GT_SAINUPDATEBUCKETPTR(currentcc);
@@ -120,12 +120,12 @@ plainseq[(GtUword) position];
 
 static void gt_sain_PLAINSEQ_induceLtypesuffixes1(GtSainseq *sainseq,
                                                  const GtUchar *plainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_assert(sainseq->roundtable == NULL);
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
@@ -172,17 +172,17 @@ plainseq[(GtUword) position];
 
 static void gt_sain_PLAINSEQ_fast_induceStypesuffixes1(GtSainseq *sainseq,
                                                  const GtUchar *plainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_assert(sainseq->roundtable != NULL);
   gt_sain_special_singleSinduction1(sainseq,
                                     suftab,
-                                    (long) (sainseq->totallength-1));
+                                    (GtWord) (sainseq->totallength-1));
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypes1fromspecialranges(sainseq,
@@ -194,10 +194,10 @@ static void gt_sain_PLAINSEQ_fast_induceStypesuffixes1(GtSainseq *sainseq,
   {
     if ((position = *suftabptr) > 0)
     {
-      if (position >= (long) sainseq->totallength)
+      if (position >= (GtWord) sainseq->totallength)
       {
         sainseq->currentround++;
-        position -= (long) sainseq->totallength;
+        position -= (GtWord) sainseq->totallength;
       }
       if (position > 0)
       {
@@ -234,17 +234,17 @@ plainseq[(GtUword) position];
 
 static void gt_sain_PLAINSEQ_induceStypesuffixes1(GtSainseq *sainseq,
                                                  const GtUchar *plainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_assert(sainseq->roundtable == NULL);
   gt_sain_special_singleSinduction1(sainseq,
                                     suftab,
-                                    (long) (sainseq->totallength-1));
+                                    (GtWord) (sainseq->totallength-1));
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypes1fromspecialranges(sainseq,
@@ -282,12 +282,12 @@ plainseq[(GtUword) position];
 
 static void gt_sain_PLAINSEQ_induceLtypesuffixes2(const GtSainseq *sainseq,
                                                  const GtUchar *plainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
   {
@@ -322,16 +322,16 @@ plainseq[(GtUword) (position-1)])
 
 static void gt_sain_PLAINSEQ_induceStypesuffixes2(const GtSainseq *sainseq,
                                                  const GtUchar *plainseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_sain_special_singleSinduction2(sainseq,
                                     suftab,
-                                    (long) sainseq->totallength,
+                                    (GtWord) sainseq->totallength,
                                     nonspecialentries);
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
@@ -491,13 +491,13 @@ sainseq->readmode))
 
 static void gt_sain_ENCSEQ_fast_induceLtypesuffixes1(GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
+  GtWord *suftabptr, *bucketptr = NULL;
   GtUchar tmpcc;
-long position;
+GtWord position;
 
   gt_assert(sainseq->roundtable != NULL);
   for (suftabptr = suftab, sainseq->currentround = 0;
@@ -507,10 +507,10 @@ long position;
     {
       GtUword currentcc;
 
-      if (position >= (long) sainseq->totallength)
+      if (position >= (GtWord) sainseq->totallength)
       {
         sainseq->currentround++;
-        position -= (long) sainseq->totallength;
+        position -= (GtWord) sainseq->totallength;
       }
       currentcc = ISSPECIAL(tmpcc = gt_encseq_get_encoded_char(
 encseq,
@@ -535,7 +535,7 @@ sainseq->readmode))
                     sainseq->roundtable[t] <= sainseq->currentround);
           if (sainseq->roundtable[t] < sainseq->currentround)
           {
-            position += (long) sainseq->totallength;
+            position += (GtWord) sainseq->totallength;
             sainseq->roundtable[t] = sainseq->currentround;
           }
           GT_SAINUPDATEBUCKETPTR(currentcc);
@@ -566,13 +566,13 @@ sainseq->readmode))
 
 static void gt_sain_ENCSEQ_induceLtypesuffixes1(GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
+  GtWord *suftabptr, *bucketptr = NULL;
   GtUchar tmpcc;
-long position;
+GtWord position;
 
   gt_assert(sainseq->roundtable == NULL);
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
@@ -625,18 +625,18 @@ sainseq->readmode))
 
 static void gt_sain_ENCSEQ_fast_induceStypesuffixes1(GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
+  GtWord *suftabptr, *bucketptr = NULL;
   GtUchar tmpcc;
-long position;
+GtWord position;
 
   gt_assert(sainseq->roundtable != NULL);
   gt_sain_special_singleSinduction1(sainseq,
                                     suftab,
-                                    (long) (sainseq->totallength-1));
+                                    (GtWord) (sainseq->totallength-1));
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypes1fromspecialranges(sainseq,
@@ -648,10 +648,10 @@ long position;
   {
     if ((position = *suftabptr) > 0)
     {
-      if (position >= (long) sainseq->totallength)
+      if (position >= (GtWord) sainseq->totallength)
       {
         sainseq->currentround++;
-        position -= (long) sainseq->totallength;
+        position -= (GtWord) sainseq->totallength;
       }
       if (position > 0)
       {
@@ -694,18 +694,18 @@ sainseq->readmode))
 
 static void gt_sain_ENCSEQ_induceStypesuffixes1(GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
+  GtWord *suftabptr, *bucketptr = NULL;
   GtUchar tmpcc;
-long position;
+GtWord position;
 
   gt_assert(sainseq->roundtable == NULL);
   gt_sain_special_singleSinduction1(sainseq,
                                     suftab,
-                                    (long) (sainseq->totallength-1));
+                                    (GtWord) (sainseq->totallength-1));
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypes1fromspecialranges(sainseq,
@@ -749,13 +749,13 @@ sainseq->readmode))
 
 static void gt_sain_ENCSEQ_induceLtypesuffixes2(const GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
+  GtWord *suftabptr, *bucketptr = NULL;
   GtUchar tmpcc;
-long position;
+GtWord position;
 
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
   {
@@ -796,17 +796,17 @@ sainseq->readmode))
 
 static void gt_sain_ENCSEQ_induceStypesuffixes2(const GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
+  GtWord *suftabptr, *bucketptr = NULL;
   GtUchar tmpcc;
-long position;
+GtWord position;
 
   gt_sain_special_singleSinduction2(sainseq,
                                     suftab,
-                                    (long) sainseq->totallength,
+                                    (GtWord) sainseq->totallength,
                                     nonspecialentries);
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
@@ -971,12 +971,12 @@ static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
 
 static void gt_sain_INTSEQ_fast_induceLtypesuffixes1(GtSainseq *sainseq,
                                                  const GtUword *array,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_assert(sainseq->roundtable != NULL);
   for (suftabptr = suftab, sainseq->currentround = 0;
@@ -986,10 +986,10 @@ static void gt_sain_INTSEQ_fast_induceLtypesuffixes1(GtSainseq *sainseq,
     {
       GtUword currentcc;
 
-      if (position >= (long) sainseq->totallength)
+      if (position >= (GtWord) sainseq->totallength)
       {
         sainseq->currentround++;
-        position -= (long) sainseq->totallength;
+        position -= (GtWord) sainseq->totallength;
       }
       currentcc = array[(GtUword) position];
       if (currentcc < sainseq->numofchars)
@@ -1006,7 +1006,7 @@ static void gt_sain_INTSEQ_fast_induceLtypesuffixes1(GtSainseq *sainseq,
                     sainseq->roundtable[t] <= sainseq->currentround);
           if (sainseq->roundtable[t] < sainseq->currentround)
           {
-            position += (long) sainseq->totallength;
+            position += (GtWord) sainseq->totallength;
             sainseq->roundtable[t] = sainseq->currentround;
           }
           GT_SAINUPDATEBUCKETPTR(currentcc);
@@ -1037,12 +1037,12 @@ static void gt_sain_INTSEQ_fast_induceLtypesuffixes1(GtSainseq *sainseq,
 
 static void gt_sain_INTSEQ_induceLtypesuffixes1(GtSainseq *sainseq,
                                                  const GtUword *array,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_assert(sainseq->roundtable == NULL);
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
@@ -1087,17 +1087,17 @@ static void gt_sain_INTSEQ_induceLtypesuffixes1(GtSainseq *sainseq,
 
 static void gt_sain_INTSEQ_fast_induceStypesuffixes1(GtSainseq *sainseq,
                                                  const GtUword *array,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_assert(sainseq->roundtable != NULL);
   gt_sain_special_singleSinduction1(sainseq,
                                     suftab,
-                                    (long) (sainseq->totallength-1));
+                                    (GtWord) (sainseq->totallength-1));
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypes1fromspecialranges(sainseq,
@@ -1109,10 +1109,10 @@ static void gt_sain_INTSEQ_fast_induceStypesuffixes1(GtSainseq *sainseq,
   {
     if ((position = *suftabptr) > 0)
     {
-      if (position >= (long) sainseq->totallength)
+      if (position >= (GtWord) sainseq->totallength)
       {
         sainseq->currentround++;
-        position -= (long) sainseq->totallength;
+        position -= (GtWord) sainseq->totallength;
       }
       if (position > 0)
       {
@@ -1147,17 +1147,17 @@ static void gt_sain_INTSEQ_fast_induceStypesuffixes1(GtSainseq *sainseq,
 
 static void gt_sain_INTSEQ_induceStypesuffixes1(GtSainseq *sainseq,
                                                  const GtUword *array,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_assert(sainseq->roundtable == NULL);
   gt_sain_special_singleSinduction1(sainseq,
                                     suftab,
-                                    (long) (sainseq->totallength-1));
+                                    (GtWord) (sainseq->totallength-1));
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypes1fromspecialranges(sainseq,
@@ -1193,12 +1193,12 @@ static void gt_sain_INTSEQ_induceStypesuffixes1(GtSainseq *sainseq,
 
 static void gt_sain_INTSEQ_induceLtypesuffixes2(const GtSainseq *sainseq,
                                                  const GtUword *array,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
   {
@@ -1231,16 +1231,16 @@ static void gt_sain_INTSEQ_induceLtypesuffixes2(const GtSainseq *sainseq,
 
 static void gt_sain_INTSEQ_induceStypesuffixes2(const GtSainseq *sainseq,
                                                  const GtUword *array,
-                                         long *suftab,
+                                         GtWord *suftab,
                                          GtUword nonspecialentries)
 {
   GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  long position;
+  GtWord *suftabptr, *bucketptr = NULL;
+  GtWord position;
 
   gt_sain_special_singleSinduction2(sainseq,
                                     suftab,
-                                    (long) sainseq->totallength,
+                                    (GtWord) sainseq->totallength,
                                     nonspecialentries);
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {

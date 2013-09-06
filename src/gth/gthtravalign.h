@@ -30,7 +30,7 @@ typedef struct {
                                    gthtraversealignment()) */
                 *eopptr;       /* the pointer to the current editoperation of
                                   the alignment (changes) */
-  long alignmentlength,        /* its length, i.e. the number of Editoperations
+  GtWord alignmentlength,      /* its length, i.e. the number of Editoperations
                                 */
        genomicptr,             /* the pointer to the current character of the
                                   genomic sequence */
@@ -67,8 +67,8 @@ typedef struct {
    If alignmentlength is less than 0 it is true returned, no matter what
    referencelength is. */
 bool gt_eops_equal_referencelength(Editoperation *alignment,
-                                   long alignmentlength,
-                                   long referencelength, bool proteineop);
+                                   GtWord alignmentlength,
+                                   GtWord referencelength, bool proteineop);
 
 /* The following function traverses an alignment given by an
    Traversealignmentstate structure <state> in forward direction, if

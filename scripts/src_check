@@ -119,10 +119,13 @@ for _, fn in ipairs(arg) do -- iterate over all files
         err(fn, ln, "do not use 'long long', use 'GtInt64' instead")
       end
 
-      -- check for unsigned long
+      -- check for unsigned long and long
       if string.find(l, "unsigned%s+long[%s,%*]") or
          string.find(l, "%(unsigned%s+long%)") then
         err(fn, ln, "do not use 'unsigned long', use 'GtUword' instead")
+      elseif string.find(l, "%slong[,%*]") or
+             string.find(l, "%(long%)") then
+        err(fn, ln, "do not use 'long', use 'GtWord' instead")
       end
     end
 

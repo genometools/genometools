@@ -146,7 +146,7 @@ static GtOPrval parse_options(int *parsed_args,
       {
         if (gt_option_is_set(optioncharlistlen))
         {
-          long readint;
+          GtWord readint;
 
           if (gt_str_array_size(charlistlen) != 2UL)
           {

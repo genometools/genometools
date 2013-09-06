@@ -70,7 +70,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
 {
   gt_assert(gm);
   GtUword columncount = 0;
-  long storeinteger[READNUMS], tmp;
+  GtWord storeinteger[READNUMS], tmp;
   long double e_value;
   float bitscore, identity;
   bool reverse = false;

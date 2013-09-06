@@ -100,7 +100,7 @@ GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream *ns)
   return gt_gff3_in_stream_plain_get_used_types(is->gff3_in_stream_plain);
 }
 
-void gt_gff3_in_stream_set_offset(GtNodeStream *ns, long offset)
+void gt_gff3_in_stream_set_offset(GtNodeStream *ns, GtWord offset)
 {
   GtGFF3InStream *is = gff3_in_stream_cast(ns);
   gt_assert(is);

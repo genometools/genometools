@@ -19,13 +19,13 @@
 #include "gth/gthtravalign.h"
 
 bool gt_eops_equal_referencelength(Editoperation *alignment,
-                                long alignmentlength,
-                                long referencelength,
+                                GtWord alignmentlength,
+                                GtWord referencelength,
                                 bool proteineop)
 {
   Eoptype eoptype;
   GtUword eoplength;
-  long i, sumofeops = 0;
+  GtWord i, sumofeops = 0;
 
   for (i = 0; i < alignmentlength; i++) {
     eoptype   = gt_editoperation_type(alignment[i], proteineop);

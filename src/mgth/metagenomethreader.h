@@ -262,12 +262,12 @@ void mg_outputwriter(ParseStruct *,
 /* Funktion zur Bestimmung der zu einem Lesereahmen gehoerigen Matrix-Zeile
    Parameter: aktueller Leserahmen
    Returnwert: Matrixzeile */
-short get_matrix_row(long);
+short get_matrix_row(GtWord);
 
 /* Funktion zur Bestimmung des Leserahmens zu einer Matrix-Zeile
    Parameter: Matrixzeile
    Returnwert: Leserahmen */
-short get_current_frame(long);
+short get_current_frame(GtWord);
 
 /* Funktion zur Berechnung des reversen Komplements
    Parameter: Zeiger auf eine Seq., Seq-Laenge, GtError-Variable

@@ -509,7 +509,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
     from_min = 0,
     to_min = 0;
 
-  long min_value,
+  GtWord min_value,
     min_value_tmp = LONG_MAX;
 
   GtArray *tmp_from;
@@ -842,7 +842,7 @@ static int check_coding(ParseStruct *parsestruct_ptr,
     endpoint = 0,
     contig_len = 0;
 
-  long diff;
+  GtWord diff;
 
   short current_frame = 0,
     found = 0;

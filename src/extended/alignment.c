@@ -210,13 +210,13 @@ GtUword gt_alignment_eval(const GtAlignment *alignment)
   return sumcost;
 }
 
-long gt_alignment_eval_with_score(const GtAlignment *alignment,
-                                  long matchscore,
-                                  long mismatchscore,
-                                  long gapscore)
+GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
+                                  GtWord matchscore,
+                                  GtWord mismatchscore,
+                                  GtWord gapscore)
 {
   GtUword i, j, idx_u = 0, idx_v = 0, meoplen;
-  long sumscore = 0;
+  GtWord sumscore = 0;
   GtMultieop *meop;
 
   gt_assert(alignment != NULL);

@@ -67,7 +67,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
 
   /* Laenge der aus dem XML-File stammenden Hit-DNA-Sequenz */
   GtUword seq_len;
-  long numb_from = 0, numb_to = 0, numb_diff = 0;
+  GtWord numb_from = 0, numb_to = 0, numb_diff = 0;
 
   GtStr *seq_var,
    *http_adr;
@@ -413,7 +413,7 @@ static void XMLCALL endElement(void *data, const char *name)
        -End-Werte sowie der Frame-Informationen */
     GtUword ulong_numb_buf = 0,
       query_nr = 0, **query_nr_p;
-    long numb_buf = 0;
+    GtWord numb_buf = 0;
 
     /* Zeiger auf die erste Zahl der GI-Nr in einem Hit-ID-XML-Eintrag */
     const char *gi_ptr = NULL;
@@ -666,7 +666,8 @@ static void XMLCALL endElement(void *data, const char *name)
         /* abspeichern des query_frames fuer spaetere Sequenzberechnnugen
            als long Value */
         numb_buf = atol(gt_str_get(PARSESTRUCT(buf_ptr)));
-        gt_array_add_elem(MATRIXSTRUCT(query_frame), &numb_buf, sizeof (long));
+        gt_array_add_elem(MATRIXSTRUCT(query_frame), &numb_buf,
+                          sizeof (GtWord));
       }
       /* Hit-Frame XML-Tag/Bearbeitung siehe Query-Frame XML-Tag als
          String */
@@ -681,7 +682,7 @@ static void XMLCALL endElement(void *data, const char *name)
         /* abspeichern des hit_frames fuer spaetere Sequenzberechnnugen
            als long Value */
         numb_buf = atol(gt_str_get(PARSESTRUCT(buf_ptr)));
-        gt_array_add_elem(MATRIXSTRUCT(hit_frame), &numb_buf, sizeof (long));
+        gt_array_add_elem(MATRIXSTRUCT(hit_frame), &numb_buf, sizeof (GtWord));
 
         /* Wenn ein Hit-FASTA-File vorliegt existiert eine GtBioseq-Struktur
            und eine Hashtabelle, ueber die die Hit-Sequenz-Informationen

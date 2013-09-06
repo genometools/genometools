@@ -49,7 +49,7 @@ typedef struct {
        tidy,
        show,
        fixboundaries;
-  long offset;
+  GtWord offset;
   GtStr *offsetfile, *newsource;
   GtUword width;
   GtTypecheckInfo *tci;

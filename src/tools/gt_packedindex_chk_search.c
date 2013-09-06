@@ -37,7 +37,7 @@
 struct chkSearchOptions
 {
   struct bwtOptions idx;
-  long minPatLen, maxPatLen;
+  GtWord minPatLen, maxPatLen;
   GtUword numOfSamples, progressInterval;
   int flags;
   bool verboseOutput;

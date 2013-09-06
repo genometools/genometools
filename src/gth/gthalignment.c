@@ -1057,7 +1057,7 @@ static void formatalignment(GtFile *outfp, GtUchar *firstlineorig,
        secondinsertioncount   = 0,
        currentshortintroninfo = 0,
        completeshortintronlen = 0;
-  long j, numofblanks;
+  GtWord j, numofblanks;
   GtUword shortintronstart,
        shortintronend,
        shortintronlength;
@@ -1128,7 +1128,7 @@ static void formatalignment(GtFile *outfp, GtUchar *firstlineorig,
         shortintronlength = shortintroninfo->spaceShortIntronInfo
                             [currentshortintroninfo].length;
 
-        numofblanks  = (long) linewidth - 33;
+        numofblanks  = (GtWord) linewidth - 33;
         numofblanks -= floor(log10((double) shortintronstart))+1;
         numofblanks -= floor(log10((double) shortintronend))+1;
         numofblanks -= floor(log10((double) shortintronlength))+1;
@@ -1143,7 +1143,7 @@ static void formatalignment(GtFile *outfp, GtUchar *firstlineorig,
 
         gt_file_xprintf(outfp, "//\n\n");
         gt_file_xprintf(outfp, "//");
-        for (j = 2; j < (long) linewidth - 2; j++) {
+        for (j = 2; j < (GtWord) linewidth - 2; j++) {
           if ((j != 0) && (j%10 == 0)) {
             OUTCHAR(' ');
           }

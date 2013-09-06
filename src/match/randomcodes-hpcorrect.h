@@ -39,8 +39,9 @@ GtRandomcodesHpcorrectData *gt_randomcodes_hpcorrect_data_new(
     bool skip_rc, bool non_redundant, bool best_score_clustering,
     bool manhattan, /* true: score = - manhattan distance,
                        false: use hard-coded distance matrix  */
-    long clustering_param, /* best_score_clustering: minimal scores percentile;
-                              otherwise: mimimal score */
+    GtWord clustering_param, /* best_score_clustering: minimal scores
+                                percentile;
+                                otherwise: mimimal score */
     GtUword maxwidth, int rext_cl_minscore,
     int rext_I_minscore, int rext_J_minscore, int rext_R_minscore,
     int rext_D_minscore, int rext_J_lminscore, GtUword rext_J_lwidth,

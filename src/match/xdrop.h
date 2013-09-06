@@ -34,14 +34,14 @@ typedef struct
 } GtXdropArbitraryscores;
 
 /* This is the type for the xdrop scores. */
-typedef long GtXdropscore;
+typedef GtWord GtXdropscore;
 
 typedef struct
 {
   GtUword ivalue, jvalue;
   GtXdropscore score;
-  long best_d;
-  long best_k;
+  GtWord best_d;
+  GtWord best_k;
 } GtXdropbest;
 
 GT_DECLAREARRAYSTRUCT(GtXdropscore);

@@ -233,7 +233,7 @@ void gt_editoperation_show(Editoperation *eops, GtUword num_of_eops,
                         bool proteineops, bool xmlout, unsigned int indentlevel,
                         GtFile *outfp)
 {
-  long i;
+  GtWord i;
   GtUword consecutive_eop_length = 0;
 
   if (xmlout) {
@@ -244,7 +244,7 @@ void gt_editoperation_show(Editoperation *eops, GtUword num_of_eops,
       gt_file_xprintf(outfp, "<DNA_eops>\n");
   }
 
-  for (i=(long) (num_of_eops - 1); i >= 0; i--) {
+  for (i=(GtWord) (num_of_eops - 1); i >= 0; i--) {
     if (i > 0) {
       showoneeditopgeneric(outfp, eops[i], proteineops, xmlout, indentlevel + 1,
                            true, eops[i-1], &consecutive_eop_length);

@@ -27,7 +27,7 @@
 static int parse_input_line(GtSSplicedAlignment **alignment, const char *line,
                             GtUword line_length, GtError *err)
 {
-  long leftpos, rightpos;
+  GtWord leftpos, rightpos;
   GtUword i = 0;
   GtRange exon;
   GtStr *id;

@@ -458,7 +458,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
       mersizes = gt_malloc(sizeof (*mersizes) * numofmersizes);
       for (idx=0; idx<numofmersizes; idx++)
       {
-        long readnum;
+        GtWord readnum;
 
         if (sscanf(gt_str_array_get(arguments->mersizesstrings,idx),
                    "%ld",&readnum) != 1 || readnum <= 0)

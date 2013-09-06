@@ -20,9 +20,9 @@
 #include "annotationsketch/coords.h"
 #include "core/minmax.h"
 
-double gt_coords_convert_point(GtRange viewrange, long pos)
+double gt_coords_convert_point(GtRange viewrange, GtWord pos)
 {
-  return ((double) (((long) pos -(long) viewrange.start)))
+  return ((double) (((GtWord) pos -(GtWord) viewrange.start)))
                   / ((double) gt_range_length(&viewrange));
 }
 

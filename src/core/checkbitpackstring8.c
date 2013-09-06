@@ -87,7 +87,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
   offset = offsetStart = random()%(sizeof (uint8_t) * CHAR_BIT);
   numRnd = random() % (MAX_RND_NUMS_uint8_t + 1);
   gt_log_log("offset=%lu, numRnd=%lu\n",
-          (long unsigned)offsetStart, (long unsigned)numRnd);
+          (GtUword)offsetStart, (GtUword)numRnd);
   {
     BitOffset numBits = sizeof (uint8_t) * CHAR_BIT * numRnd + offsetStart;
     randSrc = gt_malloc(sizeof (uint8_t)*numRnd);

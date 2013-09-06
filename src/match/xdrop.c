@@ -40,7 +40,7 @@ typedef struct
 
 typedef struct
 {
-  long row;
+  GtWord row;
   unsigned char direction; /* one of the bits GT_XDROP_REPLACEMENTBIT,
                                               GT_XDROP_DELETIONBIT,
                                               GT_XDROP_INSERTIONBIT */
@@ -67,14 +67,14 @@ GT_DECLAREARRAYSTRUCT(GtXdropfrontvalue);
    the printed matrix.
  */
 void gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
-                       long distance,
+                       GtWord distance,
                        const unsigned char *useqptr,
                        const unsigned char *vseqptr,
-                       long ulen,
-                       long vlen)
+                       GtWord ulen,
+                       GtWord vlen)
 {
   GtUword l, max_l;
-  long i, j, k, d, filled = 0, integermax = MAX(ulen,vlen),
+  GtWord i, j, k, d, filled = 0, integermax = MAX(ulen,vlen),
        integermin = -integermax;
 
   printf("frontvalues:\n");
@@ -158,7 +158,7 @@ struct GtXdropresources
   GtXdropArbitrarydistances arbitdistances;
   GtArrayGtXdropfrontvalue fronts;
   GtArrayGtXdropscore big_t;
-  long currd;
+  GtWord currd;
 };
 
 GtXdropresources *gt_xdrop_resources_new(const GtXdropArbitraryscores *scores)
@@ -188,13 +188,14 @@ void gt_xdrop_resources_delete(GtXdropresources *res)
 #define GT_XDROP_SETDBACK(XDROPBELOWSCORE)\
         (XDROPBELOWSCORE + res->arbitscores->mat/2)/res->arbitdistances.gcd + 1
 
-static long gt_xdrop_frontvalue_get(const GtXdropresources *res, long d, long k)
+static GtWord gt_xdrop_frontvalue_get(const GtXdropresources *res, GtWord d,
+                                      GtWord k)
 {
   const GtUword frontidx = GT_XDROP_FRONTIDX(d, k);
   return res->fronts.spaceGtXdropfrontvalue[frontidx].row;
 }
 
-static void gt_xdrop_frontvalue_set(GtXdropresources *res, long d, long k,
+static void gt_xdrop_frontvalue_set(GtXdropresources *res, GtWord d, GtWord k,
                                     GtXdropfrontvalue value)
 {
   const GtUword frontidx = GT_XDROP_FRONTIDX(d, k);
@@ -221,13 +222,13 @@ void gt_evalxdroparbitscoresextend(bool forward,
                                    GtUword voffset,
                                    GtXdropscore xdropbelowscore)
 {
-  const long ulen = (long) gt_seqabstract_length(useq),
-             vlen = (long) gt_seqabstract_length(vseq),
+  const GtWord ulen = (GtWord) gt_seqabstract_length(useq),
+             vlen = (GtWord) gt_seqabstract_length(vseq),
              end_k = ulen - vlen, /* diagonal of endpoint (ulen, vlen) */
              integermax = MAX(ulen, vlen),
              integermin = -integermax,
              dback = GT_XDROP_SETDBACK(xdropbelowscore);
-  long idx,
+  GtWord idx,
        lbound,    /* diagonal lower bound */
        ubound,    /* diagonal upper bound */
        currd = 0, /* distance */
@@ -245,7 +246,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
   res->big_t.nextfreeGtXdropscore = 0;
   res->fronts.nextfreeGtXdropfrontvalue = 0;
   /* phase 0 */
-  idx = (long) gt_seqabstract_lcp(forward,
+  idx = (GtWord) gt_seqabstract_lcp(forward,
                                   useq,
                                   vseq,
                                   forward ? uoffset : uoffset - 1,
@@ -275,7 +276,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
     currd++;
     /* calculate fronts */
     for (k = lbound - 1; k <= ubound + 1; k++) {
-      long i = integermin, row;
+      GtWord i = integermin, row;
       /* case 1 : DELETION-EDGE  */
       if (lbound < k &&
           currd - res->arbitdistances.del >= 0 &&
@@ -320,8 +321,8 @@ void gt_evalxdroparbitscoresextend(bool forward,
         tmpfront.row = integermin;
       }
       else {
-        long j = i - k;
-        const long previousd = currd - dback;
+        GtWord j = i - k;
+        const GtWord previousd = currd - dback;
 
         /* alignment score smaller than T - X */
         if (previousd > 0 &&
@@ -434,9 +435,9 @@ GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,
 {
   GtMultieoplist *meops = gt_multieoplist_new();
   GtUword idx, i;
-  long k = best->best_k,
+  GtWord k = best->best_k,
        d = best->best_d,
-       old_row = (long) best->ivalue;
+       old_row = (GtWord) best->ivalue;
   GtXdropfrontvalue *fronts = res->fronts.spaceGtXdropfrontvalue,
                     currfront;
 

@@ -810,10 +810,10 @@ GthAlphatype gth_input_overall_alphatype(const GthInput *input)
 /* the following function determines the index of the file name <ilename> in the
    array <files> and returns it. If the file name is not contained in the array,
    -1 is returned. */
-static long determine_file_index(const char *filename, GtStrArray *files)
+static GtWord determine_file_index(const char *filename, GtStrArray *files)
 {
   GtUword i;
-  long rval = -1;
+  GtWord rval = -1;
   for (i = 0; i < gt_str_array_size(files); i++) {
     if (!strcmp(filename, gt_str_array_get(files, i))) {
       rval = gt_safe_cast2long(i);
@@ -823,14 +823,14 @@ static long determine_file_index(const char *filename, GtStrArray *files)
   return rval;
 }
 
-long gth_input_determine_genomic_file_index(const GthInput *input,
+GtWord gth_input_determine_genomic_file_index(const GthInput *input,
                                             const char *filename)
 {
   gt_assert(input && filename);
   return determine_file_index(filename, input->genomicfiles);
 }
 
-long gth_input_determine_reference_file_index(const GthInput *input,
+GtWord gth_input_determine_reference_file_index(const GthInput *input,
                                               const char *filename)
 {
   gt_assert(input && filename);

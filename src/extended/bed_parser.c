@@ -47,7 +47,7 @@ struct GtBEDParser {
   char *feature_type,
        *thick_feature_type,
        *block_type;
-  long offset;
+  GtWord offset;
 };
 
 GtBEDParser* gt_bed_parser_new(void)
@@ -252,7 +252,7 @@ static int track_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
 }
 
 static int parse_bed_range(GtRange *range, GtStr *start, GtStr *end,
-                           long offset, GtIO *bed_file, bool thick,
+                           GtWord offset, GtIO *bed_file, bool thick,
                            GtError *err)
 {
   int had_err;

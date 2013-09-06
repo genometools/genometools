@@ -462,7 +462,7 @@ static void computebordersandscoresprocmatch(Traversealignmentstate *state,
     genomicchar1      = d->gen_seq_tran[state->genomicptr];
     /* referenceptr in valid range */
     gt_assert(state->referenceptr >= 0 &&
-              state->referenceptr <  (long) d->ref_dp_length);
+              state->referenceptr <  (GtWord) d->ref_dp_length);
     referencechar = d->ref_seq_tran[state->referenceptr];
     /* genomic char equals reference char */
     gt_assert(genomicchar1 == referencechar);
@@ -498,11 +498,11 @@ static void computebordersandscoresprocintron(Traversealignmentstate *state,
 #ifndef NDEBUG
 static bool containsintronsorinsertions(bool leading,
                                         Editoperation *alignment,
-                                        long alignmentlength,
+                                        GtWord alignmentlength,
                                         bool proteineop)
 {
   Eoptype eoptype;
-  long i;
+  GtWord i;
   bool breakforloop = false;
 
   /* check for introns or insertions */
@@ -542,7 +542,7 @@ static bool containsintronsorinsertions(bool leading,
 #ifndef NDEBUG
 static bool containsnoleadingorterminalintronsorinsertions(Editoperation
                                                            *alignment,
-                                                           long
+                                                           GtWord
                                                            alignmentlength,
                                                            bool proteineop)
 {

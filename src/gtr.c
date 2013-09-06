@@ -369,7 +369,7 @@ static int run_tests(GtR *gtr, GtError *err)
   gt_ensure(sizeof (unsigned short) == 2);
   gt_ensure(sizeof (int) == 4);
   gt_ensure(sizeof (unsigned int) == 4);
-  gt_ensure(sizeof (long) == 4 || sizeof (long) == 8);
+  gt_ensure(sizeof (GtWord) == 4 || sizeof (GtWord) == 8);
   gt_ensure(sizeof (GtUword) == 4 || sizeof (GtUword) == 8);
   gt_ensure(sizeof (GtUword) >= sizeof (size_t));
   gt_ensure(sizeof (GtInt64) == 8);

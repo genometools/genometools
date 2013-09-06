@@ -24,8 +24,8 @@
 typedef GtUword
   (*GtClusteredSetNumberOfClustersFunc)(GtClusteredSet*, GtError*);
 typedef int
-  (*GtClusteredSetMergeClustersFunc)(GtClusteredSet*, GtUword, unsigned
-   long, GtError*);
+  (*GtClusteredSetMergeClustersFunc)(GtClusteredSet*, GtUword, GtUword,
+      GtError*);
 typedef void
   (*GtClusteredSetFreeFunc)(GtClusteredSet*, GtError*);
 typedef GtClusteredSetIterator*

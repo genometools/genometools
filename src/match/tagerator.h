@@ -53,7 +53,7 @@ typedef struct
        nowildcards, /* ignore matches containing wildcards */
        skpp, /* Skip prefix of pattern without counting errors */
        best; /* use best match mode, only for edit distance */
-  long userdefinedmaxdistance; /* maximal number of allowed differences */
+  GtWord userdefinedmaxdistance; /* maximal number of allowed differences */
   int userdefinedmaxdepth;   /* use pckbuckets only up to this depth */
   unsigned int outputmode;  /* mode of output of tag matches */
   GtUword maxintervalwidth; /* max width of interval */

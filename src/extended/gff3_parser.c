@@ -57,7 +57,7 @@ struct GtGFF3Parser {
        eof_emitted,
        gvf_mode;
   GtGenomeNode *gff3_pragma;
-  long offset;
+  GtWord offset;
   GtMapping *offset_mapping;
   GtOrphanage *orphanage;
   GtTypeChecker *type_checker;
@@ -125,7 +125,7 @@ void gt_gff3_parser_do_not_check_region_boundaries(GtGFF3Parser *parser)
   parser->checkregions = false;
 }
 
-void gt_gff3_parser_set_offset(GtGFF3Parser *parser, long offset)
+void gt_gff3_parser_set_offset(GtGFF3Parser *parser, GtWord offset)
 {
   gt_assert(parser);
   gt_assert(!parser->offset_mapping);
@@ -165,7 +165,7 @@ void gt_gff3_parser_enable_tidy_mode(GtGFF3Parser *parser)
   parser->tidy = true;
 }
 
-static int offset_possible(const GtRange *range, long offset,
+static int offset_possible(const GtRange *range, GtWord offset,
                            const char *filename, unsigned int line_number,
                            GtError *err)
 {
@@ -203,7 +203,7 @@ static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
       *range = gt_range_offset(range, parser->offset);
   }
   else if (parser->offset_mapping) {
-    long offset;
+    GtWord offset;
     had_err = gt_mapping_map_integer(parser->offset_mapping, &offset, seqid,
                                      err);
     if (!had_err)

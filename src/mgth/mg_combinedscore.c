@@ -332,7 +332,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
 }
 
 /* Funktion zur Bestimmung der dem Leserahmen entsprechenden Matrix-Zeile */
-short get_matrix_row(long frame_fct)
+short get_matrix_row(GtWord frame_fct)
 {
   gt_assert(frame_fct >= -3 && frame_fct <= 3);
   return 3 - frame_fct;         /* [-3..3] -> [6..0] */
@@ -340,7 +340,7 @@ short get_matrix_row(long frame_fct)
 
 /* Umkehrfunktion zu get_matrix_row - aus der Matrix-Zeile wird der Leserahmen
    bestimmt */
-short get_current_frame(long row_fct)
+short get_current_frame(GtWord row_fct)
 {
   gt_assert(row_fct >= 0 && row_fct <= 6);
   return 3 - row_fct;           /* [0..6] -> [3..-3] */
@@ -374,7 +374,7 @@ static void fill_matrix(CombinedScoreMatrixEntry **combinedscore_matrix,
   /* das Ende von Blast-Hits innerhalb der Query-Sequenz wird mit -10
      bewertet */
   if (position_hit == hit_len - 3
-      && *(long *) MATRIXSTRUCT(query_to) != contig_len && k == 3)
+      && *(GtWord *) MATRIXSTRUCT(query_to) != contig_len && k == 3)
   {
     /* Wenn der Leserahmen negativ ist, muessen die Combined-Scores von
        Rechts nach Links in die Combined-Score Matrix eingetragen werden -

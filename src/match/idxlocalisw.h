@@ -21,7 +21,7 @@
 #include "core/encseq.h"
 #include "procmatch.h"
 
-typedef long Scoretype;
+typedef GtWord Scoretype;
 
 typedef struct
 {

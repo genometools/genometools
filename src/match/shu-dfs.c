@@ -41,7 +41,7 @@ static inline void add_filenum_count(GtUword lower,
                                      const GtShuUnitFileInfo *unit_info,
                                      const GtEncseq *encseq)
 {
-  long unsigned row;
+  GtUword row;
 
   for (row = lower; row < upper; row++)
   {

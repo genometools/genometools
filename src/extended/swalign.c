@@ -25,11 +25,11 @@
 
 typedef struct {
   GtUword x,
-                y;
+          y;
 } Coordinate;
 
 typedef struct {
-  long score;
+  GtWord score;
   bool max_replacement,
        max_deletion,
        max_insertion;
@@ -45,7 +45,7 @@ static void swalign_fill_table(DPentry **dptable,
                                unsigned int v_alpha_size)
 {
   GtUword i, j;
-  long maxscore, repscore, delscore, insscore, overall_maxscore = LONG_MIN;
+  GtWord maxscore, repscore, delscore, insscore, overall_maxscore = LONG_MIN;
   gt_assert(dptable && u && ulen && v && vlen && max_coordinate && u_alpha_size
             && v_alpha_size);
   for (j = 1; j <= vlen; j++) {

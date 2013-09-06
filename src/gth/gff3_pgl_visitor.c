@@ -102,7 +102,7 @@ static void save_pgl_in_gff3(GthPGL *pgl, GthRegionFactory *region_factory,
   GtStr *seqid;
   GT_UNUSED int had_err;
   struct GthAGS *ags;
-  long offset;
+  GtWord offset;
 
   gt_assert(pgl && region_factory && cds_visitor && nodes);
 

@@ -30,7 +30,7 @@
 */
 
 typedef struct {
-  long          Storescore;             /* the score */
+  GtWord        Storescore;             /* the score */
   GtUword       Storepositionreference, /* position of reference instance
                                            w.r.t. sequence start */
                 Storelengthreference,   /* length of reference instance */

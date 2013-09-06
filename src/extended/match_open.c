@@ -34,7 +34,7 @@ const GtMatchClass* gt_match_open_class(void);
 
 struct GtMatchOpen {
   GtMatch parent_instance;
-  long weight;
+  GtWord weight;
 };
 
 static int match_open_accept(GtMatch *match, GtMatchVisitor *mv, GtError *err)
@@ -65,7 +65,7 @@ GtMatch* gt_match_open_new(char *seqid1,
                            GtUword end_seq1,
                            GtUword start_seq2,
                            GtUword end_seq2,
-                           long weight,
+                           GtWord weight,
                            GtMatchDirection dir)
 {
   GtMatch *match;
@@ -77,13 +77,13 @@ GtMatch* gt_match_open_new(char *seqid1,
   return match;
 }
 
-void gt_match_open_set_weight(GtMatchOpen *mo, long weight)
+void gt_match_open_set_weight(GtMatchOpen *mo, GtWord weight)
 {
   gt_assert(mo);
   mo->weight = weight;
 }
 
-long gt_match_open_get_weight(GtMatchOpen *mo)
+GtWord gt_match_open_get_weight(GtMatchOpen *mo)
 {
   gt_assert(mo);
   return mo->weight;

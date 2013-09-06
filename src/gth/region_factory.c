@@ -264,8 +264,8 @@ GtStr* gth_region_factory_get_seqid(GthRegionFactory *srf,
   return seqid_store_get(srf->seqid_store, filenum, seqnum);
 }
 
-long gth_region_factory_offset(GthRegionFactory *srf,
-                               GtUword filenum, GtUword seqnum)
+GtWord gth_region_factory_offset(GthRegionFactory *srf, GtUword filenum,
+                                 GtUword seqnum)
 {
   gt_assert(srf && srf->factory_was_used);
   return seqid_store_offset(srf->seqid_store, filenum, seqnum);

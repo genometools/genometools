@@ -116,7 +116,7 @@ static bool io_zero_padding_needs_dist(DescField *field,
 typedef struct data {
   FILE         *fp;
   GtUword written_elems;
-  long          minimum_element;
+  GtWord          minimum_element;
 } EncsecDistriData;
 
 static void encdesc_distri_iter_count(GT_UNUSED GtUword symbol,
@@ -195,7 +195,7 @@ static void numeric_field_check_distri_dependence(DescField *field,
 }
 
 static enum iterator_op encdesc_li_ull_hashmap_iter_count(
-                                             GT_UNUSED long key,
+                                             GT_UNUSED GtWord key,
                                              GT_UNUSED GtUint64 value,
                                              void *data,
                                              GT_UNUSED GtError *err)
@@ -218,7 +218,7 @@ static GtUword get_hashmap_distri_size(GtHashtable *h_table)
 }
 
 static enum iterator_op encdesc_li_ull_hashmap_iter_write(
-                                                       long key,
+                                                       GtWord key,
                                                        GtUint64 value,
                                                        void *data,
                                                        GT_UNUSED GtError *err)
@@ -251,7 +251,7 @@ static void read_hashmap_distri(GtUword size,
                                 FILE *fp)
 {
   GtUword idx;
-  long symbol;
+  GtWord symbol;
   GtUint64 freq;
 
   gt_assert(h_table != NULL);

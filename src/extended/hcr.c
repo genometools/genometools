@@ -82,7 +82,7 @@ typedef struct GtHcrSeqEncoder {
   GtSampling        *sampling;
   GtUint64 total_num_of_symbols;
   GtUword      num_of_files;
-  long               startofsamplingtab,
+  GtWord               startofsamplingtab,
                      start_of_encoding;
   unsigned int       qual_offset;
 } GtHcrSeqEncoder;
@@ -127,7 +127,7 @@ typedef struct GtHcrSeqDecoder {
                        cur_read,
                        num_of_reads,
                        num_of_files;
-  long                 start_of_encoding;
+  GtWord                 start_of_encoding;
   unsigned int         alphabet_size,
                        qual_offset;
 } GtHcrSeqDecoder;
@@ -354,7 +354,7 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
                 page_counter = 0,
                 bits_left_in_page,
                 cur_read = 0;
-  long filepos;
+  GtWord filepos;
   GtSeqIterator *seqit;
   const GtUchar *seq,
                 *qual;
@@ -525,7 +525,7 @@ static int hcr_write_seq_qual_data(const char *name, GtHcrEncoder *hcr_enc,
   int had_err = 0;
   FILE *fp;
   GtUword dummy = 0;
-  long pos;
+  GtWord pos;
 
   gt_error_check(err);
 
@@ -597,8 +597,8 @@ static void hcr_read_file_info(GtHcrSeqDecoder *seq_dec, FILE *fp)
 }
 
 static HcrHuffDataIterator *decoder_init_data_iterator(
-                                                long start_of_encoding,
-                                                long end_of_encoding,
+                                                GtWord start_of_encoding,
+                                                GtWord end_of_encoding,
                                                 const GtStr *filename)
 {
   HcrHuffDataIterator *data_iter = gt_malloc(sizeof (*data_iter));
@@ -698,7 +698,7 @@ static GtRBTree *seq_decoder_init_file_info(FastqFileInfo *fileinfos,
   return tree;
 }
 
-static inline long decoder_calc_start_of_encoded_data(FILE *fp)
+static inline GtWord decoder_calc_start_of_encoded_data(FILE *fp)
 {
   bool is_not_at_pageborder;
   GtUword pagesize = gt_pagesize();
@@ -712,7 +712,7 @@ static inline long decoder_calc_start_of_encoded_data(FILE *fp)
 }
 
 static void seq_decoder_init_huffman(GtHcrSeqDecoder *seq_dec,
-                                     long end_of_encoding,
+                                     GtWord end_of_encoding,
                                      GtBaseQualDistr *bqd,
                                      GtError *err)
 {
@@ -749,7 +749,7 @@ static GtHcrSeqDecoder *hcr_seq_decoder_new(GtAlphabet *alpha, const char *name,
 {
   GtHcrSeqDecoder *seq_dec = gt_malloc(sizeof (GtHcrSeqDecoder));
   GtBaseQualDistr *bqd = NULL;
-  long end_enc_start_sampling = 0;
+  GtWord end_enc_start_sampling = 0;
   FILE *fp = NULL;
   GT_UNUSED size_t read,
             one = (size_t) 1;

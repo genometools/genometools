@@ -159,7 +159,7 @@ GtRange gt_range_join(const GtRange *range_a, const GtRange *range_b)
   return r;
 }
 
-GtRange gt_range_offset(const GtRange *range, long offset)
+GtRange gt_range_offset(const GtRange *range, GtWord offset)
 {
   GtRange transformed_range = { 0, 0 };
   gt_assert(range->start <= range->end);

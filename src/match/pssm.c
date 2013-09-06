@@ -73,7 +73,7 @@ void gt_makeitmthresholds(Profilematrix *prof,
                               ProfScore minscore)
 {
   GtUword d, a;
-  long ddown;
+  GtWord ddown;
   ProfScore partsum,
             score,
             *maxscore;
@@ -92,7 +92,7 @@ void gt_makeitmthresholds(Profilematrix *prof,
   }
   partsum = (ProfScore) 0;
   gt_assert(prof->itmthreshold != NULL);
-  for (ddown = (long) (prof->dimension-1); ddown>=0; ddown--)
+  for (ddown = (GtWord) (prof->dimension-1); ddown>=0; ddown--)
   {
     prof->itmthreshold[ddown] = minscore - partsum;
     partsum += maxscore[ddown];

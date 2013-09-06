@@ -50,7 +50,8 @@ void          gt_gff3_parser_check_region_boundaries(GtGFF3Parser *gff3_parser);
 void          gt_gff3_parser_do_not_check_region_boundaries(GtGFF3Parser
                                                                   *gff3_parser);
 /* Transform all features parsed by <gff3_parser> by the given <offset>. */
-void          gt_gff3_parser_set_offset(GtGFF3Parser *gff3_parser, long offset);
+void          gt_gff3_parser_set_offset(GtGFF3Parser *gff3_parser,
+                                        GtWord offset);
 /* Set <type_checker> used by <gff3_parser>. */
 void          gt_gff3_parser_set_type_checker(GtGFF3Parser *gff3_parser,
                                               GtTypeChecker *type_checker);

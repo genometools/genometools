@@ -154,9 +154,9 @@ bool           gth_input_forward(const GthInput*);
 bool           gth_input_reverse(const GthInput*);
 bool           gth_input_both(const GthInput*);
 GthAlphatype   gth_input_overall_alphatype(const GthInput*);
-long           gth_input_determine_genomic_file_index(const GthInput*,
+GtWord         gth_input_determine_genomic_file_index(const GthInput*,
                                                       const char *filename);
-long           gth_input_determine_reference_file_index(const GthInput*,
+GtWord         gth_input_determine_reference_file_index(const GthInput*,
                                                         const char *filename);
 int            gth_input_set_and_check_substring_spec(GthInput*, GtError*);
 bool           gth_input_use_substring_spec(const GthInput*);
