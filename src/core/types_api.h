@@ -74,16 +74,22 @@
    32-bit systems and 8 byte on 64-bit systems). */
 #ifdef _WIN64
 typedef unsigned long long GtUword;
+#define GT_UWORD_MAX ULLONG_MAX
 #else
 typedef unsigned long GtUword;
+#define GT_UWORD_MAX ULONG_MAX
 #endif
 
 /* Define GtWord as a signed integer with the machine word size (4 byte on
    32-bit systems and 8 byte on 64-bit systems). */
 #ifdef _WIN64
 typedef long long GtWord;
+#define GT_WORD_MAX LLONG_MAX
+#define GT_WORD_MIN LLONG_MIN
 #else
 typedef long GtWord;
+#define GT_WORD_MAX LONG_MAX
+#define GT_WORD_MIN LONG_MIN
 #endif
 
 typedef long long          GtInt64;
