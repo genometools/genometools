@@ -108,10 +108,6 @@ GTMAIN_DEP:=$(GTMAIN_SRC:%.c=obj/%.d)
 EXAMPLES_SRC:=src/example.c
 EXAMPLES_DEP:=$(EXAMPLES_SRC:%.c=obj/%.d)
 
-SKPROTO_SRC:=src/skproto.c src/tools/gt_skproto.c
-SKPROTO_OBJ:=$(SKPROTO_SRC:%.c=obj/%.o)
-SKPROTO_DEP:=$(SKPROTO_SRC:%.c=obj/%.d)
-
 TOOLS_SRC:=$(wildcard src/tools/*.c)
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 TOOLS_DEP:=$(TOOLS_SRC:%.c=obj/%.d)
@@ -482,7 +478,7 @@ else
 endif
 
 all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
-     bin/skproto bin/gt bin/examples/custom_stream \
+     bin/gt bin/examples/custom_stream \
      bin/examples/gff3sort bin/examples/gff3validator bin/examples/noop \
      $(ANNOTATIONSKETCH_EXAMPLES) \
      $(ADDITIONAL_BINARIES)
@@ -558,10 +554,6 @@ $(1): $(2)
 	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
 	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -o $$@
 endef
-
-$(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
-                                             lib/libgenometools.a \
-                                             $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
                                         lib/libgenometools.a \
@@ -734,7 +726,6 @@ obj/src/core/versionfunc.o: obj/gt_config.h
 # read dependencies
 -include $(GTMAIN_DEP) \
          $(EXAMPLES_DEP) \
-         $(SKPROTO_DEP) \
          $(TOOLS_DEP) \
          $(LUAMAIN_DEP) \
          $(LIBTECLA_DEP) \
