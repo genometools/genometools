@@ -89,7 +89,8 @@ static GtUword gt_kmercode2prefix_index(GtUword idx,
   const GtFirstcodesinfo *fci = (const GtFirstcodesinfo *) data;
 
   gt_assert(fci != NULL && idx < fci->differentcodes);
-  return fci->allfirstcodes[idx] >> fci->shiftright2index;
+  return (GtUword) fci->allfirstcodes[idx]
+            >> (GtUword) fci->shiftright2index;
 }
 
 static void gt_minmax_index_kmercode2prefix(GtUword *minindex,
@@ -569,12 +570,13 @@ static int gt_firstcodes_thread_sortremaining(
       threadinfo[t].sumofwidth = sumofwidth;
     }
     gt_assert(lb < threadinfo[t].sumofwidth);
-    gt_logger_log(logger,"thread %u: process ["GT_LU","GT_LU"]=["GT_LU","GT_LU"] "
-                         "of width "GT_LU"",t,threadinfo[t].minindex,
-                                          threadinfo[t].maxindex,
-                                          lb,
-                                          threadinfo[t].sumofwidth,
-                                          threadinfo[t].sumofwidth - lb);
+    gt_logger_log(logger,
+                  "thread %u: process ["GT_LU","GT_LU"]=["GT_LU","GT_LU"] "
+                  "of width "GT_LU"",t,threadinfo[t].minindex,
+                                     threadinfo[t].maxindex,
+                                     lb,
+                                     threadinfo[t].sumofwidth,
+                                     threadinfo[t].sumofwidth - lb);
     sum += threadinfo[t].sumofwidth - lb;
     threadinfo[t].thread
       = gt_thread_new (gt_firstcodes_thread_caller_sortremaining,

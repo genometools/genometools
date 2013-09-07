@@ -125,7 +125,7 @@ int gt_nextSequentiallcpvalue(GtUword *currentlcp,
                                          &ssar->suffixarray->lcptabstream);
       if (retval > 0)
       {
-        if (tmpsmalllcpvalue < LCPOVERFLOW)
+        if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)
         {
           *currentlcp = (GtUword) tmpsmalllcpvalue;
         } else
@@ -151,7 +151,7 @@ int gt_nextSequentiallcpvalue(GtUword *currentlcp,
       if (ssar->nextlcptabindex < ssar->numberofsuffixes)
       {
         tmpsmalllcpvalue = ssar->suffixarray->lcptab[ssar->nextlcptabindex++];
-        if (tmpsmalllcpvalue < LCPOVERFLOW)
+        if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)
         {
           *currentlcp = (GtUword) tmpsmalllcpvalue;
         } else

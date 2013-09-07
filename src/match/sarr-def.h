@@ -168,7 +168,7 @@ typedef struct
 
   gt_assert(pos <= gt_encseq_total_length(suffixarray->encseq));
   smalllcpvalue = suffixarray->lcptab[pos];
-  if (smalllcpvalue != LCPOVERFLOW)
+  if (smalllcpvalue != (GtUchar) LCPOVERFLOW)
   {
     return (GtUword) smalllcpvalue;
   }

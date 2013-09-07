@@ -300,7 +300,10 @@ void gt_popcount_tab_block_to_str(GtPopcountTab *popcount_tab,
   unsigned int idx;
   buffer[popcount_tab->blocksize] = 0;
   for (idx = 0; idx < popcount_tab->blocksize; ++idx) {
-    buffer[idx] = ((block >> (popcount_tab->blocksize - idx - 1)) & 1) == 1UL ?
+    buffer[idx] =
+      ((block >> (GtUword) (popcount_tab->blocksize - idx - 1)) &
+       (GtUword) 1) ==
+      (GtUword) 1 ?
       '1' : '0';
   }
 }

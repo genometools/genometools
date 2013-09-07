@@ -110,7 +110,7 @@ static int outputsuflcpllv(void *processinfo,
         currentexception.value = lcpvalue;
         gt_xfwrite(&currentexception,sizeof (Largelcpvalue), (size_t) 1,
                    mergeoutinfo->outllv.fp);
-        smallvalue = LCPOVERFLOW;
+        smallvalue = (GtUchar) LCPOVERFLOW;
       }
       gt_xfwrite(&smallvalue,sizeof (GtUchar),(size_t) 1,
                  mergeoutinfo->outlcp.fp);

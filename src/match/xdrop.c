@@ -18,13 +18,13 @@
 */
 
 #include <string.h>
-
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/ensure.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
+#include "core/types_api.h"
 #include "extended/alignment.h"
 #include "match/seqabstract.h"
 
@@ -104,7 +104,11 @@ void gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
         if (i == fronts->spaceGtXdropfrontvalue[l].row) {
           for (d = 0; d <= distance; d++) {
             if (k >= -d && k <= d && l == GT_XDROP_FRONTIDX(d, i - j)) {
+#ifndef S_SPLINT_S
               printf("%-3"GT_LDS" ", d);
+#else
+              printf("%-3ld ", d);
+#endif
               l = fronts->nextfreeGtXdropfrontvalue;
               filled++;
               break;

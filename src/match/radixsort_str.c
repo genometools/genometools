@@ -111,7 +111,7 @@ static uint8_t *gt_radixsort_str_init_xorvalue2lcp(void)
   {
     if (i > 0)
     {
-      j_bound = GT_POW2(GT_MULT2(i));
+      j_bound = (GtUword) GT_POW2(GT_MULT2(i));
       gt_assert(lcp > 0);
       lcp--;
     }

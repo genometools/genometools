@@ -48,7 +48,7 @@ GtUword gt_seqnumrelpos_decode_pos(const GtSeqnumrelpos *snrp,
 {
   GtUword seqnum, relpos;
 
-  seqnum = seqnumrelpos >> snrp->bitsforrelpos;
+  seqnum = (GtUword) seqnumrelpos >> (GtUword) snrp->bitsforrelpos;
   relpos = seqnumrelpos & snrp->relposmask;
   return gt_encseq_seqstartpos(snrp->encseq,seqnum) + relpos;
 }
@@ -56,7 +56,7 @@ GtUword gt_seqnumrelpos_decode_pos(const GtSeqnumrelpos *snrp,
 GtUword gt_seqnumrelpos_decode_seqnum(const GtSeqnumrelpos *snrp,
                                             GtUword seqnumrelpos)
 {
-  return seqnumrelpos >> snrp->bitsforrelpos;
+  return (GtUword) seqnumrelpos >> (GtUword) snrp->bitsforrelpos;
 }
 
 GtUword gt_seqnumrelpos_decode_relpos(const GtSeqnumrelpos *snrp,
@@ -70,5 +70,5 @@ GtUword gt_seqnumrelpos_encode(const GtSeqnumrelpos *snrp,
                                         GtUword relpos)
 {
   gt_assert(relpos <= snrp->relposmask);
-  return (seqnum << snrp->bitsforrelpos) | relpos;
+  return ((GtUword) seqnum << (GtUword) snrp->bitsforrelpos) | relpos;
 }

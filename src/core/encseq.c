@@ -3025,7 +3025,8 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       }
       binpreparenextrangeGtEncseqReader(esr, SWtable_wildcardrange);
 #ifdef GT_RANGEDEBUG
-      printf("wildcardranges: start advance at ("GT_LU", "GT_LU") in page "GT_LU"\n",
+      printf("wildcardranges: start advance "
+             "at ("GT_LU", "GT_LU") in page "GT_LU"\n",
                        esr->wildcardrangestate->firstcell,
                        esr->wildcardrangestate->lastcell,
                        esr->wildcardrangestate->nextpage);
@@ -3788,7 +3789,8 @@ GtUword gt_encseq_sep2seqnum(const GtUword *recordseps,
       right = mid-1;
     }
   }
-  fprintf(stderr, "gt_encseq_sep2seqnum: cannot find position "GT_LU"\n", position);
+  fprintf(stderr, "gt_encseq_sep2seqnum: cannot find position "GT_LU"\n",
+          position);
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
@@ -3927,7 +3929,8 @@ void gt_encseq_check_markpos(const GtEncseq *encseq)
         seqnum = gt_encseq_sep2seqnum(markpos, encseq->numofdbsequences,
                                       totallength, pos);
         if (seqnum != currentseqnum) {
-          fprintf(stderr, "pos= "GT_LU" seqnum = "GT_LU" != "GT_LU" = currentseqnum\n",
+          fprintf(stderr, "pos= "GT_LU" seqnum = "GT_LU" != "GT_LU" = "
+                          "currentseqnum\n",
                           pos, seqnum, currentseqnum);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
@@ -4087,7 +4090,8 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   }
   else {
     gt_logger_log(logger,
-                  "init character encoding (%s, "GT_LU" bytes, %.2f bits/symbol)",
+                  "init character encoding (%s, "GT_LU" bytes, %.2f "
+                  "bits/symbol)",
                   encseq->satname, encseq->sizeofrep, spaceinbitsperchar);
     if (encseq->numofdbsequences > 1UL) {
       GtUword sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
@@ -4099,7 +4103,8 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
       spaceinbitsperchar = determine_spaceinbitsperchar(sizessptab,
                                                         totallength);
       gt_logger_log(logger,
-                    "init ssptab encoding (%s, "GT_LU" bytes, %.2f bits/symbol)",
+                    "init ssptab encoding (%s, "GT_LU" bytes, %.2f "
+                    "bits/symbol)",
                     gt_encseq_access_type_str(encseq->satsep),
                     sizessptab,
                     spaceinbitsperchar);
@@ -4806,8 +4811,9 @@ void gt_encseq_check_startpositions(const GtEncseq *encseq, GtLogger *logger)
                         * gt_encseq_num_of_sequences(encseq));
   esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD, 0);
   startpostable[pos++] = 0;
-  gt_logger_log(logger, "sequential iteration of sequence of length "GT_LU" ...",
-                 gt_encseq_total_length(encseq));
+  gt_logger_log(logger,
+                "sequential iteration of sequence of length "GT_LU" ...",
+                gt_encseq_total_length(encseq));
   for (i = 0; i < gt_encseq_total_length(encseq); i++) {
     if (gt_encseq_reader_next_encoded_char(esr) == (GtUchar) SEPARATOR) {
       gt_assert(gt_encseq_position_is_separator(encseq, i,
@@ -4988,7 +4994,8 @@ static void updatesumranges(GtUword key, GtUint64 value,
   updatesumrangeinfo->ranges_uint32_t
      += currentspecialrangevalue(key, distvalue, (GtUword) UINT32_MAX);
   updatesumrangeinfo->realranges += distvalue;
-  gt_logger_log(updatesumrangeinfo->logger, "%sranges of length "GT_LU"="GT_LU"",
+  gt_logger_log(updatesumrangeinfo->logger,
+                "%sranges of length "GT_LU"="GT_LU"",
                 updatesumrangeinfo->kind, key, distvalue);
 }
 
@@ -7235,7 +7242,8 @@ void gt_encseq_show_features(const GtEncseq *encseq,
   }
   gt_logger_log(logger, "totallength="GT_LU"",
                        gt_encseq_total_length(encseq));
-  gt_logger_log(logger, "numofsequences="GT_LU"", encseq->logicalnumofdbsequences);
+  gt_logger_log(logger, "numofsequences="GT_LU"",
+                       encseq->logicalnumofdbsequences);
   gt_logger_log(logger, "specialcharacters="GT_LU"",
                        gt_encseq_specialcharacters(encseq));
   gt_logger_log(logger, "specialranges="GT_LU"",
@@ -7357,15 +7365,16 @@ void gt_encseq_relpos_seqnum_check(const char *filename, int line,
     seqnum2 = gt_encseq_seqnum(encseq, position);
     relpos2 = position - gt_encseq_seqstartpos(encseq, seqnum2);
     if (seqnum != seqnum2) {
-      fprintf(stderr, "file %s, line %d: pos="GT_LU", seqnum = "GT_LU" != "GT_LU" "
-                     " = seqnum.correct\n", filename, line, position,
-                     seqnum, seqnum2);
+      fprintf(stderr,
+              "file %s, line %d: pos="GT_LU", seqnum = "GT_LU" != "GT_LU" "
+              " = seqnum.correct\n", filename, line, position, seqnum, seqnum2);
       exit(EXIT_FAILURE);
     }
     if (relpos != relpos2) {
-      fprintf(stderr, "file %s, line %d: pos="GT_LU", relpos="GT_LU" != "GT_LU" "
-                     " = relpos.correct\n", filename, line, position,
-                     relpos, relpos2);
+      fprintf(stderr,
+              "file %s, line %d: pos="GT_LU", relpos="GT_LU" != "GT_LU" "
+              " = relpos.correct\n", filename, line, position,
+              relpos, relpos2);
       exit(EXIT_FAILURE);
     }
   }
@@ -7672,8 +7681,9 @@ static void testseqnumextraction(const GtEncseq *encseq)
 
       seqnum1 = gt_encseq_seqnum(encseq, pos);
       if (currentseqnum != seqnum1) {
-        fprintf(stderr, "testseqnumextraction: pos="GT_LU": currentseqnum = "GT_LU" "
-                       "!= "GT_LU" = seqnum\n", pos, currentseqnum, seqnum1);
+        fprintf(stderr,
+                "testseqnumextraction: pos="GT_LU": currentseqnum = "GT_LU" "
+                "!= "GT_LU" = seqnum\n", pos, currentseqnum, seqnum1);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
       if (startofsequence) {
@@ -7816,12 +7826,14 @@ int gt_encseq_check_minmax(const GtEncseq *encseq, GtError *err)
   max = gt_encseq_max_seq_length(encseq);
   for (i = 0UL; !had_err && i < gt_encseq_num_of_sequences(encseq); i++) {
     if (min > gt_encseq_seqlength(encseq, i)) {
-      gt_error_set(err, "sequence "GT_LU" has length "GT_LU", but indexed minimum is "
+      gt_error_set(err, "sequence "GT_LU" has length "GT_LU", but "
+                        "indexed minimum is "
                         ""GT_LU"", i, gt_encseq_seqlength(encseq, i), min);
       had_err = -1;
     }
     if (!had_err && max < gt_encseq_seqlength(encseq, i)) {
-      gt_error_set(err, "sequence "GT_LU" has length "GT_LU", but indexed maximum is "
+      gt_error_set(err, "sequence "GT_LU" has length "GT_LU", but "
+                        "indexed maximum is "
                         ""GT_LU"", i, gt_encseq_seqlength(encseq, i), max);
       had_err = -1;
     }
@@ -9335,10 +9347,10 @@ GtUint64 gt_encseq_effective_filelength(const GtEncseq *encseq,
                                         GtUword filenum)
 {
   if (encseq->numofdbfiles == 1UL)
-    return (uint64_t) encseq->totallength;
+    return (GtUint64) encseq->totallength;
   gt_assert(encseq != NULL && encseq->headerptr.filelengthtab != NULL);
   gt_assert(filenum < encseq->numofdbfiles);
-  return encseq->headerptr.filelengthtab[filenum].effectivelength;
+  return (GtUint64) encseq->headerptr.filelengthtab[filenum].effectivelength;
 }
 
 GtUword gt_encseq_filenum(const GtEncseq *encseq,
