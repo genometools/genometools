@@ -743,7 +743,7 @@ obj/src/core/versionfunc.o: obj/gt_config.h
 .PRECIOUS:
 .SUFFIXES:
 .PHONY: dist srcdist release gt install docs manuals installwww push \
-        splint test clean cleanup
+        test clean cleanup
 
 VERSION:="`cat $(CURDIR)/VERSION`"
 SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"
@@ -888,13 +888,6 @@ installmanpages: manpages
 cflags:
 	@echo ${GT_CFLAGS}
 
-splint: obj/gt_config.h
-	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) \
-	$(CURDIR)/src/*.c \
-        $(CURDIR)/src/core/*.c \
-        $(CURDIR)/src/extended/*.c \
-        $(CURDIR)/src/tools/*.c
-
 EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
@@ -965,27 +958,27 @@ obj/%.sb: src/extended/%.c
 
 obj/%.splint: ${CURDIR}/src/match/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/ltr/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/core/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/extended/%.c
 	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
 	@touch $@
 
 
