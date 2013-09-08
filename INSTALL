@@ -18,7 +18,6 @@ Possible arguments:
 - opt=no           to disable optimization
 - assert=no        to disable assertions
 - amalgamation=yes to compile as an amalgamation
-- curses=no        to disable the interactive Lua shell, dropping ncurses deps
 - cairo=no         to disable AnnotationSketch, dropping Cairo/Pango deps
 - errorcheck=no    to disable the handling of compiler warnings as errors
 - universal=yes    to build a universal binary
@@ -30,13 +29,6 @@ $ gmake assert=no
 
 Please remember to always run `make cleanup` before rebuilding with changed make
 parameters!
-
-
-Building GenomeTools without the curses library:
-------------------------------------------------
-
-On systems without an installed curses library invoke make as above with the
-argument curses=no.
 
 
 Building GenomeTools without the sketch tool:
