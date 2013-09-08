@@ -717,8 +717,9 @@ GTDISTBASENAME:="gt-$(VERSION)-$(SYSTEMNAME)-${BIT}"
 DISTDIR:="$(CURDIR)/dist/$(SYSTEMNAME)"
 SCRIPTSDIR:="$(CURDIR)/scripts"
 GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
+STRIP:=strip
 
-dist: all manuals
+dist: all
 	@echo "[build distribution]"
 	@rm -rf $(GTDISTDIR)
 	@rm -rf $(DISTDIR)/$(GTDISTBASENAME).tar.gz
@@ -728,7 +729,7 @@ dist: all manuals
 	@cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
 	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
 	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin
-	@strip $(GTDISTDIR)/bin/gt
+	@$(STRIP) $(GTDISTDIR)/bin/gt
 	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
 	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)
@@ -1023,7 +1024,7 @@ test: all
           -select $(testrange)
 
 clean:
-	rm -rf obj
+	rm -rf obj lib
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 	$(MAKE) -s -C $(CURDIR)/doc/devguide clean
 	$(MAKE) -s -C $(CURDIR)/doc/manuals cleanup
@@ -1046,5 +1047,5 @@ gtkviewer:
   -lgenometools
 
 cleanup: clean cleangenerated
-	rm -rf lib bin
+	rm -rf bin
 	rm -rf gtpython/build
