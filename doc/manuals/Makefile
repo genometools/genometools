@@ -1,5 +1,5 @@
 ALL=readjoiner.pdf\
-		hop.pdf\
+    hop.pdf\
     ltrharvest.pdf\
     ltrdigest.pdf\
     uniquesub.pdf\
@@ -9,7 +9,7 @@ ALL=readjoiner.pdf\
     repfind.pdf\
     tallymer.pdf\
     tagerator.pdf\
-		genomediff.pdf
+    genomediff.pdf
 
 TALLYMERTMP=tallymer-tmp
 TAGERATORTMP=tagerator-tmp
