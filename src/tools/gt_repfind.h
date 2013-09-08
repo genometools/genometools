@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_MAXPAIRS_H
-#define GT_MAXPAIRS_H
+#ifndef GT_REPFIND_H
+#define GT_REPFIND_H
 
 /* the repfind tool */
 GtTool* gt_repfind(void);
