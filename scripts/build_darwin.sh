@@ -2,7 +2,7 @@
 
 # build manuals for distributions first
 make cleanup
-make manuals
+make cairo=no manuals
 
 # Darwin 32-bit
 # https://launchpad.net/~flosoft/+archive/cross-apple
@@ -14,7 +14,6 @@ make SYSTEM=Darwin                     \
      RANLIB=i686-apple-darwin10-ranlib \
      STRIP=i686-apple-darwin10-strip   \
      cairo=no                          \
-     curses=no                         \
      dist $*
 
 # Darwin 64-bit
@@ -28,5 +27,4 @@ make SYSTEM=Darwin                     \
      RANLIB=i686-apple-darwin10-ranlib \
      STRIP=i686-apple-darwin10-strip   \
      cairo=no                          \
-     curses=no                         \
      dist $*
