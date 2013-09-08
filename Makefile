@@ -792,7 +792,7 @@ endif
 doc/manuals/annotationsketch.pdf: docs
 	$(MAKE) -C $(CURDIR)/doc/manuals annotationsketch
 
-manuals: $(ANNOTATIONSKETCH_MANUAL)
+manuals: bin/gt $(ANNOTATIONSKETCH_MANUAL)
 	$(MAKE) -C $(CURDIR)/doc/manuals
 
 manpages: bin/gt

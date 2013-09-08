@@ -517,7 +517,7 @@ static int gt_ltrdigest_ppt_visitor_feature_node(GtNodeVisitor *nv,
 {
   GT_UNUSED GtLTRdigestPPTVisitor *lv;
   GtFeatureNodeIterator *fni;
-  GtRange leftltrrng, rightltrrng;
+  GtRange leftltrrng = { 0 }, rightltrrng = { 0 };
   bool seen_left = false;
   GtFeatureNode *curnode = NULL,
                 *ltr_retrotrans = NULL;
