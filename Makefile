@@ -1027,7 +1027,7 @@ clean:
 	rm -rf obj lib
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 	$(MAKE) -s -C $(CURDIR)/doc/devguide clean
-	$(MAKE) -s -C $(CURDIR)/doc/manuals cleanup
+	$(MAKE) -s -C $(CURDIR)/doc/manuals clean
 
 cleangenerated:
 	rm -f doc/manuals/api_reference.tex \
@@ -1049,3 +1049,4 @@ gtkviewer:
 cleanup: clean cleangenerated
 	rm -rf bin
 	rm -rf gtpython/build
+	$(MAKE) -s -C $(CURDIR)/doc/manuals cleanup
