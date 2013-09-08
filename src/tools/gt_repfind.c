@@ -32,7 +32,7 @@
 #include "match/querymatch.h"
 #include "match/greedyedist.h"
 #include "match/xdrop.h"
-#include "tools/gt_maxpairs.h"
+#include "tools/gt_repfind.h"
 
 typedef struct
 {
