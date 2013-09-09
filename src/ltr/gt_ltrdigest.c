@@ -339,7 +339,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_option_is_extended_option(o);
   gt_option_imply(o, oh);
 
-  o = gt_option_new_ulong("threads",
+  o = gt_option_new_uword("threads",
                           "DEPRECATED, only included for compatibility reasons!"
                           " Use the -j parameter of the 'gt' call instead.",
                           &arguments->nthreads,

@@ -72,7 +72,7 @@ static GtOptionParser* gt_compressedbits_option_parser_new(void *tool_arguments)
                        "Testing compressed bitsequence, save to disk, reload.");
 
   /* -size */
-  option = gt_option_new_ulong("size",
+  option = gt_option_new_uword("size",
                                "size of GtBitsequence to create "
                                "(words 32/64 bit)",
                                &arguments->size, 20UL);
@@ -110,7 +110,7 @@ static GtOptionParser* gt_compressedbits_option_parser_new(void *tool_arguments)
   gt_option_exclude(arguments->filename_op, arguments->size_op);
   gt_option_exclude(arguments->filename_op, arguments->rand_op);
   /* -benches */
-  option = gt_option_new_ulong("benches",
+  option = gt_option_new_uword("benches",
                                "number of function calls to benchmark",
                                &arguments->benches, 100000UL);
   gt_option_parser_add_option(op, option);

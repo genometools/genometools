@@ -68,7 +68,7 @@ static GtOptionParser* gt_ltrclustering_option_parser_new(void *tool_arguments)
                             "Cluster features of LTRs.");
 
   /* -psmall */
-  option = gt_option_new_ulong_min_max("psmall", "specify how many percent of"
+  option = gt_option_new_uword_min_max("psmall", "specify how many percent of"
                                        " the smaller sequence a match needs to"
                                        " cover in order to cluster the two"
                                        " sequences of the match.",
@@ -78,7 +78,7 @@ static GtOptionParser* gt_ltrclustering_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -plarge */
-  option = gt_option_new_ulong_min_max("plarge", "specify how many percent of"
+  option = gt_option_new_uword_min_max("plarge", "specify how many percent of"
                                        " the larger sequence a match needs to"
                                        " cover in order to cluster the two"
                                        " sequences of the match.",

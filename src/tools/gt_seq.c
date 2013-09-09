@@ -79,7 +79,7 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option_showfasta);
 
   /* -showseqnum */
-  option_showseqnum = gt_option_new_ulong_min("showseqnum", "show sequence "
+  option_showseqnum = gt_option_new_uword_min("showseqnum", "show sequence "
                                               "with given number (in FASTA "
                                               "format)", &arguments->showseqnum,
                                               GT_UNDEF_ULONG, 1);
@@ -162,7 +162,8 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err && arguments->showseqnum != GT_UNDEF_ULONG) {
       if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
         gt_error_set(err, "argument '"GT_LU"' to option '-showseqnum' is too "
-                     "large. The sequence index contains only '"GT_LU"' sequences.",
+                     "large. The sequence index contains only '"GT_LU"' "
+                     "sequences.",
                      arguments->showseqnum,
                      gt_bioseq_number_of_sequences(bioseq));
         had_err = -1;

@@ -59,7 +59,7 @@ static GtOptionParser* gt_encseq_bench_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[option ...] indexname",
                             "Perform benchmark on extractions from encseq.");
 
-  option = gt_option_new_ulong("ccext", "specify number of random character "
+  option = gt_option_new_uword("ccext", "specify number of random character "
                                         "extractions",
                                &arguments->ccext, 0UL);
   gt_option_parser_add_option(op, option);
@@ -300,7 +300,8 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
         if (seqnum != ULONG_MAX) {
           GtUword seqnum2 = gt_encseq_seqnum(encseq,position);
           if (seqnum2 != seqnum) {
-            fprintf(stderr,"position "GT_LU": seqnum2 = "GT_LU" != "GT_LU" = seqnum\n",
+            fprintf(stderr,
+                    "position "GT_LU": seqnum2 = "GT_LU" != "GT_LU" = seqnum\n",
                     position,seqnum,seqnum2);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           }
@@ -313,8 +314,9 @@ static int gt_encseq_bench_runner(GT_UNUSED int argc, const char **argv,
         GtUword seqstart2 = gt_sortedlengthinfo_seqstart(encseq,
                                    sortedlengthinfo,seqnum);
         if (seqstart != seqstart2) {
-          fprintf(stderr,"seqnum="GT_LU": seqstart = "GT_LU" != "GT_LU" = seqstart2\n",
-                          seqnum,seqstart,seqstart2);
+          fprintf(stderr,
+                  "seqnum="GT_LU": seqstart = "GT_LU" != "GT_LU" = seqstart2\n",
+                  seqnum,seqstart,seqstart2);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
       }

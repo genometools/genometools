@@ -219,19 +219,19 @@ GtOption*       gt_option_new_uint_min_max(const char *option_string,
                                            unsigned int maximum_value);
 /* Return a new <GtOption> with the given <option_string>, <description>, and
    <default_value>. The result of the option parsing is stored in <value>. */
-GtOption*       gt_option_new_long(const char *option_string,
+GtOption*       gt_option_new_word(const char *option_string,
                                    const char *description,
                                    GtWord *value, GtWord default_value);
 /* Return a new <GtOption> with the given <option_string>, <description>, and
    <default_value>. The result of the option parsing is stored in <value>. */
-GtOption*       gt_option_new_ulong(const char *option_string,
+GtOption*       gt_option_new_uword(const char *option_string,
                                     const char *description,
                                     GtUword *value,
                                     GtUword default_value);
 /* Return a new <GtOption> with the given <option_string>, <description>, and
    <default_value>. The result of the option parsing is stored in <value>.
   The argument to this option must at least have the <minimum_value>. */
-GtOption*       gt_option_new_ulong_min(const char *option_string,
+GtOption*       gt_option_new_uword_min(const char *option_string,
                                         const char *description,
                                         GtUword *value,
                                         GtUword default_value,
@@ -240,6 +240,28 @@ GtOption*       gt_option_new_ulong_min(const char *option_string,
    <default_value>. The result of the option parsing is stored in <value>.
   The argument to this option must at least have the <minimum_value> and at most
   the <maximum_value>. */
+GtOption*       gt_option_new_uword_min_max(const char *option_string,
+                                            const char *description,
+                                            GtUword *value,
+                                            GtUword default_value,
+                                            GtUword minimum_value,
+                                            GtUword maximum_value);
+/* Deprecated. Usage identical to <gt_option_new_word>. */
+GtOption*       gt_option_new_long(const char *option_string,
+                                   const char *description,
+                                   GtWord *value, GtWord default_value);
+/* Deprecated. Usage identical to <gt_option_new_uword>. */
+GtOption*       gt_option_new_ulong(const char *option_string,
+                                    const char *description,
+                                    GtUword *value,
+                                    GtUword default_value);
+/* Deprecated. Usage identical to <gt_option_new_uword_min>. */
+GtOption*       gt_option_new_ulong_min(const char *option_string,
+                                        const char *description,
+                                        GtUword *value,
+                                        GtUword default_value,
+                                        GtUword minimum_value);
+/* Deprecated. Usage identical to <gt_option_new_uword_min_max>. */
 GtOption*       gt_option_new_ulong_min_max(const char *option_string,
                                             const char *description,
                                             GtUword *value,

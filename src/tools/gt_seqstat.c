@@ -127,7 +127,7 @@ static GtOptionParser* gt_seqstat_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionestimsize);
   gt_option_is_development_option(optionestimsize);
 
-  optiongenome = gt_option_new_ulong_min("genome",
+  optiongenome = gt_option_new_uword_min("genome",
                                 "set genome length for NG50/NG80 calculation",
                                 &arguments->genome_length, 0, 1UL);
   gt_option_imply(optiongenome, optioncontigs);
@@ -246,7 +246,8 @@ static void processastretches(const GtDiscDistri *distastretch,
   for (len=astretchinfo.minkey; len<=astretchinfo.maxvalue; len++)
   {
     /*@ignore@*/
-    printf("a^{"GT_LU"} occurs "GT_LLU" times\n", len,astretchinfo.mmercount[len]);
+    printf("a^{"GT_LU"} occurs "GT_LLU" times\n",
+           len,astretchinfo.mmercount[len]);
     /*@end@*/
   }
   gt_assert(astretchinfo.sumA == countA);

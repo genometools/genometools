@@ -130,7 +130,7 @@ static GtOptionParser* gt_matstat_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(arguments->optionquery);
   gt_option_parser_add_option(op, arguments->optionquery);
 
-  arguments->optionmin = gt_option_new_ulong_min("min",
+  arguments->optionmin = gt_option_new_uword_min("min",
                                    "only output length "
                                    "if >= given minimum length",
                                    &arguments->minlength.
@@ -138,7 +138,7 @@ static GtOptionParser* gt_matstat_option_parser_new(void *tool_arguments)
                                    0,(GtUword) 1);
   gt_option_parser_add_option(op, arguments->optionmin);
 
-  arguments->optionmax = gt_option_new_ulong_min("max",
+  arguments->optionmax = gt_option_new_uword_min("max",
                                    "only output length "
                                    "if <= given maximum length",
                                    &arguments->maxlength.

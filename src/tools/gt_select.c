@@ -173,14 +173,14 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -maxgenelength */
-  option = gt_option_new_ulong_min("maxgenelength", "select genes up to the "
+  option = gt_option_new_uword_min("maxgenelength", "select genes up to the "
                                    "given maximum length",
                                    &arguments->max_gene_length, GT_UNDEF_ULONG,
                                    1);
   gt_option_parser_add_option(op, option);
 
   /* -maxgenenum */
-  option = gt_option_new_ulong("maxgenenum", "select the first genes up to the "
+  option = gt_option_new_uword("maxgenenum", "select the first genes up to the "
                                "given maximum number", &arguments->max_gene_num,
                                GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
@@ -217,7 +217,7 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, singleintron_option);
 
   /* -featurenum */
-  option = gt_option_new_ulong_min("featurenum",
+  option = gt_option_new_uword_min("featurenum",
                                    "select feature tree occurring "
                                    "at given position in input",
                                    &arguments->feature_num, GT_UNDEF_ULONG, 1);

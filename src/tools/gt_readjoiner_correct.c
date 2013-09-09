@@ -60,11 +60,11 @@ static GtOptionParser* gt_readjoiner_correct_option_parser_new(
   op = gt_option_parser_new("[options] -ii indexname",
       "Readjoiner k-mer based error correction.");
 
-  option = gt_option_new_ulong_min("k","k-mer length",
+  option = gt_option_new_uword_min("k","k-mer length",
                                   &arguments->k, 31UL, 1UL);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong_min("c","minimal trusted count",
+  option = gt_option_new_uword_min("c","minimal trusted count",
                                   &arguments->c, 3UL, 1UL);
   gt_option_parser_add_option(op, option);
 
@@ -78,7 +78,7 @@ static GtOptionParser* gt_readjoiner_correct_option_parser_new(
   gt_option_is_mandatory(option);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("dbg","(debug value) "
+  option = gt_option_new_uword("dbg","(debug value) "
       "see code for current meaning", &arguments->debug_value, GT_UNDEF_ULONG);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);

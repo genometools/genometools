@@ -111,7 +111,7 @@ gt_compreads_decompress_option_parser_new(void *tool_arguments)
                                &arguments->rng, NULL);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("benchmark", "decode given number random reads "
+  option = gt_option_new_uword("benchmark", "decode given number random reads "
                                "and report the time to do this",
                                &arguments->bench, 0);
   gt_option_is_development_option(option);
@@ -225,7 +225,8 @@ static int gt_compreads_decompress_runner(GT_UNUSED int argc,
             && arguments->rng.end != GT_UNDEF_ULONG) {
           if (arguments->rng.start >= gt_hcr_decoder_num_of_reads(hcrd)
                 || arguments->rng.end >= gt_hcr_decoder_num_of_reads(hcrd)) {
-            gt_error_set(err, "range "GT_LU"-"GT_LU" includes a read number exceeding "
+            gt_error_set(err, "range "GT_LU"-"GT_LU" includes a read "
+                              "number exceeding "
                               "the total number of reads ("GT_LU")",
                               arguments->rng.start,
                               arguments->rng.end,

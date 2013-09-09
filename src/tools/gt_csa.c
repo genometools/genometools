@@ -62,7 +62,7 @@ static GtOptionParser* gt_csa_option_parser_new(void *tool_arguments)
                             "consensus spliced alignments.");
 
   /* -join-length */
-  option = gt_option_new_ulong("join-length", "set join length for the spliced "
+  option = gt_option_new_uword("join-length", "set join length for the spliced "
                                "alignment clustering", &arguments->join_length,
                                GT_DEFAULT_JOIN_LENGTH);
   gt_option_parser_add_option(op, option);

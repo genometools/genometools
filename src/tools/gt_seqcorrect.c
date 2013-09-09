@@ -200,7 +200,7 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, q_option);
 
   /* -maxlow */
-  maxlow_option = gt_option_new_ulong("maxlow",
+  maxlow_option = gt_option_new_uword("maxlow",
       "maximal number of low-quality positions in a read\n"
       "default: infinite",
       &arguments->maxlow, GT_UNDEF_ULONG);
@@ -663,7 +663,8 @@ static bool gt_seqcorrect_find_seldom(GtSeqcorrectArguments *arguments,
   if (!haserr)
   {
     GtStr *filename = gt_str_clone(arguments->encseqinput);
-    gt_logger_log(verbose_logger, "total seldom k-mers: "GT_LU"", nofseldomkmers);
+    gt_logger_log(verbose_logger, "total seldom k-mers: "GT_LU"",
+                  nofseldomkmers);
     gt_str_append_cstr(filename, GT_SEQCORRECT_SELDOMREADS_FILESUFFIX);
     if (gt_cntlist_show(seldom_reads[0], nofreads, gt_str_get(filename),
           false, err) != 0)

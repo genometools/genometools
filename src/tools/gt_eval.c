@@ -92,7 +92,7 @@ static GtOptionParser* gt_eval_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, ltroption);
 
   /* -ltrdelta */
-  ltrdeltaoption = gt_option_new_ulong("ltrdelta", "set allowed delta for LTR "
+  ltrdeltaoption = gt_option_new_uword("ltrdelta", "set allowed delta for LTR "
                                        "borders to be considered equal",
                                        &arguments->LTRdelta, 20);
   gt_option_parser_add_option(op, ltrdeltaoption);

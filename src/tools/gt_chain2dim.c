@@ -105,7 +105,7 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
                                      &arguments->weightfactor,1.0);
   arguments->refoptionweightfactor = gt_option_ref (option);
   gt_option_parser_add_option(op, option);
-  option = gt_option_new_ulong("maxgap","specify maximal width of gap in chain",
+  option = gt_option_new_uword("maxgap","specify maximal width of gap in chain",
                                          &arguments->maxgap,0);
   arguments->refoptionmaxgap = gt_option_ref(option);
   gt_option_parser_add_option(op, option);

@@ -1243,7 +1243,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     ulong_value < option->min_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                               "integer >= "GT_LU"", gt_str_get(option->option_str),
+                               "integer >= "GT_LU"",
+                               gt_str_get(option->option_str),
                                option->min_value.ul);
                   had_err = -1;
                 }
@@ -1253,7 +1254,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     ulong_value > option->max_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                               "integer <= "GT_LU"", gt_str_get(option->option_str),
+                               "integer <= "GT_LU"",
+                               gt_str_get(option->option_str),
                                option->max_value.ul);
                   had_err = -1;
                 }
@@ -1329,7 +1331,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               /* check arguments */
               if (!had_err && (((GtRange*) option->value)->start >
                                ((GtRange*) option->value)->end)) {
-                gt_error_set(err, "first argument "GT_LU" to option \"-%s\" must "
+                gt_error_set(err,
+                             "first argument "GT_LU" to option \"-%s\" must "
                              "be <= than second argument "GT_LU"",
                              ((GtRange*) option->value)->start,
                              gt_str_get(option->option_str),
@@ -1480,7 +1483,7 @@ GtOption* gt_option_new_verbose(bool *value)
 
 GtOption* gt_option_new_width(GtUword *value)
 {
-  return gt_option_new_ulong("width", "set output width for FASTA sequence "
+  return gt_option_new_uword("width", "set output width for FASTA sequence "
                              "printing\n(0 disables formatting)", value, 0);
 }
 
@@ -1634,7 +1637,7 @@ GtOption *gt_option_new_uint_min_max(const char *option_str,
   return o;
 }
 
-GtOption* gt_option_new_long(const char *option_str, const char *description,
+GtOption* gt_option_new_word(const char *option_str, const char *description,
                              GtWord *value, GtWord default_value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
@@ -1644,7 +1647,7 @@ GtOption* gt_option_new_long(const char *option_str, const char *description,
   return o;
 }
 
-GtOption* gt_option_new_ulong(const char *option_str, const char *description,
+GtOption* gt_option_new_uword(const char *option_str, const char *description,
                               GtUword *value, GtUword default_value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
@@ -1654,17 +1657,61 @@ GtOption* gt_option_new_ulong(const char *option_str, const char *description,
   return o;
 }
 
-GtOption* gt_option_new_ulong_min(const char *option_str,
+GtOption* gt_option_new_uword_min(const char *option_str,
                                   const char *description,
                                   GtUword *value,
                                   GtUword default_value,
                                   GtUword min_value)
 {
-  GtOption *o = gt_option_new_ulong(option_str, description, value,
+  GtOption *o = gt_option_new_uword(option_str, description, value,
                                     default_value);
   o->min_value_set = true;
   o->min_value.ul = min_value;
   return o;
+}
+
+GtOption *gt_option_new_uword_min_max(const char *option_str,
+                                      const char *description,
+                                      GtUword *value,
+                                      GtUword default_value,
+                                      GtUword min_value,
+                                      GtUword max_value)
+{
+  GtOption *o = gt_option_new_uword(option_str, description, value,
+                                    default_value);
+  o->min_value_set = true;
+  o->min_value.ul = min_value;
+  o->max_value_set = true;
+  o->max_value.ul = max_value;
+  return o;
+}
+
+GtOption *gt_option_new_long(const char *option_str,
+                             const char *description,
+                             GtWord *value,
+                             GtWord default_value)
+{
+  return gt_option_new_word(option_str, description, value,
+                            default_value);
+}
+
+GtOption *gt_option_new_ulong(const char *option_str,
+                              const char *description,
+                              GtUword *value,
+                              GtUword default_value)
+{
+  return gt_option_new_uword(option_str, description, value,
+                             default_value);
+}
+
+GtOption *gt_option_new_ulong_min(const char *option_str,
+                                  const char *description,
+                                  GtUword *value,
+                                  GtUword default_value,
+                                  GtUword min_value)
+{
+  return gt_option_new_uword_min(option_str, description, value,
+                                 default_value, min_value);
 }
 
 GtOption *gt_option_new_ulong_min_max(const char *option_str,
@@ -1674,13 +1721,9 @@ GtOption *gt_option_new_ulong_min_max(const char *option_str,
                                       GtUword min_value,
                                       GtUword max_value)
 {
-  GtOption *o = gt_option_new_ulong(option_str, description, value,
-                                    default_value);
-  o->min_value_set = true;
-  o->min_value.ul = min_value;
-  o->max_value_set = true;
-  o->max_value.ul = max_value;
-  return o;
+  return gt_option_new_uword_min_max(option_str, description, value,
+                                     default_value, min_value,
+                                     max_value);
 }
 
 GtOption* gt_option_new_range(const char *option_str, const char *description,
