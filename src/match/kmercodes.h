@@ -64,7 +64,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
       return GT_SWAPBITPAIRS(kmer,2,0,2);
     case 3:
       return GT_SWAPBITPAIRS(kmer,4,0,4) |
-             (kmer & (3U << 2));
+             (kmer & ((GtUword) 3 << 2));
     case 4:
       /* 4 shifts, 4 &, 2 |, 1 assignment = 11 ops */
       kmer = (kmer & 0xF0) >> 4 | (kmer & 0x0F) << 4;
@@ -72,7 +72,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
     case 5:
       return GT_SWAPBITPAIRS(kmer,8,0,8) |
              GT_SWAPBITPAIRS(kmer,6,2,4) |
-             (kmer & (3U << 4));
+             (kmer & ((GtUword) 3 << 4));
     case 6:
       return GT_SWAPBITPAIRS(kmer,10,0,10) |
              GT_SWAPBITPAIRS(kmer,8,2,6) |
@@ -81,7 +81,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
       return GT_SWAPBITPAIRS(kmer,12,0,12) |
              GT_SWAPBITPAIRS(kmer,10,2,8) |
              GT_SWAPBITPAIRS(kmer,8,4,4) |
-             (kmer & (3U << 6));
+             (kmer & ((GtUword) 3 << 6));
     case 8:
       /* 6 shifts, 6 &, 3 |, 2 assignments = 17 */
       kmer = (kmer & 0xFF00) >> 8 | (kmer & 0xFF) << 8;
@@ -92,7 +92,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,14,2,12) |
              GT_SWAPBITPAIRS(kmer,12,4,8) |
              GT_SWAPBITPAIRS(kmer,10,6,4) |
-             (kmer & (3U << 8));
+             (kmer & ((GtUword) 3 << 8));
     case 10:
       return GT_SWAPBITPAIRS(kmer,18,0,18) |
              GT_SWAPBITPAIRS(kmer,16,2,14) |
@@ -105,7 +105,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,16,4,12) |
              GT_SWAPBITPAIRS(kmer,14,6,8) |
              GT_SWAPBITPAIRS(kmer,12,8,4) |
-             (kmer & (3U << 10));
+             (kmer & ((GtUword) 3 << 10));
     case 12:
       return GT_SWAPBITPAIRS(kmer,22,0,22) |
              GT_SWAPBITPAIRS(kmer,20,2,18) |
@@ -120,7 +120,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,18,6,12) |
              GT_SWAPBITPAIRS(kmer,16,8,8) |
              GT_SWAPBITPAIRS(kmer,14,10,4) |
-             (kmer & (3U << 12));
+             (kmer & ((GtUword) 3 << 12));
     case 14:
       return GT_SWAPBITPAIRS(kmer,26,0,26) |
              GT_SWAPBITPAIRS(kmer,24,2,22) |
@@ -137,7 +137,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,20,8,12) |
              GT_SWAPBITPAIRS(kmer,18,10,8) |
              GT_SWAPBITPAIRS(kmer,16,12,4) |
-             (kmer & (3U << 14));
+             (kmer & ((GtUword) 3 << 14));
     case 16:
              /* 8 shifts, 8 &, 4 |, 3 assignments = 23 ops */
              kmer = (kmer & 0xFFFF0000) >> 16 | (kmer & 0x0000FFFF) << 16;
@@ -154,7 +154,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,22,10,12) |
              GT_SWAPBITPAIRS(kmer,20,12,8) |
              GT_SWAPBITPAIRS(kmer,18,14,4) |
-             (kmer & (3U << 16));
+             (kmer & ((GtUword) 3 << 16));
     case 18:
       return GT_SWAPBITPAIRS(kmer,34,0,34) |
              GT_SWAPBITPAIRS(kmer,32,2,30) |
@@ -175,7 +175,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,24,12,12) |
              GT_SWAPBITPAIRS(kmer,22,14,8) |
              GT_SWAPBITPAIRS(kmer,20,16,4) |
-             (kmer & (3U << 18));
+             (kmer & ((GtUword) 3 << 18));
     case 20:
       return GT_SWAPBITPAIRS(kmer,38,0,38) |
              GT_SWAPBITPAIRS(kmer,36,2,34) |
@@ -198,7 +198,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,26,14,12) |
              GT_SWAPBITPAIRS(kmer,24,16,8) |
              GT_SWAPBITPAIRS(kmer,22,18,4) |
-             (kmer & (3U << 20));
+             (kmer & ((GtUword) 3 << 20));
     case 22:
       return GT_SWAPBITPAIRS(kmer,42,0,42) |
              GT_SWAPBITPAIRS(kmer,40,2,38) |
@@ -223,7 +223,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,28,16,12) |
              GT_SWAPBITPAIRS(kmer,26,18,8) |
              GT_SWAPBITPAIRS(kmer,24,20,4) |
-             (kmer & (3U << 22));
+             (kmer & ((GtUword) 3 << 22));
     case 24:
       return GT_SWAPBITPAIRS(kmer,46,0,46) |
              GT_SWAPBITPAIRS(kmer,44,2,42) |
@@ -250,7 +250,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,30,18,12) |
              GT_SWAPBITPAIRS(kmer,28,20,8) |
              GT_SWAPBITPAIRS(kmer,26,22,4) |
-             (kmer & (3U << 24));
+             (kmer & ((GtUword) 3 << 24));
     case 26:
       return GT_SWAPBITPAIRS(kmer,50,0,50) |
              GT_SWAPBITPAIRS(kmer,48,2,46) |
@@ -279,7 +279,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,32,20,12) |
              GT_SWAPBITPAIRS(kmer,30,22,8) |
              GT_SWAPBITPAIRS(kmer,28,24,4) |
-             (kmer & (3U << 26));
+             (kmer & ((GtUword) 3 << 26));
     case 28:
       return GT_SWAPBITPAIRS(kmer,54,0,54) |
              GT_SWAPBITPAIRS(kmer,52,2,50) |
@@ -310,7 +310,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,34,22,12) |
              GT_SWAPBITPAIRS(kmer,32,24,8) |
              GT_SWAPBITPAIRS(kmer,30,26,4) |
-             (kmer & (3U << 28));
+             (kmer & ((GtUword) 3 << 28));
     case 30:
       return GT_SWAPBITPAIRS(kmer,58,0,58) |
              GT_SWAPBITPAIRS(kmer,56,2,54) |
@@ -343,7 +343,7 @@ static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
              GT_SWAPBITPAIRS(kmer,36,24,12) |
              GT_SWAPBITPAIRS(kmer,34,26,8) |
              GT_SWAPBITPAIRS(kmer,32,28,4) |
-             (kmer & (3U << 30));
+             (kmer & ((GtUword) 3 << 30));
     case 32:
              kmer = (kmer & 0xFFFFFFFF00000000) >> 32 |
                     (kmer & 0x00000000FFFFFFFF) << 32;

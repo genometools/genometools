@@ -23,6 +23,7 @@
 #include "core/divmodmul.h"
 #include "core/ma_api.h"
 #include "core/safecast-gen.h"
+#include "core/types_api.h"
 
 /*
   This file contains some definitions manipulating bitvectors represented

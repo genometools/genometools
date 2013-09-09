@@ -20,6 +20,7 @@
 #endif
 #include "core/fa.h"
 #include "core/error_api.h"
+#include "core/types_api.h"
 #include "chain2dim.h"
 
 #define READNUMS 5

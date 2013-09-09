@@ -195,7 +195,7 @@ static void dc_fillcoverrank(GtDifferencecover *dcov)
 {
   unsigned int i;
   Diffrank j;
-  const GtUword step = GT_DIVV(dcov->totallength) + 1;
+  const GtUword step = (GtUword) GT_DIVV(dcov->totallength) + 1;
   GtUword sum;
 
   dcov->coverrank_evaluated
@@ -443,7 +443,7 @@ static GtUword dc_differencecover_packsamplepos(
                                                  const GtDifferencecover *dcov,
                                                  GtUword pos)
 {
-  gt_assert(dc_is_in_differencecover(dcov,GT_MODV(pos)));
+  gt_assert(dc_is_in_differencecover(dcov,(GtUword) GT_MODV(pos)));
   return dcov->coverrank_evaluated[GT_MODV(pos)] + GT_DIVV(pos);
 }
 
@@ -471,7 +471,7 @@ static GtUword dc_derivespecialcodesonthefly(GtDifferencecover *dcov,
       {
         gt_assert(specialcontext.position >= (GtUword) prefixindex);
         pos = (GtUword) (specialcontext.position - prefixindex);
-        if (dc_is_in_differencecover(dcov,GT_MODV(pos)))
+        if (dc_is_in_differencecover(dcov,(GtUword) GT_MODV(pos)))
         {
           if (codelist != NULL)
           {
@@ -557,7 +557,7 @@ static void dc_validate_samplepositons(const GtDifferencecover *dcov)
   afterend = dcov->diffvalues + dcov->size;
   for (pos = 0, modvalue = 0; pos <= dcov->totallength; pos++)
   {
-    gt_assert((GtUword) modvalue == GT_MODV(pos));
+    gt_assert((GtUword) modvalue == (GtUword) GT_MODV(pos));
     gt_assert(diffptr == afterend || *diffptr >= (Diffvalue) modvalue);
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
@@ -565,8 +565,9 @@ static void dc_validate_samplepositons(const GtDifferencecover *dcov)
       gt_assert(sampleidxused != NULL);
       if (GT_ISIBITSET(sampleidxused,idx))
       {
-        fprintf(stderr,"sample index "GT_LU" for pos "GT_LU" already used before\n",
-                       idx,(GtUword) pos);
+        fprintf(stderr,
+                "sample index "GT_LU" for pos "GT_LU" already used before\n",
+                idx,(GtUword) pos);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
       GT_SETIBIT(sampleidxused,idx);
@@ -634,7 +635,7 @@ static GtUword dc_insertfullspecialrangesample(GtDifferencecover *dcov,
 
       gt_assert(pos < dcov->totallength);
       revpos = GT_REVERSEPOS(dcov->totallength,pos);
-      if (dc_is_in_differencecover(dcov,GT_MODV(revpos)))
+      if (dc_is_in_differencecover(dcov,(GtUword) GT_MODV(revpos)))
       {
         dc_inversesuftab_set(dcov,revpos,specialidx);
         specialidx++;
@@ -646,7 +647,7 @@ static GtUword dc_insertfullspecialrangesample(GtDifferencecover *dcov,
       pos--;
     } else
     {
-      if (dc_is_in_differencecover(dcov,GT_MODV(pos)))
+      if (dc_is_in_differencecover(dcov,(GtUword) GT_MODV(pos)))
       {
         dc_inversesuftab_set(dcov,pos,specialidx);
         specialidx++;
@@ -697,7 +698,7 @@ static void dc_initinversesuftabspecials(GtDifferencecover *dcov)
     gt_specialrangeiterator_delete(sri);
     sri = NULL;
   }
-  if (dc_is_in_differencecover(dcov,GT_MODV(dcov->totallength)))
+  if (dc_is_in_differencecover(dcov,(GtUword) GT_MODV(dcov->totallength)))
   {
     gt_assert(dcov->samplesize > 0);
     dc_inversesuftab_set(dcov,dcov->totallength,dcov->samplesize-1);
@@ -781,7 +782,8 @@ static void dc_showintervalsizes(GtUword count,
 {
   gt_logger_log(logger,
               "level "GT_LU""
-              ": (intervals="GT_LU",total="GT_LU",avg=%.2f,%.2f%% of all,maxwidth="GT_LU")",
+              ": (intervals="GT_LU",total="GT_LU","
+              "avg=%.2f,%.2f%% of all,maxwidth="GT_LU")",
               depth,
               count,
               totalwidth,

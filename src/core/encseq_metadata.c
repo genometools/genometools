@@ -109,7 +109,7 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
   NEXTFREAD(emd->version);
   if (!had_err)
   {
-    if (emd->version < GT_ENCSEQ_VERSION)    {
+    if (emd->version < (GtUword) GT_ENCSEQ_VERSION)    {
       gt_error_set(err, "index \"%s%s\" is format version "GT_LU", current is "
                         "%d -- please re-encode",
                         indexname, GT_ENCSEQFILESUFFIX,

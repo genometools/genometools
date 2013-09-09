@@ -20,6 +20,7 @@
 
 #include "core/error_api.h"
 #include "core/logger.h"
+#include "core/types_api.h"
 
 /*
   The following string is used to trigger the usage of gap costs

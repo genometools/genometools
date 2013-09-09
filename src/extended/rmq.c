@@ -270,7 +270,7 @@ static GtUword gt_rmq_find_min_index_fast(const GtRMQ *rmq,
         if (s_bj - s_bi - GT_RMQ_blocksize <= GT_RMQ_superblocksize)
         { /* just one out-of-block query */
           k = gt_rmq_log2fast(block_difference - 2);
-          twotothek = 1 << k; /* 2^k */
+          twotothek = (GtUword) 1 << k; /* 2^k */
           i = gt_rmq_trueindex(rmq, k, b_i);
           j = gt_rmq_trueindex(rmq, k, b_j-twotothek);
           min_i = rmq->arr_ptr[i] <= rmq->arr_ptr[j] ? i : j;
@@ -282,7 +282,7 @@ static GtUword gt_rmq_find_min_index_fast(const GtRMQ *rmq,
           /* end of left out-of-block query */
           block_tmp = gt_rmq_block(GT_RMQ_MUL_superblocksize(sb_i+1));
           k = gt_rmq_log2fast(block_tmp - b_i);
-          twotothek = 1 << k; /* 2^k */
+          twotothek = (GtUword) 1 << k; /* 2^k */
           i = gt_rmq_trueindex(rmq, k, b_i);
           j = gt_rmq_trueindex(rmq, k, block_tmp+1-twotothek);
           min_i = rmq->arr_ptr[i] <= rmq->arr_ptr[j] ? i : j;
@@ -290,7 +290,7 @@ static GtUword gt_rmq_find_min_index_fast(const GtRMQ *rmq,
           /* start of right out-of-block query */
           block_tmp = gt_rmq_block(GT_RMQ_MUL_superblocksize(sb_j));
           k = gt_rmq_log2fast(b_j - block_tmp);
-          twotothek = 1 << k; /* 2^k */
+          twotothek = (GtUword) 1 << k; /* 2^k */
           block_tmp--; /* going one block to the left doesn't harm
                            and saves some tests */
           i = gt_rmq_trueindex(rmq, k, block_tmp);
@@ -302,7 +302,7 @@ static GtUword gt_rmq_find_min_index_fast(const GtRMQ *rmq,
           if (sb_j > sb_i + 1)
           { /* finally, the superblock-query: */
             k = gt_rmq_log2fast(sb_j - sb_i - 2);
-            twotothek = 1 << k;
+            twotothek = (GtUword) 1 << k;
             i = rmq->Mprime[k][sb_i+1];
             j = rmq->Mprime[k][sb_j-twotothek];
             min_j = rmq->arr_ptr[i] <= rmq->arr_ptr[j] ? i : j;

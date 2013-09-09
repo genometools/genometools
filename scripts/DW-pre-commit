@@ -11,9 +11,9 @@ FILES=`git diff --cached --name-status HEAD | \
 
 make -j8 curses=no cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes CC='ccache gcc'
 
-[ $? -eq 0 ] && make curses=no cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes -j8 spgt
-
 [ $? -eq 0 ] && make curses=no cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes -j2 sbgt
+
+[ $? -eq 0 ] && make curses=no cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes -j8 spgt
 
 [ $? -eq 0 ] && if [ ${#FILES} -gt 0 ]
 then
