@@ -105,7 +105,7 @@ static GtOptionParser* gt_readjoiner_graph_option_parser_new(
   gt_option_parser_add_option(op, subgraph_option);
 
   /* -sdepth */
-  option = gt_option_new_ulong("sdepth", "subgraph depth\n"
+  option = gt_option_new_uword("sdepth", "subgraph depth\n"
       "(use 0 for infinite depth == whole connected component)",
       &(arguments->subgraph_depth), 1UL);
   gt_option_imply(option, subgraph_option);
@@ -262,8 +262,8 @@ static int gt_readjoiner_graph_error_correction(GtStrgraph *strgraph,
     gt_logger_log(verbose_logger, "removed p-bubble edges [round %u] = "GT_LU"",
         i + 1, retval);
   }
-  gt_logger_log(verbose_logger, "removed p-bubble edges [%u rounds] = "GT_LU"", i,
-      retval_sum);
+  gt_logger_log(verbose_logger, "removed p-bubble edges [%u rounds] = "GT_LU"",
+                i, retval_sum);
   gt_logger_log(verbose_logger, "remove dead-end paths");
 
   retval_sum = 0;

@@ -130,14 +130,14 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionindex);
 
    /* -seed */
-  optionseed = gt_option_new_ulong_min("seed",
+  optionseed = gt_option_new_uword_min("seed",
                                        "specify minimum seed length for "
                                        "exact repeats",
                                        &arguments->min_seed_length, 20UL, 2UL);
   gt_option_parser_add_option(op, optionseed);
 
   /* -minlentir */
-  optionminlentir = gt_option_new_ulong_min_max("mintirlen",
+  optionminlentir = gt_option_new_uword_min_max("mintirlen",
                                                 "specify minimum length for "
                                                 "each TIR",
                                                 &arguments->min_TIR_length,
@@ -145,7 +145,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionminlentir);
 
   /* -maxlentir */
-  optionmaxlentir = gt_option_new_ulong_min_max("maxtirlen",
+  optionmaxlentir = gt_option_new_uword_min_max("maxtirlen",
                                                 "specify maximum length for "
                                                 "each TIR",
                                                 &arguments->max_TIR_length,
@@ -153,7 +153,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionmaxlentir);
 
   /* -mindisttir */
-  optionmindisttir = gt_option_new_ulong_min_max("mintirdist",
+  optionmindisttir = gt_option_new_uword_min_max("mintirdist",
                                                  "specify minimum distance of "
                                                  "TIRs",
                                                  &arguments->min_TIR_distance,
@@ -161,7 +161,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionmindisttir);
 
   /* -maxdisttir */
-  optionmaxdisttir = gt_option_new_ulong_min_max("maxtirdist",
+  optionmaxdisttir = gt_option_new_uword_min_max("maxtirdist",
                                                  "specify maximum distance of "
                                                  "TIRs",
                                                  &arguments->max_TIR_distance,
@@ -220,7 +220,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   arguments->optionoverlaps = gt_option_ref(optionoverlaps);
 
   /* -mintsd */
-  optionmintsd = gt_option_new_ulong_min_max("mintsd",
+  optionmintsd = gt_option_new_uword_min_max("mintsd",
                                              "specify minimum length for each "
                                              "TSD",
                                              &arguments->min_TSD_length,
@@ -228,7 +228,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionmintsd);
 
   /* -maxtsd */
-  optionmaxtsd = gt_option_new_ulong_min_max("maxtsd",
+  optionmaxtsd = gt_option_new_uword_min_max("maxtsd",
                                              "specify maximum length for each "
                                              "TSD",
                                              &arguments->max_TSD_length,
@@ -237,7 +237,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   gt_option_imply(optionmaxtsd, optionmintsd);
 
   /* -vicinity */
-  optionvicinity = gt_option_new_ulong_min_max("vic",
+  optionvicinity = gt_option_new_uword_min_max("vic",
                                                "specify the number of "
                                                "nucleotides (to the left and "
                                                "to the right) that will be "

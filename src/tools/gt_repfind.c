@@ -447,7 +447,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                      false);
   gt_option_parser_add_option(op, reverseoption);
 
-  sampleoption = gt_option_new_ulong_min("samples","Specify number of samples",
+  sampleoption = gt_option_new_uword_min("samples","Specify number of samples",
                                          &arguments->samples,
                                          0,
                                          1UL);

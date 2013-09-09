@@ -170,7 +170,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, o_option);
 
   /* -hmin */
-  option = gt_option_new_ulong_min("hmin",
+  option = gt_option_new_uword_min("hmin",
       "minimal homopolymer length in cognate sequence",
       &arguments->hmin, 3UL, 2UL);
   gt_option_is_extended_option(option);
@@ -178,7 +178,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -read-hmin */
-  option = gt_option_new_ulong_min("read-hmin",
+  option = gt_option_new_uword_min("read-hmin",
       "minimal homopolymer length in reads",
       &arguments->read_hmin, 2UL, 1UL);
   gt_option_is_extended_option(option);
@@ -186,7 +186,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -qmax */
-  option = gt_option_new_ulong("qmax",
+  option = gt_option_new_uword("qmax",
       "maximal average quality of homopolymer in a read",
       &arguments->qmax, 120UL);
   gt_option_is_extended_option(option);
@@ -217,7 +217,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -mapqmin */
-  option = gt_option_new_ulong("mapqmin",
+  option = gt_option_new_uword("mapqmin",
       "minimal mapping quality",
       &arguments->mapqmin, 21UL);
   gt_option_is_extended_option(option);
@@ -225,7 +225,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -covmin */
-  option = gt_option_new_ulong_min("covmin",
+  option = gt_option_new_uword_min("covmin",
       "minimal coverage;\n"
       "e.g. 5 means: do not correct any read if coverage "
       "(number of reads mapped over whole homopolymer) "
@@ -245,7 +245,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -clenmax */
-  option = gt_option_new_ulong("clenmax", "maximal correction length\n"
+  option = gt_option_new_uword("clenmax", "maximal correction length\n"
       "default: unlimited", &arguments->clenmax, GT_UNDEF_ULONG);
   gt_option_hide_default(option);
   gt_option_is_extended_option(option);

@@ -255,16 +255,16 @@ static GtOPrval parse_options(Pmatchoptions *pmopt,
                          "Perform pattern matches.");
   gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
-  option = gt_option_new_ulong("minpl","Specify minimum length of pattern",
+  option = gt_option_new_uword("minpl","Specify minimum length of pattern",
                            &pmopt->minpatternlen,
                            (GtUword) 20);
   gt_option_parser_add_option(op, option);
-  option = gt_option_new_ulong("maxpl","Specify maximum length of pattern",
+  option = gt_option_new_uword("maxpl","Specify maximum length of pattern",
                             &pmopt->maxpatternlen,
                             (GtUword) 30);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("samples","Specify number of samples",
+  option = gt_option_new_uword("samples","Specify number of samples",
                             &pmopt->numofsamples,
                            (GtUword) 100000);
   gt_option_parser_add_option(op, option);

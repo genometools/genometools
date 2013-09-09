@@ -61,20 +61,20 @@ static GtOptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
                             "results on stdout.");
 
   /* -minlength */
-  option = gt_option_new_ulong("minlength",
+  option = gt_option_new_uword("minlength",
                                "set minimum length a sequence must "
                                "have to pass the filter", &arguments->minlength,
                                GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   /* -maxlength */
-  option = gt_option_new_ulong("maxlength", "set maximum length a sequence can "
+  option = gt_option_new_uword("maxlength", "set maximum length a sequence can "
                                "have to pass the filter", &arguments->maxlength,
                                GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   /* -maxseqnum */
-  option = gt_option_new_ulong("maxseqnum", "set the maximum number of "
+  option = gt_option_new_uword("maxseqnum", "set the maximum number of "
                                "sequences which can pass the filter",
                                &arguments->maxseqnum, GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);

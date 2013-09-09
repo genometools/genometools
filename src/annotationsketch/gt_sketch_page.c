@@ -124,7 +124,7 @@ static GtOptionParser* gt_sketch_page_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, o);
   gt_option_hide_default(o);
 
-  o = gt_option_new_ulong_min("linewidth", "base width of a single "
+  o = gt_option_new_uword_min("linewidth", "base width of a single "
                                            "repeated unit",
                               &arguments->width, 2000, 1000);
   gt_option_is_mandatory(o);

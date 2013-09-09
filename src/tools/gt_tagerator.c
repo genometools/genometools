@@ -95,7 +95,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
-  option = gt_option_new_long("e",
+  option = gt_option_new_word("e",
                            "Specify the allowed number of differences "
                            "(replacements/insertions/deletions)",
                            &arguments->userdefinedmaxdistance,
@@ -157,7 +157,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   gt_option_exclude(optiononline,optionbest);
   gt_option_exclude(optioncmp,optionbest);
 
-  option = gt_option_new_ulong_min("maxocc",
+  option = gt_option_new_uword_min("maxocc",
                                    "specify max number of match-occurrences",
                                    &arguments->maxintervalwidth,0,1UL);
   gt_option_parser_add_option(op, option);
@@ -287,7 +287,8 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
       printf(" without differences (exact matches)");
     } else
     {
-      printf(" with up to "GT_LD" differences",arguments->userdefinedmaxdistance);
+      printf(" with up to "GT_LD" differences",
+             arguments->userdefinedmaxdistance);
     }
     if (arguments->maxintervalwidth > 0)
     {

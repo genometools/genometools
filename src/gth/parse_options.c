@@ -341,7 +341,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -frompos */
   if (!gthconsensus_parsing) {
-    optfrompos = gt_option_new_ulong_min(FROMPOS_OPT_CSTR, "analyze genomic "
+    optfrompos = gt_option_new_uword_min(FROMPOS_OPT_CSTR, "analyze genomic "
                                       "sequence from this position\nrequires "
                                       "-topos or -width; counting from 1 on",
                                      gth_input_genomicfrompos_ptr(input),
@@ -351,7 +351,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -topos */
   if (!gthconsensus_parsing) {
-    opttopos = gt_option_new_ulong_min(TOPOS_OPT_CSTR, "analyze genomic "
+    opttopos = gt_option_new_uword_min(TOPOS_OPT_CSTR, "analyze genomic "
                                        "sequence to this position\nrequires "
                                        "-frompos; counting from 1 on",
                                        gth_input_genomictopos_ptr(input), 0, 1);
@@ -360,7 +360,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -width */
   if (!gthconsensus_parsing) {
-    optwidth = gt_option_new_ulong_min(WIDTH_OPT_CSTR, "analyze only this "
+    optwidth = gt_option_new_uword_min(WIDTH_OPT_CSTR, "analyze only this "
                                        "width of genomic sequence\nrequires "
                                        "-frompos",
                                        gth_input_genomicwidth_ptr(input), 0, 1);
@@ -431,7 +431,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   }
 
   /* -showintronmaxlen */
-  optshowintronmaxlen = gt_option_new_ulong(SHOWINTRONMAXLEN_OPT_CSTR, "set "
+  optshowintronmaxlen = gt_option_new_uword(SHOWINTRONMAXLEN_OPT_CSTR, "set "
                                             "the maximum length of a fully "
                                             "shown intron\nIf set to 0, all "
                                             "introns are shown completely",
@@ -449,7 +449,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   gt_option_parser_add_option(op, optmaxagsnum);
 
   /* -minorflen */
-  optminorflength = gt_option_new_ulong_min("minorflen", "set the minimum "
+  optminorflength = gt_option_new_uword_min("minorflen", "set the minimum "
                                             "length of an ORF to be shown",
                                             &call_info->out->minORFlength,
                                             GTH_DEFAULT_MINORFLENGTH, 1);
@@ -546,7 +546,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -minmatchlen */
   if (!gthconsensus_parsing) {
-    optminmatchlen = gt_option_new_ulong_min(MINMATCHLEN_OPT_CSTR, "specify "
+    optminmatchlen = gt_option_new_uword_min(MINMATCHLEN_OPT_CSTR, "specify "
                                              "minimum match length (cDNA "
                                              "matching)",
                                              &call_info->simfilterparam
@@ -557,7 +557,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -seedlength */
   if (!gthconsensus_parsing) {
-    optseedlength = gt_option_new_ulong_min(SEEDLENGTH_OPT_CSTR, "specify the "
+    optseedlength = gt_option_new_uword_min(SEEDLENGTH_OPT_CSTR, "specify the "
                                             "seed length (cDNA matching)",
                                             &call_info->simfilterparam
                                             .seedlength, GTH_DEFAULT_SEEDLENGTH,
@@ -567,7 +567,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -exdrop */
   if (!gthconsensus_parsing) {
-    optexdrop = gt_option_new_ulong_min("exdrop", "specify the Xdrop value for "
+    optexdrop = gt_option_new_uword_min("exdrop", "specify the Xdrop value for "
                                         "edit distance extension (cDNA "
                                         "matching)",
                                         &call_info->simfilterparam.exdrop,
@@ -577,7 +577,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -prminmatchlen */
   if (!gthconsensus_parsing) {
-    optprminmatchlen = gt_option_new_ulong_min(PRMINMATCHLEN_OPT_CSTR,
+    optprminmatchlen = gt_option_new_uword_min(PRMINMATCHLEN_OPT_CSTR,
                                                "specify minimum match length "
                                                "(protein matches)",
                                                &call_info->simfilterparam
@@ -588,7 +588,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -prseedlength */
   if (!gthconsensus_parsing) {
-    optprseedlength = gt_option_new_ulong_min(PRSEEDLENGTH_OPT_CSTR, "specify "
+    optprseedlength = gt_option_new_uword_min(PRSEEDLENGTH_OPT_CSTR, "specify "
                                               "seed length (protein matching)",
                                               &call_info->simfilterparam
                                               .prseedlength,
@@ -598,7 +598,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -prhdist */
   if (!gthconsensus_parsing) {
-    optprhdist = gt_option_new_ulong_min("prhdist", "specify Hamming distance "
+    optprhdist = gt_option_new_uword_min("prhdist", "specify Hamming distance "
                                          "(protein matching)",
                                          &call_info->simfilterparam.prhdist,
                                          GTH_DEFAULT_PRHDIST, 1);
@@ -648,7 +648,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -maxnumofmatches */
   if (!gthconsensus_parsing) {
-    optmaxnumofmatches = gt_option_new_ulong("maxnumofmatches", "set the "
+    optmaxnumofmatches = gt_option_new_uword("maxnumofmatches", "set the "
                                              "maximum number of matches per "
                                              "genomic file. I.e., only that "
                                              "number of matches will be saved "
@@ -694,7 +694,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -rare */
   if (!gthconsensus_parsing) {
-    optrare = gt_option_new_ulong("rare", "set the maximum number of (rare) "
+    optrare = gt_option_new_uword("rare", "set the maximum number of (rare) "
                                "matches. I.e., for any given start position in "
                                "the reference sequence, maximally ``rare'' "
                                "number of matches are allowed.",
@@ -1006,7 +1006,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -jtoverlap */
   if (!gthconsensus_parsing) {
-    optjtoverlap = gt_option_new_ulong("jtoverlap", "set jump table overlap",
+    optjtoverlap = gt_option_new_uword("jtoverlap", "set jump table overlap",
                                        &call_info->dp_options_core->jtoverlap,
                                        GTH_DEFAULT_JTOVERLAP);
     gt_option_is_development_option(optjtoverlap);
@@ -1472,9 +1472,10 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
       call_info->simfilterparam.minmatchlength <
       call_info->simfilterparam.seedlength) {
-    gt_error_set(err, "-%s "GT_LU" must be >= -%s "GT_LU"", MINMATCHLEN_OPT_CSTR,
-              call_info->simfilterparam.minmatchlength, SEEDLENGTH_OPT_CSTR,
-              call_info->simfilterparam.seedlength);
+    gt_error_set(err, "-%s "GT_LU" must be >= -%s "GT_LU"",
+                 MINMATCHLEN_OPT_CSTR,
+                 call_info->simfilterparam.minmatchlength, SEEDLENGTH_OPT_CSTR,
+                 call_info->simfilterparam.seedlength);
     oprval = GT_OPTION_PARSER_ERROR;
   }
 
@@ -1482,9 +1483,10 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
       call_info->simfilterparam.prminmatchlen <
       call_info->simfilterparam.prseedlength) {
-    gt_error_set(err, "-%s "GT_LU" must be >= -%s "GT_LU"", PRMINMATCHLEN_OPT_CSTR,
-              call_info->simfilterparam.prminmatchlen, PRSEEDLENGTH_OPT_CSTR,
-              call_info->simfilterparam.prseedlength);
+    gt_error_set(err, "-%s "GT_LU" must be >= -%s "GT_LU"",
+                 PRMINMATCHLEN_OPT_CSTR,
+                 call_info->simfilterparam.prminmatchlen, PRSEEDLENGTH_OPT_CSTR,
+                 call_info->simfilterparam.prseedlength);
     oprval = GT_OPTION_PARSER_ERROR;
   }
 

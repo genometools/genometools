@@ -242,7 +242,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionltrsearchseqrange);
 
   /* -seed */
-  optionseed = gt_option_new_ulong_min("seed",
+  optionseed = gt_option_new_uword_min("seed",
                                "specify minimum seed length for"
                                " exact repeats",
                                &arguments->minseedlength,
@@ -251,7 +251,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionseed);
 
   /* -minlenltr */
-  optionminlenltr = gt_option_new_ulong_min_max("minlenltr",
+  optionminlenltr = gt_option_new_uword_min_max("minlenltr",
                                "specify minimum length for each LTR",
                                &arguments->minltrlength,
                                100UL,
@@ -260,7 +260,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionminlenltr);
 
   /* -maxlenltr */
-  optionmaxlenltr = gt_option_new_ulong_min_max("maxlenltr",
+  optionmaxlenltr = gt_option_new_uword_min_max("maxlenltr",
                                "specify maximum length for each LTR",
                                &arguments->maxltrlength,
                                1000UL,
@@ -269,7 +269,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionmaxlenltr);
 
   /* -mindistltr */
-  optionmindistltr = gt_option_new_ulong_min_max("mindistltr",
+  optionmindistltr = gt_option_new_uword_min_max("mindistltr",
                                "specify minimum distance of "
                                "LTR startpositions",
                                &arguments->mindistance,
@@ -279,7 +279,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionmindistltr);
 
   /* -maxdistltr */
-  optionmaxdistltr = gt_option_new_ulong_min_max("maxdistltr",
+  optionmaxdistltr = gt_option_new_uword_min_max("maxdistltr",
                                "specify maximum distance of "
                                "LTR startpositions",
                                &arguments->maxdistance,
@@ -458,7 +458,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
   arguments->optiongff3 = gt_option_ref(optiongff3);
 
   /* -offset */
-  optionoffset = gt_option_new_ulong("offset",
+  optionoffset = gt_option_new_uword("offset",
                                      "offset added to GFF3 coordinates",
                                      &arguments->offset,
                                      0UL);

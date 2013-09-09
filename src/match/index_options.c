@@ -403,7 +403,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->optionnoshortreadsort);
   gt_option_parser_add_option(op, idxo->optionnoshortreadsort);
 
-  idxo->optionmaxwidthrealmedian = gt_option_new_ulong("maxwidthrealmedian",
+  idxo->optionmaxwidthrealmedian = gt_option_new_uword("maxwidthrealmedian",
                                                  "compute real median for "
                                                  "intervals of at most the "
                                                  "given widthprefixes",

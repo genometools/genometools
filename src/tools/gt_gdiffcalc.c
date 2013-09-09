@@ -102,7 +102,7 @@ static GtOptionParser* gt_gdiffcalc_option_parser_new(void *tool_arguments)
 
   /* dev options */
   /* -max_n */
-  option = gt_option_new_ulong("max_n", "Number of precalculated values "
+  option = gt_option_new_uword("max_n", "Number of precalculated values "
                                "for ln(n!) and pmax(x)",
                                &arguments->max_ln_n_fac, 1000UL);
   gt_option_is_development_option(option);

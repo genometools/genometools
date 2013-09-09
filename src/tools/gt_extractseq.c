@@ -74,14 +74,14 @@ static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
                             "fastaindex.");
 
   /* -frompos */
-  frompos_option = gt_option_new_ulong_min(FROMPOS_OPTION_STR,
+  frompos_option = gt_option_new_uword_min(FROMPOS_OPTION_STR,
                                         "extract sequence from this position\n"
                                         "counting from 1 on",
                                         &arguments->frompos, 0, 1UL);
   gt_option_parser_add_option(op, frompos_option);
 
   /* -topos */
-  topos_option = gt_option_new_ulong_min(TOPOS_OPTION_STR,
+  topos_option = gt_option_new_uword_min(TOPOS_OPTION_STR,
                                       "extract sequence up to this position\n"
                                       "counting from 1 on",
                                       &arguments->topos, 0, 1UL);
@@ -154,7 +154,8 @@ static int extractseq_pos(GtFile *outfp, GtBioseq *bs,
 
   if (frompos > gt_bioseq_get_total_length(bs)
         || topos > gt_bioseq_get_total_length(bs)) {
-    gt_error_set(err, "invalid position pair "GT_LU"-"GT_LU" one value is larger than "
+    gt_error_set(err, "invalid position pair "GT_LU"-"GT_LU" one value "
+                      "is larger than "
                       "sequence length "GT_LU"", frompos, topos,
                       gt_bioseq_get_total_length(bs));
     return -1;

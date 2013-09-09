@@ -71,7 +71,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, seqit_option);
 
   /* -nofseqs */
-  nofseqs_option = gt_option_new_ulong("nofseqs", "number of sequences "
+  nofseqs_option = gt_option_new_uword("nofseqs", "number of sequences "
       "(improves efficiency)\ndefault: unspecified",
       &arguments->nofseqs, 0);
   gt_option_is_development_option(nofseqs_option);
@@ -188,7 +188,8 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
 
   /* show statistics */
   if (!had_err) {
-    fprintf(stderr, "# "GT_LU" out of "GT_LU" sequences have been removed (%.3f%%)\n",
+    fprintf(stderr,
+            "# "GT_LU" out of "GT_LU" sequences have been removed (%.3f%%)\n",
             (GtUword)duplicates, (GtUword)num_of_sequences,
             ((double) duplicates / (double)num_of_sequences) * 100.0);
   }

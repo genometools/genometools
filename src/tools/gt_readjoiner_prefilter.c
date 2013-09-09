@@ -106,7 +106,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   gt_option_parser_add_option(op, q_option);
 
   /* -maxlow */
-  maxlow_option = gt_option_new_ulong("maxlow",
+  maxlow_option = gt_option_new_uword("maxlow",
       "maximal number of low-quality positions in a read\n"
       "default: infinite",
       &arguments->maxlow, GT_UNDEF_ULONG);
@@ -204,14 +204,14 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   gt_option_parser_add_option(op, testrs_print_option);
 
   /* -testrs-depth */
-  testrs_depth_option = gt_option_new_ulong("testrs-depth",
+  testrs_depth_option = gt_option_new_uword("testrs-depth",
       "depth for gt_radixsort_str test",
       &arguments->testrs_depth, 0);
   gt_option_is_development_option(testrs_depth_option);
   gt_option_parser_add_option(op, testrs_depth_option);
 
   /* -testrs-maxdepth */
-  testrs_maxdepth_option = gt_option_new_ulong("testrs-maxdepth",
+  testrs_maxdepth_option = gt_option_new_uword("testrs-maxdepth",
       "depth for gt_radixsort_str test",
       &arguments->testrs_maxdepth, 0);
   gt_option_is_development_option(testrs_maxdepth_option);
@@ -306,8 +306,9 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     tlen_invalid = gt_reads2twobit_invalid_seqs_totallength(r2t);
     tlen_input = tlen_valid + tlen_invalid;
 
-    gt_logger_log(default_logger, "number of reads in complete readset = "GT_LU"",
-        nofreads_input);
+    gt_logger_log(default_logger,
+                  "number of reads in complete readset = "GT_LU"",
+                  nofreads_input);
 
     varlen = (gt_reads2twobit_seqlen_eqlen(r2t) == 0);
     if (varlen)
@@ -343,8 +344,9 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
         gt_logger_log(verbose_logger, "readset saved: %s.%s",
             gt_str_get(arguments->readset), varlen ? "(esq|ssp)" : "esq");
       }
-      gt_logger_log(default_logger, "number of reads in output readset = "GT_LU"",
-          nofreads_output);
+      gt_logger_log(default_logger,
+                    "number of reads in output readset = "GT_LU"",
+                    nofreads_output);
     }
     else
     {
@@ -357,9 +359,10 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
       nofreads_contained = gt_contfinder_nofcontained(contfinder);
       nofreads_output -= nofreads_contained;
 
-      gt_logger_log(verbose_logger, "contained reads = "GT_LU" [%.2f %% of input]",
-          nofreads_contained, (float)nofreads_contained * 100 /
-          (float)nofreads_input);
+      gt_logger_log(verbose_logger,
+                    "contained reads = "GT_LU" [%.2f %% of input]",
+                    nofreads_contained, (float)nofreads_contained * 100 /
+                    (float)nofreads_input);
       if (!arguments->verbose)
         gt_logger_log(default_logger, "contained reads = "GT_LU"",
             nofreads_contained);
@@ -379,8 +382,9 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
               nofreads_matesofc);
       }
 
-      gt_logger_log(default_logger, "number of reads in filtered readset = "GT_LU"",
-          nofreads_output);
+      gt_logger_log(default_logger,
+                    "number of reads in filtered readset = "GT_LU"",
+                    nofreads_output);
 
       if (!had_err && arguments->cntlist)
       {

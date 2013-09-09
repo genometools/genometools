@@ -212,7 +212,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                      &arguments->bfcheck,false);
   gt_option_parser_add_option(op, optionbfcheck);
 
-  optiondelspranges = gt_option_new_ulong("delspranges",
+  optiondelspranges = gt_option_new_uword("delspranges",
                                           "delete ranges of special values",
                                            &arguments->delspranges,
                                            0);
@@ -376,9 +376,8 @@ static void gt_sfxmap_showcomparisonfailureESA(const char *filename,
   fprintf(stderr,"\",\"");
   gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,
                                     ESASUFFIXPTRGET(suftab,idx2),depth);
-  fprintf(stderr,"\"="GT_LU")=%d with maxlcp "GT_LU"\n",ESASUFFIXPTRGET(suftab,idx2),
-                                                cmp,
-                                                maxlcp);
+  fprintf(stderr,"\"="GT_LU")=%d with maxlcp "GT_LU"\n",
+          ESASUFFIXPTRGET(suftab,idx2),cmp,maxlcp);
 }
 
 static GtUword gt_sfxmap_determinenumberofwholeleaves(
@@ -567,8 +566,9 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
       = gt_sfxmap_determinenumberofwholeleaves(encseq,readmode);
     if (wholeleafcount != expectednumofwholeleaves)
     {
-      fprintf(stderr,"wholeleafcount="GT_LU" != "GT_LU"=expectednumofwholeleaves\n",
-                      wholeleafcount,expectednumofwholeleaves);
+      fprintf(stderr,
+              "wholeleafcount="GT_LU" != "GT_LU"=expectednumofwholeleaves\n",
+              wholeleafcount,expectednumofwholeleaves);
       exit(EXIT_FAILURE);
     }
   }
@@ -1020,7 +1020,8 @@ static int gt_sfxmap_comparelcpvalue(void *info,GtUword lcp,GtError *err)
     NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
     if (lcp != currentlcpvalue)
     {
-      gt_error_set(err,"lcp="GT_LU" != "GT_LU"=currentlcpvalue",lcp,currentlcpvalue);
+      gt_error_set(err,"lcp="GT_LU" != "GT_LU"=currentlcpvalue",
+                   lcp,currentlcpvalue);
       haserr = true;
       break;
     }

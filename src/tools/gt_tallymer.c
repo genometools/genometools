@@ -114,14 +114,14 @@ static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(optionesa);
   gt_option_parser_add_option(op, optionesa);
 
-  option = gt_option_new_ulong("mersize",
+  option = gt_option_new_uword("mersize",
                                "Specify the mer size.",
                                &arguments->mersize,
                                20UL);
   gt_option_parser_add_option(op, option);
 
   optionminocc
-    = gt_option_new_ulong("minocc",
+    = gt_option_new_uword("minocc",
                           "Specify the minimum occurrence number for "
                           "the mers to output/index",
                           &arguments->userdefinedminocc,
@@ -129,7 +129,7 @@ static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionminocc);
 
   optionmaxocc
-    = gt_option_new_ulong("maxocc",
+    = gt_option_new_uword("maxocc",
                           "Specify the maximum occurrence number for "
                           "the mers to output/index",
                           &arguments->userdefinedmaxocc,
@@ -364,21 +364,21 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionesa);
 
   optionminmersize
-    = gt_option_new_ulong_min("minmersize",
+    = gt_option_new_uword_min("minmersize",
                               "specify minimum mer size for which "
                               "to compute the occurrence distribution",
                               &arguments->minmersize,0,1UL);
   gt_option_parser_add_option(op, optionminmersize);
 
   optionmaxmersize
-    = gt_option_new_ulong_min("maxmersize",
+    = gt_option_new_uword_min("maxmersize",
                               "specify maximum mer size for which "
                               "to compute the occurrence distribution",
                               &arguments->maxmersize,0,1UL);
   gt_option_parser_add_option(op, optionmaxmersize);
 
   optionstep
-    = gt_option_new_ulong_min("step",
+    = gt_option_new_uword_min("step",
                               "specify step size when specifying mer sizes",
                               &arguments->stepmersize,1UL,1UL);
   gt_option_parser_add_option(op, optionstep);

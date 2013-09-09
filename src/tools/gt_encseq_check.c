@@ -57,16 +57,16 @@ static GtOptionParser* gt_encseq_check_option_parser_new(void *tool_arguments)
                             "Check the consistency of an encoded "
                             "sequence file.");
 
-  option = gt_option_new_ulong("scantrials", "specify number of scan trials",
+  option = gt_option_new_uword("scantrials", "specify number of scan trials",
                                &arguments->scantrials, 0);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("multicharcmptrials",
+  option = gt_option_new_uword("multicharcmptrials",
                                "specify number of multicharacter trials",
                                &arguments->multicharcmptrials, 0);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong_min_max("prefixlength",
+  option = gt_option_new_uword_min_max("prefixlength",
                                        "prefix length",
                                        &arguments->prefixlength, 0,
                                        0, MAXPREFIXLENGTH);

@@ -94,7 +94,7 @@ static GtOptionParser* gt_encseq_decode_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -seq */
-  optionseq = gt_option_new_ulong("seq",
+  optionseq = gt_option_new_uword("seq",
                                   "extract sequence identified by its number",
                                   &arguments->seq,
                                   GT_UNDEF_ULONG);
@@ -192,9 +192,10 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
     /* specify a single sequence to extract */
     if (args->seq != GT_UNDEF_ULONG) {
       if (args->seq >= gt_encseq_num_of_sequences(encseq)) {
-        gt_error_set(err, "requested sequence "GT_LU" exceeds number of sequences "
-                          "("GT_LU")", args->seq,
-                          gt_encseq_num_of_sequences(encseq));
+        gt_error_set(err,
+                     "requested sequence "GT_LU" exceeds number of sequences "
+                     "("GT_LU")", args->seq,
+                     gt_encseq_num_of_sequences(encseq));
         return -1;
       }
       sfrom = args->seq;
@@ -204,11 +205,12 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
       /* specify a sequence range to extract */
       if (args->seqrng.start >= gt_encseq_num_of_sequences(encseq)
             || args->seqrng.end >= gt_encseq_num_of_sequences(encseq)) {
-        gt_error_set(err, "range "GT_LU"-"GT_LU" includes a sequence number exceeding "
-                          "the total number of sequences ("GT_LU")",
-                          args->seqrng.start,
-                          args->seqrng.end,
-                          gt_encseq_num_of_sequences(encseq));
+        gt_error_set(err,
+                     "range "GT_LU"-"GT_LU" includes a sequence number "
+                     "exceeding the total number of sequences ("GT_LU")",
+                     args->seqrng.start,
+                     args->seqrng.end,
+                     gt_encseq_num_of_sequences(encseq));
         return -1;
       }
       sfrom = args->seqrng.start;
@@ -282,8 +284,9 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
     if (args->rng.start != GT_UNDEF_ULONG && args->rng.end != GT_UNDEF_ULONG) {
       if (args->rng.end > to) {
         had_err = -1;
-        gt_error_set(err, "end of range ("GT_LU") exceeds encoded sequence length "
-                          "("GT_LU")", args->rng.end, to);
+        gt_error_set(err,
+                     "end of range ("GT_LU") exceeds encoded sequence length "
+                     "("GT_LU")", args->rng.end, to);
       }
       if (!had_err) {
         from = args->rng.start;
