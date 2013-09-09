@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 #include "core/error.h"
+#include "core/types_api.h"
 
 /* a two-dimensional matrix containing boolean values */
 typedef struct GtBoolMatrix GtBoolMatrix;
@@ -29,11 +30,11 @@ bool          gt_bool_matrix_get(GtBoolMatrix*, GtUword firstdim,
                                  GtUword seconddim);
 void          gt_bool_matrix_set(GtBoolMatrix*, GtUword firstdim,
                                  GtUword seconddim, bool);
-GtUword gt_bool_matrix_get_first_column(const GtBoolMatrix*,
+GtUword       gt_bool_matrix_get_first_column(const GtBoolMatrix*,
                                               GtUword firstdim);
-GtUword gt_bool_matrix_get_last_column(const GtBoolMatrix*,
+GtUword       gt_bool_matrix_get_last_column(const GtBoolMatrix*,
                                              GtUword firstdim);
-GtUword gt_bool_matrix_get_next_column(const GtBoolMatrix*,
+GtUword       gt_bool_matrix_get_next_column(const GtBoolMatrix*,
                                              GtUword firstdim,
                                              GtUword i);
 void          gt_bool_matrix_delete(GtBoolMatrix*);
