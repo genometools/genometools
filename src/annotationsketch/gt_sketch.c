@@ -132,14 +132,14 @@ static GtOptionParser* gt_sketch_option_parser_new(void *tool_arguments)
   gt_option_hide_default(option);
 
   /* -start */
-  option = gt_option_new_ulong_min("start", "start position\n"
+  option = gt_option_new_uword_min("start", "start position\n"
                                          "default: first region start",
                             &arguments->start, GT_UNDEF_ULONG, 1);
   gt_option_parser_add_option(op, option);
   gt_option_hide_default(option);
 
   /* -end */
-  option2 = gt_option_new_ulong("end", "end position\ndefault: last region end",
+  option2 = gt_option_new_uword("end", "end position\ndefault: last region end",
                             &arguments->end, GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option2);
   /* -start and -end must be given together */

@@ -62,7 +62,7 @@ static GtOptionParser* gt_encseq_bitextract_option_parser_new(void
                                &arguments->mirror, false);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("stoppos", "output stop positions",
+  option = gt_option_new_uword("stoppos", "output stop positions",
                                &arguments->stoppos, GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
@@ -70,7 +70,7 @@ static GtOptionParser* gt_encseq_bitextract_option_parser_new(void
                                &arguments->specialranges, false);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("bitpos", "extract and display "
+  option = gt_option_new_uword("bitpos", "extract and display "
                                          "two bit encoding for position",
                                &arguments->bitpos, GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
@@ -118,7 +118,9 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err && arguments->bitpos != GT_UNDEF_ULONG) {
     if (arguments->bitpos >= gt_encseq_total_length(encseq)) {
-      gt_error_set(err, "position "GT_LU" exceeds encoded sequence length of "GT_LU"",
+      gt_error_set(err,
+                   "position "GT_LU" exceeds encoded sequence "
+                   "length of "GT_LU"",
                    arguments->bitpos, gt_encseq_total_length(encseq));
       had_err = -1;
     }
@@ -145,7 +147,9 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err && arguments->stoppos != GT_UNDEF_ULONG) {
     if (arguments->stoppos >= gt_encseq_total_length(encseq)) {
-      gt_error_set(err, "position "GT_LU" exceeds encoded sequence length of "GT_LU"",
+      gt_error_set(err,
+                   "position "GT_LU" exceeds encoded sequence "
+                   "length of "GT_LU"",
                    arguments->stoppos, gt_encseq_total_length(encseq));
       had_err = -1;
     }

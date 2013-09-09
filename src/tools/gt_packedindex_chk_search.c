@@ -131,9 +131,10 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
                       && params.minPatLen > params.maxPatLen)))
       {
-        gt_error_set(err, "Invalid pattern lengths selected: min="GT_LD", max="GT_LD";"
-                  " min <= max is required.", params.minPatLen,
-                  params.maxPatLen);
+        gt_error_set(err, "Invalid pattern lengths selected: min="GT_LD", "
+                     "max="GT_LD";"
+                     " min <= max is required.", params.minPatLen,
+                     params.maxPatLen);
         break;
       }
       if (params.minPatLen < 0 || params.maxPatLen < 0)
@@ -279,19 +280,19 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   gt_registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName);
 
-  option = gt_option_new_long("minpatlen",
+  option = gt_option_new_word("minpatlen",
                            "minimum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
                            "properties", &params->minPatLen, -1);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_long("maxpatlen",
+  option = gt_option_new_word("maxpatlen",
                            "maximum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
                            "properties", &params->maxPatLen, -1);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("nsamples",
+  option = gt_option_new_uword("nsamples",
                             "number of sequences to search for",
                             &params->numOfSamples, 1000);
   gt_option_parser_add_option(op, option);
@@ -311,7 +312,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                            &tryContextRetrieve, false);
   gt_option_parser_add_option(op, option);
 
-  optionProgress = gt_option_new_ulong("ticks",
+  optionProgress = gt_option_new_uword("ticks",
                                     "print dot after this many symbols "
                                     "tested okay", &params->progressInterval,
                                     DEFAULT_PROGRESS_INTERVAL);

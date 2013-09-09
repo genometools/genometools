@@ -83,32 +83,32 @@ static GtOptionParser* gt_simreads_option_parser_new(void *tool_arguments)
                          "random positions in the input sequence(s).");
 
   /* -num */
-  num_option = gt_option_new_ulong_min("num", "desired number of reads",
+  num_option = gt_option_new_uword_min("num", "desired number of reads",
                                        &arguments->num, GT_UNDEF_ULONG, 1UL);
   gt_option_parser_add_option(op, num_option);
 
   /* -coverage */
-  coverage_option = gt_option_new_ulong_min("coverage",
+  coverage_option = gt_option_new_uword_min("coverage",
                                             "desired coverage of the reads",
                                             &arguments->coverage,
                                             GT_UNDEF_ULONG, 1UL);
   gt_option_parser_add_option(op, coverage_option);
 
   /* -len */
-  len_option = gt_option_new_ulong_min("len", "fixed read length",
+  len_option = gt_option_new_uword_min("len", "fixed read length",
                                                &arguments->minlen,
                                                GT_UNDEF_ULONG, 1UL);
   gt_option_parser_add_option(op, len_option);
 
   /* -minlen */
-  minlen_option = gt_option_new_ulong_min("minlen",
+  minlen_option = gt_option_new_uword_min("minlen",
                                           "minimal read length",
                                           &arguments->minlen,
                                           GT_UNDEF_ULONG, 1UL);
   gt_option_parser_add_option(op, minlen_option);
 
   /* -maxlen */
-  maxlen_option = gt_option_new_ulong_min("maxlen",
+  maxlen_option = gt_option_new_uword_min("maxlen",
                                           "maximal read length",
                                           &arguments->maxlen,
                                           GT_UNDEF_ULONG, 1UL);
@@ -477,7 +477,8 @@ static int gt_simreads_runner(GT_UNUSED int argc,
       gt_logger_log(logger, "average reads length: %.1f",
                     (float) output_bases / output_reads);
     gt_logger_log(logger, "number of reads: "GT_LU"", output_reads);
-    gt_logger_log(logger, "- forward: "GT_LU"", output_reads-output_rcmode_reads);
+    gt_logger_log(logger, "- forward: "GT_LU"",
+                  output_reads-output_rcmode_reads);
     gt_logger_log(logger, "- revcompl: "GT_LU"", output_rcmode_reads);
   }
 

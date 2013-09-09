@@ -116,7 +116,7 @@ static GtOptionParser* gt_matchtool_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optiondb);
 
   /* -swminlen */
-  optionminlen = gt_option_new_ulong("swminlen",
+  optionminlen = gt_option_new_uword("swminlen",
                                      "set minimum required alignment length "
                                      "(for Smith-Waterman alignment)",
                                      &arguments->minlen,
@@ -124,7 +124,7 @@ static GtOptionParser* gt_matchtool_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionminlen);
 
   /* -swmaxedist */
-  optionmaxedist = gt_option_new_ulong("swmaxedist",
+  optionmaxedist = gt_option_new_uword("swmaxedist",
                                        "set maximum allowed edit distance "
                                        "(for Smith-Waterman alignment)",
                                        &arguments->maxedist,
@@ -344,7 +344,8 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);
         gt_match_get_range_seq2(match, &range_seq2);
-        fprintf(stdout, "%s\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\n",
+        fprintf(stdout,
+               "%s\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\n",
                 gt_match_get_seqid1(match),
                 gt_match_get_seqid2(match),
                 range_seq1.start,
@@ -371,7 +372,8 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);
         gt_match_get_range_seq2(match, &range_seq2);
-        fprintf(stdout, ""GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\n",
+        fprintf(stdout,
+              ""GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\n",
                 gt_match_last_get_seqno1(matchl),
                 gt_match_last_get_seqno2(matchl),
                 range_seq1.start,
@@ -397,7 +399,8 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
         GtRange range_seq2;
         gt_match_get_range_seq1(match, &range_seq1);
         gt_match_get_range_seq2(match, &range_seq2);
-        fprintf(stdout, "%s\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t%.3f\t%g\t"GT_LU"\n",
+        fprintf(stdout,
+              "%s\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t%.3f\t%g\t"GT_LU"\n",
                 gt_match_get_seqid1(match),
                 gt_match_get_seqid2(match),
                 range_seq1.start,

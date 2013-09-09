@@ -38,7 +38,7 @@ static GtOPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
                          "Show which parts of the given sequence regions are "
                          "covered by features.");
   /* -maxfeaturedist */
-  o = gt_option_new_ulong("maxfeaturedist", "set the maximum distance two "
+  o = gt_option_new_uword("maxfeaturedist", "set the maximum distance two "
                        "features can have while still being in the same "
                        "``cluster''", &arguments->max_feature_dist, 0);
   gt_option_parser_add_option(op, o);

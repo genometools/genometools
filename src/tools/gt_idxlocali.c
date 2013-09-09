@@ -64,27 +64,27 @@ static GtOptionParser *gt_idxlocali_option_parser_new(void *tool_arguments)
                                         arguments->queryfiles);
   gt_option_parser_add_option (op, option);
 
-  option = gt_option_new_long("match",
+  option = gt_option_new_word("match",
                               "Specify match score",
                               &arguments->matchscore, 1L);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_long("mismatch",
+  option = gt_option_new_word("mismatch",
                               "Specify mismatch score",
                               &arguments->mismatchscore, -3L);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_long("gapstart",
+  option = gt_option_new_word("gapstart",
                               "Specify gap start score",
                               &arguments->gapstart, -5L);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_long("gapextend",
+  option = gt_option_new_word("gapextend",
                               "Specify gap extension score",
                               &arguments->gapextend, -2L);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong_min("th",
+  option = gt_option_new_uword_min("th",
                                    "Specify the threshold",
                                     &arguments->threshold, 0, 1UL);
   gt_option_parser_add_option(op, option);

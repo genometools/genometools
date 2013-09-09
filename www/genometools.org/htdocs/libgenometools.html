@@ -337,16 +337,6 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         unsigned long sequence_length, unsigned long width,
-                         GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
-</p>
-<hr>
 <a name="gt_feature_index_gfflike_get_all_features"></a>
 
 <code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
@@ -442,7 +432,7 @@ Return a <code>GtAlphabet</code> object, as read from a file specified by
 <a name="gt_alphabet_new_from_string"></a>
 
 <code>GtAlphabet*     gt_alphabet_new_from_string(const char *alphadef,
-                                           unsigned long len, GtError *err)</code>
+                                           GtUword len, GtError *err)</code>
 <p>
 Return a <code>GtAlphabet</code> object, as read from a string of length <code>len</code>
    specified by <code>alphadef</code>.
@@ -461,7 +451,7 @@ Returns a new <code>GtAlphabet</code> object by scanning the sequence files in
 <hr>
 <a name="gt_alphabet_guess"></a>
 
-<code>GtAlphabet*     gt_alphabet_guess(const char *sequence, unsigned long seqlen)</code>
+<code>GtAlphabet*     gt_alphabet_guess(const char *sequence, GtUword seqlen)</code>
 <p>
 Try to guess which type the given <code>sequence</code> with <code>length</code> has (DNA or
    protein) and return an according <code>GtAlphabet*</code> object.
@@ -636,7 +626,7 @@ Decode character <code>c</code> with given <code>alphabet</code>.
 <a name="gt_alphabet_encode_seq"></a>
 
 <code>void            gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
-                                      const char *in, unsigned long length)</code>
+                                      const char *in, GtUword length)</code>
 <p>
 Encode sequence <code>in</code> of given <code>length</code> with <code>alphabet</code> and store the result
    in <code>out</code>. <code>in</code> has to be encodable with the given <code>alphabet</code>!
@@ -647,7 +637,7 @@ Encode sequence <code>in</code> of given <code>length</code> with <code>alphabet
 <code>void            gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet,
                                             FILE *fpout,
                                             const GtUchar *src,
-                                            unsigned long len)</code>
+                                            GtUword len)</code>
 <p>
 Suppose the string <code>src</code> of length <code>len</code> was transformed according to the
    <code>alphabet</code>. The following method shows each character in <code>src</code> as the
@@ -660,7 +650,7 @@ Suppose the string <code>src</code> of length <code>len</code> was transformed a
 <code>void            gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet,
                                               char *dest,
                                               const GtUchar *src,
-                                              unsigned long len)</code>
+                                              GtUword len)</code>
 <p>
 Analog to <code>gt_alphabet_decode_seq_to_fp()</code> but writing the output to
    <code>dest</code>.
@@ -670,7 +660,7 @@ Analog to <code>gt_alphabet_decode_seq_to_fp()</code> but writing the output to
 
 <code>GtStr*          gt_alphabet_decode_seq_to_str(const GtAlphabet *alphabet,
                                              const GtUchar *src,
-                                             unsigned long len)</code>
+                                             GtUword len)</code>
 <p>
 Analog to <code>gt_alphabet_decode_seq_to_fp()</code> writing the output to
    a new <code>GtStr</code>.
@@ -732,14 +722,14 @@ Deletes <code>schema</code> and frees all associated memory.
 <hr>
 <a name="gt_array_new"></a>
 
-<code>GtArray*       gt_array_new(size_t size_of_elem)</code>
+<code>GtArray*  gt_array_new(size_t size_of_elem)</code>
 <p>
 Return a new <code>GtArray</code> object whose elements have the size <code>size_of_elem</code>.
 </p>
 <hr>
 <a name="gt_array_ref"></a>
 
-<code>GtArray*       gt_array_ref(GtArray *array)</code>
+<code>GtArray*  gt_array_ref(GtArray *array)</code>
 <p>
 Increase the reference count for <code>array</code> and return it.
    If <code>array</code> is <code>NULL</code>, <code>NULL</code> is returned without any side effects.
@@ -747,14 +737,14 @@ Increase the reference count for <code>array</code> and return it.
 <hr>
 <a name="gt_array_clone"></a>
 
-<code>GtArray*       gt_array_clone(const GtArray *array)</code>
+<code>GtArray*  gt_array_clone(const GtArray *array)</code>
 <p>
 Return a clone of <code>array</code>.
 </p>
 <hr>
 <a name="gt_array_get"></a>
 
-<code>void*          gt_array_get(const GtArray *array, unsigned long index)</code>
+<code>void*     gt_array_get(const GtArray *array, GtUword index)</code>
 <p>
 Return pointer to element number <code>index</code> of <code>array</code>. <code>index</code> has to be
    smaller than <code>gt_array_size(array)</code>.
@@ -762,28 +752,28 @@ Return pointer to element number <code>index</code> of <code>array</code>. <code
 <hr>
 <a name="gt_array_get_first"></a>
 
-<code>void*          gt_array_get_first(const GtArray *array)</code>
+<code>void*     gt_array_get_first(const GtArray *array)</code>
 <p>
 Return pointer to first element of <code>array</code>.
 </p>
 <hr>
 <a name="gt_array_get_last"></a>
 
-<code>void*          gt_array_get_last(const GtArray *array)</code>
+<code>void*     gt_array_get_last(const GtArray *array)</code>
 <p>
 Return pointer to last element of <code>array</code>.
 </p>
 <hr>
 <a name="gt_array_pop"></a>
 
-<code>void*          gt_array_pop(GtArray *array)</code>
+<code>void*     gt_array_pop(GtArray *array)</code>
 <p>
 Return pointer to last element of <code>array</code> and remove it from <code>array</code>.
 </p>
 <hr>
 <a name="gt_array_get_space"></a>
 
-<code>void*          gt_array_get_space(const GtArray *array)</code>
+<code>void*     gt_array_get_space(const GtArray *array)</code>
 <p>
 Return pointer to the internal space of <code>array</code> where the elements are
    stored.
@@ -800,8 +790,7 @@ Add element <code>elem</code> to <code>array</code>. The size of <code>elem</cod
 <hr>
 <a name="gt_array_add_elem"></a>
 
-<code>void           gt_array_add_elem(GtArray *array, void *elem,
-                                size_t size_of_elem)</code>
+<code>void      gt_array_add_elem(GtArray *array, void *elem, size_t size_of_elem)</code>
 <p>
 Add element <code>elem</code> with size <code>size_of_elem</code> to <code>array</code>. <code>size_of_elem</code> must
    equal the given element size when the <code>array</code> was created. Usually, this
@@ -811,7 +800,7 @@ Add element <code>elem</code> with size <code>size_of_elem</code> to <code>array
 <hr>
 <a name="gt_array_add_array"></a>
 
-<code>void           gt_array_add_array(GtArray *dest, const GtArray *src)</code>
+<code>void      gt_array_add_array(GtArray *dest, const GtArray *src)</code>
 <p>
 Add all elements of array <code>src</code> to the array <code>dest</code>. The element sizes of
    both arrays must be equal.
@@ -819,7 +808,7 @@ Add all elements of array <code>src</code> to the array <code>dest</code>. The e
 <hr>
 <a name="gt_array_rem"></a>
 
-<code>void           gt_array_rem(GtArray *array, unsigned long index)</code>
+<code>void      gt_array_rem(GtArray *array, GtUword index)</code>
 <p>
 Remove element with number <code>index</code> from <code>array</code> in O(<code>gt_array_size(array)</code>)
    time. <code>index</code> has to be smaller than <code>gt_array_size(array)</code>.
@@ -827,8 +816,8 @@ Remove element with number <code>index</code> from <code>array</code> in O(<code
 <hr>
 <a name="gt_array_rem_span"></a>
 
-<code>void           gt_array_rem_span(GtArray *array, unsigned long frompos,
-                                unsigned long topos)</code>
+<code>void      gt_array_rem_span(GtArray *array, GtUword frompos,
+                                 GtUword topos)</code>
 <p>
 Remove elements starting with number <code>frompos</code> up to (and including) <code>topos</code>
    from <code>array</code> in O(<code>gt_array_size(array)</code>) time. <code>frompos</code> has to be smaller
@@ -838,14 +827,14 @@ Remove elements starting with number <code>frompos</code> up to (and including) 
 <hr>
 <a name="gt_array_reverse"></a>
 
-<code>void           gt_array_reverse(GtArray *array)</code>
+<code>void      gt_array_reverse(GtArray *array)</code>
 <p>
 Reverse the order of the elements in <code>array</code>.
 </p>
 <hr>
 <a name="gt_array_set_size"></a>
 
-<code>void           gt_array_set_size(GtArray *array, unsigned long size)</code>
+<code>void      gt_array_set_size(GtArray *array, GtUword size)</code>
 <p>
 Set the size of <code>array</code> to <code>size</code>. <code>size</code> must be smaller or equal than
    <code>gt_array_size(array)</code>.
@@ -853,21 +842,21 @@ Set the size of <code>array</code> to <code>size</code>. <code>size</code> must 
 <hr>
 <a name="gt_array_reset"></a>
 
-<code>void           gt_array_reset(GtArray *array)</code>
+<code>void      gt_array_reset(GtArray *array)</code>
 <p>
 Reset the <code>array</code>. That is, afterwards the array has size 0.
 </p>
 <hr>
 <a name="gt_array_elem_size"></a>
 
-<code>size_t         gt_array_elem_size(const GtArray *array)</code>
+<code>size_t    gt_array_elem_size(const GtArray *array)</code>
 <p>
 Return the size of the elements stored in <code>array</code>.
 </p>
 <hr>
 <a name="gt_array_size"></a>
 
-<code>unsigned long  gt_array_size(const GtArray *array)</code>
+<code>GtUword   gt_array_size(const GtArray *array)</code>
 <p>
 Return the number of elements in <code>array</code>. If <code>array</code> equals <code>NULL</code>, 0 is
    returned.
@@ -875,23 +864,22 @@ Return the number of elements in <code>array</code>. If <code>array</code> equal
 <hr>
 <a name="gt_array_sort"></a>
 
-<code>void           gt_array_sort(GtArray *array, GtCompare compar)</code>
+<code>void      gt_array_sort(GtArray *array, GtCompare compar)</code>
 <p>
 Sort <code>array</code> with the given compare function <code>compar</code>.
 </p>
 <hr>
 <a name="gt_array_sort_stable"></a>
 
-<code>void           gt_array_sort_stable(GtArray *array, GtCompare compar)</code>
+<code>void      gt_array_sort_stable(GtArray *array, GtCompare compar)</code>
 <p>
 Sort <code>array</code> in a stable way with the given compare function <code>compar</code>.
 </p>
 <hr>
 <a name="gt_array_sort_with_data"></a>
 
-<code>void           gt_array_sort_with_data(GtArray *array,
-                                      GtCompareWithData compar,
-                                      void *data)</code>
+<code>void      gt_array_sort_with_data(GtArray *array, GtCompareWithData compar,
+                                 void *data)</code>
 <p>
 Sort <code>array</code> with the given compare function <code>compar</code>. Passes a pointer with
    userdata <code>data</code> to <code>compar</code>.
@@ -899,9 +887,8 @@ Sort <code>array</code> with the given compare function <code>compar</code>. Pas
 <hr>
 <a name="gt_array_sort_stable_with_data"></a>
 
-<code>void           gt_array_sort_stable_with_data(GtArray *array,
-                                             GtCompareWithData compar,
-                                             void *data)</code>
+<code>void      gt_array_sort_stable_with_data(GtArray *array,
+                                        GtCompareWithData compar, void *data)</code>
 <p>
 Sort <code>array</code> in a stable way with the given compare function <code>compar</code>. Passes
    a pointer with userdata <code>data</code> to <code>compar</code>.
@@ -909,7 +896,7 @@ Sort <code>array</code> in a stable way with the given compare function <code>co
 <hr>
 <a name="gt_array_cmp"></a>
 
-<code>int            gt_array_cmp(const GtArray *array_a, const GtArray *array_b)</code>
+<code>int       gt_array_cmp(const GtArray *array_a, const GtArray *array_b)</code>
 <p>
 Compare the content of <code>array_a</code> with the content of <code>array_b</code>.
    <code>array_a</code> and <code>array_b</code> must have the same <code>gt_array_size()</code> and
@@ -918,7 +905,7 @@ Compare the content of <code>array_a</code> with the content of <code>array_b</c
 <hr>
 <a name="gt_array_delete"></a>
 
-<code>void           gt_array_delete(GtArray *array)</code>
+<code>void      gt_array_delete(GtArray *array)</code>
 <p>
 Decrease the reference count for <code>array</code> or delete it, if this was the last
    reference.
@@ -934,7 +921,7 @@ Decrease the reference count for <code>array</code> or delete it, if this was th
 <hr>
 <a name="gt_array_in_stream_new"></a>
 
-<code>GtNodeStream*  gt_array_in_stream_new(GtArray *nodes, unsigned long *progress,
+<code>GtNodeStream*  gt_array_in_stream_new(GtArray *nodes, GtUword *progress,
                                      GtError *err)</code>
 <p>
 Creates a new <code>GtArrayInStream</code>, delivering nodes from <code>nodes</code>. Note that
@@ -1013,7 +1000,7 @@ Create BED blocks parsed by <code>bed_in_stream</code> with given <code>type</co
 <hr>
 <a name="gt_bittab_new"></a>
 
-<code>GtBittab*      gt_bittab_new(unsigned long num_of_bits)</code>
+<code>GtBittab*      gt_bittab_new(GtUword num_of_bits)</code>
 <p>
 Return a new <code>GtBittab</code> of length <code>num_of_bits</code>, initialised to 0.
    <code>num_of_bits</code> has to be > 0
@@ -1021,14 +1008,14 @@ Return a new <code>GtBittab</code> of length <code>num_of_bits</code>, initialis
 <hr>
 <a name="gt_bittab_set_bit"></a>
 
-<code>void           gt_bittab_set_bit(GtBittab *bittab, unsigned long i)</code>
+<code>void           gt_bittab_set_bit(GtBittab *bittab, GtUword i)</code>
 <p>
 Set bit <code>i</code> in <code>bittab</code> to 1.
 </p>
 <hr>
 <a name="gt_bittab_unset_bit"></a>
 
-<code>void           gt_bittab_unset_bit(GtBittab *bittab, unsigned long i)</code>
+<code>void           gt_bittab_unset_bit(GtBittab *bittab, GtUword i)</code>
 <p>
 Set bit <code>i</code> in <code>bittab</code> to 0.
 </p>
@@ -1123,7 +1110,7 @@ Fill <code>array</code> with the indices of all set bits in <code>bittab</code>.
 <hr>
 <a name="gt_bittab_bit_is_set"></a>
 
-<code>bool           gt_bittab_bit_is_set(const GtBittab *bittab, unsigned long i)</code>
+<code>bool           gt_bittab_bit_is_set(const GtBittab *bittab, GtUword i)</code>
 <p>
 Return <code>true</code> if bit <code>i</code> is set in <code>bittab</code>.
 </p>
@@ -1137,22 +1124,22 @@ Return <code>true</code> if <code>bittab_a</code> and <code>bittab_b</code> are 
 <hr>
 <a name="gt_bittab_get_first_bitnum"></a>
 
-<code>unsigned long  gt_bittab_get_first_bitnum(const GtBittab *bittab)</code>
+<code>GtUword  gt_bittab_get_first_bitnum(const GtBittab *bittab)</code>
 <p>
 Return the index of the first set bit in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_get_last_bitnum"></a>
 
-<code>unsigned long  gt_bittab_get_last_bitnum(const GtBittab *bittab)</code>
+<code>GtUword  gt_bittab_get_last_bitnum(const GtBittab *bittab)</code>
 <p>
 Return the index of the last set bit in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_get_next_bitnum"></a>
 
-<code>unsigned long  gt_bittab_get_next_bitnum(const GtBittab *bittab,
-                                        unsigned long i)</code>
+<code>GtUword  gt_bittab_get_next_bitnum(const GtBittab *bittab,
+                                        GtUword i)</code>
 <p>
 Return the index of the next set bit in <code>bittab</code> with an index greater
    than <code>i</code>.
@@ -1160,14 +1147,14 @@ Return the index of the next set bit in <code>bittab</code> with an index greate
 <hr>
 <a name="gt_bittab_count_set_bits"></a>
 
-<code>unsigned long  gt_bittab_count_set_bits(const GtBittab *bittab)</code>
+<code>GtUword  gt_bittab_count_set_bits(const GtBittab *bittab)</code>
 <p>
 Return the number of set bits in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_size"></a>
 
-<code>unsigned long  gt_bittab_size(GtBittab *bittab)</code>
+<code>GtUword  gt_bittab_size(GtBittab *bittab)</code>
 <p>
 Return the total number of bits of <code>bittab</code>.
 </p>
@@ -1296,7 +1283,7 @@ Returns the <code>GtBlock</code>'s top level feature as a <code>GtFeatureNode</c
 <hr>
 <a name="gt_block_get_size"></a>
 
-<code>unsigned long          gt_block_get_size(const GtBlock*)</code>
+<code>GtUword          gt_block_get_size(const GtBlock*)</code>
 <p>
 Returns the number of elements in the <code>GtBlock</code>.
 </p>
@@ -1354,7 +1341,7 @@ Create a <code>GtCDSStream*</code> which determines the coding sequence (CDS) fo
 <a name="gt_csa_stream_new"></a>
 
 <code>GtNodeStream*  gt_csa_stream_new(GtNodeStream *in_stream,
-                                unsigned long join_length)</code>
+                                GtUword join_length)</code>
 <p>
 Create a <code>GtCSAStream*</code> which takes spliced alignments from its <code>in_stream</code>
    (which are at most <code>join_length</code> many bases apart), transforms them into
@@ -1371,14 +1358,14 @@ Create a <code>GtCSAStream*</code> which takes spliced alignments from its <code
 <hr>
 <a name="gt_canvas_get_height"></a>
 
-<code>unsigned long  gt_canvas_get_height(GtCanvas *canvas)</code>
+<code>GtUword  gt_canvas_get_height(GtCanvas *canvas)</code>
 <p>
 Returns the height of the given <code>canvas</code>.
 </p>
 <hr>
 <a name="gt_canvas_delete"></a>
 
-<code>void           gt_canvas_delete(GtCanvas *canvas)</code>
+<code>void     gt_canvas_delete(GtCanvas *canvas)</code>
 <p>
 Delete the given <code>canvas</code>.
 </p>
@@ -1395,8 +1382,8 @@ Delete the given <code>canvas</code>.
 
 <code>GtCanvas*  gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
                                       double offsetpos,
-                                      unsigned long width,
-                                      unsigned long height,
+                                      GtUword width,
+                                      GtUword height,
                                       GtImageInfo *image_info,
                                       GtError *err)</code>
 <p>
@@ -1417,8 +1404,8 @@ Create a new <code>GtCanvas</code> object tied to the cairo_t <code>context</cod
 
 <code>GtCanvas*  gt_canvas_cairo_file_new(GtStyle *style,
                                    GtGraphicsOutType output_type,
-                                   unsigned long width,
-                                   unsigned long height,
+                                   GtUword width,
+                                   GtUword height,
                                    GtImageInfo *image_info,
                                    GtError *err)</code>
 <p>
@@ -1455,7 +1442,7 @@ Append rendered <code>canvas</code> image data to given <code>stream</code>.
 <hr>
 <a name="gt_codon_iterator_current_position"></a>
 
-<code>unsigned long           gt_codon_iterator_current_position(GtCodonIterator
+<code>GtUword           gt_codon_iterator_current_position(GtCodonIterator
                                                           *codon_iterator)</code>
 <p>
 Return the current reading offset of <code>codin_iterator</code>, starting from the
@@ -1464,7 +1451,7 @@ Return the current reading offset of <code>codin_iterator</code>, starting from 
 <hr>
 <a name="gt_codon_iterator_length"></a>
 
-<code>unsigned long           gt_codon_iterator_length(GtCodonIterator
+<code>GtUword           gt_codon_iterator_length(GtCodonIterator
                                                 *codon_iterator)</code>
 <p>
 Return the length of the substring to scan, given at instantiation time.
@@ -1511,8 +1498,8 @@ Delete <code>codon_iterator</code>.
 <a name="gt_codon_iterator_encseq_new"></a>
 
 <code>GtCodonIterator*             gt_codon_iterator_encseq_new(GtEncseq *encseq,
-                                                         unsigned long startpos,
-                                                         unsigned long length,
+                                                         GtUword startpos,
+                                                         GtUword length,
                                                          GtError *err)</code>
 <p>
 Creates a new <code>GtCodonIterator</code> traversing <code>encseq</code> over a length of <code>len</code>
@@ -1524,8 +1511,8 @@ Creates a new <code>GtCodonIterator</code> traversing <code>encseq</code> over a
 
 <code>GtCodonIterator*             gt_codon_iterator_encseq_new_with_readmode(
                                                         GtEncseq *encseq,
-                                                        unsigned long startpos,
-                                                        unsigned long length,
+                                                        GtUword startpos,
+                                                        GtUword length,
                                                         GtReadmode readmode,
                                                         GtError *err)</code>
 <p>
@@ -1540,7 +1527,7 @@ Creates a new <code>GtCodonIterator</code> traversing <code>encseq</code> over a
 <a name="gt_codon_iterator_simple_new"></a>
 
 <code>GtCodonIterator*             gt_codon_iterator_simple_new(const char *seq,
-                                                         unsigned long len,
+                                                         GtUword len,
                                                          GtError *err)</code>
 <p>
 Creates a new <code>GtCodonIterator</code> traversing <code>seq</code> over a length of <code>len</code>.
@@ -1701,9 +1688,9 @@ Delete the given <code>ctrack</code>.
 <a name="gt_custom_track_gc_content_new"></a>
 
 <code>GtCustomTrack*  gt_custom_track_gc_content_new(const char *seq,
-                                              unsigned long seqlen,
-                                              unsigned long windowsize,
-                                              unsigned long height,
+                                              GtUword seqlen,
+                                              GtUword windowsize,
+                                              GtUword height,
                                               double avg,
                                               bool show_scale)</code>
 <p>
@@ -1818,8 +1805,8 @@ Delete the <code>diagram</code> and all its components.
 <hr>
 <a name="GtDiscDistriIterFunc"></a>
 
-<code>void  GtDiscDistriIterFunc(unsigned long key,
-                                     unsigned long long value,
+<code>void  GtDiscDistriIterFunc(GtUword key,
+                                     GtUint64 value,
                                      void *data)</code>
 <p>
 Callback function called during iteration over each item of the
@@ -1835,22 +1822,22 @@ Creates a new, empty <code>GtDiscDistri</code>.
 <hr>
 <a name="gt_disc_distri_add"></a>
 
-<code>void                gt_disc_distri_add(GtDiscDistri *d, unsigned long key)</code>
+<code>void                gt_disc_distri_add(GtDiscDistri *d, GtUword key)</code>
 <p>
 Adds one count of <code>key</code> to <code>d</code>.
 </p>
 <hr>
 <a name="gt_disc_distri_add_multi"></a>
 
-<code>void                gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
-                                            unsigned long long occurrences)</code>
+<code>void                gt_disc_distri_add_multi(GtDiscDistri *d, GtUword key,
+                                            GtUint64 occurrences)</code>
 <p>
 Adds <code>occurrences</code> counts of <code>key</code> to <code>d</code>.
 </p>
 <hr>
 <a name="gt_disc_distri_get"></a>
 
-<code>unsigned long long  gt_disc_distri_get(const GtDiscDistri *d, unsigned long key)</code>
+<code>GtUint64  gt_disc_distri_get(const GtDiscDistri *d, GtUword key)</code>
 <p>
 Return the current count of <code>key</code> as stored in <code>d</code>.
 </p>
@@ -1894,7 +1881,7 @@ Same as foreach, but from the longest to the smallest key.
 <hr>
 <a name="gt_dlist_new"></a>
 
-<code>GtDlist*       gt_dlist_new(GtCompare compar)</code>
+<code>GtDlist*      gt_dlist_new(GtCompare compar)</code>
 <p>
 Return a new <code>GtDlist</code> object sorted according to <code>compar</code> function. If
    <code>compar</code> equals <code>NULL</code>, no sorting is enforced.
@@ -1902,7 +1889,7 @@ Return a new <code>GtDlist</code> object sorted according to <code>compar</code>
 <hr>
 <a name="gt_dlist_new_with_data"></a>
 
-<code>GtDlist*       gt_dlist_new_with_data(GtCompareWithData compar, void *data)</code>
+<code>GtDlist*      gt_dlist_new_with_data(GtCompareWithData compar, void *data)</code>
 <p>
 Return a new <code>GtDlist</code> object sorted according to <code>compar</code> function. If
    <code>compar</code> equals <code>NULL</code>, no sorting is enforced. Use <code>data</code> to supply
@@ -1911,21 +1898,21 @@ Return a new <code>GtDlist</code> object sorted according to <code>compar</code>
 <hr>
 <a name="gt_dlist_first"></a>
 
-<code>GtDlistelem*   gt_dlist_first(const GtDlist *dlist)</code>
+<code>GtDlistelem*  gt_dlist_first(const GtDlist *dlist)</code>
 <p>
 Return the first <code>GtDlistelem</code> object in <code>dlist</code>.
 </p>
 <hr>
 <a name="gt_dlist_last"></a>
 
-<code>GtDlistelem*   gt_dlist_last(const GtDlist *dlist)</code>
+<code>GtDlistelem*  gt_dlist_last(const GtDlist *dlist)</code>
 <p>
 Return the last <code>GtDlistelem</code> object in <code>dlist</code>.
 </p>
 <hr>
 <a name="gt_dlist_find"></a>
 
-<code>GtDlistelem*   gt_dlist_find(const GtDlist *dlist, void *data)</code>
+<code>GtDlistelem*  gt_dlist_find(const GtDlist *dlist, void *data)</code>
 <p>
 Return the first <code>GtDlistelem</code> object in <code>dlist</code> which contains data
    identical to <code>data</code>. Takes O(n) time.
@@ -1933,14 +1920,14 @@ Return the first <code>GtDlistelem</code> object in <code>dlist</code> which con
 <hr>
 <a name="gt_dlist_size"></a>
 
-<code>unsigned long  gt_dlist_size(const GtDlist *dlist)</code>
+<code>GtUword       gt_dlist_size(const GtDlist *dlist)</code>
 <p>
 Return the number of <code>GtDlistelem</code> objects in <code>dlist</code>.
 </p>
 <hr>
 <a name="gt_dlist_add"></a>
 
-<code>void           gt_dlist_add(GtDlist *dlist, void *data)</code>
+<code>void          gt_dlist_add(GtDlist *dlist, void *data)</code>
 <p>
 Add a new <code>GtDlistelem</code> object containing <code>data</code> to <code>dlist</code>.
    Usually O(n), but O(1) if data is added in sorted order.
@@ -1948,21 +1935,21 @@ Add a new <code>GtDlistelem</code> object containing <code>data</code> to <code>
 <hr>
 <a name="gt_dlist_remove"></a>
 
-<code>void           gt_dlist_remove(GtDlist *dlist, GtDlistelem *dlistelem)</code>
+<code>void          gt_dlist_remove(GtDlist *dlist, GtDlistelem *dlistelem)</code>
 <p>
 Remove <code>dlistelem</code> from <code>dlist</code> and free it.
 </p>
 <hr>
 <a name="gt_dlist_example"></a>
 
-<code>int            gt_dlist_example(GtError *err)</code>
+<code>int           gt_dlist_example(GtError *err)</code>
 <p>
 Example for usage of the <code>GtDlist</code> class.
 </p>
 <hr>
 <a name="gt_dlist_delete"></a>
 
-<code>void           gt_dlist_delete(GtDlist *dlist)</code>
+<code>void          gt_dlist_delete(GtDlist *dlist)</code>
 <p>
 Delete <code>dlist</code>.
 </p>
@@ -1971,7 +1958,7 @@ Delete <code>dlist</code>.
 <h2>Class GtDlistelem</h2>
 <a name="gt_dlistelem_next"></a>
 
-<code>GtDlistelem*   gt_dlistelem_next(const GtDlistelem *dlistelem)</code>
+<code>GtDlistelem*  gt_dlistelem_next(const GtDlistelem *dlistelem)</code>
 <p>
 Return the successor of <code>dlistelem</code>, or <code>NULL</code> if the element is the last
    one in the <code>GtDlist</code>.
@@ -1979,7 +1966,7 @@ Return the successor of <code>dlistelem</code>, or <code>NULL</code> if the elem
 <hr>
 <a name="gt_dlistelem_previous"></a>
 
-<code>GtDlistelem*   gt_dlistelem_previous(const GtDlistelem *dlistelem)</code>
+<code>GtDlistelem*  gt_dlistelem_previous(const GtDlistelem *dlistelem)</code>
 <p>
 Return the predecessor of <code>dlistelem</code>, or <code>NULL</code> if the element is the
    first one in the <code>GtDlist</code>.
@@ -1987,7 +1974,7 @@ Return the predecessor of <code>dlistelem</code>, or <code>NULL</code> if the el
 <hr>
 <a name="gt_dlistelem_get_data"></a>
 
-<code>void*          gt_dlistelem_get_data(const GtDlistelem *dlistelem)</code>
+<code>void*         gt_dlistelem_get_data(const GtDlistelem *dlistelem)</code>
 <p>
 Return the data pointer attached to <code>dlistelem</code>.
 </p>
@@ -2049,7 +2036,7 @@ Returns the indexname (as given at loading time) of <code>encseq</code>
 <hr>
 <a name="gt_encseq_total_length"></a>
 
-<code>unsigned long      gt_encseq_total_length(const GtEncseq *encseq)</code>
+<code>GtUword      gt_encseq_total_length(const GtEncseq *encseq)</code>
 <p>
 Returns the total number of characters in all sequences of <code>encseq</code>,
    including separators and wildcards.
@@ -2057,7 +2044,7 @@ Returns the total number of characters in all sequences of <code>encseq</code>,
 <hr>
 <a name="gt_encseq_num_of_sequences"></a>
 
-<code>unsigned long      gt_encseq_num_of_sequences(const GtEncseq *encseq)</code>
+<code>GtUword      gt_encseq_num_of_sequences(const GtEncseq *encseq)</code>
 <p>
 Returns the total number of sequences contained in <code>encseq</code>.
 </p>
@@ -2065,7 +2052,7 @@ Returns the total number of sequences contained in <code>encseq</code>.
 <a name="gt_encseq_get_encoded_char"></a>
 
 <code>GtUchar            gt_encseq_get_encoded_char(const GtEncseq *encseq,
-                                             unsigned long pos,
+                                             GtUword pos,
                                              GtReadmode readmode)</code>
 <p>
 Returns the encoded representation of the character at position <code>pos</code> of
@@ -2075,7 +2062,7 @@ Returns the encoded representation of the character at position <code>pos</code>
 <a name="gt_encseq_get_decoded_char"></a>
 
 <code>char               gt_encseq_get_decoded_char(const GtEncseq *encseq,
-                                             unsigned long pos,
+                                             GtUword pos,
                                              GtReadmode readmode)</code>
 <p>
 Returns the decoded representation of the character at position <code>pos</code> of
@@ -2085,7 +2072,7 @@ Returns the decoded representation of the character at position <code>pos</code>
 <a name="gt_encseq_position_is_separator"></a>
 
 <code>bool               gt_encseq_position_is_separator(const GtEncseq *encseq,
-                                                  unsigned long pos,
+                                                  GtUword pos,
                                                   GtReadmode readmode)</code>
 <p>
 Returns true iff <code>pos</code> is a separator position of <code>encseq</code>
@@ -2103,7 +2090,7 @@ Increases the reference count of <code>encseq</code>.
 
 <code>GtEncseqReader*    gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
                                                         GtReadmode readmode,
-                                                        unsigned long startpos)</code>
+                                                        GtUword startpos)</code>
 <p>
 Returns a new <code>GtEncseqReader</code> for <code>encseq</code>, starting from position
    <code>startpos</code>. Also supports reading the sequence from the reverse and
@@ -2116,8 +2103,8 @@ Returns a new <code>GtEncseqReader</code> for <code>encseq</code>, starting from
 
 <code>void               gt_encseq_extract_encoded(const GtEncseq *encseq,
                                               GtUchar *buffer,
-                                              unsigned long frompos,
-                                              unsigned long topos)</code>
+                                              GtUword frompos,
+                                              GtUword topos)</code>
 <p>
 Returns the encoded representation of the substring from position <code>frompos</code>
    to position <code>topos</code> of <code>encseq</code>. The result is written to the location
@@ -2128,8 +2115,8 @@ Returns the encoded representation of the substring from position <code>frompos<
 
 <code>void               gt_encseq_extract_decoded(const GtEncseq *encseq,
                                             char *buffer,
-                                            unsigned long frompos,
-                                            unsigned long topos)</code>
+                                            GtUword frompos,
+                                            GtUword topos)</code>
 <p>
 Returns the decoded version of the substring from position <code>frompos</code>
    to position <code>topos</code> of <code>encseq</code>. The result is written to the location
@@ -2138,8 +2125,8 @@ Returns the decoded version of the substring from position <code>frompos</code>
 <hr>
 <a name="gt_encseq_seqlength"></a>
 
-<code>unsigned long      gt_encseq_seqlength(const GtEncseq *encseq,
-                                      unsigned long seqnum)</code>
+<code>GtUword      gt_encseq_seqlength(const GtEncseq *encseq,
+                                      GtUword seqnum)</code>
 <p>
 Returns the length of the <code>seqnum</code>-th sequence in the <code>encseq</code>.
    Requires multiple sequence support enabled in <code>encseq</code>.
@@ -2147,14 +2134,14 @@ Returns the length of the <code>seqnum</code>-th sequence in the <code>encseq</c
 <hr>
 <a name="gt_encseq_min_seq_length"></a>
 
-<code>unsigned long      gt_encseq_min_seq_length(const GtEncseq *encseq)</code>
+<code>GtUword      gt_encseq_min_seq_length(const GtEncseq *encseq)</code>
 <p>
 Returns the length of the shortest sequence in the <code>encseq</code>.
 </p>
 <hr>
 <a name="gt_encseq_max_seq_length"></a>
 
-<code>unsigned long      gt_encseq_max_seq_length(const GtEncseq *encseq)</code>
+<code>GtUword      gt_encseq_max_seq_length(const GtEncseq *encseq)</code>
 <p>
 Returns the length of the longest sequence in the <code>encseq</code>.
 </p>
@@ -2182,8 +2169,8 @@ Returns <code>true</code> if <code>encseq</code> has MD5 support.
 <hr>
 <a name="gt_encseq_seqstartpos"></a>
 
-<code>unsigned long      gt_encseq_seqstartpos(const GtEncseq *encseq,
-                                        unsigned long seqnum)</code>
+<code>GtUword      gt_encseq_seqstartpos(const GtEncseq *encseq,
+                                        GtUword seqnum)</code>
 <p>
 Returns the start position of the <code>seqnum</code>-th sequence in the <code>encseq</code>.
    Requires multiple sequence support enabled in <code>encseq</code>.
@@ -2191,8 +2178,8 @@ Returns the start position of the <code>seqnum</code>-th sequence in the <code>e
 <hr>
 <a name="gt_encseq_seqnum"></a>
 
-<code>unsigned long      gt_encseq_seqnum(const GtEncseq *encseq,
-                                   unsigned long position)</code>
+<code>GtUword      gt_encseq_seqnum(const GtEncseq *encseq,
+                                   GtUword position)</code>
 <p>
 Returns the sequence number from the given <code>position</code> for a given
    GtEncseq <code>encseq</code>.
@@ -2201,8 +2188,8 @@ Returns the sequence number from the given <code>position</code> for a given
 <a name="gt_encseq_description"></a>
 
 <code>const char*        gt_encseq_description(const GtEncseq *encseq,
-                                        unsigned long *desclen,
-                                        unsigned long seqnum)</code>
+                                        GtUword *desclen,
+                                        GtUword seqnum)</code>
 <p>
 Returns a pointer to the description of the <code>seqnum</code>-th sequence in the
    <code>encseq</code>. The length of the returned string is written to the
@@ -2221,15 +2208,15 @@ Returns a <code>GtStrArray</code> of the names of the original sequence files
 <hr>
 <a name="gt_encseq_num_of_files"></a>
 
-<code>unsigned long      gt_encseq_num_of_files(const GtEncseq *encseq)</code>
+<code>GtUword      gt_encseq_num_of_files(const GtEncseq *encseq)</code>
 <p>
 Returns the number of files contained in <code>encseq</code>.
 </p>
 <hr>
 <a name="gt_encseq_effective_filelength"></a>
 
-<code>uint64_t           gt_encseq_effective_filelength(const GtEncseq *encseq,
-                                                 unsigned long filenum)</code>
+<code>GtUint64           gt_encseq_effective_filelength(const GtEncseq *encseq,
+                                                 GtUword filenum)</code>
 <p>
 Returns the effective length (sum of sequence lengths and separators
    between them) of the <code>filenum</code>-th file contained in <code>encseq</code>.
@@ -2237,8 +2224,8 @@ Returns the effective length (sum of sequence lengths and separators
 <hr>
 <a name="gt_encseq_filestartpos"></a>
 
-<code>unsigned long      gt_encseq_filestartpos(const GtEncseq *encseq,
-                                         unsigned long filenum)</code>
+<code>GtUword      gt_encseq_filestartpos(const GtEncseq *encseq,
+                                         GtUword filenum)</code>
 <p>
 Returns the start position of the sequences of the  <code>filenum</code>-th file in the
    <code>encseq</code>. Requires multiple file support enabled in <code>encseq</code>.
@@ -2246,8 +2233,8 @@ Returns the start position of the sequences of the  <code>filenum</code>-th file
 <hr>
 <a name="gt_encseq_filenum"></a>
 
-<code>unsigned long      gt_encseq_filenum(const GtEncseq *encseq,
-                                    unsigned long position)</code>
+<code>GtUword      gt_encseq_filenum(const GtEncseq *encseq,
+                                    GtUword position)</code>
 <p>
 Returns the file number from the given <code>position</code> for a given
    GtEncseq <code>encseq</code>.
@@ -2255,8 +2242,8 @@ Returns the file number from the given <code>position</code> for a given
 <hr>
 <a name="gt_encseq_filenum_first_seqnum"></a>
 
-<code>unsigned long      gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
-                                                 unsigned long filenum)</code>
+<code>GtUword      gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
+                                                 GtUword filenum)</code>
 <p>
 Returns the first sequence number of the sequences in file <code>filenum</code> for a
    given GtEncseq <code>encseq</code>.
@@ -2296,7 +2283,7 @@ Returns <code>true</code> if <code>encseq</code> contains virtual reverse comple
 <hr>
 <a name="gt_encseq_version"></a>
 
-<code>unsigned long      gt_encseq_version(const GtEncseq *encseq)</code>
+<code>GtUword      gt_encseq_version(const GtEncseq *encseq)</code>
 <p>
 Returns the version number of the file representation of <code>encseq</code> if it
    exists, or 0 if it was not mapped from a file.
@@ -2435,7 +2422,7 @@ Disables creation of the .sds table.
 
 <code>void               gt_encseq_builder_add_cstr(GtEncseqBuilder *eb,
                                              const char *str,
-                                             unsigned long strlen,
+                                             GtUword strlen,
                                              const char *desc)</code>
 <p>
 Adds a sequence given as a C string <code>str</code> of length <code>strlen</code> to the
@@ -2463,7 +2450,7 @@ Adds a sequence given as a GtStr <code>str</code> to the encoded sequence to be 
 
 <code>void               gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
                                                const GtUchar *str,
-                                               unsigned long strlen,
+                                               GtUword strlen,
                                                const char *desc)</code>
 <p>
 Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>strlen</code> to
@@ -2478,7 +2465,7 @@ Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>
 
 <code>void               gt_encseq_builder_add_encoded_own(GtEncseqBuilder *eb,
                                                    const GtUchar *str,
-                                                   unsigned long strlen,
+                                                   GtUword strlen,
                                                    const char *desc)</code>
 <p>
 Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>strlen</code> to
@@ -3086,7 +3073,7 @@ Deletes <code>el</code>.
 <code>void               gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                                       const GtEncseq *encseq,
                                                       GtReadmode readmode,
-                                                      unsigned long startpos)</code>
+                                                      GtUword startpos)</code>
 <p>
 Reinitializes the given <code>esr</code> with the values as described in
    <code>gt_encseq_create_reader_with_readmode()</code>.
@@ -3214,7 +3201,7 @@ Delete the error object <code>err</code>.
                                             GtRegionMapping *region_Mapping,
                                             const char *type, bool join,
                                             bool translate, bool seqid,
-                                            bool target, unsigned long width,
+                                            bool target, GtUword width,
                                             GtFile *outfp)</code>
 <p>
 Create a <code>GtExtractFeatureStream*</code> which extracts the corresponding sequences
@@ -3429,7 +3416,7 @@ Returns <code>ptr</code> if it is a valid node indexed in <code>GtFeatureIndexMe
 <a name="gt_feature_node_new"></a>
 
 <code>GtGenomeNode*   gt_feature_node_new(GtStr *seqid, const char *type,
-                                   unsigned long start, unsigned long end,
+                                   GtUword start, GtUword end,
                                    GtStrand strand)</code>
 <p>
 Return an new <code>GtFeatureNode</code> object on sequence with ID <code>seqid</code> and type
@@ -3442,8 +3429,8 @@ Return an new <code>GtFeatureNode</code> object on sequence with ID <code>seqid<
 <hr>
 <a name="gt_feature_node_new_pseudo"></a>
 
-<code>GtGenomeNode*   gt_feature_node_new_pseudo(GtStr *seqid, unsigned long start,
-                                          unsigned long end, GtStrand strand)</code>
+<code>GtGenomeNode*   gt_feature_node_new_pseudo(GtStr *seqid, GtUword start,
+                                          GtUword end, GtStrand strand)</code>
 <p>
 Return a new pseudo-<code>GtFeatureNode</code> object on sequence with ID <code>seqid</code> which
    lies from <code>start</code> to <code>end</code> on strand <code>strand</code>. Pseudo-features do not have a
@@ -3529,7 +3516,7 @@ Return <code>true</code> if <code>feature_node</code> has given <code>type</code
 <hr>
 <a name="gt_feature_node_number_of_children"></a>
 
-<code>unsigned long   gt_feature_node_number_of_children(const GtFeatureNode
+<code>GtUword   gt_feature_node_number_of_children(const GtFeatureNode
                                                   *feature_node)</code>
 <p>
 Return the number of children for given <code>feature_node</code>.
@@ -3537,7 +3524,7 @@ Return the number of children for given <code>feature_node</code>.
 <hr>
 <a name="gt_feature_node_number_of_children_of_type"></a>
 
-<code>unsigned long   gt_feature_node_number_of_children_of_type(const GtFeatureNode
+<code>GtUword   gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                           *parent,
                                                           const GtFeatureNode
                                                           *node)</code>
@@ -4007,7 +3994,7 @@ Create a <code>GtGFF3OutStream*</code> which uses <code>in_stream</code> as inpu
 
 <code>void           gt_gff3_out_stream_set_fasta_width(GtGFF3OutStream
                                                  *gff3_out_stream,
-                                                 unsigned long fasta_width)</code>
+                                                 GtUword fasta_width)</code>
 <p>
 Set the width with which the FASTA sequences of <code>GtSequenceNode</code>s passed
    through <code>gff3_out_stream</code> are shown to <code>fasta_width</code>.
@@ -4074,7 +4061,8 @@ Disable sequence region boundary checking in <code>gff3_parser</code>. That is,
 <hr>
 <a name="gt_gff3_parser_set_offset"></a>
 
-<code>void           gt_gff3_parser_set_offset(GtGFF3Parser *gff3_parser, long offset)</code>
+<code>void           gt_gff3_parser_set_offset(GtGFF3Parser *gff3_parser,
+                                        GtWord offset)</code>
 <p>
 Transform all features parsed by <code>gff3_parser</code> by the given <code>offset</code>.
 </p>
@@ -4102,7 +4090,7 @@ Enable the tidy mode in <code>gff3_parser</code>. In tidy mode the <code>gff3_pa
                                                 GtQueue *genome_nodes,
                                                 GtCstrTable *used_types,
                                                 GtStr *filenamestr,
-                                                unsigned long long *line_number,
+                                                GtUint64 *line_number,
                                                 GtFile *fpin,
                                                 GtError *err)</code>
 <p>
@@ -4153,7 +4141,7 @@ Create a new <code>GtNodeVisitor*</code> which writes the output it produces to 
 <a name="gt_gff3_visitor_set_fasta_width"></a>
 
 <code>void            gt_gff3_visitor_set_fasta_width(GtGFF3Visitor *gff3_visitor,
-                                               unsigned long fasta_width)</code>
+                                               GtUword fasta_width)</code>
 <p>
 Set the width with which the FASTA sequences of <code>GtSequenceNode</code>s visited
    by <code>gff3_visitor</code> are shown to <code>fasta_width</code>.
@@ -4236,7 +4224,7 @@ Return the genomic range of of <code>genome_node</code>.
 <hr>
 <a name="gt_genome_node_get_start"></a>
 
-<code>unsigned long  gt_genome_node_get_start(GtGenomeNode *genome_node)</code>
+<code>GtUword  gt_genome_node_get_start(GtGenomeNode *genome_node)</code>
 <p>
 Return the start of <code>genome_node</code>.
    Corresponds to column 4 of GFF3 feature lines.
@@ -4244,7 +4232,7 @@ Return the start of <code>genome_node</code>.
 <hr>
 <a name="gt_genome_node_get_end"></a>
 
-<code>unsigned long  gt_genome_node_get_end(GtGenomeNode *genome_node)</code>
+<code>GtUword  gt_genome_node_get_end(GtGenomeNode *genome_node)</code>
 <p>
 Return the end of <code>genome_node</code>.
    Corresponds to column 5 of GFF3 feature lines.
@@ -4252,7 +4240,7 @@ Return the end of <code>genome_node</code>.
 <hr>
 <a name="gt_genome_node_get_length"></a>
 
-<code>unsigned long  gt_genome_node_get_length(GtGenomeNode *genome_node)</code>
+<code>GtUword  gt_genome_node_get_length(GtGenomeNode *genome_node)</code>
 <p>
 Return the length of <code>genome_node</code>.
    Computed from column 4 and 5 of GFF3 feature lines.
@@ -4591,8 +4579,8 @@ Draws an arrowhead at (<code>x</code>,<code>y</code>) where these are the top le
 
 <code>void    gt_graphics_draw_curve_data(GtGraphics *g, double x, double y,
                                    GtColor color,
-                                   double data[], unsigned long ndata,
-                                   GtRange valrange, unsigned long height)</code>
+                                   double data[], GtUword ndata,
+                                   GtRange valrange, GtUword height)</code>
 <p>
 Draws a curve over the full visible image width (without margins) at
    (<code>x</code>,<code>y</code>) where these are the top left coordinates. As input, the array of
@@ -4780,7 +4768,7 @@ Returns the height of the rendered image (in pixels or points).
 <hr>
 <a name="gt_image_info_num_of_rec_maps"></a>
 
-<code>unsigned long     gt_image_info_num_of_rec_maps(GtImageInfo *image_info)</code>
+<code>GtUword     gt_image_info_num_of_rec_maps(GtImageInfo *image_info)</code>
 <p>
 Returns the total number of mappings in <code>image_info</code>.
 </p>
@@ -4788,7 +4776,7 @@ Returns the total number of mappings in <code>image_info</code>.
 <a name="gt_image_info_get_rec_map"></a>
 
 <code>const GtRecMap*   gt_image_info_get_rec_map(GtImageInfo *image_info,
-                                           unsigned long i)</code>
+                                           GtUword i)</code>
 <p>
 Returns the <code>i</code>-th <code>GtRecMap</code> mapping in <code>image_info</code>.
 </p>
@@ -4837,7 +4825,7 @@ Creates a new <code>GtIntervalTree</code>. If a <code>GtFree</code> function is 
 <hr>
 <a name="gt_interval_tree_size"></a>
 
-<code>unsigned long        gt_interval_tree_size(GtIntervalTree*)</code>
+<code>GtUword        gt_interval_tree_size(GtIntervalTree*)</code>
 <p>
 Returns the number of elements in the <code>GtIntervalTree</code>.
 </p>
@@ -4845,8 +4833,8 @@ Returns the number of elements in the <code>GtIntervalTree</code>.
 <a name="gt_interval_tree_find_first_overlapping"></a>
 
 <code>GtIntervalTreeNode*  gt_interval_tree_find_first_overlapping(GtIntervalTree*,
-                                                            unsigned long start,
-                                                            unsigned long end)</code>
+                                                            GtUword start,
+                                                            GtUword end)</code>
 <p>
 Returns the first node in the <code>GtIntervalTree</code> which overlaps the given
    range (from <code>start</code> to <code>end</code>).
@@ -4863,8 +4851,8 @@ Inserts node <code>node</code> into <code>tree</code>.
 <a name="gt_interval_tree_find_all_overlapping"></a>
 
 <code>void                 gt_interval_tree_find_all_overlapping(GtIntervalTree*,
-                                                          unsigned long start,
-                                                          unsigned long end,
+                                                          GtUword start,
+                                                          GtUword end,
                                                           GtArray*)</code>
 <p>
 Collects data pointers of all <code>GtIntervalTreeNode</code>s in the tree which
@@ -4875,8 +4863,8 @@ Collects data pointers of all <code>GtIntervalTreeNode</code>s in the tree which
 
 <code>void                 gt_interval_tree_iterate_overlapping(GtIntervalTree *it,
                                                 GtIntervalTreeIteratorFunc func,
-                                                unsigned long start,
-                                                unsigned long end,
+                                                GtUword start,
+                                                GtUword end,
                                                 void *data)</code>
 <p>
 Call <code>func</code> for all <code>GtIntervalTreeNode</code>s in the tree which overlap with
@@ -4922,8 +4910,8 @@ Deletes a <code>GtIntervalTree</code>. If a <code>GtFree</code> function was set
 <a name="gt_interval_tree_node_new"></a>
 
 <code>GtIntervalTreeNode*  gt_interval_tree_node_new(void *data,
-                                              unsigned long low,
-                                              unsigned long high)</code>
+                                              GtUword low,
+                                              GtUword high)</code>
 <p>
 Creates a new <code>GtIntervalTreeNode</code>. Transfers ownership of <code>data</code> to interval
    tree if inserted into a <code>GtIntervalTree</code> in which a
@@ -4986,7 +4974,7 @@ Sets the <code>GtTrackOrderingFunc</code> comparator function <code>func</code> 
 <a name="gt_layout_get_height"></a>
 
 <code>int            gt_layout_get_height(GtLayout *layout,
-                                   unsigned long *result,
+                                   GtUword *result,
                                    GtError *err)</code>
 <p>
 Calculates the height of <code>layout</code> in pixels. The height value is written to
@@ -5109,7 +5097,7 @@ Returns a new <code>GtMD5Encoder</code> object.
 <a name="gt_md5_encoder_add_block"></a>
 
 <code>void           gt_md5_encoder_add_block(GtMD5Encoder *enc, const char *message,
-                                       unsigned long len)</code>
+                                       GtUword len)</code>
 <p>
 Processes <code>message</code> of length <code>len</code> (max. block length 64 bytes) to be
    incorporated in the hash currently represented by <code>enc</code>.
@@ -5178,7 +5166,7 @@ Sets the sequence ID of the first sequence involved in the match <code>match</co
 <a name="gt_match_set_seqid1_nt"></a>
 
 <code>void              gt_match_set_seqid1_nt(GtMatch *match, const char *seqid,
-                                        unsigned long len)</code>
+                                        GtUword len)</code>
 <p>
 Sets the sequence ID of the first sequence involved in the match <code>match</code> to
    <code>seqid</code>. The string <code>seqid</code> needs not be null-terminated, its length is
@@ -5196,7 +5184,7 @@ Sets the sequence ID of the second sequence involved in the match <code>match</c
 <a name="gt_match_set_seqid2_nt"></a>
 
 <code>void              gt_match_set_seqid2_nt(GtMatch *match, const char *seqid,
-                                        unsigned long len)</code>
+                                        GtUword len)</code>
 <p>
 Sets the sequence ID of the second sequence involved in the match <code>match</code> to
    <code>seqid</code>. The string <code>seqid</code> needs not be null-terminated, its length is
@@ -5221,8 +5209,8 @@ Returns the sequence ID of the second sequence involved in the match
 <hr>
 <a name="gt_match_set_range_seq1"></a>
 
-<code>void              gt_match_set_range_seq1(GtMatch *match, unsigned long start,
-                                         unsigned long end)</code>
+<code>void              gt_match_set_range_seq1(GtMatch *match, GtUword start,
+                                         GtUword end)</code>
 <p>
 Sets the range of the first sequence involved in the match <code>match</code> to
    <code>start</code>-<code>end</code>.
@@ -5230,8 +5218,8 @@ Sets the range of the first sequence involved in the match <code>match</code> to
 <hr>
 <a name="gt_match_set_range_seq2"></a>
 
-<code>void              gt_match_set_range_seq2(GtMatch *match, unsigned long start,
-                                         unsigned long end)</code>
+<code>void              gt_match_set_range_seq2(GtMatch *match, GtUword start,
+                                         GtUword end)</code>
 <p>
 Sets the range of the second sequence involved in the match <code>match</code> to
    <code>start</code>-<code>end</code>.
@@ -5273,13 +5261,13 @@ Deletes the match <code>match</code>, freeing all associated memory.
 
 <code>GtMatch*  gt_match_blast_new(char *seqid1,
                             char *seqid2,
-                            unsigned long start_seq1,
-                            unsigned long start_seq2,
-                            unsigned long end_seq1,
-                            unsigned long end_seq2,
+                            GtUword start_seq1,
+                            GtUword start_seq2,
+                            GtUword end_seq1,
+                            GtUword end_seq2,
                             double evalue,
                             float bitscore,
-                            unsigned long ali_l,
+                            GtUword ali_l,
                             double similarity,
                             GtMatchDirection dir)</code>
 <p>
@@ -5292,7 +5280,7 @@ Creates a new <code>GtMatch</code> object meant to store results in the BLAST
 <hr>
 <a name="gt_match_blast_set_evalue"></a>
 
-<code>void  gt_match_blast_set_evalue(GtMatchBlast *mb, long double evalue)</code>
+<code>void  gt_match_blast_set_evalue(GtMatchBlast *mb, double evalue)</code>
 <p>
 Sets <code>evalue</code> to be the E-value in <code>mb</code>.
 </p>
@@ -5306,7 +5294,7 @@ Sets <code>bits</code> to be the bit-score in <code>mb</code>.
 <hr>
 <a name="gt_match_blast_set_align_length"></a>
 
-<code>void  gt_match_blast_set_align_length(GtMatchBlast *mb, unsigned long length)</code>
+<code>void  gt_match_blast_set_align_length(GtMatchBlast *mb, GtUword length)</code>
 <p>
 Sets <code>length</code> to be the alignment length in <code>mb</code>.
 </p>
@@ -5320,7 +5308,7 @@ Sets <code>similarity</code> to be the match similarity in <code>mb</code>.
 <hr>
 <a name="gt_match_blast_get_evalue"></a>
 
-<code>long double  gt_match_blast_get_evalue(GtMatchBlast *mb)</code>
+<code>double  gt_match_blast_get_evalue(GtMatchBlast *mb)</code>
 <p>
 Returns the E-value stored in <code>mb</code>.
 </p>
@@ -5334,7 +5322,7 @@ Returns the bit-score value stored in <code>mb</code>.
 <hr>
 <a name="gt_match_blast_get_align_length"></a>
 
-<code>unsigned long  gt_match_blast_get_align_length(GtMatchBlast *mb)</code>
+<code>GtUword  gt_match_blast_get_align_length(GtMatchBlast *mb)</code>
 <p>
 Returns the alignment length stored in <code>mb</code>.
 </p>
@@ -5379,13 +5367,13 @@ Deletes <code>mp</code>, freeing all associated space.
 
 <code>GtMatch*       gt_match_last_new(const char *seqid1,
                                 const char *seqid2,
-                                unsigned long score,
-                                unsigned long seqno1,
-                                unsigned long seqno2,
-                                unsigned long start_seq1,
-                                unsigned long start_seq2,
-                                unsigned long end_seq1,
-                                unsigned long end_seq2,
+                                GtUword score,
+                                GtUword seqno1,
+                                GtUword seqno2,
+                                GtUword start_seq1,
+                                GtUword start_seq2,
+                                GtUword end_seq1,
+                                GtUword end_seq2,
                                 GtMatchDirection dir)</code>
 <p>
 Creates a new <code>GtMatch</code> object meant to store results from the
@@ -5394,21 +5382,21 @@ Creates a new <code>GtMatch</code> object meant to store results from the
 <hr>
 <a name="gt_match_last_get_seqno1"></a>
 
-<code>unsigned long  gt_match_last_get_seqno1(const GtMatchLAST *ml)</code>
+<code>GtUword  gt_match_last_get_seqno1(const GtMatchLAST *ml)</code>
 <p>
 Returns the sequence number of the match <code>ms</code> in the first sequence set.
 </p>
 <hr>
 <a name="gt_match_last_get_seqno2"></a>
 
-<code>unsigned long  gt_match_last_get_seqno2(const GtMatchLAST *ml)</code>
+<code>GtUword  gt_match_last_get_seqno2(const GtMatchLAST *ml)</code>
 <p>
 Returns the sequence number of the match <code>ms</code> in the second sequence set.
 </p>
 <hr>
 <a name="gt_match_last_get_score"></a>
 
-<code>unsigned long  gt_match_last_get_score(const GtMatchLAST *ml)</code>
+<code>GtUword  gt_match_last_get_score(const GtMatchLAST *ml)</code>
 <p>
 Returns the LAST score of the match <code>ms</code>.
 </p>
@@ -5424,11 +5412,11 @@ Returns the LAST score of the match <code>ms</code>.
 
 <code>GtMatch*  gt_match_open_new(char *seqid1,
                            char *seqid2,
-                           unsigned long start_seq1,
-                           unsigned long start_seq2,
-                           unsigned long end_seq1,
-                           unsigned long end_seq2,
-                           long weight,
+                           GtUword start_seq1,
+                           GtUword start_seq2,
+                           GtUword end_seq1,
+                           GtUword end_seq2,
+                           GtWord weight,
                            GtMatchDirection dir)</code>
 <p>
 Creates a new <code>GtMatchOpen</code> object, storing long values <code>weight</code> in addition
@@ -5438,14 +5426,14 @@ Creates a new <code>GtMatchOpen</code> object, storing long values <code>weight<
 <hr>
 <a name="gt_match_open_set_weight"></a>
 
-<code>void  gt_match_open_set_weight(GtMatchOpen *mo, long weight)</code>
+<code>void  gt_match_open_set_weight(GtMatchOpen *mo, GtWord weight)</code>
 <p>
 Sets <code>weight</code> to be the weight value in <code>mo</code>.
 </p>
 <hr>
 <a name="gt_match_open_get_weight"></a>
 
-<code>long  gt_match_open_get_weight(GtMatchOpen *mo)</code>
+<code>GtWord  gt_match_open_get_weight(GtMatchOpen *mo)</code>
 <p>
 Returns the weight value stored in <code>mo</code>.
 </p>
@@ -5461,14 +5449,14 @@ Returns the weight value stored in <code>mo</code>.
 
 <code>GtMatch*       gt_match_sw_new(const char *seqid1,
                               const char *seqid2,
-                              unsigned long seqno1,
-                              unsigned long seqno2,
-                              unsigned long length,
-                              unsigned long edist,
-                              unsigned long start_seq1,
-                              unsigned long start_seq2,
-                              unsigned long end_seq1,
-                              unsigned long end_seq2,
+                              GtUword seqno1,
+                              GtUword seqno2,
+                              GtUword length,
+                              GtUword edist,
+                              GtUword start_seq1,
+                              GtUword start_seq2,
+                              GtUword end_seq1,
+                              GtUword end_seq2,
                               GtMatchDirection dir)</code>
 <p>
 Creates a new <code>GtMatch</code> object, storing the alignment length <code>length</code>,
@@ -5479,28 +5467,28 @@ Creates a new <code>GtMatch</code> object, storing the alignment length <code>le
 <hr>
 <a name="gt_match_sw_get_seqno1"></a>
 
-<code>unsigned long  gt_match_sw_get_seqno1(const GtMatchSW *ms)</code>
+<code>GtUword  gt_match_sw_get_seqno1(const GtMatchSW *ms)</code>
 <p>
 Returns the sequence number of the match <code>ms</code> in the first sequence set.
 </p>
 <hr>
 <a name="gt_match_sw_get_seqno2"></a>
 
-<code>unsigned long  gt_match_sw_get_seqno2(const GtMatchSW *ms)</code>
+<code>GtUword  gt_match_sw_get_seqno2(const GtMatchSW *ms)</code>
 <p>
 Returns the sequence number of the match <code>ms</code> in the second sequence set.
 </p>
 <hr>
 <a name="gt_match_sw_get_alignment_length"></a>
 
-<code>unsigned long  gt_match_sw_get_alignment_length(const GtMatchSW *ms)</code>
+<code>GtUword  gt_match_sw_get_alignment_length(const GtMatchSW *ms)</code>
 <p>
 Returns the alignment length of the match <code>ms</code>.
 </p>
 <hr>
 <a name="gt_match_sw_get_edist"></a>
 
-<code>unsigned long  gt_match_sw_get_edist(const GtMatchSW *ms)</code>
+<code>GtUword  gt_match_sw_get_edist(const GtMatchSW *ms)</code>
 <p>
 Returns the edit distance of the match <code>ms</code>.
 </p>
@@ -6035,53 +6023,95 @@ Return a new <code>GtOption</code> with the given <code>option_string</code>, <c
   the <code>maximum_value</code>.
 </p>
 <hr>
-<a name="gt_option_new_long"></a>
+<a name="gt_option_new_word"></a>
 
-<code>GtOption*        gt_option_new_long(const char *option_string,
+<code>GtOption*        gt_option_new_word(const char *option_string,
                                    const char *description,
-                                   long *value, long default_value)</code>
+                                   GtWord *value, GtWord default_value)</code>
 <p>
 Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
    <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
 </p>
 <hr>
-<a name="gt_option_new_ulong"></a>
+<a name="gt_option_new_uword"></a>
 
-<code>GtOption*        gt_option_new_ulong(const char *option_string,
+<code>GtOption*        gt_option_new_uword(const char *option_string,
                                     const char *description,
-                                    unsigned long *value,
-                                    unsigned long default_value)</code>
+                                    GtUword *value,
+                                    GtUword default_value)</code>
 <p>
 Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
    <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
 </p>
 <hr>
-<a name="gt_option_new_ulong_min"></a>
+<a name="gt_option_new_uword_min"></a>
 
-<code>GtOption*        gt_option_new_ulong_min(const char *option_string,
+<code>GtOption*        gt_option_new_uword_min(const char *option_string,
                                         const char *description,
-                                        unsigned long *value,
-                                        unsigned long default_value,
-                                        unsigned long minimum_value)</code>
+                                        GtUword *value,
+                                        GtUword default_value,
+                                        GtUword minimum_value)</code>
 <p>
 Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
    <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
   The argument to this option must at least have the <code>minimum_value</code>.
 </p>
 <hr>
-<a name="gt_option_new_ulong_min_max"></a>
+<a name="gt_option_new_uword_min_max"></a>
 
-<code>GtOption*        gt_option_new_ulong_min_max(const char *option_string,
+<code>GtOption*        gt_option_new_uword_min_max(const char *option_string,
                                             const char *description,
-                                            unsigned long *value,
-                                            unsigned long default_value,
-                                            unsigned long minimum_value,
-                                            unsigned long maximum_value)</code>
+                                            GtUword *value,
+                                            GtUword default_value,
+                                            GtUword minimum_value,
+                                            GtUword maximum_value)</code>
 <p>
 Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
    <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
   The argument to this option must at least have the <code>minimum_value</code> and at most
   the <code>maximum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_long"></a>
+
+<code>GtOption*        gt_option_new_long(const char *option_string,
+                                   const char *description,
+                                   GtWord *value, GtWord default_value)</code>
+<p>
+Deprecated. Usage identical to <code>gt_option_new_word</code>.
+</p>
+<hr>
+<a name="gt_option_new_ulong"></a>
+
+<code>GtOption*        gt_option_new_ulong(const char *option_string,
+                                    const char *description,
+                                    GtUword *value,
+                                    GtUword default_value)</code>
+<p>
+Deprecated. Usage identical to <code>gt_option_new_uword</code>.
+</p>
+<hr>
+<a name="gt_option_new_ulong_min"></a>
+
+<code>GtOption*        gt_option_new_ulong_min(const char *option_string,
+                                        const char *description,
+                                        GtUword *value,
+                                        GtUword default_value,
+                                        GtUword minimum_value)</code>
+<p>
+Deprecated. Usage identical to <code>gt_option_new_uword_min</code>.
+</p>
+<hr>
+<a name="gt_option_new_ulong_min_max"></a>
+
+<code>GtOption*        gt_option_new_ulong_min_max(const char *option_string,
+                                            const char *description,
+                                            GtUword *value,
+                                            GtUword default_value,
+                                            GtUword minimum_value,
+                                            GtUword maximum_value)</code>
+<p>
+Deprecated. Usage identical to <code>gt_option_new_uword_min_max</code>.
 </p>
 <hr>
 <a name="gt_option_new_range"></a>
@@ -6102,8 +6132,8 @@ Return a new <code>GtOption</code> with the given <code>option_string</code>, <c
                                             const char *description,
                                             GtRange *value,
                                             GtRange *default_value,
-                                            unsigned long minimum_value,
-                                            unsigned long maximum_value)</code>
+                                            GtUword minimum_value,
+                                            GtUword maximum_value)</code>
 <p>
 Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
    <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
@@ -6182,7 +6212,7 @@ Return a new verbose <code>GtOption</code> object: <code>-v</code>, "be verbose"
 <hr>
 <a name="gt_option_new_width"></a>
 
-<code>GtOption*        gt_option_new_width(unsigned long *value)</code>
+<code>GtOption*        gt_option_new_width(GtUword *value)</code>
 <p>
 Return a new width <code>GtOption</code> object: <code>-width</code>, "set output width for FASTA
    sequence printing (0 disables formatting)", default is 0.
@@ -6316,7 +6346,7 @@ Delete <code>option</code>.
 <hr>
 <a name="gt_option_parse_spacespec"></a>
 
-<code>int  gt_option_parse_spacespec(unsigned long *maximumspace,
+<code>int  gt_option_parse_spacespec(GtUword *maximumspace,
                               const char *optname,
                               const GtStr *memlimit,
                               GtError *err)</code>
@@ -6581,7 +6611,7 @@ Remove <code>elem</code> from <code>queue</code> (<code>elem</code> has to be in
 <hr>
 <a name="gt_queue_size"></a>
 
-<code>unsigned long  gt_queue_size(const GtQueue *queue)</code>
+<code>GtUword  gt_queue_size(const GtQueue *queue)</code>
 <p>
 Return the number of elements in <code>queue</code>.
 </p>
@@ -6721,7 +6751,7 @@ Compare <code>range_a</code> and <code>range_b</code>. Returns 0 if <code>range_
 
 <code>int            gt_range_compare_with_delta(const GtRange *range_a,
                                           const GtRange *range_b,
-                                          unsigned long delta)</code>
+                                          GtUword delta)</code>
 <p>
 Compare <code>range_a</code> and <code>range_b</code> with given <code>delta</code>.
    Returns 0 if <code>range_a</code> equals <code>range_b</code> modulo <code>delta</code> (i.e., the start and
@@ -6741,7 +6771,7 @@ Returns <code>true</code> if <code>range_a</code> and <code>range_b</code> overl
 
 <code>bool           gt_range_overlap_delta(const GtRange *range_a,
                                      const GtRange *range_b,
-                                     unsigned long delta)</code>
+                                     GtUword delta)</code>
 <p>
 Returns <code>true</code> if <code>range_a</code> and <code>range_b</code> overlap <strong>at least</strong> <code>delta</code> many
    positions, <code>false</code> otherwise.
@@ -6756,7 +6786,7 @@ Returns <code>true</code> if <code>range_b</code> is contained in <code>range_a<
 <hr>
 <a name="gt_range_within"></a>
 
-<code>bool           gt_range_within(const GtRange *range, unsigned long point)</code>
+<code>bool           gt_range_within(const GtRange *range, GtUword point)</code>
 <p>
 Returns <code>true</code> if <code>point</code> lies within <code>range</code>, <code>false</code> otherwise.
 </p>
@@ -6770,14 +6800,14 @@ Join <code>range_a</code> and <code>range_b</code> and return the result.
 <hr>
 <a name="gt_range_offset"></a>
 
-<code>GtRange        gt_range_offset(const GtRange *range, long offset)</code>
+<code>GtRange        gt_range_offset(const GtRange *range, GtWord offset)</code>
 <p>
 Transform start and end of <code>range</code> by <code>offset</code> and return the result.
 </p>
 <hr>
 <a name="gt_range_length"></a>
 
-<code>unsigned long  gt_range_length(const GtRange *range)</code>
+<code>GtUword  gt_range_length(const GtRange *range)</code>
 <p>
 Returns the length of the given <code>range</code>.
 </p>
@@ -6904,8 +6934,8 @@ Like <code>gt_region_mapping_new_seqfiles()</code>, but using <code>encseq</code
 <a name="gt_region_mapping_new_rawseq"></a>
 
 <code>GtRegionMapping*  gt_region_mapping_new_rawseq(const char *rawseq,
-                                              unsigned long length,
-                                              unsigned long offset)</code>
+                                              GtUword length,
+                                              GtUword offset)</code>
 <p>
 Return a new <code>GtRegionMapping</code> object which maps to the given sequence
    <code>rawseq</code> with the corresponding <code>length</code> and <code>offset</code>.
@@ -6922,8 +6952,8 @@ Increase the reference count for <code>region_mapping</code> and return it.
 
 <code>int               gt_region_mapping_get_sequence(GtRegionMapping *region_mapping,
                                                 char **seq, GtStr *seqid,
-                                                unsigned long start,
-                                                unsigned long end,
+                                                GtUword start,
+                                                GtUword end,
                                                 GtError *err)</code>
 <p>
 Use <code>region_mapping</code> to extract the sequence from <code>start</code> to <code>end</code> of the
@@ -6936,7 +6966,7 @@ Use <code>region_mapping</code> to extract the sequence from <code>start</code> 
 
 <code>int               gt_region_mapping_get_sequence_length(GtRegionMapping
                                                        *region_mapping,
-                                                       unsigned long *length,
+                                                       GtUword *length,
                                                        GtStr *seqid,
                                                        GtError *err)</code>
 <p>
@@ -6964,7 +6994,7 @@ Use <code>region_mapping</code> to get the description of the MD5 sequence ID <c
                                                        *region_mapping,
                                                        GtStr *seqid,
                                                        const GtRange *range,
-                                                       unsigned long *offset,
+                                                       GtUword *offset,
                                                        GtError *err)</code>
 <p>
 Use <code>region_mapping</code> to return the MD5 fingerprint of the sequence with the
@@ -6989,8 +7019,8 @@ Delete <code>region_mapping</code>.
 <hr>
 <a name="gt_region_node_new"></a>
 
-<code>GtGenomeNode*  gt_region_node_new(GtStr *seqid, unsigned long start,
-                                               unsigned long end)</code>
+<code>GtGenomeNode*  gt_region_node_new(GtStr *seqid, GtUword start,
+                                               GtUword end)</code>
 <p>
 Create a new <code>GtRegionNode*</code> representing sequence with ID <code>seqid</code> from
    base position <code>start</code> to base position <code>end</code> (1-based).
@@ -7034,12 +7064,12 @@ Test whether the given genome node is a region node. If so, a pointer to the
                                    GtStrand strand,
                                    GtStrand targetstrand,
                                    bool has_CDS,
-                                   unsigned long max_gene_length,
-                                   unsigned long max_gene_num,
+                                   GtUword max_gene_length,
+                                   GtUword max_gene_num,
                                    double min_gene_score,
                                    double max_gene_score,
                                    double min_average_splice_site_prob,
-                                   unsigned long feature_num,
+                                   GtUword feature_num,
                                    GtStrArray *select_files,
                                    GtStr *select_logic,
                                    GtError *err)</code>
@@ -7094,8 +7124,8 @@ Sets <code>fp</code> as a handler function to be called for every <code>GtGenome
 <h2>Class GtSeqIterator</h2>
 <a name="gt_seq_iterator_set_symbolmap"></a>
 
-<code>void            gt_seq_iterator_set_symbolmap(GtSeqIterator*,
-                                            const GtUchar *symbolmap)</code>
+<code>void             gt_seq_iterator_set_symbolmap(GtSeqIterator*,
+                                              const GtUchar *symbolmap)</code>
 <p>
 Sets a symbol map for the <code>GtSeqIterator</code>.
    If a <code>symbolmap</code> is given, all read in sequences are transformed with it.
@@ -7104,7 +7134,7 @@ Sets a symbol map for the <code>GtSeqIterator</code>.
 <hr>
 <a name="gt_seq_iterator_set_sequence_output"></a>
 
-<code>void            gt_seq_iterator_set_sequence_output(GtSeqIterator*, bool)</code>
+<code>void             gt_seq_iterator_set_sequence_output(GtSeqIterator*, bool)</code>
 <p>
 If set to <code>true</code>, sequences and descriptions are processed (otherwise
    only the descriptions). By default, sequences are processed.
@@ -7112,11 +7142,11 @@ If set to <code>true</code>, sequences and descriptions are processed (otherwise
 <hr>
 <a name="gt_seq_iterator_next"></a>
 
-<code>int             gt_seq_iterator_next(GtSeqIterator *seqit,
-                                   const GtUchar **sequence,
-                                   unsigned long *len,
-                                   char **description,
-                                   GtError *err)</code>
+<code>int              gt_seq_iterator_next(GtSeqIterator *seqit,
+                                     const GtUchar **sequence,
+                                     GtUword *len,
+                                     char **description,
+                                     GtError *err)</code>
 <p>
 Get next <code>sequence</code> (of length <code>len</code>) and <code>description</code> from <code>seqit</code>.
    Note that <code>seqit</code> retains ownership of the <code>sequence</code> and <code>description</code>.
@@ -7127,24 +7157,23 @@ Get next <code>sequence</code> (of length <code>len</code>) and <code>descriptio
 <hr>
 <a name="gt_seq_iterator_getcurrentcounter"></a>
 
-<code>const unsigned
-long long*      gt_seq_iterator_getcurrentcounter(GtSeqIterator*,
-                                                unsigned long long)</code>
+<code>const GtUint64*  gt_seq_iterator_getcurrentcounter(GtSeqIterator*,
+                                                  GtUint64)</code>
 <p>
 Returns a pointer to the current total number of read characters.
 </p>
 <hr>
 <a name="gt_seq_iterator_has_qualities"></a>
 
-<code>bool            gt_seq_iterator_has_qualities(GtSeqIterator *seqit)</code>
+<code>bool             gt_seq_iterator_has_qualities(GtSeqIterator *seqit)</code>
 <p>
 Returns TRUE if <code>seqit</code> supports setting of a quality buffer.
 </p>
 <hr>
 <a name="gt_seq_iterator_set_quality_buffer"></a>
 
-<code>void            gt_seq_iterator_set_quality_buffer(GtSeqIterator *seqit,
-                                                 const GtUchar **qualities)</code>
+<code>void             gt_seq_iterator_set_quality_buffer(GtSeqIterator *seqit,
+                                                   const GtUchar **qualities)</code>
 <p>
 Turns on reporting of sequence qualities to the location
    pointed to by <code>qualities</code>. That pointer will be set to a string containing
@@ -7153,7 +7182,7 @@ Turns on reporting of sequence qualities to the location
 <hr>
 <a name="gt_seq_iterator_delete"></a>
 
-<code>void            gt_seq_iterator_delete(GtSeqIterator *seqit)</code>
+<code>void             gt_seq_iterator_delete(GtSeqIterator *seqit)</code>
 <p>
 Deletes <code>seqit</code> and frees associated memory.
 </p>
@@ -7180,7 +7209,7 @@ Create a new <code>GtSeqIteratorFastQ</code> for all sequence files in <code>fil
 <hr>
 <a name="gt_seq_iterator_fastq_get_file_index"></a>
 
-<code>unsigned long   gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit)</code>
+<code>GtUword   gt_seq_iterator_fastq_get_file_index(GtSeqIteratorFastQ *seqit)</code>
 <p>
 Returns the number of the file in the file name array which <code>seqit</code> is
    currently reading.
@@ -7244,7 +7273,7 @@ Return the sequence of <code>sequence_node</code>.
 <hr>
 <a name="gt_sequence_node_get_sequence_length"></a>
 
-<code>unsigned long             gt_sequence_node_get_sequence_length(const
+<code>GtUword             gt_sequence_node_get_sequence_length(const
                                                               GtSequenceNode
                                                               *sequence_node)</code>
 <p>
@@ -7319,7 +7348,7 @@ Create a new <code>GtSplitter</code> object.
 <a name="gt_splitter_split"></a>
 
 <code>void           gt_splitter_split(GtSplitter *splitter, char *string,
-                                unsigned long length, char delimiter)</code>
+                                GtUword length, char delimiter)</code>
 <p>
 Use <code>splitter</code> to split <code>string</code> of given <code>length</code> into tokens delimited by
    <code>delimiter</code>. Note that <code>string</code> is modified in the splitting process!
@@ -7335,7 +7364,7 @@ Return all tokens split by <code>splitter</code> in an array.
 <a name="gt_splitter_get_token"></a>
 
 <code>char*          gt_splitter_get_token(GtSplitter *splitter,
-                                    unsigned long token_num)</code>
+                                    GtUword token_num)</code>
 <p>
 Return token with number <code>token_num</code> from <code>splitter</code>.
 </p>
@@ -7349,7 +7378,7 @@ Reset the <code>splitter</code>.
 <hr>
 <a name="gt_splitter_size"></a>
 
-<code>unsigned long  gt_splitter_size(GtSplitter *splitter)</code>
+<code>GtUword  gt_splitter_size(GtSplitter *splitter)</code>
 <p>
 Return the number of tokens in <code>splitter</code>.
 </p>
@@ -7408,28 +7437,28 @@ Write the statistics gathered by <code>stat_stream</code> to <code>outfp</code>.
 <hr>
 <a name="gt_str_new"></a>
 
-<code>GtStr*         gt_str_new(void)</code>
+<code>GtStr*   gt_str_new(void)</code>
 <p>
 Return an empty <code>GtStr</code> object.
 </p>
 <hr>
 <a name="gt_str_new_cstr"></a>
 
-<code>GtStr*         gt_str_new_cstr(const char *cstr)</code>
+<code>GtStr*   gt_str_new_cstr(const char *cstr)</code>
 <p>
 Return a new <code>GtStr</code> object whose content is set to <code>cstr</code>.
 </p>
 <hr>
 <a name="gt_str_clone"></a>
 
-<code>GtStr*         gt_str_clone(const GtStr *str)</code>
+<code>GtStr*   gt_str_clone(const GtStr *str)</code>
 <p>
 Return a clone of <code>str</code>.
 </p>
 <hr>
 <a name="gt_str_ref"></a>
 
-<code>GtStr*         gt_str_ref(GtStr *str)</code>
+<code>GtStr*   gt_str_ref(GtStr *str)</code>
 <p>
 Increase the reference count for <code>str</code> and return it.
    If <code>str</code> is <code>NULL</code>, <code>NULL</code> is returned without any side effects.
@@ -7437,7 +7466,7 @@ Increase the reference count for <code>str</code> and return it.
 <hr>
 <a name="gt_str_get"></a>
 
-<code>char*          gt_str_get(const GtStr *str)</code>
+<code>char*    gt_str_get(const GtStr *str)</code>
 <p>
 Return the content of <code>str</code>.  Never returns NULL, and the content is always
    <code>\0</code>-terminated
@@ -7445,29 +7474,28 @@ Return the content of <code>str</code>.  Never returns NULL, and the content is 
 <hr>
 <a name="gt_str_set"></a>
 
-<code>void           gt_str_set(GtStr *str, const char *cstr)</code>
+<code>void     gt_str_set(GtStr *str, const char *cstr)</code>
 <p>
 Set the content of <code>str</code> to <code>cstr</code>.
 </p>
 <hr>
 <a name="gt_str_append_str"></a>
 
-<code>void           gt_str_append_str(GtStr *dest, const GtStr *src)</code>
+<code>void     gt_str_append_str(GtStr *dest, const GtStr *src)</code>
 <p>
 Append the string <code>src</code> to <code>dest</code>.
 </p>
 <hr>
 <a name="gt_str_append_cstr"></a>
 
-<code>void           gt_str_append_cstr(GtStr *str, const char *cstr)</code>
+<code>void     gt_str_append_cstr(GtStr *str, const char *cstr)</code>
 <p>
 Append the <code>\0</code>-terminated <code>cstr</code> to <code>str</code>.
 </p>
 <hr>
 <a name="gt_str_append_cstr_nt"></a>
 
-<code>void           gt_str_append_cstr_nt(GtStr *str,
-                                    const char *cstr, unsigned long length)</code>
+<code>void     gt_str_append_cstr_nt(GtStr *str, const char *cstr, GtUword length)</code>
 <p>
 Append the (not necessarily <code>\0</code>-terminated) <code>cstr</code> with given <code>length</code> to
    <code>str</code>.
@@ -7475,42 +7503,42 @@ Append the (not necessarily <code>\0</code>-terminated) <code>cstr</code> with g
 <hr>
 <a name="gt_str_append_char"></a>
 
-<code>void           gt_str_append_char(GtStr *str, char c)</code>
+<code>void     gt_str_append_char(GtStr *str, char c)</code>
 <p>
 Append character <code>c</code> to <code>str</code>.
 </p>
 <hr>
 <a name="gt_str_append_double"></a>
 
-<code>void           gt_str_append_double(GtStr *str, double d, int precision)</code>
+<code>void     gt_str_append_double(GtStr *str, double d, int precision)</code>
 <p>
 Append double <code>d</code> to <code>str</code> with given <code>precision</code>.
 </p>
 <hr>
 <a name="gt_str_append_ulong"></a>
 
-<code>void           gt_str_append_ulong(GtStr *str, unsigned long ulong)</code>
+<code>void     gt_str_append_ulong(GtStr *str, GtUword ulong)</code>
 <p>
 Append <code>ulong</code> to <code>str</code>.
 </p>
 <hr>
 <a name="gt_str_append_int"></a>
 
-<code>void           gt_str_append_int(GtStr *str, int intval)</code>
+<code>void     gt_str_append_int(GtStr *str, int intval)</code>
 <p>
 Append <code>intval</code> to <code>str</code>.
 </p>
 <hr>
 <a name="gt_str_append_uint"></a>
 
-<code>void           gt_str_append_uint(GtStr *str, unsigned int uint)</code>
+<code>void     gt_str_append_uint(GtStr *str, unsigned int uint)</code>
 <p>
 Append <code>uint</code> to <code>str</code>.
 </p>
 <hr>
 <a name="gt_str_set_length"></a>
 
-<code>void           gt_str_set_length(GtStr *str, unsigned long length)</code>
+<code>void     gt_str_set_length(GtStr *str, GtUword length)</code>
 <p>
 Set length of <code>str</code> to <code>length</code>. <code>length</code> must be smaller or equal than
    <code>gt_str_length(str)</code>.
@@ -7518,28 +7546,28 @@ Set length of <code>str</code> to <code>length</code>. <code>length</code> must 
 <hr>
 <a name="gt_str_reset"></a>
 
-<code>void           gt_str_reset(GtStr *str)</code>
+<code>void     gt_str_reset(GtStr *str)</code>
 <p>
 Reset <code>str</code> to length 0.
 </p>
 <hr>
 <a name="gt_str_cmp"></a>
 
-<code>int            gt_str_cmp(const GtStr *str1, const GtStr *str2)</code>
+<code>int      gt_str_cmp(const GtStr *str1, const GtStr *str2)</code>
 <p>
 Compare <code>str1</code> and <code>str2</code> and return the result (similar to <code>strcmp(3)</code>).
 </p>
 <hr>
 <a name="gt_str_length"></a>
 
-<code>unsigned long  gt_str_length(const GtStr *str)</code>
+<code>GtUword  gt_str_length(const GtStr *str)</code>
 <p>
 Return the length of <code>str</code>. If <code>str</code> is <code>NULL</code>, 0 is returned.
 </p>
 <hr>
 <a name="gt_str_delete"></a>
 
-<code>void           gt_str_delete(GtStr *str)</code>
+<code>void     gt_str_delete(GtStr *str)</code>
 <p>
 Decrease the reference count for <code>str</code> or delete it, if this was the last
    reference.
@@ -7575,7 +7603,7 @@ Add <code>cstr</code> to <code>str_array</code>. Thereby, an internal copy of <c
 <a name="gt_str_array_add_cstr_nt"></a>
 
 <code>void           gt_str_array_add_cstr_nt(GtStrArray *str_array, const char *cstr,
-                                       unsigned long length)</code>
+                                       GtUword length)</code>
 <p>
 Add the non <code>\0</code>-terminated <code>cstr</code> with given <code>length</code> to <code>str_array</code>.
    Thereby, an internal copy of <code>cstr</code> is created.
@@ -7591,7 +7619,7 @@ Add <code>str</code> to <code>str_array</code>. Thereby, an internal copy of <co
 <a name="gt_str_array_get"></a>
 
 <code>const char*    gt_str_array_get(const GtStrArray *str_array,
-                               unsigned long strnum)</code>
+                               GtUword strnum)</code>
 <p>
 Return pointer to internal string with number <code>strnum</code> of <code>str_array</code>.
    <code>strnum</code> must be smaller than <code>gt_str_array_size(str_array)</code>.
@@ -7599,7 +7627,7 @@ Return pointer to internal string with number <code>strnum</code> of <code>str_a
 <hr>
 <a name="gt_str_array_set_cstr"></a>
 
-<code>void           gt_str_array_set_cstr(GtStrArray *str_array, unsigned long strnum,
+<code>void           gt_str_array_set_cstr(GtStrArray *str_array, GtUword strnum,
                                     const char *cstr)</code>
 <p>
 Set the string with number <code>strnum</code> in <code>str_array</code> to <code>cstr</code>.
@@ -7607,7 +7635,7 @@ Set the string with number <code>strnum</code> in <code>str_array</code> to <cod
 <hr>
 <a name="gt_str_array_set"></a>
 
-<code>void           gt_str_array_set(GtStrArray *str_array, unsigned long strnum,
+<code>void           gt_str_array_set(GtStrArray *str_array, GtUword strnum,
                                const GtStr *str)</code>
 <p>
 Set the string with number <code>strnum</code> in <code>str_array</code> to <code>str</code>.
@@ -7615,7 +7643,7 @@ Set the string with number <code>strnum</code> in <code>str_array</code> to <cod
 <hr>
 <a name="gt_str_array_set_size"></a>
 
-<code>void           gt_str_array_set_size(GtStrArray *str_array, unsigned long size)</code>
+<code>void           gt_str_array_set_size(GtStrArray *str_array, GtUword size)</code>
 <p>
 Set the size of <code>str_array</code> to <code>size</code>. <code>size</code> must be smaller or equal than
    <code>gt_str_array_size(str_array)</code>.
@@ -7630,7 +7658,7 @@ Set the size of <code>str_array</code> to 0.
 <hr>
 <a name="gt_str_array_size"></a>
 
-<code>unsigned long  gt_str_array_size(const GtStrArray *str_array)</code>
+<code>GtUword  gt_str_array_size(const GtStrArray *str_array)</code>
 <p>
 Return the number of strings stored in <code>str_array</code>.
 </p>
@@ -8039,7 +8067,7 @@ Stop the time measurement on <code>timer</code>.
 <code>void      gt_timer_show(GtTimer *timer, FILE *fp)</code>
 <p>
 Output the current state of <code>timer</code> in the format
-   "%ld.%06lds real %lds user %lds system" to file
+   ""GT_LD".%06lds real "GT_LD"s user "GT_LD"s system" to file
    pointer <code>fp</code> (see <code>gt_timer_show_formatted</code>).
    The timer is then stopped.
 </p>
@@ -8049,7 +8077,7 @@ Output the current state of <code>timer</code> in the format
 <code>void      gt_timer_show_formatted(GtTimer *timer, const char *fmt, FILE *fp)</code>
 <p>
 Output the current state of <code>timer</code> in a user-defined format given by <code>fmt</code>.
-   <code>fmt</code> must be a format string for four %ld numbers, which are filled with:
+   <code>fmt</code> must be a format string for four "GT_LD" numbers, which are filled with:
    elapsed seconds, elapsed microseconds, used usertime in seconds,
    system time in seconds. The output is written to <code>fp</code>. The timer is then
    stopped.
@@ -8393,7 +8421,7 @@ Returns the translation of the next codon. The currently translated
 <a name="gt_translator_find_startcodon"></a>
 
 <code>GtTranslatorStatus  gt_translator_find_startcodon(GtTranslator *translator,
-                                                 unsigned long *pos,
+                                                 GtUword *pos,
                                                  GtError *err)</code>
 <p>
 Moves the <code>translator</code> to the beginning of the first codon in <code>dnaseq</code> (of
@@ -8409,7 +8437,7 @@ Moves the <code>translator</code> to the beginning of the first codon in <code>d
 <a name="gt_translator_find_stopcodon"></a>
 
 <code>GtTranslatorStatus  gt_translator_find_stopcodon(GtTranslator *translator,
-                                                unsigned long *pos,
+                                                GtUword *pos,
                                                 GtError *err)</code>
 <p>
 Moves the <code>translator</code> to the beginning of the first codon in <code>dnaseq</code> (of
@@ -8426,7 +8454,7 @@ Moves the <code>translator</code> to the beginning of the first codon in <code>d
 
 <code>GtTranslatorStatus  gt_translator_find_codon(GtTranslator *translator,
                                             GtStrArray *codons,
-                                            unsigned long *pos,
+                                            GtUword *pos,
                                             GtError *err)</code>
 <p>
 Moves the <code>translator</code> to the beginning of the first codon in <code>dnaseq</code> (of
@@ -8630,7 +8658,7 @@ Similar interface to <code>gt_bsearch_all()</code>. Additionally, if a bittab is
 <a name="BytePopcount"></a>
 <h2>Module BytePopcount</h2>
 <a name="gt_byte_popcount[256]"></a>
-<code>extern const uint8_t  gt_byte_popcount[256]</code>
+<code>extern const unsigned char  gt_byte_popcount[256]</code>
 <p>
 Lookup table containing the popcount (number of set bits). Entry at <code>i</code>
    equals popcount(<code>i</code>).
@@ -8639,7 +8667,7 @@ Lookup table containing the popcount (number of set bits). Entry at <code>i</cod
 <a name="ByteSelect"></a>
 <h2>Module ByteSelect</h2>
 <a name="gt_byte_select[2048]"></a>
-<code>extern const uint8_t  gt_byte_select[2048]</code>
+<code>extern const unsigned char  gt_byte_select[2048]</code>
 <p>
 Contains 256 * 8 select values, Entry at index 256 * <code>j</code> + <code>i</code> equals the
    position of the (<code>j</code> + 1)-th set bit in byte <code>i</code>. Positions lie in the range
@@ -8651,7 +8679,7 @@ Contains 256 * 8 select values, Entry at index 256 * <code>j</code> + <code>i</c
 <a name="gt_countingsort"></a>
 
 <code>void           gt_countingsort(void *out, const void *in, size_t elem_size,
-                              unsigned long size, unsigned long max_elemvalue,
+                              GtUword size, GtUword max_elemvalue,
                               void *data, GtGetElemvalue get_elemvalue)</code>
 <p>
 Sort the array of elements pointed to by <code>in</code> containing <code>size</code> many elements
@@ -8668,8 +8696,8 @@ Sort the array of elements pointed to by <code>in</code> containing <code>size</
 <hr>
 <a name="gt_countingsort_get_max"></a>
 
-<code>unsigned long  gt_countingsort_get_max(const void *in, size_t elem_size,
-                                      unsigned long size, void *data,
+<code>GtUword  gt_countingsort_get_max(const void *in, size_t elem_size,
+                                      GtUword size, void *data,
                                       GtGetElemvalue get_elemvalue)</code>
 <p>
 If <code>max_elemvalue</code> is not known, it can be determined with this function.
@@ -8679,7 +8707,7 @@ If <code>max_elemvalue</code> is not known, it can be determined with this funct
 <h2>Module Cstr</h2>
 <a name="gt_cstr_dup"></a>
 
-<code>char*          gt_cstr_dup(const char *cstr)</code>
+<code>char*    gt_cstr_dup(const char *cstr)</code>
 <p>
 Creates a duplicate of string <code>cstr</code> using the <em>GenomeTools</em> memory
    allocator.
@@ -8687,7 +8715,7 @@ Creates a duplicate of string <code>cstr</code> using the <em>GenomeTools</em> m
 <hr>
 <a name="gt_cstr_split"></a>
 
-<code>char**         gt_cstr_split(const char *cstr, char sep)</code>
+<code>char**   gt_cstr_split(const char *cstr, char sep)</code>
 <p>
 Splits the \0-terminated <code>cstr</code> at all positions where <code>sep</code> occurs and
    returns a C string array in which each element is a separate string between
@@ -8697,7 +8725,7 @@ Splits the \0-terminated <code>cstr</code> at all positions where <code>sep</cod
 <hr>
 <a name="gt_cstr_dup_nt"></a>
 
-<code>char*          gt_cstr_dup_nt(const char *cstr, unsigned long length)</code>
+<code>char*    gt_cstr_dup_nt(const char *cstr, GtUword length)</code>
 <p>
 Creates a duplicate of string <code>cstr</code> using the <em>GenomeTools</em> memory
    allocator. The string needs not be \0-terminated, instead its <code>length</code> must
@@ -8706,14 +8734,14 @@ Creates a duplicate of string <code>cstr</code> using the <em>GenomeTools</em> m
 <hr>
 <a name="gt_cstr_rep"></a>
 
-<code>void           gt_cstr_rep(char *cstr, char f, char t)</code>
+<code>void     gt_cstr_rep(char *cstr, char f, char t)</code>
 <p>
 Replace each occurence of <code>f</code> in <code>cstr</code> to <code>t</code>.
 </p>
 <hr>
 <a name="gt_cstr_show"></a>
 
-<code>void           gt_cstr_show(const char *cstr, unsigned long length, FILE *outfp)</code>
+<code>void     gt_cstr_show(const char *cstr, GtUword length, FILE *outfp)</code>
 <p>
 Outputs the first <code>length</code> characters of the string <code>cstr</code> to file pointer
    <code>outfp</code>.
@@ -8721,7 +8749,7 @@ Outputs the first <code>length</code> characters of the string <code>cstr</code>
 <hr>
 <a name="gt_cstr_length_up_to_char"></a>
 
-<code>unsigned long  gt_cstr_length_up_to_char(const char *cstr, char c)</code>
+<code>GtUword  gt_cstr_length_up_to_char(const char *cstr, char c)</code>
 <p>
 Returns the length of the prefix of <code>cstr</code> ending just before <code>c</code>, if <code>cstr</code>
    does not contain <code>c</code>, strlen(cstr) is returned.
@@ -8729,7 +8757,7 @@ Returns the length of the prefix of <code>cstr</code> ending just before <code>c
 <hr>
 <a name="gt_cstr_rtrim"></a>
 
-<code>char*          gt_cstr_rtrim(char* cstr, char remove)</code>
+<code>char*    gt_cstr_rtrim(char* cstr, char remove)</code>
 <p>
 Removes all occurrences of <code>remove</code> from the right end of <code>cstr</code>.
 </p>
@@ -8780,7 +8808,7 @@ Returns true if the file with path <code>a</code> has a later modification time 
 <hr>
 <a name="gt_file_number_of_lines"></a>
 
-<code>unsigned long   gt_file_number_of_lines(const char*)</code>
+<code>GtUword   gt_file_number_of_lines(const char*)</code>
 <p>
 Returns the number of lines in a file.
 </p>
@@ -8978,7 +9006,7 @@ Set logging file pointer to <code>fp</code>.
 <h2>Module MD5Fingerprint</h2>
 <a name="gt_md5_fingerprint"></a>
 
-<code>char*  gt_md5_fingerprint(const char *sequence, unsigned long seqlen)</code>
+<code>char*  gt_md5_fingerprint(const char *sequence, GtUword seqlen)</code>
 <p>
 Returns an MD5 fingerprint of <code>sequence</code> with length <code>seqlen</code> transformed to
    upper case letters (with toupper(3)).
@@ -9110,7 +9138,7 @@ Parse unsigned integer from <code>nptr</code> and store result in <code>out</cod
 <hr>
 <a name="gt_parse_long"></a>
 
-<code>int  gt_parse_long(long *out, const char *nptr)</code>
+<code>int  gt_parse_long(GtWord *out, const char *nptr)</code>
 <p>
 Parse long from <code>nptr</code> and store result in <code>out</code>.
    Returns 0 upon success and -1 upon failure.
@@ -9118,9 +9146,9 @@ Parse long from <code>nptr</code> and store result in <code>out</code>.
 <hr>
 <a name="gt_parse_ulong"></a>
 
-<code>int  gt_parse_ulong(unsigned long *out, const char *nptr)</code>
+<code>int  gt_parse_ulong(GtUword *out, const char *nptr)</code>
 <p>
-Parse unsigned long from <code>nptr</code> and store result in <code>out</code>.
+Parse GtUword from <code>nptr</code> and store result in <code>out</code>.
    Returns 0 upon success and -1 upon failure.
 </p>
 <hr>
@@ -9154,6 +9182,15 @@ Like <code>gt_parse_range</code>, but issues a warning if <code>start</code> is 
    not-positive and sets the corresponding value to 1.
 </p>
 <hr>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         GtUword sequence_length, GtUword width, GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
 <a name="Qsort"></a>
 <h2>Module Qsort</h2>
 <a name="gt_qsort_r"></a>
@@ -9169,7 +9206,7 @@ Like <code>qsort(3)</code>, but allows an additional <code>data</code> pointer p
 <h2>Module Reverse</h2>
 <a name="gt_reverse_complement"></a>
 
-<code>int  gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError*)</code>
+<code>int  gt_reverse_complement(char *dna_seq, GtUword seqlen, GtError*)</code>
 <p>
 Reverse <code>dna_seq</code> of length <code>seqlen</code> in place.
 </p>
@@ -9270,7 +9307,7 @@ The undefined <code>unsigned int</code> value.
 
 <code>#define GT_UNDEF_ULONG</code>
 <p>
-The undefined <code>unsigned long</code> value.
+The undefined <code>GtUword</code> value.
 </p>
 <hr>
 <a name="Unused"></a>
@@ -9439,7 +9476,7 @@ Shortcut to <code>gt_xfread()</code> which reads a single element of data (of si
 <hr>
 <a name="gt_xfseek"></a>
 
-<code>void    gt_xfseek(FILE*, long offset, int whence)</code>
+<code>void    gt_xfseek(FILE*, GtWord offset, int whence)</code>
 <p>
 Similar to <code>fseek(3)</code>, terminates on error.
 </p>
@@ -10871,9 +10908,17 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_option_new_ulong_min_max"><code>gt_option_new_ulong_min_max</code></a><br>
 
+  <a href="#gt_option_new_uword"><code>gt_option_new_uword</code></a><br>
+
+  <a href="#gt_option_new_uword_min"><code>gt_option_new_uword_min</code></a><br>
+
+  <a href="#gt_option_new_uword_min_max"><code>gt_option_new_uword_min_max</code></a><br>
+
   <a href="#gt_option_new_verbose"><code>gt_option_new_verbose</code></a><br>
 
   <a href="#gt_option_new_width"><code>gt_option_new_width</code></a><br>
+
+  <a href="#gt_option_new_word"><code>gt_option_new_word</code></a><br>
 
   <a href="#gt_option_parse_spacespec"><code>gt_option_parse_spacespec</code></a><br>
 
@@ -11378,7 +11423,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-08-26
+Last update: 2013-09-09
 </div>
 </div>
 <!-- Piwik -->

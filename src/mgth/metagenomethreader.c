@@ -168,7 +168,7 @@ static GtOPrval mgth_parse_options(int *parsed_args,
   /* GtOption zur Angabe der minimalen Laenger der AS-Sequnezen, die in der
      Ausgabedatei aufgefuehrt werden sollen; default: 15; min: 15 */
   min_as_option =
-    gt_option_new_ulong_min("a", "minimum length of the as-sequence",
+    gt_option_new_uword_min("a", "minimum length of the as-sequence",
                          &metagenomethreader_arguments->min_as, 15, 15);
   gt_option_parser_add_option(op, min_as_option);
 

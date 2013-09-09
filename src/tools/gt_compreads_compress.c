@@ -114,7 +114,7 @@ gt_compreads_compress_option_parser_new(void *tool_arguments)
                                &arguments->arg_range, NULL);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("srate", "sampling rate, set to sensible default"
+  option = gt_option_new_uword("srate", "sampling rate, set to sensible default"
                                " depending on sampling method",
                                &arguments->srate, GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
@@ -205,7 +205,8 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
         arguments->srate = 0;
       else if (arguments->srate != 0) {
         gt_error_set(err, "no sampling was chosen, but sampling rate was"
-                          " set to "GT_LU"! this seems wrong.", arguments->srate);
+                          " set to "GT_LU"! this seems wrong.",
+                          arguments->srate);
         had_err = -1;
       }
     }

@@ -118,11 +118,11 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
                            false);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("skip", "number of symbols to skip",
+  option = gt_option_new_uword("skip", "number of symbols to skip",
                             &params->skipCount, 0);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("ticks", "print dot after this many symbols"
+  option = gt_option_new_uword("ticks", "print dot after this many symbols"
                             " tested okay", &params->progressInterval,
                             DEFAULT_PROGRESS_INTERVAL);
   gt_option_parser_add_option(op, option);

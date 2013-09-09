@@ -64,7 +64,7 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
                                            1);
   gt_option_parser_add_option(op, numfiles_option);
 
-  targetsize_option = gt_option_new_ulong_min("targetsize",
+  targetsize_option = gt_option_new_uword_min("targetsize",
                                               "set the target file "
                                               "size in MB",
                                               &arguments->max_filesize_in_MB,

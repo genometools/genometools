@@ -168,7 +168,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, addintrons_option);
 
   /* -offset */
-  offset_option = gt_option_new_long("offset", "transform all features by the "
+  offset_option = gt_option_new_word("offset", "transform all features by the "
                                      "given offset", &arguments->offset,
                                      GT_UNDEF_LONG);
   gt_option_parser_add_option(op, offset_option);

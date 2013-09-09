@@ -116,7 +116,7 @@ static GtOptionParser* gt_readjoiner_cgraph_option_parser_new(
   gt_option_parser_add_option(op, option);
 
   /* -sdepth */
-  option = gt_option_new_ulong("sdepth", "subgraph depth\n"
+  option = gt_option_new_uword("sdepth", "subgraph depth\n"
       "(use 0 for infinite depth == whole connected component)",
       &(arguments->subgraph_depth), 1UL);
   gt_option_imply(option, subgraph_option);
