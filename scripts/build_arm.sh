@@ -29,9 +29,9 @@ make MACHINE=ARMv7_el              \
 # cd && mkdir -p arm && cd arm
 # git clone --depth 1 https://github.com/raspberrypi/tools.git
 make clean
-make MACHINE=ARMv6_hf        \
-     CC=$HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-gcc      \
-     AR=$HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-ar       \
-     STRIP=$HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-strip \
-     cairo=no                \
+make MACHINE=ARMv6_hf            \
+     CC="ccache $HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-gcc" \
+     AR=$HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-ar           \
+     STRIP=$HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-strip     \
+     cairo=no                    \
      dist $*
