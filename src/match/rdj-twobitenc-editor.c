@@ -84,7 +84,8 @@ void gt_twobitenc_editor_edit(GtTwobitencEditor *twobitenc_editor,
   oldcode = twobitenc_editor->twobitencoding[codenum];
   posincode = (GT_UNITSIN2BITENC - 1 -
       ((size_t)pos % GT_UNITSIN2BITENC)) << 1;
-  oldchar = (oldcode & ((GtTwobitencoding)3 << posincode)) >> posincode;
+  oldchar = (GtUchar) (oldcode & ((GtTwobitencoding)3 << posincode))
+               >> posincode;
   newcode = (oldcode & (~((GtTwobitencoding)3 << posincode)));
   newcode |= ((GtTwobitencoding)newchar << posincode);
   twobitenc_editor->twobitencoding[codenum] = newcode;

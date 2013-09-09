@@ -99,7 +99,7 @@ static void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
 
   if (fct->countocc_small == NULL)
   {
-    if ((count = (differences[idx] >> fct->shiftforcounts)) > 0)
+    if ((count = (GtUword) (differences[idx] >> fct->shiftforcounts)) > 0)
     {
       differences[idx] &= fct->differencemask;
       if (inc + count <= fct->countmax)
@@ -267,7 +267,8 @@ GtUword gt_firstcodes_remdups(GtUword *allfirstcodes,
                    sizeof (GtUword) * CHAR_BIT - bitsformaxdifference;
     fct->countmax = (1UL << bitsforcount) - 1UL;
     fct->shiftforcounts = bitsformaxdifference;
-    gt_logger_log(logger,"maximum difference of neighbored codes "GT_LU" (%u bits)",
+    gt_logger_log(logger,
+                  "maximum difference of neighbored codes "GT_LU" (%u bits)",
                   maxdifference,bitsformaxdifference);
     /*
     printf("maxdifference="GT_LU",bitsformaxdifference=%u,bitsforcount=%u\n",
@@ -411,7 +412,7 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
   {
     GtUword count;
 
-    if ((count = (differences[idx] >> fct->shiftforcounts)) > 0)
+    if ((count = (GtUword) (differences[idx] >> fct->shiftforcounts)) > 0)
     {
       return (uint32_t) count;
     } else
@@ -459,7 +460,7 @@ GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GtLeftborderOutbuffer *leftborderbuffer_all = NULL;
 #if defined (_LP64) || defined (_WIN64)
   const unsigned int btp = gt_determinebitspervalue(expectedlastpartsum);
-  GtUword exceedvalue = (GtUword) 1 << GT_MODVALUEBITS;
+  GtUword exceedvalue = (GtUword) 1 << (GtUword) GT_MODVALUEBITS;
 #endif
 #ifdef SKDEBUG
   GtDiscDistri *countdistri = gt_disc_distri_new();
@@ -537,7 +538,8 @@ GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
       gt_assert(fct->bitchangepoints.spaceGtUlong != NULL);
       fct->bitchangepoints.spaceGtUlong
         [fct->bitchangepoints.nextfreeGtUlong++] = idx-1;
-      exceedvalue = ((exceedvalue >> GT_MODVALUEBITS) + 1) << GT_MODVALUEBITS;
+      exceedvalue = (GtUword) ((exceedvalue >> GT_MODVALUEBITS) + 1)
+                      << (GtUword) GT_MODVALUEBITS;
     }
 #endif
     if ((idx & bitmask) == 0)
@@ -651,7 +653,7 @@ GtUword gt_firstcodes_sample2full(const GtFirstcodestab *fct,
   gt_assert(idx <= fct->numofsamples);
   if (idx < fct->numofsamples)
   {
-    return idx << fct->sampleshift;
+    return (GtUword) idx << (GtUword) fct->sampleshift;
   }
   return fct->differentcodes - 1;
 }

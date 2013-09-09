@@ -20,6 +20,7 @@
 #define COMPACT_ULONG_STORE_H
 
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 /* The <GtCompactUlongStore> class stores fixed bit witdh unsigned integers.
    Maximum bitwidth is sizeof (GtUword) * CHAR_BIT. */

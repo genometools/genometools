@@ -121,16 +121,18 @@ void gt_compact_ulong_store_update(GtCompactUlongStore *cus,
     unsigned int shiftleft = cus->bitsleft - unitoffset;
 
     cus->tab[unitindex]
-      = (cus->tab[unitindex] & ~(cus->maskright << shiftleft)) |
-        (value << shiftleft);
+      = (GtUword) (cus->tab[unitindex] & ~(cus->maskright << shiftleft)) |
+        (GtUword) (value << shiftleft);
   } else {
     unsigned int shift = unitoffset - cus->bitsleft;
 
     cus->tab[unitindex]
-      = (cus->tab[unitindex] & ~(cus->maskright >> shift)) | (value >> shift);
+      = (GtUword) (cus->tab[unitindex] & ~(cus->maskright >> shift)) |
+        (GtUword)(value >> shift);
     shift = (unsigned int) GT_INTWORDSIZE - shift;
     cus->tab[unitindex+1]
-      = (cus->tab[unitindex+1] & ~(cus->maskright << shift)) | (value << shift);
+      = (GtUword) (cus->tab[unitindex+1] & ~(cus->maskright << shift)) |
+        (GtUword) (value << shift);
   }
 }
 

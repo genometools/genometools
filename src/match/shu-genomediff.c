@@ -64,7 +64,7 @@ genomediff_calculate_genome_lengths(GtShuUnitFileInfo *unit_info)
   GtUword *genome_lengths = gt_calloc((size_t) unit_info->num_of_genomes,
                                            sizeof (*genome_lengths));
   for (i_idx = 0UL; i_idx < unit_info->num_of_files; i_idx++) {
-    eff_file_length = gt_safe_cast2ulong_64(
+    eff_file_length = gt_safe_cast2ulong_64((uint64_t)
         gt_encseq_effective_filelength(unit_info->encseq, i_idx));
     filestart = gt_encseq_filestartpos(unit_info->encseq, i_idx);
     if (i_idx == unit_info->num_of_files - 1) {
@@ -145,12 +145,15 @@ static double *genomediff_calculate_gc(GtUword *genome_lengths,
       genome_idx = unit_info->map_files[file_idx];
     else
       genome_idx = file_idx;
+    #ifndef S_SPLINT_S
     gt_safe_add(genome_gc_content[genome_idx],
                 genome_gc_content[genome_idx],
                 seq_gc_content[idx]);
+    #endif
   }
   for (idx = 0; idx < unit_info->num_of_genomes; idx++) {
-    gt_log_log("file/genome "GT_LU" has gc "GT_LU"", idx, genome_gc_content[idx]);
+    gt_log_log("file/genome "GT_LU" has gc "GT_LU"",
+               idx, genome_gc_content[idx]);
   }
 
   for (idx = 0; idx < unit_info->num_of_genomes; idx++) {

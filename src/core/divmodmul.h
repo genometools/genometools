@@ -24,28 +24,28 @@
   and modulo operations by 2, 4, 8, 16, 32 and 64.
 */
 
-#define GT_DIV2(N)      ((N) >> 1)
-#define GT_DIV4(N)      ((N) >> 2)
-#define GT_DIV8(N)      ((N) >> 3)
-#define GT_DIV16(N)     ((N) >> 4)
-#define GT_DIV32(N)     ((N) >> 5)
-#define GT_DIV64(N)     ((N) >> 6)
+#define GT_DIV2(N)      ((N) >> (__typeof__(N)) 1)
+#define GT_DIV4(N)      ((N) >> (__typeof__(N)) 2)
+#define GT_DIV8(N)      ((N) >> (__typeof__(N)) 3)
+#define GT_DIV16(N)     ((N) >> (__typeof__(N)) 4)
+#define GT_DIV32(N)     ((N) >> (__typeof__(N)) 5)
+#define GT_DIV64(N)     ((N) >> (__typeof__(N)) 6)
 
-#define GT_MOD2(N)      ((N) & 1)
-#define GT_MOD4(N)      ((N) & 3)
-#define GT_MOD8(N)      ((N) & 7)
-#define GT_MOD16(N)     ((N) & 15)
-#define GT_MOD32(N)     ((N) & 31)
-#define GT_MOD64(N)     ((N) & 63)
+#define GT_MOD2(N)      ((N) & (__typeof__(N)) 1)
+#define GT_MOD4(N)      ((N) & (__typeof__(N)) 3)
+#define GT_MOD8(N)      ((N) & (__typeof__(N)) 7)
+#define GT_MOD16(N)     ((N) & (__typeof__(N)) 15)
+#define GT_MOD32(N)     ((N) & (__typeof__(N)) 31)
+#define GT_MOD64(N)     ((N) & (__typeof__(N)) 63)
 
-#define GT_MULT2(N)     ((N) << 1)
-#define GT_MULT4(N)     ((N) << 2)
-#define GT_MULT8(N)     ((N) << 3)
-#define GT_MULT16(N)    ((N) << 4)
-#define GT_MULT32(N)    ((N) << 5)
-#define GT_MULT64(N)    ((N) << 6)
+#define GT_MULT2(N)     ((N) << (__typeof__(N)) 1)
+#define GT_MULT4(N)     ((N) << (__typeof__(N)) 2)
+#define GT_MULT8(N)     ((N) << (__typeof__(N)) 3)
+#define GT_MULT16(N)    ((N) << (__typeof__(N)) 4)
+#define GT_MULT32(N)    ((N) << (__typeof__(N)) 5)
+#define GT_MULT64(N)    ((N) << (__typeof__(N)) 6)
 
-#define GT_POW2(N)      ((1) << (N))
+#define GT_POW2(N)      ((__typeof__(N)) (1) << (__typeof__(N)) (N))
 #define GT_LOG2(v)      (log(v) / M_LN2)
 
 #endif

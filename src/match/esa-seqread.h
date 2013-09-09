@@ -136,7 +136,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
                                         &(SSAR)->suffixarray->lcptabstream);\
             if (retval > 0)\
             {\
-              if (tmpsmalllcpvalue < LCPOVERFLOW)\
+              if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
               {\
                 LCPVALUE = (GtUword) tmpsmalllcpvalue;\
               } else\
@@ -166,7 +166,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
               {\
                 tmpsmalllcpvalue\
                   = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
-                if (tmpsmalllcpvalue < LCPOVERFLOW)\
+                if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
                 {\
                   LCPVALUE = (GtUword) tmpsmalllcpvalue;\
                 } else\
@@ -206,7 +206,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
                                         &(SSAR)->suffixarray->lcptabstream);\
             if (retval > 0)\
             {\
-              if (tmpsmalllcpvalue < LCPOVERFLOW)\
+              if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
               {\
                 LCPVALUE = (GtUword) tmpsmalllcpvalue;\
               } else\
@@ -237,7 +237,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
               {\
                 tmpsmalllcpvalue\
                   = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
-                if (tmpsmalllcpvalue < LCPOVERFLOW)\
+                if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
                 {\
                   LCPVALUE = (GtUword) tmpsmalllcpvalue;\
                 } else\

@@ -312,8 +312,8 @@ GtUword gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
       gt_assert(rct->bitchangepoints.spaceGtUlong != NULL);
       rct->bitchangepoints.spaceGtUlong
         [rct->bitchangepoints.nextfreeGtUlong++] = idx-1;
-      exceedvalue
-        = ((exceedvalue >> rct->modvaluebits) + 1) << rct->modvaluebits;
+      exceedvalue = ((GtUword) (exceedvalue >> rct->modvaluebits) + 1)
+                      << rct->modvaluebits;
     }
 #endif
     if ((idx & bitmask) == 0)
@@ -425,7 +425,7 @@ GtUword gt_randomcodes_sample2full(const GtRandomcodestab *rct,
   gt_assert(idx <= rct->numofsamples);
   if (idx < rct->numofsamples)
   {
-    return idx << rct->sampleshift;
+    return (GtUword) idx << (GtUword) rct->sampleshift;
   }
   return rct->differentcodes - 1;
 }

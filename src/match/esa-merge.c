@@ -174,7 +174,7 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
                         "reading lcptab",__FILE__,__LINE__);
         return -2;
       }
-      if (tmpsmalllcpvalue == LCPOVERFLOW)
+      if (tmpsmalllcpvalue == (GtUchar) LCPOVERFLOW)
       {
         retval = gt_readnextfromstream_Largelcpvalue(
                                &tmpexception,

@@ -33,32 +33,26 @@
 #define GT_LLU "%I64u"
 #endif
 
-/* Define the conversion string for 'ld' in platform independent fashion. */
+/* Define the conversion string for 'ld' in platform independent fashion. Note
+   that splint can not handle concatenated strings in format strings, something
+   like "%03.2""ld" will break. A bug was filed for this. */
 #ifndef _WIN64
 #define GT_LDS "ld"
+#define GT_LD "%ld"
 #else
 #define GT_LDS "I64d"
+#define GT_LD "%I64d"
 #endif
 
-/* Define the conversion string for 'ld' in platform independent fashion. */
-#ifndef S_SPLINT_S
-#define GT_LD "%"GT_LDS
-#else
-#define GT_LD "%ld"
-#endif
-
-/* Define the conversion string for 'lu' in platform independent fashion. */
+/* Define the conversion string for 'lu' in platform independent fashion. Note
+   that splint can not handle concatenated strings in format strings, something
+   like "%03.2""ld" will break. A bug was filed for this. */
 #ifndef _WIN64
 #define GT_LUS "lu"
+#define GT_LU "%lu"
 #else
 #define GT_LUS "I64u"
-#endif
-
-/* Define the conversion string for '%lu' in platform independent fashion. */
-#ifndef S_SPLINT_S
-#define GT_LU "%"GT_LUS
-#else
-#define GT_LU "%lu"
+#define GT_LU "%I64u"
 #endif
 
 /* Define the conversion string for '%zu' in platform independent fashion. */
