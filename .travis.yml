@@ -1,18 +1,29 @@
 language: c
 compiler:
-  - gcc
   - clang
 env:
-  - default=yes      testrange=1..1000
-  - assert=no        testrange=1..1000
-  - amalgamation=yes testrange=1..1000
-  - opt=no cairo=no  testrange=1..1000
-  - default=yes      testrange=1001..2000
-  - assert=no        testrange=1001..2000
-  - amalgamation=yes testrange=1001..2000
-  - opt=no cairo=no  testrange=1001..2000
-  - default=yes      testrange=2001..3000
-  - assert=no        testrange=2001..3000
-  - amalgamation=yes testrange=2001..3000
-  - opt=no cairo=no  testrange=2001..3000
-script: make 64bit=yes test
+  matrix:
+    - default=yes      testrange=1..1000
+    - assert=no        testrange=1..1000
+    - amalgamation=yes testrange=1..1000
+    - opt=no cairo=no  testrange=1..1000
+    - default=yes      testrange=1001..2000
+    - assert=no        testrange=1001..2000
+    - amalgamation=yes testrange=1001..2000
+    - opt=no cairo=no  testrange=1001..2000
+    - default=yes      testrange=2001..3000
+    - assert=no        testrange=2001..3000
+    - amalgamation=yes testrange=2001..3000
+    - opt=no cairo=no  testrange=2001..3000
+matrix:
+  include:
+    - compiler: gcc
+      env: default=yes
+    - compiler: gcc
+      env: assert=no
+    - compiler: gcc
+      env: amalgamation=yes
+    - compiler: gcc
+      env: opt=no cairo=no
+
+script: ./scripts/travis_test.rb
