@@ -372,9 +372,11 @@ ifneq ($(with-sqlite),no)
   else
     EXP_CPPFLAGS += -DSQLITE_THREADSAFE=0
   endif
-  EXP_LDLIBS += -lpthread
-  ifneq ($(SYSTEM),FreeBSD)
-    EXP_LDLIBS += -ldl
+  ifneq ($(SYSTEM),Windows)
+    EXP_LDLIBS += -lpthread
+    ifneq ($(SYSTEM),FreeBSD)
+      EXP_LDLIBS += -ldl
+    endif
   endif
 else
   SQLITE_FILTER_OUT:=src/extended/rdb_sqlite.c
