@@ -3,14 +3,26 @@
 
 success = true
 if ENV["CC"] == 'gcc'
-  print `make 64bit=yes 2>&1`
+  IO.popen([{"64bit"=>"yes"}, 'make', {:err=>[:child, :out]}]) do |io|
+    while (line = io.gets)
+      print line
+    end
+  end
   success = $?.success?
   if success
-    print `bin/gt -test 2>&1`
+    IO.popen(["bin/gt", "-test", :err=>[:child, :out]]) do |io|
+      while (line = io.gets)
+        print line
+      end
+    end
     success = $?.success?
   end
 else
-  print `make 64bit=yes test 2>&1`
+  IO.popen([{"64bit"=>"yes"}, 'make', 'test', {:err=>[:child, :out]}]) do |io|
+    while (line = io.gets)
+      print line
+    end
+  end
   success = $?.success?
 end
 
