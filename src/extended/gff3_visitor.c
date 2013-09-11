@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2012 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2013 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -246,14 +246,18 @@ static int store_ids(GtFeatureNode *fn, void *data, GtError *err)
     if (gt_feature_node_is_multi(fn)) {
       id = gt_hashmap_get(gff3_visitor->feature_node_to_unique_id_str,
                           gt_feature_node_get_multi_representative(fn));
-      if (!id) { /* the representative does not have its own id */
-        if (gff3_visitor->retain_ids)
-          id = make_id_unique(gff3_visitor, fn);
+      if (!id) {
+        /* the representative does not have its own id yet -> create it */
+        if (gff3_visitor->retain_ids) {
+          id = make_id_unique(gff3_visitor,
+                              gt_feature_node_get_multi_representative(fn));
+        }
         else {
           id = create_unique_id(gff3_visitor,
                                 gt_feature_node_get_multi_representative(fn));
         }
       }
+      /* store id for feature, if the feature was not the representative */
       if (gt_feature_node_get_multi_representative(fn) != fn) {
         gt_hashmap_add(gff3_visitor->feature_node_to_unique_id_str, fn,
                        gt_str_ref(id));
