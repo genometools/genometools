@@ -17,6 +17,7 @@
 */
 
 #include <string.h>
+#include "core/compat.h"
 #include "core/ensure.h"
 #include "core/basename_api.h"
 #include "core/ma.h"
@@ -38,7 +39,7 @@ char *gt_basename(const char *path)
   }
   strcpy(sbuf, path);
   for (c = sbuf + pathlen - 1; c >= sbuf; c--) {
-    if (*c == '/') {
+    if (*c == GT_PATH_SEPARATOR) {
       if (foundother) {
         c++;
         for (i=0; c[i] != '\0'; i++)

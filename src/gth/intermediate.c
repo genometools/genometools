@@ -16,6 +16,7 @@
 */
 
 #include <expat.h>
+#include "core/compat.h"
 #include "core/fa.h"
 #include "core/unused_api.h"
 #include "gth/intermediate.h"
@@ -611,7 +612,7 @@ static void show_parse_file_status(GthShowVerbose showverbose,
   GtStr *buf = gt_str_new();
   gt_str_append_cstr(buf, "process file ");
   gt_str_append_ulong(buf, filenum + 1);
-  gt_str_append_char(buf, '/');
+  gt_str_append_char(buf, GT_PATH_SEPARATOR);
   gt_str_append_ulong(buf, numoffiles);
   gt_str_append_cstr(buf, ": ");
   gt_str_append_cstr(buf, filename);

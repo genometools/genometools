@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "core/class_alloc_lock.h"
+#include "core/compat.h"
 #include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/hashmap.h"
@@ -740,7 +741,7 @@ int gt_ltrdigest_file_out_stream_write_metadata(GtLTRdigestFileOutStream *ls,
     gt_file_xprintf(metadata_file,
                        "GFF3 input used\t<stdin>\n");
   } else {
-    if (gfffilename[0] != '/')
+    if (gfffilename[0] != GT_PATH_SEPARATOR)
       gt_file_xprintf(metadata_file,
                          "GFF3 input used\t%s/%s\n", buffer, gfffilename);
     else
@@ -764,7 +765,7 @@ int gt_ltrdigest_file_out_stream_write_metadata(GtLTRdigestFileOutStream *ls,
 
   if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
-    if (trnafilename[0] != '/')
+    if (trnafilename[0] != GT_PATH_SEPARATOR)
       gt_file_xprintf(metadata_file,
                          "tRNA library for PBS detection\t%s/%s\n",
                          buffer, trnafilename);

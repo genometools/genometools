@@ -16,6 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/compat.h"
 #include "core/option_api.h"
 #include "core/versionfunc.h"
 #include "gth/bssm_param.h"
@@ -60,7 +61,7 @@ int gt_gthmkbssmfiles(int argc, const char **argv, GtError *err)
   for (i = 0; !had_err && i <= LASTSPECIESNUM; i++) {
     GthBSSMParam *bssm_param;
     gt_str_append_cstr(filename, argv[parsed_args]);
-    gt_str_append_char(filename, '/');
+    gt_str_append_char(filename, GT_PATH_SEPARATOR);
     gt_str_append_cstr(filename, speciestab[i]);
 
     /* for files which are obsolete due to new model files produced by

@@ -16,6 +16,7 @@
 
 #include "core/assert_api.h"
 #include "core/bittab_api.h"
+#include "core/compat.h"
 #include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/file_api.h"
@@ -161,7 +162,7 @@ static GtFile* open_seq_file(const char *outdir, const char *filesuffix,
   gt_error_check(err);
   gt_assert(filesuffix);
   path = gt_str_new_cstr(outdir);
-  gt_str_append_char(path, '/');
+  gt_str_append_char(path, GT_PATH_SEPARATOR);
   gt_str_append_cstr(path, "file");
   gt_str_append_cstr(path, filesuffix);
   switch (type) {
@@ -397,9 +398,9 @@ static GtFile* open_res_file(const char *outdir, const char *resdir,
   gt_error_check(err);
   gt_assert(outdir && resdir && filename);
   path = gt_str_new_cstr(outdir);
-  gt_str_append_char(path, '/');
+  gt_str_append_char(path, GT_PATH_SEPARATOR);
   gt_str_append_cstr(path, resdir);
-  gt_str_append_char(path, '/');
+  gt_str_append_char(path, GT_PATH_SEPARATOR);
   gt_str_append_cstr(path, filename);
   gt_str_append_cstr(path, gt_file_mode_suffix(file_mode));
   file = gt_output_file_xopen_forcecheck(gt_str_get(path), "w", force,
@@ -436,7 +437,7 @@ GthBSSMSeqProcessor* gth_bssm_seq_processor_new(const char *outdir,
     gt_xmkdir(gt_str_get(dir));
 
   /* create GT directory, if necessary */
-  gt_str_append_char(dir, '/');
+  gt_str_append_char(dir, GT_PATH_SEPARATOR);
   gt_str_append_cstr(dir, GT_DIR);
   if (!gt_file_exists(gt_str_get(dir)))
     gt_xmkdir(gt_str_get(dir));
@@ -444,7 +445,7 @@ GthBSSMSeqProcessor* gth_bssm_seq_processor_new(const char *outdir,
   /* create GC directory, if necessary */
   if (gcdonor) {
     gt_str_set(dir, bsp->outdir);
-    gt_str_append_char(dir, '/');
+    gt_str_append_char(dir, GT_PATH_SEPARATOR);
     gt_str_append_cstr(dir, GC_DIR);
     if (!gt_file_exists(gt_str_get(dir)))
       gt_xmkdir(gt_str_get(dir));
@@ -452,7 +453,7 @@ GthBSSMSeqProcessor* gth_bssm_seq_processor_new(const char *outdir,
 
   /* create AG directory, if necessary */
   gt_str_set(dir, bsp->outdir);
-  gt_str_append_char(dir, '/');
+  gt_str_append_char(dir, GT_PATH_SEPARATOR);
   gt_str_append_cstr(dir, AG_DIR);
   if (!gt_file_exists(gt_str_get(dir)))
     gt_xmkdir(gt_str_get(dir));

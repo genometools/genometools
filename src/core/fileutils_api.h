@@ -31,8 +31,8 @@
 
 /* Returns the suffix of <path>, if there is any. Returns "" otherwise.
    The suffix is the part after and including the last '.' but after the last
-   '/'. Except if <path> ends with ".gz" or ".bz2", then the suffix is the part
-   after and including the second last '.'. */
+   '/' (or '\' on Windows). Except if <path> ends with ".gz" or ".bz2", then the
+   suffix is the part after and including the second last '.'. */
 const char*    gt_file_suffix(const char *path);
 
 /* Returns true if the file with the given <path> exists, false otherwise. */
@@ -56,9 +56,10 @@ void           gt_file_dirname(GtStr *path, const char *file);
    Sets <path> to the empty string if <file> could not be found in $PATH. */
 int            gt_file_find_in_path(GtStr *path, const char *file, GtError*);
 
-/* Find  <file> in the ':'-separated directory list specified in environment
-   variable $<env>, if it has no dirname; set <path> to dirname otherwise.
-   Sets <path> to the empty string if <file> could not be found in $<env>. */
+/* Find  <file> in the ':'-separated directory list (on Windows ';'-separated)
+   specified in environment variable $<env>, if it has no dirname; set <path> to
+   dirname otherwise. Sets <path> to the empty string if <file> could not be
+   found in $<env>. */
 int            gt_file_find_in_env(GtStr *path, const char *file,
                                    const char *env, GtError*);
 

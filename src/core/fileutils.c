@@ -22,13 +22,14 @@
 #ifndef S_SPLINT_S
 #include <fcntl.h>
 #endif
-#include "core/xposix.h"
-#include "core/fileutils_api.h"
-#include "core/xansi_api.h"
-#include "core/ma.h"
-#include "core/splitter.h"
-#include "core/sequence_buffer.h"
+#include "core/compat.h"
 #include "core/cstr_api.h"
+#include "core/fileutils_api.h"
+#include "core/ma.h"
+#include "core/sequence_buffer.h"
+#include "core/splitter.h"
+#include "core/xansi_api.h"
+#include "core/xposix.h"
 
 typedef bool (*FileExistsFunc)(const char *path);
 
@@ -113,7 +114,7 @@ const char* gt_file_suffix(const char *path)
   gt_assert(path);
   suffixptr = path + gt_file_basename_length(path) - 1;
   while (suffixptr > path) {
-    if (*suffixptr == '/')
+    if (*suffixptr == GT_PATH_SEPARATOR)
       return "";
     else if (*suffixptr == '.')
       break;
@@ -127,7 +128,7 @@ void gt_file_dirname(GtStr *path, const char *file)
   GtWord i;
   gt_str_reset(path);
   for (i = (GtWord) (strlen(file) - 1); i >= 0; i--) {
-    if (file[i] == '/')
+    if (file[i] == GT_PATH_SEPARATOR)
       break;
   }
   if (i > 0)
@@ -163,12 +164,12 @@ static int file_find_in_env_generic(GtStr *path, const char *file,
   if (!had_err) {
     splitter = gt_splitter_new();
     gt_splitter_split(splitter, pathvariable,
-                      (GtUword) strlen(pathvariable), ':');
+                      (GtUword) strlen(pathvariable), GT_PATH_VAR_SEPARATOR);
     for (i = 0; i < gt_splitter_size(splitter); i++) {
       pathcomponent = gt_splitter_get_token(splitter, i);
       gt_str_reset(path);
       gt_str_append_cstr(path, pathcomponent);
-      gt_str_append_char(path, '/');
+      gt_str_append_char(path, GT_PATH_SEPARATOR);
       gt_str_append_cstr(path, file);
       if (file_exists(gt_str_get(path)))
         break;
