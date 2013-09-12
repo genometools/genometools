@@ -35,4 +35,7 @@ const char* gt_version_check(unsigned int required_major,
                              unsigned int required_minor,
                              unsigned int required_micro);
 
+/* Return the version of the __GenomeTools__ library in use as a string. */
+const char* gt_version(void);
+
 #endif

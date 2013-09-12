@@ -33,3 +33,8 @@ const char* gt_version_check(unsigned int required_major,
     return "GenomeTools library version too old (micro mismatch)";
   return NULL;
 }
+
+const char* gt_version(void)
+{
+  return GT_VERSION;
+}

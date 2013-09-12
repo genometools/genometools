@@ -21,6 +21,8 @@
 #include "core/file_api.h"
 #include "core/types_api.h"
 
+/* FASTA module */
+
 /* Print a fasta entry with optional <description> and mandatory <sequence> to
    <outfp>. If <width> is != 0 the sequence is formatted accordingly. */
 void gt_fasta_show_entry(const char *description, const char *sequence,

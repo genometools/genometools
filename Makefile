@@ -579,7 +579,7 @@ obj/gt_config.h: VERSION
 	@test -d $(@D) || mkdir -p $(@D)
 	@(echo '#ifndef GT_CONFIG_H' ;\
 	echo '#define GT_CONFIG_H' ;\
-        echo '#define GT_BUILT $(BUILDSTAMP)' ;\
+	echo '#define GT_BUILT $(BUILDSTAMP)' ;\
 	echo '#define GT_CC "'`$(CC) --version | head -n 1`\" ;\
 	echo '#define GT_CFLAGS "$(EXP_CFLAGS) $(GT_CFLAGS)"' ;\
 	echo '$(EXP_CPPFLAGS) $(GT_CPPFLAGS)' | \

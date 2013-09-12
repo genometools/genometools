@@ -293,6 +293,8 @@ interfaces.
 
   <li><a href="#Endianess">Endianess</a>
 
+  <li><a href="#FASTA">FASTA</a>
+
   <li><a href="#Fileutils">Fileutils</a>
 
   <li><a href="#FunctionPointer">FunctionPointer</a>
@@ -8771,6 +8773,17 @@ Removes all occurrences of <code>remove</code> from the right end of <code>cstr<
 Returns <code>true</code> if host CPU is little-endian, <code>false</code> otherwise.
 </p>
 <hr>
+<a name="FASTA"></a>
+<h2>Module FASTA</h2>
+<a name="gt_fasta_show_entry"></a>
+
+<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
+                         GtUword sequence_length, GtUword width, GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
 <a name="Fileutils"></a>
 <h2>Module Fileutils</h2>
 <a name="gt_file_suffix"></a>
@@ -9182,15 +9195,6 @@ Like <code>gt_parse_range</code>, but issues a warning if <code>start</code> is 
    not-positive and sets the corresponding value to 1.
 </p>
 <hr>
-<a name="gt_fasta_show_entry"></a>
-
-<code>void  gt_fasta_show_entry(const char *description, const char *sequence,
-                         GtUword sequence_length, GtUword width, GtFile *outfp)</code>
-<p>
-Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
-   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
-</p>
-<hr>
 <a name="Qsort"></a>
 <h2>Module Qsort</h2>
 <a name="gt_qsort_r"></a>
@@ -9336,6 +9340,13 @@ Check that the <em>GenomeTools</em> library in use is compatible with the given
    Returns <code>NULL</code> if the <em>GenomeTools</em> library is compatible with the given
    version, or a string describing the version mismatch, if the library is not
    compatible.
+</p>
+<hr>
+<a name="gt_version"></a>
+
+<code>const char*  gt_version(void)</code>
+<p>
+Return the version of the <em>GenomeTools</em> library in use as a string.
 </p>
 <hr>
 <a name="Warning"></a>
@@ -11362,6 +11373,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_uniq_stream_new"><code>gt_uniq_stream_new</code></a><br>
 
+  <a href="#gt_version"><code>gt_version</code></a><br>
+
   <a href="#gt_version_check"><code>gt_version_check</code></a><br>
 
   <a href="#gt_visitor_stream_new"><code>gt_visitor_stream_new</code></a><br>
@@ -11423,7 +11436,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-09-09
+Last update: 2013-09-11
 </div>
 </div>
 <!-- Piwik -->
