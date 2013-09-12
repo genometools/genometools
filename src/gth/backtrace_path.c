@@ -103,7 +103,7 @@ void gth_backtrace_path_set_gen_dp_length(GthBacktracePath *bp,
 
 GtUword gth_backtrace_path_ref_dp_length(const GthBacktracePath *bp)
 {
-  gt_assert(bp && bp->ref_dp_length != GT_UNDEF_LONG);
+  gt_assert(bp && bp->ref_dp_length != GT_UNDEF_WORD);
   return bp->ref_dp_length;
 }
 

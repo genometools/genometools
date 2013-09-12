@@ -431,7 +431,7 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
       }
       else if (option->option_type == OPTION_LONG) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.ul == GT_UNDEF_LONG)
+        if (option->default_value.ul == GT_UNDEF_WORD)
           gt_xputs("undefined");
         else
           printf(""GT_LD"\n", option->default_value.l);

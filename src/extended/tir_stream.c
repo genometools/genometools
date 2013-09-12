@@ -729,7 +729,7 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
       seqnum = tir_stream->tir_pairs[tir_stream->cur_elem_index]->contignumber;
 
       /* for the first time */
-      if (tir_stream->prev_seqnum == GT_UNDEF_LONG) {
+      if (tir_stream->prev_seqnum == GT_UNDEF_WORD) {
         /* use current seqnum */
         tir_stream->prev_seqnum = seqnum;
       } else {

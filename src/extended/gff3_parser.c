@@ -100,7 +100,7 @@ GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker)
                                         (GtFree) simple_sequence_region_delete);
   parser->source_to_str_mapping = gt_hashmap_new(GT_HASH_STRING, NULL,
                                                  (GtFree) gt_str_delete);
-  parser->offset = GT_UNDEF_LONG;
+  parser->offset = GT_UNDEF_WORD;
   parser->orphanage = gt_orphanage_new();
   parser->type_checker = type_checker ? gt_type_checker_ref(type_checker)
                                       : NULL;
@@ -145,7 +145,7 @@ int gt_gff3_parser_set_offsetfile(GtGFF3Parser *parser, GtStr *offsetfile,
 {
   gt_error_check(err);
   gt_assert(parser);
-  gt_assert(parser->offset == GT_UNDEF_LONG);
+  gt_assert(parser->offset == GT_UNDEF_WORD);
   parser->offset_mapping = gt_mapping_new(offsetfile, "offsets",
                                           GT_MAPPINGTYPE_INTEGER, err);
   if (parser->offset_mapping)
@@ -176,14 +176,15 @@ static int offset_possible(const GtRange *range, GtWord offset,
     GtUword result = range->start + offset;
     if (result == 0) {
       gt_error_set(err, "==0");
-      gt_error_set(err, "adding offset "GT_LD" to node on line %u in file \"%s\" "
-                   "leads to start 0 (GFF3 files are 1-based)",
+      gt_error_set(err, "adding offset "GT_LD" to node on line %u in file "
+                   "\"%s\" leads to start 0 (GFF3 files are 1-based)",
                    offset, line_number, filename);
       had_err = -1;
     }
     else if (result > range->start) {
-      gt_error_set(err, "adding offset "GT_LD" to node on line %u in file \"%s\" "
-                   "leads to underflow", offset, line_number, filename);
+      gt_error_set(err, "adding offset "GT_LD" to node on line %u in file "
+                   "\"%s\" leads to underflow",
+                   offset, line_number, filename);
       had_err = -1;
     }
   }
@@ -196,7 +197,7 @@ static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
 {
   int had_err = 0;
   gt_error_check(err);
-  if (parser->offset != GT_UNDEF_LONG) {
+  if (parser->offset != GT_UNDEF_WORD) {
     had_err = offset_possible(range, parser->offset, filename, line_number,
                               err);
     if (!had_err)
@@ -418,10 +419,11 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
   }
   else if (parser->checkregions && !ssr->is_circular &&
            !gt_range_contains(&ssr->range, &range) && parser->checkregions) {
-    gt_error_set(err, "range ("GT_LU","GT_LU") of feature on line %u in file \"%s\" is "
-                 "not contained in range ("GT_LU","GT_LU") of corresponding sequence "
-                 "region on line %u", range.start, range.end, line_number,
-                 filename, ssr->range.start, ssr->range.end, ssr->line_number);
+    gt_error_set(err, "range ("GT_LU","GT_LU") of feature on line %u in file "
+                 "\"%s\" is not contained in range ("GT_LU","GT_LU") of "
+                 "corresponding sequence region on line %u",
+                 range.start, range.end, line_number, filename,
+                 ssr->range.start, ssr->range.end, ssr->line_number);
     had_err = -1;
   }
 

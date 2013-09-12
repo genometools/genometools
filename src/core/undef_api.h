@@ -44,7 +44,7 @@
         INT_MIN
 
 /* The undefined <long> value. */
-#define GT_UNDEF_LONG \
+#define GT_UNDEF_WORD \
         LONG_MIN
 
 /* The undefined <unsigned char> value. */
