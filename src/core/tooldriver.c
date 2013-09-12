@@ -23,13 +23,11 @@
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[])
 {
   gt_assert(tool && argv);
-  return gt_tooldriver_with_license(tool, argc, argv, NULL, 0, 0, NULL, NULL);
+  return gt_tooldriver_with_license(tool, argc, argv, NULL, NULL, NULL);
 }
 
 int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
                                GtLicense **license_out,
-                               unsigned int major_version,
-                               unsigned int minor_version,
                                GtLicenseConstructor license_constructor,
                                GtLicenseDestructor license_destructor)
 {
@@ -39,7 +37,7 @@ int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
   gt_lib_init();
   gt_assert(tool && argv);
   if (license_constructor) {
-    if (!(license = license_constructor(argv[0], major_version, minor_version)))
+    if (!(license = license_constructor(argv[0])))
       return EXIT_FAILURE;
     if (license_out)
       *license_out = license;
@@ -67,14 +65,12 @@ int gt_toolobjdriver(GtToolConstructor tool_constructor,
 {
   gt_assert(tool_constructor && argv);
   return gt_toolobjdriver_with_license(tool_constructor, version_func, argc,
-                                       argv, NULL, 0, 0, NULL, NULL);
+                                       argv, NULL, NULL, NULL);
 }
 
 int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor,
                                   GtShowVersionFunc version_func, int argc,
                                   char *argv[], GtLicense **license_out,
-                                  unsigned int major_version,
-                                  unsigned int minor_version,
                                   GtLicenseConstructor license_constructor,
                                   GtLicenseDestructor license_destructor)
 {
@@ -85,7 +81,7 @@ int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor,
   gt_lib_init();
   gt_assert(tool_constructor && argv);
   if (license_constructor) {
-    if (!(license = license_constructor(argv[0], major_version, minor_version)))
+    if (!(license = license_constructor(argv[0])))
       return EXIT_FAILURE;
     if (license_out)
       *license_out = license;

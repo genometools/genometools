@@ -26,9 +26,7 @@ typedef int (*GtToolFunc)(int argc, const char **argv, GtError *err);
 
 typedef struct GtLicense GtLicense;
 
-typedef GtLicense* (*GtLicenseConstructor)(const char *argv0,
-                                           unsigned int major_version,
-                                           unsigned int minor_version);
+typedef GtLicense* (*GtLicenseConstructor)(const char *argv0);
 typedef void       (*GtLicenseDestructor)(GtLicense*);
 
 /* The tool driver module allows one to compile a tool into a separate binary.
@@ -39,8 +37,6 @@ int gt_tooldriver(GtToolFunc tool, int argc, char *argv[]);
 
 int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
                                GtLicense **license_out,
-                               unsigned int major_version,
-                               unsigned int minor_version,
                                GtLicenseConstructor, GtLicenseDestructor);
 
 /* Optional <version_func> to override the default one. */
@@ -51,8 +47,6 @@ int gt_toolobjdriver(GtToolConstructor, GtShowVersionFunc version_func,
 int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor,
                                   GtShowVersionFunc version_func, int argc,
                                   char *argv[], GtLicense **license_out,
-                                  unsigned int major_version,
-                                  unsigned int minor_version,
                                   GtLicenseConstructor, GtLicenseDestructor);
 
 #endif
