@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2012 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2013 Gordon Gremme <gordon@gremme.org>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
@@ -40,6 +40,16 @@ bool gt_file_exists(const char *path)
     return false;
   gt_xfclose(file);
   return true;
+}
+
+bool gt_file_exists_and_is_dir(const char *path)
+{
+  struct stat sb;
+  if (stat(path, &sb))
+    return false;
+  if (S_ISDIR(sb.st_mode))
+    return true;
+  return false;
 }
 
 static bool file_exists_and_is_regular_executable(const char *path)
