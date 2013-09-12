@@ -95,13 +95,14 @@ static inline void gt_errfind_process_kmer(GtUword leafnumber,
         GT_READMODE_FORWARD) \
     : '-'
 #define RDJ_ERRFIND_SHOW_KMER \
-  gt_log_log("ln: "GT_LU"; fd: "GT_LU"; k-mer: %c...%c%c%c%c%c%c%c%c%c%c%c(%c)",\
+  gt_log_log("ln: "GT_LU"; fd: "GT_LU                            \
+             "; k-mer: %c...%c%c%c%c%c%c%c%c%c%c%c(%c)",         \
     leafnumber, fatherdepth, RDJ_ERRFIND_KMINUSITHCHAR(state->k),\
     RDJ_ERRFIND_KMINUSITHCHAR(11), RDJ_ERRFIND_KMINUSITHCHAR(10),\
-    RDJ_ERRFIND_KMINUSITHCHAR(9), RDJ_ERRFIND_KMINUSITHCHAR(8),\
-    RDJ_ERRFIND_KMINUSITHCHAR(7), RDJ_ERRFIND_KMINUSITHCHAR(6),\
-    RDJ_ERRFIND_KMINUSITHCHAR(5), RDJ_ERRFIND_KMINUSITHCHAR(4),\
-    RDJ_ERRFIND_KMINUSITHCHAR(3), RDJ_ERRFIND_KMINUSITHCHAR(2),\
+    RDJ_ERRFIND_KMINUSITHCHAR(9), RDJ_ERRFIND_KMINUSITHCHAR(8),  \
+    RDJ_ERRFIND_KMINUSITHCHAR(7), RDJ_ERRFIND_KMINUSITHCHAR(6),  \
+    RDJ_ERRFIND_KMINUSITHCHAR(5), RDJ_ERRFIND_KMINUSITHCHAR(4),  \
+    RDJ_ERRFIND_KMINUSITHCHAR(3), RDJ_ERRFIND_KMINUSITHCHAR(2),  \
     RDJ_ERRFIND_KMINUSITHCHAR(1), RDJ_ERRFIND_KMINUSITHCHAR(0));
 
 #define RDJ_ERRFIND_IS_SEPRANGE(ENCSEQ, POS)\
@@ -279,7 +280,7 @@ int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
     state->k = k;
     state->c = c;
     state->debug_value = debug_value;
-    state->quiet = (state->debug_value == GT_UNDEF_ULONG ? false : true);
+    state->quiet = (state->debug_value == GT_UNDEF_UWORD ? false : true);
     gt_errfind_reset(state);
     had_err = gt_esa_bottomup_errfind(ssar, state, err);
   }

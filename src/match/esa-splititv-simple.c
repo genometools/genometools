@@ -179,12 +179,14 @@ bool gt_lcpintervalfindcharchildintv_withcheck(const GtEncseq *encseq,
   }
   if (occurs && itv->left != itv2.left)
   {
-    fprintf(stderr,"left = "GT_LU" != "GT_LU" = left2\n",itv->left,itv2.left);
+    fprintf(stderr,"left = " GT_LU " != " GT_LU " = left2\n",
+            itv->left,itv2.left);
     exit(EXIT_FAILURE);
   }
   if (occurs && itv->right != itv2.right)
   {
-    fprintf(stderr,"right = "GT_LU" != "GT_LU" = right2\n",itv->right,itv2.right);
+    fprintf(stderr,"right = " GT_LU " != " GT_LU " = right2\n",
+            itv->right,itv2.right);
     exit(EXIT_FAILURE);
   }
   return occurs;

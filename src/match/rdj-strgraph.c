@@ -279,14 +279,15 @@ struct GtStrgraph {
   if ((LEN) > GT_STRGRAPH_LENGTH_MAX)\
   {\
     fprintf(stderr, "fatal: overflow\n");\
-    fprintf(stderr, "edge "GT_LU"%c -> "GT_LU"%c has length > "FormatGtStrgraphLength\
-        " ("FormatGtStrgraphLength" found)\n",\
-        GT_STRGRAPH_V_READNUM(FROM),\
-        GT_STRGRAPH_V_IS_E(FROM) ? 'E' : 'B',\
-        GT_STRGRAPH_V_READNUM(TO),\
-        GT_STRGRAPH_V_IS_E(TO) ? 'E' : 'B',\
-        PRINTGtStrgraphLengthcast(GT_STRGRAPH_LENGTH_MAX),\
-        PRINTGtStrgraphLengthcast(LEN));\
+    fprintf(stderr, \
+            "edge "GT_LU"%c -> "GT_LU"%c has length > "FormatGtStrgraphLength\
+            " ("FormatGtStrgraphLength" found)\n",\
+            GT_STRGRAPH_V_READNUM(FROM),\
+            GT_STRGRAPH_V_IS_E(FROM) ? 'E' : 'B',\
+            GT_STRGRAPH_V_READNUM(TO),\
+            GT_STRGRAPH_V_IS_E(TO) ? 'E' : 'B',\
+            PRINTGtStrgraphLengthcast(GT_STRGRAPH_LENGTH_MAX),\
+            PRINTGtStrgraphLengthcast(LEN));\
     exit(EXIT_FAILURE);\
   }
 
@@ -1235,7 +1236,8 @@ GtUword gt_strgraph_redpbubbles(GtStrgraph *strgraph,
   if (maxwidth == 0)
     maxwidth = (GtUword)(gt_strgraph_longest_read(strgraph) << 2) -
         (strgraph->minmatchlen << 1) - 1;
-  gt_log_log("redpbubbles(maxwidth="GT_LU", maxdiff="GT_LU")", maxwidth, maxdiff);
+  gt_log_log("redpbubbles(maxwidth="GT_LU", maxdiff="GT_LU")", maxwidth,
+             maxdiff);
 
   /* allocate info and set all marks to VACANT */
   {
@@ -1418,8 +1420,9 @@ static inline void gt_strgraph_dot_bi_show_edge(GtFile *outfp,
     GtUword sn1, bool towards1, GtUword sn2,
     bool towards2)
 {
-  gt_file_xprintf(outfp, " "GT_LU" -- "GT_LU" [arrowtail=%s,arrowhead=%s,dir=both];\n",
-      sn1, sn2, towards1 ? "normal" : "inv", towards2 ? "normal" : "inv");
+  gt_file_xprintf(outfp, " "GT_LU" -- "GT_LU
+                  " [arrowtail=%s,arrowhead=%s,dir=both];\n", sn1, sn2,
+                  towards1 ? "normal" : "inv", towards2 ? "normal" : "inv");
 }
 
 static void gt_strgraph_dot_show(const GtStrgraph *strgraph, GtFile *outfp,
@@ -1679,9 +1682,9 @@ static void gt_strgraph_spm_show(const GtStrgraph *strgraph, GtFile *outfp)
           {
             /* other E->B / B->E cases, as well as all B-B
                are not considered to avoid double output */
-            gt_file_xprintf(outfp, ""GT_LU" %s "GT_LU" %s "FormatGtStrgraphLength"\n",
-                sn1, is_e1 ? "+" : "-",
-                sn2, is_e2 ? "+" : "-",
+            gt_file_xprintf(outfp, GT_LU" %s " GT_LU " %s "
+                            FormatGtStrgraphLength"\n", sn1, is_e1 ? "+" : "-",
+                            sn2, is_e2 ? "+" : "-",
                 PRINTGtStrgraphLengthcast(spm_len));
           }
         }
@@ -2084,8 +2087,8 @@ static void gt_strgraph_count_junctions(GtStrgraph *strgraph)
       }
     }
   }
-  gt_log_log("junctions: in-1:"GT_LU" out-1:"GT_LU" multi:"GT_LU"", nof_in1_junctions,
-      nof_out1_junctions, nof_multi_junctions);
+  gt_log_log("junctions: in-1:"GT_LU" out-1:"GT_LU" multi:"GT_LU,
+             nof_in1_junctions, nof_out1_junctions, nof_multi_junctions);
 }
 #endif
 

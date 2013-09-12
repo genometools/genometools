@@ -312,8 +312,8 @@ static void updatekmercount(void *processinfo,
                                        position);
       if (code2 != 0)
       {
-        fprintf(stderr,"%s: ### position "GT_LU", code2 = "GT_LU" != 0\n",__func__,
-                       position,code2);
+        fprintf(stderr,"%s: ### position "GT_LU", code2 = "GT_LU" != 0\n",
+                __func__, position,code2);
         fprintf(stderr,"previouscode = " FormatGtCodetype "\n",previouscode);
         if (previouskmercodedefined)
         {

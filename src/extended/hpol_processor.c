@@ -78,7 +78,7 @@ GtHpolProcessor *gt_hpol_processor_new(GtEncseq *encseq, GtUword hmin)
   hpp->nof_unmapped = 0;
   hpp->nof_multihits = 0;
   hpp->nof_replaced = 0;
-  hpp->clenmax = GT_UNDEF_ULONG;
+  hpp->clenmax = GT_UNDEF_UWORD;
   hpp->altmax = (double) 1.0;
   hpp->refmin = (double) 0.0;
   hpp->alpha = gt_alphabet_new_dna();
@@ -413,7 +413,7 @@ static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
   s_hpos = gt_aligned_segment_orig_seqpos_for_refpos(as, r_hpos);
   s_offset = gt_aligned_segment_offset_for_refpos(as, r_hpos);
   s_qual = gt_malloc(sizeof (*s_qual) * (s_hlen + 1UL));
-  s_q_bef = GT_UNDEF_ULONG;
+  s_q_bef = GT_UNDEF_UWORD;
   for (i = s_offset; i > 0; /**/)
   {
     i--;
@@ -423,10 +423,10 @@ static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
       break;
     }
   }
-  gt_assert(s_q_bef != GT_UNDEF_ULONG);
+  gt_assert(s_q_bef != GT_UNDEF_UWORD);
   s_q_min = ULONG_MAX;
   s_q_max = 0;
-  s_q_first = GT_UNDEF_ULONG;
+  s_q_first = GT_UNDEF_UWORD;
   if (!gt_aligned_segment_is_reverse(as))
   {
     for (i = s_offset, pos = 0; pos < s_hlen; i++)
@@ -440,7 +440,7 @@ static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
           s_q_min = s_q_value;
         if (s_q_value > s_q_max)
           s_q_max = s_q_value;
-        if (s_q_first == GT_UNDEF_ULONG)
+        if (s_q_first == GT_UNDEF_UWORD)
           s_q_first = s_q_value;
         s_q_last = s_q_value;
       }
@@ -459,14 +459,14 @@ static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
           s_q_min = s_q_value;
         if (s_q_value > s_q_max)
           s_q_max = s_q_value;
-        if (s_q_first == GT_UNDEF_ULONG)
+        if (s_q_first == GT_UNDEF_UWORD)
           s_q_first = s_q_value;
         s_q_last = s_q_value;
       }
     }
   }
   s_qual[s_hlen] = '\0';
-  s_q_aft = GT_UNDEF_ULONG;
+  s_q_aft = GT_UNDEF_UWORD;
   for (/**/; i < gt_aligned_segment_length(as); i++)
   {
     if (q[i] != GT_UNDEF_CHAR)
@@ -475,7 +475,7 @@ static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
       break;
     }
   }
-  gt_assert(s_q_aft != GT_UNDEF_ULONG);
+  gt_assert(s_q_aft != GT_UNDEF_UWORD);
   gt_assert(s_q_min < ULONG_MAX);
   gt_assert(s_q_max >= s_q_min);
   s_q_range = s_q_max - s_q_min + 1UL;
@@ -507,11 +507,14 @@ static void gt_hpol_processor_output_stats(GtAlignedSegment *as,
     s_or = '+';
   }
   gt_file_xprintf(outfp,
-      ""GT_LU"\t%c\t"GT_LU"\t"GT_LU"\t%c\t%c\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"
-      ""GT_LU"\t"GT_LU"\t"GT_LU"\t%.2f\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t%s\t%s\n",
-      r_hpos, edit, s_hpos, s_hend, s_char, s_or, c_len, coverage, r_hlen,
-      r_supp, s_hlen, a_hlen, a_supp, s_mapq, s_q_bef, s_q_first, s_q_min,
-      s_q_ave, s_q_max, s_q_range, s_q_last, s_q_aft, s_qual, s_id);
+                  GT_LU "\t%c\t" GT_LU "\t" GT_LU "\t%c\t%c\t" GT_LU "\t" GT_LU
+                  "\t" GT_LU "\t" GT_LU "\t" GT_LU "\t" GT_LU "\t" GT_LU "\t"
+                  GT_LU "\t" GT_LU "\t" GT_LU "\t" GT_LU "\t%.2f\t" GT_LU "\t"
+                  GT_LU "\t" GT_LU "\t" GT_LU "\t%s\t%s\n",
+                  r_hpos, edit, s_hpos, s_hend, s_char, s_or, c_len, coverage,
+                  r_hlen, r_supp, s_hlen, a_hlen, a_supp, s_mapq, s_q_bef,
+                  s_q_first, s_q_min, s_q_ave, s_q_max, s_q_range, s_q_last,
+                  s_q_aft, s_qual, s_id);
   gt_free(s_qual);
 }
 
@@ -623,8 +626,8 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
   double q_ave = 0.0;
   left = gt_aligned_segment_offset_for_refpos(as, r_hstart);
   right = gt_aligned_segment_offset_for_refpos(as, r_hstart + r_hlen);
-  if (left == GT_UNDEF_ULONG || left == 0 ||
-      right == GT_UNDEF_ULONG || right == gt_aligned_segment_length(as))
+  if (left == GT_UNDEF_UWORD || left == 0 ||
+      right == GT_UNDEF_UWORD || right == gt_aligned_segment_length(as))
     return edited;
   right--;
   s = gt_aligned_segment_seq(as);
@@ -774,7 +777,7 @@ static void gt_hpol_processor_determine_alternative_consensus(
 #endif
     left = gt_aligned_segment_offset_for_refpos(as, r_hstart);
     right = gt_aligned_segment_offset_for_refpos(as, r_hstart + r_hlen);
-    if (left == GT_UNDEF_ULONG || right == GT_UNDEF_ULONG)
+    if (left == GT_UNDEF_UWORD || right == GT_UNDEF_UWORD)
       continue;
     (*piled)++;
     right--;
@@ -851,9 +854,9 @@ static void gt_hpol_processor_show_hdist(GtHpolProcessor *hpp, GtLogger *logger)
     GtUword n = (GtUword)gt_disc_distri_get(hpp->hdist, i);
     if (n > 0)
     {
-      gt_logger_log(logger, "%-6"GT_LUS"\t%-11"GT_LUS"\t%-6"GT_LUS"\t(%.2f%%)", i, n,
-          (GtUword)gt_disc_distri_get(hpp->hdist_e, i),
-          (double)gt_disc_distri_get(hpp->hdist_e, i) * 100 / n);
+      gt_logger_log(logger, "%-6"GT_LUS"\t%-11"GT_LUS"\t%-6"GT_LUS"\t(%.2f%%)",
+                    i, n, (GtUword)gt_disc_distri_get(hpp->hdist_e, i),
+                    (double)gt_disc_distri_get(hpp->hdist_e, i) * 100 / n);
     }
   }
   gt_logger_log(logger, "total \t%-11"GT_LUS"\t%-6"GT_LUS"\t(%.2f%%)",

@@ -153,7 +153,8 @@ void gt_timer_show_formatted(GT_UNUSED GtTimer *t, GT_UNUSED const char *fmt,
 
 void gt_timer_show(GtTimer *t, FILE *fp)
 {
-  gt_timer_show_formatted(t, ""GT_LD".%06lds real "GT_LD"s user "GT_LD"s system\n", fp);
+  gt_timer_show_formatted(t, GT_LD ".%06lds real " GT_LD "s user " GT_LD
+                          "s system\n", fp);
 }
 
 #ifndef _WIN32

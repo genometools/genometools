@@ -601,11 +601,12 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
             }
             else {
               if (comments) {
-                gt_file_xprintf(outfp, "%c abort backtracing, intron cutout "
-                                   "at p=%s (genpos="GT_LU" (actual strand!))\n",
-                                   COMMENTCHAR,
-                                   dna_showretracenames((DnaRetrace) pathtype),
-                                   spliced_seq->positionmapping[genptr]);
+                gt_file_xprintf(outfp,
+                                "%c abort backtracing, intron cutout at p=%s "
+                                "(genpos=" GT_LU " (actual strand!))\n",
+                                COMMENTCHAR,
+                                dna_showretracenames((DnaRetrace) pathtype),
+                                spliced_seq->positionmapping[genptr]);
               }
               return GTH_ERROR_CUTOUT_NOT_IN_INTRON;
             }
@@ -1299,7 +1300,7 @@ int gth_align_dna(GthSA *sa,
 
   /* debugging */
   if (!dpm.path_jt &&
-      dp_options_core->btmatrixgenrange.start != GT_UNDEF_ULONG) {
+      dp_options_core->btmatrixgenrange.start != GT_UNDEF_UWORD) {
     pm = gth_path_matrix_new(dpm.path, dpm.gen_dp_length, dpm.ref_dp_length,
                              &dp_options_core->btmatrixgenrange,
                              &dp_options_core->btmatrixrefrange, NULL);

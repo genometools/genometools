@@ -290,8 +290,8 @@ GtUword gt_cntlist_xload(const char *filename, GtBitsequence **cntlist,
   if (found_nofreads != expected_nofreads)
   {
     fprintf(stderr, "FATAL: error by parsing contained reads list: "
-        "file specifies a wrong number of reads\nexpected "GT_LU", found "GT_LU"\n",
-        expected_nofreads, found_nofreads);
+        "file specifies a wrong number of reads\nexpected "GT_LU", found "
+        GT_LU"\n", expected_nofreads, found_nofreads);
     exit(EXIT_FAILURE);
   }
 

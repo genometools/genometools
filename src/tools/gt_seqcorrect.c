@@ -203,7 +203,7 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   maxlow_option = gt_option_new_uword("maxlow",
       "maximal number of low-quality positions in a read\n"
       "default: infinite",
-      &arguments->maxlow, GT_UNDEF_ULONG);
+      &arguments->maxlow, GT_UNDEF_UWORD);
   gt_option_hide_default(maxlow_option);
   gt_option_is_extended_option(maxlow_option);
   gt_option_parser_add_option(op, maxlow_option);
@@ -405,7 +405,7 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
   if (arguments->phred64)
     gt_reads2twobit_use_phred64(r2t);
 
-  if (arguments->maxlow != GT_UNDEF_ULONG)
+  if (arguments->maxlow != GT_UNDEF_UWORD)
     gt_reads2twobit_set_quality_filter(r2t, arguments->maxlow,
         (char)arguments->lowqual);
 

@@ -60,8 +60,8 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
   {
     if (withminmaxindex)
     {
-      gt_log_log("part %u: width="GT_LU" (%.2f%%) offset="GT_LU" nextidx="GT_LU" "
-                 "minindex="GT_LU" maxindex="GT_LU" ",
+      gt_log_log("part %u: width="GT_LU" (%.2f%%) offset="GT_LU" nextidx="
+                 GT_LU" minindex="GT_LU" maxindex="GT_LU" ",
                  part,
                  suftabparts->components[part].widthofpart,
                  100.00 * (double) suftabparts->components[part].widthofpart/
@@ -72,7 +72,8 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
                  gt_suftabparts_maxindex(part,suftabparts));
     } else
     {
-      gt_log_log("part %u: width="GT_LU" (%.2f%%) offset="GT_LU" nextidx="GT_LU"",
+      gt_log_log("part %u: width="GT_LU" (%.2f%%) offset="GT_LU" nextidx="
+                 GT_LU,
                  part,
                  suftabparts->components[part].widthofpart,
                  100.00 * (double) suftabparts->components[part].widthofpart/
@@ -462,7 +463,7 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
     }
     gt_suftabparts_delete(suftabparts);
   }
-  gt_error_set(err,"cannot compute enhanced suffix array in at most "GT_LU" bytes",
-                   maximumspace);
+  gt_error_set(err,"cannot compute enhanced suffix array in at most "
+               GT_LU" bytes", maximumspace);
   return -1;
 }

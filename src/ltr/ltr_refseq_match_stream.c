@@ -212,7 +212,7 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   gt_feature_node_set_attribute((GtFeatureNode*) new_node, "identity", buf);
   gt_feature_node_set_source((GtFeatureNode*) new_node,
                              gt_str_new_cstr(rms->source));
-  if (rms->params_id != GT_UNDEF_ULONG) {
+  if (rms->params_id != GT_UNDEF_UWORD) {
     char params_id[BUFSIZ];
 
     (void) snprintf(params_id, BUFSIZ, ""GT_LU"", rms->params_id);
@@ -235,8 +235,8 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
                     match_range2.start, match_range2.end);
     gt_str_delete(tmpstr);
   } else
-    (void) snprintf(target, BUFSIZ, "%s "GT_LU" "GT_LU"", seqid2, match_range2.start,
-                    match_range2.end);
+    (void) snprintf(target, BUFSIZ, "%s " GT_LU " " GT_LU,
+                    seqid2, match_range2.start, match_range2.end);
   gt_feature_node_set_attribute((GtFeatureNode*) new_node, ATTR_TARGET,
                                 target);
   gt_feature_node_add_child(fn, (GtFeatureNode*) new_node);

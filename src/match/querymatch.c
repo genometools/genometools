@@ -180,7 +180,8 @@ int gt_querymatch_output(GT_UNUSED void *info,
         ? 100.0
         : 100.0 * (1.0 - querymatch->edist/
                          (double) MIN(querymatch->dblen,querymatch->querylen));
-      printf(" "GT_LD" "GT_LU" %.2f\n",querymatch->score,querymatch->edist,similarity);
+      printf(" " GT_LD " " GT_LU " %.2f\n",
+             querymatch->score,querymatch->edist,similarity);
     } else
     {
       printf("\n");

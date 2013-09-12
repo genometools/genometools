@@ -45,7 +45,7 @@ GtSamAlignment *gt_sam_alignment_new(GtAlphabet *alphabet)
   sam_alignment->qual_buffer = NULL;
   sam_alignment->s_bufsize = 0;
   sam_alignment->q_bufsize = 0;
-  sam_alignment->rightmost = GT_UNDEF_ULONG;
+  sam_alignment->rightmost = GT_UNDEF_UWORD;
   return sam_alignment;
 }
 
@@ -109,7 +109,7 @@ GtUword gt_sam_alignment_mapping_quality(GtSamAlignment *sam_alignment)
 GtUword gt_sam_alignment_rightmost_pos(GtSamAlignment *sam_alignment)
 {
   gt_assert(sam_alignment != NULL);
-  if (sam_alignment->rightmost == GT_UNDEF_ULONG)
+  if (sam_alignment->rightmost == GT_UNDEF_UWORD)
   {
     sam_alignment->rightmost = (GtUword)bam_calend(
         &sam_alignment->s_alignment->core,

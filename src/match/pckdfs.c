@@ -193,10 +193,9 @@ int gt_fmindex_dfstraverse(const FMindex *fmindex,
                                        parent.either.pckitv.upperbound);
         nonspecialwidth = dfsnonspecialwidth(&bwci);
 #ifdef SKDEBUG
-        printf("split "GT_LU" "GT_LU" into "GT_LU" intervals of width "GT_LU"\n",
-               parent.either.pckitv.lowerbound,
-               parent.either.pckitv.upperbound,
-               bwci.nextfreeBoundswithchar,
+        printf("split "GT_LU" "GT_LU" into "GT_LU" intervals of width "
+               GT_LU"\n", parent.either.pckitv.lowerbound,
+               parent.either.pckitv.upperbound, bwci.nextfreeBoundswithchar,
                nonspecialwidth);
 #endif
         gt_assert(nonspecialwidth <= parentwidth);

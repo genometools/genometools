@@ -104,7 +104,8 @@ static inline void extendqueuesize(GtInl_Queue *q,bool doublesize)
   }
   q->enqueueindex += addconst;
   /*
-  printf("from queue of size "GT_LU" to queue of size "GT_LU"\n",q->queuesize,newsize);
+  printf("from queue of size "GT_LU" to queue of size "GT_LU"\n",q->queuesize,
+         newsize);
   printf("now enqueindex="GT_LU",dequeuindex="GT_LU"\n",
          q->enqueueindex,q->dequeueindex);
   */

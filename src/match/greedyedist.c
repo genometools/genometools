@@ -291,7 +291,8 @@ GtUword greedyunitedist(GtFrontResource *ftres,
   GtFrontvalue *fptr;
 
 #ifdef SKDEBUG
-  printf("unitedistcheckSEPgeneric(ulen="GT_LU",vlen="GT_LU")\n",ulenvalue,vlenvalue);
+  printf("unitedistcheckSEPgeneric(ulen=" GT_LU ",vlen=" GT_LU ")\n",
+         ulenvalue,vlenvalue);
 #endif
   gt_assert(gt_seqabstract_length(useq) < (GtUword) LONG_MAX);
   gt_assert(gt_seqabstract_length(vseq) < (GtUword) LONG_MAX);

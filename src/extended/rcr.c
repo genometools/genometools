@@ -254,7 +254,7 @@ static GtBitsequence rcr_transencode(GtUchar ref, GtUchar base,
     if (base == code_t)
       return (GtBitsequence) 3;
   }
-  return (GtBitsequence) GT_UNDEF_ULONG;
+  return (GtBitsequence) GT_UNDEF_UWORD;
 }
 
 static GtUchar rcr_transdecode(GtUchar ref, GtBitsequence transcode,
@@ -671,7 +671,7 @@ static void rcr_get_m(GtUword key, GtUint64 value,
 {
   MedianData *md = (MedianData*) data;
   md->x = md->x + value;
-  if (md->x > (md->n) / 2 && (md->median == GT_UNDEF_ULONG))
+  if (md->x > (md->n) / 2 && (md->median == GT_UNDEF_UWORD))
     md->median = key;
 }
 
@@ -690,7 +690,7 @@ static GtUword rcr_get_median(GtDiscDistri *distr)
   md = gt_malloc(sizeof (MedianData));
   md->n = 0;
   md->x = 0;
-  md->median = GT_UNDEF_ULONG;
+  md->median = GT_UNDEF_UWORD;
   gt_disc_distri_foreach(distr, rcr_get_n, md);
   gt_disc_distri_foreach(distr, rcr_get_m, md);
   median = md->median;
@@ -722,7 +722,7 @@ static int rcr_initialize_encoders(GtRcrEncoder *rcr_enc,
     gt_timer_show_progress(timer, "initializing encoders", stdout);
 
   median = rcr_get_median(rcr_enc->readpos_distr);
-  if (median == GT_UNDEF_ULONG) {
+  if (median == GT_UNDEF_UWORD) {
     gt_error_set(err, "no mapped reads present in %s",rcr_enc->samfilename);
     return -1;
   }
@@ -735,7 +735,7 @@ static int rcr_initialize_encoders(GtRcrEncoder *rcr_enc,
   median = rcr_get_median(rcr_enc->varpos_distr);
 
   /* no variations present -> have only exact matches */
-  if (median == GT_UNDEF_ULONG)
+  if (median == GT_UNDEF_UWORD)
     has_var = false;
 
   if (median == 0)
@@ -1220,7 +1220,7 @@ static int rcr_write_header_to_file(GtRcrEncoder *rcr_enc)
   if (rcr_enc->varpos_golomb != NULL)
     m = gt_golomb_get_m(rcr_enc->varpos_golomb);
   else
-    m = GT_UNDEF_ULONG;
+    m = GT_UNDEF_UWORD;
 
   gt_xfwrite_one(&m, fp);
 
@@ -1505,7 +1505,7 @@ static void rcr_read_header(GtRcrDecoder *rcr_dec)
 
   read = gt_xfread_one(&m, rcr_dec->fp);
   gt_assert(read == one);
-  if (m != GT_UNDEF_ULONG) {
+  if (m != GT_UNDEF_UWORD) {
     rcr_dec->varpos_golomb = gt_golomb_new(m);
   }
 

@@ -458,10 +458,10 @@ void gt_spmproc_a_show_ascii(GtUword suffix_seqnum,
     void *data)
 {
   GtFile *file = data;
-  gt_file_xprintf(file, ""GT_LU" %s "GT_LU" %s "GT_LU" "GT_LU" "GT_LU"\n", suffix_seqnum,
-      suffixseq_direct ? "+" : "-", prefix_seqnum,
-      prefixseq_direct ? "+" : "-", suffix_length, prefix_length,
-      unit_edist);
+  gt_file_xprintf(file, ""GT_LU" %s "GT_LU" %s "GT_LU" "GT_LU" "GT_LU"\n",
+                  suffix_seqnum, suffixseq_direct ? "+" : "-", prefix_seqnum,
+                  prefixseq_direct ? "+" : "-", suffix_length, prefix_length,
+                  unit_edist);
 }
 
 /* ---------------------- Unit Test ---------------------- */

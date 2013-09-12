@@ -65,7 +65,7 @@ GtAlignedSegmentsPile *gt_aligned_segments_pile_new(GtSamfileIterator *sfi,
   asp->process_unmapped_data = NULL;
   asp->process_skipped = NULL;
   asp->process_skipped_data = NULL;
-  asp->position = GT_UNDEF_ULONG;
+  asp->position = GT_UNDEF_UWORD;
   asp->enable_edit_tracking = false;
   asp->delete_processed_segments = true;
   return asp;
@@ -194,7 +194,7 @@ void gt_aligned_segments_pile_move_over_position(
     GtAlignedSegmentsPile *asp, GtUword position)
 {
   int retvalue;
-  if (asp->position != GT_UNDEF_ULONG)
+  if (asp->position != GT_UNDEF_UWORD)
   {
     gt_assert(position > asp->position);
     gt_aligned_segments_pile_delete_finishing_before(asp, position);

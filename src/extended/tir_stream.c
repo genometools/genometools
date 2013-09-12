@@ -658,7 +658,7 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
       seqnum = tir_stream->tir_pairs[tir_stream->cur_elem_index]->contignumber;
 
       /* if first time we do this */
-      if (tir_stream->prev_seqnum == GT_UNDEF_ULONG) {
+      if (tir_stream->prev_seqnum == GT_UNDEF_UWORD) {
         /* use current seqnum */
         tir_stream->prev_seqnum = seqnum;
       } else {
@@ -937,7 +937,7 @@ GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
   tir_stream->num_of_tirs = 0;
   tir_stream->tir_pairs = NULL;
   tir_stream->cur_elem_index = 0;
-  tir_stream->prev_seqnum = GT_UNDEF_ULONG;
+  tir_stream->prev_seqnum = GT_UNDEF_UWORD;
   tir_stream->state = GT_TIR_STREAM_STATE_START;
 
   tir_stream->str_indexname = gt_str_ref(str_indexname);

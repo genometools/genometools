@@ -98,7 +98,7 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
   GthSpliceSiteProb *splicesiteprob;
   GthExonAGS *exon;
   GtUword i, leftexonborder, rightexonborder, exonlength,
-                leftintronborder = GT_UNDEF_ULONG, rightintronborder,
+                leftintronborder = GT_UNDEF_UWORD, rightintronborder,
                 intronlength;
   GthDbl exonscore;
   GthFlt donorsiteprob, acceptorsiteprob;
@@ -133,10 +133,10 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
       indentlevel++;
       gth_indent(outfp, indentlevel);
       gt_file_xprintf(outfp,
-                      "<gDNA_intron_boundary i_start=\""GT_LU"\" i_stop=\""GT_LU"\" "
-                      "i_length=\""GT_LU"\"/>\n",
+                      "<gDNA_intron_boundary i_start=\"" GT_LU "\" i_stop=\""
+                      GT_LU "\" i_length=\""GT_LU"\"/>\n",
                       SHOWGENPOSAGS(leftintronborder),
-                      SHOWGENPOSAGS(rightintronborder),  intronlength);
+                      SHOWGENPOSAGS(rightintronborder), intronlength);
       indentlevel--;
       gth_indent(outfp, indentlevel);
       gt_file_xprintf(outfp, "</intron>\n");
@@ -150,8 +150,9 @@ static void xml_output_exon_intron_lines(const GthAGS *ags,
     indentlevel++;
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp,
-                    "<gDNA_exon_boundary e_start=\""GT_LU"\" e_stop=\""GT_LU"\" "
-                    "e_length=\""GT_LU"\"/>\n", SHOWGENPOSAGS(leftexonborder),
+                    "<gDNA_exon_boundary e_start=\"" GT_LU "\" e_stop=\""
+                    GT_LU "\" e_length=\"" GT_LU "\"/>\n",
+                    SHOWGENPOSAGS(leftexonborder),
                     SHOWGENPOSAGS(rightexonborder), exonlength);
     indentlevel--;
     gth_indent(outfp, indentlevel);

@@ -96,7 +96,8 @@ Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err)
     tyrindex->merbytes = MERBYTES(tyrindex->mersize);
     if ((numofbytes - rest) % tyrindex->merbytes != 0)
     {
-      gt_error_set(err,"size of index is "GT_LU" which is not a multiple of "GT_LU"",
+      gt_error_set(err,"size of index is "GT_LU
+                   " which is not a multiple of "GT_LU,
                    (GtUword) (numofbytes - rest),
                    tyrindex->merbytes);
       haserr = true;
@@ -216,7 +217,8 @@ Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
   }
   if (!haserr && (numofbytes - tyrindex->numofmers) % sizeof (Largecount) != 0)
   {
-    gt_error_set(err,"(numofbytes - numofmers) = "GT_LU" must be a multiple of "GT_LU"",
+    gt_error_set(err,"(numofbytes - numofmers) = "GT_LU
+                 " must be a multiple of "GT_LU,
            (GtUword) (numofbytes - tyrindex->numofmers),
            (GtUword) sizeof (Largecount));
     haserr = true;

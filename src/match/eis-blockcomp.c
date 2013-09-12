@@ -1852,14 +1852,13 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
     fprintf(stderr,"aState->varDiskOffset/bitElemBits="GT_LU"\n",
                     (GtUword) (aState->varDiskOffset/bitElemBits));
     fprintf(stderr,"sizeof (BitElem)="GT_LU"\n",(GtUword) sizeof (BitElem));
-    fprintf(stderr,"aState->varDiskOffset/bitElemBits * sizeof (BitElem)="GT_LU"\n",
-            (GtUword) (aState->varDiskOffset/bitElemBits *
-                             sizeof (BitElem)));
+    fprintf(stderr,"aState->varDiskOffset/bitElemBits * sizeof (BitElem)="
+            GT_LU"\n", (GtUword) (aState->varDiskOffset/bitElemBits * sizeof
+                                  (BitElem)));
     fprintf(stderr,"seqIdx->externalData.varDataPos + "
-                   "aState->varDiskOffset/bitElemBits * sizeof (BitElem)="GT_LU"\n",
+            "aState->varDiskOffset/bitElemBits * sizeof (BitElem)=" GT_LU"\n",
             (GtUword) (seqIdx->externalData.varDataPos +
-                             aState->varDiskOffset/bitElemBits
-                             * sizeof (BitElem)));
+                       aState->varDiskOffset/bitElemBits * sizeof (BitElem)));
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_assert(seqIdx->externalData.cwDataPos + aState->cwDiskOffset
@@ -2623,12 +2622,13 @@ printBucket(const struct blockCompositionSeq *seqIdx, GtUword bucketNum,
       seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
       outCount +=
       fprintf(
-        fp, "# block %u: comp idx: "GT_LU", permIdxBits=%u, perm idx: "GT_LU" =>",
-        i, (GtUword)compIndex,
-        (unsigned)seqIdx->compositionTable.permutations[compIndex].permIdxBits,
-        (GtUword)gt_bsGetPermCompIndex(
-          sBlock->varData, varDataMemOffset,
-          seqIdx->compositionTable.permutations[compIndex].permIdxBits));
+         fp, "# block %u: comp idx: "GT_LU", permIdxBits=%u, perm idx: " GT_LU
+         "=>", i, (GtUword)compIndex,
+         (unsigned)seqIdx->compositionTable.permutations[compIndex].permIdxBits,
+         (GtUword)gt_bsGetPermCompIndex(
+                   sBlock->varData, varDataMemOffset,
+                   seqIdx->compositionTable.permutations[compIndex].permIdxBits)
+         );
       unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
                   blockSize);
       outCount += printBlock(block, blockSize, fp);

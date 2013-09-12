@@ -165,10 +165,10 @@ static inline int get_sequence(GtSequenceBuffer *sb,
   if ((num_chars = eat_digits(sb, currentfileread)) == EOF)
     return EOF;
   if (num_chars == 0) {
-    gt_error_set(err, "sequence offset numbers missing in line "GT_LU" of file %s",
-                      (GtUword) sb->pvt->linenum,
-                      gt_str_array_get(sb->pvt->filenametab,
-                                       (GtUword) sb->pvt->filenum));
+    gt_error_set(err, "sequence offset numbers missing in line " GT_LU
+                 " of file %s", (GtUword) sb->pvt->linenum,
+                 gt_str_array_get(sb->pvt->filenametab, (GtUword)
+                                  sb->pvt->filenum));
     return -2;
   }
   currentchar = inlinebuf_getchar(sb, sb->pvt->inputstream);
@@ -177,11 +177,10 @@ static inline int get_sequence(GtSequenceBuffer *sb,
   (*currentfileread)++;
   /* expect one blank */
   if (currentchar != ' ') {
-    gt_error_set(err, "blank expected between offset and sequence in line "GT_LU" "
-                      "of file %s",
-                      (GtUword) sb->pvt->linenum,
-                      gt_str_array_get(sb->pvt->filenametab,
-                                       (GtUword) sb->pvt->filenum));
+    gt_error_set(err, "blank expected between offset and sequence in line "
+                 GT_LU " of file %s", (GtUword) sb->pvt->linenum,
+                 gt_str_array_get(sb->pvt->filenametab, (GtUword)
+                                  sb->pvt->filenum));
     return -2;
   }
   /* read sequence */

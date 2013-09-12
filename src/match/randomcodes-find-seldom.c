@@ -46,8 +46,11 @@ static inline void gt_randomcodes_find_seldom_process_kmer_itv(
       {
         GT_SETIBIT(sdata->seldom_reads, seqnum);
         sdata->nofseldomkmers++;
-        /*gt_log_log("seldom "GT_LU"-mer, count="GT_LU", relpos="GT_LU", seqnum="GT_LU"",
-            sdata->k, nofsuffixes, relpos, seqnum);*/
+        /*
+        gt_log_log("seldom "GT_LU"-mer, count="GT_LU", relpos="GT_LU
+                   ",seqnum="GT_LU"", sdata->k, nofsuffixes, relpos,
+                   seqnum);
+         */
       }
     }
   }

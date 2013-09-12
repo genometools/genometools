@@ -343,7 +343,7 @@ char gt_encseq_get_decoded_char(const GtEncseq *encseq, GtUword pos,
     if (GT_ISDIRREVERSE(readmode))
       pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
     if (encseq->has_exceptiontable) {
-      GtUword mappos = GT_UNDEF_ULONG;
+      GtUword mappos = GT_UNDEF_UWORD;
       if (pos > encseq->totallength) {
         pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
         gt_readmode_invert(readmode);
@@ -605,7 +605,7 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
 
     ccc = esr->encseq->seqdeliverchar(esr);
     if (ccc != (GtUchar) SEPARATOR) {
-      GtUword mappos = GT_UNDEF_ULONG;
+      GtUword mappos = GT_UNDEF_UWORD;
       if (esr->encseq->specialcharinfo.realexceptionranges > 0UL
             && esr->encseq->getexceptionmapping(esr->encseq,
                                                 &mappos, esr->currentpos)) {
@@ -2100,7 +2100,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
   GtUword currentposition,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
-                nextcheckpos = GT_UNDEF_ULONG,
+                nextcheckpos = GT_UNDEF_UWORD,
                 pagenumber = 0,
                 lastexceptionrangelength = 0;
   int retval;
@@ -2262,7 +2262,7 @@ static int fillViabytecompress(GtEncseq *encseq,
   GtUword currentposition,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
-                nextcheckpos = GT_UNDEF_ULONG,
+                nextcheckpos = GT_UNDEF_UWORD,
                 pagenumber = 0,
                 lastexceptionrangelength = 0;
   int retval;
@@ -2462,7 +2462,7 @@ static int fillViaequallength(GtEncseq *encseq,
   GtUword pos,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
-                nextcheckpos = GT_UNDEF_ULONG,
+                nextcheckpos = GT_UNDEF_UWORD,
                 pagenumber = 0,
                 lastexceptionrangelength = 0;
   int retval;
@@ -2676,7 +2676,7 @@ static int fillViabitaccess(GtEncseq *encseq,
    GtUword currentposition,
                 fillexceptionrangeidx = 0,
                 mapposition = 0,
-                nextcheckpos = GT_UNDEF_ULONG,
+                nextcheckpos = GT_UNDEF_UWORD,
                 pagenumber = 0,
                 lastexceptionrangelength = 0;
   int retval;
@@ -5439,11 +5439,11 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       }
       else {
         if (retval == 0) {
-          if (*maxseqlen == GT_UNDEF_ULONG
+          if (*maxseqlen == GT_UNDEF_UWORD
                 || lengthofcurrentsequence > *maxseqlen) {
             *maxseqlen = lengthofcurrentsequence;
           }
-          if (*minseqlen == GT_UNDEF_ULONG
+          if (*minseqlen == GT_UNDEF_UWORD
                || lengthofcurrentsequence < *minseqlen) {
             *minseqlen = lengthofcurrentsequence;
           }
@@ -5550,7 +5550,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       }
     }
   }
-  if (*maxseqlen == GT_UNDEF_ULONG && *minseqlen == GT_UNDEF_ULONG) {
+  if (*maxseqlen == GT_UNDEF_UWORD && *minseqlen == GT_UNDEF_UWORD) {
     *maxseqlen = *minseqlen = lengthofcurrentsequence;
   }
   gt_free(originaldistribution);
@@ -7424,8 +7424,8 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                 *classstartpositions = NULL,
                 specialranges,
                 wildcardranges,
-                minseqlen = GT_UNDEF_ULONG,
-                maxseqlen = GT_UNDEF_ULONG,
+                minseqlen = GT_UNDEF_UWORD,
+                maxseqlen = GT_UNDEF_UWORD,
                 numofallchars = 0;
   GtEncseq *encseq = NULL;
   unsigned char subsymbolmap[UCHAR_MAX+1],
@@ -8702,7 +8702,7 @@ GtEncseqBuilder* gt_encseq_builder_new(GtAlphabet *alpha)
   eb->destab = gt_str_new();
   eb->firstdesc = true;
   eb->firstseq = true;
-  eb->minseqlen = eb->maxseqlen = GT_UNDEF_ULONG;
+  eb->minseqlen = eb->maxseqlen = GT_UNDEF_UWORD;
   return eb;
 }
 
@@ -8815,9 +8815,9 @@ void gt_encseq_builder_add_cstr(GtEncseqBuilder *eb, const char *str,
     eb->plainseq[offset+i] = gt_alphabet_encode(eb->alpha, str[i]);
   }
   eb->nof_seqs++;
-  if (eb->minseqlen == GT_UNDEF_ULONG || strlen < eb->minseqlen)
+  if (eb->minseqlen == GT_UNDEF_UWORD || strlen < eb->minseqlen)
     eb->minseqlen = strlen;
-  if (eb->maxseqlen == GT_UNDEF_ULONG || strlen > eb->maxseqlen)
+  if (eb->maxseqlen == GT_UNDEF_UWORD || strlen > eb->maxseqlen)
     eb->maxseqlen = strlen;
   eb->own = true;
 }
@@ -8905,9 +8905,9 @@ static void gt_encseq_builder_add_encoded_generic(GtEncseqBuilder *eb,
     eb->nof_seqs++;
     eb->own = true;
   }
-  if (eb->minseqlen == GT_UNDEF_ULONG || strlen < eb->minseqlen)
+  if (eb->minseqlen == GT_UNDEF_UWORD || strlen < eb->minseqlen)
     eb->minseqlen = strlen;
-  if (eb->maxseqlen == GT_UNDEF_ULONG || strlen > eb->maxseqlen)
+  if (eb->maxseqlen == GT_UNDEF_UWORD || strlen > eb->maxseqlen)
     eb->maxseqlen = strlen;
 }
 
@@ -8949,7 +8949,7 @@ void gt_encseq_builder_reset(GtEncseqBuilder *eb)
   gt_str_reset(eb->destab);
   eb->own = false;
   eb->nof_seqs = 0;
-  eb->minseqlen = eb->maxseqlen = GT_UNDEF_ULONG;
+  eb->minseqlen = eb->maxseqlen = GT_UNDEF_UWORD;
   eb->seqlen = 0;
   eb->allocated = 0;
   eb->firstdesc = true;

@@ -108,19 +108,19 @@ static bool ltr_candidates_compatible(GtGenomeNode *candidate1,
       if (clid1 != NULL)
         (void) sscanf(clid1, ""GT_LU"", &clnum1);
       else
-        clnum1 = GT_UNDEF_ULONG;
+        clnum1 = GT_UNDEF_UWORD;
       clid2 = gt_feature_node_get_attribute(curnode2, "clid");
       if (clid2 != NULL)
         (void) sscanf(clid2, ""GT_LU"", &clnum2);
       else
-        clnum2 = GT_UNDEF_ULONG;
+        clnum2 = GT_UNDEF_UWORD;
       if (clnum1 == clnum2) {
-        if ((clnum1 != GT_UNDEF_ULONG) && (clnum2 != GT_UNDEF_ULONG))
+        if ((clnum1 != GT_UNDEF_UWORD) && (clnum2 != GT_UNDEF_UWORD))
           seen_a = true;
         compatible = true;
       }
-      else if ((clnum1 == GT_UNDEF_ULONG && clnum2 != GT_UNDEF_ULONG) ||
-               (clnum1 != GT_UNDEF_ULONG && clnum2 == GT_UNDEF_ULONG))
+      else if ((clnum1 == GT_UNDEF_UWORD && clnum2 != GT_UNDEF_UWORD) ||
+               (clnum1 != GT_UNDEF_UWORD && clnum2 == GT_UNDEF_UWORD))
         compatible = true;
       else if (clnum1 != clnum2) {
         compatible = false;

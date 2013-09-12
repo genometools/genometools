@@ -62,7 +62,7 @@ static GtUword* compute_prefixtab(const char *p, GtUword m)
   char b;
   gt_assert(p);
   prefixtab = gt_malloc(sizeof (GtUword) * (m+1));
-  prefixtab[0] = GT_UNDEF_ULONG; /* paranoia */
+  prefixtab[0] = GT_UNDEF_UWORD; /* paranoia */
   if (m)
     prefixtab[1] = 0;
   for (i = 2; i <= m; i++) {
@@ -234,10 +234,10 @@ int gt_string_matching_unit_test(GtError *err)
       p[j] = gt_rand_char();
     p[m] = '\0';
     /* matching (first match) */
-    brute_force_match = GT_UNDEF_ULONG;
-    bmh_match = GT_UNDEF_ULONG;
-    kmp_match = GT_UNDEF_ULONG;
-    shift_and_match = GT_UNDEF_ULONG;
+    brute_force_match = GT_UNDEF_UWORD;
+    bmh_match = GT_UNDEF_UWORD;
+    kmp_match = GT_UNDEF_UWORD;
+    shift_and_match = GT_UNDEF_UWORD;
     gt_string_matching_brute_force(s, n, p, m, store_first_match,
                                 &brute_force_match);
     gt_string_matching_bmh(s, n, p, m, store_first_match, &bmh_match);

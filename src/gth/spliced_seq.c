@@ -160,5 +160,5 @@ GtUword gth_spliced_seq_orig_to_spliced_pos(const GthSplicedSeq
                           sizeof (GtUword), cmpulong);
   if (splicedposptr)
     return splicedposptr - spliced_seq->positionmapping;
-  return GT_UNDEF_ULONG;
+  return GT_UNDEF_UWORD;
 }

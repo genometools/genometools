@@ -41,12 +41,12 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                                     mapped4info->kmersize),
                             mapped4info->kmersize);
     transcode = GT_ISDIRCOMPLEMENT(readmode)
-                  ? gt_kmercode_complement(code,mapped4info->maskright)
+                  ? gt_kmercode_complement(code, mapped4info->maskright)
                   : code;
     GT_ENCSEQ_RELPOS_SEQNUM_CHECK(GT_ADJUSTREVERSEPOS(mapped4info->rightbound,
                                                       position));
-    PROCESSKMERCODE(processkmercodeinfo,true,
-                    GT_ADJUSTREVERSEPOS(mapped4info->rightbound,position),
+    PROCESSKMERCODE(processkmercodeinfo, true,
+                    GT_ADJUSTREVERSEPOS(mapped4info->rightbound, position),
                     specialfreeunit,
                     relpos,
                     transcode);
@@ -60,14 +60,14 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
       position--;
       relpos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      GT_UPDATEKMER(code,cc,mapped4info->maskright);
+      GT_UPDATEKMER(code, cc, mapped4info->maskright);
       transcode = (readmode == GT_READMODE_REVCOMPL)
-                    ? gt_kmercode_complement(code,mapped4info->maskright)
+                    ? gt_kmercode_complement(code, mapped4info->maskright)
                     : code;
       GT_ENCSEQ_RELPOS_SEQNUM_CHECK(GT_ADJUSTREVERSEPOS(mapped4info->rightbound,
                                                         position));
       PROCESSKMERCODE(processkmercodeinfo, false,
-                      GT_ADJUSTREVERSEPOS(mapped4info->rightbound,position),
+                      GT_ADJUSTREVERSEPOS(mapped4info->rightbound, position),
                       specialfreeunit,
                       relpos,
                       transcode);
@@ -92,7 +92,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                    position,
                                    mapped4info->kmersize);
     transcode = GT_ISDIRCOMPLEMENT(readmode)
-                  ? gt_kmercode_complement(code,mapped4info->maskright)
+                  ? gt_kmercode_complement(code, mapped4info->maskright)
                   : code;
     GT_ENCSEQ_RELPOS_SEQNUM_CHECK(position);
     PROCESSKMERCODE(processkmercodeinfo, true, position, specialfreeunit,
@@ -109,13 +109,13 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
       position++;
       relpos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      GT_UPDATEKMER(code,cc,mapped4info->maskright);
+      GT_UPDATEKMER(code, cc, mapped4info->maskright);
       transcode = (readmode == GT_READMODE_COMPL)
-                    ? gt_kmercode_complement(code,mapped4info->maskright)
+                    ? gt_kmercode_complement(code, mapped4info->maskright)
                     : code;
       GT_ENCSEQ_RELPOS_SEQNUM_CHECK(position);
-      PROCESSKMERCODE(processkmercodeinfo,false,position,specialfreeunit,relpos,
-                      transcode);
+      PROCESSKMERCODE(processkmercodeinfo, false, position, specialfreeunit,
+                      relpos, transcode);
       if (shiftright > 0)
       {
         shiftright -= 2;
@@ -182,7 +182,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
       GtCodetype newcode;
       if (GT_ISDIRCOMPLEMENT(readmode))
       {
-        lastcode = gt_kmercode_complement(lastcode,mapped4info->maskright);
+        lastcode = gt_kmercode_complement(lastcode, mapped4info->maskright);
       }
       newcode = ((lastcode << 2) | 3UL) & mapped4info->maskright;
       PROCESSKMERCODESPECIAL(processkmerspecialinfo,
@@ -203,7 +203,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
       unsigned int fillpos;
 
       fillpos = (unsigned int) (mapped4info->kmersize - (endpos - startpos));
-      lastcode = gt_kmercode_at_position(mapped4info->twobitencoding,startpos,
+      lastcode = gt_kmercode_at_position(mapped4info->twobitencoding, startpos,
                                          (unsigned int) (endpos - startpos));
       if (GT_ISDIRREVERSE(readmode) && (unsigned int) (endpos - startpos) > 1U)
       {
@@ -212,7 +212,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
       }
       if (GT_ISDIRCOMPLEMENT(readmode))
       {
-        lastcode = gt_kmercode_complement(lastcode,mapped4info->maskright);
+        lastcode = gt_kmercode_complement(lastcode, mapped4info->maskright);
       }
       newcode
         = ((lastcode << GT_MULT2(fillpos)) | ((1UL << GT_MULT2(fillpos)) - 1))
@@ -265,13 +265,14 @@ static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
 
     if (GT_ISDIRREVERSE(readmode))
     {
-      sri = gt_specialrangeiterator_new(encseq,false);
+      sri = gt_specialrangeiterator_new(encseq, false);
       for (specialfreeunit = 0;
-           gt_specialrangeiterator_next(sri,&range); specialfreeunit++)
+           gt_specialrangeiterator_next(sri, &range); specialfreeunit++)
       {
         gt_assert(range.end <= lastend);
-        /*printf("line %d: specialfreeunit=%lu, range %lu %lu\n",
-                 __LINE__,specialfreeunit,range.end,lastend);*/
+        /*printf("line %d: specialfreeunit=" GT_LU ", range " GT_LU " "
+                 GT_LU "\n",
+                 __LINE__, specialfreeunit, range.end, lastend);*/
         PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                            &mapped4info,
                                            specialfreeunit,
@@ -284,13 +285,14 @@ static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
       }
     } else
     {
-      sri = gt_specialrangeiterator_new(encseq,true);
-      for (specialfreeunit = 0; gt_specialrangeiterator_next(sri,&range);
+      sri = gt_specialrangeiterator_new(encseq, true);
+      for (specialfreeunit = 0; gt_specialrangeiterator_next(sri, &range);
            specialfreeunit++)
       {
         gt_assert(range.start >= laststart);
-        /*printf("region of length %lu\n",range.start - laststart);*/
-        /*printf("line %d: range %lu %lu\n",__LINE__,laststart,range.start);*/
+        /*printf("region of length " GT_LU "\n", range.start - laststart);*/
+        /*printf("line %d: range " GT_LU " " GT_LU "\n", __LINE__, laststart,
+                 range.start);*/
         PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                            &mapped4info,
                                            specialfreeunit,
@@ -306,14 +308,15 @@ static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
     gt_specialrangeiterator_delete(sri);
   }
   /*
-  printf("line %d: specialfreeunit=%lu,range %lu %lu\n",__LINE__,
-                                     specialfreeunit,
-                                     GT_ISDIRREVERSE(readmode)
-                                       ? 0
-                                       : laststart,
-                                     GT_ISDIRREVERSE(readmode)
-                                       ? lastend
-                                       : mapped4info.totallength);*/
+  printf("line %d: specialfreeunit=" GT_LU ", range " GT_LU " " GT_LU "\n",
+         __LINE__,
+         specialfreeunit,
+         GT_ISDIRREVERSE(readmode)
+         ? 0
+         : laststart,
+         GT_ISDIRREVERSE(readmode)
+         ? lastend
+         : mapped4info.totallength);*/
   PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                      &mapped4info,
                                      specialfreeunit,

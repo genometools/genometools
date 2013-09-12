@@ -751,9 +751,9 @@ gt_SRLPrintRangesInfo(struct seqRangeList *rangeList,
       fputs("\n", fp);
     }
     if (result +=
-        fprintf(fp, "# range overlap: symbol %u, start="GT_LU", length="GT_LU"\n",
-                MRAEncRevMapSymbol(rangeList->alphabet,
-                                   seqRangeSym(nextRange, symBits)),
+        fprintf(fp, "# range overlap: symbol %u, start="GT_LU", length="
+                GT_LU"\n", MRAEncRevMapSymbol(rangeList->alphabet,
+                                              seqRangeSym(nextRange, symBits)),
                 nextRange->startPos, seqRangeLen(nextRange, symBits)) < 0)
     {
       result = -1;

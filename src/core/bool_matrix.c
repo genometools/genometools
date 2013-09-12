@@ -83,7 +83,7 @@ GtUword gt_bool_matrix_get_first_column(const GtBoolMatrix *bm,
     if ((bt = *(GtDynBittab**) gt_array_get(bm->dyn_bittabs, firstdim)))
       return gt_dyn_bittab_get_first_bitnum(bt);
   }
-  return GT_UNDEF_ULONG;
+  return GT_UNDEF_UWORD;
 }
 
 GtUword gt_bool_matrix_get_last_column(const GtBoolMatrix *bm,
@@ -95,7 +95,7 @@ GtUword gt_bool_matrix_get_last_column(const GtBoolMatrix *bm,
     if ((bt = *(GtDynBittab**) gt_array_get(bm->dyn_bittabs, firstdim)))
       return gt_dyn_bittab_get_last_bitnum(bt);
   }
-  return GT_UNDEF_ULONG;
+  return GT_UNDEF_UWORD;
 }
 
 GtUword gt_bool_matrix_get_next_column(const GtBoolMatrix *bm,
@@ -108,7 +108,7 @@ GtUword gt_bool_matrix_get_next_column(const GtBoolMatrix *bm,
     if ((bt = *(GtDynBittab**) gt_array_get(bm->dyn_bittabs, firstdim)))
       return gt_dyn_bittab_get_next_bitnum(bt, i);
   }
-  return GT_UNDEF_ULONG;
+  return GT_UNDEF_UWORD;
 }
 
 void gt_bool_matrix_delete(GtBoolMatrix *bm)

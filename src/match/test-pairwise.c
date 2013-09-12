@@ -191,8 +191,8 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
 #endif
   if (edist1 != edist2)
   {
-    fprintf(stderr,"greedyunitedist = "GT_LU" != "GT_LU" = gt_squarededistunit\n",
-                   edist1,edist2);
+    fprintf(stderr,"greedyunitedist = "GT_LU" != "GT_LU
+            " = gt_squarededistunit\n", edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_seqabstract_delete(greedyedistuseq);

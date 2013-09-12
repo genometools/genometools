@@ -54,7 +54,7 @@ static void evalnewexonifpossible(bool proteineop, bool *newexon,
         splicedpos =
           gth_spliced_seq_orig_to_spliced_pos(spliced_seq,
                   gt_safe_cast2ulong(travstate->genomicptr - 1 + gen_dp_start));
-        if (splicedpos == GT_UNDEF_ULONG) {
+        if (splicedpos == GT_UNDEF_UWORD) {
           /* XXX: no spliced position has been found -> this is an artificially
              introduced intron, use 0.0 as acceptor site probabilty */
           intron->acceptorsiteprobability = 0.0;
@@ -156,7 +156,7 @@ static void evalnewintronifpossible(bool proteineop, bool *newexon,
         splicedpos =
           gth_spliced_seq_orig_to_spliced_pos(spliced_seq,
                       gt_safe_cast2ulong(travstate->genomicptr + gen_dp_start));
-        if (splicedpos == GT_UNDEF_ULONG) {
+        if (splicedpos == GT_UNDEF_UWORD) {
           /* XXX: no spliced position has been found -> this is an artificially
              introduced intron, use 0.0 as donor site probabilty */
           intron->donorsiteprobability = 0.0;
@@ -651,10 +651,10 @@ void gth_compute_scores(GthSA *sa,
   data.maxoverallexonweight           = (GthFlt) 0.0;
   data.cumulativelengthofscoredexons  = 0;
 
-  data.exon.leftgenomicexonborder     = GT_UNDEF_ULONG;
-  data.exon.rightgenomicexonborder    = GT_UNDEF_ULONG;
-  data.exon.leftreferenceexonborder   = GT_UNDEF_ULONG;
-  data.exon.rightreferenceexonborder  = GT_UNDEF_ULONG;
+  data.exon.leftgenomicexonborder     = GT_UNDEF_UWORD;
+  data.exon.rightgenomicexonborder    = GT_UNDEF_UWORD;
+  data.exon.leftreferenceexonborder   = GT_UNDEF_UWORD;
+  data.exon.rightreferenceexonborder  = GT_UNDEF_UWORD;
   data.exon.exonscore                 = GTH_UNDEF_GTHDBL;
 
   data.intron.donorsiteprobability    = GTH_UNDEF_GTHFLT;

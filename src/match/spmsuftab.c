@@ -46,8 +46,8 @@ GtSpmsuftab *gt_spmsuftab_new(GtUword numofentries,
   } else
   {
     gt_logger_log(logger,"use "GT_LU" bitpackarray-entries for all "
-                         "seqnum/relpos-pairs (%u bits each,"GT_LU" bytes total)",
-                         numofentries,bitsforseqnumrelpos,required);
+                  "seqnum/relpos-pairs (%u bits each,"GT_LU" bytes total)",
+                  numofentries,bitsforseqnumrelpos,required);
     spmsuftab->bitpackarray
       = gt_compact_ulong_store_new(numofentries,bitsforseqnumrelpos);
     spmsuftab->usebitsforpositions = false;

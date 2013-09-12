@@ -256,7 +256,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                                &arguments->minltrlength,
                                100UL,
                                1UL,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionminlenltr);
 
   /* -maxlenltr */
@@ -265,7 +265,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                                &arguments->maxltrlength,
                                1000UL,
                                1UL,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmaxlenltr);
 
   /* -mindistltr */
@@ -275,7 +275,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                                &arguments->mindistance,
                                1000UL,
                                1UL,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmindistltr);
 
   /* -maxdistltr */
@@ -285,7 +285,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                                &arguments->maxdistance,
                                15000UL,
                                1UL,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmaxdistltr);
 
   /* -similar */

@@ -56,7 +56,7 @@
         ~0U
 
 /* The undefined <GtUword> value. */
-#define GT_UNDEF_ULONG \
+#define GT_UNDEF_UWORD \
         ~0UL
 
 #endif

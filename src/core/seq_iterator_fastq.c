@@ -232,14 +232,13 @@ static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
   }
   /* expect newline at end of qualities */
   if (currentchar != GT_FASTQ_NEWLINESYMBOL) {
-    gt_error_set(err, "qualities string of sequence length "GT_LU" is not ended "
-                      "by newline in file '%s', line "GT_LU" -- this may be a "
-                      "sign for sequence and qualities strings of different "
-                      "length",
-                      gt_str_length(seqit->sequencebuffer),
-                      gt_str_array_get(seqit->filenametab,
-                                       seqit->filenum),
-                      seqit->curline-1);
+    gt_error_set(err, "qualities string of sequence length " GT_LU
+                 " is not ended by newline in file '%s', line "
+                 GT_LU " -- this may be a sign for sequence and qualities "
+                 "strings of different length",
+                 gt_str_length(seqit->sequencebuffer),
+                 gt_str_array_get(seqit->filenametab, seqit->filenum),
+                 seqit->curline-1);
     return -2;
   }
   return 0;
@@ -248,10 +247,10 @@ static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
 #define gt_fastq_premature_end_check(had_err, seqit) \
   if (had_err == EOF) { \
     gt_error_set(err, "premature end of file '%s' in line "GT_LU": " \
-                      "file ended before end of block", \
-                      gt_str_array_get((seqit)->filenametab, \
-                                       (seqit)->filenum), \
-                      (GtUword) (seqit)->curline-1); \
+                 "file ended before end of block", \
+                 gt_str_array_get((seqit)->filenametab, \
+                                  (seqit)->filenum), \
+                 (GtUword) (seqit)->curline-1); \
     return -2; \
   }
 

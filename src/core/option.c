@@ -438,14 +438,14 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
       }
       else if (option->option_type == OPTION_ULONG) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.ul == GT_UNDEF_ULONG)
+        if (option->default_value.ul == GT_UNDEF_UWORD)
           gt_xputs("undefined");
         else
           printf(""GT_LU"\n", option->default_value.ul);
       }
       else if (option->option_type == OPTION_RANGE) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.r.start == GT_UNDEF_ULONG)
+        if (option->default_value.r.start == GT_UNDEF_UWORD)
           gt_xputs("undefined");
         else {
           printf(""GT_LU" "GT_LU"\n", option->default_value.r.start,
@@ -631,14 +631,14 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
       }
       else if (option->option_type == OPTION_ULONG) {
         gt_str_append_cstr(outstr, "['value']");
-        if (option->default_value.ul == GT_UNDEF_ULONG)
+        if (option->default_value.ul == GT_UNDEF_UWORD)
           gt_str_append_cstr(default_string, "undefined");
         else
           gt_str_append_ulong(default_string, option->default_value.ul);
       }
       else if (option->option_type == OPTION_RANGE) {
         gt_str_append_cstr(outstr, "['start' 'end']");
-        if (option->default_value.r.start == GT_UNDEF_ULONG)
+        if (option->default_value.r.start == GT_UNDEF_UWORD)
           gt_str_append_cstr(default_string, "undefined");
         else {
           gt_str_append_char(default_string, '[');
@@ -1732,9 +1732,9 @@ GtOption* gt_option_new_range(const char *option_str, const char *description,
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_RANGE;
   o->default_value.r.start = default_value ? default_value->start
-                                           : GT_UNDEF_ULONG;
+                                           : GT_UNDEF_UWORD;
   o->default_value.r.end   = default_value ? default_value->end
-                                           : GT_UNDEF_ULONG;
+                                           : GT_UNDEF_UWORD;
   value->start = o->default_value.r.start;
   value->end   = o->default_value.r.end;
   return o;

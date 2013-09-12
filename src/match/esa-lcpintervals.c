@@ -45,7 +45,8 @@ static void showbranchingedgeDFS(bool firstsucc,GtUword fd,
                                  GtUword flb,
                                  GtUword sd,GtUword slb)
 {
-  printf("B %c "GT_LU" "GT_LU" "GT_LU" "GT_LU"\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
+  printf("B %c "GT_LU" "GT_LU" "GT_LU" "GT_LU"\n",
+         firstsucc ? '1' : '0',fd,flb,sd,slb);
 }
 
 static int processleafedge_elcp(bool firstsucc,

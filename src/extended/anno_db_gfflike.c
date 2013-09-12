@@ -1318,7 +1318,7 @@ static int get_nodes_for_stmt(GtFeatureIndexGFFlike *fi,
   GtHashtable *seen_as_children = gt_hashtable_new(node_hashtype);
 
   while (!had_err && gt_rdb_stmt_exec(stmt, err) == 0) {
-    GtUword id = GT_UNDEF_ULONG, multi_rep = GT_UNDEF_ULONG, *idp;
+    GtUword id = GT_UNDEF_UWORD, multi_rep = GT_UNDEF_UWORD, *idp;
     int phase, is_multi = 0, strand = GT_STRAND_UNKNOWN;
     GtGenomeNode *newgn;
     GtFeatureNode *newfn;

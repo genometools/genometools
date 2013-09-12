@@ -285,8 +285,8 @@ GtUword gt_contigs_graph_append_vertex(GtContigsGraph *cg,
 {
   unsigned int incoming;
   gt_assert(cg->nof_v <= cg->alloc_v);
-  gt_log_log("append_vertex(nof_spm_o="GT_LU", nof_spm_i="GT_LU", nof_units="GT_LU")",
-      nof_spm_o, nof_spm_i, nof_units);
+  gt_log_log("append_vertex(nof_spm_o="GT_LU", nof_spm_i="GT_LU", nof_units="
+             GT_LU")", nof_spm_o, nof_spm_i, nof_units);
   if (cg->nof_v == cg->alloc_v)
   {
     cg->alloc_v += GT_CONTIGS_GRAPH_V_INC;
@@ -608,7 +608,8 @@ GtContigsGraphSpmEdge* gt_contigs_graph_find_spm_edge(GtContigsGraph *cg,
     GtUword cnum, unsigned int incoming, GtUword dest)
 {
   GtContigsGraphSpmEdge *edge;
-  gt_log_log("find_spm_edge(cnum="GT_LU",incoming=%u,dest="GT_LU")",cnum,incoming,dest);
+  gt_log_log("find_spm_edge(cnum="GT_LU",incoming=%u,dest="GT_LU")",
+             cnum,incoming,dest);
   for (GT_CONTIGS_GRAPH_EACH_SPM_EDGE(cg, cnum, incoming, edge))
   {
     if (edge->deleted)
@@ -748,8 +749,8 @@ void gt_contigs_graph_simplify_from_contig(GtContigsGraph *cg,
       {
         cnum = (GtUword)edge->dest;
         incoming = GT_CONTIGS_GRAPH_VALID_PATH_DIR(incoming, edge->reverse);
-        /*gt_log_log("... continue from contig "GT_LU" (incoming=%u, deg=%u)", cnum,
-            incoming, cg->v_spm[incoming][cnum].deg);*/
+        /*gt_log_log("... continue from contig "GT_LU" (incoming=%u, deg=%u)",
+                   cnum, incoming, cg->v_spm[incoming][cnum].deg);*/
       }
       else
       {

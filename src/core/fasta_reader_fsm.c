@@ -154,8 +154,9 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
         had_err = -1;
         break;
       case READING_DESCRIPTION:
-        gt_error_set(err, "unfinished fasta entry in line "GT_LU" of sequence file "
-                  "\"%s\"", line_counter, gt_str_get(fr->sequence_filename));
+        gt_error_set(err, "unfinished fasta entry in line " GT_LU
+                     " of sequence file \"%s\"",
+                     line_counter, gt_str_get(fr->sequence_filename));
         had_err = -1;
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:

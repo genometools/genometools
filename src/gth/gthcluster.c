@@ -42,7 +42,7 @@ static void storeSAincurrentPGL(GtArray *pgls, GtUword currentPGLindex,
   GthPGL *currentPGL;
 
   /* the current PGL index is defined */
-  gt_assert(currentPGLindex != GT_UNDEF_ULONG);
+  gt_assert(currentPGLindex != GT_UNDEF_UWORD);
 
   currentPGL = *(GthPGL**) gt_array_get(pgls, currentPGLindex);
 
@@ -70,7 +70,7 @@ static void saveSAtoPGLs(GtUword *gen_file_num, GtUword *maxright,
 
   /* in this case save SA */
   range = gth_sa_range_forward(sa);
-  if ((*gen_file_num == GT_UNDEF_ULONG) ||
+  if ((*gen_file_num == GT_UNDEF_UWORD) ||
       (gth_sa_gen_file_num(sa) != *gen_file_num) ||
       (range.start > *maxright)) {
     storeSAinnewPGL(pgls, currentPGLindex, sa);
@@ -93,7 +93,7 @@ static void saveSAtoPGLs(GtUword *gen_file_num, GtUword *maxright,
 #ifndef NDEBUG
 static bool cluster_is_consistent(GtArray *pgls)
 {
-  GtUword i, j, maxright = GT_UNDEF_ULONG, gen_file_num = GT_UNDEF_ULONG;
+  GtUword i, j, maxright = GT_UNDEF_UWORD, gen_file_num = GT_UNDEF_UWORD;
   GthPGL *pgl;
   bool strandsign = GT_UNDEF_BOOL;
   GthSA *sa;
@@ -155,12 +155,12 @@ void gthclusterSAstoPGLs(GtArray *pgls, GthSACollection *sa_collection)
   gt_assert(sa_collection);
 
   /* init */
-  forwardgen_file_num   = GT_UNDEF_ULONG;
-  forwardmaxright         = GT_UNDEF_ULONG;
-  forward_currentPGLindex = GT_UNDEF_ULONG;
-  reversegen_file_num   = GT_UNDEF_ULONG;
-  reversemaxright         = GT_UNDEF_ULONG;
-  reverse_currentPGLindex = GT_UNDEF_ULONG;
+  forwardgen_file_num   = GT_UNDEF_UWORD;
+  forwardmaxright         = GT_UNDEF_UWORD;
+  forward_currentPGLindex = GT_UNDEF_UWORD;
+  reversegen_file_num   = GT_UNDEF_UWORD;
+  reversemaxright         = GT_UNDEF_UWORD;
+  reverse_currentPGLindex = GT_UNDEF_UWORD;
 
   /* cluster the SAs */
   iterator = gth_sa_collection_iterator_new(sa_collection);

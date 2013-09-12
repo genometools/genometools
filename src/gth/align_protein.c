@@ -683,10 +683,10 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
   GtUword genptr          = gen_dp_length, last_genptr = 0,
                 genptr_tail     = gen_dp_length,
                 refptr          = ref_dp_length,
-                GT_UNUSED dummy_index     = GT_UNDEF_ULONG,
-                dummy_b2_genptr = GT_UNDEF_ULONG,
-                dummy_b3_genptr = GT_UNDEF_ULONG,
-                dummy_c3_genptr = GT_UNDEF_ULONG;
+                GT_UNUSED dummy_index     = GT_UNDEF_UWORD,
+                dummy_b2_genptr = GT_UNDEF_UWORD,
+                dummy_b3_genptr = GT_UNDEF_UWORD,
+                dummy_c3_genptr = GT_UNDEF_UWORD;
 #ifndef NDEBUG
   GtUword numofincludedintrons = 0;
 #endif
@@ -762,11 +762,12 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
             }
             else {
               if (comments) {
-                gt_file_xprintf(outfp, "%c abort backtracing, intron cutout "
-                                   "at p=%s (genpos="GT_LU" (actual strand!))\n",
-                                   COMMENTCHAR,
-                                   showretracenames((Retrace) pathtype),
-                                   spliced_seq->positionmapping[genptr]);
+                gt_file_xprintf(outfp,
+                                "%c abort backtracing, intron cutout at p=%s "
+                                "(genpos=" GT_LU " (actual strand!))\n",
+                                COMMENTCHAR,
+                                showretracenames((Retrace) pathtype),
+                                spliced_seq->positionmapping[genptr]);
               }
               return GTH_ERROR_CUTOUT_NOT_IN_INTRON;
             }
@@ -861,8 +862,8 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
           case IB_N2M:
             /* add dummy */
             gth_backtrace_path_add_dummy(backtrace_path);
-            gt_assert(dummy_b2_genptr == GT_UNDEF_ULONG);
-            gt_assert(dummy_b3_genptr == GT_UNDEF_ULONG);
+            gt_assert(dummy_b2_genptr == GT_UNDEF_UWORD);
+            gt_assert(dummy_b3_genptr == GT_UNDEF_UWORD);
 
             dummystatus     = DUMMY_STATUS_UNDEFINED;
             dummy_b3_genptr = genptr - 1;
@@ -875,7 +876,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
           case IC_N1M:
             /* add dummy */
             gth_backtrace_path_add_dummy(backtrace_path);
-            gt_assert(dummy_c3_genptr == GT_UNDEF_ULONG);
+            gt_assert(dummy_c3_genptr == GT_UNDEF_UWORD);
 
             dummystatus     = DUMMY_STATUS_UNDEFINED;
             dummy_c3_genptr = genptr - 1;
@@ -917,8 +918,8 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
               skipdummyprocessing = false;
             else {
               /* resolve dummy */
-              gt_assert(dummy_b2_genptr != GT_UNDEF_ULONG);
-              gt_assert(dummy_b3_genptr != GT_UNDEF_ULONG);
+              gt_assert(dummy_b2_genptr != GT_UNDEF_UWORD);
+              gt_assert(dummy_b3_genptr != GT_UNDEF_UWORD);
 
               codon = gthgetcodon(gen_seq_tran[genptr - 2],
                                   gen_seq_tran[dummy_b2_genptr],
@@ -927,9 +928,9 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
               gth_backtrace_path_set_dummy(backtrace_path, codon
                                        == ref_seq_orig[refptr]);
               dummystatus     = DUMMY_JUST_SET;
-              dummy_index     = GT_UNDEF_ULONG;
-              dummy_b2_genptr = GT_UNDEF_ULONG;
-              dummy_b3_genptr = GT_UNDEF_ULONG;
+              dummy_index     = GT_UNDEF_UWORD;
+              dummy_b2_genptr = GT_UNDEF_UWORD;
+              dummy_b3_genptr = GT_UNDEF_UWORD;
             }
             genptr-= 2;
             actualstate = E_STATE;
@@ -951,7 +952,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
               skipdummyprocessing = false;
             else {
               /* resolve dummy here */
-              gt_assert(dummy_c3_genptr != GT_UNDEF_ULONG);
+              gt_assert(dummy_c3_genptr != GT_UNDEF_UWORD);
 
               codon = gthgetcodon(gen_seq_tran[genptr - 3],
                                   gen_seq_tran[genptr - 2],
@@ -960,8 +961,8 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
               gth_backtrace_path_set_dummy(backtrace_path, codon
                                        == ref_seq_orig[refptr]);
               dummystatus     = DUMMY_JUST_SET;
-              dummy_index     = GT_UNDEF_ULONG;
-              dummy_c3_genptr = GT_UNDEF_ULONG;
+              dummy_index     = GT_UNDEF_UWORD;
+              dummy_c3_genptr = GT_UNDEF_UWORD;
             }
             genptr-= 3;
             actualstate = E_STATE;

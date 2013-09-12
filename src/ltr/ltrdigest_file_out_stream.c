@@ -384,10 +384,10 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtLTRdigestFileOutStream *ls;
   GtFeatureNode *fn;
-  GtRange lltr_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
-          rltr_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
-          ppt_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG},
-          pbs_rng = {GT_UNDEF_ULONG, GT_UNDEF_ULONG};
+  GtRange lltr_rng = {GT_UNDEF_UWORD, GT_UNDEF_UWORD},
+          rltr_rng = {GT_UNDEF_UWORD, GT_UNDEF_UWORD},
+          ppt_rng = {GT_UNDEF_UWORD, GT_UNDEF_UWORD},
+          pbs_rng = {GT_UNDEF_UWORD, GT_UNDEF_UWORD};
   int had_err;
   GtUword i=0;
 
@@ -453,17 +453,12 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
       rltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.rightLTR);
       rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
       gt_file_xprintf(ls->tabout_file,
-                         ""GT_LU"\t"GT_LU"\t"GT_LU"\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"GT_LU"\t",
-                         rng.start,
-                         rng.end,
-                         gt_ltrelement_length(&ls->element),
-                         ls->element.seqid,
-                         lltr_rng.start,
-                         lltr_rng.end,
-                         gt_ltrelement_leftltrlen(&ls->element),
-                         rltr_rng.start,
-                         rltr_rng.end,
-                         gt_ltrelement_rightltrlen(&ls->element));
+                      GT_LU"\t"GT_LU"\t"GT_LU"\t%s\t"GT_LU"\t"GT_LU"\t"GT_LU"\t"
+                      GT_LU"\t"GT_LU"\t"GT_LU"\t",
+                      rng.start, rng.end, gt_ltrelement_length(&ls->element),
+                      ls->element.seqid, lltr_rng.start, lltr_rng.end,
+                      gt_ltrelement_leftltrlen(&ls->element), rltr_rng.start,
+                      rltr_rng.end, gt_ltrelement_rightltrlen(&ls->element));
     }
     seq = gt_str_new();
 

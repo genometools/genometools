@@ -55,9 +55,10 @@ static int parse_alphabet_line(GtArray *index_to_alpha_char_mapping,
   gt_assert(!gt_array_size(index_to_alpha_char_mapping));
   while ((token = gt_tokenizer_get_token(tz))) {
     if (gt_str_length(token) > 2) {
-      gt_error_set(err, "illegal character token '%s' on line "GT_LU" in file '%s'",
-                gt_str_get(token), gt_tokenizer_get_line_number(tz),
-                gt_tokenizer_get_filename(tz));
+      gt_error_set(err, "illegal character token '%s' on line " GT_LU
+                   " in file '%s'", gt_str_get(token),
+                   gt_tokenizer_get_line_number(tz),
+                   gt_tokenizer_get_filename(tz));
       had_err = -1;
       break;
     }
@@ -65,8 +66,8 @@ static int parse_alphabet_line(GtArray *index_to_alpha_char_mapping,
     amino_acid = tokenstr[0];
     /* check for character duplications */
     if (parsed_characters[(int) amino_acid]) {
-      gt_error_set(err, "the character '%c' appears more then once on line "GT_LU" "
-                   "in file  '%s'", amino_acid,
+      gt_error_set(err, "the character '%c' appears more then once on line "
+                   GT_LU "in file  '%s'", amino_acid,
                    gt_tokenizer_get_line_number(tz),
                    gt_tokenizer_get_filename(tz));
       had_err = -1;
@@ -82,8 +83,8 @@ static int parse_alphabet_line(GtArray *index_to_alpha_char_mapping,
     gt_array_add(index_to_alpha_char_mapping, amino_acid);
     if (gt_str_length(token) == 2) {
       if (tokenstr[1] != '\n') {
-        gt_error_set(err, "illegal character token '%s' on line "GT_LU" in file "
-                     "'%s'", gt_str_get(token),
+        gt_error_set(err, "illegal character token '%s' on line " GT_LU
+                     " in file '%s'", gt_str_get(token),
                      gt_tokenizer_get_line_number(tz),
                      gt_tokenizer_get_filename(tz));
         had_err = -1;
@@ -122,16 +123,17 @@ static int parse_score_line(GtScoreMatrix *sm, GtTokenizer *tz,
   token = gt_tokenizer_get_token(tz);
   gt_assert(token);
   if (gt_str_length(token) != 1) {
-    gt_error_set(err, "illegal character token '%s' on line "GT_LU" in file '%s'",
-                 gt_str_get(token), gt_tokenizer_get_line_number(tz),
+    gt_error_set(err, "illegal character token '%s' on line " GT_LU
+                 " in file '%s'", gt_str_get(token),
+                 gt_tokenizer_get_line_number(tz),
                  gt_tokenizer_get_filename(tz));
     had_err = -1;
   }
   amino_acid = gt_str_get(token)[0];
   /* check for character duplications */
   if (parsed_characters[(int) amino_acid]) {
-    gt_error_set(err, "multiple character '%c' entry on line "GT_LU" in file '%s'",
-                 amino_acid, gt_tokenizer_get_line_number(tz),
+    gt_error_set(err, "multiple character '%c' entry on line " GT_LU
+                 " in file '%s'", amino_acid, gt_tokenizer_get_line_number(tz),
                  gt_tokenizer_get_filename(tz));
     had_err = -1;
   }

@@ -181,7 +181,9 @@ static GtSainseq *gt_sainseq_new_from_array(GtUword *arr,
     sainseq->bucketfillptrpoints2suftab = true;
   } else
   {
-    /*printf("bucketfillptr requires "GT_LU" entries and only "GT_LU" are left\n",
+    /*
+    printf("bucketfillptr requires "GT_LU" entries and only "
+           GT_LU" are left\n",
            numofchars,suftabentries - firstusable);*/
     sainseq->bucketfillptrpoints2suftab = false;
     sainseq->bucketfillptr = gt_malloc(sizeof (*sainseq->bucketfillptr) *
@@ -1046,9 +1048,10 @@ static void gt_sain_checkorder(const GtSainseq *sainseq,
 
     if (cmp != -1)
     {
-      fprintf(stderr,"%s: check interval ["GT_LU","GT_LU"] at idx="GT_LU": suffix "
-                     ""GT_LU" >= "GT_LU"\n",__func__,start,end,idx,suftab[idx-1],
-                     suftab[idx]);
+      fprintf(stderr,
+              "%s: check interval ["GT_LU","GT_LU"] at idx="GT_LU": suffix "
+              ""GT_LU" >= "GT_LU"\n",__func__,start,end,idx,suftab[idx-1],
+              suftab[idx]);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }

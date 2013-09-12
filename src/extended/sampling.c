@@ -294,7 +294,7 @@ GtUword gt_sampling_get_next_elementnum(GtSampling *sampling)
     case GT_SAMPLING_PAGES:
       return sampling->page_sampling[sampling->current_sample_num + 1];
     default:
-      return GT_UNDEF_ULONG;
+      return GT_UNDEF_UWORD;
   }
 }
 

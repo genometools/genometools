@@ -162,13 +162,13 @@ static int traverse_units(lua_State *L,
   }
   if (!had_err && files_added != unit_info->num_of_files) {
     had_err = -1;
-    gt_error_set(err, "number of files in index ("GT_LU") and unitfile ("GT_LU")! "
-                 "differ!", unit_info->num_of_files, files_added);
+    gt_error_set(err, "number of files in index (" GT_LU ") and unitfile ("
+                 GT_LU ")! differ!", unit_info->num_of_files, files_added);
   }
   if (!had_err) {
     GtUword file_idx;
     for (file_idx = 0; file_idx < unit_info->num_of_files; file_idx++) {
-      gt_log_log("file: "GT_LU" belongs to genome: %s",
+      gt_log_log("file: " GT_LU " belongs to genome: %s",
                  file_idx,
                  gt_str_array_get(unit_info->genome_names,
                                   unit_info->map_files[file_idx]));

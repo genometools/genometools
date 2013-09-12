@@ -130,11 +130,11 @@
               (*numofseparators)++;
 #endif
 #ifdef WITHCOUNTMINMAX
-             if (*maxseqlen == GT_UNDEF_ULONG
+             if (*maxseqlen == GT_UNDEF_UWORD
                     || lengthofcurrentsequence > *maxseqlen) {
                 *maxseqlen = lengthofcurrentsequence;
               }
-              if (*minseqlen == GT_UNDEF_ULONG
+              if (*minseqlen == GT_UNDEF_UWORD
                    || lengthofcurrentsequence < *minseqlen) {
                 *minseqlen = lengthofcurrentsequence;
               }

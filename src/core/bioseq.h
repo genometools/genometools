@@ -64,7 +64,7 @@ GtUword gt_bioseq_get_sequence_length(const GtBioseq*,
 GtUword gt_bioseq_get_total_length(const GtBioseq*);
 GtUword gt_bioseq_number_of_sequences(GtBioseq*);
 /* Return the index of the (first) sequence with given <MD5> contained in
-   <bioseq>, if it exists. Otherwise <GT_UNDEF_ULONG> is returned. */
+   <bioseq>, if it exists. Otherwise <GT_UNDEF_UWORD> is returned. */
 GtUword gt_bioseq_md5_to_index(GtBioseq *bioseq, const char *MD5);
 
 /* Shows a <bioseq> on <outfp> (in fasta format).

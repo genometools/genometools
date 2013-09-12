@@ -64,19 +64,19 @@ static GtOptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
   option = gt_option_new_uword("minlength",
                                "set minimum length a sequence must "
                                "have to pass the filter", &arguments->minlength,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, option);
 
   /* -maxlength */
   option = gt_option_new_uword("maxlength", "set maximum length a sequence can "
                                "have to pass the filter", &arguments->maxlength,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, option);
 
   /* -maxseqnum */
   option = gt_option_new_uword("maxseqnum", "set the maximum number of "
                                "sequences which can pass the filter",
-                               &arguments->maxseqnum, GT_UNDEF_ULONG);
+                               &arguments->maxseqnum, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, option);
 
   /* -width */
@@ -106,11 +106,11 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
     for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
       char *seq;
-      if ((arguments->minlength == GT_UNDEF_ULONG ||
+      if ((arguments->minlength == GT_UNDEF_UWORD ||
            gt_bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
-          (arguments->maxlength == GT_UNDEF_ULONG ||
+          (arguments->maxlength == GT_UNDEF_UWORD ||
            gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength) &&
-          (arguments->maxseqnum == GT_UNDEF_ULONG ||
+          (arguments->maxseqnum == GT_UNDEF_UWORD ||
            passed + 1 <= arguments->maxseqnum)) {
         seq = gt_bioseq_get_sequence(bioseq, i);
         gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),

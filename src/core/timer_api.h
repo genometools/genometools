@@ -41,10 +41,9 @@ void     gt_timer_stop(GtTimer *timer);
    The timer is then stopped. */
 void     gt_timer_show(GtTimer *timer, FILE *fp);
 /* Output the current state of <timer> in a user-defined format given by <fmt>.
-   <fmt> must be a format string for four "GT_LD" numbers, which are filled with:
-   elapsed seconds, elapsed microseconds, used usertime in seconds,
-   system time in seconds. The output is written to <fp>. The timer is then
-   stopped. */
+   <fmt> must be a format string for four "GT_LD" numbers, which are filled
+   with: elapsed seconds, elapsed microseconds, used usertime in seconds, system
+   time in seconds. The output is written to <fp>. The timer is then stopped. */
 void     gt_timer_show_formatted(GtTimer *timer, const char *fmt, FILE *fp);
 /* Output the current state of <timer> on <fp> since the last call of
    <gt_timer_show_progress()> or the last start of <timer>, along with the

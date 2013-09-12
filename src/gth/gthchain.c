@@ -43,10 +43,10 @@ typedef struct {
 GthChain* gth_chain_new(void)
 {
   GthChain *chain = gt_calloc(1, sizeof *chain);
-  chain->gen_file_num  = GT_UNDEF_ULONG;
-  chain->gen_seq_num   = GT_UNDEF_ULONG;
-  chain->ref_file_num  = GT_UNDEF_ULONG;
-  chain->ref_seq_num   = GT_UNDEF_ULONG;
+  chain->gen_file_num  = GT_UNDEF_UWORD;
+  chain->gen_seq_num   = GT_UNDEF_UWORD;
+  chain->ref_file_num  = GT_UNDEF_UWORD;
+  chain->ref_seq_num   = GT_UNDEF_UWORD;
   chain->forwardranges = gt_array_new(sizeof (GtRange));
   chain->reverseranges = gt_array_new(sizeof (GtRange));
   return chain;
@@ -66,12 +66,12 @@ void gth_chain_delete(GthChain *chain)
 
 static void inverted_chain_init(GthInvertedChain *inverted_chain)
 {
-  inverted_chain->gen_file_num  = GT_UNDEF_ULONG;
-  inverted_chain->gen_seq_num   = GT_UNDEF_ULONG;
-  inverted_chain->ref_file_num  = GT_UNDEF_ULONG;
-  inverted_chain->ref_seq_num   = GT_UNDEF_ULONG;
-  inverted_chain->startpos      = GT_UNDEF_ULONG;
-  inverted_chain->endpos        = GT_UNDEF_ULONG;
+  inverted_chain->gen_file_num  = GT_UNDEF_UWORD;
+  inverted_chain->gen_seq_num   = GT_UNDEF_UWORD;
+  inverted_chain->ref_file_num  = GT_UNDEF_UWORD;
+  inverted_chain->ref_seq_num   = GT_UNDEF_UWORD;
+  inverted_chain->startpos      = GT_UNDEF_UWORD;
+  inverted_chain->endpos        = GT_UNDEF_UWORD;
   inverted_chain->forwardranges = gt_array_new(sizeof (GtRange));
 }
 
@@ -117,10 +117,10 @@ static bool chain_is_filled_and_consistent(GthChain *chain,
   GtArray *testranges;
 
   /* check of file sequence numbers are defined */
-  if (chain->gen_file_num == GT_UNDEF_ULONG ||
-      chain->gen_seq_num  == GT_UNDEF_ULONG ||
-      chain->ref_file_num == GT_UNDEF_ULONG ||
-      chain->ref_seq_num  == GT_UNDEF_ULONG) {
+  if (chain->gen_file_num == GT_UNDEF_UWORD ||
+      chain->gen_seq_num  == GT_UNDEF_UWORD ||
+      chain->ref_file_num == GT_UNDEF_UWORD ||
+      chain->ref_seq_num  == GT_UNDEF_UWORD) {
     return false;
   }
 
@@ -409,10 +409,9 @@ void gth_chain_shorten_introns(GthChain *chain, GtUword icdelta,
 
 static void showfragment(GtFragment *fragment, GtFile *outfp)
 {
-  gt_file_xprintf(outfp, "%c "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LD"\n", COMMENTCHAR,
-                  fragment->startpos1, fragment->endpos1,
-                  fragment->startpos2, fragment->endpos2, fragment->weight);
-}
+  gt_file_xprintf(outfp, "%c "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LD"\n",
+                  COMMENTCHAR, fragment->startpos1, fragment->endpos1,
+                  fragment->startpos2, fragment->endpos2, fragment->weight); }
 
 static GtUword totallengthoffragments(GtChain *chain,
                                             GtFragment *fragments)
@@ -421,7 +420,7 @@ static GtUword totallengthoffragments(GtChain *chain,
   GtUword i, fragnum;
   GtWord totallength = 0;
 
-  previousrange.end = GT_UNDEF_ULONG;
+  previousrange.end = GT_UNDEF_UWORD;
 
   for (i = 0; i < gt_chain_size(chain); i++) {
     fragnum = gt_chain_get_fragnum(chain, i);
@@ -759,10 +758,10 @@ void gth_save_chain(GtChain *chain, GtFragment *fragments,
     if (info->stopafterchaining) {
       gt_file_xprintf(info->outfp,
                       "%c gl. chain with coverage=%.2f and score "GT_LD" "
-                      "(genseq="GT_LU", str.=%c, refseq="GT_LU")\n", COMMENTCHAR,
-                      gth_chain->refseqcoverage, gt_chain_get_score(chain),
-                      gth_chain->gen_seq_num, SHOWSTRAND(info->directmatches),
-                      gth_chain->ref_seq_num);
+                      "(genseq="GT_LU", str.=%c, refseq="GT_LU")\n",
+                      COMMENTCHAR, gth_chain->refseqcoverage,
+                      gt_chain_get_score(chain), gth_chain->gen_seq_num,
+                      SHOWSTRAND(info->directmatches), gth_chain->ref_seq_num);
 
       for (i = 0; i < gt_chain_size(chain); i++)
         showfragment(fragments + gt_chain_get_fragnum(chain, i), info->outfp);

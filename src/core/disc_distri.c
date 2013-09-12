@@ -93,7 +93,7 @@ showvalue(GtUword key, GtUint64 occurrences,
 
   probability = (double) ((double) occurrences / info->num_of_occurrences);
   info->cumulative_probability += probability;
-  gt_file_xprintf(info->outfp, ""GT_LU": "GT_LLU" (prob=%.4f,cumulative=%.4f)\n",
+  gt_file_xprintf(info->outfp, GT_LU": "GT_LLU" (prob=%.4f,cumulative=%.4f)\n",
                   key, occurrences, probability, info->cumulative_probability);
   return CONTINUE_ITERATION;
 }

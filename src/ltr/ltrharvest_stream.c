@@ -1235,7 +1235,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
   ltrh_stream = gt_ltrharvest_stream_cast(ns);
   if (ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_START) {
     GT_INITARRAY(&ltrh_stream->repeatinfo.repeats, Repeat);
-    ltrh_stream->prevseqnum = GT_UNDEF_ULONG;
+    ltrh_stream->prevseqnum = GT_UNDEF_UWORD;
     if (!had_err && gt_enumeratemaxpairs(ltrh_stream->ssar,
                       ltrh_stream->encseq,
                       gt_readmodeSequentialsuffixarrayreader(ltrh_stream->ssar),
@@ -1302,7 +1302,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
       GtGenomeNode *rn;
       GtStr *seqid;
       seqnum = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
-      if (ltrh_stream->prevseqnum == GT_UNDEF_ULONG)
+      if (ltrh_stream->prevseqnum == GT_UNDEF_UWORD)
       {
         ltrh_stream->prevseqnum = seqnum;
       } else
@@ -1393,7 +1393,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
       GtUword desclen, seqnum;
       GtGenomeNode *cn;
       seqnum = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
-      if (ltrh_stream->prevseqnum == GT_UNDEF_ULONG)
+      if (ltrh_stream->prevseqnum == GT_UNDEF_UWORD)
       {
         ltrh_stream->prevseqnum = seqnum;
       } else

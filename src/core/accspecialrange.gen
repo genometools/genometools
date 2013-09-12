@@ -271,7 +271,7 @@ static void GT_APPENDINT(showSWtablewithpages)
   GtUword idx, startpos;
   GtRange range;
 
-  printf("page %lu: %lu elems at offset %lu\n",
+  printf("page " GT_LU ": " GT_LU " elems at offset " GT_LU "\n",
           pgnum, last - first + 1, offset);
   for (idx=first; idx<=last; idx++)
   {
@@ -468,8 +468,8 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
                   ? range->start + swtable->rangelengths[cellnum] + 1
                   : range->start + 1;
   /*
-  printf("new range [%lu,%lu] for rangelength=%s,maxvalue=%lu,transpagenum=%lu,"
-         "positions[cellnum=%lu]=%lu\n",
+  printf("new range [" GT_LU "," GT_LU "] for rangelength=%s,maxvalue=" GT_LU
+         ",transpagenum=" GT_LU ",positions[cellnum=" GT_LU "]=" GT_LU "\n",
          range->start,range->end,
          swtable->rangelengths == NULL ? "NULL" : "not NULL",
          swtable->maxrangevalue,transpagenum,cellnum,
@@ -516,8 +516,9 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
       cellnum = endpos0 + GT_DIV2(endpos1 - endpos0 - 1);
       GT_APPENDINT(determinerange)(&range,swtable,pagenum,cellnum);
 #ifdef GT_RANGEDEBUG
-      printf("%s: kindsw=%d: binsearch in [%lu,%lu] => mid = %lu => ",
-              __func__,(int) kindsw,endpos0,endpos1,cellnum);
+      printf("%s: kindsw=%d: binsearch in [" GT_LU "," GT_LU "] => mid = "
+             GT_LU " => ",
+             __func__, (int) kindsw, endpos0, endpos1, cellnum);
       showGtRange(&range);
       printf("\n");
 #endif
@@ -601,16 +602,16 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
                                  moveforward
                                    ? swstate->firstcell
                                    : (swstate->lastcell-1));
-    printf("%s: kindsw=%d,binary found pos %lu in ",
+    printf("%s: kindsw=%d,binary found pos " GT_LU " in ",
             __func__,(int) kindsw,esr->currentpos);
     showGtRange(&range);
-    printf(" at cell %lu in page %lu\n",
+    printf(" at cell " GT_LU " in page " GT_LU "\n",
            moveforward ? swstate->firstcell
                        : (swstate->lastcell-1),
            pagenum);
   } else
   {
-    printf("no nearby interval found for startpos %lu\n",esr->currentpos);
+    printf("no nearby interval found for startpos " GT_LU "\n",esr->currentpos);
   }
 #endif
   if (found)
@@ -753,7 +754,7 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
       swstate->lastcell--;
     }
 #ifdef GT_RANGEDEBUG
-    printf("%s: kindsw=%d, firstcell=%lu, lastcell=%lu\n",
+    printf("%s: kindsw=%d, firstcell=" GT_LU ", lastcell=" GT_LU "\n",
             __func__,(int) kindsw,
             swstate->firstcell,swstate->lastcell);
 #endif
@@ -825,8 +826,8 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
 
 #ifdef GT_RANGEDEBUG
   gt_assert(swstate != NULL);
-  printf(" %s(kindsw=%d,pos=%lu,previous=(%lu,%lu))\n",
-         __func__,(int) kindsw,
+  printf(" %s(kindsw=%d,pos=" GT_LU ",previous=(" GT_LU "," GT_LU "))\n",
+         __func__, (int) kindsw,
          esr->currentpos,
          swstate->previousrange.start,
          swstate->previousrange.end);

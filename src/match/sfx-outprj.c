@@ -65,7 +65,8 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"numofsequences="GT_LU"\n",numofsequences);
   fprintf(outprj,"numofdbsequences="GT_LU"\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
-  fprintf(outprj,"numberofallsortedsuffixes="GT_LU"\n",numberofallsortedsuffixes);
+  fprintf(outprj,"numberofallsortedsuffixes="GT_LU"\n",
+          numberofallsortedsuffixes);
   if (longest->defined)
   {
     fprintf(outprj,"longest="GT_LU"\n",longest->valueunsignedlong);

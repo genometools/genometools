@@ -665,8 +665,8 @@ static void pfxidxpartialsums(GtUword *count,
 #ifndef NDEBUG
     if (specialsinbucket != count[1])
     {
-      fprintf(stderr,"code " FormatGtCodetype ": sum = "GT_LU" != "GT_LU" = count[1]\n",
-              code,sum,count[1]);
+      fprintf(stderr,"code " FormatGtCodetype ": sum = "GT_LU" != "GT_LU
+              " = count[1]\n", code,sum,count[1]);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
@@ -1024,9 +1024,8 @@ void gt_bcktab_determinemaxsize(GtBcktab *bcktab,
   GtCodetype code;
 
 #ifdef SKDEBUG
-  printf("mincode="GT_LU",maxcode="GT_LU",partwidth="GT_LU",totallength="GT_LU"\n",
-          (GtUword) mincode,(GtUword) maxcode,
-          partwidth,totallength);
+  printf("mincode="GT_LU",maxcode="GT_LU",partwidth="GT_LU",totallength="
+         GT_LU"\n", (GtUword) mincode,(GtUword) maxcode, partwidth,totallength);
 #endif
   bcktab->maxbucketinfo.specialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.nonspecialsmaxbucketsize = 1UL;

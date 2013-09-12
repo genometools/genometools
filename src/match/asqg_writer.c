@@ -109,9 +109,9 @@ static inline void gt_asqg_writer_show_edge_line(GtFile *file,
     GtUword end2, GtUword seqlen2, bool revcompl,
     GtUword edist)
 {
-  gt_file_xprintf(file, "ED\t"GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" %c "GT_LU"\n",
-      seqnum1, seqnum2, start1, end1, seqlen1, start2, end2, seqlen2,
-      revcompl ? '1' : '0', edist);
+  gt_file_xprintf(file, "ED\t"GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LU" "
+                  GT_LU" "GT_LU" %c "GT_LU"\n", seqnum1, seqnum2, start1, end1,
+                  seqlen1, start2, end2, seqlen2, revcompl ? '1' : '0', edist);
 }
 
 void gt_spmproc_show_asgq(GtUword suffix_readnum,

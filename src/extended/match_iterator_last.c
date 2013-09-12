@@ -225,15 +225,15 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
                             GtError *err)
 {
   int had_err = 0;
-  GtUword score = GT_UNDEF_ULONG,
-                start1 = GT_UNDEF_ULONG,
-                start2 = GT_UNDEF_ULONG,
-                mlength1 = GT_UNDEF_ULONG,
-                mlength2 = GT_UNDEF_ULONG,
-                slength1 = GT_UNDEF_ULONG,
-                slength2 = GT_UNDEF_ULONG,
-                seqno1 = GT_UNDEF_ULONG,
-                seqno2 = GT_UNDEF_ULONG;
+  GtUword score = GT_UNDEF_UWORD,
+                start1 = GT_UNDEF_UWORD,
+                start2 = GT_UNDEF_UWORD,
+                mlength1 = GT_UNDEF_UWORD,
+                mlength2 = GT_UNDEF_UWORD,
+                slength1 = GT_UNDEF_UWORD,
+                slength2 = GT_UNDEF_UWORD,
+                seqno1 = GT_UNDEF_UWORD,
+                seqno2 = GT_UNDEF_UWORD;
   char strand1 = GT_UNDEF_CHAR,
        strand2 = GT_UNDEF_CHAR,
        seqid1[BUFSIZ],
@@ -246,13 +246,11 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
   had_err = gt_str_read_next_line_generic(mil->pvt->linebuf,
                                           mil->pvt->matchfile);
   if (!had_err) {
-    if (11 != sscanf(gt_str_get(mil->pvt->linebuf), ""GT_LU" %s "GT_LU" "GT_LU" %c "GT_LU" "
-                                     "%s "GT_LU" "GT_LU" %c "GT_LU"",
-                                     &score,
-                                     seqid1, &start1, &mlength1,
-                                     &strand1, &slength1,
-                                     seqid2, &start2, &mlength2,
-                                     &strand2, &slength2)) {
+    if (11 != sscanf(gt_str_get(mil->pvt->linebuf),
+                     GT_LU " %s " GT_LU " " GT_LU " %c " GT_LU " %s " GT_LU
+                     " " GT_LU " %c " GT_LU,
+                     &score, seqid1, &start1, &mlength1, &strand1, &slength1,
+                     seqid2, &start2, &mlength2, &strand2, &slength2)) {
       gt_error_set(err, "error parsing LAST output: "
                         "could not parse line '%s'",
                    gt_str_get(mil->pvt->linebuf));
@@ -260,9 +258,9 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
     }
     if (!had_err) {
       seqno1 = (GtUword) gt_hashmap_get(mil->pvt->desc_to_seqno, seqid1);
-      gt_assert(seqno1 != GT_UNDEF_ULONG);
+      gt_assert(seqno1 != GT_UNDEF_UWORD);
       seqno2 = (GtUword) gt_hashmap_get(mil->pvt->desc_to_seqno, seqid2);
-      gt_assert(seqno2 != GT_UNDEF_ULONG);
+      gt_assert(seqno2 != GT_UNDEF_UWORD);
       *match = gt_match_last_new(seqid1, seqid2, score,
                                  seqno1, seqno2,
                                  start1, start2,

@@ -195,7 +195,8 @@ static int extractkeyfromcurrentline(Fastakeyquery *fastakeyptr,
     fastakeyptr->fastakey[idx] = '\0';
     fastakeyptr->frompos = 1UL;
     fastakeyptr->topos = 0;
-    if (sscanf(lineptr+idx,""GT_LD" "GT_LD"\n",&readlongfrompos,&readlongtopos) == 2)
+    if (sscanf(lineptr+idx, GT_LD " " GT_LD "\n",
+               &readlongfrompos,&readlongtopos) == 2)
     {
       CHECKPOSITIVE(readlongfrompos,""GT_LD"","second");
       if (!haserr)
@@ -216,7 +217,7 @@ static int extractkeyfromcurrentline(Fastakeyquery *fastakeyptr,
     {
       gt_error_set(err, "file \"%s\", line " Formatuint64_t
                         "illegal format: second value "
-                        ""GT_LU" is larger than third value "GT_LU"",
+                        GT_LU " is larger than third value " GT_LU,
                         gt_str_get(fileofkeystoextract),
                         PRINTuint64_tcast(linenum+1),
                         fastakeyptr->frompos,

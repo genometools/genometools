@@ -209,7 +209,8 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
       if (mti->mstatlength[bitindex+first1] < currentdepth)
       {
         /*
-        printf("set mstatlength["GT_LU"]="GT_LU"\n",bitindex+first1,currentdepth);
+        printf("set mstatlength["GT_LU"]="GT_LU"\n",
+               bitindex+first1,currentdepth);
         printf("set mstatwitnessleftbound["GT_LU"]="GT_LU"\n",bitindex+first1,
                                                  (GtUword) leftbound);
         */

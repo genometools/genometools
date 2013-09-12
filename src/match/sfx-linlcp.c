@@ -40,17 +40,17 @@ GtUword *gt_lcp13_manzini(const GtEncseq *encseq,
   lcptab[0] = 0;
   for (pos=0; pos <= totallength; pos++)
   {
-    GtUword fillpos = gt_compact_ulong_store_get(inversesuftab,pos);
+    GtUword fillpos = gt_compact_ulong_store_get(inversesuftab, pos);
     if (fillpos > 0 && fillpos < partwidth)
     {
-      GtUword previousstart = ESASUFFIXPTRGET(suftab,fillpos-1);
+      GtUword previousstart = ESASUFFIXPTRGET(suftab, fillpos-1);
       while (pos+lcpvalue < totallength &&
              previousstart+lcpvalue < totallength)
       {
         GtUchar cc1, cc2;
 
-        cc1 = gt_encseq_get_encoded_char(encseq,pos+lcpvalue,readmode);
-        cc2 = gt_encseq_get_encoded_char(encseq,previousstart+lcpvalue,
+        cc1 = gt_encseq_get_encoded_char(encseq, pos+lcpvalue, readmode);
+        cc2 = gt_encseq_get_encoded_char(encseq, previousstart+lcpvalue,
                                                 readmode);
         if (cc1 == cc2 && ISNOTSPECIAL(cc1))
         {
@@ -89,7 +89,7 @@ static GtUword *computeocclesstab(const GtEncseq *encseq,
                                   (GtUchar) GT_COMPLEMENTBASE(charidx-1));
     } else
     {
-      count = gt_encseq_charcount(encseq,(GtUchar) (charidx-1));
+      count = gt_encseq_charcount(encseq, (GtUchar) (charidx-1));
     }
     occless[charidx] = occless[charidx-1] + count;
   }
@@ -117,13 +117,13 @@ static void setrelevantfrominversetab(GtCompactUlongStore *rightposinverse,
 
     for (idx = 0; idx < partwidth; idx++)
     {
-      pos = ESASUFFIXPTRGET(suftab,idx);
+      pos = ESASUFFIXPTRGET(suftab, idx);
       if (pos > 0)
       {
-        GtUchar cc = gt_encseq_get_encoded_char(encseq,pos-1,readmode);
+        GtUchar cc = gt_encseq_get_encoded_char(encseq, pos-1, readmode);
         if (ISSPECIAL(cc))
         {
-          gt_compact_ulong_store_update(rightposinverse,pos,idx);
+          gt_compact_ulong_store_update(rightposinverse, pos, idx);
         }
       }
     }
@@ -145,11 +145,11 @@ static GtUword *fillrightofpartwidth(
   countlargeranges = gt_encseq_realspecialranges(encseq);
   sri = gt_specialrangeiterator_new(encseq,
                                     GT_ISDIRREVERSE(readmode) ? false : true);
-  while (gt_specialrangeiterator_next(sri,&range))
+  while (gt_specialrangeiterator_next(sri, &range))
   {
     if (GT_ISDIRREVERSE(readmode))
     {
-      gt_range_reverse(totallength,&range);
+      gt_range_reverse(totallength, &range);
     }
     if (range.end < partwidth)
     {
@@ -166,7 +166,7 @@ static GtUword *fillrightofpartwidth(
       }
       gt_assert(nextrightofpartwidth < countlargeranges);
       rightofpartwidth[nextrightofpartwidth++]
-        = gt_compact_ulong_store_get(rightposinverse,range.end);
+        = gt_compact_ulong_store_get(rightposinverse, range.end);
     }
   }
   gt_specialrangeiterator_delete(sri);
@@ -197,29 +197,29 @@ static void inversesuffixarray2specialranknext(
     sri = gt_specialrangeiterator_new(encseq,
                                       GT_ISDIRREVERSE(readmode) ? false : true);
     nextrightofpartwidth = 0;
-    while (gt_specialrangeiterator_next(sri,&range))
+    while (gt_specialrangeiterator_next(sri, &range))
     {
       if (GT_ISDIRREVERSE(readmode))
       {
-        gt_range_reverse(totallength,&range);
+        gt_range_reverse(totallength, &range);
       }
       gt_assert(range.end <= totallength);
       for (idx = range.start; idx < range.end-1; idx++)
       {
         gt_assert(specialranklistindex < totallength);
-        gt_compact_ulong_store_update(ranknext,specialranklistindex,
+        gt_compact_ulong_store_update(ranknext, specialranklistindex,
                                       specialranklistindex + 1);
         specialranklistindex++;
       }
       gt_assert(specialranklistindex < totallength);
       if (range.end < partwidth)
       {
-        gt_compact_ulong_store_update(ranknext,specialranklistindex,
+        gt_compact_ulong_store_update(ranknext, specialranklistindex,
                                       gt_compact_ulong_store_get(
-                                             rightposinverse,range.end));
+                                             rightposinverse, range.end));
       } else
       {
-        gt_compact_ulong_store_update(ranknext,specialranklistindex,
+        gt_compact_ulong_store_update(ranknext, specialranklistindex,
                                       rightofpartwidth[nextrightofpartwidth]);
         nextrightofpartwidth++;
       }
@@ -242,19 +242,19 @@ static GtUword sa2ranknext(GtCompactUlongStore *ranknext,
 
   gt_assert(partwidth > 0);
 
-  occless = computeocclesstab(encseq,readmode);
+  occless = computeocclesstab(encseq, readmode);
   /* now inveresuftab is not used any more, and thus the
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < partwidth; idx++)
   {
-    pos = ESASUFFIXPTRGET(suftab,idx);
+    pos = ESASUFFIXPTRGET(suftab, idx);
     if (pos > 0)
     {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,pos-1, readmode);
+      GtUchar cc = gt_encseq_get_encoded_char(encseq, pos-1, readmode);
       if (ISNOTSPECIAL(cc))
       {
         gt_assert(occless[cc] < partwidth);
-        gt_compact_ulong_store_update(ranknext,occless[cc],idx);
+        gt_compact_ulong_store_update(ranknext, occless[cc], idx);
         occless[cc]++;
       }
     } else
@@ -272,16 +272,17 @@ static GtUword sa2ranknext(GtCompactUlongStore *ranknext,
                                       GT_ISDIRREVERSE(readmode) ? false : true);
     gt_assert(partwidth > 0); /* otherwise all lcps would be 0 */
     specialidx = partwidth;
-    while (gt_specialrangeiterator_next(sri,&range))
+    while (gt_specialrangeiterator_next(sri, &range))
     {
       if (GT_ISDIRREVERSE(readmode))
       {
-        gt_range_reverse(totallength,&range);
+        gt_range_reverse(totallength, &range);
       }
       gt_assert(range.start < range.end);
       if (range.start > 0)
       {
-        GtUchar cc = gt_encseq_get_encoded_char(encseq,range.start-1,readmode);
+        GtUchar cc = gt_encseq_get_encoded_char(encseq, range.start-1,
+                                                readmode);
         if (ISNOTSPECIAL(cc))
         {
           gt_assert(occless[cc] < partwidth);
@@ -299,7 +300,7 @@ static GtUword sa2ranknext(GtCompactUlongStore *ranknext,
         (!GT_ISDIRREVERSE(readmode) &&
          gt_encseq_lengthofspecialsuffix(encseq) > 0))
     {
-      gt_compact_ulong_store_update(ranknext,totallength-1,totallength);
+      gt_compact_ulong_store_update(ranknext, totallength-1, totallength);
     }
     gt_specialrangeiterator_delete(sri);
   }
@@ -324,20 +325,20 @@ GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
   {
     unsigned int bitsperentry = gt_determinebitspervalue(totallength);
     rightposinverse = ranknext
-                    = gt_compact_ulong_store_new(totallength+1,bitsperentry);
-    gt_compact_ulong_store_update(ranknext,totallength,totallength);
-    setrelevantfrominversetab(rightposinverse,encseq,readmode,suftab,
+                    = gt_compact_ulong_store_new(totallength+1, bitsperentry);
+    gt_compact_ulong_store_update(ranknext, totallength, totallength);
+    setrelevantfrominversetab(rightposinverse, encseq, readmode, suftab,
                               partwidth);
   } else
   {
     rightposinverse = ranknext = spacefortab;
   }
-  inversesuffixarray2specialranknext(rightposinverse,ranknext,
+  inversesuffixarray2specialranknext(rightposinverse, ranknext,
                                      encseq,
                                      readmode,
                                      partwidth,
                                      totallength);
-  fillpos = sa2ranknext(ranknext,encseq,readmode,partwidth,totallength,
+  fillpos = sa2ranknext(ranknext, encseq, readmode, partwidth, totallength,
                         suftab);
   lcptab = ranknext;
   /* now ranknext and lcptab point to the same memory area. After reading
@@ -354,11 +355,11 @@ GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
   {
     if (pos < totallength - 1)
     {
-      nextfillpos = gt_compact_ulong_store_get(ranknext,fillpos);
+      nextfillpos = gt_compact_ulong_store_get(ranknext, fillpos);
     }
     if (fillpos > 0 && fillpos - 1 < partwidth)
     {
-      previousstart = ESASUFFIXPTRGET(suftab,fillpos-1);
+      previousstart = ESASUFFIXPTRGET(suftab, fillpos-1);
       while (pos+lcpvalue < totallength &&
              previousstart+lcpvalue < totallength)
       {
@@ -396,7 +397,7 @@ GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
         }
         lcpvalue++;
       }
-      gt_compact_ulong_store_update(lcptab,fillpos,lcpvalue);
+      gt_compact_ulong_store_update(lcptab, fillpos, lcpvalue);
       if (lcpvalue > 0)
       {
         lcpvalue--;
@@ -418,7 +419,7 @@ static GtUword gt_check_for_range_occurrence(const ESASuffixptr *suftab,
 
   for (idx = start; idx <= end; idx++)
   {
-    GtUword position = ESASUFFIXPTRGET(suftab,idx);
+    GtUword position = ESASUFFIXPTRGET(suftab, idx);
 
     if (suffix == position)
     {
@@ -448,7 +449,7 @@ typedef struct
    publisher = {Springer-Verlag}
    }
    to check the following suffix-order condition of the sorted suffix array:
-   For all characters c, if SA[i,j] contains the suffixes starting
+   For all characters c, if SA[i, j] contains the suffixes starting
    with charcter c, then SA[i]+1, SA[i+1]+1, \ldots, SA[j]+1 occur
    in SA in this order (but not consecutively in general).
    The running time of the algorithm is independent of the alphabet size.
@@ -465,7 +466,7 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
                                      unsigned int numofranges)
 {
   unsigned int rangeidx;
-  GtUword idx, *nexttab = gt_calloc((size_t) numofchars,sizeof(*nexttab));
+  GtUword idx, *nexttab = gt_calloc((size_t) numofchars, sizeof (*nexttab));
 
   for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
   {
@@ -473,20 +474,20 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
   }
   for (idx = 0; idx < totallength; idx++)
   {
-    GtUword position = ESASUFFIXPTRGET(suftab,idx);
+    GtUword position = ESASUFFIXPTRGET(suftab, idx);
 
     if (position > 0)
     {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,position - 1,readmode);
+      GtUchar cc = gt_encseq_get_encoded_char(encseq, position - 1, readmode);
       if (ISNOTSPECIAL(cc))
       {
         GtUword checkpos;
 
-        checkpos = ESASUFFIXPTRGET(suftab,nexttab[(int) cc]) + 1;
+        checkpos = ESASUFFIXPTRGET(suftab, nexttab[(int) cc]) + 1;
         if (checkpos != position)
         {
-          fprintf(stderr,"idx="GT_LU",checkpos="GT_LU",position="GT_LU"\n",
-                          idx,checkpos,position);
+          fprintf(stderr, "idx="GT_LU", checkpos="GT_LU", position="GT_LU"\n",
+                          idx, checkpos, position);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
         nexttab[(int) cc]++;
@@ -521,7 +522,7 @@ static void gt_suftab_sk_suffixorder(GtUword totallength,
     for (idx = rangestore[rangeidx].start; idx <= rangestore[rangeidx].end;
          idx++)
     {
-      GtUword position = ESASUFFIXPTRGET(suftab,idx);
+      GtUword position = ESASUFFIXPTRGET(suftab, idx);
 
       if (position + 1 <= totallength)
       {
@@ -531,8 +532,8 @@ static void gt_suftab_sk_suffixorder(GtUword totallength,
                                                             totallength);
         if (found == ULONG_MAX)
         {
-          fprintf(stderr,"Cannot find position+1="GT_LU" in range ["GT_LU","GT_LU"]\n",
-                            position+1,start,totallength);
+          fprintf(stderr, "Cannot find position+1="GT_LU" in range ["GT_LU", "
+                  GT_LU"]\n", position+1, start, totallength);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
         numofcomparisons += found - start + 1;
@@ -541,11 +542,11 @@ static void gt_suftab_sk_suffixorder(GtUword totallength,
     }
   }
   ratio = (double) numofcomparisons/totallength;
-  if (gt_double_compare(ratio,(double) numofchars) > 0)
+  if (gt_double_compare(ratio, (double) numofchars) > 0)
   {
-    fprintf(stderr,"gt_double_compare(%.2f,%u) = %d > 0 not exected\n",
-                    ratio,numofchars,
-                    gt_double_compare(ratio,(double) numofchars));
+    fprintf(stderr, "gt_double_compare(%.2f, %u) = %d > 0 not exected\n",
+                    ratio, numofchars,
+                    gt_double_compare(ratio, (double) numofchars));
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -564,23 +565,23 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   GtRangewithchar *rangestore;
   const bool skcheck = true;
 
-  GT_INITBITTAB(startposoccurs,totallength+1);
+  GT_INITBITTAB(startposoccurs, totallength+1);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   rangestore = gt_malloc(sizeof(*rangestore) * numofchars);
   for (idx = 0; idx < totallength; idx++)
   {
-    GtUword position = ESASUFFIXPTRGET(suftab,idx);
+    GtUword position = ESASUFFIXPTRGET(suftab, idx);
     GtUchar cc;
 
-    if (GT_ISIBITSET(startposoccurs,position))
+    if (GT_ISIBITSET(startposoccurs, position))
     {
-      fprintf(stderr,"ERROR: suffix with startpos "GT_LU" already occurs\n",
-              ESASUFFIXPTRGET(suftab,idx));
+      fprintf(stderr, "ERROR: suffix with startpos "GT_LU" already occurs\n",
+              ESASUFFIXPTRGET(suftab, idx));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    GT_SETIBIT(startposoccurs,position);
+    GT_SETIBIT(startposoccurs, position);
     countbitsset++;
-    cc = gt_encseq_get_encoded_char(encseq,position,readmode);
+    cc = gt_encseq_get_encoded_char(encseq, position, readmode);
     if (idx > 0)
     {
       if (ISSPECIAL(cc))
@@ -597,9 +598,9 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
         {
           if (previouspos > position)
           {
-            fprintf(stderr,"incorrect order: "GT_LU" = "GT_LU"=SPECIAL > SPECIAL="GT_LU" "
-                           " = "GT_LU"\n",
-                      idx-1,position,previouspos,idx);
+            fprintf(stderr, "incorrect order: " GT_LU " = " GT_LU "=SPECIAL > "
+                    "SPECIAL="GT_LU"  = "GT_LU"\n",
+                    idx-1, position, previouspos, idx);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           }
         }
@@ -607,16 +608,17 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
       {
         if (ISSPECIAL(previouscc))
         {
-          fprintf(stderr,"incorrect order: "GT_LU"="GT_LU"=SPECIAL > %u="GT_LU"="GT_LU"\n",
-                    idx-1,position,(unsigned int) cc,previouspos,idx);
+          fprintf(stderr, "incorrect order: "GT_LU"="GT_LU"=SPECIAL > "
+                  "%u="GT_LU"="GT_LU"\n", idx-1, position, (unsigned int) cc,
+                  previouspos, idx);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         } else
         {
           if (previouscc > cc)
           {
-            fprintf(stderr,"incorrect order: "GT_LU" = "GT_LU"=%u > %u="GT_LU"="GT_LU"\n",
-                      idx-1,position,(unsigned int) previouscc,
-                      (unsigned int) cc,previouspos,idx);
+            fprintf(stderr, "incorrect order: "GT_LU" = "GT_LU"=%u > "
+                    "%u="GT_LU"="GT_LU"\n", idx-1, position, (unsigned int)
+                    previouscc, (unsigned int) cc, previouspos, idx);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           } else
           {
@@ -643,8 +645,8 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   }
   if (countbitsset != totallength)
   {
-    fprintf(stderr,"ERROR: only "GT_LU" of "GT_LU" suffixes occur\n",countbitsset,
-                                totallength);
+    fprintf(stderr, "ERROR: only "GT_LU" of "GT_LU" suffixes occur\n",
+            countbitsset, totallength);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_free(startposoccurs);
@@ -662,10 +664,10 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
 
     if (GT_ISDIRCOMPLEMENT(readmode))
     {
-      count = gt_encseq_charcount(encseq,(GtUchar) GT_COMPLEMENTBASE(charidx));
+      count = gt_encseq_charcount(encseq, (GtUchar) GT_COMPLEMENTBASE(charidx));
     } else
     {
-      count = gt_encseq_charcount(encseq,(GtUchar) charidx);
+      count = gt_encseq_charcount(encseq, (GtUchar) charidx);
     }
     if (count != 0)
     {
@@ -675,7 +677,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
       rangeidx++;
     }
   }
-  gt_logger_log(logger,"suftab-check, first phase done");
+  gt_logger_log(logger, "suftab-check, first phase done");
   if (skcheck)
   {
     gt_suftab_sk_suffixorder(totallength,
@@ -683,7 +685,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                              suftab,
                              rangestore,
                              numofranges);
-    gt_logger_log(logger,"suftab-check, second phase (sk-method) done");
+    gt_logger_log(logger, "suftab-check, second phase (sk-method) done");
   } else
   {
     gt_suftab_bk_suffixorder(encseq,
@@ -693,7 +695,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                              suftab,
                              rangestore,
                              numofranges);
-    gt_logger_log(logger,"suftab-check, second phase (bk-method) done");
+    gt_logger_log(logger, "suftab-check, second phase (bk-method) done");
   }
   gt_free(rangestore);
 }
@@ -721,7 +723,8 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
                            partwidth,
                            totallength,
                            suftab);
-    gt_logger_log(logger,"computed reference lcp table with manzini algorithm");
+    gt_logger_log(logger,
+                  "computed reference lcp table with manzini algorithm");
   }
   ssar = gt_newSequentialsuffixarrayreaderfromfile(esaindexname,
                                                    SARR_LCPTAB,
@@ -735,7 +738,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
   for (idx = 1UL; /* Nothing */; idx++)
   {
     GtUword mlcpvalue, lcpvalue;
-    int retval = gt_nextSequentiallcpvalue(&lcpvalue,ssar,err);
+    int retval = gt_nextSequentiallcpvalue(&lcpvalue, ssar, err);
 
     if (retval < 0)
     {
@@ -748,19 +751,19 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
     }
     if (idx < partwidth)
     {
-      mlcpvalue = gt_compact_ulong_store_get(lcptab,idx);
+      mlcpvalue = gt_compact_ulong_store_get(lcptab, idx);
     } else
     {
       mlcpvalue = 0;
     }
     if (mlcpvalue != lcpvalue)
     {
-      fprintf(stderr,""GT_LU": mlcpvalue = "GT_LU" != "GT_LU" = lcpvalue\n",
-                       idx,mlcpvalue,lcpvalue);
+      fprintf(stderr, ""GT_LU": mlcpvalue = "GT_LU" != "GT_LU" = lcpvalue\n",
+                       idx, mlcpvalue, lcpvalue);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
-  gt_logger_log(logger,"compare lcp-values against reference");
+  gt_logger_log(logger, "compare lcp-values against reference");
   if (ssar != NULL)
   {
     gt_freeSequentialsuffixarrayreader(&ssar);

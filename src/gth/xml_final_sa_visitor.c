@@ -39,7 +39,7 @@ static void xml_showgthreferenceinformation(GthSA *sa,
                                             unsigned int indentlevel,
                                             GtFile *outfp)
 {
-  gt_assert(gth_sa_ref_file_num(sa) != GT_UNDEF_ULONG);
+  gt_assert(gth_sa_ref_file_num(sa) != GT_UNDEF_UWORD);
 
   gth_indent(outfp, indentlevel);
 
@@ -73,7 +73,7 @@ static void xml_showgthgenomicinformation(GthSA *sa,
                                           unsigned int indentlevel,
                                           GtFile *outfp)
 {
-  gt_assert(gth_sa_gen_file_num(sa) != GT_UNDEF_ULONG);
+  gt_assert(gth_sa_gen_file_num(sa) != GT_UNDEF_UWORD);
 
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "<gDNA_segment>\n");
@@ -115,9 +115,9 @@ static void xml_showppaline(GthSA *sa, unsigned int indentlevel,
       gth_sa_polyAtail_stop(sa)) {
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp,
-                       "<PPA_line polyA_start=\""GT_LU"\" polyA_stop=\""GT_LU"\"/>\n",
-                       gth_sa_polyAtail_start(sa) + OUTPUTOFFSET,
-                       gth_sa_polyAtail_stop(sa) + OUTPUTOFFSET);
+                    "<PPA_line polyA_start=\"" GT_LU "\" polyA_stop=\"" GT_LU
+                    "\"/>\n", gth_sa_polyAtail_start(sa) + OUTPUTOFFSET,
+                    gth_sa_polyAtail_stop(sa) + OUTPUTOFFSET);
   }
 }
 
@@ -239,12 +239,11 @@ static void xml_showalignmentheader(GthSA *sa,
       indentlevel++;
       gth_indent(outfp, indentlevel);
       gt_file_xprintf(outfp,
-                      "<gDNA_intron_boundary i_start=\""GT_LU"\" i_stop=\""GT_LU"\" "
-                      "i_length=\""GT_LU"\">\n",
+                      "<gDNA_intron_boundary i_start=\"" GT_LU "\" i_stop=\""
+                      GT_LU "\" i_length=\""GT_LU"\">\n",
                       gth_sa_left_intron_border(sa, i-1),
                       gth_sa_right_intron_border(sa, i-1),
-                      gth_sa_intron_length(sa, i-1));
-      indentlevel++;
+                      gth_sa_intron_length(sa, i-1)); indentlevel++;
       gth_indent(outfp, indentlevel);
       gt_file_xprintf(outfp, "<donor d_prob=\"%.3f\"", donorsiteprobability);
       if (gth_sa_alphatype(sa) == DNA_ALPHA)
@@ -283,9 +282,9 @@ static void xml_showalignmentheader(GthSA *sa,
                     gth_sa_genomic_exon_length(sa, i));
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp,
-                    "<reference_exon_boundary r_type=\"%s\" r_start=\""GT_LU"\" "
-                    "r_stop=\""GT_LU"\" r_length=\""GT_LU"\" r_score=\"%5.3f\"/>\n",
-                    gth_sa_alphastring(sa),
+                    "<reference_exon_boundary r_type=\"%s\" r_start=\"" GT_LU
+                    "\" r_stop=\""GT_LU"\" r_length=\""GT_LU"\" "
+                    "r_score=\"%5.3f\"/>\n", gth_sa_alphastring(sa),
                     leftreferenceexonborder  + OUTPUTOFFSET ,
                     rightreferenceexonborder + OUTPUTOFFSET ,
                     referenceexonlength, exonscore);

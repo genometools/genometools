@@ -89,7 +89,7 @@ GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname)
   r2t->total_seqlength = 0;
   r2t->nofseqs = 0;
   r2t->phredbase = (char)33;
-  r2t->maxlow = GT_UNDEF_ULONG;
+  r2t->maxlow = GT_UNDEF_UWORD;
   r2t->lowqual = 0;
   r2t->has_paired = false;
   r2t->use_rle = false;
@@ -404,8 +404,8 @@ static void gt_reads2twobit_switch_to_varlen_mode(
   gt_assert(state->current.nofseqs > 1UL);
   gt_assert(state->current.seqlen_first != state->seqlen);
   gt_assert(state->seqlen > 1UL);
-  gt_log_log("readset is varlen: sequences 0.."GT_LU" are "
-      ""GT_LU" bp long, sequence "GT_LU" is "GT_LU" bp long",
+  gt_log_log("readset is varlen: sequences 0.."GT_LU" have length "GT_LU
+             ", sequence "GT_LU" is "GT_LU" bp long",
       state->current.nofseqs - 2UL, state->current.seqlen_first - 1UL,
       state->current.nofseqs - 1UL, state->seqlen - 1UL);
   gt_reads2twobit_init_seppos(state,
@@ -650,7 +650,7 @@ static int gt_reads2twobit_encode_unpaired_fastq_library(
           state->qbuf, &qbuf_next);
       if (qbuf_next == state->exp_qlen)
       {
-        if (state->maxlow != GT_UNDEF_ULONG)
+        if (state->maxlow != GT_UNDEF_UWORD)
           gt_reads2twobit_apply_quality_filter(state, state->qbuf, qbuf_next);
         qbuf_next = 0;
         qmode = false;
@@ -798,7 +798,7 @@ static inline int gt_reads2twobit_process_fastq_mate_pair(
         had_err = -2;
       if (!had_err && qbuf2_next == state->exp_qlen)
       {
-        if (state->maxlow != GT_UNDEF_ULONG)
+        if (state->maxlow != GT_UNDEF_UWORD)
           gt_reads2twobit_apply_quality_filter(state, state->qbuf2, qbuf2_next);
         qbuf2_next = 0;
         qmode = false;
@@ -871,7 +871,7 @@ static int gt_reads2twobit_encode_interleaved_paired_fastq_library(
           state->qbuf, &qbuf_next);
       if (qbuf_next == state->exp_qlen)
       {
-        if (state->maxlow != GT_UNDEF_ULONG)
+        if (state->maxlow != GT_UNDEF_UWORD)
           gt_reads2twobit_apply_quality_filter(state, state->qbuf, qbuf_next);
         qbuf_next = 0;
         qmode = false;
@@ -939,7 +939,7 @@ static int gt_reads2twobit_encode_twofile_paired_fastq_library(
           state->qbuf, &qbuf_next);
       if (qbuf_next == state->exp_qlen)
       {
-        if (state->maxlow != GT_UNDEF_ULONG)
+        if (state->maxlow != GT_UNDEF_UWORD)
           gt_reads2twobit_apply_quality_filter(state, state->qbuf, qbuf_next);
         qbuf_next = 0;
         qmode = false;

@@ -221,14 +221,14 @@ GtUword gt_bittab_size(GtBittab *b)
 
 GtUword gt_bittab_get_first_bitnum(const GtBittab *b)
 {
-  GtUword i, rval = GT_UNDEF_ULONG;
+  GtUword i, rval = GT_UNDEF_UWORD;
   gt_assert(b);
   for (i = 0; i < b->num_of_bits; i++)
     if (gt_bittab_bit_is_set(b, i)) {
       rval = i;
       break;
     }
-  if (rval == GT_UNDEF_ULONG)
+  if (rval == GT_UNDEF_UWORD)
     return b->num_of_bits;
   return rval;
 }
@@ -242,7 +242,7 @@ GtUword gt_bittab_get_last_bitnum(const GtBittab *b)
 GtUword gt_bittab_get_next_bitnum(const GtBittab *b,
                                         GtUword curnum)
 {
-  GtUword i, rval = GT_UNDEF_ULONG;
+  GtUword i, rval = GT_UNDEF_UWORD;
 
   gt_assert(b);
   gt_assert(curnum < b->num_of_bits);
@@ -251,7 +251,7 @@ GtUword gt_bittab_get_next_bitnum(const GtBittab *b,
       rval = i;
       break;
     }
-  if (rval == GT_UNDEF_ULONG)
+  if (rval == GT_UNDEF_UWORD)
     return b->num_of_bits;
   return rval;
 }

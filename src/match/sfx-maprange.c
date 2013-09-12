@@ -93,11 +93,11 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
   }
   if (mappedsize != gt_Sfxmappedrange_size_entire(sfxmappedrange))
   {
-    gt_error_set(err,"map file %s: mapped size = "GT_LU" != "GT_LU" = expected size",
-                     gt_str_get(sfxmappedrange->filename),
-                     (GtUword) mappedsize,
-                     (GtUword) gt_Sfxmappedrange_size_entire(
-                                                      sfxmappedrange));
+    gt_error_set(err,
+                 "map file %s: mapped size = "GT_LU" != "
+                 GT_LU" = expected size",
+                 gt_str_get(sfxmappedrange->filename), (GtUword) mappedsize,
+                 (GtUword) gt_Sfxmappedrange_size_entire(sfxmappedrange));
     gt_fa_xmunmap(sfxmappedrange->entire);
     sfxmappedrange->entire = NULL;
     return NULL;

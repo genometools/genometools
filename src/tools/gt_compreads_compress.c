@@ -55,8 +55,8 @@ static void* gt_compreads_compress_arguments_new(void)
   arguments->files = gt_str_array_new();
   arguments->qrng.start = GT_UNDEF_UINT;
   arguments->qrng.end = GT_UNDEF_UINT;
-  arguments->arg_range.start = GT_UNDEF_ULONG;
-  arguments->arg_range.end = GT_UNDEF_ULONG;
+  arguments->arg_range.start = GT_UNDEF_UWORD;
+  arguments->arg_range.end = GT_UNDEF_UWORD;
   arguments->method = gt_str_new();
   arguments->pagewise = false;
   arguments->regular = false;
@@ -116,7 +116,7 @@ gt_compreads_compress_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_uword("srate", "sampling rate, set to sensible default"
                                " depending on sampling method",
-                               &arguments->srate, GT_UNDEF_ULONG);
+                               &arguments->srate, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_choice("stype", "type of sampling\n"
@@ -180,7 +180,7 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
 
     if (!strcmp(methods[0], sampling_type)) {
       arguments->pagewise = true;
-      if (arguments->srate == GT_UNDEF_ULONG)
+      if (arguments->srate == GT_UNDEF_UWORD)
         arguments->srate = GT_SAMPLING_DEFAULT_PAGE_RATE;
       else if (arguments->srate == 0) {
         gt_error_set(err, "page sampling was chosen, but sampling"
@@ -191,7 +191,7 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
     }
     else if (!strcmp(methods[1], sampling_type)) {
       arguments->regular = true;
-      if (arguments->srate == GT_UNDEF_ULONG)
+      if (arguments->srate == GT_UNDEF_UWORD)
         arguments->srate = GT_SAMPLING_DEFAULT_REGULAR_RATE;
       else if (arguments->srate == 0) {
         gt_error_set(err, "regular sampling was chosen, but sampling rate "
@@ -201,7 +201,7 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
       }
     }
     else if (!strcmp(methods[2], sampling_type)) {
-      if (arguments->srate == GT_UNDEF_ULONG)
+      if (arguments->srate == GT_UNDEF_UWORD)
         arguments->srate = 0;
       else if (arguments->srate != 0) {
         gt_error_set(err, "no sampling was chosen, but sampling rate was"
@@ -217,7 +217,7 @@ static int gt_compreads_compress_arguments_check(GT_UNUSED int rest_argc,
   }
 
   if (!had_err) {
-    if (arguments->arg_range.start != GT_UNDEF_ULONG) {
+    if (arguments->arg_range.start != GT_UNDEF_UWORD) {
       if (arguments->arg_range.start <= (GtUword) UINT_MAX) {
         gt_safe_assign(arguments->qrng.start, arguments->arg_range.start);
         if (arguments->arg_range.end <= (GtUword) UINT_MAX)

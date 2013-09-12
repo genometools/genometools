@@ -134,17 +134,20 @@ int gt_io_expect(GtIO *io, char expected_char, GtError *err)
       return 0;
     }
     if (expected_char == GT_END_OF_FILE) {
-      gt_error_set(err, "file \"%s\": line "GT_LU": expected end-of-file, got '%c'",
+      gt_error_set(err, "file \"%s\": line "GT_LU": expected end-of-file, got "
+                   "'%c'",
                    gt_io_get_filename(io), gt_io_get_line_number(io), cc);
     }
     else if ((cc == GT_CARRIAGE_RETURN) || (cc == GT_END_OF_LINE)) {
-      gt_error_set(err, "file \"%s\": line "GT_LU": expected character '%c', got "
-                   "newline", gt_io_get_filename(io), gt_io_get_line_number(io),
+      gt_error_set(err, "file \"%s\": line "GT_LU": expected character '%c', "
+                   "got newline",
+                   gt_io_get_filename(io), gt_io_get_line_number(io),
                    expected_char);
     }
     else {
-      gt_error_set(err, "file \"%s\": line "GT_LU": expected character '%c', got "
-                   "'%c'", gt_io_get_filename(io), gt_io_get_line_number(io),
+      gt_error_set(err, "file \"%s\": line "GT_LU": expected character '%c', "
+                   "got '%c'",
+                   gt_io_get_filename(io), gt_io_get_line_number(io),
                    expected_char, cc);
     }
     return -1;

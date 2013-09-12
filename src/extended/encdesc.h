@@ -58,7 +58,7 @@ bool              gt_encdesc_encoder_sampling_is_regular(GtEncdescEncoder *ee);
 void              gt_encdesc_encoder_set_sampling_rate(GtEncdescEncoder *ee,
                                                    GtUword sampling_rate);
 
-/* Returns the samplingrate set in <ee>. Returns GT_UNDEF_ULONG if sampling is
+/* Returns the samplingrate set in <ee>. Returns GT_UNDEF_UWORD if sampling is
    disabled. */
 GtUword     gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee);
 

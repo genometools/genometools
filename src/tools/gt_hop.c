@@ -246,7 +246,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
 
   /* -clenmax */
   option = gt_option_new_uword("clenmax", "maximal correction length\n"
-      "default: unlimited", &arguments->clenmax, GT_UNDEF_ULONG);
+      "default: unlimited", &arguments->clenmax, GT_UNDEF_UWORD);
   gt_option_hide_default(option);
   gt_option_is_extended_option(option);
   gt_option_imply(option, expert_option);

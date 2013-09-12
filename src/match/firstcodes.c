@@ -314,7 +314,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        GtError *err)
 {
   GtUword current,
-                next = GT_UNDEF_ULONG,
+                next = GT_UNDEF_UWORD,
                 idx,
                 width,
                 sumwidth = 0,
@@ -379,7 +379,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
     {
       gt_assert(width == 1UL);
     }
-    gt_assert(next != GT_UNDEF_ULONG);
+    gt_assert(next != GT_UNDEF_UWORD);
     current = next;
   }
   if (itvprocess_end != NULL)

@@ -46,30 +46,31 @@ const char *EISIntegrityCheckResultStrings[] =
   "the rank operation delivered a wrong count"
 };
 
-#define verifyIntegrityErrRet(retcode)                                  \
-  {                                                                     \
-    switch (retcode) {                                                  \
-    case EIS_INTEGRITY_CHECK_INVALID_SYMBOL:                            \
-      fprintf(stderr, "Comparision failed at position "GT_LU""              \
-              ", reference symbol: %u, symbol read: %u\n",              \
-              pos, symOrig, symEnc);                                    \
-      gt_error_set(err, "Invalid symbol encountered.");                 \
-      break;                                                            \
-    case EIS_INTEGRITY_CHECK_BWT_READ_ERROR:                            \
-      fprintf(stderr, "Read of symbol failed at position "GT_LU"\n", pos);  \
-      gt_error_set(err, "Failed reading reference BWT source.");        \
-      break;                                                            \
-    case EIS_INTEGRITY_CHECK_RANK_FAILED:                               \
-      fprintf(stderr, "At position "GT_LU""                                 \
-              ", rank operation yielded  wrong count: "GT_LU""              \
-              ", expected "GT_LU" for symbol %d\n",                         \
-              pos, rankQueryResult, rankExpect, rankCmpSym);            \
-      gt_error_set(err, "Invalid rank result.");                        \
-      break;                                                            \
-    }                                                                   \
-    EISPrintDiagsForPos(seqIdx, pos, stderr, hint);                     \
-    retval = retcode;                                                   \
-    break;                                                              \
+#define verifyIntegrityErrRet(retcode)                           \
+  {                                                              \
+    switch (retcode) {                                           \
+    case EIS_INTEGRITY_CHECK_INVALID_SYMBOL:                     \
+      fprintf(stderr, "Comparision failed at position "GT_LU""   \
+              ", reference symbol: %u, symbol read: %u\n",       \
+              pos, symOrig, symEnc);                             \
+      gt_error_set(err, "Invalid symbol encountered.");          \
+      break;                                                     \
+    case EIS_INTEGRITY_CHECK_BWT_READ_ERROR:                     \
+      fprintf(stderr, "Read of symbol failed at position " GT_LU \
+              "\n", pos);                                        \
+      gt_error_set(err, "Failed reading reference BWT source."); \
+      break;                                                     \
+    case EIS_INTEGRITY_CHECK_RANK_FAILED:                        \
+      fprintf(stderr, "At position "GT_LU""                      \
+              ", rank operation yielded  wrong count: "GT_LU""   \
+              ", expected "GT_LU" for symbol %d\n",              \
+              pos, rankQueryResult, rankExpect, rankCmpSym);     \
+      gt_error_set(err, "Invalid rank result.");                 \
+      break;                                                     \
+    }                                                            \
+    EISPrintDiagsForPos(seqIdx, pos, stderr, hint);              \
+    retval = retcode;                                            \
+    break;                                                       \
   } do {} while (0)
 
 /**

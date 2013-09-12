@@ -316,7 +316,8 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
       } else
       {
 #ifdef SKDEBUG
-        printf("%s["GT_LU","GT_LU"] at offset "GT_LU"\n",__func__,sval1,sval2,offset);
+        printf("%s["GT_LU","GT_LU"] at offset"
+               GT_LU"\n",__func__,sval1,sval2,offset);
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
                                  bsr->complement,

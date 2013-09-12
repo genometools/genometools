@@ -78,10 +78,11 @@ static void gt_suffixsortspace_overflow_abort(GT_UNUSED const char *f,
                                               void *data)
 {
   fprintf(stderr, "error: overflow detected while calculating size of "
-                  "suffix sorting space: "GT_LU" * "GT_LU" bytes is too large for "
-                  "the current platform, please recompile GenomeTools with "
-                  "support for a larger address space to prevent this (e.g. "
-                  "64 bit instead of 32 bit) or use the `-parts' option.\n",
+                  "suffix sorting space: "GT_LU" * "GT_LU" bytes is too large "
+                  "for " "the current platform, please recompile GenomeTools "
+                  "with support for a larger address space to prevent this "
+                  "(e.g. 64 bit instead of 32 bit) or use the `-parts' "
+                  "option.\n",
                   (GtUword) sizeof (GtUword),
                   *(GtUword*) data);
   exit(GT_EXIT_PROGRAMMING_ERROR);

@@ -40,7 +40,7 @@ static void showgthreferenceinformation(GthSA *sa, GthInput *input,
                                         bool showseqnums,
                                         GtFile *outfp)
 {
-  gt_assert(gth_sa_ref_file_num(sa) != GT_UNDEF_ULONG);
+  gt_assert(gth_sa_ref_file_num(sa) != GT_UNDEF_UWORD);
 
   switch (gth_sa_alphatype(sa)) {
     case DNA_ALPHA:
@@ -79,7 +79,7 @@ static void showgs2referenceinformation(GthSA *sa, GtFile *outfp)
 static void showgthgenomicinformation(GthSA *sa, GthInput *input,
                                       bool showseqnums, GtFile *outfp)
 {
-  gt_assert(gth_sa_gen_file_num(sa) != GT_UNDEF_ULONG);
+  gt_assert(gth_sa_gen_file_num(sa) != GT_UNDEF_UWORD);
 
   gt_file_xprintf(outfp, "Genomic Template: file=%s, strand=%c, from="GT_LU", "
                             "to="GT_LU", description=",
@@ -108,9 +108,9 @@ static void showppaline(GthSA *sa, GtFile *outfp)
   if (gth_sa_polyAtail_start(sa) ||
       gth_sa_polyAtail_stop(sa)) {
     gt_file_xprintf(outfp,
-                       " PPA                                  cDNA %6"GT_LUS" %6"GT_LUS"\n",
-                       gth_sa_polyAtail_start(sa) + OUTPUTOFFSET,
-                       gth_sa_polyAtail_stop(sa) + OUTPUTOFFSET);
+                    " PPA                                  cDNA %6" GT_LUS " %6"
+                    GT_LUS "\n", gth_sa_polyAtail_start(sa) + OUTPUTOFFSET,
+                    gth_sa_polyAtail_stop(sa) + OUTPUTOFFSET);
   }
 }
 
@@ -188,10 +188,10 @@ static void showalignmentheader(GthSA *sa, bool gs2out, int widthforgenpos,
       acceptorsiteprobability = introninfo->acceptorsiteprobability;
       acceptorsitescore       = introninfo->acceptorsitescore;
 
-      gt_file_xprintf(outfp, "  Intron %2"GT_LUS" %*"GT_LUS" %*"GT_LUS" (%4"GT_LUS" n); ",
+      gt_file_xprintf(outfp, "  Intron %2" GT_LUS " %*" GT_LUS " %*" GT_LUS
+                      " (%4" GT_LUS " n); ",
                       i - 1 + OUTPUTOFFSET, widthforgenpos,
-                      gth_sa_left_intron_border(sa, i-1),
-                      widthforgenpos,
+                      gth_sa_left_intron_border(sa, i-1), widthforgenpos,
                       gth_sa_right_intron_border(sa, i-1),
                       gth_sa_intron_length(sa, i-1));
 
@@ -219,19 +219,16 @@ static void showalignmentheader(GthSA *sa, bool gs2out, int widthforgenpos,
     }
 
     gt_file_xprintf(outfp,
-                    " Exon %2"GT_LUS" %*"GT_LUS" %*"GT_LUS" (%4"GT_LUS" n);  %s %6"GT_LUS" %6"GT_LUS" (%4"GT_LUS" %s); "
+                    " Exon %2" GT_LUS " %*" GT_LUS " %*" GT_LUS " (%4" GT_LUS
+                    " n);  %s %6" GT_LUS " %6" GT_LUS " (%4" GT_LUS " %s); "
                     "score: %5.3f\n", i + OUTPUTOFFSET, widthforgenpos,
-                    gth_sa_left_genomic_exon_border(sa, i),
-                    widthforgenpos,
+                    gth_sa_left_genomic_exon_border(sa, i), widthforgenpos,
                     gth_sa_right_genomic_exon_border(sa, i),
-                    gth_sa_genomic_exon_length(sa, i),
-                    gth_sa_alphastring(sa),
+                    gth_sa_genomic_exon_length(sa, i), gth_sa_alphastring(sa),
                     leftreferenceexonborder  + OUTPUTOFFSET,
                     rightreferenceexonborder + OUTPUTOFFSET,
                     referenceexonlength,
-                    gth_sa_alphatype(sa) == DNA_ALPHA
-                    ? "n" : "aa",
-                    exonscore);
+                    gth_sa_alphatype(sa) == DNA_ALPHA ? "n" : "aa", exonscore);
   }
 
   /* showing PPA line (if an poly-A tail was determined) */

@@ -223,8 +223,8 @@ static void checkmstats(void *processinfo,
 #ifndef NDEBUG
   if (mstatlength != realmstatlength)
   {
-    fprintf(stderr,"patternstartpos = "GT_LU": mstatlength = "GT_LU" != "GT_LU" "
-                   " = realmstatlength\n",
+    fprintf(stderr,"patternstartpos = "GT_LU": mstatlength = "GT_LU" != "GT_LU
+            "  = realmstatlength\n",
                     patternstartpos,mstatlength,realmstatlength);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -252,14 +252,11 @@ static void checkmstats(void *processinfo,
                                   GT_READMODE_FORWARD);
         if (twl->tagptr[idx] != cc)
         {
-          fprintf(stderr,"patternstartpos = "GT_LU": pattern["GT_LU"] = %u != %u = "
-                         "sequence["GT_LU"]\n",
-                          patternstartpos,
-                          idx,
-                          (unsigned int) twl->tagptr[idx],
-                          (unsigned int) cc,
-                          (GtUword)
-                          (witnessposition+idx-patternstartpos));
+          fprintf(stderr,"patternstartpos = "GT_LU": pattern["GT_LU
+                  "] = %u != %u = sequence["GT_LU"]\n",
+                  patternstartpos, idx, (unsigned int) twl->tagptr[idx],
+                  (unsigned int) cc,
+                  (GtUword) (witnessposition+idx-patternstartpos));
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
       }

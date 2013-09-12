@@ -142,7 +142,8 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
   bfcount = gt_mmsearchiterator_count(mmsi);
   if (bfcount != countocc)
   {
-    fprintf(stderr,"bfcount = "GT_LU" != "GT_LU" = countocc\n",bfcount,countocc);
+    fprintf(stderr,"bfcount = "GT_LU" != "GT_LU" = countocc\n",
+            bfcount,countocc);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_mmsearchiterator_delete(mmsi);
@@ -283,14 +284,12 @@ static void showfinalstatistics(const TyrDfsstate *state,
               "wildcard: " Formatuint64_t,
               (GtUword) state->mersize,
               PRINTuint64_tcast(dnumofmers));
-  gt_logger_log(logger,
-              "show the distribution of the number of occurrences of "GT_LU"-mers",
-               (GtUword) state->mersize);
+  gt_logger_log(logger, "show the distribution of the number of occurrences of "
+                GT_LU "-mers", (GtUword) state->mersize);
   gt_logger_log(logger,"not containing a wildcard as rows of the form "
               "i d where");
-  gt_logger_log(logger,
-              "d is the number of events that a "GT_LU"-mer occurs exactly i times",
-              (GtUword) state->mersize);
+  gt_logger_log(logger, "d is the number of events that a "GT_LU
+                "-mer occurs exactly i times", (GtUword) state->mersize);
   showmerdistribution(state);
 }
 
@@ -624,11 +623,12 @@ static int enumeratelcpintervals(const char *inputindex,
     {
       if (state->countsfilefpout != NULL)
       {
-        gt_logger_log(logger,"write "GT_LU" mercounts > "GT_LU" to file \"%s%s\"",
-                    state->largecounts.nextfreeLargecount,
-                    (GtUword) MAXSMALLMERCOUNT,
-                    storeindex,
-                    COUNTSSUFFIX);
+        gt_logger_log(logger,"write "GT_LU" mercounts > "GT_LU
+                      " to file \"%s%s\"",
+                      state->largecounts.nextfreeLargecount,
+                      (GtUword) MAXSMALLMERCOUNT,
+                      storeindex,
+                      COUNTSSUFFIX);
         gt_xfwrite(state->largecounts.spaceLargecount, sizeof (Largecount),
                   (size_t) state->largecounts.nextfreeLargecount,
                   state->countsfilefpout);

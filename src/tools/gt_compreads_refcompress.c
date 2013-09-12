@@ -54,8 +54,8 @@ static void* gt_compreads_refcompress_arguments_new(void)
   arguments->name = gt_str_new();
   arguments->ref = gt_str_new();
   arguments->align = gt_str_new();
-  arguments->qrng.start = GT_UNDEF_ULONG;
-  arguments->qrng.end = GT_UNDEF_ULONG;
+  arguments->qrng.start = GT_UNDEF_UWORD;
+  arguments->qrng.end = GT_UNDEF_UWORD;
 
   return arguments;
 }

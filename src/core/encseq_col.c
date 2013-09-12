@@ -149,7 +149,7 @@ static int gt_encseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
                                     GtUword start, GtUword end,
                                     GtStr *md5_seqid, GtError *err)
 {
-  GtUword seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_UWORD;
   char seqid[GT_MD5_SEQID_HASH_LEN + 1];
   int had_err = 0;
   GtEncseqCol *esc;
@@ -171,7 +171,7 @@ static int gt_encseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
     }
   }
   seqnum = gt_md5_tab_map(esc->md5_tab, seqid);
-  if (seqnum != GT_UNDEF_ULONG) {
+  if (seqnum != GT_UNDEF_UWORD) {
     GtUword startpos = gt_encseq_seqstartpos(esc->encseq, seqnum),
                   GT_UNUSED seqlength = gt_encseq_seqlength(esc->encseq,
                                                             seqnum);
@@ -188,7 +188,7 @@ static int gt_encseq_col_md5_to_seq(GtSeqCol *sc, char **seq,
 static int gt_encseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
                                             GtStr *md5_seqid, GtError *err)
 {
-  GtUword seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_UWORD;
   char seqid[GT_MD5_SEQID_HASH_LEN + 1];
   int had_err = 0;
   GtEncseqCol *esc;
@@ -210,7 +210,7 @@ static int gt_encseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
     }
   }
   seqnum = gt_md5_tab_map(esc->md5_tab, seqid);
-  if (seqnum != GT_UNDEF_ULONG) {
+  if (seqnum != GT_UNDEF_UWORD) {
     const char *cdesc;
     GtUword desc_len;
     gt_assert(seqnum < gt_encseq_num_of_sequences(esc->encseq));
@@ -226,7 +226,7 @@ static int gt_encseq_col_md5_to_description(GtSeqCol *sc, GtStr *desc,
 int gt_encseq_col_md5_to_sequence_length(GtSeqCol *sc, GtUword *len,
                                          GtStr *md5_seqid, GtError *err)
 {
-  GtUword seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_UWORD;
   int had_err = 0;
   GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
@@ -235,7 +235,7 @@ int gt_encseq_col_md5_to_sequence_length(GtSeqCol *sc, GtUword *len,
   gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
   seqnum = gt_md5_tab_map(esc->md5_tab, gt_str_get(md5_seqid) +
                                           GT_MD5_SEQID_PREFIX_LEN);
-  if (seqnum != GT_UNDEF_ULONG) {
+  if (seqnum != GT_UNDEF_UWORD) {
     gt_assert(seqnum < gt_encseq_num_of_sequences(esc->encseq));
     *len = gt_encseq_seqlength(esc->encseq, seqnum);
   } else {

@@ -138,9 +138,10 @@ static int comparecodelists(const GtArrayGtCodetype *codeliststream,
   gt_error_check(err);
   if (codeliststream->nextfreeGtCodetype != codeliststring->nextfreeGtCodetype)
   {
-    gt_error_set(err,"length codeliststream= "GT_LU" != "GT_LU" =length codeliststring",
-                  (GtUword) codeliststream->nextfreeGtCodetype,
-                  (GtUword) codeliststring->nextfreeGtCodetype);
+    gt_error_set(err,"length codeliststream= "GT_LU" != "GT_LU
+                 " =length codeliststring",
+                 (GtUword) codeliststream->nextfreeGtCodetype,
+                 (GtUword) codeliststring->nextfreeGtCodetype);
     return -1;
   }
   for (i=0; i<codeliststream->nextfreeGtCodetype; i++)

@@ -167,8 +167,8 @@ static int run_orffinder(GtRegionMapping *rmap,
   gt_assert(orfi);
 
   for (i = 0; i < 3; i++) {
-    tmp_orf_rng[i].start = GT_UNDEF_ULONG;
-    tmp_orf_rng[i].end = GT_UNDEF_ULONG;
+    tmp_orf_rng[i].start = GT_UNDEF_UWORD;
+    tmp_orf_rng[i].end = GT_UNDEF_UWORD;
   }
 
   while ((state = gt_orf_iterator_next(orfi, &orf_rng, &orf_frame,
@@ -190,7 +190,7 @@ static int run_orffinder(GtRegionMapping *rmap,
   if (!had_err) {
     if (!all) {
       for (i = 0; i < 3; i++) {
-        if (tmp_orf_rng[i].start != GT_UNDEF_ULONG) {
+        if (tmp_orf_rng[i].start != GT_UNDEF_UWORD) {
           process_orf(tmp_orf_rng[i], (unsigned int) i, GT_STRAND_FORWARD, gf,
                       start, min, max, err);
         }
@@ -204,8 +204,8 @@ static int run_orffinder(GtRegionMapping *rmap,
     translator = NULL;
 
     for (i = 0; i < 3; i++) {
-      tmp_orf_rng[i].start = GT_UNDEF_ULONG;
-      tmp_orf_rng[i].end = GT_UNDEF_ULONG;
+      tmp_orf_rng[i].start = GT_UNDEF_UWORD;
+      tmp_orf_rng[i].end = GT_UNDEF_UWORD;
     }
 
     /* reverse strand */
@@ -243,7 +243,7 @@ static int run_orffinder(GtRegionMapping *rmap,
       if (!had_err) {
         if (!all) {
           for (i = 0; i < 3; i++) {
-            if (tmp_orf_rng[i].start != GT_UNDEF_ULONG) {
+            if (tmp_orf_rng[i].start != GT_UNDEF_UWORD) {
               process_orf(tmp_orf_rng[i], (unsigned int) i, GT_STRAND_REVERSE,
                           gf, sum, min, max, err);
             }

@@ -49,7 +49,7 @@ GtTrack* gt_track_new(GtStr *title, GtUword max_num_lines,
   track->max_num_lines = max_num_lines;
   track->split = split_lines;
   track->lb = lb;
-  track->y_index = GT_UNDEF_ULONG;
+  track->y_index = GT_UNDEF_UWORD;
   return track;
 }
 
@@ -77,7 +77,7 @@ static int get_next_free_line(GtTrack *track, GtLine **result, GtBlock *block,
   /* all lines are occupied, we need o create a new one */
   if (!had_err) {
     /* if line limit is hit, do not create any more lines! */
-    if (track->max_num_lines != GT_UNDEF_ULONG
+    if (track->max_num_lines != GT_UNDEF_UWORD
           && gt_array_size(track->lines) == track->max_num_lines)
     {
       track->discarded_blocks++;
@@ -337,7 +337,7 @@ int gt_track_unit_test(GtError *err)
     l_rest = BAR_VSPACE_DEFAULT;
   }
 
-  track = gt_track_new(title, GT_UNDEF_ULONG, true, lb);
+  track = gt_track_new(title, GT_UNDEF_UWORD, true, lb);
   gt_ensure(track);
   gt_ensure(gt_track_get_title(track) == title);
 
