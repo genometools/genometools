@@ -17,11 +17,19 @@
 
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/compat.h"
 #include "core/fileutils.h"
 #include "core/gtdatapath.h"
 
+#ifndef _WIN32
 #define GTDATADIR "/gtdata"
 #define UPDIR     "/.."
+#else
+#define GTDATADIR "\\gtdata"
+#define UPDIR     "\\.."
+#endif
+
+/* XXX: how to define the default path on Windows? */
 static const char* GTDATA_DEFAULT_PATHS[]={ "/usr/share/genometools" GTDATADIR,
                                             NULL };
 
@@ -51,7 +59,7 @@ GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
         return path;
     }
     if (!gt_file_exists(gt_str_get(path))) {
-      gt_error_set(err, "could not find gtdata/ directory");
+      gt_error_set(err, "could not find gtdata%c directory", GT_PATH_SEPARATOR);
       had_err = -1;
     }
   }
