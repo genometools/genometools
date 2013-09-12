@@ -62,12 +62,14 @@ int gt_basename_unit_test(GtError *err)
   int had_err = 0;
   gt_error_check(err);
 
-  bn = gt_basename("/usr/lib");
+  /* /usr/lib */
+  bn = gt_basename(GT_PATH_SEPARATOR_STR"usr"GT_PATH_SEPARATOR_STR"lib");
   gt_ensure(!strcmp(bn, "lib"));
   gt_free(bn);
 
   if (!had_err) {
-    bn = gt_basename("/usr/");
+    /* /usr/ */
+    bn = gt_basename(GT_PATH_SEPARATOR_STR"usr"GT_PATH_SEPARATOR_STR);
     gt_ensure(!strcmp(bn, "usr"));
     gt_free(bn);
   }
@@ -79,19 +81,24 @@ int gt_basename_unit_test(GtError *err)
   }
 
   if (!had_err) {
-    bn = gt_basename("/");
-    gt_ensure(!strcmp(bn, "/"));
+    bn = gt_basename(GT_PATH_SEPARATOR_STR);
+    gt_ensure(!strcmp(bn, GT_PATH_SEPARATOR_STR));
     gt_free(bn);
   }
 
   if (!had_err) {
-    bn = gt_basename("///");
-    gt_ensure(!strcmp(bn, "/"));
+    bn = gt_basename(GT_PATH_SEPARATOR_STR GT_PATH_SEPARATOR_STR
+                     GT_PATH_SEPARATOR_STR);
+    gt_ensure(!strcmp(bn, GT_PATH_SEPARATOR_STR));
     gt_free(bn);
   }
 
   if (!had_err) {
+#ifndef _WIN32
     bn = gt_basename("//usr//lib//");
+#else
+    bn = gt_basename("\\\\usr\\\\lib\\\\");
+#endif
     gt_ensure(!strcmp(bn, "lib"));
     gt_free(bn);
   }
