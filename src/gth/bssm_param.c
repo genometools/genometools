@@ -18,6 +18,7 @@
 
 #include "lauxlib.h"
 #include "core/bioseq.h"
+#include "core/compat.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
 #include "core/ma_api.h"
@@ -450,10 +451,11 @@ GthBSSMParam* gth_bssm_param_load(const char *filename, GtError *err)
   if (gt_file_exists(filename))
     gt_str_append_cstr(path, filename);
   else {
-    if (strchr(filename, '/')) {
-      gt_error_set(err, "filename \"%s\" contains illegal symbol '/': the path "
-                        "list specified by environment variable \"%s\" cannot "
-                        "be searched for it", filename, BSSMENVNAME);
+    if (strchr(filename, GT_PATH_SEPARATOR)) {
+      gt_error_set(err, "filename \"%s\" contains illegal symbol '%c': the "
+                        "path list specified by environment variable \"%s\" "
+                        "cannot be searched for it", filename,
+                        GT_PATH_SEPARATOR, BSSMENVNAME);
       had_err = -1;
     }
     if (!had_err)
@@ -465,7 +467,7 @@ GthBSSMParam* gth_bssm_param_load(const char *filename, GtError *err)
     }
     if (!had_err) {
       /* path found -> append filename */
-      gt_str_append_char(path, '/');
+      gt_str_append_char(path, GT_PATH_SEPARATOR);
       gt_str_append_cstr(path, filename);
     }
   }

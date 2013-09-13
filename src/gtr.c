@@ -26,6 +26,7 @@
 #include "lpeg.h"
 #include "md5.h"
 #include "ldes56.h"
+#include "core/compat.h"
 #include "core/cstr.h"
 #include "core/cstr_array.h"
 #include "core/ensure.h"
@@ -297,7 +298,7 @@ static int create_manpage(const char *outdir, const char *toolname,
   gt_cstr_rep(utoolname, ' ', '_');
   if (!gt_file_exists(gt_str_get(pathbuf)))
     gt_xmkdir(gt_str_get(pathbuf));
-  gt_str_append_char(pathbuf, '/');
+  gt_str_append_char(pathbuf, GT_PATH_SEPARATOR);
   gt_str_append_cstr(pathbuf, utoolname);
   gt_str_append_cstr(pathbuf, ".mansrc");
   gt_free(utoolname);
