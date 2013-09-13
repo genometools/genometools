@@ -201,7 +201,6 @@ static GtOptionParser* gtr_option_parser_new(GtR *gtr)
                          "set seed for random number generator manually\n"
                          "0 generates a seed from current time and process id",
                          &gtr->seed, gtr->seed);
-  gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
   o = gt_option_new_bool("64bit", "exit with code 0 if this is a 64bit binary, "
                          "with 1 otherwise", &gtr->check64bit, false);
