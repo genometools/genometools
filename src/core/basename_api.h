@@ -40,6 +40,8 @@
   If <path> consists entirely of the '/' character,  then gt_basename() returns
   a pointer to the string "/".
 
+  On Windows '\' is used instead of '/'.
+
   If <path> is a null pointer or points to an empty string, gt_basename()
   returns a pointer to the string ".".
 

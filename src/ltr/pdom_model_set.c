@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #endif
 #endif
+#include "core/compat.h"
 #include "core/error_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
@@ -83,7 +84,7 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
     if (!(tmpdir = getenv("TMPDIR")))
       tmpdir = "/tmp";
     gt_str_append_cstr(pdom_model_set->filename, tmpdir);
-    gt_str_append_char(pdom_model_set->filename, '/');
+    gt_str_append_char(pdom_model_set->filename, GT_PATH_SEPARATOR);
     md5_hash = gt_md5_fingerprint(gt_str_get(concat_dbnames),
                                   gt_str_length(concat_dbnames));
     gt_str_append_cstr(pdom_model_set->filename, md5_hash);

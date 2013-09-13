@@ -21,9 +21,11 @@
 
 #ifndef _WIN32
 #define GT_PATH_SEPARATOR     '/'
+#define GT_PATH_SEPARATOR_STR "/"
 #define GT_PATH_VAR_SEPARATOR ':'
 #else
 #define GT_PATH_SEPARATOR     '\\'
+#define GT_PATH_SEPARATOR_STR "\\"
 #define GT_PATH_VAR_SEPARATOR ';'
 #endif
 

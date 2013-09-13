@@ -16,6 +16,7 @@
 */
 
 #include "core/bioseq.h"
+#include "core/compat.h"
 #include "core/fa.h"
 #include "core/fasta.h"
 #include "core/fileutils_api.h"
@@ -119,7 +120,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
     char *seq;
     gt_str_reset(descname);
     gt_str_append_str(descname, splitdesc);
-    gt_str_append_char(descname, '/');
+    gt_str_append_char(descname, GT_PATH_SEPARATOR);
     gt_str_append_cstr(descname, gt_bioseq_get_description(bioseq, i));
     gt_str_append_cstr(descname, gt_file_suffix(filename));
     if (!(outfp = gt_output_file_xopen_forcecheck(gt_str_get(descname), "w",

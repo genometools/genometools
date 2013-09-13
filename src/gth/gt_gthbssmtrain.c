@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/compat.h"
 #include "core/cstr_array.h"
 #include "core/ma_api.h"
 #include "core/output_file.h"
@@ -265,7 +266,7 @@ static int gt_gthbssmtrain_runner(GT_UNUSED int argc, const char **argv,
   /* open log file */
   if (!had_err) {
     GtStr *logfile = gt_str_clone(arguments->outdir);
-    gt_str_append_char(logfile, '/');
+    gt_str_append_char(logfile, GT_PATH_SEPARATOR);
     gt_str_append_cstr(logfile, "gthbssmtrain.run");
     if (!(logfp = gt_output_file_xopen_forcecheck(gt_str_get(logfile), "w",
                                                   arguments->force,

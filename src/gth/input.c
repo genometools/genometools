@@ -17,6 +17,7 @@
 
 #include <ctype.h>
 #include <math.h>
+#include "core/compat.h"
 #include "core/fileutils_api.h"
 #include "core/md5_seqid.h"
 #include "core/safearith.h"
@@ -668,10 +669,11 @@ static GtStr* find_score_matrix_path(const char *scorematrixfile, GtError *err)
     gt_str_set(path, scorematrixfile);
     return path;
   }
-  if (strchr(scorematrixfile, '/')) {
-    gt_error_set(err, "filename \"%s\" contains illegal symbol '/': the path "
-                      "list " "specified by environment variable \"%s\" cannot "
-                      "be searched for it", scorematrixfile, GTHDATAENVNAME);
+  if (strchr(scorematrixfile, GT_PATH_SEPARATOR)) {
+    gt_error_set(err, "filename \"%s\" contains illegal symbol '%c': the path "
+                      "list specified by environment variable \"%s\" cannot be "
+                      "searched for it", scorematrixfile, GT_PATH_SEPARATOR,
+                      GTHDATAENVNAME);
     had_err = -1;
   }
   if (!had_err)
@@ -684,7 +686,7 @@ static GtStr* find_score_matrix_path(const char *scorematrixfile, GtError *err)
   if (!had_err) {
     gt_assert(gt_str_length(path));
     /* path found -> append score matrix file name */
-    gt_str_append_char(path, '/');
+    gt_str_append_char(path, GT_PATH_SEPARATOR);
     gt_str_append_cstr(path, scorematrixfile);
   }
   if (had_err) {

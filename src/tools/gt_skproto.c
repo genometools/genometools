@@ -20,6 +20,7 @@
 #include <ctype.h>
 #endif
 #include <string.h>
+#include "core/compat.h"
 #include "core/fa.h"
 #include "core/ma.h"
 #include "core/option_api.h"
@@ -82,8 +83,8 @@ static void removecomments(GtStr *line, int *incomment)
     }
     else {
       if (gt_str_length(line)     >  (GtUword) 2   &&
-          gt_str_get(line)[pos]   == '/' &&
-          gt_str_get(line)[pos+1] == '/') {
+          gt_str_get(line)[pos]   == GT_PATH_SEPARATOR &&
+          gt_str_get(line)[pos+1] == GT_PATH_SEPARATOR) {
         break;
       }
       else if (!strncmp(gt_str_get(line) + pos, "/*", (size_t) 2) &&

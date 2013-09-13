@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010-2012 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2010-2013 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,10 @@
 #define FILEUTILS_H
 
 #include "core/fileutils_api.h"
+
+/* Returns true if the file with the given <path> exists and is a directory,
+   false otherwise. */
+bool gt_file_exists_and_is_dir(const char *path);
 
 /* Compare two files bytewise, fails hard with exit(1) if files differ. */
 void gt_xfile_cmp(const char *file1, const char *file2);
