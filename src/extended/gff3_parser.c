@@ -176,13 +176,13 @@ static int offset_possible(const GtRange *range, GtWord offset,
     GtUword result = range->start + offset;
     if (result == 0) {
       gt_error_set(err, "==0");
-      gt_error_set(err, "adding offset "GT_LD" to node on line %u in file "
+      gt_error_set(err, "adding offset "GT_WD" to node on line %u in file "
                    "\"%s\" leads to start 0 (GFF3 files are 1-based)",
                    offset, line_number, filename);
       had_err = -1;
     }
     else if (result > range->start) {
-      gt_error_set(err, "adding offset "GT_LD" to node on line %u in file "
+      gt_error_set(err, "adding offset "GT_WD" to node on line %u in file "
                    "\"%s\" leads to underflow",
                    offset, line_number, filename);
       had_err = -1;
@@ -419,8 +419,8 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
   }
   else if (parser->checkregions && !ssr->is_circular &&
            !gt_range_contains(&ssr->range, &range) && parser->checkregions) {
-    gt_error_set(err, "range ("GT_LU","GT_LU") of feature on line %u in file "
-                 "\"%s\" is not contained in range ("GT_LU","GT_LU") of "
+    gt_error_set(err, "range ("GT_WU","GT_WU") of feature on line %u in file "
+                 "\"%s\" is not contained in range ("GT_WU","GT_WU") of "
                  "corresponding sequence region on line %u",
                  range.start, range.end, line_number, filename,
                  ssr->range.start, ssr->range.end, ssr->line_number);

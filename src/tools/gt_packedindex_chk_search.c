@@ -131,8 +131,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
                       && params.minPatLen > params.maxPatLen)))
       {
-        gt_error_set(err, "Invalid pattern lengths selected: min="GT_LD", "
-                     "max="GT_LD";"
+        gt_error_set(err, "Invalid pattern lengths selected: min="GT_WD", "
+                     "max="GT_WD";"
                      " min <= max is required.", params.minPatLen,
                      params.maxPatLen);
         break;
@@ -157,12 +157,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
         else
           params.maxPatLen = MAX(params.maxPatLen, params.minPatLen);
       }
-      fprintf(stderr, "Using patterns of lengths "GT_LU" to "GT_LU"\n",
+      fprintf(stderr, "Using patterns of lengths "GT_WU" to "GT_WU"\n",
               params.minPatLen, params.maxPatLen);
       if ((had_err = totalLen + 1 != BWTSeqLength(bwtSeq)))
       {
         gt_error_set(err, "base suffix array and index have diferrent lengths!"
-                          ""GT_LU" vs. "GT_LU"",  totalLen + 1,
+                          ""GT_WU" vs. "GT_WU"",  totalLen + 1,
                   BWTSeqLength(bwtSeq));
         break;
       }
@@ -213,7 +213,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
             if ((had_err = matchPos != dbstart))
             {
               gt_error_set(err, "packedindex match doesn't equal mmsearch "
-                           "match result!\n"GT_LU" vs. "GT_LU"\n",
+                           "match result!\n"GT_WU" vs. "GT_WU"\n",
                            matchPos, dbstart);
             }
           }
@@ -237,7 +237,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
           if ((had_err = numFMIMatches != numMMSearchMatches))
           {
             gt_error_set(err, "Number of matches not equal for suffix array ("
-                              ""GT_LU") and fmindex ("GT_LU").\n",
+                              ""GT_WU") and fmindex ("GT_WU").\n",
                       numFMIMatches, numMMSearchMatches);
           }
         }
@@ -248,7 +248,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       }
       if (params.progressInterval)
         putc('\n', stderr);
-      fprintf(stderr, "Finished "GT_LU" of "GT_LU" matchings successfully.\n",
+      fprintf(stderr, "Finished "GT_WU" of "GT_WU" matchings successfully.\n",
               trial, params.numOfSamples);
     }
   } while (0);

@@ -161,7 +161,7 @@ static GtUword *fillrightofpartwidth(
       {
         size_t allocsize = sizeof (*rightofpartwidth) * countlargeranges;
         rightofpartwidth = gt_malloc(allocsize);
-        /*printf("allocated "GT_LU" bytes for rightofpartwidth (%.2f)\n",
+        /*printf("allocated "GT_WU" bytes for rightofpartwidth (%.2f)\n",
             (GtUword) allocsize, (double) allocsize/totallength);*/
       }
       gt_assert(nextrightofpartwidth < countlargeranges);
@@ -486,7 +486,7 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
         checkpos = ESASUFFIXPTRGET(suftab, nexttab[(int) cc]) + 1;
         if (checkpos != position)
         {
-          fprintf(stderr, "idx="GT_LU", checkpos="GT_LU", position="GT_LU"\n",
+          fprintf(stderr, "idx="GT_WU", checkpos="GT_WU", position="GT_WU"\n",
                           idx, checkpos, position);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
@@ -532,8 +532,8 @@ static void gt_suftab_sk_suffixorder(GtUword totallength,
                                                             totallength);
         if (found == ULONG_MAX)
         {
-          fprintf(stderr, "Cannot find position+1="GT_LU" in range ["GT_LU", "
-                  GT_LU"]\n", position+1, start, totallength);
+          fprintf(stderr, "Cannot find position+1="GT_WU" in range ["GT_WU", "
+                  GT_WU"]\n", position+1, start, totallength);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
         numofcomparisons += found - start + 1;
@@ -575,7 +575,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
 
     if (GT_ISIBITSET(startposoccurs, position))
     {
-      fprintf(stderr, "ERROR: suffix with startpos "GT_LU" already occurs\n",
+      fprintf(stderr, "ERROR: suffix with startpos "GT_WU" already occurs\n",
               ESASUFFIXPTRGET(suftab, idx));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -598,8 +598,8 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
         {
           if (previouspos > position)
           {
-            fprintf(stderr, "incorrect order: " GT_LU " = " GT_LU "=SPECIAL > "
-                    "SPECIAL="GT_LU"  = "GT_LU"\n",
+            fprintf(stderr, "incorrect order: " GT_WU " = " GT_WU "=SPECIAL > "
+                    "SPECIAL="GT_WU"  = "GT_WU"\n",
                     idx-1, position, previouspos, idx);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           }
@@ -608,16 +608,16 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
       {
         if (ISSPECIAL(previouscc))
         {
-          fprintf(stderr, "incorrect order: "GT_LU"="GT_LU"=SPECIAL > "
-                  "%u="GT_LU"="GT_LU"\n", idx-1, position, (unsigned int) cc,
+          fprintf(stderr, "incorrect order: "GT_WU"="GT_WU"=SPECIAL > "
+                  "%u="GT_WU"="GT_WU"\n", idx-1, position, (unsigned int) cc,
                   previouspos, idx);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         } else
         {
           if (previouscc > cc)
           {
-            fprintf(stderr, "incorrect order: "GT_LU" = "GT_LU"=%u > "
-                    "%u="GT_LU"="GT_LU"\n", idx-1, position, (unsigned int)
+            fprintf(stderr, "incorrect order: "GT_WU" = "GT_WU"=%u > "
+                    "%u="GT_WU"="GT_WU"\n", idx-1, position, (unsigned int)
                     previouscc, (unsigned int) cc, previouspos, idx);
             exit(GT_EXIT_PROGRAMMING_ERROR);
           } else
@@ -645,7 +645,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   }
   if (countbitsset != totallength)
   {
-    fprintf(stderr, "ERROR: only "GT_LU" of "GT_LU" suffixes occur\n",
+    fprintf(stderr, "ERROR: only "GT_WU" of "GT_WU" suffixes occur\n",
             countbitsset, totallength);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -758,7 +758,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
     }
     if (mlcpvalue != lcpvalue)
     {
-      fprintf(stderr, ""GT_LU": mlcpvalue = "GT_LU" != "GT_LU" = lcpvalue\n",
+      fprintf(stderr, ""GT_WU": mlcpvalue = "GT_WU" != "GT_WU" = lcpvalue\n",
                        idx, mlcpvalue, lcpvalue);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }

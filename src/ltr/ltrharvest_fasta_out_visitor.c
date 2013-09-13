@@ -154,7 +154,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
       GtRange rootrng;
       rootrng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
       gt_warning("trying to output empty%s sequence for candidate at "
-                 ""GT_LU"-"GT_LU" on sequence "GT_LU"",
+                 ""GT_WU"-"GT_WU" on sequence "GT_WU"",
                  (lv->inner ? " inner" : ""),
                  rootrng.start,
                  rootrng.end,

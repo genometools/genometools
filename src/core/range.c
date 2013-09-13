@@ -539,7 +539,7 @@ void gt_ranges_show(GtArray *ranges, GtFile *outfp)
   gt_assert(ranges);
   for (i = 0; i < gt_array_size(ranges); i++) {
     range = gt_array_get(ranges, i);
-    gt_file_xprintf(outfp, "("GT_LU","GT_LU")", range->start, range->end);
+    gt_file_xprintf(outfp, "("GT_WU","GT_WU")", range->start, range->end);
   }
   gt_file_xfputc('\n', outfp);
 }

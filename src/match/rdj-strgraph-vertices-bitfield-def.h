@@ -23,7 +23,7 @@
 #define GT_STRGRAPH_VERTICES_REPRESENTATION "bitfield"
 
 typedef GtUword GtStrgraphVEdgenum;
-#define FormatGtStrgraphVEdgenum       ""GT_LU""
+#define FormatGtStrgraphVEdgenum       ""GT_WU""
 #define PRINTGtStrgraphVEdgenumcast(X) (X)
 #define SCANGtStrgraphVEdgenumcast(X)  (X)
 #define GT_STRGRAPH__OUTDEG_BITS       24

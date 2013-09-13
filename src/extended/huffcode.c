@@ -167,7 +167,7 @@ static void initialise_rbt(GtHuffman *huffman,
       huffman->num_of_coded_symbols++;
     }
   }
-  gt_log_log("added " GT_LU " of " GT_LU " symbols as nodes",
+  gt_log_log("added " GT_WU " of " GT_WU " symbols as nodes",
              huffman->num_of_coded_symbols,
              huffman->num_of_symbols);
 }
@@ -260,12 +260,12 @@ static int print_codes(GtUword symbol,
                        GT_UNUSED void *unused)
 {
 #ifndef S_SPLINT_S
-  printf("control symbol " GT_LU ", freq "GT_LLU", codelength %u: ",
+  printf("control symbol " GT_WU ", freq "GT_LLU", codelength %u: ",
          symbol,
          freq,
          code_len);
 #else
-  printf("control symbol " GT_LU ", freq " GT_LU ", codelength %u: ",
+  printf("control symbol " GT_WU ", freq " GT_WU ", codelength %u: ",
          symbol,
          (GtUword) freq,
          code_len);
@@ -473,7 +473,7 @@ GtHuffmanDecoder *gt_huffman_decoder_new_from_memory(
     gt_error_set(err, "error calling mem_func");
     return NULL;
   }
-  gt_log_log(GT_LU ", " GT_LU ", " GT_LU, huff_decoder->length,
+  gt_log_log(GT_WU ", " GT_WU ", " GT_WU, huff_decoder->length,
              huff_decoder->cur_bit, huff_decoder->pad_length);
   gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
   gt_assert(huff_decoder->mem_func_stat == 1);
@@ -499,7 +499,7 @@ int gt_huffman_decoder_get_new_mem_chunk(GtHuffmanDecoder *huff_decoder,
     return huff_decoder->mem_func_stat;
   }
   huff_decoder->cur_bitseq = 0;
-  gt_log_log(GT_LU ", " GT_LU ", " GT_LU, huff_decoder->length,
+  gt_log_log(GT_WU ", " GT_WU ", " GT_WU, huff_decoder->length,
              huff_decoder->cur_bit, huff_decoder->pad_length);
   gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
   return had_err;
@@ -557,7 +557,7 @@ int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
                                  &huff_decoder->cur_bit,
                                  &huff_decoder->pad_length,
                                  huff_decoder->info);
-        gt_log_log(GT_LU ", " GT_LU ", " GT_LU, huff_decoder->length,
+        gt_log_log(GT_WU ", " GT_WU ", " GT_WU, huff_decoder->length,
                    huff_decoder->cur_bit, huff_decoder->pad_length);
         if (huff_decoder->mem_func_stat == -1) {
           gt_error_set(err, "error calling mem_func");

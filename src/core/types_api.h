@@ -37,23 +37,31 @@
    that splint can not handle concatenated strings in format strings, something
    like "%03.2""ld" will break. A bug was filed for this. */
 #ifndef _WIN64
-#define GT_LDS "ld"
-#define GT_LD "%ld"
+#define GT_WDS "ld"
+#define GT_WD "%ld"
 #else
-#define GT_LDS "I64d"
-#define GT_LD "%I64d"
+#define GT_WDS "I64d"
+#define GT_WD "%I64d"
 #endif
+
+/* deprecated */
+#define GT_LDS GT_WDS
+#define GT_LD GT_WD
 
 /* Define the conversion string for 'lu' in platform independent fashion. Note
    that splint can not handle concatenated strings in format strings, something
    like "%03.2""ld" will break. A bug was filed for this. */
 #ifndef _WIN64
-#define GT_LUS "lu"
-#define GT_LU "%lu"
+#define GT_WUS "lu"
+#define GT_WU "%lu"
 #else
-#define GT_LUS "I64u"
-#define GT_LU "%I64u"
+#define GT_WUS "I64u"
+#define GT_WU "%I64u"
 #endif
+
+/* deprecated */
+#define GT_LUS GT_WUS
+#define GT_LU GT_WU
 
 /* Define the conversion string for '%zu' in platform independent fashion. */
 #if !defined(_WIN32)

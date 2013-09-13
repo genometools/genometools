@@ -85,8 +85,8 @@ static void checkifsequenceisthere(const GtEncseq *encseq,
                                               GT_READMODE_FORWARD);
     if (qptr[i] != cc)
     {
-      fprintf(stderr,"sequence of length "GT_LU" at witnesspos "GT_LU""
-                     " query["GT_LU"] = %u != %u = subject["GT_LU"]\n",
+      fprintf(stderr,"sequence of length "GT_WU" at witnesspos "GT_WU""
+                     " query["GT_WU"] = %u != %u = subject["GT_WU"]\n",
                      gmatchlength,
                      witnessposition,
                      i,
@@ -193,12 +193,12 @@ static void showifinlengthrange(const GtAlphabet *alphabet,
   {
     if (rangespecinfo->showquerypos)
     {
-      printf(""GT_LU" ",querystart);
+      printf(""GT_WU" ",querystart);
     }
-    printf(""GT_LU"",gmatchlength);
+    printf(""GT_WU"",gmatchlength);
     if (rangespecinfo->showsubjectpos)
     {
-      printf(" "GT_LU"",subjectpos);
+      printf(" "GT_WU"",subjectpos);
     }
     if (rangespecinfo->showsequence)
     {
@@ -350,13 +350,13 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
 #ifndef NDEBUG
         if (gmatchlength2 != gmatchlength)
         {
-          fprintf(stderr,"at offset "GT_LU":\n",(GtUword)
+          fprintf(stderr,"at offset "GT_WU":\n",(GtUword)
                                               (substring.currentptr -
                                                substring.start));
-          fprintf(stderr,"bucketspec=("GT_LU","GT_LU")\n",
+          fprintf(stderr,"bucketspec=("GT_WU","GT_WU")\n",
                           bucketspec.left,
                           bucketspec.left+bucketspec.nonspecialsinbucket-1);
-          fprintf(stderr,"gmatchlength2 = "GT_LU" != "GT_LU" = gmatchlength\n",
+          fprintf(stderr,"gmatchlength2 = "GT_WU" != "GT_WU" = gmatchlength\n",
                           gmatchlength2,gmatchlength);
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }

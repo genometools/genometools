@@ -104,7 +104,7 @@ static inline int parse_fastq_seqname(GtSeqIteratorFastQ *seqit,
     return EOF;
   seqit->currentread++;
   if (currentchar != startchar) {
-    gt_error_set(err, "'%c' expected, '%c' encountered instead in line "GT_LU"",
+    gt_error_set(err, "'%c' expected, '%c' encountered instead in line "GT_WU"",
                       startchar,
                       currentchar,
                       seqit->curline);
@@ -151,7 +151,7 @@ static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
     seqit->currentread++;
   }
   if (!gt_str_length(tmp_str)) {
-    gt_error_set(err, "empty sequence given in file '%s', line "GT_LU"",
+    gt_error_set(err, "empty sequence given in file '%s', line "GT_WU"",
                       gt_str_array_get(seqit->filenametab,
                                        seqit->filenum),
                       seqit->curline-1);
@@ -178,7 +178,7 @@ static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
       {
         charcode = seqit->symbolmap[(unsigned int) input_str[idx]];
         if (charcode == UNDEFCHAR) {
-          gt_error_set(err, "illegal character '%c': file \"%s\", line "GT_LU"",
+          gt_error_set(err, "illegal character '%c': file \"%s\", line "GT_WU"",
                             input_str[idx],
                             gt_str_array_get(seqit->filenametab,
                                              seqit->filenum),
@@ -232,9 +232,9 @@ static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
   }
   /* expect newline at end of qualities */
   if (currentchar != GT_FASTQ_NEWLINESYMBOL) {
-    gt_error_set(err, "qualities string of sequence length " GT_LU
+    gt_error_set(err, "qualities string of sequence length " GT_WU
                  " is not ended by newline in file '%s', line "
-                 GT_LU " -- this may be a sign for sequence and qualities "
+                 GT_WU " -- this may be a sign for sequence and qualities "
                  "strings of different length",
                  gt_str_length(seqit->sequencebuffer),
                  gt_str_array_get(seqit->filenametab, seqit->filenum),
@@ -246,7 +246,7 @@ static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
 
 #define gt_fastq_premature_end_check(had_err, seqit) \
   if (had_err == EOF) { \
-    gt_error_set(err, "premature end of file '%s' in line "GT_LU": " \
+    gt_error_set(err, "premature end of file '%s' in line "GT_WU": " \
                  "file ended before end of block", \
                  gt_str_array_get((seqit)->filenametab, \
                                   (seqit)->filenum), \
@@ -284,7 +284,7 @@ static inline int parse_fastq_block(GtSeqIteratorFastQ *seqit, GtError *err)
       && gt_str_cmp(seqit->descbuffer, seqit->qdescbuffer) != 0)
   {
       gt_error_set(err, "sequence description '%s' is not equal to "
-                        "qualities description '%s' in line "GT_LU"",
+                        "qualities description '%s' in line "GT_WU"",
                         gt_str_get(seqit->descbuffer),
                         gt_str_get(seqit->qdescbuffer),
                         seqit->curline-1);
@@ -297,7 +297,7 @@ static inline int parse_fastq_block(GtSeqIteratorFastQ *seqit, GtError *err)
           != gt_str_length(seqit->sequencebuffer))
     {
       gt_error_set(err, "lengths of character sequence and qualities "
-                        "sequence differ ("GT_LU" <-> "GT_LU")",
+                        "sequence differ ("GT_WU" <-> "GT_WU")",
                         gt_str_length(seqit->qualsbuffer),
                         gt_str_length(seqit->sequencebuffer));
       return -2;

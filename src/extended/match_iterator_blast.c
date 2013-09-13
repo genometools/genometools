@@ -36,11 +36,11 @@
 #define READVALUES 10
 
 #define GT_MATCHER_BLAST_CANNOTPARSECOLUMN(S)\
-        gt_error_set(err, "file %s, line " GT_LU ", column " GT_LU ": %s", \
+        gt_error_set(err, "file %s, line " GT_WU ", column " GT_WU ": %s", \
                      m->pvt->matchfile, m->pvt->curpos, columncount + 1, S)
 
 #define GT_MATCHER_BLAST_CANNOTPARSELINE(S)\
-        gt_error_set(err, "file %s, line " GT_LU ": %s", \
+        gt_error_set(err, "file %s, line " GT_WU ": %s", \
                      m->pvt->matchfile, m->pvt->curpos, S)
 
 #define gt_match_iterator_blast_cast(M)\
@@ -87,8 +87,8 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
     if (!m->pvt->process)
       fseek(m->pvt->matchfilep, -1, SEEK_CUR);
     readvalues = fscanf(m->pvt->matchfilep,
-                        "%s %s %f " GT_LD " %*d %*d " GT_LD " " GT_LD " " GT_LD
-                        " " GT_LD " " "%lg %f\n", query_seq, db_seq, &identity,
+                        "%s %s %f " GT_WD " %*d %*d " GT_WD " " GT_WD " " GT_WD
+                        " " GT_WD " " "%lg %f\n", query_seq, db_seq, &identity,
                         &storeinteger[0],
                         &storeinteger[1], &storeinteger[2], &storeinteger[3],
                         &storeinteger[4], &e_value, &bitscore);
@@ -112,8 +112,8 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
         i = 0;
       } else break;
     }
-    if ((readvalues = sscanf(buffer, "%s %s %f " GT_LD " %*d %*d " GT_LD " "
-                             GT_LD " " GT_LD " " GT_LD " %lg " "%f\n",
+    if ((readvalues = sscanf(buffer, "%s %s %f " GT_WD " %*d %*d " GT_WD " "
+                             GT_WD " " GT_WD " " GT_WD " %lg " "%f\n",
                              query_seq, db_seq, &identity,
                              &storeinteger[0],
                              &storeinteger[1], &storeinteger[2],

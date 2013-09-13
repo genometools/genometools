@@ -133,7 +133,7 @@ static void gt_randomcodes_fillbinsearchcache(GtRandomcodesinfo *fci,
       current += fci->binsearchcache.width;
     }
   }
-  gt_log_log("binsearchcache.depth=%u => " GT_LU " bytes",
+  gt_log_log("binsearchcache.depth=%u => " GT_WU " bytes",
              fci->binsearchcache.depth,
              (GtUword) allocbytes);
   GT_FCI_ADDWORKSPACE(fci->fcsl, "binsearchcache", allocbytes);
@@ -145,7 +145,7 @@ static void gt_randomcodes_fillbinsearchcache(GtRandomcodesinfo *fci,
           fprintf(stderr, "%s = NULL\n", #F);\
         } else\
         {\
-          fprintf(stderr, "%s = " GT_LU "\n", #F, \
+          fprintf(stderr, "%s = " GT_WU "\n", #F, \
                    (GtUword) ((F) - fci->allrandomcodes));\
         }
 
@@ -765,8 +765,8 @@ static int gt_randomcodes_thread_sortremaining(
       threadinfo[t].sumofwidth = sumofwidth;
     }
     gt_assert(lb < threadinfo[t].sumofwidth);
-    gt_logger_log(logger, "thread %u: process [" GT_LU ", " GT_LU "]=[" GT_LU
-                  ", " GT_LU "] of width " GT_LU,
+    gt_logger_log(logger, "thread %u: process [" GT_WU ", " GT_WU "]=[" GT_WU
+                  ", " GT_WU "] of width " GT_WU,
                   t, threadinfo[t].minindex, threadinfo[t].maxindex, lb,
                   threadinfo[t].sumofwidth, threadinfo[t].sumofwidth - lb);
     sum += threadinfo[t].sumofwidth - lb;
@@ -867,13 +867,13 @@ static void run_allcodes_distribution(const GtUword *allrandomcodes,
     }
     distbits[gt_determinebitspervalue(diff)]++;
   }
-  printf("allrandomcodes: mindiff=" GT_LU ", maxdiff=" GT_LU "(%u bits)\n",
+  printf("allrandomcodes: mindiff=" GT_WU ", maxdiff=" GT_WU "(%u bits)\n",
          mindiff, maxdiff, gt_determinebitspervalue(maxdiff));
   for (idx = 0; idx <= 64UL; idx++)
   {
     if (distbits[idx] > 0)
     {
-      printf("" GT_LU " bits: " GT_LU "\n", idx, distbits[idx]);
+      printf("" GT_WU " bits: " GT_WU "\n", idx, distbits[idx]);
     }
   }
 }
@@ -908,8 +908,8 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
   {
     gt_seqnumrelpos_delete(fci->buf.snrp);
     fci->buf.snrp = NULL;
-    gt_error_set(err, "cannot process encoded sequences with " GT_LU
-                 " sequences of length up to " GT_LU " (%u+%u bits)",
+    gt_error_set(err, "cannot process encoded sequences with " GT_WU
+                 " sequences of length up to " GT_WU " (%u+%u bits)",
                  numofsequences, maxseqlength, bitsforseqnum, bitsforrelpos);
     haserr = true;
   }
@@ -947,12 +947,12 @@ static inline GtUword gt_randomcodes_calculate_nofsamples(
   GtUword nofkmers = totallength,
                 nofnonkmers = (bucketkeysize + 1) * nofsequences - 1,
                 nofsamples;
-  gt_log_log("totallength = " GT_LU "", nofkmers);
-  gt_log_log("nofsequences = " GT_LU "", nofsequences);
+  gt_log_log("totallength = " GT_WU "", nofkmers);
+  gt_log_log("nofsequences = " GT_WU "", nofsequences);
   if (nofnonkmers < nofkmers)
   {
     nofkmers -= nofnonkmers;
-    gt_log_log("nofkmers = " GT_LU "", nofkmers);
+    gt_log_log("nofkmers = " GT_WU "", nofkmers);
   }
   else
   {
@@ -1006,7 +1006,7 @@ static void gt_randomcodes_generate_sampling_positions(GtUword *buffer,
   }
   if (sorted)
   {
-    gt_log_log("range of sampling positions = [" GT_LU ", " GT_LU "]",
+    gt_log_log("range of sampling positions = [" GT_WU ", " GT_WU "]",
         buffer[0], buffer[numofsamples - 1]);
   }
 }
@@ -1091,7 +1091,7 @@ static int gt_randomcodes_collectcodes(GtRandomcodesinfo *fci,
   /* add an artificial last bucket to collect suffixes
    * larger than the last code */
   gt_storerandomcodes(fci, true, /* unused*/ 0, maskright);
-  gt_logger_log(logger, "have stored " GT_LU " bucket keys", fci->countcodes);
+  gt_logger_log(logger, "have stored " GT_WU " bucket keys", fci->countcodes);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "to sort bucket keys", stdout);
@@ -1184,7 +1184,7 @@ static void gt_randomcodes_accumulatecounts_run(GtRandomcodesinfo *fci,
   gt_firstcodes_accum_runkmerscan(encseq, bucketkeysize, skipshorter,
       &fci->buf);
   gt_randomcodes_accumulatecounts_flush(fci);
-  gt_logger_log(logger, "codebuffer_total=" GT_LU " (%.3f%% of all suffixes)",
+  gt_logger_log(logger, "codebuffer_total=" GT_WU " (%.3f%% of all suffixes)",
                 fci->codebuffer_total,
                 100.0 * (double) fci->codebuffer_total/
                                  gt_encseq_total_length(encseq));
@@ -1192,8 +1192,8 @@ static void gt_randomcodes_accumulatecounts_run(GtRandomcodesinfo *fci,
   if (fci->total_count > 0)
   {
     gt_assert(fci->flushcount > 0);
-    gt_logger_log(logger, "total count=" GT_LU " (%.3f%% of all suffixes), "
-                         "%u rounds (avg length " GT_LU ")",
+    gt_logger_log(logger, "total count=" GT_WU " (%.3f%% of all suffixes), "
+                         "%u rounds (avg length " GT_WU ")",
                          fci->total_count,
                          100.0 * (double) fci->total_count/
                                           gt_encseq_total_length(encseq),
@@ -1592,7 +1592,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
         fci.total_count);
     gt_logger_log(logger, "maximum space after computing partial sums: %.2f MB",
                   GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
-    gt_logger_log(logger, "maxbucketsize=" GT_LU "", maxbucketsize);
+    gt_logger_log(logger, "maxbucketsize=" GT_WU "", maxbucketsize);
     gt_randomcodes_map_sections(&fci, sfxmrlist);
     if (numofparts == 0 || maximumspace > 0)
     {
@@ -1712,7 +1712,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       }
     }
   }
-  gt_log_log("suftabentries=" GT_LU "", suftabentries);
+  gt_log_log("suftabentries=" GT_WU "", suftabentries);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "cleaning up", stdout);
@@ -1739,8 +1739,8 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       gt_assert(fci.flushcount > 0);
       gt_logger_log(logger,
-                    "total inserted=" GT_LU " (%.3f%% of all suffixes), "
-                    "%u rounds (avg length " GT_LU ")", fci.total_inserted,
+                    "total inserted=" GT_WU " (%.3f%% of all suffixes), "
+                    "%u rounds (avg length " GT_WU ")", fci.total_inserted,
                     100.0 * (double) fci.total_inserted/totallength,
                     fci.flushcount, fci.codebuffer_total/fci.flushcount);
       gt_assert(fci.total_inserted == fci.total_count);

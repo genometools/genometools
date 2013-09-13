@@ -191,7 +191,7 @@ void gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp)
         gt_xfputc('D', fp);
         break;
     }
-    fprintf(fp, " "GT_LU"", meop.steps);
+    fprintf(fp, " "GT_WU"", meop.steps);
     if (i != 1UL)
       gt_xfputc(',', fp);
   }

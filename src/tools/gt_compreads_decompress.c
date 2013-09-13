@@ -152,7 +152,7 @@ static int gt_compreads_decompress_benchmark(GtHcrDecoder *hcrd,
   for (count = 0; count < amount; count++) {
     if (!had_err) {
       rand = gt_rand_max(max_rand);
-      gt_log_log("get read: "GT_LU"", rand);
+      gt_log_log("get read: "GT_WU"", rand);
       had_err = gt_hcr_decoder_decode(hcrd, rand, seq, qual, desc, err);
       gt_log_log("%s",gt_str_get(desc));
       gt_log_log("%s",seq);
@@ -225,9 +225,9 @@ static int gt_compreads_decompress_runner(GT_UNUSED int argc,
             && arguments->rng.end != GT_UNDEF_UWORD) {
           if (arguments->rng.start >= gt_hcr_decoder_num_of_reads(hcrd)
                 || arguments->rng.end >= gt_hcr_decoder_num_of_reads(hcrd)) {
-            gt_error_set(err, "range "GT_LU"-"GT_LU" includes a read "
+            gt_error_set(err, "range "GT_WU"-"GT_WU" includes a read "
                               "number exceeding "
-                              "the total number of reads ("GT_LU")",
+                              "the total number of reads ("GT_WU")",
                               arguments->rng.start,
                               arguments->rng.end,
                               gt_hcr_decoder_num_of_reads(hcrd));

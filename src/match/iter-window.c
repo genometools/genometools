@@ -110,8 +110,8 @@ static void checkcurrentwindow(const GtEncseq *encseq,
   {
     bfbufpos = (firstpos + idx) % windowsize;
     /*
-    printf("bufpos=" GT_LU ",(firstpos=" GT_LU " + idx=" GT_LU
-           ") %% windowsize="GT_LU ")=" GT_LU "\n",
+    printf("bufpos=" GT_WU ",(firstpos=" GT_WU " + idx=" GT_WU
+           ") %% windowsize="GT_WU ")=" GT_WU "\n",
            bufpos,firstpos,idx,windowsize,bfbufpos);
     */
     gt_assert(bfbufpos == bufpos);
@@ -173,7 +173,7 @@ static void iteroverallwords(const GtEncseq *encseq,
   }
   gt_encseq_reader_delete(esr);
   gt_free(buffer);
-  printf("# " GT_LU " windows checked\n",windowschecked);
+  printf("# " GT_WU " windows checked\n",windowschecked);
 }
 
 static void iteroverallwords2(const GtEncseq *encseq,
@@ -204,6 +204,6 @@ static void iteroverallwords2(const GtEncseq *encseq,
     }
   }
   gt_windowiterator_delete(wit);
-  printf("# " GT_LU " windows checked\n",windowschecked);
+  printf("# " GT_WU " windows checked\n",windowschecked);
 }
 #endif

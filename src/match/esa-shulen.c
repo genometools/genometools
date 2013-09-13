@@ -67,7 +67,7 @@ static void resetgnumdist_shulen(GtBUinfo_shulen *father,
   GtUword idx;
 
 #ifdef SHUDEBUG
-  printf("reset node " GT_LU "\n",father->id);
+  printf("reset node " GT_WU "\n",father->id);
 #endif
   for (idx = 0; idx < numofdbfiles; idx++)
   {
@@ -98,7 +98,7 @@ static void contribute_shulen(GT_UNUSED int line,
                               GtUword depth)
 {
 #ifdef SHUDEBUG
-  printf("line %d: add[" GT_LU "][" GT_LU "]+=count=" GT_LU "*depth=" GT_LU
+  printf("line %d: add[" GT_WU "][" GT_WU "]+=count=" GT_WU "*depth=" GT_WU
          "\n",line,referidx, shulenidx,count,depth);
 #endif
   shulengthdist[referidx][shulenidx] += count * depth;
@@ -112,13 +112,13 @@ static void shownode(int line,
 {
   GtUword idx;
 
-  printf("line %d: %s(id=" GT_LU ",numofdbfiles=" GT_LU "):",line,kind,node->id,
+  printf("line %d: %s(id=" GT_WU ",numofdbfiles=" GT_WU "):",line,kind,node->id,
                                                  state->numofdbfiles);
   for (idx=0; idx < state->numofdbfiles; idx++)
   {
     if (node->gnumdist[idx] > 0)
     {
-      printf(" " GT_LU "->" GT_LU "",idx,node->gnumdist[idx]);
+      printf(" " GT_WU "->" GT_WU "",idx,node->gnumdist[idx]);
     }
   }
   printf("\n");
@@ -203,8 +203,8 @@ static int processleafedge_shulen(bool firstsucc,
   GtUword gnum;
 
 #ifdef SHUDEBUG
-  printf("processleafedge " GT_LU " firstsucc=%s, "
-         " depth(father)=" GT_LU ", path=",
+  printf("processleafedge " GT_WU " firstsucc=%s, "
+         " depth(father)=" GT_WU ", path=",
          leafnumber,
          firstsucc ? "true" : "false",
          fatherdepth);
@@ -247,7 +247,7 @@ static int processleafedge_shulen(bool firstsucc,
   }
   father->gnumdist[gnum]++;
 #ifdef SHUDEBUG
-  printf("gnumdist[id=" GT_LU ",filenum=" GT_LU "]=" GT_LU "\n",father->id,gnum,
+  printf("gnumdist[id=" GT_WU ",filenum=" GT_WU "]=" GT_WU "\n",father->id,gnum,
                                               father->gnumdist[gnum]);
   state->lastleafnumber = leafnumber;
 #endif
@@ -266,7 +266,7 @@ static int processbranchingedge_shulen(bool firstsucc,
   GtUword idx;
 
 #ifdef SHUDEBUG
-  printf("%s firstsucc=%s, depth(father)=" GT_LU ",path=",__func__,
+  printf("%s firstsucc=%s, depth(father)=" GT_WU ",path=",__func__,
          firstsucc ? "true" : "false",fatherdepth);
   if (fatherdepth > 0)
   {
@@ -308,9 +308,9 @@ static int processbranchingedge_shulen(bool firstsucc,
       father->gnumdist[idx] += son->gnumdist[idx];
       son->gnumdist[idx] = 0;
 #ifdef SHUDEBUG
-      printf("gnumdist[id=" GT_LU ",filenum=" GT_LU "]=" GT_LU "\n",
+      printf("gnumdist[id=" GT_WU ",filenum=" GT_WU "]=" GT_WU "\n",
              father->id, idx, father->gnumdist[idx]);
-      printf("gnumdist[id=" GT_LU ",filenum=" GT_LU "]=0\n",son->id,idx);
+      printf("gnumdist[id=" GT_WU ",filenum=" GT_WU "]=0\n",son->id,idx);
 #endif
     }
   }
@@ -345,7 +345,7 @@ static void shulengthdist_print(const GtStrArray *file_names,
   GtUword idx1, idx2;
 
   /*shulengthdist[0][0] = 0; for testing */
-  printf("# sum of shulen\n" GT_LU "\n",numofdbfiles);
+  printf("# sum of shulen\n" GT_WU "\n",numofdbfiles);
   for (idx2=0; idx2 < numofdbfiles; idx2++)
   {
     if (file_names != NULL)
@@ -353,7 +353,7 @@ static void shulengthdist_print(const GtStrArray *file_names,
       printf("%s\t",gt_str_array_get(file_names,idx2));
     } else
     {
-      printf("" GT_LU "\t",idx2);
+      printf("" GT_WU "\t",idx2);
     }
     for (idx1=0; idx1 < numofdbfiles; idx1++)
     {
@@ -449,7 +449,7 @@ static GtUword gt_esa2shulengthatposition(const Suffixarray *suffixarray,
       break;
     }
   }
-  /*printf("add " GT_LU "\n",offset+1); */
+  /*printf("add " GT_WU "\n",offset+1); */
   return offset+1;
 }
 

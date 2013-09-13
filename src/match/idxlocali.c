@@ -57,9 +57,9 @@ static void showmatch(void *processinfo,const GtIdxMatch *match)
     relpos = match->dbstartpos;
     seqnum = match->dbseqnum;
   }
-  printf(""GT_LU"\t"GT_LU"\t",seqnum,relpos);
-  printf(""GT_LU"\t",match->dblen);
-  printf("\t" Formatuint64_t "\t"GT_LU"\t"GT_LU"\t"GT_LU"\n",
+  printf(""GT_WU"\t"GT_WU"\t",seqnum,relpos);
+  printf(""GT_WU"\t",match->dblen);
+  printf("\t" Formatuint64_t "\t"GT_WU"\t"GT_WU"\t"GT_WU"\n",
               PRINTuint64_tcast(showmatchinfo->queryunit),
               match->querystartpos,
               match->querylen,
@@ -121,7 +121,7 @@ void gt_checkandresetstorematch(GT_UNUSED uint64_t queryunit,
     if (GT_ISIBITSET(storeonline->hasmatch,seqnum) &&
         !GT_ISIBITSET(storeoffline->hasmatch,seqnum))
     {
-      fprintf(stderr,"query " Formatuint64_t " refseq "GT_LU": "
+      fprintf(stderr,"query " Formatuint64_t " refseq "GT_WU": "
                      "online has match but offline not\n",
                      PRINTuint64_tcast(queryunit),seqnum);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -129,7 +129,7 @@ void gt_checkandresetstorematch(GT_UNUSED uint64_t queryunit,
     if (!GT_ISIBITSET(storeonline->hasmatch,seqnum) &&
         GT_ISIBITSET(storeoffline->hasmatch,seqnum))
     {
-      fprintf(stderr,"query " Formatuint64_t " refseq "GT_LU": "
+      fprintf(stderr,"query " Formatuint64_t " refseq "GT_WU": "
                      "offline has match but online not\n",
                      PRINTuint64_tcast(queryunit),seqnum);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -142,7 +142,7 @@ void gt_checkandresetstorematch(GT_UNUSED uint64_t queryunit,
   }
   GT_CLEARBITTAB(storeonline->hasmatch,numofdbsequences);
   GT_CLEARBITTAB(storeoffline->hasmatch,numofdbsequences);
-  printf("matching sequences: "GT_LU"\n",countmatchseq);
+  printf("matching sequences: "GT_WU"\n",countmatchseq);
 }
 
 void gt_freestorematch(Storematchinfo *storematch)
@@ -275,7 +275,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
         {
           break;
         }
-        printf("process sequence " Formatuint64_t " of length "GT_LU"\n",
+        printf("process sequence " Formatuint64_t " of length "GT_WU"\n",
                 PRINTuint64_tcast(showmatchinfo.queryunit),querylen);
         if (idxlocalioptions->doonline || idxlocalioptions->docompare)
         {

@@ -79,7 +79,7 @@ Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err)
     rest = sizeof (GtUword) * EXTRAINTEGERS;
     if (rest > numofbytes)
     {
-      gt_error_set(err,"index must contain at least "GT_LU" bytes",
+      gt_error_set(err,"index must contain at least "GT_WU" bytes",
                         (GtUword) rest);
       haserr = true;
     }
@@ -96,8 +96,8 @@ Tyrindex *gt_tyrindex_new(const char *tyrindexname,GtError *err)
     tyrindex->merbytes = MERBYTES(tyrindex->mersize);
     if ((numofbytes - rest) % tyrindex->merbytes != 0)
     {
-      gt_error_set(err,"size of index is "GT_LU
-                   " which is not a multiple of "GT_LU,
+      gt_error_set(err,"size of index is "GT_WU
+                   " which is not a multiple of "GT_WU,
                    (GtUword) (numofbytes - rest),
                    tyrindex->merbytes);
       haserr = true;
@@ -132,9 +132,9 @@ void gt_tyrindex_show(const Tyrindex *tyrindex)
 {
   printf("# indexfilename = %s\n",tyrindex->indexfilename);
   printf("# alphasize = %u\n",tyrindex->alphasize);
-  printf("# mersize = "GT_LU"\n",tyrindex->mersize);
-  printf("# numofmers = "GT_LU"\n",(GtUword) tyrindex->numofmers);
-  printf("# merbytes = "GT_LU"\n",tyrindex->merbytes);
+  printf("# mersize = "GT_WU"\n",tyrindex->mersize);
+  printf("# numofmers = "GT_WU"\n",(GtUword) tyrindex->numofmers);
+  printf("# merbytes = "GT_WU"\n",tyrindex->merbytes);
 }
 
 bool gt_tyrindex_isempty(const Tyrindex *tyrindex)
@@ -210,15 +210,15 @@ Tyrcountinfo *gt_tyrcountinfo_new(const Tyrindex *tyrindex,
     if (numofbytes < tyrindex->numofmers)
     {
       gt_error_set(err,"size of file \"%s.%s\" is smaller than minimum size "
-                       ""GT_LU"",tyrindexname,COUNTSSUFFIX,
+                       ""GT_WU"",tyrindexname,COUNTSSUFFIX,
                        (GtUword) tyrindex->numofmers);
       haserr = true;
     }
   }
   if (!haserr && (numofbytes - tyrindex->numofmers) % sizeof (Largecount) != 0)
   {
-    gt_error_set(err,"(numofbytes - numofmers) = "GT_LU
-                 " must be a multiple of "GT_LU,
+    gt_error_set(err,"(numofbytes - numofmers) = "GT_WU
+                 " must be a multiple of "GT_WU,
            (GtUword) (numofbytes - tyrindex->numofmers),
            (GtUword) sizeof (Largecount));
     haserr = true;
@@ -282,7 +282,7 @@ GtUword gt_tyrcountinfo_get(const Tyrcountinfo *tyrcountinfo,
 #ifndef NDEBUG
     if (lc == NULL)
     {
-      fprintf(stderr,"cannot find count for mer number "GT_LU"",mernumber);
+      fprintf(stderr,"cannot find count for mer number "GT_WU"",mernumber);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
@@ -386,14 +386,14 @@ void gt_tyrindex_check(GT_UNUSED const Tyrindex *tyrindex)
     gt_assert(result != NULL);
     if ((result - tyrindex->mertable) % tyrindex->merbytes != 0)
     {
-      fprintf(stderr,"result is not multiple of "GT_LU"\n",tyrindex->merbytes);
+      fprintf(stderr,"result is not multiple of "GT_WU"\n",tyrindex->merbytes);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     position = (GtUword) (result-tyrindex->mertable)/
                                tyrindex->merbytes;
     if (position > 0 && previousposition + 1 != position)
     {
-      fprintf(stderr,"position "GT_LU" is not increasing\n",position);
+      fprintf(stderr,"position "GT_WU" is not increasing\n",position);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     previousposition = position;

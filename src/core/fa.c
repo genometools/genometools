@@ -669,7 +669,7 @@ static int check_mapped_file_size(const char *path,
   if (expectedunits != (GtUword) (numofbytes/sizeofunit))
   {
     gt_error_set(err,"mapping file %s%s: number of mapped units (of size %u) "
-                     " = "GT_LU" != "GT_LU" = expected number of mapped units",
+                     " = "GT_WU" != "GT_WU" = expected number of mapped units",
                       path,
                       suffix,
                       (unsigned int) sizeofunit,

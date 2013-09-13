@@ -89,10 +89,10 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
     /* and finally place the 1-count for the terminator */
     count[i] = count[i - 1] + 1;
 #ifdef EIS_DEBUG
-    gt_log_log("count[alphabetSize]="GT_LU", len="GT_LU"",count[alphabetSize],
+    gt_log_log("count[alphabetSize]="GT_WU", len="GT_WU"",count[alphabetSize],
                len);
     for (i = 0; i <= alphabetSize; ++i)
-      gt_log_log("count[%u]="GT_LU"", (unsigned)i, count[i]);
+      gt_log_log("count[%u]="GT_WU"", (unsigned)i, count[i]);
 #endif
     gt_assert(count[alphabetSize] == len);
   }
@@ -249,7 +249,7 @@ GtUword gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
   bwtbound.start = bwtSeq->count[curSym];
   bwtbound.end = bwtSeq->count[curSym+1];
 #ifdef SKDEBUG
-  printf("# bounds="GT_LU","GT_LU" = "GT_LU""
+  printf("# bounds="GT_WU","GT_WU" = "GT_WU""
           "occurrences\n",
          bwtbound.start,
          bwtbound.end,
@@ -271,7 +271,7 @@ GtUword gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
-    printf("# bounds="GT_LU","GT_LU" = "GT_LU""
+    printf("# bounds="GT_WU","GT_WU" = "GT_WU""
             "occurrences\n",
            bwtbound.start,
            bwtbound.end,
@@ -320,7 +320,7 @@ GtUword gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
     return 0;
   }
 #ifdef SKDEBUG
-  printf("# bounds="GT_LU","GT_LU" = "GT_LU""
+  printf("# bounds="GT_WU","GT_WU" = "GT_WU""
           "occurrences\n",
          bwtbound.start,
          bwtbound.end,
@@ -343,7 +343,7 @@ GtUword gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
     bwtbound.start = bwtSeq->count[curSym] + seqpospair.a;
     bwtbound.end = bwtSeq->count[curSym] + seqpospair.b;
 #ifdef SKDEBUG
-    printf("# bounds="GT_LU","GT_LU" = "GT_LU""
+    printf("# bounds="GT_WU","GT_WU" = "GT_WU""
             "occurrences\n",
            bwtbound.start,
            bwtbound.end,
@@ -524,7 +524,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
           if (sfxArrayValue != ESASUFFIXPTRGET(suffixArray.suftab,i))
           {
             gt_error_set(err, "Failed suffix array value comparison"
-                          " at position "GT_LU": "GT_LU" != "GT_LU"",
+                          " at position "GT_WU": "GT_WU" != "GT_WU"",
                           i, sfxArrayValue,
                           ESASUFFIXPTRGET(suffixArray.suftab,i));
             retval = VERIFY_BWTSEQ_SUFVAL_ERROR;
@@ -557,8 +557,8 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
       if (suffixArray.longest.defined &&
           suffixArray.longest.valueunsignedlong != nextLocate)
       {
-        gt_error_set(err, "terminator/0-rotation position mismatch "GT_LU""
-                  " vs. "GT_LU"", suffixArray.longest.valueunsignedlong,
+        gt_error_set(err, "terminator/0-rotation position mismatch "GT_WU""
+                  " vs. "GT_WU"", suffixArray.longest.valueunsignedlong,
                   nextLocate);
         retval = VERIFY_BWTSEQ_TERMPOS_ERROR;
         break;
@@ -573,7 +573,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
           Symbol sym = BWTSeqGetSym(bwtSeq, nextLocate);
           if (sym != UNDEFBWTCHAR)
           {
-            gt_error_set(err, "symbol mismatch at position "GT_LU": "
+            gt_error_set(err, "symbol mismatch at position "GT_WU": "
                       "%d vs. reference symbol %d", i - 1, (int)sym,
                       (int)UNDEFBWTCHAR);
             retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
@@ -591,7 +591,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
           Symbol symCmp = BWTSeqGetSym(bwtSeq, nextLocate);
           if (symCmp != symRef)
           {
-            gt_error_set(err, "symbol mismatch at position "GT_LU": "
+            gt_error_set(err, "symbol mismatch at position "GT_WU": "
                       "%d vs. reference symbol %d", i, symCmp, symRef);
             retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
             break;
@@ -649,7 +649,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
-              gt_error_set(err, "symbol mismatch at position "GT_LU": "
+              gt_error_set(err, "symbol mismatch at position "GT_WU": "
                         "%d vs. reference symbol %d", start + j, (int)symCmp,
                         (int)symRef);
               retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;
@@ -662,7 +662,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {
-              gt_error_set(err, "symbol mismatch at position "GT_LU": "
+              gt_error_set(err, "symbol mismatch at position "GT_WU": "
                         "%d vs. reference symbol %d", start + j, (int)symCmp,
                         (int)symRef);
               retval = VERIFY_BWTSEQ_CONTEXT_SYMFAIL;

@@ -72,7 +72,7 @@ static void gt_radix_showbytewise(GtUword value)
 
   for (shift = GT_INTWORDSIZE - 8; shift >= 0; shift-=8)
   {
-    printf(""GT_LU" ",GT_RADIX_KEY(UINT8_MAX,shift,&value));
+    printf(""GT_WU" ",GT_RADIX_KEY(UINT8_MAX,shift,&value));
     if (shift > 0)
     {
       printf(" ");

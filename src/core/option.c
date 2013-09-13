@@ -434,21 +434,21 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
         if (option->default_value.ul == GT_UNDEF_WORD)
           gt_xputs("undefined");
         else
-          printf(""GT_LD"\n", option->default_value.l);
+          printf(""GT_WD"\n", option->default_value.l);
       }
       else if (option->option_type == OPTION_ULONG) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.ul == GT_UNDEF_UWORD)
           gt_xputs("undefined");
         else
-          printf(""GT_LU"\n", option->default_value.ul);
+          printf(""GT_WU"\n", option->default_value.ul);
       }
       else if (option->option_type == OPTION_RANGE) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.r.start == GT_UNDEF_UWORD)
           gt_xputs("undefined");
         else {
-          printf(""GT_LU" "GT_LU"\n", option->default_value.r.start,
+          printf(""GT_WU" "GT_WU"\n", option->default_value.r.start,
                  option->default_value.r.end);
         }
       }
@@ -1243,7 +1243,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     ulong_value < option->min_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                               "integer >= "GT_LU"",
+                               "integer >= "GT_WU"",
                                gt_str_get(option->option_str),
                                option->min_value.ul);
                   had_err = -1;
@@ -1254,7 +1254,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     ulong_value > option->max_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                               "integer <= "GT_LU"",
+                               "integer <= "GT_WU"",
                                gt_str_get(option->option_str),
                                option->max_value.ul);
                   had_err = -1;
@@ -1290,7 +1290,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     long_value < option->min_value.ul) {
                   gt_error_set(err, "first argument to option \"-%s\" must be "
-                               "an integer >= "GT_LU"",
+                               "an integer >= "GT_WU"",
                                gt_str_get(option->option_str),
                                option->min_value.ul);
                   had_err = -1;
@@ -1320,7 +1320,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     long_value > option->max_value.ul) {
                   gt_error_set(err, "second argument to option \"-%s\" must be "
-                               "an integer <= "GT_LU"",
+                               "an integer <= "GT_WU"",
                                gt_str_get(option->option_str),
                                option->max_value.ul);
                   had_err = -1;
@@ -1332,8 +1332,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               if (!had_err && (((GtRange*) option->value)->start >
                                ((GtRange*) option->value)->end)) {
                 gt_error_set(err,
-                             "first argument "GT_LU" to option \"-%s\" must "
-                             "be <= than second argument "GT_LU"",
+                             "first argument "GT_WU" to option \"-%s\" must "
+                             "be <= than second argument "GT_WU"",
                              ((GtRange*) option->value)->start,
                              gt_str_get(option->option_str),
                              ((GtRange*) option->value)->end);

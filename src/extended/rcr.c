@@ -644,7 +644,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
           break;
         default:
           /* XXX gt_error nutzen */
-          gt_log_log("encountered funny cigar_op: "GT_LU"", cigar_op);
+          gt_log_log("encountered funny cigar_op: "GT_WU"", cigar_op);
           return -1;
           ;
       }
@@ -653,7 +653,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
     rcr_encode_write_var_type(rcr_enc, (GtUword) ENDOFRECORD);
     if (readlength != read_i) {
       /* XXX gt_error nutzen */
-      gt_log_log("readlength: "GT_LU", read_i: "GT_LU"", readlength, read_i);
+      gt_log_log("readlength: "GT_WU", read_i: "GT_WU"", readlength, read_i);
       return -1;
     }
   }
@@ -1276,7 +1276,7 @@ static int rcr_write_encoding_to_file(GtRcrEncoder *rcr_enc, GtError *err)
       rcr_enc->cur_seq_startpos =
         gt_encseq_seqstartpos(rcr_enc->encseq, (GtUword) tid);
       gt_bitoutstream_append(rcr_enc->bitstream, new_ref, one_bit);
-      gt_log_log("reset pos for new ref "GT_LU"", rcr_enc->cur_seq_startpos);
+      gt_log_log("reset pos for new ref "GT_WU"", rcr_enc->cur_seq_startpos);
     }
     else
       gt_bitoutstream_append(rcr_enc->bitstream, old_ref, one_bit);
@@ -1291,7 +1291,7 @@ static int rcr_write_encoding_to_file(GtRcrEncoder *rcr_enc, GtError *err)
 
 #ifndef S_SPLINT_S
   if (rcr_enc->is_verbose) {
-    printf("encoded "GT_LU" BAM records, "GT_LU" reads(s) unmapped\n",
+    printf("encoded "GT_WU" BAM records, "GT_WU" reads(s) unmapped\n",
            rcr_enc->numofreads, rcr_enc->numofunmappedreads);
     printf("encoded "GT_LLU" bases\n",rcr_enc->encodedbases);
     printf("total number of bits used for encoding: "GT_LLU"\n",
@@ -1960,10 +1960,10 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
     for (i = 0; i < gt_encseq_num_of_sequences(rcr_dec->encseq); i++) {
       const char *seqname = gt_encseq_description(rcr_dec->encseq, &l, i);
       GtUword len = gt_encseq_seqlength(rcr_dec->encseq, i);
-      fprintf(rcr_dec->fp, "@SQ\tSN:%.*s\tLN:"GT_LU"\n", (int) l, seqname, len);
+      fprintf(rcr_dec->fp, "@SQ\tSN:%.*s\tLN:"GT_WU"\n", (int) l, seqname, len);
     }
 
-    gt_log_log("start to decode "GT_LU" reads", rcr_dec->numofreads);
+    gt_log_log("start to decode "GT_WU" reads", rcr_dec->numofreads);
   }
 
   while (!had_err &&
@@ -1973,7 +1973,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
     if (RCR_NEXT_BIT(bit)) {
       if (bit) {
         seqstart = gt_encseq_seqstartpos(rcr_dec->encseq, refnum);
-        gt_log_log("get start for new ref "GT_LU": "GT_LU"", refnum, seqstart);
+        gt_log_log("get start for new ref "GT_WU": "GT_WU"", refnum, seqstart);
         refnum++;
         prev_readpos = 0;
       }
@@ -2044,14 +2044,14 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
 
         /* write read to file */
         if (readlength != gt_str_length(info->base_string)) {
-          gt_log_log("readlen: "GT_LU", stringlen: "GT_LU", read: "GT_LU"",
+          gt_log_log("readlen: "GT_WU", stringlen: "GT_WU", read: "GT_WU"",
                      readlength, gt_str_length(info->base_string), cur_read);
         }
         gt_assert(readlength == gt_str_length(info->base_string));
         gt_assert(readlength == gt_str_length(info->qual_string));
         fprintf(rcr_dec->fp, "%s", gt_str_get(qname));
         fprintf(rcr_dec->fp, "\t%c", strand?'-':'+');
-        fprintf(rcr_dec->fp, "\t"GT_LU"", readpos + 1);
+        fprintf(rcr_dec->fp, "\t"GT_WU"", readpos + 1);
         if (rcr_dec->store_mapping_qual)
           fprintf(rcr_dec->fp, "\t%u", (unsigned) mapping_qual);
         else
@@ -2074,7 +2074,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
   gt_golomb_bitwise_decoder_delete(readpos_gbwd);
   gt_bitinstream_delete(bitstream);
   rcr_delete_decode_info(info);
-  gt_log_log("decoded "GT_LU" reads", cur_read);
+  gt_log_log("decoded "GT_WU" reads", cur_read);
   return had_err;
 }
 

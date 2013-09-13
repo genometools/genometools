@@ -29,7 +29,7 @@
 
 #define OUTCHAR(C)         gt_file_xfputc((C),outfp)
 
-#define OUTSTRINGNUM(N,S)  gt_file_xprintf(outfp,"%*"GT_LUS,(int) (N), (S))
+#define OUTSTRINGNUM(N,S)  gt_file_xprintf(outfp,"%*"GT_WUS,(int) (N), (S))
 
 #define CHECK_FOR_IDENTICAL_SUBSTRING_OF_LENGTH_0(EOPPTR)\
         if ((EOPPTR) == 0)\
@@ -1134,7 +1134,8 @@ static void formatalignment(GtFile *outfp, GtUchar *firstlineorig,
         numofblanks -= floor(log10((double) shortintronlength))+1;
         numofblanks += (linewidth / 10 ) - 1;
 
-        gt_file_xprintf(outfp, "// intron part "GT_LU" "GT_LU" ("GT_LU" n) not shown",
+        gt_file_xprintf(outfp,
+                        "// intron part "GT_WU" "GT_WU" ("GT_WU" n) not shown",
                         shortintronstart, shortintronend, shortintronlength);
 
         for (j = 0; j < numofblanks; j++) {

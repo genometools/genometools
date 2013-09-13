@@ -207,11 +207,11 @@ static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
   cdi.hugesum = 0;
   gt_disc_distri_foreach(countdistri,gt_firstcodes_evaluate_distvalue,&cdi);
   sum = cdi.smallsum + cdi.largesum + cdi.hugesum;
-  gt_log_log("small="GT_LU","GT_LU" (%.2f)",cdi.smallcount,cdi.smallsum,
+  gt_log_log("small="GT_WU","GT_WU" (%.2f)",cdi.smallcount,cdi.smallsum,
           (double) cdi.smallsum/sum);
-  gt_log_log("large="GT_LU","GT_LU" (%.2f)",cdi.largecount,cdi.largesum,
+  gt_log_log("large="GT_WU","GT_WU" (%.2f)",cdi.largecount,cdi.largesum,
           (double) cdi.largesum/sum);
-  gt_log_log("huge="GT_LU","GT_LU" (%.2f)",cdi.hugecount,cdi.hugesum,
+  gt_log_log("huge="GT_WU","GT_WU" (%.2f)",cdi.hugecount,cdi.hugesum,
           (double) cdi.largesum/sum);
   spacenow = sizeof (uint32_t) * sum;
   spaceopt = sizeof (uint8_t) * sum;
@@ -268,10 +268,10 @@ GtUword gt_firstcodes_remdups(GtUword *allfirstcodes,
     fct->countmax = (1UL << bitsforcount) - 1UL;
     fct->shiftforcounts = bitsformaxdifference;
     gt_logger_log(logger,
-                  "maximum difference of neighbored codes "GT_LU" (%u bits)",
+                  "maximum difference of neighbored codes "GT_WU" (%u bits)",
                   maxdifference,bitsformaxdifference);
     /*
-    printf("maxdifference="GT_LU",bitsformaxdifference=%u,bitsforcount=%u\n",
+    printf("maxdifference="GT_WU",bitsformaxdifference=%u,bitsforcount=%u\n",
             maxdifference,bitsformaxdifference,bitsforcount);
     */
     gt_firstcodes_countocc_new(fcsl,fct,bitsforcount,numofsequences);
@@ -332,7 +332,7 @@ GtUword gt_firstcodes_remdups(GtUword *allfirstcodes,
       {
         if (distbits[bits] > 0)
         {
-          printf("%d bits: "GT_LU"\n",bits,distbits[bits]);
+          printf("%d bits: "GT_WU"\n",bits,distbits[bits]);
         }
       }
       gt_free(distbits);
@@ -347,8 +347,8 @@ GtUword gt_firstcodes_remdups(GtUword *allfirstcodes,
     }
     fct->differentcodes = numofdifferentcodes;
   }
-  gt_logger_log(logger,"number of different first codes="GT_LU" (%.2f%%) "
-                       "in "GT_LU" sequences",
+  gt_logger_log(logger,"number of different first codes="GT_WU" (%.2f%%) "
+                       "in "GT_WU" sequences",
                 fct->differentcodes,
                 100.00 * (double) fct->differentcodes/numofsequences,
                 numofsequences);
@@ -467,10 +467,10 @@ GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
 #endif
 
   gt_assert(fct->differentcodes < UINT32_MAX);
-  gt_log_log("hashmap_addcount="GT_LU" (%.5f%%)",fct->hashmap_addcount,
+  gt_log_log("hashmap_addcount="GT_WU" (%.5f%%)",fct->hashmap_addcount,
                   100.0 * (double) fct->hashmap_addcount/
                                    fct->differentcodes);
-  gt_log_log("hashmap_getcount="GT_LU" (%.5f%%)",
+  gt_log_log("hashmap_getcount="GT_WU" (%.5f%%)",
                   fct->hashmap_getcount,
                   100.0 * (double) fct->hashmap_getcount/
                                    fct->differentcodes);
@@ -483,7 +483,7 @@ GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   } else
   {
     fct->bitchangepoints.allocatedGtUlong = 1UL << (btp - GT_MODVALUEBITS);
-    gt_log_log("lastpartsum="GT_LU", bitchangepoints.allocated="GT_LU"",
+    gt_log_log("lastpartsum="GT_WU", bitchangepoints.allocated="GT_WU"",
               expectedlastpartsum,fct->bitchangepoints.allocatedGtUlong);
     fct->bitchangepoints.spaceGtUlong
       = gt_malloc(sizeof (*fct->bitchangepoints.spaceGtUlong)
@@ -583,7 +583,7 @@ GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     spacewithouthashmap = gt_ma_get_space_current() + gt_fa_get_space_current();
     gt_assert(spacewithouthashmap < spacewithhashmap);
     hashmapspace = spacewithhashmap - spacewithouthashmap;
-    gt_log_log("space for hashmap=%.2f ("GT_LU" bytes per entry)",
+    gt_log_log("space for hashmap=%.2f ("GT_WU" bytes per entry)",
                GT_MEGABYTES(hashmapspace),hashmapspace/fct->hashmap_addcount);
   }
   fct->countocc_exceptions = NULL;

@@ -142,7 +142,7 @@ void gt_pck_count_nodes_dfs(const FMindex *index,
       if GT_STACK_ISEMPTY(&stack)
       {
         /* XXX change to gt_loger_log */
-        gt_log_log("on root:\n "GT_LU" branching nodes\n "GT_LU" leaves\n",
+        gt_log_log("on root:\n "GT_WU" branching nodes\n "GT_WU" leaves\n",
            current->branching, current->leaves);
       }
       else

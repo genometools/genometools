@@ -34,7 +34,7 @@
 #include "stamp.h"
 
 #define PRJSPECIALOUT(VAL)\
-        fprintf(outprj,"%s="GT_LU"\n",#VAL,gt_encseq_##VAL(encseq))
+        fprintf(outprj,"%s="GT_WU"\n",#VAL,gt_encseq_##VAL(encseq))
 
 static void showprjinfo(FILE *outprj,
                         GtReadmode readmode,
@@ -50,7 +50,7 @@ static void showprjinfo(FILE *outprj,
   GtUword numofsequences;
 
   totallength = gt_encseq_total_length(encseq);
-  fprintf(outprj,"totallength="GT_LU"\n",totallength);
+  fprintf(outprj,"totallength="GT_WU"\n",totallength);
   PRJSPECIALOUT(specialcharacters);
   PRJSPECIALOUT(specialranges);
   PRJSPECIALOUT(realspecialranges);
@@ -62,19 +62,19 @@ static void showprjinfo(FILE *outprj,
   PRJSPECIALOUT(lengthofwildcardprefix);
   PRJSPECIALOUT(lengthofwildcardsuffix);
   numofsequences = gt_encseq_num_of_sequences(encseq);
-  fprintf(outprj,"numofsequences="GT_LU"\n",numofsequences);
-  fprintf(outprj,"numofdbsequences="GT_LU"\n",numofsequences);
+  fprintf(outprj,"numofsequences="GT_WU"\n",numofsequences);
+  fprintf(outprj,"numofdbsequences="GT_WU"\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
-  fprintf(outprj,"numberofallsortedsuffixes="GT_LU"\n",
+  fprintf(outprj,"numberofallsortedsuffixes="GT_WU"\n",
           numberofallsortedsuffixes);
   if (longest->defined)
   {
-    fprintf(outprj,"longest="GT_LU"\n",longest->valueunsignedlong);
+    fprintf(outprj,"longest="GT_WU"\n",longest->valueunsignedlong);
   }
   fprintf(outprj,"prefixlength=%u\n",prefixlength);
-  fprintf(outprj,"largelcpvalues="GT_LU"\n",numoflargelcpvalues);
+  fprintf(outprj,"largelcpvalues="GT_WU"\n",numoflargelcpvalues);
   fprintf(outprj,"averagelcp=%.2f\n",averagelcp);
-  fprintf(outprj,"maxbranchdepth="GT_LU"\n",maxbranchdepth);
+  fprintf(outprj,"maxbranchdepth="GT_WU"\n",maxbranchdepth);
   fprintf(outprj,"integersize=%u\n",
                   (unsigned int) (sizeof (GtUword) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",gt_is_little_endian() ? '1' : '0');

@@ -47,8 +47,8 @@ static inline void gt_randomcodes_find_seldom_process_kmer_itv(
         GT_SETIBIT(sdata->seldom_reads, seqnum);
         sdata->nofseldomkmers++;
         /*
-        gt_log_log("seldom "GT_LU"-mer, count="GT_LU", relpos="GT_LU
-                   ",seqnum="GT_LU"", sdata->k, nofsuffixes, relpos,
+        gt_log_log("seldom "GT_WU"-mer, count="GT_WU", relpos="GT_WU
+                   ",seqnum="GT_WU"", sdata->k, nofsuffixes, relpos,
                    seqnum);
          */
       }
@@ -102,7 +102,7 @@ void gt_randomcodes_find_seldom_data_collect_stats(
     GtRandomcodesFindSeldomData *sdata, unsigned int threadnum,
     GtUword *nofseldomkmers)
 {
-  gt_log_log("thread %u: "GT_LU"", threadnum, sdata->nofseldomkmers);
+  gt_log_log("thread %u: "GT_WU"", threadnum, sdata->nofseldomkmers);
   *nofseldomkmers += sdata->nofseldomkmers;
 }
 

@@ -409,7 +409,7 @@ void gth_chain_shorten_introns(GthChain *chain, GtUword icdelta,
 
 static void showfragment(GtFragment *fragment, GtFile *outfp)
 {
-  gt_file_xprintf(outfp, "%c "GT_LU" "GT_LU" "GT_LU" "GT_LU" "GT_LD"\n",
+  gt_file_xprintf(outfp, "%c "GT_WU" "GT_WU" "GT_WU" "GT_WU" "GT_WD"\n",
                   COMMENTCHAR, fragment->startpos1, fragment->endpos1,
                   fragment->startpos2, fragment->endpos2, fragment->weight); }
 
@@ -459,9 +459,9 @@ static bool globalchainislongenough(GtChain *chain, GtFragment *fragments,
   chain_length = totallengthoffragments(chain, fragments);
 
   if (comments) {
-    gt_file_xprintf(outfp, "%c chain_length="GT_LU"\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c chain_length="GT_WU"\n", COMMENTCHAR,
                        chain_length);
-    gt_file_xprintf(outfp, "%c referencelength="GT_LU"\n", COMMENTCHAR,
+    gt_file_xprintf(outfp, "%c referencelength="GT_WU"\n", COMMENTCHAR,
                        referencelength);
   }
 
@@ -648,7 +648,7 @@ void gth_save_chain(GtChain *chain, GtFragment *fragments,
   gt_assert(chain_is_colinear(chain, fragments));
 
   if (info->comments) {
-    gt_file_xprintf(info->outfp, "%c process global chain with score "GT_LD"\n",
+    gt_file_xprintf(info->outfp, "%c process global chain with score "GT_WD"\n",
                        COMMENTCHAR, gt_chain_get_score(chain));
     gt_file_xprintf(info->outfp, "%c process global chain with the "
                        "following fragments\n", COMMENTCHAR);
@@ -757,8 +757,8 @@ void gth_save_chain(GtChain *chain, GtFragment *fragments,
      */
     if (info->stopafterchaining) {
       gt_file_xprintf(info->outfp,
-                      "%c gl. chain with coverage=%.2f and score "GT_LD" "
-                      "(genseq="GT_LU", str.=%c, refseq="GT_LU")\n",
+                      "%c gl. chain with coverage=%.2f and score "GT_WD" "
+                      "(genseq="GT_WU", str.=%c, refseq="GT_WU")\n",
                       COMMENTCHAR, gth_chain->refseqcoverage,
                       gt_chain_get_score(chain), gth_chain->gen_seq_num,
                       SHOWSTRAND(info->directmatches), gth_chain->ref_seq_num);

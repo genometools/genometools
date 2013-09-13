@@ -105,7 +105,7 @@ void gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
           for (d = 0; d <= distance; d++) {
             if (k >= -d && k <= d && l == GT_XDROP_FRONTIDX(d, i - j)) {
 #ifndef S_SPLINT_S
-              printf("%-3"GT_LDS" ", d);
+              printf("%-3"GT_WDS" ", d);
 #else
               printf("%-3ld ", d);
 #endif

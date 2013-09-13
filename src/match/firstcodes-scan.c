@@ -40,8 +40,8 @@ static void gt_firstcode_verifycodes(const GtBitsequence *twobitencoding,
   gt_assert(fcode == bfcode);
   if (rccode != bfrccode)
   {
-    printf("position " GT_LU ": fcode=" GT_LU ",rccode=" GT_LU " != "
-           GT_LU "\n",position,fcode, rccode,bfrccode);
+    printf("position " GT_WU ": fcode=" GT_WU ",rccode=" GT_WU " != "
+           GT_WU "\n",position,fcode, rccode,bfrccode);
     exit(EXIT_FAILURE);
   }
 }
@@ -241,7 +241,7 @@ static void showcodes (GtCodetype code,
                        GtUword relpos,
                        GT_UNUSED void *data)
 {
-  printf("%c " GT_LU " " GT_LU " " GT_LU "\n",relpos == 0 ? 'T' : 'F',
+  printf("%c " GT_WU " " GT_WU " " GT_WU "\n",relpos == 0 ? 'T' : 'F',
          code,seqnum,relpos);
 }
 
@@ -264,7 +264,7 @@ void gt_firstcode_runkmerscan(const GtEncseq *encseq,
   }
   numofsequences = gt_encseq_num_of_sequences(encseq);
   maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
-  gt_log_log("totallength=" GT_LU ",maxunitindex=" GT_LU "\n",
+  gt_log_log("totallength=" GT_WU ",maxunitindex=" GT_WU "\n",
              totallength,maxunitindex);
   if (gt_encseq_accesstype_get(encseq) == GT_ACCESS_TYPE_EQUALLENGTH)
   {
@@ -293,5 +293,5 @@ void gt_firstcode_runkmerscan(const GtEncseq *encseq,
                                          mode == 2U ? showcodes : NULL,
                                          NULL);
   }
-  gt_log_log("encodingsum = " GT_LU "\n",encodingsum);
+  gt_log_log("encodingsum = " GT_WU "\n",encodingsum);
 }

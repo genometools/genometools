@@ -206,7 +206,7 @@ static void gt_outputformatchaingeneric(
   Counter *counter = (Counter *) data;
 
   chainlength = gt_chain_chainlength(chain);
-  printf("# chain "GT_LU": length "GT_LU" score "GT_LD"\n",
+  printf("# chain "GT_WU": length "GT_WU" score "GT_WD"\n",
          counter->chaincounter,chainlength,gt_chain_chainscore(chain));
   if (!silent)
   {

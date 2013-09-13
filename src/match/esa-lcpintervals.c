@@ -45,7 +45,7 @@ static void showbranchingedgeDFS(bool firstsucc,GtUword fd,
                                  GtUword flb,
                                  GtUword sd,GtUword slb)
 {
-  printf("B %c "GT_LU" "GT_LU" "GT_LU" "GT_LU"\n",
+  printf("B %c "GT_WU" "GT_WU" "GT_WU" "GT_WU"\n",
          firstsucc ? '1' : '0',fd,flb,sd,slb);
 }
 
@@ -58,7 +58,7 @@ static int processleafedge_elcp(bool firstsucc,
 {
   Lcpinterval *father = (Lcpinterval *) afather;
 
-  printf("L %c "GT_LU" "GT_LU" "GT_LU"\n",firstsucc ? '1' : '0',
+  printf("L %c "GT_WU" "GT_WU" "GT_WU"\n",firstsucc ? '1' : '0',
                               fatherdepth,father->left,leafnumber);
   return 0;
 }
@@ -182,7 +182,7 @@ static int gt_processlcpintervals(bool outedges,
 
 static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
 {
-  printf("N "GT_LU" "GT_LU" "GT_LU"\n",lcpinterval->offset,
+  printf("N "GT_WU" "GT_WU" "GT_WU"\n",lcpinterval->offset,
                            lcpinterval->left,
                            lcpinterval->right);
   return 0;
@@ -294,8 +294,8 @@ static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
   }
   if (!haserr)
   {
-    printf("sumsuftab="GT_LU"\n",sumsuftab);
-    printf("sumlcptab="GT_LU"\n",sumlcptab);
+    printf("sumsuftab="GT_WU"\n",sumsuftab);
+    printf("sumlcptab="GT_WU"\n",sumlcptab);
   }
   return haserr ? -1 : 0;
 }

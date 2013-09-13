@@ -245,7 +245,7 @@ static int gt_convertseq_runner(int argc, const char **argv, int parsed_args,
     }
     if (arguments->showflv) {
       for (j=0;j<gt_str_array_size(files);j++) {
-        fprintf(stderr, "file "GT_LU" (%s): "GT_LU"/"GT_LU"\n",
+        fprintf(stderr, "file "GT_WU" (%s): "GT_WU"/"GT_WU"\n",
                j,
                gt_str_array_get(files, j),
                (GtUword) flv[j].length,

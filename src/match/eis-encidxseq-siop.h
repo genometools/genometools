@@ -97,8 +97,8 @@ EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, GtUword posA,
 {
   if (tSym >= gt_MRAEncGetSize(EISGetAlphabet(seq)))
   {
-    fprintf(stderr,"tsym="GT_LU",gt_MRAEncGetSize(EISGetAlphabet(seq)="
-            GT_LU"\n", (GtUword) tSym,
+    fprintf(stderr,"tsym="GT_WU",gt_MRAEncGetSize(EISGetAlphabet(seq)="
+            GT_WU"\n", (GtUword) tSym,
             (GtUword) gt_MRAEncGetSize(EISGetAlphabet(seq)));
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }

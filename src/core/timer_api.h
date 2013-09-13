@@ -36,12 +36,12 @@ void     gt_timer_start(GtTimer *timer);
 /* Stop the time measurement on <timer>. */
 void     gt_timer_stop(GtTimer *timer);
 /* Output the current state of <timer> in the format
-   ""GT_LD".%06lds real "GT_LD"s user "GT_LD"s system" to file
+   ""GT_WD".%06lds real "GT_WD"s user "GT_WD"s system" to file
    pointer <fp> (see <gt_timer_show_formatted>).
    The timer is then stopped. */
 void     gt_timer_show(GtTimer *timer, FILE *fp);
 /* Output the current state of <timer> in a user-defined format given by <fmt>.
-   <fmt> must be a format string for four "GT_LD" numbers, which are filled
+   <fmt> must be a format string for four "GT_WD" numbers, which are filled
    with: elapsed seconds, elapsed microseconds, used usertime in seconds, system
    time in seconds. The output is written to <fp>. The timer is then stopped. */
 void     gt_timer_show_formatted(GtTimer *timer, const char *fmt, FILE *fp);

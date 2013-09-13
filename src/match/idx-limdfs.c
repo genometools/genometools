@@ -623,7 +623,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   startpos = ESASUFFIXPTRGET(limdfsresources->genericindex->suffixarray->suftab,
                              child->leftbound);
 #ifdef SKDEBUG
-  printf("retrieve context of startpos="GT_LU"\n",(GtUword) startpos);
+  printf("retrieve context of startpos="GT_WU"\n",(GtUword) startpos);
 #endif
   for (pos = startpos + child->offset - 1;
        pos < limdfsresources->genericindex->totallength; pos++)
@@ -719,7 +719,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                    bound);
   initparentcopy(limdfsresources,adfst);
 #ifdef SKDEBUG
-  printf("retrieve context for bound = "GT_LU"\n",(GtUword) bound);
+  printf("retrieve context for bound = "GT_WU"\n",(GtUword) bound);
 #endif
   for (contextlength = 0; /* nothing */; contextlength++)
   {
@@ -934,8 +934,8 @@ static void showLCPinterval(bool withesa,const Indexbounds *itv)
 
   width = withesa ? (itv->rightbound - itv->leftbound + 1)
                   : itv->rightbound - itv->leftbound;
-  printf("("GT_LU",width="GT_LU")",(GtUword) itv->offset,(GtUword) width);
-  printf("("GT_LU","GT_LU")",(GtUword) itv->leftbound,
+  printf("("GT_WU",width="GT_WU")",(GtUword) itv->offset,(GtUword) width);
+  printf("("GT_WU","GT_WU")",(GtUword) itv->leftbound,
                      (GtUword)
                      (withesa ? itv->rightbound : itv->rightbound-1));
 }
@@ -1142,7 +1142,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
   {
     gt_assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
     /*
-    printf("nextfreeLcpintervalwithinfo="GT_LU"\n",
+    printf("nextfreeLcpintervalwithinfo="GT_WU"\n",
                limdfsresources->stack.nextfreeLcpintervalwithinfo);
     */
     stackptr = limdfsresources->stack.spaceLcpintervalwithinfo +

@@ -233,8 +233,9 @@ GtUword gth_path_walker_ref_distance(const GthPathWalker *pw)
 void gth_path_walker_show(const GthPathWalker *pw, GtFile *outfp)
 {
   gt_assert(pw);
-  gt_file_xprintf(outfp, "GthPathWalker: orientation=%s, eop_dist="GT_LU", "
-                     "gen_dist="GT_LU", ref_dist="GT_LU", actual="GT_LU", steps_cur=%d\n",
+  gt_file_xprintf(outfp, "GthPathWalker: orientation=%s, eop_dist="GT_WU", "
+                     "gen_dist="GT_WU", ref_dist="GT_WU", actual="GT_WU
+                     ", steps_cur=%d\n",
                      pw->forward ? "forward" : "reverse",
                      pw->eop_distance, pw->gen_distance, pw->ref_distance,
                      pw->actual_eops, pw->steps_in_current_eop);

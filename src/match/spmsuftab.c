@@ -36,8 +36,8 @@ GtSpmsuftab *gt_spmsuftab_new(GtUword numofentries,
   bitsforpositions = gt_determinebitspervalue(maxvalue);
   if (bitsforpositions < bitsforseqnumrelpos)
   {
-    gt_logger_log(logger,"use "GT_LU" bitpackarray-entries for all positions "
-                         "(%u bits each,"GT_LU" bytes total)",
+    gt_logger_log(logger,"use "GT_WU" bitpackarray-entries for all positions "
+                         "(%u bits each,"GT_WU" bytes total)",
                          numofentries,bitsforpositions,required);
     spmsuftab->bitpackarray
       = gt_compact_ulong_store_new(numofentries,bitsforpositions);
@@ -45,8 +45,8 @@ GtSpmsuftab *gt_spmsuftab_new(GtUword numofentries,
     spmsuftab->maxvalue = maxvalue;
   } else
   {
-    gt_logger_log(logger,"use "GT_LU" bitpackarray-entries for all "
-                  "seqnum/relpos-pairs (%u bits each,"GT_LU" bytes total)",
+    gt_logger_log(logger,"use "GT_WU" bitpackarray-entries for all "
+                  "seqnum/relpos-pairs (%u bits each,"GT_WU" bytes total)",
                   numofentries,bitsforseqnumrelpos,required);
     spmsuftab->bitpackarray
       = gt_compact_ulong_store_new(numofentries,bitsforseqnumrelpos);

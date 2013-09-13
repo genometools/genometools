@@ -94,15 +94,15 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
   if (mappedsize != gt_Sfxmappedrange_size_entire(sfxmappedrange))
   {
     gt_error_set(err,
-                 "map file %s: mapped size = "GT_LU" != "
-                 GT_LU" = expected size",
+                 "map file %s: mapped size = "GT_WU" != "
+                 GT_WU" = expected size",
                  gt_str_get(sfxmappedrange->filename), (GtUword) mappedsize,
                  (GtUword) gt_Sfxmappedrange_size_entire(sfxmappedrange));
     gt_fa_xmunmap(sfxmappedrange->entire);
     sfxmappedrange->entire = NULL;
     return NULL;
   }
-  gt_log_log("map %s completely ("GT_LU" units of size %u)",
+  gt_log_log("map %s completely ("GT_WU" units of size %u)",
               gt_str_get(sfxmappedrange->tablename),
               (GtUword) sfxmappedrange->numofunits,
               (unsigned int) sfxmappedrange->sizeofunit);
@@ -171,7 +171,7 @@ static void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
   sfxmappedrange->writable = writable;
   outfp = gt_xtmpfp(sfxmappedrange->filename);
   gt_assert(outfp != NULL);
-  gt_log_log("write %s to file %s ("GT_LU" units of "GT_LU" bytes)",
+  gt_log_log("write %s to file %s ("GT_WU" units of "GT_WU" bytes)",
              gt_str_get(sfxmappedrange->tablename),
              gt_str_get(sfxmappedrange->filename),
              (GtUword) sfxmappedrange->numofunits,
@@ -254,7 +254,7 @@ void gt_Sfxmappedrange_usetmp(GtSfxmappedrange *sfxmappedrange,
   {
     sfxmappedrange->numofunits = (size_t) numofentries;
   }
-  gt_log_log("use file %s for table %s ("GT_LU" units of "GT_LU" bytes)",
+  gt_log_log("use file %s for table %s ("GT_WU" units of "GT_WU" bytes)",
              gt_str_get(sfxmappedrange->filename),
              gt_str_get(sfxmappedrange->tablename),
              (GtUword) sfxmappedrange->numofunits,
@@ -324,7 +324,7 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             minindex,
                             maxindex);
     sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);
-    gt_log_log("mapped %s["GT_LU".."GT_LU"] for %s (%.1f%% of all)",
+    gt_log_log("mapped %s["GT_WU".."GT_WU"] for %s (%.1f%% of all)",
                gt_str_get(sfxmappedrange->tablename),
                lbrange.mapoffset,
                lbrange.mapend,
@@ -458,7 +458,7 @@ GtUword gt_Sfxmappedrangelist_size_mapped(
       GtSfxmappedrange *sfxmappedrange = sfxmrlist->arr[idx];
       if (sfxmappedrange != NULL)
       {
-        /*printf("size_mapped %s "GT_LU" "GT_LU" => "GT_LU"\n",
+        /*printf("size_mapped %s "GT_WU" "GT_WU" => "GT_WU"\n",
                     gt_str_get(sfxmappedrange->tablename),
                     minindex,maxindex,
                     gt_Sfxmappedrange_size_mapped(sfxmappedrange,minindex,

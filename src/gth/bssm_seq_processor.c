@@ -1292,31 +1292,31 @@ static void show_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
   len2 = gt_array_size(bsp->i2_true_don_gt);
 
   if (verbose) {
-    printf("%s/T1: "GT_LU" seqs\n", GT_DIR, len0);
-    printf("%s/T2: "GT_LU" seqs\n", GT_DIR, len1);
-    printf("%s/T0: "GT_LU" seqs\n", GT_DIR, len2);
-    printf("%s/F1: "GT_LU" seqs (sampled out of "GT_LU")\n", GT_DIR, len0,
+    printf("%s/T1: "GT_WU" seqs\n", GT_DIR, len0);
+    printf("%s/T2: "GT_WU" seqs\n", GT_DIR, len1);
+    printf("%s/T0: "GT_WU" seqs\n", GT_DIR, len2);
+    printf("%s/F1: "GT_WU" seqs (sampled out of "GT_WU")\n", GT_DIR, len0,
            gt_array_size(bsp->e0_false_don_gt));
-    printf("%s/F2: "GT_LU" seqs (sampled out of "GT_LU")\n", GT_DIR, len1,
+    printf("%s/F2: "GT_WU" seqs (sampled out of "GT_WU")\n", GT_DIR, len1,
            gt_array_size(bsp->e1_false_don_gt));
-    printf("%s/F0: "GT_LU" seqs (sampled out of "GT_LU")\n", GT_DIR, len2,
+    printf("%s/F0: "GT_WU" seqs (sampled out of "GT_WU")\n", GT_DIR, len2,
            gt_array_size(bsp->e2_false_don_gt));
-    printf("%s/Fi: "GT_LU" seqs (sampled out of "GT_LU")\n", GT_DIR,
+    printf("%s/Fi: "GT_WU" seqs (sampled out of "GT_WU")\n", GT_DIR,
            MAX3(len0, len1, len2),
            gt_array_size(bsp->i_false_don_gt));
   }
 
-  gt_file_xprintf(logfp, "%s/T1: "GT_LU" seqs\n", GT_DIR, len0);
-  gt_file_xprintf(logfp, "%s/T2: "GT_LU" seqs\n", GT_DIR, len1);
-  gt_file_xprintf(logfp, "%s/T0: "GT_LU" seqs\n", GT_DIR, len2);
-  gt_file_xprintf(logfp, "%s/F1: "GT_LU" seqs (sampled out of "GT_LU")\n", GT_DIR, len0,
-                  gt_array_size(bsp->e0_false_don_gt));
-  gt_file_xprintf(logfp, "%s/F2: "GT_LU" seqs (sampled out of "GT_LU")\n", GT_DIR, len1,
-                  gt_array_size(bsp->e1_false_don_gt));
-  gt_file_xprintf(logfp, "%s/F0: "GT_LU" seqs (sampled out of "GT_LU")\n", GT_DIR, len2,
-                  gt_array_size(bsp->e2_false_don_gt));
-  gt_file_xprintf(logfp, "%s/Fi: "GT_LU" seqs (sampled out of "GT_LU")\n", GT_DIR,
-                  MAX3(len0, len1, len2),
+  gt_file_xprintf(logfp, "%s/T1: "GT_WU" seqs\n", GT_DIR, len0);
+  gt_file_xprintf(logfp, "%s/T2: "GT_WU" seqs\n", GT_DIR, len1);
+  gt_file_xprintf(logfp, "%s/T0: "GT_WU" seqs\n", GT_DIR, len2);
+  gt_file_xprintf(logfp, "%s/F1: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                  GT_DIR, len0, gt_array_size(bsp->e0_false_don_gt));
+  gt_file_xprintf(logfp, "%s/F2: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                  GT_DIR, len1, gt_array_size(bsp->e1_false_don_gt));
+  gt_file_xprintf(logfp, "%s/F0: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                  GT_DIR, len2, gt_array_size(bsp->e2_false_don_gt));
+  gt_file_xprintf(logfp, "%s/Fi: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                  GT_DIR, MAX3(len0, len1, len2),
                   gt_array_size(bsp->i_false_don_gt));
 
   if (bsp->gcdonor) {
@@ -1325,31 +1325,31 @@ static void show_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
     len2 = gt_array_size(bsp->i2_true_don_gc);
 
     if (verbose) {
-      printf("%s/T1: "GT_LU" seqs\n", GC_DIR, len0);
-      printf("%s/T2: "GT_LU" seqs\n", GC_DIR, len1);
-      printf("%s/T0: "GT_LU" seqs\n", GC_DIR, len2);
-      printf("%s/F1: "GT_LU" seqs (sampled out of "GT_LU")\n", GC_DIR, len0,
+      printf("%s/T1: "GT_WU" seqs\n", GC_DIR, len0);
+      printf("%s/T2: "GT_WU" seqs\n", GC_DIR, len1);
+      printf("%s/T0: "GT_WU" seqs\n", GC_DIR, len2);
+      printf("%s/F1: "GT_WU" seqs (sampled out of "GT_WU")\n", GC_DIR, len0,
              gt_array_size(bsp->e0_false_don_gc));
-      printf("%s/F2: "GT_LU" seqs (sampled out of "GT_LU")\n", GC_DIR, len1,
+      printf("%s/F2: "GT_WU" seqs (sampled out of "GT_WU")\n", GC_DIR, len1,
              gt_array_size(bsp->e1_false_don_gc));
-      printf("%s/F0: "GT_LU" seqs (sampled out of "GT_LU")\n", GC_DIR, len2,
+      printf("%s/F0: "GT_WU" seqs (sampled out of "GT_WU")\n", GC_DIR, len2,
              gt_array_size(bsp->e2_false_don_gc));
-      printf("%s/Fi: "GT_LU" seqs (sampled out of "GT_LU")\n", GC_DIR,
+      printf("%s/Fi: "GT_WU" seqs (sampled out of "GT_WU")\n", GC_DIR,
              MAX3(len0, len1, len2),
              gt_array_size(bsp->i_false_don_gc));
     }
 
-    gt_file_xprintf(logfp, "%s/T1: "GT_LU" seqs\n", GC_DIR, len0);
-    gt_file_xprintf(logfp, "%s/T2: "GT_LU" seqs\n", GC_DIR, len1);
-    gt_file_xprintf(logfp, "%s/T0: "GT_LU" seqs\n", GC_DIR, len2);
-    gt_file_xprintf(logfp, "%s/F1: "GT_LU" seqs (sampled out of "GT_LU")\n", GC_DIR,
-                    len0, gt_array_size(bsp->e0_false_don_gc));
-    gt_file_xprintf(logfp, "%s/F2: "GT_LU" seqs (sampled out of "GT_LU")\n", GC_DIR,
-                    len1, gt_array_size(bsp->e1_false_don_gc));
-    gt_file_xprintf(logfp, "%s/F0: "GT_LU" seqs (sampled out of "GT_LU")\n", GC_DIR,
-                    len2, gt_array_size(bsp->e2_false_don_gc));
-    gt_file_xprintf(logfp, "%s/Fi: "GT_LU" seqs (sampled out of "GT_LU")\n", GC_DIR,
-                    MAX3(len0, len1, len2),
+    gt_file_xprintf(logfp, "%s/T1: "GT_WU" seqs\n", GC_DIR, len0);
+    gt_file_xprintf(logfp, "%s/T2: "GT_WU" seqs\n", GC_DIR, len1);
+    gt_file_xprintf(logfp, "%s/T0: "GT_WU" seqs\n", GC_DIR, len2);
+    gt_file_xprintf(logfp, "%s/F1: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                    GC_DIR, len0, gt_array_size(bsp->e0_false_don_gc));
+    gt_file_xprintf(logfp, "%s/F2: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                    GC_DIR, len1, gt_array_size(bsp->e1_false_don_gc));
+    gt_file_xprintf(logfp, "%s/F0: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                    GC_DIR, len2, gt_array_size(bsp->e2_false_don_gc));
+    gt_file_xprintf(logfp, "%s/Fi: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                    GC_DIR, MAX3(len0, len1, len2),
                     gt_array_size(bsp->i_false_don_gc));
   }
 
@@ -1358,31 +1358,32 @@ static void show_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
   len2 = gt_array_size(bsp->i2_true_acc);
 
   if (verbose) {
-    printf("%s/T1: "GT_LU" seqs\n", AG_DIR, len0);
-    printf("%s/T2: "GT_LU" seqs\n", AG_DIR, len1);
-    printf("%s/T0: "GT_LU" seqs\n", AG_DIR, len2);
-    printf("%s/F1: "GT_LU" seqs (sampled out of "GT_LU")\n", AG_DIR, len0,
+    printf("%s/T1: "GT_WU" seqs\n", AG_DIR, len0);
+    printf("%s/T2: "GT_WU" seqs\n", AG_DIR, len1);
+    printf("%s/T0: "GT_WU" seqs\n", AG_DIR, len2);
+    printf("%s/F1: "GT_WU" seqs (sampled out of "GT_WU")\n", AG_DIR, len0,
            gt_array_size(bsp->e0_false_acc));
-    printf("%s/F2: "GT_LU" seqs (sampled out of "GT_LU")\n", AG_DIR, len1,
+    printf("%s/F2: "GT_WU" seqs (sampled out of "GT_WU")\n", AG_DIR, len1,
            gt_array_size(bsp->e1_false_acc));
-    printf("%s/F0: "GT_LU" seqs (sampled out of "GT_LU")\n", AG_DIR, len2,
+    printf("%s/F0: "GT_WU" seqs (sampled out of "GT_WU")\n", AG_DIR, len2,
            gt_array_size(bsp->e2_false_acc));
-    printf("%s/Fi: "GT_LU" seqs (sampled out of "GT_LU")\n", AG_DIR,
+    printf("%s/Fi: "GT_WU" seqs (sampled out of "GT_WU")\n", AG_DIR,
            MAX3(len0, len1, len2),
            gt_array_size(bsp->i_false_acc));
   }
 
-  gt_file_xprintf(logfp, "%s/T1: "GT_LU" seqs\n", AG_DIR, len0);
-  gt_file_xprintf(logfp, "%s/T2: "GT_LU" seqs\n", AG_DIR, len1);
-  gt_file_xprintf(logfp, "%s/T0: "GT_LU" seqs\n", AG_DIR, len2);
-  gt_file_xprintf(logfp, "%s/F1: "GT_LU" seqs (sampled out of "GT_LU")\n", AG_DIR, len0,
-                  gt_array_size(bsp->e0_false_acc));
-  gt_file_xprintf(logfp, "%s/F2: "GT_LU" seqs (sampled out of "GT_LU")\n", AG_DIR, len1,
-                  gt_array_size(bsp->e1_false_acc));
-  gt_file_xprintf(logfp, "%s/F0: "GT_LU" seqs (sampled out of "GT_LU")\n", AG_DIR, len2,
-                  gt_array_size(bsp->e2_false_acc));
-  gt_file_xprintf(logfp, "%s/Fi: "GT_LU" seqs (sampled out of "GT_LU")\n", AG_DIR,
-                  MAX3(len0, len1, len2), gt_array_size(bsp->i_false_acc));
+  gt_file_xprintf(logfp, "%s/T1: "GT_WU" seqs\n", AG_DIR, len0);
+  gt_file_xprintf(logfp, "%s/T2: "GT_WU" seqs\n", AG_DIR, len1);
+  gt_file_xprintf(logfp, "%s/T0: "GT_WU" seqs\n", AG_DIR, len2);
+  gt_file_xprintf(logfp, "%s/F1: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                  AG_DIR, len0, gt_array_size(bsp->e0_false_acc));
+  gt_file_xprintf(logfp, "%s/F2: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                  AG_DIR, len1, gt_array_size(bsp->e1_false_acc));
+  gt_file_xprintf(logfp, "%s/F0: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                  AG_DIR, len2, gt_array_size(bsp->e2_false_acc));
+  gt_file_xprintf(logfp, "%s/Fi: "GT_WU" seqs (sampled out of "GT_WU")\n",
+                  AG_DIR, MAX3(len0, len1, len2),
+                  gt_array_size(bsp->i_false_acc));
 
 }
 

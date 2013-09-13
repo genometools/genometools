@@ -247,8 +247,8 @@ static int last_parse_match(GtMatchIteratorLast *mil, GtMatch **match,
                                           mil->pvt->matchfile);
   if (!had_err) {
     if (11 != sscanf(gt_str_get(mil->pvt->linebuf),
-                     GT_LU " %s " GT_LU " " GT_LU " %c " GT_LU " %s " GT_LU
-                     " " GT_LU " %c " GT_LU,
+                     GT_WU " %s " GT_WU " " GT_WU " %c " GT_WU " %s " GT_WU
+                     " " GT_WU " %c " GT_WU,
                      &score, seqid1, &start1, &mlength1, &strand1, &slength1,
                      seqid2, &start2, &mlength2, &strand2, &slength2)) {
       gt_error_set(err, "error parsing LAST output: "

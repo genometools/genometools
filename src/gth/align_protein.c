@@ -764,7 +764,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
               if (comments) {
                 gt_file_xprintf(outfp,
                                 "%c abort backtracing, intron cutout at p=%s "
-                                "(genpos=" GT_LU " (actual strand!))\n",
+                                "(genpos=" GT_WU " (actual strand!))\n",
                                 COMMENTCHAR,
                                 showretracenames((Retrace) pathtype),
                                 spliced_seq->positionmapping[genptr]);

@@ -573,8 +573,8 @@ void gt_consensus_sa(const void *set_of_sas, GtUword number_of_sas,
   gt_assert(get_genomic_range && get_strand && get_exons);
   gt_assert(set_of_sas_is_sorted(set_of_sas, number_of_sas, size_of_sa,
                               get_genomic_range));
-  gt_log_log("-from "GT_LU"", get_genomic_range(set_of_sas).start);
-  gt_log_log("csa number_of_sas="GT_LU"", number_of_sas);
+  gt_log_log("-from "GT_WU"", get_genomic_range(set_of_sas).start);
+  gt_log_log("csa number_of_sas="GT_WU"", number_of_sas);
 
   /* init */
   csa.set_of_sas          = set_of_sas;

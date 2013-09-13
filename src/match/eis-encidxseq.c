@@ -50,20 +50,20 @@ const char *EISIntegrityCheckResultStrings[] =
   {                                                              \
     switch (retcode) {                                           \
     case EIS_INTEGRITY_CHECK_INVALID_SYMBOL:                     \
-      fprintf(stderr, "Comparision failed at position "GT_LU""   \
+      fprintf(stderr, "Comparision failed at position "GT_WU""   \
               ", reference symbol: %u, symbol read: %u\n",       \
               pos, symOrig, symEnc);                             \
       gt_error_set(err, "Invalid symbol encountered.");          \
       break;                                                     \
     case EIS_INTEGRITY_CHECK_BWT_READ_ERROR:                     \
-      fprintf(stderr, "Read of symbol failed at position " GT_LU \
+      fprintf(stderr, "Read of symbol failed at position " GT_WU \
               "\n", pos);                                        \
       gt_error_set(err, "Failed reading reference BWT source."); \
       break;                                                     \
     case EIS_INTEGRITY_CHECK_RANK_FAILED:                        \
-      fprintf(stderr, "At position "GT_LU""                      \
-              ", rank operation yielded  wrong count: "GT_LU""   \
-              ", expected "GT_LU" for symbol %d\n",              \
+      fprintf(stderr, "At position "GT_WU""                      \
+              ", rank operation yielded  wrong count: "GT_WU""   \
+              ", expected "GT_WU" for symbol %d\n",              \
               pos, rankQueryResult, rankExpect, rankCmpSym);     \
       gt_error_set(err, "Invalid rank result.");                 \
       break;                                                     \
@@ -125,7 +125,7 @@ gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
       if (skip >= length)
       {
         gt_logger_log(verbosity, "Invalid skip request: "GT_LLD","
-                    " too large for sequence length: "GT_LU"",
+                    " too large for sequence length: "GT_WU"",
                     (GtInt64)skip, length);
         return -1;
       }

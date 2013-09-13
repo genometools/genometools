@@ -24,7 +24,7 @@
 */
 
 #ifdef S_SPLINT_S
-#define Formatuint64_t ""GT_LU""
+#define Formatuint64_t ""GT_WU""
 #define SCANint64_tcast(X) ((GtWord *) (X))
 #define PRINTuint64_tcast(X) ((GtUword) (X))
 #else
@@ -34,7 +34,7 @@
 #endif
 
 #ifdef S_SPLINT_S
-#define FormatScanint64_t ""GT_LD""
+#define FormatScanint64_t ""GT_WD""
 #else
 #define FormatScanint64_t "%" SCNd64
 #endif

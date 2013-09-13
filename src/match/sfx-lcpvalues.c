@@ -539,8 +539,8 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
     if ((checkequality && currentlcp != reallcp) ||
         (!checkequality && currentlcp > reallcp))
     {
-      fprintf(stderr,"idx="GT_LU",suffixpair="GT_LU","GT_LU": "
-                     "currentlcp = "GT_LU" %s "GT_LU" = reallcp\n",
+      fprintf(stderr,"idx="GT_WU",suffixpair="GT_WU","GT_WU": "
+                     "currentlcp = "GT_WU" %s "GT_WU" = reallcp\n",
                       idx,startpos1,startpos2,currentlcp,
                       checkequality ? "!=" : ">",reallcp);
       gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos1,50UL);
@@ -554,7 +554,7 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
     }
     startpos1 = startpos2;
   }
-  /*printf("totalcmpmissing = "GT_LU"(avg=%.2f)\n",
+  /*printf("totalcmpmissing = "GT_WU"(avg=%.2f)\n",
          totalcmpmissing,(double) totalcmpmissing/effectivesamplesize);*/
 }
 

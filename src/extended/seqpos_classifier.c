@@ -157,7 +157,7 @@ int gt_seqpos_classifier_position_is_inside_feature(
       if (i == seqpos_classifier->next_inside)
       {
         (*inside) = true;
-        /*printf(""GT_LU"..", i+1);*/
+        /*printf(""GT_WU"..", i+1);*/
         gt_assert(seqpos_classifier->next_not_inside >
             seqpos_classifier->next_inside);
       }
@@ -194,7 +194,7 @@ int gt_seqpos_classifier_position_is_inside_feature(
               }
               else
               {
-                /*printf(""GT_LU"\n", i);*/
+                /*printf(""GT_WU"\n", i);*/
                 (*inside) = false;
                 gt_assert(next_specified_ft_range.end > i);
                 seqpos_classifier->next_inside = next_specified_ft_range.start;

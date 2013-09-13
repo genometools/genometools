@@ -87,7 +87,7 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
   gt_assert(showmatchinfo->tageratoroptions != NULL);
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBLENGTH)
   {
-    printf(""GT_LU"",match->dblen);
+    printf(""GT_WU"",match->dblen);
     firstitem = false;
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSTARTPOS)
@@ -95,7 +95,7 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
     ADDTABULATOR;
     if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBABSPOS)
     {
-      printf(""GT_LU"",match->dbstartpos);
+      printf(""GT_WU"",match->dbstartpos);
     } else
     {
       GtUword seqstartpos,
@@ -103,7 +103,7 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
                                                   match->dbstartpos);
       seqstartpos = gt_encseq_seqstartpos(showmatchinfo->encseq, seqnum);
       gt_assert(seqstartpos <= match->dbstartpos);
-      printf(""GT_LU"\t"GT_LU"",seqnum, match->dbstartpos - seqstartpos);
+      printf(""GT_WU"\t"GT_WU"",seqnum, match->dbstartpos - seqstartpos);
     }
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSEQUENCE)
@@ -123,7 +123,7 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_EDIST)
   {
     ADDTABULATOR;
-    printf(""GT_LU"",match->distance);
+    printf(""GT_WU"",match->distance);
   }
   if (showmatchinfo->tageratoroptions->maxintervalwidth > 0)
   {
@@ -145,12 +145,12 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
         {
           ADDTABULATOR;
-          printf(""GT_LU"",match->querylen - suffixlength);
+          printf(""GT_WU"",match->querylen - suffixlength);
         }
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
         {
           ADDTABULATOR;
-          printf(""GT_LU"",suffixlength);
+          printf(""GT_WU"",suffixlength);
         }
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
         {
@@ -171,7 +171,7 @@ static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
       if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
       {
         ADDTABULATOR;
-        printf(""GT_LU"",match->querylen);
+        printf(""GT_WU"",match->querylen);
       }
       if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
       {
@@ -223,7 +223,7 @@ static void checkmstats(void *processinfo,
 #ifndef NDEBUG
   if (mstatlength != realmstatlength)
   {
-    fprintf(stderr,"patternstartpos = "GT_LU": mstatlength = "GT_LU" != "GT_LU
+    fprintf(stderr,"patternstartpos = "GT_WU": mstatlength = "GT_WU" != "GT_WU
             "  = realmstatlength\n",
                     patternstartpos,mstatlength,realmstatlength);
     exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -252,8 +252,8 @@ static void checkmstats(void *processinfo,
                                   GT_READMODE_FORWARD);
         if (twl->tagptr[idx] != cc)
         {
-          fprintf(stderr,"patternstartpos = "GT_LU": pattern["GT_LU
-                  "] = %u != %u = sequence["GT_LU"]\n",
+          fprintf(stderr,"patternstartpos = "GT_WU": pattern["GT_WU
+                  "] = %u != %u = sequence["GT_WU"]\n",
                   patternstartpos, idx, (unsigned int) twl->tagptr[idx],
                   (unsigned int) cc,
                   (GtUword) (witnessposition+idx-patternstartpos));
@@ -273,7 +273,7 @@ static void showmstats(void *processinfo,
 {
   TgrTagwithlength *twl = (TgrTagwithlength *) patterninfo;
 
-  printf(""GT_LU" %c",mstatlength,ISRCDIR(twl) ? '-' : '+');
+  printf(""GT_WU" %c",mstatlength,ISRCDIR(twl) ? '-' : '+');
   if (gt_intervalwidthleq((const Limdfsresources *) processinfo,leftbound,
                        rightbound))
   {
@@ -285,7 +285,7 @@ static void showmstats(void *processinfo,
                                   mstatlength);
     for (idx = 0; idx<mstatspos->nextfreeGtUlong; idx++)
     {
-      printf(" "GT_LU"",mstatspos->spaceGtUlong[idx]);
+      printf(" "GT_WU"",mstatspos->spaceGtUlong[idx]);
     }
   }
   printf("\n");
@@ -328,8 +328,8 @@ static int dotransformtag(GtUchar *transformedtag,
 
   if (taglen > (GtUword) MAXTAGSIZE)
   {
-    gt_error_set(err,"tag \"%*.*s\" of length "GT_LU"; "
-                  "tags must not be longer than "GT_LU"",
+    gt_error_set(err,"tag \"%*.*s\" of length "GT_WU"; "
+                  "tags must not be longer than "GT_WU"",
                    (int) taglen,(int) taglen,currenttag,taglen,
                    (GtUword) MAXTAGSIZE);
     return -1;
@@ -408,7 +408,7 @@ static void compareresults(const ArrayTgrSimplematch *storeonline,
   if (storeonline->nextfreeTgrSimplematch
         != storeoffline->nextfreeTgrSimplematch)
   {
-    fprintf(stderr,"nextfreeTgrSimplematch: storeonline = "GT_LU" != "GT_LU" "
+    fprintf(stderr,"nextfreeTgrSimplematch: storeonline = "GT_WU" != "GT_WU" "
                    "storeoffline\n",
                    storeonline->nextfreeTgrSimplematch,
                    storeoffline->nextfreeTgrSimplematch);
@@ -430,22 +430,22 @@ static void compareresults(const ArrayTgrSimplematch *storeonline,
     if (storeonline->spaceTgrSimplematch[ss].rcmatch &&
         !storeoffline->spaceTgrSimplematch[ss].rcmatch)
     {
-      fprintf(stderr,"rcmatch: storeonline["GT_LU"] = p != d "
-                     "= storeoffline["GT_LU"]\n",ss,ss);
+      fprintf(stderr,"rcmatch: storeonline["GT_WU"] = p != d "
+                     "= storeoffline["GT_WU"]\n",ss,ss);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!storeonline->spaceTgrSimplematch[ss].rcmatch &&
         storeoffline->spaceTgrSimplematch[ss].rcmatch)
     {
-      fprintf(stderr,"rcmatch: storeonline["GT_LU"] = d != p "
-                     "= storeoffline["GT_LU"]\n",ss,ss);
+      fprintf(stderr,"rcmatch: storeonline["GT_WU"] = d != p "
+                     "= storeoffline["GT_WU"]\n",ss,ss);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (storeonline->spaceTgrSimplematch[ss].matchlength !=
         storeoffline->spaceTgrSimplematch[ss].matchlength)
     {
-      fprintf(stderr,"matchlength: storeonline["GT_LU"] = "GT_LU""
-                     " != "GT_LU" = storeoffline["GT_LU"]\n",
+      fprintf(stderr,"matchlength: storeonline["GT_WU"] = "GT_WU""
+                     " != "GT_WU" = storeoffline["GT_WU"]\n",
                      ss,
                      storeonline->spaceTgrSimplematch[ss].matchlength,
                      storeoffline->spaceTgrSimplematch[ss].matchlength,
@@ -455,8 +455,8 @@ static void compareresults(const ArrayTgrSimplematch *storeonline,
     if (storeonline->spaceTgrSimplematch[ss].dbstartpos !=
         storeoffline->spaceTgrSimplematch[ss].dbstartpos)
     {
-      fprintf(stderr,"dbstartpos: storeonline["GT_LU"] = "GT_LU""
-                     " != "GT_LU" = storeoffline["GT_LU"]\n",
+      fprintf(stderr,"dbstartpos: storeonline["GT_WU"] = "GT_WU""
+                     " != "GT_WU" = storeoffline["GT_WU"]\n",
                      ss,
                      storeonline->spaceTgrSimplematch[ss].dbstartpos,
                      storeoffline->spaceTgrSimplematch[ss].dbstartpos,
@@ -711,7 +711,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         if (tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
         {
           ADDTABULATOR;
-          printf(""GT_LU"",twl.taglen);
+          printf(""GT_WU"",twl.taglen);
         }
         if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
         {
@@ -726,9 +726,9 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
             twl.taglen <= (GtUword)
                           tageratoroptions->userdefinedmaxdistance)
         {
-          gt_error_set(err,"tag \"%*.*s\" of length "GT_LU"; "
+          gt_error_set(err,"tag \"%*.*s\" of length "GT_WU"; "
                        "tags must be longer than the allowed number of errors "
-                       "(which is "GT_LD")",
+                       "(which is "GT_WD")",
                        (int) twl.taglen,
                        (int) twl.taglen,currenttag,
                        twl.taglen,

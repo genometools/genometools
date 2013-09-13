@@ -202,7 +202,7 @@ void gth_sa_show_exons(const GthSA *sa, GtFile *outfp)
   gt_assert(sa);
   for (i = 0; i < gt_array_size(sa->exons); i++) {
     exoninfo = (Exoninfo*) gt_array_get(sa->exons, i);
-    gt_file_xprintf(outfp, "("GT_LU","GT_LU")", exoninfo->leftgenomicexonborder,
+    gt_file_xprintf(outfp, "("GT_WU","GT_WU")", exoninfo->leftgenomicexonborder,
                     exoninfo->rightgenomicexonborder);
   }
   gt_file_xfputc('\n', outfp);

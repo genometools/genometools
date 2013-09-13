@@ -161,8 +161,8 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
 
     if (!had_err && arguments->showseqnum != GT_UNDEF_UWORD) {
       if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
-        gt_error_set(err, "argument '"GT_LU"' to option '-showseqnum' is too "
-                     "large. The sequence index contains only '"GT_LU"' "
+        gt_error_set(err, "argument '"GT_WU"' to option '-showseqnum' is too "
+                     "large. The sequence index contains only '"GT_WU"' "
                      "sequences.",
                      arguments->showseqnum,
                      gt_bioseq_number_of_sequences(bioseq));

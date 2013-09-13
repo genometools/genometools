@@ -391,7 +391,7 @@ static void allocdistpfxidxcounts(GtBcktab *bcktab,unsigned int prefixlength,
         uint_setdistpfxidxptrs(bcktab->uintdistpfxidx,uintcounters,
                                bcktab->basepower,prefixlength);
       }
-      gt_logger_log(logger,"sizeof (distpfxidx)="GT_LU" bytes",
+      gt_logger_log(logger,"sizeof (distpfxidx)="GT_WU" bytes",
                             (GtUword) allocsize);
     }
   }
@@ -496,11 +496,11 @@ GtBcktab *gt_bcktab_new(unsigned int numofchars,
         memset(bcktab->uintcountspecialcodes,0,allocsize_countspecialcodes);
       }
     }
-    gt_logger_log(logger,"sizeof (leftborder)="GT_LU" bytes",
+    gt_logger_log(logger,"sizeof (leftborder)="GT_WU" bytes",
                 (GtUword) allocsize_bounds);
     if (withspecialsuffixes)
     {
-      gt_logger_log(logger,"sizeof (countspecialcodes)="GT_LU" bytes",
+      gt_logger_log(logger,"sizeof (countspecialcodes)="GT_WU" bytes",
                 (GtUword) allocsize_countspecialcodes);
       allocdistpfxidxcounts(bcktab,prefixlength,logger);
     }
@@ -665,7 +665,7 @@ static void pfxidxpartialsums(GtUword *count,
 #ifndef NDEBUG
     if (specialsinbucket != count[1])
     {
-      fprintf(stderr,"code " FormatGtCodetype ": sum = "GT_LU" != "GT_LU
+      fprintf(stderr,"code " FormatGtCodetype ": sum = "GT_WU" != "GT_WU
               " = count[1]\n", code,sum,count[1]);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -742,9 +742,9 @@ void gt_bcktab_show(const GtBcktab *bcktab)
     {
       value = gt_bcktab_distpfxidx_get(bcktab,prefixindex-1,code);
       sum += value;
-      printf("distpfxidx[%u]["GT_LU"]="GT_LU"\n",prefixindex,code,value);
+      printf("distpfxidx[%u]["GT_WU"]="GT_WU"\n",prefixindex,code,value);
     }
-    printf("sum "GT_LU"\n",sum);
+    printf("sum "GT_WU"\n",sum);
   }
 }
 
@@ -754,7 +754,7 @@ void gt_bcktab_leftborder_show(const GtBcktab *bcktab)
 
   for (idx=0; idx<bcktab->numofallcodes; idx++)
   {
-    printf("leftborder[" FormatGtCodetype "]="GT_LU"\n",idx,
+    printf("leftborder[" FormatGtCodetype "]="GT_WU"\n",idx,
                                     gt_bcktab_get_leftborder(bcktab,idx));
   }
 }
@@ -1024,8 +1024,8 @@ void gt_bcktab_determinemaxsize(GtBcktab *bcktab,
   GtCodetype code;
 
 #ifdef SKDEBUG
-  printf("mincode="GT_LU",maxcode="GT_LU",partwidth="GT_LU",totallength="
-         GT_LU"\n", (GtUword) mincode,(GtUword) maxcode, partwidth,totallength);
+  printf("mincode="GT_WU",maxcode="GT_WU",partwidth="GT_WU",totallength="
+         GT_WU"\n", (GtUword) mincode,(GtUword) maxcode, partwidth,totallength);
 #endif
   bcktab->maxbucketinfo.specialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.nonspecialsmaxbucketsize = 1UL;
@@ -1057,11 +1057,11 @@ void gt_bcktab_determinemaxsize(GtBcktab *bcktab,
     }
   }
   /*
-  gt_logger_log(logger,"maxbucket (specials)="GT_LU"",
+  gt_logger_log(logger,"maxbucket (specials)="GT_WU"",
               bcktab->maxbucketinfo.specialsmaxbucketsize);
-  gt_logger_log(logger,"maxbucket (nonspecials)="GT_LU"",
+  gt_logger_log(logger,"maxbucket (nonspecials)="GT_WU"",
               bcktab->maxbucketinfo.nonspecialsmaxbucketsize);
-  gt_logger_log(logger,"maxbucket (all)="GT_LU"",
+  gt_logger_log(logger,"maxbucket (all)="GT_WU"",
               bcktab->maxbucketinfo.maxbucketsize);
   */
 }

@@ -345,7 +345,7 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-    gt_logger_log(default_logger, "number of %ssuffix-prefix matches = "GT_LU"",
+    gt_logger_log(default_logger, "number of %ssuffix-prefix matches = "GT_WU"",
         arguments->elimtrans ? "irreducible " : "", total_nof_irr_spm);
     gt_logger_log(default_logger, "average %sSPM/read = %.2f",
         arguments->elimtrans ? "irreducible " : "", (float)total_nof_irr_spm /
@@ -353,7 +353,7 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
         : GT_DIV2(gt_encseq_num_of_sequences(encseq))));
     if (arguments->elimtrans)
       gt_logger_log(default_logger, "number of transitive suffix-prefix "
-          "matches = "GT_LU"", total_nof_trans_spm);
+          "matches = "GT_WU"", total_nof_trans_spm);
   }
   gt_logger_delete(default_logger);
   gt_logger_delete(verbose_logger);

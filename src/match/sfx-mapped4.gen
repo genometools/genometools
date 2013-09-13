@@ -270,8 +270,8 @@ static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
            gt_specialrangeiterator_next(sri, &range); specialfreeunit++)
       {
         gt_assert(range.end <= lastend);
-        /*printf("line %d: specialfreeunit=" GT_LU ", range " GT_LU " "
-                 GT_LU "\n",
+        /*printf("line %d: specialfreeunit=" GT_WU ", range " GT_WU " "
+                 GT_WU "\n",
                  __LINE__, specialfreeunit, range.end, lastend);*/
         PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                            &mapped4info,
@@ -290,8 +290,8 @@ static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
            specialfreeunit++)
       {
         gt_assert(range.start >= laststart);
-        /*printf("region of length " GT_LU "\n", range.start - laststart);*/
-        /*printf("line %d: range " GT_LU " " GT_LU "\n", __LINE__, laststart,
+        /*printf("region of length " GT_WU "\n", range.start - laststart);*/
+        /*printf("line %d: range " GT_WU " " GT_WU "\n", __LINE__, laststart,
                  range.start);*/
         PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                            &mapped4info,
@@ -308,7 +308,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
     gt_specialrangeiterator_delete(sri);
   }
   /*
-  printf("line %d: specialfreeunit=" GT_LU ", range " GT_LU " " GT_LU "\n",
+  printf("line %d: specialfreeunit=" GT_WU ", range " GT_WU " " GT_WU "\n",
          __LINE__,
          specialfreeunit,
          GT_ISDIRREVERSE(readmode)

@@ -187,11 +187,11 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
   edist1 = greedyunitedist(frontresource,greedyedistuseq,greedyedistvseq);
   edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);
 #ifdef SKDEBUG
-  printf("edist = "GT_LU"\n",edist1);
+  printf("edist = "GT_WU"\n",edist1);
 #endif
   if (edist1 != edist2)
   {
-    fprintf(stderr,"greedyunitedist = "GT_LU" != "GT_LU
+    fprintf(stderr,"greedyunitedist = "GT_WU" != "GT_WU
             " = gt_squarededistunit\n", edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }

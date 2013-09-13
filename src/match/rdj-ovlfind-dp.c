@@ -179,11 +179,11 @@ GT_UNUSED static void print_row_and_col(GtOvlfindDpCell *row, GtUword m,
   GtUword i, j;
 
   for (i = 0; i <= m; i++)
-    gt_log_log("col["GT_LU"]=(("GT_LU","GT_LU"),"GT_LU")\n", i, col[i].start_i,
+    gt_log_log("col["GT_WU"]=(("GT_WU","GT_WU"),"GT_WU")\n", i, col[i].start_i,
         col[i].start_j, col[i].edist);
 
   for (j = 0; j <= n; j++)
-    gt_log_log("row["GT_LU"]=(("GT_LU","GT_LU"),"GT_LU")\n", j, row[j].start_i,
+    gt_log_log("row["GT_WU"]=(("GT_WU","GT_WU"),"GT_WU")\n", j, row[j].start_i,
         row[j].start_j, row[j].edist);
 }
 

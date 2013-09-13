@@ -110,7 +110,7 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
   if (!had_err)
   {
     if (emd->version < (GtUword) GT_ENCSEQ_VERSION)    {
-      gt_error_set(err, "index \"%s%s\" is format version "GT_LU", current is "
+      gt_error_set(err, "index \"%s%s\" is format version "GT_WU", current is "
                         "%d -- please re-encode",
                         indexname, GT_ENCSEQFILESUFFIX,
                         emd->version, GT_ENCSEQ_VERSION);
@@ -122,7 +122,7 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
   {
     if (cc >= (GtUword) GT_ACCESS_TYPE_UNDEFINED)
     {
-      gt_error_set(err, "illegal type "GT_LU" in \"%s%s\"", cc,
+      gt_error_set(err, "illegal type "GT_WU" in \"%s%s\"", cc,
                    indexname, GT_ENCSEQFILESUFFIX);
       had_err = true;
     }
@@ -140,7 +140,7 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
   NEXTFREAD(alphatype);
   if (!had_err) {
     if (alphatype > 2UL) {
-      gt_error_set(err, "illegal alphabet type "GT_LU" in \"%s%s\"", alphatype,
+      gt_error_set(err, "illegal alphabet type "GT_WU" in \"%s%s\"", alphatype,
                    indexname, GT_ENCSEQFILESUFFIX);
       had_err = true;
     }

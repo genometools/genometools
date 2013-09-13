@@ -72,9 +72,9 @@ GtUword gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
 #ifndef NDEBUG
     if (cmp > 0)
     {
-      fprintf(stderr,"pos="GT_LU""
-              ": cmp "GT_LU""
-              " "GT_LU" = %d, lcpval="GT_LU"\n",
+      fprintf(stderr,"pos="GT_WU""
+              ": cmp "GT_WU""
+              " "GT_WU" = %d, lcpval="GT_WU"\n",
               lvi->relpos,
               lvi->lastsuftabentry,
               ESASUFFIXPTRGET(suftabptr,lvi->relpos),

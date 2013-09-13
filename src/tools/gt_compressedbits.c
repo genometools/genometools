@@ -180,7 +180,7 @@ static int gt_compressedbits_runner(GT_UNUSED int argc,
     fp = NULL;
 
     gt_log_log("filename: %s", gt_str_get(filename));
-    gt_log_log("size in words: "GT_LU"", arguments->size);
+    gt_log_log("size in words: "GT_WU"", arguments->size);
     cbs = gt_compressed_bitsequence_new(
                             bits, arguments->samplerate,
                             (GtUword) num_of_bits);

@@ -66,7 +66,7 @@ int gt_custom_track_example_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                              start_ypos + gt_graphics_get_text_height(graphics),
                              ((const char*) buffer));
 
-  sprintf(buffer, "Range "GT_LU" - "GT_LU"", viewrange.start, viewrange.end);
+  sprintf(buffer, "Range "GT_WU" - "GT_WU"", viewrange.start, viewrange.end);
   gt_graphics_draw_text_centered(graphics,
                            margins+((gt_graphics_get_image_width(graphics)
                              - 2*margins) /2),
