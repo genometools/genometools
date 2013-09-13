@@ -97,7 +97,7 @@ static uint64_t detexpectedaccordingtomapspec(const GtArrayGtMapspecification
 #ifdef SKDEBUG
 static void showmapspec(const GtMapspecification *mapspec)
 {
-  printf("(%s,size="GT_LU",elems="GT_LU")",
+  printf("(%s,size="GT_WU",elems="GT_WU")",
            mapspec->function,
            (GtUword) mapspec->sizeofunit,
            mapspec->numofunits);
@@ -158,7 +158,7 @@ static int assigncorrecttype(GtMapspecification *mapspec,
       ASSIGNPTR2STARTPTR(unsigned int);
       break;
     default:
-      gt_error_set(err,"no assignment specification for size "GT_LU"",
+      gt_error_set(err,"no assignment specification for size "GT_WU"",
                     (GtUword) mapspec->sizeofunit);
       had_err = -1;
   }
@@ -240,8 +240,8 @@ int  gt_mapspec_read_header(GtMapspecSetupFunc setup, void *data,
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
-      gt_error_set(err,"mapping: expected header size is "GT_LU" bytes, "
-                       "but file has "GT_LU" bytes",
+      gt_error_set(err,"mapping: expected header size is "GT_WU" bytes, "
+                       "but file has "GT_WU" bytes",
                        expectedsize,byteoffset);
       had_err = -1;
     }
@@ -288,7 +288,7 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
                                detexpectedaccordingtomapspec(&ms->mapspectable);
     if (expectedaccordingtomapspec != (uint64_t) numofbytes)
     {
-      gt_error_set(err,""GT_LU" bytes read from %s, but " Formatuint64_t
+      gt_error_set(err,""GT_WU" bytes read from %s, but " Formatuint64_t
                          " expected",
                          (GtUword) numofbytes,
                          filename,
@@ -336,8 +336,8 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
-      gt_error_set(err,"mapping: expected file size is "GT_LU" bytes, "
-                       "but file has "GT_LU" bytes",
+      gt_error_set(err,"mapping: expected file size is "GT_WU" bytes, "
+                       "but file has "GT_WU" bytes",
                        expectedsize,byteoffset);
       had_err = -1;
     }
@@ -386,7 +386,7 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
 #ifdef SKDEBUG
     printf("# %s",__func__);
     showmapspec(mapspecptr);
-    printf(" at byteoffset "GT_LU"\n",byteoffset);
+    printf(" at byteoffset "GT_WU"\n",byteoffset);
 #endif
     if (mapspecptr->numofunits > 0)
     {
@@ -435,7 +435,7 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
           WRITEACTIONWITHTYPE(unsigned int);
           break;
         default:
-           gt_error_set(err,"no map specification for size "GT_LU"",
+           gt_error_set(err,"no map specification for size "GT_WU"",
                          (GtUword) mapspecptr->sizeofunit);
            had_err = -1;
       }
@@ -459,8 +459,8 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
-      gt_error_set(err,"expected file size is "GT_LU" bytes, "
-                       "but file has "GT_LU" bytes",
+      gt_error_set(err,"expected file size is "GT_WU" bytes, "
+                       "but file has "GT_WU" bytes",
                        expectedsize,
                        byteoffset);
       had_err = -1;

@@ -215,13 +215,14 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
             }
             if (mapfile != NULL) {
               gt_error_set(err,
-                           "illegal character '%c' in line "GT_LU" of mapfile %s",
-                           cc,linecount,mapfile);
+                           "illegal character '%c' in line " GT_WU
+                           " of mapfile %s",
+                           cc, linecount,mapfile);
             } else {
               gt_error_set(err,
-                           "illegal character '%c' in line "GT_LU" of alphabet "
-                           "definition",
-                           cc,linecount);
+                           "illegal character '%c' in line " GT_WU
+                           " of alphabet definition",
+                           cc, linecount);
             }
             haserr = true;
             break;
@@ -237,12 +238,12 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
           {
             if (mapfile != NULL) {
               gt_error_set(err,"illegal character '%c' at the end of "
-                            "line "GT_LU" in mapfile %s",
-                            LINE(column+1),linecount,mapfile);
+                           "line "GT_WU" in mapfile %s",
+                           LINE(column+1),linecount,mapfile);
             } else {
               gt_error_set(err,"illegal character '%c' at the end of "
-                            "line "GT_LU" of alphabet definition",
-                            LINE(column+1),linecount);
+                           "line "GT_WU" of alphabet definition",
+                           LINE(column+1),linecount);
             }
             haserr  = true;
             break;

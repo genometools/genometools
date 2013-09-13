@@ -106,7 +106,7 @@ static bool filter_contain_range(GtFeatureNode *fn, GtRange contain_range)
   GtRange range;
   gt_assert(fn);
   range = gt_genome_node_get_range((GtGenomeNode*) fn);
-  if (contain_range.start != GT_UNDEF_ULONG &&
+  if (contain_range.start != GT_UNDEF_UWORD &&
       !gt_range_contains(&contain_range, &range)) {
     return true;
   }
@@ -118,7 +118,7 @@ static bool filter_overlap_range(GtFeatureNode *fn, GtRange overlap_range)
   GtRange feature_range;
   gt_assert(fn);
   feature_range = gt_genome_node_get_range((GtGenomeNode*) fn);
-  if (overlap_range.start != GT_UNDEF_ULONG &&
+  if (overlap_range.start != GT_UNDEF_UWORD &&
       !gt_range_overlap(&overlap_range, &feature_range))
     return true;
   return false;
@@ -227,11 +227,11 @@ static int select_visitor_feature_node(GtNodeVisitor *nv,
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
     if (fn && gt_feature_node_has_type(fn, gt_ft_gene)) {
-      if (fv->max_gene_length != GT_UNDEF_ULONG &&
+      if (fv->max_gene_length != GT_UNDEF_UWORD &&
           gt_range_length(&range) > fv->max_gene_length) {
         select_node = true;
       }
-      else if (fv->max_gene_num != GT_UNDEF_ULONG &&
+      else if (fv->max_gene_num != GT_UNDEF_UWORD &&
                fv->gene_num >= fv->max_gene_num) {
         select_node = true;
       }
@@ -243,7 +243,7 @@ static int select_visitor_feature_node(GtNodeVisitor *nv,
                gt_feature_node_get_score(fn) > fv->max_gene_score) {
         select_node = true;
       }
-      else if (fv->feature_num != GT_UNDEF_ULONG &&
+      else if (fv->feature_num != GT_UNDEF_UWORD &&
                fv->feature_num != fv->current_feature) {
         select_node = true;
       }
@@ -298,7 +298,7 @@ static int select_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
   if (!gt_str_length(select_visitor->seqid) || /* no seqid was specified */
       !gt_str_cmp(select_visitor->seqid,       /* or seqids are equal */
                gt_genome_node_get_seqid((GtGenomeNode*) rn))) {
-    if (select_visitor->contain_range.start != GT_UNDEF_ULONG) {
+    if (select_visitor->contain_range.start != GT_UNDEF_UWORD) {
       GtRange range = gt_genome_node_get_range((GtGenomeNode*) rn);
       if (gt_range_overlap(&range, &select_visitor->contain_range)) {
         /* an overlapping contain range was defined -> update range  */
@@ -392,14 +392,14 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
   if (contain_range)
     select_visitor->contain_range = *contain_range;
   else {
-    select_visitor->contain_range.start = GT_UNDEF_ULONG;
-    select_visitor->contain_range.end   = GT_UNDEF_ULONG;
+    select_visitor->contain_range.start = GT_UNDEF_UWORD;
+    select_visitor->contain_range.end   = GT_UNDEF_UWORD;
   }
   if (overlap_range)
     select_visitor->overlap_range = *overlap_range;
   else {
-    select_visitor->overlap_range.start = GT_UNDEF_ULONG;
-    select_visitor->overlap_range.end   = GT_UNDEF_ULONG;
+    select_visitor->overlap_range.start = GT_UNDEF_UWORD;
+    select_visitor->overlap_range.end   = GT_UNDEF_UWORD;
   }
   select_visitor->strand = strand;
   select_visitor->targetstrand = targetstrand;

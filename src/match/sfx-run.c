@@ -90,7 +90,7 @@ static void gt_suflcptab2genomediff(GT_UNUSED void *data,
   {
     lcpvalue = gt_lcptab_getvalue(tableoflcpvalues,bucketoffset,idx);
     suffix = gt_suffixsortspace_get(sssp,bucketoffset+posoffset,idx);
-    printf(""GT_LU" "GT_LU"\n",suffix,MIN(lcpvalue,LCPOVERFLOW));
+    printf(""GT_WU" "GT_WU"\n",suffix,MIN(lcpvalue,LCPOVERFLOW));
   }
 }
 */
@@ -733,7 +733,7 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
     GtLogger *logger = gt_logger_new(so.beverbose,
                                      GT_LOGGER_DEFLT_PREFIX, stdout);
 
-    gt_logger_log(logger,"sizeof (GtUword)="GT_LU"",
+    gt_logger_log(logger,"sizeof (GtUword)="GT_WU"",
                   (GtUword) (sizeof (GtUword) * CHAR_BIT));
     if (runsuffixerator(doesa,&so,NULL,logger,err) < 0)
     {

@@ -142,7 +142,8 @@ static void checknumberofoccurrences(const TyrDfsstate *dfsstate,
   bfcount = gt_mmsearchiterator_count(mmsi);
   if (bfcount != countocc)
   {
-    fprintf(stderr,"bfcount = "GT_LU" != "GT_LU" = countocc\n",bfcount,countocc);
+    fprintf(stderr,"bfcount = "GT_WU" != "GT_WU" = countocc\n",
+            bfcount,countocc);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_mmsearchiterator_delete(mmsi);
@@ -248,7 +249,7 @@ static void showmerdistribution(const TyrDfsstate *state)
   {
     if (state->occdistribution.spaceCountwithpositions[countocc].occcount > 0)
     {
-      printf(""GT_LU" "GT_LU"\n",countocc,
+      printf(""GT_WU" "GT_WU"\n",countocc,
                          state->occdistribution.
                                 spaceCountwithpositions[countocc].occcount);
       if (decideifocc(state,countocc))
@@ -279,18 +280,16 @@ static void showfinalstatistics(const TyrDfsstate *state,
   gt_logger_log(logger,
               "represented by the index \"%s\"",inputindex);
   gt_logger_log(logger,
-              "number of "GT_LU"-mers in the sequences not containing a "
+              "number of "GT_WU"-mers in the sequences not containing a "
               "wildcard: " Formatuint64_t,
               (GtUword) state->mersize,
               PRINTuint64_tcast(dnumofmers));
-  gt_logger_log(logger,
-              "show the distribution of the number of occurrences of "GT_LU"-mers",
-               (GtUword) state->mersize);
+  gt_logger_log(logger, "show the distribution of the number of occurrences of "
+                GT_WU "-mers", (GtUword) state->mersize);
   gt_logger_log(logger,"not containing a wildcard as rows of the form "
               "i d where");
-  gt_logger_log(logger,
-              "d is the number of events that a "GT_LU"-mer occurs exactly i times",
-              (GtUword) state->mersize);
+  gt_logger_log(logger, "d is the number of events that a "GT_WU
+                "-mer occurs exactly i times", (GtUword) state->mersize);
   showmerdistribution(state);
 }
 
@@ -569,7 +568,7 @@ static int enumeratelcpintervals(const char *inputindex,
   }
   if (state->mersize > state->totallength)
   {
-    gt_error_set(err,"mersize "GT_LU" > "GT_LU" = totallength not allowed",
+    gt_error_set(err,"mersize "GT_WU" > "GT_WU" = totallength not allowed",
                  state->mersize,
                  state->totallength);
     haserr = true;
@@ -624,11 +623,12 @@ static int enumeratelcpintervals(const char *inputindex,
     {
       if (state->countsfilefpout != NULL)
       {
-        gt_logger_log(logger,"write "GT_LU" mercounts > "GT_LU" to file \"%s%s\"",
-                    state->largecounts.nextfreeLargecount,
-                    (GtUword) MAXSMALLMERCOUNT,
-                    storeindex,
-                    COUNTSSUFFIX);
+        gt_logger_log(logger,"write "GT_WU" mercounts > "GT_WU
+                      " to file \"%s%s\"",
+                      state->largecounts.nextfreeLargecount,
+                      (GtUword) MAXSMALLMERCOUNT,
+                      storeindex,
+                      COUNTSSUFFIX);
         gt_xfwrite(state->largecounts.spaceLargecount, sizeof (Largecount),
                   (size_t) state->largecounts.nextfreeLargecount,
                   state->countsfilefpout);
@@ -636,7 +636,7 @@ static int enumeratelcpintervals(const char *inputindex,
     }
     if (!haserr)
     {
-      gt_logger_log(logger,"number of "GT_LU"-mers in index: "GT_LU"",
+      gt_logger_log(logger,"number of "GT_WU"-mers in index: "GT_WU"",
                   mersize,
                   state->countoutputmers);
       gt_logger_log(logger,"index size: %.2f megabytes\n",

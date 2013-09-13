@@ -294,11 +294,11 @@ static int gt_readjoiner_assembly_error_correction(GtStrgraph *strgraph,
   {
     retval = gt_strgraph_redpbubbles(strgraph, 0, 1UL, false);
     retval_sum += retval;
-    gt_logger_log(verbose_logger, "removed p-bubble edges [round %u] = "GT_LU"",
-        i + 1, retval);
+    gt_logger_log(verbose_logger, "removed p-bubble edges [round %u] = "GT_WU,
+                  i + 1, retval);
   }
-  gt_logger_log(verbose_logger, "removed p-bubble edges [%u rounds] = "GT_LU"", i,
-      retval_sum);
+  gt_logger_log(verbose_logger, "removed p-bubble edges [%u rounds] = "GT_WU,
+                i, retval_sum);
   gt_logger_log(verbose_logger, "remove dead-end paths");
 
   retval_sum = 0;
@@ -309,10 +309,10 @@ static int gt_readjoiner_assembly_error_correction(GtStrgraph *strgraph,
         false);
     retval_sum += retval;
     gt_logger_log(verbose_logger, "removed dead-end path edges [round %u] = "
-        ""GT_LU"", i + 1, retval);
+       GT_WU, i + 1, retval);
   }
   gt_logger_log(verbose_logger,
-      "removed dead-end path edges [%u rounds] = "GT_LU"", i, retval_sum);
+      "removed dead-end path edges [%u rounds] = " GT_WU, i, retval_sum);
   return 0;
 }
 
@@ -510,16 +510,16 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     gt_assert(reads != NULL);
     eqlen = gt_encseq_accesstype_get(reads) == GT_ACCESS_TYPE_EQUALLENGTH;
     nreads = gt_encseq_num_of_sequences(reads);
-    gt_logger_log(default_logger, "number of reads in filtered readset = "GT_LU"",
-        nreads);
+    gt_logger_log(default_logger, "number of reads in filtered readset = "
+                  GT_WU, nreads);
     tlen = gt_encseq_total_length(reads) - nreads + 1;
-    gt_logger_log(verbose_logger, "total length of filtered readset = "GT_LU"",
+    gt_logger_log(verbose_logger, "total length of filtered readset = " GT_WU,
         tlen);
 
     if (eqlen)
     {
       rlen = gt_encseq_seqlength(reads, 0);
-      gt_logger_log(verbose_logger, "read length = "GT_LU"", rlen);
+      gt_logger_log(verbose_logger, "read length = " GT_WU, rlen);
       gt_encseq_delete(reads);
       reads = NULL;
     }

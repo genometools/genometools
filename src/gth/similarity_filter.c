@@ -61,7 +61,7 @@ static void show_matrix_calculation_status(GthShowVerbose showverbose,
   GT_UNUSED int rval;
 
   if (introncutout) {
-    rval =  snprintf(icdeltastring, ICDELTASTRINGLENGTH, ", icdelta="GT_LU"",
+    rval =  snprintf(icdeltastring, ICDELTASTRINGLENGTH, ", icdelta=" GT_WU ,
                      icdelta);
     /* buffer icdeltastring[ICDELTASTRINGLENGTH] is large enough */
     gt_assert(rval <  ICDELTASTRINGLENGTH);
@@ -70,19 +70,20 @@ static void show_matrix_calculation_status(GthShowVerbose showverbose,
   if (num_of_gen_files == 1 && num_of_ref_files == 1) {
     rval = snprintf(buf, SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE,
                     "d=%c, compute spliced alignment, genseq=%c, "
-                    "chain="GT_LU"/"GT_LU", refseq=%c%s", SHOWSTRAND(directmatches),
-                    SHOWSTRAND(gen_strand_forward),  chainctr + 1,
-                    num_of_chains, SHOWSTRAND(ref_strand_forward),
+                    "chain=" GT_WU "/" GT_WU ", refseq=%c%s",
+                    SHOWSTRAND(directmatches), SHOWSTRAND(gen_strand_forward),
+                    chainctr + 1, num_of_chains, SHOWSTRAND(ref_strand_forward),
                     introncutout ? icdeltastring : "");
   }
   else {
     rval = snprintf(buf, SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE,
-                    "gf="GT_LU"/"GT_LU", d=%c, rf="GT_LU"/"GT_LU", compute spliced alignment, "
-                    "gs=%c, chain="GT_LU"/"GT_LU", rs=%c%s", gen_file_num + 1,
-                    num_of_gen_files, SHOWSTRAND(directmatches),
-                    ref_file_num + 1, num_of_ref_files,
-                    SHOWSTRAND(gen_strand_forward), chainctr + 1,
-                    num_of_chains, SHOWSTRAND(ref_strand_forward),
+                    "gf=" GT_WU "/" GT_WU ", d=%c, rf=" GT_WU "/" GT_WU
+                    ", compute spliced alignment, gs=%c, chain=" GT_WU "/"
+                    GT_WU ", rs=%c%s",
+                    gen_file_num + 1, num_of_gen_files,
+                    SHOWSTRAND(directmatches), ref_file_num + 1,
+                    num_of_ref_files, SHOWSTRAND(gen_strand_forward),
+                    chainctr + 1, num_of_chains, SHOWSTRAND(ref_strand_forward),
                     introncutout ? icdeltastring : "");
   }
   /* buf[SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE] is large enough */
@@ -641,7 +642,7 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
 {
   const unsigned char *ref_seq_tran, *ref_seq_orig, *ref_seq_tran_rc = NULL,
                       *ref_seq_orig_rc = NULL;
-  GtUword chainctr, gen_offset = GT_UNDEF_ULONG, gen_total_length,
+  GtUword chainctr, gen_offset = GT_UNDEF_UWORD, gen_total_length,
                 ref_total_length;
   GtFile *outfp = call_info->out->outfp;
   GtRange gen_seq_bounds, gen_seq_bounds_rc;
@@ -721,12 +722,12 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
       GtStr *ref_id = gt_str_new();
       gth_input_save_ref_id(input, ref_id, chain->ref_file_num,
                             chain->ref_seq_num);
-      gt_warning("protein sequence '%s' (#"GT_LU" in file %s) does not end with a "
-                 "stop amino acid ('%c'). If it is not a protein fragment you "
-                 "should add a stop amino acid to improve the prediction. "
-                 "For example with `gt seqtransform -addstopaminos` (see "
-                 "http://genometools.org for details).", gt_str_get(ref_id),
-                 chain->ref_seq_num,
+      gt_warning("protein sequence '%s' (#" GT_WU " in file %s) does not end "
+                 "with a stop amino acid ('%c'). If it is not a protein "
+                 "fragment you should add a stop amino acid to improve the "
+                 "prediction. For example with `gt seqtransform "
+                 "-addstopaminos` (see http://genometools.org for details).",
+                 gt_str_get(ref_id), chain->ref_seq_num,
                  gth_input_get_reference_filename(input, chain->ref_file_num),
                  GT_STOP_AMINO);
       match_info->stop_amino_acid_warning = true;
@@ -810,15 +811,15 @@ static void show_compute_matches_status(bool direct, GthShowVerbose showverbose,
   else {
     if (direct) {
       rval = snprintf(buf, SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE,
-                      "compute direct matches for genomic file (gf) "GT_LU"/"GT_LU" "
-                      "and reference file (rf) "GT_LU"/"GT_LU"",
+                      "compute direct matches for genomic file (gf) " GT_WU "/"
+                      GT_WU " and reference file (rf) " GT_WU "/" GT_WU,
                       gen_file_num + 1, num_of_gen_files,
                       ref_file_num + 1, num_of_ref_files);
     }
     else {
       rval = snprintf(buf, SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE,
-                      "compute palindromic matches for genomic file (gf) "
-                      ""GT_LU"/"GT_LU" and reference file (rf) "GT_LU"/"GT_LU"",
+                      "compute palindromic matches for genomic file (gf) " GT_WU
+                      "/" GT_WU " and reference file (rf) " GT_WU "/" GT_WU,
                       gen_file_num + 1,  num_of_gen_files,
                       ref_file_num + 1,  num_of_ref_files);
     }

@@ -182,7 +182,7 @@ static void show_duplicate(const char *fingerprint, GtUword occurrences,
 {
   FingerprintInfo *info = data;
   if (occurrences > 1) {
-    printf("%s\t"GT_LU"\n", fingerprint, occurrences);
+    printf("%s\t"GT_WU"\n", fingerprint, occurrences);
     info->duplicates += occurrences - 1;
   }
   info->num_of_sequences += occurrences;

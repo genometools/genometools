@@ -71,46 +71,46 @@ GthBacktracePath* gth_backtrace_path_new(GtUword gen_dp_start,
   bp->gen_dp_length = gen_dp_length;
   bp->ref_dp_start = ref_dp_start;
   bp->ref_dp_length = ref_dp_length;
-  bp->dummy_index = GT_UNDEF_ULONG;
+  bp->dummy_index = GT_UNDEF_UWORD;
   return bp;
 }
 
 GtUword gth_backtrace_path_gen_dp_start(const GthBacktracePath *bp)
 {
-  gt_assert(bp && bp->gen_dp_start != GT_UNDEF_ULONG);
+  gt_assert(bp && bp->gen_dp_start != GT_UNDEF_UWORD);
   return bp->gen_dp_start;
 }
 
 void gth_backtrace_path_set_gen_dp_start(GthBacktracePath *bp,
                                          GtUword gen_dp_start)
 {
-  gt_assert(bp && gen_dp_start != GT_UNDEF_ULONG);
+  gt_assert(bp && gen_dp_start != GT_UNDEF_UWORD);
   bp->gen_dp_start = gen_dp_start;
 }
 
 GtUword gth_backtrace_path_gen_dp_length(const GthBacktracePath *bp)
 {
-  gt_assert(bp && bp->gen_dp_length != GT_UNDEF_ULONG);
+  gt_assert(bp && bp->gen_dp_length != GT_UNDEF_UWORD);
   return bp->gen_dp_length;
 }
 
 void gth_backtrace_path_set_gen_dp_length(GthBacktracePath *bp,
                                           GtUword gen_dp_length)
 {
-  gt_assert(bp && gen_dp_length != GT_UNDEF_ULONG);
+  gt_assert(bp && gen_dp_length != GT_UNDEF_UWORD);
   bp->gen_dp_length = gen_dp_length;
 }
 
 GtUword gth_backtrace_path_ref_dp_length(const GthBacktracePath *bp)
 {
-  gt_assert(bp && bp->ref_dp_length != GT_UNDEF_LONG);
+  gt_assert(bp && bp->ref_dp_length != GT_UNDEF_WORD);
   return bp->ref_dp_length;
 }
 
 void gth_backtrace_path_set_ref_dp_length(GthBacktracePath *bp,
                                           GtUword ref_dp_length)
 {
-  gt_assert(bp && ref_dp_length != GT_UNDEF_ULONG);
+  gt_assert(bp && ref_dp_length != GT_UNDEF_UWORD);
   bp->ref_dp_length = ref_dp_length;
 }
 
@@ -708,7 +708,7 @@ void gth_backtrace_path_add_dummy(GthBacktracePath *bp)
   gt_assert(bp);
   gt_assert(bp->alphatype == PROTEIN_ALPHA);
   gt_assert(bp->max_identical_length == MAXIDENTICALLENGTH_PROTEIN);
-  gt_assert(bp->dummy_index == GT_UNDEF_ULONG);
+  gt_assert(bp->dummy_index == GT_UNDEF_UWORD);
   gt_array_add(bp->editoperations, dummy_eop);
   bp->dummy_index = gt_array_size(bp->editoperations) - 1;
 }
@@ -719,19 +719,19 @@ void gth_backtrace_path_set_dummy(GthBacktracePath *bp, bool match)
   gt_assert(bp);
   gt_assert(bp->alphatype == PROTEIN_ALPHA);
   gt_assert(bp->max_identical_length == MAXIDENTICALLENGTH_PROTEIN);
-  gt_assert(bp->dummy_index != GT_UNDEF_ULONG);
+  gt_assert(bp->dummy_index != GT_UNDEF_UWORD);
   eopptr = gt_array_get(bp->editoperations, bp->dummy_index);
   if (match)
     *eopptr = 1; /* match */
   else
     *eopptr = MISMATCHEOP;
-  bp->dummy_index = GT_UNDEF_ULONG; /* reset dummy */
+  bp->dummy_index = GT_UNDEF_UWORD; /* reset dummy */
 }
 
 bool gth_backtrace_path_contain_dummy(const GthBacktracePath *bp)
 {
   gt_assert(bp);
-  if (bp->dummy_index == GT_UNDEF_ULONG)
+  if (bp->dummy_index == GT_UNDEF_UWORD)
     return false;
   return true;
 }
@@ -743,7 +743,7 @@ bool gth_backtrace_path_last_is_intron(const GthBacktracePath *bp)
   gt_assert(bp);
 
   /* check if a dummy has just been inserted */
-  if (bp->dummy_index != GT_UNDEF_ULONG &&
+  if (bp->dummy_index != GT_UNDEF_UWORD &&
       gt_array_size(bp->editoperations) - 1 == bp->dummy_index) {
     return false;
   }
@@ -885,10 +885,10 @@ void gth_backtrace_path_show_complete(const GthBacktracePath *bp, bool xmlout,
 void gth_backtrace_path_cutoff_start(GthBacktracePath *bp)
 {
   gt_assert(bp);
-  gt_assert(bp->gen_dp_start != GT_UNDEF_ULONG);
-  gt_assert(bp->gen_dp_length != GT_UNDEF_ULONG);
-  gt_assert(bp->ref_dp_start != GT_UNDEF_ULONG);
-  gt_assert(bp->ref_dp_length != GT_UNDEF_ULONG);
+  gt_assert(bp->gen_dp_start != GT_UNDEF_UWORD);
+  gt_assert(bp->gen_dp_length != GT_UNDEF_UWORD);
+  gt_assert(bp->ref_dp_start != GT_UNDEF_UWORD);
+  gt_assert(bp->ref_dp_length != GT_UNDEF_UWORD);
   if (bp->cutoffs.start.genomiccutoff) {
     bp->gen_dp_start += bp->cutoffs.start.genomiccutoff;
     gt_assert(bp->gen_dp_length >= bp->cutoffs.start.genomiccutoff);
@@ -912,8 +912,8 @@ void gth_backtrace_path_cutoff_start(GthBacktracePath *bp)
 void gth_backtrace_path_cutoff_end(GthBacktracePath *bp)
 {
   gt_assert(bp);
-  gt_assert(bp->gen_dp_length != GT_UNDEF_ULONG);
-  gt_assert(bp->ref_dp_length != GT_UNDEF_ULONG);
+  gt_assert(bp->gen_dp_length != GT_UNDEF_UWORD);
+  gt_assert(bp->ref_dp_length != GT_UNDEF_UWORD);
   if (bp->cutoffs.end.genomiccutoff) {
     gt_assert(bp->gen_dp_length >= bp->cutoffs.end.genomiccutoff);
     bp->gen_dp_length -= bp->cutoffs.end.genomiccutoff;
@@ -1097,7 +1097,7 @@ bool gth_backtrace_path_is_valid(const GthBacktracePath *bp)
   bool is_valid;
   gt_assert(bp);
   gt_assert(bp->alphatype == DNA_ALPHA || bp->alphatype == PROTEIN_ALPHA);
-  gt_assert(bp->ref_dp_length != GT_UNDEF_ULONG);
+  gt_assert(bp->ref_dp_length != GT_UNDEF_UWORD);
   is_valid =
     gt_eops_equal_referencelength((Editoperation*)
                                gt_array_get_space(bp->editoperations)
@@ -1118,7 +1118,7 @@ void gth_backtrace_path_reset(GthBacktracePath *bp)
   gt_assert(bp);
   gt_array_set_size(bp->editoperations, 0);
   bp->alphatype = UNDEF_ALPHA;
-  bp->dummy_index = GT_UNDEF_ULONG;
+  bp->dummy_index = GT_UNDEF_UWORD;
 }
 
 void gth_backtrace_path_delete(GthBacktracePath *bp)

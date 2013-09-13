@@ -61,7 +61,7 @@ GtArrayGtIndexwithcode *gt_firstcodes_binsearchcache_new(
                    * binsearchcache->allocatedGtIndexwithcode;
       gt_assert(binsearchcache->width > 0);
       binsearchcache->spaceGtIndexwithcode = gt_malloc(allocbytes);
-      gt_log_log("binsearchcache->depth=%u => "GT_LU" bytes",
+      gt_log_log("binsearchcache->depth=%u => "GT_WU" bytes",
                  binsearchcache->depth,
                  (GtUword) allocbytes);
       GT_FCI_ADDWORKSPACE(fcsl,"binsearchcache",allocbytes);

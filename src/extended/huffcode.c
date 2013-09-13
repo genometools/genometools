@@ -57,7 +57,7 @@ struct GtHuffman {
   GtHuffmanTree *root_huffman_tree;   /* stores the final huffmantree */
   GtRBTree      *rbt_root;            /* red black tree */
   GtHuffmanCode *code_tab;            /* table for encoding */
-  GtUword  num_of_coded_symbols,/* number of nodes in red black tree, */
+  GtUword  num_of_coded_symbols, /* number of nodes in red black tree, */
                                       /* e.g. symbols with frequency > 0*/
                  num_of_symbols;      /* symbols with frequency >= 0 */
 };
@@ -167,7 +167,7 @@ static void initialise_rbt(GtHuffman *huffman,
       huffman->num_of_coded_symbols++;
     }
   }
-  gt_log_log("added "GT_LU" of "GT_LU" symbols as nodes",
+  gt_log_log("added " GT_WU " of " GT_WU " symbols as nodes",
              huffman->num_of_coded_symbols,
              huffman->num_of_symbols);
 }
@@ -260,12 +260,12 @@ static int print_codes(GtUword symbol,
                        GT_UNUSED void *unused)
 {
 #ifndef S_SPLINT_S
-  printf("control symbol "GT_LU", freq "GT_LLU", codelength %u: ",
+  printf("control symbol " GT_WU ", freq "GT_LLU", codelength %u: ",
          symbol,
          freq,
          code_len);
 #else
-  printf("control symbol "GT_LU", freq "GT_LU", codelength %u: ",
+  printf("control symbol " GT_WU ", freq " GT_WU ", codelength %u: ",
          symbol,
          (GtUword) freq,
          code_len);
@@ -473,8 +473,8 @@ GtHuffmanDecoder *gt_huffman_decoder_new_from_memory(
     gt_error_set(err, "error calling mem_func");
     return NULL;
   }
-  gt_log_log(""GT_LU", "GT_LU", "GT_LU"",huff_decoder->length,huff_decoder->cur_bit,
-             huff_decoder->pad_length);
+  gt_log_log(GT_WU ", " GT_WU ", " GT_WU, huff_decoder->length,
+             huff_decoder->cur_bit, huff_decoder->pad_length);
   gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
   gt_assert(huff_decoder->mem_func_stat == 1);
   return huff_decoder;
@@ -499,8 +499,8 @@ int gt_huffman_decoder_get_new_mem_chunk(GtHuffmanDecoder *huff_decoder,
     return huff_decoder->mem_func_stat;
   }
   huff_decoder->cur_bitseq = 0;
-  gt_log_log(""GT_LU", "GT_LU", "GT_LU"",huff_decoder->length,huff_decoder->cur_bit,
-             huff_decoder->pad_length);
+  gt_log_log(GT_WU ", " GT_WU ", " GT_WU, huff_decoder->length,
+             huff_decoder->cur_bit, huff_decoder->pad_length);
   gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
   return had_err;
 }
@@ -557,8 +557,8 @@ int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
                                  &huff_decoder->cur_bit,
                                  &huff_decoder->pad_length,
                                  huff_decoder->info);
-        gt_log_log(""GT_LU", "GT_LU", "GT_LU"",huff_decoder->length,huff_decoder->cur_bit,
-                   huff_decoder->pad_length);
+        gt_log_log(GT_WU ", " GT_WU ", " GT_WU, huff_decoder->length,
+                   huff_decoder->cur_bit, huff_decoder->pad_length);
         if (huff_decoder->mem_func_stat == -1) {
           gt_error_set(err, "error calling mem_func");
           had_err = huff_decoder->mem_func_stat;
@@ -663,7 +663,7 @@ static int test_bitwise(GtError *err)
 {
   int had_err = 0,
       stat;
-  GtUword i,j,
+  GtUword i, j,
                 symbol;
   unsigned length1 = 0,
            length2 = 0;
@@ -672,7 +672,7 @@ static int test_bitwise(GtError *err)
   GtBitsequence bitseq;
   GtUint64 distr[6] = {45ULL, 16ULL, 13ULL, 12ULL, 9ULL, 5ULL};
 
-  huffman = gt_huffman_new(&distr,unit_test_distr_func, 6UL);
+  huffman = gt_huffman_new(&distr, unit_test_distr_func, 6UL);
 
   hbwd = gt_huffman_bitwise_decoder_new(huffman, err);
   gt_ensure(hbwd);
@@ -878,7 +878,7 @@ int test_mem(GtError *err)
     huffdec = gt_huffman_decoder_new(huff,
                                      gt_array_get_space(codes),
                                      gt_array_size(codes),
-                                     0,/*offset*/
+                                     0, /*offset*/
                                      bits_remain);
     gt_ensure(huffdec);
   }

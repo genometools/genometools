@@ -62,6 +62,15 @@ perform unit tests and exit (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
+<strong>-seed</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+set seed for random number generator manually
+0 generates a seed from current time and process id (default: 6427173)
+</p>
+</dd>
+<dt class="hdlist1">
 <strong>-help</strong> 
 </dt>
 <dd>
@@ -440,7 +449,7 @@ for some program parts if implemented.</p></div>
 <div class="paragraph"><p>Set the environment variable <tt>GT_SEED</tt> to an integer value to supply a seed for
 the random number generator. Can be overridden by the <tt>-seed</tt> option.</p></div>
 <div class="paragraph"><p>Combinations are possible. Running the <tt>gt</tt> binary with <tt>GT_ENV_OPTIONS=-help</tt>
-shows all possible &#8220;environment options&#8221;)</p></div>
+shows all possible "environment options".</p></div>
 </div>
 </div>
 <div class="sect1">

@@ -145,7 +145,7 @@ static void showdistseqlen(GtUword key, GtUint64 value,
 
   gt_assert(value <= (GtUint64) ULONG_MAX);
   distvalue = (GtUword) value;
-  printf(""GT_LU"--"GT_LU" "GT_LU"\n",
+  printf(""GT_WU"--"GT_WU" "GT_WU"\n",
          (*bucketsize) * key,
          (*bucketsize) * (key+1) - 1,
          distvalue);
@@ -182,7 +182,7 @@ static void showastretches(GtUword key, GtUint64 value,
     astretchinfo->maxvalue = key;
   }
   /*@ignore@*/
-  printf(""GT_LU" "GT_LLU"\n", key,value);
+  printf(""GT_WU" "GT_LLU"\n", key,value);
   /*@end@*/
 }
 
@@ -246,7 +246,7 @@ static void processastretches(const GtDiscDistri *distastretch,
   for (len=astretchinfo.minkey; len<=astretchinfo.maxvalue; len++)
   {
     /*@ignore@*/
-    printf("a^{"GT_LU"} occurs "GT_LLU" times\n",
+    printf("a^{"GT_WU"} occurs "GT_LLU" times\n",
            len,astretchinfo.mmercount[len]);
     /*@end@*/
   }
@@ -364,8 +364,8 @@ static int gt_seqstat_runner(int argc, const char **argv, int parsed_args,
              PRINTuint64_tcast(numofseq),(double) sumlength/numofseq);
     printf("# total length " Formatuint64_t "\n",
              PRINTuint64_tcast(sumlength));
-    printf("# minimum length "GT_LU"\n",minlength);
-    printf("# maximum length "GT_LU"\n",maxlength);
+    printf("# minimum length "GT_WU"\n",minlength);
+    printf("# maximum length "GT_WU"\n",maxlength);
     if (arguments->binarydistlen)
     {
       FILE *distlenoutfile;

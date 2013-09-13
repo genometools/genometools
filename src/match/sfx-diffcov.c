@@ -495,7 +495,7 @@ static GtUword dc_derivespecialcodesonthefly(GtDifferencecover *dcov,
                                            countderived].code == code);
           }
           /*
-          printf("%u "GT_LU"\n",prefixindex,
+          printf("%u "GT_WU"\n",prefixindex,
                             (GtUword)
                             (specialcontext.position-prefixindex));
           */
@@ -566,7 +566,7 @@ static void dc_validate_samplepositons(const GtDifferencecover *dcov)
       if (GT_ISIBITSET(sampleidxused,idx))
       {
         fprintf(stderr,
-                "sample index "GT_LU" for pos "GT_LU" already used before\n",
+                "sample index "GT_WU" for pos "GT_WU" already used before\n",
                 idx,(GtUword) pos);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
@@ -687,7 +687,7 @@ static void dc_initinversesuftabspecials(GtDifferencecover *dcov)
     while (gt_specialrangeiterator_next(sri,&range))
     {
       /*
-      printf("specialrange "GT_LU" "GT_LU"\n",(GtUword) range.leftpos,
+      printf("specialrange "GT_WU" "GT_WU"\n",(GtUword) range.leftpos,
                                       (GtUword) range.rightpos);
       */
       specialidx = dc_insertfullspecialrangesample(dcov,
@@ -781,9 +781,9 @@ static void dc_showintervalsizes(GtUword count,
                                  GtLogger *logger)
 {
   gt_logger_log(logger,
-              "level "GT_LU""
-              ": (intervals="GT_LU",total="GT_LU","
-              "avg=%.2f,%.2f%% of all,maxwidth="GT_LU")",
+              "level "GT_WU""
+              ": (intervals="GT_WU",total="GT_WU","
+              "avg=%.2f,%.2f%% of all,maxwidth="GT_WU")",
               depth,
               count,
               totalwidth,
@@ -826,7 +826,7 @@ static void dc_processunsortedrange(GtDifferencecover *dcov,
     {
       dcov->firstwithnewdepth.defined = true;
     }
-    gt_logger_log(dcov->logger,"enter new level "GT_LU"",depth);
+    gt_logger_log(dcov->logger,"enter new level "GT_WU"",depth);
     dcov->firstwithnewdepth.blisbl = blisbl;
     dcov->firstwithnewdepth.width = width;
     dcov->firstwithnewdepth.depth = depth;
@@ -891,7 +891,7 @@ static void dc_sortsuffixesonthislevel(GtDifferencecover *dcov,
   }
   gt_assert(dcov->allocateditvinfo >= width);
   /*
-  printf("new interval of width "GT_LU"\n",width);
+  printf("new interval of width "GT_WU"\n",width);
   */
   for (idx=0; idx<width; idx++)
   {
@@ -970,7 +970,7 @@ static void dc_bcktab2firstlevelintervals(GtDifferencecover *dcov)
   GtBucketspecification bucketspec;
   const GtCodetype mincode = 0;
 
-  gt_logger_log(dcov->logger,"maxbucketsize="GT_LU"",dcov->allocateditvinfo);
+  gt_logger_log(dcov->logger,"maxbucketsize="GT_WU"",dcov->allocateditvinfo);
   rightchar = (unsigned int) (mincode % dcov->numofchars);
   for (code = 0; code <= dcov->maxcode; code++)
   {
@@ -1424,7 +1424,7 @@ static void dc_sortremainingsamples(GtDifferencecover *dcov)
     dcov->currentqueuesize--;
     dc_sortsuffixesonthislevel(dcov,thispair.blisbl,thispair.width);
   }
-  gt_logger_log(dcov->logger,"maxqueuesize="GT_LU"",dcov->maxqueuesize);
+  gt_logger_log(dcov->logger,"maxqueuesize="GT_WU"",dcov->maxqueuesize);
   gt_free(dcov->itvinfo);
   dcov->itvinfo = NULL;
   gt_inl_queue_delete(dcov->rangestobesorted);
@@ -1455,11 +1455,11 @@ static void dc_init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
   {
     defaultsfxstrategy(sfxstrategy,bitwise_cmp_ok);
   }
-  gt_logger_log(logger,"samplesort.maxinsertionsort="GT_LU"",
+  gt_logger_log(logger,"samplesort.maxinsertionsort="GT_WU"",
                 sfxstrategy->maxinsertionsort);
-  gt_logger_log(logger,"samplesort.maxbltriesort="GT_LU"",
+  gt_logger_log(logger,"samplesort.maxbltriesort="GT_WU"",
                 sfxstrategy->maxbltriesort);
-  gt_logger_log(logger,"samplesort.maxcountingsort="GT_LU"",
+  gt_logger_log(logger,"samplesort.maxcountingsort="GT_WU"",
                 sfxstrategy->maxcountingsort);
 }
 
@@ -1584,7 +1584,7 @@ static void dc_verify_inversesuftab(const GtDifferencecover *dcov)
     GtUword idx2 = dc_inversesuftab_get(dcov,dc_suffixptrget(dcov,idx));
     if (idx != idx2)
     {
-      fprintf(stderr,"idx = "GT_LU" != "GT_LU" = idx2\n",idx,idx2);
+      fprintf(stderr,"idx = "GT_WU" != "GT_WU" = idx2\n",idx,idx2);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
@@ -1683,11 +1683,11 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   gt_assert(dcov->samplesize <= dcov->samplesize_upperbound);
   (void) gt_bcktab_leftborderpartialsums(NULL,NULL,dcov->bcktab);
   gt_logger_log(dcov->logger,
-              ""GT_LU" positions are sampled (%.2f%%), pl=%u",
+              ""GT_WU" positions are sampled (%.2f%%), pl=%u",
               dcov->samplesize,
               100.0 * (double) dcov->samplesize/(dcov->totallength+1),
               dcov->prefixlength);
-  gt_logger_log(dcov->logger,"specials="GT_LU", fullspecials="GT_LU"",
+  gt_logger_log(dcov->logger,"specials="GT_WU", fullspecials="GT_WU"",
                 specials,fullspecials);
   if (withcheck && codelist.nextfreeCodeatposition > 1UL)
   {
@@ -1942,11 +1942,11 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
   }
   dcov->effectivesamplesize = dcov->samplesize - fullspecials;
   gt_logger_log(dcov->logger,
-              ""GT_LU" positions are sampled (%.2f) pl=%u",
+              ""GT_WU" positions are sampled (%.2f) pl=%u",
               dcov->samplesize,
               100.0 * (double) dcov->samplesize/(dcov->totallength+1),
               dcov->prefixlength);
-  gt_logger_log(dcov->logger,"fullspecials="GT_LU"",fullspecials);
+  gt_logger_log(dcov->logger,"fullspecials="GT_WU"",fullspecials);
   dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
                                               dcov->totallength,
                                               sfxstrategy.suftabuint,
@@ -2032,7 +2032,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
       GtUword idx2 = dc_inversesuftab_get(dcov,dc_suffixptrget(dcov,idx));
       if (idx != idx2)
       {
-        fprintf(stderr,"idx = "GT_LU" != "GT_LU" = idx2\n",idx,idx2);
+        fprintf(stderr,"idx = "GT_WU" != "GT_WU" = idx2\n",idx,idx2);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
     }
@@ -2104,7 +2104,7 @@ void gt_differencecover_check(const GtEncseq *encseq,GtReadmode readmode)
   unsigned int vparam;
   bool withcheck = true;
 
-  printf("sizeof (differencecovertab)="GT_LU"\n",
+  printf("sizeof (differencecovertab)="GT_WU"\n",
           (GtUword) sizeof (differencecovertab));
   for (logmod = startlogmod;
        logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);

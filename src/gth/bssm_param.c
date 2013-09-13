@@ -542,7 +542,7 @@ GthBSSMParam* gth_bssm_param_extract(GtUword speciesnum, GtError *err)
     }
   }
   else {
-    gt_error_set(err, "illegal speciesnum (speciesnum == "GT_LU")", speciesnum);
+    gt_error_set(err, "illegal speciesnum (speciesnum == "GT_WU")", speciesnum);
     gth_bssm_param_delete(bssm_param);
     return NULL;
   }
@@ -615,7 +615,7 @@ static void bssm_model_echo(const GthBSSMModel *bssm_model, FILE *outfp)
   gt_assert(bssm_model_is_seven_class(bssm_model));
 
   for (i = 0; i < HYPOTHESIS7; i++) {
-    fprintf(outfp,"\n\nHypothesis: "GT_LU"", i);
+    fprintf(outfp,"\n\nHypothesis: "GT_WU"", i);
     for (j = 0; j < STRINGSIZE; j++) {
       fprintf(outfp,"\n");
       for (k = 0; k < ALPHSIZE; k++) {
@@ -873,7 +873,8 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
       GtUchar encoded_seq[2];
       /* check length */
       if (gt_bioseq_get_sequence_length(bioseq, j) != STRINGSIZE) {
-        gt_error_set(err, "sequence "GT_LU" in file \"%s\" does not have length %u",
+        gt_error_set(err,
+                     "sequence "GT_WU" in file \"%s\" does not have length %u",
                      j, gt_str_get(file2proc), STRINGSIZE);
         had_err = -1;
       }
@@ -885,7 +886,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
           case GT_DONOR_TYPE:
             if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'G') ||
                 encoded_seq[1] != gt_alphabet_encode(alphabet, 'T')) {
-              gt_error_set(err, "sequence "GT_LU" in file \"%s\" is not a GT "
+              gt_error_set(err, "sequence "GT_WU" in file \"%s\" is not a GT "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
@@ -893,7 +894,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
           case GC_DONOR_TYPE:
             if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'G') ||
                 encoded_seq[1] != gt_alphabet_encode(alphabet, 'C')) {
-              gt_error_set(err, "sequence "GT_LU" in file \"%s\" is not a GC "
+              gt_error_set(err, "sequence "GT_WU" in file \"%s\" is not a GC "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }
@@ -901,7 +902,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
           case AG_ACCEPTOR_TYPE:
             if (encoded_seq[0] != gt_alphabet_encode(alphabet, 'A') ||
                 encoded_seq[1] != gt_alphabet_encode(alphabet, 'G')) {
-              gt_error_set(err, "sequence "GT_LU" in file \"%s\" is not a AG "
+              gt_error_set(err, "sequence "GT_WU" in file \"%s\" is not a AG "
                                 "sequence", j, gt_str_get(file2proc));
               had_err = -1;
             }

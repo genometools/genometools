@@ -164,7 +164,7 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
       PRINTuint64_tcast(asc->numofseq));
   if (asc->genome_length > 0)
   {
-    gt_logger_log(logger, "genome length:         "GT_LU"",
+    gt_logger_log(logger, "genome length:         "GT_WU"",
         PRINTuint64_tcast(asc->genome_length));
   }
   gt_logger_log(logger, "total contigs length:  "Formatuint64_t"",
@@ -177,8 +177,8 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   gt_logger_log(logger, "mean contig size:      %.2f",
       (double) asc->sumlength / asc->numofseq);
   gt_logger_log(logger, "median contig size:    "GT_LLU"", nstats.median);
-  gt_logger_log(logger, "longest contig:        "GT_LU"", asc->maxlength);
-  gt_logger_log(logger, "shortest contig:       "GT_LU"", asc->minlength);
+  gt_logger_log(logger, "longest contig:        "GT_WU"", asc->maxlength);
+  gt_logger_log(logger, "shortest contig:       "GT_WU"", asc->minlength);
   gt_logger_log(logger, "contigs > 500 nt:      "GT_LLU" (%.2f %%)",
       nstats.larger_than_limit[0], (double) nstats.larger_than_limit[0] * 100
       / asc->numofseq);
@@ -198,9 +198,9 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   {
     if (nstats.nvalue[i] > 0)
     {
-      gt_logger_log(logger, "N%s                  "GT_LU"", nstats.name[i],
+      gt_logger_log(logger, "N%s                  "GT_WU"", nstats.name[i],
           nstats.nvalue[i]);
-      gt_logger_log(logger, "L%s                  "GT_LU"", nstats.name[i],
+      gt_logger_log(logger, "L%s                  "GT_WU"", nstats.name[i],
           nstats.lvalue[i]);
     }
     else

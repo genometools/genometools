@@ -437,9 +437,9 @@ gt_compressed_bitsequence_new(GtBitsequence *bitseq,
   cbs->from_file = false;
   gt_log_log("new cbs:\n"
              "blzise: %u\n"
-             "offsize: "GT_LU"\n"
+             "offsize: "GT_WU"\n"
              "cbits: %u\n"
-             "csize: "GT_LU"\n"
+             "csize: "GT_WU"\n"
              "lastblen: %u\n",
              cbs->blocksize,
              cbs->c_offsets_size,
@@ -954,15 +954,15 @@ int gt_compressed_bitsequence_write(GtCompressedBitsequence *cbs,
   }
   if (!had_err) {
     gt_log_log("blocksize: %u\n"
-           "class_offsets_size: "GT_LU"\n"
+           "class_offsets_size: "GT_WU"\n"
            "class_bits: %u\n"
-           "classes_size: "GT_LU"\n"
+           "classes_size: "GT_WU"\n"
            "last_block_len: %u\n"
-           "num_of_bits: "GT_LU"\n"
-           "num_of_blocks: "GT_LU"\n"
-           "num_of_superblocks: "GT_LU"\n"
+           "num_of_bits: "GT_WU"\n"
+           "num_of_blocks: "GT_WU"\n"
+           "num_of_superblocks: "GT_WU"\n"
            "superblocksize: %u\n"
-           "size: "GT_LU"\n",
+           "size: "GT_WU"\n",
            cbs->blocksize,
            cbs->c_offsets_size,
            cbs->class_bits,
@@ -1013,15 +1013,15 @@ gt_compressed_bitsequence_new_from_file(const char *filename,
     cbs->mmapped = NULL;
     if (!had_err) {
       gt_log_log("blocksize: %u\n"
-             "class_offsets_size: "GT_LU"\n"
+             "class_offsets_size: "GT_WU"\n"
              "class_bits: %u\n"
-             "classes_size: "GT_LU"\n"
+             "classes_size: "GT_WU"\n"
              "last_block_len: %u\n"
-             "num_of_bits: "GT_LU"\n"
-             "num_of_blocks: "GT_LU"\n"
-             "num_of_superblocks: "GT_LU"\n"
+             "num_of_bits: "GT_WU"\n"
+             "num_of_blocks: "GT_WU"\n"
+             "num_of_superblocks: "GT_WU"\n"
              "superblocksize: %u\n"
-             "size: "GT_LU"\n",
+             "size: "GT_WU"\n",
              cbs->blocksize,
              cbs->c_offsets_size,
              cbs->class_bits,
@@ -1035,7 +1035,7 @@ gt_compressed_bitsequence_new_from_file(const char *filename,
     }
     if (!had_err) {
       expectedsize = (GtUword) gt_compressed_bitsequence_file_size(cbs);
-      gt_log_log("new expected: "GT_LU"\n", expectedsize);
+      gt_log_log("new expected: "GT_WU"\n", expectedsize);
       had_err =
         gt_mapspec_read(
                        gt_compressed_bitsequence_data_setup_mapspec,
@@ -1044,15 +1044,15 @@ gt_compressed_bitsequence_new_from_file(const char *filename,
     }
     if (!had_err) {
       gt_log_log("blocksize: %u\n"
-             "class_offsets_size: "GT_LU"\n"
+             "class_offsets_size: "GT_WU"\n"
              "class_bits: %u\n"
-             "classes_size: "GT_LU"\n"
+             "classes_size: "GT_WU"\n"
              "last_block_len: %u\n"
-             "num_of_bits: "GT_LU"\n"
-             "num_of_blocks: "GT_LU"\n"
-             "num_of_superblocks: "GT_LU"\n"
+             "num_of_bits: "GT_WU"\n"
+             "num_of_blocks: "GT_WU"\n"
+             "num_of_superblocks: "GT_WU"\n"
              "superblocksize: %u\n"
-             "size: "GT_LU"\n",
+             "size: "GT_WU"\n",
              cbs->blocksize,
              cbs->c_offsets_size,
              cbs->class_bits,

@@ -206,7 +206,7 @@ gt_initCompositionList(struct compList *newList, unsigned blockSize,
                                alphabetSize, newList->bitsPerSymbol))
         gt_initCompositionListErrRet();
 #if defined(EIS_DEBUG) && !defined(NDEBUG)
-      gt_log_log(""GT_LU"",
+      gt_log_log(""GT_WU"",
               (GtUword)newList->permutations[cmpIdx].numPermutations);
 #endif
 #ifndef NDEBUG
@@ -225,7 +225,7 @@ gt_initCompositionList(struct compList *newList, unsigned blockSize,
     /* verify that the last composition is indeed the lexically maximally */
     gt_assert(composition[0] == blockSize);
 #if defined(EIS_DEBUG) && !defined(NDEBUG)
-    gt_log_log("permSum="GT_LU", alphabetSize="GT_LU", blockSize=%d, "
+    gt_log_log("permSum="GT_WU", alphabetSize="GT_WU", blockSize=%d, "
             "pow(alphabetSize, blockSize)=%f",
             (GtUword)permSum, (GtUword)alphabetSize, blockSize,
             gt_power_for_small_exponents(alphabetSize, blockSize));
@@ -427,10 +427,10 @@ printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize)
 {
   unsigned i;
   if (blockSize)
-    fprintf(fp, ""GT_LU"", (GtUword)permutation[0]);
+    fprintf(fp, ""GT_WU"", (GtUword)permutation[0]);
   for (i = 1; i < blockSize; ++i)
   {
-    fprintf(fp, ""GT_LU"", (GtUword)permutation[i]);
+    fprintf(fp, ""GT_WU"", (GtUword)permutation[i]);
   }
   fputs("\n", fp);
 }

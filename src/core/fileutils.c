@@ -265,7 +265,7 @@ void gt_xfile_cmp(const char *file1,const char *file2)
     cc2 = fgetc(fp2);
     if (cc1 != cc2)
     {
-      fprintf(stderr,"files %s and %s differ in byte "GT_LU": %d != %d\n",
+      fprintf(stderr,"files %s and %s differ in byte "GT_WU": %d != %d\n",
                       file1,file2,(GtUword) offset,cc1,cc2);
       exit(EXIT_FAILURE);
     }

@@ -121,6 +121,6 @@ GtWord gt_bitoutstream_pos(const GtBitOutStream *bitstream)
 void gt_bitoutstream_delete(GtBitOutStream *bitstream)
 {
   if (bitstream != NULL)
-    gt_log_log("written "GT_LU" bits", bitstream->written_bits);
+    gt_log_log("written "GT_WU" bits", bitstream->written_bits);
   gt_free(bitstream);
 }

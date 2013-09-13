@@ -31,9 +31,9 @@ void gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
   GtUword i;
   GtRange orf;
   gt_assert(orf_processor && framenum <= 2 && frame);
-  orf.start = GT_UNDEF_ULONG;
+  orf.start = GT_UNDEF_UWORD;
   for (i = 0; i < framelen; i++) {
-    if (orf.start == GT_UNDEF_ULONG) {
+    if (orf.start == GT_UNDEF_UWORD) {
       if (start_codon) {
         if (start_codons ? start_codons[i] == GT_START_AMINO
                          : frame[i] == GT_START_AMINO)
@@ -54,12 +54,12 @@ void gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
       if (frame[i] == GT_STOP_AMINO) {
         orf.end = framepos ? i : i * GT_CODON_LENGTH + framenum + 2;
         orf_processor(data, &orf, framenum, frame, true);
-        orf.start = GT_UNDEF_ULONG;
+        orf.start = GT_UNDEF_UWORD;
       }
     }
   }
   if (!final_stop_codon) {
-    if (orf.start != GT_UNDEF_ULONG) {
+    if (orf.start != GT_UNDEF_UWORD) {
       orf.end = framepos ? framelen - 1
                          : (framelen - 1) * GT_CODON_LENGTH + framenum + 2;
       orf_processor(data, &orf, framenum, frame, false);

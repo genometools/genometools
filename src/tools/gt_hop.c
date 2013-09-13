@@ -246,7 +246,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
 
   /* -clenmax */
   option = gt_option_new_uword("clenmax", "maximal correction length\n"
-      "default: unlimited", &arguments->clenmax, GT_UNDEF_ULONG);
+      "default: unlimited", &arguments->clenmax, GT_UNDEF_UWORD);
   gt_option_hide_default(option);
   gt_option_is_extended_option(option);
   gt_option_imply(option, expert_option);
@@ -394,17 +394,17 @@ static int gt_hop_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_assert(arguments);
   v_logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   gt_logger_log(v_logger, "Correction parameters:");
-  gt_logger_log(v_logger, "hmin = "GT_LU"", arguments->hmin);
-  gt_logger_log(v_logger, "read-hmin = "GT_LU"", arguments->read_hmin);
+  gt_logger_log(v_logger, "hmin = "GT_WU"", arguments->hmin);
+  gt_logger_log(v_logger, "read-hmin = "GT_WU"", arguments->read_hmin);
   gt_logger_log(v_logger, "altmax = %.2f", arguments->altmax);
   gt_logger_log(v_logger, "cogmin = %.2f", arguments->cogmin);
-  gt_logger_log(v_logger, "mapqmin = "GT_LU"", arguments->mapqmin);
-  gt_logger_log(v_logger, "qmax = "GT_LU"", arguments->qmax);
-  gt_logger_log(v_logger, "covmin = "GT_LU"", arguments->covmin);
+  gt_logger_log(v_logger, "mapqmin = "GT_WU"", arguments->mapqmin);
+  gt_logger_log(v_logger, "qmax = "GT_WU"", arguments->qmax);
+  gt_logger_log(v_logger, "covmin = "GT_WU"", arguments->covmin);
   if (arguments->clenmax == ULONG_MAX)
     gt_logger_log(v_logger, "clenmax = unlimited");
   else
-    gt_logger_log(v_logger, "clenmax = "GT_LU"", arguments->clenmax);
+    gt_logger_log(v_logger, "clenmax = "GT_WU"", arguments->clenmax);
   gt_logger_log(v_logger, "allow-multiple = %s", arguments->allow_multiple
       ? "yes" : "no");
   if (gt_str_length(arguments->annotation) > 0)

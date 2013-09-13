@@ -315,7 +315,7 @@ static void swproducealignment(GtAlignment *alignment,
                                              scorevalues->gapextend);
     if (evalscore < 0 || (GtUword) evalscore < scorethreshold)
     {
-      fprintf(stderr,"unexpected eval score "GT_LD"\n",evalscore);
+      fprintf(stderr,"unexpected eval score "GT_WD"\n",evalscore);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }

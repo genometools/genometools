@@ -39,6 +39,7 @@
 
 #include "core/fptr_api.h"
 #include "core/minmax.h"
+#include "core/types_api.h"
 
 static inline void *
 med3(void *a, void *b, void *c, GtCompareWithData cmp, void *data);
@@ -48,7 +49,7 @@ static inline void       swapfunc(char *, char *, int, int);
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
  */
 #define swapcode(TYPE, parmi, parmj, n) do {            \
-    long i = (n) / sizeof (TYPE);                       \
+    GtWord i = (n) / sizeof (TYPE);                     \
     TYPE *pi = (TYPE *) (parmi);                        \
     TYPE *pj = (TYPE *) (parmj);                        \
     do {                                                \
@@ -58,14 +59,15 @@ static inline void       swapfunc(char *, char *, int, int);
     } while (--i > 0);                                  \
   } while (0)
 
-#define SWAPINIT(a, es) swaptype = ((char *)a - (char *)0) % sizeof (long) || \
-      es % sizeof (long) ? 2 : es == sizeof (long)? 0 : 1;
+#define SWAPINIT(a, es) \
+  swaptype = ((char *)a - (char *)0) % sizeof (GtWord) || \
+  es % sizeof (GtWord) ? 2 : es == sizeof (GtWord)? 0 : 1;
 
 static inline void
 swapfunc(char *a, char *b, int n, int swaptype)
 {
   if (swaptype <= 1)
-    swapcode(long, a, b, n);
+    swapcode(GtWord, a, b, n);
   else
     swapcode(char, a, b, n);
 }
@@ -73,9 +75,9 @@ swapfunc(char *a, char *b, int n, int swaptype)
 #define swap(a, b)                                  \
   do {                                              \
     if (swaptype == 0) {                            \
-      long t = *(long *)(a);                        \
-      *(long *)(a) = *(long *)(b);                  \
-      *(long *)(b) = t;                             \
+      GtWord t = *(GtWord *)(a);                        \
+      *(GtWord *)(a) = *(GtWord *)(b);                  \
+      *(GtWord *)(b) = t;                             \
     } else                                          \
       swapfunc(a, b, es, swaptype);                 \
   } while (0)

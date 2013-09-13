@@ -109,7 +109,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   maxlow_option = gt_option_new_uword("maxlow",
       "maximal number of low-quality positions in a read\n"
       "default: infinite",
-      &arguments->maxlow, GT_UNDEF_ULONG);
+      &arguments->maxlow, GT_UNDEF_UWORD);
   gt_option_hide_default(maxlow_option);
   gt_option_is_extended_option(maxlow_option);
   gt_option_parser_add_option(op, maxlow_option);
@@ -283,7 +283,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
   if (arguments->phred64)
     gt_reads2twobit_use_phred64(r2t);
 
-  if (arguments->maxlow != GT_UNDEF_ULONG)
+  if (arguments->maxlow != GT_UNDEF_UWORD)
     gt_reads2twobit_set_quality_filter(r2t, arguments->maxlow,
         (char)arguments->lowqual);
 
@@ -307,24 +307,24 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     tlen_input = tlen_valid + tlen_invalid;
 
     gt_logger_log(default_logger,
-                  "number of reads in complete readset = "GT_LU"",
+                  "number of reads in complete readset = "GT_WU"",
                   nofreads_input);
 
     varlen = (gt_reads2twobit_seqlen_eqlen(r2t) == 0);
     if (varlen)
-      gt_logger_log(verbose_logger, "read length = variable ["GT_LU".."GT_LU"]",
+      gt_logger_log(verbose_logger, "read length = variable ["GT_WU".."GT_WU"]",
           gt_reads2twobit_seqlen_min(r2t), gt_reads2twobit_seqlen_max(r2t));
     else
-      gt_logger_log(verbose_logger, "read length = "GT_LU"",
+      gt_logger_log(verbose_logger, "read length = "GT_WU"",
           gt_reads2twobit_seqlen_eqlen(r2t) - 1UL);
 
-    gt_logger_log(verbose_logger, "total length of complete readset = "GT_LU"",
+    gt_logger_log(verbose_logger, "total length of complete readset = "GT_WU"",
         tlen_input);
-    gt_logger_log(verbose_logger, "low-quality reads = "GT_LU" "
+    gt_logger_log(verbose_logger, "low-quality reads = "GT_WU" "
         "[%.2f %% of input]", nofreads_invalid, (float)nofreads_invalid * 100 /
         (float)nofreads_input);
     if (!arguments->verbose)
-      gt_logger_log(default_logger, "low-quality reads = "GT_LU"",
+      gt_logger_log(default_logger, "low-quality reads = "GT_WU"",
           nofreads_invalid);
     nofreads_output = nofreads_valid;
     if (arguments->encodeonly)
@@ -345,7 +345,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
             gt_str_get(arguments->readset), varlen ? "(esq|ssp)" : "esq");
       }
       gt_logger_log(default_logger,
-                    "number of reads in output readset = "GT_LU"",
+                    "number of reads in output readset = "GT_WU"",
                     nofreads_output);
     }
     else
@@ -360,11 +360,11 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
       nofreads_output -= nofreads_contained;
 
       gt_logger_log(verbose_logger,
-                    "contained reads = "GT_LU" [%.2f %% of input]",
+                    "contained reads = "GT_WU" [%.2f %% of input]",
                     nofreads_contained, (float)nofreads_contained * 100 /
                     (float)nofreads_input);
       if (!arguments->verbose)
-        gt_logger_log(default_logger, "contained reads = "GT_LU"",
+        gt_logger_log(default_logger, "contained reads = "GT_WU"",
             nofreads_contained);
 
       if (gt_reads2twobit_has_paired(r2t))
@@ -374,16 +374,16 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
         nofreads_output -= nofreads_matesofc;
 
         gt_logger_log(verbose_logger,
-            "mates of contained reads = "GT_LU" [%.2f %% of input]",
+            "mates of contained reads = "GT_WU" [%.2f %% of input]",
             nofreads_matesofc, (float)nofreads_matesofc * 100 /
             (float)nofreads_input);
         if (!arguments->verbose)
-          gt_logger_log(default_logger, "mates of contained reads = "GT_LU"",
+          gt_logger_log(default_logger, "mates of contained reads = "GT_WU"",
               nofreads_matesofc);
       }
 
       gt_logger_log(default_logger,
-                    "number of reads in filtered readset = "GT_LU"",
+                    "number of reads in filtered readset = "GT_WU"",
                     nofreads_output);
 
       if (!had_err && arguments->cntlist)

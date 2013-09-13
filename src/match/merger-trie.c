@@ -157,7 +157,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
       }
     } else
     {
-      printf(" d="GT_LU",i=" Formatuint64_t "\n",
+      printf(" d="GT_WU",i=" Formatuint64_t "\n",
             current->depth,
             PRINTuint64_tcast(current->suffixinfo.ident));
       showmergertrie2(trierep,characters,level+1,current);
@@ -198,7 +198,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
 #ifndef NDEBUG
     if (ISIBITSET(leafused,start))
     {
-      fprintf(stderr,"leaf "GT_LU" already found\n",start);
+      fprintf(stderr,"leaf "GT_WU" already found\n",start);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
 #endif
@@ -213,7 +213,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
 #ifndef NDEBUG
       if (father->depth >= node->depth)
       {
-        fprintf(stderr,"father.depth = "GT_LU" >= "GT_LU" = node.depth\n",
+        fprintf(stderr,"father.depth = "GT_WU" >= "GT_WU" = node.depth\n",
                        father->depth,
                        node->depth);
         exit(GT_EXIT_PROGRAMMING_ERROR);

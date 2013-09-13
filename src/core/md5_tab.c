@@ -216,7 +216,7 @@ GtUword gt_md5_tab_map(GtMD5Tab *md5_tab, const char *md5)
   value = gt_hashmap_get(md5_tab->md5map, md5);
   if (value)
     return ((GtUword) value) - 1;
-  return GT_UNDEF_ULONG;
+  return GT_UNDEF_UWORD;
 }
 
 GtUword gt_md5_tab_size(const GtMD5Tab *md5_tab)

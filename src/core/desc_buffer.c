@@ -169,7 +169,7 @@ void gt_desc_buffer_delete(GtDescBuffer *db)
 static int queueprinter(void **elem, GT_UNUSED void *info,
                         GT_UNUSED GtError *err)
 {
-  printf(""GT_LU" ", *(GtUword*) elem);
+  printf(""GT_WU" ", *(GtUword*) elem);
   return 0;
 }
 

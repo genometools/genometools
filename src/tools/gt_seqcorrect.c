@@ -203,7 +203,7 @@ static GtOptionParser* gt_seqcorrect_option_parser_new(void *tool_arguments)
   maxlow_option = gt_option_new_uword("maxlow",
       "maximal number of low-quality positions in a read\n"
       "default: infinite",
-      &arguments->maxlow, GT_UNDEF_ULONG);
+      &arguments->maxlow, GT_UNDEF_UWORD);
   gt_option_hide_default(maxlow_option);
   gt_option_is_extended_option(maxlow_option);
   gt_option_parser_add_option(op, maxlow_option);
@@ -405,7 +405,7 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
   if (arguments->phred64)
     gt_reads2twobit_use_phred64(r2t);
 
-  if (arguments->maxlow != GT_UNDEF_ULONG)
+  if (arguments->maxlow != GT_UNDEF_UWORD)
     gt_reads2twobit_set_quality_filter(r2t, arguments->maxlow,
         (char)arguments->lowqual);
 
@@ -436,23 +436,23 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
       gt_reads2twobit_nofseqs(r2t);
 
     gt_logger_log(default_logger, "number of reads in original read set "
-        "= "GT_LU"", nofreads_input);
+        "= "GT_WU"", nofreads_input);
 
     varlen = (gt_reads2twobit_seqlen_eqlen(r2t) == 0);
     if (varlen)
-      gt_logger_log(verbose_logger, "read length = variable ["GT_LU".."GT_LU"]",
+      gt_logger_log(verbose_logger, "read length = variable ["GT_WU".."GT_WU"]",
           gt_reads2twobit_seqlen_min(r2t), gt_reads2twobit_seqlen_max(r2t));
     else
-      gt_logger_log(verbose_logger, "read length = "GT_LU"",
+      gt_logger_log(verbose_logger, "read length = "GT_WU"",
           gt_reads2twobit_seqlen_eqlen(r2t) - 1UL);
 
-    gt_logger_log(verbose_logger, "total length of original read set = "GT_LU"",
+    gt_logger_log(verbose_logger, "total length of original read set = "GT_WU"",
         tlen_valid + gt_reads2twobit_invalid_seqs_totallength(r2t));
-    gt_logger_log(verbose_logger, "low-quality reads = "GT_LU" "
+    gt_logger_log(verbose_logger, "low-quality reads = "GT_WU" "
         "[%.2f %% of input]", nofreads_invalid, (float)nofreads_invalid *
         100 / (float)nofreads_input);
     if (!arguments->verbose)
-      gt_logger_log(default_logger, "low-quality reads = "GT_LU"",
+      gt_logger_log(default_logger, "low-quality reads = "GT_WU"",
           nofreads_invalid);
     if (!haserr)
     {
@@ -461,9 +461,9 @@ static bool gt_seqcorrect_encode(GtSeqcorrectArguments *arguments,
       if (!haserr)
       {
         gt_logger_log(verbose_logger,
-            "number of reads in output read set = "GT_LU"", nofreads_valid);
+            "number of reads in output read set = "GT_WU"", nofreads_valid);
         gt_logger_log(verbose_logger,
-            "total length of output read set = "GT_LU"", tlen_valid);
+            "total length of output read set = "GT_WU"", tlen_valid);
         gt_logger_log(verbose_logger, "read set saved as GtEncseq: %s.%s",
             gt_str_get(arguments->indexname), varlen ?
             "(esq|ssp)" : "esq");
@@ -558,13 +558,13 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
     cumulative_nofcorrections += nofcorrections;
 
     gt_logger_log(verbose_logger, "[iteration %u] "
-        "total number of k-mers: "GT_LU"", iteration, nofkmers);
+        "total number of k-mers: "GT_WU"", iteration, nofkmers);
     gt_logger_log(verbose_logger, "[iteration %u] "
-        "number of different k-mers: "GT_LU"", iteration, nofkmeritvs);
+        "number of different k-mers: "GT_WU"", iteration, nofkmeritvs);
     gt_logger_log(verbose_logger, "[iteration %u] "
-        "number of different k-1-mers: "GT_LU"", iteration, nofkmergroups);
+        "number of different k-1-mers: "GT_WU"", iteration, nofkmergroups);
     gt_logger_log(verbose_logger, "[iteration %u] "
-        "number of kmer corrections: "GT_LU"", iteration, nofcorrections);
+        "number of kmer corrections: "GT_WU"", iteration, nofcorrections);
 
     if (!haserr) {
       gt_logger_log(verbose_logger, "[iteration %u] apply corrections...",
@@ -575,7 +575,7 @@ static bool gt_seqcorrect_correct(GtSeqcorrectArguments *arguments,
       }
     }
   }
-  gt_logger_log(verbose_logger, "total corrections: "GT_LU"",
+  gt_logger_log(verbose_logger, "total corrections: "GT_WU"",
       cumulative_nofcorrections);
   gt_free(data_array);
   return haserr;
@@ -663,7 +663,7 @@ static bool gt_seqcorrect_find_seldom(GtSeqcorrectArguments *arguments,
   if (!haserr)
   {
     GtStr *filename = gt_str_clone(arguments->encseqinput);
-    gt_logger_log(verbose_logger, "total seldom k-mers: "GT_LU"",
+    gt_logger_log(verbose_logger, "total seldom k-mers: "GT_WU"",
                   nofseldomkmers);
     gt_str_append_cstr(filename, GT_SEQCORRECT_SELDOMREADS_FILESUFFIX);
     if (gt_cntlist_show(seldom_reads[0], nofreads, gt_str_get(filename),

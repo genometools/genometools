@@ -141,7 +141,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
                                                 "specify minimum length for "
                                                 "each TIR",
                                                 &arguments->min_TIR_length,
-                                                27UL, 1UL, GT_UNDEF_ULONG);
+                                                27UL, 1UL, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionminlentir);
 
   /* -maxlentir */
@@ -149,7 +149,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
                                                 "specify maximum length for "
                                                 "each TIR",
                                                 &arguments->max_TIR_length,
-                                                1000UL, 1UL, GT_UNDEF_ULONG);
+                                                1000UL, 1UL, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmaxlentir);
 
   /* -mindisttir */
@@ -157,7 +157,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
                                                  "specify minimum distance of "
                                                  "TIRs",
                                                  &arguments->min_TIR_distance,
-                                                 100UL, 1UL, GT_UNDEF_ULONG);
+                                                 100UL, 1UL, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmindisttir);
 
   /* -maxdisttir */
@@ -165,7 +165,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
                                                  "specify maximum distance of "
                                                  "TIRs",
                                                  &arguments->max_TIR_distance,
-                                                 10000UL, 1UL, GT_UNDEF_ULONG);
+                                                 10000UL, 1UL, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmaxdisttir);
 
   optionmat = gt_option_new_int_min("mat",

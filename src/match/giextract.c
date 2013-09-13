@@ -133,7 +133,7 @@ static GtUword remdupsfastakeyqueries(Fastakeyquery *fastakeyqueries,
     {
       if (verbose)
       {
-        printf("# removed "GT_LU" duplicate queries\n",
+        printf("# removed "GT_WU" duplicate queries\n",
                 numofqueries - newnumofqueries);
       }
       for (storeptr = fastakeyqueries + newnumofqueries;
@@ -184,7 +184,7 @@ static int extractkeyfromcurrentline(Fastakeyquery *fastakeyptr,
   {
     if (idx != (size_t) keysize)
     {
-      gt_error_set(err,"key \"%*.*s\" is not of size "GT_LU"",(int) idx,
+      gt_error_set(err,"key \"%*.*s\" is not of size "GT_WU"",(int) idx,
                    (int) idx,lineptr,keysize);
       haserr = true;
     }
@@ -195,13 +195,14 @@ static int extractkeyfromcurrentline(Fastakeyquery *fastakeyptr,
     fastakeyptr->fastakey[idx] = '\0';
     fastakeyptr->frompos = 1UL;
     fastakeyptr->topos = 0;
-    if (sscanf(lineptr+idx,""GT_LD" "GT_LD"\n",&readlongfrompos,&readlongtopos) == 2)
+    if (sscanf(lineptr+idx, GT_WD " " GT_WD "\n",
+               &readlongfrompos,&readlongtopos) == 2)
     {
-      CHECKPOSITIVE(readlongfrompos,""GT_LD"","second");
+      CHECKPOSITIVE(readlongfrompos,""GT_WD"","second");
       if (!haserr)
       {
         fastakeyptr->frompos = (GtUword) readlongfrompos;
-        CHECKPOSITIVE(readlongtopos,""GT_LD"","third");
+        CHECKPOSITIVE(readlongtopos,""GT_WD"","third");
       }
       if (!haserr)
       {
@@ -216,7 +217,7 @@ static int extractkeyfromcurrentline(Fastakeyquery *fastakeyptr,
     {
       gt_error_set(err, "file \"%s\", line " Formatuint64_t
                         "illegal format: second value "
-                        ""GT_LU" is larger than third value "GT_LU"",
+                        GT_WU " is larger than third value " GT_WU,
                         gt_str_get(fileofkeystoextract),
                         PRINTuint64_tcast(linenum+1),
                         fastakeyptr->frompos,
@@ -286,14 +287,14 @@ static Fastakeyquery *readfileofkeystoextract(bool verbose,
         comparefastakeys);
   if (verbose)
   {
-    printf("# "GT_LU" fastakey-queries successfully parsed and sorted\n",
+    printf("# "GT_WU" fastakey-queries successfully parsed and sorted\n",
             *numofqueries);
   }
   *numofqueries = remdupsfastakeyqueries(fastakeyqueries,*numofqueries,verbose);
 #ifdef SKDEBUG
   for (i=0; i<*numofqueries; i++)
   {
-    printf(""GT_LU" %s\n",i,fastakeyqueries[i].fastakey);
+    printf(""GT_WU" %s\n",i,fastakeyqueries[i].fastakey);
   }
 #endif
   return fastakeyqueries;
@@ -352,13 +353,13 @@ static void outputnonmarked(const Fastakeyquery *fastakeyqueries,
         printf(" complete\n");
       } else
       {
-        printf(" "GT_LU" "GT_LU"\n",fastakeyqueries[idx].frompos,
+        printf(" "GT_WU" "GT_WU"\n",fastakeyqueries[idx].frompos,
                             fastakeyqueries[idx].topos);
       }
       countmissing++;
     }
   }
-  printf("# number of unsatified fastakey-queries: "GT_LU"\n",countmissing);
+  printf("# number of unsatified fastakey-queries: "GT_WU"\n",countmissing);
 }
 
 static const char *desc2key(GtUword *keylen,const char *desc,
@@ -406,7 +407,7 @@ static int giextract_encodedseq2fasta(FILE *fpout,
   gt_xfputc('>',fpout);
   if (fastakeyquery != NULL && !COMPLETE(fastakeyquery))
   {
-    printf("%s "GT_LU" "GT_LU" ",fastakeyquery->fastakey,
+    printf("%s "GT_WU" "GT_WU" ",fastakeyquery->fastakey,
                          fastakeyquery->frompos,
                          fastakeyquery->topos);
   }
@@ -508,7 +509,7 @@ int gt_extractkeysfromdesfile(const char *indexname,
     {
       if (keylen > (GtUword) CHAR_MAX)
       {
-        gt_error_set(err,"key \"%*.*s\" of length "GT_LU" not allowed; "
+        gt_error_set(err,"key \"%*.*s\" of length "GT_WU" not allowed; "
                          "no key must be larger than %d",
                           (int) keylen,(int) keylen,keyptr,keylen,CHAR_MAX);
         haserr = true;
@@ -525,7 +526,7 @@ int gt_extractkeysfromdesfile(const char *indexname,
         GtEncseqLoader *el;
         if (constantkeylen > (GtUword) MAXFIXEDKEYSIZE)
         {
-          gt_error_set(err,"key \"%*.*s\" of length "GT_LU" not allowed; "
+          gt_error_set(err,"key \"%*.*s\" of length "GT_WU" not allowed; "
                            "no key must be larger than %d",
                             (int) keylen,(int) keylen,keyptr,keylen,
                             MAXFIXEDKEYSIZE);
@@ -550,9 +551,9 @@ int gt_extractkeysfromdesfile(const char *indexname,
     {
       if (constantkeylen != keylen)
       {
-        gt_error_set(err,"key \"%*.*s\" of length "GT_LU": all keys must be of "
+        gt_error_set(err,"key \"%*.*s\" of length "GT_WU": all keys must be of "
                          "the same length which for all previously seen "
-                         "headers is "GT_LU"",
+                         "headers is "GT_WU"",
                          (int) keylen,(int) keylen,keyptr,keylen,
                          constantkeylen);
         haserr = true;
@@ -567,7 +568,7 @@ int gt_extractkeysfromdesfile(const char *indexname,
         haserr = true;
         break;
         /*
-        printf("previous key \"%s\" (no "GT_LU") is lexicographically larger "
+        printf("previous key \"%s\" (no "GT_WU") is lexicographically larger "
                "than current key \"%*.*s\"\n",
                previouskey,linenum,(int) keylen,(int) keylen,keyptr);
         incorrectorder++;
@@ -592,10 +593,10 @@ int gt_extractkeysfromdesfile(const char *indexname,
   }
   if (!haserr)
   {
-    gt_logger_log(logger,"number of keys of length "GT_LU" = "GT_LU"",
+    gt_logger_log(logger,"number of keys of length "GT_WU" = "GT_WU"",
                 constantkeylen,linenum);
     /*
-    gt_logger_log(logger,"number of incorrectly ordered keys = "GT_LU"",
+    gt_logger_log(logger,"number of incorrectly ordered keys = "GT_WU"",
                 incorrectorder);
     */
   }
@@ -731,7 +732,7 @@ static int itersearchoverallkeys(const GtEncseq *encseq,
   }
   if (!haserr && countmissing > 0)
   {
-    printf("# number of unsatified fastakey-queries: "GT_LU"\n",countmissing);
+    printf("# number of unsatified fastakey-queries: "GT_WU"\n",countmissing);
   }
   gt_str_delete(currentline);
   gt_fa_fclose(fp);
@@ -930,7 +931,7 @@ int gt_extractkeysfromfastafile(bool verbose,
           } else
           {
             (void) snprintf(headerbufferspace,headerbuffersize,
-                            "%*.*s "GT_LU" "GT_LU" %s",
+                            "%*.*s "GT_WU" "GT_WU" %s",
                             (int) keylen,(int) keylen,keyspace,
                             fastakeyqueries[keyposition].frompos,
                             fastakeyqueries[keyposition].topos,
@@ -949,7 +950,7 @@ int gt_extractkeysfromfastafile(bool verbose,
         }
       }
 #ifdef SKDEBUG
-      printf("%s 1 "GT_LU"\n",keyspace, len);
+      printf("%s 1 "GT_WU"\n",keyspace, len);
 #endif
     }
   }

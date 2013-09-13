@@ -34,7 +34,7 @@ plainseq[position];
       }
 #undef SAINSHOWSTATE
 #ifdef SAINSHOWSTATE
-      printf("Sstar.suftab[%lu]=%lu\n",fillptr[nextcc],position+1);
+      printf("Sstar.suftab[" GT_WU "]=" GT_WU "\n",fillptr[nextcc],position+1);
 #endif
     }
     nextisStype = currentisStype;
@@ -100,7 +100,7 @@ plainseq[(GtUword) position];
           *suftabptr = 0;
 #ifdef SAINSHOWSTATE
           gt_assert(bucketptr != NULL);
-          printf("L-induce: suftab[%lu]=%ld\n",
+          printf("L-induce: suftab[" GT_WU "]=" GT_WD "\n",
                   (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
         }
@@ -152,7 +152,7 @@ plainseq[(GtUword) position];
           *suftabptr = 0;
 #ifdef SAINSHOWSTATE
           gt_assert(bucketptr != NULL);
-          printf("L-induce: suftab[%lu]=%ld\n",
+          printf("L-induce: suftab[" GT_WU "]=" GT_WD "\n",
                   (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
         }
@@ -222,7 +222,7 @@ plainseq[(GtUword) position];
           gt_assert(bucketptr != NULL && bucketptr - 1 < suftabptr);
           *(--bucketptr) = (t & 1UL) ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-          printf("S-induce: suftab[%lu]=%ld\n",
+          printf("S-induce: suftab[" GT_WU "]=" GT_WD "\n",
                   (GtUword) (bucketptr - suftab),*bucketptr);
 #endif
         }
@@ -271,7 +271,7 @@ plainseq[(GtUword) position];
         *(--bucketptr) = (leftcontextcc > currentcc)
                           ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-        printf("S-induce: suftab[%lu]=%ld\n",
+        printf("S-induce: suftab[" GT_WU "]=" GT_WD "\n",
                (GtUword) (bucketptr - suftab),*bucketptr);
 #endif
       }
@@ -312,7 +312,7 @@ plainseq[(GtUword) (position-1)])
                         ? ~position : position;
 #ifdef SAINSHOWSTATE
         gt_assert(bucketptr != NULL);
-        printf("L-induce: suftab[%lu]=%ld\n",
+        printf("L-induce: suftab[" GT_WU "]=" GT_WD "\n",
                (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
       }
@@ -365,7 +365,7 @@ plainseq[(GtUword) (position-1)])
                          ? ~position : position;
 #ifdef SAINSHOWSTATE
         gt_assert(bucketptr != NULL);
-        printf("S-induce: suftab[%lu]=%ld\n",
+        printf("S-induce: suftab[" GT_WU "]=" GT_WD "\n",
                 (GtUword) (bucketptr-suftab),*bucketptr);
 #endif
       }
@@ -473,7 +473,7 @@ sainseq->readmode))
       }
 #undef SAINSHOWSTATE
 #ifdef SAINSHOWSTATE
-      printf("Sstar.suftab[%lu]=%lu\n",fillptr[nextcc],position+1);
+      printf("Sstar.suftab[" GT_WU "]=" GT_WU "\n",fillptr[nextcc],position+1);
 #endif
     }
     nextisStype = currentisStype;
@@ -546,7 +546,7 @@ sainseq->readmode))
           *suftabptr = 0;
 #ifdef SAINSHOWSTATE
           gt_assert(bucketptr != NULL);
-          printf("L-induce: suftab[%lu]=%ld\n",
+          printf("L-induce: suftab[" GT_WU "]=" GT_WD "\n",
                   (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
         }
@@ -605,7 +605,7 @@ sainseq->readmode))
           *suftabptr = 0;
 #ifdef SAINSHOWSTATE
           gt_assert(bucketptr != NULL);
-          printf("L-induce: suftab[%lu]=%ld\n",
+          printf("L-induce: suftab[" GT_WU "]=" GT_WD "\n",
                   (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
         }
@@ -682,7 +682,7 @@ sainseq->readmode))
           gt_assert(bucketptr != NULL && bucketptr - 1 < suftabptr);
           *(--bucketptr) = (t & 1UL) ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-          printf("S-induce: suftab[%lu]=%ld\n",
+          printf("S-induce: suftab[" GT_WU "]=" GT_WD "\n",
                   (GtUword) (bucketptr - suftab),*bucketptr);
 #endif
         }
@@ -738,7 +738,7 @@ sainseq->readmode))
         *(--bucketptr) = (leftcontextcc > currentcc)
                           ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-        printf("S-induce: suftab[%lu]=%ld\n",
+        printf("S-induce: suftab[" GT_WU "]=" GT_WD "\n",
                (GtUword) (bucketptr - suftab),*bucketptr);
 #endif
       }
@@ -786,7 +786,7 @@ sainseq->readmode))
                         ? ~position : position;
 #ifdef SAINSHOWSTATE
         gt_assert(bucketptr != NULL);
-        printf("L-induce: suftab[%lu]=%ld\n",
+        printf("L-induce: suftab[" GT_WU "]=" GT_WD "\n",
                (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
       }
@@ -846,7 +846,7 @@ sainseq->readmode))
                          ? ~position : position;
 #ifdef SAINSHOWSTATE
         gt_assert(bucketptr != NULL);
-        printf("S-induce: suftab[%lu]=%ld\n",
+        printf("S-induce: suftab[" GT_WU "]=" GT_WD "\n",
                 (GtUword) (bucketptr-suftab),*bucketptr);
 #endif
       }
@@ -953,7 +953,7 @@ static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
       }
 #undef SAINSHOWSTATE
 #ifdef SAINSHOWSTATE
-      printf("Sstar.suftab[%lu]=%lu\n",fillptr[nextcc],position+1);
+      printf("Sstar.suftab[" GT_WU "]=" GT_WU "\n",fillptr[nextcc],position+1);
 #endif
     }
     nextisStype = currentisStype;
@@ -1017,7 +1017,7 @@ static void gt_sain_INTSEQ_fast_induceLtypesuffixes1(GtSainseq *sainseq,
           *suftabptr = 0;
 #ifdef SAINSHOWSTATE
           gt_assert(bucketptr != NULL);
-          printf("L-induce: suftab[%lu]=%ld\n",
+          printf("L-induce: suftab[" GT_WU "]=" GT_WD "\n",
                   (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
         }
@@ -1067,7 +1067,7 @@ static void gt_sain_INTSEQ_induceLtypesuffixes1(GtSainseq *sainseq,
           *suftabptr = 0;
 #ifdef SAINSHOWSTATE
           gt_assert(bucketptr != NULL);
-          printf("L-induce: suftab[%lu]=%ld\n",
+          printf("L-induce: suftab[" GT_WU "]=" GT_WD "\n",
                   (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
         }
@@ -1135,7 +1135,7 @@ static void gt_sain_INTSEQ_fast_induceStypesuffixes1(GtSainseq *sainseq,
           gt_assert(bucketptr != NULL && bucketptr - 1 < suftabptr);
           *(--bucketptr) = (t & 1UL) ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-          printf("S-induce: suftab[%lu]=%ld\n",
+          printf("S-induce: suftab[" GT_WU "]=" GT_WD "\n",
                   (GtUword) (bucketptr - suftab),*bucketptr);
 #endif
         }
@@ -1182,7 +1182,7 @@ static void gt_sain_INTSEQ_induceStypesuffixes1(GtSainseq *sainseq,
         *(--bucketptr) = (leftcontextcc > currentcc)
                           ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-        printf("S-induce: suftab[%lu]=%ld\n",
+        printf("S-induce: suftab[" GT_WU "]=" GT_WD "\n",
                (GtUword) (bucketptr - suftab),*bucketptr);
 #endif
       }
@@ -1221,7 +1221,7 @@ static void gt_sain_INTSEQ_induceLtypesuffixes2(const GtSainseq *sainseq,
                         ? ~position : position;
 #ifdef SAINSHOWSTATE
         gt_assert(bucketptr != NULL);
-        printf("L-induce: suftab[%lu]=%ld\n",
+        printf("L-induce: suftab[" GT_WU "]=" GT_WD "\n",
                (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
       }
@@ -1272,7 +1272,7 @@ static void gt_sain_INTSEQ_induceStypesuffixes2(const GtSainseq *sainseq,
                          ? ~position : position;
 #ifdef SAINSHOWSTATE
         gt_assert(bucketptr != NULL);
-        printf("S-induce: suftab[%lu]=%ld\n",
+        printf("S-induce: suftab[" GT_WU "]=" GT_WD "\n",
                 (GtUword) (bucketptr-suftab),*bucketptr);
 #endif
       }

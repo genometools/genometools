@@ -46,7 +46,7 @@ static void spse_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
 {
   const SpseLimdfsstate *col = (const SpseLimdfsstate *) aliascol;
 
-  printf("at depth "GT_LU" (pathmatches=%s)\n",currentdepth,
+  printf("at depth "GT_WU" (pathmatches=%s)\n",currentdepth,
                                            col->pathmatches ? "true" : "false");
 }
 

@@ -88,7 +88,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                 / ((double) gt_graphics_get_image_width(graphics)
                    - 2*gt_graphics_get_xmargins(graphics));
 
-  gt_log_log("len="GT_LU", iter_step = %f, width = %f, margins = %f\n",
+  gt_log_log("len="GT_WU", iter_step = %f, width = %f, margins = %f\n",
                       gt_range_length(&viewrange),
                       iter_step, gt_graphics_get_image_width(graphics),
                       gt_graphics_get_xmargins(graphics));
@@ -104,7 +104,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
     data[n++] = get_val_for_pos(ctgc, floor(iter));
   }
 
-  gt_log_log("i="GT_LU", widthval = %f\n", n,
+  gt_log_log("i="GT_WU", widthval = %f\n", n,
                  (gt_graphics_get_image_width(graphics)
                     - 2*gt_graphics_get_xmargins(graphics)));
   if (ctgc->show_scale)

@@ -154,9 +154,9 @@ static int extractseq_pos(GtFile *outfp, GtBioseq *bs,
 
   if (frompos > gt_bioseq_get_total_length(bs)
         || topos > gt_bioseq_get_total_length(bs)) {
-    gt_error_set(err, "invalid position pair "GT_LU"-"GT_LU" one value "
+    gt_error_set(err, "invalid position pair "GT_WU"-"GT_WU" one value "
                       "is larger than "
-                      "sequence length "GT_LU"", frompos, topos,
+                      "sequence length "GT_WU"", frompos, topos,
                       gt_bioseq_get_total_length(bs));
     return -1;
   }

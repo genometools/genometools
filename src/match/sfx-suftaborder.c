@@ -42,8 +42,8 @@ static void showcomparisonfailure(const char *filename,
   pos1 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx1);
   pos2 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx2);
   fprintf(stderr,"ERROR: file \"%s\", line %d: ",filename,line);
-  fprintf(stderr,"%s("GT_LU" vs "GT_LU""
-                 " "GT_LU"=\"",
+  fprintf(stderr,"%s("GT_WU" vs "GT_WU""
+                 " "GT_WU"=\"",
                        where,
                        idx1,
                        idx2,
@@ -51,7 +51,7 @@ static void showcomparisonfailure(const char *filename,
   gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,pos1,depth);
   fprintf(stderr,"\",\"");
   gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,pos2,depth);
-  fprintf(stderr,"\"="GT_LU")=%d with maxlcp "GT_LU",depth="GT_LU"\n",pos2,cmp,
+  fprintf(stderr,"\"="GT_WU")=%d with maxlcp "GT_WU",depth="GT_WU"\n",pos2,cmp,
           maxlcp,depth);
 }
 
@@ -114,7 +114,7 @@ void gt_showentiresuftab(const GtEncseq *encseq,
   for (idx = 0; idx <= totallength; idx++)
   {
     pos = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx);
-    printf("suftab["GT_LU"]="GT_LU" ",idx,pos);
+    printf("suftab["GT_WU"]="GT_WU" ",idx,pos);
     gt_encseq_showatstartposwithdepth(stdout,encseq,readmode,pos,depth);
     printf("\n");
   }

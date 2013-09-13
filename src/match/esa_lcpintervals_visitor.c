@@ -37,7 +37,8 @@ static int gt_esa_lcpitvs_visitor_processleafedge(GT_UNUSED GtESAVisitor *ev,
                                                   GT_UNUSED GtError *err)
 
 {
-  printf("L %c "GT_LU" "GT_LU" "GT_LU"\n", firstsucc ? '1' : '0', fd, flb, leafnumber);
+  printf("L %c " GT_WU " " GT_WU " " GT_WU "\n", firstsucc ? '1' : '0',
+         fd, flb, leafnumber);
   return 0;
 }
 
@@ -55,7 +56,8 @@ static int gt_esa_lcpitvs_visitor_processbranchingedge(
                                                         GtESAVisitorInfo *sinfo,
                                                     GT_UNUSED GtError *err)
 {
-  printf("B %c "GT_LU" "GT_LU" "GT_LU" "GT_LU"\n", firstsucc ? '1' : '0', fd, flb, sd, slb);
+  printf("B %c " GT_WU " " GT_WU " " GT_WU " " GT_WU "\n",
+         firstsucc ? '1' : '0', fd, flb, sd, slb);
   return 0;
 }
 

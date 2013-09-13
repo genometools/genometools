@@ -187,7 +187,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
     if (ltr_retrotrans != NULL) {
       /* whole element */
       rng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
-      (void) snprintf(buf, BUFSIZ-1, ""GT_LU"  "GT_LU"  "GT_LU"  ", rng.start,
+      (void) snprintf(buf, BUFSIZ-1, ""GT_WU"  "GT_WU"  "GT_WU"  ", rng.start,
                       rng.end, gt_range_length(&rng));
       gt_str_append_cstr(line, buf);
     } else {
@@ -198,7 +198,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
   if (!had_err && !no_element) {
     /* left LTR */
     rng = gt_genome_node_get_range((GtGenomeNode*) leftltr);
-    (void) snprintf(buf, BUFSIZ-1, ""GT_LU"  "GT_LU"  "GT_LU"  ", rng.start,
+    (void) snprintf(buf, BUFSIZ-1, ""GT_WU"  "GT_WU"  "GT_WU"  ", rng.start,
                     rng.end, gt_range_length(&rng));
     gt_str_append_cstr(line, buf);
     /* left TSD */
@@ -221,7 +221,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
 
     /* right LTR */
     rng = gt_genome_node_get_range((GtGenomeNode*) rightltr);
-    (void) snprintf(buf, BUFSIZ-1, ""GT_LU"  "GT_LU"  "GT_LU"  ", rng.start,
+    (void) snprintf(buf, BUFSIZ-1, ""GT_WU"  "GT_WU"  "GT_WU"  ", rng.start,
                     rng.end, gt_range_length(&rng));
     gt_str_append_cstr(line, buf);
     /* right TSD */

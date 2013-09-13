@@ -1100,12 +1100,12 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
         rate = gt_sampling_get_rate(ee->encdesc->sampling);
         if (gt_sampling_is_regular(ee->encdesc->sampling)) {
           gt_log_log("applied sampling technique:"
-                     " sampling every "GT_LU"th description",
+                     " sampling every "GT_WU"th description",
                      rate);
         }
         else {
           gt_log_log("applied sampling technique:"
-                     " sampling every "GT_LU"th page",
+                     " sampling every "GT_WU"th page",
                      rate);
         }
       }
@@ -1113,7 +1113,7 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
         gt_log_log("applied sampling technique: none");
       }
 
-      gt_log_log("total number of encoded descriptions: "GT_LU"",
+      gt_log_log("total number of encoded descriptions: "GT_WU"",
                  ee->encdesc->num_of_descs);
       gt_log_log("total number of encoded characters: "GT_LLU"",
                  ee->encdesc->total_num_of_chars);
@@ -1210,7 +1210,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
   GtBitsequence bitseq;
   GtHuffmanBitwiseDecoder *huff_bitwise_decoder;
 
-  gt_log_log("current_desc: "GT_LU"", encdesc->cur_desc);
+  gt_log_log("current_desc: "GT_WU"", encdesc->cur_desc);
   if (encdesc->cur_desc == encdesc->num_of_descs) {
     gt_error_set(err,"nothing done, eof?");
     return had_err;

@@ -1472,7 +1472,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
       call_info->simfilterparam.minmatchlength <
       call_info->simfilterparam.seedlength) {
-    gt_error_set(err, "-%s "GT_LU" must be >= -%s "GT_LU"",
+    gt_error_set(err, "-%s "GT_WU" must be >= -%s "GT_WU"",
                  MINMATCHLEN_OPT_CSTR,
                  call_info->simfilterparam.minmatchlength, SEEDLENGTH_OPT_CSTR,
                  call_info->simfilterparam.seedlength);
@@ -1483,7 +1483,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing &&
       call_info->simfilterparam.prminmatchlen <
       call_info->simfilterparam.prseedlength) {
-    gt_error_set(err, "-%s "GT_LU" must be >= -%s "GT_LU"",
+    gt_error_set(err, "-%s "GT_WU" must be >= -%s "GT_WU"",
                  PRMINMATCHLEN_OPT_CSTR,
                  call_info->simfilterparam.prminmatchlen, PRSEEDLENGTH_OPT_CSTR,
                  call_info->simfilterparam.prseedlength);

@@ -222,17 +222,17 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
   logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (arguments->verbose)
   {
-    printf("# mersize="GT_LU"\n",arguments->mersize);
+    printf("# mersize="GT_WU"\n",arguments->mersize);
     if (arguments->userdefinedminocc > 0)
     {
-      printf("# minocc="GT_LU"\n",arguments->userdefinedminocc);
+      printf("# minocc="GT_WU"\n",arguments->userdefinedminocc);
     } else
     {
       printf("# minocc=undefined\n");
     }
     if (arguments->userdefinedmaxocc > 0)
     {
-      printf("# maxocc="GT_LU"\n",arguments->userdefinedmaxocc);
+      printf("# maxocc="GT_WU"\n",arguments->userdefinedmaxocc);
     } else
     {
       printf("# maxocc=undefined\n");
@@ -461,7 +461,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
         GtWord readnum;
 
         if (sscanf(gt_str_array_get(arguments->mersizesstrings,idx),
-                   ""GT_LD"",&readnum) != 1 || readnum <= 0)
+                   ""GT_WD"",&readnum) != 1 || readnum <= 0)
         {
           gt_error_set(err,"invalid argument \"%s\" of option -mersizes: "
                        "must be a positive integer",
@@ -585,7 +585,7 @@ static void showitvdistribution(const GtArrayuint64_t *dist,
     if (GT_ISIBITSET(outputvector,idx) && dist->spaceuint64_t[idx] > 0)
     {
       /*@ignore@*/
-      printf(""GT_LU" " Formatuint64_t "\n",
+      printf(""GT_WU" " Formatuint64_t "\n",
               idx,
               PRINTuint64_tcast(dist->spaceuint64_t[idx]));
       /*@end@*/
@@ -637,7 +637,7 @@ static void showitvsumdistributionoftwo(Summode mode,
         if (mode == Onlyshowsum)
         {
           /*@ignore@*/
-          printf(""GT_LU" " Formatuint64_t "\n",
+          printf(""GT_WU" " Formatuint64_t "\n",
                   idx,
                   PRINTuint64_tcast(sumoftwo));
           /*@end@*/
@@ -657,7 +657,7 @@ static void showitvsumdistributionoftwo(Summode mode,
           if (tmp > 0)
           {
             /*@ignore@*/
-            printf(""GT_LU" " Formatuint64_t " %.3f\n",
+            printf(""GT_WU" " Formatuint64_t " %.3f\n",
                   idx,
                   PRINTuint64_tcast(tmp),
                   (double) tmp/(double) sumoftwo);

@@ -95,13 +95,14 @@ static inline void gt_errfind_process_kmer(GtUword leafnumber,
         GT_READMODE_FORWARD) \
     : '-'
 #define RDJ_ERRFIND_SHOW_KMER \
-  gt_log_log("ln: "GT_LU"; fd: "GT_LU"; k-mer: %c...%c%c%c%c%c%c%c%c%c%c%c(%c)",\
+  gt_log_log("ln: "GT_WU"; fd: "GT_WU                            \
+             "; k-mer: %c...%c%c%c%c%c%c%c%c%c%c%c(%c)",         \
     leafnumber, fatherdepth, RDJ_ERRFIND_KMINUSITHCHAR(state->k),\
     RDJ_ERRFIND_KMINUSITHCHAR(11), RDJ_ERRFIND_KMINUSITHCHAR(10),\
-    RDJ_ERRFIND_KMINUSITHCHAR(9), RDJ_ERRFIND_KMINUSITHCHAR(8),\
-    RDJ_ERRFIND_KMINUSITHCHAR(7), RDJ_ERRFIND_KMINUSITHCHAR(6),\
-    RDJ_ERRFIND_KMINUSITHCHAR(5), RDJ_ERRFIND_KMINUSITHCHAR(4),\
-    RDJ_ERRFIND_KMINUSITHCHAR(3), RDJ_ERRFIND_KMINUSITHCHAR(2),\
+    RDJ_ERRFIND_KMINUSITHCHAR(9), RDJ_ERRFIND_KMINUSITHCHAR(8),  \
+    RDJ_ERRFIND_KMINUSITHCHAR(7), RDJ_ERRFIND_KMINUSITHCHAR(6),  \
+    RDJ_ERRFIND_KMINUSITHCHAR(5), RDJ_ERRFIND_KMINUSITHCHAR(4),  \
+    RDJ_ERRFIND_KMINUSITHCHAR(3), RDJ_ERRFIND_KMINUSITHCHAR(2),  \
     RDJ_ERRFIND_KMINUSITHCHAR(1), RDJ_ERRFIND_KMINUSITHCHAR(0));
 
 #define RDJ_ERRFIND_IS_SEPRANGE(ENCSEQ, POS)\
@@ -182,7 +183,7 @@ static inline bool gt_errfind_are_all_trusted(const GtBUstate_errfind *state)
       alltrusted = false;
 #ifdef RDJ_ERRFIND_DEBUG
   for (cnum = 0; cnum < state->alphasize; cnum++)
-    gt_log_log("cnum %u count: "GT_LU"", cnum, state->count[cnum]);
+    gt_log_log("cnum %u count: "GT_WU"", cnum, state->count[cnum]);
 #endif
   return alltrusted;
 }
@@ -200,7 +201,7 @@ static inline GtUchar gt_errfind_trusted_char(const GtBUstate_errfind *state)
       trusted_char = gt_encseq_get_encoded_char_nospecial(state->encseq,
          state->kpositions[cnum * state->c], GT_READMODE_FORWARD);
 #ifdef RDJ_ERRFIND_DEBUG
-      gt_log_log("trusted_char: %c (cnum: %u), count: "GT_LU", pos: "GT_LU"",
+      gt_log_log("trusted_char: %c (cnum: %u), count: "GT_WU", pos: "GT_WU"",
           "acgt"[trusted_char], cnum, state->count[cnum],
           state->kpositions[cnum * state->c]);
 #endif
@@ -236,7 +237,7 @@ static int processlcpinterval_errfind(GtUword lcp,
             if (state->editor != NULL)
             {
 #ifdef RDJ_ERRFIND_DEBUG
-              printf(""GT_LU":%u\n", pos, (unsigned int)newchar);
+              printf(""GT_WU":%u\n", pos, (unsigned int)newchar);
 #endif
               gt_twobitenc_editor_edit(state->editor, pos, newchar);
             }
@@ -279,7 +280,7 @@ int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
     state->k = k;
     state->c = c;
     state->debug_value = debug_value;
-    state->quiet = (state->debug_value == GT_UNDEF_ULONG ? false : true);
+    state->quiet = (state->debug_value == GT_UNDEF_UWORD ? false : true);
     gt_errfind_reset(state);
     had_err = gt_esa_bottomup_errfind(ssar, state, err);
   }

@@ -151,7 +151,7 @@ GtUword gt_rdb_last_inserted_id(GtRDB *db, const char *table, GtError *e)
   gt_assert(db && db->c_class);
   if (db->c_class->last_id_func)
     return db->c_class->last_id_func(db, table, e);
-  return GT_UNDEF_ULONG;
+  return GT_UNDEF_UWORD;
 }
 
 GtCstrTable* gt_rdb_get_indexes(GtRDB *db, GtError *err)

@@ -140,8 +140,8 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
     gt_file_xprintf(outfp, "<gDNA id=\"%s\" strand=\"%c\"/>\n", gen_id,
                     SHOWSTRAND(gen_strand_forward));
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<serials PGL_serial=\""GT_LU"\" AGS_serial=\""GT_LU"\" "
-                    "PPS_serial=\""GT_LU"\"/>\n", pglnum + OUTPUTOFFSET,
+    gt_file_xprintf(outfp, "<serials PGL_serial=\""GT_WU"\" AGS_serial=\""
+                    GT_WU"\" PPS_serial=\""GT_WU"\"/>\n", pglnum + OUTPUTOFFSET,
                     agsnum + OUTPUTOFFSET,  ppsnum + OUTPUTOFFSET);
     gth_indent(outfp, indentlevel);
     gt_file_xprintf(outfp, "<orf_info>\n");
@@ -150,18 +150,18 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
     gt_file_xprintf(outfp, "<exon_boundaries>\n");
     indentlevel++;
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<exon start=\""GT_LU"\" ",
+    gt_file_xprintf(outfp, "<exon start=\""GT_WU"\" ",
                     SHOWGENPOS(gen_strand_forward, gen_total_length,
                                gen_offset,
                                splicedseq
                                ->positionmapping[orf->splseqrange.start]));
   }
   else {
-    gt_file_xprintf(outfp, ">%s%c_PGL-"GT_LU"_AGS-"GT_LU"_PPS_"GT_LU" ("GT_LU"  ", gen_id,
-                    SHOWSTRAND(gen_strand_forward), pglnum + OUTPUTOFFSET,
-                    agsnum + OUTPUTOFFSET,  ppsnum + OUTPUTOFFSET,
-                    SHOWGENPOS(gen_strand_forward, gen_total_length,
-                               gen_offset,
+    gt_file_xprintf(outfp, ">%s%c_PGL-"GT_WU"_AGS-"GT_WU"_PPS_"GT_WU" ("
+                    GT_WU"  ",
+                    gen_id, SHOWSTRAND(gen_strand_forward), pglnum +
+                    OUTPUTOFFSET, agsnum + OUTPUTOFFSET,  ppsnum + OUTPUTOFFSET,
+                    SHOWGENPOS(gen_strand_forward, gen_total_length, gen_offset,
                                splicedseq
                                ->positionmapping[orf->splseqrange.start]));
   }
@@ -170,18 +170,18 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
        i < orf->splseqrange.end + orf->stopcodon * GT_CODON_LENGTH; i++) {
     if (gth_spliced_seq_pos_is_border(splicedseq, i)) {
       if (out->xmlout) {
-        gt_file_xprintf(outfp, "stop=\""GT_LU"\"/>\n",
+        gt_file_xprintf(outfp, "stop=\""GT_WU"\"/>\n",
                         SHOWGENPOS(gen_strand_forward, gen_total_length,
                                    gen_offset,
                                    splicedseq->positionmapping[i]));
         gth_indent(outfp, indentlevel);
-        gt_file_xprintf(outfp, "<exon start=\""GT_LU"\" ",
+        gt_file_xprintf(outfp, "<exon start=\""GT_WU"\" ",
                         SHOWGENPOS(gen_strand_forward, gen_total_length,
                                    gen_offset,
                                    splicedseq->positionmapping[i+1]));
       }
       else {
-        gt_file_xprintf(outfp, ""GT_LU","GT_LU"  ",
+        gt_file_xprintf(outfp, ""GT_WU","GT_WU"  ",
                         SHOWGENPOS(gen_strand_forward, gen_total_length,
                                    gen_offset,
                                    splicedseq->positionmapping[i]),
@@ -195,7 +195,7 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
   }
 
   if (out->xmlout) {
-    gt_file_xprintf(outfp, "stop=\""GT_LU"\"/>\n",
+    gt_file_xprintf(outfp, "stop=\""GT_WU"\"/>\n",
                     SHOWGENPOS(gen_strand_forward, gen_total_length,
                                gen_offset, splicedseq
                                ->positionmapping[orf->splseqrange.end +
@@ -206,7 +206,7 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
     gt_file_xprintf(outfp, "</exon_boundaries>\n");
   }
   else {
-    gt_file_xprintf(outfp, ""GT_LU")",
+    gt_file_xprintf(outfp, ""GT_WU")",
                     SHOWGENPOS(gen_strand_forward,
                                gen_total_length, gen_offset, splicedseq
                                ->positionmapping[orf->splseqrange.end +
@@ -218,13 +218,13 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
   {
 
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<frame>"GT_LU"</frame>\n",  orf->framenum);
+    gt_file_xprintf(outfp, "<frame>"GT_WU"</frame>\n",  orf->framenum);
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<number_coding_nucleotides>"GT_LU""
+    gt_file_xprintf(outfp, "<number_coding_nucleotides>"GT_WU""
                     "</number_coding_nucleotides>\n",
                     orf->lengthwithoutstopcodon * GT_CODON_LENGTH);
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<number_encoded_amino_acids>"GT_LU""
+    gt_file_xprintf(outfp, "<number_encoded_amino_acids>"GT_WU""
                     "</number_encoded_amino_acids>\n",
                     orf->lengthwithoutstopcodon);
     indentlevel--;
@@ -232,7 +232,8 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
     gt_file_xprintf(outfp, "</orf_info>\n");
   }
   else {
-    gt_file_xprintf(outfp, "\t(frame '"GT_LU"'; %*"GT_LUS" bp, %*"GT_LUS" residues)",
+    gt_file_xprintf(outfp, "\t(frame '"GT_WU"'; %*"GT_WUS" bp, %*"
+                    GT_WUS" residues)",
                     orf->framenum, ORFBPWIDTH,
                     orf->lengthwithoutstopcodon * GT_CODON_LENGTH,
                     ORFRESIDUESWIDTH,
@@ -252,7 +253,7 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
       if (i % ORFBLOCKWIDTH == 0)
         gt_file_xfputc(' ', outfp);
       if (i % ORFLINEWIDTH == 0) {
-        gt_file_xprintf(outfp, "\n%*"GT_LUS"  ", out->widthforgenpos,
+        gt_file_xprintf(outfp, "\n%*"GT_WUS"  ", out->widthforgenpos,
                         i + OUTPUTOFFSET);
       }
     }
@@ -300,7 +301,8 @@ static void outputconsolidatedORFs(GtArray *consolidatedORFs,
   }
   else {
     gt_file_xprintf(outfp,
-              "Maximal non-overlapping open reading frames (>= "GT_LU" codons)\n",
+              "Maximal non-overlapping open reading frames (>= "
+              GT_WU" codons)\n",
                 out->minORFlength);
   }
 

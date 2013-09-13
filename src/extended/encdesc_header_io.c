@@ -181,7 +181,7 @@ static void numeric_field_check_distri_dependence(DescField *field,
         field->delta_values_size <= GT_ENCDESC_MAX_NUM_VAL_HUF) {
       *needs_delta_dist = true;
       field->use_hc = true;
-      gt_log_log("delta_values_size: "GT_LU"", field->delta_values_size);
+      gt_log_log("delta_values_size: "GT_WU"", field->delta_values_size);
     }
   }
   else {
@@ -189,7 +189,7 @@ static void numeric_field_check_distri_dependence(DescField *field,
         field->num_values_size <= GT_ENCDESC_MAX_NUM_VAL_HUF) {
       *needs_value_dist = true;
       field->use_hc = true;
-      gt_log_log("num_values_size: "GT_LU"", field->num_values_size);
+      gt_log_log("num_values_size: "GT_WU"", field->num_values_size);
     }
   }
 }
@@ -242,7 +242,7 @@ static void write_hashmap_distri(EncsecDistriData *data,
                                    data,
                                    NULL);
   if (data->written_elems != size)
-    gt_log_log(""GT_LU" != "GT_LU"", size, data->written_elems);
+    gt_log_log(""GT_WU" != "GT_WU"", size, data->written_elems);
   gt_assert(data->written_elems == size);
 }
 

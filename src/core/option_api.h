@@ -270,7 +270,7 @@ GtOption*       gt_option_new_ulong_min_max(const char *option_string,
                                             GtUword maximum_value);
 /* Return a new <GtOption> with the given <option_string>, <description>, and
    <default_value>. The result of the option parsing is stored in <value>.
-   If <default_value> equals <NULL>, <GT_UNDEF_LONG> will be used as the default
+   If <default_value> equals <NULL>, <GT_UNDEF_WORD> will be used as the default
    start and end point of <value>. */
 GtOption*       gt_option_new_range(const char *option_string,
                                     const char *description,

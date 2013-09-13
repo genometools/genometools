@@ -255,7 +255,7 @@ GtNodeStream* gt_snp_annotator_stream_new(GtNodeStream *gvf_stream,
   sas->merge_stream = gt_merge_stream_new(sas->instreams);
   sas->rmap = gt_region_mapping_ref(rmap);
   sas->cur_gene_range.start =
-    sas->cur_gene_range.end = GT_UNDEF_ULONG;
+    sas->cur_gene_range.end = GT_UNDEF_UWORD;
   sas->snps = gt_queue_new();
   sas->outqueue = gt_queue_new();
   sas->tt = trans_table;

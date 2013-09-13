@@ -48,8 +48,8 @@ static void* gt_encseq_decode_arguments_new(void)
   arguments->mode = gt_str_new();
   arguments->sepchar = gt_str_new();
   arguments->dir = gt_str_new();
-  arguments->seqrng.start = arguments->seqrng.end = GT_UNDEF_ULONG;
-  arguments->rng.start = arguments->rng.end = GT_UNDEF_ULONG;
+  arguments->seqrng.start = arguments->seqrng.end = GT_UNDEF_UWORD;
+  arguments->rng.start = arguments->rng.end = GT_UNDEF_UWORD;
   return arguments;
 }
 
@@ -97,7 +97,7 @@ static GtOptionParser* gt_encseq_decode_option_parser_new(void *tool_arguments)
   optionseq = gt_option_new_uword("seq",
                                   "extract sequence identified by its number",
                                   &arguments->seq,
-                                  GT_UNDEF_ULONG);
+                                  GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionseq);
 
   /* -seqrange */
@@ -154,20 +154,20 @@ int gt_encseq_decode_arguments_check(GT_UNUSED int rest_argc,
     else
       args->rm = (GtReadmode) rval;
   }
-  if (!had_err && args->seqrng.start != GT_UNDEF_ULONG &&
-        args->seqrng.end != GT_UNDEF_ULONG && args->seq != GT_UNDEF_ULONG) {
+  if (!had_err && args->seqrng.start != GT_UNDEF_UWORD &&
+        args->seqrng.end != GT_UNDEF_UWORD && args->seq != GT_UNDEF_UWORD) {
     gt_error_set(err, "'-seq' and '-seqrange' cannot be used together");
     had_err = -1;
   }
-  if (!had_err && (args->seqrng.start != GT_UNDEF_ULONG ||
-        args->seqrng.end != GT_UNDEF_ULONG || args->seq != GT_UNDEF_ULONG)
+  if (!had_err && (args->seqrng.start != GT_UNDEF_UWORD ||
+        args->seqrng.end != GT_UNDEF_UWORD || args->seq != GT_UNDEF_UWORD)
         && strcmp(gt_str_get(args->mode), "fasta") != 0) {
     gt_error_set(err, "'-seq' and '-seqrange' can only be used with the "
                       "'-output fasta' option");
     had_err = -1;
   }
-  if (!had_err && (args->rng.start != GT_UNDEF_ULONG ||
-        args->rng.end != GT_UNDEF_ULONG)
+  if (!had_err && (args->rng.start != GT_UNDEF_UWORD ||
+        args->rng.end != GT_UNDEF_UWORD)
         && strcmp(gt_str_get(args->mode), "concat") != 0) {
     gt_error_set(err, "'-range' can only be used with the "
                       "'-output concat' option");
@@ -190,24 +190,24 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
 
   if (strcmp(gt_str_get(args->mode), "fasta") == 0) {
     /* specify a single sequence to extract */
-    if (args->seq != GT_UNDEF_ULONG) {
+    if (args->seq != GT_UNDEF_UWORD) {
       if (args->seq >= gt_encseq_num_of_sequences(encseq)) {
         gt_error_set(err,
-                     "requested sequence "GT_LU" exceeds number of sequences "
-                     "("GT_LU")", args->seq,
+                     "requested sequence "GT_WU" exceeds number of sequences "
+                     "("GT_WU")", args->seq,
                      gt_encseq_num_of_sequences(encseq));
         return -1;
       }
       sfrom = args->seq;
       sto = args->seq + 1;
-    } else if (args->seqrng.start != GT_UNDEF_ULONG
-                 && args->seqrng.end != GT_UNDEF_ULONG) {
+    } else if (args->seqrng.start != GT_UNDEF_UWORD
+                 && args->seqrng.end != GT_UNDEF_UWORD) {
       /* specify a sequence range to extract */
       if (args->seqrng.start >= gt_encseq_num_of_sequences(encseq)
             || args->seqrng.end >= gt_encseq_num_of_sequences(encseq)) {
         gt_error_set(err,
-                     "range "GT_LU"-"GT_LU" includes a sequence number "
-                     "exceeding the total number of sequences ("GT_LU")",
+                     "range "GT_WU"-"GT_WU" includes a sequence number "
+                     "exceeding the total number of sequences ("GT_WU")",
                      args->seqrng.start,
                      args->seqrng.end,
                      gt_encseq_num_of_sequences(encseq));
@@ -231,7 +231,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
         if (has_desc) {
           desc = gt_encseq_description(encseq, &desclen, i);
         } else {
-          (void) snprintf(buf, BUFSIZ, "sequence "GT_LU"", i);
+          (void) snprintf(buf, BUFSIZ, "sequence "GT_WU"", i);
           desclen = strlen(buf);
           desc = buf;
         }
@@ -248,7 +248,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
                                        &desclen,
                                        gt_encseq_num_of_sequences(encseq)-1-i);
         } else {
-          (void) snprintf(buf, BUFSIZ, "sequence "GT_LU"", i);
+          (void) snprintf(buf, BUFSIZ, "sequence "GT_WU"", i);
           desclen = strlen(buf);
           desc = buf;
         }
@@ -281,12 +281,12 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
   if (strcmp(gt_str_get(args->mode), "concat") == 0) {
     GtUword from = 0,
                   to = gt_encseq_total_length(encseq) - 1;
-    if (args->rng.start != GT_UNDEF_ULONG && args->rng.end != GT_UNDEF_ULONG) {
+    if (args->rng.start != GT_UNDEF_UWORD && args->rng.end != GT_UNDEF_UWORD) {
       if (args->rng.end > to) {
         had_err = -1;
         gt_error_set(err,
-                     "end of range ("GT_LU") exceeds encoded sequence length "
-                     "("GT_LU")", args->rng.end, to);
+                     "end of range ("GT_WU") exceeds encoded sequence length "
+                     "("GT_WU")", args->rng.end, to);
       }
       if (!had_err) {
         from = args->rng.start;

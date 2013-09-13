@@ -161,27 +161,29 @@ static GtSainseq *gt_sainseq_new_from_array(GtUword *arr,
   gt_assert(firstusable < suftabentries);
   if (suftabentries - firstusable >= numofchars)
   {
-    /*printf("bucketsize: reclaim suftab["GT_LU","GT_LU"]\n",
+    /*printf("bucketsize: reclaim suftab["GT_WU","GT_WU"]\n",
             suftabentries - numofchars,suftabentries-1);*/
     sainseq->bucketsize = suftab + suftabentries - numofchars;
     sainseq->bucketsizepoints2suftab = true;
   } else
   {
-    printf("bucketsize requires "GT_LU" entries and only "GT_LU" are left\n",
+    printf("bucketsize requires "GT_WU" entries and only "GT_WU" are left\n",
            numofchars,suftabentries - firstusable);
     sainseq->bucketsizepoints2suftab = false;
     sainseq->bucketsize = gt_malloc(sizeof (*sainseq->bucketsize) * numofchars);
   }
   if (suftabentries - firstusable >= GT_MULT2(numofchars))
   {
-    /*printf("bucketfillptr: reclaim suftab["GT_LU","GT_LU"]\n",
+    /*printf("bucketfillptr: reclaim suftab["GT_WU","GT_WU"]\n",
             suftabentries - GT_MULT2(numofchars),
             suftabentries - numofchars -1);*/
     sainseq->bucketfillptr = suftab + suftabentries - GT_MULT2(numofchars);
     sainseq->bucketfillptrpoints2suftab = true;
   } else
   {
-    /*printf("bucketfillptr requires "GT_LU" entries and only "GT_LU" are left\n",
+    /*
+    printf("bucketfillptr requires "GT_WU" entries and only "
+           GT_WU" are left\n",
            numofchars,suftabentries - firstusable);*/
     sainseq->bucketfillptrpoints2suftab = false;
     sainseq->bucketfillptr = gt_malloc(sizeof (*sainseq->bucketfillptr) *
@@ -191,7 +193,7 @@ static GtSainseq *gt_sainseq_new_from_array(GtUword *arr,
   {
     if (suftabentries - firstusable >= GT_MULT4(numofchars))
     {
-      /*printf("roundtable: reclaim suftab["GT_LU","GT_LU"]\n",
+      /*printf("roundtable: reclaim suftab["GT_WU","GT_WU"]\n",
               suftabentries - GT_MULT4(numofchars),
               suftabentries - GT_MULT2(numofchars) - 1);*/
       sainseq->roundtable = suftab + suftabentries - GT_MULT4(numofchars);
@@ -320,7 +322,7 @@ static GtSainbuffer *gt_sainbuffer_new(GtUword *suftab,
     buf->size += sizeof (*buf->values) * buf->cachesize;
     buf->nextidx = gt_calloc((size_t) numofchars,sizeof (*buf->nextidx));
     buf->size += sizeof (*buf->nextidx) * numofchars;
-    gt_logger_log(logger,"used buffer of "GT_LU" bytes (bufsize="GT_LU")",
+    gt_logger_log(logger,"used buffer of "GT_WU" bytes (bufsize="GT_WU")",
                          (GtUword) buf->size,buf->buf_size);
     return buf;
   } else
@@ -554,7 +556,7 @@ static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
     }
     suftab[putidx] = (leftcontextcc > currentcc) ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-    printf("end S-induce: suftab["GT_LU"]="GT_LD"\n",putidx,suftab[putidx]);
+    printf("end S-induce: suftab["GT_WU"]="GT_WD"\n",putidx,suftab[putidx]);
 #endif
   }
 }
@@ -788,7 +790,7 @@ static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
                                          (position-1)) > currentcc)
                       ? ~position : position;
 #ifdef SAINSHOWSTATE
-    printf("end S-induce: suftab["GT_LU"]="GT_LD"\n",putidx,suftab[putidx]);
+    printf("end S-induce: suftab["GT_WU"]="GT_WD"\n",putidx,suftab[putidx]);
 #endif
   }
 }
@@ -1046,9 +1048,10 @@ static void gt_sain_checkorder(const GtSainseq *sainseq,
 
     if (cmp != -1)
     {
-      fprintf(stderr,"%s: check interval ["GT_LU","GT_LU"] at idx="GT_LU": suffix "
-                     ""GT_LU" >= "GT_LU"\n",__func__,start,end,idx,suftab[idx-1],
-                     suftab[idx]);
+      fprintf(stderr,
+              "%s: check interval ["GT_WU","GT_WU"] at idx="GT_WU": suffix "
+              ""GT_WU" >= "GT_WU"\n",__func__,start,end,idx,suftab[idx-1],
+              suftab[idx]);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
@@ -1121,9 +1124,9 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSainseq *sainseq,
           suftab[putidx - offset] = suftab[readidx - offset];
           suftab[readidx - offset] = 0;
 #ifdef SAINSHOWSTATE
-          printf("insertsorted: suftab["GT_LU"]="GT_LU"\n",putidx-offset,
+          printf("insertsorted: suftab["GT_WU"]="GT_WU"\n",putidx-offset,
                                                    suftab[putidx-offset]);
-          printf("insertsorted: suftab["GT_LU"]=undef\n",readidx-offset);
+          printf("insertsorted: suftab["GT_WU"]=undef\n",readidx-offset);
 #endif
         }
       }
@@ -1196,11 +1199,11 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
 
   GT_SAIN_SHOWTIMER("insert Sstar suffixes");
   countSstartype = gt_sain_insertSstarsuffixes(sainseq,suftab,logger);
-  gt_logger_log(logger,"level %u: sort sequence of length "GT_LU" over "
-                       ""GT_LU" symbols (%.2f)",
+  gt_logger_log(logger,"level %u: sort sequence of length "GT_WU" over "
+                       ""GT_WU" symbols (%.2f)",
           level,sainseq->totallength,sainseq->numofchars,
           (double) sainseq->numofchars/sainseq->totallength);
-  gt_logger_log(logger,"Sstar-type: "GT_LU" (%.2f)",countSstartype,
+  gt_logger_log(logger,"Sstar-type: "GT_WU" (%.2f)",countSstartype,
                  (double) countSstartype/sainseq->totallength);
   if (countSstartype > 0)
   {
@@ -1364,7 +1367,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                            logger,
                            timer);
 #ifdef GT_SAIN_WITHCOUNTS
-  printf("countcharaccess="GT_LU" (%.2f)\n",gt_sain_countcharaccess,
+  printf("countcharaccess="GT_WU" (%.2f)\n",gt_sain_countcharaccess,
           (double) gt_sain_countcharaccess/sainseq->totallength);
 #endif
   gt_sainseq_delete(sainseq);
@@ -1394,7 +1397,7 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                            logger,
                            timer);
 #ifdef GT_SAIN_WITHCOUNTS
-  printf("countcharaccess="GT_LU" (%.2f)\n",gt_sain_countcharaccess,
+  printf("countcharaccess="GT_WU" (%.2f)\n",gt_sain_countcharaccess,
           (double) gt_sain_countcharaccess/sainseq->totallength);
 #endif
   gt_sainseq_delete(sainseq);

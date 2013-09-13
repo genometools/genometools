@@ -204,7 +204,7 @@ void gt_esa_spmitvs_visitor_print_results(GtESASpmitvsVisitor *esv,
                                           GtUword nonspecials)
 {
   GtUword idx;
-  printf("unnecessaryleaves="GT_LU" (%.2f)\n",
+  printf("unnecessaryleaves="GT_WU" (%.2f)\n",
          esv->unnecessaryleaves,
          (double) esv->unnecessaryleaves/nonspecials);
   for (idx = 0; idx<= esv->maxlen; idx++)
@@ -212,12 +212,12 @@ void gt_esa_spmitvs_visitor_print_results(GtESASpmitvsVisitor *esv,
     if (esv->wholeleafcount[idx].wholeleaf != 0 ||
         esv->wholeleafcount[idx].nowholeleaf != 0)
     {
-      printf("wholeleaf["GT_LU"]:num="GT_LU" (%.2f), ",idx,
+      printf("wholeleaf["GT_WU"]:num="GT_WU" (%.2f), ",idx,
              esv->wholeleafcount[idx].wholeleaf,
              (double) esv->wholeleafcount[idx].wholeleaf/
                       (esv->wholeleafcount[idx].wholeleaf+
                        esv->wholeleafcount[idx].nowholeleaf));
-      printf("width="GT_LU" (%.2f)\n",
+      printf("width="GT_WU" (%.2f)\n",
               esv->wholeleafcount[idx].wholeleafwidth,
               (double) esv->wholeleafcount[idx].wholeleafwidth/
                        esv->totallength);

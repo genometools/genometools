@@ -352,8 +352,8 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_error_check(err);
   gt_assert(arguments);
   if (arguments->verbose) {
-    printf("# number of items = "GT_LU"\n", arguments->num_values);
-    printf("# max value items = "GT_LU"\n", arguments->maxvalue);
+    printf("# number of items = "GT_WU"\n", arguments->num_values);
+    printf("# max value items = "GT_WU"\n", arguments->maxvalue);
     printf("# implementation = %s\n", gt_str_get(arguments->impl));
   }
 
@@ -403,7 +403,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_free(array);
   if (cmpcount > 0)
   {
-    printf("cmpcount = "GT_LU"\n",cmpcount);
+    printf("cmpcount = "GT_WU"\n",cmpcount);
   }
   return had_err;
 }

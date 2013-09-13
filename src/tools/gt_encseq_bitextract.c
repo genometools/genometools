@@ -63,7 +63,7 @@ static GtOptionParser* gt_encseq_bitextract_option_parser_new(void
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_uword("stoppos", "output stop positions",
-                               &arguments->stoppos, GT_UNDEF_ULONG);
+                               &arguments->stoppos, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("specialranges", "output special ranges",
@@ -72,7 +72,7 @@ static GtOptionParser* gt_encseq_bitextract_option_parser_new(void
 
   option = gt_option_new_uword("bitpos", "extract and display "
                                          "two bit encoding for position",
-                               &arguments->bitpos, GT_UNDEF_ULONG);
+                               &arguments->bitpos, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, option);
 
   gt_encseq_options_add_readmode_option(op, arguments->readmode);
@@ -116,11 +116,11 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
     fwd = GT_ISDIRREVERSE(rm) ? false : true;
   }
 
-  if (!had_err && arguments->bitpos != GT_UNDEF_ULONG) {
+  if (!had_err && arguments->bitpos != GT_UNDEF_UWORD) {
     if (arguments->bitpos >= gt_encseq_total_length(encseq)) {
       gt_error_set(err,
-                   "position "GT_LU" exceeds encoded sequence "
-                   "length of "GT_LU"",
+                   "position "GT_WU" exceeds encoded sequence "
+                   "length of "GT_WU"",
                    arguments->bitpos, gt_encseq_total_length(encseq));
       had_err = -1;
     }
@@ -135,8 +135,8 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
       gt_bitsequence_tostring(buffer, etbe.tbe);
       printf("Twobitencoding   %s\n"
              "unitsnotspecial  %u\n"
-             "position         "GT_LU"\n"
-             "returnvalue      "GT_LU"\n",
+             "position         "GT_WU"\n"
+             "returnvalue      "GT_WU"\n",
              buffer,
              etbe.unitsnotspecial,
              arguments->bitpos,
@@ -145,11 +145,11 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
     }
   }
 
-  if (!had_err && arguments->stoppos != GT_UNDEF_ULONG) {
+  if (!had_err && arguments->stoppos != GT_UNDEF_UWORD) {
     if (arguments->stoppos >= gt_encseq_total_length(encseq)) {
       gt_error_set(err,
-                   "position "GT_LU" exceeds encoded sequence "
-                   "length of "GT_LU"",
+                   "position "GT_WU" exceeds encoded sequence "
+                   "length of "GT_WU"",
                    arguments->stoppos, gt_encseq_total_length(encseq));
       had_err = -1;
     }
@@ -158,7 +158,7 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
       /* check stoppos stuff */
       gt_encseq_reader_reinit_with_readmode(esr, encseq, rm,
                                             arguments->stoppos);
-      printf(""GT_LU": "GT_LU"\n", arguments->stoppos,
+      printf(""GT_WU": "GT_WU"\n", arguments->stoppos,
                            gt_getnexttwobitencodingstoppos(fwd, esr));
       gt_encseq_reader_delete(esr);
     }
@@ -171,7 +171,7 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
       while (true) {
         it1 = gt_specialrangeiterator_next(sri, &srng);
         if (it1)
-          printf(""GT_LU":"GT_LU"\n", srng.start, srng.end);
+          printf(""GT_WU":"GT_WU"\n", srng.start, srng.end);
         else break;
       }
       gt_specialrangeiterator_delete(sri);

@@ -130,7 +130,7 @@ static GtIndexOptions* gt_index_options_new(void)
         if (!haserr)\
         {\
           arg = gt_str_array_get(algbounds, IDX);\
-          if (sscanf(arg,""GT_LD"", &readint) != 1 || readint <= 0)\
+          if (sscanf(arg,""GT_WD"", &readint) != 1 || readint <= 0)\
           {\
             gt_error_set(err,"option -algbds: all arguments must be positive " \
                              "numbers");\

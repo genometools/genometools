@@ -60,7 +60,7 @@ static void* xcalloc(size_t nmemb, size_t size, GtUword current_size,
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
            src_file);
     if (current_size)
-      fprintf(stderr, ""GT_LU" bytes were allocated altogether\n", current_size);
+      fprintf(stderr, GT_WU " bytes were allocated altogether\n", current_size);
     exit(EXIT_FAILURE);
   }
   return p;
@@ -75,7 +75,7 @@ static void* xmalloc(size_t size, GtUword current_size,
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
             src_file);
     if (current_size)
-      fprintf(stderr, ""GT_LU" bytes were allocated altogether\n", current_size);
+      fprintf(stderr, GT_WU " bytes were allocated altogether\n", current_size);
     exit(EXIT_FAILURE);
   }
   return p;
@@ -90,7 +90,7 @@ static void* xrealloc(void *ptr, size_t size, GtUword current_size,
     fprintf(stderr, "attempted on line %d in file \"%s\"\n", src_line,
             src_file);
     if (current_size)
-      fprintf(stderr, ""GT_LU" bytes were allocated altogether\n", current_size);
+      fprintf(stderr, GT_WU " bytes were allocated altogether\n", current_size);
     exit(EXIT_FAILURE);
   }
   return p;

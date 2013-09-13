@@ -42,7 +42,7 @@ GtReadsLibrariesTable* gt_reads_libraries_table_new(GtUword noflibraries)
   rlt->library = gt_malloc(sizeof (*rlt->library) * noflibraries);
   rlt->noflibraries = noflibraries;
   rlt->nextfreelibrary = 0;
-  rlt->firstunpaired = GT_UNDEF_ULONG;
+  rlt->firstunpaired = GT_UNDEF_UWORD;
   return rlt;
 }
 
@@ -63,7 +63,7 @@ void gt_reads_libraries_table_add(GtReadsLibrariesTable *rlt,
   gt_assert(rlt->nextfreelibrary < rlt->noflibraries);
   if (!paired)
   {
-    if (rlt->firstunpaired == GT_UNDEF_ULONG)
+    if (rlt->firstunpaired == GT_UNDEF_UWORD)
     {
       rlt->firstunpaired = first_seqnum;
     }
@@ -74,7 +74,7 @@ void gt_reads_libraries_table_add(GtReadsLibrariesTable *rlt,
   }
   else
   {
-    gt_assert(rlt->firstunpaired == GT_UNDEF_ULONG);
+    gt_assert(rlt->firstunpaired == GT_UNDEF_UWORD);
   }
   rlt->library[rlt->nextfreelibrary].first_seqnum = first_seqnum;
   rlt->library[rlt->nextfreelibrary].insertlength = insertlength;
@@ -144,8 +144,8 @@ GtReadsLibrariesTable* gt_reads_libraries_table_load(FILE *rlt_fp,
         (size_t)rlt->noflibraries, rlt_fp);
     if (count != (size_t)rlt->noflibraries)
     {
-      gt_error_set(err, "library table: "GT_LU" libraries expected, "GT_LU" found",
-          rlt->noflibraries, (GtUword)count);
+      gt_error_set(err, "library table: "GT_WU" libraries expected, "GT_WU
+                   " found", rlt->noflibraries, (GtUword)count);
       gt_free(rlt->library);
       gt_free(rlt);
       return NULL;
