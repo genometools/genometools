@@ -134,13 +134,13 @@ static GtOptionParser* gt_sketch_option_parser_new(void *tool_arguments)
   /* -start */
   option = gt_option_new_uword_min("start", "start position\n"
                                          "default: first region start",
-                            &arguments->start, GT_UNDEF_ULONG, 1);
+                            &arguments->start, GT_UNDEF_UWORD, 1);
   gt_option_parser_add_option(op, option);
   gt_option_hide_default(option);
 
   /* -end */
   option2 = gt_option_new_uword("end", "end position\ndefault: last region end",
-                            &arguments->end, GT_UNDEF_ULONG);
+                            &arguments->end, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, option2);
   /* -start and -end must be given together */
   gt_option_imply(option, option2);
@@ -228,11 +228,11 @@ static int gt_sketch_arguments_check(GT_UNUSED int rest_argc,
   gt_error_check(err);
   gt_assert(arguments);
 
-  if (arguments->start != GT_UNDEF_ULONG &&
-      arguments->end != GT_UNDEF_ULONG &&
+  if (arguments->start != GT_UNDEF_UWORD &&
+      arguments->end != GT_UNDEF_UWORD &&
       !(arguments->start < arguments->end)) {
-    gt_error_set(err, "start of query range ("GT_LU") must be before "
-                      "end of query range ("GT_LU")",
+    gt_error_set(err, "start of query range ("GT_WU") must be before "
+                      "end of query range ("GT_WU")",
                       arguments->start, arguments->end);
     had_err = -1;
   }
@@ -373,17 +373,17 @@ static int gt_sketch_runner(int argc, const char **argv, int parsed_args,
                                                    err);
   }
   if (!had_err) {
-    qry_range.start = (arguments->start == GT_UNDEF_ULONG ?
+    qry_range.start = (arguments->start == GT_UNDEF_UWORD ?
                          sequence_region_range.start :
                          arguments->start);
-    qry_range.end   = (arguments->end == GT_UNDEF_ULONG ?
+    qry_range.end   = (arguments->end == GT_UNDEF_UWORD ?
                          sequence_region_range.end :
                          arguments->end);
   }
 
   if (!had_err) {
     if (arguments->verbose)
-      fprintf(stderr, "# of results: "GT_LU"\n", gt_array_size(results));
+      fprintf(stderr, "# of results: "GT_WU"\n", gt_array_size(results));
 
     /* find and load style file */
     if (!(sty = gt_style_new(err)))

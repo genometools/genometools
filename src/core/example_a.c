@@ -28,7 +28,7 @@ struct GtExampleA {
 static int gt_example_a_run(GtExample *e) /* hidden from outside  */
 {
   GtExampleA *ea = (GtExampleA*) e;       /* downcast to specific type */
-  printf(""GT_LU"", ea->my_property);         /* run functionality */
+  printf(""GT_WU"", ea->my_property);         /* run functionality */
   return 0;
 }
 

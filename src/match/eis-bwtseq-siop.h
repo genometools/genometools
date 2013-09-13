@@ -273,7 +273,7 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, GtUword *pos,
 {
   if (iter->nextMatchBWTPos < iter->bounds.end)
   {
-    /*printf("nextMatchBWTPos="GT_LU"\n",(GtUword) iter->nextMatchBWTPos);*/
+    /*printf("nextMatchBWTPos="GT_WU"\n",(GtUword) iter->nextMatchBWTPos);*/
     *pos = gt_BWTSeqLocateMatch(bwtSeq, iter->nextMatchBWTPos, &iter->extBits);
     iter->nextMatchBWTPos++;
     return true;

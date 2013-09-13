@@ -49,7 +49,7 @@
           fprintf(stderr, "\nExpected file content: \n%s\n",               \
                   EXPOUT);                                                 \
           fprintf(stderr, "\nFile content actually read "                  \
-                         "(up to "GT_LU" bytes):\n%s\n",                       \
+                         "(up to "GT_WU" bytes):\n%s\n",                       \
                (GtUword) strlen(EXPOUT), buffer);                    \
         }
 

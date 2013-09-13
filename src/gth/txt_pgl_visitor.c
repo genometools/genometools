@@ -41,12 +41,12 @@ static void outputAGSline(const GthAGS *ags, GtUword agsnum,
   GthExonAGS *exon;
   GtUword i;
 
-  gt_file_xprintf(outfp, "AGS-"GT_LU" (",  agsnum + OUTPUTOFFSET);
+  gt_file_xprintf(outfp, "AGS-" GT_WU " (",  agsnum + OUTPUTOFFSET);
   for (i = 0; i < gth_ags_num_of_exons(ags); i++) {
     exon = gth_ags_get_exon(ags, i);
     if (i > 0)
       gt_file_xfputc(',', outfp);
-    gt_file_xprintf(outfp, ""GT_LU"  "GT_LU"", SHOWGENPOSAGS(exon->range.start),
+    gt_file_xprintf(outfp, GT_WU "  " GT_WU, SHOWGENPOSAGS(exon->range.start),
                     SHOWGENPOSAGS(exon->range.end));
   }
   gt_file_xprintf(outfp, ")\n");
@@ -76,7 +76,7 @@ static void output_exon_intron_lines(const GthAGS *ags, int widthforgenpos,
   GthSpliceSiteProb *splicesiteprob;
   GthExonAGS *exon;
   GtUword i, leftexonborder, rightexonborder, exonlength,
-                leftintronborder = GT_UNDEF_ULONG, rightintronborder,
+                leftintronborder = GT_UNDEF_UWORD, rightintronborder,
                 intronlength;
   GthDbl exonscore;
   GthFlt donorsiteprob, acceptorsiteprob;
@@ -97,19 +97,22 @@ static void output_exon_intron_lines(const GthAGS *ags, int widthforgenpos,
       acceptorsiteprob  = splicesiteprob->acceptorsiteprob;
 
       /* output intron */
-      gt_file_xprintf(outfp,"    Intron %2"GT_LUS" %*"GT_LUS" %*"GT_LUS" (%4"GT_LUS" n);           "
-                      "Pd: %5.3f  Pa: %5.3f\n",  i - 1 + OUTPUTOFFSET,
-                      widthforgenpos, SHOWGENPOSAGS(leftintronborder),
-                      widthforgenpos, SHOWGENPOSAGS(rightintronborder),
-                      intronlength, donorsiteprob, acceptorsiteprob);
+      gt_file_xprintf(outfp,
+                      "    Intron %2" GT_WUS " %*" GT_WUS " %*" GT_WUS " (%4"
+                      GT_WUS " n);           " "Pd: %5.3f  Pa: %5.3f\n",
+                      i - 1 + OUTPUTOFFSET, widthforgenpos,
+                      SHOWGENPOSAGS(leftintronborder), widthforgenpos,
+                      SHOWGENPOSAGS(rightintronborder), intronlength,
+                      donorsiteprob, acceptorsiteprob);
     }
     leftintronborder = rightexonborder + 1;
 
     /* output exon */
-    gt_file_xprintf(outfp, "  Exon %2"GT_LUS" %*"GT_LUS" %*"GT_LUS" (%4"GT_LUS" n); score: %5.3f\n",
+    gt_file_xprintf(outfp,
+                    "  Exon %2" GT_WUS " %*" GT_WUS " %*" GT_WUS " (%4" GT_WUS
+                    " n); score: %5.3f\n",
                     i + OUTPUTOFFSET, widthforgenpos,
-                    SHOWGENPOSAGS(leftexonborder),
-                    widthforgenpos,
+                    SHOWGENPOSAGS(leftexonborder), widthforgenpos,
                     SHOWGENPOSAGS(rightexonborder), exonlength, exonscore);
   }
   gt_file_xfputc('\n', outfp);
@@ -127,7 +130,7 @@ static void outputPGSlines(GtArray *alignments, GtFile *outfp)
     for (j = 0; j < gth_sa_num_of_exons(sa); j++) {
       if (j > 0)
         gt_file_xfputc(',', outfp);
-      gt_file_xprintf(outfp, ""GT_LU"  "GT_LU"",
+      gt_file_xprintf(outfp, GT_WU "  " GT_WU ,
                       gth_sa_left_genomic_exon_border(sa, j),
                       gth_sa_right_genomic_exon_border(sa, j));
     }
@@ -178,21 +181,23 @@ static void show_pgl(GthPGL *pgl, GtUword pglnum,
     gt_file_xprintf(outfp, "<predicted_gene_location>\n");
     indentlevel++;
     gth_indent(outfp, indentlevel);
-    gt_file_xprintf(outfp, "<PGL_line PGL_serial=\""GT_LU"\" PGL_strand=\"%c\" "
-                     "PGL_start=\""GT_LU"\" PGL_stop=\""GT_LU"\"/>\n",
-                     pglnum + OUTPUTOFFSET,
-                     SHOWSTRAND(gth_pgl_is_forward(pgl)),
-                     SHOWGENPOS(gth_pgl_is_forward(pgl),
-                                gth_pgl_total_length(pgl),
-                                gth_pgl_genomic_offset(pgl),
-                                pgl->maxrange.start),
-                     SHOWGENPOS(gth_pgl_is_forward(pgl),
-                                gth_pgl_total_length(pgl),
-                                gth_pgl_genomic_offset(pgl),
-                                pgl->maxrange.end));
+    gt_file_xprintf(outfp, "<PGL_line PGL_serial=\"" GT_WU "\" "
+                    "PGL_strand=\"%c\" PGL_start=\"" GT_WU "\" PGL_stop=\""
+                    GT_WU "\"/>\n",
+                    pglnum + OUTPUTOFFSET,
+                    SHOWSTRAND(gth_pgl_is_forward(pgl)),
+                    SHOWGENPOS(gth_pgl_is_forward(pgl),
+                               gth_pgl_total_length(pgl),
+                               gth_pgl_genomic_offset(pgl),
+                               pgl->maxrange.start),
+                    SHOWGENPOS(gth_pgl_is_forward(pgl),
+                               gth_pgl_total_length(pgl),
+                               gth_pgl_genomic_offset(pgl),
+                               pgl->maxrange.end));
   }
   else {
-    gt_file_xprintf(outfp, "PGL %3"GT_LUS" (%c strand):      "GT_LU"     "GT_LU"",
+    gt_file_xprintf(outfp, "PGL %3" GT_WUS " (%c strand):      " GT_WU "     "
+                    GT_WU,
                     pglnum + OUTPUTOFFSET,
                     SHOWSTRAND(gth_pgl_is_forward(pgl)),
                     SHOWGENPOS(gth_pgl_is_forward(pgl),
@@ -228,8 +233,8 @@ static void txt_pgl_visitor_preface(GthPGLVisitor *pgl_visitor,
   for (i = 0; i < DELIMITERLINELENGTH; i++)
     gt_file_xfputc(PGLS_DELIMITERCHAR, visitor->out->outfp);
   gt_file_xprintf(visitor->out->outfp, "\n\n");
-  gt_file_xprintf(visitor->out->outfp,
-                     "Predicted gene locations ("GT_LU"):\n\n\n", num_of_pgls);
+  gt_file_xprintf(visitor->out->outfp, "Predicted gene locations (" GT_WU
+                  "):\n\n\n", num_of_pgls);
 }
 
 static void txt_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,

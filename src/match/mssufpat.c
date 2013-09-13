@@ -52,18 +52,18 @@ static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
 
   GtUword idx, backmask;
 
-  printf("at depth "GT_LU": [",currentdepth);
+  printf("at depth "GT_WU": [",currentdepth);
   for (idx=0, backmask = 1UL; idx<mti->patternlength; idx++, backmask <<= 1)
   {
     if (col->prefixofsuffixbits & backmask)
     {
       if (first)
       {
-        printf(""GT_LU"",idx);
+        printf(""GT_WU"",idx);
         first = false;
       } else
       {
-        printf(","GT_LU"",idx);
+        printf(","GT_WU"",idx);
       }
     }
   }
@@ -209,8 +209,9 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
       if (mti->mstatlength[bitindex+first1] < currentdepth)
       {
         /*
-        printf("set mstatlength["GT_LU"]="GT_LU"\n",bitindex+first1,currentdepth);
-        printf("set mstatwitnessleftbound["GT_LU"]="GT_LU"\n",bitindex+first1,
+        printf("set mstatlength["GT_WU"]="GT_WU"\n",
+               bitindex+first1,currentdepth);
+        printf("set mstatwitnessleftbound["GT_WU"]="GT_WU"\n",bitindex+first1,
                                                  (GtUword) leftbound);
         */
         mti->mstatlength[bitindex+first1] = currentdepth;
@@ -256,7 +257,7 @@ static void pms_nextLimdfsstate(const Limdfsconstinfo *mt,
 #ifdef SKDEBUG
   bitsequence2string(buffer1,(Bitsequence) incol->prefixofsuffixbits);
   bitsequence2string(buffer2,(Bitsequence) outcol->prefixofsuffixbits);
-  printf("next(%s,%u,depth="GT_LU")->%s\n",buffer1,(unsigned int) currentchar,
+  printf("next(%s,%u,depth="GT_WU")->%s\n",buffer1,(unsigned int) currentchar,
                                        currentdepth,buffer2);
 #endif
 }
@@ -281,7 +282,7 @@ static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
 #ifdef SKDEBUG
   bitsequence2string(buffer1,(uint32_t) tmp);
   bitsequence2string(buffer2,(uint32_t) col->prefixofsuffixbits);
-  printf("inplacenext(%s,%u,"GT_LU")->%s\n",buffer1,(unsigned int) currentchar,
+  printf("inplacenext(%s,%u,"GT_WU")->%s\n",buffer1,(unsigned int) currentchar,
                                         currentdepth,buffer2);
 #endif
 }

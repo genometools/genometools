@@ -146,9 +146,9 @@ static GtUword gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
                 one_rank_prefix = 0,
                 left_child_size,
                 rank;
-  gt_log_log("alphabet: %u-%u-%u, sym: "GT_LU"", alpha_start, middle, alpha_end,
+  gt_log_log("alphabet: %u-%u-%u, sym: "GT_WU"", alpha_start, middle, alpha_end,
              (GtUword) sym);
-  gt_log_log("pos: "GT_LU"", pos);
+  gt_log_log("pos: "GT_WU"", pos);
   gt_assert(pos < node_size);
 
   if (alpha_start < alpha_end) {
@@ -181,7 +181,7 @@ static GtUword gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
       node_start +=
         we->parent_instance.members->length + left_child_size;
     }
-    gt_log_log("bit: %d, nodesize: "GT_LU"", bit, node_size);
+    gt_log_log("bit: %d, nodesize: "GT_WU"", bit, node_size);
     if (node_size != 0 && rank != 0) {
       pos = rank - 1;
       return gt_wtree_encseq_rank_rec(we, pos, sym,
@@ -190,7 +190,7 @@ static GtUword gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
     }
     return 0;
   }
-  gt_log_log("found: rank="GT_LU"", pos + 1);
+  gt_log_log("found: rank="GT_WU"", pos + 1);
   return pos + 1; /* convert position to count */
 }
 

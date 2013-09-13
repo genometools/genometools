@@ -28,7 +28,7 @@
 typedef unsigned char GtStrgraphCount__Small;
 typedef GtUword GtStrgraphCount__Large;
 typedef GtStrgraphCount__Large GtStrgraphCount;
-#define FormatGtStrgraphCount       ""GT_LU""
+#define FormatGtStrgraphCount       ""GT_WU""
 #define PRINTGtStrgraphCountcast(X) (X)
 #define SCANGtStrgraphCountcast(X)  (X)
 #define GT_STRGRAPH_COUNT_MAX       ULONG_MAX

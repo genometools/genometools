@@ -35,27 +35,29 @@ static int writefmascii(const char *indexname,
   {
     return -1;
   }
-  fprintf (fmafp, "bwtlength="GT_LU"\n",
+  fprintf (fmafp, "bwtlength=" GT_WU "\n",
            fm->bwtlength);
-  fprintf (fmafp, "longest="GT_LU"\n",
+  fprintf (fmafp, "longest=" GT_WU "\n",
                    fm->longestsuffixpos);
   fprintf (fmafp, "storeindexpos=%d\n", storeindexpos ? 1 : 0);
   fprintf (fmafp, "log2blocksize=%u\n", fm->log2bsize);
   fprintf (fmafp, "log2markdist=%u\n", fm->log2markdist);
-  fprintf (fmafp, "specialcharacters="GT_LU"\n",specialcharinfo->specialcharacters);
-  fprintf (fmafp, "specialranges="GT_LU"\n",specialcharinfo->specialranges);
-  fprintf (fmafp, "realspecialranges="GT_LU"\n",specialcharinfo->realspecialranges);
-  fprintf (fmafp, "lengthofspecialprefix="GT_LU"\n",
+  fprintf (fmafp, "specialcharacters=" GT_WU "\n",
+           specialcharinfo->specialcharacters);
+  fprintf (fmafp, "specialranges=" GT_WU "\n",specialcharinfo->specialranges);
+  fprintf (fmafp, "realspecialranges=" GT_WU "\n",
+           specialcharinfo->realspecialranges);
+  fprintf (fmafp, "lengthofspecialprefix=" GT_WU "\n",
            specialcharinfo->lengthofspecialprefix);
-  fprintf (fmafp, "lengthofspecialsuffix="GT_LU"\n",
+  fprintf (fmafp, "lengthofspecialsuffix=" GT_WU "\n",
            specialcharinfo->lengthofspecialsuffix);
-  fprintf (fmafp, "wildcards="GT_LU"\n",specialcharinfo->wildcards);
-  fprintf (fmafp, "wildcardranges="GT_LU"\n",specialcharinfo->wildcardranges);
-  fprintf (fmafp, "realwildcardranges="GT_LU"\n",
+  fprintf (fmafp, "wildcards=" GT_WU "\n",specialcharinfo->wildcards);
+  fprintf (fmafp, "wildcardranges=" GT_WU "\n",specialcharinfo->wildcardranges);
+  fprintf (fmafp, "realwildcardranges=" GT_WU "\n",
                    specialcharinfo->realwildcardranges);
-  fprintf (fmafp, "lengthofwildcardprefix="GT_LU"\n",
+  fprintf (fmafp, "lengthofwildcardprefix=" GT_WU "\n",
            specialcharinfo->lengthofwildcardprefix);
-  fprintf (fmafp, "lengthofwildcardsuffix="GT_LU"\n",
+  fprintf (fmafp, "lengthofwildcardsuffix=" GT_WU "\n",
            specialcharinfo->lengthofwildcardsuffix);
   fprintf (fmafp, "suffixlength=%u\n", fm->suffixlength);
   gt_fa_xfclose(fmafp);

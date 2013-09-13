@@ -91,10 +91,10 @@ GthSA* gth_sa_new(void)
   sa->ref_id = gt_str_new();
 
   /* initialize all arrays */
-  sa->backtrace_path = gth_backtrace_path_new(GT_UNDEF_ULONG,
-                                              GT_UNDEF_ULONG,
+  sa->backtrace_path = gth_backtrace_path_new(GT_UNDEF_UWORD,
+                                              GT_UNDEF_UWORD,
                                               0, /* ref_dp_start */
-                                              GT_UNDEF_ULONG);
+                                              GT_UNDEF_UWORD);
   sa->exons = gt_array_new(sizeof (Exoninfo));
   sa->introns = gt_array_new(sizeof (Introninfo));
 
@@ -202,7 +202,7 @@ void gth_sa_show_exons(const GthSA *sa, GtFile *outfp)
   gt_assert(sa);
   for (i = 0; i < gt_array_size(sa->exons); i++) {
     exoninfo = (Exoninfo*) gt_array_get(sa->exons, i);
-    gt_file_xprintf(outfp, "("GT_LU","GT_LU")", exoninfo->leftgenomicexonborder,
+    gt_file_xprintf(outfp, "("GT_WU","GT_WU")", exoninfo->leftgenomicexonborder,
                     exoninfo->rightgenomicexonborder);
   }
   gt_file_xfputc('\n', outfp);
@@ -256,7 +256,7 @@ GtRange gth_sa_range_forward(const GthSA *sa)
   }
   else {
     /* genomic offset is defined */
-    gt_assert(sa->gen_offset != GT_UNDEF_ULONG);
+    gt_assert(sa->gen_offset != GT_UNDEF_UWORD);
     range.start  = sa->gen_total_length - 1
                    - (rightgenomicborder - sa->gen_offset)
                    + sa->gen_offset;

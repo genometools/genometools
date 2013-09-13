@@ -60,7 +60,7 @@ static void showmaxleqvalue(FILE *fp,GtUword maxleqk,
     fprintf(fp,"undefined");
   } else
   {
-    fprintf(fp,""GT_LU"",maxleqk);
+    fprintf(fp,""GT_WU"",maxleqk);
   }
 }
 
@@ -79,7 +79,7 @@ static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
   {
     GtUword idx, backmask, score = currentdepth;
 
-    printf("["GT_LU"",score);
+    printf("["GT_WU"",score);
     for (idx=1UL, backmask = 1UL; idx<=col->maxleqk; idx++, backmask <<= 1)
     {
       if (col->Pv & backmask)
@@ -92,9 +92,9 @@ static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
           score--;
         }
       }
-      printf(","GT_LU"",score);
+      printf(","GT_WU"",score);
     }
-    printf("] with maxleqk="GT_LU"",col->maxleqk);
+    printf("] with maxleqk="GT_WU"",col->maxleqk);
   }
 }
 
@@ -146,7 +146,7 @@ static void verifycolumnvalues(const Limdfsconstinfo *mt,
   }
   if (bfmaxleqk != UNDEFMAXLEQK && minscore != col->lastdistvalue)
   {
-    fprintf(stderr,"correct score = "GT_LU" != "GT_LU" = col->score\n",
+    fprintf(stderr,"correct score = "GT_WU" != "GT_WU" = col->score\n",
                  minscore,
                  col->lastdistvalue);
     exit(GT_EXIT_PROGRAMMING_ERROR);

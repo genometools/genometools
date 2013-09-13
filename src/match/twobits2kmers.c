@@ -51,12 +51,12 @@ static void showdifferentkmers(int line,GtUword pos,GtCodetype kmer1,
 {
   char buffer[2*GT_INTWORDSIZE+1];
 
-  fprintf(stderr,"line %d: pos="GT_LU"\n",line,pos);
+  fprintf(stderr,"line %d: pos="GT_WU"\n",line,pos);
   gt_bitsequence_tostring_units(buffer,(GtBitsequence) kmer1,2U);
   fprintf(stderr,"kmer1=%s\n",buffer);
   gt_bitsequence_tostring_units(buffer,(GtBitsequence) kmer2,2U);
   fprintf(stderr,"kmer2=%s\n",buffer);
-  fprintf(stderr,"kmer1="GT_LU" != "GT_LU"= kmer2\n",kmer1,kmer2);
+  fprintf(stderr,"kmer1="GT_WU" != "GT_WU"= kmer2\n",kmer1,kmer2);
 }
 
 static void scbs_init(Singlecharacterbitstreamstate *scbs,

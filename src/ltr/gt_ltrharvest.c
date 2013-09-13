@@ -104,15 +104,15 @@ static void gt_ltrharvest_showopts(const LTRharvestArguments *lo)
   }
   printf("#   xdropbelowscore: %d\n", lo->xdropbelowscore);
   printf("#   similaritythreshold: %.2f\n", lo->similaritythreshold);
-  printf("#   minseedlength: "GT_LU"\n", lo->minseedlength);
+  printf("#   minseedlength: "GT_WU"\n", lo->minseedlength);
   printf("#   matchscore: %d\n", lo->arbitscores.mat);
   printf("#   mismatchscore: %d\n", lo->arbitscores.mis);
   printf("#   insertionscore: %d\n", lo->arbitscores.ins);
   printf("#   deletionscore: %d\n", lo->arbitscores.del);
-  printf("#   minLTRlength: "GT_LU"\n",  lo->minltrlength);
-  printf("#   maxLTRlength: "GT_LU"\n",  lo->maxltrlength);
-  printf("#   minLTRdistance: "GT_LU"\n",  lo->mindistance);
-  printf("#   maxLTRdistance: "GT_LU"\n",  lo->maxdistance);
+  printf("#   minLTRlength: "GT_WU"\n",  lo->minltrlength);
+  printf("#   maxLTRlength: "GT_WU"\n",  lo->maxltrlength);
+  printf("#   minLTRdistance: "GT_WU"\n",  lo->mindistance);
+  printf("#   maxLTRdistance: "GT_WU"\n",  lo->maxdistance);
   if (lo->nooverlaps)
   {
     printf("#   overlaps: no\n");
@@ -136,7 +136,7 @@ static void gt_ltrharvest_showopts(const LTRharvestArguments *lo)
   if (lo->searchrange.start != 0 ||
       lo->searchrange.end != 0)
   {
-    printf("# ltrsearchseqrange=("GT_LU","GT_LU")\n",
+    printf("# ltrsearchseqrange=("GT_WU","GT_WU")\n",
           lo->searchrange.start,
           lo->searchrange.end);
   }
@@ -256,7 +256,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                                &arguments->minltrlength,
                                100UL,
                                1UL,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionminlenltr);
 
   /* -maxlenltr */
@@ -265,7 +265,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                                &arguments->maxltrlength,
                                1000UL,
                                1UL,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmaxlenltr);
 
   /* -mindistltr */
@@ -275,7 +275,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                                &arguments->mindistance,
                                1000UL,
                                1UL,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmindistltr);
 
   /* -maxdistltr */
@@ -285,7 +285,7 @@ static GtOptionParser* gt_ltrharvest_option_parser_new(void *tool_arguments)
                                &arguments->maxdistance,
                                15000UL,
                                1UL,
-                               GT_UNDEF_ULONG);
+                               GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmaxdistltr);
 
   /* -similar */

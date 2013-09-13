@@ -461,7 +461,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
       }
       if (arguments->countspms)
       {
-        printf("number of suffix-prefix matches="GT_LU"\n",countmatches);
+        printf("number of suffix-prefix matches="GT_WU"\n",countmatches);
       }
       gt_free(spmsk_states);
     }

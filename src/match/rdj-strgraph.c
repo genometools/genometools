@@ -216,7 +216,7 @@ void gt_strgraph_show_limits_debug_log(void)
 
 void gt_strgraph_show_limits(void)
 {
-  printf("# max number of reads: "GT_LU"\n", (GtUword) GT_STRGRAPH_N_READS_MAX);
+  printf("# max number of reads: "GT_WU"\n", (GtUword) GT_STRGRAPH_N_READS_MAX);
   printf("# max read length: "FormatGtStrgraphLength"\n",
       PRINTGtStrgraphLengthcast(GT_STRGRAPH_LENGTH_MAX));
   printf("# max degree of a vertex: "FormatGtStrgraphVEdgenum"\n",
@@ -270,7 +270,7 @@ struct GtStrgraph {
   if ((NOFREADS) > GT_STRGRAPH_N_READS_MAX)\
   {\
     fprintf(stderr, "fatal: overflow\n");\
-    fprintf(stderr, "more than "GT_LU" reads ("GT_LU" found)\n",\
+    fprintf(stderr, "more than "GT_WU" reads ("GT_WU" found)\n",\
         GT_STRGRAPH_N_READS_MAX, (NOFREADS));\
     exit(EXIT_FAILURE);\
   }
@@ -279,14 +279,15 @@ struct GtStrgraph {
   if ((LEN) > GT_STRGRAPH_LENGTH_MAX)\
   {\
     fprintf(stderr, "fatal: overflow\n");\
-    fprintf(stderr, "edge "GT_LU"%c -> "GT_LU"%c has length > "FormatGtStrgraphLength\
-        " ("FormatGtStrgraphLength" found)\n",\
-        GT_STRGRAPH_V_READNUM(FROM),\
-        GT_STRGRAPH_V_IS_E(FROM) ? 'E' : 'B',\
-        GT_STRGRAPH_V_READNUM(TO),\
-        GT_STRGRAPH_V_IS_E(TO) ? 'E' : 'B',\
-        PRINTGtStrgraphLengthcast(GT_STRGRAPH_LENGTH_MAX),\
-        PRINTGtStrgraphLengthcast(LEN));\
+    fprintf(stderr, \
+            "edge "GT_WU"%c -> "GT_WU"%c has length > "FormatGtStrgraphLength\
+            " ("FormatGtStrgraphLength" found)\n",\
+            GT_STRGRAPH_V_READNUM(FROM),\
+            GT_STRGRAPH_V_IS_E(FROM) ? 'E' : 'B',\
+            GT_STRGRAPH_V_READNUM(TO),\
+            GT_STRGRAPH_V_IS_E(TO) ? 'E' : 'B',\
+            PRINTGtStrgraphLengthcast(GT_STRGRAPH_LENGTH_MAX),\
+            PRINTGtStrgraphLengthcast(LEN));\
     exit(EXIT_FAILURE);\
   }
 
@@ -305,7 +306,7 @@ struct GtStrgraph {
   if ((OUTDEG) > GT_STRGRAPH_V_EDGENUM_MAX)\
   {\
     fprintf(stderr, "fatal: overflow\n");\
-    fprintf(stderr, "vertex "GT_LU"%c has more than "\
+    fprintf(stderr, "vertex "GT_WU"%c has more than "\
         FormatGtStrgraphVEdgenum" outgoing edges ("FormatGtStrgraphVEdgenum\
         " found)\n", GT_STRGRAPH_V_READNUM(VNUM),\
         GT_STRGRAPH_V_IS_E(VNUM) ? 'E' : 'B',\
@@ -916,7 +917,7 @@ GtUword gt_strgraph_redself(GtStrgraph *strgraph, bool show_progressbar)
   if (show_progressbar)
     gt_progressbar_stop();
 
-  gt_log_log("self-matches counter: "GT_LU"", counter);
+  gt_log_log("self-matches counter: "GT_WU"", counter);
   /* self matches shoud be found twice, check number is even */
   gt_assert((counter & 1) == 0);
 #ifndef NDEBUG
@@ -966,7 +967,7 @@ GtUword gt_strgraph_redwithrc(GtStrgraph *strgraph, bool show_progressbar)
   if (show_progressbar)
     gt_progressbar_stop();
 
-  gt_log_log("withrc-matches counter: "GT_LU"", counter);
+  gt_log_log("withrc-matches counter: "GT_WU"", counter);
   /* withrc matches shoud be found twice, check number is even */
   gt_assert((counter & 1) == 0);
 #ifndef NDEBUG
@@ -1038,7 +1039,7 @@ GtUword gt_strgraph_redtrans(GtStrgraph *strgraph, bool show_progressbar)
     gt_progressbar_stop();
 
   counter = gt_strgraph_reduce_marked_edges(strgraph);
-  gt_log_log("transitive counter: "GT_LU"", counter);
+  gt_log_log("transitive counter: "GT_WU"", counter);
   /* trans spm should be found twice, check number is even */
   /*gt_assert((counter & 1) == 0);*/
 #ifndef NDEBUG
@@ -1092,7 +1093,7 @@ GtUword gt_strgraph_redsubmax(GtStrgraph *strgraph, bool show_progressbar)
   }
   if (show_progressbar)
     gt_progressbar_stop();
-  gt_log_log("submaximal counter: "GT_LU"", counter);
+  gt_log_log("submaximal counter: "GT_WU"", counter);
   /* nonmax spm shoud be found twice, check number is even */
   gt_assert((counter & 1) == 0);
 #ifndef NDEBUG
@@ -1193,8 +1194,8 @@ GtUword gt_strgraph_reddepaths(GtStrgraph *strgraph,
   counter = gt_strgraph_reduce_marked_edges(strgraph);
   if (show_progressbar)
     gt_progressbar_stop();
-  gt_log_log("dead-paths = "GT_LU"", nofdepaths);
-  gt_log_log("dead-path edges = "GT_LU"", counter);
+  gt_log_log("dead-paths = "GT_WU"", nofdepaths);
+  gt_log_log("dead-path edges = "GT_WU"", counter);
 #ifndef NDEBUG
   gt_strgraph_check_outdegs(strgraph);
 #endif
@@ -1235,7 +1236,8 @@ GtUword gt_strgraph_redpbubbles(GtStrgraph *strgraph,
   if (maxwidth == 0)
     maxwidth = (GtUword)(gt_strgraph_longest_read(strgraph) << 2) -
         (strgraph->minmatchlen << 1) - 1;
-  gt_log_log("redpbubbles(maxwidth="GT_LU", maxdiff="GT_LU")", maxwidth, maxdiff);
+  gt_log_log("redpbubbles(maxwidth="GT_WU", maxdiff="GT_WU")", maxwidth,
+             maxdiff);
 
   /* allocate info and set all marks to VACANT */
   {
@@ -1246,7 +1248,7 @@ GtUword gt_strgraph_redpbubbles(GtStrgraph *strgraph,
       if (GT_STRGRAPH_V_OUTDEG(strgraph, i) > (GtStrgraphVEdgenum)maxoutdeg)
         maxoutdeg = (GtUword)GT_STRGRAPH_V_OUTDEG(strgraph, i);
     }
-    gt_log_log("maxoutdeg = "GT_LU"", maxoutdeg);
+    gt_log_log("maxoutdeg = "GT_WU"", maxoutdeg);
     info = gt_malloc(sizeof (GtStrgraphPathInfo) * maxoutdeg);
   }
 
@@ -1338,8 +1340,8 @@ GtUword gt_strgraph_redpbubbles(GtStrgraph *strgraph,
   if (show_progressbar)
     gt_progressbar_stop();
   gt_free(info);
-  gt_log_log("p-bubbles = "GT_LU"", nofpbubbles);
-  gt_log_log("removed p-bubble edges = "GT_LU"", counter);
+  gt_log_log("p-bubbles = "GT_WU"", nofpbubbles);
+  gt_log_log("removed p-bubble edges = "GT_WU"", counter);
 #ifndef NDEBUG
   gt_strgraph_check_outdegs(strgraph);
 #endif
@@ -1390,13 +1392,13 @@ static inline void gt_strgraph_dot_show_vertex(GtFile *outfp,
              *color = GT_STRGRAPH_DOT_SELECT_VCOLOR(strgraph, v, depth, group);
   if (format == GT_STRGRAPH_DOT)
   {
-    gt_file_xprintf(outfp, " \""GT_LU"%c\" [shape=%s,%s]\n",
+    gt_file_xprintf(outfp, " \""GT_WU"%c\" [shape=%s,%s]\n",
         GT_STRGRAPH_V_READNUM(v), GT_STRGRAPH_V_CHAR(v), shape, color);
   }
   else
   {
     gt_assert(format == GT_STRGRAPH_DOT_BI);
-    gt_file_xprintf(outfp, " "GT_LU" [shape=%s,%s]\n",
+    gt_file_xprintf(outfp, " "GT_WU" [shape=%s,%s]\n",
         GT_STRGRAPH_V_READNUM(v), shape, color);
   }
 }
@@ -1405,7 +1407,7 @@ static inline void gt_strgraph_dot_show_edge(GtFile *outfp,
     GtStrgraphVnum from, GtStrgraphVnum to, GtStrgraphLength length)
 {
   gt_file_xprintf(outfp,
-      " \""GT_LU"%c\" -> \""GT_LU"%c\" "
+      " \""GT_WU"%c\" -> \""GT_WU"%c\" "
       "[label="FormatGtStrgraphLength"];\n",
       GT_STRGRAPH_V_READNUM(from),
       GT_STRGRAPH_V_CHAR(from),
@@ -1418,8 +1420,9 @@ static inline void gt_strgraph_dot_bi_show_edge(GtFile *outfp,
     GtUword sn1, bool towards1, GtUword sn2,
     bool towards2)
 {
-  gt_file_xprintf(outfp, " "GT_LU" -- "GT_LU" [arrowtail=%s,arrowhead=%s,dir=both];\n",
-      sn1, sn2, towards1 ? "normal" : "inv", towards2 ? "normal" : "inv");
+  gt_file_xprintf(outfp, " "GT_WU" -- "GT_WU
+                  " [arrowtail=%s,arrowhead=%s,dir=both];\n", sn1, sn2,
+                  towards1 ? "normal" : "inv", towards2 ? "normal" : "inv");
 }
 
 static void gt_strgraph_dot_show(const GtStrgraph *strgraph, GtFile *outfp,
@@ -1541,7 +1544,7 @@ static int gt_strgraph_dot_show_context(GtStrgraph *strgraph,
     if (readnum >= (GtUword)GT_STRGRAPH_NOFREADS(strgraph))
     {
       had_err = -1;
-      gt_error_set(err, "Can't show context of read "GT_LU" "
+      gt_error_set(err, "Can't show context of read "GT_WU" "
           "because the readset has "FormatGtStrgraphVnum" reads", readnum,
           GT_STRGRAPH_NOFREADS(strgraph));
       break;
@@ -1626,7 +1629,7 @@ static void gt_strgraph_adjlist_show(const GtStrgraph *strgraph, GtFile *outfp)
 
   for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
   {
-    gt_file_xprintf(outfp, ""GT_LU"%c "
+    gt_file_xprintf(outfp, ""GT_WU"%c "
         "["FormatGtStrgraphVEdgenum"]",
         GT_STRGRAPH_V_READNUM(i),
         GT_STRGRAPH_V_CHAR(i),
@@ -1639,7 +1642,7 @@ static void gt_strgraph_adjlist_show(const GtStrgraph *strgraph, GtFile *outfp)
       {
         if (!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph, i, j))
         {
-          gt_file_xprintf(outfp, ""GT_LU"%c ("FormatGtStrgraphLength");",
+          gt_file_xprintf(outfp, ""GT_WU"%c ("FormatGtStrgraphLength");",
               GT_STRGRAPH_V_READNUM(GT_STRGRAPH_EDGE_DEST(strgraph, i, j)),
               GT_STRGRAPH_V_CHAR(GT_STRGRAPH_EDGE_DEST(strgraph, i, j)),
               PRINTGtStrgraphVEdgenumcast(
@@ -1679,9 +1682,9 @@ static void gt_strgraph_spm_show(const GtStrgraph *strgraph, GtFile *outfp)
           {
             /* other E->B / B->E cases, as well as all B-B
                are not considered to avoid double output */
-            gt_file_xprintf(outfp, ""GT_LU" %s "GT_LU" %s "FormatGtStrgraphLength"\n",
-                sn1, is_e1 ? "+" : "-",
-                sn2, is_e2 ? "+" : "-",
+            gt_file_xprintf(outfp, GT_WU" %s " GT_WU " %s "
+                            FormatGtStrgraphLength"\n", sn1, is_e1 ? "+" : "-",
+                            sn2, is_e2 ? "+" : "-",
                 PRINTGtStrgraphLengthcast(spm_len));
           }
         }
@@ -1785,7 +1788,7 @@ void gt_strgraph_show(const GtStrgraph *strgraph, GtStrgraphFormat format,
 static int gt_strgraph_show_disc_distri_datapoint(GtUword key,
     GtUint64 value, GtFile *outfile)
 {
-  gt_file_xprintf(outfile, ""GT_LU" "Formatuint64_t"\n", key,
+  gt_file_xprintf(outfile, ""GT_WU" "Formatuint64_t"\n", key,
      PRINTuint64_tcast((uint64_t)value));
   return 0;
 }
@@ -1880,7 +1883,7 @@ static void gt_strgraph_log_space_value(const char *prefix, size_t value)
   char unit_prefix;
   float float_value;
   if (value < (size_t)1024) {
-    gt_log_log("%s = "GT_LU" bytes", prefix, (GtUword)value);
+    gt_log_log("%s = "GT_WU" bytes", prefix, (GtUword)value);
   } else {
     if (value < (size_t)1048576) {
       unit_prefix = 'k';
@@ -1892,7 +1895,7 @@ static void gt_strgraph_log_space_value(const char *prefix, size_t value)
       unit_prefix = 'G';
       float_value = (float)value / 1073741824.F;
     }
-    gt_log_log("%s = "GT_LU" bytes (%.2f %cb)", prefix, (GtUword)value,
+    gt_log_log("%s = "GT_WU" bytes (%.2f %cb)", prefix, (GtUword)value,
         float_value, unit_prefix);
   }
 }
@@ -2084,8 +2087,8 @@ static void gt_strgraph_count_junctions(GtStrgraph *strgraph)
       }
     }
   }
-  gt_log_log("junctions: in-1:"GT_LU" out-1:"GT_LU" multi:"GT_LU"", nof_in1_junctions,
-      nof_out1_junctions, nof_multi_junctions);
+  gt_log_log("junctions: in-1:"GT_WU" out-1:"GT_WU" multi:"GT_WU,
+             nof_in1_junctions, nof_out1_junctions, nof_multi_junctions);
 }
 #endif
 
@@ -2313,8 +2316,8 @@ static void gt_strgraph_show_contigpaths(GtStrgraph *strgraph,
   (void)gt_xfwrite(&pdata.contignum, sizeof (pdata.contignum),
       (size_t)1, cjl_o_file);
 
-  gt_log_log("traversed edges = "GT_LU"", pdata.total_depth);
-  gt_log_log("numofcontigs = "GT_LU"", pdata.contignum);
+  gt_log_log("traversed edges = "GT_WU"", pdata.total_depth);
+  gt_log_log("numofcontigs = "GT_WU"", pdata.contignum);
 
   GT_FREEARRAY(&pdata.contig, GtContigpathElem);
 }
@@ -2390,8 +2393,8 @@ static void gt_strgraph_show_contigs(GtStrgraph *strgraph,
   else
     gt_contigs_writer_abort(sdata.cw);
 
-  gt_log_log("traversed edges = "GT_LU"", sdata.total_depth);
-  gt_log_log("numofcontigs = "GT_LU"", sdata.contignum);
+  gt_log_log("traversed edges = "GT_WU"", sdata.total_depth);
+  gt_log_log("numofcontigs = "GT_WU"", sdata.contignum);
 
   if (sdata.contignum > 0)
     gt_contigs_writer_show_stats(sdata.cw, logger);

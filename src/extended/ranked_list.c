@@ -305,8 +305,9 @@ int gt_ranked_list_unit_test(GtError *err)
       gt_ensure(mystr != NULL);
       gt_ensure(mystr->id == str->id);
       gt_ensure(mystr->score == str->score);
-      /* printf("id: "GT_LU"/"GT_LU", score "GT_LU"/"GT_LU"\n", mystr->id, str->id,
-                                                mystr->score, str->score); */
+      /*
+      printf("id: "GT_WU"/"GT_WU", score "GT_WU"/"GT_WU"\n", mystr->id,
+             str->id, mystr->score, str->score); */
     }
     gt_ranked_list_iter_delete(iter);
 

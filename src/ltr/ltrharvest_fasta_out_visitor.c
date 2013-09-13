@@ -59,7 +59,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
       added_ltr = 0;
   GtRange rng,
           outrng;
-  GtUword seqnum = GT_UNDEF_ULONG;
+  GtUword seqnum = GT_UNDEF_UWORD;
   const char *fnt;
   lv = gt_ltrharvest_fasta_out_visitor_cast(nv);
   gt_assert(lv);
@@ -129,7 +129,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
       GtStr *desc;
       GtUword startpos,
                     seqdesclen;
-      gt_assert(seqnum != GT_UNDEF_ULONG
+      gt_assert(seqnum != GT_UNDEF_UWORD
                   && seqnum < gt_encseq_num_of_sequences(lv->encseq));
       seqdesc = gt_encseq_description(lv->encseq, &seqdesclen, seqnum);
       desc = gt_str_new();
@@ -154,7 +154,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
       GtRange rootrng;
       rootrng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
       gt_warning("trying to output empty%s sequence for candidate at "
-                 ""GT_LU"-"GT_LU" on sequence "GT_LU"",
+                 ""GT_WU"-"GT_WU" on sequence "GT_WU"",
                  (lv->inner ? " inner" : ""),
                  rootrng.start,
                  rootrng.end,

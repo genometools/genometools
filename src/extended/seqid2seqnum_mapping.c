@@ -60,8 +60,8 @@ static int seqid_info_add(SeqidInfo *seqid_info, GtUword seqnum,
   gt_error_check(err);
   gt_assert(range);
   seqid_info_elem_ptr = gt_array_get_first(seqid_info);
-  if (range->end == GT_UNDEF_ULONG ||
-      seqid_info_elem_ptr->descrange.end == GT_UNDEF_ULONG) {
+  if (range->end == GT_UNDEF_UWORD ||
+      seqid_info_elem_ptr->descrange.end == GT_UNDEF_UWORD) {
     gt_error_set(err, "sequence file \"%s\" does contain multiple sequences "
                   "with ID \"%s\" and not all of them have description ranges",
                   filename, seqid);
@@ -85,7 +85,7 @@ static int seqid_info_get(SeqidInfo *seqid_info, GtUword *seqnum,
   gt_assert(seqid_info && seqnum && outrange && inrange);
   for (i = 0; i < gt_array_size(seqid_info); i++) {
     seqid_info_elem = gt_array_get(seqid_info, i);
-    if (seqid_info_elem->descrange.end == GT_UNDEF_ULONG ||
+    if (seqid_info_elem->descrange.end == GT_UNDEF_UWORD ||
         gt_range_contains(&seqid_info_elem->descrange, inrange)) {
       *seqnum = seqid_info_elem->seqnum;
       *filenum = seqid_info_elem->filenum;
@@ -93,9 +93,10 @@ static int seqid_info_get(SeqidInfo *seqid_info, GtUword *seqnum,
       return 0;
     }
   }
-  gt_error_set(err, "cannot find sequence ID \"%s\" (with range "GT_LU","GT_LU") in "
-               "sequence file \"%s\"", seqid, inrange->start, inrange->end,
-               filename);
+  gt_error_set(err,
+               "cannot find sequence ID \"%s\" (with range " GT_WU "," GT_WU
+               ") in " "sequence file \"%s\"",
+               seqid, inrange->start, inrange->end, filename);
   return -1;
 }
 
@@ -119,7 +120,7 @@ static int handle_description(GtSeqid2SeqnumMapping *mapping, const char *desc,
   if (gt_parse_description_range(desc, &descrange)) {
     /* no offset could be parsed -> store description as sequence id */
     descrange.start = 1;
-    descrange.end = GT_UNDEF_ULONG;
+    descrange.end = GT_UNDEF_UWORD;
     if ((seqid_info = gt_hashmap_get(mapping->map, desc))) {
       had_err = seqid_info_add(seqid_info, seqnum, filenum,
                                &descrange, mapping->filename, desc, err);
@@ -239,7 +240,7 @@ int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
   gt_assert(mapping && seqid && seqnum);
   /* try to answer request from cache */
   if (mapping->cached_seqid && !strcmp(seqid, mapping->cached_seqid) &&
-      (mapping->cached_range.end == GT_UNDEF_ULONG ||
+      (mapping->cached_range.end == GT_UNDEF_UWORD ||
        gt_range_contains(&mapping->cached_range, inrange))) {
     *seqnum = mapping->cached_seqnum;
     *filenum = mapping->cached_filenum;

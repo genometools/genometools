@@ -80,14 +80,14 @@ bool gt_dyn_bittab_bit_is_set(const GtDynBittab *b, GtUword bit)
 
 GtUword gt_dyn_bittab_get_first_bitnum(const GtDynBittab *b)
 {
-  GtUword i, rval = GT_UNDEF_ULONG;
+  GtUword i, rval = GT_UNDEF_UWORD;
   gt_assert(b);
   for (i = 0; i < b->num_of_bits; i++)
     if (gt_dyn_bittab_bit_is_set(b, i)) {
       rval = i;
       break;
     }
-  if (rval == GT_UNDEF_ULONG)
+  if (rval == GT_UNDEF_UWORD)
     return b->num_of_bits;
   return rval;
 }
@@ -101,7 +101,7 @@ GtUword gt_dyn_bittab_get_last_bitnum(const GtDynBittab *b)
 GtUword gt_dyn_bittab_get_next_bitnum(const GtDynBittab *b,
                                             GtUword curnum)
 {
-  GtUword i, rval = GT_UNDEF_ULONG;
+  GtUword i, rval = GT_UNDEF_UWORD;
 
   gt_assert(b);
   gt_assert(curnum < b->num_of_bits);
@@ -110,7 +110,7 @@ GtUword gt_dyn_bittab_get_next_bitnum(const GtDynBittab *b,
       rval = i;
       break;
     }
-  if (rval == GT_UNDEF_ULONG)
+  if (rval == GT_UNDEF_UWORD)
     return b->num_of_bits;
   return rval;
 }

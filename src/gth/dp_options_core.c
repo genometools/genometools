@@ -29,10 +29,10 @@ GthDPOptionsCore* gth_dp_options_core_new(void)
   dp_options_core->dpminintronlength = GTH_DEFAULT_DPMININTRONLENGTH;
   dp_options_core->shortexonpenalty = GTH_DEFAULT_SHORTEXONPENALTY;
   dp_options_core->shortintronpenalty = GTH_DEFAULT_SHORTINTRONPENALTY;
-  dp_options_core->btmatrixgenrange.start = GT_UNDEF_ULONG;
-  dp_options_core->btmatrixgenrange.end = GT_UNDEF_ULONG;
-  dp_options_core->btmatrixrefrange.start = GT_UNDEF_ULONG;
-  dp_options_core->btmatrixrefrange.end = GT_UNDEF_ULONG;
+  dp_options_core->btmatrixgenrange.start = GT_UNDEF_UWORD;
+  dp_options_core->btmatrixgenrange.end = GT_UNDEF_UWORD;
+  dp_options_core->btmatrixrefrange.start = GT_UNDEF_UWORD;
+  dp_options_core->btmatrixrefrange.end = GT_UNDEF_UWORD;
   dp_options_core->jtoverlap = GTH_DEFAULT_JTOVERLAP;
   dp_options_core->jtdebug = GTH_DEFAULT_JTDEBUG;
   return dp_options_core;

@@ -56,14 +56,14 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
   uint64_t sizeofrep;
 
 #ifdef WITHINFO
-  printf("maxbytes = "GT_LU"\n",(GtUword) (maxbytes * factor));
+  printf("maxbytes = "GT_WU"\n",(GtUword) (maxbytes * factor));
 #endif
   for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
     sizeofrep = gt_bcktab_sizeoftable(numofchars,prefixlength,
                                       maxvalue,withspecialsuffixes);
 #ifdef WITHINFO
-    printf("sizeofrep = "GT_LU", after divide "GT_LU"\n",(GtUword) sizeofrep,
+    printf("sizeofrep = "GT_WU", after divide "GT_WU"\n",(GtUword) sizeofrep,
                                         (GtUword) (sizeofrep/factor));
 #endif
     if (sizeofrep/factor > (uint64_t) maxbytes)

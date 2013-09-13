@@ -43,7 +43,7 @@ GtORFIterator* gt_orf_iterator_new(GtCodonIterator *ci,
   orfi->translator = translator;
 
   for (i = 0; i < 3; i++) {
-    orfi->orf_start[i] = GT_UNDEF_ULONG;
+    orfi->orf_start[i] = GT_UNDEF_UWORD;
     orfi->found_start[i] = false;
   }
   return orfi;

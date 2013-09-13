@@ -90,7 +90,7 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
     return EOF;
   (*currentfileread)++;
   if (currentchar == NEWLINESYMBOL) {
-    gt_error_set(err, "2-character line code not found in line "GT_LU"",
+    gt_error_set(err, "2-character line code not found in line "GT_WU"",
                  (GtUword) pvt->linenum - 1);
     return -2;
   }
@@ -117,7 +117,7 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
         return 0;
       if (!isspace(currentchar)) {
         gt_error_set(err, "3 blanks expected between line code and content "
-                          "in line "GT_LU"",
+                          "in line "GT_WU"",
                      (GtUword) pvt->linenum - 1);
         return -2;
       }
@@ -251,7 +251,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
       case EMBL_IN_SEQUENCE:
         /* only a terminator may come after a sequence */
         if (lc != SEQUENCE) {
-          gt_error_set(err, "unterminated sequence in line "GT_LU" of file %s",
+          gt_error_set(err, "unterminated sequence in line "GT_WU" of file %s",
                             (GtUword) pvt->linenum,
                             gt_str_array_get(pvt->filenametab,
                                                 (GtUword) pvt->filenum));

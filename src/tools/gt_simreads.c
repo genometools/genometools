@@ -84,34 +84,34 @@ static GtOptionParser* gt_simreads_option_parser_new(void *tool_arguments)
 
   /* -num */
   num_option = gt_option_new_uword_min("num", "desired number of reads",
-                                       &arguments->num, GT_UNDEF_ULONG, 1UL);
+                                       &arguments->num, GT_UNDEF_UWORD, 1UL);
   gt_option_parser_add_option(op, num_option);
 
   /* -coverage */
   coverage_option = gt_option_new_uword_min("coverage",
                                             "desired coverage of the reads",
                                             &arguments->coverage,
-                                            GT_UNDEF_ULONG, 1UL);
+                                            GT_UNDEF_UWORD, 1UL);
   gt_option_parser_add_option(op, coverage_option);
 
   /* -len */
   len_option = gt_option_new_uword_min("len", "fixed read length",
                                                &arguments->minlen,
-                                               GT_UNDEF_ULONG, 1UL);
+                                               GT_UNDEF_UWORD, 1UL);
   gt_option_parser_add_option(op, len_option);
 
   /* -minlen */
   minlen_option = gt_option_new_uword_min("minlen",
                                           "minimal read length",
                                           &arguments->minlen,
-                                          GT_UNDEF_ULONG, 1UL);
+                                          GT_UNDEF_UWORD, 1UL);
   gt_option_parser_add_option(op, minlen_option);
 
   /* -maxlen */
   maxlen_option = gt_option_new_uword_min("maxlen",
                                           "maximal read length",
                                           &arguments->maxlen,
-                                          GT_UNDEF_ULONG, 1UL);
+                                          GT_UNDEF_UWORD, 1UL);
   gt_option_parser_add_option(op, maxlen_option);
 
   /* -distlen */
@@ -183,7 +183,7 @@ static int gt_simreads_arguments_check(GT_UNUSED int rest_argc,
   arguments->dl = (gt_str_length(arguments->dlfilename) > 0);
   arguments->ds = (gt_str_length(arguments->dsfilename) > 0);
 
-  if ((arguments->maxlen != GT_UNDEF_ULONG) &&
+  if ((arguments->maxlen != GT_UNDEF_UWORD) &&
       (arguments->minlen > arguments->maxlen)) {
     gt_error_set(err,
       "argument to option '-minlen' must be <= argument to option '-maxlen'");
@@ -224,7 +224,7 @@ static int gt_simreads_plot_disc_distri(GtUword key,
                                         GtUint64 value,
                                         GtFile *outfile)
 {
-  gt_file_xprintf(outfile, ""GT_LU" "GT_LLU"\n", key, value);
+  gt_file_xprintf(outfile, ""GT_WU" "GT_LLU"\n", key, value);
   return 0;
 }
 
@@ -310,8 +310,8 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   gt_assert(arguments);
 
   logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stderr);
-  fixed_readlen = (arguments->maxlen == GT_UNDEF_ULONG &&
-      arguments->minlen != GT_UNDEF_ULONG);
+  fixed_readlen = (arguments->maxlen == GT_UNDEF_UWORD &&
+      arguments->minlen != GT_UNDEF_UWORD);
   if (arguments->ds)
     starts = gt_disc_distri_new();
   if (arguments->dl)
@@ -332,13 +332,13 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     target_total_length = gt_encseq_total_length(target);
-    gt_logger_log(logger, "number of templates: "GT_LU"",
+    gt_logger_log(logger, "number of templates: "GT_WU"",
                   gt_encseq_num_of_sequences(target));
-    gt_logger_log(logger, "total template length: "GT_LU"",
+    gt_logger_log(logger, "total template length: "GT_WU"",
                   target_total_length);
-    if (arguments->coverage != GT_UNDEF_ULONG)
+    if (arguments->coverage != GT_UNDEF_UWORD)
     {
-      gt_logger_log(logger, "required coverage: "GT_LU"",
+      gt_logger_log(logger, "required coverage: "GT_WU"",
                             arguments->coverage);
       required_output_bases = arguments->coverage * target_total_length;
       if (arguments->show_progressbar)
@@ -347,8 +347,8 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     }
     else
     {
-      gt_assert(arguments->num != GT_UNDEF_ULONG);
-      gt_logger_log(logger, "required number of reads: "GT_LU"",
+      gt_assert(arguments->num != GT_UNDEF_UWORD);
+      gt_logger_log(logger, "required number of reads: "GT_WU"",
                             arguments->num);
       if (arguments->show_progressbar)
         gt_progressbar_start(&progress, (GtUint64)arguments->num);
@@ -375,10 +375,10 @@ static int gt_simreads_runner(GT_UNUSED int argc,
       }
     }
     else if (fixed_readlen)
-      gt_logger_log(logger, "required read length (fixed): "GT_LU"",
+      gt_logger_log(logger, "required read length (fixed): "GT_WU"",
                     arguments->minlen);
     else
-      gt_logger_log(logger, "required read length range: "GT_LU"-"GT_LU"",
+      gt_logger_log(logger, "required read length range: "GT_WU"-"GT_WU"",
                     arguments->minlen, arguments->maxlen);
   }
 
@@ -451,7 +451,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     }
 
     /* test break conditions and update progressbar */
-    if (arguments->coverage != GT_UNDEF_ULONG)
+    if (arguments->coverage != GT_UNDEF_UWORD)
     {
       if (arguments->show_progressbar)
         progress = (GtUint64)output_bases;
@@ -460,7 +460,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     }
     else
     {
-      gt_assert(arguments->num != GT_UNDEF_ULONG);
+      gt_assert(arguments->num != GT_UNDEF_UWORD);
       if (arguments->show_progressbar)
         progress = (GtUint64)output_reads;
       if (output_reads == arguments->num)
@@ -472,14 +472,14 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   {
     gt_logger_log(logger, "coverage: %.3f",
                   (float) output_bases / target_total_length);
-    gt_logger_log(logger, "total reads length: "GT_LU"", output_bases);
+    gt_logger_log(logger, "total reads length: "GT_WU"", output_bases);
     if (!fixed_readlen)
       gt_logger_log(logger, "average reads length: %.1f",
                     (float) output_bases / output_reads);
-    gt_logger_log(logger, "number of reads: "GT_LU"", output_reads);
-    gt_logger_log(logger, "- forward: "GT_LU"",
+    gt_logger_log(logger, "number of reads: "GT_WU"", output_reads);
+    gt_logger_log(logger, "- forward: "GT_WU"",
                   output_reads-output_rcmode_reads);
-    gt_logger_log(logger, "- revcompl: "GT_LU"", output_rcmode_reads);
+    gt_logger_log(logger, "- revcompl: "GT_WU"", output_rcmode_reads);
   }
 
   if (!had_err && arguments->dl)

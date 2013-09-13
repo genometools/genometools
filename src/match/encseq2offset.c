@@ -106,7 +106,7 @@ GtUword *gt_encseqtable2sequenceoffsets(
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmpwildcardranges);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmprealspecialranges);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmprealwildcardranges);
-    printf("# seqlen[%u] = "GT_LU"\n",
+    printf("# seqlen[%u] = "GT_WU"\n",
            idx,
            gt_encseq_total_length(suffixarraytable[idx].encseq));
   }

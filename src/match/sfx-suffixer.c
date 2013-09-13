@@ -160,15 +160,15 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
 
   if (len1 != len2)
   {
-    fprintf(stderr,"%s: len1 = "GT_LU" != "GT_LU" = len2\n",__func__,len1,len2);
+    fprintf(stderr,"%s: len1 = "GT_WU" != "GT_WU" = len2\n",__func__,len1,len2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   for (idx=0; idx<len1; idx++)
   {
     if (codelist1[idx].position != codelist2[idx].position)
     {
-      fprintf(stderr,"%s: listlength = "GT_LU",idx "GT_LU", codelist1.position "
-                     "= "GT_LU" != "GT_LU" = codelist2.position\n",
+      fprintf(stderr,"%s: listlength = "GT_WU",idx "GT_WU", codelist1.position "
+                     "= "GT_WU" != "GT_WU" = codelist2.position\n",
                       __func__,len1,idx,
                       codelist1[idx].position,
                       codelist2[idx].position);
@@ -184,7 +184,7 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
     }
     if (codelist1[idx].maxprefixindex != codelist2[idx].maxprefixindex)
     {
-      fprintf(stderr,"%s: idx "GT_LU", codelist1.maxprefixindex = %u != %u = "
+      fprintf(stderr,"%s: idx "GT_WU", codelist1.maxprefixindex = %u != %u = "
                      "codelist2.maxprefixindex\n",__func__,idx,
                       codelist1[idx].maxprefixindex,
                       codelist2[idx].maxprefixindex);
@@ -192,7 +192,7 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
     }
     if (codelist1[idx].code != codelist2[idx].code)
     {
-      fprintf(stderr,"%s: idx "GT_LU", codelist1.code = %u != %u = "
+      fprintf(stderr,"%s: idx "GT_WU", codelist1.code = %u != %u = "
                      "codelist2.code\n",__func__,idx,
                       codelist1[idx].code,
                       codelist2[idx].code);
@@ -280,7 +280,7 @@ static void updatekmercount(void *processinfo,
           cp->maxprefixindex = kmercode->specialposition;
           cp->position = position + kmercode->specialposition;
           /*
-          printf("store(code=%u,maxprefixindex=%u,pos="GT_LU")\n",
+          printf("store(code=%u,maxprefixindex=%u,pos="GT_WU")\n",
                   cp->code,cp->maxprefixindex,cp->position);
           */
         }
@@ -312,8 +312,8 @@ static void updatekmercount(void *processinfo,
                                        position);
       if (code2 != 0)
       {
-        fprintf(stderr,"%s: ### position "GT_LU", code2 = "GT_LU" != 0\n",__func__,
-                       position,code2);
+        fprintf(stderr,"%s: ### position "GT_WU", code2 = "GT_WU" != 0\n",
+                __func__, position,code2);
         fprintf(stderr,"previouscode = " FormatGtCodetype "\n",previouscode);
         if (previouskmercodedefined)
         {
@@ -1293,7 +1293,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       sfi->spaceCodeatposition
         = gt_malloc(sizeof (*sfi->spaceCodeatposition) * (realspecialranges+1));
-      gt_logger_log(logger,"sizeof (spaceCodeatposition)="GT_LU" bytes",
+      gt_logger_log(logger,"sizeof (spaceCodeatposition)="GT_WU" bytes",
                  (GtUword) (sizeof (*sfi->spaceCodeatposition) *
                                           (realspecialranges+1)));
       estimatedspace += sizeof (*sfi->spaceCodeatposition) *
@@ -1339,18 +1339,18 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       defaultsfxstrategy(&sfi->sfxstrategy,
                          gt_encseq_bitwise_cmp_ok(encseq) ? false : true);
     }
-    gt_logger_log(logger,"maxinsertionsort="GT_LU"",
+    gt_logger_log(logger,"maxinsertionsort="GT_WU"",
                   sfi->sfxstrategy.maxinsertionsort);
-    gt_logger_log(logger,"maxbltriesort="GT_LU"",
+    gt_logger_log(logger,"maxbltriesort="GT_WU"",
                   sfi->sfxstrategy.maxbltriesort);
-    gt_logger_log(logger,"maxcountingsort="GT_LU"",
+    gt_logger_log(logger,"maxcountingsort="GT_WU"",
                   sfi->sfxstrategy.maxcountingsort);
     gt_logger_log(logger,"storespecialcodes=%s",
                   sfi->sfxstrategy.storespecialcodes ? "true" : "false");
     gt_logger_log(logger,"cmpcharbychar=%s",
                   sfi->sfxstrategy.cmpcharbychar ? "true" : "false");
     sfi->totallength = gt_encseq_total_length(encseq);
-    gt_logger_log(logger,"totallength="GT_LU"",sfi->totallength);
+    gt_logger_log(logger,"totallength="GT_WU"",sfi->totallength);
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = (GtOutlcpinfo *) voidoutlcpinfo;
     sfi->outlcpinfoforsample = NULL;
@@ -1493,7 +1493,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       estimatedspace += sizeofprefixmarks;
       gt_logger_log(sfi->logger,"for all sequences, keep track of "
                                 "%u-mers starting at position 0 using a "
-                                "table of "GT_LU" bytes",
+                                "table of "GT_WU" bytes",
                                 sfi->prefixlength +
                                 sfi->spmopt_additionalprefixchars,
                                 (GtUword) sizeofprefixmarks);
@@ -1515,7 +1515,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       estimatedspace += sizeofsuffixmarks;
       gt_logger_log(sfi->logger,"for all sequences, keep track of "
                                 "%u-mers starting at position %u "
-                                "using a table of "GT_LU" bytes",
+                                "using a table of "GT_WU" bytes",
                                 suffixchars,
                                 sfi->prefixlength +
                                 sfi->spmopt_additionalprefixchars,
@@ -1620,13 +1620,13 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       = gt_bcktab_leftborderpartialsums(&saved_bucketswithoutwholeleaf,
                                         &numofsuffixestosort,
                                         sfi->bcktab);
-    gt_logger_log(sfi->logger, "largest bucket size="GT_LU"",largestbucketsize);
+    gt_logger_log(sfi->logger, "largest bucket size="GT_WU"",largestbucketsize);
     if (sfi->sfxstrategy.spmopt_minlength > 0)
     {
       gt_logger_log(sfi->logger, "relevant suffixes=%.2f%%",100.0 *
                                         (double) numofsuffixestosort/
                                         (sfi->totallength+1));
-      gt_logger_log(sfi->logger,"saved_bucketswithoutwholeleaf="GT_LU"",
+      gt_logger_log(sfi->logger,"saved_bucketswithoutwholeleaf="GT_WU"",
                                    saved_bucketswithoutwholeleaf);
       /*
       gt_assert(saved_bucketswithoutwholeleaf +
@@ -1802,8 +1802,8 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
   {
     gt_logger_log(sfi->logger,"compute part %u: "
-                              ""GT_LU" suffixes,"GT_LU" buckets from "
-                              ""GT_LU".."GT_LU"",
+                              ""GT_WU" suffixes,"GT_WU" buckets from "
+                              ""GT_WU".."GT_WU"",
                   sfi->part,
                   gt_suftabparts_widthofpart(sfi->part,sfi->suftabparts),
                   sfi->currentmaxcode - sfi->currentmincode + 1,

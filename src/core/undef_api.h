@@ -43,9 +43,13 @@
 #define GT_UNDEF_INT \
         INT_MIN
 
-/* The undefined <long> value. */
-#define GT_UNDEF_LONG \
+/* The undefined <GtWord> value. */
+#define GT_UNDEF_WORD \
         LONG_MIN
+
+/* The undefined <long> value. deprecated */
+#define GT_UNDEF_LONG \
+        GT_UNDEF_WORD
 
 /* The undefined <unsigned char> value. */
 #define GT_UNDEF_UCHAR \
@@ -56,7 +60,11 @@
         ~0U
 
 /* The undefined <GtUword> value. */
-#define GT_UNDEF_ULONG \
+#define GT_UNDEF_UWORD \
         ~0UL
+
+/* The undefined <unsigned long> value. deprecated */
+#define GT_UNDEF_ULONG \
+        GT_UNDEF_UWORD
 
 #endif

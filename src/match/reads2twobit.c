@@ -89,7 +89,7 @@ GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname)
   r2t->total_seqlength = 0;
   r2t->nofseqs = 0;
   r2t->phredbase = (char)33;
-  r2t->maxlow = GT_UNDEF_ULONG;
+  r2t->maxlow = GT_UNDEF_UWORD;
   r2t->lowqual = 0;
   r2t->has_paired = false;
   r2t->use_rle = false;
@@ -373,7 +373,7 @@ static void gt_reads2twobit_init_seppos(GtReads2TwobitEncodeState *state,
   gt_assert(currentpos > 0);
   gt_assert(state->inputfiles_totallength > currentpos);
   state->seppos_alloc = state->inputfiles_totallength / currentpos;
-  gt_log_log("rough estimate of nofseqs = "GT_LU"", state->seppos_alloc);
+  gt_log_log("rough estimate of nofseqs = "GT_WU"", state->seppos_alloc);
   state->seppos = gt_malloc(sizeof (state->seppos) * state->seppos_alloc);
   state->current.seppos_nextfree = 0;
 }
@@ -404,8 +404,8 @@ static void gt_reads2twobit_switch_to_varlen_mode(
   gt_assert(state->current.nofseqs > 1UL);
   gt_assert(state->current.seqlen_first != state->seqlen);
   gt_assert(state->seqlen > 1UL);
-  gt_log_log("readset is varlen: sequences 0.."GT_LU" are "
-      ""GT_LU" bp long, sequence "GT_LU" is "GT_LU" bp long",
+  gt_log_log("readset is varlen: sequences 0.."GT_WU" have length "GT_WU
+             ", sequence "GT_WU" is "GT_WU" bp long",
       state->current.nofseqs - 2UL, state->current.seqlen_first - 1UL,
       state->current.nofseqs - 1UL, state->seqlen - 1UL);
   gt_reads2twobit_init_seppos(state,
@@ -498,7 +498,7 @@ static void gt_reads2twobit_switch_to_invalid_mode(
   state->invalid_total_length += state->seqlen_mate;
   if (state->varlen_mode && state->backup.seppos_nextfree == 0)
   {
-    gt_log_log("switch back to eqlen mode, seqlen = "GT_LU"",
+    gt_log_log("switch back to eqlen mode, seqlen = "GT_WU"",
         state->backup.seqlen_first);
     gt_free(state->seppos);
     state->seppos = NULL;
@@ -650,7 +650,7 @@ static int gt_reads2twobit_encode_unpaired_fastq_library(
           state->qbuf, &qbuf_next);
       if (qbuf_next == state->exp_qlen)
       {
-        if (state->maxlow != GT_UNDEF_ULONG)
+        if (state->maxlow != GT_UNDEF_UWORD)
           gt_reads2twobit_apply_quality_filter(state, state->qbuf, qbuf_next);
         qbuf_next = 0;
         qmode = false;
@@ -798,7 +798,7 @@ static inline int gt_reads2twobit_process_fastq_mate_pair(
         had_err = -2;
       if (!had_err && qbuf2_next == state->exp_qlen)
       {
-        if (state->maxlow != GT_UNDEF_ULONG)
+        if (state->maxlow != GT_UNDEF_UWORD)
           gt_reads2twobit_apply_quality_filter(state, state->qbuf2, qbuf2_next);
         qbuf2_next = 0;
         qmode = false;
@@ -871,7 +871,7 @@ static int gt_reads2twobit_encode_interleaved_paired_fastq_library(
           state->qbuf, &qbuf_next);
       if (qbuf_next == state->exp_qlen)
       {
-        if (state->maxlow != GT_UNDEF_ULONG)
+        if (state->maxlow != GT_UNDEF_UWORD)
           gt_reads2twobit_apply_quality_filter(state, state->qbuf, qbuf_next);
         qbuf_next = 0;
         qmode = false;
@@ -939,7 +939,7 @@ static int gt_reads2twobit_encode_twofile_paired_fastq_library(
           state->qbuf, &qbuf_next);
       if (qbuf_next == state->exp_qlen)
       {
-        if (state->maxlow != GT_UNDEF_ULONG)
+        if (state->maxlow != GT_UNDEF_UWORD)
           gt_reads2twobit_apply_quality_filter(state, state->qbuf, qbuf_next);
         qbuf_next = 0;
         qmode = false;
@@ -1166,7 +1166,7 @@ static void gt_reads2twobit_tbe_flush_and_realloc(GtReads2Twobit *r2t,
   }
   if (state->current.nofseqs > 0)
   {
-    gt_log_log("realloc tbe, total_seqlength = "GT_LU", nofseqs = "GT_LU"",
+    gt_log_log("realloc tbe, total_seqlength = "GT_WU", nofseqs = "GT_WU"",
         r2t->total_seqlength, state->current.nofseqs);
     gt_assert(r2t->total_seqlength > 0);
     r2t->twobitencoding = gt_realloc(r2t->twobitencoding,
@@ -1320,7 +1320,7 @@ static inline GtTwobitencoding gt_reads2twobit_less_frequent_char(
       code = i;
     }
   }
-  gt_log_log("less frequent char code: "GT_LU"", (GtUword)code);
+  gt_log_log("less frequent char code: "GT_WU"", (GtUword)code);
   return code;
 }
 
@@ -1757,7 +1757,7 @@ static void gt_reads2twobit_set_separators_to_less_frequent_char(
   if (sepcode != r2t->current_sepcode && r2t->nofseqs > 1UL)
   {
     GtUword from, to;
-    gt_log_log("changing sepcode from "GT_LU" to "GT_LU"",
+    gt_log_log("changing sepcode from "GT_WU" to "GT_WU"",
                 (GtUword) r2t->current_sepcode,
                 (GtUword) sepcode);
     from = r2t->seqlen_eqlen > 0 ? 1UL : 0;
@@ -1862,7 +1862,7 @@ int gt_reads2twobit_write_encseq(GtReads2Twobit *r2t, GtError *err)
   }
   gt_assert(r2t->twobitencoding != NULL);
   gt_log_log("write encseq %s", gt_str_get(r2t->indexname));
-  gt_log_log("seqlen_eqlen = "GT_LU"", r2t->seqlen_eqlen);
+  gt_log_log("seqlen_eqlen = "GT_WU"", r2t->seqlen_eqlen);
   if (r2t->seqlen_eqlen > 0)
   {
     had_err = gt_reads2twobit_write_encseq_eqlen(r2t, err);

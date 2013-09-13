@@ -79,7 +79,7 @@ static GtOptionParser* gt_readjoiner_correct_option_parser_new(
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_uword("dbg","(debug value) "
-      "see code for current meaning", &arguments->debug_value, GT_UNDEF_ULONG);
+      "see code for current meaning", &arguments->debug_value, GT_UNDEF_UWORD);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 

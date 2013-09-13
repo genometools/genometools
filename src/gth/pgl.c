@@ -40,12 +40,12 @@ GthPGL* gth_pgl_new(bool forward)
   pgl->pglo = gt_malloc(sizeof *pgl->pglo);
 
   pgl->pglo->gen_strand_forward = forward;
-  pgl->pglo->gen_file_num       = GT_UNDEF_ULONG;
-  pgl->pglo->gen_seq_num        = GT_UNDEF_ULONG;
-  pgl->pglo->gen_total_length   = GT_UNDEF_ULONG;
-  pgl->pglo->gen_offset         = GT_UNDEF_ULONG;
-  pgl->maxrange.start           = GT_UNDEF_ULONG;
-  pgl->maxrange.end             = GT_UNDEF_ULONG;
+  pgl->pglo->gen_file_num       = GT_UNDEF_UWORD;
+  pgl->pglo->gen_seq_num        = GT_UNDEF_UWORD;
+  pgl->pglo->gen_total_length   = GT_UNDEF_UWORD;
+  pgl->pglo->gen_offset         = GT_UNDEF_UWORD;
+  pgl->maxrange.start           = GT_UNDEF_UWORD;
+  pgl->maxrange.end             = GT_UNDEF_UWORD;
 
   pgl->assemblies = gt_array_new(sizeof (GthAGS*));
   pgl->alignments = gt_array_new(sizeof (GthSA*));
@@ -89,7 +89,7 @@ void gth_pgl_add_sa(GthPGL *pgl, GthSA *sa)
   gt_assert(pgl && sa);
 
   /* save genomic sequence number and total length of genomic sequence */
-  if ((pgl->pglo->gen_total_length == GT_UNDEF_ULONG) &&
+  if ((pgl->pglo->gen_total_length == GT_UNDEF_UWORD) &&
       !gt_array_size(pgl->alignments)) {
     pgl->pglo->gen_file_num     = gth_sa_gen_file_num(sa);
     pgl->pglo->gen_seq_num      = gth_sa_gen_seq_num(sa);

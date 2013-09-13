@@ -65,7 +65,7 @@ static int parse_fasta_sequence(GtStr *sequence, GtIO *seqio, GtError *err)
       gt_str_append_char(sequence, cc);
   }
   if (!gt_str_length(sequence)) {
-    gt_error_set(err, "empty sequence given in line "GT_LU"",
+    gt_error_set(err, "empty sequence given in line "GT_WU"",
               gt_io_get_line_number(seqio));
     return -1;
   }

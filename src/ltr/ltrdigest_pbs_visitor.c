@@ -401,11 +401,11 @@ static void pbs_attach_results_to_gff3(GtLTRdigestPBSVisitor *lv,
                                    gt_pbs_hit_get_trna(hit));
   }
   gt_feature_node_set_strand(mainnode, gt_pbs_hit_get_strand(hit));
-  (void) snprintf(buffer, BUFSIZ-1, ""GT_LU"", gt_pbs_hit_get_tstart(hit));
+  (void) snprintf(buffer, BUFSIZ-1, ""GT_WU"", gt_pbs_hit_get_tstart(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf, "trnaoffset", buffer);
-  (void) snprintf(buffer, BUFSIZ-1, ""GT_LU"", gt_pbs_hit_get_offset(hit));
+  (void) snprintf(buffer, BUFSIZ-1, ""GT_WU"", gt_pbs_hit_get_offset(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf, "pbsoffset", buffer);
-  (void) snprintf(buffer, BUFSIZ-1, ""GT_LU"", gt_pbs_hit_get_edist(hit));
+  (void) snprintf(buffer, BUFSIZ-1, ""GT_WU"", gt_pbs_hit_get_edist(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf, "edist", buffer);
 
   gt_feature_node_add_child(mainnode, (GtFeatureNode*) gf);

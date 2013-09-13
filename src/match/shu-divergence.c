@@ -40,7 +40,7 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
 
   if (x > n_s) {
     /* change this to standard GT-behaviour XXX*/
-    printf("Error: x = "GT_LU"."
+    printf("Error: x = "GT_WU"."
            " The maximum number of elements in the array"
            " s1 should be increased!\n", x);
   }

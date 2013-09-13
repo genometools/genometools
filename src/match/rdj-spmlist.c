@@ -101,7 +101,7 @@ static int gt_spmlist_parse_bin ## BITS(FILE *file, GtUword min_length,\
     if (retval != (size_t)3)\
     {\
       had_err = -1;\
-      gt_log_log("retval: "GT_LU"", (GtUword)retval);\
+      gt_log_log("retval: "GT_WU"", (GtUword)retval);\
       gt_error_set(err, "SPM binary file error: %s", feof(file) ?\
           "premature EOF" : strerror(errno));\
     }\
@@ -443,7 +443,7 @@ void gt_spmproc_show_ascii(GtUword suffix_seqnum,
     void *data)
 {
   GtFile *file = data;
-  gt_file_xprintf(file, ""GT_LU" %s "GT_LU" %s "GT_LU"\n", suffix_seqnum,
+  gt_file_xprintf(file, ""GT_WU" %s "GT_WU" %s "GT_WU"\n", suffix_seqnum,
       suffixseq_direct ? "+" : "-", prefix_seqnum,
       prefixseq_direct ? "+" : "-", length);
 }
@@ -458,10 +458,10 @@ void gt_spmproc_a_show_ascii(GtUword suffix_seqnum,
     void *data)
 {
   GtFile *file = data;
-  gt_file_xprintf(file, ""GT_LU" %s "GT_LU" %s "GT_LU" "GT_LU" "GT_LU"\n", suffix_seqnum,
-      suffixseq_direct ? "+" : "-", prefix_seqnum,
-      prefixseq_direct ? "+" : "-", suffix_length, prefix_length,
-      unit_edist);
+  gt_file_xprintf(file, ""GT_WU" %s "GT_WU" %s "GT_WU" "GT_WU" "GT_WU"\n",
+                  suffix_seqnum, suffixseq_direct ? "+" : "-", prefix_seqnum,
+                  prefixseq_direct ? "+" : "-", suffix_length, prefix_length,
+                  unit_edist);
 }
 
 /* ---------------------- Unit Test ---------------------- */

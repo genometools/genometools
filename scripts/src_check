@@ -138,11 +138,11 @@ for _, fn in ipairs(arg) do -- iterate over all files
       end
 
       if string.find(l, "%%ld") then
-        err(fn, ln, "do not use '%ld', use 'GT_LD' instead")
+        err(fn, ln, "do not use '%ld', use 'GT_WD' instead")
       end
 
       if string.find(l, "%%lu") then
-        err(fn, ln, "do not use '%lu', use 'GT_LU' instead")
+        err(fn, ln, "do not use '%lu', use 'GT_WU' instead")
       end
 
       if string.find(l, "%%zu") then

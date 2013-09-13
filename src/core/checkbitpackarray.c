@@ -48,7 +48,7 @@ int gt_bitpackarray_unit_test(GtError *err)
     else
       mask = ~((~(uint32_t)0)<<bits);
 
-    gt_log_log("numRnd="GT_LU"\n", (GtUword)numRnd);
+    gt_log_log("numRnd="GT_WU"\n", (GtUword)numRnd);
     randSrc = gt_malloc(sizeof (uint32_t)*numRnd);
     bitStore = bitpackarray_new(bits, numRnd,true);
     randCmp = gt_malloc(sizeof (uint32_t)*numRnd);
@@ -65,7 +65,7 @@ int gt_bitpackarray_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("gt_bsStoreUInt32/bitpackarray_get_uint32: "
-                "Expected %"PRIu32", got %"PRIu32", i = "GT_LU", bits=%u\n",
+                "Expected %"PRIu32", got %"PRIu32", i = "GT_WU", bits=%u\n",
                 v & mask, r, (GtUword)i, bits);
         gt_free(randSrc);
         gt_free(randCmp);
@@ -118,7 +118,7 @@ int gt_bitpackarray_unit_test(GtError *err)
       if (had_err)
       {
         gt_log_log("gt_bsStoreUInt64/bitpackarray_get_uint64: "
-                "Expected "GT_LLU", got "GT_LLU", i = "GT_LU", bits=%u\n",
+                "Expected "GT_LLU", got "GT_LLU", i = "GT_WU", bits=%u\n",
                 (GtUint64)(v & mask),
                 (GtUint64)r, (GtUword)i, bits);
         gt_free(randSrc);

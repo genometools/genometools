@@ -69,14 +69,14 @@ static void showDfs_Boundsatdepth(const char *kind,const Dfs_Boundsatdepth *bd)
   printf("%s ",kind);
   if (bd->isinterval)
   {
-    printf("l="GT_LU" u="GT_LU" i=%u d="GT_LU"\n",bd->either.pckitv.lowerbound,
+    printf("l="GT_WU" u="GT_WU" i=%u d="GT_WU"\n",bd->either.pckitv.lowerbound,
                                       bd->either.pckitv.upperbound,
                                       (unsigned int)
                                       bd->either.pckitv.inchar,
                                       bd->depth);
   } else
   {
-    printf("w="GT_LU" d="GT_LU"\n",bd->either.remainingspecial,bd->depth);
+    printf("w="GT_WU" d="GT_WU"\n",bd->either.remainingspecial,bd->depth);
   }
 }
 #endif
@@ -193,10 +193,9 @@ int gt_fmindex_dfstraverse(const FMindex *fmindex,
                                        parent.either.pckitv.upperbound);
         nonspecialwidth = dfsnonspecialwidth(&bwci);
 #ifdef SKDEBUG
-        printf("split "GT_LU" "GT_LU" into "GT_LU" intervals of width "GT_LU"\n",
-               parent.either.pckitv.lowerbound,
-               parent.either.pckitv.upperbound,
-               bwci.nextfreeBoundswithchar,
+        printf("split "GT_WU" "GT_WU" into "GT_WU" intervals of width "
+               GT_WU"\n", parent.either.pckitv.lowerbound,
+               parent.either.pckitv.upperbound, bwci.nextfreeBoundswithchar,
                nonspecialwidth);
 #endif
         gt_assert(nonspecialwidth <= parentwidth);

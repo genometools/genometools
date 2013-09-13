@@ -84,8 +84,8 @@ GthInput *gth_input_new(GthInputFilePreprocessor file_preprocessor,
   input->referencefiles = gt_str_array_new();
   input->alphatypes = gt_array_new(sizeof (GthAlphatype));
   input->overall_alphatype = UNDEF_ALPHA;
-  input->gen_file_num = GT_UNDEF_ULONG;
-  input->ref_file_num = GT_UNDEF_ULONG;
+  input->gen_file_num = GT_UNDEF_UWORD;
+  input->ref_file_num = GT_UNDEF_UWORD;
   input->seq_con_constructor = seq_con_constructor;
   input->proteinsmap = gt_str_new_cstr(GTH_DEFAULT_PROTEINSMAP);
   input->bssmfile = gt_str_new();
@@ -289,7 +289,7 @@ static void format_reference_seq(unsigned char *seq, GtUword len,
   /* show sequence */
   for (i = 0, j = 0, tennercount = 0; /* nothing */; i++) {
     if (showcharnum) {
-      gt_file_xprintf(outfp, "  %*"GT_LUS"  ", width, i + OUTPUTOFFSET);
+      gt_file_xprintf(outfp, "  %*"GT_WUS"  ", width, i + OUTPUTOFFSET);
       showcharnum = false;
     }
     gt_file_xfputc(toupper(seq[i]), outfp);
@@ -357,7 +357,7 @@ static void save_sequenceid(GtStr *sequenceid, GthSeqCon *seqcol,
   GtStr *description;
 
   /* sequence number is defined */
-  gt_assert(seqnum != GT_UNDEF_ULONG);
+  gt_assert(seqnum != GT_UNDEF_UWORD);
 
   description = gt_str_new();
   gth_seq_con_get_description(seqcol, seqnum, description);
@@ -518,7 +518,8 @@ void gth_input_load_genomic_file_func(GthInput *input,
   gt_assert(input && gen_file_num < gt_str_array_size(input->genomicfiles));
 
 #if INPUT_DEBUG
-  printf("load genomic   (file %s, line %d): gen_file_num: "GT_LU", translate=%s\n",
+  printf("load genomic   (file %s, line %d): gen_file_num: " GT_WU
+         ", translate=%s\n",
          src_file, src_line, gen_file_num, translate ? "true" : "false");
 #endif
 
@@ -527,7 +528,7 @@ void gth_input_load_genomic_file_func(GthInput *input,
     GtStr *indexname;
 
     /* free old genomic file */
-    if (input->gen_file_num != GT_UNDEF_ULONG) {
+    if (input->gen_file_num != GT_UNDEF_UWORD) {
       /* in this case a sequence collection has been loaded -> free it */
       gth_seq_con_delete(input->gen_seq_con);
       /* delete caches */
@@ -576,7 +577,8 @@ void gth_input_load_reference_file_func(GthInput *input,
             ref_file_num < gt_str_array_size(input->referencefiles));
 
 #if INPUT_DEBUG
-  printf("load reference (file %s, line %d): ref_file_num: "GT_LU", translate=%s\n",
+  printf("load reference (file %s, line %d): ref_file_num: " GT_WU
+         ", translate=%s\n",
          src_file, src_line, ref_file_num, translate ? "true" : "false");
 #endif
 
@@ -586,7 +588,7 @@ void gth_input_load_reference_file_func(GthInput *input,
     GtStr *indexname;
 
     /* free old reference file */
-    if (input->ref_file_num != GT_UNDEF_ULONG) {
+    if (input->ref_file_num != GT_UNDEF_UWORD) {
       /* in this case a sequence collection has been loaded -> free it */
       gth_seq_con_delete(input->ref_seq_con);
       gth_md5_cache_delete(input->ref_md5_cache);
@@ -984,7 +986,7 @@ int gth_input_make_indices(GthInput *input, const char *progname, GtError *err)
 void gth_input_delete_current(GthInput *input)
 {
   /* free current genomic virtual tree */
-  if (input->gen_file_num != GT_UNDEF_ULONG) {
+  if (input->gen_file_num != GT_UNDEF_UWORD) {
     /* in this case a virtual tree has been loaded -> free it */
     gth_seq_con_delete(input->gen_seq_con);
     gth_md5_cache_delete(input->gen_md5_cache);
@@ -992,7 +994,7 @@ void gth_input_delete_current(GthInput *input)
   }
 
   /* free current reference virtual tree */
-  if (input->ref_file_num != GT_UNDEF_ULONG) {
+  if (input->ref_file_num != GT_UNDEF_UWORD) {
     /* in this case a virtual tree has been loaded -> free it */
     gth_seq_con_delete(input->ref_seq_con);
     gth_md5_cache_delete(input->ref_md5_cache);
@@ -1000,8 +1002,8 @@ void gth_input_delete_current(GthInput *input)
   }
 
   /* set the filenumbers to undefined values */
-  input->gen_file_num = GT_UNDEF_ULONG;
-  input->ref_file_num = GT_UNDEF_ULONG;
+  input->gen_file_num = GT_UNDEF_UWORD;
+  input->ref_file_num = GT_UNDEF_UWORD;
 
   input->genomic_translate = GT_UNDEF_BOOL;
   input->reference_translate = GT_UNDEF_BOOL;

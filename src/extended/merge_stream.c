@@ -38,7 +38,7 @@ static int merge_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtMergeStream *ms;
   GtGenomeNode *min_node = NULL;
-  GtUword i, j, min_i = GT_UNDEF_ULONG;
+  GtUword i, j, min_i = GT_UNDEF_UWORD;
   unsigned int gt_genome_node_consolidated;
   int had_err = 0;
 
@@ -87,14 +87,14 @@ static int merge_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
   if (!had_err) {
     for (i = 0; i < gt_array_size(ms->node_streams); i++) {
       if (ms->buffer[i]) {
-        if (min_i != GT_UNDEF_ULONG) {
+        if (min_i != GT_UNDEF_UWORD) {
           if (gt_genome_node_compare(ms->buffer + i, ms->buffer + min_i) < 0)
             min_i = i;
         }
         else min_i = i;
       }
     }
-    if (min_i != GT_UNDEF_ULONG) {
+    if (min_i != GT_UNDEF_UWORD) {
       min_node = ms->buffer[min_i];
       ms->buffer[min_i] = NULL;
     }

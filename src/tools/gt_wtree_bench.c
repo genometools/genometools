@@ -152,9 +152,9 @@ static int gt_wtree_bench_bench_wtree(GtWtree *wt,
     tmp = gt_wtree_rank(wt, pos, symbol);
     c = gt_wtree_encseq_unmap_decoded(wt, symbol);
     if (isprint(c))
-      printf("rank of %c at "GT_LU": "GT_LU"\n", c, pos, tmp);
+      printf("rank of %c at "GT_WU": "GT_WU"\n", c, pos, tmp);
     else
-      printf("rank of %d at "GT_LU": "GT_LU"\n", c, pos, tmp);
+      printf("rank of %d at "GT_WU": "GT_WU"\n", c, pos, tmp);
   }
   printf("\n");
   gt_timer_show_progress(timer, "1M random select", stderr);
@@ -173,9 +173,9 @@ static int gt_wtree_bench_bench_wtree(GtWtree *wt,
     tmp = gt_wtree_select(wt, pos, symbol);
     c = gt_wtree_encseq_unmap_decoded(wt, symbol);
     if (isprint(c))
-      printf("select "GT_LU"th %c: at "GT_LU"\n", pos, c, tmp);
+      printf("select "GT_WU"th %c: at "GT_WU"\n", pos, c, tmp);
     else
-      printf("select "GT_LU"th %d: at "GT_LU"\n", pos, c, tmp);
+      printf("select "GT_WU"th %d: at "GT_WU"\n", pos, c, tmp);
   }
   printf("\n");
   gt_free(max_ranks);

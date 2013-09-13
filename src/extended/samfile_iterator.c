@@ -104,7 +104,7 @@ int gt_samfile_iterator_next(GtSamfileIterator *s_iter,
   int read;
   if (s_iter->current_alignment == NULL)
     s_iter->current_alignment = gt_sam_alignment_new(s_iter->alphabet);
-  s_iter->current_alignment->rightmost = GT_UNDEF_ULONG;
+  s_iter->current_alignment->rightmost = GT_UNDEF_UWORD;
   read = samread(s_iter->samfile, s_iter->current_alignment->s_alignment);
   if (read > 0) {
     *s_alignment = s_iter->current_alignment;

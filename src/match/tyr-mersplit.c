@@ -357,7 +357,7 @@ int gt_constructmerbuckets(const char *inputindex,
       = gt_power_for_small_exponents(gt_tyrindex_alphasize(tyrindex),
                                      tyrbckinfo.prefixlength);
     tyrbckinfo.mappedmbdfileptr = NULL;
-    printf("# numofcodes = "GT_LU"\n",tyrbckinfo.numofcodes);
+    printf("# numofcodes = "GT_WU"\n",tyrbckinfo.numofcodes);
     gt_tyrindex_show(tyrindex);
     tyrbckinfo.bounds = gt_malloc(sizeof *tyrbckinfo.bounds
                                   * (tyrbckinfo.numofcodes+1));

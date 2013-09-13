@@ -100,7 +100,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
           if (!sequence_length) {
             gt_assert(line_counter);
             gt_error_set(err, "empty sequence after description given in line "
-                              ""GT_LU"", line_counter - 1);
+                              ""GT_WU"", line_counter - 1);
             had_err = -1;
             break;
           }
@@ -154,8 +154,9 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
         had_err = -1;
         break;
       case READING_DESCRIPTION:
-        gt_error_set(err, "unfinished fasta entry in line "GT_LU" of sequence file "
-                  "\"%s\"", line_counter, gt_str_get(fr->sequence_filename));
+        gt_error_set(err, "unfinished fasta entry in line " GT_WU
+                     " of sequence file \"%s\"",
+                     line_counter, gt_str_get(fr->sequence_filename));
         had_err = -1;
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:
@@ -163,7 +164,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
         if (!sequence_length) {
           gt_assert(line_counter);
           gt_error_set(err, "empty sequence after description given in line "
-                            ""GT_LU"", line_counter - 1);
+                            ""GT_WU"", line_counter - 1);
           had_err = -1;
         }
         else {

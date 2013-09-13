@@ -118,11 +118,11 @@ static void gt_randomcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
   cdi.hugesum = 0;
   gt_disc_distri_foreach(countdistri,gt_randomcodes_evaluate_distvalue,&cdi);
   sum = cdi.smallsum + cdi.largesum + cdi.hugesum;
-  gt_log_log("small="GT_LU","GT_LU" (%.2f)",cdi.smallcount,cdi.smallsum,
+  gt_log_log("small="GT_WU","GT_WU" (%.2f)",cdi.smallcount,cdi.smallsum,
           (double) cdi.smallsum/sum);
-  gt_log_log("large="GT_LU","GT_LU" (%.2f)",cdi.largecount,cdi.largesum,
+  gt_log_log("large="GT_WU","GT_WU" (%.2f)",cdi.largecount,cdi.largesum,
           (double) cdi.largesum/sum);
-  gt_log_log("huge="GT_LU","GT_LU" (%.2f)",cdi.hugecount,cdi.hugesum,
+  gt_log_log("huge="GT_WU","GT_WU" (%.2f)",cdi.hugecount,cdi.hugesum,
           (double) cdi.largesum/sum);
   spacenow = sizeof (uint32_t) * sum;
   spaceopt = sizeof (uint8_t) * sum;
@@ -175,8 +175,8 @@ GtUword gt_randomcodes_remdups(GtUword *allrandomcodes,
 #endif
     }
   }
-  gt_logger_log(logger,"number of different bucket codes="GT_LU" (%.2f%%) "
-                       "of "GT_LU" sampled codes",
+  gt_logger_log(logger,"number of different bucket codes="GT_WU" (%.2f%%) "
+                       "of "GT_WU" sampled codes",
                 numofdifferentcodes,
                 100.00 * (double) numofdifferentcodes/numofcodes,
                 numofcodes);
@@ -237,14 +237,14 @@ GtUword gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
 #endif
 
   gt_assert(rct->differentcodes < UINT32_MAX);
-  gt_log_log("hashmap_addcount="GT_LU" (%.2f%%)",rct->hashmap_addcount,
+  gt_log_log("hashmap_addcount="GT_WU" (%.2f%%)",rct->hashmap_addcount,
                   100.0 * (double) rct->hashmap_addcount/
                                    rct->differentcodes);
-  gt_log_log("hashmap_incrementcount="GT_LU" (%.2f%%)",
+  gt_log_log("hashmap_incrementcount="GT_WU" (%.2f%%)",
                   rct->hashmap_incrementcount,
                   100.0 * (double) rct->hashmap_incrementcount/
                                    rct->all_incrementcount);
-  gt_log_log("hashmap_getcount="GT_LU" (%.2f%%)",
+  gt_log_log("hashmap_getcount="GT_WU" (%.2f%%)",
                   rct->hashmap_getcount,
                   100.0 * (double) rct->hashmap_getcount/
                                    rct->all_incrementcount);
@@ -257,7 +257,7 @@ GtUword gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
   } else
   {
     rct->bitchangepoints.allocatedGtUlong = 1UL << (btp - rct->modvaluebits);
-    gt_log_log("lastpartsum="GT_LU", bitchangepoints.allocated="GT_LU"",
+    gt_log_log("lastpartsum="GT_WU", bitchangepoints.allocated="GT_WU"",
               expectedlastpartsum,rct->bitchangepoints.allocatedGtUlong);
     rct->bitchangepoints.spaceGtUlong
       = gt_malloc(sizeof (*rct->bitchangepoints.spaceGtUlong)
@@ -355,7 +355,7 @@ GtUword gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
     spacewithouthashmap = gt_ma_get_space_current() + gt_fa_get_space_current();
     gt_assert(spacewithouthashmap < spacewithhashmap);
     hashmapspace = spacewithhashmap - spacewithouthashmap;
-    gt_log_log("space for hashmap=%.2f ("GT_LU" bytes per entry)",
+    gt_log_log("space for hashmap=%.2f ("GT_WU" bytes per entry)",
                GT_MEGABYTES(hashmapspace),hashmapspace/rct->hashmap_addcount);
   }
   rct->countocc_exceptions = NULL;

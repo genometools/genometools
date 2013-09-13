@@ -163,7 +163,7 @@ static int gt_idxlocali_runner(GT_UNUSED int argc,
   {
     printf("# queryfile=%s\n",gt_str_array_get (arguments->queryfiles, idx));
   }
-  printf("# threshold="GT_LU"\n", arguments->threshold);
+  printf("# threshold="GT_WU"\n", arguments->threshold);
   if (!haserr && gt_runidxlocali (arguments, err) != 0)
   {
     haserr = true;

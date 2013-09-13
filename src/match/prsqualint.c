@@ -91,7 +91,7 @@ Qualifiedinteger *gt_parsequalifiedinteger(const char *option,
         qualint->qualtag = Qualabsolute;
       }
     }
-    if (sscanf(lparamcopy,""GT_LD"",&readint) != 1 || readint <= 0)
+    if (sscanf(lparamcopy,""GT_WD"",&readint) != 1 || readint <= 0)
     {
       ERRORLPARAM;
       haserr = true;

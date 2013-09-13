@@ -158,8 +158,8 @@ static void gt_aligned_segment_align_using_cigar(GtAlignedSegment *as,
 static void gt_aligned_segment_init_from_unmapped_sa(GtAlignedSegment *as,
     GtSamAlignment *sa)
 {
-  as->r_left = GT_UNDEF_ULONG;
-  as->r_right = GT_UNDEF_ULONG;
+  as->r_left = GT_UNDEF_UWORD;
+  as->r_right = GT_UNDEF_UWORD;
   as->alen = gt_sam_alignment_read_length(sa);
   as->s = gt_malloc(sizeof (*as->s) * (as->alen + 1UL));
   as->q = gt_malloc(sizeof (*as->q) * (as->alen + 1UL));
@@ -279,7 +279,7 @@ GtUword gt_aligned_segment_offset_for_refpos(const GtAlignedSegment *as,
   GtUword r_offset, pos, ungapped_pos;
   gt_assert(as != NULL);
   if (refpos < as->r_left || refpos > as->r_right)
-    return GT_UNDEF_ULONG;
+    return GT_UNDEF_UWORD;
   r_offset = refpos - as->r_left;
   pos = 0;
   ungapped_pos = 0;
@@ -306,7 +306,7 @@ GtUword gt_aligned_segment_orig_seqpos_for_refpos(
   gt_assert(as != NULL);
   gt_assert(as->s_orig != NULL);
   if (refpos < as->r_left || refpos > as->r_right)
-    return GT_UNDEF_ULONG;
+    return GT_UNDEF_UWORD;
   r_offset = refpos - as->r_left;
   gapped_pos = 0;
   ungapped_pos_on_r = 0;

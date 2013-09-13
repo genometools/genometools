@@ -237,32 +237,33 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
 {
   GtStatVisitor *sv = stat_visitor_cast(nv);
   if (sv->number_of_sequence_regions) {
-    gt_file_xprintf(outfp, "sequence regions: "GT_LU" (total length: "GT_LLU")\n",
+    gt_file_xprintf(outfp, "sequence regions: "GT_WU
+                    " (total length: "GT_LLU")\n",
                     sv->number_of_sequence_regions,
                     sv->total_length_of_sequence_regions);
   }
   if (sv->number_of_multi_features) {
-    gt_file_xprintf(outfp, "multi-features: "GT_LU"\n",
+    gt_file_xprintf(outfp, "multi-features: "GT_WU"\n",
                     sv->number_of_multi_features);
   }
   if (sv->number_of_genes)
-    gt_file_xprintf(outfp, "genes: "GT_LU"\n", sv->number_of_genes);
+    gt_file_xprintf(outfp, "genes: "GT_WU"\n", sv->number_of_genes);
   if (sv->number_of_protein_coding_genes) {
-    gt_file_xprintf(outfp, "protein-coding genes: "GT_LU"\n",
+    gt_file_xprintf(outfp, "protein-coding genes: "GT_WU"\n",
                     sv->number_of_protein_coding_genes);
   }
   if (sv->number_of_mRNAs)
-    gt_file_xprintf(outfp, "mRNAs: "GT_LU"\n", sv->number_of_mRNAs);
+    gt_file_xprintf(outfp, "mRNAs: "GT_WU"\n", sv->number_of_mRNAs);
   if (sv->number_of_protein_coding_mRNAs) {
-    gt_file_xprintf(outfp, "protein-coding mRNAs: "GT_LU"\n",
+    gt_file_xprintf(outfp, "protein-coding mRNAs: "GT_WU"\n",
                     sv->number_of_protein_coding_mRNAs);
   }
   if (sv->number_of_exons)
-    gt_file_xprintf(outfp, "exons: "GT_LU"\n", sv->number_of_exons);
+    gt_file_xprintf(outfp, "exons: "GT_WU"\n", sv->number_of_exons);
   if (sv->number_of_CDSs)
-    gt_file_xprintf(outfp, "CDSs: "GT_LU"\n", sv->number_of_CDSs);
+    gt_file_xprintf(outfp, "CDSs: "GT_WU"\n", sv->number_of_CDSs);
   if (sv->number_of_LTR_retrotransposons) {
-    gt_file_xprintf(outfp, "LTR_retrotransposons: "GT_LU"\n",
+    gt_file_xprintf(outfp, "LTR_retrotransposons: "GT_WU"\n",
                     sv->number_of_LTR_retrotransposons);
   }
   if (sv->gene_length_distribution) {

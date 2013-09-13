@@ -176,7 +176,7 @@ static int get_caption_display_status(GtDiagram *d, const char *gft,
   status = (bool*) gt_hashmap_get(d->caption_display_status, gft);
   if (!status)
   {
-    GtUword threshold = GT_UNDEF_ULONG;
+    GtUword threshold = GT_UNDEF_UWORD;
     double tmp = GT_UNDEF_DOUBLE;
     status = gt_malloc(sizeof (bool));
     *status = true;
@@ -202,7 +202,7 @@ static int get_caption_display_status(GtDiagram *d, const char *gft,
         default:
           gt_assert(tmp != GT_UNDEF_DOUBLE);
           threshold = tmp;
-          gt_assert(tmp != GT_UNDEF_ULONG);
+          gt_assert(tmp != GT_UNDEF_UWORD);
           *status = (gt_range_length(&d->range) <= threshold);
           break;
       }
@@ -436,8 +436,8 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
              *parent_gft = NULL;
   double tmp;
   GtStyleQueryStatus rval;
-  GtUword max_show_width = GT_UNDEF_ULONG,
-                par_max_show_width = GT_UNDEF_ULONG;
+  GtUword max_show_width = GT_UNDEF_UWORD,
+                par_max_show_width = GT_UNDEF_UWORD;
 
   gt_assert(d && node);
 
@@ -491,11 +491,11 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
           break;
       }
     } else
-      par_max_show_width = GT_UNDEF_ULONG;
+      par_max_show_width = GT_UNDEF_UWORD;
   }
 
   /* check if this type is to be displayed at all */
-  if (max_show_width != GT_UNDEF_ULONG &&
+  if (max_show_width != GT_UNDEF_UWORD &&
       gt_range_length(&d->range) > max_show_width)
   {
     return 0;
@@ -503,7 +503,7 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
 
   /* disregard parent node if it is configured not to be shown */
   if (parent
-        && par_max_show_width != GT_UNDEF_ULONG
+        && par_max_show_width != GT_UNDEF_UWORD
         && gt_range_length(&d->range) > par_max_show_width)
   {
     parent = NULL;

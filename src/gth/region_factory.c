@@ -53,7 +53,7 @@ static SeqidStore* seqid_store_new(GthInput *input)
   /* initialize offsets to undefined values */
   for (i = 0; i < ss->num_of_files; i++) {
     for (j = 0; j < ss->num_of_sequences[i]; j++)
-      ss->offsets[i][j] = GT_UNDEF_ULONG;
+      ss->offsets[i][j] = GT_UNDEF_UWORD;
   }
   return ss;
 }
@@ -85,7 +85,7 @@ static void seqid_store_add(SeqidStore *ss, GtUword filenum,
   gt_assert(seqnum < ss->num_of_sequences[filenum]);
   gt_assert(!ss->store[filenum][seqnum]); /* is unused */
   ss->store[filenum][seqnum] = gt_str_clone(seqid);
-  ss->offsets[filenum][seqnum] = offset == GT_UNDEF_ULONG ? 1 : offset;
+  ss->offsets[filenum][seqnum] = offset == GT_UNDEF_UWORD ? 1 : offset;
 }
 
 static GtStr* seqid_store_get(SeqidStore *ss, GtUword filenum,
@@ -109,7 +109,7 @@ static GtUword seqid_store_offset(SeqidStore *ss, GtUword filenum,
   gt_assert(filenum < ss->num_of_files);
   gt_assert(seqnum < ss->num_of_sequences[filenum]);
   offset = ss->offsets[filenum][seqnum];
-  gt_assert(offset != GT_UNDEF_ULONG); /* is defined */
+  gt_assert(offset != GT_UNDEF_UWORD); /* is defined */
   return offset;
 }
 
@@ -177,7 +177,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
     gt_free(base);
     gt_str_append_char(seqid, '|');
     gt_str_append_ulong(seqid, seqnum + 1); /* 1-based */
-    seqid_store_add(srf->seqid_store, filenum, seqnum, seqid, GT_UNDEF_ULONG);
+    seqid_store_add(srf->seqid_store, filenum, seqnum, seqid, GT_UNDEF_UWORD);
     gt_assert(!gt_cstr_table_get(srf->used_seqids, gt_str_get(seqid)));
     gt_cstr_table_add(srf->used_seqids, gt_str_get(seqid));
     sr = gt_region_node_new(seqid_store_get(srf->seqid_store, filenum, seqnum),
@@ -195,7 +195,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
       /* no sequence region with this id exists -> create one */
       gt_cstr_table_add(srf->used_seqids, gt_str_get(sequenceid));
       seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid,
-                      offset_is_defined ? descrange.start : GT_UNDEF_ULONG);
+                      offset_is_defined ? descrange.start : GT_UNDEF_UWORD);
       sr = gt_region_node_new(seqid_store_get(srf->seqid_store, filenum,
                                               seqnum), range.start, range.end);
       gt_hashmap_add(sequence_regions,
@@ -212,7 +212,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
       new_range = gt_range_join(&prev_range, &range);
       gt_genome_node_set_range(sr, &new_range);
       seqid_store_add(srf->seqid_store, filenum, seqnum, sequenceid,
-                      offset_is_defined ? descrange.start : GT_UNDEF_ULONG);
+                      offset_is_defined ? descrange.start : GT_UNDEF_UWORD);
     }
   }
   gt_assert(sr);

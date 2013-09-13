@@ -450,7 +450,7 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
     }
     else {
     hcr_enc->seq_encoder->startofsamplingtab = filepos;
-    gt_log_log("start of samplingtab: "GT_LU"",
+    gt_log_log("start of samplingtab: "GT_WU"",
                hcr_enc->seq_encoder->startofsamplingtab);
     if (hcr_enc->seq_encoder->sampling != NULL)
       gt_sampling_write(hcr_enc->seq_encoder->sampling, fp);
@@ -628,7 +628,7 @@ static int get_next_file_chunk_for_huffman(GtBitsequence **bits,
   gt_assert(bits && length && offset && pad_length);
   data_iter = (HcrHuffDataIterator*) meminfo;
 
-  gt_log_log("pos in iter: "GT_LU"", (GtUword) data_iter->pos);
+  gt_log_log("pos in iter: "GT_WU"", (GtUword) data_iter->pos);
   if (data_iter->pos < data_iter->end) {
     gt_fa_xmunmap(data_iter->data);
     data_iter->data = NULL;
@@ -665,7 +665,7 @@ static void reset_data_iterator_to_pos(HcrHuffDataIterator *data_iter,
   gt_assert(pos < data_iter->end);
   gt_assert(data_iter->start <= pos);
   gt_fa_xmunmap(data_iter->data);
-  gt_log_log("reset to pos: "GT_LU"", (GtUword) pos);
+  gt_log_log("reset to pos: "GT_WU"", (GtUword) pos);
   data_iter->data = NULL;
   data_iter->pos = pos;
 }
@@ -882,7 +882,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
       gt_array_reset(seq_dec->symbols);
 
     cur_read.readnum = seq_dec->cur_read;
-    gt_log_log("cur_read: "GT_LU"",seq_dec->cur_read);
+    gt_log_log("cur_read: "GT_WU"",seq_dec->cur_read);
     fileinfo = (FastqFileInfo *)gt_rbtree_next_key(seq_dec->file_info_rbt,
                                                    &cur_read,
                                                    hcr_cmp_FastqFileInfo,
@@ -976,9 +976,9 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
         reads_to_read = readnum - nearestsample;
         hcr_dec->seq_dec->cur_read = nearestsample;
       }
-      gt_log_log("reads to read: "GT_LU", nearest sample: "GT_LU"",
+      gt_log_log("reads to read: "GT_WU", nearest sample: "GT_WU"",
                  reads_to_read,nearestsample);
-      gt_log_log("start of nearest: "GT_LU"", (GtUword) startofnearestsample);
+      gt_log_log("start of nearest: "GT_WU"", (GtUword) startofnearestsample);
     }
     else {
       if (current_read <= readnum)
@@ -1009,7 +1009,7 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
 
   if (hcr_dec->encdesc != NULL) {
     if (gt_encdesc_decode(hcr_dec->encdesc, readnum, desc, err) == -1) {
-      gt_error_set(err, "cannot retrieve description with number "GT_LU"."
+      gt_error_set(err, "cannot retrieve description with number "GT_WU"."
                    "(%d)", readnum, __LINE__);
       return -1;
     }
@@ -1050,7 +1050,7 @@ int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
       if (hcr_dec->encdesc != NULL)
         gt_xfputs(gt_str_get(desc), output);
       else
-        fprintf(output, ""GT_LU"", cur_read);
+        fprintf(output, ""GT_WU"", cur_read);
       gt_xfputc('\n', output);
       for (i = 0, cur_width = 0; i < strlen(seq); i++, cur_width++) {
         if (cur_width == HCR_LINEWIDTH) {
@@ -1291,16 +1291,16 @@ int gt_hcr_encoder_encode(GtHcrEncoder *hcr_enc, const char *name,
     gt_log_log("sequences with qualities encoding overview:");
     gt_log_log("**>");
     if (hcr_enc->page_sampling)
-        gt_log_log("applied sampling technique: sampling every "GT_LU"th page",
+        gt_log_log("applied sampling technique: sampling every "GT_WU"th page",
                    hcr_enc->sampling_rate);
     else if (hcr_enc->regular_sampling)
-        gt_log_log("applied sampling technique: sampling every "GT_LU"th read",
+        gt_log_log("applied sampling technique: sampling every "GT_WU"th read",
                    hcr_enc->sampling_rate);
     else
         gt_log_log("applied sampling technique: none");
 
     gt_log_log("total number of encoded nucleotide sequences with qualities: "
-               ""GT_LU"", hcr_enc->num_of_reads);
+               ""GT_WU"", hcr_enc->num_of_reads);
     gt_log_log("total number of encoded nucleotides: "GT_LLU"",
                hcr_enc->seq_encoder->total_num_of_symbols);
     gt_log_log("bits per nucleotide encoding: %f",
