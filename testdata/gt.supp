@@ -161,10 +161,49 @@
    ...
 }
 {
+   cairo_surface_error
+   Memcheck:Addr8
+   ...
+   fun:cairo_surface_finish
+   fun:gt_graphics_cairo_save_to_file
+   ...
+}
+{
+   cairo_surface_error
+   Memcheck:Addr4
+   ...
+   fun:cairo_surface_finish
+   fun:gt_graphics_cairo_save_to_file
+   ...
+}
+{
+   cairo_surface_error
+   Memcheck:Addr8
+   ...
+   fun:cairo_surface_finish
+   fun:gt_graphics_cairo_save_to_stream
+   ...
+}
+{
+   cairo_surface_error
+   Memcheck:Addr4
+   ...
+   fun:cairo_surface_finish
+   fun:gt_graphics_cairo_save_to_stream
+   ...
+}
+{
    fontconfig_leak
    Memcheck:Leak
    fun:*alloc
    ...
    obj:*lib/libfontconfig*
+   ...
+}
+{
+   glib_leak
+   Memcheck:Leak
+   ...
+   fun:gobject_init_ctor
    ...
 }
