@@ -181,13 +181,13 @@ GT_UNUSED static int pdom_printvals(void *key, void *val, GT_UNUSED void *data,
   printf(">>  %s\n", (char*) key);
   for (i = 0; i < gt_array_size(mh->fwd_hits); i++) {
     GtHMMERSingleHit *h = *(GtHMMERSingleHit**) gt_array_get(mh->fwd_hits, i);
-    printf(">>f    "GT_LU"-"GT_LU" ("GT_LU"%c, eval %e)\n", h->alifrom, h->alito, h->frame,
-           GT_STRAND_CHARS[h->strand], h->evalue);
+    printf(">>f    "GT_LU"-"GT_LU" ("GT_LU"%c, eval %e)\n", h->alifrom,
+           h->alito, h->frame, GT_STRAND_CHARS[h->strand], h->evalue);
   }
   for (i = 0; i < gt_array_size(mh->rev_hits); i++) {
     GtHMMERSingleHit *h = *(GtHMMERSingleHit**) gt_array_get(mh->rev_hits, i);
-    printf(">>r    "GT_LU"-"GT_LU" ("GT_LU"%c, eval %e)\n", h->alifrom, h->alito, h->frame,
-           GT_STRAND_CHARS[h->strand], h->evalue);
+    printf(">>r    "GT_LU"-"GT_LU" ("GT_LU"%c, eval %e)\n", h->alifrom,
+           h->alito, h->frame, GT_STRAND_CHARS[h->strand], h->evalue);
   }
   printf("bestf: %e, bestr: %e\n", mh->best_fwd, mh->best_rev);
   return 0;
@@ -419,9 +419,9 @@ static int gt_ltrdigest_pdom_visitor_parse_domainhits(GtLTRdigestPdomVisitor
       gt_hmmer_parse_status_mark_frame_finished(status);
     }
     while (!had_err &&
-             8 == sscanf(buf, ""GT_LU" %c %lf %*f %*f %lf "GT_LU" "GT_LU" %*s "GT_LU" "GT_LU"",
-                         &no,  &threshold_ok, &score, &evalue, &hmmfrom, &hmmto,
-                         &alifrom, &alito)) {
+             8 == sscanf(buf, ""GT_LU" %c %lf %*f %*f %lf "GT_LU" "GT_LU" %*s "
+                         GT_LU" "GT_LU"", &no,  &threshold_ok, &score, &evalue,
+                         &hmmfrom, &hmmto, &alifrom, &alito)) {
       GtHMMERSingleHit *shit = gt_calloc((size_t) 1, sizeof (*shit));
       shit->hmmfrom = hmmfrom;
       shit->hmmto = hmmto;
@@ -528,8 +528,8 @@ static void gt_ltrdigest_pdom_visitor_chainproc(GtChain *c, GtFragment *f,
   for (i = 0; i < gt_chain_size(c); i++) {
     GtFragment frag;
     frag = f[gt_chain_get_fragnum(c, i)];
-    gt_log_log("("GT_LU" "GT_LU") ("GT_LU" "GT_LU")", frag.startpos1, frag.endpos1,
-                                      frag.startpos2, frag.endpos2);
+    gt_log_log("("GT_LU" "GT_LU") ("GT_LU" "GT_LU")", frag.startpos1,
+               frag.endpos1, frag.startpos2, frag.endpos2);
     gt_array_add(((GtHMMERSingleHit*) frag.data)->chains, *chainno);
   }
   (*chainno)++;

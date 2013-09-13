@@ -341,16 +341,16 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
         range = gt_genome_node_get_range((GtGenomeNode*) curnode);
         if ((range.end - range.start + 1) < 10UL)
           continue;
-        (void) snprintf(header, BUFSIZ, "%s_"GT_LU"_"GT_LU"", buffer, range.start,
-                        range.end);
+        (void) snprintf(header, BUFSIZ, "%s_"GT_LU"_"GT_LU"", buffer,
+                        range.start, range.end);
         gt_hashmap_add(desc2node, (void*) gt_cstr_dup(header), (void*) curnode);
       } else if (strcmp(fnt, real_feature) == 0) {
         GtRange range;
         range = gt_genome_node_get_range((GtGenomeNode*) curnode);
         if ((range.end - range.start + 1) < 10UL)
           continue;
-        (void) snprintf(header, BUFSIZ, "%s_"GT_LU"_"GT_LU"", buffer, range.start,
-                        range.end);
+        (void) snprintf(header, BUFSIZ, "%s_"GT_LU"_"GT_LU"", buffer,
+                        range.start, range.end);
         gt_hashmap_add(desc2node, (void*) gt_cstr_dup(header), (void*) curnode);
       }
     }

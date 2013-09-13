@@ -47,26 +47,26 @@ static void showsimpleoptions(const Cmppairwiseopt *opt)
   if (gt_str_array_size(opt->strings) > 0)
   {
     if (!opt->showedist)
-      printf("# two strings \"%s\" \"%s\"\n",gt_str_array_get(opt->strings,0),
-                                           gt_str_array_get(opt->strings,1UL));
+      printf("# two strings \"%s\" \"%s\"\n", gt_str_array_get(opt->strings,0),
+             gt_str_array_get(opt->strings,1UL));
     return;
   }
   if (gt_str_array_size(opt->files) > 0)
   {
-    printf("# two files \"%s\" \"%s\"\n",gt_str_array_get(opt->files,0),
-                                         gt_str_array_get(opt->files,1UL));
+    printf("# two files \"%s\" \"%s\"\n", gt_str_array_get(opt->files,0),
+           gt_str_array_get(opt->files,1UL));
     return;
   }
   if (opt->charlistlen != NULL)
   {
-    printf("# alphalen \"%s\" "GT_LU"\n",
-             gt_str_get(opt->charlistlen->charlist),
-             opt->charlistlen->len);
+    printf("# alphalen \"%s\" " GT_LU "\n",
+           gt_str_get(opt->charlistlen->charlist),
+           opt->charlistlen->len);
     return;
   }
   if (gt_str_length(opt->text) > 0)
   {
-    printf("# text \"%s\"\n",gt_str_get(opt->text));
+    printf("# text \"%s\"\n", gt_str_get(opt->text));
     return;
   }
 }
@@ -91,14 +91,14 @@ static GtOPrval parse_options(int *parsed_args,
   pw->text = gt_str_new();
   pw->charlistlen = NULL;
   pw->showedist = false;
-  op = gt_option_parser_new("options","Apply function to pairs of strings.");
-  gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
+  op = gt_option_parser_new("options", "Apply function to pairs of strings.");
+  gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
-  optionstrings = gt_option_new_string_array("ss","use two strings",
+  optionstrings = gt_option_new_string_array("ss", "use two strings",
                                              pw->strings);
   gt_option_parser_add_option(op, optionstrings);
 
-  optionfiles = gt_option_new_filename_array("ff","use two files",
+  optionfiles = gt_option_new_filename_array("ff", "use two files",
                                              pw->files);
   gt_option_parser_add_option(op, optionfiles);
 
@@ -107,7 +107,7 @@ static GtOPrval parse_options(int *parsed_args,
                                              charlistlen);
   gt_option_parser_add_option(op, optioncharlistlen);
 
-  optiontext = gt_option_new_string("t","use text",pw->text, NULL);
+  optiontext = gt_option_new_string("t", "use text", pw->text, NULL);
   gt_option_parser_add_option(op, optiontext);
 
   optionshowedist = gt_option_new_bool("e", "output unit edit distance",
@@ -158,7 +158,7 @@ static GtOPrval parse_options(int *parsed_args,
           pw->charlistlen->charlist =
             gt_str_ref(gt_str_array_get_str(charlistlen,
                                                                   0));
-          if (sscanf(gt_str_array_get(charlistlen,1UL),""GT_LD"",&readint) != 1 ||
+          if (sscanf(gt_str_array_get(charlistlen,1UL), GT_LD, &readint) != 1 ||
               readint < 1L)
           {
             gt_error_set(err,
@@ -237,7 +237,7 @@ static GtUword applycheckfunctiontosimpleoptions(
   }
   if (gt_str_length(opt->text) > 0)
   {
-    return gt_runcheckfunctionontext(checkfunction,gt_str_get(opt->text));
+    return gt_runcheckfunctionontext(checkfunction, gt_str_get(opt->text));
   }
   gt_assert(false);
   return 0;
@@ -251,7 +251,7 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
 
   gt_error_check(err);
 
-  oprval = parse_options(&parsed_args,&cmppairwise,argc, argv, err);
+  oprval = parse_options(&parsed_args, &cmppairwise, argc, argv, err);
   if (oprval == GT_OPTION_PARSER_OK)
   {
     gt_assert(parsed_args == argc);
@@ -264,14 +264,14 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
-      printf(""GT_LU"\n",edist);
+      printf(GT_LU "\n", edist);
     }
     else
     {
       GtUword testcases;
       testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
                                                     &cmppairwise);
-      printf("# number of testcases: "GT_LU"\n",testcases);
+      printf("# number of testcases: " GT_LU "\n", testcases);
     }
   }
   freesimpleoption(&cmppairwise);

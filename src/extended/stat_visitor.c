@@ -237,7 +237,8 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
 {
   GtStatVisitor *sv = stat_visitor_cast(nv);
   if (sv->number_of_sequence_regions) {
-    gt_file_xprintf(outfp, "sequence regions: "GT_LU" (total length: "GT_LLU")\n",
+    gt_file_xprintf(outfp, "sequence regions: "GT_LU
+                    " (total length: "GT_LLU")\n",
                     sv->number_of_sequence_regions,
                     sv->total_length_of_sequence_regions);
   }

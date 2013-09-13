@@ -350,15 +350,6 @@ Retrieves all features contained in <code>gfi</code> into <code>results</code>. 
    accordingly.
 </p>
 <hr>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
-</p>
-<hr>
 <a name="GtTrackOrderingFunc"></a>
 
 <code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
@@ -368,6 +359,15 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
+</p>
+<hr>
+<a name="GtTrackSelectorFunc"></a>
+
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
+<p>
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -6124,7 +6124,7 @@ Deprecated. Usage identical to <code>gt_option_new_uword_min_max</code>.
 <p>
 Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
    <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
-   If <code>default_value</code> equals <code>NULL</code>, <code>GT_UNDEF_LONG</code> will be used as the default
+   If <code>default_value</code> equals <code>NULL</code>, <code>GT_UNDEF_WORD</code> will be used as the default
    start and end point of <code>value</code>.
 </p>
 <hr>
@@ -8079,10 +8079,9 @@ Output the current state of <code>timer</code> in the format
 <code>void      gt_timer_show_formatted(GtTimer *timer, const char *fmt, FILE *fp)</code>
 <p>
 Output the current state of <code>timer</code> in a user-defined format given by <code>fmt</code>.
-   <code>fmt</code> must be a format string for four "GT_LD" numbers, which are filled with:
-   elapsed seconds, elapsed microseconds, used usertime in seconds,
-   system time in seconds. The output is written to <code>fp</code>. The timer is then
-   stopped.
+   <code>fmt</code> must be a format string for four "GT_LD" numbers, which are filled
+   with: elapsed seconds, elapsed microseconds, used usertime in seconds, system
+   time in seconds. The output is written to <code>fp</code>. The timer is then stopped.
 </p>
 <hr>
 <a name="gt_timer_show_progress"></a>
@@ -8788,24 +8787,24 @@ Print a fasta entry with optional <code>description</code> and mandatory <code>s
 <h2>Module Fileutils</h2>
 <a name="gt_file_suffix"></a>
 
-<code>const char*     gt_file_suffix(const char *path)</code>
+<code>const char*  gt_file_suffix(const char *path)</code>
 <p>
 Returns the suffix of <code>path</code>, if there is any. Returns "" otherwise.
    The suffix is the part after and including the last '.' but after the last
-   '/'. Except if <code>path</code> ends with ".gz" or ".bz2", then the suffix is the part
-   after and including the second last '.'.
+   '/' (or '\' on Windows). Except if <code>path</code> ends with ".gz" or ".bz2", then the
+   suffix is the part after and including the second last '.'.
 </p>
 <hr>
 <a name="gt_file_exists"></a>
 
-<code>bool            gt_file_exists(const char *path)</code>
+<code>bool         gt_file_exists(const char *path)</code>
 <p>
 Returns true if the file with the given <code>path</code> exists, false otherwise.
 </p>
 <hr>
 <a name="gt_file_exists_with_suffix"></a>
 
-<code>bool            gt_file_exists_with_suffix(const char *path, const char *suffix)</code>
+<code>bool         gt_file_exists_with_suffix(const char *path, const char *suffix)</code>
 <p>
 Returns true if the file with the name composed of the concatenation of
    <code>path</code> and <code>suffix</code> exists, false otherwise.
@@ -8813,7 +8812,7 @@ Returns true if the file with the name composed of the concatenation of
 <hr>
 <a name="gt_file_is_newer"></a>
 
-<code>bool            gt_file_is_newer(const char *a, const char *b)</code>
+<code>bool         gt_file_is_newer(const char *a, const char *b)</code>
 <p>
 Returns true if the file with path <code>a</code> has a later modification time than the
    file with path <code>b</code>, false otherwise.
@@ -8821,21 +8820,21 @@ Returns true if the file with path <code>a</code> has a later modification time 
 <hr>
 <a name="gt_file_number_of_lines"></a>
 
-<code>GtUword   gt_file_number_of_lines(const char*)</code>
+<code>GtUword      gt_file_number_of_lines(const char*)</code>
 <p>
 Returns the number of lines in a file.
 </p>
 <hr>
 <a name="gt_file_dirname"></a>
 
-<code>void            gt_file_dirname(GtStr *path, const char *file)</code>
+<code>void         gt_file_dirname(GtStr *path, const char *file)</code>
 <p>
 Set <code>path</code> to the dirname of <code>file</code>, if it has one, to "" otherwise.
 </p>
 <hr>
 <a name="gt_file_find_in_path"></a>
 
-<code>int             gt_file_find_in_path(GtStr *path, const char *file, GtError*)</code>
+<code>int          gt_file_find_in_path(GtStr *path, const char *file, GtError*)</code>
 <p>
 Find <code>file</code> in $PATH, if it has no dirname; set <code>path</code> to dirname otherwise.
    Sets <code>path</code> to the empty string if <code>file</code> could not be found in $PATH.
@@ -8843,17 +8842,18 @@ Find <code>file</code> in $PATH, if it has no dirname; set <code>path</code> to 
 <hr>
 <a name="gt_file_find_in_env"></a>
 
-<code>int             gt_file_find_in_env(GtStr *path, const char *file,
-                                   const char *env, GtError*)</code>
+<code>int          gt_file_find_in_env(GtStr *path, const char *file, const char *env,
+                                GtError*)</code>
 <p>
-Find  <code>file</code> in the ':'-separated directory list specified in environment
-   variable $<code>env</code>, if it has no dirname; set <code>path</code> to dirname otherwise.
-   Sets <code>path</code> to the empty string if <code>file</code> could not be found in $<code>env</code>.
+Find  <code>file</code> in the ':'-separated directory list (on Windows ';'-separated)
+   specified in environment variable $<code>env</code>, if it has no dirname; set <code>path</code> to
+   dirname otherwise. Sets <code>path</code> to the empty string if <code>file</code> could not be
+   found in $<code>env</code>.
 </p>
 <hr>
 <a name="gt_file_estimate_size"></a>
 
-<code>off_t           gt_file_estimate_size(const char *file)</code>
+<code>off_t        gt_file_estimate_size(const char *file)</code>
 <p>
 Return the (estimated) size of <code>file</code>. If <code>file</code> is uncompressed, the exact
    size is returned. If <code>file</code> is compressed, an estimation which assumes that
@@ -8862,7 +8862,7 @@ Return the (estimated) size of <code>file</code>. If <code>file</code> is uncomp
 <hr>
 <a name="gt_files_estimate_total_size"></a>
 
-<code>off_t           gt_files_estimate_total_size(const GtStrArray *filenames)</code>
+<code>off_t        gt_files_estimate_total_size(const GtStrArray *filenames)</code>
 <p>
 Return the (estimated) total size of all files given in <code>filenames</code>.
    Uses <code>gt_file_estimate_size()</code>.
@@ -8870,8 +8870,8 @@ Return the (estimated) total size of all files given in <code>filenames</code>.
 <hr>
 <a name="gt_files_guess_if_protein_sequences"></a>
 
-<code>int             gt_files_guess_if_protein_sequences(const GtStrArray *filenames,
-                                                   GtError *err)</code>
+<code>int          gt_files_guess_if_protein_sequences(const GtStrArray *filenames,
+                                                GtError *err)</code>
 <p>
 Guesse if the sequences contained in the files given in <code>filenames</code> are
    protein sequences. Returns 1 if the guess is that the files contain protein
@@ -8882,8 +8882,8 @@ Guesse if the sequences contained in the files given in <code>filenames</code> a
 <hr>
 <a name="gt_file_find_exec_in_path"></a>
 
-<code>int             gt_file_find_exec_in_path(GtStr *path, const char *file,
-                                         GtError *err)</code>
+<code>int          gt_file_find_exec_in_path(GtStr *path, const char *file,
+                                      GtError *err)</code>
 <p>
 Find regular executable <code>file</code> in $PATH, if it has no dirname; set <code>path</code> to
    dirname otherwise. Sets <code>path</code> to the empty string if regular executable
@@ -8892,14 +8892,14 @@ Find regular executable <code>file</code> in $PATH, if it has no dirname; set <c
 <hr>
 <a name="gt_file_size"></a>
 
-<code>off_t           gt_file_size(const char *file)</code>
+<code>off_t        gt_file_size(const char *file)</code>
 <p>
 Return the size of <code>file</code> in bytes. <code>file</code> must exist.
 </p>
 <hr>
 <a name="gt_file_size_with_suffix"></a>
 
-<code>off_t           gt_file_size_with_suffix(const char *path, const char *suffix)</code>
+<code>off_t        gt_file_size_with_suffix(const char *path, const char *suffix)</code>
 <p>
 Returns the size of the file whose name is composed of the
   concatenation of <code>path</code> and <code>suffix</code>. <code>file</code> must exist.
@@ -9123,6 +9123,8 @@ This module implements the function <code>gt_basename()</code> according to the
   If <code>path</code> consists entirely of the '/' character,  then <code>gt_basename()</code> returns
   a pointer to the string "/".
 
+  On Windows '\' is used instead of '/'.
+
   If <code>path</code> is a null pointer or points to an empty string, <code>gt_basename()</code>
   returns a pointer to the string ".".
 
@@ -9286,11 +9288,18 @@ The undefined <code>float</code> value.
 The undefined <code>int</code> value.
 </p>
 <hr>
+<a name="GT_UNDEF_WORD"></a>
+
+<code>#define GT_UNDEF_WORD</code>
+<p>
+The undefined <code>GtWord</code> value.
+</p>
+<hr>
 <a name="GT_UNDEF_LONG"></a>
 
 <code>#define GT_UNDEF_LONG</code>
 <p>
-The undefined <code>long</code> value.
+The undefined <code>long</code> value. deprecated
 </p>
 <hr>
 <a name="GT_UNDEF_UCHAR"></a>
@@ -9307,11 +9316,18 @@ The undefined <code>unsigned char</code> value.
 The undefined <code>unsigned int</code> value.
 </p>
 <hr>
+<a name="GT_UNDEF_UWORD"></a>
+
+<code>#define GT_UNDEF_UWORD</code>
+<p>
+The undefined <code>GtUword</code> value.
+</p>
+<hr>
 <a name="GT_UNDEF_ULONG"></a>
 
 <code>#define GT_UNDEF_ULONG</code>
 <p>
-The undefined <code>GtUword</code> value.
+The undefined <code>unsigned long</code> value. deprecated
 </p>
 <hr>
 <a name="Unused"></a>
@@ -9582,6 +9598,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#GT_UNDEF_UINT"><code>GT_UNDEF_UINT</code></a><br>
 
   <a href="#GT_UNDEF_ULONG"><code>GT_UNDEF_ULONG</code></a><br>
+
+  <a href="#GT_UNDEF_UWORD"><code>GT_UNDEF_UWORD</code></a><br>
+
+  <a href="#GT_UNDEF_WORD"><code>GT_UNDEF_WORD</code></a><br>
 
   <a href="#GT_UNUSED"><code>GT_UNUSED</code></a><br>
 
@@ -11436,7 +11456,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-09-11
+Last update: 2013-09-13
 </div>
 </div>
 <!-- Piwik -->

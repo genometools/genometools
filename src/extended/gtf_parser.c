@@ -309,7 +309,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
     had_err = 0;
 
     if (line_length == 0) {
-      gt_warning("skipping blank line "GT_LU" in file \"%s\"", line_number,
+      gt_warning("skipping blank line " GT_LU " in file \"%s\"", line_number,
                  filename);
     }
     else if (line[0] == '#') {
@@ -326,8 +326,9 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       gt_splitter_reset(splitter);
       gt_splitter_split(splitter, line, line_length, '\t');
       if (gt_splitter_size(splitter) != 9UL) {
-        gt_error_set(err, "line "GT_LU" in file \"%s\" contains "GT_LU" tab (\\t) "
-                  "separated fields instead of 9", line_number, filename,
+        gt_error_set(err, "line " GT_LU " in file \"%s\" contains " GT_LU
+                     " tab (\\t) " "separated fields instead of 9", line_number,
+                     filename,
                   gt_splitter_size(splitter));
         had_err = -1;
         break;
@@ -346,8 +347,8 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       /* parse feature */
       if (GTF_feature_type_get(&gtf_feature_type, feature) == -1) {
         /* we skip unknown features */
-        fprintf(stderr, "skipping line "GT_LU" in file \"%s\": unknown feature: "
-                        "\"%s\"\n", line_number, filename, feature);
+        fprintf(stderr, "skipping line " GT_LU " in file \"%s\": unknown "
+                "feature: \"%s\"\n", line_number, filename, feature);
         gt_str_reset(line_buffer);
         continue;
       }
@@ -403,8 +404,8 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
         /* look for the two mandatory attributes */
         if (strncmp(token, GENE_ID_ATTRIBUTE, strlen(GENE_ID_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(GENE_ID_ATTRIBUTE)) {
-            gt_error_set(err, "missing value to attribute \"%s\" on line "GT_LU" "
-                         "in file \"%s\"", GENE_ID_ATTRIBUTE, line_number,
+            gt_error_set(err, "missing value to attribute \"%s\" on line "
+                         GT_LU "in file \"%s\"", GENE_ID_ATTRIBUTE, line_number,
                          filename);
             had_err = -1;
           }
@@ -414,9 +415,9 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
         else if (strncmp(token, TRANSCRIPT_ID_ATTRIBUTE,
                          strlen(TRANSCRIPT_ID_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(TRANSCRIPT_ID_ATTRIBUTE)) {
-            gt_error_set(err, "missing value to attribute \"%s\" on line "GT_LU" "
-                         "in file \"%s\"", TRANSCRIPT_ID_ATTRIBUTE, line_number,
-                         filename);
+            gt_error_set(err, "missing value to attribute \"%s\" on line "
+                         GT_LU "in file \"%s\"", TRANSCRIPT_ID_ATTRIBUTE,
+                         line_number, filename);
             had_err = -1;
           }
           HANDLE_ERROR;
@@ -425,9 +426,9 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
         else if (strncmp(token, GENE_NAME_ATTRIBUTE,
                          strlen(GENE_NAME_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(GENE_NAME_ATTRIBUTE)) {
-            gt_error_set(err, "missing value to attribute \"%s\" on line "GT_LU" "
-                         "in file \"%s\"", GENE_NAME_ATTRIBUTE, line_number,
-                         filename);
+            gt_error_set(err, "missing value to attribute \"%s\" on line "
+                         GT_LU "in file \"%s\"", GENE_NAME_ATTRIBUTE,
+                         line_number, filename);
             had_err = -1;
           }
           HANDLE_ERROR;
@@ -441,8 +442,8 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
         else if (strncmp(token, TRANSCRIPT_NAME_ATTRIBUTE,
                          strlen(TRANSCRIPT_NAME_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(TRANSCRIPT_NAME_ATTRIBUTE)) {
-            gt_error_set(err, "missing value to attribute \"%s\" on line "GT_LU" "
-                         "in file \"%s\"", TRANSCRIPT_NAME_ATTRIBUTE,
+            gt_error_set(err, "missing value to attribute \"%s\" on line "
+                         GT_LU "in file \"%s\"", TRANSCRIPT_NAME_ATTRIBUTE,
                          line_number, filename);
             had_err = -1;
           }
@@ -458,14 +459,16 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
 
       /* check for the mandatory attributes */
       if (!gene_id) {
-        gt_error_set(err, "missing attribute \"%s\" on line "GT_LU" in file \"%s\"",
-                  GENE_ID_ATTRIBUTE, line_number, filename);
+        gt_error_set(err, "missing attribute \"%s\" on line " GT_LU
+                     " in file \"%s\"", GENE_ID_ATTRIBUTE, line_number,
+                     filename);
         had_err = -1;
       }
       HANDLE_ERROR;
       if (!transcript_id) {
-        gt_error_set(err, "missing attribute \"%s\" on line "GT_LU" in file \"%s\"",
-                  TRANSCRIPT_ID_ATTRIBUTE, line_number, filename);
+        gt_error_set(err, "missing attribute \"%s\" on line " GT_LU
+                     " in file \"%s\"", TRANSCRIPT_ID_ATTRIBUTE, line_number,
+                     filename);
         had_err = -1;
       }
       HANDLE_ERROR;

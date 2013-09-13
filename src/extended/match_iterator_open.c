@@ -33,11 +33,11 @@
 #define READNUMS 5
 
 #define GT_MATCHER_OPEN_CANNOTPARSECOLUMN(S)\
-        gt_error_set(err,"file %s, line "GT_LU", column "GT_LU": %s", \
+        gt_error_set(err, "file %s, line " GT_LU ", column " GT_LU ": %s", \
                      mpi->pvt->matchfile, mpi->pvt->curpos, columncount+1, S)
 
 #define GT_MATCHER_OPEN_CANNOTPARSELINE(S)\
-        gt_error_set(err,"file %s, line "GT_LU": %s", \
+        gt_error_set(err, "file %s, line " GT_LU ": %s", \
                      mpi->pvt->matchfile, mpi->pvt->curpos, S)
 
 #define gt_match_iterator_open_cast(M)\
@@ -77,8 +77,8 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
       } else break;
     }
     fseek(mpi->pvt->matchfilep, -1, SEEK_CUR);
-    readnums = fscanf(mpi->pvt->matchfilep," "GT_LD" %s "GT_LD" %c "GT_LD" %s "GT_LD" %*d %*e "
-                      ""GT_LD" %*f\n",
+    readnums = fscanf(mpi->pvt->matchfilep, " " GT_LD " %s " GT_LD " %c " GT_LD
+                      " %s " GT_LD " %*d %*e " GT_LD " %*f\n",
                       &storeinteger[0],
                       seqid1,
                       &storeinteger[1],
@@ -107,7 +107,8 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
         i = 0;
       } else break;
     }
-    if (sscanf(buffer," "GT_LD" %s "GT_LD" %*c "GT_LD" %s "GT_LD" %*d %*e "GT_LD" %*f\n",
+    if (sscanf(buffer, " " GT_LD " %s " GT_LD " %*c " GT_LD " %s " GT_LD
+               " %*d %*e " GT_LD " %*f\n",
                &storeinteger[0],
                seqid1,
                &storeinteger[1],

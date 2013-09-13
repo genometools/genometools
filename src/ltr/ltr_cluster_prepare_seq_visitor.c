@@ -51,7 +51,8 @@ static int extract_feature_seq(GtEncseqBuilder *b, const char *header,
   if (seqnum >= gt_encseq_num_of_sequences(encseq)) {
     gt_error_set(err, "annotation encountered for sequence "GT_LU", but the "
                       "supplied encoded sequence only contains sequences "
-                      "0-"GT_LU"", seqnum, gt_encseq_num_of_sequences(encseq)-1);
+                      "0-"GT_LU"", seqnum,
+                    gt_encseq_num_of_sequences(encseq)-1);
     had_err = -1;
   }
 
