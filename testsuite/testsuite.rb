@@ -90,15 +90,18 @@ def run_test(str, opts = {})
   else
     $memcheck = ""
   end
-  run("env GT_SEED=#{$SEED} #{$memcheck} #{$path}#{str}", opts)
+  run("env G_DEBUG=gc-friendly G_SLICE=always-malloc GT_SEED=#{$SEED} " + \
+      "#{$memcheck} #{$path}#{str}", opts)
 end
 
 def run_ruby(str, opts = {})
-  run("env LD_LIBRARY_PATH=#{$cur}/lib ruby -I #{$gtruby} #{$path}#{str}", opts)
+  run("env G_DEBUG=gc-friendly G_SLICE=always-malloc " + \
+      "LD_LIBRARY_PATH=#{$cur}/lib ruby -I #{$gtruby} #{$path}#{str}", opts)
 end
 
 def run_python(str, opts = {})
-  run("env PYTHONPATH=#{$gtpython} LD_LIBRARY_PATH=#{$cur}/lib python " + \
+  run("env G_DEBUG=gc-friendly G_SLICE=always-malloc " + \
+      "PYTHONPATH=#{$gtpython} LD_LIBRARY_PATH=#{$cur}/lib python " + \
       "#{$path}#{str}", opts)
 end
 
