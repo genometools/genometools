@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2012 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2003-2013 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -690,6 +690,21 @@ static GtStr* find_score_matrix_path(const char *scorematrixfile, GtError *err)
     /* path found -> append score matrix file name */
     gt_str_append_char(path, GT_PATH_SEPARATOR);
     gt_str_append_cstr(path, scorematrixfile);
+  }
+  else {
+    /* check for file relative to binary */
+    int new_err = gt_file_find_exec_in_path(path, gt_error_get_progname(err),
+                                            NULL);
+    if (!new_err) {
+      gt_str_append_char(path, GT_PATH_SEPARATOR);
+      gt_str_append_cstr(path, GTHDATADIRNAME);
+      gt_str_append_char(path, GT_PATH_SEPARATOR);
+      gt_str_append_cstr(path, scorematrixfile);
+      if (gt_file_exists(gt_str_get(path))) {
+        gt_error_unset(err);
+        had_err = 0;
+      }
+    }
   }
   if (had_err) {
     gt_str_delete(path);

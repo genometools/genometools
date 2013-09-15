@@ -24,9 +24,12 @@
 #define MAXSUFFIXLEN            11
 
 /* the name of the environment variable containing the path for gth data */
-#define GTHDATAENVNAME                  "GTHDATADIR"
+#define GTHDATAENVNAME          "GTHDATADIR"
+
+/* the name of the gth data file path relative to binary */
+#define GTHDATADIRNAME          "gthdata"
 
 /* the name of the environment variable used to disable file locking */
-#define GTHNOFLOCKENVNAME               "GTHNOFLOCK"
+#define GTHNOFLOCKENVNAME       "GTHNOFLOCK"
 
 #endif
