@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2003-2011 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2003-2005 Michael E Sparks <mespar1@iastate.edu>
-  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2011, 2013 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2003-2005       Michael E Sparks <mespar1@iastate.edu>
+  Copyright (c) 2003-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -458,17 +458,34 @@ GthBSSMParam* gth_bssm_param_load(const char *filename, GtError *err)
                         GT_PATH_SEPARATOR, BSSMENVNAME);
       had_err = -1;
     }
+    /* check for file path in environment variable */
     if (!had_err)
       had_err = gt_file_find_in_env(path, filename, BSSMENVNAME, err);
     if (!had_err && !gt_str_length(path)) {
-      gt_error_set(err, "file \"%s\" not found in directory list specified by "
-                        "environment variable %s", filename, BSSMENVNAME);
+      gt_error_set(err, "file \"%s\" not found in directory list specified "
+                        "by environment variable %s", filename, BSSMENVNAME);
       had_err = -1;
     }
     if (!had_err) {
       /* path found -> append filename */
       gt_str_append_char(path, GT_PATH_SEPARATOR);
       gt_str_append_cstr(path, filename);
+    }
+    else {
+      /* check for file path relative to binary */
+      int new_err = gt_file_find_exec_in_path(path, gt_error_get_progname(err),
+                                              NULL);
+      if (!new_err) {
+        gt_assert(gt_str_length(path));
+        gt_str_append_char(path, GT_PATH_SEPARATOR);
+        gt_str_append_cstr(path, "bssm");
+        gt_str_append_char(path, GT_PATH_SEPARATOR);
+        gt_str_append_cstr(path, filename);
+        if (gt_file_exists(gt_str_get(path))) {
+          gt_error_unset(err);
+          had_err = 0;
+        }
+      }
     }
   }
 
