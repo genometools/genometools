@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008, 2013 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -244,6 +244,39 @@ int gt_str_read_next_line(GtStr *s, FILE *fpin)
       s->cstr[s->length] = '\0';
       return 0;
     }
+    else if (cc == '\r') {
+      /* check if we have a Windows newline "\r\n" */
+      int ncc;
+      char nc;
+      ncc = gt_xfgetc(fpin);
+      if (ncc == EOF) {
+        c = cc;
+        if ((s->length+2) * sizeof (char) > s->allocated) {
+          s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                                (s->length+2) * sizeof (char));
+        }
+        s->cstr[s->length++] = c;
+        return EOF;
+      }
+      if (ncc == '\n') {
+        if ((s->length+1) * sizeof (char) > s->allocated) {
+          s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                                (s->length+1) * sizeof (char));
+        }
+        s->cstr[s->length] = '\0';
+        return 0;
+      }
+      c = cc;
+      nc = ncc;
+      if ((s->length+3) * sizeof (char) > s->allocated) {
+        s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                              (s->length+3) * sizeof (char));
+      }
+      s->cstr[s->length++] = c;
+      s->cstr[s->length++] = nc;
+      continue;
+    }
+
     c = cc;
     if ((s->length+2) * sizeof (char) > s->allocated) {
       s->cstr = gt_dynalloc(s->cstr, &s->allocated,
@@ -269,6 +302,38 @@ int gt_str_read_next_line_generic(GtStr *s, GtFile *fpin)
       }
       s->cstr[s->length] = '\0';
       return 0;
+    }
+    else if (cc == '\r') {
+      /* check if we have a Windows newline "\r\n" */
+      int ncc;
+      char nc;
+      ncc = gt_file_xfgetc(fpin);
+      if (ncc == EOF) {
+        c = cc;
+        if ((s->length+2) * sizeof (char) > s->allocated) {
+          s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                                (s->length+2) * sizeof (char));
+        }
+        s->cstr[s->length++] = c;
+        return EOF;
+      }
+      if (ncc == '\n') {
+        if ((s->length+1) * sizeof (char) > s->allocated) {
+          s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                                (s->length+1) * sizeof (char));
+        }
+        s->cstr[s->length] = '\0';
+        return 0;
+      }
+      c = cc;
+      nc = ncc;
+      if ((s->length+3) * sizeof (char) > s->allocated) {
+        s->cstr = gt_dynalloc(s->cstr, &s->allocated,
+                              (s->length+3) * sizeof (char));
+      }
+      s->cstr[s->length++] = c;
+      s->cstr[s->length++] = nc;
+      continue;
     }
     c = cc;
     if ((s->length+2) * sizeof (char) > s->allocated) {
