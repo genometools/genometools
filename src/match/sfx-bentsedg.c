@@ -157,7 +157,6 @@ typedef struct
   GtProcessunsortedsuffixrange processunsortedsuffixrange;
   void *processunsortedsuffixrangeinfo;
   bool *equalwithprevious;
-  size_t sizeofworkspace;
   GtUword countinsertionsort,
                 counttqsort,
                 countshortreadsort,
@@ -1366,7 +1365,7 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
   }
 }
 
-static void bentsedgresources_init(GtBentsedgresources *bsr,
+static GtBentsedgresources *bentsedgresources_new(
                                    GtSuffixsortspace *suffixsortspace,
                                    const GtEncseq *encseq,
                                    GtReadmode readmode,
@@ -1375,7 +1374,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
                                    const Sfxstrategy *sfxstrategy,
                                    bool withlcps)
 {
-  GtUword idx;
+  GtBentsedgresources *bsr = (GtBentsedgresources *) gt_malloc(sizeof *bsr);
 
   bsr->readmode = readmode;
   bsr->totallength = gt_encseq_total_length(encseq);
@@ -1410,8 +1409,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
     }
   } else
   {
-    if (gt_encseq_lengthoflongestnonspecial(encseq) >
-        (GtUword) prefixlength)
+    if (gt_encseq_lengthoflongestnonspecial(encseq) > (GtUword) prefixlength)
     {
       bsr->srs_maxremain = gt_encseq_lengthoflongestnonspecial(encseq) -
                            prefixlength;
@@ -1420,10 +1418,10 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
       bsr->srs_maxremain = 0;
     }
   }
-  bsr->sizeofworkspace = gt_size_of_sort_workspace (sfxstrategy);
-  bsr->shortreadsort_maxwidth = gt_shortreadsort_maxwidth(false,
-                                                          bsr->srs_maxremain,
-                                                          bsr->sizeofworkspace);
+  bsr->shortreadsort_maxwidth
+    = gt_shortreadsort_maxwidth(false,
+                                bsr->srs_maxremain,
+                                gt_size_of_sort_workspace (sfxstrategy));
   GT_INITARRAY(&bsr->mkvauxstack,GtMKVstack);
   bsr->countingsortinfo = NULL;
   bsr->medianinfospace = NULL;
@@ -1432,6 +1430,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   bsr->srsw = NULL;
   if (!sfxstrategy->cmpcharbychar)
   {
+    int idx;
     const bool withmediumsizelcps = (sortmaxdepth > 0 && !withlcps)
                                     ? true : false;
     if (sortmaxdepth == 0 ||
@@ -1440,7 +1439,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
       bsr->srsw = gt_shortreadsort_new(0,bsr->srs_maxremain,readmode,false,
                                        withmediumsizelcps);
     }
-    for (idx = 0; idx < (GtUword) GT_UNITSIN2BITENC; idx++)
+    for (idx = 0; idx < GT_UNITSIN2BITENC; idx++)
     {
       bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
     }
@@ -1465,6 +1464,8 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
                                     readmode);
   if (sortmaxdepth > 0 && bsr->sfxstrategy->maxinsertionsort >= 2UL)
   {
+    GtUword idx;
+
     bsr->equalwithprevious = gt_malloc(sizeof (*bsr->equalwithprevious) *
                                        bsr->sfxstrategy->maxinsertionsort);
     for (idx=0; idx < bsr->sfxstrategy->maxinsertionsort; idx++)
@@ -1481,6 +1482,21 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   bsr->countbltriesort = 0;
   bsr->countshortreadsort = 0;
   bsr->countradixsort = 0;
+  return bsr;
+}
+
+static void gt_bentsedgresources_addlcpinfo(GtBentsedgresources *bsr,
+                                            GtOutlcpinfo *outlcpinfo,
+                                            const GtBcktab *bcktab)
+{
+  if (outlcpinfo != NULL)
+  {
+    bsr->tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,bcktab);
+    if (bsr->srsw != NULL)
+    {
+      gt_shortreadsort_assigntableoflcpvalues(bsr->srsw,bsr->tableoflcpvalues);
+    }
+  }
 }
 
 size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy)
@@ -1519,6 +1535,7 @@ static void bentsedgresources_delete(GtBentsedgresources *bsr, GtLogger *logger)
   gt_logger_log(logger,"countshortreadsort="GT_WU"",bsr->countshortreadsort);
   gt_logger_log(logger,"countradixsort="GT_WU"",bsr->countradixsort);
   gt_logger_log(logger,"counttqsort="GT_WU"",bsr->counttqsort);
+  gt_free(bsr);
 }
 
 /*
@@ -1549,39 +1566,30 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   GtCodetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
   GtBucketspecification bucketspec;
-  GtBentsedgresources bsr;
-
-  bentsedgresources_init(&bsr,
-                         suffixsortspace,
-                         encseq,
-                         readmode,
-                         prefixlength,
-                         sortmaxdepth,
-                         sfxstrategy,
-                         outlcpinfo != NULL ? true : false);
+  GtBentsedgresources *bsr = bentsedgresources_new(suffixsortspace,
+                                                   encseq,
+                                                   readmode,
+                                                   prefixlength,
+                                                   sortmaxdepth,
+                                                   sfxstrategy,
+                                                   outlcpinfo != NULL ? true
+                                                                      : false);
   gt_bcktab_determinemaxsize(bcktab, mincode, maxcode, numberofsuffixes);
-  if (bsr.sfxstrategy->withradixsort &&
-      gt_encseq_accesstype_get(bsr.encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
-      bsr.readmode == GT_READMODE_FORWARD)
+  if (bsr->sfxstrategy->withradixsort &&
+      gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
+      bsr->readmode == GT_READMODE_FORWARD)
   {
-    bsr.rsi = gt_radixsort_str_new(bsr.twobitencoding,
-                                   gt_encseq_is_mirrored(encseq)
-                                     ? GT_DIV2(bsr.totallength - 1)
-                                     : bsr.totallength,
-                                   1 + gt_encseq_equallength(bsr.encseq),
-                                   gt_bcktab_nonspecialsmaxsize(bcktab));
-    bsr.radixsortmaxwidth = gt_radixsort_str_maxwidth(bsr.rsi);
+    bsr->rsi = gt_radixsort_str_new(bsr->twobitencoding,
+                                    gt_encseq_is_mirrored(encseq)
+                                      ? GT_DIV2(bsr->totallength - 1)
+                                      : bsr->totallength,
+                                    1 + gt_encseq_equallength(bsr->encseq),
+                                    gt_bcktab_nonspecialsmaxsize(bcktab));
+    bsr->radixsortmaxwidth = gt_radixsort_str_maxwidth(bsr->rsi);
   }
-  if (outlcpinfo != NULL)
-  {
-    bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,bcktab);
-    if (bsr.srsw != NULL)
-    {
-      gt_shortreadsort_assigntableoflcpvalues(bsr.srsw,bsr.tableoflcpvalues);
-    }
-  }
-  bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
-  bsr.processunsortedsuffixrange = processunsortedsuffixrange;
+  gt_bentsedgresources_addlcpinfo(bsr,outlcpinfo,bcktab);
+  bsr->processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
+  bsr->processunsortedsuffixrange = processunsortedsuffixrange;
   for (code = mincode; code <= maxcode; code++)
   {
     if (bucketspec2 != NULL)
@@ -1606,21 +1614,21 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
     {
       if (bucketspec.nonspecialsinbucket > 1UL)
       {
-        gt_suffixsortspace_bucketleftidx_set(bsr.sssp,bucketspec.left);
-        gt_sort_bentleysedgewick(&bsr,bucketspec.nonspecialsinbucket,
+        gt_suffixsortspace_bucketleftidx_set(bsr->sssp,bucketspec.left);
+        gt_sort_bentleysedgewick(bsr,bucketspec.nonspecialsinbucket,
                                  (GtUword) prefixlength);
-        gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
+        gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
       }
       gt_Outlcpinfo_nonspecialsbucket(outlcpinfo,
                                       prefixlength,
-                                      bsr.sssp,
-                                      bsr.tableoflcpvalues,
+                                      bsr->sssp,
+                                      bsr->tableoflcpvalues,
                                       &bucketspec,
                                       code);
     }
     gt_Outlcpinfo_postbucket(outlcpinfo,
                              prefixlength,
-                             bsr.sssp,
+                             bsr->sssp,
                              bcktab,
                              &bucketspec,
                              code);
@@ -1632,7 +1640,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   saved_intervals = 0;
   saved_width = 0;
 #endif
-  bentsedgresources_delete(&bsr, logger);
+  bentsedgresources_delete(bsr, logger);
 }
 
 void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
@@ -1647,31 +1655,22 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  void *processunsortedsuffixrangeinfo,
                                  GtLogger *logger)
 {
-  GtBentsedgresources bsr;
-
   if (numberofsuffixes > 1UL)
   {
-    bentsedgresources_init(&bsr,
-                           suffixsortspace,
-                           encseq,
-                           readmode,
-                           0,
-                           sortmaxdepth,
-                           sfxstrategy,
-                           outlcpinfo != NULL ? true : false);
-    if (outlcpinfo != NULL)
-    {
-      bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,NULL);
-      if (bsr.srsw != NULL)
-      {
-        gt_shortreadsort_assigntableoflcpvalues(bsr.srsw,bsr.tableoflcpvalues);
-      }
-    }
-    bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
-    bsr.processunsortedsuffixrange = processunsortedsuffixrange;
-    gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
-    gt_sort_bentleysedgewick(&bsr,numberofsuffixes,0);
-    gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
-    bentsedgresources_delete(&bsr, logger);
+    GtBentsedgresources *bsr = bentsedgresources_new(suffixsortspace,
+                                                     encseq,
+                                                     readmode,
+                                                     0,
+                                                     sortmaxdepth,
+                                                     sfxstrategy,
+                                                     outlcpinfo != NULL
+                                                       ? true : false);
+    gt_bentsedgresources_addlcpinfo(bsr,outlcpinfo,NULL);
+    bsr->processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
+    bsr->processunsortedsuffixrange = processunsortedsuffixrange;
+    gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
+    gt_sort_bentleysedgewick(bsr,numberofsuffixes,0);
+    gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
+    bentsedgresources_delete(bsr, logger);
   }
 }
