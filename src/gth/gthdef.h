@@ -21,7 +21,7 @@
 /* file suffixes for different indices */
 #define DNASUFFIX               "dna"
 #define POLYASUFFIX             "polya"
-#define MAXSUFFIXLEN            11
+#define MAXSUFFIXLEN            14
 
 /* the name of the environment variable containing the path for gth data */
 #define GTHDATAENVNAME          "GTHDATADIR"

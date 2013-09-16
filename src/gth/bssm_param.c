@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2003-2011, 2013 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2003-2005       Michael E Sparks <mespar1@iastate.edu>
-  Copyright (c) 2003-2008       Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2013 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2003-2005 Michael E Sparks <mespar1@iastate.edu>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -632,44 +632,51 @@ static void bssm_model_echo(const GthBSSMModel *bssm_model, FILE *outfp)
   gt_assert(bssm_model_is_seven_class(bssm_model));
 
   for (i = 0; i < HYPOTHESIS7; i++) {
-    fprintf(outfp,"\n\nHypothesis: "GT_WU"", i);
+    fprintf(outfp, "\n\nHypothesis: "GT_WU"", i);
     for (j = 0; j < STRINGSIZE; j++) {
-      fprintf(outfp,"\n");
+      fprintf(outfp, "\n");
       for (k = 0; k < ALPHSIZE; k++) {
-        fprintf(outfp,"\n");
+        fprintf(outfp, "\n");
         for (l = 0; l < ALPHSIZE; l++) {
-          fprintf(outfp,"%.4f ", bssm_model->hypotables.hypo7table[i][j][k][l]);
+          fprintf(outfp, "%.4f ",
+                  bssm_model->hypotables.hypo7table[i][j][k][l]);
         }
       }
     }
   }
-  fprintf(outfp,"\n\n");
+  fprintf(outfp, "\n\n");
 }
 
 void gth_bssm_param_echo(const GthBSSMParam *bssm_param, FILE *outfp)
 {
   gt_assert(bssm_param && outfp);
-  fprintf(outfp,"BSSMPARAMVERSION is %u\n\n", bssm_param->version_num);
-  fprintf(outfp,"Is the GT donor model set? -> %s\n",
+  fprintf(outfp, "BSSMPARAMVERSION is %u\n\n", bssm_param->version_num);
+  fprintf(outfp, "Is the GT donor model set? -> %s\n",
           GTH_SHOWBOOL(bssm_param->gt_donor_model_set));
-  fprintf(outfp,"Is the GC donor model set? -> %s\n\n",
+  fprintf(outfp, "Is the GC donor model set? -> %s\n\n",
           GTH_SHOWBOOL(bssm_param->gc_donor_model_set));
-  fprintf(outfp,"Is the AG acceptor model set? -> %s\n\n",
+  fprintf(outfp, "Is the AG acceptor model set? -> %s\n\n",
           GTH_SHOWBOOL(bssm_param->ag_acceptor_model_set));
 
-  if (bssm_param->gt_donor_model_set) {
-    fprintf(outfp,"reporting GT donor model parameterization");
-    bssm_model_echo(&bssm_param->gt_donor_model, outfp);
-  }
+  if (gth_bssm_param_is_seven_class(bssm_param)) {
+    if (bssm_param->gt_donor_model_set) {
+      fprintf(outfp, "reporting GT donor model parameterization");
+      bssm_model_echo(&bssm_param->gt_donor_model, outfp);
+    }
 
-  if (bssm_param->gc_donor_model_set) {
-    fprintf(outfp,"reporting GC donor model parameterization");
-    bssm_model_echo(&bssm_param->gc_donor_model, outfp);
-  }
+    if (bssm_param->gc_donor_model_set) {
+      fprintf(outfp, "reporting GC donor model parameterization");
+      bssm_model_echo(&bssm_param->gc_donor_model, outfp);
+    }
 
-  if (bssm_param->ag_acceptor_model_set) {
-    fprintf(outfp,"reporting AG acceptor model parameterization");
-    bssm_model_echo(&bssm_param->ag_acceptor_model, outfp);
+    if (bssm_param->ag_acceptor_model_set) {
+      fprintf(outfp, "reporting AG acceptor model parameterization");
+      bssm_model_echo(&bssm_param->ag_acceptor_model, outfp);
+    }
+  }
+  else {
+    fprintf(outfp,
+            "Cannot report model parameterization for two-class BSSMs.\n");
   }
 }
 
