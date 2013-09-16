@@ -18,49 +18,45 @@
 #ifndef S_SPLINT_S
 #include <sys/types.h>
 #endif
-#ifndef _WIN32
-#include <regex.h>
-#endif
 #include <stdlib.h>
 #include "core/ensure.h"
 #include "core/grep_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
+#include "tre.h"
 
-#ifndef _WIN32
 static void grep_error(int errcode, regex_t *matcher, GtError *err)
 {
   char sbuf[BUFSIZ], *buf;
   size_t bufsize;
   gt_error_check(err);
-  bufsize = regerror(errcode, matcher, NULL, 0);
+  bufsize = tre_regerror(errcode, matcher, NULL, 0);
   buf = gt_malloc(bufsize);
-  (void) regerror(errcode, matcher, buf ? buf : sbuf, buf ? bufsize : BUFSIZ);
+  (void) tre_regerror(errcode, matcher, buf ? buf : sbuf,
+                      buf ? bufsize : BUFSIZ);
   gt_error_set(err, "grep(): %s", buf ? buf : sbuf);
   gt_free(buf);
 }
-#endif
 
 int gt_grep(GT_UNUSED bool *match, GT_UNUSED const char *pattern,
             GT_UNUSED const char *line, GtError *err)
 {
-#ifndef _WIN32
   regex_t matcher;
   int rval, had_err = 0;
   gt_error_check(err);
   gt_assert(pattern && line);
-  if ((rval = regcomp(&matcher, pattern, REG_EXTENDED | REG_NOSUB))) {
+  if ((rval = tre_regcomp(&matcher, pattern, REG_EXTENDED | REG_NOSUB))) {
     grep_error(rval, &matcher, err);
     had_err = -1;
   }
   if (!had_err) {
-    rval = regexec(&matcher, line, 0, NULL, 0);
+    rval = tre_regexec(&matcher, line, 0, NULL, 0);
     if (rval && rval != REG_NOMATCH) {
       grep_error(rval, &matcher, err);
       had_err = -1;
     }
   }
-  regfree(&matcher);
+  tre_regfree(&matcher);
   if (!had_err) {
     if (rval)
       *match = false;
@@ -68,11 +64,6 @@ int gt_grep(GT_UNUSED bool *match, GT_UNUSED const char *pattern,
       *match = true;
   }
   return had_err;
-#else
-  /* XXX */
-  gt_error_set(err, "gt_grep() not implemented");
-  return -1;
-#endif
 }
 
 int gt_grep_unit_test(GtError *err)
