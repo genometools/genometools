@@ -18,23 +18,22 @@
 #include <signal.h>
 #include <stdlib.h>
 #include "core/sig.h"
-#include "core/unused_api.h"
 #include "core/xposix.h"
 
-void gt_sig_register_all(GT_UNUSED void (*func)(int sigraised))
+void gt_sig_register_all(void (*func)(int sigraised))
 {
-#ifndef _WIN32
   /* POSIX */
   (void) gt_xsignal(SIGABRT, func);
-  (void) gt_xsignal(SIGBUS, func);
   (void) gt_xsignal(SIGFPE, func);
-  (void) gt_xsignal(SIGHUP, func);
   (void) gt_xsignal(SIGILL, func);
   (void) gt_xsignal(SIGINT, func);
-  (void) gt_xsignal(SIGPIPE, func);
-  (void) gt_xsignal(SIGQUIT, func);
   (void) gt_xsignal(SIGSEGV, func);
   (void) gt_xsignal(SIGTERM, func);
+#ifndef _WIN32
+  (void) gt_xsignal(SIGBUS, func);
+  (void) gt_xsignal(SIGHUP, func);
+  (void) gt_xsignal(SIGPIPE, func);
+  (void) gt_xsignal(SIGQUIT, func);
   (void) gt_xsignal(SIGTSTP, func);
   (void) gt_xsignal(SIGTTIN, func);
   (void) gt_xsignal(SIGTTOU, func);
@@ -43,32 +42,28 @@ void gt_sig_register_all(GT_UNUSED void (*func)(int sigraised))
   (void) gt_xsignal(SIGSYS, func);
   (void) gt_xsignal(SIGXCPU, func);
   (void) gt_xsignal(SIGXFSZ, func);
+#endif
 
   /* OpenBSD */
 #ifdef SIGEMT
   (void) gt_xsignal(SIGEMT, func);
 #endif
-#else
-  /* XXX */
-  fprintf(stderr, "gt_sig_register_all() not implemented\n");
-  exit(EXIT_FAILURE);
-#endif
 }
 
 void gt_sig_unregister_all(void)
 {
-#ifndef _WIN32
   /* POSIX */
   (void) gt_xsignal(SIGABRT, SIG_DFL);
-  (void) gt_xsignal(SIGBUS, SIG_DFL);
   (void) gt_xsignal(SIGFPE, SIG_DFL);
-  (void) gt_xsignal(SIGHUP, SIG_DFL);
   (void) gt_xsignal(SIGILL, SIG_DFL);
   (void) gt_xsignal(SIGINT, SIG_DFL);
-  (void) gt_xsignal(SIGPIPE, SIG_DFL);
-  (void) gt_xsignal(SIGQUIT, SIG_DFL);
   (void) gt_xsignal(SIGSEGV, SIG_DFL);
   (void) gt_xsignal(SIGTERM, SIG_DFL);
+#ifndef _WIN32
+  (void) gt_xsignal(SIGBUS, SIG_DFL);
+  (void) gt_xsignal(SIGHUP, SIG_DFL);
+  (void) gt_xsignal(SIGPIPE, SIG_DFL);
+  (void) gt_xsignal(SIGQUIT, SIG_DFL);
   (void) gt_xsignal(SIGTSTP, SIG_DFL);
   (void) gt_xsignal(SIGTTIN, SIG_DFL);
   (void) gt_xsignal(SIGTTOU, SIG_DFL);
@@ -77,14 +72,10 @@ void gt_sig_unregister_all(void)
   (void) gt_xsignal(SIGSYS, SIG_DFL);
   (void) gt_xsignal(SIGXCPU, SIG_DFL);
   (void) gt_xsignal(SIGXFSZ, SIG_DFL);
+#endif
 
   /* OpenBSD */
 #ifdef SIGEMT
   (void) gt_xsignal(SIGEMT, SIG_DFL);
-#endif
-#else
-  /* XXX */
-  fprintf(stderr, "gt_sig_unregister_all() not implemented\n");
-  exit(EXIT_FAILURE);
 #endif
 }
