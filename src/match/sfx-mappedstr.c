@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2007-2010 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2013 Ole Eigenbrod <ole.eigenbrod@gmx.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,18 +19,20 @@
 #ifndef S_SPLINT_S
 #include <ctype.h>
 #endif
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+
+#include "core/alphabet.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"
-#include "core/ma_api.h"
 #include "core/divmodmul.h"
-#include "core/alphabet.h"
+#include "core/encseq.h"
 #include "core/error_api.h"
+#include "core/ma_api.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
-#include "core/encseq.h"
+#include "core/types_api.h"
 #include "initbasepower.h"
 #include "sfx-mappedstr.h"
 #undef SKDEBUG
@@ -222,15 +225,21 @@ static void special_queue_verify(const GtKmerstream *kmerstream)
 }
 #endif
 
+static void special_queue_reset(GtSpecialqueue *specialqueue)
+{
+  specialqueue->noofelements = 0;
+  specialqueue->dequeueptr = specialqueue->enqueueptr
+                           = specialqueue->queuespace +
+                             specialqueue->queuesize - 1;
+}
+
 static void special_queue_init(GtSpecialqueue *specialqueue,
                                unsigned int queuesize)
 {
+  specialqueue->queuesize = queuesize;
   specialqueue->queuespace
     = gt_malloc(queuesize * sizeof (*specialqueue->queuespace));
-  specialqueue->noofelements = 0;
-  specialqueue->queuesize = queuesize;
-  specialqueue->dequeueptr = specialqueue->enqueueptr
-                           = specialqueue->queuespace + queuesize - 1;
+  special_queue_reset(specialqueue);
 }
 
 static bool special_queue_is_empty(const GtSpecialqueue *specialqueue)
@@ -279,6 +288,18 @@ static void special_queue_delete(GtSpecialqueue *specialqueue)
   gt_free(specialqueue->queuespace);
 }
 
+static void kmerstream_init(GtKmerstream *spwp,
+                            unsigned int numofchars,
+                            unsigned int kmersize)
+{
+  spwp->lengthwithoutspecial = 0;
+  spwp->codewithoutspecial = 0;
+  spwp->kmersize = kmersize;
+  spwp->numofchars = numofchars;
+  spwp->windowwidth = 0;
+  spwp->firstindex = 0;
+}
+
 static GtKmerstream *kmerstream_new(unsigned int numofchars,
                                     unsigned int kmersize)
 {
@@ -287,15 +308,16 @@ static GtKmerstream *kmerstream_new(unsigned int numofchars,
   gt_assert(kmersize <= (unsigned int) MAXPREFIXLENGTH);
   spwp = gt_malloc(sizeof (*spwp));
   spwp->multimappower = gt_initmultimappower(numofchars,kmersize);
-  spwp->lengthwithoutspecial = 0;
-  spwp->codewithoutspecial = 0;
-  spwp->kmersize = kmersize;
-  spwp->numofchars = numofchars;
-  spwp->windowwidth = 0;
-  spwp->firstindex = 0;
+  kmerstream_init(spwp, numofchars, kmersize);
   special_queue_init(&spwp->specialqueue,kmersize);
   spwp->filltable = gt_filllargestchartable(numofchars,kmersize);
   return spwp;
+}
+
+static void kmerstream_reset(GtKmerstream *spwp)
+{
+  kmerstream_init(spwp, spwp->numofchars, spwp->kmersize);
+  special_queue_reset(&(spwp->specialqueue));
 }
 
 static void kmerstream_updatespecialpositions(GtKmerstream *spwp,
@@ -358,42 +380,7 @@ static void kmerstream_updatespecialpositions(GtKmerstream *spwp,
 
 static void kmerstream_newcode(GtKmercode *kmercode, GtKmerstream *spwp)
 {
-#ifdef SKDEBUG
-  unsigned int firstspecialbrute;
-
-  if (!special_queue_is_empty(&spwp->specialqueue))
   {
-    GtSpecialcontext *head = special_queue_head_get(&spwp->specialqueue);
-    GtCodetype tmpprefixcode = prefixwindowkmer2code(head->lengthofleftcontext,
-                                                     spwp->kmersize,
-                                                     (const GtCodetype **)
-                                                       spwp->multimappower,
-                                                     spwp->cyclicwindow,
-                                                     spwp->firstindex);
-    gt_assert(tmpprefixcode == head->codeofleftcontext);
-  }
-  firstspecialbrute = determinefirstspecialposition(spwp->windowwidth,
-                                                    spwp->kmersize,
-                                                    spwp->cyclicwindow,
-                                                    spwp->firstindex);
-  if (special_queue_is_empty(&spwp->specialqueue))
-  {
-    gt_assert(firstspecialbrute == spwp->kmersize);
-  } else
-  {
-    GtSpecialcontext *head = special_queue_head_get(&spwp->specialqueue);
-    gt_assert(head->lengthofleftcontext == firstspecialbrute);
-  }
-#endif
-  {
-#ifdef SKDEBUG
-    GtCodetype wcode;
-
-    wcode = windowkmer2code(spwp->numofchars,
-                            spwp->kmersize,
-                            spwp->cyclicwindow,
-                            spwp->firstindex);
-#endif
     if (special_queue_is_empty(&spwp->specialqueue))
     {
       kmercode->definedspecialposition = false;
@@ -408,18 +395,12 @@ static void kmerstream_newcode(GtKmercode *kmercode, GtKmerstream *spwp)
       kmercode->definedspecialposition = true;
       kmercode->specialposition = head->lengthofleftcontext;
     }
-#ifdef SKDEBUG
-    gt_assert(wcode == kmercode->code);
-#endif
   }
 }
 
-static void kmerstream_shiftrightwithchar(GtKmerstream *spwp,GtUchar charcode)
+static void kmerstream_shiftrightwithchar(GtKmerstream *spwp, GtUchar charcode)
 {
   gt_assert(spwp->windowwidth == spwp->kmersize);
-#ifdef SKDEBUG
-  special_queue_verify(spwp);
-#endif
   kmerstream_updatespecialpositions(spwp,charcode,true,
                                     spwp->cyclicwindow[spwp->firstindex]);
   spwp->cyclicwindow[spwp->firstindex] = charcode;
@@ -452,6 +433,50 @@ struct GtKmercodeiterator
   GtSequenceBuffer *fb; /* only for generating from file */
 };
 
+void gt_kmercodeiterator_reset(GtKmercodeiterator *kmercodeiterator,
+                               GtReadmode readmode,
+                               GtUword startpos)
+{
+  GtUchar charcode;
+  const GtEncseq *encseq = kmercodeiterator->encseq;
+  GtUword kmersize = (GtUword) kmercodeiterator->spwp->kmersize;
+
+  gt_assert(!GT_ISDIRREVERSE(readmode) || startpos == 0);
+  kmercodeiterator->totallength = gt_encseq_total_length(encseq);
+  kmercodeiterator->startpos = startpos;
+  gt_assert(startpos < kmercodeiterator->totallength);
+  kmercodeiterator->fb = NULL;
+  if (kmercodeiterator->totallength - startpos < kmersize)
+  {
+    kmercodeiterator->inputexhausted = true;
+    gt_encseq_reader_delete(kmercodeiterator->esr);
+    kmercodeiterator->esr = NULL;
+    kmerstream_delete(kmercodeiterator->spwp);
+    kmercodeiterator->spwp = NULL;
+  } else
+  {
+    kmercodeiterator->inputexhausted = false;
+    kmercodeiterator->readmode = readmode;
+    gt_encseq_reader_reinit_with_readmode(kmercodeiterator->esr,
+                                          encseq,
+                                          readmode,
+                                          startpos);
+    kmerstream_reset(kmercodeiterator->spwp);
+    kmercodeiterator->hasprocessedfirst = false;
+    for (kmercodeiterator->currentposition = startpos;
+         kmercodeiterator->currentposition < startpos+(GtUword) kmersize;
+         kmercodeiterator->currentposition++)
+    {
+      charcode = gt_encseq_reader_next_encoded_char(kmercodeiterator->esr);
+      kmercodeiterator->spwp->windowwidth++;
+      kmerstream_updatespecialpositions(kmercodeiterator->spwp,charcode,
+                                        false,0);
+      kmercodeiterator->spwp->cyclicwindow[kmercodeiterator->
+                                           spwp->windowwidth-1] = charcode;
+    }
+  }
+}
+
 /*@notnull@*/ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
                                             const GtEncseq *encseq,
                                             GtReadmode readmode,
@@ -467,18 +492,16 @@ struct GtKmercodeiterator
   kmercodeiterator->totallength = gt_encseq_total_length(encseq);
   kmercodeiterator->startpos = startpos;
   gt_assert(startpos < kmercodeiterator->totallength);
+  kmercodeiterator->fb = NULL;
+  kmercodeiterator->encseq = encseq;
   if (kmercodeiterator->totallength - startpos < (GtUword) kmersize)
   {
     kmercodeiterator->inputexhausted = true;
-    kmercodeiterator->fb = NULL;
-    kmercodeiterator->encseq = encseq;
     kmercodeiterator->esr = NULL;
     kmercodeiterator->spwp = NULL;
   } else
   {
     kmercodeiterator->inputexhausted = false;
-    kmercodeiterator->fb = NULL;
-    kmercodeiterator->encseq = encseq;
     kmercodeiterator->readmode = readmode;
     kmercodeiterator->esr = gt_encseq_create_reader_with_readmode(encseq,
                                                                   readmode,
@@ -499,6 +522,34 @@ struct GtKmercodeiterator
     }
   }
   return kmercodeiterator;
+}
+
+GtUword gt_kmercodeiterator_encseq_get_currentpos(
+                                                GtKmercodeiterator *kmercodeit)
+{
+  return kmercodeit->currentposition;
+}
+
+void gt_kmercodeiterator_encseq_set_currentpos(GtKmercodeiterator *kmercodeit,
+                                               GtUword position)
+{
+  kmercodeit->currentposition = position;
+}
+
+bool gt_kmercodeiterator_encseq_isspecial(GtKmercodeiterator *kmercodeit)
+{
+  return !special_queue_is_empty(&(kmercodeit->spwp->specialqueue));
+}
+
+bool gt_kmercodeiterator_encseq_isexhausted(GtKmercodeiterator *kmercodeit)
+{
+  return kmercodeit->inputexhausted;
+}
+
+void gt_kmercodeiterator_encseq_setexhausted(GtKmercodeiterator *kmercodeit,
+                                             bool exhausted)
+{
+  kmercodeit->inputexhausted = exhausted;
 }
 
 const GtKmercode *gt_kmercodeiterator_encseq_next(

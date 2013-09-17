@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2013 Ole Eigenbrod <ole.eigenbrod@gmx.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -33,40 +34,62 @@ typedef struct
 
 typedef struct GtKmercodeiterator GtKmercodeiterator;
 
-/*@notnull@*/ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
-                                            const GtEncseq *encseq,
-                                            GtReadmode readmode,
-                                            unsigned int kmersize,
-                                            GtUword startpos);
+/*@notnull@*/
+GtKmercodeiterator *gt_kmercodeiterator_encseq_new(const GtEncseq *encseq,
+                                                   GtReadmode readmode,
+                                                   unsigned int kmersize,
+                                                   GtUword startpos);
 
-const GtKmercode *gt_kmercodeiterator_encseq_next(
-                       GtKmercodeiterator *kmercodeiterator);
+GtUword             gt_kmercodeiterator_encseq_get_currentpos(
+                                                GtKmercodeiterator *kmercodeit);
 
-const GtKmercode *gt_kmercodeiterator_encseq_nonspecial_next(
-                             GtKmercodeiterator *kmercodeiterator);
+void                gt_kmercodeiterator_encseq_set_currentpos(
+                                                 GtKmercodeiterator *kmercodeit,
+                                                 GtUword position);
 
-GtKmercodeiterator *gt_kmercodeiterator_filetab_new(
-        const GtStrArray *filenametab,
-        unsigned int numofchars,
-        unsigned int kmersize,
-        const GtUchar *symbolmap,
-        bool plainformat,
-        GtError *err);
+void                gt_kmercodeiterator_reset(
+                                         GtKmercodeiterator *kmercodeiterator,
+                                         GtReadmode readmode, GtUword startpos);
 
-int gt_kmercodeiterator_filetab_next(const GtKmercode **kmercodeptr,
-                                     GtKmercodeiterator *kmercodeiterator,
-                                     GtError *err);
+bool                gt_kmercodeiterator_encseq_isspecial(
+                                                GtKmercodeiterator *kmercodeit);
+bool                gt_kmercodeiterator_encseq_isexhausted(
+                                                GtKmercodeiterator *kmercodeit);
+void                gt_kmercodeiterator_encseq_setexhausted(
+                                                 GtKmercodeiterator *kmercodeit,
+                                                 bool exhausted);
 
-bool gt_kmercodeiterator_inputexhausted(
-                       const GtKmercodeiterator *kmercodeiterator);
+const GtKmercode*   gt_kmercodeiterator_encseq_next(
+                                          GtKmercodeiterator *kmercodeiterator);
 
-void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator);
+const GtKmercode*   gt_kmercodeiterator_encseq_nonspecial_next(
+                                          GtKmercodeiterator *kmercodeiterator);
 
-void getencseqkmers(const GtEncseq *encseq,
-                    GtReadmode readmode,
-                    unsigned int kmersize,
-                    void(*processkmercode)(void *,
-                                           GtUword,
-                                           const GtKmercode *),
-                    void *processkmercodeinfo);
+GtKmercodeiterator* gt_kmercodeiterator_filetab_new(
+                                                  const GtStrArray *filenametab,
+                                                  unsigned int numofchars,
+                                                  unsigned int kmersize,
+                                                  const GtUchar *symbolmap,
+                                                  bool plainformat,
+                                                  GtError *err);
+
+int                 gt_kmercodeiterator_filetab_next(
+                                           const GtKmercode **kmercodeptr,
+                                           GtKmercodeiterator *kmercodeiterator,
+                                           GtError *err);
+
+bool                gt_kmercodeiterator_inputexhausted(
+                                    const GtKmercodeiterator *kmercodeiterator);
+
+void                gt_kmercodeiterator_delete(
+                                          GtKmercodeiterator *kmercodeiterator);
+
+void                getencseqkmers(const GtEncseq *encseq,
+                                   GtReadmode readmode,
+                                   unsigned int kmersize,
+                                   void(*processkmercode)(void *,
+                                                          GtUword,
+                                                          const GtKmercode *),
+                                   void *processkmercodeinfo);
+
 #endif
