@@ -25,7 +25,8 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.6 \
             -I$(CURDIR)/src/external/samtools-0.1.18 \
-            -I$(CURDIR)/src/external/sqlite-3.8.0.1
+            -I$(CURDIR)/src/external/sqlite-3.8.0.1 \
+            -I$(CURDIR)/src/external/tre/include/tre
 
 ifeq ($(shell pkg-config --version > /dev/null 2> /dev/null; echo $$?),0)
   HAS_PKGCONFIG:=yes
@@ -114,6 +115,15 @@ LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
               $(EXPAT_DIR)/xmltok.c
 LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
 LIBEXPAT_DEP:=$(LIBEXPAT_SRC:%.c=obj/%.d)
+
+TRE_DIR:=src/external/tre/lib
+LIBTRE_SRC:=$(TRE_DIR)/regcomp.c $(TRE_DIR)/regerror.c $(TRE_DIR)/regexec.c \
+            $(TRE_DIR)/tre-ast.c $(TRE_DIR)/tre-compile.c \
+            $(TRE_DIR)/tre-filter.c $(TRE_DIR)/tre-match-backtrack.c \
+            $(TRE_DIR)/tre-match-parallel.c $(TRE_DIR)/tre-mem.c \
+            $(TRE_DIR)/tre-parse.c $(TRE_DIR)/tre-stack.c $(TRE_DIR)/xmalloc.c
+LIBTRE_OBJ:=$(LIBTRE_SRC:%.c=obj/%.o)
+LIBTRE_DEP:=$(LIBTRE_SRC:%.c=obj/%.d)
 
 LIBLUA_SRC=src/lualib.c\
            src/external/md5-1.1.2/src/md5.c\
@@ -417,11 +427,13 @@ ifneq ($(useshared),yes)
   LIBGENOMETOOLS_OBJ += $(LIBLUA_OBJ) \
                         $(SAMTOOLS_OBJ) \
                         $(LIBEXPAT_OBJ) \
+                        $(LIBTRE_OBJ) \
                         $(LIBBZ2_OBJ) \
                         $(ZLIB_OBJ)
   LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
                         $(SAMTOOLS_DEP) \
                         $(LIBEXPAT_DEP) \
+                        $(LIBTRE_DEP) \
                         $(LIBBZ2_DEP) \
                         $(ZLIB_DEP)
 endif
@@ -464,6 +476,14 @@ lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(AR) ru $@ $(LIBEXPAT_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
+lib/libtre.a: $(LIBTRE_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(AR) ru $@ $(LIBTRE_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
