@@ -41,7 +41,7 @@ GtRange       gt_alignment_get_urange(const GtAlignment *alignment);
 GtRange       gt_alignment_get_vrange(const GtAlignment *alignment);
 void          gt_alignment_set_urange(GtAlignment *alignment, GtRange range);
 void          gt_alignment_set_vrange(GtAlignment *alignment, GtRange range);
-/* can be either match, mismatch, <GtMultieoplist> handles them separately */
+/* can be either match, mismatch, <GtMultieoplist> handles them as match! */
 void          gt_alignment_add_replacement(GtAlignment *alignment);
 void          gt_alignment_add_deletion(GtAlignment *alignment);
 void          gt_alignment_add_insertion(GtAlignment *alignment);

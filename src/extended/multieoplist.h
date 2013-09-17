@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2013 Ole Eigenbrod <ole.eigenbrod@gmx.de>
+  Copyright (c) 2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,40 +23,85 @@
 #include "core/types_api.h"
 #include "core/encseq_api.h"
 
+/* Class <GtMultieoplist> stores a list of edit operations that define an
+   alignment between two sequences. */
 typedef struct GtMultieoplist GtMultieoplist;
 
+/* <AlignmentEoptype> represents the types of operations allowed in
+   <GtMultieoplist>. <Replacement> will be stored as a <Match>. Its use is
+   deprecated and should be replaced by <Match> or <Mismatch>. */
 typedef enum {
+  Match,
+  Mismatch,
   Replacement,
   Deletion,
-  Insertion,
-  Match,
-  Mismatch
+  Insertion
 } AlignmentEoptype;
 
+/* <GtMultieop> one edit operation of type <type> repeated <steps> times in the
+   alignment. */
 typedef struct {
   AlignmentEoptype type;
   GtUword steps;
 } GtMultieop;
-/* XXX: possible improvement to save memory: combine both parts into a single
-        variable (use bit shifting operations) */
 
+/* Returns new empty <GtMultieoplist> object */
 GtMultieoplist* gt_multieoplist_new(void);
+/* Returns reference to <multieops> */
 GtMultieoplist* gt_multieoplist_ref(GtMultieoplist *multieops);
 void            gt_multieoplist_delete(GtMultieoplist *multieops);
 
+/* Add one <Replacement> operation to the list of edit operations. Multiple
+   additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_replacement(GtMultieoplist *multieops);
+/* Add one <Insertion> operation to the list of edit operations. Multiple
+   additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_insertion(GtMultieoplist *multieops);
+/* Add one <Deletion> operation to the list of edit operations. Multiple
+   additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_deletion(GtMultieoplist *multieops);
+/* Add one <Mismatch> operation to the list of edit operations. Multiple
+   additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_mismatch(GtMultieoplist *multieops);
+/* Add one <Match> operation to the list of edit operations. Multiple
+   additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_match(GtMultieoplist *multieops);
+/* Remove all operations from <multieops> */
 void            gt_multieoplist_reset(GtMultieoplist *multieops);
+/* Remove the last added edit operation. Will remove exactly one! (decrease
+   <steps>) */
 void            gt_multieoplist_remove_last(GtMultieoplist *multieops);
-GtUword   gt_multieoplist_get_length(GtMultieoplist *multieops);
-GtMultieop*     gt_multieoplist_get_entry(GtMultieoplist *multieops,
+/* Returns the number of <GtMultieop> elements in <multieops>, each of which
+   can have <steps> > 1, therefor this represents not the length of the
+   alignment. */
+GtUword         gt_multieoplist_get_length(GtMultieoplist *multieops);
+/* Returns <GtMultieop> number <index>. */
+GtMultieop      gt_multieoplist_get_entry(GtMultieoplist *multieops,
                                           GtUword index);
-GtUword   gt_multieoplist_get_repdel_length(GtMultieoplist *multieops);
-GtUword   gt_multieoplist_get_repins_length(GtMultieoplist *multieops);
+/* Returns sum of <Replacement>, <Match>, <Mismatch> and <Deletion> including
+   their <steps>. This corresponds to the length of the first sequence. */
+GtUword         gt_multieoplist_get_repdel_length(GtMultieoplist *multieops);
+/* Returns sum of <Replacement>, <Match>, <Mismatch> and <Insertion> including
+   their <steps>. This corresponds to the length of the second sequence. */
+GtUword         gt_multieoplist_get_repins_length(GtMultieoplist *multieops);
 
+/* Print a string representation of <multieops> to <fp> ending with a newline.
+   For example: [M5,R2,M3,I1,M6] R is equivalent for <Mismatch> and
+   <Replacement> */
 void            gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp);
+
+/* Function type, used for reading and writing <GtMultieoplist> to/from a file,
+   similar to fread() and fwrite(). Should contain the errorhandling for file IO
+   errors. */
+typedef void (*MeoplistIOFunc)(void *ptr,
+                               size_t size,
+                               size_t nmemb,
+                               FILE *stream);
+
+/* Read or write to/from File, depending on <MeoplistIOFunc> it writes to <fp>
+   or reads from it, in which case <multieops> can be NULL. */
+GtMultieoplist* gt_meoplist_io(GtMultieoplist *multieops,
+                               MeoplistIOFunc io_func,
+                               FILE *fp);
 
 #endif

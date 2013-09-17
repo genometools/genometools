@@ -162,6 +162,7 @@ require 'gt_splitfasta_include'
 require 'gt_stat_include'
 require 'gt_tirvish_include'
 require 'gt_uniq_include'
+require 'gt_unique_encseq_include'
 if not $arguments["nocairo"] then
   require 'gt_sketch_include'
 end
