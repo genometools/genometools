@@ -73,7 +73,11 @@ end
 $systemname=`uname -s`
 $systemname.chomp!
 
-$SEED = rand(2**31)
+if $arguments["seed"] then
+  $SEED = $arguments["seed"]
+else
+  $SEED = rand(2**31)
+end
 
 $MEMCHECK_SUPPORTEDPLATFORMS = ["Linux", "Darwin"]
 
