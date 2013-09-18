@@ -13,6 +13,7 @@
 #include "tre-mem.h"
 #include "tre-internal.h"
 #include "tre-compile.h"
+#include "core/types_api.h"
 
 /* The different AST node types. */
 typedef enum {
@@ -55,8 +56,8 @@ typedef struct {
    tags, matching parameter settings, and all expressions that match one
    character. */
 typedef struct {
-  long code_min;
-  long code_max;
+  GtWord code_min;
+  GtWord code_max;
   int position;
   union {
     tre_ctype_t class;
