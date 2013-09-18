@@ -457,7 +457,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
       max = l->code_max;
 
       DPRINT(("item: %d - %d, class %ld, curr_max = %d\n",
-	      (int)l->code_min, (int)l->code_max, (long)l->u.class, curr_max));
+	      (int)l->code_min, (int)l->code_max, (GtWord)l->u.class, curr_max));
 
       if (negate)
 	{
@@ -1451,7 +1451,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		    {
 		      /* 8 bit hex char. */
 		      char tmp[3] = {0, 0, 0};
-		      long val;
+		      GtWord val;
 		      DPRINT(("tre_parse:  8 bit hex: '%.*" STRF "'\n",
 			      REST(ctx->re - 2)));
 
@@ -1475,7 +1475,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		    {
 		      /* Wide char. */
 		      char tmp[32];
-		      long val;
+		      GtWord val;
 		      int i = 0;
 		      ctx->re++;
 		      while (ctx->re_end - ctx->re >= 0)

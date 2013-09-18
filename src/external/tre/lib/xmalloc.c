@@ -21,6 +21,7 @@
 #include <stdio.h>
 #define XMALLOC_INTERNAL 1
 #include "xmalloc.h"
+#include "core/types_api.h"
 
 
 /*
@@ -82,7 +83,7 @@ hash_void_ptr(void *ptr)
   hash = 0;
   for (i = 0; i < (int)sizeof(ptr)*8 / TABLE_BITS; i++)
     {
-      hash ^= (unsigned long)ptr >> i*8;
+      hash ^= (GtUword)ptr >> i*8;
       hash += i * 17;
       hash &= TABLE_MASK;
     }
