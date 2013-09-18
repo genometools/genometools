@@ -64,6 +64,7 @@ char *alloca ();
 #include "tre-match-utils.h"
 #include "tre.h"
 #include "xmalloc.h"
+#include "core/types_api.h"
 
 
 
@@ -161,7 +162,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
     pbytes = sizeof(*reach_pos) * tnfa->num_states;
     xbytes = sizeof(int) * num_tags;
     total_bytes =
-      (sizeof(long) - 1) * 4 /* for alignment paddings */
+      (sizeof(GtWord) - 1) * 4 /* for alignment paddings */
       + (rbytes + xbytes * tnfa->num_states) * 2 + tbytes + pbytes;
 
     /* Allocate the memory. */
@@ -177,16 +178,16 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
     /* Get the various pointers within tmp_buf (properly aligned). */
     tmp_tags = (void *)buf;
     tmp_buf = buf + tbytes;
-    tmp_buf += ALIGN(tmp_buf, long);
+    tmp_buf += ALIGN(tmp_buf, GtWord);
     reach_next = (void *)tmp_buf;
     tmp_buf += rbytes;
-    tmp_buf += ALIGN(tmp_buf, long);
+    tmp_buf += ALIGN(tmp_buf, GtWord);
     reach = (void *)tmp_buf;
     tmp_buf += rbytes;
-    tmp_buf += ALIGN(tmp_buf, long);
+    tmp_buf += ALIGN(tmp_buf, GtWord);
     reach_pos = (void *)tmp_buf;
     tmp_buf += pbytes;
-    tmp_buf += ALIGN(tmp_buf, long);
+    tmp_buf += ALIGN(tmp_buf, GtWord);
     for (i = 0; i < tnfa->num_states; i++)
       {
 	reach[i].tags = (void *)tmp_buf;
@@ -217,7 +218,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 #endif /* !TRE_USE_ALLOCA */
 	  return REG_NOMATCH;
 	}
-      DPRINT(("skipped %lu chars\n", (unsigned long)(str_byte - orig_str)));
+      DPRINT(("skipped %lu chars\n", (GtUword)(str_byte - orig_str)));
       if (str_byte >= orig_str + 1)
 	prev_c = (unsigned char)*(str_byte - 1);
       next_c = (unsigned char)*str_byte;

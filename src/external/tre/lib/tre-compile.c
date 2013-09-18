@@ -1749,7 +1749,7 @@ tre_make_trans(tre_pos_and_tags_t *p1, tre_pos_and_tags_t *p2,
 	      if (trans->assertions & ASSERT_BACKREF)
 		DPRINT((", backref %d", trans->u.backref));
 	      else if (trans->u.class)
-		DPRINT((", class %ld", (long)trans->u.class));
+		DPRINT((", class %ld", (GtWord)trans->u.class));
 	      if (trans->neg_classes)
 		DPRINT((", neg_classes %p", trans->neg_classes));
 	      if (trans->params)

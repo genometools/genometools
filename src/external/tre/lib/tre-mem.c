@@ -22,6 +22,7 @@
 #include "tre-internal.h"
 #include "tre-mem.h"
 #include "xmalloc.h"
+#include "core/types_api.h"
 
 
 /* Returns a new memory allocator or NULL if out of memory. */
@@ -138,7 +139,7 @@ tre_mem_alloc_impl(tre_mem_t mem, int provided, void *provided_block,
     }
 
   /* Make sure the next pointer will be aligned. */
-  size += ALIGN(mem->ptr + size, long);
+  size += ALIGN(mem->ptr + size, GtWord);
 
   /* Allocate from current block. */
   ptr = mem->ptr;
