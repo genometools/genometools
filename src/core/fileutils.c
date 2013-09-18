@@ -57,15 +57,18 @@ static bool file_exists_and_is_regular_executable(const char *path)
   bool is_exec = false;
   struct stat sb;
   FILE *file;
+#ifdef _WIN32
+  size_t len = strlen(path);
+#endif
   if ((file = fopen(path, "r")) == NULL)
     return false;
   gt_xfstat(fileno(file), &sb);
   if (S_ISREG(sb.st_mode) &&
-      (sb.st_mode & S_IXUSR
 #ifndef _WIN32
-       || sb.st_mode & S_IXGRP || sb.st_mode & S_IXOTH
+      (sb.st_mode & S_IXUSR || sb.st_mode & S_IXGRP || sb.st_mode & S_IXOTH )
+#else
+      (len > 4 && !strcmp(path + len - 4, ".exe"))
 #endif
-      )
      ) {
     is_exec = true;
   }
@@ -145,21 +148,37 @@ void gt_file_dirname(GtStr *path, const char *file)
     gt_str_append_cstr_nt(path, file, (GtUword) i);
 }
 
-static int file_find_in_env_generic(GtStr *path, const char *file,
+#ifdef _WIN32
+static void append_dot_exe_if_necessary(GtStr *file)
+{
+  GtUword length;
+  gt_assert(file);
+  length = gt_str_length(file);
+  if (length < 4 || strcmp(gt_str_get(file) + length - 4, ".exe"))
+    gt_str_append_cstr(file, ".exe");
+}
+#endif
+
+static int file_find_in_env_generic(GtStr *path, const char *file_path,
                                     const char *env, FileExistsFunc file_exists,
                                     GtError *err)
 {
   char *pathvariable, *pathcomponent = NULL;
   GtSplitter *splitter = NULL;
+  bool found = false;
+  GtStr *file;
   GtUword i;
   int had_err = 0;
 
   gt_error_check(err);
-  gt_assert(file);
+  gt_assert(file_path);
   gt_assert(file_exists);
 
+  /* make writeable copy of 'file_path' */
+  file = gt_str_new_cstr(file_path);
+
   /* check if 'file' has dirname */
-  gt_file_dirname(path, file);
+  gt_file_dirname(path, gt_str_get(file));
   if (gt_str_length(path))
     return had_err;
   /* 'file' has no dirname -> scan $env */
@@ -171,7 +190,24 @@ static int file_find_in_env_generic(GtStr *path, const char *file,
     had_err = -1;
   }
 
-  if (!had_err) {
+#ifdef _WIN32
+  if (!had_err && file_exists == file_exists_and_is_regular_executable) {
+    append_dot_exe_if_necessary(file);
+    /* in Windows '.' is implicitly included in $PATH, check first */
+    gt_str_reset(path);
+    gt_str_append_char(path, '.');
+    gt_str_append_char(path, GT_PATH_SEPARATOR);
+    gt_str_append_str(path, file);
+    if (file_exists(gt_str_get(path))) {
+      gt_str_reset(path);
+      gt_str_append_char(path, '.');
+      gt_str_append_char(path, GT_PATH_SEPARATOR);
+      found = true;
+    }
+  }
+#endif
+
+  if (!had_err && !found) {
     splitter = gt_splitter_new();
     gt_splitter_split(splitter, pathvariable,
                       (GtUword) strlen(pathvariable), GT_PATH_VAR_SEPARATOR);
@@ -180,7 +216,7 @@ static int file_find_in_env_generic(GtStr *path, const char *file,
       gt_str_reset(path);
       gt_str_append_cstr(path, pathcomponent);
       gt_str_append_char(path, GT_PATH_SEPARATOR);
-      gt_str_append_cstr(path, file);
+      gt_str_append_str(path, file);
       if (file_exists(gt_str_get(path)))
         break;
     }
@@ -198,6 +234,7 @@ static int file_find_in_env_generic(GtStr *path, const char *file,
   /* free */
   gt_free(pathvariable);
   gt_splitter_delete(splitter);
+  gt_str_delete(file);
 
   return had_err;
 }
