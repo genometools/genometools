@@ -210,7 +210,7 @@ GtUword gt_multieoplist_get_length(GtMultieoplist *multieops)
 GtMultieop gt_multieoplist_get_entry(GtMultieoplist *multieops,
                                      GtUword index)
 {
-  GtMultieop eop;
+  GtMultieop eop = { 0 };
   Eop *space;
   gt_assert(multieops);
   space = multieops->meoplist.spaceEop;
