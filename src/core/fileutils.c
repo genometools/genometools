@@ -179,8 +179,10 @@ static int file_find_in_env_generic(GtStr *path, const char *file_path,
 
   /* check if 'file' has dirname */
   gt_file_dirname(path, gt_str_get(file));
-  if (gt_str_length(path))
+  if (gt_str_length(path)) {
+    gt_str_delete(file);
     return had_err;
+  }
   /* 'file' has no dirname -> scan $env */
   pathvariable = getenv(env);
   if (pathvariable != NULL)
