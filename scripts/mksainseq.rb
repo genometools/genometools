@@ -6,7 +6,7 @@ def getc_param(key)
   if key == "PLAINSEQ"
     return "const GtUchar *plainseq"
   elsif key == "INTSEQ"
-    return "const unsigned long *array"
+    return "const GtUword *array"
   else
     return "const GtEncseq *encseq"
   end
@@ -14,7 +14,7 @@ end
 
 def getc_call(key,posexpr)
   if key == "PLAINSEQ"
-    return "(unsigned long)\nplainseq[#{posexpr}]"
+    return "(GtUword)\nplainseq[#{posexpr}]"
   elsif key == "INTSEQ"
     return "array[#{posexpr}]"
   else
@@ -22,7 +22,7 @@ def getc_call(key,posexpr)
                                   "encseq,\n" +
                                   "#{posexpr},\n" +
                                   "sainseq->readmode))\n" +
-               "  ? GT_UNIQUEINT(#{posexpr}) : (unsigned long) tmpcc"
+               "  ? GT_UNIQUEINT(#{posexpr}) : (GtUword) tmpcc"
   end
 end
 
@@ -43,12 +43,12 @@ end
 
 keylist.each do |key|
 fo.puts <<CCODE
-static unsigned long gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
+static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
                                                  #{getc_param(key)},
-                                                 unsigned long *suftab,
+                                                 GtUword *suftab,
                                                  GtLogger *logger)
 {
-  unsigned long position,
+  GtUword position,
                 nextcc = GT_UNIQUEINT(sainseq->totallength),
                 countSstartype = 0,
                 *fillptr = sainseq->bucketfillptr;
@@ -59,7 +59,7 @@ static unsigned long gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
   gt_sain_endbuckets(sainseq);
   for (position = sainseq->totallength-1; /* Nothing */; position--)
   {
-    unsigned long currentcc = #{getc_call(key,"position")};
+    GtUword currentcc = #{getc_call(key,"position")};
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
     if (!currentisStype && nextisStype)
@@ -78,7 +78,7 @@ static unsigned long gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
       }
 #undef SAINSHOWSTATE
 #ifdef SAINSHOWSTATE
-      printf("Sstar.suftab[%lu]=%lu\\n",fillptr[nextcc],position+1);
+      printf("Sstar.suftab[" GT_WU "]=" GT_WU "\\n",fillptr[nextcc],position+1);
 #endif
     }
     nextisStype = currentisStype;
@@ -96,12 +96,12 @@ static unsigned long gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
 
 static void gt_sain_#{key}_fast_induceLtypesuffixes1(GtSainseq *sainseq,
                                                  #{getc_param(key)},
-                                         long *suftab,
-                                         unsigned long nonspecialentries)
+                                         GtWord *suftab,
+                                         GtUword nonspecialentries)
 {
-  unsigned long lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"long position")}
+  GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
+  GtWord *suftabptr, *bucketptr = NULL;
+  #{declare_tmpcc(key,"GtWord position")}
 
   gt_assert(sainseq->roundtable != NULL);
   for (suftabptr = suftab, sainseq->currentround = 0;
@@ -109,29 +109,29 @@ static void gt_sain_#{key}_fast_induceLtypesuffixes1(GtSainseq *sainseq,
   {
     if ((position = *suftabptr) > 0)
     {
-      unsigned long currentcc;
+      GtUword currentcc;
 
-      if (position >= (long) sainseq->totallength)
+      if (position >= (GtWord) sainseq->totallength)
       {
         sainseq->currentround++;
-        position -= (long) sainseq->totallength;
+        position -= (GtWord) sainseq->totallength;
       }
-      currentcc = #{getc_call(key,"(unsigned long) position")};
+      currentcc = #{getc_call(key,"(GtUword) position")};
       if (currentcc < sainseq->numofchars)
       {
         if (position > 0)
         {
-          unsigned long t, leftcontextcc;
+          GtUword t, leftcontextcc;
 
           gt_assert(position > 0);
           position--;
-          leftcontextcc = #{getc_call(key,"(unsigned long) position")};
+          leftcontextcc = #{getc_call(key,"(GtUword) position")};
           t = (currentcc << 1) | (leftcontextcc < currentcc ? 1UL : 0);
           gt_assert(currentcc > 0 &&
                     sainseq->roundtable[t] <= sainseq->currentround);
           if (sainseq->roundtable[t] < sainseq->currentround)
           {
-            position += (long) sainseq->totallength;
+            position += (GtWord) sainseq->totallength;
             sainseq->roundtable[t] = sainseq->currentround;
           }
           GT_SAINUPDATEBUCKETPTR(currentcc);
@@ -142,8 +142,8 @@ static void gt_sain_#{key}_fast_induceLtypesuffixes1(GtSainseq *sainseq,
           *suftabptr = 0;
 #ifdef SAINSHOWSTATE
           gt_assert(bucketptr != NULL);
-          printf("L-induce: suftab[%lu]=%ld\\n",
-                  (unsigned long) (bucketptr-1-suftab),*(bucketptr-1));
+          printf("L-induce: suftab[" GT_WU "]=" GT_WD "\\n",
+                  (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
         }
       } else
@@ -162,28 +162,28 @@ static void gt_sain_#{key}_fast_induceLtypesuffixes1(GtSainseq *sainseq,
 
 static void gt_sain_#{key}_induceLtypesuffixes1(GtSainseq *sainseq,
                                                  #{getc_param(key)},
-                                         long *suftab,
-                                         unsigned long nonspecialentries)
+                                         GtWord *suftab,
+                                         GtUword nonspecialentries)
 {
-  unsigned long lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"long position")}
+  GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
+  GtWord *suftabptr, *bucketptr = NULL;
+  #{declare_tmpcc(key,"GtWord position")}
 
   gt_assert(sainseq->roundtable == NULL);
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
   {
     if ((position = *suftabptr) > 0)
     {
-      unsigned long currentcc = #{getc_call(key,"(unsigned long) position")};
+      GtUword currentcc = #{getc_call(key,"(GtUword) position")};
       if (currentcc < sainseq->numofchars)
       {
         if (position > 0)
         {
-          unsigned long leftcontextcc;
+          GtUword leftcontextcc;
 
           gt_assert(position > 0);
           position--;
-          leftcontextcc = #{getc_call(key,"(unsigned long) position")};
+          leftcontextcc = #{getc_call(key,"(GtUword) position")};
           GT_SAINUPDATEBUCKETPTR(currentcc);
           /* negative => position does not derive L-suffix
              positive => position may derive L-suffix */
@@ -192,8 +192,8 @@ static void gt_sain_#{key}_induceLtypesuffixes1(GtSainseq *sainseq,
           *suftabptr = 0;
 #ifdef SAINSHOWSTATE
           gt_assert(bucketptr != NULL);
-          printf("L-induce: suftab[%lu]=%ld\\n",
-                  (unsigned long) (bucketptr-1-suftab),*(bucketptr-1));
+          printf("L-induce: suftab[" GT_WU "]=" GT_WD "\\n",
+                  (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
         }
       } else
@@ -212,17 +212,17 @@ static void gt_sain_#{key}_induceLtypesuffixes1(GtSainseq *sainseq,
 
 static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
                                                  #{getc_param(key)},
-                                         long *suftab,
-                                         unsigned long nonspecialentries)
+                                         GtWord *suftab,
+                                         GtUword nonspecialentries)
 {
-  unsigned long lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"long position")}
+  GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
+  GtWord *suftabptr, *bucketptr = NULL;
+  #{declare_tmpcc(key,"GtWord position")}
 
   gt_assert(sainseq->roundtable != NULL);
   gt_sain_special_singleSinduction1(sainseq,
                                     suftab,
-                                    (long) (sainseq->totallength-1));
+                                    (GtWord) (sainseq->totallength-1));
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypes1fromspecialranges(sainseq,
@@ -234,21 +234,21 @@ static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
   {
     if ((position = *suftabptr) > 0)
     {
-      if (position >= (long) sainseq->totallength)
+      if (position >= (GtWord) sainseq->totallength)
       {
         sainseq->currentround++;
-        position -= (long) sainseq->totallength;
+        position -= (GtWord) sainseq->totallength;
       }
       if (position > 0)
       {
-        unsigned long currentcc = #{getc_call(key,"(unsigned long) position")};
+        GtUword currentcc = #{getc_call(key,"(GtUword) position")};
 
         if (currentcc < sainseq->numofchars)
         {
-          unsigned long t, leftcontextcc;
+          GtUword t, leftcontextcc;
 
           position--;
-          leftcontextcc = #{getc_call(key,"(unsigned long) position")};
+          leftcontextcc = #{getc_call(key,"(GtUword) position")};
           t = (currentcc << 1) | (leftcontextcc > currentcc ? 1UL : 0);
           gt_assert(sainseq->roundtable[t] <= sainseq->currentround);
           if (sainseq->roundtable[t] < sainseq->currentround)
@@ -260,8 +260,8 @@ static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
           gt_assert(bucketptr != NULL && bucketptr - 1 < suftabptr);
           *(--bucketptr) = (t & 1UL) ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-          printf("S-induce: suftab[%lu]=%ld\\n",
-                  (unsigned long) (bucketptr - suftab),*bucketptr);
+          printf("S-induce: suftab[" GT_WU "]=" GT_WD "\\n",
+                  (GtUword) (bucketptr - suftab),*bucketptr);
 #endif
         }
       }
@@ -272,17 +272,17 @@ static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
 
 static void gt_sain_#{key}_induceStypesuffixes1(GtSainseq *sainseq,
                                                  #{getc_param(key)},
-                                         long *suftab,
-                                         unsigned long nonspecialentries)
+                                         GtWord *suftab,
+                                         GtUword nonspecialentries)
 {
-  unsigned long lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"long position")}
+  GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
+  GtWord *suftabptr, *bucketptr = NULL;
+  #{declare_tmpcc(key,"GtWord position")}
 
   gt_assert(sainseq->roundtable == NULL);
   gt_sain_special_singleSinduction1(sainseq,
                                     suftab,
-                                    (long) (sainseq->totallength-1));
+                                    (GtWord) (sainseq->totallength-1));
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
     gt_sain_induceStypes1fromspecialranges(sainseq,
@@ -294,21 +294,21 @@ static void gt_sain_#{key}_induceStypesuffixes1(GtSainseq *sainseq,
   {
     if ((position = *suftabptr) > 0)
     {
-      unsigned long currentcc = #{getc_call(key,"(unsigned long) position")};
+      GtUword currentcc = #{getc_call(key,"(GtUword) position")};
 
       if (currentcc < sainseq->numofchars)
       {
-        unsigned long leftcontextcc;
+        GtUword leftcontextcc;
 
         position--;
-        leftcontextcc = #{getc_call(key,"(unsigned long) position")};
+        leftcontextcc = #{getc_call(key,"(GtUword) position")};
         GT_SAINUPDATEBUCKETPTR(currentcc);
         gt_assert(bucketptr != NULL && bucketptr - 1 < suftabptr);
         *(--bucketptr) = (leftcontextcc > currentcc)
                           ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
-        printf("S-induce: suftab[%lu]=%ld\\n",
-               (unsigned long) (bucketptr - suftab),*bucketptr);
+        printf("S-induce: suftab[" GT_WU "]=" GT_WD "\\n",
+               (GtUword) (bucketptr - suftab),*bucketptr);
 #endif
       }
       *suftabptr = 0;
@@ -318,12 +318,12 @@ static void gt_sain_#{key}_induceStypesuffixes1(GtSainseq *sainseq,
 
 static void gt_sain_#{key}_induceLtypesuffixes2(const GtSainseq *sainseq,
                                                  #{getc_param(key)},
-                                         long *suftab,
-                                         unsigned long nonspecialentries)
+                                         GtWord *suftab,
+                                         GtUword nonspecialentries)
 {
-  unsigned long lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"long position")}
+  GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
+  GtWord *suftabptr, *bucketptr = NULL;
+  #{declare_tmpcc(key,"GtWord position")}
 
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
   {
@@ -331,23 +331,23 @@ static void gt_sain_#{key}_induceLtypesuffixes2(const GtSainseq *sainseq,
     *suftabptr = ~position;
     if (position > 0)
     {
-      unsigned long currentcc;
+      GtUword currentcc;
 
       position--;
-      currentcc = #{getc_call(key,"(unsigned long) position")};
+      currentcc = #{getc_call(key,"(GtUword) position")};
       if (currentcc < sainseq->numofchars)
       {
         gt_assert(currentcc > 0);
         GT_SAINUPDATEBUCKETPTR(currentcc);
         gt_assert(bucketptr != NULL && suftabptr < bucketptr);
         *bucketptr++ = (position > 0 &&
-                        (#{getc_call(key,"(unsigned long) (position-1)")})
+                        (#{getc_call(key,"(GtUword) (position-1)")})
                                             < currentcc)
                         ? ~position : position;
 #ifdef SAINSHOWSTATE
         gt_assert(bucketptr != NULL);
-        printf("L-induce: suftab[%lu]=%ld\\n",
-               (unsigned long) (bucketptr-1-suftab),*(bucketptr-1));
+        printf("L-induce: suftab[" GT_WU "]=" GT_WD "\\n",
+               (GtUword) (bucketptr-1-suftab),*(bucketptr-1));
 #endif
       }
     }
@@ -356,16 +356,16 @@ static void gt_sain_#{key}_induceLtypesuffixes2(const GtSainseq *sainseq,
 
 static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
                                                  #{getc_param(key)},
-                                         long *suftab,
-                                         unsigned long nonspecialentries)
+                                         GtWord *suftab,
+                                         GtUword nonspecialentries)
 {
-  unsigned long lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
-  long *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"long position")}
+  GtUword lastupdatecc = 0, *fillptr = sainseq->bucketfillptr;
+  GtWord *suftabptr, *bucketptr = NULL;
+  #{declare_tmpcc(key,"GtWord position")}
 
   gt_sain_special_singleSinduction2(sainseq,
                                     suftab,
-                                    (long) sainseq->totallength,
+                                    (GtWord) sainseq->totallength,
                                     nonspecialentries);
   if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
@@ -383,22 +383,22 @@ static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
   {
     if ((position = *suftabptr) > 0)
     {
-      unsigned long currentcc;
+      GtUword currentcc;
 
       position--;
-      currentcc = #{getc_call(key,"(unsigned long) position")};
+      currentcc = #{getc_call(key,"(GtUword) position")};
       if (currentcc < sainseq->numofchars)
       {
         GT_SAINUPDATEBUCKETPTR(currentcc);
         gt_assert(bucketptr != NULL && bucketptr - 1 < suftabptr);
         *(--bucketptr) = (position == 0 ||
-                          (#{getc_call(key,"(unsigned long) (position-1)")})
+                          (#{getc_call(key,"(GtUword) (position-1)")})
                                              > currentcc)
                          ? ~position : position;
 #ifdef SAINSHOWSTATE
         gt_assert(bucketptr != NULL);
-        printf("S-induce: suftab[%lu]=%ld\\n",
-                (unsigned long) (bucketptr-suftab),*bucketptr);
+        printf("S-induce: suftab[" GT_WU "]=" GT_WD "\\n",
+                (GtUword) (bucketptr-suftab),*bucketptr);
 #endif
       }
     } else
@@ -410,19 +410,19 @@ static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
 
 static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
                                                  #{getc_param(key)},
-                                         unsigned long numberofsuffixes,
-                                         unsigned long *suftab)
+                                         GtUword numberofsuffixes,
+                                         GtUword *suftab)
 {
-  unsigned long *suftabptr, position,
+  GtUword *suftabptr, position,
                 writeidx = numberofsuffixes - 1,
                 nextcc = GT_UNIQUEINT(sainseq->totallength),
                 *sstarsuffixes = suftab + numberofsuffixes;
-  unsigned long *sstarfirstcharcount = NULL, *bucketsize = NULL;
+  GtUword *sstarfirstcharcount = NULL, *bucketsize = NULL;
   #{declare_tmpcc(key,"bool nextisStype = true")}
 
   if (sainseq->seqtype == GT_SAIN_INTSEQ)
   {
-    unsigned long charidx;
+    GtUword charidx;
 
     gt_assert(sainseq->sstarfirstcharcount == NULL);
     sstarfirstcharcount = sainseq->sstarfirstcharcount
@@ -436,7 +436,7 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
   }
   for (position = sainseq->totallength-1; /* Nothing */; position--)
   {
-    unsigned long currentcc = #{getc_call(key,"position")};
+    GtUword currentcc = #{getc_call(key,"position")};
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
 
