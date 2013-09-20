@@ -172,9 +172,10 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   return haserr ? -1 : 0;
 }
 
-static GtUword samplesubstring(GtUchar *seqspace,
-                              const GtEncseq *encseq,
-                              GtUword substringlength)
+static GtUword samplesubstring(bool replacespecialchars,
+                               GtUchar *seqspace,
+                               const GtEncseq *encseq,
+                               GtUword substringlength)
 {
   GtUword start, totallength;
 
@@ -185,8 +186,20 @@ static GtUword samplesubstring(GtUchar *seqspace,
     substringlength = totallength - start;
   }
   gt_assert(substringlength > 0);
-  gt_encseq_extract_encoded(encseq,seqspace,start,
-                                       start+substringlength-1);
+  gt_encseq_extract_encoded(encseq,seqspace,start,start+substringlength-1);
+  if (replacespecialchars)
+  {
+    GtUword idx;
+    const unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
+
+    for (idx = 0; idx < substringlength; idx++)
+    {
+      if (ISSPECIAL(seqspace[idx]))
+      {
+        seqspace[idx] = (GtUchar) (random() % numofchars);
+      }
+    }
+  }
   return substringlength;
 }
 
@@ -409,8 +422,8 @@ int gt_testmaxpairs(const char *indexname,
   }
   for (s=0; s<samples && !haserr; s++)
   {
-    dblen = samplesubstring(dbseq,encseq,substringlength);
-    querylen = samplesubstring(query,encseq,substringlength);
+    dblen = samplesubstring(false,dbseq,encseq,substringlength);
+    querylen = samplesubstring(true,query,encseq,substringlength);
     gt_logger_log(logger,"run query match for dblen="GT_WU""
                          ",querylen= "GT_WU", minlength=%u",
                          dblen,
