@@ -212,7 +212,7 @@ GtUword gt_multieoplist_get_length(GtMultieoplist *multieops)
 GtMultieop gt_multieoplist_get_entry(GtMultieoplist *multieops,
                                      GtUword index)
 {
-  GtMultieop eop = { 0 };
+  GtMultieop eop = { (AlignmentEoptype) 0, (GtUword) 0};
   Eop *space;
   gt_assert(multieops);
   space = multieops->meoplist.spaceEop;
