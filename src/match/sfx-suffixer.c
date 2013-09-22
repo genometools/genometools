@@ -1924,6 +1924,8 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
       processunsortedsuffixrange = gt_differencecover_sortunsortedbucket;
     }
     gt_assert(sortmaxdepth != 0 || processunsortedsuffixrange == NULL);
+    gt_bcktab_determinemaxsize(sfi->bcktab, sfi->currentmincode, 
+                               sfi->currentmaxcode,sumofwidthforpart);
     gt_sortallbuckets(sfi->suffixsortspace,
                       sumofwidthforpart,
                       bucketspec2,
