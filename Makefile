@@ -744,22 +744,36 @@ STRIP:=strip
 dist: all
 	@echo "[build distribution]"
 	@rm -rf $(GTDISTDIR)
-	@rm -rf $(DISTDIR)/$(GTDISTBASENAME).tar.gz
+ifeq ($(SYSTEM),Windows)
+	@rm -f $(DISTDIR)/$(GTDISTBASENAME).zip
+else
+	@rm -f $(DISTDIR)/$(GTDISTBASENAME).tar.gz
+endif
 	@mkdir -p $(GTDISTDIR)/bin $(GTDISTDIR)/doc
 	@cp $(CURDIR)/doc/dist_readme.txt $(GTDISTDIR)/README
 	@cp $(CURDIR)/LICENSE $(GTDISTDIR)
 	@cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
 	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
+ifeq ($(SYSTEM),Windows)
+	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin/gt.exe
+	@$(STRIP) $(GTDISTDIR)/bin/gt.exe
+else
 	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin
 	@$(STRIP) $(GTDISTDIR)/bin/gt
+endif
 	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
 	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)
 	@cp -r $(CURDIR)/gtruby $(GTDISTDIR)
 	@$(MAKE) prefix=$(GTDISTDIR) install
+ifeq ($(SYSTEM),Windows)
+	@cd $(DISTDIR) && 7z a -tzip $(GTDISTBASENAME).zip $(GTDISTBASENAME)
+	@echo "$(DISTDIR)/$(GTDISTBASENAME).zip"
+else
 	@cd $(DISTDIR) && $(SCRIPTSDIR)/tar_root.sh $(GTDISTBASENAME)
 	@cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
 	@echo "$(DISTDIR)/$(GTDISTBASENAME).tar.gz"
+endif
 
 srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
