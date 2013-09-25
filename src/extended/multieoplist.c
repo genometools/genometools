@@ -16,7 +16,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <ctype.h>
+#endif
 #include "core/xansi_api.h"
 #include "extended/multieoplist.h"
 #include "core/ma.h"
@@ -210,7 +212,7 @@ GtUword gt_multieoplist_get_length(GtMultieoplist *multieops)
 GtMultieop gt_multieoplist_get_entry(GtMultieoplist *multieops,
                                      GtUword index)
 {
-  GtMultieop eop = { 0 };
+  GtMultieop eop = { (AlignmentEoptype) 0, (GtUword) 0};
   Eop *space;
   gt_assert(multieops);
   space = multieops->meoplist.spaceEop;
