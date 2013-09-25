@@ -1599,7 +1599,13 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       if (sfi->sfxstrategy.storespecialcodes &&
           sfi->sfxstrategy.spmopt_minlength == 0)
       {
+        size_t size_codeatposition = sizeof (*sfi->spaceCodeatposition) *
+                                     sfi->nextfreeCodeatposition;
         gt_assert(realspecialranges+1 >= sfi->nextfreeCodeatposition);
+        gt_logger_log(sfi->logger, "size for Codeatposition: %.2f MB=%.2f "
+                                   "bytes/special suffix",
+                 GT_MEGABYTES(size_codeatposition),
+                 (double) size_codeatposition/specialcharacters);
         gt_reversespecialcodes(sfi->spaceCodeatposition,
                                sfi->nextfreeCodeatposition);
 #ifdef SKDEBUG
