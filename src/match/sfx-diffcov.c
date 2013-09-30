@@ -1790,7 +1790,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
     /* now sort the suffix sample up to a prefix of length vparam */
     if (dcov->effectivesamplesize > 0)
     {
-      gt_bcktab_determinemaxsize(dcov->bcktab, 0, dcov->maxcode, 
+      gt_bcktab_determinemaxsize(dcov->bcktab, 0, dcov->maxcode,
                                  dcov->effectivesamplesize);
       gt_sortallbuckets(dcov->sortedsample,
                         dcov->effectivesamplesize,
