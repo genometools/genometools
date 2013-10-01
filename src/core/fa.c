@@ -581,6 +581,50 @@ void* gt_fa_xmmap_read_func(const char *path, size_t *len,
                                 NULL);
 }
 
+void *gt_fa_heap_read_func(const char *path, size_t *len,
+                           const char *src_file, int src_line, GtError *err)
+{
+  int fd;
+  struct stat buf;
+  bool haserr = false;
+
+  gt_assert(path != NULL);
+  fd = open(path,O_RDONLY); /* open file for read, get filedes */
+  if (fd == -1) /* check for error code */
+  {
+    gt_error_set(err,"%s, line %d: cannot open \"%s\"",src_file,src_line,path);
+    haserr = true;
+  }
+  if (!haserr && fstat(fd,&buf) == -1)  /* get status information of file */
+  {
+    gt_error_set(err,"%s, line %d: cannot access status of file \"%s\"",
+                 src_file,src_line,path);
+    close(fd);
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    void *ptr;
+
+    *len = buf.st_size;
+    ptr = gt_malloc(*len);
+    gt_assert(fd > 0);
+    if (read(fd,ptr,*len) == -1)
+    {
+      gt_error_set(err,"%s, line %d: read(%s) failed",src_file,src_line,path);
+      haserr = true;
+    }
+    if (haserr)
+    {
+      gt_free(ptr);
+      return NULL;
+    }
+    close(fd);
+    return ptr;
+  }
+  return NULL;
+}
+
 void* gt_fa_xmmap_read_func_range(const char *path, size_t len, size_t offset,
                                   const char *src_file, int src_line)
 {
