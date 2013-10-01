@@ -96,6 +96,11 @@ FILE*   gt_xtmpfp_generic_func(GtStr *template_code, enum tmpfp_flags flags,
 #define gt_xtmpfp(template_code)\
         gt_xtmpfp_generic(template_code, TMPFP_DEFAULT_FLAGS)
 
+#define gt_fa_heap_read(PATH,LENPTR,ERR)\
+        gt_fa_heap_read_func(PATH,LENPTR,__FILE__,__LINE__,ERR)
+
+void *gt_fa_heap_read_func(const char *path, size_t *len,
+                           const char *src_file, int src_line, GtError *err);
 /* memory map functions */
 #define gt_fa_mmap_read(path, len, err)\
         gt_fa_mmap_read_func(path, len, __FILE__, __LINE__, err)

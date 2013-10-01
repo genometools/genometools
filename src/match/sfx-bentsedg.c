@@ -142,7 +142,6 @@ typedef struct
                  *esr2;
   GtReadmode readmode;
   bool fwd, complement;
-  GtUword totallength;
   GtArrayGtMKVstack mkvauxstack; /* XXX be careful with threads */
   GtLcpvalues *tableoflcpvalues;
   GtMedianinfo *medianinfospace;
@@ -151,22 +150,23 @@ typedef struct
   unsigned int sortmaxdepth,
                prefixlength;
   GtBlindtrie *blindtrie;
-  GtUword leftlcpdist[GT_UNITSIN2BITENC],
-                rightlcpdist[GT_UNITSIN2BITENC];
   GtSuffixsortspace *sssp;
   GtProcessunsortedsuffixrange processunsortedsuffixrange;
   void *processunsortedsuffixrangeinfo;
   bool *equalwithprevious;
   GtUword countinsertionsort,
-                counttqsort,
-                countshortreadsort,
-                countradixsort,
-                countcountingsort,
-                countbltriesort,
-                srs_maxremain; /* only relevant for short read sort */
-  GtUword radixsortminwidth,
-                radixsortmaxwidth,
-                shortreadsort_maxwidth;
+          counttqsort,
+          countshortreadsort,
+          countradixsort,
+          countcountingsort,
+          countbltriesort,
+          srs_maxremain, /* only relevant for short read sort */
+          radixsortminwidth,
+          radixsortmaxwidth,
+          totallength,
+          shortreadsort_maxwidth,
+          leftlcpdist[GT_UNITSIN2BITENC],
+          rightlcpdist[GT_UNITSIN2BITENC];
   GtShortreadsortworkinfo *srsw;
   const GtTwobitencoding *twobitencoding;
   GtRadixsortstringinfo *rsi;
@@ -789,29 +789,6 @@ static void showcountingsortinfo(const GtCountingsortinfo *countingsortinfo,
 }
 */
 
-#undef CHECKFORWHOLELEAFS
-#ifdef CHECKFORWHOLELEAFS
-static bool gt_containswholeleaf(const GtBentsedgresources *bsr,
-                                 GtUword subbucketleft,
-                                 GtUword width)
-{
-  GtUword position, idx;
-
-  for (idx = 0;  idx < width; idx++)
-  {
-    position = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx);
-    if (position == 0 || gt_encseq_position_is_separator(bsr->encseq,
-                                                         position - 1,
-                                                         bsr->readmode))
-    {
-      return true;
-    }
-  }
-  return false;
-}
-static GtUword saved_intervals = 0, saved_width = 0;
-#endif
-
 static bool multistrategysort(GtBentsedgresources *bsr,
                               GtUword subbucketleft,
                               GtUword width,
@@ -865,15 +842,6 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                                      subbucketleft,
                                      width,
                                      depth);
-    }
-#endif
-#ifdef CHECKFORWHOLELEAFS
-    if (bsr->sfxstrategy->spmopt > 0 &&
-        !gt_containswholeleaf(bsr,subbucketleft,width))
-    {
-      saved_intervals++;
-      saved_width += width;
-      return;
     }
 #endif
     if (bsr->rsi != NULL && width >= bsr->radixsortminwidth
@@ -1370,19 +1338,20 @@ static GtBentsedgresources *bentsedgresources_new(
                                    const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    unsigned int prefixlength,
+                                   const GtBcktab *bcktab,
                                    unsigned int sortmaxdepth,
                                    const Sfxstrategy *sfxstrategy,
                                    bool withlcps)
 {
   GtBentsedgresources *bsr = (GtBentsedgresources *) gt_malloc(sizeof *bsr);
 
+  bsr->encseq = encseq;
   bsr->readmode = readmode;
   bsr->totallength = gt_encseq_total_length(encseq);
   bsr->sfxstrategy = sfxstrategy;
   bsr->sssp = suffixsortspace;
   bsr->rsi = NULL;
   gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
-  bsr->encseq = encseq;
   bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
   bsr->complement = GT_ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
   bsr->tableoflcpvalues = NULL;
@@ -1482,6 +1451,19 @@ static GtBentsedgresources *bentsedgresources_new(
   bsr->countbltriesort = 0;
   bsr->countshortreadsort = 0;
   bsr->countradixsort = 0;
+  if (bcktab != NULL &&
+      sfxstrategy->withradixsort &&
+      gt_encseq_accesstype_get(encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
+      readmode == GT_READMODE_FORWARD)
+  {
+    bsr->rsi = gt_radixsort_str_new(bsr->twobitencoding,
+                                    gt_encseq_is_mirrored(encseq)
+                                      ? GT_DIV2(bsr->totallength - 1)
+                                      : bsr->totallength,
+                                    1 + gt_encseq_equallength(encseq),
+                                    gt_bcktab_nonspecialsmaxsize(bcktab));
+    bsr->radixsortmaxwidth = gt_radixsort_str_maxwidth(bsr->rsi);
+  }
   return bsr;
 }
 
@@ -1552,7 +1534,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        GtReadmode readmode,
                        GtCodetype mincode,
                        GtCodetype maxcode,
-                       GtBcktab *bcktab,
+                       const GtBcktab *bcktab,
                        unsigned int numofchars,
                        unsigned int prefixlength,
                        GtOutlcpinfo *outlcpinfo,
@@ -1570,23 +1552,11 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                                    encseq,
                                                    readmode,
                                                    prefixlength,
+                                                   bcktab,
                                                    sortmaxdepth,
                                                    sfxstrategy,
                                                    outlcpinfo != NULL ? true
                                                                       : false);
-  gt_bcktab_determinemaxsize(bcktab, mincode, maxcode, numberofsuffixes);
-  if (bsr->sfxstrategy->withradixsort &&
-      gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
-      bsr->readmode == GT_READMODE_FORWARD)
-  {
-    bsr->rsi = gt_radixsort_str_new(bsr->twobitencoding,
-                                    gt_encseq_is_mirrored(encseq)
-                                      ? GT_DIV2(bsr->totallength - 1)
-                                      : bsr->totallength,
-                                    1 + gt_encseq_equallength(bsr->encseq),
-                                    gt_bcktab_nonspecialsmaxsize(bcktab));
-    bsr->radixsortmaxwidth = gt_radixsort_str_maxwidth(bsr->rsi);
-  }
   gt_bentsedgresources_addlcpinfo(bsr,outlcpinfo,bcktab);
   bsr->processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr->processunsortedsuffixrange = processunsortedsuffixrange;
@@ -1633,13 +1603,6 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                              &bucketspec,
                              code);
   }
-#ifdef CHECKFORWHOLELEAFS
-  printf("saved_intervals="GT_WU",saved_width="GT_WU" (%.2f)\n",
-          saved_intervals,saved_width,100.0 *
-                                      (double) saved_width/numberofsuffixes);
-  saved_intervals = 0;
-  saved_width = 0;
-#endif
   bentsedgresources_delete(bsr, logger);
 }
 
@@ -1661,6 +1624,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                                      encseq,
                                                      readmode,
                                                      0,
+                                                     NULL,
                                                      sortmaxdepth,
                                                      sfxstrategy,
                                                      outlcpinfo != NULL

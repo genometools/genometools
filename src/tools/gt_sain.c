@@ -26,7 +26,7 @@
 
 typedef struct
 {
-  bool icheck, fcheck, verbose;
+  bool icheck, fcheck, verbose, dommap;
   GtStr *encseqfile, *plainseqfile, *dir;
   GtReadmode readmode;
 } GtSainArguments;
@@ -58,7 +58,7 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
 {
   GtSainArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionfcheck, *optionesq, *optionfile;
+  GtOption *option, *optionfcheck, *optionesq, *optionfile, *optionmmap;
 
   gt_assert(arguments != NULL);
 
@@ -87,12 +87,20 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
                               &arguments->icheck, false);
   gt_option_parser_add_option(op, option);
 
+  /* -mmap */
+  optionmmap = gt_option_new_bool("mmap",
+                                  "use mmap to map the input file "
+                                  "(requires option -file)",
+                                  &arguments->dommap, false);
+  gt_option_parser_add_option(op, optionmmap);
+
   /* -fcheck */
   optionfcheck = gt_option_new_bool("fcheck", "final check of suffix array",
                                     &arguments->fcheck, false);
   gt_option_parser_add_option(op, optionfcheck);
   gt_option_imply(optionfcheck, optionesq);
   gt_option_exclude(optionesq,optionfile);
+  gt_option_imply(optionmmap, optionfile);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -249,7 +257,15 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
       GtUchar *plainseq;
       size_t len;
 
-      plainseq = gt_fa_mmap_read(gt_str_get(arguments->plainseqfile),&len,err);
+      if (arguments->dommap)
+      {
+        plainseq = gt_fa_mmap_read (gt_str_get(arguments->plainseqfile),&len,
+                                    err);
+      } else
+      {
+        plainseq = gt_fa_heap_read (gt_str_get(arguments->plainseqfile),&len,
+                                    err);
+      }
       if (plainseq == NULL)
       {
         had_err = -1;
@@ -278,7 +294,13 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           gt_sain_timer_logger_delete(tl);
         }
       }
-      gt_fa_xmunmap(plainseq);
+      if (arguments->dommap)
+      {
+        gt_fa_xmunmap(plainseq);
+      } else
+      {
+        gt_free(plainseq);
+      }
     }
   }
   return had_err;
