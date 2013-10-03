@@ -36,20 +36,23 @@ typedef enum
   GT_SAIN_ENCSEQ
 } GtSainSeqtype;
 
+typedef unsigned int GtUsainindextype;
+typedef signed int GtSsainindextype;
+
 typedef struct
 {
   GtUword totallength,
-                numofchars,
-                currentround,
-                *bucketsize,
-                *bucketfillptr,
-                *sstarfirstcharcount,
-                *roundtable;
+          numofchars;
+  GtUsainindextype currentround,
+                  *bucketsize,
+                  *bucketfillptr,
+                  *sstarfirstcharcount,
+                  *roundtable;
   union
   {
     const GtEncseq *encseq;
     const GtUchar *plainseq;
-    const GtUword *array;
+    const GtUsainindextype *array;
   } seq;
   GtReadmode readmode; /* only relevant for encseq */
   GtSainSeqtype seqtype;
@@ -69,28 +72,32 @@ static GtSainseq *gt_sainseq_new_from_encseq(const GtEncseq *encseq,
                                              GtReadmode readmode)
 {
   GtUword idx;
-  GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
+  GtSainseq *sainseq = (GtSainseq *) gt_malloc(sizeof *sainseq);
 
   sainseq->seqtype = GT_SAIN_ENCSEQ;
   sainseq->seq.encseq = encseq;
   sainseq->readmode = readmode;
   sainseq->totallength = gt_encseq_total_length(encseq);
   sainseq->numofchars = (GtUword) gt_encseq_alphabetnumofchars(encseq);
-  sainseq->bucketsize = gt_malloc(sizeof (*sainseq->bucketsize) *
+  sainseq->bucketsize = (GtUsainindextype *)
+                        gt_malloc(sizeof (*sainseq->bucketsize) *
                                   sainseq->numofchars);
-  sainseq->bucketfillptr = gt_malloc(sizeof (*sainseq->bucketfillptr) *
+  sainseq->bucketfillptr = (GtUsainindextype *)
+                           gt_malloc(sizeof (*sainseq->bucketfillptr) *
                                      sainseq->numofchars);
   if (gt_sain_decideforfastmethod(sainseq->totallength+GT_COMPAREOFFSET,
                                   sainseq->totallength))
   {
-    sainseq->roundtable = gt_malloc(sizeof (*sainseq->roundtable) *
+    sainseq->roundtable = (GtUsainindextype *)
+                          gt_malloc(sizeof (*sainseq->roundtable) *
                                     (size_t) GT_MULT2(sainseq->numofchars));
   } else
   {
     sainseq->roundtable = NULL;
   }
   sainseq->sstarfirstcharcount
-    = gt_calloc((size_t) sainseq->numofchars,
+    = (GtUsainindextype *)
+      gt_calloc((size_t) sainseq->numofchars,
                 sizeof (*sainseq->sstarfirstcharcount));
   sainseq->bucketfillptrpoints2suftab = false;
   sainseq->bucketsizepoints2suftab = false;
@@ -100,10 +107,12 @@ static GtSainseq *gt_sainseq_new_from_encseq(const GtEncseq *encseq,
     if (GT_ISDIRCOMPLEMENT(readmode))
     {
       sainseq->bucketsize[idx]
-        = gt_encseq_charcount(encseq,(GtUchar) GT_COMPLEMENTBASE(idx));
+        = (GtUsainindextype)
+          gt_encseq_charcount(encseq,(GtUchar) GT_COMPLEMENTBASE(idx));
     } else
     {
-      sainseq->bucketsize[idx] = gt_encseq_charcount(encseq,(GtUchar) idx);
+      sainseq->bucketsize[idx]
+        = (GtUsainindextype)  gt_encseq_charcount(encseq,(GtUchar) idx);
     }
   }
   return sainseq;
@@ -113,26 +122,31 @@ static GtSainseq *gt_sainseq_new_from_plainseq(const GtUchar *plainseq,
                                                GtUword len)
 {
   const GtUchar *cptr;
-  GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
+  GtSainseq *sainseq = (GtSainseq *) gt_malloc(sizeof *sainseq);
 
   sainseq->seqtype = GT_SAIN_PLAINSEQ;
   sainseq->seq.plainseq = plainseq;
   sainseq->totallength = len;
   sainseq->numofchars = UCHAR_MAX+1;
-  sainseq->bucketsize = gt_calloc((size_t) sainseq->numofchars,
+  sainseq->bucketsize
+    = (GtUsainindextype *)
+      gt_calloc((size_t) sainseq->numofchars,
                                   sizeof (*sainseq->bucketsize));
-  sainseq->bucketfillptr = gt_malloc(sizeof (*sainseq->bucketfillptr) *
-                                     sainseq->numofchars);
+  sainseq->bucketfillptr
+    = (GtUsainindextype *)
+      gt_malloc(sizeof (*sainseq->bucketfillptr) * sainseq->numofchars);
   if (gt_sain_decideforfastmethod(len+1,len))
   {
-    sainseq->roundtable = gt_malloc(sizeof (*sainseq->roundtable) *
+    sainseq->roundtable = (GtUsainindextype *)
+                          gt_malloc(sizeof (*sainseq->roundtable) *
                                     (size_t) GT_MULT2(sainseq->numofchars));
   } else
   {
     sainseq->roundtable = NULL;
   }
   sainseq->sstarfirstcharcount
-    = gt_calloc((size_t) sainseq->numofchars,
+    = (GtUsainindextype *)
+      gt_calloc((size_t) sainseq->numofchars,
                 sizeof (*sainseq->sstarfirstcharcount));
   sainseq->bucketfillptrpoints2suftab = false;
   sainseq->bucketsizepoints2suftab = false;
@@ -144,21 +158,22 @@ static GtSainseq *gt_sainseq_new_from_plainseq(const GtUchar *plainseq,
   return sainseq;
 }
 
-static GtSainseq *gt_sainseq_new_from_array(GtUword *arr,
+static GtSainseq *gt_sainseq_new_from_array(GtUsainindextype *arr,
                                             GtUword len,
                                             GtUword numofchars,
-                                            GtUword *suftab,
-                                            GtUword firstusable,
+                                            GtUsainindextype *suftab,
+                                            GtUsainindextype firstusable,
                                             GtUword suftabentries)
 {
-  GtUword charidx, *cptr;
-  GtSainseq *sainseq = gt_malloc(sizeof *sainseq);
+  GtUword charidx;
+  GtUsainindextype *cptr;
+  GtSainseq *sainseq = (GtSainseq *) gt_malloc(sizeof *sainseq);
 
   sainseq->seqtype = GT_SAIN_INTSEQ;
   sainseq->seq.array = arr;
   sainseq->totallength = len;
   sainseq->numofchars = numofchars;
-  gt_assert(firstusable < suftabentries);
+  gt_assert((GtUword) firstusable < suftabentries);
   if (suftabentries - firstusable >= numofchars)
   {
     /*printf("bucketsize: reclaim suftab["GT_WU","GT_WU"]\n",
@@ -170,7 +185,9 @@ static GtSainseq *gt_sainseq_new_from_array(GtUword *arr,
     printf("bucketsize requires "GT_WU" entries and only "GT_WU" are left\n",
            numofchars,suftabentries - firstusable);
     sainseq->bucketsizepoints2suftab = false;
-    sainseq->bucketsize = gt_malloc(sizeof (*sainseq->bucketsize) * numofchars);
+    sainseq->bucketsize
+      = (GtUsainindextype *)
+        gt_malloc(sizeof (*sainseq->bucketsize) * numofchars);
   }
   if (suftabentries - firstusable >= GT_MULT2(numofchars))
   {
@@ -186,8 +203,9 @@ static GtSainseq *gt_sainseq_new_from_array(GtUword *arr,
            GT_WU" are left\n",
            numofchars,suftabentries - firstusable);*/
     sainseq->bucketfillptrpoints2suftab = false;
-    sainseq->bucketfillptr = gt_malloc(sizeof (*sainseq->bucketfillptr) *
-                                       numofchars);
+    sainseq->bucketfillptr
+      = (GtUsainindextype *)
+        gt_malloc(sizeof (*sainseq->bucketfillptr) * numofchars);
   }
   if (gt_sain_decideforfastmethod(len+1,len))
   {
@@ -201,8 +219,9 @@ static GtSainseq *gt_sainseq_new_from_array(GtUword *arr,
     } else
     {
       sainseq->roundtablepoints2suftab = false;
-      sainseq->roundtable = gt_malloc(sizeof (*sainseq->roundtable) *
-                                      GT_MULT2(numofchars));
+      sainseq->roundtable
+        = (GtUsainindextype *)
+          gt_malloc(sizeof (*sainseq->roundtable) * GT_MULT2(numofchars));
     }
   } else
   {
@@ -250,7 +269,7 @@ static GtUword gt_sain_countcharaccess = 0;
 #endif
 
 static GtUword gt_sainseq_getchar(const GtSainseq *sainseq,
-                                        GtUword position)
+                                  GtUword position)
 {
   GtUchar cc;
 
@@ -261,7 +280,7 @@ static GtUword gt_sainseq_getchar(const GtSainseq *sainseq,
   return (sainseq->seqtype == GT_SAIN_PLAINSEQ)
          ? (GtUword) sainseq->seq.plainseq[position]
          : ((sainseq->seqtype == GT_SAIN_INTSEQ)
-            ? sainseq->seq.array[position]
+            ? (GtUword) sainseq->seq.array[position]
             : ISSPECIAL(cc = gt_encseq_get_encoded_char(sainseq->seq.encseq,
                                                         position,
                                                         sainseq->readmode))
@@ -270,7 +289,8 @@ static GtUword gt_sainseq_getchar(const GtSainseq *sainseq,
 
 static void gt_sain_endbuckets(GtSainseq *sainseq)
 {
-  GtUword charidx, previous;
+  GtUword charidx;
+  GtUsainindextype previous;
 
   previous = sainseq->bucketfillptr[0] = sainseq->bucketsize[0];
   for (charidx = 1UL; charidx < sainseq->numofchars; charidx++)
@@ -282,7 +302,8 @@ static void gt_sain_endbuckets(GtSainseq *sainseq)
 
 static void gt_sain_startbuckets(GtSainseq *sainseq)
 {
-  GtUword charidx, previous;
+  GtUword charidx;
+  GtUsainindextype previous;
 
   previous = sainseq->bucketfillptr[0] = 0;
   for (charidx = 1UL; charidx < sainseq->numofchars; charidx++)
@@ -294,31 +315,33 @@ static void gt_sain_startbuckets(GtSainseq *sainseq)
 
 typedef struct
 {
-  GtUword buf_size, numofchars, cachesize, *values, *fillptr, *suftab;
+  GtUword buf_size, numofchars, cachesize;
+  GtUsainindextype *values, *fillptr, *suftab;
   uint16_t *nextidx;
   int log_bufsize;
   size_t size;
 } GtSainbuffer;
 
-static GtSainbuffer *gt_sainbuffer_new(GtUword *suftab,
-                                       GtUword *fillptr,
+static GtSainbuffer *gt_sainbuffer_new(GtUsainindextype *suftab,
+                                       GtUsainindextype *fillptr,
                                        GtUword numofchars,
                                        GtLogger *logger)
 {
   if (numofchars <= UCHAR_MAX+1)
   {
-    GtSainbuffer *buf = gt_malloc(sizeof (*buf));
+    GtSainbuffer *buf = (GtSainbuffer *) gt_malloc(sizeof (*buf));
 
     buf->size = sizeof (*buf);
     buf->fillptr = fillptr;
     buf->suftab = suftab;
-    buf->log_bufsize = 18 - (sizeof (GtUword) == (size_t) 4 ? 1 : 2) -
+    buf->log_bufsize = 18 - (sizeof (GtUsainindextype) == (size_t) 4 ? 1 : 2) -
                              (int) gt_determinebitspervalue(numofchars);
     buf->buf_size = 1UL << buf->log_bufsize;
     buf->numofchars = numofchars;
     gt_assert(buf->buf_size <= UINT16_MAX);
     buf->cachesize = numofchars << buf->log_bufsize;
-    buf->values = gt_malloc(sizeof (*buf->values) * buf->cachesize);
+    buf->values = (GtUsainindextype *)
+                  gt_malloc(sizeof (*buf->values) * buf->cachesize);
     buf->size += sizeof (*buf->values) * buf->cachesize;
     buf->nextidx = gt_calloc((size_t) numofchars,sizeof (*buf->nextidx));
     buf->size += sizeof (*buf->nextidx) * numofchars;
@@ -333,7 +356,7 @@ static GtSainbuffer *gt_sainbuffer_new(GtUword *suftab,
 
 static void gt_sainbuffer_update(GtSainbuffer *buf,
                                  GtUword charidx,
-                                 GtUword value)
+                                 GtUsainindextype value)
 {
   const GtUword offset = charidx << buf->log_bufsize;
 
@@ -343,9 +366,9 @@ static void gt_sainbuffer_update(GtSainbuffer *buf,
     buf->nextidx[charidx]++;
   } else
   {
-    GtUword *writeptr = buf->suftab + buf->fillptr[charidx] - 1,
-                  *readptr = buf->values + offset;
-    const GtUword *readend = readptr + buf->buf_size;
+    GtUsainindextype *writeptr = buf->suftab + buf->fillptr[charidx] - 1,
+                     *readptr = buf->values + offset;
+    const GtUsainindextype *readend = readptr + buf->buf_size;
 
     while (readptr < readend)
     {
@@ -366,13 +389,13 @@ static void gt_sainbuffer_flushall(GtSainbuffer *buf)
   }
   for (charidx = 0; charidx < buf->numofchars; charidx++)
   {
-    const GtUword bufleft = (GtUword) buf->nextidx[charidx];
+    const GtUsainindextype bufleft = (GtUsainindextype) buf->nextidx[charidx];
 
     if (bufleft > 0)
     {
-      GtUword *writeptr = buf->suftab + buf->fillptr[charidx] - 1,
-                    *readptr = buf->values + (charidx << buf->log_bufsize);
-      const GtUword *readend = readptr + bufleft;
+      GtUsainindextype *writeptr = buf->suftab + buf->fillptr[charidx] - 1,
+                       *readptr = buf->values + (charidx << buf->log_bufsize);
+      const GtUsainindextype *readend = readptr + bufleft;
 
       while (readptr < readend)
       {
@@ -399,7 +422,7 @@ static void gt_sainbuffer_delete(GtSainbuffer *buf)
         {\
           if ((CURRENTCC) != lastupdatecc)\
           {\
-            fillptr[lastupdatecc] = (GtUword) (bucketptr - suftab);\
+            fillptr[lastupdatecc] = (GtUsainindextype) (bucketptr - suftab);\
             bucketptr = suftab + fillptr[CURRENTCC];\
             lastupdatecc = CURRENTCC;\
           }\
@@ -410,29 +433,29 @@ static void gt_sainbuffer_delete(GtSainbuffer *buf)
         }
 
 static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
-                                              GtWord *suftab,
-                                              GtWord position);
+                                              GtSsainindextype *suftab,
+                                              GtSsainindextype position);
 
 static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
                                                    const GtEncseq *encseq,
-                                                   GtWord *suftab);
+                                                   GtSsainindextype *suftab);
 
 static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
-                                              GtWord *suftab,
-                                              GtWord position,
+                                              GtSsainindextype *suftab,
+                                              GtSsainindextype position,
                                               GT_UNUSED GtUword
                                                 nonspecialentries);
 
 static void gt_sain_induceStypes2fromspecialranges(
                                    const GtSainseq *sainseq,
                                    const GtEncseq *encseq,
-                                   GtWord *suftab,
+                                   GtSsainindextype *suftab,
                                    GtUword nonspecialentries);
 
 #include "match/sfx-sain.inc"
 
 static GtUword gt_sain_insertSstarsuffixes(GtSainseq *sainseq,
-                                                 GtUword *suftab,
+                                                 GtUsainindextype *suftab,
                                                  GtLogger *logger)
 {
   switch (sainseq->seqtype)
@@ -453,9 +476,10 @@ static GtUword gt_sain_insertSstarsuffixes(GtSainseq *sainseq,
 }
 
 static void gt_sain_incrementfirstSstar(GtSainseq *sainseq,
-                                        GtUword *suftab)
+                                        GtUsainindextype *suftab)
 {
-  GtUword charidx, sum = 0;
+  GtUword charidx;
+  GtUsainindextype sum = 0;
 
   for (charidx = 0; charidx < sainseq->numofchars; charidx++)
   {
@@ -471,7 +495,7 @@ static void gt_sain_incrementfirstSstar(GtSainseq *sainseq,
 }
 
 static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
-                                         GtWord *suftab,
+                                         GtSsainindextype *suftab,
                                          GtUword nonspecialentries)
 {
   switch (sainseq->seqtype)
@@ -497,27 +521,27 @@ static void gt_sain_induceLtypesuffixes1(GtSainseq *sainseq,
   }
 }
 
-static void gt_sain_adjustsuftab(GtUword totallength,GtWord *suftab,
+static void gt_sain_adjustsuftab(GtUword totallength,GtSsainindextype *suftab,
                                  GtUword nonspecialentries)
 {
-  GtWord *suftabptr;
+  GtSsainindextype *suftabptr;
 
   for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
        suftabptr--)
   {
-    if (*suftabptr > 0 && *suftabptr < (GtWord) totallength)
+    if (*suftabptr > 0 && *suftabptr < (GtSsainindextype) totallength)
     {
-      GtWord *nextgteq;
+      GtSsainindextype *nextgteq;
 
-      *suftabptr += (GtWord) totallength;
+      *suftabptr += (GtSsainindextype) totallength;
       nextgteq = suftabptr - 1;
-      while (nextgteq >= suftab && *nextgteq < (GtWord) totallength)
+      while (nextgteq >= suftab && *nextgteq < (GtSsainindextype) totallength)
       {
         nextgteq--;
       }
-      if (*nextgteq >= (GtWord) totallength)
+      if (*nextgteq >= (GtSsainindextype) totallength)
       {
-        *nextgteq -= (GtWord) totallength;
+        *nextgteq -= (GtSsainindextype) totallength;
       }
       suftabptr = nextgteq;
     }
@@ -525,24 +549,22 @@ static void gt_sain_adjustsuftab(GtUword totallength,GtWord *suftab,
 }
 
 static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
-                                              GtWord *suftab,
-                                              GtWord position)
+                                              GtSsainindextype *suftab,
+                                              GtSsainindextype position)
 {
-  GtUword currentcc = gt_sainseq_getchar(sainseq,
-                                               (GtUword) position);
+  GtUword currentcc = gt_sainseq_getchar(sainseq,(GtUword) position);
 
   if (currentcc < sainseq->numofchars)
   {
-    GtUword leftcontextcc,
-                  putidx = --sainseq->bucketfillptr[currentcc];
+    GtUword leftcontextcc;
+    GtUsainindextype putidx = --sainseq->bucketfillptr[currentcc];
 
     gt_assert(position > 0);
-    position--;
-    leftcontextcc = gt_sainseq_getchar(sainseq,(GtUword) position);
+    leftcontextcc = gt_sainseq_getchar(sainseq,(GtUword) --position);
     if (sainseq->roundtable != NULL)
     {
       GtUword t = (currentcc << 1) |
-                        (leftcontextcc > currentcc ? 1UL : 0);
+                  (leftcontextcc > currentcc ? 1UL : 0);
 
       gt_assert (sainseq->roundtable[t] <= sainseq->currentround);
       if (sainseq->roundtable[t] < sainseq->currentround)
@@ -563,7 +585,7 @@ static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
 
 static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
                                                    const GtEncseq *encseq,
-                                                   GtWord *suftab)
+                                                   GtSsainindextype *suftab)
 {
   if (gt_encseq_has_specialranges(encseq))
   {
@@ -582,7 +604,7 @@ static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
       {
         gt_sain_special_singleSinduction1(sainseq,
                                           suftab,
-                                          (GtWord) (range.start - 1));
+                                          (GtSsainindextype) (range.start - 1));
       }
     }
     gt_specialrangeiterator_delete(sri);
@@ -590,7 +612,7 @@ static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
 }
 
 static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
-                                         GtWord *suftab,
+                                         GtSsainindextype *suftab,
                                          GtUword nonspecialentries)
 {
   switch (sainseq->seqtype)
@@ -617,11 +639,11 @@ static void gt_sain_induceStypesuffixes1(GtSainseq *sainseq,
 }
 
 static void gt_sain_moveSstar2front(GtUword countSstartype,
-                                    GtWord *suftab,
+                                    GtSsainindextype *suftab,
                                     GT_UNUSED GtUword nonspecialentries)
 {
   GtUword readidx, writeidx = 0;
-  GtWord position;
+  GtSsainindextype position;
 
   for (readidx = 0; (position = suftab[readidx]) < 0; readidx++)
   {
@@ -659,16 +681,16 @@ static void gt_sain_moveSstar2front(GtUword countSstartype,
 static GtUword gt_sain_fast_moveSstar2front(
                                       GtUword totallength,
                                       GtUword countSstartype,
-                                      GtWord *suftab,
+                                      GtSsainindextype *suftab,
                                       GT_UNUSED GtUword nonspecialentries)
 {
   GtUword readidx, namecount = 0, writeidx = 0;
-  GtWord position;
+  GtSsainindextype position;
 
   for (readidx = 0; (position = suftab[readidx]) < 0; readidx++)
   {
     position = ~position;
-    if (position >= (GtWord) totallength)
+    if (position >= (GtSsainindextype) totallength)
     {
       namecount++;
     }
@@ -683,7 +705,7 @@ static GtUword gt_sain_fast_moveSstar2front(
       if ((position = suftab[readidx]) < 0)
       {
         position = ~position;
-        if (position >= (GtWord) totallength)
+        if (position >= (GtSsainindextype) totallength)
         {
           namecount++;
         }
@@ -709,22 +731,22 @@ static GtUword gt_sain_fast_moveSstar2front(
 
 static void gt_sain_fast_assignSstarnames(GtUword totallength,
                                           GtUword countSstartype,
-                                          GtUword *suftab,
+                                          GtUsainindextype *suftab,
                                           GtUword numberofnames,
                                           GtUword nonspecialentries)
 {
-  GtUword *suftabptr, *secondhalf = suftab + countSstartype;
+  GtUsainindextype *suftabptr, *secondhalf = suftab + countSstartype;
 
-  if (numberofnames < countSstartype)
+  if ((GtUword) numberofnames < countSstartype)
   {
     GtUword currentname = numberofnames + 1;
 
     for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
          suftabptr--)
     {
-      GtUword position;
+      GtUsainindextype position;
 
-      if ((position = *suftabptr) >= totallength)
+      if ((position = *suftabptr) >= (GtUsainindextype) totallength)
       {
         position -= totallength;
         gt_assert(currentname > 0);
@@ -732,7 +754,7 @@ static void gt_sain_fast_assignSstarnames(GtUword totallength,
       }
       if (currentname <= numberofnames)
       {
-        secondhalf[GT_DIV2(position)] = currentname;
+        secondhalf[GT_DIV2(position)] = (GtUsainindextype) currentname;
       }
     }
   } else
@@ -740,7 +762,7 @@ static void gt_sain_fast_assignSstarnames(GtUword totallength,
     for (suftabptr = suftab; suftabptr < suftab + nonspecialentries;
          suftabptr++)
     {
-      if (*suftabptr >= totallength)
+      if (*suftabptr >= (GtUsainindextype) totallength)
       {
         *suftabptr -= totallength;
       }
@@ -749,7 +771,7 @@ static void gt_sain_fast_assignSstarnames(GtUword totallength,
 }
 
 static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
-                                         GtWord *suftab,
+                                         GtSsainindextype *suftab,
                                          GtUword nonspecialentries)
 {
   switch (sainseq->seqtype)
@@ -770,20 +792,19 @@ static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
 }
 
 static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
-                                              GtWord *suftab,
-                                              GtWord position,
+                                              GtSsainindextype *suftab,
+                                              GtSsainindextype position,
                                               GT_UNUSED GtUword
                                                 nonspecialentries)
 {
   GtUword currentcc;
 
-  position--;
-  currentcc = gt_sainseq_getchar(sainseq,(GtUword) position);
+  currentcc = gt_sainseq_getchar(sainseq,(GtUword) --position);
   if (currentcc < sainseq->numofchars)
   {
-    GtUword putidx = --sainseq->bucketfillptr[currentcc];
+    GtUsainindextype putidx = --sainseq->bucketfillptr[currentcc];
 
-    gt_assert(putidx < nonspecialentries);
+    gt_assert((GtUword) putidx < nonspecialentries);
     suftab[putidx] = (position == 0 ||
                       gt_sainseq_getchar(sainseq,
                                          (GtUword)
@@ -798,7 +819,7 @@ static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
 static void gt_sain_induceStypes2fromspecialranges(
                                    const GtSainseq *sainseq,
                                    const GtEncseq *encseq,
-                                   GtWord *suftab,
+                                   GtSsainindextype *suftab,
                                    GtUword nonspecialentries)
 {
   if (gt_encseq_has_specialranges(encseq))
@@ -818,7 +839,7 @@ static void gt_sain_induceStypes2fromspecialranges(
       {
         gt_sain_special_singleSinduction2(sainseq,
                                           suftab,
-                                          (GtWord) range.start,
+                                          (GtSsainindextype) range.start,
                                           nonspecialentries);
       }
     }
@@ -827,7 +848,7 @@ static void gt_sain_induceStypes2fromspecialranges(
 }
 
 static void gt_sain_induceStypesuffixes2(const GtSainseq *sainseq,
-                                         GtWord *suftab,
+                                         GtSsainindextype *suftab,
                                          GtUword nonspecialentries)
 {
   switch (sainseq->seqtype)
@@ -925,10 +946,10 @@ static int gt_sain_compare_suffixes(const GtSainseq *sainseq,
   }
 }
 
-static void gt_sain_setundefined(bool fwd,GtUword *suftab,
+static void gt_sain_setundefined(bool fwd,GtUsainindextype *suftab,
                                  GtUword start, GtUword end)
 {
-  GtUword *ptr;
+  GtUsainindextype *ptr;
 
   if (fwd)
   {
@@ -946,16 +967,18 @@ static void gt_sain_setundefined(bool fwd,GtUword *suftab,
 }
 
 static void gt_sain_assignSstarlength(GtSainseq *sainseq,
-                                      GtUword *lentab)
+                                      GtUsainindextype *lentab)
 {
   bool nextisStype = true;
-  GtUword position,
-                nextSstartypepos = sainseq->totallength,
-                nextcc = GT_UNIQUEINT(sainseq->totallength);
+  GtUsainindextype position,
+                   nextSstartypepos = (GtUsainindextype) sainseq->totallength;
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
 
-  for (position = sainseq->totallength-1; /* Nothing */; position--)
+  for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
+       position--)
   {
-    GtUword currentcc = gt_sainseq_getchar(sainseq,position);
+    GtUword currentcc = (GtUword) gt_sainseq_getchar(sainseq,
+                                                     (GtUword) position);
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
     if (!currentisStype && nextisStype)
@@ -974,26 +997,28 @@ static void gt_sain_assignSstarlength(GtSainseq *sainseq,
 }
 
 static GtUword gt_sain_assignSstarnames(const GtSainseq *sainseq,
-                                              GtUword countSstartype,
-                                              GtUword *suftab)
+                                        GtUword countSstartype,
+                                        GtUsainindextype *suftab)
 {
-  GtUword *suftabptr, *secondhalf = suftab + countSstartype,
-                previouspos, previouslen, currentname = 1UL;
+  GtUsainindextype *suftabptr, *secondhalf = suftab + countSstartype,
+                   previouspos;
+  GtUword previouslen, currentname = 1UL;
 
   previouspos = suftab[0];
-  previouslen = secondhalf[GT_DIV2(previouspos)];
-  secondhalf[GT_DIV2(previouspos)] = currentname;
+  previouslen = (GtUword) secondhalf[GT_DIV2(previouspos)];
+  secondhalf[GT_DIV2(previouspos)] = (GtUsainindextype) currentname;
   for (suftabptr = suftab + 1UL; suftabptr < suftab + countSstartype;
        suftabptr++)
   {
     int cmp;
-    GtUword currentlen = 0, position = *suftabptr;
+    GtUsainindextype position = *suftabptr;
+    GtUword currentlen = 0;
 
-    currentlen = secondhalf[GT_DIV2(position)];
+    currentlen = (GtUword) secondhalf[GT_DIV2(position)];
     if (previouslen == currentlen)
     {
-      cmp = gt_sain_compare_Sstarstrings(sainseq,previouspos,position,
-                                         currentlen);
+      cmp = gt_sain_compare_Sstarstrings(sainseq,(GtUword) previouspos,
+                                         (GtUword) position,currentlen);
       gt_assert(cmp != 1);
     } else
     {
@@ -1007,19 +1032,19 @@ static GtUword gt_sain_assignSstarnames(const GtSainseq *sainseq,
        the Sstar suffixes differ by at least 2, the used address
        is unique */
     previouslen = currentlen;
-    secondhalf[GT_DIV2(position)] = currentname;
+    secondhalf[GT_DIV2(position)] = (GtUsainindextype) currentname;
     previouspos = position;
   }
   return currentname;
 }
 
-static void gt_sain_movenames2front(GtUword *suftab,
+static void gt_sain_movenames2front(GtUsainindextype *suftab,
                                     GtUword numberofsuffixes,
                                     GtUword totallength)
 {
-  GtUword *rptr, *wptr;
-  const GtUword *maxrptr = suftab + numberofsuffixes +
-                                 GT_DIV2(totallength);
+  GtUsainindextype *rptr, *wptr;
+  const GtUsainindextype *maxrptr = suftab + numberofsuffixes +
+                                    GT_DIV2(totallength);
 
   for (rptr = wptr = suftab + numberofsuffixes; rptr <= maxrptr; rptr++)
   {
@@ -1035,7 +1060,7 @@ static void gt_sain_movenames2front(GtUword *suftab,
 }
 
 static void gt_sain_checkorder(const GtSainseq *sainseq,
-                               const GtUword *suftab,
+                               const GtUsainindextype *suftab,
                                GtUword start,
                                GtUword end)
 {
@@ -1043,15 +1068,16 @@ static void gt_sain_checkorder(const GtSainseq *sainseq,
 
   for (idx = start+1; idx <= end; idx++)
   {
-    int cmp
-      = gt_sain_compare_suffixes(sainseq,suftab[idx-1],suftab[idx]);
+    int cmp = gt_sain_compare_suffixes(sainseq,(GtUword) suftab[idx-1],
+                                       (GtUword) suftab[idx]);
 
     if (cmp != -1)
     {
       fprintf(stderr,
               "%s: check interval ["GT_WU","GT_WU"] at idx="GT_WU": suffix "
-              ""GT_WU" >= "GT_WU"\n",__func__,start,end,idx,suftab[idx-1],
-              suftab[idx]);
+              ""GT_WU" >= "GT_WU"\n",__func__,start,end,idx,
+              (GtUword) suftab[idx-1],
+              (GtUword) suftab[idx]);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
@@ -1059,7 +1085,7 @@ static void gt_sain_checkorder(const GtSainseq *sainseq,
 
 static void gt_sain_expandorder2original(GtSainseq *sainseq,
                                          GtUword numberofsuffixes,
-                                         GtUword *suftab)
+                                         GtUsainindextype *suftab)
 {
   switch (sainseq->seqtype)
   {
@@ -1080,7 +1106,7 @@ static void gt_sain_expandorder2original(GtSainseq *sainseq,
 
 static void gt_sain_determineSstarfirstchardist(GtSainseq *sainseq)
 {
-  const GtUword *seqptr;
+  const GtUsainindextype *seqptr;
   GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
   bool nextisStype = true;
 
@@ -1088,7 +1114,7 @@ static void gt_sain_determineSstarfirstchardist(GtSainseq *sainseq)
   for (seqptr = sainseq->seq.array + sainseq->totallength - 1;
        seqptr >= sainseq->seq.array; seqptr--)
   {
-    GtUword currentcc = *seqptr;
+    GtUword currentcc = (GtUword) *seqptr;
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
     if (!currentisStype && nextisStype)
@@ -1102,7 +1128,7 @@ static void gt_sain_determineSstarfirstchardist(GtSainseq *sainseq)
 }
 
 static void gt_sain_insertsortedSstarsuffixes(const GtSainseq *sainseq,
-                                              GtUword *suftab,
+                                              GtUsainindextype *suftab,
                                               GtUword readidx,
                                               GtUword nonspecialentries)
 {
@@ -1117,7 +1143,7 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSainseq *sainseq,
       gt_assert(readidx <= putidx);
       if (readidx < putidx)
       {
-        GtUword offset;
+        GtUsainindextype offset;
 
         for (offset = 0; offset < sainseq->sstarfirstcharcount[cc]; offset++)
         {
@@ -1131,7 +1157,7 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSainseq *sainseq,
         }
       }
     }
-    gt_assert(fillidx >= sainseq->bucketsize[cc]);
+    gt_assert(fillidx >= (GtUword) sainseq->bucketsize[cc]);
     fillidx -= sainseq->bucketsize[cc];
     gt_assert(sainseq->bucketsize[cc] >=
               sainseq->sstarfirstcharcount[cc]);
@@ -1141,7 +1167,7 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSainseq *sainseq,
                            fillidx + sainseq->bucketsize[cc] -
                            sainseq->sstarfirstcharcount[cc] - 1);
     }
-    readidx -= sainseq->sstarfirstcharcount[cc];
+    readidx -= (GtUword) sainseq->sstarfirstcharcount[cc];
     if (cc == 0)
     {
       break;
@@ -1149,12 +1175,12 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSainseq *sainseq,
   }
 }
 
-static void gt_sain_filltailsuffixes(GtUword *suftabtail,
+static void gt_sain_filltailsuffixes(GtUsainindextype *suftabtail,
                                      const GtEncseq *encseq,
                                      GtReadmode readmode)
 {
   GtUword specialcharacters = gt_encseq_specialcharacters(encseq),
-                totallength = gt_encseq_total_length(encseq);
+          totallength = gt_encseq_total_length(encseq);
 
   if (gt_encseq_has_specialranges(encseq))
   {
@@ -1175,19 +1201,19 @@ static void gt_sain_filltailsuffixes(GtUword *suftabtail,
       for (idx = range.start; idx < range.end; idx++)
       {
         gt_assert(countspecial < specialcharacters && idx < totallength);
-        suftabtail[countspecial++] = idx;
+        suftabtail[countspecial++] = (GtUsainindextype) idx;
       }
     }
     gt_assert(countspecial == specialcharacters);
     gt_specialrangeiterator_delete(sri);
   }
-  suftabtail[specialcharacters] = totallength;
+  suftabtail[specialcharacters] = (GtUsainindextype) totallength;
 }
 
 static void gt_sain_rec_sortsuffixes(unsigned int level,
                                      GtSainseq *sainseq,
-                                     GtUword *suftab,
-                                     GtUword firstusable,
+                                     GtUsainindextype *suftab,
+                                     GtUsainindextype firstusable,
                                      GtUword nonspecialentries,
                                      GtUword suftabentries,
                                      bool intermediatecheck,
@@ -1217,20 +1243,22 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     GT_SAIN_SHOWTIMER(sainseq->roundtable == NULL
                       ? "induce L suffixes" : "fast induce L suffixes");
 
-    gt_sain_induceLtypesuffixes1(sainseq,(GtWord *) suftab,nonspecialentries);
+    gt_sain_induceLtypesuffixes1(sainseq,(GtSsainindextype *) suftab,
+                                 nonspecialentries);
     if (sainseq->roundtable != NULL)
     {
-      gt_sain_adjustsuftab(sainseq->totallength,(GtWord *) suftab,
+      gt_sain_adjustsuftab(sainseq->totallength,(GtSsainindextype *) suftab,
                            nonspecialentries);
     }
     gt_sain_endbuckets(sainseq);
     GT_SAIN_SHOWTIMER(sainseq->roundtable == NULL
                       ? "induce S suffixes" : "fast induce S suffixes");
-    gt_sain_induceStypesuffixes1(sainseq,(GtWord *) suftab,nonspecialentries);
+    gt_sain_induceStypesuffixes1(sainseq,(GtSsainindextype *) suftab,
+                                 nonspecialentries);
     if (sainseq->roundtable == NULL)
     {
       GT_SAIN_SHOWTIMER("simple moverSstar2front");
-      gt_sain_moveSstar2front(countSstartype,(GtWord *) suftab,
+      gt_sain_moveSstar2front(countSstartype,(GtSsainindextype *) suftab,
                               nonspecialentries);
       GT_SAIN_SHOWTIMER("simple assignSstarlength");
       gt_sain_assignSstarlength(sainseq,suftab + countSstartype);
@@ -1241,7 +1269,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
       GT_SAIN_SHOWTIMER("fast moveSstar2front");
       numberofnames = gt_sain_fast_moveSstar2front(sainseq->totallength,
                                                    countSstartype,
-                                                   (GtWord *) suftab,
+                                                   (GtSsainindextype *) suftab,
                                                    nonspecialentries);
       if (!sainseq->roundtablepoints2suftab)
       {
@@ -1257,7 +1285,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     {
     /* Now the name sequence is in the range from
        countSstartype .. 2 * countSstartype - 1 */
-      GtUword *subseq = suftab + countSstartype;
+      GtUsainindextype *subseq = suftab + countSstartype;
       GtSainseq *sainseq_rec;
 
       GT_SAIN_SHOWTIMER("movenames2front");
@@ -1265,7 +1293,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
       gt_sain_movenames2front(suftab,countSstartype,sainseq->totallength);
       if (level == 0)
       {
-        firstusable = GT_MULT2(countSstartype);
+        firstusable = (GtUsainindextype) GT_MULT2(countSstartype);
       }
       sainseq_rec = gt_sainseq_new_from_array(subseq,countSstartype,
                                               numberofnames,
@@ -1315,10 +1343,12 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   }
   gt_sain_startbuckets(sainseq);
   GT_SAIN_SHOWTIMER("final induce L suffixes");
-  gt_sain_induceLtypesuffixes2(sainseq,(GtWord *) suftab,nonspecialentries);
+  gt_sain_induceLtypesuffixes2(sainseq,(GtSsainindextype *) suftab,
+                               nonspecialentries);
   gt_sain_endbuckets(sainseq);
   GT_SAIN_SHOWTIMER("final induce S suffixes");
-  gt_sain_induceStypesuffixes2(sainseq,(GtWord *) suftab,nonspecialentries);
+  gt_sain_induceStypesuffixes2(sainseq,(GtSsainindextype *) suftab,
+                               nonspecialentries);
   if (nonspecialentries > 0)
   {
     if (intermediatecheck)
@@ -1336,6 +1366,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                                  sainseq->readmode,
                                  sainseq->totallength,
                                  suftab,
+                                 sizeof *suftab,
                                  NULL);
     }
   }
@@ -1348,13 +1379,15 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                                  GtLogger *logger,
                                  GtTimer *timer)
 {
-  GtUword nonspecialentries, suftabentries, totallength, *suftab;
+  GtUword nonspecialentries, suftabentries, totallength;
+  GtUsainindextype *suftab;
   GtSainseq *sainseq;
 
   totallength = gt_encseq_total_length(encseq);
   nonspecialentries = totallength - gt_encseq_specialcharacters(encseq);
   suftabentries = totallength+1;
-  suftab = gt_calloc((size_t) suftabentries,sizeof (*suftab));
+  suftab = (GtUsainindextype *) gt_calloc((size_t) suftabentries,
+                                          sizeof *suftab);
   sainseq = gt_sainseq_new_from_encseq(encseq,readmode);
   gt_sain_rec_sortsuffixes(0,
                            sainseq,
@@ -1380,11 +1413,13 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                                 GtLogger *logger,
                                 GtTimer *timer)
 {
-  GtUword suftabentries, *suftab;
+  GtUword suftabentries;
+  GtUsainindextype *suftab;
   GtSainseq *sainseq;
 
   suftabentries = len+1;
-  suftab = gt_calloc((size_t) suftabentries,sizeof (*suftab));
+  suftab = (GtUsainindextype *) gt_calloc((size_t) suftabentries,
+                                          sizeof *suftab);
   sainseq = gt_sainseq_new_from_plainseq(plainseq,len);
   gt_sain_rec_sortsuffixes(0,
                            sainseq,

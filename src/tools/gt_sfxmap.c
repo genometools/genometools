@@ -752,6 +752,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
           {
             gt_suftab_lightweightcheck(suffixarray.encseq, suffixarray.readmode,
                                        totallength,suffixarray.suftab,
+                                       sizeof suffixarray.suftab,
                                        logger);
             if (arguments->inputlcp)
             {
@@ -933,7 +934,7 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
       }
       gt_assert(countentries == numberofentries);
       gt_suftab_lightweightcheck(encseq, GT_READMODE_FORWARD,
-                                 totallength,suftab,NULL);
+                                 totallength,suftab,sizeof *suftab,NULL);
       gt_free(suftab);
     }
     gt_fa_fclose(fp);
