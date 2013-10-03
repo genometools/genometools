@@ -410,16 +410,25 @@ GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
   return lcptab;
 }
 
-static GtUword gt_check_for_range_occurrence(const ESASuffixptr *suftab,
-                                                   GtUword suffix,
-                                                   GtUword start,
-                                                   GtUword end)
+#ifdef _WIN32
+#define GEN_ESASUFFIXPTRGET(TAB,IDX) ((unsigned int *) TAB)[IDX]
+#else
+#define GEN_ESASUFFIXPTRGET(TAB,IDX) (unitsize == (size_t) 4\
+                                       ? (GtUword) ((unsigned int *) TAB)[IDX] \
+                                       : (GtUword) ((GtUword *) TAB)[IDX])
+#endif
+
+static GtUword gt_check_for_range_occurrence(const void *suftab,
+                                             size_t unitsize,
+                                             GtUword suffix,
+                                             GtUword start,
+                                             GtUword end)
 {
   GtUword idx;
 
   for (idx = start; idx <= end; idx++)
   {
-    GtUword position = ESASUFFIXPTRGET(suftab, idx);
+    GtUword position = GEN_ESASUFFIXPTRGET(suftab, idx);
 
     if (suffix == position)
     {
@@ -461,7 +470,8 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
                                      GtReadmode readmode,
                                      GtUword totallength,
                                      unsigned int numofchars,
-                                     const ESASuffixptr *suftab,
+                                     const void  *suftab,
+                                     size_t unitsize,
                                      const GtRangewithchar *rangestore,
                                      unsigned int numofranges)
 {
@@ -474,7 +484,7 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
   }
   for (idx = 0; idx < totallength; idx++)
   {
-    GtUword position = ESASUFFIXPTRGET(suftab, idx);
+    GtUword position = GEN_ESASUFFIXPTRGET(suftab, idx);
 
     if (position > 0)
     {
@@ -483,7 +493,7 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
       {
         GtUword checkpos;
 
-        checkpos = ESASUFFIXPTRGET(suftab, nexttab[(int) cc]) + 1;
+        checkpos = GEN_ESASUFFIXPTRGET(suftab, nexttab[(int) cc]) + 1;
         if (checkpos != position)
         {
           fprintf(stderr, "idx="GT_WU", checkpos="GT_WU", position="GT_WU"\n",
@@ -507,7 +517,8 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
 
 static void gt_suftab_sk_suffixorder(GtUword totallength,
                                      unsigned int numofchars,
-                                     const ESASuffixptr *suftab,
+                                     const void *suftab,
+                                     size_t unitsize,
                                      const GtRangewithchar *rangestore,
                                      unsigned int numofranges)
 {
@@ -522,14 +533,15 @@ static void gt_suftab_sk_suffixorder(GtUword totallength,
     for (idx = rangestore[rangeidx].start; idx <= rangestore[rangeidx].end;
          idx++)
     {
-      GtUword position = ESASUFFIXPTRGET(suftab, idx);
+      GtUword position = GEN_ESASUFFIXPTRGET(suftab, idx);
 
       if (position + 1 <= totallength)
       {
         GtUword found = gt_check_for_range_occurrence(suftab,
-                                                            position + 1,
-                                                            start,
-                                                            totallength);
+                                                      unitsize,
+                                                      position + 1,
+                                                      start,
+                                                      totallength);
         if (found == ULONG_MAX)
         {
           fprintf(stderr, "Cannot find position+1="GT_WU" in range ["GT_WU", "
@@ -552,10 +564,11 @@ static void gt_suftab_sk_suffixorder(GtUword totallength,
 }
 
 void gt_suftab_lightweightcheck(const GtEncseq *encseq,
-                               GtReadmode readmode,
-                               GtUword totallength,
-                               const ESASuffixptr *suftab,
-                               GtLogger *logger)
+                                GtReadmode readmode,
+                                GtUword totallength,
+                                const void *suftab,
+                                GT_UNUSED size_t unitsize,
+                                GtLogger *logger)
 {
   GtUword idx, countbitsset = 0, previouspos = 0,
                 firstspecial = totallength, rangestart = 0;
@@ -565,18 +578,23 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   GtRangewithchar *rangestore;
   const bool skcheck = true;
 
+#ifdef _WIN32
+  gt_assert(unitsize == (size_t) 4);
+#else
+  gt_assert(unitsize == (size_t) 4 || unitsize == (size_t) 8);
+#endif
   GT_INITBITTAB(startposoccurs, totallength+1);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   rangestore = gt_malloc(sizeof(*rangestore) * numofchars);
   for (idx = 0; idx < totallength; idx++)
   {
-    GtUword position = ESASUFFIXPTRGET(suftab, idx);
+    GtUword position = GEN_ESASUFFIXPTRGET(suftab, idx);
     GtUchar cc;
 
     if (GT_ISIBITSET(startposoccurs, position))
     {
       fprintf(stderr, "ERROR: suffix with startpos "GT_WU" already occurs\n",
-              ESASUFFIXPTRGET(suftab, idx));
+              GEN_ESASUFFIXPTRGET(suftab, idx));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     GT_SETIBIT(startposoccurs, position);
@@ -683,6 +701,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
     gt_suftab_sk_suffixorder(totallength,
                              numofchars,
                              suftab,
+                             unitsize,
                              rangestore,
                              numofranges);
     gt_logger_log(logger, "suftab-check, second phase (sk-method) done");
@@ -693,6 +712,7 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
                              totallength,
                              numofchars,
                              suftab,
+                             unitsize,
                              rangestore,
                              numofranges);
     gt_logger_log(logger, "suftab-check, second phase (bk-method) done");
