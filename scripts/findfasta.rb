@@ -43,8 +43,11 @@ testdata_exclude = ["solid_color_reads.fastq",
                     "sw100K1.fsa",
                     "sw100K2.fsa"]
 
-listselected("testdata",testdata_exclude) do |filename|
-  puts filename
+if ENV.has_key?("GTDIR")
+  testdata_dir = "#{ENV["GTDIR"]}/testdata"
+  listselected(testdata_dir,testdata_exclude) do |filename|
+    puts filename
+  end
 end
 
 if ENV.has_key?("GTTESTDATA")

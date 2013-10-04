@@ -21,10 +21,7 @@ plainseq[position];
     if (!currentisStype && nextisStype)
     {
       countSstartype++;
-      if (sainseq->sstarfirstcharcount != NULL)
-      {
-        sainseq->sstarfirstcharcount[nextcc]++;
-      }
+sainseq->sstarfirstcharcount[nextcc]++;
       if (sainbuffer != NULL)
       {
         gt_sainbuffer_update(sainbuffer,nextcc,position);
@@ -346,10 +343,6 @@ static void gt_sain_PLAINSEQ_induceStypesuffixes2(const GtSainseq *sainseq,
                                            suftab,
                                            nonspecialentries);
   }
-  if (nonspecialentries == 0)
-  {
-    return;
-  }
   for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
        suftabptr--)
   {
@@ -388,8 +381,7 @@ static void gt_sain_PLAINSEQ_expandorder2original(GtSainseq *sainseq,
 {
   GtUsainindextype *suftabptr,
                    position,
-                   writeidx = (GtUsainindextype) (numberofsuffixes - 1),
-                   *sstarsuffixes = suftab + numberofsuffixes,
+                   *sstarsuffixes = suftab + GT_MULT2(numberofsuffixes),
                    *sstarfirstcharcount = NULL,
                    *bucketsize = NULL;
   GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
@@ -409,6 +401,7 @@ static void gt_sain_PLAINSEQ_expandorder2original(GtSainseq *sainseq,
       bucketsize[charidx] = 0;
     }
   }
+
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
@@ -419,16 +412,10 @@ plainseq[position];
 
     if (!currentisStype && nextisStype)
     {
-      if (sstarfirstcharcount != NULL)
-      {
-        sstarfirstcharcount[nextcc]++;
-      }
-      sstarsuffixes[writeidx--] = position+1;
+
+      *--sstarsuffixes = position+1;
     }
-    if (bucketsize != NULL)
-    {
-      bucketsize[currentcc]++;
-    }
+
     nextisStype = currentisStype;
     nextcc = currentcc;
     if (position == 0)
@@ -468,10 +455,7 @@ sainseq->readmode))
     if (!currentisStype && nextisStype)
     {
       countSstartype++;
-      if (sainseq->sstarfirstcharcount != NULL)
-      {
-        sainseq->sstarfirstcharcount[nextcc]++;
-      }
+sainseq->sstarfirstcharcount[nextcc]++;
       if (sainbuffer != NULL)
       {
         gt_sainbuffer_update(sainbuffer,nextcc,position);
@@ -829,10 +813,6 @@ GtSsainindextype position;
                                            suftab,
                                            nonspecialentries);
   }
-  if (nonspecialentries == 0)
-  {
-    return;
-  }
   for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
        suftabptr--)
   {
@@ -877,8 +857,7 @@ static void gt_sain_ENCSEQ_expandorder2original(GtSainseq *sainseq,
 {
   GtUsainindextype *suftabptr,
                    position,
-                   writeidx = (GtUsainindextype) (numberofsuffixes - 1),
-                   *sstarsuffixes = suftab + numberofsuffixes,
+                   *sstarsuffixes = suftab + GT_MULT2(numberofsuffixes),
                    *sstarfirstcharcount = NULL,
                    *bucketsize = NULL;
   GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
@@ -899,6 +878,7 @@ bool nextisStype = true;
       bucketsize[charidx] = 0;
     }
   }
+
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
@@ -912,16 +892,10 @@ sainseq->readmode))
 
     if (!currentisStype && nextisStype)
     {
-      if (sstarfirstcharcount != NULL)
-      {
-        sstarfirstcharcount[nextcc]++;
-      }
-      sstarsuffixes[writeidx--] = position+1;
+
+      *--sstarsuffixes = position+1;
     }
-    if (bucketsize != NULL)
-    {
-      bucketsize[currentcc]++;
-    }
+
     nextisStype = currentisStype;
     nextcc = currentcc;
     if (position == 0)
@@ -956,10 +930,7 @@ static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
     if (!currentisStype && nextisStype)
     {
       countSstartype++;
-      if (sainseq->sstarfirstcharcount != NULL)
-      {
-        sainseq->sstarfirstcharcount[nextcc]++;
-      }
+
       if (sainbuffer != NULL)
       {
         gt_sainbuffer_update(sainbuffer,nextcc,position);
@@ -1271,10 +1242,6 @@ static void gt_sain_INTSEQ_induceStypesuffixes2(const GtSainseq *sainseq,
                                            suftab,
                                            nonspecialentries);
   }
-  if (nonspecialentries == 0)
-  {
-    return;
-  }
   for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
        suftabptr--)
   {
@@ -1311,8 +1278,7 @@ static void gt_sain_INTSEQ_expandorder2original(GtSainseq *sainseq,
 {
   GtUsainindextype *suftabptr,
                    position,
-                   writeidx = (GtUsainindextype) (numberofsuffixes - 1),
-                   *sstarsuffixes = suftab + numberofsuffixes,
+                   *sstarsuffixes = suftab + GT_MULT2(numberofsuffixes),
                    *sstarfirstcharcount = NULL,
                    *bucketsize = NULL;
   GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
@@ -1332,6 +1298,7 @@ static void gt_sain_INTSEQ_expandorder2original(GtSainseq *sainseq,
       bucketsize[charidx] = 0;
     }
   }
+gt_assert(bucketsize != NULL && sstarfirstcharcount != NULL);
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
@@ -1341,16 +1308,10 @@ static void gt_sain_INTSEQ_expandorder2original(GtSainseq *sainseq,
 
     if (!currentisStype && nextisStype)
     {
-      if (sstarfirstcharcount != NULL)
-      {
-        sstarfirstcharcount[nextcc]++;
-      }
-      sstarsuffixes[writeidx--] = position+1;
+sstarfirstcharcount[nextcc]++;
+      *--sstarsuffixes = position+1;
     }
-    if (bucketsize != NULL)
-    {
-      bucketsize[currentcc]++;
-    }
+bucketsize[currentcc]++;
     nextisStype = currentisStype;
     nextcc = currentcc;
     if (position == 0)

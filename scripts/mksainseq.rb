@@ -34,6 +34,35 @@ def declare_tmpcc(key,context)
   end
 end
 
+def sstarfirstcharcount_bucketsize_assert_not_NULL(key,which)
+  if which.member?(key)
+    return "gt_assert(bucketsize != NULL && sstarfirstcharcount != NULL);"
+  else
+    return ""
+  end
+end
+
+
+def sstarfirstcharcount_update(key,struct,which)
+  if which.member?(key)
+    if struct
+      return "sainseq->sstarfirstcharcount[nextcc]++;"
+    else
+      return "sstarfirstcharcount[nextcc]++;"
+    end
+  else
+    return ""
+  end
+end
+
+def bucketsize_update(key,which)
+  if which.member?(key)
+    return "bucketsize[currentcc]++;"
+  else
+    return ""
+  end
+end
+
 begin
   fo = File.open("src/match/sfx-sain.inc","w")
 rescue => err
@@ -65,10 +94,7 @@ static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
     if (!currentisStype && nextisStype)
     {
       countSstartype++;
-      if (sainseq->sstarfirstcharcount != NULL)
-      {
-        sainseq->sstarfirstcharcount[nextcc]++;
-      }
+#{sstarfirstcharcount_update(key,true,["PLAINSEQ","ENCSEQ"])}
       if (sainbuffer != NULL)
       {
         gt_sainbuffer_update(sainbuffer,nextcc,position);
@@ -380,10 +406,6 @@ static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
                                            suftab,
                                            nonspecialentries);
   }
-  if (nonspecialentries == 0)
-  {
-    return;
-  }
   for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
        suftabptr--)
   {
@@ -420,8 +442,7 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
 {
   GtUsainindextype *suftabptr,
                    position,
-                   writeidx = (GtUsainindextype) (numberofsuffixes - 1),
-                   *sstarsuffixes = suftab + numberofsuffixes,
+                   *sstarsuffixes = suftab + GT_MULT2(numberofsuffixes),
                    *sstarfirstcharcount = NULL,
                    *bucketsize = NULL;
   GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
@@ -441,6 +462,7 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
       bucketsize[charidx] = 0;
     }
   }
+#{sstarfirstcharcount_bucketsize_assert_not_NULL(key,["INTSEQ"])}
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
@@ -450,16 +472,10 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
 
     if (!currentisStype && nextisStype)
     {
-      if (sstarfirstcharcount != NULL)
-      {
-        sstarfirstcharcount[nextcc]++;
-      }
-      sstarsuffixes[writeidx--] = position+1;
+#{sstarfirstcharcount_update(key,false,["INTSEQ"])}
+      *--sstarsuffixes = position+1;
     }
-    if (bucketsize != NULL)
-    {
-      bucketsize[currentcc]++;
-    }
+#{bucketsize_update(key,["INTSEQ"])}
     nextisStype = currentisStype;
     nextcc = currentcc;
     if (position == 0)
