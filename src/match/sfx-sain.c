@@ -62,9 +62,11 @@ typedef struct
 } GtSainseq;
 
 static bool gt_sain_decideforfastmethod(GtUword maxvalue,
-                                        GtUword len)
+                                        GtUword len,
+                                        GtUword numofchars)
 {
   return maxvalue < (GtUword) GT_FIRSTTWOBITS && len > 1024UL
+         && len >= GT_MULT2(numofchars)
          ? true : false;
 }
 
@@ -86,7 +88,8 @@ static GtSainseq *gt_sainseq_new_from_encseq(const GtEncseq *encseq,
                            gt_malloc(sizeof (*sainseq->bucketfillptr) *
                                      sainseq->numofchars);
   if (gt_sain_decideforfastmethod(sainseq->totallength+GT_COMPAREOFFSET,
-                                  sainseq->totallength))
+                                  sainseq->totallength,
+                                  sainseq->numofchars))
   {
     sainseq->roundtable = (GtUsainindextype *)
                           gt_malloc(sizeof (*sainseq->roundtable) *
@@ -135,7 +138,7 @@ static GtSainseq *gt_sainseq_new_from_plainseq(const GtUchar *plainseq,
   sainseq->bucketfillptr
     = (GtUsainindextype *)
       gt_malloc(sizeof (*sainseq->bucketfillptr) * sainseq->numofchars);
-  if (gt_sain_decideforfastmethod(len+1,len))
+  if (gt_sain_decideforfastmethod(len+1,len,sainseq->numofchars))
   {
     sainseq->roundtable = (GtUsainindextype *)
                           gt_malloc(sizeof (*sainseq->roundtable) *
@@ -182,8 +185,8 @@ static GtSainseq *gt_sainseq_new_from_array(GtUsainindextype *arr,
     sainseq->bucketsizepoints2suftab = true;
   } else
   {
-    printf("bucketsize requires "GT_WU" entries and only "GT_WU" are left\n",
-           numofchars,suftabentries - firstusable);
+    /*printf("bucketsize requires "GT_WU" entries and only "GT_WU" are left\n",
+              numofchars,suftabentries - firstusable);*/
     sainseq->bucketsizepoints2suftab = false;
     sainseq->bucketsize
       = (GtUsainindextype *)
@@ -200,14 +203,13 @@ static GtSainseq *gt_sainseq_new_from_array(GtUsainindextype *arr,
   {
     /*
     printf("bucketfillptr requires "GT_WU" entries and only "
-           GT_WU" are left\n",
-           numofchars,suftabentries - firstusable);*/
+           GT_WU" are left\n", numofchars,suftabentries - firstusable);*/
     sainseq->bucketfillptrpoints2suftab = false;
     sainseq->bucketfillptr
       = (GtUsainindextype *)
         gt_malloc(sizeof (*sainseq->bucketfillptr) * numofchars);
   }
-  if (gt_sain_decideforfastmethod(len+1,len))
+  if (gt_sain_decideforfastmethod(len+1,len,numofchars))
   {
     if (suftabentries - firstusable >= GT_MULT4(numofchars))
     {
@@ -235,6 +237,7 @@ static GtSainseq *gt_sainseq_new_from_array(GtUsainindextype *arr,
   }
   for (cptr = arr; cptr < arr + sainseq->totallength; cptr++)
   {
+    gt_assert((GtUword) *cptr < numofchars);
     sainseq->bucketsize[*cptr]++;
   }
   return sainseq;
@@ -423,13 +426,11 @@ static void gt_sainbuffer_delete(GtSainbuffer *buf)
           if ((CURRENTCC) != lastupdatecc)\
           {\
             fillptr[lastupdatecc] = (GtUsainindextype) (bucketptr - suftab);\
-            bucketptr = suftab + fillptr[CURRENTCC];\
-            lastupdatecc = CURRENTCC;\
+            bucketptr = suftab + fillptr[lastupdatecc = CURRENTCC];\
           }\
         } else\
         {\
-          bucketptr = suftab + fillptr[CURRENTCC];\
-          lastupdatecc = CURRENTCC;\
+          bucketptr = suftab + fillptr[lastupdatecc = CURRENTCC];\
         }
 
 static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
@@ -455,8 +456,8 @@ static void gt_sain_induceStypes2fromspecialranges(
 #include "match/sfx-sain.inc"
 
 static GtUword gt_sain_insertSstarsuffixes(GtSainseq *sainseq,
-                                                 GtUsainindextype *suftab,
-                                                 GtLogger *logger)
+                                           GtUsainindextype *suftab,
+                                           GtLogger *logger)
 {
   switch (sainseq->seqtype)
   {
@@ -569,12 +570,9 @@ static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
       gt_assert (sainseq->roundtable[t] <= sainseq->currentround);
       if (sainseq->roundtable[t] < sainseq->currentround)
       {
-        position += sainseq->totallength;
         sainseq->roundtable[t] = sainseq->currentround;
-      } else
-      {
-        position += sainseq->totallength;
       }
+      position += sainseq->totallength;
     }
     suftab[putidx] = (leftcontextcc > currentcc) ? ~(position+1) : position;
 #ifdef SAINSHOWSTATE
