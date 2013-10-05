@@ -15,6 +15,7 @@ static GtUword gt_sain_PLAINSEQ_insertSstarsuffixes(GtSainseq *sainseq,
   bool nextisStype = true;
 
   gt_sain_endbuckets(sainseq);
+
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
@@ -45,6 +46,7 @@ sainseq->sstarfirstcharcount[nextcc]++;
       break;
     }
   }
+
   gt_sainbuffer_flushall(sainbuffer);
   gt_sainbuffer_delete(sainbuffer);
   gt_assert(GT_MULT2(countSstartype) <= sainseq->totallength);
@@ -416,7 +418,6 @@ static void gt_sain_PLAINSEQ_expandorder2original(GtSainseq *sainseq,
 plainseq[position];
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
-
     if (!currentisStype && nextisStype)
     {
 
@@ -430,6 +431,7 @@ plainseq[position];
       break;
     }
   }
+
   for (suftabptr = suftab; suftabptr < suftab + numberofsuffixes; suftabptr++)
   {
     *suftabptr = sstarsuffixes[*suftabptr];
@@ -447,17 +449,20 @@ static GtUword gt_sain_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
                                                sainseq->numofchars,logger);
 GtUchar tmpcc;
+GtEncseqReader *esr;
   bool nextisStype = true;
 
   gt_sain_endbuckets(sainseq);
+esr = gt_encseq_create_reader_with_readmode(
+                            encseq,
+                            gt_readmode_inverse_direction(sainseq->readmode),
+                            0);
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
-    GtUword currentcc = ISSPECIAL(tmpcc = gt_encseq_get_encoded_char(
-encseq,
-(GtUword) (position),
-sainseq->readmode))
-  ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
+    GtUword currentcc = ISSPECIAL(tmpcc =
+gt_encseq_reader_next_encoded_char(esr))
+ ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
     if (!currentisStype && nextisStype)
@@ -483,6 +488,7 @@ sainseq->sstarfirstcharcount[nextcc]++;
       break;
     }
   }
+gt_encseq_reader_delete(esr);
   gt_sainbuffer_flushall(sainbuffer);
   gt_sainbuffer_delete(sainbuffer);
   gt_assert(GT_MULT2(countSstartype) <= sainseq->totallength);
@@ -854,6 +860,7 @@ static void gt_sain_ENCSEQ_expandorder2original(GtSainseq *sainseq,
                    *bucketsize = NULL;
   GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
 GtUchar tmpcc;
+GtEncseqReader *esr;
   bool nextisStype = true;
 
   if (sainseq->seqtype == GT_SAIN_INTSEQ)
@@ -870,18 +877,18 @@ GtUchar tmpcc;
       bucketsize[charidx] = 0;
     }
   }
-
+esr = gt_encseq_create_reader_with_readmode(
+                            encseq,
+                            gt_readmode_inverse_direction(sainseq->readmode),
+                            0);
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
-    GtUword currentcc = ISSPECIAL(tmpcc = gt_encseq_get_encoded_char(
-encseq,
-(GtUword) (position),
-sainseq->readmode))
-  ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
+    GtUword currentcc = ISSPECIAL(tmpcc =
+gt_encseq_reader_next_encoded_char(esr))
+ ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
-
     if (!currentisStype && nextisStype)
     {
 
@@ -895,6 +902,7 @@ sainseq->readmode))
       break;
     }
   }
+gt_encseq_reader_delete(esr);
   for (suftabptr = suftab; suftabptr < suftab + numberofsuffixes; suftabptr++)
   {
     *suftabptr = sstarsuffixes[*suftabptr];
@@ -915,6 +923,7 @@ static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
   bool nextisStype = true;
 
   gt_sain_endbuckets(sainseq);
+
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
@@ -944,6 +953,7 @@ static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
       break;
     }
   }
+
   gt_sainbuffer_flushall(sainbuffer);
   gt_sainbuffer_delete(sainbuffer);
   gt_assert(GT_MULT2(countSstartype) <= sainseq->totallength);
@@ -1302,7 +1312,6 @@ gt_assert(bucketsize != NULL && sstarfirstcharcount != NULL);
     GtUword currentcc = (GtUword) array[position];
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
-
     if (!currentisStype && nextisStype)
     {
 sstarfirstcharcount[nextcc]++;
@@ -1316,6 +1325,7 @@ bucketsize[currentcc]++;
       break;
     }
   }
+
   for (suftabptr = suftab; suftabptr < suftab + numberofsuffixes; suftabptr++)
   {
     *suftabptr = sstarsuffixes[*suftabptr];

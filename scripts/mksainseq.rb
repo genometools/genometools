@@ -12,17 +12,14 @@ def getc_param(key)
   end
 end
 
-def getc_call(key,posexpr,withunique = false)
+def getc_call(key,posexpr,seqaccess = false)
   if key == "PLAINSEQ"
     return "(GtUword)\nplainseq[#{posexpr}]"
   elsif key == "INTSEQ"
     return "(GtUword) array[#{posexpr}]"
-  elsif withunique
-    return "ISSPECIAL(tmpcc = gt_encseq_get_encoded_char(\n" +
-                                  "encseq,\n" +
-                                  "(GtUword) (#{posexpr}),\n" +
-                                  "sainseq->readmode))\n" +
-               "  ? GT_UNIQUEINT(#{posexpr}) : (GtUword) tmpcc"
+  elsif seqaccess
+    return "ISSPECIAL(tmpcc =\ngt_encseq_reader_next_encoded_char(esr))\n" +
+               " ? GT_UNIQUEINT(#{posexpr}) : (GtUword) tmpcc"
   else
     return "(GtUword) gt_encseq_get_encoded_char(\n" +
                                   "encseq,\n" +
@@ -31,9 +28,9 @@ def getc_call(key,posexpr,withunique = false)
   end
 end
 
-def declare_tmpcc(key,withunique = false)
-  if withunique and key == "ENCSEQ"
-    return "GtUchar tmpcc;"
+def declare_tmpvars(key,seqaccess = false)
+  if seqaccess and key == "ENCSEQ"
+    return "GtUchar tmpcc;\nGtEncseqReader *esr;"
   else
     return ""
   end
@@ -68,6 +65,25 @@ def bucketsize_update(key,which)
   end
 end
 
+def init_esr(key)
+  if key == "ENCSEQ"
+    return "esr = gt_encseq_create_reader_with_readmode(
+                            encseq,
+                            gt_readmode_inverse_direction(sainseq->readmode),
+                            0);"
+  else
+    return ""
+  end
+end
+
+def delete_esr(key)
+  if key == "ENCSEQ"
+    return "gt_encseq_reader_delete(esr);"
+  else
+    return ""
+  end
+end
+
 begin
   fo = File.open("src/match/sfx-sain.inc","w")
 rescue => err
@@ -90,10 +106,11 @@ static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
   GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
                                                sainseq->numofchars,logger);
-#{declare_tmpcc(key,true)}
+#{declare_tmpvars(key,true)}
   bool nextisStype = true;
 
   gt_sain_endbuckets(sainseq);
+#{init_esr(key)}
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
@@ -123,6 +140,7 @@ static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
       break;
     }
   }
+#{delete_esr(key)}
   gt_sainbuffer_flushall(sainbuffer);
   gt_sainbuffer_delete(sainbuffer);
   gt_assert(GT_MULT2(countSstartype) <= sainseq->totallength);
@@ -136,7 +154,7 @@ static void gt_sain_#{key}_fast_induceLtypesuffixes1(GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtSsainindextype *suftabptr, *bucketptr = NULL;
-#{declare_tmpcc(key)}
+#{declare_tmpvars(key)}
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
 
   gt_assert(sainseq->roundtable != NULL);
@@ -203,7 +221,7 @@ static void gt_sain_#{key}_induceLtypesuffixes1(GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
-#{declare_tmpcc(key)}
+#{declare_tmpvars(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
 
   gt_assert(sainseq->roundtable == NULL);
@@ -254,7 +272,7 @@ static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
-#{declare_tmpcc(key)}
+#{declare_tmpvars(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
 
   gt_assert(sainseq->roundtable != NULL);
@@ -316,7 +334,7 @@ static void gt_sain_#{key}_induceStypesuffixes1(GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
-#{declare_tmpcc(key)}
+#{declare_tmpvars(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
 
   gt_assert(sainseq->roundtable == NULL);
@@ -364,7 +382,7 @@ static void gt_sain_#{key}_induceLtypesuffixes2(const GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
-#{declare_tmpcc(key)}
+#{declare_tmpvars(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
 
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
@@ -402,7 +420,7 @@ static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
-#{declare_tmpcc(key)}
+#{declare_tmpvars(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
 
   gt_sain_special_singleSinduction2(sainseq,
@@ -457,7 +475,7 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
                    *sstarfirstcharcount = NULL,
                    *bucketsize = NULL;
   GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
-#{declare_tmpcc(key,true)}
+#{declare_tmpvars(key,true)}
   bool nextisStype = true;
 
   if (sainseq->seqtype == GT_SAIN_INTSEQ)
@@ -474,14 +492,13 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
       bucketsize[charidx] = 0;
     }
   }
-#{sstarfirstcharcount_bucketsize_assert_not_NULL(key,["INTSEQ"])}
+#{sstarfirstcharcount_bucketsize_assert_not_NULL(key,["INTSEQ"])}#{init_esr(key)}
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
     GtUword currentcc = #{getc_call(key,"position",true)};
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
-
     if (!currentisStype && nextisStype)
     {
 #{sstarfirstcharcount_update(key,false,["INTSEQ"])}
@@ -495,6 +512,7 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
       break;
     }
   }
+#{delete_esr(key)}
   for (suftabptr = suftab; suftabptr < suftab + numberofsuffixes; suftabptr++)
   {
     *suftabptr = sstarsuffixes[*suftabptr];
