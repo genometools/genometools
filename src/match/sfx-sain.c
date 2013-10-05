@@ -29,6 +29,14 @@
           gt_timer_show_progress(timer,DESC,stdout);\
         }
 
+/* GT_READMODE_FORWARD <=> GT_READMODE_REVERSE
+   GT_READMODE_COMPL <=> GT_READMODE_REVCOMPL
+*/
+
+#define gt_readmode_inverse_direction(RM)\
+        ((int) (RM)) % 2 == 0 ? (GtReadmode) ((int) (RM) + 1)\
+                              : (GtReadmode) ((int) (RM) - 1)
+
 typedef enum
 {
   GT_SAIN_PLAINSEQ,
