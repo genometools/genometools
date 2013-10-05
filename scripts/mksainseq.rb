@@ -12,25 +12,30 @@ def getc_param(key)
   end
 end
 
-def getc_call(key,posexpr)
+def getc_call(key,posexpr,withunique = false)
   if key == "PLAINSEQ"
     return "(GtUword)\nplainseq[#{posexpr}]"
   elsif key == "INTSEQ"
     return "(GtUword) array[#{posexpr}]"
-  else
+  elsif withunique
     return "ISSPECIAL(tmpcc = gt_encseq_get_encoded_char(\n" +
                                   "encseq,\n" +
                                   "(GtUword) (#{posexpr}),\n" +
                                   "sainseq->readmode))\n" +
                "  ? GT_UNIQUEINT(#{posexpr}) : (GtUword) tmpcc"
+  else
+    return "(GtUword) gt_encseq_get_encoded_char(\n" +
+                                  "encseq,\n" +
+                                  "(GtUword) (#{posexpr}),\n" +
+                                  "sainseq->readmode)"
   end
 end
 
-def declare_tmpcc(key,context)
-  if key == "ENCSEQ"
-    return "GtUchar tmpcc;\n#{context};"
+def declare_tmpcc(key,withunique = false)
+  if withunique and key == "ENCSEQ"
+    return "GtUchar tmpcc;"
   else
-    return "#{context};"
+    return ""
   end
 end
 
@@ -82,13 +87,14 @@ static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
   GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
                                                sainseq->numofchars,logger);
-  #{declare_tmpcc(key,"bool nextisStype = true")}
+#{declare_tmpcc(key,true)}
+  bool nextisStype = true;
 
   gt_sain_endbuckets(sainseq);
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
-    GtUword currentcc = #{getc_call(key,"position")};
+    GtUword currentcc = #{getc_call(key,"position",true)};
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
     if (!currentisStype && nextisStype)
@@ -127,13 +133,14 @@ static void gt_sain_#{key}_fast_induceLtypesuffixes1(GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtSsainindextype *suftabptr, *bucketptr = NULL;
+#{declare_tmpcc(key)}
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
-  #{declare_tmpcc(key,"GtSsainindextype position")}
 
   gt_assert(sainseq->roundtable != NULL);
   for (suftabptr = suftab, sainseq->currentround = 0;
        suftabptr < suftab + nonspecialentries; suftabptr++)
   {
+    GtSsainindextype position;
     if ((position = *suftabptr) > 0)
     {
       GtUword currentcc;
@@ -193,12 +200,13 @@ static void gt_sain_#{key}_induceLtypesuffixes1(GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
+#{declare_tmpcc(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"GtSsainindextype position")}
 
   gt_assert(sainseq->roundtable == NULL);
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
   {
+    GtSsainindextype position;
     if ((position = *suftabptr) > 0)
     {
       GtUword currentcc = #{getc_call(key,"position")};
@@ -243,8 +251,8 @@ static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
+#{declare_tmpcc(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"GtSsainindextype position")}
 
   gt_assert(sainseq->roundtable != NULL);
   gt_sain_special_singleSinduction1(sainseq,
@@ -260,6 +268,7 @@ static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
   for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
        suftabptr--)
   {
+    GtSsainindextype position;
     if ((position = *suftabptr) > 0)
     {
       if (position >= (GtSsainindextype) sainseq->totallength)
@@ -270,7 +279,6 @@ static void gt_sain_#{key}_fast_induceStypesuffixes1(GtSainseq *sainseq,
       if (position > 0)
       {
         GtUword currentcc = #{getc_call(key,"position")};
-
         if (currentcc < sainseq->numofchars)
         {
           GtUword t, leftcontextcc;
@@ -305,8 +313,8 @@ static void gt_sain_#{key}_induceStypesuffixes1(GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
+#{declare_tmpcc(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"GtSsainindextype position")}
 
   gt_assert(sainseq->roundtable == NULL);
   gt_sain_special_singleSinduction1(sainseq,
@@ -322,10 +330,10 @@ static void gt_sain_#{key}_induceStypesuffixes1(GtSainseq *sainseq,
   for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
        suftabptr--)
   {
+    GtSsainindextype position;
     if ((position = *suftabptr) > 0)
     {
       GtUword currentcc = #{getc_call(key,"position")};
-
       if (currentcc < sainseq->numofchars)
       {
         GtUword leftcontextcc;
@@ -353,12 +361,12 @@ static void gt_sain_#{key}_induceLtypesuffixes2(const GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
+#{declare_tmpcc(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"GtSsainindextype position")}
 
   for (suftabptr = suftab; suftabptr < suftab + nonspecialentries; suftabptr++)
   {
-    position = *suftabptr;
+    GtSsainindextype position = *suftabptr;
     *suftabptr = ~position;
     if (position > 0)
     {
@@ -372,8 +380,7 @@ static void gt_sain_#{key}_induceLtypesuffixes2(const GtSainseq *sainseq,
         GT_SAINUPDATEBUCKETPTR(currentcc);
         gt_assert(bucketptr != NULL && suftabptr < bucketptr);
         *bucketptr++ = (position > 0 &&
-                        (#{getc_call(key,"position-1")})
-                                            < currentcc)
+                        (#{getc_call(key,"position-1")}) < currentcc)
                         ? ~position : position;
 #ifdef SAINSHOWSTATE
         gt_assert(bucketptr != NULL);
@@ -392,8 +399,8 @@ static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
 {
   GtUword lastupdatecc = 0;
   GtUsainindextype *fillptr = sainseq->bucketfillptr;
+#{declare_tmpcc(key)}
   GtSsainindextype *suftabptr, *bucketptr = NULL;
-  #{declare_tmpcc(key,"GtSsainindextype position")}
 
   gt_sain_special_singleSinduction2(sainseq,
                                     suftab,
@@ -409,6 +416,7 @@ static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
   for (suftabptr = suftab + nonspecialentries - 1; suftabptr >= suftab;
        suftabptr--)
   {
+    GtSsainindextype position;
     if ((position = *suftabptr) > 0)
     {
       GtUword currentcc;
@@ -446,7 +454,8 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
                    *sstarfirstcharcount = NULL,
                    *bucketsize = NULL;
   GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
-  #{declare_tmpcc(key,"bool nextisStype = true")}
+#{declare_tmpcc(key,true)}
+  bool nextisStype = true;
 
   if (sainseq->seqtype == GT_SAIN_INTSEQ)
   {
@@ -466,7 +475,7 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
-    GtUword currentcc = #{getc_call(key,"position")};
+    GtUword currentcc = #{getc_call(key,"position",true)};
     bool currentisStype = (currentcc < nextcc ||
                            (currentcc == nextcc && nextisStype)) ? true : false;
 
