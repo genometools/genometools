@@ -438,6 +438,95 @@ plainseq[position];
   }
 }
 
+static int gt_sain_PLAINSEQ_compare_Sstarstrings(const GtSainseq *sainseq,
+                                               const GtUchar *plainseq,
+                                               GtUword start1,
+                                               GtUword start2,
+                                               GtUword len)
+{
+  GtUword end1 = start1 + len;
+
+  gt_assert(start1 <= sainseq->totallength &&
+            start2 <= sainseq->totallength &&
+            start1 != start2);
+  while (start1 < end1)
+  {
+    GtUword cc1, cc2;
+
+    if (start1 == sainseq->totallength)
+    {
+      gt_assert(start1 > start2);
+      return 1;
+    }
+    if (start2 == sainseq->totallength)
+    {
+      gt_assert(start1 < start2);
+      return -1;
+    }
+    cc1 = (GtUword)
+plainseq[start1];;
+    cc2 = (GtUword)
+plainseq[start2];;
+    if (cc1 < cc2)
+    {
+      return -1;
+    }
+    if (cc1 > cc2)
+    {
+      return 1;
+    }
+    start1++;
+    start2++;
+  }
+  return 0;
+}
+
+static GtUword gt_sain_PLAINSEQ_assignSstarnames(const GtSainseq *sainseq,
+                                               const GtUchar *plainseq,
+                                               GtUword countSstartype,
+                                               GtUsainindextype *suftab)
+{
+  GtUsainindextype *suftabptr, *secondhalf = suftab + countSstartype,
+                   previouspos;
+  GtUword previouslen, currentname = 1UL;
+
+  previouspos = suftab[0];
+  previouslen = (GtUword) secondhalf[GT_DIV2(previouspos)];
+  secondhalf[GT_DIV2(previouspos)] = (GtUsainindextype) currentname;
+  for (suftabptr = suftab + 1UL; suftabptr < suftab + countSstartype;
+       suftabptr++)
+  {
+    int cmp;
+    GtUsainindextype position = *suftabptr;
+    GtUword currentlen = 0;
+
+    currentlen = (GtUword) secondhalf[GT_DIV2(position)];
+    if (previouslen == currentlen)
+    {
+      cmp = gt_sain_PLAINSEQ_compare_Sstarstrings(sainseq,
+                                                plainseq,
+                                                (GtUword) previouspos,
+                                                (GtUword) position,
+                                                currentlen);
+      gt_assert(cmp != 1);
+    } else
+    {
+      cmp = -1;
+    }
+    if (cmp == -1)
+    {
+      currentname++;
+    }
+    /* write the names in order of positions. As the positions of
+       the Sstar suffixes differ by at least 2, the used address
+       is unique */
+    previouslen = currentlen;
+    secondhalf[GT_DIV2(position)] = (GtUsainindextype) currentname;
+    previouspos = position;
+  }
+  return currentname;
+}
+
 static GtUword gt_sain_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
                                                  GtUsainindextype *suftab,
@@ -909,6 +998,99 @@ gt_encseq_reader_delete(esr);
   }
 }
 
+static int gt_sain_ENCSEQ_compare_Sstarstrings(const GtSainseq *sainseq,
+                                               const GtEncseq *encseq,
+                                               GtUword start1,
+                                               GtUword start2,
+                                               GtUword len)
+{
+  GtUword end1 = start1 + len;
+
+  gt_assert(start1 <= sainseq->totallength &&
+            start2 <= sainseq->totallength &&
+            start1 != start2);
+  while (start1 < end1)
+  {
+    GtUword cc1, cc2;
+
+    if (start1 == sainseq->totallength)
+    {
+      gt_assert(start1 > start2);
+      return 1;
+    }
+    if (start2 == sainseq->totallength)
+    {
+      gt_assert(start1 < start2);
+      return -1;
+    }
+    cc1 = (GtUword) gt_encseq_get_encoded_char(
+encseq,
+(GtUword) (start1),
+sainseq->readmode);if (ISSPECIAL(cc1)) { cc1 = GT_UNIQUEINT(start1); };
+    cc2 = (GtUword) gt_encseq_get_encoded_char(
+encseq,
+(GtUword) (start2),
+sainseq->readmode);if (ISSPECIAL(cc2)) { cc2 = GT_UNIQUEINT(start2); };
+    if (cc1 < cc2)
+    {
+      return -1;
+    }
+    if (cc1 > cc2)
+    {
+      return 1;
+    }
+    start1++;
+    start2++;
+  }
+  return 0;
+}
+
+static GtUword gt_sain_ENCSEQ_assignSstarnames(const GtSainseq *sainseq,
+                                               const GtEncseq *encseq,
+                                               GtUword countSstartype,
+                                               GtUsainindextype *suftab)
+{
+  GtUsainindextype *suftabptr, *secondhalf = suftab + countSstartype,
+                   previouspos;
+  GtUword previouslen, currentname = 1UL;
+
+  previouspos = suftab[0];
+  previouslen = (GtUword) secondhalf[GT_DIV2(previouspos)];
+  secondhalf[GT_DIV2(previouspos)] = (GtUsainindextype) currentname;
+  for (suftabptr = suftab + 1UL; suftabptr < suftab + countSstartype;
+       suftabptr++)
+  {
+    int cmp;
+    GtUsainindextype position = *suftabptr;
+    GtUword currentlen = 0;
+
+    currentlen = (GtUword) secondhalf[GT_DIV2(position)];
+    if (previouslen == currentlen)
+    {
+      cmp = gt_sain_ENCSEQ_compare_Sstarstrings(sainseq,
+                                                encseq,
+                                                (GtUword) previouspos,
+                                                (GtUword) position,
+                                                currentlen);
+      gt_assert(cmp != 1);
+    } else
+    {
+      cmp = -1;
+    }
+    if (cmp == -1)
+    {
+      currentname++;
+    }
+    /* write the names in order of positions. As the positions of
+       the Sstar suffixes differ by at least 2, the used address
+       is unique */
+    previouslen = currentlen;
+    secondhalf[GT_DIV2(position)] = (GtUsainindextype) currentname;
+    previouspos = position;
+  }
+  return currentname;
+}
+
 static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtUsainindextype *array,
                                                  GtUsainindextype *suftab,
@@ -1330,4 +1512,91 @@ bucketsize[currentcc]++;
   {
     *suftabptr = sstarsuffixes[*suftabptr];
   }
+}
+
+static int gt_sain_INTSEQ_compare_Sstarstrings(const GtSainseq *sainseq,
+                                               const GtUsainindextype *array,
+                                               GtUword start1,
+                                               GtUword start2,
+                                               GtUword len)
+{
+  GtUword end1 = start1 + len;
+
+  gt_assert(start1 <= sainseq->totallength &&
+            start2 <= sainseq->totallength &&
+            start1 != start2);
+  while (start1 < end1)
+  {
+    GtUword cc1, cc2;
+
+    if (start1 == sainseq->totallength)
+    {
+      gt_assert(start1 > start2);
+      return 1;
+    }
+    if (start2 == sainseq->totallength)
+    {
+      gt_assert(start1 < start2);
+      return -1;
+    }
+    cc1 = (GtUword) array[start1];;
+    cc2 = (GtUword) array[start2];;
+    if (cc1 < cc2)
+    {
+      return -1;
+    }
+    if (cc1 > cc2)
+    {
+      return 1;
+    }
+    start1++;
+    start2++;
+  }
+  return 0;
+}
+
+static GtUword gt_sain_INTSEQ_assignSstarnames(const GtSainseq *sainseq,
+                                               const GtUsainindextype *array,
+                                               GtUword countSstartype,
+                                               GtUsainindextype *suftab)
+{
+  GtUsainindextype *suftabptr, *secondhalf = suftab + countSstartype,
+                   previouspos;
+  GtUword previouslen, currentname = 1UL;
+
+  previouspos = suftab[0];
+  previouslen = (GtUword) secondhalf[GT_DIV2(previouspos)];
+  secondhalf[GT_DIV2(previouspos)] = (GtUsainindextype) currentname;
+  for (suftabptr = suftab + 1UL; suftabptr < suftab + countSstartype;
+       suftabptr++)
+  {
+    int cmp;
+    GtUsainindextype position = *suftabptr;
+    GtUword currentlen = 0;
+
+    currentlen = (GtUword) secondhalf[GT_DIV2(position)];
+    if (previouslen == currentlen)
+    {
+      cmp = gt_sain_INTSEQ_compare_Sstarstrings(sainseq,
+                                                array,
+                                                (GtUword) previouspos,
+                                                (GtUword) position,
+                                                currentlen);
+      gt_assert(cmp != 1);
+    } else
+    {
+      cmp = -1;
+    }
+    if (cmp == -1)
+    {
+      currentname++;
+    }
+    /* write the names in order of positions. As the positions of
+       the Sstar suffixes differ by at least 2, the used address
+       is unique */
+    previouslen = currentlen;
+    secondhalf[GT_DIV2(position)] = (GtUsainindextype) currentname;
+    previouspos = position;
+  }
+  return currentname;
 }

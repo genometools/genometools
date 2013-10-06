@@ -445,21 +445,20 @@ static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
                                               GtSsainindextype *suftab,
                                               GtSsainindextype position);
 
-static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
-                                                   const GtEncseq *encseq,
-                                                   GtSsainindextype *suftab);
-
 static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
                                               GtSsainindextype *suftab,
                                               GtSsainindextype position,
                                               GT_UNUSED GtUword
                                                 nonspecialentries);
 
-static void gt_sain_induceStypes2fromspecialranges(
-                                   const GtSainseq *sainseq,
-                                   const GtEncseq *encseq,
-                                   GtSsainindextype *suftab,
-                                   GtUword nonspecialentries);
+static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
+                                                   const GtEncseq *encseq,
+                                                   GtSsainindextype *suftab);
+
+static void gt_sain_induceStypes2fromspecialranges(const GtSainseq *sainseq,
+                                                   const GtEncseq *encseq,
+                                                   GtSsainindextype *suftab,
+                                                   GtUword nonspecialentries);
 
 #include "match/sfx-sain.inc"
 
@@ -874,47 +873,6 @@ static void gt_sain_induceStypesuffixes2(const GtSainseq *sainseq,
   }
 }
 
-static int gt_sain_compare_Sstarstrings(const GtSainseq *sainseq,
-                                        GtUword start1,
-                                        GtUword start2,
-                                        GtUword len)
-{
-  GtUword end1 = start1 + len;
-
-  gt_assert(start1 <= sainseq->totallength &&
-            start2 <= sainseq->totallength &&
-            start1 != start2);
-
-  while (start1 < end1)
-  {
-    GtUword cc1, cc2;
-
-    if (start1 == sainseq->totallength)
-    {
-      gt_assert(start1 > start2);
-      return 1;
-    }
-    if (start2 == sainseq->totallength)
-    {
-      gt_assert(start1 < start2);
-      return -1;
-    }
-    cc1 = gt_sainseq_getchar(sainseq,start1);
-    cc2 = gt_sainseq_getchar(sainseq,start2);
-    if (cc1 < cc2)
-    {
-      return -1;
-    }
-    if (cc1 > cc2)
-    {
-      return 1;
-    }
-    start1++;
-    start2++;
-  }
-  return 0;
-}
-
 static int gt_sain_compare_suffixes(const GtSainseq *sainseq,
                                     GtUword start1,
                                     GtUword start2)
@@ -1002,48 +960,6 @@ static void gt_sain_assignSstarlength(GtSainseq *sainseq,
   }
 }
 
-static GtUword gt_sain_assignSstarnames(const GtSainseq *sainseq,
-                                        GtUword countSstartype,
-                                        GtUsainindextype *suftab)
-{
-  GtUsainindextype *suftabptr, *secondhalf = suftab + countSstartype,
-                   previouspos;
-  GtUword previouslen, currentname = 1UL;
-
-  previouspos = suftab[0];
-  previouslen = (GtUword) secondhalf[GT_DIV2(previouspos)];
-  secondhalf[GT_DIV2(previouspos)] = (GtUsainindextype) currentname;
-  for (suftabptr = suftab + 1UL; suftabptr < suftab + countSstartype;
-       suftabptr++)
-  {
-    int cmp;
-    GtUsainindextype position = *suftabptr;
-    GtUword currentlen = 0;
-
-    currentlen = (GtUword) secondhalf[GT_DIV2(position)];
-    if (previouslen == currentlen)
-    {
-      cmp = gt_sain_compare_Sstarstrings(sainseq,(GtUword) previouspos,
-                                         (GtUword) position,currentlen);
-      gt_assert(cmp != 1);
-    } else
-    {
-      cmp = -1;
-    }
-    if (cmp == -1)
-    {
-      currentname++;
-    }
-    /* write the names in order of positions. As the positions of
-       the Sstar suffixes differ by at least 2, the used address
-       is unique */
-    previouslen = currentlen;
-    secondhalf[GT_DIV2(position)] = (GtUsainindextype) currentname;
-    previouspos = position;
-  }
-  return currentname;
-}
-
 static void gt_sain_movenames2front(GtUsainindextype *suftab,
                                     GtUword numberofsuffixes,
                                     GtUword totallength)
@@ -1107,6 +1023,30 @@ static void gt_sain_expandorder2original(GtSainseq *sainseq,
       gt_sain_INTSEQ_expandorder2original(sainseq,sainseq->seq.array,
                                           numberofsuffixes,suftab);
       break;
+  }
+}
+
+static GtUword gt_sain_assignSstarnames(const GtSainseq *sainseq,
+                                        GtUword countSstartype,
+                                        GtUsainindextype *suftab)
+{
+  switch (sainseq->seqtype)
+  {
+    case GT_SAIN_PLAINSEQ:
+      return gt_sain_PLAINSEQ_assignSstarnames(sainseq,
+                                               sainseq->seq.plainseq,
+                                               countSstartype,
+                                               suftab);
+    case GT_SAIN_ENCSEQ:
+      return gt_sain_ENCSEQ_assignSstarnames(sainseq,
+                                             sainseq->seq.encseq,
+                                             countSstartype,
+                                             suftab);
+    case GT_SAIN_INTSEQ:
+      return gt_sain_INTSEQ_assignSstarnames(sainseq,
+                                             sainseq->seq.array,
+                                             countSstartype,
+                                             suftab);
   }
 }
 
