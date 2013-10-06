@@ -527,6 +527,39 @@ static GtUword gt_sain_PLAINSEQ_assignSstarnames(const GtSainseq *sainseq,
   return currentname;
 }
 
+static void gt_sain_PLAINSEQ_assignSstarlength(GtSainseq *sainseq,
+                                             const GtUchar *plainseq,
+                                             GtUsainindextype *lentab)
+{
+  bool nextisStype = true;
+  GtUsainindextype position,
+                   nextSstartypepos = (GtUsainindextype) sainseq->totallength;
+
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
+
+  for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
+       position--)
+  {
+    GtUword currentcc = (GtUword)
+plainseq[position];
+    bool currentisStype = (currentcc < nextcc ||
+                           (currentcc == nextcc && nextisStype)) ? true : false;
+    if (!currentisStype && nextisStype)
+    {
+      gt_assert(position < nextSstartypepos);
+      lentab[GT_DIV2(position+1)] = nextSstartypepos - position;
+      nextSstartypepos = position + 1;
+    }
+    nextisStype = currentisStype;
+    nextcc = currentcc;
+    if (position == 0)
+    {
+      break;
+    }
+  }
+
+}
+
 static GtUword gt_sain_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
                                                  GtUsainindextype *suftab,
@@ -1091,6 +1124,44 @@ static GtUword gt_sain_ENCSEQ_assignSstarnames(const GtSainseq *sainseq,
   return currentname;
 }
 
+static void gt_sain_ENCSEQ_assignSstarlength(GtSainseq *sainseq,
+                                             const GtEncseq *encseq,
+                                             GtUsainindextype *lentab)
+{
+  bool nextisStype = true;
+  GtUsainindextype position,
+                   nextSstartypepos = (GtUsainindextype) sainseq->totallength;
+GtUchar tmpcc;
+GtEncseqReader *esr;
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
+esr = gt_encseq_create_reader_with_readmode(
+                            encseq,
+                            gt_readmode_inverse_direction(sainseq->readmode),
+                            0);
+  for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
+       position--)
+  {
+    GtUword currentcc = ISSPECIAL(tmpcc =
+gt_encseq_reader_next_encoded_char(esr))
+ ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
+    bool currentisStype = (currentcc < nextcc ||
+                           (currentcc == nextcc && nextisStype)) ? true : false;
+    if (!currentisStype && nextisStype)
+    {
+      gt_assert(position < nextSstartypepos);
+      lentab[GT_DIV2(position+1)] = nextSstartypepos - position;
+      nextSstartypepos = position + 1;
+    }
+    nextisStype = currentisStype;
+    nextcc = currentcc;
+    if (position == 0)
+    {
+      break;
+    }
+  }
+gt_encseq_reader_delete(esr);
+}
+
 static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtUsainindextype *array,
                                                  GtUsainindextype *suftab,
@@ -1599,4 +1670,36 @@ static GtUword gt_sain_INTSEQ_assignSstarnames(const GtSainseq *sainseq,
     previouspos = position;
   }
   return currentname;
+}
+
+static void gt_sain_INTSEQ_assignSstarlength(GtSainseq *sainseq,
+                                             const GtUsainindextype *array,
+                                             GtUsainindextype *lentab)
+{
+  bool nextisStype = true;
+  GtUsainindextype position,
+                   nextSstartypepos = (GtUsainindextype) sainseq->totallength;
+
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
+
+  for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
+       position--)
+  {
+    GtUword currentcc = (GtUword) array[position];
+    bool currentisStype = (currentcc < nextcc ||
+                           (currentcc == nextcc && nextisStype)) ? true : false;
+    if (!currentisStype && nextisStype)
+    {
+      gt_assert(position < nextSstartypepos);
+      lentab[GT_DIV2(position+1)] = nextSstartypepos - position;
+      nextSstartypepos = position + 1;
+    }
+    nextisStype = currentisStype;
+    nextcc = currentcc;
+    if (position == 0)
+    {
+      break;
+    }
+  }
+
 }

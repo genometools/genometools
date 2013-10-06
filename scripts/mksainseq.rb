@@ -623,5 +623,37 @@ static GtUword gt_sain_#{key}_assignSstarnames(const GtSainseq *sainseq,
   }
   return currentname;
 }
+
+static void gt_sain_#{key}_assignSstarlength(GtSainseq *sainseq,
+                                             #{getc_param(key)},
+                                             GtUsainindextype *lentab)
+{
+  bool nextisStype = true;
+  GtUsainindextype position,
+                   nextSstartypepos = (GtUsainindextype) sainseq->totallength;
+#{declare_tmpvars(key,true)}
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
+#{init_esr(key)}
+  for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
+       position--)
+  {
+    GtUword currentcc = #{getc_call(key,"position",true)};
+    bool currentisStype = (currentcc < nextcc ||
+                           (currentcc == nextcc && nextisStype)) ? true : false;
+    if (!currentisStype && nextisStype)
+    {
+      gt_assert(position < nextSstartypepos);
+      lentab[GT_DIV2(position+1)] = nextSstartypepos - position;
+      nextSstartypepos = position + 1;
+    }
+    nextisStype = currentisStype;
+    nextcc = currentcc;
+    if (position == 0)
+    {
+      break;
+    }
+  }
+#{delete_esr(key)}
+}
 CCODE
 end

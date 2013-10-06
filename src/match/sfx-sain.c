@@ -930,36 +930,6 @@ static void gt_sain_setundefined(bool fwd,GtUsainindextype *suftab,
   }
 }
 
-static void gt_sain_assignSstarlength(GtSainseq *sainseq,
-                                      GtUsainindextype *lentab)
-{
-  bool nextisStype = true;
-  GtUsainindextype position,
-                   nextSstartypepos = (GtUsainindextype) sainseq->totallength;
-  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength);
-
-  for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
-       position--)
-  {
-    GtUword currentcc = (GtUword) gt_sainseq_getchar(sainseq,
-                                                     (GtUword) position);
-    bool currentisStype = (currentcc < nextcc ||
-                           (currentcc == nextcc && nextisStype)) ? true : false;
-    if (!currentisStype && nextisStype)
-    {
-      gt_assert(position < nextSstartypepos);
-      lentab[GT_DIV2(position+1)] = nextSstartypepos - position;
-      nextSstartypepos = position + 1;
-    }
-    nextisStype = currentisStype;
-    nextcc = currentcc;
-    if (position == 0)
-    {
-      break;
-    }
-  }
-}
-
 static void gt_sain_movenames2front(GtUsainindextype *suftab,
                                     GtUword numberofsuffixes,
                                     GtUword totallength)
@@ -1022,6 +992,23 @@ static void gt_sain_expandorder2original(GtSainseq *sainseq,
     case GT_SAIN_INTSEQ:
       gt_sain_INTSEQ_expandorder2original(sainseq,sainseq->seq.array,
                                           numberofsuffixes,suftab);
+      break;
+  }
+}
+
+static void gt_sain_assignSstarlength(GtSainseq *sainseq,
+                                      GtUsainindextype *lentab)
+{
+  switch (sainseq->seqtype)
+  {
+    case GT_SAIN_PLAINSEQ:
+      gt_sain_PLAINSEQ_assignSstarlength(sainseq,sainseq->seq.plainseq,lentab);
+      break;
+    case GT_SAIN_ENCSEQ:
+      gt_sain_ENCSEQ_assignSstarlength(sainseq,sainseq->seq.encseq,lentab);
+      break;
+    case GT_SAIN_INTSEQ:
+      gt_sain_INTSEQ_assignSstarlength(sainseq,sainseq->seq.array,lentab);
       break;
   }
 }
