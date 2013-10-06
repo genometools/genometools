@@ -15,6 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
+#include <ctype.h>
+#endif
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/fa.h"
@@ -24,10 +27,81 @@
 #include "tools/gt_sain.h"
 #include "match/sfx-sain.h"
 
+static int gt_sain_parse_dna_sequence(GtUchar *filecontents,
+                                      size_t *numofbytes,
+                                      GtError *err)
+{
+  GtUchar *writeptr = filecontents, *readptr = filecontents,
+          smap[UCHAR_MAX+1];
+  size_t idx;
+  const GtUchar undefined = (GtUchar) UCHAR_MAX,
+        *endptr = filecontents + *numofbytes;
+  bool firstline = true, haserr = false;
+  const char *wildcard_list = "nsywrkvbdhmNSYWRKVBDHM";
+
+  for (idx = 0; idx <= (size_t) UCHAR_MAX; idx++)
+  {
+    smap[idx] = undefined;
+  }
+  smap['a'] = 0;
+  smap['A'] = 0;
+  smap['c'] = (GtUchar) 1;
+  smap['C'] = (GtUchar) 1;
+  smap['g'] = (GtUchar) 2;
+  smap['G'] = (GtUchar) 2;
+  smap['t'] = (GtUchar) 3;
+  smap['T'] = (GtUchar) 3;
+  smap['u'] = (GtUchar) 3;
+  smap['U'] = (GtUchar) 3;
+  for (idx = 0; idx < strlen(wildcard_list); idx++)
+  {
+    smap[(int) wildcard_list[idx]] = WILDCARD;
+  }
+  readptr = filecontents;
+  while (!haserr && readptr < endptr)
+  {
+    if (*readptr == '>')
+    {
+      if (!firstline)
+      {
+        *writeptr++ = SEPARATOR;
+      } else
+      {
+        firstline = false;
+      }
+      while (readptr < endptr && *readptr != '\n')
+      {
+        readptr++;
+      }
+      readptr++;
+    } else
+    {
+      while (readptr < endptr && *readptr != '\n')
+      {
+        if (!isspace(*readptr))
+        {
+          GtUchar cc = smap[*readptr];
+          if (cc == undefined)
+          {
+            gt_error_set(err,"illegal input characters %c\n",*readptr);
+            haserr = true;
+            break;
+          }
+          *writeptr++ = cc;
+        }
+        readptr++;
+      }
+      readptr++;
+    }
+  }
+  *numofbytes = (size_t) (writeptr - filecontents);
+  return haserr ? -1 : 0;
+}
+
 typedef struct
 {
   bool icheck, fcheck, verbose, dommap;
-  GtStr *encseqfile, *plainseqfile, *dir;
+  GtStr *encseqfile, *plainseqfile, *fastadnafile, *dir;
   GtReadmode readmode;
 } GtSainArguments;
 
@@ -36,6 +110,7 @@ static void* gt_sain_arguments_new(void)
   GtSainArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->encseqfile = gt_str_new();
   arguments->plainseqfile = gt_str_new();
+  arguments->fastadnafile = gt_str_new();
   arguments->dir = gt_str_new_cstr("fwd");
   arguments->readmode = GT_READMODE_FORWARD;
   return arguments;
@@ -49,6 +124,7 @@ static void gt_sain_arguments_delete(void *tool_arguments)
   {
     gt_str_delete(arguments->encseqfile);
     gt_str_delete(arguments->plainseqfile);
+    gt_str_delete(arguments->fastadnafile);
     gt_str_delete(arguments->dir);
     gt_free(arguments);
   }
@@ -58,7 +134,8 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
 {
   GtSainArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionfcheck, *optionesq, *optionfile, *optionmmap;
+  GtOption *option, *optionfcheck, *optionesq, *optionfile, *optionmmap,
+           *optionfastadna;
 
   gt_assert(arguments != NULL);
 
@@ -81,6 +158,12 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
                                    arguments->plainseqfile, NULL);
   gt_option_parser_add_option(op, optionfile);
 
+  /* -fastadna */
+  optionfastadna = gt_option_new_string("fastadna",
+                                        "fasta input with DNA sequence",
+                                        arguments->fastadnafile, NULL);
+  gt_option_parser_add_option(op, optionfastadna);
+
   /* -icheck */
   option = gt_option_new_bool("icheck",
                               "intermediate check of all sorted arrays",
@@ -100,6 +183,9 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionfcheck);
   gt_option_imply(optionfcheck, optionesq);
   gt_option_exclude(optionesq,optionfile);
+  gt_option_exclude(optionesq, optionfastadna);
+  gt_option_exclude(optionfile, optionfastadna);
+  gt_option_exclude(optionfastadna, optionmmap);
   gt_option_imply(optionmmap, optionfile);
 
   /* -v */
@@ -252,54 +338,70 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
       gt_encseq_delete(encseq);
       gt_encseq_loader_delete(el);
     }
-    if (gt_str_length(arguments->plainseqfile) > 0)
+    if (gt_str_length(arguments->plainseqfile) > 0 ||
+        gt_str_length(arguments->fastadnafile) > 0)
     {
-      GtUchar *plainseq;
+      GtUchar *filecontents;
       size_t len;
+      const char *inputfile = gt_str_length(arguments->plainseqfile) > 0
+                                ? gt_str_get(arguments->plainseqfile)
+                                : gt_str_get(arguments->fastadnafile);
 
       if (arguments->dommap)
       {
-        plainseq = gt_fa_mmap_read (gt_str_get(arguments->plainseqfile),&len,
-                                    err);
+        filecontents = gt_fa_mmap_read (inputfile,&len,err);
       } else
       {
-        plainseq = gt_fa_heap_read (gt_str_get(arguments->plainseqfile),&len,
-                                    err);
+        filecontents = gt_fa_heap_read (inputfile,&len,err);
       }
-      if (plainseq == NULL)
+      if (filecontents == NULL)
       {
         had_err = -1;
       } else
       {
-        if (gt_sain_checkmaxsequencelength((GtUword) len,false,err) != 0)
+        if (gt_str_length(arguments->fastadnafile) > 0)
         {
-          had_err = -1;
-        } else
-        {
-          if (arguments->readmode != GT_READMODE_FORWARD)
+          if (gt_sain_parse_dna_sequence(filecontents,&len,err) != 0)
           {
-            gt_error_set(err,"option -dir and -file exclude each other");
             had_err = -1;
+          }
+        }
+        if (!had_err)
+        {
+          if (gt_sain_checkmaxsequencelength((GtUword) len,false,err) != 0)
+          {
+            had_err = -1;
+          } else
+          {
+            if (arguments->readmode != GT_READMODE_FORWARD)
+            {
+              gt_error_set(err,"option -dir and -file/-fastadna exclude "
+                               " each other");
+              had_err = -1;
+            }
           }
         }
         if (!had_err)
         {
           GtSainTimerandLogger *tl
             = gt_sain_timer_logger_new(arguments->verbose);
-          gt_sain_plain_sortsuffixes(plainseq,
-                                     (GtUword) len,
-                                     arguments->icheck,
-                                     tl->logger,
-                                     tl->timer);
+          if (gt_str_length(arguments->plainseqfile) > 0)
+          {
+            gt_sain_plain_sortsuffixes(filecontents,
+                                       (GtUword) len,
+                                       arguments->icheck,
+                                       tl->logger,
+                                       tl->timer);
+          }
           gt_sain_timer_logger_delete(tl);
         }
       }
       if (arguments->dommap)
       {
-        gt_fa_xmunmap(plainseq);
+        gt_fa_xmunmap(filecontents);
       } else
       {
-        gt_free(plainseq);
+        gt_free(filecontents);
       }
     }
   }
