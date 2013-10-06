@@ -27,17 +27,33 @@
 #include "tools/gt_sain.h"
 #include "match/sfx-sain.h"
 
-static int gt_sain_parse_dna_sequence(GtUchar *filecontents,
-                                      size_t *numofbytes,
-                                      GtError *err)
+typedef struct
+{
+  GtUchar *sequence;
+  GtUword totallength, specialcharacters, numofchars, *charcount;
+} GtBareEncseq;
+
+static void gt_bare_encseq_delete(GtBareEncseq *bare_encseq)
+{
+  if (bare_encseq != NULL)
+  {
+    gt_free(bare_encseq->charcount);
+    gt_free(bare_encseq);
+  }
+}
+
+static GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,
+                                        size_t numofbytes,
+                                        GtError *err)
 {
   GtUchar *writeptr = filecontents, *readptr = filecontents,
           smap[UCHAR_MAX+1];
   size_t idx;
   const GtUchar undefined = (GtUchar) UCHAR_MAX,
-        *endptr = filecontents + *numofbytes;
+        *endptr = filecontents + numofbytes;
   bool firstline = true, haserr = false;
   const char *wildcard_list = "nsywrkvbdhmNSYWRKVBDHM";
+  GtBareEncseq *bare_encseq = gt_malloc(sizeof *bare_encseq);
 
   for (idx = 0; idx <= (size_t) UCHAR_MAX; idx++)
   {
@@ -53,6 +69,10 @@ static int gt_sain_parse_dna_sequence(GtUchar *filecontents,
   smap['T'] = (GtUchar) 3;
   smap['u'] = (GtUchar) 3;
   smap['U'] = (GtUchar) 3;
+  bare_encseq->specialcharacters = 0;
+  bare_encseq->numofchars = 4UL;
+  bare_encseq->charcount = gt_calloc((size_t) bare_encseq->numofchars,
+                                     sizeof *bare_encseq->charcount);
   for (idx = 0; idx < strlen(wildcard_list); idx++)
   {
     smap[(int) wildcard_list[idx]] = WILDCARD;
@@ -65,6 +85,7 @@ static int gt_sain_parse_dna_sequence(GtUchar *filecontents,
       if (!firstline)
       {
         *writeptr++ = SEPARATOR;
+        bare_encseq->specialcharacters++;
       } else
       {
         firstline = false;
@@ -87,6 +108,14 @@ static int gt_sain_parse_dna_sequence(GtUchar *filecontents,
             haserr = true;
             break;
           }
+          if (ISSPECIAL(cc))
+          {
+            bare_encseq->specialcharacters++;
+          } else
+          {
+            gt_assert((GtUword) cc < bare_encseq->numofchars);
+            bare_encseq->charcount[(int) cc]++;
+          }
           *writeptr++ = cc;
         }
         readptr++;
@@ -94,8 +123,14 @@ static int gt_sain_parse_dna_sequence(GtUchar *filecontents,
       readptr++;
     }
   }
-  *numofbytes = (size_t) (writeptr - filecontents);
-  return haserr ? -1 : 0;
+  bare_encseq->sequence = filecontents;
+  bare_encseq->totallength = (GtUword) (writeptr - filecontents);
+  if (haserr)
+  {
+    gt_bare_encseq_delete(bare_encseq);
+    return NULL;
+  }
+  return bare_encseq;
 }
 
 typedef struct
@@ -359,9 +394,12 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         had_err = -1;
       } else
       {
+        GtBareEncseq *bare_encseq = NULL;
+
         if (gt_str_length(arguments->fastadnafile) > 0)
         {
-          if (gt_sain_parse_dna_sequence(filecontents,&len,err) != 0)
+          bare_encseq = gt_bare_encseq_new(filecontents,len,err);
+          if (bare_encseq == NULL)
           {
             had_err = -1;
           }
@@ -395,6 +433,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           }
           gt_sain_timer_logger_delete(tl);
         }
+        gt_bare_encseq_delete(bare_encseq);
       }
       if (arguments->dommap)
       {
