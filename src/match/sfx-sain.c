@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2012-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -443,22 +443,119 @@ static void gt_sainbuffer_delete(GtSainbuffer *buf)
 
 static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
                                               GtSsainindextype *suftab,
-                                              GtSsainindextype position);
+                                              GtSsainindextype position)
+{
+  GtUword currentcc = gt_sainseq_getchar(sainseq,(GtUword) position);
+
+  if (currentcc < sainseq->numofchars)
+  {
+    GtUword leftcontextcc;
+    GtUsainindextype putidx = --sainseq->bucketfillptr[currentcc];
+
+    gt_assert(position > 0);
+    leftcontextcc = gt_sainseq_getchar(sainseq,(GtUword) --position);
+    if (sainseq->roundtable != NULL)
+    {
+      GtUword t = (currentcc << 1) |
+                  (leftcontextcc > currentcc ? 1UL : 0);
+
+      gt_assert (sainseq->roundtable[t] <= sainseq->currentround);
+      if (sainseq->roundtable[t] < sainseq->currentround)
+      {
+        sainseq->roundtable[t] = sainseq->currentround;
+      }
+      position += sainseq->totallength;
+    }
+    suftab[putidx] = (leftcontextcc > currentcc) ? ~(position+1) : position;
+#ifdef SAINSHOWSTATE
+    printf("end S-induce: suftab["GT_WU"]="GT_WD"\n",putidx,suftab[putidx]);
+#endif
+  }
+}
+
+static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
+                                                   const GtEncseq *encseq,
+                                                   GtSsainindextype *suftab)
+{
+  if (gt_encseq_has_specialranges(encseq))
+  {
+    GtSpecialrangeiterator *sri;
+    GtRange range;
+    sri = gt_specialrangeiterator_new(encseq,
+                                      GT_ISDIRREVERSE(sainseq->readmode)
+                                        ? true : false);
+    while (gt_specialrangeiterator_next(sri,&range))
+    {
+      if (GT_ISDIRREVERSE(sainseq->readmode))
+      {
+        gt_range_reverse(sainseq->totallength,&range);
+      }
+      if (range.start > 1UL)
+      {
+        gt_sain_special_singleSinduction1(sainseq,
+                                          suftab,
+                                          (GtSsainindextype) (range.start - 1));
+      }
+    }
+    gt_specialrangeiterator_delete(sri);
+  }
+}
 
 static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
                                               GtSsainindextype *suftab,
                                               GtSsainindextype position,
                                               GT_UNUSED GtUword
-                                                nonspecialentries);
+                                                nonspecialentries)
+{
+  GtUword currentcc;
 
-static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
-                                                   const GtEncseq *encseq,
-                                                   GtSsainindextype *suftab);
+  currentcc = gt_sainseq_getchar(sainseq,(GtUword) --position);
+  if (currentcc < sainseq->numofchars)
+  {
+    GtUsainindextype putidx = --sainseq->bucketfillptr[currentcc];
 
-static void gt_sain_induceStypes2fromspecialranges(const GtSainseq *sainseq,
-                                                   const GtEncseq *encseq,
-                                                   GtSsainindextype *suftab,
-                                                   GtUword nonspecialentries);
+    gt_assert((GtUword) putidx < nonspecialentries);
+    suftab[putidx] = (position == 0 ||
+                      gt_sainseq_getchar(sainseq,
+                                         (GtUword)
+                                         (position-1)) > currentcc)
+                      ? ~position : position;
+#ifdef SAINSHOWSTATE
+    printf("end S-induce: suftab["GT_WU"]="GT_WD"\n",putidx,suftab[putidx]);
+#endif
+  }
+}
+
+static void gt_sain_induceStypes2fromspecialranges(
+                                   const GtSainseq *sainseq,
+                                   const GtEncseq *encseq,
+                                   GtSsainindextype *suftab,
+                                   GtUword nonspecialentries)
+{
+  if (gt_encseq_has_specialranges(encseq))
+  {
+    GtSpecialrangeiterator *sri;
+    GtRange range;
+    sri = gt_specialrangeiterator_new(encseq,
+                                      GT_ISDIRREVERSE(sainseq->readmode)
+                                        ? true : false);
+    while (gt_specialrangeiterator_next(sri,&range))
+    {
+      if (GT_ISDIRREVERSE(sainseq->readmode))
+      {
+        gt_range_reverse(sainseq->totallength,&range);
+      }
+      if (range.start > 0)
+      {
+        gt_sain_special_singleSinduction2(sainseq,
+                                          suftab,
+                                          (GtSsainindextype) range.start,
+                                          nonspecialentries);
+      }
+    }
+    gt_specialrangeiterator_delete(sri);
+  }
+}
 
 #include "match/sfx-sain.inc"
 
@@ -553,66 +650,6 @@ static void gt_sain_adjustsuftab(GtUword totallength,GtSsainindextype *suftab,
       }
       suftabptr = nextgteq;
     }
-  }
-}
-
-static void gt_sain_special_singleSinduction1(GtSainseq *sainseq,
-                                              GtSsainindextype *suftab,
-                                              GtSsainindextype position)
-{
-  GtUword currentcc = gt_sainseq_getchar(sainseq,(GtUword) position);
-
-  if (currentcc < sainseq->numofchars)
-  {
-    GtUword leftcontextcc;
-    GtUsainindextype putidx = --sainseq->bucketfillptr[currentcc];
-
-    gt_assert(position > 0);
-    leftcontextcc = gt_sainseq_getchar(sainseq,(GtUword) --position);
-    if (sainseq->roundtable != NULL)
-    {
-      GtUword t = (currentcc << 1) |
-                  (leftcontextcc > currentcc ? 1UL : 0);
-
-      gt_assert (sainseq->roundtable[t] <= sainseq->currentround);
-      if (sainseq->roundtable[t] < sainseq->currentround)
-      {
-        sainseq->roundtable[t] = sainseq->currentround;
-      }
-      position += sainseq->totallength;
-    }
-    suftab[putidx] = (leftcontextcc > currentcc) ? ~(position+1) : position;
-#ifdef SAINSHOWSTATE
-    printf("end S-induce: suftab["GT_WU"]="GT_WD"\n",putidx,suftab[putidx]);
-#endif
-  }
-}
-
-static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
-                                                   const GtEncseq *encseq,
-                                                   GtSsainindextype *suftab)
-{
-  if (gt_encseq_has_specialranges(encseq))
-  {
-    GtSpecialrangeiterator *sri;
-    GtRange range;
-    sri = gt_specialrangeiterator_new(encseq,
-                                      GT_ISDIRREVERSE(sainseq->readmode)
-                                        ? true : false);
-    while (gt_specialrangeiterator_next(sri,&range))
-    {
-      if (GT_ISDIRREVERSE(sainseq->readmode))
-      {
-        gt_range_reverse(sainseq->totallength,&range);
-      }
-      if (range.start > 1UL)
-      {
-        gt_sain_special_singleSinduction1(sainseq,
-                                          suftab,
-                                          (GtSsainindextype) (range.start - 1));
-      }
-    }
-    gt_specialrangeiterator_delete(sri);
   }
 }
 
@@ -793,62 +830,6 @@ static void gt_sain_induceLtypesuffixes2(const GtSainseq *sainseq,
       gt_sain_INTSEQ_induceLtypesuffixes2(sainseq,sainseq->seq.array,
                                           suftab,nonspecialentries);
       break;
-  }
-}
-
-static void gt_sain_special_singleSinduction2(const GtSainseq *sainseq,
-                                              GtSsainindextype *suftab,
-                                              GtSsainindextype position,
-                                              GT_UNUSED GtUword
-                                                nonspecialentries)
-{
-  GtUword currentcc;
-
-  currentcc = gt_sainseq_getchar(sainseq,(GtUword) --position);
-  if (currentcc < sainseq->numofchars)
-  {
-    GtUsainindextype putidx = --sainseq->bucketfillptr[currentcc];
-
-    gt_assert((GtUword) putidx < nonspecialentries);
-    suftab[putidx] = (position == 0 ||
-                      gt_sainseq_getchar(sainseq,
-                                         (GtUword)
-                                         (position-1)) > currentcc)
-                      ? ~position : position;
-#ifdef SAINSHOWSTATE
-    printf("end S-induce: suftab["GT_WU"]="GT_WD"\n",putidx,suftab[putidx]);
-#endif
-  }
-}
-
-static void gt_sain_induceStypes2fromspecialranges(
-                                   const GtSainseq *sainseq,
-                                   const GtEncseq *encseq,
-                                   GtSsainindextype *suftab,
-                                   GtUword nonspecialentries)
-{
-  if (gt_encseq_has_specialranges(encseq))
-  {
-    GtSpecialrangeiterator *sri;
-    GtRange range;
-    sri = gt_specialrangeiterator_new(encseq,
-                                      GT_ISDIRREVERSE(sainseq->readmode)
-                                        ? true : false);
-    while (gt_specialrangeiterator_next(sri,&range))
-    {
-      if (GT_ISDIRREVERSE(sainseq->readmode))
-      {
-        gt_range_reverse(sainseq->totallength,&range);
-      }
-      if (range.start > 0)
-      {
-        gt_sain_special_singleSinduction2(sainseq,
-                                          suftab,
-                                          (GtSsainindextype) range.start,
-                                          nonspecialentries);
-      }
-    }
-    gt_specialrangeiterator_delete(sri);
   }
 }
 
