@@ -29,8 +29,17 @@
 
 typedef struct
 {
+  GtUword start,
+          length;
+} GtSainSpecialrange;
+
+GT_DECLAREARRAYSTRUCT(GtSainSpecialrange);
+
+typedef struct
+{
   GtUchar *sequence;
   GtUword totallength, specialcharacters, numofchars, *charcount;
+  GtArrayGtSainSpecialrange specialranges;
 } GtBareEncseq;
 
 static void gt_bare_encseq_delete(GtBareEncseq *bare_encseq)
@@ -38,6 +47,10 @@ static void gt_bare_encseq_delete(GtBareEncseq *bare_encseq)
   if (bare_encseq != NULL)
   {
     gt_free(bare_encseq->charcount);
+    printf("number of special characters: " GT_WU " (" GT_WU " range(s))\n",
+           bare_encseq->specialcharacters,
+           bare_encseq->specialranges.nextfreeGtSainSpecialrange);
+    GT_FREEARRAY(&bare_encseq->specialranges,GtSainSpecialrange);
     gt_free(bare_encseq);
   }
 }
@@ -46,13 +59,14 @@ static GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,
                                         size_t numofbytes,
                                         GtError *err)
 {
-  GtUchar *writeptr = filecontents, *readptr = filecontents,
-          smap[UCHAR_MAX+1];
-  size_t idx;
+  GtUchar *writeptr = filecontents, *readptr = filecontents, smap[UCHAR_MAX+1];
   const GtUchar undefined = (GtUchar) UCHAR_MAX,
         *endptr = filecontents + numofbytes;
   bool firstline = true, haserr = false;
+  size_t idx;
   const char *wildcard_list = "nsywrkvbdhmNSYWRKVBDHM";
+  GtUword lastspecialrange_length = 0;
+  GtSainSpecialrange *srptr = NULL;
   GtBareEncseq *bare_encseq = gt_malloc(sizeof *bare_encseq);
 
   for (idx = 0; idx <= (size_t) UCHAR_MAX; idx++)
@@ -73,6 +87,7 @@ static GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,
   bare_encseq->numofchars = 4UL;
   bare_encseq->charcount = gt_calloc((size_t) bare_encseq->numofchars,
                                      sizeof *bare_encseq->charcount);
+  GT_INITARRAY(&bare_encseq->specialranges,GtSainSpecialrange);
   for (idx = 0; idx < strlen(wildcard_list); idx++)
   {
     smap[(int) wildcard_list[idx]] = WILDCARD;
@@ -84,6 +99,13 @@ static GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,
     {
       if (!firstline)
       {
+        if (lastspecialrange_length == 0)
+        {
+          GT_GETNEXTFREEINARRAY(srptr,&bare_encseq->specialranges,
+                                GtSainSpecialrange,128UL);
+          srptr->start = (GtUword) (writeptr - filecontents);
+        }
+        lastspecialrange_length++;
         *writeptr++ = SEPARATOR;
         bare_encseq->specialcharacters++;
       } else
@@ -110,11 +132,24 @@ static GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,
           }
           if (ISSPECIAL(cc))
           {
+            if (lastspecialrange_length == 0)
+            {
+              GT_GETNEXTFREEINARRAY(srptr,&bare_encseq->specialranges,
+                                    GtSainSpecialrange,128UL);
+              srptr->start = (GtUword) (writeptr - filecontents);
+            }
+            lastspecialrange_length++;
             bare_encseq->specialcharacters++;
           } else
           {
             gt_assert((GtUword) cc < bare_encseq->numofchars);
             bare_encseq->charcount[(int) cc]++;
+            if (lastspecialrange_length > 0)
+            {
+              gt_assert(srptr != NULL);
+              srptr->length = lastspecialrange_length;
+            }
+            lastspecialrange_length = 0;
           }
           *writeptr++ = cc;
         }
