@@ -21,6 +21,7 @@
 #include "core/timer_api.h"
 #include "core/logger_api.h"
 #include "core/encseq.h"
+#include "match/sfx-sain-bareesq.h"
 
 void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                                  GtReadmode readmode,
@@ -28,6 +29,12 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                                  bool finalcheck,
                                  GtLogger *logger,
                                  GtTimer *timer);
+
+void gt_sain_bare_encseq_sortsuffixes(const GtBareEncseq *bare_encseq,
+                                      bool intermediatecheck,
+                                      bool finalcheck,
+                                      GtLogger *logger,
+                                      GtTimer *timer);
 
 void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                                 GtUword len,
