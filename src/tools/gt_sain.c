@@ -15,9 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
-#include <ctype.h>
-#endif
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/fa.h"
@@ -26,147 +23,7 @@
 #include "core/logger.h"
 #include "tools/gt_sain.h"
 #include "match/sfx-sain.h"
-
-typedef struct
-{
-  GtUword start,
-          length;
-} GtSainSpecialrange;
-
-GT_DECLAREARRAYSTRUCT(GtSainSpecialrange);
-
-typedef struct
-{
-  GtUchar *sequence;
-  GtUword totallength, specialcharacters, numofchars, *charcount;
-  GtArrayGtSainSpecialrange specialranges;
-} GtBareEncseq;
-
-static void gt_bare_encseq_delete(GtBareEncseq *bare_encseq)
-{
-  if (bare_encseq != NULL)
-  {
-    gt_free(bare_encseq->charcount);
-    printf("number of special characters: " GT_WU " (" GT_WU " range(s))\n",
-           bare_encseq->specialcharacters,
-           bare_encseq->specialranges.nextfreeGtSainSpecialrange);
-    GT_FREEARRAY(&bare_encseq->specialranges,GtSainSpecialrange);
-    gt_free(bare_encseq);
-  }
-}
-
-static GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,
-                                        size_t numofbytes,
-                                        GtError *err)
-{
-  GtUchar *writeptr = filecontents, *readptr = filecontents, smap[UCHAR_MAX+1];
-  const GtUchar undefined = (GtUchar) UCHAR_MAX,
-        *endptr = filecontents + numofbytes;
-  bool firstline = true, haserr = false;
-  size_t idx;
-  const char *wildcard_list = "nsywrkvbdhmNSYWRKVBDHM";
-  GtUword lastspecialrange_length = 0;
-  GtSainSpecialrange *srptr = NULL;
-  GtBareEncseq *bare_encseq = gt_malloc(sizeof *bare_encseq);
-
-  for (idx = 0; idx <= (size_t) UCHAR_MAX; idx++)
-  {
-    smap[idx] = undefined;
-  }
-  smap['a'] = 0;
-  smap['A'] = 0;
-  smap['c'] = (GtUchar) 1;
-  smap['C'] = (GtUchar) 1;
-  smap['g'] = (GtUchar) 2;
-  smap['G'] = (GtUchar) 2;
-  smap['t'] = (GtUchar) 3;
-  smap['T'] = (GtUchar) 3;
-  smap['u'] = (GtUchar) 3;
-  smap['U'] = (GtUchar) 3;
-  bare_encseq->specialcharacters = 0;
-  bare_encseq->numofchars = 4UL;
-  bare_encseq->charcount = gt_calloc((size_t) bare_encseq->numofchars,
-                                     sizeof *bare_encseq->charcount);
-  GT_INITARRAY(&bare_encseq->specialranges,GtSainSpecialrange);
-  for (idx = 0; idx < strlen(wildcard_list); idx++)
-  {
-    smap[(int) wildcard_list[idx]] = WILDCARD;
-  }
-  readptr = filecontents;
-  while (!haserr && readptr < endptr)
-  {
-    if (*readptr == '>')
-    {
-      if (!firstline)
-      {
-        if (lastspecialrange_length == 0)
-        {
-          GT_GETNEXTFREEINARRAY(srptr,&bare_encseq->specialranges,
-                                GtSainSpecialrange,128UL);
-          srptr->start = (GtUword) (writeptr - filecontents);
-        }
-        lastspecialrange_length++;
-        *writeptr++ = SEPARATOR;
-        bare_encseq->specialcharacters++;
-      } else
-      {
-        firstline = false;
-      }
-      while (readptr < endptr && *readptr != '\n')
-      {
-        readptr++;
-      }
-      readptr++;
-    } else
-    {
-      while (readptr < endptr && *readptr != '\n')
-      {
-        if (!isspace(*readptr))
-        {
-          GtUchar cc = smap[*readptr];
-          if (cc == undefined)
-          {
-            gt_error_set(err,"illegal input characters %c\n",*readptr);
-            haserr = true;
-            break;
-          }
-          if (ISSPECIAL(cc))
-          {
-            if (lastspecialrange_length == 0)
-            {
-              GT_GETNEXTFREEINARRAY(srptr,&bare_encseq->specialranges,
-                                    GtSainSpecialrange,128UL);
-              srptr->start = (GtUword) (writeptr - filecontents);
-            }
-            lastspecialrange_length++;
-            bare_encseq->specialcharacters++;
-          } else
-          {
-            gt_assert((GtUword) cc < bare_encseq->numofchars);
-            bare_encseq->charcount[(int) cc]++;
-            if (lastspecialrange_length > 0)
-            {
-              gt_assert(srptr != NULL);
-              srptr->length = lastspecialrange_length;
-            }
-            lastspecialrange_length = 0;
-          }
-          *writeptr++ = cc;
-        }
-        readptr++;
-      }
-      readptr++;
-    }
-  }
-  bare_encseq->sequence = filecontents;
-  bare_encseq->totallength = (GtUword) (writeptr - filecontents);
-  if (haserr)
-  {
-    gt_bare_encseq_delete(bare_encseq);
-    return NULL;
-  }
-  return bare_encseq;
-}
+#include "match/sfx-sain-bareesq.h"
 
 typedef struct
 {
@@ -465,6 +322,15 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                        arguments->icheck,
                                        tl->logger,
                                        tl->timer);
+          } else
+          {
+            gt_assert(gt_str_length(arguments->fastadnafile) > 0 &&
+                      bare_encseq != NULL);
+            gt_sain_bare_encseq_sortsuffixes(bare_encseq,
+                                             arguments->icheck,
+                                             arguments->fcheck,
+                                             tl->logger,
+                                             tl->timer);
           }
           gt_sain_timer_logger_delete(tl);
         }
