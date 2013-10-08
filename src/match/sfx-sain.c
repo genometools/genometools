@@ -530,9 +530,9 @@ static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
     gt_assert(sainseq->seqtype == GT_SAIN_BARE_ENCSEQ &&
               sainseq->bare_encseq != NULL);
     specialranges = gt_bare_encseq_specialranges(sainseq->bare_encseq);
-    for (sr = specialranges->spaceGtSainSpecialrange;
-         sr < specialranges->spaceGtSainSpecialrange +
-              specialranges->nextfreeGtSainSpecialrange; sr++)
+    for (sr = specialranges->spaceGtSainSpecialrange +
+              specialranges->nextfreeGtSainSpecialrange - 1;
+         sr >= specialranges->spaceGtSainSpecialrange; sr--)
     {
       if (sr->start > 1UL)
       {
@@ -607,9 +607,9 @@ static void gt_sain_induceStypes2fromspecialranges(const GtSainseq *sainseq,
     gt_assert(sainseq->seqtype == GT_SAIN_BARE_ENCSEQ &&
               sainseq->bare_encseq != NULL);
     specialranges = gt_bare_encseq_specialranges(sainseq->bare_encseq);
-    for (sr = specialranges->spaceGtSainSpecialrange;
-         sr < specialranges->spaceGtSainSpecialrange +
-              specialranges->nextfreeGtSainSpecialrange; sr++)
+    for (sr = specialranges->spaceGtSainSpecialrange +
+              specialranges->nextfreeGtSainSpecialrange - 1;
+         sr >= specialranges->spaceGtSainSpecialrange; sr--)
     {
       if (sr->start > 0)
       {
@@ -1082,25 +1082,71 @@ static GtUword gt_sain_assignSstarnames(const GtSainseq *sainseq,
                                         GtUword countSstartype,
                                         GtUsainindextype *suftab)
 {
-  switch (sainseq->seqtype)
+  GtUsainindextype *suftabptr, *secondhalf = suftab + countSstartype,
+                   previouspos;
+  GtUword previouslen, currentname = 1UL;
+
+  previouspos = suftab[0];
+  previouslen = (GtUword) secondhalf[GT_DIV2(previouspos)];
+  secondhalf[GT_DIV2(previouspos)] = (GtUsainindextype) currentname;
+  for (suftabptr = suftab + 1UL; suftabptr < suftab + countSstartype;
+       suftabptr++)
   {
-    case GT_SAIN_PLAINSEQ:
-    case GT_SAIN_BARE_ENCSEQ:
-      return gt_sain_PLAINSEQ_assignSstarnames(sainseq,
-                                               sainseq->seq.plainseq,
-                                               countSstartype,
-                                               suftab);
-    case GT_SAIN_ENCSEQ:
-      return gt_sain_ENCSEQ_assignSstarnames(sainseq,
-                                             sainseq->seq.encseq,
-                                             countSstartype,
-                                             suftab);
-    case GT_SAIN_INTSEQ:
-      return gt_sain_INTSEQ_assignSstarnames(sainseq,
-                                             sainseq->seq.array,
-                                             countSstartype,
-                                             suftab);
+    int cmp;
+    GtUsainindextype position = *suftabptr;
+    GtUword currentlen = 0;
+
+    currentlen = (GtUword) secondhalf[GT_DIV2(position)];
+    if (previouslen == currentlen)
+    {
+      switch (sainseq->seqtype)
+      {
+        case GT_SAIN_PLAINSEQ:
+          cmp = gt_sain_PLAINSEQ_compare_Sstarstrings(sainseq,
+                                                      sainseq->seq.plainseq,
+                                                      (GtUword) previouspos,
+                                                      (GtUword) position,
+                                                      currentlen);
+          break;
+        case GT_SAIN_ENCSEQ:
+          cmp = gt_sain_ENCSEQ_compare_Sstarstrings(sainseq,
+                                                    sainseq->seq.encseq,
+                                                    (GtUword) previouspos,
+                                                    (GtUword) position,
+                                                    currentlen);
+          break;
+        case GT_SAIN_INTSEQ:
+          cmp = gt_sain_INTSEQ_compare_Sstarstrings(sainseq,
+                                                    sainseq->seq.array,
+                                                    (GtUword) previouspos,
+                                                    (GtUword) position,
+                                                    currentlen);
+          break;
+        case GT_SAIN_BARE_ENCSEQ:
+          cmp = gt_sain_BARE_ENCSEQ_compare_Sstarstrings(sainseq,
+                                                         sainseq->seq.plainseq,
+                                                         (GtUword) previouspos,
+                                                         (GtUword) position,
+                                                         currentlen);
+          break;
+      }
+      gt_assert(cmp != 1);
+    } else
+    {
+      cmp = -1;
+    }
+    if (cmp == -1)
+    {
+      currentname++;
+    }
+    /* write the names in order of positions. As the positions of
+       the Sstar suffixes differ by at least 2, the used address
+       is unique */
+    previouslen = currentlen;
+    secondhalf[GT_DIV2(position)] = (GtUsainindextype) currentname;
+    previouspos = position;
   }
+  return currentname;
 }
 
 static void gt_sain_determineSstarfirstchardist(GtSainseq *sainseq)
