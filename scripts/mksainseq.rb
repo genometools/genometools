@@ -432,7 +432,10 @@ static void gt_sain_#{key}_induceStypesuffixes2(const GtSainseq *sainseq,
     }
   }
 }
-
+CCODE
+end
+["PLAINSEQ","ENCSEQ","BARE_ENCSEQ","INTSEQ"].each do |key|
+fo.puts <<CCODE
 static int gt_sain_#{key}_compare_Sstarstrings(const GtSainseq *sainseq,
                                                #{getc_param(key)},
                                                GtUword start1,
@@ -473,56 +476,6 @@ static int gt_sain_#{key}_compare_Sstarstrings(const GtSainseq *sainseq,
   }
   return 0;
 }
-
-static GtUword gt_sain_#{key}_assignSstarnames(const GtSainseq *sainseq,
-                                               #{getc_param(key)},
-                                               GtUword countSstartype,
-                                               GtUsainindextype *suftab)
-{
-  GtUsainindextype *suftabptr, *secondhalf = suftab + countSstartype,
-                   previouspos;
-  GtUword previouslen, currentname = 1UL;
-
-  previouspos = suftab[0];
-  previouslen = (GtUword) secondhalf[GT_DIV2(previouspos)];
-  secondhalf[GT_DIV2(previouspos)] = (GtUsainindextype) currentname;
-  for (suftabptr = suftab + 1UL; suftabptr < suftab + countSstartype;
-       suftabptr++)
-  {
-    int cmp;
-    GtUsainindextype position = *suftabptr;
-    GtUword currentlen = 0;
-
-    currentlen = (GtUword) secondhalf[GT_DIV2(position)];
-    if (previouslen == currentlen)
-    {
-      cmp = gt_sain_#{key}_compare_Sstarstrings(sainseq,
-                                                #{getc_argument(key)},
-                                                (GtUword) previouspos,
-                                                (GtUword) position,
-                                                currentlen);
-      gt_assert(cmp != 1);
-    } else
-    {
-      cmp = -1;
-    }
-    if (cmp == -1)
-    {
-      currentname++;
-    }
-    /* write the names in order of positions. As the positions of
-       the Sstar suffixes differ by at least 2, the used address
-       is unique */
-    previouslen = currentlen;
-    secondhalf[GT_DIV2(position)] = (GtUsainindextype) currentname;
-    previouspos = position;
-  }
-  return currentname;
-}
-CCODE
-end
-["PLAINSEQ","ENCSEQ","BARE_ENCSEQ","INTSEQ"].each do |key|
-fo.puts <<CCODE
 static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
                                                  #{getc_param(key)},
                                          GtUword numberofsuffixes,
