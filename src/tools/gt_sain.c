@@ -23,7 +23,7 @@
 #include "core/logger.h"
 #include "tools/gt_sain.h"
 #include "match/sfx-sain.h"
-#include "match/sfx-sain-bareesq.h"
+#include "match/bare-encseq.h"
 
 typedef struct
 {

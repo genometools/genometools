@@ -22,7 +22,7 @@
 #include "core/mathsupport.h"
 #include "sfx-lwcheck.h"
 #include "sfx-sain.h"
-#include "sfx-sain-bareesq.h"
+#include "bare-encseq.h"
 
 #define GT_SAIN_SHOWTIMER(DESC)\
         if (timer != NULL && gt_logger_enabled(logger))\
