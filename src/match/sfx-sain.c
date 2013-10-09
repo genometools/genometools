@@ -20,7 +20,7 @@
 #include "core/unused_api.h"
 #include "core/timer_api.h"
 #include "core/mathsupport.h"
-#include "sfx-linlcp.h"
+#include "sfx-lwcheck.h"
 #include "sfx-sain.h"
 #include "sfx-sain-bareesq.h"
 

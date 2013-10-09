@@ -39,8 +39,9 @@
 #include "match/sfx-suffixgetset.h"
 #include "match/sfx-suftaborder.h"
 #include "match/test-mappedstr.pr"
-#include "match/twobits2kmers.h"
 #include "match/sfx-linlcp.h"
+#include "match/sfx-lwcheck.h"
+#include "match/twobits2kmers.h"
 #include "match/esa-fileend.h"
 #include "tools/gt_sfxmap.h"
 
