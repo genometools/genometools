@@ -50,4 +50,7 @@ GtUword gt_bare_encseq_charcount(const GtBareEncseq *bare_encseq,
 
 GtUword gt_bare_encseq_specialcharacters(const GtBareEncseq *bare_encseq);
 
+GtUchar gt_bare_encseq_get_encoded_char(const GtBareEncseq *bare_encseq,
+                                        GtUword position);
+
 #endif

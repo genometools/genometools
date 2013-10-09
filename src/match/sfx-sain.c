@@ -1221,38 +1221,69 @@ static void gt_sain_insertsortedSstarsuffixes(const GtSainseq *sainseq,
 }
 
 static void gt_sain_filltailsuffixes(GtUsainindextype *suftabtail,
-                                     const GtEncseq *encseq,
+                                     const GtSainseq *sainseq,
                                      GtReadmode readmode)
 {
-  GtUword specialcharacters = gt_encseq_specialcharacters(encseq),
-          totallength = gt_encseq_total_length(encseq);
-
-  if (gt_encseq_has_specialranges(encseq))
+  if (sainseq->seqtype == GT_SAIN_ENCSEQ)
   {
-    GtSpecialrangeiterator *sri;
-    GtRange range;
+    GtUword specialcharacters
+              = gt_encseq_specialcharacters(sainseq->seq.encseq),
+            totallength = gt_encseq_total_length(sainseq->seq.encseq);
+
+    if (gt_encseq_has_specialranges(sainseq->seq.encseq))
+    {
+      GtSpecialrangeiterator *sri;
+      GtRange range;
+      GtUword countspecial = 0;
+
+      sri = gt_specialrangeiterator_new(sainseq->seq.encseq,
+                                        GT_ISDIRREVERSE(readmode) ? false
+                                                                  : true);
+      while (gt_specialrangeiterator_next(sri,&range))
+      {
+        GtUword idx;
+
+        if (GT_ISDIRREVERSE(readmode))
+        {
+          gt_range_reverse(totallength,&range);
+        }
+        for (idx = range.start; idx < range.end; idx++)
+        {
+          gt_assert(countspecial < specialcharacters && idx < totallength);
+          suftabtail[countspecial++] = (GtUsainindextype) idx;
+        }
+      }
+      gt_assert(countspecial == specialcharacters);
+      gt_specialrangeiterator_delete(sri);
+    }
+    suftabtail[specialcharacters] = (GtUsainindextype) totallength;
+  } else
+  {
+    GtUword specialcharacters, totallength;
+
+    const GtSainSpecialrange *sr;
+    const GtArrayGtSainSpecialrange *specialranges;
     GtUword countspecial = 0;
 
-    sri = gt_specialrangeiterator_new(encseq,
-                                      GT_ISDIRREVERSE(readmode) ? false : true);
-    while (gt_specialrangeiterator_next(sri,&range))
+    gt_assert(sainseq->seqtype == GT_SAIN_BARE_ENCSEQ &&
+              sainseq->bare_encseq != NULL);
+    specialcharacters = gt_bare_encseq_specialcharacters(sainseq->bare_encseq);
+    totallength = gt_bare_encseq_total_length(sainseq->bare_encseq);
+    specialranges = gt_bare_encseq_specialranges(sainseq->bare_encseq);
+    for (sr = specialranges->spaceGtSainSpecialrange;
+         sr < specialranges->spaceGtSainSpecialrange +
+              specialranges->nextfreeGtSainSpecialrange;
+         sr++)
     {
       GtUword idx;
 
-      if (GT_ISDIRREVERSE(readmode))
-      {
-        gt_range_reverse(totallength,&range);
-      }
-      for (idx = range.start; idx < range.end; idx++)
+      for (idx = sr->start; idx < sr->start + sr->length; idx++)
       {
         gt_assert(countspecial < specialcharacters && idx < totallength);
         suftabtail[countspecial++] = (GtUsainindextype) idx;
       }
     }
-    gt_assert(countspecial == specialcharacters);
-    gt_specialrangeiterator_delete(sri);
   }
-  suftabtail[specialcharacters] = (GtUsainindextype) totallength;
 }
 
 static void gt_sain_rec_sortsuffixes(unsigned int level,
@@ -1400,19 +1431,24 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     {
       gt_sain_checkorder(sainseq,suftab,0,nonspecialentries-1);
     }
-    if (sainseq->seqtype == GT_SAIN_ENCSEQ && finalcheck)
+    if ((sainseq->seqtype == GT_SAIN_ENCSEQ ||
+         sainseq->seqtype == GT_SAIN_BARE_ENCSEQ) && finalcheck)
     {
       GT_SAIN_SHOWTIMER("fill tail suffixes");
       gt_sain_filltailsuffixes(suftab + nonspecialentries,
-                               sainseq->seq.encseq,
+                               sainseq,
                                sainseq->readmode);
       GT_SAIN_SHOWTIMER("check suffix order");
-      gt_suftab_lightweightcheck(sainseq->seq.encseq,
-                                 sainseq->readmode,
-                                 sainseq->totallength,
-                                 suftab,
-                                 sizeof *suftab,
-                                 NULL);
+      gt_suftab_lightweightcheck(
+                sainseq->seqtype == GT_SAIN_BARE_ENCSEQ ? true : false,
+                sainseq->seqtype == GT_SAIN_BARE_ENCSEQ 
+                  ? (void *) sainseq->bare_encseq
+                  : (void *) sainseq->seq.encseq,
+                sainseq->readmode,
+                sainseq->totallength,
+                suftab,
+                sizeof *suftab,
+                NULL);
     }
   }
 }
