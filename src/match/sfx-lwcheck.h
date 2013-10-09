@@ -22,7 +22,8 @@
 #include "core/logger_api.h"
 #include "core/encseq.h"
 
-void gt_suftab_lightweightcheck(const GtEncseq *encseq,
+void gt_suftab_lightweightcheck(bool bare,
+                                const void *encseq,
                                 GtReadmode readmode,
                                 GtUword totallength,
                                 const void *suftab,

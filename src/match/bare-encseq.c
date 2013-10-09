@@ -170,6 +170,12 @@ const GtUchar *gt_bare_encseq_sequence(const GtBareEncseq *bare_encseq)
   return bare_encseq->sequence;
 }
 
+GtUchar gt_bare_encseq_get_encoded_char(const GtBareEncseq *bare_encseq,
+                                        GtUword position)
+{
+  return bare_encseq->sequence[position];
+}
+
 GtUword gt_bare_encseq_total_length(const GtBareEncseq *bare_encseq)
 {
   gt_assert(bare_encseq != NULL);

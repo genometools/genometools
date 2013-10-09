@@ -22,6 +22,7 @@
 #include "core/intbits.h"
 #include "core/ma_api.h"
 #include "core/encseq.h"
+#include "bare-encseq.h"
 
 #ifdef _WIN32
 #define GEN_ESASUFFIXPTRGET(TAB,IDX) ((unsigned int *) TAB)[IDX]
@@ -79,7 +80,8 @@ typedef struct
    which slows it down.
 */
 
-static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
+static void gt_suftab_bk_suffixorder(bool bare,
+                                     const void *encseq,
                                      GtReadmode readmode,
                                      GtUword totallength,
                                      unsigned int numofchars,
@@ -91,6 +93,7 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
   unsigned int rangeidx;
   GtUword idx, *nexttab = gt_calloc((size_t) numofchars, sizeof (*nexttab));
 
+  gt_assert(!bare || readmode == GT_READMODE_FORWARD);
   for (rangeidx = 0; rangeidx < numofranges; rangeidx++)
   {
     nexttab[rangestore[rangeidx].firstchar] = rangestore[rangeidx].start;
@@ -101,7 +104,11 @@ static void gt_suftab_bk_suffixorder(const GtEncseq *encseq,
 
     if (position > 0)
     {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq, position - 1, readmode);
+      GtUchar cc
+        = bare ? gt_bare_encseq_get_encoded_char((const GtBareEncseq *) encseq,
+                                                 position - 1)
+               : gt_encseq_get_encoded_char((const GtEncseq *) encseq,
+                                            position - 1, readmode);
       if (ISNOTSPECIAL(cc))
       {
         GtUword checkpos;
@@ -176,7 +183,8 @@ static void gt_suftab_sk_suffixorder(GtUword totallength,
   }
 }
 
-void gt_suftab_lightweightcheck(const GtEncseq *encseq,
+void gt_suftab_lightweightcheck(bool bare,
+                                const void *encseq,
                                 GtReadmode readmode,
                                 GtUword totallength,
                                 const void *suftab,
@@ -197,7 +205,10 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   gt_assert(unitsize == (size_t) 4 || unitsize == (size_t) 8);
 #endif
   GT_INITBITTAB(startposoccurs, totallength+1);
-  numofchars = gt_encseq_alphabetnumofchars(encseq);
+  numofchars
+    = bare ? (unsigned int) gt_bare_encseq_numofchars(
+                                    (const GtBareEncseq *) encseq)
+           : gt_encseq_alphabetnumofchars((const GtEncseq *) encseq);
   rangestore = gt_malloc(sizeof(*rangestore) * numofchars);
   for (idx = 0; idx < totallength; idx++)
   {
@@ -212,7 +223,10 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
     }
     GT_SETIBIT(startposoccurs, position);
     countbitsset++;
-    cc = gt_encseq_get_encoded_char(encseq, position, readmode);
+    cc = bare ? gt_bare_encseq_get_encoded_char((const GtBareEncseq *) encseq,
+                                                position)
+              : gt_encseq_get_encoded_char((const GtEncseq *) encseq,
+                                           position, readmode);
     if (idx > 0)
     {
       if (ISSPECIAL(cc))
@@ -292,14 +306,13 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
   for (charidx = 0, rangeidx = 0; charidx < numofchars; charidx++)
   {
     GtUword count;
+    GtUchar thisidx = GT_ISDIRCOMPLEMENT(readmode)
+                        ? (GtUchar) GT_COMPLEMENTBASE(charidx)
+                        : (GtUchar) charidx;
 
-    if (GT_ISDIRCOMPLEMENT(readmode))
-    {
-      count = gt_encseq_charcount(encseq, (GtUchar) GT_COMPLEMENTBASE(charidx));
-    } else
-    {
-      count = gt_encseq_charcount(encseq, (GtUchar) charidx);
-    }
+    count = bare ? gt_bare_encseq_charcount((const GtBareEncseq *) encseq,
+                                             thisidx)
+                 : gt_encseq_charcount((const GtEncseq *) encseq, thisidx);
     if (count != 0)
     {
       gt_assert(rangestore[rangeidx].firstchar == (GtUchar) charidx);
@@ -320,7 +333,8 @@ void gt_suftab_lightweightcheck(const GtEncseq *encseq,
     gt_logger_log(logger, "suftab-check, second phase (sk-method) done");
   } else
   {
-    gt_suftab_bk_suffixorder(encseq,
+    gt_suftab_bk_suffixorder(bare,
+                             encseq,
                              readmode,
                              totallength,
                              numofchars,

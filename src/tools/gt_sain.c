@@ -108,7 +108,8 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   optionfcheck = gt_option_new_bool("fcheck", "final check of suffix array",
                                     &arguments->fcheck, false);
   gt_option_parser_add_option(op, optionfcheck);
-  gt_option_imply(optionfcheck, optionesq);
+
+  gt_option_imply_either_2(optionfcheck, optionesq, optionfastadna);
   gt_option_exclude(optionesq,optionfile);
   gt_option_exclude(optionesq, optionfastadna);
   gt_option_exclude(optionfile, optionfastadna);
