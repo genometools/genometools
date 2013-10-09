@@ -23,7 +23,7 @@
 #include "core/types_api.h"
 #include "core/chardef.h"
 #include "core/arraydef.h"
-#include "sfx-sain-bareesq.h"
+#include "bare-encseq.h"
 
 struct GtBareEncseq
 {

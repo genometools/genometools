@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_SAIN_BAREESQ_H
-#define SFX_SAIN_BAREESQ_H
+#ifndef BARE_ENCSEQ_H
+#define BARE_ENCSEQ_H
 
 #include "core/error_api.h"
 #include "core/types_api.h"
