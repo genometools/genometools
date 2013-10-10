@@ -317,6 +317,7 @@ static GtUword gt_sainseq_getchar(const GtSainseq *sainseq,
         return ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (GtUword) cc;
       }
   }
+  return 0;
 }
 
 static void gt_sain_endbuckets(GtSainseq *sainseq)
@@ -1092,7 +1093,7 @@ static GtUword gt_sain_assignSstarnames(const GtSainseq *sainseq,
   for (suftabptr = suftab + 1UL; suftabptr < suftab + countSstartype;
        suftabptr++)
   {
-    int cmp;
+    int cmp = 0;
     GtUsainindextype position = *suftabptr;
     GtUword currentlen = 0;
 
