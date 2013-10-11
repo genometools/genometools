@@ -555,7 +555,7 @@ static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
     if (!currentisStype && nextisStype)
     {
       countSstartype++;
-#{sstarfirstcharcount_update(key,true,["PLAINSEQ","ENCSEQ"])}
+#{sstarfirstcharcount_update(key,true,["PLAINSEQ","ENCSEQ","BARE_ENCSEQ"])}
       if (sainbuffer != NULL)
       {
         gt_sainbuffer_update(sainbuffer,nextcc,position);

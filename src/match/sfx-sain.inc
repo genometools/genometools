@@ -1497,7 +1497,7 @@ plainseq[position])
     if (!currentisStype && nextisStype)
     {
       countSstartype++;
-
+sainseq->sstarfirstcharcount[nextcc]++;
       if (sainbuffer != NULL)
       {
         gt_sainbuffer_update(sainbuffer,nextcc,position);
