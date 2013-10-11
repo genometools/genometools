@@ -315,7 +315,8 @@ void gt_suftab_lightweightcheck(bool bare,
                  : gt_encseq_charcount((const GtEncseq *) encseq, thisidx);
     if (count != 0)
     {
-      gt_assert(rangestore[rangeidx].firstchar == (GtUchar) charidx);
+      gt_assert(rangeidx < numofranges &&
+                rangestore[rangeidx].firstchar == (GtUchar) charidx);
       gt_assert(rangestore[rangeidx].end - rangestore[rangeidx].start + 1
                 == count);
       rangeidx++;

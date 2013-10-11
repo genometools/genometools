@@ -147,6 +147,11 @@ GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
       readptr++;
     }
   }
+  if (lastspecialrange_length > 0)
+  {
+    gt_assert(srptr != NULL);
+    srptr->length = lastspecialrange_length;
+  }
   bare_encseq->sequence = filecontents;
   bare_encseq->totallength = (GtUword) (writeptr - filecontents);
   if (haserr)
