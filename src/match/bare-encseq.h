@@ -20,14 +20,17 @@
 
 #include "core/error_api.h"
 #include "core/types_api.h"
+#include "core/range_api.h"
 
 typedef struct
 {
   GtUword start,
           length;
-} GtSainSpecialrange;
+} GtBareSpecialrange;
 
-GT_DECLAREARRAYSTRUCT(GtSainSpecialrange);
+typedef struct GtBareSpecialrangeiterator GtBareSpecialrangeiterator;
+
+GT_DECLAREARRAYSTRUCT(GtBareSpecialrange);
 
 typedef struct GtBareEncseq GtBareEncseq;
 
@@ -36,7 +39,7 @@ void gt_bare_encseq_delete(GtBareEncseq *bare_encseq);
 GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
                                  GtError *err);
 
-const GtArrayGtSainSpecialrange *gt_bare_encseq_specialranges(
+const GtArrayGtBareSpecialrange *gt_bare_encseq_specialranges(
                                            const GtBareEncseq *bare_encseq);
 
 const GtUchar *gt_bare_encseq_sequence(const GtBareEncseq *bare_encseq);

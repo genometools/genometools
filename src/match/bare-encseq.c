@@ -29,7 +29,7 @@ struct GtBareEncseq
 {
   GtUchar *sequence;
   GtUword totallength, specialcharacters, numofchars, *charcount;
-  GtArrayGtSainSpecialrange specialranges;
+  GtArrayGtBareSpecialrange specialranges;
 };
 
 void gt_bare_encseq_delete(GtBareEncseq *bare_encseq)
@@ -37,10 +37,7 @@ void gt_bare_encseq_delete(GtBareEncseq *bare_encseq)
   if (bare_encseq != NULL)
   {
     gt_free(bare_encseq->charcount);
-    printf("number of special characters: " GT_WU " (" GT_WU " range(s))\n",
-           bare_encseq->specialcharacters,
-           bare_encseq->specialranges.nextfreeGtSainSpecialrange);
-    GT_FREEARRAY(&bare_encseq->specialranges,GtSainSpecialrange);
+    GT_FREEARRAY(&bare_encseq->specialranges,GtBareSpecialrange);
     gt_free(bare_encseq);
   }
 }
@@ -55,7 +52,7 @@ GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
   size_t idx;
   const char *wildcard_list = "nsywrkvbdhmNSYWRKVBDHM";
   GtUword lastspecialrange_length = 0;
-  GtSainSpecialrange *srptr = NULL;
+  GtBareSpecialrange *srptr = NULL;
   GtBareEncseq *bare_encseq = gt_malloc(sizeof *bare_encseq);
 
   for (idx = 0; idx <= (size_t) UCHAR_MAX; idx++)
@@ -76,7 +73,7 @@ GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
   bare_encseq->numofchars = 4UL;
   bare_encseq->charcount = gt_calloc((size_t) bare_encseq->numofchars,
                                      sizeof *bare_encseq->charcount);
-  GT_INITARRAY(&bare_encseq->specialranges,GtSainSpecialrange);
+  GT_INITARRAY(&bare_encseq->specialranges,GtBareSpecialrange);
   for (idx = 0; idx < strlen(wildcard_list); idx++)
   {
     smap[(int) wildcard_list[idx]] = WILDCARD;
@@ -91,7 +88,7 @@ GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
         if (lastspecialrange_length == 0)
         {
           GT_GETNEXTFREEINARRAY(srptr,&bare_encseq->specialranges,
-                                GtSainSpecialrange,128UL);
+                                GtBareSpecialrange,128UL);
           srptr->start = (GtUword) (writeptr - filecontents);
         }
         lastspecialrange_length++;
@@ -124,7 +121,7 @@ GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
             if (lastspecialrange_length == 0)
             {
               GT_GETNEXTFREEINARRAY(srptr,&bare_encseq->specialranges,
-                                    GtSainSpecialrange,128UL);
+                                    GtBareSpecialrange,128UL);
               srptr->start = (GtUword) (writeptr - filecontents);
             }
             lastspecialrange_length++;
@@ -162,7 +159,7 @@ GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
   return bare_encseq;
 }
 
-const GtArrayGtSainSpecialrange *gt_bare_encseq_specialranges(
+const GtArrayGtBareSpecialrange *gt_bare_encseq_specialranges(
                                            const GtBareEncseq *bare_encseq)
 {
   gt_assert(bare_encseq != NULL);
@@ -203,4 +200,62 @@ GtUword gt_bare_encseq_specialcharacters(const GtBareEncseq *bare_encseq)
 {
   gt_assert(bare_encseq != NULL);
   return bare_encseq->specialcharacters;
+}
+
+struct GtBareSpecialrangeiterator
+{
+  const GtBareSpecialrange *startptr, *endptr, *current;
+  bool moveforward;
+};
+
+GtBareSpecialrangeiterator* gt_bare_encseq_specialrangeiterator_new(
+                       const GtBareEncseq *bare_encseq,
+                       bool moveforward)
+{
+  gt_assert(bare_encseq != NULL);
+  if (bare_encseq->specialranges.nextfreeGtBareSpecialrange == 0)
+  {
+    return NULL;
+  } else
+  {
+    GtBareSpecialrangeiterator *sri = gt_malloc(sizeof *sri);
+
+    sri->startptr = bare_encseq->specialranges.spaceGtBareSpecialrange;
+    sri->endptr = bare_encseq->specialranges.spaceGtBareSpecialrange +
+                  bare_encseq->specialranges.nextfreeGtBareSpecialrange;
+    sri->moveforward = moveforward;
+    sri->current = moveforward ? sri->startptr : sri->endptr - 1;
+    return sri;
+  }
+}
+
+bool gt_bare_encseq_specialrangeiterator_next(GtBareSpecialrangeiterator *sri,
+                                              GtRange *range)
+{
+  if (sri->current != NULL)
+  {
+    range->start = sri->current->start;
+    range->end = sri->current->start + sri->current->length;
+    if (sri->moveforward)
+    {
+      if (sri->current < sri->endptr - 2)
+      {
+        sri->current++;
+      } else
+      {
+        sri->current = NULL;
+      }
+    } else
+    {
+      if (sri->current > sri->startptr)
+      {
+        sri->current--;
+      } else
+      {
+        sri->current = NULL;
+      }
+    }
+    return true;
+  }
+  return false;
 }

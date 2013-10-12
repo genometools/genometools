@@ -534,13 +534,13 @@ static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
               sainseq->bare_encseq != NULL);
     if (gt_bare_encseq_specialcharacters(sainseq->bare_encseq) > 0)
     {
-      const GtSainSpecialrange *sr;
-      const GtArrayGtSainSpecialrange *specialranges;
+      const GtBareSpecialrange *sr;
+      const GtArrayGtBareSpecialrange *specialranges;
 
       specialranges = gt_bare_encseq_specialranges(sainseq->bare_encseq);
-      for (sr = specialranges->spaceGtSainSpecialrange +
-                specialranges->nextfreeGtSainSpecialrange - 1;
-           sr >= specialranges->spaceGtSainSpecialrange; sr--)
+      for (sr = specialranges->spaceGtBareSpecialrange +
+                specialranges->nextfreeGtBareSpecialrange - 1;
+           sr >= specialranges->spaceGtBareSpecialrange; sr--)
       {
         if (sr->start > 1UL)
         {
@@ -614,13 +614,13 @@ static void gt_sain_induceStypes2fromspecialranges(const GtSainseq *sainseq,
               sainseq->bare_encseq != NULL);
     if (gt_bare_encseq_specialcharacters(sainseq->bare_encseq) > 0)
     {
-      const GtSainSpecialrange *sr;
-      const GtArrayGtSainSpecialrange *specialranges;
+      const GtBareSpecialrange *sr;
+      const GtArrayGtBareSpecialrange *specialranges;
 
       specialranges = gt_bare_encseq_specialranges(sainseq->bare_encseq);
-      for (sr = specialranges->spaceGtSainSpecialrange +
-                specialranges->nextfreeGtSainSpecialrange - 1;
-           sr >= specialranges->spaceGtSainSpecialrange; sr--)
+      for (sr = specialranges->spaceGtBareSpecialrange +
+                specialranges->nextfreeGtBareSpecialrange - 1;
+           sr >= specialranges->spaceGtBareSpecialrange; sr--)
       {
         if (sr->start > 0)
         {
@@ -1279,15 +1279,15 @@ static void gt_sain_filltailsuffixes(GtUsainindextype *suftabtail,
     totallength = gt_bare_encseq_total_length(sainseq->bare_encseq);
     if (specialcharacters > 0)
     {
-      const GtSainSpecialrange *sr;
-      const GtArrayGtSainSpecialrange *specialranges;
+      const GtBareSpecialrange *sr;
+      const GtArrayGtBareSpecialrange *specialranges;
       GtUword countspecial = 0;
 
       specialranges = gt_bare_encseq_specialranges(sainseq->bare_encseq);
       gt_assert(specialranges != NULL);
-      for (sr = specialranges->spaceGtSainSpecialrange;
-           sr < specialranges->spaceGtSainSpecialrange +
-                specialranges->nextfreeGtSainSpecialrange;
+      for (sr = specialranges->spaceGtBareSpecialrange;
+           sr < specialranges->spaceGtBareSpecialrange +
+                specialranges->nextfreeGtBareSpecialrange;
            sr++)
       {
         GtUword idx;
