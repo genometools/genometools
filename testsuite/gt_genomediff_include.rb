@@ -134,6 +134,7 @@ Test do
       test_pck("#{code}*.fas", "", "-mirrored")
   end
 end
+
 Name "gt genomediff esa testset"
 Keywords "gt_genomediff esa"
 Test do
@@ -154,6 +155,19 @@ Test do
   end
 end
 
+Name "gt genomediff parts memlimit"
+Keywords "gt_genomediff parts memlimit"
+Test do
+  allfilecodes.each do |code|
+    numfiles = Dir.glob("#{code}*.fas").length
+    test_esq("#{code}*.fas", "-indexname esq -parts #{numfiles}")
+    test_pck("#{code}*.fas", "-parts #{numfiles}", "")
+    test_esa("#{code}*.fas", "-parts #{numfiles}", "")
+    test_esq("#{code}*.fas", "-indexname esq -memlimit 512MB")
+    test_pck("#{code}*.fas", "-memlimit 512MB", "")
+    test_esa("#{code}*.fas", "-memlimit 512MB", "")
+  end
+end
 code = smallfilecodes[0]
 
 Name "gt genomediff compare kr"
