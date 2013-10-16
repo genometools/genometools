@@ -534,22 +534,22 @@ static void gt_sain_induceStypes1fromspecialranges(GtSainseq *sainseq,
               sainseq->bare_encseq != NULL);
     if (gt_bare_encseq_specialcharacters(sainseq->bare_encseq) > 0)
     {
-      const GtBareSpecialrange *sr;
-      const GtArrayGtBareSpecialrange *specialranges;
+      GtRange range;
+      GtBareSpecialrangeiterator *sri
+        = gt_bare_encseq_specialrangeiterator_new(sainseq->bare_encseq,false);
 
-      specialranges = gt_bare_encseq_specialranges(sainseq->bare_encseq);
-      for (sr = specialranges->spaceGtBareSpecialrange +
-                specialranges->nextfreeGtBareSpecialrange - 1;
-           sr >= specialranges->spaceGtBareSpecialrange; sr--)
+      gt_assert(sri != NULL);
+      while (gt_bare_encseq_specialrangeiterator_next(sri,&range))
       {
-        if (sr->start > 1UL)
+        if (range.start > 1UL)
         {
           gt_sain_special_singleSinduction1(sainseq,
                                             suftab,
                                             (GtSsainindextype)
-                                            (sr->start - 1));
+                                            (range.start - 1));
         }
       }
+      gt_bare_encseq_specialrangeiterator_delete(sri);
     }
   }
 }
@@ -614,22 +614,22 @@ static void gt_sain_induceStypes2fromspecialranges(const GtSainseq *sainseq,
               sainseq->bare_encseq != NULL);
     if (gt_bare_encseq_specialcharacters(sainseq->bare_encseq) > 0)
     {
-      const GtBareSpecialrange *sr;
-      const GtArrayGtBareSpecialrange *specialranges;
+      GtRange range;
+      GtBareSpecialrangeiterator *sri
+        = gt_bare_encseq_specialrangeiterator_new(sainseq->bare_encseq,false);
 
-      specialranges = gt_bare_encseq_specialranges(sainseq->bare_encseq);
-      for (sr = specialranges->spaceGtBareSpecialrange +
-                specialranges->nextfreeGtBareSpecialrange - 1;
-           sr >= specialranges->spaceGtBareSpecialrange; sr--)
+      gt_assert(sri != NULL);
+      while (gt_bare_encseq_specialrangeiterator_next(sri,&range))
       {
-        if (sr->start > 0)
+        if (range.start > 0)
         {
           gt_sain_special_singleSinduction2(sainseq,
                                             suftab,
-                                            (GtSsainindextype) sr->start,
+                                            (GtSsainindextype) range.start,
                                             nonspecialentries);
         }
       }
+      gt_bare_encseq_specialrangeiterator_delete(sri);
     }
   }
 }
@@ -1279,26 +1279,24 @@ static void gt_sain_filltailsuffixes(GtUsainindextype *suftabtail,
     totallength = gt_bare_encseq_total_length(sainseq->bare_encseq);
     if (specialcharacters > 0)
     {
-      const GtBareSpecialrange *sr;
-      const GtArrayGtBareSpecialrange *specialranges;
+      GtRange range;
       GtUword countspecial = 0;
+      GtBareSpecialrangeiterator *sri
+        = gt_bare_encseq_specialrangeiterator_new(sainseq->bare_encseq,true);
 
-      specialranges = gt_bare_encseq_specialranges(sainseq->bare_encseq);
-      gt_assert(specialranges != NULL);
-      for (sr = specialranges->spaceGtBareSpecialrange;
-           sr < specialranges->spaceGtBareSpecialrange +
-                specialranges->nextfreeGtBareSpecialrange;
-           sr++)
+      gt_assert(sri != NULL);
+      while (gt_bare_encseq_specialrangeiterator_next(sri,&range))
       {
         GtUword idx;
 
-        for (idx = sr->start; idx < sr->start + sr->length; idx++)
+        for (idx = range.start; idx < range.end; idx++)
         {
           gt_assert(countspecial < specialcharacters && idx < totallength);
           suftabtail[countspecial++] = (GtUsainindextype) idx;
         }
       }
       gt_assert(countspecial == specialcharacters);
+      gt_bare_encseq_specialrangeiterator_delete(sri);
     }
     suftabtail[specialcharacters] = (GtUsainindextype) totallength;
   }

@@ -25,6 +25,14 @@
 #include "core/arraydef.h"
 #include "bare-encseq.h"
 
+typedef struct
+{
+  GtUword start,
+          length;
+} GtBareSpecialrange;
+
+GT_DECLAREARRAYSTRUCT(GtBareSpecialrange);
+
 struct GtBareEncseq
 {
   GtUchar *sequence;
@@ -159,13 +167,6 @@ GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
   return bare_encseq;
 }
 
-const GtArrayGtBareSpecialrange *gt_bare_encseq_specialranges(
-                                           const GtBareEncseq *bare_encseq)
-{
-  gt_assert(bare_encseq != NULL);
-  return &bare_encseq->specialranges;
-}
-
 const GtUchar *gt_bare_encseq_sequence(const GtBareEncseq *bare_encseq)
 {
   gt_assert(bare_encseq != NULL);
@@ -229,6 +230,14 @@ GtBareSpecialrangeiterator* gt_bare_encseq_specialrangeiterator_new(
   }
 }
 
+void gt_bare_encseq_specialrangeiterator_delete(GtBareSpecialrangeiterator *sri)
+{
+  if (sri != NULL)
+  {
+    gt_free(sri);
+  }
+}
+
 bool gt_bare_encseq_specialrangeiterator_next(GtBareSpecialrangeiterator *sri,
                                               GtRange *range)
 {
@@ -238,7 +247,7 @@ bool gt_bare_encseq_specialrangeiterator_next(GtBareSpecialrangeiterator *sri,
     range->end = sri->current->start + sri->current->length;
     if (sri->moveforward)
     {
-      if (sri->current < sri->endptr - 2)
+      if (sri->current < sri->endptr - 1)
       {
         sri->current++;
       } else

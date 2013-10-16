@@ -22,15 +22,7 @@
 #include "core/types_api.h"
 #include "core/range_api.h"
 
-typedef struct
-{
-  GtUword start,
-          length;
-} GtBareSpecialrange;
-
 typedef struct GtBareSpecialrangeiterator GtBareSpecialrangeiterator;
-
-GT_DECLAREARRAYSTRUCT(GtBareSpecialrange);
 
 typedef struct GtBareEncseq GtBareEncseq;
 
@@ -38,9 +30,6 @@ void gt_bare_encseq_delete(GtBareEncseq *bare_encseq);
 
 GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
                                  GtError *err);
-
-const GtArrayGtBareSpecialrange *gt_bare_encseq_specialranges(
-                                           const GtBareEncseq *bare_encseq);
 
 const GtUchar *gt_bare_encseq_sequence(const GtBareEncseq *bare_encseq);
 
@@ -55,5 +44,15 @@ GtUword gt_bare_encseq_specialcharacters(const GtBareEncseq *bare_encseq);
 
 GtUchar gt_bare_encseq_get_encoded_char(const GtBareEncseq *bare_encseq,
                                         GtUword position);
+
+GtBareSpecialrangeiterator* gt_bare_encseq_specialrangeiterator_new(
+                       const GtBareEncseq *bare_encseq,
+                       bool moveforward);
+
+void gt_bare_encseq_specialrangeiterator_delete(
+                       GtBareSpecialrangeiterator *sri);
+
+bool gt_bare_encseq_specialrangeiterator_next(GtBareSpecialrangeiterator *sri,
+                                              GtRange *range);
 
 #endif
