@@ -23,6 +23,7 @@
 #include "core/types_api.h"
 #include "core/chardef.h"
 #include "core/arraydef.h"
+#include "core/readmode.h"
 #include "bare-encseq.h"
 
 typedef struct
@@ -267,4 +268,48 @@ bool gt_bare_encseq_specialrangeiterator_next(GtBareSpecialrangeiterator *sri,
     return true;
   }
   return false;
+}
+
+void bare_encseq_convert(GtBareEncseq *bare_encseq,bool forward,bool direct)
+{
+  GtUchar *leftptr, *rightptr;
+
+  if (forward)
+  {
+    for (leftptr = bare_encseq->sequence;
+         leftptr < bare_encseq->sequence + bare_encseq->totallength;
+         leftptr++)
+    {
+      if (ISNOTSPECIAL(*leftptr))
+      {
+        *leftptr = GT_COMPLEMENTBASE(*leftptr);
+      }
+    }
+    gt_assert(!direct);
+  } else
+  {
+    if (direct)
+    {
+      for (leftptr = bare_encseq->sequence,
+           rightptr = bare_encseq->sequence + bare_encseq->totallength - 1;
+           leftptr < rightptr; leftptr++, rightptr--)
+      {
+        GtUchar tmp = *leftptr;
+        *leftptr = *rightptr;
+        *rightptr = tmp;
+      }
+    } else
+    {
+      for (leftptr = bare_encseq->sequence,
+           rightptr = bare_encseq->sequence + bare_encseq->totallength - 1;
+           leftptr < rightptr; leftptr++, rightptr--)
+      {
+        GtUchar tmp = *leftptr;
+        *leftptr = ISSPECIAL(*rightptr) ? *rightptr
+                                        : GT_COMPLEMENTBASE(*rightptr);
+        *rightptr = ISSPECIAL(tmp) ? tmp
+                                   : GT_COMPLEMENTBASE(tmp);
+      }
+    }
+  }
 }

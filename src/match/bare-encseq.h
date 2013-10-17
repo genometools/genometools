@@ -55,4 +55,6 @@ void gt_bare_encseq_specialrangeiterator_delete(
 bool gt_bare_encseq_specialrangeiterator_next(GtBareSpecialrangeiterator *sri,
                                               GtRange *range);
 
+void bare_encseq_convert(GtBareEncseq *bare_encseq,bool forward,bool direct);
+
 #endif

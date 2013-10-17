@@ -31,6 +31,7 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
                                  GtTimer *timer);
 
 void gt_sain_bare_encseq_sortsuffixes(const GtBareEncseq *bare_encseq,
+                                      GtReadmode readmode,
                                       bool intermediatecheck,
                                       bool finalcheck,
                                       GtLogger *logger,

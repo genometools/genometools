@@ -302,14 +302,6 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           if (gt_sain_checkmaxsequencelength((GtUword) len,false,err) != 0)
           {
             had_err = -1;
-          } else
-          {
-            if (arguments->readmode != GT_READMODE_FORWARD)
-            {
-              gt_error_set(err,"option -dir and -file/-fastadna exclude "
-                               " each other");
-              had_err = -1;
-            }
           }
         }
         if (!had_err)
@@ -327,7 +319,16 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           {
             gt_assert(gt_str_length(arguments->fastadnafile) > 0 &&
                       bare_encseq != NULL);
+            if (arguments->readmode != GT_READMODE_FORWARD)
+            {
+              bare_encseq_convert(bare_encseq,
+                                  GT_ISDIRREVERSE(arguments->readmode)
+                                    ? false : true,
+                                  GT_ISDIRCOMPLEMENT(arguments->readmode)
+                                    ? false : true);
+            }
             gt_sain_bare_encseq_sortsuffixes(bare_encseq,
+                                             arguments->readmode,
                                              arguments->icheck,
                                              arguments->fcheck,
                                              tl->logger,
