@@ -23,7 +23,7 @@ void gt_inplace_reversecomplement(GtUchar *seq,GtUword len)
   GtUchar tmp, *frontptr, *backptr;
 
   for (frontptr = seq, backptr = seq + len - 1;
-       frontptr < backptr; frontptr++, backptr--)
+       frontptr <= backptr; frontptr++, backptr--)
   {
     tmp = *frontptr;
     *frontptr = GT_COMPLEMENTBASE(*backptr);
