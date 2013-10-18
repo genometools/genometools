@@ -27,8 +27,8 @@
 
 typedef struct
 {
-  bool icheck, fcheck, verbose, dommap;
-  GtStr *encseqfile, *plainseqfile, *fastadnafile, *dir;
+  bool icheck, fcheck, verbose, dommap, dnaalphabet, proteinalphabet;
+  GtStr *encseqfile, *plainseqfile, *fastafile, *dir, *smap;
   GtReadmode readmode;
 } GtSainArguments;
 
@@ -37,7 +37,8 @@ static void* gt_sain_arguments_new(void)
   GtSainArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->encseqfile = gt_str_new();
   arguments->plainseqfile = gt_str_new();
-  arguments->fastadnafile = gt_str_new();
+  arguments->fastafile = gt_str_new();
+  arguments->smap = gt_str_new();
   arguments->dir = gt_str_new_cstr("fwd");
   arguments->readmode = GT_READMODE_FORWARD;
   return arguments;
@@ -51,7 +52,8 @@ static void gt_sain_arguments_delete(void *tool_arguments)
   {
     gt_str_delete(arguments->encseqfile);
     gt_str_delete(arguments->plainseqfile);
-    gt_str_delete(arguments->fastadnafile);
+    gt_str_delete(arguments->fastafile);
+    gt_str_delete(arguments->smap);
     gt_str_delete(arguments->dir);
     gt_free(arguments);
   }
@@ -62,7 +64,8 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   GtSainArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *optionfcheck, *optionesq, *optionfile, *optionmmap,
-           *optionfastadna;
+           *optionfasta, *optiondnaalphabet, *optionproteinalphabet,
+           *optionsmap;
 
   gt_assert(arguments != NULL);
 
@@ -85,11 +88,25 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
                                    arguments->plainseqfile, NULL);
   gt_option_parser_add_option(op, optionfile);
 
-  /* -fastadna */
-  optionfastadna = gt_option_new_string("fastadna",
-                                        "fasta input with DNA sequence",
-                                        arguments->fastadnafile, NULL);
-  gt_option_parser_add_option(op, optionfastadna);
+  /* -fasta */
+  optionfasta = gt_option_new_string("fasta","fasta input",
+                                    arguments->fastafile, NULL);
+  gt_option_parser_add_option(op, optionfasta);
+
+  /* -dna */
+  optiondnaalphabet = gt_option_new_bool("dna","use DNA alphabet",
+                                         &arguments->dnaalphabet, false);
+  gt_option_parser_add_option(op, optiondnaalphabet);
+
+  /* -protein */
+  optionproteinalphabet = gt_option_new_bool("protein","use protein alphabet",
+                                             &arguments->proteinalphabet,false);
+  gt_option_parser_add_option(op, optionproteinalphabet);
+
+  /* -smap */
+  optionsmap = gt_option_new_string("smap","specify symbol map file",
+                                    arguments->smap, NULL);
+  gt_option_parser_add_option(op, optionsmap);
 
   /* -icheck */
   option = gt_option_new_bool("icheck",
@@ -109,17 +126,21 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
                                     &arguments->fcheck, false);
   gt_option_parser_add_option(op, optionfcheck);
 
-  gt_option_imply_either_2(optionfcheck, optionesq, optionfastadna);
-  gt_option_exclude(optionesq,optionfile);
-  gt_option_exclude(optionesq, optionfastadna);
-  gt_option_exclude(optionfile, optionfastadna);
-  gt_option_exclude(optionfastadna, optionmmap);
-  gt_option_imply(optionmmap, optionfile);
-
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
+  gt_option_imply_either_2(optionfcheck, optionesq, optionfasta);
+  gt_option_exclude(optionesq,optionfile);
+  gt_option_exclude(optionesq, optionfasta);
+  gt_option_exclude(optionfile, optionfasta);
+  gt_option_exclude(optionfasta, optionmmap);
+  gt_option_exclude(optiondnaalphabet,optionproteinalphabet);
+  gt_option_exclude(optiondnaalphabet,optionsmap);
+  gt_option_exclude(optionproteinalphabet,optionsmap);
+  gt_option_is_mandatory_either_3(optiondnaalphabet,optionproteinalphabet,
+                                  optionsmap);
+  gt_option_imply(optionmmap, optionfile);
   return op;
 }
 
@@ -267,13 +288,13 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
       gt_encseq_loader_delete(el);
     }
     if (gt_str_length(arguments->plainseqfile) > 0 ||
-        gt_str_length(arguments->fastadnafile) > 0)
+        gt_str_length(arguments->fastafile) > 0)
     {
       GtUchar *filecontents;
       size_t len;
       const char *inputfile = gt_str_length(arguments->plainseqfile) > 0
                                 ? gt_str_get(arguments->plainseqfile)
-                                : gt_str_get(arguments->fastadnafile);
+                                : gt_str_get(arguments->fastafile);
 
       if (arguments->dommap)
       {
@@ -288,15 +309,49 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
       } else
       {
         GtBareEncseq *bare_encseq = NULL;
+        GtAlphabet *alphabet = NULL;
 
-        if (gt_str_length(arguments->fastadnafile) > 0)
+        if (arguments->dnaalphabet)
         {
-          bare_encseq = gt_bare_encseq_new(filecontents,len,err);
+          alphabet = gt_alphabet_new_dna();
+        } else
+        {
+          if (arguments->proteinalphabet)
+          {
+            alphabet = gt_alphabet_new_protein();
+          } else
+          {
+            if (gt_str_length(arguments->smap) > 0)
+            {
+              alphabet = gt_alphabet_new_from_file(gt_str_get(arguments->smap),
+                                                   err);
+              if (alphabet == NULL)
+              {
+                had_err = -1;
+              }
+            } else
+            {
+              gt_assert(false);
+            }
+          }
+        }
+        if (!gt_alphabet_is_dna(alphabet) &&
+            (arguments->readmode == GT_READMODE_COMPL ||
+             arguments->readmode == GT_READMODE_REVCOMPL))
+        {
+          gt_error_set(err,"option -dir cpl and -dir rcl is only "
+                           "possible for DNA sequences");
+          had_err = -1;
+        }
+        if (!had_err && gt_str_length(arguments->fastafile) > 0)
+        {
+          bare_encseq = gt_bare_encseq_new(filecontents,len,alphabet,err);
           if (bare_encseq == NULL)
           {
             had_err = -1;
           }
         }
+        gt_alphabet_delete(alphabet);
         if (!had_err)
         {
           if (gt_sain_checkmaxsequencelength((GtUword) len,false,err) != 0)
@@ -317,7 +372,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                        tl->timer);
           } else
           {
-            gt_assert(gt_str_length(arguments->fastadnafile) > 0 &&
+            gt_assert(gt_str_length(arguments->fastafile) > 0 &&
                       bare_encseq != NULL);
             if (arguments->readmode != GT_READMODE_FORWARD)
             {

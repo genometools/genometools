@@ -21,6 +21,7 @@
 #include <limits.h>
 #include <string.h>
 #include "core/types_api.h"
+#include "core/alphabet_api.h"
 #include "core/chardef.h"
 #include "core/arraydef.h"
 #include "core/readmode.h"
@@ -52,41 +53,22 @@ void gt_bare_encseq_delete(GtBareEncseq *bare_encseq)
 }
 
 GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
+                                 const GtAlphabet *alphabet,
                                  GtError *err)
 {
-  GtUchar *writeptr = filecontents, *readptr = filecontents, smap[UCHAR_MAX+1];
-  const GtUchar undefined = (GtUchar) UCHAR_MAX,
-        *endptr = filecontents + numofbytes;
+  GtUchar *writeptr = filecontents, *readptr = filecontents;
+  const GtUchar *endptr = filecontents + numofbytes;
   bool firstline = true, haserr = false;
-  size_t idx;
-  const char *wildcard_list = "nsywrkvbdhmNSYWRKVBDHM";
   GtUword lastspecialrange_length = 0;
   GtBareSpecialrange *srptr = NULL;
   GtBareEncseq *bare_encseq = gt_malloc(sizeof *bare_encseq);
+  const GtUchar *smap = gt_alphabet_symbolmap(alphabet);
 
-  for (idx = 0; idx <= (size_t) UCHAR_MAX; idx++)
-  {
-    smap[idx] = undefined;
-  }
-  smap['a'] = 0;
-  smap['A'] = 0;
-  smap['c'] = (GtUchar) 1;
-  smap['C'] = (GtUchar) 1;
-  smap['g'] = (GtUchar) 2;
-  smap['G'] = (GtUchar) 2;
-  smap['t'] = (GtUchar) 3;
-  smap['T'] = (GtUchar) 3;
-  smap['u'] = (GtUchar) 3;
-  smap['U'] = (GtUchar) 3;
   bare_encseq->specialcharacters = 0;
-  bare_encseq->numofchars = 4UL;
+  bare_encseq->numofchars = (GtUword) gt_alphabet_num_of_chars(alphabet);
   bare_encseq->charcount = gt_calloc((size_t) bare_encseq->numofchars,
                                      sizeof *bare_encseq->charcount);
   GT_INITARRAY(&bare_encseq->specialranges,GtBareSpecialrange);
-  for (idx = 0; idx < strlen(wildcard_list); idx++)
-  {
-    smap[(int) wildcard_list[idx]] = WILDCARD;
-  }
   readptr = filecontents;
   while (!haserr && readptr < endptr)
   {
@@ -119,7 +101,7 @@ GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
         if (!isspace(*readptr))
         {
           GtUchar cc = smap[*readptr];
-          if (cc == undefined)
+          if (cc == UNDEFCHAR)
           {
             gt_error_set(err,"illegal input characters %c\n",*readptr);
             haserr = true;
