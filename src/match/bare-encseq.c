@@ -302,7 +302,7 @@ void bare_encseq_convert(GtBareEncseq *bare_encseq,bool forward,bool direct)
     {
       for (leftptr = bare_encseq->sequence,
            rightptr = bare_encseq->sequence + bare_encseq->totallength - 1;
-           leftptr < rightptr; leftptr++, rightptr--)
+           leftptr <= rightptr; leftptr++, rightptr--)
       {
         GtUchar tmp = *leftptr;
         *leftptr = ISSPECIAL(*rightptr) ? *rightptr
