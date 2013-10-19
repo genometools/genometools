@@ -138,9 +138,9 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   gt_option_exclude(optiondnaalphabet,optionproteinalphabet);
   gt_option_exclude(optiondnaalphabet,optionsmap);
   gt_option_exclude(optionproteinalphabet,optionsmap);
-  gt_option_is_mandatory_either_3(optiondnaalphabet,optionproteinalphabet,
-                                  optionsmap);
-  gt_option_imply(optionmmap, optionfile);
+  gt_option_imply(optiondnaalphabet,optionfasta);
+  gt_option_imply(optionproteinalphabet,optionfasta);
+  gt_option_imply(optionsmap,optionfasta);
   return op;
 }
 
@@ -229,6 +229,61 @@ static void gt_sain_timer_logger_delete(GtSainTimerandLogger *tl)
   gt_free(tl);
 }
 
+static GtAlphabet *gt_sain_getalphabet(const GtSainArguments *arguments,
+                                       GtError *err)
+{
+  GtAlphabet *alphabet;
+  int had_err = 0;
+
+  if (arguments->dnaalphabet)
+  {
+    alphabet = gt_alphabet_new_dna();
+  } else
+  {
+    if (arguments->proteinalphabet)
+    {
+      alphabet = gt_alphabet_new_protein();
+    } else
+    {
+      if (gt_str_length(arguments->smap) > 0)
+      {
+        alphabet = gt_alphabet_new_from_file_no_suffix(
+                                           gt_str_get(arguments->smap),
+                                           err);
+      } else
+      {
+        GtStrArray *filenametab = gt_str_array_new();
+
+        gt_assert(gt_str_length(arguments->fastafile) > 0);
+        gt_str_array_add_cstr(filenametab,gt_str_get(arguments->fastafile));
+        alphabet = gt_alphabet_new_from_sequence(filenametab, err);
+        gt_str_array_delete(filenametab);
+      }
+      if (alphabet == NULL)
+      {
+        had_err = -1;
+      } else
+      {
+        if (!gt_alphabet_is_dna(alphabet) &&
+            (arguments->readmode == GT_READMODE_COMPL ||
+             arguments->readmode == GT_READMODE_REVCOMPL))
+        {
+          gt_error_set(err,"option -dir cpl and -dir rcl is only "
+                           "possible for DNA sequences");
+          had_err = -1;
+        }
+      }
+    }
+  }
+  if (had_err)
+  {
+    gt_alphabet_delete(alphabet);
+    return NULL;
+  }
+  gt_assert(alphabet != NULL);
+  return alphabet;
+}
+
 static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                           int parsed_args, void *tool_arguments, GtError *err)
 {
@@ -287,8 +342,8 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
       gt_encseq_delete(encseq);
       gt_encseq_loader_delete(el);
     }
-    if (gt_str_length(arguments->plainseqfile) > 0 ||
-        gt_str_length(arguments->fastafile) > 0)
+    if (!had_err && (gt_str_length(arguments->plainseqfile) > 0 ||
+                     gt_str_length(arguments->fastafile) > 0))
     {
       GtUchar *filecontents;
       size_t len;
@@ -309,55 +364,31 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
       } else
       {
         GtBareEncseq *bare_encseq = NULL;
-        GtAlphabet *alphabet = NULL;
 
-        if (arguments->dnaalphabet)
+        if (!had_err)
         {
-          alphabet = gt_alphabet_new_dna();
-        } else
-        {
-          if (arguments->proteinalphabet)
+          if (gt_str_length(arguments->fastafile) > 0)
           {
-            alphabet = gt_alphabet_new_protein();
-          } else
-          {
-            if (gt_str_length(arguments->smap) > 0)
+            GtAlphabet *alphabet = gt_sain_getalphabet(arguments,err);
+
+            if (alphabet == NULL)
             {
-              alphabet = gt_alphabet_new_from_file(gt_str_get(arguments->smap),
-                                                   err);
-              if (alphabet == NULL)
+              had_err = -1;
+            } else
+            {
+              bare_encseq = gt_bare_encseq_new(filecontents,len,alphabet,err);
+              if (bare_encseq == NULL)
               {
                 had_err = -1;
               }
-            } else
-            {
-              gt_assert(false);
             }
+            gt_alphabet_delete(alphabet);
           }
         }
-        if (!gt_alphabet_is_dna(alphabet) &&
-            (arguments->readmode == GT_READMODE_COMPL ||
-             arguments->readmode == GT_READMODE_REVCOMPL))
+        if (!had_err &&
+            gt_sain_checkmaxsequencelength((GtUword) len,false,err) != 0)
         {
-          gt_error_set(err,"option -dir cpl and -dir rcl is only "
-                           "possible for DNA sequences");
           had_err = -1;
-        }
-        if (!had_err && gt_str_length(arguments->fastafile) > 0)
-        {
-          bare_encseq = gt_bare_encseq_new(filecontents,len,alphabet,err);
-          if (bare_encseq == NULL)
-          {
-            had_err = -1;
-          }
-        }
-        gt_alphabet_delete(alphabet);
-        if (!had_err)
-        {
-          if (gt_sain_checkmaxsequencelength((GtUword) len,false,err) != 0)
-          {
-            had_err = -1;
-          }
         }
         if (!had_err)
         {

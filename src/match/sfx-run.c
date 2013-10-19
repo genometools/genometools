@@ -442,10 +442,9 @@ int gt_runsuffixerator(bool doesa,
 
   gt_error_check(err);
 
-  so->outlcptab = so->genomediff
-    ? true
-    : gt_index_options_outlcptab_value(so->idxopts);
-
+  so->outlcptab
+    = so->genomediff ? true
+                     : gt_index_options_outlcptab_value(so->idxopts);
   if (gt_showtime_enabled())
   {
     sfxprogress = gt_timer_new_with_progress_description("determining sequence "
@@ -499,8 +498,8 @@ int gt_runsuffixerator(bool doesa,
     ee = gt_encseq_encoder_new_from_options(so->encopts, err);
     /* '-plain' implies no description support */
     if (gt_encseq_options_plain_value(so->loadopts)) {
-      gt_encseq_encoder_do_not_create_des_tab(ee);
-      gt_encseq_encoder_do_not_create_sds_tab(ee);
+        gt_encseq_encoder_do_not_create_des_tab(ee);
+        gt_encseq_encoder_do_not_create_sds_tab(ee);
     }
     if (ee == NULL)
       haserr = true;
@@ -551,9 +550,8 @@ int gt_runsuffixerator(bool doesa,
       }
     }
   }
-  if (!haserr
-        && gt_index_options_outkystab_value(so->idxopts)
-        && !gt_index_options_outkyssort_value(so->idxopts))
+  if (!haserr && gt_index_options_outkystab_value(so->idxopts)
+              && !gt_index_options_outkyssort_value(so->idxopts))
   {
     if (gt_extractkeysfromdesfile(gt_str_get(so->indexname),
                                   false, logger, err) != 0)
