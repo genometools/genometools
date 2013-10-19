@@ -27,12 +27,12 @@
 #include "sarr-def.h"
 #include "sfx-linlcp.h"
 
-GtUword *gt_lcp13_manzini(const GtEncseq *encseq,
-                                GtReadmode readmode,
-                                GtUword partwidth,
-                                GtUword totallength,
-                                const ESASuffixptr *suftab,
-                                GtCompactUlongStore *inversesuftab)
+GtUword *gt_ENCSEQ_lcp13_manzini(const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 GtUword partwidth,
+                                 GtUword totallength,
+                                 const ESASuffixptr *suftab,
+                                 GtCompactUlongStore *inversesuftab)
 {
   GtUword pos, lcpvalue = 0, *lcptab;
 
@@ -70,8 +70,8 @@ GtUword *gt_lcp13_manzini(const GtEncseq *encseq,
   return lcptab;
 }
 
-static GtUword *computeocclesstab(const GtEncseq *encseq,
-                                        GtReadmode readmode)
+static GtUword *gt_ENCSEQ_compute_occless_tab(const GtEncseq *encseq,
+                                              GtReadmode readmode)
 {
   GtUword *occless;
   unsigned int charidx, numofchars;
@@ -105,7 +105,8 @@ static GtUword *computeocclesstab(const GtEncseq *encseq,
    we obtain these values by the following function:
 */
 
-static void setrelevantfrominversetab(GtCompactUlongStore *rightposinverse,
+static void gt_ENCSEQ_set_relevant_from_inversetab(
+                                      GtCompactUlongStore *rightposinverse,
                                       const GtEncseq *encseq,
                                       GtReadmode readmode,
                                       const ESASuffixptr *suftab,
@@ -130,12 +131,12 @@ static void setrelevantfrominversetab(GtCompactUlongStore *rightposinverse,
   }
 }
 
-static GtUword *fillrightofpartwidth(
-                                     const GtCompactUlongStore *rightposinverse,
-                                     const GtEncseq *encseq,
-                                     GtReadmode readmode,
-                                     GtUword partwidth,
-                                     GtUword totallength)
+static GtUword *gt_ENCSEQ_fill_right_of_partwidth(
+                               const GtCompactUlongStore *rightposinverse,
+                               const GtEncseq *encseq,
+                               GtReadmode readmode,
+                               GtUword partwidth,
+                               GtUword totallength)
 {
   GtSpecialrangeiterator *sri;
   GtRange range;
@@ -161,8 +162,6 @@ static GtUword *fillrightofpartwidth(
       {
         size_t allocsize = sizeof (*rightofpartwidth) * countlargeranges;
         rightofpartwidth = gt_malloc(allocsize);
-        /*printf("allocated "GT_WU" bytes for rightofpartwidth (%.2f)\n",
-            (GtUword) allocsize, (double) allocsize/totallength);*/
       }
       gt_assert(nextrightofpartwidth < countlargeranges);
       rightofpartwidth[nextrightofpartwidth++]
@@ -173,7 +172,7 @@ static GtUword *fillrightofpartwidth(
   return rightofpartwidth;
 }
 
-static void inversesuffixarray2specialranknext(
+static void gt_ENCSEQ_inversesuffixarray2specialranknext(
                          const GtCompactUlongStore *rightposinverse,
                          GtCompactUlongStore *ranknext,
                          const GtEncseq *encseq,
@@ -188,11 +187,11 @@ static void inversesuffixarray2specialranknext(
     GtUword idx, *rightofpartwidth = NULL,
                   specialranklistindex, nextrightofpartwidth = 0;
 
-    rightofpartwidth = fillrightofpartwidth(rightposinverse,
-                                            encseq,
-                                            readmode,
-                                            partwidth,
-                                            totallength);
+    rightofpartwidth = gt_ENCSEQ_fill_right_of_partwidth(rightposinverse,
+                                                         encseq,
+                                                         readmode,
+                                                         partwidth,
+                                                         totallength);
     specialranklistindex = partwidth;
     sri = gt_specialrangeiterator_new(encseq,
                                       GT_ISDIRREVERSE(readmode) ? false : true);
@@ -231,18 +230,17 @@ static void inversesuffixarray2specialranknext(
   }
 }
 
-static GtUword sa2ranknext(GtCompactUlongStore *ranknext,
-                                 const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 GtUword partwidth,
-                                 GtUword totallength,
-                                 const ESASuffixptr *suftab)
+static GtUword gt_ENCSEQ_sa2ranknext(GtCompactUlongStore *ranknext,
+                                     const GtEncseq *encseq,
+                                     GtReadmode readmode,
+                                     GtUword partwidth,
+                                     GtUword totallength,
+                                     const ESASuffixptr *suftab)
 {
   GtUword idx, pos, longest = 0, *occless;
 
   gt_assert(partwidth > 0);
-
-  occless = computeocclesstab(encseq, readmode);
+  occless = gt_ENCSEQ_compute_occless_tab(encseq, readmode);
   /* now inveresuftab is not used any more, and thus the
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < partwidth; idx++)
@@ -308,12 +306,12 @@ static GtUword sa2ranknext(GtCompactUlongStore *ranknext,
   return longest;
 }
 
-GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
-                                 const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 GtUword partwidth,
-                                 GtUword totallength,
-                                 const ESASuffixptr *suftab)
+GtCompactUlongStore *gt_ENCSEQ_lcp9_manzini(GtCompactUlongStore *spacefortab,
+                                            const GtEncseq *encseq,
+                                            GtReadmode readmode,
+                                            GtUword partwidth,
+                                            GtUword totallength,
+                                            const ESASuffixptr *suftab)
 {
   GtUword pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0,
                 previouscc1pos, previouscc2pos;
@@ -327,19 +325,19 @@ GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
     rightposinverse = ranknext
                     = gt_compact_ulong_store_new(totallength+1, bitsperentry);
     gt_compact_ulong_store_update(ranknext, totallength, totallength);
-    setrelevantfrominversetab(rightposinverse, encseq, readmode, suftab,
-                              partwidth);
+    gt_ENCSEQ_set_relevant_from_inversetab(rightposinverse, encseq, readmode,
+                                           suftab, partwidth);
   } else
   {
     rightposinverse = ranknext = spacefortab;
   }
-  inversesuffixarray2specialranknext(rightposinverse, ranknext,
-                                     encseq,
-                                     readmode,
-                                     partwidth,
-                                     totallength);
-  fillpos = sa2ranknext(ranknext, encseq, readmode, partwidth, totallength,
-                        suftab);
+  gt_ENCSEQ_inversesuffixarray2specialranknext(rightposinverse, ranknext,
+                                               encseq,
+                                               readmode,
+                                               partwidth,
+                                               totallength);
+  fillpos = gt_ENCSEQ_sa2ranknext(ranknext, encseq, readmode, partwidth,
+                                  totallength, suftab);
   lcptab = ranknext;
   /* now ranknext and lcptab point to the same memory area. After reading
      ranknext at position fillpos, the same cell is used for storing
@@ -427,12 +425,12 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
   partwidth = totallength - specials;
   if (partwidth > 0)
   {
-    lcptab = gt_lcp9_manzini(NULL,
-                           encseq,
-                           readmode,
-                           partwidth,
-                           totallength,
-                           suftab);
+    lcptab = gt_ENCSEQ_lcp9_manzini(NULL,
+                                    encseq,
+                                    readmode,
+                                    partwidth,
+                                    totallength,
+                                    suftab);
     gt_logger_log(logger,
                   "computed reference lcp table with manzini algorithm");
   }
