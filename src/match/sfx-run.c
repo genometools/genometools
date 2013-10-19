@@ -426,11 +426,11 @@ static int run_packedindexconstruction(GtLogger *logger,
 }
 #endif
 
-int runsuffixerator(bool doesa,
-                    Suffixeratoroptions *so,
-                    GenomediffInfo *gd_info,
-                    GtLogger *logger,
-                    GtError *err)
+int gt_runsuffixerator(bool doesa,
+                       Suffixeratoroptions *so,
+                       GenomediffInfo *gd_info,
+                       GtLogger *logger,
+                       GtError *err)
 {
   GtTimer *sfxprogress = NULL;
   Outfileinfo outfileinfo;
@@ -735,7 +735,7 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
 
     gt_logger_log(logger,"sizeof (GtUword)="GT_WU"",
                   (GtUword) (sizeof (GtUword) * CHAR_BIT));
-    if (runsuffixerator(doesa,&so,NULL,logger,err) < 0)
+    if (gt_runsuffixerator(doesa,&so,NULL,logger,err) < 0)
     {
       haserr = true;
     }

@@ -373,7 +373,7 @@ static int gt_genomediff_runner(int argc, const char **argv,
                           unit_info->num_of_genomes);
       gd_info.shulensums = shusums;
       gd_info.unit_info = unit_info;
-      had_err = runsuffixerator(doesa, &sopts, &gd_info, logger, err);
+      had_err = gt_runsuffixerator(doesa, &sopts, &gd_info, logger, err);
     }
     if (!had_err && shusums != NULL) {
       had_err = gt_genomediff_kr_calc(shusums, arguments, unit_info,

@@ -26,7 +26,7 @@
 int gt_parseargsandcallsuffixerator(bool doesa,int argc,
                                     const char **argv,GtError *err);
 
-int runsuffixerator(bool doesa, Suffixeratoroptions *so,
-                    GenomediffInfo *gd_info,
-                    GtLogger *logger, GtError *err);
+int gt_runsuffixerator(bool doesa, Suffixeratoroptions *so,
+                       GenomediffInfo *gd_info,
+                       GtLogger *logger, GtError *err);
 #endif
