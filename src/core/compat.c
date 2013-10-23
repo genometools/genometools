@@ -25,21 +25,21 @@
 #endif
 #include "core/compat.h"
 
-int gt_mkstemp(char *template)
+int gt_mkstemp(char *templ)
 {
 #ifndef _WIN32
-  return mkstemp(template);
+  return mkstemp(templ);
 #else
   /* XXX: is this replacement good enough? */
 #ifdef _mktemp_s
-  errno_t err = _mktemp_s(template, strlen(template) + 1);
+  errno_t err = _mktemp_s(templ, strlen(templ) + 1);
   if (err == EINVAL)
     return -1;
 #else
-  if (!_mktemp(template))
+  if (!_mktemp(templ))
     return -1;
 #endif
-  return open(template, O_RDWR, O_EXCL);
+  return open(templ, O_RDWR, O_EXCL);
 #endif
 }
 

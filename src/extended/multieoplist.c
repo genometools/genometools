@@ -43,6 +43,34 @@ GtMultieoplist *gt_multieoplist_new(void)
   return multieops;
 }
 
+GtMultieoplist *gt_multieoplist_new_with_size(GtUword size)
+{
+  GtMultieoplist *multieops;
+  multieops = gt_malloc(sizeof (GtMultieoplist));
+  multieops->refcount = 0;
+  GT_INITARRAY(&multieops->meoplist, Eop);
+  multieops->meoplist.spaceEop = gt_calloc((size_t) size,
+                              sizeof (*(multieops->meoplist.spaceEop)));
+  multieops->meoplist.allocatedEop = size;
+  return multieops;
+}
+
+void gt_multieoplist_clone(GtMultieoplist *copy, GtMultieoplist *source)
+{
+  int i;
+  gt_assert(copy != NULL && source != NULL);
+  if (copy->meoplist.allocatedEop < source->meoplist.nextfreeEop) {
+    copy->meoplist.spaceEop = gt_realloc(copy->meoplist.spaceEop,
+                                         source->meoplist.nextfreeEop);
+    copy->meoplist.allocatedEop = source->meoplist.nextfreeEop;
+  }
+  copy->refcount = 0;
+  copy->meoplist.nextfreeEop = source->meoplist.nextfreeEop; 
+  for (i = 0; i < copy->meoplist.nextfreeEop; i++) {
+    copy->meoplist.spaceEop[i] = source->meoplist.spaceEop[i];
+  }
+}
+
 GtMultieoplist *gt_multieoplist_ref(GtMultieoplist *multieops)
 {
   multieops->refcount++;

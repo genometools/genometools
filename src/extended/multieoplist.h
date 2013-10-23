@@ -47,6 +47,8 @@ typedef struct {
 
 /* Returns new empty <GtMultieoplist> object */
 GtMultieoplist* gt_multieoplist_new(void);
+/* Returns new <GtMultieoplist> object of size size*/
+GtMultieoplist *gt_multieoplist_new_with_size(GtUword size);
 /* Returns reference to <multieops> */
 GtMultieoplist* gt_multieoplist_ref(GtMultieoplist *multieops);
 void            gt_multieoplist_delete(GtMultieoplist *multieops);
@@ -71,6 +73,9 @@ void            gt_multieoplist_reset(GtMultieoplist *multieops);
 /* Remove the last added edit operation. Will remove exactly one! (decrease
    <steps>) */
 void            gt_multieoplist_remove_last(GtMultieoplist *multieops);
+/* Copy contents from <GtMultieoplist> <source> to <GtMultieoplist>
+   <copy>. <copy> may not be NULL */
+void            gt_multieoplist_clone(GtMultieoplist *copy, GtMultieoplist *source);
 /* Returns the number of <GtMultieop> elements in <multieops>, each of which
    can have <steps> > 1, therefor this represents not the length of the
    alignment. */
@@ -103,5 +108,6 @@ typedef void (*MeoplistIOFunc)(void *ptr,
 GtMultieoplist* gt_meoplist_io(GtMultieoplist *multieops,
                                MeoplistIOFunc io_func,
                                FILE *fp);
+
 
 #endif
