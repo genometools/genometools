@@ -186,6 +186,7 @@ static void gt_suftab_sk_suffixorder(GtUword totallength,
 void gt_suftab_lightweightcheck(bool bare,
                                 const void *encseq,
                                 GtReadmode readmode,
+                                unsigned int numofchars,
                                 GtUword totallength,
                                 const void *suftab,
                                 GT_UNUSED size_t unitsize,
@@ -193,7 +194,7 @@ void gt_suftab_lightweightcheck(bool bare,
 {
   GtUword idx, countbitsset = 0, previouspos = 0,
                 firstspecial = totallength, rangestart = 0;
-  unsigned int numofchars, charidx, rangeidx = 0, numofranges;
+  unsigned int charidx, rangeidx = 0, numofranges;
   GtBitsequence *startposoccurs;
   GtUchar previouscc = 0;
   GtRangewithchar *rangestore;
@@ -205,10 +206,6 @@ void gt_suftab_lightweightcheck(bool bare,
   gt_assert(unitsize == (size_t) 4 || unitsize == (size_t) 8);
 #endif
   GT_INITBITTAB(startposoccurs, totallength+1);
-  numofchars
-    = bare ? (unsigned int) gt_bare_encseq_numofchars(
-                                    (const GtBareEncseq *) encseq)
-           : gt_encseq_alphabetnumofchars((const GtEncseq *) encseq);
   rangestore = gt_malloc(sizeof(*rangestore) * numofchars);
   for (idx = 0; idx < totallength; idx++)
   {

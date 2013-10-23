@@ -18,6 +18,9 @@ is generated depending on the experiment size, all other inputs are cut to size.
 
 def generate(p,i=1)
   chars = "$abcdefghijklmnopqrstuvwxyz"
+  if p == 4
+    chars = "$acgt"
+  end
   if i == p
     return "#{chars[i,1]}"
   else

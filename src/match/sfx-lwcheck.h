@@ -25,6 +25,7 @@
 void gt_suftab_lightweightcheck(bool bare,
                                 const void *encseq,
                                 GtReadmode readmode,
+                                unsigned int numofchars,
                                 GtUword totallength,
                                 const void *suftab,
                                 GT_UNUSED size_t unitsize,

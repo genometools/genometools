@@ -1039,7 +1039,7 @@ static void gt_sain_movenames2front(GtUsainindextype *suftab,
                                   signified by 0 */
     }
   }
-  gt_assert(wptr == suftab + GT_MULT2(numberofsuffixes));
+  /*gt_assert(wptr == suftab + GT_MULT2(numberofsuffixes));*/
 }
 
 static void gt_sain_checkorder(const GtSainseq *sainseq,
@@ -1486,6 +1486,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                   ? (void *) sainseq->bare_encseq
                   : (void *) sainseq->seq.encseq,
                 sainseq->readmode,
+                (unsigned int) sainseq->numofchars,
                 sainseq->totallength,
                 suftab,
                 sizeof *suftab,
