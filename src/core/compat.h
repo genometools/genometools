@@ -29,7 +29,7 @@
 #define GT_PATH_VAR_SEPARATOR ';'
 #endif
 
-int     gt_mkstemp(char *template);
+int     gt_mkstemp(char *templ);
 GtUword gt_pagesize(void);
 
 #endif
