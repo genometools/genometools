@@ -55,10 +55,14 @@ GtMultieoplist *gt_multieoplist_new_with_size(GtUword size)
   return multieops;
 }
 
-void gt_multieoplist_clone(GtMultieoplist *copy, GtMultieoplist *source)
+GtMultieoplist *gt_multieoplist_clone(GtMultieoplist *copy,
+                                      GtMultieoplist *source)
 {
   GtUword i;
-  gt_assert(copy != NULL && source != NULL);
+  gt_assert(source != NULL);
+  if (copy == NULL) {
+    copy = gt_multieoplist_new();
+  }
   if (copy->meoplist.allocatedEop < source->meoplist.nextfreeEop) {
     copy->meoplist.spaceEop = gt_realloc(copy->meoplist.spaceEop,
                                          (size_t) source->meoplist.nextfreeEop);
@@ -69,6 +73,7 @@ void gt_multieoplist_clone(GtMultieoplist *copy, GtMultieoplist *source)
   for (i = 0; i < copy->meoplist.nextfreeEop; i++) {
     copy->meoplist.spaceEop[i] = source->meoplist.spaceEop[i];
   }
+  return copy;
 }
 
 GtMultieoplist *gt_multieoplist_ref(GtMultieoplist *multieops)

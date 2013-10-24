@@ -47,8 +47,10 @@ typedef struct {
 
 /* Returns new empty <GtMultieoplist> object */
 GtMultieoplist* gt_multieoplist_new(void);
+
 /* Returns new <GtMultieoplist> object of size size*/
 GtMultieoplist *gt_multieoplist_new_with_size(GtUword size);
+
 /* Returns reference to <multieops> */
 GtMultieoplist* gt_multieoplist_ref(GtMultieoplist *multieops);
 void            gt_multieoplist_delete(GtMultieoplist *multieops);
@@ -56,36 +58,50 @@ void            gt_multieoplist_delete(GtMultieoplist *multieops);
 /* Add one <Replacement> operation to the list of edit operations. Multiple
    additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_replacement(GtMultieoplist *multieops);
+
 /* Add one <Insertion> operation to the list of edit operations. Multiple
    additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_insertion(GtMultieoplist *multieops);
+
 /* Add one <Deletion> operation to the list of edit operations. Multiple
    additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_deletion(GtMultieoplist *multieops);
+
 /* Add one <Mismatch> operation to the list of edit operations. Multiple
    additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_mismatch(GtMultieoplist *multieops);
+
 /* Add one <Match> operation to the list of edit operations. Multiple
    additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_match(GtMultieoplist *multieops);
+
 /* Remove all operations from <multieops> */
 void            gt_multieoplist_reset(GtMultieoplist *multieops);
+
 /* Remove the last added edit operation. Will remove exactly one! (decrease
    <steps>) */
 void            gt_multieoplist_remove_last(GtMultieoplist *multieops);
-/* Copy contents from <GtMultieoplist> <source> to <GtMultieoplist>
-   <copy>. <copy> may not be NULL */
-void            gt_multieoplist_clone(GtMultieoplist *copy, GtMultieoplist *source);
+
+/* Returns pointer to a copy of contents from <GtMultieoplist> <source> to
+   <GtMultieoplist> <copy>. <copy> may be NULL, returns new <GtMultieoplist>
+   object in that case. <source> may not be NULL!
+ */
+GtMultieoplist* gt_multieoplist_clone(GtMultieoplist *copy,
+                                      GtMultieoplist *source);
+
 /* Returns the number of <GtMultieop> elements in <multieops>, each of which
    can have <steps> > 1, therefor this represents not the length of the
    alignment. */
 GtUword         gt_multieoplist_get_length(GtMultieoplist *multieops);
+
 /* Returns <GtMultieop> number <index>. */
 GtMultieop      gt_multieoplist_get_entry(GtMultieoplist *multieops,
                                           GtUword index);
+
 /* Returns sum of <Replacement>, <Match>, <Mismatch> and <Deletion> including
    their <steps>. This corresponds to the length of the first sequence. */
 GtUword         gt_multieoplist_get_repdel_length(GtMultieoplist *multieops);
+
 /* Returns sum of <Replacement>, <Match>, <Mismatch> and <Insertion> including
    their <steps>. This corresponds to the length of the second sequence. */
 GtUword         gt_multieoplist_get_repins_length(GtMultieoplist *multieops);
@@ -108,6 +124,5 @@ typedef void (*MeoplistIOFunc)(void *ptr,
 GtMultieoplist* gt_meoplist_io(GtMultieoplist *multieops,
                                MeoplistIOFunc io_func,
                                FILE *fp);
-
 
 #endif
