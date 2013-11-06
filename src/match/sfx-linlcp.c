@@ -36,7 +36,7 @@ GtUword *gt_ENCSEQ_lcp13_manzini(const GtEncseq *encseq,
 {
   GtUword pos, lcpvalue = 0, *lcptab;
 
-  lcptab = gt_malloc(sizeof (GtUword) * partwidth);
+  lcptab = gt_malloc(sizeof (*lcptab) * partwidth);
   lcptab[0] = 0;
   for (pos=0; pos <= totallength; pos++)
   {
@@ -67,6 +67,74 @@ GtUword *gt_ENCSEQ_lcp13_manzini(const GtEncseq *encseq,
       lcpvalue--;
     }
   }
+  return lcptab;
+}
+
+#define LINLCP_ACCESS_TAB(TAB,POS)\
+        (unitsize == (size_t) 4 ? (GtUword) ((unsigned int *) (TAB))[POS]\
+                                : ((GtUword *) (TAB))[POS])
+
+unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
+                                     GtUword totallength,
+                                     const void *suftab,
+                                     size_t unitsize)
+{
+  unsigned int *lcptab;
+  GtUword pos, lcpvalue = 0;
+  void *inversesuftab;
+
+  gt_assert(unitsize == (size_t) 4 || unitsize == (size_t) 8);
+  inversesuftab = gt_malloc(unitsize * (totallength+1));
+  if (unitsize == (size_t) 4)
+  {
+    unsigned int idx;
+
+    gt_assert(totallength <= (GtUword) UINT_MAX);
+    for (idx = 0; idx <= (unsigned int) totallength; idx++)
+    {
+      ((unsigned int *) inversesuftab)[((unsigned int *) suftab)[idx]] = idx;
+    }
+  } else
+  {
+    GtUword idx;
+
+    for (idx = 0; idx <= totallength; idx++)
+    {
+      ((GtUword *) inversesuftab)[((GtUword *) suftab)[idx]] = idx;
+    }
+  }
+  lcptab = gt_malloc(sizeof (*lcptab) * (totallength+1));
+  lcptab[0] = 0;
+  for (pos = 0; pos <= totallength; pos++)
+  {
+    GtUword fillpos = LINLCP_ACCESS_TAB(inversesuftab,pos);
+    if (fillpos > 0)
+    {
+      GtUword previousstart = LINLCP_ACCESS_TAB(suftab,pos);
+      while (pos + lcpvalue < totallength &&
+             previousstart + lcpvalue < totallength)
+      {
+        GtUchar cc1, cc2;
+
+        cc1 = sequence[pos+lcpvalue];
+        cc2 = sequence[previousstart+lcpvalue];
+        if (cc1 == cc2)
+        {
+          lcpvalue++;
+        } else
+        {
+          break;
+        }
+      }
+      gt_assert(lcpvalue <= (GtUword) UINT_MAX);
+      lcptab[fillpos] = (unsigned int) lcpvalue;
+    }
+    if (lcpvalue > 0)
+    {
+      lcpvalue--;
+    }
+  }
+  gt_free(inversesuftab);
   return lcptab;
 }
 

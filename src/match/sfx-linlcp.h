@@ -29,6 +29,11 @@ GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
                                  GtUword totallength,
                                  const ESASuffixptr *suftab);
 
+unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
+                                     GtUword totallength,
+                                     const void *suftab,
+                                     size_t unitsize);
+
 int gt_lcptab_lightweightcheck(const char *esaindexname,
                                const GtEncseq *encseq,
                                GtReadmode readmode,
