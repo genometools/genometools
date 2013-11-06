@@ -1038,7 +1038,7 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
   GtUword totallength = 0;
   unsigned int numofchars = 0;
   GtEncseqMetadata *encseqmetadata = NULL;
-  Sequentialsuffixarrayreader *ssar;
+  Sequentialsuffixarrayreader *ssar = NULL;
 
   gt_error_check(err);
   gt_assert(gt_str_length(arguments->pckindexname) > 0);
@@ -1073,9 +1073,6 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
       {
         haserr = true;
       }
-    } else
-    {
-      ssar = NULL;
     }
   }
   if (!haserr)
