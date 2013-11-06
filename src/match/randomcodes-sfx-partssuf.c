@@ -201,6 +201,7 @@ GtSuftabparts_rc *gt_suftabparts_rc_new(unsigned int numofparts,
   }
   if (suftabparts_rc->numofparts == 0)
   {
+    gt_assert(numofparts != 0);
     suftabparts_rc->largestsuftabwidth = fullspecials/numofparts+1;
     suftabparts_rc->largestsizemappedpartwise
       = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
