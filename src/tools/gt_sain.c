@@ -411,26 +411,6 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                                 tl->logger,
                                                 tl->timer);
 
-            if (arguments->outlcptab && tl->logger != NULL)
-            {
-              unsigned int maxlcp = 0, *lcptab;
-              size_t idx;
-
-              lcptab = gt_plain_lcp13_manzini(filecontents,
-                                              (GtUword) len,
-                                              suftab,
-                                              sizeof *suftab);
-
-              for (idx = 0; idx <= len; idx++)
-              {
-                if (maxlcp < lcptab[idx])
-                {
-                  maxlcp = lcptab[idx];
-                }
-              }
-              gt_logger_log(tl->logger,"maxlcp = %u",maxlcp);
-              gt_free(lcptab);
-            }
           } else
           {
             gt_assert(gt_str_length(arguments->fastafile) > 0 &&
@@ -449,6 +429,31 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                                       arguments->fcheck,
                                                       tl->logger,
                                                       tl->timer);
+          }
+          if (arguments->outlcptab && tl->logger != NULL)
+          {
+            unsigned int maxlcp = 0, *lcptab;
+            GtUword idx, totallength
+                           = gt_str_length(arguments->plainseqfile) > 0
+                               ? (GtUword) len
+                               : gt_bare_encseq_total_length(bare_encseq);
+
+            lcptab = gt_plain_lcp13_manzini(filecontents,
+                           gt_str_length(arguments->plainseqfile) > 0
+                              ? false : true,
+                           totallength,
+                           suftab,
+                           sizeof *suftab);
+
+            for (idx = 0; idx <= totallength; idx++)
+            {
+              if (maxlcp < lcptab[idx])
+              {
+                maxlcp = lcptab[idx];
+              }
+            }
+            gt_logger_log(tl->logger,"maxlcp = %u",maxlcp);
+            gt_free(lcptab);
           }
           gt_free(suftab);
           gt_sain_timer_logger_delete(tl);

@@ -75,6 +75,7 @@ GtUword *gt_ENCSEQ_lcp13_manzini(const GtEncseq *encseq,
                                 : ((GtUword *) (TAB))[POS])
 
 unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
+                                     bool withspecial,
                                      GtUword totallength,
                                      const void *suftab,
                                      size_t unitsize)
@@ -118,7 +119,7 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
 
         cc1 = sequence[pos+lcpvalue];
         cc2 = sequence[previousstart+lcpvalue];
-        if (cc1 == cc2)
+        if (cc1 == cc2 && (!withspecial || ISNOTSPECIAL(cc1)))
         {
           lcpvalue++;
         } else

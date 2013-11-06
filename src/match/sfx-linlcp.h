@@ -30,6 +30,7 @@ GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
                                      const ESASuffixptr *suftab);
 
 unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
+                                     bool withspecial,
                                      GtUword totallength,
                                      const void *suftab,
                                      size_t unitsize);
