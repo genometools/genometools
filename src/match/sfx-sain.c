@@ -46,7 +46,6 @@ typedef enum
   GT_SAIN_BARE_ENCSEQ
 } GtSainSeqtype;
 
-typedef unsigned int GtUsainindextype;
 typedef signed int GtSsainindextype;
 
 typedef struct
@@ -1518,6 +1517,9 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
         gt_sain_filltailsuffixes(suftab + nonspecialentries,
                                  sainseq,
                                  sainseq->readmode);
+      } else
+      {
+        suftab[sainseq->totallength] = (GtUsainindextype) sainseq->totallength;
       }
       GT_SAIN_SHOWTIMER("check suffix order");
       switch (sainseq->seqtype)
@@ -1563,12 +1565,12 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   }
 }
 
-void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 bool intermediatecheck,
-                                 bool finalcheck,
-                                 GtLogger *logger,
-                                 GtTimer *timer)
+GtUsainindextype *gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
+                                              GtReadmode readmode,
+                                              bool intermediatecheck,
+                                              bool finalcheck,
+                                              GtLogger *logger,
+                                              GtTimer *timer)
 {
   GtUword nonspecialentries, suftabentries, totallength;
   GtUsainindextype *suftab;
@@ -1595,10 +1597,11 @@ void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
           (double) gt_sain_countcharaccess/sainseq->totallength);
 #endif
   gt_sainseq_delete(sainseq);
-  gt_free(suftab);
+  return suftab;
 }
 
-void gt_sain_bare_encseq_sortsuffixes(const GtBareEncseq *bare_encseq,
+GtUsainindextype *gt_sain_bare_encseq_sortsuffixes(
+                                      const GtBareEncseq *bare_encseq,
                                       GtReadmode readmode,
                                       bool intermediatecheck,
                                       bool finalcheck,
@@ -1631,14 +1634,15 @@ void gt_sain_bare_encseq_sortsuffixes(const GtBareEncseq *bare_encseq,
           (double) gt_sain_countcharaccess/sainseq->totallength);
 #endif
   gt_sainseq_delete(sainseq);
-  gt_free(suftab);
+  return suftab;
 }
 
-void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
-                                GtUword len,
-                                bool intermediatecheck,
-                                GtLogger *logger,
-                                GtTimer *timer)
+GtUsainindextype *gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
+                                             GtUword len,
+                                             bool intermediatecheck,
+                                             bool finalcheck,
+                                             GtLogger *logger,
+                                             GtTimer *timer)
 {
   GtUword suftabentries;
   GtUsainindextype *suftab;
@@ -1655,7 +1659,7 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                            sainseq->totallength,
                            suftabentries,
                            intermediatecheck,
-                           false,
+                           finalcheck,
                            logger,
                            timer);
 #ifdef GT_SAIN_WITHCOUNTS
@@ -1663,5 +1667,5 @@ void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
           (double) gt_sain_countcharaccess/sainseq->totallength);
 #endif
   gt_sainseq_delete(sainseq);
-  gt_free(suftab);
+  return suftab;
 }

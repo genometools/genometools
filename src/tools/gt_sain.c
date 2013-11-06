@@ -299,6 +299,8 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
     had_err = -1;
   } else
   {
+    GtUsainindextype *suftab;
+
     if (gt_str_length(arguments->encseqfile) > 0)
     {
       GtEncseqLoader *el = gt_encseq_loader_new();
@@ -329,12 +331,13 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
         {
           GtSainTimerandLogger *tl
             = gt_sain_timer_logger_new(arguments->verbose);
-          gt_sain_encseq_sortsuffixes(encseq,
-                                      arguments->readmode,
-                                      arguments->icheck,
-                                      arguments->fcheck,
-                                      tl->logger,
-                                      tl->timer);
+          suftab = gt_sain_encseq_sortsuffixes(encseq,
+                                               arguments->readmode,
+                                               arguments->icheck,
+                                               arguments->fcheck,
+                                               tl->logger,
+                                               tl->timer);
+          gt_free(suftab);
           gt_sain_timer_logger_delete(tl);
         }
       }
@@ -395,11 +398,12 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
             = gt_sain_timer_logger_new(arguments->verbose);
           if (gt_str_length(arguments->plainseqfile) > 0)
           {
-            gt_sain_plain_sortsuffixes(filecontents,
-                                       (GtUword) len,
-                                       arguments->icheck,
-                                       tl->logger,
-                                       tl->timer);
+            suftab = gt_sain_plain_sortsuffixes(filecontents,
+                                                (GtUword) len,
+                                                arguments->icheck,
+                                                arguments->fcheck,
+                                                tl->logger,
+                                                tl->timer);
           } else
           {
             gt_assert(gt_str_length(arguments->fastafile) > 0 &&
@@ -412,13 +416,14 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                   GT_ISDIRCOMPLEMENT(arguments->readmode)
                                     ? false : true);
             }
-            gt_sain_bare_encseq_sortsuffixes(bare_encseq,
-                                             arguments->readmode,
-                                             arguments->icheck,
-                                             arguments->fcheck,
-                                             tl->logger,
-                                             tl->timer);
+            suftab = gt_sain_bare_encseq_sortsuffixes(bare_encseq,
+                                                      arguments->readmode,
+                                                      arguments->icheck,
+                                                      arguments->fcheck,
+                                                      tl->logger,
+                                                      tl->timer);
           }
+          gt_free(suftab);
           gt_sain_timer_logger_delete(tl);
         }
         gt_bare_encseq_delete(bare_encseq);

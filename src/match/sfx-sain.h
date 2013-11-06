@@ -23,24 +23,28 @@
 #include "core/encseq.h"
 #include "bare-encseq.h"
 
-void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 bool intermediatecheck,
-                                 bool finalcheck,
-                                 GtLogger *logger,
-                                 GtTimer *timer);
+typedef unsigned int GtUsainindextype;
 
-void gt_sain_bare_encseq_sortsuffixes(const GtBareEncseq *bare_encseq,
+GtUsainindextype *gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
+                                              GtReadmode readmode,
+                                              bool intermediatecheck,
+                                              bool finalcheck,
+                                              GtLogger *logger,
+                                              GtTimer *timer);
+
+GtUsainindextype *gt_sain_bare_encseq_sortsuffixes(
+                                      const GtBareEncseq *bare_encseq,
                                       GtReadmode readmode,
                                       bool intermediatecheck,
                                       bool finalcheck,
                                       GtLogger *logger,
                                       GtTimer *timer);
 
-void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
-                                GtUword len,
-                                bool intermediatecheck,
-                                GtLogger *logger,
-                                GtTimer *timer);
+GtUsainindextype *gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
+                                             GtUword len,
+                                             bool intermediatecheck,
+                                             bool finalcheck,
+                                             GtLogger *logger,
+                                             GtTimer *timer);
 
 #endif
