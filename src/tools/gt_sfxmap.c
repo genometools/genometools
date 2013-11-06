@@ -649,6 +649,19 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
   return haserr ? -1 : 0;
 }
 
+static GtUchar sfx_accesschar_encseq(const void *encseq,GtUword position,
+                                     GtReadmode readmode)
+{
+  return gt_encseq_get_encoded_char((const GtEncseq *) encseq,
+                                    position,
+                                    readmode);
+}
+
+GtUword sfx_charcount_encseq(const void *encseq,GtUchar idx)
+{
+  return gt_encseq_charcount((const GtEncseq *) encseq, idx);
+}
+
 static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
                          GtError *err)
 {
@@ -751,12 +764,13 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
         {
           if (suffixarray.numberofallsortedsuffixes == totallength + 1)
           {
-            gt_suftab_lightweightcheck(false,
+            gt_suftab_lightweightcheck(sfx_accesschar_encseq,
+                                       sfx_charcount_encseq,
                                        suffixarray.encseq,
                                        suffixarray.readmode,
+                                       totallength,
                                        gt_encseq_alphabetnumofchars(
                                                  suffixarray.encseq),
-                                       totallength,
                                        suffixarray.suftab,
                                        sizeof suffixarray.suftab,
                                        logger);
@@ -939,11 +953,12 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
         }
       }
       gt_assert(countentries == numberofentries);
-      gt_suftab_lightweightcheck(false,
+      gt_suftab_lightweightcheck(sfx_accesschar_encseq,
+                                 sfx_charcount_encseq,
                                  encseq,
                                  GT_READMODE_FORWARD,
-                                 gt_encseq_alphabetnumofchars(encseq),
                                  totallength,
+                                 gt_encseq_alphabetnumofchars(encseq),
                                  suftab,
                                  sizeof *suftab,
                                  NULL);

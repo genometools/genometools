@@ -1026,9 +1026,10 @@ static void gt_sain_movenames2front(GtUsainindextype *suftab,
                                     GtUword totallength)
 {
   GtUsainindextype *rptr, *wptr;
-  const GtUsainindextype *maxrptr = suftab + numberofsuffixes +
-                                    GT_DIV2(totallength);
+  const GtUsainindextype *maxrptr;
 
+  gt_assert(totallength > 0);
+  maxrptr = suftab + numberofsuffixes + GT_DIV2(totallength-1);
   for (rptr = wptr = suftab + numberofsuffixes; rptr <= maxrptr; rptr++)
   {
     if (*rptr > 0)
@@ -1039,7 +1040,7 @@ static void gt_sain_movenames2front(GtUsainindextype *suftab,
                                   signified by 0 */
     }
   }
-  /*gt_assert(wptr == suftab + GT_MULT2(numberofsuffixes));*/
+  gt_assert(wptr == suftab + GT_MULT2(numberofsuffixes));
 }
 
 static void gt_sain_checkorder(const GtSainseq *sainseq,
@@ -1330,6 +1331,31 @@ static void gt_sain_filltailsuffixes(GtUsainindextype *suftabtail,
   }
 }
 
+static GtUchar sain_accesschar_bare_encseq(const void *encseq,GtUword position,
+                                           GT_UNUSED GtReadmode readmode)
+{
+  return gt_bare_encseq_get_encoded_char((const GtBareEncseq *) encseq,
+                                         position);
+}
+
+GtUword sain_charcount_bare_encseq(const void *encseq,GtUchar idx)
+{
+  return gt_bare_encseq_charcount((const GtBareEncseq *) encseq,idx);
+}
+
+static GtUchar sain_accesschar_encseq(const void *encseq,GtUword position,
+                                      GtReadmode readmode)
+{
+  return gt_encseq_get_encoded_char((const GtEncseq *) encseq,
+                                    position,
+                                    readmode);
+}
+
+GtUword sain_charcount_encseq(const void *encseq,GtUchar idx)
+{
+  return gt_encseq_charcount((const GtEncseq *) encseq, idx);
+}
+
 static void gt_sain_rec_sortsuffixes(unsigned int level,
                                      GtSainseq *sainseq,
                                      GtUsainindextype *suftab,
@@ -1481,13 +1507,18 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
                                sainseq->readmode);
       GT_SAIN_SHOWTIMER("check suffix order");
       gt_suftab_lightweightcheck(
-                sainseq->seqtype == GT_SAIN_BARE_ENCSEQ ? true : false,
+                sainseq->seqtype == GT_SAIN_BARE_ENCSEQ
+                  ? sain_accesschar_bare_encseq
+                  : sain_accesschar_encseq,
+                sainseq->seqtype == GT_SAIN_BARE_ENCSEQ
+                  ? sain_charcount_bare_encseq
+                  : sain_charcount_encseq,
                 sainseq->seqtype == GT_SAIN_BARE_ENCSEQ
                   ? (void *) sainseq->bare_encseq
                   : (void *) sainseq->seq.encseq,
                 sainseq->readmode,
-                (unsigned int) sainseq->numofchars,
                 sainseq->totallength,
+                (unsigned int) sainseq->numofchars,
                 suftab,
                 sizeof *suftab,
                 NULL);

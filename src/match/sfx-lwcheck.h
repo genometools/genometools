@@ -20,15 +20,19 @@
 
 #include "core/types_api.h"
 #include "core/logger_api.h"
-#include "core/encseq.h"
+#include "core/readmode_api.h"
 
-void gt_suftab_lightweightcheck(bool bare,
+typedef GtUchar (*LW_accesschar)(const void *,GtUword,GtReadmode);
+typedef GtUword (*LW_charcount)(const void *,GtUchar);
+
+void gt_suftab_lightweightcheck(LW_accesschar accesschar,
+                                LW_charcount charcount,
                                 const void *encseq,
                                 GtReadmode readmode,
-                                unsigned int numofchars,
                                 GtUword totallength,
+                                unsigned int numofchars,
                                 const void *suftab,
-                                GT_UNUSED size_t unitsize,
+                                size_t unitsize,
                                 GtLogger *logger);
 
 #endif
