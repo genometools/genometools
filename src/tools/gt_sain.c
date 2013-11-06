@@ -63,7 +63,7 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
 {
   GtSainArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionfcheck, *optionesq, *optionfile, *optionmmap,
+  GtOption *option, *optionesq, *optionfile, *optionmmap,
            *optionfasta, *optiondnaalphabet, *optionproteinalphabet,
            *optionsmap;
 
@@ -122,15 +122,14 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionmmap);
 
   /* -fcheck */
-  optionfcheck = gt_option_new_bool("fcheck", "final check of suffix array",
-                                    &arguments->fcheck, false);
-  gt_option_parser_add_option(op, optionfcheck);
+  option = gt_option_new_bool("fcheck", "final check of suffix array",
+                              &arguments->fcheck, false);
+  gt_option_parser_add_option(op, option);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
-  gt_option_imply_either_2(optionfcheck, optionesq, optionfasta);
   gt_option_exclude(optionesq,optionfile);
   gt_option_exclude(optionesq, optionfasta);
   gt_option_exclude(optionfile, optionfasta);

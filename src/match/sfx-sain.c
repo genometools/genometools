@@ -1356,6 +1356,17 @@ GtUword sain_charcount_encseq(const void *encseq,GtUchar idx)
   return gt_encseq_charcount((const GtEncseq *) encseq, idx);
 }
 
+static GtUchar sain_accesschar_plainseq(const void *encseq,GtUword position,
+                                        GT_UNUSED GtReadmode readmode)
+{
+  return ((const GtSainseq *) encseq)->seq.plainseq[position];
+}
+
+static GtUword sain_charcount_plainseq(const void *encseq,GtUchar idx)
+{
+  return (GtUword) ((const GtSainseq *) encseq)->bucketsize[idx];
+}
+
 static void gt_sain_rec_sortsuffixes(unsigned int level,
                                      GtSainseq *sainseq,
                                      GtUsainindextype *suftab,
@@ -1498,30 +1509,56 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     {
       gt_sain_checkorder(sainseq,suftab,0,nonspecialentries-1);
     }
-    if ((sainseq->seqtype == GT_SAIN_ENCSEQ ||
-         sainseq->seqtype == GT_SAIN_BARE_ENCSEQ) && finalcheck)
+    if (sainseq->seqtype != GT_SAIN_INTSEQ && finalcheck)
     {
-      GT_SAIN_SHOWTIMER("fill tail suffixes");
-      gt_sain_filltailsuffixes(suftab + nonspecialentries,
-                               sainseq,
-                               sainseq->readmode);
+      if (sainseq->seqtype == GT_SAIN_BARE_ENCSEQ ||
+          sainseq->seqtype == GT_SAIN_ENCSEQ)
+      {
+        GT_SAIN_SHOWTIMER("fill tail suffixes");
+        gt_sain_filltailsuffixes(suftab + nonspecialentries,
+                                 sainseq,
+                                 sainseq->readmode);
+      }
       GT_SAIN_SHOWTIMER("check suffix order");
-      gt_suftab_lightweightcheck(
-                sainseq->seqtype == GT_SAIN_BARE_ENCSEQ
-                  ? sain_accesschar_bare_encseq
-                  : sain_accesschar_encseq,
-                sainseq->seqtype == GT_SAIN_BARE_ENCSEQ
-                  ? sain_charcount_bare_encseq
-                  : sain_charcount_encseq,
-                sainseq->seqtype == GT_SAIN_BARE_ENCSEQ
-                  ? (void *) sainseq->bare_encseq
-                  : (void *) sainseq->seq.encseq,
-                sainseq->readmode,
-                sainseq->totallength,
-                (unsigned int) sainseq->numofchars,
-                suftab,
-                sizeof *suftab,
-                NULL);
+      switch (sainseq->seqtype)
+      {
+        case GT_SAIN_BARE_ENCSEQ:
+          gt_suftab_lightweightcheck(sain_accesschar_bare_encseq,
+                                     sain_charcount_bare_encseq,
+                                     (void *) sainseq->bare_encseq,
+                                     sainseq->readmode,
+                                     sainseq->totallength,
+                                     (unsigned int) sainseq->numofchars,
+                                     suftab,
+                                     sizeof *suftab,
+                                     NULL);
+          break;
+        case GT_SAIN_ENCSEQ:
+          gt_suftab_lightweightcheck(sain_accesschar_encseq,
+                                     sain_charcount_encseq,
+                                     (void *) sainseq->seq.encseq,
+                                     sainseq->readmode,
+                                     sainseq->totallength,
+                                     (unsigned int) sainseq->numofchars,
+                                     suftab,
+                                     sizeof *suftab,
+                                     NULL);
+          break;
+        case GT_SAIN_PLAINSEQ:
+          gt_assert(sainseq->readmode == GT_READMODE_FORWARD);
+          gt_suftab_lightweightcheck(sain_accesschar_plainseq,
+                                     sain_charcount_plainseq,
+                                     (void *) sainseq,
+                                     sainseq->readmode,
+                                     sainseq->totallength,
+                                     (unsigned int) sainseq->numofchars,
+                                     suftab,
+                                     sizeof *suftab,
+                                     NULL);
+          break;
+        default:
+          gt_assert(false);
+      }
     }
   }
 }
