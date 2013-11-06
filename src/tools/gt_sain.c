@@ -22,12 +22,13 @@
 #include "core/showtime.h"
 #include "core/logger.h"
 #include "tools/gt_sain.h"
+#include "match/sfx-linlcp.h"
 #include "match/sfx-sain.h"
 #include "match/bare-encseq.h"
 
 typedef struct
 {
-  bool icheck, fcheck, verbose, dommap, dnaalphabet, proteinalphabet;
+  bool icheck, fcheck, outlcptab, verbose, dommap, dnaalphabet, proteinalphabet;
   GtStr *encseqfile, *plainseqfile, *fastafile, *dir, *smap;
   GtReadmode readmode;
 } GtSainArguments;
@@ -59,13 +60,13 @@ static void gt_sain_arguments_delete(void *tool_arguments)
   }
 }
 
-static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
+static GtOptionParser *gt_sain_option_parser_new(void *tool_arguments)
 {
   GtSainArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *optionesq, *optionfile, *optionmmap,
            *optionfasta, *optiondnaalphabet, *optionproteinalphabet,
-           *optionsmap;
+           *optionlcp, *optionsmap;
 
   gt_assert(arguments != NULL);
 
@@ -82,6 +83,11 @@ static GtOptionParser* gt_sain_option_parser_new(void *tool_arguments)
 
   /* -dir */
   gt_encseq_options_add_readmode_option(op, arguments->dir);
+
+  /* -lcp */
+  optionlcp = gt_option_new_bool("lcp", "output lcp table",
+                                 &arguments->outlcptab, NULL);
+  gt_option_parser_add_option(op, optionlcp);
 
   /* -file */
   optionfile = gt_option_new_string("file", "specify filename",
@@ -299,7 +305,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
     had_err = -1;
   } else
   {
-    GtUsainindextype *suftab;
+    GtUsainindextype *suftab = NULL;
 
     if (gt_str_length(arguments->encseqfile) > 0)
     {
@@ -337,8 +343,8 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                                arguments->fcheck,
                                                tl->logger,
                                                tl->timer);
-          gt_free(suftab);
           gt_sain_timer_logger_delete(tl);
+          gt_free(suftab);
         }
       }
       gt_encseq_delete(encseq);
@@ -404,6 +410,27 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                                 arguments->fcheck,
                                                 tl->logger,
                                                 tl->timer);
+
+            if (arguments->outlcptab && tl->logger != NULL)
+            {
+              unsigned int maxlcp = 0, *lcptab;
+              size_t idx;
+
+              lcptab = gt_plain_lcp13_manzini(filecontents,
+                                              (GtUword) len,
+                                              suftab,
+                                              sizeof *suftab);
+
+              for (idx = 0; idx <= len; idx++)
+              {
+                if (maxlcp < lcptab[idx])
+                {
+                  maxlcp = lcptab[idx];
+                }
+              }
+              gt_logger_log(tl->logger,"maxlcp = %u",maxlcp);
+              gt_free(lcptab);
+            }
           } else
           {
             gt_assert(gt_str_length(arguments->fastafile) > 0 &&

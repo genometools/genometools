@@ -23,11 +23,11 @@
 #include "match/sarr-def.h"
 
 GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
-                                 const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 GtUword partwidth,
-                                 GtUword totallength,
-                                 const ESASuffixptr *suftab);
+                                     const GtEncseq *encseq,
+                                     GtReadmode readmode,
+                                     GtUword partwidth,
+                                     GtUword totallength,
+                                     const ESASuffixptr *suftab);
 
 unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
                                      GtUword totallength,

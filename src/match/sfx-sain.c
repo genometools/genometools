@@ -1508,7 +1508,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
     {
       gt_sain_checkorder(sainseq,suftab,0,nonspecialentries-1);
     }
-    if (sainseq->seqtype != GT_SAIN_INTSEQ && finalcheck)
+    if (sainseq->seqtype != GT_SAIN_INTSEQ)
     {
       if (sainseq->seqtype == GT_SAIN_BARE_ENCSEQ ||
           sainseq->seqtype == GT_SAIN_ENCSEQ)
@@ -1521,6 +1521,9 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
       {
         suftab[sainseq->totallength] = (GtUsainindextype) sainseq->totallength;
       }
+    }
+    if (finalcheck && sainseq->seqtype != GT_SAIN_INTSEQ)
+    {
       GT_SAIN_SHOWTIMER("check suffix order");
       switch (sainseq->seqtype)
       {
