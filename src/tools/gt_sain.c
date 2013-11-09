@@ -289,6 +289,20 @@ static GtAlphabet *gt_sain_getalphabet(const GtSainArguments *arguments,
   return alphabet;
 }
 
+static void checkplcptab(const unsigned int *lcptab,
+                         const unsigned int *plcptab,
+                         const unsigned *suftab,
+                         GtUword partwidth)
+{
+  GtUword idx;
+
+  for (idx = 1UL; idx < partwidth; idx++)
+  {
+    unsigned int suftabvalue = suftab[idx];
+    gt_assert(lcptab[idx] == plcptab[suftabvalue]);
+  }
+}
+
 static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                           int parsed_args, void *tool_arguments, GtError *err)
 {
@@ -430,30 +444,42 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                                       tl->logger,
                                                       tl->timer);
           }
-          if (arguments->outlcptab && tl->logger != NULL)
+          if (arguments->outlcptab)
           {
-            unsigned int maxlcp = 0, *lcptab;
-            GtUword idx, totallength
-                           = gt_str_length(arguments->plainseqfile) > 0
-                               ? (GtUword) len
-                               : gt_bare_encseq_total_length(bare_encseq);
+            unsigned int maxlcp = 0, *lcptab, *plcptab;
+            bool withspecial;
+            GtUword idx, partwidth, totallength;
 
+            if (gt_str_length(arguments->plainseqfile) > 0)
+            {
+              withspecial = false;
+              totallength = (GtUword) len;
+              partwidth = totallength;
+            } else
+            {
+              withspecial = true;
+              totallength = gt_bare_encseq_total_length(bare_encseq);
+              partwidth = totallength -
+                          gt_bare_encseq_specialcharacters(bare_encseq);
+            }
             lcptab = gt_plain_lcp13_manzini(filecontents,
-                           gt_str_length(arguments->plainseqfile) > 0
-                              ? false : true,
-                           totallength,
-                           suftab,
-                           sizeof *suftab);
-
-            for (idx = 0; idx <= totallength; idx++)
+                                            withspecial,
+                                            partwidth,
+                                            totallength,
+                                            suftab);
+            for (idx = 0; idx < partwidth; idx++)
             {
               if (maxlcp < lcptab[idx])
               {
                 maxlcp = lcptab[idx];
               }
             }
-            gt_logger_log(tl->logger,"maxlcp = %u",maxlcp);
+            gt_logger_log(tl->logger,"maxlcp=%u",maxlcp);
+            plcptab = gt_plain_phialg(filecontents, withspecial, totallength,
+                                      suftab);
+            checkplcptab(lcptab,plcptab,suftab,partwidth);
             gt_free(lcptab);
+            gt_free(plcptab);
           }
           gt_free(suftab);
           gt_sain_timer_logger_delete(tl);

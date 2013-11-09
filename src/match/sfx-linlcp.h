@@ -31,9 +31,14 @@ GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
 
 unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
                                      bool withspecial,
+                                     GtUword partwidth,
                                      GtUword totallength,
-                                     const void *suftab,
-                                     size_t unitsize);
+                                     const unsigned int *suftab);
+
+unsigned int *gt_plain_phialg(const GtUchar *sequence,
+                              bool withspecial,
+                              GtUword totallength,
+                              const unsigned int *suftab);
 
 int gt_lcptab_lightweightcheck(const char *esaindexname,
                                const GtEncseq *encseq,

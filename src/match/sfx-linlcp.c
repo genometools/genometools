@@ -70,48 +70,31 @@ GtUword *gt_ENCSEQ_lcp13_manzini(const GtEncseq *encseq,
   return lcptab;
 }
 
-#define LINLCP_ACCESS_TAB(TAB,POS)\
-        (unitsize == (size_t) 4 ? (GtUword) ((unsigned int *) (TAB))[POS]\
-                                : ((GtUword *) (TAB))[POS])
-
 unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
                                      bool withspecial,
+                                     GtUword partwidth,
                                      GtUword totallength,
-                                     const void *suftab,
-                                     size_t unitsize)
+                                     const unsigned int *suftab)
 {
   unsigned int *lcptab;
+  unsigned int idx;
+  unsigned int *inversesuftab;
   GtUword pos, lcpvalue = 0;
-  void *inversesuftab;
 
-  gt_assert(unitsize == (size_t) 4 || unitsize == (size_t) 8);
-  inversesuftab = gt_malloc(unitsize * (totallength+1));
-  if (unitsize == (size_t) 4)
+  inversesuftab = gt_malloc(sizeof (*inversesuftab) * (totallength+1));
+  gt_assert(totallength <= (GtUword) UINT_MAX);
+  for (idx = 0; idx <= (unsigned int) totallength; idx++)
   {
-    unsigned int idx;
-
-    gt_assert(totallength <= (GtUword) UINT_MAX);
-    for (idx = 0; idx <= (unsigned int) totallength; idx++)
-    {
-      ((unsigned int *) inversesuftab)[((unsigned int *) suftab)[idx]] = idx;
-    }
-  } else
-  {
-    GtUword idx;
-
-    for (idx = 0; idx <= totallength; idx++)
-    {
-      ((GtUword *) inversesuftab)[((GtUword *) suftab)[idx]] = idx;
-    }
+    inversesuftab[suftab[idx]] = idx;
   }
   lcptab = gt_malloc(sizeof (*lcptab) * (totallength+1));
   lcptab[0] = 0;
   for (pos = 0; pos <= totallength; pos++)
   {
-    GtUword fillpos = LINLCP_ACCESS_TAB(inversesuftab,pos);
-    if (fillpos > 0)
+    GtUword fillpos = (GtUword) inversesuftab[pos];
+    if (fillpos > 0 && fillpos < partwidth)
     {
-      GtUword previousstart = LINLCP_ACCESS_TAB(suftab,pos);
+      GtUword previousstart = (GtUword) suftab[fillpos-1];
       while (pos + lcpvalue < totallength &&
              previousstart + lcpvalue < totallength)
       {
@@ -137,6 +120,52 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
   }
   gt_free(inversesuftab);
   return lcptab;
+}
+
+unsigned int *gt_plain_phialg(const GtUchar *sequence,
+                              bool withspecial,
+                              GtUword totallength,
+                              const unsigned int *suftab)
+{
+  unsigned int *plcptab, *phitab, lcpvalue = 0, suftab0, previousvalue;
+  GtUword idx, pos;
+
+  phitab = gt_malloc(sizeof (*phitab) * (totallength+1));
+  suftab0 = previousvalue = suftab[0];
+  for (idx = 1UL; idx <= totallength; idx++)
+  {
+    unsigned int currentvalue = suftab[idx];
+    phitab[currentvalue] = previousvalue;
+    previousvalue = currentvalue;
+  }
+  plcptab = gt_malloc(sizeof (*plcptab) * (totallength+1));
+  for (pos = 0; pos < totallength; pos++)
+  {
+    if (pos != (GtUword) suftab0)
+    {
+      const GtUchar *largerptr,
+                    *ptr1 = sequence + pos,
+                    *ptr2 = sequence + phitab[pos];
+
+      largerptr = ptr1 > ptr2 ? ptr1 : ptr2;
+      while (largerptr + lcpvalue < sequence + totallength &&
+             ptr1[lcpvalue] == ptr2[lcpvalue] &&
+             (!withspecial || ISNOTSPECIAL(ptr1[lcpvalue])))
+      {
+        lcpvalue++;
+      }
+      plcptab[pos] = lcpvalue;
+      if (lcpvalue > 0)
+      {
+        lcpvalue--;
+      }
+    } else
+    {
+      plcptab[pos] = 0;
+    }
+  }
+  gt_free(phitab);
+  return plcptab;
 }
 
 static GtUword *gt_ENCSEQ_compute_occless_tab(const GtEncseq *encseq,

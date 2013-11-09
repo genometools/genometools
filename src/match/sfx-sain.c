@@ -1502,68 +1502,65 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
   GT_SAIN_SHOWTIMER("final induce S suffixes");
   gt_sain_induceStypesuffixes2(sainseq,(GtSsainindextype *) suftab,
                                nonspecialentries);
-  if (nonspecialentries > 0)
+  if (intermediatecheck && nonspecialentries > 0)
   {
-    if (intermediatecheck)
+    gt_sain_checkorder(sainseq,suftab,0,nonspecialentries-1);
+  }
+  if (sainseq->seqtype != GT_SAIN_INTSEQ)
+  {
+    if (sainseq->seqtype == GT_SAIN_BARE_ENCSEQ ||
+        sainseq->seqtype == GT_SAIN_ENCSEQ)
     {
-      gt_sain_checkorder(sainseq,suftab,0,nonspecialentries-1);
+      GT_SAIN_SHOWTIMER("fill tail suffixes");
+      gt_sain_filltailsuffixes(suftab + nonspecialentries,
+                               sainseq,
+                               sainseq->readmode);
+    } else
+    {
+      suftab[sainseq->totallength] = (GtUsainindextype) sainseq->totallength;
     }
-    if (sainseq->seqtype != GT_SAIN_INTSEQ)
+  }
+  if (finalcheck && sainseq->seqtype != GT_SAIN_INTSEQ)
+  {
+    GT_SAIN_SHOWTIMER("check suffix order");
+    switch (sainseq->seqtype)
     {
-      if (sainseq->seqtype == GT_SAIN_BARE_ENCSEQ ||
-          sainseq->seqtype == GT_SAIN_ENCSEQ)
-      {
-        GT_SAIN_SHOWTIMER("fill tail suffixes");
-        gt_sain_filltailsuffixes(suftab + nonspecialentries,
-                                 sainseq,
-                                 sainseq->readmode);
-      } else
-      {
-        suftab[sainseq->totallength] = (GtUsainindextype) sainseq->totallength;
-      }
-    }
-    if (finalcheck && sainseq->seqtype != GT_SAIN_INTSEQ)
-    {
-      GT_SAIN_SHOWTIMER("check suffix order");
-      switch (sainseq->seqtype)
-      {
-        case GT_SAIN_BARE_ENCSEQ:
-          gt_suftab_lightweightcheck(sain_accesschar_bare_encseq,
-                                     sain_charcount_bare_encseq,
-                                     (void *) sainseq->bare_encseq,
-                                     sainseq->readmode,
-                                     sainseq->totallength,
-                                     (unsigned int) sainseq->numofchars,
-                                     suftab,
-                                     sizeof *suftab,
-                                     NULL);
-          break;
-        case GT_SAIN_ENCSEQ:
-          gt_suftab_lightweightcheck(sain_accesschar_encseq,
-                                     sain_charcount_encseq,
-                                     (void *) sainseq->seq.encseq,
-                                     sainseq->readmode,
-                                     sainseq->totallength,
-                                     (unsigned int) sainseq->numofchars,
-                                     suftab,
-                                     sizeof *suftab,
-                                     NULL);
-          break;
-        case GT_SAIN_PLAINSEQ:
-          gt_assert(sainseq->readmode == GT_READMODE_FORWARD);
-          gt_suftab_lightweightcheck(sain_accesschar_plainseq,
-                                     sain_charcount_plainseq,
-                                     (void *) sainseq,
-                                     sainseq->readmode,
-                                     sainseq->totallength,
-                                     (unsigned int) sainseq->numofchars,
-                                     suftab,
-                                     sizeof *suftab,
-                                     NULL);
-          break;
-        default:
-          gt_assert(false);
-      }
+      case GT_SAIN_BARE_ENCSEQ:
+        gt_suftab_lightweightcheck(sain_accesschar_bare_encseq,
+                                   sain_charcount_bare_encseq,
+                                   (void *) sainseq->bare_encseq,
+                                   sainseq->readmode,
+                                   sainseq->totallength,
+                                   (unsigned int) sainseq->numofchars,
+                                   suftab,
+                                   sizeof *suftab,
+                                   NULL);
+        break;
+      case GT_SAIN_ENCSEQ:
+        gt_suftab_lightweightcheck(sain_accesschar_encseq,
+                                   sain_charcount_encseq,
+                                   (void *) sainseq->seq.encseq,
+                                   sainseq->readmode,
+                                   sainseq->totallength,
+                                   (unsigned int) sainseq->numofchars,
+                                   suftab,
+                                   sizeof *suftab,
+                                   NULL);
+        break;
+      case GT_SAIN_PLAINSEQ:
+        gt_assert(sainseq->readmode == GT_READMODE_FORWARD);
+        gt_suftab_lightweightcheck(sain_accesschar_plainseq,
+                                   sain_charcount_plainseq,
+                                   (void *) sainseq,
+                                   sainseq->readmode,
+                                   sainseq->totallength,
+                                   (unsigned int) sainseq->numofchars,
+                                   suftab,
+                                   sizeof *suftab,
+                                   NULL);
+        break;
+      default:
+        gt_assert(false);
     }
   }
 }
