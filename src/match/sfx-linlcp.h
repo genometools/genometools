@@ -37,6 +37,7 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
 
 unsigned int *gt_plain_phialg(const GtUchar *sequence,
                               bool withspecial,
+                              GtUword partwidth,
                               GtUword totallength,
                               const unsigned int *suftab);
 

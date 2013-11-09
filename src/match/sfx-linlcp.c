@@ -94,9 +94,9 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
     if (fillpos > 0 && fillpos < partwidth)
     {
       GtUword previousstart = (GtUword) suftab[fillpos-1],
-              largervalue = MAX(pos,previousstart);
+              lastoffset = totallength - MAX(pos,previousstart);
 
-      while (largervalue + lcpvalue < totallength)
+      while (lcpvalue < lastoffset)
       {
         GtUchar cc1, cc2;
 
@@ -124,10 +124,12 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
 
 unsigned int *gt_plain_phialg(const GtUchar *sequence,
                               bool withspecial,
+                              GtUword partwidth,
                               GtUword totallength,
                               const unsigned int *suftab)
 {
-  unsigned int *plcptab, *phitab, pos, suftab0, lcpvalue = 0, previousvalue;
+  unsigned int *plcptab, *phitab, *lcptab, pos, suftab0, lcpvalue = 0,
+               previousvalue;
   GtUword idx;
 
   phitab = gt_malloc(sizeof (*phitab) * (totallength+1));
@@ -148,8 +150,9 @@ unsigned int *gt_plain_phialg(const GtUchar *sequence,
       const GtUchar *ptr1 = sequence + pos,
                     *ptr2 = sequence + phitab[pos];
 
-      const unsigned int larger = MAX(pos,phitab[pos]);
-      while (larger + lcpvalue < (unsigned int) totallength)
+      const unsigned int lastoffset
+        = (unsigned int) (totallength - MAX(pos,phitab[pos]));
+      while (lcpvalue < lastoffset)
       {
         GtUchar cc1 = ptr1[lcpvalue];
         GtUchar cc2 = ptr2[lcpvalue];
@@ -172,7 +175,17 @@ unsigned int *gt_plain_phialg(const GtUchar *sequence,
     }
   }
   gt_free(phitab);
-  return plcptab;
+  lcptab = gt_malloc(sizeof (*lcptab) * (totallength+1));
+  for (idx = 0; idx < partwidth; idx++)
+  {
+    lcptab[idx] = plcptab[suftab[idx]];
+  }
+  gt_free(plcptab);
+  for (idx = partwidth; idx <= totallength; idx++)
+  {
+    lcptab[idx] = 0;
+  }
+  return lcptab;
 }
 
 static GtUword *gt_ENCSEQ_compute_occless_tab(const GtEncseq *encseq,

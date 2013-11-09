@@ -289,17 +289,15 @@ static GtAlphabet *gt_sain_getalphabet(const GtSainArguments *arguments,
   return alphabet;
 }
 
-static void checkplcptab(const unsigned int *lcptab,
-                         const unsigned int *plcptab,
-                         const unsigned *suftab,
-                         GtUword partwidth)
+static void checklcptab(const unsigned int *lcptab,
+                        const unsigned int *lcptab2,
+                        GtUword partwidth)
 {
   GtUword idx;
 
-  for (idx = 1UL; idx < partwidth; idx++)
+  for (idx = 0; idx < partwidth; idx++)
   {
-    unsigned int suftabvalue = suftab[idx];
-    gt_assert(lcptab[idx] == plcptab[suftabvalue]);
+    gt_assert(lcptab[idx] == lcptab2[idx]);
   }
 }
 
@@ -446,7 +444,7 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           }
           if (arguments->outlcptab)
           {
-            unsigned int maxlcp = 0, *lcptab, *plcptab;
+            unsigned int maxlcp = 0, *lcptab, *lcptab2;
             bool withspecial;
             GtUword idx, partwidth, totallength;
 
@@ -475,11 +473,11 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
               }
             }
             gt_logger_log(tl->logger,"maxlcp=%u",maxlcp);
-            plcptab = gt_plain_phialg(filecontents, withspecial, totallength,
-                                      suftab);
-            checkplcptab(lcptab,plcptab,suftab,partwidth);
+            lcptab2 = gt_plain_phialg(filecontents, withspecial, partwidth,
+                                      totallength, suftab);
+            checklcptab(lcptab,lcptab2,partwidth);
             gt_free(lcptab);
-            gt_free(plcptab);
+            gt_free(lcptab2);
           }
           gt_free(suftab);
           gt_sain_timer_logger_delete(tl);
