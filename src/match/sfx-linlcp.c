@@ -22,6 +22,7 @@
 #include "core/range.h"
 #include "core/mathsupport.h"
 #include "core/logger.h"
+#include "core/minmax.h"
 #include "core/compact_ulong_store.h"
 #include "esa-seqread.h"
 #include "sarr-def.h"
@@ -76,9 +77,7 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
                                      GtUword totallength,
                                      const unsigned int *suftab)
 {
-  unsigned int *lcptab;
-  unsigned int idx;
-  unsigned int *inversesuftab;
+  unsigned int *lcptab, *inversesuftab, idx;
   GtUword pos, lcpvalue = 0;
 
   inversesuftab = gt_malloc(sizeof (*inversesuftab) * (totallength+1));
@@ -94,9 +93,10 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
     GtUword fillpos = (GtUword) inversesuftab[pos];
     if (fillpos > 0 && fillpos < partwidth)
     {
-      GtUword previousstart = (GtUword) suftab[fillpos-1];
-      while (pos + lcpvalue < totallength &&
-             previousstart + lcpvalue < totallength)
+      GtUword previousstart = (GtUword) suftab[fillpos-1],
+              largervalue = MAX(pos,previousstart);
+
+      while (largervalue + lcpvalue < totallength)
       {
         GtUchar cc1, cc2;
 
@@ -127,11 +127,11 @@ unsigned int *gt_plain_phialg(const GtUchar *sequence,
                               GtUword totallength,
                               const unsigned int *suftab)
 {
-  unsigned int *plcptab, *phitab, lcpvalue = 0, suftab0, previousvalue;
-  GtUword idx, pos;
+  unsigned int *plcptab, *phitab, pos, suftab0, lcpvalue = 0, previousvalue;
+  GtUword idx;
 
   phitab = gt_malloc(sizeof (*phitab) * (totallength+1));
-  suftab0 = previousvalue = suftab[0];
+  previousvalue = suftab[0];
   for (idx = 1UL; idx <= totallength; idx++)
   {
     unsigned int currentvalue = suftab[idx];
@@ -139,20 +139,27 @@ unsigned int *gt_plain_phialg(const GtUchar *sequence,
     previousvalue = currentvalue;
   }
   plcptab = gt_malloc(sizeof (*plcptab) * (totallength+1));
-  for (pos = 0; pos < totallength; pos++)
+  suftab0 = suftab[0];
+  gt_assert(totallength <= (GtUword) UINT_MAX);
+  for (pos = 0; pos < (unsigned int) totallength; pos++)
   {
-    if (pos != (GtUword) suftab0)
+    if (pos != suftab0)
     {
-      const GtUchar *largerptr,
-                    *ptr1 = sequence + pos,
+      const GtUchar *ptr1 = sequence + pos,
                     *ptr2 = sequence + phitab[pos];
 
-      largerptr = ptr1 > ptr2 ? ptr1 : ptr2;
-      while (largerptr + lcpvalue < sequence + totallength &&
-             ptr1[lcpvalue] == ptr2[lcpvalue] &&
-             (!withspecial || ISNOTSPECIAL(ptr1[lcpvalue])))
+      const unsigned int larger = MAX(pos,phitab[pos]);
+      while (larger + lcpvalue < (unsigned int) totallength)
       {
-        lcpvalue++;
+        GtUchar cc1 = ptr1[lcpvalue];
+        GtUchar cc2 = ptr2[lcpvalue];
+        if (cc1 == cc2 && (!withspecial || ISNOTSPECIAL(cc1)))
+        {
+          lcpvalue++;
+        } else
+        {
+          break;
+        }
       }
       plcptab[pos] = lcpvalue;
       if (lcpvalue > 0)
