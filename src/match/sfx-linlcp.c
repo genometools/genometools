@@ -28,12 +28,12 @@
 #include "sarr-def.h"
 #include "sfx-linlcp.h"
 
-GtUword *gt_ENCSEQ_lcp13_manzini(const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 GtUword partwidth,
-                                 GtUword totallength,
-                                 const ESASuffixptr *suftab,
-                                 GtCompactUlongStore *inversesuftab)
+GtUword *gt_ENCSEQ_lcp13_kasai(const GtEncseq *encseq,
+                               GtReadmode readmode,
+                               GtUword partwidth,
+                               GtUword totallength,
+                               const ESASuffixptr *suftab,
+                               GtCompactUlongStore *inversesuftab)
 {
   GtUword pos, lcpvalue = 0, *lcptab;
 
@@ -71,11 +71,12 @@ GtUword *gt_ENCSEQ_lcp13_manzini(const GtEncseq *encseq,
   return lcptab;
 }
 
-unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
-                                     bool withspecial,
-                                     GtUword partwidth,
-                                     GtUword totallength,
-                                     const unsigned int *suftab)
+unsigned int *gt_plain_lcp13_kasai(GtUword *maxlcp,
+                                   const GtUchar *sequence,
+                                   bool withspecial,
+                                   GtUword partwidth,
+                                   GtUword totallength,
+                                   const unsigned int *suftab)
 {
   unsigned int *lcptab, *inversesuftab, idx;
   GtUword pos, lcpvalue = 0;
@@ -88,6 +89,7 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
   }
   lcptab = gt_malloc(sizeof (*lcptab) * (totallength+1));
   lcptab[0] = 0;
+  *maxlcp = 0;
   for (pos = 0; pos <= totallength; pos++)
   {
     GtUword fillpos = (GtUword) inversesuftab[pos];
@@ -112,6 +114,10 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
       }
       gt_assert(lcpvalue <= (GtUword) UINT_MAX);
       lcptab[fillpos] = (unsigned int) lcpvalue;
+      if (*maxlcp < lcpvalue)
+      {
+        *maxlcp = lcpvalue;
+      }
     }
     if (lcpvalue > 0)
     {
@@ -122,15 +128,16 @@ unsigned int *gt_plain_lcp13_manzini(const GtUchar *sequence,
   return lcptab;
 }
 
-unsigned int *gt_plain_phialg(const GtUchar *sequence,
-                              bool withspecial,
-                              GtUword partwidth,
-                              GtUword totallength,
-                              const unsigned int *suftab)
+unsigned int *gt_plain_lcp_phialgorithm(bool onlyplcp,
+                                        GtUword *maxlcp,
+                                        const GtUchar *sequence,
+                                        bool withspecial,
+                                        GtUword partwidth,
+                                        GtUword totallength,
+                                        const unsigned int *suftab)
 {
-  unsigned int *plcptab, *phitab, *lcptab, pos, suftab0, lcpvalue = 0,
-               previousvalue;
-  GtUword idx;
+  unsigned int *plcptab, *phitab, pos, suftab0, previousvalue;
+  GtUword idx, lcpvalue = 0;
 
   phitab = gt_malloc(sizeof (*phitab) * (totallength+1));
   previousvalue = suftab[0];
@@ -143,6 +150,7 @@ unsigned int *gt_plain_phialg(const GtUchar *sequence,
   plcptab = gt_malloc(sizeof (*plcptab) * (totallength+1));
   suftab0 = suftab[0];
   gt_assert(totallength <= (GtUword) UINT_MAX);
+  *maxlcp = 0;
   for (pos = 0; pos < (unsigned int) totallength; pos++)
   {
     if (pos != suftab0)
@@ -150,8 +158,7 @@ unsigned int *gt_plain_phialg(const GtUchar *sequence,
       const GtUchar *ptr1 = sequence + pos,
                     *ptr2 = sequence + phitab[pos];
 
-      const unsigned int lastoffset
-        = (unsigned int) (totallength - MAX(pos,phitab[pos]));
+      const GtUword lastoffset = totallength - MAX(pos,phitab[pos]);
       while (lcpvalue < lastoffset)
       {
         GtUchar cc1 = ptr1[lcpvalue];
@@ -164,9 +171,14 @@ unsigned int *gt_plain_phialg(const GtUchar *sequence,
           break;
         }
       }
-      plcptab[pos] = lcpvalue;
+      gt_assert(lcpvalue <= (GtUword) UINT_MAX);
+      plcptab[pos] = (unsigned int) lcpvalue;
       if (lcpvalue > 0)
       {
+        if (*maxlcp < lcpvalue)
+        {
+          *maxlcp = lcpvalue;
+        }
         lcpvalue--;
       }
     } else
@@ -175,17 +187,24 @@ unsigned int *gt_plain_phialg(const GtUchar *sequence,
     }
   }
   gt_free(phitab);
-  lcptab = gt_malloc(sizeof (*lcptab) * (totallength+1));
-  for (idx = 0; idx < partwidth; idx++)
+  if (onlyplcp)
   {
-    lcptab[idx] = plcptab[suftab[idx]];
-  }
-  gt_free(plcptab);
-  for (idx = partwidth; idx <= totallength; idx++)
+    return plcptab;
+  } else
   {
-    lcptab[idx] = 0;
+    unsigned int *lcptab = gt_malloc(sizeof (*lcptab) * (totallength+1));
+
+    for (idx = 0; idx < partwidth; idx++)
+    {
+      lcptab[idx] = plcptab[suftab[idx]];
+    }
+    gt_free(plcptab);
+    for (idx = partwidth; idx <= totallength; idx++)
+    {
+      lcptab[idx] = 0;
+    }
+    return lcptab;
   }
-  return lcptab;
 }
 
 static GtUword *gt_ENCSEQ_compute_occless_tab(const GtEncseq *encseq,

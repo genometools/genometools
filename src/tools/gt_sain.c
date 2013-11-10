@@ -28,7 +28,8 @@
 
 typedef struct
 {
-  bool icheck, fcheck, outlcptab, verbose, dommap, dnaalphabet, proteinalphabet;
+  bool icheck, fcheck, outlcptab, lcpkasai,
+       verbose, dommap, dnaalphabet, proteinalphabet;
   GtStr *encseqfile, *plainseqfile, *fastafile, *dir, *smap;
   GtReadmode readmode;
 } GtSainArguments;
@@ -66,7 +67,7 @@ static GtOptionParser *gt_sain_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *optionesq, *optionfile, *optionmmap,
            *optionfasta, *optiondnaalphabet, *optionproteinalphabet,
-           *optionlcp, *optionsmap;
+           *optionlcp, *optionlcpkasai, *optionsmap;
 
   gt_assert(arguments != NULL);
 
@@ -86,8 +87,14 @@ static GtOptionParser *gt_sain_option_parser_new(void *tool_arguments)
 
   /* -lcp */
   optionlcp = gt_option_new_bool("lcp", "output lcp table",
-                                 &arguments->outlcptab, NULL);
+                                 &arguments->outlcptab, false);
   gt_option_parser_add_option(op, optionlcp);
+
+  /* -kasai */
+  optionlcpkasai = gt_option_new_bool("kasai", "use kasai algorithm to compute "
+                                      "lcp table",
+                                      &arguments->lcpkasai, false);
+  gt_option_parser_add_option(op, optionlcpkasai);
 
   /* -file */
   optionfile = gt_option_new_string("file", "specify filename",
@@ -144,6 +151,7 @@ static GtOptionParser *gt_sain_option_parser_new(void *tool_arguments)
   gt_option_exclude(optiondnaalphabet,optionsmap);
   gt_option_exclude(optionproteinalphabet,optionsmap);
   gt_option_imply(optiondnaalphabet,optionfasta);
+  gt_option_imply(optionlcpkasai,optionlcp);
   gt_option_imply(optionproteinalphabet,optionfasta);
   gt_option_imply(optionsmap,optionfasta);
   return op;
@@ -289,18 +297,6 @@ static GtAlphabet *gt_sain_getalphabet(const GtSainArguments *arguments,
   return alphabet;
 }
 
-static void checklcptab(const unsigned int *lcptab,
-                        const unsigned int *lcptab2,
-                        GtUword partwidth)
-{
-  GtUword idx;
-
-  for (idx = 0; idx < partwidth; idx++)
-  {
-    gt_assert(lcptab[idx] == lcptab2[idx]);
-  }
-}
-
 static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                           int parsed_args, void *tool_arguments, GtError *err)
 {
@@ -444,9 +440,9 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
           }
           if (arguments->outlcptab)
           {
-            unsigned int maxlcp = 0, *lcptab, *lcptab2;
+            unsigned int *lcptab;
+            GtUword maxlcp = 0, partwidth, totallength;
             bool withspecial;
-            GtUword idx, partwidth, totallength;
 
             if (gt_str_length(arguments->plainseqfile) > 0)
             {
@@ -460,24 +456,26 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
               partwidth = totallength -
                           gt_bare_encseq_specialcharacters(bare_encseq);
             }
-            lcptab = gt_plain_lcp13_manzini(filecontents,
-                                            withspecial,
-                                            partwidth,
-                                            totallength,
-                                            suftab);
-            for (idx = 0; idx < partwidth; idx++)
+            if (arguments->lcpkasai)
             {
-              if (maxlcp < lcptab[idx])
-              {
-                maxlcp = lcptab[idx];
-              }
+              lcptab = gt_plain_lcp13_kasai (&maxlcp,
+                                             filecontents,
+                                             withspecial,
+                                             partwidth,
+                                             totallength,
+                                             suftab);
+            } else
+            {
+              lcptab = gt_plain_lcp_phialgorithm(false,
+                                                 &maxlcp,
+                                                 filecontents,
+                                                 withspecial,
+                                                 partwidth,
+                                                 totallength,
+                                                 suftab);
             }
-            gt_logger_log(tl->logger,"maxlcp=%u",maxlcp);
-            lcptab2 = gt_plain_phialg(filecontents, withspecial, partwidth,
-                                      totallength, suftab);
-            checklcptab(lcptab,lcptab2,partwidth);
+            gt_logger_log(tl->logger,"maxlcp="GT_WU,maxlcp);
             gt_free(lcptab);
-            gt_free(lcptab2);
           }
           gt_free(suftab);
           gt_sain_timer_logger_delete(tl);
