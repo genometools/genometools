@@ -418,7 +418,6 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                                 arguments->fcheck,
                                                 tl->logger,
                                                 tl->timer);
-
           } else
           {
             gt_assert(gt_str_length(arguments->fastafile) > 0 &&
@@ -456,14 +455,18 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
               partwidth = totallength -
                           gt_bare_encseq_specialcharacters(bare_encseq);
             }
+            if (tl->timer != NULL && gt_logger_enabled(tl->logger))
+            {
+              gt_timer_show_progress(tl->timer,"compute lcp-value",stdout);
+            }
             if (arguments->lcpkasai)
             {
-              lcptab = gt_plain_lcp13_kasai (&maxlcp,
-                                             filecontents,
-                                             withspecial,
-                                             partwidth,
-                                             totallength,
-                                             suftab);
+              lcptab = gt_plain_lcp13_kasai(&maxlcp,
+                                            filecontents,
+                                            withspecial,
+                                            partwidth,
+                                            totallength,
+                                            suftab);
             } else
             {
               lcptab = gt_plain_lcp_phialgorithm(false,

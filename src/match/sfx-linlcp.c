@@ -147,7 +147,7 @@ unsigned int *gt_plain_lcp_phialgorithm(bool onlyplcp,
     phitab[currentvalue] = previousvalue;
     previousvalue = currentvalue;
   }
-  plcptab = gt_malloc(sizeof (*plcptab) * (totallength+1));
+  plcptab = phitab; /* overlay both arrays */
   suftab0 = suftab[0];
   gt_assert(totallength <= (GtUword) UINT_MAX);
   *maxlcp = 0;
@@ -155,10 +155,11 @@ unsigned int *gt_plain_lcp_phialgorithm(bool onlyplcp,
   {
     if (pos != suftab0)
     {
+      const unsigned int currentphitab = phitab[pos];
+      const GtUword lastoffset = totallength - MAX(pos,currentphitab);
       const GtUchar *ptr1 = sequence + pos,
-                    *ptr2 = sequence + phitab[pos];
+                    *ptr2 = sequence + currentphitab;
 
-      const GtUword lastoffset = totallength - MAX(pos,phitab[pos]);
       while (lcpvalue < lastoffset)
       {
         GtUchar cc1 = ptr1[lcpvalue];
@@ -186,7 +187,6 @@ unsigned int *gt_plain_lcp_phialgorithm(bool onlyplcp,
       plcptab[pos] = 0;
     }
   }
-  gt_free(phitab);
   if (onlyplcp)
   {
     return plcptab;
