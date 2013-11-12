@@ -28,9 +28,12 @@ typedef struct GtBareEncseq GtBareEncseq;
 
 void gt_bare_encseq_delete(GtBareEncseq *bare_encseq);
 
-GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
-                                 const GtAlphabet *alphabet,
-                                 GtError *err);
+GtBareEncseq *gt_bare_encseq_new(GtUchar *sequence,GtUword len,
+                                 GtUword numofchars);
+
+GtBareEncseq *gt_bare_encseq_parse_new(GtUchar *filecontents,size_t numofbytes,
+                                       const GtAlphabet *alphabet,
+                                       GtError *err);
 
 const GtUchar *gt_bare_encseq_sequence(const GtBareEncseq *bare_encseq);
 

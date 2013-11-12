@@ -52,9 +52,57 @@ void gt_bare_encseq_delete(GtBareEncseq *bare_encseq)
   }
 }
 
-GtBareEncseq *gt_bare_encseq_new(GtUchar *filecontents,size_t numofbytes,
-                                 const GtAlphabet *alphabet,
-                                 GtError *err)
+GtBareEncseq *gt_bare_encseq_new(GtUchar *sequence,GtUword len,
+                                 GtUword numofchars)
+{
+  GtBareEncseq *bare_encseq = gt_malloc(sizeof *bare_encseq);
+  const GtUchar *readptr;
+  GtBareSpecialrange *srptr = NULL;
+  GtUword lastspecialrange_length = 0;
+
+  bare_encseq->specialcharacters = 0;
+  bare_encseq->numofchars = numofchars;
+  bare_encseq->charcount = gt_calloc((size_t) bare_encseq->numofchars,
+                                     sizeof *bare_encseq->charcount);
+  GT_INITARRAY(&bare_encseq->specialranges,GtBareSpecialrange);
+  for (readptr = sequence; readptr < sequence + len; readptr++)
+  {
+    GtUchar cc = *readptr;
+    if (ISSPECIAL(cc))
+    {
+      if (lastspecialrange_length == 0)
+      {
+        GT_GETNEXTFREEINARRAY(srptr,&bare_encseq->specialranges,
+                              GtBareSpecialrange,128UL);
+        srptr->start = (GtUword) (readptr - sequence);
+      }
+      lastspecialrange_length++;
+      bare_encseq->specialcharacters++;
+    } else
+    {
+      gt_assert((GtUword) cc < bare_encseq->numofchars);
+      bare_encseq->charcount[(int) cc]++;
+      if (lastspecialrange_length > 0)
+      {
+        gt_assert(srptr != NULL);
+        srptr->length = lastspecialrange_length;
+      }
+      lastspecialrange_length = 0;
+    }
+  }
+  if (lastspecialrange_length > 0)
+  {
+    gt_assert(srptr != NULL);
+    srptr->length = lastspecialrange_length;
+  }
+  bare_encseq->sequence = sequence;
+  bare_encseq->totallength = len;
+  return bare_encseq;
+}
+
+GtBareEncseq *gt_bare_encseq_parse_new(GtUchar *filecontents,size_t numofbytes,
+                                       const GtAlphabet *alphabet,
+                                       GtError *err)
 {
   GtUchar *writeptr = filecontents, *readptr = filecontents;
   const GtUchar *endptr = filecontents + numofbytes;

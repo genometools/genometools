@@ -20,6 +20,7 @@
 
 #include "core/timer_api.h"
 #include "core/logger_api.h"
+#include "core/error_api.h"
 #include "core/encseq.h"
 #include "bare-encseq.h"
 
@@ -46,5 +47,7 @@ GtUsainindextype *gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
                                              bool finalcheck,
                                              GtLogger *logger,
                                              GtTimer *timer);
+
+int gt_sain_checkmaxsequencelength(GtUword len,bool forencseq,GtError *err);
 
 #endif

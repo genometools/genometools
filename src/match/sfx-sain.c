@@ -1669,3 +1669,64 @@ GtUsainindextype *gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
   gt_sainseq_delete(sainseq);
   return suftab;
 }
+
+int gt_sain_checkmaxsequencelength(GtUword len,bool forencseq,GtError *err)
+{
+  GtUword maxsequencelength;
+
+  if (forencseq)
+  {
+    maxsequencelength = (GtUword) (~GT_FIRSTBIT) - 1 - GT_COMPAREOFFSET;
+  } else
+  {
+    maxsequencelength = (GtUword) (~GT_FIRSTBIT) - 1;
+  }
+  if (len > maxsequencelength)
+  {
+    gt_error_set(err,"sequence of size "GT_WU" is too long: sain algorithm "
+                     "can only compute sequence of length up to "GT_WU"",
+                     len,maxsequencelength);
+    return -1;
+  }
+  return 0;
+}
+
+struct GtSainSufLcpIterator
+{
+  GtUsainindextype *suftab;
+  GtBareEncseq *bare_encseq;
+};
+
+typedef struct GtSainSufLcpIterator GtSainSufLcpIterator;
+
+GtSainSufLcpIterator *gt_sain_suf_lcp_iterator(GtUchar *sequence,
+                                               GtUword len,
+                                               GtReadmode readmode,
+                                               GtUword numofchars,
+                                               GtError *err)
+{
+  GtSainSufLcpIterator *suflcpiterator;
+
+  if (gt_sain_checkmaxsequencelength(len,false,err) != 0)
+  {
+    return NULL;
+  }
+  suflcpiterator = gt_malloc(sizeof *suflcpiterator);
+  suflcpiterator->suftab = NULL;
+  suflcpiterator->bare_encseq = gt_bare_encseq_new(sequence,len,numofchars);
+  gt_assert(suflcpiterator->bare_encseq != NULL);
+  if (readmode != GT_READMODE_FORWARD)
+  {
+    bare_encseq_convert(suflcpiterator->bare_encseq,
+                        GT_ISDIRREVERSE(readmode) ? false : true,
+                        GT_ISDIRCOMPLEMENT(readmode) ? false : true);
+  }
+  suflcpiterator->suftab
+    = gt_sain_bare_encseq_sortsuffixes(suflcpiterator->bare_encseq,
+                                       readmode,
+                                       false,
+                                       false,
+                                       NULL,
+                                       NULL);
+  return suflcpiterator;
+}

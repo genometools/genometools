@@ -180,28 +180,6 @@ static int gt_sain_option_parser_check(int rest_argc,
   }
 }
 
-static int gt_sain_checkmaxsequencelength(GtUword len,bool forencseq,
-                                          GtError *err)
-{
-  GtUword maxsequencelength;
-
-  if (forencseq)
-  {
-    maxsequencelength = (GtUword) (~GT_FIRSTBIT) - 1 - GT_COMPAREOFFSET;
-  } else
-  {
-    maxsequencelength = (GtUword) (~GT_FIRSTBIT) - 1;
-  }
-  if (len > maxsequencelength)
-  {
-    gt_error_set(err,"sequence of size "GT_WU" is too long: sain algorithm "
-                     "can only compute sequence of length up to "GT_WU"",
-                     len,maxsequencelength);
-    return -1;
-  }
-  return 0;
-}
-
 typedef struct
 {
   GtTimer *timer;
@@ -392,7 +370,8 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
               had_err = -1;
             } else
             {
-              bare_encseq = gt_bare_encseq_new(filecontents,len,alphabet,err);
+              bare_encseq = gt_bare_encseq_parse_new(filecontents,len,alphabet,
+                                                     err);
               if (bare_encseq == NULL)
               {
                 had_err = -1;
