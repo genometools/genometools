@@ -63,10 +63,10 @@ end
 
 def processleafedgeargs(options)
   if options.absolute
-    return "unsigned long, /* position */"
+    return "GtUword, /* position */"
   else
-    return "unsigned long, /* seqnum */
-    unsigned long, /* relpos */"
+    return "GtUword, /* seqnum */
+    GtUword, /* relpos */"
   end
 end
 
@@ -123,7 +123,7 @@ end
 
 def processbranching_call2(key,options)
   if options.with_process_branching
-    return "unsigned long lastintervallcp = lastinterval->lcp,
+    return "GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,lastintervallb);
         if (processbranchingedge_#{key}(true,
@@ -144,7 +144,7 @@ end
 
 def processlcpinterval_decl(key,options)
   if options.with_process_lcpinterval
-    return "static int processlcpinterval_#{key}(unsigned long,
+    return "static int processlcpinterval_#{key}(GtUword,
     GtBUinfo_#{key} *,
     GtBUstate_#{key} *,
     GtError *err);"
@@ -228,7 +228,7 @@ print <<END_OF_FILE
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
+        GtUword lastintervallb = lastinterval->lb;
         #{processbranching_call2(key,options)}
         lastinterval = NULL;
       } else
@@ -250,7 +250,7 @@ end
 
 def lastsuftabvalue_fromarray(options)
   if not options.usefile
-    return "unsigned long lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];"
+    return "GtUword lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];"
   else
     return "/* no assignment to lastsuftabvalue */"
   end
@@ -301,10 +301,10 @@ end
 def processbranchingedge_decl(key,options)
   if options.with_process_branching
     return "static int processbranchingedge_#{key}(bool firstsucc,
-    unsigned long,
+    GtUword,
     GtBUinfo_#{key} *,
-    unsigned long,
-    unsigned long,
+    GtUword,
+    GtUword,
     GtBUinfo_#{key} *,
     GtBUstate_#{key} *,
     GtError *);"
@@ -340,7 +340,7 @@ end
 def accessbucketofsuffixes(idx,options)
   if options.additionaluint32bucket
     return "bucketofsuffixes != NULL ? bucketofsuffixes[#{idx}]
-                                 : (unsigned long)
+                                 : (GtUword)
                                    bucketofsuffixes_uint32[#{idx}];"
   else
     return "bucketofsuffixes[#{idx}];"
@@ -419,7 +419,7 @@ static void initBUinfo_#{key}(GtBUinfo_#{key} *,GtBUstate_#{key} *);
 static void freeBUinfo_#{key}(GtBUinfo_#{key} *,GtBUstate_#{key} *);
 
 static int processleafedge_#{key}(bool,
-    unsigned long,
+    GtUword,
     GtBUinfo_#{key} *,
     #{processleafedgeargs(options)}
     GtBUstate_#{key} *,
@@ -454,14 +454,14 @@ static int processleafedge_#{key}(bool,
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtBUinfo_#{key} info;
 } GtBUItvinfo_#{key};
 
 typedef struct
 {
   GtBUItvinfo_#{key} *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 } GtArrayGtBUItvinfo_#{key};
 
@@ -477,7 +477,7 @@ GtArrayGtBUItvinfo_#{key} *gt_GtArrayGtBUItvinfo_new_#{key}(void)
 void gt_GtArrayGtBUItvinfo_delete_#{key}(GtArrayGtBUItvinfo_#{key} *stack,
                                   GtBUstate_#{key} *state)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -488,11 +488,11 @@ void gt_GtArrayGtBUItvinfo_delete_#{key}(GtArrayGtBUItvinfo_#{key} *stack,
 }
 
 static GtBUItvinfo_#{key} *allocateBUstack_#{key}(GtBUItvinfo_#{key} *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
+                                   GtUword currentallocated,
+                                   GtUword allocated,
                                    GtBUstate_#{key} *state)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo_#{key} *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -511,15 +511,15 @@ if options.withlastfrompreviousbucket
 print <<END_OF_FILE
 
 static int gt_esa_bottomup_RAM_previousfromlast_#{key}(
-                        unsigned long previoussuffix,
-                        unsigned long lcpvalue,
+                        GtUword previoussuffix,
+                        GtUword lcpvalue,
                         GtArrayGtBUItvinfo_#{key} *stack,
                         GtBUstate_#{key} *bustate,
                         #{return_snrp_decl(options)}
                         GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long idx = 0;
+  const GtUword incrementstacksize = 32UL;
+  GtUword idx = 0;
   GtBUItvinfo_#{key} *lastinterval = NULL;
   bool haserr = false, firstedge,
        firstedgefromroot = bustate->firstedgefromroot;
@@ -546,8 +546,8 @@ static int gt_esa_bottomup_#{key}(Sequentialsuffixarrayreader *ssar,
                     #{return_snrp_decl(options)}
                     GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix = 0,
                 idx,
                 numberofsuffixes,
@@ -567,16 +567,16 @@ END_OF_FILE
 else
 print <<END_OF_FILE
 
-static int gt_esa_bottomup_RAM_#{key}(const unsigned long *bucketofsuffixes,
+static int gt_esa_bottomup_RAM_#{key}(const GtUword *bucketofsuffixes,
                         #{additionaluint32bucket(options)} *lcptab_bucket,
-                        unsigned long numberofsuffixes,
+                        GtUword numberofsuffixes,
                         GtArrayGtBUItvinfo_#{key} *stack,
                         GtBUstate_#{key} *bustate,
                         #{return_snrp_decl(options)}
                         GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix,
                 idx;
   GtBUItvinfo_#{key} *lastinterval = NULL;
@@ -589,7 +589,7 @@ print <<END_OF_FILE
   gt_assert (numberofsuffixes > 0);
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
-    lcpvalue = (unsigned long) lcptab_bucket[idx+1];
+    lcpvalue = (GtUword) lcptab_bucket[idx+1];
     previoussuffix = #{accessbucketofsuffixes("idx",options)}
 END_OF_FILE
 end
