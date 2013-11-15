@@ -29,8 +29,8 @@ typedef struct <%=classN%>Members <%=classN%>Members;
 
 /* TODO: add typedefs for functions here */
 /* examples showcasing coding convention:
-typedef unsigned int (*<%=classN%>FooFunc)(<%=classN%>*, unsigned long*);
-typedef int *(*<%=classN%>BarFunc)(<%=classN%>*, unsigned long);
+typedef unsigned int (*<%=classN%>FooFunc)(<%=classN%>*, GtUword*);
+typedef int *(*<%=classN%>BarFunc)(<%=classN%>*, GtUword);
 */
 typedef void (*<%=classN%>DeleteFunc)(<%=classN%>*);
 
@@ -44,7 +44,7 @@ struct <%=classN%>Class {
   /* XXfunctionNamesXX do not change will be replaced by function names */
 };
 
-struct <%=classN%>Members {<% if options.refcount %>\n  unsigned long refcount;<% end %>
+struct <%=classN%>Members {<% if options.refcount %>\n  GtUword refcount;<% end %>
 };
 
 const <%=classN%>Class* gt_<%=fkt_pref%>_class_new(size_t size,

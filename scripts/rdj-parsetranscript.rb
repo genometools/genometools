@@ -929,7 +929,7 @@ module OutputParser
         @operation[1] = "" #next detect: no auto-conversion into Float for $1
         detect(log, /# init character encoding \((\S+)/, "@sat")
       end
-      detect(log, /# sizeof \(unsigned long\)=(\d+)/, "@index_bits")
+      detect(log, /# sizeof \(GtUword\)=(\d+)/, "@index_bits")
     end
 
   end
