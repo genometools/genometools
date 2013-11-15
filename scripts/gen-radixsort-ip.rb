@@ -32,7 +32,7 @@ end
 
 def maketype(options)
   if options.ulong 
-    return "unsigned long"
+    return "GtUword"
   else
     return "GtUlongPair"
   end
@@ -58,27 +58,27 @@ options = parseargs(ARGV)
 
 print <<END_OF_FILE
 static #{maketype(options)} gt_radixsort_#{makekey(options)}_bin_get(const GtRadixbuffer *rbuf,
-                                            unsigned long binnum)
+                                            GtUword binnum)
 {
   return rbuf->values.#{makekey(options)}ptr[(binnum << rbuf->log_bufsize) +
-                             (unsigned long) rbuf->nextidx[binnum]];
+                             (GtUword) rbuf->nextidx[binnum]];
 }
 
 static void gt_radixsort_#{makekey(options)}_bin_update(#{maketype(options)} *target,
                                     GtRadixbuffer *rbuf,
-                                    unsigned long binnum,
+                                    GtUword binnum,
                                     #{maketype(options)} value)
 {
-  unsigned long binoffset = binnum << rbuf->log_bufsize;
+  GtUword binoffset = binnum << rbuf->log_bufsize;
 
-  rbuf->values.#{makekey(options)}ptr[binoffset + (unsigned long) rbuf->nextidx[binnum]]
+  rbuf->values.#{makekey(options)}ptr[binoffset + (GtUword) rbuf->nextidx[binnum]]
     = value;
-  if ((unsigned long) rbuf->nextidx[binnum] < rbuf->buf_size - 1)
+  if ((GtUword) rbuf->nextidx[binnum] < rbuf->buf_size - 1)
   {
     rbuf->nextidx[binnum]++;
   } else
   {
-    unsigned long j;
+    GtUword j;
     #{maketype(options)} *wtargetptr, *rtargetptr, *rend, *valptr;
 
     wtargetptr = target + rbuf->endofbin[binnum] - (rbuf->buf_size - 1);
@@ -104,7 +104,7 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
                                               GtCountbasetype len,
                                               size_t rightshift)
 {
-  unsigned long binoffset, binnum, bufoffset,
+  GtUword binoffset, binnum, bufoffset,
                 nextbin, firstnonemptybin = UINT8_MAX+1;
   GtCountbasetype *count, previouscount, current;
   #{maketype(options)} *sp, *spend = source + len;
@@ -123,8 +123,8 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
   for (bufoffset = 0, binoffset = 0, binnum = 0; binnum <= UINT8_MAX;
        bufoffset += rbuf->buf_size, binoffset += count[binnum], binnum++)
   {
-    unsigned long j;
-    const unsigned long end = MIN(rbuf->buf_size,(unsigned long) count[binnum]);
+    GtUword j;
+    const GtUword end = MIN(rbuf->buf_size,(GtUword) count[binnum]);
 
     if (firstnonemptybin == UINT8_MAX+1 && end > 0)
     {
@@ -183,11 +183,11 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
   }
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
-    unsigned long bufleft = (unsigned long) rbuf->nextidx[binnum];
+    GtUword bufleft = (GtUword) rbuf->nextidx[binnum];
 
     if (bufleft > 0)
     {
-      unsigned long j;
+      GtUword j;
       #{maketype(options)} *targetptr, *valptr;
 
       valptr = rbuf->values.#{makekey(options)}ptr + (binnum << rbuf->log_bufsize);
@@ -205,7 +205,7 @@ static void gt_radixsort_#{makekey(options)}_uncached_shuffle(GtRadixbuffer *rbu
                                                 GtCountbasetype len,
                                                 size_t rightshift)
 {
-  unsigned long binnum, nextbin;
+  GtUword binnum, nextbin;
   #{maketype(options)} *sp, *spend = source + len;
   GtCountbasetype current, previouscount, *count;
 
@@ -277,7 +277,7 @@ static void gt_radixsort_#{makekey(options)}_shuffle(GtRadixbuffer *rbuf,
                                        size_t rightshift)
 {
   gt_assert(rbuf != NULL);
-  if ((unsigned long) len > rbuf->cachesize)
+  if ((GtUword) len > rbuf->cachesize)
   {
     gt_radixsort_#{makekey(options)}_cached_shuffle(rbuf,source,len,rightshift);
   } else
@@ -314,7 +314,7 @@ static void gt_radixsort_#{makekey(options)}_process_bin(
                                      #{maketype(options)} *source,
                                      size_t shift)
 {
-  unsigned long binnum;
+  GtUword binnum;
 
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
