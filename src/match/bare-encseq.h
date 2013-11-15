@@ -21,6 +21,7 @@
 #include "core/error_api.h"
 #include "core/types_api.h"
 #include "core/range_api.h"
+#include "core/alphabet_api.h"
 
 typedef struct GtBareSpecialrangeiterator GtBareSpecialrangeiterator;
 

@@ -306,6 +306,7 @@ void bare_encseq_convert(GtBareEncseq *bare_encseq,bool forward,bool direct)
 
   if (forward)
   {
+    gt_assert(!direct);
     for (leftptr = bare_encseq->sequence;
          leftptr < bare_encseq->sequence + bare_encseq->totallength;
          leftptr++)
@@ -315,7 +316,6 @@ void bare_encseq_convert(GtBareEncseq *bare_encseq,bool forward,bool direct)
         *leftptr = GT_COMPLEMENTBASE(*leftptr);
       }
     }
-    gt_assert(!direct);
   } else
   {
     if (direct)

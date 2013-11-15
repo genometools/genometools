@@ -21,8 +21,9 @@
 #include "core/timer_api.h"
 #include "core/mathsupport.h"
 #include "sfx-lwcheck.h"
-#include "sfx-sain.h"
 #include "bare-encseq.h"
+#include "sfx-sain.h"
+#include "sfx-linlcp.h"
 
 #define GT_SAIN_SHOWTIMER(DESC)\
         if (timer != NULL && gt_logger_enabled(logger))\
@@ -1694,16 +1695,18 @@ int gt_sain_checkmaxsequencelength(GtUword len,bool forencseq,GtError *err)
 struct GtSainSufLcpIterator
 {
   GtUsainindextype *suftab;
+  unsigned int *plcptab;
   GtBareEncseq *bare_encseq;
 };
 
 typedef struct GtSainSufLcpIterator GtSainSufLcpIterator;
 
-GtSainSufLcpIterator *gt_sain_suf_lcp_iterator(GtUchar *sequence,
-                                               GtUword len,
-                                               GtReadmode readmode,
-                                               GtUword numofchars,
-                                               GtError *err)
+GtSainSufLcpIterator *gt_sain_suf_lcp_iterator_new(bool withlcp,
+                                                   GtUchar *sequence,
+                                                   GtUword len,
+                                                   GtReadmode readmode,
+                                                   GtUword numofchars,
+                                                   GtError *err)
 {
   GtSainSufLcpIterator *suflcpiterator;
 
@@ -1713,6 +1716,7 @@ GtSainSufLcpIterator *gt_sain_suf_lcp_iterator(GtUchar *sequence,
   }
   suflcpiterator = gt_malloc(sizeof *suflcpiterator);
   suflcpiterator->suftab = NULL;
+  suflcpiterator->plcptab = NULL;
   suflcpiterator->bare_encseq = gt_bare_encseq_new(sequence,len,numofchars);
   gt_assert(suflcpiterator->bare_encseq != NULL);
   if (readmode != GT_READMODE_FORWARD)
@@ -1728,5 +1732,31 @@ GtSainSufLcpIterator *gt_sain_suf_lcp_iterator(GtUchar *sequence,
                                        false,
                                        NULL,
                                        NULL);
+  if (withlcp)
+  {
+    GtUword maxlcp = 0,
+            totallength
+              = gt_bare_encseq_total_length(suflcpiterator->bare_encseq),
+            partwidth
+              = totallength -
+                gt_bare_encseq_specialcharacters(suflcpiterator->bare_encseq);
+    suflcpiterator->plcptab = gt_plain_lcp_phialgorithm(true,
+                                                        &maxlcp,
+                                                        sequence,
+                                                        true,
+                                                        partwidth,
+                                                        totallength,
+                                                        suflcpiterator->suftab);
+  }
   return suflcpiterator;
+}
+
+void gt_sain_suf_lcp_iterator_delete(GtSainSufLcpIterator *suflcpiterator)
+{
+  if (suflcpiterator != NULL)
+  {
+    gt_bare_encseq_delete(suflcpiterator->bare_encseq);
+    gt_free(suflcpiterator->suftab);
+    gt_free(suflcpiterator->plcptab);
+  }
 }
