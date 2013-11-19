@@ -249,8 +249,7 @@ static void showexpandcode(const GtBucketspec2 *bucketspec2,
                            unsigned int prefixlength)
 {
   GtCodetype ecode, code2;
-  const GtUchar *characters =
-                     gt_encseq_alphabetcharacters(bucketspec2->encseq);
+  const GtUchar *characters = gt_encseq_alphabetcharacters(bucketspec2->encseq);
 
   for (code2 = 0; code2 < (GtCodetype) bucketspec2->numofcharssquared; code2++)
   {

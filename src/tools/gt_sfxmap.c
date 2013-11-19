@@ -620,7 +620,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
     }
     if (ssar != NULL)
     {
-      NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+      SSAR_NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
       if (maxlcp != currentlcp)
       {
         fprintf(stderr,""GT_WU": startpos="GT_WU", firstchar=%u, "
@@ -1016,7 +1016,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
         {
           GtUword currentlcp;
 
-          NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+          SSAR_NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
           gt_bitbuffer_next_fixed_bits_value (bitbuffer,currentlcp);
           elems++;
         }
@@ -1045,7 +1045,7 @@ static int gt_sfxmap_comparelcpvalue(void *info,GtUword lcp,GtError *err)
   gt_error_check(err);
   do /* fake loop to allow for the use of a break statement */
   {
-    NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
+    SSAR_NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
     if (lcp != currentlcpvalue)
     {
       gt_error_set(err,"lcp="GT_WU" != "GT_WU"=currentlcpvalue",
@@ -1127,7 +1127,7 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
       }
       if (arguments->cmpsuf && ssar != NULL)
       {
-        NEXTSEQUENTIALSUFTABVALUE(currentsuffix,ssar);
+        SSAR_NEXTSEQUENTIALSUFTABVALUE(currentsuffix,ssar);
         gt_assert(pos == currentsuffix);
       }
       /*printf(""GT_WU": pos = "GT_WU"\n",idx,pos);*/

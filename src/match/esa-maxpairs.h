@@ -21,19 +21,28 @@
 #include "core/error_api.h"
 #include "core/encseq.h"
 #include "esa-seqread.h"
+#include "bare-encseq.h"
 
-typedef int (*Processmaxpairs)(void *,
-                               const GtEncseq *,
-                               GtUword,
-                               GtUword,
-                               GtUword,
-                               GtError *);
+typedef struct
+{
+  bool hasencseq;
+  union
+  {
+    const GtEncseq *encseq;
+    const GtBareEncseq *bare_encseq;
+  } seqptr;
+} GtGenericEncseq;
+
+typedef int (*GtProcessmaxpairs)(void *,
+                                 const GtGenericEncseq *,
+                                 GtUword,
+                                 GtUword,
+                                 GtUword,
+                                 GtError *);
 
 int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                         const GtEncseq *encseq,
-                         GtReadmode readmode,
                          unsigned int searchlength,
-                         Processmaxpairs processmaxpairs,
+                         GtProcessmaxpairs processmaxpairs,
                          void *processmaxpairsinfo,
                          GtError *err);
 

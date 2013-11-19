@@ -1697,9 +1697,8 @@ struct GtSainSufLcpIterator
   GtUsainindextype *suftab;
   unsigned int *plcptab;
   GtBareEncseq *bare_encseq;
+  GtUword currentsuftabvalue, currentsuftabindex;
 };
-
-typedef struct GtSainSufLcpIterator GtSainSufLcpIterator;
 
 GtSainSufLcpIterator *gt_sain_suf_lcp_iterator_new(bool withlcp,
                                                    GtUchar *sequence,
@@ -1717,6 +1716,8 @@ GtSainSufLcpIterator *gt_sain_suf_lcp_iterator_new(bool withlcp,
   suflcpiterator = gt_malloc(sizeof *suflcpiterator);
   suflcpiterator->suftab = NULL;
   suflcpiterator->plcptab = NULL;
+  suflcpiterator->currentsuftabindex = 0;
+  suflcpiterator->currentsuftabvalue = GT_UWORD_MAX;
   suflcpiterator->bare_encseq = gt_bare_encseq_new(sequence,len,numofchars);
   gt_assert(suflcpiterator->bare_encseq != NULL);
   if (readmode != GT_READMODE_FORWARD)
@@ -1759,4 +1760,27 @@ void gt_sain_suf_lcp_iterator_delete(GtSainSufLcpIterator *suflcpiterator)
     gt_free(suflcpiterator->suftab);
     gt_free(suflcpiterator->plcptab);
   }
+}
+
+GtUword gt_sain_suf_lcp_iterator_nonspecials(const GtSainSufLcpIterator
+                                                   *suflcpiterator)
+{
+  GtUword totallength;
+
+  gt_assert(suflcpiterator != NULL);
+  totallength = gt_bare_encseq_total_length(suflcpiterator->bare_encseq);
+  return totallength -
+         gt_bare_encseq_specialcharacters(suflcpiterator->bare_encseq);
+}
+
+GtUword gt_sain_suf_lcp_iterator_next(GtUword *lcpvalue,
+                                      GtSainSufLcpIterator *suflcpiterator)
+{
+  gt_assert(suflcpiterator != NULL);
+
+  suflcpiterator->currentsuftabvalue
+    = (GtUword) suflcpiterator->suftab[suflcpiterator->currentsuftabindex++];
+  *lcpvalue = (GtUword) suflcpiterator->plcptab[suflcpiterator->
+                                                currentsuftabvalue];
+  return suflcpiterator->currentsuftabvalue;
 }

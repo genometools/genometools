@@ -133,8 +133,8 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (currentindex = 0; currentindex < nonspecials; currentindex++)
   {
-    NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
-    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    SSAR_NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     while (currentlcp < TOP.depth)
     {
       if (TOP.lastisleafedge)

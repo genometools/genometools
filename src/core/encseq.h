@@ -417,6 +417,10 @@ GtUword gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq);
    <encseq>. The number does not include the wildcards. */
 unsigned int  gt_encseq_alphabetnumofchars(const GtEncseq *encseq);
 
+/* Returns an array of the characters in the alphabet for the encoded
+   sequence <encseq>. */
+const GtUchar *gt_encseq_alphabetcharacters(const GtEncseq *encseq);
+
 /* Sets <specialcharinfo> to point to a <GtSpecialcharinfo> for the index
   files specified by <indexname>, even if the encoded sequence is not mapped.
   Returns 0 on success, -1 otherwise. */

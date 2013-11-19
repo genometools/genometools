@@ -18,6 +18,7 @@ def parseargs(argv)
   options.process_lastvalue = true
   options.withlastfrompreviousbucket = false
   options.gtlcpvaluetypeset = false
+  options.sa_reader_standard = true
   options.nodeclarations = false
   options.additionaluint32bucket = false
   opts = OptionParser.new
@@ -50,6 +51,9 @@ def parseargs(argv)
   end
   opts.on("--no_declarations","do not output declarations") do |x|
     options.nodeclarations = true
+  end
+  opts.on("--sa_reader_sain","use suffixarray_reader with sain-alg") do |x|
+    options.sa_reader_standard = false
   end
   rest = opts.parse(argv)
   if not rest.empty?
@@ -152,6 +156,7 @@ def processlcpinterval_decl(key,options)
     return "/* no declaration of processlcpinterval_#{key} */"
   end
 end
+
 
 def processlcpinterval_call1(key,options)
   if options.with_process_lcpinterval
@@ -321,6 +326,31 @@ def return_snrp_decl(options)
   end
 end
 
+def return_sa_reader(options)
+  if options.sa_reader_standard
+    return "Sequentialsuffixarrayreader *ssar"
+  else
+    return "GtSainSufLcpIterator *ssli"
+  end
+end
+
+def return_nonspecials(options)
+  if options.sa_reader_standard
+    return "gt_Sequentialsuffixarrayreader_nonspecials(ssar);"
+  else
+    return "gt_sain_suf_lcp_iterator_nonspecials(ssli);"
+  end
+end
+
+def return_next_suf_lcp_call(options)
+  if options.sa_reader_standard
+    return "SSAR_NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue," +
+           "ssar);\n    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);"
+  else
+    return "previoussuffix = gt_sain_suf_lcp_iterator_next(&lcpvalue,ssli);"
+  end
+end
+
 def lcptype(options)
   if options.gtlcpvaluetypeset
     return "const GtLcpvaluetype"
@@ -414,9 +444,11 @@ END_OF_FILE
 if not options.nodeclarations
 print <<END_OF_FILE
 
-static void initBUinfo_#{key}(GtBUinfo_#{key} *,GtBUstate_#{key} *);
+static void initBUinfo_#{key}(GtBUinfo_#{key} *,
+                              GtBUstate_#{key} *);
 
-static void freeBUinfo_#{key}(GtBUinfo_#{key} *,GtBUstate_#{key} *);
+static void freeBUinfo_#{key}(GtBUinfo_#{key} *,
+                              GtBUstate_#{key} *);
 
 static int processleafedge_#{key}(bool,
     GtUword,
@@ -474,8 +506,9 @@ GtArrayGtBUItvinfo_#{key} *gt_GtArrayGtBUItvinfo_new_#{key}(void)
   return stack;
 }
 
-void gt_GtArrayGtBUItvinfo_delete_#{key}(GtArrayGtBUItvinfo_#{key} *stack,
-                                  GtBUstate_#{key} *state)
+void gt_GtArrayGtBUItvinfo_delete_#{key}(
+                           GtArrayGtBUItvinfo_#{key} *stack,
+                           GtBUstate_#{key} *state)
 {
   GtUword idx;
 
@@ -487,7 +520,8 @@ void gt_GtArrayGtBUItvinfo_delete_#{key}(GtArrayGtBUItvinfo_#{key} *stack,
   gt_free(stack);
 }
 
-static GtBUItvinfo_#{key} *allocateBUstack_#{key}(GtBUItvinfo_#{key} *ptr,
+static GtBUItvinfo_#{key} *allocateBUstack_#{key}(
+                                   GtBUItvinfo_#{key} *ptr,
                                    GtUword currentallocated,
                                    GtUword allocated,
                                    GtBUstate_#{key} *state)
@@ -541,7 +575,7 @@ end
 if options.usefile
 print <<END_OF_FILE
 
-static int gt_esa_bottomup_#{key}(Sequentialsuffixarrayreader *ssar,
+static int gt_esa_bottomup_#{key}(#{return_sa_reader(options)},
                     GtBUstate_#{key} *bustate,
                     #{return_snrp_decl(options)}
                     GtError *err)
@@ -558,11 +592,10 @@ static int gt_esa_bottomup_#{key}(Sequentialsuffixarrayreader *ssar,
 
   stack = gt_GtArrayGtBUItvinfo_new_#{key}();
   PUSH_ESA_BOTTOMUP_#{key}(0,0);
-  numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
+  numberofsuffixes = #{return_nonspecials(options)}
   for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
-    NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
-    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    #{return_next_suf_lcp_call(options)}
 END_OF_FILE
 else
 print <<END_OF_FILE

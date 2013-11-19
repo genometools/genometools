@@ -50,4 +50,17 @@ GtUsainindextype *gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
 
 int gt_sain_checkmaxsequencelength(GtUword len,bool forencseq,GtError *err);
 
+typedef struct GtSainSufLcpIterator GtSainSufLcpIterator;
+
+GtUword gt_sain_suf_lcp_iterator_nonspecials(const GtSainSufLcpIterator
+                                                   *suflcpiterator);
+
+void gt_sain_suf_lcp_iterator_delete(GtSainSufLcpIterator *suflcpiterator);
+
+GtUword gt_sain_suf_lcp_iterator_nonspecials(const GtSainSufLcpIterator
+                                                   *suflcpiterator);
+
+GtUword gt_sain_suf_lcp_iterator_next(GtUword *lcpvalue,
+                                      GtSainSufLcpIterator *suflcpiterator);
+
 #endif

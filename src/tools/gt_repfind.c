@@ -28,7 +28,7 @@
 #include "match/esa-seqread.h"
 #include "match/esa-mmsearch.h"
 #include "match/esa-maxpairs.h"
-#include "match/test-maxpairs.pr"
+#include "match/test-maxpairs.h"
 #include "match/querymatch.h"
 #include "match/greedyedist.h"
 #include "match/xdrop.h"
@@ -45,7 +45,7 @@ typedef struct
 } Maxpairsoptions;
 
 static int gt_simpleexactselfmatchoutput(void *info,
-                                         const GtEncseq *encseq,
+                                         const GtGenericEncseq *genericencseq,
                                          GtUword len,
                                          GtUword pos1,
                                          GtUword pos2,
@@ -53,6 +53,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
 {
   GtUword queryseqnum, seqstartpos, seqlength;
   GtQuerymatch *querymatch = (GtQuerymatch *) info;
+  const GtEncseq *encseq;
 
   if (pos1 > pos2)
   {
@@ -60,6 +61,8 @@ static int gt_simpleexactselfmatchoutput(void *info,
     pos1 = pos2;
     pos2 = tmp;
   }
+  gt_assert(genericencseq != NULL && genericencseq->hasencseq);
+  encseq = genericencseq->seqptr.encseq;
   queryseqnum = gt_encseq_seqnum(encseq,pos2);
   seqstartpos = gt_encseq_seqstartpos(encseq, queryseqnum);
   seqlength = gt_encseq_seqlength(encseq, queryseqnum);
@@ -93,7 +96,7 @@ typedef struct
 } GtXdropmatchinfo;
 
 static int gt_simplexdropselfmatchoutput(void *info,
-                                         const GtEncseq *encseq,
+                                         const GtGenericEncseq *genericencseq,
                                          GtUword len,
                                          GtUword pos1,
                                          GtUword pos2,
@@ -103,9 +106,12 @@ static int gt_simplexdropselfmatchoutput(void *info,
   GtXdropscore score;
   GtUword dbseqnum, dbseqstartpos, dbseqlength, dbstart, dblen,
                 querystart, queryseqnum, querylen, queryseqlength,
-                queryseqstartpos;
-  const GtUword dbtotallength = gt_encseq_total_length(encseq);
+                queryseqstartpos, dbtotallength;
+  const GtEncseq *encseq;
 
+  gt_assert(genericencseq != NULL && genericencseq->hasencseq);
+  encseq = genericencseq->seqptr.encseq;
+  dbtotallength = gt_encseq_total_length(encseq);
   if (pos1 > pos2)
   {
     GtUword tmp = pos1;
@@ -307,13 +313,15 @@ static int gt_processxdropquerymatches(void *info,
 }
 
 static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
-                                            const GtEncseq *encseq,
+                                            const GtGenericEncseq
+                                              *genericencseq,
                                             GtUword matchlen,
                                             GtUword pos1,
                                             GtUword pos2,
                                             GT_UNUSED GtError *err)
 {
   GtUword seqnum1, relpos1, seqnum2, relpos2, seqstartpos;
+  const GtEncseq *encseq;
 
   if (pos1 > pos2)
   {
@@ -321,6 +329,8 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
     pos1 = pos2;
     pos2 = tmp;
   }
+  gt_assert(genericencseq != NULL && genericencseq->hasencseq);
+  encseq = genericencseq->seqptr.encseq;
   seqnum1 = gt_encseq_seqnum(encseq,pos1);
   seqstartpos = gt_encseq_seqstartpos(encseq, seqnum1);
   gt_assert(seqstartpos <= pos1);
@@ -355,7 +365,7 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
 static int callenummaxpairs(const char *indexname,
                             unsigned int userdefinedleastlength,
                             bool scanfile,
-                            Processmaxpairs processmaxpairs,
+                            GtProcessmaxpairs processmaxpairs,
                             void *processmaxpairsinfo,
                             GtLogger *logger,
                             GtError *err)
@@ -379,8 +389,6 @@ static int callenummaxpairs(const char *indexname,
   }
   if (!haserr &&
       gt_enumeratemaxpairs(ssar,
-                           gt_encseqSequentialsuffixarrayreader(ssar),
-                           gt_readmodeSequentialsuffixarrayreader(ssar),
                            userdefinedleastlength,
                            processmaxpairs,
                            processmaxpairsinfo,

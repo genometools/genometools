@@ -59,9 +59,9 @@ typedef struct  /* global information */
                alphabetsize;
   GtArrayGtUlong uniquechar,
               *poslist;
-  const GtEncseq *encseq;
+  GtGenericEncseq genericencseq;
   GtReadmode readmode;
-  Processmaxpairs processmaxpairs;
+  GtProcessmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
 } GtBUstate_maxpairs;
 
@@ -122,7 +122,7 @@ static int cartproduct1_maxpairs(GtBUstate_maxpairs *state,
   start = state->poslist[base].spaceGtUlong + pl->start;
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
-    if (state->processmaxpairs(state->processmaxpairsinfo,state->encseq,
+    if (state->processmaxpairs(state->processmaxpairsinfo,&state->genericencseq,
                                fatherdepth,leafnumber,*spptr,err) != 0)
     {
       return -1;
@@ -150,7 +150,8 @@ static int cartproduct2_maxpairs(GtBUstate_maxpairs *state,
   {
     for (spptr2 = start2; spptr2 < start2 + pl2->length; spptr2++)
     {
-      if (state->processmaxpairs(state->processmaxpairsinfo,state->encseq,
+      if (state->processmaxpairs(state->processmaxpairsinfo,
+                                 &state->genericencseq,
                                  fatherdepth,*spptr1,*spptr2,err) != 0)
       {
         return -1;
@@ -203,7 +204,8 @@ static int processleafedge_maxpairs(bool firstsucc,
   } else
   {
     /* Random access */
-    leftchar = gt_encseq_get_encoded_char(state->encseq,
+    gt_assert(state->genericencseq.hasencseq);
+    leftchar = gt_encseq_get_encoded_char(state->genericencseq.seqptr.encseq,
                                           leafnumber-1,
                                           state->readmode);
   }
@@ -245,7 +247,8 @@ static int processleafedge_maxpairs(bool firstsucc,
             father->uniquecharposstart;
     for (spptr = start; spptr < start + father->uniquecharposlength; spptr++)
     {
-      if (state->processmaxpairs(state->processmaxpairsinfo,state->encseq,
+      if (state->processmaxpairs(state->processmaxpairsinfo,
+                                 &state->genericencseq,
                                  fatherdepth,leafnumber,*spptr,err) != 0)
       {
         return -2;
@@ -334,7 +337,8 @@ static int processbranchingedge_maxpairs(bool firstsucc,
       }
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
-        if (state->processmaxpairs(state->processmaxpairsinfo,state->encseq,
+        if (state->processmaxpairs(state->processmaxpairsinfo,
+                                   &state->genericencseq,
                                    fatherdepth,*fptr,*spptr,err) != 0)
         {
           return -4;
@@ -349,25 +353,29 @@ static int processbranchingedge_maxpairs(bool firstsucc,
 #include "esa-bottomup-maxpairs.inc"
 
 int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                         const GtEncseq *encseq,
-                         GtReadmode readmode,
                          unsigned int searchlength,
-                         Processmaxpairs processmaxpairs,
+                         GtProcessmaxpairs processmaxpairs,
                          void *processmaxpairsinfo,
                          GtError *err)
 {
   unsigned int base;
   GtArrayGtUlong *ptr;
   GtBUstate_maxpairs *state;
+  const GtEncseq *encseq;
+  GtReadmode readmode;
   bool haserr = false;
 
+  gt_assert(ssar != NULL);
+  encseq = gt_encseqSequentialsuffixarrayreader(ssar);
+  readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
   state = gt_malloc(sizeof (*state));
   state->alphabetsize = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   state->searchlength = searchlength;
   state->processmaxpairs = processmaxpairs;
   state->processmaxpairsinfo = processmaxpairsinfo;
   state->initialized = false;
-  state->encseq = encseq;
+  state->genericencseq.hasencseq = true;
+  state->genericencseq.seqptr.encseq = encseq;
   state->readmode = readmode;
 
   GT_INITARRAY(&state->uniquechar,GtUlong);

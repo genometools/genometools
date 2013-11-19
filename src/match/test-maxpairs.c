@@ -33,12 +33,13 @@
 #include "sfx-apfxlen.h"
 #include "esa-maxpairs.h"
 #include "esa-seqread.h"
+#include "test-maxpairs.h"
 
 typedef struct
 {
   unsigned int minlength;
   GtEncseq *encseq;
-  Processmaxpairs processmaxpairs;
+  GtProcessmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
 } Substringmatchinfo;
 
@@ -58,7 +59,6 @@ static int constructsarrandrunmaxpairs(
   bool haserr = false;
   Sfxiterator *sfi;
   bool specialsuffixes = false;
-
   Sfxstrategy sfxstrategy;
 
   defaultsfxstrategy(&sfxstrategy,
@@ -81,8 +81,7 @@ static int constructsarrandrunmaxpairs(
     Sequentialsuffixarrayreader *ssar = NULL;
     bool firstpage = true;
 
-    ssar = gt_newSequentialsuffixarrayreaderfromRAM(ssi->encseq,
-                                                    readmode);
+    ssar = gt_newSequentialsuffixarrayreaderfromRAM(ssi->encseq,readmode);
     while (true)
     {
       suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,&specialsuffixes,
@@ -99,8 +98,6 @@ static int constructsarrandrunmaxpairs(
                numberofsuffixes);
       firstpage = false;
       if (gt_enumeratemaxpairs(ssar,
-                               ssi->encseq,
-                               readmode,
                                ssi->minlength,
                                ssi->processmaxpairs,
                                ssi->processmaxpairsinfo,
@@ -127,7 +124,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                   GtUword querylen,
                                   unsigned int minlength,
                                   GtAlphabet *alpha,
-                                  Processmaxpairs processmaxpairs,
+                                  GtProcessmaxpairs processmaxpairs,
                                   void *processmaxpairsinfo,
                                   GtLogger *logger,
                                   GtError *err)
@@ -141,7 +138,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   gt_encseq_builder_disable_multiseq_support(eb);
   gt_encseq_builder_disable_description_support(eb);
   gt_encseq_builder_set_logger(eb, logger);
-  gt_encseq_builder_add_encoded(eb, dbseq, dblen, NULL);
+  gt_encseq_builder_add_multiple_encoded(eb, dbseq, dblen);
   gt_encseq_builder_add_encoded(eb, query, querylen, NULL);
   ssi.encseq = gt_encseq_builder_build(eb, err);
   gt_encseq_builder_delete(eb);
@@ -237,7 +234,7 @@ typedef struct
 } Maxmatchselfinfo;
 
 static int storemaxmatchself(void *info,
-                             GT_UNUSED const GtEncseq *encseq,
+                             GT_UNUSED const GtGenericEncseq *genericencseq,
                              GtUword len,
                              GtUword pos1,
                              GtUword pos2,

@@ -67,7 +67,7 @@ int gt_nextSequentiallcpvalue(GtUword *currentlcp,
 int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
                                  Sequentialsuffixarrayreader *ssar);
 
-#define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,TYPE)\
+#define SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,TYPE)\
         {\
           GtBufferedfile_ ## TYPE *buf\
             = &(SSAR)->suffixarray->suftabstream_ ## TYPE;\
@@ -97,25 +97,27 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
         }
 
 #if defined (_LP64) || defined (_WIN64)
-#define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
+#define SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
         if ((SSAR)->suffixarray->suftabstream_GtUlong.fp != NULL)\
         {\
-          NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,GtUlong);\
+          SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,\
+                                                          GtUlong);\
         } else\
         {\
-          NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,\
-                                                     uint32_t);\
+          SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,\
+                                                          uint32_t);\
         }
 #else
-#define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
-        NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,GtUlong)
+#define SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
+        SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,\
+                                                        GtUlong)
 #endif
 
-#define NEXTSEQUENTIALSUFTABVALUE(SUFTABVALUE,SSAR)\
+#define SSAR_NEXTSEQUENTIALSUFTABVALUE(SUFTABVALUE,SSAR)\
         switch ((SSAR)->seqactype)\
         {\
           case SEQ_scan:\
-            NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR);\
+            SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR);\
             break;\
           case SEQ_mappedboth:\
             SUFTABVALUE = ESASUFFIXPTRGET((SSAR)->suffixarray->suftab,\
@@ -127,7 +129,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
           break;\
         }
 
-#define NEXTSEQUENTIALLCPTABVALUE(LCPVALUE,SSAR)\
+#define SSAR_NEXTSEQUENTIALLCPTABVALUE(LCPVALUE,SSAR)\
         {\
           GtUchar tmpsmalllcpvalue;\
           if ((SSAR)->seqactype == SEQ_scan)\
@@ -197,7 +199,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
           }\
         }
 
-#define NEXTSEQUENTIALLCPTABVALUEWITHLAST(LCPVALUE,LASTSUFTABVALUE,SSAR)\
+#define SSAR_NEXTSEQUENTIALLCPTABVALUEWITHLAST(LCPVALUE,LASTSUFTABVALUE,SSAR)\
         {\
           GtUchar tmpsmalllcpvalue;\
           if ((SSAR)->seqactype == SEQ_scan)\
@@ -226,7 +228,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
               }\
             } else\
             {\
-              NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(LASTSUFTABVALUE,SSAR);\
+              SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(LASTSUFTABVALUE,SSAR);\
               break;\
             }\
           } else\

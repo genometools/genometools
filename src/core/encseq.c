@@ -8916,6 +8916,7 @@ void gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
                                    GtUword strlen,
                                    const char *desc)
 {
+  gt_assert(memchr(str,(int) SEPARATOR,(size_t) strlen) == NULL);
   gt_encseq_builder_add_encoded_generic(eb, str, strlen, desc, false);
 }
 
@@ -8924,7 +8925,27 @@ void gt_encseq_builder_add_encoded_own(GtEncseqBuilder *eb,
                                        GtUword strlen,
                                        const char *desc)
 {
+  gt_assert(memchr(str,(int) SEPARATOR,(size_t) strlen) == NULL);
   gt_encseq_builder_add_encoded_generic(eb, str, strlen, desc, true);
+}
+
+void gt_encseq_builder_add_multiple_encoded(GtEncseqBuilder *eb,
+                                            const GtUchar *str,
+                                            GtUword strlen)
+{
+  GtUword idx, laststart = 0;
+
+  for (idx = 0; idx < strlen; idx++)
+  {
+    if (str[idx] == SEPARATOR)
+    {
+      gt_assert(laststart < idx);
+      gt_encseq_builder_add_encoded(eb, str + laststart, idx - laststart, NULL);
+      laststart = idx + 1;
+    }
+  }
+  gt_assert(laststart < idx);
+  gt_encseq_builder_add_encoded(eb, str + laststart, idx - laststart, NULL);
 }
 
 void gt_encseq_builder_set_logger(GtEncseqBuilder *eb, GtLogger *l)

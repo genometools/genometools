@@ -30,9 +30,11 @@
 #include "esa-seqread.h"
 /* no include for seqnumrelpos.h */
 
-static void initBUinfo_shulen(GtBUinfo_shulen *,GtBUstate_shulen *);
+static void initBUinfo_shulen(GtBUinfo_shulen *,
+                              GtBUstate_shulen *);
 
-static void freeBUinfo_shulen(GtBUinfo_shulen *,GtBUstate_shulen *);
+static void freeBUinfo_shulen(GtBUinfo_shulen *,
+                              GtBUstate_shulen *);
 
 static int processleafedge_shulen(bool,
     GtUword,
@@ -97,8 +99,9 @@ GtArrayGtBUItvinfo_shulen *gt_GtArrayGtBUItvinfo_new_shulen(void)
   return stack;
 }
 
-void gt_GtArrayGtBUItvinfo_delete_shulen(GtArrayGtBUItvinfo_shulen *stack,
-                                  GtBUstate_shulen *state)
+void gt_GtArrayGtBUItvinfo_delete_shulen(
+                           GtArrayGtBUItvinfo_shulen *stack,
+                           GtBUstate_shulen *state)
 {
   GtUword idx;
 
@@ -110,7 +113,8 @@ void gt_GtArrayGtBUItvinfo_delete_shulen(GtArrayGtBUItvinfo_shulen *stack,
   gt_free(stack);
 }
 
-static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
+static GtBUItvinfo_shulen *allocateBUstack_shulen(
+                                   GtBUItvinfo_shulen *ptr,
                                    GtUword currentallocated,
                                    GtUword allocated,
                                    GtBUstate_shulen *state)
@@ -148,8 +152,8 @@ static int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
   numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
-    NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
-    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    SSAR_NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
+    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
     {

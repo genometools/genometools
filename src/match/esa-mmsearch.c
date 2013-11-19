@@ -806,6 +806,7 @@ static int gt_constructsarrandrunmmsearch(
                  void *processquerymatchinfo,
                  GtTimer *sfxprogress,
                  bool withprogressbar,
+                 GtLogger *logger,
                  GtError *err)
 {
   bool haserr = false;
@@ -823,7 +824,7 @@ static int gt_constructsarrandrunmmsearch(
                            &sfxstrategy, /* sfxstrategy */
                            sfxprogress,
                            withprogressbar,
-                           NULL, /* logger */
+                           logger, /* logger */
                            err);
   if (sfi == NULL)
   {
@@ -896,7 +897,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
   gt_encseq_builder_disable_multiseq_support(eb);
   gt_encseq_builder_disable_description_support(eb);
   gt_encseq_builder_set_logger(eb, logger);
-  gt_encseq_builder_add_encoded(eb, dbseq, dblen, NULL);
+  gt_encseq_builder_add_multiple_encoded(eb,dbseq,dblen);
   dbencseq = gt_encseq_builder_build(eb, err);
   gt_encseq_builder_delete(eb);
 
@@ -917,6 +918,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                      processquerymatchinfo,
                                      NULL,
                                      false,
+                                     logger,
                                      err) != 0)
   {
     haserr = true;

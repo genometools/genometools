@@ -30,9 +30,11 @@
 #include "esa-seqread.h"
 /* no include for seqnumrelpos.h */
 
-static void initBUinfo_maxpairs(GtBUinfo_maxpairs *,GtBUstate_maxpairs *);
+static void initBUinfo_maxpairs(GtBUinfo_maxpairs *,
+                              GtBUstate_maxpairs *);
 
-static void freeBUinfo_maxpairs(GtBUinfo_maxpairs *,GtBUstate_maxpairs *);
+static void freeBUinfo_maxpairs(GtBUinfo_maxpairs *,
+                              GtBUstate_maxpairs *);
 
 static int processleafedge_maxpairs(bool,
     GtUword,
@@ -97,8 +99,9 @@ GtArrayGtBUItvinfo_maxpairs *gt_GtArrayGtBUItvinfo_new_maxpairs(void)
   return stack;
 }
 
-void gt_GtArrayGtBUItvinfo_delete_maxpairs(GtArrayGtBUItvinfo_maxpairs *stack,
-                                  GtBUstate_maxpairs *state)
+void gt_GtArrayGtBUItvinfo_delete_maxpairs(
+                           GtArrayGtBUItvinfo_maxpairs *stack,
+                           GtBUstate_maxpairs *state)
 {
   GtUword idx;
 
@@ -110,7 +113,8 @@ void gt_GtArrayGtBUItvinfo_delete_maxpairs(GtArrayGtBUItvinfo_maxpairs *stack,
   gt_free(stack);
 }
 
-static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(GtBUItvinfo_maxpairs *ptr,
+static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(
+                                   GtBUItvinfo_maxpairs *ptr,
                                    GtUword currentallocated,
                                    GtUword allocated,
                                    GtBUstate_maxpairs *state)
@@ -148,8 +152,8 @@ static int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
   numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
-    NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
-    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    SSAR_NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
+    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
     {

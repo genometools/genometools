@@ -29,9 +29,11 @@
 #include "esa-seqread.h"
 /* no include for seqnumrelpos.h */
 
-static void initBUinfo_errfind(GtBUinfo_errfind *,GtBUstate_errfind *);
+static void initBUinfo_errfind(GtBUinfo_errfind *,
+                              GtBUstate_errfind *);
 
-static void freeBUinfo_errfind(GtBUinfo_errfind *,GtBUstate_errfind *);
+static void freeBUinfo_errfind(GtBUinfo_errfind *,
+                              GtBUstate_errfind *);
 
 static int processleafedge_errfind(bool,
     GtUword,
@@ -99,8 +101,9 @@ GtArrayGtBUItvinfo_errfind *gt_GtArrayGtBUItvinfo_new_errfind(void)
   return stack;
 }
 
-void gt_GtArrayGtBUItvinfo_delete_errfind(GtArrayGtBUItvinfo_errfind *stack,
-                                  GtBUstate_errfind *state)
+void gt_GtArrayGtBUItvinfo_delete_errfind(
+                           GtArrayGtBUItvinfo_errfind *stack,
+                           GtBUstate_errfind *state)
 {
   GtUword idx;
 
@@ -112,7 +115,8 @@ void gt_GtArrayGtBUItvinfo_delete_errfind(GtArrayGtBUItvinfo_errfind *stack,
   gt_free(stack);
 }
 
-static GtBUItvinfo_errfind *allocateBUstack_errfind(GtBUItvinfo_errfind *ptr,
+static GtBUItvinfo_errfind *allocateBUstack_errfind(
+                                   GtBUItvinfo_errfind *ptr,
                                    GtUword currentallocated,
                                    GtUword allocated,
                                    GtBUstate_errfind *state)
@@ -150,8 +154,8 @@ static int gt_esa_bottomup_errfind(Sequentialsuffixarrayreader *ssar,
   numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
-    NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
-    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    SSAR_NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
+    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_errfind.lcp)
     {
