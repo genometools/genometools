@@ -18,6 +18,11 @@
 #ifndef MD5SET_H
 #define MD5SET_H
 
+#include <stdbool.h>
+
+#include "core/types_api.h"
+#include "core/error_api.h"
+
 /* A set which represents a (possibly large) set of sequences, allowing to
    check whether a sequence or its reverse complement belongs to the set;
    only 128-bit MD5 hashes are stored, not the sequences themselves
@@ -33,10 +38,10 @@ typedef enum {
 
 /* Create a new <GtMD5Set> with <nof_elements> sequences. If the number of
    sequences is not known, set <nof_elements> to 0. */
-GtMD5Set* gt_md5set_new(GtUword nof_elements);
+GtMD5Set*      gt_md5set_new(GtUword nof_elements);
 
 /* Deletes a <GtMD5Set> and frees all associated memory. */
-void      gt_md5set_delete(GtMD5Set *set);
+void           gt_md5set_delete(GtMD5Set *set);
 
 /* Calculates the MD5 hash of an upper case copy of <seq> and adds it to
    <set> if not present. If <both_strands> is true, the MD5 hash of the reverse
@@ -49,7 +54,7 @@ void      gt_md5set_delete(GtMD5Set *set);
    <GT_MD5SET_RC_FOUND> if <seq> was already present in the reverse complement
    direction. */
 GtMD5SetStatus gt_md5set_add_sequence(GtMD5Set *set, const char* seq,
-                                 GtUword seqlen, bool both_strands,
-                                 GtError *err);
+                                      GtUword seqlen, bool both_strands,
+                                      GtError *err);
 
 #endif

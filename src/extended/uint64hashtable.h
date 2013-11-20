@@ -19,8 +19,10 @@
 #define UINT64HASHTABLE_H
 
 #include <inttypes.h>
-#include "core/timer_api.h"
+
 #include "core/error.h"
+#include "core/timer_api.h"
+#include "core/types_api.h"
 
 /* An hash table of uint64_t values without any associated information */
 typedef struct GtUint64hashtable GtUint64hashtable;
@@ -30,22 +32,24 @@ typedef struct GtUint64hashtable GtUint64hashtable;
 GtUint64hashtable* gt_uint64hashtable_new(size_t nof_elements);
 
 /* Deletes a <GtUint64hashtable> and frees all associated memory */
-void gt_uint64hashtable_delete(GtUint64hashtable *table);
+void               gt_uint64hashtable_delete(GtUint64hashtable *table);
 
 /* Searches key in table; returns true if found, false otherwise;
  * if insert_if_not_found is true, key is added to the table if not already
  * contained */
-bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
-                               bool insert_if_not_found);
+bool               gt_uint64hashtable_search(GtUint64hashtable *table,
+                                             uint64_t key,
+                                             bool insert_if_not_found);
 
-GtUword gt_uint64hashtable_countsum_get(const GtUint64hashtable *table);
+GtUword            gt_uint64hashtable_countsum_get(
+                                                const GtUint64hashtable *table);
 
-GtUword gt_uint64hashtable_partialsums(GtUint64hashtable *table,
-                                             GtTimer *timer);
+GtUword            gt_uint64hashtable_partialsums(GtUint64hashtable *table,
+                                                  GtTimer *timer);
 
-GtUword gt_uint64hashtable_insertionindex(GtUint64hashtable *table,
-                                                uint64_t key);
+GtUword            gt_uint64hashtable_insertionindex(GtUint64hashtable *table,
+                                                     uint64_t key);
 
-int gt_uint64hashtable_unit_test(GtError *err);
+int                gt_uint64hashtable_unit_test(GtError *err);
 
 #endif
