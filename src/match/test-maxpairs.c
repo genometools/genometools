@@ -174,9 +174,8 @@ static GtUword samplesubstring(bool replacespecialchars,
                                const GtEncseq *encseq,
                                GtUword substringlength)
 {
-  GtUword start, totallength;
+  GtUword start, totallength = gt_encseq_total_length(encseq);
 
-  totallength = gt_encseq_total_length(encseq);
   start = (GtUword) (random() % totallength);
   if (start + substringlength > totallength)
   {
@@ -421,6 +420,12 @@ int gt_testmaxpairs(const char *indexname,
   {
     dblen = samplesubstring(false,dbseq,encseq,substringlength);
     querylen = samplesubstring(true,query,encseq,substringlength);
+    if (dbseq[0] == SEPARATOR || query[0] == SEPARATOR ||
+        dbseq[substringlength-1] == SEPARATOR ||
+        query[substringlength-1] == SEPARATOR)
+    {
+      continue;
+    }
     gt_logger_log(logger,"run query match for dblen="GT_WU""
                          ",querylen= "GT_WU", minlength=%u",
                          dblen,
@@ -492,7 +497,8 @@ int gt_testmaxpairs(const char *indexname,
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     gt_free(maxmatchselfinfo.querymarkpos);
-    printf("# numberofmatches="GT_WU"\n",gt_array_size(tabmaxquerymatches));
+    /*printf("# * numberofmatches="GT_WU"\n",
+              gt_array_size(tabmaxquerymatches));*/
     gt_array_delete(tabmaxquerymatches);
     gt_array_delete(maxmatchselfinfo.results);
   }

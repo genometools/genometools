@@ -119,7 +119,6 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
                                numofentries,
                                gt_suffixsortspace_overflow_abort,
                                &numofentries);
-  gt_log_log("sizeof (suftab)="GT_WU" bytes",sufspacesize);
   if (gt_decide_to_use_uint(useuint,maxvalue))
   {
     suffixsortspace->ulongtab = NULL;

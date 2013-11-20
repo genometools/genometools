@@ -392,7 +392,6 @@ void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange)
   {
     return;
   }
-  gt_log_log("delete table %s",gt_str_get(sfxmappedrange->tablename));
   gt_fa_xmunmap(sfxmappedrange->ptr);
   sfxmappedrange->ptr = NULL;
   gt_fa_xmunmap(sfxmappedrange->entire);
@@ -403,7 +402,6 @@ void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange)
   }
   if (sfxmappedrange->filename != NULL)
   {
-    gt_log_log("remove \"%s\"",gt_str_get(sfxmappedrange->filename));
     gt_xunlink(gt_str_get(sfxmappedrange->filename));
   }
   gt_str_delete(sfxmappedrange->tablename);

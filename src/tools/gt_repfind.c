@@ -15,6 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+/*
+GT_SEED=1095849084 valgrind bin/gt -debug repfind -l 5 -samples 1000 -ii at1MB
+*/
+
 #include <inttypes.h>
 #include "core/error_api.h"
 #include "core/str_api.h"
@@ -597,7 +601,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                             arguments->samples,
                             arguments->userdefinedleastlength,
                             (GtUword)
-                            (100 * arguments->userdefinedleastlength),
+                            (10 * arguments->userdefinedleastlength),
                             logger,
                             err) != 0)
         {
