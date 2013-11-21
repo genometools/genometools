@@ -15,10 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-/*
-GT_SEED=1095849084 valgrind bin/gt -debug repfind -l 5 -samples 1000 -ii at1MB
-*/
-
 #include <inttypes.h>
 #include "core/error_api.h"
 #include "core/str_api.h"

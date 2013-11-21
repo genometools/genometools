@@ -187,8 +187,10 @@ static int processleafedge_maxpairs(bool firstsucc,
   GtUword *start, *spptr;
   GtUchar leftchar;
 
+#undef SKDEBUG
 #ifdef SKDEBUG
-  printf("%s "GT_WU" firstsucc=%s, __func__," " depth(father)= "GT_WU"\n",
+  printf("%s "GT_WU" firstsucc=%s, depth(father)= "GT_WU"\n",
+         __func__,
          leafnumber,
          firstsucc ? "true" : "false",
          fatherdepth);
