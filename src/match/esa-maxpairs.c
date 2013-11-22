@@ -19,6 +19,7 @@
 #include "core/unused_api.h"
 #include "esa-seqread.h"
 #include "esa-maxpairs.h"
+#include "sfx-sain.h"
 
 #define ISLEFTDIVERSE   (GtUchar) (state->alphabetsize)
 #define INITIALCHAR     (GtUchar) (state->alphabetsize+1)
@@ -388,6 +389,103 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     GT_INITARRAY(ptr,GtUlong);
   }
   if (gt_esa_bottomup_maxpairs(ssar, state, err) != 0)
+  {
+    haserr = true;
+  }
+  GT_FREEARRAY(&state->uniquechar,GtUlong);
+  for (base = 0; base < state->alphabetsize; base++)
+  {
+    ptr = &state->poslist[base];
+    GT_FREEARRAY(ptr,GtUlong);
+  }
+  gt_free(state->poslist);
+  gt_free(state);
+  return haserr ? -1 : 0;
+}
+
+typedef GtBUinfo_maxpairs GtBUinfo_sain_maxpairs;
+typedef GtBUstate_maxpairs GtBUstate_sain_maxpairs;
+
+static void initBUinfo_sain_maxpairs(GtBUinfo_maxpairs *buinfo,
+                                     GtBUstate_maxpairs *state)
+{
+  initBUinfo_maxpairs(buinfo,state);
+}
+
+static void freeBUinfo_sain_maxpairs(GtBUinfo_maxpairs *buinfo,
+                                     GT_UNUSED GtBUstate_maxpairs *state)
+{
+  freeBUinfo_sain_maxpairs(buinfo,state);
+}
+
+static int processleafedge_sain_maxpairs(bool firstsucc,
+                                         GtUword fatherdepth,
+                                         GtBUinfo_maxpairs *father,
+                                         GtUword leafnumber,
+                                         GtBUstate_maxpairs *state,
+                                         GtError *err)
+{
+  return processleafedge_maxpairs(firstsucc,
+                                  fatherdepth,
+                                  father,
+                                  leafnumber,
+                                  state,
+                                  err);
+}
+
+static int processbranchingedge_sain_maxpairs(bool firstsucc,
+                                              GtUword fatherdepth,
+                                              GtBUinfo_maxpairs *father,
+                                              GT_UNUSED GtUword sondepth,
+                                              GT_UNUSED GtUword sonwidth,
+                                              GtBUinfo_maxpairs *son,
+                                              GtBUstate_maxpairs *state,
+                                              GtError *err)
+{
+  return processbranchingedge_maxpairs(firstsucc,
+                                       fatherdepth,
+                                       father,
+                                       sondepth,
+                                       sonwidth,
+                                       son,
+                                       state,
+                                       err);
+}
+
+#include "esa-bottomup-sain-maxpairs.inc"
+
+int gt_enumeratemaxpairs_sain(GtSainSufLcpIterator *suflcpiterator,
+                              unsigned int searchlength,
+                              GtProcessmaxpairs processmaxpairs,
+                              void *processmaxpairsinfo,
+                              GtError *err)
+{
+  unsigned int base;
+  GtArrayGtUlong *ptr;
+  GtBUstate_maxpairs *state;
+  bool haserr = false;
+
+  state = gt_malloc(sizeof (*state));
+  state->searchlength = searchlength;
+  state->processmaxpairs = processmaxpairs;
+  state->processmaxpairsinfo = processmaxpairsinfo;
+  state->initialized = false;
+  state->readmode = GT_READMODE_FORWARD;
+  state->genericencseq.hasencseq = false;
+  state->genericencseq.seqptr.bare_encseq
+    = gt_sain_suf_lcp_iterator_bare_encseq(suflcpiterator);
+  state->alphabetsize
+    = (unsigned int)
+      gt_bare_encseq_numofchars(state->genericencseq.seqptr.bare_encseq);
+
+  GT_INITARRAY(&state->uniquechar,GtUlong);
+  state->poslist = gt_malloc(sizeof (*state->poslist) * state->alphabetsize);
+  for (base = 0; base < state->alphabetsize; base++)
+  {
+    ptr = &state->poslist[base];
+    GT_INITARRAY(ptr,GtUlong);
+  }
+  if (gt_esa_bottomup_sain_maxpairs(suflcpiterator, state, err) != 0)
   {
     haserr = true;
   }

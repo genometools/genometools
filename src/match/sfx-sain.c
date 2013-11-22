@@ -1697,7 +1697,7 @@ struct GtSainSufLcpIterator
   GtUsainindextype *suftab;
   unsigned int *plcptab;
   GtBareEncseq *bare_encseq;
-  GtUword currentsuftabvalue, currentsuftabindex;
+  GtUword currentsuftabindex;
 };
 
 GtSainSufLcpIterator *gt_sain_suf_lcp_iterator_new(bool withlcp,
@@ -1717,7 +1717,6 @@ GtSainSufLcpIterator *gt_sain_suf_lcp_iterator_new(bool withlcp,
   suflcpiterator->suftab = NULL;
   suflcpiterator->plcptab = NULL;
   suflcpiterator->currentsuftabindex = 0;
-  suflcpiterator->currentsuftabvalue = GT_UWORD_MAX;
   suflcpiterator->bare_encseq = gt_bare_encseq_new(sequence,len,numofchars);
   gt_assert(suflcpiterator->bare_encseq != NULL);
   if (readmode != GT_READMODE_FORWARD)
@@ -1773,14 +1772,20 @@ GtUword gt_sain_suf_lcp_iterator_nonspecials(const GtSainSufLcpIterator
          gt_bare_encseq_specialcharacters(suflcpiterator->bare_encseq);
 }
 
+const GtBareEncseq *gt_sain_suf_lcp_iterator_bare_encseq(
+         const GtSainSufLcpIterator *suflcpiterator)
+{
+  return suflcpiterator->bare_encseq;
+}
+
 GtUword gt_sain_suf_lcp_iterator_next(GtUword *lcpvalue,
                                       GtSainSufLcpIterator *suflcpiterator)
 {
+  GtUsainindextype previoussuffix, currentsuffix;
   gt_assert(suflcpiterator != NULL);
 
-  suflcpiterator->currentsuftabvalue
-    = (GtUword) suflcpiterator->suftab[suflcpiterator->currentsuftabindex++];
-  *lcpvalue = (GtUword) suflcpiterator->plcptab[suflcpiterator->
-                                                currentsuftabvalue];
-  return suflcpiterator->currentsuftabvalue;
+  previoussuffix = suflcpiterator->suftab[suflcpiterator->currentsuftabindex++];
+  currentsuffix = suflcpiterator->suftab[suflcpiterator->currentsuftabindex];
+  *lcpvalue = (GtUword) suflcpiterator->plcptab[currentsuffix];
+  return (GtUword) previoussuffix;
 }

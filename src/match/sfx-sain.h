@@ -63,4 +63,7 @@ GtUword gt_sain_suf_lcp_iterator_nonspecials(const GtSainSufLcpIterator
 GtUword gt_sain_suf_lcp_iterator_next(GtUword *lcpvalue,
                                       GtSainSufLcpIterator *suflcpiterator);
 
+const GtBareEncseq *gt_sain_suf_lcp_iterator_bare_encseq(
+         const GtSainSufLcpIterator *suflcpiterator);
+
 #endif

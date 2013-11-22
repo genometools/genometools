@@ -420,6 +420,7 @@ int gt_testmaxpairs(const char *indexname,
   {
     dblen = samplesubstring(false,dbseq,encseq,substringlength);
     querylen = samplesubstring(true,query,encseq,substringlength);
+    gt_assert(dbseq != NULL && query != NULL);
     if (dbseq[0] == SEPARATOR || query[0] == SEPARATOR ||
         dbseq[substringlength-1] == SEPARATOR ||
         query[substringlength-1] == SEPARATOR)
