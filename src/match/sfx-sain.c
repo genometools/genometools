@@ -1758,6 +1758,7 @@ void gt_sain_suf_lcp_iterator_delete(GtSainSufLcpIterator *suflcpiterator)
     gt_bare_encseq_delete(suflcpiterator->bare_encseq);
     gt_free(suflcpiterator->suftab);
     gt_free(suflcpiterator->plcptab);
+    gt_free(suflcpiterator);
   }
 }
 

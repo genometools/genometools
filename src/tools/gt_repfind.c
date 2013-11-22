@@ -597,7 +597,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                             arguments->samples,
                             arguments->userdefinedleastlength,
                             (GtUword)
-                            (10 * arguments->userdefinedleastlength),
+                            (100 * arguments->userdefinedleastlength),
                             logger,
                             err) != 0)
         {

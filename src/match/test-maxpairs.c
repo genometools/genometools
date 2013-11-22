@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,156 +23,55 @@
 #include "core/encseq.h"
 #include "core/format64.h"
 #include "core/logger.h"
-#include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/ma_api.h"
 #include "core/yarandom.h"
 #include "esa-mmsearch.h"
 #include "echoseq.h"
-#include "sfx-suffixer.h"
-#include "sfx-apfxlen.h"
 #include "esa-maxpairs.h"
-#include "esa-seqread.h"
+#include "sfx-sain.h"
 #include "test-maxpairs.h"
 
-typedef struct
+static int gt_constructsarrandrunmaxpairs(GtUchar *dbseqquery,
+                                          GtUword dbseqquerylen,
+                                          GtReadmode readmode,
+                                          unsigned int searchlength,
+                                          unsigned int numofchars,
+                                          GtProcessmaxpairs processmaxpairs,
+                                          void *processmaxpairsinfo,
+                                          GtError *err)
 {
-  unsigned int minlength;
-  GtEncseq *encseq;
-  GtProcessmaxpairs processmaxpairs;
-  void *processmaxpairsinfo;
-} Substringmatchinfo;
-
-static int constructsarrandrunmaxpairs(
-                 Substringmatchinfo *ssi,
-                 GtReadmode readmode,
-                 unsigned int prefixlength,
-                 unsigned int numofparts,
-                 GtUword maximumspace,
-                 GtTimer *sfxprogress,
-                 bool withprogressbar,
-                 GT_UNUSED GtLogger *logger,
-                 GtError *err)
-{
-  const GtSuffixsortspace *suffixsortspace;
-  GtUword numberofsuffixes;
   bool haserr = false;
-  Sfxiterator *sfi;
-  bool specialsuffixes = false;
-  Sfxstrategy sfxstrategy;
+  GtSainSufLcpIterator *suflcpiterator;
 
-  defaultsfxstrategy(&sfxstrategy,
-                     gt_encseq_bitwise_cmp_ok(ssi->encseq) ? false : true);
-  sfi = gt_Sfxiterator_new(ssi->encseq,
-                           readmode,
-                           prefixlength,
-                           numofparts,
-                           maximumspace,
-                           &sfxstrategy,
-                           sfxprogress,
-                           withprogressbar,
-                           NULL, /* logger */
-                           err);
-  if (sfi == NULL)
+  suflcpiterator = gt_sain_suf_lcp_iterator_new(true,
+                                                dbseqquery,
+                                                dbseqquerylen,
+                                                readmode,
+                                                (GtUword) numofchars,
+                                                err);
+  if (suflcpiterator == NULL)
   {
     haserr = true;
   } else
   {
-    Sequentialsuffixarrayreader *ssar = NULL;
-    bool firstpage = true;
-
-    ssar = gt_newSequentialsuffixarrayreaderfromRAM(ssi->encseq,readmode);
-    while (true)
-    {
-      suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,&specialsuffixes,
-                                            sfi);
-      if (suffixsortspace == NULL || specialsuffixes)
-      {
-        break;
-      }
-      gt_updateSequentialsuffixarrayreaderfromRAM(
-               ssar,
-               (const ESASuffixptr *)
-               gt_suffixsortspace_ulong_get(suffixsortspace),
-               firstpage,
-               numberofsuffixes);
-      firstpage = false;
-      if (gt_enumeratemaxpairs(ssar,
-                               ssi->minlength,
-                               ssi->processmaxpairs,
-                               ssi->processmaxpairsinfo,
-                               err) != 0)
-      {
-        haserr = true;
-      }
-    }
-    if (ssar != NULL)
-    {
-      gt_freeSequentialsuffixarrayreader(&ssar);
-    }
-  }
-  if (gt_Sfxiterator_delete(sfi,err) != 0)
-  {
-    haserr = true;
-  }
-  return haserr ? -1 : 0;
-}
-
-static int sarrselfsubstringmatch(const GtUchar *dbseq,
-                                  GtUword dblen,
-                                  const GtUchar *query,
-                                  GtUword querylen,
-                                  unsigned int minlength,
-                                  GtAlphabet *alpha,
-                                  GtProcessmaxpairs processmaxpairs,
-                                  void *processmaxpairsinfo,
-                                  GtLogger *logger,
-                                  GtError *err)
-{
-  Substringmatchinfo ssi;
-  unsigned int numofchars, recommendedprefixlength;
-  GtEncseqBuilder *eb;
-  bool haserr = false;
-
-  eb = gt_encseq_builder_new(alpha);
-  gt_encseq_builder_disable_multiseq_support(eb);
-  gt_encseq_builder_disable_description_support(eb);
-  gt_encseq_builder_set_logger(eb, logger);
-  gt_encseq_builder_add_multiple_encoded(eb, dbseq, dblen);
-  gt_encseq_builder_add_encoded(eb, query, querylen, NULL);
-  ssi.encseq = gt_encseq_builder_build(eb, err);
-  gt_encseq_builder_delete(eb);
-
-  ssi.minlength = minlength;
-  ssi.processmaxpairs = processmaxpairs;
-  ssi.processmaxpairsinfo = processmaxpairsinfo;
-  numofchars = gt_alphabet_num_of_chars(alpha);
-  recommendedprefixlength
-    = gt_recommendedprefixlength(numofchars,
-                                 dblen+querylen+1,
-                                 GT_RECOMMENDED_MULTIPLIER_DEFAULT,
-                                 true);
-  if (constructsarrandrunmaxpairs(&ssi,
-                                  GT_READMODE_FORWARD,
-                                  recommendedprefixlength,
-                                  1U, /* parts */
-                                  0, /* maximumspace */
-                                  NULL,
-                                  false,
-                                  logger,
+    if (gt_enumeratemaxpairs_sain(suflcpiterator,
+                                  searchlength,
+                                  processmaxpairs,
+                                  processmaxpairsinfo,
                                   err) != 0)
-  {
-    haserr = true;
+    {
+      haserr = true;
+    }
   }
-  gt_encseq_delete(ssi.encseq);
-  ssi.encseq = NULL;
+  gt_sain_suf_lcp_iterator_delete(suflcpiterator);
   return haserr ? -1 : 0;
 }
 
-static GtUword samplesubstring(bool replacespecialchars,
-                               GtUchar *seqspace,
-                               const GtEncseq *encseq,
-                               GtUword substringlength)
+static GtUword gt_samplesubstring(bool replacespecialchars,
+                                  GtUchar *seqspace,
+                                  const GtEncseq *encseq,
+                                  GtUword substringlength)
 {
   GtUword start, totallength = gt_encseq_total_length(encseq);
 
@@ -202,17 +101,17 @@ static GtUword samplesubstring(bool replacespecialchars,
 typedef struct
 {
   GtUword len,
-         dbstart,
-         querystart;
+          dbstart,
+          querystart;
   uint64_t queryseqnum;
 } Substringmatch;
 
-static int storemaxmatchquery(void *info,
-                              GT_UNUSED const GtEncseq *encseq,
-                              const GtQuerymatch *querymatch,
-                              GT_UNUSED const GtUchar *query,
-                              GT_UNUSED GtUword query_totallength,
-                              GT_UNUSED GtError *err)
+static int gt_storemaxmatchquery(void *info,
+                                 GT_UNUSED const GtEncseq *encseq,
+                                 const GtQuerymatch *querymatch,
+                                 GT_UNUSED const GtUchar *query,
+                                 GT_UNUSED GtUword query_totallength,
+                                 GT_UNUSED GtError *err)
 {
   GtArray *tab = (GtArray *) info;
   Substringmatch subm;
@@ -228,18 +127,17 @@ static int storemaxmatchquery(void *info,
 typedef struct
 {
   GtArray *results;
-  GtUword dblen, *querymarkpos, querylen;
-  GtUword numofquerysequences;
-} Maxmatchselfinfo;
+  GtUword dblen, *querymarkpos, querylen, numofquerysequences;
+} GtMaxmatchselfinfo;
 
-static int storemaxmatchself(void *info,
-                             GT_UNUSED const GtGenericEncseq *genericencseq,
-                             GtUword len,
-                             GtUword pos1,
-                             GtUword pos2,
-                             GT_UNUSED GtError *err)
+static int gt_storemaxmatchself(void *info,
+                                GT_UNUSED const GtGenericEncseq *genericencseq,
+                                GtUword len,
+                                GtUword pos1,
+                                GtUword pos2,
+                                GT_UNUSED GtError *err)
 {
-  Maxmatchselfinfo *maxmatchselfinfo = (Maxmatchselfinfo *) info;
+  GtMaxmatchselfinfo *maxmatchselfinfo = (GtMaxmatchselfinfo *) info;
   GtUword dbstart, querystart;
 
   if (pos1 < pos2)
@@ -268,9 +166,9 @@ static int storemaxmatchself(void *info,
     {
       GtUword queryseqnum
         = gt_encseq_sep2seqnum(maxmatchselfinfo->querymarkpos,
-                                        maxmatchselfinfo->numofquerysequences,
-                                        maxmatchselfinfo->querylen,
-                                        pos);
+                               maxmatchselfinfo->numofquerysequences,
+                               maxmatchselfinfo->querylen,
+                               pos);
       if (queryseqnum == maxmatchselfinfo->numofquerysequences)
       {
         return -1;
@@ -290,7 +188,7 @@ static int storemaxmatchself(void *info,
   return 0;
 }
 
-static int orderSubstringmatch(const void *a,const void *b)
+static int gt_orderSubstringmatch(const void *a,const void *b)
 {
   Substringmatch *m1 = (Substringmatch *) a,
                  *m2 = (Substringmatch *) b;
@@ -330,8 +228,8 @@ static int orderSubstringmatch(const void *a,const void *b)
   return 0;
 }
 
-static int showSubstringmatch(void *a, GT_UNUSED void *info,
-                              GT_UNUSED GtError *err)
+static int gt_showSubstringmatch(void *a, GT_UNUSED void *info,
+                                 GT_UNUSED GtError *err)
 {
   Substringmatch *m = (Substringmatch *) a;
 
@@ -343,12 +241,11 @@ static int showSubstringmatch(void *a, GT_UNUSED void *info,
   return 0;
 }
 
-static GtUword *sequence2markpositions(GtUword *numofsequences,
-                                      const GtUchar *seq,
-                                      GtUword seqlen)
+static GtUword *gt_sequence2markpositions(GtUword *numofsequences,
+                                          const GtUchar *seq,
+                                          GtUword seqlen)
 {
-  GtUword *spacemarkpos, idx;
-  GtUword allocatedmarkpos, nextfreemarkpos;
+  GtUword *spacemarkpos, idx, allocatedmarkpos, nextfreemarkpos;
 
   *numofsequences = 1UL;
   for (idx=0; idx<seqlen; idx++)
@@ -381,17 +278,16 @@ int gt_testmaxpairs(const char *indexname,
                     GtLogger *logger,
                     GtError *err)
 {
-  GtEncseq *encseq;
-  GtUword totallength = 0, dblen, querylen;
-  GtUchar *dbseq = NULL, *query = NULL;
   bool haserr = false;
-  GtUword s;
+  GtEncseq *encseq;
+  GtUword idx, totallength = 0, dblen, querylen;
+  GtUchar *dbseq = NULL, *query = NULL;
+  GtAlphabet *alphabet = NULL;
   GtArray *tabmaxquerymatches;
-  Maxmatchselfinfo maxmatchselfinfo;
+  GtMaxmatchselfinfo maxmatchselfinfo;
   GtEncseqLoader *el;
 
   gt_logger_log(logger,"draw "GT_WU" samples",samples);
-
   el = gt_encseq_loader_new();
   gt_encseq_loader_do_not_require_des_tab(el);
   gt_encseq_loader_do_not_require_ssp_tab(el);
@@ -413,14 +309,19 @@ int gt_testmaxpairs(const char *indexname,
     {
       substringlength = totallength/2;
     }
-    dbseq = gt_malloc(sizeof *dbseq * substringlength);
-    query = gt_malloc(sizeof *query * substringlength);
+    /* use one memory area for dbseq and query, since in one method
+       we concatenate both sequences */
+    dbseq = gt_malloc(sizeof *dbseq * (1 + GT_MULT2(substringlength)));
+    alphabet = gt_encseq_alphabet(encseq);
   }
-  for (s=0; s<samples && !haserr; s++)
+  for (idx = 0; idx < samples && !haserr; idx++)
   {
-    dblen = samplesubstring(false,dbseq,encseq,substringlength);
-    querylen = samplesubstring(true,query,encseq,substringlength);
-    gt_assert(dbseq != NULL && query != NULL);
+    dblen = gt_samplesubstring(false,dbseq,encseq,substringlength);
+    gt_assert(dbseq != NULL);
+    query = dbseq + dblen + 1;
+    gt_assert(query != NULL);
+    dbseq[dblen] = SEPARATOR;
+    querylen = gt_samplesubstring(true,query,encseq,substringlength);
     if (dbseq[0] == SEPARATOR || query[0] == SEPARATOR ||
         dbseq[substringlength-1] == SEPARATOR ||
         query[substringlength-1] == SEPARATOR)
@@ -436,10 +337,10 @@ int gt_testmaxpairs(const char *indexname,
     if (gt_sarrquerysubstringmatch(dbseq,
                                    dblen,
                                    query,
-                                   (GtUword) querylen,
+                                   querylen,
                                    minlength,
-                                   gt_encseq_alphabet(encseq),
-                                   storemaxmatchquery,
+                                   alphabet,
+                                   gt_storemaxmatchquery,
                                    tabmaxquerymatches,
                                    logger,
                                    err) != 0)
@@ -456,56 +357,43 @@ int gt_testmaxpairs(const char *indexname,
     maxmatchselfinfo.dblen = dblen;
     maxmatchselfinfo.querylen = querylen;
     maxmatchselfinfo.querymarkpos
-      = sequence2markpositions(&maxmatchselfinfo.numofquerysequences,
-                               query,querylen);
-    if (sarrselfsubstringmatch(dbseq,
-                               dblen,
-                               query,
-                               (GtUword) querylen,
-                               minlength,
-                               gt_encseq_alphabet(encseq),
-                               storemaxmatchself,
-                               &maxmatchselfinfo,
-                               logger,
-                               err) != 0)
+      = gt_sequence2markpositions(&maxmatchselfinfo.numofquerysequences,
+                                  query,querylen);
+    if (gt_constructsarrandrunmaxpairs(
+                 dbseq,
+                 dblen + 1 + querylen,
+                 GT_READMODE_FORWARD,
+                 minlength,
+                 gt_encseq_alphabetnumofchars(encseq),
+                 gt_storemaxmatchself,
+                 &maxmatchselfinfo,
+                 err) != 0)
     {
       haserr = true;
       break;
     }
-    gt_array_sort(tabmaxquerymatches,orderSubstringmatch);
-    gt_array_sort(maxmatchselfinfo.results,orderSubstringmatch);
+    gt_array_sort(tabmaxquerymatches,gt_orderSubstringmatch);
+    gt_array_sort(maxmatchselfinfo.results,gt_orderSubstringmatch);
     if (!gt_array_equal(tabmaxquerymatches,maxmatchselfinfo.results,
-                        orderSubstringmatch))
+                        gt_orderSubstringmatch))
     {
       const GtUword width = 60UL;
-      printf("failure for query of length "GT_WU"\n",(GtUword) querylen);
-      printf("querymatches\n");
-      (void) gt_array_iterate(tabmaxquerymatches,showSubstringmatch,NULL,
-                           err);
-      printf("dbmatches\n");
-      (void) gt_array_iterate(maxmatchselfinfo.results,showSubstringmatch,
-                           NULL,err);
-      gt_symbolstring2fasta(stdout,"dbseq",
-                         gt_encseq_alphabet(encseq),
-                         dbseq,
-                         (GtUword) dblen,
-                         width);
-      gt_symbolstring2fasta(stdout,"queryseq",
-                         gt_encseq_alphabet(encseq),
-                         query,
-                         (GtUword) querylen,
-                         width);
+      fprintf(stderr,"failure for query of length "GT_WU"\n",querylen);
+      fprintf(stderr,"querymatches\n");
+      (void) gt_array_iterate(tabmaxquerymatches,gt_showSubstringmatch,NULL,
+                              err);
+      fprintf(stderr,"dbmatches\n");
+      (void) gt_array_iterate(maxmatchselfinfo.results,gt_showSubstringmatch,
+                              NULL,err);
+      gt_symbolstring2fasta(stderr,"dbseq", alphabet, dbseq, dblen, width);
+      gt_symbolstring2fasta(stderr,"queryseq", alphabet, query, querylen,width);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     gt_free(maxmatchselfinfo.querymarkpos);
-    /*printf("# * numberofmatches="GT_WU"\n",
-              gt_array_size(tabmaxquerymatches));*/
     gt_array_delete(tabmaxquerymatches);
     gt_array_delete(maxmatchselfinfo.results);
   }
   gt_free(dbseq);
-  gt_free(query);
   gt_encseq_delete(encseq);
-  encseq = NULL;
   return haserr ? -1 : 0;
 }

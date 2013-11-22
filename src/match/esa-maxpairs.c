@@ -61,6 +61,7 @@ typedef struct  /* global information */
   GtArrayGtUlong uniquechar,
               *poslist;
   GtGenericEncseq genericencseq;
+  const GtUchar *sequence;
   GtReadmode readmode;
   GtProcessmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
@@ -207,10 +208,15 @@ static int processleafedge_maxpairs(bool firstsucc,
   } else
   {
     /* Random access */
-    gt_assert(state->genericencseq.hasencseq);
-    leftchar = gt_encseq_get_encoded_char(state->genericencseq.seqptr.encseq,
-                                          leafnumber-1,
-                                          state->readmode);
+    if (state->genericencseq.hasencseq)
+    {
+      leftchar = gt_encseq_get_encoded_char(state->genericencseq.seqptr.encseq,
+                                            leafnumber - 1,
+                                            state->readmode);
+    } else
+    {
+      leftchar = state->sequence[leafnumber-1];
+    }
   }
   state->initialized = false;
 #ifdef SKDEBUG
@@ -379,6 +385,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   state->initialized = false;
   state->genericencseq.hasencseq = true;
   state->genericencseq.seqptr.encseq = encseq;
+  state->sequence = NULL;
   state->readmode = readmode;
 
   GT_INITARRAY(&state->uniquechar,GtUlong);
@@ -403,55 +410,6 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-typedef GtBUinfo_maxpairs GtBUinfo_sain_maxpairs;
-typedef GtBUstate_maxpairs GtBUstate_sain_maxpairs;
-
-static void initBUinfo_sain_maxpairs(GtBUinfo_maxpairs *buinfo,
-                                     GtBUstate_maxpairs *state)
-{
-  initBUinfo_maxpairs(buinfo,state);
-}
-
-static void freeBUinfo_sain_maxpairs(GtBUinfo_maxpairs *buinfo,
-                                     GT_UNUSED GtBUstate_maxpairs *state)
-{
-  freeBUinfo_sain_maxpairs(buinfo,state);
-}
-
-static int processleafedge_sain_maxpairs(bool firstsucc,
-                                         GtUword fatherdepth,
-                                         GtBUinfo_maxpairs *father,
-                                         GtUword leafnumber,
-                                         GtBUstate_maxpairs *state,
-                                         GtError *err)
-{
-  return processleafedge_maxpairs(firstsucc,
-                                  fatherdepth,
-                                  father,
-                                  leafnumber,
-                                  state,
-                                  err);
-}
-
-static int processbranchingedge_sain_maxpairs(bool firstsucc,
-                                              GtUword fatherdepth,
-                                              GtBUinfo_maxpairs *father,
-                                              GT_UNUSED GtUword sondepth,
-                                              GT_UNUSED GtUword sonwidth,
-                                              GtBUinfo_maxpairs *son,
-                                              GtBUstate_maxpairs *state,
-                                              GtError *err)
-{
-  return processbranchingedge_maxpairs(firstsucc,
-                                       fatherdepth,
-                                       father,
-                                       sondepth,
-                                       sonwidth,
-                                       son,
-                                       state,
-                                       err);
-}
-
 #include "esa-bottomup-sain-maxpairs.inc"
 
 int gt_enumeratemaxpairs_sain(GtSainSufLcpIterator *suflcpiterator,
@@ -474,6 +432,8 @@ int gt_enumeratemaxpairs_sain(GtSainSufLcpIterator *suflcpiterator,
   state->genericencseq.hasencseq = false;
   state->genericencseq.seqptr.bare_encseq
     = gt_sain_suf_lcp_iterator_bare_encseq(suflcpiterator);
+  state->sequence
+    = gt_bare_encseq_sequence(state->genericencseq.seqptr.bare_encseq);
   state->alphabetsize
     = (unsigned int)
       gt_bare_encseq_numofchars(state->genericencseq.seqptr.bare_encseq);

@@ -52,6 +52,13 @@ int gt_sain_checkmaxsequencelength(GtUword len,bool forencseq,GtError *err);
 
 typedef struct GtSainSufLcpIterator GtSainSufLcpIterator;
 
+GtSainSufLcpIterator *gt_sain_suf_lcp_iterator_new(bool withlcp,
+                                                   GtUchar *sequence,
+                                                   GtUword len,
+                                                   GtReadmode readmode,
+                                                   GtUword numofchars,
+                                                   GtError *err);
+
 GtUword gt_sain_suf_lcp_iterator_nonspecials(const GtSainSufLcpIterator
                                                    *suflcpiterator);
 

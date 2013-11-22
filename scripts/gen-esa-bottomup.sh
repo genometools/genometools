@@ -20,5 +20,6 @@ ${SC} --key shulen --gtlcpvaluetypeset --absolute --no_process_lastvalue \
                    --withlastfrompreviousbucket \
                    --additionaluint32bucket \
                    --no_declarations > ${TEMPLATE}-shulen-RAM.inc
-${SC} --key sain_maxpairs --reader --absolute --sa_reader_sain\
-                     --no_process_lcpinterval > ${TEMPLATE}-sain-maxpairs.inc
+${SC} --key sain_maxpairs --typeextension maxpairs\
+      --reader --absolute --sa_reader_sain\
+      --no_process_lcpinterval > ${TEMPLATE}-sain-maxpairs.inc

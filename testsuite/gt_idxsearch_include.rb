@@ -152,7 +152,8 @@ Test do
   run_test "#{$bin}gt repfind -scan -l 8 -ii sfx"
   run "grep -v '^#' #{last_stdout}"
   run "diff -w #{last_stdout} #{$testdata}repfind-8-Atinsert.txt"
-  run_test "#{$bin}gt repfind -samples 40 -l 6 -ii sfx",:maxtime => 600
+  run_test "#{$bin}gt repfind -samples 10 -l 6 -ii sfx",:maxtime => 600
+  run "#{$bin}gt repfind -samples 1000 -l 6 -ii sfx",:maxtime => 600
 end
 
 if $gttestdata then

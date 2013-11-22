@@ -22,6 +22,7 @@
 #include "core/encseq.h"
 #include "esa-seqread.h"
 #include "bare-encseq.h"
+#include "sfx-sain.h"
 
 typedef struct
 {
@@ -45,5 +46,11 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                          GtProcessmaxpairs processmaxpairs,
                          void *processmaxpairsinfo,
                          GtError *err);
+
+int gt_enumeratemaxpairs_sain(GtSainSufLcpIterator *suflcpiterator,
+                              unsigned int searchlength,
+                              GtProcessmaxpairs processmaxpairs,
+                              void *processmaxpairsinfo,
+                              GtError *err);
 
 #endif
