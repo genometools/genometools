@@ -75,6 +75,7 @@ int gt_nextSequentiallcpvalue(GtUword *currentlcp,
   GtUchar tmpsmalllcpvalue;
   int retval;
 
+  gt_assert(ssar != NULL);
   if (ssar->scanfile)
   {
     retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,
@@ -127,6 +128,7 @@ int gt_nextSequentiallcpvalue(GtUword *currentlcp,
 int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
                                  Sequentialsuffixarrayreader *ssar)
 {
+  gt_assert(ssar != NULL);
   if (ssar->scanfile)
   {
 #if defined (_LP64) || defined (_WIN64)
@@ -162,18 +164,21 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
 const GtEncseq *gt_encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar)
 {
+  gt_assert(ssar != NULL);
   return ssar->encseq;
 }
 
 GtReadmode gt_readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar)
 {
+  gt_assert(ssar != NULL);
   return ssar->readmode;
 }
 
 const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
                         const Sequentialsuffixarrayreader *ssar)
 {
+  gt_assert(ssar != NULL);
   if (ssar->scanfile)
   {
     return ssar->suftab;
@@ -184,31 +189,35 @@ const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
 const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar)
 {
+  gt_assert(ssar != NULL);
   return ssar->suffixarray;
 }
 
 GtUword gt_Sequentialsuffixarrayreader_nonspecials(
                           const Sequentialsuffixarrayreader *ssar)
 {
+  gt_assert(ssar != NULL);
   return ssar->nonspecials;
 }
 
 GtUword gt_Sequentialsuffixarrayreader_totallength(
               const Sequentialsuffixarrayreader *ssar)
 {
-  gt_assert(ssar->numberofsuffixes > 0);
+  gt_assert(ssar != NULL && ssar->numberofsuffixes > 0);
   return ssar->numberofsuffixes - 1;
 }
 
 GtUword gt_Sequentialsuffixarrayreader_maxbranchdepth(
               const Sequentialsuffixarrayreader *ssar)
 {
-  gt_assert(ssar->suffixarray->maxbranchdepth.defined);
+  gt_assert(ssar != NULL && ssar->suffixarray != NULL &&
+            ssar->suffixarray->maxbranchdepth.defined);
   return ssar->suffixarray->maxbranchdepth.valueunsignedlong;
 }
 
 unsigned int gt_Sequentialsuffixarrayreader_prefixlength(
               const Sequentialsuffixarrayreader *ssar)
 {
+  gt_assert(ssar != NULL && ssar->suffixarray != NULL);
   return ssar->suffixarray->prefixlength;
 }

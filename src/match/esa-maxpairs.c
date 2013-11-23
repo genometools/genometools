@@ -360,34 +360,46 @@ static int processbranchingedge_maxpairs(bool firstsucc,
 }
 
 #include "esa-bottomup-maxpairs.inc"
+#include "esa-bottomup-sain-maxpairs.inc"
 
-int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                         unsigned int searchlength,
-                         GtProcessmaxpairs processmaxpairs,
-                         void *processmaxpairsinfo,
-                         GtError *err)
+int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
+                                 GtSainSufLcpIterator *suflcpiterator,
+                                 unsigned int searchlength,
+                                 GtProcessmaxpairs processmaxpairs,
+                                 void *processmaxpairsinfo,
+                                 GtError *err)
 {
   unsigned int base;
   GtArrayGtUlong *ptr;
   GtBUstate_maxpairs *state;
-  const GtEncseq *encseq;
-  GtReadmode readmode;
   bool haserr = false;
 
-  gt_assert(ssar != NULL);
-  encseq = gt_encseqSequentialsuffixarrayreader(ssar);
-  readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
   state = gt_malloc(sizeof (*state));
-  state->alphabetsize = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   state->searchlength = searchlength;
   state->processmaxpairs = processmaxpairs;
   state->processmaxpairsinfo = processmaxpairsinfo;
   state->initialized = false;
-  state->genericencseq.hasencseq = true;
-  state->genericencseq.seqptr.encseq = encseq;
-  state->sequence = NULL;
-  state->readmode = readmode;
+  if (ssar != NULL)
+  {
+    const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
 
+    state->readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
+    state->alphabetsize = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
+    state->genericencseq.hasencseq = true;
+    state->genericencseq.seqptr.encseq = encseq;
+    state->sequence = NULL;
+  } else
+  {
+    const GtBareEncseq *bare_encseq;
+
+    gt_assert(suflcpiterator != NULL);
+    bare_encseq = gt_sain_suf_lcp_iterator_bare_encseq(suflcpiterator);
+    state->readmode = gt_sain_suf_lcp_iterator_readmode(suflcpiterator);
+    state->alphabetsize = (unsigned int) gt_bare_encseq_numofchars(bare_encseq);
+    state->genericencseq.hasencseq = false;
+    state->genericencseq.seqptr.bare_encseq = bare_encseq;
+    state->sequence = gt_bare_encseq_sequence(bare_encseq);
+  }
   GT_INITARRAY(&state->uniquechar,GtUlong);
   state->poslist = gt_malloc(sizeof (*state->poslist) * state->alphabetsize);
   for (base = 0; base < state->alphabetsize; base++)
@@ -395,9 +407,19 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     ptr = &state->poslist[base];
     GT_INITARRAY(ptr,GtUlong);
   }
-  if (gt_esa_bottomup_maxpairs(ssar, state, err) != 0)
+  if (ssar != NULL)
   {
-    haserr = true;
+    if (gt_esa_bottomup_maxpairs(ssar, state, err) != 0)
+    {
+      haserr = true;
+    }
+  } else
+  {
+    gt_assert(suflcpiterator != NULL);
+    if (gt_esa_bottomup_sain_maxpairs(suflcpiterator, state, err) != 0)
+    {
+      haserr = true;
+    }
   }
   GT_FREEARRAY(&state->uniquechar,GtUlong);
   for (base = 0; base < state->alphabetsize; base++)
@@ -410,7 +432,20 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-#include "esa-bottomup-sain-maxpairs.inc"
+int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
+                         unsigned int searchlength,
+                         GtProcessmaxpairs processmaxpairs,
+                         void *processmaxpairsinfo,
+                         GtError *err)
+{
+  gt_assert (ssar != NULL);
+  return gt_enumeratemaxpairs_generic(ssar,
+                                      NULL,
+                                      searchlength,
+                                      processmaxpairs,
+                                      processmaxpairsinfo,
+                                      err);
+}
 
 int gt_enumeratemaxpairs_sain(GtSainSufLcpIterator *suflcpiterator,
                               unsigned int searchlength,
@@ -418,44 +453,11 @@ int gt_enumeratemaxpairs_sain(GtSainSufLcpIterator *suflcpiterator,
                               void *processmaxpairsinfo,
                               GtError *err)
 {
-  unsigned int base;
-  GtArrayGtUlong *ptr;
-  GtBUstate_maxpairs *state;
-  bool haserr = false;
-
-  state = gt_malloc(sizeof (*state));
-  state->searchlength = searchlength;
-  state->processmaxpairs = processmaxpairs;
-  state->processmaxpairsinfo = processmaxpairsinfo;
-  state->initialized = false;
-  state->readmode = GT_READMODE_FORWARD;
-  state->genericencseq.hasencseq = false;
-  state->genericencseq.seqptr.bare_encseq
-    = gt_sain_suf_lcp_iterator_bare_encseq(suflcpiterator);
-  state->sequence
-    = gt_bare_encseq_sequence(state->genericencseq.seqptr.bare_encseq);
-  state->alphabetsize
-    = (unsigned int)
-      gt_bare_encseq_numofchars(state->genericencseq.seqptr.bare_encseq);
-
-  GT_INITARRAY(&state->uniquechar,GtUlong);
-  state->poslist = gt_malloc(sizeof (*state->poslist) * state->alphabetsize);
-  for (base = 0; base < state->alphabetsize; base++)
-  {
-    ptr = &state->poslist[base];
-    GT_INITARRAY(ptr,GtUlong);
-  }
-  if (gt_esa_bottomup_sain_maxpairs(suflcpiterator, state, err) != 0)
-  {
-    haserr = true;
-  }
-  GT_FREEARRAY(&state->uniquechar,GtUlong);
-  for (base = 0; base < state->alphabetsize; base++)
-  {
-    ptr = &state->poslist[base];
-    GT_FREEARRAY(ptr,GtUlong);
-  }
-  gt_free(state->poslist);
-  gt_free(state);
-  return haserr ? -1 : 0;
+  gt_assert(suflcpiterator != NULL);
+  return gt_enumeratemaxpairs_generic(NULL,
+                                      suflcpiterator,
+                                      searchlength,
+                                      processmaxpairs,
+                                      processmaxpairsinfo,
+                                      err);
 }

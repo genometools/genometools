@@ -67,6 +67,9 @@ void gt_sain_suf_lcp_iterator_delete(GtSainSufLcpIterator *suflcpiterator);
 GtUword gt_sain_suf_lcp_iterator_nonspecials(const GtSainSufLcpIterator
                                                    *suflcpiterator);
 
+GtReadmode gt_sain_suf_lcp_iterator_readmode(const GtSainSufLcpIterator
+                                             *suflcpiterator);
+
 GtUword gt_sain_suf_lcp_iterator_next(GtUword *lcpvalue,
                                       GtSainSufLcpIterator *suflcpiterator);
 

@@ -1697,6 +1697,7 @@ struct GtSainSufLcpIterator
   GtUsainindextype *suftab;
   unsigned int *plcptab;
   GtBareEncseq *bare_encseq;
+  GtReadmode readmode;
   GtUword currentsuftabindex;
 };
 
@@ -1717,6 +1718,7 @@ GtSainSufLcpIterator *gt_sain_suf_lcp_iterator_new(bool withlcp,
   suflcpiterator->suftab = NULL;
   suflcpiterator->plcptab = NULL;
   suflcpiterator->currentsuftabindex = 0;
+  suflcpiterator->readmode = readmode;
   suflcpiterator->bare_encseq = gt_bare_encseq_new(sequence,len,numofchars);
   gt_assert(suflcpiterator->bare_encseq != NULL);
   if (readmode != GT_READMODE_FORWARD)
@@ -1749,6 +1751,12 @@ GtSainSufLcpIterator *gt_sain_suf_lcp_iterator_new(bool withlcp,
                                                         suflcpiterator->suftab);
   }
   return suflcpiterator;
+}
+
+GtReadmode gt_sain_suf_lcp_iterator_readmode(const GtSainSufLcpIterator
+                                             *suflcpiterator)
+{
+  return suflcpiterator->readmode;
 }
 
 void gt_sain_suf_lcp_iterator_delete(GtSainSufLcpIterator *suflcpiterator)
