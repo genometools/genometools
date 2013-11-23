@@ -20,14 +20,13 @@
 #include "core/ma_api.h"
 #include "sarr-def.h"
 #include "esa-seqread.h"
-#include "esa-lcpval.h"
 #include "lcpoverflow.h"
 #include "esa-map.h"
 
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                         const char *indexname,
                                         unsigned int demand,
-                                        Sequentialaccesstype seqactype,
+                                        bool scanfile,
                                         GtLogger *logger,
                                         GtError *err)
 {
@@ -35,13 +34,11 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
 
   ssar = gt_malloc(sizeof *ssar);
   ssar->suffixarray = gt_malloc(sizeof *ssar->suffixarray);
-  gt_assert(seqactype == SEQ_mappedboth || seqactype == SEQ_scan);
-  if ((seqactype == SEQ_mappedboth
-         ? gt_mapsuffixarray : streamsuffixarray)(ssar->suffixarray,
-                                                  demand,
-                                                  indexname,
-                                                  logger,
-                                                  err) != 0)
+  if ((scanfile ? streamsuffixarray : gt_mapsuffixarray)(ssar->suffixarray,
+                                                         demand,
+                                                         indexname,
+                                                         logger,
+                                                         err) != 0)
   {
     gt_free(ssar->suffixarray);
     gt_free(ssar);
@@ -50,7 +47,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
   ssar->nextsuftabindex = 0;
   ssar->nextlcptabindex = 1UL;
   ssar->largelcpindex = 0;
-  ssar->seqactype = seqactype;
+  ssar->scanfile = scanfile;
   ssar->suftab = NULL;
   gt_assert(ssar->suffixarray != NULL);
   ssar->encseq = ssar->suffixarray->encseq;
@@ -58,46 +55,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
   ssar->numberofsuffixes = gt_encseq_total_length(ssar->encseq) + 1;
   ssar->nonspecials = gt_encseq_total_length(ssar->encseq) -
                       gt_encseq_specialcharacters(ssar->encseq);
-  ssar->lvi = NULL;
   return ssar;
-}
-
-Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
-                                        const GtEncseq *encseq,
-                                        GtReadmode readmode)
-{
-  Sequentialsuffixarrayreader *ssar;
-
-  ssar = gt_malloc(sizeof *ssar);
-  ssar->lvi = gt_newLcpvalueiterator(encseq,readmode);
-  ssar->suffixarray = NULL;
-  ssar->nextlcptabindex = 1UL; /* not required here */
-  ssar->largelcpindex = 0; /* not required here */
-  ssar->seqactype = SEQ_suftabfrommemory;
-  ssar->readmode = readmode;
-  ssar->encseq = encseq;
-  ssar->numberofsuffixes = gt_encseq_total_length(encseq) + 1;
-  ssar->nonspecials = gt_encseq_total_length(encseq) -
-                      gt_encseq_specialcharacters(encseq);
-  return ssar;
-}
-
-void gt_updateSequentialsuffixarrayreaderfromRAM(
-                    Sequentialsuffixarrayreader *ssar,
-                    const ESASuffixptr *suftab,
-                    bool firstpage,
-                    GtUword numberofsuffixes)
-{
-  ssar->nextsuftabindex = 0;
-  ssar->suftab = suftab;
-  ssar->numberofsuffixes = numberofsuffixes;
-  if (firstpage)
-  {
-    (void) gt_nextLcpvalueiterator(ssar->lvi,
-                                   true,
-                                   suftab,
-                                   numberofsuffixes);
-  }
 }
 
 void gt_freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
@@ -107,7 +65,6 @@ void gt_freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
     gt_freesuffixarray((*ssar)->suffixarray);
     gt_free((*ssar)->suffixarray);
   }
-  gt_freeLcpvalueiterator((*ssar)->lvi);
   gt_free(*ssar);
 }
 
@@ -118,66 +75,51 @@ int gt_nextSequentiallcpvalue(GtUword *currentlcp,
   GtUchar tmpsmalllcpvalue;
   int retval;
 
-  switch (ssar->seqactype)
+  if (ssar->scanfile)
   {
-    case SEQ_scan:
-      retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,
-                                         &ssar->suffixarray->lcptabstream);
-      if (retval > 0)
+    retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,
+                                           &ssar->suffixarray->lcptabstream);
+    if (retval > 0)
+    {
+      if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)
       {
-        if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)
-        {
-          *currentlcp = (GtUword) tmpsmalllcpvalue;
-        } else
-        {
-          Largelcpvalue tmpexception;
+        *currentlcp = (GtUword) tmpsmalllcpvalue;
+      } else
+      {
+        Largelcpvalue tmpexception;
 
-          retval = gt_readnextfromstream_Largelcpvalue(&tmpexception,
-                                            &ssar->suffixarray->llvtabstream);
-          if (retval == 0)
-          {
-            gt_error_set(err,"file %s: line %d: unexpected end of file when "
-                             "reading llvtab",__FILE__,__LINE__);
-            return -1;
-          }
-          *currentlcp = tmpexception.value;
-        }
-      } else
-      {
-        return 0;
-      }
-      break;
-    case SEQ_mappedboth:
-      if (ssar->nextlcptabindex < ssar->numberofsuffixes)
-      {
-        tmpsmalllcpvalue = ssar->suffixarray->lcptab[ssar->nextlcptabindex++];
-        if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)
+        retval = gt_readnextfromstream_Largelcpvalue(&tmpexception,
+                                          &ssar->suffixarray->llvtabstream);
+        if (retval == 0)
         {
-          *currentlcp = (GtUword) tmpsmalllcpvalue;
-        } else
-        {
-          gt_assert(ssar->suffixarray->llvtab[ssar->largelcpindex].position ==
-                 ssar->nextlcptabindex-1);
-          *currentlcp = ssar->suffixarray->llvtab[ssar->largelcpindex++].value;
+          gt_error_set(err,"file %s: line %d: unexpected end of file when "
+                           "reading llvtab",__FILE__,__LINE__);
+          return -1;
         }
+        *currentlcp = tmpexception.value;
+      }
+    } else
+    {
+      return 0;
+    }
+  } else
+  {
+    if (ssar->nextlcptabindex < ssar->numberofsuffixes)
+    {
+      tmpsmalllcpvalue = ssar->suffixarray->lcptab[ssar->nextlcptabindex++];
+      if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)
+      {
+        *currentlcp = (GtUword) tmpsmalllcpvalue;
       } else
       {
-        return 0;
+        gt_assert(ssar->suffixarray->llvtab[ssar->largelcpindex].position ==
+                  ssar->nextlcptabindex-1);
+        *currentlcp = ssar->suffixarray->llvtab[ssar->largelcpindex++].value;
       }
-      break;
-    case SEQ_suftabfrommemory:
-      if (ssar->nextlcptabindex < ssar->numberofsuffixes)
-      {
-        *currentlcp = gt_nextLcpvalueiterator(ssar->lvi,
-                                              true,
-                                              ssar->suftab,
-                                              ssar->numberofsuffixes);
-        ssar->nextlcptabindex++;
-      } else
-      {
-        return 0;
-      }
-      break;
+    } else
+    {
+      return 0;
+    }
   }
   return 1;
 }
@@ -185,7 +127,7 @@ int gt_nextSequentiallcpvalue(GtUword *currentlcp,
 int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
                                  Sequentialsuffixarrayreader *ssar)
 {
-  if (ssar->seqactype == SEQ_scan)
+  if (ssar->scanfile)
   {
 #if defined (_LP64) || defined (_WIN64)
     if (ssar->suffixarray->suftabstream_GtUlong.fp != NULL)
@@ -206,13 +148,14 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
                                       &ssar->suffixarray->suftabstream_GtUlong);
 #endif
   }
-  if (ssar->seqactype == SEQ_mappedboth)
+  if (ssar->scanfile)
+  {
+    *currentsuffix = ESASUFFIXPTRGET(ssar->suftab,ssar->nextsuftabindex++);
+  } else
   {
     *currentsuffix = ESASUFFIXPTRGET(ssar->suffixarray->suftab,
                                      ssar->nextsuftabindex++);
-    return 1;
   }
-  *currentsuffix = ESASUFFIXPTRGET(ssar->suftab,ssar->nextsuftabindex++);
   return 1;
 }
 
@@ -231,12 +174,11 @@ GtReadmode gt_readmodeSequentialsuffixarrayreader(
 const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
                         const Sequentialsuffixarrayreader *ssar)
 {
-  gt_assert(ssar->seqactype != SEQ_scan);
-  if (ssar->seqactype == SEQ_mappedboth)
+  if (ssar->scanfile)
   {
-    return ssar->suffixarray->suftab;
+    return ssar->suftab;
   }
-  return ssar->suftab;
+  return ssar->suffixarray->suftab;
 }
 
 const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
@@ -269,10 +211,4 @@ unsigned int gt_Sequentialsuffixarrayreader_prefixlength(
               const Sequentialsuffixarrayreader *ssar)
 {
   return ssar->suffixarray->prefixlength;
-}
-
-GtBcktab *gt_Sequentialsuffixarrayreader_bcktab(
-              const Sequentialsuffixarrayreader *ssar)
-{
-  return ssar->suffixarray->bcktab;
 }

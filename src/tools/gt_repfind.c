@@ -379,8 +379,7 @@ static int callenummaxpairs(const char *indexname,
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB |
                                                    SARR_SSPTAB,
-                                                   scanfile ? SEQ_scan
-                                                            : SEQ_mappedboth,
+                                                   scanfile,
                                                    logger,
                                                    err);
   if (ssar == NULL)

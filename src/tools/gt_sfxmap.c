@@ -732,7 +732,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
             ssar = gt_newSequentialsuffixarrayreaderfromfile(
                                           gt_str_get(arguments->esaindexname),
                                           SARR_LCPTAB | SARR_ESQTAB,
-                                          SEQ_scan,
+                                          true,
                                           logger,
                                           err);
           } else
@@ -980,7 +980,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
   ssar = gt_newSequentialsuffixarrayreaderfromfile(
                                           indexname,
                                           SARR_LCPTAB | SARR_ESQTAB,
-                                          SEQ_scan,
+                                          true,
                                           logger,
                                           err);
   if (ssar == NULL)
@@ -1094,7 +1094,7 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
                                           gt_str_get(arguments->esaindexname),
                                           arguments->cmpsuf ? SARR_SUFTAB
                                                             : SARR_LCPTAB,
-                                          SEQ_scan,
+                                          true,
                                           logger,
                                           err);
       if (ssar == NULL)

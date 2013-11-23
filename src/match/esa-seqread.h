@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,44 +21,24 @@
 #include "core/str.h"
 #include "core/error.h"
 #include "core/encseq.h"
-
-#include "esa-lcpval.h"
 #include "sarr-def.h"
 #include "lcpoverflow.h"
-
-typedef enum
-{
-  SEQ_scan,
-  SEQ_mappedboth,
-  SEQ_suftabfrommemory
-} Sequentialaccesstype;
 
 struct Sequentialsuffixarrayreader
 {
   Suffixarray *suffixarray;
   GtUword nonspecials,
          numberofsuffixes,
-         nextsuftabindex, /* for SEQ_mappedboth | SEQ_suftabfrommemory */
-         nextlcptabindex, /* for SEQ_mappedboth */
-         largelcpindex;   /* SEQ_mappedboth */
-  Sequentialaccesstype seqactype;
-  Lcpvalueiterator *lvi;
+         nextsuftabindex, /* for !scanfile */
+         nextlcptabindex, /* for !scanfile */
+         largelcpindex;   /* for !scanfile */
   const ESASuffixptr *suftab;
   const GtEncseq *encseq;
+  bool scanfile;
   GtReadmode readmode;
 };
 
 typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
-
-Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
-                                        const GtEncseq *encseq,
-                                        GtReadmode readmode);
-
-void gt_updateSequentialsuffixarrayreaderfromRAM(
-                    Sequentialsuffixarrayreader *ssar,
-                    const ESASuffixptr *suftab,
-                    bool firstpage,
-                    GtUword numberofsuffixes);
 
 int gt_nextSequentiallcpvalue(GtUword *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
@@ -114,25 +94,19 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
 #endif
 
 #define SSAR_NEXTSEQUENTIALSUFTABVALUE(SUFTABVALUE,SSAR)\
-        switch ((SSAR)->seqactype)\
+        if ((SSAR)->scanfile)\
         {\
-          case SEQ_scan:\
-            SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR);\
-            break;\
-          case SEQ_mappedboth:\
-            SUFTABVALUE = ESASUFFIXPTRGET((SSAR)->suffixarray->suftab,\
-                                          (SSAR)->nextsuftabindex++);\
-            break;\
-          case SEQ_suftabfrommemory:\
-            SUFTABVALUE = ESASUFFIXPTRGET((SSAR)->suftab,\
-                                          (SSAR)->nextsuftabindex++);\
-          break;\
+          SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR);\
+        } else\
+        {\
+          SUFTABVALUE = ESASUFFIXPTRGET((SSAR)->suffixarray->suftab,\
+                                        (SSAR)->nextsuftabindex++);\
         }
 
 #define SSAR_NEXTSEQUENTIALLCPTABVALUE(LCPVALUE,SSAR)\
         {\
           GtUchar tmpsmalllcpvalue;\
-          if ((SSAR)->seqactype == SEQ_scan)\
+          if ((SSAR)->scanfile)\
           {\
             int retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,\
                                         &(SSAR)->suffixarray->lcptabstream);\
@@ -162,39 +136,23 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
             }\
           } else\
           {\
-            if ((SSAR)->seqactype == SEQ_mappedboth)\
+            if ((SSAR)->nextlcptabindex < (SSAR)->numberofsuffixes)\
             {\
-              if ((SSAR)->nextlcptabindex < (SSAR)->numberofsuffixes)\
+              tmpsmalllcpvalue\
+                = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
+              if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
               {\
-                tmpsmalllcpvalue\
-                  = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
-                if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
-                {\
-                  LCPVALUE = (GtUword) tmpsmalllcpvalue;\
-                } else\
-                {\
-                  gt_assert((SSAR)->suffixarray->llvtab[(SSAR)->largelcpindex]\
-                             .position == (SSAR)->nextlcptabindex-1);\
-                  LCPVALUE = (SSAR)->suffixarray->llvtab\
-                                      [(SSAR)->largelcpindex++].value;\
-                }\
+                LCPVALUE = (GtUword) tmpsmalllcpvalue;\
               } else\
               {\
-                break;\
+                gt_assert((SSAR)->suffixarray->llvtab[(SSAR)->largelcpindex]\
+                           .position == (SSAR)->nextlcptabindex-1);\
+                LCPVALUE = (SSAR)->suffixarray->llvtab\
+                                    [(SSAR)->largelcpindex++].value;\
               }\
             } else\
             {\
-              if ((SSAR)->nextlcptabindex < (SSAR)->numberofsuffixes)\
-              {\
-                LCPVALUE = gt_nextLcpvalueiterator((SSAR)->lvi,\
-                                                   true,\
-                                                   (SSAR)->suftab,\
-                                                   (SSAR)->numberofsuffixes);\
-                (SSAR)->nextlcptabindex++;\
-              } else\
-              {\
-                break;\
-              }\
+              break;\
             }\
           }\
         }
@@ -202,7 +160,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
 #define SSAR_NEXTSEQUENTIALLCPTABVALUEWITHLAST(LCPVALUE,LASTSUFTABVALUE,SSAR)\
         {\
           GtUchar tmpsmalllcpvalue;\
-          if ((SSAR)->seqactype == SEQ_scan)\
+          if ((SSAR)->scanfile)\
           {\
             int retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,\
                                         &(SSAR)->suffixarray->lcptabstream);\
@@ -233,43 +191,25 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
             }\
           } else\
           {\
-            if ((SSAR)->seqactype == SEQ_mappedboth)\
+            if ((SSAR)->nextlcptabindex < (SSAR)->numberofsuffixes)\
             {\
-              if ((SSAR)->nextlcptabindex < (SSAR)->numberofsuffixes)\
+              tmpsmalllcpvalue\
+                = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
+              if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
               {\
-                tmpsmalllcpvalue\
-                  = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
-                if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
-                {\
-                  LCPVALUE = (GtUword) tmpsmalllcpvalue;\
-                } else\
-                {\
-                  gt_assert((SSAR)->suffixarray->llvtab[(SSAR)->largelcpindex]\
-                             .position == (SSAR)->nextlcptabindex-1);\
-                  LCPVALUE = (SSAR)->suffixarray->llvtab\
-                                      [(SSAR)->largelcpindex++].value;\
-                }\
+                LCPVALUE = (GtUword) tmpsmalllcpvalue;\
               } else\
               {\
-                LASTSUFTABVALUE = ESASUFFIXPTRGET((SSAR)->suffixarray->suftab,\
-                                                  (SSAR)->nextsuftabindex++);\
-                break;\
+                gt_assert((SSAR)->suffixarray->llvtab[(SSAR)->largelcpindex]\
+                           .position == (SSAR)->nextlcptabindex-1);\
+                LCPVALUE = (SSAR)->suffixarray->llvtab\
+                                    [(SSAR)->largelcpindex++].value;\
               }\
             } else\
             {\
-              if ((SSAR)->nextlcptabindex < (SSAR)->numberofsuffixes)\
-              {\
-                LCPVALUE = gt_nextLcpvalueiterator((SSAR)->lvi,\
-                                                   true,\
-                                                   (SSAR)->suftab,\
-                                                   (SSAR)->numberofsuffixes);\
-                (SSAR)->nextlcptabindex++;\
-              } else\
-              {\
-                LASTSUFTABVALUE = ESASUFFIXPTRGET((SSAR)->suftab,\
-                                                  (SSAR)->nextsuftabindex++);\
-                break;\
-              }\
+              LASTSUFTABVALUE = ESASUFFIXPTRGET((SSAR)->suffixarray->suftab,\
+                                                (SSAR)->nextsuftabindex++);\
+              break;\
             }\
           }\
         }
@@ -277,7 +217,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                         const char *indexname,
                                         unsigned int demand,
-                                        Sequentialaccesstype seqactype,
+                                        bool scanfile,
                                         GtLogger *logger,
                                         GtError *err);
 
@@ -305,9 +245,6 @@ GtUword gt_Sequentialsuffixarrayreader_maxbranchdepth(
               const Sequentialsuffixarrayreader *ssar);
 
 unsigned int gt_Sequentialsuffixarrayreader_prefixlength(
-              const Sequentialsuffixarrayreader *ssar);
-
-GtBcktab *gt_Sequentialsuffixarrayreader_bcktab(
               const Sequentialsuffixarrayreader *ssar);
 
 #endif

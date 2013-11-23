@@ -114,7 +114,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* scan */
   option = gt_option_new_bool("scan", "do not load esa index but scan "
-                              "it sequentially.", &arguments->scan, true);
+                              "it sequentially.", &arguments->scanfile, true);
   gt_option_is_extended_option(option);
   gt_option_parser_add_option(op, option);
 

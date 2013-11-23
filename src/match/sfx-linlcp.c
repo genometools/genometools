@@ -573,7 +573,7 @@ int gt_lcptab_lightweightcheck(const char *esaindexname,
   }
   ssar = gt_newSequentialsuffixarrayreaderfromfile(esaindexname,
                                                    SARR_LCPTAB,
-                                                   SEQ_scan,
+                                                   true,
                                                    logger,
                                                    err);
   if (ssar == NULL)

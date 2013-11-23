@@ -966,7 +966,7 @@ GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
                                                 SARR_LCPTAB | SARR_SUFTAB |
                                                 SARR_ESQTAB | SARR_DESTAB |
                                                 SARR_SSPTAB | SARR_SDSTAB,
-                                                SEQ_scan,
+                                                true,
                                                 NULL,
                                                 err);
   if (tir_stream->ssar == NULL) {

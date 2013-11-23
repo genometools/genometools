@@ -202,7 +202,7 @@ int gt_runenumlcpvalues(const char *inputindex,
                                                    SARR_LCPTAB |
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB,
-                                                   SEQ_scan,
+                                                   true,
                                                    logger,
                                                    err);
   if (ssar == NULL)
@@ -311,7 +311,7 @@ int gt_runscanesa(const char *inputindex, unsigned int mode,
                                                    SARR_LCPTAB |
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB,
-                                                   SEQ_scan,
+                                                   true,
                                                    logger,
                                                    err);
   if (ssar == NULL)

@@ -28,7 +28,7 @@
 #include "match/shu_unitfile.h"
 
 typedef struct GtGenomediffArguments {
-  bool scan,
+  bool scanfile,
        verbose,
        with_esa,
        with_pck,

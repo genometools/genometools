@@ -1686,7 +1686,7 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                        bool verbosemode,
                                        bool nooverlaps,
                                        bool bestoverlaps,
-                                       bool scan,
+                                       bool scanfile,
                                        GtUword offset,
                                        unsigned int minlengthTSD,
                                        unsigned int maxlengthTSD,
@@ -1724,9 +1724,7 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                                 SARR_LCPTAB | SARR_SUFTAB |
                                                 SARR_ESQTAB |
                                                 SARR_SSPTAB | SARR_SDSTAB,
-                                                scan
-                                                  ? SEQ_scan
-                                                  : SEQ_mappedboth,
+                                                scanfile,
                                                 NULL,
                                                 err);
   if (ltrh_stream->ssar == NULL)
