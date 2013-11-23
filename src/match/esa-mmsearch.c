@@ -284,8 +284,7 @@ bool gt_mmsearchiterator_isempty(const GtMMsearchiterator *mmsi)
 bool gt_mmsearchiterator_identical(const GtMMsearchiterator *mmsi1,
                                    const GtMMsearchiterator *mmsi2)
 {
-  gt_assert(mmsi1 != NULL);
-  gt_assert(mmsi2 != NULL);
+  gt_assert(mmsi1 != NULL && mmsi2 != NULL);
   return mmsi1->lcpitv.left == mmsi2->lcpitv.left &&
          mmsi1->lcpitv.right == mmsi2->lcpitv.right;
 }
@@ -893,6 +892,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
   GtEncseq *dbencseq;
   GtEncseqBuilder *eb;
 
+  gt_assert(querylen >= (GtUword) minlength && dblen >= (GtUword) minlength);
   eb = gt_encseq_builder_new(alpha);
   gt_encseq_builder_disable_multiseq_support(eb);
   gt_encseq_builder_disable_description_support(eb);

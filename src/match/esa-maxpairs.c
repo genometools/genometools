@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -359,8 +359,29 @@ static int processbranchingedge_maxpairs(bool firstsucc,
   return 0;
 }
 
+static GtUword gt_ssar_ssli_nonspecials(const Sequentialsuffixarrayreader *ssar,
+                                        const GtSainSufLcpIterator *ssli)
+{
+  if (ssar != NULL)
+  {
+    return gt_Sequentialsuffixarrayreader_nonspecials(ssar);
+  } else
+  {
+    return gt_sain_suf_lcp_iterator_nonspecials(ssli);
+  }
+}
+
+#define SSAR_SSLI_NEXT_SUF_LCP(SSAR,SSLI,PREVIOUSSUFFIX,LCPVALUE,LASTSUFTABVAL)\
+        if ((SSAR) != NULL)\
+        {\
+           SSAR_NEXTSEQUENTIALLCPTABVALUEWITHLAST(LCPVALUE,LASTSUFTABVAL,SSAR);\
+           SSAR_NEXTSEQUENTIALSUFTABVALUE(PREVIOUSSUFFIX,SSAR);\
+        } else\
+        {\
+          PREVIOUSSUFFIX = gt_sain_suf_lcp_iterator_next(&(LCPVALUE),SSLI);\
+        }
+
 #include "esa-bottomup-maxpairs.inc"
-#include "esa-bottomup-sain-maxpairs.inc"
 
 int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
                                  GtSainSufLcpIterator *suflcpiterator,
@@ -407,19 +428,9 @@ int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
     ptr = &state->poslist[base];
     GT_INITARRAY(ptr,GtUlong);
   }
-  if (ssar != NULL)
+  if (gt_esa_bottomup_maxpairs(ssar, suflcpiterator,  state, err) != 0)
   {
-    if (gt_esa_bottomup_maxpairs(ssar, state, err) != 0)
-    {
-      haserr = true;
-    }
-  } else
-  {
-    gt_assert(suflcpiterator != NULL);
-    if (gt_esa_bottomup_sain_maxpairs(suflcpiterator, state, err) != 0)
-    {
-      haserr = true;
-    }
+    haserr = true;
   }
   GT_FREEARRAY(&state->uniquechar,GtUlong);
   for (base = 0; base < state->alphabetsize; base++)

@@ -4,6 +4,7 @@ TEMPLATE=src/match/esa-bottomup
 SC=scripts/gen-esa-bottomup.rb
 
 ${SC} --key maxpairs --reader --absolute \
+                     --sa_reader_sain \
                      --no_process_lcpinterval > ${TEMPLATE}-maxpairs.inc
 ${SC} --key spmsk --no_process_branchingedge > ${TEMPLATE}-spmsk.inc
 ${SC} --key rdjcv --reader --absolute \
@@ -20,6 +21,3 @@ ${SC} --key shulen --gtlcpvaluetypeset --absolute --no_process_lastvalue \
                    --withlastfrompreviousbucket \
                    --additionaluint32bucket \
                    --no_declarations > ${TEMPLATE}-shulen-RAM.inc
-${SC} --key sain_maxpairs --typeextension maxpairs\
-      --reader --absolute --sa_reader_sain\
-      --no_process_lcpinterval > ${TEMPLATE}-sain-maxpairs.inc

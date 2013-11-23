@@ -333,15 +333,16 @@ def return_sa_reader(options)
   if options.sa_reader_standard
     return "Sequentialsuffixarrayreader *ssar"
   else
-    return "GtSainSufLcpIterator *ssli"
+    return "Sequentialsuffixarrayreader *ssar,\n" +
+           "GtSainSufLcpIterator *ssli"
   end
 end
 
 def return_nonspecials(options)
   if options.sa_reader_standard
-    return "gt_Sequentialsuffixarrayreader_nonspecials(ssar);"
+    return "numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);"
   else
-    return "gt_sain_suf_lcp_iterator_nonspecials(ssli);"
+    return "numberofsuffixes = gt_ssar_ssli_nonspecials(ssar,ssli);"
   end
 end
 
@@ -350,7 +351,8 @@ def return_next_suf_lcp_call(options)
     return "SSAR_NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue," +
            "ssar);\n    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);"
   else
-    return "previoussuffix = gt_sain_suf_lcp_iterator_next(&lcpvalue,ssli);"
+    return "SSAR_SSLI_NEXT_SUF_LCP(ssar,ssli,previoussuffix,lcpvalue," +
+                                   "lastsuftabvalue);"
   end
 end
 
@@ -599,7 +601,7 @@ static int gt_esa_bottomup_#{key}(#{return_sa_reader(options)},
 
   stack = gt_GtArrayGtBUItvinfo_new_#{key}();
   PUSH_ESA_BOTTOMUP_#{key}(0,0);
-  numberofsuffixes = #{return_nonspecials(options)}
+  #{return_nonspecials(options)}
   for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
     #{return_next_suf_lcp_call(options)}

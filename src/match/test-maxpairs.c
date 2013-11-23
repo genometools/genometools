@@ -322,7 +322,8 @@ int gt_testmaxpairs(const char *indexname,
     gt_assert(query != NULL);
     dbseq[dblen] = SEPARATOR;
     querylen = gt_samplesubstring(true,query,encseq,substringlength);
-    if (dbseq[0] == SEPARATOR || query[0] == SEPARATOR ||
+    if (querylen < (GtUword) minlength || dblen < (GtUword) minlength ||
+        dbseq[0] == SEPARATOR || query[0] == SEPARATOR ||
         dbseq[substringlength-1] == SEPARATOR ||
         query[substringlength-1] == SEPARATOR)
     {
