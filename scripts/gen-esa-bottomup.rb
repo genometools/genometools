@@ -11,7 +11,6 @@ end
 def parseargs(argv)
   options = OpenStruct.new
   options.key = nil
-  options.typeextension = nil
   options.usefile = false
   options.absolute = false
   options.with_process_branching = true
@@ -25,9 +24,6 @@ def parseargs(argv)
   opts = OptionParser.new
   opts.on("-k","--key STRING","use given key as suffix for all symbols") do |x|
     options.key = x
-  end
-  opts.on("-t","--typeextension STRING","specify type extension") do |x|
-    options.typeextension = x
   end
   opts.on("--reader","generate code for the esa-reader") do |x|
     options.usefile = true
@@ -99,7 +95,7 @@ def previoussuffix_param_get(width,options)
   return previoussuffix_expr_get(width,"previoussuffix",options)
 end
 
-def processbranching_call1(key,typeextension,options)
+def processbranching_call1(key,options)
   if options.with_process_branching
     return "if (TOP_ESA_BOTTOMUP_#{key}.lcp > 0 || !firstedgefromroot)
         {
@@ -109,7 +105,7 @@ def processbranching_call1(key,typeextension,options)
           firstedge = true;
           firstedgefromroot = false;
         }
-        if (processbranchingedge_#{typeextension}(firstedge,
+        if (processbranchingedge_#{key}(firstedge,
                TOP_ESA_BOTTOMUP_#{key}.lcp,
                &TOP_ESA_BOTTOMUP_#{key}.info,
                lastinterval->lcp,
@@ -125,16 +121,16 @@ def processbranching_call1(key,typeextension,options)
         {
           firstedgefromroot = false;
         }
-        /* no call to processbranchingedge_#{typeextension} */"
+        /* no call to processbranchingedge_#{key} */"
   end
 end
 
-def processbranching_call2(key,typeextension,options)
+def processbranching_call2(key,options)
   if options.with_process_branching
     return "GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,lastintervallb);
-        if (processbranchingedge_#{typeextension}(true,
+        if (processbranchingedge_#{key}(true,
                        TOP_ESA_BOTTOMUP_#{key}.lcp,
                        &TOP_ESA_BOTTOMUP_#{key}.info,
                        lastintervallcp,
@@ -150,11 +146,11 @@ def processbranching_call2(key,typeextension,options)
   end
 end
 
-def processlcpinterval_decl(key,typeextension,options)
+def processlcpinterval_decl(key,options)
   if options.with_process_lcpinterval
     return "static int processlcpinterval_#{key}(GtUword,
-    GtBUinfo_#{typeextension} *,
-    GtBUstate_#{typeextension} *,
+    GtBUinfo_#{key} *,
+    GtBUstate_#{key} *,
     GtError *err);"
   else
     return "/* no declaration of processlcpinterval_#{key} */"
@@ -197,7 +193,7 @@ def showidxexpr(options)
   end
 end
 
-def process_suf_lcp(key,typeextension,options)
+def process_suf_lcp(key,options)
 print <<END_OF_FILE
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_#{key}.lcp)
@@ -210,7 +206,7 @@ print <<END_OF_FILE
         firstedge = true;
         firstedgefromroot = false;
       }
-      if (processleafedge_#{typeextension}(firstedge,
+      if (processleafedge_#{key}(firstedge,
                           TOP_ESA_BOTTOMUP_#{key}.lcp,
                           &TOP_ESA_BOTTOMUP_#{key}.info,
                           #{previoussuffix_param_get(14,options)}
@@ -228,7 +224,7 @@ print <<END_OF_FILE
       #{processlcpinterval_call1(key,options)}
       if (lcpvalue <= TOP_ESA_BOTTOMUP_#{key}.lcp)
       {
-        #{processbranching_call1(key,typeextension,options)}
+        #{processbranching_call1(key,options)}
         lastinterval = NULL;
       }
     }
@@ -237,12 +233,12 @@ print <<END_OF_FILE
       if (lastinterval != NULL)
       {
         GtUword lastintervallb = lastinterval->lb;
-        #{processbranching_call2(key,typeextension,options)}
+        #{processbranching_call2(key,options)}
         lastinterval = NULL;
       } else
       {
         PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,#{showidxexpr(options)});
-        if (processleafedge_#{typeextension}(true,
+        if (processleafedge_#{key}(true,
                             TOP_ESA_BOTTOMUP_#{key}.lcp,
                             &TOP_ESA_BOTTOMUP_#{key}.info,
                             #{previoussuffix_param_get(16,options)}
@@ -264,14 +260,14 @@ def lastsuftabvalue_fromarray(options)
   end
 end
 
-def lastsuftabvalue_get(key,typeextension,options)
+def lastsuftabvalue_get(key,options)
   if options.process_lastvalue
 print <<END_OF_FILE
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_#{key}.lcp > 0)
   {
     #{lastsuftabvalue_fromarray(options)}
-    if (processleafedge_#{typeextension}(false,
+    if (processleafedge_#{key}(false,
                         TOP_ESA_BOTTOMUP_#{key}.lcp,
                         &TOP_ESA_BOTTOMUP_#{key}.info,
                         #{previoussuffix_expr_get(12,"lastsuftabvalue",options)}
@@ -306,18 +302,18 @@ def seqnumrelpos_include(options)
   end
 end
 
-def processbranchingedge_decl(typeextension,options)
+def processbranchingedge_decl(key,options)
   if options.with_process_branching
-    return "static int processbranchingedge_#{typeextension}(bool firstsucc,
+    return "static int processbranchingedge_#{key}(bool firstsucc,
     GtUword,
-    GtBUinfo_#{typeextension} *,
+    GtBUinfo_#{key} *,
     GtUword,
     GtUword,
-    GtBUinfo_#{typeextension} *,
-    GtBUstate_#{typeextension} *,
+    GtBUinfo_#{key} *,
+    GtBUstate_#{key} *,
     GtError *);"
   else
-   return "/* no declaration of processbranchingedge_#{typeextension} */"
+   return "/* no declaration of processbranchingedge_#{key} */"
   end
 end
 
@@ -416,10 +412,6 @@ end
 
 options = parseargs(ARGV)
 key = options.key
-typeextension = options.key
-if not options.typeextension.nil?
-  typeextension = options.typeextension
-end
 
 print <<END_OF_FILE
 /*
@@ -453,22 +445,22 @@ END_OF_FILE
 if not options.nodeclarations
 print <<END_OF_FILE
 
-static void initBUinfo_#{typeextension}(GtBUinfo_#{typeextension} *,
-                              GtBUstate_#{typeextension} *);
+static void initBUinfo_#{key}(GtBUinfo_#{key} *,
+                              GtBUstate_#{key} *);
 
-static void freeBUinfo_#{typeextension}(GtBUinfo_#{typeextension} *,
-                              GtBUstate_#{typeextension} *);
+static void freeBUinfo_#{key}(GtBUinfo_#{key} *,
+                              GtBUstate_#{key} *);
 
-static int processleafedge_#{typeextension}(bool,
+static int processleafedge_#{key}(bool,
     GtUword,
-    GtBUinfo_#{typeextension} *,
+    GtBUinfo_#{key} *,
     #{processleafedgeargs(options)}
-    GtBUstate_#{typeextension} *,
+    GtBUstate_#{key} *,
     GtError *err);
 
-#{processbranchingedge_decl(typeextension,options)}
+#{processbranchingedge_decl(key,options)}
 
-#{processlcpinterval_decl(key,typeextension,options)}
+#{processlcpinterval_decl(key,options)}
 
 #define TOP_ESA_BOTTOMUP_#{key}\\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -496,7 +488,7 @@ static int processleafedge_#{typeextension}(bool,
 typedef struct
 {
   GtUword lcp, lb, rb;
-  GtBUinfo_#{typeextension} info;
+  GtBUinfo_#{key} info;
 } GtBUItvinfo_#{key};
 
 typedef struct
@@ -517,13 +509,13 @@ GtArrayGtBUItvinfo_#{key} *gt_GtArrayGtBUItvinfo_new_#{key}(void)
 
 void gt_GtArrayGtBUItvinfo_delete_#{key}(
                            GtArrayGtBUItvinfo_#{key} *stack,
-                           GtBUstate_#{typeextension} *state)
+                           GtBUstate_#{key} *state)
 {
   GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
-    freeBUinfo_#{typeextension}(&stack->spaceGtBUItvinfo[idx].info,state);
+    freeBUinfo_#{key}(&stack->spaceGtBUItvinfo[idx].info,state);
   }
   gt_free(stack->spaceGtBUItvinfo);
   gt_free(stack);
@@ -533,7 +525,7 @@ static GtBUItvinfo_#{key} *allocateBUstack_#{key}(
                                    GtBUItvinfo_#{key} *ptr,
                                    GtUword currentallocated,
                                    GtUword allocated,
-                                   GtBUstate_#{typeextension} *state)
+                                   GtBUstate_#{key} *state)
 {
   GtUword idx;
   GtBUItvinfo_#{key} *itvinfo;
@@ -542,7 +534,7 @@ static GtBUItvinfo_#{key} *allocateBUstack_#{key}(
   gt_assert(allocated > currentallocated);
   for (idx=currentallocated; idx<allocated; idx++)
   {
-    initBUinfo_#{typeextension}(&itvinfo[idx].info,state);
+    initBUinfo_#{key}(&itvinfo[idx].info,state);
   }
   gt_assert(itvinfo != NULL);
   return itvinfo;
@@ -557,7 +549,7 @@ static int gt_esa_bottomup_RAM_previousfromlast_#{key}(
                         GtUword previoussuffix,
                         GtUword lcpvalue,
                         GtArrayGtBUItvinfo_#{key} *stack,
-                        GtBUstate_#{typeextension} *bustate,
+                        GtBUstate_#{key} *bustate,
                         #{return_snrp_decl(options)}
                         GtError *err)
 {
@@ -569,7 +561,7 @@ static int gt_esa_bottomup_RAM_previousfromlast_#{key}(
 
 END_OF_FILE
 
-  process_suf_lcp(key,typeextension,options)
+  process_suf_lcp(key,options)
 
 print <<END_OF_FILE
   if (!haserr)
@@ -585,7 +577,7 @@ if options.usefile
 print <<END_OF_FILE
 
 static int gt_esa_bottomup_#{key}(#{return_sa_reader(options)},
-                    GtBUstate_#{typeextension} *bustate,
+                    GtBUstate_#{key} *bustate,
                     #{return_snrp_decl(options)}
                     GtError *err)
 {
@@ -613,7 +605,7 @@ static int gt_esa_bottomup_RAM_#{key}(const GtUword *bucketofsuffixes,
                         #{additionaluint32bucket(options)} *lcptab_bucket,
                         GtUword numberofsuffixes,
                         GtArrayGtBUItvinfo_#{key} *stack,
-                        GtBUstate_#{typeextension} *bustate,
+                        GtBUstate_#{key} *bustate,
                         #{return_snrp_decl(options)}
                         GtError *err)
 {
@@ -635,9 +627,9 @@ print <<END_OF_FILE
     previoussuffix = #{accessbucketofsuffixes("idx",options)}
 END_OF_FILE
 end
-process_suf_lcp(key,typeextension,options)
+process_suf_lcp(key,options)
 puts "  }"
-lastsuftabvalue_get(key,typeextension,options)
+lastsuftabvalue_get(key,options)
 if options.usefile
   puts "  gt_GtArrayGtBUItvinfo_delete_#{key}(stack,bustate);"
 elsif options.process_lastvalue
