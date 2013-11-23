@@ -373,6 +373,7 @@ typedef struct
 static GtSainbuffer *gt_sainbuffer_new(GtUsainindextype *suftab,
                                        GtUsainindextype *fillptr,
                                        GtUword numofchars,
+                                       GtUword totallength,
                                        GtLogger *logger)
 {
   if (numofchars <= UCHAR_MAX+1)
@@ -388,13 +389,20 @@ static GtSainbuffer *gt_sainbuffer_new(GtUsainindextype *suftab,
     buf->numofchars = numofchars;
     gt_assert(buf->buf_size <= UINT16_MAX);
     buf->cachesize = numofchars << buf->log_bufsize;
-    buf->values = (GtUsainindextype *)
-                  gt_malloc(sizeof (*buf->values) * buf->cachesize);
     buf->size += sizeof (*buf->values) * buf->cachesize;
-    buf->nextidx = gt_calloc((size_t) numofchars,sizeof (*buf->nextidx));
     buf->size += sizeof (*buf->nextidx) * numofchars;
-    gt_logger_log(logger,"used buffer of "GT_WU" bytes (bufsize="GT_WU")",
+    if (buf->size * (size_t) 10 >= totallength)
+    {
+      gt_free(buf);
+      buf = NULL;
+    } else
+    {
+      buf->values = (GtUsainindextype *)
+                    gt_malloc(sizeof (*buf->values) * buf->cachesize);
+      buf->nextidx = gt_calloc((size_t) numofchars,sizeof (*buf->nextidx));
+      gt_logger_log(logger,"used buffer of "GT_WU" bytes (bufsize="GT_WU")",
                          (GtUword) buf->size,buf->buf_size);
+    }
     return buf;
   } else
   {

@@ -540,7 +540,8 @@ static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
           countSstartype = 0;
   GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
-                                               sainseq->numofchars,logger);
+                                               sainseq->numofchars,
+                                               sainseq->totallength,logger);
 #{declare_tmpvars(key,true)}
   bool nextisStype = true;
 

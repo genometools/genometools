@@ -1094,7 +1094,8 @@ static GtUword gt_sain_PLAINSEQ_insertSstarsuffixes(GtSainseq *sainseq,
           countSstartype = 0;
   GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
-                                               sainseq->numofchars,logger);
+                                               sainseq->numofchars,
+                                               sainseq->totallength,logger);
 
   bool nextisStype = true;
 
@@ -1285,7 +1286,8 @@ static GtUword gt_sain_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
           countSstartype = 0;
   GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
-                                               sainseq->numofchars,logger);
+                                               sainseq->numofchars,
+                                               sainseq->totallength,logger);
 GtUchar tmpcc;
 GtEncseqReader *esr;
   bool nextisStype = true;
@@ -1479,7 +1481,8 @@ static GtUword gt_sain_BARE_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
           countSstartype = 0;
   GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
-                                               sainseq->numofchars,logger);
+                                               sainseq->numofchars,
+                                               sainseq->totallength,logger);
 GtUchar tmpcc;
   bool nextisStype = true;
 
@@ -1662,7 +1665,8 @@ static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
           countSstartype = 0;
   GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
   GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
-                                               sainseq->numofchars,logger);
+                                               sainseq->numofchars,
+                                               sainseq->totallength,logger);
 
   bool nextisStype = true;
 
