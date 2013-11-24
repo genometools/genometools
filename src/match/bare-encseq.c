@@ -233,7 +233,6 @@ GtUword gt_bare_encseq_specialcharacters(const GtBareEncseq *bare_encseq)
   gt_assert(bare_encseq != NULL);
   return bare_encseq->specialcharacters;
 }
-<<<<<<< HEAD
 
 struct GtBareSpecialrangeiterator
 {

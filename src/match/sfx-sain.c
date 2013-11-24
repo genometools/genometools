@@ -47,7 +47,6 @@ typedef enum
   GT_SAIN_BARE_ENCSEQ
 } GtSainSeqtype;
 
-typedef unsigned int GtUsainindextype;
 typedef signed int GtSsainindextype;
 
 typedef struct
@@ -392,7 +391,7 @@ static GtSainbuffer *gt_sainbuffer_new(GtUsainindextype *suftab,
     buf->cachesize = numofchars << buf->log_bufsize;
     buf->size += sizeof (*buf->values) * buf->cachesize;
     buf->size += sizeof (*buf->nextidx) * numofchars;
-    if (buf->size * (size_t) 10 >= totallength)
+    if ((GtUword) buf->size * 10UL >= totallength)
     {
       gt_free(buf);
       buf = NULL;
