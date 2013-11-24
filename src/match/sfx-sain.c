@@ -47,6 +47,7 @@ typedef enum
   GT_SAIN_BARE_ENCSEQ
 } GtSainSeqtype;
 
+typedef unsigned int GtUsainindextype;
 typedef signed int GtSsainindextype;
 
 typedef struct

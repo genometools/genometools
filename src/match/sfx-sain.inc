@@ -1084,6 +1084,7 @@ plainseq[position];
     *suftabptr = sstarsuffixes[*suftabptr];
   }
 }
+<<<<<<< HEAD
 
 static GtUword gt_sain_PLAINSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtUchar *plainseq,
@@ -1099,6 +1100,22 @@ static GtUword gt_sain_PLAINSEQ_insertSstarsuffixes(GtSainseq *sainseq,
 
   bool nextisStype = true;
 
+=======
+
+static GtUword gt_sain_PLAINSEQ_insertSstarsuffixes(GtSainseq *sainseq,
+                                                 const GtUchar *plainseq,
+                                                 GtUsainindextype *suftab,
+                                                 GtLogger *logger)
+{
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength),
+          countSstartype = 0;
+  GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
+  GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
+                                               sainseq->numofchars,logger);
+
+  bool nextisStype = true;
+
+>>>>>>> 765e044aa8aaa2f805bbbb16563feb849a4076c5
   gt_sain_endbuckets(sainseq);
 
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
@@ -1276,6 +1293,7 @@ gt_encseq_reader_delete(esr);
     *suftabptr = sstarsuffixes[*suftabptr];
   }
 }
+<<<<<<< HEAD
 
 static GtUword gt_sain_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtEncseq *encseq,
@@ -1292,6 +1310,23 @@ GtUchar tmpcc;
 GtEncseqReader *esr;
   bool nextisStype = true;
 
+=======
+
+static GtUword gt_sain_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
+                                                 const GtEncseq *encseq,
+                                                 GtUsainindextype *suftab,
+                                                 GtLogger *logger)
+{
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength),
+          countSstartype = 0;
+  GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
+  GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
+                                               sainseq->numofchars,logger);
+GtUchar tmpcc;
+GtEncseqReader *esr;
+  bool nextisStype = true;
+
+>>>>>>> 765e044aa8aaa2f805bbbb16563feb849a4076c5
   gt_sain_endbuckets(sainseq);
 esr = gt_encseq_create_reader_with_readmode(
                             encseq,
@@ -1471,6 +1506,7 @@ plainseq[position])
     *suftabptr = sstarsuffixes[*suftabptr];
   }
 }
+<<<<<<< HEAD
 
 static GtUword gt_sain_BARE_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtUchar *plainseq,
@@ -1486,6 +1522,22 @@ static GtUword gt_sain_BARE_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
 GtUchar tmpcc;
   bool nextisStype = true;
 
+=======
+
+static GtUword gt_sain_BARE_ENCSEQ_insertSstarsuffixes(GtSainseq *sainseq,
+                                                 const GtUchar *plainseq,
+                                                 GtUsainindextype *suftab,
+                                                 GtLogger *logger)
+{
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength),
+          countSstartype = 0;
+  GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
+  GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
+                                               sainseq->numofchars,logger);
+GtUchar tmpcc;
+  bool nextisStype = true;
+
+>>>>>>> 765e044aa8aaa2f805bbbb16563feb849a4076c5
   gt_sain_endbuckets(sainseq);
 
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
@@ -1655,6 +1707,7 @@ bucketsize[currentcc]++;
     *suftabptr = sstarsuffixes[*suftabptr];
   }
 }
+<<<<<<< HEAD
 
 static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
                                                  const GtUsainindextype *array,
@@ -1670,6 +1723,22 @@ static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
 
   bool nextisStype = true;
 
+=======
+
+static GtUword gt_sain_INTSEQ_insertSstarsuffixes(GtSainseq *sainseq,
+                                                 const GtUsainindextype *array,
+                                                 GtUsainindextype *suftab,
+                                                 GtLogger *logger)
+{
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength),
+          countSstartype = 0;
+  GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
+  GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
+                                               sainseq->numofchars,logger);
+
+  bool nextisStype = true;
+
+>>>>>>> 765e044aa8aaa2f805bbbb16563feb849a4076c5
   gt_sain_endbuckets(sainseq);
 
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;

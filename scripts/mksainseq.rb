@@ -530,6 +530,7 @@ static void gt_sain_#{key}_expandorder2original(GtSainseq *sainseq,
     *suftabptr = sstarsuffixes[*suftabptr];
   }
 }
+<<<<<<< HEAD
 
 static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
                                                  #{getc_param(key)},
@@ -545,6 +546,22 @@ static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
 #{declare_tmpvars(key,true)}
   bool nextisStype = true;
 
+=======
+
+static GtUword gt_sain_#{key}_insertSstarsuffixes(GtSainseq *sainseq,
+                                                 #{getc_param(key)},
+                                                 GtUsainindextype *suftab,
+                                                 GtLogger *logger)
+{
+  GtUword nextcc = GT_UNIQUEINT(sainseq->totallength),
+          countSstartype = 0;
+  GtUsainindextype position, *fillptr = sainseq->bucketfillptr;
+  GtSainbuffer *sainbuffer = gt_sainbuffer_new(suftab,fillptr,
+                                               sainseq->numofchars,logger);
+#{declare_tmpvars(key,true)}
+  bool nextisStype = true;
+
+>>>>>>> 765e044aa8aaa2f805bbbb16563feb849a4076c5
   gt_sain_endbuckets(sainseq);
 #{init_esr(key)}
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;

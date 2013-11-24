@@ -33,6 +33,5 @@ void gt_suftab_lightweightcheck(LW_accesschar accesschar,
                                 unsigned int numofchars,
                                 const void *suftab,
                                 size_t unitsize,
-                                GtLogger *logger);
 
 #endif
