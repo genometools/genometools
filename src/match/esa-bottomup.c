@@ -132,8 +132,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
   {
-    NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
-    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    SSAR_NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
+    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
     {
       if (TOP_ESA_BOTTOMUP.lcp > 0 || !firstedgefromroot)

@@ -48,8 +48,7 @@ static int callmultishulengthdist(const char *indexname,
                                                    SARR_LCPTAB |
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB,
-                                                   scanfile
-                                                    ? SEQ_scan : SEQ_mappedboth,
+                                                   scanfile,
                                                    logger,
                                                    err);
   if (ssar == NULL)

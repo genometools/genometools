@@ -182,7 +182,8 @@ static int bdcompare(const void *a, const void *b)
   return 0;
 }
 
-static int gt_simpleexactselfmatchstore(void *info, const GtEncseq *encseq,
+static int gt_simpleexactselfmatchstore(void *info,
+                                        const GtGenericEncseq *genericencseq,
                                         GtUword len, GtUword pos1,
                                         GtUword pos2,
                                         GT_UNUSED GtError *err)
@@ -211,9 +212,11 @@ static int gt_simpleexactselfmatchstore(void *info, const GtEncseq *encseq,
   if (len <= repeatinfo->lmax && repeatinfo->dmin <= distance
                               && distance <= repeatinfo->dmax)
   {
-    const GtUword seqnum1 = gt_encseq_seqnum(encseq,pos1);
-    const GtUword seqnum2 = gt_encseq_seqnum(encseq,pos2);
+    GtUword seqnum1, seqnum2;
 
+    gt_assert(genericencseq->hasencseq);
+    seqnum1 = gt_encseq_seqnum(genericencseq->seqptr.encseq,pos1);
+    seqnum2 = gt_encseq_seqnum(genericencseq->seqptr.encseq,pos2);
     if (seqnum1 == seqnum2)
     {
       Repeat *nextfreerepeatptr;
@@ -1237,8 +1240,6 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
     GT_INITARRAY(&ltrh_stream->repeatinfo.repeats, Repeat);
     ltrh_stream->prevseqnum = GT_UNDEF_UWORD;
     if (!had_err && gt_enumeratemaxpairs(ltrh_stream->ssar,
-                      ltrh_stream->encseq,
-                      gt_readmodeSequentialsuffixarrayreader(ltrh_stream->ssar),
                       (unsigned int) ltrh_stream->minseedlength,
                       gt_simpleexactselfmatchstore,
                       &ltrh_stream->repeatinfo,
@@ -1685,7 +1686,7 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                        bool verbosemode,
                                        bool nooverlaps,
                                        bool bestoverlaps,
-                                       bool scan,
+                                       bool scanfile,
                                        GtUword offset,
                                        unsigned int minlengthTSD,
                                        unsigned int maxlengthTSD,
@@ -1723,9 +1724,7 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                                 SARR_LCPTAB | SARR_SUFTAB |
                                                 SARR_ESQTAB |
                                                 SARR_SSPTAB | SARR_SDSTAB,
-                                                scan
-                                                  ? SEQ_scan
-                                                  : SEQ_mappedboth,
+                                                scanfile,
                                                 NULL,
                                                 err);
   if (ltrh_stream->ssar == NULL)

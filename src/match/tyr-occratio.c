@@ -252,8 +252,7 @@ int gt_tyr_occratio_func(const char *inputindex,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
                                                 SARR_ESQTAB,
-                                                scanfile ? SEQ_scan
-                                                         : SEQ_mappedboth,
+                                                scanfile,
                                                 logger,
                                                 err);
   if (ssar == NULL)

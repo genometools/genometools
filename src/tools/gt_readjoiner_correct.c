@@ -104,7 +104,7 @@ static int gt_readjoiner_correct_runner(GT_UNUSED int argc,
 
   ssar = gt_newSequentialsuffixarrayreaderfromfile(
       gt_str_get(arguments->indexname), SARR_LCPTAB | SARR_SUFTAB |
-      SARR_ESQTAB | SARR_SSPTAB, SEQ_scan, logger, err);
+      SARR_ESQTAB | SARR_SSPTAB, true, logger, err);
   if (ssar == NULL)
     had_err = -1;
   else

@@ -26,7 +26,6 @@
    with values of type <GtUword>. Thus the implementation can
    sort arrays referenced by pointers of type <GtUword *>,
    or arrays referenced by pointers of type <GtUlongPair *>.
-<<<<<<< HEAD
    In the latter case, the component <a> is the key and <b> is the
    value.
 

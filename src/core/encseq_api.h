@@ -506,8 +506,8 @@ void              gt_encseq_builder_add_str(GtEncseqBuilder *eb, GtStr *str,
                                            const char *desc);
 /* Adds a sequence given as a pre-encoded string  <str> of length <strlen> to
    the encoded sequence to be built by <eb>. <str> must be encoded using the
-   alphabet set at the construction time of <eb>.
-   Does not take ownership of <str>.
+   alphabet set at the construction time of <eb>. <str> is not allowed to
+   include sequence separators. Does not take ownership of <str>.
    Additionally, a description <desc> can be given. If description support
    is enabled, this must not be <NULL>. */
 void              gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
@@ -525,6 +525,13 @@ void              gt_encseq_builder_add_encoded_own(GtEncseqBuilder *eb,
                                                    const GtUchar *str,
                                                    GtUword strlen,
                                                    const char *desc);
+/* Adds a sequence given as a pre-encoded string  <str> of length <strlen> to
+   the encoded sequence to be built by <eb>. <str> must be encoded using the
+   alphabet set at the construction time of <eb>. <str> may include
+   sequence separators. Does not take ownership of <str>.*/
+void gt_encseq_builder_add_multiple_encoded(GtEncseqBuilder *eb,
+                                            const GtUchar *str,
+                                            GtUword strlen);
 /* Sets the logger to use by <ee> during encoding to <l>. Default is <NULL> (no
    logging). */
 void              gt_encseq_builder_set_logger(GtEncseqBuilder*, GtLogger *l);

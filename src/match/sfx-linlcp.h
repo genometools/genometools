@@ -23,17 +23,26 @@
 #include "match/sarr-def.h"
 
 GtCompactUlongStore *gt_lcp9_manzini(GtCompactUlongStore *spacefortab,
-                                 const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 GtUword partwidth,
-                                 GtUword totallength,
-                                 const ESASuffixptr *suftab);
+                                     const GtEncseq *encseq,
+                                     GtReadmode readmode,
+                                     GtUword partwidth,
+                                     GtUword totallength,
+                                     const ESASuffixptr *suftab);
 
-void gt_suftab_lightweightcheck(const GtEncseq *encseq,
-                                GtReadmode readmode,
-                                GtUword totallength,
-                                const ESASuffixptr *suftab,
-                                GtLogger *logger);
+unsigned int *gt_plain_lcp13_kasai(GtUword *maxlcp,
+                                   const GtUchar *sequence,
+                                   bool withspecial,
+                                   GtUword partwidth,
+                                   GtUword totallength,
+                                   const unsigned int *suftab);
+
+unsigned int *gt_plain_lcp_phialgorithm(bool onlyplcp,
+                                        GtUword *maxlcp,
+                                        const GtUchar *sequence,
+                                        bool withspecial,
+                                        GtUword partwidth,
+                                        GtUword totallength,
+                                        const unsigned int *suftab);
 
 int gt_lcptab_lightweightcheck(const char *esaindexname,
                                const GtEncseq *encseq,

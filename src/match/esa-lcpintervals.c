@@ -202,7 +202,7 @@ int gt_runenumlcpvalues(const char *inputindex,
                                                    SARR_LCPTAB |
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB,
-                                                   SEQ_scan,
+                                                   true,
                                                    logger,
                                                    err);
   if (ssar == NULL)
@@ -279,10 +279,10 @@ static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
     {
       for (idx = 0; !haserr && idx < nonspecials; idx++)
       {
-        NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
+        SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
         sumlcptab += lcpvalue; /* silly but guarantees that loop is
                                   not eliminated by compiler */
-        NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+        SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
         sumsuftab += previoussuffix; /* silly but guarantees that loop is
                                         not eliminated by compiler */
       }
@@ -311,7 +311,7 @@ int gt_runscanesa(const char *inputindex, unsigned int mode,
                                                    SARR_LCPTAB |
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB,
-                                                   SEQ_scan,
+                                                   true,
                                                    logger,
                                                    err);
   if (ssar == NULL)

@@ -32,7 +32,7 @@ int gt_process_spmitv(const char *inputindex, GtLogger *logger, GtError *err)
                                                    SARR_LCPTAB |
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB,
-                                                   SEQ_scan,
+                                                   true,
                                                    logger,
                                                    err);
   if (ssar == NULL)

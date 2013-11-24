@@ -252,7 +252,7 @@ uint64_t **gt_genomediff_shulen_sum(const GtGenomediffArguments *arguments,
                                     gt_str_array_get(arguments->filenames, 0),
                                     SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB |
                                       SARR_SSPTAB,
-                                    arguments->scan ? SEQ_scan : SEQ_mappedboth,
+                                    arguments->scanfile,
                                     logger, err);
     if (ssar == NULL)
       had_err = -1;

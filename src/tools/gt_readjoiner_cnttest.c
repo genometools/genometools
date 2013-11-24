@@ -181,7 +181,7 @@ static int gt_readjoiner_cnttest_runner(GT_UNUSED int argc,
         GT_LOGGER_DEFLT_PREFIX, stderr);
     ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(
           arguments->readset), SARR_LCPTAB | SARR_SUFTAB | SARR_SSPTAB,
-        SEQ_scan, verbose_logger, err);
+        true, verbose_logger, err);
     if (gt_error_is_set(err))
       had_err = -1;
     else

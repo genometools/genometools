@@ -20,19 +20,60 @@
 
 #include "core/timer_api.h"
 #include "core/logger_api.h"
+#include "core/error_api.h"
 #include "core/encseq.h"
+#include "bare-encseq.h"
 
-void gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 bool intermediatecheck,
-                                 bool finalcheck,
-                                 GtLogger *logger,
-                                 GtTimer *timer);
+typedef unsigned int GtUsainindextype;
 
-void gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
-                                GtUword len,
-                                bool intermediatecheck,
-                                GtLogger *logger,
-                                GtTimer *timer);
+GtUsainindextype *gt_sain_encseq_sortsuffixes(const GtEncseq *encseq,
+                                              GtReadmode readmode,
+                                              bool intermediatecheck,
+                                              bool finalcheck,
+                                              GtLogger *logger,
+                                              GtTimer *timer);
+
+GtUsainindextype *gt_sain_bare_encseq_sortsuffixes(
+                                      const GtBareEncseq *bare_encseq,
+                                      GtReadmode readmode,
+                                      bool intermediatecheck,
+                                      bool finalcheck,
+                                      GtLogger *logger,
+                                      GtTimer *timer);
+
+GtUsainindextype *gt_sain_plain_sortsuffixes(const GtUchar *plainseq,
+                                             GtUword len,
+                                             bool intermediatecheck,
+                                             bool finalcheck,
+                                             GtLogger *logger,
+                                             GtTimer *timer);
+
+int gt_sain_checkmaxsequencelength(GtUword len,bool forencseq,GtError *err);
+
+typedef struct GtSainSufLcpIterator GtSainSufLcpIterator;
+
+GtSainSufLcpIterator *gt_sain_suf_lcp_iterator_new(bool withlcp,
+                                                   GtUchar *sequence,
+                                                   GtUword len,
+                                                   GtReadmode readmode,
+                                                   GtUword numofchars,
+                                                   GtError *err);
+
+GtUword gt_sain_suf_lcp_iterator_nonspecials(const GtSainSufLcpIterator
+                                                   *suflcpiterator);
+
+void gt_sain_suf_lcp_iterator_delete(GtSainSufLcpIterator *suflcpiterator);
+
+GtUword gt_sain_suf_lcp_iterator_nonspecials(const GtSainSufLcpIterator
+                                                   *suflcpiterator);
+
+GtReadmode gt_sain_suf_lcp_iterator_readmode(const GtSainSufLcpIterator
+                                             *suflcpiterator);
+
+GtUword gt_sain_suf_lcp_iterator_next(GtUword *lcpvalue,
+                                      GtSainSufLcpIterator *suflcpiterator);
+
+const GtBareEncseq *gt_sain_suf_lcp_iterator_bare_encseq(
+         const GtSainSufLcpIterator *suflcpiterator);
 
 #endif

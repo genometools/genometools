@@ -39,8 +39,9 @@
 #include "match/sfx-suffixgetset.h"
 #include "match/sfx-suftaborder.h"
 #include "match/test-mappedstr.pr"
-#include "match/twobits2kmers.h"
 #include "match/sfx-linlcp.h"
+#include "match/sfx-lwcheck.h"
+#include "match/twobits2kmers.h"
 #include "match/esa-fileend.h"
 #include "tools/gt_sfxmap.h"
 
@@ -619,7 +620,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
     }
     if (ssar != NULL)
     {
-      NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+      SSAR_NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
       if (maxlcp != currentlcp)
       {
         fprintf(stderr,""GT_WU": startpos="GT_WU", firstchar=%u, "
@@ -646,6 +647,19 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
   return haserr ? -1 : 0;
+}
+
+static GtUchar sfx_accesschar_encseq(const void *encseq,GtUword position,
+                                     GtReadmode readmode)
+{
+  return gt_encseq_get_encoded_char((const GtEncseq *) encseq,
+                                    position,
+                                    readmode);
+}
+
+GtUword sfx_charcount_encseq(const void *encseq,GtUchar idx)
+{
+  return gt_encseq_charcount((const GtEncseq *) encseq, idx);
 }
 
 static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
@@ -718,7 +732,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
             ssar = gt_newSequentialsuffixarrayreaderfromfile(
                                           gt_str_get(arguments->esaindexname),
                                           SARR_LCPTAB | SARR_ESQTAB,
-                                          SEQ_scan,
+                                          true,
                                           logger,
                                           err);
           } else
@@ -750,8 +764,15 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
         {
           if (suffixarray.numberofallsortedsuffixes == totallength + 1)
           {
-            gt_suftab_lightweightcheck(suffixarray.encseq, suffixarray.readmode,
-                                       totallength,suffixarray.suftab,
+            gt_suftab_lightweightcheck(sfx_accesschar_encseq,
+                                       sfx_charcount_encseq,
+                                       suffixarray.encseq,
+                                       suffixarray.readmode,
+                                       totallength,
+                                       gt_encseq_alphabetnumofchars(
+                                                 suffixarray.encseq),
+                                       suffixarray.suftab,
+                                       sizeof suffixarray.suftab,
                                        logger);
             if (arguments->inputlcp)
             {
@@ -932,8 +953,15 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
         }
       }
       gt_assert(countentries == numberofentries);
-      gt_suftab_lightweightcheck(encseq, GT_READMODE_FORWARD,
-                                 totallength,suftab,NULL);
+      gt_suftab_lightweightcheck(sfx_accesschar_encseq,
+                                 sfx_charcount_encseq,
+                                 encseq,
+                                 GT_READMODE_FORWARD,
+                                 totallength,
+                                 gt_encseq_alphabetnumofchars(encseq),
+                                 suftab,
+                                 sizeof *suftab,
+                                 NULL);
       gt_free(suftab);
     }
     gt_fa_fclose(fp);
@@ -952,7 +980,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
   ssar = gt_newSequentialsuffixarrayreaderfromfile(
                                           indexname,
                                           SARR_LCPTAB | SARR_ESQTAB,
-                                          SEQ_scan,
+                                          true,
                                           logger,
                                           err);
   if (ssar == NULL)
@@ -988,7 +1016,7 @@ static int gt_sfxmap_compresslcp(const char *indexname,
         {
           GtUword currentlcp;
 
-          NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+          SSAR_NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
           gt_bitbuffer_next_fixed_bits_value (bitbuffer,currentlcp);
           elems++;
         }
@@ -1017,7 +1045,7 @@ static int gt_sfxmap_comparelcpvalue(void *info,GtUword lcp,GtError *err)
   gt_error_check(err);
   do /* fake loop to allow for the use of a break statement */
   {
-    NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
+    SSAR_NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
     if (lcp != currentlcpvalue)
     {
       gt_error_set(err,"lcp="GT_WU" != "GT_WU"=currentlcpvalue",
@@ -1066,7 +1094,7 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
                                           gt_str_get(arguments->esaindexname),
                                           arguments->cmpsuf ? SARR_SUFTAB
                                                             : SARR_LCPTAB,
-                                          SEQ_scan,
+                                          true,
                                           logger,
                                           err);
       if (ssar == NULL)
@@ -1099,7 +1127,7 @@ static int gt_sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
       }
       if (arguments->cmpsuf && ssar != NULL)
       {
-        NEXTSEQUENTIALSUFTABVALUE(currentsuffix,ssar);
+        SSAR_NEXTSEQUENTIALSUFTABVALUE(currentsuffix,ssar);
         gt_assert(pos == currentsuffix);
       }
       /*printf(""GT_WU": pos = "GT_WU"\n",idx,pos);*/

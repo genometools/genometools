@@ -131,7 +131,7 @@ struct GtTIRStream
 };
 
 /* optimized to discard irrelevant seeds as soon as possible */
-static int gt_tir_store_seeds(void *info, const GtEncseq *encseq,
+static int gt_tir_store_seeds(void *info, const GtGenericEncseq *genericencseq,
                               GtUword len, GtUword pos1,
                               GtUword pos2, GT_UNUSED GtError *err)
 {
@@ -140,8 +140,11 @@ static int gt_tir_store_seeds(void *info, const GtEncseq *encseq,
   Seed *nextfreeseedpointer;
   GtUword distance;
   SeedInfo *seeds = (SeedInfo *) info;
+  const GtEncseq *encseq;
   gt_error_check(err);
 
+  gt_assert(genericencseq->hasencseq);
+  encseq = genericencseq->seqptr.encseq;
   /* ensure order of seeds */
   if (pos1 > pos2) {
     GtUword tmp = 0;
@@ -626,8 +629,6 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
   /* generate and check seeds */
    if (tir_stream->state == GT_TIR_STREAM_STATE_START) {
     if (!had_err && gt_enumeratemaxpairs(tir_stream->ssar,
-                      tir_stream->encseq,
-                      gt_readmodeSequentialsuffixarrayreader(tir_stream->ssar),
                       (unsigned int) tir_stream->min_seed_length,
                       gt_tir_store_seeds,
                       &tir_stream->seedinfo,
@@ -965,7 +966,7 @@ GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
                                                 SARR_LCPTAB | SARR_SUFTAB |
                                                 SARR_ESQTAB | SARR_DESTAB |
                                                 SARR_SSPTAB | SARR_SDSTAB,
-                                                SEQ_scan,
+                                                true,
                                                 NULL,
                                                 err);
   if (tir_stream->ssar == NULL) {

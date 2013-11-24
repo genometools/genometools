@@ -187,7 +187,7 @@ static int gt_readjoiner_spmtest_runner(GT_UNUSED int argc,
       case GT_READJOINER_SPMTEST_GUSFIELD:
         ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(
               arguments->readset), SARR_LCPTAB | SARR_SUFTAB | SARR_SSPTAB |
-            SARR_ESQTAB, SEQ_mappedboth, verbose_logger, err);
+            SARR_ESQTAB, false, verbose_logger, err);
         if (gt_error_is_set(err))
           had_err = -1;
         else

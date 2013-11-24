@@ -426,11 +426,11 @@ static int run_packedindexconstruction(GtLogger *logger,
 }
 #endif
 
-int runsuffixerator(bool doesa,
-                    Suffixeratoroptions *so,
-                    GenomediffInfo *gd_info,
-                    GtLogger *logger,
-                    GtError *err)
+int gt_runsuffixerator(bool doesa,
+                       Suffixeratoroptions *so,
+                       GenomediffInfo *gd_info,
+                       GtLogger *logger,
+                       GtError *err)
 {
   GtTimer *sfxprogress = NULL;
   Outfileinfo outfileinfo;
@@ -442,10 +442,9 @@ int runsuffixerator(bool doesa,
 
   gt_error_check(err);
 
-  so->outlcptab = so->genomediff
-    ? true
-    : gt_index_options_outlcptab_value(so->idxopts);
-
+  so->outlcptab
+    = so->genomediff ? true
+                     : gt_index_options_outlcptab_value(so->idxopts);
   if (gt_showtime_enabled())
   {
     sfxprogress = gt_timer_new_with_progress_description("determining sequence "
@@ -499,8 +498,8 @@ int runsuffixerator(bool doesa,
     ee = gt_encseq_encoder_new_from_options(so->encopts, err);
     /* '-plain' implies no description support */
     if (gt_encseq_options_plain_value(so->loadopts)) {
-      gt_encseq_encoder_do_not_create_des_tab(ee);
-      gt_encseq_encoder_do_not_create_sds_tab(ee);
+        gt_encseq_encoder_do_not_create_des_tab(ee);
+        gt_encseq_encoder_do_not_create_sds_tab(ee);
     }
     if (ee == NULL)
       haserr = true;
@@ -551,9 +550,8 @@ int runsuffixerator(bool doesa,
       }
     }
   }
-  if (!haserr
-        && gt_index_options_outkystab_value(so->idxopts)
-        && !gt_index_options_outkyssort_value(so->idxopts))
+  if (!haserr && gt_index_options_outkystab_value(so->idxopts)
+              && !gt_index_options_outkyssort_value(so->idxopts))
   {
     if (gt_extractkeysfromdesfile(gt_str_get(so->indexname),
                                   false, logger, err) != 0)
@@ -735,7 +733,7 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
 
     gt_logger_log(logger,"sizeof (GtUword)="GT_WU"",
                   (GtUword) (sizeof (GtUword) * CHAR_BIT));
-    if (runsuffixerator(doesa,&so,NULL,logger,err) < 0)
+    if (gt_runsuffixerator(doesa,&so,NULL,logger,err) < 0)
     {
       haserr = true;
     }

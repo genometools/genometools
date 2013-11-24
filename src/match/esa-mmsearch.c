@@ -284,8 +284,7 @@ bool gt_mmsearchiterator_isempty(const GtMMsearchiterator *mmsi)
 bool gt_mmsearchiterator_identical(const GtMMsearchiterator *mmsi1,
                                    const GtMMsearchiterator *mmsi2)
 {
-  gt_assert(mmsi1 != NULL);
-  gt_assert(mmsi2 != NULL);
+  gt_assert(mmsi1 != NULL && mmsi2 != NULL);
   return mmsi1->lcpitv.left == mmsi2->lcpitv.left &&
          mmsi1->lcpitv.right == mmsi2->lcpitv.right;
 }
@@ -806,6 +805,7 @@ static int gt_constructsarrandrunmmsearch(
                  void *processquerymatchinfo,
                  GtTimer *sfxprogress,
                  bool withprogressbar,
+                 GtLogger *logger,
                  GtError *err)
 {
   bool haserr = false;
@@ -823,7 +823,7 @@ static int gt_constructsarrandrunmmsearch(
                            &sfxstrategy, /* sfxstrategy */
                            sfxprogress,
                            withprogressbar,
-                           NULL, /* logger */
+                           logger, /* logger */
                            err);
   if (sfi == NULL)
   {
@@ -892,11 +892,12 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
   GtEncseq *dbencseq;
   GtEncseqBuilder *eb;
 
+  gt_assert(querylen >= (GtUword) minlength && dblen >= (GtUword) minlength);
   eb = gt_encseq_builder_new(alpha);
   gt_encseq_builder_disable_multiseq_support(eb);
   gt_encseq_builder_disable_description_support(eb);
   gt_encseq_builder_set_logger(eb, logger);
-  gt_encseq_builder_add_encoded(eb, dbseq, dblen, NULL);
+  gt_encseq_builder_add_multiple_encoded(eb,dbseq,dblen);
   dbencseq = gt_encseq_builder_build(eb, err);
   gt_encseq_builder_delete(eb);
 
@@ -917,6 +918,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                      processquerymatchinfo,
                                      NULL,
                                      false,
+                                     logger,
                                      err) != 0)
   {
     haserr = true;

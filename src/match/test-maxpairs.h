@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,23 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_LCPVAL_H
-#define ESA_LCPVAL_H
+#ifndef TEST_MAXPAIRS_H
+#define TEST_MAXPAIRS_H
 
-#include "core/readmode.h"
-#include "core/encseq.h"
-#include "match/sarr-def.h"
+#include "core/types_api.h"
+#include "core/logger_api.h"
+#include "core/error_api.h"
 
-typedef struct Lcpvalueiterator Lcpvalueiterator;
-
-Lcpvalueiterator *gt_newLcpvalueiterator(const GtEncseq *encseq,
-                                      GtReadmode readmode);
-
-GtUword gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
-                                      bool firstpage,
-                                      const ESASuffixptr *suftabptr,
-                                      GtUword numberofsuffixes);
-
-void gt_freeLcpvalueiterator(Lcpvalueiterator *lvi);
+int gt_testmaxpairs(const char *indexname,
+                    GtUword samples,
+                    unsigned int minlength,
+                    GtUword substringlength,
+                    GtLogger *logger,
+                    GtError *err);
 
 #endif

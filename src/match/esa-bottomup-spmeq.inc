@@ -28,9 +28,11 @@
 #include "esa-seqread.h"
 #include "seqnumrelpos.h"
 
-static void initBUinfo_spmeq(GtBUinfo_spmeq *,GtBUstate_spmeq *);
+static void initBUinfo_spmeq(GtBUinfo_spmeq *,
+                              GtBUstate_spmeq *);
 
-static void freeBUinfo_spmeq(GtBUinfo_spmeq *,GtBUstate_spmeq *);
+static void freeBUinfo_spmeq(GtBUinfo_spmeq *,
+                              GtBUstate_spmeq *);
 
 static int processleafedge_spmeq(bool,
     GtUword,
@@ -96,8 +98,9 @@ GtArrayGtBUItvinfo_spmeq *gt_GtArrayGtBUItvinfo_new_spmeq(void)
   return stack;
 }
 
-void gt_GtArrayGtBUItvinfo_delete_spmeq(GtArrayGtBUItvinfo_spmeq *stack,
-                                  GtBUstate_spmeq *state)
+void gt_GtArrayGtBUItvinfo_delete_spmeq(
+                           GtArrayGtBUItvinfo_spmeq *stack,
+                           GtBUstate_spmeq *state)
 {
   GtUword idx;
 
@@ -109,7 +112,8 @@ void gt_GtArrayGtBUItvinfo_delete_spmeq(GtArrayGtBUItvinfo_spmeq *stack,
   gt_free(stack);
 }
 
-static GtBUItvinfo_spmeq *allocateBUstack_spmeq(GtBUItvinfo_spmeq *ptr,
+static GtBUItvinfo_spmeq *allocateBUstack_spmeq(
+                                   GtBUItvinfo_spmeq *ptr,
                                    GtUword currentallocated,
                                    GtUword allocated,
                                    GtBUstate_spmeq *state)

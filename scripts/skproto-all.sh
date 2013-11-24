@@ -166,6 +166,7 @@ tagerator.c
 test-pairwise.c
 turnwheels.c
 twobits2kmers.c
+test-maxpairs.c
 tyr-map.c
 tyr-mersplit.c
 tyr-mkindex.c
