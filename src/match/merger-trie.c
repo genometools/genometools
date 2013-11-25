@@ -300,7 +300,7 @@ static void shownoderelations(int line,char *nodestring,
   showsimplenoderelations(node);
 }
 
-void merertrie_showallnoderelations(const Mergertrienode *node)
+void mergertrie_showallnoderelations(const Mergertrienode *node)
 {
   Mergertrienode *tmp;
 
@@ -312,7 +312,7 @@ void merertrie_showallnoderelations(const Mergertrienode *node)
       showsimplenoderelations(tmp);
     } else
     {
-      showallnoderelations(tmp);
+      mergertrie_showallnoderelations(tmp);
     }
   }
 }

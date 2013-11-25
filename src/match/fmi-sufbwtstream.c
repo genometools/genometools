@@ -32,7 +32,7 @@
 #include "fmindex.h"
 #include "esa-map.h"
 
-#include "encseq2offset.pr"
+#include "encseq2offset.h"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 

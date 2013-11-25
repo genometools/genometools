@@ -20,7 +20,7 @@
 #include "core/unused_api.h"
 #include "core/logger.h"
 #include "match/intcode-def.h"  /* XXX */
-#include "match/test-mappedstr.pr"  /* XXX */
+#include "match/test-mappedstr.h"
 #include "tools/gt_encseq_check.h"
 
 typedef struct {

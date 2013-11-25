@@ -19,7 +19,7 @@
 #include "core/logger.h"
 #include "core/option_api.h"
 #include "core/versionfunc.h"
-#include "match/test-mergeesa.pr"
+#include "match/test-mergeesa.h"
 #include "tools/gt_mergeesa.h"
 
 static GtOPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
