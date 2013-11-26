@@ -15,12 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
-#include "match/fmi-mkindex.h"
-#include "tools/gt_mkfmindex.h"
+#ifndef FMI_SUFBWTSTREAM_H
+#define FMI_SUFBWTSTREAM_H
 
-int gt_mkfmindex(int argc, const char **argv, GtError *err)
-{
-  gt_error_check(err);
-  return gt_parseargsandcallmkfmindex(argc, argv, err);
-}
+#include <stdbool.h>
+#include "core/chardef.h"
+#include "core/str_array.h"
+#include "core/logger_api.h"
+#include "core/error_api.h"
+#include "fmindex.h"
+
+int gt_sufbwt2fmindex(Fmindex *fmindex,
+                      GtSpecialcharinfo *specialcharinfo,
+                      unsigned int log2bsize,
+                      unsigned int log2markdist,
+                      const char *outfmindex,
+                      const GtStrArray *indexnametab,
+                      bool storeindexpos,
+                      GtLogger *logger,
+                      GtError *err);
+
+#endif

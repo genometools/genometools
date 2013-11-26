@@ -18,6 +18,7 @@
 #include "core/divmodmul.h"
 
 #include "fmindex.h"
+#include "fmi-locate.h"
 #include "fmi-occ.gen"
 
 static GtUword searchsmallestgeq(const GtPairBwtidx *left,

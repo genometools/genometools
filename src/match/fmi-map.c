@@ -28,8 +28,8 @@
 #include "esa-scanprj.h"
 #include "fmindex.h"
 
-#include "fmi-keyval.pr"
-#include "fmi-mapspec.pr"
+#include "fmi-keyval.h"
+#include "fmi-mapspec.h"
 
 bool gt_fmindexexists(const char *indexname)
 {

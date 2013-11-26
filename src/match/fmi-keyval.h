@@ -15,12 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
-#include "match/fmi-mkindex.h"
-#include "tools/gt_mkfmindex.h"
+#ifndef FMI_KEYVAL_H
+#define FMI_KEYVAL_H
+#include <stdbool.h>
+#include "core/types_api.h"
+#include "core/chardef.h"
+#include "fmindex.h"
 
-int gt_mkfmindex(int argc, const char **argv, GtError *err)
-{
-  gt_error_check(err);
-  return gt_parseargsandcallmkfmindex(argc, argv, err);
-}
+GtUword gt_determinenumberofspecialstostore(const GtSpecialcharinfo
+                                            *specialcharinfo);
+
+void gt_computefmkeyvalues (Fmindex *fm,
+                            const GtSpecialcharinfo *specialcharinfo,
+                            GtUword bwtlength,
+                            unsigned int log2bsize,
+                            unsigned int log2markdist,
+                            unsigned int numofchars,
+                            unsigned int suffixlength,
+                            bool storeindexpos);
+
+#endif

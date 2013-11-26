@@ -15,12 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
-#include "match/fmi-mkindex.h"
-#include "tools/gt_mkfmindex.h"
+#ifndef FMI_MKINDEX_H
+#define FMI_MKINDEX_H
+#include "core/error_api.h"
 
-int gt_mkfmindex(int argc, const char **argv, GtError *err)
-{
-  gt_error_check(err);
-  return gt_parseargsandcallmkfmindex(argc, argv, err);
-}
+int gt_parseargsandcallmkfmindex(int argc,const char **argv,GtError *err);
+
+#endif

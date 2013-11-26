@@ -22,9 +22,10 @@
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "fmindex.h"
-#include "fmi-save.pr"
-#include "fmi-keyval.pr"
-#include "fmi-sufbwtstream.pr"
+#include "fmi-save.h"
+#include "fmi-keyval.h"
+#include "fmi-mkindex.h"
+#include "fmi-sufbwtstream.h"
 
 typedef struct
 {

@@ -22,7 +22,8 @@
 #include "fmindex.h"
 
 #include "fmi-occ.gen"
-#include "fmi-locate.pr"
+#include "fmi-locate.h"
+#include "fmi-fwduni.h"
 
 GtUword gt_skfmuniqueforward (const void *genericindex,
                                  GT_UNUSED GtUword offset,

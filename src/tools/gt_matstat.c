@@ -33,8 +33,8 @@
 #include "tools/gt_matstat.h"
 #include "tools/gt_uniquesub.h"
 
-#include "match/fmi-fwduni.pr"
-#include "match/fmi-map.pr"
+#include "match/fmi-fwduni.h"
+#include "match/fmi-map.h"
 
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
