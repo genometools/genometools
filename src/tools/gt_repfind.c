@@ -556,17 +556,30 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       {
         if (arguments->forward)
         {
+          GtProcessmaxpairs processmaxpairs;
+          void *processmaxpairsdata;
+
+          if (arguments->searchspm)
+          {
+            processmaxpairs = gt_simplesuffixprefixmatchoutput;
+            processmaxpairsdata = NULL;
+          } else
+          {
+            if (arguments->extendseed)
+            {
+              processmaxpairs = gt_simplexdropselfmatchoutput;
+              processmaxpairsdata = (void *) &xdropmatchinfo;
+            } else
+            {
+              processmaxpairs = gt_simpleexactselfmatchoutput;
+              processmaxpairsdata = (void *) querymatchspaceptr;
+            }
+          }
           if (callenummaxpairs(gt_str_get(arguments->indexname),
                                arguments->userdefinedleastlength,
                                arguments->scanfile,
-                               arguments->searchspm
-                                 ? gt_simplesuffixprefixmatchoutput
-                                 : (arguments->extendseed
-                                     ? gt_simplexdropselfmatchoutput
-                                     : gt_simpleexactselfmatchoutput),
-                               arguments->extendseed
-                                 ? (void *) &xdropmatchinfo
-                                 : (void *) querymatchspaceptr,
+                               processmaxpairs,
+                               processmaxpairsdata,
                                logger,
                                err) != 0)
           {

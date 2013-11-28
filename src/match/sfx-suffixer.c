@@ -41,6 +41,9 @@
 #include "core/divmodmul.h"
 #include "core/format64.h"
 #include "core/fileutils.h"
+#ifdef GT_THREADS_ENABLED
+#include "core/thread_api.h"
+#endif
 #include "intcode-def.h"
 #include "firstcodes-buf.h"
 #include "esa-fileend.h"
@@ -55,7 +58,6 @@
 #include "sfx-bentsedg.h"
 #include "sfx-suffixgetset.h"
 #include "sfx-maprange.h"
-#include "stamp.h"
 
 typedef struct
 {
@@ -1785,6 +1787,12 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 err);
 }
 
+#ifdef GT_THREADS_ENABLED
+#define GT_SFX_THREADS_JOBS gt_jobs
+#else
+#define GT_SFX_THREADS_JOBS 1U
+#endif
+
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 {
   GtUword sumofwidthforpart;
@@ -1886,7 +1894,9 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 
   if (gt_suftabparts_numofparts(sfi->suftabparts) == 1U &&
       sfi->outlcpinfo == NULL &&
-      sfi->prefixlength >= 2U && sfi->sfxstrategy.spmopt_minlength == 0)
+      sfi->prefixlength >= 2U &&
+      sfi->sfxstrategy.spmopt_minlength == 0 &&
+      GT_SFX_THREADS_JOBS == 1U)
   {
     bucketspec2 = gt_copysort_new(sfi->bcktab,sfi->encseq,sfi->readmode,
                                   sumofwidthforpart,sfi->numofchars);
