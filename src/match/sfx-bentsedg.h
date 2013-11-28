@@ -54,6 +54,21 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        GtUint64 *bucketiterstep,
                        GtLogger *logger);
 
+void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+                       GtUword numberofsuffixes,
+                       const GtEncseq *encseq,
+                       GtReadmode readmode,
+                       GtCodetype mincode,
+                       GtCodetype maxcode,
+                       const GtBcktab *bcktab,
+                       unsigned int numofchars,
+                       unsigned int prefixlength,
+                       unsigned int sortmaxdepth,
+                       const Sfxstrategy *sfxstrategy,
+                       GtProcessunsortedsuffixrange processunsortedsuffixrange,
+                       void *processunsortedsuffixrangeinfo,
+                       GtLogger *logger);
+
 void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  GtUword numberofsuffixes,
                                  const GtEncseq *encseq,

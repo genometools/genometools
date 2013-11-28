@@ -1936,6 +1936,26 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     gt_assert(sortmaxdepth != 0 || processunsortedsuffixrange == NULL);
     gt_bcktab_determinemaxsize(sfi->bcktab, sfi->currentmincode,
                                sfi->currentmaxcode,sumofwidthforpart);
+#ifdef GT_THREADS_ENABLED
+    if (GT_SFX_THREADS_JOBS > 1U)
+    {
+      gt_threaded_sortallbuckets(sfi->suffixsortspace,
+                                 sumofwidthforpart,
+                                 sfi->encseq,
+                                 sfi->readmode,
+                                 sfi->currentmincode,
+                                 sfi->currentmaxcode,
+                                 sfi->bcktab,
+                                 sfi->numofchars,
+                                 sfi->prefixlength,
+                                 sortmaxdepth,
+                                 &sfi->sfxstrategy,
+                                 processunsortedsuffixrange,
+                                 (void *) sfi->dcov,
+                                 sfi->logger);
+    } else
+    {
+#endif
     gt_sortallbuckets(sfi->suffixsortspace,
                       sumofwidthforpart,
                       bucketspec2,
@@ -1953,6 +1973,9 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                       (void *) sfi->dcov,
                       &sfi->bucketiterstep,
                       sfi->logger);
+#ifdef GT_THREADS_ENABLED
+    }
+#endif
   }
   if (bucketspec2 != NULL)
   {

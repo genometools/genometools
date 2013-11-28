@@ -1606,6 +1606,53 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   bentsedgresources_delete(bsr, logger);
 }
 
+void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+                       GtUword numberofsuffixes,
+                       const GtEncseq *encseq,
+                       GtReadmode readmode,
+                       GtCodetype mincode,
+                       GtCodetype maxcode,
+                       const GtBcktab *bcktab,
+                       unsigned int numofchars,
+                       unsigned int prefixlength,
+                       unsigned int sortmaxdepth,
+                       const Sfxstrategy *sfxstrategy,
+                       GtProcessunsortedsuffixrange processunsortedsuffixrange,
+                       void *processunsortedsuffixrangeinfo,
+                       GtLogger *logger)
+{
+  GtCodetype code;
+  unsigned int rightchar = (unsigned int) (mincode % numofchars);
+  GtBucketspecification bucketspec;
+  GtBentsedgresources *bsr = bentsedgresources_new(suffixsortspace,
+                                                   encseq,
+                                                   readmode,
+                                                   prefixlength,
+                                                   bcktab,
+                                                   sortmaxdepth,
+                                                   sfxstrategy,
+                                                   false);
+  bsr->processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
+  bsr->processunsortedsuffixrange = processunsortedsuffixrange;
+  for (code = mincode; code <= maxcode; code++)
+  {
+    rightchar = gt_bcktab_calcboundsparts(&bucketspec,
+                                          bcktab,
+                                          code,
+                                          maxcode,
+                                          numberofsuffixes,
+                                          rightchar);
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      gt_suffixsortspace_bucketleftidx_set(bsr->sssp,bucketspec.left);
+      gt_sort_bentleysedgewick(bsr,bucketspec.nonspecialsinbucket,
+                               (GtUword) prefixlength);
+      gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
+    }
+  }
+  bentsedgresources_delete(bsr, logger);
+}
+
 void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  GtUword numberofsuffixes,
                                  const GtEncseq *encseq,
