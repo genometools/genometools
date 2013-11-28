@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
-#include "match/fmi-mkindex.h"
-#include "tools/gt_mkfmindex.h"
+#ifndef TEST_MAPPEDSTR_H
+#define TEST_MAPPEDSTR_H
 
-int gt_mkfmindex(int argc, const char **argv, GtError *err)
-{
-  gt_error_check(err);
-  return gt_parseargsandcallmkfmindex(argc, argv, err);
-}
+#include "core/encseq.h"
+#include "core/error_api.h"
+
+int gt_verifymappedstr(const GtEncseq *encseq,
+                       unsigned int prefixlength,
+                       GtError *err);
+
+#endif

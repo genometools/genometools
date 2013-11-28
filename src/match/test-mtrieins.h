@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
-#include "match/fmi-mkindex.h"
-#include "tools/gt_mkfmindex.h"
+#ifndef TEST_MTRIEINS_H
+#define TEST_MTRIEINS_H
 
-int gt_mkfmindex(int argc, const char **argv, GtError *err)
-{
-  gt_error_check(err);
-  return gt_parseargsandcallmkfmindex(argc, argv, err);
-}
+#include <stdbool.h>
+#include "core/error_api.h"
+
+int gt_test_trieins(bool onlyins,const char *indexname,GtError *err);
+
+#endif

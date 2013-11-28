@@ -138,22 +138,17 @@ GT_DECLAREARRAYSTRUCT(GtMKVstack);
 typedef struct
 {
   const GtEncseq *encseq;
-  GtEncseqReader *esr1, /* XXX be careful with threads */
+  GtEncseqReader *esr1,
                  *esr2;
   GtReadmode readmode;
   bool fwd, complement;
-  GtArrayGtMKVstack mkvauxstack; /* XXX be careful with threads */
+  GtArrayGtMKVstack mkvauxstack;
   GtLcpvalues *tableoflcpvalues;
-  GtMedianinfo *medianinfospace;
-  GtCountingsortinfo *countingsortinfo;
   const Sfxstrategy *sfxstrategy;
-  unsigned int sortmaxdepth,
-               prefixlength;
-  GtBlindtrie *blindtrie;
   GtSuffixsortspace *sssp;
   GtProcessunsortedsuffixrange processunsortedsuffixrange;
-  void *processunsortedsuffixrangeinfo;
-  bool *equalwithprevious;
+  unsigned int sortmaxdepth,
+               prefixlength;
   GtUword countinsertionsort,
           counttqsort,
           countshortreadsort,
@@ -167,6 +162,11 @@ typedef struct
           shortreadsort_maxwidth,
           leftlcpdist[GT_UNITSIN2BITENC],
           rightlcpdist[GT_UNITSIN2BITENC];
+  void *processunsortedsuffixrangeinfo;
+  bool *equalwithprevious;
+  GtBlindtrie *blindtrie;
+  GtMedianinfo *medianinfospace;
+  GtCountingsortinfo *countingsortinfo;
   GtShortreadsortworkinfo *srsw;
   const GtTwobitencoding *twobitencoding;
   GtRadixsortstringinfo *rsi;
@@ -1378,10 +1378,10 @@ static GtBentsedgresources *bentsedgresources_new(
     }
   } else
   {
-    if (gt_encseq_lengthoflongestnonspecial(encseq) > (GtUword) prefixlength)
+    GtUword longestnsp = gt_encseq_lengthoflongestnonspecial(encseq);
+    if (longestnsp > (GtUword) prefixlength)
     {
-      bsr->srs_maxremain = gt_encseq_lengthoflongestnonspecial(encseq) -
-                           prefixlength;
+      bsr->srs_maxremain = longestnsp - prefixlength;
     } else
     {
       bsr->srs_maxremain = 0;

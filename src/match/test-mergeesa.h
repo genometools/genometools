@@ -15,12 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
-#include "match/fmi-mkindex.h"
-#include "tools/gt_mkfmindex.h"
+#ifndef TEST_MERGEESA_H
+#define TEST_MERGEESA_H
 
-int gt_mkfmindex(int argc, const char **argv, GtError *err)
-{
-  gt_error_check(err);
-  return gt_parseargsandcallmkfmindex(argc, argv, err);
-}
+#include "core/str_api.h"
+#include "core/str_array_api.h"
+#include "core/logger_api.h"
+#include "core/error_api.h"
+
+int gt_performtheindexmerging(const GtStr *storeindex,
+                              const GtStrArray *indexnametab,
+                              GtLogger *logger,
+                              GtError *err);
+
+#endif

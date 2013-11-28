@@ -15,12 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
-#include "match/fmi-mkindex.h"
-#include "tools/gt_mkfmindex.h"
+#ifndef FMI_MAPSPEC_H
+#define FMI_MAPSPEC_H
+#include <stdbool.h>
+#include <stdio.h>
+#include "core/error_api.h"
+#include "core/str_api.h"
+#include "fmindex.h"
 
-int gt_mkfmindex(int argc, const char **argv, GtError *err)
-{
-  gt_error_check(err);
-  return gt_parseargsandcallmkfmindex(argc, argv, err);
-}
+int gt_flushfmindex2file(FILE *fp,
+                         Fmindex *fmindex,
+                         bool storeindexpos,
+                         GtError *err);
+
+int gt_fillfmmapspecstartptr(Fmindex *fmindex,
+                             bool storeindexpos,
+                             const GtStr *tmpfilename,
+                             GtError *err);
+
+#endif

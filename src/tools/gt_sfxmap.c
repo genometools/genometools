@@ -38,7 +38,6 @@
 #include "match/sfx-strategy.h"
 #include "match/sfx-suffixgetset.h"
 #include "match/sfx-suftaborder.h"
-#include "match/test-mappedstr.pr"
 #include "match/sfx-linlcp.h"
 #include "match/sfx-lwcheck.h"
 #include "match/twobits2kmers.h"

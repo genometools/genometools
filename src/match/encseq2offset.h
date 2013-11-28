@@ -15,12 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
-#include "match/fmi-mkindex.h"
-#include "tools/gt_mkfmindex.h"
+#ifndef ENCSEQ2OFFSET_H
+#define ENCSEQ2OFFSET_H
 
-int gt_mkfmindex(int argc, const char **argv, GtError *err)
-{
-  gt_error_check(err);
-  return gt_parseargsandcallmkfmindex(argc, argv, err);
-}
+#include "core/types_api.h"
+#include "core/chardef.h"
+#include "match/sarr-def.h"
+
+GtUword *gt_encseqtable2sequenceoffsets(GtUword *totallength,
+                                        GtSpecialcharinfo *specialcharinfo,
+                                        const Suffixarray *suffixarraytable,
+                                        unsigned int numofindexes);
+
+#endif

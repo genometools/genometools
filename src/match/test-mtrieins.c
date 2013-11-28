@@ -22,6 +22,7 @@
 #include "sarr-def.h"
 #include "merger-trie.h"
 #include "esa-map.h"
+#include "test-mtrieins.h"
 
 static void maketrie(Mergertrierep *trierep,
                      GT_UNUSED const GtUchar *characters,
@@ -114,7 +115,7 @@ int gt_test_trieins(bool onlyins,const char *indexname,GtError *err)
     {
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
-      showallnoderelations(trierep.root);
+      mergertrie_showallnoderelations(trierep.root);
 #endif
 #endif
       successivelydeletesmallest(&trierep,totallength,characters,err);

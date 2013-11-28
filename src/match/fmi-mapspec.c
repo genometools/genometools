@@ -17,6 +17,7 @@
 
 #include "core/unused_api.h"
 #include "core/mapspec.h"
+#include "fmi-mapspec.h"
 #include "fmindex.h"
 
 static void assignfmmapspecification(GtMapspec *mapspec,

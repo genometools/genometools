@@ -20,6 +20,7 @@
 #include "core/mathsupport.h"
 #include "core/safecast-gen.h"
 #include "fmindex.h"
+#include "fmi-keyval.h"
 
 GtUword gt_determinenumberofspecialstostore(const GtSpecialcharinfo
                                                         *specialcharinfo)

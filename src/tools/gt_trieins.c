@@ -18,7 +18,7 @@
 #include "core/error.h"
 #include "core/option_api.h"
 #include "core/versionfunc.h"
-#include "match/test-mtrieins.pr"
+#include "match/test-mtrieins.h"
 #include "tools/gt_trieins.h"
 
 static GtOPrval parse_options(bool *onlyins,int *parsed_args,

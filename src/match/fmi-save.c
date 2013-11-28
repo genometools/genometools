@@ -19,7 +19,8 @@
 #include "core/fa.h"
 #include "fmindex.h"
 
-#include "fmi-mapspec.pr"
+#include "fmi-mapspec.h"
+#include "fmi-save.h"
 
 static int writefmascii(const char *indexname,
                         const Fmindex *fm,

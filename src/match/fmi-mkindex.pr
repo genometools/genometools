@@ -1,8 +1,0 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-int gt_parseargsandcallmkfmindex(int argc,const char **argv,GtError *err);
-
-#ifdef __cplusplus
-}
-#endif

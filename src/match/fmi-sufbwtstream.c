@@ -32,9 +32,10 @@
 #include "fmindex.h"
 #include "esa-map.h"
 
-#include "encseq2offset.pr"
-#include "fmi-keyval.pr"
-#include "fmi-mapspec.pr"
+#include "encseq2offset.h"
+#include "fmi-keyval.h"
+#include "fmi-mapspec.h"
+#include "fmi-sufbwtstream.h"
 
 static int copytheindexfile(const char *destindex,
                             const char *sourceindex,

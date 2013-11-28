@@ -1,8 +1,0 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-GtUword gt_fmfindtextpos (const Fmindex *fm,GtUword idx);
-
-#ifdef __cplusplus
-}
-#endif

@@ -27,8 +27,9 @@
 #include "emimergeesa.h"
 #include "esa-fileend.h"
 #include "lcpoverflow.h"
+#include "test-mergeesa.h"
 
-#include "encseq2offset.pr"
+#include "encseq2offset.h"
 
 typedef struct
 {
