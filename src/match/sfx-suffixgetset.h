@@ -80,6 +80,16 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
 void gt_suffixsortspace_init_seqstartpos(GtSuffixsortspace *sssp,
                                          const GtEncseq *encseq);
 
+void gt_suffixsortspace_init_identity(GtSuffixsortspace *sssp,
+                                      GtUword numofsuffixes);
+
+GtUword gt_suffixsortspace_insertfullspecialrange(GtSuffixsortspace *sssp,
+                                                  GtUword nextfree,
+                                                  GtReadmode readmode,
+                                                  GtUword totallength,
+                                                  GtUword leftpos,
+                                                  GtUword rightpos);
+
 GtSuffixsortspace_exportptr *gt_suffixsortspace_exportptr(
                                   GtSuffixsortspace *sssp,
                                   GtUword subbucketleft);

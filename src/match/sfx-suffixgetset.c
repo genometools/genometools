@@ -26,6 +26,8 @@
 #include "core/safearith.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "core/readmode.h"
+#include "core/encseq.h"
 #include "sfx-suffixgetset.h"
 
 struct GtSuffixsortspace
@@ -296,6 +298,61 @@ void gt_suffixsortspace_init_seqstartpos(GtSuffixsortspace *sssp,
   {
     gt_suffixsortspace_setdirect(sssp, idx, gt_encseq_seqstartpos(encseq, idx));
   }
+}
+
+void gt_suffixsortspace_init_identity(GtSuffixsortspace *sssp,
+                                      GtUword numofsuffixes)
+{
+  GtUword idx;
+
+  for (idx=0; idx<numofsuffixes; idx++)
+  {
+    gt_suffixsortspace_setdirect(sssp,idx,idx);
+  }
+}
+
+GtUword gt_suffixsortspace_insertfullspecialrange(GtSuffixsortspace *sssp,
+                                                  GtUword nextfree,
+                                                  GtReadmode readmode,
+                                                  GtUword totallength,
+                                                  GtUword leftpos,
+                                                  GtUword rightpos)
+{
+  GtUword pos;
+
+  gt_assert(leftpos < rightpos);
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    pos = rightpos - 1;
+  } else
+  {
+    pos = leftpos;
+  }
+  while (true)
+  {
+    if (GT_ISDIRREVERSE(readmode))
+    {
+      gt_assert(pos < totallength);
+      gt_suffixsortspace_setdirect(sssp,nextfree,
+                                   GT_REVERSEPOS(totallength,pos));
+      nextfree++;
+      if (pos == leftpos)
+      {
+        break;
+      }
+      pos--;
+    } else
+    {
+      gt_suffixsortspace_setdirect(sssp, nextfree, pos);
+      nextfree++;
+      if (pos == rightpos-1)
+      {
+        break;
+      }
+      pos++;
+    }
+  }
+  return nextfree;
 }
 
 GtUword gt_suffixsortspace_bucketleftidx_get (const GtSuffixsortspace *sssp)
