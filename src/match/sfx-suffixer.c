@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -59,6 +59,49 @@
 #include "sfx-suffixgetset.h"
 #include "sfx-maprange.h"
 
+typedef struct
+{
+  GtSuffixsortspace *sssp;
+  GtSpecialrangeiterator *sri;
+  GtRange overhang;
+  GtUword size,
+          nextfree,
+          totallength;
+  GtReadmode readmode;
+} GtSSSPbuf;
+
+GtSSSPbuf *gt_SSSPbuf_new(GtSuffixsortspace *suffixsortspace,
+                          GtUword size,
+                          GtSpecialrangeiterator *sri,
+                          GtReadmode readmode,
+                          GtUword totallength)
+{
+  GtSSSPbuf *sssp_buf = gt_malloc(sizeof *sssp_buf);
+
+  sssp_buf->size = size;
+  sssp_buf->nextfree = 0;
+  sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
+  sssp_buf->sssp = suffixsortspace;
+  sssp_buf->sri = sri;
+  sssp_buf->readmode = readmode;
+  sssp_buf->totallength = totallength;
+  return sssp_buf;
+}
+
+GtUword gt_SSSPbuf_filled(const GtSSSPbuf *sssp_buf)
+{
+  gt_assert(sssp_buf != NULL);
+  return sssp_buf->nextfree;
+}
+
+void gt_SSSPbuf_delete(GtSSSPbuf *sssp_buf)
+{
+  if (sssp_buf != NULL)
+  {
+    gt_free(sssp_buf);
+  }
+}
+
 struct Sfxiterator
 {
   /* globally constant */
@@ -85,13 +128,11 @@ struct Sfxiterator
   GtUword widthofpart;
   unsigned int part;
   GtOutlcpinfo *outlcpinfo;
-  GtUword sssp_size;
-  GtUword sssp_nextfree;
-  GtRange overhang;
   bool exhausted;
   GtUint64 bucketiterstep; /* for progressbar */
   GtLogger *logger;
   GtTimer *sfxprogress;
+  GtSSSPbuf *sssp_buf;
   GtSpecialrangeiterator *sri; /* refers to space used in each part */
 
   /* use for generating k-mer codes */
@@ -563,6 +604,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   sfi->mappedmarkprefixbuckets = NULL;
   gt_free(sfi->marksuffixbuckets);
   gt_differencecover_delete(sfi->dcov);
+  gt_SSSPbuf_delete(sfi->sssp_buf);
   gt_free(sfi);
   return haserr ? -1 : 0;
 }
@@ -1356,6 +1398,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->exhausted = false;
     sfi->bucketiterstep = 0;
     sfi->logger = logger;
+    sfi->sssp_buf = NULL;
     sfi->sfxprogress = sfxprogress;
     if (sfi->sfxstrategy.differencecover > 0 &&
         specialcharacters < sfi->totallength)
@@ -1741,8 +1784,12 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       sfi->sri = NULL;
     }
-    sfi->sssp_size = gt_suftabparts_largest_width(sfi->suftabparts);
-    sfi->overhang.start = sfi->overhang.end = 0;
+    sfi->sssp_buf
+      = gt_SSSPbuf_new(sfi->suffixsortspace,
+                       gt_suftabparts_largest_width(sfi->suftabparts),
+                       sfi->sri,
+                       sfi->readmode,
+                       sfi->totallength);
   }
   SHOWACTUALSPACE;
   gt_Sfxmappedrangelist_delete(sfxmrlist);
@@ -1831,7 +1878,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   SHOWACTUALSPACE;
   gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
                                     gt_suftabparts_offset(sfi->part,
-                                                             sfi->suftabparts));
+                                                          sfi->suftabparts));
   if (sfi->sfxstrategy.spmopt_minlength == 0)
   {
     if (sfi->sfxstrategy.storespecialcodes)
@@ -1980,103 +2027,115 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   sfi->part++;
 }
 
-static void insertfullspecialrange(Sfxiterator *sfi,
-                                   GtUword leftpos,
-                                   GtUword rightpos)
+static void gt_SSSPbuf_insertfullspecialrange(GtSSSPbuf *sssp_buf,
+                                              GtUword leftpos,
+                                              GtUword rightpos)
 {
-   sfi->sssp_nextfree
-     = gt_suffixsortspace_insertfullspecialrange(sfi->suffixsortspace,
-                                                 sfi->sssp_nextfree,
-                                                 sfi->readmode,
-                                                 sfi->totallength,
-                                                 leftpos,
-                                                 rightpos);
+  gt_assert(sssp_buf != NULL);
+  sssp_buf->nextfree
+    = gt_suffixsortspace_insertfullspecialrange(sssp_buf->sssp,
+                                                sssp_buf->nextfree,
+                                                sssp_buf->readmode,
+                                                sssp_buf->totallength,
+                                                leftpos,
+                                                rightpos);
 }
 
-static void fillspecialnextpage(Sfxiterator *sfi)
+bool gt_SSSPbuf_fillspecialnextpage(GtSSSPbuf *sssp_buf)
 {
+  bool exhausted = false;
+
+  gt_assert(sssp_buf != NULL);
+  sssp_buf->nextfree = 0;
   while (true)
   {
-    if (sfi->overhang.start < sfi->overhang.end)
+    if (sssp_buf->overhang.start < sssp_buf->overhang.end)
     {
-      GtUword width = sfi->overhang.end - sfi->overhang.start;
-      if (sfi->sssp_nextfree + width > sfi->sssp_size)
+      GtUword width = sssp_buf->overhang.end - sssp_buf->overhang.start;
+      if (sssp_buf->nextfree + width > sssp_buf->size)
       {
         /* does not fit into the buffer, so only output a part */
-        GtUword rest = sfi->sssp_nextfree + width - sfi->sssp_size;
+        GtUword rest = sssp_buf->nextfree + width - sssp_buf->size;
         gt_assert(rest > 0);
-        if (GT_ISDIRREVERSE(sfi->readmode))
+        if (GT_ISDIRREVERSE(sssp_buf->readmode))
         {
-          insertfullspecialrange(sfi,
-                                 sfi->overhang.start + rest,
-                                 sfi->overhang.end);
-          sfi->overhang.end = sfi->overhang.start + rest;
+          gt_SSSPbuf_insertfullspecialrange(sssp_buf,
+                                            sssp_buf->overhang.start + rest,
+                                            sssp_buf->overhang.end);
+          sssp_buf->overhang.end = sssp_buf->overhang.start + rest;
         } else
         {
-          insertfullspecialrange(sfi,
-                                 sfi->overhang.start,
-                                 sfi->overhang.end - rest);
-          sfi->overhang.start = sfi->overhang.end - rest;
+          gt_SSSPbuf_insertfullspecialrange(sssp_buf,
+                                            sssp_buf->overhang.start,
+                                            sssp_buf->overhang.end - rest);
+          sssp_buf->overhang.start = sssp_buf->overhang.end - rest;
         }
         break;
       }
-      if (sfi->sssp_nextfree + width == sfi->sssp_size)
+      if (sssp_buf->nextfree + width == sssp_buf->size)
       { /* overhang fits into the buffer and buffer is full */
-        insertfullspecialrange(sfi,sfi->overhang.start,sfi->overhang.end);
-        sfi->overhang.start = sfi->overhang.end = 0;
+        gt_SSSPbuf_insertfullspecialrange(sssp_buf,sssp_buf->overhang.start,
+                                          sssp_buf->overhang.end);
+        sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
         break;
       }
       /* overhang fits into the buffer and buffer is not full */
-      insertfullspecialrange(sfi,sfi->overhang.start,sfi->overhang.end);
-      sfi->overhang.start = sfi->overhang.end = 0;
+      gt_SSSPbuf_insertfullspecialrange(sssp_buf,sssp_buf->overhang.start,
+                                        sssp_buf->overhang.end);
+      sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
     } else
     {
       GtRange range;
 
-      if (sfi->sri != NULL && gt_specialrangeiterator_next(sfi->sri,&range))
+      if (sssp_buf->sri != NULL &&
+          gt_specialrangeiterator_next(sssp_buf->sri,&range))
       {
         GtUword width = range.end - range.start;
         gt_assert(width > 0);
-        if (sfi->sssp_nextfree + width > sfi->sssp_size)
+        if (sssp_buf->nextfree + width > sssp_buf->size)
         { /* does not fit into the buffer, so only output a part */
-          GtUword rest = sfi->sssp_nextfree + width - sfi->sssp_size;
-          if (GT_ISDIRREVERSE(sfi->readmode))
+          GtUword rest = sssp_buf->nextfree + width - sssp_buf->size;
+          if (GT_ISDIRREVERSE(sssp_buf->readmode))
           {
-            insertfullspecialrange(sfi,range.start + rest, range.end);
-            sfi->overhang.start = range.start;
-            sfi->overhang.end = range.start + rest;
+            gt_SSSPbuf_insertfullspecialrange(sssp_buf,range.start + rest,
+                                              range.end);
+            sssp_buf->overhang.start = range.start;
+            sssp_buf->overhang.end = range.start + rest;
           } else
           {
-            insertfullspecialrange(sfi,range.start,range.end - rest);
-            sfi->overhang.start = range.end - rest;
-            sfi->overhang.end = range.end;
+            gt_SSSPbuf_insertfullspecialrange(sssp_buf,range.start,
+                                              range.end - rest);
+            sssp_buf->overhang.start = range.end - rest;
+            sssp_buf->overhang.end = range.end;
           }
           break;
         }
-        if (sfi->sssp_nextfree + width == sfi->sssp_size)
+        if (sssp_buf->nextfree + width == sssp_buf->size)
         { /* overhang fits into the buffer and buffer is full */
-          insertfullspecialrange(sfi,range.start,range.end);
-          sfi->overhang.start = sfi->overhang.end = 0;
+          gt_SSSPbuf_insertfullspecialrange(sssp_buf,range.start,range.end);
+          sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
           break;
         }
         /* overhang fits into the buffer and buffer is not full */
-        insertfullspecialrange(sfi,range.start,range.end);
-        sfi->overhang.start = sfi->overhang.end = 0;
+        gt_SSSPbuf_insertfullspecialrange(sssp_buf,range.start,range.end);
+        sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
       } else
       {
-        if (sfi->sssp_nextfree < sfi->sssp_size)
+        if (sssp_buf->nextfree < sssp_buf->size)
         {
           /* add last suffix for start position totallength */
-          gt_suffixsortspace_setdirect(sfi->suffixsortspace,
-                                       sfi->sssp_nextfree,
-                                       sfi->totallength);
-          sfi->sssp_nextfree++;
-          sfi->exhausted = true;
+          gt_suffixsortspace_setdirect(sssp_buf->sssp,
+                                       sssp_buf->nextfree,
+                                       sssp_buf->totallength);
+          sssp_buf->nextfree++;
+          exhausted = true;
         }
         break;
       }
     }
   }
+  gt_assert(sssp_buf->nextfree > 0);
+  return exhausted;
 }
 
 const GtSuffixsortspace *gt_Sfxiterator_next(GtUword *numberofsuffixes,
@@ -2101,18 +2160,17 @@ const GtSuffixsortspace *gt_Sfxiterator_next(GtUword *numberofsuffixes,
     }
     return NULL;
   }
-  sfi->sssp_nextfree = 0;
   if (sfi->sfxstrategy.spmopt_minlength == 0)
   {
     gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
                                       sfi->totallength-sfi->specialcharacters);
-    fillspecialnextpage(sfi);
-    gt_assert(sfi->sssp_nextfree > 0);
+    sfi->exhausted = gt_SSSPbuf_fillspecialnextpage(sfi->sssp_buf);
+    *numberofsuffixes = gt_SSSPbuf_filled(sfi->sssp_buf);
   } else
   {
     sfi->exhausted = true;
+    *numberofsuffixes = 0;
   }
-  *numberofsuffixes = sfi->sssp_nextfree;
   if (specialsuffixes != NULL)
   {
     *specialsuffixes = true;
