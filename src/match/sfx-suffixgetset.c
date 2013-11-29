@@ -287,6 +287,17 @@ void gt_suffixsortspace_set (GtSuffixsortspace *sssp,
                                        - sssp->partoffset,value);
 }
 
+void gt_suffixsortspace_init_seqstartpos(GtSuffixsortspace *sssp,
+                                         const GtEncseq *encseq)
+{
+  GtUword idx, numofsequences = gt_encseq_num_of_sequences(encseq);
+
+  for (idx = 0; idx < numofsequences; idx++)
+  {
+    gt_suffixsortspace_setdirect(sssp, idx, gt_encseq_seqstartpos(encseq, idx));
+  }
+}
+
 GtUword gt_suffixsortspace_bucketleftidx_get (const GtSuffixsortspace *sssp)
 {
   gt_assert(sssp != NULL);

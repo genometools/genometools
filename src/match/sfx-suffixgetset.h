@@ -22,6 +22,7 @@
 #include <inttypes.h>
 #include "core/logger_api.h"
 #include "core/error_api.h"
+#include "core/encseq_api.h"
 #include "core/bitbuffer.h"
 
 #define GT_SUFFIXSORTSPACE_EXPORT_SET(SSSP,EXPORTPTR,INDEX,POS)\
@@ -75,6 +76,9 @@ void gt_suffixsortspace_updatelongest(GtSuffixsortspace *sssp,
 void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
                                   GtUword idx,
                                   GtUword value);
+
+void gt_suffixsortspace_init_seqstartpos(GtSuffixsortspace *sssp,
+                                         const GtEncseq *encseq);
 
 GtSuffixsortspace_exportptr *gt_suffixsortspace_exportptr(
                                   GtSuffixsortspace *sssp,
