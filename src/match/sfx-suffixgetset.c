@@ -20,23 +20,18 @@
 #include <limits.h>
 #include "core/assert_api.h"
 #include "core/defined-types.h"
-#include "core/fa.h"
-#include "core/log_api.h"
 #include "core/logger_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "core/intbits.h"
-#include "core/arraydef.h"
 #include "sfx-suffixgetset.h"
 
 struct GtSuffixsortspace
 {
-  bool unmapsortspace, currentexport;
+  bool currentexport;
   Definedunsignedlong longestidx;
-  size_t basesize;
   GtSuffixsortspace_exportptr exportptr;
   GtUword maxindex,
           maxvalue,
@@ -95,6 +90,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
 {
   GtSuffixsortspace *suffixsortspace;
   GtUword sufspacesize;
+  size_t basesize;
 
   gt_assert(numofentries > 0);
   suffixsortspace = gt_malloc(sizeof (*suffixsortspace));
@@ -111,11 +107,11 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
                          gt_decide_to_use_uint(useuint,maxvalue) ? 32 : 64,
                          maxvalue,numofentries);
 #endif
-  suffixsortspace->basesize = gt_decide_to_use_uint(useuint,maxvalue)
-                                ? sizeof (*suffixsortspace->uinttab)
-                                : sizeof (*suffixsortspace->ulongtab);
+  basesize = gt_decide_to_use_uint(useuint,maxvalue)
+               ? sizeof (*suffixsortspace->uinttab)
+               : sizeof (*suffixsortspace->ulongtab);
   sufspacesize
-    = gt_safe_mult_ulong_check((GtUword) suffixsortspace->basesize,
+    = gt_safe_mult_ulong_check((GtUword) basesize,
                                numofentries,
                                gt_suffixsortspace_overflow_abort,
                                &numofentries);
@@ -130,76 +126,33 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
   }
   suffixsortspace->partoffset = 0;
   suffixsortspace->bucketleftidx = 0;
-  suffixsortspace->unmapsortspace = false;
-  return suffixsortspace;
-}
-
-GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
-                                                   const char *filename,
-                                                   GtUword numofentries,
-                                                   GtUword maxvalue,
-                                                   bool useuint)
-{
-  GtSuffixsortspace *suffixsortspace;
-  void *ptr;
-
-  suffixsortspace = gt_malloc(sizeof (*suffixsortspace));
-  suffixsortspace->basesize = gt_decide_to_use_uint(useuint,maxvalue)
-                                ? sizeof (*suffixsortspace->uinttab)
-                                : sizeof (*suffixsortspace->ulongtab);
-  ptr = gt_fa_mmap_generic_fd(filedesc,filename,
-                              (size_t) numofentries * suffixsortspace->basesize,
-                              (size_t) 0,false,false,NULL);
-  if (gt_decide_to_use_uint(useuint,maxvalue))
-  {
-    suffixsortspace->uinttab = ptr;
-    suffixsortspace->ulongtab = NULL;
-  } else
-  {
-    suffixsortspace->ulongtab = ptr;
-    suffixsortspace->uinttab = NULL;
-  }
-  suffixsortspace->partoffset = 0;
-  suffixsortspace->bucketleftidx = 0;
-  suffixsortspace->unmapsortspace = true;
-  suffixsortspace->maxindex = numofentries - 1;
-  suffixsortspace->maxvalue = maxvalue;
-  suffixsortspace->longestidx.defined = false;
-  suffixsortspace->longestidx.valueunsignedlong = 0;
-  suffixsortspace->exportptr.ulongtabsectionptr = NULL;
-  suffixsortspace->exportptr.uinttabsectionptr = NULL;
-  suffixsortspace->currentexport = false;
   return suffixsortspace;
 }
 
 void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
-                               GT_UNUSED bool checklongestdefined)
+                               bool checklongestdefined)
 {
   if (suffixsortspace != NULL)
   {
-    gt_assert(!checklongestdefined || suffixsortspace->longestidx.defined);
-    if (suffixsortspace->unmapsortspace)
+    if (checklongestdefined && !suffixsortspace->longestidx.defined)
     {
-      gt_fa_xmunmap(suffixsortspace->ulongtab);
-      gt_fa_xmunmap(suffixsortspace->uinttab);
-    } else
-    {
-      gt_free(suffixsortspace->uinttab);
-      gt_free(suffixsortspace->ulongtab);
+      fprintf(stderr,"%s, l. %d: longest is not defined\n",__FILE__,__LINE__);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
+    gt_free(suffixsortspace->uinttab);
+    gt_free(suffixsortspace->ulongtab);
     gt_free(suffixsortspace);
   }
 }
 
 void gt_suffixsortspace_nooffsets(GT_UNUSED const GtSuffixsortspace *sssp)
 {
-  gt_assert(sssp->partoffset == 0 && sssp->bucketleftidx == 0);
+  gt_assert(sssp != NULL && sssp->partoffset == 0 && sssp->bucketleftidx == 0);
 }
 
-GtUword gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
-                                           GtUword idx)
+GtUword gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,GtUword idx)
 {
-  gt_assert(idx <= sssp->maxindex);
+  gt_assert(sssp != NULL && idx <= sssp->maxindex);
   if (sssp->ulongtab != NULL)
   {
     return sssp->ulongtab[idx];
@@ -210,6 +163,7 @@ GtUword gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
 
 void gt_suffixsortspace_updatelongest(GtSuffixsortspace *sssp,GtUword idx)
 {
+  gt_assert(sssp != NULL);
   sssp->longestidx.defined = true;
   sssp->longestidx.valueunsignedlong = sssp->bucketleftidx + idx;
 }
@@ -218,7 +172,7 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
                                   GtUword idx,
                                   GtUword value)
 {
-  gt_assert(idx <= sssp->maxindex && value <= sssp->maxvalue);
+  gt_assert(sssp != NULL && idx <= sssp->maxindex && value <= sssp->maxvalue);
   if (value == 0)
   {
     sssp->longestidx.defined = true;
@@ -229,8 +183,7 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
     sssp->ulongtab[idx] = value;
   } else
   {
-    gt_assert (sssp->uinttab != NULL);
-    gt_assert (value <= (GtUword) UINT_MAX);
+    gt_assert (sssp->uinttab != NULL && value <= (GtUword) UINT_MAX);
     sssp->uinttab[idx] = (uint32_t) value;
   }
 }
@@ -241,6 +194,7 @@ void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
 {
   GtUword idx;
 
+  gt_assert(sssp != NULL);
   printf(""GT_WU","GT_WU"=",sssp->bucketleftidx+subbucketleft-sssp->partoffset,
                     sssp->bucketleftidx+subbucketleft+width-1-sssp->partoffset);
   for (idx=sssp->bucketleftidx+subbucketleft-sssp->partoffset;
@@ -251,31 +205,11 @@ void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
   }
 }
 
-void gt_suffixsortspace_checkorder (const GtSuffixsortspace *sssp,
-                                    GtUword subbucketleft,
-                                    GtUword width)
-{
-  GtUword idx, currentpos;
-  GT_UNUSED GtUword prevpos;
-
-  gt_assert(width > 0);
-  prevpos = gt_suffixsortspace_getdirect(sssp,
-                                         sssp->bucketleftidx+subbucketleft -
-                                         sssp->partoffset);
-  for (idx=sssp->bucketleftidx+subbucketleft - sssp->partoffset + 1;
-       idx<sssp->bucketleftidx+subbucketleft + width - sssp->partoffset;
-       idx++)
-  {
-    currentpos = gt_suffixsortspace_getdirect(sssp,idx);
-    gt_assert(prevpos > currentpos);
-    prevpos = currentpos;
-  }
-}
-
 GtSuffixsortspace_exportptr *gt_suffixsortspace_exportptr(
-                                  GtUword subbucketleft,
-                                  GtSuffixsortspace *sssp)
+                                  GtSuffixsortspace *sssp,
+                                  GtUword subbucketleft)
 {
+  gt_assert(sssp != NULL);
   if (sssp->ulongtab != NULL)
   {
     sssp->exportptr.ulongtabsectionptr = sssp->ulongtab + sssp->bucketleftidx
@@ -296,6 +230,7 @@ GtSuffixsortspace_exportptr *gt_suffixsortspace_exportptr(
 
 void gt_suffixsortspace_export_done (GtSuffixsortspace *sssp)
 {
+  gt_assert(sssp != NULL);
   sssp->exportptr.ulongtabsectionptr = NULL;
   sssp->exportptr.uinttabsectionptr = NULL;
   sssp->currentexport = false;
@@ -305,6 +240,7 @@ GtUword gt_suffixsortspace_get (const GtSuffixsortspace *sssp,
                                 GtUword subbucketleft,
                                 GtUword idx)
 {
+  gt_assert(sssp != NULL);
   return gt_suffixsortspace_getdirect(sssp, sssp->bucketleftidx
                                               + subbucketleft
                                               + idx
@@ -314,6 +250,7 @@ GtUword gt_suffixsortspace_get (const GtSuffixsortspace *sssp,
 const GtUword *gt_suffixsortspace_getptr_ulong (const GtSuffixsortspace *sssp,
                                                 GtUword subbucketleft)
 {
+  gt_assert(sssp != NULL);
   if (sssp->ulongtab != NULL)
   {
     return sssp->ulongtab + sssp->bucketleftidx + subbucketleft
@@ -327,6 +264,7 @@ const GtUword *gt_suffixsortspace_getptr_ulong (const GtSuffixsortspace *sssp,
 const uint32_t *gt_suffixsortspace_getptr_uint32 (const GtSuffixsortspace *sssp,
                                                   GtUword subbucketleft)
 {
+  gt_assert(sssp != NULL);
   if (sssp->uinttab != NULL)
   {
     return sssp->uinttab + sssp->bucketleftidx + subbucketleft
@@ -342,6 +280,7 @@ void gt_suffixsortspace_set (GtSuffixsortspace *sssp,
                              GtUword idx,
                              GtUword value)
 {
+  gt_assert(sssp != NULL);
   gt_suffixsortspace_setdirect(sssp, sssp->bucketleftidx
                                        + subbucketleft
                                        + idx
@@ -357,34 +296,37 @@ GtUword gt_suffixsortspace_bucketleftidx_get (const GtSuffixsortspace *sssp)
 void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,
                                           GtUword value)
 {
-  gt_assert(sssp->bucketleftidx == value || !sssp->currentexport);
+  gt_assert(sssp != NULL && (sssp->bucketleftidx == value ||
+                             !sssp->currentexport));
   sssp->bucketleftidx = value;
 }
 
 void gt_suffixsortspace_partoffset_set (GtSuffixsortspace *sssp,
                                         GtUword partoffset)
 {
-  gt_assert(sssp->partoffset == partoffset || !sssp->currentexport);
+  gt_assert(sssp != NULL && (sssp->partoffset == partoffset ||
+                             !sssp->currentexport));
   sssp->partoffset = partoffset;
 }
 
 void gt_suffixsortspace_sortspace_delete (GtSuffixsortspace *sssp)
 {
+  gt_assert(sssp != NULL);
   gt_free(sssp->ulongtab);
   sssp->ulongtab = NULL;
   gt_free(sssp->uinttab);
   sssp->uinttab = NULL;
 }
 
-GtUword *gt_suffixsortspace_ulong_get (const GtSuffixsortspace *sssp)
+const GtUword *gt_suffixsortspace_ulong_get (const GtSuffixsortspace *sssp)
 {
-  gt_assert(sssp->ulongtab != NULL);
-  return (GtUword *) sssp->ulongtab; /* XXX constrain the type cast */
+  gt_assert(sssp != NULL && sssp->ulongtab != NULL);
+  return sssp->ulongtab;
 }
 
 GtUword gt_suffixsortspace_longest(const GtSuffixsortspace *sssp)
 {
-  gt_assert(sssp->longestidx.defined);
+  gt_assert(sssp != NULL && sssp->longestidx.defined);
   return sssp->longestidx.valueunsignedlong;
 }
 
@@ -392,20 +334,24 @@ void gt_suffixsortspace_to_file (FILE *outfpsuftab,
                                  const GtSuffixsortspace *sssp,
                                  GtUword numberofsuffixes)
 {
-  size_t basesize = sssp->ulongtab != NULL ? sizeof (*sssp->ulongtab)
-                                           : sizeof (*sssp->uinttab);
-
-  gt_xfwrite(sssp->ulongtab != NULL ? (void *) sssp->ulongtab
-                                    : (void *) sssp->uinttab,
-             basesize,
-             (size_t) numberofsuffixes,
-             outfpsuftab);
+  gt_assert(sssp != NULL);
+  if (sssp->ulongtab != NULL)
+  {
+    gt_xfwrite((void *) sssp->ulongtab,sizeof (*sssp->ulongtab),
+               (size_t) numberofsuffixes, outfpsuftab);
+  } else
+  {
+    gt_assert(sssp->uinttab != NULL);
+    gt_xfwrite((void *) sssp->uinttab,sizeof (*sssp->uinttab),
+               (size_t) numberofsuffixes, outfpsuftab);
+  }
 }
 
 void gt_suffixsortspace_compressed_to_file (const GtSuffixsortspace *sssp,
                                             GtBitbuffer *bb,
                                             GtUword numberofsuffixes)
 {
+  gt_assert(sssp != NULL);
   if (sssp->ulongtab != NULL)
   {
     gt_bitbuffer_next_ulongtab(bb,sssp->ulongtab,numberofsuffixes);

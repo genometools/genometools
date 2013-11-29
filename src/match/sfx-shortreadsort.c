@@ -575,7 +575,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   GtSuffixsortspace_exportptr *exportptr;
 
   gt_shortreadsort_resize(srsw, false, width, maxremain);
-  exportptr = gt_suffixsortspace_exportptr(subbucketleft, sssp);
+  exportptr = gt_suffixsortspace_exportptr(sssp, subbucketleft);
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
   if (exportptr->ulongtabsectionptr != NULL)
   {

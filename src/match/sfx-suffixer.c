@@ -1853,7 +1853,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     }
   }
   SHOWACTUALSPACE;
-  sfi->exportptr = gt_suffixsortspace_exportptr(0,sfi->suffixsortspace);
+  sfi->exportptr = gt_suffixsortspace_exportptr(sfi->suffixsortspace, 0);
   if (sfi->prefixlength > 1U
       && gt_encseq_has_twobitencoding(sfi->encseq)
       && !sfi->sfxstrategy.kmerswithencseqreader)

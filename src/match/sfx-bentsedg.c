@@ -482,9 +482,9 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
   }
   if (idx > 0)
   {
-    GtUword equalsrangewidth = 0;
-    GtUword bucketleftidx
-     = gt_suffixsortspace_bucketleftidx_get(bsr->sssp);
+    GtUword equalsrangewidth = 0,
+            bucketleftidx = gt_suffixsortspace_bucketleftidx_get(bsr->sssp);
+
 #ifdef SKDEBUG
     printf("ordered suffix "GT_WU"\n",gt_suffixsortspace_get(bsr->sssp,
                                                          subbucketleft,0));
@@ -1090,9 +1090,6 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
                                      GtUword depth)
 {
   bsr->mkvauxstack.nextfreeGtMKVstack = 0;
-/*#ifndef NDEBUG
-  gt_suffixsortspace_checkorder(bsr->sssp,0,width);
-#endif*/
   subsort_bentleysedgewick(bsr, 0, width, depth);
   while (bsr->mkvauxstack.nextfreeGtMKVstack > 0)
   {
