@@ -23,6 +23,7 @@
 #include "core/logger_api.h"
 #include "core/error_api.h"
 #include "core/encseq_api.h"
+#include "core/encseq.h"
 #include "core/bitbuffer.h"
 
 #define GT_SUFFIXSORTSPACE_EXPORT_SET(SSSP,EXPORTPTR,INDEX,POS)\
@@ -83,13 +84,6 @@ void gt_suffixsortspace_init_seqstartpos(GtSuffixsortspace *sssp,
 void gt_suffixsortspace_init_identity(GtSuffixsortspace *sssp,
                                       GtUword numofsuffixes);
 
-GtUword gt_suffixsortspace_insertfullspecialrange(GtSuffixsortspace *sssp,
-                                                  GtUword nextfree,
-                                                  GtReadmode readmode,
-                                                  GtUword totallength,
-                                                  GtUword leftpos,
-                                                  GtUword rightpos);
-
 GtSuffixsortspace_exportptr *gt_suffixsortspace_exportptr(
                                   GtSuffixsortspace *sssp,
                                   GtUword subbucketleft);
@@ -136,5 +130,19 @@ void gt_suffixsortspace_to_file (FILE *outfpsuftab,
 void gt_suffixsortspace_compressed_to_file (const GtSuffixsortspace *sssp,
                                             GtBitbuffer *bb,
                                             GtUword numberofsuffixes);
+
+typedef struct GtSSSPbuf GtSSSPbuf;
+
+GtSSSPbuf *gt_SSSPbuf_new(GtUword size);
+
+GtUword gt_SSSPbuf_filled(const GtSSSPbuf *sssp_buf);
+
+void gt_SSSPbuf_delete(GtSSSPbuf *sssp_buf);
+
+bool gt_SSSPbuf_fillspecialnextpage(GtSuffixsortspace *sssp,
+                                    GtReadmode readmode,
+                                    GtSpecialrangeiterator *sri,
+                                    GtUword totallength,
+                                    GtSSSPbuf *sssp_buf);
 
 #endif

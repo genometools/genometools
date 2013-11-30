@@ -311,50 +311,6 @@ void gt_suffixsortspace_init_identity(GtSuffixsortspace *sssp,
   }
 }
 
-GtUword gt_suffixsortspace_insertfullspecialrange(GtSuffixsortspace *sssp,
-                                                  GtUword nextfree,
-                                                  GtReadmode readmode,
-                                                  GtUword totallength,
-                                                  GtUword leftpos,
-                                                  GtUword rightpos)
-{
-  GtUword pos;
-
-  gt_assert(leftpos < rightpos);
-  if (GT_ISDIRREVERSE(readmode))
-  {
-    pos = rightpos - 1;
-  } else
-  {
-    pos = leftpos;
-  }
-  while (true)
-  {
-    if (GT_ISDIRREVERSE(readmode))
-    {
-      gt_assert(pos < totallength);
-      gt_suffixsortspace_setdirect(sssp,nextfree,
-                                   GT_REVERSEPOS(totallength,pos));
-      nextfree++;
-      if (pos == leftpos)
-      {
-        break;
-      }
-      pos--;
-    } else
-    {
-      gt_suffixsortspace_setdirect(sssp, nextfree, pos);
-      nextfree++;
-      if (pos == rightpos-1)
-      {
-        break;
-      }
-      pos++;
-    }
-  }
-  return nextfree;
-}
-
 GtUword gt_suffixsortspace_bucketleftidx_get (const GtSuffixsortspace *sssp)
 {
   gt_assert(sssp != NULL);
@@ -428,4 +384,202 @@ void gt_suffixsortspace_compressed_to_file (const GtSuffixsortspace *sssp,
     gt_assert (sssp->uinttab != NULL);
     gt_bitbuffer_next_uint32tab(bb,sssp->uinttab,numberofsuffixes);
   }
+}
+
+static GtUword gt_suffixsortspace_insertfullspecialrange(
+                                                  GtSuffixsortspace *sssp,
+                                                  GtReadmode readmode,
+                                                  GtUword nextfree,
+                                                  GtUword totallength,
+                                                  GtUword leftpos,
+                                                  GtUword rightpos)
+{
+  GtUword pos;
+
+  gt_assert(leftpos < rightpos);
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    pos = rightpos - 1;
+  } else
+  {
+    pos = leftpos;
+  }
+  while (true)
+  {
+    if (GT_ISDIRREVERSE(readmode))
+    {
+      gt_assert(pos < totallength);
+      gt_suffixsortspace_setdirect(sssp,nextfree,
+                                   GT_REVERSEPOS(totallength,pos));
+      nextfree++;
+      if (pos == leftpos)
+      {
+        break;
+      }
+      pos--;
+    } else
+    {
+      gt_suffixsortspace_setdirect(sssp, nextfree, pos);
+      nextfree++;
+      if (pos == rightpos-1)
+      {
+        break;
+      }
+      pos++;
+    }
+  }
+  return nextfree;
+}
+
+struct GtSSSPbuf
+{
+  GtRange overhang;
+  GtUword size, nextfree;
+};
+
+GtSSSPbuf *gt_SSSPbuf_new(GtUword size)
+{
+  GtSSSPbuf *sssp_buf = gt_malloc(sizeof *sssp_buf);
+
+  sssp_buf->size = size;
+  sssp_buf->nextfree = 0;
+  sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
+  return sssp_buf;
+}
+
+GtUword gt_SSSPbuf_filled(const GtSSSPbuf *sssp_buf)
+{
+  gt_assert(sssp_buf != NULL);
+  return sssp_buf->nextfree;
+}
+
+void gt_SSSPbuf_delete(GtSSSPbuf *sssp_buf)
+{
+  if (sssp_buf != NULL)
+  {
+    gt_free(sssp_buf);
+  }
+}
+
+static void gt_SSSPbuf_insertfullspecialrange(GtSuffixsortspace *sssp,
+                                              GtReadmode readmode,
+                                              GtSSSPbuf *sssp_buf,
+                                              GtUword totallength,
+                                              GtUword leftpos,
+                                              GtUword rightpos)
+{
+  gt_assert(sssp_buf != NULL);
+  sssp_buf->nextfree
+    = gt_suffixsortspace_insertfullspecialrange(sssp,
+                                                readmode,
+                                                sssp_buf->nextfree,
+                                                totallength,
+                                                leftpos,
+                                                rightpos);
+}
+
+bool gt_SSSPbuf_fillspecialnextpage(GtSuffixsortspace *sssp,
+                                    GtReadmode readmode,
+                                    GtSpecialrangeiterator *sri,
+                                    GtUword totallength,
+                                    GtSSSPbuf *sssp_buf)
+{
+  bool exhausted = false;
+
+  gt_assert(sssp_buf != NULL);
+  sssp_buf->nextfree = 0;
+  while (true)
+  {
+    if (sssp_buf->overhang.start < sssp_buf->overhang.end)
+    {
+      GtUword width = sssp_buf->overhang.end - sssp_buf->overhang.start;
+      if (sssp_buf->nextfree + width > sssp_buf->size)
+      {
+        /* does not fit into the buffer, so only output a part */
+        GtUword rest = sssp_buf->nextfree + width - sssp_buf->size;
+        gt_assert(rest > 0);
+        if (GT_ISDIRREVERSE(readmode))
+        {
+          gt_SSSPbuf_insertfullspecialrange(sssp,readmode,sssp_buf,totallength,
+                                            sssp_buf->overhang.start + rest,
+                                            sssp_buf->overhang.end);
+          sssp_buf->overhang.end = sssp_buf->overhang.start + rest;
+        } else
+        {
+          gt_SSSPbuf_insertfullspecialrange(sssp,readmode,sssp_buf,totallength,
+                                            sssp_buf->overhang.start,
+                                            sssp_buf->overhang.end - rest);
+          sssp_buf->overhang.start = sssp_buf->overhang.end - rest;
+        }
+        break;
+      }
+      if (sssp_buf->nextfree + width == sssp_buf->size)
+      { /* overhang fits into the buffer and buffer is full */
+        gt_SSSPbuf_insertfullspecialrange(sssp,readmode,sssp_buf,totallength,
+                                          sssp_buf->overhang.start,
+                                          sssp_buf->overhang.end);
+        sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
+        break;
+      }
+      /* overhang fits into the buffer and buffer is not full */
+      gt_SSSPbuf_insertfullspecialrange(sssp,readmode,sssp_buf,totallength,
+                                        sssp_buf->overhang.start,
+                                        sssp_buf->overhang.end);
+      sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
+    } else
+    {
+      GtRange range;
+
+      if (sri != NULL && gt_specialrangeiterator_next(sri,&range))
+      {
+        GtUword width = range.end - range.start;
+        gt_assert(width > 0);
+        if (sssp_buf->nextfree + width > sssp_buf->size)
+        { /* does not fit into the buffer, so only output a part */
+          GtUword rest = sssp_buf->nextfree + width - sssp_buf->size;
+          if (GT_ISDIRREVERSE(readmode))
+          {
+            gt_SSSPbuf_insertfullspecialrange(sssp,readmode,sssp_buf,
+                                              totallength,
+                                              range.start + rest,
+                                              range.end);
+            sssp_buf->overhang.start = range.start;
+            sssp_buf->overhang.end = range.start + rest;
+          } else
+          {
+            gt_SSSPbuf_insertfullspecialrange(sssp,readmode,sssp_buf,
+                                              totallength,
+                                              range.start,
+                                              range.end - rest);
+            sssp_buf->overhang.start = range.end - rest;
+            sssp_buf->overhang.end = range.end;
+          }
+          break;
+        }
+        if (sssp_buf->nextfree + width == sssp_buf->size)
+        { /* overhang fits into the buffer and buffer is full */
+          gt_SSSPbuf_insertfullspecialrange(sssp,readmode,sssp_buf,totallength,
+                                            range.start,range.end);
+          sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
+          break;
+        }
+        /* overhang fits into the buffer and buffer is not full */
+        gt_SSSPbuf_insertfullspecialrange(sssp,readmode,sssp_buf,totallength,
+                                          range.start,range.end);
+        sssp_buf->overhang.start = sssp_buf->overhang.end = 0;
+      } else
+      {
+        if (sssp_buf->nextfree < sssp_buf->size)
+        {
+          /* add last suffix for start position totallength */
+          gt_suffixsortspace_setdirect(sssp,sssp_buf->nextfree,totallength);
+          sssp_buf->nextfree++;
+          exhausted = true;
+        }
+        break;
+      }
+    }
+  }
+  gt_assert(sssp_buf->nextfree > 0);
+  return exhausted;
 }
