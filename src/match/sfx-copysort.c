@@ -20,9 +20,9 @@
 #include "core/qsort_r.h"
 #include "core/array2dim_api.h"
 #include "core/mathsupport.h"
+#include "core/logger.h"
 #include "bcktab.h"
 #include "kmer2string.h"
-#include "core/logger.h"
 #include "sfx-copysort.h"
 
 typedef struct
@@ -30,7 +30,7 @@ typedef struct
   bool hardworktodo,
        sorted;
   GtUword bucketend;
-} Bucketinfo;
+} GtBucketinfo2;
 
 struct GtBucketspec2
 {
@@ -39,7 +39,7 @@ struct GtBucketspec2
   GtReadmode readmode;
   unsigned int numofchars, numofcharssquared, prefixlength, *order;
   GtCodetype expandfactor, expandfillsum;
-  Bucketinfo *superbuckettab, **subbuckettab;
+  GtBucketinfo2 *superbuckettab, **subbuckettab;
 };
 
 static GtUword superbucketsize(const GtBucketspec2 *bucketspec2,
@@ -399,18 +399,15 @@ static void forwardderive(const GtBucketspec2 *bucketspec2,
                           unsigned int source,
                           GtUword idx)
 {
-  GtUword startpos;
-  GtUchar cc;
-
   gt_assert (idx < targetoffset[source]);
   for (; idx < targetoffset[source]; idx++)
   {
-    startpos = gt_suffixsortspace_getdirect(suffixsortspace,idx);
+    GtUword startpos = gt_suffixsortspace_getdirect(suffixsortspace,idx);
     if (startpos > 0)
     {
-      cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
-                                      startpos-1,
-                                      bucketspec2->readmode);
+      GtUchar cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
+                                              startpos-1,
+                                              bucketspec2->readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         gt_suffixsortspace_setdirect(suffixsortspace,targetoffset[cc],
@@ -427,17 +424,14 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
                            unsigned int source,
                            GtUword idx)
 {
-  GtUword startpos;
-  GtUchar cc;
-
   for (; idx + 1 > targetoffset[source] + 1; idx--)
   {
-    startpos = gt_suffixsortspace_getdirect(suffixsortspace,idx);
+    GtUword startpos = gt_suffixsortspace_getdirect(suffixsortspace,idx);
     if (startpos > 0)
     {
-      cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
-                                      startpos-1,
-                                      bucketspec2->readmode);
+      GtUchar cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
+                                              startpos-1,
+                                              bucketspec2->readmode);
       if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         gt_suffixsortspace_setdirect(suffixsortspace,targetoffset[cc],
@@ -465,8 +459,7 @@ void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
                                GtSuffixsortspace *suffixsortspace,
                                GtLogger *logger)
 {
-  GtUword hardwork = 0,
-                *targetoffset;
+  GtUword hardwork = 0, *targetoffset;
   unsigned int idx, idxsource, source, second;
 
 #ifdef WITHSUFFIXES
@@ -519,7 +512,7 @@ void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
     {
       for (idx = 0; idx < bucketspec2->numofchars; idx++)
       {
-        /* do not need to assert that getendidx(idx,source)  > 0, as later the
+        /* do not need to assert that getendidx(idx,source) > 0, as later the
            value stored in targetoffset is incremented */
         targetoffset[idx] = getendidx(bucketspec2,idx,source) - 1;
       }
