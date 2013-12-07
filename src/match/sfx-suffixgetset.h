@@ -36,10 +36,15 @@
                     (POS) <= (GtUword) UINT_MAX);\
           (EXPORTPTR)->uinttabsectionptr[INDEX] = (uint32_t) POS;\
         }\
-        if (POS == 0)\
+        if ((POS) == 0)\
         {\
           gt_suffixsortspace_updatelongest(SSSP,INDEX);\
         }
+
+#define GT_SUFFIXSORTSPACE_EXPORT_GET(EXPORTPTR,INDEX)\
+        (((EXPORTPTR)->ulongtabsectionptr != NULL) \
+          ? (EXPORTPTR)->ulongtabsectionptr[INDEX] \
+          : (GtUword) (EXPORTPTR)->uinttabsectionptr[INDEX])
 
 typedef struct GtSuffixsortspace GtSuffixsortspace;
 
@@ -73,10 +78,6 @@ void gt_suffixsortspace_nooffsets(const GtSuffixsortspace *sssp);
 
 void gt_suffixsortspace_updatelongest(GtSuffixsortspace *sssp,
                                       GtUword idx);
-
-void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
-                                  GtUword idx,
-                                  GtUword value);
 
 void gt_suffixsortspace_init_seqstartpos(GtSuffixsortspace *sssp,
                                          const GtEncseq *encseq);

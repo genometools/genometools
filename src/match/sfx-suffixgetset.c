@@ -105,7 +105,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
   suffixsortspace->currentexport = false;
 #if defined (_LP64) || defined (_WIN64)
   gt_logger_log(logger,"suftab uses %dbit values: "
-                         "maxvalue="GT_WU",numofentries="GT_WU"",
+                         "maxvalue="GT_WU",numofentries="GT_WU,
                          gt_decide_to_use_uint(useuint,maxvalue) ? 32 : 64,
                          maxvalue,numofentries);
 #endif
@@ -170,9 +170,9 @@ void gt_suffixsortspace_updatelongest(GtSuffixsortspace *sssp,GtUword idx)
   sssp->longestidx.valueunsignedlong = sssp->bucketleftidx + idx;
 }
 
-void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
-                                  GtUword idx,
-                                  GtUword value)
+static void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
+                                         GtUword idx,
+                                         GtUword value)
 {
   gt_assert(sssp != NULL && idx <= sssp->maxindex && value <= sssp->maxvalue);
   if (value == 0)
@@ -197,13 +197,13 @@ void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
   GtUword idx;
 
   gt_assert(sssp != NULL);
-  printf(""GT_WU","GT_WU"=",sssp->bucketleftidx+subbucketleft-sssp->partoffset,
+  printf(GT_WU","GT_WU"=",sssp->bucketleftidx+subbucketleft-sssp->partoffset,
                     sssp->bucketleftidx+subbucketleft+width-1-sssp->partoffset);
   for (idx=sssp->bucketleftidx+subbucketleft-sssp->partoffset;
        idx<sssp->bucketleftidx+subbucketleft+width-sssp->partoffset;
        idx++)
   {
-    printf(" "GT_WU"", gt_suffixsortspace_getdirect(sssp,idx));
+    printf(" "GT_WU, gt_suffixsortspace_getdirect(sssp,idx));
   }
 }
 
