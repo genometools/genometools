@@ -64,6 +64,10 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
                                           bool useuint,
                                           GtLogger *logger);
 
+GtSuffixsortspace *gt_suffixsortspace_clone(GtSuffixsortspace *sssp,
+                                            bool useuint,
+                                            GtLogger *logger);
+
 void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
                                bool checklongestdefined);
 
@@ -106,12 +110,13 @@ void gt_suffixsortspace_set(GtSuffixsortspace *sssp,
                             GtUword idx,
                             GtUword value);
 
-void gt_suffixsortspace_bucketleftidx_reset(GtSuffixsortspace *sssp);
+void gt_suffixsortspace_bucketrange_reset(GtSuffixsortspace *sssp);
 
 GtUword gt_suffixsortspace_bucketleftidx_get(const GtSuffixsortspace *sssp);
 
-void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,
-                                          GtUword value);
+void gt_suffixsortspace_bucketrange_set(GtSuffixsortspace *sssp,
+                                        GtUword bucketleftidx,
+                                        GtUword widthrelative2bucketleftidx);
 
 void gt_suffixsortspace_sortspace_delete(GtSuffixsortspace *sssp);
 

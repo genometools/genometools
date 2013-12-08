@@ -32,15 +32,16 @@
 
 struct GtSuffixsortspace
 {
-  bool currentexport;
+  bool currentexport, cloned;
   Definedunsignedlong longestidx;
   GtSuffixsortspace_exportptr exportptr;
   GtUword maxindex,
           maxvalue,
           partoffset,
           bucketleftidx,
-          *ulongtab;
-  uint32_t *uinttab;
+          widthrelative2bucketleftidx,
+          *ulongtab;      /* clone */
+  uint32_t *uinttab;      /* clone */
 };
 
 static bool gt_decide_to_use_uint(bool useuint,GtUword maxvalue)
@@ -85,14 +86,13 @@ static void gt_suffixsortspace_overflow_abort(GT_UNUSED const char *f,
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
-                                          GtUword maxvalue,
-                                          bool useuint,
-                                          GT_UNUSED GtLogger *logger)
+GtSuffixsortspace *gt_suffixsortspace_new_generic(GtUword numofentries,
+                                                  GtUword maxvalue,
+                                                  bool useuint,
+                                                  void *tab2clone,
+                                                  GT_UNUSED GtLogger *logger)
 {
   GtSuffixsortspace *suffixsortspace;
-  GtUword sufspacesize;
-  size_t basesize;
 
   gt_assert(numofentries > 0);
   suffixsortspace = gt_malloc(sizeof (*suffixsortspace));
@@ -103,32 +103,80 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
   suffixsortspace->exportptr.ulongtabsectionptr = NULL;
   suffixsortspace->exportptr.uinttabsectionptr = NULL;
   suffixsortspace->currentexport = false;
-#if defined (_LP64) || defined (_WIN64)
-  gt_logger_log(logger,"suftab uses %dbit values: "
-                         "maxvalue="GT_WU",numofentries="GT_WU,
-                         gt_decide_to_use_uint(useuint,maxvalue) ? 32 : 64,
-                         maxvalue,numofentries);
-#endif
-  basesize = gt_decide_to_use_uint(useuint,maxvalue)
-               ? sizeof (*suffixsortspace->uinttab)
-               : sizeof (*suffixsortspace->ulongtab);
-  sufspacesize
-    = gt_safe_mult_ulong_check((GtUword) basesize,
-                               numofentries,
-                               gt_suffixsortspace_overflow_abort,
-                               &numofentries);
-  if (gt_decide_to_use_uint(useuint,maxvalue))
-  {
-    suffixsortspace->ulongtab = NULL;
-    suffixsortspace->uinttab = gt_malloc((size_t) sufspacesize);
-  } else
-  {
-    suffixsortspace->uinttab = NULL;
-    suffixsortspace->ulongtab = gt_malloc((size_t) sufspacesize);
-  }
   suffixsortspace->partoffset = 0;
   suffixsortspace->bucketleftidx = 0;
+  suffixsortspace->widthrelative2bucketleftidx = 0;
+#if defined (_LP64) || defined (_WIN64)
+  gt_logger_log(logger,"suftab uses %dbit values: "
+                       "maxvalue="GT_WU",numofentries="GT_WU,
+                       gt_decide_to_use_uint(useuint,maxvalue) ? 32 : 64,
+                       maxvalue,numofentries);
+#endif
+  if (gt_decide_to_use_uint(useuint,maxvalue))
+  {
+    if (tab2clone == NULL)
+    {
+      GtUword sufspacesize
+        = gt_safe_mult_ulong_check((GtUword)
+                                   sizeof (*suffixsortspace->uinttab),
+                                   numofentries,
+                                   gt_suffixsortspace_overflow_abort,
+                                   &numofentries);
+      suffixsortspace->uinttab = gt_malloc((size_t) sufspacesize);
+      suffixsortspace->cloned = false;
+    } else
+    {
+      suffixsortspace->uinttab = (uint32_t *) tab2clone;
+      suffixsortspace->cloned = true;
+    }
+    suffixsortspace->ulongtab = NULL;
+  } else
+  {
+    if (tab2clone == NULL)
+    {
+      GtUword sufspacesize
+        = gt_safe_mult_ulong_check((GtUword)
+                                   sizeof (*suffixsortspace->ulongtab),
+                                   numofentries,
+                                   gt_suffixsortspace_overflow_abort,
+                                   &numofentries);
+      suffixsortspace->ulongtab = gt_malloc((size_t) sufspacesize);
+      suffixsortspace->cloned = false;
+    } else
+    {
+      suffixsortspace->ulongtab = (GtUword *) tab2clone;
+      suffixsortspace->cloned = true;
+    }
+    suffixsortspace->uinttab = NULL;
+  }
   return suffixsortspace;
+}
+
+GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
+                                          GtUword maxvalue,
+                                          bool useuint,
+                                          GtLogger *logger)
+{
+  return gt_suffixsortspace_new_generic(numofentries,
+                                        maxvalue,
+                                        useuint,
+                                        NULL,
+                                        logger);
+}
+
+GtSuffixsortspace *gt_suffixsortspace_clone(GtSuffixsortspace *sssp,
+                                            bool useuint,
+                                            GT_UNUSED GtLogger *logger)
+{
+  void *tab2clone = gt_decide_to_use_uint(useuint,sssp->maxvalue)
+                      ? (void *) sssp->uinttab
+                      : (void *) sssp->ulongtab;
+
+  return gt_suffixsortspace_new_generic(sssp->maxindex + 1,
+                                        sssp->maxvalue,
+                                        useuint,
+                                        tab2clone,
+                                        logger);
 }
 
 void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
@@ -141,8 +189,11 @@ void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
       fprintf(stderr,"%s, l. %d: longest is not defined\n",__FILE__,__LINE__);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    gt_free(suffixsortspace->uinttab);
-    gt_free(suffixsortspace->ulongtab);
+    if (!suffixsortspace->cloned)
+    {
+      gt_free(suffixsortspace->uinttab);
+      gt_free(suffixsortspace->ulongtab);
+    }
     gt_free(suffixsortspace);
   }
 }
@@ -317,17 +368,20 @@ GtUword gt_suffixsortspace_bucketleftidx_get (const GtSuffixsortspace *sssp)
   return sssp->bucketleftidx;
 }
 
-void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,
-                                          GtUword value)
+void gt_suffixsortspace_bucketrange_set(GtSuffixsortspace *sssp,
+                                        GtUword bucketleftidx,
+                                        GtUword widthrelative2bucketleftidx)
 {
-  gt_assert(sssp != NULL && (sssp->bucketleftidx == value ||
+  gt_assert(sssp != NULL && (sssp->bucketleftidx == bucketleftidx ||
                              !sssp->currentexport));
-  sssp->bucketleftidx = value;
+  sssp->bucketleftidx = bucketleftidx;
+  sssp->widthrelative2bucketleftidx = widthrelative2bucketleftidx;
 }
 
-void gt_suffixsortspace_bucketleftidx_reset(GtSuffixsortspace *sssp)
+void gt_suffixsortspace_bucketrange_reset(GtSuffixsortspace *sssp)
 {
   sssp->bucketleftidx = 0;
+  sssp->widthrelative2bucketleftidx = 0;
 }
 
 void gt_suffixsortspace_partoffset_set (GtSuffixsortspace *sssp,

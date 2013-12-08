@@ -1091,7 +1091,7 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
                                      GtUword depth)
 {
   bsr->mkvauxstack.nextfreeGtMKVstack = 0;
-  gt_suffixsortspace_bucketleftidx_set(bsr->sssp,bucketleftidx);
+  gt_suffixsortspace_bucketrange_set(bsr->sssp,bucketleftidx,width);
   subsort_bentleysedgewick(bsr, 0, width, depth);
   while (bsr->mkvauxstack.nextfreeGtMKVstack > 0)
   {
@@ -1330,7 +1330,7 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
       }
     }
   }
-  gt_suffixsortspace_bucketleftidx_reset(bsr->sssp);
+  gt_suffixsortspace_bucketrange_reset(bsr->sssp);
 }
 
 static GtBentsedgresources *bentsedgresources_new(
