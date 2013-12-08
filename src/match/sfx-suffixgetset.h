@@ -106,6 +106,8 @@ void gt_suffixsortspace_set(GtSuffixsortspace *sssp,
                             GtUword idx,
                             GtUword value);
 
+void gt_suffixsortspace_bucketleftidx_reset(GtSuffixsortspace *sssp);
+
 GtUword gt_suffixsortspace_bucketleftidx_get(const GtSuffixsortspace *sssp);
 
 void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,

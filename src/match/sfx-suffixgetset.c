@@ -325,6 +325,11 @@ void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,
   sssp->bucketleftidx = value;
 }
 
+void gt_suffixsortspace_bucketleftidx_reset(GtSuffixsortspace *sssp)
+{
+  sssp->bucketleftidx = 0;
+}
+
 void gt_suffixsortspace_partoffset_set (GtSuffixsortspace *sssp,
                                         GtUword partoffset)
 {

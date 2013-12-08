@@ -1086,10 +1086,12 @@ static inline void vectorswap(GtSuffixsortspace *sssp,
 }
 
 static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
+                                     GtUword bucketleftidx,
                                      GtUword width,
                                      GtUword depth)
 {
   bsr->mkvauxstack.nextfreeGtMKVstack = 0;
+  gt_suffixsortspace_bucketleftidx_set(bsr->sssp,bucketleftidx);
   subsort_bentleysedgewick(bsr, 0, width, depth);
   while (bsr->mkvauxstack.nextfreeGtMKVstack > 0)
   {
@@ -1328,6 +1330,7 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
       }
     }
   }
+  gt_suffixsortspace_bucketleftidx_reset(bsr->sssp);
 }
 
 static GtBentsedgresources *bentsedgresources_new(
@@ -1348,7 +1351,6 @@ static GtBentsedgresources *bentsedgresources_new(
   bsr->sfxstrategy = sfxstrategy;
   bsr->sssp = suffixsortspace;
   bsr->rsi = NULL;
-  gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
   bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
   bsr->complement = GT_ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
   bsr->tableoflcpvalues = NULL;
@@ -1581,10 +1583,9 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
     {
       if (bucketspec.nonspecialsinbucket > 1UL)
       {
-        gt_suffixsortspace_bucketleftidx_set(bsr->sssp,bucketspec.left);
-        gt_sort_bentleysedgewick(bsr,bucketspec.nonspecialsinbucket,
+        gt_sort_bentleysedgewick(bsr,bucketspec.left,
+                                 bucketspec.nonspecialsinbucket,
                                  (GtUword) prefixlength);
-        gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
       }
       gt_Outlcpinfo_nonspecialsbucket(outlcpinfo,
                                       prefixlength,
@@ -1641,10 +1642,9 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                           rightchar);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
-      gt_suffixsortspace_bucketleftidx_set(bsr->sssp,bucketspec.left);
-      gt_sort_bentleysedgewick(bsr,bucketspec.nonspecialsinbucket,
+      gt_sort_bentleysedgewick(bsr,bucketspec.left,
+                               bucketspec.nonspecialsinbucket,
                                (GtUword) prefixlength);
-      gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
     }
   }
   bentsedgresources_delete(bsr, logger);
@@ -1676,9 +1676,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
     gt_bentsedgresources_addlcpinfo(bsr,outlcpinfo,NULL);
     bsr->processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
     bsr->processunsortedsuffixrange = processunsortedsuffixrange;
-    gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
-    gt_sort_bentleysedgewick(bsr,numberofsuffixes,0);
-    gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
+    gt_sort_bentleysedgewick(bsr,0,numberofsuffixes,0);
     bentsedgresources_delete(bsr, logger);
   }
 }
