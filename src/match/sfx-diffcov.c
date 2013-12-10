@@ -167,7 +167,6 @@ struct GtDifferencecover
   GtSuffixsortspace *sssp,
                     *sortedsample;
   GtRMQ *rmq;
-  GtUword sortoffset;
 };
 
 /* Compute difference cover on the fly */
@@ -439,9 +438,8 @@ void gt_differencecover_delete(GtDifferencecover *dcov)
 
 /* the following implements the \mu function from BAE:KAER:2003 */
 
-static GtUword dc_differencecover_packsamplepos(
-                                                 const GtDifferencecover *dcov,
-                                                 GtUword pos)
+static GtUword dc_differencecover_packsamplepos(const GtDifferencecover *dcov,
+                                                GtUword pos)
 {
   gt_assert(dc_is_in_differencecover(dcov,(GtUword) GT_MODV(pos)));
   return dcov->coverrank_evaluated[GT_MODV(pos)] + GT_DIVV(pos);
@@ -450,7 +448,7 @@ static GtUword dc_differencecover_packsamplepos(
 GT_DECLAREARRAYSTRUCT(Codeatposition);
 
 static GtUword dc_derivespecialcodesonthefly(GtDifferencecover *dcov,
-                                                   const GtArrayCodeatposition
+                                             const GtArrayCodeatposition
                                                            *codelist)
 {
   unsigned int prefixindex, unitsnotspecial;
@@ -997,8 +995,7 @@ static void dc_addunsortedrange(void *voiddcov,
   GtDifferencecover *dcov = (GtDifferencecover *) voiddcov;
   GtDcPairsuffixptr *ptr;
 
-  gt_assert(dcov->sssp == NULL);
-  gt_assert(depth >= (GtUword) dcov->vparam);
+  gt_assert(dcov->sssp == NULL && depth >= (GtUword) dcov->vparam);
   dc_updatewidth (dcov,width,dcov->vparam);
   GT_GETNEXTFREEINARRAY(ptr,&dcov->firstgeneration,GtDcPairsuffixptr,1024);
   ptr->blisbl = blisbl;
@@ -1042,24 +1039,24 @@ int gt_differencecover_compare (const GtDifferencecover *dcov,
 #define QSORTNAME(NAME) dc_##NAME
 
 #define dc_ARRAY_GET(ARR,RELIDX)\
-        gt_suffixsortspace_get(data->sssp,data->sortoffset,RELIDX)
+        gt_suffixsortspace_get(data->sssp,subbucketleft,RELIDX)
 
 #define dc_ARRAY_SET(ARR,RELIDX,VALUE)\
-        gt_suffixsortspace_set(data->sssp,data->sortoffset,RELIDX,VALUE)
+        gt_suffixsortspace_set(data->sssp,subbucketleft,RELIDX,VALUE)
 
 typedef GtDifferencecover * QSORTNAME(Datatype);
 
-static int QSORTNAME(qsortcmparr) (
-                  GtUword a,
-                  GtUword b,
-                  GtLcptrace *lcptrace,
-                  const QSORTNAME(Datatype) data)
+static int QSORTNAME(qsortcmparr) (GtUword a,
+                                   GtUword b,
+                                   GtLcptrace *lcptrace,
+                                   GtUword subbucketleft,
+                                   const QSORTNAME(Datatype) data)
 {
   GtUword suffixpos1, suffixpos2;
 
   gt_assert(data->sssp != NULL);
-  suffixpos1 = dc_ARRAY_GET(NULL,a);
-  suffixpos2 = dc_ARRAY_GET(NULL,b);
+  suffixpos1 = dc_ARRAY_GET(data,a);
+  suffixpos2 = dc_ARRAY_GET(data,b);
   return gt_differencecover_compare (data, lcptrace, suffixpos1, suffixpos2);
 }
 
@@ -1096,18 +1093,20 @@ typedef void * QSORTNAME(Sorttype);
 static inline GtUword QSORTNAME(gt_inlined_qsort_arr_r_med3)
                      (GtUword a, GtUword b, GtUword c,
                       GtLcptrace *lcptrace,
+                      GtUword subbucketleft,
                       const QSORTNAME(Datatype) data)
 {
-  return QSORTNAME(qsortcmparr) (a, b, lcptrace, data) < 0
-           ? (QSORTNAME(qsortcmparr) (b, c, lcptrace, data) < 0
-                ? b
-                : (QSORTNAME(qsortcmparr) (a, c, lcptrace, data) < 0
-                     ? c : a))
-           : (QSORTNAME(qsortcmparr) (b, c, lcptrace, data) > 0
-                ? b
-                : (QSORTNAME(qsortcmparr) (a, c, lcptrace, data) < 0
-                     ? a
-                     : c));
+  return
+    QSORTNAME(qsortcmparr) (a, b, lcptrace, subbucketleft, data) < 0
+      ? (QSORTNAME(qsortcmparr) (b, c, lcptrace, subbucketleft, data) < 0
+        ? b
+        : (QSORTNAME(qsortcmparr) (a, c, lcptrace, subbucketleft, data) < 0
+          ? c : a))
+          : (QSORTNAME(qsortcmparr) (b, c, lcptrace, subbucketleft, data) > 0
+            ? b
+            : (QSORTNAME(qsortcmparr) (a, c, lcptrace, subbucketleft, data) < 0
+              ? a
+              : c));
 }
 
 #ifndef GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
@@ -1155,7 +1154,8 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
       {
         for (pl = pm; pl > current.startindex; pl--)
         {
-          r = QSORTNAME(qsortcmparr) (pl - 1, pl, &lcptrace, data);
+          r = QSORTNAME(qsortcmparr) (pl - 1, pl, &lcptrace, subbucketleft,
+                                      data);
           if (data->sssplcpvalues != NULL)
           {
             if (pl < pm && r > 0)
@@ -1186,17 +1186,21 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         s = GT_DIV8 (current.len);
         pl = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pl, pl + s,
                                                      pl + GT_MULT2 (s),
-                                                     &lcptrace, data);
+                                                     &lcptrace, subbucketleft,
+                                                     data);
         gt_assert(pm >= s);
         pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pm - s, pm,
                                                      pm + s,
-                                                     &lcptrace, data);
+                                                     &lcptrace, subbucketleft,
+                                                     data);
         gt_assert(pn >= GT_MULT2(s));
         pn = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pn - GT_MULT2 (s),
                                                      pn - s, pn,
-                                                     &lcptrace, data);
+                                                     &lcptrace, subbucketleft,
+                                                     data);
       }
-      pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pl, pm, pn, &lcptrace, data);
+      pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pl, pm, pn, &lcptrace,
+                                                   subbucketleft,  data);
     }
     GT_QSORT_ARR_SWAP (arr, current.startindex, pm);
     pa = pb = current.startindex + 1;
@@ -1206,13 +1210,13 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     {
       while (pb <= pc)
       {
-        r = QSORTNAME(qsortcmparr) (pb, current.startindex, &lcptrace, data);
+        r = QSORTNAME(qsortcmparr) (pb, current.startindex, &lcptrace,
+                                    subbucketleft, data);
         if (r > 0)
         {
           if (data->sssplcpvalues != NULL)
           {
-            GtUword tmplcplen
-              = gt_differencecover_eval_lcp(&lcptrace,data);
+            GtUword tmplcplen = gt_differencecover_eval_lcp(&lcptrace,data);
             GT_UPDATE_MAX(greatermaxlcp,tmplcplen);
           }
           break;
@@ -1226,8 +1230,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         {
           if (data->sssplcpvalues != NULL)
           {
-            GtUword tmplcplen
-              = gt_differencecover_eval_lcp(&lcptrace,data);
+            GtUword tmplcplen = gt_differencecover_eval_lcp(&lcptrace,data);
             GT_UPDATE_MAX(smallermaxlcp,tmplcplen);
           }
         }
@@ -1235,13 +1238,13 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
       }
       while (pb <= pc)
       {
-        r = QSORTNAME(qsortcmparr) (pc, current.startindex, &lcptrace, data);
+        r = QSORTNAME(qsortcmparr) (pc, current.startindex, &lcptrace,
+                                    subbucketleft, data);
         if (r < 0)
         {
           if (data->sssplcpvalues != NULL)
           {
-            GtUword tmplcplen
-              = gt_differencecover_eval_lcp(&lcptrace,data);
+            GtUword tmplcplen = gt_differencecover_eval_lcp(&lcptrace,data);
             GT_UPDATE_MAX(smallermaxlcp,tmplcplen);
           }
           break;
@@ -1256,8 +1259,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         {
           if (data->sssplcpvalues != NULL)
           {
-            GtUword tmplcplen
-              = gt_differencecover_eval_lcp(&lcptrace,data);
+            GtUword tmplcplen = gt_differencecover_eval_lcp(&lcptrace,data);
             GT_UPDATE_MAX(greatermaxlcp,tmplcplen);
           }
         }
@@ -1284,7 +1286,8 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
       {
         for (pl = pm; pl > current.startindex; pl--)
         {
-          r = QSORTNAME(qsortcmparr) (pl - 1, pl, &lcptrace, data);
+          r = QSORTNAME(qsortcmparr) (pl - 1, pl, &lcptrace, subbucketleft,
+                                      data);
           if (r <= 0)
           {
             break;
@@ -1363,11 +1366,11 @@ void gt_differencecover_sortunsortedbucket(void *data,
   const GtUword bucketleftidx
     = gt_suffixsortspace_bucketleftidx_get(dcov->sssp);
 
-  gt_assert(depth >= (GtUword) dcov->vparam);
-  gt_assert(dcov->diff2pos != NULL);
-  gt_assert(width >= 2UL);
-  gt_assert(dcov->sssp != NULL);
-  gt_assert(blisbl >= bucketleftidx);
+  gt_assert(depth >= (GtUword) dcov->vparam &&
+            dcov->diff2pos != NULL &&
+            width >= 2UL &&
+            dcov->sssp != NULL &&
+            blisbl >= bucketleftidx);
   /* blisbl = bucketleftindex + subbucketleft already contains
      bucketleftindex, therefore we cannot use
      gt_suffixsortspace_set or
@@ -1375,8 +1378,7 @@ void gt_differencecover_sortunsortedbucket(void *data,
      bucketleftindex + subbucketleft + idx - partoffset
      = blisbl - partoffset + idx. Thus, instead we use the functions
      to directly access the suffix sortspace. */
-  dcov->sortoffset = blisbl - gt_suffixsortspace_bucketleftidx_get(dcov->sssp);
-  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width,data,
+  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, data,
                                     blisbl - bucketleftidx);
 }
 
