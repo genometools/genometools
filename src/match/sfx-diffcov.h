@@ -33,7 +33,7 @@ typedef struct GtDifferencecover GtDifferencecover;
 /* The following function is used for test purposes only */
 
 void gt_differencecover_check(const GtEncseq *encseq,
-                               GtReadmode readmode);
+                              GtReadmode readmode);
 
 GtDifferencecover *gt_differencecover_new(unsigned int vparam,
                                           const GtEncseq *encseq,
@@ -60,19 +60,17 @@ void gt_differencecover_delete(GtDifferencecover *dcov);
 
 size_t gt_differencecover_requiredspace(const GtDifferencecover *dcov);
 
-void gt_differencecover_sortunsortedbucket(void *data,
+void gt_differencecover_sortunsortedbucket(const GtDifferencecover *dcov,
+                                           GtSuffixsortspace *sssp,
+                                           GtLcpvalues *sssplcpvalues,
                                            GtUword blisbl,
                                            GtUword width,
                                            GT_UNUSED GtUword depth);
 
-void gt_differencecover_completelargelcpvalues(void *data,
+void gt_differencecover_completelargelcpvalues(GtDifferencecover *dcov,
                                                const GtSuffixsortspace *sssp,
                                                GtLcpvalues *tableoflcpvalues,
                                                GtUword width,
                                                GtUword posoffset);
-
-void gt_differencecover_set_sssp_lcp(GtDifferencecover *dcov,
-                                     GtSuffixsortspace *sssp,
-                                     GtOutlcpinfo *outlcpinfo);
 
 #endif

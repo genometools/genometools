@@ -1785,6 +1785,27 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 #define GT_SFX_THREADS_JOBS 1U
 #endif
 
+static void gt_suffixer_sort_with_dcov(void *voidsfi,
+                                       GtUword blisbl,
+                                       GtUword width,
+                                       GtUword depth)
+{
+  Sfxiterator *sfi = (Sfxiterator *) voidsfi;
+  GtLcpvalues *sssplcpvalues;
+
+  gt_assert(sfi != NULL);
+  if (sfi->outlcpinfo != NULL)
+  {
+    sssplcpvalues = gt_Outlcpinfo_lcpvalues_ref(sfi->outlcpinfo);
+  } else
+  {
+    sssplcpvalues = NULL;
+  }
+  gt_differencecover_sortunsortedbucket(sfi->dcov,sfi->suffixsortspace,
+                                        sssplcpvalues,
+                                        blisbl,width,depth);
+}
+
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 {
   GtUword sumofwidthforpart;
@@ -1894,11 +1915,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                   sumofwidthforpart,sfi->numofchars);
   }
   SHOWACTUALSPACE;
-  if (sfi->sfxstrategy.differencecover > 0 && sfi->dcov != NULL)
-  {
-    gt_differencecover_set_sssp_lcp(sfi->dcov,sfi->suffixsortspace,
-                                    sfi->outlcpinfo);
-  }
   if (sfi->part == 0)
   {
     gt_logger_log(sfi->logger,"used workspace for sorting: %.2f MB",
@@ -1908,6 +1924,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   {
     unsigned int sortmaxdepth;
     GtProcessunsortedsuffixrange processunsortedsuffixrange;
+    void *processunsortedsuffixrangeinfo;
 
     if (sfi->dcov == NULL)
     {
@@ -1919,11 +1936,13 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
         sortmaxdepth = sfi->sfxstrategy.userdefinedsortmaxdepth;
       }
       processunsortedsuffixrange = NULL;
+      processunsortedsuffixrangeinfo = NULL;
     } else
     {
       gt_assert(sfi->sfxstrategy.userdefinedsortmaxdepth == 0);
       sortmaxdepth = sfi->sfxstrategy.differencecover;
-      processunsortedsuffixrange = gt_differencecover_sortunsortedbucket;
+      processunsortedsuffixrange = gt_suffixer_sort_with_dcov;
+      processunsortedsuffixrangeinfo = sfi;
     }
     gt_assert(sortmaxdepth != 0 || processunsortedsuffixrange == NULL);
     gt_bcktab_determinemaxsize(sfi->bcktab, sfi->currentmincode,
@@ -1943,7 +1962,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                  sortmaxdepth,
                                  &sfi->sfxstrategy,
                                  processunsortedsuffixrange,
-                                 (void *) sfi->dcov,
+                                 processunsortedsuffixrangeinfo,
                                  sfi->logger);
     } else
     {
@@ -1962,7 +1981,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                       sortmaxdepth,
                       &sfi->sfxstrategy,
                       processunsortedsuffixrange,
-                      (void *) sfi->dcov,
+                      processunsortedsuffixrangeinfo,
                       &sfi->bucketiterstep,
                       sfi->logger);
 #ifdef GT_THREADS_ENABLED
