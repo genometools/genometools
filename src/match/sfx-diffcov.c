@@ -176,8 +176,7 @@ struct GtDifferencecover
 
 #include "tab-diffcover.h"
 
-static GtUword dc_suffixptrget(const GtDifferencecover *dcov,
-                                     GtUword idx)
+static GtUword dc_suffixptrget(const GtDifferencecover *dcov,GtUword idx)
 {
   gt_suffixsortspace_nooffsets(dcov->sortedsample);
   return gt_suffixsortspace_get(dcov->sortedsample,0,idx);
@@ -1162,7 +1161,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
             {
               gt_lcptab_update(data->sssplcpvalues,subbucketleft,pl+1,
                                gt_lcptab_getvalue(data->sssplcpvalues,
-                                                     subbucketleft,pl));
+                                                  subbucketleft,pl));
             }
             gt_lcptab_update(data->sssplcpvalues,subbucketleft,pl,
                              gt_differencecover_eval_lcp(&lcptrace, data));
@@ -1557,6 +1556,7 @@ void gt_differencecover_completelargelcpvalues(void *data,
 
   gt_assert(width > 0 && sssp != NULL && tableoflcpvalues != NULL &&
             dcov->rmq != NULL);
+  gt_assert(sssp == dcov->sssp);
   for (idx = 1UL; idx < width; idx++)
   {
     lcpvalue = gt_lcptab_getvalue(tableoflcpvalues,0,idx);

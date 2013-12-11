@@ -59,6 +59,17 @@ typedef void (*GtProcessunsortedsuffixrange)(void *,
                                              GtUword,
                                              GtUword);
 
+/* We use the following functions of this type as parameters to
+   the function sorting an array of
+
+   gt_differencecover_sortunsortedbucket(dcov) and dcov is not written readable
+
+   dc_addunsortedrange(dcov) and dcov is writeable
+
+   gt_sfxmap_sortmaxdepth_processunsortedrange(some structure: to check if
+   suffixes in interval have a common prefix.
+*/
+
 GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
                                           GtUword maxvalue,
                                           bool useuint,
