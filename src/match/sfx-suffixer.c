@@ -1791,19 +1791,12 @@ static void gt_suffixer_sort_with_dcov(void *voidsfi,
                                        GtUword depth)
 {
   Sfxiterator *sfi = (Sfxiterator *) voidsfi;
-  GtLcpvalues *sssplcpvalues;
 
   gt_assert(sfi != NULL);
-  if (sfi->outlcpinfo != NULL)
-  {
-    sssplcpvalues = gt_Outlcpinfo_lcpvalues_ref(sfi->outlcpinfo);
-  } else
-  {
-    sssplcpvalues = NULL;
-  }
-  gt_differencecover_sortunsortedbucket(sfi->dcov,sfi->suffixsortspace,
-                                        sssplcpvalues,
-                                        blisbl,width,depth);
+  gt_differencecover_sortunsortedbucket(
+                               sfi->suffixsortspace,
+                               gt_Outlcpinfo_lcpvalues_ref(sfi->outlcpinfo),
+                               sfi->dcov, blisbl, width,depth);
 }
 
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)

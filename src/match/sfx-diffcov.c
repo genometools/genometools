@@ -97,7 +97,7 @@ typedef struct
 typedef struct
 {
   GtUword blisbl, /* bucketleftindex + subbucketleft */
-                width;
+          width;
 } GtDcPairsuffixptr;
 
 GT_DECLAREARRAYSTRUCT(GtDcPairsuffixptr);
@@ -109,11 +109,11 @@ typedef GtDcPairsuffixptr GtInl_Queueelem;
 typedef struct
 {
   GtUword blisbl, /* bucketleftindex + subbucketleft */
-                width,
-                count,
-                totalwidth,
-                maxwidth,
-                depth;
+          width,
+          count,
+          totalwidth,
+          maxwidth,
+          depth;
   bool defined;
 } GtDcFirstwithnewdepth;
 
@@ -1110,14 +1110,13 @@ GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
 #define GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
 #endif
 
-static void QSORTNAME(gt_inlinedarr_qsort_r) (
-                                   GtUword insertionsortthreshold,
-                                   bool handlenotswapped,
-                                   GtUword len,
-                                   const GtDifferencecover *dcov,
-                                   QSORTNAME(Datatype) data,
-                                   GtLcpvalues *sssplcpvalues,
-                                   GtUword subbucketleft)
+static void QSORTNAME(gt_inlinedarr_qsort_r) (QSORTNAME(Datatype) data,
+                                              GtLcpvalues *sssplcpvalues,
+                                              const GtDifferencecover *dcov,
+                                              GtUword insertionsortthreshold,
+                                              bool handlenotswapped,
+                                              GtUword subbucketleft,
+                                              GtUword len)
 {
   GtUword tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s,
           smallermaxlcp, greatermaxlcp;
@@ -1334,8 +1333,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           element in the first part of the right side.
         */
         gt_assert(pn >= s);
-        gt_lcptab_update(sssplcpvalues,subbucketleft,pn - s,
-                         greatermaxlcp);
+        gt_lcptab_update(sssplcpvalues,subbucketleft,pn - s, greatermaxlcp);
       }
       if (s > 1UL)
       {
@@ -1349,9 +1347,9 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
   GT_STACK_DELETE(&intervalstack);
 }
 
-void gt_differencecover_sortunsortedbucket(const GtDifferencecover *dcov,
-                                           GtSuffixsortspace *sssp,
+void gt_differencecover_sortunsortedbucket(GtSuffixsortspace *sssp,
                                            GtLcpvalues *sssplcpvalues,
+                                           const GtDifferencecover *dcov,
                                            GtUword blisbl,
                                            GtUword width,
                                            GT_UNUSED GtUword depth)
@@ -1370,8 +1368,8 @@ void gt_differencecover_sortunsortedbucket(const GtDifferencecover *dcov,
      bucketleftindex + subbucketleft + idx - partoffset
      = blisbl - partoffset + idx. Thus, instead we use the functions
      to directly access the suffix sortspace. */
-  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, dcov, sssp,
-                                    sssplcpvalues, blisbl - bucketleftidx);
+  QSORTNAME(gt_inlinedarr_qsort_r) (sssp, sssplcpvalues, dcov, 6UL, false,
+                                    blisbl - bucketleftidx, width);
 }
 
 static void dc_sortremainingsamples(GtDifferencecover *dcov)
@@ -1761,6 +1759,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   {
     dcov->requiredspace += gt_Outlcpinfo_size(outlcpinfosample);
     dcov->samplelcpvalues = gt_Outlcpinfo_lcpvalues_ref(outlcpinfosample);
+    gt_assert(dcov->samplelcpvalues != NULL);
   }
   if (dcov->vparam == dcov->prefixlength)
   {

@@ -60,9 +60,9 @@ void gt_differencecover_delete(GtDifferencecover *dcov);
 
 size_t gt_differencecover_requiredspace(const GtDifferencecover *dcov);
 
-void gt_differencecover_sortunsortedbucket(const GtDifferencecover *dcov,
-                                           GtSuffixsortspace *sssp,
+void gt_differencecover_sortunsortedbucket(GtSuffixsortspace *sssp,
                                            GtLcpvalues *sssplcpvalues,
+                                           const GtDifferencecover *dcov,
                                            GtUword blisbl,
                                            GtUword width,
                                            GT_UNUSED GtUword depth);
