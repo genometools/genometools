@@ -64,12 +64,3 @@ technical guidelines).
 
 To report a bug, ask a question, or suggest new features, use the
 [GenomeTools issue tracker](https://github.com/genometools/genometools/issues).
-
-### [Team Members](#team-members)
-
-* Gordon Gremme (<gordon@gremme.org>)
-* Sascha Steinbiss (<sascha@steinbiss.name>)
-* Stefan Kurtz (<kurtz@zbh.uni-hamburg.de>)
-* Dirk Willrodt (<willrodt@zbh.uni-hamburg.de>)
-
-...and all people listed in the [CONTRIBUTORS](https://github.com/genometools/genometools/blob/master/CONTRIBUTORS) file.
