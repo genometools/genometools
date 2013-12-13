@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2012 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2013 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -1074,7 +1074,10 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
           had_err = compare_target_attribute((GtFeatureNode*) new_gf,
                                              (GtFeatureNode*) old_gf, id, err);
         }
-        else {
+        else if (!strcmp(attr_name, GT_GFF_PARENT) ||
+                 !strcmp(attr_name, GT_GFF_NAME)) {
+          /* we relaxed the check and now only require the 'Parent' and the
+             'Name' attribute to match*/
           had_err = compare_other_attribute(attr_name, (GtFeatureNode*) new_gf,
                                             (GtFeatureNode*) old_gf, id, parser,
                                             err);
