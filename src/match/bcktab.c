@@ -1316,12 +1316,22 @@ GtUword gt_bcktab_maxbucketsize(const GtBcktab *bcktab)
 }
 
 GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
+                                     GtCodetype mincode,
+                                     GtCodetype maxcode,
                                      GtUword suftaboffset)
 {
-  GtCodetype left = 0, right = bcktab->numofallcodes, mid,
-             found = bcktab->numofallcodes;
+  GtCodetype left, mid, right, found;
   GtUword midval;
 
+  if (mincode > maxcode)
+  {
+    left = 0;
+    right = found = bcktab->numofallcodes;
+  } else
+  {
+    left = mincode;
+    right = found = maxcode+1;
+  }
   while (left+1 < right)
   {
     mid = GT_DIV2(left+right);

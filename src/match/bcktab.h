@@ -190,6 +190,8 @@ GtUword gt_bcktab_nonspecialsmaxsize(const GtBcktab *bcktab);
 void gt_bcktab_leftborder_show(const GtBcktab *bcktab);
 
 GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
+                                     GtCodetype mincode,
+                                     GtCodetype maxcode,
                                      GtUword suftaboffset);
 
 #ifdef SKDEBUG

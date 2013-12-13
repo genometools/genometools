@@ -168,6 +168,8 @@ static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
 
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                   const GtBcktab *bcktab,
+                                  GtCodetype mincode,
+                                  GtCodetype maxcode,
                                   const GtFirstcodestab *fct,
                                   const GtSfxmappedrangelist *sfxmrlist,
                                   GtUword numofsuffixestoinsert,
@@ -228,20 +230,36 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       {
         suftaboffset += widthofsuftabpart;
       }
-      if (part == suftabparts->numofparts - 1)
+      if (bcktab != NULL)
       {
-        secondidx = bcktab != NULL ? gt_bcktab_numofallcodes(bcktab)
-                                   : gt_firstcodes_numofsamples(fct);
+        if (part == suftabparts->numofparts - 1)
+        {
+          if (mincode <= maxcode)
+          {
+            secondidx = maxcode + 1;
+          } else
+          {
+            secondidx = gt_bcktab_numofallcodes(bcktab);
+          }
+        } else
+        {
+          secondidx = gt_bcktab_findfirstlarger(bcktab,mincode,maxcode,
+                                                suftaboffset);
+        }
+        secondbound = gt_bcktab_get_leftborder(bcktab,secondidx);
       } else
       {
-        secondidx = bcktab != NULL
-                      ? gt_bcktab_findfirstlarger(bcktab,suftaboffset)
-                      : gt_firstcodes_findfirstsamplelarger(fct,suftaboffset);
+        gt_assert(fct != NULL && mincode > maxcode);
+        if (part == suftabparts->numofparts - 1)
+        {
+          secondidx = gt_firstcodes_numofsamples(fct);
+        } else
+        {
+          secondidx = gt_firstcodes_findfirstsamplelarger(fct,suftaboffset);
+        }
+        secondbound = gt_firstcodes_get_sample(fct,secondidx);
       }
       suftabparts->components[part].nextidx = secondidx;
-      secondbound = bcktab != NULL
-                      ? gt_bcktab_get_leftborder(bcktab,secondidx)
-                      : gt_firstcodes_get_sample(fct,secondidx);
       if (part == 0)
       {
         suftabparts->components[part].widthofpart = secondbound;
@@ -278,7 +296,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
     for (part=1U; part < suftabparts->numofparts; part++)
     {
       if (suftabparts->components[part].minindex !=
-            suftabparts->components[part-1].maxindex + 1)
+          suftabparts->components[part-1].maxindex + 1)
       {
         suftabparts->components[part].minindex
           = suftabparts->components[part-1].maxindex + 1;
@@ -414,6 +432,8 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
 
     suftabparts = gt_suftabparts_new(parts,
                                      bcktab,
+                                     (GtCodetype) 1,
+                                     (GtCodetype) 0,
                                      fct,
                                      sfxmrlist,
                                      numofsuffixestosort,

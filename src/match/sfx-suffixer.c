@@ -1694,6 +1694,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     gt_assert(sfi != NULL);
     sfi->suftabparts = gt_suftabparts_new(numofparts,
                                          sfi->bcktab,
+                                         (GtCodetype) 1,
+                                         (GtCodetype) 0,
                                          NULL,
                                          sfxmrlist,
                                          numofsuffixestosort,

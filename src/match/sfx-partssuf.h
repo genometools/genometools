@@ -32,6 +32,8 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
 
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                   const GtBcktab *bcktab,
+                                  GtCodetype mincode,
+                                  GtCodetype maxcode,
                                   const GtFirstcodestab *fct,
                                   const GtSfxmappedrangelist *sfxmrlist,
                                   GtUword numofsuffixestoinsert,
