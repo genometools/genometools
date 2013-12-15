@@ -1945,12 +1945,21 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 #ifdef GT_THREADS_ENABLED
     if (GT_SFX_THREADS_JOBS > 1U)
     {
+      GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
+      GtSuftabparts *partition_for_threads
+        = gt_suftabparts_new(GT_SFX_THREADS_JOBS,
+                             sfi->bcktab,
+                             sfi->currentmincode,
+                             sfi->currentmaxcode,
+                             NULL,
+                             sfxmrlist,
+                             sumofwidthforpart,
+                             sfi->specialcharacters + 1,
+                             sfi->logger);
       gt_threaded_sortallbuckets(sfi->suffixsortspace,
-                                 sumofwidthforpart,
+                                 partition_for_threads,
                                  sfi->encseq,
                                  sfi->readmode,
-                                 sfi->currentmincode,
-                                 sfi->currentmaxcode,
                                  sfi->bcktab,
                                  sfi->numofchars,
                                  sfi->prefixlength,
@@ -1959,6 +1968,8 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                  processunsortedsuffixrange,
                                  processunsortedsuffixrangeinfo,
                                  sfi->logger);
+      gt_suftabparts_delete(partition_for_threads);
+      gt_Sfxmappedrangelist_delete(sfxmrlist);
     } else
     {
 #endif

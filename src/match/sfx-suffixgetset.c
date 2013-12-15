@@ -165,12 +165,11 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
 }
 
 GtSuffixsortspace *gt_suffixsortspace_clone(GtSuffixsortspace *sssp,
-                                            bool useuint,
-                                            GT_UNUSED GtLogger *logger)
+                                            GtLogger *logger)
 {
-  void *tab2clone = gt_decide_to_use_uint(useuint,sssp->maxvalue)
-                      ? (void *) sssp->uinttab
-                      : (void *) sssp->ulongtab;
+  bool useuint = sssp->uinttab != NULL ? true : false;
+  void *tab2clone = useuint ? (void *) sssp->uinttab
+                            : (void *) sssp->ulongtab;
 
   return gt_suffixsortspace_new_generic(sssp->maxindex + 1,
                                         sssp->maxvalue,
@@ -399,6 +398,26 @@ void gt_suffixsortspace_sortspace_delete (GtSuffixsortspace *sssp)
   sssp->ulongtab = NULL;
   gt_free(sssp->uinttab);
   sssp->uinttab = NULL;
+}
+
+void gt_suffixsortspace_delete_cloned(GtSuffixsortspace **sssp_tab,
+                                      unsigned int parts)
+{
+  unsigned int p;
+
+  gt_assert(sssp_tab != NULL && parts > 1U && !sssp_tab[0]->cloned);
+  for (p = 1U; p < parts; p++)
+  {
+    gt_assert(sssp_tab[p]->cloned);
+    if (sssp_tab[p]->longestidx.defined)
+    {
+      gt_assert(!sssp_tab[0]->longestidx.defined);
+      sssp_tab[0]->longestidx.defined = true;
+      sssp_tab[0]->longestidx.valueunsignedlong
+        = sssp_tab[p]->longestidx.valueunsignedlong;
+    }
+    gt_suffixsortspace_delete(sssp_tab[p],false);
+  }
 }
 
 const GtUword *gt_suffixsortspace_ulong_get (const GtSuffixsortspace *sssp)

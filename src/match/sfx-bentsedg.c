@@ -35,6 +35,9 @@
 #include "sfx-suftaborder.h"
 #include "sfx-suffixgetset.h"
 #include "sfx-shortreadsort.h"
+#ifdef GT_THREADS_ENABLED
+#include "core/thread_api.h"
+#endif
 
 #define ACCESSCHARRAND(POS)    gt_encseq_get_encoded_char(bsr->encseq,\
                                                           POS,bsr->readmode)
@@ -1604,52 +1607,6 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   bentsedgresources_delete(bsr, logger);
 }
 
-void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
-                       GtUword numberofsuffixes,
-                       const GtEncseq *encseq,
-                       GtReadmode readmode,
-                       GtCodetype mincode,
-                       GtCodetype maxcode,
-                       const GtBcktab *bcktab,
-                       unsigned int numofchars,
-                       unsigned int prefixlength,
-                       unsigned int sortmaxdepth,
-                       const Sfxstrategy *sfxstrategy,
-                       GtProcessunsortedsuffixrange processunsortedsuffixrange,
-                       void *processunsortedsuffixrangeinfo,
-                       GtLogger *logger)
-{
-  GtCodetype code;
-  unsigned int rightchar = (unsigned int) (mincode % numofchars);
-  GtBucketspecification bucketspec;
-  GtBentsedgresources *bsr = bentsedgresources_new(suffixsortspace,
-                                                   encseq,
-                                                   readmode,
-                                                   prefixlength,
-                                                   bcktab,
-                                                   sortmaxdepth,
-                                                   sfxstrategy,
-                                                   false);
-  bsr->processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
-  bsr->processunsortedsuffixrange = processunsortedsuffixrange;
-  for (code = mincode; code <= maxcode; code++)
-  {
-    rightchar = gt_bcktab_calcboundsparts(&bucketspec,
-                                          bcktab,
-                                          code,
-                                          maxcode,
-                                          numberofsuffixes,
-                                          rightchar);
-    if (bucketspec.nonspecialsinbucket > 1UL)
-    {
-      gt_sort_bentleysedgewick(bsr,bucketspec.left,
-                               bucketspec.nonspecialsinbucket,
-                               (GtUword) prefixlength);
-    }
-  }
-  bentsedgresources_delete(bsr, logger);
-}
-
 void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  GtUword numberofsuffixes,
                                  const GtEncseq *encseq,
@@ -1680,3 +1637,134 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
     bentsedgresources_delete(bsr, logger);
   }
 }
+
+#ifdef GT_THREADS_ENABLED
+typedef struct
+{
+  unsigned int numofchars,
+               prefixlength,
+               sortmaxdepth;
+  const Sfxstrategy *sfxstrategy;
+  GtProcessunsortedsuffixrange processunsortedsuffixrange;
+  void *processunsortedsuffixrangeinfo;
+  GtLogger *logger;
+  const GtBcktab *bcktab;
+
+  GtSuffixsortspace *suffixsortspace;
+  GtCodetype mincode,
+             maxcode;
+  GtUword totalwidth;
+  GtBentsedgresources *bsr;
+  GtThread *thread;
+} GtBentsedge_thread_info;
+
+static void *gt_bentsedg_thread_caller(void *data)
+{
+  GtCodetype code;
+  GtBentsedge_thread_info *thinfo = (GtBentsedge_thread_info *) data;
+  unsigned int rightchar;
+
+  rightchar = (unsigned int) (thinfo->mincode % thinfo->numofchars);
+  printf("mincode=%lu,maxcode=%lu,totalwidth=%lu\n",
+         thinfo->mincode,
+         thinfo->maxcode,
+         thinfo->totalwidth);
+  for (code = thinfo->mincode; code <= thinfo->maxcode; code++)
+  {
+    GtBucketspecification bucketspec;
+    rightchar = gt_bcktab_calcboundsparts(&bucketspec,
+                                          thinfo->bcktab,
+                                          code,
+                                          thinfo->maxcode,
+                                          thinfo->totalwidth,
+                                          rightchar);
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      gt_sort_bentleysedgewick(thinfo->bsr,bucketspec.left,
+                               bucketspec.nonspecialsinbucket,
+                               (GtUword) thinfo->prefixlength);
+    }
+  }
+  return NULL;
+}
+
+void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+                       const GtSuftabparts *partition_for_threads,
+                       const GtEncseq *encseq,
+                       GtReadmode readmode,
+                       const GtBcktab *bcktab,
+                       unsigned int numofchars,
+                       unsigned int prefixlength,
+                       unsigned int sortmaxdepth,
+                       const Sfxstrategy *sfxstrategy,
+                       GtProcessunsortedsuffixrange processunsortedsuffixrange,
+                       void *processunsortedsuffixrangeinfo,
+                       GtLogger *logger)
+{
+  unsigned int tp, thread_parts;
+  bool haserr = false;
+  GtBentsedge_thread_info *th_tab;
+  GtSuffixsortspace **sssp_tab;
+
+  gt_assert(partition_for_threads != NULL);
+  gt_suftabparts_showallrecords(partition_for_threads,false);
+  thread_parts = gt_suftabparts_numofparts(partition_for_threads);
+  gt_assert(thread_parts > 0);
+  th_tab = gt_malloc(sizeof *th_tab * thread_parts);
+  sssp_tab = gt_malloc(sizeof *sssp_tab * thread_parts);
+  for (tp = 0; !haserr && tp < thread_parts; tp++)
+  {
+    th_tab[tp].numofchars = numofchars;
+    th_tab[tp].prefixlength = prefixlength;
+    th_tab[tp].sortmaxdepth = sortmaxdepth;
+    th_tab[tp].sfxstrategy = sfxstrategy;
+    th_tab[tp].bcktab = bcktab;
+    th_tab[tp].processunsortedsuffixrange = processunsortedsuffixrange;
+    th_tab[tp].processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
+    th_tab[tp].logger = logger;
+    th_tab[tp].mincode = gt_suftabparts_minindex(tp,partition_for_threads);
+    th_tab[tp].maxcode = gt_suftabparts_maxindex(tp,partition_for_threads);
+    th_tab[tp].totalwidth = gt_suftabparts_sumofwidth(tp,partition_for_threads);
+    if (tp == 0)
+    {
+      th_tab[tp].suffixsortspace = suffixsortspace;
+    } else
+    {
+      th_tab[tp].suffixsortspace
+        = gt_suffixsortspace_clone(suffixsortspace,logger);
+    }
+    sssp_tab[tp] = th_tab[tp].suffixsortspace;
+    th_tab[tp].bsr = bentsedgresources_new(th_tab[tp].suffixsortspace,
+                                           encseq,
+                                           readmode,
+                                           prefixlength,
+                                           bcktab,
+                                           sortmaxdepth,
+                                           sfxstrategy,
+                                           false);
+    th_tab[tp].bsr->processunsortedsuffixrangeinfo
+      = processunsortedsuffixrangeinfo;
+    th_tab[tp].bsr->processunsortedsuffixrange
+      = processunsortedsuffixrange;
+    th_tab[tp].thread
+      = gt_thread_new (gt_bentsedg_thread_caller,th_tab + tp,NULL);
+    if (th_tab[tp].thread == NULL)
+    {
+      haserr = true;
+    }
+  }
+  for (tp = 0; tp < thread_parts; tp++)
+  {
+    if (!haserr)
+    {
+      gt_thread_join(th_tab[tp].thread);
+    }
+    gt_thread_delete(th_tab[tp].thread);
+    bentsedgresources_delete(th_tab[tp].bsr, logger);
+  }
+  gt_suffixsortspace_delete_cloned(sssp_tab,thread_parts);
+  gt_free(sssp_tab);
+  gt_free(th_tab);
+  gt_assert(!haserr);
+}
+#endif

@@ -51,13 +51,13 @@ GtCodetype gt_suftabparts_maxindex(unsigned int part,
 GtCodetype gt_suftabparts_maxindex_last(const GtSuftabparts *suftabparts);
 
 GtUword gt_suftabparts_offset(unsigned int part,
-                                    const GtSuftabparts *suftabparts);
+                              const GtSuftabparts *suftabparts);
 
 GtUword gt_suftabparts_sumofwidth(unsigned int part,
-                                        const GtSuftabparts *suftabparts);
+                                  const GtSuftabparts *suftabparts);
 
 GtUword gt_suftabparts_widthofpart(unsigned int part,
-                                         const GtSuftabparts *suftabparts);
+                                   const GtSuftabparts *suftabparts);
 
 GtUword gt_suftabparts_largest_width(const GtSuftabparts *suftabparts);
 
