@@ -6,7 +6,7 @@ tools (in the realm of genome informatics) combined into a single binary named
 variety of classes for efficient and convenient implementation of sequence and
 annotation processing software.
 
-![Overview](https://raw.github.com/satta/genometools/github-readme/www/github/assets/overview.png)
+![Overview](https://raw.github.com/genometools/genometools/master/www/github/assets/overview.png)
 
 If you are interested in gene prediction, have a look at
 [GenomeThreader](http://genomethreader.org).
