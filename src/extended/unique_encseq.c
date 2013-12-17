@@ -1379,7 +1379,7 @@ void getencseqkmers_only_regular_kmers2(GtUniqueEncseqInfo *ueinfo)
   if (ueinfo->totallength < (GtUword) ueinfo->kmersize) {
     return;
   }
-  while (!gt_kmercodeiterator_encseq_isexhausted(ueinfo->kmercodeitMain)) {
+  while (!gt_kmercodeiterator_inputexhausted(ueinfo->kmercodeitMain)) {
     ueinfo->kmercodeMain =
         gt_kmercodeiterator_encseq_next(ueinfo->kmercodeitMain);
     if (ueinfo->kmercodeMain != NULL )

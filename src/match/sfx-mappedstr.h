@@ -53,8 +53,6 @@ void                gt_kmercodeiterator_reset(
 
 bool                gt_kmercodeiterator_encseq_isspecial(
                                                 GtKmercodeiterator *kmercodeit);
-bool                gt_kmercodeiterator_encseq_isexhausted(
-                                                GtKmercodeiterator *kmercodeit);
 void                gt_kmercodeiterator_encseq_setexhausted(
                                                  GtKmercodeiterator *kmercodeit,
                                                  bool exhausted);

@@ -541,11 +541,6 @@ bool gt_kmercodeiterator_encseq_isspecial(GtKmercodeiterator *kmercodeit)
   return !special_queue_is_empty(&(kmercodeit->spwp->specialqueue));
 }
 
-bool gt_kmercodeiterator_encseq_isexhausted(GtKmercodeiterator *kmercodeit)
-{
-  return kmercodeit->inputexhausted;
-}
-
 void gt_kmercodeiterator_encseq_setexhausted(GtKmercodeiterator *kmercodeit,
                                              bool exhausted)
 {
