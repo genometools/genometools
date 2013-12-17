@@ -524,27 +524,24 @@ void gt_kmercodeiterator_reset(GtKmercodeiterator *kmercodeiterator,
   return kmercodeiterator;
 }
 
-GtUword gt_kmercodeiterator_encseq_get_currentpos(
-                                                GtKmercodeiterator *kmercodeit)
+GtUword
+gt_kmercodeiterator_encseq_get_currentpos(GtKmercodeiterator *kmercodeiterator)
 {
-  return kmercodeit->currentposition;
+  return kmercodeiterator->currentposition;
 }
 
-void gt_kmercodeiterator_encseq_set_currentpos(GtKmercodeiterator *kmercodeit,
-                                               GtUword position)
+void
+gt_kmercodeiterator_encseq_set_currentpos(GtKmercodeiterator *kmercodeiterator,
+                                          GtUword position)
 {
-  kmercodeit->currentposition = position;
+  kmercodeiterator->currentposition = position;
 }
 
-bool gt_kmercodeiterator_encseq_isspecial(GtKmercodeiterator *kmercodeit)
+void
+gt_kmercodeiterator_encseq_setexhausted(GtKmercodeiterator *kmercodeiterator,
+                                        bool exhausted)
 {
-  return !special_queue_is_empty(&(kmercodeit->spwp->specialqueue));
-}
-
-void gt_kmercodeiterator_encseq_setexhausted(GtKmercodeiterator *kmercodeit,
-                                             bool exhausted)
-{
-  kmercodeit->inputexhausted = exhausted;
+  kmercodeiterator->inputexhausted = exhausted;
 }
 
 const GtKmercode *gt_kmercodeiterator_encseq_next(

@@ -1009,7 +1009,7 @@ static void gt_unique_encseq_process_kmer_hit(GtUniqueEncseqInfo *ueinfo,
         (GtKmercode *) gt_kmercodeiterator_encseq_next(
             kmerhitinfo->kmercodeit1);
     if (i % kmersize == 0) {
-      if (gt_kmercodeiterator_encseq_isspecial(kmerhitinfo->kmercodeit1)) {
+      if (ueinfo->kmercodeExt->definedspecialposition) {
         nohitcount++;
         gt_logger_log(ueinfo->debug_logger, "special kmer in extension");
       }
@@ -1305,7 +1305,7 @@ static void gt_unique_encseq_processkmercode(GtUniqueEncseqInfo *ueinfo,
       - ueinfo->kmersize;
   ueinfo->nPosSinceInsert++;
 
-  if (gt_kmercodeiterator_encseq_isspecial(ueinfo->kmercodeitMain)) {
+  if (ueinfo->kmercodeMain->definedspecialposition) {
     gt_logger_log(ueinfo->debug_logger,
                   "special found at position " GT_WU,
                   position);

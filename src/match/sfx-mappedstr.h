@@ -41,21 +41,19 @@ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(const GtEncseq *encseq,
                                                    GtUword startpos);
 
 GtUword             gt_kmercodeiterator_encseq_get_currentpos(
-                                                GtKmercodeiterator *kmercodeit);
+                                          GtKmercodeiterator *kmercodeiterator);
 
 void                gt_kmercodeiterator_encseq_set_currentpos(
-                                                 GtKmercodeiterator *kmercodeit,
-                                                 GtUword position);
+                                           GtKmercodeiterator *kmercodeiterator,
+                                           GtUword position);
 
 void                gt_kmercodeiterator_reset(
                                          GtKmercodeiterator *kmercodeiterator,
                                          GtReadmode readmode, GtUword startpos);
 
-bool                gt_kmercodeiterator_encseq_isspecial(
-                                                GtKmercodeiterator *kmercodeit);
 void                gt_kmercodeiterator_encseq_setexhausted(
-                                                 GtKmercodeiterator *kmercodeit,
-                                                 bool exhausted);
+                                           GtKmercodeiterator *kmercodeiterator,
+                                           bool exhausted);
 
 const GtKmercode*   gt_kmercodeiterator_encseq_next(
                                           GtKmercodeiterator *kmercodeiterator);
