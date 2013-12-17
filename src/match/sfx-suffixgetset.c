@@ -32,7 +32,8 @@
 
 struct GtSuffixsortspace
 {
-  bool currentexport, cloned;
+  bool currentexport;
+  unsigned int clonenumber; /* 0 for no clone, > 0 otherwise */
   Definedunsignedlong longestidx;
   GtSuffixsortspace_exportptr exportptr;
   GtUword maxindex,
@@ -123,11 +124,11 @@ GtSuffixsortspace *gt_suffixsortspace_new_generic(GtUword numofentries,
                                    gt_suffixsortspace_overflow_abort,
                                    &numofentries);
       suffixsortspace->uinttab = gt_malloc((size_t) sufspacesize);
-      suffixsortspace->cloned = false;
+      suffixsortspace->clonenumber = 0;
     } else
     {
       suffixsortspace->uinttab = (uint32_t *) tab2clone;
-      suffixsortspace->cloned = true;
+      suffixsortspace->clonenumber = UINT_MAX; /* undefined */
     }
     suffixsortspace->ulongtab = NULL;
   } else
@@ -141,11 +142,11 @@ GtSuffixsortspace *gt_suffixsortspace_new_generic(GtUword numofentries,
                                    gt_suffixsortspace_overflow_abort,
                                    &numofentries);
       suffixsortspace->ulongtab = gt_malloc((size_t) sufspacesize);
-      suffixsortspace->cloned = false;
+      suffixsortspace->clonenumber = 0;
     } else
     {
       suffixsortspace->ulongtab = (GtUword *) tab2clone;
-      suffixsortspace->cloned = true;
+      suffixsortspace->clonenumber = UINT_MAX; /* undefined */
     }
     suffixsortspace->uinttab = NULL;
   }
@@ -165,17 +166,26 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
 }
 
 GtSuffixsortspace *gt_suffixsortspace_clone(GtSuffixsortspace *sssp,
+                                            unsigned int clonenumber,
                                             GtLogger *logger)
 {
-  bool useuint = sssp->uinttab != NULL ? true : false;
-  void *tab2clone = useuint ? (void *) sssp->uinttab
-                            : (void *) sssp->ulongtab;
+  bool useuint;
+  void *tab2clone;
+  GtSuffixsortspace *cloned_sssp;
 
-  return gt_suffixsortspace_new_generic(sssp->maxindex + 1,
-                                        sssp->maxvalue,
-                                        useuint,
-                                        tab2clone,
-                                        logger);
+  gt_assert(sssp != NULL);
+  useuint = sssp->uinttab != NULL ? true : false;
+  tab2clone = useuint ? (void *) sssp->uinttab
+                      : (void *) sssp->ulongtab;
+  gt_assert(tab2clone != NULL);
+  cloned_sssp = gt_suffixsortspace_new_generic(sssp->maxindex + 1,
+                                               sssp->maxvalue,
+                                               useuint,
+                                               tab2clone,
+                                               logger);
+  gt_assert(clonenumber > 0);
+  cloned_sssp->clonenumber = clonenumber;
+  return cloned_sssp;
 }
 
 void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
@@ -188,7 +198,7 @@ void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
       fprintf(stderr,"%s, l. %d: longest is not defined\n",__FILE__,__LINE__);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    if (!suffixsortspace->cloned)
+    if (suffixsortspace->clonenumber == 0)
     {
       gt_free(suffixsortspace->uinttab);
       gt_free(suffixsortspace->ulongtab);
@@ -216,6 +226,7 @@ GtUword gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,GtUword idx)
 void gt_suffixsortspace_updatelongest(GtSuffixsortspace *sssp,GtUword idx)
 {
   gt_assert(sssp != NULL);
+
   sssp->longestidx.defined = true;
   sssp->longestidx.valueunsignedlong = sssp->bucketleftidx + idx;
 }
@@ -371,8 +382,8 @@ void gt_suffixsortspace_bucketrange_set(GtSuffixsortspace *sssp,
                                         GtUword bucketleftidx,
                                         GtUword widthrelative2bucketleftidx)
 {
-  gt_assert(sssp != NULL && (sssp->bucketleftidx == bucketleftidx ||
-                             !sssp->currentexport));
+  gt_assert(sssp != NULL);
+  gt_assert(sssp->bucketleftidx == bucketleftidx || !sssp->currentexport);
   sssp->bucketleftidx = bucketleftidx;
   sssp->widthrelative2bucketleftidx = widthrelative2bucketleftidx;
 }
@@ -403,18 +414,27 @@ void gt_suffixsortspace_sortspace_delete (GtSuffixsortspace *sssp)
 void gt_suffixsortspace_delete_cloned(GtSuffixsortspace **sssp_tab,
                                       unsigned int parts)
 {
+  bool found = false;
   unsigned int p;
 
-  gt_assert(sssp_tab != NULL && parts > 1U && !sssp_tab[0]->cloned);
+  gt_assert(sssp_tab != NULL && parts > 1U && sssp_tab[0]->clonenumber == 0);
   for (p = 1U; p < parts; p++)
   {
-    gt_assert(sssp_tab[p]->cloned);
-    if (sssp_tab[p]->longestidx.defined)
+    GtSuffixsortspace *sssp = sssp_tab[p];
+
+    gt_assert(sssp->clonenumber == p);
+    if (!found && sssp->longestidx.defined)
     {
-      gt_assert(!sssp_tab[0]->longestidx.defined);
-      sssp_tab[0]->longestidx.defined = true;
-      sssp_tab[0]->longestidx.valueunsignedlong
-        = sssp_tab[p]->longestidx.valueunsignedlong;
+      if ((sssp->ulongtab != NULL &&
+          sssp->ulongtab[sssp->longestidx.valueunsignedlong] == 0) ||
+          (sssp->uinttab != NULL &&
+          sssp->uinttab[sssp->longestidx.valueunsignedlong] == 0))
+      {
+        sssp_tab[0]->longestidx.defined = true;
+        sssp_tab[0]->longestidx.valueunsignedlong
+          = sssp->longestidx.valueunsignedlong;
+        found = true;
+      }
     }
     gt_suffixsortspace_delete(sssp_tab[p],false);
   }

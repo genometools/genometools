@@ -76,6 +76,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(GtUword numofentries,
                                           GtLogger *logger);
 
 GtSuffixsortspace *gt_suffixsortspace_clone(GtSuffixsortspace *sssp,
+                                            unsigned int clonenumber,
                                             GtLogger *logger);
 
 void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,

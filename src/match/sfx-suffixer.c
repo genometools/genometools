@@ -109,6 +109,9 @@ struct Sfxiterator
   GtUword spmopt_numofallprefixcodes,
                 spmopt_numofallsuffixcodes;
   GtSfxmappedrange *mappedmarkprefixbuckets;
+#ifdef GT_THREADS_ENABLED
+  GtSuftabparts *partition_for_threads;
+#endif
 };
 
 #ifdef SKDEBUG
@@ -552,6 +555,9 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   }
   gt_bcktab_delete(sfi->bcktab);
   gt_suftabparts_delete(sfi->suftabparts);
+#ifdef GT_THREADS_ENABLED
+  gt_suftabparts_delete(sfi->partition_for_threads);
+#endif
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   if (sfi->mappedmarkprefixbuckets == NULL)
   {
@@ -1229,6 +1235,12 @@ static void gt_bcktab_code_to_minmax_prefix_index(GtUword *mincode,
   *maxcode = gt_bcktab_code_to_prefix_index(*maxcode,data);
 }
 
+#ifdef GT_THREADS_ENABLED
+#define GT_SFX_THREADS_JOBS gt_jobs
+#else
+#define GT_SFX_THREADS_JOBS 1U
+#endif
+
 Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
@@ -1302,6 +1314,9 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->nextfreeCodeatposition = 0;
     sfi->suffixsortspace = NULL;
     sfi->suftabparts = NULL;
+#ifdef GT_THREADS_ENABLED
+    sfi->partition_for_threads = NULL;
+#endif
     sfi->encseq = encseq;
     sfi->readmode = readmode;
     sfi->numofchars = gt_encseq_alphabetnumofchars(encseq);
@@ -1542,8 +1557,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->storespecials = true;
     if (sfxprogress != NULL)
     {
-      gt_timer_show_progress(sfxprogress, "counting prefix distribution",
-                             stdout);
+      gt_timer_show_progress(sfxprogress,"counting prefix distribution",stdout);
     }
     if (prefixlength == 1U)
     {
@@ -1724,6 +1738,22 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     }
   }
   SHOWACTUALSPACE;
+#ifdef GT_THREADS_ENABLED
+  if (GT_SFX_THREADS_JOBS > 1U)
+  {
+    sfi->partition_for_threads = gt_suftabparts_new(GT_SFX_THREADS_JOBS,
+                                                    sfi->bcktab,
+                                                    1U,
+                                                    0,
+                                                    /*sfi->currentmincode,
+                                                    sfi->currentmaxcode,*/
+                                                    NULL,
+                                                    sfxmrlist,
+                                                    numofsuffixestosort,
+                                                    specialcharacters + 1,
+                                                    logger);
+  }
+#endif
   if (!haserr)
   {
     gt_assert(sfi != NULL);
@@ -1780,12 +1810,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 logger,
                                 err);
 }
-
-#ifdef GT_THREADS_ENABLED
-#define GT_SFX_THREADS_JOBS gt_jobs
-#else
-#define GT_SFX_THREADS_JOBS 1U
-#endif
 
 static void gt_suffixer_sort_with_dcov(void *voidsfi,
                                        GtUword blisbl,
@@ -1943,21 +1967,11 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     gt_bcktab_determinemaxsize(sfi->bcktab, sfi->currentmincode,
                                sfi->currentmaxcode,sumofwidthforpart);
 #ifdef GT_THREADS_ENABLED
-    if (GT_SFX_THREADS_JOBS > 1U)
+    if (GT_SFX_THREADS_JOBS > 1U &&
+        gt_suftabparts_numofparts(sfi->partition_for_threads) > 1U)
     {
-      GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
-      GtSuftabparts *partition_for_threads
-        = gt_suftabparts_new(GT_SFX_THREADS_JOBS,
-                             sfi->bcktab,
-                             sfi->currentmincode,
-                             sfi->currentmaxcode,
-                             NULL,
-                             sfxmrlist,
-                             sumofwidthforpart,
-                             sfi->specialcharacters + 1,
-                             sfi->logger);
       gt_threaded_sortallbuckets(sfi->suffixsortspace,
-                                 partition_for_threads,
+                                 sfi->partition_for_threads,
                                  sfi->encseq,
                                  sfi->readmode,
                                  sfi->bcktab,
@@ -1968,8 +1982,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                  processunsortedsuffixrange,
                                  processunsortedsuffixrangeinfo,
                                  sfi->logger);
-      gt_suftabparts_delete(partition_for_threads);
-      gt_Sfxmappedrangelist_delete(sfxmrlist);
     } else
     {
 #endif

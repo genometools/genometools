@@ -1330,7 +1330,7 @@ GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
   } else
   {
     left = mincode;
-    right = found = maxcode+1;
+    right = found = maxcode + 1;
   }
   while (left+1 < right)
   {

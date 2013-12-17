@@ -1665,10 +1665,6 @@ static void *gt_bentsedg_thread_caller(void *data)
   unsigned int rightchar;
 
   rightchar = (unsigned int) (thinfo->mincode % thinfo->numofchars);
-  printf("mincode=%lu,maxcode=%lu,totalwidth=%lu\n",
-         thinfo->mincode,
-         thinfo->maxcode,
-         thinfo->totalwidth);
   for (code = thinfo->mincode; code <= thinfo->maxcode; code++)
   {
     GtBucketspecification bucketspec;
@@ -1709,7 +1705,7 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   gt_assert(partition_for_threads != NULL);
   gt_suftabparts_showallrecords(partition_for_threads,false);
   thread_parts = gt_suftabparts_numofparts(partition_for_threads);
-  gt_assert(thread_parts > 0);
+  gt_assert(thread_parts > 1U);
   th_tab = gt_malloc(sizeof *th_tab * thread_parts);
   sssp_tab = gt_malloc(sizeof *sssp_tab * thread_parts);
   for (tp = 0; !haserr && tp < thread_parts; tp++)
@@ -1731,7 +1727,7 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
     } else
     {
       th_tab[tp].suffixsortspace
-        = gt_suffixsortspace_clone(suffixsortspace,logger);
+        = gt_suffixsortspace_clone(suffixsortspace,tp,logger);
     }
     sssp_tab[tp] = th_tab[tp].suffixsortspace;
     th_tab[tp].bsr = bentsedgresources_new(th_tab[tp].suffixsortspace,
