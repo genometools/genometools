@@ -194,8 +194,21 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
                                         gt_encseq_total_length(encseq));
 
       gt_file_xprintf(arguments->outfp, "compressed size: ");
-      gt_file_xprintf(arguments->outfp, ""GT_WU" bytes\n",
+      if (gt_encseq_sizeofrep(encseq) < (1<<10))
+        gt_file_xprintf(arguments->outfp, ""GT_WU" bytes\n",
                                         gt_encseq_sizeofrep(encseq));
+      else if (gt_encseq_sizeofrep(encseq) < (1<<20))
+        gt_file_xprintf(arguments->outfp, ""GT_WU" bytes ("GT_WU" KiB)\n",
+                                        gt_encseq_sizeofrep(encseq),
+                                        gt_encseq_sizeofrep(encseq)>>10);
+      else if (gt_encseq_sizeofrep(encseq) < (1<<30))
+        gt_file_xprintf(arguments->outfp, ""GT_WU" bytes ("GT_WU" MiB)\n",
+                                        gt_encseq_sizeofrep(encseq),
+                                        gt_encseq_sizeofrep(encseq)>>20);
+      else
+        gt_file_xprintf(arguments->outfp, ""GT_WU" bytes ("GT_WU" GiB)\n",
+                                        gt_encseq_sizeofrep(encseq),
+                                        gt_encseq_sizeofrep(encseq)>>30);
 
       gt_file_xprintf(arguments->outfp, "number of sequences: ");
       gt_file_xprintf(arguments->outfp, ""GT_WU"\n",
@@ -214,10 +227,23 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       filenames = gt_encseq_filenames(encseq);
       gt_file_xprintf(arguments->outfp, "original filenames:\n");
       for (i = 0; i < gt_str_array_size(filenames); i++) {
-        gt_file_xprintf(arguments->outfp, "\t%s ("GT_WU" characters)\n",
+        GtUword seq_number_diff;
+        gt_file_xprintf(arguments->outfp, "\t%s ("GT_WU" characters",
                                           gt_str_array_get(filenames, i),
                                           (GtUword)
                                      gt_encseq_effective_filelength(encseq, i));
+        if (i+1 < gt_str_array_size(filenames))
+          seq_number_diff = gt_encseq_filenum_first_seqnum(encseq, i+1) -
+              gt_encseq_filenum_first_seqnum(encseq, i);
+        else
+          seq_number_diff = gt_encseq_num_of_sequences(encseq) -
+              gt_encseq_filenum_first_seqnum(encseq, i);
+        if (seq_number_diff == 1)
+          gt_file_xprintf(arguments->outfp, ", "GT_WU" sequence)\n",
+              seq_number_diff);
+        else
+          gt_file_xprintf(arguments->outfp, ", "GT_WU" sequences)\n",
+              seq_number_diff);
       }
 
       alpha = gt_encseq_alphabet(encseq);
