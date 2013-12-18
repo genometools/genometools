@@ -70,7 +70,7 @@ GtNodeStream* gt_script_wrapper_stream_new(GtScriptWrapperStreamNextFunc next,
   GtNodeStream *ns;
   GtScriptWrapperStream *script_wrapper_stream;
   gt_assert(next);
-  ns = gt_node_stream_create(gt_script_wrapper_stream_class(), true);
+  ns = gt_node_stream_create(gt_script_wrapper_stream_class(), false);
   script_wrapper_stream = script_wrapper_stream_cast(ns);
   script_wrapper_stream->next_func = next;
   script_wrapper_stream->free_func = free;
