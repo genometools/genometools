@@ -150,6 +150,7 @@ typedef struct
   const Sfxstrategy *sfxstrategy;
   GtSuffixsortspace *sssp;
   GtProcessunsortedsuffixrange processunsortedsuffixrange;
+  void *processunsortedsuffixrangeinfo;
   unsigned int sortmaxdepth,
                prefixlength;
   GtUword countinsertionsort,
@@ -165,7 +166,6 @@ typedef struct
           shortreadsort_maxwidth,
           leftlcpdist[GT_UNITSIN2BITENC],
           rightlcpdist[GT_UNITSIN2BITENC];
-  void *processunsortedsuffixrangeinfo;
   bool *equalwithprevious;
   GtBlindtrie *blindtrie;
   GtMedianinfo *medianinfospace;
@@ -514,6 +514,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
           if (bsr->processunsortedsuffixrange != NULL)
           {
             bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
+                                            bsr->sssp,
                                             bucketleftidx + subbucketleft
                                                           + idx - 1
                                                           - equalsrangewidth,
@@ -532,6 +533,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
       if (bsr->processunsortedsuffixrange != NULL)
       {
         bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
+                                        bsr->sssp,
                                         bucketleftidx + subbucketleft + width
                                                       - 1 - equalsrangewidth,
                                         equalsrangewidth + 1, sortmaxdepth);
@@ -818,8 +820,8 @@ static bool multistrategysort(GtBentsedgresources *bsr,
                             width,
                             depth,
                             sortmaxdepth,
-                            bsr->processunsortedsuffixrangeinfo,
-                            bsr->processunsortedsuffixrange);
+                            bsr->processunsortedsuffixrange,
+                            bsr->processunsortedsuffixrangeinfo);
     bsr->countbltriesort++;
     return true;
   }
@@ -882,6 +884,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                               subbucketleft,
                               width,
                               (GtUword) bsr->sortmaxdepth,
+                              bsr->sssp,
                               bsr->processunsortedsuffixrange,
                               bsr->processunsortedsuffixrangeinfo);
       }
@@ -894,6 +897,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       {
         bsr->processunsortedsuffixrange(
                          bsr->processunsortedsuffixrangeinfo,
+                         bsr->sssp,
                          gt_suffixsortspace_bucketleftidx_get(bsr->sssp) +
                          subbucketleft,
                          width,depth);
@@ -1445,8 +1449,8 @@ static GtBentsedgresources *bentsedgresources_new(
     }
   }
   bsr->sortmaxdepth = sortmaxdepth;
-  bsr->processunsortedsuffixrangeinfo = NULL;
   bsr->processunsortedsuffixrange = NULL;
+  bsr->processunsortedsuffixrangeinfo = NULL;
   bsr->countinsertionsort = 0;
   bsr->counttqsort = 0;
   bsr->countcountingsort = 0;
@@ -1631,8 +1635,8 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                                      outlcpinfo != NULL
                                                        ? true : false);
     gt_bentsedgresources_addlcpinfo(bsr,outlcpinfo,NULL);
-    bsr->processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
     bsr->processunsortedsuffixrange = processunsortedsuffixrange;
+    bsr->processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
     gt_sort_bentleysedgewick(bsr,0,numberofsuffixes,0);
     bentsedgresources_delete(bsr, logger);
   }
@@ -1642,12 +1646,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
 typedef struct
 {
   unsigned int numofchars,
-               prefixlength,
-               sortmaxdepth;
-  const Sfxstrategy *sfxstrategy;
-  GtProcessunsortedsuffixrange processunsortedsuffixrange;
-  void *processunsortedsuffixrangeinfo;
-  GtLogger *logger;
+               prefixlength;
   const GtBcktab *bcktab;
 
   GtSuffixsortspace *suffixsortspace;
@@ -1712,12 +1711,7 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   {
     th_tab[tp].numofchars = numofchars;
     th_tab[tp].prefixlength = prefixlength;
-    th_tab[tp].sortmaxdepth = sortmaxdepth;
-    th_tab[tp].sfxstrategy = sfxstrategy;
     th_tab[tp].bcktab = bcktab;
-    th_tab[tp].processunsortedsuffixrange = processunsortedsuffixrange;
-    th_tab[tp].processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
-    th_tab[tp].logger = logger;
     th_tab[tp].mincode = gt_suftabparts_minindex(tp,partition_for_threads);
     th_tab[tp].maxcode = gt_suftabparts_maxindex(tp,partition_for_threads);
     th_tab[tp].totalwidth = gt_suftabparts_sumofwidth(tp,partition_for_threads);
@@ -1738,10 +1732,10 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                            sortmaxdepth,
                                            sfxstrategy,
                                            false);
-    th_tab[tp].bsr->processunsortedsuffixrangeinfo
-      = processunsortedsuffixrangeinfo;
     th_tab[tp].bsr->processunsortedsuffixrange
       = processunsortedsuffixrange;
+    th_tab[tp].bsr->processunsortedsuffixrangeinfo
+      = processunsortedsuffixrangeinfo;
     th_tab[tp].thread
       = gt_thread_new (gt_bentsedg_thread_caller,th_tab + tp,NULL);
     if (th_tab[tp].thread == NULL)
@@ -1756,6 +1750,9 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
       gt_thread_join(th_tab[tp].thread);
     }
     gt_thread_delete(th_tab[tp].thread);
+  }
+  for (tp = 0; tp < thread_parts; tp++)
+  {
     bentsedgresources_delete(th_tab[tp].bsr, logger);
   }
   gt_suffixsortspace_delete_cloned(sssp_tab,thread_parts);

@@ -67,7 +67,7 @@ void gt_differencecover_sortunsortedbucket(GtSuffixsortspace *sssp,
                                            GtUword width,
                                            GT_UNUSED GtUword depth);
 
-void gt_differencecover_completelargelcpvalues(GtDifferencecover *dcov,
+void gt_differencecover_completelargelcpvalues(const GtDifferencecover *dcov,
                                                const GtSuffixsortspace *sssp,
                                                GtLcpvalues *tableoflcpvalues,
                                                GtUword width,

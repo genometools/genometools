@@ -1812,6 +1812,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 }
 
 static void gt_suffixer_sort_with_dcov(void *voidsfi,
+                                       GtSuffixsortspace *sssp,
                                        GtUword blisbl,
                                        GtUword width,
                                        GtUword depth)
@@ -1819,10 +1820,10 @@ static void gt_suffixer_sort_with_dcov(void *voidsfi,
   Sfxiterator *sfi = (Sfxiterator *) voidsfi;
 
   gt_assert(sfi != NULL);
-  gt_differencecover_sortunsortedbucket(
-                               sfi->suffixsortspace,
-                               gt_Outlcpinfo_lcpvalues_ref(sfi->outlcpinfo),
-                               sfi->dcov, blisbl, width,depth);
+  gt_differencecover_sortunsortedbucket(sssp,
+                                        gt_Outlcpinfo_lcpvalues_ref(
+                                               sfi->outlcpinfo),
+                                        sfi->dcov, blisbl, width,depth);
 }
 
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)

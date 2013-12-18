@@ -343,11 +343,14 @@ void gt_suffixsortspace_set (GtSuffixsortspace *sssp,
                              GtUword idx,
                              GtUword value)
 {
+  GtUword updateindex;
+
   gt_assert(sssp != NULL);
-  gt_suffixsortspace_setdirect(sssp, sssp->bucketleftidx
-                                       + subbucketleft
-                                       + idx
-                                       - sssp->partoffset,value);
+  updateindex = sssp->bucketleftidx + subbucketleft + idx - sssp->partoffset;
+  gt_assert (sssp->widthrelative2bucketleftidx  == 0 ||
+             updateindex <
+             sssp->bucketleftidx + sssp->widthrelative2bucketleftidx);
+  gt_suffixsortspace_setdirect(sssp, updateindex,value);
 }
 
 void gt_suffixsortspace_init_seqstartpos(GtSuffixsortspace *sssp,
@@ -382,8 +385,8 @@ void gt_suffixsortspace_bucketrange_set(GtSuffixsortspace *sssp,
                                         GtUword bucketleftidx,
                                         GtUword widthrelative2bucketleftidx)
 {
-  gt_assert(sssp != NULL);
-  gt_assert(sssp->bucketleftidx == bucketleftidx || !sssp->currentexport);
+  gt_assert(sssp != NULL && (sssp->bucketleftidx == bucketleftidx ||
+                             !sssp->currentexport));
   sssp->bucketleftidx = bucketleftidx;
   sssp->widthrelative2bucketleftidx = widthrelative2bucketleftidx;
 }

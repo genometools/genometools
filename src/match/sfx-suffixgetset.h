@@ -55,6 +55,7 @@ typedef struct
 } GtSuffixsortspace_exportptr;
 
 typedef void (*GtProcessunsortedsuffixrange)(void *,
+                                             GtSuffixsortspace *,
                                              GtUword,
                                              GtUword,
                                              GtUword);

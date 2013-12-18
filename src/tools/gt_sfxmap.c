@@ -1294,6 +1294,7 @@ typedef struct
 } Checkunsortedrangeinfo;
 
 static void gt_sfxmap_sortmaxdepth_processunsortedrange(void *voiddcov,
+                                              GT_UNUSED GtSuffixsortspace *sssp,
                                               GtUword subbucketleft,
                                               GtUword width,
                                               GT_UNUSED GtUword depth)
