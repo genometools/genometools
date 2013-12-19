@@ -139,7 +139,7 @@ GtUword gt_assembly_stats_calculator_nstat(GtAssemblyStatsCalculator *asc,
   Nstats nstats;
   gt_assert(n > 0);
   gt_assert(n < (GtUword)100UL);
-  nstats.min[0] = (asc->sumlength * ((float)n / 100U));
+  nstats.min[0] = (GtUint64) (asc->sumlength * ((float)n / 100U));
   nstats.nvalue[0] = 0;
   nstats.lvalue[0] = 0;
   nstats.done[0] = false;
