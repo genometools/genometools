@@ -133,6 +133,25 @@ static void calcNstats(GtUword key, GtUint64 value,
   nstats.limit[INDEX] = (GtUint64) (LENGTH);\
   nstats.larger_than_limit[INDEX] = 0
 
+GtUword gt_assembly_stats_calculator_nstat(GtAssemblyStatsCalculator *asc,
+    GtUword n)
+{
+  Nstats nstats;
+  gt_assert(n > 0);
+  gt_assert(n < (GtUword)100UL);
+  nstats.min[0] = (asc->sumlength * ((float)n / 100U));
+  nstats.nvalue[0] = 0;
+  nstats.lvalue[0] = 0;
+  nstats.done[0] = false;
+  nstats.nofstats = 1U;
+  nstats.current_len = 0;
+  nstats.current_num = 0;
+  nstats.half_num = (GtUint64) (asc->numofseq >> 1);
+  nstats.median = 0;
+  gt_disc_distri_foreach_in_reverse_order(asc->lengths, calcNstats, &nstats);
+  return nstats.nvalue[0];
+}
+
 void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
     GtLogger *logger)
 {

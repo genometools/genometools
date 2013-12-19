@@ -23,38 +23,38 @@
 
 typedef struct GtSeqCol GtSeqCol;
 
-void          gt_seq_col_delete(GtSeqCol*);
-int           gt_seq_col_grep_desc(GtSeqCol*, char **seq,
-                                   GtUword start, GtUword end,
-                                   GtStr *seqid, GtError*);
-int           gt_seq_col_grep_desc_md5(GtSeqCol*, const char **md5,
-                                       GtStr *seqid, GtError*);
-int           gt_seq_col_grep_desc_sequence_length(GtSeqCol *sc,
-                                                   GtUword *length,
-                                                   GtStr *seqid,
-                                                   GtError *err);
-int           gt_seq_col_md5_to_seq(GtSeqCol*, char **seq,
-                                    GtUword start, GtUword end,
-                                    GtStr *md5_seqid, GtError *err);
-int           gt_seq_col_md5_to_description(GtSeqCol*, GtStr *desc,
-                                            GtStr *md5_seqid, GtError *err);
-int           gt_seq_col_md5_to_sequence_length(GtSeqCol*, GtUword *len,
-                                                GtStr *md5_seqid, GtError *err);
-GtUword gt_seq_col_num_of_files(const GtSeqCol*);
-GtUword gt_seq_col_num_of_seqs(const GtSeqCol*, GtUword filenum);
-const char*   gt_seq_col_get_md5_fingerprint(const GtSeqCol*,
-                                             GtUword filenum,
-                                             GtUword seqnum);
-char*         gt_seq_col_get_sequence(const GtSeqCol*,
-                                      GtUword filenum,
-                                      GtUword seqnum,
-                                      GtUword start,
-                                      GtUword end);
-char*         gt_seq_col_get_description(const GtSeqCol*,
-                                         GtUword filenum,
-                                         GtUword seqnum);
-GtUword gt_seq_col_get_sequence_length(const GtSeqCol*,
-                                             GtUword filenum,
-                                             GtUword seqnum);
+void        gt_seq_col_delete(GtSeqCol*);
+int         gt_seq_col_grep_desc(GtSeqCol*, char **seq,
+                                 GtUword start, GtUword end,
+                                 GtStr *seqid, GtError*);
+int         gt_seq_col_grep_desc_md5(GtSeqCol*, const char **md5,
+                                     GtStr *seqid, GtError*);
+int         gt_seq_col_grep_desc_sequence_length(GtSeqCol *sc,
+                                                 GtUword *length,
+                                                 GtStr *seqid,
+                                                 GtError *err);
+int         gt_seq_col_md5_to_seq(GtSeqCol*, char **seq,
+                                  GtUword start, GtUword end,
+                                  GtStr *md5_seqid, GtError *err);
+int         gt_seq_col_md5_to_description(GtSeqCol*, GtStr *desc,
+                                          GtStr *md5_seqid, GtError *err);
+int         gt_seq_col_md5_to_sequence_length(GtSeqCol*, GtUword *len,
+                                              GtStr *md5_seqid, GtError *err);
+GtUword     gt_seq_col_num_of_files(const GtSeqCol*);
+GtUword     gt_seq_col_num_of_seqs(const GtSeqCol*, GtUword filenum);
+const char* gt_seq_col_get_md5_fingerprint(const GtSeqCol*,
+                                           GtUword filenum,
+                                           GtUword seqnum);
+char*       gt_seq_col_get_sequence(const GtSeqCol*,
+                                    GtUword filenum,
+                                    GtUword seqnum,
+                                    GtUword start,
+                                    GtUword end);
+char*       gt_seq_col_get_description(const GtSeqCol*,
+                                       GtUword filenum,
+                                       GtUword seqnum);
+GtUword     gt_seq_col_get_sequence_length(const GtSeqCol*,
+                                           GtUword filenum,
+                                           GtUword seqnum);
 
 #endif
