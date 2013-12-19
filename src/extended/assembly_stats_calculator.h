@@ -21,20 +21,41 @@
 #include "core/logger.h"
 #include "core/types_api.h"
 
+/* GtAssemblyStatsCalculator computes statistics for sequence sets,
+   which are in particular useful for assemblies (contigs sets) */
 typedef struct GtAssemblyStatsCalculator GtAssemblyStatsCalculator;
 
+/* Create a new GtAssemblyStatsCalculator object */
 GtAssemblyStatsCalculator *gt_assembly_stats_calculator_new(void);
 
-void                       gt_assembly_stats_calculator_delete(GtAssemblyStatsCalculator *asc);
+/* Delete the GtAssemblyStatsCalculator <asc> */
+void                       gt_assembly_stats_calculator_delete(
+                                                GtAssemblyStatsCalculator *asc);
 
-void                       gt_assembly_stats_calculator_add(GtAssemblyStatsCalculator *asc,
-                                      GtUword length);
+/* Add to the GtAssemblyStatsCalculator <asc> the sequence length <length>;
+   the calculator (only) needs to know about the length of each sequence in the
+   set in order to compute the statistics*/
+void                       gt_assembly_stats_calculator_add(
+                                                GtAssemblyStatsCalculator *asc,
+                                                GtUword length);
 
-/* if the following is set to a value > 0 (which is the default value)
- * then the NG50 and NG80 are also calculated */
+/* Compute the N statistics <n> for the GtAssemblyStatsCalculator <asc>;
+   <n> is an integer between 0 and 100 (extremes excluded);
+   e.g. for N50 use n = 50 */
+GtUword gt_assembly_stats_calculator_nstat(GtAssemblyStatsCalculator *asc,
+                                           GtUword n);
+
+/* Set the genome length for the GtAssemblyStatsCalculator <asc>;
+   this is not necessary, but if the genome length is set;
+   then the NG/LG statistics can also be computed;
+   to disable NG statistics computation set the genome lenght to 0
+   (this is the default) */
 void gt_assembly_stats_calculator_set_genome_length(
-                                                    GtAssemblyStatsCalculator *asc, GtUword genome_length);
+                                                 GtAssemblyStatsCalculator *asc,
+                                                 GtUword genome_length);
 
+/* Print the statistics for GtAssemblyStatsCalculator <asc>
+   to the GtLogger <logger> in a pre-formatted table */
 void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
                                        GtLogger *logger);
 
