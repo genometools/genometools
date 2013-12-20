@@ -57,7 +57,7 @@ void          gt_gff3_parser_set_offset(GtGFF3Parser *gff3_parser,
 void          gt_gff3_parser_set_type_checker(GtGFF3Parser *gff3_parser,
                                               GtTypeChecker *type_checker);
 /* Set <xrf_checker> used by <gff3_parser>. */
-void          gt_gff3_parser_set_xrf_checker(GtGFF3Parser *gff3_parser, 
+void          gt_gff3_parser_set_xrf_checker(GtGFF3Parser *gff3_parser,
                                              GtXRFChecker *xrf_checker);
 /* Enable the tidy mode in <gff3_parser>. In tidy mode the <gff3_parser> parser
    tries to tidy up features which would normally lead to a parse error. */

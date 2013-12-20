@@ -22,23 +22,27 @@
 
 typedef struct GtXRFAbbrParseTree GtXRFAbbrParseTree;
 
-/* Parse the XRF abbreviation file given with <file_path> and return the result as an
-   GtXRFAbbrParseTree. If an error occurs during parsing, NULL is returned and 
-   <err> is set. */
+/* Parse the XRF abbreviation file given with <file_path> and return the
+   result as a GtXRFAbbrParseTree. If an error occurs during parsing,
+   NULL is returned and <err> is set. */
 GtXRFAbbrParseTree*   gt_xrf_abbr_parse_tree_new(const char *file_path,
                                                  GtError *err);
 void                  gt_xrf_abbr_parse_tree_delete(GtXRFAbbrParseTree*);
 /* Return the type of entry number <entry_number>. */
-const char*           gt_xrf_abbr_parse_tree_get_entry_type(const GtXRFAbbrParseTree*,
+const char*           gt_xrf_abbr_parse_tree_get_entry_type(const
+                                                     GtXRFAbbrParseTree*,
                                                      GtUword entry_num);
 /* Return the value of entry <entry_key> in entry number <entry_number>. */
-const char*           gt_xrf_abbr_parse_tree_get_entry_value(const GtXRFAbbrParseTree*,
+const char*           gt_xrf_abbr_parse_tree_get_entry_value(const
+                                                      GtXRFAbbrParseTree*,
                                                       GtUword entry_num,
                                                       const char *entry_key);
 /* Return OBO entry with number <entry_number. */
-const GtXRFAbbrEntry* gt_xrf_abbr_parse_tree_get_entry(const GtXRFAbbrParseTree*,
+const GtXRFAbbrEntry* gt_xrf_abbr_parse_tree_get_entry(const
+                                                       GtXRFAbbrParseTree*,
                                                        GtUword entry_num);
 /* Return the number of entries. */
-GtUword               gt_xrf_abbr_parse_tree_num_of_entries(const GtXRFAbbrParseTree*);
+GtUword               gt_xrf_abbr_parse_tree_num_of_entries(const
+                                                       GtXRFAbbrParseTree*);
 
 #endif

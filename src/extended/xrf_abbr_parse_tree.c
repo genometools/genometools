@@ -47,12 +47,12 @@
 #define XRF_LABEL_REPLACED_BY     "replaced_by"
 
 struct GtXRFAbbrParseTree {
-  GtArray *entries;  
+  GtArray *entries;
 };
 
-static bool valid_label(const char *label) 
+static bool valid_label(const char *label)
 {
-  if (strcmp(label, XRF_LABEL_ABBREVIATION) == 0 
+  if (strcmp(label, XRF_LABEL_ABBREVIATION) == 0
         || strcmp(label, XRF_LABEL_SHORTHAND_NAME) == 0
         || strcmp(label, XRF_LABEL_DATABASE) == 0
         || strcmp(label, XRF_LABEL_OBJECT) == 0
@@ -69,7 +69,8 @@ static bool valid_label(const char *label)
   return false;
 }
 
-static void gt_xrf_abbr_parse_tree_add_entry(GtXRFAbbrParseTree *xrf_abbr_parse_tree,
+static void gt_xrf_abbr_parse_tree_add_entry(GtXRFAbbrParseTree
+                                             *xrf_abbr_parse_tree,
                                              GtXRFAbbrEntry *xrf_abbr_entry)
 {
   gt_assert(xrf_abbr_parse_tree && xrf_abbr_entry);
@@ -86,9 +87,9 @@ static int gt_xrf_abbr_parse_tree_validate_entries(const GtXRFAbbrParseTree
   int had_err = 0;
   gt_error_check(err);
   gt_assert(xrf_abbr_parse_tree);
-  
+
   abbrvs = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
-  for (i = 0; !had_err 
+  for (i = 0; !had_err
          && i < gt_xrf_abbr_parse_tree_num_of_entries(xrf_abbr_parse_tree);
        i++) {
     GtXRFAbbrEntry *entry = *(GtXRFAbbrEntry**)
@@ -98,7 +99,7 @@ static int gt_xrf_abbr_parse_tree_validate_entries(const GtXRFAbbrParseTree
                         "label \"" XRF_LABEL_ABBREVIATION "\" missing",
                    gt_xrf_abbr_entry_filename(entry),
                    gt_xrf_abbr_entry_line(entry));
-      had_err = -1; 
+      had_err = -1;
     }
     if (!had_err) {
       gt_assert(value);
@@ -113,20 +114,24 @@ static int gt_xrf_abbr_parse_tree_validate_entries(const GtXRFAbbrParseTree
         gt_hashmap_add(abbrvs, (void*) value, (void*) value);
       }
     }
-    if (!had_err && (value = gt_xrf_abbr_entry_get_value(entry, XRF_LABEL_SHORTHAND_NAME))) {
+    if (!had_err && (value = gt_xrf_abbr_entry_get_value(entry,
+                                                XRF_LABEL_SHORTHAND_NAME))) {
       if (strlen(value) >= 10) {
-        gt_error_set(err, "file \"%s\": line "GT_WU": length of shorthand name \"%s\" "
+        gt_error_set(err, "file \"%s\": line "GT_WU": length of "
+                          "shorthand name \"%s\" "
                           "is not less than 10 characters",
                      gt_xrf_abbr_entry_filename(entry),
                      gt_xrf_abbr_entry_line(entry), value);
         had_err = -1;
       }
     }
-    if (!had_err && (value = gt_xrf_abbr_entry_get_value(entry, XRF_LABEL_LOCAL_ID_SYNTAX))) {
+    if (!had_err && (value = gt_xrf_abbr_entry_get_value(entry,
+                                              XRF_LABEL_LOCAL_ID_SYNTAX))) {
       GtError *regex_error = gt_error_new();
       bool match;
       if (gt_grep(&match, value, "", regex_error)) {
-        gt_error_set(err, "file \"%s\": line "GT_WU": invalid regular expression \"%s\" (%s)",
+        gt_error_set(err, "file \"%s\": line "GT_WU": invalid "
+                          "regular expression \"%s\" (%s)",
                      gt_xrf_abbr_entry_filename(entry),
                      gt_xrf_abbr_entry_line(entry), value,
                      gt_error_get(regex_error));
@@ -227,24 +232,27 @@ static bool ignored_line(GtIO *xrf_abbr_file, GtError *err)
   return false;
 }
 
-static int proc_any_char(GtIO *xrf_abbr_file, GtStr *capture, bool be_permissive,
-                         GtError *err)
+static int proc_any_char(GtIO *xrf_abbr_file, GtStr *capture,
+                         bool be_permissive, GtError *err)
 {
   gt_error_check(err);
   gt_assert(xrf_abbr_file && capture);
   if (!any_char(xrf_abbr_file, be_permissive)) {
     if (gt_io_peek(xrf_abbr_file) == GT_END_OF_FILE) {
       gt_error_set(err, "file \"%s\": line "GT_WU": unexpected end-of-file",
-                gt_io_get_filename(xrf_abbr_file), gt_io_get_line_number(xrf_abbr_file));
+                gt_io_get_filename(xrf_abbr_file),
+                gt_io_get_line_number(xrf_abbr_file));
     }
     else if ((gt_io_peek(xrf_abbr_file) == GT_CARRIAGE_RETURN) ||
              (gt_io_peek(xrf_abbr_file) == GT_END_OF_LINE)) {
       gt_error_set(err, "file \"%s\": line "GT_WU": unexpected newline",
-                gt_io_get_filename(xrf_abbr_file), gt_io_get_line_number(xrf_abbr_file));
+                gt_io_get_filename(xrf_abbr_file),
+                gt_io_get_line_number(xrf_abbr_file));
     }
     else {
       gt_error_set(err, "file \"%s\": line "GT_WU": unexpected character '%c'",
-                gt_io_get_filename(xrf_abbr_file), gt_io_get_line_number(xrf_abbr_file),
+                gt_io_get_filename(xrf_abbr_file),
+                gt_io_get_line_number(xrf_abbr_file),
                 gt_io_peek(xrf_abbr_file));
     }
     return -1;
@@ -287,7 +295,8 @@ static int tag_line(GtIO *xrf_abbr_file, GtStr *tag, GtStr *value, GtError *err)
   return had_err;
 }
 
-static int entry(GtXRFAbbrParseTree *xrf_abbr_parse_tree, GtIO *xrf_abbr_file, GtError *err)
+static int entry(GtXRFAbbrParseTree *xrf_abbr_parse_tree,
+                 GtIO *xrf_abbr_file, GtError *err)
 {
   GtUword entry_line_number;
   int had_err = 0;
@@ -311,7 +320,8 @@ static int entry(GtXRFAbbrParseTree *xrf_abbr_parse_tree, GtIO *xrf_abbr_file, G
         had_err = comment_line(xrf_abbr_file, err);
       else {
         had_err = tag_line(xrf_abbr_file, tag, value, err);
-        gt_xrf_abbr_entry_add(xrf_abbr_entry, gt_str_get(tag), gt_str_get(value));
+        gt_xrf_abbr_entry_add(xrf_abbr_entry, gt_str_get(tag),
+                              gt_str_get(value));
       }
     }
   }
@@ -352,11 +362,13 @@ static int parse_xrf_abbr_file(GtXRFAbbrParseTree *xrf_abbr_parse_tree,
   if (!had_err)
     had_err = gt_io_expect(xrf_abbr_file, GT_END_OF_FILE, err);
   if (!had_err)
-    had_err = gt_xrf_abbr_parse_tree_validate_entries(xrf_abbr_parse_tree, err);
+    had_err = gt_xrf_abbr_parse_tree_validate_entries(xrf_abbr_parse_tree,
+                                                      err);
   return had_err;
 }
 
-GtXRFAbbrParseTree* gt_xrf_abbr_parse_tree_new(const char *xrf_abbr_file_path, GtError *err)
+GtXRFAbbrParseTree* gt_xrf_abbr_parse_tree_new(const char *xrf_abbr_file_path,
+                                               GtError *err)
 {
   GtXRFAbbrParseTree *xrf_abbr_parse_tree;
   GtIO *xrf_abbr_file;
@@ -402,7 +414,8 @@ const GtXRFAbbrEntry* gt_xrf_abbr_parse_tree_get_entry(const GtXRFAbbrParseTree
                                                 GtUword entry_num)
 {
   gt_assert(xrf_abbr_parse_tree);
-  return *(GtXRFAbbrEntry**) gt_array_get(xrf_abbr_parse_tree->entries, entry_num);
+  return *(GtXRFAbbrEntry**) gt_array_get(xrf_abbr_parse_tree->entries,
+                                          entry_num);
 }
 
 GtUword gt_xrf_abbr_parse_tree_num_of_entries(const GtXRFAbbrParseTree

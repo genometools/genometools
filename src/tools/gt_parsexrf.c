@@ -55,8 +55,9 @@ static GtOptionParser* gt_parsexrf_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_parsexrf_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
-                              void *tool_arguments, GT_UNUSED GtError *err)
+static int gt_parsexrf_runner(GT_UNUSED int argc, const char **argv,
+                              int parsed_args, void *tool_arguments,
+                              GtError *err)
 {
   GtParsexrfArguments *arguments = tool_arguments;
   GtXRFAbbrParseTree *xpt;
@@ -67,14 +68,14 @@ static int gt_parsexrf_runner(GT_UNUSED int argc, const char **argv, int parsed_
   xpt = gt_xrf_abbr_parse_tree_new(argv[parsed_args], err);
   if (!xpt)
     had_err = -1;
-  
+
   if (!had_err) {
     for (i = 0; i < gt_xrf_abbr_parse_tree_num_of_entries(xpt); i++) {
       const GtXRFAbbrEntry *e = gt_xrf_abbr_parse_tree_get_entry(xpt, i);
       printf("%s\n", gt_xrf_abbr_entry_get_value(e, "abbreviation"));
     }
   }
-  
+
   gt_xrf_abbr_parse_tree_delete(xpt);
   gt_assert(arguments);
 

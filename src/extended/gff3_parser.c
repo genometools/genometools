@@ -110,12 +110,12 @@ GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker)
   return parser;
 }
 
-void gt_gff3_parser_set_xrf_checker(GtGFF3Parser *parser, 
+void gt_gff3_parser_set_xrf_checker(GtGFF3Parser *parser,
                                     GtXRFChecker *xrf_checker)
 {
   gt_assert(parser && xrf_checker);
   gt_xrf_checker_delete(parser->xrf_checker);
-  parser->xrf_checker = gt_xrf_checker_ref(xrf_checker);  
+  parser->xrf_checker = gt_xrf_checker_ref(xrf_checker);
 }
 
 void gt_gff3_parser_check_id_attributes(GtGFF3Parser *parser)
@@ -1361,7 +1361,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
           gt_str_array_delete(target_ids);
         }
       }
-      else if (!strcmp(attr_tag, GT_GFF_DBXREF) 
+      else if (!strcmp(attr_tag, GT_GFF_DBXREF)
                  || !strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM)) {
         if (parser->xrf_checker) {
           if (!gt_xrf_checker_is_valid(parser->xrf_checker, attr_value, err)) {

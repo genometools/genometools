@@ -42,21 +42,21 @@ bool gt_xrf_checker_is_valid(GtXRFChecker *xrc, const char *value, GtError *err)
 {
   bool valid = true;
   char *myvalue = gt_cstr_dup(value),
-       *dbid = myvalue, 
+       *dbid = myvalue,
        *localid = NULL;
   GtXRFAbbrEntry *e;
   GtUword nof_tokens, i;
   gt_assert(xrc && value);
   gt_error_check(err);
-  
+
   /* XXX: Thread safety! */
   gt_splitter_reset(xrc->splitter);
   gt_splitter_split(xrc->splitter, myvalue, strlen(myvalue), ',');
   nof_tokens = gt_splitter_size(xrc->splitter);
-  
-  for(i = 0; valid && i < nof_tokens; i++) {
+
+  for (i = 0; valid && i < nof_tokens; i++) {
     dbid = gt_splitter_get_token(xrc->splitter, i);
-    
+
     if (!(localid = strchr(dbid, ':'))) {
       gt_error_set(err, "xref \"%s\": separator colon missing", value);
       valid = false;
@@ -81,7 +81,7 @@ bool gt_xrf_checker_is_valid(GtXRFChecker *xrc, const char *value, GtError *err)
       /* TODO: use #defines here. */
       const char *regex = NULL;
       gt_assert(e);
-      if ((regex = gt_xrf_abbr_entry_get_value(e, "local_id_syntax"))) { 
+      if ((regex = gt_xrf_abbr_entry_get_value(e, "local_id_syntax"))) {
         bool match = false;
         int rval;
         rval = gt_grep(&match, regex, localid, NULL);
@@ -96,7 +96,7 @@ bool gt_xrf_checker_is_valid(GtXRFChecker *xrc, const char *value, GtError *err)
       }
     }
   }
-  
+
   gt_free(myvalue);
   return valid;
 }
@@ -107,7 +107,7 @@ GtXRFChecker* gt_xrf_checker_new(const char *file_path, GtError *err)
   GtUword i;
   gt_error_check(err);
   gt_assert(file_path);
-  
+
   xrc = gt_calloc(1UL, sizeof (GtXRFChecker));
   xrc->xpt = gt_xrf_abbr_parse_tree_new(file_path, err);
   if (!xrc->xpt) {
@@ -118,7 +118,7 @@ GtXRFChecker* gt_xrf_checker_new(const char *file_path, GtError *err)
   for (i = 0; i < gt_xrf_abbr_parse_tree_num_of_entries(xrc->xpt); i++) {
     const GtXRFAbbrEntry *e = gt_xrf_abbr_parse_tree_get_entry(xrc->xpt, i);
     const char *synonym;
-    gt_hashmap_add(xrc->abbrvs, 
+    gt_hashmap_add(xrc->abbrvs,
                    (void*) gt_xrf_abbr_entry_get_value(e, "abbreviation"),
                    (void*) e);
     if ((synonym = gt_xrf_abbr_entry_get_value(e, "synonym"))) {

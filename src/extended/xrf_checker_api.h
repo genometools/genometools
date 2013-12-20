@@ -19,7 +19,7 @@
 
 #include "core/error_api.h"
 
-/* The <GtXRFChecker> interface, allows one to check the validity of 
+/* The <GtXRFChecker> interface, allows one to check the validity of
    Dbxref and Ontology_type attributes. */
 typedef struct GtXRFChecker GtXRFChecker;
 
@@ -28,7 +28,7 @@ typedef struct GtXRFChecker GtXRFChecker;
 GtXRFChecker* gt_xrf_checker_new(const char *file_path, GtError *err);
 /* Increase reference count for <xrf_checker> */
 GtXRFChecker* gt_xrf_checker_ref(GtXRFChecker *xrf_checker);
-/* Return <true> if <value> is valid for the given <xrf_checker>, 
+/* Return <true> if <value> is valid for the given <xrf_checker>,
    <false> otherwise. In case of <value> being invalid, <err> is
    set accordingly. */
 bool          gt_xrf_checker_is_valid(GtXRFChecker *xrf_checker,

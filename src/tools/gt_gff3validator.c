@@ -67,13 +67,13 @@ static GtOptionParser* gt_gff3validator_option_parser_new(void *tool_arguments)
                               &arguments->strict, false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
-  
+
   /* -xrfcheck */
   option = gt_option_new_string("xrfcheck", "check XRF abbreviations",
                                 arguments->xrffile, NULL);
   gt_option_parser_add_option(op, option);
   arguments->xrfoption = option;
-  
+
   return op;
 }
 

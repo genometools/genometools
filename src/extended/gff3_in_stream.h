@@ -30,7 +30,8 @@ void                     gt_gff3_in_stream_set_type_checker(GtNodeStream*,
                                                             GtTypeChecker
                                                             *type_checker);
 void                     gt_gff3_in_stream_set_xrf_checker(GtNodeStream *ns,
-                                                           GtXRFChecker *xrf_checker);
+                                                           GtXRFChecker
+                                                             *xrf_checker);
 /* Returns a <GtStrArray*> which contains all type names in alphabetical order
    which have been parsed by <gff3_in_stream>.
    The caller is responsible to free it! */
