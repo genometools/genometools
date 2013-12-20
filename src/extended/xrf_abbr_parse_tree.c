@@ -25,8 +25,8 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
-#include "extended/xrf_abbr_parse_tree.h"
 #include "extended/xrf_abbr_entry.h"
+#include "extended/xrf_abbr_parse_tree.h"
 
 #define XRF_BLANK_CHAR           ' '
 #define XRF_COMMENT_CHAR         '!'
@@ -50,7 +50,7 @@ struct GtXRFAbbrParseTree {
   GtArray *entries;
 };
 
-static bool valid_label(const char *label)
+static bool gt_xrf_abbr_parse_tree_valid_label(const char *label)
 {
   if (strcmp(label, XRF_LABEL_ABBREVIATION) == 0
         || strcmp(label, XRF_LABEL_SHORTHAND_NAME) == 0
@@ -78,7 +78,7 @@ static void gt_xrf_abbr_parse_tree_add_entry(GtXRFAbbrParseTree
 }
 
 static int gt_xrf_abbr_parse_tree_validate_entries(const GtXRFAbbrParseTree
-                                                     *xrf_abbr_parse_tree,
+                                                           *xrf_abbr_parse_tree,
                                                    GtError *err)
 {
   GtUword i;
@@ -144,7 +144,8 @@ static int gt_xrf_abbr_parse_tree_validate_entries(const GtXRFAbbrParseTree
   return had_err;
 }
 
-static bool any_char(GtIO *xrf_abbr_file, bool be_permissive)
+static bool gt_xrf_abbr_parse_tree_any_char(GtIO *xrf_abbr_file,
+                                            bool be_permissive)
 {
   switch (gt_io_peek(xrf_abbr_file)) {
     case XRF_BLANK_CHAR:
@@ -160,7 +161,7 @@ static bool any_char(GtIO *xrf_abbr_file, bool be_permissive)
   return true;
 }
 
-static bool ignored_char(GtIO *xrf_abbr_file)
+static bool gt_xrf_abbr_parse_tree_ignored_char(GtIO *xrf_abbr_file)
 {
   char cc = gt_io_peek(xrf_abbr_file);
   if ((cc == XRF_BLANK_CHAR) || (cc == XRF_COMMENT_CHAR) ||
@@ -169,7 +170,8 @@ static bool ignored_char(GtIO *xrf_abbr_file)
   return false;
 }
 
-static int comment_line(GtIO *xrf_abbr_file, GtError *err)
+static int gt_xrf_abbr_parse_tree_comment_line(GtIO *xrf_abbr_file,
+                                               GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -194,7 +196,7 @@ static int comment_line(GtIO *xrf_abbr_file, GtError *err)
   return had_err;
 }
 
-static int blank_line(GtIO *xrf_abbr_file, GtError *err)
+static int gt_xrf_abbr_parse_tree_blank_line(GtIO *xrf_abbr_file, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -203,7 +205,7 @@ static int blank_line(GtIO *xrf_abbr_file, GtError *err)
   while (!had_err) {
     char cc = gt_io_peek(xrf_abbr_file);
     if (cc == XRF_COMMENT_CHAR)
-      return comment_line(xrf_abbr_file, err);
+      return gt_xrf_abbr_parse_tree_comment_line(xrf_abbr_file, err);
     else if (cc == GT_CARRIAGE_RETURN) {
       gt_io_next(xrf_abbr_file);
       if (gt_io_peek(xrf_abbr_file) == GT_END_OF_LINE)
@@ -220,24 +222,27 @@ static int blank_line(GtIO *xrf_abbr_file, GtError *err)
   return had_err;
 }
 
-static bool ignored_line(GtIO *xrf_abbr_file, GtError *err)
+static bool gt_xrf_abbr_parse_tree_ignored_line(GtIO *xrf_abbr_file,
+                                                GtError *err)
 {
   gt_error_check(err);
     gt_log_log("ignored");
   if (gt_io_peek(xrf_abbr_file) == XRF_BLANK_CHAR)
-    return blank_line(xrf_abbr_file, err);
+    return gt_xrf_abbr_parse_tree_blank_line(xrf_abbr_file, err);
   if (gt_io_peek(xrf_abbr_file) == XRF_COMMENT_CHAR)
-    return comment_line(xrf_abbr_file, err);
+    return gt_xrf_abbr_parse_tree_comment_line(xrf_abbr_file, err);
   gt_io_next(xrf_abbr_file);
   return false;
 }
 
-static int proc_any_char(GtIO *xrf_abbr_file, GtStr *capture,
-                         bool be_permissive, GtError *err)
+static int gt_xrf_abbr_parse_tree_proc_any_char(GtIO *xrf_abbr_file,
+                                                GtStr *capture,
+                                                bool be_permissive,
+                                                GtError *err)
 {
   gt_error_check(err);
   gt_assert(xrf_abbr_file && capture);
-  if (!any_char(xrf_abbr_file, be_permissive)) {
+  if (!gt_xrf_abbr_parse_tree_any_char(xrf_abbr_file, be_permissive)) {
     if (gt_io_peek(xrf_abbr_file) == GT_END_OF_FILE) {
       gt_error_set(err, "file \"%s\": line "GT_WU": unexpected end-of-file",
                 gt_io_get_filename(xrf_abbr_file),
@@ -261,31 +266,34 @@ static int proc_any_char(GtIO *xrf_abbr_file, GtStr *capture,
   return 0;
 }
 
-static int tag_line(GtIO *xrf_abbr_file, GtStr *tag, GtStr *value, GtError *err)
+static int gt_xrf_abbr_parse_tree_tag_line(GtIO *xrf_abbr_file, GtStr *tag,
+                                           GtStr *value, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
   gt_log_log("tag");
   gt_assert(xrf_abbr_file && tag && value);
   do {
-    had_err = proc_any_char(xrf_abbr_file, tag, false, err);
-  } while (!had_err && any_char(xrf_abbr_file, false));
+    had_err = gt_xrf_abbr_parse_tree_proc_any_char(xrf_abbr_file, tag,
+                                                   false, err);
+  } while (!had_err && gt_xrf_abbr_parse_tree_any_char(xrf_abbr_file, false));
   if (!had_err)
     had_err = gt_io_expect(xrf_abbr_file, XRF_SEPARATOR_CHAR, err);
   while (!had_err && gt_io_peek(xrf_abbr_file) == XRF_BLANK_CHAR)
     gt_io_next(xrf_abbr_file);
   if (!had_err) {
     do {
-      had_err = proc_any_char(xrf_abbr_file, value, true, err);
-    } while (!had_err && any_char(xrf_abbr_file, true));
+      had_err = gt_xrf_abbr_parse_tree_proc_any_char(xrf_abbr_file, value,
+                                                     true, err);
+    } while (!had_err && gt_xrf_abbr_parse_tree_any_char(xrf_abbr_file, true));
   }
   if (!had_err) {
     if (gt_io_peek(xrf_abbr_file) == XRF_COMMENT_CHAR)
-      had_err = comment_line(xrf_abbr_file, err);
+      had_err = gt_xrf_abbr_parse_tree_comment_line(xrf_abbr_file, err);
     else
       had_err = gt_io_expect(xrf_abbr_file, GT_END_OF_LINE, err);
   }
-  if (!had_err && !valid_label(gt_str_get(tag))) {
+  if (!had_err && !gt_xrf_abbr_parse_tree_valid_label(gt_str_get(tag))) {
     gt_warning("file \"%s\": line "GT_WU": unknown label \"%s\"",
                 gt_io_get_filename(xrf_abbr_file),
                 gt_io_get_line_number(xrf_abbr_file),
@@ -295,7 +303,7 @@ static int tag_line(GtIO *xrf_abbr_file, GtStr *tag, GtStr *value, GtError *err)
   return had_err;
 }
 
-static int entry(GtXRFAbbrParseTree *xrf_abbr_parse_tree,
+static int gt_xrf_abbr_parse_tree_entry(GtXRFAbbrParseTree *xrf_abbr_parse_tree,
                  GtIO *xrf_abbr_file, GtError *err)
 {
   GtUword entry_line_number;
@@ -312,14 +320,15 @@ static int entry(GtXRFAbbrParseTree *xrf_abbr_parse_tree,
                             gt_io_get_filename_str(xrf_abbr_file));
     gt_xrf_abbr_parse_tree_add_entry(xrf_abbr_parse_tree, xrf_abbr_entry);
     while (!had_err &&
-           (any_char(xrf_abbr_file, false) ||
+           (gt_xrf_abbr_parse_tree_any_char(xrf_abbr_file, false) ||
             gt_io_peek(xrf_abbr_file) == XRF_COMMENT_CHAR)) {
       gt_str_reset(tag);
       gt_str_reset(value);
       if (gt_io_peek(xrf_abbr_file) == XRF_COMMENT_CHAR)
-        had_err = comment_line(xrf_abbr_file, err);
+        had_err = gt_xrf_abbr_parse_tree_comment_line(xrf_abbr_file, err);
       else {
-        had_err = tag_line(xrf_abbr_file, tag, value, err);
+        had_err = gt_xrf_abbr_parse_tree_tag_line(xrf_abbr_file, tag, value,
+                                                  err);
         gt_xrf_abbr_entry_add(xrf_abbr_entry, gt_str_get(tag),
                               gt_str_get(value));
       }
@@ -336,16 +345,16 @@ static int parse_xrf_abbr_file(GtXRFAbbrParseTree *xrf_abbr_parse_tree,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(xrf_abbr_parse_tree && xrf_abbr_file);
-  while (!had_err && ignored_char(xrf_abbr_file)) {
-    had_err = ignored_line(xrf_abbr_file, err);
+  while (!had_err && gt_xrf_abbr_parse_tree_ignored_char(xrf_abbr_file)) {
+    had_err = gt_xrf_abbr_parse_tree_ignored_line(xrf_abbr_file, err);
   }
   while (!had_err && gt_io_has_char(xrf_abbr_file)) {
     switch (gt_io_peek(xrf_abbr_file)) {
       case XRF_BLANK_CHAR:
-        had_err = blank_line(xrf_abbr_file, err);
+        had_err = gt_xrf_abbr_parse_tree_blank_line(xrf_abbr_file, err);
         break;
       case XRF_COMMENT_CHAR:
-        had_err = comment_line(xrf_abbr_file, err);
+        had_err = gt_xrf_abbr_parse_tree_comment_line(xrf_abbr_file, err);
         break;
       case GT_CARRIAGE_RETURN:
         gt_io_next(xrf_abbr_file);
@@ -356,7 +365,8 @@ static int parse_xrf_abbr_file(GtXRFAbbrParseTree *xrf_abbr_parse_tree,
         gt_io_next(xrf_abbr_file);
         break;
       default:
-        had_err = entry(xrf_abbr_parse_tree, xrf_abbr_file, err);
+        had_err = gt_xrf_abbr_parse_tree_entry(xrf_abbr_parse_tree,
+                                               xrf_abbr_file, err);
     }
   }
   if (!had_err)
@@ -399,19 +409,19 @@ void gt_xrf_abbr_parse_tree_delete(GtXRFAbbrParseTree *xrf_abbr_parse_tree)
 }
 
 const char* gt_xrf_abbr_parse_tree_get_entry_value(const GtXRFAbbrParseTree
-                                               *xrf_abbr_parse_tree,
-                                               GtUword entry_num,
-                                               const char *entry_key)
+                                                           *xrf_abbr_parse_tree,
+                                                   GtUword entry_num,
+                                                   const char *entry_key)
 {
   gt_assert(xrf_abbr_parse_tree);
   return gt_xrf_abbr_entry_get_value(*(GtXRFAbbrEntry**)
-                                 gt_array_get(xrf_abbr_parse_tree->entries,
-                                              entry_num), entry_key);
+                                      gt_array_get(xrf_abbr_parse_tree->entries,
+                                                   entry_num), entry_key);
 }
 
 const GtXRFAbbrEntry* gt_xrf_abbr_parse_tree_get_entry(const GtXRFAbbrParseTree
-                                                *xrf_abbr_parse_tree,
-                                                GtUword entry_num)
+                                                           *xrf_abbr_parse_tree,
+                                                       GtUword entry_num)
 {
   gt_assert(xrf_abbr_parse_tree);
   return *(GtXRFAbbrEntry**) gt_array_get(xrf_abbr_parse_tree->entries,
